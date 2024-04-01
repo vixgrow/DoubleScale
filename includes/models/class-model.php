@@ -1,0 +1,56 @@
+<?php
+/**
+ * Class Model
+ * This class is responsible for handling the model
+ *
+ * @since 1.0.0
+ *
+ * @package QuillCRM
+ */
+
+namespace QuillCRM\Models;
+
+use WeDevs\ORM\Eloquent\Model as WeDevsModel;
+
+/**
+ * Model class
+ */
+class Model extends WeDevsModel {
+
+	/**
+	 * Overide parent method to make sure prefixing is correct.
+	 *
+	 * @return string
+	 */
+	public function getTable() {
+		global $wpdb;
+
+		if ( strpos( $this->table, $wpdb->prefix ) === 0 ) {
+			return $this->table;
+		}
+
+		return $wpdb->prefix . $this->table;
+	}
+
+	/**
+	 * Define a many-to-many relationship.
+	 *
+	 * @param  string $related
+	 * @param  string $table
+	 * @param  string $foreignPivotKey
+	 * @param  string $relatedPivotKey
+	 * @param  string $parentKey
+	 * @param  string $relatedKey
+	 * @param  string $relation
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+	 */
+	public function belongsToMany( $related, $table = null, $foreignPivotKey = null, $relatedPivotKey = null, $parentKey = null, $relatedKey = null, $relation = null ) {
+		global $wpdb;
+
+		if ( strpos( $table, $wpdb->prefix ) === 0 ) {
+			return parent::belongsToMany( $related, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $relation );
+		}
+
+		return parent::belongsToMany( $related, $wpdb->prefix . $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $relation );
+	}
+}

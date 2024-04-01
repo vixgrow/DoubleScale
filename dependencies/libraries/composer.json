@@ -1,0 +1,24 @@
+{
+    "name": "quillcrm/quillcrm-deps",
+    "require": {
+        "composer/installers": "~1.0",
+        "woocommerce/action-scheduler": "^3.2",
+        "tareq1988/wp-eloquent": "dev-master",
+        "illuminate/events": "^5.4"
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true
+        },
+        "preferred-install": {
+            "woocommerce/action-scheduler": "dist"
+        }
+    },
+    "extra": {
+        "installer-paths": {
+            "{$name}": [
+                "woocommerce/action-scheduler"
+            ]
+        }
+    }
+}

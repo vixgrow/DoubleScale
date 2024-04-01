@@ -92,5 +92,12 @@ class List_Model extends Model {
 				$list->slug = $slug;
 			}
 		);
+
+		// When deleting a list, delete all relationships.
+		static::deleting(
+			function ( $list ) {
+				$list->contacts()->detach();
+			}
+		);
 	}
 }

@@ -93,5 +93,12 @@ class Tag_Model extends Model {
 				$tag->slug = $slug;
 			}
 		);
+
+		// Delete the relationship when deleting the tag
+		static::deleting(
+			function ( $tag ) {
+				$tag->contacts()->detach();
+			}
+		);
 	}
 }

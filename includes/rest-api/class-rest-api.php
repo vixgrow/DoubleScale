@@ -10,6 +10,8 @@
 namespace QuillCRM\REST_API;
 
 use QuillCRM\REST_API\Controllers\V1\REST_Contact_Controller;
+use QuillCRM\REST_API\Controllers\V1\REST_List_Controller;
+use QuillCRM\REST_API\Controllers\V1\REST_Tag_Controller;
 
 /**
  * REST_API class is mainly responsible for registering routes.
@@ -66,6 +68,8 @@ class REST_API {
 	public function register_rest_routes() {
 		$controllers = array(
 			REST_Contact_Controller::class,
+			REST_List_Controller::class,
+			REST_Tag_Controller::class,
 		);
 
 		foreach ( $controllers as $controller ) {

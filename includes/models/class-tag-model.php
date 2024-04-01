@@ -11,6 +11,8 @@
 namespace QuillCRM\Models;
 
 use QuillCRM\Models\Model;
+use QuillCRM\Models\Contact_Model;
+use Illuminate\Support\Str;
 
 /**
  * Tag_Model class
@@ -89,10 +91,6 @@ class Tag_Model extends Model {
 				}
 
 				$tag->slug = $slug;
-
-				if ( ! $tag->status ) {
-					$tag->status = 'active';
-				}
 			}
 		);
 	}

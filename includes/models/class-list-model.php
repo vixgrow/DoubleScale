@@ -90,9 +90,6 @@ class List_Model extends Model {
 				}
 
 				$list->slug = $slug;
-				if ( ! $list->status ) {
-					$list->status = 'active';
-				}
 			}
 		);
 	}

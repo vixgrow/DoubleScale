@@ -36,7 +36,7 @@ class Lists_Table extends Migration {
 			name VARCHAR(255) NOT NULL,
 			slug VARCHAR(255) NOT NULL,
 			description TEXT,
-			status VARCHAR(255) NOT NULL,
+			status VARCHAR(255) NOT NULL DEFAULT "active",
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),

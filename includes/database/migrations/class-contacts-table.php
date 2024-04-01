@@ -43,6 +43,7 @@ class Contacts_Table extends Migration {
 			state VARCHAR(255),
 			country VARCHAR(255),
 			zip VARCHAR(255),
+			status VARCHAR(255) DEFAULT "subscribed",
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),

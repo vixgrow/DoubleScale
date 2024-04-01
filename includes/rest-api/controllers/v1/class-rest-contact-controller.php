@@ -16,6 +16,7 @@ use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\List_Model;
+use QuillCRM\Models\Tag_Model;
 
 /**
  * REST_Contact_Controller is REST api controller class for log
@@ -47,12 +48,27 @@ class REST_Contact_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'per_page' => array(
+							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'page'     => array(
+							'description' => __( 'Page number.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( true ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_items' ),
+					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 				),
 			)
 		);
@@ -81,6 +97,33 @@ class REST_Contact_Controller extends REST_Controller {
 			)
 		);
 
+		// Search contact
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/search',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'search_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'keyword'  => array(
+							'description' => __( 'Keyword to search.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+						'per_page' => array(
+							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'page'     => array(
+							'description' => __( 'Page number.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -156,15 +199,17 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return WP_REST_Response $response The response data.
 	 */
 	public function get_items( $request ) {
-		// Pagination
-		$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 1;
-		$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+		try {
+			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 
-		// Get and add lists and tags
-		$contacts = Contact_Model::with( 'lists', 'tags' )
-			->paginate( $per_page, array( '*' ), 'page', $page );
+			$contacts = Contact_Model::with( 'lists', 'tags' )
+				->paginate( $per_page, array( '*' ), 'page', $page );
 
-		return new WP_REST_Response( $contacts, 200 );
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
 	}
 
 	/**
@@ -193,6 +238,34 @@ class REST_Contact_Controller extends REST_Controller {
 			$this->sync_tags( $request, $contact );
 
 			return new WP_REST_Response( $contact, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Delete a collection of contacts
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response $response The response data.
+	 */
+	public function delete_items( $request ) {
+		try {
+			$contact_ids = $request->get_param( 'ids' ) ? $request->get_param( 'ids' ) : array();
+			$contacts    = Contact_Model::find( $contact_ids );
+
+			if ( ! $contacts ) {
+				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
+			}
+
+			foreach ( $contacts as $contact ) {
+				$contact->delete();
+			}
+
+			return new WP_REST_Response( $contacts, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
@@ -279,6 +352,34 @@ class REST_Contact_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Search contacts
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response $response The response data.
+	 */
+	public function search_items( $request ) {
+		try {
+			$keyword  = $request->get_param( 'keyword' );
+			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+
+			$contacts = Contact_Model::with( 'lists', 'tags' )
+				->where( 'first_name', 'like', '%' . $keyword . '%' )
+				->orWhere( 'last_name', 'like', '%' . $keyword . '%' )
+				->orWhere( 'email', 'like', '%' . $keyword . '%' )
+				->orWhere( 'phone', 'like', '%' . $keyword . '%' )
+				->paginate( $per_page, array( '*' ), 'page', $page );
+
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
 	 * Check if a given request has access to get items
 	 *
 	 * @since 1.0.0
@@ -344,6 +445,19 @@ class REST_Contact_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Check if a given request has access to delete items
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool $response Permission check result.
+	 */
+	public function delete_items_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
 	 * Prepare contact from request
 	 *
 	 * @since 1.0.0
@@ -394,8 +508,10 @@ class REST_Contact_Controller extends REST_Controller {
 
 				foreach ( $lists as $list ) {
 					if ( isset( $list['type'] ) && 'new' === $list['type'] ) {
-						$list        = List_Model::create( array( 'name' => $list['name'] ) );
-						$lists_arr[] = $list->id;
+						$list = List_Model::create( array( 'name' => $list['name'] ) );
+						if ( $list ) {
+							$lists_arr[] = $list->id;
+						}
 					} else {
 						$list = List_Model::find( $list['id'] );
 						if ( $list ) {
@@ -430,7 +546,7 @@ class REST_Contact_Controller extends REST_Controller {
 				$tags_arr = array();
 
 				foreach ( $tags as $tag ) {
-					if ( isset( $list['type'] ) && 'new' === $list['type'] ) {
+					if ( isset( $tag['type'] ) && 'new' === $tag['type'] ) {
 						$tag = Tag_Model::create( array( 'name' => $tag['name'] ) );
 						if ( $tag ) {
 							$tags_arr[] = $tag->id;

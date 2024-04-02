@@ -12,6 +12,7 @@ namespace QuillCRM\Models;
 
 use QuillCRM\Models\Model;
 use Illuminate\Support\Str;
+use QuillCRM\Models\Contact_Model;
 
 /**
  * List_Model class
@@ -69,7 +70,7 @@ class List_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function contacts() {
-		return $this->belongsToMany( 'QuillCRM\Models\Contact_Model', 'quillcrm_contact_list_relationship', 'list_id', 'contact_id' );
+		return $this->belongsToMany( Contact_Model::class, 'quillcrm_contact_list_relationship', 'list_id', 'contact_id' );
 	}
 
 	/**

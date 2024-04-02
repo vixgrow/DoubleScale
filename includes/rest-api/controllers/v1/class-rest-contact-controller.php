@@ -52,7 +52,6 @@ class REST_Contact_Controller extends REST_Controller {
 						'keyword'  => array(
 							'description' => __( 'Keyword to search.', 'quillcrm' ),
 							'type'        => 'string',
-							'required'    => true,
 						),
 						'per_page' => array(
 							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
@@ -182,14 +181,14 @@ class REST_Contact_Controller extends REST_Controller {
 			$keyword  = $request->get_param( 'keyword' ) ?? '';
 
 			if ( '' !== $keyword ) {
-				$contacts = Contact_Model::with( 'lists', 'tags' )
+				$contacts = Contact_Model::with( 'lists', 'tags', 'custom_fields' )
 				->where( 'first_name', 'like', '%' . $keyword . '%' )
 				->orWhere( 'last_name', 'like', '%' . $keyword . '%' )
 				->orWhere( 'email', 'like', '%' . $keyword . '%' )
 				->orWhere( 'phone', 'like', '%' . $keyword . '%' )
 				->paginate( $per_page, array( '*' ), 'page', $page );
 			} else {
-				$contacts = Contact_Model::with( 'lists', 'tags' )->paginate( $per_page, array( '*' ), 'page', $page );
+				$contacts = Contact_Model::with( 'lists', 'tags', 'custom_fields' )->paginate( $per_page, array( '*' ), 'page', $page );
 			}
 
 			return new WP_REST_Response( $contacts, 200 );
@@ -222,6 +221,7 @@ class REST_Contact_Controller extends REST_Controller {
 
 			$this->sync_lists( $request, $contact );
 			$this->sync_tags( $request, $contact );
+			$this->sync_custom_fields( $request, $contact );
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
@@ -330,6 +330,7 @@ class REST_Contact_Controller extends REST_Controller {
 
 			$this->sync_lists( $request, $contact );
 			$this->sync_tags( $request, $contact );
+			$this->sync_custom_fields( $request, $contact );
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
@@ -518,6 +519,43 @@ class REST_Contact_Controller extends REST_Controller {
 				}
 
 				$contact->tags()->sync( $tags_arr );
+			}
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Sync custom fields to contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return void|WP_Error
+	 */
+	protected function sync_custom_fields( $request, $contact ) {
+		try {
+			$custom_fields = $request->get_param( 'custom_fields' );
+			if ( $custom_fields ) {
+				$custom_fields     = $custom_fields;
+				$custom_fields_arr = array();
+
+				foreach ( $custom_fields as $custom_field ) {
+					// Check if custom field exists
+					$custom_field_model = Custom_Field_Model::find( $custom_field['id'] );
+					if ( ! $custom_field_model ) {
+						return new WP_Error( 'error', 'Custom field not found', array( 'status' => 400 ) );
+					}
+
+					if ( ! $custom_field_model->validate_value( $custom_field['value'] ) ) {
+						return new WP_Error( 'error', 'Invalid value for custom field', array( 'status' => 400 ) );
+					}
+
+					$custom_fields_arr[ $custom_field['id'] ] = array( 'value' => $custom_field['value'] );
+				}
+
+				$contact->custom_fields()->sync( $custom_fields_arr );
 			}
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );

@@ -1,0 +1,142 @@
+<?php
+/**
+ * Class Custom_Field_Model
+ * This class is responsible for handling the custom field model
+ *
+ * @since 1.0.0
+ *
+ * @package QuillCRM
+ */
+
+namespace QuillCRM\Models;
+
+use Illuminate\Support\Str;
+use QuillCRM\Models\Model;
+
+/**
+ * Custom_Field_Model class
+ */
+class Custom_Field_Model extends Model {
+
+	/**
+	 * Table name
+	 *
+	 * @var string
+	 *
+	 * @since 1.0.0
+	 */
+	protected $table = 'quillcrm_custom_fields';
+
+	/**
+	 * Primary key
+	 *
+	 * @var string
+	 *
+	 * @since 1.0.0
+	 */
+	protected $primary_key = 'id';
+
+	/**
+	 * Fillable columns
+	 *
+	 * @var array
+	 *
+	 * @since 1.0.0
+	 */
+	protected $fillable = array(
+		'name',
+		'slug',
+		'type',
+		'attributes',
+		'group_id',
+		'created_at',
+		'updated_at',
+	);
+
+	/**
+	 * Timestamps
+	 *
+	 * @var bool
+	 *
+	 * @since 1.0.0
+	 */
+	public $timestamps = true;
+
+	/**
+	 * Get the custom field group
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function group() {
+		return $this->belongsTo( Custom_Field_Group_Model::class, 'group_id' );
+	}
+
+	/**
+	 * Get custom field contacts
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+	 */
+	public function contacts() {
+		return $this->belongsToMany( Contact_Model::class, 'contact_custom_field_relationship', 'custom_field_id', 'contact_id' );
+	}
+
+	/**
+	 * Validate custom field value
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $value Custom field value.
+	 *
+	 * @return bool
+	 */
+	public function validate_value( $value ) {
+		switch ( $this->type ) {
+			case 'text':
+				return is_string( $value );
+			case 'number':
+				return is_numeric( $value );
+			case 'date':
+				return (bool) strtotime( $value );
+			case 'email':
+				return is_email( $value );
+			case 'phone':
+				return preg_match( '/^[0-9\-\(\)\/\+\s]*$/', $value );
+			case 'url':
+				return filter_var( $value, FILTER_VALIDATE_URL );
+			case 'select':
+				return in_array( $value, $this->attributes );
+			case 'multiselect':
+				$values = explode( ',', $value );
+				foreach ( $values as $val ) {
+					if ( ! in_array( $val, $this->attributes ) ) {
+						return false;
+					}
+				}
+				return true;
+			default:
+				return true;
+		}
+	}
+
+	/**
+	 * Automatically set the slug using the name and boot method
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function boot() {
+		parent::boot();
+
+		static::creating(
+			function( $field ) {
+				$field->slug = Str::slug( $field->name );
+			}
+		);
+	}
+
+}

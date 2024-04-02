@@ -1,7 +1,7 @@
 <?php
 /**
- * Class Campaign_Model
- * This class is responsible for handling the campaign model
+ * Class Template_Model
+ * This class is responsible for handling the template model
  *
  * @since 1.0.0
  *
@@ -13,9 +13,9 @@ namespace QuillCRM\Models;
 use QuillCRM\Models\Model;
 
 /**
- * Campaign_Model class
+ * Template_Model class
  */
-class Campaign_Model extends Model {
+class Template_Model extends Model {
 
 	/**
 	 * Table name
@@ -24,7 +24,7 @@ class Campaign_Model extends Model {
 	 *
 	 * @since 1.0.0
 	 */
-	protected $table = 'quillcrm_campaigns';
+	protected $table = 'quillcrm_templates';
 
 	/**
 	 * Primary key
@@ -44,12 +44,10 @@ class Campaign_Model extends Model {
 	 */
 	protected $fillable = array(
 		'name',
-		'description',
-		'status',
+		'type',
+		'subject',
+		'body',
 		'settings',
-		'parent_id',
-		'count',
-		'execute_at',
 		'created_at',
 		'updated_at',
 	);

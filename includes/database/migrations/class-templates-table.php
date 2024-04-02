@@ -1,7 +1,7 @@
 <?php
 /**
- * Class Campaign_Table
- * This class is responsible for handling the campaign table migration
+ * Class Templates_Table
+ * This class is responsible for handling the template table migration
  *
  * @since 1.0.0
  *
@@ -11,9 +11,9 @@
 namespace QuillCRM\Database\Migrations;
 
 /**
- * Campaign_Table class
+ * Templates_Table class
  */
-class Campaign_Table extends Migration {
+class Templates_Table extends Migration {
 
 	/**
 	 * Table name
@@ -22,7 +22,7 @@ class Campaign_Table extends Migration {
 	 *
 	 * @since 1.0.0
 	 */
-	public $table_name = 'campaign';
+	public $table_name = 'templates';
 
 	/**
 	 * Get query
@@ -37,28 +37,24 @@ class Campaign_Table extends Migration {
 		 *
 		 * id BIGINT(20) NOT NULL AUTO_INCREMENT,
 		 * name VARCHAR(255) NOT NULL,
-		 * description TEXT,
-		 * status VARCHAR(255) NOT NULL DEFAULT "inactive",
+		 * type VARCHAR(255) NOT NULL DEFAULT "email",
+		 * subject VARCHAR(255) NOT NULL,
+		 * body TEXT,
 		 * settings TEXT,
-		 * parent_id BIGINT(20) NOT NULL DEFAULT 0,
-		 * count INT(11) NOT NULL DEFAULT 0,
-		 * execute_at TIMESTAMP,
 		 * created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		 * updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL,
-            description TEXT,
-            status VARCHAR(255) NOT NULL DEFAULT "inactive",
+            type VARCHAR(255) NOT NULL DEFAULT "email",
+            subject VARCHAR(255) NOT NULL,
+            body TEXT,
             settings TEXT,
-            parent_id BIGINT(20) NOT NULL DEFAULT 0,
-            count INT(11) NOT NULL DEFAULT 0,
-            execute_at TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id)';
 
 		return $query;
 	}
-}
 
+}

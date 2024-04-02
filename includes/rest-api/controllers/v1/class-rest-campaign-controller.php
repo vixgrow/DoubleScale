@@ -204,7 +204,7 @@ class REST_Campaign_Controller extends REST_Controller {
 			$keyword  = $request->get_param( 'keyword' ) ? $request->get_param( 'keyword' ) : '';
 			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			error_log( 'keyword ' . $keyword );
+
 			if ( $keyword ) {
 				$campaigns = Campaign_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )
 					->paginate( $per_page, array( '*' ), 'page', $page );

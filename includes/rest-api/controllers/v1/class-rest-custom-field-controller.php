@@ -91,6 +91,11 @@ class REST_Custom_Field_Controller extends REST_Controller {
 			'title'      => 'custom_field',
 			'type'       => 'object',
 			'properties' => array(
+				'id'         => array(
+					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					'type'        => 'integer',
+					'readonly'    => true,
+				),
 				'name'       => array(
 					'description' => __( 'Name of the custom field.', 'quillcrm' ),
 					'type'        => 'string',
@@ -245,11 +250,11 @@ class REST_Custom_Field_Controller extends REST_Controller {
 			'name'       => $request->get_param( 'name' ),
 			'type'       => $request->get_param( 'type' ),
 			'attributes' => $request->get_param( 'attributes' ),
-			'group_id'   => $request->get_param( 'group_id' ),
+			'group_id'   => $request->get_param( 'group_id' ) ? $request->get_param( 'group_id' ) : 0,
 		);
 
 		foreach ( $custom_field_data as $key => $value ) {
-			if ( empty( $value ) ) {
+			if ( empty( $value ) && 'group_id' !== $key ) {
 				unset( $custom_field_data[ $key ] );
 			}
 		}

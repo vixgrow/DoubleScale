@@ -49,6 +49,7 @@ class REST_Tag_Controller extends REST_Controller {
 						'keyword'  => array(
 							'description' => __( 'Keyword to search.', 'quillcrm' ),
 							'type'        => 'string',
+							'format'      => 'text-field',
 						),
 						'per_page' => array(
 							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
@@ -114,18 +115,18 @@ class REST_Tag_Controller extends REST_Controller {
 				'name'        => array(
 					'description' => __( 'Name of the tag.', 'quillcrm' ),
 					'type'        => 'string',
+					'format'      => 'text-field',
 					'required'    => true,
-					'args'        => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
 				),
 				'slug'        => array(
 					'description' => __( 'An alphanumeric identifier for the tag.', 'quillcrm' ),
 					'type'        => 'string',
+					'format'      => 'text-field',
 				),
 				'description' => array(
 					'description' => __( 'Description of the tag.', 'quillcrm' ),
 					'type'        => 'string',
+					'format'      => 'textarea-field',
 				),
 				'status'      => array(
 					'description' => __( 'Status of the tag.', 'quillcrm' ),

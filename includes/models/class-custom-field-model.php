@@ -12,6 +12,7 @@ namespace QuillCRM\Models;
 
 use Illuminate\Support\Str;
 use QuillCRM\Models\Model;
+use QuillCRM\Models\Custom_Fields_Group_Model;
 
 /**
  * Custom_Field_Model class
@@ -70,7 +71,7 @@ class Custom_Field_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function group() {
-		return $this->belongsTo( Custom_Field_Group_Model::class, 'group_id' );
+		return $this->belongsTo( Custom_Fields_Group_Model::class, 'group_id' );
 	}
 
 	/**
@@ -81,7 +82,7 @@ class Custom_Field_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function contacts() {
-		return $this->belongsToMany( Contact_Model::class, 'contact_custom_field_relationship', 'custom_field_id', 'contact_id' );
+		return $this->belongsToMany( Contact_Model::class, 'quillcrm_contact_custom_field_relationship', 'custom_field_id', 'contact_id' );
 	}
 
 	/**
@@ -135,6 +136,21 @@ class Custom_Field_Model extends Model {
 		static::creating(
 			function( $field ) {
 				$field->slug = Str::slug( $field->name );
+
+				if ( static::where( 'slug', $field->slug )->exists() ) {
+					throw new \Exception( sprintf( __( '%s already exists.', 'quillcrm' ), $field->name ) );
+				}
+
+				if ( ! Custom_Fields_Group_Model::find( $field->group_id ) && $field->group_id !== 0 ) {
+					throw new \Exception( sprintf( __( 'Group with ID %s does not exist.', 'quillcrm' ), $field->group_id ) );
+				}
+			}
+		);
+
+		// Delete the custom field relationships when the custom field is deleted
+		static::deleting(
+			function( $field ) {
+				$field->contacts()->detach();
 			}
 		);
 	}

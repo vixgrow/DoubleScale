@@ -115,7 +115,7 @@ class REST_List_Controller extends REST_Controller {
 					'description' => __( 'Name of the list.', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
-					'args'        => array(
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),

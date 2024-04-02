@@ -17,6 +17,7 @@ use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Tag_Model;
+use QuillCRM\Models\Custom_Field_Model;
 
 /**
  * REST_Contact_Controller is REST api controller class for log
@@ -67,7 +68,7 @@ class REST_Contact_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( true ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
@@ -219,9 +220,20 @@ class REST_Contact_Controller extends REST_Controller {
 			$contact_data = $this->prepare_contact( $request );
 			$contact      = Contact_Model::create( $contact_data );
 
-			$this->sync_lists( $request, $contact );
-			$this->sync_tags( $request, $contact );
-			$this->sync_custom_fields( $request, $contact );
+			$sync_lists = $this->sync_lists( $request, $contact );
+			if ( is_wp_error( $sync_lists ) ) {
+				return $sync_lists;
+			}
+
+			$sync_tags = $this->sync_tags( $request, $contact );
+			if ( is_wp_error( $sync_tags ) ) {
+				return $sync_tags;
+			}
+
+			$sync_custom_fields = $this->sync_custom_fields( $request, $contact );
+			if ( is_wp_error( $sync_custom_fields ) ) {
+				return $sync_custom_fields;
+			}
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
@@ -328,9 +340,20 @@ class REST_Contact_Controller extends REST_Controller {
 			$contact_data = $this->prepare_contact( $request );
 			$contact->update( $contact_data );
 
-			$this->sync_lists( $request, $contact );
-			$this->sync_tags( $request, $contact );
-			$this->sync_custom_fields( $request, $contact );
+			$sync_lists = $this->sync_lists( $request, $contact );
+			if ( is_wp_error( $sync_lists ) ) {
+				return $sync_lists;
+			}
+
+			$sync_tags = $this->sync_tags( $request, $contact );
+			if ( is_wp_error( $sync_tags ) ) {
+				return $sync_tags;
+			}
+
+			$sync_custom_fields = $this->sync_custom_fields( $request, $contact );
+			if ( is_wp_error( $sync_custom_fields ) ) {
+				return $sync_custom_fields;
+			}
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
@@ -545,11 +568,11 @@ class REST_Contact_Controller extends REST_Controller {
 					// Check if custom field exists
 					$custom_field_model = Custom_Field_Model::find( $custom_field['id'] );
 					if ( ! $custom_field_model ) {
-						return new WP_Error( 'error', 'Custom field not found', array( 'status' => 400 ) );
+						return new WP_Error( 'error', __( 'Custom field not found', 'quillcrm' ), array( 'status' => 400 ) );
 					}
 
 					if ( ! $custom_field_model->validate_value( $custom_field['value'] ) ) {
-						return new WP_Error( 'error', 'Invalid value for custom field', array( 'status' => 400 ) );
+						continue;
 					}
 
 					$custom_fields_arr[ $custom_field['id'] ] = array( 'value' => $custom_field['value'] );

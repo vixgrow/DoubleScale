@@ -66,10 +66,10 @@ class Custom_Fields_Group_Model extends Model {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return array
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function custom_fields() {
-		return $this->has_many( Custom_Field_Model::class, 'group_id' );
+		return $this->hasMany( Custom_Field_Model::class, 'group_id' );
 	}
 
 	/**

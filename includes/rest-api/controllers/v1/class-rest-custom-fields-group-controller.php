@@ -59,13 +59,6 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
-				'args' => array(
-					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'quillcrm' ),
-						'type'        => 'integer',
-						'required'    => true,
-					),
-				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
@@ -80,6 +73,33 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+					'args'                => array(
+						'new_group_id' => array(
+							'description' => __( 'New group id to move the fields.', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
+		// Get fields for a group.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/fields',
+			array(
+				'args' => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'quillcrm' ),
+						'type'        => 'integer',
+						'required'    => true,
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_fields' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 			)
 		);
@@ -98,6 +118,11 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 			'title'      => 'custom_fields_group',
 			'type'       => 'object',
 			'properties' => array(
+				'id'   => array(
+					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					'type'        => 'integer',
+					'readonly'    => true,
+				),
 				'name' => array(
 					'description' => __( 'Name of the custom fields group.', 'quillcrm' ),
 					'type'        => 'string',
@@ -122,7 +147,7 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$groups = Custom_Fields_Group_Model::all();
+			$groups = Custom_Fields_Group_Model::with( 'custom_fields' )->get();
 
 			return new WP_REST_Response( $groups, 200 );
 		} catch ( \Exception $e ) {
@@ -149,6 +174,32 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 			}
 
 			return new WP_REST_Response( $group, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_fields( $request ) {
+		try {
+			$group_id = $request->get_param( 'id' );
+			$group    = Custom_Fields_Group_Model::find( $group_id );
+
+			if ( ! $group ) {
+				return new WP_Error( 'error', __( 'Custom fields group not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			$fields = $group->custom_fields;
+
+			return new WP_REST_Response( $fields, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -225,7 +276,17 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 				return new WP_Error( 'error', __( 'Custom fields group not found.', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
-			$group->delete();
+			// First move all the fields to the the given group.
+			$new_group_id = $request->get_param( 'new_group_id' );
+			$new_group    = Custom_Fields_Group_Model::find( $new_group_id );
+
+			if ( ! $new_group ) {
+				return new WP_Error( 'error', __( 'New group not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			$fields = $group->custom_fields;
+			// Use method to move fields to new group.
+			$new_group->custom_fields()->associate( $fields );
 
 			return new WP_REST_Response( null, 204 );
 		} catch ( \Exception $e ) {

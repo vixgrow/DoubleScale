@@ -37,7 +37,7 @@ class Custom_Field_Table extends Migration {
 			slug VARCHAR(255) NOT NULL,
 			type VARCHAR(255) NOT NULL,
 			attributes TEXT,
-			group_id BIGINT(20) UNSIGNED NOT NULL,
+			group_id BIGINT(20) NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),

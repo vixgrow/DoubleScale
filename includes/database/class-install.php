@@ -19,6 +19,7 @@ use QuillCRM\Database\Migrations\Custom_Fields_Group_Table;
 use QuillCRM\Database\Migrations\Custom_Field_Table;
 use QuillCRM\Database\Migrations\Lists_Table;
 use QuillCRM\Database\Migrations\Tags_Table;
+use QuillCRM\Database\Migrations\Campaign_Table;
 
 /**
  * Install class
@@ -48,6 +49,7 @@ class Install {
 				'lists'                             => Lists_Table::class,
 				'tags'                              => Tags_Table::class,
 				'contact_note'                      => Contact_Note_Table::class,
+				'campaign'                          => Campaign_Table::class,
 			)
 		);
 

@@ -15,6 +15,7 @@ use QuillCRM\REST_API\Controllers\V1\REST_Tag_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Custom_Fields_Group_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Custom_Field_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Contact_Note_Controller;
+use QuillCRM\REST_API\Controllers\V1\REST_Campaign_Controller;
 
 /**
  * REST_API class is mainly responsible for registering routes.
@@ -76,6 +77,7 @@ class REST_API {
 			REST_Custom_Fields_Group_Controller::class,
 			REST_Custom_Field_Controller::class,
 			Rest_Contact_Note_Controller::class,
+			REST_Campaign_Controller::class,
 		);
 
 		foreach ( $controllers as $controller ) {

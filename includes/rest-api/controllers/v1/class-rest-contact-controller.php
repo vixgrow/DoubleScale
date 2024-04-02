@@ -319,9 +319,7 @@ class REST_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
 			}
 
-			foreach ( $contacts as $contact ) {
-				$contact->delete();
-			}
+			Contact_Model::destroy( $contact_ids );
 
 			return new WP_REST_Response( $contacts, 200 );
 		} catch ( Exception $e ) {

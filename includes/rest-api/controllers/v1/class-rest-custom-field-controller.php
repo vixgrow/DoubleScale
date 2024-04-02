@@ -100,15 +100,51 @@ class REST_Custom_Field_Controller extends REST_Controller {
 					'description' => __( 'Name of the custom field.', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
+					'args'        => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'type'       => array(
 					'description' => __( 'Type of the custom field.', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
+					'enum'        => array(
+						'text',
+						'textarea',
+						'select',
+						'checkbox',
+						'radio',
+						'date',
+						'number',
+						'email',
+						'url',
+						'file',
+					),
 				),
 				'attributes' => array(
 					'description' => __( 'Attributes of the custom field.', 'quillcrm' ),
-					'type'        => 'string',
+					'type'        => 'array',
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'label' => array(
+								'description' => __( 'Label of the attribute.', 'quillcrm' ),
+								'type'        => 'string',
+								'required'    => true,
+								'args'        => array(
+									'sanitize_callback' => 'sanitize_text_field',
+								),
+							),
+							'value' => array(
+								'description' => __( 'Value of the attribute.', 'quillcrm' ),
+								'type'        => 'string',
+								'required'    => true,
+								'args'        => array(
+									'sanitize_callback' => 'sanitize_text_field',
+								),
+							),
+						),
+					),
 				),
 				'group_id'   => array(
 					'description' => __( 'Group ID of the custom field.', 'quillcrm' ),

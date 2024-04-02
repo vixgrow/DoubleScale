@@ -122,45 +122,75 @@ class REST_Contact_Controller extends REST_Controller {
 					'readonly'    => true,
 				),
 				'first_name' => array(
-					'description' => __( 'First name of the contact.', 'quillcrm' ),
-					'type'        => 'string',
+					'description'  => __( 'First name of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'last_name'  => array(
-					'description' => __( 'Last name of the contact.', 'quillcrm' ),
-					'type'        => 'string',
+					'description'  => __( 'Last name of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'email'      => array(
-					'description' => __( 'Email of the contact.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
+					'description'  => __( 'Email of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'required'     => true,
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_email',
+					),
 				),
 				'phone'      => array(
-					'description' => __( 'Phone number of the contact.', 'quillcrm' ),
-					'type'        => 'string',
+					'description'  => __( 'Phone number of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'address_1'  => array(
-					'description' => __( 'Address line 1 of the contact.', 'quillcrm' ),
-					'type'        => 'string',
+					'description'  => __( 'Address line 1 of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'address_2'  => array(
-					'description' => __( 'Address line 2 of the contact.', 'quillcrm' ),
-					'type'        => 'string',
+					'description'  => __( 'Address line 2 of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'city'       => array(
-					'description' => __( 'City of the contact.', 'quillcrm' ),
-					'type'        => 'string',
+					'description'  => __( 'City of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'state'      => array(
-					'description' => __( 'State of the contact.', 'quillcrm' ),
-					'type'        => 'string',
+					'description'  => __( 'State of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'country'    => array(
-					'description' => __( 'Country of the contact.', 'quillcrm' ),
-					'type'        => 'string',
+					'description'  => __( 'Country of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'zip'        => array(
-					'description' => __( 'Zip code of the contact.', 'quillcrm' ),
-					'type'        => 'string',
+					'description'  => __( 'Zip code of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 			),
 		);

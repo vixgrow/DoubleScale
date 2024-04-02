@@ -124,13 +124,19 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 					'readonly'    => true,
 				),
 				'name' => array(
-					'description' => __( 'Name of the custom fields group.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
+					'description'  => __( 'Name of the custom fields group.', 'quillcrm' ),
+					'type'         => 'string',
+					'required'     => true,
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'slug' => array(
-					'description' => __( 'Slug of the custom fields group.', 'quillcrm' ),
-					'type'        => 'string',
+					'description'  => __( 'Slug of the custom fields group.', 'quillcrm' ),
+					'type'         => 'string',
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_title',
+					),
 				),
 			),
 		);

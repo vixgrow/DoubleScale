@@ -122,10 +122,16 @@ class REST_List_Controller extends REST_Controller {
 				'slug'        => array(
 					'description' => __( 'An alphanumeric identifier for the list.', 'quillcrm' ),
 					'type'        => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_title',
+					),
 				),
 				'description' => array(
 					'description' => __( 'Description of the list.', 'quillcrm' ),
 					'type'        => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'status'      => array(
 					'description' => __( 'Status of the list.', 'quillcrm' ),

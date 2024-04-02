@@ -101,6 +101,19 @@ class REST_Contact_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Get contact notes
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/notes',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_contact_notes' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -192,6 +205,18 @@ class REST_Contact_Controller extends REST_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
+				'created_at' => array(
+					'type'        => 'string',
+					'description' => 'Created at',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
+				'updated_at' => array(
+					'type'        => 'string',
+					'description' => 'Updated at',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
 			),
 		);
 	}
@@ -212,14 +237,14 @@ class REST_Contact_Controller extends REST_Controller {
 			$keyword  = $request->get_param( 'keyword' ) ?? '';
 
 			if ( '' !== $keyword ) {
-				$contacts = Contact_Model::with( 'lists', 'tags', 'custom_fields' )
+				$contacts = Contact_Model::with( 'lists', 'tags', 'custom_fields', 'notes' )
 				->where( 'first_name', 'like', '%' . $keyword . '%' )
 				->orWhere( 'last_name', 'like', '%' . $keyword . '%' )
 				->orWhere( 'email', 'like', '%' . $keyword . '%' )
 				->orWhere( 'phone', 'like', '%' . $keyword . '%' )
 				->paginate( $per_page, array( '*' ), 'page', $page );
 			} else {
-				$contacts = Contact_Model::with( 'lists', 'tags', 'custom_fields' )->paginate( $per_page, array( '*' ), 'page', $page );
+				$contacts = Contact_Model::with( 'lists', 'tags', 'custom_fields', 'notes' )->paginate( $per_page, array( '*' ), 'page', $page );
 			}
 
 			return new WP_REST_Response( $contacts, 200 );
@@ -263,6 +288,11 @@ class REST_Contact_Controller extends REST_Controller {
 			$sync_custom_fields = $this->sync_custom_fields( $request, $contact );
 			if ( is_wp_error( $sync_custom_fields ) ) {
 				return $sync_custom_fields;
+			}
+
+			$sync_notes = $this->sync_notes( $request, $contact );
+			if ( is_wp_error( $sync_notes ) ) {
+				return $sync_notes;
 			}
 
 			return new WP_REST_Response( $contact, 200 );
@@ -385,7 +415,38 @@ class REST_Contact_Controller extends REST_Controller {
 				return $sync_custom_fields;
 			}
 
+			$sync_notes = $this->sync_notes( $request, $contact );
+			if ( is_wp_error( $sync_notes ) ) {
+				return $sync_notes;
+			}
+
 			return new WP_REST_Response( $contact, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Get contact notes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response $response The response data.
+	 */
+	public function get_contact_notes( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$contact    = Contact_Model::find( $contact_id );
+
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
+
+			$notes = $contact->notes()->get();
+
+			return new WP_REST_Response( $notes, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
@@ -609,6 +670,35 @@ class REST_Contact_Controller extends REST_Controller {
 				}
 
 				$contact->custom_fields()->sync( $custom_fields_arr );
+			}
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Sync notes to contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return void|WP_Error
+	 */
+	protected function sync_notes( $request, $contact ) {
+		try {
+			$notes = $request->get_param( 'notes' );
+			if ( $notes ) {
+				$notes     = $notes;
+				$notes_arr = array();
+
+				foreach ( $notes as $note ) {
+					$notes_arr[] = array(
+						'note' => sanitize_text_field( $note['text'] ),
+					);
+				}
+
+				$contact->notes()->createMany( $notes_arr );
 			}
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );

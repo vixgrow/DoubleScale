@@ -13,6 +13,8 @@ namespace QuillCRM\Models;
 use QuillCRM\Models\Model;
 use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Tag_Model;
+use QuillCRM\Models\Custom_Field_Model;
+use QuillCRM\Models\Contact_Note_Model;
 
 /**
  * Contact_Model class
@@ -99,5 +101,33 @@ class Contact_Model extends Model {
 	 */
 	public function custom_fields() {
 		return $this->belongsToMany( Custom_Field_Model::class, 'quillcrm_contact_custom_field_relationship', 'contact_id', 'custom_field_id' )->withPivot( 'value' );
+	}
+
+	/**
+	 * Get the contact notes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function notes() {
+		return $this->hasMany( Contact_Note_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Delete the contact notes boot method
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function boot() {
+		parent::boot();
+
+		static::deleting(
+			function( $contact ) {
+				$contact->notes()->delete();
+			}
+		);
 	}
 }

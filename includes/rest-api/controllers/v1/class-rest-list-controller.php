@@ -138,6 +138,18 @@ class REST_List_Controller extends REST_Controller {
 					'type'        => 'string',
 					'enum'        => array( 'active', 'inactive' ),
 				),
+				'created_at'  => array(
+					'type'        => 'string',
+					'description' => 'Created at',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
+				'updated_at'  => array(
+					'type'        => 'string',
+					'description' => 'Updated at',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
 			),
 		);
 	}

@@ -118,12 +118,12 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 			'title'      => 'custom_fields_group',
 			'type'       => 'object',
 			'properties' => array(
-				'id'   => array(
+				'id'         => array(
 					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
 					'type'        => 'integer',
 					'readonly'    => true,
 				),
-				'name' => array(
+				'name'       => array(
 					'description'  => __( 'Name of the custom fields group.', 'quillcrm' ),
 					'type'         => 'string',
 					'required'     => true,
@@ -131,12 +131,24 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'slug' => array(
+				'slug'       => array(
 					'description'  => __( 'Slug of the custom fields group.', 'quillcrm' ),
 					'type'         => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_title',
 					),
+				),
+				'created_at' => array(
+					'type'        => 'string',
+					'description' => 'Created at',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
+				),
+				'updated_at' => array(
+					'type'        => 'string',
+					'description' => 'Updated at',
+					'context'     => array( 'view', 'edit', 'embed' ),
+					'readonly'    => true,
 				),
 			),
 		);

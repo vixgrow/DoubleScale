@@ -13,10 +13,10 @@ namespace QuillCRM\Database;
 use QuillCRM\Database\Migrations\Contact_Custom_Field_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_List_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_Tag_Relationship_Table;
-use QuillCRM\Database\Migrations\Contact_Note_Table;
+use QuillCRM\Database\Migrations\Contact_Notes_Table;
 use QuillCRM\Database\Migrations\Contacts_Table;
-use QuillCRM\Database\Migrations\Custom_Fields_Group_Table;
-use QuillCRM\Database\Migrations\Custom_Field_Table;
+use QuillCRM\Database\Migrations\Custom_Fields_Groups_Table;
+use QuillCRM\Database\Migrations\Custom_Fields_Table;
 use QuillCRM\Database\Migrations\Lists_Table;
 use QuillCRM\Database\Migrations\Tags_Table;
 use QuillCRM\Database\Migrations\Campaigns_Table;
@@ -45,11 +45,11 @@ class Install {
 				'contact_custom_field_relationship' => Contact_Custom_Field_Relationship_Table::class,
 				'contact_list_relationship'         => Contact_List_Relationship_Table::class,
 				'contact_tag_relationship'          => Contact_Tag_Relationship_Table::class,
-				'custom_fields'                     => Custom_Field_Table::class,
-				'custom_fields_groups'              => Custom_Fields_Group_Table::class,
+				'custom_fields'                     => Custom_Fields_Table::class,
+				'custom_fields_groups'              => Custom_Fields_Groups_Table::class,
 				'lists'                             => Lists_Table::class,
 				'tags'                              => Tags_Table::class,
-				'contact_note'                      => Contact_Note_Table::class,
+				'contact_notes'                     => Contact_Notes_Table::class,
 				'campaigns'                         => Campaigns_Table::class,
 				'templates'                         => Templates_Table::class,
 			)

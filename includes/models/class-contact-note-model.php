@@ -25,7 +25,7 @@ class Contact_Note_Model extends Model {
 	 *
 	 * @since 1.0.0
 	 */
-	protected $table = 'quillcrm_contact_note';
+	protected $table = 'quillcrm_contact_notes';
 
 	/**
 	 * Primary key

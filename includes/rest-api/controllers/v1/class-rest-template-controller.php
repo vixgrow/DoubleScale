@@ -130,9 +130,6 @@ class REST_Template_Controller extends REST_Controller {
 					'description' => __( 'Body of the template.', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_textarea_field',
-					),
 				),
 				'settings'   => array(
 					'description' => __( 'Settings of the template.', 'quillcrm' ),

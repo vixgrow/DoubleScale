@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Contact_Note_Table
+ * Class Contact_Notes_Table
  * This class is responsible for handling the contact note table migration
  *
  * @since 1.0.0
@@ -11,9 +11,9 @@
 namespace QuillCRM\Database\Migrations;
 
 /**
- * Contact_Note_Table class
+ * Contact_Notes_Table class
  */
-class Contact_Note_Table extends Migration {
+class Contact_Notes_Table extends Migration {
 
 	/**
 	 * Table name
@@ -22,7 +22,7 @@ class Contact_Note_Table extends Migration {
 	 *
 	 * @since 1.0.0
 	 */
-	public $table_name = 'contact_note';
+	public $table_name = 'contact_notes';
 
 	/**
 	 * Get query

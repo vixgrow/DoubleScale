@@ -113,10 +113,10 @@ class REST_Tag_Controller extends REST_Controller {
 					'readonly'    => true,
 				),
 				'name'        => array(
-					'description'  => __( 'Name of the tag.', 'quillcrm' ),
-					'type'         => 'string',
-					'required'     => true,
-					'args_options' => array(
+					'description' => __( 'Name of the tag.', 'quillcrm' ),
+					'type'        => 'string',
+					'required'    => true,
+					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),

@@ -15,6 +15,7 @@ use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Custom_Field_Model;
 use QuillCRM\Models\Contact_Note_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 
 /**
  * Contact_Model class
@@ -115,6 +116,28 @@ class Contact_Model extends Model {
 	}
 
 	/**
+	 * Get the contact automations
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
+	 */
+	public function automation_contact() {
+		return $this->hasOne( Automation_Contact_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Get automation data
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Automation_Model
+	 */
+	public function automation() {
+		return $this->automation_contact->automation;
+	}
+
+	/**
 	 * Delete the contact notes boot method
 	 *
 	 * @since 1.0.0
@@ -127,6 +150,10 @@ class Contact_Model extends Model {
 		static::deleting(
 			function( $contact ) {
 				$contact->notes()->delete();
+
+				if ( $contact->automation_contact ) {
+					$contact->automation_contact->delete();
+				}
 			}
 		);
 	}

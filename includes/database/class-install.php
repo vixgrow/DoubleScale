@@ -10,6 +10,9 @@
 
 namespace QuillCRM\Database;
 
+use QuillCRM\Database\Migrations\Automation_Contacts_Table;
+use QuillCRM\Database\Migrations\Automation_Steps_Table;
+use QuillCRM\Database\Migrations\Automations_Table;
 use QuillCRM\Database\Migrations\Contact_Custom_Field_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_List_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_Tag_Relationship_Table;
@@ -52,6 +55,9 @@ class Install {
 				'contact_notes'                     => Contact_Notes_Table::class,
 				'campaigns'                         => Campaigns_Table::class,
 				'templates'                         => Templates_Table::class,
+				'automations'                       => Automations_Table::class,
+				'automation_steps'                  => Automation_Steps_Table::class,
+				'automation_contacts'               => Automation_Contacts_Table::class,
 			)
 		);
 

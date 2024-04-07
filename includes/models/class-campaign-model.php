@@ -11,6 +11,7 @@
 namespace QuillCRM\Models;
 
 use QuillCRM\Models\Model;
+use QuillCRM\Models\Campaign_Email_Model;
 
 /**
  * Campaign_Model class
@@ -62,6 +63,17 @@ class Campaign_Model extends Model {
 	 * @since 1.0.0
 	 */
 	public $timestamps = true;
+
+	/**
+	 * Get the campaign emails
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function emails() {
+		return $this->hasMany( Campaign_Email_Model::class, 'campaign_id', 'id' );
+	}
 
 	/**
 	 * Boot method

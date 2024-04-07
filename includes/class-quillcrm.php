@@ -13,6 +13,8 @@ use QuillCRM\REST_API\REST_API;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
+use QuillCRM\Tasks;
+use QuillCRM\Campaign\Processing as Campaign_Processing;
 
 /**
  * QuillCRM Main Class.
@@ -21,6 +23,13 @@ use Illuminate\Container\Container;
  * @since 1.0.0
  */
 final class QuillCRM {
+
+	/**
+	 * Campaigns tasks
+	 *
+	 * @var Tasks
+	 */
+	private $campaigns_tasks;
 
 	/**
 	 * Class Instance.
@@ -58,6 +67,18 @@ final class QuillCRM {
 		$this->init_illuminate();
 		$this->init_objects();
 		$this->init_hooks();
+		add_action( 'init', array( $this, 'register_tasks' ) );
+	}
+
+	/**
+	 * Register tasks
+	 *
+	 * @since 1.0.0
+	 */
+	public function register_tasks() {
+		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_campaigns' ) === false ) {
+			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_campaigns' );
+		}
 	}
 
 	/**
@@ -114,7 +135,10 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	private function init_objects() {
+		$this->campaigns_tasks = new Tasks( 'quillcrm_campaigns' );
+
 		REST_API::instance();
+		Campaign_Processing::instance();
 	}
 
 	/**

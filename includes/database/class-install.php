@@ -24,6 +24,8 @@ use QuillCRM\Database\Migrations\Lists_Table;
 use QuillCRM\Database\Migrations\Tags_Table;
 use QuillCRM\Database\Migrations\Campaigns_Table;
 use QuillCRM\Database\Migrations\Templates_Table;
+use QuillCRM\Database\Migrations\Task_Meta_Table;
+use QuillCRM\Database\Migrations\Campaign_Emails_Table;
 
 /**
  * Install class
@@ -58,6 +60,8 @@ class Install {
 				'automations'                       => Automations_Table::class,
 				'automation_steps'                  => Automation_Steps_Table::class,
 				'automation_contacts'               => Automation_Contacts_Table::class,
+				'task_meta'                         => Task_Meta_Table::class,
+				'campaign_emails'                   => Campaign_Emails_Table::class,
 			)
 		);
 

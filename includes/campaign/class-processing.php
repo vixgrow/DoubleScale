@@ -15,6 +15,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Campaign_Email_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
+use QuillCRM\Emails\Emails;
 
 /**
  * Campaign class processing
@@ -88,6 +89,7 @@ class Processing {
 			'init',
 			function() {
 				QuillCRM::instance()->campaigns_tasks->register_callback( 'quillcrm_campaigns', array( $this, 'process' ) );
+				QuillCRM::instance()->campaigns_tasks->register_callback( 'process_campaign_email', array( $this, 'process_campaign_email' ) );
 			}
 		);
 	}
@@ -108,6 +110,7 @@ class Processing {
 	 * @return void
 	 */
 	public function process() {
+		error_log( 'Processing::process()' );
 		$this->start_time = microtime( true );
 
 		// Check if memory limit is reached
@@ -122,12 +125,13 @@ class Processing {
 			return;
 		}
 
-		error_log( 'Processing::campaign() ' . $campaign->id );
-		error_log( 'Max Execution Time: ' . $this->max_execution_time );
-		error_log( 'Current Execution Time: ' . $this->get_current_execution_time() );
-
 		$last_contact_offset = get_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
-		$campaign_recipients = $campaign->count;
+		$campaign_recipients = Contact_Model::where( 'status', 'subscribed' )->count();
+
+		if ( $campaign->count != $campaign_recipients ) {
+			$campaign->count = $campaign_recipients;
+			$campaign->save();
+		}
 
 		if ( $last_contact_offset >= $campaign_recipients ) {
 			$campaign->status = 'completed';
@@ -138,12 +142,17 @@ class Processing {
 		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
 			// Usleep is used to prevent the server from crashing
 			usleep( 1000000 );
-			error_log( 'Processing::campaign(222) ' . $campaign->id );
 			if ( $last_contact_offset >= $campaign_recipients ) {
+				$campaign->status = 'completed';
+				$campaign->save();
+				update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
 				break;
 			}
 
-			$contacts = Contact_Model::where( 'status', 'subscribed' )->skip( $last_contact_offset )->take( 10 )->get();
+			$contacts = Contact_Model::where( 'status', 'subscribed' )
+			->offset( $last_contact_offset )
+			->limit( 10 )
+			->get();
 
 			if ( ! $contacts ) {
 				break;
@@ -177,10 +186,11 @@ class Processing {
 				'email'       => $contact->email,
 				'template_id' => 1,
 			);
-			error_log( 'Campaign_Email_Model::create( $campaign_email_data )' );
-			Campaign_Email_Model::create( $campaign_email_data );
+			$campaign_email      = Campaign_Email_Model::create( $campaign_email_data );
 
-			update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", $last_contact_offset );
+			// Update last contact offset
+			update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
+			QuillCRM::instance()->campaigns_tasks->enqueue_async( 'process_campaign_email', $campaign, $contact, $campaign_email );
 
 			return true;
 		} catch ( \Exception $e ) {
@@ -188,5 +198,99 @@ class Processing {
 		}
 	}
 
+	/**
+	 * Process campaign email
+	 *
+	 * @param Campaign_Model       $campaign
+	 * @param Contact_Model        $contact
+	 * @param Campaign_Email_Model $campaign_email
+	 *
+	 * @return void
+	 */
+	public function process_campaign_email( Campaign_Model $campaign, Contact_Model $contact, Campaign_Email_Model $campaign_email ) {
+		// Check if memory limit is reached
+		if ( Utils::is_memory_limit_reached() ) {
+			// If memory limit is reached, we will requeue the task
+			QuillCRM::instance()->campaigns_tasks->enqueue_async( 'process_campaign_email', $campaign, $contact, $campaign_email );
+			return;
+		}
+
+		// Build email message with footer
+		$message = sprintf(
+			'%s%s',
+			$this->build_email_message( $campaign_email, $contact ),
+			$this->build_email_footer( $campaign_email, $contact )
+		);
+
+		$emails = new Emails();
+		$result = $emails->send(
+			$contact->email,
+			'Welcome to QuillCRM',
+			$message,
+		);
+
+		error_log( 'Processing::process_campaign_email() ' . $campaign_email->id . ' ' . $result );
+
+		$campaign_email->status = 'sent';
+		$campaign_email->save();
+	}
+
+	/**
+	 * Build email message
+	 *
+	 * @param Campaign_Email_Model $campaign_email
+	 * @param Contact_Model        $contact
+	 *
+	 * @return string
+	 */
+	protected function build_email_message( Campaign_Email_Model $campaign_email, Contact_Model $contact ) {
+		$message = '';
+
+		// Add test message
+		$message .= sprintf(
+			'<p>%s</p>',
+			__( 'Welcome to QuillCRM', 'quillcrm' )
+		);
+
+		// Add open email image 1x1
+		$message .= sprintf(
+			'<img src="%s" alt="%s" style="width:1px;height:1px;" />',
+			admin_url( 'admin.php?quillcrm=email_open&hash_key=' . $campaign_email->hash_key ),
+			__( 'Open Email', 'quillcrm' )
+		);
+
+		return $message;
+	}
+
+	/**
+	 * Build email footer
+	 *
+	 * @param Campaign_Email_Model $campaign_email
+	 * @param Contact_Model        $contact
+	 *
+	 * @return string
+	 */
+	protected function build_email_footer( Campaign_Email_Model $campaign_email, Contact_Model $contact ) {
+		$footer = '';
+
+		// Add preview image 1x1
+		$footer .= sprintf(
+			'<img src="%s" alt="%s" style="width:1px;height:1px;" />',
+			admin_url( 'admin.php?quillcrm=email_preview&hash_key=' . $campaign_email->hash_key ),
+			__( 'Preview Email', 'quillcrm' )
+		);
+
+		// Add unsubscribe link
+		$footer .= sprintf(
+			'<p>%s</p>',
+			sprintf(
+				'<a href="%s">%s</a>',
+				admin_url( 'admin.php?quillcrm=unsubscribe&hash_key=' . $campaign_email->hash_key ),
+				__( 'Unsubscribe', 'quillcrm' )
+			)
+		);
+
+		return $footer;
+	}
 }
 

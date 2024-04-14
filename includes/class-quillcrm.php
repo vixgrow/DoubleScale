@@ -65,6 +65,7 @@ final class QuillCRM {
 	private function __construct() {
 		register_activation_hook( QUILLCRM_PLUGIN_FILE, array( Install::class, 'install' ) );
 		$this->init_illuminate();
+		$this->load_dependencies();
 		$this->init_objects();
 		$this->init_hooks();
 		add_action( 'init', array( $this, 'register_tasks' ) );
@@ -148,6 +149,15 @@ final class QuillCRM {
 	 */
 	private function init_hooks() {
 
+	}
+
+	/**
+	 * Load dependencies
+	 *
+	 * @since 1.0.0
+	 */
+	private function load_dependencies() {
+		require QUILLCRM_PLUGIN_DIR . 'includes/functions.php';
 	}
 
 	/**

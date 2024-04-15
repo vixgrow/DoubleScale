@@ -15,6 +15,7 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
 use QuillCRM\Tasks;
 use QuillCRM\Campaign\Processing as Campaign_Processing;
+use QuillCRM\Tracking\Email as Email_Tracking;
 
 /**
  * QuillCRM Main Class.
@@ -140,6 +141,7 @@ final class QuillCRM {
 
 		REST_API::instance();
 		Campaign_Processing::instance();
+		Email_Tracking::instance();
 	}
 
 	/**

@@ -78,4 +78,17 @@ class Campaign_Email_Model extends Model {
 	public function campaign() {
 		return $this->belongsTo( Campaign_Model::class, 'campaign_id' );
 	}
+
+	/**
+	 * Get by hash key
+	 *
+	 * @param string $hash_key Hash key.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return object
+	 */
+	public static function get_by_hash_key( $hash_key ) {
+		return self::where( 'hash_key', $hash_key )->firstOrFail();
+	}
 }

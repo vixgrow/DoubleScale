@@ -110,7 +110,6 @@ class Processing {
 	 * @return void
 	 */
 	public function process() {
-		error_log( 'Processing::process()' );
 		$this->start_time = microtime( true );
 
 		// Check if memory limit is reached
@@ -118,52 +117,52 @@ class Processing {
 			return;
 		}
 
-		// Get first campaign with status 'processing'
-		$campaign = Campaign_Model::where( 'status', 'processing' )->firstOrFail();
+		try {
+			// Get first campaign with status 'processing'
+			$campaign = Campaign_Model::where( 'status', 'processing' )->firstOrFail();
 
-		if ( ! $campaign ) {
-			return;
-		}
+			$last_contact_offset = get_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
+			$campaign_recipients = Contact_Model::where( 'status', 'subscribed' )->count();
 
-		$last_contact_offset = get_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
-		$campaign_recipients = Contact_Model::where( 'status', 'subscribed' )->count();
+			if ( $campaign->count != $campaign_recipients ) {
+				$campaign->count = $campaign_recipients;
+				$campaign->save();
+			}
 
-		if ( $campaign->count != $campaign_recipients ) {
-			$campaign->count = $campaign_recipients;
-			$campaign->save();
-		}
-
-		if ( $last_contact_offset >= $campaign_recipients ) {
-			$campaign->status = 'completed';
-			$campaign->save();
-			return;
-		}
-
-		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
-			// Usleep is used to prevent the server from crashing
-			usleep( 1000000 );
 			if ( $last_contact_offset >= $campaign_recipients ) {
 				$campaign->status = 'completed';
 				$campaign->save();
-				update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
-				break;
+				return;
 			}
 
-			$contacts = Contact_Model::where( 'status', 'subscribed' )
-			->offset( $last_contact_offset )
-			->limit( 10 )
-			->get();
+			while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
+				// Usleep is used to prevent the server from crashing
+				usleep( 1000000 );
+				if ( $last_contact_offset >= $campaign_recipients ) {
+					$campaign->status = 'completed';
+					$campaign->save();
+					update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
+					break;
+				}
 
-			if ( ! $contacts ) {
-				break;
-			}
+				$contacts = Contact_Model::where( 'status', 'subscribed' )
+				->offset( $last_contact_offset )
+				->limit( 10 )
+				->get();
 
-			foreach ( $contacts as $contact ) {
-				$result = $this->add_campaign_email( $campaign, $contact, $last_contact_offset );
-				if ( $result ) {
-					$last_contact_offset++;
+				if ( ! $contacts ) {
+					break;
+				}
+
+				foreach ( $contacts as $contact ) {
+					$result = $this->add_campaign_email( $campaign, $contact, $last_contact_offset );
+					if ( $result ) {
+						$last_contact_offset++;
+					}
 				}
 			}
+		} catch ( \Exception $e ) {
+			error_log( 'Processing::process() ' . $e->getMessage() );
 		}
 	}
 
@@ -222,6 +221,9 @@ class Processing {
 			$this->build_email_footer( $campaign_email, $contact )
 		);
 
+		// Add click tracking to all links
+		$message = $this->add_click_tracking( $message, $campaign_email->hash_key );
+
 		$emails = new Emails();
 		$result = $emails->send(
 			$contact->email,
@@ -229,7 +231,7 @@ class Processing {
 			$message,
 		);
 
-		error_log( 'Processing::process_campaign_email() ' . $campaign_email->id . ' ' . $result );
+		error_log( 'Processing::process_campaign_email() ' . $campaign_email->id . ' result: ' . $result );
 
 		$campaign_email->status = 'sent';
 		$campaign_email->save();
@@ -254,9 +256,8 @@ class Processing {
 
 		// Add open email image 1x1
 		$message .= sprintf(
-			'<img src="%s" alt="%s" style="width:1px;height:1px;" />',
-			admin_url( 'admin.php?quillcrm=email_open&hash_key=' . $campaign_email->hash_key ),
-			__( 'Open Email', 'quillcrm' )
+			'<img src="%s" width="1" height="1" style="width:1px;height:1px;" />',
+			home_url( '?quillcrm=email_open&hash_key=' . $campaign_email->hash_key ),
 		);
 
 		return $message;
@@ -275,9 +276,8 @@ class Processing {
 
 		// Add preview image 1x1
 		$footer .= sprintf(
-			'<img src="%s" alt="%s" style="width:1px;height:1px;" />',
-			admin_url( 'admin.php?quillcrm=email_preview&hash_key=' . $campaign_email->hash_key ),
-			__( 'Preview Email', 'quillcrm' )
+			'<img src="%s" width="1" height="1" style="width:1px;height:1px;" />',
+			home_url( '?quillcrm=email_preview&hash_key=' . $campaign_email->hash_key ),
 		);
 
 		// Add unsubscribe link
@@ -285,12 +285,46 @@ class Processing {
 			'<p>%s</p>',
 			sprintf(
 				'<a href="%s">%s</a>',
-				admin_url( 'admin.php?quillcrm=unsubscribe&hash_key=' . $campaign_email->hash_key ),
+				home_url(),
 				__( 'Unsubscribe', 'quillcrm' )
 			)
 		);
 
 		return $footer;
+	}
+
+	/**
+	 * Add click tracking to all links
+	 *
+	 * @param string $message
+	 * @param string $hash_key
+	 *
+	 * @return string
+	 */
+	protected function add_click_tracking( $message, $hash_key ) {
+		// Match all links
+		preg_match_all( '/<a[^>]+href=([\'"])(?<href>.+?)\1[^>]*>/i', $message, $matches );
+
+		if ( ! isset( $matches['href'] ) ) {
+			return $message;
+		}
+
+		foreach ( $matches['href'] as $key => $href ) {
+			// Add click orginal link to click tracking
+			$click_url = add_query_arg(
+				array(
+					'quillcrm' => 'email_click',
+					'hash_key' => $hash_key,
+					'orginal'  => urlencode( $href ),
+				),
+				home_url()
+			);
+
+			// Replace orginal link with click tracking link
+			$message = str_replace( $href, $click_url, $message );
+		}
+
+		return $message;
 	}
 }
 

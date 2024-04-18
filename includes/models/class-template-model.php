@@ -53,6 +53,15 @@ class Template_Model extends Model {
 	);
 
 	/**
+	 * Casts
+	 *
+	 * @var array
+	 */
+	protected $casts = array(
+		'settings' => 'array',
+	);
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool
@@ -60,24 +69,4 @@ class Template_Model extends Model {
 	 * @since 1.0.0
 	 */
 	public $timestamps = true;
-
-	/**
-	 * Boot method
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public static function boot() {
-		parent::boot();
-
-		// Add settings column to campaign when creating
-		self::creating(
-			function( $model ) {
-				if ( ! isset( $model->settings ) ) {
-					$model->settings = wp_json_encode( array() );
-				}
-			}
-		);
-	}
 }

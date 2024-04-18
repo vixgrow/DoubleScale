@@ -55,6 +55,15 @@ class Custom_Field_Model extends Model {
 	);
 
 	/**
+	 * Casts
+	 *
+	 * @var array
+	 */
+	protected $casts = array(
+		'attributes' => 'array',
+	);
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool

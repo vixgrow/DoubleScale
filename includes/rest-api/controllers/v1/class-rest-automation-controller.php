@@ -257,13 +257,6 @@ class Rest_Automation_Controller extends REST_Controller {
 			}
 
 			$steps = $steps->toArray();
-			$steps = array_map(
-				function( $step ) {
-					$step['settings'] = json_decode( $step['settings'] );
-					return $step;
-				},
-				$steps
-			);
 
 			return new WP_REST_Response( $steps, 200 );
 		} catch ( \Exception $e ) {

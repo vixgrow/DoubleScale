@@ -121,3 +121,18 @@ function quillcrm_decode_string( $string ) {
 	// And now we need to sanitize AGAIN, to avoid unwanted tags that appeared after decoding.
 	return quillcrm_sanitize_text_deeply( $string, true );
 }
+
+/**
+ * Check if plugin is active
+ *
+ * @since 1.0.0
+ *
+ * @param string $plugin_name
+ *
+ * @return bool
+ */
+function quillcrm_is_plugin_active( $plugin_name ) {
+	$active_plugins = get_option( 'active_plugins' );
+
+	return in_array( $plugin_name, $active_plugins, true );
+}

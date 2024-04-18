@@ -10,6 +10,7 @@
 namespace QuillCRM\REST_API\Controllers\V1;
 
 use WP_Error;
+use Exception;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;

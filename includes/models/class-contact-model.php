@@ -58,6 +58,8 @@ class Contact_Model extends Model {
 		'state',
 		'country',
 		'zip',
+		'source',
+		'status',
 		'created_at',
 		'updated_at',
 	);
@@ -124,6 +126,23 @@ class Contact_Model extends Model {
 	 */
 	public function automation_contact() {
 		return $this->hasOne( Automation_Contact_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Override the save method to add validation.
+	 *
+	 * @param array $options
+	 * @return bool
+	 * @throws \Exception
+	 */
+	public function save( array $options = array() ) {
+		// Check if the email field is empty
+		if ( empty( $this->email ) ) {
+			throw new \Exception( 'Email field is required.' );
+		}
+
+		// Call the parent save method to perform the actual saving
+		return parent::save( $options );
 	}
 
 	/**

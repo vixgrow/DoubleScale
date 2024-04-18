@@ -162,7 +162,7 @@ class Processing {
 				}
 			}
 		} catch ( \Exception $e ) {
-			error_log( 'Processing::process() ' . $e->getMessage() );
+			// error_log( 'Processing::process() ' . $e->getMessage() );
 		}
 	}
 

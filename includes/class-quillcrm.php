@@ -16,6 +16,7 @@ use Illuminate\Container\Container;
 use QuillCRM\Tasks;
 use QuillCRM\Campaign\Processing as Campaign_Processing;
 use QuillCRM\Tracking\Email as Email_Tracking;
+use QuillCRM\Managers\Forms_Manager;
 
 /**
  * QuillCRM Main Class.
@@ -142,6 +143,7 @@ final class QuillCRM {
 		REST_API::instance();
 		Campaign_Processing::instance();
 		Email_Tracking::instance();
+		Forms_Manager::instance();
 	}
 
 	/**
@@ -160,6 +162,12 @@ final class QuillCRM {
 	 */
 	private function load_dependencies() {
 		require QUILLCRM_PLUGIN_DIR . 'includes/functions.php';
+
+		// Load all forms files
+		$forms_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/forms/**/class-form.php' );
+		foreach ( $forms_files as $file ) {
+			require $file;
+		}
 	}
 
 	/**

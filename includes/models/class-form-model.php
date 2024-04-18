@@ -1,7 +1,8 @@
 <?php
 /**
- * Class Campaign_Model
- * This class is responsible for handling the campaign model
+ * Class Form_Model
+ *
+ * This class is responsible for handling the form model
  *
  * @since 1.0.0
  *
@@ -11,12 +12,11 @@
 namespace QuillCRM\Models;
 
 use QuillCRM\Models\Model;
-use QuillCRM\Models\Campaign_Email_Model;
 
 /**
- * Campaign_Model class
+ * Form_Model class
  */
-class Campaign_Model extends Model {
+class Form_Model extends Model {
 
 	/**
 	 * Table name
@@ -25,7 +25,7 @@ class Campaign_Model extends Model {
 	 *
 	 * @since 1.0.0
 	 */
-	protected $table = 'quillcrm_campaigns';
+	protected $table = 'quillcrm_forms';
 
 	/**
 	 * Primary key
@@ -45,12 +45,10 @@ class Campaign_Model extends Model {
 	 */
 	protected $fillable = array(
 		'name',
-		'description',
+		'form_type',
+		'form_id',
+		'data',
 		'status',
-		'settings',
-		'parent_id',
-		'count',
-		'execute_at',
 		'created_at',
 		'updated_at',
 	);
@@ -61,7 +59,7 @@ class Campaign_Model extends Model {
 	 * @var array
 	 */
 	protected $casts = array(
-		'settings' => 'array',
+		'data' => 'array',
 	);
 
 	/**
@@ -74,13 +72,18 @@ class Campaign_Model extends Model {
 	public $timestamps = true;
 
 	/**
-	 * Get the campaign emails
+	 * Get form by form id
 	 *
-	 * @since 1.0.0
+	 * @param int    $form_id Form ID
+	 * @param string $form_type Form Type
+	 * @param string $status Status
 	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 * @return Form_Model
 	 */
-	public function emails() {
-		return $this->hasMany( Campaign_Email_Model::class, 'campaign_id', 'id' );
+	public static function get_form_by_form_id( $form_id, $form_type, $status = 'active' ) {
+		return self::where( 'form_id', $form_id )
+			->where( 'form_type', $form_type )
+			->where( 'status', $status )
+			->firstOrFail();
 	}
 }

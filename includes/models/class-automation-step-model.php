@@ -53,6 +53,15 @@ class Automation_Step_Model extends Model {
 	);
 
 	/**
+	 * Casts
+	 *
+	 * @var array
+	 */
+	protected $casts = array(
+		'settings' => 'array',
+	);
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool

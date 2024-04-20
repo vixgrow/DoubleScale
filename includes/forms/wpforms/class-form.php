@@ -155,6 +155,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $fields, $entry, $form_data, $entry_id ) {
+		if ( ! $this->is_form_active( $form_data['id'] ) ) {
+			return;
+		}
 		$data               = $this->get_default_data();
 		$entry['fields']    = $fields;
 		$data['entry']      = $this->prepare_entry( $entry, $this->prepare_fields( $fields ) );

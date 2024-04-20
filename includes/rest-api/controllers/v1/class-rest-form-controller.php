@@ -132,9 +132,9 @@ class Rest_Form_Controller extends REST_Controller {
 				),
 				'form_id'    => array(
 					'description' => esc_html__( 'ID of the form.', 'quillcrm' ),
-					'type'        => 'integer',
+					'type'        => array( 'integer', 'string' ),
 					'arg_options' => array(
-						'sanitize_callback' => 'absint',
+						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'data'       => array(

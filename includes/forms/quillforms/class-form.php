@@ -72,7 +72,7 @@ class Form extends Abstracts_Form {
 		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( wp_unslash( $_POST['form_id'] ) ) : null;
 
 		if ( ! $form_id ) {
-			wp_send_json_error( array( 'message' => __( 'Form ID is required.', 'quillforms' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Form ID is required.', 'quillcrm' ) ) );
 		}
 
 		$fields = $this->get_fields( $form_id );
@@ -116,6 +116,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $entry, $form_data ) {
+		if ( ! $this->is_form_active( $entry->form_id ) ) {
+			return;
+		}
 		$form_utils         = new Form_Utils( $entry->form_id, $form_data );
 		$form_data          = $form_utils->prepare_entry( $entry );
 		$data               = $this->get_default_data();

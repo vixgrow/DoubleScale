@@ -105,7 +105,6 @@ abstract class Form {
 		try {
 			$this->submission = $data;
 			$form_id          = $this->submission['form_id'];
-			$this->form_data  = Form_Model::get_form_by_form_id( $form_id, $this->slug, 'active' );
 			$contact_data     = $this->get_contact_data();
 
 			// Add source to contact data
@@ -152,6 +151,9 @@ abstract class Form {
 			/** @var \QuillCRM\Abstracts\Field_Type $field_type */
 			$field_type = new $contact_fields[ $key ]['type']( $contact_fields[ $key ] );
 			$value      = $field_type->sanitize_field( $entry['fields'][ $value ] );
+			if ( 'country' === $key ) {
+				$value = quillcrm_get_country_code( $value );
+			}
 			$field_type->validate_value( $value );
 			if ( $field_type->is_valid ) {
 				$contact_data[ $key ] = $value;
@@ -170,5 +172,44 @@ abstract class Form {
 	 */
 	public function get_default_data() {
 		return array();
+	}
+
+	/**
+	 * Check if form is active
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $form_id
+	 *
+	 * @return bool
+	 */
+	public function is_form_active( $form_id ) {
+		try {
+			$form            = Form_Model::get_form_by_form_id( $form_id, $this->slug, 'active' );
+			$this->form_data = $form;
+			return true;
+		} catch ( Exception $e ) {
+			error_log( 'Error getting form data: ' . $e->getMessage() );
+			return false;
+		}
+	}
+
+	/**
+	 * Get form options
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_form_options() {
+		$options = array(
+			'form_id' => array(
+				'label'       => __( 'Form ID', 'quillcrm' ),
+				'type'        => 'ajax_select',
+				'ajax_action' => "quillcrm_{$this->slug}_get_form_select_options",
+			),
+		);
+
+		return $options;
 	}
 }

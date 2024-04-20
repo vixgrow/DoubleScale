@@ -136,3 +136,56 @@ function quillcrm_is_plugin_active( $plugin_name ) {
 
 	return in_array( $plugin_name, $active_plugins, true );
 }
+
+/**
+ * Get countries list
+ *
+ * @since 1.0.0
+ *
+ * @return array
+ */
+function quillcrm_get_countries() {
+	require_once ABSPATH . 'wp-admin/includes/file.php'; // We will probably need to load this file.
+	global $wp_filesystem;
+	WP_Filesystem(); // Initial WP file system.
+	$contries  = QUILLCRM_PLUGIN_DIR . 'assets/countries.json';
+	$countries = $wp_filesystem->get_contents( $contries );
+
+	return json_decode( $countries, true );
+}
+
+/**
+ * Get country code by country name
+ *
+ * @since 1.0.0
+ *
+ * @param string $country_name
+ *
+ * @return string
+ */
+function quillcrm_get_country_code( $country_name ) {
+	$countries = quillcrm_get_countries();
+	if ( isset( $countries[ $country_name ] ) ) {
+		return $country_name;
+	}
+	$country_name = ucwords( strtolower( $country_name ) );
+	$code         = array_search( $country_name, array_column( $countries, 'name' ) );
+
+	return $code;
+}
+
+/**
+ * Get country name by country code
+ *
+ * @since 1.0.0
+ *
+ * @param string $country_code
+ *
+ * @return string
+ */
+function quillcrm_get_country_name( $country_code ) {
+	$countries = quillcrm_get_countries();
+	$name      = $countries[ $country_code ]['name'] ?? '';
+
+	return $name;
+}

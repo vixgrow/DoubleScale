@@ -76,6 +76,12 @@ final class Forms_Manager {
 			);
 		}
 
+		if ( isset( $this->forms[ $form->slug ] ) ) {
+			throw new Exception(
+				sprintf( __( 'Form with slug %s already exists', 'quillcrm' ), $form->slug )
+			);
+		}
+
 		$this->forms[ $form->slug ] = $form;
 	}
 

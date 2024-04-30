@@ -17,6 +17,9 @@ use QuillCRM\Tasks;
 use QuillCRM\Campaign\Processing as Campaign_Processing;
 use QuillCRM\Tracking\Email as Email_Tracking;
 use QuillCRM\Managers\Forms_Manager;
+use QuillCRM\Managers\Triggers_Manager;
+use QuillCRM\Managers\Actions_Manager;
+use QuillCRM\Automations\Loader as Automations_Loader;
 
 /**
  * QuillCRM Main Class.
@@ -32,6 +35,13 @@ final class QuillCRM {
 	 * @var Tasks
 	 */
 	private $campaigns_tasks;
+
+	/**
+	 * Automations tasks
+	 *
+	 * @var Tasks
+	 */
+	private $automations_tasks;
 
 	/**
 	 * Class Instance.
@@ -138,12 +148,16 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	private function init_objects() {
-		$this->campaigns_tasks = new Tasks( 'quillcrm_campaigns' );
+		$this->campaigns_tasks   = new Tasks( 'quillcrm_campaigns' );
+		$this->automations_tasks = new Tasks( 'quillcrm_automations' );
 
 		REST_API::instance();
 		Campaign_Processing::instance();
 		Email_Tracking::instance();
 		Forms_Manager::instance();
+		Triggers_Manager::instance();
+		Actions_Manager::instance();
+		Automations_Loader::instance();
 	}
 
 	/**
@@ -166,6 +180,18 @@ final class QuillCRM {
 		// Load all forms files
 		$forms_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/forms/**/class-form.php' );
 		foreach ( $forms_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations triggers files
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations actions files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
+		foreach ( $actions_files as $file ) {
 			require $file;
 		}
 	}

@@ -1,7 +1,8 @@
 <?php
 /**
- * Class Automation_Steps_Table
- * This class is responsible for handling the Automation_Steps_Table table
+ * Class Automation_Contact_Processes_Table
+ *
+ * This class is responsible for handling the Automation_Contact_Processes_Table table
  *
  * @since 1.0.0
  *
@@ -11,9 +12,9 @@
 namespace QuillCRM\Database\Migrations;
 
 /**
- * Automation_Steps_Table Table class
+ * Automation_Contact_Processes_Table Table class
  */
-class Automation_Steps_Table extends Migration {
+class Automation_Contact_Processes_Table extends Migration {
 
 	/**
 	 * Table name
@@ -22,7 +23,7 @@ class Automation_Steps_Table extends Migration {
 	 *
 	 * @since 1.0.0
 	 */
-	public $table_name = 'automation_steps';
+	public $table_name = 'automation_contact_processes';
 
 	/**
 	 * Get query
@@ -36,26 +37,27 @@ class Automation_Steps_Table extends Migration {
 		 * Fields:
 		 *
 		 * id: Primary key
+		 * step_id: Step ID
+		 * contact_id: Contact ID
 		 * automation_id: Automation ID
-		 * action: Action of the step
-		 * type: Type of the step
-		 * status: Status of the step
-		 * settings: Settings of the step
-		 * order: Order of the step
+		 * automation_contact_id: Automation Contact ID
+		 * status: Status of the process
 		 * created_at: Created at timestamp
 		 * updated_at: Updated at timestamp
 		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
+            step_id BIGINT(20) UNSIGNED NOT NULL,
+            contact_id BIGINT(20) UNSIGNED NOT NULL,
             automation_id BIGINT(20) UNSIGNED NOT NULL,
-            action VARCHAR(255) NOT NULL,
-            type VARCHAR(255) NOT NULL,
+			automation_contact_id BIGINT(20) UNSIGNED NOT NULL,
             status VARCHAR(255) NOT NULL,
-            settings TEXT,
-			`order` INT(11) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
-			KEY automation_id (automation_id)';
+            KEY step_id (step_id),
+            KEY contact_id (contact_id),
+            KEY automation_id (automation_id),
+			KEY automation_contact_id (automation_contact_id)';
 
 		return $query;
 	}

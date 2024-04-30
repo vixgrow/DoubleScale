@@ -14,6 +14,7 @@ use QuillCRM\Models\Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Automation_Step_Model;
+use QuillCRM\Models\Automation_Contact_Processes_Model;
 
 /**
  * Automation_Contact_Model class
@@ -48,11 +49,9 @@ class Automation_Contact_Model extends Model {
 	protected $fillable = array(
 		'contact_id',
 		'automation_id',
-		'execution_time',
-		'event',
 		'status',
-		'step_id',
 		'data',
+		'execution_time',
 		'created_at',
 		'updated_at',
 	);
@@ -65,6 +64,15 @@ class Automation_Contact_Model extends Model {
 	 * @since 1.0.0
 	 */
 	public $timestamps = true;
+
+	/**
+	 * Casts
+	 *
+	 * @var array
+	 */
+	protected $casts = array(
+		'data' => 'array',
+	);
 
 	/**
 	 * Automation
@@ -97,5 +105,34 @@ class Automation_Contact_Model extends Model {
 	 */
 	public function step() {
 		return $this->belongsTo( Automation_Step_Model::class, 'step_id' );
+	}
+
+	/**
+	 * Processes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function processes() {
+		return $this->hasMany( Automation_Contact_Processes_Model::class, 'automation_contact_id' );
+	}
+
+	/**
+	 * Boot
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function boot() {
+		parent::boot();
+
+		// Delete all the contact processes when the contact is deleted
+		static::deleting(
+			function( $automation_contact ) {
+				$automation_contact->processes()->delete();
+			}
+		);
 	}
 }

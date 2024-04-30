@@ -38,25 +38,23 @@ class Automation_Contacts_Table extends Migration {
 		 * id PRIMARY KEY
 		 * contact_id BIGINT(20) UNSIGNED NOT NULL
 		 * automation_id BIGINT(20) UNSIGNED NOT NULL
-		 * execution_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		 * event VARCHAR(255) NOT NULL
 		 * status VARCHAR(255) NOT NULL
-		 * step_id BIGINT(20) UNSIGNED NOT NULL
 		 * data TEXT
+		 * execution_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		 * created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		 * updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
-            contact_id BIGINT(20) UNSIGNED NOT NULL,
-            automation_id BIGINT(20) UNSIGNED NOT NULL,
-            execution_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            event VARCHAR(255) NOT NULL,
-            status VARCHAR(255) NOT NULL,
-            step_id BIGINT(20) UNSIGNED NOT NULL,
-            data TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (id)';
+			contact_id BIGINT(20) UNSIGNED NOT NULL,
+			automation_id BIGINT(20) UNSIGNED NOT NULL,
+			status VARCHAR(255) NOT NULL,
+			data TEXT,
+			execution_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY contact_id (contact_id),
+			KEY automation_id (automation_id)';
 
 		return $query;
 	}

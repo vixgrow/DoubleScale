@@ -90,7 +90,7 @@ class Tasks {
 		}
 
 		// add action.
-		$action_id = as_enqueue_async_action( "{$this->group}_$hook", compact( 'meta_id' ), $this->group );
+		$action_id = as_enqueue_async_action( "{$this->group}_$hook", compact( 'meta_id' ), $this->group, false, 0 );
 		if ( ! $action_id ) {
 			return false;
 		}
@@ -119,7 +119,7 @@ class Tasks {
 		}
 
 		// add action.
-		$action_id = as_schedule_single_action( $timestamp, "{$this->group}_$hook", compact( 'meta_id' ), $this->group );
+		$action_id = as_schedule_single_action( $timestamp, "{$this->group}_$hook", compact( 'meta_id' ), $this->group, false, 0 );
 		if ( ! $action_id ) {
 			return false;
 		}

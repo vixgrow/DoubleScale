@@ -127,6 +127,13 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 					'description' => __( 'The settings of the step.', 'quillcrm' ),
 					'type'        => 'object',
 				),
+				'order'         => array(
+					'description' => __( 'Order of the list.', 'quillcrm' ),
+					'type'        => 'integer',
+					'arg_options' => array(
+						'sanitize_callback' => 'absint',
+					),
+				),
 				'created_at'    => array(
 					'description' => __( 'The date the object was created.', 'quillcrm' ),
 					'type'        => 'string',
@@ -259,6 +266,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			'type'          => $request->get_param( 'type' ),
 			'status'        => $request->get_param( 'status' ),
 			'settings'      => $request->get_param( 'settings' ),
+			'order'         => $request->get_param( 'order' ),
 		);
 
 		foreach ( $step_data as $key => $value ) {

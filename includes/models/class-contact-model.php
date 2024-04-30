@@ -122,10 +122,21 @@ class Contact_Model extends Model {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function automation_contact() {
-		return $this->hasOne( Automation_Contact_Model::class, 'contact_id', 'id' );
+	public function automation_contacts() {
+		return $this->hasMany( Automation_Contact_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Get contact processes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function processes() {
+		return $this->hasMany( Automation_Contact_Process_Model::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -170,9 +181,8 @@ class Contact_Model extends Model {
 			function( $contact ) {
 				$contact->notes()->delete();
 
-				if ( $contact->automation_contact ) {
-					$contact->automation_contact->delete();
-				}
+				// Delete the contact from the automation contacts
+				$contact->automation_contacts()->delete();
 			}
 		);
 	}

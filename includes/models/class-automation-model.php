@@ -90,4 +90,114 @@ class Automation_Model extends Model {
 	public function steps() {
 		return $this->hasMany( Automation_Step_Model::class, 'automation_id', 'id' );
 	}
+
+	/**
+	 * Processes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function processes() {
+		return $this->hasMany( Automation_Contact_Processes_Model::class, 'automation_id', 'id' );
+	}
+
+	/**
+	 * Get all automations by trigger
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $trigger Trigger name
+	 *
+	 * @return Automation_Model[]
+	 */
+	public static function get_automations_by_trigger( $trigger ) {
+		return self::where( 'trigger', $trigger )
+			->where( 'status', 'active' )
+			->get();
+	}
+
+	/**
+	 * Get automation steps ordered by order
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Automation_Step_Model[]
+	 */
+	public function get_steps() {
+		return $this->steps()
+			->orderBy( 'order', 'asc' )
+			->get();
+	}
+
+	/**
+	 * Get first step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Automation_Step_Model
+	 */
+	public function get_first_step() {
+		return $this->steps()
+			->orderBy( 'order', 'asc' )
+			->first();
+	}
+
+	/**
+	 * Get last step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Automation_Step_Model
+	 */
+	public function get_last_step() {
+		return $this->steps()
+			->orderBy( 'order', 'desc' )
+			->first();
+	}
+
+	/**
+	 * Get step by order
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $order Step order
+	 *
+	 * @return Automation_Step_Model
+	 */
+	public function get_step_by_order( $order ) {
+		return $this->steps()
+			->where( 'order', $order )
+			->first();
+	}
+
+	/**
+	 * Get next step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $order Step order
+	 *
+	 * @return Automation_Step_Model
+	 */
+	public function get_next_step( $order ) {
+		return $this->steps()
+			->where( 'order', '>', $order )
+			->orderBy( 'order', 'asc' )
+			->first();
+	}
+
+	/**
+	 * Get Setting
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $key Setting key
+	 * @param mixed  $default Default value
+	 *
+	 * @return mixed
+	 */
+	public function get_setting( $key, $default = null ) {
+		return isset( $this->settings[ $key ] ) ? $this->settings[ $key ] : $default;
+	}
 }

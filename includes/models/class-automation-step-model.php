@@ -48,6 +48,7 @@ class Automation_Step_Model extends Model {
 		'type',
 		'status',
 		'settings',
+		'order',
 		'created_at',
 		'updated_at',
 	);
@@ -90,5 +91,30 @@ class Automation_Step_Model extends Model {
 	 */
 	public function contacts() {
 		return $this->hasMany( Automation_Contact_Model::class, 'step_id', 'id' );
+	}
+
+	/**
+	 * Get the processes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function processes() {
+		return $this->hasMany( Automation_Contact_Processes_Model::class, 'step_id', 'id' );
+	}
+
+	/**
+	 * Get setting
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $key Key.
+	 * @param mixed  $default Default.
+	 *
+	 * @return mixed
+	 */
+	public function get_setting( $key, $default = null ) {
+		return $this->settings[ $key ] ?? $default;
 	}
 }

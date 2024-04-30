@@ -372,6 +372,8 @@ class REST_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
+			$contact->load( 'lists', 'tags', 'custom_fields', 'notes' );
+
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );

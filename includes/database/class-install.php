@@ -27,6 +27,7 @@ use QuillCRM\Database\Migrations\Templates_Table;
 use QuillCRM\Database\Migrations\Task_Meta_Table;
 use QuillCRM\Database\Migrations\Campaign_Emails_Table;
 use QuillCRM\Database\Migrations\Forms_Table;
+use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
 
 /**
  * Install class
@@ -64,6 +65,7 @@ class Install {
 				'task_meta'                         => Task_Meta_Table::class,
 				'campaign_emails'                   => Campaign_Emails_Table::class,
 				'forms'                             => Forms_Table::class,
+				'automation_contact_processes'      => Automation_Contact_Processes_Table::class,
 			)
 		);
 

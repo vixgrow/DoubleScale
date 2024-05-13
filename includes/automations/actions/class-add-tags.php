@@ -57,6 +57,8 @@ class Add_Tags extends Action {
 	 * @param Automation_Model      $automation Automation Model.
 	 * @param Automation_Step_Model $step Automation Step Model.
 	 * @param Contact_Model         $contact Contact Model.
+	 *
+	 * @return bool
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Contact_Model $contact ) {
 		$tags_ids = $step->get_setting( 'tags' );
@@ -68,6 +70,27 @@ class Add_Tags extends Action {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get attributes schema
+	 *
+	 * @return array
+	 */
+	public function get_attributes_schema() {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'tags' => array(
+					'type'     => 'array',
+					'items'    => array(
+						'type' => 'integer',
+					),
+					'default'  => array(),
+					'required' => true,
+				),
+			),
+		);
 	}
 }
 

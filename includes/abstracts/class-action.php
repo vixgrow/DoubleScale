@@ -54,6 +54,15 @@ abstract class Action {
 	public $auto_enqueue = true;
 
 	/**
+	 * Constructor
+	 *
+	 * @since 1.0.0
+	 */
+	public function __construct() {
+		$this->attributes = $this->get_attributes_schema();
+	}
+
+	/**
 	 * Process Action
 	 *
 	 * @since 1.0.0
@@ -65,4 +74,15 @@ abstract class Action {
 	 * @return bool
 	 */
 	abstract public function process_action( Automation_Model $automation, Automation_Step_Model $step, Contact_Model $contact );
+
+	/**
+	 * Get attributes schema
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_attributes_schema() {
+		return array();
+	}
 }

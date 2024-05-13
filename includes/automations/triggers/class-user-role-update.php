@@ -70,8 +70,8 @@ class User_Role_Update extends Trigger {
 	public function user_role_update( $user_id, $role, $old_roles ) {
 		$user = get_user_by( 'id', $user_id );
 		$data = array(
-			'contact_email' => $user->user_email,
-			'data'          => array(
+			'email' => $user->user_email,
+			'data'  => array(
 				'old_roles' => $old_roles,
 				'user_id'   => $user_id,
 			),

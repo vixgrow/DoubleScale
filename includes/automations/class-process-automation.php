@@ -79,15 +79,10 @@ class Process_Automation {
 	 */
 	public function add_contact() {
 		$multiple_runs = $this->automation->get_setting( 'multiple_runs', false );
-		$contact_email = $this->args['contact_email'];
-		$contact       = Contact_Model::where( 'email', $contact_email )->first();
+		$contact       = $this->args['contact'] ?? null;
 
 		if ( ! $contact ) {
-			$contact = Contact_Model::create(
-				array(
-					'email' => $contact_email,
-				)
-			);
+			$contact = $this->maybe_create_contact();
 		}
 
 		$automation_contact = $this->automation->contacts()->where( 'contact_id', $contact->id )->first();
@@ -108,6 +103,25 @@ class Process_Automation {
 		}
 
 		return $automation_contact;
+	}
+
+	/**
+	 * Maybe Create Contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Contact_Model
+	 */
+	public function maybe_create_contact() {
+		$contact = Contact_Model::where( 'email', $this->args['email'] )->first();
+
+		if ( ! $contact ) {
+			$contact = Contact_Model::create( $this->args );
+		} else {
+			$contact->update( $this->args );
+		}
+
+		return $contact;
 	}
 
 	/**
@@ -210,6 +224,6 @@ class Process_Automation {
 	 */
 	public function enqueue_step( $step_id, $automation_contact_id ) {
 		error_log( 'Enqueue Step: ' . $step_id . ' Automation Contact ID: ' . $automation_contact_id );
-		QuillCRM::instance()->automations_tasks->enqueue_async( 'process_automation_step', $this->automation, $step_id, $automation_contact_id );
+		QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automation_step', $this->automation, $step_id, $automation_contact_id );
 	}
 }

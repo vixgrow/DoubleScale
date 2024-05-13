@@ -69,8 +69,8 @@ class User_Register extends Trigger {
 	public function user_register( $user_id, $user_data ) {
 		$user_email = $user_data['user_email'];
 		$data       = array(
-			'contact_email' => $user_email,
-			'data'          => array(
+			'email' => $user_email,
+			'data'  => array(
 				'user_id' => $user_id,
 			),
 		);

@@ -102,6 +102,19 @@ class Tasks {
 	}
 
 	/**
+	 * Enqueu sync task
+	 *
+	 * @param string $hook Hook name.
+	 * @param array  ...$args Args passed to hook.
+	 *
+	 * @return integer|false
+	 */
+	public function enqueue_sync( $hook, ...$args ) {
+		do_action( "{$this->group}_$hook", ...$args );
+	}
+
+
+	/**
 	 * Schedule recurring task
 	 *
 	 * @since 1.6.0
@@ -160,43 +173,7 @@ class Tasks {
 	 * @return void
 	 */
 	public function register_callback( $hook, $callback ) {
-		add_action(
-			"{$this->group}_$hook",
-			function( $meta_id ) use ( $hook, $callback ) {
-				// quillcrm_get_logger()->debug( "Start processing 'as' task '{$this->group}_$hook'" );
-				$meta = $this->get_meta( $meta_id );
-				if ( ! isset( $meta['value'] ) ) {
-					// quillcrm_get_logger()->critical(
-					// esc_html__( 'Cannot find task meta', 'quillcrm' ),
-					// array(
-					// 'code'    => 'cannot_find_task_meta',
-					// 'hook'    => $hook,
-					// 'group'   => $this->group,
-					// 'meta_id' => $meta_id,
-					// )
-					// );
-					return;
-				}
-				try {
-					// quillcrm_get_logger()->debug( "Processing 'as' task.", compact( 'meta' ) );
-					call_user_func_array( $callback, $meta['value'] );
-				} catch ( Throwable $e ) {
-					// quillcrm_get_logger()->error(
-					// esc_html__( 'Task threw an exception', 'quillcrm' ),
-					// array(
-					// 'code'      => 'task_threw_exception',
-					// 'hook'      => $hook,
-					// 'group'     => $this->group,
-					// 'exception' => array(
-					// 'code'    => $e->getCode(),
-					// 'message' => $e->getMessage(),
-					// 'trace'   => $e->getTraceAsString(),
-					// ),
-					// )
-					// );
-				}
-			}
-		);
+		add_action( "{$this->group}_$hook", $callback, 10, 999 );
 	}
 
 	/**

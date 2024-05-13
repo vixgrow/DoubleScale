@@ -16,6 +16,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Automation_Step_Model;
+use QuillCRM\Managers\Actions_Manager;
 
 /**
  * Rest_Automation_Step_Controller class
@@ -126,6 +127,9 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				'settings'      => array(
 					'description' => __( 'The settings of the step.', 'quillcrm' ),
 					'type'        => 'object',
+					'arg_options' => array(
+						'validate_callback' => array( $this, 'validate_item_settings' ),
+					),
 				),
 				'order'         => array(
 					'description' => __( 'Order of the list.', 'quillcrm' ),
@@ -148,6 +152,41 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Validate the create item request
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed           $value The value of the parameter.
+	 * @param WP_REST_Request $request The request object.
+	 * @param string          $param The parameter name.
+	 *
+	 * @return WP_Error|bool
+	 */
+	public function validate_item_settings( $value, $request, $param ) {
+		try {
+			$data   = $request->get_json_params();
+			$action = Actions_Manager::instance()->get_action( $data['action'] );
+
+			if ( ! $action ) {
+				return new WP_Error( 'rest_invalid_action', __( 'Invalid action.', 'quillcrm' ), array( 'status' => 400 ) );
+			}
+
+			if ( empty( $action->attributes ) ) {
+				return true;
+			}
+
+			$validator = rest_validate_value_from_schema( $data, $action->attributes, 'settings' );
+			if ( is_wp_error( $validator ) ) {
+				return $validator;
+			}
+
+			return true;
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'rest_automation_step_validate_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
 	}
 
 	/**

@@ -168,6 +168,56 @@ class Contact_Model extends Model {
 	}
 
 	/**
+	 * Sync lists
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $lists List IDs
+	 *
+	 * @return void
+	 */
+	public function sync_lists( $lists ) {
+		$existing_lists  = $this->lists->pluck( 'id' )->toArray();
+		$lists_to_add    = array_diff( $lists, $existing_lists );
+		$lists_to_remove = array_diff( $existing_lists, $lists );
+
+		if ( ! empty( $lists_to_add ) ) {
+			$this->lists()->attach( $lists_to_add );
+			do_action( 'quillcrm_contact_lists_applied', $this, $lists_to_add );
+		}
+
+		if ( ! empty( $lists_to_remove ) ) {
+			$this->lists()->detach( $lists_to_remove );
+			do_action( 'quillcrm_contact_lists_removed', $this, $lists_to_remove );
+		}
+	}
+
+	/**
+	 * Sync tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $tags Tag IDs
+	 *
+	 * @return void
+	 */
+	public function sync_tags( $tags ) {
+		$existing_tags  = $this->tags->pluck( 'id' )->toArray();
+		$tags_to_add    = array_diff( $tags, $existing_tags );
+		$tags_to_remove = array_diff( $existing_tags, $tags );
+
+		if ( ! empty( $tags_to_add ) ) {
+			$this->tags()->attach( $tags_to_add );
+			do_action( 'quillcrm_contact_tags_applied', $this, $tags_to_add );
+		}
+
+		if ( ! empty( $tags_to_remove ) ) {
+			$this->tags()->detach( $tags_to_remove );
+			do_action( 'quillcrm_contact_tags_removed', $this, $tags_to_remove );
+		}
+	}
+
+	/**
 	 * Delete the contact notes boot method
 	 *
 	 * @since 1.0.0
@@ -183,6 +233,16 @@ class Contact_Model extends Model {
 
 				// Delete the contact from the automation contacts
 				$contact->automation_contacts()->delete();
+			}
+		);
+
+		parent::saved(
+			function( $contact ) {
+				if ( $contact->status == 'unsubscribed' ) {
+					do_action( 'quillcrm_contact_unsubscribed', $contact );
+				} else {
+					do_action( 'quillcrm_contact_subscribed', $contact );
+				}
 			}
 		);
 	}

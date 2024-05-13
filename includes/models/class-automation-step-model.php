@@ -117,4 +117,23 @@ class Automation_Step_Model extends Model {
 	public function get_setting( $key, $default = null ) {
 		return $this->settings[ $key ] ?? $default;
 	}
+
+	/**
+	 * Boot
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function boot() {
+		parent::boot();
+
+		// Update order on create
+		static::creating(
+			function ( $step ) {
+				$last_step   = $step->automation->get_last_step();
+				$step->order = $last_step ? $last_step->order + 1 : 1;
+			}
+		);
+	}
 }

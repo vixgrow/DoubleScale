@@ -206,6 +206,14 @@ class REST_Contact_Controller extends REST_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
+				'status'     => array(
+					'description'  => __( 'Status of the contact.', 'quillcrm' ),
+					'type'         => 'string',
+					'enum'         => array( 'subscribed', 'unsubscribed' ),
+					'args_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
 				'created_at' => array(
 					'type'        => 'string',
 					'description' => 'Created at',
@@ -552,6 +560,7 @@ class REST_Contact_Controller extends REST_Controller {
 			'state'      => $request->get_param( 'state' ),
 			'country'    => $request->get_param( 'country' ),
 			'zip'        => $request->get_param( 'zip' ),
+			'status'     => $request->get_param( 'status' ),
 		);
 
 		foreach ( $contact as $key => $value ) {
@@ -594,8 +603,7 @@ class REST_Contact_Controller extends REST_Controller {
 					}
 				}
 
-				// Remove all lists and add the new ones
-				$contact->lists()->sync( $lists_arr );
+				$contact->sync_lists( $lists_arr );
 			}
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
@@ -633,7 +641,7 @@ class REST_Contact_Controller extends REST_Controller {
 					}
 				}
 
-				$contact->tags()->sync( $tags_arr );
+				$contact->sync_tags( $tags_arr );
 			}
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );

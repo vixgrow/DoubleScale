@@ -68,8 +68,8 @@ class User_Login extends Trigger {
 	 */
 	public function user_login( $user_login, $user ) {
 		$data = array(
-			'contact_email' => $user->user_email,
-			'data'          => array(
+			'email' => $user->user_email,
+			'data'  => array(
 				'user_id' => $user->ID,
 			),
 		);

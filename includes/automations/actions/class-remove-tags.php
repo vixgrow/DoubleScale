@@ -71,6 +71,27 @@ class Remove_Tags extends Action {
 
 		return true;
 	}
+
+	/**
+	 * Get attributes schema
+	 *
+	 * @return array
+	 */
+	public function get_attributes_schema() {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'tags' => array(
+					'type'     => 'array',
+					'items'    => array(
+						'type' => 'integer',
+					),
+					'default'  => array(),
+					'required' => true,
+				),
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Remove_Tags() );

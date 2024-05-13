@@ -1,6 +1,7 @@
 <?php
 /**
- * Send Email Action
+ * Update User Role Action
+ * This action will update the user role.
  *
  * @since 1.0.0
  *
@@ -14,34 +15,33 @@ use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Emails\Emails;
-use QuillCRM\Models\Template_Model;
+use WP_User;
 
 /**
- * Send Email Action
+ * Update User Role Action
  */
-class Send_Email extends Action {
+class Update_User_Role extends Action {
 
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Send Email';
+	public $name = 'Update User Role';
 
 	/**
 	 * Action Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'send_email';
+	public $slug = 'update_user_role';
 
 	/**
 	 * Action Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This action will send an email to the user.';
+	public $description = 'This action will update the user role.';
 
 	/**
 	 * Action Attributes
@@ -62,28 +62,21 @@ class Send_Email extends Action {
 	 * @return bool
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Contact_Model $contact ) {
-		$template_id = $step->get_setting( 'template_id' );
-		$template    = Template_Model::find( $template_id );
-
-		if ( empty( $template ) ) {
+		$user = get_user_by( 'email', $contact->email );
+		if ( ! $user ) {
 			return false;
 		}
 
-		$template_settings = $template->settings;
-		$subject           = $template->subject;
-		$body              = $template->body;
-		$to_email          = $template_settings['to_email'] ?? $contact->email;
+		$role    = $step->get_attribute( 'role' );
+		$replace = $step->get_attribute( 'replace' );
 
-		$emails = new Emails();
-		$result = $emails->send(
-			$to_email,
-			$subject,
-			$body,
-		);
+		if ( $replace ) {
+			$user->set_role( $role );
+		} else {
+			$user->add_role( $role );
+		}
 
-		error_log( 'Email Sent: ' . $result );
-
-		return $result;
+		return true;
 	}
 
 	/**
@@ -95,13 +88,21 @@ class Send_Email extends Action {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'template_id' => array(
-					'type'     => 'integer',
-					'required' => true,
+				'role'    => array(
+					'type'        => 'string',
+					'title'       => 'Role',
+					'description' => 'Enter the role.',
+					'required'    => true,
+				),
+				'replace' => array(
+					'type'        => 'boolean',
+					'title'       => 'Replace',
+					'description' => 'Replace the existing roles.',
+					'default'     => true,
 				),
 			),
 		);
 	}
 }
 
-Actions_Manager::instance()->register( new Send_Email() );
+Actions_Manager::instance()->register( new Update_User_Role() );

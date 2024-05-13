@@ -69,6 +69,28 @@ class Remove_Lists extends Action {
 
 		return true;
 	}
+
+	/**
+	 * Get attributes schema
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_attributes_schema() {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'lists' => array(
+					'type'     => 'array',
+					'items'    => array(
+						'type' => 'integer',
+					),
+					'required' => true,
+				),
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Remove_Lists() );

@@ -11,7 +11,7 @@ namespace QuillCRM\Abstracts;
 
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 
 /**
  * Action class
@@ -54,6 +54,20 @@ abstract class Action {
 	public $auto_enqueue = true;
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source;
+
+	/**
+	 * Tigger Group
+	 *
+	 * @var string
+	 */
+	public $group;
+
+	/**
 	 * Constructor
 	 *
 	 * @since 1.0.0
@@ -67,13 +81,13 @@ abstract class Action {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Automation_Model      $automation Automation Model.
-	 * @param Automation_Step_Model $step Automation Step Model.
-	 * @param Contact_Model         $contact Contact Model.
+	 * @param Automation_Model         $automation Automation Model.
+	 * @param Automation_Step_Model    $step Automation Step Model.
+	 * @param Automation_Contact_Model $contact Contact Model.
 	 *
 	 * @return bool
 	 */
-	abstract public function process_action( Automation_Model $automation, Automation_Step_Model $step, Contact_Model $contact );
+	abstract public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact);
 
 	/**
 	 * Get attributes schema

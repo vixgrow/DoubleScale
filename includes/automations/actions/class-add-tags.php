@@ -13,7 +13,7 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Tag_Model;
 
 /**
@@ -34,6 +34,20 @@ class Add_Tags extends Action {
 	 * @var string
 	 */
 	public $slug = 'add_tags';
+
+	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'crm';
+
+	/**
+	 * Tigger Group
+	 *
+	 * @var string
+	 */
+	public $group = 'contact';
 
 	/**
 	 * Action Description
@@ -60,13 +74,13 @@ class Add_Tags extends Action {
 	 *
 	 * @return bool
 	 */
-	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Contact_Model $contact ) {
+	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$tags_ids = $step->get_setting( 'tags' );
 		$tags     = Tag_Model::find( $tags_ids );
 
 		if ( ! empty( $tags ) ) {
 			$tags_ids = wp_list_pluck( $tags->toArray(), 'id' );
-			$contact->tags()->syncWithoutDetaching( $tags_ids );
+			$automation_contact->contact->tags()->syncWithoutDetaching( $tags_ids );
 		}
 
 		return true;

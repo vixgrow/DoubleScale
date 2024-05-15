@@ -13,7 +13,7 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\List_Model;
 
 /**
@@ -50,22 +50,36 @@ class Add_Lists extends Action {
 	public $attributes = array();
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'crm';
+
+	/**
+	 * Tigger Group
+	 *
+	 * @var string
+	 */
+	public $group = 'contact';
+
+	/**
 	 * Process Action
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Automation_Model      $automation Automation Model.
-	 * @param Automation_Step_Model $step Automation Step Model.
-	 * @param Contact_Model         $contact Contact Model.
+	 * @param Automation_Model         $automation Automation Model.
+	 * @param Automation_Step_Model    $step Automation Step Model.
+	 * @param Automation_Contact_Model $contact Contact Model.
 	 */
-	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Contact_Model $contact ) {
+	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$lists_ids = $step->get_setting( 'lists' );
 		$lists     = List_Model::find( $lists_ids );
 
 		if ( ! empty( $lists ) ) {
 			$lists_ids = wp_list_pluck( $lists->toArray(), 'id' );
 			error_log( 'Lists IDs: ' . wp_json_encode( $lists_ids ) );
-			$contact->lists()->syncWithoutDetaching( $lists_ids );
+			$automation_contact->contact->lists()->syncWithoutDetaching( $lists_ids );
 		}
 
 		return true;

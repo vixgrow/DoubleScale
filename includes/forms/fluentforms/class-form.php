@@ -33,6 +33,13 @@ class Form extends Abstracts_Form {
 	public $name = 'Fluent Forms';
 
 	/**
+	 * Description
+	 *
+	 * @var string
+	 */
+	public $description = 'This will trigger when a form is submitted';
+
+	/**
 	 * Load Hooks
 	 */
 	public function load_hooks() {
@@ -41,6 +48,17 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_fields", array( $this, 'ajax_get_fields' ) );
 		// Ajax Get Form Select Options
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
+	}
+
+	/**
+	 * Is Enabled
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_enabled() {
+		return quillcrm_is_plugin_active( 'fluentform/fluentform.php' );
 	}
 
 	/**
@@ -150,9 +168,6 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $submission_id, $form_data, $form ) {
-		if ( ! $this->is_form_active( $form['id'] ) ) {
-			return;
-		}
 		$data               = $this->get_default_data();
 		$data['form_id']    = $form['id'];
 		$data['form_title'] = $form['title'];
@@ -162,7 +177,11 @@ class Form extends Abstracts_Form {
 			'fields' => $this->prepare_form_fields_recursive( $form_data ),
 		);
 
-		$this->process_form( $data );
+		if ( $this->is_form_active( $form['id'] ) ) {
+			$this->process_form( $data );
+		}
+
+		$this->process_automations( $data );
 	}
 
 	/**
@@ -195,6 +214,4 @@ class Form extends Abstracts_Form {
 	}
 }
 
-if ( quillcrm_is_plugin_active( 'fluentform/fluentform.php' ) ) {
-	Forms_Manager::instance()->register( new Form() );
-}
+Forms_Manager::instance()->register( new Form() );

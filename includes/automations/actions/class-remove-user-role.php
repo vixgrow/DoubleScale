@@ -1,7 +1,7 @@
 <?php
 /**
- * Update User Role Action
- * This action will update the user role.
+ * Remove User Role Action
+ * This action will remove a user role.
  *
  * @since 1.0.0
  *
@@ -11,44 +11,35 @@
 namespace QuillCRM\Automations\Actions;
 
 use QuillCRM\Abstracts\Action;
-use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
-use WP_User;
 
 /**
- * Update User Role Action
+ * Remove User Role Action
  */
-class Update_User_Role extends Action {
+class Remove_User_Role extends Action {
 
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Update User Role';
+	public $name = 'Remove User Role';
 
 	/**
 	 * Action Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'update_user_role';
+	public $slug = 'remove_user_role';
 
 	/**
 	 * Action Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This action will update the user role.';
-
-	/**
-	 * Action Attributes
-	 *
-	 * @var array
-	 */
-	public $attributes = array();
+	public $description = 'This action will remove a user role.';
 
 	/**
 	 * Source
@@ -82,20 +73,20 @@ class Update_User_Role extends Action {
 			return false;
 		}
 
-		$role    = $step->get_attribute( 'role' );
-		$replace = $step->get_attribute( 'replace' );
-
-		if ( $replace ) {
-			$user->set_role( $role );
-		} else {
-			$user->add_role( $role );
+		$role = $step->get_attribute( 'role' );
+		if ( ! $role ) {
+			return false;
 		}
+
+		$user->remove_role( $role );
 
 		return true;
 	}
 
 	/**
-	 * Get attributes schema
+	 * Get Attributes schema.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -103,21 +94,11 @@ class Update_User_Role extends Action {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'role'    => array(
-					'type'        => 'string',
-					'title'       => 'Role',
-					'description' => 'Enter the role.',
-					'required'    => true,
-				),
-				'replace' => array(
-					'type'        => 'boolean',
-					'title'       => 'Replace',
-					'description' => 'Replace the existing roles.',
-					'default'     => true,
+				'role' => array(
+					'type'     => 'string',
+					'required' => true,
 				),
 			),
 		);
 	}
 }
-
-Actions_Manager::instance()->register( new Update_User_Role() );

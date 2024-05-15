@@ -46,6 +46,20 @@ class User_Role_Update extends Trigger {
 	public $attributes = array();
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'wp';
+
+	/**
+	 * Group
+	 *
+	 * @var string
+	 */
+	public $group = 'user';
+
+	/**
 	 * Load Hooks
 	 *
 	 * @since 1.0.0

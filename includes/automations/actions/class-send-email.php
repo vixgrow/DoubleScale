@@ -13,7 +13,7 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Models\Template_Model;
 
@@ -37,6 +37,20 @@ class Send_Email extends Action {
 	public $slug = 'send_email';
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'message';
+
+	/**
+	 * Tigger Group
+	 *
+	 * @var string
+	 */
+	public $group = 'email';
+
+	/**
 	 * Action Description
 	 *
 	 * @var string
@@ -55,24 +69,23 @@ class Send_Email extends Action {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Automation_Model      $automation Automation Model.
-	 * @param Automation_Step_Model $step Automation Step Model.
-	 * @param Contact_Model         $contact Contact Model.
+	 * @param Automation_Model         $automation Automation Model.
+	 * @param Automation_Step_Model    $step Automation Step Model.
+	 * @param Automation_Contact_Model $contact Contact Model.
 	 *
 	 * @return bool
 	 */
-	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Contact_Model $contact ) {
+	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$template_id = $step->get_setting( 'template_id' );
 		$template    = Template_Model::find( $template_id );
 
 		if ( empty( $template ) ) {
 			return false;
 		}
-
-		$template_settings = $template->settings;
-		$subject           = $template->subject;
-		$body              = $template->body;
-		$to_email          = $template_settings['to_email'] ?? $contact->email;
+		$contact  = $automation_contact->contact;
+		$subject  = $template->subject;
+		$body     = $template->body;
+		$to_email = $template->get_setting( 'to_email' ) ?? $contact->email;
 
 		$emails = new Emails();
 		$result = $emails->send(

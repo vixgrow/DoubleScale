@@ -119,6 +119,20 @@ class Automation_Contact_Model extends Model {
 	}
 
 	/**
+	 * Get data
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $key Key.
+	 * @param mixed  $default Default.
+	 *
+	 * @return mixed
+	 */
+	public function get_data( $key, $default = null ) {
+		return $this->data[ $key ] ?? $default;
+	}
+
+	/**
 	 * Boot
 	 *
 	 * @since 1.0.0

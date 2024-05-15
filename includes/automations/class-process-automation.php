@@ -139,8 +139,7 @@ class Process_Automation {
 		try {
 			$automation_contact = Automation_Contact_Model::findOrFail( $automation_contact_id );
 			$action             = Actions_Manager::instance()->get_action( $step->action );
-			error_log( $automation_contact->contact );
-			$result = $action->process_action( $this->automation, $step, $automation_contact->contact );
+			$result             = $action->process_action( $this->automation, $step, $automation_contact );
 
 			if ( ! $result ) {
 				$this->add_automation_contact_process( $step, $automation_contact->id, 'failed' );
@@ -162,7 +161,7 @@ class Process_Automation {
 			if ( $action->auto_enqueue ) {
 				$next_step = $this->automation->get_next_step( $step->order );
 				// Enqueue next step
-				$this->enqueue_step( $next_step->id, $$automation_contact->id );
+				$this->enqueue_step( $next_step->id, $automation_contact->id );
 			}
 		} catch ( Exception $e ) {
 			error_log( 'Process Step Error: ' . $e->getMessage() );

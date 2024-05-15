@@ -69,4 +69,18 @@ class Template_Model extends Model {
 	 * @since 1.0.0
 	 */
 	public $timestamps = true;
+
+	/**
+	 * Get setting
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $key Key.
+	 * @param mixed  $default Default.
+	 *
+	 * @return mixed
+	 */
+	public function get_setting( $key, $default = null ) {
+		return $this->settings[ $key ] ?? $default;
+	}
 }

@@ -34,6 +34,13 @@ class Form extends Abstracts_Form {
 	public $name = 'Contact Form 7';
 
 	/**
+	 * Description
+	 *
+	 * @var string
+	 */
+	public $description = 'This will trigger when a form is submitted';
+
+	/**
 	 * Load Hooks
 	 */
 	public function load_hooks() {
@@ -42,6 +49,15 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_fields", array( $this, 'ajax_get_fields' ) );
 		// Ajax Get Form Select Options
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
+	}
+
+	/**
+	 * Set is_enabled
+	 *
+	 * @since 1.0.0
+	 */
+	public function is_enabled() {
+		return quillcrm_is_plugin_active( 'contact-form-7/wp-contact-form-7.php' );
 	}
 
 	/**
@@ -121,9 +137,6 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $contact_form, $result ) {
-		if ( ! $this->is_form_active( $contact_form->id() ) ) {
-			return;
-		}
 		$data               = $this->get_default_data();
 		$data['form_id']    = $contact_form->id();
 		$data['fields']     = $this->get_fields( $contact_form->id() );
@@ -132,7 +145,11 @@ class Form extends Abstracts_Form {
 			'fields' => $this->get_form_entry_fields( $contact_form ),
 		);
 
-		$this->process_form( $data );
+		if ( $this->is_form_active( $contact_form->id() ) ) {
+			$this->process_form( $data );
+		}
+
+		$this->process_automations( $data );
 	}
 
 	/**
@@ -177,6 +194,4 @@ class Form extends Abstracts_Form {
 	}
 }
 
-if ( quillcrm_is_plugin_active( 'contact-form-7/wp-contact-form-7.php' ) ) {
-	Forms_Manager::instance()->register( new Form() );
-}
+Forms_Manager::instance()->register( new Form() );

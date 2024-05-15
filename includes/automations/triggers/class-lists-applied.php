@@ -49,6 +49,20 @@ class Lists_Applied extends Trigger {
 	public $attributes = array();
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'crm';
+
+	/**
+	 * Group
+	 *
+	 * @var string
+	 */
+	public $group = 'contact';
+
+	/**
 	 * Load Hooks
 	 *
 	 * @since 1.0.0

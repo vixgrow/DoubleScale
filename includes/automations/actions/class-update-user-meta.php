@@ -1,7 +1,8 @@
 <?php
 /**
- * Update User Role Action
- * This action will update the user role.
+ * Update User Meta Action
+ *
+ * This action will update the user meta.
  *
  * @since 1.0.0
  *
@@ -11,58 +12,35 @@
 namespace QuillCRM\Automations\Actions;
 
 use QuillCRM\Abstracts\Action;
-use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
-use WP_User;
 
 /**
- * Update User Role Action
+ * Update User Meta Action
  */
-class Update_User_Role extends Action {
+class Update_User_Meta extends Action {
 
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Update User Role';
+	public $name = 'Update User Meta';
 
 	/**
 	 * Action Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'update_user_role';
+	public $slug = 'update_user_meta';
 
 	/**
 	 * Action Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This action will update the user role.';
-
-	/**
-	 * Action Attributes
-	 *
-	 * @var array
-	 */
-	public $attributes = array();
-
-	/**
-	 * Source
-	 *
-	 * @var string
-	 */
-	public $source = 'wp';
-
-	/**
-	 * Tigger Group
-	 *
-	 * @var string
-	 */
-	public $group = 'user';
+	public $description = 'This action will update the user meta.';
 
 	/**
 	 * Process Action
@@ -82,20 +60,18 @@ class Update_User_Role extends Action {
 			return false;
 		}
 
-		$role    = $step->get_attribute( 'role' );
-		$replace = $step->get_attribute( 'replace' );
-
-		if ( $replace ) {
-			$user->set_role( $role );
-		} else {
-			$user->add_role( $role );
+		$meta = $step->get_attribute( 'meta', array() );
+		foreach ( $meta as $item ) {
+			update_user_meta( $user->ID, $item['key'], $item['value'] );
 		}
 
 		return true;
 	}
 
 	/**
-	 * Get attributes schema
+	 * Get Attributes schema.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -103,21 +79,28 @@ class Update_User_Role extends Action {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'role'    => array(
-					'type'        => 'string',
-					'title'       => 'Role',
-					'description' => 'Enter the role.',
+				'meta' => array(
+					'type'        => 'array',
+					'label'       => 'Meta',
+					'description' => 'User meta to update.',
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'key'   => array(
+								'type'        => 'string',
+								'label'       => 'Meta Key',
+								'description' => 'Meta key to update.',
+							),
+							'value' => array(
+								'type'        => 'string',
+								'label'       => 'Meta Value',
+								'description' => 'Meta value to update.',
+							),
+						),
+					),
 					'required'    => true,
-				),
-				'replace' => array(
-					'type'        => 'boolean',
-					'title'       => 'Replace',
-					'description' => 'Replace the existing roles.',
-					'default'     => true,
 				),
 			),
 		);
 	}
 }
-
-Actions_Manager::instance()->register( new Update_User_Role() );

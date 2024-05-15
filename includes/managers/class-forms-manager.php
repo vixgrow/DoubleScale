@@ -103,7 +103,7 @@ final class Forms_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return array
+	 * @return Form[]
 	 */
 	public function get_all_forms() {
 		return $this->forms;

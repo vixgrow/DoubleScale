@@ -49,6 +49,20 @@ class Order_Created extends Trigger {
 	public $attributes = array();
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'woocommerce';
+
+	/**
+	 * Group
+	 *
+	 * @var string
+	 */
+	public $group = 'order';
+
+	/**
 	 * Load Hooks
 	 *
 	 * @since 1.0.0

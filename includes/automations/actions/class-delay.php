@@ -13,7 +13,7 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\QuillCRM;
 
 /**
@@ -57,22 +57,36 @@ class Delay extends Action {
 	public $auto_enqueue = false;
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'crm';
+
+	/**
+	 * Tigger Group
+	 *
+	 * @var string
+	 */
+	public $group = 'contact';
+
+	/**
 	 * Process Action
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Automation_Model      $automation Automation Model.
-	 * @param Automation_Step_Model $step Automation Step Model.
-	 * @param Contact_Model         $contact Contact Model.
+	 * @param Automation_Model         $automation Automation Model.
+	 * @param Automation_Step_Model    $step Automation Step Model.
+	 * @param Automation_Contact_Model $contact Contact Model.
 	 *
 	 * @return bool
 	 */
-	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Contact_Model $contact ) {
+	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		error_log( 'Delay: ' . $automation->name . ' - ' . $step->name );
 		// Schedule the next step after 2 minutes
 		$next_step = $automation->get_next_step( $step->order );
 		$time      = time() + MINUTE_IN_SECONDS;
-		QuillCRM::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation, $next_step->id, $contact->id );
+		QuillCRM::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation, $next_step->id, $automation_contact->id );
 
 		return true;
 	}

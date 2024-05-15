@@ -33,6 +33,13 @@ class Form extends Abstracts_Form {
 	public $name = 'Formidable';
 
 	/**
+	 * Description
+	 *
+	 * @var string
+	 */
+	public $description = 'This will trigger when a form is submitted';
+
+	/**
 	 * Load Hooks
 	 */
 	public function load_hooks() {
@@ -41,6 +48,17 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_fields", array( $this, 'ajax_get_fields' ) );
 		// Ajax Get Form Select Options
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
+	}
+
+	/**
+	 * Is Enabled
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_enabled() {
+		return quillcrm_is_plugin_active( 'formidable/formidable.php' );
 	}
 
 	/**
@@ -118,9 +136,6 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $entry_id, $form_id ) {
-		if ( ! $this->is_form_active( $form_id ) ) {
-			return;
-		}
 		$entry = \FrmEntry::getOne( $entry_id, true );
 		if ( ! isset( $entry->metas ) ) {
 			return;
@@ -138,11 +153,13 @@ class Form extends Abstracts_Form {
 			$data['entry']['fields'][ $field_id ] = $value;
 		}
 
-		$this->process_form( $data );
+		if ( $this->is_form_active( $form_id ) ) {
+			$this->process_form( $data );
+		}
+
+		$this->process_automations( $data );
 	}
 
 }
 
-if ( quillcrm_is_plugin_active( 'formidable/formidable.php' ) ) {
-	Forms_Manager::instance()->register( new Form() );
-}
+Forms_Manager::instance()->register( new Form() );

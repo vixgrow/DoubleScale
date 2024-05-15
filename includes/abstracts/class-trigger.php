@@ -12,7 +12,6 @@ namespace QuillCRM\Abstracts;
 use Exception;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\QuillCRM;
-use QuillCRM\Automations\Process_Automation;
 
 /**
  * Trigger class
@@ -48,6 +47,20 @@ abstract class Trigger {
 	public $attributes = array();
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source;
+
+	/**
+	 * Tigger Group
+	 *
+	 * @var string
+	 */
+	public $group;
+
+	/**
 	 * Constructor
 	 *
 	 * @since 1.0.0
@@ -77,7 +90,6 @@ abstract class Trigger {
 	public function process( $args ) {
 		try {
 			$automations = Automation_Model::get_automations_by_trigger( $this->slug );
-
 			foreach ( $automations as $automation ) {
 				if ( ! $this->is_processable( $automation, $args ) ) {
 					continue;

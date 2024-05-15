@@ -33,6 +33,13 @@ class Form extends Abstracts_Form {
 	public $name = 'MetForm';
 
 	/**
+	 * Description
+	 *
+	 * @var string
+	 */
+	public $description = 'This will trigger when a form is submitted';
+
+	/**
 	 * Load Hooks
 	 */
 	public function load_hooks() {
@@ -41,6 +48,17 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_fields", array( $this, 'ajax_get_fields' ) );
 		// Ajax Get Form Select Options
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
+	}
+
+	/**
+	 * Is Enabled
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_enabled() {
+		return quillcrm_is_plugin_active( 'metform/metform.php' );
 	}
 
 	/**
@@ -126,9 +144,6 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $form_id, $form_data ) {
-		if ( ! $this->is_form_active( $form_id ) ) {
-			return;
-		}
 		$data               = $this->get_default_data();
 		$data['form_id']    = $form_id;
 		$data['fields']     = $this->get_fields( $form_id );
@@ -137,10 +152,12 @@ class Form extends Abstracts_Form {
 			'fields' => $form_data,
 		);
 
-		$this->process_form( $data );
+		if ( $this->is_form_active( $form_id ) ) {
+			$this->process_form( $data );
+		}
+
+		$this->process_automations( $data );
 	}
 }
 
-if ( quillcrm_is_plugin_active( 'metform/metform.php' ) ) {
-	Forms_Manager::instance()->register( new Form() );
-}
+Forms_Manager::instance()->register( new Form() );

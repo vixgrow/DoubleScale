@@ -48,6 +48,20 @@ class Topic_Completed extends Trigger {
 	public $attributes = array();
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'lms';
+
+	/**
+	 * Group
+	 *
+	 * @var string
+	 */
+	public $group = 'learndash';
+
+	/**
 	 * Load Hooks
 	 *
 	 * @since 1.0.0

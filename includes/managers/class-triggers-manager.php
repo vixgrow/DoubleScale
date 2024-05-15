@@ -12,6 +12,7 @@ namespace QuillCRM\Managers;
 
 use Exception;
 use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Managers\Forms_Manager;
 
 /**
  * Triggers class
@@ -26,6 +27,13 @@ final class Triggers_Manager {
 	 * @var array
 	 */
 	protected $triggers = array();
+
+	/**
+	 * Sources
+	 *
+	 * @var array
+	 */
+	protected $sources = array();
 
 	/**
 	 * Class Instance.
@@ -57,6 +65,8 @@ final class Triggers_Manager {
 	 * constructor
 	 */
 	private function __construct() {
+		$this->set_sources();
+		$this->set_forms_sources();
 		add_action( 'quillcrm_loaded', array( $this, 'load_triggers' ) );
 	}
 
@@ -94,6 +104,10 @@ final class Triggers_Manager {
 		}
 
 		$this->triggers[ $trigger->slug ] = $trigger;
+		$this->sources[ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = array(
+			'label'       => $trigger->name,
+			'description' => $trigger->description,
+		);
 	}
 
 	/**
@@ -114,5 +128,88 @@ final class Triggers_Manager {
 	 */
 	public function get_all_triggers() {
 		return $this->triggers;
+	}
+
+	/**
+	 * Get sources
+	 *
+	 * @return array
+	 */
+	public function set_sources() {
+		$this->sources = array(
+			'crm'         => array(
+				'label'  => __( 'CRM', 'quillcrm' ),
+				'groups' => array(
+					'contact' => array(
+						'label'    => __( 'Contact', 'quillcrm' ),
+						'triggers' => array(),
+					),
+				),
+			),
+			'woocommerce' => array(
+				'label'       => __( 'WooCommerce', 'quillcrm' ),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				'groups'      => array(
+					'order' => array(
+						'label'    => __( 'Order', 'quillcrm' ),
+						'triggers' => array(),
+					),
+				),
+			),
+			'wp'          => array(
+				'label'  => __( 'WordPress', 'quillcrm' ),
+				'groups' => array(
+					'user' => array(
+						'label'    => __( 'User', 'quillcrm' ),
+						'triggers' => array(),
+					),
+				),
+			),
+			'lms'         => array(
+				'label'  => __( 'LMS', 'quillcrm' ),
+				'groups' => array(
+					'learndash' => array(
+						'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
+						'label'       => __( 'LearnDash', 'quillcrm' ),
+						'triggers'    => array(),
+					),
+				),
+			),
+			'forms'       => array(
+				'label'  => __( 'Forms', 'quillcrm' ),
+				'groups' => array(),
+			),
+		);
+
+		$this->sources = apply_filters( 'quillcrm_triggers_sources', $this->sources );
+	}
+
+	/**
+	 * Get forms sources
+	 *
+	 * @return void
+	 */
+	public function set_forms_sources() {
+		$forms = Forms_Manager::instance()->get_all_forms();
+
+		foreach ( $forms as $form ) {
+			$this->sources['forms']['groups'][ $form->slug ] = array(
+				'label'       => $form->name,
+				'is_disabled' => ! $form->is_enabled(),
+				'triggers'    => array(
+					'label'       => __( 'Form Submitted', 'quillcrm' ),
+					'description' => $form->description,
+				),
+			);
+		}
+	}
+
+	/**
+	 * Get sources
+	 *
+	 * @return array
+	 */
+	public function get_sources() {
+		return $this->sources;
 	}
 }

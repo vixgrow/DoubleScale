@@ -41,6 +41,13 @@ class Form extends Abstracts_Form {
 	public $post_id;
 
 	/**
+	 * Description
+	 *
+	 * @var string
+	 */
+	public $description = 'This will trigger when a form is submitted';
+
+	/**
 	 * Load Hooks
 	 */
 	public function load_hooks() {
@@ -51,6 +58,17 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
 		// Ajax Get Source Select Options
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_source_select_options", array( $this, 'ajax_get_source_select_options' ) );
+	}
+
+	/**
+	 * Is Enabled
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_enabled() {
+		return quillcrm_is_plugin_active( 'elementor-pro/elementor-pro.php' );
 	}
 
 	/**
@@ -142,9 +160,6 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $record, $handler ) {
-		if ( ! $this->is_form_active( $record->get_form_settings( 'id' ) ) ) {
-			return;
-		}
 		$data               = $this->get_default_data();
 		$data['form_id']    = $record->get_form_settings( 'id' );
 		$data['form_title'] = $record->get_form_settings( 'form_name' );
@@ -160,9 +175,11 @@ class Form extends Abstracts_Form {
 
 		$data['entry'] = $entry;
 
-		error_log( 'Form Record: ' . wp_json_encode( $data ) );
+		if ( $this->is_form_active( $record->get_form_settings( 'id' ) ) ) {
+			$this->process_form( $data );
+		}
 
-		$this->process_form( $data );
+		$this->process_automations( $data );
 	}
 
 	/**
@@ -233,6 +250,4 @@ class Form extends Abstracts_Form {
 }
 
 
-if ( quillcrm_is_plugin_active( 'elementor-pro/elementor-pro.php' ) ) {
-	Forms_Manager::instance()->register( new Form() );
-}
+Forms_Manager::instance()->register( new Form() );

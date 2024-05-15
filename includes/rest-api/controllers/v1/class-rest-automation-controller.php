@@ -18,6 +18,8 @@ use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Managers\Triggers_Manager;
+use QuillCRM\Managers\Actions_Manager;
 
 /**
  * Rest_Automation_Controller class
@@ -121,6 +123,32 @@ class Rest_Automation_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Get the triggers.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/triggers',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_triggers' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+			)
+		);
+
+		// Get the actions.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/actions',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_actions' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -208,6 +236,36 @@ class Rest_Automation_Controller extends REST_Controller {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Get triggers
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_triggers( $request ) {
+		$triggers = Triggers_Manager::instance()->get_sources();
+
+		return new WP_REST_Response( $triggers, 200 );
+	}
+
+	/**
+	 * Get actions
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_actions( $request ) {
+		$actions = Actions_Manager::instance()->get_sources();
+
+		return new WP_REST_Response( $actions, 200 );
 	}
 
 	/**

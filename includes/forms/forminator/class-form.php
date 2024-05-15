@@ -34,6 +34,13 @@ class Form extends Abstracts_Form {
 	public $name = 'Forminator';
 
 	/**
+	 * Description
+	 *
+	 * @var string
+	 */
+	public $description = 'This will trigger when a form is submitted';
+
+	/**
 	 * Load Hooks
 	 */
 	public function load_hooks() {
@@ -42,6 +49,17 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_fields", array( $this, 'ajax_get_fields' ) );
 		// Ajax Get Form Select Options
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
+	}
+
+	/**
+	 * Is Enabled
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_enabled() {
+		return quillcrm_is_plugin_active( 'forminator/forminator.php' );
 	}
 
 	/**
@@ -143,9 +161,6 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $field_data_array, $form_id ) {
-		if ( ! $this->is_form_active( $form_id ) ) {
-			return $field_data_array;
-		}
 		try {
 			$data               = $this->get_default_data();
 			$data['form_id']    = $form_id;
@@ -155,7 +170,11 @@ class Form extends Abstracts_Form {
 				'fields' => $this->prepare_form_fields( $field_data_array ),
 			);
 
-			$this->process_form( $data );
+			if ( ! $this->is_form_active( $form_id ) ) {
+				$this->process_form( $data );
+			}
+
+			$this->process_automations( $data );
 
 			return $field_data_array;
 		} catch ( \Exception $e ) {
@@ -205,6 +224,4 @@ class Form extends Abstracts_Form {
 
 }
 
-if ( quillcrm_is_plugin_active( 'forminator/forminator.php' ) ) {
-	Forms_Manager::instance()->register( new Form() );
-}
+Forms_Manager::instance()->register( new Form() );

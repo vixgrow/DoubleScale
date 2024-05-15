@@ -178,7 +178,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				return true;
 			}
 
-			$validator = rest_validate_value_from_schema( $data, $action->attributes, 'settings' );
+			$validator = rest_validate_value_from_schema( $data['settings'] ?? array(), $action->attributes, 'settings' );
 			if ( is_wp_error( $validator ) ) {
 				return $validator;
 			}

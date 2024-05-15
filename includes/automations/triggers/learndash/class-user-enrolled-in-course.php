@@ -48,6 +48,20 @@ class User_Enrolled_In_Course extends Trigger {
 	public $attributes = array();
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'lms';
+
+	/**
+	 * Group
+	 *
+	 * @var string
+	 */
+	public $group = 'learndash';
+
+	/**
 	 * Load Hooks
 	 *
 	 * @since 1.0.0

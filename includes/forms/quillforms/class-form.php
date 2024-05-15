@@ -35,6 +35,13 @@ class Form extends Abstracts_Form {
 	public $name = 'QuillForms';
 
 	/**
+	 * Description
+	 *
+	 * @var string
+	 */
+	public $description = 'This will trigger when a form is submitted';
+
+	/**
 	 * Load Hooks
 	 */
 	public function load_hooks() {
@@ -43,6 +50,17 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_fields", array( $this, 'ajax_get_fields' ) );
 		// Ajax Get Form Select Options
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
+	}
+
+	/**
+	 * Is Enabled
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_enabled() {
+		return quillcrm_is_plugin_active( 'quillforms/quillforms.php' );
 	}
 
 	/**
@@ -116,9 +134,6 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $entry, $form_data ) {
-		if ( ! $this->is_form_active( $entry->form_id ) ) {
-			return;
-		}
 		$form_utils         = new Form_Utils( $entry->form_id, $form_data );
 		$form_data          = $form_utils->prepare_entry( $entry );
 		$data               = $this->get_default_data();
@@ -127,10 +142,12 @@ class Form extends Abstracts_Form {
 		$data['form_id']    = $entry->form_id;
 		$data['form_title'] = isset( $entry->form_id ) ? get_the_title( $entry->form_id ) : '';
 
-		$this->process_form( $data );
+		if ( $this->is_form_active( $entry->form_id ) ) {
+			$this->process_form( $data );
+		}
+
+		$this->process_automations( $data );
 	}
 }
 
-if ( quillcrm_is_plugin_active( 'quillforms/quillforms.php' ) ) {
-	Forms_Manager::instance()->register( new Form() );
-}
+Forms_Manager::instance()->register( new Form() );

@@ -14,7 +14,7 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Tag_Model;
 
 /**
@@ -44,6 +44,20 @@ class Remove_Tags extends Action {
 	public $description = 'This action will remove tags from the contact.';
 
 	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'crm';
+
+	/**
+	 * Tigger Group
+	 *
+	 * @var string
+	 */
+	public $group = 'contact';
+
+	/**
 	 * Action Attributes
 	 *
 	 * @var array
@@ -59,13 +73,13 @@ class Remove_Tags extends Action {
 	 * @param Automation_Step_Model $step Automation Step Model.
 	 * @param Contact_Model         $contact Contact Model.
 	 */
-	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Contact_Model $contact ) {
+	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$tags_ids = $step->get_setting( 'tags', array() );
 		$tags     = Tag_Model::find( $tags_ids );
 
 		if ( ! empty( $tags ) ) {
 			$tags_ids = wp_list_pluck( $tags->toArray(), 'id' );
-
+			$contact  = $automation_contact->contact;
 			$contact->tags()->detach( $tags_ids );
 		}
 

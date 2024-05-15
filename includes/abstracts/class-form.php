@@ -15,6 +15,7 @@ use Exception;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Form_Model;
 use QuillCRM\Fields\Contact_Fields;
+use QuillCRM\Models\Automation_Model;
 
 /**
  * Form class
@@ -26,14 +27,21 @@ abstract class Form {
 	 *
 	 * @var string
 	 */
-	protected $slug;
+	public $slug;
 
 	/**
 	 * Name
 	 *
 	 * @var string
 	 */
-	protected $name;
+	public $name;
+
+	/**
+	 * Description
+	 *
+	 * @var string
+	 */
+	public $description;
 
 	/**
 	 * Form Data
@@ -195,6 +203,48 @@ abstract class Form {
 	}
 
 	/**
+	 * Process automations
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $args Arguments
+	 *
+	 * @return void
+	 */
+	public function process_automations( $args ) {
+		try {
+			$automations = Automation_Model::get_automations_by_trigger( $this->slug );
+
+			foreach ( $automations as $automation ) {
+				if ( ! $this->is_processable( $automation, $args ) ) {
+					continue;
+				}
+
+				QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automations', $automation, $args );
+			}
+		} catch ( Exception $e ) {
+			// Log error
+		}
+	}
+
+	/**
+	 * Check if trigger should be processed
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Automation_Model $automation Automation Model
+	 * @param array            $args Arguments
+	 *
+	 * @return bool
+	 */
+	public function is_processable( Automation_Model $automation, $args ) {
+		$form_id            = $args['form_id'];
+		$automation_form_id = $automation->get_setting( 'form_id' );
+
+		return $form_id === $automation_form_id;
+	}
+
+	/**
 	 * Get form options
 	 *
 	 * @since 1.0.0
@@ -211,5 +261,16 @@ abstract class Form {
 		);
 
 		return $options;
+	}
+
+	/**
+	 * Is Enabled
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_enabled() {
+		return true;
 	}
 }

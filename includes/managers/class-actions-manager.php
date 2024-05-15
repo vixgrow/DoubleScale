@@ -28,6 +28,14 @@ final class Actions_Manager {
 	protected $actions = array();
 
 	/**
+	 * Sources
+	 *
+	 * @var array
+	 */
+	protected $sources = array();
+
+
+	/**
 	 * Class Instance.
 	 *
 	 * @since 1.0.0
@@ -56,7 +64,9 @@ final class Actions_Manager {
 	/**
 	 * constructor
 	 */
-	private function __construct() {}
+	private function __construct() {
+		$this->set_sources();
+	}
 
 
 	/**
@@ -77,6 +87,10 @@ final class Actions_Manager {
 		}
 
 		$this->actions[ $action->slug ] = $action;
+		$this->sources[ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = array(
+			'label'       => $action->name,
+			'description' => $action->description,
+		);
 	}
 
 	/**
@@ -104,5 +118,64 @@ final class Actions_Manager {
 	 */
 	public function get_actions() {
 		return $this->actions;
+	}
+
+	/**
+	 * Get sources
+	 *
+	 * @return array
+	 */
+	public function set_sources() {
+		$this->sources = array(
+			'crm'         => array(
+				'label'  => __( 'CRM', 'quillcrm' ),
+				'groups' => array(
+					'contact' => array(
+						'label'   => __( 'Contact', 'quillcrm' ),
+						'actions' => array(),
+					),
+				),
+			),
+			'woocommerce' => array(
+				'label'       => __( 'WooCommerce', 'quillcrm' ),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				'groups'      => array(
+					'order' => array(
+						'label'   => __( 'Order', 'quillcrm' ),
+						'actions' => array(),
+					),
+				),
+			),
+			'wp'          => array(
+				'label'  => __( 'WordPress', 'quillcrm' ),
+				'groups' => array(
+					'user' => array(
+						'label'   => __( 'User', 'quillcrm' ),
+						'actions' => array(),
+					),
+				),
+			),
+			'lms'         => array(
+				'label'  => __( 'LMS', 'quillcrm' ),
+				'groups' => array(
+					'learndash' => array(
+						'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
+						'label'       => __( 'LearnDash', 'quillcrm' ),
+						'actions'     => array(),
+					),
+				),
+			),
+		);
+
+		$this->sources = apply_filters( 'quillcrm_actions_sources', $this->sources );
+	}
+
+	/**
+	 * Get sources
+	 *
+	 * @return array
+	 */
+	public function get_sources() {
+		return $this->sources;
 	}
 }

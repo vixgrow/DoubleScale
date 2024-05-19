@@ -12,6 +12,7 @@ namespace QuillCRM\Abstracts;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * Action class
@@ -68,12 +69,20 @@ abstract class Action {
 	public $group;
 
 	/**
+	 * Merge Tags Manager
+	 *
+	 * @var Merge_Tags_Manager
+	 */
+	public $merge_tags_manager;
+
+	/**
 	 * Constructor
 	 *
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		$this->attributes = $this->get_attributes_schema();
+		$this->attributes         = $this->get_attributes_schema();
+		$this->merge_tags_manager = Merge_Tags_Manager::instance();
 	}
 
 	/**

@@ -16,6 +16,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Form_Model;
 use QuillCRM\Fields\Contact_Fields;
 use QuillCRM\Models\Automation_Model;
+use QuillCRM\QuillCRM;
 
 /**
  * Form class
@@ -123,7 +124,7 @@ abstract class Form {
 				$contact_data['status'] = 'unsubscribed';
 			}
 
-			$contact = Contact_Model::create( $contact_data );
+			$contact = Contact_Model::createOrUpdate( $contact_data );
 			error_log( 'Contact created: ' . $contact->id );
 		} catch ( Exception $e ) {
 			error_log( 'Error form creating contact: ' . $e->getMessage() );
@@ -138,14 +139,30 @@ abstract class Form {
 	 * @return array
 	 */
 	public function get_contact_data() {
-		$entry          = $this->submission['entry'];
-		$fields         = $this->submission['fields'] ?? array();
-		$contact_fields = Contact_Fields::instance()->get_fields();
-		$mapped_fields  = $this->form_data->data['mapped_fields'] ?? array();
+		$mapped_fields = $this->form_data->data['mapped_fields'] ?? array();
 
 		if ( empty( $mapped_fields ) ) {
 			throw new Exception( 'No mapped fields found' );
 		}
+
+		$contact_data = $this->get_contact_fields( $mapped_fields );
+
+		return $contact_data;
+	}
+
+	/**
+	 * Get contact fields for form
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param $mapped_fields array Mapped fields
+	 *
+	 * @return array
+	 */
+	public function get_contact_fields( $mapped_fields ) {
+		$entry          = $this->submission['entry'];
+		$fields         = $this->submission['fields'] ?? array();
+		$contact_fields = Contact_Fields::instance()->get_fields();
 
 		$contact_data = array();
 		foreach ( $mapped_fields as $key => $value ) {
@@ -213,17 +230,55 @@ abstract class Form {
 	 */
 	public function process_automations( $args ) {
 		try {
-			$automations = Automation_Model::get_automations_by_trigger( $this->slug );
+			$this->submission = $args;
+			$automations      = Automation_Model::get_automations_by_trigger( $this->slug );
 
 			foreach ( $automations as $automation ) {
 				if ( ! $this->is_processable( $automation, $args ) ) {
 					continue;
 				}
 
-				QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automations', $automation, $args );
+				$contact = $this->maybe_create_contact( $automation );
+				if ( ! $contact ) {
+					continue;
+				}
+
+				$data = array(
+					'contact' => $contact,
+					'data'    => $args,
+				);
+
+				QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automations', $automation, $data );
 			}
 		} catch ( Exception $e ) {
 			// Log error
+		}
+	}
+
+	/**
+	 * Maybe create contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Automation_Model $automation Automation Model
+	 *
+	 * @return Contact_Model
+	 */
+	public function maybe_create_contact( Automation_Model $automation ) {
+		try {
+			$mapped_fields          = $automation->get_setting( 'mapped_fields', array() );
+			$contact_data           = $this->get_contact_fields( $mapped_fields );
+			$contact_data['source'] = $this->slug;
+			$make_as_subscriber     = $automation->get_setting( 'make_as_subscriber' ) ?? false;
+			if ( ! $make_as_subscriber ) {
+				$contact_data['status'] = 'unsubscribed';
+			}
+			$contact = Contact_Model::createOrUpdate( $contact_data );
+
+			return $contact;
+		} catch ( Exception $e ) {
+			error_log( 'Error creating contact: ' . $e->getMessage() );
+			return null;
 		}
 	}
 

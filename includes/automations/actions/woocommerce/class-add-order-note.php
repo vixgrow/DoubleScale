@@ -1,8 +1,8 @@
 <?php
 /**
- * Change Order Status Action
+ * Add Order Note Action
  *
- * This action will change the order status.
+ * This action will add a note to the order.
  *
  * @since 1.0.0
  *
@@ -17,30 +17,30 @@ use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 
 /**
- * Change Order Status Action
+ * Add Order Note Action
  */
-class Change_Order_Status extends Action {
+class Add_Order_Note extends Action {
 
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Change Order Status';
+	public $name = 'Add Order Note';
 
 	/**
 	 * Action Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'change_order_status';
+	public $slug = 'add_order_note';
 
 	/**
 	 * Action Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This action will change the order status.';
+	public $description = 'This action will add a note to the order.';
 
 	/**
 	 * Source
@@ -59,13 +59,11 @@ class Change_Order_Status extends Action {
 	/**
 	 * Process Action
 	 *
-	 * @since 1.0.0
-	 *
-	 * @param Automation_Model         $automation Automation Model.
-	 * @param Automation_Step_Model    $step Automation Step Model.
-	 * @param Automation_Contact_Model $contact Contact Model.
-	 *
-	 * @return bool
+	 * @param Automation_Model         $automation
+	 * @param Automation_Step_Model    $step
+	 * @param Automation_Contact_Model $contact
+	 * @param array                    $data
+	 * @return void
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$order_id = $automation_contact->get_data( 'order_id', null );
@@ -77,13 +75,8 @@ class Change_Order_Status extends Action {
 		if ( ! $order ) {
 			return false;
 		}
-
-		$status = $automation->get_setting( 'status', '' );
-		if ( ! $status ) {
-			return false;
-		}
-
-		$order->update_status( $status );
+		$note = $step->get_setting( 'note', '' );
+		$order->add_order_note( $note );
 
 		return true;
 	}

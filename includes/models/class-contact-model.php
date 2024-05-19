@@ -107,6 +107,24 @@ class Contact_Model extends Model {
 	}
 
 	/**
+	 * Get the contact custom field value
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $custom_field_id Custom field ID
+	 *
+	 * @return string
+	 */
+	public function get_custom_field( $custom_field_id ) {
+		$custom_field = $this->custom_fields->where( 'id', $custom_field_id )->first();
+		if ( $custom_field ) {
+			return $custom_field->pivot;
+		}
+
+		return null;
+	}
+
+	/**
 	 * Get the contact notes
 	 *
 	 * @since 1.0.0
@@ -215,6 +233,26 @@ class Contact_Model extends Model {
 			$this->tags()->detach( $tags_to_remove );
 			do_action( 'quillcrm_contact_tags_removed', $this, $tags_to_remove );
 		}
+	}
+
+	/**
+	 * Create or update contact
+	 *
+	 * @param array $data Contact data
+	 *
+	 * @return Contact_Model
+	 */
+	public static function createOrUpdate( $data ) {
+		$contact = self::where( 'email', $data['email'] ?? '' )->first();
+
+		if ( ! $contact ) {
+			$contact = new self();
+		}
+
+		$contact->fill( $data );
+		$contact->save();
+
+		return $contact;
 	}
 
 	/**

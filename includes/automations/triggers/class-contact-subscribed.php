@@ -86,7 +86,6 @@ class Contact_Subscribed extends Trigger {
 			'contact' => $contact,
 		);
 
-		error_log( 'Contact Subscribed: ' . wp_json_encode( $data ) );
 		$this->process( $data );
 	}
 }

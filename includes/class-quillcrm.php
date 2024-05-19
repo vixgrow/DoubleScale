@@ -20,6 +20,7 @@ use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Automations\Loader as Automations_Loader;
+use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * QuillCRM Main Class.
@@ -158,6 +159,7 @@ final class QuillCRM {
 		Triggers_Manager::instance();
 		Actions_Manager::instance();
 		Automations_Loader::instance();
+		Merge_Tags_Manager::instance();
 	}
 
 	/**
@@ -208,6 +210,32 @@ final class QuillCRM {
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
 		foreach ( $actions_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations woocommerce actions files
+		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/woocommerce/class-*.php' );
+			foreach ( $actions_files as $file ) {
+				require $file;
+			}
+		}
+
+		// Load all contact merge tags files
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/contact/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
+			require $file;
+		}
+
+		// Load all general merge tags files
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/general/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
+			require $file;
+		}
+
+		// Load all order merge tags files
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/woocommerce/order/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
 			require $file;
 		}
 	}

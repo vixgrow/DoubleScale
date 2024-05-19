@@ -133,6 +133,20 @@ class Custom_Field_Model extends Model {
 	}
 
 	/**
+	 * Get custom field ID by key
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $key Custom field key.
+	 *
+	 * @return int
+	 */
+	public static function get_id( $key ) {
+		$field = static::where( 'slug', $key )->first();
+		return $field ? $field->id : 0;
+	}
+
+	/**
 	 * Automatically set the slug using the name and boot method
 	 *
 	 * @since 1.0.0

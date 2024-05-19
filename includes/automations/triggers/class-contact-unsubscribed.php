@@ -86,7 +86,6 @@ class Contact_Unsubscribed extends Trigger {
 			'contact' => $contact,
 		);
 
-		error_log( 'Contact Unsubscribed: ' . wp_json_encode( $data ) );
 		$this->process( $data );
 	}
 }

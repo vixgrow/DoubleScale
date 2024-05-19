@@ -20,6 +20,7 @@ use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
+use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * Rest_Automation_Controller class
@@ -149,6 +150,19 @@ class Rest_Automation_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Get the merge tags.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/merge-tags',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_merge_tags' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -266,6 +280,21 @@ class Rest_Automation_Controller extends REST_Controller {
 		$actions = Actions_Manager::instance()->get_sources();
 
 		return new WP_REST_Response( $actions, 200 );
+	}
+
+	/**
+	 * Get merge tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_merge_tags( $request ) {
+		$merge_tags = Merge_Tags_Manager::instance()->get_groups();
+
+		return new WP_REST_Response( $merge_tags, 200 );
 	}
 
 	/**

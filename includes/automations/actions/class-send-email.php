@@ -83,8 +83,8 @@ class Send_Email extends Action {
 			return false;
 		}
 		$contact  = $automation_contact->contact;
-		$subject  = $template->subject;
-		$body     = $template->body;
+		$subject  = $this->merge_tags_manager->process_merge_tags( $template->subject, $automation_contact );
+		$body     = $this->merge_tags_manager->process_merge_tags( $template->body, $automation_contact );
 		$to_email = $template->get_setting( 'to_email' ) ?? $contact->email;
 
 		$emails = new Emails();

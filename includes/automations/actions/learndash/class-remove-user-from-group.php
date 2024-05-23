@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Add User To Group
+ * Class Remove User From Group
  *
  * @since 1.0.0
  *
@@ -15,30 +15,30 @@ use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 
 /**
- * Add User To Group
+ * Remove User From Group
  */
-class Add_User_To_Group extends Action {
+class Remove_User_From_Group extends Action {
 
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Add User To Group';
+	public $name = 'Remove User From Group';
 
 	/**
 	 * Action Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'learndash_add_user_to_group';
+	public $slug = 'learndash_remove_user_from_group';
 
 	/**
 	 * Action Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This action will add a user to a group.';
+	public $description = 'This action will remove a user from a group.';
 
 	/**
 	 * Action Attributes
@@ -86,25 +86,8 @@ class Add_User_To_Group extends Action {
 
 		$group_id = absint( $group_id );
 
-		ld_update_group_access( $user->ID, $group_id );
+		ld_update_group_access( $user->ID, $group_id, true );
 
 		return true;
-	}
-
-	/**
-	 * Get attributes schema
-	 *
-	 * @return array
-	 */
-	public function get_attributes_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'group_id' => array(
-					'type'     => 'string',
-					'required' => true,
-				),
-			),
-		);
 	}
 }

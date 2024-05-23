@@ -1,52 +1,52 @@
 <?php
 /**
- * Class Order Customer Note Merge Tag
+ * Class Purchase Count
  *
- * This class is responsible for handling the order customer note merge tag
+ * This class is responsible for handling the purchase count merge tag
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\WooCommerce\Order;
+namespace QuillCRM\Merge_Tags\EDD\Customer;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Order Customer Note Merge Tag
+ * Purchase Count Merge Tag
  */
-class Order_Customer_Note extends Merge_Tag {
+class Purchase_Count extends Merge_Tag {
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Order Customer Note';
+	public $name = 'Purchase Count';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'customer_note';
+	public $slug = 'purchase_count';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Order Customer Note';
+	public $description = 'Purchase Count';
 
 	/**
 	 * Merge Tag Group
 	 *
 	 * @var string
 	 */
-	public $group = 'order';
+	public $group = 'edd_customer';
 
 	/**
 	 * Get Merge Tag Value
@@ -57,14 +57,16 @@ class Order_Customer_Note extends Merge_Tag {
 	 * @return string
 	 */
 	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
-		$order_id = $automation_contact->get_data( 'order_id' );
-		$order    = wc_get_order( $order_id );
-		if ( ! $order instanceof \WC_Order ) {
+		$customer_id = $automation_contact->get_data( 'customer_id' );
+		$customer    = edd_get_customer( $customer_id );
+		if ( ! $customer ) {
 			return '';
 		}
 
-		return $order->get_customer_note();
+		$purchase_count = $customer->purchase_count;
+
+		return $purchase_count;
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Order_Customer_Note() );
+Merge_Tags_Manager::instance()->register( new Purchase_Count() );

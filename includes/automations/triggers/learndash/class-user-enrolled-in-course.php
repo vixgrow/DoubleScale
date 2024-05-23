@@ -97,9 +97,10 @@ class User_Enrolled_In_Course extends Trigger {
 			'data'  => array(
 				'course_id'          => $course_id,
 				'course_access_list' => $course_access_list,
+				'user_id'            => $user_id,
 			),
 		);
-		error_log( 'User Enrolled in Course:' . wp_json_encode( $data ) );
+		$this->process( $data );
 	}
 }
 

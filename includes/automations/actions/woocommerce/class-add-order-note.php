@@ -62,8 +62,6 @@ class Add_Order_Note extends Action {
 	 * @param Automation_Model         $automation
 	 * @param Automation_Step_Model    $step
 	 * @param Automation_Contact_Model $contact
-	 * @param array                    $data
-	 * @return void
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$order_id = $automation_contact->get_data( 'order_id', null );

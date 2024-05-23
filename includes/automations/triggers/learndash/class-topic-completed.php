@@ -99,6 +99,7 @@ class Topic_Completed extends Trigger {
 				'lesson_id' => $lesson_id,
 				'topic_id'  => $topic_id,
 				'progress'  => $progress,
+				'user_id'   => $user_id,
 			),
 		);
 

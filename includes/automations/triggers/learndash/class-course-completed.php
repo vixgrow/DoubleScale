@@ -88,10 +88,12 @@ class Course_Completed extends Trigger {
 		if ( ! $user instanceof WP_User ) {
 			return;
 		}
+
 		$data = array(
 			'email' => $user->user_email,
 			'data'  => array(
 				'course_id' => $course_id,
+				'user_id'   => $user_id,
 				'progress'  => $progress,
 			),
 		);

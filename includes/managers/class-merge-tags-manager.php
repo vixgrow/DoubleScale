@@ -169,8 +169,7 @@ final class Merge_Tags_Manager {
 				$slug_parts     = explode( ' ', $slug );
 				$merge_tag_slug = $slug_parts[0];
 				$merge_tag      = $this->get_merge_tag( $group, $merge_tag_slug );
-				error_log( 'Slug: ' . $slug );
-				error_log( 'Merge Tag: ' . $merge_tag_slug );
+
 				if ( ! $merge_tag ) {
 					return '';
 				}

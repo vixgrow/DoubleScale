@@ -1,52 +1,52 @@
 <?php
 /**
- * Class Order Customer Note Merge Tag
+ * Class Group Name Merge Tag
  *
- * This class is responsible for handling the order customer note merge tag
+ * This class is responsible for handling the group name merge tag
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\WooCommerce\Order;
+namespace QuillCRM\Merge_Tags\LMS\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Order Customer Note Merge Tag
+ * Group Name Merge Tag
  */
-class Order_Customer_Note extends Merge_Tag {
+class Group_Name extends Merge_Tag {
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Order Customer Note';
+	public $name = 'Group Name';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'customer_note';
+	public $slug = 'group_name';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Order Customer Note';
+	public $description = 'Group Name';
 
 	/**
 	 * Merge Tag Group
 	 *
 	 * @var string
 	 */
-	public $group = 'order';
+	public $group = 'learndash';
 
 	/**
 	 * Get Merge Tag Value
@@ -57,14 +57,15 @@ class Order_Customer_Note extends Merge_Tag {
 	 * @return string
 	 */
 	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
-		$order_id = $automation_contact->get_data( 'order_id' );
-		$order    = wc_get_order( $order_id );
-		if ( ! $order instanceof \WC_Order ) {
-			return '';
+		$group_id = $automation_contact->get_data( 'group_id' );
+
+		$group = get_post( $group_id );
+		if ( ! empty( $group ) ) {
+			return $group->post_title;
 		}
 
-		return $order->get_customer_note();
+		return '';
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Order_Customer_Note() );
+Merge_Tags_Manager::instance()->register( new Group_Name() );

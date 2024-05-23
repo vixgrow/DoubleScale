@@ -207,6 +207,22 @@ final class QuillCRM {
 			}
 		}
 
+		// Load all automations memberpress triggers files
+		if ( quillcrm_is_plugin_active( 'memberpress/memberpress.php' ) ) {
+			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/memberpress/class-*.php' );
+			foreach ( $triggers_files as $file ) {
+				require $file;
+			}
+		}
+
+		// Load all automations edd triggers files
+		if ( quillcrm_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ) ) {
+			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/edd/class-*.php' );
+			foreach ( $triggers_files as $file ) {
+				require $file;
+			}
+		}
+
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
 		foreach ( $actions_files as $file ) {
@@ -235,6 +251,12 @@ final class QuillCRM {
 
 		// Load all order merge tags files
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/woocommerce/order/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
+			require $file;
+		}
+
+		// Load all order merge tags files
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/edd/**/class-*.php' );
 		foreach ( $merge_tags_files as $file ) {
 			require $file;
 		}

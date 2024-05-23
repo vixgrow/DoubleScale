@@ -1,8 +1,8 @@
 <?php
 /**
- * Class Order Customer Note Merge Tag
+ * Class Order Coupons Merge Tag
  *
- * This class is responsible for handling the order customer note merge tag
+ * This class is responsible for handling the order coupons merge tag
  *
  * @since 1.0.0
  *
@@ -16,30 +16,30 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Order Customer Note Merge Tag
+ * Order Coupons Merge Tag
  */
-class Order_Customer_Note extends Merge_Tag {
+class Order_Coupons extends Merge_Tag {
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Order Customer Note';
+	public $name = 'Order Coupons';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'customer_note';
+	public $slug = 'coupons';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Order Customer Note';
+	public $description = 'Order Coupons';
 
 	/**
 	 * Merge Tag Group
@@ -63,8 +63,10 @@ class Order_Customer_Note extends Merge_Tag {
 			return '';
 		}
 
-		return $order->get_customer_note();
+		$coupons = $order->get_coupon_codes();
+
+		return ! empty( $coupons ) ? implode( ', ', $coupons ) : '';
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Order_Customer_Note() );
+Merge_Tags_Manager::instance()->register( new Order_Coupons() );

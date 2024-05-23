@@ -1,8 +1,8 @@
 <?php
 /**
- * Class Order Customer Note Merge Tag
+ * Order Total Merge Tag
  *
- * This class is responsible for handling the order customer note merge tag
+ * This class is responsible for handling the order total merge tag
  *
  * @since 1.0.0
  *
@@ -16,30 +16,30 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Order Customer Note Merge Tag
+ * Order Total Merge Tag
  */
-class Order_Customer_Note extends Merge_Tag {
+class Order_Total extends Merge_Tag {
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Order Customer Note';
+	public $name = 'Order Total';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'customer_note';
+	public $slug = 'total';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Order Customer Note';
+	public $description = 'Order Total';
 
 	/**
 	 * Merge Tag Group
@@ -63,8 +63,8 @@ class Order_Customer_Note extends Merge_Tag {
 			return '';
 		}
 
-		return $order->get_customer_note();
+		return $order->get_total();
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Order_Customer_Note() );
+Merge_Tags_Manager::instance()->register( new Order_Total() );

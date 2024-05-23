@@ -1,52 +1,52 @@
 <?php
 /**
- * Class Order Customer Note Merge Tag
+ * Class Course URL Merge Tag
  *
- * This class is responsible for handling the order customer note merge tag
+ * This class is responsible for handling the course URL merge tag
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\WooCommerce\Order;
+namespace QuillCRM\Merge_Tags\LMS\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Order Customer Note Merge Tag
+ * Course URL Merge Tag
  */
-class Order_Customer_Note extends Merge_Tag {
+class Course_URL extends Merge_Tag {
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Order Customer Note';
+	public $name = 'Course URL';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'customer_note';
+	public $slug = 'course_url';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Order Customer Note';
+	public $description = 'Course URL';
 
 	/**
 	 * Merge Tag Group
 	 *
 	 * @var string
 	 */
-	public $group = 'order';
+	public $group = 'learndash';
 
 	/**
 	 * Get Merge Tag Value
@@ -57,14 +57,11 @@ class Order_Customer_Note extends Merge_Tag {
 	 * @return string
 	 */
 	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
-		$order_id = $automation_contact->get_data( 'order_id' );
-		$order    = wc_get_order( $order_id );
-		if ( ! $order instanceof \WC_Order ) {
-			return '';
-		}
+		$course_id  = $automation_contact->get_data( 'course_id' );
+		$course_url = get_permalink( $course_id );
 
-		return $order->get_customer_note();
+		return $course_url ? $course_url : '';
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Order_Customer_Note() );
+Merge_Tags_Manager::instance()->register( new Course_URL() );

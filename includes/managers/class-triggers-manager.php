@@ -175,6 +175,16 @@ final class Triggers_Manager {
 					),
 				),
 			),
+			'memberpress' => array(
+				'label'  => __( 'MemberPress', 'quillcrm' ),
+				'groups' => array(
+					'memberpress' => array(
+						'is_disabled' => ! quillcrm_is_plugin_active( 'memberpress/memberpress.php' ),
+						'label'       => __( 'MemberPress', 'quillcrm' ),
+						'triggers'    => array(),
+					),
+				),
+			),
 			'forms'       => array(
 				'label'  => __( 'Forms', 'quillcrm' ),
 				'groups' => array(),

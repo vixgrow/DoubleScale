@@ -97,6 +97,7 @@ class Lesson_Completed extends Trigger {
 				'course_id' => $course_id,
 				'lesson_id' => $lesson_id,
 				'progress'  => $progress,
+				'user_id'   => $user_id,
 			),
 		);
 

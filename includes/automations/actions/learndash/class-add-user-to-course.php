@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Add User To Group
+ * Class Add User To Course
  *
  * @since 1.0.0
  *
@@ -15,30 +15,30 @@ use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 
 /**
- * Add User To Group
+ * Add User To Course
  */
-class Add_User_To_Group extends Action {
+class Add_User_To_Course extends Action {
 
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Add User To Group';
+	public $name = 'Add User To Course';
 
 	/**
 	 * Action Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'learndash_add_user_to_group';
+	public $slug = 'learndash_add_user_to_course';
 
 	/**
 	 * Action Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This action will add a user to a group.';
+	public $description = 'This action will add a user to a course.';
 
 	/**
 	 * Action Attributes
@@ -79,20 +79,20 @@ class Add_User_To_Group extends Action {
 			return false;
 		}
 
-		$group_id = $step->get_setting( 'group_id' );
-		if ( ! $group_id ) {
+		$course_id = $step->get_setting( 'course_id' );
+		if ( ! $course_id ) {
 			return false;
 		}
 
-		$group_id = absint( $group_id );
-
-		ld_update_group_access( $user->ID, $group_id );
+		ld_update_course_access( $user->ID, $course_id );
 
 		return true;
 	}
 
 	/**
-	 * Get attributes schema
+	 * Get Attributes schema.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
@@ -100,7 +100,7 @@ class Add_User_To_Group extends Action {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'group_id' => array(
+				'course_id' => array(
 					'type'     => 'string',
 					'required' => true,
 				),

@@ -1,8 +1,8 @@
 <?php
 /**
- * Class Order Customer Note Merge Tag
+ * Order Tax Merge Tag
  *
- * This class is responsible for handling the order customer note merge tag
+ * This class is responsible for handling the order tax merge tag
  *
  * @since 1.0.0
  *
@@ -16,30 +16,30 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Order Customer Note Merge Tag
+ * Order Tax Merge Tag
  */
-class Order_Customer_Note extends Merge_Tag {
+class Order_Tax extends Merge_Tag {
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Order Customer Note';
+	public $name = 'Order Tax';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'customer_note';
+	public $slug = 'tax';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Order Customer Note';
+	public $description = 'Order Tax';
 
 	/**
 	 * Merge Tag Group
@@ -59,12 +59,15 @@ class Order_Customer_Note extends Merge_Tag {
 	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
 		$order_id = $automation_contact->get_data( 'order_id' );
 		$order    = wc_get_order( $order_id );
+
 		if ( ! $order instanceof \WC_Order ) {
 			return '';
 		}
 
-		return $order->get_customer_note();
+		$tax = $order->get_total_tax();
+
+		return $tax ? $tax : 0;
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Order_Customer_Note() );
+Merge_Tags_Manager::instance()->register( new Order_Tax() );

@@ -100,6 +100,13 @@ class Process_Automation {
 					'data'          => $this->args['data'] ?? array(),
 				)
 			);
+		} else {
+			$automation_contact->update(
+				array(
+					'status' => 'active',
+					'data'   => $this->args['data'] ?? array(),
+				)
+			);
 		}
 
 		return $automation_contact;

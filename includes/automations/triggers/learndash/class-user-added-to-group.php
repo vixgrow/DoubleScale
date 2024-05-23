@@ -91,6 +91,7 @@ class User_Added_To_Group extends Trigger {
 			'email' => $user->user_email,
 			'data'  => array(
 				'group_id' => $group_id,
+				'user_id'  => $user_id,
 			),
 		);
 

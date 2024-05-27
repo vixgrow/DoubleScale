@@ -12,6 +12,8 @@ namespace QuillCRM\Models;
 
 use QuillCRM\Models\Model;
 use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Template_Model;
 
 /**
  * Campaign_Email_Model class
@@ -73,10 +75,32 @@ class Campaign_Email_Model extends Model {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return object
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function campaign() {
 		return $this->belongsTo( Campaign_Model::class, 'campaign_id' );
+	}
+
+	/**
+	 * Contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function contact() {
+		return $this->belongsTo( Contact_Model::class, 'contact_id' );
+	}
+
+	/**
+	 * Template
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function template() {
+		return $this->belongsTo( Template_Model::class, 'template_id' );
 	}
 
 	/**

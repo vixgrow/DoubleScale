@@ -21,6 +21,7 @@ use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Tracking\Link_Triggers;
 
 /**
  * QuillCRM Main Class.
@@ -155,6 +156,7 @@ final class QuillCRM {
 		REST_API::instance();
 		Campaign_Processing::instance();
 		Email_Tracking::instance();
+		Link_Triggers::instance();
 		Forms_Manager::instance();
 		Triggers_Manager::instance();
 		Actions_Manager::instance();

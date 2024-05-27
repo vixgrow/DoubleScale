@@ -16,6 +16,8 @@ use QuillCRM\Models\Campaign_Email_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Emails\Emails;
+use QuillCRM\Models\Template_Model;
+use QuillCRM\Models\Link_Trigger_Model;
 
 /**
  * Campaign class processing
@@ -121,7 +123,8 @@ class Processing {
 			// Get first campaign with status 'processing'
 			$campaign = Campaign_Model::where( 'status', 'processing' )->firstOrFail();
 
-			$last_contact_offset = get_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
+			// $last_contact_offset = get_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
+			$last_contact_offset = 0;
 			$campaign_recipients = Contact_Model::where( 'status', 'subscribed' )->count();
 
 			if ( $campaign->count != $campaign_recipients ) {
@@ -138,6 +141,7 @@ class Processing {
 			while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
 				// Usleep is used to prevent the server from crashing
 				usleep( 1000000 );
+				error_log( 'Processing::process() ' . $last_contact_offset );
 				if ( $last_contact_offset >= $campaign_recipients ) {
 					$campaign->status = 'completed';
 					$campaign->save();
@@ -177,19 +181,20 @@ class Processing {
 	 */
 	protected function add_campaign_email( Campaign_Model $campaign, Contact_Model $contact, $last_contact_offset ) {
 		try {
+			$template_id         = $campaign->get_setting( 'template_id' );
 			$campaign_email_data = array(
 				'campaign_id' => $campaign->id,
 				'contact_id'  => $contact->id,
 				'status'      => 'pending',
 				'hash_key'    => Utils::generate_hash_key(),
 				'email'       => $contact->email,
-				'template_id' => 1,
+				'template_id' => $template_id,
 			);
 			$campaign_email      = Campaign_Email_Model::create( $campaign_email_data );
 
 			// Update last contact offset
 			update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
-			QuillCRM::instance()->campaigns_tasks->enqueue_async( 'process_campaign_email', $campaign, $contact, $campaign_email );
+			QuillCRM::instance()->campaigns_tasks->enqueue_sync( 'process_campaign_email', $campaign, $contact, $campaign_email );
 
 			return true;
 		} catch ( \Exception $e ) {
@@ -214,20 +219,24 @@ class Processing {
 			return;
 		}
 
+		$template = Template_Model::find( $campaign_email->template_id );
+		$subject  = $template->subject;
+		$body     = $template->body;
+
 		// Build email message with footer
 		$message = sprintf(
 			'%s%s',
-			$this->build_email_message( $campaign_email, $contact ),
+			$this->build_email_message( $campaign_email, $contact, $body ),
 			$this->build_email_footer( $campaign_email, $contact )
 		);
 
 		// Add click tracking to all links
-		$message = $this->add_click_tracking( $message, $campaign_email->hash_key );
+		$message = $this->add_click_tracking( $message, $campaign_email->hash_key, $contact );
 
 		$emails = new Emails();
 		$result = $emails->send(
 			$contact->email,
-			'Welcome to QuillCRM',
+			$subject,
 			$message,
 		);
 
@@ -245,9 +254,7 @@ class Processing {
 	 *
 	 * @return string
 	 */
-	protected function build_email_message( Campaign_Email_Model $campaign_email, Contact_Model $contact ) {
-		$message = '';
-
+	protected function build_email_message( Campaign_Email_Model $campaign_email, Contact_Model $contact, $message = '' ) {
 		// Add test message
 		$message .= sprintf(
 			'<p>%s</p>',
@@ -296,12 +303,13 @@ class Processing {
 	/**
 	 * Add click tracking to all links
 	 *
-	 * @param string $message
-	 * @param string $hash_key
+	 * @param string        $message - Email message
+	 * @param string        $hash_key - Campaign email hash key\
+	 * @param Contact_Model $contact - Contact model
 	 *
 	 * @return string
 	 */
-	protected function add_click_tracking( $message, $hash_key ) {
+	protected function add_click_tracking( $message, $hash_key, $contact ) {
 		// Match all links
 		preg_match_all( '/<a[^>]+href=([\'"])(?<href>.+?)\1[^>]*>/i', $message, $matches );
 
@@ -309,7 +317,30 @@ class Processing {
 			return $message;
 		}
 
+		error_log( wp_json_encode( $matches['href'] ) );
 		foreach ( $matches['href'] as $key => $href ) {
+
+			// Check if link trigger quillcrm-link-trigger.
+			if ( false !== strpos( $href, 'quillcrm-link-trigger' ) ) {
+				// Get query string
+				$query_string = parse_url( $href, PHP_URL_QUERY );
+				parse_str( $query_string, $query_args );
+
+				// Get link trigger hash
+				$hash         = $query_args['quillcrm-link-trigger'] ?? '';
+				$link_trigger = Link_Trigger_Model::where( 'hash', $hash )->first();
+				if ( ! $link_trigger ) {
+					continue;
+				}
+
+				$link_trigger_url = $this->configure_link_trigger_url( $link_trigger, $contact, $hash_key );
+
+				// Replace orginal link with click tracking link
+				$to_replace = $matches[0][ $key ];
+				$message    = str_replace( $to_replace, str_replace( $href, $link_trigger_url, $to_replace ), $message );
+				continue;
+			}
+
 			// Add click orginal link to click tracking
 			$click_url = add_query_arg(
 				array(
@@ -321,10 +352,38 @@ class Processing {
 			);
 
 			// Replace orginal link with click tracking link
-			$message = str_replace( $href, $click_url, $message );
+			$to_replace = $matches[0][ $key ];
+			$message    = str_replace( $to_replace, str_replace( $href, $click_url, $to_replace ), $message );
 		}
 
 		return $message;
+	}
+
+	/**
+	 * Configure link trigger url
+	 *
+	 * @param Link_Trigger_Model $link_trigger
+	 * @param Contact_Model      $contact
+	 * @param string             $hash_key
+	 *
+	 * @return string
+	 */
+	protected function configure_link_trigger_url( Link_Trigger_Model $link_trigger, Contact_Model $contact, $hash_key ) {
+		$auto_login    = $link_trigger->get_setting( 'auto_login', true );
+		$contact_email = $contact->email;
+		$user          = get_user_by( 'email', $contact_email );
+		$args          = array(
+			'quillcrm-link-trigger' => $link_trigger->hash,
+			'track-id'              => $hash_key,
+		);
+
+		if ( $auto_login && $user ) {
+			$args['auth-id'] = wp_hash_password( $contact_email );
+		}
+
+		$link_trigger_url = add_query_arg( $args, home_url() );
+
+		return $link_trigger_url;
 	}
 }
 

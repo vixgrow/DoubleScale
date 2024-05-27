@@ -1,7 +1,8 @@
 <?php
 /**
- * Class Campaign_Model
- * This class is responsible for handling the campaign model
+ * Class Link Trigger Model
+ *
+ * This class is responsible for handling the link trigger model
  *
  * @since 1.0.0
  *
@@ -11,12 +12,11 @@
 namespace QuillCRM\Models;
 
 use QuillCRM\Models\Model;
-use QuillCRM\Models\Campaign_Email_Model;
 
 /**
- * Campaign_Model class
+ * Link Trigger Model class
  */
-class Campaign_Model extends Model {
+class Link_Trigger_Model extends Model {
 
 	/**
 	 * Table name
@@ -25,7 +25,7 @@ class Campaign_Model extends Model {
 	 *
 	 * @since 1.0.0
 	 */
-	protected $table = 'quillcrm_campaigns';
+	protected $table = 'quillcrm_link_triggers';
 
 	/**
 	 * Primary key
@@ -45,12 +45,10 @@ class Campaign_Model extends Model {
 	 */
 	protected $fillable = array(
 		'name',
-		'description',
+		'hash',
 		'status',
 		'settings',
-		'parent_id',
-		'count',
-		'execute_at',
+		'click_count',
 		'created_at',
 		'updated_at',
 	);
@@ -72,17 +70,6 @@ class Campaign_Model extends Model {
 	 * @since 1.0.0
 	 */
 	public $timestamps = true;
-
-	/**
-	 * Get the campaign emails
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
-	 */
-	public function emails() {
-		return $this->hasMany( Campaign_Email_Model::class, 'campaign_id', 'id' );
-	}
 
 	/**
 	 * Get setting

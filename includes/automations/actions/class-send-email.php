@@ -89,7 +89,7 @@ class Send_Email extends Action {
 
 		$emails = new Emails();
 		$result = $emails->send(
-			'kixexab957@huleos.com',
+			'rixemo3739@hutov.com',
 			$subject,
 			$body,
 		);

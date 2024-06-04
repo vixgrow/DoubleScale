@@ -36,9 +36,11 @@ class Automation_Steps_Table extends Migration {
 		 * Fields:
 		 *
 		 * id: Primary key
+		 * parent_id: Parent ID not null and default 0
 		 * automation_id: Automation ID
 		 * action: Action of the step
 		 * type: Type of the step
+		 * condition: Condition of the step small text yes or no
 		 * status: Status of the step
 		 * settings: Settings of the step
 		 * order: Order of the step
@@ -46,16 +48,19 @@ class Automation_Steps_Table extends Migration {
 		 * updated_at: Updated at timestamp
 		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
+			parent_id BIGINT(20) NOT NULL DEFAULT 0,
             automation_id BIGINT(20) UNSIGNED NOT NULL,
             action VARCHAR(255) NOT NULL,
             type VARCHAR(255) NOT NULL,
+			`condition` VARCHAR(255) NOT NULL,
             status VARCHAR(255) NOT NULL,
             settings TEXT,
 			`order` INT(11) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
-			KEY automation_id (automation_id)';
+			KEY automation_id (automation_id),
+			KEY parent_id (parent_id)';
 
 		return $query;
 	}

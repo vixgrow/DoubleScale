@@ -126,4 +126,15 @@ abstract class Trigger {
 	public function get_attributes_schema() {
 		return array();
 	}
+
+	/**
+	 * Set automation attributes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Automation_Model $automation Automation Model
+	 *
+	 * @return void
+	 */
+	public function set_settings( Automation_Model $automation ) {}
 }

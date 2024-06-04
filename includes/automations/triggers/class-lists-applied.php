@@ -91,7 +91,6 @@ class Lists_Applied extends Trigger {
 			),
 		);
 
-		error_log( 'Lists Applied: ' . wp_json_encode( $data ) );
 		$this->process( $data );
 	}
 

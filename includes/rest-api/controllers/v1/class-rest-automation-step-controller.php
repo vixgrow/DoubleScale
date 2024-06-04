@@ -101,6 +101,13 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 						'sanitize_callback' => 'absint',
 					),
 				),
+				'parent_id'     => array(
+					'description' => __( 'The ID of the parent step.', 'quillcrm' ),
+					'type'        => 'integer',
+					'arg_options' => array(
+						'sanitize_callback' => 'absint',
+					),
+				),
 				'action'        => array(
 					'description' => __( 'The action of the step.', 'quillcrm' ),
 					'type'        => 'string',
@@ -113,6 +120,13 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 					'description' => __( 'The type of the step.', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'condition'     => array(
+					'description' => __( 'The condition of the step.', 'quillcrm' ),
+					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
@@ -167,20 +181,19 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 */
 	public function validate_item_settings( $value, $request, $param ) {
 		try {
-			$data   = $request->get_json_params();
-			$action = Actions_Manager::instance()->get_action( $data['action'] );
+			$data        = $request->get_json_params();
+			$action_type = $data['type'] ?? '';
 
-			if ( ! $action ) {
-				return new WP_Error( 'rest_invalid_action', __( 'Invalid action.', 'quillcrm' ), array( 'status' => 400 ) );
-			}
+			if ( 'action' === $action_type ) {
+				$action = Actions_Manager::instance()->get_action( $data['action'] );
+				if ( empty( $action->attributes ) ) {
+					return true;
+				}
 
-			if ( empty( $action->attributes ) ) {
-				return true;
-			}
-
-			$validator = rest_validate_value_from_schema( $data['settings'] ?? array(), $action->attributes, 'settings' );
-			if ( is_wp_error( $validator ) ) {
-				return $validator;
+				$validator = rest_validate_value_from_schema( $data['settings'] ?? array(), $action->attributes, 'settings' );
+				if ( is_wp_error( $validator ) ) {
+					return $validator;
+				}
 			}
 
 			return true;
@@ -301,8 +314,10 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	private function prepare_step( $request ) {
 		$step_data = array(
 			'automation_id' => $request->get_param( 'automation_id' ),
+			'parent_id'     => $request->get_param( 'parent_id' ),
 			'action'        => $request->get_param( 'action' ),
 			'type'          => $request->get_param( 'type' ),
+			'condition'     => $request->get_param( 'condition' ),
 			'status'        => $request->get_param( 'status' ),
 			'settings'      => $request->get_param( 'settings' ),
 			'order'         => $request->get_param( 'order' ),

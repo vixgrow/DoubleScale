@@ -21,6 +21,8 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Managers\Rules_Manager;
+use QuillCRM\Managers\Goals_Manager;
 
 /**
  * Rest_Automation_Controller class
@@ -163,6 +165,64 @@ class Rest_Automation_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Get the rules.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/rules',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_rules' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'trigger' => array(
+							'description' => __( 'The trigger of the rule.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		// Get the goals.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/goals',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_goals' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+			)
+		);
+
+		// Receive a webhook.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/webhook',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'receive_webhook' ),
+					'permission_callback' => '__return_true',
+					'args'                => array(
+						'quillcrm_id'  => array(
+							'description' => __( 'The automation ID.', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+						'quillcrm_key' => array(
+							'description' => __( 'The automation key.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -249,6 +309,74 @@ class Rest_Automation_Controller extends REST_Controller {
 					'readonly'    => true,
 				),
 			),
+		);
+	}
+
+	/**
+	 * Get goals
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_goals( $request ) {
+		$goals = Goals_Manager::instance()->get_sources();
+
+		return new WP_REST_Response( $goals, 200 );
+	}
+
+	/**
+	 * Get rules
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_rules( $request ) {
+		$trigger = $request->get_param( 'trigger' );
+		$rules   = Rules_Manager::instance()->get_groups();
+
+		return new WP_REST_Response( $rules, 200 );
+	}
+
+	/**
+	 * Receive webhook
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function receive_webhook( $request ) {
+		$webhook_id  = $request->get_param( 'quillcrm_id' );
+		$webhook_key = $request->get_param( 'quillcrm_key' );
+		$params      = $request->get_params();
+		unset( $params['quillcrm_id'] );
+		unset( $params['quillcrm_key'] );
+
+		$automation = Automation_Model::find( $webhook_id );
+		if ( ! $automation ) {
+			return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
+		}
+
+		$webhook_key = $automation->get_setting( 'webhook_key' );
+		if ( $webhook_key !== $webhook_key ) {
+			return new WP_Error( 'unauthorized', __( 'Unauthorized.', 'quillcrm' ), array( 'status' => 401 ) );
+		}
+
+		do_action( 'quillcrm_webhook_received', $automation, $params );
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => 'Webhook received.',
+			),
+			200
 		);
 	}
 
@@ -420,6 +548,13 @@ class Rest_Automation_Controller extends REST_Controller {
 			if ( ! $automation ) {
 				return new WP_Error( 'error', __( 'Failed to create automation.', 'quillcrm' ), array( 'status' => 500 ) );
 			}
+
+			$trigger = Triggers_Manager::instance()->get_trigger( $automation->trigger );
+			if ( empty( $trigger ) ) {
+				throw new \Exception( 'Trigger not found.' );
+			}
+
+			$trigger->set_settings( $automation );
 
 			return new WP_REST_Response( $automation, 201 );
 		} catch ( \Exception $e ) {

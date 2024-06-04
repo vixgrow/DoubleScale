@@ -200,4 +200,20 @@ class Automation_Model extends Model {
 	public function get_setting( $key, $default = null ) {
 		return isset( $this->settings[ $key ] ) ? $this->settings[ $key ] : $default;
 	}
+
+	/**
+	 * Set Setting
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $key Setting key
+	 * @param mixed  $value Setting value
+	 *
+	 * @return void
+	 */
+	public function set_setting( $key, $value ) {
+		$settings         = $this->settings;
+		$settings[ $key ] = $value;
+		$this->settings   = $settings;
+	}
 }

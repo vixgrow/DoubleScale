@@ -91,7 +91,6 @@ class Lists_Removed extends Trigger {
 			),
 		);
 
-		error_log( 'Lists Removed: ' . wp_json_encode( $data ) );
 		$this->process( $data );
 	}
 

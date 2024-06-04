@@ -22,6 +22,7 @@ use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Tracking\Link_Triggers;
+use QuillCRM\Managers\Rules_Manager;
 
 /**
  * QuillCRM Main Class.
@@ -162,6 +163,7 @@ final class QuillCRM {
 		Actions_Manager::instance();
 		Automations_Loader::instance();
 		Merge_Tags_Manager::instance();
+		Rules_Manager::instance();
 	}
 
 	/**
@@ -260,6 +262,18 @@ final class QuillCRM {
 		// Load all order merge tags files
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/edd/**/class-*.php' );
 		foreach ( $merge_tags_files as $file ) {
+			require $file;
+		}
+
+		// Load contact rules files
+		$rules_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/rules/**/class-*.php' );
+		foreach ( $rules_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations goals files
+		$goals_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/goals/class-*.php' );
+		foreach ( $goals_files as $file ) {
 			require $file;
 		}
 	}

@@ -92,7 +92,6 @@ class Tags_Applied extends Trigger {
 			),
 		);
 
-		error_log( 'Tags Applied: ' . wp_json_encode( $data ) );
 		$this->process( $data );
 	}
 

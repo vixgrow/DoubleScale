@@ -49,6 +49,8 @@ class Automation_Contact_Model extends Model {
 	protected $fillable = array(
 		'contact_id',
 		'automation_id',
+		'current_step',
+		'next_step',
 		'status',
 		'data',
 		'execution_time',
@@ -82,7 +84,7 @@ class Automation_Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function automation() {
-		return $this->belongsTo( Automation_Model::class, 'automation_id' );
+		return $this->belongsTo( Automation_Model::class, 'automation_id', 'id' );
 	}
 
 	/**
@@ -93,18 +95,29 @@ class Automation_Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function contact() {
-		return $this->belongsTo( Contact_Model::class, 'contact_id' );
+		return $this->belongsTo( Contact_Model::class, 'contact_id', 'id' );
 	}
 
 	/**
-	 * Step
+	 * Next step
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
-	public function step() {
-		return $this->belongsTo( Automation_Step_Model::class, 'step_id' );
+	public function next_step() {
+		return $this->belongsTo( Automation_Step_Model::class, 'next_step' );
+	}
+
+	/**
+	 * Current step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function current_step() {
+		return $this->belongsTo( Automation_Step_Model::class, 'current_step' );
 	}
 
 	/**
@@ -115,7 +128,7 @@ class Automation_Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function processes() {
-		return $this->hasMany( Automation_Contact_Processes_Model::class, 'automation_contact_id' );
+		return $this->hasMany( Automation_Contact_Processes_Model::class, 'automation_contact_id', 'id' );
 	}
 
 	/**

@@ -44,8 +44,10 @@ class Automation_Step_Model extends Model {
 	 */
 	protected $fillable = array(
 		'automation_id',
+		'parent_id',
 		'action',
 		'type',
+		'condition',
 		'status',
 		'settings',
 		'order',
@@ -105,6 +107,28 @@ class Automation_Step_Model extends Model {
 	}
 
 	/**
+	 * Get the parent
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function parent() {
+		return $this->belongsTo( Automation_Step_Model::class, 'parent_id', 'id' );
+	}
+
+	/**
+	 * Get the children
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function children() {
+		return $this->hasMany( Automation_Step_Model::class, 'parent_id', 'id' );
+	}
+
+	/**
 	 * Get setting
 	 *
 	 * @since 1.0.0
@@ -131,8 +155,28 @@ class Automation_Step_Model extends Model {
 		// Update order on create
 		static::creating(
 			function ( $step ) {
-				$last_step   = $step->automation->get_last_step();
-				$step->order = $last_step ? $last_step->order + 1 : 1;
+				$last_step        = $step->automation->get_last_step();
+				$automation_steps = $step->automation->steps;
+				if ( $automation_steps->count() === 1 && $last_step->order > 1 ) {
+					$last_step->order = 1;
+					$last_step->save();
+				}
+
+				if ( $step->parent_id ) {
+					$parent_step         = $step->parent;
+					$siblings            = $parent_step->children;
+					$yes_condition_steps = $siblings->where( 'condition', 'yes' );
+					$no_condition_steps  = $siblings->where( 'condition', 'no' );
+					if ( $step->condition === 'yes' ) {
+						$step->order = $yes_condition_steps->count() ? $yes_condition_steps->last()->order + 1 : 1;
+					} else {
+						$step->order = $no_condition_steps->count() ? $no_condition_steps->last()->order + 1 : 1;
+					}
+				} else {
+					// Get last step with no parent
+					$last_step   = $automation_steps->where( 'parent_id', 0 )->last();
+					$step->order = $last_step ? $last_step->order + 1 : 1;
+				}
 			}
 		);
 	}

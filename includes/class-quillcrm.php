@@ -23,6 +23,8 @@ use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Tracking\Link_Triggers;
 use QuillCRM\Managers\Rules_Manager;
+use QuillCRM\Admin\Admin;
+use QuillCRM\Admin\Admin_Loader;
 
 /**
  * QuillCRM Main Class.
@@ -154,6 +156,8 @@ final class QuillCRM {
 		$this->campaigns_tasks   = new Tasks( 'quillcrm_campaigns' );
 		$this->automations_tasks = new Tasks( 'quillcrm_automations' );
 
+		Admin::instance();
+		Admin_Loader::instance();
 		REST_API::instance();
 		Campaign_Processing::instance();
 		Email_Tracking::instance();

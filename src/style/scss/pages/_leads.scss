@@ -1,0 +1,295 @@
+.kanban-wrapper {
+    display: flex;
+    overflow-x: auto;
+    align-items: self-start;
+    margin-bottom: 24px;
+    .kanban-list-items {
+        border: 1px solid $light-900;
+        box-shadow: 0px 4px 4px 0px #DBDBDB40;
+        border-radius: 5px;
+        @include margin-padding(0 20px 20px 0, 15px);
+        &:last-child {
+            margin-right: 0;
+        }
+        .kanban-list-head {
+            background: $white;
+            padding: 15px;
+            border-radius: 5px;
+            min-width: 285px;
+            .action-icon {
+                &::after {
+                    display: none;
+                }
+            }
+            .kanban-title-head {
+                h5 {
+                    font-size: $font-size-18;
+                    font-weight: $font-weight-semibold;
+                    margin-bottom: 5px;
+                    position: relative;
+                    padding-left: 15px;
+                    &:before {
+                        content: "";
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 10px;
+                        position: absolute;
+                        left: 0;
+                        top: 50%;
+                        transform: translateY(-50%);
+                    }
+                }
+                span {
+                    font-size: $font-size-14;
+                    font-weight: $font-weight-medium;
+                }
+                &.dot-success {
+                    h5 {
+                        &:before {
+                            background: $success;
+                        }
+                    }
+                }
+                &.dot-info {
+                    h5 {
+                        &:before {
+                            background: $info;
+                        }
+                    }
+                }
+                &.dot-warning {
+                    h5 {
+                        &:before {
+                            background: $warning;
+                        }
+                    }
+                }
+                &.dot-purple {
+                    h5 {
+                        &:before {
+                            background: $purple;
+                        }
+                    }
+                }
+                &.dot-danger {
+                    h5 {
+                        &:before {
+                            background: $danger;
+                        }
+                    }
+                }
+            }
+            
+            .kanban-action-btns {
+                .plus-btn {
+                    color: $purple;
+                    margin-right: 10px;
+                    &:hover {
+                        color: $primary;
+                    }
+                }
+                .table-action {
+                    .action-icon {
+                        background-color: $white;
+                    }
+                }
+            }
+        }
+        .kanban-drag-wrap {
+            padding-top: 24px;
+        }
+    }
+}
+.kanban-card {
+    background: $white;
+    box-shadow: 0px 4px 24px 0px #BCBCBC40;
+    border: 1px solid $light-900;
+    border-radius: 5px;
+    padding: 15px;
+    min-width: 285px;
+    margin-bottom: 15px;
+    .kanban-card-head {
+        .bar-design {
+            display: block;
+            width: 100%;
+            height: 4px;
+            &.bg-purple {
+                background: $purple;
+            }
+        }
+        .kanban-card-title {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            span {
+                width: 50px;
+                height: 50px;
+                border-radius: 5px;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: $font-size-16;
+                font-weight: $font-weight-medium;
+                background: $background-3;
+                margin-right: 8px;
+            }
+            h6 {
+                font-size: $font-size-14;
+                font-weight: $font-weight-medium;
+                max-width: 143px;
+            }
+        }
+    }
+    .kanban-card-body {
+        ul {
+            margin-bottom: 15px;
+            li {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+                color: $text-color;
+                i {
+                    margin-right: 8px;
+
+                }
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+        }
+        .badge {
+            font-weight: $font-weight-medium;
+            font-size: $font-size-14;
+            border-radius: 5px;
+            padding: 7px 6px;
+            color: $white;
+            i {
+                margin-right: 5px;
+            }
+        }
+        .card-user-info {
+            display: flex;
+            align-items: center;
+            .avatar {
+                width: 32px;
+                height: 32px;
+                margin-right: 10px;
+            }
+            .user-name {
+                color: $gray-400;
+            }
+        }
+    }
+    .kanban-card-footer {
+        border-top: 1px solid $light-900;
+        margin-top: 15px;
+        padding-top: 15px;
+        ul {
+            display: flex;
+            align-items: center;
+            li {
+                margin-right: 5px;
+                a {
+                    width: 30px;
+                    height: 30px;
+                    display: -webkit-box;
+                    display: -ms-flexbox;
+                    display: flex;
+                    -webkit-box-align: center;
+                    -ms-flex-align: center;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    color: $title-color;;
+                    background: $light-500;
+                    &:hover {
+                        background: $danger-100;
+                        color: $primary;
+                    }
+                }
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
+        }
+    }
+}
+.kanban-drag-wrap {
+    > li {
+        &:last-child {
+            .kanban-card {
+                margin-bottom: 0;
+            }
+        }
+       
+    }
+}
+.leads-kanban-wrapper {
+    .kanban-card {
+        .kanban-card-head {
+            .kanban-card-title {
+                span {
+                    background: $background-3;
+                }
+            }
+        }
+        .kanban-card-footer {
+            span {
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid $light-900;
+                border-radius: 5px;
+            }
+        }
+    }
+}
+.pipeline-progress {
+    .progress {
+        background: transparent;
+        width: 70px;
+        height: 5px;
+        .progress-bar {
+            width: 70px;
+            height: 5px;
+            border-radius: 5px;
+            &.progress-bar-success {
+                background: $success;
+            }
+            &.progress-bar-violet {
+                background: $purple;
+            }
+            &.progress-bar-info {
+                background: $info;
+            }
+            &.progress-bar-warning {
+                background: $warning;
+            }
+            &.progress-bar-green {
+                background: $green;
+            }
+            &.progress-bar-danger {
+                background: $danger;
+            }
+        }
+    }
+    span {
+        margin-left: 10px;
+        color: $gray-900;
+        font-weight: $font-weight-medium;
+    }
+}
+.pipe-title {
+    .add-stage {
+        color: $primary;
+        font-weight: $font-weight-medium;
+        margin-bottom: 15px;
+        display: inline-block;
+        i {
+            margin-right: 8px;
+        }
+    }
+}

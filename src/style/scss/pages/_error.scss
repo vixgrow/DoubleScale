@@ -1,0 +1,313 @@
+.error-page {
+    background: $white;
+}
+.error-box {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    justify-content: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    padding: 50px 0;
+    @include respond-below(custom991) {
+        padding: 40px 0;
+    }
+    @include respond-below(custom767) {
+        padding: 30px 0;
+    }
+    .error-img {
+        padding-bottom: 50px;
+        @include respond-below(custom991) {
+            padding-bottom: 30px;
+        }
+        @include respond-below(custom767) {
+            padding-bottom: 20px;
+        }
+    }
+    .error-content {
+        text-align: center;
+        .btn {
+            display: -webkit-inline-box;
+            display: -ms-inline-flexbox;
+            display: inline-flex;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            justify-content: center;
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            i {
+                font-size: $font-size-18;
+                line-height: normal;
+                margin-right: 6px;
+            }
+        }
+    }
+    h3 {
+        font-size: $font-size-28;
+        font-weight: $font-weight-bold;
+        color: $black;
+        margin-bottom: 15px;
+        @include respond-below(custom767) {
+            font-size: $font-size-24;
+        }
+    }
+    p {
+        font-size: $font-size-16;
+        max-width: 430px;
+        margin: 0 auto 15px;
+        @include respond-below(custom767) {
+            font-size: $font-size-14;
+        }
+    }
+}
+.comming-soon {
+    width: 100%;
+    height: 100%;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    justify-content: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    position: relative;
+    @include respond-below(custom991) {
+        height: 100%;
+    }
+    .coming-soon-box {
+        width: 800px;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        position: relative;
+        @include respond-below(custom1199) {
+            padding: 20px 40px;
+            max-width: 800px;
+        }
+        @include respond-below(custom991) {
+            width: auto;
+            padding: 30px;
+        }
+        @include respond-below(custom575) {
+            padding: 15px;
+        }
+        .crms-logo {
+            margin-bottom: 30px;
+            @include respond-below(custom1199) {
+                margin-bottom: 20px;
+            }
+            img {
+                @include respond-below(custom767) {
+                    width: 140px;
+                }
+            }
+        }
+        span {
+            font-size: $font-size-24;
+            font-weight: $font-weight-bold;
+            @include respond-below(custom767) {
+                font-size: $font-size-18;
+            }
+        }
+        h1 {
+            font-size: $font-size-60;
+            line-height: normal;
+            @include respond-below(custom1199) {
+                font-size: $font-size-50;
+            }
+            @include respond-below(custom991) {
+                font-size: $font-size-40;
+            }
+            @include respond-below(custom575) {
+                font-size: $font-size-26;
+            }
+            span {
+                font-size: $font-size-60;
+                color: $primary;
+                @include respond-below(custom1199) {
+                    font-size: $font-size-50;
+                }
+                @include respond-below(custom991) {
+                    font-size: $font-size-40;
+                }
+                @include respond-below(custom575) {
+                    font-size: $font-size-28;
+                }
+            }
+        }
+        p {
+            font-size: $font-size-15;
+            max-width: 400px;
+            text-align: center; 
+            margin: auto;
+            @include respond-below(custom767) {
+                font-size: $font-size-14;
+            }
+        }
+        .coming-soon-timer {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            align-items: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            justify-content: center;
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            margin: 40px 0;
+            @include respond-below(custom1199) {
+                margin: 20px 0;
+            }
+            li {
+                font-size: $font-size-16;
+                font-weight: $font-weight-medium;
+                color: $gray-400;
+                border: 1px solid #919EAB4D;
+                background-color: $white;
+                width: 85px;
+                height: 85px;
+                margin-right: 14px;
+                border-radius: $border-radius-xl;
+                display: -webkit-box;
+                display: -ms-flexbox;
+                display: flex;
+                align-items: center;
+                -webkit-box-align: center;
+                -ms-flex-align: center;
+                justify-content: center;
+                -webkit-justify-content: center;
+                -ms-flex-pack: center;
+                flex-direction: column;
+                @include respond-below(custom767) {
+                    font-size: $font-size-14;
+                }
+                @include respond-below(custom575) {
+                    width: 50px;
+                    height: 50px;
+                    margin-right: 5px;
+                }
+                span {
+                    font-size: $font-size-28;
+                    font-weight: $font-weight-bold;
+                    color: $gray-900;
+                    line-height: normal;
+                    @include respond-below(custom767) {
+                        font-size: $font-size-18;
+                    }
+                }
+                &.seperate-dot {
+                    color: $gray-900;
+                    width: auto;
+                    height: auto;
+                    border: 0;
+                    border-radius: 0;
+                    background-color: transparent;
+                }
+                &:last-child {
+                    margin-right: 0;
+                }
+            }
+        }
+        .subscribe-form {
+            position: relative;
+            .subscribe-btn {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+            }
+            input {
+                font-size: $font-size-16;
+                font-weight: $font-weight-semibold;
+                height: 58px;
+                padding-right: 130px;
+                @include respond-below(custom767) {
+                    font-size: $font-size-14;
+                }
+                &::placeholder {
+                    font-size: $font-size-16;
+                    font-weight: $font-weight-semibold;
+                    color: $gray-400;  
+                    @include respond-below(custom767) {
+                        font-size: $font-size-14;
+                    }
+                }
+            }
+            label {
+                font-size: $font-size-16;
+                font-weight: $font-weight-semibold;
+                @include respond-below(custom767) {
+                    font-size: $font-size-14;
+                }
+            }
+        }
+        .social-media-icons {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            align-items: center;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            justify-content: center;
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            margin-top: 30px;
+            @include respond-below(custom1199) {
+                margin-top: 20px;
+            }
+            li {
+                margin-right: 5px;
+                &:last-child {
+                    margin-right: 0;
+                }
+                a {
+                    display: -webkit-box;
+                    display: -ms-flexbox;
+                    display: flex;
+                    align-items: center;
+                    -webkit-box-align: center;
+                    -ms-flex-align: center;
+                    justify-content: center;
+                    -webkit-justify-content: center;
+                    -ms-flex-pack: center;
+                    width: 32px;
+                    height: 32px;
+                    background-color: $gray-800;
+                    border-radius: 5px;
+                    &:hover {
+                        background-color: $gray-400;
+                    }
+                    i {
+                        color: $white;
+                    }
+                }
+            }
+        }
+    }
+}
+.comming-shapes {
+    position: relative;
+    @include respond-below(custom991) {
+        display: none;
+    }
+    .comming-right-shape {
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+    .comming-left-shape {
+        position: fixed;
+        bottom: -5px;
+        right: 0;
+    }
+    img {
+        width: 500px;
+    }
+}

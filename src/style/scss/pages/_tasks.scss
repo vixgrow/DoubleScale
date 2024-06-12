@@ -1,0 +1,166 @@
+.tasks-activity {
+	&.tasks {
+		& > ul {
+			margin-top: 15px;
+			.task-wrap {
+				display: -webkit-box;
+				display: -ms-flexbox;
+				display: flex;
+				-webkit-box-align: center;
+				-ms-flex-align: center;
+				align-items: center;
+				justify-content: space-between;
+				-webkit-justify-content: space-between;
+				-ms-flex-pack: space-between;
+				flex-wrap: wrap;
+				&.pending {
+					&::before { 
+						background-color: $violet;
+					}
+				}
+				&.warning {
+					&::before { 
+						background-color: $warning;
+					}
+				}
+				&.success {
+					&::before { 
+						background-color: $success;
+					}
+				}
+				.task-info {
+					.task-icon {
+						margin: 0 20px 10px 0;
+					}
+					.task-checkbox {
+						margin: 0 20px 10px 0;
+						.checkboxs .checkmarks {
+							top: 50%;
+							@include transform(translateY(-50%));
+						}
+					}
+					.set-star {
+						margin: 0 20px 10px 0;
+					}
+					p {
+						font-weight: $font-weight-medium;
+					}
+					.badge {
+						font-weight: $font-weight-semibold;
+						font-size: $font-size-12;
+						@include margin-padding(0 5px 10px 0, 5px 7px);
+						color: $white;
+						&:last-child {
+							margin-right: 0;
+						}
+					}
+				}	
+				.task-actions {
+					ul {	
+						li {
+							@include margin-padding(0 10px 10px 0, null);
+							.badge-tag {
+								padding: 5px 4px; 
+							}
+							&:last-child {
+								margin-right: 0;
+							}
+						}
+					}
+				}			
+			}			
+		}
+	}
+}
+.all-read {
+	.checkboxs {
+		.checkmarks {
+			top: 50%;
+			@include transform(translateY(-50%));
+		}
+	}
+}
+.task-drops {
+	.dropdown-toggle {
+		border: 0;
+		padding: 0;
+		font-size: $font-size-18;
+		font-weight: $font-weight-semibold;
+		box-shadow: none;
+		&.show {
+			border: 0;
+		}
+		@include respond-below(custom767) {
+			font-size: $font-size-16;
+		}
+	}
+}
+.task-wrapper {
+	border-bottom: 1px solid $light-900;
+	margin-bottom: 15px;
+	padding-bottom: 15px;
+	.tasks-activity {
+			&.tasks {			
+				& > ul {
+					margin-bottom: 15px;
+				}
+			}
+		}
+	&:last-child {
+		padding-bottom: 0;
+		.tasks-activity {
+			&.tasks {			
+				& > ul {
+					margin-bottom: 0;
+				}
+			}
+		}
+	}
+	.task-accordion {
+		font-size: $font-size-18;
+		font-weight: $font-weight-semibold;
+		position: relative;
+		display: block;
+		h4 {
+			@include respond-below(custom767) {
+				font-size: $font-size-16;
+			}
+		}
+		span {
+			width: 20px;
+			height: 20px;
+			@include rounded(50%);
+			border: 1px solid $light-900;
+			display: -webkit-inline-box;
+			display: -ms-inline-flexbox;
+			display: inline-flex;
+			-webkit-box-align: center;
+			-ms-flex-align: center;
+			align-items: center;
+			justify-content: center;
+			-webkit-justify-content: center;
+			-ms-flex-pack: center;
+			margin-left: 10px;
+			color: $gray-900;
+			font-weight: $font-weight-semibold;
+			font-size: $font-size-10;
+		}
+		&::before {
+            content: "\f054";
+            font-family: 'Font Awesome 5 Free';
+            @include position(absolute, 50%, 10px, null, null);
+            @include transform(translateY(-50%));
+            font-size: $font-size-14;
+            font-weight: $font-weight-semibold;
+        } 
+        &:not(.collapsed) {                 
+            &::before {
+                content: "\f078";
+            }           
+        }
+	}
+	&:last-child {
+		border: 0;
+		margin-bottom: 0;
+	}
+}

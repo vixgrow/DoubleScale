@@ -1,0 +1,92 @@
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    border-radius: 50px !important;
+}
+::-webkit-scrollbar-track {
+    background: $gray-300;
+}
+::-webkit-scrollbar-thumb {
+    background: $primary;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: $gray-300;
+}
+.swal2-header{
+    .swal2-title{
+        font-size: $font-size-18;
+    }
+}
+.none{
+    display: none !important;
+}
+.text-red{color: $danger !important;
+}
+.text-green{
+    color: $success !important;
+}
+.input-blocks{
+    input[type=text]{
+        &:focus{
+            border-color: $input-border;
+        }
+    }
+}
+.input-group{
+    .scanner-set {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        justify-content: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        background: $primary;
+        border-radius: 5px !important;
+        width: 40px;
+        color: $white;
+        font-weight: $font-weight-semibold;
+        padding: 0;
+        &:hover{
+            background: $title-color;
+        }
+    }
+}
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    border-radius: 50px !important;
+}
+::-webkit-scrollbar-track {
+    background: $gray-300;
+}
+::-webkit-scrollbar-thumb {
+    background: $primary;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: $gray-300;
+}
+.swal2-header{
+    .swal2-title{
+        font-size: $font-size-18;
+    }
+}
+.none{
+    display: none !important;
+}
+.text-red{
+    color: $danger !important;
+}
+.text-green{
+    color: $success !important;
+}
+
+.input-blocks{
+    input[type=text]{
+        &:focus{
+            border-color: $input-border;
+        }
+    }
+}

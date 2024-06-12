@@ -1,0 +1,118 @@
+.membership-plans {
+	.plan-selected {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			margin-bottom: 30px;
+		h4 {
+			color: $gray-400;
+			font-size: $font-size-20;
+		}
+		.status-toggle {
+			margin: 0 24px;
+		}
+	}
+}
+.membership-plan-grid {
+	border: 1px solid #E8E8E8;
+	border-radius: 5px;
+	padding: 24px;
+	background: $white;
+	margin-bottom: 24px;
+	&.active {
+		background: #F9F9FC;
+
+	}
+	.plan-price-head{
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		border-bottom: 1px solid #E8E8E8;
+		margin-bottom: 15px;
+		padding-bottom: 15PX;
+		.plan-type {
+			color: $gray-900;
+			font-weight: $font-weight-medium;
+		}
+		h4 {
+			display: flex;
+			align-items: end;
+			font-size: $font-size-28;
+			margin-top: 5px;
+			span {
+				color: $gray-900;
+				font-size: $font-size-14;
+				margin-left: 8px;
+				font-weight: $font-weight-medium;
+			}
+		}
+	}
+	.plans-features {
+		ul {
+			li {
+				font-weight: $font-weight-medium;
+				color: $gray-900;
+				font-size: $font-size-16;
+				display: flex;
+				align-items: center;
+				span {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 14px;
+					height: 14px;
+					border-radius: 2px;
+					background: $success;
+					color: $white;
+					font-size: $font-size-12;
+					margin-right: 8px;
+				}
+				+ li {
+					margin-top: 10px;
+				}
+			}
+		}
+	}
+	.plan-btn {
+		margin-top: 15px;
+	}
+}
+.form-wrap {
+	.checkmarks.mem-plane-check {
+		top: 3px;
+	}
+}
+
+.table-imgname.flag-image img {
+	width: 24px;
+	height: 18px;
+	border-radius: 5px;
+}
+.table-imgname.flag-image {
+	display: flex;
+	align-items: center;
+	
+}
+.location-flag-img {
+	border: 1px solid #E8E8E8;
+	border-radius: 5px;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 8px;
+}
+.table-imgname.flag-image span {
+	font-weight: 500;
+	color: #262A2A;
+}
+#delete_request {
+	td {
+		span {
+			&.badge {
+				cursor: pointer;
+			}
+		}
+	}
+}

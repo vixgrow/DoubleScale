@@ -186,11 +186,11 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 
 			if ( 'action' === $action_type ) {
 				$action = Actions_Manager::instance()->get_action( $data['action'] );
-				if ( empty( $action->attributes ) ) {
+				if ( empty( $action->get_attributes_schema() ) ) {
 					return true;
 				}
 
-				$validator = rest_validate_value_from_schema( $data['settings'] ?? array(), $action->attributes, 'settings' );
+				$validator = rest_validate_value_from_schema( $data['settings'] ?? array(), $action->get_attributes_schema(), 'settings' );
 				if ( is_wp_error( $validator ) ) {
 					return $validator;
 				}

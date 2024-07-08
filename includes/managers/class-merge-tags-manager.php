@@ -126,16 +126,20 @@ final class Merge_Tags_Manager {
 	 */
 	public function set_groups() {
 		$this->groups = array(
-			'contact' => array(
+			'contact'        => array(
 				'label' => __( 'Contact', 'quillcrm' ),
 				'tags'  => array(),
 			),
-			'general' => array(
+			'general'        => array(
 				'label' => __( 'General', 'quillcrm' ),
 				'tags'  => array(),
 			),
-			'order'   => array(
+			'order'          => array(
 				'label' => __( 'Order', 'quillcrm' ),
+				'tags'  => array(),
+			),
+			'abandoned_cart' => array(
+				'label' => __( 'Abandoned Cart', 'quillcrm' ),
 				'tags'  => array(),
 			),
 		);

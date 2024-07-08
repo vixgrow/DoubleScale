@@ -154,6 +154,10 @@ final class Triggers_Manager {
 						'label'    => __( 'Order', 'quillcrm' ),
 						'triggers' => array(),
 					),
+					'cart'  => array(
+						'label'    => __( 'Abandoned Cart', 'quillcrm' ),
+						'triggers' => array(),
+					),
 				),
 			),
 			'wp'          => array(

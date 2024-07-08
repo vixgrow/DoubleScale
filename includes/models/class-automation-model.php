@@ -139,6 +139,7 @@ class Automation_Model extends Model {
 	 */
 	public function get_first_step() {
 		return $this->steps()
+			->where( 'status', 'active' )
 			->orderBy( 'order', 'asc' )
 			->first();
 	}
@@ -152,6 +153,7 @@ class Automation_Model extends Model {
 	 */
 	public function get_last_step() {
 		return $this->steps()
+			->where( 'status', 'active' )
 			->orderBy( 'order', 'desc' )
 			->first();
 	}
@@ -167,6 +169,7 @@ class Automation_Model extends Model {
 	 */
 	public function get_step_by_order( $order ) {
 		return $this->steps()
+			->where( 'status', 'active' )
 			->where( 'order', $order )
 			->first();
 	}
@@ -182,6 +185,7 @@ class Automation_Model extends Model {
 	 */
 	public function get_next_step( $order ) {
 		return $this->steps()
+			->where( 'status', 'active' )
 			->where( 'order', '>', $order )
 			->orderBy( 'order', 'asc' )
 			->first();

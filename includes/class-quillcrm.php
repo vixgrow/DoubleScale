@@ -25,6 +25,7 @@ use QuillCRM\Tracking\Link_Triggers;
 use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Admin\Admin;
 use QuillCRM\Admin\Admin_Loader;
+use QuillCRM\Abandoned_Cart\Abandoned_Cart;
 
 /**
  * QuillCRM Main Class.
@@ -168,6 +169,7 @@ final class QuillCRM {
 		Automations_Loader::instance();
 		Merge_Tags_Manager::instance();
 		Rules_Manager::instance();
+		Abandoned_Cart::instance();
 	}
 
 	/**
@@ -245,6 +247,12 @@ final class QuillCRM {
 			}
 		}
 
+		// Load all automations crm actions files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/crm/**/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
+
 		// Load all contact merge tags files
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/contact/class-*.php' );
 		foreach ( $merge_tags_files as $file ) {
@@ -258,7 +266,7 @@ final class QuillCRM {
 		}
 
 		// Load all order merge tags files
-		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/woocommerce/order/class-*.php' );
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/woocommerce/**/class-*.php' );
 		foreach ( $merge_tags_files as $file ) {
 			require $file;
 		}
@@ -278,6 +286,12 @@ final class QuillCRM {
 		// Load all automations goals files
 		$goals_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/goals/class-*.php' );
 		foreach ( $goals_files as $file ) {
+			require $file;
+		}
+
+		// Load all integrations files
+		$integrations_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/integrations/**/class-integration.php' );
+		foreach ( $integrations_files as $file ) {
 			require $file;
 		}
 	}

@@ -165,6 +165,15 @@ final class Actions_Manager {
 					),
 				),
 			),
+			'send_data'   => array(
+				'label'  => __( 'Send Data', 'quillcrm' ),
+				'groups' => array(
+					'activecampaign' => array(
+						'label'   => __( 'ActiveCampaign', 'quillcrm' ),
+						'actions' => array(),
+					),
+				),
+			),
 		);
 
 		$this->sources = apply_filters( 'quillcrm_actions_sources', $this->sources );

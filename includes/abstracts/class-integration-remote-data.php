@@ -79,7 +79,7 @@ abstract class Integration_Remote_Data {
 	public function register_entities_routes() {
 		$entities = $this->get_entities();
 
-		foreach ( $entities as $entity ) {
+		foreach ( $entities ?? array() as $entity ) {
 			register_rest_route(
 				$this->namespace,
 				'/' . $this->rest_base . '/' . $entity,

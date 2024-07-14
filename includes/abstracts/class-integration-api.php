@@ -66,7 +66,7 @@ abstract class Integration_API {
 	 * @param array|null $body Body.
 	 * @return array
 	 */
-	public function post( $path, $body ) {
+	public function post( $path, $body = array() ) {
 		return $this->request( 'POST', $path, $body ? json_encode( $body ) : null );
 	}
 
@@ -96,10 +96,11 @@ abstract class Integration_API {
 	 * Send DELETE request to the api.
 	 *
 	 * @param string $path Path.
+	 * @param array  $body Body.
 	 * @return array
 	 */
-	public function delete( $path ) {
-		return $this->request( 'DELETE', $path );
+	public function delete( $path, $body = array() ) {
+		return $this->request( 'DELETE', $path, $body ? json_encode( $body ) : null );
 	}
 
 	/**

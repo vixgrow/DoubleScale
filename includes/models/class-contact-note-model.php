@@ -45,6 +45,8 @@ class Contact_Note_Model extends Model {
 	 */
 	protected $fillable = array(
 		'contact_id',
+		'title',
+		'type',
 		'note',
 		'created_at',
 		'updated_at',

@@ -107,7 +107,6 @@ class REST_Template_Controller extends REST_Controller {
 				'name'       => array(
 					'description' => __( 'Name of the template.', 'quillcrm' ),
 					'type'        => 'string',
-					'required'    => true,
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
@@ -115,7 +114,6 @@ class REST_Template_Controller extends REST_Controller {
 				'type'       => array(
 					'description' => __( 'Type of the template.', 'quillcrm' ),
 					'type'        => 'string',
-					'required'    => true,
 					'enum'        => array( 'email', 'sms' ),
 				),
 				'subject'    => array(
@@ -133,8 +131,7 @@ class REST_Template_Controller extends REST_Controller {
 				),
 				'settings'   => array(
 					'description' => __( 'Settings of the template.', 'quillcrm' ),
-					'type'        => 'object',
-					'required'    => true,
+					'type'        => array( 'object', 'null' ),
 				),
 				'created_at' => array(
 					'description' => __( 'Creation time of the template.', 'quillcrm' ),
@@ -339,8 +336,8 @@ class REST_Template_Controller extends REST_Controller {
 	 */
 	public function prepare_template( $request ) {
 		$template_data = array(
-			'name'       => $request->get_param( 'name' ),
-			'type'       => $request->get_param( 'type' ),
+			'name'       => $request->get_param( 'name' ) ?? __( 'New Template', 'quillcrm' ),
+			'type'       => $request->get_param( 'type' ) ?? 'email',
 			'subject'    => $request->get_param( 'subject' ),
 			'body'       => $request->get_param( 'body' ),
 			'settings'   => $request->get_param( 'settings' ),

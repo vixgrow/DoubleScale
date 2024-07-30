@@ -1,0 +1,17 @@
+.custom-fields {
+	.custom-fields-group {
+		margin-bottom: 20px;
+	}
+	.custom-fields-actions {
+		display: flex;
+		gap: 10px;
+	}
+	.custom-fields-header {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 20px;
+		h4 {
+			margin: 0;
+		}
+	}
+}

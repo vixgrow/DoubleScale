@@ -156,7 +156,6 @@ class REST_Campaign_Controller extends REST_Controller {
 				'settings'    => array(
 					'description' => __( 'The settings of the campaign.', 'quillcrm' ),
 					'type'        => 'object',
-					'required'    => true,
 				),
 				'parent_id'   => array(
 					'description' => __( 'The parent id of the campaign.', 'quillcrm' ),

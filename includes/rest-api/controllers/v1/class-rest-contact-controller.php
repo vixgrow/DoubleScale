@@ -112,6 +112,47 @@ class REST_Contact_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_contact_notes' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'id'       => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'per_page' => array(
+							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'page'     => array(
+							'description' => __( 'Page number.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
+				),
+			)
+		);
+
+		// Get automation contacts
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/automation-contacts',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_automation_contacts' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'id'       => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'per_page' => array(
+							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'page'     => array(
+							'description' => __( 'Page number.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
 				),
 			)
 		);
@@ -380,7 +421,7 @@ class REST_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
-			$contact->load( 'lists', 'tags', 'custom_fields', 'notes' );
+			$contact->load( 'lists', 'tags' );
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
@@ -453,9 +494,40 @@ class REST_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
-			$notes = $contact->notes()->get();
+			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$notes    = $contact->notes()->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $notes, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Get automation contacts
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response $response The response data.
+	 */
+	public function get_automation_contacts( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$contact    = Contact_Model::find( $contact_id );
+
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
+
+			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$contacts = $contact->automation_contacts()->paginate( $per_page, array( '*' ), 'page', $page );
+			$contacts->load( 'automation' );
+
+			return new WP_REST_Response( $contacts, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}

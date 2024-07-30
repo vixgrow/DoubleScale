@@ -10,6 +10,7 @@
 namespace QuillCRM\Fields\Types;
 
 use QuillCRM\Abstracts\Field_Type;
+use QuillCRM\Managers\Custom_Fields_Manager;
 
 /**
  * Email_Field class
@@ -22,6 +23,13 @@ class Email_Field extends Field_Type {
 	 * @var string
 	 */
 	public $name = 'Email Field';
+
+	/**
+	 * Slug
+	 *
+	 * @var string
+	 */
+	public $slug = 'email';
 
 	/**
 	 * Is Value Array
@@ -61,3 +69,5 @@ class Email_Field extends Field_Type {
 		}
 	}
 }
+
+Custom_Fields_Manager::instance()->register( new Email_Field() );

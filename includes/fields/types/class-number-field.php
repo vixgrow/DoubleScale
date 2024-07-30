@@ -10,6 +10,7 @@
 namespace QuillCRM\Fields\Types;
 
 use QuillCRM\Abstracts\Field_Type;
+use QuillCRM\Managers\Custom_Fields_Manager;
 
 /**
  * Number_Field class
@@ -22,6 +23,13 @@ class Number_Field extends Field_Type {
 	 * @var string
 	 */
 	public $name = 'Number Field';
+
+	/**
+	 * Slug
+	 *
+	 * @var string
+	 */
+	public $slug = 'number';
 
 	/**
 	 * Is Value Array
@@ -61,3 +69,5 @@ class Number_Field extends Field_Type {
 		}
 	}
 }
+
+Custom_Fields_Manager::instance()->register( new Number_Field() );

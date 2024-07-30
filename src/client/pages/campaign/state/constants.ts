@@ -1,0 +1,4 @@
+export const SET_CAMPAIGN = 'SET_CAMPAIGN';
+export const UPDATE_CAMPAIGN = 'UPDATE_CAMPAIGN';
+export const SET_TEMPLATE = 'SET_TEMPLATE';
+export const UPDATE_TEMPLATE = 'UPDATE_TEMPLATE';

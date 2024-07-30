@@ -34,6 +34,8 @@ class Contact_Notes_Table extends Migration {
 	public function get_query() {
 		return 'id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
                 contact_id BIGINT(20) UNSIGNED NOT NULL,
+				title VARCHAR(255) NOT NULL,
+				type VARCHAR(255) NOT NULL,
                 note TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

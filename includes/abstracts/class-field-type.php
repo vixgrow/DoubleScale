@@ -22,6 +22,13 @@ abstract class Field_Type {
 	public $name;
 
 	/**
+	 * Slug
+	 *
+	 * @var string
+	 */
+	public $slug;
+
+	/**
 	 * Is Valid
 	 *
 	 * @var bool

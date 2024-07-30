@@ -1,0 +1,345 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
+import { useEffect, useState } from '@wordpress/element';
+import { addQueryArgs } from '@wordpress/url';
+
+/**
+ * External dependencies
+ */
+import {
+	Button,
+	Input,
+	Card,
+	Typography,
+	List,
+	Modal,
+	Select,
+	Popconfirm,
+	Flex,
+} from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { isEmpty } from 'lodash';
+
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+import { Note } from '../../types';
+import { useContactContext } from '../state/context';
+
+interface NotesProps {
+	contact_id: number;
+}
+
+const Notes: React.FC<NotesProps> = ({ contact_id }) => {
+	const {
+		notes,
+		setNotes,
+		addNote,
+		deleteNote: removeNote,
+		updateNote,
+	} = useContactContext();
+	const [loading, setLoading] = useState<boolean>(true);
+	const [perPage, setPerPage] = useState<number>(10);
+	const [page, setPage] = useState<number>(1);
+	const [total, setTotal] = useState<number>(0);
+	const [noteModalVisible, setNoteModalVisible] = useState(false);
+	const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+	const [isSavingNote, setIsSavingNote] = useState(false);
+	const [note, setNote] = useState({
+		title: '',
+		note: '',
+		type: 'note',
+	});
+
+	const fetchNotes = async () => {
+		setLoading(true);
+
+		try {
+			const response = (await apiFetch({
+				path: addQueryArgs(`/qc/v1/contacts/${contact_id}/notes`, {
+					per_page: perPage,
+					page,
+				}),
+			})) as any;
+
+			setNotes(response.data as Note[]);
+			setTotal(response.total);
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		fetchNotes();
+	}, [page, perPage]);
+
+	const saveNote = async () => {
+		if (!note) {
+			return;
+		}
+		setIsSavingNote(true);
+		try {
+			const response = (await apiFetch({
+				path: `/qc/v1/contact-notes`,
+				method: 'POST',
+				data: {
+					title: note.title,
+					note: note.note,
+					type: note.type,
+					contact_id: contact_id,
+				},
+			})) as Note;
+
+			setNote({
+				title: '',
+				note: '',
+				type: 'note',
+			});
+			addNote({
+				...response,
+			});
+			setNoteModalVisible(false);
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setIsSavingNote(false);
+		}
+	};
+
+	const editNote = async () => {
+		if (!selectedNote) {
+			return;
+		}
+
+		setIsSavingNote(true);
+		try {
+			const response = (await apiFetch({
+				path: `/qc/v1/contact-notes/${selectedNote.id}`,
+				method: 'PUT',
+				data: {
+					title: selectedNote.title,
+					note: selectedNote.note,
+					type: selectedNote.type,
+					contact_id: contact_id,
+				},
+			})) as Note;
+
+			setSelectedNote(null);
+			updateNote({
+				...response,
+			});
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setIsSavingNote(false);
+			setNoteModalVisible(false);
+		}
+	};
+
+	const deleteNote = async (note: Note) => {
+		try {
+			await apiFetch({
+				path: `/qc/v1/contact-notes/${note.id}`,
+				method: 'DELETE',
+			});
+
+			removeNote({
+				...note,
+			});
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	return (
+		<>
+			<Card className="qcrm-contact-notes" loading={loading}>
+				<Flex
+					justify="space-between"
+					align="center"
+					style={{ marginBottom: 20 }}
+				>
+					<Typography.Title level={4} style={{ margin: 0 }}>
+						{__('Notes', 'quillcrm')}
+					</Typography.Title>
+					<Button
+						onClick={() => {
+							setSelectedNote(null);
+							setNoteModalVisible(true);
+						}}
+						type="primary"
+					>
+						{__('Add Note', 'quillcrm')}
+					</Button>
+				</Flex>
+				{isEmpty(notes) ? (
+					<p>{__('No notes found.', 'quillcrm')}</p>
+				) : (
+					<List
+						itemLayout="horizontal"
+						dataSource={notes}
+						pagination={{
+							current: page,
+							pageSize: perPage,
+							total,
+							onChange: (page, perPage) => {
+								setPage(page);
+								setPerPage(perPage);
+							},
+							position: 'bottom',
+							align: 'center',
+						}}
+						renderItem={(item: Note) => (
+							<List.Item
+								actions={[
+									<Button
+										onClick={() => {
+											setSelectedNote(item);
+											setNoteModalVisible(true);
+										}}
+										type="link"
+									>
+										<EditOutlined />
+									</Button>,
+									<Popconfirm
+										title={__(
+											'Are you sure you want to delete this note?',
+											'quillcrm'
+										)}
+										onConfirm={() => deleteNote(item)}
+										okText={__('Yes', 'quillcrm')}
+										cancelText={__('No', 'quillcrm')}
+									>
+										<Button type="link" danger>
+											<DeleteOutlined />
+										</Button>
+									</Popconfirm>,
+								]}
+							>
+								<List.Item.Meta
+									title={item.title}
+									description={item.note}
+								/>
+							</List.Item>
+						)}
+					/>
+				)}
+			</Card>
+			<Modal
+				title={
+					selectedNote
+						? __('Edit Note', 'quillcrm')
+						: __('Add Note', 'quillcrm')
+				}
+				open={noteModalVisible}
+				onOk={() => (selectedNote ? editNote() : saveNote())}
+				onCancel={() => setNoteModalVisible(false)}
+				okText={__('Save', 'quillcrm')}
+				cancelText={__('Cancel', 'quillcrm')}
+				confirmLoading={isSavingNote}
+			>
+				<div className="qcrm-fields">
+					<div className="qcrm-field">
+						<div className="qcrm-field-label">
+							<Typography.Text>
+								{__('Title', 'quillcrm')}
+							</Typography.Text>
+						</div>
+						<div className="qcrm-field-input">
+							<Input
+								value={
+									selectedNote
+										? selectedNote.title
+										: note.title
+								}
+								onChange={(e) => {
+									if (selectedNote) {
+										setSelectedNote({
+											...selectedNote,
+											title: e.target.value,
+										});
+									} else {
+										setNote({
+											...note,
+											title: e.target.value,
+										});
+									}
+								}}
+							/>
+						</div>
+					</div>
+					<div className="qcrm-field">
+						<div className="qcrm-field-label">
+							<Typography.Text>
+								{__('Note', 'quillcrm')}
+							</Typography.Text>
+						</div>
+						<div className="qcrm-field-input">
+							<Input.TextArea
+								value={
+									selectedNote ? selectedNote.note : note.note
+								}
+								onChange={(e) => {
+									if (selectedNote) {
+										setSelectedNote({
+											...selectedNote,
+											note: e.target.value,
+										});
+									} else {
+										setNote({
+											...note,
+											note: e.target.value,
+										});
+									}
+								}}
+							/>
+						</div>
+					</div>
+					<div className="qcrm-field">
+						<div className="qcrm-field-label">
+							<Typography.Text>
+								{__('Type', 'quillcrm')}
+							</Typography.Text>
+						</div>
+						<div className="qcrm-field-input">
+							<Select
+								value={
+									selectedNote ? selectedNote.type : note.type
+								}
+								onChange={(value) => {
+									if (selectedNote) {
+										setSelectedNote({
+											...selectedNote,
+											type: value,
+										});
+									} else {
+										setNote({
+											...note,
+											type: value,
+										});
+									}
+								}}
+								style={{ width: '100%' }}
+							>
+								<Select.Option value="note">
+									{__('Note', 'quillcrm')}
+								</Select.Option>
+								<Select.Option value="reminder">
+									{__('Reminder', 'quillcrm')}
+								</Select.Option>
+							</Select>
+						</div>
+					</div>
+				</div>
+			</Modal>
+		</>
+	);
+};
+
+export default Notes;

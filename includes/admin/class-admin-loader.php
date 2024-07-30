@@ -12,7 +12,7 @@ namespace QuillCRM\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
-use QuillCRM\Core;
+use QuillCRM\Managers\Custom_Fields_Manager;
 
 /**
  * Admin Loader Class.
@@ -72,9 +72,14 @@ class Admin_Loader {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_inline_scripts' ), 14 );
 
 		// Remove notices.
-		add_action( 'admin_notices', array( $this, 'remove_notices' ), 999 );
-		// add_action( 'admin_notices', array( __CLASS__, 'inject_before_notices' ), -9999 );
-		// add_action( 'admin_notices', array( __CLASS__, 'inject_after_notices' ), PHP_INT_MAX );
+		add_action( 'admin_notices', array( $this, 'remove_notices' ), 1 );
+		add_action( 'admin_notices', array( __CLASS__, 'inject_before_notices' ), -9999 );
+		add_action( 'admin_notices', array( __CLASS__, 'inject_after_notices' ), PHP_INT_MAX );
+
+		// Remove admin footer text.
+		add_filter( 'admin_footer_text', '__return_empty_string' );
+		// Remove admin footer version.
+		add_filter( 'update_footer', '__return_empty_string', 11 );
 	}
 
 
@@ -180,11 +185,12 @@ class Admin_Loader {
 			'qcrm-admin',
 			'qcrmAdmin',
 			array(
-				'adminUrl'       => admin_url(),
-				'assetsBuildUrl' => QUILLCRM_PLUGIN_URL,
-				'submenuPages'   => $submenu['quillcrm'] ?? array(),
-				'license_nonce'  => wp_create_nonce( 'quillcrm_license' ),
-				'adminUrl'       => admin_url(),
+				'adminUrl'          => admin_url(),
+				'assetsBuildUrl'    => QUILLCRM_PLUGIN_URL,
+				'submenuPages'      => $submenu['quillcrm'] ?? array(),
+				'license_nonce'     => wp_create_nonce( 'quillcrm_license' ),
+				'adminUrl'          => admin_url(),
+				'customFieldsTypes' => Custom_Fields_Manager::instance()->get_options(),
 			)
 		);
 

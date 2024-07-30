@@ -10,6 +10,7 @@
 namespace QuillCRM\Fields\Types;
 
 use QuillCRM\Abstracts\Field_Type;
+use QuillCRM\Managers\Custom_Fields_Manager;
 
 /**
  * Boolean_Field class
@@ -22,6 +23,13 @@ class Boolean_Field extends Field_Type {
 	 * @var string
 	 */
 	public $name = 'Boolean Field';
+
+	/**
+	 * Slug
+	 *
+	 * @var string
+	 */
+	public $slug = 'boolean';
 
 	/**
 	 * Is Value Array
@@ -61,3 +69,5 @@ class Boolean_Field extends Field_Type {
 		}
 	}
 }
+
+Custom_Fields_Manager::instance()->register( new Boolean_Field() );

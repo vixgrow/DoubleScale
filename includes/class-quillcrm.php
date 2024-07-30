@@ -26,6 +26,7 @@ use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Admin\Admin;
 use QuillCRM\Admin\Admin_Loader;
 use QuillCRM\Abandoned_Cart\Abandoned_Cart;
+use QuillCRM\Managers\Custom_Fields_Manager;
 
 /**
  * QuillCRM Main Class.
@@ -157,6 +158,7 @@ final class QuillCRM {
 		$this->campaigns_tasks   = new Tasks( 'quillcrm_campaigns' );
 		$this->automations_tasks = new Tasks( 'quillcrm_automations' );
 
+		Custom_Fields_Manager::instance();
 		Admin::instance();
 		Admin_Loader::instance();
 		REST_API::instance();
@@ -292,6 +294,12 @@ final class QuillCRM {
 		// Load all integrations files
 		$integrations_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/integrations/**/class-integration.php' );
 		foreach ( $integrations_files as $file ) {
+			require $file;
+		}
+
+		// Load all custom fields types files
+		$custom_fields_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/fields/types/class-*.php' );
+		foreach ( $custom_fields_files as $file ) {
 			require $file;
 		}
 	}

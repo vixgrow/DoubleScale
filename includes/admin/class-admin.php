@@ -130,5 +130,15 @@ class Admin {
 			'quillcrm',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
+
+		// Contacts.
+		add_submenu_page(
+			'quillcrm',
+			__( 'Contacts', 'quillcrm' ),
+			__( 'Contacts', 'quillcrm' ),
+			'manage_options',
+			'quillcrm&path=contacts',
+			array( Admin_Loader::class, 'page_wrapper' )
+		);
 	}
 }

@@ -100,6 +100,22 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 					'type'        => 'integer',
 					'description' => 'Contact ID',
 				),
+				'title'      => array(
+					'type'        => 'string',
+					'description' => 'Title',
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'type'       => array(
+					'type'        => 'string',
+					'description' => 'Type',
+					'required'    => true,
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
 				'note'       => array(
 					'type'        => 'string',
 					'description' => 'Note',
@@ -256,6 +272,8 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 		$note_data = array(
 			'contact_id' => $request->get_param( 'contact_id' ),
 			'note'       => $request->get_param( 'note' ),
+			'title'      => $request->get_param( 'title' ),
+			'type'       => $request->get_param( 'type' ),
 		);
 
 		foreach ( $note_data as $key => $value ) {

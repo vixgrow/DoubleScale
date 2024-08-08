@@ -23,6 +23,7 @@ use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Contact_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Form_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Link_Trigger_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Integration_Controller;
+use QuillCRM\REST_API\Controllers\V1\REST_Settings_Controller;
 
 /**
  * REST_API class is mainly responsible for registering routes.
@@ -92,6 +93,7 @@ class REST_API {
 			Rest_Form_Controller::class,
 			REST_Link_Trigger_Controller::class,
 			REST_Integration_Controller::class,
+			REST_Settings_Controller::class,
 		);
 
 		foreach ( $controllers as $controller ) {

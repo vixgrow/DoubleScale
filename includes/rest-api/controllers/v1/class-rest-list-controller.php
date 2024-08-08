@@ -58,6 +58,13 @@ class REST_List_Controller extends REST_Controller {
 							'description' => __( 'Page number.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
+						'ids'      => array(
+							'description' => __( 'List IDs.', 'quillcrm' ),
+							'type'        => 'array',
+							'items'       => array(
+								'type' => 'integer',
+							),
+						),
 					),
 				),
 				array(
@@ -168,6 +175,13 @@ class REST_List_Controller extends REST_Controller {
 			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 			$keyword  = $request->get_param( 'keyword' ) ?? '';
+			$ids      = $request->get_param( 'ids' ) ?? array();
+
+			if ( ! empty( $ids ) ) {
+				$lists = List_Model::whereIn( 'id', $ids )->paginate( $per_page, array( '*' ), 'page', $page );
+
+				return new WP_REST_Response( $lists, 200 );
+			}
 
 			if ( '' !== $keyword ) {
 				$lists = List_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )

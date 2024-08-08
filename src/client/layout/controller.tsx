@@ -84,4 +84,5 @@ registerAdminPage('campaign', {
 	path: 'campaigns/:id/:tab?',
 	component: () => <Campaign />,
 	label: __('Campaign', 'quillcrm'),
+	requiresInitialPayload: true,
 });

@@ -83,4 +83,27 @@ class Template_Model extends Model {
 	public function get_setting( $key, $default = null ) {
 		return $this->settings[ $key ] ?? $default;
 	}
+
+	/**
+	 * Create or update template
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int   $id ID.
+	 * @param array $data Data.
+	 *
+	 * @return Template_Model
+	 */
+	public static function createOrUpdate( $id, $data ) {
+		$template = self::find( $id );
+
+		if ( ! $template ) {
+			$template = new self();
+		}
+
+		$template->fill( $data );
+		$template->save();
+
+		return $template;
+	}
 }

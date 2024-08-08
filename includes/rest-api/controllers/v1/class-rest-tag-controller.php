@@ -59,6 +59,13 @@ class REST_Tag_Controller extends REST_Controller {
 							'description' => __( 'Page number.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
+						'ids'      => array(
+							'description' => __( 'IDs of tags to fetch.', 'quillcrm' ),
+							'type'        => 'array',
+							'items'       => array(
+								'type' => 'integer',
+							),
+						),
 					),
 				),
 				array(
@@ -169,6 +176,13 @@ class REST_Tag_Controller extends REST_Controller {
 			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 			$keyword  = $request->get_param( 'keyword' ) ?? '';
+			$ids      = $request->get_param( 'ids' ) ?? array();
+
+			if ( ! empty( $ids ) ) {
+				$tags = Tag_Model::whereIn( 'id', $ids )->paginate( $per_page, array( '*' ), 'page', $page );
+
+				return new WP_REST_Response( $tags, 200 );
+			}
 
 			if ( '' !== $keyword ) {
 				$tags = Tag_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )

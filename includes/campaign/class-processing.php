@@ -18,6 +18,7 @@ use QuillCRM\Utils;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Link_Trigger_Model;
+use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 
 /**
  * Campaign class processing
@@ -124,8 +125,16 @@ class Processing {
 			$campaign = Campaign_Model::where( 'status', 'processing' )->firstOrFail();
 
 			// $last_contact_offset = get_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
+			$filters             = $campaign->get_setting( 'filters', array() );
 			$last_contact_offset = 0;
-			$campaign_recipients = Contact_Model::where( 'status', 'subscribed' )->count();
+			$campaign_recipients = Contact_Model::where( 'status', 'subscribed' );
+
+			if ( ! empty( $filters ) ) {
+				$contact_filters     = new Contact_Filters_Process( $campaign_recipients, $filters );
+				$campaign_recipients = $contact_filters->filter();
+			}
+
+			$campaign_recipients = $campaign_recipients->count();
 
 			if ( $campaign->count != $campaign_recipients ) {
 				$campaign->count = $campaign_recipients;
@@ -141,7 +150,7 @@ class Processing {
 			while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
 				// Usleep is used to prevent the server from crashing
 				usleep( 1000000 );
-				error_log( 'Processing::process() ' . $last_contact_offset );
+
 				if ( $last_contact_offset >= $campaign_recipients ) {
 					$campaign->status = 'completed';
 					$campaign->save();
@@ -149,8 +158,13 @@ class Processing {
 					break;
 				}
 
-				$contacts = Contact_Model::where( 'status', 'subscribed' )
-				->offset( $last_contact_offset )
+				$contacts = Contact_Model::where( 'status', 'subscribed' );
+				if ( ! empty( $filters ) ) {
+					$contact_filters = new Contact_Filters_Process( $contacts, $filters );
+					$contacts        = $contact_filters->filter();
+				}
+
+				$contacts = $contacts->offset( $last_contact_offset )
 				->limit( 10 )
 				->get();
 
@@ -181,7 +195,7 @@ class Processing {
 	 */
 	protected function add_campaign_email( Campaign_Model $campaign, Contact_Model $contact, $last_contact_offset ) {
 		try {
-			$template_id         = $campaign->get_setting( 'template_id' );
+			$template_id         = $this->get_template_id( $campaign );
 			$campaign_email_data = array(
 				'campaign_id' => $campaign->id,
 				'contact_id'  => $contact->id,
@@ -200,6 +214,34 @@ class Processing {
 		} catch ( \Exception $e ) {
 			return false;
 		}
+	}
+
+	/**
+	 * Get template id
+	 *
+	 * @param Campaign_Model $campaign
+	 *
+	 * @return int
+	 */
+	protected function get_template_id( $campaign ) {
+		$templates = $campaign->get_setting( 'templates', array() );
+		$ab_test   = $campaign->get_setting( 'ab_test', false );
+
+		if ( ! $ab_test ) {
+			return $templates[0]['template_id'];
+		}
+
+		$last_template          = get_option( "quillcrm_campaigns_last_template_{$campaign->id}", 0 );
+		$max_expected_templates = count( $templates );
+		$next_template_id       = $last_template + 1;
+
+		if ( $next_template_id >= $max_expected_templates ) {
+			$next_template_id = 0;
+		}
+
+		update_option( "quillcrm_campaigns_last_template_{$campaign->id}", $next_template_id );
+
+		return $templates[ $next_template_id ]['template_id'];
 	}
 
 	/**
@@ -317,7 +359,6 @@ class Processing {
 			return $message;
 		}
 
-		error_log( wp_json_encode( $matches['href'] ) );
 		foreach ( $matches['href'] as $key => $href ) {
 
 			// Check if link trigger quillcrm-link-trigger.

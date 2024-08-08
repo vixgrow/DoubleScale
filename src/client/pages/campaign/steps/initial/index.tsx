@@ -16,9 +16,28 @@ import { useCampaignContext } from '../../state/context';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 
 const Initial: React.FC = () => {
-	const { campaign, updateCampaign, isLoading, saveCampaign, isSaving } =
-		useCampaignContext();
+	const {
+		campaign,
+		updateCampaign,
+		isLoading,
+		saveCampaign,
+		isSaving,
+		updateSettings,
+	} = useCampaignContext();
 	const navigate = useNavigate();
+
+	const save = async () => {
+		if (!campaign) {
+			return;
+		}
+
+		try {
+			await saveCampaign();
+			navigate(getToLink(`campaigns/${campaign.id}/template`));
+		} catch (error) {
+			console.error(error);
+		}
+	};
 
 	return (
 		<Card loading={isLoading}>
@@ -59,12 +78,10 @@ const Initial: React.FC = () => {
 								<Checkbox
 									checked={campaign.settings?.ab_test}
 									onChange={(e) => {
-										updateCampaign({
-											settings: {
-												...campaign.settings,
-												ab_test: e.target.checked,
-											},
-										});
+										updateSettings(
+											'ab_test',
+											e.target.checked
+										);
 									}}
 								/>
 							</div>
@@ -74,14 +91,7 @@ const Initial: React.FC = () => {
 						<Button
 							type="primary"
 							loading={isSaving}
-							onClick={async () => {
-								await saveCampaign();
-								navigate(
-									getToLink(
-										`campaigns/${campaign.id}/template`
-									)
-								);
-							}}
+							onClick={save}
 						>
 							{__('Next', 'quillcrm')}
 						</Button>

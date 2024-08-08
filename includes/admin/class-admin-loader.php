@@ -13,6 +13,7 @@ namespace QuillCRM\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use QuillCRM\Managers\Custom_Fields_Manager;
+use QuillCRM\Managers\Filters_Manager;
 
 /**
  * Admin Loader Class.
@@ -165,13 +166,13 @@ class Admin_Loader {
 		$config_ver   = isset( $config['version'] ) ? $config['version'] : QUILLCRM_VERSION;
 
 		// Register scripts.
-		// wp_register_script(
-		// 'qcrm-config',
-		// QUILLCRM_PLUGIN_URL . 'build/config/index.js',
-		// $config_deps,
-		// $config_ver,
-		// true
-		// );
+		wp_register_script(
+			'qcrm-config',
+			QUILLCRM_PLUGIN_URL . 'build/config/index.js',
+			$config_deps,
+			$config_ver,
+			true
+		);
 
 		wp_register_script(
 			'qcrm-admin',
@@ -191,6 +192,7 @@ class Admin_Loader {
 				'license_nonce'     => wp_create_nonce( 'quillcrm_license' ),
 				'adminUrl'          => admin_url(),
 				'customFieldsTypes' => Custom_Fields_Manager::instance()->get_options(),
+				'filters'           => Filters_Manager::instance()->get_groups(),
 			)
 		);
 

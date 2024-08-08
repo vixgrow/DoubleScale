@@ -1,0 +1,16 @@
+.qcrm-filter-item {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.qcrm-contacts-total {
+	margin-top: 20px;
+}
+
+.qcrm-filter-actions {
+	display: flex;
+	gap: 20px;
+}

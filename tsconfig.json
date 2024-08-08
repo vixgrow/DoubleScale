@@ -1,44 +1,45 @@
 {
-  "compilerOptions": {
-    "rootDir": "src",
-    "allowJs": true,
-    "checkJs": true,
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react-jsx",
-    "target": "es2018",
-    "module": "esnext",
-    "lib": ["dom", "esnext"],
-    "declaration": true,
-    "declarationMap": true,
-    "composite": true,
-    "emitDeclarationOnly": true,
-    "isolatedModules": true,
+	"compilerOptions": {
+		"rootDir": "src",
+		"allowJs": true,
+		"checkJs": true,
+		"allowSyntheticDefaultImports": true,
+		"jsx": "react-jsx",
+		"target": "es2018",
+		"module": "esnext",
+		"lib": ["dom", "esnext"],
+		"declaration": true,
+		"declarationMap": true,
+		"composite": true,
+		"emitDeclarationOnly": true,
+		"isolatedModules": true,
 
-    /* Strict Type-Checking Options */
-    "strict": true,
+		/* Strict Type-Checking Options */
+		"strict": true,
 
-    /* Additional Checks */
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
+		/* Additional Checks */
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
 
-    /* Module Resolution Options */
-    "moduleResolution": "node",
+		/* Module Resolution Options */
+		"moduleResolution": "node",
 
-    /* This needs to be false so our types are possible to consume without setting this */
-    "esModuleInterop": false,
-    "resolveJsonModule": true,
-    "noImplicitAny": false,
-    "typeRoots": ["./node_modules/@types"],
-    "baseUrl": "src",
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "types": [],
-    "paths": {
-      "@quillcrm/navigation": ["navigation"],
-      "@quillcrm/store": ["store/index.ts"]
-    }
-  },
-  "include": ["src"]
+		/* This needs to be false so our types are possible to consume without setting this */
+		"esModuleInterop": false,
+		"resolveJsonModule": true,
+		"noImplicitAny": false,
+		"typeRoots": ["./node_modules/@types"],
+		"baseUrl": "src",
+		"skipLibCheck": true,
+		"strictNullChecks": true,
+		"types": [],
+		"paths": {
+			"@quillcrm/navigation": ["navigation"],
+			"@quillcrm/store": ["store/index.ts"],
+			"@quillcrm/config": ["config"]
+		}
+	},
+	"include": ["src"]
 }

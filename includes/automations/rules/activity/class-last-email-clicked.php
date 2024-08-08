@@ -80,6 +80,23 @@ class Last_Email_Clicked extends Rule {
 	}
 
 	/**
+	 * Get operators
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_operators() {
+		return array(
+			'before'  => __( 'Before', 'quillcrm' ),
+			'after'   => __( 'After', 'quillcrm' ),
+			'on'      => __( 'On', 'quillcrm' ),
+			'between' => __( 'Between', 'quillcrm' ),
+			'within'  => __( 'Within', 'quillcrm' ),
+		);
+	}
+
+	/**
 	 * Is met
 	 *
 	 * @since 1.0.0

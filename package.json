@@ -18,16 +18,21 @@
     "antd": "^5.19.2",
     "lodash": "^4.17.21",
     "qs": "^6.12.3",
+    "quill": "^2.0.2",
     "react-dom": "^18.3.1",
     "react-loader-spinner": "^6.1.6",
     "react-router": "^6.25.1",
     "react-router-dom": "^6.25.1",
+    "react-select": "^5.8.0",
     "rtlcss-webpack-plugin": "^4.0.7",
-    "ts-loader": "^9.5.1"
+    "ts-loader": "^9.5.1",
+    "utility-types": "^3.11.0"
   },
   "scripts": {
     "dev": "wp-scripts start src/index.tsx --output-path=build",
-    "build": "wp-scripts build src/index.tsx --output-path=build"
+    "build": "wp-scripts build src/index.tsx --output-path=build",
+    "dev-config": "wp-scripts start src/config/index.ts --output-path=build/config",
+    "build-config": "wp-scripts build src/config/index.ts --output-path=build/config"
   },
   "eslintConfig": {
     "extends": [

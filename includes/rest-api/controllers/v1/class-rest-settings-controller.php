@@ -9,12 +9,13 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
-use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Settings;
 use WP_Error;
+use Exception;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use QuillCRM\Abstracts\REST_Controller;
 
 /**
  * REST_Settings_Controller class.
@@ -54,7 +55,6 @@ class REST_Settings_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'update' ),
 					'permission_callback' => array( $this, 'update_permissions_check' ),
-					'args'                => rest_get_endpoint_args_for_schema( $this->get_schema(), WP_REST_Server::CREATABLE ),
 				),
 			)
 		);
@@ -94,15 +94,15 @@ class REST_Settings_Controller extends REST_Controller {
 					'properties'           => array(
 						'from_name'     => array(
 							'type'    => 'string',
-							'default' => '',
+							'default' => bloginfo( 'name' ),
 						),
 						'from_email'    => array(
 							'type'    => 'string',
-							'default' => '',
+							'default' => get_option( 'admin_email' ),
 						),
 						'reply_to'      => array(
 							'type'    => 'string',
-							'default' => '',
+							'default' => get_option( 'admin_email' ),
 						),
 						'email_footer'  => array(
 							'type'    => 'string',
@@ -185,8 +185,7 @@ class REST_Settings_Controller extends REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function get_permissions_check( $request ) {
-		$capability = 'manage_options';
-		return current_user_can( $capability, $request );
+		return current_user_can( 'manage_options' );
 	}
 
 	/**
@@ -212,8 +211,7 @@ class REST_Settings_Controller extends REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function update_permissions_check( $request ) {
-		$capability = 'manage_options';
-		return current_user_can( $capability, $request );
+		return current_user_can( 'manage_options' );
 	}
 
 }

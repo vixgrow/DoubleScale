@@ -1,13 +1,8 @@
 /**
  * Internal dependencies
  */
-import {
-	SET_CAMPAIGN,
-	UPDATE_CAMPAIGN,
-	SET_TEMPLATE,
-	UPDATE_TEMPLATE,
-} from './constants';
-import type { Campaign, Template } from '../../types';
+import { SET_CAMPAIGN, UPDATE_CAMPAIGN, UPDATE_SETTINGS } from './constants';
+import type { Campaign } from '../../types';
 
 export type setCampaign = {
 	type: typeof SET_CAMPAIGN;
@@ -21,18 +16,10 @@ export type updateCampaign = {
 	};
 };
 
-export type setTemplate = {
-	type: typeof SET_TEMPLATE;
-	template: Template;
+export type updateSettings = {
+	type: typeof UPDATE_SETTINGS;
+	key: string;
+	value: any;
 };
 
-export type updateTemplate = {
-	type: typeof UPDATE_TEMPLATE;
-	payload: {
-		[key: string]: any;
-	};
-};
-
-export type CampaignAction = setCampaign | updateCampaign;
-
-export type TemplateAction = setTemplate | updateTemplate;
+export type CampaignAction = setCampaign | updateCampaign | updateSettings;

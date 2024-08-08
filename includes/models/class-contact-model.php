@@ -16,6 +16,8 @@ use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Custom_Field_Model;
 use QuillCRM\Models\Contact_Note_Model;
 use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Models\User_Model;
+use QuillCRM\Models\Campaign_Email_Model;
 
 /**
  * Contact_Model class
@@ -105,6 +107,29 @@ class Contact_Model extends Model {
 	public function custom_fields() {
 		return $this->belongsToMany( Custom_Field_Model::class, 'quillcrm_contact_custom_field_relationship', 'contact_id', 'custom_field_id' )->withPivot( 'value' );
 	}
+
+	/**
+	 * Get the contact user
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function user() {
+		return $this->belongsTo( User_Model::class, 'email', 'user_email' );
+	}
+
+	/**
+	 * Get the contact campaign emails
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+	 */
+	public function campaign_emails() {
+		return $this->hasMany( Campaign_Email_Model::class, 'contact_id', 'id' );
+	}
+
 
 	/**
 	 * Get the contact custom field value

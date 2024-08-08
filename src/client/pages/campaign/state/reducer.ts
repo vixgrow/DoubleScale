@@ -7,20 +7,14 @@ import { combineReducers } from '@wordpress/data';
  * External dependencies
  */
 import type { Reducer } from 'redux';
+import { isObject } from 'lodash';
 
 /**
  * Internal dependencies
  */
-import {
-	SET_CAMPAIGN,
-	UPDATE_CAMPAIGN,
-	SET_TEMPLATE,
-	UPDATE_TEMPLATE,
-} from './constants';
-
-import type { Campaign, Template } from '../../types';
-
-import type { CampaignAction, TemplateAction } from './types';
+import { SET_CAMPAIGN, UPDATE_CAMPAIGN, UPDATE_SETTINGS } from './constants';
+import type { Campaign } from '../../types';
+import type { CampaignAction } from './types';
 
 const campaign = (state: Campaign | null = null, action: CampaignAction) => {
 	switch (action.type) {
@@ -31,19 +25,19 @@ const campaign = (state: Campaign | null = null, action: CampaignAction) => {
 				...state,
 				...action.payload,
 			};
-		default:
-			return state;
-	}
-};
+		case UPDATE_SETTINGS:
+			if (!state) {
+				return state;
+			}
+			const newSettings = isObject(state.settings)
+				? { ...state.settings }
+				: {};
 
-const template = (state: Template | null = null, action: TemplateAction) => {
-	switch (action.type) {
-		case SET_TEMPLATE:
-			return action.template;
-		case UPDATE_TEMPLATE:
+			newSettings[action.key] = action.value;
+
 			return {
 				...state,
-				...action.payload,
+				settings: newSettings,
 			};
 		default:
 			return state;
@@ -52,7 +46,6 @@ const template = (state: Template | null = null, action: TemplateAction) => {
 
 const CombinedReducer: Reducer = combineReducers({
 	campaign,
-	template,
 });
 
 export type State = ReturnType<typeof CombinedReducer>;

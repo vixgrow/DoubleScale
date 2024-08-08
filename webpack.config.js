@@ -19,6 +19,7 @@ module.exports = {
         alias: {
             '@quillcrm/navigation': path.resolve(__dirname, 'src/navigation'),
             '@quillcrm/store': path.resolve(__dirname, 'src/store'),
+            '@quillcrm/config': path.resolve(__dirname, 'src/config'),
         },
     },
     plugins: [

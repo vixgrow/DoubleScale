@@ -27,6 +27,7 @@ use QuillCRM\Admin\Admin;
 use QuillCRM\Admin\Admin_Loader;
 use QuillCRM\Abandoned_Cart\Abandoned_Cart;
 use QuillCRM\Managers\Custom_Fields_Manager;
+use QuillCRM\Managers\Filters_Manager;
 
 /**
  * QuillCRM Main Class.
@@ -172,6 +173,7 @@ final class QuillCRM {
 		Merge_Tags_Manager::instance();
 		Rules_Manager::instance();
 		Abandoned_Cart::instance();
+		Filters_Manager::instance();
 	}
 
 	/**
@@ -300,6 +302,12 @@ final class QuillCRM {
 		// Load all custom fields types files
 		$custom_fields_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/fields/types/class-*.php' );
 		foreach ( $custom_fields_files as $file ) {
+			require $file;
+		}
+
+		// Load all custom filters files
+		$filters_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/contact-filters/**/class-*.php' );
+		foreach ( $filters_files as $file ) {
 			require $file;
 		}
 	}

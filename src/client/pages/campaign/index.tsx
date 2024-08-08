@@ -20,19 +20,21 @@ import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
 import InitialStep from './steps/initial';
-import TemplateStep from './steps/template';
+import TemplatesStep from './steps/templates';
+import ContactsStep from './steps/contacts';
+import ReviewStep from './steps/review';
+import { Campaign as CampaignType } from '../types';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
 	const [state, dispatch] = useReducer(reducer, {
 		campaign: null,
-		template: null,
 	} as State);
 	const stateRef = useRef<State>(state);
 	stateRef.current = state;
 	const $actions = actions(dispatch);
 	const { setCampaign } = $actions;
-	const { campaign, template } = state;
+	const { campaign } = state;
 	const [loading, setLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const navigate = useNavigate();
@@ -59,16 +61,15 @@ const Campaign: React.FC = () => {
 
 	const saveCampaign = async () => {
 		setIsSaving(true);
-		console.log('saveCampaign', campaign);
 
 		try {
-			await apiFetch({
+			const response = (await apiFetch({
 				path: `/qc/v1/campaigns/${campaign.id}`,
 				method: 'POST',
 				data: campaign,
-			});
+			})) as CampaignType;
 
-			setCampaign(campaign);
+			setCampaign(response);
 		} catch (error) {
 			console.error(error);
 		} finally {
@@ -86,7 +87,17 @@ const Campaign: React.FC = () => {
 		{
 			key: 'template',
 			label: __('Template', 'quillcrm'),
-			children: <TemplateStep />,
+			children: <TemplatesStep />,
+		},
+		{
+			key: 'contacts',
+			label: __('Contacts', 'quillcrm'),
+			children: <ContactsStep />,
+		},
+		{
+			key: 'review',
+			label: __('Review', 'quillcrm'),
+			children: <ReviewStep />,
 		},
 	];
 
@@ -94,7 +105,6 @@ const Campaign: React.FC = () => {
 		<Provider
 			value={{
 				campaign,
-				template,
 				isLoading: loading,
 				isSaving,
 				setIsLoading: setLoading,

@@ -1,0 +1,80 @@
+<?php
+/**
+ * Class User_Model
+ *
+ * This class is responsible for handling the user model
+ *
+ * @since 1.0.0
+ *
+ * @package QuillCRM
+ */
+
+namespace QuillCRM\Models;
+
+use QuillCRM\Models\Model;
+use QuillCRM\Models\UserMeta_Model;
+
+/**
+ * User_Model class
+ */
+class User_Model extends Model {
+
+	/**
+	 * Table name
+	 *
+	 * @var string
+	 *
+	 * @since 1.0.0
+	 */
+	protected $table = 'users';
+
+	/**
+	 * Primary key
+	 *
+	 * @var string
+	 *
+	 * @since 1.0.0
+	 */
+	protected $primary_key = 'ID';
+
+	/**
+	 * Fillable columns
+	 *
+	 * @var array
+	 *
+	 * @since 1.0.0
+	 */
+	protected $fillable = array(
+		'user_login',
+		'user_pass',
+		'user_nicename',
+		'user_email',
+		'user_url',
+		'user_registered',
+		'user_activation_key',
+		'user_status',
+		'display_name',
+	);
+
+	/**
+	 * User meta
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function meta() {
+		return $this->hasMany( UserMeta_Model::class, 'user_id', 'ID' );
+	}
+
+	/**
+	 * Capability
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function capability() {
+		return $this->hasMany( UserMeta_Model::class, 'user_id', 'ID' )->where( 'meta_key', 'wp_capabilities' );
+	}
+}

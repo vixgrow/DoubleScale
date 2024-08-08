@@ -12,6 +12,7 @@ namespace QuillCRM\Models;
 
 use QuillCRM\Models\Model;
 use QuillCRM\Models\Campaign_Email_Model;
+use QuillCRM\Models\Template_Model;
 
 /**
  * Campaign_Model class
@@ -94,5 +95,103 @@ class Campaign_Model extends Model {
 	 */
 	public function get_setting( $key, $default = null ) {
 		return isset( $this->settings[ $key ] ) ? $this->settings[ $key ] : $default;
+	}
+
+	/**
+	 * Get the templates
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_templates() {
+		// Get the templates
+		$templates = $this->get_setting( 'templates', array() );
+
+		foreach ( $templates as $index => $template ) {
+			$template_id  = $template['template_id'] ?? null;
+			$from_name    = $template['from_name'] ?? null;
+			$from_email   = $template['from_email'] ?? null;
+			$reply_to     = $template['reply_to'] ?? null;
+			$subject      = $template['subject'] ?? null;
+			$preview_text = $template['preview_text'] ?? null;
+			$body         = $template['body'] ?? null;
+			$enable_utm   = $template['enable_utm'] ?? false;
+			$utm_source   = $template['utm_source'] ?? null;
+			$utm_medium   = $template['utm_medium'] ?? null;
+			$utm_campaign = $template['utm_campaign'] ?? null;
+			$utm_term     = $template['utm_term'] ?? null;
+			$utm_content  = $template['utm_content'] ?? null;
+			$template     = Template_Model::createOrUpdate(
+				$template_id,
+				array(
+					'name'     => __( 'Campaign Template', 'quillcrm' ),
+					'type'     => 'email',
+					'subject'  => $subject ?? '',
+					'body'     => $body ?? '',
+					'settings' => array(
+						'from_name'    => $from_name,
+						'from_email'   => $from_email,
+						'reply_to'     => $reply_to,
+						'preview_text' => $preview_text,
+						'enable_utm'   => $enable_utm,
+						'utm_source'   => $utm_source,
+						'utm_medium'   => $utm_medium,
+						'utm_campaign' => $utm_campaign,
+						'utm_term'     => $utm_term,
+						'utm_content'  => $utm_content,
+					),
+				)
+			);
+
+			// Update the template id
+			$templates[ $index ]['template_id'] = $template->id;
+		}
+
+		return $templates;
+	}
+
+	/**
+	 * Delete the contact notes boot method
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function boot() {
+		parent::boot();
+
+		// Save templates when saving the campaign
+		static::saving(
+			function( $campaign ) {
+				// Retrieve the settings attribute
+				$settings = $campaign->settings;
+
+				// Modify the templates key in the settings array
+				$settings['templates'] = $campaign->get_templates();
+
+				// Set the modified settings back to the model
+				$campaign->settings = $settings;
+			}
+		);
+
+		// Delete the campaign templates when deleting the campaign
+		static::deleting(
+			function( $campaign ) {
+				// Get the templates
+				$templates = $campaign->get_templates();
+
+				// Delete the templates
+				foreach ( $templates as $template ) {
+					$template_id = $template['template_id'] ?? null;
+					if ( $template_id ) {
+						$template = Template_Model::find( $template_id );
+						if ( $template ) {
+							$template->delete();
+						}
+					}
+				}
+			}
+		);
 	}
 }

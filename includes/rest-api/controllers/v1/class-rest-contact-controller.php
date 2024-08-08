@@ -19,6 +19,8 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Custom_Field_Model;
+use QuillCRM\Managers\Filters_Manager;
+use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 
 /**
  * REST_Contact_Controller is REST api controller class for log
@@ -62,6 +64,10 @@ class REST_Contact_Controller extends REST_Controller {
 						'page'     => array(
 							'description' => __( 'Page number.', 'quillcrm' ),
 							'type'        => 'integer',
+						),
+						'filters'  => array(
+							'description' => __( 'Filters to apply.', 'quillcrm' ),
+							'type'        => 'array',
 						),
 					),
 				),
@@ -153,6 +159,19 @@ class REST_Contact_Controller extends REST_Controller {
 							'type'        => 'integer',
 						),
 					),
+				),
+			)
+		);
+
+		// Get the filters.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/filters',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_filters' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 			)
 		);
@@ -272,6 +291,21 @@ class REST_Contact_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Get filters
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_filters( $request ) {
+		$filters = Filters_Manager::instance()->get_groups();
+
+		return new WP_REST_Response( $filters, 200 );
+	}
+
+	/**
 	 * Get a collection of contacts
 	 *
 	 * @since 1.0.0
@@ -285,17 +319,25 @@ class REST_Contact_Controller extends REST_Controller {
 			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 			$keyword  = $request->get_param( 'keyword' ) ?? '';
+			$filters  = $request->get_param( 'filters' );
 
 			if ( '' !== $keyword ) {
 				$contacts = Contact_Model::with( 'lists', 'tags', 'custom_fields', 'notes' )
 				->where( 'first_name', 'like', '%' . $keyword . '%' )
 				->orWhere( 'last_name', 'like', '%' . $keyword . '%' )
 				->orWhere( 'email', 'like', '%' . $keyword . '%' )
-				->orWhere( 'phone', 'like', '%' . $keyword . '%' )
-				->paginate( $per_page, array( '*' ), 'page', $page );
+				->orWhere( 'phone', 'like', '%' . $keyword . '%' );
 			} else {
-				$contacts = Contact_Model::with( 'lists', 'tags', 'custom_fields', 'notes' )->paginate( $per_page, array( '*' ), 'page', $page );
+				$contacts = Contact_Model::with( 'lists', 'tags', 'custom_fields', 'notes' );
 			}
+
+			if ( $filters ) {
+				$filters_process = new Contact_Filters_Process( $contacts, $filters );
+				$contacts        = $filters_process->filter();
+			}
+
+			// Apply pagination.
+			$contacts = $contacts->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $contacts, 200 );
 		} catch ( Exception $e ) {

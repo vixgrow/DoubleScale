@@ -93,9 +93,33 @@ export type CustomFieldsGroup = {
 // The array type
 export type CustomFieldsGroups = CustomFieldsGroup[];
 
+export type Template = {
+	from_name: string;
+	from_email: string;
+	reply_to: string;
+	subject: string;
+	preview_text: string;
+	body: string;
+	enable_utm: boolean;
+	utm_source: string;
+	utm_medium: string;
+	utm_name: string;
+	utm_term: string;
+	utm_content: string;
+};
+
 type CampaignSettings = {
-	template_id: number;
-	[setting: string]: any;
+	templates: Template[];
+	contacts: number[];
+	filters: Filter[];
+	ab_test: boolean;
+};
+
+export type Filter = {
+	group: string;
+	filter: string;
+	operator: string;
+	value: any;
 };
 
 export type Campaign = {
@@ -113,13 +137,42 @@ export type Campaign = {
 
 export type Campaigns = Campaign[];
 
-export type Template = {
-	id: number;
+type OperatorOptions = {
+	is: string;
+	is_not: string;
+	contains: string;
+	does_not_contain: string;
+	starts_with: string;
+	ends_with: string;
+	is_empty: string;
+	is_not_empty: string;
+};
+
+export type FilterSettings = {
 	name: string;
 	type: string;
-	subject: string;
-	body: string;
-	settings: any | null;
-	created_at: string;
-	updated_at: string;
+	operators: OperatorOptions;
+	options: {
+		[key: string]: string;
+	};
+	is_dynamic: boolean;
+	dynamic_args: {
+		endpoint: string;
+		key: string;
+		label: string;
+		[key: string]: string;
+	};
+};
+
+type Filters = {
+	[key: string]: FilterSettings;
+};
+
+type FiltersGroup = {
+	name: string;
+	filters: Filters;
+};
+
+export type FiltersGroups = {
+	contact: FiltersGroup;
 };

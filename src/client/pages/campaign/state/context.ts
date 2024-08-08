@@ -6,11 +6,10 @@ import { createContext, useContext } from 'react';
 /**
  * Internal dependencies
  */
-import { Campaign, Template } from '../../types';
+import { Campaign } from '../../types';
 
 export const CampaignContext = createContext<{
 	campaign: Campaign | null;
-	template: Template | null;
 	isLoading: boolean;
 	isSaving: boolean;
 	setCampaign: (campaign: Campaign) => void;
@@ -18,8 +17,7 @@ export const CampaignContext = createContext<{
 	setIsSaving: (isSaving: boolean) => void;
 	updateCampaign: (payload: { [key: string]: any }) => void;
 	saveCampaign: () => void;
-	setTemplate: (template: Template) => void;
-	updateTemplate: (payload: { [key: string]: any }) => void;
+	updateSettings: (key: string, value: any) => void;
 }>({
 	campaign: null,
 	isLoading: false,
@@ -36,15 +34,11 @@ export const CampaignContext = createContext<{
 	updateCampaign: (_payload: { [key: string]: any }) => {
 		throw new Error('updateCampaign() not implemented');
 	},
-	saveCampaign: () => {
+	saveCampaign: (_payload?: { [key: string]: any }) => {
 		throw new Error('saveCampaign() not implemented');
 	},
-	template: null,
-	setTemplate: (_template: Template) => {
-		throw new Error('setTemplate() not implemented');
-	},
-	updateTemplate: (_payload: { [key: string]: any }) => {
-		throw new Error('updateTemplate() not implemented');
+	updateSettings: (_key: string, _value: any) => {
+		throw new Error('updateSettings() not implemented');
 	},
 });
 

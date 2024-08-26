@@ -112,7 +112,6 @@ class Rest_Form_Controller extends REST_Controller {
 				'id'         => array(
 					'description' => esc_html__( 'Unique identifier for the object.', 'quillcrm' ),
 					'type'        => 'integer',
-					'readonly'    => true,
 				),
 				'name'       => array(
 					'description' => esc_html__( 'Name of the form.', 'quillcrm' ),
@@ -128,7 +127,6 @@ class Rest_Form_Controller extends REST_Controller {
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
-					'required'    => true,
 				),
 				'form_id'    => array(
 					'description' => esc_html__( 'ID of the form.', 'quillcrm' ),
@@ -188,6 +186,13 @@ class Rest_Form_Controller extends REST_Controller {
 				'type'        => 'integer',
 				'default'     => 1,
 			),
+			'ids'      => array(
+				'description' => __( 'IDs of the forms.', 'quillcrm' ),
+				'type'        => 'array',
+				'items'       => array(
+					'type' => 'integer',
+				),
+			),
 		);
 	}
 
@@ -205,16 +210,17 @@ class Rest_Form_Controller extends REST_Controller {
 			$keyword  = $request->get_param( 'keyword' ) ? $request->get_param( 'keyword' ) : '';
 			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$ids      = $request->get_param( 'ids' ) ? $request->get_param( 'ids' ) : array();
 
-			if ( $keyword ) {
-				$forms = Form_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )
-					->limit( $per_page )
-					->offset( ( $page - 1 ) * $per_page )
-					->get();
+			if ( ! empty( $ids ) ) {
+				$forms = Form_Model::whereIn( 'id', $ids )->get();
 			} else {
-				$forms = Form_Model::limit( $per_page )
-					->offset( ( $page - 1 ) * $per_page )
-					->get();
+				if ( $keyword ) {
+					$forms = Form_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )
+					->paginate( $per_page, array( '*' ), 'page', $page );
+				} else {
+					$forms = Form_Model::paginate( $per_page, array( '*' ), 'page', $page );
+				}
 			}
 
 			return new WP_REST_Response( $forms, 200 );
@@ -256,7 +262,8 @@ class Rest_Form_Controller extends REST_Controller {
 		try {
 			$form_data = $this->prepare_form( $request );
 			$form      = Form_Model::create( $form_data );
-
+			error_log( 'form_data: ' . wp_json_encode( $form_data ) );
+			error_log( 'form: ' . wp_json_encode( $form ) );
 			return new WP_REST_Response( $form, 201 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );

@@ -190,10 +190,10 @@ class REST_Template_Controller extends REST_Controller {
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 
 			if ( $keyword ) {
-				$templates = Template_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )
+				$templates = Template_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )->where( 'hidden', 0 )
 					->paginate( $per_page, array( '*' ), 'page', $page );
 			} else {
-				$templates = Template_Model::paginate( $per_page, array( '*' ), 'page', $page );
+				$templates = Template_Model::where( 'hidden', 0 )->paginate( $per_page, array( '*' ), 'page', $page );
 			}
 
 			return new WP_REST_Response( $templates, 200 );

@@ -82,4 +82,22 @@ class Link_Trigger_Model extends Model {
 	public function get_setting( $key, $default = null ) {
 		return isset( $this->settings[ $key ] ) ? $this->settings[ $key ] : $default;
 	}
+
+	/**
+	 * Automatically set the slug using the name and boot method
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function boot() {
+		parent::boot();
+
+		// Attach full link url to the model when retrieved
+		static::retrieved(
+			function ( $link_trigger ) {
+				$link_trigger->full_url = home_url( '?quillcrm-link-trigger=' . $link_trigger->hash );
+			}
+		);
+	}
 }

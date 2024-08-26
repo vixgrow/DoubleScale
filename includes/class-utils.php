@@ -10,6 +10,9 @@
 
 namespace QuillCRM;
 
+use QuillCRM\Models\Custom_Fields_Group_Model;
+use QuillCRM\Models\Custom_Field_Model;
+
 /**
  * Utils class
  */
@@ -101,5 +104,95 @@ class Utils {
 	 */
 	public static function generate_hash_key() {
 		return md5( uniqid( rand(), true ) );
+	}
+
+	/**
+	 * Get contact fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public static function get_contact_fields() {
+		$default_fields = array(
+			'default' => array(
+				'label'  => __( 'Default Fields', 'quillcrm' ),
+				'fields' => array(
+					'first_name' => array(
+						'label' => __( 'First Name', 'quillcrm' ),
+						'type'  => 'text',
+					),
+					'last_name'  => array(
+						'label' => __( 'Last Name', 'quillcrm' ),
+						'type'  => 'text',
+					),
+					'email'      => array(
+						'label' => __( 'Email', 'quillcrm' ),
+						'type'  => 'email',
+					),
+					'phone'      => array(
+						'label' => __( 'Phone', 'quillcrm' ),
+						'type'  => 'phone',
+					),
+					'address_1'  => array(
+						'label' => __( 'Address 1', 'quillcrm' ),
+						'type'  => 'text',
+					),
+					'address_2'  => array(
+						'label' => __( 'Address 2', 'quillcrm' ),
+						'type'  => 'text',
+					),
+					'city'       => array(
+						'label' => __( 'City', 'quillcrm' ),
+						'type'  => 'text',
+					),
+					'state'      => array(
+						'label' => __( 'State', 'quillcrm' ),
+						'type'  => 'text',
+					),
+					'zip'        => array(
+						'label' => __( 'Zip', 'quillcrm' ),
+						'type'  => 'text',
+					),
+				),
+			),
+		);
+
+		$custom_fields = self::get_custom_fields();
+
+		$fields = array_merge( $default_fields, $custom_fields );
+
+		return $fields;
+	}
+
+	/**
+	 * Get custom fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public static function get_custom_fields() {
+		$groups = Custom_Fields_Group_Model::with( 'custom_fields' )->get();
+
+		$fields = array();
+
+		foreach ( $groups as $group ) {
+			/** @var Custom_Fields_Group_Model $group */
+			$fields[ $group->id ] = array(
+				'label'  => $group->name,
+				'fields' => array(),
+			);
+
+			foreach ( $group->custom_fields as $field ) {
+				/** @var Custom_Field_Model $field */
+				$fields[ $group->id ]['fields'][ $field->id ] = array(
+					'label' => $field->name,
+					'type'  => $field->type,
+				);
+			}
+		}
+
+		return $fields;
 	}
 }

@@ -13,25 +13,41 @@ import {
  * WordPress Dependencies
  */
 import { SlotFillProvider } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
  */
 import { size, map } from 'lodash';
-import { ThreeDots as Loader } from 'react-loader-spinner';
-import { css } from '@emotion/css';
-import { notification } from 'antd';
+
+import { notification, ConfigProvider } from 'antd';
 
 /**
  * Internal dependencies
  */
 import { NavBar } from '../components';
 import { Controller } from './controller';
-import ConfigAPI from '@quillcrm/config';
 import './style.scss';
+
+const AntProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+	return (
+		<ConfigProvider
+			theme={{
+				components: {
+					Popover: {
+						padding: 5,
+					},
+					Typography: {
+						titleMarginTop: 0,
+					},
+				},
+			}}
+		>
+			{children}
+		</ConfigProvider>
+	);
+};
 
 const Notices: React.FC = () => {
 	const { notices } = useSelect((select) => ({
@@ -63,13 +79,15 @@ const Notices: React.FC = () => {
 export const Layout = (props) => {
 	return (
 		<SlotFillProvider>
-			<div className="qcrm-layout">
-				<NavBar />
-				<Notices />
-				<div className="qcrm-layout__main">
-					<Controller {...props} />
+			<AntProvider>
+				<div className="qcrm-layout">
+					<NavBar />
+					<Notices />
+					<div className="qcrm-layout__main">
+						<Controller {...props} />
+					</div>
 				</div>
-			</div>
+			</AntProvider>
 		</SlotFillProvider>
 	);
 };

@@ -41,6 +41,7 @@ class Templates_Table extends Migration {
 		 * subject VARCHAR(255) NOT NULL,
 		 * body TEXT,
 		 * settings TEXT,
+		 * hidden TINYINT(1) NOT NULL DEFAULT 1,
 		 * created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		 * updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 		 */
@@ -50,6 +51,7 @@ class Templates_Table extends Migration {
             subject VARCHAR(255) NOT NULL,
             body TEXT,
             settings TEXT,
+			hidden TINYINT(1) NOT NULL DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id)';

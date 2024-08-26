@@ -180,4 +180,20 @@ abstract class Integration {
 	public function validate( $settings ) {
 		return true;
 	}
+
+	/**
+	 * Is connected
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_connected() {
+		$api = $this->connect();
+		if ( $api instanceof Integration_API ) {
+			return true;
+		}
+
+		return false;
+	}
 }

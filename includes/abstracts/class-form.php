@@ -270,10 +270,35 @@ abstract class Form {
 			$contact_data           = $this->get_contact_fields( $mapped_fields );
 			$contact_data['source'] = $this->slug;
 			$make_as_subscriber     = $automation->get_setting( 'make_as_subscriber' ) ?? false;
+			$update_blank_fields    = $automation->get_setting( 'update_blank_fields' ) ?? false;
+			$update_existing        = $automation->get_setting( 'update_existing_contact' ) ?? false;
+			$lists                  = $automation->get_setting( 'lists', array() );
+			$tags                   = $automation->get_setting( 'tags', array() );
+
 			if ( ! $make_as_subscriber ) {
 				$contact_data['status'] = 'unsubscribed';
 			}
+
+			if ( ! $update_blank_fields ) {
+				$contact_data = array_filter( $contact_data );
+			}
+
+			if ( ! $update_existing ) {
+				$contact = Contact_Model::get_contact_by_email( $contact_data['email'] );
+				if ( $contact ) {
+					return $contact;
+				}
+			}
+
 			$contact = Contact_Model::createOrUpdate( $contact_data );
+
+			if ( ! empty( $lists ) ) {
+				$contact->sync_lists( $lists );
+			}
+
+			if ( ! empty( $tags ) ) {
+				$contact->sync_tags( $tags );
+			}
 
 			return $contact;
 		} catch ( Exception $e ) {
@@ -316,6 +341,24 @@ abstract class Form {
 		);
 
 		return $options;
+	}
+
+	/**
+	 * Get form fields settings
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_form_fields_settings() {
+		$settings = array(
+			'action' => "quillcrm_{$this->slug}_get_fields",
+			'fields' => array(
+				'form_id',
+			),
+		);
+
+		return $settings;
 	}
 
 	/**

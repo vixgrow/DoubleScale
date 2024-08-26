@@ -28,6 +28,13 @@ final class Forms_Manager {
 	protected $forms = array();
 
 	/**
+	 * Options
+	 *
+	 * @var array
+	 */
+	protected $options = array();
+
+	/**
 	 * Class Instance.
 	 *
 	 * @since 1.0.0
@@ -82,7 +89,13 @@ final class Forms_Manager {
 			);
 		}
 
-		$this->forms[ $form->slug ] = $form;
+		$this->forms[ $form->slug ]   = $form;
+		$this->options[ $form->slug ] = array(
+			'label'           => $form->name,
+			'description'     => $form->description,
+			'options'         => $form->get_form_options(),
+			'fields_settings' => $form->get_form_fields_settings(),
+		);
 	}
 
 	/**
@@ -121,5 +134,16 @@ final class Forms_Manager {
 			/** @var Form $form */
 			$form->load_hooks();
 		}
+	}
+
+	/**
+	 * Get form options
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_options() {
+		return $this->options;
 	}
 }

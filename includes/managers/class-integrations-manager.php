@@ -28,6 +28,13 @@ final class Integrations_Manager {
 	protected $integrations = array();
 
 	/**
+	 * Options
+	 *
+	 * @var array
+	 */
+	protected $options = array();
+
+	/**
 	 * Class Instance.
 	 *
 	 * @since 1.0.0
@@ -71,6 +78,13 @@ final class Integrations_Manager {
 		}
 
 		$this->integrations[ $integration->slug ] = $integration;
+		$this->options[ $integration->slug ]      = array(
+			'label'        => $integration->name,
+			'description'  => $integration->description,
+			'fields'       => $integration->rest_controller->get_settings_schema()['properties'],
+			'is_connected' => $integration->is_connected(),
+			'settings'     => $integration->get_settings(),
+		);
 	}
 
 	/**
@@ -98,5 +112,16 @@ final class Integrations_Manager {
 	 */
 	public function get_integrations() {
 		return $this->integrations;
+	}
+
+	/**
+	 * Get Options
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_options() {
+		return $this->options;
 	}
 }

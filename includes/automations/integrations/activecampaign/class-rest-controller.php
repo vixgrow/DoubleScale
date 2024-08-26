@@ -28,6 +28,7 @@ class REST_Controller extends REST_Integration_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'api_url' => array(
+					'label'       => __( 'API URL', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'arg_options' => array(
@@ -38,6 +39,7 @@ class REST_Controller extends REST_Integration_Controller {
 					),
 				),
 				'api_key' => array(
+					'label'       => __( 'API Key', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'arg_options' => array(

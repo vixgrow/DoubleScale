@@ -57,11 +57,13 @@ class REST_Controller extends REST_Integration_Controller {
 					'context'    => array( 'view' ),
 					'properties' => array(
 						'client_id'     => array(
+							'label'    => __( 'Client ID', 'quillcrm' ),
 							'type'     => 'string',
 							'required' => true,
 							'context'  => array( 'view' ),
 						),
 						'client_secret' => array(
+							'label'    => __( 'Client Secret', 'quillcrm' ),
 							'type'     => 'string',
 							'required' => true,
 							'context'  => array(),

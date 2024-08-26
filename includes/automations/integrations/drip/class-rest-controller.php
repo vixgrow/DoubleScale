@@ -53,6 +53,7 @@ class REST_Controller extends REST_Integration_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'api_token'  => array(
+					'label'       => __( 'API Token', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'arg_options' => array(
@@ -60,6 +61,7 @@ class REST_Controller extends REST_Integration_Controller {
 					),
 				),
 				'account_id' => array(
+					'label'       => __( 'Account ID', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => false,
 					'arg_options' => array(

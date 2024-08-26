@@ -157,7 +157,7 @@ class API extends Integration_API {
 	 * @param array|null $body Body.
 	 * @return array
 	 */
-	public function post( $path, $body ) {
+	public function post( $path, $body = null ) {
 		$body['api_secret'] = $this->api_secret;
 		return $this->request( 'POST', $path, $body ? json_encode( $body ) : null );
 	}

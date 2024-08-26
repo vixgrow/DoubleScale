@@ -32,6 +32,7 @@ class REST_Controller extends REST_Integration_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'api_key' => array(
+					'label'       => __( 'API Key', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'arg_options' => array(

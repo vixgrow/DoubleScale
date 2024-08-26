@@ -12,8 +12,7 @@ namespace QuillCRM\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
-use QuillCRM\Managers\Custom_Fields_Manager;
-use QuillCRM\Managers\Filters_Manager;
+use QuillCRM\Core;
 
 /**
  * Admin Loader Class.
@@ -144,7 +143,7 @@ class Admin_Loader {
 	 * @since 1.0.0
 	 */
 	public static function add_inline_scripts() {
-		// Core::set_admin_config();
+		Core::set_admin_config();
 	}
 
 	/**
@@ -177,23 +176,9 @@ class Admin_Loader {
 		wp_register_script(
 			'qcrm-admin',
 			QUILLCRM_PLUGIN_URL . 'build/index.js',
-			$dependencies,
+			array_merge( $dependencies, array( 'qcrm-config' ) ),
 			$version,
 			true
-		);
-
-		wp_localize_script(
-			'qcrm-admin',
-			'qcrmAdmin',
-			array(
-				'adminUrl'          => admin_url(),
-				'assetsBuildUrl'    => QUILLCRM_PLUGIN_URL,
-				'submenuPages'      => $submenu['quillcrm'] ?? array(),
-				'license_nonce'     => wp_create_nonce( 'quillcrm_license' ),
-				'adminUrl'          => admin_url(),
-				'customFieldsTypes' => Custom_Fields_Manager::instance()->get_options(),
-				'filters'           => Filters_Manager::instance()->get_groups(),
-			)
 		);
 
 		// Register styles.
@@ -220,6 +205,7 @@ class Admin_Loader {
 		do_action( 'qcrm_admin_enqueue_scripts' );
 
 		// Enqueue scripts.
+		wp_enqueue_script( 'qcrm-config' );
 		wp_enqueue_script( 'qcrm-admin' );
 		wp_enqueue_style( 'qcrm-admin' );
 		wp_add_inline_style(

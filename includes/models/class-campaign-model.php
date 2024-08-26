@@ -13,6 +13,8 @@ namespace QuillCRM\Models;
 use QuillCRM\Models\Model;
 use QuillCRM\Models\Campaign_Email_Model;
 use QuillCRM\Models\Template_Model;
+use QuillCRM\Models\Contact_Model;
+use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 
 /**
  * Campaign_Model class
@@ -191,6 +193,22 @@ class Campaign_Model extends Model {
 						}
 					}
 				}
+			}
+		);
+
+		static::retrieved(
+			function ( $campaign ) {
+				$filters             = $campaign->get_setting( 'filters', array() );
+				$campaign_recipients = Contact_Model::where( 'status', 'subscribed' );
+				if ( ! empty( $filters ) ) {
+					$contact_filters     = new Contact_Filters_Process( $campaign_recipients, $filters );
+					$campaign_recipients = $contact_filters->filter();
+				}
+
+				$campaign->contacts_count = $campaign_recipients->count();
+				$campaign->sent_count     = $campaign->emails()->where( 'status', 'sent' )->count();
+				$campaign->opened_count   = $campaign->emails()->where( 'status', 'opened' )->count();
+				$campaign->clicked_count  = $campaign->emails()->where( 'status', 'clicked' )->count();
 			}
 		);
 	}

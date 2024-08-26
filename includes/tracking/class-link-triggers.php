@@ -139,7 +139,7 @@ class Link_Triggers {
 	 * @param Contact_Model      $contact      Contact Model.
 	 */
 	public function sync_contact_data( Link_Trigger_Model $link_trigger, $contact ) {
-		$to_apply_tags = $link_trigger->get_setting( 'apply_tags', array() );
+		$to_apply_tags = $link_trigger->get_setting( 'add_tags', array() );
 		if ( ! empty( $to_apply_tags ) ) {
 			$contact->tags()->syncWithoutDetaching( $to_apply_tags );
 		}
@@ -149,7 +149,7 @@ class Link_Triggers {
 			$contact->tags()->detach( $to_remove_tags );
 		}
 
-		$to_apply_lists = $link_trigger->get_setting( 'apply_lists', array() );
+		$to_apply_lists = $link_trigger->get_setting( 'add_lists', array() );
 		if ( ! empty( $to_apply_lists ) ) {
 			$contact->lists()->syncWithoutDetaching( $to_apply_lists );
 		}

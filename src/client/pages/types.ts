@@ -133,6 +133,10 @@ export type Campaign = {
 	execute_at: string;
 	created_at: string;
 	updated_at: string;
+	contacts_count: number;
+	sent_count: number;
+	opened_count: number;
+	clicked_count: number;
 };
 
 export type Campaigns = Campaign[];
@@ -175,4 +179,72 @@ type FiltersGroup = {
 
 export type FiltersGroups = {
 	contact: FiltersGroup;
+};
+
+type MappedFields = {
+	first_name: string;
+	last_name: string;
+	email: string;
+	[key: string]: string;
+};
+
+type FormData = {
+	mapped_fields: MappedFields;
+	[key: string]: any;
+};
+
+export type Form = {
+	id: number;
+	name: string;
+	form_type: string;
+	form_id: string;
+	data: FormData;
+	status: string;
+	created_at: string;
+	updated_at: string;
+	[temp: string]: any;
+};
+
+export type Forms = Form[];
+
+export type LinkTrigger = {
+	id: number;
+	name: string;
+	hash: string;
+	status: string;
+	settings: {
+		redirect_url: string;
+		auto_login: boolean;
+		add_tags: number[];
+		remove_tags: number[];
+		add_lists: number[];
+		remove_lists: number[];
+	};
+	click_count: string;
+	created_at: string;
+	updated_at: string;
+	full_url: string;
+};
+
+export type LinkTriggers = LinkTrigger[];
+
+export type CustomTemplate = {
+	id: number;
+	name: string;
+	body: string;
+	subject: string;
+	settings: {
+		preview_text: string;
+		from_name: string;
+		from_email: string;
+		reply_to: string;
+		enable_utm: boolean;
+		utm_source: string;
+		utm_medium: string;
+		utm_name: string;
+		utm_term: string;
+		utm_content: string;
+	};
+	created_at: string;
+	updated_at: string;
 };

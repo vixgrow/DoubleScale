@@ -24,6 +24,7 @@ import TemplatesStep from './steps/templates';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import { Campaign as CampaignType } from '../types';
+import Overview from './overview';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
@@ -113,16 +114,19 @@ const Campaign: React.FC = () => {
 				...$actions,
 			}}
 		>
-			<Tabs
-				defaultActiveKey="information"
-				activeKey={tab}
-				tabPosition="left"
-				tabBarStyle={{ width: 200 }}
-				items={tabItems}
-				onChange={(key) => {
-					navigate(getToLink(`campaigns/${id}/${key}`));
-				}}
-			/>
+			{tab !== 'overview' && campaign?.status === 'draft' && (
+				<Tabs
+					defaultActiveKey="information"
+					activeKey={tab}
+					tabPosition="left"
+					tabBarStyle={{ width: 200 }}
+					items={tabItems}
+					onChange={(key) => {
+						navigate(getToLink(`campaigns/${id}/${key}`));
+					}}
+				/>
+			)}
+			{tab === 'overview' && <Overview />}
 		</Provider>
 	);
 };

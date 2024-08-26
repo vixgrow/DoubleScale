@@ -23,6 +23,19 @@ const Review: React.FC = () => {
 		useCampaignContext();
 	const navigate = useNavigate();
 
+	const save = async () => {
+		if (!campaign) {
+			return;
+		}
+
+		try {
+			await saveCampaign();
+			navigate(getToLink(`campaigns/${campaign.id}/overview`));
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	return (
 		<Card loading={isLoading}>
 			{campaign && (
@@ -95,7 +108,7 @@ const Review: React.FC = () => {
 						<Button
 							type="primary"
 							loading={isSaving}
-							onClick={saveCampaign}
+							onClick={save}
 						>
 							{__('Save', 'quillcrm')}
 						</Button>

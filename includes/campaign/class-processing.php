@@ -122,7 +122,8 @@ class Processing {
 
 		try {
 			// Get first campaign with status 'processing'
-			$campaign = Campaign_Model::where( 'status', 'processing' )->firstOrFail();
+			$campaign = Campaign_Model::where( 'status', 'processing' )->orWhere( 'status', 'scheduled' )->where( 'execute_at', '<=', current_time( 'mysql' ) )
+			->firstOrFail();
 
 			// $last_contact_offset = get_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
 			$filters             = $campaign->get_setting( 'filters', array() );

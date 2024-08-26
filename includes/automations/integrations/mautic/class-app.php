@@ -106,7 +106,11 @@ class App {
 			$tokens
 		);
 
-		echo esc_html__( 'Success! You can close this window now.', 'quillcrm' );
+		wp_redirect(
+			admin_url(
+				"admin.php?page=quillcrm&path=integrations&id={$this->integration->slug}&tab=success"
+			)
+		);
 		exit;
 	}
 

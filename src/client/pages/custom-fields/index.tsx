@@ -26,6 +26,7 @@ import { map, keys, omit } from 'lodash';
  */
 import './style.scss';
 import { CustomFieldsGroups, CustomFieldsGroup, CustomField } from '../types';
+import ConfigAPI from '@quillcrm/config';
 
 const { Column } = Table;
 
@@ -52,7 +53,7 @@ const CustomFields: React.FC = () => {
 	const [selectedField, setSelectedField] = useState<CustomField | null>(
 		null
 	);
-	const { customFieldsTypes } = window['qcrmAdmin'] || ({} as any);
+	const customFieldsTypes = ConfigAPI.getCustomFieldsTypes();
 
 	const typesOptions = map(keys(customFieldsTypes), (type) => ({
 		label: customFieldsTypes[type].name,

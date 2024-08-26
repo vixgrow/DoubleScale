@@ -24,6 +24,13 @@ import Tags from '../pages/tags';
 import CustomFields from '../pages/custom-fields';
 import Campaigns from '../pages/campaings';
 import Campaign from '../pages/campaign';
+import Forms from '../pages/forms';
+import Form from '../pages/form';
+import LinkTriggers from '../pages/link-triggers';
+import LinkTrigger from '../pages/link-trigger';
+import Integrations from '../pages/intergrations';
+import Templates from '../pages/templates';
+import Template from '../pages/template';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -54,6 +61,7 @@ registerAdminPage('contact', {
 	path: 'contacts/:id/:tab?',
 	component: () => <Contact />,
 	label: __('Contact', 'quillcrm'),
+	hidden: true,
 });
 
 registerAdminPage('lists', {
@@ -84,5 +92,50 @@ registerAdminPage('campaign', {
 	path: 'campaigns/:id/:tab?',
 	component: () => <Campaign />,
 	label: __('Campaign', 'quillcrm'),
-	requiresInitialPayload: true,
+	hidden: true,
+});
+
+registerAdminPage('forms', {
+	path: 'forms',
+	component: () => <Forms />,
+	label: __('Forms', 'quillcrm'),
+});
+
+registerAdminPage('form', {
+	path: 'forms/:id/:tab?',
+	component: () => <Form />,
+	label: __('Form', 'quillcrm'),
+	hidden: true,
+});
+
+registerAdminPage('link-triggers', {
+	path: 'link-triggers',
+	component: () => <LinkTriggers />,
+	label: __('Link Triggers', 'quillcrm'),
+});
+
+registerAdminPage('link-trigger', {
+	path: 'link-triggers/:id',
+	component: () => <LinkTrigger />,
+	label: __('Link Trigger', 'quillcrm'),
+	hidden: true,
+});
+
+registerAdminPage('integrations', {
+	path: 'integrations/:id?/:tab?',
+	component: () => <Integrations />,
+	label: __('Integrations', 'quillcrm'),
+});
+
+registerAdminPage('templates', {
+	path: 'templates',
+	component: () => <Templates />,
+	label: __('Templates', 'quillcrm'),
+});
+
+registerAdminPage('template', {
+	path: 'templates/:id',
+	component: () => <Template />,
+	label: __('Template', 'quillcrm'),
+	hidden: true,
 });

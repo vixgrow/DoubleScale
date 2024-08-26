@@ -23,19 +23,15 @@ import { map } from 'lodash';
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useCampaignContext } from '../../state/context';
-import type {
-	FiltersGroups as FiltersGroupsType,
-	Filter as FilterType,
-} from '../../../types';
+import type { Filter as FilterType } from '../../../types';
 import Filter from './filter';
+import ConfigAPI from '@quillcrm/config';
 
 const Contacts: React.FC = () => {
 	const { campaign, isLoading, saveCampaign, isSaving, updateSettings } =
 		useCampaignContext();
 	const navigate = useNavigate();
-	const { filters: filtersGroups } = window['qcrmAdmin'] as {
-		filters: FiltersGroupsType;
-	};
+	const filtersGroups = ConfigAPI.getFiltersGroups();
 	const [selectedGroup, setSelectedGroup] = useState<string>('');
 	const filters = campaign?.settings.filters || [];
 	const setFilters = (newFilters: FilterType[]) => {

@@ -28,6 +28,7 @@ class REST_Controller extends REST_Integration_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'account_sid'  => array(
+					'label'       => __( 'Account SID', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'arg_options' => array(
@@ -35,6 +36,7 @@ class REST_Controller extends REST_Integration_Controller {
 					),
 				),
 				'auth_token'   => array(
+					'label'       => __( 'Auth Token', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'arg_options' => array(
@@ -42,6 +44,7 @@ class REST_Controller extends REST_Integration_Controller {
 					),
 				),
 				'phone_number' => array(
+					'label'       => __( 'Phone Number', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'arg_options' => array(

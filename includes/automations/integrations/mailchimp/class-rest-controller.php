@@ -53,6 +53,7 @@ class REST_Controller extends REST_Integration_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'api_key' => array(
+					'label'       => __( 'API Key', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => true,
 					'arg_options' => array(
@@ -60,10 +61,19 @@ class REST_Controller extends REST_Integration_Controller {
 					),
 				),
 				'list_id' => array(
+					'label'       => __( 'List ID', 'quillcrm' ),
 					'type'        => 'string',
 					'required'    => false,
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'has_options' => true,
+					'endpoint'    => 'lists',
+					'conditions'  => array(
+						'api_key' => array(
+							'operator' => '!=',
+							'value'    => '',
+						),
 					),
 				),
 			),

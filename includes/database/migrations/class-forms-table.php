@@ -45,9 +45,9 @@ class Forms_Table extends Migration {
 		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL,
-            form_type VARCHAR(255) NOT NULL,
-            form_id VARCHAR(255) NOT NULL,
-            data TEXT NOT NULL,
+            form_type VARCHAR(255),
+            form_id VARCHAR(255),
+            data TEXT,
             status VARCHAR(255) NOT NULL DEFAULT "inactive",
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

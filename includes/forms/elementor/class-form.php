@@ -215,29 +215,17 @@ class Form extends Abstracts_Form {
 				'type'        => 'ajax_select',
 				'help'        => __( 'The Post/Page or Elementor Library ID where the form is located', 'quillcrm' ),
 				'ajax_action' => "quillcrm_{$this->slug}_get_source_select_options",
-				'conditions'  => array(
-					'relation' => 'and',
-					'rules'    => array(
-						array(
-							'field'    => 'form_source',
-							'operator' => 'not_empty',
-						),
-					),
-				),
 			),
 			'form_id' => array(
 				'label'       => __( 'Form ID', 'quillcrm' ),
 				'type'        => 'ajax_select',
 				'ajax_action' => "quillcrm_{$this->slug}_get_form_select_options",
+				'parent'      => 'post_id',
 				'conditions'  => array(
 					'relation' => 'and',
 					'rules'    => array(
 						array(
-							'field'    => 'form_source',
-							'operator' => 'not_empty',
-						),
-						array(
-							'field'    => 'form_source',
+							'field'    => 'settings.post_id',
 							'operator' => 'not_empty',
 						),
 					),
@@ -246,6 +234,25 @@ class Form extends Abstracts_Form {
 		);
 
 		return $options;
+	}
+
+	/**
+	 * Get form fields settings
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_form_fields_settings() {
+		$settings = array(
+			'action' => "quillcrm_{$this->slug}_get_fields",
+			'fields' => array(
+				'post_id',
+				'form_id',
+			),
+		);
+
+		return $settings;
 	}
 }
 

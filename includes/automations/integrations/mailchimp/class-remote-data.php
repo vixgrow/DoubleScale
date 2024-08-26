@@ -67,8 +67,18 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_lists();
+		$result   = array();
 
-		return $response;
+		if ( ! empty( $response ) ) {
+			foreach ( $response['data']['lists'] ?? array() as $list ) {
+				$result[] = array(
+					'id'   => $list['id'],
+					'name' => $list['name'],
+				);
+			}
+		}
+
+		return $result;
 	}
 
 	/**

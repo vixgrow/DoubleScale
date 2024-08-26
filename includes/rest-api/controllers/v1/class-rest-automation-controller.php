@@ -23,6 +23,7 @@ use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Managers\Goals_Manager;
+use QuillCRM\Managers\Integrations_Manager;
 
 /**
  * Rest_Automation_Controller class

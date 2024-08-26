@@ -30,6 +30,9 @@ const NavBar: React.FC = () => {
 
 	for (const key in pages) {
 		const item = pages[key];
+		if (item.hidden) {
+			continue;
+		}
 		items.push({
 			key: key,
 			label: item.label,

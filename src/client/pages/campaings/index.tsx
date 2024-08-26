@@ -9,8 +9,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import { Typography, Table, Input, Button, Modal, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Typography, Table, Input, Button, Modal } from 'antd';
 
 /**
  * Internal dependencies
@@ -115,7 +114,13 @@ const Campaigns: React.FC = () => {
 					dataIndex="name"
 					key="name"
 					render={(_, record: Campaign) => (
-						<NavLink to={`campaigns/${record.id}`}>
+						<NavLink
+							to={
+								record.status === 'completed'
+									? `campaigns/${record.id}/overview`
+									: `campaigns/${record.id}`
+							}
+						>
 							{record.name}
 						</NavLink>
 					)}

@@ -1,5 +1,12 @@
 /* eslint-disable jsdoc/check-line-alignment */
-import type { ConfigData } from './types/config-data';
+import type {
+	ConfigData,
+	Forms,
+	CustomFieldsTypes,
+	FiltersGroups,
+	ContactFieldsGroups,
+	Integrations,
+} from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
 
 const configData: ConfigData = {
@@ -29,6 +36,16 @@ const configData: ConfigData = {
 	adminEmail: '',
 	ajaxUrl: '',
 	nonce: '',
+	forms: {},
+	customFieldsTypes: {},
+	filtersGroups: {
+		contact: {
+			name: '',
+			filters: {},
+		},
+	},
+	contactFieldsGroups: {},
+	integrations: {},
 };
 
 /**
@@ -158,6 +175,115 @@ const setPluginDirUrl = (data: ConfigData) => (value: string) => {
 	data.pluginDirUrl = value;
 };
 
+/**
+ * Get forms
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @returns Forms
+ */
+export const getForms = (data: ConfigData): Forms => {
+	return data.forms;
+};
+
+/**
+ * Set forms
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setForms = (data: ConfigData) => (value: Forms) => {
+	data.forms = value;
+};
+
+/**
+ * Get custom fields types
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns CustomFieldsTypes
+ */
+export const getCustomFieldsTypes = (data: ConfigData): CustomFieldsTypes => {
+	return data.customFieldsTypes;
+};
+
+/**
+ * Set custom fields types
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setCustomFieldsTypes =
+	(data: ConfigData) => (value: CustomFieldsTypes) => {
+		data.customFieldsTypes = value;
+	};
+
+/**
+ * Get filters groups
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns FiltersGroups
+ */
+export const getFiltersGroups = (data: ConfigData): FiltersGroups => {
+	return data.filtersGroups;
+};
+
+/**
+ * Set filters groups
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setFiltersGroups =
+	(data: ConfigData) => (value: FiltersGroups) => {
+		data.filtersGroups = value;
+	};
+
+/**
+ * Get contact fields groups
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns ContactFieldsGroups
+ */
+export const getContactFieldsGroups = (
+	data: ConfigData
+): ContactFieldsGroups => {
+	return data.contactFieldsGroups;
+};
+
+/**
+ * Set contact fields groups
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setContactFieldsGroups =
+	(data: ConfigData) => (value: ContactFieldsGroups) => {
+		data.contactFieldsGroups = value;
+	};
+
+/**
+ * Get integrations
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns Integrations
+ */
+export const getIntegrations = (data: ConfigData): Integrations => {
+	return data.integrations;
+};
+
+/**
+ * Set integrations
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setIntegrations = (data: ConfigData) => (value: Integrations) => {
+	data.integrations = value;
+};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -172,6 +298,16 @@ export interface ConfigApi {
 	getNonce: () => string;
 	setPluginDirUrl: (value: string) => void;
 	getPluginDirUrl: () => string;
+	getForms: () => Forms;
+	setForms: (value: Forms) => void;
+	getCustomFieldsTypes: () => CustomFieldsTypes;
+	setCustomFieldsTypes: (value: CustomFieldsTypes) => void;
+	getFiltersGroups: () => FiltersGroups;
+	setFiltersGroups: (value: FiltersGroups) => void;
+	getContactFieldsGroups: () => ContactFieldsGroups;
+	setContactFieldsGroups: (value: ContactFieldsGroups) => void;
+	getIntegrations: () => Integrations;
+	setIntegrations: (value: Integrations) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -188,6 +324,16 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setNonce = setNonce(data);
 	configApi.getPluginDirUrl = getPluginDirUrl(data);
 	configApi.setPluginDirUrl = setPluginDirUrl(data);
+	configApi.getForms = () => getForms(data);
+	configApi.setForms = setForms(data);
+	configApi.getCustomFieldsTypes = () => getCustomFieldsTypes(data);
+	configApi.setCustomFieldsTypes = setCustomFieldsTypes(data);
+	configApi.getFiltersGroups = () => getFiltersGroups(data);
+	configApi.setFiltersGroups = setFiltersGroups(data);
+	configApi.getContactFieldsGroups = () => getContactFieldsGroups(data);
+	configApi.setContactFieldsGroups = setContactFieldsGroups(data);
+	configApi.getIntegrations = () => getIntegrations(data);
+	configApi.setIntegrations = setIntegrations(data);
 
 	return configApi;
 };
@@ -195,13 +341,14 @@ const createConfig = (data: ConfigData): ConfigApi => {
 const ConfigAPI = createConfig(configData);
 
 // @ts-ignore
-if (window.qcrmAdmin === undefined) {
+if (window.qcrm === undefined) {
 	// @ts-ignore
-	window.qcrmAdmin = {
+	window.qcrm = {
 		config: ConfigAPI,
 	};
 }
 
 // @ts-ignore
-export default window.qcrmAdmin.config as ConfigApi;
+export default window.qcrm.config as ConfigApi;
 export * from './types/initial-payload';
+export * from './types/config-data';

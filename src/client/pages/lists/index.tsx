@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -36,6 +37,7 @@ const Lists: React.FC = () => {
 		name: '',
 		description: '',
 	});
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchLists = async () => {
 		setLoading(true);
@@ -52,7 +54,10 @@ const Lists: React.FC = () => {
 			setLists(response.data as ContactList[]);
 			setTotal(response.total);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch lists', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -78,7 +83,10 @@ const Lists: React.FC = () => {
 				description: '',
 			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to create list', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}
@@ -101,8 +109,15 @@ const Lists: React.FC = () => {
 
 			setVisible(false);
 			setSelectedList(null);
+			createNotice({
+				type: 'success',
+				message: __('List updated successfully', 'quillcrm'),
+			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to update list', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}
@@ -117,7 +132,10 @@ const Lists: React.FC = () => {
 
 			setLists(lists.filter((list) => list.id !== id));
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete list', 'quillcrm'),
+			});
 		}
 	};
 

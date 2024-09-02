@@ -5,6 +5,7 @@ import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -33,6 +34,7 @@ const TemplatesList: React.FC = () => {
 	const [template, setTemplate] = useState({
 		name: '',
 	});
+	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
 	const Search = Input.Search;
 
@@ -51,7 +53,10 @@ const TemplatesList: React.FC = () => {
 			response.total && setTotal(response.total);
 			response.data && setData(response.data as Template[]);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch templates', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -74,7 +79,10 @@ const TemplatesList: React.FC = () => {
 			setVisible(false);
 			navigate(getToLink(`templates/${response.id}`));
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to create template', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}

@@ -214,28 +214,28 @@ final class QuillCRM {
 		}
 
 		// Load all automations learndash triggers files
-		if ( quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) ) {
+		// if ( quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) ) {
 			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/learndash/class-*.php' );
-			foreach ( $triggers_files as $file ) {
-				require $file;
-			}
+		foreach ( $triggers_files as $file ) {
+			require $file;
 		}
+		// }
 
 		// Load all automations memberpress triggers files
-		if ( quillcrm_is_plugin_active( 'memberpress/memberpress.php' ) ) {
+		// if ( quillcrm_is_plugin_active( 'memberpress/memberpress.php' ) ) {
 			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/memberpress/class-*.php' );
-			foreach ( $triggers_files as $file ) {
-				require $file;
-			}
+		foreach ( $triggers_files as $file ) {
+			require $file;
 		}
+		// }
 
 		// Load all automations edd triggers files
-		if ( quillcrm_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ) ) {
+		// if ( quillcrm_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ) ) {
 			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/edd/class-*.php' );
-			foreach ( $triggers_files as $file ) {
-				require $file;
-			}
+		foreach ( $triggers_files as $file ) {
+			require $file;
 		}
+		// }
 
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
@@ -244,12 +244,12 @@ final class QuillCRM {
 		}
 
 		// Load all automations woocommerce actions files
-		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+		// if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/woocommerce/class-*.php' );
-			foreach ( $actions_files as $file ) {
-				require $file;
-			}
+		foreach ( $actions_files as $file ) {
+			require $file;
 		}
+		// }
 
 		// Load all automations crm actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/crm/**/class-*.php' );

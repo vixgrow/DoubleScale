@@ -16,6 +16,9 @@ use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Integrations_Manager;
 use QuillCRM\Utils;
+use QuillCRM\Managers\Triggers_Manager;
+use QuillCRM\Managers\Actions_Manager;
+use QuillCRM\Managers\Goals_Manager;
 
 /**
  * Core Class
@@ -48,7 +51,10 @@ class Core {
 			'qcrm.config.setFiltersGroups(' . wp_json_encode( Filters_Manager::instance()->get_groups() ) . ');' .
 			'qcrm.config.setCustomFieldsTypes(' . wp_json_encode( Custom_Fields_Manager::instance()->get_options() ) . ');' .
 			'qcrm.config.setContactFieldsGroups(' . wp_json_encode( Utils::get_contact_fields() ) . ');' .
-			'qcrm.config.setIntegrations(' . wp_json_encode( Integrations_Manager::instance()->get_options() ) . ');'
+			'qcrm.config.setIntegrations(' . wp_json_encode( Integrations_Manager::instance()->get_options() ) . ');' .
+			'qcrm.config.setAutomationTriggers(' . wp_json_encode( Triggers_Manager::instance()->get_sources() ) . ');' .
+			'qcrm.config.setAutomationActions(' . wp_json_encode( Actions_Manager::instance()->get_sources() ) . ');' .
+			'qcrm.config.setAutomationGoals(' . wp_json_encode( Goals_Manager::instance()->get_sources() ) . ');'
 		);
 	}
 }

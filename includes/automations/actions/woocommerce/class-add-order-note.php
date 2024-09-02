@@ -15,6 +15,7 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Managers\Actions_Manager;
 
 /**
  * Add Order Note Action
@@ -78,4 +79,22 @@ class Add_Order_Note extends Action {
 
 		return true;
 	}
+
+	/**
+	 * Get fields.
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			array(
+				'name'    => 'note',
+				'label'   => __( 'Note', 'quillcrm' ),
+				'type'    => 'textarea',
+				'default' => '',
+			),
+		);
+	}
 }
+
+Actions_Manager::instance()->register( new Add_Order_Note() );

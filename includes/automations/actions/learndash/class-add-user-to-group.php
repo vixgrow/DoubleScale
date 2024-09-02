@@ -13,6 +13,7 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
+use QuillCRM\Managers\Actions_Manager;
 
 /**
  * Add User To Group
@@ -92,6 +93,39 @@ class Add_User_To_Group extends Action {
 	}
 
 	/**
+	 * Get Groups
+	 *
+	 * @since 1.0.0
+	 */
+	public function get_groups() {
+		$groups = learndash_get_groups( array( 'posts_per_page' => -1 ) );
+
+		$options = array();
+		foreach ( $groups as $group ) {
+			$options[ $group->ID ] = $group->post_title;
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'group_id' => array(
+				'type'    => 'select',
+				'label'   => __( 'Group', 'quillcrm' ),
+				'options' => $this->get_groups(),
+			),
+		);
+	}
+
+	/**
 	 * Get attributes schema
 	 *
 	 * @return array
@@ -108,3 +142,5 @@ class Add_User_To_Group extends Action {
 		);
 	}
 }
+
+Actions_Manager::instance()->register( new Add_User_To_Group() );

@@ -124,6 +124,18 @@ class Rest_Automation_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_contacts' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'per_page' => array(
+							'description'       => __( 'Maximum number of items to be returned in result set.', 'quillcrm' ),
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+						),
+						'page'     => array(
+							'description'       => __( 'Current page of the collection.', 'quillcrm' ),
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 			)
 		);
@@ -492,14 +504,11 @@ class Rest_Automation_Controller extends REST_Controller {
 	public function get_contacts( $request ) {
 		try {
 			$id                  = $request->get_param( 'id' );
-			$automation_contacts = Automation_Contact_Model::where( 'automation_id', $id )->get();
-			$contacts            = array();
+			$per_page            = $request->get_param( 'per_page' ) ?? 10;
+			$page                = $request->get_param( 'page' ) ?? 1;
+			$automation_contacts = Automation_Contact_Model::where( 'automation_id', $id )->with( 'contact', 'processes' )->paginate( $per_page, array( '*' ), 'page', $page );
 
-			foreach ( $automation_contacts as $automation_contact ) {
-				$contacts[] = $automation_contact->contact;
-			}
-
-			return new WP_REST_Response( $contacts, 200 );
+			return new WP_REST_Response( $automation_contacts, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -610,6 +619,37 @@ class Rest_Automation_Controller extends REST_Controller {
 			}
 
 			$automation->delete();
+
+			return new WP_REST_Response( null, 204 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Delete items
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function delete_items( $request ) {
+		try {
+			$ids = $request->get_param( 'ids' );
+			if ( empty( $ids ) ) {
+				return new WP_Error( 'error', __( 'No IDs provided.', 'quillcrm' ), array( 'status' => 400 ) );
+			}
+
+			$automations = Automation_Model::find( $ids );
+			if ( ! $automations ) {
+				return new WP_Error( 'not_found', __( 'Automations not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			foreach ( $automations as $automation ) {
+				$automation->delete();
+			}
 
 			return new WP_REST_Response( null, 204 );
 		} catch ( \Exception $e ) {

@@ -1,0 +1,7 @@
+export const SET_AUTOMATION = 'SET_AUTOMATION';
+export const UPDATE_AUTOMATION = 'UPDATE_AUTOMATION';
+export const UPDATE_SETTINGS = 'UPDATE_SETTINGS';
+export const SET_STEPS = 'SET_STEPS';
+export const ADD_STEP = 'ADD_STEP';
+export const REMOVE_STEP = 'REMOVE_STEP';
+export const UPDATE_STEP = 'UPDATE_STEP';

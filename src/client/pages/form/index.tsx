@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -37,6 +38,7 @@ const Form: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const navigate = useNavigate();
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	useEffect(() => {
 		fetchForm();
@@ -52,7 +54,10 @@ const Form: React.FC = () => {
 
 			setForm(response);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch form', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -72,7 +77,10 @@ const Form: React.FC = () => {
 
 			setForm(response);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to save form', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}

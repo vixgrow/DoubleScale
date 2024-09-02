@@ -113,6 +113,23 @@ class List_Removed extends Goal {
 	}
 
 	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'lists' => array(
+				'label'    => __( 'Lists', 'quillcrm' ),
+				'type'     => 'lists',
+				'multiple' => true,
+			),
+		);
+	}
+
+	/**
 	 * Get attributes schema
 	 *
 	 * @return array

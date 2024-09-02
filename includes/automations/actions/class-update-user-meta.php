@@ -69,6 +69,35 @@ class Update_User_Meta extends Action {
 	}
 
 	/**
+	 * Get fields.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'meta' => array(
+				'type'        => 'repeater',
+				'label'       => __( 'Meta', 'quillcrm' ),
+				'description' => __( 'User meta to update.', 'quillcrm' ),
+				'fields'      => array(
+					'key'   => array(
+						'type'        => 'string',
+						'label'       => __( 'Meta Key', 'quillcrm' ),
+						'description' => __( 'Meta key to update.', 'quillcrm' ),
+					),
+					'value' => array(
+						'type'        => 'string',
+						'label'       => __( 'Meta Value', 'quillcrm' ),
+						'description' => __( 'Meta value to update.', 'quillcrm' ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
 	 * Get Attributes schema.
 	 *
 	 * @since 1.0.0

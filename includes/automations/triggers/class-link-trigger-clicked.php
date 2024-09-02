@@ -118,6 +118,25 @@ class Link_Trigger_Clicked extends Trigger {
 	}
 
 	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'links' => array(
+				'type'        => 'api_select',
+				'label'       => __( 'Links', 'quillcrm' ),
+				'endpoint'    => 'qc/v1/link-triggers',
+				'placeholder' => __( 'Select Links', 'quillcrm' ),
+				'multiple'    => true,
+			),
+		);
+	}
+
+	/**
 	 * Get Attributes Schema
 	 *
 	 * @since 1.0.0

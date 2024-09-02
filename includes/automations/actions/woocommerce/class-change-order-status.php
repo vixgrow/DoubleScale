@@ -15,6 +15,7 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Managers\Actions_Manager;
 
 /**
  * Change Order Status Action
@@ -87,4 +88,53 @@ class Change_Order_Status extends Action {
 
 		return true;
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'status' => array(
+				'type'    => 'select',
+				'label'   => __( 'Order Status', 'quillcrm' ),
+				'options' => array(
+					'wc-pending'        => __( 'Pending Payment', 'quillcrm' ),
+					'wc-processing'     => __( 'Processing', 'quillcrm' ),
+					'wc-on-hold'        => __( 'On Hold', 'quillcrm' ),
+					'wc-completed'      => __( 'Completed', 'quillcrm' ),
+					'wc-cancelled'      => __( 'Cancelled', 'quillcrm' ),
+					'wc-refunded'       => __( 'Refunded', 'quillcrm' ),
+					'wc-failed'         => __( 'Failed', 'quillcrm' ),
+					'wc-checkout-draft' => __( 'Checkout Draft', 'quillcrm' ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get attributes schema
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_attributes_schema() {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'statuses' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type' => 'string',
+					),
+				),
+			),
+		);
+	}
 }
+
+Actions_Manager::instance()->register( new Change_Order_Status() );

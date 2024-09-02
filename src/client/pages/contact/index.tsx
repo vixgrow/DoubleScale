@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -66,6 +67,7 @@ const Contact: React.FC = () => {
 	const $actions = actions(dispatch);
 	const { setContact } = $actions;
 	const { contact } = state;
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchLists = async (keyword = '') => {
 		setFetchingLists(true);
@@ -78,7 +80,10 @@ const Contact: React.FC = () => {
 
 			setLists(response.data as ContactList[]);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch lists', 'quillcrm'),
+			});
 		} finally {
 			setFetchingLists(false);
 		}
@@ -95,7 +100,10 @@ const Contact: React.FC = () => {
 
 			setTags(response.data as Tag[]);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch tags', 'quillcrm'),
+			});
 		} finally {
 			setFetchingTags(false);
 		}
@@ -120,7 +128,10 @@ const Contact: React.FC = () => {
 				lists: contact.lists.filter((list) => list.id !== listId),
 			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete list', 'quillcrm'),
+			});
 		}
 	};
 
@@ -144,7 +155,10 @@ const Contact: React.FC = () => {
 				lists: [...contact.lists, ...selectedLists],
 			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to add lists', 'quillcrm'),
+			});
 		} finally {
 			setIsSavingLists(false);
 			setShowAddList(false);
@@ -171,7 +185,10 @@ const Contact: React.FC = () => {
 				tags: contact.tags.filter((tag) => tag.id !== tagId),
 			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete tag', 'quillcrm'),
+			});
 		}
 	};
 
@@ -195,7 +212,10 @@ const Contact: React.FC = () => {
 				tags: [...contact.tags, ...selectedTags],
 			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to add tags', 'quillcrm'),
+			});
 		} finally {
 			setIsSavingTags(false);
 			setShowAddTag(false);
@@ -213,7 +233,10 @@ const Contact: React.FC = () => {
 
 			setContact(response as ContactType);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch contact', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -229,8 +252,15 @@ const Contact: React.FC = () => {
 			});
 
 			setContact(response as ContactType);
+			createNotice({
+				type: 'success',
+				message: __('Contact updated successfully', 'quillcrm'),
+			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to update contact', 'quillcrm'),
+			});
 		} finally {
 			setIsUpdating(false);
 		}

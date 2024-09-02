@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -30,6 +31,7 @@ const Campaigns: React.FC = () => {
 	const [visible, setVisible] = useState<boolean>(false);
 	const [isAdding, setIsAdding] = useState<boolean>(false);
 	const [name, setName] = useState<string>('');
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	useEffect(() => {
 		fetchCampaigns();
@@ -49,7 +51,10 @@ const Campaigns: React.FC = () => {
 			setCampaigns(response.data);
 			setTotal(response.total);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch campaigns', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}

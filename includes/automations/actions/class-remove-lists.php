@@ -86,6 +86,23 @@ class Remove_Lists extends Action {
 	}
 
 	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'lists' => array(
+				'label'    => __( 'Lists', 'quillcrm' ),
+				'type'     => 'lists',
+				'multiple' => true,
+			),
+		);
+	}
+
+	/**
 	 * Get attributes schema
 	 *
 	 * @since 1.0.0

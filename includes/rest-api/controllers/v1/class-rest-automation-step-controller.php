@@ -111,7 +111,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				'action'        => array(
 					'description' => __( 'The action of the step.', 'quillcrm' ),
 					'type'        => 'string',
-					'required'    => true,
+					'required'    => false,
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),

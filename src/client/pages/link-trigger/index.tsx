@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -43,6 +44,7 @@ const LinkTrigger: React.FC = () => {
 		redirect_url: '',
 		auto_login: false,
 	};
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchLists = async (keyword = '', ids: number[] = []) => {
 		try {
@@ -60,7 +62,10 @@ const LinkTrigger: React.FC = () => {
 				value: list.id,
 			}));
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch lists', 'quillcrm'),
+			});
 			return [];
 		}
 	};
@@ -81,7 +86,10 @@ const LinkTrigger: React.FC = () => {
 				value: tag.id,
 			}));
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch tags', 'quillcrm'),
+			});
 			return [];
 		}
 	};
@@ -99,7 +107,6 @@ const LinkTrigger: React.FC = () => {
 			})) as any;
 
 			setLinkTrigger(response);
-			console.log(response);
 
 			if (response) {
 				if (
@@ -127,7 +134,10 @@ const LinkTrigger: React.FC = () => {
 				}
 			}
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch link trigger', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -147,7 +157,10 @@ const LinkTrigger: React.FC = () => {
 
 			setLinkTrigger(response);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to save link trigger', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}

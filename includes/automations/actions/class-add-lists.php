@@ -78,11 +78,27 @@ class Add_Lists extends Action {
 
 		if ( ! empty( $lists ) ) {
 			$lists_ids = wp_list_pluck( $lists->toArray(), 'id' );
-			error_log( 'Lists IDs: ' . wp_json_encode( $lists_ids ) );
 			$automation_contact->contact->lists()->syncWithoutDetaching( $lists_ids );
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'lists' => array(
+				'label'    => __( 'Lists', 'quillcrm' ),
+				'type'     => 'lists',
+				'multiple' => true,
+			),
+		);
 	}
 
 	/**

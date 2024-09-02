@@ -5,6 +5,7 @@ import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -27,6 +28,7 @@ const ContactsList: React.FC = () => {
 	const [total, setTotal] = useState(0);
 	const [data, setData] = useState<Contact[]>([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchContacts = async () => {
 		setLoading(true);
@@ -42,7 +44,10 @@ const ContactsList: React.FC = () => {
 			response.total && setTotal(response.total);
 			response.data && setData(response.data as Contact[]);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch contacts', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}

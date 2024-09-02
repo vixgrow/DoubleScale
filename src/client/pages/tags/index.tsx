@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -36,6 +37,7 @@ const Tags: React.FC = () => {
 		name: '',
 		description: '',
 	});
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchTags = async () => {
 		setLoading(true);
@@ -52,7 +54,10 @@ const Tags: React.FC = () => {
 			setTags(response.data as ContactTag[]);
 			setTotal(response.total);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch tags', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -78,7 +83,10 @@ const Tags: React.FC = () => {
 				description: '',
 			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to create tag', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}
@@ -100,7 +108,10 @@ const Tags: React.FC = () => {
 			setVisible(false);
 			setSelectedTag(null);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to update tag', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}
@@ -115,7 +126,10 @@ const Tags: React.FC = () => {
 
 			setTags(tags.filter((tag) => tag.id !== id));
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete tag', 'quillcrm'),
+			});
 		}
 	};
 

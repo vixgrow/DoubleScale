@@ -6,6 +6,9 @@ import type {
 	FiltersGroups,
 	ContactFieldsGroups,
 	Integrations,
+	AutomationTriggers,
+	AutomationActions,
+	AutomationGoals,
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
 
@@ -46,6 +49,9 @@ const configData: ConfigData = {
 	},
 	contactFieldsGroups: {},
 	integrations: {},
+	automationTriggers: {},
+	automationActions: {},
+	automationGoals: {},
 };
 
 /**
@@ -284,6 +290,72 @@ export const setIntegrations = (data: ConfigData) => (value: Integrations) => {
 	data.integrations = value;
 };
 
+/**
+ * Get automation triggers
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns AutomationTriggers
+ */
+export const getAutomationTriggers = (data: ConfigData): AutomationTriggers => {
+	return data.automationTriggers;
+};
+
+/**
+ * Set automation triggers
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setAutomationTriggers =
+	(data: ConfigData) => (value: AutomationTriggers) => {
+		data.automationTriggers = value;
+	};
+
+/**
+ * Get automation actions
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns AutomationActions
+ */
+export const getAutomationActions = (data: ConfigData): AutomationActions => {
+	return data.automationActions;
+};
+
+/**
+ * Set automation actions
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setAutomationActions =
+	(data: ConfigData) => (value: AutomationActions) => {
+		data.automationActions = value;
+	};
+
+/**
+ * Get automation goals
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns AutomationGoals
+ */
+export const getAutomationGoals = (data: ConfigData): AutomationGoals => {
+	return data.automationGoals;
+};
+
+/**
+ * Set automation goals
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setAutomationGoals =
+	(data: ConfigData) => (value: AutomationGoals) => {
+		data.automationGoals = value;
+	};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -308,6 +380,12 @@ export interface ConfigApi {
 	setContactFieldsGroups: (value: ContactFieldsGroups) => void;
 	getIntegrations: () => Integrations;
 	setIntegrations: (value: Integrations) => void;
+	getAutomationTriggers: () => AutomationTriggers;
+	setAutomationTriggers: (value: AutomationTriggers) => void;
+	getAutomationActions: () => AutomationActions;
+	setAutomationActions: (value: AutomationActions) => void;
+	getAutomationGoals: () => AutomationGoals;
+	setAutomationGoals: (value: AutomationGoals) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -334,6 +412,12 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setContactFieldsGroups = setContactFieldsGroups(data);
 	configApi.getIntegrations = () => getIntegrations(data);
 	configApi.setIntegrations = setIntegrations(data);
+	configApi.getAutomationTriggers = () => getAutomationTriggers(data);
+	configApi.setAutomationTriggers = setAutomationTriggers(data);
+	configApi.getAutomationActions = () => getAutomationActions(data);
+	configApi.setAutomationActions = setAutomationActions(data);
+	configApi.getAutomationGoals = () => getAutomationGoals(data);
+	configApi.setAutomationGoals = setAutomationGoals(data);
 
 	return configApi;
 };

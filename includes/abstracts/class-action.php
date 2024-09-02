@@ -108,4 +108,15 @@ abstract class Action {
 	public function get_attributes_schema() {
 		return array();
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array();
+	}
 }

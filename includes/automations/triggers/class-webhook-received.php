@@ -149,6 +149,33 @@ class Webhook_Received extends Trigger {
 		$automation->save();
 		error_log( 'Webhook Key: ' . $random_string );
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'mapped_fields' => array(
+				'label'  => __( 'Mapped Fields', 'quillcrm' ),
+				'type'   => 'mapped_fields',
+				'fields' => array(
+					'first_name' => array(
+						'label' => __( 'First Name', 'quillcrm' ),
+					),
+					'last_name'  => array(
+						'label' => __( 'Last Name', 'quillcrm' ),
+					),
+					'email'      => array(
+						'label' => __( 'Email', 'quillcrm' ),
+					),
+				),
+			),
+		);
+	}
 }
 
 Triggers_Manager::instance()->register( new Webhook_Received() );

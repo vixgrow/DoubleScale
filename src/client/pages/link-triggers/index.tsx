@@ -5,6 +5,7 @@ import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -46,6 +47,7 @@ const LinkTriggerList: React.FC = () => {
 	const [keyword, setKeyword] = useState('');
 	const navigate = useNavigate();
 	const { Search } = Input;
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchLinks = async () => {
 		setLoading(true);
@@ -62,7 +64,10 @@ const LinkTriggerList: React.FC = () => {
 			response.total && setTotal(response.total);
 			response.data && setData(response.data as LinkTrigger[]);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch link triggers', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -88,7 +93,10 @@ const LinkTriggerList: React.FC = () => {
 			setVisible(false);
 			navigate(getToLink(`link-triggers/${response.id}`));
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to create link trigger', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}

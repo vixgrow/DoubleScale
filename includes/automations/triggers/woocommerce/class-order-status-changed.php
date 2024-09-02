@@ -133,6 +133,67 @@ class Order_Status_Changed extends Trigger {
 
 		return true;
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'from_status' => array(
+				'type'    => 'select',
+				'label'   => __( 'From Status', 'quillcrm' ),
+				'options' => array(
+					'wc-pending'        => __( 'Pending Payment', 'quillcrm' ),
+					'wc-processing'     => __( 'Processing', 'quillcrm' ),
+					'wc-on-hold'        => __( 'On Hold', 'quillcrm' ),
+					'wc-completed'      => __( 'Completed', 'quillcrm' ),
+					'wc-cancelled'      => __( 'Cancelled', 'quillcrm' ),
+					'wc-refunded'       => __( 'Refunded', 'quillcrm' ),
+					'wc-failed'         => __( 'Failed', 'quillcrm' ),
+					'wc-checkout-draft' => __( 'Checkout Draft', 'quillcrm' ),
+				),
+			),
+			'to_status'   => array(
+				'type'    => 'select',
+				'label'   => __( 'To Status', 'quillcrm' ),
+				'options' => array(
+					'wc-pending'        => __( 'Pending Payment', 'quillcrm' ),
+					'wc-processing'     => __( 'Processing', 'quillcrm' ),
+					'wc-on-hold'        => __( 'On Hold', 'quillcrm' ),
+					'wc-completed'      => __( 'Completed', 'quillcrm' ),
+					'wc-cancelled'      => __( 'Cancelled', 'quillcrm' ),
+					'wc-refunded'       => __( 'Refunded', 'quillcrm' ),
+					'wc-failed'         => __( 'Failed', 'quillcrm' ),
+					'wc-checkout-draft' => __( 'Checkout Draft', 'quillcrm' ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get attributes schema
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_attributes_schema() {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'from_status' => array(
+					'type' => 'string',
+				),
+				'to_status'   => array(
+					'type' => 'string',
+				),
+			),
+		);
+	}
 }
 
 Triggers_Manager::instance()->register( new Order_Status_Changed() );

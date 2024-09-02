@@ -82,15 +82,53 @@ class Delay extends Action {
 	 * @return bool
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
-		error_log( 'Delay: ' . $automation->name . ' - ' . $step->name );
 		// Schedule the next step after 2 minutes
 		$next_step = $automation->get_next_step( $step->order );
-		$time      = time() + MINUTE_IN_SECONDS;
+		$time      = null;
+		$delay     = $step->get_attribute( 'delay' );
+		$unit      = $step->get_attribute( 'unit' );
+
+		switch ( $unit ) {
+			case 'minutes':
+				$time = strtotime( "+{$delay} minutes" );
+				break;
+			case 'hours':
+				$time = strtotime( "+{$delay} hours" );
+				break;
+			case 'days':
+				$time = strtotime( "+{$delay} days" );
+				break;
+		}
+
 		QuillCRM::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation, $next_step->id, $automation_contact->id );
 
 		return true;
 	}
 
+	/**
+	 * Get fields.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'delay' => array(
+				'type'  => 'number',
+				'label' => __( 'Delay', 'quillcrm' ),
+			),
+			'unit'  => array(
+				'type'    => 'select',
+				'label'   => __( 'Unit', 'quillcrm' ),
+				'options' => array(
+					'minutes' => __( 'Minutes', 'quillcrm' ),
+					'hours'   => __( 'Hours', 'quillcrm' ),
+					'days'    => __( 'Days', 'quillcrm' ),
+				),
+			),
+		);
+	}
 
 	/**
 	 * Get Attributes Schema

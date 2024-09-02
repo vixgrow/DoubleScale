@@ -89,7 +89,7 @@ class New_Order_Success extends Trigger {
 		if ( ! $user instanceof \WP_User ) {
 			return;
 		}
-		error_log( 'CId ' . $customer->id );
+
 		$data = array(
 			'email' => $user->user_email,
 			'data'  => array(

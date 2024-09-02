@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -54,6 +55,7 @@ const CustomFields: React.FC = () => {
 		null
 	);
 	const customFieldsTypes = ConfigAPI.getCustomFieldsTypes();
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const typesOptions = map(keys(customFieldsTypes), (type) => ({
 		label: customFieldsTypes[type].name,
@@ -84,7 +86,10 @@ const CustomFields: React.FC = () => {
 
 			setGroups(response);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch custom fields', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -116,8 +121,15 @@ const CustomFields: React.FC = () => {
 			});
 			setGroups(updatedGroups);
 			setVisible(false);
+			createNotice({
+				type: 'success',
+				message: __('Custom field added', 'quillcrm'),
+			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to add custom field', 'quillcrm'),
+			});
 		} finally {
 			setIsAdding(false);
 		}
@@ -157,8 +169,15 @@ const CustomFields: React.FC = () => {
 
 			setGroups(updatedGroups);
 			setVisible(false);
+			createNotice({
+				type: 'success',
+				message: __('Custom field edited', 'quillcrm'),
+			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to edit custom field', 'quillcrm'),
+			});
 		} finally {
 			setIsEditing(false);
 		}
@@ -185,7 +204,10 @@ const CustomFields: React.FC = () => {
 
 			setGroups(updatedGroups);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete custom field', 'quillcrm'),
+			});
 		}
 	};
 

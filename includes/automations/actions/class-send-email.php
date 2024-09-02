@@ -100,6 +100,24 @@ class Send_Email extends Action {
 	}
 
 	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'subject' => array(
+				'label' => __( 'Subject', 'quillcrm' ),
+				'type'  => 'text',
+			),
+			'body'    => array(
+				'label' => __( 'Body', 'quillcrm' ),
+				'type'  => 'textarea',
+			),
+		);
+	}
+
+	/**
 	 * Get attributes schema
 	 *
 	 * @return array
@@ -108,9 +126,13 @@ class Send_Email extends Action {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'template_id' => array(
-					'type'     => 'integer',
-					'required' => true,
+				'subject' => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'body'    => array(
+					'type'    => 'string',
+					'default' => '',
 				),
 			),
 		);

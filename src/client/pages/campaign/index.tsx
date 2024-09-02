@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -39,6 +40,7 @@ const Campaign: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const navigate = useNavigate();
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	useEffect(() => {
 		fetchCampaign();
@@ -54,7 +56,10 @@ const Campaign: React.FC = () => {
 
 			setCampaign(response);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch campaign', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -71,8 +76,12 @@ const Campaign: React.FC = () => {
 			})) as CampaignType;
 
 			setCampaign(response);
+			navigate(getToLink(`campaigns/${response.id}/overview`));
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to save campaign', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}

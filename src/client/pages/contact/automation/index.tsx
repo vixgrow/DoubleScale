@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -29,6 +30,7 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
 	const [total, setTotal] = useState<number>(0);
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchAutomationContacts = async () => {
 		setLoading(true);
@@ -47,7 +49,10 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 			setAutomationContacts(response.data as AutomationContact[]);
 			setTotal(response.total);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch automation', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}

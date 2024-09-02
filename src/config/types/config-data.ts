@@ -12,6 +12,99 @@ export type ConfigData = Record<string, unknown> & {
 	filtersGroups: FiltersGroups;
 	contactFieldsGroups: ContactFieldsGroups;
 	integrations: Integrations;
+	automationTriggers: AutomationTriggers;
+	automationActions: AutomationActions;
+	automationGoals: AutomationGoals;
+};
+
+export type Trigger = {
+	label: string;
+	description: string;
+	fields: {
+		[key: string]: {
+			label: string;
+			type: string;
+			options?: {
+				[key: string]: string;
+			};
+			multiple?: boolean;
+		};
+	};
+};
+
+export type TriggersGroup = {
+	label: string;
+	triggers: {
+		[triggerName: string]: Trigger;
+	};
+	is_disabled?: boolean;
+};
+
+export type AutomationTriggers = {
+	[key: string]: {
+		label: string;
+		groups: TriggersGroup[];
+	};
+};
+
+export type Action = {
+	label: string;
+	description: string;
+	fields: {
+		[key: string]: {
+			label: string;
+			type: string;
+			options?: {
+				[key: string]: string;
+			};
+			multiple?: boolean;
+		};
+	};
+};
+
+export type ActionsGroup = {
+	label: string;
+	actions: {
+		[key: string]: Action;
+	};
+	is_disabled?: boolean;
+};
+
+export type AutomationActions = {
+	[key: string]: {
+		label: string;
+		groups: ActionsGroup[];
+	};
+};
+
+export type Goal = {
+	label: string;
+	description: string;
+	fields: {
+		[key: string]: {
+			label: string;
+			type: string;
+			options?: {
+				[key: string]: string;
+			};
+			multiple?: boolean;
+		};
+	};
+};
+
+export type GoalsGroup = {
+	label: string;
+	goals: {
+		[key: string]: Goal;
+	};
+	is_disabled?: boolean;
+};
+
+export type AutomationGoals = {
+	[key: string]: {
+		label: string;
+		groups: GoalsGroup[];
+	};
 };
 
 export type Integrations = {

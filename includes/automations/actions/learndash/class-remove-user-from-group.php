@@ -13,6 +13,7 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
+use QuillCRM\Managers\Actions_Manager;
 
 /**
  * Remove User From Group
@@ -90,4 +91,56 @@ class Remove_User_From_Group extends Action {
 
 		return true;
 	}
+
+	/**
+	 * Get Groups
+	 *
+	 * @since 1.0.0
+	 */
+	public function get_groups() {
+		$groups = learndash_get_groups( array( 'posts_per_page' => -1 ) );
+
+		$options = array();
+		foreach ( $groups as $group ) {
+			$options[ $group->ID ] = $group->post_title;
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'group_id' => array(
+				'type'    => 'select',
+				'label'   => __( 'Group', 'quillcrm' ),
+				'options' => $this->get_groups(),
+			),
+		);
+	}
+
+	/**
+	 * Get attributes schema
+	 *
+	 * @return array
+	 */
+	public function get_attributes_schema() {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'group_id' => array(
+					'type'     => 'string',
+					'required' => true,
+				),
+			),
+		);
+	}
 }
+
+Actions_Manager::instance()->register( new Remove_User_From_Group() );

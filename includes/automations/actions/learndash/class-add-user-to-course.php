@@ -13,6 +13,7 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
+use QuillCRM\Managers\Actions_Manager;
 
 /**
  * Add User To Course
@@ -90,6 +91,39 @@ class Add_User_To_Course extends Action {
 	}
 
 	/**
+	 * Get Courses
+	 *
+	 * @since 1.0.0
+	 */
+	public function get_courses() {
+		$courses = learndash_get_courses();
+
+		$options = array();
+		foreach ( $courses as $course ) {
+			$options[ $course->ID ] = $course->post_title;
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Get fields.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'course_id' => array(
+				'type'    => 'select',
+				'label'   => __( 'Course', 'quillcrm' ),
+				'options' => $this->get_courses(),
+			),
+		);
+	}
+
+	/**
 	 * Get Attributes schema.
 	 *
 	 * @since 1.0.0
@@ -108,3 +142,5 @@ class Add_User_To_Course extends Action {
 		);
 	}
 }
+
+Actions_Manager::instance()->register( new Add_User_To_Group() );

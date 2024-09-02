@@ -5,6 +5,7 @@ import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -32,6 +33,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 }) => {
 	const [options, setOptions] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchOptions = async () => {
 		setIsLoading(true);
@@ -51,7 +53,10 @@ const SelectField: React.FC<SelectFieldProps> = ({
 				}))
 			);
 		} catch (error) {
-			console.log(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch options', 'quillcrm'),
+			});
 		} finally {
 			setIsLoading(false);
 		}

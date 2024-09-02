@@ -90,6 +90,7 @@ final class Actions_Manager {
 		$this->sources[ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = array(
 			'label'       => $action->name,
 			'description' => $action->description,
+			'fields'      => $action->get_fields(),
 		);
 	}
 

@@ -114,6 +114,23 @@ class Tags_Added extends Goal {
 	}
 
 	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'tags' => array(
+				'label'    => __( 'Tags', 'quillcrm' ),
+				'type'     => 'tags',
+				'multiple' => true,
+			),
+		);
+	}
+
+	/**
 	 * Get attributes schema
 	 *
 	 * @return array

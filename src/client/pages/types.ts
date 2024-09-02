@@ -59,15 +59,21 @@ export type AutomationContact = {
 	created_at: string;
 	updated_at: string;
 	automation: Automation;
+	contact: Contact;
 };
 
-type Automation = {
+export type Automation = {
 	id: number;
 	name: string;
 	trigger: string;
 	status: string;
+	settings: {
+		multiple_runs: boolean;
+		[key: string]: any;
+	};
 	created_at: string;
 	updated_at: string;
+	steps: AutomationStep[];
 };
 
 export type CustomField = {
@@ -247,4 +253,61 @@ export type CustomTemplate = {
 	};
 	created_at: string;
 	updated_at: string;
+};
+
+export type Automations = Automation[];
+
+export type AutomationStep = {
+	id: number;
+	parent_id: number;
+	automation_id: number;
+	action: string;
+	type: string;
+	condition: string;
+	settings: {
+		[key: string]: any;
+	};
+	created_at: string;
+	updated_at: string;
+};
+
+export type AbandonedCart = {
+	id: number;
+	hash_key: string;
+	user_id: string;
+	email: string;
+	fields: {
+		[key: string]: string;
+	};
+	items: Record<string, CartItem>;
+	coupons: string[];
+	total: string;
+	fees: string[];
+	taxes: string[];
+	shipping: string;
+	currency: string;
+	order_id: string;
+	status: string;
+	created_at: string;
+	updated_at: string;
+};
+
+export type CartItem = {
+	key: string;
+	product_id: number;
+	variation_id: number;
+	variation: string[];
+	quantity: number;
+	data_hash: string;
+	line_tax_data: LineTaxData;
+	line_subtotal: number;
+	line_subtotal_tax: number;
+	line_total: number;
+	line_tax: number;
+	data: string[];
+};
+
+type LineTaxData = {
+	subtotal: string[];
+	total: string[];
 };

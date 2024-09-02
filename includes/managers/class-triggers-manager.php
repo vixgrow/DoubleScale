@@ -107,6 +107,7 @@ final class Triggers_Manager {
 		$this->sources[ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = array(
 			'label'       => $trigger->name,
 			'description' => $trigger->description,
+			'fields'      => $trigger->get_fields(),
 		);
 	}
 
@@ -140,8 +141,16 @@ final class Triggers_Manager {
 			'crm'         => array(
 				'label'  => __( 'CRM', 'quillcrm' ),
 				'groups' => array(
-					'contact' => array(
+					'contact'       => array(
 						'label'    => __( 'Contact', 'quillcrm' ),
+						'triggers' => array(),
+					),
+					'link_triggers' => array(
+						'label'    => __( 'Link Triggers', 'quillcrm' ),
+						'triggers' => array(),
+					),
+					'webhooks'      => array(
+						'label'    => __( 'Webhooks', 'quillcrm' ),
 						'triggers' => array(),
 					),
 				),
@@ -211,8 +220,10 @@ final class Triggers_Manager {
 				'label'       => $form->name,
 				'is_disabled' => ! $form->is_enabled(),
 				'triggers'    => array(
-					'label'       => __( 'Form Submitted', 'quillcrm' ),
-					'description' => $form->description,
+					$form->slug => array(
+						'label'       => __( 'Form Submitted', 'quillcrm' ),
+						'description' => $form->description,
+					),
 				),
 			);
 		}

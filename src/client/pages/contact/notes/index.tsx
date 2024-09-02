@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -54,6 +55,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 		note: '',
 		type: 'note',
 	});
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchNotes = async () => {
 		setLoading(true);
@@ -69,7 +71,10 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 			setNotes(response.data as Note[]);
 			setTotal(response.total);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch notes', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -105,8 +110,15 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 				...response,
 			});
 			setNoteModalVisible(false);
+			createNotice({
+				type: 'success',
+				message: __('Note saved successfully', 'quillcrm'),
+			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to save note', 'quillcrm'),
+			});
 		} finally {
 			setIsSavingNote(false);
 		}
@@ -134,8 +146,15 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 			updateNote({
 				...response,
 			});
+			createNotice({
+				type: 'success',
+				message: __('Note updated successfully', 'quillcrm'),
+			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to update note', 'quillcrm'),
+			});
 		} finally {
 			setIsSavingNote(false);
 			setNoteModalVisible(false);
@@ -153,7 +172,10 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 				...note,
 			});
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete note', 'quillcrm'),
+			});
 		}
 	};
 

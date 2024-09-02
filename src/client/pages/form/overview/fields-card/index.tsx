@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -44,6 +45,7 @@ const FieldsCard: React.FC = () => {
 	const [savedTags, setSavedTags] = useState<Tag[]>([]);
 	const [savedLists, setSavedLists] = useState<List[]>([]);
 	const navigate = useNavigate();
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const getFormFields = async () => {
 		if (!form || !fieldsSettings) {
@@ -68,7 +70,10 @@ const FieldsCard: React.FC = () => {
 
 			setFormFields(data.data);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch form fields', 'quillcrm'),
+			});
 		} finally {
 			setIsFetching(false);
 		}
@@ -90,7 +95,10 @@ const FieldsCard: React.FC = () => {
 				value: list.id,
 			}));
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch lists', 'quillcrm'),
+			});
 			return [];
 		}
 	};
@@ -111,7 +119,10 @@ const FieldsCard: React.FC = () => {
 				value: tag.id,
 			}));
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch tags', 'quillcrm'),
+			});
 			return [];
 		}
 	};

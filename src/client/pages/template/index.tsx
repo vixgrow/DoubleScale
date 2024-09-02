@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -35,6 +36,7 @@ const Template: React.FC = () => {
 		utm_term: '',
 		utm_content: '',
 	};
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	useEffect(() => {
 		fetchTemplate();
@@ -50,7 +52,10 @@ const Template: React.FC = () => {
 
 			setTemplate(response);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch template', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -70,7 +75,10 @@ const Template: React.FC = () => {
 
 			setTemplate(response);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to save template', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}

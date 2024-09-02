@@ -5,6 +5,7 @@ import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -34,7 +35,7 @@ const App: React.FC<IntegrationProps> = ({
 	const { fields, settings } = integration;
 	const [app, setApp] = useState(settings.app || {});
 	const [isSaving, setIsSaving] = useState(false);
-	console.log(fields);
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const save = async () => {
 		setIsSaving(true);
@@ -53,7 +54,10 @@ const App: React.FC<IntegrationProps> = ({
 
 			await getAuthUrl();
 		} catch (error) {
-			console.log(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to save settings', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}
@@ -68,7 +72,10 @@ const App: React.FC<IntegrationProps> = ({
 
 			window.location = response.auth_uri;
 		} catch (error) {
-			console.log(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to get auth url', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}

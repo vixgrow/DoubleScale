@@ -137,4 +137,15 @@ abstract class Trigger {
 	 * @return void
 	 */
 	public function set_settings( Automation_Model $automation ) {}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array();
+	}
 }

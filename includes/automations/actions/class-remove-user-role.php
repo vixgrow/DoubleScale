@@ -84,6 +84,49 @@ class Remove_User_Role extends Action {
 	}
 
 	/**
+	 * Get options
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_options() {
+		// Get all WordPress roles
+		global $wp_roles;
+
+		if ( ! isset( $wp_roles ) ) {
+			$wp_roles = new \WP_Roles();
+		}
+
+		$roles   = $wp_roles->roles;
+		$options = array();
+
+		foreach ( $roles as $role => $role_data ) {
+			$options[ $role ] = $role_data['name'];
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'role' => array(
+				'type'     => 'select',
+				'label'    => __( 'Role', 'quillcrm' ),
+				'required' => true,
+				'options'  => $this->get_options(),
+			),
+		);
+	}
+
+	/**
 	 * Get Attributes schema.
 	 *
 	 * @since 1.0.0

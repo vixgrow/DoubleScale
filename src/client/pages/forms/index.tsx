@@ -5,6 +5,7 @@ import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -36,6 +37,7 @@ const FormsList: React.FC = () => {
 	});
 	const forms = ConfigAPI.getForms();
 	const navigate = useNavigate();
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchForms = async () => {
 		setLoading(true);
@@ -52,7 +54,10 @@ const FormsList: React.FC = () => {
 			response.total && setTotal(response.total);
 			response.data && setData(response.data as Forms);
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to fetch forms', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -69,7 +74,10 @@ const FormsList: React.FC = () => {
 
 			navigate(getToLink(`forms/${response.id}`));
 		} catch (error) {
-			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __('Failed to create form', 'quillcrm'),
+			});
 		} finally {
 			setIsSaving(false);
 		}
@@ -97,7 +105,7 @@ const FormsList: React.FC = () => {
 				</div>
 				<div>
 					<Button type="primary" onClick={() => setVisible(true)}>
-						{__('Create List', 'quillcrm')}
+						{__('Create Form', 'quillcrm')}
 					</Button>
 				</div>
 			</div>

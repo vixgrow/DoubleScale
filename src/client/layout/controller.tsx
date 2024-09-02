@@ -31,6 +31,9 @@ import LinkTrigger from '../pages/link-trigger';
 import Integrations from '../pages/intergrations';
 import Templates from '../pages/templates';
 import Template from '../pages/template';
+import Automations from '../pages/automations';
+import Automation from '../pages/automation';
+import AbandonedCartsList from '../pages/abandond-carts';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -138,4 +141,23 @@ registerAdminPage('template', {
 	component: () => <Template />,
 	label: __('Template', 'quillcrm'),
 	hidden: true,
+});
+
+registerAdminPage('automations', {
+	path: 'automations',
+	component: () => <Automations />,
+	label: __('Automations', 'quillcrm'),
+});
+
+registerAdminPage('automation', {
+	path: 'automations/:id/:tab?',
+	component: () => <Automation />,
+	label: __('Automation', 'quillcrm'),
+	hidden: true,
+});
+
+registerAdminPage('abandoned-carts', {
+	path: 'abandoned-carts',
+	component: () => <AbandonedCartsList />,
+	label: __('Abandoned Carts', 'quillcrm'),
 });

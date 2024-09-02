@@ -137,4 +137,15 @@ abstract class Goal {
 	public function enqueue_goal( $contact, $step ) {
 		QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automation_goal', $step, $contact->id );
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array();
+	}
 }

@@ -102,6 +102,7 @@ final class Goals_Manager {
 		$this->sources[ $goal->source ]['groups'][ $goal->group ]['goals'][ $goal->slug ] = array(
 			'label'       => $goal->name,
 			'description' => $goal->description,
+			'fields'      => $goal->get_fields(),
 		);
 	}
 

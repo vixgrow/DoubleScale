@@ -6,7 +6,7 @@ import { createContext, useContext } from 'react';
 /**
  * Internal dependencies
  */
-import { Automation, AutomationStep } from '../../types';
+import { Automation, AutomationStep } from '@quillcrm/client';
 
 export const AutomationContext = createContext<{
 	automation: Automation | null;

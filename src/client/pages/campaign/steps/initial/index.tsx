@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Button, Input, Card, Typography, Checkbox } from 'antd';
+import { Button, Card } from 'antd';
 
 /**
  * Internal dependencies
@@ -14,6 +14,7 @@ import { Button, Input, Card, Typography, Checkbox } from 'antd';
 import './style.scss';
 import { useCampaignContext } from '../../state/context';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { Field } from '@quillcrm/components';
 
 const Initial: React.FC = () => {
 	const {
@@ -44,48 +45,24 @@ const Initial: React.FC = () => {
 			{campaign && (
 				<>
 					<div className="qcrm-fields">
-						<div className="qcrm-field">
-							<div className="qcrm-field-label">
-								<Typography.Text>
-									{__('Name', 'quillcrm')}
-								</Typography.Text>
-							</div>
-							<div className="qcrm-field-input">
-								<Input
-									value={campaign.name}
-									onChange={(e) => {
-										updateCampaign({
-											name: e.target.value,
-										});
-									}}
-								/>
-							</div>
-						</div>
-						<div
-							className="qcrm-field"
-							style={{
-								flexDirection: 'row',
-								alignItems: 'center',
-								marginBottom: 20,
+						<Field
+							label={__('Name', 'quillcrm')}
+							value={campaign.name}
+							onChange={(name) => {
+								updateCampaign({
+									name,
+								});
 							}}
-						>
-							<div className="qcrm-field-label">
-								<Typography.Text>
-									{__('A/B Test', 'quillcrm')}
-								</Typography.Text>
-							</div>
-							<div className="qcrm-field-input">
-								<Checkbox
-									checked={campaign.settings?.ab_test}
-									onChange={(e) => {
-										updateSettings(
-											'ab_test',
-											e.target.checked
-										);
-									}}
-								/>
-							</div>
-						</div>
+							type="text"
+						/>
+						<Field
+							label={__('A/B Test', 'quillcrm')}
+							value={campaign.settings?.ab_test}
+							onChange={(ab_test) => {
+								updateSettings('ab_test', ab_test);
+							}}
+							type="checkbox"
+						/>
 					</div>
 					<div className="qcrm-actions">
 						<Button

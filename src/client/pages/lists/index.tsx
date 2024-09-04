@@ -17,7 +17,8 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
  * Internal dependencies
  */
 import './style.scss';
-import { List as ContactList } from '../types';
+import { List as ContactList } from '@quillcrm/client';
+import { Field } from '@quillcrm/components';
 
 const { Column } = Table;
 
@@ -240,62 +241,46 @@ const Lists: React.FC = () => {
 				confirmLoading={isSaving}
 			>
 				<div className="qcrm-fields">
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Name', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input
-								value={
-									selectedList ? selectedList.name : list.name
-								}
-								onChange={(e) => {
-									if (selectedList) {
-										setSelectedList({
-											...selectedList,
-											name: e.target.value,
-										});
-									} else {
-										setList({
-											...list,
-											name: e.target.value,
-										});
-									}
-								}}
-							/>
-						</div>
-					</div>
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Description', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input.TextArea
-								value={
-									selectedList
-										? selectedList.description ?? ''
-										: list.description
-								}
-								onChange={(e) => {
-									if (selectedList) {
-										setSelectedList({
-											...selectedList,
-											description: e.target.value,
-										});
-									} else {
-										setList({
-											...list,
-											description: e.target.value,
-										});
-									}
-								}}
-							/>
-						</div>
-					</div>
+					<Field
+						label={__('Name', 'quillcrm')}
+						value={selectedList ? selectedList.name : list.name}
+						onChange={(value) => {
+							if (selectedList) {
+								setSelectedList({
+									...selectedList,
+									name: value,
+								});
+							} else {
+								setList({
+									...list,
+									name: value,
+								});
+							}
+						}}
+						type="text"
+					/>
+					<Field
+						label={__('Description', 'quillcrm')}
+						value={
+							selectedList
+								? selectedList.description ?? ''
+								: list.description
+						}
+						onChange={(value) => {
+							if (selectedList) {
+								setSelectedList({
+									...selectedList,
+									description: value,
+								});
+							} else {
+								setList({
+									...list,
+									description: value,
+								});
+							}
+						}}
+						type="textarea"
+					/>
 				</div>
 			</Modal>
 		</div>

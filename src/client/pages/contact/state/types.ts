@@ -9,7 +9,7 @@ import {
 	UPDATE_NOTE,
 	SET_AUTOMATION_CONTACTS,
 } from './constants';
-import type { Contact, Note, AutomationContact } from '../../types';
+import type { Contact, Note, AutomationContact } from '@quillcrm/client';
 
 export type setContact = {
 	type: typeof SET_CONTACT;

@@ -17,7 +17,8 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
  * Internal dependencies
  */
 import './style.scss';
-import { Tag as ContactTag } from '../types';
+import { Tag as ContactTag } from '@quillcrm/client';
+import { Field } from '@quillcrm/components';
 
 const { Column } = Table;
 
@@ -234,62 +235,46 @@ const Tags: React.FC = () => {
 				confirmLoading={isSaving}
 			>
 				<div className="qcrm-fields">
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Name', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input
-								value={
-									selectedTag ? selectedTag.name : tag.name
-								}
-								onChange={(e) => {
-									if (selectedTag) {
-										setSelectedTag({
-											...selectedTag,
-											name: e.target.value,
-										});
-									} else {
-										setTag({
-											...tag,
-											name: e.target.value,
-										});
-									}
-								}}
-							/>
-						</div>
-					</div>
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Description', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input.TextArea
-								value={
-									selectedTag
-										? selectedTag.description ?? ''
-										: tag.description
-								}
-								onChange={(e) => {
-									if (selectedTag) {
-										setSelectedTag({
-											...selectedTag,
-											description: e.target.value,
-										});
-									} else {
-										setTag({
-											...tag,
-											description: e.target.value,
-										});
-									}
-								}}
-							/>
-						</div>
-					</div>
+					<Field
+						label={__('Name', 'quillcrm')}
+						value={selectedTag ? selectedTag.name : tag.name}
+						onChange={(value) => {
+							if (selectedTag) {
+								setSelectedTag({
+									...selectedTag,
+									name: value,
+								});
+							} else {
+								setTag({
+									...tag,
+									name: value,
+								});
+							}
+						}}
+						type="text"
+					/>
+					<Field
+						label={__('Description', 'quillcrm')}
+						value={
+							selectedTag
+								? selectedTag.description ?? ''
+								: tag.description
+						}
+						onChange={(value) => {
+							if (selectedTag) {
+								setSelectedTag({
+									...selectedTag,
+									description: value,
+								});
+							} else {
+								setTag({
+									...tag,
+									description: value,
+								});
+							}
+						}}
+						type="textarea"
+					/>
 				</div>
 			</Modal>
 		</div>

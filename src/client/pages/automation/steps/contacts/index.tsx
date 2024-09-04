@@ -16,7 +16,7 @@ import { Table, Tag } from 'antd';
  * Internal dependencies
  */
 import './style.scss';
-import type { AutomationContact } from '../../../types';
+import type { AutomationContact } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { useParams } from '@quillcrm/navigation';
 

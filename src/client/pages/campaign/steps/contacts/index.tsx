@@ -24,7 +24,7 @@ import { map } from 'lodash';
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useCampaignContext } from '../../state/context';
-import type { Filter as FilterType } from '../../../types';
+import type { Filter as FilterType } from '@quillcrm/client';
 import Filter from './filter';
 import ConfigAPI from '@quillcrm/config';
 

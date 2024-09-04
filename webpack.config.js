@@ -20,6 +20,9 @@ module.exports = {
             '@quillcrm/navigation': path.resolve(__dirname, 'src/navigation'),
             '@quillcrm/store': path.resolve(__dirname, 'src/store'),
             '@quillcrm/config': path.resolve(__dirname, 'src/config'),
+            '@quillcrm/client': path.resolve(__dirname, 'src/client/index.tsx'),
+            '@quillcrm/components': path.resolve(__dirname, 'src/components'),
+            '@quillcrm/utils': path.resolve(__dirname, 'src/utils'),
         },
     },
     plugins: [

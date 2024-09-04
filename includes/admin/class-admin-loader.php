@@ -155,7 +155,7 @@ class Admin_Loader {
 		global $submenu;
 		$user = wp_get_current_user();
 
-		$asset_file   = QUILLCRM_PLUGIN_DIR . 'build/index.asset.php';
+		$asset_file   = QUILLCRM_PLUGIN_DIR . 'build/client/index.asset.php';
 		$asset        = file_exists( $asset_file ) ? require $asset_file : null;
 		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : array();
 		$version      = isset( $asset['version'] ) ? $asset['version'] : QUILLCRM_VERSION;
@@ -175,7 +175,7 @@ class Admin_Loader {
 
 		wp_register_script(
 			'qcrm-admin',
-			QUILLCRM_PLUGIN_URL . 'build/index.js',
+			QUILLCRM_PLUGIN_URL . 'build/client/index.js',
 			array_merge( $dependencies, array( 'qcrm-config' ) ),
 			$version,
 			true
@@ -184,7 +184,7 @@ class Admin_Loader {
 		// Register styles.
 		wp_register_style(
 			'qcrm-admin',
-			QUILLCRM_PLUGIN_URL . 'build/style.css',
+			QUILLCRM_PLUGIN_URL . 'build/client/style.css',
 			array(),
 			$version
 		);

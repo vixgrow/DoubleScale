@@ -12,6 +12,8 @@ import { ConfigProvider } from 'antd';
  * Internal dependencies
  */
 import PageLayout from './layout';
+import '@quillcrm/store';
+export * from './types';
 
 const appRoot = document.getElementById('qcrm-admin-root');
 
@@ -19,19 +21,14 @@ if (appRoot) {
 	createRoot(appRoot).render(
 		<ConfigProvider
 			theme={{
+				token: {
+					colorPrimary: '#6d78d8',
+				},
 				components: {
 					Button: {
-						borderRadius: 0,
-						borderRadiusLG: 0,
-						borderRadiusSM: 0,
-						borderRadiusOuter: 0,
 						algorithm: false,
 					},
 					Input: {
-						borderRadius: 0,
-						borderRadiusLG: 0,
-						borderRadiusSM: 0,
-						borderRadiusOuter: 0,
 						paddingBlock: 14,
 						paddingInline: 14,
 					},

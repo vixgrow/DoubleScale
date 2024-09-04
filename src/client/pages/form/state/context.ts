@@ -6,7 +6,7 @@ import { createContext, useContext } from 'react';
 /**
  * Internal dependencies
  */
-import { Form } from '../../types';
+import { Form } from '@quillcrm/client';
 
 export const FormContext = createContext<{
 	form: Form | null;

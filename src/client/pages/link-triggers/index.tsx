@@ -13,7 +13,6 @@ import { useDispatch } from '@wordpress/data';
 import {
 	Table,
 	Tag as AntTag,
-	Typography,
 	Modal,
 	Input,
 	Button,
@@ -26,8 +25,9 @@ import { MoreOutlined } from '@ant-design/icons';
  * Internal dependencies
  */
 import './style.scss';
-import type { LinkTrigger } from '../types';
+import type { LinkTrigger } from '@quillcrm/client';
 import { NavLink, useNavigate, getToLink } from '@quillcrm/navigation';
+import { Field } from '@quillcrm/components';
 
 const { Column } = Table;
 
@@ -208,24 +208,14 @@ const LinkTriggerList: React.FC = () => {
 				confirmLoading={isSaving}
 			>
 				<div className="qcrm-fields">
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Name', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input
-								value={link.name}
-								onChange={(e) => {
-									setLinkTrigger({
-										...link,
-										name: e.target.value,
-									});
-								}}
-							/>
-						</div>
-					</div>
+					<Field
+						label={__('Name', 'quillcrm')}
+						value={link.name}
+						onChange={(value) =>
+							setLinkTrigger({ ...link, name: value })
+						}
+						type="text"
+					/>
 				</div>
 			</Modal>
 		</div>

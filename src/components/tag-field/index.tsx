@@ -17,7 +17,7 @@ import { map } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import { Tag } from '../../../types';
+import type { Tag } from '@quillcrm/client';
 
 interface Props {
 	value: string[];

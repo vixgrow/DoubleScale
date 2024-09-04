@@ -17,17 +17,19 @@ import { map } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import { List } from '../../../types';
+import type { LinkTrigger } from '@quillcrm/client';
 
 interface Props {
 	value: string[];
 	onChange: (value: string[]) => void;
 }
 
-const ListField = ({ value, onChange }: Props) => {
-	const [savedLists, setSavedLists] = useState<List[]>([]);
+const LinkTriggerField = ({ value, onChange }: Props) => {
+	const [savedLinkTriggers, setSavedLinkTriggers] = useState<LinkTrigger[]>(
+		[]
+	);
 
-	const fetchLists = async (keyword = '', ids: any = []) => {
+	const fetchLinkTriggers = async (keyword = '', ids: any = []) => {
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/lists', {
@@ -36,9 +38,9 @@ const ListField = ({ value, onChange }: Props) => {
 				}),
 			})) as any;
 
-			setSavedLists([...savedLists, ...response.data]);
+			setSavedLinkTriggers([...savedLinkTriggers, ...response.data]);
 
-			return response.data.map((list: List) => ({
+			return response.data.map((list: LinkTrigger) => ({
 				label: list.name,
 				value: list.id,
 			}));
@@ -50,7 +52,7 @@ const ListField = ({ value, onChange }: Props) => {
 
 	useEffect(() => {
 		if (value?.length) {
-			fetchLists('', value);
+			fetchLinkTriggers('', value);
 		}
 	}, []);
 
@@ -62,13 +64,18 @@ const ListField = ({ value, onChange }: Props) => {
 						<Flex vertical={true} gap={10} style={{ flex: 1 }}>
 							<AsyncSelect
 								loadOptions={(inputValue, callback) => {
-									fetchLists(inputValue).then((data) => {
-										callback(data);
-									});
+									fetchLinkTriggers(inputValue).then(
+										(data) => {
+											callback(data);
+										}
+									);
 								}}
 								onChange={(val: any) => {
-									const newLists = [...value, val.value];
-									onChange(newLists);
+									const newLinkTriggers = [
+										...value,
+										val.value,
+									];
+									onChange(newLinkTriggers);
 								}}
 								placeholder={__('Select list', 'quillcrm')}
 							/>
@@ -79,15 +86,17 @@ const ListField = ({ value, onChange }: Props) => {
 											key={list_id.id}
 											closable
 											onClose={() => {
-												const newLists = value.filter(
-													(list) => list !== list_id
-												);
+												const newLinkTriggers =
+													value.filter(
+														(list) =>
+															list !== list_id
+													);
 
-												onChange(newLists);
+												onChange(newLinkTriggers);
 											}}
 										>
 											{
-												savedLists.find(
+												savedLinkTriggers.find(
 													(list) =>
 														list.id === list_id
 												)?.name
@@ -104,4 +113,4 @@ const ListField = ({ value, onChange }: Props) => {
 	);
 };
 
-export default ListField;
+export default LinkTriggerField;

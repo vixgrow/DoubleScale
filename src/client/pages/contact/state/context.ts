@@ -6,7 +6,7 @@ import { createContext, useContext } from 'react';
 /**
  * Internal dependencies
  */
-import { Contact, Note, AutomationContact } from '../../types';
+import { Contact, Note, AutomationContact } from '@quillcrm/client';
 
 export const ContactContext = createContext<{
 	contact: Contact | null;

@@ -26,10 +26,11 @@ import { map } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import type { Automations, Automation } from '../types';
+import type { Automations, Automation } from '@quillcrm/client';
 import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
 import type { TriggersGroup } from '@quillcrm/config';
+import { Field } from '@quillcrm/components';
 
 const { Column } = Table;
 const { Search } = Input;
@@ -238,24 +239,14 @@ const AutomationsList: React.FC = () => {
 				style={{ minWidth: '800px' }}
 			>
 				<div className="qcrm-fields" style={{ marginBottom: '20px' }}>
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Name', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input
-								value={automation.name}
-								onChange={(e) => {
-									setAutomation({
-										...automation,
-										name: e.target.value,
-									});
-								}}
-							/>
-						</div>
-					</div>
+					<Field
+						label={__('Name', 'quillcrm')}
+						value={automation.name}
+						onChange={(value) =>
+							setAutomation({ ...automation, name: value })
+						}
+						type="text"
+					/>
 					<div className="qcrm-field">
 						<div className="qcrm-field-label">
 							<Typography.Text>

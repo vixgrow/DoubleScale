@@ -15,7 +15,7 @@ import { Button, Card, Tabs } from 'antd';
 import './style.scss';
 import { useCampaignContext } from '../../state/context';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
-import Template from './template';
+import { Template } from '@quillcrm/components';
 
 const Templates: React.FC = () => {
 	const { campaign, isLoading, saveCampaign, isSaving, updateSettings } =

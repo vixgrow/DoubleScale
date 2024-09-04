@@ -28,7 +28,7 @@ import { map, isEmpty } from 'lodash';
 import './style.scss';
 import { useFormContext } from '../../state/context';
 import ConfigAPI from '@quillcrm/config';
-import { Tag, List } from '../../../types';
+import { Tag, List } from '@quillcrm/client';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 
 const FieldsCard: React.FC = () => {

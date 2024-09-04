@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { SET_CAMPAIGN, UPDATE_CAMPAIGN, UPDATE_SETTINGS } from './constants';
-import type { Campaign } from '../../types';
+import type { Campaign } from '@quillcrm/client';
 
 export type setCampaign = {
 	type: typeof SET_CAMPAIGN;

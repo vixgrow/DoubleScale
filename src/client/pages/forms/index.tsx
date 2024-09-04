@@ -10,15 +10,16 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Table, Tag as AntTag, Input, Button, Modal, Typography } from 'antd';
+import { Table, Tag as AntTag, Input, Button, Modal } from 'antd';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Forms, Form } from '../types';
+import type { Forms, Form } from '@quillcrm/client';
 import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
+import { Field } from '@quillcrm/components';
 
 const { Column } = Table;
 const { Search } = Input;
@@ -186,24 +187,17 @@ const FormsList: React.FC = () => {
 				confirmLoading={isSaving}
 			>
 				<div className="qcrm-fields">
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Name', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input
-								value={form.name}
-								onChange={(e) => {
-									setForm({
-										...form,
-										name: e.target.value,
-									});
-								}}
-							/>
-						</div>
-					</div>
+					<Field
+						label={__('Name', 'quillcrm')}
+						value={form.name}
+						onChange={(value) =>
+							setForm({
+								...form,
+								name: value,
+							})
+						}
+						type="text"
+					/>
 				</div>
 			</Modal>
 		</div>

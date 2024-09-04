@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import type { Contact, Note, AutomationContact } from '../../types';
+import type { Contact, Note, AutomationContact } from '@quillcrm/client';
 import {
 	SET_CONTACT,
 	SET_NOTES,

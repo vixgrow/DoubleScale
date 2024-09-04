@@ -16,7 +16,7 @@ import { Typography, Table, Input, Button, Modal } from 'antd';
  * Internal dependencies
  */
 import './style.scss';
-import { Campaign } from '../types';
+import { Campaign } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 
 const { Column } = Table;

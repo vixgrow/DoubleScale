@@ -21,7 +21,7 @@ import {
 	SET_AUTOMATION_CONTACTS,
 } from './constants';
 
-import type { Contact, Note, AutomationContact } from '../../types';
+import type { Contact, Note, AutomationContact } from '@quillcrm/client';
 
 import type {
 	ContactAction,

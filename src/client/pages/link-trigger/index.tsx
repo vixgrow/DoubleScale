@@ -10,24 +10,15 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import {
-	Card,
-	Button,
-	Input,
-	Flex,
-	Switch,
-	Typography,
-	Tag as AntTag,
-} from 'antd';
-import { map } from 'lodash';
-import AsyncSelect from 'react-select/async';
+import { Card, Button, Flex, Typography } from 'antd';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { LinkTrigger as LinkTriggerType, Tag, List } from '../types';
+import { LinkTrigger as LinkTriggerType, Tag, List } from '@quillcrm/client';
 import { useParams } from '@quillcrm/navigation';
+import { Field } from '@quillcrm/components';
 
 const LinkTrigger: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
@@ -194,388 +185,78 @@ const LinkTrigger: React.FC = () => {
 				{link && (
 					<>
 						<div className="qcrm-fields">
-							<div className="qcrm-field">
-								<div className="qcrm-field-label">
-									<Typography.Text>
-										{__('Name', 'quillcrm')}
-									</Typography.Text>
-								</div>
-								<div className="qcrm-field-input">
-									<Input
-										value={link.name}
-										onChange={(e) =>
-											setLinkTrigger({
-												...link,
-												name: e.target.value,
-											})
+							<Field
+								label={__('Name', 'quillcrm')}
+								value={link.name}
+								onChange={(value) =>
+									setLinkTrigger({ ...link, name: value })
+								}
+								type="text"
+							/>
+							<Field
+								label={__('Redirect URL', 'quillcrm')}
+								value={settings.redirect_url}
+								onChange={(value) =>
+									updateSettings({ redirect_url: value })
+								}
+								type="url"
+							/>
+							<Flex vertical={true} gap={20}>
+								<Typography.Text>
+									{__('Contact', 'quillcrm')}
+								</Typography.Text>
+								<Flex gap={10}>
+									<Field
+										label={__('Add to List', 'quillcrm')}
+										value={settings.add_lists}
+										onChange={(value) =>
+											updateSettings({ add_lists: value })
 										}
+										type="lists"
 									/>
-								</div>
-							</div>
-							<div className="qcrm-field">
-								<div className="qcrm-field-label">
-									<Typography.Text>
-										{__('Redirect URL', 'quillcrm')}
-									</Typography.Text>
-								</div>
-								<div className="qcrm-field-input">
-									<Input
-										value={settings.redirect_url}
-										onChange={(e) =>
+									<Field
+										label={__('Add Tags', 'quillcrm')}
+										value={settings.add_tags}
+										onChange={(value) =>
+											updateSettings({ add_tags: value })
+										}
+										type="tags"
+									/>
+								</Flex>
+								<Flex gap={10}>
+									<Field
+										label={__(
+											'Remove from List',
+											'quillcrm'
+										)}
+										value={settings.remove_lists}
+										onChange={(value) =>
 											updateSettings({
-												redirect_url: e.target.value,
+												remove_lists: value,
 											})
 										}
+										type="lists"
 									/>
-								</div>
-							</div>
-							<div className="qcrm-field">
-								<div className="qcrm-field-label">
-									<Typography.Text>
-										{__('Contact', 'quillcrm')}
-									</Typography.Text>
-								</div>
-								<div className="qcrm-field-input">
-									<Flex vertical={true} gap={10}>
-										<Flex justify="space-between" gap={10}>
-											<Flex
-												vertical={true}
-												gap={10}
-												style={{ flex: 1 }}
-											>
-												<Typography.Text>
-													{__(
-														'Add Lists',
-														'quillcrm'
-													)}
-												</Typography.Text>
-												<AsyncSelect
-													loadOptions={(
-														inputValue,
-														callback
-													) => {
-														fetchLists(
-															inputValue
-														).then((data) => {
-															callback(data);
-														});
-													}}
-													onChange={(value: any) => {
-														const newLists =
-															settings?.add_lists
-																? [
-																		...settings.add_lists,
-																		value.value,
-																	]
-																: [value.value];
-														updateSettings({
-															add_lists: newLists,
-														});
-													}}
-													placeholder={__(
-														'Select list',
-														'quillcrm'
-													)}
-												/>
-												{settings?.add_lists && (
-													<Flex gap={10}>
-														{map(
-															settings.add_lists,
-															(list_id) => (
-																<AntTag
-																	key={
-																		list_id.id
-																	}
-																	closable
-																	onClose={() => {
-																		updateSettings(
-																			{
-																				add_lists:
-																					settings.add_lists.filter(
-																						(
-																							list
-																						) =>
-																							list !==
-																							list_id
-																					),
-																			}
-																		);
-																	}}
-																>
-																	{
-																		savedLists.find(
-																			(
-																				list
-																			) =>
-																				list.id ===
-																				list_id
-																		)?.name
-																	}
-																</AntTag>
-															)
-														)}
-													</Flex>
-												)}
-											</Flex>
-											<Flex
-												vertical={true}
-												gap={10}
-												style={{ flex: 1 }}
-											>
-												<Typography.Text>
-													{__('Add Tags', 'quillcrm')}
-												</Typography.Text>
-												<AsyncSelect
-													loadOptions={(
-														inputValue,
-														callback
-													) => {
-														fetchTags(
-															inputValue
-														).then((data) => {
-															callback(data);
-														});
-													}}
-													onChange={(value: any) => {
-														const newTags =
-															settings?.add_tags
-																? [
-																		...settings.add_tags,
-																		value.value,
-																	]
-																: [value.value];
-														updateSettings({
-															add_tags: newTags,
-														});
-													}}
-													placeholder={__(
-														'Select tag',
-														'quillcrm'
-													)}
-												/>
-												{settings?.add_tags && (
-													<Flex gap={10}>
-														{map(
-															settings.add_tags,
-															(tag_id) => (
-																<AntTag
-																	key={
-																		tag_id.id
-																	}
-																	closable
-																	onClose={() => {
-																		updateSettings(
-																			{
-																				add_tags:
-																					settings.add_tags.filter(
-																						(
-																							tag
-																						) =>
-																							tag !==
-																							tag_id
-																					),
-																			}
-																		);
-																	}}
-																>
-																	{
-																		savedTags.find(
-																			(
-																				tag
-																			) =>
-																				tag.id ===
-																				tag_id
-																		)?.name
-																	}
-																</AntTag>
-															)
-														)}
-													</Flex>
-												)}
-											</Flex>
-										</Flex>
-										<Flex justify="space-between" gap={10}>
-											<Flex
-												vertical={true}
-												gap={10}
-												style={{ flex: 1 }}
-											>
-												<Typography.Text>
-													{__(
-														'Remove Lists',
-														'quillcrm'
-													)}
-												</Typography.Text>
-												<AsyncSelect
-													loadOptions={(
-														inputValue,
-														callback
-													) => {
-														fetchLists(
-															inputValue
-														).then((data) => {
-															callback(data);
-														});
-													}}
-													onChange={(value: any) => {
-														const newLists =
-															settings?.remove_lists
-																? [
-																		...settings.remove_lists,
-																		value.value,
-																	]
-																: [value.value];
-														updateSettings({
-															remove_lists:
-																newLists,
-														});
-													}}
-													placeholder={__(
-														'Select list',
-														'quillcrm'
-													)}
-												/>
-												{settings?.remove_lists && (
-													<Flex gap={10}>
-														{map(
-															settings.remove_lists,
-															(list_id) => (
-																<AntTag
-																	key={
-																		list_id.id
-																	}
-																	closable
-																	onClose={() => {
-																		updateSettings(
-																			{
-																				remove_lists:
-																					settings.remove_lists.filter(
-																						(
-																							list
-																						) =>
-																							list !==
-																							list_id
-																					),
-																			}
-																		);
-																	}}
-																>
-																	{
-																		savedLists.find(
-																			(
-																				list
-																			) =>
-																				list.id ===
-																				list_id
-																		)?.name
-																	}
-																</AntTag>
-															)
-														)}
-													</Flex>
-												)}
-											</Flex>
-											<Flex
-												vertical={true}
-												gap={10}
-												style={{ flex: 1 }}
-											>
-												<Typography.Text>
-													{__(
-														'Remove Tags',
-														'quillcrm'
-													)}
-												</Typography.Text>
-												<AsyncSelect
-													loadOptions={(
-														inputValue,
-														callback
-													) => {
-														fetchTags(
-															inputValue
-														).then((data) => {
-															callback(data);
-														});
-													}}
-													onChange={(value: any) => {
-														const newTags =
-															settings?.remove_tags
-																? [
-																		...settings.remove_tags,
-																		value.value,
-																	]
-																: [value.value];
-														updateSettings({
-															remove_tags:
-																newTags,
-														});
-													}}
-													placeholder={__(
-														'Select tag',
-														'quillcrm'
-													)}
-												/>
-												{settings?.remove_tags && (
-													<Flex gap={10}>
-														{map(
-															settings.remove_tags,
-															(tag_id) => (
-																<AntTag
-																	key={
-																		tag_id.id
-																	}
-																	closable
-																	onClose={() => {
-																		updateSettings(
-																			{
-																				remove_tags:
-																					settings.remove_tags.filter(
-																						(
-																							tag
-																						) =>
-																							tag !==
-																							tag_id
-																					),
-																			}
-																		);
-																	}}
-																>
-																	{
-																		savedTags.find(
-																			(
-																				tag
-																			) =>
-																				tag.id ===
-																				tag_id
-																		)?.name
-																	}
-																</AntTag>
-															)
-														)}
-													</Flex>
-												)}
-											</Flex>
-										</Flex>
-									</Flex>
-								</div>
-							</div>
-							<div className="qcrm-field">
-								<div className="qcrm-field-label">
-									<Typography.Text>
-										{__('Auto Login', 'quillcrm')}
-									</Typography.Text>
-								</div>
-								<div className="qcrm-field-input">
-									<Switch
-										checked={settings.auto_login}
-										onChange={(checked) =>
+									<Field
+										label={__('Remove Tags', 'quillcrm')}
+										value={settings.remove_tags}
+										onChange={(value) =>
 											updateSettings({
-												auto_login: checked,
+												remove_tags: value,
 											})
 										}
+										type="tags"
 									/>
-								</div>
-							</div>
+								</Flex>
+							</Flex>
+							<Field
+								label={__('Auto Login', 'quillcrm')}
+								value={settings.auto_login}
+								onChange={(value) =>
+									updateSettings({ auto_login: value })
+								}
+								type="switch"
+							/>
 						</div>
 					</>
 				)}

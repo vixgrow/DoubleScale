@@ -6,7 +6,7 @@ import { createContext, useContext } from 'react';
 /**
  * Internal dependencies
  */
-import { Campaign } from '../../types';
+import { Campaign } from '@quillcrm/client';
 
 export const CampaignContext = createContext<{
 	campaign: Campaign | null;

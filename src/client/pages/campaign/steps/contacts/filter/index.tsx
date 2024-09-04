@@ -20,7 +20,7 @@ import Select from 'react-select';
  * Internal dependencies
  */
 import './style.scss';
-import type { Filter as FilterType, FilterSettings } from '../../../../types';
+import type { Filter as FilterType, FilterSettings } from '@quillcrm/client';
 
 interface FilterProps {
 	filterSettings: FilterSettings;

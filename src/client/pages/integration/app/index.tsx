@@ -10,7 +10,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Typography, Input, Modal } from 'antd';
+import { Modal } from 'antd';
 import { map } from 'lodash';
 
 /**
@@ -18,6 +18,7 @@ import { map } from 'lodash';
  */
 import './style.scss';
 import type { Integration as IntegrationType } from '@quillcrm/config';
+import { Field } from '@quillcrm/components';
 
 interface IntegrationProps {
 	open: boolean;
@@ -92,26 +93,18 @@ const App: React.FC<IntegrationProps> = ({
 			<div className="qcrm-fields" style={{ marginBottom: 20 }}>
 				{map(fields.app['properties'], (field, key) => {
 					return (
-						<div className="qcrm-field">
-							<div className="qcrm-field">
-								<div className="qcrm-field-label">
-									<Typography.Text>
-										{field.label}
-									</Typography.Text>
-								</div>
-								<div className="qcrm-field-input">
-									<Input
-										value={app[key]}
-										onChange={(e) => {
-											setApp({
-												...app,
-												[key]: e.target.value,
-											});
-										}}
-									/>
-								</div>
-							</div>
-						</div>
+						<Field
+							key={key}
+							label={field.label}
+							value={app[key]}
+							onChange={(value) => {
+								setApp({
+									...app,
+									[key]: value,
+								});
+							}}
+							type="text"
+						/>
 					);
 				})}
 			</div>

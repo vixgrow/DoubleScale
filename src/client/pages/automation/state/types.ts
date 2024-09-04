@@ -10,7 +10,7 @@ import {
 	REMOVE_STEP,
 	UPDATE_STEP,
 } from './constants';
-import type { Automation, AutomationStep } from '../../types';
+import type { Automation, AutomationStep } from '@quillcrm/client';
 
 export type setAutomation = {
 	type: typeof SET_AUTOMATION;

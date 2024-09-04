@@ -26,8 +26,13 @@ import { map, keys, omit } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import { CustomFieldsGroups, CustomFieldsGroup, CustomField } from '../types';
+import {
+	CustomFieldsGroups,
+	CustomFieldsGroup,
+	CustomField,
+} from '@quillcrm/client';
 import ConfigAPI from '@quillcrm/config';
+import { Field } from '@quillcrm/components';
 
 const { Column } = Table;
 
@@ -75,6 +80,8 @@ const CustomFields: React.FC = () => {
 			value: group.id,
 		})),
 	];
+
+	console.log('groupOptions', groupOptions, typesOptions);
 
 	const fetchGroups = async () => {
 		setLoading(true);
@@ -298,97 +305,74 @@ const CustomFields: React.FC = () => {
 				]}
 			>
 				<div className="qcrm-fields">
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Name', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input
-								value={
-									selectedField
-										? selectedField.name
-										: customField.name
-								}
-								onChange={(e) => {
-									if (selectedField) {
-										setSelectedField({
-											...selectedField,
-											name: e.target.value,
-										});
-									} else {
-										setCustomField({
-											...customField,
-											name: e.target.value,
-										});
-									}
-								}}
-							/>
-						</div>
-					</div>
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Type', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Select
-								options={typesOptions}
-								value={
-									selectedField
-										? selectedField.type
-										: customField.type
-								}
-								onChange={(value) => {
-									if (selectedField) {
-										setSelectedField({
-											...selectedField,
-											type: value,
-										});
-									} else {
-										setCustomField({
-											...customField,
-											type: value,
-										});
-									}
-								}}
-								style={{ width: '100%' }}
-							/>
-						</div>
-					</div>
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Group', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Select
-								options={groupOptions}
-								value={
-									selectedField
-										? selectedField.group_id
-										: customField.group_id
-								}
-								onChange={(value) => {
-									if (selectedField) {
-										setSelectedField({
-											...selectedField,
-											group_id: value,
-										});
-									} else {
-										setCustomField({
-											...customField,
-											group_id: value,
-										});
-									}
-								}}
-								style={{ width: '100%' }}
-							/>
-						</div>
-					</div>
+					<Field
+						label={__('Name', 'quillcrm')}
+						value={
+							selectedField
+								? selectedField.name
+								: customField.name
+						}
+						onChange={(value) => {
+							if (selectedField) {
+								setSelectedField({
+									...selectedField,
+									name: value,
+								});
+							} else {
+								setCustomField({
+									...customField,
+									name: value,
+								});
+							}
+						}}
+						type="text"
+					/>
+					<Field
+						label={__('Type', 'quillcrm')}
+						value={
+							selectedField
+								? selectedField.type
+								: customField.type
+						}
+						onChange={(value) => {
+							if (selectedField) {
+								setSelectedField({
+									...selectedField,
+									type: value,
+								});
+							} else {
+								setCustomField({
+									...customField,
+									type: value,
+								});
+							}
+						}}
+						type="select"
+						options={typesOptions}
+					/>
+					<Field
+						label={__('Group', 'quillcrm')}
+						value={
+							selectedField
+								? selectedField.group_id
+								: customField.group_id
+						}
+						onChange={(value) => {
+							if (selectedField) {
+								setSelectedField({
+									...selectedField,
+									group_id: value,
+								});
+							} else {
+								setCustomField({
+									...customField,
+									group_id: value,
+								});
+							}
+						}}
+						type="select"
+						options={groupOptions as any}
+					/>
 				</div>
 			</Modal>
 		</div>

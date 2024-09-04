@@ -20,7 +20,7 @@ import './style.scss';
 import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
-import { Automation as AutomationType } from '../types';
+import { Automation as AutomationType } from '@quillcrm/client';
 import Workflow from './steps/workflow';
 import Contacts from './steps/contacts';
 

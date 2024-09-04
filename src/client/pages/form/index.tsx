@@ -20,7 +20,7 @@ import './style.scss';
 import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
-import { Form as FormType } from '../types';
+import { Form as FormType } from '@quillcrm/client';
 import InitialStep from './steps/initial';
 import SettingsStep from './steps/settings';
 import Overview from './overview';

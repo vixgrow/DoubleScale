@@ -13,7 +13,7 @@ import { isObject } from 'lodash';
  * Internal dependencies
  */
 import { SET_FORM, UPDATE_FORM, UPDATE_SETTINGS } from './constants';
-import type { Form } from '../../types';
+import type { Form } from '@quillcrm/client';
 import type { FormAction } from './types';
 
 const form = (state: Form | null = null, action: FormAction) => {

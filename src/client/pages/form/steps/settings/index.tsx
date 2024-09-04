@@ -3,26 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import {
-	Button,
-	Card,
-	Typography,
-	Flex,
-	Input,
-	Tag as AntTag,
-	Switch,
-} from 'antd';
+import { Button, Card, Typography, Flex, Input, Switch } from 'antd';
 import { map } from 'lodash';
 import { ThreeDots as Loader } from 'react-loader-spinner';
 import Select from 'react-select';
-import AsyncSelect from 'react-select/async';
 
 /**
  * Internal dependencies
@@ -31,7 +20,7 @@ import './style.scss';
 import { useFormContext } from '../../state/context';
 import ConfigAPI from '@quillcrm/config';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { Tag, List } from '../../../types';
+import { ListField, TagField } from '@quillcrm/components';
 
 const Settings: React.FC = () => {
 	const { form, isLoading, saveForm, isSaving, updateSettings } =
@@ -43,8 +32,6 @@ const Settings: React.FC = () => {
 		: null;
 	const [formFields, setFormFields] = useState(null);
 	const [isFetching, setIsFetching] = useState(false);
-	const [savedTags, setSavedTags] = useState<Tag[]>([]);
-	const [savedLists, setSavedLists] = useState<List[]>([]);
 	const { getAjaxUrl, getNonce, getContactFieldsGroups } = ConfigAPI;
 	const contactFieldsGroups = getContactFieldsGroups();
 	const navigate = useNavigate();
@@ -82,64 +69,8 @@ const Settings: React.FC = () => {
 		}
 	};
 
-	const fetchLists = async (keyword = '', ids = []) => {
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/lists', {
-					keyword: keyword,
-					ids: ids,
-				}),
-			})) as any;
-
-			setSavedLists([...savedLists, ...response.data]);
-
-			return response.data.map((list: List) => ({
-				label: list.name,
-				value: list.id,
-			}));
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to fetch lists', 'quillcrm'),
-			});
-			return [];
-		}
-	};
-
-	const fetchTags = async (keyword = '', ids = []) => {
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/tags', {
-					keyword: keyword,
-					ids: ids,
-				}),
-			})) as any;
-
-			setSavedTags([...savedTags, ...response.data]);
-
-			return response.data.map((tag: Tag) => ({
-				label: tag.name,
-				value: tag.id,
-			}));
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to fetch tags', 'quillcrm'),
-			});
-			return [];
-		}
-	};
-
 	useEffect(() => {
 		getFormFields();
-
-		if (form?.data?.lists) {
-			fetchLists('', form.data.lists);
-		}
-
-		if (form?.data?.tags) {
-			fetchTags('', form.data.tags);
-		}
 	}, [form?.form_id]);
 
 	const settings = form?.data || null;
@@ -198,7 +129,6 @@ const Settings: React.FC = () => {
 											{__('Map fields', 'quillcrm')}
 										</Typography.Text>
 									</div>
-
 									<Flex
 										className="qcrm-field-input"
 										vertical={true}
@@ -299,77 +229,18 @@ const Settings: React.FC = () => {
 															'quillcrm'
 														)}
 													</Typography.Text>
-													<AsyncSelect
-														loadOptions={(
-															inputValue,
-															callback
-														) => {
-															fetchLists(
-																inputValue
-															).then((data) => {
-																callback(data);
-															});
-														}}
-														onChange={(
-															value: any
-														) => {
-															const newLists =
-																settings?.lists
-																	? [
-																			...settings.lists,
-																			value.value,
-																		]
-																	: [
-																			value.value,
-																		];
+													<ListField
+														value={
+															settings?.lists ||
+															[]
+														}
+														onChange={(value) => {
 															updateSettings(
 																'lists',
-																newLists
+																value
 															);
 														}}
-														placeholder={__(
-															'Select list',
-															'quillcrm'
-														)}
 													/>
-													{settings?.lists && (
-														<Flex gap={10}>
-															{map(
-																settings.lists,
-																(list_id) => (
-																	<AntTag
-																		key={
-																			list_id.id
-																		}
-																		closable
-																		onClose={() => {
-																			updateSettings(
-																				'lists',
-																				settings.lists.filter(
-																					(
-																						list
-																					) =>
-																						list !==
-																						list_id
-																				)
-																			);
-																		}}
-																	>
-																		{
-																			savedLists.find(
-																				(
-																					list
-																				) =>
-																					list.id ===
-																					list_id
-																			)
-																				?.name
-																		}
-																	</AntTag>
-																)
-															)}
-														</Flex>
-													)}
 												</Flex>
 												<Flex
 													vertical={true}
@@ -379,77 +250,17 @@ const Settings: React.FC = () => {
 													<Typography.Text>
 														{__('Tags', 'quillcrm')}
 													</Typography.Text>
-													<AsyncSelect
-														loadOptions={(
-															inputValue,
-															callback
-														) => {
-															fetchTags(
-																inputValue
-															).then((data) => {
-																callback(data);
-															});
-														}}
-														onChange={(
-															value: any
-														) => {
-															const newTags =
-																settings?.tags
-																	? [
-																			...settings.tags,
-																			value.value,
-																		]
-																	: [
-																			value.value,
-																		];
+													<TagField
+														value={
+															settings?.tags || []
+														}
+														onChange={(value) => {
 															updateSettings(
 																'tags',
-																newTags
+																value
 															);
 														}}
-														placeholder={__(
-															'Select tag',
-															'quillcrm'
-														)}
 													/>
-													{settings?.tags && (
-														<Flex gap={10}>
-															{map(
-																settings.tags,
-																(tag_id) => (
-																	<AntTag
-																		key={
-																			tag_id.id
-																		}
-																		closable
-																		onClose={() => {
-																			updateSettings(
-																				'tags',
-																				settings.tags.filter(
-																					(
-																						tag
-																					) =>
-																						tag !==
-																						tag_id
-																				)
-																			);
-																		}}
-																	>
-																		{
-																			savedTags.find(
-																				(
-																					tag
-																				) =>
-																					tag.id ===
-																					tag_id
-																			)
-																				?.name
-																		}
-																	</AntTag>
-																)
-															)}
-														</Flex>
-													)}
 												</Flex>
 											</Flex>
 											<Flex

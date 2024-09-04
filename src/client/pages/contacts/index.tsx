@@ -16,7 +16,7 @@ import { Table, Tag as AntTag } from 'antd';
  * Internal dependencies
  */
 import './style.scss';
-import type { Contact, Tag, List } from '../types';
+import type { Contact, Tag, List } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 
 const { Column } = Table;

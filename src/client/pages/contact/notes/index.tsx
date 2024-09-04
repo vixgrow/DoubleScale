@@ -28,7 +28,7 @@ import { isEmpty } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import { Note } from '../../types';
+import { Note } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
 
 interface NotesProps {

@@ -10,14 +10,15 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Table, Input, Button, Modal, Typography } from 'antd';
+import { Table, Input, Button, Modal } from 'antd';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { CustomTemplate as Template } from '../types';
+import type { CustomTemplate as Template } from '@quillcrm/client';
 import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
+import { Field } from '@quillcrm/components';
 
 const { Column } = Table;
 
@@ -158,24 +159,17 @@ const TemplatesList: React.FC = () => {
 				confirmLoading={isSaving}
 			>
 				<div className="qcrm-fields">
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Name', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input
-								value={template.name}
-								onChange={(e) => {
-									setTemplate({
-										...template,
-										name: e.target.value,
-									});
-								}}
-							/>
-						</div>
-					</div>
+					<Field
+						label={__('Name', 'quillcrm')}
+						value={template.name}
+						onChange={(value) =>
+							setTemplate({
+								...template,
+								name: value,
+							})
+						}
+						type="text"
+					/>
 				</div>
 			</Modal>
 		</div>

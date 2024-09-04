@@ -26,7 +26,7 @@ import { notification, ConfigProvider } from 'antd';
 /**
  * Internal dependencies
  */
-import { NavBar } from '../components';
+import { NavBar } from '@quillcrm/components';
 import { Controller } from './controller';
 import './style.scss';
 

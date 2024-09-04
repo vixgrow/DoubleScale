@@ -21,7 +21,7 @@ import {
 	REMOVE_STEP,
 	UPDATE_STEP,
 } from './constants';
-import type { Automation, AutomationStep } from '../../types';
+import type { Automation, AutomationStep } from '@quillcrm/client';
 import type { AutomationAction, StepAction } from './types';
 
 const automation = (

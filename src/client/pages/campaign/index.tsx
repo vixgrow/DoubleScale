@@ -24,7 +24,7 @@ import InitialStep from './steps/initial';
 import TemplatesStep from './steps/templates';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
-import { Campaign as CampaignType } from '../types';
+import { Campaign as CampaignType } from '@quillcrm/client';
 import Overview from './overview';
 
 const Campaign: React.FC = () => {

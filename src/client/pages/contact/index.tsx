@@ -34,7 +34,11 @@ import { isEmpty } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import { Contact as ContactType, Tag, List as ContactList } from '../types';
+import {
+	Contact as ContactType,
+	Tag,
+	List as ContactList,
+} from '@quillcrm/client';
 import NotesTab from './notes';
 import ProfileTab from './profile';
 import Automation from './automation';

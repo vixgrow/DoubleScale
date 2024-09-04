@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import { AutomationContact } from '../../types';
+import { AutomationContact } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
 
 interface AutomationProps {

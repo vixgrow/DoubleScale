@@ -16,7 +16,7 @@ import { Table } from 'antd';
  * Internal dependencies
  */
 import './style.scss';
-import type { AbandonedCart } from '../types';
+import type { AbandonedCart } from '@quillcrm/client';
 
 const { Column } = Table;
 

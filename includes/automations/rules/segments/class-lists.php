@@ -55,7 +55,7 @@ class Lists extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $type = 'select';
+	public $type = 'lists';
 
 	/**
 	 * Get options

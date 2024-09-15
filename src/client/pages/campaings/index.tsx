@@ -10,7 +10,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Typography, Table, Input, Button, Modal } from 'antd';
+import { Flex, Table, Input, Button, Modal, Select } from 'antd';
 
 /**
  * Internal dependencies
@@ -18,7 +18,7 @@ import { Typography, Table, Input, Button, Modal } from 'antd';
 import './style.scss';
 import { Campaign } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
-
+import { getToLink, useNavigate } from '@quillcrm/navigation';
 const { Column } = Table;
 
 const Campaigns: React.FC = () => {
@@ -31,7 +31,11 @@ const Campaigns: React.FC = () => {
 	const [visible, setVisible] = useState<boolean>(false);
 	const [isAdding, setIsAdding] = useState<boolean>(false);
 	const [name, setName] = useState<string>('');
+	const [keyword, setKeyword] = useState<string>('');
+	const [bulkAction, setBulkAction] = useState<string>('');
+	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		fetchCampaigns();
@@ -45,6 +49,7 @@ const Campaigns: React.FC = () => {
 				path: addQueryArgs('/qc/v1/campaigns', {
 					page,
 					per_page: perPage,
+					keyword,
 				}),
 			})) as any;
 
@@ -80,6 +85,7 @@ const Campaigns: React.FC = () => {
 			setCampaigns([...campaigns, response]);
 			setName('');
 			setVisible(false);
+			navigate(getToLink(`campaigns/${response.id}`));
 		} catch (error) {
 			console.error(error);
 		} finally {
@@ -87,14 +93,84 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
+	const deleteSelected = async () => {
+		setIsApplying(true);
+
+		try {
+			await apiFetch({
+				path: '/qc/v1/campaigns',
+				method: 'DELETE',
+				data: {
+					ids: selectedRowKeys,
+				},
+			});
+
+			setSelectedRowKeys([]);
+			fetchCampaigns();
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
 	return (
 		<div className="qcrm-campaigns">
-			<div className="qcrm-campaigns-header">
-				<Typography.Title level={4}>{__('Campaigns')}</Typography.Title>
-				<Button onClick={() => setVisible(true)}>
-					{__('Add Campaign')}
+			<Flex
+				className="qcrm-contacts-list__actions"
+				justify="space-between"
+			>
+				<Flex gap={10}>
+					<Flex gap={10}>
+						<Select
+							options={[
+								{
+									label: __('Bulk Actions', 'quillcrm'),
+									value: '',
+								},
+								{
+									label: __('Delete', 'quillcrm'),
+									value: 'delete',
+								},
+							]}
+							value={bulkAction}
+							onChange={(value) => setBulkAction(value)}
+							disabled={selectedRowKeys.length === 0}
+						/>
+						<Button
+							type="primary"
+							onClick={() => {
+								if (bulkAction === 'delete') {
+									deleteSelected();
+								}
+							}}
+							disabled={selectedRowKeys.length === 0}
+							loading={isApplying}
+						>
+							{__('Apply', 'quillcrm')}
+						</Button>
+					</Flex>
+					<Input.Search
+						placeholder={__('Search', 'quillcrm')}
+						allowClear
+						onSearch={() => {
+							fetchCampaigns();
+						}}
+						onChange={(e) => setKeyword(e.target.value)}
+						styles={{
+							affixWrapper: {
+								padding: '4px 5px',
+							},
+							input: {
+								minHeight: 'auto',
+							},
+						}}
+					/>
+				</Flex>
+				<Button type="primary" onClick={() => setVisible(true)}>
+					{__('Create Campaign', 'quillcrm')}
 				</Button>
-			</div>
+			</Flex>
 			<Table
 				dataSource={campaigns}
 				rowKey="id"

@@ -220,6 +220,8 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				return $automation_step;
 			}
 
+			$automation_step = Automation_Step_Model::find( $automation_step->id );
+
 			return new WP_REST_Response( $automation_step, 201 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_automation_step_create_error', $e->getMessage(), array( 'status' => 500 ) );

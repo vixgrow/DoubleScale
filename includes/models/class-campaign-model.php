@@ -117,7 +117,7 @@ class Campaign_Model extends Model {
 			$reply_to     = $template['reply_to'] ?? null;
 			$subject      = $template['subject'] ?? null;
 			$preview_text = $template['preview_text'] ?? null;
-			$body         = $template['body'] ?? null;
+			$body         = $template['body'] ?? 'This is a test email';
 			$enable_utm   = $template['enable_utm'] ?? false;
 			$utm_source   = $template['utm_source'] ?? null;
 			$utm_medium   = $template['utm_medium'] ?? null;
@@ -171,9 +171,14 @@ class Campaign_Model extends Model {
 
 				// Modify the templates key in the settings array
 				$settings['templates'] = $campaign->get_templates();
-
 				// Set the modified settings back to the model
 				$campaign->settings = $settings;
+
+				// Remove the contacts count, sent count, opened count and clicked count
+				unset( $campaign->contacts_count );
+				unset( $campaign->sent_count );
+				unset( $campaign->opened_count );
+				unset( $campaign->clicked_count );
 			}
 		);
 

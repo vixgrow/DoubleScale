@@ -41,6 +41,12 @@ const AntProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 					Typography: {
 						titleMarginTop: 0,
 					},
+					Table: {
+						headerBg: '#fff',
+					},
+					Input: {
+						borderRadius: 4,
+					},
 				},
 			}}
 		>

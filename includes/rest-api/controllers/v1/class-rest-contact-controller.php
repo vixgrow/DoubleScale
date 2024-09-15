@@ -81,6 +81,12 @@ class REST_Contact_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_items' ),
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
+					'args'                => array(
+						'ids' => array(
+							'description' => __( 'Contact IDs.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+					),
 				),
 			)
 		);

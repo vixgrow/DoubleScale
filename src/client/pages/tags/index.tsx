@@ -10,8 +10,18 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Typography, Table, Input, Button, Modal, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+	Typography,
+	Table,
+	Input,
+	Button,
+	Modal,
+	Popconfirm,
+	Flex,
+	Select,
+	Popover,
+} from 'antd';
+import { EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
@@ -29,7 +39,6 @@ const Tags: React.FC = () => {
 	const [page, setPage] = useState<number>(1);
 	const [total, setTotal] = useState<number>(0);
 	const [keyword, setKeyword] = useState<string>('');
-	const { Search } = Input;
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedTag, setSelectedTag] = useState<ContactTag | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -38,6 +47,8 @@ const Tags: React.FC = () => {
 		name: '',
 		description: '',
 	});
+	const [bulkAction, setBulkAction] = useState<string>('');
+	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchTags = async () => {
@@ -66,7 +77,7 @@ const Tags: React.FC = () => {
 
 	useEffect(() => {
 		fetchTags();
-	}, [page, perPage, keyword]);
+	}, [page, perPage]);
 
 	const createTag = async () => {
 		setIsSaving(true);
@@ -134,31 +145,92 @@ const Tags: React.FC = () => {
 		}
 	};
 
+	const deleteSelectedTags = async () => {
+		if (selectedRowKeys.length === 0) {
+			return;
+		}
+
+		setIsApplying(true);
+		try {
+			// @ts-ignore
+			const response = await apiFetch({
+				path: '/qc/v1/tags',
+				method: 'DELETE',
+				data: { ids: selectedRowKeys },
+			});
+
+			setTags(tags.filter((tag) => !selectedRowKeys.includes(tag.id)));
+			setSelectedRowKeys([]);
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete tags', 'quillcrm'),
+			});
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
 	return (
 		<div className="qcrm-contacts-tags-list">
 			<Typography.Title level={2}>
 				{__('Tags', 'quillcrm')}
 			</Typography.Title>
-			<div className="qcrm-contacts-tags-list__actions">
-				<div className="qcrm-contacts-tags-list__search">
-					<Search
-						placeholder={__('Search', 'quillcrm')}
-						onSearch={(value, _e) => {
-							if (value.length < 2 && value.length > 0) {
-								return;
-							}
-							setKeyword(value);
+			<Flex
+				className="qcrm-contacts-list__actions"
+				justify="space-between"
+			>
+				<Flex gap={10}>
+					<Flex gap={10}>
+						<Select
+							options={[
+								{
+									label: __('Bulk Actions', 'quillcrm'),
+									value: '',
+								},
+								{
+									label: __('Delete', 'quillcrm'),
+									value: 'delete',
+								},
+							]}
+							value={bulkAction}
+							onChange={(value) => setBulkAction(value)}
+							disabled={selectedRowKeys.length === 0}
+						/>
+						<Button
+							type="primary"
+							onClick={() => {
+								if (bulkAction === 'delete') {
+									deleteSelectedTags();
+								}
+							}}
+							disabled={selectedRowKeys.length === 0}
+							loading={isApplying}
+						>
+							{__('Apply', 'quillcrm')}
+						</Button>
+					</Flex>
+					<Input.Search
+						placeholder={__('Search Tags', 'quillcrm')}
+						allowClear
+						onSearch={() => {
+							fetchTags();
 						}}
-						enterButton={__('Search', 'quillcrm')}
-						size="large"
+						onChange={(e) => setKeyword(e.target.value)}
+						styles={{
+							affixWrapper: {
+								padding: '4px 5px',
+							},
+							input: {
+								minHeight: 'auto',
+							},
+						}}
 					/>
-				</div>
-				<div>
-					<Button type="primary" onClick={() => setVisible(true)}>
-						{__('Create Tag', 'quillcrm')}
-					</Button>
-				</div>
-			</div>
+				</Flex>
+				<Button type="primary" onClick={() => setVisible(true)}>
+					{__('Create Tag', 'quillcrm')}
+				</Button>
+			</Flex>
 			<Table
 				dataSource={tags}
 				rowKey="id"
@@ -180,47 +252,56 @@ const Tags: React.FC = () => {
 					title={__('Name', 'quillcrm')}
 					dataIndex="name"
 					key="name"
+					render={(name: string, record: ContactTag) => (
+						<Flex gap={10} align="center">
+							<Popover
+								content={
+									<Flex vertical gap={10}>
+										<Button
+											icon={<EditOutlined />}
+											onClick={() => {
+												setSelectedTag(record);
+												setVisible(true);
+											}}
+										>
+											{__('Edit', 'quillcrm')}
+										</Button>
+										<Popconfirm
+											title={__(
+												'Are you sure?',
+												'quillcrm'
+											)}
+											onConfirm={() =>
+												deleteTag(record.id)
+											}
+										>
+											<Button
+												icon={<DeleteOutlined />}
+												danger
+											>
+												{__('Delete', 'quillcrm')}
+											</Button>
+										</Popconfirm>
+									</Flex>
+								}
+								trigger="click"
+							>
+								<MoreOutlined size={40} />
+							</Popover>
+							<Typography.Text>{name}</Typography.Text>
+						</Flex>
+					)}
 				/>
 				<Column
-					title={__('Description', 'quillcrm')}
-					dataIndex="description"
-					key="description"
+					title={__('Contacts', 'quillcrm')}
+					dataIndex="contacts_count"
+					key="contacts_count"
 				/>
 				<Column
 					title={__('Created At', 'quillcrm')}
 					dataIndex="created_at"
 					key="created_at"
 					render={(date: string) => new Date(date).toLocaleString()}
-				/>
-				<Column
-					title={__('Actions', 'quillcrm')}
-					key="actions"
-					render={(_, record: ContactTag) => (
-						<div className="qcrm-contacts-tags-list-table__actions">
-							<Button
-								type="link"
-								icon={<EditOutlined />}
-								onClick={() => {
-									setSelectedTag(record);
-									setVisible(true);
-								}}
-							>
-								{__('Edit', 'quillcrm')}
-							</Button>
-							<Popconfirm
-								title={__('Are you sure?', 'quillcrm')}
-								onConfirm={() => deleteTag(record.id)}
-							>
-								<Button
-									type="link"
-									icon={<DeleteOutlined />}
-									danger
-								>
-									{__('Delete', 'quillcrm')}
-								</Button>
-							</Popconfirm>
-						</div>
-					)}
 				/>
 			</Table>
 			<Modal

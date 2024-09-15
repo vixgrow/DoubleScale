@@ -19,6 +19,7 @@ use QuillCRM\Utils;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Managers\Goals_Manager;
+use QuillCRM\Managers\Rules_Manager;
 
 /**
  * Core Class
@@ -42,6 +43,7 @@ class Core {
 
 		wp_add_inline_script(
 			'qcrm-config',
+			'qcrm.config.setBlogName("' . get_bloginfo( 'name' ) . '");' .
 			'qcrm.config.setAdminUrl("' . admin_url() . '");' .
 			'qcrm.config.setAdminEmail("' . $admin_email . '");' .
 			'qcrm.config.setAjaxUrl("' . $ajax_url . '");' .
@@ -54,7 +56,8 @@ class Core {
 			'qcrm.config.setIntegrations(' . wp_json_encode( Integrations_Manager::instance()->get_options() ) . ');' .
 			'qcrm.config.setAutomationTriggers(' . wp_json_encode( Triggers_Manager::instance()->get_sources() ) . ');' .
 			'qcrm.config.setAutomationActions(' . wp_json_encode( Actions_Manager::instance()->get_sources() ) . ');' .
-			'qcrm.config.setAutomationGoals(' . wp_json_encode( Goals_Manager::instance()->get_sources() ) . ');'
+			'qcrm.config.setAutomationGoals(' . wp_json_encode( Goals_Manager::instance()->get_sources() ) . ');' .
+			'qcrm.config.setAutomationRules(' . wp_json_encode( Rules_Manager::instance()->get_groups() ) . ');'
 		);
 	}
 }

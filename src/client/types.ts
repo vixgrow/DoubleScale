@@ -4,6 +4,7 @@ export type List = {
 	slug: string;
 	description: string | null;
 	status: string;
+	contacts_count: number;
 	created_at: string;
 	updated_at: string;
 };
@@ -310,4 +311,32 @@ export type CartItem = {
 type LineTaxData = {
 	subtotal: string[];
 	total: string[];
+};
+
+export type CampaignEmail = {
+	id: number;
+	campaign_id: string;
+	contact_id: string;
+	template_id: string;
+	hash_key: string;
+	email: string;
+	opened: string;
+	clicked: string;
+	status: string;
+	sent_at: string;
+	opened_at: string;
+	clicked_at: string;
+	created_at: string;
+	updated_at: string;
+	contact: Contact;
+};
+
+export type AutomationRules = Rules[];
+
+export type Rules = Rule[];
+
+export type Rule = {
+	rule: string;
+	value: string;
+	operator: string;
 };

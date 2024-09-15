@@ -1,0 +1,26 @@
+.qcrm-contacts-list {
+	&__avatar {
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		background-color: #0073aa;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		svg {
+			fill: #fff;
+		}
+	}
+	&__actions {
+		padding: 10px;
+		margin-bottom: 20px;
+		border-radius: 6px;
+		background-color: #f7f9ff;
+	}
+	&__filters {
+		padding: 10px;
+		margin-bottom: 20px;
+		border-radius: 6px;
+		background-color: #f7f9ff;
+	}
+}

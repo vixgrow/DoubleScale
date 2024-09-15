@@ -16,6 +16,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Models\Campaign_Email_Model;
 
 /**
  * Rest_Campaign_Controller class
@@ -110,6 +111,35 @@ class REST_Campaign_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				),
+			)
+		);
+
+		// Get campaign emails
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/emails',
+			array(
+				'args' => array(
+					'id'       => array(
+						'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+						'type'        => 'integer',
+					),
+					'per_page' => array(
+						'description' => __( 'The number of items to return per page.', 'quillcrm' ),
+						'type'        => 'integer',
+						'default'     => 10,
+					),
+					'page'     => array(
+						'description' => __( 'The page number.', 'quillcrm' ),
+						'type'        => 'integer',
+						'default'     => 1,
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_campaign_emails' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 			)
 		);
@@ -212,6 +242,30 @@ class REST_Campaign_Controller extends REST_Controller {
 			}
 
 			return new WP_REST_Response( $campaigns, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Get campaign emails
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response $response The response object
+	 */
+	public function get_campaign_emails( $request ) {
+		try {
+			$campaign_id = $request->get_param( 'id' );
+			$per_page    = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page        = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+
+			$campaign_emails = Campaign_Email_Model::where( 'campaign_id', $campaign_id )->with( 'contact' )
+				->paginate( $per_page, array( '*' ), 'page', $page );
+
+			return new WP_REST_Response( $campaign_emails, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}

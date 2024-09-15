@@ -5,3 +5,5 @@ export { default as LinkTriggerField } from './link-trigger-field';
 export { default as Field } from './field';
 export { default as Fields } from './fields';
 export { default as Template } from './template';
+export { default as Filters } from './filters';
+export { default as Rule } from './rule';

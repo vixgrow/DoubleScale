@@ -19,6 +19,7 @@ import {
 	Typography,
 	Tabs,
 	Flex,
+	Select,
 } from 'antd';
 import { map } from 'lodash';
 
@@ -33,7 +34,6 @@ import type { TriggersGroup } from '@quillcrm/config';
 import { Field } from '@quillcrm/components';
 
 const { Column } = Table;
-const { Search } = Input;
 
 const TriggersGroupRender: React.FC<{
 	groups: TriggersGroup[];
@@ -88,6 +88,8 @@ const AutomationsList: React.FC = () => {
 		name: '',
 		trigger: '',
 	});
+	const [bulkAction, setBulkAction] = useState<string>('');
+	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const navigate = useNavigate();
 	const automationTriggers = ConfigAPI.getAutomationTriggers();
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -153,33 +155,88 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
+	const deleteSelected = async () => {
+		setIsApplying(true);
+
+		try {
+			await apiFetch({
+				path: '/qc/v1/automations',
+				method: 'DELETE',
+				data: {
+					ids: selectedRowKeys,
+				},
+			});
+
+			setSelectedRowKeys([]);
+			fetchAutomations();
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
 	useEffect(() => {
 		fetchAutomations();
 	}, [page, perPage]);
-	console.log(automation);
 
 	return (
 		<div className="qcrm-automations-list">
-			<div className="qcrm-contacts-automations-list__actions">
-				<div className="qcrm-contacts-automations-list__search">
-					<Search
+			<Flex
+				className="qcrm-contacts-list__actions"
+				justify="space-between"
+			>
+				<Flex gap={10}>
+					<Flex gap={10}>
+						<Select
+							options={[
+								{
+									label: __('Bulk Actions', 'quillcrm'),
+									value: '',
+								},
+								{
+									label: __('Delete', 'quillcrm'),
+									value: 'delete',
+								},
+							]}
+							value={bulkAction}
+							onChange={(value) => setBulkAction(value)}
+							disabled={selectedRowKeys.length === 0}
+						/>
+						<Button
+							type="primary"
+							onClick={() => {
+								if (bulkAction === 'delete') {
+									deleteSelected();
+								}
+							}}
+							disabled={selectedRowKeys.length === 0}
+							loading={isApplying}
+						>
+							{__('Apply', 'quillcrm')}
+						</Button>
+					</Flex>
+					<Input.Search
 						placeholder={__('Search', 'quillcrm')}
-						onSearch={(value, _e) => {
-							if (value.length < 2 && value.length > 0) {
-								return;
-							}
-							setKeyword(value);
+						allowClear
+						onSearch={() => {
+							fetchAutomations();
 						}}
-						enterButton={__('Search', 'quillcrm')}
-						size="large"
+						onChange={(e) => setKeyword(e.target.value)}
+						styles={{
+							affixWrapper: {
+								padding: '4px 5px',
+							},
+							input: {
+								minHeight: 'auto',
+							},
+						}}
 					/>
-				</div>
-				<div>
-					<Button type="primary" onClick={() => setVisible(true)}>
-						{__('Create Automation', 'quillcrm')}
-					</Button>
-				</div>
-			</div>
+				</Flex>
+				<Button type="primary" onClick={() => setVisible(true)}>
+					{__('Create Automation', 'quillcrm')}
+				</Button>
+			</Flex>
 			<Table
 				dataSource={data}
 				rowKey="id"

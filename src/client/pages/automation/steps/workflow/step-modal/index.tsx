@@ -15,6 +15,7 @@ import type { AutomationStep } from '@quillcrm/client';
 import StepFieldsModal from '../step-fields-modal';
 import GoalSelector from '../goal-selector';
 import ActionSelector from '../action-selector';
+import ConditionsModal from '../conditions-modal';
 
 interface StepModalProps {
 	step: AutomationStep;
@@ -27,15 +28,18 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 	const [value, setValue] = useState('');
 	const { createNotice } = useDispatch('quillcrm/core');
 
-	const saveStep = async () => {
+	const saveStep = async (payload: any = {}) => {
+		const data = {
+			...step,
+			action: value,
+			...payload,
+		};
+
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/automation-steps/${step.id}`,
 				method: 'POST',
-				data: {
-					...step,
-					action: value,
-				},
+				data,
 			})) as AutomationStep;
 
 			updateStep(response.id, response);
@@ -51,6 +55,20 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 			});
 		}
 	};
+
+	if (step.type === 'condition') {
+		return (
+			<ConditionsModal
+				step={step}
+				onSave={saveStep}
+				visible={actionModalVisible}
+				onClose={() => {
+					setActionModalVisible(false);
+					setStep(null);
+				}}
+			/>
+		);
+	}
 
 	if (!step.action) {
 		switch (step.type) {
@@ -80,6 +98,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 						onSave={() => saveStep()}
 					/>
 				);
+
 			default:
 				return null;
 		}

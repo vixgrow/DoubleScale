@@ -8,9 +8,19 @@
 		flex-direction: column;
 		gap: 10px;
 		width: 100%;
+		&.inline {
+			flex-direction: row;
+			align-items: center;
+			padding-bottom: 10px;
+			border-bottom: 1px solid rgb(237, 240, 247);
+			&:last-child {
+				border-bottom: none;
+			}
+		}
 		.qcrm-field-label {
 			font-size: 1.2rem;
 			font-weight: 600;
+			display: inline-flex;
 			span {
 				color: #606266;
 			}
@@ -21,6 +31,13 @@
 			gap: 10px;
 		}
 	}
+}
+
+.qcrm-contact-profile {
+	display: flex;
+	gap: 20px;
+	flex-direction: column;
+	width: 100%;
 }
 
 .ant-modal-root,
@@ -43,16 +60,12 @@
 		display: inline-block;
 		width: 100%;
 		min-width: 0;
-		border-radius: 0;
+		border-radius: 4px;
 		transition: all 0.2s;
 		min-height: 40px;
 	}
 }
 
-.qcrm-contact-profile {
-	display: flex;
-	gap: 40px;
-}
 .ant-card-body {
 	width: 100%;
 }

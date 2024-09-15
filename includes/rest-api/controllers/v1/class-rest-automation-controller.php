@@ -594,6 +594,8 @@ class Rest_Automation_Controller extends REST_Controller {
 			$automation->fill( $automation_data );
 			$automation->save();
 
+			$automation = Automation_Model::with( 'steps' )->find( $id );
+
 			return new WP_REST_Response( $automation, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );

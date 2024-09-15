@@ -1,52 +1,64 @@
 #screen-meta-links {
-  display: none !important;
+	display: none !important;
 }
 
 .qcrm-layout {
-  margin-left: -20px;
+	font-size: 13px;
 }
 
+#wpwrap {
+	background-color: #ffffff;
+}
+
+div#wpcontent {
+	padding: 0;
+	overflow-x: unset !important;
+	min-height: calc(100vh - 32px);
+}
+
+.qcrm-layout * {
+	box-sizing: border-box;
+}
 .qcrm-layout__main {
-  display: flex;
-  height: calc(100vh - 55px);
-  box-sizing: border-box;
-  .qcrm-page-component-wrapper {
-    width: 100%;
-    position: relative;
-    padding: 20px 40px;
-    padding-top: 40px;
-  }
+	display: flex;
+	box-sizing: border-box;
+	.qcrm-page-component-wrapper {
+		width: 100%;
+		position: relative;
+		padding: 20px 40px;
+		padding-top: 40px;
+	}
 }
 // Hide all wordpress admin notices
 #qcrm-admin-root {
-  .notice {
-    display: none !important;
-  }
+	.notice {
+		display: none !important;
+	}
 }
 
 :root {
-  --delay: 0s;
+	--delay: 0s;
 }
 
 * {
-  outline: none;
-  box-sizing: border-box;
+	outline: none;
+	box-sizing: border-box;
 }
 
 .hidden {
-  display: none !important;
+	display: none !important;
 }
 
 html {
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
+	box-sizing: border-box;
+	-webkit-font-smoothing: antialiased;
 }
 
 img {
-  max-width: 100%;
+	max-width: 100%;
 }
 
 body {
-  font-family: "Inter", sans-serif;
-  color: #9b9ca7;
+	font-family: "Inter", sans-serif;
+	color: #9b9ca7;
 }

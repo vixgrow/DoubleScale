@@ -264,7 +264,7 @@ class Processing {
 
 		$template = Template_Model::find( $campaign_email->template_id );
 		$subject  = $template->subject;
-		$body     = $template->body;
+		$body     = $template->body ?? 'Template not found';
 
 		// Build email message with footer
 		$message = sprintf(

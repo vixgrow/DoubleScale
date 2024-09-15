@@ -28,7 +28,7 @@ class Tags extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $name = 'Lists';
+	public $name = 'Tags';
 
 	/**
 	 * Slug
@@ -55,7 +55,7 @@ class Tags extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $type = 'select';
+	public $type = 'tags';
 
 	/**
 	 * Get options

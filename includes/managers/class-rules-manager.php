@@ -126,6 +126,7 @@ final class Rules_Manager {
 			'name'      => $rule->name,
 			'type'      => $rule->type,
 			'operators' => $rule->get_operators(),
+			'options'   => $rule->get_options(),
 		);
 	}
 

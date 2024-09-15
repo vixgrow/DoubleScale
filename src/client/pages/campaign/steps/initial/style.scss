@@ -1,0 +1,9 @@
+.qcrm-campaign-type-card {
+	h4 {
+		margin-top: 0;
+	}
+	&.qcrm-card-active {
+		border: 1px solid #6d78d8;
+	}
+	cursor: pointer;
+}

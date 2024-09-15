@@ -74,6 +74,17 @@ class REST_Tag_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'deletes_item' ),
+					'permission_callback' => array( $this, 'deletes_item_permissions_check' ),
+					'args'                => array(
+						'ids' => array(
+							'description' => __( 'Tag IDs.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+					),
+				),
 			)
 		);
 
@@ -356,6 +367,50 @@ class REST_Tag_Controller extends REST_Controller {
 	 * @return bool $response Permission check result.
 	 */
 	public function delete_item_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Delete multiple items from the collection
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function deletes_item( $request ) {
+		try {
+			$ids = $request->get_param( 'ids' );
+
+			if ( empty( $ids ) ) {
+				return new WP_Error( 'rest_tag_cannot_delete', __( 'No tags to delete.', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			$tags = Tag_Model::whereIn( 'id', $ids )->get();
+
+			if ( ! $tags ) {
+				return new WP_Error( 'rest_tag_cannot_delete', __( 'Tags not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			Tag_Model::whereIn( 'id', $ids )->delete();
+
+			return new WP_REST_Response( $tags, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'rest_tag_cannot_delete', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Check if a given request has access to delete multiple items
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool $response Permission check result.
+	 */
+	public function deletes_item_permissions_check( $request ) {
 		return current_user_can( 'manage_options' );
 	}
 

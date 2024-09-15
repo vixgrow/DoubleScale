@@ -16,17 +16,20 @@ import './style.scss';
 import { useCampaignContext } from '../../state/context';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { Template } from '@quillcrm/components';
+import ConfigAPI from '@quillcrm/config';
 
 const Templates: React.FC = () => {
 	const { campaign, isLoading, saveCampaign, isSaving, updateSettings } =
 		useCampaignContext();
 	const navigate = useNavigate();
+	const adminEmail = ConfigAPI.getAdminEmail();
+	const blogName = ConfigAPI.getBlogName();
 	const defaultTemplate = {
-		from_name: '',
-		from_email: '',
-		reply_to: '',
+		from_name: blogName,
+		from_email: adminEmail,
+		reply_to: adminEmail,
 		preview_text: '',
-		subject: '',
+		subject: __('New Email', 'quillcrm'),
 		body: '',
 		enable_utm: false,
 		utm_source: '',
@@ -45,7 +48,6 @@ const Templates: React.FC = () => {
 
 		const newTemplates = templates ? [...templates] : [];
 		newTemplates.push(defaultTemplate);
-
 		updateSettings('templates', newTemplates);
 		setCurrentTab(newTemplates.length - 1);
 	};
@@ -67,10 +69,16 @@ const Templates: React.FC = () => {
 		}
 
 		const newTemplates = templates ? [...templates] : [];
-		newTemplates[index] = {
-			...newTemplates[index],
-			...data,
-		};
+		newTemplates[index] = newTemplates[index]
+			? {
+					...newTemplates[index],
+					...data,
+				}
+			: {
+					...defaultTemplate,
+					...data,
+				};
+
 		updateSettings('templates', newTemplates);
 	};
 

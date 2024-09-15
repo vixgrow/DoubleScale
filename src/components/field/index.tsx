@@ -6,9 +6,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Input, Typography, Checkbox, Switch } from 'antd';
+import { Input, Typography, Checkbox, Switch, DatePicker } from 'antd';
+import en from 'antd/es/date-picker/locale/en_US';
+import dayjs from 'dayjs';
 import type { InputProps } from 'antd';
-import { map } from 'lodash';
+import { map, isEmpty } from 'lodash';
 import Select from 'react-select';
 
 /**
@@ -18,7 +20,7 @@ import './style.scss';
 import { ListField, TagField, LinkTriggerField } from '@quillcrm/components';
 
 interface FieldProps {
-	label: string;
+	label?: string;
 	type: string;
 	options?: Record<string, string>;
 	onChange: (value: any) => void;
@@ -137,15 +139,28 @@ const Field: React.FC<FieldProps> = ({
 				/>
 			);
 			break;
+		case 'date':
+			fieldContent = (
+				<DatePicker
+					value={!isEmpty(value) ? dayjs(value) : null}
+					onChange={(value) =>
+						onChange(dayjs(value).format('YYYY-MM-DD'))
+					}
+					locale={en}
+				/>
+			);
+			break;
 		default:
 			fieldContent = null;
 	}
 
 	return (
 		<div className="qcrm-field">
-			<div className="qcrm-field-label">
-				<Typography.Text>{label}</Typography.Text>
-			</div>
+			{label && (
+				<div className="qcrm-field-label">
+					<Typography.Text>{label}</Typography.Text>
+				</div>
+			)}
 			<div className="qcrm-field-input">{fieldContent}</div>
 		</div>
 	);

@@ -100,5 +100,12 @@ class List_Model extends Model {
 				$list->contacts()->detach();
 			}
 		);
+
+		// Attach contacts count to the list.
+		static::retrieved(
+			function ( $list ) {
+				$list->contacts_count = $list->contacts()->count();
+			}
+		);
 	}
 }

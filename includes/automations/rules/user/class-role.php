@@ -66,7 +66,11 @@ class Role extends Rule {
 	public function get_options() {
 		// Get all WordPress roles
 		global $wp_roles;
-		error_log( print_r( $wp_roles, true ) );
+
+		if ( ! isset( $wp_roles ) ) {
+			$wp_roles = new \WP_Roles();
+		}
+
 		$roles   = $wp_roles->roles;
 		$options = array();
 

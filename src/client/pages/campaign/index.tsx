@@ -12,6 +12,7 @@ import { useDispatch } from '@wordpress/data';
 import { useReducer, useRef } from 'react';
 import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
 import { Tabs } from 'antd';
+import { CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
@@ -93,21 +94,45 @@ const Campaign: React.FC = () => {
 			key: 'information',
 			label: __('Information', 'quillcrm'),
 			children: <InitialStep />,
+			icon:
+				tab === 'information' || !tab ? (
+					<CheckCircleOutlined />
+				) : (
+					<InfoCircleOutlined />
+				),
 		},
 		{
 			key: 'template',
 			label: __('Template', 'quillcrm'),
 			children: <TemplatesStep />,
+			icon:
+				tab === 'template' ? (
+					<CheckCircleOutlined />
+				) : (
+					<InfoCircleOutlined />
+				),
 		},
 		{
 			key: 'contacts',
 			label: __('Contacts', 'quillcrm'),
 			children: <ContactsStep />,
+			icon:
+				tab === 'contacts' ? (
+					<CheckCircleOutlined />
+				) : (
+					<InfoCircleOutlined />
+				),
 		},
 		{
 			key: 'review',
 			label: __('Review', 'quillcrm'),
 			children: <ReviewStep />,
+			icon:
+				tab === 'review' ? (
+					<CheckCircleOutlined />
+				) : (
+					<InfoCircleOutlined />
+				),
 		},
 	];
 
@@ -123,7 +148,7 @@ const Campaign: React.FC = () => {
 				...$actions,
 			}}
 		>
-			{tab !== 'overview' && campaign?.status === 'draft' && (
+			{tab !== 'overview' && campaign?.status !== 'completed' && (
 				<Tabs
 					defaultActiveKey="information"
 					activeKey={tab}

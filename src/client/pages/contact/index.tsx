@@ -304,15 +304,6 @@ const Contact: React.FC = () => {
 			}}
 		>
 			<div className="qcrm-contact">
-				<Button
-					onClick={() => navigate(getToLink(`contacts`))}
-					type="link"
-				>
-					{__('Back to Contacts', 'quillcrm')}
-				</Button>
-				<Typography.Title level={3}>
-					{__('Contact', 'quillcrm')}
-				</Typography.Title>
 				<Card
 					loading={loading}
 					className="qcrm-contact-overview-card"
@@ -322,7 +313,14 @@ const Contact: React.FC = () => {
 						<div className="qcrm-contact-overview">
 							<div className="qcrm-contact-overview-avatar">
 								<div className="qcrm-contact-overview-avatar">
-									<Avatar size={64} icon={<UserOutlined />} />
+									<Avatar
+										size={64}
+										icon={<UserOutlined />}
+										style={{
+											backgroundColor: '#0073aa',
+											color: '#fff',
+										}}
+									/>
 								</div>
 								<div className="qcrm-contact-overview-details">
 									<Typography.Title level={4}>

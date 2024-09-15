@@ -51,6 +51,8 @@ function getHistory(): PremiumBrowserHistory {
 						pathname += '/' + query.id;
 					if (typeof query.tab === 'string')
 						pathname += '/' + query.tab;
+					if (typeof query.subtab === 'string')
+						pathname += '/' + query.subtab;
 				} else {
 					pathname = '/';
 				}

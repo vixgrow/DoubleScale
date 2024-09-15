@@ -71,3 +71,36 @@ export const getTrigger = (trigger: string): Trigger => {
 		fields: {},
 	};
 };
+
+export const convertDate = (date: string) => {
+	// Convert to be like April 20, 2021
+	const dateObj = new Date(date);
+	return dateObj.toLocaleDateString(undefined, {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+	});
+};
+
+export const getFilterBySlug = (slug: string, group: string) => {
+	const filtersGroups = ConfigAPI.getFiltersGroups();
+	return filtersGroups[group]['filters'][slug];
+};
+
+export const getRuleBySlug = (slug: string) => {
+	const automationRules = ConfigAPI.getAutomationRules();
+	const groups = keys(automationRules);
+	for (let i = 0; i < groups.length; i++) {
+		const group = automationRules[groups[i]];
+		if (group.rules[slug]) {
+			return group.rules[slug];
+		}
+	}
+
+	return {
+		name: '',
+		type: '',
+		operators: {},
+		options: {},
+	};
+};

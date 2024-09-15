@@ -92,7 +92,7 @@ registerAdminPage('campaigns', {
 });
 
 registerAdminPage('campaign', {
-	path: 'campaigns/:id/:tab?',
+	path: 'campaigns/:id/:tab?/:subtab?',
 	component: () => <Campaign />,
 	label: __('Campaign', 'quillcrm'),
 	hidden: true,

@@ -10,8 +10,18 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Typography, Table, Input, Button, Modal, Popconfirm } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+	Typography,
+	Table,
+	Input,
+	Button,
+	Modal,
+	Popconfirm,
+	Flex,
+	Popover,
+	Select,
+} from 'antd';
+import { EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
@@ -19,6 +29,7 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import './style.scss';
 import { List as ContactList } from '@quillcrm/client';
 import { Field } from '@quillcrm/components';
+import { convertDate } from '@quillcrm/utils';
 
 const { Column } = Table;
 
@@ -29,7 +40,6 @@ const Lists: React.FC = () => {
 	const [page, setPage] = useState<number>(1);
 	const [total, setTotal] = useState<number>(0);
 	const [keyword, setKeyword] = useState<string>('');
-	const { Search } = Input;
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedList, setSelectedList] = useState<ContactList | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -38,6 +48,8 @@ const Lists: React.FC = () => {
 		name: '',
 		description: '',
 	});
+	const [bulkAction, setBulkAction] = useState<string>('');
+	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchLists = async () => {
@@ -66,7 +78,7 @@ const Lists: React.FC = () => {
 
 	useEffect(() => {
 		fetchLists();
-	}, [page, perPage, keyword]);
+	}, [page, perPage]);
 
 	const createList = async () => {
 		setIsSaving(true);
@@ -140,31 +152,94 @@ const Lists: React.FC = () => {
 		}
 	};
 
+	const deleteSelectedLists = async () => {
+		if (selectedRowKeys.length === 0) {
+			return;
+		}
+
+		setIsApplying(true);
+		try {
+			// @ts-ignore
+			const response = await apiFetch({
+				path: '/qc/v1/lists',
+				method: 'DELETE',
+				data: { ids: selectedRowKeys },
+			});
+
+			setLists(
+				lists.filter((list) => !selectedRowKeys.includes(list.id))
+			);
+			setSelectedRowKeys([]);
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete lists', 'quillcrm'),
+			});
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
 	return (
 		<div className="qcrm-contacts-lists-list">
 			<Typography.Title level={2}>
 				{__('Lists', 'quillcrm')}
 			</Typography.Title>
-			<div className="qcrm-contacts-lists-list__actions">
-				<div className="qcrm-contacts-lists-list__search">
-					<Search
-						placeholder={__('Search', 'quillcrm')}
-						onSearch={(value, _e) => {
-							if (value.length < 2 && value.length > 0) {
-								return;
-							}
-							setKeyword(value);
+			<Flex
+				className="qcrm-contacts-list__actions"
+				justify="space-between"
+			>
+				<Flex gap={10}>
+					<Flex gap={10}>
+						<Select
+							options={[
+								{
+									label: __('Bulk Actions', 'quillcrm'),
+									value: '',
+								},
+								{
+									label: __('Delete', 'quillcrm'),
+									value: 'delete',
+								},
+							]}
+							value={bulkAction}
+							onChange={(value) => setBulkAction(value)}
+							disabled={selectedRowKeys.length === 0}
+						/>
+						<Button
+							type="primary"
+							onClick={() => {
+								if (bulkAction === 'delete') {
+									deleteSelectedLists();
+								}
+							}}
+							disabled={selectedRowKeys.length === 0}
+							loading={isApplying}
+						>
+							{__('Apply', 'quillcrm')}
+						</Button>
+					</Flex>
+					<Input.Search
+						placeholder={__('Search Lists', 'quillcrm')}
+						allowClear
+						onSearch={() => {
+							fetchLists();
 						}}
-						enterButton={__('Search', 'quillcrm')}
-						size="large"
+						onChange={(e) => setKeyword(e.target.value)}
+						styles={{
+							affixWrapper: {
+								padding: '4px 5px',
+							},
+							input: {
+								minHeight: 'auto',
+							},
+						}}
 					/>
-				</div>
-				<div>
-					<Button type="primary" onClick={() => setVisible(true)}>
-						{__('Create List', 'quillcrm')}
-					</Button>
-				</div>
-			</div>
+				</Flex>
+				<Button type="primary" onClick={() => setVisible(true)}>
+					{__('Create List', 'quillcrm')}
+				</Button>
+			</Flex>
 			<Table
 				dataSource={lists}
 				rowKey="id"
@@ -186,47 +261,56 @@ const Lists: React.FC = () => {
 					title={__('Name', 'quillcrm')}
 					dataIndex="name"
 					key="name"
+					render={(name: string, record: ContactList) => (
+						<Flex gap={10} align="center">
+							<Popover
+								content={
+									<Flex vertical gap={10}>
+										<Button
+											icon={<EditOutlined />}
+											onClick={() => {
+												setSelectedList(record);
+												setVisible(true);
+											}}
+										>
+											{__('Edit', 'quillcrm')}
+										</Button>
+										<Popconfirm
+											title={__(
+												'Are you sure?',
+												'quillcrm'
+											)}
+											onConfirm={() =>
+												deleteList(record.id)
+											}
+										>
+											<Button
+												icon={<DeleteOutlined />}
+												danger
+											>
+												{__('Delete', 'quillcrm')}
+											</Button>
+										</Popconfirm>
+									</Flex>
+								}
+								trigger="click"
+							>
+								<MoreOutlined size={40} />
+							</Popover>
+							<Typography.Text>{name}</Typography.Text>
+						</Flex>
+					)}
 				/>
 				<Column
-					title={__('Description', 'quillcrm')}
-					dataIndex="description"
-					key="description"
+					title={__('Contacts', 'quillcrm')}
+					dataIndex="contacts_count"
+					key="contacts_count"
 				/>
 				<Column
 					title={__('Created At', 'quillcrm')}
 					dataIndex="created_at"
 					key="created_at"
-					render={(date: string) => new Date(date).toLocaleString()}
-				/>
-				<Column
-					title={__('Actions', 'quillcrm')}
-					key="actions"
-					render={(_, record: ContactList) => (
-						<div className="qcrm-contacts-lists-list-table__actions">
-							<Button
-								type="link"
-								icon={<EditOutlined />}
-								onClick={() => {
-									setSelectedList(record);
-									setVisible(true);
-								}}
-							>
-								{__('Edit', 'quillcrm')}
-							</Button>
-							<Popconfirm
-								title={__('Are you sure?', 'quillcrm')}
-								onConfirm={() => deleteList(record.id)}
-							>
-								<Button
-									type="link"
-									icon={<DeleteOutlined />}
-									danger
-								>
-									{__('Delete', 'quillcrm')}
-								</Button>
-							</Popconfirm>
-						</div>
-					)}
+					render={(date: string) => convertDate(date)}
 				/>
 			</Table>
 			<Modal

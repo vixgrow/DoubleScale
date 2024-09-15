@@ -28,9 +28,11 @@ import type { AutomationStep } from '@quillcrm/client';
 
 interface AddStepProps {
 	setStep: (step: AutomationStep) => void;
+	parentId?: number;
+	condition?: string;
 }
 
-const AddStep: React.FC<AddStepProps> = ({ setStep }) => {
+const AddStep: React.FC<AddStepProps> = ({ setStep, parentId, condition }) => {
 	const { automation, addStep } = useAutomationContext();
 	const [loading, setLoading] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -42,15 +44,26 @@ const AddStep: React.FC<AddStepProps> = ({ setStep }) => {
 	const saveStep = async (type: string) => {
 		setLoading(true);
 
+		const data = {
+			automation_id: automation.id,
+			type,
+			status: 'active',
+		} as any;
+
+		if (type === 'condition') {
+			data.action = condition;
+		}
+
+		if (parentId && condition) {
+			data.parent_id = parentId;
+			data.condition = condition;
+		}
+
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/automation-steps`,
 				method: 'POST',
-				data: {
-					automation_id: automation.id,
-					type,
-					status: 'active',
-				},
+				data,
 			})) as AutomationStep;
 
 			addStep(response);

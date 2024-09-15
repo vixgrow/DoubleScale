@@ -2,6 +2,7 @@ import type { InitialPayload } from './initial-payload';
 
 export type ConfigData = Record<string, unknown> & {
 	initialPayload: InitialPayload;
+	blogName: string;
 	adminUrl: string;
 	pluginDirUrl: string;
 	adminEmail: string;
@@ -15,6 +16,29 @@ export type ConfigData = Record<string, unknown> & {
 	automationTriggers: AutomationTriggers;
 	automationActions: AutomationActions;
 	automationGoals: AutomationGoals;
+	automationRules: AutomationRules;
+};
+
+export type AutomationRules = {
+	[key: string]: {
+		name: string;
+		rules: Rules;
+	};
+};
+
+export type Rules = {
+	[key: string]: Rule;
+};
+
+export type Rule = {
+	name: string;
+	type: string;
+	operators: {
+		[key: string]: string;
+	};
+	options: {
+		[key: string]: string;
+	};
 };
 
 export type Trigger = {

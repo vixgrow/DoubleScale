@@ -9,6 +9,7 @@ import type {
 	AutomationTriggers,
 	AutomationActions,
 	AutomationGoals,
+	AutomationRules,
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
 
@@ -34,6 +35,7 @@ const configData: ConfigData = {
 			confirmation_redirect: '',
 		},
 	},
+	blogName: '',
 	adminUrl: '',
 	pluginDirUrl: '',
 	adminEmail: '',
@@ -52,6 +54,7 @@ const configData: ConfigData = {
 	automationTriggers: {},
 	automationActions: {},
 	automationGoals: {},
+	automationRules: {},
 };
 
 /**
@@ -89,6 +92,25 @@ const setInitialPayload = (data: ConfigData) => (value: InitialPayload) => {
  */
 const getInitialPayload = (data: ConfigData) => (): InitialPayload => {
 	return data.initialPayload;
+};
+
+/**
+ * Get blog name
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @returns string
+ */
+const getBlogName = (data: ConfigData) => (): string => {
+	return data.blogName;
+};
+
+/**
+ * Set blog name
+ *
+ * @param data the json environment configuration to use for getting config values
+ */
+const setBlogName = (data: ConfigData) => (value: string) => {
+	data.blogName = value;
 };
 
 /**
@@ -356,10 +378,34 @@ export const setAutomationGoals =
 		data.automationGoals = value;
 	};
 
+/**
+ * Get automation rules
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns AutomationRules
+ */
+export const getAutomationRules = (data: ConfigData): AutomationRules => {
+	return data.automationRules;
+};
+
+/**
+ * Set automation rules
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setAutomationRules =
+	(data: ConfigData) => (value: AutomationRules) => {
+		data.automationRules = value;
+	};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
 	getInitialPayload: () => InitialPayload;
+	getBlogName: () => string;
+	setBlogName: (value: string) => void;
 	setAdminUrl: (value: string) => void;
 	getAdminUrl: () => string;
 	setAdminEmail: (value: string) => void;
@@ -386,12 +432,16 @@ export interface ConfigApi {
 	setAutomationActions: (value: AutomationActions) => void;
 	getAutomationGoals: () => AutomationGoals;
 	setAutomationGoals: (value: AutomationGoals) => void;
+	getAutomationRules: () => AutomationRules;
+	setAutomationRules: (value: AutomationRules) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
 	const configApi = config(data) as ConfigApi;
 	configApi.setInitialPayload = setInitialPayload(data);
 	configApi.getInitialPayload = getInitialPayload(data);
+	configApi.getBlogName = getBlogName(data);
+	configApi.setBlogName = setBlogName(data);
 	configApi.getAdminUrl = getAdminUrl(data);
 	configApi.setAdminUrl = setAdminUrl(data);
 	configApi.getAdminEmail = getAdminEmail(data);
@@ -418,6 +468,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setAutomationActions = setAutomationActions(data);
 	configApi.getAutomationGoals = () => getAutomationGoals(data);
 	configApi.setAutomationGoals = setAutomationGoals(data);
+	configApi.getAutomationRules = () => getAutomationRules(data);
+	configApi.setAutomationRules = setAutomationRules(data);
 
 	return configApi;
 };

@@ -15,7 +15,7 @@ export { getHistory } from './history';
 export const getToLink = (to: string) => {
 	const pathname = document.location.pathname;
 	const basename = pathname.substring(0, pathname.lastIndexOf('/'));
-	const [path, id, tab] = to.split('/');
+	const [path, id, tab, subtab] = to.split('/');
 
 	to = `${basename}/admin.php?page=quillcrm&path=${path}`;
 
@@ -25,6 +25,10 @@ export const getToLink = (to: string) => {
 
 	if (tab) {
 		to += `&tab=${tab}`;
+	}
+
+	if (subtab) {
+		to += `&subtab=${subtab}`;
 	}
 
 	return to;

@@ -100,5 +100,12 @@ class Tag_Model extends Model {
 				$tag->contacts()->detach();
 			}
 		);
+
+		// Attach contacts count to the tag.
+		static::retrieved(
+			function ( $tag ) {
+				$tag->contacts_count = $tag->contacts()->count();
+			}
+		);
 	}
 }

@@ -16,7 +16,10 @@ import { Table, Tag } from 'antd';
  * Internal dependencies
  */
 import './style.scss';
-import type { AutomationContact } from '@quillcrm/client';
+import type {
+	AutomationContact,
+	AutomationContactsResponse,
+} from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { useParams } from '@quillcrm/navigation';
 
@@ -41,10 +44,10 @@ const ContactsList: React.FC = () => {
 					per_page: perPage,
 				}),
 				method: 'GET',
-			})) as any;
+			})) as AutomationContactsResponse;
 
 			response.total && setTotal(response.total);
-			response.data && setData(response.data as AutomationContact[]);
+			response.data && setData(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',

@@ -13,21 +13,30 @@ import { Button, Input, DatePicker } from 'antd';
 import en from 'antd/es/date-picker/locale/en_US';
 import dayjs from 'dayjs';
 import { DeleteOutlined } from '@ant-design/icons';
-import { map, isEmpty, isArray } from 'lodash';
+import { map, isEmpty, isArray, isObject } from 'lodash';
 import Select from 'react-select';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Filter as FilterType, FilterSettings } from '@quillcrm/client';
+import type {
+	Filter as FilterType,
+	FilterSettings,
+	ReactSelectOptions,
+	Response,
+} from '@quillcrm/client';
 
 interface FilterProps {
 	filterSettings: FilterSettings;
 	filter: FilterType;
-	onChange: (key: string, value: any) => void;
+	onChange: (key: string, value: string | string[]) => void;
 	onRemove: () => void;
 }
+
+type OptionsResponse = Response & {
+	data: { [key: string]: string }[];
+};
 
 const Filter: React.FC<FilterProps> = ({
 	filterSettings,
@@ -35,9 +44,9 @@ const Filter: React.FC<FilterProps> = ({
 	onChange,
 	onRemove,
 }) => {
-	const [options, setOptions] = useState<any[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [keyword, setKeyword] = useState('');
+	const [options, setOptions] = useState<ReactSelectOptions>([]);
+	const [loading, setLoading] = useState<boolean>(true);
+	const [keyword, setKeyword] = useState<string>('');
 
 	const fetchOptions = async () => {
 		setLoading(true);
@@ -48,10 +57,10 @@ const Filter: React.FC<FilterProps> = ({
 					ids: isArray(filter.value) ? filter.value : '',
 				}),
 				method: 'GET',
-			})) as any;
+			})) as OptionsResponse;
 
 			setOptions(
-				map(response.data, (item: any) => ({
+				map(response.data, (item: { [key: string]: string }) => ({
 					label: item[filterSettings.dynamic_args.label],
 					value: item[filterSettings.dynamic_args.key],
 				}))
@@ -81,9 +90,13 @@ const Filter: React.FC<FilterProps> = ({
 							label: filterSettings.operators[filter.operator],
 							value: filter.operator,
 						}}
-						onChange={(value: any) =>
-							onChange('operator', value.value)
-						}
+						onChange={(value) => {
+							if (!isObject(value)) {
+								return;
+							}
+
+							onChange('operator', value.value);
+						}}
 						options={map(
 							filterSettings.operators,
 							(label, value) => ({
@@ -109,9 +122,13 @@ const Filter: React.FC<FilterProps> = ({
 									filter.value,
 								value: filter.value,
 							}}
-							onChange={(value: any) =>
-								onChange('value', value.value)
-							}
+							onChange={(value) => {
+								if (!isObject(value)) {
+									return;
+								}
+
+								onChange('value', value.value);
+							}}
 							options={map(
 								filterSettings.options,
 								(label, value) => ({
@@ -132,7 +149,7 @@ const Filter: React.FC<FilterProps> = ({
 									)?.label || value,
 								value,
 							}))}
-							onChange={(value: any) =>
+							onChange={(value) =>
 								onChange(
 									'value',
 									map(value, (item) => item.value)

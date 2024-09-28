@@ -11,30 +11,30 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import { Tag as AntTag, Flex } from 'antd';
 import AsyncSelect from 'react-select/async';
-import { map } from 'lodash';
+import { isObject, map } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { List } from '@quillcrm/client';
+import type { List, ListsResponse } from '@quillcrm/client';
 
 interface Props {
-	value: string[];
-	onChange: (value: string[]) => void;
+	value: number[];
+	onChange: (value: number[]) => void;
 }
 
 const ListField = ({ value, onChange }: Props) => {
 	const [savedLists, setSavedLists] = useState<List[]>([]);
 
-	const fetchLists = async (keyword = '', ids: any = []) => {
+	const fetchLists = async (keyword = '', ids: number[] = []) => {
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/lists', {
 					keyword: keyword,
 					ids: ids,
 				}),
-			})) as any;
+			})) as ListsResponse;
 
 			setSavedLists([...savedLists, ...response.data]);
 
@@ -66,7 +66,10 @@ const ListField = ({ value, onChange }: Props) => {
 										callback(data);
 									});
 								}}
-								onChange={(val: any) => {
+								onChange={(val) => {
+									if (!isObject(val)) {
+										return;
+									}
 									const newLists = [...value, val.value];
 									onChange(newLists);
 								}}
@@ -76,7 +79,7 @@ const ListField = ({ value, onChange }: Props) => {
 								<Flex gap={10}>
 									{map(value, (list_id) => (
 										<AntTag
-											key={list_id.id}
+											key={list_id}
 											closable
 											onClose={() => {
 												const newLists = value.filter(

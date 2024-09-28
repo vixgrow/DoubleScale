@@ -9,9 +9,22 @@ import { map } from 'lodash';
 import './style.scss';
 import Field from '../field';
 
+type FieldType = {
+	label: string;
+	type: string;
+	options?: {
+		[key: string]: string;
+	};
+	multiple?: boolean;
+};
+
+type FieldsType = {
+	[key: string]: FieldType;
+};
+
 interface FieldsProps {
-	fields: any;
-	values: any;
+	fields: FieldsType;
+	values: { [key: string]: any };
 	onChange: (value: any) => void;
 }
 
@@ -25,6 +38,14 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 		onChange(newValues);
 	};
 
+	const optionsArray = (field: FieldType) => {
+		const options = map(field.options, (label, value) => {
+			return { label, value };
+		});
+
+		return options;
+	};
+
 	return (
 		<div className="qcrm-fields" style={{ marginBottom: '20px' }}>
 			{map(fields, (field, key) => {
@@ -33,7 +54,7 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 						key={key}
 						label={field.label}
 						type={field.type}
-						options={field.options}
+						options={optionsArray(field)}
 						value={values?.[key]}
 						onChange={(value) => handleChange(key, value)}
 					/>

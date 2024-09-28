@@ -17,13 +17,16 @@ export type ConfigData = Record<string, unknown> & {
 	automationActions: AutomationActions;
 	automationGoals: AutomationGoals;
 	automationRules: AutomationRules;
+	isWoocommerceActive: boolean;
 };
 
 export type AutomationRules = {
-	[key: string]: {
-		name: string;
-		rules: Rules;
-	};
+	[key: string]: RulesGroup;
+};
+
+export type RulesGroup = {
+	name: string;
+	rules: Rules;
 };
 
 export type Rules = {
@@ -136,8 +139,8 @@ export type Integrations = {
 };
 
 export type Integration = {
-	label: string;
-	desciption: string;
+	name: string;
+	description: string;
 	fields: IntegrationFields;
 	is_connected: boolean;
 	settings: {
@@ -159,6 +162,7 @@ export type IntegrationField = {
 		};
 	};
 	has_options?: boolean;
+	endpoint?: string;
 };
 
 export type ContactFieldsGroups = {
@@ -199,7 +203,7 @@ type FormOptions = {
 	[key: string]: Option;
 };
 
-type Form = {
+export type Form = {
 	label: string;
 	description: string;
 	options: FormOptions;
@@ -251,11 +255,11 @@ export type FilterSettings = {
 	};
 };
 
-type Filters = {
+export type Filters = {
 	[key: string]: FilterSettings;
 };
 
-type FiltersGroup = {
+export type FiltersGroup = {
 	name: string;
 	filters: Filters;
 };

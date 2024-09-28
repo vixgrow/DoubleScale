@@ -68,7 +68,7 @@ class Link_Triggers {
 				return;
 			}
 
-			$link_trigger = Link_Trigger_Model::where( 'hash', $hash )->first();
+			$link_trigger = Link_Trigger_Model::where( 'hash', $hash )->where( 'status', 'active' )->first();
 			if ( ! $link_trigger ) {
 				return;
 			}

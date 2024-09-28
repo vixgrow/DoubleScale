@@ -13,13 +13,16 @@ export default (dispatch: React.Dispatch<FormAction>) => {
 				form,
 			});
 		},
-		updateForm: (payload: Record<string, any>) => {
+		updateForm: (payload: Partial<Form>) => {
 			dispatch({
 				type: UPDATE_FORM,
 				payload,
 			});
 		},
-		updateSettings: (key: string, value: any) => {
+		updateSettings: <K extends keyof Form['data']>(
+			key: K,
+			value: Form['data'][K]
+		) => {
 			dispatch({
 				type: UPDATE_SETTINGS,
 				key,

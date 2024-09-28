@@ -32,6 +32,7 @@ ChartJS.register(ArcElement, DoughnutController, Tooltip, Legend, Title);
  */
 import './style.scss';
 import { useCampaignContext } from '../../state/context';
+import { Campaign as CampaignType } from '@quillcrm/client';
 
 const Analytics: React.FC = () => {
 	const { campaign, isLoading, updateCampaign } = useCampaignContext();
@@ -46,7 +47,7 @@ const Analytics: React.FC = () => {
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/campaigns/${campaign.id}`,
-			})) as any;
+			})) as CampaignType;
 
 			updateCampaign(response);
 		} catch (error) {

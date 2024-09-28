@@ -10,19 +10,23 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { map } from 'lodash';
+import { isObject, map } from 'lodash';
 import Select from 'react-select';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+import type {
+	IntegrationSelectOptions,
+	ReactSelectOptions,
+} from '@quillcrm/client';
 
 interface SelectFieldProps {
 	integration: string;
 	slug: string;
-	onChange: (value: any) => void;
-	value: any;
+	onChange: (value: string) => void;
+	value: string;
 }
 
 const SelectField: React.FC<SelectFieldProps> = ({
@@ -31,8 +35,8 @@ const SelectField: React.FC<SelectFieldProps> = ({
 	onChange,
 	value,
 }) => {
-	const [options, setOptions] = useState([]);
-	const [isLoading, setIsLoading] = useState(false);
+	const [options, setOptions] = useState<ReactSelectOptions>([]);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchOptions = async () => {
@@ -44,7 +48,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 					`/qc/v1/integrations/${integration}/${slug}`
 				),
 				method: 'GET',
-			})) as any;
+			})) as IntegrationSelectOptions;
 
 			setOptions(
 				map(response, (option) => ({
@@ -71,10 +75,13 @@ const SelectField: React.FC<SelectFieldProps> = ({
 			<Select
 				isLoading={isLoading}
 				options={options}
-				onChange={(value: any) => {
+				onChange={(value) => {
+					if (!isObject(value)) {
+						return;
+					}
 					onChange(value.value);
 				}}
-				value={options.find((option: any) => option.value === value)}
+				value={options.find((option) => option.value === value)}
 			/>
 		</div>
 	);

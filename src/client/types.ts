@@ -47,6 +47,28 @@ export type Contact = {
 	lists: List[];
 	tags: Tag[];
 	notes: Note[];
+	orders?: Order[];
+	revenue?: string;
+};
+
+export type Order = {
+	id: number;
+	status: string;
+	currency: string;
+	type: string;
+	tax_amount: string;
+	total_amount: string;
+	customer_id: string;
+	billing_email: string;
+	date_created_gmt: string;
+	date_updated_gmt: string;
+	parent_order_id: string;
+	payment_method: string;
+	payment_method_title: string;
+	transaction_id: string;
+	ip_address: string;
+	user_agent: string;
+	customer_note: string;
 };
 
 export type AutomationContact = {
@@ -265,11 +287,18 @@ export type AutomationStep = {
 	action: string;
 	type: string;
 	condition: string;
-	settings: {
-		[key: string]: any;
-	};
+	// This type is any because the structure of fields is different for each action
+	settings: any;
+	order: number;
+	status: string;
 	created_at: string;
 	updated_at: string;
+};
+
+export type OrganizedSteps = OrganizedStep[];
+
+export type OrganizedStep = AutomationStep & {
+	children: OrganizedStep[];
 };
 
 export type AbandonedCart = {
@@ -288,7 +317,7 @@ export type AbandonedCart = {
 	shipping: string;
 	currency: string;
 	order_id: string;
-	status: string;
+	status: 'pending' | 'recovered' | 'lost' | 'skipped' | 'processing';
 	created_at: string;
 	updated_at: string;
 };
@@ -340,3 +369,174 @@ export type Rule = {
 	value: string;
 	operator: string;
 };
+
+export type DashboardData = {
+	total_contacts: number;
+	total_sent_emails: number;
+	total_orders: number;
+	total_revenue: string;
+	recent_contacts: Contact[];
+	recent_unsubscribed_contacts: Contact[];
+	recent_abandoned_carts: AbandonedCart[];
+	recent_recoverd_carts: AbandonedCart[];
+	top_campaigns: Campaign[];
+	top_automations: Automation[];
+	recent_emails: CampaignEmail[];
+};
+
+export type CartAnalytics = {
+	carts: {
+		[date: string]: AbandonedCart[];
+	};
+	revenue: {
+		[date: string]: number;
+	};
+	dates: {
+		days: string[];
+		months: string[];
+	};
+	total: {
+		carts: number;
+		revenue: number;
+	};
+};
+
+export type ContactAnalytics = {
+	contacts: {
+		[date: string]: Contact[];
+	};
+	dates: {
+		days: string[];
+		months: string[];
+	};
+	total: string;
+	total_subscribed: number;
+	total_unsubscribed: number;
+};
+
+export type EmailsAnalytics = {
+	emails: {
+		[date: string]: CampaignEmail[];
+	};
+	dates: {
+		days: string[];
+		months: string[];
+	};
+	total: string;
+	total_sent: number;
+	total_opened: number;
+	total_clicked: number;
+};
+
+export type Settings = {
+	business: {
+		business_name: string;
+		business_address: string;
+	};
+	email: {
+		from_name: string;
+		from_email: string;
+		reply_to: string;
+		email_footer: string;
+		max_in_second: number;
+		max_in_day: number;
+	};
+	double_optin: {
+		email_subject: string;
+		email_content: string;
+		after_confirmation: string;
+		confirmation_message: string;
+		confirmation_redirect: string;
+	};
+	cart: {
+		enable_cart_tracking: boolean;
+		wait_period: number;
+		cool_off_period: number;
+		lost_cart_days: number;
+	};
+};
+
+export type Response = {
+	current_page: number;
+	first_page_url: string;
+	from: number;
+	last_page: number;
+	last_page_url: string;
+	next_page_url: string;
+	path: string;
+	prev_page_url: string;
+	per_page: number;
+	to: number;
+	total: number;
+};
+
+export type ContactsResponse = Response & {
+	data: Contact[];
+};
+
+export type ListsResponse = Response & {
+	data: List[];
+};
+
+export type TagsResponse = Response & {
+	data: Tag[];
+};
+
+export type AutomationsResponse = Response & {
+	data: Automation[];
+};
+
+export type CampaignsResponse = Response & {
+	data: Campaign[];
+};
+
+export type CampaignEmailsResponse = Response & {
+	data: CampaignEmail[];
+};
+
+export type CustomFieldsResponse = Response & {
+	data: CustomField[];
+};
+
+export type CustomFieldsGroupsResponse = Response & {
+	data: CustomFieldsGroups;
+};
+
+export type FormsResponse = Response & {
+	data: Form[];
+};
+
+export type LinkTriggersResponse = Response & {
+	data: LinkTrigger[];
+};
+
+export type TemplatesResponse = Response & {
+	data: CustomTemplate[];
+};
+
+export type AbandonedCartsResponse = Response & {
+	data: AbandonedCart[];
+};
+
+export type AutomationContactsResponse = Response & {
+	data: AutomationContact[];
+};
+
+export type AutomationStepsResponse = Response & {
+	data: AutomationStep[];
+};
+
+export type NotesResponse = Response & {
+	data: Note[];
+};
+
+export type IntegrationSelectOptions = {
+	name: string;
+	id: string;
+}[];
+
+export type ReactSelectOptions = {
+	label: string;
+	value: string;
+	style?: React.CSSProperties;
+}[];

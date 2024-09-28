@@ -22,6 +22,7 @@ import './style.scss';
 import type { Filter as FilterType } from '@quillcrm/client';
 import { getFilterBySlug } from '@quillcrm/utils';
 import ConfigAPI from '@quillcrm/config';
+import type { FiltersGroup } from '@quillcrm/config';
 import Filter from '../filter';
 
 interface FilterProps {
@@ -92,7 +93,10 @@ const Filters: React.FC<FilterProps> = ({
 												};
 											}
 										)}
-										renderItem={(item: any) => (
+										renderItem={(item: {
+											key: string;
+											group: FiltersGroup;
+										}) => (
 											<List.Item
 												style={{
 													cursor: 'pointer',
@@ -142,7 +146,10 @@ const Filters: React.FC<FilterProps> = ({
 													};
 												}
 											)}
-											renderItem={(item: any) => (
+											renderItem={(item: {
+												key: string;
+												filter: FiltersGroup;
+											}) => (
 												<List.Item
 													style={{
 														cursor: 'pointer',

@@ -17,7 +17,10 @@ import { isEmpty } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import { AutomationContact } from '@quillcrm/client';
+import {
+	AutomationContact,
+	AutomationContactsResponse,
+} from '@quillcrm/client';
 import { useContactContext } from '../state/context';
 
 interface AutomationProps {
@@ -44,9 +47,9 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 						page,
 					}
 				),
-			})) as any;
+			})) as AutomationContactsResponse;
 
-			setAutomationContacts(response.data as AutomationContact[]);
+			setAutomationContacts(response.data);
 			setTotal(response.total);
 		} catch (error) {
 			createNotice({

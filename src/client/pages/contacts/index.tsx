@@ -19,6 +19,7 @@ import {
 	Input,
 	Checkbox,
 	Select,
+	Modal,
 } from 'antd';
 import { UserOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { map } from 'lodash';
@@ -32,10 +33,12 @@ import type {
 	Tag,
 	List,
 	Filter as FilterType,
+	ContactsResponse,
 } from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
+import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
-import { Filters } from '@quillcrm/components';
+import { Filters, Field } from '@quillcrm/components';
+import ConfigAPI from '@quillcrm/config';
 
 const { Column } = Table;
 
@@ -47,20 +50,87 @@ const ContactsList: React.FC = () => {
 	const [data, setData] = useState<Contact[]>([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const { createNotice } = useDispatch('quillcrm/core');
-	const [selectedColumns, setSelectedColumns] = useState<string[]>([
+	const isWooCommerceActive = ConfigAPI.isWoocommerceActive();
+	const defaultSelectedColumns = [
 		'full_name',
 		'email',
 		'status',
 		'phone',
 		'country',
 		'created_at',
-	]);
+	];
+	const navigate = useNavigate();
+	const [contact, setContact] = useState({
+		email: '',
+		first_name: '',
+		last_name: '',
+	});
+	const [isSaving, setIsSaving] = useState(false);
+
+	if (isWooCommerceActive) {
+		defaultSelectedColumns.push('total_orders');
+		defaultSelectedColumns.push('total_revenue');
+		defaultSelectedColumns.push('last_order_date');
+		// Move created_at to the end
+		defaultSelectedColumns.splice(
+			defaultSelectedColumns.indexOf('created_at'),
+			1
+		);
+		defaultSelectedColumns.push('created_at');
+	}
+
+	const [selectedColumns, setSelectedColumns] = useState<string[]>(
+		defaultSelectedColumns
+	);
 	const [keyword, setKeyword] = useState<string>('');
 	const [showFilters, setShowFilters] = useState(false);
 	const [filters, setFilters] = useState<FilterType[]>([]);
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState(false);
+	const [visible, setVisible] = useState(false);
+
+	const createContact = async () => {
+		setIsSaving(true);
+		try {
+			const response = (await apiFetch({
+				path: '/qc/v1/contacts',
+				method: 'POST',
+				data: contact,
+			})) as Contact;
+
+			navigate(getToLink(`contacts/${response.id}`));
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message:
+					error.message || __('Failed to create Contact', 'quillcrm'),
+			});
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
+	const getContactOrderDetails = (contact: Contact) => {
+		const details = {
+			orders: 0,
+			revenue: '-',
+			lastOrderDate: '-',
+		};
+		if (!isWooCommerceActive) {
+			return details;
+		}
+
+		if (!contact.orders || contact.orders.length === 0) {
+			return details;
+		}
+
+		details.orders = contact.orders.length;
+		details.revenue = contact.revenue || '-';
+		details.lastOrderDate = contact.orders[0].date_created_gmt;
+
+		return details;
+	};
 
 	const fetchContacts = async () => {
 		setLoading(true);
@@ -73,10 +143,10 @@ const ContactsList: React.FC = () => {
 					filters: filters,
 				}),
 				method: 'GET',
-			})) as any;
+			})) as ContactsResponse;
 
 			response.total && setTotal(response.total);
-			response.data && setData(response.data as Contact[]);
+			response.data && setData(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -203,6 +273,44 @@ const ContactsList: React.FC = () => {
 		},
 	];
 
+	if (isWooCommerceActive) {
+		columns.push({
+			title: __('Total Orders', 'quillcrm'),
+			dataIndex: 'total_orders',
+			key: 'total_orders',
+			render: (_, record: Contact) => {
+				const details = getContactOrderDetails(record);
+				return <>{details.orders}</>;
+			},
+		});
+
+		columns.push({
+			title: __('Total Revenue', 'quillcrm'),
+			dataIndex: 'total_revenue',
+			key: 'total_revenue',
+			render: (_, record: Contact) => {
+				const details = getContactOrderDetails(record);
+				return <>{details.revenue}</>;
+			},
+		});
+
+		columns.push({
+			title: __('Last Order Date', 'quillcrm'),
+			dataIndex: 'last_order_date',
+			key: 'last_order_date',
+			render: (_, record: Contact) => {
+				const details = getContactOrderDetails(record);
+				return (
+					<>
+						{details.lastOrderDate
+							? convertDate(details.lastOrderDate)
+							: '-'}
+					</>
+				);
+			},
+		});
+	}
+
 	return (
 		<div className="qcrm-contacts-list">
 			<Flex
@@ -301,6 +409,9 @@ const ContactsList: React.FC = () => {
 							{__('Columns', 'quillcrm')}
 						</Button>
 					</Popover>
+					<Button type="primary" onClick={() => setVisible(true)}>
+						{__('Create Contact', 'quillcrm')}
+					</Button>
 				</Flex>
 			</Flex>
 			{showFilters && (
@@ -346,6 +457,49 @@ const ContactsList: React.FC = () => {
 					return <Column {...columnData} />;
 				})}
 			</Table>
+			<Modal
+				title={__('Create Form', 'quillcrm')}
+				open={visible}
+				onOk={createContact}
+				onCancel={() => setVisible(false)}
+				confirmLoading={isSaving}
+			>
+				<div className="qcrm-fields">
+					<Field
+						label={__('Email', 'quillcrm')}
+						value={contact.email}
+						onChange={(value) =>
+							setContact({
+								...contact,
+								email: value,
+							})
+						}
+						type="email"
+					/>
+					<Field
+						label={__('First Name', 'quillcrm')}
+						value={contact.first_name}
+						onChange={(value) =>
+							setContact({
+								...contact,
+								first_name: value,
+							})
+						}
+						type="text"
+					/>
+					<Field
+						label={__('Last Name', 'quillcrm')}
+						value={contact.last_name}
+						onChange={(value) =>
+							setContact({
+								...contact,
+								last_name: value,
+							})
+						}
+						type="text"
+					/>
+				</div>
+			</Modal>
 		</div>
 	);
 };

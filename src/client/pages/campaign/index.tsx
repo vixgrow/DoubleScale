@@ -38,8 +38,8 @@ const Campaign: React.FC = () => {
 	const $actions = actions(dispatch);
 	const { setCampaign } = $actions;
 	const { campaign } = state;
-	const [loading, setLoading] = useState(true);
-	const [isSaving, setIsSaving] = useState(false);
+	const [loading, setLoading] = useState<boolean>(true);
+	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -53,7 +53,7 @@ const Campaign: React.FC = () => {
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/campaigns/${id}`,
-			})) as any;
+			})) as CampaignType;
 
 			setCampaign(response);
 		} catch (error) {

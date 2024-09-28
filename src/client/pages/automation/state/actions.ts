@@ -10,10 +10,13 @@ import {
 	ADD_STEP,
 	REMOVE_STEP,
 	UPDATE_STEP,
+	SET_UPDATED_STEPS,
 } from './constants';
-import type { AutomationAction, StepAction } from './types';
+import type { AutomationAction, StepAction, setUpdatedSteps } from './types';
 
-export default (dispatch: React.Dispatch<AutomationAction | StepAction>) => {
+export default (
+	dispatch: React.Dispatch<AutomationAction | StepAction | setUpdatedSteps>
+) => {
 	return {
 		setAutomation: (automation: Automation) => {
 			dispatch({
@@ -21,17 +24,28 @@ export default (dispatch: React.Dispatch<AutomationAction | StepAction>) => {
 				automation,
 			});
 		},
-		updateAutomation: (payload: Record<string, any>) => {
+		updateAutomation: (payload: Partial<Automation>) => {
 			dispatch({
 				type: UPDATE_AUTOMATION,
 				payload,
 			});
 		},
-		updateSettings: (key: string, value: any) => {
+		updateSettings: (
+			key: keyof Automation['settings'],
+			value: Automation['settings'][keyof Automation['settings']]
+		) => {
 			dispatch({
 				type: UPDATE_SETTINGS,
 				key,
 				value,
+			});
+		},
+		setUpdatedSteps: (steps: {
+			[stepId: number]: Partial<AutomationStep>;
+		}) => {
+			dispatch({
+				type: SET_UPDATED_STEPS,
+				steps,
 			});
 		},
 		setSteps: (steps: AutomationStep[]) => {
@@ -52,7 +66,7 @@ export default (dispatch: React.Dispatch<AutomationAction | StepAction>) => {
 				stepId,
 			});
 		},
-		updateStep: (stepId: number, payload: Record<string, any>) => {
+		updateStep: (stepId: number, payload: Partial<AutomationStep>) => {
 			dispatch({
 				type: UPDATE_STEP,
 				stepId,

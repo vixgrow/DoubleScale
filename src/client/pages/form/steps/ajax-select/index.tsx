@@ -59,6 +59,7 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent }) => {
 			});
 
 			const data = await response.json();
+			console.log(data);
 
 			setFormOptions(data.data);
 		} catch (error) {

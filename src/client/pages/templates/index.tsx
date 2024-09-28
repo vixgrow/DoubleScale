@@ -16,7 +16,10 @@ import { Table, Input, Button, Modal } from 'antd';
  * Internal dependencies
  */
 import './style.scss';
-import type { CustomTemplate as Template } from '@quillcrm/client';
+import type {
+	CustomTemplate as Template,
+	TemplatesResponse,
+} from '@quillcrm/client';
 import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import { Field } from '@quillcrm/components';
 
@@ -49,10 +52,10 @@ const TemplatesList: React.FC = () => {
 					keyword,
 				}),
 				method: 'GET',
-			})) as any;
+			})) as TemplatesResponse;
 
 			response.total && setTotal(response.total);
-			response.data && setData(response.data as Template[]);
+			response.data && setData(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -75,7 +78,7 @@ const TemplatesList: React.FC = () => {
 				path: '/qc/v1/templates',
 				method: 'POST',
 				data: template,
-			})) as any;
+			})) as Template;
 
 			setVisible(false);
 			navigate(getToLink(`templates/${response.id}`));

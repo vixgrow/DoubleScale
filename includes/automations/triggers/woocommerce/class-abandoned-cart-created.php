@@ -13,6 +13,8 @@ namespace QuillCRM\Automations\Triggers\WooCommerce;
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Models\Abandoned_Cart_Model;
+use QuillCRM\Models\Automation_Model;
+use QuillCRM\QuillCRM;
 
 /**
  * Abandoned Cart Created Trigger
@@ -96,6 +98,35 @@ class Abandoned_Cart_Created extends Trigger {
 		);
 
 		$this->process( $data );
+	}
+
+	/**
+	 * Process automations
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $args Arguments
+	 *
+	 * @return void
+	 */
+	public function process( $args ) {
+		try {
+			$automations = Automation_Model::get_automations_by_trigger( $this->slug );
+			if ( count( $automations ) === 0 ) {
+				do_action( 'quillcrm_abandoned_cart_skipped', $args['data']['cart_id'] ?? null );
+				return;
+			}
+
+			foreach ( $automations as $automation ) {
+				if ( ! $this->is_processable( $automation, $args ) ) {
+					continue;
+				}
+
+				QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automations', $automation, $args );
+			}
+		} catch ( \Exception $e ) {
+			error_log( 'Error processing Abandoned Cart Created Trigger: ' . $e->getMessage() );
+		}
 	}
 }
 

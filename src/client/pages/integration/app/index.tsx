@@ -43,7 +43,7 @@ const App: React.FC<IntegrationProps> = ({
 
 		try {
 			// @ts-ignore
-			const response = (await apiFetch({
+			const response = await apiFetch({
 				path: addQueryArgs(`/qc/v1/integrations/${slug}`),
 				method: 'POST',
 				data: {
@@ -51,7 +51,7 @@ const App: React.FC<IntegrationProps> = ({
 						app,
 					},
 				},
-			})) as any;
+			});
 
 			await getAuthUrl();
 		} catch (error) {
@@ -69,7 +69,7 @@ const App: React.FC<IntegrationProps> = ({
 			const response = (await apiFetch({
 				path: addQueryArgs(`/qc/v1/integrations/${slug}/auth`),
 				method: 'GET',
-			})) as any;
+			})) as { auth_uri: Location };
 
 			window.location = response.auth_uri;
 		} catch (error) {

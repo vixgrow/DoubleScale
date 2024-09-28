@@ -22,11 +22,12 @@ import './style.scss';
 import type { Rules as RulesType, AutomationStep } from '@quillcrm/client';
 import { getRuleBySlug } from '@quillcrm/utils';
 import ConfigAPI from '@quillcrm/config';
+import type { Rule as AutomationRule, RulesGroup } from '@quillcrm/config';
 import { Rule } from '@quillcrm/components';
 
 interface RulesProps {
 	step: AutomationStep;
-	onSave: (data: any) => void;
+	onSave: (data: Partial<AutomationStep>) => void;
 	visible: boolean;
 	onClose: () => void;
 }
@@ -37,11 +38,11 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	visible,
 	onClose,
 }) => {
-	const stepRules = step.settings || [];
-	const [rules, setRules] = useState<RulesType[] | any>(stepRules);
+	const stepRules = step.settings || ([] as RulesType[]);
+	const [rules, setRules] = useState<RulesType[]>(stepRules);
 	const [isSaving, setIsSaving] = useState(false);
 
-	const save = async (data: any) => {
+	const save = async (data: Partial<AutomationStep>) => {
 		setIsSaving(true);
 		try {
 			await onSave(data);
@@ -168,7 +169,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 
 // Separate or and and buttons into separate popovers
 interface ConditionButtonProps {
-	rules: RulesType[] | any;
+	rules: RulesType[];
 	type: 'or' | 'and';
 	parentIndex: number;
 	onChange: (rules: RulesType[]) => void;
@@ -215,7 +216,10 @@ const ConditionButton: React.FC<ConditionButtonProps> = ({
 									};
 								}
 							)}
-							renderItem={(item: any) => (
+							renderItem={(item: {
+								key: string;
+								rule: AutomationRule;
+							}) => (
 								<List.Item
 									style={{
 										cursor: 'pointer',
@@ -258,7 +262,10 @@ const ConditionButton: React.FC<ConditionButtonProps> = ({
 							key,
 							group,
 						}))}
-						renderItem={(item: any) => (
+						renderItem={(item: {
+							key: string;
+							group: RulesGroup;
+						}) => (
 							<>
 								<List.Item
 									style={{

@@ -15,7 +15,7 @@ import { map } from 'lodash';
  */
 import './style.scss';
 import ConfigAPI from '@quillcrm/config';
-import type { ActionsGroup } from '@quillcrm/config';
+import type { GoalsGroup } from '@quillcrm/config';
 
 interface GoalSelectorProps {
 	value: string;
@@ -85,7 +85,7 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 };
 
 const GoalsGroupRender: React.FC<{
-	groups: ActionsGroup[];
+	groups: GoalsGroup[];
 	onChange: (value: string) => void;
 	value: string;
 }> = ({ groups, onChange, value }) => {

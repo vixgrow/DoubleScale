@@ -139,7 +139,7 @@ const CustomFields: React.FC = () => {
 		},
 		...map(groups, (group) => ({
 			label: group.name,
-			value: group.id,
+			value: group.id.toString(),
 		})),
 	];
 
@@ -280,6 +280,7 @@ const CustomFields: React.FC = () => {
 
 	const saveField = async (field: CustomField) => {
 		try {
+			// @ts-ignore
 			const response = (await apiFetch({
 				path: `/qc/v1/custom-fields/${field.id}`,
 				method: 'PUT',
@@ -320,7 +321,7 @@ const CustomFields: React.FC = () => {
 	};
 
 	const getField = (fieldId: number): CustomField | null => {
-		let field = null;
+		let field: CustomField | null = null;
 		map(groups, (group) => {
 			map(group.custom_fields, (f) => {
 				if (f.id === fieldId) {
@@ -521,7 +522,7 @@ const CustomFields: React.FC = () => {
 							}
 						}}
 						type="select"
-						options={groupOptions as any}
+						options={groupOptions}
 					/>
 				</div>
 			</Modal>

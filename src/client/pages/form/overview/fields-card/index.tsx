@@ -28,7 +28,13 @@ import { map, isEmpty } from 'lodash';
 import './style.scss';
 import { useFormContext } from '../../state/context';
 import ConfigAPI from '@quillcrm/config';
-import { Tag, List } from '@quillcrm/client';
+import type {
+	Tag,
+	List,
+	Form,
+	ListsResponse,
+	TagsResponse,
+} from '@quillcrm/client';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 
 const FieldsCard: React.FC = () => {
@@ -40,8 +46,10 @@ const FieldsCard: React.FC = () => {
 		: null;
 	const { getAjaxUrl, getNonce, getContactFieldsGroups } = ConfigAPI;
 	const contactFieldsGroups = getContactFieldsGroups();
-	const [formFields, setFormFields] = useState(null);
-	const [isFetching, setIsFetching] = useState(false);
+	const [formFields, setFormFields] = useState<
+		Form['fields_settings']['fields'] | null
+	>(null);
+	const [isFetching, setIsFetching] = useState<boolean>(false);
 	const [savedTags, setSavedTags] = useState<Tag[]>([]);
 	const [savedLists, setSavedLists] = useState<List[]>([]);
 	const navigate = useNavigate();
@@ -86,7 +94,7 @@ const FieldsCard: React.FC = () => {
 					keyword: keyword,
 					ids: ids,
 				}),
-			})) as any;
+			})) as ListsResponse;
 
 			setSavedLists([...savedLists, ...response.data]);
 
@@ -110,7 +118,7 @@ const FieldsCard: React.FC = () => {
 					keyword: keyword,
 					ids: ids,
 				}),
-			})) as any;
+			})) as TagsResponse;
 
 			setSavedTags([...savedTags, ...response.data]);
 

@@ -27,7 +27,11 @@ import { map } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import type { Automations, Automation } from '@quillcrm/client';
+import type {
+	Automations,
+	Automation,
+	AutomationsResponse,
+} from '@quillcrm/client';
 import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
 import type { TriggersGroup } from '@quillcrm/config';
@@ -121,10 +125,10 @@ const AutomationsList: React.FC = () => {
 					keyword,
 				}),
 				method: 'GET',
-			})) as any;
+			})) as AutomationsResponse;
 
 			response.total && setTotal(response.total);
-			response.data && setData(response.data as Automations);
+			response.data && setData(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',

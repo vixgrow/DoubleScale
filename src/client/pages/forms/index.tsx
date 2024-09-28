@@ -10,19 +10,19 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Table, Tag as AntTag, Input, Button, Modal } from 'antd';
+import { Table, Tag as AntTag, Input, Button, Modal, Flex, Select } from 'antd';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Forms, Form } from '@quillcrm/client';
+import type { Forms, Form, FormsResponse } from '@quillcrm/client';
 import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
 import { Field } from '@quillcrm/components';
+import { convertDate } from '@quillcrm/utils';
 
 const { Column } = Table;
-const { Search } = Input;
 const FormsList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
@@ -39,6 +39,8 @@ const FormsList: React.FC = () => {
 	const forms = ConfigAPI.getForms();
 	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
+	const [bulkAction, setBulkAction] = useState('');
+	const [isApplying, setIsApplying] = useState(false);
 
 	const fetchForms = async () => {
 		setLoading(true);
@@ -50,10 +52,10 @@ const FormsList: React.FC = () => {
 					keyword,
 				}),
 				method: 'GET',
-			})) as any;
+			})) as FormsResponse;
 
 			response.total && setTotal(response.total);
-			response.data && setData(response.data as Forms);
+			response.data && setData(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -88,28 +90,90 @@ const FormsList: React.FC = () => {
 		fetchForms();
 	}, [page, perPage]);
 
+	const deleteSelected = async () => {
+		setIsApplying(true);
+		try {
+			await apiFetch({
+				path: '/qc/v1/forms',
+				method: 'DELETE',
+				data: {
+					ids: selectedRowKeys,
+				},
+			});
+
+			createNotice({
+				type: 'success',
+				message: __('Forms deleted', 'quillcrm'),
+			});
+			setSelectedRowKeys([]);
+			fetchForms();
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete forms', 'quillcrm'),
+			});
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
 	return (
 		<div className="qcrm-forms-list">
-			<div className="qcrm-contacts-forms-list__actions">
-				<div className="qcrm-contacts-forms-list__search">
-					<Search
+			<Flex
+				className="qcrm-contacts-list__actions"
+				justify="space-between"
+			>
+				<Flex gap={10}>
+					<Flex gap={10}>
+						<Select
+							options={[
+								{
+									label: __('Bulk Actions', 'quillcrm'),
+									value: '',
+								},
+								{
+									label: __('Delete', 'quillcrm'),
+									value: 'delete',
+								},
+							]}
+							value={bulkAction}
+							onChange={(value) => setBulkAction(value)}
+							disabled={selectedRowKeys.length === 0}
+						/>
+						<Button
+							type="primary"
+							onClick={() => {
+								if (bulkAction === 'delete') {
+									deleteSelected();
+								}
+							}}
+							disabled={selectedRowKeys.length === 0}
+							loading={isApplying}
+						>
+							{__('Apply', 'quillcrm')}
+						</Button>
+					</Flex>
+					<Input.Search
 						placeholder={__('Search', 'quillcrm')}
-						onSearch={(value, _e) => {
-							if (value.length < 2 && value.length > 0) {
-								return;
-							}
-							setKeyword(value);
+						allowClear
+						onSearch={() => {
+							fetchForms();
 						}}
-						enterButton={__('Search', 'quillcrm')}
-						size="large"
+						onChange={(e) => setKeyword(e.target.value)}
+						styles={{
+							affixWrapper: {
+								padding: '4px 5px',
+							},
+							input: {
+								minHeight: 'auto',
+							},
+						}}
 					/>
-				</div>
-				<div>
-					<Button type="primary" onClick={() => setVisible(true)}>
-						{__('Create Form', 'quillcrm')}
-					</Button>
-				</div>
-			</div>
+				</Flex>
+				<Button type="primary" onClick={() => setVisible(true)}>
+					{__('Create Form', 'quillcrm')}
+				</Button>
+			</Flex>
 			<Table
 				dataSource={data}
 				rowKey="id"
@@ -172,11 +236,13 @@ const FormsList: React.FC = () => {
 					title={__('Created At')}
 					dataIndex="created_at"
 					key="created_at"
+					render={(text) => convertDate(text)}
 				/>
 				<Column
 					title={__('Updated At')}
 					dataIndex="updated_at"
 					key="updated_at"
+					render={(text) => convertDate(text)}
 				/>
 			</Table>
 			<Modal

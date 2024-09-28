@@ -17,7 +17,7 @@ import { UserOutlined } from '@ant-design/icons';
  * Internal dependencies
  */
 import './style.scss';
-import { CampaignEmail } from '@quillcrm/client';
+import { CampaignEmail, CampaignEmailsResponse } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
 import { useParams } from '@quillcrm/navigation';
@@ -40,10 +40,10 @@ const Engagements: React.FC = () => {
 					per_page: perPage,
 					page,
 				}),
-			})) as any;
+			})) as CampaignEmailsResponse;
 
 			response.total && setTotal(response.total);
-			response.data && setData(response.data as CampaignEmail[]);
+			response.data && setData(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',

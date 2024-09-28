@@ -15,9 +15,12 @@ export const CampaignContext = createContext<{
 	setCampaign: (campaign: Campaign) => void;
 	setIsLoading: (isLoading: boolean) => void;
 	setIsSaving: (isSaving: boolean) => void;
-	updateCampaign: (payload: { [key: string]: any }) => void;
+	updateCampaign: (payload: Partial<Campaign>) => void;
 	saveCampaign: () => void;
-	updateSettings: (key: string, value: any) => void;
+	updateSettings: (
+		key: keyof Campaign['settings'],
+		value: Campaign['settings'][keyof Campaign['settings']]
+	) => void;
 }>({
 	campaign: null,
 	isLoading: false,
@@ -31,13 +34,16 @@ export const CampaignContext = createContext<{
 	setIsSaving: (_isSaving: boolean) => {
 		throw new Error('setIsSaving() not implemented');
 	},
-	updateCampaign: (_payload: { [key: string]: any }) => {
+	updateCampaign: (_payload: Partial<Campaign>) => {
 		throw new Error('updateCampaign() not implemented');
 	},
-	saveCampaign: (_payload?: { [key: string]: any }) => {
+	saveCampaign: (_payload?: Partial<Campaign>) => {
 		throw new Error('saveCampaign() not implemented');
 	},
-	updateSettings: (_key: string, _value: any) => {
+	updateSettings: (
+		_key: keyof Campaign['settings'],
+		_value: Campaign['settings'][keyof Campaign['settings']]
+	) => {
 		throw new Error('updateSettings() not implemented');
 	},
 });

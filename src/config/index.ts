@@ -55,6 +55,7 @@ const configData: ConfigData = {
 	automationActions: {},
 	automationGoals: {},
 	automationRules: {},
+	isWoocommerceActive: false,
 };
 
 /**
@@ -400,6 +401,28 @@ export const setAutomationRules =
 		data.automationRules = value;
 	};
 
+/**
+ * Get is woocommerce active
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns boolean
+ */
+export const isWoocommerceActive = (data: ConfigData): boolean => {
+	return data.isWoocommerceActive;
+};
+
+/**
+ * Set is woocommerce active
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setIsWoocommerceActive =
+	(data: ConfigData) => (value: boolean) => {
+		data.isWoocommerceActive = value;
+	};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -434,6 +457,8 @@ export interface ConfigApi {
 	setAutomationGoals: (value: AutomationGoals) => void;
 	getAutomationRules: () => AutomationRules;
 	setAutomationRules: (value: AutomationRules) => void;
+	isWoocommerceActive: () => boolean;
+	setIsWoocommerceActive: (value: boolean) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -470,6 +495,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setAutomationGoals = setAutomationGoals(data);
 	configApi.getAutomationRules = () => getAutomationRules(data);
 	configApi.setAutomationRules = setAutomationRules(data);
+	configApi.isWoocommerceActive = () => isWoocommerceActive(data);
+	configApi.setIsWoocommerceActive = setIsWoocommerceActive(data);
 
 	return configApi;
 };

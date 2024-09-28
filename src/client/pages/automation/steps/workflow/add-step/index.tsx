@@ -24,16 +24,60 @@ import { map } from 'lodash';
  */
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
-import type { AutomationStep } from '@quillcrm/client';
+import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+
+const updateStepOrderRecursive = (
+	steps: AutomationStep[],
+	parentId: number,
+	order: number
+) => {
+	const updatedSteps = {};
+	const newSteps = updateOrder(parentId, order, steps, updatedSteps);
+
+	return { newSteps, updatedSteps };
+};
+
+const updateOrder = (
+	parentId: number,
+	order: number,
+	steps: AutomationStep[],
+	updatedSteps: { [key: string]: Partial<AutomationStep> }
+) => {
+	if (parentId > 0) {
+		const children = steps.filter((step) => step.parent_id === parentId);
+		children.forEach((child) => {
+			if (child.order >= order) {
+				child.order = child.order + 1;
+				updatedSteps[child.id] = { order: child.order };
+			}
+		});
+	} else {
+		steps.forEach((step) => {
+			if (step.order >= order) {
+				step.order = step.order + 1;
+				updatedSteps[step.id] = { order: step.order };
+			}
+		});
+	}
+
+	return steps;
+};
 
 interface AddStepProps {
-	setStep: (step: AutomationStep) => void;
+	setStep: (step: OrganizedStep | null) => void;
 	parentId?: number;
 	condition?: string;
+	prevStep?: OrganizedStep | null;
 }
 
-const AddStep: React.FC<AddStepProps> = ({ setStep, parentId, condition }) => {
-	const { automation, addStep } = useAutomationContext();
+const AddStep: React.FC<AddStepProps> = ({
+	setStep,
+	parentId,
+	condition,
+	prevStep,
+}) => {
+	const { automation, steps, setSteps, addStep, setUpdatedSteps } =
+		useAutomationContext();
 	const [loading, setLoading] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -41,16 +85,52 @@ const AddStep: React.FC<AddStepProps> = ({ setStep, parentId, condition }) => {
 		return null;
 	}
 
-	const saveStep = async (type: string) => {
+	const saveStep = (type: string) => {
+		const randomStringID = Math.random();
+		const order = getNewStepOrder();
+		const data = {
+			id: randomStringID,
+			automation_id: automation.id,
+			type,
+			status: 'active',
+			order,
+			parent_id: 0,
+			action: '',
+		} as AutomationStep;
+
+		if (type === 'condition' && condition) {
+			data.action = condition;
+		}
+
+		if (parentId && condition) {
+			data.parent_id = parentId;
+			data.condition = condition;
+		}
+
+		const { newSteps, updatedSteps } = updateStepOrderRecursive(
+			steps,
+			parentId || 0,
+			order
+		);
+		console.log(updatedSteps);
+
+		setUpdatedSteps(updatedSteps);
+		setSteps([...newSteps, data]);
+		setStep(null);
+	};
+
+	const storeStep = async (type: string) => {
 		setLoading(true);
 
+		const order = getNewStepOrder();
 		const data = {
 			automation_id: automation.id,
 			type,
 			status: 'active',
-		} as any;
+			order,
+		} as AutomationStep;
 
-		if (type === 'condition') {
+		if (type === 'condition' && condition) {
 			data.action = condition;
 		}
 
@@ -67,7 +147,7 @@ const AddStep: React.FC<AddStepProps> = ({ setStep, parentId, condition }) => {
 			})) as AutomationStep;
 
 			addStep(response);
-			setStep(response);
+			setStep(response as OrganizedStep);
 			createNotice({
 				type: 'success',
 				message: __('Step added', 'quillcrm'),
@@ -80,6 +160,19 @@ const AddStep: React.FC<AddStepProps> = ({ setStep, parentId, condition }) => {
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const getNewStepOrder = () => {
+		if (!parentId && !prevStep) {
+			return 1;
+		}
+
+		if (prevStep) {
+			// @ts-ignore
+			return parseInt(prevStep.order) + 1;
+		}
+
+		return 1;
 	};
 
 	const typesOptions = {
@@ -114,7 +207,13 @@ const AddStep: React.FC<AddStepProps> = ({ setStep, parentId, condition }) => {
 								<Button
 									key={key}
 									icon={type.icon}
-									onClick={() => saveStep(key)}
+									onClick={() =>
+										key == 'end_automation' ||
+										key == 'goal' ||
+										key == 'condition'
+											? storeStep(key)
+											: saveStep(key)
+									}
 								>
 									{type.label}
 								</Button>
@@ -124,13 +223,20 @@ const AddStep: React.FC<AddStepProps> = ({ setStep, parentId, condition }) => {
 				</>
 			}
 		>
-			<Button
-				type="primary"
-				icon={<PlusCircleOutlined />}
-				style={{
-					borderRadius: '50%',
-				}}
-			/>
+			<Flex
+				justify="center"
+				align="center"
+				className="qcrm-automation-workflow__add-step"
+			>
+				<Button
+					type="primary"
+					icon={<PlusCircleOutlined />}
+					style={{
+						borderRadius: '50%',
+					}}
+					className="add-step-button"
+				/>
+			</Flex>
 		</Popover>
 	);
 };

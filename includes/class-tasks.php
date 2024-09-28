@@ -125,6 +125,8 @@ class Tasks {
 	 * @return integer|false
 	 */
 	public function schedule_single( $timestamp, $hook, ...$args ) {
+		$this->enqueue_sync( $hook, ...$args );
+		return;
 		// add args meta.
 		$meta_id = $this->add_meta( "{$this->group}_$hook", $args );
 		if ( ! $meta_id ) {

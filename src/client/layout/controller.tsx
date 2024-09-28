@@ -34,6 +34,11 @@ import Template from '../pages/template';
 import Automations from '../pages/automations';
 import Automation from '../pages/automation';
 import AbandonedCartsList from '../pages/abandond-carts';
+import Setting from '../pages/settings';
+import Dashboard from '../pages/home';
+import CartAnalysis from '../pages/cart-analytics';
+import ContactAnalytics from '../pages/contacts-analytics';
+import EmailAnalytics from '../pages/emails-analytics';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -50,8 +55,8 @@ export const Controller = ({ page }) => {
 
 registerAdminPage('home', {
 	path: '/',
-	label: __('Dashboard', 'quillcrm'),
-	component: () => <h1>{__('Dashboard', 'quillcrm')}</h1>,
+	component: () => <Dashboard />,
+	label: __('Home', 'quillcrm'),
 });
 
 registerAdminPage('contacts', {
@@ -160,4 +165,28 @@ registerAdminPage('abandoned-carts', {
 	path: 'abandoned-carts',
 	component: () => <AbandonedCartsList />,
 	label: __('Abandoned Carts', 'quillcrm'),
+});
+
+registerAdminPage('settings', {
+	path: 'settings',
+	component: () => <Setting />,
+	label: __('Settings', 'quillcrm'),
+});
+
+registerAdminPage('cart-analytics', {
+	path: 'cart-analytics',
+	component: () => <CartAnalysis />,
+	label: __('Cart Analytics', 'quillcrm'),
+});
+
+registerAdminPage('contacts-analytics', {
+	path: 'contacts-analytics',
+	component: () => <ContactAnalytics />,
+	label: __('Contacts Analytics', 'quillcrm'),
+});
+
+registerAdminPage('emails-analytics', {
+	path: 'emails-analytics',
+	component: () => <EmailAnalytics />,
+	label: __('Emails Analytics', 'quillcrm'),
 });

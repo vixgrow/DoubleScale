@@ -27,7 +27,7 @@ import { EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
  * Internal dependencies
  */
 import './style.scss';
-import { Tag as ContactTag } from '@quillcrm/client';
+import type { Tag as ContactTag, TagsResponse } from '@quillcrm/client';
 import { Field } from '@quillcrm/components';
 
 const { Column } = Table;
@@ -61,9 +61,9 @@ const Tags: React.FC = () => {
 					page,
 					keyword,
 				}),
-			})) as { data: ContactTag[]; total: number };
+			})) as TagsResponse;
 
-			setTags(response.data as ContactTag[]);
+			setTags(response.data);
 			setTotal(response.total);
 		} catch (error) {
 			createNotice({
@@ -111,7 +111,7 @@ const Tags: React.FC = () => {
 				path: `/qc/v1/tags/${selectedTag?.id}`,
 				method: 'PUT',
 				data: selectedTag,
-			})) as any;
+			})) as ContactTag;
 
 			setTags([
 				...tags.map((tag) => (tag.id === response.id ? response : tag)),

@@ -10,7 +10,7 @@ import { Input, Typography, Checkbox, Switch, DatePicker } from 'antd';
 import en from 'antd/es/date-picker/locale/en_US';
 import dayjs from 'dayjs';
 import type { InputProps } from 'antd';
-import { map, isEmpty } from 'lodash';
+import { map, isEmpty, isObject } from 'lodash';
 import Select from 'react-select';
 
 /**
@@ -18,11 +18,12 @@ import Select from 'react-select';
  */
 import './style.scss';
 import { ListField, TagField, LinkTriggerField } from '@quillcrm/components';
+import type { ReactSelectOptions } from '@quillcrm/client';
 
 interface FieldProps {
 	label?: string;
 	type: string;
-	options?: Record<string, string>;
+	options?: ReactSelectOptions;
 	onChange: (value: any) => void;
 	value: any;
 	status?: InputProps['status'];
@@ -99,7 +100,12 @@ const Field: React.FC<FieldProps> = ({
 								)
 							: null
 					}
-					onChange={(value) => onChange(value.value)}
+					onChange={(value) => {
+						if (!isObject(value)) {
+							return;
+						}
+						onChange(value.value);
+					}}
 					options={selectOptions}
 				/>
 			);
@@ -112,7 +118,7 @@ const Field: React.FC<FieldProps> = ({
 			fieldContent = (
 				<Select
 					onChange={(value) => {
-						const values = value.map((val: any) => val.value);
+						const values = value.map((val) => val.value);
 						onChange(values);
 					}}
 					options={multiOptions}

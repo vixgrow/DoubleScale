@@ -43,13 +43,13 @@ const Credentials: React.FC<IntegrationProps> = ({
 
 		try {
 			// @ts-ignore
-			const response = (await apiFetch({
+			const response = await apiFetch({
 				path: addQueryArgs(`/qc/v1/integrations/${slug}`),
 				method: 'POST',
 				data: {
 					settings: fieldsValue,
 				},
-			})) as any;
+			});
 
 			onClose();
 		} catch (error) {
@@ -135,7 +135,7 @@ const Credentials: React.FC<IntegrationProps> = ({
 									{field.has_options && (
 										<SelectField
 											integration={slug}
-											slug={field.endpoint}
+											slug={field.endpoint || ''}
 											onChange={(value) => {
 												setFieldsValue({
 													...fieldsValue,

@@ -533,7 +533,7 @@ class Rest_Automation_Controller extends REST_Controller {
 			}
 
 			// Get the automation with its steps.
-			$automation = Automation_Model::with( 'steps' )->find( $id );
+			$automation->load( 'steps' );
 
 			return new WP_REST_Response( $automation, 200 );
 		} catch ( \Exception $e ) {
@@ -583,8 +583,11 @@ class Rest_Automation_Controller extends REST_Controller {
 	 */
 	public function update_item( $request ) {
 		try {
-			$id         = $request->get_param( 'id' );
-			$automation = Automation_Model::find( $id );
+			$id            = $request->get_param( 'id' );
+			$automation    = Automation_Model::find( $id );
+			$mode          = $request->get_param( 'mode' ) ? $request->get_param( 'mode' ) : 'edit';
+			$step          = $request->get_param( 'step' ) ?? array();
+			$updated_steps = $request->get_param( 'updated_steps' ) ?? array();
 
 			if ( ! $automation ) {
 				return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
@@ -593,6 +596,36 @@ class Rest_Automation_Controller extends REST_Controller {
 			$automation_data = $this->prepare_automation( $request );
 			$automation->fill( $automation_data );
 			$automation->save();
+
+			if ( $mode === 'add' ) {
+				unset( $step['id'] );
+				$step['automation_id'] = $id;
+				$new_step              = Automation_Step_Model::create( $step );
+
+				if ( ! $new_step ) {
+					throw new \Exception( 'Failed to create step.' );
+				}
+			} elseif ( $mode === 'delete' ) {
+				$step = Automation_Step_Model::find( $step['id'] );
+
+				if ( ! $step ) {
+					throw new \Exception( 'Step not found.' );
+				}
+
+				$step->delete();
+			}
+
+			if ( ! empty( $updated_steps ) ) {
+				foreach ( $updated_steps as $step_id => $step ) {
+					$step = Automation_Step_Model::find( $step_id );
+					if ( ! $step ) {
+						continue;
+					}
+
+					$step->order = $step['order'];
+					$step->save();
+				}
+			}
 
 			$automation = Automation_Model::with( 'steps' )->find( $id );
 

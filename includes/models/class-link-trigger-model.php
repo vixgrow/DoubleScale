@@ -99,5 +99,12 @@ class Link_Trigger_Model extends Model {
 				$link_trigger->full_url = home_url( '?quillcrm-link-trigger=' . $link_trigger->hash );
 			}
 		);
+
+		// Unset full link url when saving
+		static::saving(
+			function ( $link_trigger ) {
+				unset( $link_trigger->full_url );
+			}
+		);
 	}
 }

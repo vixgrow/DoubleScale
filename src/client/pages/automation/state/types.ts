@@ -9,6 +9,7 @@ import {
 	ADD_STEP,
 	REMOVE_STEP,
 	UPDATE_STEP,
+	SET_UPDATED_STEPS,
 } from './constants';
 import type { Automation, AutomationStep } from '@quillcrm/client';
 
@@ -19,15 +20,13 @@ export type setAutomation = {
 
 export type updateAutomation = {
 	type: typeof UPDATE_AUTOMATION;
-	payload: {
-		[key: string]: any;
-	};
+	payload: Partial<Automation>;
 };
 
 export type updateSettings = {
 	type: typeof UPDATE_SETTINGS;
-	key: string;
-	value: any;
+	key: keyof Automation['settings'];
+	value: Automation['settings'][keyof Automation['settings']];
 };
 
 export type setSteps = {
@@ -48,8 +47,13 @@ export type removeStep = {
 export type updateStep = {
 	type: typeof UPDATE_STEP;
 	stepId: number;
-	payload: {
-		[key: string]: any;
+	payload: Partial<AutomationStep>;
+};
+
+export type setUpdatedSteps = {
+	type: typeof SET_UPDATED_STEPS;
+	steps: {
+		[stepId: number]: Partial<AutomationStep>;
 	};
 };
 

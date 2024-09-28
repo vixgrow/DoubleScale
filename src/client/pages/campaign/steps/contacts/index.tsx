@@ -18,7 +18,7 @@ import { Button, Card, Badge, Flex, Typography, Spin } from 'antd';
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useCampaignContext } from '../../state/context';
-import type { Filter as FilterType } from '@quillcrm/client';
+import type { Filter as FilterType, ContactsResponse } from '@quillcrm/client';
 import { Filters } from '@quillcrm/components';
 
 const Contacts: React.FC = () => {
@@ -45,7 +45,7 @@ const Contacts: React.FC = () => {
 				}),
 				method: 'GET',
 				parse: true,
-			})) as any;
+			})) as ContactsResponse;
 
 			setTotal(response.total);
 		} catch (error) {

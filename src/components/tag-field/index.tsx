@@ -11,30 +11,30 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import { Tag as AntTag, Flex } from 'antd';
 import AsyncSelect from 'react-select/async';
-import { map } from 'lodash';
+import { isObject, map } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Tag } from '@quillcrm/client';
+import type { Tag, TagsResponse } from '@quillcrm/client';
 
 interface Props {
-	value: string[];
-	onChange: (value: string[]) => void;
+	value: number[];
+	onChange: (value: number[]) => void;
 }
 
 const TagField = ({ value, onChange }: Props) => {
 	const [savedTags, setSavedTags] = useState<Tag[]>([]);
 
-	const fetchTags = async (keyword = '', ids: any = []) => {
+	const fetchTags = async (keyword = '', ids: number[] = []) => {
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/tags', {
 					keyword: keyword,
 					ids: ids,
 				}),
-			})) as any;
+			})) as TagsResponse;
 
 			setSavedTags([...savedTags, ...response.data]);
 
@@ -64,7 +64,10 @@ const TagField = ({ value, onChange }: Props) => {
 								callback(data);
 							});
 						}}
-						onChange={(val: any) => {
+						onChange={(val) => {
+							if (!isObject(val)) {
+								return;
+							}
 							const newTags = [...value, val.value];
 							onChange(newTags);
 						}}
@@ -74,7 +77,7 @@ const TagField = ({ value, onChange }: Props) => {
 						<Flex gap={10}>
 							{map(value, (tag_id) => (
 								<AntTag
-									key={tag_id.id}
+									key={tag_id}
 									closable
 									onClose={() => {
 										const newTags = value.filter(

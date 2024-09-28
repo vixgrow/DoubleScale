@@ -11,7 +11,6 @@ namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Settings;
 use WP_Error;
-use Exception;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -94,11 +93,11 @@ class REST_Settings_Controller extends REST_Controller {
 					'properties'           => array(
 						'from_name'     => array(
 							'type'    => 'string',
-							'default' => bloginfo( 'name' ),
+							'default' => '',
 						),
 						'from_email'    => array(
 							'type'    => 'string',
-							'default' => get_option( 'admin_email' ),
+							'default' => '',
 						),
 						'reply_to'      => array(
 							'type'    => 'string',
@@ -144,6 +143,28 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
+				'cart'         => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'enable_cart_tracking' => array(
+							'type'    => 'boolean',
+							'default' => true,
+						),
+						'wait_period'          => array(
+							'type'    => 'integer',
+							'default' => 1,
+						),
+						'cool_off_period'      => array(
+							'type'    => 'integer',
+							'default' => 15,
+						),
+						'lost_cart_days'       => array(
+							'type'    => 'integer',
+							'default' => 15,
+						),
+					),
+				),
 			),
 		);
 		return $schema;
@@ -158,21 +179,16 @@ class REST_Settings_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get( $request ) { // phpcs:ignore
-		$groups   = $request->get_param( 'groups' )
-			? explode( ',', $request->get_param( 'groups' ) )
-			: array();
 		$settings = Settings::get_all();
 
 		$result = array();
 		foreach ( $this->get_schema()['properties'] as $group_key => $group_schema ) {
-			if ( in_array( $group_key, $groups, true ) ) {
-				$result[ $group_key ] = array();
-				foreach ( $group_schema['properties'] as $setting_key => $setting_schema ) {
-					$result[ $group_key ][ $setting_key ] = $settings[ $setting_key ] ?? $setting_schema['default'];
-				}
+			$result[ $group_key ] = array();
+			foreach ( $group_schema['properties'] as $setting_key => $setting_schema ) {
+				$result[ $group_key ][ $setting_key ] = $settings[ $group_key ][ $setting_key ] ?? $setting_schema['default'];
 			}
 		}
-
+		error_log( wp_json_encode( $result ) );
 		return new WP_REST_Response( $result, 200 );
 	}
 

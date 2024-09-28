@@ -52,6 +52,20 @@ final class QuillCRM {
 	private $automations_tasks;
 
 	/**
+	 * Daily tasks
+	 *
+	 * @var Tasks
+	 */
+	private $daily_tasks;
+
+	/**
+	 * Abandoned cart tasks
+	 *
+	 * @var Tasks
+	 */
+	private $abandoned_cart_tasks;
+
+	/**
 	 * Class Instance.
 	 *
 	 * @since 1.0.0
@@ -99,6 +113,10 @@ final class QuillCRM {
 	public function register_tasks() {
 		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_campaigns' ) === false ) {
 			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_campaigns' );
+		}
+
+		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily1' ) === false ) {
+			$this->daily_tasks->schedule_recurring( time(), MINUTE_IN_SECONDS, 'quillcrm_daily1' );
 		}
 	}
 
@@ -156,8 +174,10 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	private function init_objects() {
-		$this->campaigns_tasks   = new Tasks( 'quillcrm_campaigns' );
-		$this->automations_tasks = new Tasks( 'quillcrm_automations' );
+		$this->campaigns_tasks      = new Tasks( 'quillcrm_campaigns' );
+		$this->automations_tasks    = new Tasks( 'quillcrm_automations' );
+		$this->daily_tasks          = new Tasks( 'quillcrm_daily' );
+		$this->abandoned_cart_tasks = new Tasks( 'quillcrm_abandoned_cart' );
 
 		Custom_Fields_Manager::instance();
 		Admin::instance();

@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { Button } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
+import { map } from 'lodash';
 
 /**
  * Internal dependencies
@@ -20,7 +21,7 @@ import Field from '../field';
 interface RuleProps {
 	ruleSettings: RuleSettings;
 	rule: RuleType;
-	onChange: (key: string, value: any) => void;
+	onChange: (key: string, value: string) => void;
 	onRemove: () => void;
 }
 
@@ -37,7 +38,10 @@ const Rule: React.FC<RuleProps> = ({
 				{ruleSettings.operators && (
 					<Field
 						type="select"
-						options={ruleSettings.operators}
+						options={map(ruleSettings.operators, (operator) => ({
+							label: operator,
+							value: operator,
+						}))}
 						value={rule.operator}
 						onChange={(value) => onChange('operator', value)}
 					/>
@@ -46,7 +50,10 @@ const Rule: React.FC<RuleProps> = ({
 					type={ruleSettings.type}
 					value={rule.value}
 					onChange={(value) => onChange('value', value)}
-					options={ruleSettings.options}
+					options={map(ruleSettings.options, (option) => ({
+						label: option,
+						value: option,
+					}))}
 				/>
 				<div className="qcrm-rule-row-item">
 					<Button

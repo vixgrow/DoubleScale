@@ -7,7 +7,7 @@ import { combineReducers } from '@wordpress/data';
  * External dependencies
  */
 import type { Reducer } from 'redux';
-import { isObject } from 'lodash';
+import { isObject, update } from 'lodash';
 
 /**
  * Internal dependencies
@@ -20,9 +20,10 @@ import {
 	ADD_STEP,
 	REMOVE_STEP,
 	UPDATE_STEP,
+	SET_UPDATED_STEPS,
 } from './constants';
 import type { Automation, AutomationStep } from '@quillcrm/client';
-import type { AutomationAction, StepAction } from './types';
+import type { AutomationAction, StepAction, setUpdatedSteps } from './types';
 
 const automation = (
 	state: Automation | null = null,
@@ -50,6 +51,7 @@ const automation = (
 				...state,
 				settings: newSettings,
 			};
+
 		default:
 			return state;
 	}
@@ -78,9 +80,22 @@ const steps = (state: AutomationStep[] = [], action: StepAction) => {
 	}
 };
 
+const updatedSteps = (
+	state: { [stepId: number]: Partial<AutomationStep> } = {},
+	action: setUpdatedSteps
+) => {
+	switch (action.type) {
+		case SET_UPDATED_STEPS:
+			return action.steps;
+		default:
+			return state;
+	}
+};
+
 const CombinedReducer: Reducer = combineReducers({
 	automation,
 	steps,
+	updatedSteps,
 });
 
 export type State = ReturnType<typeof CombinedReducer>;

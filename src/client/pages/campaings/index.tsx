@@ -16,7 +16,7 @@ import { Flex, Table, Input, Button, Modal, Select } from 'antd';
  * Internal dependencies
  */
 import './style.scss';
-import { Campaign } from '@quillcrm/client';
+import { Campaign, CampaignsResponse } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
 const { Column } = Table;
@@ -51,7 +51,7 @@ const Campaigns: React.FC = () => {
 					per_page: perPage,
 					keyword,
 				}),
-			})) as any;
+			})) as CampaignsResponse;
 
 			setCampaigns(response.data);
 			setTotal(response.total);
@@ -80,7 +80,7 @@ const Campaigns: React.FC = () => {
 					description: __('New campaign', 'quillcrm'),
 					status: 'draft',
 				},
-			})) as any;
+			})) as Campaign;
 
 			setCampaigns([...campaigns, response]);
 			setName('');

@@ -30,7 +30,7 @@ const Integrations: React.FC = () => {
 				title: __('Success', 'quillcrm'),
 				content: sprintf(
 					__('You have successfully connected %s', 'quillcrm'),
-					integration.label
+					integration.name
 				),
 				onOk: () => navigate(getToLink('integrations')),
 			});
@@ -60,13 +60,7 @@ const Integrations: React.FC = () => {
 									: __('Connect', 'quillcrm')}
 							</Button>
 							{integration.is_connected && (
-								<Button
-									onClick={() => {
-										console.log('Disconnect');
-									}}
-								>
-									{__('Disconnect', 'quillcrm')}
-								</Button>
+								<Button>{__('Disconnect', 'quillcrm')}</Button>
 							)}
 						</Flex>
 					</Card>

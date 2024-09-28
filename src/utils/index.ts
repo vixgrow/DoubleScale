@@ -1,75 +1,62 @@
 /**
  * External dependencies
  */
-import { keys, find } from 'lodash';
+import { find, flatMap } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import ConfigAPI from '@quillcrm/config';
-import type { Trigger } from '@quillcrm/config';
+import type { Trigger, Action, Goal, Rule } from '@quillcrm/config';
 
-export const getAction = (action: string) => {
+export const getAction = (action: string): Action => {
 	const actions = ConfigAPI.getAutomationActions();
-	const actionGroups = keys(actions);
-	for (let i = 0; i < actionGroups.length; i++) {
-		const groups = actions[actionGroups[i]].groups;
-		const actionGroup = find(groups, (group) => {
-			return group.actions[action];
-		});
+	const actionGroups = flatMap(actions, (group) =>
+		flatMap(group.groups, (group) => group.actions)
+	);
+	const foundAction = find(actionGroups, (actions) => actions[action]);
 
-		if (actionGroup) {
-			return actionGroup.actions[action];
-		}
-	}
-
-	return {
-		label: '',
-		description: '',
-		fields: {},
-	};
+	return foundAction
+		? foundAction[action]
+		: {
+				label: '',
+				description: '',
+				fields: {},
+			};
 };
 
-export const getGoal = (goal: string) => {
+export const getGoal = (goal: string): Goal => {
 	const goals = ConfigAPI.getAutomationGoals();
-	const goalGroups = keys(goals);
-	for (let i = 0; i < goalGroups.length; i++) {
-		const groups = goals[goalGroups[i]].groups;
-		const goalGroup = find(groups, (group) => {
-			return group.goals[goal];
-		});
 
-		if (goalGroup) {
-			return goalGroup.goals[goal];
-		}
-	}
+	const goalGroups = flatMap(goals, (group) =>
+		flatMap(group.groups, (group) => group.goals)
+	);
 
-	return {
-		label: '',
-		description: '',
-		fields: {},
-	};
+	const foundGoal = find(goalGroups, (goals) => goals[goal]);
+
+	return foundGoal
+		? foundGoal[goal]
+		: {
+				label: '',
+				description: '',
+				fields: {},
+			};
 };
 
 export const getTrigger = (trigger: string): Trigger => {
 	const automationTriggers = ConfigAPI.getAutomationTriggers();
-	const triggerGroups = keys(automationTriggers);
-	for (let i = 0; i < triggerGroups.length; i++) {
-		const groups = automationTriggers[triggerGroups[i]].groups;
-		const triggerGroup = find(groups, (group) => {
-			return group.triggers[trigger];
-		});
+	const triggersGroups = flatMap(automationTriggers, (group) =>
+		flatMap(group.groups, (group) => group.triggers)
+	);
+	const foundTrigger = find(triggersGroups, (triggers) => triggers[trigger]);
 
-		if (triggerGroup) {
-			return triggerGroup.triggers[trigger];
-		}
-	}
-
-	return {
-		label: '',
-		description: '',
-		fields: {},
-	};
+	return foundTrigger
+		? foundTrigger[trigger]
+		: {
+				label: '',
+				description: '',
+				fields: {},
+			};
 };
 
 export const convertDate = (date: string) => {
@@ -87,20 +74,17 @@ export const getFilterBySlug = (slug: string, group: string) => {
 	return filtersGroups[group]['filters'][slug];
 };
 
-export const getRuleBySlug = (slug: string) => {
+export const getRuleBySlug = (slug: string): Rule => {
 	const automationRules = ConfigAPI.getAutomationRules();
-	const groups = keys(automationRules);
-	for (let i = 0; i < groups.length; i++) {
-		const group = automationRules[groups[i]];
-		if (group.rules[slug]) {
-			return group.rules[slug];
-		}
-	}
+	const rules = flatMap(automationRules, (group) => group.rules);
+	const foundRule = find(rules, (rule) => rule[slug]);
 
-	return {
-		name: '',
-		type: '',
-		operators: {},
-		options: {},
-	};
+	return foundRule
+		? foundRule[slug]
+		: {
+				name: '',
+				type: '',
+				operators: {},
+				options: {},
+			};
 };

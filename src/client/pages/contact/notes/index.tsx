@@ -28,7 +28,7 @@ import { isEmpty } from 'lodash';
  * Internal dependencies
  */
 import './style.scss';
-import { Note } from '@quillcrm/client';
+import type { Note, NotesResponse } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
 
 interface NotesProps {
@@ -66,9 +66,9 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 					per_page: perPage,
 					page,
 				}),
-			})) as any;
+			})) as NotesResponse;
 
-			setNotes(response.data as Note[]);
+			setNotes(response.data);
 			setTotal(response.total);
 		} catch (error) {
 			createNotice({

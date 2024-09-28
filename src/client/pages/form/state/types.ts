@@ -11,15 +11,13 @@ export type setForm = {
 
 export type updateForm = {
 	type: typeof UPDATE_FORM;
-	payload: {
-		[key: string]: any;
-	};
+	payload: Partial<Form>;
 };
 
 export type updateSettings = {
 	type: typeof UPDATE_SETTINGS;
-	key: string;
-	value: any;
+	key: keyof Form['data'];
+	value: Form['data'][keyof Form['data']];
 };
 
 export type FormAction = setForm | updateForm | updateSettings;

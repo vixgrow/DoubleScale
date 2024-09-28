@@ -52,7 +52,7 @@ const Template: React.FC = () => {
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/templates/${id}`,
-			})) as any;
+			})) as TemplateType;
 
 			setTemplate(response);
 		} catch (error) {
@@ -65,7 +65,9 @@ const Template: React.FC = () => {
 		}
 	};
 
-	const saveTemplate = async (data: any = {}) => {
+	const saveTemplate = async (
+		data: { [key: string]: Partial<TemplateType> } = {}
+	) => {
 		setIsSaving(true);
 
 		const newTemplate = { ...template, ...data };
@@ -92,7 +94,7 @@ const Template: React.FC = () => {
 		}
 	};
 
-	const updateSettings = (data: { [key: string]: any }) => {
+	const updateSettings = (data: { [key: string]: Partial<TemplateType> }) => {
 		if (!template) {
 			return;
 		}

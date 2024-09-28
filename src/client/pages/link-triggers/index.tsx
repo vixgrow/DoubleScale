@@ -18,6 +18,7 @@ import {
 	Button,
 	Popover,
 	Flex,
+	Select,
 } from 'antd';
 import { MoreOutlined } from '@ant-design/icons';
 
@@ -25,9 +26,10 @@ import { MoreOutlined } from '@ant-design/icons';
  * Internal dependencies
  */
 import './style.scss';
-import type { LinkTrigger } from '@quillcrm/client';
+import type { LinkTrigger, LinkTriggersResponse } from '@quillcrm/client';
 import { NavLink, useNavigate, getToLink } from '@quillcrm/navigation';
 import { Field } from '@quillcrm/components';
+import { convertDate } from '@quillcrm/utils';
 
 const { Column } = Table;
 
@@ -46,8 +48,9 @@ const LinkTriggerList: React.FC = () => {
 	});
 	const [keyword, setKeyword] = useState('');
 	const navigate = useNavigate();
-	const { Search } = Input;
 	const { createNotice } = useDispatch('quillcrm/core');
+	const [bulkAction, setBulkAction] = useState('');
+	const [isApplying, setIsApplying] = useState(false);
 
 	const fetchLinks = async () => {
 		setLoading(true);
@@ -59,10 +62,10 @@ const LinkTriggerList: React.FC = () => {
 					keyword,
 				}),
 				method: 'GET',
-			})) as any;
+			})) as LinkTriggersResponse;
 
 			response.total && setTotal(response.total);
-			response.data && setData(response.data as LinkTrigger[]);
+			response.data && setData(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -102,28 +105,90 @@ const LinkTriggerList: React.FC = () => {
 		}
 	};
 
+	const deleteSelected = async () => {
+		setIsApplying(true);
+		try {
+			await apiFetch({
+				path: '/qc/v1/link-triggers',
+				method: 'DELETE',
+				data: {
+					ids: selectedRowKeys,
+				},
+			});
+
+			createNotice({
+				type: 'success',
+				message: __('Link triggers deleted', 'quillcrm'),
+			});
+			setSelectedRowKeys([]);
+			fetchLinks();
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete link triggers', 'quillcrm'),
+			});
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
 	return (
 		<div className="qcrm-link-trigger-list">
-			<div className="qcrm-contacts-links-list__actions">
-				<div className="qcrm-contacts-links-list__search">
-					<Search
+			<Flex
+				className="qcrm-contacts-list__actions"
+				justify="space-between"
+			>
+				<Flex gap={10}>
+					<Flex gap={10}>
+						<Select
+							options={[
+								{
+									label: __('Bulk Actions', 'quillcrm'),
+									value: '',
+								},
+								{
+									label: __('Delete', 'quillcrm'),
+									value: 'delete',
+								},
+							]}
+							value={bulkAction}
+							onChange={(value) => setBulkAction(value)}
+							disabled={selectedRowKeys.length === 0}
+						/>
+						<Button
+							type="primary"
+							onClick={() => {
+								if (bulkAction === 'delete') {
+									deleteSelected();
+								}
+							}}
+							disabled={selectedRowKeys.length === 0}
+							loading={isApplying}
+						>
+							{__('Apply', 'quillcrm')}
+						</Button>
+					</Flex>
+					<Input.Search
 						placeholder={__('Search', 'quillcrm')}
-						onSearch={(value, _e) => {
-							if (value.length < 2 && value.length > 0) {
-								return;
-							}
-							setKeyword(value);
+						allowClear
+						onSearch={() => {
+							fetchLinks();
 						}}
-						enterButton={__('Search', 'quillcrm')}
-						size="large"
+						onChange={(e) => setKeyword(e.target.value)}
+						styles={{
+							affixWrapper: {
+								padding: '4px 5px',
+							},
+							input: {
+								minHeight: 'auto',
+							},
+						}}
 					/>
-				</div>
-				<div>
-					<Button type="primary" onClick={() => setVisible(true)}>
-						{__('Create Link Trigger', 'quillcrm')}
-					</Button>
-				</div>
-			</div>
+				</Flex>
+				<Button type="primary" onClick={() => setVisible(true)}>
+					{__('Create Link', 'quillcrm')}
+				</Button>
+			</Flex>
 			<Table
 				dataSource={data}
 				rowKey="id"
@@ -187,9 +252,9 @@ const LinkTriggerList: React.FC = () => {
 				/>
 				<Column
 					title={__('Clicks', 'quillcrm')}
-					dataIndex="count"
-					key="count"
-					render={(count) => count || 0}
+					dataIndex="click_count"
+					key="click_count"
+					render={(click_count) => click_count || 0}
 				/>
 				<Column
 					title={__('Created At', 'quillcrm')}
@@ -198,6 +263,7 @@ const LinkTriggerList: React.FC = () => {
 					sorter={(a: LinkTrigger, b: LinkTrigger) =>
 						a.created_at.localeCompare(b.created_at)
 					}
+					render={(created_at) => convertDate(created_at)}
 				/>
 			</Table>
 			<Modal

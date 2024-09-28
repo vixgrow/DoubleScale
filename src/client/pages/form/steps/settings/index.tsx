@@ -9,7 +9,7 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Button, Card, Typography, Flex, Input, Switch } from 'antd';
-import { map } from 'lodash';
+import { isObject, map } from 'lodash';
 import { ThreeDots as Loader } from 'react-loader-spinner';
 import Select from 'react-select';
 
@@ -19,6 +19,7 @@ import Select from 'react-select';
 import './style.scss';
 import { useFormContext } from '../../state/context';
 import ConfigAPI from '@quillcrm/config';
+import type { Form } from '@quillcrm/config';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { ListField, TagField } from '@quillcrm/components';
 
@@ -30,7 +31,9 @@ const Settings: React.FC = () => {
 	const fieldsSettings = form
 		? forms[form?.form_type]?.fields_settings
 		: null;
-	const [formFields, setFormFields] = useState(null);
+	const [formFields, setFormFields] = useState<
+		Form['fields_settings']['fields'] | null
+	>(null);
 	const [isFetching, setIsFetching] = useState(false);
 	const { getAjaxUrl, getNonce, getContactFieldsGroups } = ConfigAPI;
 	const contactFieldsGroups = getContactFieldsGroups();
@@ -58,7 +61,7 @@ const Settings: React.FC = () => {
 
 			const data = await response.json();
 
-			setFormFields(data.data);
+			setFormFields(data.data as Form['fields_settings']['fields']);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -74,7 +77,13 @@ const Settings: React.FC = () => {
 	}, [form?.form_id]);
 
 	const settings = form?.data || null;
-	const mappedFields = settings ? settings?.mapped_fields : {};
+	const mappedFields = settings
+		? settings?.mapped_fields
+		: {
+				first_name: '',
+				last_name: '',
+				email: '',
+			};
 
 	const save = async (status) => {
 		if (!form) {
@@ -98,7 +107,7 @@ const Settings: React.FC = () => {
 		}
 	};
 
-	const getValueLabel = (value) => {
+	const getValueLabel = (value: string) => {
 		for (const groupKey in contactFieldsGroups) {
 			const group = contactFieldsGroups[groupKey];
 
@@ -156,8 +165,15 @@ const Settings: React.FC = () => {
 																	]
 																)}
 																onChange={(
-																	value: any
+																	value
 																) => {
+																	if (
+																		!isObject(
+																			value
+																		)
+																	) {
+																		return;
+																	}
 																	updateSettings(
 																		'mapped_fields',
 																		{

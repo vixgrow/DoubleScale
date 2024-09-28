@@ -11,17 +11,17 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import { Tag as AntTag, Flex } from 'antd';
 import AsyncSelect from 'react-select/async';
-import { map } from 'lodash';
+import { isObject, map } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { LinkTrigger } from '@quillcrm/client';
+import type { LinkTrigger, LinkTriggersResponse } from '@quillcrm/client';
 
 interface Props {
-	value: string[];
-	onChange: (value: string[]) => void;
+	value: number[];
+	onChange: (value: number[]) => void;
 }
 
 const LinkTriggerField = ({ value, onChange }: Props) => {
@@ -29,14 +29,14 @@ const LinkTriggerField = ({ value, onChange }: Props) => {
 		[]
 	);
 
-	const fetchLinkTriggers = async (keyword = '', ids: any = []) => {
+	const fetchLinkTriggers = async (keyword = '', ids: number[] = []) => {
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/lists', {
 					keyword: keyword,
 					ids: ids,
 				}),
-			})) as any;
+			})) as LinkTriggersResponse;
 
 			setSavedLinkTriggers([...savedLinkTriggers, ...response.data]);
 
@@ -70,7 +70,10 @@ const LinkTriggerField = ({ value, onChange }: Props) => {
 										}
 									);
 								}}
-								onChange={(val: any) => {
+								onChange={(val) => {
+									if (!isObject(val)) {
+										return;
+									}
 									const newLinkTriggers = [
 										...value,
 										val.value,
@@ -83,7 +86,7 @@ const LinkTriggerField = ({ value, onChange }: Props) => {
 								<Flex gap={10}>
 									{map(value, (list_id) => (
 										<AntTag
-											key={list_id.id}
+											key={list_id}
 											closable
 											onClose={() => {
 												const newLinkTriggers =

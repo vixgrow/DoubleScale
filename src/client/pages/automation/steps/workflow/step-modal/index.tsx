@@ -11,39 +11,44 @@ import { useDispatch } from '@wordpress/data';
  */
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
-import type { AutomationStep } from '@quillcrm/client';
+import type { OrganizedStep, Automation } from '@quillcrm/client';
 import StepFieldsModal from '../step-fields-modal';
 import GoalSelector from '../goal-selector';
 import ActionSelector from '../action-selector';
 import ConditionsModal from '../conditions-modal';
 
 interface StepModalProps {
-	step: AutomationStep;
-	setStep: (step: AutomationStep | null) => void;
+	step: OrganizedStep;
+	setStep: (step: OrganizedStep | null) => void;
 }
 
 const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
-	const { updateStep } = useAutomationContext();
+	const { setSteps, updatedSteps, updateStep, setUpdatedSteps } =
+		useAutomationContext();
 	const [actionModalVisible, setActionModalVisible] = useState(!step.action);
 	const [value, setValue] = useState('');
 	const { createNotice } = useDispatch('quillcrm/core');
-
-	const saveStep = async (payload: any = {}) => {
+	console.log(updatedSteps, 'updatedSteps');
+	const saveStep = async (payload: Partial<OrganizedStep>) => {
 		const data = {
-			...step,
-			action: value,
-			...payload,
+			step: {
+				...step,
+				...payload,
+			},
+			mode: 'add',
+			updated_steps: updatedSteps,
 		};
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/automation-steps/${step.id}`,
+				path: `/qc/v1/automations/${step.automation_id}`,
 				method: 'POST',
 				data,
-			})) as AutomationStep;
+			})) as Automation;
 
-			updateStep(response.id, response);
 			setStep(null);
+			setUpdatedSteps({});
+			setSteps(response.steps);
 			createNotice({
 				type: 'success',
 				message: __('Automation updated', 'quillcrm'),
@@ -54,6 +59,16 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 				message: __('Failed to update automation', 'quillcrm'),
 			});
 		}
+	};
+
+	const saveEmptyStep = async () => {
+		const data = {
+			...step,
+			action: value,
+		};
+
+		updateStep(step.id, data);
+		setStep(data);
 	};
 
 	if (step.type === 'condition') {
@@ -82,7 +97,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 							setStep(null);
 						}}
 						onChange={(value) => setValue(value)}
-						onSave={() => saveStep()}
+						onSave={() => saveEmptyStep()}
 					/>
 				);
 			case 'goal':
@@ -95,7 +110,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 							setStep(null);
 						}}
 						onChange={(value) => setValue(value)}
-						onSave={() => saveStep()}
+						onSave={() => saveEmptyStep()}
 					/>
 				);
 
@@ -103,7 +118,13 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 				return null;
 		}
 	} else {
-		return <StepFieldsModal step={step} setStep={setStep} />;
+		return (
+			<StepFieldsModal
+				step={step}
+				setStep={setStep}
+				saveStep={saveStep}
+			/>
+		);
 	}
 };
 

@@ -8,6 +8,7 @@ import { useState } from '@wordpress/element';
  * External dependencies
  */
 import { Button, Card, Tabs } from 'antd';
+import { isString } from 'lodash';
 
 /**
  * Internal dependencies
@@ -17,6 +18,7 @@ import { useCampaignContext } from '../../state/context';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { Template } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
+import type { Template as TemplateType } from '@quillcrm/client';
 
 const Templates: React.FC = () => {
 	const { campaign, isLoading, saveCampaign, isSaving, updateSettings } =
@@ -63,7 +65,7 @@ const Templates: React.FC = () => {
 		setCurrentTab(0);
 	};
 
-	const updateTemplate = (index: number, data: { [key: string]: any }) => {
+	const updateTemplate = (index: number, data: Partial<TemplateType>) => {
 		if (!campaign) {
 			return;
 		}
@@ -105,7 +107,7 @@ const Templates: React.FC = () => {
 
 	const tabs = ab_test ? templates : [templates[0] ?? defaultTemplate];
 	const tabList = tabs.map((template, index) => ({
-		key: index,
+		key: index.toString(),
 		label: templatesSettings[index].title,
 		children: (
 			<Template
@@ -126,16 +128,20 @@ const Templates: React.FC = () => {
 							type="editable-card"
 							tabBarGutter={20}
 							tabBarStyle={{ marginBottom: 0 }}
-							items={tabList as any}
-							onEdit={(key: any, action) => {
+							items={tabList}
+							onEdit={(key, action) => {
 								if (action === 'add') {
 									addTemplate();
 								} else {
-									removeTemplate(key);
+									if (!isString(key)) {
+										return;
+									}
+									const id = parseInt(key);
+									removeTemplate(id);
 								}
 							}}
 							hideAdd={templates.length >= 3 || !ab_test}
-							activeKey={currentTab as any}
+							activeKey={currentTab.toString()}
 							onChange={(key) => setCurrentTab(Number(key))}
 						/>
 					</div>

@@ -27,7 +27,7 @@ import { EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
  * Internal dependencies
  */
 import './style.scss';
-import { List as ContactList } from '@quillcrm/client';
+import type { List as ContactList, ListsResponse } from '@quillcrm/client';
 import { Field } from '@quillcrm/components';
 import { convertDate } from '@quillcrm/utils';
 
@@ -62,9 +62,9 @@ const Lists: React.FC = () => {
 					page,
 					keyword,
 				}),
-			})) as { data: ContactList[]; total: number };
+			})) as ListsResponse;
 
-			setLists(response.data as ContactList[]);
+			setLists(response.data);
 			setTotal(response.total);
 		} catch (error) {
 			createNotice({
@@ -112,7 +112,7 @@ const Lists: React.FC = () => {
 				path: `/qc/v1/lists/${selectedList?.id}`,
 				method: 'PUT',
 				data: selectedList,
-			})) as any;
+			})) as ContactList;
 
 			setLists([
 				...lists.map((list) =>

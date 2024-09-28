@@ -16,7 +16,13 @@ import { Card, Button, Flex, Typography } from 'antd';
  * Internal dependencies
  */
 import './style.scss';
-import { LinkTrigger as LinkTriggerType, Tag, List } from '@quillcrm/client';
+import {
+	LinkTrigger as LinkTriggerType,
+	Tag,
+	List,
+	TagsResponse,
+	ListsResponse,
+} from '@quillcrm/client';
 import { useParams } from '@quillcrm/navigation';
 import { Field } from '@quillcrm/components';
 
@@ -44,7 +50,7 @@ const LinkTrigger: React.FC = () => {
 					keyword: keyword,
 					ids: ids,
 				}),
-			})) as any;
+			})) as ListsResponse;
 
 			setSavedLists([...savedLists, ...response.data]);
 
@@ -68,7 +74,7 @@ const LinkTrigger: React.FC = () => {
 					keyword: keyword,
 					ids: ids,
 				}),
-			})) as any;
+			})) as TagsResponse;
 
 			setSavedTags([...savedTags, ...response.data]);
 
@@ -95,7 +101,7 @@ const LinkTrigger: React.FC = () => {
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/link-triggers/${id}`,
-			})) as any;
+			})) as LinkTriggerType;
 
 			setLinkTrigger(response);
 
@@ -134,7 +140,9 @@ const LinkTrigger: React.FC = () => {
 		}
 	};
 
-	const saveLink = async (data: any = {}) => {
+	const saveLink = async (
+		data: { [key: string]: Partial<LinkTriggerType> } = {}
+	) => {
 		setIsSaving(true);
 
 		const newLink = { ...link, ...data };
@@ -157,7 +165,9 @@ const LinkTrigger: React.FC = () => {
 		}
 	};
 
-	const updateSettings = (data: { [key: string]: any }) => {
+	const updateSettings = (data: {
+		[key: string]: Partial<LinkTriggerType>;
+	}) => {
 		if (!link) {
 			return;
 		}

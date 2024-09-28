@@ -29,14 +29,15 @@ const Automation: React.FC = () => {
 	const [state, dispatch] = useReducer(reducer, {
 		automation: null,
 		steps: [],
+		updatedSteps: {},
 	} as State);
 	const stateRef = useRef<State>(state);
 	stateRef.current = state;
 	const $actions = actions(dispatch);
 	const { setAutomation, setSteps } = $actions;
-	const { automation, steps } = state;
-	const [loading, setLoading] = useState(true);
-	const [isSaving, setIsSaving] = useState(false);
+	const { automation, steps, updatedSteps } = state;
+	const [loading, setLoading] = useState<boolean>(true);
+	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -50,7 +51,7 @@ const Automation: React.FC = () => {
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/automations/${id}`,
-			})) as any;
+			})) as AutomationType;
 
 			setAutomation(response);
 			setSteps(response.steps);
@@ -64,7 +65,7 @@ const Automation: React.FC = () => {
 		}
 	};
 
-	const saveAutomation = async (data: any = {}) => {
+	const saveAutomation = async (data: Partial<AutomationType> = {}) => {
 		setIsSaving(true);
 
 		const newAutomation = { ...automation, ...data };
@@ -104,6 +105,7 @@ const Automation: React.FC = () => {
 			value={{
 				automation,
 				steps,
+				updatedSteps,
 				isLoading: loading,
 				isSaving,
 				setIsLoading: setLoading,

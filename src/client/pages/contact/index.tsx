@@ -38,6 +38,8 @@ import {
 	Contact as ContactType,
 	Tag,
 	List as ContactList,
+	ListsResponse,
+	TagsResponse,
 } from '@quillcrm/client';
 import NotesTab from './notes';
 import ProfileTab from './profile';
@@ -80,9 +82,9 @@ const Contact: React.FC = () => {
 				path: addQueryArgs('/qc/v1/lists', {
 					keyword: keyword,
 				}),
-			})) as any;
+			})) as ListsResponse;
 
-			setLists(response.data as ContactList[]);
+			setLists(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -100,9 +102,9 @@ const Contact: React.FC = () => {
 				path: addQueryArgs('/qc/v1/tags', {
 					keyword: keyword,
 				}),
-			})) as any;
+			})) as TagsResponse;
 
-			setTags(response.data as Tag[]);
+			setTags(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',

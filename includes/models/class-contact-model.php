@@ -18,6 +18,8 @@ use QuillCRM\Models\Contact_Note_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\User_Model;
 use QuillCRM\Models\Campaign_Email_Model;
+use QuillCRM\Models\WC_Order_Model;
+use QuillCRM\Utils;
 
 /**
  * Contact_Model class
@@ -130,6 +132,16 @@ class Contact_Model extends Model {
 		return $this->hasMany( Campaign_Email_Model::class, 'contact_id', 'id' );
 	}
 
+	/**
+	 * Get the contact orders
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function orders() {
+		return $this->hasMany( WC_Order_Model::class, 'billing_email', 'email' );
+	}
 
 	/**
 	 * Get the contact custom field value
@@ -308,5 +320,24 @@ class Contact_Model extends Model {
 				}
 			}
 		);
+
+		// Attach revenue to the contact if woo commerce is active in retreving contact.
+		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			parent::retrieved(
+				function( $contact ) {
+					$orders  = $contact->orders;
+					$revenue = 0;
+
+					foreach ( $orders as $order ) {
+						$revenue += $order->total_amount;
+					}
+
+					// WooCommerce Currency
+					$currency = \get_woocommerce_currency();
+
+					$contact->revenue = $revenue . ' ' . $currency;
+				}
+			);
+		}
 	}
 }

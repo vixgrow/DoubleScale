@@ -13,21 +13,31 @@ export const AutomationContext = createContext<{
 	steps: AutomationStep[];
 	isLoading: boolean;
 	isSaving: boolean;
+	updatedSteps: {
+		[stepId: number]: Partial<AutomationStep>;
+	};
 	setAutomation: (automation: Automation) => void;
 	setIsLoading: (isLoading: boolean) => void;
 	setIsSaving: (isSaving: boolean) => void;
-	updateAutomation: (payload: { [key: string]: any }) => void;
-	saveAutomation: (payload?: { [key: string]: any }) => void;
-	updateSettings: (key: string, value: any) => void;
+	updateAutomation: (payload: Partial<Automation>) => void;
+	saveAutomation: (payload?: Partial<Automation>) => void;
+	updateSettings: (
+		key: keyof Automation['settings'],
+		value: Automation['settings'][keyof Automation['settings']]
+	) => void;
 	setSteps: (steps: AutomationStep[]) => void;
 	addStep: (step: AutomationStep) => void;
 	removeStep: (stepId: number) => void;
-	updateStep: (stepId: number, payload: { [key: string]: any }) => void;
+	updateStep: (stepId: number, payload: Partial<AutomationStep>) => void;
+	setUpdatedSteps: (steps: {
+		[stepId: number]: Partial<AutomationStep>;
+	}) => void;
 }>({
 	automation: null,
 	steps: [],
 	isLoading: false,
 	isSaving: false,
+	updatedSteps: {},
 	setAutomation: (_automation: Automation) => {
 		throw new Error('setAutomation() not implemented');
 	},
@@ -37,13 +47,16 @@ export const AutomationContext = createContext<{
 	setIsSaving: (_isSaving: boolean) => {
 		throw new Error('setIsSaving() not implemented');
 	},
-	updateAutomation: (_payload: { [key: string]: any }) => {
+	updateAutomation: (_payload: Partial<Automation>) => {
 		throw new Error('updateAutomation() not implemented');
 	},
-	saveAutomation: (_payload?: { [key: string]: any }) => {
+	saveAutomation: (_payload?: Partial<Automation>) => {
 		throw new Error('saveAutomation() not implemented');
 	},
-	updateSettings: (_key: string, _value: any) => {
+	updateSettings: (
+		_key: keyof Automation['settings'],
+		_value: Automation['settings'][keyof Automation['settings']]
+	) => {
 		throw new Error('updateSettings() not implemented');
 	},
 	setSteps: (_steps: AutomationStep[]) => {
@@ -55,8 +68,13 @@ export const AutomationContext = createContext<{
 	removeStep: (_stepId: number) => {
 		throw new Error('removeStep() not implemented');
 	},
-	updateStep: (_stepId: number, _payload: { [key: string]: any }) => {
+	updateStep: (_stepId: number, _payload: Partial<AutomationStep>) => {
 		throw new Error('updateStep() not implemented');
+	},
+	setUpdatedSteps: (_steps: {
+		[stepId: number]: Partial<AutomationStep>;
+	}) => {
+		throw new Error('setUpdatedSteps() not implemented');
 	},
 });
 

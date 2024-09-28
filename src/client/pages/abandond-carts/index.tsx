@@ -10,13 +10,14 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Table } from 'antd';
+import { Table, Flex, Select, Button, Badge } from 'antd';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { AbandonedCart } from '@quillcrm/client';
+import type { AbandonedCart, AbandonedCartsResponse } from '@quillcrm/client';
+import { convertDate } from '@quillcrm/utils';
 
 const { Column } = Table;
 
@@ -28,6 +29,8 @@ const AbandonedCartsList: React.FC = () => {
 	const [data, setData] = useState<AbandonedCart[]>([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const { createNotice } = useDispatch('quillcrm/core');
+	const [bulkAction, setBulkAction] = useState('');
+	const [isApplying, setIsApplying] = useState(false);
 
 	const fetchAbandonedCarts = async () => {
 		setLoading(true);
@@ -38,10 +41,10 @@ const AbandonedCartsList: React.FC = () => {
 					per_page: perPage,
 				}),
 				method: 'GET',
-			})) as any;
+			})) as AbandonedCartsResponse;
 
 			response.total && setTotal(response.total);
-			response.data && setData(response.data as AbandonedCart[]);
+			response.data && setData(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -56,8 +59,71 @@ const AbandonedCartsList: React.FC = () => {
 		fetchAbandonedCarts();
 	}, [page, perPage]);
 
+	const deleteSelected = async () => {
+		setIsApplying(true);
+		try {
+			await apiFetch({
+				path: '/qc/v1/abandoned-carts',
+				method: 'DELETE',
+				data: {
+					ids: selectedRowKeys,
+				},
+			});
+
+			createNotice({
+				type: 'success',
+				message: __('Carts deleted', 'quillcrm'),
+			});
+			setSelectedRowKeys([]);
+			fetchAbandonedCarts();
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete carts', 'quillcrm'),
+			});
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
 	return (
 		<div className="qcrm-carts-list">
+			<Flex
+				className="qcrm-contacts-list__actions"
+				justify="space-between"
+			>
+				<Flex gap={10}>
+					<Flex gap={10}>
+						<Select
+							options={[
+								{
+									label: __('Bulk Actions', 'quillcrm'),
+									value: '',
+								},
+								{
+									label: __('Delete', 'quillcrm'),
+									value: 'delete',
+								},
+							]}
+							value={bulkAction}
+							onChange={(value) => setBulkAction(value)}
+							disabled={selectedRowKeys.length === 0}
+						/>
+						<Button
+							type="primary"
+							onClick={() => {
+								if (bulkAction === 'delete') {
+									deleteSelected();
+								}
+							}}
+							disabled={selectedRowKeys.length === 0}
+							loading={isApplying}
+						>
+							{__('Apply', 'quillcrm')}
+						</Button>
+					</Flex>
+				</Flex>
+			</Flex>
 			<Table
 				dataSource={data}
 				rowKey="id"
@@ -86,6 +152,22 @@ const AbandonedCartsList: React.FC = () => {
 					title={__('Status', 'quillcrm')}
 					dataIndex="status"
 					key="status"
+					render={(text) => (
+						<Badge
+							status={
+								text === 'skipped'
+									? 'warning'
+									: text === 'recovered'
+										? 'success'
+										: text === 'processing'
+											? 'processing'
+											: text === 'pending'
+												? 'default'
+												: 'error'
+							}
+							text={text}
+						/>
+					)}
 				/>
 				<Column
 					title={__('Total', 'quillcrm')}
@@ -96,11 +178,13 @@ const AbandonedCartsList: React.FC = () => {
 					title={__('Created At', 'quillcrm')}
 					dataIndex="created_at"
 					key="created_at"
+					render={(text) => convertDate(text)}
 				/>
 				<Column
 					title={__('Updated At', 'quillcrm')}
 					dataIndex="updated_at"
 					key="updated_at"
+					render={(text) => convertDate(text)}
 				/>
 			</Table>
 		</div>

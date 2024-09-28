@@ -17,7 +17,7 @@ import Field from '../field';
 
 interface Props {
 	template: Template;
-	updateTemplate: (data: { [key: string]: any }) => void;
+	updateTemplate: (data: Partial<Template>) => void;
 }
 
 const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {

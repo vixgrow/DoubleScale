@@ -13,13 +13,16 @@ export default (dispatch: React.Dispatch<CampaignAction>) => {
 				campaign,
 			});
 		},
-		updateCampaign: (payload: Record<string, any>) => {
+		updateCampaign: (payload: Partial<Campaign>) => {
 			dispatch({
 				type: UPDATE_CAMPAIGN,
 				payload,
 			});
 		},
-		updateSettings: (key: string, value: any) => {
+		updateSettings: (
+			key: keyof Campaign['settings'],
+			value: Campaign['settings'][keyof Campaign['settings']]
+		) => {
 			dispatch({
 				type: UPDATE_SETTINGS,
 				key,

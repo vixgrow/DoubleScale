@@ -61,7 +61,10 @@ class Automation_Step_Model extends Model {
 	 * @var array
 	 */
 	protected $casts = array(
-		'settings' => 'array',
+		'settings'      => 'array',
+		'parent_id'     => 'integer',
+		'order'         => 'integer',
+		'automation_id' => 'integer',
 	);
 
 	/**
@@ -152,30 +155,11 @@ class Automation_Step_Model extends Model {
 	public static function boot() {
 		parent::boot();
 
-		// Update order on create
-		static::creating(
+		// If step type is conditiion, delete all children.
+		static::deleting(
 			function ( $step ) {
-				$last_step        = $step->automation->get_last_step();
-				$automation_steps = $step->automation->steps;
-				if ( $automation_steps->count() === 1 && $last_step->order > 1 ) {
-					$last_step->order = 1;
-					$last_step->save();
-				}
-
-				if ( $step->parent_id ) {
-					$parent_step         = $step->parent;
-					$siblings            = $parent_step->children;
-					$yes_condition_steps = $siblings->where( 'condition', 'yes' );
-					$no_condition_steps  = $siblings->where( 'condition', 'no' );
-					if ( $step->condition === 'yes' ) {
-						$step->order = $yes_condition_steps->count() ? $yes_condition_steps->last()->order + 1 : 1;
-					} else {
-						$step->order = $no_condition_steps->count() ? $no_condition_steps->last()->order + 1 : 1;
-					}
-				} else {
-					// Get last step with no parent
-					$last_step   = $automation_steps->where( 'parent_id', 0 )->last();
-					$step->order = $last_step ? $last_step->order + 1 : 1;
+				if ( 'condition' === $step->type ) {
+					$step->children()->delete();
 				}
 			}
 		);

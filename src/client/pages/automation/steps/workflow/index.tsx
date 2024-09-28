@@ -9,22 +9,37 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Card, Flex, Modal, Switch, Tag, Typography } from 'antd';
+import {
+	Card,
+	Flex,
+	Modal,
+	Switch,
+	Tag,
+	Typography,
+	Popconfirm,
+	Button,
+} from 'antd';
 import {
 	TrophyOutlined,
 	BranchesOutlined,
 	DisconnectOutlined,
 	RocketOutlined,
 	ThunderboltOutlined,
+	DeleteOutlined,
 } from '@ant-design/icons';
-import { isEmpty } from 'lodash';
+import { isEmpty, filter } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { useAutomationContext } from '../../state/context';
-import type { AutomationStep } from '@quillcrm/client';
+import type {
+	AutomationStep,
+	OrganizedSteps,
+	OrganizedStep,
+	Automation,
+} from '@quillcrm/client';
 import { Fields } from '@quillcrm/components';
 import StepModal from './step-modal';
 import AddStep from './add-step';
@@ -38,29 +53,35 @@ const Workflow: React.FC = () => {
 		updateAutomation,
 		saveAutomation,
 		isSaving: isSavingAutomation,
+		setSteps,
+		updatedSteps,
 	} = useAutomationContext();
-	const [currentStep, setCurrentStep] = useState<AutomationStep | null>(null);
+	const [currentStep, setCurrentStep] = useState<OrganizedStep | null>(null);
 	const [visible, setVisible] = useState<boolean>(false);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
+	console.log('updatedSteps', updatedSteps);
 
 	const processSteps = (
-		parentId: number | string,
+		parentId: number,
 		steps: AutomationStep[]
 	): AutomationStep[] => {
-		return steps
+		const newSteps = steps
 			.filter((step) => step.parent_id == parentId)
 			.map((step) => ({
 				...step,
 				children: processSteps(step.id, steps),
 			}));
+
+		newSteps.sort((a, b) => a.order - b.order);
+		return newSteps;
 	};
 
 	const organizedSteps = useMemo(() => {
-		return processSteps('0', steps);
-	}, [steps]);
+		return processSteps(0, steps);
+	}, [steps]) as OrganizedSteps;
 
-	const organizeChildrenByCondition = (children: AutomationStep[]) => {
+	const organizeChildrenByCondition = (children: OrganizedStep[]) => {
 		const yesChildren = children.filter(
 			(child) => child.condition === 'yes'
 		);
@@ -84,7 +105,7 @@ const Workflow: React.FC = () => {
 					...automation,
 					...data,
 				},
-			})) as any;
+			})) as Automation;
 
 			updateAutomation(response);
 		} catch (error) {
@@ -133,7 +154,72 @@ const Workflow: React.FC = () => {
 		}
 	};
 
-	const renderStep = (step: any) => {
+	const deleteStep = async (step: OrganizedStep) => {
+		if (!automation) {
+			return;
+		}
+
+		const getNewSteps = () => {
+			const updatedOrdersSteps = {};
+			const newSteps = [...steps];
+
+			if (step.parent_id) {
+				const children = filter(newSteps, {
+					parent_id: step.parent_id,
+				});
+
+				children.forEach((child) => {
+					if (child.order > step.order) {
+						child.order -= 1;
+						updatedOrdersSteps[child.id] = {
+							order: child.order - 1,
+						};
+					}
+				});
+			} else {
+				newSteps.forEach((child) => {
+					if (child.order > step.order) {
+						child.order -= 1;
+						updatedOrdersSteps[child.id] = {
+							order: child.order - 1,
+						};
+					}
+				});
+			}
+
+			return { updatedOrdersSteps, newSteps };
+		};
+
+		const { newSteps, updatedOrdersSteps } = getNewSteps();
+		if (step.status === 'draft') {
+			const updatedSteps = newSteps.filter((s) => s.id !== step.id);
+			setSteps(updatedSteps);
+			return;
+		}
+
+		try {
+			console.log(updatedOrdersSteps);
+
+			const response = (await apiFetch({
+				path: `/qc/v1/automations/${automation.id}`,
+				method: 'POST',
+				data: {
+					step,
+					mode: 'delete',
+					updated_steps: updatedOrdersSteps,
+				},
+			})) as Automation;
+
+			setSteps(response.steps);
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete step', 'quillcrm'),
+			});
+		}
+	};
+
+	const renderStep = (step: OrganizedStep) => {
 		const { yesChildren, noChildren } = organizeChildrenByCondition(
 			step.children || []
 		);
@@ -148,7 +234,11 @@ const Workflow: React.FC = () => {
 			label = stepData.label;
 		}
 
-		const setStepHandler = (step: AutomationStep) => {
+		const setStepHandler = (step: OrganizedStep) => {
+			if (!step.action) {
+				setCurrentStep(step);
+				return;
+			}
 			if (
 				(step.type !== 'end_automation' && !isEmpty(stepData.fields)) ||
 				step.type === 'condition'
@@ -162,9 +252,22 @@ const Workflow: React.FC = () => {
 				<Card
 					className="qcrm-automation-workflow__card"
 					hoverable
-					onClick={() => setStepHandler(step)}
+					actions={[
+						<Popconfirm
+							title={__('Are you sure?', 'quillcrm')}
+							onConfirm={() => deleteStep(step)}
+							okText={__('Yes', 'quillcrm')}
+							cancelText={__('No', 'quillcrm')}
+						>
+							<Button
+								type="text"
+								icon={<DeleteOutlined />}
+								danger
+							/>
+						</Popconfirm>,
+					]}
 				>
-					<Flex gap={10}>
+					<Flex gap={10} onClick={() => setStepHandler(step)}>
 						<div className="qcrm-automation-workflow__card-icon">
 							{typesOptions[step.type].icon}
 						</div>
@@ -186,6 +289,9 @@ const Workflow: React.FC = () => {
 						</div>
 					</Flex>
 				</Card>
+				{step.type !== 'condition' && (
+					<AddStep setStep={setCurrentStep} prevStep={step ?? null} />
+				)}
 				{step.type === 'condition' && (
 					<Flex gap={20} style={{ marginTop: 10 }}>
 						<Card
@@ -196,11 +302,14 @@ const Workflow: React.FC = () => {
 								<h4>{__('Yes', 'quillcrm')}</h4>
 								{yesChildren.length > 0 &&
 									yesChildren.map(renderStep)}
-								<AddStep
-									setStep={setCurrentStep}
-									parentId={step.id}
-									condition="yes"
-								/>
+								{yesChildren.length === 0 && (
+									<AddStep
+										setStep={setCurrentStep}
+										prevStep={null}
+										parentId={step.id}
+										condition="yes"
+									/>
+								)}
 							</Flex>
 						</Card>
 						<Card
@@ -211,14 +320,20 @@ const Workflow: React.FC = () => {
 								<h4>{__('No', 'quillcrm')}</h4>
 								{noChildren.length > 0 &&
 									noChildren.map(renderStep)}
-								<AddStep
-									setStep={setCurrentStep}
-									parentId={step.id}
-									condition="no"
-								/>
+								{noChildren.length === 0 && (
+									<AddStep
+										setStep={setCurrentStep}
+										prevStep={null}
+										parentId={step.id}
+										condition="no"
+									/>
+								)}
 							</Flex>
 						</Card>
 					</Flex>
+				)}
+				{step.type === 'condition' && (
+					<AddStep setStep={setCurrentStep} prevStep={step ?? null} />
 				)}
 			</div>
 		);
@@ -277,9 +392,11 @@ const Workflow: React.FC = () => {
 										</Flex>
 									</Card>
 								</div>
+								{isEmpty(organizedSteps) && (
+									<AddStep setStep={setCurrentStep} />
+								)}
 								{organizedSteps.map(renderStep)}
 							</Flex>
-							<AddStep setStep={setCurrentStep} />
 						</Flex>
 					</>
 				)}
@@ -295,16 +412,18 @@ const Workflow: React.FC = () => {
 					style={{ minWidth: '800px', minHeight: '500px' }}
 					closable={false}
 				>
-					<Fields
-						fields={trigger?.fields}
-						values={automation?.settings || {}}
-						onChange={(value) => {
-							updateAutomation({
-								...automation,
-								settings: value,
-							});
-						}}
-					/>
+					{trigger?.fields && automation && (
+						<Fields
+							fields={trigger.fields}
+							values={automation.settings || {}}
+							onChange={(value) => {
+								updateAutomation({
+									...automation,
+									settings: value,
+								});
+							}}
+						/>
+					)}
 				</Modal>
 			</Card>
 		</>

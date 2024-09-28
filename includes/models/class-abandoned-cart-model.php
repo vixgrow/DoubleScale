@@ -154,21 +154,4 @@ class Abandoned_Cart_Model extends Model {
 	public static function getByHashKey( $hash_key ) {
 		return self::where( 'hash_key', $hash_key )->first();
 	}
-
-	/**
-	 * Delete the cart boot method
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public static function boot() {
-		parent::boot();
-
-		parent::created(
-			function( $cart ) {
-				do_action( 'quillcrm_abandoned_cart_created', $cart );
-			}
-		);
-	}
 }

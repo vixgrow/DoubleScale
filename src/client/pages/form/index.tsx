@@ -50,7 +50,7 @@ const Form: React.FC = () => {
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/forms/${id}`,
-			})) as any;
+			})) as FormType;
 
 			setForm(response);
 		} catch (error) {
@@ -63,7 +63,7 @@ const Form: React.FC = () => {
 		}
 	};
 
-	const saveForm = async (data: any = {}) => {
+	const saveForm = async (data: Partial<FormType> = {}) => {
 		setIsSaving(true);
 
 		const newForm = { ...form, ...data };

@@ -9,8 +9,10 @@
 
 namespace QuillCRM\Abandoned_Cart;
 
+use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Models\Abandoned_Cart_Model;
+use QuillCRM\Settings;
 
 /**
  * Abandoned Cart Class.
@@ -59,11 +61,157 @@ class Abandoned_Cart {
 		add_action( 'wp_ajax_quillcrm_save_abandoned_cart', array( $this, 'save_abandoned_cart' ) );
 		add_action( 'wp_ajax_nopriv_quillcrm_save_abandoned_cart', array( $this, 'save_abandoned_cart' ) );
 
+		// Mark the cart as recovered when the order is processed.
+		add_action( 'woocommerce_checkout_order_processed', array( $this, 'mark_as_recoverd' ), 1 );
+		add_action( 'woocommerce_store_api_checkout_order_processed', array( $this, 'mark_as_recoverd' ), 1 );
+
 		// Restore the abandoned cart.
 		add_action( 'wp', array( $this, 'restore_abandoned_cart' ) );
 
 		// Save the cart blocks.
 		add_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this, 'save_cart_blocks' ) );
+
+		add_action(
+			'init',
+			function() {
+				QuillCRM::instance()->daily_tasks->register_callback( 'quillcrm_daily1', array( $this, 'check_lost_carts' ) );
+				QuillCRM::instance()->abandoned_cart_tasks->register_callback( 'mark_cart_recoverable', array( $this, 'mark_cart_recoverable' ) );
+			}
+		);
+
+		add_action( 'quillcrm_abandoned_cart_skipped', array( $this, 'skip_abandoned_cart' ) );
+		add_action( 'quillcrm_abandoned_cart_processing', array( $this, 'mark_as_processing' ) );
+	}
+
+	/**
+	 * Mark as Processing.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $cart_id Cart ID.
+	 */
+	public function mark_as_processing( $cart_id ) {
+		error_log( 'mark_as_processing' );
+		$abandoned_cart = Abandoned_Cart_Model::find( $cart_id );
+		if ( empty( $abandoned_cart ) ) {
+			return;
+		}
+
+		$abandoned_cart->status = 'processing';
+		$abandoned_cart->save();
+	}
+
+	/**
+	 * Mark as Recovered.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param \WC_Order $order Order.
+	 */
+	public function mark_as_recoverd( $order ) {
+		if ( ! $order instanceof \WC_Order ) {
+			return;
+		}
+
+		// Get session.
+		$session = $this->get_session();
+		if ( empty( $session ) ) {
+			return;
+		}
+
+		// Get the abandoned cart.
+		$abandoned_cart = Abandoned_Cart_Model::getByHashKey( $session );
+		if ( empty( $abandoned_cart ) ) {
+			return;
+		}
+
+		// Update the abandoned cart items.
+		$items = array();
+		foreach ( $order->get_items() as $item ) {
+			$product_id   = $item->get_product_id();
+			$variation_id = $item->get_variation_id();
+			$quantity     = $item->get_quantity();
+			$variation    = $item->get_meta_data();
+			$variation    = wp_list_pluck( $variation, 'value', 'key' );
+
+			$items[] = array(
+				'product_id'   => $product_id,
+				'variation_id' => $variation_id,
+				'quantity'     => $quantity,
+				'variation'    => $variation,
+			);
+		}
+
+		$abandoned_cart->items    = $items;
+		$abandoned_cart->status   = 'recovered';
+		$abandoned_cart->order_id = $order->get_id();
+		$abandoned_cart->save();
+
+		// Clear the session.
+		$this->clear_session();
+	}
+
+	/**
+	 * Skip Abandoned Cart.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $cart_id Cart ID.
+	 */
+	public function skip_abandoned_cart( $cart_id ) {
+		error_log( 'skip_abandoned_cart' );
+		$abandoned_cart = Abandoned_Cart_Model::find( $cart_id );
+		if ( empty( $abandoned_cart ) ) {
+			return;
+		}
+
+		$abandoned_cart->status = 'skipped';
+		$abandoned_cart->save();
+	}
+
+	/**
+	 * Mark Cart Recoverable.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $cart_id Cart ID.
+	 */
+	public function mark_cart_recoverable( $cart_id ) {
+		$abandoned_cart = Abandoned_Cart_Model::find( $cart_id );
+
+		if ( empty( $abandoned_cart ) ) {
+			return;
+		}
+
+		if ( $abandoned_cart->status === 'recovered' ) {
+			return;
+		}
+
+		do_action( 'quillcrm_abandoned_cart_created', $abandoned_cart );
+	}
+
+	/**
+	 * Check Lost Carts.
+	 *
+	 * @since 1.0.0
+	 */
+	public function check_lost_carts() {
+		$settings       = Settings::get( 'cart', array() );
+		$lost_cart_days = $settings['lost_cart_days'] ?? 15;
+
+		// Get all carts that are pending and older than the lost cart days.
+		$abandoned_carts = Abandoned_Cart_Model::where( 'status', 'pending' )
+			->where( 'created_at', '<', strtotime( '-' . $lost_cart_days . ' days' ) )
+			->get();
+
+		if ( empty( $abandoned_carts ) ) {
+			return;
+		}
+
+		foreach ( $abandoned_carts as $abandoned_cart ) {
+			$abandoned_cart->status = 'lost';
+			$abandoned_cart->save();
+		}
 	}
 
 	/**
@@ -78,7 +226,7 @@ class Abandoned_Cart {
 		}
 
 		// Get the abandoned cart.
-		$abandoned_cart = Abandoned_Cart_Model::getByHashKey( $cart_id );
+		$abandoned_cart = Abandoned_Cart_Model::where( 'hash_key', $cart_id )->where( 'status', 'pending' )->first();
 		if ( empty( $abandoned_cart ) ) {
 			return;
 		}
@@ -254,8 +402,6 @@ class Abandoned_Cart {
 			$update = $this->update( $session, $data );
 			if ( $update ) {
 				return;
-			} else {
-				$this->clear_session();
 			}
 		}
 
@@ -292,6 +438,7 @@ class Abandoned_Cart {
 		);
 
 		$items = WC()->cart->get_cart();
+		error_log( print_r( $items, true ) );
 		if ( empty( $items ) ) {
 			wp_send_json_error( __( 'Cart is empty.', 'quillcrm' ) );
 		}
@@ -320,8 +467,6 @@ class Abandoned_Cart {
 			$update = $this->update( $session, $data );
 			if ( $update ) {
 				wp_send_json_success();
-			} else {
-				$this->clear_session();
 			}
 		}
 
@@ -345,11 +490,21 @@ class Abandoned_Cart {
 	 * @return Abandoned_Cart_Model|false
 	 */
 	public function save( $data ) {
+		$settings    = Settings::get( 'cart', array() );
+		$wait_period = $settings['wait_period'] ?? 1;
+		$wait_period = $wait_period * 60;
+
 		try {
-			$abandoned_cart = Abandoned_Cart_Model::createOrUpdate( $data );
-			if ( $abandoned_cart ) {
-				$this->save_session( $abandoned_cart->hash_key );
+			$abandoned_cart = Abandoned_Cart_Model::where( 'email', $data['email'] )->first();
+			if ( ! empty( $abandoned_cart ) ) {
+				$abandoned_cart->fill( $data );
+				$abandoned_cart->save();
+			} else {
+				$abandoned_cart = Abandoned_Cart_Model::create( $data );
+				QuillCRM::instance()->abandoned_cart_tasks->schedule_single( time() + $wait_period, 'mark_cart_recoverable', $abandoned_cart->id );
 			}
+
+			$this->save_session( $abandoned_cart->hash_key );
 			return $abandoned_cart;
 		} catch ( \Exception $e ) {
 			return false;
@@ -367,12 +522,16 @@ class Abandoned_Cart {
 	 * @return Abandoned_Cart_Model|false
 	 */
 	public function update( $hash_key, $data ) {
+		$settings    = Settings::get( 'cart', array() );
+		$wait_period = $settings['wait_period'] ?? 1;
+		$wait_period = $wait_period * 60;
+
 		try {
 			$abandoned_cart = Abandoned_Cart_Model::updateByHashKey( $hash_key, $data );
 			if ( ! $abandoned_cart ) {
 				return false;
 			}
-
+			QuillCRM::instance()->abandoned_cart_tasks->schedule_single( time() + $wait_period, 'mark_cart_recoverable', $abandoned_cart->id );
 			return $abandoned_cart;
 		} catch ( \Exception $e ) {
 			return false;

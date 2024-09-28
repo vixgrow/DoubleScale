@@ -11,15 +11,13 @@ export type setCampaign = {
 
 export type updateCampaign = {
 	type: typeof UPDATE_CAMPAIGN;
-	payload: {
-		[key: string]: any;
-	};
+	payload: Partial<Campaign>;
 };
 
 export type updateSettings = {
 	type: typeof UPDATE_SETTINGS;
-	key: string;
-	value: any;
+	key: keyof Campaign['settings'];
+	value: Campaign['settings'][keyof Campaign['settings']];
 };
 
 export type CampaignAction = setCampaign | updateCampaign | updateSettings;

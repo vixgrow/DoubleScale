@@ -11,7 +11,11 @@ import { useDispatch } from '@wordpress/data';
  */
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
-import type { OrganizedStep, Automation } from '@quillcrm/client';
+import type {
+	OrganizedStep,
+	Automation,
+	AutomationStep,
+} from '@quillcrm/client';
 import StepFieldsModal from '../step-fields-modal';
 import GoalSelector from '../goal-selector';
 import ActionSelector from '../action-selector';
@@ -28,8 +32,9 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 	const [actionModalVisible, setActionModalVisible] = useState(!step.action);
 	const [value, setValue] = useState('');
 	const { createNotice } = useDispatch('quillcrm/core');
-	console.log(updatedSteps, 'updatedSteps');
-	const saveStep = async (payload: Partial<OrganizedStep>) => {
+	console.log(step);
+
+	const saveAutomationStep = async (payload: Partial<OrganizedStep>) => {
 		const data = {
 			step: {
 				...step,
@@ -49,6 +54,31 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 			setStep(null);
 			setUpdatedSteps({});
 			setSteps(response.steps);
+			createNotice({
+				type: 'success',
+				message: __('Automation updated', 'quillcrm'),
+			});
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message: __('Failed to update automation', 'quillcrm'),
+			});
+		}
+	};
+
+	const saveStep = async (payload: Partial<OrganizedStep> = {}) => {
+		try {
+			const response = (await apiFetch({
+				path: `/qc/v1/automation-steps/${step.id}`,
+				method: 'POST',
+				data: {
+					...step,
+					...payload,
+				},
+			})) as AutomationStep;
+
+			updateStep(response.id, response);
+			setStep(null);
 			createNotice({
 				type: 'success',
 				message: __('Automation updated', 'quillcrm'),
@@ -122,7 +152,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 			<StepFieldsModal
 				step={step}
 				setStep={setStep}
-				saveStep={saveStep}
+				saveStep={step?.temp ? saveAutomationStep : saveStep}
 			/>
 		);
 	}

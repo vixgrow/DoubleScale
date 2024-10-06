@@ -26,46 +26,22 @@ class Remote_Data extends Integration_Remote_Data {
 	 * @var array
 	 */
 	protected $entities = array(
-		'accounts',
-		'campaigns',
-		'tags',
-		'fields',
-		'workflows',
+		'accounts'  => array(
+			'callback' => 'fetch_accounts',
+		),
+		'campaigns' => array(
+			'callback' => 'fetch_campaigns',
+		),
+		'tags'      => array(
+			'callback' => 'fetch_tags',
+		),
+		'fields'    => array(
+			'callback' => 'fetch_fields',
+		),
+		'workflows' => array(
+			'callback' => 'fetch_workflows',
+		),
 	);
-
-	/**
-	 * Get remote data
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @param string          $entity Entity.
-	 * @param int             $entity_id Entity ID.
-	 * @return array|WP_Error
-	 */
-	public function fetch( $request, $entity, $entity_id ) {
-		$result = array();
-
-		switch ( $entity ) {
-			case 'fields':
-				$result = $this->fetch_fields();
-				break;
-			case 'tags':
-				$result = $this->fetch_tags();
-				break;
-			case 'campaigns':
-				$result = $this->fetch_campaigns();
-				break;
-			case 'accounts':
-				$result = $this->fetch_accounts();
-				break;
-			case 'workflows':
-				$result = $this->fetch_workflows();
-				break;
-		}
-
-		return $result;
-	}
 
 	/**
 	 * Fetch fields.
@@ -79,8 +55,20 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_fields();
+		$result   = array();
 
-		return $response;
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['custom_field_identifiers'] ?? array() as $field ) {
+			$result[] = array(
+				'label' => $field,
+				'value' => $field,
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -95,8 +83,20 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_tags();
+		$result   = array();
 
-		return $response;
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['tags'] ?? array() as $tag ) {
+			$result[] = array(
+				'label' => $tag,
+				'value' => $tag,
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -111,8 +111,20 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_campaigns();
+		$result   = array();
 
-		return $response;
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['campaigns'] ?? array() as $campaign ) {
+			$result[] = array(
+				'label' => $campaign['name'],
+				'value' => $campaign['id'],
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -127,8 +139,20 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_accounts();
+		$result   = array();
 
-		return $response;
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['accounts'] ?? array() as $account ) {
+			$result[] = array(
+				'label' => $account['name'],
+				'value' => $account['id'],
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -143,7 +167,19 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_workflows();
+		$result   = array();
 
-		return $response;
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['workflows'] ?? array() as $workflow ) {
+			$result[] = array(
+				'label' => $workflow['name'],
+				'value' => $workflow['id'],
+			);
+		}
+
+		return $result;
 	}
 }

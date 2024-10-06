@@ -40,6 +40,7 @@ const configData: ConfigData = {
 	pluginDirUrl: '',
 	adminEmail: '',
 	ajaxUrl: '',
+	siteUrl: '',
 	nonce: '',
 	forms: {},
 	customFieldsTypes: {},
@@ -423,6 +424,26 @@ export const setIsWoocommerceActive =
 		data.isWoocommerceActive = value;
 	};
 
+/**
+ * Get site url
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns string
+ */
+export const getSiteUrl = (data: ConfigData) => (): string => {
+	return data.siteUrl;
+};
+
+/**
+ * Set site url
+ *
+ * @param data the json environment configuration to use for getting config values
+ */
+export const setSiteUrl = (data: ConfigData) => (value: string) => {
+	data.siteUrl = value;
+};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -459,6 +480,8 @@ export interface ConfigApi {
 	setAutomationRules: (value: AutomationRules) => void;
 	isWoocommerceActive: () => boolean;
 	setIsWoocommerceActive: (value: boolean) => void;
+	getSiteUrl: () => string;
+	setSiteUrl: (value: string) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -497,6 +520,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setAutomationRules = setAutomationRules(data);
 	configApi.isWoocommerceActive = () => isWoocommerceActive(data);
 	configApi.setIsWoocommerceActive = setIsWoocommerceActive(data);
+	configApi.getSiteUrl = getSiteUrl(data);
+	configApi.setSiteUrl = setSiteUrl(data);
 
 	return configApi;
 };

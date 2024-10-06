@@ -111,6 +111,21 @@ class Add_To_Workflow extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'workflow_id' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'Workflow', 'quillcrm' ),
+				'endpoint' => 'drip/workflows',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Add_To_Workflow() );

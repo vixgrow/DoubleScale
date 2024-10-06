@@ -110,6 +110,22 @@ class Remove_Tags extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'tags' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'Tags', 'quillcrm' ),
+				'endpoint' => 'convertkit/tags',
+				'multiple' => true,
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Remove_Tags() );

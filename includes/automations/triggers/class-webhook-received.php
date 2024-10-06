@@ -143,7 +143,6 @@ class Webhook_Received extends Trigger {
 	 * @return void
 	 */
 	public function set_settings( $automation ) {
-		// Random string with 32 characters
 		$random_string = bin2hex( random_bytes( 16 ) );
 		$automation->set_setting( 'webhook_key', $random_string );
 		$automation->save();

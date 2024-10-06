@@ -114,6 +114,21 @@ class Add_To_List extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'list_id' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'List', 'quillcrm' ),
+				'endpoint' => 'mautic/lists',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Add_To_List() );

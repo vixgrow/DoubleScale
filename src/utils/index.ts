@@ -88,3 +88,19 @@ export const getRuleBySlug = (slug: string): Rule => {
 				options: {},
 			};
 };
+
+export const formatDate = (date: string, type: string = 'hour') => {
+	switch (type) {
+		case 'hour':
+			return new Date(date).toLocaleTimeString();
+		case 'day':
+			return new Date(date).toLocaleDateString();
+		case 'month':
+			return new Date(date).toLocaleDateString(undefined, {
+				month: 'long',
+				year: 'numeric',
+			});
+		default:
+			return new Date(date).toLocaleTimeString();
+	}
+};

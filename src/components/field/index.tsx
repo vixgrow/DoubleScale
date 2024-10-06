@@ -19,6 +19,9 @@ import Select from 'react-select';
 import './style.scss';
 import { ListField, TagField, LinkTriggerField } from '@quillcrm/components';
 import type { ReactSelectOptions } from '@quillcrm/client';
+import ContactMappedFields from '../contact-mapped-fields';
+import APISelect from '../api-select';
+import APIMappedFields from '../api-mapped-fields';
 
 interface FieldProps {
 	label?: string;
@@ -27,6 +30,13 @@ interface FieldProps {
 	onChange: (value: any) => void;
 	value: any;
 	status?: InputProps['status'];
+	fields?: {
+		[key: string]: {
+			label: string;
+		};
+	};
+	endpoint?: string;
+	multiple?: boolean;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -36,6 +46,9 @@ const Field: React.FC<FieldProps> = ({
 	onChange,
 	value,
 	status,
+	fields,
+	endpoint,
+	multiple,
 }) => {
 	let fieldContent;
 
@@ -153,6 +166,35 @@ const Field: React.FC<FieldProps> = ({
 						onChange(dayjs(value).format('YYYY-MM-DD'))
 					}
 					locale={en}
+				/>
+			);
+			break;
+		case 'contact_mapped_fields':
+			fieldContent = (
+				<ContactMappedFields
+					onChange={onChange}
+					values={value}
+					fields={fields || {}}
+				/>
+			);
+			break;
+		case 'api_select':
+			fieldContent = (
+				<APISelect
+					onChange={onChange}
+					value={value}
+					endpoint={endpoint || ''}
+					multiple={multiple || false}
+				/>
+			);
+			break;
+		case 'api_mapped_fields':
+			fieldContent = (
+				<APIMappedFields
+					onChange={onChange}
+					values={value}
+					fields={fields || {}}
+					endpoint={endpoint || ''}
 				/>
 			);
 			break;

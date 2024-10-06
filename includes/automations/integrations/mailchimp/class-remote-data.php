@@ -26,34 +26,13 @@ class Remote_Data extends Integration_Remote_Data {
 	 * @var array
 	 */
 	protected $entities = array(
-		'lists',
-		'tags',
+		'lists' => array(
+			'callback' => 'fetch_lists',
+		),
+		'tags'  => array(
+			'callback' => 'fetch_tags',
+		),
 	);
-
-	/**
-	 * Get remote data
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @param string          $entity Entity.
-	 * @param int             $entity_id Entity ID.
-	 * @return array|WP_Error
-	 */
-	public function fetch( $request, $entity, $entity_id ) {
-		$result = array();
-
-		switch ( $entity ) {
-			case 'lists':
-				$result = $this->fetch_lists();
-				break;
-			case 'tags':
-				$result = $this->fetch_tags();
-				break;
-		}
-
-		return $result;
-	}
 
 	/**
 	 * Fetch lists.
@@ -72,8 +51,8 @@ class Remote_Data extends Integration_Remote_Data {
 		if ( ! empty( $response ) ) {
 			foreach ( $response['data']['lists'] ?? array() as $list ) {
 				$result[] = array(
-					'id'   => $list['id'],
-					'name' => $list['name'],
+					'value' => $list['id'],
+					'label' => $list['name'],
 				);
 			}
 		}
@@ -93,7 +72,17 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_tags( $this->integration->get_setting( 'list_id' ) );
+		$result   = array();
 
-		return $response;
+		if ( ! empty( $response ) ) {
+			foreach ( $response['data']['tags'] ?? array() as $tag ) {
+				$result[] = array(
+					'value' => $tag['id'],
+					'label' => $tag['name'],
+				);
+			}
+		}
+
+		return $result;
 	}
 }

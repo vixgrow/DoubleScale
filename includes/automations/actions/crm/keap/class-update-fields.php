@@ -119,6 +119,22 @@ class Update_Fields extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'mapped_fields' => array(
+				'label'    => __( 'Mapped Fields', 'quillcrm' ),
+				'type'     => 'api_mapped_fields',
+				'fields'   => array(),
+				'endpoint' => 'keap/fields',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Update_Fields() );

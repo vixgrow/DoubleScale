@@ -96,6 +96,7 @@ const AddStep: React.FC<AddStepProps> = ({
 			order,
 			parent_id: 0,
 			action: '',
+			temp: true,
 		} as AutomationStep;
 
 		if (type === 'condition' && condition) {

@@ -26,30 +26,16 @@ class Remote_Data extends Integration_Remote_Data {
 	 * @var array
 	 */
 	protected $entities = array(
-		'fields',
+		'lists'  => array(
+			'callback' => 'fetch_lists',
+		),
+		'tags'   => array(
+			'callback' => 'fetch_tags',
+		),
+		'fields' => array(
+			'callback' => 'fetch_fields',
+		),
 	);
-
-	/**
-	 * Get remote data
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @param string          $entity Entity.
-	 * @param int             $entity_id Entity ID.
-	 * @return array|WP_Error
-	 */
-	public function fetch( $request, $entity, $entity_id ) {
-		$result = array();
-
-		switch ( $entity ) {
-			case 'fields':
-				$result = $this->fetch_fields();
-				break;
-		}
-
-		return $result;
-	}
 
 	/**
 	 * Fetch fields.
@@ -63,7 +49,75 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_fields();
+		$result   = array();
 
-		return $response;
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['fields'] ?? array() as $field ) {
+			$result[] = array(
+				'label' => $field['name'],
+				'value' => $field['id'],
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Fetch lists.
+	 *
+	 * @return array
+	 */
+	public function fetch_lists() {
+		/** @var API $api */
+		$api = $this->integration->connect();
+		if ( ! $api ) {
+			return array();
+		}
+		$response = $api->get_lists();
+		$result   = array();
+
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['lists'] ?? array() as $list ) {
+			$result[] = array(
+				'label' => $list['name'],
+				'value' => $list['id'],
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Fetch tags.
+	 *
+	 * @return array
+	 */
+	public function fetch_tags() {
+		/** @var API $api */
+		$api = $this->integration->connect();
+		if ( ! $api ) {
+			return array();
+		}
+		$response = $api->get_tags();
+		$result   = array();
+
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['tags'] ?? array() as $tag ) {
+			$result[] = array(
+				'label' => $tag['tag'],
+				'value' => $tag['id'],
+			);
+		}
+
+		return $result;
 	}
 }

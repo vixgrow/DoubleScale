@@ -26,34 +26,13 @@ class Remote_Data extends Integration_Remote_Data {
 	 * @var array
 	 */
 	protected $entities = array(
-		'user',
-		'conversations',
+		'user'          => array(
+			'callback' => 'fetch_user',
+		),
+		'conversations' => array(
+			'callback' => 'fetch_conversations',
+		),
 	);
-
-	/**
-	 * Get remote data
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @param string          $entity Entity.
-	 * @param int             $entity_id Entity ID.
-	 * @return array|WP_Error
-	 */
-	public function fetch( $request, $entity, $entity_id ) {
-		$result = array();
-
-		switch ( $entity ) {
-			case 'user':
-				$result = $this->fetch_user( $entity_id );
-				break;
-			case 'conversations':
-				$result = $this->fetch_conversations();
-				break;
-		}
-
-		return $result;
-	}
 
 	/**
 	 * Fetch user.
@@ -93,7 +72,19 @@ class Remote_Data extends Integration_Remote_Data {
 				'types'  => 'public_channel,private_channel,mpim,im',
 			)
 		);
+		$result   = array();
 
-		return $response;
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['channels'] as $channel ) {
+			$result[] = array(
+				'value' => $channel['id'],
+				'label' => $channel['name'],
+			);
+		}
+
+		return $result;
 	}
 }

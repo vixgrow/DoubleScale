@@ -79,7 +79,7 @@ abstract class Integration_Remote_Data {
 	public function register_entities_routes() {
 		$entities = $this->get_entities();
 
-		foreach ( $entities ?? array() as $entity ) {
+		foreach ( $entities ?? array() as $entity => $data ) {
 			register_rest_route(
 				$this->namespace,
 				'/' . $this->rest_base . '/' . $entity,
@@ -113,7 +113,7 @@ abstract class Integration_Remote_Data {
 		$entity_id = $request->get_param( 'entity_id' );
 
 		// remote account data.
-		$result = $this->fetch( $request, $entity, $entity_id );
+		$result = $this->{$this->entities[ $entity ]['callback']}( $entity_id );
 
 		return rest_ensure_response( $result );
 	}
@@ -129,16 +129,4 @@ abstract class Integration_Remote_Data {
 	public function get_entity_permissions_check( $request ) {
 		return current_user_can( 'manage_options' );
 	}
-
-	/**
-	 * Get remote data
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @param string          $entity Entity.
-	 * @param int             $entity_id Entity ID.
-	 * @return array|WP_Error
-	 */
-	abstract public function fetch( $request, $entity, $entity_id );
 }

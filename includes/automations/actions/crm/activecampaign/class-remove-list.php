@@ -123,6 +123,21 @@ class Remove_List extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'list' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'List', 'quillcrm' ),
+				'endpoint' => 'activecampaign/lists',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Remove_List() );

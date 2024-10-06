@@ -105,6 +105,21 @@ class Add_To_Sequence extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'sequence_id' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'Sequence', 'quillcrm' ),
+				'endpoint' => 'convertkit/sequence',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Add_To_Sequence() );

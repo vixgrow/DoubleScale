@@ -44,6 +44,7 @@ import { Fields } from '@quillcrm/components';
 import StepModal from './step-modal';
 import AddStep from './add-step';
 import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
+import WebhookFields from './webhook-fields';
 
 const Workflow: React.FC = () => {
 	const {
@@ -412,10 +413,23 @@ const Workflow: React.FC = () => {
 					style={{ minWidth: '800px', minHeight: '500px' }}
 					closable={false}
 				>
-					{trigger?.fields && automation && (
-						<Fields
-							fields={trigger.fields}
-							values={automation.settings || {}}
+					{trigger?.fields &&
+						automation?.trigger !== 'webhook_received' &&
+						automation && (
+							<Fields
+								fields={trigger.fields}
+								values={automation.settings || {}}
+								onChange={(value) => {
+									updateAutomation({
+										...automation,
+										settings: value,
+									});
+								}}
+							/>
+						)}
+					{automation?.trigger === 'webhook_received' && (
+						<WebhookFields
+							values={automation?.settings || {}}
 							onChange={(value) => {
 								updateAutomation({
 									...automation,

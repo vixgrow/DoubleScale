@@ -117,6 +117,12 @@ final class Loader {
 		error_log( 'Process Automation Goal: ' . $step->id . ' Contact ID: ' . $contact_id );
 		try {
 			$skip = $step->get_setting( 'skip', false );
+			// Check if automation is deleted.
+			$automation = $step->automation;
+			if ( ! $automation ) {
+				return;
+			}
+
 			if ( ! $skip ) {
 				$automation_contacts = $step->automation->contacts()->where( 'contact_id', $contact_id )->where( 'current_step', $step->id )->where( 'status', 'pending' )->get();
 				foreach ( $automation_contacts as $automation_contact ) {

@@ -108,6 +108,21 @@ class Remove_Subscriber_From_List extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'list_id' => array(
+				'label'    => __( 'List ID', 'quillcrm' ),
+				'type'     => 'api_select',
+				'endpoint' => 'hubspot/lists',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Remove_Subscriber_From_List() );

@@ -112,6 +112,21 @@ class Add_To_Group extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'group_id' => array(
+				'label'    => __( 'Group ID', 'quillcrm' ),
+				'type'     => 'api_select',
+				'endpoint' => 'mailerlite/groups',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Add_To_Group() );

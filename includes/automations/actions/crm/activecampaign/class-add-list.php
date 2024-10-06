@@ -59,6 +59,13 @@ class Add_List extends Action {
 	public $description = 'This action will add list to a contact in ActiveCampaign.';
 
 	/**
+	 * Is integration
+	 *
+	 * @var bool
+	 */
+	public $is_integration = true;
+
+	/**
 	 * Process Action
 	 *
 	 * @since 1.0.0
@@ -120,6 +127,21 @@ class Add_List extends Action {
 					'type'     => 'string',
 					'required' => true,
 				),
+			),
+		);
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'list' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'List', 'quillcrm' ),
+				'endpoint' => 'activecampaign/lists',
 			),
 		);
 	}

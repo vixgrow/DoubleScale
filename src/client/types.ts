@@ -293,6 +293,7 @@ export type AutomationStep = {
 	status: string;
 	created_at: string;
 	updated_at: string;
+	temp?: boolean;
 };
 
 export type OrganizedSteps = OrganizedStep[];
@@ -391,9 +392,9 @@ export type CartAnalytics = {
 	revenue: {
 		[date: string]: number;
 	};
-	dates: {
-		days: string[];
-		months: string[];
+	data: {
+		dates: string[];
+		type: 'hour' | 'day' | 'month';
 	};
 	total: {
 		carts: number;
@@ -403,11 +404,11 @@ export type CartAnalytics = {
 
 export type ContactAnalytics = {
 	contacts: {
-		[date: string]: Contact[];
+		[date: string]: number;
 	};
-	dates: {
-		days: string[];
-		months: string[];
+	data: {
+		dates: string[];
+		type: 'hour' | 'day' | 'month';
 	};
 	total: string;
 	total_subscribed: number;
@@ -418,9 +419,9 @@ export type EmailsAnalytics = {
 	emails: {
 		[date: string]: CampaignEmail[];
 	};
-	dates: {
-		days: string[];
-		months: string[];
+	data: {
+		dates: string[];
+		type: 'hour' | 'day' | 'month';
 	};
 	total: string;
 	total_sent: number;

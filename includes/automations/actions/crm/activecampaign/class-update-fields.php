@@ -17,6 +17,7 @@ use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Integrations_Manager;
+use QuillCRM\Automations\Integrations\ActiveCampaign;
 
 /**
  * Update Fields class
@@ -117,6 +118,32 @@ class Update_Fields extends Action {
 					'type'     => 'object',
 					'required' => true,
 				),
+			),
+		);
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'mapped_fields' => array(
+				'label'    => __( 'Mapped Fields', 'quillcrm' ),
+				'type'     => 'api_mapped_fields',
+				'fields'   => array(
+					'email'      => array(
+						'label' => __( 'Email', 'quillcrm' ),
+					),
+					'first_name' => array(
+						'label' => __( 'First Name', 'quillcrm' ),
+					),
+					'last_name'  => array(
+						'label' => __( 'Last Name', 'quillcrm' ),
+					),
+				),
+				'endpoint' => 'activecampaign/fields',
 			),
 		);
 	}

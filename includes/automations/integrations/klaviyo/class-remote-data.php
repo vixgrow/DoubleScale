@@ -26,30 +26,10 @@ class Remote_Data extends Integration_Remote_Data {
 	 * @var array
 	 */
 	protected $entities = array(
-		'lists',
+		'lists' => array(
+			'callback' => 'fetch_lists',
+		),
 	);
-
-	/**
-	 * Get remote data
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @param string          $entity Entity.
-	 * @param int             $entity_id Entity ID.
-	 * @return array|WP_Error
-	 */
-	public function fetch( $request, $entity, $entity_id ) {
-		$result = array();
-
-		switch ( $entity ) {
-			case 'lists':
-				$result = $this->fetch_lists();
-				break;
-		}
-
-		return $result;
-	}
 
 	/**
 	 * Fetch lists.
@@ -63,7 +43,19 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_lists();
+		$result   = array();
 
-		return $response;
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['data'] as $list ) {
+			$result[] = array(
+				'label' => $list['attributes']['name'],
+				'value' => $list['id'],
+			);
+		}
+
+		return $result;
 	}
 }

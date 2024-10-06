@@ -14,9 +14,7 @@ use Exception;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
-use DateInterval;
-use DatePeriod;
-use DateTime;
+use QuillCRM\Utils;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\List_Model;
@@ -194,16 +192,10 @@ class REST_Contact_Controller extends REST_Controller {
 					'callback'            => array( $this, 'get_analytics' ),
 					'permission_callback' => array( $this, 'get_analytics_permissions_check' ),
 					'args'                => array(
-						'type'       => array(
-							'description' => __( 'Type of data to be fetched.', 'quillcrm' ),
-							'type'        => 'string',
-							'enum'        => array( 'custom', 'order' ),
-							'required'    => false,
-						),
 						'interval'   => array(
 							'description' => __( 'Interval for the analytics.', 'quillcrm' ),
 							'type'        => 'string',
-							'enum'        => array( 'today', 'yesterday', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year', 'last_year' ),
+							'enum'        => array( 'custom', 'today', 'yesterday', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year', 'last_year' ),
 							'required'    => false,
 						),
 						'start_date' => array(
@@ -314,7 +306,7 @@ class REST_Contact_Controller extends REST_Controller {
 				'status'     => array(
 					'description'  => __( 'Status of the contact.', 'quillcrm' ),
 					'type'         => 'string',
-					'enum'         => array( 'subscribed', 'unsubscribed' ),
+					'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'junk' ),
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
@@ -884,31 +876,42 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	public function get_analytics( $request ) {
 		try {
-			$type       = $request->get_param( 'type' ) ? $request->get_param( 'type' ) : 'order';
 			$interval   = $request->get_param( 'interval' ) ? $request->get_param( 'interval' ) : 'last_30_days';
 			$start_date = $request->get_param( 'start_date' ) ? $request->get_param( 'start_date' ) : '';
 			$end_date   = $request->get_param( 'end_date' ) ? $request->get_param( 'end_date' ) : '';
 
-			if ( 'order' === $type ) {
-				$start_date = $this->get_start_date( $interval, $start_date );
-				$end_date   = $this->get_end_date( $interval, $end_date );
+			if ( 'custom' !== $interval ) {
+				$start_date = Utils::get_start_date( $interval, $start_date );
+				$end_date   = Utils::get_end_date( $interval, $end_date );
 			}
 
-			$dates              = $this->get_days_months_between_dates( $start_date, $end_date );
-			$contacts           = Contact_Model::whereBetween( 'created_at', array( $start_date, $end_date ) )
-				->get()
-				->groupBy(
-					function( $item ) use ( $dates ) {
-						return $this->is_date( $item->created_at, $dates['days'] ) ? date( 'Y-m-d', strtotime( $item->created_at ) ) : date( 'Y-m', strtotime( $item->created_at ) );
-					}
-				);
+			$dates              = Utils::get_dates_between_dates( $start_date, $end_date );
+			$type               = $dates['type'] ?? 'hour';
 			$total_contacts     = Contact_Model::count();
 			$total_subscribed   = Contact_Model::where( 'status', 'subscribed' )->count();
 			$total_unsubscribed = Contact_Model::where( 'status', 'unsubscribed' )->count();
+			$contacts           = array();
+
+			foreach ( $dates['dates'] as $date ) {
+				switch ( $type ) {
+					case 'hour':
+						$contacts[ $date ] = Contact_Model::whereBetween( 'created_at', array( $date, date( 'Y-m-d H:i:s', strtotime( $date . ' +1 hour' ) ) ) )->count();
+						break;
+					case 'day':
+						$contacts[ $date ] = Contact_Model::whereDay( 'created_at', date( 'd', strtotime( $date ) ) )->count();
+						break;
+					case 'month':
+						$contacts[ $date ] = Contact_Model::whereMonth( 'created_at', date( 'm', strtotime( $date ) ) )->count();
+						break;
+					case 'year':
+						$contacts[ $date ] = Contact_Model::whereYear( 'created_at', date( 'Y', strtotime( $date ) ) )->count();
+						break;
+				}
+			}
 
 			$analytics = array(
 				'contacts'           => $contacts,
-				'dates'              => $dates,
+				'data'               => $dates,
 				'total'              => $total_contacts,
 				'total_subscribed'   => $total_subscribed,
 				'total_unsubscribed' => $total_unsubscribed,
@@ -930,136 +933,5 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	public function get_analytics_permissions_check( $request ) {
 		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Get start date
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $interval Interval.
-	 * @param string $start_date Start date.
-	 *
-	 * @return string
-	 */
-	private function get_start_date( $interval, $start_date ) {
-		$start_date = '';
-		switch ( $interval ) {
-			case 'today':
-				$start_date = date( 'Y-m-d' );
-				break;
-			case 'yesterday':
-				$start_date = date( 'Y-m-d', strtotime( '-1 day' ) );
-				break;
-			case 'last_7_days':
-				$start_date = date( 'Y-m-d', strtotime( '-7 days' ) );
-				break;
-			case 'last_30_days':
-				$start_date = date( 'Y-m-d', strtotime( '-30 days' ) );
-				break;
-			case 'this_month':
-				$start_date = date( 'Y-m-01' );
-				break;
-			case 'last_month':
-				$start_date = date( 'Y-m-01', strtotime( 'first day of last month' ) );
-				break;
-			case 'this_year':
-				$start_date = date( 'Y-01-01' );
-				break;
-			case 'last_year':
-				$start_date = date( 'Y-01-01', strtotime( 'first day of last year' ) );
-				break;
-		}
-
-		return $start_date;
-	}
-
-	/**
-	 * Get end date
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $interval Interval.
-	 * @param string $end_date End date.
-	 *
-	 * @return string
-	 */
-	private function get_end_date( $interval, $end_date ) {
-		$end_date = '';
-		switch ( $interval ) {
-			case 'today':
-				$end_date = date( 'Y-m-d' );
-				break;
-			case 'yesterday':
-				$end_date = date( 'Y-m-d', strtotime( '-1 day' ) );
-				break;
-			case 'last_7_days':
-				$end_date = date( 'Y-m-d' );
-				break;
-			case 'last_30_days':
-				$end_date = date( 'Y-m-d' );
-				break;
-			case 'this_month':
-				$end_date = date( 'Y-m-t' );
-				break;
-			case 'last_month':
-				$end_date = date( 'Y-m-t', strtotime( 'last day of last month' ) );
-				break;
-			case 'this_year':
-				$end_date = date( 'Y-12-31' );
-				break;
-			case 'last_year':
-				$end_date = date( 'Y-12-31', strtotime( 'last day of last year' ) );
-				break;
-		}
-
-		return $end_date;
-	}
-
-	/**
-	 * Get days/months between two dates
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $start_date Start date.
-	 * @param string $end_date End date.
-	 *
-	 * @return array
-	 */
-	private function get_days_months_between_dates( $start_date, $end_date ) {
-		$days     = array();
-		$months   = array();
-		$interval = new DateInterval( 'P1D' );
-		$realEnd  = new DateTime( $end_date );
-		$realEnd->add( $interval );
-		$period = new DatePeriod( new DateTime( $start_date ), $interval, $realEnd );
-
-		foreach ( $period as $date ) {
-			$days[]   = $date->format( 'Y-m-d' );
-			$months[] = $date->format( 'Y-m' );
-		}
-
-		return array(
-			'days'   => $days,
-			'months' => $months,
-		);
-	}
-
-
-	/**
-	 * Check if date is in array
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $date Date.
-	 * @param array  $dates Dates.
-	 *
-	 * @return bool
-	 */
-	private function is_date( $date, $dates ) {
-		// Date to same format as in array
-		$date = date( 'Y-m-d', strtotime( $date ) );
-
-		return in_array( $date, $dates );
 	}
 }

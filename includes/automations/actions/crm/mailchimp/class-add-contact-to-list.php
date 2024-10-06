@@ -112,6 +112,21 @@ class Add_Contact extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'list' => array(
+				'label'    => __( 'List ID', 'quillcrm' ),
+				'type'     => 'api_select',
+				'endpoint' => 'mailchimp/lists',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Add_Contact() );

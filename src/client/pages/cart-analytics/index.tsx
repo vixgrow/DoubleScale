@@ -12,7 +12,7 @@ import { useDispatch } from '@wordpress/data';
  */
 import { Card, Flex, Skeleton, Typography } from 'antd';
 import { UserOutlined, MailOutlined } from '@ant-design/icons';
-
+import dayjs from 'dayjs';
 import { map } from 'lodash';
 import {
 	Chart as ChartJS,
@@ -44,17 +44,26 @@ ChartJS.register(
 import './style.scss';
 import type { CartAnalytics as CartAnalyticsData } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
+import { convertDate, formatDate } from '@quillcrm/utils';
+import { DateFilter } from '@quillcrm/components';
 
 const CartAnalytics: React.FC = () => {
 	const [data, setData] = useState<CartAnalyticsData | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [interval, setInterval] = useState<string>('today');
+	const [startDate, setStartDate] = useState<Date>(new Date());
+	const [endDate, setEndDate] = useState<Date>(new Date());
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchCartAnalytics = async () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/abandoned-carts/analytics'),
+				path: addQueryArgs('/qc/v1/abandoned-carts/analytics', {
+					interval,
+					start_date: dayjs(startDate).format('YYYY-MM-DD'),
+					end_date: dayjs(endDate).format('YYYY-MM-DD'),
+				}),
 			})) as CartAnalyticsData;
 
 			setData(response);
@@ -110,6 +119,15 @@ const CartAnalytics: React.FC = () => {
 					</Flex>
 				</Card>
 			</Flex>
+			<DateFilter
+				interval={interval}
+				startDate={startDate}
+				endDate={endDate}
+				onIntervalChange={(value) => setInterval(value)}
+				onChangeFromDate={(date) => setStartDate(date)}
+				onChangeToDate={(date) => setEndDate(date)}
+				onSubmit={fetchCartAnalytics}
+			/>
 			<Flex gap={20}>
 				<Card
 					title={__('Cart Analytics', 'quillcrm')}
@@ -122,16 +140,15 @@ const CartAnalytics: React.FC = () => {
 				>
 					<Line
 						data={{
-							labels: map(data.dates.days, (date) => {
-								const newDate = new Date(date);
-								return newDate.getDate();
+							labels: map(data.data.dates, (date) => {
+								return formatDate(date, data.data.type);
 							}),
 							datasets: [
 								{
 									label: __('Carts', 'quillcrm'),
-									data: map(data.dates.days, (date) => {
+									data: map(data.data.dates, (date) => {
 										return data.carts[date]
-											? data.carts[date].length
+											? data.carts[date]
 											: 0;
 									}),
 									borderColor: '#6d78d8',
@@ -151,6 +168,18 @@ const CartAnalytics: React.FC = () => {
 									max: data.total.carts + 10,
 								},
 							},
+							plugins: {
+								tooltip: {
+									callbacks: {
+										label: function (context) {
+											return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
+										},
+										title: function (context) {
+											return `Carts: ${data.carts[data.data.dates[context[0].dataIndex]]}`;
+										},
+									},
+								},
+							},
 						}}
 						height={100}
 					/>
@@ -166,14 +195,13 @@ const CartAnalytics: React.FC = () => {
 				>
 					<Line
 						data={{
-							labels: map(data.dates.days, (date) => {
-								const newDate = new Date(date);
-								return newDate.getDate();
+							labels: map(data.data.dates, (date) => {
+								return formatDate(date, data.data.type);
 							}),
 							datasets: [
 								{
 									label: __('Revenue', 'quillcrm'),
-									data: map(data.dates.days, (date) => {
+									data: map(data.data.dates, (date) => {
 										return data.revenue[date]
 											? data.revenue[date]
 											: 0;
@@ -197,6 +225,18 @@ const CartAnalytics: React.FC = () => {
 										parseInt(
 											data.total.revenue.toString()
 										) + 10,
+								},
+							},
+							plugins: {
+								tooltip: {
+									callbacks: {
+										label: function (context) {
+											return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
+										},
+										title: function (context) {
+											return `Revenue: ${data.revenue[data.data.dates[context[0].dataIndex]]}`;
+										},
+									},
 								},
 							},
 						}}

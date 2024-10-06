@@ -4,6 +4,7 @@ export type ConfigData = Record<string, unknown> & {
 	initialPayload: InitialPayload;
 	blogName: string;
 	adminUrl: string;
+	siteUrl: string;
 	pluginDirUrl: string;
 	adminEmail: string;
 	ajaxUrl: string;
@@ -117,6 +118,7 @@ export type Goal = {
 			multiple?: boolean;
 		};
 	};
+	is_integration: boolean;
 };
 
 export type GoalsGroup = {

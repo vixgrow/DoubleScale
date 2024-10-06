@@ -26,34 +26,13 @@ class Remote_Data extends Integration_Remote_Data {
 	 * @var array
 	 */
 	protected $entities = array(
-		'lists',
-		'fields',
+		'lists'  => array(
+			'callback' => 'fetch_lists',
+		),
+		'fields' => array(
+			'callback' => 'fetch_fields',
+		),
 	);
-
-	/**
-	 * Get remote data
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @param string          $entity Entity.
-	 * @param int             $entity_id Entity ID.
-	 * @return array|WP_Error
-	 */
-	public function fetch( $request, $entity, $entity_id ) {
-		$result = array();
-
-		switch ( $entity ) {
-			case 'lists':
-				$result = $this->fetch_lists();
-				break;
-			case 'fields':
-				$result = $this->fetch_fields();
-				break;
-		}
-
-		return $result;
-	}
 
 	/**
 	 * Fetch lists.
@@ -67,8 +46,20 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_lists();
+		$result   = array();
 
-		return $response;
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data']['lists'] as $list ) {
+			$result[] = array(
+				'id'    => $list['listId'],
+				'label' => $list['name'],
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -83,7 +74,19 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_fields();
+		$result   = array();
 
-		return $response;
+		if ( ! $response['success'] ) {
+			return $result;
+		}
+
+		foreach ( $response['data'] as $field ) {
+			$result[] = array(
+				'label' => $field['label'],
+				'value' => $field['name'],
+			);
+		}
+
+		return $result;
 	}
 }

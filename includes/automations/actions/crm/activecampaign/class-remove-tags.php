@@ -71,7 +71,7 @@ class Remove_Tags extends Action {
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$tags = $step->get_setting( 'tags', array() );
-		error_log( wp_json_encode( $tags ) );
+
 		if ( empty( $tags ) ) {
 			return false;
 		}
@@ -88,7 +88,6 @@ class Remove_Tags extends Action {
 		}
 
 		$contact_id = $result['data']['contacts'][0]['id'] ?? null;
-		error_log( $contact_id );
 		if ( ! $contact_id ) {
 			return false;
 		}
@@ -122,6 +121,22 @@ class Remove_Tags extends Action {
 						'type' => 'string',
 					),
 				),
+			),
+		);
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'tags' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'Tags', 'quillcrm' ),
+				'endpoint' => 'activecampaign/tags',
+				'multiple' => true,
 			),
 		);
 	}

@@ -7,3 +7,5 @@ export { default as Fields } from './fields';
 export { default as Template } from './template';
 export { default as Filters } from './filters';
 export { default as Rule } from './rule';
+export { default as DateFilter } from './date-filter';
+export { default as ContactMappedFields } from './contact-mapped-fields';

@@ -114,6 +114,21 @@ class Remove_Subscriber_From_List extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'list_id' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'List', 'quillcrm' ),
+				'endpoint' => 'mautic/lists',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Remove_Subscriber_From_List() );

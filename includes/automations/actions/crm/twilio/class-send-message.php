@@ -184,6 +184,48 @@ class Send_Message extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'message'      => array(
+				'type'  => 'textarea',
+				'label' => __( 'Message', 'quillcrm' ),
+			),
+			'to'           => array(
+				'type'  => 'text',
+				'label' => __( 'To', 'quillcrm' ),
+			),
+			'media_url'    => array(
+				'type'  => 'text',
+				'label' => __( 'Media URL', 'quillcrm' ),
+			),
+			'add_utm'      => array(
+				'type'  => 'checkbox',
+				'label' => __( 'Add UTM', 'quillcrm' ),
+			),
+			'utm_source'   => array(
+				'type'  => 'text',
+				'label' => __( 'UTM Source', 'quillcrm' ),
+			),
+			'utm_medium'   => array(
+				'type'  => 'text',
+				'label' => __( 'UTM Medium', 'quillcrm' ),
+			),
+			'utm_campaign' => array(
+				'type'  => 'text',
+				'label' => __( 'UTM Campaign', 'quillcrm' ),
+			),
+			'utm_term'     => array(
+				'type'  => 'text',
+				'label' => __( 'UTM Term', 'quillcrm' ),
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Send_Message() );

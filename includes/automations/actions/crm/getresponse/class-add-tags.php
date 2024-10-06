@@ -126,6 +126,27 @@ class Add_Tags extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'tags'    => array(
+				'type'     => 'api_select',
+				'label'    => __( 'Tags', 'quillcrm' ),
+				'endpoint' => 'getresponse/tags',
+				'multiple' => true,
+			),
+			'list_id' => array(
+				'label'    => __( 'List ID', 'quillcrm' ),
+				'type'     => 'api_select',
+				'endpoint' => 'getresponse/lists',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Add_Tags() );

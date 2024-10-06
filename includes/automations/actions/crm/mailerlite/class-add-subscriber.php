@@ -77,10 +77,18 @@ class Add_Subscriber extends Action {
 	 * @return bool
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
-		$email      = $this->merge_tags_manager->process_merge_tags( $step->get_setting( 'email' ), $automation_contact );
-		$first_name = $this->merge_tags_manager->process_merge_tags( $step->get_setting( 'first_name' ), $automation_contact );
-		$last_name  = $this->merge_tags_manager->process_merge_tags( $step->get_setting( 'last_name' ), $automation_contact );
-		$data       = array(
+		$mapped_fields = $step->get_setting(
+			'mapped_fields',
+			array(
+				'email'      => '',
+				'first_name' => '',
+				'last_name'  => '',
+			)
+		);
+		$email         = $this->merge_tags_manager->process_merge_tags( $mapped_fields['email'], $automation_contact );
+		$first_name    = $this->merge_tags_manager->process_merge_tags( $mapped_fields['first_name'], $automation_contact );
+		$last_name     = $this->merge_tags_manager->process_merge_tags( $mapped_fields['last_name'], $automation_contact );
+		$data          = array(
 			'email'  => $email,
 			'fields' => array(
 				'first_name' => $first_name,
@@ -108,20 +116,47 @@ class Add_Subscriber extends Action {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'email'      => array(
-					'description' => __( 'Email', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
+				'mapped_fields' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'email'      => array(
+							'type'     => 'string',
+							'required' => true,
+						),
+						'first_name' => array(
+							'type'     => 'string',
+							'required' => false,
+						),
+						'last_name'  => array(
+							'type'     => 'string',
+							'required' => false,
+						),
+					),
 				),
-				'first_name' => array(
-					'description' => __( 'First Name', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-				),
-				'last_name'  => array(
-					'description' => __( 'Last Name', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
+			),
+		);
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'mapped_fields' => array(
+				'label'  => __( 'Mapped Fields', 'quillcrm' ),
+				'type'   => 'contact_mapped_fields',
+				'fields' => array(
+					'email'      => array(
+						'label' => __( 'Email', 'quillcrm' ),
+					),
+					'first_name' => array(
+						'label' => __( 'First Name', 'quillcrm' ),
+					),
+					'last_name'  => array(
+						'label' => __( 'Last Name', 'quillcrm' ),
+					),
 				),
 			),
 		);

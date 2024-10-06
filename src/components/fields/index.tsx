@@ -16,6 +16,12 @@ type FieldType = {
 		[key: string]: string;
 	};
 	multiple?: boolean;
+	fields?: {
+		[key: string]: {
+			label: string;
+		};
+	};
+	endpoint?: string;
 };
 
 type FieldsType = {
@@ -57,6 +63,9 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 						options={optionsArray(field)}
 						value={values?.[key]}
 						onChange={(value) => handleChange(key, value)}
+						fields={field.fields}
+						endpoint={field.endpoint}
+						multiple={field.multiple}
 					/>
 				);
 			})}

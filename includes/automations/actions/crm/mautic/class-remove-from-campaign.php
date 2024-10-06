@@ -114,6 +114,21 @@ class Remove_From_Campaign extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'campaign_id' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'Campaign', 'quillcrm' ),
+				'endpoint' => 'mautic/campaigns',
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Remove_From_Campaign() );

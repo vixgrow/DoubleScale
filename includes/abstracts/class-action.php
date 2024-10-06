@@ -76,6 +76,13 @@ abstract class Action {
 	public $merge_tags_manager;
 
 	/**
+	 * Is integration
+	 *
+	 * @var bool
+	 */
+	public $is_integration = false;
+
+	/**
 	 * Constructor
 	 *
 	 * @since 1.0.0

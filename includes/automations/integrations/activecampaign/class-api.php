@@ -124,6 +124,24 @@ class API extends Integration_API {
 	}
 
 	/**
+	 * Get lists
+	 *
+	 * @return array
+	 */
+	public function get_lists() {
+		return $this->get( 'lists' );
+	}
+
+	/**
+	 * Get tags
+	 *
+	 * @return array
+	 */
+	public function get_tags() {
+		return $this->get( 'tags' );
+	}
+
+	/**
 	 * Send request to the api.
 	 *
 	 * @param string      $method Method.

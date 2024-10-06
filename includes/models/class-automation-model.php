@@ -220,4 +220,23 @@ class Automation_Model extends Model {
 		$settings[ $key ] = $value;
 		$this->settings   = $settings;
 	}
+
+	/**
+	 * Boot
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function boot() {
+		parent::boot();
+
+		self::deleting(
+			function( $automation ) {
+				$automation->contacts()->delete();
+				$automation->steps()->delete();
+				$automation->processes()->delete();
+			}
+		);
+	}
 }

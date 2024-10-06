@@ -39,6 +39,7 @@ import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
 import { Filters, Field } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
+import ImportModal from '../import-modal';
 
 const { Column } = Table;
 
@@ -66,6 +67,7 @@ const ContactsList: React.FC = () => {
 		last_name: '',
 	});
 	const [isSaving, setIsSaving] = useState(false);
+	const [importModalVisible, setImportModalVisible] = useState(false);
 
 	if (isWooCommerceActive) {
 		defaultSelectedColumns.push('total_orders');
@@ -412,6 +414,12 @@ const ContactsList: React.FC = () => {
 					<Button type="primary" onClick={() => setVisible(true)}>
 						{__('Create Contact', 'quillcrm')}
 					</Button>
+					<Button
+						type="primary"
+						onClick={() => setImportModalVisible(true)}
+					>
+						{__('Import Contacts', 'quillcrm')}
+					</Button>
 				</Flex>
 			</Flex>
 			{showFilters && (
@@ -500,6 +508,10 @@ const ContactsList: React.FC = () => {
 					/>
 				</div>
 			</Modal>
+			<ImportModal
+				open={importModalVisible}
+				onClose={() => setImportModalVisible(false)}
+			/>
 		</div>
 	);
 };

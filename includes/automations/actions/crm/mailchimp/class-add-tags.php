@@ -126,6 +126,27 @@ class Add_Tags extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'list' => array(
+				'label'    => __( 'List ID', 'quillcrm' ),
+				'type'     => 'api_select',
+				'endpoint' => 'mailchimp/lists',
+			),
+			'tags' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'Tags', 'quillcrm' ),
+				'endpoint' => 'mailchimp/tags',
+				'multiple' => true,
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Add_Tags() );

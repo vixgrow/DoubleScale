@@ -11,6 +11,7 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Card, Flex, Skeleton, Typography } from 'antd';
+import dayjs from 'dayjs';
 import { UserOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import { map } from 'lodash';
 import {
@@ -43,17 +44,26 @@ ChartJS.register(
 import './style.scss';
 import type { ContactAnalytics as ContactAnalyticsData } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
+import { convertDate, formatDate } from '@quillcrm/utils';
+import { DateFilter } from '@quillcrm/components';
 
 const ContactAnalytics: React.FC = () => {
 	const [data, setData] = useState<ContactAnalyticsData | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [interval, setInterval] = useState<string>('today');
+	const [startDate, setStartDate] = useState<Date>(new Date());
+	const [endDate, setEndDate] = useState<Date>(new Date());
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchContactAnalytics = async () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts/analytics'),
+				path: addQueryArgs('/qc/v1/contacts/analytics', {
+					interval,
+					start_date: dayjs(startDate).format('YYYY-MM-DD'),
+					end_date: dayjs(endDate).format('YYYY-MM-DD'),
+				}),
 			})) as ContactAnalyticsData;
 
 			setData(response);
@@ -124,6 +134,17 @@ const ContactAnalytics: React.FC = () => {
 					</Flex>
 				</Card>
 			</Flex>
+			<Flex gap={20} align="flex-end">
+				<DateFilter
+					interval={interval}
+					startDate={startDate}
+					endDate={endDate}
+					onIntervalChange={(value) => setInterval(value)}
+					onChangeFromDate={(date) => setStartDate(date)}
+					onChangeToDate={(date) => setEndDate(date)}
+					onSubmit={fetchContactAnalytics}
+				/>
+			</Flex>
 			<Flex gap={20}>
 				<Card
 					title={__('Contact Analytics', 'quillcrm')}
@@ -136,16 +157,15 @@ const ContactAnalytics: React.FC = () => {
 				>
 					<Line
 						data={{
-							labels: map(data.dates.days, (date) => {
-								const newDate = new Date(date);
-								return newDate.getDate();
+							labels: map(data.data.dates, (date) => {
+								return formatDate(date, data.data.type);
 							}),
 							datasets: [
 								{
 									label: __('Contacts', 'quillcrm'),
-									data: map(data.dates.days, (date) => {
+									data: map(data.data.dates, (date) => {
 										return data.contacts[date]
-											? data.contacts[date].length
+											? data.contacts[date]
 											: 0;
 									}),
 									borderColor: '#6d78d8',
@@ -163,6 +183,18 @@ const ContactAnalytics: React.FC = () => {
 								y: {
 									beginAtZero: true,
 									max: parseInt(data.total) + 10,
+								},
+							},
+							plugins: {
+								tooltip: {
+									callbacks: {
+										label: function (context) {
+											return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
+										},
+										title: function (context) {
+											return `Contacts: ${data.contacts[data.data.dates[context[0].dataIndex]]}`;
+										},
+									},
 								},
 							},
 						}}

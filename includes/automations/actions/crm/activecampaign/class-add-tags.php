@@ -59,6 +59,13 @@ class Add_Tags extends Action {
 	public $description = 'This action will add tags to a contact in ActiveCampaign.';
 
 	/**
+	 * Is integration
+	 *
+	 * @var bool
+	 */
+	public $is_integration = true;
+
+	/**
 	 * Process Action
 	 *
 	 * @since 1.0.0
@@ -121,6 +128,22 @@ class Add_Tags extends Action {
 						'type' => 'string',
 					),
 				),
+			),
+		);
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'tag' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'Tags', 'quillcrm' ),
+				'endpoint' => 'activecampaign/tags',
+				'multiple' => true,
 			),
 		);
 	}

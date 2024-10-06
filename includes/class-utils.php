@@ -12,6 +12,9 @@ namespace QuillCRM;
 
 use QuillCRM\Models\Custom_Fields_Group_Model;
 use QuillCRM\Models\Custom_Field_Model;
+use DateInterval;
+use DatePeriod;
+use DateTime;
 
 /**
  * Utils class
@@ -194,5 +197,221 @@ class Utils {
 		}
 
 		return $fields;
+	}
+
+	/**
+	 * Get days/months between two dates
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $start_date Start date.
+	 * @param string $end_date End date.
+	 *
+	 * @return array
+	 */
+	public static function get_dates_between_dates( $start_date, $end_date ) {
+		// First check if days > 30 return months.
+		$days  = self::get_days_count_between_dates( $start_date, $end_date );
+		$dates = array(
+			'dates' => array(),
+			'type'  => 'day',
+		);
+
+		if ( $days > 30 ) {
+			$dates = array(
+				'dates' => self::get_months_between_dates( $start_date, $end_date ),
+				'type'  => 'month',
+			);
+		} elseif ( $days === 0 ) {
+			$dates = array(
+				'dates' => self::get_day_hours_between_dates( $start_date ),
+				'type'  => 'hour',
+			);
+		} else {
+			$dates = array(
+				'dates' => self::get_days_between_dates( $start_date, $end_date ),
+				'type'  => 'day',
+			);
+		}
+
+		return $dates;
+	}
+
+	/**
+	 * Get days between two dates
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $start_date Start date.
+	 * @param string $end_date End date.
+	 *
+	 * @return int
+	 */
+	public static function get_days_count_between_dates( $start_date, $end_date ) {
+		$datetime1 = new DateTime( $start_date );
+		$datetime2 = new DateTime( $end_date );
+		$interval  = $datetime1->diff( $datetime2 );
+
+		return $interval->days;
+	}
+
+	/**
+	 * Get days between two dates
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $start_date Start date.
+	 * @param string $end_date End date.
+	 *
+	 * @return array
+	 */
+	public static function get_days_between_dates( $start_date, $end_date ) {
+		$dates = array();
+
+		$start_date = new DateTime( $start_date );
+		$end_date   = new DateTime( $end_date );
+
+		$end_date->modify( '+1 day' );
+
+		$interval  = new DateInterval( 'P1D' );
+		$daterange = new DatePeriod( $start_date, $interval, $end_date );
+
+		foreach ( $daterange as $date ) {
+			$dates[] = $date->format( 'Y-m-d' );
+		}
+
+		return $dates;
+	}
+
+	/**
+	 * Get months between two dates
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $start_date Start date.
+	 * @param string $end_date End date.
+	 *
+	 * @return array
+	 */
+	public static function get_months_between_dates( $start_date, $end_date ) {
+		$dates = array();
+
+		$start_date = new DateTime( $start_date );
+		$end_date   = new DateTime( $end_date );
+
+		$end_date->modify( '+1 month' );
+
+		$interval  = new DateInterval( 'P1M' );
+		$daterange = new DatePeriod( $start_date, $interval, $end_date );
+
+		foreach ( $daterange as $date ) {
+			$dates[] = $date->format( 'Y-m-d' );
+		}
+
+		return $dates;
+	}
+
+	/**
+	 * Get day hours between two dates
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $date date.
+	 *
+	 * @return array
+	 */
+	public static function get_day_hours_between_dates( $date ) {
+		$dates = array();
+
+		// Get day hours.
+		for ( $i = 0; $i < 24; $i++ ) {
+			$dates[] = $date . ' ' . $i . ':00:00';
+		}
+
+		return $dates;
+	}
+
+	/**
+	 * Get start date
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $interval Interval.
+	 * @param string $start_date Start date.
+	 *
+	 * @return string
+	 */
+	public static function get_start_date( $interval, $start_date ) {
+		$start_date = '';
+		switch ( $interval ) {
+			case 'today':
+				$start_date = date( 'Y-m-d' );
+				break;
+			case 'yesterday':
+				$start_date = date( 'Y-m-d', strtotime( '-1 day' ) );
+				break;
+			case 'last_7_days':
+				$start_date = date( 'Y-m-d', strtotime( '-7 days' ) );
+				break;
+			case 'last_30_days':
+				$start_date = date( 'Y-m-d', strtotime( '-30 days' ) );
+				break;
+			case 'this_month':
+				$start_date = date( 'Y-m-01' );
+				break;
+			case 'last_month':
+				$start_date = date( 'Y-m-01', strtotime( 'first day of last month' ) );
+				break;
+			case 'this_year':
+				$start_date = date( 'Y-01-01' );
+				break;
+			case 'last_year':
+				$start_date = date( 'Y-01-01', strtotime( 'first day of last year' ) );
+				break;
+		}
+
+		return $start_date;
+	}
+
+	/**
+	 * Get end date
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $interval Interval.
+	 * @param string $end_date End date.
+	 *
+	 * @return string
+	 */
+	public static function get_end_date( $interval, $end_date ) {
+		$end_date = '';
+		switch ( $interval ) {
+			case 'today':
+				$end_date = date( 'Y-m-d' );
+				break;
+			case 'yesterday':
+				$end_date = date( 'Y-m-d', strtotime( '-1 day' ) );
+				break;
+			case 'last_7_days':
+				$end_date = date( 'Y-m-d' );
+				break;
+			case 'last_30_days':
+				$end_date = date( 'Y-m-d' );
+				break;
+			case 'this_month':
+				$end_date = date( 'Y-m-t' );
+				break;
+			case 'last_month':
+				$end_date = date( 'Y-m-t', strtotime( 'last day of last month' ) );
+				break;
+			case 'this_year':
+				$end_date = date( 'Y-12-31' );
+				break;
+			case 'last_year':
+				$end_date = date( 'Y-12-31', strtotime( 'last day of last year' ) );
+				break;
+		}
+
+		return $end_date;
 	}
 }

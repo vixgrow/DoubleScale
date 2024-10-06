@@ -108,6 +108,25 @@ class Send_To_Channel extends Action {
 			),
 		);
 	}
+
+	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'channel' => array(
+				'type'     => 'api_select',
+				'label'    => __( 'Channel', 'quillcrm' ),
+				'endpoint' => 'slack/channels',
+			),
+			'message' => array(
+				'type'  => 'textarea',
+				'label' => __( 'Message', 'quillcrm' ),
+			),
+		);
+	}
 }
 
 Actions_Manager::instance()->register( new Send_To_Channel() );

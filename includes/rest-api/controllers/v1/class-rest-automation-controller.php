@@ -526,14 +526,17 @@ class Rest_Automation_Controller extends REST_Controller {
 	public function get_item( $request ) {
 		try {
 			$id         = $request->get_param( 'id' );
-			$automation = Automation_Model::find( $id );
+			$automation = Automation_Model::with(
+				array(
+					'steps' => function ( $query ) {
+						$query->where( 'status', 'active' );
+					},
+				)
+			)->find( $id );
 
 			if ( ! $automation ) {
 				return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
 			}
-
-			// Get the automation with its steps.
-			$automation->load( 'steps' );
 
 			return new WP_REST_Response( $automation, 200 );
 		} catch ( \Exception $e ) {
@@ -612,7 +615,8 @@ class Rest_Automation_Controller extends REST_Controller {
 					throw new \Exception( 'Step not found.' );
 				}
 
-				$step->delete();
+				$step->status = 'deleted';
+				$step->save();
 			}
 
 			if ( ! empty( $updated_steps ) ) {
@@ -627,7 +631,14 @@ class Rest_Automation_Controller extends REST_Controller {
 				}
 			}
 
-			$automation = Automation_Model::with( 'steps' )->find( $id );
+			// Get the automation with its steps.
+			$automation->load(
+				array(
+					'steps' => function ( $query ) {
+						$query->where( 'status', 'active' );
+					},
+				)
+			);
 
 			return new WP_REST_Response( $automation, 200 );
 		} catch ( \Exception $e ) {

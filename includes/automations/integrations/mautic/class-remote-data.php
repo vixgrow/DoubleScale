@@ -26,42 +26,19 @@ class Remote_Data extends Integration_Remote_Data {
 	 * @var array
 	 */
 	protected $entities = array(
-		'tags',
-		'fields',
-		'lists',
-		'campaigns',
+		'tags'      => array(
+			'callback' => 'fetch_tags',
+		),
+		'fields'    => array(
+			'callback' => 'fetch_fields',
+		),
+		'lists'     => array(
+			'callback' => 'fetch_lists',
+		),
+		'campaigns' => array(
+			'callback' => 'fetch_campaigns',
+		),
 	);
-
-	/**
-	 * Get remote data
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request.
-	 * @param string          $entity Entity.
-	 * @param int             $entity_id Entity ID.
-	 * @return array|WP_Error
-	 */
-	public function fetch( $request, $entity, $entity_id ) {
-		$result = array();
-
-		switch ( $entity ) {
-			case 'tags':
-				$result = $this->fetch_tags();
-				break;
-			case 'fields':
-				$result = $this->fetch_fields();
-				break;
-			case 'lists':
-				$result = $this->fetch_lists();
-				break;
-			case 'campaigns':
-				$result = $this->fetch_campaigns();
-				break;
-		}
-
-		return $result;
-	}
 
 	/**
 	 * Fetch tags.
@@ -75,8 +52,16 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_tags();
+		$result   = array();
 
-		return $response;
+		foreach ( $response['data']['tags'] as $group ) {
+			$result[] = array(
+				'value' => $group['id'],
+				'label' => $group['tag'],
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -91,8 +76,16 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_fields();
+		$result   = array();
 
-		return $response;
+		foreach ( $response['data']['fields'] as $field ) {
+			$result[] = array(
+				'label' => $field['label'],
+				'value' => $field['alias'],
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -107,8 +100,16 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_lists();
+		$result   = array();
 
-		return $response;
+		foreach ( $response['data']['lists'] as $list ) {
+			$result[] = array(
+				'label' => $list['name'],
+				'value' => $list['id'],
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -123,7 +124,15 @@ class Remote_Data extends Integration_Remote_Data {
 			return array();
 		}
 		$response = $api->get_campaigns();
+		$result   = array();
 
-		return $response;
+		foreach ( $response['data']['campaigns'] as $key => $campaign ) {
+			$result[] = array(
+				'label' => $campaign['name'],
+				'value' => $campaign['id'],
+			);
+		}
+
+		return $result;
 	}
 }

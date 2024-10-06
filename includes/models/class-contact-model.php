@@ -339,5 +339,12 @@ class Contact_Model extends Model {
 				}
 			);
 		}
+
+		// Save templates when saving the campaign
+		static::saving(
+			function( $contact ) {
+				unset( $contact->revenue );
+			}
+		);
 	}
 }

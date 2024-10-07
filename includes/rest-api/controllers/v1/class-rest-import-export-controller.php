@@ -16,6 +16,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Import_Export\Import;
+use QuillCRM\Import_Export\Security;
 
 /**
  * Import_Export Controller
@@ -61,15 +62,37 @@ class Rest_Import_Export_Controller extends REST_Controller {
 					'callback'            => array( $this, 'import' ),
 					'permission_callback' => array( $this, 'import_export_permissions_check' ),
 					'args'                => array(
-						'source' => array(
+						'source'    => array(
 							'required' => true,
 							'type'     => 'string',
 						),
-						'offset' => array(
+						'offset'    => array(
 							'required' => false,
 							'type'     => 'integer',
 						),
+						'file_name' => array(
+							'required' => false,
+							'type'     => 'string',
+						),
+						'mapping'   => array(
+							'required'             => false,
+							'type'                 => 'object',
+							'additionalProperties' => true,
+						),
 					),
+				),
+			)
+		);
+
+		// Upload and analyze file
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/upload",
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'upload' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
 				),
 			)
 		);
@@ -98,6 +121,73 @@ class Rest_Import_Export_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Upload
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function upload( $request ) {
+		$file = $request->get_file_params();
+		if ( ! $file ) {
+			return new WP_Error( 'no_file', 'No file provided', array( 'status' => 400 ) );
+		}
+
+		// WP Filesystem.
+		global $wp_filesystem;
+
+		// Check if WP Filesystem is loaded.
+		if ( empty( $wp_filesystem ) ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
+		if ( ! Security::prepare_upload_dir() ) {
+			return new WP_Error( 'filesystem_error', 'Failed to create upload directory', array( 'status' => 500 ) );
+		}
+
+		$upload_dir = Security::get_upload_dir();
+		$file_name  = time() . '_' . $file['file']['name'];
+		$file_path  = $upload_dir . '/' . $file_name;
+
+		if ( ! $wp_filesystem->move( $file['file']['tmp_name'], $file_path ) ) {
+			return new WP_Error( 'move_error', 'Failed to move file', array( 'status' => 500 ) );
+		}
+
+		$header_columns = $this->get_header_columns( $file_path );
+
+		return new WP_REST_Response(
+			array(
+				'file_name'      => $file_name,
+				'header_columns' => $header_columns,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Get header columns
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $file_path File path.
+	 *
+	 * @return array
+	 */
+	public function get_header_columns( $file_path ) {
+		if ( ( $handle = fopen( $file_path, 'r' ) ) !== false ) {
+			$column_names = fgetcsv( $handle );
+			fclose( $handle );
+
+			return $column_names;
+		} else {
+			return null;
+		}
+	}
+
+	/**
 	 * Import
 	 *
 	 * @since 1.0.0
@@ -107,13 +197,17 @@ class Rest_Import_Export_Controller extends REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function import( $request ) {
-		$source = $request->get_param( 'source' ) ?? 'csv';
-		$offset = $request->get_param( 'offset' ) ?? 0;
-		$result = array();
+		$source    = $request->get_param( 'source' ) ?? 'csv';
+		$offset    = $request->get_param( 'offset' ) ?? 0;
+		$file_name = $request->get_param( 'file_name' ) ?? '';
+		$mapping   = $request->get_param( 'mapping' ) ?? array();
+		$result    = array();
 
-		if ( 'fluentcrm' === $source ) {
-			$exporter = new Import();
-			$result   = $exporter->import_from_fluentcrm( $offset );
+		$exporter = new Import();
+		if ( 'csv' === $source ) {
+			$result = $exporter->import_from_csv( $file_name, $mapping, $offset );
+		} else {
+			$result = $exporter->import( $source, $offset );
 		}
 
 		return new WP_REST_Response( $result, 200 );

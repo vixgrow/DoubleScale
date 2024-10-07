@@ -4,7 +4,8 @@
         "composer/installers": "~1.0",
         "woocommerce/action-scheduler": "^3.2",
         "tareq1988/wp-eloquent": "dev-master",
-        "illuminate/events": "^5.4"
+        "illuminate/events": "^5.4",
+        "league/csv": "9.0.0"
     },
     "config": {
         "allow-plugins": {

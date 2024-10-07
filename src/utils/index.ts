@@ -60,8 +60,12 @@ export const getTrigger = (trigger: string): Trigger => {
 };
 
 export const convertDate = (date: string) => {
-	// Convert to be like April 20, 2021
 	const dateObj = new Date(date);
+
+	if (isNaN(dateObj.getTime())) {
+		return null;
+	}
+
 	return dateObj.toLocaleDateString(undefined, {
 		year: 'numeric',
 		month: 'long',

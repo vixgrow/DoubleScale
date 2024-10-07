@@ -13,6 +13,9 @@ namespace QuillCRM\Import_Export;
 
 use QuillCRM\Utils;
 use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\User_Model;
+use League\Csv\Reader;
+use League\Csv\Statement;
 
 /**
  * Import class
@@ -49,48 +52,205 @@ class Import {
 	}
 
 	/**
+	 * Import
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $source Source
+	 * @param int    $offset Offset
+	 *
+	 * @return array
+	 */
+	public function import( $source, $offset = 0 ) {
+		switch ( $source ) {
+			case 'fluentcrm':
+				return $this->import_from_fluentcrm( $offset );
+			case 'wpfunnelkit':
+				return $this->import_from_wpfunnels( $offset );
+			case 'wc':
+				return $this->import_from_woocommerce( $offset );
+			case 'wpusers':
+				return $this->import_from_wordpress_users( $offset );
+		}
+	}
+
+	/**
 	 * Import from fluentCRM
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param int $offset Offset
-	 * @param int $limit Limit
 	 *
 	 * @return array
 	 */
-	public function import_from_fluentcrm( $offset = 0, $limit = 20 ) {
+	public function import_from_fluentcrm( $offset = 0 ) {
 		global $wpdb;
 
 		$this->start_time = microtime( true );
 		$table_name       = $wpdb->prefix . 'fc_subscribers';
 		$total            = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
+		$mapping          = array(
+			'first_name' => 'first_name',
+			'last_name'  => 'last_name',
+			'email'      => 'email',
+			'phone'      => 'phone',
+			'address_1'  => 'address_line_1',
+			'address_2'  => 'address_line_2',
+			'city'       => 'city',
+			'state'      => 'state',
+			'zip'        => 'postal_code',
+			'country'    => 'country',
+		);
 
-		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
-			// Usleep is used to prevent the server from crashing
-			usleep( 1000000 );
+		$result = $this->import_with_offset(
+			$total,
+			$offset,
+			function( $offset ) use ( $wpdb, $table_name ) {
+				return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name LIMIT %d, 20", $offset ) );
+			},
+			$mapping
+		);
 
-			$subscribers = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name LIMIT %d, %d", $offset, $limit ) );
-			if ( empty( $subscribers ) ) {
-				break;
-			}
+		return $result;
+	}
 
-			foreach ( $subscribers as $subscriber ) {
-				$this->import_contact( $subscriber );
-				$offset++;
-			}
+	/**
+	 * Import from WPFunnels
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $offset Offset
+	 *
+	 * @return array
+	 */
+	public function import_from_wpfunnels( $offset = 0 ) {
+		global $wpdb;
 
-			// Check if offset is greater than or equal to total
-			if ( $offset >= $total ) {
-				break;
-			}
+		$this->start_time = microtime( true );
+		$table_name       = $wpdb->prefix . 'bwf_contact';
+		$total            = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
+		$mapping          = array(
+			'first_name' => 'f_name',
+			'last_name'  => 'l_name',
+			'email'      => 'email',
+			'state'      => 'state',
+			'country'    => 'country',
+		);
+
+		$result = $this->import_with_offset(
+			$total,
+			$offset,
+			function( $offset ) use ( $wpdb, $table_name ) {
+				return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name LIMIT %d, 20", $offset ) );
+			},
+			$mapping
+		);
+
+		return $result;
+	}
+
+	/**
+	 * Import from WooCommerce
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $offset Offset
+	 *
+	 * @return array
+	 */
+	public function import_from_woocommerce( $offset = 0 ) {
+		global $wpdb;
+
+		$this->start_time = microtime( true );
+		$table_name       = $wpdb->prefix . 'wc_customer_lookup';
+		$total            = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
+		$mapping          = array(
+			'first_name' => 'first_name',
+			'last_name'  => 'last_name',
+			'email'      => 'email',
+			'city'       => 'city',
+			'state'      => 'state',
+			'zip'        => 'postcode',
+			'country'    => 'country',
+		);
+
+		$result = $this->import_with_offset(
+			$total,
+			$offset,
+			function( $offset ) use ( $wpdb, $table_name ) {
+				return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name LIMIT %d, 20", $offset ) );
+			},
+			$mapping
+		);
+
+		return $result;
+	}
+
+	/**
+	 * Import WordPress users
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $offset Offset
+	 *
+	 * @return array
+	 */
+	public function import_from_wordpress_users( $offset = 0 ) {
+
+		$this->start_time = microtime( true );
+		$total            = User_Model::count();
+
+		$mapping = array(
+			'email' => 'user_email',
+		);
+
+		$result = $this->import_with_offset(
+			$total,
+			$offset,
+			function( $offset ) {
+				return User_Model::offset( $offset )->limit( 20 )->get();
+			},
+			$mapping
+		);
+
+		return $result;
+	}
+
+	/**
+	 * Import from csv
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $file_name File name
+	 * @param array $mapping Mapping
+	 * @param int   $offset Offset
+	 *
+	 * @return array
+	 */
+	public function import_from_csv( $file_name, $mapping, $offset = 0 ) {
+		$this->start_time = microtime( true );
+		$mapping          = array_flip( $mapping );
+		$file_path        = wp_upload_dir()['basedir'] . '/QuillCRM/Import-Export/' . $file_name;
+		$csv              = Reader::createFromPath( $file_path, 'r' );
+		$csv->setHeaderOffset( 0 );
+		$total = count( $csv );
+
+		$result = $this->import_with_offset(
+			$total,
+			$offset,
+			function( $offset ) use ( $csv ) {
+				$stmt        = ( new Statement() )->offset( $offset )->limit( 20 );
+				$subscribers = $stmt->process( $csv );
+				return $subscribers;
+			},
+			$mapping
+		);
+
+		if ( 'completed' === $result['status'] ) {
+			unlink( $file_path );
 		}
 
-		$status = $offset >= $total ? 'completed' : 'in_progress';
-		return array(
-			'offset' => $offset,
-			'status' => $status,
-			'total'  => $total,
-		);
+		return $result;
 	}
 
 	/**
@@ -99,28 +259,23 @@ class Import {
 	 * @since 1.0.0
 	 *
 	 * @param object $subscriber Subscriber
+	 * @param array  $mapping Mapping
 	 *
 	 * @return bool
 	 */
-	public function import_contact( $subscriber ) {
+	public function import_contact( $subscriber, $mapping ) {
 		try {
 			// Check if the contact already exists
-			$contact = Contact_Model::where( 'email', $subscriber->email )->first();
+			$email   = is_object( $subscriber ) ? $subscriber->{$mapping['email']} : $subscriber[ $mapping['email'] ];
+			$contact = Contact_Model::where( 'email', $email )->first();
 			if ( $contact ) {
 				return;
 			}
 
-			$contact             = new Contact_Model();
-			$contact->first_name = $subscriber->first_name;
-			$contact->last_name  = $subscriber->last_name;
-			$contact->email      = $subscriber->email;
-			$contact->phone      = $subscriber->phone;
-			$contact->address_1  = $subscriber->address_line_1;
-			$contact->address_2  = $subscriber->address_line_2;
-			$contact->city       = $subscriber->city;
-			$contact->state      = $subscriber->state;
-			$contact->zip        = $subscriber->postal_code;
-			$contact->country    = $subscriber->country;
+			$contact = new Contact_Model();
+			foreach ( $mapping as $key => $value ) {
+				$contact->$key = is_object( $subscriber ) ? $subscriber->$value : $subscriber[ $value ];
+			}
 			$contact->save();
 		} catch ( \Exception $e ) {
 			return new \WP_Error( 'import_failed', $e->getMessage() );
@@ -134,5 +289,44 @@ class Import {
 	 */
 	public function get_current_execution_time() {
 		return microtime( true ) - $this->start_time;
+	}
+
+	/**
+	 * Import with offset
+	 *
+	 * @param int      $total
+	 * @param int      $offset
+	 * @param callable $get_subscribers_callback
+	 * @param array    $mapping
+	 * @return array
+	 */
+	private function import_with_offset( $total, $offset, $get_subscribers_callback, $mapping ) {
+		while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
+			// Usleep is used to prevent the server from crashing
+			usleep( 1000000 );
+
+			$subscribers = $get_subscribers_callback( $offset );
+			if ( empty( $subscribers ) ) {
+				break;
+			}
+
+			foreach ( $subscribers as $subscriber ) {
+				$this->import_contact( $subscriber, $mapping );
+				$offset++;
+			}
+
+			// Check if offset is greater than or equal to total
+			if ( $offset >= $total ) {
+				break;
+			}
+		}
+
+		$result = array(
+			'offset' => $offset,
+			'status' => $offset >= $total ? 'completed' : 'in_progress',
+			'total'  => $total,
+		);
+
+		return $result;
 	}
 }

@@ -37,7 +37,7 @@ class Utils {
 			}
 		}
 
-		return apply_filters( 'quillcrm_max_execution_time', $max_execution_time );
+		return apply_filters( 'quillcrm_max_execution_time', 0.005 );
 	}
 
 	/**

@@ -305,7 +305,7 @@ const ContactsList: React.FC = () => {
 				return (
 					<>
 						{details.lastOrderDate
-							? convertDate(details.lastOrderDate)
+							? convertDate(details.lastOrderDate) || '-'
 							: '-'}
 					</>
 				);
@@ -511,6 +511,7 @@ const ContactsList: React.FC = () => {
 			<ImportModal
 				open={importModalVisible}
 				onClose={() => setImportModalVisible(false)}
+				onCompleted={() => fetchContacts()}
 			/>
 		</div>
 	);

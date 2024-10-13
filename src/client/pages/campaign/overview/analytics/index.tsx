@@ -65,6 +65,8 @@ const Analytics: React.FC = () => {
 			return () => {
 				clearTimeout(timeout);
 			};
+		} else {
+			fetchCampaign();
 		}
 	}, [campaign]);
 

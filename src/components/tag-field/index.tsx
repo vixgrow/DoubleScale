@@ -37,8 +37,8 @@ const TagField = ({ value, onChange }: Props) => {
 			})) as TagsResponse;
 
 			setSavedTags([...savedTags, ...response.data]);
-
-			return response.data.map((tag: Tag) => ({
+			const tags = response.data;
+			return tags.map((tag: Tag) => ({
 				label: tag.name,
 				value: tag.id,
 			}));
@@ -64,14 +64,27 @@ const TagField = ({ value, onChange }: Props) => {
 								callback(data);
 							});
 						}}
+						defaultOptions
+						value={''}
 						onChange={(val) => {
 							if (!isObject(val)) {
 								return;
 							}
+
+							if (value.includes(val.value)) {
+								return;
+							}
+
 							const newTags = [...value, val.value];
 							onChange(newTags);
 						}}
 						placeholder={__('Select tag', 'quillcrm')}
+						styles={{
+							control: (styles) => ({
+								...styles,
+								minWidth: 200,
+							}),
+						}}
 					/>
 					{value && (
 						<Flex gap={10}>

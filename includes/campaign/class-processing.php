@@ -122,12 +122,16 @@ class Processing {
 
 		try {
 			// Get first campaign with status 'processing'
-			$campaign = Campaign_Model::where( 'status', 'processing' )->orWhere( 'status', 'scheduled' )->where( 'execute_at', '<=', current_time( 'mysql' ) )
+			$campaign = Campaign_Model::where( 'status', 'processing' )->orWhere( 'status', 'schedule' )->whereDate( 'execute_at', '<=', date( 'Y-m-d H:i:s' ) )
 			->firstOrFail();
 
-			// $last_contact_offset = get_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
+			if ( 'schedule' === $campaign->status ) {
+				$campaign->status = 'processing';
+				$campaign->save();
+			}
+
+			$last_contact_offset = get_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
 			$filters             = $campaign->get_setting( 'filters', array() );
-			$last_contact_offset = 0;
 			$campaign_recipients = Contact_Model::where( 'status', 'subscribed' );
 
 			if ( ! empty( $filters ) ) {
@@ -155,7 +159,7 @@ class Processing {
 				if ( $last_contact_offset >= $campaign_recipients ) {
 					$campaign->status = 'completed';
 					$campaign->save();
-					update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", 0 );
+					update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", $campaign_recipients );
 					break;
 				}
 

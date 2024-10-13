@@ -23,7 +23,7 @@ import type { Template as TemplateType } from '@quillcrm/client';
 import { isEmail } from 'validator';
 
 const Templates: React.FC = () => {
-	const { campaign, isLoading, saveCampaign, isSaving, updateSettings } =
+	const { campaign, isLoading, saveCampaign, isSaving } =
 		useCampaignContext();
 	const navigate = useNavigate();
 	const adminEmail = ConfigAPI.getAdminEmail();
@@ -61,7 +61,7 @@ const Templates: React.FC = () => {
 
 		const newTemplates = templates ? [...templates] : [];
 		newTemplates.push(defaultTemplate);
-		updateSettings('templates', newTemplates);
+		setTemplates(newTemplates);
 		setCurrentTab(newTemplates.length - 1);
 	};
 
@@ -72,7 +72,7 @@ const Templates: React.FC = () => {
 
 		const newTemplates = templates ? [...templates] : [];
 		newTemplates.splice(index, 1);
-		updateSettings('templates', newTemplates);
+		setTemplates(newTemplates);
 		setCurrentTab(0);
 	};
 
@@ -92,7 +92,7 @@ const Templates: React.FC = () => {
 					...data,
 				};
 
-		updateSettings('templates', newTemplates);
+		setTemplates(newTemplates);
 	};
 
 	const save = async () => {

@@ -91,6 +91,27 @@ const Campaign: React.FC = () => {
 		}
 	};
 
+	const canGoNext = (nextTab: string) => {
+		if (!campaign) {
+			return false;
+		}
+
+		let canGo = true;
+
+		switch (nextTab) {
+			case 'template':
+				canGo = campaign?.name;
+				break;
+			case 'contacts':
+			case 'review':
+				canGo =
+					campaign.settings?.templates?.length > 0 && campaign?.name;
+				break;
+		}
+
+		return canGo;
+	};
+
 	// Switch to the new tab items
 	const tabItems = [
 		{
@@ -114,6 +135,7 @@ const Campaign: React.FC = () => {
 				) : (
 					<InfoCircleOutlined />
 				),
+			disabled: !canGoNext('template'),
 		},
 		{
 			key: 'contacts',
@@ -125,6 +147,7 @@ const Campaign: React.FC = () => {
 				) : (
 					<InfoCircleOutlined />
 				),
+			disabled: !canGoNext('contacts'),
 		},
 		{
 			key: 'review',
@@ -136,32 +159,13 @@ const Campaign: React.FC = () => {
 				) : (
 					<InfoCircleOutlined />
 				),
+			disabled: !canGoNext('review'),
 		},
 	];
 
 	if (!campaign) {
 		return <Skeleton active />;
 	}
-
-	const canGoNext = (nextTab: string) => {
-		if (!campaign) {
-			return false;
-		}
-
-		let canGo = true;
-
-		switch (nextTab) {
-			case 'template':
-				canGo = campaign?.name;
-				break;
-			case 'contacts':
-			case 'review':
-				canGo = campaign?.templates?.length > 0;
-				break;
-		}
-
-		return canGo;
-	};
 
 	const isOverview =
 		(campaign.status === 'schedule' && tab === 'overview') ||

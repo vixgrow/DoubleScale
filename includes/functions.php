@@ -7,6 +7,7 @@
  *
  * @package QuillCRM
  */
+use QuillCRM\QuillCRM;
 
 /**
  * Helper function to sanitize a string from user input or from the db
@@ -188,4 +189,15 @@ function quillcrm_get_country_name( $country_code ) {
 	$name      = $countries[ $country_code ]['name'] ?? '';
 
 	return $name;
+}
+
+/**
+ * Get validator
+ *
+ * @since 1.0.0
+ *
+ * @return object
+ */
+function quillcrm_validator() {
+	return QuillCRM::instance()->validator;
 }

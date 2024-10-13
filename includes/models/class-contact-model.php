@@ -19,7 +19,6 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\User_Model;
 use QuillCRM\Models\Campaign_Email_Model;
 use QuillCRM\Models\WC_Order_Model;
-use QuillCRM\Utils;
 
 /**
  * Contact_Model class
@@ -76,6 +75,33 @@ class Contact_Model extends Model {
 	 * @since 1.0.0
 	 */
 	public $timestamps = true;
+
+	/**
+	 * Rules
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public $rules = array(
+		'email' => 'required|email',
+		'phone' => 'nullable|regex:/^\+?[0-9]+$/',
+		'zip'   => 'nullable|numeric',
+	);
+
+	/**
+	 * Messages
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public $messages = array(
+		'email.required' => 'Contact email field is required.',
+		'email.email'    => 'Invalid email address.',
+		'phone.regex'    => 'Invalid phone number.',
+		'zip.numeric'    => 'Invalid zip code.',
+	);
 
 	/**
 	 * Get the contact lists
@@ -192,23 +218,6 @@ class Contact_Model extends Model {
 	 */
 	public function processes() {
 		return $this->hasMany( Automation_Contact_Process_Model::class, 'contact_id', 'id' );
-	}
-
-	/**
-	 * Override the save method to add validation.
-	 *
-	 * @param array $options
-	 * @return bool
-	 * @throws \Exception
-	 */
-	public function save( array $options = array() ) {
-		// Check if the email field is empty
-		if ( empty( $this->email ) ) {
-			throw new \Exception( 'Email field is required.' );
-		}
-
-		// Call the parent save method to perform the actual saving
-		return parent::save( $options );
 	}
 
 	/**

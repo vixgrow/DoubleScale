@@ -23,6 +23,7 @@ import {
 } from 'antd';
 import { UserOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { map } from 'lodash';
+import { isEmail } from 'validator';
 
 /**
  * Internal dependencies
@@ -40,6 +41,7 @@ import { convertDate } from '@quillcrm/utils';
 import { Filters, Field } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
 import ImportModal from '../import-modal';
+import { ListField, TagField } from '@quillcrm/components';
 
 const { Column } = Table;
 
@@ -50,6 +52,8 @@ const ContactsList: React.FC = () => {
 	const [total, setTotal] = useState(0);
 	const [data, setData] = useState<Contact[]>([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+	const [selectedLists, setSelectedLists] = useState<number[]>([]);
+	const [selectedTags, setSelectedTags] = useState<number[]>([]);
 	const { createNotice } = useDispatch('quillcrm/core');
 	const isWooCommerceActive = ConfigAPI.isWoocommerceActive();
 	const defaultSelectedColumns = [
@@ -93,7 +97,16 @@ const ContactsList: React.FC = () => {
 	const [visible, setVisible] = useState(false);
 
 	const createContact = async () => {
+		if (!isEmail(contact.email)) {
+			createNotice({
+				type: 'error',
+				message: __('Invalid email', 'quillcrm'),
+			});
+			return;
+		}
+
 		setIsSaving(true);
+
 		try {
 			const response = (await apiFetch({
 				path: '/qc/v1/contacts',
@@ -102,7 +115,7 @@ const ContactsList: React.FC = () => {
 			})) as Contact;
 
 			navigate(getToLink(`contacts/${response.id}`));
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
 				message:
@@ -134,14 +147,14 @@ const ContactsList: React.FC = () => {
 		return details;
 	};
 
-	const fetchContacts = async () => {
+	const fetchContacts = async (clear: boolean = false) => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/contacts', {
 					page,
 					per_page: perPage,
-					keyword,
+					keyword: clear ? '' : keyword,
 					filters: filters,
 				}),
 				method: 'GET',
@@ -172,13 +185,151 @@ const ContactsList: React.FC = () => {
 			setSelectedRowKeys([]);
 			setBulkAction('');
 			fetchContacts();
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete contacts', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsApplying(false);
+		}
+	};
+
+	const addToList = async () => {
+		if (selectedLists.length === 0) {
+			createNotice({
+				type: 'error',
+				message: __('Please select a list', 'quillcrm'),
+			});
+			return;
+		}
+		setIsApplying(true);
+		try {
+			await apiFetch({
+				path: '/qc/v1/contacts/add-to-list',
+				method: 'POST',
+				data: { ids: selectedRowKeys, list_ids: selectedLists },
+			});
+
+			setSelectedRowKeys([]);
+			setBulkAction('');
+			fetchContacts();
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
+	const removeFromList = async () => {
+		if (selectedLists.length === 0) {
+			createNotice({
+				type: 'error',
+				message: __('Please select a list', 'quillcrm'),
+			});
+			return;
+		}
+		setIsApplying(true);
+		try {
+			await apiFetch({
+				path: '/qc/v1/contacts/remove-from-list',
+				method: 'POST',
+				data: { ids: selectedRowKeys, list_ids: selectedLists },
+			});
+
+			setSelectedRowKeys([]);
+			setBulkAction('');
+			fetchContacts();
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
+	const addTag = async () => {
+		if (selectedTags.length === 0) {
+			createNotice({
+				type: 'error',
+				message: __('Please select a tag', 'quillcrm'),
+			});
+			return;
+		}
+		setIsApplying(true);
+		try {
+			await apiFetch({
+				path: '/qc/v1/contacts/add-tag',
+				method: 'POST',
+				data: { ids: selectedRowKeys, tag_ids: selectedTags },
+			});
+
+			setSelectedRowKeys([]);
+			setBulkAction('');
+			fetchContacts();
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
+	const removeTag = async () => {
+		if (selectedTags.length === 0) {
+			createNotice({
+				type: 'error',
+				message: __('Please select a tag', 'quillcrm'),
+			});
+			return;
+		}
+		setIsApplying(true);
+		try {
+			await apiFetch({
+				path: '/qc/v1/contacts/remove-tag',
+				method: 'POST',
+				data: { ids: selectedRowKeys, tag_ids: selectedTags },
+			});
+
+			setSelectedRowKeys([]);
+			setBulkAction('');
+			fetchContacts();
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
+	const doBulkAction = async (action: string) => {
+		switch (action) {
+			case 'delete':
+				deleteSelected();
+				break;
+			case 'add_to_list':
+				addToList();
+				break;
+			case 'remove_from_list':
+				removeFromList();
+				break;
+			case 'add_tag':
+				addTag();
+				break;
+			case 'remove_tag':
+				removeTag();
+				break;
+			default:
+				break;
 		}
 	};
 
@@ -236,36 +387,44 @@ const ContactsList: React.FC = () => {
 			title: __('Phone', 'quillcrm'),
 			dataIndex: 'phone',
 			key: 'phone',
+			render: (_, record: Contact) => record.phone || '-',
 		},
 		{
 			title: __('Country', 'quillcrm'),
 			dataIndex: 'country',
 			key: 'country',
+			render: (_, record: Contact) => record.country || '-',
 		},
 		{
 			title: __('City', 'quillcrm'),
 			dataIndex: 'city',
 			key: 'city',
+			render: (_, record: Contact) => record.city || '-',
 		},
 		{
 			title: __('Address 1', 'quillcrm'),
 			dataIndex: 'address_1',
 			key: 'address_1',
+			render: (_, record: Contact) => record.address_1 || '-',
 		},
 		{
 			title: __('Address 2', 'quillcrm'),
 			dataIndex: 'address_2',
 			key: 'address_2',
+			render: (_, record: Contact) => record.address_2 || '-',
 		},
 		{
 			title: __('State', 'quillcrm'),
 			dataIndex: 'state',
 			key: 'state',
+			render: (_, record: Contact) =>
+				record ? record.state || '-' : '-',
 		},
 		{
 			title: __('Postal Code', 'quillcrm'),
 			dataIndex: 'zip',
 			key: 'zip',
+			render: (_, record: Contact) => record.zip || '-',
 		},
 		{
 			title: __('Created At', 'quillcrm'),
@@ -312,6 +471,8 @@ const ContactsList: React.FC = () => {
 			},
 		});
 	}
+	console.log(selectedLists, 'selectedLists');
+	console.log(selectedTags, 'selectedTags');
 
 	return (
 		<div className="qcrm-contacts-list">
@@ -331,18 +492,48 @@ const ContactsList: React.FC = () => {
 									label: __('Delete', 'quillcrm'),
 									value: 'delete',
 								},
+								{
+									label: __('Add to List', 'quillcrm'),
+									value: 'add_to_list',
+								},
+								{
+									label: __('Add Tag', 'quillcrm'),
+									value: 'add_tag',
+								},
+								{
+									label: __('Remove from List', 'quillcrm'),
+									value: 'remove_from_list',
+								},
+								{
+									label: __('Remove Tag', 'quillcrm'),
+									value: 'remove_tag',
+								},
 							]}
 							value={bulkAction}
-							onChange={(value) => setBulkAction(value)}
+							onChange={(value) => {
+								setBulkAction(value);
+								setSelectedLists([]);
+								setSelectedTags([]);
+							}}
 							disabled={selectedRowKeys.length === 0}
 						/>
+						{(bulkAction === 'add_to_list' ||
+							bulkAction === 'remove_from_list') && (
+							<ListField
+								value={selectedLists}
+								onChange={(value) => setSelectedLists(value)}
+							/>
+						)}
+						{(bulkAction === 'add_tag' ||
+							bulkAction === 'remove_tag') && (
+							<TagField
+								value={selectedTags}
+								onChange={(value) => setSelectedTags(value)}
+							/>
+						)}
 						<Button
 							type="primary"
-							onClick={() => {
-								if (bulkAction === 'delete') {
-									deleteSelected();
-								}
-							}}
+							onClick={() => doBulkAction(bulkAction)}
 							disabled={selectedRowKeys.length === 0}
 							loading={isApplying}
 						>
@@ -352,7 +543,11 @@ const ContactsList: React.FC = () => {
 					<Input.Search
 						placeholder={__('Search Contacts', 'quillcrm')}
 						allowClear
-						onSearch={() => {
+						onSearch={(_value, _e, source) => {
+							if ('clear' === source?.source) {
+								fetchContacts(true);
+								return;
+							}
 							fetchContacts();
 						}}
 						onChange={(e) => setKeyword(e.target.value)}
@@ -386,18 +581,37 @@ const ContactsList: React.FC = () => {
 										)}
 										onChange={(e) => {
 											if (e.target.checked) {
-												setSelectedColumns([
+												const newColumns = [
 													...selectedColumns,
 													column.dataIndex,
-												]);
+												];
+
+												newColumns.splice(
+													newColumns.indexOf(
+														'created_at'
+													),
+													1
+												);
+												newColumns.push('created_at');
+
+												setSelectedColumns(newColumns);
 											} else {
-												setSelectedColumns(
+												const newColumns =
 													selectedColumns.filter(
 														(col) =>
 															col !==
 															column.dataIndex
-													)
+													);
+
+												newColumns.splice(
+													newColumns.indexOf(
+														'created_at'
+													),
+													1
 												);
+												newColumns.push('created_at');
+
+												setSelectedColumns(newColumns);
 											}
 										}}
 									>

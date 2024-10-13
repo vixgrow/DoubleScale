@@ -10,7 +10,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Table, Input, Button, Modal } from 'antd';
+import { Table, Input, Button, Modal, Flex, Select } from 'antd';
 
 /**
  * Internal dependencies
@@ -38,28 +38,29 @@ const TemplatesList: React.FC = () => {
 	const [template, setTemplate] = useState({
 		name: '',
 	});
+	const [bulkAction, setBulkAction] = useState<string>('');
+	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
-	const Search = Input.Search;
 
-	const fetchTemplates = async () => {
+	const fetchTemplates = async (clear: boolean = false) => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/templates', {
 					page,
 					per_page: perPage,
-					keyword,
+					keyword: clear ? '' : keyword,
 				}),
 				method: 'GET',
 			})) as TemplatesResponse;
 
 			response.total && setTotal(response.total);
 			response.data && setData(response.data);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch templates', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -71,6 +72,13 @@ const TemplatesList: React.FC = () => {
 	}, [page, perPage]);
 
 	const createTemplate = async () => {
+		if (!template.name) {
+			createNotice({
+				type: 'error',
+				message: __('Template name is required', 'quillcrm'),
+			});
+			return;
+		}
 		setIsSaving(true);
 
 		try {
@@ -82,38 +90,101 @@ const TemplatesList: React.FC = () => {
 
 			setVisible(false);
 			navigate(getToLink(`templates/${response.id}`));
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to create template', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
 		}
 	};
 
+	const deleteSelected = async () => {
+		setIsApplying(true);
+
+		try {
+			await apiFetch({
+				path: '/qc/v1/campaigns',
+				method: 'DELETE',
+				data: {
+					ids: selectedRowKeys,
+				},
+			});
+
+			setSelectedRowKeys([]);
+			fetchTemplates();
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		} finally {
+			setIsApplying(false);
+		}
+	};
+
 	return (
 		<div className="qcrm-templates-list">
-			<div className="qcrm-contacts-templates-list__actions">
-				<div className="qcrm-contacts-templates-list__search">
-					<Search
+			<Flex
+				className="qcrm-contacts-list__actions"
+				justify="space-between"
+			>
+				<Flex gap={10}>
+					<Flex gap={10}>
+						<Select
+							options={[
+								{
+									label: __('Bulk Actions', 'quillcrm'),
+									value: '',
+								},
+								{
+									label: __('Delete', 'quillcrm'),
+									value: 'delete',
+								},
+							]}
+							value={bulkAction}
+							onChange={(value) => setBulkAction(value)}
+							disabled={selectedRowKeys.length === 0}
+						/>
+						<Button
+							type="primary"
+							onClick={() => {
+								if (bulkAction === 'delete') {
+									deleteSelected();
+								}
+							}}
+							disabled={selectedRowKeys.length === 0}
+							loading={isApplying}
+						>
+							{__('Apply', 'quillcrm')}
+						</Button>
+					</Flex>
+					<Input.Search
 						placeholder={__('Search', 'quillcrm')}
-						onSearch={(value, _e) => {
-							if (value.length < 2 && value.length > 0) {
+						allowClear
+						onSearch={(_value, _e, source) => {
+							if (source?.source === 'clear') {
+								fetchTemplates(true);
 								return;
 							}
-							setKeyword(value);
+							fetchTemplates();
 						}}
-						enterButton={__('Search', 'quillcrm')}
-						size="large"
+						onChange={(e) => setKeyword(e.target.value)}
+						styles={{
+							affixWrapper: {
+								padding: '4px 5px',
+							},
+							input: {
+								minHeight: 'auto',
+							},
+						}}
 					/>
-				</div>
-				<div>
-					<Button type="primary" onClick={() => setVisible(true)}>
-						{__('Create Template', 'quillcrm')}
-					</Button>
-				</div>
-			</div>
+				</Flex>
+				<Button type="primary" onClick={() => setVisible(true)}>
+					{__('Create Template', 'quillcrm')}
+				</Button>
+			</Flex>
 			<Table
 				dataSource={data}
 				rowKey="id"

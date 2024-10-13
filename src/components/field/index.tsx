@@ -37,6 +37,7 @@ interface FieldProps {
 	};
 	endpoint?: string;
 	multiple?: boolean;
+	required?: boolean;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -100,10 +101,7 @@ const Field: React.FC<FieldProps> = ({
 			);
 			break;
 		case 'select':
-			const selectOptions = map(options, (label, value) => ({
-				label,
-				value,
-			}));
+			const selectOptions = options || [];
 			fieldContent = (
 				<Select
 					value={

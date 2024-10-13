@@ -67,6 +67,10 @@ const Campaigns: React.FC = () => {
 
 	const addCampaign = async () => {
 		if (!name) {
+			createNotice({
+				type: 'error',
+				message: __('Campaign name is required', 'quillcrm'),
+			});
 			return;
 		}
 		setIsAdding(true);
@@ -86,8 +90,11 @@ const Campaigns: React.FC = () => {
 			setName('');
 			setVisible(false);
 			navigate(getToLink(`campaigns/${response.id}`));
-		} catch (error) {
-			console.error(error);
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
 		} finally {
 			setIsAdding(false);
 		}
@@ -107,8 +114,11 @@ const Campaigns: React.FC = () => {
 
 			setSelectedRowKeys([]);
 			fetchCampaigns();
-		} catch (error) {
-			console.error(error);
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
 		} finally {
 			setIsApplying(false);
 		}

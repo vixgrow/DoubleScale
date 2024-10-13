@@ -92,11 +92,11 @@ class Fields extends Rule {
 	}
 }
 
-$custom_fields = Custom_Field_Model::all();
+// $custom_fields = Custom_Field_Model::all();
 
-if ( ! empty( $custom_fields ) ) {
-	foreach ( $custom_fields as $custom_field ) {
-		$rule = new Fields( $custom_field );
-		Rules_Manager::instance()->register( $rule );
-	}
-}
+// if ( ! empty( $custom_fields ) ) {
+// foreach ( $custom_fields as $custom_field ) {
+// $rule = new Fields( $custom_field );
+// Rules_Manager::instance()->register( $rule );
+// }
+// }

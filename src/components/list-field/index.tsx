@@ -37,8 +37,8 @@ const ListField = ({ value, onChange }: Props) => {
 			})) as ListsResponse;
 
 			setSavedLists([...savedLists, ...response.data]);
-
-			return response.data.map((list: List) => ({
+			const lists = response.data;
+			return lists.map((list: List) => ({
 				label: list.name,
 				value: list.id,
 			}));
@@ -66,14 +66,27 @@ const ListField = ({ value, onChange }: Props) => {
 										callback(data);
 									});
 								}}
+								defaultOptions
+								value={''}
 								onChange={(val) => {
 									if (!isObject(val)) {
 										return;
 									}
+
+									if (value.includes(val.value)) {
+										return;
+									}
+
 									const newLists = [...value, val.value];
 									onChange(newLists);
 								}}
 								placeholder={__('Select list', 'quillcrm')}
+								styles={{
+									control: (styles) => ({
+										...styles,
+										minWidth: 200,
+									}),
+								}}
 							/>
 							{value && (
 								<Flex gap={10}>

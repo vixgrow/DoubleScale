@@ -119,7 +119,7 @@ class REST_Template_Controller extends REST_Controller {
 				'subject'    => array(
 					'description' => __( 'Subject of the template.', 'quillcrm' ),
 					'type'        => 'string',
-					'required'    => true,
+					'required'    => false,
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
@@ -127,7 +127,7 @@ class REST_Template_Controller extends REST_Controller {
 				'body'       => array(
 					'description' => __( 'Body of the template.', 'quillcrm' ),
 					'type'        => 'string',
-					'required'    => true,
+					'required'    => false,
 				),
 				'settings'   => array(
 					'description' => __( 'Settings of the template.', 'quillcrm' ),
@@ -136,12 +136,12 @@ class REST_Template_Controller extends REST_Controller {
 				'created_at' => array(
 					'description' => __( 'Creation time of the template.', 'quillcrm' ),
 					'type'        => 'string',
-					'readonly'    => true,
+					'readonly'    => false,
 				),
 				'updated_at' => array(
 					'description' => __( 'Update time of the template.', 'quillcrm' ),
 					'type'        => 'string',
-					'readonly'    => true,
+					'readonly'    => false,
 				),
 			),
 		);

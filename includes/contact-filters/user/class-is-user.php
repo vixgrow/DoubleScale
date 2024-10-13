@@ -54,7 +54,7 @@ class Is_User extends Filter {
 	 *
 	 * @since 1.0.0
 	 */
-	public $type = 'select';
+	public $type = 'boolean';
 
 	/**
 	 * Get operators

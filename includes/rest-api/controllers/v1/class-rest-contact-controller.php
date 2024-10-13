@@ -212,6 +212,98 @@ class REST_Contact_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Add to lists
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/add-to-list',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'add_to_lists' ),
+					'permission_callback' => array( $this, 'add_to_lists_permissions_check' ),
+					'args'                => array(
+						'ids'      => array(
+							'description' => __( 'Contact IDs.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+						'list_ids' => array(
+							'description' => __( 'Lists to add.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+					),
+				),
+			)
+		);
+
+		// Remove from lists
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/remove-from-list',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'remove_from_lists' ),
+					'permission_callback' => array( $this, 'remove_from_lists_permissions_check' ),
+					'args'                => array(
+						'ids'      => array(
+							'description' => __( 'Contact IDs.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+						'list_ids' => array(
+							'description' => __( 'Lists to remove.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+					),
+				),
+			)
+		);
+
+		// Add tags
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/add-tag',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'add_tags' ),
+					'permission_callback' => array( $this, 'add_tags_permissions_check' ),
+					'args'                => array(
+						'ids'     => array(
+							'description' => __( 'Contact IDs.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+						'tag_ids' => array(
+							'description' => __( 'Tags to add.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+					),
+				),
+			)
+		);
+
+		// Remove tags
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/remove-tag',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'remove_tags' ),
+					'permission_callback' => array( $this, 'remove_tags_permissions_check' ),
+					'args'                => array(
+						'ids'     => array(
+							'description' => __( 'Contact IDs.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+						'tag_ids' => array(
+							'description' => __( 'Tags to remove.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -373,11 +465,11 @@ class REST_Contact_Controller extends REST_Controller {
 				$contacts        = $filters_process->filter();
 			}
 
-			// Apply pagination.
-			$contacts = $contacts->paginate( $per_page, array( '*' ), 'page', $page );
+			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $contacts, 200 );
 		} catch ( Exception $e ) {
+			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
@@ -426,6 +518,7 @@ class REST_Contact_Controller extends REST_Controller {
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
+			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
@@ -932,6 +1025,190 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_analytics_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Add to lists
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function add_to_lists( $request ) {
+		try {
+			$contact_ids = $request->get_param( 'ids' );
+			$list_ids    = $request->get_param( 'list_ids' );
+
+			if ( ! $list_ids ) {
+				return new WP_Error( 'error', 'Lists not found', array( 'status' => 404 ) );
+			}
+
+			$contacts = Contact_Model::find( $contact_ids );
+			if ( ! $contacts ) {
+				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
+			}
+
+			foreach ( $contacts as $contact ) {
+				$contact->sync_lists( $list_ids );
+			}
+
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Add to lists permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function add_to_lists_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Remove from lists
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function remove_from_lists( $request ) {
+		try {
+			$contact_ids = $request->get_param( 'ids' );
+			$list_ids    = $request->get_param( 'list_ids' );
+
+			if ( ! $list_ids ) {
+				return new WP_Error( 'error', 'Lists not found', array( 'status' => 404 ) );
+			}
+
+			$contacts = Contact_Model::find( $contact_ids );
+			if ( ! $contacts ) {
+				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
+			}
+
+			foreach ( $contacts as $contact ) {
+				$contact->lists()->detach( $list_ids );
+			}
+
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Remove from lists permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function remove_from_lists_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Add tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function add_tags( $request ) {
+		try {
+			$contact_ids = $request->get_param( 'ids' );
+			$tags_ids    = $request->get_param( 'tag_ids' );
+
+			if ( ! $tags_ids ) {
+				return new WP_Error( 'error', 'Tags not found', array( 'status' => 404 ) );
+			}
+
+			$contacts = Contact_Model::find( $contact_ids );
+			if ( ! $contacts ) {
+				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
+			}
+
+			foreach ( $contacts as $contact ) {
+				$contact->sync_tags( $tags_ids );
+			}
+
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Add tags permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function add_tags_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Remove tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function remove_tags( $request ) {
+		try {
+			$contact_ids = $request->get_param( 'ids' );
+			$tags_ids    = $request->get_param( 'tag_ids' );
+
+			if ( ! $tags_ids ) {
+				return new WP_Error( 'error', 'Tags not found', array( 'status' => 404 ) );
+			}
+
+			$contacts = Contact_Model::find( $contact_ids );
+			if ( ! $contacts ) {
+				return new WP_Error( 'not_found', 'Contacts not found', array( 'status' => 404 ) );
+			}
+
+			foreach ( $contacts as $contact ) {
+				$contact->tags()->detach( $tags_ids );
+			}
+
+			return new WP_REST_Response( $contacts, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Remove tags permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function remove_tags_permissions_check( $request ) {
 		return current_user_can( 'manage_options' );
 	}
 }

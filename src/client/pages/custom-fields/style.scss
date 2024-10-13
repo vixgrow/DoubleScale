@@ -20,13 +20,16 @@
 	border: 1px solid #f0f0f0;
 	border-radius: 6px;
 	flex: 1;
+	.custom-fields-group-header {
+		padding: 20px 15px;
+		border-radius: 6px;
+		background-color: #f9f9f9;
+	}
+
 	.custom-fields-group-title {
 		font-size: 16px;
 		font-weight: 600;
 		margin: 0;
-		padding: 20px 15px;
-		border-radius: 6px;
-		background-color: #f9f9f9;
 	}
 	.custom-fields-group-items {
 		padding: 20px 15px;

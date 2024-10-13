@@ -81,6 +81,10 @@ const Lists: React.FC = () => {
 	}, [page, perPage]);
 
 	const createList = async () => {
+		if (!validate(list)) {
+			return;
+		}
+
 		setIsSaving(true);
 		try {
 			const response = await apiFetch({
@@ -106,6 +110,9 @@ const Lists: React.FC = () => {
 	};
 
 	const updateList = async () => {
+		if (!selectedList || !validate(selectedList)) {
+			return;
+		}
 		setIsSaving(true);
 		try {
 			const response = (await apiFetch({
@@ -178,6 +185,17 @@ const Lists: React.FC = () => {
 		} finally {
 			setIsApplying(false);
 		}
+	};
+
+	const validate = (list: Partial<ContactList>) => {
+		if (!list.name) {
+			createNotice({
+				type: 'error',
+				message: __('List name is required', 'quillcrm'),
+			});
+			return false;
+		}
+		return true;
 	};
 
 	return (
@@ -305,6 +323,7 @@ const Lists: React.FC = () => {
 					title={__('Contacts', 'quillcrm')}
 					dataIndex="contacts_count"
 					key="contacts_count"
+					render={(count: number) => count ?? 0}
 				/>
 				<Column
 					title={__('Created At', 'quillcrm')}

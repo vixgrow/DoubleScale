@@ -29,6 +29,7 @@ import {
 	ArrowDownOutlined,
 } from '@ant-design/icons';
 import { isEmpty } from 'lodash';
+import AsyncSelect from 'react-select/async';
 
 /**
  * Internal dependencies
@@ -55,12 +56,10 @@ const Contact: React.FC = () => {
 	const [isUpdating, setIsUpdating] = useState(false);
 	const [lists, setLists] = useState<ContactList[]>([]);
 	const [tags, setTags] = useState<Tag[]>([]);
-	const [fetchingTags, setFetchingTags] = useState(false);
-	const [fetchingLists, setFetchingLists] = useState(false);
 	const [showAddTag, setShowAddTag] = useState(false);
 	const [showAddList, setShowAddList] = useState(false);
-	const [selectedLists, setSelectedLists] = useState<ContactList[]>([]);
-	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+	const [selectedLists, setSelectedLists] = useState<number[]>([]);
+	const [selectedTags, setSelectedTags] = useState<number[]>([]);
 	const [isSavingTags, setIsSavingTags] = useState(false);
 	const [isSavingLists, setIsSavingLists] = useState(false);
 	const [state, dispatch] = useReducer(reducer, {
@@ -76,42 +75,51 @@ const Contact: React.FC = () => {
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchLists = async (keyword = '') => {
-		setFetchingLists(true);
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/lists', {
 					keyword: keyword,
+					contact_id: id,
 				}),
 			})) as ListsResponse;
 
-			setLists(response.data);
-		} catch (error) {
+			setLists([...lists, ...response.data]);
+
+			return response.data.map((list) => ({
+				label: list.name,
+				value: list.id,
+			}));
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch lists', 'quillcrm'),
+				message: error.message,
 			});
-		} finally {
-			setFetchingLists(false);
+
+			return [];
 		}
 	};
 
 	const fetchTags = async (keyword = '') => {
-		setFetchingTags(true);
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/tags', {
 					keyword: keyword,
+					contact_id: id,
 				}),
 			})) as TagsResponse;
 
-			setTags(response.data);
-		} catch (error) {
+			setTags([...tags, ...response.data]);
+
+			return response.data.map((tag) => ({
+				label: tag.name,
+				value: tag.id,
+			}));
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch tags', 'quillcrm'),
+				message: error.message,
 			});
-		} finally {
-			setFetchingTags(false);
+			return [];
 		}
 	};
 
@@ -133,10 +141,10 @@ const Contact: React.FC = () => {
 				...contact,
 				lists: contact.lists.filter((list) => list.id !== listId),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete list', 'quillcrm'),
+				message: error.message,
 			});
 		}
 	};
@@ -146,24 +154,29 @@ const Contact: React.FC = () => {
 			return;
 		}
 
+		const newLists = lists.filter((tag) => selectedLists.includes(tag.id));
+		if (isEmpty(newLists)) {
+			return;
+		}
+
 		setIsSavingLists(true);
 		try {
 			await apiFetch({
 				path: `/qc/v1/contacts/${contact.id}`,
 				method: 'POST',
 				data: {
-					lists: [...contact.lists, ...selectedLists],
+					lists: [...contact.lists, ...newLists],
 				},
 			});
 
 			setContact({
 				...contact,
-				lists: [...contact.lists, ...selectedLists],
+				lists: [...contact.lists, ...newLists],
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to add lists', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSavingLists(false);
@@ -190,37 +203,43 @@ const Contact: React.FC = () => {
 				...contact,
 				tags: contact.tags.filter((tag) => tag.id !== tagId),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete tag', 'quillcrm'),
+				message: error.message,
 			});
 		}
 	};
 
 	const addTags = async () => {
-		if (!contact || isEmpty(selectedTags)) {
+		if (!contact) {
+			return;
+		}
+
+		const newTags = tags.filter((tag) => selectedTags.includes(tag.id));
+		if (isEmpty(newTags)) {
 			return;
 		}
 
 		setIsSavingTags(true);
+
 		try {
 			await apiFetch({
 				path: `/qc/v1/contacts/${contact.id}`,
 				method: 'POST',
 				data: {
-					tags: [...contact.tags, ...selectedTags],
+					tags: [...contact.tags, ...newTags],
 				},
 			});
 
 			setContact({
 				...contact,
-				tags: [...contact.tags, ...selectedTags],
+				tags: [...contact.tags, ...newTags],
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to add tags', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSavingTags(false);
@@ -238,10 +257,10 @@ const Contact: React.FC = () => {
 			});
 
 			setContact(response as ContactType);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch contact', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -262,10 +281,10 @@ const Contact: React.FC = () => {
 				type: 'success',
 				message: __('Contact updated successfully', 'quillcrm'),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to update contact', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsUpdating(false);
@@ -332,6 +351,7 @@ const Contact: React.FC = () => {
 									<Typography.Text>
 										{contact.email}
 										<Popover
+											trigger={['click']}
 											content={
 												<div
 													style={{
@@ -492,35 +512,31 @@ const Contact: React.FC = () => {
 				>
 					<div className="qcrm-fields">
 						<div className="qcrm-field">
-							<Select
-								mode="multiple"
-								showSearch
-								value={selectedTags.map((tag) => tag.id)}
+							<AsyncSelect
+								isMulti
+								value={selectedTags.map((tag) => ({
+									label: tags.find((t) => t.id === tag)?.name,
+									value: tag,
+								}))}
 								onChange={(value) => {
-									const selected = tags.filter((tag) =>
-										value.includes(tag.id)
+									if (!value || !Array.isArray(value)) {
+										return;
+									}
+
+									const selected = value.map(
+										(val) => val.value
 									);
 
 									setSelectedTags(selected);
 								}}
-								onSearch={(value) => {
-									if (value?.length > 2) {
-										fetchTags(value);
-									}
+								defaultOptions
+								loadOptions={(inputValue, callback) => {
+									fetchTags(inputValue).then((data) => {
+										callback(data);
+									});
 								}}
-								style={{ width: '100%' }}
-								loading={fetchingTags}
-								options={tags
-									.filter(
-										(tag) =>
-											!contact?.tags
-												.map((t) => t.id)
-												.includes(tag.id)
-									)
-									.map((tag) => ({
-										label: tag.name,
-										value: tag.id,
-									}))}
+								isClearable
+								cacheOptions={false}
 							/>
 						</div>
 					</div>
@@ -534,35 +550,32 @@ const Contact: React.FC = () => {
 				>
 					<div className="qcrm-fields">
 						<div className="qcrm-field">
-							<Select
-								mode="multiple"
-								showSearch
-								value={selectedLists.map((list) => list.id)}
+							<AsyncSelect
+								isMulti
+								value={selectedLists.map((list) => ({
+									label: lists.find((t) => t.id === list)
+										?.name,
+									value: list,
+								}))}
 								onChange={(value) => {
-									const selected = lists.filter((list) =>
-										value.includes(list.id)
+									if (!Array.isArray(value)) {
+										return;
+									}
+
+									const selected = value.map(
+										(val) => val.value
 									);
 
 									setSelectedLists(selected);
 								}}
-								onSearch={(value) => {
-									if (value?.length > 2) {
-										fetchLists(value);
-									}
+								defaultOptions
+								loadOptions={(inputValue, callback) => {
+									fetchLists(inputValue).then((data) => {
+										callback(data);
+									});
 								}}
-								style={{ width: '100%' }}
-								loading={fetchingLists}
-								options={lists
-									.filter(
-										(list) =>
-											!contact?.lists
-												.map((l) => l.id)
-												.includes(list.id)
-									)
-									.map((list) => ({
-										label: list.name,
-										value: list.id,
-									}))}
+								isClearable
+								cacheOptions={false}
 							/>
 						</div>
 					</div>

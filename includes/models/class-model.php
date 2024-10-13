@@ -18,6 +18,20 @@ use WeDevs\ORM\Eloquent\Model as WeDevsModel;
 class Model extends WeDevsModel {
 
 	/**
+	 * Rules
+	 *
+	 * @var array
+	 */
+	protected $rules = array();
+
+	/**
+	 * Messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array();
+
+	/**
 	 * Overide parent method to make sure prefixing is correct.
 	 *
 	 * @return string
@@ -52,5 +66,31 @@ class Model extends WeDevsModel {
 		}
 
 		return parent::belongsToMany( $related, $wpdb->prefix . $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $relation );
+	}
+
+	/**
+	 * Override the save method to add validation.
+	 *
+	 * @param array $options
+	 * @return bool
+	 * @throws \Exception
+	 */
+	public function save( array $options = array() ) {
+		if ( empty( $this->rules ) ) {
+			return parent::save( $options );
+		}
+
+		$validator = quillcrm_validator()->make(
+			$this->toArray(),
+			$this->rules,
+			$this->messages
+		);
+
+		if ( $validator->fails() ) {
+			throw new \Exception( $validator->errors()->first() );
+		}
+
+		// Call the parent save method to perform the actual saving
+		return parent::save( $options );
 	}
 }

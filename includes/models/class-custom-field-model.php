@@ -61,6 +61,29 @@ class Custom_Field_Model extends Model {
 	 */
 	protected $casts = array(
 		'attributes' => 'array',
+		'group_id'   => 'integer',
+	);
+
+	/**
+	 * Rules
+	 *
+	 * @var array
+	 */
+	protected $rules = array(
+		'name'     => 'required',
+		'type'     => 'required',
+		'group_id' => 'required',
+	);
+
+	/**
+	 * Messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array(
+		'name.required'     => 'Custom field name is required',
+		'type.required'     => 'Custom field type is required',
+		'group_id.required' => 'Custom field group ID is required',
 	);
 
 	/**

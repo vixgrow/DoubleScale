@@ -12,7 +12,6 @@
 namespace QuillCRM\Goals;
 
 use QuillCRM\Abstracts\Goal;
-use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Managers\Goals_Manager;

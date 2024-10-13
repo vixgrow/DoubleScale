@@ -86,9 +86,10 @@ final class Merge_Tags_Manager {
 
 		// Merge tag will be like {{group:slug}}
 		$this->merge_tags[ $merge_tag->group ][ $merge_tag->slug ]     = $merge_tag;
-		$this->groups[ $merge_tag->group ]['tags'][ $merge_tag->slug ] = array(
-			'label'       => $merge_tag->name,
-			'description' => $merge_tag->description,
+		$this->groups[ $merge_tag->group ]['mergeTags'][ $merge_tag->slug ] = array(
+			'name'       => $merge_tag->name,
+			// 'description' => $merge_tag->description,
+			'value' => "{{$merge_tag->group}:{$merge_tag->slug}}",
 		);
 	}
 
@@ -127,20 +128,20 @@ final class Merge_Tags_Manager {
 	public function set_groups() {
 		$this->groups = array(
 			'contact'        => array(
-				'label' => __( 'Contact', 'quillcrm' ),
-				'tags'  => array(),
+				'name' => __( 'Contact', 'quillcrm' ),
+				'mergeTags'  => array(),
 			),
 			'general'        => array(
-				'label' => __( 'General', 'quillcrm' ),
-				'tags'  => array(),
+				'name' => __( 'General', 'quillcrm' ),
+				'mergeTags'  => array(),
 			),
 			'order'          => array(
-				'label' => __( 'Order', 'quillcrm' ),
-				'tags'  => array(),
+				'name' => __( 'Order', 'quillcrm' ),
+				'mergeTags'  => array(),
 			),
 			'abandoned_cart' => array(
-				'label' => __( 'Abandoned Cart', 'quillcrm' ),
-				'tags'  => array(),
+				'name' => __( 'Abandoned Cart', 'quillcrm' ),
+				'mergeTags'  => array(),
 			),
 		);
 	}

@@ -28,6 +28,9 @@ use QuillCRM\Admin\Admin_Loader;
 use QuillCRM\Abandoned_Cart\Abandoned_Cart;
 use QuillCRM\Managers\Custom_Fields_Manager;
 use QuillCRM\Managers\Filters_Manager;
+use Illuminate\Translation\Translator;
+use Illuminate\Translation\ArrayLoader;
+use Illuminate\Validation\Factory as ValidatorFactory;
 
 /**
  * QuillCRM Main Class.
@@ -64,6 +67,13 @@ final class QuillCRM {
 	 * @var Tasks
 	 */
 	private $abandoned_cart_tasks;
+
+	/**
+	 * Validator
+	 *
+	 * @var ValidatorFactory
+	 */
+	private $validator;
 
 	/**
 	 * Class Instance.
@@ -166,6 +176,9 @@ final class QuillCRM {
 		$capsule->setAsGlobal();
 
 		$capsule->bootEloquent();
+
+		$translator      = new Translator( new ArrayLoader(), 'en' );
+		$this->validator = new ValidatorFactory( $translator );
 	}
 
 	/**

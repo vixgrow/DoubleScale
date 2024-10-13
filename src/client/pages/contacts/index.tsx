@@ -23,6 +23,7 @@ import {
 } from 'antd';
 import { UserOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { map } from 'lodash';
+import { isEmail } from 'validator';
 
 /**
  * Internal dependencies
@@ -93,7 +94,16 @@ const ContactsList: React.FC = () => {
 	const [visible, setVisible] = useState(false);
 
 	const createContact = async () => {
+		if (!isEmail(contact.email)) {
+			createNotice({
+				type: 'error',
+				message: __('Invalid email', 'quillcrm'),
+			});
+			return;
+		}
+
 		setIsSaving(true);
+
 		try {
 			const response = (await apiFetch({
 				path: '/qc/v1/contacts',
@@ -102,7 +112,7 @@ const ContactsList: React.FC = () => {
 			})) as Contact;
 
 			navigate(getToLink(`contacts/${response.id}`));
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
 				message:
@@ -134,14 +144,14 @@ const ContactsList: React.FC = () => {
 		return details;
 	};
 
-	const fetchContacts = async () => {
+	const fetchContacts = async (clear: boolean = false) => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/contacts', {
 					page,
 					per_page: perPage,
-					keyword,
+					keyword: clear ? '' : keyword,
 					filters: filters,
 				}),
 				method: 'GET',
@@ -236,36 +246,44 @@ const ContactsList: React.FC = () => {
 			title: __('Phone', 'quillcrm'),
 			dataIndex: 'phone',
 			key: 'phone',
+			render: (_, record: Contact) => record.phone || '-',
 		},
 		{
 			title: __('Country', 'quillcrm'),
 			dataIndex: 'country',
 			key: 'country',
+			render: (_, record: Contact) => record.country || '-',
 		},
 		{
 			title: __('City', 'quillcrm'),
 			dataIndex: 'city',
 			key: 'city',
+			render: (_, record: Contact) => record.city || '-',
 		},
 		{
 			title: __('Address 1', 'quillcrm'),
 			dataIndex: 'address_1',
 			key: 'address_1',
+			render: (_, record: Contact) => record.address_1 || '-',
 		},
 		{
 			title: __('Address 2', 'quillcrm'),
 			dataIndex: 'address_2',
 			key: 'address_2',
+			render: (_, record: Contact) => record.address_2 || '-',
 		},
 		{
 			title: __('State', 'quillcrm'),
 			dataIndex: 'state',
 			key: 'state',
+			render: (_, record: Contact) =>
+				record ? record.state || '-' : '-',
 		},
 		{
 			title: __('Postal Code', 'quillcrm'),
 			dataIndex: 'zip',
 			key: 'zip',
+			render: (_, record: Contact) => record.zip || '-',
 		},
 		{
 			title: __('Created At', 'quillcrm'),
@@ -352,7 +370,11 @@ const ContactsList: React.FC = () => {
 					<Input.Search
 						placeholder={__('Search Contacts', 'quillcrm')}
 						allowClear
-						onSearch={() => {
+						onSearch={(_value, _e, source) => {
+							if ('clear' === source?.source) {
+								fetchContacts(true);
+								return;
+							}
 							fetchContacts();
 						}}
 						onChange={(e) => setKeyword(e.target.value)}

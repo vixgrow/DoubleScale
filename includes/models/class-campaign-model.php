@@ -68,6 +68,24 @@ class Campaign_Model extends Model {
 	);
 
 	/**
+	 * Rules
+	 *
+	 * @var array
+	 */
+	protected $rules = array(
+		'name' => 'required',
+	);
+
+	/**
+	 * Messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array(
+		'name.required' => 'Campaign name is required',
+	);
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool
@@ -124,6 +142,7 @@ class Campaign_Model extends Model {
 			$utm_campaign = $template['utm_campaign'] ?? null;
 			$utm_term     = $template['utm_term'] ?? null;
 			$utm_content  = $template['utm_content'] ?? null;
+			$hidden       = $template['hidden'] ?? 1;
 			$template     = Template_Model::createOrUpdate(
 				$template_id,
 				array(
@@ -143,6 +162,7 @@ class Campaign_Model extends Model {
 						'utm_term'     => $utm_term,
 						'utm_content'  => $utm_content,
 					),
+					'hidden'   => $hidden,
 				)
 			);
 

@@ -2,7 +2,8 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -19,6 +20,7 @@ import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { Template } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
 import type { Template as TemplateType } from '@quillcrm/client';
+import { isEmail } from 'validator';
 
 const Templates: React.FC = () => {
 	const { campaign, isLoading, saveCampaign, isSaving, updateSettings } =
@@ -32,7 +34,7 @@ const Templates: React.FC = () => {
 		reply_to: adminEmail,
 		preview_text: '',
 		subject: __('New Email', 'quillcrm'),
-		body: '',
+		body: 'Email body',
 		enable_utm: false,
 		utm_source: '',
 		utm_medium: '',
@@ -40,8 +42,17 @@ const Templates: React.FC = () => {
 		utm_term: '',
 		utm_content: '',
 	};
-	const { templates = [], ab_test } = campaign?.settings ?? {};
+	const [templates, setTemplates] = useState<TemplateType[]>(
+		campaign?.settings.templates || []
+	);
 	const [currentTab, setCurrentTab] = useState(0);
+	const { createNotice } = useDispatch('quillcrm/core');
+
+	useEffect(() => {
+		if (templates.length === 0) {
+			setTemplates([defaultTemplate]);
+		}
+	}, []);
 
 	const addTemplate = () => {
 		if (!campaign) {
@@ -88,7 +99,19 @@ const Templates: React.FC = () => {
 		if (!campaign) {
 			return;
 		}
-		await saveCampaign();
+
+		// Validate templates
+		const isValid = templates.every((template) => validate(template));
+		if (!isValid) {
+			return;
+		}
+
+		await saveCampaign({
+			settings: {
+				...campaign.settings,
+				templates,
+			},
+		});
 		navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 	};
 
@@ -105,7 +128,9 @@ const Templates: React.FC = () => {
 		},
 	];
 
-	const tabs = ab_test ? templates : [templates[0] ?? defaultTemplate];
+	const tabs = campaign?.settings.ab_test
+		? templates
+		: [templates[0] ?? defaultTemplate];
 	const tabList = tabs.map((template, index) => ({
 		key: index.toString(),
 		label: templatesSettings[index].title,
@@ -117,6 +142,50 @@ const Templates: React.FC = () => {
 		),
 		closable: templatesSettings[index].closable ?? true,
 	}));
+
+	const validate = (template: Partial<TemplateType>) => {
+		if (!template.subject) {
+			createNotice({
+				type: 'error',
+				message: __('Subject is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		if (!template.body) {
+			createNotice({
+				type: 'error',
+				message: __('Body is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		if (!template.from_name) {
+			createNotice({
+				type: 'error',
+				message: __('From name is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		if (!template.from_email) {
+			createNotice({
+				type: 'error',
+				message: __('From email is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		if (!isEmail(template.from_email)) {
+			createNotice({
+				type: 'error',
+				message: __('From email is not valid', 'quillcrm'),
+			});
+			return false;
+		}
+
+		return true;
+	};
 
 	return (
 		<Card loading={isLoading}>
@@ -140,7 +209,10 @@ const Templates: React.FC = () => {
 									removeTemplate(id);
 								}
 							}}
-							hideAdd={templates.length >= 3 || !ab_test}
+							hideAdd={
+								templates.length >= 3 ||
+								!campaign?.settings.ab_test
+							}
 							activeKey={currentTab.toString()}
 							onChange={(key) => setCurrentTab(Number(key))}
 						/>

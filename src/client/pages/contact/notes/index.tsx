@@ -50,7 +50,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 	const [noteModalVisible, setNoteModalVisible] = useState(false);
 	const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 	const [isSavingNote, setIsSavingNote] = useState(false);
-	const [note, setNote] = useState({
+	const [note, setNote] = useState<Partial<Note>>({
 		title: '',
 		note: '',
 		type: 'note',
@@ -70,10 +70,10 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 
 			setNotes(response.data);
 			setTotal(response.total);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch notes', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -88,6 +88,12 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 		if (!note) {
 			return;
 		}
+
+		if (!validate(note)) {
+			setIsSavingNote(false);
+			return;
+		}
+
 		setIsSavingNote(true);
 		try {
 			const response = (await apiFetch({
@@ -114,10 +120,10 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 				type: 'success',
 				message: __('Note saved successfully', 'quillcrm'),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to save note', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSavingNote(false);
@@ -129,7 +135,13 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 			return;
 		}
 
+		if (!validate(selectedNote)) {
+			setIsSavingNote(false);
+			return;
+		}
+
 		setIsSavingNote(true);
+
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/contact-notes/${selectedNote.id}`,
@@ -177,6 +189,26 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 				message: __('Failed to delete note', 'quillcrm'),
 			});
 		}
+	};
+
+	const validate = (note: Partial<Note>) => {
+		if (!note.title) {
+			createNotice({
+				type: 'error',
+				message: __('Title is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		if (!note.note) {
+			createNotice({
+				type: 'error',
+				message: __('Note is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		return true;
 	};
 
 	return (

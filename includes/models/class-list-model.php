@@ -54,6 +54,24 @@ class List_Model extends Model {
 	);
 
 	/**
+	 * Rules
+	 *
+	 * @var array
+	 */
+	protected $rules = array(
+		'name' => 'required',
+	);
+
+	/**
+	 * Messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array(
+		'name.required' => 'List name is required',
+	);
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool

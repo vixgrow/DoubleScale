@@ -62,6 +62,26 @@ class Template_Model extends Model {
 	);
 
 	/**
+	 * Rules
+	 *
+	 * @var array
+	 */
+	protected $rules = array(
+		'name'                => 'required',
+		'settings.from_email' => 'email',
+	);
+
+	/**
+	 * Messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array(
+		'name.required'             => 'Template name is required',
+		'settings.from_email.email' => 'From email is not a valid email',
+	);
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool

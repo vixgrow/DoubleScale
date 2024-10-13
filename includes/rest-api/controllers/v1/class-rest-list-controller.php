@@ -46,24 +46,28 @@ class REST_List_Controller extends REST_Controller {
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
-						'keyword'  => array(
+						'keyword'    => array(
 							'description' => __( 'Keyword to search.', 'quillcrm' ),
 							'type'        => 'string',
 						),
-						'per_page' => array(
+						'per_page'   => array(
 							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
-						'page'     => array(
+						'page'       => array(
 							'description' => __( 'Page number.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
-						'ids'      => array(
+						'ids'        => array(
 							'description' => __( 'List IDs.', 'quillcrm' ),
 							'type'        => 'array',
 							'items'       => array(
 								'type' => 'integer',
 							),
+						),
+						'contact_id' => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
 						),
 					),
 				),
@@ -183,10 +187,11 @@ class REST_List_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$keyword  = $request->get_param( 'keyword' ) ?? '';
-			$ids      = $request->get_param( 'ids' ) ?? array();
+			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$keyword    = $request->get_param( 'keyword' ) ?? '';
+			$ids        = $request->get_param( 'ids' ) ?? array();
+			$contact_id = $request->get_param( 'contact_id' ) ?? '';
 
 			if ( ! empty( $ids ) ) {
 				$lists = List_Model::whereIn( 'id', $ids )->paginate( $per_page, array( '*' ), 'page', $page );
@@ -194,13 +199,23 @@ class REST_List_Controller extends REST_Controller {
 				return new WP_REST_Response( $lists, 200 );
 			}
 
+			$lists = List_Model::query();
+
 			if ( '' !== $keyword ) {
-				$lists = List_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )
-					->orWhere( 'description', 'LIKE', '%' . $keyword . '%' )
-					->paginate( $per_page, array( '*' ), 'page', $page );
-			} else {
-				$lists = List_Model::paginate( $per_page, array( '*' ), 'page', $page );
+				$lists = $lists->where( 'name', 'LIKE', '%' . $keyword . '%' )
+					->orWhere( 'description', 'LIKE', '%' . $keyword . '%' );
 			}
+
+			if ( '' !== $contact_id ) {
+				$lists = $lists->whereDoesntHave(
+					'contacts',
+					function( $q ) use ( $contact_id ) {
+						$q->where( 'contact_id', $contact_id );
+					}
+				);
+			}
+
+			$lists = $lists->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $lists, 200 );
 		} catch ( \Exception $e ) {

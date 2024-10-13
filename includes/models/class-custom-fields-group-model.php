@@ -60,6 +60,23 @@ class Custom_Fields_Group_Model extends Model {
 	 */
 	public $timestamps = true;
 
+	/**
+	 * Rules
+	 *
+	 * @var array
+	 */
+	protected $rules = array(
+		'name' => 'required',
+	);
+
+	/**
+	 * Messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array(
+		'name.required' => 'Group name is required',
+	);
 
 	/**
 	 * Get custom fields

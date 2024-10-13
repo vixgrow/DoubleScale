@@ -11,7 +11,7 @@ import { useDispatch } from '@wordpress/data';
  */
 import { useReducer, useRef } from 'react';
 import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
-import { Tabs } from 'antd';
+import { Tabs, Skeleton } from 'antd';
 import { CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 /**
@@ -31,7 +31,7 @@ import Overview from './overview';
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
 	const [state, dispatch] = useReducer(reducer, {
-		campaign: null,
+		campaign: null as CampaignType | null,
 	} as State);
 	const stateRef = useRef<State>(state);
 	stateRef.current = state;
@@ -66,14 +66,17 @@ const Campaign: React.FC = () => {
 		}
 	};
 
-	const saveCampaign = async () => {
+	const saveCampaign = async (data: Partial<CampaignType> = {}) => {
 		setIsSaving(true);
 
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/campaigns/${campaign.id}`,
 				method: 'POST',
-				data: campaign,
+				data: {
+					...campaign,
+					...data,
+				},
 			})) as CampaignType;
 
 			setCampaign(response);
@@ -136,6 +139,34 @@ const Campaign: React.FC = () => {
 		},
 	];
 
+	if (!campaign) {
+		return <Skeleton active />;
+	}
+
+	const canGoNext = (nextTab: string) => {
+		if (!campaign) {
+			return false;
+		}
+
+		let canGo = true;
+
+		switch (nextTab) {
+			case 'template':
+				canGo = campaign?.name;
+				break;
+			case 'contacts':
+			case 'review':
+				canGo = campaign?.templates?.length > 0;
+				break;
+		}
+
+		return canGo;
+	};
+
+	const isOverview =
+		(campaign.status === 'schedule' && tab === 'overview') ||
+		(['processing', 'completed'].includes(campaign.status) ? true : false);
+
 	return (
 		<Provider
 			value={{
@@ -148,19 +179,22 @@ const Campaign: React.FC = () => {
 				...$actions,
 			}}
 		>
-			{tab !== 'overview' && campaign?.status !== 'completed' && (
-				<Tabs
-					defaultActiveKey="information"
-					activeKey={tab}
-					tabPosition="left"
-					tabBarStyle={{ width: 200 }}
-					items={tabItems}
-					onChange={(key) => {
-						navigate(getToLink(`campaigns/${id}/${key}`));
-					}}
-				/>
-			)}
-			{tab === 'overview' && <Overview />}
+			{!['processing', 'completed'].includes(campaign.status) &&
+				tab !== 'overview' && (
+					<Tabs
+						defaultActiveKey="information"
+						activeKey={tab === 'overview' ? 'information' : tab}
+						tabPosition="left"
+						tabBarStyle={{ width: 200 }}
+						items={tabItems}
+						onChange={(key) => {
+							if (canGoNext(key)) {
+								navigate(getToLink(`campaigns/${id}/${key}`));
+							}
+						}}
+					/>
+				)}
+			{isOverview && <Overview />}
 		</Provider>
 	);
 };

@@ -53,6 +53,26 @@ class Contact_Note_Model extends Model {
 	);
 
 	/**
+	 * Rules
+	 *
+	 * @var array
+	 */
+	protected $rules = array(
+		'title' => 'required',
+		'note'  => 'required',
+	);
+
+	/**
+	 * Messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array(
+		'title.required' => 'Title is required',
+		'note.required'  => 'Note is required',
+	);
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool

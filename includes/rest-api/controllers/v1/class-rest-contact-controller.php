@@ -373,11 +373,11 @@ class REST_Contact_Controller extends REST_Controller {
 				$contacts        = $filters_process->filter();
 			}
 
-			// Apply pagination.
-			$contacts = $contacts->paginate( $per_page, array( '*' ), 'page', $page );
+			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $contacts, 200 );
 		} catch ( Exception $e ) {
+			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}
@@ -426,6 +426,7 @@ class REST_Contact_Controller extends REST_Controller {
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
+			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
 	}

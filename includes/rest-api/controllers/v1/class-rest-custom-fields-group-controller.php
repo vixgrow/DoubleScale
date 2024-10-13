@@ -15,6 +15,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
+use QuillCRM\Models\Custom_Field_Model;
 use QuillCRM\Models\Custom_Fields_Group_Model;
 
 /**
@@ -234,11 +235,9 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 */
 	public function create_item( $request ) {
 		try {
-			$group = $this->prepare_group( $request );
-
-			$group_id = Custom_Fields_Group_Model::create( $group );
-
-			$group = Custom_Fields_Group_Model::find( $group_id );
+			$data                 = $this->prepare_group( $request );
+			$group                = Custom_Fields_Group_Model::create( $data );
+			$group->custom_fields = array();
 
 			return new WP_REST_Response( $group, 201 );
 		} catch ( \Exception $e ) {
@@ -295,18 +294,30 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 			}
 
 			// First move all the fields to the the given group.
-			$new_group_id = $request->get_param( 'new_group_id' );
-			$new_group    = Custom_Fields_Group_Model::find( $new_group_id );
+			$new_group_id = $request->get_param( 'new_group_id' ) ? $request->get_param( 'new_group_id' ) : 0;
 
-			if ( ! $new_group ) {
-				return new WP_Error( 'error', __( 'New group not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			if ( $new_group_id ) {
+				$new_group = Custom_Fields_Group_Model::find( $new_group_id );
+
+				if ( ! $new_group ) {
+					return new WP_Error( 'error', __( 'New group not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				}
+
+				$fields = $group->custom_fields;
+				foreach ( $fields as $field ) {
+					$field->group_id = $new_group_id; // Update the foreign key
+					$field->save(); // Save the updated field
+				}
 			}
 
-			$fields = $group->custom_fields;
-			// Use method to move fields to new group.
-			$new_group->custom_fields()->associate( $fields );
+			$group->delete();
 
-			return new WP_REST_Response( null, 204 );
+			return new WP_REST_Response(
+				array(
+					'message' => __( 'Custom fields group deleted.', 'quillcrm' ),
+				),
+				204
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}

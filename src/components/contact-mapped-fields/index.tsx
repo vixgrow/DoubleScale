@@ -31,6 +31,7 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 	fields,
 }) => {
 	const contactFieldsGroups = ConfigAPI.getContactFieldsGroups();
+	console.log(contactFieldsGroups);
 
 	return (
 		<Flex gap={10} vertical>

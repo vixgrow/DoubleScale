@@ -116,6 +116,7 @@ const Initial: React.FC = () => {
 							type="primary"
 							loading={isSaving}
 							onClick={save}
+							disabled={!campaign.name || isSaving}
 						>
 							{__('Next', 'quillcrm')}
 						</Button>

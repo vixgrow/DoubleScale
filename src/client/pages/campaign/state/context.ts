@@ -16,7 +16,7 @@ export const CampaignContext = createContext<{
 	setIsLoading: (isLoading: boolean) => void;
 	setIsSaving: (isSaving: boolean) => void;
 	updateCampaign: (payload: Partial<Campaign>) => void;
-	saveCampaign: () => void;
+	saveCampaign: (payload?: Partial<Campaign>) => void;
 	updateSettings: (
 		key: keyof Campaign['settings'],
 		value: Campaign['settings'][keyof Campaign['settings']]

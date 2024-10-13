@@ -538,6 +538,6 @@ export type IntegrationSelectOptions = {
 
 export type ReactSelectOptions = {
 	label: string;
-	value: string;
+	value: string | number;
 	style?: React.CSSProperties;
 }[];

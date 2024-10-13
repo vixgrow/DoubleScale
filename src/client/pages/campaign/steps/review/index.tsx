@@ -2,6 +2,8 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
+import { useState } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -17,19 +19,49 @@ import type { RadioChangeEvent } from 'antd';
 import './style.scss';
 import { useCampaignContext } from '../../state/context';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { isEmpty, isString } from 'lodash';
 
 const Review: React.FC = () => {
-	const { campaign, updateCampaign, isLoading, saveCampaign, isSaving } =
+	const { campaign, isLoading, saveCampaign, isSaving } =
 		useCampaignContext();
 	const navigate = useNavigate();
+	const { createNotice } = useDispatch('quillcrm/core');
+	const [runType, setRunType] = useState<string>(campaign?.status || '');
+	const [executeAt, setExecuteAt] = useState<string>(
+		campaign?.execute_at || new Date().toISOString()
+	);
 
 	const save = async () => {
 		if (!campaign) {
 			return;
 		}
 
+		if (!runType) {
+			createNotice({
+				type: 'error',
+				message: __('Please select a run type', 'quillcrm'),
+			});
+			return;
+		}
+
+		if (runType === 'schedule' && isEmpty(executeAt)) {
+			createNotice({
+				type: 'error',
+				message: __('Please select a schedule date', 'quillcrm'),
+			});
+			return;
+		}
+
+		const data = {
+			status: runType,
+		};
+
+		if (runType === 'schedule') {
+			data['execute_at'] = executeAt;
+		}
+
 		try {
-			await saveCampaign();
+			await saveCampaign(data);
 			navigate(getToLink(`campaigns/${campaign.id}/overview`));
 		} catch (error) {
 			console.error(error);
@@ -49,11 +81,9 @@ const Review: React.FC = () => {
 							</div>
 							<div className="qcrm-field-input">
 								<Radio.Group
-									value={campaign.status}
+									value={runType}
 									onChange={(e: RadioChangeEvent) => {
-										updateCampaign({
-											status: e.target.value,
-										});
+										setRunType(e.target.value);
 									}}
 									optionType="button"
 									buttonStyle="solid"
@@ -67,7 +97,7 @@ const Review: React.FC = () => {
 								</Radio.Group>
 							</div>
 						</div>
-						{campaign.status === 'schedule' && (
+						{runType === 'schedule' && (
 							<div className="qcrm-review-schedule-date qcrm-field">
 								<div className="qcrm-field-label">
 									<Typography.Text>
@@ -80,12 +110,13 @@ const Review: React.FC = () => {
 										format="YYYY-MM-DD HH:mm:ss"
 										showTime
 										showSecond={false}
-										value={dayjs(campaign.execute_at)}
+										value={dayjs(executeAt)}
 										// @ts-ignore
 										onChange={(date, dateString) => {
-											updateCampaign({
-												execute_at: dateString,
-											});
+											if (!isString(dateString)) {
+												return;
+											}
+											setExecuteAt(dateString);
 										}}
 									/>
 								</div>
@@ -109,6 +140,10 @@ const Review: React.FC = () => {
 							type="primary"
 							loading={isSaving}
 							onClick={save}
+							disabled={
+								!runType ||
+								(runType === 'schedule' && isEmpty(executeAt))
+							}
 						>
 							{__('Save', 'quillcrm')}
 						</Button>

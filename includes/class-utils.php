@@ -37,7 +37,9 @@ class Utils {
 			}
 		}
 
-		return apply_filters( 'quillcrm_max_execution_time', 0.005 );
+		$adjusted_execution_time = $max_execution_time * 0.75;
+
+		return apply_filters( 'quillcrm_max_execution_time', $adjusted_execution_time );
 	}
 
 	/**
@@ -117,8 +119,8 @@ class Utils {
 	 * @return array
 	 */
 	public static function get_contact_fields() {
-		$default_fields = array(
-			'default' => array(
+		$fields = array(
+			0 => array(
 				'label'  => __( 'Default Fields', 'quillcrm' ),
 				'fields' => array(
 					'first_name' => array(
@@ -153,6 +155,10 @@ class Utils {
 						'label' => __( 'State', 'quillcrm' ),
 						'type'  => 'text',
 					),
+					'country'    => array(
+						'label' => __( 'Country', 'quillcrm' ),
+						'type'  => 'text',
+					),
 					'zip'        => array(
 						'label' => __( 'Zip', 'quillcrm' ),
 						'type'  => 'text',
@@ -163,7 +169,7 @@ class Utils {
 
 		$custom_fields = self::get_custom_fields();
 
-		$fields = array_merge( $default_fields, $custom_fields );
+		$fields = array_merge( $fields, $custom_fields );
 
 		return $fields;
 	}
@@ -181,6 +187,10 @@ class Utils {
 		$fields = array();
 
 		foreach ( $groups as $group ) {
+			if ( empty( $group->custom_fields ) ) {
+				continue;
+			}
+
 			/** @var Custom_Fields_Group_Model $group */
 			$fields[ $group->id ] = array(
 				'label'  => $group->name,

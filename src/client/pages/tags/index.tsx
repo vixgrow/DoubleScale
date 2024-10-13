@@ -29,6 +29,7 @@ import { EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
 import './style.scss';
 import type { Tag as ContactTag, TagsResponse } from '@quillcrm/client';
 import { Field } from '@quillcrm/components';
+import { convertDate } from '@quillcrm/utils';
 
 const { Column } = Table;
 
@@ -51,7 +52,7 @@ const Tags: React.FC = () => {
 	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
-	const fetchTags = async () => {
+	const fetchTags = async (clear: boolean = false) => {
 		setLoading(true);
 
 		try {
@@ -59,16 +60,16 @@ const Tags: React.FC = () => {
 				path: addQueryArgs('/qc/v1/tags', {
 					per_page: perPage,
 					page,
-					keyword,
+					keyword: clear ? '' : keyword,
 				}),
 			})) as TagsResponse;
 
 			setTags(response.data);
 			setTotal(response.total);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch tags', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -80,6 +81,10 @@ const Tags: React.FC = () => {
 	}, [page, perPage]);
 
 	const createTag = async () => {
+		if (!validate(tag)) {
+			return;
+		}
+
 		setIsSaving(true);
 		try {
 			const response = await apiFetch({
@@ -94,10 +99,10 @@ const Tags: React.FC = () => {
 				name: '',
 				description: '',
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to create tag', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
@@ -105,6 +110,14 @@ const Tags: React.FC = () => {
 	};
 
 	const updateTag = async () => {
+		if (!selectedTag) {
+			return;
+		}
+
+		if (!validate(selectedTag)) {
+			return;
+		}
+
 		setIsSaving(true);
 		try {
 			const response = (await apiFetch({
@@ -119,10 +132,10 @@ const Tags: React.FC = () => {
 
 			setVisible(false);
 			setSelectedTag(null);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to update tag', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
@@ -137,10 +150,10 @@ const Tags: React.FC = () => {
 			});
 
 			setTags(tags.filter((tag) => tag.id !== id));
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete tag', 'quillcrm'),
+				message: error.message,
 			});
 		}
 	};
@@ -161,14 +174,26 @@ const Tags: React.FC = () => {
 
 			setTags(tags.filter((tag) => !selectedRowKeys.includes(tag.id)));
 			setSelectedRowKeys([]);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete tags', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsApplying(false);
 		}
+	};
+
+	const validate = (tag: Partial<ContactTag>) => {
+		if (!tag.name) {
+			createNotice({
+				type: 'error',
+				message: __('Tag name is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		return true;
 	};
 
 	return (
@@ -213,7 +238,11 @@ const Tags: React.FC = () => {
 					<Input.Search
 						placeholder={__('Search Tags', 'quillcrm')}
 						allowClear
-						onSearch={() => {
+						onSearch={(_value, _e, source) => {
+							if (source?.source === 'clear') {
+								fetchTags(true);
+								return;
+							}
 							fetchTags();
 						}}
 						onChange={(e) => setKeyword(e.target.value)}
@@ -296,12 +325,13 @@ const Tags: React.FC = () => {
 					title={__('Contacts', 'quillcrm')}
 					dataIndex="contacts_count"
 					key="contacts_count"
+					render={(count: number) => count ?? 0}
 				/>
 				<Column
 					title={__('Created At', 'quillcrm')}
 					dataIndex="created_at"
 					key="created_at"
-					render={(date: string) => new Date(date).toLocaleString()}
+					render={(date: string) => convertDate(date)}
 				/>
 			</Table>
 			<Modal

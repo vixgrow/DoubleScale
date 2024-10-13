@@ -12,8 +12,15 @@ import { useDispatch } from '@wordpress/data';
  */
 import { Typography, Button, Modal, Popconfirm, Flex, Skeleton } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { map, keys, omit } from 'lodash';
-import { useDroppable, useDraggable, DndContext } from '@dnd-kit/core';
+import { map, keys } from 'lodash';
+import {
+	useDroppable,
+	useDraggable,
+	DndContext,
+	useSensors,
+	useSensor,
+	PointerSensor,
+} from '@dnd-kit/core';
 
 /**
  * Internal dependencies
@@ -27,7 +34,7 @@ import {
 import ConfigAPI from '@quillcrm/config';
 import { Field } from '@quillcrm/components';
 
-function Droppable({ children, id, title }) {
+function Droppable({ children, id, title, onDelete, fieldsCount, deletable }) {
 	const { setNodeRef } = useDroppable({
 		id: id,
 	});
@@ -38,9 +45,38 @@ function Droppable({ children, id, title }) {
 			gap={10}
 			className="custom-fields-group"
 		>
-			<Typography.Title level={5} className="custom-fields-group-title">
-				{title}
-			</Typography.Title>
+			<Flex
+				justify="space-between"
+				align="center"
+				className="custom-fields-group-header"
+			>
+				<Typography.Title
+					className="custom-fields-group-title"
+					level={5}
+				>
+					{title}
+				</Typography.Title>
+				{deletable ? (
+					fieldsCount > 0 ? (
+						<Button
+							onClick={() => onDelete()}
+							icon={<DeleteOutlined />}
+							danger
+						/>
+					) : (
+						<Popconfirm
+							title={__(
+								'Are you sure you want to delete this group?'
+							)}
+							onConfirm={() => onDelete()}
+							okText={__('Yes', 'quillcrm')}
+							cancelText={__('No', 'quillcrm')}
+						>
+							<Button icon={<DeleteOutlined />} danger />
+						</Popconfirm>
+					)
+				) : null}
+			</Flex>
 			<Flex gap={20} vertical className="custom-fields-group-items">
 				{children}
 			</Flex>
@@ -76,12 +112,7 @@ const Draggable = (props) => {
 		>
 			<Typography.Text>{props.children}</Typography.Text>
 			<Flex gap={10}>
-				<Button
-					onClick={() => {
-						console.log(Math.random());
-					}}
-					icon={<EditOutlined />}
-				/>
+				<Button onClick={props.onEdit} icon={<EditOutlined />} />
 				<Popconfirm
 					title={__('Are you sure you want to delete this field?')}
 					onConfirm={props.onDelete}
@@ -122,6 +153,11 @@ const CustomFields: React.FC = () => {
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [addGroupVisible, setAddGroupVisible] = useState<boolean>(false);
 	const customFieldsTypes = ConfigAPI.getCustomFieldsTypes();
+	const [deleteGroupId, setDeleteGroupId] = useState<number>(0);
+	const [newGroupId, setNewGroupId] = useState<number>(0);
+	const [deleteGroupVisible, setDeleteGroupVisible] =
+		useState<boolean>(false);
+	const [isDeletingGroup, setIsDeletingGroup] = useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const typesOptions = map(keys(customFieldsTypes), (type) => ({
@@ -130,16 +166,9 @@ const CustomFields: React.FC = () => {
 	}));
 
 	const groupOptions = [
-		{
-			value: 0,
-			label: __('Select a group', 'quillcrm'),
-			style: {
-				display: 'none',
-			},
-		},
 		...map(groups, (group) => ({
 			label: group.name,
-			value: group.id.toString(),
+			value: group.id,
 		})),
 	];
 
@@ -167,6 +196,9 @@ const CustomFields: React.FC = () => {
 	}, []);
 
 	const addField = async () => {
+		if (!validate(customField)) {
+			return;
+		}
 		setIsAdding(true);
 
 		try {
@@ -180,14 +212,20 @@ const CustomFields: React.FC = () => {
 				if (group.id === response.group_id) {
 					return {
 						...group,
-						custom_fields: group.custom_fields.concat(response),
+						custom_fields: [...group.custom_fields, response],
 					};
 				}
 
 				return group;
 			});
+
 			setGroups(updatedGroups);
 			setVisible(false);
+			setCustomField({
+				name: '',
+				type: '',
+				group_id: 0,
+			});
 			createNotice({
 				type: 'success',
 				message: __('Custom field added', 'quillcrm'),
@@ -204,6 +242,10 @@ const CustomFields: React.FC = () => {
 
 	const editField = async () => {
 		if (!selectedField) {
+			return;
+		}
+
+		if (!validate(selectedField)) {
 			return;
 		}
 		setIsEditing(true);
@@ -250,7 +292,7 @@ const CustomFields: React.FC = () => {
 		}
 	};
 
-	const deleteField = async () => {
+	const deleteField = async (selectedField: CustomField) => {
 		if (!selectedField) {
 			return;
 		}
@@ -263,17 +305,22 @@ const CustomFields: React.FC = () => {
 
 			const updatedGroups = map(groups, (group) => {
 				if (group.id === selectedField.group_id) {
-					return omit(group, selectedField.id);
+					return {
+						...group,
+						custom_fields: group.custom_fields.filter(
+							(field) => field.id !== selectedField.id
+						),
+					};
 				}
 
 				return group;
 			});
 
 			setGroups(updatedGroups);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete custom field', 'quillcrm'),
+				message: error.message,
 			});
 		}
 	};
@@ -295,6 +342,9 @@ const CustomFields: React.FC = () => {
 	};
 
 	const addGroup = async () => {
+		if (!validateGroup(group)) {
+			return;
+		}
 		setIsSaving(true);
 
 		try {
@@ -305,7 +355,7 @@ const CustomFields: React.FC = () => {
 			})) as CustomFieldsGroup;
 
 			setGroups([...groups, response]);
-			setVisible(false);
+			setAddGroupVisible(false);
 			createNotice({
 				type: 'success',
 				message: __('Group added', 'quillcrm'),
@@ -317,6 +367,73 @@ const CustomFields: React.FC = () => {
 			});
 		} finally {
 			setIsSaving(false);
+		}
+	};
+
+	const deleteGroup = async (groupId?: number) => {
+		if (isDeletingGroup) {
+			return;
+		}
+		const toDeleteGroupId = groupId || deleteGroupId;
+		if (!toDeleteGroupId) {
+			return;
+		}
+
+		setIsDeletingGroup(true);
+
+		try {
+			const response = await apiFetch({
+				path: `/qc/v1/custom-fields-groups/${toDeleteGroupId}`,
+				method: 'DELETE',
+				data: {
+					new_group_id: newGroupId,
+				},
+			});
+
+			let updatedGroups = [...groups].filter(
+				(group) => group.id !== toDeleteGroupId
+			);
+
+			if (newGroupId) {
+				const deletedGroup = groups.find(
+					(group) => group.id === toDeleteGroupId
+				);
+				const newGroup = groups.find(
+					(group) => group.id === newGroupId
+				);
+
+				if (deletedGroup && newGroup) {
+					updatedGroups = map(updatedGroups, (group) => {
+						if (group.id === newGroupId) {
+							return {
+								...group,
+								custom_fields: [
+									...group.custom_fields,
+									...deletedGroup.custom_fields,
+								],
+							};
+						}
+
+						return group;
+					});
+				}
+			}
+
+			setGroups(updatedGroups);
+			setDeleteGroupVisible(false);
+			setDeleteGroupId(0);
+			setNewGroupId(0);
+			createNotice({
+				type: 'success',
+				message: __('Group deleted', 'quillcrm'),
+			});
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message: __('Failed to delete group', 'quillcrm'),
+			});
+		} finally {
+			setIsDeletingGroup(false);
 		}
 	};
 
@@ -373,9 +490,57 @@ const CustomFields: React.FC = () => {
 		return updatedGroups;
 	};
 
+	const sensors = useSensors(
+		useSensor(PointerSensor, {
+			activationConstraint: {
+				distance: 8,
+			},
+		})
+	);
+
 	if (loading) {
 		return <Skeleton active />;
 	}
+
+	const validate = (field: Partial<CustomField>) => {
+		if (!field.name) {
+			createNotice({
+				type: 'error',
+				message: __('Field name is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		if (!field.type) {
+			createNotice({
+				type: 'error',
+				message: __('Field type is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		if (!field.group_id) {
+			createNotice({
+				type: 'error',
+				message: __('Field group is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		return true;
+	};
+
+	const validateGroup = (group: Partial<CustomFieldsGroup>) => {
+		if (!group.name) {
+			createNotice({
+				type: 'error',
+				message: __('Group name is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		return true;
+	};
 
 	return (
 		<div className="custom-fields">
@@ -383,15 +548,35 @@ const CustomFields: React.FC = () => {
 				className="qcrm-contacts-list__actions"
 				justify="space-between"
 			>
-				<Button onClick={() => setAddGroupVisible(true)}>
+				<Button
+					onClick={() => {
+						setAddGroupVisible(true);
+					}}
+				>
 					{__('Add Group')}
 				</Button>
-				<Button type="primary" onClick={() => setVisible(true)}>
+				<Button
+					type="primary"
+					onClick={() => {
+						if (groups.length === 0) {
+							createNotice({
+								type: 'error',
+								message: __(
+									'Please add group first',
+									'quillcrm'
+								),
+							});
+							return;
+						}
+						setVisible(true);
+					}}
+				>
 					{__('Add Field')}
 				</Button>
 			</Flex>
 			<Flex gap={10}>
 				<DndContext
+					sensors={sensors}
 					onDragEnd={({ active, over }) => {
 						if (!over) {
 							return;
@@ -416,6 +601,16 @@ const CustomFields: React.FC = () => {
 							key={group.id}
 							id={`group-${group.id}`}
 							title={group.name}
+							fieldsCount={group.custom_fields.length}
+							onDelete={() => {
+								if (group.custom_fields.length > 0) {
+									setDeleteGroupId(group.id);
+									setDeleteGroupVisible(true);
+								} else {
+									deleteGroup(group.id);
+								}
+							}}
+							deletable={groups.length > 1}
 						>
 							{map(group.custom_fields, (field: CustomField) => (
 								<Draggable
@@ -425,10 +620,7 @@ const CustomFields: React.FC = () => {
 										setSelectedField(field);
 										setVisible(true);
 									}}
-									onDelete={() => {
-										setSelectedField(field);
-										deleteField();
-									}}
+									onDelete={() => deleteField(field)}
 								>
 									{field.name}
 								</Draggable>
@@ -506,7 +698,7 @@ const CustomFields: React.FC = () => {
 						value={
 							selectedField
 								? selectedField.group_id
-								: customField.group_id
+								: customField.group_id || 0
 						}
 						onChange={(value) => {
 							if (selectedField) {
@@ -560,6 +752,49 @@ const CustomFields: React.FC = () => {
 						type="text"
 					/>
 				</div>
+			</Modal>
+			<Modal
+				title={__('Delete Group', 'quillcrm')}
+				open={deleteGroupVisible}
+				footer={[
+					<Button
+						key="cancel"
+						onClick={() => setDeleteGroupVisible(false)}
+						disabled={isDeletingGroup}
+					>
+						{__('Cancel')}
+					</Button>,
+					<Button
+						loading={isDeletingGroup}
+						onClick={() => {
+							if (!newGroupId) {
+								createNotice({
+									type: 'error',
+									message: __(
+										'Please select a group to move fields',
+										'quillcrm'
+									),
+								});
+								return;
+							}
+
+							deleteGroup();
+						}}
+						danger
+					>
+						{__('Delete')}
+					</Button>,
+				]}
+			>
+				<Field
+					label={__('Move fields to', 'quillcrm')}
+					value={newGroupId}
+					onChange={(value) => setNewGroupId(value)}
+					type="select"
+					options={groupOptions.filter(
+						(option) => option.value !== deleteGroupId
+					)}
+				/>
 			</Modal>
 		</div>
 	);

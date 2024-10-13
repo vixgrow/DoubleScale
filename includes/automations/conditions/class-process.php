@@ -56,7 +56,7 @@ class Process {
 	 * @return bool
 	 */
 	public function Check() {
-		foreach ( $this->conditions as $group ) {
+		foreach ( $this->conditions ?? array() as $group ) {
 			$group_result = $this->check_group( $group );
 
 			if ( ! $group_result ) {

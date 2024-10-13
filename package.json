@@ -4,6 +4,7 @@
   "main": "webpack.config.js",
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
+    "@types/validator": "^13.12.2",
     "@woocommerce/navigation": "^8.2.0",
     "@woocommerce/settings": "^1.0.0",
     "@wordpress/api-fetch": "^7.3.0",
@@ -30,7 +31,8 @@
     "react-select": "^5.8.0",
     "rtlcss-webpack-plugin": "^4.0.7",
     "ts-loader": "^9.5.1",
-    "utility-types": "^3.11.0"
+    "utility-types": "^3.11.0",
+    "validator": "^13.12.0"
   },
   "scripts": {
     "dev": "wp-scripts start src/client/index.tsx --output-path=build/client",

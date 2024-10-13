@@ -54,7 +54,36 @@ class Status extends Filter {
 	 *
 	 * @since 1.0.0
 	 */
-	public $type = 'text';
+	public $type = 'select';
+
+	/**
+	 * Get operators
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_operators() {
+		return array(
+			'is'     => 'Is',
+			'is_not' => 'Is Not',
+		);
+	}
+
+	/**
+	 * Get options
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_options() {
+		return array(
+			'subscribed'   => __( 'Subscribed', 'quillcrm' ),
+			'unsubscribed' => __( 'Unsubscribed', 'quillcrm' ),
+			'bounced'      => __( 'Bounced', 'quillcrm' ),
+		);
+	}
 }
 
 Filters_Manager::instance()->register( new Status() );

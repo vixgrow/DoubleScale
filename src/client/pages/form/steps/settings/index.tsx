@@ -8,10 +8,8 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Card, Typography, Flex, Input, Switch } from 'antd';
-import { isObject, map } from 'lodash';
-import { ThreeDots as Loader } from 'react-loader-spinner';
-import Select from 'react-select';
+import { Button, Card, Typography, Flex, Switch } from 'antd';
+import { map, mapValues } from 'lodash';
 
 /**
  * Internal dependencies
@@ -20,12 +18,12 @@ import './style.scss';
 import { useFormContext } from '../../state/context';
 import ConfigAPI from '@quillcrm/config';
 import type { Form } from '@quillcrm/config';
+import type { MappedFields } from '@quillcrm/client';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { ListField, TagField } from '@quillcrm/components';
+import { ListField, TagField, ContactMappedFields } from '@quillcrm/components';
 
 const Settings: React.FC = () => {
-	const { form, isLoading, saveForm, isSaving, updateSettings } =
-		useFormContext();
+	const { form, saveForm, updateSettings } = useFormContext();
 	const { getForms } = ConfigAPI;
 	const forms = getForms();
 	const fieldsSettings = form
@@ -34,18 +32,18 @@ const Settings: React.FC = () => {
 	const [formFields, setFormFields] = useState<
 		Form['fields_settings']['fields'] | null
 	>(null);
-	const [isFetching, setIsFetching] = useState(false);
-	const { getAjaxUrl, getNonce, getContactFieldsGroups } = ConfigAPI;
-	const contactFieldsGroups = getContactFieldsGroups();
+	const [isFetching, setIsFetching] = useState(true);
+	const { getAjaxUrl, getNonce } = ConfigAPI;
 	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
+	const [isSaving, setIsSaving] = useState(false);
+	const [isActivating, setIsActivating] = useState(false);
 
 	const getFormFields = async () => {
 		if (!form || !fieldsSettings) {
 			return;
 		}
-
-		setIsFetching(true);
+		console.log(form);
 
 		try {
 			const body = new FormData();
@@ -54,14 +52,23 @@ const Settings: React.FC = () => {
 			map(fieldsSettings.fields, (key) => {
 				body.append(key, form[key] || '');
 			});
+			console.log(fieldsSettings, 'fieldsSettings');
+
 			const response = await fetch(getAjaxUrl(), {
 				method: 'POST',
 				body,
 			});
 
 			const data = await response.json();
+			console.log(data);
 
-			setFormFields(data.data as Form['fields_settings']['fields']);
+			if (!data.success) {
+				throw new Error(data.data);
+			}
+
+			setFormFields(
+				data.data as Form['fields_settings']['fields']
+			);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -77,17 +84,17 @@ const Settings: React.FC = () => {
 	}, [form?.form_id]);
 
 	const settings = form?.data || null;
-	const mappedFields = settings
-		? settings?.mapped_fields
-		: {
-				first_name: '',
-				last_name: '',
-				email: '',
-			};
+	const mappedFields = settings ? settings?.mapped_fields : {};
 
 	const save = async (status) => {
 		if (!form) {
 			return;
+		}
+
+		if (status === 'active') {
+			setIsActivating(true);
+		} else {
+			setIsSaving(true);
 		}
 
 		try {
@@ -104,31 +111,19 @@ const Settings: React.FC = () => {
 				type: 'error',
 				message: __('Failed to save form', 'quillcrm'),
 			});
-		}
-	};
-
-	const getValueLabel = (value: string) => {
-		for (const groupKey in contactFieldsGroups) {
-			const group = contactFieldsGroups[groupKey];
-
-			if (group.fields[value]) {
-				return {
-					label: group.fields[value].label,
-					value: value,
-				};
+		} finally {
+			if (status === 'active') {
+				setIsActivating(false);
+			} else {
+				setIsSaving(false);
 			}
 		}
-
-		return '';
 	};
 
 	return (
-		<Card loading={isLoading}>
+		<Card loading={isFetching}>
 			{form && (
 				<>
-					{isFetching && (
-						<Loader color="#00BFFF" height={40} width={40} />
-					)}
 					{!isFetching && (
 						<>
 							<div className="qcrm-fields">
@@ -138,89 +133,21 @@ const Settings: React.FC = () => {
 											{__('Map fields', 'quillcrm')}
 										</Typography.Text>
 									</div>
-									<Flex
-										className="qcrm-field-input"
-										vertical={true}
-										gap={10}
-									>
-										{formFields &&
-											map(formFields, (data, key) => {
-												return (
-													<div key={key}>
-														<Flex
-															justify="space-between"
-															gap={10}
-														>
-															<Input
-																readOnly
-																value={data}
-																style={{
-																	flex: 1,
-																}}
-															/>
-															<Select
-																value={getValueLabel(
-																	mappedFields[
-																		key
-																	]
-																)}
-																onChange={(
-																	value
-																) => {
-																	if (
-																		!isObject(
-																			value
-																		)
-																	) {
-																		return;
-																	}
-																	updateSettings(
-																		'mapped_fields',
-																		{
-																			...mappedFields,
-																			[key]: value.value,
-																		}
-																	);
-																}}
-																styles={{
-																	container: (
-																		styles
-																	) => ({
-																		...styles,
-																		flex: 1,
-																	}),
-																}}
-																options={map(
-																	contactFieldsGroups,
-																	(
-																		group,
-																		groupKey
-																	) => ({
-																		label: group.label,
-																		value: groupKey,
-																		options:
-																			map(
-																				group.fields,
-																				(
-																					field,
-																					fieldKey
-																				) => ({
-																					label: field.label,
-																					value: fieldKey,
-																				})
-																			),
-																	})
-																)}
-																placeholder={__(
-																	'Select field',
-																	'quillcrm'
-																)}
-															/>
-														</Flex>
-													</div>
+									{formFields && (
+										<ContactMappedFields
+											values={mappedFields}
+											onChange={(value: MappedFields) => {
+												updateSettings(
+													'mapped_fields',
+													value
 												);
-											})}
-									</Flex>
+											}}
+											fields={mapValues(
+												formFields,
+												(name) => ({ label: name })
+											)}
+										/>
+									)}
 								</div>
 								<div className="qcrm-field">
 									<div className="qcrm-field-label">
@@ -358,7 +285,7 @@ const Settings: React.FC = () => {
 								</Button>
 								<Button
 									type="primary"
-									loading={isSaving}
+									loading={isActivating}
 									onClick={() => save('active')}
 								>
 									{__('Activate', 'quillcrm')}

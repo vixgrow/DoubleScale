@@ -8,7 +8,6 @@
 
 namespace QuillCRM;
 
-use QuillCRM\Database\Install;
 use QuillCRM\REST_API\REST_API;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher;
@@ -107,7 +106,6 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	private function __construct() {
-		register_activation_hook( QUILLCRM_PLUGIN_FILE, array( Install::class, 'install' ) );
 		$this->init_illuminate();
 		$this->load_dependencies();
 		$this->init_objects();

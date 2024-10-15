@@ -68,7 +68,7 @@ class Form extends Abstracts_Form {
 	 *
 	 * @param string $form_id
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function get_fields( $form_id ) {
 		$form   = wpFluent()->table( 'fluentform_forms' )->find( $form_id );
@@ -91,7 +91,7 @@ class Form extends Abstracts_Form {
 	 *
 	 * @param array $fields
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function get_fields_recursive( $fields ) {
 		$result = array();
@@ -191,7 +191,7 @@ class Form extends Abstracts_Form {
 	 *
 	 * @param array $fields Fields.
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function prepare_form_fields_recursive( $fields ) {
 		$result = array();

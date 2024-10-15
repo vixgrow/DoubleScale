@@ -95,7 +95,7 @@ class Form extends Abstracts_Form {
 
 		$fields = $this->get_fields( $form_id );
 
-		wp_send_json_success( array( 'fields' => $fields ) );
+		wp_send_json_success( $fields );
 	}
 
 	/**
@@ -120,7 +120,7 @@ class Form extends Abstracts_Form {
 			}
 		}
 
-		wp_send_json_success( array( 'options' => $options ) );
+		wp_send_json_success( $options );
 	}
 
 	/**

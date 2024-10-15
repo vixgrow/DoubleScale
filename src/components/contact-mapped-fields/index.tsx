@@ -6,14 +6,16 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Typography, Flex, Select, Input } from 'antd';
+import { Typography, Flex, Input } from 'antd';
+import Select from 'react-select';
+import { find, flatMap } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import ConfigAPI from '@quillcrm/config';
-import { map } from 'lodash';
+import { isObject, map } from 'lodash';
 
 interface ContactMappedFieldsProps {
 	onChange: (value: { [key: string]: string }) => void;
@@ -31,7 +33,32 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 	fields,
 }) => {
 	const contactFieldsGroups = ConfigAPI.getContactFieldsGroups();
-	console.log(contactFieldsGroups);
+
+	const getAllValue = (value: string) => {
+		if (!value) {
+			return null;
+		}
+
+		const groups = flatMap(contactFieldsGroups, (group) => group.fields);
+		const field = find(groups, (fields) => fields[value]);
+
+		return field ? { label: field[value].label, value } : null;
+	};
+
+	const options = map(contactFieldsGroups, (group, groupKey) => ({
+		label: group.label,
+		value: groupKey,
+		options: map(group.fields, (field, fieldKey) => ({
+			label: field.label,
+			value: fieldKey,
+		})),
+	}));
+
+	// @ts-ignore The none option not a group.
+	options.unshift({
+		label: __('None', 'quillcrm'),
+		value: '',
+	});
 
 	return (
 		<Flex gap={10} vertical>
@@ -46,30 +73,35 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 			{map(fields, (_, key) => {
 				return (
 					<Flex key={key} gap={20}>
-						<Input value={key} disabled style={{ flex: 1 }} />
+						<Input
+							value={fields[key].label}
+							disabled
+							style={{ flex: 1 }}
+						/>
 						<Select
 							onChange={(value) => {
+								if (!isObject(value)) {
+									return;
+								}
+
 								onChange({
 									...values,
-									[key]: value,
+									[key]: value.value,
 								});
 							}}
-							value={values?.[key] || ''}
-							options={map(
-								contactFieldsGroups,
-								(group, groupKey) => ({
-									label: group.label,
-									value: groupKey,
-									options: map(
-										group.fields,
-										(field, fieldKey) => ({
-											label: field.label,
-											value: fieldKey,
-										})
-									),
-								})
-							)}
-							style={{ flex: 1 }}
+							value={getAllValue(values[key])}
+							options={options}
+							styles={{
+								control: (styles) => ({
+									...styles,
+									flex: 1,
+								}),
+								container: (styles) => ({
+									...styles,
+									flex: 1,
+								}),
+							}}
+							isSearchable={false}
 						/>
 					</Flex>
 				);

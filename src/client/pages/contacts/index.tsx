@@ -471,8 +471,6 @@ const ContactsList: React.FC = () => {
 			},
 		});
 	}
-	console.log(selectedLists, 'selectedLists');
-	console.log(selectedTags, 'selectedTags');
 
 	return (
 		<div className="qcrm-contacts-list">
@@ -519,18 +517,18 @@ const ContactsList: React.FC = () => {
 						/>
 						{(bulkAction === 'add_to_list' ||
 							bulkAction === 'remove_from_list') && (
-							<ListField
-								value={selectedLists}
-								onChange={(value) => setSelectedLists(value)}
-							/>
-						)}
+								<ListField
+									value={selectedLists}
+									onChange={(value) => setSelectedLists(value)}
+								/>
+							)}
 						{(bulkAction === 'add_tag' ||
 							bulkAction === 'remove_tag') && (
-							<TagField
-								value={selectedTags}
-								onChange={(value) => setSelectedTags(value)}
-							/>
-						)}
+								<TagField
+									value={selectedTags}
+									onChange={(value) => setSelectedTags(value)}
+								/>
+							)}
 						<Button
 							type="primary"
 							onClick={() => doBulkAction(bulkAction)}

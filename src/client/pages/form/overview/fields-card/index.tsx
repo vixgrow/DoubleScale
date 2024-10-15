@@ -76,7 +76,9 @@ const FieldsCard: React.FC = () => {
 
 			const data = await response.json();
 
-			setFormFields(data.data);
+			setFormFields(
+				data.data.fields as Form['fields_settings']['fields']
+			);
 		} catch (error) {
 			createNotice({
 				type: 'error',

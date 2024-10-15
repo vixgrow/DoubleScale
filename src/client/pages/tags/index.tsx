@@ -30,6 +30,7 @@ import './style.scss';
 import type { Tag as ContactTag, TagsResponse } from '@quillcrm/client';
 import { Field } from '@quillcrm/components';
 import { convertDate } from '@quillcrm/utils';
+import { isEmpty } from 'validator';
 
 const { Column } = Table;
 
@@ -185,7 +186,7 @@ const Tags: React.FC = () => {
 	};
 
 	const validate = (tag: Partial<ContactTag>) => {
-		if (!tag.name) {
+		if (isEmpty(tag.name || '', { ignore_whitespace: true })) {
 			createNotice({
 				type: 'error',
 				message: __('Tag name is required', 'quillcrm'),

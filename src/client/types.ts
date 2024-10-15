@@ -210,10 +210,7 @@ export type FiltersGroups = {
 	contact: FiltersGroup;
 };
 
-type MappedFields = {
-	first_name: string;
-	last_name: string;
-	email: string;
+export type MappedFields = {
 	[key: string]: string;
 };
 
@@ -232,6 +229,7 @@ export type Form = {
 	created_at: string;
 	updated_at: string;
 	[temp: string]: any;
+	post_id?: number;
 };
 
 export type Forms = Form[];

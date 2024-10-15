@@ -30,6 +30,7 @@ import './style.scss';
 import type { List as ContactList, ListsResponse } from '@quillcrm/client';
 import { Field } from '@quillcrm/components';
 import { convertDate } from '@quillcrm/utils';
+import { isEmpty } from 'validator';
 
 const { Column } = Table;
 
@@ -41,8 +42,12 @@ const Lists: React.FC = () => {
 	const [total, setTotal] = useState<number>(0);
 	const [keyword, setKeyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
-	const [selectedList, setSelectedList] = useState<ContactList | null>(null);
-	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+	const [selectedList, setSelectedList] = useState<ContactList | null>(
+		null
+	);
+	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>(
+		[]
+	);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [list, setList] = useState({
 		name: '',
@@ -66,10 +71,10 @@ const Lists: React.FC = () => {
 
 			setLists(response.data);
 			setTotal(response.total);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch lists', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -99,10 +104,10 @@ const Lists: React.FC = () => {
 				name: '',
 				description: '',
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to create list', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
@@ -133,10 +138,10 @@ const Lists: React.FC = () => {
 				type: 'success',
 				message: __('List updated successfully', 'quillcrm'),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to update list', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
@@ -151,10 +156,10 @@ const Lists: React.FC = () => {
 			});
 
 			setLists(lists.filter((list) => list.id !== id));
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete list', 'quillcrm'),
+				message: error.message,
 			});
 		}
 	};
@@ -174,13 +179,15 @@ const Lists: React.FC = () => {
 			});
 
 			setLists(
-				lists.filter((list) => !selectedRowKeys.includes(list.id))
+				lists.filter(
+					(list) => !selectedRowKeys.includes(list.id)
+				)
 			);
 			setSelectedRowKeys([]);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete lists', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsApplying(false);
@@ -188,7 +195,7 @@ const Lists: React.FC = () => {
 	};
 
 	const validate = (list: Partial<ContactList>) => {
-		if (!list.name) {
+		if (isEmpty(list.name || '', { ignore_whitespace: true })) {
 			createNotice({
 				type: 'error',
 				message: __('List name is required', 'quillcrm'),

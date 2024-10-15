@@ -61,6 +61,9 @@ const TagField = ({ value, onChange }: Props) => {
 					<AsyncSelect
 						loadOptions={(inputValue, callback) => {
 							fetchTags(inputValue).then((data) => {
+								if (!data) {
+									return;
+								}
 								callback(data);
 							});
 						}}

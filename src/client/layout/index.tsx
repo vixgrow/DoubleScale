@@ -68,11 +68,10 @@ const Notices: React.FC = () => {
 		}
 
 		map(notices, (notice, id) => {
-			const { message, description, type, duration, placement } = notice;
+			const { message, type, duration, placement } = notice;
 			api[type]({
 				message: message,
-				duration: duration || 6,
-				description: description,
+				duration: duration || 3,
 				onClose: () => deleteNotice(id),
 				placement: placement || 'bottomRight',
 			});

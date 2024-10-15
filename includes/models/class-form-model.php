@@ -63,6 +63,24 @@ class Form_Model extends Model {
 	);
 
 	/**
+	 * Rules
+	 *
+	 * @var array
+	 */
+	protected $rules = array(
+		'name' => 'required',
+	);
+
+	/**
+	 * Messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array(
+		'name.required' => 'From name is required',
+	);
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool

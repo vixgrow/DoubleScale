@@ -63,6 +63,10 @@ const ListField = ({ value, onChange }: Props) => {
 							<AsyncSelect
 								loadOptions={(inputValue, callback) => {
 									fetchLists(inputValue).then((data) => {
+										if (!data) {
+											return;
+										}
+
 										callback(data);
 									});
 								}}

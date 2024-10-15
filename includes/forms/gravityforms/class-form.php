@@ -133,7 +133,7 @@ class Form extends Abstracts_Form {
 			}
 		}
 
-		wp_send_json_success( array( 'options' => $options ) );
+		wp_send_json_success( $options );
 	}
 
 	/**

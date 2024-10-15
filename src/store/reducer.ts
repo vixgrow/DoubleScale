@@ -42,14 +42,12 @@ const reducer: Reducer<CorePureState, CoreActionTypes> = (
 		}
 		case ADD_NOTICE: {
 			const { notice } = action;
-			const { notices } = state;
 			const randomId = () => Math.random().toString(36).substr(2, 9);
 			const id = randomId();
 
 			return {
 				...state,
 				notices: {
-					...notices,
 					[id]: notice,
 				},
 			};

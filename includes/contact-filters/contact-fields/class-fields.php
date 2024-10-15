@@ -150,11 +150,11 @@ class Fields extends Filter {
 	}
 }
 
-// $custom_fields = Custom_Field_Model::all();
+$custom_fields = Custom_Field_Model::all();
 
-// if ( ! empty( $custom_fields ) ) {
-// foreach ( $custom_fields as $custom_field ) {
-// $filter = new Fields( $custom_field );
-// Filters_Manager::instance()->register( $filter );
-// }
-// }
+if ( ! empty( $custom_fields ) ) {
+	foreach ( $custom_fields as $custom_field ) {
+		$filter = new Fields( $custom_field );
+		Filters_Manager::instance()->register( $filter );
+	}
+}

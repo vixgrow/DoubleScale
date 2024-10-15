@@ -89,7 +89,7 @@ abstract class Integration_Remote_Data {
 					'permission_callback' => array( $this, 'get_entity_permissions_check' ),
 					'args'                => array(
 						'entity' => array(
-							'description' => __( 'The ID of the entity.', 'quillforms-clickup' ),
+							'description' => __( 'The ID of the entity.', 'quillcrm' ),
 							'type'        => 'integer',
 							'required'    => false,
 						),

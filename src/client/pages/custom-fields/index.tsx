@@ -34,7 +34,14 @@ import {
 import ConfigAPI from '@quillcrm/config';
 import { Field } from '@quillcrm/components';
 
-function Droppable({ children, id, title, onDelete, fieldsCount, deletable }) {
+function Droppable({
+	children,
+	id,
+	title,
+	onDelete,
+	fieldsCount,
+	deletable,
+}) {
 	const { setNodeRef } = useDroppable({
 		id: id,
 	});
@@ -90,10 +97,10 @@ const Draggable = (props) => {
 	});
 	const style = transform
 		? {
-				transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-				transition:
-					'transform 0.25s cubic-bezier(0.15, 0.59, 0.29, 0.99)',
-			}
+			transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+			transition:
+				'transform 0.25s cubic-bezier(0.15, 0.59, 0.29, 0.99)',
+		}
 		: undefined;
 
 	return (
@@ -114,7 +121,9 @@ const Draggable = (props) => {
 			<Flex gap={10}>
 				<Button onClick={props.onEdit} icon={<EditOutlined />} />
 				<Popconfirm
-					title={__('Are you sure you want to delete this field?')}
+					title={__(
+						'Are you sure you want to delete this field?'
+					)}
 					onConfirm={props.onDelete}
 				>
 					<Button danger icon={<DeleteOutlined />} />
@@ -151,13 +160,15 @@ const CustomFields: React.FC = () => {
 		name: '',
 	});
 	const [isSaving, setIsSaving] = useState<boolean>(false);
-	const [addGroupVisible, setAddGroupVisible] = useState<boolean>(false);
+	const [addGroupVisible, setAddGroupVisible] =
+		useState<boolean>(false);
 	const customFieldsTypes = ConfigAPI.getCustomFieldsTypes();
 	const [deleteGroupId, setDeleteGroupId] = useState<number>(0);
 	const [newGroupId, setNewGroupId] = useState<number>(0);
 	const [deleteGroupVisible, setDeleteGroupVisible] =
 		useState<boolean>(false);
-	const [isDeletingGroup, setIsDeletingGroup] = useState<boolean>(false);
+	const [isDeletingGroup, setIsDeletingGroup] =
+		useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const typesOptions = map(keys(customFieldsTypes), (type) => ({
@@ -181,10 +192,10 @@ const CustomFields: React.FC = () => {
 			})) as CustomFieldsGroups;
 
 			setGroups(response);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch custom fields', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -230,10 +241,10 @@ const CustomFields: React.FC = () => {
 				type: 'success',
 				message: __('Custom field added', 'quillcrm'),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to add custom field', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsAdding(false);
@@ -259,13 +270,16 @@ const CustomFields: React.FC = () => {
 
 			const updatedGroups = map(groups, (group) => {
 				if (group.id === response.group_id) {
-					const updatedFields = map(group.custom_fields, (field) => {
-						if (field.id === response.id) {
-							return response;
-						}
+					const updatedFields = map(
+						group.custom_fields,
+						(field) => {
+							if (field.id === response.id) {
+								return response;
+							}
 
-						return field;
-					});
+							return field;
+						}
+					);
 
 					return {
 						...group,
@@ -282,10 +296,10 @@ const CustomFields: React.FC = () => {
 				type: 'success',
 				message: __('Custom field edited', 'quillcrm'),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to edit custom field', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsEditing(false);
@@ -333,10 +347,10 @@ const CustomFields: React.FC = () => {
 				method: 'PUT',
 				data: field,
 			})) as CustomField;
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to save custom field', 'quillcrm'),
+				message: error.message,
 			});
 		}
 	};
@@ -360,10 +374,10 @@ const CustomFields: React.FC = () => {
 				type: 'success',
 				message: __('Group added', 'quillcrm'),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to add group', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
@@ -382,7 +396,7 @@ const CustomFields: React.FC = () => {
 		setIsDeletingGroup(true);
 
 		try {
-			const response = await apiFetch({
+			await apiFetch({
 				path: `/qc/v1/custom-fields-groups/${toDeleteGroupId}`,
 				method: 'DELETE',
 				data: {
@@ -427,10 +441,10 @@ const CustomFields: React.FC = () => {
 				type: 'success',
 				message: __('Group deleted', 'quillcrm'),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete group', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsDeletingGroup(false);
@@ -612,19 +626,22 @@ const CustomFields: React.FC = () => {
 							}}
 							deletable={groups.length > 1}
 						>
-							{map(group.custom_fields, (field: CustomField) => (
-								<Draggable
-									key={field.id}
-									id={`field-${field.id}`}
-									onEdit={() => {
-										setSelectedField(field);
-										setVisible(true);
-									}}
-									onDelete={() => deleteField(field)}
-								>
-									{field.name}
-								</Draggable>
-							))}
+							{map(
+								group.custom_fields,
+								(field: CustomField) => (
+									<Draggable
+										key={field.id}
+										id={`field-${field.id}`}
+										onEdit={() => {
+											setSelectedField(field);
+											setVisible(true);
+										}}
+										onDelete={() => deleteField(field)}
+									>
+										{field.name}
+									</Draggable>
+								)
+							)}
 						</Droppable>
 					))}
 				</DndContext>

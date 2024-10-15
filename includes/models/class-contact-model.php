@@ -232,6 +232,19 @@ class Contact_Model extends Model {
 	}
 
 	/**
+	 * Get contact by email
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $email Contact email
+	 *
+	 * @return Contact_Model
+	 */
+	public static function get_by_email( $email ) {
+		return self::where( 'email', $email )->first();
+	}
+
+	/**
 	 * Sync lists
 	 *
 	 * @since 1.0.0

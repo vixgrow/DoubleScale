@@ -42,9 +42,14 @@ const form = (state: Form | null = null, action: FormAction) => {
 	}
 };
 
-const CombinedReducer: Reducer = combineReducers({
+const CombinedReducer: Reducer<
+	{
+		form: ReturnType<typeof form>;
+	},
+	any
+> = combineReducers({
 	form,
-});
+}) as Reducer;
 
 export type State = ReturnType<typeof CombinedReducer>;
 export default CombinedReducer;

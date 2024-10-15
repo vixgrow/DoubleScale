@@ -199,6 +199,7 @@ type Option = {
 	help?: string;
 	ajax_action: string;
 	conditions?: Condition;
+	parent?: string;
 };
 
 type FormOptions = {
@@ -212,7 +213,6 @@ export type Form = {
 	fields_settings: {
 		action: string;
 		fields: {
-			form_id: string;
 			[key: string]: string;
 		};
 	};

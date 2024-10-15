@@ -2,14 +2,14 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 
 /**
  * External dependencies
  */
 import { Typography } from 'antd';
-import { map } from 'lodash';
-import Select from 'react-select';
+import { isObject, map } from 'lodash';
+import AsyncSelect from 'react-select/async';
 
 /**
  * Internal dependencies
@@ -22,25 +22,20 @@ interface Props {
 	label: string;
 	ajax_action: string;
 	parent: string;
+	slug: string;
 }
 
-const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent }) => {
+const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 	const { form, updateForm } = useFormContext();
 	const { getAjaxUrl, getNonce } = ConfigAPI;
 	const [formOptions, setFormOptions] = useState({});
-	const [isFetching, setIsFetching] = useState(false);
 
-	useEffect(() => {
-		fetchOptions();
-	}, [form]);
 	if (!form) return null;
 
 	const fetchOptions = async () => {
 		if (!form) {
 			return;
 		}
-
-		setIsFetching(true);
 
 		try {
 			const body = new FormData();
@@ -59,13 +54,17 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent }) => {
 			});
 
 			const data = await response.json();
-			console.log(data);
 
 			setFormOptions(data.data);
+			const options = map(data.data, (value, key) => ({
+				label: value,
+				value: key,
+			}));
+
+			return options;
 		} catch (error) {
 			console.error(error);
-		} finally {
-			setIsFetching(false);
+			return [];
 		}
 	};
 
@@ -75,24 +74,35 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent }) => {
 				<Typography.Text>{label}</Typography.Text>
 			</div>
 			<div className="qcrm-field-input">
-				<Select
-					isLoading={isFetching}
-					options={map(formOptions, (value, key) => ({
-						label: value,
-						value: key,
-					}))}
-					onChange={(selected) => {
-						updateForm({
-							form_id: selected.value,
+				<AsyncSelect
+					loadOptions={(_inputValue, callback) => {
+						fetchOptions().then((data) => {
+							if (!data) {
+								return;
+							}
+							callback(data);
 						});
 					}}
+					defaultOptions
 					value={
 						map(formOptions, (value, key) => ({
 							label: value,
 							value: key,
-						})).find((option) => option.value === form.form_id) ||
-						null
+						})).find((option) => option.value == form[slug]) || {
+							label: __('Select Option', 'quillcrm'),
+							value: '',
+						}
 					}
+					onChange={(val) => {
+						if (!isObject(val)) {
+							return;
+						}
+
+						updateForm({
+							[slug]: val.value,
+						});
+					}}
+					cacheOptions={false}
 				/>
 			</div>
 		</div>

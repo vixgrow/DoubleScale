@@ -135,7 +135,6 @@ const Initial: React.FC = () => {
 							</div>
 						</div>
 						{form.form_type &&
-							// @ts-ignore
 							map(formOptions, (options, key) => {
 								const {
 									type,
@@ -161,6 +160,7 @@ const Initial: React.FC = () => {
 												ajax_action={ajax_action}
 												key={key}
 												parent={parent}
+												slug={key}
 											/>
 										);
 									default:

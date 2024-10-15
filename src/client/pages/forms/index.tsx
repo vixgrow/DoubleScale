@@ -21,6 +21,7 @@ import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
 import { Field } from '@quillcrm/components';
 import { convertDate } from '@quillcrm/utils';
+import { isEmpty } from 'validator';
 
 const { Column } = Table;
 const FormsList: React.FC = () => {
@@ -56,10 +57,10 @@ const FormsList: React.FC = () => {
 
 			response.total && setTotal(response.total);
 			response.data && setData(response.data);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch forms', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -67,6 +68,13 @@ const FormsList: React.FC = () => {
 	};
 
 	const createForm = async () => {
+		if (isEmpty(form.name, { ignore_whitespace: true })) {
+			createNotice({
+				type: 'error',
+				message: __('Form name is required', 'quillcrm'),
+			});
+			return;
+		}
 		setIsSaving(true);
 		try {
 			const response = (await apiFetch({
@@ -76,10 +84,10 @@ const FormsList: React.FC = () => {
 			})) as Form;
 
 			navigate(getToLink(`forms/${response.id}`));
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to create form', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
@@ -107,10 +115,10 @@ const FormsList: React.FC = () => {
 			});
 			setSelectedRowKeys([]);
 			fetchForms();
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete forms', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsApplying(false);

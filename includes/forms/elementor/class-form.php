@@ -225,7 +225,7 @@ class Form extends Abstracts_Form {
 					'relation' => 'and',
 					'rules'    => array(
 						array(
-							'field'    => 'settings.post_id',
+							'field'    => 'post_id',
 							'operator' => 'not_empty',
 						),
 					),

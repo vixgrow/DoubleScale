@@ -114,7 +114,12 @@ abstract class Form {
 		try {
 			$this->submission = $data;
 			$form_id          = $this->submission['form_id'];
-			$contact_data     = $this->get_contact_data();
+			$contact_fields   = $this->get_contact_data();
+			$contact_data     = $contact_fields['fields'];
+			$custom_fields    = $contact_fields['custom_fields'];
+			$lists            = $this->form_data->data['lists'] ?? array();
+			$tags             = $this->form_data->data['tags'] ?? array();
+			$update_existing  = $this->form_data->data['update_existing_contact'] ?? false;
 
 			// Add source to contact data
 			$contact_data['source'] = $this->slug;
@@ -124,7 +129,33 @@ abstract class Form {
 				$contact_data['status'] = 'unsubscribed';
 			}
 
+			if ( ! $update_existing ) {
+				$contact = Contact_Model::get_by_email( $contact_data['email'] ?? '' );
+				if ( $contact ) {
+					return;
+				}
+			}
+
 			$contact = Contact_Model::createOrUpdate( $contact_data );
+
+			if ( ! empty( $lists ) ) {
+				$contact->sync_lists( $lists );
+			}
+
+			if ( ! empty( $tags ) ) {
+				$contact->sync_tags( $tags );
+			}
+
+			if ( ! empty( $custom_fields ) ) {
+				$custom_fields_values = array();
+				foreach ( $custom_fields as $key => $value ) {
+					$custom_fields_values[ $key ] = array(
+						'value' => $value,
+					);
+				}
+
+				$contact->custom_fields()->sync( $custom_fields_values );
+			}
 			error_log( 'Contact created: ' . $contact->id );
 		} catch ( Exception $e ) {
 			error_log( 'Error form creating contact: ' . $e->getMessage() );
@@ -164,28 +195,36 @@ abstract class Form {
 		$fields         = $this->submission['fields'] ?? array();
 		$contact_fields = Contact_Fields::instance()->get_fields();
 
-		$contact_data = array();
-		foreach ( $mapped_fields as $key => $value ) {
-			if ( ! isset( $contact_fields[ $key ] ) || ! isset( $entry['fields'][ $value ] ) || ! isset( $fields[ $value ] ) ) {
+		$contact_data  = array();
+		$custom_fields = array();
+		foreach ( $mapped_fields as $form_field => $contact_field ) {
+			if ( ! isset( $contact_fields[ $contact_field ] ) || ! isset( $entry['fields'][ $form_field ] ) || ! isset( $fields[ $form_field ] ) ) {
 				continue;
 			}
 
-			if ( ! class_exists( $contact_fields[ $key ]['type'] ) ) {
+			if ( ! class_exists( $contact_fields[ $contact_field ]['type'] ) ) {
 				throw new Exception( 'Invalid field type' );
 			}
 			/** @var \QuillCRM\Abstracts\Field_Type $field_type */
-			$field_type = new $contact_fields[ $key ]['type']( $contact_fields[ $key ] );
-			$value      = $field_type->sanitize_field( $entry['fields'][ $value ] );
-			if ( 'country' === $key ) {
-				$value = quillcrm_get_country_code( $value );
+			$field_type = new $contact_fields[ $contact_field ]['type']( $contact_fields[ $contact_field ] );
+			$form_field = $field_type->sanitize_field( $entry['fields'][ $form_field ] );
+			if ( 'country' === $contact_field ) {
+				$form_field = quillcrm_get_country_code( $form_field );
 			}
-			$field_type->validate_value( $value );
+			$field_type->validate_value( $form_field );
 			if ( $field_type->is_valid ) {
-				$contact_data[ $key ] = $value;
+				if ( $contact_fields[ $contact_field ]['is_custom'] ?? false ) {
+					$custom_fields[ $contact_field ] = $form_field;
+				} else {
+					$contact_data[ $contact_field ] = $form_field;
+				}
 			}
 		}
 
-		return $contact_data;
+		return array(
+			'fields'        => $contact_data,
+			'custom_fields' => $custom_fields,
+		);
 	}
 
 	/**
@@ -210,13 +249,31 @@ abstract class Form {
 	 */
 	public function is_form_active( $form_id ) {
 		try {
-			$form            = Form_Model::get_form_by_form_id( $form_id, $this->slug, 'active' );
+			$form            = Form_Model::get_form_by_form_id( $this->get_form_id( $form_id ), $this->slug, 'active' );
 			$this->form_data = $form;
 			return true;
 		} catch ( Exception $e ) {
 			error_log( 'Error getting form data: ' . $e->getMessage() );
 			return false;
 		}
+	}
+
+	/**
+	 * Get form id
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $form_id
+	 *
+	 * @return string
+	 */
+	public function get_form_id( $form_id ) {
+		if ( strpos( $form_id, ':' ) !== false ) {
+			$form_id = explode( ':', $form_id );
+			$form_id = $form_id[1];
+		}
+
+		return $form_id;
 	}
 
 	/**
@@ -267,7 +324,9 @@ abstract class Form {
 	public function maybe_create_contact( Automation_Model $automation ) {
 		try {
 			$mapped_fields          = $automation->get_setting( 'mapped_fields', array() );
-			$contact_data           = $this->get_contact_fields( $mapped_fields );
+			$contact_fields         = $this->get_contact_fields( $mapped_fields );
+			$custom_fields          = $contact_fields['custom_fields'];
+			$contact_data           = $contact_fields['fields'];
 			$contact_data['source'] = $this->slug;
 			$make_as_subscriber     = $automation->get_setting( 'make_as_subscriber' ) ?? false;
 			$update_blank_fields    = $automation->get_setting( 'update_blank_fields' ) ?? false;
@@ -284,7 +343,7 @@ abstract class Form {
 			}
 
 			if ( ! $update_existing ) {
-				$contact = Contact_Model::get_contact_by_email( $contact_data['email'] );
+				$contact = Contact_Model::get_by_email( $contact_data['email'] );
 				if ( $contact ) {
 					return $contact;
 				}
@@ -298,6 +357,10 @@ abstract class Form {
 
 			if ( ! empty( $tags ) ) {
 				$contact->sync_tags( $tags );
+			}
+
+			if ( ! empty( $custom_fields ) ) {
+				$contact->sync_custom_fields( $custom_fields );
 			}
 
 			return $contact;
@@ -318,7 +381,7 @@ abstract class Form {
 	 * @return bool
 	 */
 	public function is_processable( Automation_Model $automation, $args ) {
-		$form_id            = $args['form_id'];
+		$form_id            = $this->get_form_id( $args['form_id'] );
 		$automation_form_id = $automation->get_setting( 'form_id' );
 
 		return $form_id === $automation_form_id;

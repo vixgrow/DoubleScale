@@ -52,11 +52,11 @@ const Form: React.FC = () => {
 				path: `/qc/v1/forms/${id}`,
 			})) as FormType;
 
-			setForm(response);
-		} catch (error) {
+			setForm(prepareForm(response));
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch form', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -68,6 +68,10 @@ const Form: React.FC = () => {
 
 		const newForm = { ...form, ...data };
 
+		if (newForm.post_id) {
+			newForm.form_id = `${newForm.post_id}:${newForm.form_id}`;
+		}
+
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/forms/${newForm.id}`,
@@ -75,16 +79,26 @@ const Form: React.FC = () => {
 				data: newForm,
 			})) as FormType;
 
-			setForm(response);
-		} catch (error) {
+			setForm(prepareForm(response));
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to save form', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
 		}
 	};
+
+	const prepareForm = (form: FormType) => {
+		if (form.form_id?.includes(':')) {
+			const [postId, formId] = form.form_id.split(':');
+			form.post_id = parseInt(postId);
+			form.form_id = formId;
+		}
+
+		return form;
+	}
 
 	// Switch to the new tab items
 	const tabItems = [
@@ -97,13 +111,14 @@ const Form: React.FC = () => {
 			key: 'settings',
 			label: __('Settings', 'quillcrm'),
 			children: <SettingsStep />,
+			disabled: !form?.form_id || !form?.form_type,
 		},
 	];
 
 	return (
 		<Provider
 			value={{
-				form,
+				form: form as FormType,
 				isLoading: loading,
 				isSaving,
 				setIsLoading: setLoading,

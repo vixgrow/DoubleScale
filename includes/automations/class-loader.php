@@ -78,6 +78,7 @@ final class Loader {
 	 * @return void
 	 */
 	public function process_automations( Automation_Model $automation, $args ) {
+		error_log( 'started' );
 		$process_automation = new Process_Automation( $automation, $args );
 		$process_automation->start();
 	}

@@ -41,9 +41,9 @@ const Settings: React.FC = () => {
 
 	const getFormFields = async () => {
 		if (!form || !fieldsSettings) {
+			setIsFetching(false);
 			return;
 		}
-		console.log(form);
 
 		try {
 			const body = new FormData();
@@ -52,7 +52,6 @@ const Settings: React.FC = () => {
 			map(fieldsSettings.fields, (key) => {
 				body.append(key, form[key] || '');
 			});
-			console.log(fieldsSettings, 'fieldsSettings');
 
 			const response = await fetch(getAjaxUrl(), {
 				method: 'POST',

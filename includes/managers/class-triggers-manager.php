@@ -223,6 +223,9 @@ final class Triggers_Manager {
 					$form->slug => array(
 						'label'       => __( 'Form Submitted', 'quillcrm' ),
 						'description' => $form->description,
+						'fields'      => $form->get_form_options(),
+						'is_disabled' => ! $form->is_enabled(),
+						'is_form'     => true,
 					),
 				),
 			);

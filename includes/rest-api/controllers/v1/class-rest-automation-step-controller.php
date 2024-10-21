@@ -214,10 +214,11 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	public function create_item( $request ) {
 		try {
 			$step_data       = $this->prepare_step( $request );
+			$updated_steps   = $request->get_param( 'updated_steps' ) ?? array();
 			$automation_step = Automation_Step_Model::create( $step_data );
 
-			if ( is_wp_error( $automation_step ) ) {
-				return $automation_step;
+			if ( ! empty( $updated_steps ) ) {
+				$this->update_orders( $updated_steps );
 			}
 
 			$automation_step = Automation_Step_Model::find( $automation_step->id );
@@ -291,16 +292,44 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	public function delete_item( $request ) {
 		try {
 			$automation_step = Automation_Step_Model::find( $request->get_param( 'id' ) );
+			$updated_steps   = $request->get_param( 'updated_steps' ) ?? array();
 
 			if ( ! $automation_step ) {
 				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
-			$automation_step->delete();
+			$automation_step->status = 'deleted';
+			$automation_step->save();
+
+			if ( ! empty( $updated_steps ) ) {
+				$this->update_orders( $updated_steps );
+			}
 
 			return new WP_REST_Response( null, 204 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_automation_step_delete_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Update orders of the steps
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $steps Steps.
+	 *
+	 * @return void
+	 */
+	private function update_orders( $steps ) {
+		foreach ( $steps as $step_id => $step_data ) {
+			$step = Automation_Step_Model::find( $step_id );
+			if ( ! $step ) {
+				continue;
+			}
+
+			$step->order = $step_data['order'];
+			$step->save();
+			error_log( 'Step: ' . print_r( $step, true ) );
 		}
 	}
 

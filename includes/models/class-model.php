@@ -80,6 +80,9 @@ class Model extends WeDevsModel {
 			return parent::save( $options );
 		}
 
+		// Trim all the values
+		$this->trim();
+
 		$validator = quillcrm_validator()->make(
 			$this->toArray(),
 			$this->rules,
@@ -92,5 +95,21 @@ class Model extends WeDevsModel {
 
 		// Call the parent save method to perform the actual saving
 		return parent::save( $options );
+	}
+
+	/**
+	 * Trim all the values
+	 *
+	 * @return void
+	 */
+	public function trim() {
+		array_walk_recursive(
+			$this->attributes,
+			function( &$value ) {
+				if ( is_string( $value ) ) {
+					$value = trim( $value );
+				}
+			}
+		);
 	}
 }

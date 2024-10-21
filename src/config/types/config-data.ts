@@ -58,6 +58,7 @@ export type Trigger = {
 			multiple?: boolean;
 		};
 	};
+	is_form?: boolean;
 };
 
 export type TriggersGroup = {
@@ -216,6 +217,7 @@ export type Form = {
 			[key: string]: string;
 		};
 	};
+	is_enabled: boolean;
 };
 
 export type Forms = {

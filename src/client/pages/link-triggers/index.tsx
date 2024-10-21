@@ -30,6 +30,7 @@ import type { LinkTrigger, LinkTriggersResponse } from '@quillcrm/client';
 import { NavLink, useNavigate, getToLink } from '@quillcrm/navigation';
 import { Field } from '@quillcrm/components';
 import { convertDate } from '@quillcrm/utils';
+import { isEmpty } from 'validator';
 
 const { Column } = Table;
 
@@ -66,10 +67,10 @@ const LinkTriggerList: React.FC = () => {
 
 			response.total && setTotal(response.total);
 			response.data && setData(response.data);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch link triggers', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -81,7 +82,11 @@ const LinkTriggerList: React.FC = () => {
 	}, [page, perPage]);
 
 	const createLinkTrigger = async () => {
-		if (!link.name) {
+		if (isEmpty(link.name, { ignore_whitespace: true })) {
+			createNotice({
+				type: 'error',
+				message: __('Link trigger name is required', 'quillcrm'),
+			});
 			return;
 		}
 		setIsSaving(true);
@@ -95,10 +100,10 @@ const LinkTriggerList: React.FC = () => {
 
 			setVisible(false);
 			navigate(getToLink(`link-triggers/${response.id}`));
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to create link trigger', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
@@ -122,10 +127,10 @@ const LinkTriggerList: React.FC = () => {
 			});
 			setSelectedRowKeys([]);
 			fetchLinks();
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete link triggers', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsApplying(false);

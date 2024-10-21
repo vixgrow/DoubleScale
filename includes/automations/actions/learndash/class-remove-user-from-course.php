@@ -96,6 +96,9 @@ class Remove_User_From_Course extends Action {
 	 * @since 1.0.0
 	 */
 	public function get_courses() {
+		if ( ! function_exists( 'learndash_get_courses' ) ) {
+			return array();
+		}
 		$courses = learndash_get_courses();
 
 		$options = array();

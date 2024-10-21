@@ -23,7 +23,7 @@ use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Managers\Goals_Manager;
-use QuillCRM\Managers\Integrations_Manager;
+use QuillCRM\Managers\Forms_Manager;
 
 /**
  * Rest_Automation_Controller class
@@ -562,12 +562,21 @@ class Rest_Automation_Controller extends REST_Controller {
 				return new WP_Error( 'error', __( 'Failed to create automation.', 'quillcrm' ), array( 'status' => 500 ) );
 			}
 
+			$is_form = false;
 			$trigger = Triggers_Manager::instance()->get_trigger( $automation->trigger );
 			if ( empty( $trigger ) ) {
-				throw new \Exception( 'Trigger not found.' );
+				$form = Forms_Manager::instance()->get_form( $automation->trigger );
+				if ( empty( $form ) ) {
+					$automation->delete();
+					throw new \Exception( 'Trigger not found.' );
+				} else {
+					$is_form = true;
+				}
 			}
 
-			$trigger->set_settings( $automation );
+			if ( ! $is_form ) {
+				$trigger->set_settings( $automation );
+			}
 
 			return new WP_REST_Response( $automation, 201 );
 		} catch ( \Exception $e ) {
@@ -586,11 +595,8 @@ class Rest_Automation_Controller extends REST_Controller {
 	 */
 	public function update_item( $request ) {
 		try {
-			$id            = $request->get_param( 'id' );
-			$automation    = Automation_Model::find( $id );
-			$mode          = $request->get_param( 'mode' ) ? $request->get_param( 'mode' ) : 'edit';
-			$step          = $request->get_param( 'step' ) ?? array();
-			$updated_steps = $request->get_param( 'updated_steps' ) ?? array();
+			$id         = $request->get_param( 'id' );
+			$automation = Automation_Model::find( $id );
 
 			if ( ! $automation ) {
 				return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
@@ -600,42 +606,10 @@ class Rest_Automation_Controller extends REST_Controller {
 			$automation->fill( $automation_data );
 			$automation->save();
 
-			if ( $mode === 'add' ) {
-				unset( $step['id'] );
-				$step['automation_id'] = $id;
-				$new_step              = Automation_Step_Model::create( $step );
-
-				if ( ! $new_step ) {
-					throw new \Exception( 'Failed to create step.' );
-				}
-			} elseif ( $mode === 'delete' ) {
-				$step = Automation_Step_Model::find( $step['id'] );
-
-				if ( ! $step ) {
-					throw new \Exception( 'Step not found.' );
-				}
-
-				$step->status = 'deleted';
-				$step->save();
-			}
-
-			if ( ! empty( $updated_steps ) ) {
-				foreach ( $updated_steps as $step_id => $step ) {
-					$step = Automation_Step_Model::find( $step_id );
-					if ( ! $step ) {
-						continue;
-					}
-
-					$step->order = $step['order'];
-					$step->save();
-				}
-			}
-
-			// Get the automation with its steps.
 			$automation->load(
 				array(
 					'steps' => function ( $query ) {
-						$query->where( 'status', 'active' );
+						$query->whereIn( 'status', array( 'active', 'draft' ) );
 					},
 				)
 			);

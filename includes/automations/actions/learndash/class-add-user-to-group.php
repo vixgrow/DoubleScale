@@ -98,6 +98,9 @@ class Add_User_To_Group extends Action {
 	 * @since 1.0.0
 	 */
 	public function get_groups() {
+		if ( ! function_exists( 'learndash_get_groups' ) ) {
+			return array();
+		}
 		$groups = learndash_get_groups( array( 'posts_per_page' => -1 ) );
 
 		$options = array();

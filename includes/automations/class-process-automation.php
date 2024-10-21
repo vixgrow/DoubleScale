@@ -211,6 +211,10 @@ class Process_Automation {
 			}
 		}
 
+		if ( $next_step && 'end_automation' === $next_step->type ) {
+			$next_step = false;
+		}
+
 		return $next_step;
 	}
 

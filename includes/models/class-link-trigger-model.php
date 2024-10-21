@@ -63,6 +63,24 @@ class Link_Trigger_Model extends Model {
 	);
 
 	/**
+	 * Rules
+	 *
+	 * @var array
+	 */
+	protected $rules = array(
+		'name' => 'required',
+	);
+
+	/**
+	 * Messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array(
+		'name.required' => 'Link trigger name is required',
+	);
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool

@@ -131,7 +131,7 @@ const Form: React.FC = () => {
 			{tab !== 'overview' && (
 				<Tabs
 					defaultActiveKey="information"
-					activeKey={tab}
+					activeKey={!form?.form_id || !form?.form_type ? 'information' : tab}
 					tabPosition="left"
 					tabBarStyle={{ width: 200 }}
 					items={tabItems}

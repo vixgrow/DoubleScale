@@ -19,10 +19,10 @@ export const getAction = (action: string): Action => {
 	return foundAction
 		? foundAction[action]
 		: {
-				label: '',
-				description: '',
-				fields: {},
-			};
+			label: '',
+			description: '',
+			fields: {},
+		};
 };
 
 export const getGoal = (goal: string): Goal => {
@@ -37,10 +37,10 @@ export const getGoal = (goal: string): Goal => {
 	return foundGoal
 		? foundGoal[goal]
 		: {
-				label: '',
-				description: '',
-				fields: {},
-			};
+			label: '',
+			description: '',
+			fields: {},
+		};
 };
 
 export const getTrigger = (trigger: string): Trigger => {
@@ -53,10 +53,10 @@ export const getTrigger = (trigger: string): Trigger => {
 	return foundTrigger
 		? foundTrigger[trigger]
 		: {
-				label: '',
-				description: '',
-				fields: {},
-			};
+			label: '',
+			description: '',
+			fields: {},
+		};
 };
 
 export const convertDate = (date: string) => {
@@ -86,11 +86,11 @@ export const getRuleBySlug = (slug: string): Rule => {
 	return foundRule
 		? foundRule[slug]
 		: {
-				name: '',
-				type: '',
-				operators: {},
-				options: {},
-			};
+			name: '',
+			type: '',
+			operators: {},
+			options: {},
+		};
 };
 
 export const formatDate = (date: string, type: string = 'hour') => {

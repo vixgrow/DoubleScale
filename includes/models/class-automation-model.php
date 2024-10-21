@@ -61,6 +61,26 @@ class Automation_Model extends Model {
 	);
 
 	/**
+	 * Rules
+	 *
+	 * @var array
+	 */
+	protected $rules = array(
+		'name'    => 'required',
+		'trigger' => 'required',
+	);
+
+	/**
+	 * Messages
+	 *
+	 * @var array
+	 */
+	protected $messages = array(
+		'name.required'    => 'Automation name is required',
+		'trigger.required' => 'Automation trigger is required',
+	);
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool
@@ -236,6 +256,15 @@ class Automation_Model extends Model {
 				$automation->contacts()->delete();
 				$automation->steps()->delete();
 				$automation->processes()->delete();
+			}
+		);
+
+		// Delete draft steps will retrerive the automation
+		self::retrieved(
+			function( $automation ) {
+				$automation->steps()
+					->where( 'status', 'draft' )
+					->delete();
 			}
 		);
 	}

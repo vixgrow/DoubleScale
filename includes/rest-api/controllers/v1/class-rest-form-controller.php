@@ -262,8 +262,7 @@ class Rest_Form_Controller extends REST_Controller {
 		try {
 			$form_data = $this->prepare_form( $request );
 			$form      = Form_Model::create( $form_data );
-			error_log( 'form_data: ' . wp_json_encode( $form_data ) );
-			error_log( 'form: ' . wp_json_encode( $form ) );
+
 			return new WP_REST_Response( $form, 201 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );

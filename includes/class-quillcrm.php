@@ -288,6 +288,14 @@ final class QuillCRM {
 			require $file;
 		}
 
+		// Load all automations learndash actions files
+		// if ( quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) ) {
+			$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/learndash/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
+		// }
+
 		// Load all contact merge tags files
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/contact/class-*.php' );
 		foreach ( $merge_tags_files as $file ) {

@@ -36,6 +36,7 @@ import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
 import type { TriggersGroup } from '@quillcrm/config';
 import { Field } from '@quillcrm/components';
+import { isEmpty } from 'validator';
 
 const { Column } = Table;
 
@@ -129,10 +130,10 @@ const AutomationsList: React.FC = () => {
 
 			response.total && setTotal(response.total);
 			response.data && setData(response.data);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch automations', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -140,6 +141,9 @@ const AutomationsList: React.FC = () => {
 	};
 
 	const createAutomation = async () => {
+		if (!validate(automation)) {
+			return;
+		}
 		setIsSaving(true);
 		try {
 			const response = (await apiFetch({
@@ -149,10 +153,10 @@ const AutomationsList: React.FC = () => {
 			})) as Automation;
 
 			navigate(getToLink(`automations/${response.id}`));
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to create automation', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
@@ -173,11 +177,34 @@ const AutomationsList: React.FC = () => {
 
 			setSelectedRowKeys([]);
 			fetchAutomations();
-		} catch (error) {
-			console.error(error);
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
 		} finally {
 			setIsApplying(false);
 		}
+	};
+
+	const validate = (automation: Partial<Automation>) => {
+		if (isEmpty(automation.name || '', { ignore_whitespace: true })) {
+			createNotice({
+				type: 'error',
+				message: __('Automation name is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		if (isEmpty(automation.trigger || '')) {
+			createNotice({
+				type: 'error',
+				message: __('Automation trigger is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		return true;
 	};
 
 	useEffect(() => {

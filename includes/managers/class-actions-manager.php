@@ -174,6 +174,50 @@ final class Actions_Manager {
 						'label'   => __( 'ActiveCampaign', 'quillcrm' ),
 						'actions' => array(),
 					),
+					'convertkit'     => array(
+						'label'   => __( 'ConvertKit', 'quillcrm' ),
+						'actions' => array(),
+					),
+					'drip'           => array(
+						'label'   => __( 'Drip', 'quillcrm' ),
+						'actions' => array(),
+					),
+					'getresponse'    => array(
+						'label'   => __( 'GetResponse', 'quillcrm' ),
+						'actions' => array(),
+					),
+					'hubspot'        => array(
+						'label'   => __( 'HubSpot', 'quillcrm' ),
+						'actions' => array(),
+					),
+					'keap'           => array(
+						'label'   => __( 'Keap', 'quillcrm' ),
+						'actions' => array(),
+					),
+					'klaviyo'        => array(
+						'label'   => __( 'Klaviyo', 'quillcrm' ),
+						'actions' => array(),
+					),
+					'mailchimp'      => array(
+						'label'   => __( 'Mailchimp', 'quillcrm' ),
+						'actions' => array(),
+					),
+					'mailerlite'     => array(
+						'label'   => __( 'MailerLite', 'quillcrm' ),
+						'actions' => array(),
+					),
+					'mautic'         => array(
+						'label'   => __( 'Mautic', 'quillcrm' ),
+						'actions' => array(),
+					),
+					'slack'          => array(
+						'label'   => __( 'Slack', 'quillcrm' ),
+						'actions' => array(),
+					),
+					'twilio'         => array(
+						'label'   => __( 'Twilio', 'quillcrm' ),
+						'actions' => array(),
+					),
 				),
 			),
 		);

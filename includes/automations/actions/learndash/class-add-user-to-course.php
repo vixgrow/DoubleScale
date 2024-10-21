@@ -96,6 +96,9 @@ class Add_User_To_Course extends Action {
 	 * @since 1.0.0
 	 */
 	public function get_courses() {
+		if ( ! function_exists( 'learndash_get_courses' ) ) {
+			return array();
+		}
 		$courses = learndash_get_courses();
 
 		$options = array();
@@ -143,4 +146,4 @@ class Add_User_To_Course extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_User_To_Group() );
+Actions_Manager::instance()->register( new Add_User_To_Course() );

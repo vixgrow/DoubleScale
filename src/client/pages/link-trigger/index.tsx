@@ -58,10 +58,10 @@ const LinkTrigger: React.FC = () => {
 				label: list.name,
 				value: list.id,
 			}));
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch lists', 'quillcrm'),
+				message: error.message,
 			});
 			return [];
 		}
@@ -82,10 +82,10 @@ const LinkTrigger: React.FC = () => {
 				label: tag.name,
 				value: tag.id,
 			}));
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch tags', 'quillcrm'),
+				message: error.message,
 			});
 			return [];
 		}
@@ -130,10 +130,10 @@ const LinkTrigger: React.FC = () => {
 					fetchTags('', tagIds);
 				}
 			}
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch link trigger', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -155,10 +155,10 @@ const LinkTrigger: React.FC = () => {
 			})) as LinkTriggerType;
 
 			setLinkTrigger(response);
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to save link trigger', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);

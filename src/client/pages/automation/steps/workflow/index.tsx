@@ -45,6 +45,7 @@ import StepModal from './step-modal';
 import AddStep from './add-step';
 import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
 import WebhookFields from './webhook-fields';
+import FormFields from './form-fields';
 
 const Workflow: React.FC = () => {
 	const {
@@ -199,23 +200,21 @@ const Workflow: React.FC = () => {
 		}
 
 		try {
-			console.log(updatedOrdersSteps);
-
+			// @ts-ignore
 			const response = (await apiFetch({
-				path: `/qc/v1/automations/${automation.id}`,
-				method: 'POST',
+				path: `/qc/v1/automation-steps/${step.id}`,
+				method: 'DELETE',
 				data: {
-					step,
-					mode: 'delete',
 					updated_steps: updatedOrdersSteps,
 				},
 			})) as Automation;
 
-			setSteps(response.steps);
-		} catch (error) {
+			const updatedSteps = newSteps.filter((s) => s.id !== step.id);
+			setSteps(updatedSteps);
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to delete step', 'quillcrm'),
+				message: error.message,
 			});
 		}
 	};
@@ -290,8 +289,8 @@ const Workflow: React.FC = () => {
 						</div>
 					</Flex>
 				</Card>
-				{step.type !== 'condition' && (
-					<AddStep setStep={setCurrentStep} prevStep={step ?? null} />
+				{step.type !== 'condition' && step.type !== 'end_automation' && (
+					<AddStep setStep={setCurrentStep} prevStep={step ?? null} condition={step.condition} parentId={step.parent_id} />
 				)}
 				{step.type === 'condition' && (
 					<Flex gap={20} style={{ marginTop: 10 }}>
@@ -301,16 +300,14 @@ const Workflow: React.FC = () => {
 						>
 							<Flex vertical gap={10}>
 								<h4>{__('Yes', 'quillcrm')}</h4>
+								<AddStep
+									setStep={setCurrentStep}
+									prevStep={null}
+									parentId={step.id}
+									condition="yes"
+								/>
 								{yesChildren.length > 0 &&
 									yesChildren.map(renderStep)}
-								{yesChildren.length === 0 && (
-									<AddStep
-										setStep={setCurrentStep}
-										prevStep={null}
-										parentId={step.id}
-										condition="yes"
-									/>
-								)}
 							</Flex>
 						</Card>
 						<Card
@@ -319,16 +316,14 @@ const Workflow: React.FC = () => {
 						>
 							<Flex vertical gap={10}>
 								<h4>{__('No', 'quillcrm')}</h4>
+								<AddStep
+									setStep={setCurrentStep}
+									prevStep={null}
+									parentId={step.id}
+									condition="no"
+								/>
 								{noChildren.length > 0 &&
 									noChildren.map(renderStep)}
-								{noChildren.length === 0 && (
-									<AddStep
-										setStep={setCurrentStep}
-										prevStep={null}
-										parentId={step.id}
-										condition="no"
-									/>
-								)}
 							</Flex>
 						</Card>
 					</Flex>
@@ -393,9 +388,7 @@ const Workflow: React.FC = () => {
 										</Flex>
 									</Card>
 								</div>
-								{isEmpty(organizedSteps) && (
-									<AddStep setStep={setCurrentStep} />
-								)}
+								<AddStep setStep={setCurrentStep} />
 								{organizedSteps.map(renderStep)}
 							</Flex>
 						</Flex>
@@ -404,21 +397,32 @@ const Workflow: React.FC = () => {
 				{currentStep && (
 					<StepModal step={currentStep} setStep={setCurrentStep} />
 				)}
-				<Modal
-					title={__('Trigger', 'quillcrm')}
-					open={visible}
-					onOk={() => save()}
-					onCancel={() => setVisible(false)}
-					confirmLoading={isSaving}
-					style={{ minWidth: '800px', minHeight: '500px' }}
-					closable={false}
-				>
-					{trigger?.fields &&
-						automation?.trigger !== 'webhook_received' &&
-						automation && (
-							<Fields
-								fields={trigger.fields}
-								values={automation.settings || {}}
+				{trigger?.fields && (
+					<Modal
+						title={__('Trigger', 'quillcrm')}
+						open={visible}
+						onOk={() => save()}
+						onCancel={() => setVisible(false)}
+						confirmLoading={isSaving}
+						style={{ minWidth: '800px', minHeight: '500px' }}
+						closable={false}
+					>
+						{automation?.trigger !== 'webhook_received' && !trigger?.is_form &&
+							automation && (
+								<Fields
+									fields={trigger.fields}
+									values={automation.settings || {}}
+									onChange={(value) => {
+										updateAutomation({
+											...automation,
+											settings: value,
+										});
+									}}
+								/>
+							)}
+						{automation?.trigger !== 'webhook_received' && trigger?.is_form && (
+							<FormFields
+								values={automation?.settings || {}}
 								onChange={(value) => {
 									updateAutomation({
 										...automation,
@@ -427,18 +431,19 @@ const Workflow: React.FC = () => {
 								}}
 							/>
 						)}
-					{automation?.trigger === 'webhook_received' && (
-						<WebhookFields
-							values={automation?.settings || {}}
-							onChange={(value) => {
-								updateAutomation({
-									...automation,
-									settings: value,
-								});
-							}}
-						/>
-					)}
-				</Modal>
+						{automation?.trigger === 'webhook_received' && (
+							<WebhookFields
+								values={automation?.settings || {}}
+								onChange={(value) => {
+									updateAutomation({
+										...automation,
+										settings: value,
+									});
+								}}
+							/>
+						)}
+					</Modal>
+				)}
 			</Card>
 		</>
 	);

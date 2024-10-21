@@ -130,6 +130,7 @@ const Initial: React.FC = () => {
 									options={map(keys(forms), (key) => ({
 										value: key,
 										label: forms[key].label,
+										disabled: !forms[key].is_enabled
 									}))}
 								/>
 							</div>

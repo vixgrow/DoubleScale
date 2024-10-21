@@ -29,30 +29,38 @@ import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
 const updateStepOrderRecursive = (
 	steps: AutomationStep[],
 	parentId: number,
-	order: number
+	order: number,
+	condition?: string
 ) => {
 	const updatedSteps = {};
-	const newSteps = updateOrder(parentId, order, steps, updatedSteps);
+	const newSteps = [...steps];
 
-	return { newSteps, updatedSteps };
-};
-
-const updateOrder = (
-	parentId: number,
-	order: number,
-	steps: AutomationStep[],
-	updatedSteps: { [key: string]: Partial<AutomationStep> }
-) => {
 	if (parentId > 0) {
-		const children = steps.filter((step) => step.parent_id === parentId);
+		const children = !condition ? newSteps.filter((step) => step.parent_id === parentId) : newSteps.filter((step) => step.parent_id === parentId && step.condition === condition);
+
+		children.sort((a, b) => a.order - b.order);
+		children.forEach((child, index) => {
+			const newOrder = index + 1;
+			if (newOrder !== child.order) {
+				updatedSteps[child.id] = { order: newOrder };
+			}
+		});
 		children.forEach((child) => {
 			if (child.order >= order) {
 				child.order = child.order + 1;
 				updatedSteps[child.id] = { order: child.order };
 			}
+
 		});
 	} else {
-		steps.forEach((step) => {
+		newSteps.sort((a, b) => a.order - b.order);
+		newSteps.forEach((step, index) => {
+			const newOrder = index + 1;
+			if (newOrder !== step.order) {
+				updatedSteps[step.id] = { order: newOrder };
+			}
+		});
+		newSteps.forEach((step) => {
 			if (step.order >= order) {
 				step.order = step.order + 1;
 				updatedSteps[step.id] = { order: step.order };
@@ -60,7 +68,7 @@ const updateOrder = (
 		});
 	}
 
-	return steps;
+	return { newSteps, updatedSteps };
 };
 
 interface AddStepProps {
@@ -76,7 +84,7 @@ const AddStep: React.FC<AddStepProps> = ({
 	condition,
 	prevStep,
 }) => {
-	const { automation, steps, setSteps, addStep, setUpdatedSteps } =
+	const { automation, steps, setSteps, setUpdatedSteps } =
 		useAutomationContext();
 	const [loading, setLoading] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -85,60 +93,37 @@ const AddStep: React.FC<AddStepProps> = ({
 		return null;
 	}
 
-	const saveStep = (type: string) => {
-		const randomStringID = Math.random();
+	const storeStep = async (type: string) => {
+		setLoading(true);
+
 		const order = getNewStepOrder();
-		const data = {
-			id: randomStringID,
+		const stepData = {
 			automation_id: automation.id,
 			type,
-			status: 'active',
+			status: type === 'end_automation' ? 'active' : 'draft',
 			order,
-			parent_id: 0,
-			action: '',
-			temp: true,
 		} as AutomationStep;
 
-		if (type === 'condition' && condition) {
-			data.action = condition;
+		if (type === 'condition') {
+			stepData.action = 'condition';
 		}
 
 		if (parentId && condition) {
-			data.parent_id = parentId;
-			data.condition = condition;
+			stepData.parent_id = parentId;
+			stepData.condition = condition;
 		}
 
 		const { newSteps, updatedSteps } = updateStepOrderRecursive(
 			steps,
 			parentId || 0,
-			order
-		);
-		console.log(updatedSteps);
-
-		setUpdatedSteps(updatedSteps);
-		setSteps([...newSteps, data]);
-		setStep(null);
-	};
-
-	const storeStep = async (type: string) => {
-		setLoading(true);
-
-		const order = getNewStepOrder();
-		const data = {
-			automation_id: automation.id,
-			type,
-			status: 'active',
 			order,
-		} as AutomationStep;
+			condition
+		);
 
-		if (type === 'condition' && condition) {
-			data.action = condition;
-		}
-
-		if (parentId && condition) {
-			data.parent_id = parentId;
-			data.condition = condition;
-		}
+		const data = {
+			...stepData,
+			updated_steps: updatedSteps,
+		};
 
 		try {
 			const response = (await apiFetch({
@@ -147,16 +132,21 @@ const AddStep: React.FC<AddStepProps> = ({
 				data,
 			})) as AutomationStep;
 
-			addStep(response);
-			setStep(response as OrganizedStep);
+			const organizedStep = {
+				...response,
+				children: [],
+			} as OrganizedStep;
+			setUpdatedSteps({});
+			setSteps([...newSteps, response]);
+			setStep(organizedStep);
 			createNotice({
 				type: 'success',
 				message: __('Step added', 'quillcrm'),
 			});
-		} catch (error) {
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to add step', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setLoading(false);
@@ -169,8 +159,7 @@ const AddStep: React.FC<AddStepProps> = ({
 		}
 
 		if (prevStep) {
-			// @ts-ignore
-			return parseInt(prevStep.order) + 1;
+			return prevStep.order + 1;
 		}
 
 		return 1;
@@ -208,12 +197,7 @@ const AddStep: React.FC<AddStepProps> = ({
 								<Button
 									key={key}
 									icon={type.icon}
-									onClick={() =>
-										key == 'end_automation' ||
-										key == 'goal' ||
-										key == 'condition'
-											? storeStep(key)
-											: saveStep(key)
+									onClick={() => storeStep(key)
 									}
 								>
 									{type.label}

@@ -163,5 +163,23 @@ class Automation_Step_Model extends Model {
 				}
 			}
 		);
+
+		// If step type is action, and action not found, make status as draft.
+		static::creating(
+			function ( $step ) {
+				if ( isset( $step->parent_id ) && 0 !== $step->parent_id ) {
+					$condition = $step->condition;
+					$last_step = $step->where( 'automation_id', $step->automation_id )->where( 'condition', $condition )->where( 'parent_id', $step->parent_id )->where( 'status', '!=', 'deleted' )->where( 'order', '<', $step->order )->orderBy( 'order', 'asc' )->first();
+					if ( $last_step && 'end_automation' === $last_step->type ) {
+						throw new \Exception( 'You can not add any step after end automation' );
+					}
+				} else {
+					$last_step = $step->where( 'automation_id', $step->automation_id )->where( 'parent_id', 0 )->where( 'status', '!=', 'deleted' )->where( 'order', '<', $step->order )->orderBy( 'order', 'desc' )->first();
+					if ( $last_step && 'end_automation' === $last_step->type ) {
+						throw new \Exception( 'You can not add any step after end automation 2' );
+					}
+				}
+			}
+		);
 	}
 }

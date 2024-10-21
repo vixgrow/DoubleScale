@@ -291,7 +291,6 @@ export type AutomationStep = {
 	status: string;
 	created_at: string;
 	updated_at: string;
-	temp?: boolean;
 };
 
 export type OrganizedSteps = OrganizedStep[];

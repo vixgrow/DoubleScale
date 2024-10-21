@@ -95,6 +95,7 @@ final class Forms_Manager {
 			'description'     => $form->description,
 			'options'         => $form->get_form_options(),
 			'fields_settings' => $form->get_form_fields_settings(),
+			'is_enabled'      => $form->is_enabled(),
 		);
 	}
 
@@ -107,7 +108,7 @@ final class Forms_Manager {
 	 *
 	 * @return Form
 	 */
-	public function get_forms( $slug ) {
+	public function get_form( $slug ) {
 		return isset( $this->forms[ $slug ] ) ? $this->forms[ $slug ] : null;
 	}
 

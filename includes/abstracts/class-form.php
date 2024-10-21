@@ -124,7 +124,7 @@ abstract class Form {
 			// Add source to contact data
 			$contact_data['source'] = $this->slug;
 
-			$make_as_subscriber = $this->form_data->data['make_as_subscriber'] ?? false;
+			$make_as_subscriber = $this->form_data->data['mark_as_subscribed'] ?? false;
 			if ( ! $make_as_subscriber ) {
 				$contact_data['status'] = 'unsubscribed';
 			}
@@ -139,11 +139,11 @@ abstract class Form {
 			$contact = Contact_Model::createOrUpdate( $contact_data );
 
 			if ( ! empty( $lists ) ) {
-				$contact->sync_lists( $lists );
+				$contact->syncWithoutDetaching( $lists );
 			}
 
 			if ( ! empty( $tags ) ) {
-				$contact->sync_tags( $tags );
+				$contact->syncWithoutDetaching( $tags );
 			}
 
 			if ( ! empty( $custom_fields ) ) {
@@ -154,7 +154,7 @@ abstract class Form {
 					);
 				}
 
-				$contact->custom_fields()->sync( $custom_fields_values );
+				$contact->custom_fields()->syncWithoutDetaching( $custom_fields_values );
 			}
 			error_log( 'Contact created: ' . $contact->id );
 		} catch ( Exception $e ) {
@@ -296,6 +296,7 @@ abstract class Form {
 				}
 
 				$contact = $this->maybe_create_contact( $automation );
+				error_log( 'Contact: ' . $contact->id );
 				if ( ! $contact ) {
 					continue;
 				}
@@ -328,39 +329,43 @@ abstract class Form {
 			$custom_fields          = $contact_fields['custom_fields'];
 			$contact_data           = $contact_fields['fields'];
 			$contact_data['source'] = $this->slug;
-			$make_as_subscriber     = $automation->get_setting( 'make_as_subscriber' ) ?? false;
-			$update_blank_fields    = $automation->get_setting( 'update_blank_fields' ) ?? false;
-			$update_existing        = $automation->get_setting( 'update_existing_contact' ) ?? false;
+			$make_as_subscriber     = $automation->get_setting( 'mark_as_subscribed', false );
+			$update_blank_fields    = $automation->get_setting( 'update_blank_fields', false );
+			$update_existing        = $automation->get_setting( 'update_existing_contact', false );
 			$lists                  = $automation->get_setting( 'lists', array() );
 			$tags                   = $automation->get_setting( 'tags', array() );
 
 			if ( ! $make_as_subscriber ) {
 				$contact_data['status'] = 'unsubscribed';
+			} else {
+				$contact_data['status'] = 'subscribed';
 			}
-
+			error_log( 'Form Data 1: ' . wp_json_encode( $contact_data ) );
 			if ( ! $update_blank_fields ) {
 				$contact_data = array_filter( $contact_data );
 			}
 
 			if ( ! $update_existing ) {
-				$contact = Contact_Model::get_by_email( $contact_data['email'] );
+				$contact = Contact_Model::get_by_email( $contact_data['email'] ?? '' );
 				if ( $contact ) {
 					return $contact;
 				}
 			}
 
+			error_log( 'Form Data: ' . wp_json_encode( $contact_data ) );
+
 			$contact = Contact_Model::createOrUpdate( $contact_data );
 
 			if ( ! empty( $lists ) ) {
-				$contact->sync_lists( $lists );
+				$contact->syncWithoutDetaching( $lists );
 			}
 
 			if ( ! empty( $tags ) ) {
-				$contact->sync_tags( $tags );
+				$contact->syncWithoutDetaching( $tags );
 			}
 
 			if ( ! empty( $custom_fields ) ) {
-				$contact->sync_custom_fields( $custom_fields );
+				$contact->custom_fields()->syncWithoutDetaching( $custom_fields );
 			}
 
 			return $contact;
@@ -383,6 +388,9 @@ abstract class Form {
 	public function is_processable( Automation_Model $automation, $args ) {
 		$form_id            = $this->get_form_id( $args['form_id'] );
 		$automation_form_id = $automation->get_setting( 'form_id' );
+
+		error_log( 'Form ID: ' . $form_id );
+		error_log( 'Automation Form ID: ' . $automation_form_id );
 
 		return $form_id === $automation_form_id;
 	}

@@ -3,11 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { Modal } from 'antd';
+import { Button, Flex, Modal } from 'antd';
 
 /**
  * Internal dependencies
@@ -30,6 +31,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 }) => {
 	const [isSaving, setIsSaving] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
+	const { setMergeTagsVisible } = useDispatch('quillcrm/core');
 
 	const handleSave = async () => {
 		setIsSaving(true);
@@ -48,11 +50,22 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 
 	return (
 		<Modal
-			title={
-				step.type === 'action'
-					? __('Action', 'quillcrm')
-					: __('Goal', 'quillcrm')
-			}
+			title={(
+				<Flex justify="space-between">
+					{
+						step.type === 'action'
+							? __('Action', 'quillcrm')
+							: __('Goal', 'quillcrm')
+					}
+					<Button
+						onClick={() => {
+							setMergeTagsVisible(true);
+						}}
+					>
+						{__('Merge Tags', 'quillcrm')}
+					</Button>
+				</Flex>
+			)}
 			open={true}
 			onOk={handleSave}
 			onCancel={() => setStep(null)}

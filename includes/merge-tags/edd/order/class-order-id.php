@@ -51,14 +51,16 @@ class Order_ID extends Merge_Tag {
 	/**
 	 * Get Merge Tag Value
 	 *
-	 * @param Automation_Contact_Model $automation_contact Contact Model.
+	 * @param Automation_Contact_Model $contact Contact Model.
 	 * @param string                   $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
-	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
-		$payment_id = $automation_contact->get_data( 'payment_id' );
+	public function get_value( $contact, $merge_tag = '' ) {
+		$payment_id = $contact->get_data( 'payment_id' );
 
 		return edd_get_order_id_from_transaction_id( $payment_id );
 	}
 }
+
+Merge_Tags_Manager::instance()->register( new Order_ID() );

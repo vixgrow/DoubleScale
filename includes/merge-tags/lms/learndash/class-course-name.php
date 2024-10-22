@@ -13,6 +13,7 @@ namespace QuillCRM\Merge_Tags\LMS\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
@@ -51,13 +52,13 @@ class Course_Name extends Merge_Tag {
 	/**
 	 * Get Merge Tag Value
 	 *
-	 * @param Automation_Contact_Model $automation_contact Contact Model.
+	 * @param Automation_Contact_Model $contact Contact Model.
 	 * @param string                   $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
-	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
-		$course_id = $automation_contact->get_data( 'course_id' );
+	public function get_value( $contact, $merge_tag = '' ) {
+		$course_id = $contact->get_data( 'course_id' );
 		$course    = get_post( $course_id );
 
 		if ( ! $course ) {

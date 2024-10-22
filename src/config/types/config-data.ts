@@ -19,6 +19,26 @@ export type ConfigData = Record<string, unknown> & {
 	automationGoals: AutomationGoals;
 	automationRules: AutomationRules;
 	isWoocommerceActive: boolean;
+	mergeTags: AutomationMergeTags;
+};
+
+export type AutomationMergeTags = {
+	[key: string]: MergeTagsGroup;
+};
+
+export type MergeTagsGroup = {
+	name: string;
+	mergeTags: MergeTags;
+	triggers?: string[];
+};
+
+export type MergeTags = {
+	[key: string]: MergeTag;
+};
+
+export type MergeTag = {
+	name: string;
+	value: string;
 };
 
 export type AutomationRules = {
@@ -142,7 +162,7 @@ export type Integrations = {
 };
 
 export type Integration = {
-	name: string;
+	label: string;
 	description: string;
 	fields: IntegrationFields;
 	is_connected: boolean;

@@ -455,9 +455,9 @@ class Rest_Automation_Controller extends REST_Controller {
 
 			if ( $keyword ) {
 				$automations = Automation_Model::where( 'name', 'like', '%' . $keyword . '%' )
-					->paginate( $per_page, array( '*' ), 'page', $page );
+				->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			} else {
-				$automations = Automation_Model::paginate( $per_page, array( '*' ), 'page', $page );
+				$automations = Automation_Model::orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			}
 
 			return new WP_REST_Response( $automations, 200 );
@@ -506,7 +506,7 @@ class Rest_Automation_Controller extends REST_Controller {
 			$id                  = $request->get_param( 'id' );
 			$per_page            = $request->get_param( 'per_page' ) ?? 10;
 			$page                = $request->get_param( 'page' ) ?? 1;
-			$automation_contacts = Automation_Contact_Model::where( 'automation_id', $id )->with( 'contact', 'processes' )->paginate( $per_page, array( '*' ), 'page', $page );
+			$automation_contacts = Automation_Contact_Model::where( 'automation_id', $id )->with( 'contact', 'processes.step', 'current_step', 'next_step' )->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $automation_contacts, 200 );
 		} catch ( \Exception $e ) {

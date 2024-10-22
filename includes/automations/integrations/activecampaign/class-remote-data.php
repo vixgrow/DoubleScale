@@ -57,7 +57,7 @@ class Remote_Data extends Integration_Remote_Data {
 
 		foreach ( $response['data']['fields'] ?? array() as $field ) {
 			$result[] = array(
-				'label' => $field['name'],
+				'label' => $field['title'],
 				'value' => $field['id'],
 			);
 		}

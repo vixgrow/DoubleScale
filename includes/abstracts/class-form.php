@@ -139,11 +139,11 @@ abstract class Form {
 			$contact = Contact_Model::createOrUpdate( $contact_data );
 
 			if ( ! empty( $lists ) ) {
-				$contact->syncWithoutDetaching( $lists );
+				$contact->lists()->syncWithoutDetaching( $lists );
 			}
 
 			if ( ! empty( $tags ) ) {
-				$contact->syncWithoutDetaching( $tags );
+				$contact->tags()->syncWithoutDetaching( $tags );
 			}
 
 			if ( ! empty( $custom_fields ) ) {
@@ -154,7 +154,7 @@ abstract class Form {
 					);
 				}
 
-				$contact->custom_fields()->syncWithoutDetaching( $custom_fields_values );
+				$contact->custom_fields()->sync( $custom_fields_values );
 			}
 			error_log( 'Contact created: ' . $contact->id );
 		} catch ( Exception $e ) {
@@ -296,7 +296,6 @@ abstract class Form {
 				}
 
 				$contact = $this->maybe_create_contact( $automation );
-				error_log( 'Contact: ' . $contact->id );
 				if ( ! $contact ) {
 					continue;
 				}
@@ -340,7 +339,7 @@ abstract class Form {
 			} else {
 				$contact_data['status'] = 'subscribed';
 			}
-			error_log( 'Form Data 1: ' . wp_json_encode( $contact_data ) );
+
 			if ( ! $update_blank_fields ) {
 				$contact_data = array_filter( $contact_data );
 			}
@@ -352,20 +351,25 @@ abstract class Form {
 				}
 			}
 
-			error_log( 'Form Data: ' . wp_json_encode( $contact_data ) );
-
 			$contact = Contact_Model::createOrUpdate( $contact_data );
 
 			if ( ! empty( $lists ) ) {
-				$contact->syncWithoutDetaching( $lists );
+				$contact->lists()->syncWithoutDetaching( $lists );
 			}
 
 			if ( ! empty( $tags ) ) {
-				$contact->syncWithoutDetaching( $tags );
+				$contact->tags()->syncWithoutDetaching( $tags );
 			}
 
 			if ( ! empty( $custom_fields ) ) {
-				$contact->custom_fields()->syncWithoutDetaching( $custom_fields );
+				$custom_fields_values = array();
+				foreach ( $custom_fields as $key => $value ) {
+					$custom_fields_values[ $key ] = array(
+						'value' => $value,
+					);
+				}
+
+				$contact->custom_fields()->syncWithoutDetaching( $custom_fields_values );
 			}
 
 			return $contact;
@@ -388,9 +392,6 @@ abstract class Form {
 	public function is_processable( Automation_Model $automation, $args ) {
 		$form_id            = $this->get_form_id( $args['form_id'] );
 		$automation_form_id = $automation->get_setting( 'form_id' );
-
-		error_log( 'Form ID: ' . $form_id );
-		error_log( 'Automation Form ID: ' . $automation_form_id );
 
 		return $form_id === $automation_form_id;
 	}

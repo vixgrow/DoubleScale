@@ -11,11 +11,13 @@ import type { FunctionKeys } from 'utility-types';
 /**
  * Internal Dependencies.
  */
-import { SETUP_STORE, ADD_NOTICE, DELETE_NOTICE } from './constants';
+import { SETUP_STORE, ADD_NOTICE, DELETE_NOTICE, SET_MERGE_TAGS_VISIBLE, SET_CURRENT_TRIGGER } from './constants';
 
 export type CorePureState = {
 	notices: Notices;
 	initialAccountData: InitialAccountData;
+	mergeTagsVisible: boolean;
+	currentTrigger: string;
 };
 
 export type InitialAccountData = {
@@ -47,10 +49,22 @@ type deleteNote = {
 	id: string;
 };
 
+export type setMergeTagsVisible = {
+	type: typeof SET_MERGE_TAGS_VISIBLE;
+	visible: boolean;
+};
+
+export type setCurrentTrigger = {
+	type: typeof SET_CURRENT_TRIGGER;
+	trigger: string;
+};
+
 export type CoreActionTypes =
 	| setupStoreAction
 	| addNote
 	| deleteNote
+	| setMergeTagsVisible
+	| setCurrentTrigger
 	| ReturnType<() => { type: 'NOOP' }>;
 
 /**
@@ -61,8 +75,8 @@ export type CoreActionTypes =
 
 export type SelectFromMap<S extends Record<string, unknown>> = {
 	[selector in FunctionKeys<S>]: S[selector] extends (...args: any[]) => any
-		? (...args: TailParameters<S[selector]>) => ReturnType<S[selector]>
-		: never;
+	? (...args: TailParameters<S[selector]>) => ReturnType<S[selector]>
+	: never;
 };
 
 /**

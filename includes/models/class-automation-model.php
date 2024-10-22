@@ -160,6 +160,7 @@ class Automation_Model extends Model {
 	public function get_first_step() {
 		return $this->steps()
 			->where( 'status', 'active' )
+			->where( 'parent_id', 0 )
 			->orderBy( 'order', 'asc' )
 			->first();
 	}

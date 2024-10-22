@@ -116,6 +116,25 @@ class REST_Campaign_Controller extends REST_Controller {
 			)
 		);
 
+		// Duplicate a campaign
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/duplicate',
+			array(
+				'args' => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'duplicate_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+			)
+		);
+
 		// Get campaign emails
 		register_rest_route(
 			$this->namespace,
@@ -266,10 +285,10 @@ class REST_Campaign_Controller extends REST_Controller {
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 
 			if ( $keyword ) {
-				$campaigns = Campaign_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )
+				$campaigns = Campaign_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )->orderBy( 'created_at', 'desc' )
 					->paginate( $per_page, array( '*' ), 'page', $page );
 			} else {
-				$campaigns = Campaign_Model::paginate( $per_page, array( '*' ), 'page', $page );
+				$campaigns = Campaign_Model::orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			}
 
 			return new WP_REST_Response( $campaigns, 200 );
@@ -339,6 +358,38 @@ class REST_Campaign_Controller extends REST_Controller {
 		try {
 			$campaign_data = $this->prepare_campaign( $request );
 			$campaign      = Campaign_Model::create( $campaign_data );
+
+			return new WP_REST_Response( $campaign, 201 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Duplicate a campaign
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response $response The response object
+	 */
+	public function duplicate_item( $request ) {
+		try {
+			$campaign_id = $request->get_param( 'id' );
+			$campaign    = Campaign_Model::find( $campaign_id );
+
+			if ( ! $campaign ) {
+				return new WP_Error( 'error', __( 'Campaign not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			$campaign_data = $campaign->toArray();
+			unset( $campaign_data['id'] );
+			unset( $campaign_data['created_at'] );
+			unset( $campaign_data['updated_at'] );
+			$campaign_data['status'] = 'draft';
+			$campaign_data['name']   = $campaign_data['name'] . ' - Copy';
+			$campaign                = Campaign_Model::create( $campaign_data );
 
 			return new WP_REST_Response( $campaign, 201 );
 		} catch ( \Exception $e ) {

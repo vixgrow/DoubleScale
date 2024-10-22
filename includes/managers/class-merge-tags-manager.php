@@ -85,11 +85,11 @@ final class Merge_Tags_Manager {
 		}
 
 		// Merge tag will be like {{group:slug}}
-		$this->merge_tags[ $merge_tag->group ][ $merge_tag->slug ]     = $merge_tag;
+		$this->merge_tags[ $merge_tag->group ][ $merge_tag->slug ]          = $merge_tag;
 		$this->groups[ $merge_tag->group ]['mergeTags'][ $merge_tag->slug ] = array(
-			'name'       => $merge_tag->name,
+			'name'  => $merge_tag->name,
 			// 'description' => $merge_tag->description,
-			'value' => "{{$merge_tag->group}:{$merge_tag->slug}}",
+			'value' => "{{{$merge_tag->group}:{$merge_tag->slug}}}",
 		);
 	}
 
@@ -128,20 +128,22 @@ final class Merge_Tags_Manager {
 	public function set_groups() {
 		$this->groups = array(
 			'contact'        => array(
-				'name' => __( 'Contact', 'quillcrm' ),
-				'mergeTags'  => array(),
+				'name'      => __( 'Contact', 'quillcrm' ),
+				'mergeTags' => array(),
 			),
 			'general'        => array(
-				'name' => __( 'General', 'quillcrm' ),
-				'mergeTags'  => array(),
+				'name'      => __( 'General', 'quillcrm' ),
+				'mergeTags' => array(),
 			),
 			'order'          => array(
-				'name' => __( 'Order', 'quillcrm' ),
-				'mergeTags'  => array(),
+				'name'      => __( 'Order', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'wc_order_completed', 'wc_order_created', 'wc_order_refunded', 'wc_order_status_changed' ),
 			),
 			'abandoned_cart' => array(
-				'name' => __( 'Abandoned Cart', 'quillcrm' ),
-				'mergeTags'  => array(),
+				'name'      => __( 'Abandoned Cart', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'wc_abandoned_cart_created' ),
 			),
 		);
 	}
@@ -160,15 +162,15 @@ final class Merge_Tags_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string                   $content Content.
-	 * @param Automation_Contact_Model $automation_contact Contact Model.
+	 * @param string                                      $content Content.
+	 * @param Automation_Contact_Model|Contact_Model|null $automation_contact Contact Model.
 	 *
 	 * @return string
 	 */
-	public function process_merge_tags( $content, Automation_Contact_Model $automation_contact ) {
+	public function process_merge_tags( $content, $contact ) {
 		return preg_replace_callback(
 			'/{{(.*?):(.*?)}}/',
-			function( $matches ) use ( $automation_contact ) {
+			function( $matches ) use ( $contact ) {
 				$group          = $matches[1];
 				$slug           = $matches[2];
 				$slug_parts     = explode( ' ', $slug );
@@ -178,8 +180,8 @@ final class Merge_Tags_Manager {
 				if ( ! $merge_tag ) {
 					return '';
 				}
-
-				return $merge_tag->get_value( $automation_contact, $slug );
+				error_log( $slug );
+				return $merge_tag->get_tag_value( $contact, $slug );
 			},
 			$content
 		);

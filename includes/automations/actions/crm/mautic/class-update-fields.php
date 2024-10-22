@@ -88,8 +88,14 @@ class Update_Fields extends Action {
 			return false;
 		}
 
-		foreach ( $mapped_fields as $key => $value ) {
-			$data['fields'][ $key ] = $this->merge_tags_manager->process_merge_tags( $value, $automation_contact );
+		foreach ( $mapped_fields as $field ) {
+			$field_key = $field['key'];
+			$value     = $field['value'];
+			if ( empty( $value ) || empty( $field_key ) ) {
+				continue;
+			}
+
+			$data['fields'][ $field_key ] = $this->merge_tags_manager->process_merge_tags( $value, $automation_contact );
 		}
 
 		$result = $api->create_or_update_contact( $data );

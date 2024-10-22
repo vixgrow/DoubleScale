@@ -10,7 +10,8 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Flex, Table, Input, Button, Modal, Select } from 'antd';
+import { Flex, Table, Input, Button, Modal, Select, Popconfirm, Popover } from 'antd';
+import { EditOutlined, DeleteOutlined, CopyOutlined, MoreOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
@@ -19,6 +20,7 @@ import './style.scss';
 import { Campaign, CampaignsResponse } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
+import { convertDate } from '@quillcrm/utils';
 const { Column } = Table;
 
 const Campaigns: React.FC = () => {
@@ -124,6 +126,43 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
+	const deleteCampaign = async (id: number) => {
+		try {
+			await apiFetch({
+				path: `/qc/v1/campaigns/${id}`,
+				method: 'DELETE',
+			});
+
+			fetchCampaigns();
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	};
+
+	const duplicateCampaign = async (id: number) => {
+		createNotice({
+			type: 'info',
+			message: __('Duplicating campaign...', 'quillcrm'),
+		});
+
+		try {
+			const response = (await apiFetch({
+				path: `/qc/v1/campaigns/${id}/duplicate`,
+				method: 'POST',
+			})) as Campaign;
+
+			navigate(getToLink(`campaigns/${response.id}`));
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	}
+
 	return (
 		<div className="qcrm-campaigns">
 			<Flex
@@ -205,27 +244,84 @@ const Campaigns: React.FC = () => {
 					dataIndex="name"
 					key="name"
 					render={(_, record: Campaign) => (
-						<NavLink
-							to={
-								record.status === 'completed'
-									? `campaigns/${record.id}/overview`
-									: `campaigns/${record.id}`
-							}
-						>
-							{record.name}
-						</NavLink>
+						<Flex gap={10} align="center">
+							<Popover
+								content={
+									<Flex vertical gap={10}>
+										<Button
+											icon={<EditOutlined />}
+											onClick={() => {
+												navigate(
+													getToLink(
+														`campaigns/${record.id}`
+													)
+												);
+											}}
+										>
+											{record.status !== 'draft' && record.status !== 'schedule' ? __('Overview', 'quillcrm') : __('Edit', 'quillcrm')}
+										</Button>
+										<Button
+											icon={<CopyOutlined />}
+											onClick={() =>
+												duplicateCampaign(record.id)
+											}
+										>
+											{__('Duplicate', 'quillcrm')}
+										</Button>
+										<Popconfirm
+											title={__(
+												'Are you sure?',
+												'quillcrm'
+											)}
+											onConfirm={() =>
+												deleteCampaign(record.id)
+											}
+										>
+											<Button
+												icon={<DeleteOutlined />}
+												danger
+											>
+												{__('Delete', 'quillcrm')}
+											</Button>
+										</Popconfirm>
+									</Flex>
+								}
+								trigger="click"
+							>
+								<MoreOutlined size={40} />
+							</Popover>
+							<NavLink
+								to={
+									record.status === 'completed'
+										? `campaigns/${record.id}/overview`
+										: `campaigns/${record.id}`
+								}
+							>
+								{record.name}
+							</NavLink>
+						</Flex>
 					)}
 				/>
 				<Column title={__('Status')} dataIndex="status" key="status" />
 				<Column
-					title={__('Created At')}
-					dataIndex="created_at"
-					key="created_at"
+					title={__('Execute At')}
+					dataIndex="execute_at"
+					key="execute_at"
+					render={(text, record: Campaign) =>
+						record.status === 'schedule' ? convertDate(text) : '-'
+					}
 				/>
 				<Column
 					title={__('Updated At')}
 					dataIndex="updated_at"
 					key="updated_at"
+					render={(text) => convertDate(text, true)}
+				/>
+				<Column
+					title={__('Created At')}
+					dataIndex="created_at"
+					key="created_at"
+					render={(text) => convertDate(text, true)}
 				/>
 			</Table>
 			<Modal

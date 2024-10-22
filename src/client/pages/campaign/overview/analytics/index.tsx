@@ -8,7 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
-import { Card, Flex, Typography, Spin } from 'antd';
+import { Card, Flex, Typography, Spin, Progress } from 'antd';
 import {
 	SendOutlined,
 	EyeOutlined,
@@ -37,6 +37,8 @@ import { Campaign as CampaignType } from '@quillcrm/client';
 const Analytics: React.FC = () => {
 	const { campaign, isLoading, updateCampaign } = useCampaignContext();
 	const [isFetching, setIsFetching] = useState(false);
+	const [started, setStarted] = useState(campaign?.status === 'processing' && campaign?.sent_count > 0);
+
 	const fetchCampaign = async () => {
 		if (!campaign || isFetching) {
 			return;
@@ -49,6 +51,13 @@ const Analytics: React.FC = () => {
 				path: `/qc/v1/campaigns/${campaign.id}`,
 			})) as CampaignType;
 
+			if (response.sent_count > 0 && !started) {
+				setStarted(true);
+			}
+
+			if (response.status === 'completed') {
+				setStarted(false);
+			}
 			updateCampaign(response);
 		} catch (error) {
 			console.error(error);
@@ -141,6 +150,21 @@ const Analytics: React.FC = () => {
 							</Flex>
 						</Card>
 					</Flex>
+					{started && (
+						<Flex>
+							<Progress
+								percent={
+									campaign.sent_count > 0
+										? Math.round(
+											(campaign.sent_count / campaign.contacts_count) *
+											100
+										)
+										: 0
+								}
+								format={(percent) => `${percent}%`}
+							/>
+						</Flex>
+					)}
 					<Card>
 						<Flex justify="center">
 							<div style={{ maxWidth: 400 }}>

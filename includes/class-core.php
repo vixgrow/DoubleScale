@@ -20,6 +20,7 @@ use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Managers\Goals_Manager;
 use QuillCRM\Managers\Rules_Manager;
+use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * Core Class
@@ -59,7 +60,8 @@ class Core {
 			'qcrm.config.setAutomationGoals(' . wp_json_encode( Goals_Manager::instance()->get_sources() ) . ');' .
 			'qcrm.config.setAutomationRules(' . wp_json_encode( Rules_Manager::instance()->get_groups() ) . ');' .
 			'qcrm.config.setIsWoocommerceActive( ' . quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) . ' );' .
-			'qcrm.config.setSiteUrl( "' . site_url() . '" );'
+			'qcrm.config.setSiteUrl( "' . site_url() . '" );' .
+			'qcrm.config.setMergeTags( ' . wp_json_encode( Merge_Tags_Manager::instance()->get_groups() ) . ');'
 		);
 	}
 }

@@ -12,7 +12,7 @@
 namespace QuillCRM\Merge_Tags\General;
 
 use QuillCRM\Abstracts\Merge_Tag;
-use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
@@ -49,14 +49,21 @@ class Site_URL extends Merge_Tag {
 	public $group = 'general';
 
 	/**
+	 * Is automation merge tag
+	 *
+	 * @var bool
+	 */
+	public $is_automation = false;
+
+	/**
 	 * Get Merge Tag Value
 	 *
-	 * @param Automation_Contact_Model $automation_contact Contact Model.
-	 * @param string                   $merge_tag Merge Tag.
+	 * @param Contact_Model $contact Contact Model.
+	 * @param string        $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
-	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
+	public function get_value( $contact, $merge_tag = '' ) {
 		return get_site_url();
 	}
 }

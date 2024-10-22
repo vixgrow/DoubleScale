@@ -77,13 +77,11 @@ class Process {
 	 * @return bool
 	 */
 	protected function check_group( $group ) {
-		foreach ( $group as $condition ) {
-			$condition        = new Condition( $this->automation_contact, $condition );
-			$condition_result = $condition->is_condition_fulfilled();
+		$condition        = new Condition( $this->automation_contact, $group );
+		$condition_result = $condition->is_condition_fulfilled();
 
-			if ( ! $condition_result ) {
-				return false;
-			}
+		if ( ! $condition_result ) {
+			return false;
 		}
 
 		return true;

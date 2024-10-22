@@ -10,7 +10,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Table, Tag } from 'antd';
+import { Table, Tag, Modal, Button } from 'antd';
 
 /**
  * Internal dependencies
@@ -22,6 +22,8 @@ import type {
 } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { useParams } from '@quillcrm/navigation';
+import Result from '../workflow/result';
+import { convertDate } from '@quillcrm/utils';
 
 const { Column } = Table;
 
@@ -33,6 +35,7 @@ const ContactsList: React.FC = () => {
 	const [total, setTotal] = useState(0);
 	const [data, setData] = useState<AutomationContact[]>([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+	const [contact, setContact] = useState<AutomationContact | null>(null);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchContacts = async () => {
@@ -97,11 +100,13 @@ const ContactsList: React.FC = () => {
 					title={__('Started At', 'quillcrm')}
 					dataIndex="created_at"
 					key="created_at"
+					render={(date) => convertDate(date)}
 				/>
 				<Column
 					title={__('Last Run', 'quillcrm')}
 					dataIndex="updated_at"
 					key="updated_at"
+					render={(date) => convertDate(date)}
 				/>
 				<Column
 					title={__('Status', 'quillcrm')}
@@ -125,12 +130,20 @@ const ContactsList: React.FC = () => {
 					title={__('Actions', 'quillcrm')}
 					key="actions"
 					render={(_, record: AutomationContact) => (
-						<NavLink to={`contacts/${record.contact.id}`}>
+						<Button type='link' onClick={() => setContact(record)}>
 							{__('View Journey', 'quillcrm')}
-						</NavLink>
+						</Button>
 					)}
 				/>
 			</Table>
+			<Modal
+				open={contact !== null}
+				onCancel={() => setContact(null)}
+				footer={null}
+				width={800}
+			>
+				<Result contact={contact} />
+			</Modal>
 		</div>
 	);
 };

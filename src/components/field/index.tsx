@@ -20,6 +20,7 @@ import './style.scss';
 import { ListField, TagField, LinkTriggerField } from '@quillcrm/components';
 import type { ReactSelectOptions } from '@quillcrm/client';
 import ContactMappedFields from '../contact-mapped-fields';
+import MappedFields from '../mapped-fields';
 import APISelect from '../api-select';
 import APIMappedFields from '../api-mapped-fields';
 
@@ -107,8 +108,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-									(option) => option.value === value
-								)
+								(option) => option.value === value
+							)
 							: null
 					}
 					onChange={(value) => {
@@ -193,6 +194,15 @@ const Field: React.FC<FieldProps> = ({
 					values={value}
 					fields={fields || {}}
 					endpoint={endpoint || ''}
+				/>
+			);
+			break;
+		case 'mapped_fields':
+			fieldContent = (
+				<MappedFields
+					onChange={onChange}
+					values={value}
+					fields={fields || {}}
 				/>
 			);
 			break;

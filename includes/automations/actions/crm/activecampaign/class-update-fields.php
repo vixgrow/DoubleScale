@@ -80,7 +80,18 @@ class Update_Fields extends Action {
 			'email' => $automation_contact->contact->email,
 		);
 
-		foreach ( $mapped_fields as $field_key => $value ) {
+		foreach ( $mapped_fields as $field ) {
+			$field_key = $field['key'];
+			$value     = $field['value'];
+			if ( empty( $value ) || empty( $field_key ) ) {
+				continue;
+			}
+
+			if ( in_array( $field_key, array( 'email', 'first_name', 'last_name' ) ) ) {
+				$data[ $field_key ] = $this->merge_tags_manager->process_merge_tags( $value, $automation_contact );
+				continue;
+			}
+
 			$data['fieldValues'][] = array(
 				'field' => $field_key,
 				'value' => $this->merge_tags_manager->process_merge_tags( $value, $automation_contact ),
@@ -93,12 +104,17 @@ class Update_Fields extends Action {
 			return false;
 		}
 
-		$result = $api->create_or_update( $data );
+		$result = $api->create_or_update(
+			array(
+				'contact' => $data,
+			)
+		);
+		error_log( 'Result: ' . wp_json_encode( $result ) );
 		if ( $result['success'] ) {
 			return true;
 		}
 
-		if ( 422 === $result['response']['code'] ) {
+		if ( 422 === $result['code'] ) {
 			return true;
 		}
 

@@ -93,7 +93,8 @@ class Remove_Subscriber_From_List extends Action {
 			return false;
 		}
 
-		$result = $api->remove_contact_from_list( $result['data']['id'], $list_id );
+		$contact_id = isset( $result['data']['contact'] ) ? $result['data']['contact']['id'] : $result['data']['id'];
+		$result     = $api->remove_contact_from_list( $contact_id, $list_id );
 
 		return $result['success'];
 	}

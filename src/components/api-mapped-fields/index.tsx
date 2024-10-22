@@ -9,6 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
  * External dependencies
  */
 import { Typography, Flex, Select, Input, Skeleton, Button } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
@@ -18,8 +19,8 @@ import type { ReactSelectOptions } from '@quillcrm/client';
 import { map } from 'lodash';
 
 interface APIMappedFieldsProps {
-	onChange: (value: { [key: string]: string }) => void;
-	values: { [key: string]: string };
+	onChange: (value: { key: string; value: string }[]) => void;
+	values: { key: string; value: string }[];
 	fields: {
 		[key: string]: {
 			label: string;
@@ -30,17 +31,19 @@ interface APIMappedFieldsProps {
 
 const APIMappedFields: React.FC<APIMappedFieldsProps> = ({
 	onChange,
-	values,
+	values = [],
 	endpoint,
 	fields: initialFields = {},
 }) => {
+	initialFields = initialFields || {};
+	initialFields = { '': { label: __('Select', 'quillcrm') }, ...initialFields };
 	const preloadedFields = map(initialFields, (field, key) => ({
 		label: field.label,
 		value: key,
 	}));
+
 	const [fields, setFields] = useState<ReactSelectOptions>(preloadedFields);
 	const [loading, setLoading] = useState(true);
-	console.log(fields);
 
 	const fetchOptions = async () => {
 		setLoading(true);
@@ -66,10 +69,25 @@ const APIMappedFields: React.FC<APIMappedFieldsProps> = ({
 	}
 
 	const addNewField = () => {
-		onChange({
+		onChange([
 			...values,
-			'': '',
-		});
+			{
+				key: '',
+				value: '',
+			},
+		]);
+	};
+
+	const changeHandler = (index: number, payload: { key?: string; value?: string }) => {
+		const newValues = [...values];
+		newValues[index] = { ...newValues[index], ...payload };
+		onChange(newValues);
+	};
+
+	const removeField = (index: number) => {
+		const newValues = [...values];
+		newValues.splice(index, 1);
+		onChange(newValues);
 	};
 
 	return (
@@ -82,21 +100,25 @@ const APIMappedFields: React.FC<APIMappedFieldsProps> = ({
 					{__('Value', 'quillcrm')}
 				</Typography.Text>
 			</Flex>
-			{map(values, (_, key) => {
+			{fields.length > 0 && map(values, (field, index) => {
 				return (
-					<Flex key={key} gap={20}>
+					<Flex key={index} gap={20}>
 						<Select
 							onChange={(value) => {
-								onChange({
-									...values,
-									[key]: value,
-								});
+								changeHandler(index, { key: value });
 							}}
-							value={values?.[key] || ''}
+							value={field.key}
 							options={fields}
 							style={{ flex: 1 }}
 						/>
-						<Input value={key} disabled style={{ flex: 1 }} />
+						<Input
+							value={field.value}
+							onChange={(e) => {
+								changeHandler(index, { value: e.target.value });
+							}}
+							style={{ flex: 1 }}
+						/>
+						<Button icon={<DeleteOutlined />} onClick={() => removeField(index)} danger />
 					</Flex>
 				);
 			})}

@@ -217,9 +217,9 @@ class Rest_Form_Controller extends REST_Controller {
 			} else {
 				if ( $keyword ) {
 					$forms = Form_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )
-					->paginate( $per_page, array( '*' ), 'page', $page );
+					->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 				} else {
-					$forms = Form_Model::paginate( $per_page, array( '*' ), 'page', $page );
+					$forms = Form_Model::orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 				}
 			}
 

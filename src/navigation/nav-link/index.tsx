@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useNavigate, useMatch } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 let forceReload = false;
 
@@ -14,6 +14,7 @@ import { getToLink } from '..';
 
 const CustomNavLink: React.FC<Props> = (props) => {
 	const navigate = useNavigate();
+
 	return (
 		<a
 			href={props.to}

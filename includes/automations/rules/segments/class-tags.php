@@ -58,6 +58,24 @@ class Tags extends Rule {
 	public $type = 'tags';
 
 	/**
+	 * Get operators
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_operators() {
+		return array(
+			'is'               => __( 'Is', 'quillcrm' ),
+			'is_not'           => __( 'Is not', 'quillcrm' ),
+			'contains'         => __( 'Contains', 'quillcrm' ),
+			'does_not_contain' => __( 'Does not contain', 'quillcrm' ),
+			'is_empty'         => __( 'Is empty', 'quillcrm' ),
+			'is_not_empty'     => __( 'Is not empty', 'quillcrm' ),
+		);
+	}
+
+	/**
 	 * Get options
 	 *
 	 * @since 1.0.0
@@ -89,7 +107,8 @@ class Tags extends Rule {
 	 */
 	public function get_value( $automation_contact ) {
 		$contact = $automation_contact->contact;
-		return $contact->tags;
+		$ids     = $contact->tags->pluck( 'id' )->toArray();
+		return $ids;
 	}
 }
 

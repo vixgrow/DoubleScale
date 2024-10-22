@@ -51,13 +51,13 @@ class Order_Shipping_Postcode extends Merge_Tag {
 	/**
 	 * Get Merge Tag Value
 	 *
-	 * @param Automation_Contact_Model $automation_contact Contact Model.
+	 * @param Automation_Contact_Model $contact Contact Model.
 	 * @param string                   $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
-	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
-		$order_id = $automation_contact->get_data( 'order_id' );
+	public function get_value( $contact, $merge_tag = '' ) {
+		$order_id = $contact->get_data( 'order_id' );
 		$order    = wc_get_order( $order_id );
 		if ( ! $order instanceof \WC_Order ) {
 			return '';

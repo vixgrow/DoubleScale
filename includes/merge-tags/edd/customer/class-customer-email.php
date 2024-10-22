@@ -13,6 +13,7 @@ namespace QuillCRM\Merge_Tags\EDD\Customer;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
@@ -51,13 +52,13 @@ class Customer_Email extends Merge_Tag {
 	/**
 	 * Get Merge Tag Value
 	 *
-	 * @param Automation_Contact_Model $automation_contact Contact Model.
+	 * @param Automation_Contact_Model $contact Contact Model.
 	 * @param string                   $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
-	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
-		$customer_id = $automation_contact->get_data( 'customer_id' );
+	public function get_value( $contact, $merge_tag = '' ) {
+		$customer_id = $contact->get_data( 'customer_id' );
 		$customer    = edd_get_customer( $customer_id );
 		if ( ! $customer ) {
 			return '';

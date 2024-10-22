@@ -130,6 +130,7 @@ class Email {
 			}
 
 			$orginal_url = urldecode( $_GET['orginal'] );
+			error_log( $orginal_url );
 			wp_redirect( $orginal_url );
 			exit;
 		} catch ( \Exception $e ) {

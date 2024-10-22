@@ -13,6 +13,8 @@ use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Fields\Contact_Fields;
+use QuillCRM\Models\Contact_Model;
 
 /**
  * Action class

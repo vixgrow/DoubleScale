@@ -194,7 +194,7 @@ class REST_List_Controller extends REST_Controller {
 			$contact_id = $request->get_param( 'contact_id' ) ?? '';
 
 			if ( ! empty( $ids ) ) {
-				$lists = List_Model::whereIn( 'id', $ids )->paginate( $per_page, array( '*' ), 'page', $page );
+				$lists = List_Model::whereIn( 'id', $ids )->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 				return new WP_REST_Response( $lists, 200 );
 			}
@@ -215,7 +215,7 @@ class REST_List_Controller extends REST_Controller {
 				);
 			}
 
-			$lists = $lists->paginate( $per_page, array( '*' ), 'page', $page );
+			$lists = $lists->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $lists, 200 );
 		} catch ( \Exception $e ) {

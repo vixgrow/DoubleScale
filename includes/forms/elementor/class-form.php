@@ -100,6 +100,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_fields() {
+		// Check nonce.
+		check_ajax_referer( 'quillcrm-admin', 'nonce' );
+
 		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( $_POST['form_id'] ) : '';
 		$post_id = isset( $_POST['post_id'] ) ? sanitize_text_field( $_POST['post_id'] ) : '';
 
@@ -125,6 +128,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_source_select_options() {
+		// Check nonce.
+		check_ajax_referer( 'quillcrm-admin', 'nonce' );
+
 		$pages = Utils::get_pages();
 
 		wp_send_json_success( $pages );
@@ -138,6 +144,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_form_select_options() {
+		// Check nonce.
+		check_ajax_referer( 'quillcrm-admin', 'nonce' );
+
 		$post_id = isset( $_POST['post_id'] ) ? sanitize_text_field( $_POST['post_id'] ) : '';
 
 		if ( empty( $post_id ) ) {

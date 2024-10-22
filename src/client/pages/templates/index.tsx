@@ -22,6 +22,7 @@ import type {
 } from '@quillcrm/client';
 import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import { Field } from '@quillcrm/components';
+import { convertDate } from '@quillcrm/utils';
 
 const { Column } = Table;
 
@@ -223,6 +224,7 @@ const TemplatesList: React.FC = () => {
 					title={__('Created At', 'quillcrm')}
 					dataIndex="created_at"
 					key="created_at"
+					render={(date: string) => convertDate(date)}
 				/>
 			</Table>
 			<Modal

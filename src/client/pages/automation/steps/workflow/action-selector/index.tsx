@@ -111,6 +111,7 @@ const ActionsGroupRender: React.FC<{
 									key={key}
 									onClick={() => onChange(key)}
 									type={value === key ? 'primary' : 'default'}
+									disabled={group.is_disabled}
 								>
 									{action.label}
 								</Button>

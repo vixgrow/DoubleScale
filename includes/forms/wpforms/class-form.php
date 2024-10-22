@@ -130,6 +130,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_fields() {
+		// Check nonce.
+		check_ajax_referer( 'quillcrm-admin', 'nonce' );
+
 		$form_id = isset( $_POST['form_id'] ) ? absint( $_POST['form_id'] ) : 0;
 
 		if ( ! $form_id ) {
@@ -149,6 +152,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_form_select_options() {
+		// Check nonce.
+		check_ajax_referer( 'quillcrm-admin', 'nonce' );
+
 		$forms = wpforms()->form->get();
 
 		$options = array();

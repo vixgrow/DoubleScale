@@ -145,6 +145,29 @@ class Process_Automation {
 			case 'goal':
 				$this->process_goal( $step, $automation_contact_id );
 				break;
+			case 'end_automation':
+				$this->process_end_automation( $step, $automation_contact_id );
+				break;
+		}
+	}
+
+	/**
+	 * Process End Automation
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $step Automation Step.
+	 * @param int    $automation_contact_id Automation Contact ID.
+	 *
+	 * @return void
+	 */
+	public function process_end_automation( $step, $automation_contact_id ) {
+		try {
+			$automation_contact = Automation_Contact_Model::findOrFail( $automation_contact_id );
+			$this->update_automation_contact_status( $automation_contact, 'completed', $step->id, 0 );
+		} catch ( Exception $e ) {
+			error_log( 'Process End Automation Error: ' . $e->getMessage() );
+			return;
 		}
 	}
 
@@ -201,18 +224,13 @@ class Process_Automation {
 			return $this->automation->get_next_step( $step->order );
 		}
 
-		$next_step = $this->automation->steps()->where( 'parent_id', $step->parent_id )->where( 'condition', $step->condition )->where( 'order', '>', $step->order )->first();
+		$next_step = $this->automation->steps()->where( 'status', 'active' )->where( 'parent_id', $step->parent_id )->where( 'condition', $step->condition )->where( 'order', '>', $step->order )->orderBy( 'order', 'asc' )->first();
 		if ( ! $next_step ) {
-			// Get the next step after the last step in the parent
-			if ( 0 !== $step->parent->parent_id ) {
-				$next_step = $this->automation->steps()->where( 'parent_id', $step->parent->parent_id )->where( 'condition', $step->parent->condition )->where( 'order', '>', $step->parent->order )->first();
+			if ( $step->parent && 0 !== $step->parent->parent_id ) {
+				$next_step = $this->automation->steps()->where( 'status', 'active' )->where( 'parent_id', $step->parent->parent_id )->where( 'condition', $step->parent->condition )->where( 'order', '>', $step->parent->order )->orderBy( 'order', 'asc' )->first();
 			} else {
-				$next_step = $this->automation->steps()->where( 'order', '>', $step->parent->order )->first();
+				$next_step = $this->automation->steps()->where( 'status', 'active' )->where( 'order', '>', $step->order )->orderBy( 'order', 'asc' )->first();
 			}
-		}
-
-		if ( $next_step && 'end_automation' === $next_step->type ) {
-			$next_step = false;
 		}
 
 		return $next_step;
@@ -235,6 +253,8 @@ class Process_Automation {
 			$result             = new Process_Conditions( $automation_contact, $conditions );
 			$check              = $result->check();
 			error_log( $check ? 'Condition Check: Yes' : 'Condition Check: No' );
+
+			$this->add_automation_contact_process( $step, $automation_contact->id, 'completed' );
 			if ( $check ) {
 				$this->process_yes_steps( $step, $automation_contact );
 			} else {
@@ -258,7 +278,7 @@ class Process_Automation {
 	 * @return void
 	 */
 	public function process_yes_steps( $step, $automation_contact ) {
-		$first_yes_step = $automation_contact->automation->steps()->where( 'parent_id', $step->id )->where( 'condition', 'yes' )->first();
+		$first_yes_step = $automation_contact->automation->steps()->where( 'status', 'active' )->where( 'parent_id', $step->id )->where( 'condition', 'yes' )->where( 'order', 1 )->orderBy( 'order', 'asc' )->first();
 		if ( $first_yes_step ) {
 			$this->enqueue_step( $first_yes_step->id, $automation_contact->id );
 		}
@@ -275,7 +295,7 @@ class Process_Automation {
 	 * @return void
 	 */
 	public function process_no_steps( $step, $automation_contact ) {
-		$first_no_step = $automation_contact->automation->steps()->where( 'parent_id', $step->id )->where( 'condition', 'no' )->first();
+		$first_no_step = $automation_contact->automation->steps()->where( 'status', 'active' )->where( 'parent_id', $step->id )->where( 'condition', 'no' )->where( 'order', 1 )->orderBy( 'order', 'asc' )->first();
 		if ( $first_no_step ) {
 			$this->enqueue_step( $first_no_step->id, $automation_contact->id );
 		}
@@ -346,7 +366,7 @@ class Process_Automation {
 	 * @return void
 	 */
 	public function add_automation_contact_process( $step, $automation_contact_id, $status ) {
-		error_log( 'Add Automation Contact Process: ' . $step->id . ' Automation Contact ID: ' . $automation_contact_id . ' Status: ' . $status );
+		error_log( 'Add Automation Contact Process: ' . $step->id . ' Automation Contact ID: ' . $automation_contact_id . ' Status: ' . $status . 'Order: ' . $step->order );
 		$this->automation->processes()->create(
 			array(
 				'automation_contact_id' => $automation_contact_id,

@@ -52,13 +52,13 @@ class Cart_Shipping_Address_2 extends Merge_Tag {
 	/**
 	 * Get Merge Tag Value
 	 *
-	 * @param Automation_Contact_Model $automation_contact Contact Model.
+	 * @param Automation_Contact_Model $contact Contact Model. Contact Model.
 	 * @param string                   $merge_tag         Merge Tag.
 	 *
 	 * @return string
 	 */
-	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
-		$abandoned_cart_id = $automation_contact->get_data( 'cart_id', 0 );
+	public function get_value( $contact, $merge_tag = '' ) {
+		$abandoned_cart_id = $contact->get_data( 'cart_id', 0 );
 		$abandoned_cart    = Abandoned_Cart_Model::find( $abandoned_cart_id );
 		if ( ! $abandoned_cart ) {
 			return '';

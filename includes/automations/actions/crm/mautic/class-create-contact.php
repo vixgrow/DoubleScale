@@ -142,7 +142,7 @@ class Add_Contact extends Action {
 		return array(
 			'mapped_fields' => array(
 				'label'  => __( 'Mapped Fields', 'quillcrm' ),
-				'type'   => 'contact_mapped_fields',
+				'type'   => 'mapped_fields',
 				'fields' => array(
 					'email'      => array(
 						'label' => __( 'Email', 'quillcrm' ),

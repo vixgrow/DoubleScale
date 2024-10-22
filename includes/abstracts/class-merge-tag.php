@@ -12,6 +12,7 @@
 namespace QuillCRM\Abstracts;
 
 use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Models\Contact_Model;
 
 /**
  * Merge Tag class
@@ -47,12 +48,51 @@ abstract class Merge_Tag {
 	public $group;
 
 	/**
+	 * Is automation merge tag
+	 *
+	 * @var bool
+	 */
+	public $is_automation = true;
+
+	/**
 	 * Get Merge Tag Value
 	 *
-	 * @param Automation_Contact_Model $automation_contact Contact Model.
-	 * @param string                   $merge_tag Merge Tag.
+	 * @param Automation_Contact_Model|Contact_Model|null $contact Contact Model.
+	 * @param string                                      $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
-	abstract public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' );
+	abstract public function get_value( $contact, $merge_tag = '' );
+
+	/**
+	 * Is Automation Contact
+	 *
+	 * @param Automation_Contact_Model|Contact_Model|null $contact Contact Model.
+	 *
+	 * @return bool
+	 */
+	public function is_automation_contact( $contact ) {
+		return $contact instanceof Automation_Contact_Model;
+	}
+
+	/**
+	 * Get tag value
+	 *
+	 * @param Automation_Contact_Model|Contact_Model|null $contact Contact Model.
+	 * @param string                                      $merge_tag Merge Tag.
+	 *
+	 * @return string
+	 */
+	public function get_tag_value( $contact, $merge_tag = '' ) {
+		if ( $this->is_automation && ! $this->is_automation_contact( $contact ) ) {
+			return '';
+		}
+
+		if ( ! $this->is_automation && $this->is_automation_contact( $contact ) ) {
+			error_log( 'Merge Tag is not for automation contact' );
+			return $this->get_value( $contact->contact, $merge_tag );
+		}
+
+		return $this->get_value( $contact, $merge_tag );
+	}
 }

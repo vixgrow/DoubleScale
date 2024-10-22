@@ -121,12 +121,13 @@ abstract class Rule {
 		$value      = $this->get_value( $automation_contact );
 		$operator   = $rule['operator'];
 		$rule_value = $rule['value'];
-
+		error_log( 'operator: ' . $operator );
 		switch ( $operator ) {
 			case 'is':
 				if ( is_array( $value ) ) {
-					return in_array( $rule_value, $value ); // phpcs:ignore
+					return array_diff( $value, $rule_value );
 				}
+
 				return ( $value == $rule_value ); // phpcs:ignore
 
 			case 'is_not':
@@ -148,9 +149,15 @@ abstract class Rule {
 				return (float) $value < (float) $rule_value;
 
 			case 'contains':
+				if ( is_array( $value ) ) {
+					return array_intersect( $value, $rule_value );
+				}
 				return strpos( $value, $rule_value ) !== false;
 
 			case 'not_contains':
+				if ( is_array( $value ) ) {
+					return ! array_intersect( $value, $rule_value );
+				}
 				return strpos( $value, $rule_value ) === false;
 
 			case 'starts_with':
@@ -164,7 +171,10 @@ abstract class Rule {
 					return false;
 				}
 				return substr_compare( $value, $rule_value, -strlen( $rule_value ) ) === 0;
-
+			case 'is_empty':
+				return empty( $value );
+			case 'is_not_empty':
+				return ! empty( $value );
 			default:
 				return false;
 		}

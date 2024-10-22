@@ -115,10 +115,8 @@ final class Loader {
 	 * @return void
 	 */
 	public function process_automation_goal( $step, $contact_id ) {
-		error_log( 'Process Automation Goal: ' . $step->id . ' Contact ID: ' . $contact_id );
 		try {
-			$skip = $step->get_setting( 'skip', false );
-			// Check if automation is deleted.
+			$skip       = $step->get_setting( 'skip', false );
 			$automation = $step->automation;
 			if ( ! $automation ) {
 				return;

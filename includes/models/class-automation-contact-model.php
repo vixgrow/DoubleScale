@@ -73,7 +73,11 @@ class Automation_Contact_Model extends Model {
 	 * @var array
 	 */
 	protected $casts = array(
-		'data' => 'array',
+		'data'          => 'array',
+		'contact_id'    => 'integer',
+		'automation_id' => 'integer',
+		'current_step'  => 'integer',
+		'next_step'     => 'integer',
 	);
 
 	/**

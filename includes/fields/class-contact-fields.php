@@ -137,4 +137,24 @@ class Contact_Fields {
 	public function get_fields() {
 		return $this->fields;
 	}
+
+	/**
+	 * Get field value
+	 *
+	 * @param string        $field Field.
+	 * @param Contact_Model $contact Contact Model.
+	 *
+	 * @return mixed
+	 */
+	public function get_field_value( $field, $contact ) {
+		if ( ! isset( $this->fields[ $field ] ) ) {
+			return null;
+		}
+
+		if ( ! isset( $this->fields[ $field ]['is_custom'] ) ) {
+			return $contact->{$field};
+		}
+
+		return $contact->get_custom_field( $field );
+	}
 }

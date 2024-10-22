@@ -10,6 +10,7 @@ import type {
 	AutomationActions,
 	AutomationGoals,
 	AutomationRules,
+	AutomationMergeTags,
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
 
@@ -57,6 +58,7 @@ const configData: ConfigData = {
 	automationGoals: {},
 	automationRules: {},
 	isWoocommerceActive: false,
+	mergeTags: {},
 };
 
 /**
@@ -71,12 +73,12 @@ const configData: ConfigData = {
  */
 const config =
 	(data: ConfigData) =>
-	<T>(key: string): T | undefined => {
-		if (key in data) {
-			return data[key] as T;
-		}
-		return undefined;
-	};
+		<T>(key: string): T | undefined => {
+			if (key in data) {
+				return data[key] as T;
+			}
+			return undefined;
+		};
 
 /**
  * set initial builder payload
@@ -444,6 +446,27 @@ export const setSiteUrl = (data: ConfigData) => (value: string) => {
 	data.siteUrl = value;
 };
 
+/**
+ * Get merge tags
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * 
+ * @returns AutomationMergeTags
+ */
+export const getMergeTags = (data: ConfigData): AutomationMergeTags => {
+	return data.mergeTags;
+};
+
+/**
+ * Set merge tags
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setMergeTags = (data: ConfigData) => (value: AutomationMergeTags) => {
+	data.mergeTags = value;
+};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -482,6 +505,8 @@ export interface ConfigApi {
 	setIsWoocommerceActive: (value: boolean) => void;
 	getSiteUrl: () => string;
 	setSiteUrl: (value: string) => void;
+	getMergeTags: () => AutomationMergeTags;
+	setMergeTags: (value: AutomationMergeTags) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -522,6 +547,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setIsWoocommerceActive = setIsWoocommerceActive(data);
 	configApi.getSiteUrl = getSiteUrl(data);
 	configApi.setSiteUrl = setSiteUrl(data);
+	configApi.getMergeTags = () => getMergeTags(data);
+	configApi.setMergeTags = setMergeTags(data);
 
 	return configApi;
 };

@@ -12,6 +12,7 @@ namespace QuillCRM\Managers;
 
 use Exception;
 use QuillCRM\Abstracts\Action;
+use QuillCRM\Managers\Integrations_Manager;
 
 /**
  * Actions class
@@ -221,6 +222,10 @@ final class Actions_Manager {
 				),
 			),
 		);
+
+		foreach ( $this->sources['send_data']['groups'] as $group => $data ) {
+			$this->sources['send_data']['groups'][ $group ]['is_disabled'] = ! Integrations_Manager::instance()->is_active( $group );
+		}
 
 		$this->sources = apply_filters( 'quillcrm_actions_sources', $this->sources );
 	}

@@ -232,8 +232,8 @@ class Campaign_Model extends Model {
 
 				$campaign->contacts_count = $campaign_recipients->count();
 				$campaign->sent_count     = $campaign->emails()->where( 'status', 'sent' )->count();
-				$campaign->opened_count   = $campaign->emails()->where( 'status', 'opened' )->count();
-				$campaign->clicked_count  = $campaign->emails()->where( 'status', 'clicked' )->count();
+				$campaign->opened_count   = $campaign->emails()->where( 'clicked', 1 )->count();
+				$campaign->clicked_count  = $campaign->emails()->where( 'opened', 1 )->count();
 			}
 		);
 	}

@@ -10,7 +10,7 @@
 namespace QuillCRM\Merge_Tags\Contact;
 
 use QuillCRM\Abstracts\Merge_Tag;
-use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Models\Custom_Field_Model;
 
@@ -48,6 +48,13 @@ class Contact_Custom_Field extends Merge_Tag {
 	public $group = 'contact';
 
 	/**
+	 * Is automation merge tag
+	 *
+	 * @var bool
+	 */
+	public $is_automation = false;
+
+	/**
 	 * Constructor
 	 *
 	 * @param Custom_Field_Model $custom_field Custom Field Model.
@@ -61,19 +68,22 @@ class Contact_Custom_Field extends Merge_Tag {
 	/**
 	 * Get Merge Tag Value
 	 *
-	 * @param Automation_Contact_Model $automation_contact Contact Model.
-	 * @param string                   $merge_tag Merge Tag.
+	 * @param Contact_Model $contact Contact Model.
+	 * @param string        $merge_tag Merge Tag.
 	 *
 	 * @return string
 	 */
-	public function get_value( Automation_Contact_Model $automation_contact, $merge_tag = '' ) {
-		// Get the custom field key.
+	public function get_value( $contact, $merge_tag = '' ) {
+		if ( is_null( $contact ) ) {
+			return '';
+		}
+
 		$key             = str_replace( 'contact_field:', '', $merge_tag );
 		$custom_field_id = Custom_Field_Model::get_id( $key );
-		$custom_field    = $automation_contact->contact->get_custom_field( $custom_field_id );
+		$custom_field    = $contact->get_custom_field( $custom_field_id );
 
 		if ( $custom_field ) {
-			return $custom_field->value;
+			return $custom_field;
 		}
 
 		return '';

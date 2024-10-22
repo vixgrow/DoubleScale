@@ -195,7 +195,7 @@ class REST_Tag_Controller extends REST_Controller {
 			$contact_id = $request->get_param( 'contact_id' ) ?? '';
 
 			if ( ! empty( $ids ) ) {
-				$tags = Tag_Model::whereIn( 'id', $ids )->paginate( $per_page, array( '*' ), 'page', $page );
+				$tags = Tag_Model::whereIn( 'id', $ids )->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 				return new WP_REST_Response( $tags, 200 );
 			}
@@ -216,7 +216,7 @@ class REST_Tag_Controller extends REST_Controller {
 				);
 			}
 
-			$tags = $tags->paginate( $per_page, array( '*' ), 'page', $page );
+			$tags = $tags->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $tags, 200 );
 		} catch ( \Exception $e ) {

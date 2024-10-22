@@ -91,6 +91,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_fields() {
+		// Check nonce.
+		check_ajax_referer( 'quillcrm-admin', 'nonce' );
+
 		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( $_POST['form_id'] ) : '';
 
 		if ( empty( $form_id ) ) {
@@ -110,6 +113,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_form_select_options() {
+		// Check nonce.
+		check_ajax_referer( 'quillcrm-admin', 'nonce' );
+
 		$forms   = Ninja_Forms()->form()->get_forms();
 		$options = array();
 

@@ -89,7 +89,7 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 									[key]: value.value,
 								});
 							}}
-							value={getAllValue(values[key])}
+							value={values ? getAllValue(values[key]) : null}
 							options={options}
 							styles={{
 								control: (styles) => ({

@@ -77,7 +77,13 @@ class Update_Fields extends Action {
 
 		$data = array();
 
-		foreach ( $mapped_fields as $field_key => $value ) {
+		foreach ( $mapped_fields as $field ) {
+			$field_key = $field['key'];
+			$value     = $field['value'];
+			if ( empty( $value ) || empty( $field_key ) ) {
+				continue;
+			}
+
 			$data['customFieldValues'][] = array(
 				'customFieldId' => $field_key,
 				'value'         => $this->merge_tags_manager->process_merge_tags( $value, $automation_contact ),

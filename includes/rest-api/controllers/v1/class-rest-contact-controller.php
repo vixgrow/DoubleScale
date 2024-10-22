@@ -668,7 +668,7 @@ class REST_Contact_Controller extends REST_Controller {
 
 			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$notes    = $contact->notes()->paginate( $per_page, array( '*' ), 'page', $page );
+			$notes    = $contact->notes()->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $notes, 200 );
 		} catch ( Exception $e ) {
@@ -696,7 +696,7 @@ class REST_Contact_Controller extends REST_Controller {
 
 			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$contacts = $contact->automation_contacts()->paginate( $per_page, array( '*' ), 'page', $page );
+			$contacts = $contact->automation_contacts()->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			$contacts->load( 'automation' );
 
 			return new WP_REST_Response( $contacts, 200 );
@@ -829,8 +829,11 @@ class REST_Contact_Controller extends REST_Controller {
 	protected function sync_lists( $request, $contact ) {
 		try {
 			$lists = $request->get_param( 'lists' );
-			if ( $lists ) {
-				$lists     = $lists;
+			if ( is_array( $lists ) ) {
+				if ( empty( $lists ) ) {
+					$contact->lists()->detach();
+					return;
+				}
 				$lists_arr = array();
 
 				foreach ( $lists as $list ) {
@@ -867,8 +870,12 @@ class REST_Contact_Controller extends REST_Controller {
 	protected function sync_tags( $request, $contact ) {
 		try {
 			$tags = $request->get_param( 'tags' );
-			if ( $tags ) {
-				$tags     = $tags;
+			if ( is_array( $tags ) ) {
+				if ( empty( $tags ) ) {
+					$contact->tags()->detach();
+					return;
+				}
+
 				$tags_arr = array();
 
 				foreach ( $tags as $tag ) {

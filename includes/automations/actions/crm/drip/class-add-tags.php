@@ -125,7 +125,7 @@ class Add_Tags extends Action {
 			'tags' => array(
 				'type'     => 'api_select',
 				'label'    => __( 'Tags', 'quillcrm' ),
-				'endpoint' => 'convertkit/tags',
+				'endpoint' => 'drip/tags',
 				'multiple' => true,
 			),
 		);

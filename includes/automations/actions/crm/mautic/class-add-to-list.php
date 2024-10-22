@@ -92,7 +92,7 @@ class Add_To_List extends Action {
 			return false;
 		}
 
-		$contact_id = $result['data']['id'];
+		$contact_id = isset( $result['data']['contact'] ) ? $result['data']['contact']['id'] : $result['data']['id'];
 		$result     = $api->add_contact_to_list( $contact_id, $list_id );
 
 		return $result['success'];

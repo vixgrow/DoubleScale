@@ -112,6 +112,14 @@ class List_Model extends Model {
 			}
 		);
 
+		static::saving(
+			function ( $list ) {
+				if ( isset( $list->contacts_count ) ) {
+					unset( $list->contacts_count );
+				}
+			}
+		);
+
 		// When deleting a list, delete all relationships.
 		static::deleting(
 			function ( $list ) {

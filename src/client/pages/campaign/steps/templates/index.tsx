@@ -84,13 +84,13 @@ const Templates: React.FC = () => {
 		const newTemplates = templates ? [...templates] : [];
 		newTemplates[index] = newTemplates[index]
 			? {
-					...newTemplates[index],
-					...data,
-				}
+				...newTemplates[index],
+				...data,
+			}
 			: {
-					...defaultTemplate,
-					...data,
-				};
+				...defaultTemplate,
+				...data,
+			};
 
 		setTemplates(newTemplates);
 	};

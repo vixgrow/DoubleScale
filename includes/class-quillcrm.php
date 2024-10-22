@@ -224,6 +224,12 @@ final class QuillCRM {
 	private function load_dependencies() {
 		require QUILLCRM_PLUGIN_DIR . 'includes/functions.php';
 
+		// Load all integrations files
+		$integrations_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/integrations/**/class-integration.php' );
+		foreach ( $integrations_files as $file ) {
+			require $file;
+		}
+
 		// Load all forms files
 		$forms_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/forms/**/class-form.php' );
 		foreach ( $forms_files as $file ) {
@@ -329,12 +335,6 @@ final class QuillCRM {
 		// Load all automations goals files
 		$goals_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/goals/class-*.php' );
 		foreach ( $goals_files as $file ) {
-			require $file;
-		}
-
-		// Load all integrations files
-		$integrations_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/integrations/**/class-integration.php' );
-		foreach ( $integrations_files as $file ) {
 			require $file;
 		}
 

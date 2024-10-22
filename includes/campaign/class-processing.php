@@ -19,6 +19,7 @@ use QuillCRM\Emails\Emails;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Link_Trigger_Model;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
+use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * Campaign class processing
@@ -95,8 +96,83 @@ class Processing {
 				QuillCRM::instance()->campaigns_tasks->register_callback( 'process_campaign_email', array( $this, 'process_campaign_email' ) );
 			}
 		);
+
+		// Send test email
+		add_action( 'wp_ajax_quillcrm_send_test_email', array( $this, 'send_test_email' ) );
 	}
 
+	/**
+	 * Send test email
+	 *
+	 * @return void
+	 */
+	public function send_test_email() {
+		// Check nonce.
+		check_ajax_referer( 'quillcrm-admin', 'nonce' );
+
+		$email = isset( $_POST['email'] ) ? trim( sanitize_text_field( $_POST['email'] ) ) : '';
+		if ( empty( $email ) ) {
+			wp_send_json_error( array( 'message' => __( 'Email is required.', 'quillcrm' ) ) );
+		}
+
+		$subject = isset( $_POST['subject'] ) ? trim( sanitize_text_field( $_POST['subject'] ) ) : '';
+		if ( empty( $subject ) ) {
+			wp_send_json_error( array( 'message' => __( 'Subject is required.', 'quillcrm' ) ) );
+		}
+
+		$body = isset( $_POST['body'] ) ? trim( sanitize_text_field( $_POST['body'] ) ) : '';
+		if ( empty( $body ) ) {
+			wp_send_json_error( array( 'message' => __( 'Body is required.', 'quillcrm' ) ) );
+		}
+
+		$from_name  = isset( $_POST['from_name'] ) ? trim( sanitize_text_field( $_POST['from_name'] ) ) : get_bloginfo( 'name' );
+		$from_email = isset( $_POST['from_email'] ) ? trim( sanitize_text_field( $_POST['from_email'] ) ) : get_bloginfo( 'admin_email' );
+		$reply_to   = isset( $_POST['reply_to'] ) ? trim( sanitize_text_field( $_POST['reply_to'] ) ) : '';
+
+		$emails               = new Emails();
+		$emails->from_address = $from_email;
+		$emails->from_name    = $from_name;
+		if ( ! empty( $reply_to ) ) {
+			$emails->reply_to = $reply_to;
+		}
+
+		$for_testing_body = '<div>
+				<p>Hi {{contact:first_name}} {{contact:last_name}},</p>
+				<p>Welcom to QuillCRM.</p>
+		</div>';
+
+		$contact = $this->get_current_user_contact();
+		$result  = $emails->send(
+			$email,
+			$subject,
+			Merge_Tags_Manager::instance()->process_merge_tags( $for_testing_body, $contact )
+		);
+
+		if ( $result ) {
+			wp_send_json_success( array( 'message' => __( 'Email sent successfully.', 'quillcrm' ) ) );
+		} else {
+			wp_send_json_error( array( 'message' => __( 'Failed to send email.', 'quillcrm' ) ) );
+		}
+	}
+
+	/**
+	 * Get current user contact
+	 *
+	 * @return Contact_Model
+	 */
+	public function get_current_user_contact() {
+		$user = wp_get_current_user();
+		if ( ! $user ) {
+			return null;
+		}
+
+		$contact = Contact_Model::get_by_email( $user->user_email );
+		if ( $contact ) {
+			return $contact;
+		}
+
+		return null;
+	}
 
 	/**
 	 * Get current execution time

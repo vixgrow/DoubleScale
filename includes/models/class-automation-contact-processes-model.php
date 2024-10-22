@@ -58,7 +58,11 @@ class Automation_Contact_Processes_Model extends Model {
 	 * @var array
 	 */
 	protected $casts = array(
-		'settings' => 'array',
+		'settings'              => 'array',
+		'step_id'               => 'integer',
+		'contact_id'            => 'integer',
+		'automation_id'         => 'integer',
+		'automation_contact_id' => 'integer',
 	);
 
 	/**

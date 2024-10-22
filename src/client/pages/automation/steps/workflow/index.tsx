@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useMemo } from '@wordpress/element';
+import { useState, useMemo, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
@@ -27,7 +27,7 @@ import {
 	ThunderboltOutlined,
 	DeleteOutlined,
 } from '@ant-design/icons';
-import { isEmpty, filter } from 'lodash';
+import { isEmpty } from 'lodash';
 
 /**
  * Internal dependencies
@@ -40,7 +40,7 @@ import type {
 	OrganizedStep,
 	Automation,
 } from '@quillcrm/client';
-import { Fields } from '@quillcrm/components';
+import { Field, Fields } from '@quillcrm/components';
 import StepModal from './step-modal';
 import AddStep from './add-step';
 import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
@@ -56,13 +56,18 @@ const Workflow: React.FC = () => {
 		saveAutomation,
 		isSaving: isSavingAutomation,
 		setSteps,
-		updatedSteps,
+		updateSettings
 	} = useAutomationContext();
 	const [currentStep, setCurrentStep] = useState<OrganizedStep | null>(null);
 	const [visible, setVisible] = useState<boolean>(false);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
-	const { createNotice } = useDispatch('quillcrm/core');
-	console.log('updatedSteps', updatedSteps);
+	const { createNotice, setCurrentTrigger } = useDispatch('quillcrm/core');
+
+	useEffect(() => {
+		if (automation) {
+			setCurrentTrigger(automation.trigger);
+		}
+	}, [automation]);
 
 	const processSteps = (
 		parentId: number,
@@ -166,25 +171,17 @@ const Workflow: React.FC = () => {
 			const newSteps = [...steps];
 
 			if (step.parent_id) {
-				const children = filter(newSteps, {
-					parent_id: step.parent_id,
-				});
-
-				children.forEach((child) => {
-					if (child.order > step.order) {
-						child.order -= 1;
-						updatedOrdersSteps[child.id] = {
-							order: child.order - 1,
-						};
+				newSteps.filter((child) => child.parent_id === step.parent_id && child.condition === step.condition).filter((s) => s.id !== step.id).sort((a, b) => a.order - b.order).forEach((child, index) => {
+					const newOrder = index + 1;
+					if (newOrder !== child.order) {
+						updatedOrdersSteps[child.id] = { order: newOrder };
 					}
 				});
 			} else {
-				newSteps.forEach((child) => {
-					if (child.order > step.order) {
-						child.order -= 1;
-						updatedOrdersSteps[child.id] = {
-							order: child.order - 1,
-						};
+				newSteps.sort((a, b) => a.order - b.order).filter((s) => s.id !== step.id).forEach((step, index) => {
+					const newOrder = index + 1;
+					if (newOrder !== step.order) {
+						updatedOrdersSteps[step.id] = { order: newOrder };
 					}
 				});
 			}
@@ -193,11 +190,6 @@ const Workflow: React.FC = () => {
 		};
 
 		const { newSteps, updatedOrdersSteps } = getNewSteps();
-		if (step.status === 'draft') {
-			const updatedSteps = newSteps.filter((s) => s.id !== step.id);
-			setSteps(updatedSteps);
-			return;
-		}
 
 		try {
 			// @ts-ignore
@@ -373,10 +365,7 @@ const Workflow: React.FC = () => {
 									<Card
 										className="qcrm-automation-workflow__card"
 										hoverable
-										onClick={() =>
-											!isEmpty(trigger?.fields) &&
-											setVisible(true)
-										}
+										onClick={() => setVisible(true)}
 									>
 										<Flex gap={10}>
 											<div className="qcrm-automation-workflow__card-icon">
@@ -397,7 +386,7 @@ const Workflow: React.FC = () => {
 				{currentStep && (
 					<StepModal step={currentStep} setStep={setCurrentStep} />
 				)}
-				{trigger?.fields && (
+				{automation && trigger && (
 					<Modal
 						title={__('Trigger', 'quillcrm')}
 						open={visible}
@@ -407,41 +396,51 @@ const Workflow: React.FC = () => {
 						style={{ minWidth: '800px', minHeight: '500px' }}
 						closable={false}
 					>
-						{automation?.trigger !== 'webhook_received' && !trigger?.is_form &&
-							automation && (
-								<Fields
-									fields={trigger.fields}
-									values={automation.settings || {}}
-									onChange={(value) => {
-										updateAutomation({
-											...automation,
-											settings: value,
-										});
-									}}
-								/>
-							)}
-						{automation?.trigger !== 'webhook_received' && trigger?.is_form && (
-							<FormFields
-								values={automation?.settings || {}}
+						{trigger.fields && (
+							<>
+								{automation.trigger === 'webhook_received'
+									? <WebhookFields
+										values={automation?.settings || {}}
+										onChange={(value) => {
+											updateAutomation({
+												...automation,
+												settings: value,
+											});
+										}}
+									/> : !trigger?.is_form ? (
+										<Fields
+											fields={trigger.fields}
+											values={automation.settings || {}}
+											onChange={(value) => {
+												updateAutomation({
+													...automation,
+													settings: value,
+												});
+											}}
+										/>
+									) : (
+										<FormFields
+											values={automation?.settings || {}}
+											onChange={(value) => {
+												updateAutomation({
+													...automation,
+													settings: value,
+												});
+											}}
+										/>
+									)}
+							</>
+						)}
+						<div style={{ marginTop: 20 }}>
+							<Field
+								type='switch'
+								label={__('Run Multiple Times (If you want to restart the automation for the same contact)', 'quillcrm')}
+								value={automation?.settings?.multiple_runs}
 								onChange={(value) => {
-									updateAutomation({
-										...automation,
-										settings: value,
-									});
+									updateSettings('multiple_runs', value);
 								}}
 							/>
-						)}
-						{automation?.trigger === 'webhook_received' && (
-							<WebhookFields
-								values={automation?.settings || {}}
-								onChange={(value) => {
-									updateAutomation({
-										...automation,
-										settings: value,
-									});
-								}}
-							/>
-						)}
+						</div>
 					</Modal>
 				)}
 			</Card>

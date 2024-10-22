@@ -105,6 +105,7 @@ const Contacts: React.FC = () => {
 											color: '#fff',
 											marginLeft: '10px',
 										}}
+										showZero
 									/>
 								)}
 								{loading && <Spin />}

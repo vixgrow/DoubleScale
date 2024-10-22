@@ -154,7 +154,16 @@ const Contact: React.FC = () => {
 			return;
 		}
 
-		const newLists = lists.filter((tag) => selectedLists.includes(tag.id));
+		// Check if the selected lists are already added to the contact
+		if (
+			selectedLists.every((list) =>
+				contact.lists.some((l) => l.id === list)
+			)
+		) {
+			return;
+		}
+
+		const newLists = lists.filter((list) => selectedLists.includes(list.id));
 		if (isEmpty(newLists)) {
 			return;
 		}
@@ -165,13 +174,21 @@ const Contact: React.FC = () => {
 				path: `/qc/v1/contacts/${contact.id}`,
 				method: 'POST',
 				data: {
-					lists: [...contact.lists, ...newLists],
+					lists: [...contact.lists, ...newLists].filter(
+						(list, index, self) =>
+							index ===
+							self.findIndex((t) => t.id === list.id)
+					),
 				},
 			});
 
 			setContact({
 				...contact,
-				lists: [...contact.lists, ...newLists],
+				lists: [...contact.lists, ...newLists].filter(
+					(list, index, self) =>
+						index ===
+						self.findIndex((t) => t.id === list.id)
+				),
 			});
 		} catch (error: any) {
 			createNotice({
@@ -370,6 +387,12 @@ const Contact: React.FC = () => {
 															});
 														}}
 													>
+														<Select.Option value="unverified">
+															{__(
+																'Unverified',
+																'quillcrm'
+															)}
+														</Select.Option>
 														<Select.Option value="subscribed">
 															{__(
 																'Subscribed',

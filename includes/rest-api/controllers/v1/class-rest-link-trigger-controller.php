@@ -178,9 +178,9 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 		$page     = $request->get_param( 'page' ) ?: 1;
 
 		if ( $keyword ) {
-			$link_triggers = Link_Trigger_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )->paginate( $per_page, array( '*' ), $page );
+			$link_triggers = Link_Trigger_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), $page );
 		} else {
-			$link_triggers = Link_Trigger_Model::paginate( $per_page, array( '*' ), $page );
+			$link_triggers = Link_Trigger_Model::orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), $page );
 		}
 
 		return new WP_REST_Response( $link_triggers );

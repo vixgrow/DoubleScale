@@ -113,6 +113,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 						visible={actionModalVisible}
 						onClose={() => {
 							setActionModalVisible(false);
+							setStep(null);
 						}}
 						onChange={(value) => setValue(value)}
 						onSave={() => saveActionStep()}
@@ -125,6 +126,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 						visible={actionModalVisible}
 						onClose={() => {
 							setActionModalVisible(false);
+							setStep(null);
 						}}
 						onChange={(value) => setValue(value)}
 						onSave={() => saveActionStep()}

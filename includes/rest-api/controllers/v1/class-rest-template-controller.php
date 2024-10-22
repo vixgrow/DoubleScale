@@ -191,9 +191,9 @@ class REST_Template_Controller extends REST_Controller {
 
 			if ( $keyword ) {
 				$templates = Template_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )->where( 'hidden', 0 )
-					->paginate( $per_page, array( '*' ), 'page', $page );
+				->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			} else {
-				$templates = Template_Model::where( 'hidden', 0 )->paginate( $per_page, array( '*' ), 'page', $page );
+				$templates = Template_Model::where( 'hidden', 0 )->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			}
 
 			return new WP_REST_Response( $templates, 200 );

@@ -298,8 +298,12 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
-			$automation_step->status = 'deleted';
-			$automation_step->save();
+			if ( 'draft' === $automation_step->status ) {
+				$automation_step->delete();
+			} else {
+				$automation_step->status = 'deleted';
+				$automation_step->save();
+			}
 
 			if ( ! empty( $updated_steps ) ) {
 				$this->update_orders( $updated_steps );
@@ -329,7 +333,6 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 
 			$step->order = $step_data['order'];
 			$step->save();
-			error_log( 'Step: ' . print_r( $step, true ) );
 		}
 	}
 

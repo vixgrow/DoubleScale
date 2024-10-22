@@ -177,6 +177,8 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'rest_automation_contact_not_found', __( 'Automation Contact not found.', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
+			$automation_contact->load( 'processes.step', 'current_step', 'next_step' );
+
 			return new WP_REST_Response( $automation_contact, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_automation_contact_get_error', $e->getMessage(), array( 'status' => 500 ) );

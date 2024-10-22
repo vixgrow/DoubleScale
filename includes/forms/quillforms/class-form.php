@@ -87,6 +87,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_fields() {
+		// Check nonce.
+		check_ajax_referer( 'quillcrm-admin', 'nonce' );
+
 		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( wp_unslash( $_POST['form_id'] ) ) : null;
 
 		if ( ! $form_id ) {
@@ -106,6 +109,9 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_form_select_options() {
+		// Check nonce.
+		check_ajax_referer( 'quillcrm-admin', 'nonce' );
+
 		$options = array();
 		$forms   = get_posts(
 			array(

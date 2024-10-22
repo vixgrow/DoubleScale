@@ -8,6 +8,12 @@ import { find, flatMap } from 'lodash';
  */
 import ConfigAPI from '@quillcrm/config';
 import type { Trigger, Action, Goal, Rule } from '@quillcrm/config';
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export const getAction = (action: string): Action => {
 	const actions = ConfigAPI.getAutomationActions();
@@ -59,18 +65,19 @@ export const getTrigger = (trigger: string): Trigger => {
 		};
 };
 
-export const convertDate = (date: string) => {
+export const convertDate = (date: string, addTime: boolean = false) => {
 	const dateObj = new Date(date);
 
 	if (isNaN(dateObj.getTime())) {
 		return null;
 	}
 
-	return dateObj.toLocaleDateString(undefined, {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric',
-	});
+	const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	if (addTime) {
+		return dayjs.utc(date).tz(userTimeZone).format('MMMM D, YYYY [on] h:mm A');
+	}
+
+	return dayjs.utc(date).tz(userTimeZone).format('MMMM D, YYYY');
 };
 
 export const getFilterBySlug = (slug: string, group: string) => {

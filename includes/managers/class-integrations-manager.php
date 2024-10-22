@@ -23,7 +23,7 @@ final class Integrations_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @var array
+	 * @var Integration[]
 	 */
 	protected $integrations = array();
 
@@ -123,5 +123,22 @@ final class Integrations_Manager {
 	 */
 	public function get_options() {
 		return $this->options;
+	}
+
+	/**
+	 * Is active
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $slug
+	 *
+	 * @return bool
+	 */
+	public function is_active( $slug ) {
+		if ( isset( $this->integrations[ $slug ] ) ) {
+			return $this->integrations[ $slug ]->is_connected();
+		}
+
+		return false;
 	}
 }

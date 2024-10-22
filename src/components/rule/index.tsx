@@ -38,9 +38,9 @@ const Rule: React.FC<RuleProps> = ({
 				{ruleSettings.operators && (
 					<Field
 						type="select"
-						options={map(ruleSettings.operators, (operator) => ({
+						options={map(ruleSettings.operators, (operator, key) => ({
 							label: operator,
-							value: operator,
+							value: key,
 						}))}
 						value={rule.operator}
 						onChange={(value) => onChange('operator', value)}

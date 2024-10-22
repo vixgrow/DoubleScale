@@ -37,6 +37,7 @@ import ConfigAPI from '@quillcrm/config';
 import type { TriggersGroup } from '@quillcrm/config';
 import { Field } from '@quillcrm/components';
 import { isEmpty } from 'validator';
+import { convertDate } from '@quillcrm/utils';
 
 const { Column } = Table;
 
@@ -67,6 +68,7 @@ const TriggersGroupRender: React.FC<{
 									key={key}
 									onClick={() => onChange(key)}
 									type={value === key ? 'primary' : 'default'}
+									disabled={group.is_disabled}
 								>
 									{trigger.label}
 								</Button>
@@ -311,11 +313,13 @@ const AutomationsList: React.FC = () => {
 					title={__('Created At')}
 					dataIndex="created_at"
 					key="created_at"
+					render={(date) => convertDate(date)}
 				/>
 				<Column
 					title={__('Updated At')}
 					dataIndex="updated_at"
 					key="updated_at"
+					render={(date) => convertDate(date)}
 				/>
 			</Table>
 			<Modal

@@ -29,6 +29,7 @@ import { notification, ConfigProvider } from 'antd';
 import { NavBar } from '@quillcrm/components';
 import { Controller } from './controller';
 import './style.scss';
+import { MergeTagsModal } from '@quillcrm/components';
 
 const AntProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	return (
@@ -82,12 +83,22 @@ const Notices: React.FC = () => {
 };
 
 export const Layout = (props) => {
+	const { mergeTagsVisible } = useSelect((select) => ({
+		mergeTagsVisible: select('quillcrm/core').getMergeTagsVisible(),
+	}));
+	const { setMergeTagsVisible } = useDispatch('quillcrm/core');
+	console.log(mergeTagsVisible, 'mergeTagsVisible');
+
 	return (
 		<SlotFillProvider>
 			<AntProvider>
 				<div className="qcrm-layout">
 					<NavBar />
 					<Notices />
+					<MergeTagsModal
+						visible={mergeTagsVisible}
+						onClose={() => setMergeTagsVisible(false)}
+					/>
 					<div className="qcrm-layout__main">
 						<Controller {...props} />
 					</div>

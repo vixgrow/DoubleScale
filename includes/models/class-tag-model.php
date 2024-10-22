@@ -112,6 +112,14 @@ class Tag_Model extends Model {
 			}
 		);
 
+		static::saving(
+			function ( $tag ) {
+				if ( isset( $tag->contacts_count ) ) {
+					unset( $tag->contacts_count );
+				}
+			}
+		);
+
 		// Delete the relationship when deleting the tag
 		static::deleting(
 			function ( $tag ) {

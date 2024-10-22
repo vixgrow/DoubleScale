@@ -119,7 +119,7 @@ class Send_To_Channel extends Action {
 			'channel' => array(
 				'type'     => 'api_select',
 				'label'    => __( 'Channel', 'quillcrm' ),
-				'endpoint' => 'slack/channels',
+				'endpoint' => 'slack/conversations',
 			),
 			'message' => array(
 				'type'  => 'textarea',

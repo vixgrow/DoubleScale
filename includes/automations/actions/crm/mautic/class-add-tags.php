@@ -105,7 +105,7 @@ class Add_Tags extends Action {
 				'tags' => array(
 					'type'  => 'array',
 					'items' => array(
-						'type' => 'string',
+						'type' => array( 'string', 'number' ),
 					),
 				),
 			),

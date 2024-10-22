@@ -73,16 +73,28 @@ export type Order = {
 
 export type AutomationContact = {
 	id: number;
-	contact_id: string;
-	automation_id: string;
-	current_step: string;
-	next_step: string;
+	contact_id: number;
+	automation_id: number;
+	current_step: AutomationStep;
+	next_step: AutomationStep;
 	status: string;
 	execution_time: string;
 	created_at: string;
 	updated_at: string;
-	automation: Automation;
 	contact: Contact;
+	processes: AutomationProcess[];
+};
+
+export type AutomationProcess = {
+	id: number;
+	step_id: number;
+	contact_id: number;
+	automation_id: number;
+	automation_contact_id: number;
+	status: string;
+	step: AutomationStep;
+	created_at: string;
+	updated_at: string;
 };
 
 export type Automation = {

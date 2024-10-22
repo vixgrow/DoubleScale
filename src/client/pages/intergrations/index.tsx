@@ -30,7 +30,7 @@ const Integrations: React.FC = () => {
 				title: __('Success', 'quillcrm'),
 				content: sprintf(
 					__('You have successfully connected %s', 'quillcrm'),
-					integration.name
+					integration.label
 				),
 				onOk: () => navigate(getToLink('integrations')),
 			});
@@ -41,7 +41,7 @@ const Integrations: React.FC = () => {
 		<div className="qcrm-integrations">
 			<Flex gap={20} wrap="wrap">
 				{map(integrations, (integration, key) => (
-					<Card key={key} title={integration.name}>
+					<Card key={key} title={integration.label}>
 						<Typography.Title
 							level={5}
 							style={{ marginTop: 0, marginBottom: 20 }}

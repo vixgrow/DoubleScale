@@ -92,7 +92,7 @@ class Remove_From_Campaign extends Action {
 			return false;
 		}
 
-		$contact_id = $result['data']['id'];
+		$contact_id = isset( $result['data']['contact'] ) ? $result['data']['contact']['id'] : $result['data']['id'];
 		$result     = $api->remove_contact_from_campaign( $contact_id, $campaign_id );
 
 		return $result['success'];

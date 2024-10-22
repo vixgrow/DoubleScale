@@ -79,6 +79,10 @@ class Remote_Data extends Integration_Remote_Data {
 		}
 
 		foreach ( $response['data']['channels'] as $channel ) {
+			if ( ! isset( $channel['name'] ) ) {
+				continue;
+			}
+
 			$result[] = array(
 				'value' => $channel['id'],
 				'label' => $channel['name'],

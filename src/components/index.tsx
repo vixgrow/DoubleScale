@@ -9,3 +9,4 @@ export { default as Filters } from './filters';
 export { default as Rule } from './rule';
 export { default as DateFilter } from './date-filter';
 export { default as ContactMappedFields } from './contact-mapped-fields';
+export { default as MergeTagsModal } from './merge-tags';

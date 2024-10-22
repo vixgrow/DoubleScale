@@ -85,9 +85,10 @@ class Add_Contact extends Action {
 				'last_name'  => '',
 			)
 		);
-		$email         = $this->merge_tags_manager->process_merge_tags( $mapped_fields['email'], $automation_contact );
-		$first_name    = $this->merge_tags_manager->process_merge_tags( $mapped_fields['first_name'], $automation_contact );
-		$last_name     = $this->merge_tags_manager->process_merge_tags( $mapped_fields['last_name'], $automation_contact );
+
+		$email      = $this->merge_tags_manager->process_merge_tags( $mapped_fields['email'], $automation_contact );
+		$first_name = $this->merge_tags_manager->process_merge_tags( $mapped_fields['first_name'], $automation_contact );
+		$last_name  = $this->merge_tags_manager->process_merge_tags( $mapped_fields['last_name'], $automation_contact );
 
 		if ( empty( $email ) ) {
 			return false;
@@ -112,7 +113,7 @@ class Add_Contact extends Action {
 			return true;
 		}
 
-		if ( 422 === $result['response']['code'] ) {
+		if ( 422 === $result['code'] ) {
 			return true;
 		}
 
@@ -158,7 +159,7 @@ class Add_Contact extends Action {
 		return array(
 			'mapped_fields' => array(
 				'label'  => __( 'Mapped Fields', 'quillcrm' ),
-				'type'   => 'contact_mapped_fields',
+				'type'   => 'mapped_fields',
 				'fields' => array(
 					'email'      => array(
 						'label' => __( 'Email', 'quillcrm' ),

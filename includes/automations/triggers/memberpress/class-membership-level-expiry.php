@@ -59,7 +59,7 @@ class Membership_Level_Expiry extends Trigger {
 	 *
 	 * @var string
 	 */
-	public $group = 'membership';
+	public $group = 'memberpress';
 
 	/**
 	 * Load hooks

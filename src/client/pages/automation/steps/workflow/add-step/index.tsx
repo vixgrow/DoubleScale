@@ -34,41 +34,45 @@ const updateStepOrderRecursive = (
 ) => {
 	const updatedSteps = {};
 	const newSteps = [...steps];
+	let currentStepOrder = order;
 
 	if (parentId > 0) {
-		const children = !condition ? newSteps.filter((step) => step.parent_id === parentId) : newSteps.filter((step) => step.parent_id === parentId && step.condition === condition);
+		newSteps.filter((step) => step.parent_id === parentId && step.condition === condition).sort((a, b) => a.order - b.order).forEach((child, index) => {
+			let newOrder = index + 1;
 
-		children.sort((a, b) => a.order - b.order);
-		children.forEach((child, index) => {
-			const newOrder = index + 1;
+			if (currentStepOrder === child.order) {
+				currentStepOrder = child.order;
+			}
+
+			if (child.order >= order) {
+				newOrder = newOrder + 1;
+			}
+
 			if (newOrder !== child.order) {
+				child.order = newOrder;
 				updatedSteps[child.id] = { order: newOrder };
 			}
 		});
-		children.forEach((child) => {
-			if (child.order >= order) {
-				child.order = child.order + 1;
-				updatedSteps[child.id] = { order: child.order };
+	} else {
+		newSteps.sort((a, b) => a.order - b.order).forEach((step, index) => {
+			let newOrder = index + 1;
+
+			if (currentStepOrder === step.order) {
+				currentStepOrder = step.order;
 			}
 
-		});
-	} else {
-		newSteps.sort((a, b) => a.order - b.order);
-		newSteps.forEach((step, index) => {
-			const newOrder = index + 1;
-			if (newOrder !== step.order) {
-				updatedSteps[step.id] = { order: newOrder };
-			}
-		});
-		newSteps.forEach((step) => {
 			if (step.order >= order) {
-				step.order = step.order + 1;
-				updatedSteps[step.id] = { order: step.order };
+				newOrder = newOrder + 1;
+			}
+
+			if (newOrder !== step.order) {
+				step.order = newOrder;
+				updatedSteps[step.id] = { order: newOrder };
 			}
 		});
 	}
 
-	return { newSteps, updatedSteps };
+	return { newSteps, updatedSteps, currentStepOrder };
 };
 
 interface AddStepProps {
@@ -113,7 +117,7 @@ const AddStep: React.FC<AddStepProps> = ({
 			stepData.condition = condition;
 		}
 
-		const { newSteps, updatedSteps } = updateStepOrderRecursive(
+		const { newSteps, updatedSteps, currentStepOrder } = updateStepOrderRecursive(
 			steps,
 			parentId || 0,
 			order,
@@ -122,6 +126,7 @@ const AddStep: React.FC<AddStepProps> = ({
 
 		const data = {
 			...stepData,
+			order: currentStepOrder,
 			updated_steps: updatedSteps,
 		};
 

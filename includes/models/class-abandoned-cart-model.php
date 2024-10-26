@@ -12,6 +12,7 @@
 namespace QuillCRM\Models;
 
 use QuillCRM\Models\Model;
+use QuillCRM\Models\Contact_Model;
 
 /**
  * Abandoned_Cart_Model class
@@ -101,6 +102,15 @@ class Abandoned_Cart_Model extends Model {
 	}
 
 	/**
+	 * Contact relationship
+	 *
+	 * @return \QuillCRM\Models\Contact_Model
+	 */
+	public function contact() {
+		return $this->belongsTo( Contact_Model::class, 'email', 'email' );
+	}
+
+	/**
 	 * Create or update abandoned cart
 	 *
 	 * @param array $fields Fields.
@@ -153,5 +163,38 @@ class Abandoned_Cart_Model extends Model {
 	 */
 	public static function getByHashKey( $hash_key ) {
 		return self::where( 'hash_key', $hash_key )->first();
+	}
+
+	/**
+	 * boot method
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public static function boot() {
+		parent::boot();
+
+		// Retrieving: attach items product data
+		static::retrieved(
+			function( $cart ) {
+				$items = $cart->items;
+				foreach ( $items as $id => $item ) {
+					$product = wc_get_product( $item['product_id'] );
+					if ( $product ) {
+						$product_data = array(
+							'id'    => $product->get_id(),
+							'name'  => $product->get_name(),
+							'price' => $product->get_price() . ' ' . get_woocommerce_currency(),
+							'image' => $product->get_image(),
+						);
+
+						$items[ $id ]['product'] = $product_data;
+					}
+				}
+
+				$cart->items = $items;
+			}
+		);
 	}
 }

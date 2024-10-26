@@ -75,6 +75,85 @@ class Import {
 	}
 
 	/**
+	 * Get fluentCRM lists and tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fluentcrm_lists_and_tags() {
+		global $wpdb;
+		$lists_table = $wpdb->prefix . 'fc_lists';
+		$tags_table  = $wpdb->prefix . 'fc_tags';
+
+		$lists = $wpdb->get_results( "SELECT * FROM $lists_table" );
+		$tags  = $wpdb->get_results( "SELECT * FROM $tags_table" );
+
+		$lists_array = array();
+		foreach ( $lists ?? array() as $list ) {
+			$lists_array[] = array(
+				'value' => $list->id,
+				'label' => $list->title,
+			);
+		}
+
+		$tags_array = array();
+		foreach ( $tags ?? array() as $tag ) {
+			$tags_array[] = array(
+				'value' => $tag->id,
+				'label' => $tag->title,
+			);
+		}
+
+		return array(
+			'lists' => $lists_array,
+			'tags'  => $tags_array,
+		);
+	}
+
+	/**
+	 * Get WPFunnels lists and tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_wpfunnels_lists_and_tags() {
+		global $wpdb;
+		$terms_table = $wpdb->prefix . 'bwfan_terms';
+
+		$terms = $wpdb->get_results( "SELECT * FROM $terms_table" );
+
+		$lists_array = array();
+		$tags_array  = array();
+
+		foreach ( $terms ?? array() as $term ) {
+			if ( ! isset( $term->type ) || ! in_array( $term->type, array( 1, 2 ) ) ) {
+				continue;
+			}
+
+			if ( 1 === $term->type ) {
+				$tags_array[] = array(
+					'value' => $term->ID,
+					'label' => $term->name,
+				);
+
+				continue;
+			}
+
+			$lists_array[] = array(
+				'value' => $term->ID,
+				'label' => $term->name,
+			);
+		}
+
+		return array(
+			'lists' => $lists_array,
+			'tags'  => $tags_array,
+		);
+	}
+
+	/**
 	 * Import from fluentCRM
 	 *
 	 * @since 1.0.0

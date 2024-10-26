@@ -22,6 +22,9 @@ use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Custom_Field_Model;
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
+use QuillCRM\Settings;
+use QuillCRM\Emails\Emails;
+use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * REST_Contact_Controller is REST api controller class for log
@@ -54,21 +57,25 @@ class REST_Contact_Controller extends REST_Controller {
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
-						'keyword'  => array(
+						'keyword'    => array(
 							'description' => __( 'Keyword to search.', 'quillcrm' ),
 							'type'        => 'string',
 						),
-						'per_page' => array(
+						'per_page'   => array(
 							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
-						'page'     => array(
+						'page'       => array(
 							'description' => __( 'Page number.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
-						'filters'  => array(
+						'filters'    => array(
 							'description' => __( 'Filters to apply.', 'quillcrm' ),
 							'type'        => 'array',
+						),
+						'subscribed' => array(
+							'description' => __( 'Subscribed contacts.', 'quillcrm' ),
+							'type'        => 'boolean',
 						),
 					),
 				),
@@ -136,6 +143,25 @@ class REST_Contact_Controller extends REST_Controller {
 						),
 						'page'     => array(
 							'description' => __( 'Page number.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
+				),
+			)
+		);
+
+		// Send opt-in email
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/send-opt-in',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_opt_in_email' ),
+					'permission_callback' => array( $this, 'send_opt_in_email_permissions_check' ),
+					'args'                => array(
+						'id' => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
 					),
@@ -398,7 +424,7 @@ class REST_Contact_Controller extends REST_Controller {
 				'status'     => array(
 					'description'  => __( 'Status of the contact.', 'quillcrm' ),
 					'type'         => 'string',
-					'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'junk' ),
+					'enum'         => array( 'subscribed', 'unsubscribed', 'bounced', 'unverified' ),
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
@@ -445,10 +471,11 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$keyword  = $request->get_param( 'keyword' ) ?? '';
-			$filters  = $request->get_param( 'filters' );
+			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$keyword    = $request->get_param( 'keyword' ) ?? '';
+			$filters    = $request->get_param( 'filters' );
+			$subscribed = $request->get_param( 'subscribed' ) ?? false;
 
 			if ( '' !== $keyword ) {
 				$contacts = Contact_Model::with( 'lists', 'tags', 'custom_fields', 'notes' )
@@ -463,6 +490,10 @@ class REST_Contact_Controller extends REST_Controller {
 			if ( $filters ) {
 				$filters_process = new Contact_Filters_Process( $contacts, $filters );
 				$contacts        = $filters_process->filter();
+			}
+
+			if ( $subscribed ) {
+				$contacts = $contacts->where( 'status', 'subscribed' );
 			}
 
 			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
@@ -1020,6 +1051,70 @@ class REST_Contact_Controller extends REST_Controller {
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Send optin email
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function send_opt_in_email( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$contact    = Contact_Model::find( $contact_id );
+
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
+
+			$double_optin = Settings::get( 'double_optin', array() );
+			$subject      = $double_optin['email_subject'] ?? __( 'Confirm Subscription', 'quillcrm' );
+			$subject      = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+			$body         = $double_optin['email_body'] ?? $this->default_opt_in_email_body();
+			$body         = Merge_Tags_Manager::instance()->process_merge_tags( $body, $contact );
+
+			$emails = new Emails();
+			$result = $emails->send(
+				$contact->email,
+				$subject,
+				$body,
+			);
+
+			return new WP_REST_Response( array( 'success' => $result ), 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Default Opt In Email Body
+	 *
+	 * @return string
+	 */
+	public function default_opt_in_email_body() {
+		$body = sprintf(
+			'<p>' . __( 'Please confirm your subscription by clicking the link below:', 'quillcrm' ) . '</p>
+            <p><a href="{{contact:subscribe_link}}">' . __( 'Confirm Subscription', 'quillcrm' ) . '</a></p>',
+			'{{contact:subscribe_link}}'
+		);
+		return $body;
+	}
+
+	/**
+	 * Send optin email permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function send_opt_in_email_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
 	}
 
 	/**

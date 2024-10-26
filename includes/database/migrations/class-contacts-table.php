@@ -33,6 +33,7 @@ class Contacts_Table extends Migration {
 	 */
 	public function get_query() {
 		$query = 'id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			hash_id VARCHAR(255) NOT NULL,
 			email VARCHAR(255) NOT NULL,
 			first_name VARCHAR(255),
 			last_name VARCHAR(255),

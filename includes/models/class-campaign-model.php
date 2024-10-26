@@ -174,6 +174,38 @@ class Campaign_Model extends Model {
 	}
 
 	/**
+	 * Attach counts
+	 *
+	 * @param Campaign_Model $campaign campaign model.
+	 *
+	 * @return void
+	 */
+	public function attach_counts( $campaign ) {
+		$filters             = $campaign->get_setting( 'filters', array() );
+		$campaign_recipients = Contact_Model::where( 'status', 'subscribed' );
+		if ( ! empty( $filters ) ) {
+			$contact_filters     = new Contact_Filters_Process( $campaign_recipients, $filters );
+			$campaign_recipients = $contact_filters->filter();
+		}
+
+		// Templates count
+		$templates_count = array();
+		foreach ( $campaign->settings['templates'] ?? array() ?? array() as $template ) {
+			$template_id = $template['template_id'] ?? null;
+			if ( $template_id ) {
+				$templates_count[ $template_id ] = $campaign->emails()->where( 'template_id', $template_id )->count();
+			}
+		}
+
+		$campaign->templates_count = $templates_count;
+		$campaign->contacts_count  = $campaign_recipients->count();
+		$campaign->sent_count      = $campaign->emails()->where( 'status', 'sent' )->count();
+		$campaign->failed_count    = $campaign->emails()->where( 'status', 'failed' )->count();
+		$campaign->opened_count    = $campaign->emails()->where( 'clicked', 1 )->count();
+		$campaign->clicked_count   = $campaign->emails()->where( 'opened', 1 )->count();
+	}
+
+	/**
 	 * Delete the contact notes boot method
 	 *
 	 * @since 1.0.0
@@ -195,8 +227,10 @@ class Campaign_Model extends Model {
 				$campaign->settings = $settings;
 
 				// Remove the contacts count, sent count, opened count and clicked count
+				unset( $campaign->templates_count );
 				unset( $campaign->contacts_count );
 				unset( $campaign->sent_count );
+				unset( $campaign->failed_count );
 				unset( $campaign->opened_count );
 				unset( $campaign->clicked_count );
 			}
@@ -223,17 +257,13 @@ class Campaign_Model extends Model {
 
 		static::retrieved(
 			function ( $campaign ) {
-				$filters             = $campaign->get_setting( 'filters', array() );
-				$campaign_recipients = Contact_Model::where( 'status', 'subscribed' );
-				if ( ! empty( $filters ) ) {
-					$contact_filters     = new Contact_Filters_Process( $campaign_recipients, $filters );
-					$campaign_recipients = $contact_filters->filter();
-				}
+				$campaign->attach_counts( $campaign );
+			}
+		);
 
-				$campaign->contacts_count = $campaign_recipients->count();
-				$campaign->sent_count     = $campaign->emails()->where( 'status', 'sent' )->count();
-				$campaign->opened_count   = $campaign->emails()->where( 'clicked', 1 )->count();
-				$campaign->clicked_count  = $campaign->emails()->where( 'opened', 1 )->count();
+		static::saved(
+			function ( $campaign ) {
+				$campaign->attach_counts( $campaign );
 			}
 		);
 	}

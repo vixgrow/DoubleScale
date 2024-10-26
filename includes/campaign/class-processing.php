@@ -20,6 +20,7 @@ use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Link_Trigger_Model;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Settings;
 
 /**
  * Campaign class processing
@@ -46,6 +47,13 @@ class Processing {
 	 * @var int
 	 */
 	protected $current_execution_time;
+
+	/**
+	 * Settings
+	 *
+	 * @var Settings
+	 */
+	protected $settings;
 
 	/**
 	 * Class Instance.
@@ -77,10 +85,13 @@ class Processing {
 	 * Constructor
 	 */
 	public function __construct() {
+		$this->settings = Settings::get( 'email', array() );
 		// Get the max execution time
 		$this->max_execution_time = Utils::get_max_execution_time();
 
 		add_action( 'quillcrm_loaded', array( $this, 'add_hooks' ) );
+
+		add_action( 'quillcrm_email_send_after', array( $this, 'email_send_after' ) );
 	}
 
 	/**
@@ -92,86 +103,11 @@ class Processing {
 		add_action(
 			'init',
 			function() {
+				QuillCRM::instance()->daily_tasks->register_callback( 'quillcrm_daily', array( $this, 'reset_daily_email' ) );
 				QuillCRM::instance()->campaigns_tasks->register_callback( 'quillcrm_campaigns', array( $this, 'process' ) );
 				QuillCRM::instance()->campaigns_tasks->register_callback( 'process_campaign_email', array( $this, 'process_campaign_email' ) );
 			}
 		);
-
-		// Send test email
-		add_action( 'wp_ajax_quillcrm_send_test_email', array( $this, 'send_test_email' ) );
-	}
-
-	/**
-	 * Send test email
-	 *
-	 * @return void
-	 */
-	public function send_test_email() {
-		// Check nonce.
-		check_ajax_referer( 'quillcrm-admin', 'nonce' );
-
-		$email = isset( $_POST['email'] ) ? trim( sanitize_text_field( $_POST['email'] ) ) : '';
-		if ( empty( $email ) ) {
-			wp_send_json_error( array( 'message' => __( 'Email is required.', 'quillcrm' ) ) );
-		}
-
-		$subject = isset( $_POST['subject'] ) ? trim( sanitize_text_field( $_POST['subject'] ) ) : '';
-		if ( empty( $subject ) ) {
-			wp_send_json_error( array( 'message' => __( 'Subject is required.', 'quillcrm' ) ) );
-		}
-
-		$body = isset( $_POST['body'] ) ? trim( sanitize_text_field( $_POST['body'] ) ) : '';
-		if ( empty( $body ) ) {
-			wp_send_json_error( array( 'message' => __( 'Body is required.', 'quillcrm' ) ) );
-		}
-
-		$from_name  = isset( $_POST['from_name'] ) ? trim( sanitize_text_field( $_POST['from_name'] ) ) : get_bloginfo( 'name' );
-		$from_email = isset( $_POST['from_email'] ) ? trim( sanitize_text_field( $_POST['from_email'] ) ) : get_bloginfo( 'admin_email' );
-		$reply_to   = isset( $_POST['reply_to'] ) ? trim( sanitize_text_field( $_POST['reply_to'] ) ) : '';
-
-		$emails               = new Emails();
-		$emails->from_address = $from_email;
-		$emails->from_name    = $from_name;
-		if ( ! empty( $reply_to ) ) {
-			$emails->reply_to = $reply_to;
-		}
-
-		$for_testing_body = '<div>
-				<p>Hi {{contact:first_name}} {{contact:last_name}},</p>
-				<p>Welcom to QuillCRM.</p>
-		</div>';
-
-		$contact = $this->get_current_user_contact();
-		$result  = $emails->send(
-			$email,
-			$subject,
-			Merge_Tags_Manager::instance()->process_merge_tags( $for_testing_body, $contact )
-		);
-
-		if ( $result ) {
-			wp_send_json_success( array( 'message' => __( 'Email sent successfully.', 'quillcrm' ) ) );
-		} else {
-			wp_send_json_error( array( 'message' => __( 'Failed to send email.', 'quillcrm' ) ) );
-		}
-	}
-
-	/**
-	 * Get current user contact
-	 *
-	 * @return Contact_Model
-	 */
-	public function get_current_user_contact() {
-		$user = wp_get_current_user();
-		if ( ! $user ) {
-			return null;
-		}
-
-		$contact = Contact_Model::get_by_email( $user->user_email );
-		if ( $contact ) {
-			return $contact;
-		}
-
-		return null;
 	}
 
 	/**
@@ -184,11 +120,94 @@ class Processing {
 	}
 
 	/**
+	 * Reset daily email
+	 *
+	 * @return void
+	 */
+	public function reset_daily_email() {
+		error_log( 'Processing::reset_daily_email() ' );
+		update_option( 'quillcrm_daily_email_count', 0 );
+	}
+
+	/**
+	 * Email send after
+	 *
+	 * @return void
+	 */
+	public function email_send_after() {
+		$daily_email_count = get_option( 'quillcrm_daily_email_count', 0 );
+		update_option( 'quillcrm_daily_email_count', $daily_email_count + 1 );
+	}
+
+	/**
+	 * Resent failed
+	 *
+	 * @param Campaign_Model $campaign
+	 *
+	 * @return void
+	 */
+	public function resent_failed( $campaign ) {
+		try {
+			$last_email_offset = get_option( "quillcrm_campaigns_last_resent_email_offset_{$campaign->id}", 0 );
+			$count             = $campaign->emails()->where( 'status', 'failed' )->count();
+
+			if ( $last_email_offset >= $count ) {
+				$campaign->status = 'completed';
+				$campaign->save();
+				update_option( "quillcrm_campaigns_last_resent_email_offset_{$campaign->id}", 0 );
+				return;
+			}
+
+			while ( $this->get_current_execution_time() < $this->max_execution_time && ! Utils::is_memory_limit_reached() ) {
+				// Usleep is used to prevent the server from crashing
+				usleep( 1000000 );
+
+				if ( $last_email_offset >= $count ) {
+					$campaign->status = 'completed';
+					$campaign->save();
+					update_option( "quillcrm_campaigns_last_resent_email_offset_{$campaign->id}", 0 );
+					break;
+				}
+
+				$max_per_second = $this->settings['max_in_second'] ?? 15;
+				$emails         = $campaign->emails()->where( 'status', 'failed' )
+				->offset( $last_email_offset )
+				->limit( $max_per_second )
+				->get();
+
+				if ( ! $emails ) {
+					break;
+				}
+
+				foreach ( $emails as $email ) {
+					$email->status = 'scheduled';
+					$email->save();
+					QuillCRM::instance()->campaigns_tasks->enqueue_sync( 'process_campaign_email', $campaign, $email->contact, $email );
+					$last_email_offset++;
+					update_option( "quillcrm_campaigns_last_resent_email_offset_{$campaign->id}", $last_email_offset );
+				}
+			}
+		} catch ( \Exception $e ) {
+			// error_log( 'Processing::resent_failed() ' . $e->getMessage() );
+		}
+	}
+
+	/**
 	 * Process
 	 *
 	 * @return void
 	 */
 	public function process() {
+		// Check if reached max email per day
+		$daily_email_count = get_option( 'quillcrm_daily_email_count', 0 );
+		$max_email_per_day = $this->settings['max_in_day'] ?? 10000;
+		error_log( 'Processing::process() Daily: ' . $daily_email_count . ' Max: ' . $max_email_per_day );
+		if ( $daily_email_count >= $max_email_per_day ) {
+			return;
+		}
+
+		error_log( 'Processing::process() ' );
+
 		$this->start_time = microtime( true );
 
 		// Check if memory limit is reached
@@ -197,6 +216,12 @@ class Processing {
 		}
 
 		try {
+			$resending_campaign = Campaign_Model::where( 'status', 'resending' )->orderBy( 'updated_at', 'asc' )->first();
+			if ( $resending_campaign ) {
+				$this->resent_failed( $resending_campaign );
+				return;
+			}
+
 			// Get first campaign with status 'processing'
 			$campaign = Campaign_Model::where( 'status', 'processing' )->orWhere( 'status', 'schedule' )->whereDate( 'execute_at', '<=', date( 'Y-m-d H:i:s' ) )
 			->firstOrFail();
@@ -245,8 +270,9 @@ class Processing {
 					$contacts        = $contact_filters->filter();
 				}
 
-				$contacts = $contacts->offset( $last_contact_offset )
-				->limit( 10 )
+				$max_per_second = $this->settings['max_in_second'] ?? 15;
+				$contacts       = $contacts->offset( $last_contact_offset )
+				->limit( $max_per_second )
 				->get();
 
 				if ( ! $contacts ) {
@@ -353,6 +379,7 @@ class Processing {
 			$this->build_email_footer( $campaign_email, $contact )
 		);
 
+		$message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
 		// Add click tracking to all links
 		$message = $this->add_click_tracking( $message, $campaign_email->hash_key, $contact );
 
@@ -365,7 +392,7 @@ class Processing {
 
 		error_log( 'Processing::process_campaign_email() ' . $campaign_email->id . ' result: ' . $result );
 
-		$campaign_email->status = 'sent';
+		$campaign_email->status = $result ? 'sent' : 'failed';
 		$campaign_email->save();
 	}
 
@@ -410,17 +437,21 @@ class Processing {
 			home_url( '?quillcrm=email_preview&hash_key=' . $campaign_email->hash_key ),
 		);
 
+		$email_footer = $this->settings['email_footer'] ?? $this->default_email_footer();
+
 		// Add unsubscribe link
-		$footer .= sprintf(
-			'<p>%s</p>',
-			sprintf(
-				'<a href="%s">%s</a>',
-				home_url(),
-				__( 'Unsubscribe', 'quillcrm' )
-			)
-		);
+		$footer .= $email_footer;
 
 		return $footer;
+	}
+
+	/**
+	 * Default email footer
+	 *
+	 * @return string
+	 */
+	protected function default_email_footer() {
+		return "<p>Don't want to stay in the loop? We'll be sad to see you go, but you can click here to <a href='{{contact:unsubscribe_link}}'>unsubscribe</a>.</p>";
 	}
 
 	/**

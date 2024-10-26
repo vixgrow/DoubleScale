@@ -141,10 +141,10 @@ class Rest_Abandoned_Cart_Controller extends REST_Controller {
 			$keyword  = $request->get_param( 'keyword' ) ?? '';
 
 			if ( $keyword ) {
-				$carts = Abandoned_Cart_Model::where( 'name', 'like', '%' . $keyword . '%' )->orderBy( 'created_at', 'desc' )
+				$carts = Abandoned_Cart_Model::where( 'name', 'like', '%' . $keyword . '%' )->with( 'contact' )->orderBy( 'created_at', 'desc' )
 					->paginate( $per_page, array( '*' ), 'page', $page );
 			} else {
-				$carts = Abandoned_Cart_Model::orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+				$carts = Abandoned_Cart_Model::orderBy( 'created_at', 'desc' )->with( 'contact' )->paginate( $per_page, array( '*' ), 'page', $page );
 			}
 
 			return new WP_REST_Response( $carts, 200 );

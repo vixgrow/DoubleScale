@@ -42,6 +42,7 @@ const Contacts: React.FC = () => {
 					per_page: 1,
 					page: 1,
 					filters: filters,
+					subscribed: true,
 				}),
 				method: 'GET',
 				parse: true,

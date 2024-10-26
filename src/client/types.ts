@@ -178,6 +178,10 @@ export type Campaign = {
 	sent_count: number;
 	opened_count: number;
 	clicked_count: number;
+	failed_count: number;
+	templates_count: {
+		[key: string]: number
+	}
 };
 
 export type Campaigns = Campaign[];
@@ -319,7 +323,9 @@ export type AbandonedCart = {
 	fields: {
 		[key: string]: string;
 	};
-	items: Record<string, CartItem>;
+	items: {
+		[key: string]: CartItem;
+	};
 	coupons: string[];
 	total: string;
 	fees: string[];
@@ -345,6 +351,14 @@ export type CartItem = {
 	line_total: number;
 	line_tax: number;
 	data: string[];
+	product: WCProduct;
+};
+
+export type WCProduct = {
+	id: number;
+	image: string;
+	name: string;
+	price: string;
 };
 
 type LineTaxData = {
@@ -368,6 +382,7 @@ export type CampaignEmail = {
 	created_at: string;
 	updated_at: string;
 	contact: Contact;
+	template: CustomTemplate;
 };
 
 export type AutomationRules = Rules[];
@@ -463,6 +478,12 @@ export type Settings = {
 		wait_period: number;
 		cool_off_period: number;
 		lost_cart_days: number;
+		gdpr_compliance: boolean;
+		gdpr_message: string;
+		tags: number[];
+		lists: number[];
+		lost_tags: number[];
+		lost_lists: number[];
 	};
 };
 

@@ -19,6 +19,70 @@ class CheckoutFormHandler {
             console.log('Checkout form found2');
             this.attachEventListeners();
         }
+
+        this.maybeAddGDPRConsent();
+    }
+
+    maybeAddGDPRConsent() {
+        const enableGdpr = this.quillcrmAbandonedCart.gdpr_compliance;
+        if (enableGdpr) {
+            // Check if gdpr_consent field already exists
+            if (document.querySelector('.quillcrm-gdpr-message')) {
+                return;
+            }
+
+            const gdprMessage = this.quillcrmAbandonedCart.gdpr_message;
+            const gdprMessageEl = document.createElement('div');
+            gdprMessageEl.className = 'quillcrm-gdpr-message';
+            gdprMessageEl.style.marginTop = '10px';
+            gdprMessageEl.style.fontSize = 'small';
+            gdprMessageEl.innerHTML = `
+                <p>${gdprMessage}</p>
+            `;
+
+            // Add after the email field
+            const emailField = document.querySelector('#billing_email_field, .wc-block-components-address-form__email');
+            if (emailField) {
+                emailField.insertAdjacentElement('afterend', gdprMessageEl);
+            } else {
+                setTimeout(() => {
+                    this.maybeAddGDPRConsent();
+                }, 3000);
+            }
+
+            // Add event listener for opt-out
+            const optOutLink = document.querySelector('#quillcrm-opt-out');
+            if (optOutLink) {
+                optOutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Opting out');
+                    fetch(this.quillcrmAbandonedCart.ajax_url, {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                        body: new URLSearchParams({
+                            action: 'quillcrm_opt_out_abandoned_cart',
+                            nonce: this.quillcrmAbandonedCart.nonce,
+                        }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            const messageEl = document.querySelector('.quillcrm-gdpr-message');
+                            if (messageEl) {
+                                messageEl.innerHTML = `<p>${data.data.message}</p>`;
+
+                                setTimeout(() => {
+                                    messageEl.style.display = 'none';
+                                }, 5000);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                });
+            }
+        }
     }
 
     attachEventListeners() {

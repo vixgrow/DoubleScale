@@ -80,7 +80,6 @@ const Campaign: React.FC = () => {
 			})) as CampaignType;
 
 			setCampaign(response);
-			navigate(getToLink(`campaigns/${response.id}/overview`));
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -169,7 +168,7 @@ const Campaign: React.FC = () => {
 
 	const isOverview =
 		(campaign.status === 'schedule' && tab === 'overview') ||
-		(['processing', 'completed'].includes(campaign.status) ? true : false);
+		(['processing', 'completed', 'resending'].includes(campaign.status) ? true : false);
 
 	return (
 		<Provider
@@ -183,7 +182,7 @@ const Campaign: React.FC = () => {
 				...$actions,
 			}}
 		>
-			{!['processing', 'completed'].includes(campaign.status) &&
+			{!['processing', 'completed', 'resending'].includes(campaign.status) &&
 				tab !== 'overview' && (
 					<Tabs
 						defaultActiveKey="information"

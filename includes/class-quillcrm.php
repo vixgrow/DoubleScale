@@ -21,6 +21,7 @@ use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Tracking\Link_Triggers;
+use QuillCRM\Subscription_Manage\Subscription_Manage;
 use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Admin\Admin;
 use QuillCRM\Admin\Admin_Loader;
@@ -123,8 +124,8 @@ final class QuillCRM {
 			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_campaigns' );
 		}
 
-		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily1' ) === false ) {
-			$this->daily_tasks->schedule_recurring( time(), MINUTE_IN_SECONDS, 'quillcrm_daily1' );
+		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily' ) === false ) {
+			$this->daily_tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'quillcrm_daily' );
 		}
 	}
 
@@ -197,6 +198,7 @@ final class QuillCRM {
 		Campaign_Processing::instance();
 		Email_Tracking::instance();
 		Link_Triggers::instance();
+		Subscription_Manage::instance();
 		Forms_Manager::instance();
 		Triggers_Manager::instance();
 		Actions_Manager::instance();

@@ -20,6 +20,7 @@ import {
 	Select,
 	Popconfirm,
 	Flex,
+	Tag
 } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { isEmpty } from 'lodash';
@@ -276,10 +277,17 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 									</Popconfirm>,
 								]}
 							>
-								<List.Item.Meta
-									title={item.title}
-									description={item.note}
-								/>
+								<Flex vertical gap={10} style={{ width: '100%' }}>
+									<Flex align="center">
+										<Tag color={item.type === 'system' ? 'blue' : item.type === 'reminder' ? 'orange' : 'green'}>
+											{item.type}
+										</Tag>
+									</Flex>
+									<List.Item.Meta
+										title={item.title}
+										description={item.note}
+									/>
+								</Flex>
 							</List.Item>
 						)}
 					/>

@@ -9,7 +9,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Tabs, Card, Button } from 'antd';
+import { Tabs, Card, Button, Flex, Typography, Divider } from 'antd';
 import { UserOutlined, UnorderedListOutlined } from '@ant-design/icons';
 
 /**
@@ -265,6 +265,8 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
 			[key]: value,
 		});
 	};
+	console.log(settings);
+
 	return (
 		<div className="double-optin-settings qcrm-fields">
 			<Field
@@ -285,24 +287,31 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
 				onChange={(value) =>
 					handleFieldChange('after_confirmation', value)
 				}
-				type="text"
+				type="select"
+				options={[
+					{ label: __('Redirect to URL', 'quillcrm'), value: 'url' },
+					{ label: __('Show Message', 'quillcrm'), value: 'message' },
+				]}
 			/>
-			<Field
-				label={__('Confirmation Message', 'quillcrm')}
-				value={confirmation_message}
-				onChange={(value) =>
-					handleFieldChange('confirmation_message', value)
-				}
-				type="textarea"
-			/>
-			<Field
-				label={__('Confirmation Redirect', 'quillcrm')}
-				value={confirmation_redirect}
-				onChange={(value) =>
-					handleFieldChange('confirmation_redirect', value)
-				}
-				type="text"
-			/>
+			{after_confirmation === 'message' ? (
+				<Field
+					label={__('Confirmation Message', 'quillcrm')}
+					value={confirmation_message}
+					onChange={(value) =>
+						handleFieldChange('confirmation_message', value)
+					}
+					type="textarea"
+				/>
+			) : (
+				<Field
+					label={__('Confirmation Redirect', 'quillcrm')}
+					value={confirmation_redirect}
+					onChange={(value) =>
+						handleFieldChange('confirmation_redirect', value)
+					}
+					type="text"
+				/>
+			)}
 		</div>
 	);
 };
@@ -318,6 +327,12 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 		wait_period,
 		cool_off_period,
 		lost_cart_days,
+		gdpr_compliance,
+		gdpr_message,
+		lists,
+		tags,
+		lost_lists,
+		lost_tags,
 	} = settings.cart;
 	const handleFieldChange = (key: string, value: string) => {
 		onChange({
@@ -336,7 +351,7 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 				onChange={(value) =>
 					handleFieldChange('enable_cart_tracking', value)
 				}
-				type="checkbox"
+				type="switch"
 			/>
 			{enable_cart_tracking && (
 				<>
@@ -364,6 +379,102 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 						}
 						type="number"
 					/>
+					<Flex vertical gap={10}>
+						<Typography.Title level={5}>
+							{__('GDPR Consent', 'quillcrm')}
+						</Typography.Title>
+						<Field
+							label={__('Inform customers that their will be recieving marketing emails', 'quillcrm')}
+							value={gdpr_compliance}
+							onChange={(value) =>
+								handleFieldChange('gdpr_compliance', value)
+							}
+							type="switch"
+						/>
+						{gdpr_compliance && (
+							<>
+								<Field
+									label={__('GDPR Message', 'quillcrm')}
+									value={gdpr_message}
+									onChange={(value) =>
+										handleFieldChange('gdpr_message', value)
+									}
+									type="textarea"
+								/>
+								<Typography.Text type="secondary">
+									{__('Use {{no_thanks text="No Thanks"}} to add a no thanks link', 'quillcrm')}
+								</Typography.Text>
+							</>
+						)}
+					</Flex>
+					<Flex vertical gap={10}>
+						<Typography.Title level={5}>
+							{__('Contact tags and lists', 'quillcrm')}
+						</Typography.Title>
+						<Divider />
+						<Flex vertical gap={10}>
+							<Typography.Title level={5}>
+								{__('Add Lists on Cart Abandoned', 'quillcrm')}
+							</Typography.Title>
+							<Flex vertical gap={10}>
+								<Field
+									label={__('Lists', 'quillcrm')}
+									value={lists}
+									onChange={(value) =>
+										handleFieldChange('lists', value)
+									}
+									type="lists"
+								/>
+								<Typography.Text type="secondary">
+									{__('The selected tag(s) will be added when cart is abandoned. The tag(s) will be automatically removed when cart recovers', 'quillcrm')}
+								</Typography.Text>
+							</Flex>
+							<Flex vertical gap={10}>
+								<Field
+									label={__('Add Tags on Cart Abandoned', 'quillcrm')}
+									value={tags}
+									onChange={(value) =>
+										handleFieldChange('tags', value)
+									}
+									type="tags"
+								/>
+								<Typography.Text type="secondary">
+									{__('The selected tag(s) will be added when cart is abandoned. The tag(s) will be automatically removed when cart recovers', 'quillcrm')}
+								</Typography.Text>
+							</Flex>
+						</Flex>
+						<Flex vertical gap={10}>
+							<Typography.Title level={5}>
+								{__('Lost Cart', 'quillcrm')}
+							</Typography.Title>
+							<Flex vertical gap={10}>
+								<Field
+									label={__('Add Lists on Cart Lost', 'quillcrm')}
+									value={lost_lists}
+									onChange={(value) =>
+										handleFieldChange('lost_lists', value)
+									}
+									type="lists"
+								/>
+								<Typography.Text type="secondary">
+									{__('The selected tag(s) will be added when cart is lost. The tag(s) will be automatically removed when cart recovers', 'quillcrm')}
+								</Typography.Text>
+							</Flex>
+							<Flex vertical gap={10}>
+								<Field
+									label={__('Add Tags on Cart Lost', 'quillcrm')}
+									value={lost_tags}
+									onChange={(value) =>
+										handleFieldChange('lost_tags', value)
+									}
+									type="tags"
+								/>
+								<Typography.Text type="secondary">
+									{__('The selected tag(s) will be added when cart is lost. The tag(s) will be automatically removed when cart recovers', 'quillcrm')}
+								</Typography.Text>
+							</Flex>
+						</Flex>
+					</Flex>
 				</>
 			)}
 		</div>

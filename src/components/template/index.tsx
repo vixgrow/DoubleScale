@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
@@ -17,7 +18,6 @@ import './style.scss';
 import type { Template } from '@quillcrm/client';
 import React, { useRef } from 'react';
 import { Field } from '@quillcrm/components';
-import ConfigAPI from '@quillcrm/config';
 import { isEmail, isEmpty } from 'validator';
 
 interface Props {
@@ -30,8 +30,6 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 	const [toEmail, setToEmail] = React.useState('');
 	const [isSending, setIsSending] = React.useState(false);
 	const { from_name, from_email, subject, body } = template;
-	const ajaxUrl = ConfigAPI.getAjaxUrl();
-	const nonce = ConfigAPI.getNonce();
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const sendTestEmail = async () => {
@@ -41,33 +39,23 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 
 		setIsSending(true);
 		try {
-			const requestBody = new FormData();
-			requestBody.append('action', 'quillcrm_send_test_email');
-			requestBody.append('nonce', nonce);
-			requestBody.append('email', toEmail);
-			requestBody.append('from_name', from_name);
-			requestBody.append('from_email', from_email);
-			requestBody.append('reply_to', template.reply_to);
-			requestBody.append('subject', subject);
-			requestBody.append('body', body);
-			const response = await fetch(ajaxUrl, {
+			const response = await apiFetch({
+				path: '/qc/v1/campaigns/send-test-email',
 				method: 'POST',
-				body: requestBody,
+				data: {
+					email: toEmail,
+					from_name,
+					from_email,
+					reply_to: template.reply_to,
+					subject,
+					body,
+				},
 			});
 
-			const data = await response.json();
-
-			if (data.success) {
-				createNotice({
-					type: 'success',
-					message: __('Email sent successfully', 'quillcrm'),
-				});
-			} else {
-				createNotice({
-					type: 'error',
-					message: __('Failed to send email', 'quillcrm'),
-				});
-			}
+			createNotice({
+				type: 'success',
+				message: __('Email sent successfully', 'quillcrm'),
+			});
 		} catch (error) {
 			createNotice({
 				type: 'error',

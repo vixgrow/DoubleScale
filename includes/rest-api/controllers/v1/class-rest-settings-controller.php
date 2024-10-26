@@ -163,6 +163,42 @@ class REST_Settings_Controller extends REST_Controller {
 							'type'    => 'integer',
 							'default' => 15,
 						),
+						'gdpr_compliance'      => array(
+							'type'    => 'boolean',
+							'default' => false,
+						),
+						'gdpr_message'         => array(
+							'type'    => 'string',
+							'default' => 'Your email and cart are saved so we can send you email reminders about this order. {{no_thanks text="No Thanks"}}',
+						),
+						'tags'                 => array(
+							'type'    => 'array',
+							'items'   => array(
+								'type' => array( 'number', 'string' ),
+							),
+							'default' => array(),
+						),
+						'lists'                => array(
+							'type'    => 'array',
+							'items'   => array(
+								'type' => array( 'number', 'string' ),
+							),
+							'default' => array(),
+						),
+						'lost_tags'            => array(
+							'type'    => 'array',
+							'items'   => array(
+								'type' => array( 'number', 'string' ),
+							),
+							'default' => array(),
+						),
+						'lost_lists'           => array(
+							'type'    => 'array',
+							'items'   => array(
+								'type' => array( 'number', 'string' ),
+							),
+							'default' => array(),
+						),
 					),
 				),
 			),
@@ -188,7 +224,7 @@ class REST_Settings_Controller extends REST_Controller {
 				$result[ $group_key ][ $setting_key ] = $settings[ $group_key ][ $setting_key ] ?? $setting_schema['default'];
 			}
 		}
-		error_log( wp_json_encode( $result ) );
+
 		return new WP_REST_Response( $result, 200 );
 	}
 

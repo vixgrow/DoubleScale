@@ -19,6 +19,7 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\User_Model;
 use QuillCRM\Models\Campaign_Email_Model;
 use QuillCRM\Models\WC_Order_Model;
+use QuillCRM\Utils;
 
 /**
  * Contact_Model class
@@ -51,6 +52,7 @@ class Contact_Model extends Model {
 	 * @since 1.0.0
 	 */
 	protected $fillable = array(
+		'hash_id',
 		'email',
 		'first_name',
 		'last_name',
@@ -245,6 +247,19 @@ class Contact_Model extends Model {
 	}
 
 	/**
+	 * Get contact by hash ID
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $hash_id Contact hash ID
+	 *
+	 * @return Contact_Model
+	 */
+	public static function get_by_hash_id( $hash_id ) {
+		return self::where( 'hash_id', $hash_id )->first();
+	}
+
+	/**
 	 * Sync lists
 	 *
 	 * @since 1.0.0
@@ -366,6 +381,12 @@ class Contact_Model extends Model {
 		static::saving(
 			function( $contact ) {
 				unset( $contact->revenue );
+			}
+		);
+
+		static::creating(
+			function( $contact ) {
+				$contact->hash_id = Utils::generate_hash_key();
 			}
 		);
 	}

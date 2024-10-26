@@ -10,14 +10,14 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import { Card, Flex, Typography, Table, Badge } from 'antd';
+import { Card, Flex, Typography, Table, Badge, Radio, Modal, Divider, Button } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { CampaignEmail, CampaignEmailsResponse } from '@quillcrm/client';
+import type { CampaignEmail, CampaignEmailsResponse } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
 import { useParams } from '@quillcrm/navigation';
@@ -30,6 +30,8 @@ const Engagements: React.FC = () => {
 	const [total, setTotal] = useState(0);
 	const [data, setData] = useState<CampaignEmail[]>([]);
 	const { createNotice } = useDispatch('quillcrm/core');
+	const [status, setStatus] = useState('all');
+	const [campaignEmail, setCampaignEmail] = useState<CampaignEmail | null>(null);
 
 	const fetchCampaignEmails = async () => {
 		setIsLoading(true);
@@ -39,6 +41,7 @@ const Engagements: React.FC = () => {
 				path: addQueryArgs(`/qc/v1/campaigns/${id}/emails`, {
 					per_page: perPage,
 					page,
+					status,
 				}),
 			})) as CampaignEmailsResponse;
 
@@ -56,7 +59,7 @@ const Engagements: React.FC = () => {
 
 	useEffect(() => {
 		fetchCampaignEmails();
-	}, [page, perPage]);
+	}, [page, perPage, status]);
 
 	const columns = [
 		{
@@ -93,7 +96,7 @@ const Engagements: React.FC = () => {
 			key: 'status',
 			render: (_, record: CampaignEmail) => (
 				<Badge
-					status={record.status === 'sent' ? 'success' : 'default'}
+					status={record.status === 'sent' ? 'success' : 'error'}
 					text={record.status}
 				/>
 			),
@@ -128,6 +131,23 @@ const Engagements: React.FC = () => {
 				/>
 			),
 		},
+		{
+			title: __('Template', 'quillcrm'),
+			key: 'template',
+			render: (_, record: CampaignEmail) => (
+				<Button onClick={() => setCampaignEmail(record)}>
+					{__('View', 'quillcrm')}
+				</Button>
+			),
+		}
+	];
+
+	const statusOptions = [
+		{ value: 'all', label: __('All', 'quillcrm') },
+		{ value: 'sent', label: __('Sent', 'quillcrm') },
+		{ value: 'failed', label: __('Failed', 'quillcrm') },
+		{ value: 'opened', label: __('Opened', 'quillcrm') },
+		{ value: 'clicked', label: __('Clicked', 'quillcrm') },
 	];
 
 	return (
@@ -140,20 +160,69 @@ const Engagements: React.FC = () => {
 				</Flex>
 			}
 		>
-			<Table
-				dataSource={data}
-				columns={columns}
-				loading={isLoading}
-				pagination={{
-					current: page,
-					pageSize: perPage,
-					total: total,
-					onChange: (page, pageSize) => {
-						setPage(page);
-						setPerPage(pageSize);
-					},
-				}}
-			/>
+			<Flex vertical gap={20}>
+				<Flex gap={20} align='center'>
+					<Typography.Text>{__('Filter by status')}</Typography.Text>
+					<Radio.Group
+						options={statusOptions}
+						onChange={(e) => setStatus(e.target.value)}
+						value={status}
+						optionType="button"
+						buttonStyle="solid"
+					/>
+				</Flex>
+				<Table
+					dataSource={data}
+					columns={columns}
+					loading={isLoading}
+					pagination={{
+						current: page,
+						pageSize: perPage,
+						total: total,
+						onChange: (page, pageSize) => {
+							setPage(page);
+							setPerPage(pageSize);
+						},
+					}}
+				/>
+			</Flex>
+			<Modal
+				open={!!campaignEmail}
+				title={__('Details')}
+				onCancel={() => setCampaignEmail(null)}
+				footer={null}
+				style={{ minWidth: '800px' }}
+			>
+				{campaignEmail && (
+					<Flex vertical gap={20}>
+						<Flex vertical gap={10}>
+							<Flex gap={10}>
+								<Typography.Text>{__('Status', 'quillcrm')}{': '}</Typography.Text>
+								<Badge
+									status={campaignEmail.status === 'sent' ? 'success' : 'error'}
+									text={campaignEmail.status}
+								/>
+							</Flex>
+							<Flex gap={10}>
+								<Typography.Text>{__('From Name', 'quillcrm')}{': '}</Typography.Text>
+								<Typography.Text strong>{campaignEmail.template.settings.from_name}</Typography.Text>
+							</Flex>
+							<Flex gap={10}>
+								<Typography.Text>{__('From Email', 'quillcrm')}{': '}</Typography.Text>
+								<Typography.Text strong>{campaignEmail.template.settings.from_email}</Typography.Text>
+							</Flex>
+							<Flex gap={10}>
+								<Typography.Text>{__('Subject', 'quillcrm')}{': '}</Typography.Text>
+								<Typography.Text strong>{campaignEmail.template.subject}</Typography.Text>
+							</Flex>
+						</Flex>
+						<Divider style={{ margin: 0 }} />
+						<Card title={__('Body', 'quillcrm')}>
+							<div dangerouslySetInnerHTML={{ __html: campaignEmail.template.body }} />
+						</Card>
+					</Flex>
+				)}
+			</Modal>
 		</Card>
 	);
 };

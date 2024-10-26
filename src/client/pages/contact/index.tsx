@@ -22,6 +22,8 @@ import {
 	Avatar,
 	Tag as AntTag,
 	Popover,
+	Popconfirm,
+	Flex,
 } from 'antd';
 import {
 	UserOutlined,
@@ -308,6 +310,35 @@ const Contact: React.FC = () => {
 		}
 	};
 
+	const sendOptInEmail = async () => {
+		if (!contact) {
+			return;
+		}
+
+		createNotice({
+			type: 'info',
+			message: __('Sending opt-in email', 'quillcrm'),
+		});
+
+		try {
+			const response = await apiFetch({
+				path: `/qc/v1/contacts/${contact.id}/send-opt-in`,
+				method: 'POST',
+			});
+			console.log(response);
+
+			createNotice({
+				type: 'success',
+				message: __('Opt-in email sent successfully', 'quillcrm'),
+			});
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	};
+
 	useEffect(() => {
 		fetchContact();
 	}, [id]);
@@ -365,78 +396,93 @@ const Contact: React.FC = () => {
 										{contact.first_name || '-'}{' '}
 										{contact.last_name || '-'}
 									</Typography.Title>
-									<Typography.Text>
-										{contact.email}
-										<Popover
-											trigger={['click']}
-											content={
-												<div
-													style={{
-														display: 'flex',
-														flexDirection: 'column',
-														gap: 8,
-													}}
-												>
-													<Select
-														value={contact.status}
-														style={{ width: 200 }}
-														onChange={(value) => {
-															setContact({
-																...contact,
-																status: value,
-															});
+									<Flex vertical gap={10}>
+										<Typography.Text>
+											{contact.email}
+											<Popover
+												trigger={['click']}
+												content={
+													<div
+														style={{
+															display: 'flex',
+															flexDirection: 'column',
+															gap: 8,
 														}}
 													>
-														<Select.Option value="unverified">
+														<Select
+															value={contact.status}
+															style={{ width: 200 }}
+															onChange={(value) => {
+																setContact({
+																	...contact,
+																	status: value,
+																});
+															}}
+														>
+															<Select.Option value="unverified">
+																{__(
+																	'Unverified',
+																	'quillcrm'
+																)}
+															</Select.Option>
+															<Select.Option value="subscribed">
+																{__(
+																	'Subscribed',
+																	'quillcrm'
+																)}
+															</Select.Option>
+															<Select.Option value="unsubscribed">
+																{__(
+																	'Unsubscribed',
+																	'quillcrm'
+																)}
+															</Select.Option>
+															<Select.Option value="bounced">
+																{__(
+																	'Bounced',
+																	'quillcrm'
+																)}
+															</Select.Option>
+														</Select>
+														<Button
+															onClick={updateContact}
+															type="primary"
+															loading={isUpdating}
+														>
 															{__(
-																'Unverified',
+																'Update',
 																'quillcrm'
 															)}
-														</Select.Option>
-														<Select.Option value="subscribed">
-															{__(
-																'Subscribed',
-																'quillcrm'
-															)}
-														</Select.Option>
-														<Select.Option value="unsubscribed">
-															{__(
-																'Unsubscribed',
-																'quillcrm'
-															)}
-														</Select.Option>
-														<Select.Option value="bounced">
-															{__(
-																'Bounced',
-																'quillcrm'
-															)}
-														</Select.Option>
-													</Select>
-													<Button
-														onClick={updateContact}
-														type="primary"
-														loading={isUpdating}
-													>
-														{__(
-															'Update',
-															'quillcrm'
-														)}
-													</Button>
-												</div>
-											}
-										>
-											<AntTag
-												color="processing"
-												icon={<ArrowDownOutlined />}
-												style={{
-													marginLeft: 8,
-													cursor: 'pointer',
-												}}
+														</Button>
+													</div>
+												}
 											>
-												{contact.status}
-											</AntTag>
-										</Popover>
-									</Typography.Text>
+												<AntTag
+													color="processing"
+													icon={<ArrowDownOutlined />}
+													style={{
+														marginLeft: 8,
+														cursor: 'pointer',
+													}}
+												>
+													{contact.status}
+												</AntTag>
+											</Popover>
+										</Typography.Text>
+										{contact.status === 'unverified' && (
+											<Popconfirm
+												title={__(
+													'Are you sure you want to send an opt-in email?',
+													'quillcrm'
+												)}
+												onConfirm={sendOptInEmail}
+											>
+												<Button size='small'>
+													{__('Send Opt-in Email', 'quillcrm')}
+												</Button>
+											</Popconfirm>
+										)}
+									</Flex>
 								</div>
 							</div>
 							<div className="qcrm-contact-overview-lists-tags">

@@ -26,7 +26,7 @@ const Review: React.FC = () => {
 		useCampaignContext();
 	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
-	const [runType, setRunType] = useState<string>(campaign?.status || '');
+	const [runType, setRunType] = useState<string>(campaign && campaign.status !== 'draft' ? campaign.status : 'processing');
 	const [executeAt, setExecuteAt] = useState<string>(
 		campaign?.execute_at || new Date().toISOString()
 	);

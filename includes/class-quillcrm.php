@@ -124,8 +124,8 @@ final class QuillCRM {
 			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_campaigns' );
 		}
 
-		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily' ) === false ) {
-			$this->daily_tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'quillcrm_daily' );
+		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily3' ) === false ) {
+			$this->daily_tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'quillcrm_daily3' );
 		}
 	}
 

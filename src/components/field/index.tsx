@@ -39,6 +39,8 @@ interface FieldProps {
 	endpoint?: string;
 	multiple?: boolean;
 	required?: boolean;
+	helperText?: string;
+	style?: React.CSSProperties;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -51,6 +53,8 @@ const Field: React.FC<FieldProps> = ({
 	fields,
 	endpoint,
 	multiple,
+	helperText,
+	style,
 }) => {
 	let fieldContent;
 
@@ -211,13 +215,14 @@ const Field: React.FC<FieldProps> = ({
 	}
 
 	return (
-		<div className="qcrm-field">
+		<div className="qcrm-field" style={style || {}}>
 			{label && (
 				<div className="qcrm-field-label">
 					<Typography.Text>{label}</Typography.Text>
 				</div>
 			)}
 			<div className="qcrm-field-input">{fieldContent}</div>
+			{helperText && <Typography.Text type="secondary">{helperText}</Typography.Text>}
 		</div>
 	);
 };

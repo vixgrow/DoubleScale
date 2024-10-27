@@ -16,6 +16,8 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\User_Model;
 use League\Csv\Reader;
 use League\Csv\Statement;
+use QuillCRM\Models\Tag_Model;
+use QuillCRM\Models\List_Model;
 
 /**
  * Import class
@@ -44,11 +46,71 @@ class Import {
 	protected $current_execution_time;
 
 	/**
-	 * Constructor
+	 * Lists mapping
+	 *
+	 * @var array
 	 */
-	public function __construct() {
+	protected $lists_mapping;
+
+	/**
+	 * Tags mapping
+	 *
+	 * @var array
+	 */
+	protected $tags_mapping;
+
+	/**
+	 * Lists
+	 *
+	 * @var array
+	 */
+	protected $lists;
+
+	/**
+	 * Tags
+	 *
+	 * @var array
+	 */
+	protected $tags;
+
+	/**
+	 * Offset
+	 *
+	 * @var int
+	 */
+	protected $offset;
+
+	/**
+	 * Update existing
+	 *
+	 * @var bool
+	 */
+	protected $update_existing;
+
+	/**
+	 * Status
+	 *
+	 * @var string
+	 */
+	protected $status;
+
+	/**
+	 * Constructor
+	 *
+	 * @param array $args args
+	 */
+	public function __construct( $args = array() ) {
 		// Get the max execution time
 		$this->max_execution_time = Utils::get_max_execution_time();
+
+		// Set the args
+		$this->update_existing = $args['update_existing'] ?? false;
+		$this->status          = $args['status'] ?? 'unverified';
+		$this->lists_mapping   = $args['lists_mapping'] ?? array();
+		$this->tags_mapping    = $args['tags_mapping'] ?? array();
+		$this->offset          = $args['offset'] ?? 0;
+		$this->lists           = $args['lists'] ?? array();
+		$this->tags            = $args['tags'] ?? array();
 	}
 
 	/**
@@ -57,20 +119,19 @@ class Import {
 	 * @since 1.0.0
 	 *
 	 * @param string $source Source
-	 * @param int    $offset Offset
 	 *
 	 * @return array
 	 */
-	public function import( $source, $offset = 0 ) {
+	public function import( $source ) {
 		switch ( $source ) {
 			case 'fluentcrm':
-				return $this->import_from_fluentcrm( $offset );
+				return $this->import_from_fluentcrm();
 			case 'wpfunnelkit':
-				return $this->import_from_wpfunnels( $offset );
+				return $this->import_from_wpfunnels();
 			case 'wc':
-				return $this->import_from_woocommerce( $offset );
+				return $this->import_from_woocommerce();
 			case 'wpusers':
-				return $this->import_from_wordpress_users( $offset );
+				return $this->import_from_wordpress_users();
 		}
 	}
 
@@ -91,18 +152,12 @@ class Import {
 
 		$lists_array = array();
 		foreach ( $lists ?? array() as $list ) {
-			$lists_array[] = array(
-				'value' => $list->id,
-				'label' => $list->title,
-			);
+			$lists_array[] = $list->title;
 		}
 
 		$tags_array = array();
 		foreach ( $tags ?? array() as $tag ) {
-			$tags_array[] = array(
-				'value' => $tag->id,
-				'label' => $tag->title,
-			);
+			$tags_array[] = $tag->title;
 		}
 
 		return array(
@@ -132,19 +187,12 @@ class Import {
 				continue;
 			}
 
-			if ( 1 === $term->type ) {
-				$tags_array[] = array(
-					'value' => $term->ID,
-					'label' => $term->name,
-				);
-
+			if ( 1 == $term->type ) {
+				$tags_array[] = $term->name;
 				continue;
 			}
 
-			$lists_array[] = array(
-				'value' => $term->ID,
-				'label' => $term->name,
-			);
+			$lists_array[] = $term->name;
 		}
 
 		return array(
@@ -158,17 +206,20 @@ class Import {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $offset Offset
-	 *
 	 * @return array
 	 */
-	public function import_from_fluentcrm( $offset = 0 ) {
+	public function import_from_fluentcrm() {
 		global $wpdb;
 
 		$this->start_time = microtime( true );
-		$table_name       = $wpdb->prefix . 'fc_subscribers';
-		$total            = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
-		$mapping          = array(
+
+		$table_name  = $wpdb->prefix . 'fc_subscribers';
+		$pivot_table = $wpdb->prefix . 'fc_subscriber_pivot';
+		$list_table  = $wpdb->prefix . 'fc_lists';
+		$tag_table   = $wpdb->prefix . 'fc_tags';
+
+		// Define the mapping as before
+		$mapping = array(
 			'first_name' => 'first_name',
 			'last_name'  => 'last_name',
 			'email'      => 'email',
@@ -179,13 +230,37 @@ class Import {
 			'state'      => 'state',
 			'zip'        => 'postal_code',
 			'country'    => 'country',
+			'status'     => array(
+				'unsubscribed' => 'unsubscribed',
+				'subscribed'   => 'subscribed',
+				'pending'      => 'unverified',
+			),
 		);
+
+		// Get total subscribers count
+		$total = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
 
 		$result = $this->import_with_offset(
 			$total,
-			$offset,
-			function( $offset ) use ( $wpdb, $table_name ) {
-				return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name LIMIT %d, 20", $offset ) );
+			$this->offset,
+			function ( $offset ) use ( $wpdb, $table_name, $pivot_table, $list_table, $tag_table ) {
+				return $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT s.*, 
+								GROUP_CONCAT(DISTINCT CASE WHEN p.object_type LIKE '%List%' THEN l.title END) AS lists,
+								GROUP_CONCAT(DISTINCT CASE WHEN p.object_type LIKE '%Tag%' THEN t.title END) AS tags
+						 FROM $table_name AS s
+						 
+						 LEFT JOIN $pivot_table AS p ON s.id = p.subscriber_id
+						 LEFT JOIN $list_table AS l ON p.object_id = l.id AND p.object_type LIKE '%List%'
+						 LEFT JOIN $tag_table AS t ON p.object_id = t.id AND p.object_type LIKE '%Tag%'
+						 
+						 GROUP BY s.id
+						 LIMIT %d, 20",
+						$offset
+					),
+					ARRAY_A
+				);
 			},
 			$mapping
 		);
@@ -198,15 +273,14 @@ class Import {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $offset Offset
-	 *
 	 * @return array
 	 */
-	public function import_from_wpfunnels( $offset = 0 ) {
+	public function import_from_wpfunnels() {
 		global $wpdb;
 
 		$this->start_time = microtime( true );
 		$table_name       = $wpdb->prefix . 'bwf_contact';
+		$terms_table      = $wpdb->prefix . 'bwfan_terms';
 		$total            = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
 		$mapping          = array(
 			'first_name' => 'f_name',
@@ -214,13 +288,33 @@ class Import {
 			'email'      => 'email',
 			'state'      => 'state',
 			'country'    => 'country',
+			'status'     => array(
+				'0' => 'unverified',
+				'1' => 'subscribed',
+				'2' => 'unsubscribed',
+			),
 		);
 
 		$result = $this->import_with_offset(
 			$total,
-			$offset,
-			function( $offset ) use ( $wpdb, $table_name ) {
-				return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name LIMIT %d, 20", $offset ) );
+			$this->offset,
+			function( $offset ) use ( $wpdb, $table_name, $terms_table ) {
+				return $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT c.*, 
+								GROUP_CONCAT(DISTINCT CASE WHEN t.type = 2 THEN t.name END) AS lists,
+								GROUP_CONCAT(DISTINCT CASE WHEN t.type = 1 THEN t.name END) AS tags
+						 FROM $table_name AS c
+						 
+						 LEFT JOIN $terms_table AS t 
+							ON JSON_CONTAINS(c.lists, JSON_QUOTE(CAST(t.id AS CHAR))) OR JSON_CONTAINS(c.tags, JSON_QUOTE(CAST(t.id AS CHAR)))
+		
+						 GROUP BY c.id
+						 LIMIT %d, 20",
+						$offset
+					),
+					ARRAY_A
+				);
 			},
 			$mapping
 		);
@@ -233,11 +327,9 @@ class Import {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $offset Offset
-	 *
 	 * @return array
 	 */
-	public function import_from_woocommerce( $offset = 0 ) {
+	public function import_from_woocommerce() {
 		global $wpdb;
 
 		$this->start_time = microtime( true );
@@ -255,7 +347,7 @@ class Import {
 
 		$result = $this->import_with_offset(
 			$total,
-			$offset,
+			$this->offset,
 			function( $offset ) use ( $wpdb, $table_name ) {
 				return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name LIMIT %d, 20", $offset ) );
 			},
@@ -270,11 +362,9 @@ class Import {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $offset Offset
-	 *
 	 * @return array
 	 */
-	public function import_from_wordpress_users( $offset = 0 ) {
+	public function import_from_wordpress_users() {
 
 		$this->start_time = microtime( true );
 		$total            = User_Model::count();
@@ -285,7 +375,7 @@ class Import {
 
 		$result = $this->import_with_offset(
 			$total,
-			$offset,
+			$this->offset,
 			function( $offset ) {
 				return User_Model::offset( $offset )->limit( 20 )->get();
 			},
@@ -302,11 +392,10 @@ class Import {
 	 *
 	 * @param array $file_name File name
 	 * @param array $mapping Mapping
-	 * @param int   $offset Offset
 	 *
 	 * @return array
 	 */
-	public function import_from_csv( $file_name, $mapping, $offset = 0 ) {
+	public function import_from_csv( $file_name, $mapping ) {
 		$this->start_time = microtime( true );
 		$mapping          = array_flip( $mapping );
 		$file_path        = wp_upload_dir()['basedir'] . '/QuillCRM/Import-Export/' . $file_name;
@@ -316,7 +405,7 @@ class Import {
 
 		$result = $this->import_with_offset(
 			$total,
-			$offset,
+			$this->offset,
 			function( $offset ) use ( $csv ) {
 				$stmt        = ( new Statement() )->offset( $offset )->limit( 20 );
 				$subscribers = $stmt->process( $csv );
@@ -345,17 +434,83 @@ class Import {
 	public function import_contact( $subscriber, $mapping ) {
 		try {
 			// Check if the contact already exists
-			$email   = is_object( $subscriber ) ? $subscriber->{$mapping['email']} : $subscriber[ $mapping['email'] ];
-			$contact = Contact_Model::where( 'email', $email )->first();
-			if ( $contact ) {
-				return;
+			$email = is_object( $subscriber ) ? $subscriber->{$mapping['email']} : $subscriber[ $mapping['email'] ];
+			$lists = is_object( $subscriber ) ? $subscriber->lists ?? array() : $subscriber['lists'] ?? array();
+			$lists = $lists ? explode( ',', $lists ) : array();
+			$tags  = is_object( $subscriber ) ? $subscriber->tags ?? array() : $subscriber['tags'] ?? array();
+			$tags  = $tags ? explode( ',', $tags ) : array();
+
+			$contact  = Contact_Model::where( 'email', $email )->first();
+			$existing = $contact ? true : false;
+			if ( ! $contact ) {
+				$contact = new Contact_Model();
 			}
 
-			$contact = new Contact_Model();
-			foreach ( $mapping as $key => $value ) {
-				$contact->$key = is_object( $subscriber ) ? $subscriber->$value : $subscriber[ $value ];
+			if ( ( $this->update_existing && $existing ) || ! $existing ) {
+				foreach ( $mapping as $key => $value ) {
+					if ( 'status' === $key ) {
+						$status          = is_object( $subscriber ) ? $subscriber->status : $subscriber['status'];
+						$contact->status = isset( $value[ $status ] ) ? $value[ $status ] : 'unverified';
+						continue;
+					}
+
+					$contact->$key = is_object( $subscriber ) ? $subscriber->$value : $subscriber[ $value ];
+				}
+
+				if ( ! empty( $this->status ) && ! isset( $mapping['status'] ) ) {
+					$contact->status = $this->status;
+				}
+
+				$contact->save();
+
+				// Add the contact to the lists
+				foreach ( $this->lists_mapping as $list ) {
+					$name        = $list['list'];
+					$assign_to   = $list['assignedList'] ?? array();
+					$auto_create = $list['auto'] ?? false;
+
+					if ( ! in_array( $name, $lists ) ) {
+						continue;
+					}
+
+					if ( $auto_create ) {
+						$list = List_Model::getOrCreate( $name );
+						$contact->lists()->sync( $list->id, false );
+					} else {
+						if ( ! empty( $assign_to ) ) {
+							$contact->lists()->sync( $assign_to, false );
+						}
+					}
+				}
+
+				// Add the contact to the tags
+				foreach ( $this->tags_mapping as $tag ) {
+					$name        = $tag['tag'];
+					$assign_to   = $tag['assignedTag'] ?? array();
+					$auto_create = $tag['auto'] ?? false;
+
+					if ( ! in_array( $name, $tags ) ) {
+						continue;
+					}
+
+					if ( $auto_create ) {
+						$tag = Tag_Model::getOrCreate( $name );
+						$contact->tags()->sync( $tag->id, false );
+					} else {
+						if ( ! empty( $assign_to ) ) {
+							$contact->tags()->sync( $assign_to, false );
+						}
+					}
+				}
+
+				if ( ! empty( $this->tags ) ) {
+					$contact->tags()->sync( $this->tags, false );
+				}
+
+				if ( ! empty( $this->lists ) ) {
+					$contact->lists()->sync( $this->lists, false );
+				}
 			}
-			$contact->save();
 		} catch ( \Exception $e ) {
 			return new \WP_Error( 'import_failed', $e->getMessage() );
 		}

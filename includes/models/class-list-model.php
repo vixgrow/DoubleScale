@@ -92,6 +92,51 @@ class List_Model extends Model {
 	}
 
 	/**
+	 * Get by name
+	 *
+	 * @param string $name List name
+	 *
+	 * @return mixed
+	 */
+	public static function get_by_name( $name ) {
+		return static::where( 'name', $name )->first();
+	}
+
+	/**
+	 * Get or create list
+	 *
+	 * @param string $name Tag name
+	 *
+	 * @return mixed
+	 */
+	public static function getOrCreate( $name ) {
+		$list = static::get_by_name( $name );
+
+		if ( ! $list ) {
+			$list = static::create( array( 'name' => $name ) );
+		}
+
+		return $list;
+	}
+
+	/**
+	 * Override the save method to add validation.
+	 *
+	 * @param array $options
+	 * @return bool
+	 * @throws \Exception
+	 */
+	public function save( array $options = array() ) {
+		$search = static::get_by_name( $this->name );
+
+		if ( $search && $search->id !== $this->id ) {
+			throw new \Exception( __( 'List name already exists', 'quillcrm' ) );
+		}
+
+		return parent::save( $options );
+	}
+
+	/**
 	 * Automatically add slug when creating a list using the name and boot method
 	 *
 	 * @since 1.0.0

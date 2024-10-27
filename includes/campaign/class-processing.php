@@ -103,7 +103,7 @@ class Processing {
 		add_action(
 			'init',
 			function() {
-				QuillCRM::instance()->daily_tasks->register_callback( 'quillcrm_daily', array( $this, 'reset_daily_email' ) );
+				QuillCRM::instance()->daily_tasks->register_callback( 'quillcrm_daily3', array( $this, 'reset_daily_email' ) );
 				QuillCRM::instance()->campaigns_tasks->register_callback( 'quillcrm_campaigns', array( $this, 'process' ) );
 				QuillCRM::instance()->campaigns_tasks->register_callback( 'process_campaign_email', array( $this, 'process_campaign_email' ) );
 			}
@@ -125,7 +125,6 @@ class Processing {
 	 * @return void
 	 */
 	public function reset_daily_email() {
-		error_log( 'Processing::reset_daily_email() ' );
 		update_option( 'quillcrm_daily_email_count', 0 );
 	}
 
@@ -205,8 +204,6 @@ class Processing {
 		if ( $daily_email_count >= $max_email_per_day ) {
 			return;
 		}
-
-		error_log( 'Processing::process() ' );
 
 		$this->start_time = microtime( true );
 

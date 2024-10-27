@@ -62,22 +62,58 @@ class Rest_Import_Export_Controller extends REST_Controller {
 					'callback'            => array( $this, 'import' ),
 					'permission_callback' => array( $this, 'import_export_permissions_check' ),
 					'args'                => array(
-						'source'    => array(
+						'source'          => array(
 							'required' => true,
 							'type'     => 'string',
 						),
-						'offset'    => array(
+						'offset'          => array(
 							'required' => false,
 							'type'     => 'integer',
 						),
-						'file_name' => array(
+						'file_name'       => array(
 							'required' => false,
 							'type'     => 'string',
 						),
-						'mapping'   => array(
+						'mapping'         => array(
 							'required'             => false,
 							'type'                 => 'object',
 							'additionalProperties' => true,
+						),
+						'lists_mapping'   => array(
+							'required' => false,
+							'type'     => 'array',
+							'items'    => array(
+								'type' => 'object',
+							),
+						),
+						'tags_mapping'    => array(
+							'required' => false,
+							'type'     => 'array',
+							'items'    => array(
+								'type' => 'object',
+							),
+						),
+						'lists'           => array(
+							'required' => false,
+							'type'     => 'array',
+							'items'    => array(
+								'type' => 'number',
+							),
+						),
+						'tags'            => array(
+							'required' => false,
+							'type'     => 'array',
+							'items'    => array(
+								'type' => 'number',
+							),
+						),
+						'status'          => array(
+							'required' => false,
+							'type'     => 'string',
+						),
+						'update_existing' => array(
+							'required' => false,
+							'type'     => 'boolean',
 						),
 					),
 				),
@@ -92,6 +128,32 @@ class Rest_Import_Export_Controller extends REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'upload' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+				),
+			)
+		);
+
+		// Get fluentcrm lists and tags
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/fluentcrm",
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'fluentcrm' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+				),
+			)
+		);
+
+		// Get funnelkit lists and tags
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/wpfunnelkit",
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'funnelkit' ),
 					'permission_callback' => array( $this, 'import_export_permissions_check' ),
 				),
 			)
@@ -197,18 +259,61 @@ class Rest_Import_Export_Controller extends REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function import( $request ) {
-		$source    = $request->get_param( 'source' ) ?? 'csv';
-		$offset    = $request->get_param( 'offset' ) ?? 0;
-		$file_name = $request->get_param( 'file_name' ) ?? '';
-		$mapping   = $request->get_param( 'mapping' ) ?? array();
-		$result    = array();
+		$source          = $request->get_param( 'source' ) ?? 'csv';
+		$offset          = $request->get_param( 'offset' ) ?? 0;
+		$file_name       = $request->get_param( 'file_name' ) ?? '';
+		$mapping         = $request->get_param( 'mapping' ) ?? array();
+		$lists_mapping   = $request->get_param( 'lists_mapping' ) ?? array();
+		$tags_mapping    = $request->get_param( 'tags_mapping' ) ?? array();
+		$lists           = $request->get_param( 'lists' ) ?? array();
+		$tags            = $request->get_param( 'tags' ) ?? array();
+		$status          = $request->get_param( 'status' ) ?? 'subscribed';
+		$update_existing = $request->get_param( 'update_existing' ) ?? false;
+		$result          = array();
 
-		$exporter = new Import();
+		$args     = array(
+			'offset'          => $offset,
+			'status'          => $status,
+			'update_existing' => $update_existing,
+			'lists_mapping'   => $lists_mapping,
+			'tags_mapping'    => $tags_mapping,
+			'lists'           => $lists,
+			'tags'            => $tags,
+		);
+		$exporter = new Import( $args );
 		if ( 'csv' === $source ) {
-			$result = $exporter->import_from_csv( $file_name, $mapping, $offset );
+			$result = $exporter->import_from_csv( $file_name, $mapping );
 		} else {
-			$result = $exporter->import( $source, $offset );
+			$result = $exporter->import( $source );
 		}
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Get FluentCRM lists and tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function fluentcrm() {
+		$exporter = new Import();
+		$result   = $exporter->get_fluentcrm_lists_and_tags();
+
+		return new WP_REST_Response( $result, 200 );
+	}
+
+	/**
+	 * Get FunnelKit lists and tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function funnelkit() {
+		$exporter = new Import();
+		$result   = $exporter->get_wpfunnels_lists_and_tags();
 
 		return new WP_REST_Response( $result, 200 );
 	}

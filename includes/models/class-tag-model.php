@@ -92,6 +92,51 @@ class Tag_Model extends Model {
 	}
 
 	/**
+	 * Get by name
+	 *
+	 * @param string $name Tag name
+	 *
+	 * @return mixed
+	 */
+	public static function get_by_name( $name ) {
+		return static::where( 'name', $name )->first();
+	}
+
+	/**
+	 * Get or create tag
+	 *
+	 * @param string $name Tag name
+	 *
+	 * @return mixed
+	 */
+	public static function getOrCreate( $name ) {
+		$tag = static::get_by_name( $name );
+
+		if ( ! $tag ) {
+			$tag = static::create( array( 'name' => $name ) );
+		}
+
+		return $tag;
+	}
+
+	/**
+	 * Override the save method to add validation.
+	 *
+	 * @param array $options
+	 * @return bool
+	 * @throws \Exception
+	 */
+	public function save( array $options = array() ) {
+		$search = static::get_by_name( $this->name );
+
+		if ( $search && $search->id !== $this->id ) {
+			throw new \Exception( __( 'Tag name already exists', 'quillcrm' ) );
+		}
+
+		return parent::save( $options );
+	}
+
+	/**
 	 * Automatically add slug when creating a tag using the name and boot method
 	 *
 	 * @since 1.0.0

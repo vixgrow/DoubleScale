@@ -41,6 +41,7 @@ import { convertDate } from '@quillcrm/utils';
 import { Filters, Field } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
 import ImportModal from '../import-modal';
+import ExportModal from '../export-modal';
 import { ListField, TagField } from '@quillcrm/components';
 
 const { Column } = Table;
@@ -72,6 +73,7 @@ const ContactsList: React.FC = () => {
 	});
 	const [isSaving, setIsSaving] = useState(false);
 	const [importModalVisible, setImportModalVisible] = useState(false);
+	const [exportModalVisible, setExportModalVisible] = useState(false);
 
 	if (isWooCommerceActive) {
 		defaultSelectedColumns.push('total_orders');
@@ -632,6 +634,12 @@ const ContactsList: React.FC = () => {
 					>
 						{__('Import Contacts', 'quillcrm')}
 					</Button>
+					<Button
+						type="primary"
+						onClick={() => setExportModalVisible(true)}
+					>
+						{__('Export Contacts', 'quillcrm')}
+					</Button>
 				</Flex>
 			</Flex>
 			{showFilters && (
@@ -724,6 +732,10 @@ const ContactsList: React.FC = () => {
 				open={importModalVisible}
 				onClose={() => setImportModalVisible(false)}
 				onCompleted={() => fetchContacts()}
+			/>
+			<ExportModal
+				open={exportModalVisible}
+				onClose={() => setExportModalVisible(false)}
 			/>
 		</div>
 	);

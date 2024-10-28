@@ -53,7 +53,7 @@ class Process {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return bool
+	 * @return object
 	 */
 	public function filter() {
 		foreach ( $this->filters ?? array() as $filter ) {

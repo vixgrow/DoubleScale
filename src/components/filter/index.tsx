@@ -13,7 +13,7 @@ import { Button, Input, DatePicker } from 'antd';
 import en from 'antd/es/date-picker/locale/en_US';
 import dayjs from 'dayjs';
 import { DeleteOutlined } from '@ant-design/icons';
-import { map, isEmpty, isArray, isObject } from 'lodash';
+import { map, isEmpty, isArray, isObject, isString } from 'lodash';
 import Select from 'react-select';
 
 /**
@@ -127,7 +127,10 @@ const Filter: React.FC<FilterProps> = ({
 									return;
 								}
 
-								onChange('value', value.value);
+								onChange('operator', value.value);
+								setTimeout(() => {
+									onChange('value', '');
+								}, 0);
 							}}
 							options={map(
 								filterSettings.options,
@@ -163,15 +166,58 @@ const Filter: React.FC<FilterProps> = ({
 						/>
 					)}
 				{filterSettings.type === 'date' && (
-					<DatePicker
-						value={
-							!isEmpty(filter.value) ? dayjs(filter.value) : null
-						}
-						onChange={(value) =>
-							onChange('value', dayjs(value).format('YYYY-MM-DD'))
-						}
-						locale={en}
-					/>
+					<>
+						{filter.operator === 'within' ? (
+							<>
+								<DatePicker
+									value={
+										!isEmpty(filter.value)
+											? isString(filter.value)
+												? dayjs(filter.value)
+												: dayjs(filter.value[0])
+											: null
+									}
+									onChange={(value) => {
+										const newValue = isArray(filter.value) ? filter.value : [];
+										newValue[0] = dayjs(value).format('YYYY-MM-DD');
+										if (isEmpty(newValue[1])) {
+											newValue[1] = dayjs(value).format('YYYY-MM-DD');
+										}
+										onChange('value', newValue);
+									}}
+									locale={en}
+								/>
+								<DatePicker
+									value={
+										!isEmpty(filter.value)
+											? isString(filter.value)
+												? dayjs(filter.value)
+												: dayjs(filter.value[1])
+											: null
+									}
+									onChange={(value) => {
+										const newValue = isArray(filter.value) ? filter.value : [];
+										newValue[1] = dayjs(value).format('YYYY-MM-DD');
+										if (isEmpty(newValue[0])) {
+											newValue[0] = dayjs(value).format('YYYY-MM-DD');
+										}
+										onChange('value', newValue);
+									}}
+									locale={en}
+								/>
+							</>
+						) : (
+							<DatePicker
+								value={
+									!isEmpty(filter.value) ? isArray(filter.value) ? dayjs(filter.value[0]) : dayjs(filter.value) : null
+								}
+								onChange={(value) =>
+									onChange('value', dayjs(value).format('YYYY-MM-DD'))
+								}
+								locale={en}
+							/>
+						)}
+					</>
 				)}
 				<Button
 					danger

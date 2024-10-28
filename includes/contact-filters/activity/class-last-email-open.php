@@ -87,12 +87,32 @@ class Last_Email_Open extends Filter {
 		$operator = isset( $filter['operator'] ) ? $filter['operator'] : 'before';
 		$value    = isset( $filter['value'] ) ? $filter['value'] : '';
 
+		if ( 'within' === $operator && ! is_array( $value ) ) {
+			$value = array( $value, $value );
+		} elseif ( 'within' !== $operator && is_array( $value ) ) {
+			$value = $value[0];
+		}
+
 		// Convert string to date
-		$date = new \DateTime( $value );
-		if ( $date ) {
-			$value = $date->format( 'Y-m-d' );
+		if ( is_array( $value ) ) {
+			$value = array_map(
+				function( $val ) {
+					$date = new \DateTime( $val );
+					if ( $date ) {
+						return $date->format( 'Y-m-d' );
+					} else {
+						return $val;
+					}
+				},
+				$value
+			);
 		} else {
-			return $query;
+			$date = new \DateTime( $value );
+			if ( $date ) {
+				$value = $date->format( 'Y-m-d' );
+			} else {
+				return $query;
+			}
 		}
 
 		switch ( $operator ) {
@@ -129,6 +149,9 @@ class Last_Email_Open extends Filter {
 				);
 				break;
 			case 'within':
+				if ( ! is_array( $value ) || count( $value ) !== 2 ) {
+					return $query;
+				}
 				$query->whereHas(
 					'campaign_emails',
 					function ( $query ) use ( $value ) {

@@ -49,6 +49,11 @@ export type Contact = {
 	notes: Note[];
 	orders?: Order[];
 	revenue?: string;
+	custom_fields: (CustomField & {
+		pivot: {
+			value: string;
+		};
+	})[];
 };
 
 export type Order = {

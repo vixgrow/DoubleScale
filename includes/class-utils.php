@@ -37,7 +37,7 @@ class Utils {
 			}
 		}
 
-		$adjusted_execution_time = $max_execution_time * 0.75;
+		$adjusted_execution_time = 5 * 0.75;
 
 		return apply_filters( 'quillcrm_max_execution_time', $adjusted_execution_time );
 	}
@@ -423,5 +423,32 @@ class Utils {
 		}
 
 		return $end_date;
+	}
+
+	/**
+	 * Format a date to the site's timezone, optionally including the time.
+	 *
+	 * @param string $date_string  The date string in UTC format.
+	 * @param bool   $include_time Optional. Whether to include the time in the output. Default false.
+	 *
+	 * @return string The formatted date in the site's timezone.
+	 */
+	public static function format_date( $date_string, $include_time = false ) {
+		if ( empty( $date_string ) ) {
+			return '';
+		}
+		// Get the site's timezone setting, or default to 'UTC'.
+		$site_timezone = get_option( 'timezone_string' ) ?: 'UTC';
+
+		// Create a DateTime object in UTC timezone.
+		$date = new DateTime( $date_string, new \DateTimeZone( 'UTC' ) );
+
+		// Set the timezone to the site's timezone.
+		$date->setTimezone( new \DateTimeZone( $site_timezone ) );
+
+		// Determine the format based on whether to include time.
+		$format = $include_time ? 'F j, Y \o\n h:i A' : 'F j, Y';
+
+		return $date->format( $format );
 	}
 }

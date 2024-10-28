@@ -16,6 +16,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Import_Export\Import;
+use QuillCRM\Import_Export\Export;
 use QuillCRM\Import_Export\Security;
 
 /**
@@ -48,7 +49,28 @@ class Rest_Import_Export_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'export' ),
 					'permission_callback' => array( $this, 'import_export_permissions_check' ),
-					'args'                => array(),
+					'args'                => array(
+						'file_id' => array(
+							'required' => false,
+							'type'     => array( 'string', 'integer' ),
+						),
+						'offset'  => array(
+							'required' => false,
+							'type'     => 'integer',
+						),
+						'fields'  => array(
+							'required'             => false,
+							'type'                 => 'array',
+							'items'                => array(
+								'type' => 'string',
+							),
+							'additionalProperties' => true,
+						),
+						'filters' => array(
+							'description' => __( 'Filters to apply.', 'quillcrm' ),
+							'type'        => 'array',
+						),
+					),
 				),
 			)
 		);
@@ -158,6 +180,62 @@ class Rest_Import_Export_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Download file
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/download",
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'download' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+					'args'                => array(
+						'file_id' => array(
+							'required' => true,
+							'type'     => 'string',
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Download
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function download( $request ) {
+		$file_id = $request->get_param( 'file_id' );
+		$file    = wp_upload_dir()['basedir'] . '/QuillCRM/Import-Export/quillcrm-export-' . $file_id . '.csv';
+
+		if ( ! file_exists( $file ) ) {
+			return new WP_Error( 'file_not_found', 'File not found', array( 'status' => 404 ) );
+		}
+
+		$file_name = basename( $file );
+		$file_size = filesize( $file );
+
+		// Set headers.
+		header( 'Content-Type: application/csv' );
+		header( 'Content-Disposition: attachment; filename="' . $file_name . '"' );
+		header( 'Content-Length: ' . $file_size );
+
+		// Check if file exists.
+		if ( file_exists( $file ) ) {
+			// Read file.
+			readfile( $file );
+
+			// Delete file.
+			unlink( $file );
+		}
+
+		exit;
 	}
 
 	/**
@@ -170,16 +248,24 @@ class Rest_Import_Export_Controller extends REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function export( $request ) {
-		// $source = $request->get_param( 'source' ) ?? 'csv';
-		// $page        = $request->get_param( 'page' ) ?? 1;
-		// $result      = array();
+		$file_id = $request->get_param( 'file_id' ) ? $request->get_param( 'file_id' ) : time();
+		$offset  = $request->get_param( 'offset' ) ?? 0;
+		$fields  = $request->get_param( 'fields' ) ?? array();
+		$filters = $request->get_param( 'filters' ) ?? array();
 
-		// if ( 'fluentcrm' === $source ) {
-		// $exporter = new Import();
-		// $result   = $exporter->import_from_fluentcrm( $page );
-		// }
+		$args = array(
+			'file_id' => $file_id,
+			'offset'  => $offset,
+			'fields'  => $fields,
+			'filters' => $filters,
+		);
 
-		// return new WP_REST_Response( $result, 200 );
+		$exporter = new Export( $args );
+		$result   = $exporter->export();
+
+		$result['file_id'] = $file_id;
+
+		return new WP_REST_Response( $result, 200 );
 	}
 
 	/**

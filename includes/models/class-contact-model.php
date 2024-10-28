@@ -183,7 +183,7 @@ class Contact_Model extends Model {
 	public function get_custom_field( $custom_field_id ) {
 		$custom_field = $this->custom_fields->where( 'id', $custom_field_id )->first();
 		if ( $custom_field ) {
-			return $custom_field->pivot;
+			return $custom_field->pivot->value ?? '';
 		}
 
 		return null;

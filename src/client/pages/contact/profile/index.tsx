@@ -13,6 +13,7 @@ import { Button, Skeleton, Typography, Collapse } from 'antd';
  */
 import './style.scss';
 import { useContactContext } from '../state/context';
+import { getCustomFieldById } from '@quillcrm/utils';
 
 const Profile: React.FC = () => {
 	const { setContact, updateContact, isLoading, isUpdating, contact } =
@@ -248,6 +249,10 @@ const Profile: React.FC = () => {
 								</div>
 							</div>
 						</div>
+					</Collapse.Panel>
+				</Collapse>
+				<Collapse defaultActiveKey={['1']}>
+					<Collapse.Panel header={__('Custom Fields', 'quillcrm')} key="1">
 					</Collapse.Panel>
 				</Collapse>
 			</div>

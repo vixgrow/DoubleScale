@@ -116,6 +116,10 @@ class Contact_Fields {
 				'name' => __( 'Zip', 'quillcrm' ),
 				'type' => $this->types['number'],
 			),
+			'phone'      => array(
+				'name' => __( 'Phone', 'quillcrm' ),
+				'type' => $this->types['text'],
+			),
 		);
 
 		$custom_fields = Custom_Field_Model::all();

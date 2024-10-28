@@ -87,14 +87,32 @@ class Last_Email_Sent extends Filter {
 		$operator = isset( $filter['operator'] ) ? $filter['operator'] : 'before';
 		$value    = isset( $filter['value'] ) ? $filter['value'] : '';
 
-		error_log( 'Before value: ' . $value . ' Operator: ' . $operator );
+		if ( 'within' === $operator && ! is_array( $value ) ) {
+			$value = array( $value, $value );
+		} elseif ( 'within' !== $operator && is_array( $value ) ) {
+			$value = $value[0];
+		}
 
 		// Convert string to date
-		$date = new \DateTime( $value );
-		if ( $date ) {
-			$value = $date->format( 'Y-m-d' );
+		if ( is_array( $value ) ) {
+			$value = array_map(
+				function( $val ) {
+					$date = new \DateTime( $val );
+					if ( $date ) {
+						return $date->format( 'Y-m-d' );
+					} else {
+						return $val;
+					}
+				},
+				$value
+			);
 		} else {
-			return $query;
+			$date = new \DateTime( $value );
+			if ( $date ) {
+				$value = $date->format( 'Y-m-d' );
+			} else {
+				return $query;
+			}
 		}
 
 		switch ( $operator ) {
@@ -131,6 +149,9 @@ class Last_Email_Sent extends Filter {
 				);
 				break;
 			case 'within':
+				if ( ! is_array( $value ) || count( $value ) !== 2 ) {
+					return $query;
+				}
 				$query->whereHas(
 					'campaign_emails',
 					function ( $query ) use ( $value ) {
@@ -141,7 +162,6 @@ class Last_Email_Sent extends Filter {
 				break;
 		}
 
-		error_log( 'Query: ' . $query->toSql() . ' Bindings: ' . print_r( $query->getBindings(), true ) );
 		return $query;
 	}
 }

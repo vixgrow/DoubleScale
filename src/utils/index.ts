@@ -100,6 +100,20 @@ export const getRuleBySlug = (slug: string): Rule => {
 		};
 };
 
+export const getCustomFieldById = (id: number) => {
+	const customFieldsGroups = ConfigAPI.getContactFieldsGroups();
+
+	const customFields = flatMap(customFieldsGroups, (group) => group.fields);
+	const foundField = find(customFields, (fields) => fields[id]);
+
+	return foundField
+		? foundField[id]
+		: {
+			label: '',
+			type: '',
+		};
+}
+
 export const formatDate = (date: string, type: string = 'hour') => {
 	switch (type) {
 		case 'hour':

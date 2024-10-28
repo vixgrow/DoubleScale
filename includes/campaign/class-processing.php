@@ -200,7 +200,7 @@ class Processing {
 		// Check if reached max email per day
 		$daily_email_count = get_option( 'quillcrm_daily_email_count', 0 );
 		$max_email_per_day = $this->settings['max_in_day'] ?? 10000;
-		error_log( 'Processing::process() Daily: ' . $daily_email_count . ' Max: ' . $max_email_per_day );
+
 		if ( $daily_email_count >= $max_email_per_day ) {
 			return;
 		}

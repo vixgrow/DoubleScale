@@ -624,7 +624,7 @@ class REST_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
-			$contact->load( 'lists', 'tags' );
+			$contact->load( 'lists', 'tags', 'custom_fields' );
 
 			return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
@@ -957,7 +957,7 @@ class REST_Contact_Controller extends REST_Controller {
 						continue;
 					}
 
-					$custom_fields_arr[ $custom_field['id'] ] = array( 'value' => $custom_field['value'] );
+					$custom_fields_arr[ $custom_field['id'] ] = array( 'value' => $custom_field['pivot']['value'] );
 				}
 
 				$contact->custom_fields()->sync( $custom_fields_arr );

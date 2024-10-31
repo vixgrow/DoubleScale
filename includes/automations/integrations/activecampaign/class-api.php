@@ -142,6 +142,33 @@ class API extends Integration_API {
 	}
 
 	/**
+	 * Get contacts by offset
+	 *
+	 * @param int $offset Offset.
+	 *
+	 * @return array
+	 */
+	public function get_contacts_by_offset( $offset ) {
+		return $this->get(
+			'contacts',
+			array(
+				'offset'  => $offset,
+				'limit'   => 20,
+				'include' => 'contactTags,contactLists,fieldValues',
+			)
+		);
+	}
+
+	/**
+	 * Get contacts count
+	 *
+	 * @return array
+	 */
+	public function get_contacts_count() {
+		return $this->get( 'contacts?limit=1' );
+	}
+
+	/**
 	 * Send request to the api.
 	 *
 	 * @param string      $method Method.

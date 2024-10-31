@@ -20,6 +20,39 @@ export type ConfigData = Record<string, unknown> & {
 	automationRules: AutomationRules;
 	isWoocommerceActive: boolean;
 	mergeTags: AutomationMergeTags;
+	importers: Importers;
+};
+
+export type Importers = {
+	[key: string]: Importer;
+};
+
+export type Importer = {
+	name: string;
+	slug: string;
+	credentials: {
+		[key: string]: ImporterField;
+	},
+	is_integration: boolean;
+	is_active: boolean;
+	fields: {
+		[key: string]: ImporterField;
+	};
+};
+
+export type ImporterField = {
+	label: string;
+	type: string;
+	options: {
+		key: string;
+		label: string;
+	}[];
+	conditions?: {
+		[key: string]: {
+			operator: string;
+			value?: string;
+		};
+	};
 };
 
 export type AutomationMergeTags = {

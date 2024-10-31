@@ -28,6 +28,7 @@ use QuillCRM\Admin\Admin_Loader;
 use QuillCRM\Abandoned_Cart\Abandoned_Cart;
 use QuillCRM\Managers\Custom_Fields_Manager;
 use QuillCRM\Managers\Filters_Manager;
+use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
 use Illuminate\Translation\Translator;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Validation\Factory as ValidatorFactory;
@@ -207,6 +208,7 @@ final class QuillCRM {
 		Rules_Manager::instance();
 		Abandoned_Cart::instance();
 		Filters_Manager::instance();
+		Importers_Manager::instance();
 	}
 
 	/**

@@ -11,6 +11,7 @@ import type {
 	AutomationGoals,
 	AutomationRules,
 	AutomationMergeTags,
+	Importers,
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
 
@@ -59,6 +60,7 @@ const configData: ConfigData = {
 	automationRules: {},
 	isWoocommerceActive: false,
 	mergeTags: {},
+	importers: {},
 };
 
 /**
@@ -467,6 +469,27 @@ export const setMergeTags = (data: ConfigData) => (value: AutomationMergeTags) =
 	data.mergeTags = value;
 };
 
+/**
+ * Get importers
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * 
+ * @returns Importers
+ */
+export const getImporters = (data: ConfigData): Importers => {
+	return data.importers;
+};
+
+/**
+ * Set importers
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setImporters = (data: ConfigData) => (value: Importers) => {
+	data.importers = value;
+};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -507,6 +530,8 @@ export interface ConfigApi {
 	setSiteUrl: (value: string) => void;
 	getMergeTags: () => AutomationMergeTags;
 	setMergeTags: (value: AutomationMergeTags) => void;
+	getImporters: () => Importers;
+	setImporters: (value: Importers) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -549,6 +574,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setSiteUrl = setSiteUrl(data);
 	configApi.getMergeTags = () => getMergeTags(data);
 	configApi.setMergeTags = setMergeTags(data);
+	configApi.getImporters = () => getImporters(data);
+	configApi.setImporters = setImporters(data);
 
 	return configApi;
 };

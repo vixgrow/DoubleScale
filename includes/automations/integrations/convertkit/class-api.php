@@ -135,6 +135,17 @@ class API extends Integration_API {
 	}
 
 	/**
+	 * Get subscribers by page
+	 *
+	 * @param int $page
+	 *
+	 * @return array
+	 */
+	public function get_subscribers_by_page( $page ) {
+		return $this->get( 'subscribers', array( 'page' => $page ) );
+	}
+
+	/**
 	 * Send GET request to the api.
 	 *
 	 * @param string     $path Path.

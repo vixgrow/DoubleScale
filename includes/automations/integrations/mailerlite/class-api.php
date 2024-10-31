@@ -91,6 +91,33 @@ class API extends Integration_API {
 	}
 
 	/**
+	 * Get fields
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return $this->get( 'fields' );
+	}
+
+	/**
+	 * Get subscriber by offset
+	 *
+	 * @param int $offset
+	 * @param int $group_id
+	 *
+	 * @return array
+	 */
+	public function get_subscribers_by_offset( $offset, $group_id ) {
+		return $this->get(
+			"groups/$group_id/subscribers",
+			array(
+				'offset' => $offset,
+				'limit'  => 20,
+			)
+		);
+	}
+
+	/**
 	 * Send request to the api.
 	 *
 	 * @param string      $method Method.
@@ -113,4 +140,5 @@ class API extends Integration_API {
 			)
 		);
 	}
+
 }

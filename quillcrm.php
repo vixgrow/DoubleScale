@@ -37,8 +37,8 @@ if ( ! defined( 'QUILLCRM_PLUGIN_URL' ) ) {
 }
 
 // Require dependencies.
-require_once QUILLCRM_PLUGIN_DIR . 'dependencies/libraries/vendor/autoload.php';
-require_once QUILLCRM_PLUGIN_DIR . 'vendor/autoload.php';
+require_once QUILLCRM_PLUGIN_DIR . 'dependencies/libraries/load.php';
+require_once QUILLCRM_PLUGIN_DIR . 'dependencies/vendor/autoload.php';
 
 // Require autoload.
 require_once QUILLCRM_PLUGIN_DIR . 'includes/autoload.php';

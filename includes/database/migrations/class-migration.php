@@ -51,6 +51,8 @@ abstract class Migration {
 	public function run() {
 		global $wpdb;
 
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
 		$charset_collate = $wpdb->get_charset_collate();
 
 		$query = $this->get_query();

@@ -47,15 +47,6 @@ class Integration extends Integration_Abstract {
 	public $description = 'MailerLite Integration';
 
 	/**
-	 * Option name
-	 *
-	 * @var string
-	 *
-	 * @since 1.0.0
-	 */
-	public $option_name = 'mailerlite';
-
-	/**
 	 * Class names
 	 *
 	 * @var array
@@ -64,13 +55,6 @@ class Integration extends Integration_Abstract {
 		'remote_data'     => Remote_Data::class,
 		'rest_controller' => REST_Controller::class,
 	);
-
-	/**
-	 * Constructor
-	 */
-	public function __construct() {
-		parent::__construct();
-	}
 
 	/**
 	 * Connect the integration

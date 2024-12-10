@@ -47,9 +47,13 @@ import {
 import NotesTab from './notes';
 import ProfileTab from './profile';
 import Automation from './automation';
+import Emails from './emails';
+import PurchaseHistory from './purchase-history';
+import Courses from './courses';
 import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
+import ConfigAPI from '@quillcrm/config';
 
 const Contact: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
@@ -68,12 +72,18 @@ const Contact: React.FC = () => {
 		contact: null,
 		notes: [],
 		automationContacts: [],
+		emailAnalytics: null,
+		purchaseHistory: null,
+		courses: [],
 	} as State);
 	const stateRef = useRef<State>(state);
 	stateRef.current = state;
 	const $actions = actions(dispatch);
 	const { setContact } = $actions;
 	const { contact } = state;
+	const isEddActive = ConfigAPI.isEddActive();
+	const isWooActive = ConfigAPI.isWoocommerceActive();
+	const lmsActive = ConfigAPI.isLmsActive();
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchLists = async (keyword = '') => {
@@ -351,6 +361,11 @@ const Contact: React.FC = () => {
 			children: <ProfileTab />,
 		},
 		{
+			key: 'emails',
+			label: __('Emails', 'quillcrm'),
+			children: contact && <Emails contact_id={contact.id} />,
+		},
+		{
 			key: 'notes',
 			label: __('Notes', 'quillcrm'),
 			children: contact && <NotesTab contact_id={contact.id} />,
@@ -361,6 +376,22 @@ const Contact: React.FC = () => {
 			children: contact && <Automation contact_id={contact.id} />,
 		},
 	];
+
+	if (isWooActive || isEddActive) {
+		tabItems.push({
+			key: 'purchase-history',
+			label: __('Purchase History', 'quillcrm'),
+			children: contact && <PurchaseHistory contact_id={contact.id} />,
+		});
+	}
+
+	if (lmsActive) {
+		tabItems.push({
+			key: 'courses',
+			label: __('Courses', 'quillcrm'),
+			children: contact && <Courses contact_id={contact.id} />,
+		});
+	}
 
 	return (
 		<Provider

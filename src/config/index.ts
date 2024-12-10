@@ -59,6 +59,8 @@ const configData: ConfigData = {
 	automationGoals: {},
 	automationRules: {},
 	isWoocommerceActive: false,
+	isEddActive: false,
+	isLmsActive: false,
 	mergeTags: {},
 	importers: {},
 };
@@ -429,6 +431,48 @@ export const setIsWoocommerceActive =
 	};
 
 /**
+ * Get is edd active
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * 
+ * @returns boolean
+ */
+export const isEddActive = (data: ConfigData): boolean => {
+	return data.isEddActive;
+};
+
+/**
+ * Set is edd active
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setIsEddActive = (data: ConfigData) => (value: boolean) => {
+	data.isEddActive = value;
+};
+
+/**
+ * Get is lms active
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * 
+ * @returns boolean
+ */
+export const isLmsActive = (data: ConfigData): boolean => {
+	return data.isLmsActive;
+};
+
+/**
+ * Set is lms active
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setIsLmsActive = (data: ConfigData) => (value: boolean) => {
+	data.isLmsActive = value;
+}
+
+/**
  * Get site url
  *
  * @param data the json environment configuration to use for getting config values
@@ -532,6 +576,10 @@ export interface ConfigApi {
 	setMergeTags: (value: AutomationMergeTags) => void;
 	getImporters: () => Importers;
 	setImporters: (value: Importers) => void;
+	isEddActive: () => boolean;
+	setIsEddActive: (value: boolean) => void;
+	isLmsActive: () => boolean;
+	setIsLmsActive: (value: boolean) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -576,6 +624,10 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setMergeTags = setMergeTags(data);
 	configApi.getImporters = () => getImporters(data);
 	configApi.setImporters = setImporters(data);
+	configApi.isEddActive = () => isEddActive(data);
+	configApi.setIsEddActive = setIsEddActive(data);
+	configApi.isLmsActive = () => isLmsActive(data);
+	configApi.setIsLmsActive = setIsLmsActive(data);
 
 	return configApi;
 };

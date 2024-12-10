@@ -100,7 +100,14 @@ const Analytics: React.FC = () => {
 		}
 	};
 
-	console.log(campaign?.settings?.templates);
+	const calculatePercentage = (total: number, value: number) => {
+		if (total === 0) {
+			return 0;
+		}
+
+		return ((value / total) * 100).toFixed(2);
+	};
+
 
 
 	return (
@@ -179,7 +186,7 @@ const Analytics: React.FC = () => {
 								<Flex gap={10}>
 									<UserOutlined />
 									<Typography.Text strong>
-										{__('Contacts')}
+										{__('Contacts', 'quillcrm')}
 									</Typography.Text>
 								</Flex>
 								<Typography.Text className="qcrm-analytics-count">
@@ -192,7 +199,7 @@ const Analytics: React.FC = () => {
 								<Flex gap={10}>
 									<SendOutlined />
 									<Typography.Text strong>
-										{__('Sent')}
+										{__('Sent', 'quillcrm')}
 									</Typography.Text>
 								</Flex>
 								<Typography.Text className="qcrm-analytics-count">
@@ -205,7 +212,7 @@ const Analytics: React.FC = () => {
 								<Flex gap={10}>
 									<WarningOutlined />
 									<Typography.Text strong>
-										{__('Failed')}
+										{__('Failed', 'quillcrm')}
 									</Typography.Text>
 								</Flex>
 								<Typography.Text className="qcrm-analytics-count">
@@ -218,11 +225,11 @@ const Analytics: React.FC = () => {
 								<Flex gap={10}>
 									<EyeOutlined />
 									<Typography.Text strong>
-										{__('Opened')}
+										{__('Open Rate', 'quillcrm')}
 									</Typography.Text>
 								</Flex>
 								<Typography.Text className="qcrm-analytics-count">
-									{campaign.opened_count}
+									{calculatePercentage(totalEmails, campaign.opened_count)}%
 								</Typography.Text>
 							</Flex>
 						</Card>
@@ -231,11 +238,11 @@ const Analytics: React.FC = () => {
 								<Flex gap={10}>
 									<LinkOutlined />
 									<Typography.Text strong>
-										{__('Clicked')}
+										{__('Click Rate', 'quillcrm')}
 									</Typography.Text>
 								</Flex>
 								<Typography.Text className="qcrm-analytics-count">
-									{campaign.clicked_count}
+									{calculatePercentage(totalEmails, campaign.clicked_count)}%
 								</Typography.Text>
 							</Flex>
 						</Card>

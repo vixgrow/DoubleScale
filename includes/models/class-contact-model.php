@@ -172,6 +172,17 @@ class Contact_Model extends Model {
 	}
 
 	/**
+	 * Get edd orders
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function edd_orders() {
+		return $this->hasMany( EDD_Order_Model::class, 'email', 'email' );
+	}
+
+	/**
 	 * Get the contact custom field value
 	 *
 	 * @since 1.0.0

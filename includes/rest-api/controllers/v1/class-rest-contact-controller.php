@@ -330,6 +330,71 @@ class REST_Contact_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Get email campaigns
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/email-campaigns',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_email_campaigns' ),
+					'permission_callback' => array( $this, 'get_email_campaigns_permissions_check' ),
+					'args'                => array(
+						'id'       => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'per_page' => array(
+							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'page'     => array(
+							'description' => __( 'Page number.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
+				),
+			)
+		);
+
+		// Get purchase history
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/purchase-history',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_purchase_history' ),
+					'permission_callback' => array( $this, 'get_purchase_history_permissions_check' ),
+					'args'                => array(
+						'id' => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
+				),
+			)
+		);
+
+		// Get lms courses
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/lms-courses',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_lms_courses' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'id' => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -443,6 +508,209 @@ class REST_Contact_Controller extends REST_Controller {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Get lms courses
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_lms_courses( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$contact    = Contact_Model::find( $contact_id );
+
+			if ( ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) ) {
+				return new WP_Error( 'error', 'LearnDash is not active', array( 'status' => 400 ) );
+			}
+
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
+
+			$user = get_user_by( 'email', $contact->email );
+			if ( ! $user ) {
+				return array();
+			}
+
+			$courses = learndash_user_get_enrolled_courses( $user->ID );
+			$result  = array();
+
+			foreach ( $courses as $course_id ) {
+				$course = get_post( $course_id );
+				if ( $course ) {
+					$completed_on = learndash_user_get_course_completed_date( $user->ID, $course_id );
+					$started_on   = ld_course_access_from( $user->ID, $course_id );
+					$result[]     = array(
+						'id'           => $course->ID,
+						'name'         => $course->post_title,
+						'url'          => get_edit_post_link( $course->ID ),
+						'status'       => learndash_course_status( $course_id, $user->ID ),
+						'completed_on' => $completed_on ? date( 'Y-m-d H:i:s', $completed_on ) : null,
+						'started_on'   => $started_on ? date( 'Y-m-d H:i:s', $started_on ) : null,
+					);
+				}
+			}
+
+			return new WP_REST_Response( $result, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Get lms courses permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return bool
+	 */
+	public function get_lms_courses_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Get purchase history
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_purchase_history( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$contact    = Contact_Model::find( $contact_id );
+
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
+
+			$results = array(
+				'edd' => array(
+					'orders'     => array(),
+					'total'      => 0,
+					'revenue'    => 0,
+					'average'    => 0,
+					'last_order' => null,
+					'currency'   => null,
+				),
+				'wc'  => array(
+					'orders'     => array(),
+					'total'      => 0,
+					'revenue'    => 0,
+					'average'    => 0,
+					'last_order' => null,
+					'currency'   => null,
+				),
+			);
+
+			if ( defined( 'EDD_PLUGIN_FILE' ) ) {
+				$edd_orders                   = $contact->edd_orders()
+				->orderBy( 'date_created', 'desc' )
+				->get();
+				$results['edd']['orders']     = $edd_orders;
+				$results['edd']['total']      = $edd_orders->count();
+				$results['edd']['revenue']    = $edd_orders->sum( 'total' );
+				$results['edd']['average']    = $edd_orders->avg( 'total' );
+				$results['edd']['last_order'] = $edd_orders->first()->date_created ?? null;
+				$results['edd']['currency']   = edd_get_option( 'currency', 'USD' );
+			}
+
+			if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+				$wc_orders                   = $contact->orders()
+				->orderBy( 'date_created_gmt', 'desc' )
+				->get();
+				$results['wc']['orders']     = $wc_orders;
+				$results['wc']['total']      = $wc_orders->count();
+				$results['wc']['revenue']    = $wc_orders->sum( 'total_amount' );
+				$results['wc']['average']    = $wc_orders->avg( 'total_amount' );
+				$results['wc']['last_order'] = $wc_orders->first()->date_created_gmt ?? null;
+				$results['wc']['currency']   = get_woocommerce_currency();
+			}
+
+			return new WP_REST_Response( $results, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Check if a given request has access to get purchase history
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return bool
+	 */
+	public function get_purchase_history_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Get Email Campaigns
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_email_campaigns( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+
+			$contact = Contact_Model::find( $contact_id );
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
+
+			$campaigns     = $contact->campaign_emails()->with(
+				array(
+					'campaign' => function( $query ) {
+						$query->select( 'id', 'name' );
+					},
+					'template',
+				)
+			)->paginate( $per_page, array( '*' ), 'page', $page );
+			$total_sent    = $contact->campaign_emails()->where( 'status', 'sent' )->count();
+			$total_opened  = $contact->campaign_emails()->where( 'opened', 1 )->count();
+			$total_clicked = $contact->campaign_emails()->where( 'clicked', 1 )->count();
+
+			$result = array(
+				'emails'        => $campaigns,
+				'total_sent'    => $total_sent,
+				'total_opened'  => $total_opened,
+				'total_clicked' => $total_clicked,
+			);
+
+			return new WP_REST_Response( $result, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Check if a given request has access to get email campaigns
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return bool
+	 */
+	public function get_email_campaigns_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
 	}
 
 	/**

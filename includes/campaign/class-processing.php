@@ -309,7 +309,6 @@ class Processing {
 				'template_id' => $template_id,
 			);
 			$campaign_email      = Campaign_Email_Model::create( $campaign_email_data );
-
 			// Update last contact offset
 			update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
 			QuillCRM::instance()->campaigns_tasks->enqueue_sync( 'process_campaign_email', $campaign, $contact, $campaign_email );
@@ -386,6 +385,7 @@ class Processing {
 			$subject,
 			$message,
 		);
+		$result = true;
 
 		error_log( 'Processing::process_campaign_email() ' . $campaign_email->id . ' result: ' . $result );
 

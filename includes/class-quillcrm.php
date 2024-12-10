@@ -32,6 +32,7 @@ use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
 use Illuminate\Translation\Translator;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Validation\Factory as ValidatorFactory;
+use QuillCRM\Custom_Metabox;
 
 /**
  * QuillCRM Main Class.
@@ -209,6 +210,7 @@ final class QuillCRM {
 		Abandoned_Cart::instance();
 		Filters_Manager::instance();
 		Importers_Manager::instance();
+		Custom_Metabox::get_instance();
 	}
 
 	/**

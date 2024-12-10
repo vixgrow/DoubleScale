@@ -8,8 +8,11 @@ import {
 	DELETE_NOTE,
 	UPDATE_NOTE,
 	SET_AUTOMATION_CONTACTS,
+	SET_EMAIL_ANALYTICS,
+	SET_PURCHASES_HISTORY,
+	SET_COURSES
 } from './constants';
-import type { Contact, Note, AutomationContact } from '@quillcrm/client';
+import type { Contact, Note, AutomationContact, CampaignEmailsResponse, Order, EddOrder, LMSCourse } from '@quillcrm/client';
 
 export type setContact = {
 	type: typeof SET_CONTACT;
@@ -41,8 +44,55 @@ export type setAutomationContacts = {
 	automationContacts: AutomationContact[];
 };
 
+export type EmailAnalytics = {
+	emails: CampaignEmailsResponse;
+	total_sent: number;
+	total_opened: number;
+	total_clicked: number;
+} | null;
+
+export type setEmailAnalytics = {
+	type: typeof SET_EMAIL_ANALYTICS;
+	emailAnalytics: EmailAnalytics;
+};
+
+export type PurchaseHistory = {
+	edd: {
+		orders: EddOrder[];
+		total: number;
+		revenue: number;
+		average: number;
+		last_order: string;
+		currency: string;
+	},
+	wc: {
+		orders: Order[];
+		total: number;
+		revenue: number;
+		average: number;
+		last_order: string;
+		currency: string;
+	}
+} | null;
+
+export type setPurchaseHistory = {
+	type: typeof SET_PURCHASES_HISTORY;
+	purchaseHistory: PurchaseHistory;
+};
+
+export type setCourses = {
+	type: typeof SET_COURSES;
+	courses: LMSCourse[];
+};
+
 export type ContactAction = setContact;
 
 export type NoteAction = setNotes | addNote | deleteNote | updateNote;
 
 export type AutomationContactAction = setAutomationContacts;
+
+export type EmailAnalyticsAction = setEmailAnalytics;
+
+export type PurchaseHistoryAction = setPurchaseHistory;
+
+export type CoursesAction = setCourses;

@@ -57,6 +57,18 @@ class User_Model extends Model {
 	);
 
 	/**
+	 * Attributes that should be hidden for arrays and JSON.
+	 *
+	 * @var array
+	 */
+	protected $visible = array(
+		'ID',
+		'user_login',
+		'user_email',
+		'display_name',
+	);
+
+	/**
 	 * User meta
 	 *
 	 * @since 1.0.0

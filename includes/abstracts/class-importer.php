@@ -337,6 +337,7 @@ abstract class Importer {
 			}
 
 			foreach ( $subscribers as $subscriber ) {
+				error_log( 'Importing contact: ' . $offset );
 				$this->import_contact( $subscriber, $mapping );
 				$offset++;
 			}

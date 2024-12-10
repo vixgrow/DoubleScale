@@ -152,7 +152,7 @@ const Dashboard: React.FC = () => {
 									dataIndex: 'name',
 									key: 'name',
 									render: (_, record) => (
-										<NavLink to={`/contacts/${record.id}`}>
+										<NavLink to={`contacts/${record.id}`}>
 											<Flex gap={10} align="center">
 												<div className="qcrm-contacts-list__avatar">
 													<UserOutlined />
@@ -168,7 +168,7 @@ const Dashboard: React.FC = () => {
 									dataIndex: 'email',
 									key: 'email',
 									render: (text, record) => (
-										<NavLink to={`/contacts/${record.id}`}>
+										<NavLink to={`contacts/${record.id}`}>
 											{text}
 										</NavLink>
 									),
@@ -196,7 +196,7 @@ const Dashboard: React.FC = () => {
 									dataIndex: 'name',
 									key: 'name',
 									render: (_, record) => (
-										<NavLink to={`/contacts/${record.id}`}>
+										<NavLink to={`contacts/${record.id}`}>
 											<Flex gap={10} align="center">
 												<div className="qcrm-contacts-list__avatar">
 													<UserOutlined />
@@ -212,7 +212,7 @@ const Dashboard: React.FC = () => {
 									dataIndex: 'email',
 									key: 'email',
 									render: (text, record) => (
-										<NavLink to={`/contacts/${record.id}`}>
+										<NavLink to={`contacts/${record.id}`}>
 											{text}
 										</NavLink>
 									),
@@ -243,7 +243,7 @@ const Dashboard: React.FC = () => {
 									key: 'name',
 									render: (_, record) => (
 										<NavLink
-											to={`/automations/${record.id}`}
+											to={`automations/${record.id}`}
 										>
 											{record.name}
 										</NavLink>
@@ -277,7 +277,7 @@ const Dashboard: React.FC = () => {
 									dataIndex: 'name',
 									key: 'name',
 									render: (_, record) => (
-										<NavLink to={`/campaigns/${record.id}`}>
+										<NavLink to={`campaigns/${record.id}`}>
 											{record.name}
 										</NavLink>
 									),
@@ -312,7 +312,7 @@ const Dashboard: React.FC = () => {
 								key: 'email',
 								render: (_, record) => (
 									<NavLink
-										to={`/contacts/${record.contact_id}`}
+										to={`contacts/${record.contact_id}`}
 									>
 										{record.email}
 									</NavLink>
@@ -365,7 +365,7 @@ const Dashboard: React.FC = () => {
 										key: 'email',
 										render: (_, record) => (
 											<NavLink
-												to={`/abandoned-carts/${record.id}`}
+												to={`abandoned-carts/${record.id}`}
 											>
 												{record.email}
 											</NavLink>
@@ -406,7 +406,7 @@ const Dashboard: React.FC = () => {
 										key: 'email',
 										render: (_, record) => (
 											<NavLink
-												to={`/abandoned-carts/${record.id}`}
+												to={`abandoned-carts/${record.id}`}
 											>
 												{record.email}
 											</NavLink>

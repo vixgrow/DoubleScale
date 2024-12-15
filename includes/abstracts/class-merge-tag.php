@@ -89,7 +89,6 @@ abstract class Merge_Tag {
 		}
 
 		if ( ! $this->is_automation && $this->is_automation_contact( $contact ) ) {
-			error_log( 'Merge Tag is not for automation contact' );
 			return $this->get_value( $contact->contact, $merge_tag );
 		}
 

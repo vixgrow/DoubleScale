@@ -99,12 +99,54 @@ class Add_Subscriber extends Action {
 		$mailerlite = Integrations_Manager::instance()->get_integration( 'mailerlite' );
 		$api        = $mailerlite->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite Add Subscriber: API is not connected.', 'quillcrm' ),
+				array(
+					'code' => 'mailerlite_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->add_subscriber( $data );
-		error_log( wp_json_encode( $result ) );
-		return $result['success'];
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite Add Subscriber: Failed to add subscriber.', 'quillcrm' ),
+				array(
+					'code'     => 'mailerlite_add_subscriber',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
+
+		quillcrm_get_logger()->info(
+			__( 'MailerLite Add Subscriber: Subscriber added successfully.', 'quillcrm' ),
+			array(
+				'code'     => 'mailerlite_add_subscriber',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

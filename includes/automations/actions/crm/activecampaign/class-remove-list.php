@@ -72,22 +72,88 @@ class Remove_List extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$list = $step->get_setting( 'list', '' );
 		if ( empty( $list ) ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign Remove List: List is empty.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_remove_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$activecampaign = Integrations_Manager::instance()->get_integration( 'activecampaign' );
 		$api            = $activecampaign->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->get_contact( $automation_contact->contact->email );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to get contact from ActiveCampaign.', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_get_contact',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
 		$contact_id = $result['data']['contacts'][0]['id'] ?? null;
 		if ( ! $contact_id ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to get contact ID from ActiveCampaign.', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_get_contact_id',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
@@ -101,9 +167,43 @@ class Remove_List extends Action {
 
 		$result = $api->sync_contact_list( $data );
 		if ( $result['success'] ) {
+			quillcrm_get_logger()->info(
+				__( 'List removed from ActiveCampaign.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_remove_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+						'response'   => $result,
+					),
+				)
+			);
 			return true;
 		}
 
+		quillcrm_get_logger()->error(
+			__( 'Failed to remove list from ActiveCampaign.', 'quillcrm' ),
+			array(
+				'code' => 'activecampaign_remove_list',
+				'data' => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id'   => $step->id,
+						'type' => $step->type,
+					),
+					'response'   => $result,
+				),
+			)
+		);
 		return false;
 	}
 

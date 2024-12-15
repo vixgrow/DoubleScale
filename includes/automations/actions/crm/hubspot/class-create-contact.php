@@ -83,6 +83,21 @@ class Add_Contact extends Action {
 		$last_name     = $this->merge_tags_manager->process_merge_tags( $mapped_fields['last_name'], $automation_contact );
 
 		if ( empty( $email ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Hubspot Add Contact: Email is required.', 'quillcrm' ),
+				array(
+					'code' => 'hubspot_add_contact',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -97,12 +112,63 @@ class Add_Contact extends Action {
 		$hubspot = Integrations_Manager::instance()->get_integration( 'hubspot' );
 		$api     = $hubspot->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Hubspot API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'hubspot_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->create_contact( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to create contact in Hubspot.', 'quillcrm' ),
+				array(
+					'code' => 'hubspot_create_contact',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+						'response'   => $result,
+					),
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Contact added to Hubspot.', 'quillcrm' ),
+			array(
+				'code' => 'hubspot_add_contact',
+				'data' => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id' => $step->id,
+					),
+					'response'   => $result,
+				),
+			)
+		);
+
+		return true;
 	}
 
 	/**

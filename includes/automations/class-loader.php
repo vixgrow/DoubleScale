@@ -94,13 +94,22 @@ final class Loader {
 	 * @return void
 	 */
 	public function process_automation_step( $automation, $step_id, $contact_id ) {
-		error_log( 'Process Automation Step: ' . $step_id . ' Contact ID: ' . $contact_id );
 		try {
 			$step               = Automation_Step_Model::findOrFail( $step_id );
 			$automation_process = new Process_Automation( $automation );
 			$automation_process->process_step( $step, $contact_id );
 		} catch ( Exception $e ) {
-			error_log( 'Process Automation Step Error: ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Process Automation Step Error: ', 'quillcrm' ),
+				array(
+					'code'  => 'process_automation_step',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 		}
 	}
 
@@ -141,7 +150,17 @@ final class Loader {
 				}
 			}
 		} catch ( Exception $e ) {
-			error_log( 'Process Automation Goal Error: ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Process Automation Goal Error: ', 'quillcrm' ),
+				array(
+					'code'  => 'process_automation_goal',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 		}
 	}
 }

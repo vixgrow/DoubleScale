@@ -73,12 +73,42 @@ class Add_To_Group extends Action {
 		$group_id = $step->get_setting( 'group_id' );
 
 		if ( empty( $group_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite Add To Group: Group ID is required.', 'quillcrm' ),
+				array(
+					'code' => 'mailerlite_add_to_group',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$mailerlite = Integrations_Manager::instance()->get_integration( 'mailerlite' );
 		$api        = $mailerlite->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite Add To Group: API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'mailerlite_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -91,8 +121,35 @@ class Add_To_Group extends Action {
 		);
 
 		$result = $api->add_subscriber( $subscriber );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to add contact to MailerLite group.', 'quillcrm' ),
+				array(
+					'code'     => 'mailerlite_add_to_group',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Contact added to MailerLite group.', 'quillcrm' ),
+			array(
+				'code'     => 'mailerlite_add_to_group',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

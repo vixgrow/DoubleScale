@@ -72,6 +72,23 @@ class Update_Fields extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Convertkit Update Fields: Mapped Fields is empty.', 'quillcrm' ),
+				array(
+					'code'          => 'converkit_update_fields',
+					'data'          => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'mapped_fields' => $mapped_fields,
+				)
+			);
 			return false;
 		}
 
@@ -90,26 +107,110 @@ class Update_Fields extends Action {
 		$convertkit = Integrations_Manager::instance()->get_integration( 'convertkit' );
 		$api        = $convertkit->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Convertkit Add Tags: API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'convertkit_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$email  = $automation_contact->contact->email;
 		$result = $api->get_subscriber( $email );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to get subscriber from Convertkit.', 'quillcrm' ),
+				array(
+					'code'     => 'convertkit_get_subscriber',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
 		$subscriber = $result['data']['subscribers'][0] ?? null;
 		if ( ! $subscriber ) {
+			quillcrm_get_logger()->error(
+				__( 'Subscriber not found in Convertkit.', 'quillcrm' ),
+				array(
+					'code'     => 'convertkit_get_subscriber',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
 		$subscriber_id = $subscriber['id'] ?? null;
 		$result        = $api->update_subscriber( $subscriber_id, $data );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to update subscriber in Convertkit.', 'quillcrm' ),
+				array(
+					'code'     => 'convertkit_update_subscriber',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
+		quillcrm_get_logger()->info(
+			__( 'Subscriber updated in Convertkit.', 'quillcrm' ),
+			array(
+				'code'     => 'convertkit_update_subscriber',
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id'   => $step->id,
+						'type' => $step->type,
+					),
+				),
+				'response' => $result,
+			)
+		);
 		return true;
 	}
 

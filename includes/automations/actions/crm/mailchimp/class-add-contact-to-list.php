@@ -72,12 +72,42 @@ class Add_Contact extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$list = $step->get_setting( 'list', '' );
 		if ( empty( $list ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Mailchimp add contact to list action failed. List ID is required.', 'quillcrm' ),
+				array(
+					'code' => 'mailchimp_add_contact',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$mailchimp = Integrations_Manager::instance()->get_integration( 'mailchimp' );
 		$api       = $mailchimp->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Mailchimp add contact to list action failed. Mailchimp API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'mailchimp_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -90,8 +120,32 @@ class Add_Contact extends Action {
 
 		$result = $api->add_subscriber( $list, $data );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Mailchimp add contact to list action failed. Failed to add contact to list.', 'quillcrm' ),
+				array(
+					'code'     => 'mailchimp_add_contact',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
+
+		quillcrm_get_logger()->info(
+			__( 'Mailchimp add contact to list action completed successfully.', 'quillcrm' ),
+			array(
+				'code'     => 'mailchimp_add_contact',
+				'response' => $result,
+			)
+		);
 
 		return true;
 	}

@@ -72,16 +72,61 @@ class Remove_Tags extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$list = $step->get_setting( 'list', '' );
 		if ( empty( $list ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Mailchimp Remove Tags: List ID is required.', 'quillcrm' ),
+				array(
+					'code' => 'mailchimp_remove_tags',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Mailchimp Remove Tags: Tags are required.', 'quillcrm' ),
+				array(
+					'code' => 'mailchimp_remove_tags',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$mailchimp = Integrations_Manager::instance()->get_integration( 'mailchimp' );
 		$api       = $mailchimp->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Mailchimp Remove Tags: API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'mailchimp_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -96,10 +141,41 @@ class Remove_Tags extends Action {
 
 		$email  = $automation_contact->contact->email;
 		$result = $api->remove_tags( $list, $email, $data );
-		$result = $api->remove_subscriber( $list, $email );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Mailchimp Remove Tags: Failed to remove tags.', 'quillcrm' ),
+				array(
+					'code'     => 'mailchimp_remove_tags',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
+
+		quillcrm_get_logger()->info(
+			__( 'Mailchimp Remove Tags: Tags removed successfully.', 'quillcrm' ),
+			array(
+				'code' => 'mailchimp_remove_tags',
+				'data' => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id' => $step->id,
+					),
+				),
+			)
+		);
 
 		return true;
 	}

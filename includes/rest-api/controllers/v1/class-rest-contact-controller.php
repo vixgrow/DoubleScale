@@ -625,15 +625,44 @@ class REST_Contact_Controller extends REST_Controller {
 			}
 
 			if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-				$wc_orders                   = $contact->orders()
-				->orderBy( 'date_created_gmt', 'desc' )
-				->get();
-				$results['wc']['orders']     = $wc_orders;
-				$results['wc']['total']      = $wc_orders->count();
-				$results['wc']['revenue']    = $wc_orders->sum( 'total_amount' );
-				$results['wc']['average']    = $wc_orders->avg( 'total_amount' );
-				$results['wc']['last_order'] = $wc_orders->first()->date_created_gmt ?? null;
-				$results['wc']['currency']   = get_woocommerce_currency();
+				$user = get_user_by( 'email', $contact->email );
+				if ( $user ) {
+					$wc_orders                   = wc_get_orders(
+						array(
+							'customer' => $user->ID,
+							'limit'    => -1,
+						)
+					);
+					$results['wc']['orders']     = array_map(
+						function( $order ) {
+							return array(
+								'id'           => $order->get_id(),
+								'total_amount' => floatval( $order->get_total() ),
+								'date'         => $order->get_date_created(),
+								'url'          => get_edit_post_link( $order->get_id() ),
+								'status'       => wc_get_order_status_name( $order->get_status() ),
+								'subtotal'     => $order->get_subtotal(),
+								'currency'     => $order->get_currency(),
+							);
+						},
+						$wc_orders
+					);
+					$results['wc']['total']      = count( $wc_orders );
+					$results['wc']['revenue']    = array_sum( array_column( $results['wc']['orders'], 'total_amount' ) );
+					$results['wc']['average']    = $results['wc']['revenue'] / $results['wc']['total'];
+					$results['wc']['last_order'] = $wc_orders[0]->get_date_created() ?? null;
+					$results['wc']['currency']   = get_woocommerce_currency();
+				} else {
+					$wc_orders                   = $contact->orders()
+					->orderBy( 'date_created_gmt', 'desc' )
+					->get();
+					$results['wc']['orders']     = $wc_orders;
+					$results['wc']['total']      = $wc_orders->count();
+					$results['wc']['revenue']    = $wc_orders->sum( 'total_amount' );
+					$results['wc']['average']    = $wc_orders->avg( 'total_amount' );
+					$results['wc']['last_order'] = $wc_orders->first()->date_created_gmt ?? null;
+					$results['wc']['currency']   = get_woocommerce_currency();
+				}
 			}
 
 			return new WP_REST_Response( $results, 200 );

@@ -72,6 +72,21 @@ class Add_To_List extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$list_id = $step->get_setting( 'list_id', '' );
 		if ( empty( $list_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Hubspot Add To List: List ID is required.', 'quillcrm' ),
+				array(
+					'code' => 'hubspot_add_to_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -87,18 +102,70 @@ class Add_To_List extends Action {
 		$hubspot = Integrations_Manager::instance()->get_integration( 'hubspot' );
 		$api     = $hubspot->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Hubspot API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'hubspot_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->get_or_create_contact( $data );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to get or create contact in Hubspot.', 'quillcrm' ),
+				array(
+					'code' => 'hubspot_get_or_create_contact',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$contact_id = $result['data']['id'];
 		$result     = $api->add_contact_to_list( $contact_id, $list_id );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to add contact to Hubspot list.', 'quillcrm' ),
+				array(
+					'code' => 'hubspot_add_contact_to_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+					),
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Contact added to Hubspot list.', 'quillcrm' ),
+			array(
+				'code' => 'hubspot_add_contact_to_list',
+				'data' => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+				),
+			)
+		);
+
+		return true;
 	}
 
 	/**

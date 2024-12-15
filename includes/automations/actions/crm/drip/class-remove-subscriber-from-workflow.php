@@ -72,6 +72,22 @@ class Remove_Subscriber_From_Workflow extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$workflow_id = $step->get_setting( 'workflow_id', '' );
 		if ( empty( $workflow_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Drip workflow ID is required.', 'quillcrm' ),
+				array(
+					'code' => 'drip_remove_subscriber_from_workflow',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'name' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -87,12 +103,66 @@ class Remove_Subscriber_From_Workflow extends Action {
 		$drip = Integrations_Manager::instance()->get_integration( 'drip' );
 		$api  = $drip->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Drip API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'drip_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->remove_subscriber_from_workflow( $workflow_id, $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Drip API request failed.', 'quillcrm' ),
+				array(
+					'code'     => 'drip_remove_subscriber_from_workflow',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Subscriber removed from Drip workflow.', 'quillcrm' ),
+			array(
+				'code'     => 'drip_remove_subscriber_from_workflow',
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id'   => $step->id,
+						'type' => $step->type,
+					),
+				),
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

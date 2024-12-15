@@ -83,6 +83,21 @@ class Add_Contact extends Action {
 		$last_name     = $this->merge_tags_manager->process_merge_tags( $mapped_fields['last_name'], $automation_contact );
 
 		if ( empty( $email ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Create Contact', 'quillcrm' ),
+				array(
+					'code' => 'mautic_create_contact',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -95,12 +110,54 @@ class Add_Contact extends Action {
 		$mautic = Integrations_Manager::instance()->get_integration( 'mautic' );
 		$api    = $mautic->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Failed To Connect', 'quillcrm' ),
+				array(
+					'code' => 'mautic_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->create( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Failed To Create Contact', 'quillcrm' ),
+				array(
+					'code'     => 'mautic_create_contact',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Mautic Contact Added', 'quillcrm' ),
+			array(
+				'code'     => 'mautic_create_contact',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

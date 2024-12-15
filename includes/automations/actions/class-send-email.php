@@ -89,12 +89,10 @@ class Send_Email extends Action {
 
 		$emails = new Emails();
 		$result = $emails->send(
-			'hesem40177@dovinou.com',
+			$to_email,
 			$subject,
 			$body,
 		);
-
-		error_log( 'Email Sent: ' . $result );
 
 		return $result;
 	}

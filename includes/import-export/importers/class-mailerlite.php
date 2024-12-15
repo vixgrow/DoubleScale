@@ -72,6 +72,13 @@ class MailerLite extends Importer {
 		$api             = $this->get_api();
 		$groups_response = $api->get_groups();
 		if ( ! $groups_response['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite: Error fetching groups', 'quillcrm' ),
+				array(
+					'code'     => 'mailerlite_get_groups',
+					'response' => $groups_response,
+				)
+			);
 			throw new \Exception( __( 'Error fetching groups', 'quillcrm' ) );
 		}
 
@@ -196,6 +203,13 @@ class MailerLite extends Importer {
 		$api      = $this->get_api();
 		$response = $api->get_fields();
 		if ( ! $response['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite: Error fetching fields', 'quillcrm' ),
+				array(
+					'code'     => 'mailerlite_get_fields',
+					'response' => $response,
+				)
+			);
 			throw new \Exception( __( 'Error fetching fields', 'quillcrm' ) );
 		}
 
@@ -218,6 +232,13 @@ class MailerLite extends Importer {
 		$api      = $this->get_api();
 		$response = $api->get_groups();
 		if ( ! $response['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite: Error fetching groups', 'quillcrm' ),
+				array(
+					'code'     => 'mailerlite_get_groups',
+					'response' => $response,
+				)
+			);
 			throw new \Exception( __( 'Error fetching groups', 'quillcrm' ) );
 		}
 

@@ -101,12 +101,66 @@ class Add_Subscriber extends Action {
 		$drip = Integrations_Manager::instance()->get_integration( 'drip' );
 		$api  = $drip->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Drip API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'drip_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->add_subscriber( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to add subscriber to Drip.', 'quillcrm' ),
+				array(
+					'code'     => 'drip_add_subscriber',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Subscriber added to Drip.', 'quillcrm' ),
+			array(
+				'code'     => 'drip_add_subscriber',
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id'   => $step->id,
+						'type' => $step->type,
+					),
+				),
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

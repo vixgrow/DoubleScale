@@ -154,6 +154,13 @@ class Processing {
 				$campaign->status = 'completed';
 				$campaign->save();
 				update_option( "quillcrm_campaigns_last_resent_email_offset_{$campaign->id}", 0 );
+				quillcrm_get_logger()->info(
+					__( 'Resent failed emails completed.', 'quillcrm' ),
+					array(
+						'code'     => 'resent_failed',
+						'campaign' => $campaign->id,
+					)
+				);
 				return;
 			}
 
@@ -187,7 +194,17 @@ class Processing {
 				}
 			}
 		} catch ( \Exception $e ) {
-			// error_log( 'Processing::resent_failed() ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Resent failed emails error.', 'quillcrm' ),
+				array(
+					'code'  => 'resent_failed',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 		}
 	}
 
@@ -202,6 +219,16 @@ class Processing {
 		$max_email_per_day = $this->settings['max_in_day'] ?? 10000;
 
 		if ( $daily_email_count >= $max_email_per_day ) {
+			quillcrm_get_logger()->info(
+				__( 'Daily email limit reached.', 'quillcrm' ),
+				array(
+					'code' => 'daily_email_limit_reached',
+					'data' => array(
+						'daily_email_count' => $daily_email_count,
+						'max_email_per_day' => $max_email_per_day,
+					),
+				)
+			);
 			return;
 		}
 
@@ -247,6 +274,17 @@ class Processing {
 			if ( $last_contact_offset >= $campaign_recipients ) {
 				$campaign->status = 'completed';
 				$campaign->save();
+				update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", $campaign_recipients );
+				quillcrm_get_logger()->info(
+					__( 'Campaign completed.', 'quillcrm' ),
+					array(
+						'code'     => 'campaign_completed',
+						'campaign' => array(
+							'id'   => $campaign->id,
+							'name' => $campaign->name,
+						),
+					)
+				);
 				return;
 			}
 
@@ -258,6 +296,16 @@ class Processing {
 					$campaign->status = 'completed';
 					$campaign->save();
 					update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", $campaign_recipients );
+					quillcrm_get_logger()->info(
+						__( 'Campaign completed.', 'quillcrm' ),
+						array(
+							'code'     => 'campaign_completed',
+							'campaign' => array(
+								'id'   => $campaign->id,
+								'name' => $campaign->name,
+							),
+						)
+					);
 					break;
 				}
 
@@ -284,7 +332,7 @@ class Processing {
 				}
 			}
 		} catch ( \Exception $e ) {
-			// error_log( 'Processing::process() ' . $e->getMessage() );
+			// Log error
 		}
 	}
 
@@ -313,8 +361,29 @@ class Processing {
 			update_option( "quillcrm_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
 			QuillCRM::instance()->campaigns_tasks->enqueue_sync( 'process_campaign_email', $campaign, $contact, $campaign_email );
 
+			quillcrm_get_logger()->info(
+				__( 'Campaign email enqueued.', 'quillcrm' ),
+				array(
+					'code'           => 'add_campaign_email',
+					'campaign_email' => array(
+						'id'       => $campaign_email->id,
+						'hash_key' => $campaign_email->hash_key,
+					),
+				)
+			);
 			return true;
 		} catch ( \Exception $e ) {
+			quillcrm_get_logger()->error(
+				__( 'Add campaign email error.', 'quillcrm' ),
+				array(
+					'code'  => 'add_campaign_email',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 			return false;
 		}
 	}
@@ -387,10 +456,19 @@ class Processing {
 		);
 		$result = true;
 
-		error_log( 'Processing::process_campaign_email() ' . $campaign_email->id . ' result: ' . $result );
-
 		$campaign_email->status = $result ? 'sent' : 'failed';
 		$campaign_email->save();
+
+		quillcrm_get_logger()->info(
+			__( 'Campaign email sent.', 'quillcrm' ),
+			array(
+				'code'    => 'campaign_email_sent',
+				'contact' => array(
+					'id'    => $contact->id,
+					'email' => $contact->email,
+				),
+			)
+		);
 	}
 
 	/**

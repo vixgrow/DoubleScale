@@ -604,3 +604,14 @@ export type ReactSelectOptions = {
 	value: string | number;
 	style?: React.CSSProperties;
 }[];
+
+export type Log = {
+	level: string;
+	message: string;
+	source: string;
+	datetime: string;
+	local_datetime: string;
+	context: {
+		[key: string]: string;
+	};
+}

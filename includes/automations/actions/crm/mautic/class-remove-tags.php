@@ -72,6 +72,21 @@ class Remove_Tags extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Remove Tags action is missing tags.', 'quillcrm' ),
+				array(
+					'code' => 'mautic_remove_tags',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -92,12 +107,54 @@ class Remove_Tags extends Action {
 		$mautic = Integrations_Manager::instance()->get_integration( 'mautic' );
 		$api    = $mautic->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Remove Tags: Could not connect to Mautic.', 'quillcrm' ),
+				array(
+					'code' => 'mautic_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->create_or_update_contact( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Remove Tags: Could not create or update contact.', 'quillcrm' ),
+				array(
+					'code'     => 'mautic_create_or_update_contact',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Mautic Remove Tags: Tags removed successfully.', 'quillcrm' ),
+			array(
+				'code'     => 'mautic_remove_tags',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

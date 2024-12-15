@@ -74,16 +74,61 @@ class Add_Tags extends Action {
 		$list_id = $this->merge_tags_manager->process_merge_tags( $step->get_setting( 'list_id' ), $automation_contact );
 
 		if ( empty( $list_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'List ID is required to add tags.', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_add_tags',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		if ( empty( $tags ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Tags are required to add tags.', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_add_tags',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$getresponse = Integrations_Manager::instance()->get_integration( 'getresponse' );
 		$api         = $getresponse->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to connect to GetResponse.', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -101,8 +146,44 @@ class Add_Tags extends Action {
 		}
 
 		$result = $api->create_or_update_contact( $email, $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to add tags to GetResponse.', 'quillcrm' ),
+				array(
+					'code'     => 'getresponse_add_tags',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Tags added to GetResponse.', 'quillcrm' ),
+			array(
+				'code'     => 'getresponse_add_tags',
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id' => $step->id,
+					),
+				),
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

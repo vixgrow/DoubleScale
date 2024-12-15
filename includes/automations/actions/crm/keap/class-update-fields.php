@@ -72,6 +72,21 @@ class Update_Fields extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Keap Update Fields: Mapped Fields are empty.', 'quillcrm' ),
+				array(
+					'code' => 'keap_update_fields',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -101,12 +116,61 @@ class Update_Fields extends Action {
 		$keap = Integrations_Manager::instance()->get_integration( 'keap' );
 		$api  = $keap->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Keap Update Fields: Could not connect to Keap.', 'quillcrm' ),
+				array(
+					'code' => 'keap_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->create_or_update( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Keap Update Fields: Could not update fields.', 'quillcrm' ),
+				array(
+					'code' => 'keap_update_fields',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Keap Update Fields: Fields updated successfully.', 'quillcrm' ),
+			array(
+				'code' => 'keap_update_fields',
+				'data' => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id' => $step->id,
+					),
+				),
+			)
+		);
+
+		return true;
 	}
 
 	/**

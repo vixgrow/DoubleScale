@@ -27,6 +27,7 @@ use QuillCRM\REST_API\Controllers\V1\REST_Settings_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Abandoned_Cart_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_General_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Import_Export_Controller;
+use QuillCRM\REST_API\Controllers\V1\REST_Log_Controller;
 
 /**
  * REST_API class is mainly responsible for registering routes.
@@ -100,6 +101,7 @@ class REST_API {
 			Rest_Abandoned_Cart_Controller::class,
 			REST_General_Controller::class,
 			Rest_Import_Export_Controller::class,
+			REST_Log_Controller::class,
 		);
 
 		foreach ( $controllers as $controller ) {

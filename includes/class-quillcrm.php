@@ -33,6 +33,7 @@ use Illuminate\Translation\Translator;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Validation\Factory as ValidatorFactory;
 use QuillCRM\Custom_Metabox;
+use QuillCRM\Log_Handlers\Log_Handler_DB;
 
 /**
  * QuillCRM Main Class.
@@ -219,7 +220,8 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	private function init_hooks() {
-
+		// Register log handlers.
+		add_filter( 'quillcrm_register_log_handlers', array( $this, 'register_log_handlers' ) );
 	}
 
 	/**
@@ -377,5 +379,16 @@ final class QuillCRM {
 
 		return true;
 
+	}
+
+	/**
+	 * Register log handlers
+	 *
+	 * @param  array $handlers Handlers array to filter.
+	 * @return array
+	 */
+	public function register_log_handlers( $handlers ) {
+		$handlers[] = new Log_Handler_DB();
+		return $handlers;
 	}
 }

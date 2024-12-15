@@ -9,6 +9,10 @@
  */
 use QuillCRM\QuillCRM;
 
+use QuillCRM\Interfaces\Logger_Interface;
+use QuillCRM\Logger;
+use QuillCRM\Settings;
+
 /**
  * Helper function to sanitize a string from user input or from the db
  * Forked from WordPress core
@@ -201,3 +205,64 @@ function quillcrm_get_country_name( $country_code ) {
 function quillcrm_validator() {
 	return QuillCRM::instance()->validator;
 }
+
+/**
+ * Get a shared logger instance.
+ * This function is forked from Woocommerce
+ *
+ * Use the quillcrm_logging_class filter to change the logging class. You may provide one of the following:
+ *     - a class name which will be instantiated as `new $class` with no arguments
+ *     - an instance which will be used directly as the logger
+ * In either case, the class or instance *must* implement Logger_Interface.
+ *
+ * @since 1.0.0
+ * @see Logger_Interface
+ *
+ * @return Logger
+ */
+function quillcrm_get_logger() {
+	static $logger = null;
+
+	$class = apply_filters( 'quillcrm_logging_class', Logger::class );
+
+	if ( null !== $logger && is_string( $class ) && is_a( $logger, $class ) ) {
+		return $logger;
+	}
+
+	$implements = class_implements( $class );
+
+	if ( is_array( $implements ) && in_array( Logger_Interface::class, $implements, true ) ) {
+		$threshold = Settings::get( 'log_level', 'info' );
+		$logger    = is_object( $class ) ? $class : new $class( null, $threshold );
+	} else {
+		_doing_it_wrong(
+			__FUNCTION__,
+			sprintf(
+				/* translators: 1: class name 2: quillcrm_logging_class 3: Logger_Interface */
+				__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'quillcrm' ),
+				'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
+				'<code>quillcrm_logging_class</code>',
+				'<code>Logger_Interface</code>'
+			),
+			'1.0.0'
+		);
+
+		$logger = is_a( $logger, Logger::class ) ? $logger : new Logger();
+	}
+
+	return $logger;
+}
+
+/**
+ * Trigger logging cleanup using the logging class.
+ *
+ * @since 1.0.0
+ */
+function quillcrm_cleanup_logs() {
+	$logger = quillcrm_get_logger();
+
+	if ( is_callable( array( $logger, 'clear_expired_logs' ) ) ) {
+		$logger->clear_expired_logs();
+	}
+}
+add_action( 'quillcrm_cleanup_logs', 'quillcrm_cleanup_logs' );

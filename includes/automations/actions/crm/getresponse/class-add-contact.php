@@ -84,6 +84,21 @@ class Add_Contact extends Action {
 		$list_id       = $step->get_setting( 'list_id' );
 
 		if ( empty( $list_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'GetResponse Add Contact: List ID is empty.', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_add_contact',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -98,12 +113,63 @@ class Add_Contact extends Action {
 		$getresponse = Integrations_Manager::instance()->get_integration( 'getresponse' );
 		$api         = $getresponse->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to connect to GetResponse.', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->add_contact( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to add contact to GetResponse.', 'quillcrm' ),
+				array(
+					'code'     => 'getresponse_add_contact',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Contact added to GetResponse.', 'quillcrm' ),
+			array(
+				'code'     => 'getresponse_add_contact',
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id' => $step->id,
+					),
+				),
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

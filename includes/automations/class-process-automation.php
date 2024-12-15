@@ -166,7 +166,17 @@ class Process_Automation {
 			$automation_contact = Automation_Contact_Model::findOrFail( $automation_contact_id );
 			$this->update_automation_contact_status( $automation_contact, 'completed', $step->id, 0 );
 		} catch ( Exception $e ) {
-			error_log( 'Process End Automation Error: ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Process End Automation Error', 'quillcrm' ),
+				array(
+					'code'  => 'process_end_automation',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 			return;
 		}
 	}
@@ -205,7 +215,17 @@ class Process_Automation {
 				}
 			}
 		} catch ( Exception $e ) {
-			error_log( 'Process Action Error: ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Process Action Error', 'quillcrm' ),
+				array(
+					'code'  => 'process_action',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 			return;
 		}
 	}
@@ -252,17 +272,25 @@ class Process_Automation {
 			$conditions         = $step->settings;
 			$result             = new Process_Conditions( $automation_contact, $conditions );
 			$check              = $result->check();
-			error_log( $check ? 'Condition Check: Yes' : 'Condition Check: No' );
 
 			$this->add_automation_contact_process( $step, $automation_contact->id, 'completed' );
 			if ( $check ) {
 				$this->process_yes_steps( $step, $automation_contact );
 			} else {
-				error_log( 'Condition No Steps' );
 				$this->process_no_steps( $step, $automation_contact );
 			}
 		} catch ( Exception $e ) {
-			error_log( 'Process Condition Error: ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Process Condition Error', 'quillcrm' ),
+				array(
+					'code'  => 'process_condition',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 			return;
 		}
 	}
@@ -325,7 +353,17 @@ class Process_Automation {
 			}
 			$this->update_automation_contact_status( $automation_contact, 'pending', $step->id, $next_step ? $next_step->id : 0 );
 		} catch ( Exception $e ) {
-			error_log( 'Process Goal Error: ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Process Goal Error', 'quillcrm' ),
+				array(
+					'code'  => 'process_goal',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 			return;
 		}
 	}
@@ -343,8 +381,6 @@ class Process_Automation {
 	 * @return void
 	 */
 	public function update_automation_contact_status( $automation_contact, $status, $current_step, $next_step ) {
-		error_log( 'Update Automation Contact Status: ' . $automation_contact->id . ' Status: ' . $status );
-
 		$automation_contact->update(
 			array(
 				'status'       => $status,
@@ -366,7 +402,6 @@ class Process_Automation {
 	 * @return void
 	 */
 	public function add_automation_contact_process( $step, $automation_contact_id, $status ) {
-		error_log( 'Add Automation Contact Process: ' . $step->id . ' Automation Contact ID: ' . $automation_contact_id . ' Status: ' . $status . 'Order: ' . $step->order );
 		$this->automation->processes()->create(
 			array(
 				'automation_contact_id' => $automation_contact_id,
@@ -387,7 +422,6 @@ class Process_Automation {
 	 * @return void
 	 */
 	public function enqueue_step( $step_id, $automation_contact_id ) {
-		error_log( 'Enqueue Step: ' . $step_id . ' Automation Contact ID: ' . $automation_contact_id );
 		QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automation_step', $this->automation, $step_id, $automation_contact_id );
 	}
 }

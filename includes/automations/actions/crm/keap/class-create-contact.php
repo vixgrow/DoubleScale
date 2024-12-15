@@ -83,6 +83,21 @@ class Add_Contact extends Action {
 		$last_name     = $this->merge_tags_manager->process_merge_tags( $mapped_fields['last_name'], $automation_contact );
 
 		if ( empty( $email ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Keap Add Contact: Email is required.', 'quillcrm' ),
+				array(
+					'code' => 'keap_add_contact',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -101,12 +116,54 @@ class Add_Contact extends Action {
 		$keap = Integrations_Manager::instance()->get_integration( 'keap' );
 		$api  = $keap->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Keap Add Contact: API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'keap_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->create_or_update( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Keap Add Contact: Failed to create or update contact.', 'quillcrm' ),
+				array(
+					'code'     => 'keap_create_or_update_contact',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Keap Add Contact: Contact added successfully.', 'quillcrm' ),
+			array(
+				'code'     => 'keap_add_contact',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

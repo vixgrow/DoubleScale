@@ -80,6 +80,21 @@ class Send_Message extends Action {
 		$utm_term     = $this->merge_tags_manager->process_merge_tags( $step->get_setting( 'utm_term', '' ), $automation_contact );
 
 		if ( empty( $message ) || empty( $to ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Twilio Send Message action is missing required fields.', 'quillcrm' ),
+				array(
+					'code' => 'twilio_send_message',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -87,6 +102,21 @@ class Send_Message extends Action {
 		$api    = $twilio->connect();
 
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Twilio Send Message action failed to connect to Twilio.', 'quillcrm' ),
+				array(
+					'code' => 'twilio_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -104,8 +134,35 @@ class Send_Message extends Action {
 		}
 
 		$result = $api->send_sms( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Twilio Send Message action failed to send message.', 'quillcrm' ),
+				array(
+					'code'     => 'twilio_send_message',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Twilio Send Message action successfully sent message.', 'quillcrm' ),
+			array(
+				'code'     => 'twilio_send_message',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

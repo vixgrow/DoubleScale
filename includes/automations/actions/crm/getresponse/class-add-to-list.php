@@ -73,12 +73,42 @@ class Add_To_List extends Action {
 		$list_id = $step->get_setting( 'list_id' );
 
 		if ( empty( $list_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'GetResponse Add To List action is missing list_id', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_add_to_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$getresponse = Integrations_Manager::instance()->get_integration( 'getresponse' );
 		$api         = $getresponse->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'GetResponse failed to connect to API', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -90,8 +120,42 @@ class Add_To_List extends Action {
 			),
 		);
 		$result = $api->create_or_update_contact( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'GetResponse failed to add contact to list', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_add_to_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'GetResponse added contact to list', 'quillcrm' ),
+			array(
+				'code' => 'getresponse_add_to_list',
+				'data' => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id' => $step->id,
+					),
+				),
+			)
+		);
+
+		return true;
 	}
 
 	/**

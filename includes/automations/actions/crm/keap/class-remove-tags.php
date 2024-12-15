@@ -72,17 +72,63 @@ class Remove_Tags extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Keap Remove Tags: Tags is empty.', 'quillcrm' ),
+				array(
+					'code' => 'keap_remove_tags',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$keap = Integrations_Manager::instance()->get_integration( 'keap' );
 		$api  = $keap->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Keap Remove Tags: API is not connected.', 'quillcrm' ),
+				array(
+					'code' => 'keap_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->get_contact( $automation_contact->contact->email );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Keap Remove Tags: Failed to get contact.', 'quillcrm' ),
+				array(
+					'code'     => 'keap_get_contact',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return true;
 		}
 
@@ -92,8 +138,45 @@ class Remove_Tags extends Action {
 		);
 
 		$result = $api->remove_tags( $contact_id, $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Keap Remove Tags: Failed to remove tags.', 'quillcrm' ),
+				array(
+					'code'     => 'keap_remove_tags',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Keap Remove Tags: Tags removed successfully.', 'quillcrm' ),
+			array(
+				'code'     => 'keap_remove_tags',
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id' => $step->id,
+					),
+					'tags'       => $tags,
+				),
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

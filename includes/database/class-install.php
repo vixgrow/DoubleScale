@@ -30,6 +30,7 @@ use QuillCRM\Database\Migrations\Forms_Table;
 use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
 use QuillCRM\Database\Migrations\Link_Triggers_Table;
 use QuillCRM\Database\Migrations\Abandoned_Carts_Table;
+use QuillCRM\Database\Migrations\Logs_Table;
 
 /**
  * Install class
@@ -70,6 +71,7 @@ class Install {
 				'automation_contact_processes'      => Automation_Contact_Processes_Table::class,
 				'link_triggers'                     => Link_Triggers_Table::class,
 				'abandoned_carts'                   => Abandoned_Carts_Table::class,
+				'logs'                              => Logs_Table::class,
 			)
 		);
 

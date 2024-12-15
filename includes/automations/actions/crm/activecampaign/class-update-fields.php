@@ -73,6 +73,23 @@ class Update_Fields extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign Update Fields: Mapped Fields is empty.', 'quillcrm' ),
+				array(
+					'code'          => 'activecampaign_update_fields',
+					'data'          => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'mapped_fields' => $mapped_fields,
+				)
+			);
 			return false;
 		}
 
@@ -101,6 +118,22 @@ class Update_Fields extends Action {
 		$activecampaign = Integrations_Manager::instance()->get_integration( 'activecampaign' );
 		$api            = $activecampaign->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -109,15 +142,66 @@ class Update_Fields extends Action {
 				'contact' => $data,
 			)
 		);
-		error_log( 'Result: ' . wp_json_encode( $result ) );
+
 		if ( $result['success'] ) {
+			quillcrm_get_logger()->info(
+				__( 'ActiveCampaign Update Fields: Contact updated successfully.', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_update_fields',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return true;
 		}
 
 		if ( 422 === $result['code'] ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign Update Fields: Failed to update contact.', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_update_fields',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return true;
 		}
 
+		quillcrm_get_logger()->error(
+			__( 'ActiveCampaign Update Fields: Failed to update contact.', 'quillcrm' ),
+			array(
+				'code'     => 'activecampaign_update_fields',
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id'   => $step->id,
+						'type' => $step->type,
+					),
+				),
+				'response' => $result,
+			)
+		);
 		return false;
 	}
 

@@ -61,11 +61,10 @@ class Condition {
 		foreach ( $this->rules as $rule ) {
 			$rule_manager = Rules_Manager::instance()->get_rule( $rule['rule'] );
 			if ( ! $rule_manager ) {
-				error_log( 'Rule not found: ' . $rule['rule'] );
 				continue;
 			}
+
 			$rule_result = $rule_manager->is_met( $this->automation_contact, $rule );
-			error_log( 'Rule: ' . $rule['rule'] );
 			if ( ! $rule_result ) {
 				$result = false;
 				break;

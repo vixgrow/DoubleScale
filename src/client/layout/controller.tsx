@@ -39,6 +39,7 @@ import Dashboard from '../pages/home';
 import CartAnalysis from '../pages/cart-analytics';
 import ContactAnalytics from '../pages/contacts-analytics';
 import EmailAnalytics from '../pages/emails-analytics';
+import Debug from '../pages/debug';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -189,4 +190,10 @@ registerAdminPage('emails-analytics', {
 	path: 'emails-analytics',
 	component: () => <EmailAnalytics />,
 	label: __('Emails Analytics', 'quillcrm'),
+});
+
+registerAdminPage('debug', {
+	path: 'debug',
+	component: () => <Debug />,
+	label: __('Debug', 'quillcrm'),
 });

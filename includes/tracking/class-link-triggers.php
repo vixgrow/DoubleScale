@@ -127,8 +127,17 @@ class Link_Triggers {
 			wp_redirect( $redirect_url );
 			exit;
 		} catch ( \Exception $e ) {
-			// Do nothing.
-			error_log( 'Link Trigger Tracking Error: ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Link Trigger Tracking Error', 'quillcrm' ),
+				array(
+					'code'  => 'link_trigger_tracking',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 		}
 	}
 

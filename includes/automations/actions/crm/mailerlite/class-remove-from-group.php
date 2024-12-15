@@ -73,26 +73,99 @@ class Remove_From_Group extends Action {
 		$group_id = $step->get_setting( 'group_id' );
 
 		if ( empty( $group_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite Remove From Group: Group ID is required', 'quillcrm' ),
+				array(
+					'code' => 'mailerlite_remove_from_group',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$mailerlite = Integrations_Manager::instance()->get_integration( 'mailerlite' );
 		$api        = $mailerlite->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite Remove From Group: API connection failed', 'quillcrm' ),
+				array(
+					'code' => 'mailerlite_remove_from_group',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$email  = $automation_contact->contact->email;
 		$result = $api->get_subscriber( $email );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite Remove From Group: Subscriber not found', 'quillcrm' ),
+				array(
+					'code'     => 'mailerlite_remove_from_group',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return true;
 		}
 
 		$subscriber    = $result['data'];
 		$subscriber_id = $subscriber['id'];
 		$result        = $api->delete_subscriber_from_group( $group_id, $subscriber_id );
-		error_log( wp_json_encode( $result ) );
-		return $result['success'];
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'MailerLite Remove From Group: Failed to remove subscriber from group', 'quillcrm' ),
+				array(
+					'code'     => 'mailerlite_remove_from_group',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
+
+		quillcrm_get_logger()->info(
+			__( 'MailerLite Remove From Group: Subscriber removed from group', 'quillcrm' ),
+			array(
+				'code'     => 'mailerlite_remove_from_group',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

@@ -11,10 +11,6 @@
 
 namespace QuillCRM\Abstracts;
 
-use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\QuillCRM;
-use QuillCRM\Models\Contact_Model;
-
 /**
  * Integration class
  */

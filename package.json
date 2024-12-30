@@ -36,8 +36,10 @@
     "validator": "^13.12.0"
   },
   "scripts": {
-    "dev": "wp-scripts start src/client/index.tsx --output-path=build/client",
-    "build": "wp-scripts build src/client/index.tsx --output-path=build/client",
+    "dev": "npm run dev-client && npm run dev-config",
+    "build": "npm run build-client && npm run build-config",
+    "dev-client": "wp-scripts start src/client/index.tsx --output-path=build/client",
+    "build-client": "wp-scripts build src/client/index.tsx --output-path=build/client",
     "dev-config": "wp-scripts start src/config/index.ts --output-path=build/config",
     "build-config": "wp-scripts build src/config/index.ts --output-path=build/config"
   },

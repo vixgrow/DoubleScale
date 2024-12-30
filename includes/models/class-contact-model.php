@@ -10,7 +10,7 @@
 
 namespace QuillCRM\Models;
 
-use QuillCRM\Models\Model;
+use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Custom_Field_Model;

@@ -1,12 +1,13 @@
 <?php
 
-namespace WeDevs\ORM\WP;
+namespace WPEloquent\WP;
 
 
-use WeDevs\ORM\Eloquent\Model;
+use WPEloquent\Eloquent\Model;
 
 class PostMeta extends Model
 {
+    protected $table = 'postmeta';
     protected $primaryKey = 'meta_id';
 
     public $timestamps    = false;

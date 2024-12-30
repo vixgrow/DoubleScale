@@ -6,7 +6,8 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'WeDevs\\ORM\\' => array($vendorDir . '/tareq1988/wp-eloquent/src'),
+    'WPEloquent\\WP\\' => array($vendorDir . '/quillforms/wpeloquent/src/WP'),
+    'WPEloquent\\Eloquent\\' => array($vendorDir . '/quillforms/wpeloquent/src/Eloquent'),
     'Symfony\\Polyfill\\Php80\\' => array($vendorDir . '/symfony/polyfill-php80'),
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Symfony\\Polyfill\\Intl\\Normalizer\\' => array($vendorDir . '/symfony/polyfill-intl-normalizer'),
@@ -20,15 +21,7 @@ return array(
     'Psr\\Container\\' => array($vendorDir . '/psr/container/src'),
     'Psr\\Clock\\' => array($vendorDir . '/psr/clock/src'),
     'League\\Csv\\' => array($vendorDir . '/league/csv/src'),
-    'Illuminate\\Validation\\' => array($vendorDir . '/illuminate/validation'),
-    'Illuminate\\Translation\\' => array($vendorDir . '/illuminate/translation'),
-    'Illuminate\\Support\\' => array($vendorDir . '/illuminate/support'),
-    'Illuminate\\Pagination\\' => array($vendorDir . '/illuminate/pagination'),
-    'Illuminate\\Filesystem\\' => array($vendorDir . '/illuminate/filesystem'),
-    'Illuminate\\Events\\' => array($vendorDir . '/illuminate/events'),
-    'Illuminate\\Database\\' => array($vendorDir . '/illuminate/database'),
-    'Illuminate\\Contracts\\' => array($vendorDir . '/illuminate/contracts'),
-    'Illuminate\\Container\\' => array($vendorDir . '/illuminate/container'),
+    'Illuminate\\' => array($vendorDir . '/quillforms/wpeloquent/src/Illuminate'),
     'Egulias\\EmailValidator\\' => array($vendorDir . '/egulias/email-validator/src'),
     'Doctrine\\Inflector\\' => array($vendorDir . '/doctrine/inflector/lib/Doctrine/Inflector'),
     'Doctrine\\Common\\Lexer\\' => array($vendorDir . '/doctrine/lexer/lib/Doctrine/Common/Lexer'),

@@ -4,23 +4,24 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit9efd7104b056d94481ac42526aba0c80
+class ComposerStaticInit2f84b82cd5e5e6e609e237309f4cb28d
 {
     public static $files = array (
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
-        'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
-        '72579e7bd17821bb1321b87411366eae' => __DIR__ . '/..' . '/illuminate/support/helpers.php',
         'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
+        'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
         '9e4824c5afbdc1482b6025ce3d4dfde8' => __DIR__ . '/..' . '/league/csv/src/functions_include.php',
+        'c53bdb7aec0ddd79599fdc88b1c10d08' => __DIR__ . '/..' . '/quillforms/wpeloquent/src/Illuminate/support/helpers.php',
     );
 
     public static $prefixLengthsPsr4 = array (
         'W' => 
         array (
-            'WeDevs\\ORM\\' => 11,
+            'WPEloquent\\WP\\' => 14,
+            'WPEloquent\\Eloquent\\' => 20,
         ),
         'S' => 
         array (
@@ -46,15 +47,7 @@ class ComposerStaticInit9efd7104b056d94481ac42526aba0c80
         ),
         'I' => 
         array (
-            'Illuminate\\Validation\\' => 22,
-            'Illuminate\\Translation\\' => 23,
-            'Illuminate\\Support\\' => 19,
-            'Illuminate\\Pagination\\' => 22,
-            'Illuminate\\Filesystem\\' => 22,
-            'Illuminate\\Events\\' => 18,
-            'Illuminate\\Database\\' => 20,
-            'Illuminate\\Contracts\\' => 21,
-            'Illuminate\\Container\\' => 21,
+            'Illuminate\\' => 11,
         ),
         'E' => 
         array (
@@ -75,9 +68,13 @@ class ComposerStaticInit9efd7104b056d94481ac42526aba0c80
     );
 
     public static $prefixDirsPsr4 = array (
-        'WeDevs\\ORM\\' => 
+        'WPEloquent\\WP\\' => 
         array (
-            0 => __DIR__ . '/..' . '/tareq1988/wp-eloquent/src',
+            0 => __DIR__ . '/..' . '/quillforms/wpeloquent/src/WP',
+        ),
+        'WPEloquent\\Eloquent\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/quillforms/wpeloquent/src/Eloquent',
         ),
         'Symfony\\Polyfill\\Php80\\' => 
         array (
@@ -131,41 +128,9 @@ class ComposerStaticInit9efd7104b056d94481ac42526aba0c80
         array (
             0 => __DIR__ . '/..' . '/league/csv/src',
         ),
-        'Illuminate\\Validation\\' => 
+        'Illuminate\\' => 
         array (
-            0 => __DIR__ . '/..' . '/illuminate/validation',
-        ),
-        'Illuminate\\Translation\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/illuminate/translation',
-        ),
-        'Illuminate\\Support\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/illuminate/support',
-        ),
-        'Illuminate\\Pagination\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/illuminate/pagination',
-        ),
-        'Illuminate\\Filesystem\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/illuminate/filesystem',
-        ),
-        'Illuminate\\Events\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/illuminate/events',
-        ),
-        'Illuminate\\Database\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/illuminate/database',
-        ),
-        'Illuminate\\Contracts\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/illuminate/contracts',
-        ),
-        'Illuminate\\Container\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/illuminate/container',
+            0 => __DIR__ . '/..' . '/quillforms/wpeloquent/src/Illuminate',
         ),
         'Egulias\\EmailValidator\\' => 
         array (
@@ -210,9 +175,9 @@ class ComposerStaticInit9efd7104b056d94481ac42526aba0c80
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit9efd7104b056d94481ac42526aba0c80::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit9efd7104b056d94481ac42526aba0c80::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit9efd7104b056d94481ac42526aba0c80::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit2f84b82cd5e5e6e609e237309f4cb28d::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit2f84b82cd5e5e6e609e237309f4cb28d::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit2f84b82cd5e5e6e609e237309f4cb28d::$classMap;
 
         }, null, ClassLoader::class);
     }

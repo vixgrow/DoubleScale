@@ -1,21 +1,17 @@
 <?php
-/**
- * Class Model
- * This class is responsible for handling the model
- *
- * @since 1.0.0
- *
- * @package QuillCRM
- */
+namespace WPEloquent\Eloquent;
 
-namespace QuillCRM\Models;
-
-use WeDevs\ORM\Eloquent\Model as WeDevsModel;
+use Illuminate\Database\Eloquent\Model as Eloquent;
+use Illuminate\Translation\Translator;
+use Illuminate\Translation\ArrayLoader;
+use Illuminate\Validation\Factory as ValidatorFactory;
 
 /**
- * Model class
+ * Model Class
+ *
+ * @package WeDevs\ERP\Framework
  */
-class Model extends WeDevsModel {
+abstract class Model extends Eloquent {
 
 	/**
 	 * Rules
@@ -32,6 +28,24 @@ class Model extends WeDevsModel {
 	protected $messages = array();
 
 	/**
+	 * @param array $attributes
+	 */
+	public function __construct( array $attributes = array() ) {
+		static::$resolver = new Resolver();
+
+		parent::__construct( $attributes );
+	}
+
+	/**
+	 * Get the database connection for the model.
+	 *
+	 * @return Database
+	 */
+	public function getConnection() {
+		return Database::instance();
+	}
+
+	/**
 	 * Overide parent method to make sure prefixing is correct.
 	 *
 	 * @return string
@@ -44,6 +58,22 @@ class Model extends WeDevsModel {
 		}
 
 		return $wpdb->prefix . $this->table;
+	}
+
+	/**
+	 * Get a new query builder instance for the connection.
+	 *
+	 * @return \Illuminate\Database\Query\Builder
+	 */
+	protected function newBaseQueryBuilder() {
+
+		$connection = $this->getConnection();
+
+		return new Builder(
+			$connection,
+			$connection->getQueryGrammar(),
+			$connection->getPostProcessor()
+		);
 	}
 
 	/**
@@ -83,7 +113,7 @@ class Model extends WeDevsModel {
 		// Trim all the values
 		$this->trim();
 
-		$validator = quillcrm_validator()->make(
+		$validator = $this->validator()->make(
 			$this->toArray(),
 			$this->rules,
 			$this->messages
@@ -111,5 +141,17 @@ class Model extends WeDevsModel {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Get the validator instance
+	 *
+	 * @return \Illuminate\Validation\Factory
+	 */
+	public function validator() {
+		$translator = new Translator( new ArrayLoader(), 'en' );
+		$validator  = new ValidatorFactory( $translator );
+
+		return $validator;
 	}
 }

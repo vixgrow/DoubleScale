@@ -11,7 +11,7 @@
 
 namespace QuillCRM\Models;
 
-use QuillCRM\Models\Model;
+use WPEloquent\Eloquent\Model;
 
 /**
  * User_Meta_Model class

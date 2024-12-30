@@ -1,12 +1,14 @@
 <?php
 
-namespace WeDevs\ORM\WP;
+namespace WPEloquent\WP;
 
 
-use WeDevs\ORM\Eloquent\Model;
+use WPEloquent\Eloquent\Model;
 
 class Comment extends Model
 {
+
+    protected $table = 'comments';
     protected $primaryKey = 'comment_ID';
 
     /**
@@ -16,6 +18,6 @@ class Comment extends Model
      */
     public function post()
     {
-        return $this->hasOne('WeDevs\ORM\WP\Post');
+        return $this->hasOne('WPEloquent\WP\Post');
     }
 }

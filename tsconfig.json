@@ -41,8 +41,9 @@
 			"@quillcrm/config": ["config"],
 			"@quillcrm/client": ["client"],
 			"@quillcrm/components": ["components"],
-			"@quillcrm/utils": ["utils"]
+			"@quillcrm/utils": ["utils"],
 		}
 	},
-	"include": ["src"]
+	"include": ["src"],
+	"exclude": ["src/components/template-builder"]
 }

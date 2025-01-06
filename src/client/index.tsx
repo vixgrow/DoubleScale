@@ -12,8 +12,9 @@ import { ConfigProvider } from 'antd';
  * Internal dependencies
  */
 import PageLayout from './layout';
-import '@quillcrm/store';
+import "../stores"
 export * from './types';
+import "../api/email-editor-blocks"
 
 const appRoot = document.getElementById('qcrm-admin-root');
 

@@ -151,14 +151,51 @@ class Admin_Loader {
 	 *
 	 * @since 1.0.0
 	 */
-	public function enqueue_scripts() {
-		global $submenu;
-		$user = wp_get_current_user();
+	public function enqueue_scripts($hook) {
+		global $current_screen;
+		if ( 'toplevel_page_quillcrm' !== $hook ) {
+			return;
+		}
 
-		$asset_file   = QUILLCRM_PLUGIN_DIR . 'build/client/index.asset.php';
-		$asset        = file_exists( $asset_file ) ? require $asset_file : null;
-		$dependencies = isset( $asset['dependencies'] ) ? $asset['dependencies'] : array();
-		$version      = isset( $asset['version'] ) ? $asset['version'] : QUILLCRM_VERSION;
+		 $current_screen->is_block_editor( false );
+
+		$script_handle = 'qcrm-admin';
+
+		// Enqueue scripts with @wordpress package deps extracted via `@wordpress/wp-scripts
+		// See:
+		// - https://developer.wordpress.org/block-editor/packages/packages-scripts/#webpack-config.
+		// - https://developer.wordpress.org/block-editor/packages/packages-dependency-extraction-webpack-plugin/.
+		$script_path       = QUILLCRM_PLUGIN_DIR . 'build/client/index.js';
+		$script_asset_path = QUILLCRM_PLUGIN_DIR . 'build/client/index.asset.php';
+		$script_asset      = file_exists( $script_asset_path )
+			? require $script_asset_path
+			: array(
+				'dependencies' => array(),
+				'version'      => filemtime( $script_path ),
+			);
+		$script_url        = QUILLCRM_PLUGIN_URL . 'build/client/index.js';
+		$script_asset_dependencies[] = 'qcrm-config';
+		wp_register_script( $script_handle, $script_url, $script_asset['dependencies'], $script_asset['version'] );
+
+		// // Inline the Editor Settings.
+		// $settings = $this->get_block_editor_settings();
+		// wp_add_inline_script( $script_handle, 'window.getdaveSbeSettings = ' . wp_json_encode( $settings ) . ';' );
+
+		// // Preload server-registered block schemas.
+		// wp_add_inline_script(
+		// 	'wp-blocks',
+		// 	'wp.blocks.unstable__bootstrapServerSideBlockDefinitions(' . wp_json_encode( get_block_editor_server_block_settings() ) . ');'
+		// );
+
+		// Editor default styles.
+
+		// wp_enqueue_script( 'wp-format-library' );
+		// wp_enqueue_style( 'wp-format-library' );
+
+		// load editor assets
+		// do_action('enqueue_block_assets');
+		global $submenu;
+
 		$config_file  = QUILLCRM_PLUGIN_DIR . 'build/config/index.asset.php';
 		$config       = file_exists( $config_file ) ? require $config_file : null;
 		$config_deps  = isset( $config['dependencies'] ) ? $config['dependencies'] : array();
@@ -173,20 +210,20 @@ class Admin_Loader {
 			true
 		);
 
-		wp_register_script(
-			'qcrm-admin',
-			QUILLCRM_PLUGIN_URL . 'build/client/index.js',
-			array_merge( $dependencies, array( 'qcrm-config' ) ),
-			$version,
-			true
-		);
 
 		// Register styles.
 		wp_register_style(
 			'qcrm-admin',
-			QUILLCRM_PLUGIN_URL . 'build/client/style.css',
-			array(),
-			$version
+			QUILLCRM_PLUGIN_URL . 'build/client/index.tsx.css',
+			array('wp-components', 'wp-block-editor', 'wp-edit-blocks', 'wp-format-library'),
+			'1.0.0'
+		);
+
+		wp_register_style(
+			'qcrm-admin-style',
+			QUILLCRM_PLUGIN_URL . 'build/client/style-index.tsx.css',
+			array('wp-components', 'wp-block-editor', 'wp-edit-blocks', 'wp-format-library'),
+			'1.0.0'
 		);
 
 		// RTL styles.
@@ -205,9 +242,9 @@ class Admin_Loader {
 		do_action( 'qcrm_admin_enqueue_scripts' );
 
 		// Enqueue scripts.
-		wp_enqueue_script( 'qcrm-config' );
 		wp_enqueue_script( 'qcrm-admin' );
 		wp_enqueue_style( 'qcrm-admin' );
+		wp_enqueue_style( 'qcrm-admin-style' );
 		wp_add_inline_style(
 			'qcrm-admin',
 			'.s0 { fill: url(#g1) } 
@@ -317,4 +354,34 @@ class Admin_Loader {
 		</div>
 		<?php
 	}
+
+	function get_block_editor_settings() {
+		$settings = array(
+			'disableCustomColors'    => get_theme_support( 'disable-custom-colors' ),
+			'disableCustomFontSizes' => get_theme_support( 'disable-custom-font-sizes' ),
+			// 'imageSizes'             => $available_image_sizes,
+			'isRTL'                  => is_rtl(),
+			// 'maxUploadFileSize'      => $max_upload_size,
+			'__experimentalBlockPatterns' => [],
+			'__experimentalFeatures' => [
+				'blocks' => [
+					'core/button' => [
+						'border' => [
+							'customRadius' => true
+						]
+					]
+				]
+			]
+		);
+		list( $color_palette, ) = (array) get_theme_support( 'editor-color-palette' );
+		list( $font_sizes, )    = (array) get_theme_support( 'editor-font-sizes' );
+		if ( false !== $color_palette ) {
+			$settings['colors'] = $color_palette;
+		}
+		if ( false !== $font_sizes ) {
+			$settings['fontSizes'] = $font_sizes;
+		}
+	
+		return $settings;
+	}	
 }

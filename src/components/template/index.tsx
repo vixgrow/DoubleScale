@@ -2,23 +2,23 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, withDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
  */
 import { Button, Card, Flex, Popconfirm } from 'antd';
-import EmailEditor from 'react-email-editor'
 
 /**
  * Internal dependencies
  */
-import './style.scss';
 import type { Template } from '@quillcrm/client';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Field } from '@quillcrm/components';
 import { isEmail, isEmpty } from 'validator';
+import TemplateBuilder from '../template-builder';
+
 
 interface Props {
 	template: Template;
@@ -29,8 +29,11 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 	const emailEditorRef = useRef(null);
 	const [toEmail, setToEmail] = React.useState('');
 	const [isSending, setIsSending] = React.useState(false);
+	const [isBuilderVisible, setIsBuilderVisible] = React.useState(false);
+
 	const { from_name, from_email, subject, body } = template;
 	const { createNotice } = useDispatch('quillcrm/core');
+
 
 	const sendTestEmail = async () => {
 		if (!validate()) {
@@ -119,12 +122,18 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 		return true;
 	};
 
-	return (
-		// 	<div>
-		// 		<EmailEditor ref={emailEditorRef} />
+	if (isBuilderVisible) {
+		return (
 
-		// 	</div>
-		// )
+			<TemplateBuilder
+				updateTemplate={updateTemplate}
+				onClose={() => setIsBuilderVisible(false)}
+			/>
+		);
+	}
+
+
+	return (
 		<Card>
 			<Flex gap={40}>
 				<Flex className="qcrm-fields" vertical style={{ flex: 1 }}>
@@ -280,7 +289,9 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 							justify="center"
 							style={{ height: '100%' }}
 						>
-							<Button type="primary" size="large">
+							<Button type="primary" size="large" onClick={() => {
+								setIsBuilderVisible(true);
+							}}>
 								{__('Create with email designer', 'quillcrm')}
 							</Button>
 						</Flex>

@@ -1,7 +1,8 @@
 /**
  * Internal dependencies
  */
-import type { Contact, Note, AutomationContact } from '@quillcrm/client';
+import type { Contact, Note, AutomationContact, LMSCourse } from '@quillcrm/client';
+import type { EmailAnalytics, PurchaseHistory } from './types';
 import {
 	SET_CONTACT,
 	SET_NOTES,
@@ -9,16 +10,22 @@ import {
 	DELETE_NOTE,
 	UPDATE_NOTE,
 	SET_AUTOMATION_CONTACTS,
+	SET_EMAIL_ANALYTICS,
+	SET_PURCHASES_HISTORY,
+	SET_COURSES
 } from './constants';
 import type {
 	ContactAction,
 	NoteAction,
 	AutomationContactAction,
+	EmailAnalyticsAction,
+	PurchaseHistoryAction,
+	CoursesAction
 } from './types';
 
 export default (
 	dispatch: React.Dispatch<
-		ContactAction | NoteAction | AutomationContactAction
+		ContactAction | NoteAction | AutomationContactAction | EmailAnalyticsAction | PurchaseHistoryAction | CoursesAction
 	>
 ) => {
 	return {
@@ -56,6 +63,24 @@ export default (
 			dispatch({
 				type: SET_AUTOMATION_CONTACTS,
 				automationContacts,
+			});
+		},
+		setEmailAnalytics: (emailAnalytics: EmailAnalytics) => {
+			dispatch({
+				type: SET_EMAIL_ANALYTICS,
+				emailAnalytics,
+			});
+		},
+		setPurchaseHistory: (purchaseHistory: PurchaseHistory) => {
+			dispatch({
+				type: SET_PURCHASES_HISTORY,
+				purchaseHistory,
+			});
+		},
+		setCourses: (courses: LMSCourse[]) => {
+			dispatch({
+				type: SET_COURSES,
+				courses,
 			});
 		},
 	};

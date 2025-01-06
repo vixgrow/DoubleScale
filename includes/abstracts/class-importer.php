@@ -304,6 +304,17 @@ abstract class Importer {
 				}
 			}
 		} catch ( \Exception $e ) {
+			quillcrm_get_logger()->error(
+				__( 'Error importing contact', 'quillcrm' ),
+				array(
+					'code'       => 'import_contact_error',
+					'subscriber' => $subscriber,
+					'error'      => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+					),
+				)
+			);
 			return new \WP_Error( 'import_failed', $e->getMessage() );
 		}
 	}

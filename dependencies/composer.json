@@ -2,14 +2,19 @@
     "name": "quillcrm/quillcrm-deps",
     "require": {
         "composer/installers": "~1.0",
-        "tareq1988/wp-eloquent": "dev-master",
-        "illuminate/events": "^5.4",
         "league/csv": "9.0.0",
-        "illuminate/validation": "5.8"
+        "quillforms/wpeloquent": "^1.0.0"
     },
     "config": {
         "allow-plugins": {
             "composer/installers": true
         }
-    }
+    },
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:quillforms/wpeloquent.git"
+        }
+    ]
 }

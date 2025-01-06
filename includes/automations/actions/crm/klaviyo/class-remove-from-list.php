@@ -73,12 +73,42 @@ class Remove_From_List extends Action {
 		$list_id = $step->get_setting( 'list_id' );
 
 		if ( empty( $list_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Klaviyo Remove From List action failed. List ID is required.', 'quillcrm' ),
+				array(
+					'code' => 'klaviyo_remove_from_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$klaviyo = Integrations_Manager::instance()->get_integration( 'klaviyo' );
 		$api     = $klaviyo->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Klaviyo Remove From List action failed. API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'klaviyo_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -86,6 +116,21 @@ class Remove_From_List extends Action {
 		$result  = $api->get_profile( $email, $list_id );
 		$profile = $result['data']['data'][0] ?? null;
 		if ( ! $profile ) {
+			quillcrm_get_logger()->error(
+				__( 'Klaviyo Remove From List action failed. Profile not found.', 'quillcrm' ),
+				array(
+					'code' => 'klaviyo_remove_from_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return true;
 		}
 
@@ -99,8 +144,35 @@ class Remove_From_List extends Action {
 			),
 		);
 		$result     = $api->remove_profile_from_list( $list_id, $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Klaviyo Remove From List action failed. Failed to remove profile from list.', 'quillcrm' ),
+				array(
+					'code'     => 'klaviyo_remove_from_list',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Klaviyo Remove From List action completed successfully.', 'quillcrm' ),
+			array(
+				'code'     => 'klaviyo_remove_from_list',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

@@ -73,6 +73,21 @@ class Send_To_Channel extends Action {
 		$message = $this->merge_tags_manager->process_merge_tags( $step->get_setting( 'message', '' ), $automation_contact );
 		$channel = $step->get_setting( 'channel', '' );
 		if ( empty( $message ) || empty( $channel ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Slack Send To Channel action is missing required fields.', 'quillcrm' ),
+				array(
+					'code' => 'slack_send_to_channel',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -80,12 +95,54 @@ class Send_To_Channel extends Action {
 		$api         = $integration->connect();
 
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Slack Send To Channel action failed to connect to Slack.', 'quillcrm' ),
+				array(
+					'code' => 'slack_send_to_channel',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->post_message( $channel, $message );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Slack Send To Channel action failed to send message.', 'quillcrm' ),
+				array(
+					'code'     => 'slack_send_to_channel',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Slack Send To Channel action sent message.', 'quillcrm' ),
+			array(
+				'code'     => 'slack_send_to_channel',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

@@ -10,7 +10,7 @@
 
 namespace QuillCRM\Models;
 
-use QuillCRM\Models\Model;
+use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Custom_Field_Model;
@@ -169,6 +169,17 @@ class Contact_Model extends Model {
 	 */
 	public function orders() {
 		return $this->hasMany( WC_Order_Model::class, 'billing_email', 'email' );
+	}
+
+	/**
+	 * Get edd orders
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function edd_orders() {
+		return $this->hasMany( EDD_Order_Model::class, 'email', 'email' );
 	}
 
 	/**

@@ -72,6 +72,22 @@ class Add_Tags extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Drip Add Tags: Tags is empty.', 'quillcrm' ),
+				array(
+					'code' => 'drip_add_tags',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -88,12 +104,65 @@ class Add_Tags extends Action {
 		$drip = Integrations_Manager::instance()->get_integration( 'drip' );
 		$api  = $drip->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Drip API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'drip_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->add_subscriber( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to add subscriber to Drip.', 'quillcrm' ),
+				array(
+					'code'     => 'drip_add_subscriber',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Tags added to Drip subscriber.', 'quillcrm' ),
+			array(
+				'code' => 'drip_add_tags',
+				'data' => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id'   => $step->id,
+						'type' => $step->type,
+					),
+					'tags'       => $tags,
+				),
+			)
+		);
+		return true;
 	}
 
 	/**

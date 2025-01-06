@@ -74,6 +74,33 @@ export type Order = {
 	ip_address: string;
 	user_agent: string;
 	customer_note: string;
+	url: string;
+};
+
+export type EddOrder = {
+	id: number;
+	status: string;
+	user_id: number;
+	email: string;
+	currency: string;
+	subtotal: number;
+	discount: number;
+	tax: number;
+	total: number;
+	date_created: string;
+	date_modified: string;
+	date_completed: string;
+	date_refundable: string;
+	url: string;
+};
+
+export type LMSCourse = {
+	id: number;
+	name: string;
+	status: string;
+	url: string;
+	completed_on: string;
+	started_on: string;
 };
 
 export type AutomationContact = {
@@ -388,6 +415,7 @@ export type CampaignEmail = {
 	updated_at: string;
 	contact: Contact;
 	template: CustomTemplate;
+	campaign?: Partial<Campaign>;
 };
 
 export type AutomationRules = Rules[];
@@ -576,3 +604,14 @@ export type ReactSelectOptions = {
 	value: string | number;
 	style?: React.CSSProperties;
 }[];
+
+export type Log = {
+	level: string;
+	message: string;
+	source: string;
+	datetime: string;
+	local_datetime: string;
+	context: {
+		[key: string]: string;
+	};
+}

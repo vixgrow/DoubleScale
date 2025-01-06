@@ -69,12 +69,8 @@ class REST_General_Controller extends REST_Controller {
 	public function get_dashboard( WP_REST_Request $request ) {
 		$total_contacts               = Contact_Model::count();
 		$total_sent_emails            = Campaign_Email_Model::where( 'status', 'sent' )->count();
-		$total_orders                 = Abandoned_Cart_Model::where( 'order_id', '>', 0 )->count();
-		$total_revenue                = Abandoned_Cart_Model::where( 'order_id', '>', 0 )->sum( 'total' );
 		$recent_contacts              = Contact_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$recent_unsubscribed_contacts = Contact_Model::where( 'status', 'unsubscribed' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
-		$recent_abandoned_carts       = Abandoned_Cart_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
-		$recent_recoverd_carts        = Abandoned_Cart_Model::where( 'status', 'recovered' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_campaigns                = Campaign_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_automations              = Automation_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$recent_emails                = Campaign_Email_Model::with( 'template' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
@@ -82,16 +78,24 @@ class REST_General_Controller extends REST_Controller {
 		$response = array(
 			'total_contacts'               => $total_contacts,
 			'total_sent_emails'            => $total_sent_emails,
-			'total_orders'                 => $total_orders,
-			'total_revenue'                => $total_revenue,
 			'recent_contacts'              => $recent_contacts,
 			'recent_unsubscribed_contacts' => $recent_unsubscribed_contacts,
-			'recent_abandoned_carts'       => $recent_abandoned_carts,
-			'recent_recoverd_carts'        => $recent_recoverd_carts,
 			'top_campaigns'                => $top_campaigns,
 			'top_automations'              => $top_automations,
 			'recent_emails'                => $recent_emails,
 		);
+
+		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			$total_orders           = Abandoned_Cart_Model::where( 'order_id', '>', 0 )->count();
+			$total_revenue          = Abandoned_Cart_Model::where( 'order_id', '>', 0 )->sum( 'total' );
+			$recent_abandoned_carts = Abandoned_Cart_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
+			$recent_recoverd_carts  = Abandoned_Cart_Model::where( 'status', 'recovered' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
+
+			$response['total_orders']           = $total_orders;
+			$response['total_revenue']          = $total_revenue;
+			$response['recent_abandoned_carts'] = $recent_abandoned_carts;
+			$response['recent_recoverd_carts']  = $recent_recoverd_carts;
+		}
 
 		return new WP_REST_Response( $response, 200 );
 	}
@@ -106,6 +110,6 @@ class REST_General_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_dashboard_permissions_check( WP_REST_Request $request ) {
-		return true;
+		return current_user_can( 'manage_options' );
 	}
 }

@@ -11,7 +11,7 @@
 namespace QuillCRM\Models;
 
 use Illuminate\Support\Str;
-use QuillCRM\Models\Model;
+use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\Custom_Fields_Group_Model;
 
 /**

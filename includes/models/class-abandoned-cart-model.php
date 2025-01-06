@@ -11,7 +11,7 @@
 
 namespace QuillCRM\Models;
 
-use QuillCRM\Models\Model;
+use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\Contact_Model;
 
 /**

@@ -72,6 +72,21 @@ class Add_To_Campaign extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$campaign_id = $step->get_setting( 'campaign_id', '' );
 		if ( empty( $campaign_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Add To Campaign action is missing campaign_id', 'quillcrm' ),
+				array(
+					'code' => 'mautic_add_to_campaign',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -84,18 +99,76 @@ class Add_To_Campaign extends Action {
 		$mautic = Integrations_Manager::instance()->get_integration( 'mautic' );
 		$api    = $mautic->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Add To Campaign: Could not connect to Mautic API.', 'quillcrm' ),
+				array(
+					'code' => 'mautic_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->get_or_create_contact( $data );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Add To Campaign: Failed to get or create contact.', 'quillcrm' ),
+				array(
+					'code'     => 'mautic_get_or_create_contact',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
 		$contact_id = isset( $result['data']['contact'] ) ? $result['data']['contact']['id'] : $result['data']['id'];
 		$result     = $api->add_contact_to_campaign( $contact_id, $campaign_id );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Add To Campaign: Failed to add contact to campaign.', 'quillcrm' ),
+				array(
+					'code'     => 'mautic_add_to_campaign',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Mautic Add To Campaign: Contact added to campaign.', 'quillcrm' ),
+			array(
+				'code'     => 'mautic_add_to_campaign',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

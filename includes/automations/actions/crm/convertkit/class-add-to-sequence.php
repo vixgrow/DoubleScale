@@ -71,22 +71,87 @@ class Add_To_Sequence extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$sequence_id = $step->get_setting( 'sequence_id' );
 		if ( empty( $sequence_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Convertkit Sequence ID is required.', 'quillcrm' ),
+				array(
+					'code' => 'convertkit_add_sequence',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$convertkit = Integrations_Manager::instance()->get_integration( 'convertkit' );
 		$api        = $convertkit->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Convertkit Add Tags: API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'convertkit_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$email  = $automation_contact->contact->email;
 		$result = $api->add_subscriber_to_sequence( $email, $sequence_id );
-
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to add contact to Convertkit Sequence.', 'quillcrm' ),
+				array(
+					'code'     => 'convertkit_add_sequence',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
+		quillcrm_get_logger()->info(
+			__( 'Contact added to Convertkit Sequence.', 'quillcrm' ),
+			array(
+				'code'     => 'convertkit_add_sequence',
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id'   => $step->id,
+						'type' => $step->type,
+					),
+				),
+				'response' => $result,
+			)
+		);
 		return true;
 	}
 

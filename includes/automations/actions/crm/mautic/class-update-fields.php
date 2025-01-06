@@ -72,6 +72,21 @@ class Update_Fields extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Update Fields action is missing mapped_fields.', 'quillcrm' ),
+				array(
+					'code' => 'mautic_update_fields',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -85,6 +100,21 @@ class Update_Fields extends Action {
 		$mautic = Integrations_Manager::instance()->get_integration( 'mautic' );
 		$api    = $mautic->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Update Fields action failed to connect to Mautic.', 'quillcrm' ),
+				array(
+					'code' => 'mautic_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -99,8 +129,35 @@ class Update_Fields extends Action {
 		}
 
 		$result = $api->create_or_update_contact( $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Update Fields action failed to update fields.', 'quillcrm' ),
+				array(
+					'code'     => 'mautic_update_fields',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Mautic Update Fields action successfully updated fields.', 'quillcrm' ),
+			array(
+				'code'     => 'mautic_update_fields',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

@@ -47,15 +47,6 @@ class Integration extends Integration_Abstract {
 	public $description = 'Keap Integration';
 
 	/**
-	 * Option name
-	 *
-	 * @var string
-	 *
-	 * @since 1.0.0
-	 */
-	public $option_name = 'keap';
-
-	/**
 	 * App
 	 *
 	 * @var App

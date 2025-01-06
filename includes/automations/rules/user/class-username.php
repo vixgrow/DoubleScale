@@ -14,7 +14,7 @@ namespace QuillCRM\Automations\Rules\User;
 use QuillCRM\Abstracts\Rule;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Rules_Manager;
-use WeDevs\ORM\WP\User;
+use WPEloquent\WP\User;
 
 /**
  * Username class

@@ -11,7 +11,7 @@
 
 namespace QuillCRM\Models;
 
-use QuillCRM\Models\Model;
+use WPEloquent\Eloquent\Model;
 
 /**
  * WC_Order_Model class
@@ -64,6 +64,21 @@ class WC_Order_Model extends Model {
 	);
 
 	/**
+	 * Casts
+	 *
+	 * @var array
+	 */
+	protected $casts = array(
+		'id'               => 'integer',
+		'customer_id'      => 'integer',
+		'tax_amount'       => 'float',
+		'total_amount'     => 'float',
+		'date_created_gmt' => 'datetime',
+		'date_updated_gmt' => 'datetime',
+		'parent_order_id'  => 'integer',
+	);
+
+	/**
 	 * Get contacts
 	 *
 	 * @since 1.0.0
@@ -72,5 +87,23 @@ class WC_Order_Model extends Model {
 	 */
 	public function contact() {
 		return $this->belongsTo( Contact_Model::class, 'email', 'billing_email' );
+	}
+
+	/**
+	 * Boot method
+	 *
+	 * @since 1.0.0
+	 */
+	public static function boot() {
+		parent::boot();
+
+		// Add order status name not slug while retrieving
+		static::retrieved(
+			function ( $order ) {
+				$status        = $order->status;
+				$order->status = wc_get_order_status_name( $status );
+				$order->url    = get_edit_post_link( $order->id );
+			}
+		);
 	}
 }

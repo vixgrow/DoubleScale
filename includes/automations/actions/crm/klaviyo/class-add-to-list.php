@@ -73,12 +73,42 @@ class Add_To_List extends Action {
 		$list_id = $step->get_setting( 'list_id' );
 
 		if ( empty( $list_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Klaviyo Add To List action failed. List ID is empty.', 'quillcrm' ),
+				array(
+					'code' => 'klaviyo_add_to_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$klaviyo = Integrations_Manager::instance()->get_integration( 'klaviyo' );
 		$api     = $klaviyo->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Klaviyo Add To List action failed. Unable to connect to Klaviyo.', 'quillcrm' ),
+				array(
+					'code' => 'klaviyo_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -94,6 +124,22 @@ class Add_To_List extends Action {
 
 		$result = $api->create_or_update_profile( $data );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Klaviyo Add To List action failed. Failed to create or update profile.', 'quillcrm' ),
+				array(
+					'code'     => 'klaviyo_create_or_update_profile',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
@@ -108,8 +154,35 @@ class Add_To_List extends Action {
 		);
 
 		$result = $api->add_profile_to_list( $list_id, $list_data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Klaviyo Add To List action failed. Failed to add profile to list.', 'quillcrm' ),
+				array(
+					'code'     => 'klaviyo_add_profile_to_list',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Klaviyo Add To List action completed successfully.', 'quillcrm' ),
+			array(
+				'code'     => 'klaviyo_add_to_list',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

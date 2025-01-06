@@ -180,7 +180,7 @@ final class Merge_Tags_Manager {
 				if ( ! $merge_tag ) {
 					return '';
 				}
-				error_log( $slug );
+
 				return $merge_tag->get_tag_value( $contact, $slug );
 			},
 			$content

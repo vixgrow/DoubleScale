@@ -92,6 +92,17 @@ class Email {
 			header( 'Pragma: no-cache' );
 			die( base64_decode( 'R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=' ) );
 		} catch ( \Exception $e ) {
+			quillcrm_get_logger()->error(
+				__( 'Email Opened Tracking Error', 'quillcrm' ),
+				array(
+					'code'  => 'email_opened_tracking',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 			return;
 		}
 	}
@@ -130,10 +141,20 @@ class Email {
 			}
 
 			$orginal_url = urldecode( $_GET['orginal'] );
-			error_log( $orginal_url );
 			wp_redirect( $orginal_url );
 			exit;
 		} catch ( \Exception $e ) {
+			quillcrm_get_logger()->error(
+				__( 'Email Clicked Tracking Error', 'quillcrm' ),
+				array(
+					'code'  => 'email_clicked_tracking',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 			return;
 		}
 	}

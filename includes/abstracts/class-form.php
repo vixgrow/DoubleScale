@@ -113,7 +113,6 @@ abstract class Form {
 	public function process_form( $data ) {
 		try {
 			$this->submission = $data;
-			$form_id          = $this->submission['form_id'];
 			$contact_fields   = $this->get_contact_data();
 			$contact_data     = $contact_fields['fields'];
 			$custom_fields    = $contact_fields['custom_fields'];
@@ -156,9 +155,28 @@ abstract class Form {
 
 				$contact->custom_fields()->sync( $custom_fields_values );
 			}
-			error_log( 'Contact created: ' . $contact->id );
+
+			quillcrm_get_logger()->info(
+				__( 'Contact created successfully', 'quillcrm' ),
+				array(
+					'id'     => $contact->id,
+					'email'  => $contact->email,
+					'source' => $this->slug,
+				)
+			);
 		} catch ( Exception $e ) {
-			error_log( 'Error form creating contact: ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Error creating contact', 'quillcrm' ),
+				array(
+					'code'  => 'error_creating_contact',
+					'data'  => $data,
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 		}
 	}
 
@@ -253,7 +271,6 @@ abstract class Form {
 			$this->form_data = $form;
 			return true;
 		} catch ( Exception $e ) {
-			error_log( 'Error getting form data: ' . $e->getMessage() );
 			return false;
 		}
 	}
@@ -308,7 +325,18 @@ abstract class Form {
 				QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automations', $automation, $data );
 			}
 		} catch ( Exception $e ) {
-			// Log error
+			quillcrm_get_logger()->error(
+				__( 'Error processing automations', 'quillcrm' ),
+				array(
+					'code'  => 'error_processing_automations',
+					'data'  => $args,
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 		}
 	}
 
@@ -374,7 +402,18 @@ abstract class Form {
 
 			return $contact;
 		} catch ( Exception $e ) {
-			error_log( 'Error creating contact: ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Error creating contact', 'quillcrm' ),
+				array(
+					'code'  => 'error_creating_contact',
+					'data'  => $contact_data,
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
 			return null;
 		}
 	}

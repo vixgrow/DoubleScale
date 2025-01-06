@@ -72,6 +72,21 @@ class Remove_Subscriber_From_List extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$list_id = $step->get_setting( 'list_id', '' );
 		if ( empty( $list_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Hubspot Remove Subscriber From List: List ID is required.', 'quillcrm' ),
+				array(
+					'code' => 'hubspot_remove_contact_from_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -79,17 +94,84 @@ class Remove_Subscriber_From_List extends Action {
 		$hubspot = Integrations_Manager::instance()->get_integration( 'hubspot' );
 		$api     = $hubspot->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Could not connect to Hubspot.', 'quillcrm' ),
+				array(
+					'code' => 'hubspot_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->get_contact_by_email( $email );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Hubspot Remove Subscriber From List: Could not get contact.', 'quillcrm' ),
+				array(
+					'code'     => 'hubspot_remove_contact_from_list',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return true;
 		}
 
 		$result = $api->remove_contact_from_list( $result['data']['id'], $list_id );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Hubspot Remove Subscriber From List: Could not remove contact from list.', 'quillcrm' ),
+				array(
+					'code' => 'hubspot_remove_contact_from_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+						'response'   => $result,
+					),
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Hubspot Remove Subscriber From List: Contact removed from list.', 'quillcrm' ),
+			array(
+				'code'     => 'hubspot_remove_contact_from_list',
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id' => $step->id,
+					),
+				),
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

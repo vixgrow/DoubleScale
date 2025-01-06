@@ -72,12 +72,44 @@ class Remove_Tags extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$tags = $step->get_setting( 'tags', array() );
 		if ( empty( $tags ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Convertkit Remove Tags: Tags is empty.', 'quillcrm' ),
+				array(
+					'code' => 'convertkit_remove_tags',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$convertkit = Integrations_Manager::instance()->get_integration( 'convertkit' );
 		$api        = $convertkit->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Convertkit Add Tags: API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'convertkit_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -87,6 +119,44 @@ class Remove_Tags extends Action {
 
 		foreach ( $tags as $tag ) {
 			$result = $api->remove_subscriber_tag( $tag, $data );
+			if ( ! $result['success'] ) {
+				quillcrm_get_logger()->error(
+					__( 'Failed to remove tag from Convertkit.', 'quillcrm' ),
+					array(
+						'code' => 'convertkit_remove_tags',
+						'data' => array(
+							'automation' => array(
+								'id'   => $automation->id,
+								'name' => $automation->name,
+							),
+							'step'       => array(
+								'id'   => $step->id,
+								'type' => $step->type,
+							),
+						),
+					)
+				);
+				continue;
+			} else {
+				quillcrm_get_logger()->info(
+					__( 'Tag removed from Convertkit.', 'quillcrm' ),
+					array(
+						'code'     => 'convertkit_remove_tags',
+						'data'     => array(
+							'automation' => array(
+								'id'   => $automation->id,
+								'name' => $automation->name,
+							),
+							'step'       => array(
+								'id'   => $step->id,
+								'type' => $step->type,
+							),
+							'tag'        => $tag,
+						),
+						'response' => $result,
+					)
+				);
+			}
 		}
 
 		return true;

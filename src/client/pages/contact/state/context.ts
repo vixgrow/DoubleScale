@@ -6,7 +6,8 @@ import { createContext, useContext } from 'react';
 /**
  * Internal dependencies
  */
-import { Contact, Note, AutomationContact } from '@quillcrm/client';
+import type { Contact, Note, AutomationContact, LMSCourse } from '@quillcrm/client';
+import type { EmailAnalytics, PurchaseHistory } from './types';
 
 export const ContactContext = createContext<{
 	contact: Contact | null;
@@ -21,6 +22,12 @@ export const ContactContext = createContext<{
 	updateNote: (note: Note) => void;
 	automationContacts: AutomationContact[];
 	setAutomationContacts: (automationContacts: AutomationContact[]) => void;
+	emailAnalytics: EmailAnalytics;
+	setEmailAnalytics: (emailAnalytics: EmailAnalytics) => void;
+	purchaseHistory: PurchaseHistory;
+	setPurchaseHistory: (purchaseHistory: PurchaseHistory) => void;
+	courses: LMSCourse[];
+	setCourses: (courses: LMSCourse[]) => void;
 }>({
 	contact: null,
 	isLoading: false,
@@ -47,6 +54,18 @@ export const ContactContext = createContext<{
 	automationContacts: [],
 	setAutomationContacts: (_automationContacts: AutomationContact[]) => {
 		throw new Error('setAutomationContacts() not implemented');
+	},
+	emailAnalytics: null,
+	setEmailAnalytics: (_emailAnalytics: EmailAnalytics) => {
+		throw new Error('setEmailAnalytics() not implemented');
+	},
+	purchaseHistory: null,
+	setPurchaseHistory: (_purchaseHistory: PurchaseHistory) => {
+		throw new Error('setPurchaseHistory() not implemented');
+	},
+	courses: [],
+	setCourses: (_courses: LMSCourse[]) => {
+		throw new Error('setCourses() not implemented');
 	},
 });
 

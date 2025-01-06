@@ -10,7 +10,7 @@
 
 namespace QuillCRM\Models;
 
-use QuillCRM\Models\Model;
+use WPEloquent\Eloquent\Model;
 use Illuminate\Support\Str;
 use QuillCRM\Models\Contact_Model;
 

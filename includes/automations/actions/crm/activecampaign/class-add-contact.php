@@ -91,6 +91,27 @@ class Add_Contact extends Action {
 		$last_name  = $this->merge_tags_manager->process_merge_tags( $mapped_fields['last_name'], $automation_contact );
 
 		if ( empty( $email ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to add contact to ActiveCampaign. Email is required.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_add_contact',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+						'data'       => array(
+							'email'      => $email,
+							'first_name' => $first_name,
+							'last_name'  => $last_name,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -104,19 +125,110 @@ class Add_Contact extends Action {
 
 		$activecampaign = Integrations_Manager::instance()->get_integration( 'activecampaign' );
 		$api            = $activecampaign->connect();
+		error_log( 'email1: ' . $email );
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to connect to ActiveCampaign.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+						'data'       => array(
+							'email'      => $email,
+							'first_name' => $first_name,
+							'last_name'  => $last_name,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->create_or_update( $data );
 		if ( $result['success'] ) {
+			quillcrm_get_logger()->info(
+				__( 'Contact added to ActiveCampaign.', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_add_contact',
+					'response' => $result,
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+						'data'       => array(
+							'email'      => $email,
+							'first_name' => $first_name,
+							'last_name'  => $last_name,
+						),
+					),
+				)
+			);
+			error_log( 'email2: ' . $email );
 			return true;
 		}
 
 		if ( 422 === $result['code'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Contact already exists.', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_add_contact',
+					'response' => $result,
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+						'data'       => array(
+							'email'      => $email,
+							'first_name' => $first_name,
+							'last_name'  => $last_name,
+						),
+					),
+				)
+			);
+			error_log( 'email3: ' . $email );
 			return true;
 		}
 
+		quillcrm_get_logger()->error(
+			__( 'Failed to add contact to ActiveCampaign.', 'quillcrm' ),
+			array(
+				'code'     => 'activecampaign_add_contact',
+				'response' => $result,
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id'   => $step->id,
+						'type' => $step->type,
+					),
+					'data'       => array(
+						'email'      => $email,
+						'first_name' => $first_name,
+						'last_name'  => $last_name,
+					),
+				),
+			)
+		);
+		error_log( 'email4: ' . $email );
 		return false;
 	}
 

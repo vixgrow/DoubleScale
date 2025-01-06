@@ -68,7 +68,7 @@ class Contact_First_Name extends Merge_Tag {
 		if ( is_null( $contact ) ) {
 			return '';
 		}
-		error_log( 'Contact First Name: ' . $contact->first_name );
+
 		return $contact->first_name;
 	}
 }

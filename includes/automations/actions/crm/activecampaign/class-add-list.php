@@ -79,22 +79,88 @@ class Add_List extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$list = $step->get_setting( 'list', '' );
 		if ( empty( $list ) ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign Add List: List is empty.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_add_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$activecampaign = Integrations_Manager::instance()->get_integration( 'activecampaign' );
 		$api            = $activecampaign->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to add list to ActiveCampaign. API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->get_contact( $automation_contact->contact->email );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to add list to ActiveCampaign. Failed to get contact.', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_add_list',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
 		$contact_id = $result['data']['contacts'][0]['id'] ?? null;
 		if ( ! $contact_id ) {
+			qcrm_logger()->error(
+				__( 'Failed to add list to ActiveCampaign. Contact not found.', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_add_list',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
@@ -108,9 +174,44 @@ class Add_List extends Action {
 
 		$result = $api->sync_contact_list( $data );
 		if ( $result['success'] ) {
+			qcrm_logger()->info(
+				__( 'List added to contact in ActiveCampaign.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_add_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+						'list'       => $list,
+					),
+				)
+			);
 			return true;
 		}
 
+		qcrm_logger()->error(
+			__( 'Failed to add list to contact in ActiveCampaign.', 'quillcrm' ),
+			array(
+				'code'     => 'activecampaign_add_list',
+				'data'     => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id'   => $step->id,
+						'type' => $step->type,
+					),
+					'list'       => $list,
+				),
+				'response' => $result,
+			)
+		);
 		return false;
 	}
 

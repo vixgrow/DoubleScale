@@ -73,22 +73,88 @@ class Remove_Tags extends Action {
 		$tags = $step->get_setting( 'tags', array() );
 
 		if ( empty( $tags ) ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign Remove Tags: Tags is empty.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_remove_tags',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$activecampaign = Integrations_Manager::instance()->get_integration( 'activecampaign' );
 		$api            = $activecampaign->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'activecampaign_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->get_contact( $automation_contact->contact->email );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to get contact from ActiveCampaign.', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_get_contact',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
 		$contact_id = $result['data']['contacts'][0]['id'] ?? null;
 		if ( ! $contact_id ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to get contact ID from ActiveCampaign.', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_get_contact_id',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id'   => $step->id,
+							'type' => $step->type,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
 
@@ -101,6 +167,46 @@ class Remove_Tags extends Action {
 			);
 
 			$result = $api->remove_contact_tag( $data );
+			if ( ! $result['success'] ) {
+				quillcrm_get_logger()->error(
+					__( 'Failed to remove tag from ActiveCampaign.', 'quillcrm' ),
+					array(
+						'code'     => 'activecampaign_remove_tag',
+						'data'     => array(
+							'automation' => array(
+								'id'   => $automation->id,
+								'name' => $automation->name,
+							),
+							'step'       => array(
+								'id'   => $step->id,
+								'type' => $step->type,
+							),
+							'tag'        => $tag,
+						),
+						'response' => $result,
+					)
+				);
+				continue;
+			} else {
+				quillcrm_get_logger()->info(
+					__( 'Tag removed from ActiveCampaign.', 'quillcrm' ),
+					array(
+						'code'     => 'activecampaign_remove_tag',
+						'data'     => array(
+							'automation' => array(
+								'id'   => $automation->id,
+								'name' => $automation->name,
+							),
+							'step'       => array(
+								'id'   => $step->id,
+								'type' => $step->type,
+							),
+							'tag'        => $tag,
+						),
+						'response' => $result,
+					)
+				);
+			}
 		}
 
 		return true;

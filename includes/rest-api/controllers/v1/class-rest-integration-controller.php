@@ -103,7 +103,7 @@ class REST_Integration_Controller extends REST_Controller {
 		try {
 			$slug              = $request->get_param( 'slug' );
 			$integration       = Integrations_Manager::instance()->get_integration( $slug );
-			$attributes_schema = $integration->get_attributes_schema();
+			$attributes_schema = $integration->rest_controller->get_settings_schema();
 			$validator         = rest_validate_value_from_schema( $value, $attributes_schema, $param );
 
 			if ( is_wp_error( $validator ) ) {

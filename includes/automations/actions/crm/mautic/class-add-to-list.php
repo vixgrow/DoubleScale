@@ -72,6 +72,21 @@ class Add_To_List extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$list_id = $step->get_setting( 'list_id', '' );
 		if ( empty( $list_id ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Add To List action is missing list_id.', 'quillcrm' ),
+				array(
+					'code' => 'mautic_add_to_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -84,18 +99,75 @@ class Add_To_List extends Action {
 		$mautic = Integrations_Manager::instance()->get_integration( 'mautic' );
 		$api    = $mautic->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Add To List: Could not connect to Mautic.', 'quillcrm' ),
+				array(
+					'code' => 'mautic_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$result = $api->get_or_create_contact( $data );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Add To List: Failed to get or create contact.', 'quillcrm' ),
+				array(
+					'code' => 'mautic_add_to_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$contact_id = isset( $result['data']['contact'] ) ? $result['data']['contact']['id'] : $result['data']['id'];
 		$result     = $api->add_contact_to_list( $contact_id, $list_id );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Mautic Add To List: Failed to add contact to list.', 'quillcrm' ),
+				array(
+					'code'     => 'mautic_add_to_list',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Mautic Add To List: Contact added to list.', 'quillcrm' ),
+			array(
+				'code'     => 'mautic_add_to_list',
+				'response' => $result,
+			)
+		);
+
+		return true;
 	}
 
 	/**

@@ -47,6 +47,13 @@ class ActiveCampaign extends Importer {
 		$api   = $this->get_api();
 		$lists = $api->get_lists();
 		if ( ! $lists['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign: Error fetching lists', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_get_lists',
+					'response' => $lists,
+				)
+			);
 			throw new \Exception( __( 'Error fetching lists', 'quillcrm' ) );
 		}
 		$lists_array = array();
@@ -56,6 +63,13 @@ class ActiveCampaign extends Importer {
 
 		$tags = $api->get_tags();
 		if ( ! $tags['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign: Error fetching tags', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_get_tags',
+					'response' => $tags,
+				)
+			);
 			throw new \Exception( __( 'Error fetching tags', 'quillcrm' ) );
 		}
 		$tags_array = array();
@@ -168,6 +182,13 @@ class ActiveCampaign extends Importer {
 		$api      = $this->get_api();
 		$response = $api->get_lists();
 		if ( ! $response['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign: Error fetching lists', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_get_lists',
+					'response' => $response,
+				)
+			);
 			throw new \Exception( __( 'Error fetching lists', 'quillcrm' ) );
 		}
 
@@ -191,6 +212,13 @@ class ActiveCampaign extends Importer {
 		$api      = $this->get_api();
 		$response = $api->get_tags();
 		if ( ! $response['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'ActiveCampaign: Error fetching tags', 'quillcrm' ),
+				array(
+					'code'     => 'activecampaign_get_tags',
+					'response' => $response,
+				)
+			);
 			throw new \Exception( __( 'Error fetching tags', 'quillcrm' ) );
 		}
 

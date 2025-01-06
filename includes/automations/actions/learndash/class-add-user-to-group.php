@@ -104,7 +104,12 @@ class Add_User_To_Group extends Action {
 		$groups = learndash_get_groups( array( 'posts_per_page' => -1 ) );
 
 		$options = array();
-		foreach ( $groups as $group ) {
+		foreach ( $groups ?? array() as $group ) {
+			// Check if not object.
+			if ( ! is_object( $group ) ) {
+				continue;
+			}
+
 			$options[ $group->ID ] = $group->post_title;
 		}
 

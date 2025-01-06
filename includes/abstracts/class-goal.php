@@ -97,7 +97,16 @@ abstract class Goal {
 				}
 			}
 		} catch ( Exception $e ) {
-			// Log error
+			quillcrm_get_logger()->error(
+				__( 'Error processing goal', 'quillcrm' ),
+				array(
+					'code'  => 'goal_error',
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+					),
+				)
+			);
 		}
 	}
 

@@ -10,7 +10,7 @@
 
 namespace QuillCRM\Models;
 
-use QuillCRM\Models\Model;
+use WPEloquent\Eloquent\Model;
 
 /**
  * Automation_Contact_Processes_Model class

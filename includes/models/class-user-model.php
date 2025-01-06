@@ -11,7 +11,7 @@
 
 namespace QuillCRM\Models;
 
-use QuillCRM\Models\Model;
+use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\UserMeta_Model;
 
 /**
@@ -53,6 +53,18 @@ class User_Model extends Model {
 		'user_registered',
 		'user_activation_key',
 		'user_status',
+		'display_name',
+	);
+
+	/**
+	 * Attributes that should be hidden for arrays and JSON.
+	 *
+	 * @var array
+	 */
+	protected $visible = array(
+		'ID',
+		'user_login',
+		'user_email',
 		'display_name',
 	);
 

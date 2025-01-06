@@ -72,6 +72,21 @@ class Update_Fields extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$mapped_fields = $step->get_setting( 'mapped_fields', array() );
 		if ( empty( $mapped_fields ) ) {
+			quillcrm_get_logger()->error(
+				__( 'GetResponse Update Fields: Mapped Fields are empty', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_update_fields',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
@@ -93,13 +108,62 @@ class Update_Fields extends Action {
 		$getresponse = Integrations_Manager::instance()->get_integration( 'getresponse' );
 		$api         = $getresponse->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'GetResponse Update Fields: API connection failed', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$email  = $automation_contact->contact->email;
 		$result = $api->create_or_update_contact( $email, $data );
+		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Failed to update fields of contact in GetResponse', 'quillcrm' ),
+				array(
+					'code' => 'getresponse_update_fields',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
+			return false;
+		}
 
-		return $result['success'];
+		quillcrm_get_logger()->info(
+			__( 'Fields of contact updated in GetResponse', 'quillcrm' ),
+			array(
+				'code' => 'getresponse_update_fields',
+				'data' => array(
+					'automation' => array(
+						'id'   => $automation->id,
+						'name' => $automation->name,
+					),
+					'step'       => array(
+						'id' => $step->id,
+					),
+				),
+			)
+		);
+
+		return true;
 	}
 
 	/**

@@ -72,25 +72,74 @@ class Remove_From_List extends Action {
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		$list = $step->get_setting( 'list', '' );
 		if ( empty( $list ) ) {
+			quillcrm_get_logger()->error(
+				__( 'Mailchimp Remove From List: List ID is required.', 'quillcrm' ),
+				array(
+					'code' => 'mailchimp_remove_from_list',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
 		$mailchimp = Integrations_Manager::instance()->get_integration( 'mailchimp' );
 		$api       = $mailchimp->connect();
 		if ( ! $api ) {
+			quillcrm_get_logger()->error(
+				__( 'Mailchimp Remove From List: API connection failed.', 'quillcrm' ),
+				array(
+					'code' => 'mailchimp_connect',
+					'data' => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+				)
+			);
 			return false;
 		}
 
-		$email = $automation_contact->contact->email;
-		$data  = array(
-			'email_address' => $email,
-			'status'        => 'unsubscribed',
-		);
-
+		$email  = $automation_contact->contact->email;
 		$result = $api->remove_subscriber( $list, $email );
 		if ( ! $result['success'] ) {
+			quillcrm_get_logger()->error(
+				__( 'Mailchimp Remove From List: Failed to remove subscriber.', 'quillcrm' ),
+				array(
+					'code'     => 'mailchimp_remove_subscriber',
+					'data'     => array(
+						'automation' => array(
+							'id'   => $automation->id,
+							'name' => $automation->name,
+						),
+						'step'       => array(
+							'id' => $step->id,
+						),
+					),
+					'response' => $result,
+				)
+			);
 			return false;
 		}
+
+		quillcrm_get_logger()->info(
+			__( 'Mailchimp Remove From List: Subscriber removed successfully.', 'quillcrm' ),
+			array(
+				'code'     => 'mailchimp_remove_subscriber',
+				'response' => $result,
+			)
+		);
 
 		return true;
 	}

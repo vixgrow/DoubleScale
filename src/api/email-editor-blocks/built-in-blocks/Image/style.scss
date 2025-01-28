@@ -1,0 +1,35 @@
+.qcrm-image-block {
+    text-align: center;
+    padding: 12px;
+    background: var(--qcrm-white);
+    border: 1px solid var(--qcrm-border-color);
+    border-radius: 6px;
+    transition: var(--qcrm-transition);
+
+    img {
+        max-width: 100%;
+        border-radius: 4px;
+    }
+
+    .qcrm-image-controls {
+        margin-top: 8px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+
+        label {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            .qcrm-image-control-input {
+                width: 60px;
+                padding: 4px;
+                font-size: 14px;
+                border: 1px solid var(--qcrm-border-color);
+                border-radius: 4px;
+            }
+        }
+    }
+}

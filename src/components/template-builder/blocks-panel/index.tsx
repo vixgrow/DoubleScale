@@ -1,118 +1,74 @@
-/* eslint-disable no-shadow */
-/**
- * Internal Dependencies
- */
-import {
-	Draggable,
-	Droppable,
-} from 'react-beautiful-dnd';
-// import BlockTypesListItem from '../block-types-list-item';
-
-/**
- * WordPress Dependencies
- */
-import { Fragment } from '@wordpress/element';
+// BlockTypesList.tsx
+import { useDraggable } from '@dnd-kit/core';
+import { FC } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-
-/**
- * External Dependencies
- */
 import classnames from 'classnames';
 import { keys, map } from 'lodash';
-import { FC } from 'react';
 
-/**
- * 
- * Internal Dependencies
- */
-import './style.scss';
+interface DraggableBlockProps {
+	name: string;
+	blockType: any;
+}
+
+const DraggableBlock: FC<DraggableBlockProps> = ({ name, blockType }) => {
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		isDragging,
+		transform,
+	} = useDraggable({
+		id: `${name}`, // Add 'panel-' prefix to distinguish from drop area blocks
+		data: {
+			type: 'PANEL_BLOCK',
+			name
+		}
+	});
+
+	const style = transform ? {
+		transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+	} : undefined;
+
+	return (
+		<div
+			ref={setNodeRef}
+			className={classnames('block-item-wrapper', {
+				'is-dragging': isDragging
+			})}
+			{...attributes}
+			{...listeners}
+			style={style}
+		>
+			<div className="qcrm-email-editor-blocks-list__item">
+				<div className="qcrm-email-editor-blocks-list__item-icon">
+					{blockType.icon}
+				</div>
+				<div className="qcrm-email-editor-blocks-list__item-title">
+					{blockType.title}
+				</div>
+			</div>
+		</div>
+	);
+};
 
 const BlockTypesList: FC = () => {
-	const { blockTypes } = useSelect((select) => {
-		const blockTypes = select('quillcrm/email-editor-blocks').getBlockTypes();
-		return {
-			blockTypes,
-		};
-	});
+	const { blockTypes } = useSelect((select) => ({
+		blockTypes: select('quillcrm/email-editor-blocks').getBlockTypes(),
+	}));
+
 	return (
-		<div className="qcrm-email-editor-blocks-list">
-			<Droppable droppableId="BLOCKS_LIST" isDropDisabled={true}>
-				{(provided, _snapshot) => (
-					<div
-						ref={provided.innerRef}
-						{...provided.droppableProps}
-						style={{
-							display: 'grid',
-							gridTemplateColumns: 'repeat(2, 1fr)', // Two columns
-							gap: '16px', // Gap between items
-						}}
-					>
-
-						{map(keys(blockTypes), (blockName, index) => {
-							const blockType = blockTypes[blockName];
-
-							return (
-								<div
-									key={blockName}
-									style={{
-										marginBottom: '20px',
-										overflow: 'auto',
-									}}
-								>
-									<Draggable
-
-										draggableId={blockName}
-										index={index}
-									>
-										{(provided, snapshot) => (
-											<Fragment>
-												<div
-													className={classnames(
-														'admin-components-blocks-list__item-wrapper',
-														{
-															'is-dragging': snapshot.isDragging
-																? true
-																: false,
-														}
-													)}
-													{...provided.draggableProps}
-													{...provided.dragHandleProps}
-													ref={provided.innerRef}
-													style={{
-														userSelect: 'none',
-														margin: '0',
-														...provided.draggableProps.style
-													}}
-												>
-													<div className="qcrm-email-editor-blocks-list__item">
-														<div className="qcrm-email-editor-blocks-list__item-icon">
-															{blockType.icon}
-														</div>
-														<div className="qcrm-email-editor-blocks-list__item-title">
-															{blockType.title}
-														</div>
-													</div>
-												</div>
-												{snapshot.isDragging && (
-													<div className="qcrm-email-editor-blocks-list__item">
-														<div className="qcrm-email-editor-blocks-list__item-icon">
-															{blockType.icon}
-														</div>
-														<div className="qcrm-email-editor-blocks-list__item-title">
-															{blockType.title}
-														</div>
-													</div>
-												)}
-											</Fragment>
-										)}
-									</Draggable>
-								</div>
-							);
-						})}
-						{provided.placeholder}
-					</div>
-				)}
-			</Droppable>
+		<div id="BlocksPanel" className="qcrm-email-editor-blocks-panel">
+			<div className="qcrm-email-editor-blocks-list">
+				<div className="qcrm-email-editor-blocks-list__grid">
+					{map(keys(blockTypes), (blockName) => (
+						<DraggableBlock
+							key={blockName}
+							name={blockName}
+							blockType={blockTypes[blockName]}
+						/>
+					))}
+				</div>
+			</div>
 		</div>
 	);
 };

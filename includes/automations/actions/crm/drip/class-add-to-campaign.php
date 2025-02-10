@@ -197,4 +197,5 @@ class Add_To_Campaign extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_To_Campaign() );
+Add_To_Campaign::instance();
+

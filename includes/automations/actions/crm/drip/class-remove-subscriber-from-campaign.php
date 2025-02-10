@@ -196,4 +196,4 @@ class Remove_Subscriber_From_Campaign extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Remove_Subscriber_From_Campaign() );
+Remove_Subscriber_From_Campaign::instance();

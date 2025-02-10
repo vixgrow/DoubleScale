@@ -146,4 +146,4 @@ class Add_User_To_Course extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_User_To_Course() );
+Add_User_To_Course::instance();

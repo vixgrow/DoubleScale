@@ -146,4 +146,4 @@ class Remove_User_From_Group extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Remove_User_From_Group() );
+Remove_User_From_Group::instance();

@@ -145,3 +145,5 @@ class Remove_User_Role extends Action {
 		);
 	}
 }
+
+Remove_User_Role::instance();

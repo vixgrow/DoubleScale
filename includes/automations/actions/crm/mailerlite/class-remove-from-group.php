@@ -202,4 +202,4 @@ class Remove_From_Group extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Remove_From_Group() );
+Remove_From_Group::instance();

@@ -90,4 +90,4 @@ class Create_User extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Create_User() );
+Create_User::instance();

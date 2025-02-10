@@ -186,4 +186,4 @@ class Send_To_Channel extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Send_To_Channel() );
+Send_To_Channel::instance();

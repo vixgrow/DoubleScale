@@ -204,4 +204,4 @@ class Remove_From_Campaign extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Remove_From_Campaign() );
+Remove_From_Campaign::instance();

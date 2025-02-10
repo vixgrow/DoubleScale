@@ -207,4 +207,4 @@ class Update_Fields extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Update_Fields() );
+Update_Fields::instance();

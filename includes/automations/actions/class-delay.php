@@ -154,4 +154,4 @@ class Delay extends Action {
 
 }
 
-Actions_Manager::instance()->register( new Delay() );
+Delay::instance();

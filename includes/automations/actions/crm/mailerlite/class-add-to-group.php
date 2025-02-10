@@ -186,4 +186,4 @@ class Add_To_Group extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_To_Group() );
+Add_To_Group::instance();

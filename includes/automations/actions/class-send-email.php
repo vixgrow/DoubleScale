@@ -137,4 +137,4 @@ class Send_Email extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Send_Email() );
+Send_Email::instance();

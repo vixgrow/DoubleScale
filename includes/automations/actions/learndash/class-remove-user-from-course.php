@@ -148,4 +148,4 @@ class Remove_User_From_Course extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Remove_User_From_Course() );
+Remove_User_From_Course::instance();

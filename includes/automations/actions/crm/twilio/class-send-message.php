@@ -285,4 +285,4 @@ class Send_Message extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Send_Message() );
+Send_Message::instance();

@@ -240,4 +240,4 @@ class Remove_List extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Remove_List() );
+Remove_List::instance();

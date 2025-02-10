@@ -207,4 +207,4 @@ class Remove_Subscriber_From_List extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Remove_Subscriber_From_List() );
+Remove_Subscriber_From_List::instance();

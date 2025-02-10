@@ -192,4 +192,4 @@ class Add_To_List extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_To_List() );
+Add_To_List::instance();

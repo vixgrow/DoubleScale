@@ -151,4 +151,4 @@ class Add_User_To_Group extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_User_To_Group() );
+Add_User_To_Group::instance();

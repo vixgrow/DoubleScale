@@ -97,4 +97,4 @@ class Add_Order_Note extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_Order_Note() );
+Add_Order_Note::instance();

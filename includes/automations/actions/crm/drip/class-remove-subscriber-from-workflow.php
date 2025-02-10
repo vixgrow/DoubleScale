@@ -198,4 +198,4 @@ class Remove_Subscriber_From_Workflow extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Remove_Subscriber_From_Workflow() );
+Remove_Subscriber_From_Workflow::instance();

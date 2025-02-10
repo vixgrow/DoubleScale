@@ -137,4 +137,4 @@ class Change_Order_Status extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Change_Order_Status() );
+Change_Order_Status::instance();

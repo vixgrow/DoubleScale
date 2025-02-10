@@ -58,12 +58,6 @@ class Add_Subscriber extends Action {
 	 */
 	public $description = 'This action will add a subscriber to MailerLite';
 
-	/**
-	 * Constructor
-	 */
-	public function __construct() {
-		parent::__construct();
-	}
 
 	/**
 	 * Process Action
@@ -205,4 +199,4 @@ class Add_Subscriber extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_Subscriber() );
+Add_Subscriber::instance();

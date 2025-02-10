@@ -222,4 +222,4 @@ class Add_Contact extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_Contact() );
+Add_Contact::instance();

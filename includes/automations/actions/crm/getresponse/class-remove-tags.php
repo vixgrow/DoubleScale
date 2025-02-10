@@ -258,4 +258,4 @@ class Remove_Tags extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Remove_Tags() );
+Remove_Tags::instance();

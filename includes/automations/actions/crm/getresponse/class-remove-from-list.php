@@ -229,4 +229,4 @@ class Remove_From_List extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Remove_From_List() );
+Remove_From_List::instance();

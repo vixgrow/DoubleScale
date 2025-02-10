@@ -122,4 +122,4 @@ class Add_Lists extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_Lists() );
+Add_Lists::instance();

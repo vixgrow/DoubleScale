@@ -133,3 +133,5 @@ class Update_User_Meta extends Action {
 		);
 	}
 }
+
+Update_User_Meta::instance();

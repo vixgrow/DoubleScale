@@ -124,4 +124,4 @@ class Change_Status extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Change_Status() );
+Change_Status::instance();

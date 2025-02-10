@@ -197,4 +197,4 @@ class Add_To_Workflow extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_To_Workflow() );
+Add_To_Workflow::instance();

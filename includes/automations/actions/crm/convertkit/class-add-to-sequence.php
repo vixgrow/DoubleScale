@@ -187,4 +187,4 @@ class Add_To_Sequence extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_To_Sequence() );
+Add_To_Sequence::instance();

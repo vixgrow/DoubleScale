@@ -254,4 +254,4 @@ class Add_Tags extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Add_Tags() );
+Add_Tags::instance();

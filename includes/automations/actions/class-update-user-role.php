@@ -168,4 +168,4 @@ class Update_User_Role extends Action {
 	}
 }
 
-Actions_Manager::instance()->register( new Update_User_Role() );
+Update_User_Role::instance();

@@ -184,13 +184,21 @@ class Admin_Loader {
 		// Register styles.
 		wp_register_style(
 			'qcrm-admin',
-			QUILLCRM_PLUGIN_URL . 'build/client/style.css',
+			QUILLCRM_PLUGIN_URL . 'build/client/index.css',
+			array(),
+			$version
+		);
+
+		wp_register_style(
+			'qcrm-admin-extra',
+			QUILLCRM_PLUGIN_URL . 'build/client/style-index.css',
 			array(),
 			$version
 		);
 
 		// RTL styles.
 		wp_style_add_data( 'qcrm-admin', 'rtl', 'replace' );
+		wp_style_add_data( 'qcrm-admin-extra', 'rtl', 'replace' );
 	}
 
 	/**
@@ -208,6 +216,7 @@ class Admin_Loader {
 		wp_enqueue_script( 'qcrm-config' );
 		wp_enqueue_script( 'qcrm-admin' );
 		wp_enqueue_style( 'qcrm-admin' );
+		wp_enqueue_style( 'qcrm-admin-extra' );
 		wp_add_inline_style(
 			'qcrm-admin',
 			'.s0 { fill: url(#g1) } 

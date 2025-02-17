@@ -35,14 +35,18 @@ module.exports = {
         ...defaultConfig.plugins.map(
             (plugin) => {
                 if (plugin instanceof MiniCssExtractPlugin) {
-                    // Change the filename of the css file
-                    plugin.options.filename = '[name].css';
+                    plugin.options.filename = (pathData) => {
+                        const name = pathData.chunk.name.replace(/\.[^/.]+$/, '');
+                        return `${name}.css`;
+                    };
                     return plugin;
                 }
 
                 if (plugin instanceof RtlCssPlugin) {
-                    // Change the filename of the rtl css file
-                    plugin.options.filename = '[name]-rtl.css';
+                    plugin.options.filename = (pathData) => {
+                        const name = pathData.chunk.name.replace(/\.[^/.]+$/, '');
+                        return `${name}-rtl.css`;
+                    };
                     return plugin;
                 }
 

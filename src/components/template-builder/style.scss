@@ -1,4 +1,11 @@
+// we need to import tailwind
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+
 // Variables
+
 :root {
     --qcrm-sidebar-width: 300px;
     --qcrm-primary-color: var(--wp-admin-theme-color, #007cba);
@@ -175,9 +182,6 @@ body.qcrm-template-builder-open {
 
     &__item {
         background: #f8f9fa;
-        border: 1px solid #e2e4e7;
-        border-radius: 6px;
-        padding: 12px;
         cursor: grab;
         transition: all 0.2s ease;
         user-select: none;

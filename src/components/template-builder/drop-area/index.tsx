@@ -5,56 +5,15 @@ import { Fragment } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
+import SortableBlock from '../sortable-block';
 import DropAreaPlaceholder from '../drop-area-placeholder';
 
 const BlockDragIndexLine = () => {
     return <div className="block-drag-index-line"></div>;
 };
 
-const SortableBlock = ({ id, blockType: BlockType, attributes }) => {
-    const {
-        attributes: sortableAttributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({
-        id,
-        data: {
-            type: 'EXISTING_BLOCK'
-        }
-    });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
-
-    return (
-        <div
-            ref={setNodeRef}
-            className={classNames('sortable-block', {
-                'is-dragging': isDragging
-            })}
-            style={style}
-            {...sortableAttributes}
-            {...listeners}
-        >
-            <div className="sortable-block__content">
-                <BlockType.edit
-                    id={id}
-                    attributes={attributes}
-                />
-            </div>
-        </div>
-    );
-};
 
 const DropArea = ({ items = [], targetIndex, isDragging }) => {
-    const { blockTypes } = useSelect((select) => ({
-        blockTypes: select('quillcrm/email-editor-blocks').getBlockTypes(),
-    }));
 
     const { setNodeRef, isOver } = useDroppable({
         id: 'DROP_AREA',
@@ -85,13 +44,12 @@ const DropArea = ({ items = [], targetIndex, isDragging }) => {
                         <div className="blocks-container">
                             {showDragLine && targetIndex === 0 && <BlockDragIndexLine />}
                             {items.map((block, index) => {
-                                const BlockType = blockTypes[block.name];
                                 console.log(block);
                                 return (
                                     <Fragment key={block.id}>
                                         <SortableBlock
+                                            blockName={block.name}
                                             id={block.id}
-                                            blockType={BlockType}
                                             attributes={block.attributes}
                                         />
                                         {showDragLine && targetIndex === index + 1 && (

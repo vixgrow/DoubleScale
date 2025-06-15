@@ -52,9 +52,8 @@ quillcrm_pre_init();
  * @since 1.0.0
  */
 function quillcrm_pre_init() {
-
-	QuillCRM\QuillCRM::instance();
 	register_activation_hook( __FILE__, array( QuillCRM\Database\Install::class, 'install' ) );
+	QuillCRM\QuillCRM::instance();
 
 	add_action(
 		'plugins_loaded',

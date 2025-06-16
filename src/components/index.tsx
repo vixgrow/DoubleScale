@@ -12,3 +12,4 @@ export { default as DateFilter } from './date-filter';
 export { default as ContactMappedFields } from './contact-mapped-fields';
 export { default as MergeTagsModal } from './merge-tags';
 export { default as PageHeader } from './page-header';
+export { default as PageTabs } from './page-tabs';

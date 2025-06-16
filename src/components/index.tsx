@@ -1,3 +1,4 @@
+export * from './icons';
 export { default as NavBar } from './navbar';
 export { default as TagField } from './tag-field';
 export { default as ListField } from './list-field';
@@ -10,3 +11,4 @@ export { default as Rule } from './rule';
 export { default as DateFilter } from './date-filter';
 export { default as ContactMappedFields } from './contact-mapped-fields';
 export { default as MergeTagsModal } from './merge-tags';
+export { default as PageHeader } from './page-header';

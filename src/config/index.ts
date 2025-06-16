@@ -1,17 +1,17 @@
 /* eslint-disable jsdoc/check-line-alignment */
 import type {
-	ConfigData,
-	Forms,
-	CustomFieldsTypes,
-	FiltersGroups,
-	ContactFieldsGroups,
-	Integrations,
-	AutomationTriggers,
 	AutomationActions,
 	AutomationGoals,
-	AutomationRules,
 	AutomationMergeTags,
+	AutomationRules,
+	AutomationTriggers,
+	ConfigData,
+	ContactFieldsGroups,
+	CustomFieldsTypes,
+	FiltersGroups,
+	Forms,
 	Importers,
+	Integrations,
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
 
@@ -644,5 +644,6 @@ if (window.qcrm === undefined) {
 
 // @ts-ignore
 export default window.qcrm.config as ConfigApi;
-export * from './types/initial-payload';
 export * from './types/config-data';
+export * from './types/icons-type';
+export * from './types/initial-payload';

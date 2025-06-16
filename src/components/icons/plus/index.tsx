@@ -1,6 +1,6 @@
 import { IconProps } from '@quillcrm/config';
 
-const PlusIcon: React.FC<IconProps> = ({ width, height }) => {
+const PlusIcon: React.FC<IconProps> = ({ width = 14, height = 14 }) => {
 	return (
 		<svg
 			width={width}

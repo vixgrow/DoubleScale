@@ -40,6 +40,7 @@
 			"@quillcrm/store": ["store/index.ts"],
 			"@quillcrm/config": ["config"],
 			"@quillcrm/client": ["client"],
+			"@quillcrm/components": ["components"],
 			"@quillcrm/components/*": ["components/*"],
 			"@quillcrm/utils": ["utils"],
 			"@/*": ["./*"]

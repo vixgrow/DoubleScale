@@ -1,1 +1,15 @@
+export { default as AnalyticsReportsIcon } from './analytics-reports';
+export { default as AutomationsIcon } from './automations';
+export { default as CampaignIcon } from './campaign';
+export { default as ContactsIcon } from './contacts';
+export { default as DashboardIcon } from './dashboard';
+export { default as DiscountIcon } from './discount';
+export { default as formsIcon } from './forms';
+export { default as IntegrationsIcon } from './integrations';
+export { default as LogoIcon } from './logo';
+export { default as LogoutIcon } from './logout';
+export { default as NavbarToggleIcon } from './navbar-toggle';
 export { default as PlusIcon } from './plus';
+export { default as SettingsIcon } from './settings';
+export { default as SupportIcon } from './support';
+export { default as ToolsIcon } from './tools';

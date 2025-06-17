@@ -1,6 +1,6 @@
 import { IconProps } from '@quillcrm/config';
 
-const CampaignIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
+const CampaignsIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
 	return (
 		<svg
 			width={width}
@@ -18,6 +18,7 @@ const CampaignIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
 			<path
 				fill-rule="evenodd"
 				clip-rule="evenodd"
+				opacity="0.4"
 				d="M6.97129 15.951L5.45689 13.2899L3.94249 10.6289L1.53467 12.0392C0.0715744 12.8962 -0.434306 14.8118 0.410363 16.296C1.25508 17.7803 3.14325 18.2936 4.60634 17.4367C4.60634 17.4367 7.52326 16.9899 7.01417 16.0264C6.99835 15.9964 6.97129 15.951 6.97129 15.951Z"
 				fill="currentColor"
 			/>
@@ -25,4 +26,4 @@ const CampaignIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
 	);
 };
 
-export default CampaignIcon;
+export default CampaignsIcon;

@@ -40,6 +40,9 @@ import CartAnalysis from '../pages/cart-analytics';
 import ContactAnalytics from '../pages/contacts-analytics';
 import EmailAnalytics from '../pages/emails-analytics';
 import Debug from '../pages/debug';
+import AnalyticsAndReports from '../pages/analytics-and-reports';
+import Tools from '../pages/tools';
+import { AnalyticsReportsIcon, AutomationsIcon, CampaignsIcon, ContactsIcon, DashboardIcon, FormsIcon, IntegrationsIcon, SettingsIcon, ToolsIcon } from '@quillcrm/components';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -54,16 +57,18 @@ export const Controller = ({ page }) => {
 	);
 };
 
-registerAdminPage('home', {
+registerAdminPage('dashboard', {
 	path: '/',
 	component: () => <Dashboard />,
-	label: __('Home', 'quillcrm'),
+	label: __('	Dashboard', 'quillcrm'),
+	icon: <DashboardIcon />,
 });
 
 registerAdminPage('contacts', {
 	path: 'contacts',
 	component: () => <Contacts />,
 	label: __('Contacts', 'quillcrm'),
+	icon: <ContactsIcon/>,
 });
 
 registerAdminPage('contact', {
@@ -77,24 +82,28 @@ registerAdminPage('lists', {
 	path: 'lists',
 	component: () => <Lists />,
 	label: __('Lists', 'quillcrm'),
+	hidden: true,
 });
 
 registerAdminPage('tags', {
 	path: 'tags',
 	component: () => <Tags />,
 	label: __('Tags', 'quillcrm'),
+	hidden: true,
 });
 
 registerAdminPage('custom-fields', {
 	path: 'custom-fields',
 	component: () => <CustomFields />,
 	label: __('Custom Fields', 'quillcrm'),
+	hidden: true,
 });
 
 registerAdminPage('campaigns', {
 	path: 'campaigns',
 	component: () => <Campaigns />,
 	label: __('Campaigns', 'quillcrm'),
+	icon: <CampaignsIcon/>,
 });
 
 registerAdminPage('campaign', {
@@ -104,10 +113,25 @@ registerAdminPage('campaign', {
 	hidden: true,
 });
 
+registerAdminPage('automations', {
+	path: 'automations',
+	component: () => <Automations />,
+	label: __('Automations', 'quillcrm'),
+	icon: <AutomationsIcon />,
+});
+
+registerAdminPage('automation', {
+	path: 'automations/:id/:tab?',
+	component: () => <Automation />,
+	label: __('Automation', 'quillcrm'),
+	hidden: true,
+});
+
 registerAdminPage('forms', {
 	path: 'forms',
 	component: () => <Forms />,
 	label: __('Forms', 'quillcrm'),
+	icon: <FormsIcon/>,
 });
 
 registerAdminPage('form', {
@@ -121,6 +145,7 @@ registerAdminPage('link-triggers', {
 	path: 'link-triggers',
 	component: () => <LinkTriggers />,
 	label: __('Link Triggers', 'quillcrm'),
+	hidden: true,
 });
 
 registerAdminPage('link-trigger', {
@@ -134,12 +159,14 @@ registerAdminPage('integrations', {
 	path: 'integrations/:id?/:tab?',
 	component: () => <Integrations />,
 	label: __('Integrations', 'quillcrm'),
+	icon: <IntegrationsIcon/>,
 });
 
 registerAdminPage('templates', {
 	path: 'templates',
 	component: () => <Templates />,
 	label: __('Templates', 'quillcrm'),
+	hidden: true,
 });
 
 registerAdminPage('template', {
@@ -149,51 +176,58 @@ registerAdminPage('template', {
 	hidden: true,
 });
 
-registerAdminPage('automations', {
-	path: 'automations',
-	component: () => <Automations />,
-	label: __('Automations', 'quillcrm'),
-});
-
-registerAdminPage('automation', {
-	path: 'automations/:id/:tab?',
-	component: () => <Automation />,
-	label: __('Automation', 'quillcrm'),
-	hidden: true,
-});
-
 registerAdminPage('abandoned-carts', {
 	path: 'abandoned-carts',
 	component: () => <AbandonedCartsList />,
 	label: __('Abandoned Carts', 'quillcrm'),
+	hidden: true,
 });
 
-registerAdminPage('settings', {
-	path: 'settings',
-	component: () => <Setting />,
-	label: __('Settings', 'quillcrm'),
+registerAdminPage('analytics-and-reports', {
+	path: 'analytics-and-reports',
+	component: () => <AnalyticsAndReports />,
+	label: __('Analytics and Reports', 'quillcrm'),
+	icon: <AnalyticsReportsIcon />,
 });
 
 registerAdminPage('cart-analytics', {
 	path: 'cart-analytics',
 	component: () => <CartAnalysis />,
 	label: __('Cart Analytics', 'quillcrm'),
+	hidden: true,
 });
 
 registerAdminPage('contacts-analytics', {
 	path: 'contacts-analytics',
 	component: () => <ContactAnalytics />,
 	label: __('Contacts Analytics', 'quillcrm'),
+	hidden: true,
 });
 
 registerAdminPage('emails-analytics', {
 	path: 'emails-analytics',
 	component: () => <EmailAnalytics />,
 	label: __('Emails Analytics', 'quillcrm'),
+	hidden: true,
+});
+
+registerAdminPage('tools', {
+	path: 'tools',
+	component: () => <Tools />,
+	label: __('Tools', 'quillcrm'),
+	icon: <ToolsIcon />,
+});
+
+registerAdminPage('settings', {
+	path: 'settings',
+	component: () => <Setting />,
+	label: __('Settings', 'quillcrm'),
+	icon: <SettingsIcon/>,
 });
 
 registerAdminPage('debug', {
 	path: 'debug',
 	component: () => <Debug />,
 	label: __('Debug', 'quillcrm'),
+	hidden: true,
 });

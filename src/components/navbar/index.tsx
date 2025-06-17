@@ -22,7 +22,7 @@ import './style.scss';
 
 const NavBar: React.FC = () => {
 	const navigate = useNavigate();
-	const [selectedKey, setSelectedKey] = useState('home');
+	const [selectedKey, setSelectedKey] = useState('dashboard');
 	const pages = getAdminPages();
 	type MenuItem = Required<MenuProps>['items'][number];
 

@@ -42,7 +42,17 @@ import EmailAnalytics from '../pages/emails-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 import Tools from '../pages/tools';
-import { AnalyticsReportsIcon, AutomationsIcon, CampaignsIcon, ContactsIcon, DashboardIcon, FormsIcon, IntegrationsIcon, SettingsIcon, ToolsIcon } from '@quillcrm/components';
+import {
+	AnalyticsReportsIcon,
+	AutomationsIcon,
+	CampaignsIcon,
+	ContactsIcon,
+	DashboardIcon,
+	FormsIcon,
+	IntegrationsIcon,
+	SettingsIcon,
+	ToolsIcon,
+} from '@quillcrm/components';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -60,7 +70,7 @@ export const Controller = ({ page }) => {
 registerAdminPage('dashboard', {
 	path: '/',
 	component: () => <Dashboard />,
-	label: __('	Dashboard', 'quillcrm'),
+	label: __('Dashboard', 'quillcrm'),
 	icon: <DashboardIcon />,
 });
 
@@ -68,7 +78,7 @@ registerAdminPage('contacts', {
 	path: 'contacts',
 	component: () => <Contacts />,
 	label: __('Contacts', 'quillcrm'),
-	icon: <ContactsIcon/>,
+	icon: <ContactsIcon />,
 });
 
 registerAdminPage('contact', {
@@ -103,7 +113,7 @@ registerAdminPage('campaigns', {
 	path: 'campaigns',
 	component: () => <Campaigns />,
 	label: __('Campaigns', 'quillcrm'),
-	icon: <CampaignsIcon/>,
+	icon: <CampaignsIcon />,
 });
 
 registerAdminPage('campaign', {
@@ -131,7 +141,7 @@ registerAdminPage('forms', {
 	path: 'forms',
 	component: () => <Forms />,
 	label: __('Forms', 'quillcrm'),
-	icon: <FormsIcon/>,
+	icon: <FormsIcon />,
 });
 
 registerAdminPage('form', {
@@ -159,7 +169,7 @@ registerAdminPage('integrations', {
 	path: 'integrations/:id?/:tab?',
 	component: () => <Integrations />,
 	label: __('Integrations', 'quillcrm'),
-	icon: <IntegrationsIcon/>,
+	icon: <IntegrationsIcon />,
 });
 
 registerAdminPage('templates', {
@@ -222,7 +232,7 @@ registerAdminPage('settings', {
 	path: 'settings',
 	component: () => <Setting />,
 	label: __('Settings', 'quillcrm'),
-	icon: <SettingsIcon/>,
+	icon: <SettingsIcon />,
 });
 
 registerAdminPage('debug', {

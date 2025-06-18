@@ -1,35 +1,22 @@
-export * from './api';
 export {
-	Routes,
-	Route,
-	matchPath,
-	BrowserRouter,
-	useParams,
-	unstable_HistoryRouter as HistoryRouter,
-	useNavigate,
-	useMatch,
+	BrowserRouter, unstable_HistoryRouter as HistoryRouter, matchPath, Route, Routes, useMatch, useNavigate, useParams
 } from 'react-router-dom';
-export { NavLink, setForceReload } from './nav-link';
+export * from './api';
 export { getHistory } from './history';
+export { NavLink, setForceReload } from './nav-link';
 
-export const getToLink = (to: string) => {
+export const getToLink = (routeTemplate: string) => {
 	const pathname = document.location.pathname;
 	const basename = pathname.substring(0, pathname.lastIndexOf('/'));
-	const [path, id, tab, subtab] = to.split('/');
+	let to = `${basename}/admin.php?page=quillcrm`;
 
-	to = `${basename}/admin.php?page=quillcrm&path=${path}`;
+	// Replace dynamic segments in the route template with the actual values from `params`.
+	const route = routeTemplate.replace(/:([^/]+)/g, (_, key) => {
+		const value = key;
+		return value;
+	});
 
-	if (id) {
-		to += `&id=${id}`;
-	}
-
-	if (tab) {
-		to += `&tab=${tab}`;
-	}
-
-	if (subtab) {
-		to += `&subtab=${subtab}`;
-	}
+	to += `&path=${route}`;
 
 	return to;
 };

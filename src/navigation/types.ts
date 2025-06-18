@@ -5,6 +5,7 @@ export type PageSettings = {
 	component: React.FC | JSX.Element | React.Component;
 	requiresInitialPayload?: boolean;
 	label: string;
+	icon?: React.ReactNode;
 	hidden?: boolean;
 };
 export type Pages = Record<string, PageSettings>;

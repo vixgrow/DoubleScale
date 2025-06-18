@@ -21,7 +21,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
  */
 import { size, map } from 'lodash';
 
-import { notification, ConfigProvider } from 'antd';
+import { notification } from 'antd';
 
 /**
  * Internal dependencies
@@ -30,31 +30,10 @@ import { NavBar } from '@quillcrm/components';
 import { Controller } from './controller';
 import './style.scss';
 import { MergeTagsModal } from '@quillcrm/components';
-
-const AntProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	return (
-		<ConfigProvider
-			theme={{
-				components: {
-					Popover: {
-						padding: 5,
-					},
-					Typography: {
-						titleMarginTop: 0,
-					},
-					Table: {
-						headerBg: '#fff',
-					},
-					Input: {
-						borderRadius: 4,
-					},
-				},
-			}}
-		>
-			{children}
-		</ConfigProvider>
-	);
-};
+import {
+	SidebarProvider,
+	SidebarTrigger,
+} from '@quillcrm/components/ui/sidebar';
 
 const Notices: React.FC = () => {
 	const { notices } = useSelect((select) => ({
@@ -91,19 +70,20 @@ export const Layout = (props) => {
 
 	return (
 		<SlotFillProvider>
-			<AntProvider>
-				<div className="qcrm-layout">
-					<NavBar />
+			<SidebarProvider>
+				<div>
 					<Notices />
 					<MergeTagsModal
 						visible={mergeTagsVisible}
 						onClose={() => setMergeTagsVisible(false)}
 					/>
 					<div className="qcrm-layout__main">
+						<NavBar />
+						<SidebarTrigger />
 						<Controller {...props} />
 					</div>
 				</div>
-			</AntProvider>
+			</SidebarProvider>
 		</SlotFillProvider>
 	);
 };

@@ -1,12 +1,6 @@
 import {
 	ColumnDef,
-	SortingState,
-	VisibilityState,
 	flexRender,
-	getCoreRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useReactTable,
 } from '@tanstack/react-table';
 
 import {
@@ -18,96 +12,74 @@ import {
 	TableRow,
 } from '@/components/ui/table';
 
-import { Button } from '@/components/ui/button';
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-
-import { useState } from 'react';
 import { DataTablePagination } from './data-table-pagination';
+import { Filters } from '@quillcrm/components';
+import { __ } from '@wordpress/i18n';
+import { useDataTable } from '../../hooks/use-dataTable';
+import { DataTableSearch } from './data-table-search';
+import { DataTableActions } from './data-table-actions';
+import { DataTableConfig } from '@quillcrm/client';
 
-interface DataTableProps<TData, TValue> {
-	columns: ColumnDef<TData, TValue>[];
+interface DataTableProps<TData> {
+	columns: ColumnDef<TData, any>[];
 	data: TData[];
+	config: DataTableConfig<TData>;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData>({
 	columns,
 	data,
-}: DataTableProps<TData, TValue>) {
-	const [sorting, setSorting] = useState<SortingState>([]);
-	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-		{}
-	);
-	const [rowSelection, setRowSelection] = useState({});
-
-	const table = useReactTable({
-		data,
-		columns,
-		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		onSortingChange: setSorting,
-		getSortedRowModel: getSortedRowModel(),
-		onColumnVisibilityChange: setColumnVisibility,
-		onRowSelectionChange: setRowSelection,
-		state: {
-			sorting,
-			columnVisibility,
-			rowSelection,
-		},
-	});
+	config,
+}: DataTableProps<TData>) {
+	const {
+		table,
+		globalFilter,
+		setGlobalFilter,
+	} = useDataTable(data, columns, config);
 
 	return (
 		<div>
-			<div className="flex items-center py-4">
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="outline" className="ml-auto">
-							Columns
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						{table
-							.getAllColumns()
-							.filter((column) => column.getCanHide())
-							.map((column) => {
-								return (
-									<DropdownMenuCheckboxItem
-										key={column.id}
-										className="capitalize"
-										checked={column.getIsVisible()}
-										onCheckedChange={(value) =>
-											column.toggleVisibility(!!value)
-										}
-									>
-										{column.id}
-									</DropdownMenuCheckboxItem>
-								);
-							})}
-					</DropdownMenuContent>
-				</DropdownMenu>
+			{/* Main Actions Row */}
+			<div className="flex items-center justify-between p-5 border rounded-lg my-4">
+				<DataTableSearch
+					value={globalFilter}
+					onChange={setGlobalFilter}
+					placeholder={config.search?.placeholder}
+				/>
+
+				<DataTableActions
+					table={table}
+					config={config}
+				/>
 			</div>
+
+			{/* Advanced Filters Panel */}
+			{config.filters?.enabled && config.filters.showFilters && (
+				<div className="mb-4 p-4 border rounded-lg bg-muted/50">
+					<Filters
+						filters={config.filters.currentFilters}
+						onChange={config.filters.onFiltersChange}
+						onApply={config.filters.onApplyFilters}
+						isApplying={config.filters.isApplying}
+					/>
+				</div>
+			)}
+
 			<div className="rounded-md border">
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
-								{headerGroup.headers.map((header) => {
-									return (
-										<TableHead key={header.id}>
-											{header.isPlaceholder
-												? null
-												: flexRender(
-														header.column.columnDef
-															.header,
-														header.getContext()
-													)}
-										</TableHead>
-									);
-								})}
+								{headerGroup.headers.map((header) => (
+									<TableHead key={header.id}>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+												header.column.columnDef.header,
+												header.getContext()
+											)}
+									</TableHead>
+								))}
 							</TableRow>
 						))}
 					</TableHeader>
@@ -116,9 +88,7 @@ export function DataTable<TData, TValue>({
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									data-state={
-										row.getIsSelected() && 'selected'
-									}
+									data-state={row.getIsSelected() && 'selected'}
 								>
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id}>
@@ -136,7 +106,7 @@ export function DataTable<TData, TValue>({
 									colSpan={columns.length}
 									className="h-24 text-center"
 								>
-									No results.
+									{__('No results found.', 'quillcrm')}
 								</TableCell>
 							</TableRow>
 						)}

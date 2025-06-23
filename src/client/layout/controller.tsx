@@ -42,7 +42,17 @@ import EmailAnalytics from '../pages/emails-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 import Tools from '../pages/tools';
-import { AnalyticsReportsIcon, AutomationsIcon, CampaignsIcon, ContactsIcon, DashboardIcon, FormsIcon, IntegrationsIcon, SettingsIcon, ToolsIcon } from '@quillcrm/components';
+import {
+	AnalyticsReportsIcon,
+	AutomationsIcon,
+	CampaignsIcon,
+	ContactsIcon,
+	DashboardIcon,
+	FormsIcon,
+	IntegrationsIcon,
+	SettingsIcon,
+	ToolsIcon,
+} from '@quillcrm/components';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -60,7 +70,7 @@ export const Controller = ({ page }) => {
 registerAdminPage('dashboard', {
 	path: '/',
 	component: () => <Dashboard />,
-	label: __('	Dashboard', 'quillcrm'),
+	label: __('Dashboard', 'quillcrm'),
 	icon: <DashboardIcon />,
 });
 

@@ -212,8 +212,8 @@ export type Campaign = {
 	clicked_count: number;
 	failed_count: number;
 	templates_count: {
-		[key: string]: number
-	}
+		[key: string]: number;
+	};
 };
 
 export type Campaigns = Campaign[];
@@ -613,5 +613,39 @@ export type Log = {
 	local_datetime: string;
 	context: {
 		[key: string]: string;
+	};
+};
+
+export interface DataTableConfig<TData> {
+	search?: {
+		placeholder?: string;
+	};
+	selection?: {
+		enabled: boolean;
+		selectedKeys: React.Key[];
+		onSelectionChange: (keys: React.Key[]) => void;
+	};
+	bulkActions?: {
+		enabled: boolean;
+		currentAction: string;
+		onActionChange: (action: string) => void;
+		onExecuteAction: (action: string) => void;
+		lists?: {
+			selected: string[];
+			onSelectionChange: (lists: string[]) => void;
+		};
+		tags?: {
+			selected: string[];
+			onSelectionChange: (tags: string[]) => void;
+		};
+	};
+	filters?: {
+		enabled: boolean;
+		showFilters: boolean;
+		onToggleFilters: (show: boolean) => void;
+		currentFilters: any[];
+		onFiltersChange: (filters: any[]) => void;
+		onApplyFilters: () => void;
+		isApplying: boolean;
 	};
 }

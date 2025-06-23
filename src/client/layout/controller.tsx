@@ -19,9 +19,9 @@ import { motion } from 'framer-motion';
  */
 import Contacts from '../pages/contacts';
 import Contact from '../pages/contact';
-import Lists from '../pages/lists';
-import Tags from '../pages/tags';
-import CustomFields from '../pages/custom-fields';
+import Lists from '../pages/contacts/lists';
+import Tags from '../pages/contacts/tags';
+import CustomFields from '../pages/contacts/custom-fields';
 import Campaigns from '../pages/campaings';
 import Campaign from '../pages/campaign';
 import Forms from '../pages/forms';
@@ -68,7 +68,7 @@ registerAdminPage('contacts', {
 	path: 'contacts',
 	component: () => <Contacts />,
 	label: __('Contacts', 'quillcrm'),
-	icon: <ContactsIcon/>,
+	icon: <ContactsIcon />,
 });
 
 registerAdminPage('contact', {
@@ -103,7 +103,7 @@ registerAdminPage('campaigns', {
 	path: 'campaigns',
 	component: () => <Campaigns />,
 	label: __('Campaigns', 'quillcrm'),
-	icon: <CampaignsIcon/>,
+	icon: <CampaignsIcon />,
 });
 
 registerAdminPage('campaign', {
@@ -131,7 +131,7 @@ registerAdminPage('forms', {
 	path: 'forms',
 	component: () => <Forms />,
 	label: __('Forms', 'quillcrm'),
-	icon: <FormsIcon/>,
+	icon: <FormsIcon />,
 });
 
 registerAdminPage('form', {
@@ -159,7 +159,7 @@ registerAdminPage('integrations', {
 	path: 'integrations/:id?/:tab?',
 	component: () => <Integrations />,
 	label: __('Integrations', 'quillcrm'),
-	icon: <IntegrationsIcon/>,
+	icon: <IntegrationsIcon />,
 });
 
 registerAdminPage('templates', {
@@ -222,7 +222,7 @@ registerAdminPage('settings', {
 	path: 'settings',
 	component: () => <Setting />,
 	label: __('Settings', 'quillcrm'),
-	icon: <SettingsIcon/>,
+	icon: <SettingsIcon />,
 });
 
 registerAdminPage('debug', {

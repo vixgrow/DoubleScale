@@ -1,109 +1,164 @@
-import { Table } from '@tanstack/react-table';
-import {
-	ChevronLeft,
-	ChevronRight,
-	ChevronsLeft,
-	ChevronsRight,
-} from 'lucide-react';
-
-import { Button } from '@quillcrm/components/ui/button';
+import React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from '@quillcrm/components/ui/select';
+} from "@/components/ui/select"
 
-interface DataTablePaginationProps<TData> {
-	table: Table<TData>;
+// Mock table interface for demonstration
+interface MockTable {
+	getState: () => ({
+		pagination: {
+			pageIndex: number;
+			pageSize: number;
+		};
+	});
+	getPageCount: () => number;
+	getFilteredSelectedRowModel: () => ({ rows: any[] });
+	getFilteredRowModel: () => ({ rows: any[] });
+	setPageSize: (size: number) => void;
+	setPageIndex: (index: number) => void;
+	getCanPreviousPage: () => boolean;
+	getCanNextPage: () => boolean;
+	previousPage: () => void;
+	nextPage: () => void;
 }
 
-export function DataTablePagination<TData>({
-	table,
+interface DataTablePaginationProps<TData> {
+	table: MockTable;
+}
+
+// Mock data for demonstration
+const mockTable: MockTable = {
+	getState: () => ({
+		pagination: {
+			pageIndex: 0, // Current page (0-indexed)
+			pageSize: 10,
+		},
+	}),
+	getPageCount: () => 85, // Total pages
+	getFilteredSelectedRowModel: () => ({ rows: [] }),
+	getFilteredRowModel: () => ({ rows: Array(843).fill({}) }), // Total 843 results
+	setPageSize: (size: number) => console.log('Set page size:', size),
+	setPageIndex: (index: number) => console.log('Set page index:', index),
+	getCanPreviousPage: () => false, // First page
+	getCanNextPage: () => true,
+	previousPage: () => console.log('Previous page'),
+	nextPage: () => console.log('Next page'),
+};
+
+export default function DataTablePagination<TData>({
+	table = mockTable,
 }: DataTablePaginationProps<TData>) {
+	const currentPage = table.getState().pagination.pageIndex + 1; // Convert to 1-indexed
+	const totalPages = table.getPageCount();
+	const pageSize = table.getState().pagination.pageSize;
+	const totalResults = table.getFilteredRowModel().rows.length;
+
+	// Calculate which page numbers to show
+	const getVisiblePages = (): (number | string)[] => {
+		const delta = 2; // Number of pages to show on each side of current page
+		const range: number[] = [];
+		const rangeWithDots: (number | string)[] = [];
+
+		for (let i = Math.max(2, currentPage - delta);
+			i <= Math.min(totalPages - 1, currentPage + delta);
+			i++) {
+			range.push(i);
+		}
+
+		if (currentPage - delta > 2) {
+			rangeWithDots.push(1, '...');
+		} else {
+			rangeWithDots.push(1);
+		}
+
+		rangeWithDots.push(...range);
+
+		if (currentPage + delta < totalPages - 1) {
+			rangeWithDots.push('...', totalPages);
+		} else if (totalPages > 1) {
+			rangeWithDots.push(totalPages);
+		}
+
+		// Remove duplicates
+		return rangeWithDots.filter((item, index, arr) =>
+			index === 0 || item !== arr[index - 1]
+		);
+	};
+
+	const visiblePages = getVisiblePages();
+
 	return (
-		<div className="flex items-center justify-between px-2">
-			<div className="text-muted-foreground flex-1 text-sm">
-				{table.getFilteredSelectedRowModel().rows.length} of{' '}
-				{table.getFilteredRowModel().rows.length} row(s) selected.
-			</div>
-			<div className="flex items-center space-x-6 lg:space-x-8">
-				<div className="flex items-center space-x-2">
-					<p className="text-sm font-medium">Rows per page</p>
+		<div className="flex items-center justify-between px-4 pt-3 pb-8 rounded-b-md border">
+			{/* Left side - Results info */}
+			<div className="flex items-center text-sm text-gray-700 space-x-2">
+				<span className='text-[#3F3F46]'>
+					Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalResults)} of {totalResults} results
+				</span>
+				{/* Per page selector */}
+				<div className="flex items-center mr-6 border rounded-lg">
+					<span className="text-sm text-[#71717A] border-r py-2 px-3">Per page</span>
 					<Select
-						value={`${table.getState().pagination.pageSize}`}
-						onValueChange={(value) => {
-							table.setPageSize(Number(value));
-						}}
+						value={String(pageSize)}
+						onValueChange={(value) => table.setPageSize(Number(value))}
 					>
-						<SelectTrigger className="h-8 w-[70px]">
-							<SelectValue
-								placeholder={
-									table.getState().pagination.pageSize
-								}
-							/>
+						<SelectTrigger className="w-20 outline-none border-none ml-0 pr-4">
+							<SelectValue placeholder="Page Size" />
 						</SelectTrigger>
-						<SelectContent side="top">
-							{[10, 20, 25, 30, 40, 50].map((pageSize) => (
-								<SelectItem
-									key={pageSize}
-									value={`${pageSize}`}
-								>
-									{pageSize}
+						<SelectContent>
+							{[10, 20, 30, 40, 50].map((size) => (
+								<SelectItem key={size} value={String(size)}>
+									{size}
 								</SelectItem>
 							))}
 						</SelectContent>
 					</Select>
+
 				</div>
-				<div className="flex w-[100px] items-center justify-center text-sm font-medium">
-					Page {table.getState().pagination.pageIndex + 1} of{' '}
-					{table.getPageCount()}
-				</div>
-				<div className="flex items-center space-x-2">
-					<Button
-						variant="outline"
-						size="icon"
-						className="hidden size-8 lg:flex"
-						onClick={() => table.setPageIndex(0)}
-						disabled={!table.getCanPreviousPage()}
-					>
-						<span className="sr-only">Go to first page</span>
-						<ChevronsLeft />
-					</Button>
-					<Button
-						variant="outline"
-						size="icon"
-						className="size-8"
-						onClick={() => table.previousPage()}
-						disabled={!table.getCanPreviousPage()}
-					>
-						<span className="sr-only">Go to previous page</span>
-						<ChevronLeft />
-					</Button>
-					<Button
-						variant="outline"
-						size="icon"
-						className="size-8"
-						onClick={() => table.nextPage()}
-						disabled={!table.getCanNextPage()}
-					>
-						<span className="sr-only">Go to next page</span>
-						<ChevronRight />
-					</Button>
-					<Button
-						variant="outline"
-						size="icon"
-						className="hidden size-8 lg:flex"
-						onClick={() =>
-							table.setPageIndex(table.getPageCount() - 1)
-						}
-						disabled={!table.getCanNextPage()}
-					>
-						<span className="sr-only">Go to last page</span>
-						<ChevronsRight />
-					</Button>
-				</div>
+			</div>
+
+			{/* Right side - Pagination controls */}
+			<div className="flex items-center border rounded-lg">
+				{/* Previous button */}
+				<button
+					onClick={() => table.previousPage()}
+					disabled={!table.getCanPreviousPage()}
+					className="flex items-center justify-center w-8 h-8 bg-white text-[#A1A1AA] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+				>
+					<ChevronLeft className="w-4 h-4" />
+				</button>
+
+				{/* Page numbers */}
+				{visiblePages.map((page, index) => (
+					<React.Fragment key={index}>
+						{page === '...' ? (
+							<span className="px-2 text-gray-500">...</span>
+						) : (
+							<button
+								onClick={() => table.setPageIndex(Number(page) - 1)}
+								className={`flex items-center justify-center w-8 h-8 border-x border-[#E4E4E7] text-sm font-medium ${page === currentPage
+										? 'bg-[#FAFAFA] text-[#547D29]'
+										: 'bg-white text-[#3F3F46] hover:bg-gray-50'
+									}`}
+							>
+								{page}
+							</button>
+						)}
+					</React.Fragment>
+				))}
+
+				{/* Next button */}
+				<button
+					onClick={() => table.nextPage()}
+					disabled={!table.getCanNextPage()}
+					className="flex items-center justify-center w-8 h-8 bg-white text-[#A1A1AA] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+				>
+					<ChevronRight className="w-4 h-4" />
+				</button>
 			</div>
 		</div>
 	);

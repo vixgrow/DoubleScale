@@ -277,12 +277,7 @@ const AllContacts: React.FC = () => {
             header: __('Full Name', 'quillcrm'),
             cell: ({ row }) => (
                 <NavLink to={`contacts/${row.original.id}`}>
-                    <Flex gap={10} align="center">
-                        <div className="qcrm-contacts-list__avatar">
-                            <UserOutlined />
-                        </div>
                         {row.original.first_name || '-'} {row.original.last_name || '-'}
-                    </Flex>
                 </NavLink>
             ),
         },
@@ -308,6 +303,11 @@ const AllContacts: React.FC = () => {
         {
             accessorKey: 'status',
             header: __('Status', 'quillcrm'),
+            cell: ({ row }) => (
+                <div className='text-[#16A34A] text-xs capitalize bg-[#EFFFF5] rounded-lg py-1 px-3'>
+                        {row.original.status || '-'}
+                </div>
+            ),
         },
         {
             accessorKey: 'phone',

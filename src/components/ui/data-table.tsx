@@ -12,7 +12,7 @@ import {
 	TableRow,
 } from '@/components/ui/table';
 
-import { DataTablePagination } from './data-table-pagination';
+import  DataTablePagination  from './data-table-pagination';
 import { Filters } from '@quillcrm/components';
 import { __ } from '@wordpress/i18n';
 import { useDataTable } from '../../hooks/use-dataTable';
@@ -38,9 +38,9 @@ export function DataTable<TData>({
 	} = useDataTable(data, columns, config);
 
 	return (
-		<div>
+		<div className='w-full'>
 			{/* Main Actions Row */}
-			<div className="flex items-center justify-between p-5 border rounded-lg my-4">
+			<div className="flex items-center justify-between p-5 border rounded-lg my-4 w-full">
 				<DataTableSearch
 					value={globalFilter}
 					onChange={setGlobalFilter}
@@ -65,13 +65,13 @@ export function DataTable<TData>({
 				</div>
 			)}
 
-			<div className="rounded-md border">
+			<div className="rounded-t-md border w-full">
 				<Table>
-					<TableHeader>
+					<TableHeader className='bg-[#FAFAFA]'>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map((header) => (
-									<TableHead key={header.id}>
+									<TableHead key={header.id} className='text-[#09090B]'>
 										{header.isPlaceholder
 											? null
 											: flexRender(
@@ -91,7 +91,7 @@ export function DataTable<TData>({
 									data-state={row.getIsSelected() && 'selected'}
 								>
 									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id}>
+										<TableCell key={cell.id} className='text-[#09090B]'>
 											{flexRender(
 												cell.column.columnDef.cell,
 												cell.getContext()

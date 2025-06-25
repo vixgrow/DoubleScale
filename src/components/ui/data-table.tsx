@@ -1,8 +1,19 @@
+/**
+ * wordpress depnedencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
+ * external dependencies
+ */
 import {
 	ColumnDef,
 	flexRender,
 } from '@tanstack/react-table';
 
+/**
+ * internal dependencies
+ */
 import {
 	Table,
 	TableBody,
@@ -11,10 +22,8 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-
 import  DataTablePagination  from './data-table-pagination';
 import { Filters } from '@quillcrm/components';
-import { __ } from '@wordpress/i18n';
 import { useDataTable } from '../../hooks/use-dataTable';
 import { DataTableSearch } from './data-table-search';
 import { DataTableActions } from './data-table-actions';

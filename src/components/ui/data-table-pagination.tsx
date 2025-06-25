@@ -1,12 +1,25 @@
+/**
+ * wordpress depnedencies
+ */
+
+/**
+ * external dependencies
+ */
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+/**
+ * internal dependencies
+ */
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+
 
 // Mock table interface for demonstration
 interface MockTable {
@@ -124,13 +137,15 @@ export default function DataTablePagination<TData>({
 			{/* Right side - Pagination controls */}
 			<div className="flex items-center border rounded-lg">
 				{/* Previous button */}
-				<button
+				<Button
 					onClick={() => table.previousPage()}
 					disabled={!table.getCanPreviousPage()}
-					className="flex items-center justify-center w-8 h-8 bg-white text-[#A1A1AA] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+					size="icon"
+					variant="ghost"
+					className="w-8 h-8 text-[#A1A1AA] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					<ChevronLeft className="w-4 h-4" />
-				</button>
+				</Button>
 
 				{/* Page numbers */}
 				{visiblePages.map((page, index) => (
@@ -141,8 +156,8 @@ export default function DataTablePagination<TData>({
 							<button
 								onClick={() => table.setPageIndex(Number(page) - 1)}
 								className={`flex items-center justify-center w-8 h-8 border-x border-[#E4E4E7] text-sm font-medium ${page === currentPage
-										? 'bg-[#FAFAFA] text-[#547D29]'
-										: 'bg-white text-[#3F3F46] hover:bg-gray-50'
+									? 'bg-[#FAFAFA] text-[#547D29]'
+									: 'bg-white text-[#3F3F46] hover:bg-gray-50'
 									}`}
 							>
 								{page}
@@ -152,13 +167,15 @@ export default function DataTablePagination<TData>({
 				))}
 
 				{/* Next button */}
-				<button
+				<Button
 					onClick={() => table.nextPage()}
 					disabled={!table.getCanNextPage()}
-					className="flex items-center justify-center w-8 h-8 bg-white text-[#A1A1AA] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+					size="icon"
+					variant="ghost"
+					className="w-8 h-8 text-[#A1A1AA] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					<ChevronRight className="w-4 h-4" />
-				</button>
+				</Button>
 			</div>
 		</div>
 	);

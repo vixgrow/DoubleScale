@@ -1,3 +1,16 @@
+/**
+ * wordpress depnedencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
+ * external dependencies
+ */
+import { Table } from '@tanstack/react-table';
+
+/**
+ * internal dependencies
+ */
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -6,9 +19,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ColumnsIcon, FiltersIcon, BulkActionSelect } from '@quillcrm/components';
-import { __ } from '@wordpress/i18n';
-import { Flex } from 'antd';
-import { Table } from '@tanstack/react-table';
 import { DataTableConfig } from '@quillcrm/client';
 
 interface DataTableActionsProps<TData> {
@@ -21,7 +31,7 @@ export function DataTableActions<TData>({
     config,
 }: DataTableActionsProps<TData>) {
     return (
-        <Flex gap={10} align="center">
+        <div className='flex gap-[10px] items-center'>
             {/* Manage Columns Dropdown */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -71,6 +81,6 @@ export function DataTableActions<TData>({
                     selectedTags={config.bulkActions.tags?.selected || []}
                 />
             )}
-        </Flex>
+        </div>
     );
 }

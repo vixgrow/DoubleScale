@@ -8,6 +8,7 @@
 
 .qcrm-layout {
 	font-size: 13px;
+	width: 100%;
 }
 
 #wpwrap {
@@ -22,10 +23,12 @@ div#wpcontent {
 
 .qcrm-layout * {
 	box-sizing: border-box;
+	width: 100%;
 }
 .qcrm-layout__main {
 	display: flex;
 	box-sizing: border-box;
+	width: 100%;
 	.qcrm-page-component-wrapper {
 		width: 100%;
 		position: relative;

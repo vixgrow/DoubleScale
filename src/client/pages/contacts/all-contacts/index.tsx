@@ -11,8 +11,7 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { ColumnDef } from '@tanstack/react-table';
-import { Flex, Tag as AntTag } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+import { Tag as AntTag } from 'antd';
 
 /**
  * Internal dependencies
@@ -29,7 +28,6 @@ import ConfigAPI from '@quillcrm/config';
 import { DataTable } from '@/components/ui/data-table';
 import { Checkbox } from '@/components/ui/checkbox'; // adjust path if needed
 import { SortIcon, ViewIcon } from '@quillcrm/components';
-import { Button } from '@quillcrm/components/ui/button';
 
 const selectionColumn: ColumnDef<Contact> = {
 	id: 'select',
@@ -523,7 +521,7 @@ const AllContacts: React.FC = () => {
 	};
 
 	return (
-		<div className="qcrm-all-contacts">
+		<div className="qcrm-all-contacts w-full">
 			{/* DataTable now includes search, filters, bulk actions, and column management */}
 			<DataTable columns={columns} data={data} config={tableConfig} />
 		</div>

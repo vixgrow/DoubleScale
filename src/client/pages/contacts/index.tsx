@@ -3,6 +3,7 @@
  */
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
@@ -23,7 +24,6 @@ import CustomFields from './custom-fields';
 import AllContacts from './all-contacts';
 import { Contact } from '@/client/types';
 import { createNotice } from '@/stores/core/actions';
-import apiFetch from '@wordpress/api-fetch';
 import { isEmail } from 'validator';
 
 const ContactsList: React.FC = () => {
@@ -75,7 +75,7 @@ const ContactsList: React.FC = () => {
 	};
 
 	return (
-		<div className="qcrm-contacts-list">
+		<div className="qcrm-contacts-list w-full">
 			<PageHeader
 				title={__('Contacts List', '@quillcrm')}
 				subtitle={__('Contacts')}

@@ -22,6 +22,7 @@ import {
 	Select,
 } from 'antd';
 import { EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
+import React, { forwardRef, useImperativeHandle } from 'react';
 
 /**
  * Internal dependencies
@@ -34,7 +35,11 @@ import { isEmpty } from 'validator';
 
 const { Column } = Table;
 
-const Lists: React.FC = () => {
+export interface ListsRef {
+	openCreateListModal: () => void;
+}
+
+const Lists = forwardRef<ListsRef>((_, ref) => {
 	const [lists, setLists] = useState<ContactList[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
@@ -56,6 +61,13 @@ const Lists: React.FC = () => {
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
+
+	useImperativeHandle(ref, () => ({
+		openCreateListModal: () => {
+			setSelectedList(null);
+			setVisible(true);
+		},
+	}));
 
 	const fetchLists = async () => {
 		setLoading(true);
@@ -207,9 +219,6 @@ const Lists: React.FC = () => {
 
 	return (
 		<div className="qcrm-contacts-lists-list">
-			<Typography.Title level={2}>
-				{__('Lists', 'quillcrm')}
-			</Typography.Title>
 			<Flex
 				className="qcrm-contacts-list__actions"
 				justify="space-between"
@@ -261,9 +270,6 @@ const Lists: React.FC = () => {
 						}}
 					/>
 				</Flex>
-				<Button type="primary" onClick={() => setVisible(true)}>
-					{__('Create List', 'quillcrm')}
-				</Button>
 			</Flex>
 			<Table
 				dataSource={lists}
@@ -395,6 +401,6 @@ const Lists: React.FC = () => {
 			</Modal>
 		</div>
 	);
-};
+});
 
 export default Lists;

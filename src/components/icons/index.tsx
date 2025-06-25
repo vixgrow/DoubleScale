@@ -20,3 +20,5 @@ export { default as ToolsIcon } from './tools';
 export { default as CalendarIcon } from './calendar';
 export { default as ColumnsIcon } from './columns';
 export { default as FiltersIcon } from './filters';
+export { default as ViewIcon } from './view';
+export { default as SortIcon } from './sort';

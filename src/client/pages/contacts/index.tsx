@@ -38,6 +38,14 @@ const ContactsList: React.FC = () => {
 	const [exportModalVisible, setExportModalVisible] = useState(false);
 	const [visible, setVisible] = useState(false);
 	const [allContactsKey, setAllContactsKey] = useState(0); // Key to force re-render of AllContacts
+	const [activeTab, setActiveTab] = useState('all');
+
+	const tabTitles = {
+		all: __('Contacts List', 'quillcrm'),
+		lists: __('Lists', 'quillcrm'),
+		tags: __('Tags', 'quillcrm'),
+		'custom-fields': __('Custom Fields', 'quillcrm'),
+	};
 
 	const createContact = async () => {
 		if (!isEmail(contact.email)) {
@@ -77,7 +85,7 @@ const ContactsList: React.FC = () => {
 	return (
 		<div className="qcrm-contacts-list w-full">
 			<PageHeader
-				title={__('Contacts List', '@quillcrm')}
+				title={tabTitles[activeTab]}
 				subtitle={__('Contacts')}
 				actions={[
 					{
@@ -102,6 +110,7 @@ const ContactsList: React.FC = () => {
 
 			<PageTabs
 				defaultValue="all"
+				onValueChange={(value) => setActiveTab(value)}
 				tabsList={[
 					{
 						label: 'All Contacts',

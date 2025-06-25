@@ -18,15 +18,17 @@ interface PageTabsProps {
 	className?: string;
 	tabsList: TabListItem[];
 	tabsContent: TabContent[];
+	onValueChange?: (value: string) => void; // 👈 Add this line
 }
 const PageTabs: React.FC<PageTabsProps> = ({
 	defaultValue,
 	tabsList,
 	tabsContent,
 	className,
+	onValueChange,
 }) => {
 	return (
-		<Tabs defaultValue={defaultValue} className={className}>
+		<Tabs defaultValue={defaultValue} className={className} onValueChange={onValueChange}>
 			<div className="border px-5 py-3 rounded-lg">
 				<TabsList className="bg-transparent text-foreground gap-3">
 					{tabsList.map((tab) => (

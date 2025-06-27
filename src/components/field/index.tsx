@@ -217,8 +217,8 @@ const Field: React.FC<FieldProps> = ({
 	return (
 		<div className="qcrm-field" style={style || {}}>
 			{label && (
-				<div className="qcrm-field-label">
-					<Typography.Text>{label}</Typography.Text>
+				<div className="qcrm-field-label text-[#09090B] font-normal text-base">
+					{label} <span className='text-red-600'>*</span>
 				</div>
 			)}
 			<div className="qcrm-field-input">{fieldContent}</div>

@@ -22,3 +22,4 @@ export { default as ColumnsIcon } from './columns';
 export { default as FiltersIcon } from './filters';
 export { default as ViewIcon } from './view';
 export { default as SortIcon } from './sort';
+export { default as GradientListIcon } from './gradient-list';

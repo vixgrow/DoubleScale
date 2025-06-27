@@ -93,6 +93,7 @@ const Field: React.FC<FieldProps> = ({
 					onChange={(e) => onChange(e.target.value)}
 					type={type}
 					status={status || ''}
+					className='h-12'
 				/>
 			);
 			break;

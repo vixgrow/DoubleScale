@@ -617,6 +617,9 @@ export type Log = {
 };
 
 export interface DataTableConfig<TData> {
+	manageColumns?:{
+		enabled:boolean;
+	}
 	search?: {
 		placeholder?: string;
 	};
@@ -638,6 +641,7 @@ export interface DataTableConfig<TData> {
 			selected: string[];
 			onSelectionChange: (tags: string[]) => void;
 		};
+		activeTab?: string,
 	};
 	filters?: {
 		enabled: boolean;

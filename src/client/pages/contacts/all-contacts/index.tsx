@@ -51,7 +51,11 @@ const selectionColumn: ColumnDef<Contact> = {
 	enableHiding: false,
 };
 
-const AllContacts: React.FC = () => {
+interface AllContactsProps {
+	activeTab?: string;
+}
+
+const AllContacts: React.FC<AllContactsProps> = ({ activeTab }) => {
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(10);
@@ -483,6 +487,9 @@ const AllContacts: React.FC = () => {
 	const columns: ColumnDef<Contact>[] = [selectionColumn, ...baseColumns];
 
 	const tableConfig: DataTableConfig<Contact> = {
+		manageColumns:{
+			enabled: true,
+		},
 		search: {
 			placeholder: __('Search contacts...', 'quillcrm'),
 		},
@@ -505,6 +512,7 @@ const AllContacts: React.FC = () => {
 				selected: selectedTags,
 				onSelectionChange: (tags: string[]) => setSelectedTags(tags),
 			},
+			activeTab: activeTab,
 		},
 		filters: {
 			enabled: true,
@@ -523,7 +531,7 @@ const AllContacts: React.FC = () => {
 	return (
 		<div className="qcrm-all-contacts w-full">
 			{/* DataTable now includes search, filters, bulk actions, and column management */}
-			<DataTable columns={columns} data={data} config={tableConfig} />
+			<DataTable columns={columns} data={data} config={tableConfig} activeTab={activeTab}/>
 		</div>
 	);
 };

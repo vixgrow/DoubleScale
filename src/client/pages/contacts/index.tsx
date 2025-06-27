@@ -184,11 +184,11 @@ const ContactsList: React.FC = () => {
 				tabsContent={[
 					{
 						value: 'all',
-						children: <AllContacts key={allContactsKey} />
+						children: <AllContacts key={allContactsKey} activeTab="all"/>
 					},
 					{
 						value: 'lists',
-						children: <Lists ref={listsRef} />,
+						children: <Lists ref={listsRef} activeTab="lists"/>,
 					},
 					{
 						value: 'tags',

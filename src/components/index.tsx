@@ -14,3 +14,4 @@ export { default as MergeTagsModal } from './merge-tags';
 export { default as PageHeader } from './page-header';
 export { default as PageTabs } from './page-tabs';
 export { default as BulkActionSelect } from './bulk-actions';
+export { default as CustomDialogHeader } from './dialog-header';  

@@ -18,6 +18,7 @@ interface BulkActionSelectProps {
     setSelectedTags: (tags: string[]) => void;
     selectedLists: string[];
     selectedTags: string[];
+    activeTab?: string; // Add active tab prop
 }
 
 const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
@@ -29,8 +30,9 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
     setSelectedTags,
     selectedLists,
     selectedTags,
+    activeTab, 
 }) => {
-    const handleAction = (value) => {
+    const handleAction = (value: string) => {
         setBulkAction(value);
         setSelectedLists([]);
         setSelectedTags([]);
@@ -40,6 +42,43 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
             doBulkAction(value);
         }
     };
+
+    // Define bulk actions based on active tab
+    const getBulkActionsForTab = () => {
+        switch (activeTab) {
+            case 'all': // All Contacts tab
+                return [
+                    { value: "none", label: __("Bulk Actions", "quillcrm") },
+                    { value: "delete", label: __("Delete", "quillcrm") },
+                    { value: "add_to_list", label: __("Add to List", "quillcrm") },
+                    { value: "add_tag", label: __("Add Tag", "quillcrm") },
+                    { value: "remove_from_list", label: __("Remove from List", "quillcrm") },
+                    { value: "remove_tag", label: __("Remove Tag", "quillcrm") },
+                ];
+            case 'lists': // Lists tab
+                return [
+                    { value: "none", label: __("Bulk Actions", "quillcrm") },
+                    { value: "delete", label: __("Delete Lists", "quillcrm") },
+                ];
+            case 'tags': // Tags tab
+                return [
+                    { value: "none", label: __("Bulk Actions", "quillcrm") },
+                    { value: "delete", label: __("Delete Tags", "quillcrm") },
+                ];
+            case 'custom-fields': // Custom Fields tab
+                return [
+                    { value: "none", label: __("Bulk Actions", "quillcrm") },
+                    { value: "delete", label: __("Delete Fields", "quillcrm") },
+                ];
+            default:
+                return [
+                    { value: "none", label: __("Bulk Actions", "quillcrm") },
+                    { value: "delete", label: __("Delete", "quillcrm") },
+                ];
+        }
+    };
+
+    const availableActions = getBulkActionsForTab();
 
     return (
         <div className="flex gap-4 flex-wrap">
@@ -52,16 +91,16 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
                     <SelectValue placeholder="Bulk Actions" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="none">{__("Bulk Actions", "quillcrm")}</SelectItem>
-                    <SelectItem value="delete">{__("Delete", "quillcrm")}</SelectItem>
-                    <SelectItem value="add_to_list">{__("Add to List", "quillcrm")}</SelectItem>
-                    <SelectItem value="add_tag">{__("Add Tag", "quillcrm")}</SelectItem>
-                    <SelectItem value="remove_from_list">{__("Remove from List", "quillcrm")}</SelectItem>
-                    <SelectItem value="remove_tag">{__("Remove Tag", "quillcrm")}</SelectItem>
+                    {availableActions.map((action) => (
+                        <SelectItem key={action.value} value={action.value}>
+                            {action.label}
+                        </SelectItem>
+                    ))}
                 </SelectContent>
             </Select>
 
-            {(bulkAction === "add_to_list" || bulkAction === "remove_from_list") && (
+            {/* Only show list and tag fields for contacts tab */}
+            {activeTab === 'all' && (bulkAction === "add_to_list" || bulkAction === "remove_from_list") && (
                 <ListField
                     value={selectedLists.map((id) => Number(id))}
                     onChange={(value) => {
@@ -71,7 +110,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
                 />
             )}
 
-            {(bulkAction === "add_tag" || bulkAction === "remove_tag") && (
+            {activeTab === 'all' && (bulkAction === "add_tag" || bulkAction === "remove_tag") && (
                 <TagField
                     value={selectedTags.map((id) => Number(id))}
                     onChange={(value) => {
@@ -83,5 +122,5 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
         </div>
     );
 }
+
 export default BulkActionSelect;
-  

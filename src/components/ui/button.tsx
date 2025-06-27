@@ -19,11 +19,13 @@ const buttonVariants = cva(
 					'border border-secondary text-secondary shadow-sm hover:bg-secondary/80 hover:text-primary-foreground',
 				ghost: 'hover:bg-accent hover:text-accent-foreground',
 				link: 'text-primary underline-offset-4 hover:underline',
+				gradient: 'bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] text-primary-foreground',
 			},
 			size: {
 				default: 'h-9 rounded-xl px-6 py-[20px]',
 				sm: 'h-8 rounded-md px-3 text-xs',
 				lg: 'h-10 rounded-md px-8',
+				xl: 'h-12 rounded-lg',
 				icon: 'h-9 w-9',
 			},
 		},

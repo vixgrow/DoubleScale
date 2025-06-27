@@ -33,12 +33,14 @@ interface DataTableProps<TData> {
 	columns: ColumnDef<TData, any>[];
 	data: TData[];
 	config: DataTableConfig<TData>;
+	activeTab?: string;
 }
 
 export function DataTable<TData>({
 	columns,
 	data,
 	config,
+	activeTab
 }: DataTableProps<TData>) {
 	const {
 		table,
@@ -59,6 +61,7 @@ export function DataTable<TData>({
 				<DataTableActions
 					table={table}
 					config={config}
+					activeTab={activeTab}
 				/>
 			</div>
 

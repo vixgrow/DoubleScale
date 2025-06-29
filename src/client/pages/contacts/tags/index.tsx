@@ -18,7 +18,7 @@ import { ColumnDef } from '@tanstack/react-table';
  */
 import './style.scss';
 import type { Tag as ContactTag, TagsResponse, DataTableConfig, NoticeMessage } from '@quillcrm/client';
-import { CustomDialogHeader, Field, GradientListIcon, SortIcon, NoticeBanner } from '@quillcrm/components';
+import { CustomDialogHeader, Field, SortIcon, NoticeBanner, GradientTagIcon } from '@quillcrm/components';
 import { convertDate } from '@quillcrm/utils';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
@@ -65,10 +65,9 @@ const selectionColumn: ColumnDef<ContactTag> = {
 const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [tags, setTags] = useState<ContactTag[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [perPage, setPerPage] = useState<number>(10);
-	const [page, setPage] = useState<number>(1);
-	const [total, setTotal] = useState<number>(0);
-	const [keyword, setKeyword] = useState<string>('');
+	const [perPage] = useState<number>(10);
+	const [page] = useState<number>(1);
+	const [keyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedTag, setSelectedTag] = useState<ContactTag | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -117,7 +116,6 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			})) as TagsResponse;
 
 			setTags(response.data);
-			setTotal(response.total);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -355,7 +353,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 							<CustomDialogHeader
 								title={selectedTag ? __('Edit Tag', 'quillcrm') : __('Create Tag', 'quillcrm')}
 								subtitle={__('Add basic information below to add new Tag', 'quillcrm')}
-								icon={<GradientListIcon />}
+								icon={<GradientTagIcon />}
 							/>
 						</DialogTitle>
 					</DialogHeader>

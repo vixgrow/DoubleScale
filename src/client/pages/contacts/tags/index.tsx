@@ -5,36 +5,64 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import {
-	Typography,
-	Table,
-	Input,
-	Button,
-	Modal,
-	Popconfirm,
-	Flex,
-	Select,
-	Popover,
-} from 'antd';
-import { EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
+import { EditOutlined } from '@ant-design/icons';
+import React, { forwardRef, useImperativeHandle } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Tag as ContactTag, TagsResponse } from '@quillcrm/client';
-import { Field } from '@quillcrm/components';
+import type { Tag as ContactTag, TagsResponse, DataTableConfig, NoticeMessage } from '@quillcrm/client';
+import { CustomDialogHeader, Field, GradientListIcon, SortIcon, NoticeBanner } from '@quillcrm/components';
 import { convertDate } from '@quillcrm/utils';
 import { isEmpty } from 'validator';
+import { DataTable } from '@/components/ui/data-table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@quillcrm/components/ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+} from "@/components/ui/dialog";
 
-const { Column } = Table;
+export interface TagsRef {
+	openCreateTagModal: () => void;
+}
 
-const Tags: React.FC = () => {
+interface TagsProps {
+	activeTab?: string;
+}
+
+const selectionColumn: ColumnDef<ContactTag> = {
+	id: 'select',
+	header: ({ table }) => (
+		<Checkbox
+			checked={table.getIsAllPageRowsSelected()}
+			onCheckedChange={(value) =>
+				table.toggleAllPageRowsSelected(!!value)
+			}
+			aria-label="Select all"
+		/>
+	),
+	cell: ({ row }) => (
+		<Checkbox
+			checked={row.getIsSelected()}
+			onCheckedChange={(value) => row.toggleSelected(!!value)}
+			aria-label="Select row"
+		/>
+	),
+	enableSorting: false,
+	enableHiding: false,
+};
+
+const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [tags, setTags] = useState<ContactTag[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
@@ -51,9 +79,32 @@ const Tags: React.FC = () => {
 	});
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
-	const { createNotice } = useDispatch('quillcrm/core');
 
-	const fetchTags = async (clear: boolean = false) => {
+	// Notice state
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+
+	// Helper function to show notice
+	const showNotice = (type: 'success' | 'error', message: string) => {
+		setNotice({ type, message });
+	};
+
+	// Helper function to close notice
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	useImperativeHandle(ref, () => ({
+		openCreateTagModal: () => {
+			setSelectedTag(null);
+			setTag({
+				name: '',
+				description: '',
+			});
+			setVisible(true);
+		},
+	}));
+
+	const fetchTags = async () => {
 		setLoading(true);
 
 		try {
@@ -61,17 +112,14 @@ const Tags: React.FC = () => {
 				path: addQueryArgs('/qc/v1/tags', {
 					per_page: perPage,
 					page,
-					keyword: clear ? '' : keyword,
+					keyword,
 				}),
 			})) as TagsResponse;
 
 			setTags(response.data);
 			setTotal(response.total);
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setLoading(false);
 		}
@@ -79,7 +127,7 @@ const Tags: React.FC = () => {
 
 	useEffect(() => {
 		fetchTags();
-	}, [page, perPage]);
+	}, [page, perPage, keyword]);
 
 	const createTag = async () => {
 		if (!validate(tag)) {
@@ -100,25 +148,18 @@ const Tags: React.FC = () => {
 				name: '',
 				description: '',
 			});
+			showNotice('success', __('Your Tag was successfully added  — check it out!', 'quillcrm'));
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setIsSaving(false);
 		}
 	};
 
 	const updateTag = async () => {
-		if (!selectedTag) {
+		if (!selectedTag || !validate(selectedTag)) {
 			return;
 		}
-
-		if (!validate(selectedTag)) {
-			return;
-		}
-
 		setIsSaving(true);
 		try {
 			const response = (await apiFetch({
@@ -128,34 +169,18 @@ const Tags: React.FC = () => {
 			})) as ContactTag;
 
 			setTags([
-				...tags.map((tag) => (tag.id === response.id ? response : tag)),
+				...tags.map((tag) =>
+					tag.id === response.id ? response : tag
+				),
 			]);
 
 			setVisible(false);
 			setSelectedTag(null);
+			showNotice('success', __('Tag updated successfully', 'quillcrm'));
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setIsSaving(false);
-		}
-	};
-
-	const deleteTag = async (id: number) => {
-		try {
-			await apiFetch({
-				path: `/qc/v1/tags/${id}`,
-				method: 'DELETE',
-			});
-
-			setTags(tags.filter((tag) => tag.id !== id));
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
 		}
 	};
 
@@ -166,231 +191,215 @@ const Tags: React.FC = () => {
 
 		setIsApplying(true);
 		try {
-			// @ts-ignore
-			const response = await apiFetch({
+			await apiFetch({
 				path: '/qc/v1/tags',
 				method: 'DELETE',
 				data: { ids: selectedRowKeys },
 			});
 
-			setTags(tags.filter((tag) => !selectedRowKeys.includes(tag.id)));
+			await fetchTags();
 			setSelectedRowKeys([]);
+			setBulkAction('');
+			showNotice('success', __('Selected tags deleted successfully', 'quillcrm'));
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setIsApplying(false);
 		}
 	};
 
+	const doBulkAction = async (action: string) => {
+		switch (action) {
+			case 'delete':
+				deleteSelectedTags();
+				break;
+			default:
+				break;
+		}
+	};
+
 	const validate = (tag: Partial<ContactTag>) => {
 		if (isEmpty(tag.name || '', { ignore_whitespace: true })) {
-			createNotice({
-				type: 'error',
-				message: __('Tag name is required', 'quillcrm'),
-			});
+			showNotice('error', __('Tag name is required', 'quillcrm'));
 			return false;
 		}
-
 		return true;
+	};
+
+	const columns: ColumnDef<ContactTag>[] = [
+		selectionColumn,
+		{
+			accessorKey: 'name',
+			header: ({ column }) => (
+				<div className='flex items-center gap-1'
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Name', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => (
+				<span>{row.original.name}</span>
+			),
+		},
+		{
+			accessorKey: 'description',
+			header: ({ column }) => (
+				<div className='flex items-center gap-1'
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Description', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => row.original.description || '-',
+		},
+		{
+			accessorKey: 'contacts_count',
+			header: ({ column }) => (
+				<div className='flex items-center gap-1'
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Contacts', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => (row.original as any).contacts_count ?? 0,
+		},
+		{
+			accessorKey: 'created_at',
+			header: ({ column }) => (
+				<div className='flex items-center gap-1'
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Created At', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => convertDate(row.original.created_at),
+		},
+		{
+			accessorKey: 'actions',
+			header: () => __('Actions', 'quillcrm'),
+			cell: ({ row }) => (
+				<Button
+					onClick={() => {
+						setSelectedTag(row.original);
+						setVisible(true);
+					}}
+					variant="ghost"
+					className='p-0'
+				>
+					<EditOutlined />
+					{__('Edit', 'quillcrm')}
+				</Button>
+			),
+		},
+	];
+
+	const tableConfig: DataTableConfig<ContactTag> = {
+		manageColumns: {
+			enabled: false,
+		},
+		search: {
+			placeholder: __('Search Tags', 'quillcrm'),
+		},
+		selection: {
+			enabled: true,
+			selectedKeys: selectedRowKeys,
+			onSelectionChange: setSelectedRowKeys,
+		},
+		bulkActions: {
+			enabled: true,
+			currentAction: bulkAction,
+			onActionChange: setBulkAction,
+			onExecuteAction: doBulkAction,
+			activeTab: activeTab,
+		},
 	};
 
 	return (
 		<div className="qcrm-contacts-tags-list">
-			<Typography.Title level={2}>
-				{__('Tags', 'quillcrm')}
-			</Typography.Title>
-			<Flex
-				className="qcrm-contacts-list__actions"
-				justify="space-between"
-			>
-				<Flex gap={10}>
-					<Flex gap={10}>
-						<Select
-							options={[
-								{
-									label: __('Bulk Actions', 'quillcrm'),
-									value: '',
-								},
-								{
-									label: __('Delete', 'quillcrm'),
-									value: 'delete',
-								},
-							]}
-							value={bulkAction}
-							onChange={(value) => setBulkAction(value)}
-							disabled={selectedRowKeys.length === 0}
-						/>
-						<Button
-							type="primary"
-							onClick={() => {
-								if (bulkAction === 'delete') {
-									deleteSelectedTags();
-								}
-							}}
-							disabled={selectedRowKeys.length === 0}
-							loading={isApplying}
-						>
-							{__('Apply', 'quillcrm')}
-						</Button>
-					</Flex>
-					<Input.Search
-						placeholder={__('Search Tags', 'quillcrm')}
-						allowClear
-						onSearch={(_value, _e, source) => {
-							if (source?.source === 'clear') {
-								fetchTags(true);
-								return;
-							}
-							fetchTags();
-						}}
-						onChange={(e) => setKeyword(e.target.value)}
-						styles={{
-							affixWrapper: {
-								padding: '4px 5px',
-							},
-							input: {
-								minHeight: 'auto',
-							},
-						}}
-					/>
-				</Flex>
-				<Button type="primary" onClick={() => setVisible(true)}>
-					{__('Create Tag', 'quillcrm')}
-				</Button>
-			</Flex>
-			<Table
-				dataSource={tags}
-				rowKey="id"
-				loading={loading}
-				pagination={{
-					current: page,
-					pageSize: perPage,
-					total,
-					onChange: (newPage) => setPage(newPage),
-					onShowSizeChange: (_, newSize) => setPerPage(newSize),
-				}}
-				rowSelection={{
-					selectedRowKeys,
-					onChange: (selectedRowKeys) =>
-						setSelectedRowKeys(selectedRowKeys),
-				}}
-			>
-				<Column
-					title={__('Name', 'quillcrm')}
-					dataIndex="name"
-					key="name"
-					render={(name: string, record: ContactTag) => (
-						<Flex gap={10} align="center">
-							<Popover
-								content={
-									<Flex vertical gap={10}>
-										<Button
-											icon={<EditOutlined />}
-											onClick={() => {
-												setSelectedTag(record);
-												setVisible(true);
-											}}
-										>
-											{__('Edit', 'quillcrm')}
-										</Button>
-										<Popconfirm
-											title={__(
-												'Are you sure?',
-												'quillcrm'
-											)}
-											onConfirm={() =>
-												deleteTag(record.id)
-											}
-										>
-											<Button
-												icon={<DeleteOutlined />}
-												danger
-											>
-												{__('Delete', 'quillcrm')}
-											</Button>
-										</Popconfirm>
-									</Flex>
-								}
-								trigger="click"
-							>
-								<MoreOutlined size={40} />
-							</Popover>
-							<Typography.Text>{name}</Typography.Text>
-						</Flex>
-					)}
+			{/* Notice Banner */}
+			{notice && (
+				<NoticeBanner
+					notice={notice}
+					closeNotice={closeNotice}
 				/>
-				<Column
-					title={__('Contacts', 'quillcrm')}
-					dataIndex="contacts_count"
-					key="contacts_count"
-					render={(count: number) => count ?? 0}
-				/>
-				<Column
-					title={__('Created At', 'quillcrm')}
-					dataIndex="created_at"
-					key="created_at"
-					render={(date: string) => convertDate(date)}
-				/>
-			</Table>
-			<Modal
-				title={
-					selectedTag
-						? __('Edit Tag', 'quillcrm')
-						: __('Create Tag', 'quillcrm')
+			)}
+
+			<DataTable
+				columns={columns}
+				data={tags}
+				config={tableConfig}
+			/>
+
+			<Dialog open={visible} onOpenChange={(open) => {
+				setVisible(open);
+				if (!open) {
+					setSelectedTag(null);
+					setTag({ name: '', description: '' });
 				}
-				open={visible}
-				onOk={() => (selectedTag ? updateTag() : createTag())}
-				onCancel={() => setVisible(false)}
-				confirmLoading={isSaving}
-			>
-				<div className="qcrm-fields">
-					<Field
-						label={__('Name', 'quillcrm')}
-						value={selectedTag ? selectedTag.name : tag.name}
-						onChange={(value) => {
-							if (selectedTag) {
-								setSelectedTag({
-									...selectedTag,
-									name: value,
-								});
-							} else {
-								setTag({
-									...tag,
-									name: value,
-								});
-							}
-						}}
-						type="text"
-					/>
-					<Field
-						label={__('Description', 'quillcrm')}
-						value={
-							selectedTag
-								? selectedTag.description ?? ''
-								: tag.description
-						}
-						onChange={(value) => {
-							if (selectedTag) {
-								setSelectedTag({
-									...selectedTag,
-									description: value,
-								});
-							} else {
-								setTag({
-									...tag,
-									description: value,
-								});
-							}
-						}}
-						type="textarea"
-					/>
-				</div>
-			</Modal>
+			}}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>
+							<CustomDialogHeader
+								title={selectedTag ? __('Edit Tag', 'quillcrm') : __('Create Tag', 'quillcrm')}
+								subtitle={__('Add basic information below to add new Tag', 'quillcrm')}
+								icon={<GradientListIcon />}
+							/>
+						</DialogTitle>
+					</DialogHeader>
+
+					<div className="qcrm-fields space-y-4 mt-4">
+						<Field
+							label={__('Tag Name', 'quillcrm')}
+							value={selectedTag ? selectedTag.name : tag.name}
+							onChange={(value) => {
+								selectedTag
+									? setSelectedTag({ ...selectedTag, name: value })
+									: setTag({ ...tag, name: value });
+							}}
+							type="text"
+						/>
+						<Field
+							label={__('Tag Description', 'quillcrm')}
+							value={selectedTag ? selectedTag.description ?? '' : tag.description}
+							onChange={(value) => {
+								selectedTag
+									? setSelectedTag({ ...selectedTag, description: value })
+									: setTag({ ...tag, description: value });
+							}}
+							type="textarea"
+						/>
+					</div>
+
+					<DialogFooter className="mt-6 w-full">
+						<Button
+							onClick={() => {
+								selectedTag ? updateTag() : createTag();
+							}}
+							disabled={isSaving}
+							size='xl'
+							variant="gradient"
+							className='w-full'
+						>
+							{isSaving ? __('Submitting...', 'quillcrm') : __('Submit', 'quillcrm')}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
-};
+});
 
 export default Tags;

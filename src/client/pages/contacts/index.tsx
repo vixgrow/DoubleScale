@@ -6,11 +6,6 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
- * External dependencies
- */
-import { Modal } from 'antd';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
@@ -20,7 +15,7 @@ import ImportModal from '../import-modal';
 import ExportModal from '../export-modal';
 import Lists from './lists';
 import { ListsRef } from './lists';
-import Tags from './tags';
+import Tags, { TagsRef } from './tags';
 import CustomFields from './custom-fields';
 import AllContacts from './all-contacts';
 import { Contact } from '@/client/types';
@@ -28,7 +23,6 @@ import { createNotice } from '@/stores/core/actions';
 import { isEmail } from 'validator';
 import {
 	Dialog,
-	DialogTrigger,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
@@ -52,6 +46,7 @@ const ContactsList: React.FC = () => {
 	const [activeTab, setActiveTab] = useState('all');
 
 	const listsRef = useRef<ListsRef>(null);
+	const tagsRef = useRef<TagsRef>(null);
 
 	const tabTitles = {
 		all: __('Contacts List', 'quillcrm'),
@@ -96,7 +91,7 @@ const ContactsList: React.FC = () => {
 						{
 							label: 'Add Tags',
 							onClick: () => {
-								// your logic for adding a tag
+								tagsRef.current?.openCreateTagModal()
 							},
 							icon: <PlusIcon />,
 						},
@@ -184,15 +179,15 @@ const ContactsList: React.FC = () => {
 				tabsContent={[
 					{
 						value: 'all',
-						children: <AllContacts key={allContactsKey} activeTab="all"/>
+						children: <AllContacts key={allContactsKey} activeTab="all" />
 					},
 					{
 						value: 'lists',
-						children: <Lists ref={listsRef} activeTab="lists"/>,
+						children: <Lists ref={listsRef} activeTab="lists" />,
 					},
 					{
 						value: 'tags',
-						children: <Tags />
+						children: <Tags ref={tagsRef} activeTab="tags" />
 					},
 					{
 						value: 'custom-fields',

@@ -23,4 +23,6 @@ export { default as FiltersIcon } from './filters';
 export { default as ViewIcon } from './view';
 export { default as SortIcon } from './sort';
 export { default as GradientListIcon } from './gradient-list';
+export { default as GradientTagIcon } from './gradient-tag';
+export { default as GradientAddContactIcon } from './gradient-add-contact';
 export { default as CheckCircleIcon } from './check-circle';

@@ -5,41 +5,69 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
 import {
-	Typography,
-	Table,
-	Input,
-	Button,
-	Modal,
 	Popconfirm,
 	Flex,
 	Popover,
-	Select,
 } from 'antd';
-import { EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
+import { EditOutlined, MoreOutlined } from '@ant-design/icons';
 import React, { forwardRef, useImperativeHandle } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { List as ContactList, ListsResponse } from '@quillcrm/client';
-import { Field } from '@quillcrm/components';
+import type { List as ContactList, ListsResponse, DataTableConfig, NoticeMessage } from '@quillcrm/client';
+import { CustomDialogHeader, Field, GradientListIcon, SortIcon, NoticeBanner } from '@quillcrm/components';
 import { convertDate } from '@quillcrm/utils';
 import { isEmpty } from 'validator';
-
-const { Column } = Table;
+import { DataTable } from '@/components/ui/data-table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@quillcrm/components/ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+} from "@/components/ui/dialog";
 
 export interface ListsRef {
 	openCreateListModal: () => void;
 }
 
-const Lists = forwardRef<ListsRef>((_, ref) => {
+interface ListsProps {
+	activeTab?: string;
+}
+
+const selectionColumn: ColumnDef<ContactList> = {
+	id: 'select',
+	header: ({ table }) => (
+		<Checkbox
+			checked={table.getIsAllPageRowsSelected()}
+			onCheckedChange={(value) =>
+				table.toggleAllPageRowsSelected(!!value)
+			}
+			aria-label="Select all"
+		/>
+	),
+	cell: ({ row }) => (
+		<Checkbox
+			checked={row.getIsSelected()}
+			onCheckedChange={(value) => row.toggleSelected(!!value)}
+			aria-label="Select row"
+		/>
+	),
+	enableSorting: false,
+	enableHiding: false,
+};
+
+const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [lists, setLists] = useState<ContactList[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
@@ -47,12 +75,8 @@ const Lists = forwardRef<ListsRef>((_, ref) => {
 	const [total, setTotal] = useState<number>(0);
 	const [keyword, setKeyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
-	const [selectedList, setSelectedList] = useState<ContactList | null>(
-		null
-	);
-	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>(
-		[]
-	);
+	const [selectedList, setSelectedList] = useState<ContactList | null>(null);
+	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [list, setList] = useState({
 		name: '',
@@ -60,11 +84,27 @@ const Lists = forwardRef<ListsRef>((_, ref) => {
 	});
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
-	const { createNotice } = useDispatch('quillcrm/core');
+	
+	// Notice state
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+
+	// Helper function to show notice
+	const showNotice = (type: 'success' | 'error', message: string) => {
+		setNotice({ type, message });
+	};
+
+	// Helper function to close notice
+	const closeNotice = () => {
+		setNotice(null);
+	};
 
 	useImperativeHandle(ref, () => ({
 		openCreateListModal: () => {
 			setSelectedList(null);
+			setList({
+				name: '',
+				description: '',
+			});
 			setVisible(true);
 		},
 	}));
@@ -84,10 +124,7 @@ const Lists = forwardRef<ListsRef>((_, ref) => {
 			setLists(response.data);
 			setTotal(response.total);
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setLoading(false);
 		}
@@ -95,7 +132,7 @@ const Lists = forwardRef<ListsRef>((_, ref) => {
 
 	useEffect(() => {
 		fetchLists();
-	}, [page, perPage]);
+	}, [page, perPage, keyword]);
 
 	const createList = async () => {
 		if (!validate(list)) {
@@ -116,11 +153,9 @@ const Lists = forwardRef<ListsRef>((_, ref) => {
 				name: '',
 				description: '',
 			});
+			showNotice('success', __('Your List was successfully added  — check it out!', 'quillcrm'));
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setIsSaving(false);
 		}
@@ -146,15 +181,9 @@ const Lists = forwardRef<ListsRef>((_, ref) => {
 
 			setVisible(false);
 			setSelectedList(null);
-			createNotice({
-				type: 'success',
-				message: __('List updated successfully', 'quillcrm'),
-			});
+			showNotice('success', __('List updated successfully', 'quillcrm'));
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setIsSaving(false);
 		}
@@ -168,11 +197,9 @@ const Lists = forwardRef<ListsRef>((_, ref) => {
 			});
 
 			setLists(lists.filter((list) => list.id !== id));
+			showNotice('success', __('List deleted successfully', 'quillcrm'));
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		}
 	};
 
@@ -183,222 +210,215 @@ const Lists = forwardRef<ListsRef>((_, ref) => {
 
 		setIsApplying(true);
 		try {
-			// @ts-ignore
-			const response = await apiFetch({
+			await apiFetch({
 				path: '/qc/v1/lists',
 				method: 'DELETE',
 				data: { ids: selectedRowKeys },
 			});
 
-			setLists(
-				lists.filter(
-					(list) => !selectedRowKeys.includes(list.id)
-				)
-			);
+			await fetchLists();
 			setSelectedRowKeys([]);
+			setBulkAction('');
+			showNotice('success', __('Selected lists deleted successfully', 'quillcrm'));
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setIsApplying(false);
 		}
 	};
 
+	const doBulkAction = async (action: string) => {
+		switch (action) {
+			case 'delete':
+				deleteSelectedLists();
+				break;
+			default:
+				break;
+		}
+	};
+
 	const validate = (list: Partial<ContactList>) => {
 		if (isEmpty(list.name || '', { ignore_whitespace: true })) {
-			createNotice({
-				type: 'error',
-				message: __('List name is required', 'quillcrm'),
-			});
+			showNotice('error', __('List name is required', 'quillcrm'));
 			return false;
 		}
 		return true;
 	};
 
+	const columns: ColumnDef<ContactList>[] = [
+		selectionColumn,
+		{
+			accessorKey: 'name',
+			header: ({ column }) => (
+				<div className='flex items-center gap-1'
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Name', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => (
+				<Flex gap={10} align="center">
+					<span>{row.original.name}</span>
+				</Flex>
+			),
+		},
+		{
+			accessorKey: 'description',
+			header: ({ column }) => (
+				<div className='flex items-center gap-1'
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Description', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => row.original.description || '-',
+		},
+		{
+			accessorKey: 'contacts_count',
+			header: ({ column }) => (
+				<div className='flex items-center gap-1'
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Contacts', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => row.original.contacts_count ?? 0,
+		},
+		{
+			accessorKey: 'created_at',
+			header: ({ column }) => (
+				<div className='flex items-center gap-1'
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Created At', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
+			cell: ({ row }) => convertDate(row.original.created_at),
+		},
+		{
+			accessorKey: 'actions',
+			header: () => __('Actions', 'quillcrm'),
+			cell: ({ row }) => (
+				<Button
+					onClick={() => {
+						setSelectedList(row.original);
+						setVisible(true);
+					}}
+					variant="ghost"
+					className='p-0'
+				>
+					<EditOutlined />
+					{__('Edit', 'quillcrm')}
+				</Button>
+			),
+		},
+	];
+
+	const tableConfig: DataTableConfig<ContactList> = {
+		manageColumns: {
+			enabled: false,
+		},
+		search: {
+			placeholder: __('Search Lists', 'quillcrm'),
+		},
+		selection: {
+			enabled: true,
+			selectedKeys: selectedRowKeys,
+			onSelectionChange: setSelectedRowKeys,
+		},
+		bulkActions: {
+			enabled: true,
+			currentAction: bulkAction,
+			onActionChange: setBulkAction,
+			onExecuteAction: doBulkAction,
+			activeTab: activeTab,
+		},
+	};
+
 	return (
 		<div className="qcrm-contacts-lists-list">
-			<Flex
-				className="qcrm-contacts-list__actions"
-				justify="space-between"
-			>
-				<Flex gap={10}>
-					<Flex gap={10}>
-						<Select
-							options={[
-								{
-									label: __('Bulk Actions', 'quillcrm'),
-									value: '',
-								},
-								{
-									label: __('Delete', 'quillcrm'),
-									value: 'delete',
-								},
-							]}
-							value={bulkAction}
-							onChange={(value) => setBulkAction(value)}
-							disabled={selectedRowKeys.length === 0}
-						/>
-						<Button
-							type="primary"
-							onClick={() => {
-								if (bulkAction === 'delete') {
-									deleteSelectedLists();
-								}
-							}}
-							disabled={selectedRowKeys.length === 0}
-							loading={isApplying}
-						>
-							{__('Apply', 'quillcrm')}
-						</Button>
-					</Flex>
-					<Input.Search
-						placeholder={__('Search Lists', 'quillcrm')}
-						allowClear
-						onSearch={() => {
-							fetchLists();
-						}}
-						onChange={(e) => setKeyword(e.target.value)}
-						styles={{
-							affixWrapper: {
-								padding: '4px 5px',
-							},
-							input: {
-								minHeight: 'auto',
-							},
-						}}
-					/>
-				</Flex>
-			</Flex>
-			<Table
-				dataSource={lists}
-				rowKey="id"
-				loading={loading}
-				pagination={{
-					current: page,
-					pageSize: perPage,
-					total,
-					onChange: (newPage) => setPage(newPage),
-					onShowSizeChange: (_, newSize) => setPerPage(newSize),
-				}}
-				rowSelection={{
-					selectedRowKeys,
-					onChange: (selectedRowKeys) =>
-						setSelectedRowKeys(selectedRowKeys),
-				}}
-			>
-				<Column
-					title={__('Name', 'quillcrm')}
-					dataIndex="name"
-					key="name"
-					render={(name: string, record: ContactList) => (
-						<Flex gap={10} align="center">
-							<Popover
-								content={
-									<Flex vertical gap={10}>
-										<Button
-											icon={<EditOutlined />}
-											onClick={() => {
-												setSelectedList(record);
-												setVisible(true);
-											}}
-										>
-											{__('Edit', 'quillcrm')}
-										</Button>
-										<Popconfirm
-											title={__(
-												'Are you sure?',
-												'quillcrm'
-											)}
-											onConfirm={() =>
-												deleteList(record.id)
-											}
-										>
-											<Button
-												icon={<DeleteOutlined />}
-												danger
-											>
-												{__('Delete', 'quillcrm')}
-											</Button>
-										</Popconfirm>
-									</Flex>
-								}
-								trigger="click"
-							>
-								<MoreOutlined size={40} />
-							</Popover>
-							<Typography.Text>{name}</Typography.Text>
-						</Flex>
-					)}
+			{/* Notice Banner */}
+			{notice && (
+				<NoticeBanner
+					notice={notice}
+					closeNotice={closeNotice}
 				/>
-				<Column
-					title={__('Contacts', 'quillcrm')}
-					dataIndex="contacts_count"
-					key="contacts_count"
-					render={(count: number) => count ?? 0}
-				/>
-				<Column
-					title={__('Created At', 'quillcrm')}
-					dataIndex="created_at"
-					key="created_at"
-					render={(date: string) => convertDate(date)}
-				/>
-			</Table>
-			<Modal
-				title={
-					selectedList
-						? __('Edit List', 'quillcrm')
-						: __('Create List', 'quillcrm')
+			)}
+
+			<DataTable
+				columns={columns}
+				data={lists}
+				config={tableConfig}
+			/>
+
+			<Dialog open={visible} onOpenChange={(open) => {
+				setVisible(open);
+				if (!open) {
+					setSelectedList(null);
+					setList({ name: '', description: '' });
 				}
-				open={visible}
-				onOk={() => (selectedList ? updateList() : createList())}
-				onCancel={() => setVisible(false)}
-				confirmLoading={isSaving}
-			>
-				<div className="qcrm-fields">
-					<Field
-						label={__('Name', 'quillcrm')}
-						value={selectedList ? selectedList.name : list.name}
-						onChange={(value) => {
-							if (selectedList) {
-								setSelectedList({
-									...selectedList,
-									name: value,
-								});
-							} else {
-								setList({
-									...list,
-									name: value,
-								});
-							}
-						}}
-						type="text"
-					/>
-					<Field
-						label={__('Description', 'quillcrm')}
-						value={
-							selectedList
-								? selectedList.description ?? ''
-								: list.description
-						}
-						onChange={(value) => {
-							if (selectedList) {
-								setSelectedList({
-									...selectedList,
-									description: value,
-								});
-							} else {
-								setList({
-									...list,
-									description: value,
-								});
-							}
-						}}
-						type="textarea"
-					/>
-				</div>
-			</Modal>
+			}}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>
+							<CustomDialogHeader
+								title={selectedList ? __('Edit List', 'quillcrm') : __('Create List', 'quillcrm')}
+								subtitle={__('Add basic information below to add new List', 'quillcrm')}
+								icon={<GradientListIcon />}
+							/>
+						</DialogTitle>
+					</DialogHeader>
+
+					<div className="qcrm-fields space-y-4 mt-4">
+						<Field
+							label={__('List Name', 'quillcrm')}
+							value={selectedList ? selectedList.name : list.name}
+							onChange={(value) => {
+								selectedList
+									? setSelectedList({ ...selectedList, name: value })
+									: setList({ ...list, name: value });
+							}}
+							type="text"
+						/>
+						<Field
+							label={__('List Description', 'quillcrm')}
+							value={selectedList ? selectedList.description ?? '' : list.description}
+							onChange={(value) => {
+								selectedList
+									? setSelectedList({ ...selectedList, description: value })
+									: setList({ ...list, description: value });
+							}}
+							type="textarea"
+						/>
+					</div>
+
+					<DialogFooter className="mt-6 w-full">
+						<Button
+							onClick={() => {
+								selectedList ? updateList() : createList();
+							}}
+							disabled={isSaving}
+							size='xl'
+							variant="gradient"
+							className='w-full'
+						>
+							{isSaving ? __('Submitting...', 'quillcrm') : __('Submit', 'quillcrm')}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 });

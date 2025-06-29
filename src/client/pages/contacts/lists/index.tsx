@@ -9,12 +9,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import {
-	Popconfirm,
-	Flex,
-	Popover,
-} from 'antd';
-import { EditOutlined, MoreOutlined } from '@ant-design/icons';
+import { EditOutlined } from '@ant-design/icons';
 import React, { forwardRef, useImperativeHandle } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 
@@ -84,7 +79,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	});
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
-	
+
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
@@ -189,20 +184,6 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		}
 	};
 
-	const deleteList = async (id: number) => {
-		try {
-			await apiFetch({
-				path: `/qc/v1/lists/${id}`,
-				method: 'DELETE',
-			});
-
-			setLists(lists.filter((list) => list.id !== id));
-			showNotice('success', __('List deleted successfully', 'quillcrm'));
-		} catch (error: any) {
-			showNotice('error', error.message);
-		}
-	};
-
 	const deleteSelectedLists = async () => {
 		if (selectedRowKeys.length === 0) {
 			return;
@@ -260,9 +241,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				</div>
 			),
 			cell: ({ row }) => (
-				<Flex gap={10} align="center">
-					<span>{row.original.name}</span>
-				</Flex>
+				<span>{row.original.name}</span>
 			),
 		},
 		{
@@ -287,7 +266,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Contacts', 'quillcrm')}
+					{__('Contacts No', 'quillcrm')}
 					<SortIcon />
 				</div>
 			),

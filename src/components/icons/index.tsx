@@ -26,3 +26,9 @@ export { default as GradientListIcon } from './gradient-list';
 export { default as GradientTagIcon } from './gradient-tag';
 export { default as GradientAddContactIcon } from './gradient-add-contact';
 export { default as CheckCircleIcon } from './check-circle';
+export { default as DeleteIcon } from './delete';
+export { default as AddToListIcon } from './add-to-list';
+export { default as RemoveFromListIcon } from './remove-from-list';
+export { default as AddTagIcon } from './add-tag';
+export { default as RemoveTagIcon } from './remove-tag';
+

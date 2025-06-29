@@ -40,7 +40,7 @@ const ContactsList: React.FC = () => {
 	};
 
 	const headerActions =
-		activeTab === 'all'
+		activeTab == 'all'
 			? [
 					{
 						label: __('Export Contact', 'quillcrm'),
@@ -63,7 +63,7 @@ const ContactsList: React.FC = () => {
 						icon: <PlusIcon />,
 					},
 				]
-			: activeTab === 'lists'
+			: activeTab == 'lists'
 				? [
 						{
 							label: __('Add Lists', 'quillcrm'),
@@ -73,7 +73,7 @@ const ContactsList: React.FC = () => {
 							icon: <PlusIcon />,
 						},
 					]
-				: activeTab === 'tags'
+				: activeTab == 'tags'
 					? [
 							{
 								label: __('Add Tags', 'quillcrm'),

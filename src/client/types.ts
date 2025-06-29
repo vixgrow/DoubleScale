@@ -653,3 +653,8 @@ export interface DataTableConfig<TData> {
 		isApplying: boolean;
 	};
 }
+
+export type NoticeMessage = {
+	type: 'success' | 'error';
+	message: string;
+};

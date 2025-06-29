@@ -17,8 +17,19 @@ import { ColumnDef } from '@tanstack/react-table';
  * Internal dependencies
  */
 import './style.scss';
-import type { List as ContactList, ListsResponse, DataTableConfig, NoticeMessage } from '@quillcrm/client';
-import { CustomDialogHeader, Field, GradientListIcon, SortIcon, NoticeBanner } from '@quillcrm/components';
+import type {
+	List as ContactList,
+	ListsResponse,
+	DataTableConfig,
+	NoticeMessage,
+} from '@quillcrm/client';
+import {
+	CustomDialogHeader,
+	Field,
+	GradientListIcon,
+	SortIcon,
+	NoticeBanner,
+} from '@quillcrm/components';
 import { convertDate } from '@quillcrm/utils';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
@@ -30,7 +41,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 export interface ListsRef {
 	openCreateListModal: () => void;
@@ -146,7 +157,13 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				name: '',
 				description: '',
 			});
-			showNotice('success', __('Your List was successfully added  — check it out!', 'quillcrm'));
+			showNotice(
+				'success',
+				__(
+					'Your List was successfully added  — check it out!',
+					'quillcrm'
+				)
+			);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -198,7 +215,10 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			await fetchLists();
 			setSelectedRowKeys([]);
 			setBulkAction('');
-			showNotice('success', __('Selected lists deleted successfully', 'quillcrm'));
+			showNotice(
+				'success',
+				__('Selected lists deleted successfully', 'quillcrm')
+			);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -229,7 +249,8 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		{
 			accessorKey: 'name',
 			header: ({ column }) => (
-				<div className='flex items-center gap-1'
+				<div
+					className="flex items-center gap-1"
 					onClick={() =>
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
@@ -238,14 +259,13 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => (
-				<span>{row.original.name}</span>
-			),
+			cell: ({ row }) => <span>{row.original.name}</span>,
 		},
 		{
 			accessorKey: 'description',
 			header: ({ column }) => (
-				<div className='flex items-center gap-1'
+				<div
+					className="flex items-center gap-1"
 					onClick={() =>
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
@@ -259,7 +279,8 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		{
 			accessorKey: 'contacts_count',
 			header: ({ column }) => (
-				<div className='flex items-center gap-1'
+				<div
+					className="flex items-center gap-1"
 					onClick={() =>
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
@@ -273,7 +294,8 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		{
 			accessorKey: 'created_at',
 			header: ({ column }) => (
-				<div className='flex items-center gap-1'
+				<div
+					className="flex items-center gap-1"
 					onClick={() =>
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
@@ -294,7 +316,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 						setVisible(true);
 					}}
 					variant="ghost"
-					className='p-0'
+					className="p-0"
 				>
 					<EditOutlined />
 					{__('Edit', 'quillcrm')}
@@ -328,31 +350,34 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		<div className="qcrm-contacts-lists-list">
 			{/* Notice Banner */}
 			{notice && (
-				<NoticeBanner
-					notice={notice}
-					closeNotice={closeNotice}
-				/>
+				<NoticeBanner notice={notice} closeNotice={closeNotice} />
 			)}
 
-			<DataTable
-				columns={columns}
-				data={lists}
-				config={tableConfig}
-			/>
+			<DataTable columns={columns} data={lists} config={tableConfig} />
 
-			<Dialog open={visible} onOpenChange={(open) => {
-				setVisible(open);
-				if (!open) {
-					setSelectedList(null);
-					setList({ name: '', description: '' });
-				}
-			}}>
+			<Dialog
+				open={visible}
+				onOpenChange={(open) => {
+					setVisible(open);
+					if (!open) {
+						setSelectedList(null);
+						setList({ name: '', description: '' });
+					}
+				}}
+			>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>
 							<CustomDialogHeader
-								title={selectedList ? __('Edit List', 'quillcrm') : __('Create List', 'quillcrm')}
-								subtitle={__('Add basic information below to add new List', 'quillcrm')}
+								title={
+									selectedList
+										? __('Edit List', 'quillcrm')
+										: __('Create List', 'quillcrm')
+								}
+								subtitle={__(
+									'Add basic information below to add new List',
+									'quillcrm'
+								)}
 								icon={<GradientListIcon />}
 							/>
 						</DialogTitle>
@@ -364,17 +389,27 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 							value={selectedList ? selectedList.name : list.name}
 							onChange={(value) => {
 								selectedList
-									? setSelectedList({ ...selectedList, name: value })
+									? setSelectedList({
+											...selectedList,
+											name: value,
+										})
 									: setList({ ...list, name: value });
 							}}
 							type="text"
 						/>
 						<Field
 							label={__('List Description', 'quillcrm')}
-							value={selectedList ? selectedList.description ?? '' : list.description}
+							value={
+								selectedList
+									? (selectedList.description ?? '')
+									: list.description
+							}
 							onChange={(value) => {
 								selectedList
-									? setSelectedList({ ...selectedList, description: value })
+									? setSelectedList({
+											...selectedList,
+											description: value,
+										})
 									: setList({ ...list, description: value });
 							}}
 							type="textarea"
@@ -387,11 +422,13 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 								selectedList ? updateList() : createList();
 							}}
 							disabled={isSaving}
-							size='xl'
+							size="xl"
 							variant="gradient"
-							className='w-full'
+							className="w-full"
 						>
-							{isSaving ? __('Submitting...', 'quillcrm') : __('Submit', 'quillcrm')}
+							{isSaving
+								? __('Submitting...', 'quillcrm')
+								: __('Submit', 'quillcrm')}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

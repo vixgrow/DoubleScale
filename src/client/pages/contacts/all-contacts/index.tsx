@@ -1,17 +1,22 @@
 /**
  * WordPress dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	forwardRef,
+	useImperativeHandle,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
 import { ColumnDef } from '@tanstack/react-table';
 import { Tag as AntTag } from 'antd';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -21,13 +26,32 @@ import type {
 	Filter as FilterType,
 	ContactsResponse,
 	DataTableConfig,
+	NoticeMessage,
 } from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
+import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
 import ConfigAPI from '@quillcrm/config';
 import { DataTable } from '@/components/ui/data-table';
-import { Checkbox } from '@/components/ui/checkbox'; // adjust path if needed
-import { SortIcon, ViewIcon } from '@quillcrm/components';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+	SortIcon,
+	ViewIcon,
+	NoticeBanner,
+	Field,
+	CustomDialogHeader,
+	GradientAddContactIcon,
+} from '@quillcrm/components';
+import { Button } from '@/components/ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+} from '@/components/ui/dialog';
+import { isEmail } from 'validator';
+import ImportModal from '../../import-modal';
+import ExportModal from '../../export-modal';
 
 const selectionColumn: ColumnDef<Contact> = {
 	id: 'select',
@@ -51,489 +75,662 @@ const selectionColumn: ColumnDef<Contact> = {
 	enableHiding: false,
 };
 
+export interface AllContactsRef {
+	openCreateContactModal: () => void;
+	openImportModal: () => void;
+	openExportModal: () => void;
+}
+
 interface AllContactsProps {
 	activeTab?: string;
 }
 
-const AllContacts: React.FC<AllContactsProps> = ({ activeTab }) => {
-	const [loading, setLoading] = useState(true);
-	const [page, setPage] = useState(1);
-	const [perPage, setPerPage] = useState(10);
-	const [total, setTotal] = useState(0);
-	const [data, setData] = useState<Contact[]>([]);
-	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-	const [selectedLists, setSelectedLists] = useState<string[]>([]);
-	const [selectedTags, setSelectedTags] = useState<string[]>([]);
-	const { createNotice } = useDispatch('quillcrm/core');
-	const isWooCommerceActive = ConfigAPI.isWoocommerceActive();
-	const [showFilters, setShowFilters] = useState(false);
-	const [filters, setFilters] = useState<FilterType[]>([]);
-	const [isFiltering, setIsFiltering] = useState(false);
-	const [bulkAction, setBulkAction] = useState<string>('');
-	const [isApplying, setIsApplying] = useState(false);
+const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
+	({ activeTab }, ref) => {
+		const navigate = useNavigate();
+		const [loading, setLoading] = useState(true);
+		const [page, setPage] = useState(1);
+		const [perPage] = useState(10);
+		const [total, setTotal] = useState(0);
+		const [data, setData] = useState<Contact[]>([]);
+		const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+		const [selectedLists, setSelectedLists] = useState<string[]>([]);
+		const [selectedTags, setSelectedTags] = useState<string[]>([]);
+		const [notice, setNotice] = useState<NoticeMessage | null>(null);
+		const isWooCommerceActive = ConfigAPI.isWoocommerceActive();
+		const [showFilters, setShowFilters] = useState(false);
+		const [filters, setFilters] = useState<FilterType[]>([]);
+		const [isFiltering, setIsFiltering] = useState(false);
+		const [bulkAction, setBulkAction] = useState<string>('');
+		const [isApplying, setIsApplying] = useState(false);
 
-	const getContactOrderDetails = (contact: Contact) => {
-		const details = {
-			orders: 0,
-			revenue: '-',
-			lastOrderDate: '-',
+		// Modal states
+		const [createContactVisible, setCreateContactVisible] = useState(false);
+		const [importModalVisible, setImportModalVisible] = useState(false);
+		const [exportModalVisible, setExportModalVisible] = useState(false);
+		const [isSaving, setIsSaving] = useState(false);
+		const [contact, setContact] = useState({
+			email: '',
+			first_name: '',
+			last_name: '',
+		});
+
+		// Expose methods to parent component
+		useImperativeHandle(ref, () => ({
+			openCreateContactModal: () => {
+				setContact({
+					email: '',
+					first_name: '',
+					last_name: '',
+				});
+				setCreateContactVisible(true);
+			},
+			openImportModal: () => {
+				setImportModalVisible(true);
+			},
+			openExportModal: () => {
+				setExportModalVisible(true);
+			},
+		}));
+
+		const showNotice = (type: 'success' | 'error', message: string) => {
+			setNotice({ type, message });
 		};
-		if (!isWooCommerceActive) {
-			return details;
-		}
 
-		if (!contact.orders || contact.orders.length === 0) {
-			return details;
-		}
+		const closeNotice = () => {
+			setNotice(null);
+		};
 
-		details.orders = contact.orders.length;
-		details.revenue = contact.revenue || '-';
-		details.lastOrderDate = contact.orders[0].date_created_gmt;
-
-		return details;
-	};
-
-	const fetchContacts = async () => {
-		setLoading(true);
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts', {
-					page,
-					per_page: perPage,
-					filters: filters,
-				}),
-				method: 'GET',
-			})) as ContactsResponse;
-
-			response.total && setTotal(response.total);
-			response.data && setData(response.data);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to fetch contacts', 'quillcrm'),
-			});
-		} finally {
-			setLoading(false);
-			setIsFiltering(false);
-		}
-	};
-
-	const deleteSelected = async () => {
-		setIsApplying(true);
-		try {
-			await apiFetch({
-				path: '/qc/v1/contacts',
-				method: 'DELETE',
-				data: { ids: selectedRowKeys },
-			});
-
-			setSelectedRowKeys([]);
-			setBulkAction('');
-			fetchContacts();
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsApplying(false);
-		}
-	};
-
-	const addToList = async () => {
-		if (selectedLists.length === 0) {
-			createNotice({
-				type: 'error',
-				message: __('Please select a list', 'quillcrm'),
-			});
-			return;
-		}
-		setIsApplying(true);
-		try {
-			await apiFetch({
-				path: '/qc/v1/contacts/add-to-list',
-				method: 'POST',
-				data: {
-					ids: selectedRowKeys,
-					list_ids: selectedLists.map(Number),
-				},
-			});
-
-			setSelectedRowKeys([]);
-			setBulkAction('');
-			fetchContacts();
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsApplying(false);
-		}
-	};
-
-	const removeFromList = async () => {
-		if (selectedLists.length === 0) {
-			createNotice({
-				type: 'error',
-				message: __('Please select a list', 'quillcrm'),
-			});
-			return;
-		}
-		setIsApplying(true);
-		try {
-			await apiFetch({
-				path: '/qc/v1/contacts/remove-from-list',
-				method: 'POST',
-				data: {
-					ids: selectedRowKeys,
-					list_ids: selectedLists.map(Number),
-				},
-			});
-
-			setSelectedRowKeys([]);
-			setBulkAction('');
-			fetchContacts();
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsApplying(false);
-		}
-	};
-
-	const addTag = async () => {
-		if (selectedTags.length === 0) {
-			createNotice({
-				type: 'error',
-				message: __('Please select a tag', 'quillcrm'),
-			});
-			return;
-		}
-		setIsApplying(true);
-		try {
-			await apiFetch({
-				path: '/qc/v1/contacts/add-tag',
-				method: 'POST',
-				data: {
-					ids: selectedRowKeys,
-					tag_ids: selectedTags.map(Number),
-				},
-			});
-
-			setSelectedRowKeys([]);
-			setBulkAction('');
-			fetchContacts();
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsApplying(false);
-		}
-	};
-
-	const removeTag = async () => {
-		if (selectedTags.length === 0) {
-			createNotice({
-				type: 'error',
-				message: __('Please select a tag', 'quillcrm'),
-			});
-			return;
-		}
-		setIsApplying(true);
-		try {
-			await apiFetch({
-				path: '/qc/v1/contacts/remove-tag',
-				method: 'POST',
-				data: {
-					ids: selectedRowKeys,
-					tag_ids: selectedTags.map(Number),
-				},
-			});
-
-			setSelectedRowKeys([]);
-			setBulkAction('');
-			fetchContacts();
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsApplying(false);
-		}
-	};
-
-	const doBulkAction = async (action: string) => {
-		switch (action) {
-			case 'delete':
-				deleteSelected();
-				break;
-			case 'add_to_list':
-				addToList();
-				break;
-			case 'remove_from_list':
-				removeFromList();
-				break;
-			case 'add_tag':
-				addTag();
-				break;
-			case 'remove_tag':
-				removeTag();
-				break;
-			default:
-				break;
-		}
-	};
-
-	useEffect(() => {
-		fetchContacts();
-	}, [page, perPage]);
-
-	const baseColumns: ColumnDef<Contact>[] = [
-		{
-			accessorKey: 'full_name',
-			header: ({ column }) => (
-				<div className='flex items-center gap-1'
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Full Name', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => (
-				<NavLink to={`contacts/${row.original.id}`}>
-					{row.original.first_name || '-'}{' '}
-					{row.original.last_name || '-'}
-				</NavLink>
-			),
-		},
-		{
-			accessorKey: 'email',
-			header: ({ column }) => (
-				<div className='flex items-center gap-1'
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Email', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => (
-				<NavLink to={`contacts/${row.original.id}`}>
-					{row.original.email}
-				</NavLink>
-			),
-		},
-		{
-			accessorKey: 'tags',
-			header: 'Tag',
-			cell: ({ row }) =>
-				row.original.tags?.map((tag) => (
-					<AntTag key={tag.id}>{tag.name}</AntTag>
-				)),
-		},
-		{
-			accessorKey: 'lists',
-			header: 'List',
-			cell: ({ row }) =>
-				row.original.lists?.map((list) => (
-					<AntTag key={list.id}>{list.name}</AntTag>
-				)),
-		},
-		{
-			accessorKey: 'status',
-			header: ({ column }) => (
-				<div className='flex items-center gap-1'
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Status', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => (
-				<div className="text-[#16A34A] text-xs capitalize bg-[#EFFFF5] rounded-lg py-1 px-3">
-					{row.original.status || '-'}
-				</div>
-			),
-		},
-		{
-			accessorKey: 'phone',
-			header: ({ column }) => (
-				<div className='flex items-center gap-1'
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Phone', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => row.original.phone || '-',
-		},
-		{
-			accessorKey: 'country',
-			header: ({ column }) => (
-				<div className='flex items-center gap-1'
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Country', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => row.original.country || '-',
-		},
-		{
-			accessorKey: 'city',
-			header: __('City', 'quillcrm'),
-			cell: ({ row }) => row.original.city || '-',
-		},
-		{
-			accessorKey: 'address_1',
-			header: __('Address 1', 'quillcrm'),
-			cell: ({ row }) => row.original.address_1 || '-',
-		},
-		{
-			accessorKey: 'address_2',
-			header: __('Address 2', 'quillcrm'),
-			cell: ({ row }) => row.original.address_2 || '-',
-		},
-		{
-			accessorKey: 'state',
-			header: __('State', 'quillcrm'),
-			cell: ({ row }) => row.original.state || '-',
-		},
-		{
-			accessorKey: 'zip',
-			header: __('Postal Code', 'quillcrm'),
-			cell: ({ row }) => row.original.zip || '-',
-		},
-		{
-			accessorKey: 'created_at',
-			header: ({ column }) => (
-				<div className='flex items-center gap-1'
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Created At', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => convertDate(row.original.created_at),
-		},
-		{
-			accessorKey: 'view',
-			header: __('Actions', 'quillcrm'),
-			cell: ({ row }) => (
-				<NavLink to={`contacts/${row.original.id}`}>
-					<div className="flex items-center gap-1 text-[#3F3F46]">
-						<div className="text-[#A1A1AA]">
-							<ViewIcon />
-						</div>
-						View
-					</div>
-				</NavLink>
-			),
-		},
-	];
-
-	if (isWooCommerceActive) {
-		baseColumns.push(
-			{
-				accessorKey: 'total_orders',
-				header: __('Total Orders', 'quillcrm'),
-				cell: ({ row }) => {
-					const details = getContactOrderDetails(row.original);
-					return <>{details.orders}</>;
-				},
-			},
-			{
-				accessorKey: 'total_revenue',
-				header: __('Total Revenue', 'quillcrm'),
-				cell: ({ row }) => {
-					const details = getContactOrderDetails(row.original);
-					return <>{details.revenue}</>;
-				},
-			},
-			{
-				accessorKey: 'last_order_date',
-				header: __('Last Order Date', 'quillcrm'),
-				cell: ({ row }) => {
-					const details = getContactOrderDetails(row.original);
-					return (
-						<>
-							{details.lastOrderDate
-								? convertDate(details.lastOrderDate) || '-'
-								: '-'}
-						</>
-					);
-				},
+		const getContactOrderDetails = (contact: Contact) => {
+			const details = {
+				orders: 0,
+				revenue: '-',
+				lastOrderDate: '-',
+			};
+			if (!isWooCommerceActive) {
+				return details;
 			}
+
+			if (!contact.orders || contact.orders.length === 0) {
+				return details;
+			}
+
+			details.orders = contact.orders.length;
+			details.revenue = contact.revenue || '-';
+			details.lastOrderDate = contact.orders[0].date_created_gmt;
+
+			return details;
+		};
+
+		const fetchContacts = async () => {
+			setLoading(true);
+			try {
+				const response = (await apiFetch({
+					path: addQueryArgs('/qc/v1/contacts', {
+						page,
+						per_page: perPage,
+						filters: filters,
+					}),
+					method: 'GET',
+				})) as ContactsResponse;
+
+				response.total && setTotal(response.total);
+				response.data && setData(response.data);
+			} catch (error) {
+				showNotice('error', __('Failed to fetch contacts', 'quillcrm'));
+			} finally {
+				setLoading(false);
+				setIsFiltering(false);
+			}
+		};
+
+		const createContact = async () => {
+			if (!isEmail(contact.email)) {
+				showNotice('error', __('Invalid email', 'quillcrm'));
+				return;
+			}
+
+			setIsSaving(true);
+
+			try {
+				const response = (await apiFetch({
+					path: '/qc/v1/contacts',
+					method: 'POST',
+					data: contact,
+				})) as Contact;
+
+				navigate(getToLink(`contacts/${response.id}`));
+			} catch (error: any) {
+				showNotice(
+					'error',
+					error.message || __('Failed to create Contact', 'quillcrm')
+				);
+			} finally {
+				setIsSaving(false);
+			}
+		};
+
+		const handleImportCompleted = () => {
+			fetchContacts();
+		};
+
+		const deleteSelected = async () => {
+			setIsApplying(true);
+			try {
+				await apiFetch({
+					path: '/qc/v1/contacts',
+					method: 'DELETE',
+					data: { ids: selectedRowKeys },
+				});
+
+				setSelectedRowKeys([]);
+				setBulkAction('');
+				showNotice(
+					'success',
+					__('Contacts deleted successfully', 'quillcrm')
+				);
+				fetchContacts();
+			} catch (error: any) {
+				showNotice('error', error.message);
+			} finally {
+				setIsApplying(false);
+			}
+		};
+
+		const addToList = async () => {
+			if (selectedLists.length === 0) {
+				showNotice('error', __('Please select a list', 'quillcrm'));
+				return;
+			}
+			setIsApplying(true);
+			try {
+				await apiFetch({
+					path: '/qc/v1/contacts/add-to-list',
+					method: 'POST',
+					data: {
+						ids: selectedRowKeys,
+						list_ids: selectedLists.map(Number),
+					},
+				});
+
+				setSelectedRowKeys([]);
+				setBulkAction('');
+				showNotice(
+					'success',
+					__('Contacts added to list successfully', 'quillcrm')
+				);
+				fetchContacts();
+			} catch (error: any) {
+				showNotice('error', error.message);
+			} finally {
+				setIsApplying(false);
+			}
+		};
+
+		const removeFromList = async () => {
+			if (selectedLists.length === 0) {
+				showNotice('error', __('Please select a list', 'quillcrm'));
+				return;
+			}
+			setIsApplying(true);
+			try {
+				await apiFetch({
+					path: '/qc/v1/contacts/remove-from-list',
+					method: 'POST',
+					data: {
+						ids: selectedRowKeys,
+						list_ids: selectedLists.map(Number),
+					},
+				});
+
+				setSelectedRowKeys([]);
+				setBulkAction('');
+				showNotice(
+					'success',
+					__('Contacts removed from list successfully', 'quillcrm')
+				);
+				fetchContacts();
+			} catch (error: any) {
+				showNotice('error', error.message);
+			} finally {
+				setIsApplying(false);
+			}
+		};
+
+		const addTag = async () => {
+			if (selectedTags.length === 0) {
+				showNotice('error', __('Please select a tag', 'quillcrm'));
+				return;
+			}
+			setIsApplying(true);
+			try {
+				await apiFetch({
+					path: '/qc/v1/contacts/add-tag',
+					method: 'POST',
+					data: {
+						ids: selectedRowKeys,
+						tag_ids: selectedTags.map(Number),
+					},
+				});
+
+				setSelectedRowKeys([]);
+				setBulkAction('');
+				showNotice(
+					'success',
+					__('Tags added successfully', 'quillcrm')
+				);
+				fetchContacts();
+			} catch (error: any) {
+				showNotice('error', error.message);
+			} finally {
+				setIsApplying(false);
+			}
+		};
+
+		const removeTag = async () => {
+			if (selectedTags.length === 0) {
+				showNotice('error', __('Please select a tag', 'quillcrm'));
+				return;
+			}
+			setIsApplying(true);
+			try {
+				await apiFetch({
+					path: '/qc/v1/contacts/remove-tag',
+					method: 'POST',
+					data: {
+						ids: selectedRowKeys,
+						tag_ids: selectedTags.map(Number),
+					},
+				});
+
+				setSelectedRowKeys([]);
+				setBulkAction('');
+				showNotice(
+					'success',
+					__('Tags removed successfully', 'quillcrm')
+				);
+				fetchContacts();
+			} catch (error: any) {
+				showNotice('error', error.message);
+			} finally {
+				setIsApplying(false);
+			}
+		};
+
+		const doBulkAction = async (action: string) => {
+			switch (action) {
+				case 'delete':
+					deleteSelected();
+					break;
+				case 'add_to_list':
+					addToList();
+					break;
+				case 'remove_from_list':
+					removeFromList();
+					break;
+				case 'add_tag':
+					addTag();
+					break;
+				case 'remove_tag':
+					removeTag();
+					break;
+				default:
+					break;
+			}
+		};
+
+		useEffect(() => {
+			fetchContacts();
+		}, [page, perPage]);
+
+		const baseColumns: ColumnDef<Contact>[] = [
+			{
+				accessorKey: 'full_name',
+				header: ({ column }) => (
+					<div
+						className="flex items-center gap-1"
+						onClick={() =>
+							column.toggleSorting(column.getIsSorted() === 'asc')
+						}
+					>
+						{__('Full Name', 'quillcrm')}
+						<SortIcon />
+					</div>
+				),
+				cell: ({ row }) => (
+					<NavLink to={`contacts/${row.original.id}`}>
+						{row.original.first_name || '-'}{' '}
+						{row.original.last_name || '-'}
+					</NavLink>
+				),
+			},
+			{
+				accessorKey: 'email',
+				header: ({ column }) => (
+					<div
+						className="flex items-center gap-1"
+						onClick={() =>
+							column.toggleSorting(column.getIsSorted() === 'asc')
+						}
+					>
+						{__('Email', 'quillcrm')}
+						<SortIcon />
+					</div>
+				),
+				cell: ({ row }) => (
+					<NavLink to={`contacts/${row.original.id}`}>
+						{row.original.email}
+					</NavLink>
+				),
+			},
+			{
+				accessorKey: 'tags',
+				header: 'Tag',
+				cell: ({ row }) =>
+					row.original.tags?.map((tag) => (
+						<AntTag key={tag.id}>{tag.name}</AntTag>
+					)),
+			},
+			{
+				accessorKey: 'lists',
+				header: 'List',
+				cell: ({ row }) =>
+					row.original.lists?.map((list) => (
+						<AntTag key={list.id}>{list.name}</AntTag>
+					)),
+			},
+			{
+				accessorKey: 'status',
+				header: ({ column }) => (
+					<div
+						className="flex items-center gap-1"
+						onClick={() =>
+							column.toggleSorting(column.getIsSorted() === 'asc')
+						}
+					>
+						{__('Status', 'quillcrm')}
+						<SortIcon />
+					</div>
+				),
+				cell: ({ row }) => (
+					<div className="text-[#16A34A] text-xs capitalize bg-[#EFFFF5] rounded-lg py-1 px-3">
+						{row.original.status || '-'}
+					</div>
+				),
+			},
+			{
+				accessorKey: 'phone',
+				header: ({ column }) => (
+					<div
+						className="flex items-center gap-1"
+						onClick={() =>
+							column.toggleSorting(column.getIsSorted() === 'asc')
+						}
+					>
+						{__('Phone', 'quillcrm')}
+						<SortIcon />
+					</div>
+				),
+				cell: ({ row }) => row.original.phone || '-',
+			},
+			{
+				accessorKey: 'country',
+				header: ({ column }) => (
+					<div
+						className="flex items-center gap-1"
+						onClick={() =>
+							column.toggleSorting(column.getIsSorted() === 'asc')
+						}
+					>
+						{__('Country', 'quillcrm')}
+						<SortIcon />
+					</div>
+				),
+				cell: ({ row }) => row.original.country || '-',
+			},
+			{
+				accessorKey: 'city',
+				header: __('City', 'quillcrm'),
+				cell: ({ row }) => row.original.city || '-',
+			},
+			{
+				accessorKey: 'address_1',
+				header: __('Address 1', 'quillcrm'),
+				cell: ({ row }) => row.original.address_1 || '-',
+			},
+			{
+				accessorKey: 'address_2',
+				header: __('Address 2', 'quillcrm'),
+				cell: ({ row }) => row.original.address_2 || '-',
+			},
+			{
+				accessorKey: 'state',
+				header: __('State', 'quillcrm'),
+				cell: ({ row }) => row.original.state || '-',
+			},
+			{
+				accessorKey: 'zip',
+				header: __('Postal Code', 'quillcrm'),
+				cell: ({ row }) => row.original.zip || '-',
+			},
+			{
+				accessorKey: 'created_at',
+				header: ({ column }) => (
+					<div
+						className="flex items-center gap-1"
+						onClick={() =>
+							column.toggleSorting(column.getIsSorted() === 'asc')
+						}
+					>
+						{__('Created At', 'quillcrm')}
+						<SortIcon />
+					</div>
+				),
+				cell: ({ row }) => convertDate(row.original.created_at),
+			},
+			{
+				accessorKey: 'view',
+				header: __('Actions', 'quillcrm'),
+				cell: ({ row }) => (
+					<NavLink to={`contacts/${row.original.id}`}>
+						<div className="flex items-center gap-1 text-[#3F3F46]">
+							<div className="text-[#A1A1AA]">
+								<ViewIcon />
+							</div>
+							View
+						</div>
+					</NavLink>
+				),
+			},
+		];
+
+		if (isWooCommerceActive) {
+			baseColumns.push(
+				{
+					accessorKey: 'total_orders',
+					header: __('Total Orders', 'quillcrm'),
+					cell: ({ row }) => {
+						const details = getContactOrderDetails(row.original);
+						return <>{details.orders}</>;
+					},
+				},
+				{
+					accessorKey: 'total_revenue',
+					header: __('Total Revenue', 'quillcrm'),
+					cell: ({ row }) => {
+						const details = getContactOrderDetails(row.original);
+						return <>{details.revenue}</>;
+					},
+				},
+				{
+					accessorKey: 'last_order_date',
+					header: __('Last Order Date', 'quillcrm'),
+					cell: ({ row }) => {
+						const details = getContactOrderDetails(row.original);
+						return (
+							<>
+								{details.lastOrderDate
+									? convertDate(details.lastOrderDate) || '-'
+									: '-'}
+							</>
+						);
+					},
+				}
+			);
+		}
+
+		const columns: ColumnDef<Contact>[] = [selectionColumn, ...baseColumns];
+
+		const tableConfig: DataTableConfig<Contact> = {
+			manageColumns: {
+				enabled: true,
+			},
+			search: {
+				placeholder: __('Search contacts...', 'quillcrm'),
+			},
+			selection: {
+				enabled: true,
+				selectedKeys: selectedRowKeys,
+				onSelectionChange: setSelectedRowKeys,
+			},
+			bulkActions: {
+				enabled: true,
+				currentAction: bulkAction,
+				onActionChange: setBulkAction,
+				onExecuteAction: doBulkAction,
+				lists: {
+					selected: selectedLists,
+					onSelectionChange: (lists: string[]) =>
+						setSelectedLists(lists.map((id) => id.toString())),
+				},
+				tags: {
+					selected: selectedTags,
+					onSelectionChange: (tags: string[]) =>
+						setSelectedTags(tags),
+				},
+				activeTab: activeTab,
+			},
+			filters: {
+				enabled: true,
+				showFilters: showFilters,
+				onToggleFilters: setShowFilters,
+				currentFilters: filters,
+				onFiltersChange: setFilters,
+				onApplyFilters: () => {
+					setPage(1);
+					fetchContacts();
+				},
+				isApplying: isFiltering,
+			},
+		};
+
+		return (
+			<div className="qcrm-all-contacts w-full">
+				{notice && (
+					<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				)}
+				<DataTable
+					columns={columns}
+					data={data}
+					config={tableConfig}
+					activeTab={activeTab}
+				/>
+
+				{/* Create Contact Modal */}
+				<Dialog
+					open={createContactVisible}
+					onOpenChange={(open) => {
+						setCreateContactVisible(open);
+						if (!open) {
+							setContact({
+								email: '',
+								first_name: '',
+								last_name: '',
+							});
+						}
+					}}
+				>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>
+								<CustomDialogHeader
+									title={__('Create Contact', 'quillcrm')}
+									subtitle={__(
+										'Add basic information below to add new Contact',
+										'quillcrm'
+									)}
+									icon={<GradientAddContactIcon />}
+								/>
+							</DialogTitle>
+						</DialogHeader>
+
+						<div className="qcrm-fields space-y-4">
+							<Field
+								label={__('First Name', 'quillcrm')}
+								value={contact.first_name}
+								onChange={(value) =>
+									setContact({
+										...contact,
+										first_name: value,
+									})
+								}
+								type="text"
+							/>
+							<Field
+								label={__('Last Name', 'quillcrm')}
+								value={contact.last_name}
+								onChange={(value) =>
+									setContact({
+										...contact,
+										last_name: value,
+									})
+								}
+								type="text"
+							/>
+							<Field
+								label={__('Email', 'quillcrm')}
+								value={contact.email}
+								onChange={(value) =>
+									setContact({
+										...contact,
+										email: value,
+									})
+								}
+								type="email"
+							/>
+						</div>
+
+						<DialogFooter className="mt-6">
+							<Button
+								onClick={createContact}
+								disabled={isSaving}
+								size="xl"
+								variant="gradient"
+								className="w-full"
+							>
+								{isSaving
+									? __('Submitting...', 'quillcrm')
+									: __('Submit', 'quillcrm')}
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+
+				{/* Import Modal */}
+				<ImportModal
+					open={importModalVisible}
+					onClose={() => setImportModalVisible(false)}
+					onCompleted={handleImportCompleted}
+				/>
+
+				{/* Export Modal */}
+				<ExportModal
+					open={exportModalVisible}
+					onClose={() => setExportModalVisible(false)}
+				/>
+			</div>
 		);
 	}
-
-	const columns: ColumnDef<Contact>[] = [selectionColumn, ...baseColumns];
-
-	const tableConfig: DataTableConfig<Contact> = {
-		manageColumns:{
-			enabled: true,
-		},
-		search: {
-			placeholder: __('Search contacts...', 'quillcrm'),
-		},
-		selection: {
-			enabled: true,
-			selectedKeys: selectedRowKeys,
-			onSelectionChange: setSelectedRowKeys,
-		},
-		bulkActions: {
-			enabled: true,
-			currentAction: bulkAction,
-			onActionChange: setBulkAction,
-			onExecuteAction: doBulkAction,
-			lists: {
-				selected: selectedLists,
-				onSelectionChange: (lists: string[]) =>
-					setSelectedLists(lists.map((id) => id.toString())),
-			},
-			tags: {
-				selected: selectedTags,
-				onSelectionChange: (tags: string[]) => setSelectedTags(tags),
-			},
-			activeTab: activeTab,
-		},
-		filters: {
-			enabled: true,
-			showFilters: showFilters,
-			onToggleFilters: setShowFilters,
-			currentFilters: filters,
-			onFiltersChange: setFilters,
-			onApplyFilters: () => {
-				setPage(1);
-				fetchContacts();
-			},
-			isApplying: isFiltering,
-		},
-	};
-
-	return (
-		<div className="qcrm-all-contacts w-full">
-			{/* DataTable now includes search, filters, bulk actions, and column management */}
-			<DataTable columns={columns} data={data} config={tableConfig} activeTab={activeTab}/>
-		</div>
-	);
-};
+);
 
 export default AllContacts;

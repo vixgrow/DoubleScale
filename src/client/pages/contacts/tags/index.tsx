@@ -17,8 +17,19 @@ import { ColumnDef } from '@tanstack/react-table';
  * Internal dependencies
  */
 import './style.scss';
-import type { Tag as ContactTag, TagsResponse, DataTableConfig, NoticeMessage } from '@quillcrm/client';
-import { CustomDialogHeader, Field, SortIcon, NoticeBanner, GradientTagIcon } from '@quillcrm/components';
+import type {
+	Tag as ContactTag,
+	TagsResponse,
+	DataTableConfig,
+	NoticeMessage,
+} from '@quillcrm/client';
+import {
+	CustomDialogHeader,
+	Field,
+	SortIcon,
+	NoticeBanner,
+	GradientTagIcon,
+} from '@quillcrm/components';
 import { convertDate } from '@quillcrm/utils';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
@@ -30,7 +41,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 
 export interface TagsRef {
 	openCreateTagModal: () => void;
@@ -146,7 +157,13 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				name: '',
 				description: '',
 			});
-			showNotice('success', __('Your Tag was successfully added  — check it out!', 'quillcrm'));
+			showNotice(
+				'success',
+				__(
+					'Your Tag was successfully added  — check it out!',
+					'quillcrm'
+				)
+			);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -167,9 +184,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			})) as ContactTag;
 
 			setTags([
-				...tags.map((tag) =>
-					tag.id === response.id ? response : tag
-				),
+				...tags.map((tag) => (tag.id === response.id ? response : tag)),
 			]);
 
 			setVisible(false);
@@ -198,7 +213,10 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			await fetchTags();
 			setSelectedRowKeys([]);
 			setBulkAction('');
-			showNotice('success', __('Selected tags deleted successfully', 'quillcrm'));
+			showNotice(
+				'success',
+				__('Selected tags deleted successfully', 'quillcrm')
+			);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -229,7 +247,8 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		{
 			accessorKey: 'name',
 			header: ({ column }) => (
-				<div className='flex items-center gap-1'
+				<div
+					className="flex items-center gap-1"
 					onClick={() =>
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
@@ -238,14 +257,13 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => (
-				<span>{row.original.name}</span>
-			),
+			cell: ({ row }) => <span>{row.original.name}</span>,
 		},
 		{
 			accessorKey: 'description',
 			header: ({ column }) => (
-				<div className='flex items-center gap-1'
+				<div
+					className="flex items-center gap-1"
 					onClick={() =>
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
@@ -259,7 +277,8 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		{
 			accessorKey: 'contacts_count',
 			header: ({ column }) => (
-				<div className='flex items-center gap-1'
+				<div
+					className="flex items-center gap-1"
 					onClick={() =>
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
@@ -273,7 +292,8 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		{
 			accessorKey: 'created_at',
 			header: ({ column }) => (
-				<div className='flex items-center gap-1'
+				<div
+					className="flex items-center gap-1"
 					onClick={() =>
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
@@ -294,7 +314,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 						setVisible(true);
 					}}
 					variant="ghost"
-					className='p-0'
+					className="p-0"
 				>
 					<EditOutlined />
 					{__('Edit', 'quillcrm')}
@@ -328,31 +348,34 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		<div className="qcrm-contacts-tags-list">
 			{/* Notice Banner */}
 			{notice && (
-				<NoticeBanner
-					notice={notice}
-					closeNotice={closeNotice}
-				/>
+				<NoticeBanner notice={notice} closeNotice={closeNotice} />
 			)}
 
-			<DataTable
-				columns={columns}
-				data={tags}
-				config={tableConfig}
-			/>
+			<DataTable columns={columns} data={tags} config={tableConfig} />
 
-			<Dialog open={visible} onOpenChange={(open) => {
-				setVisible(open);
-				if (!open) {
-					setSelectedTag(null);
-					setTag({ name: '', description: '' });
-				}
-			}}>
+			<Dialog
+				open={visible}
+				onOpenChange={(open) => {
+					setVisible(open);
+					if (!open) {
+						setSelectedTag(null);
+						setTag({ name: '', description: '' });
+					}
+				}}
+			>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>
 							<CustomDialogHeader
-								title={selectedTag ? __('Edit Tag', 'quillcrm') : __('Create Tag', 'quillcrm')}
-								subtitle={__('Add basic information below to add new Tag', 'quillcrm')}
+								title={
+									selectedTag
+										? __('Edit Tag', 'quillcrm')
+										: __('Create Tag', 'quillcrm')
+								}
+								subtitle={__(
+									'Add basic information below to add new Tag',
+									'quillcrm'
+								)}
 								icon={<GradientTagIcon />}
 							/>
 						</DialogTitle>
@@ -364,17 +387,27 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 							value={selectedTag ? selectedTag.name : tag.name}
 							onChange={(value) => {
 								selectedTag
-									? setSelectedTag({ ...selectedTag, name: value })
+									? setSelectedTag({
+											...selectedTag,
+											name: value,
+										})
 									: setTag({ ...tag, name: value });
 							}}
 							type="text"
 						/>
 						<Field
 							label={__('Tag Description', 'quillcrm')}
-							value={selectedTag ? selectedTag.description ?? '' : tag.description}
+							value={
+								selectedTag
+									? (selectedTag.description ?? '')
+									: tag.description
+							}
 							onChange={(value) => {
 								selectedTag
-									? setSelectedTag({ ...selectedTag, description: value })
+									? setSelectedTag({
+											...selectedTag,
+											description: value,
+										})
 									: setTag({ ...tag, description: value });
 							}}
 							type="textarea"
@@ -387,11 +420,13 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 								selectedTag ? updateTag() : createTag();
 							}}
 							disabled={isSaving}
-							size='xl'
+							size="xl"
 							variant="gradient"
-							className='w-full'
+							className="w-full"
 						>
-							{isSaving ? __('Submitting...', 'quillcrm') : __('Submit', 'quillcrm')}
+							{isSaving
+								? __('Submitting...', 'quillcrm')
+								: __('Submit', 'quillcrm')}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

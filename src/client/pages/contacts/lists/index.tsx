@@ -65,10 +65,9 @@ const selectionColumn: ColumnDef<ContactList> = {
 const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [lists, setLists] = useState<ContactList[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [perPage, setPerPage] = useState<number>(10);
-	const [page, setPage] = useState<number>(1);
-	const [total, setTotal] = useState<number>(0);
-	const [keyword, setKeyword] = useState<string>('');
+	const [perPage] = useState<number>(10);
+	const [page] = useState<number>(1);
+	const [keyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedList, setSelectedList] = useState<ContactList | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -117,7 +116,6 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			})) as ListsResponse;
 
 			setLists(response.data);
-			setTotal(response.total);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {

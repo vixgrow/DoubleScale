@@ -1,3 +1,14 @@
+/**
+ * wordpress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+/**
+ * external dependencies
+ */
+import { useState } from 'react';
+/**
+ * internal dependencies
+ */
 import {
 	Select,
 	SelectTrigger,
@@ -5,8 +16,6 @@ import {
 	SelectContent,
 	SelectItem,
 } from '@/components/ui/select';
-import { __ } from '@wordpress/i18n';
-import { useState } from 'react';
 import {
 	AddTagIcon,
 	AddToListIcon,

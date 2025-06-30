@@ -1,4 +1,14 @@
+/**
+ * wordpress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+/**
+ * external dependencies
+ */
 import React from 'react';
+/**
+ * internal dependencies
+ */
 import {
 	Dialog,
 	DialogContent,
@@ -7,8 +17,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { __ } from '@wordpress/i18n';
-import { ColoredDeleteIcon } from '../icons';
+import { ColoredDeleteIcon } from '@quillcrm/components';
 
 interface DeleteConfirmationModalProps {
 	isOpen: boolean;

@@ -1,5 +1,11 @@
-import { Input } from '@/components/ui/input';
+/**
+ * external dependencies
+ */
 import { Search } from 'lucide-react';
+/**
+ * internal dependencies
+ */
+import { Input } from '@/components/ui/input';
 
 interface DataTableSearchProps {
     value: string;

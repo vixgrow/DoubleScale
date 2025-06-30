@@ -1,4 +1,18 @@
+/**
+ * wordpress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
+/**
+ * external dependencies
+ */
 import React, { useState, useEffect } from 'react';
+import AsyncSelect from 'react-select/async';
+import { isObject, map } from 'lodash';
+/**
+ * internal dependencies
+ */
 import {
 	Dialog,
 	DialogContent,
@@ -6,12 +20,6 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
-import AsyncSelect from 'react-select/async';
-import { Flex } from 'antd';
-import { isObject, map } from 'lodash';
 import './style.scss';
 import type { Tag as TagType, TagsResponse } from '@quillcrm/client';
 import { CustomDialogHeader, GradientTagIcon, Tag } from '@quillcrm/components';
@@ -197,7 +205,7 @@ const AddRemoveTagsModal: React.FC<AddRemoveTagsModalProps> = ({
 					</div>
 
 					{selectedTags.length > 0 && (
-						<Flex gap={8} wrap="wrap">
+						<div className='flex gap-2 flex-wrap'>
 							{map(selectedTags, (tagId) => (
 								<Tag
 									key={tagId}
@@ -214,7 +222,7 @@ const AddRemoveTagsModal: React.FC<AddRemoveTagsModalProps> = ({
 									}}
 								/>
 							))}
-						</Flex>
+						</div>
 					)}
 
 					<div className="flex gap-2">

@@ -16,3 +16,7 @@ export { default as PageTabs } from './page-tabs';
 export { default as BulkActionSelect } from './bulk-actions';
 export { default as CustomDialogHeader } from './dialog-header';  
 export { default as NoticeBanner } from './notice-banner';
+export { default as AddRemoveListsModal } from './add-remove-list-modal';
+export { default as AddRemoveTagsModal } from './add-remove-tag-modal';
+export { default as Tag } from './tag';
+export { default as DeleteModal } from './delete-modal';

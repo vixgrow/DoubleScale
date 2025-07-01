@@ -17,9 +17,12 @@ const buttonVariants = cva(
 					'border border-input text-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground',
 				secondary:
 					'border border-secondary text-secondary shadow-sm hover:bg-secondary/80 hover:text-primary-foreground',
+				tertiary:
+					'bg-[#C6DFF3] text-[#274C77] shadow-sm hover:bg-secondary/80 hover:text-primary-foreground',
 				ghost: 'hover:bg-accent hover:text-accent-foreground',
 				link: 'text-primary underline-offset-4 hover:underline',
-				gradient: 'bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] text-primary-foreground',
+				gradient:
+					'bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] text-primary-foreground',
 			},
 			size: {
 				default: 'h-9 rounded-xl px-6 py-[20px]',

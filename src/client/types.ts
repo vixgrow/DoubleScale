@@ -617,9 +617,9 @@ export type Log = {
 };
 
 export interface DataTableConfig<TData> {
-	manageColumns?:{
-		enabled:boolean;
-	}
+	manageColumns?: {
+		enabled: boolean;
+	};
 	search?: {
 		placeholder?: string;
 	};
@@ -641,7 +641,7 @@ export interface DataTableConfig<TData> {
 			selected: string[];
 			onSelectionChange: (tags: string[]) => void;
 		};
-		activeTab?: string,
+		activeTab?: string;
 	};
 	filters?: {
 		enabled: boolean;
@@ -658,3 +658,35 @@ export type NoticeMessage = {
 	type: 'success' | 'error';
 	message: string;
 };
+
+export interface CustomFieldsRef {
+	openCreateGroupModal: () => void;
+	openCreateFieldModal: () => void;
+}
+
+export interface CustomFieldsProps {
+	activeTab?: string;
+}
+
+export interface FieldDialogProps {
+	visible: boolean;
+	onClose: () => void;
+	field?: CustomField | null;
+	groups: CustomFieldsGroup[];
+	fieldTypes: Record<string, any>;
+	onSave: (field: CustomField, isNew: boolean) => Promise<boolean>;
+}
+
+export interface GroupDialogProps {
+	visible: boolean;
+	onClose: () => void;
+	onSave: (name: string) => Promise<boolean>;
+}
+
+export interface DeleteGroupDialogProps {
+	visible: boolean;
+	onClose: () => void;
+	groupId: number;
+	groups: CustomFieldsGroup[];
+	onDelete: (groupId: number, newGroupId?: number) => Promise<boolean>;
+}

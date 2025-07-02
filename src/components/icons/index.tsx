@@ -32,3 +32,7 @@ export { default as RemoveFromListIcon } from './remove-from-list';
 export { default as AddTagIcon } from './add-tag';
 export { default as RemoveTagIcon } from './remove-tag';
 export { default as ColoredDeleteIcon } from './colored-delete';
+export { default as GradientGroupIcon } from './gradient-goup';
+export { default as CopyIcon } from './copy';
+export { default as EditIcon } from './edit';
+export { default as MoveIcon } from './move';

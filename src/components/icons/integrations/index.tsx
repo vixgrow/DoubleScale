@@ -1,6 +1,6 @@
 import { IconProps } from '@quillcrm/config';
 
-const IntegratiosIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
+const IntegrationsIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
 	return (
 		<svg
 			width={width}
@@ -31,4 +31,4 @@ const IntegratiosIcon: React.FC<IconProps> = ({ width = 24, height = 24 }) => {
 	);
 };
 
-export default IntegratiosIcon;
+export default IntegrationsIcon;

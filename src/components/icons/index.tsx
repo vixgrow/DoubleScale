@@ -36,3 +36,4 @@ export { default as GradientGroupIcon } from './gradient-goup';
 export { default as CopyIcon } from './copy';
 export { default as EditIcon } from './edit';
 export { default as MoveIcon } from './move';
+export { default as ImportProgressIcon } from './import-progress';

@@ -34,13 +34,17 @@ interface DataTableProps<TData> {
 	data: TData[];
 	config: DataTableConfig<TData>;
 	activeTab?: string;
+	showMainActions?: boolean;
+	showPagination?: boolean;
 }
 
 export function DataTable<TData>({
 	columns,
 	data,
 	config,
-	activeTab
+	activeTab,
+	showMainActions = true,
+	showPagination = true
 }: DataTableProps<TData>) {
 	const {
 		table,
@@ -50,20 +54,22 @@ export function DataTable<TData>({
 
 	return (
 		<div className='w-full'>
-			{/* Main Actions Row */}
-			<div className="flex items-center justify-between p-5 border rounded-lg my-4 w-full">
-				<DataTableSearch
-					value={globalFilter}
-					onChange={setGlobalFilter}
-					placeholder={config.search?.placeholder}
-				/>
+			{/* Main Actions Row - Optional */}
+			{showMainActions && (
+				<div className="flex items-center justify-between p-5 border rounded-lg my-4 w-full">
+					<DataTableSearch
+						value={globalFilter}
+						onChange={setGlobalFilter}
+						placeholder={config.search?.placeholder}
+					/>
 
-				<DataTableActions
-					table={table}
-					config={config}
-					activeTab={activeTab}
-				/>
-			</div>
+					<DataTableActions
+						table={table}
+						config={config}
+						activeTab={activeTab}
+					/>
+				</div>
+			)}
 
 			{/* Advanced Filters Panel */}
 			{config.filters?.enabled && config.filters.showFilters && (
@@ -126,7 +132,8 @@ export function DataTable<TData>({
 				</Table>
 			</div>
 
-			<DataTablePagination table={table} />
+			{/* Pagination - Optional */}
+			{showPagination && <DataTablePagination table={table} />}
 		</div>
 	);
 }

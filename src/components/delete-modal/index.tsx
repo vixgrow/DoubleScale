@@ -87,7 +87,7 @@ const DeleteModal: React.FC<DeleteConfirmationModalProps> = ({
 						<div className="flex items-center justify-center rounded-3xl p-5 bg-[#FCDADA] text-[#EF4444]">
 							<ColoredDeleteIcon />
 						</div>
-						<DialogTitle className="text-2xl font-bold text-[#09090B]">
+						<DialogTitle className="text-2xl font-bold text-[#09090B] text-center">
 							{deleteMessage.message}
 						</DialogTitle>
 					</div>

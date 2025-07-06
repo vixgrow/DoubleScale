@@ -76,9 +76,9 @@ const selectionColumn: ColumnDef<ContactList> = {
 const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [lists, setLists] = useState<ContactList[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [perPage] = useState<number>(10);
-	const [page] = useState<number>(1);
-	const [keyword] = useState<string>('');
+	const [perPage, setPerPage] = useState<number>(10);
+	const [page,setPage] = useState<number>(1);
+	const [keyword, setKeyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedList, setSelectedList] = useState<ContactList | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);

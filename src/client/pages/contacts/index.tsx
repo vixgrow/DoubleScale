@@ -24,6 +24,7 @@ import { ListsRef } from './lists';
 import Tags, { TagsRef } from './tags';
 import CustomFields from './custom-fields';
 import AllContacts, { AllContactsRef } from './all-contacts';
+import { CustomFieldsRef } from '@quillcrm/client';
 
 const ContactsList: React.FC = () => {
 	const [activeTab, setActiveTab] = useState('all');
@@ -31,6 +32,7 @@ const ContactsList: React.FC = () => {
 	const listsRef = useRef<ListsRef>(null);
 	const tagsRef = useRef<TagsRef>(null);
 	const allContactsRef = useRef<AllContactsRef>(null);
+	const customFieldsRef = useRef<CustomFieldsRef>(null);
 
 	const tabTitles = {
 		all: __('Contacts List', 'quillcrm'),
@@ -86,9 +88,17 @@ const ContactsList: React.FC = () => {
 					: activeTab === 'custom-fields'
 						? [
 								{
+									label: __('Add Field', 'quillcrm'),
+									variant: 'tertiary',
+									onClick: () => {
+										customFieldsRef.current?.openCreateFieldModal();
+									},
+									icon: <PlusIcon />,
+								},
+								{
 									label: __('Add Group', 'quillcrm'),
 									onClick: () => {
-										// your logic for adding a field
+										customFieldsRef.current?.openCreateGroupModal();
 									},
 									icon: <PlusIcon />,
 								},
@@ -145,7 +155,7 @@ const ContactsList: React.FC = () => {
 					},
 					{
 						value: 'custom-fields',
-						children: <CustomFields />,
+						children: <CustomFields ref={customFieldsRef} activeTab="custom-fields"/>,
 					},
 				]}
 			/>

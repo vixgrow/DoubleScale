@@ -15,7 +15,6 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { ColumnDef } from '@tanstack/react-table';
-import { Tag as AntTag } from 'antd';
 import React from 'react';
 
 /**
@@ -90,7 +89,7 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 		const navigate = useNavigate();
 		const [loading, setLoading] = useState(true);
 		const [page, setPage] = useState(1);
-		const [perPage] = useState(10);
+		const [perPage, setPerPage] = useState(10);
 		const [total, setTotal] = useState(0);
 		const [data, setData] = useState<Contact[]>([]);
 		const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -237,8 +236,8 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 			}
 		};
 
-		const addToList = async () => {
-			if (selectedLists.length === 0) {
+		const addToListWithData = async (lists: string[]) => {
+			if (lists.length === 0) {
 				showNotice('error', __('Please select a list', 'quillcrm'));
 				return;
 			}
@@ -249,7 +248,7 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 					method: 'POST',
 					data: {
 						ids: selectedRowKeys,
-						list_ids: selectedLists.map(Number),
+						list_ids: lists.map(Number),
 					},
 				});
 
@@ -257,7 +256,10 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 				setBulkAction('');
 				showNotice(
 					'success',
-					__('Contacts added to list successfully', 'quillcrm')
+					__(
+						`Your Contact ( contact ) was successfully added to list (list name)  — check it out!`,
+						'quillcrm'
+					)
 				);
 				fetchContacts();
 			} catch (error: any) {
@@ -267,8 +269,8 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 			}
 		};
 
-		const removeFromList = async () => {
-			if (selectedLists.length === 0) {
+		const removeFromListWithData = async (lists: string[]) => {
+			if (lists.length === 0) {
 				showNotice('error', __('Please select a list', 'quillcrm'));
 				return;
 			}
@@ -279,7 +281,7 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 					method: 'POST',
 					data: {
 						ids: selectedRowKeys,
-						list_ids: selectedLists.map(Number),
+						list_ids: lists.map(Number),
 					},
 				});
 
@@ -297,8 +299,8 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 			}
 		};
 
-		const addTag = async () => {
-			if (selectedTags.length === 0) {
+		const addTagWithData = async (tags: string[]) => {
+			if (tags.length === 0) {
 				showNotice('error', __('Please select a tag', 'quillcrm'));
 				return;
 			}
@@ -309,7 +311,7 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 					method: 'POST',
 					data: {
 						ids: selectedRowKeys,
-						tag_ids: selectedTags.map(Number),
+						tag_ids: tags.map(Number),
 					},
 				});
 
@@ -327,8 +329,8 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 			}
 		};
 
-		const removeTag = async () => {
-			if (selectedTags.length === 0) {
+		const removeTagWithData = async (tags: string[]) => {
+			if (tags.length === 0) {
 				showNotice('error', __('Please select a tag', 'quillcrm'));
 				return;
 			}
@@ -339,7 +341,7 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 					method: 'POST',
 					data: {
 						ids: selectedRowKeys,
-						tag_ids: selectedTags.map(Number),
+						tag_ids: tags.map(Number),
 					},
 				});
 
@@ -357,28 +359,39 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 			}
 		};
 
-		const doBulkAction = async (action: string) => {
+		const doBulkAction = async (action: string, data?: any) => {
 			switch (action) {
 				case 'delete':
 					deleteSelected();
 					break;
 				case 'add_to_list':
-					addToList();
+					// Use the lists from data parameter
+					if (data?.lists) {
+						await addToListWithData(data.lists);
+					}
 					break;
 				case 'remove_from_list':
-					removeFromList();
+					// Use the lists from data parameter
+					if (data?.lists) {
+						await removeFromListWithData(data.lists);
+					}
 					break;
 				case 'add_tag':
-					addTag();
+					// Use the tags from data parameter
+					if (data?.tags) {
+						await addTagWithData(data.tags);
+					}
 					break;
 				case 'remove_tag':
-					removeTag();
+					// Use the tags from data parameter
+					if (data?.tags) {
+						await removeTagWithData(data.tags);
+					}
 					break;
 				default:
 					break;
 			}
 		};
-
 		useEffect(() => {
 			fetchContacts();
 		}, [page, perPage]);
@@ -428,7 +441,7 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 				header: 'Tag',
 				cell: ({ row }) =>
 					row.original.tags?.map((tag) => (
-						<AntTag key={tag.id}>{tag.name}</AntTag>
+						<div key={tag.id}>{tag.name}</div>
 					)),
 			},
 			{
@@ -436,7 +449,7 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 				header: 'List',
 				cell: ({ row }) =>
 					row.original.lists?.map((list) => (
-						<AntTag key={list.id}>{list.name}</AntTag>
+						<div key={list.id}>{list.name}</div>
 					)),
 			},
 			{
@@ -452,11 +465,36 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 						<SortIcon />
 					</div>
 				),
-				cell: ({ row }) => (
-					<div className="text-[#16A34A] text-xs capitalize bg-[#EFFFF5] rounded-lg py-1 px-3">
-						{row.original.status || '-'}
-					</div>
-				),
+				cell: ({ row }) => {
+					const status = row.original.status || '-';
+					let statusClasses = '';
+
+					// Define styles for each status
+					switch (status.toLowerCase()) {
+						case 'subscribed':
+							statusClasses = 'text-[#16A34A] bg-[#EFFFF5]';
+							break;
+						case 'unsubscribed':
+							statusClasses = 'text-[#1C1D22] bg-[#FFF2E2]';
+							break;
+						case 'bounced':
+							statusClasses = 'text-[#5570F1] bg-[#5570F129]';
+							break;
+						case 'unverified':
+							statusClasses = 'text-[#CC5F5F] bg-[#F57E7729]';
+							break;
+						default:
+							statusClasses = 'text-gray-600 bg-gray-100';
+					}
+
+					return (
+						<div
+							className={`text-xs capitalize rounded-lg py-1 px-3 ${statusClasses}`}
+						>
+							{status}
+						</div>
+					);
+				},
 			},
 			{
 				accessorKey: 'phone',

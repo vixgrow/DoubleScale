@@ -76,9 +76,9 @@ const selectionColumn: ColumnDef<ContactTag> = {
 const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [tags, setTags] = useState<ContactTag[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
-	const [perPage] = useState<number>(10);
-	const [page] = useState<number>(1);
-	const [keyword] = useState<string>('');
+	const [perPage, setPerPage] = useState<number>(10);
+	const [page,setPage] = useState<number>(1);
+	const [keyword, setKeyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedTag, setSelectedTag] = useState<ContactTag | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);

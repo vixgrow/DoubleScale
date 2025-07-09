@@ -6,7 +6,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Input, Typography, Checkbox, Switch, DatePicker } from 'antd';
+import { Typography, DatePicker } from 'antd';
+
 import en from 'antd/es/date-picker/locale/en_US';
 import dayjs from 'dayjs';
 import type { InputProps } from 'antd';
@@ -21,8 +22,12 @@ import { ListField, TagField, LinkTriggerField } from '@quillcrm/components';
 import type { ReactSelectOptions } from '@quillcrm/client';
 import ContactMappedFields from '../contact-mapped-fields';
 import MappedFields from '../mapped-fields';
+import { Input } from '@/components/ui/input';
 import APISelect from '../api-select';
 import APIMappedFields from '../api-mapped-fields';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface FieldProps {
 	label?: string;
@@ -54,6 +59,7 @@ const Field: React.FC<FieldProps> = ({
 	endpoint,
 	multiple,
 	helperText,
+	required,
 	style,
 }) => {
 	let fieldContent;
@@ -92,17 +98,20 @@ const Field: React.FC<FieldProps> = ({
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
 					type={type}
-					status={status || ''}
-					className='h-12'
+					className={`h-12 ${status === 'error' ? 'border-red-500 focus:ring-red-500' : ''}`}
 				/>
 			);
 			break;
 		case 'textarea':
 			fieldContent = (
-				<Input.TextArea
+				<Textarea
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
-					status={status || ''}
+					className={
+						status === 'error'
+							? 'border-red-500 focus:ring-red-500'
+							: ''
+					}
 				/>
 			);
 			break;
@@ -113,8 +122,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-								(option) => option.value === value
-							)
+									(option) => option.value === value
+								)
 							: null
 					}
 					onChange={(value) => {
@@ -150,7 +159,7 @@ const Field: React.FC<FieldProps> = ({
 			fieldContent = (
 				<Checkbox
 					checked={value}
-					onChange={(e) => onChange(e.target.checked)}
+					onCheckedChange={(checked) => onChange(checked)}
 				/>
 			);
 			break;
@@ -158,7 +167,7 @@ const Field: React.FC<FieldProps> = ({
 			fieldContent = (
 				<Switch
 					checked={value}
-					onChange={(checked) => onChange(checked)}
+					onCheckedChange={(checked) => onChange(checked)}
 				/>
 			);
 			break;
@@ -219,11 +228,14 @@ const Field: React.FC<FieldProps> = ({
 		<div className="qcrm-field" style={style || {}}>
 			{label && (
 				<div className="qcrm-field-label text-[#09090B] font-normal text-base">
-					{label} <span className='text-red-600'>*</span>
+					{label}{' '}
+					{required && <span className="text-red-600">*</span>}
 				</div>
 			)}
 			<div className="qcrm-field-input">{fieldContent}</div>
-			{helperText && <Typography.Text type="secondary">{helperText}</Typography.Text>}
+			{helperText && (
+				<Typography.Text type="secondary">{helperText}</Typography.Text>
+			)}
 		</div>
 	);
 };

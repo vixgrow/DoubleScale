@@ -73,6 +73,15 @@ export const FieldTable: React.FC<FieldTableProps> = ({
 			),
 		},
 		{
+			accessorKey: 'created_at',
+			header: __('Created At', 'quillcrm'),
+			cell: ({ row }) => (
+				<div className="">
+					{row.original.created_at}
+				</div>
+			),
+		},
+		{
 			accessorKey: 'actions',
 			header: __('Actions', 'quillcrm'),
 			cell: ({ row }) => (

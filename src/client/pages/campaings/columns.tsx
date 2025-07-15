@@ -1,7 +1,8 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { Campaign } from '../../types';
-import { Checkbox } from '../../../components/ui/checkbox';
-
+import { Campaign, CampaignStatus } from '../../types';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CAMPAIGN_STATUS_COLORS } from './constants';
+import { Badge } from '@/components/ui/badge';
 // You can use a Zod schema here if you want.
 export const columns: ColumnDef<Campaign>[] = [
 	{
@@ -36,6 +37,18 @@ export const columns: ColumnDef<Campaign>[] = [
 	{
 		accessorKey: 'status',
 		header: 'Status',
+		cell: ({ row }) => {
+			const status = row.getValue('status') as CampaignStatus;
+			const colorClasses =
+				CAMPAIGN_STATUS_COLORS[status] ||
+				'bg-muted text-muted-foreground';
+
+			return (
+				<Badge className={colorClasses} variant="outline">
+					{status.charAt(0).toUpperCase() + status.slice(1)}
+				</Badge>
+			);
+		},
 	},
 	{
 		accessorKey: 'broadcast',

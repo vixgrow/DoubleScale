@@ -10,8 +10,13 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Flex, Table, Input, Button, Modal, Select, Popconfirm, Popover } from 'antd';
-import { EditOutlined, DeleteOutlined, CopyOutlined, MoreOutlined } from '@ant-design/icons';
+
+import {
+	EditOutlined,
+	DeleteOutlined,
+	CopyOutlined,
+	MoreOutlined,
+} from '@ant-design/icons';
 
 /**
  * Internal dependencies
@@ -21,7 +26,9 @@ import { Campaign, CampaignsResponse } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
-const { Column } = Table;
+import { DataTable } from '../../../components/ui/data-table';
+import { columns } from './columns';
+import { PageHeader, PlusIcon } from '../../../components';
 
 const Campaigns: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -161,194 +168,42 @@ const Campaigns: React.FC = () => {
 				message: error.message,
 			});
 		}
-	}
+	};
 
 	return (
 		<div className="qcrm-campaigns">
-			<Flex
-				className="qcrm-contacts-list__actions"
-				justify="space-between"
-			>
-				<Flex gap={10}>
-					<Flex gap={10}>
-						<Select
-							options={[
-								{
-									label: __('Bulk Actions', 'quillcrm'),
-									value: '',
-								},
-								{
-									label: __('Delete', 'quillcrm'),
-									value: 'delete',
-								},
-							]}
-							value={bulkAction}
-							onChange={(value) => setBulkAction(value)}
-							disabled={selectedRowKeys.length === 0}
-						/>
-						<Button
-							type="primary"
-							onClick={() => {
-								if (bulkAction === 'delete') {
-									deleteSelected();
-								}
-							}}
-							disabled={selectedRowKeys.length === 0}
-							loading={isApplying}
-						>
-							{__('Apply', 'quillcrm')}
-						</Button>
-					</Flex>
-					<Input.Search
-						placeholder={__('Search', 'quillcrm')}
-						allowClear
-						onSearch={() => {
-							fetchCampaigns();
-						}}
-						onChange={(e) => setKeyword(e.target.value)}
-						styles={{
-							affixWrapper: {
-								padding: '4px 5px',
-							},
-							input: {
-								minHeight: 'auto',
-							},
-						}}
-					/>
-				</Flex>
-				<Button type="primary" onClick={() => setVisible(true)}>
-					{__('Create Campaign', 'quillcrm')}
-				</Button>
-			</Flex>
-			<Table
-				dataSource={campaigns}
-				rowKey="id"
-				loading={loading}
-				pagination={{
-					total,
-					current: page,
-					pageSize: perPage,
-					onChange: (page, pageSize) => {
-						setPage(page);
-						setPerPage(pageSize);
+			<PageHeader
+				title={__('Campaigns List', 'quillcrm')}
+				subtitle={__('Campaigns', 'quillcrm')}
+				actions={[
+					{
+						label: __('Create Campaign', 'quillcrm'),
+						icon: <PlusIcon />,
+						onClick: () => setVisible(true),
 					},
-				}}
-				rowSelection={{
-					selectedRowKeys,
-					onChange: (selectedRowKeys) =>
-						setSelectedRowKeys(selectedRowKeys),
-				}}
-			>
-				<Column
-					title={__('Name')}
-					dataIndex="name"
-					key="name"
-					render={(_, record: Campaign) => (
-						<Flex gap={10} align="center">
-							<Popover
-								content={
-									<Flex vertical gap={10}>
-										<Button
-											icon={<EditOutlined />}
-											onClick={() => {
-												navigate(
-													getToLink(
-														`campaigns/${record.id}`
-													)
-												);
-											}}
-										>
-											{record.status !== 'draft' && record.status !== 'schedule' ? __('Overview', 'quillcrm') : __('Edit', 'quillcrm')}
-										</Button>
-										<Button
-											icon={<CopyOutlined />}
-											onClick={() =>
-												duplicateCampaign(record.id)
-											}
-										>
-											{__('Duplicate', 'quillcrm')}
-										</Button>
-										<Popconfirm
-											title={__(
-												'Are you sure?',
-												'quillcrm'
-											)}
-											onConfirm={() =>
-												deleteCampaign(record.id)
-											}
-										>
-											<Button
-												icon={<DeleteOutlined />}
-												danger
-											>
-												{__('Delete', 'quillcrm')}
-											</Button>
-										</Popconfirm>
-									</Flex>
-								}
-								trigger="click"
-							>
-								<MoreOutlined size={40} />
-							</Popover>
-							<NavLink
-								to={
-									record.status === 'completed'
-										? `campaigns/${record.id}/overview`
-										: `campaigns/${record.id}`
-								}
-							>
-								{record.name}
-							</NavLink>
-						</Flex>
-					)}
-				/>
-				<Column title={__('Status')} dataIndex="status" key="status" />
-				<Column
-					title={__('Execute At')}
-					dataIndex="execute_at"
-					key="execute_at"
-					render={(text, record: Campaign) =>
-						record.status === 'schedule' ? convertDate(text) : '-'
-					}
-				/>
-				<Column
-					title={__('Updated At')}
-					dataIndex="updated_at"
-					key="updated_at"
-					render={(text) => convertDate(text, true)}
-				/>
-				<Column
-					title={__('Created At')}
-					dataIndex="created_at"
-					key="created_at"
-					render={(text) => convertDate(text, true)}
-				/>
-			</Table>
-			<Modal
-				title={__('Add Campaign')}
-				open={visible}
-				onOk={addCampaign}
-				onCancel={() => setVisible(false)}
-				footer={[
-					<Button key="back" onClick={() => setVisible(false)}>
-						{__('Cancel')}
-					</Button>,
-					<Button
-						key="submit"
-						type="primary"
-						onClick={addCampaign}
-						loading={isAdding}
-					>
-						{__('Add')}
-					</Button>,
 				]}
-			>
-				<Input
-					placeholder={__('Campaign Name')}
-					value={name}
-					onChange={(e) => setName(e.target.value)}
-				/>
-			</Modal>
+			/>
+			<DataTable
+				columns={columns}
+				data={campaigns}
+				config={{
+					search: {
+						placeholder: __('Search', 'quillcrm'),
+					},
+					selection: {
+						enabled: true,
+						selectedKeys: selectedRowKeys,
+						onSelectionChange: setSelectedRowKeys,
+					},
+					// bulkActions: {
+					// 	enabled: true,
+					// 	currentAction: bulkAction,
+					// 	onActionChange: (value) => setBulkAction(value),
+					// 	onExecuteAction: (value) => setBulkAction(value),
+					// 	activeTab: 'all',
+					// },
+				}}
+			/>
 		</div>
 	);
 };

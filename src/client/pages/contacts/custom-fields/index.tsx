@@ -162,14 +162,19 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
             onDragEnd={async ({ active, over }) => {
               if (!over) return;
 
+              // Check if the drag actually moved to a different location
+              if (active.id === over.id) return;
+
               const activeData = active.data.current;
               const overData = over.data.current;
 
               if (activeData?.type === 'field' && overData?.type === 'group') {
                 const field = activeData.field;
                 const groupId = parseInt(overData.groupId);
-                
-                // Use the moveField function from the hook
+
+                // Additional check: don't move if it's already in the same group
+                if (field.group_id === groupId) return;
+
                 await moveField(field, groupId);
               }
             }}

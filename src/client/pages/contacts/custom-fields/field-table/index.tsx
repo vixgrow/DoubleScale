@@ -13,7 +13,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import { EditIcon, DeleteIcon } from '@quillcrm/components';
+import { EditIcon, DeleteIcon, SortIcon } from '@quillcrm/components';
 import { CustomField } from '@quillcrm/client';
 import { DraggableField } from '../draggable-field';
 
@@ -58,14 +58,34 @@ export const FieldTable: React.FC<FieldTableProps> = ({
 		},
 		{
 			accessorKey: 'name',
-			header: __('Name', 'quillcrm'),
+			header: ({ column }) => (
+				<div
+					className="flex items-center gap-1 cursor-pointer select-none"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Name', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
 			cell: ({ row }) => (
 				<div className="font-medium">{row.original.name}</div>
 			),
 		},
 		{
 			accessorKey: 'type',
-			header: __('Type', 'quillcrm'),
+			header: ({ column }) => (
+				<div
+					className="flex items-center gap-1 cursor-pointer select-none"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Type', 'quillcrm')}
+					<SortIcon />
+				</div>
+			),
 			cell: ({ row }) => (
 				<div className="capitalize">
 					{fieldTypes[row.original.type]?.name || row.original.type}
@@ -74,16 +94,22 @@ export const FieldTable: React.FC<FieldTableProps> = ({
 		},
 		{
 			accessorKey: 'created_at',
-			header: __('Created At', 'quillcrm'),
-			cell: ({ row }) => (
-				<div className="">
-					{row.original.created_at}
+			header: ({ column }) => (
+				<div
+					className="flex items-center gap-1 cursor-pointer select-none"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
+				>
+					{__('Created At', 'quillcrm')}
+					<SortIcon />
 				</div>
 			),
+			cell: ({ row }) => <div>{row.original.created_at}</div>,
 		},
 		{
 			accessorKey: 'actions',
-			header: __('Actions', 'quillcrm'),
+			header: () => __('Actions', 'quillcrm'),
 			cell: ({ row }) => (
 				<div className="flex gap-2">
 					<DraggableField field={row.original}>
@@ -112,6 +138,7 @@ export const FieldTable: React.FC<FieldTableProps> = ({
 			enableSorting: false,
 		},
 	];
+	
 
 	return (
 		<DataTable

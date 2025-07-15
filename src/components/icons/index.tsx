@@ -38,3 +38,4 @@ export { default as EditIcon } from './edit';
 export { default as MoveIcon } from './move';
 export { default as ImportProgressIcon } from './import-progress';
 export { default as InstallIcon } from './install';
+export { default as OutlinedCalendarIcon } from './outlined-calendar';

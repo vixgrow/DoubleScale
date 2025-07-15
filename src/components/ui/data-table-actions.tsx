@@ -24,6 +24,7 @@ import {
 	BulkActionSelect,
 } from '@quillcrm/components';
 import { DataTableConfig } from '@quillcrm/client';
+import { DateRangePicker } from './date-range-picker';
 
 interface DataTableActionsProps<TData> {
 	table: Table<TData>;
@@ -38,6 +39,13 @@ export function DataTableActions<TData>({
 }: DataTableActionsProps<TData>) {
 	return (
 		<div className="flex gap-[10px] items-center">
+			{config.dateRange?.enabled && (
+				<DateRangePicker
+					value={config.dateRange.value}
+					onChange={config.dateRange.onDateChange}
+					placeholder={config.dateRange.placeholder}
+				/>
+			)}
 			{/* Bulk Actions - Always visible when enabled, but disabled when no rows selected */}
 			{config.bulkActions?.enabled && (
 				<BulkActionSelect

@@ -9,7 +9,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Flex, Popover, Spin } from 'antd';
+import { Button, Flex, Popover, Spin, Popconfirm } from 'antd';
 import {
 	TrophyOutlined,
 	BranchesOutlined,
@@ -18,13 +18,19 @@ import {
 	PlusCircleOutlined,
 } from '@ant-design/icons';
 import { map } from 'lodash';
+import { Handle, Position, NodeProps } from '@xyflow/react';
 
 /**
  * Internal dependencies
  */
-import './style.scss';
-import { useAutomationContext } from '../../../state/context';
+import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+
+interface AddStepNodeData {
+	parentId?: number | null;
+	condition?: string | null;
+	prevStep?: AutomationStep | null;
+}
 
 const updateStepOrderRecursive = (
 	steps: AutomationStep[],
@@ -83,96 +89,17 @@ const updateStepOrderRecursive = (
 	return { newSteps, updatedSteps, currentStepOrder };
 };
 
-interface AddStepProps {
-	setStep: (step: OrganizedStep | null) => void;
-	parentId?: number;
-	condition?: string;
-	prevStep?: OrganizedStep | null;
-}
-
-const AddStep: React.FC<AddStepProps> = ({
-	setStep,
-	parentId,
-	condition,
-	prevStep,
-}) => {
+const AddStepNode: React.FC<NodeProps> = ({ data }) => {
+	const { parentId, condition, prevStep } =
+		data as unknown as AddStepNodeData;
+	const [loading, setLoading] = useState(false);
 	const { automation, steps, setSteps, setUpdatedSteps } =
 		useAutomationContext();
-	const [loading, setLoading] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	if (!automation) {
 		return null;
 	}
-
-	const storeStep = async (type: string) => {
-		setLoading(true);
-
-		const order = getNewStepOrder();
-		const stepData = {
-			automation_id: automation.id,
-			type,
-			status: 'active', // Use 'active' instead of 'draft' to persist after refresh
-			order,
-		} as AutomationStep;
-
-		if (type === 'condition') {
-			stepData.action = 'condition';
-		}
-
-		if (parentId && condition) {
-			stepData.parent_id = parentId;
-			stepData.condition = condition;
-		}
-
-		const { newSteps, updatedSteps, currentStepOrder } =
-			updateStepOrderRecursive(steps, parentId || 0, order, condition);
-
-		const data = {
-			...stepData,
-			order: currentStepOrder,
-			updated_steps: updatedSteps,
-		};
-
-		try {
-			const response = (await apiFetch({
-				path: `/qc/v1/automation-steps`,
-				method: 'POST',
-				data,
-			})) as AutomationStep;
-
-			const organizedStep = {
-				...response,
-				children: [],
-			} as OrganizedStep;
-			setUpdatedSteps({});
-			setSteps([...newSteps, response]);
-			setStep(organizedStep);
-			createNotice({
-				type: 'success',
-				message: __('Step added', 'quillcrm'),
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const getNewStepOrder = () => {
-		if (!parentId && !prevStep) {
-			return 1;
-		}
-
-		if (prevStep) {
-			return prevStep.order + 1;
-		}
-
-		return 1;
-	};
 
 	const typesOptions = {
 		action: {
@@ -193,45 +120,124 @@ const AddStep: React.FC<AddStepProps> = ({
 		},
 	};
 
+	const getNewStepOrder = () => {
+		if (!parentId && !prevStep) {
+			return 1;
+		}
+
+		if (prevStep) {
+			return prevStep.order + 1;
+		}
+
+		return 1;
+	};
+
+	const handleStepSelection = async (type: string) => {
+		setLoading(true);
+
+		const order = getNewStepOrder();
+		const stepData = {
+			automation_id: automation.id,
+			type,
+			status: 'active', // Use 'active' instead of 'draft' to persist after refresh
+			order,
+		} as AutomationStep;
+
+		if (type === 'condition') {
+			stepData.action = 'condition';
+		}
+
+		if (parentId && condition) {
+			stepData.parent_id = parentId;
+			stepData.condition = condition;
+		}
+
+		const { newSteps, updatedSteps, currentStepOrder } =
+			updateStepOrderRecursive(
+				steps,
+				parentId || 0,
+				order,
+				condition || undefined
+			);
+
+		const requestData = {
+			...stepData,
+			order: currentStepOrder,
+			updated_steps: updatedSteps,
+		};
+
+		try {
+			const response = (await apiFetch({
+				path: `/qc/v1/automation-steps`,
+				method: 'POST',
+				data: requestData,
+			})) as AutomationStep;
+
+			setUpdatedSteps({});
+			setSteps([...newSteps, response]);
+
+			createNotice({
+				type: 'success',
+				message: __('Step added', 'quillcrm'),
+			});
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
-		<Popover
-			placement="top"
-			trigger="click"
-			content={
-				<>
-					{loading && <Spin />}
-					{!loading && (
-						<Flex gap={10} wrap>
-							{map(typesOptions, (type, key) => (
-								<Button
-									key={key}
-									icon={type.icon}
-									onClick={() => storeStep(key)}
-								>
-									{type.label}
-								</Button>
-							))}
-						</Flex>
-					)}
-				</>
-			}
-		>
-			<Flex
-				justify="center"
-				align="center"
-				className="qcrm-automation-workflow__add-step"
+		<div className="qcrm-reactflow-node qcrm-reactflow-node--add-step">
+			<Handle
+				type="target"
+				position={Position.Top}
+				className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+			/>
+
+			<Popover
+				placement="right"
+				trigger="click"
+				content={
+					<>
+						{loading && <Spin />}
+						{!loading && (
+							<Flex gap={10} wrap vertical>
+								{map(typesOptions, (type, key) => (
+									<Button
+										key={key}
+										icon={type.icon}
+										onClick={() => handleStepSelection(key)}
+										style={{ justifyContent: 'flex-start' }}
+									>
+										{type.label}
+									</Button>
+								))}
+							</Flex>
+						)}
+					</>
+				}
 			>
-				<Button
-					type="primary"
-					icon={<PlusCircleOutlined />}
-					style={{
-						borderRadius: '50%',
-					}}
-					className="add-step-button"
-				/>
-			</Flex>
-		</Popover>
+				<div className="qcrm-reactflow-node__add-button">
+					<Button
+						type="primary"
+						icon={<PlusCircleOutlined />}
+						shape="circle"
+						size="large"
+					/>
+				</div>
+			</Popover>
+
+			<Handle
+				type="source"
+				position={Position.Bottom}
+				className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+			/>
+		</div>
 	);
 };
 
-export default AddStep;
+export default AddStepNode;

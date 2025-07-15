@@ -2,19 +2,29 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
  */
-import { Card, Flex, Typography, Spin, Progress, Table, Divider, Button, Modal } from 'antd';
+import {
+	Card,
+	Flex,
+	Typography,
+	Spin,
+	Progress,
+	Table,
+	Divider,
+	Button,
+	Modal,
+} from 'antd';
 import {
 	SendOutlined,
 	EyeOutlined,
 	LinkOutlined,
 	UserOutlined,
-	WarningOutlined
+	WarningOutlined,
 } from '@ant-design/icons';
 import { Chart } from 'react-chartjs-2';
 import {
@@ -36,14 +46,19 @@ import { useCampaignContext } from '../../state/context';
 import { Campaign as CampaignType, Template } from '@quillcrm/client';
 
 const Analytics: React.FC = () => {
-	const { campaign, isLoading, updateCampaign, saveCampaign } = useCampaignContext();
-	const totalEmails = campaign ? campaign.sent_count + campaign.failed_count : 0;
+	const { campaign, isLoading, updateCampaign, saveCampaign } =
+		useCampaignContext();
+	const totalEmails = campaign
+		? campaign.sent_count + campaign.failed_count
+		: 0;
 	const [isFetching, setIsFetching] = useState(false);
-	const [started, setStarted] = useState(campaign?.status === 'processing' && totalEmails > 0);
+	const [started, setStarted] = useState(
+		campaign?.status === 'processing' && totalEmails > 0
+	);
 	const [template, setTemplate] = useState<Template | null>(null);
 	const [resending, setResending] = useState(false);
 
-	const fetchCampaign = async () => {
+	const fetchCampaign = useCallback(async () => {
 		if (!campaign || isFetching) {
 			return;
 		}
@@ -56,7 +71,11 @@ const Analytics: React.FC = () => {
 			})) as CampaignType;
 
 			const totalEmails = response.sent_count + response.failed_count;
-			if (totalEmails > 0 && !started && totalEmails !== (campaign.sent_count + campaign.failed_count)) {
+			if (
+				totalEmails > 0 &&
+				!started &&
+				totalEmails !== campaign.sent_count + campaign.failed_count
+			) {
 				setStarted(true);
 			}
 
@@ -65,25 +84,28 @@ const Analytics: React.FC = () => {
 			if (response.status === 'completed') {
 				setStarted(false);
 			}
-
 		} catch (error) {
 			console.error(error);
 		} finally {
 			setIsFetching(false);
 		}
-	};
+	}, [campaign, isFetching, started, updateCampaign]);
 
 	// @ts-ignore
 	useEffect(() => {
 		let timeout;
-		if (campaign && (campaign.status === 'processing' || campaign.status === 'resending')) {
+		if (
+			campaign &&
+			(campaign.status === 'processing' ||
+				campaign.status === 'resending')
+		) {
 			timeout = setTimeout(fetchCampaign, 5000);
 		}
 
 		return () => {
 			clearTimeout(timeout);
 		};
-	}, [campaign]);
+	}, [campaign, fetchCampaign]);
 
 	const resendFailed = async () => {
 		if (!campaign) {
@@ -108,8 +130,6 @@ const Analytics: React.FC = () => {
 		return ((value / total) * 100).toFixed(2);
 	};
 
-
-
 	return (
 		<Card
 			loading={isLoading}
@@ -120,7 +140,9 @@ const Analytics: React.FC = () => {
 					</Typography.Title>
 					<Flex gap={10}>
 						<Typography.Text>{campaign?.status}</Typography.Text>
-						{campaign && (campaign.status === 'processing' || campaign.status === 'resending') && <Spin />}
+						{campaign &&
+							(campaign.status === 'processing' ||
+								campaign.status === 'resending') && <Spin />}
 					</Flex>
 				</Flex>
 			}
@@ -160,20 +182,29 @@ const Analytics: React.FC = () => {
 											key: 'subject',
 										},
 										{
-											title: __('Total Recipients', 'quillcrm'),
+											title: __(
+												'Total Recipients',
+												'quillcrm'
+											),
 											key: 'total_recipients',
-											render: (_, record: Template) => campaign.templates_count[record['template_id']],
+											render: (_, record: Template) =>
+												campaign.templates_count[
+													record['template_id']
+												],
 										},
 										{
 											title: __('View', 'quillcrm'),
 											key: 'view',
 											render: (_, record: Template) => (
-												<Button onClick={() => setTemplate(record)}>
+												<Button
+													onClick={() =>
+														setTemplate(record)
+													}
+												>
 													{__('View', 'quillcrm')}
 												</Button>
-											)
-
-										}
+											),
+										},
 									]}
 									pagination={false}
 								/>
@@ -229,7 +260,11 @@ const Analytics: React.FC = () => {
 									</Typography.Text>
 								</Flex>
 								<Typography.Text className="qcrm-analytics-count">
-									{calculatePercentage(totalEmails, campaign.opened_count)}%
+									{calculatePercentage(
+										totalEmails,
+										campaign.opened_count
+									)}
+									%
 								</Typography.Text>
 							</Flex>
 						</Card>
@@ -242,7 +277,11 @@ const Analytics: React.FC = () => {
 									</Typography.Text>
 								</Flex>
 								<Typography.Text className="qcrm-analytics-count">
-									{calculatePercentage(totalEmails, campaign.clicked_count)}%
+									{calculatePercentage(
+										totalEmails,
+										campaign.clicked_count
+									)}
+									%
 								</Typography.Text>
 							</Flex>
 						</Card>
@@ -253,40 +292,55 @@ const Analytics: React.FC = () => {
 								percent={
 									totalEmails > 0
 										? Math.round(
-											(totalEmails / campaign.contacts_count) *
-											100
-										)
+												(totalEmails /
+													campaign.contacts_count) *
+													100
+											)
 										: 0
 								}
 								format={(percent) => `${percent}%`}
 							/>
 						</Flex>
 					)}
-					{(campaign.status === 'processing' || campaign.status === 'resending') && !started && (
-						<Flex gap={20}>
-							<Typography.Text>
-								{__('Campaign is being processed.')}
-							</Typography.Text>
-							<Spin />
-						</Flex>
-					)}
-					{campaign.status === 'completed' && !started && campaign.failed_count > 0 && (
-						<Card>
-							<Flex vertical gap={20} align='center'>
-								<Typography.Title level={5}>
-									{sprintf(
-										__('Campaign has been completed. %s emails failed to send.', 'quillcrm'),
-										campaign.failed_count
-									)}
-								</Typography.Title>
-								<Flex justify="center">
-									<Button onClick={resendFailed} loading={resending} disabled={resending}>
-										{__('Resend Failed Emails', 'quillcrm')}
-									</Button>
-								</Flex>
+					{(campaign.status === 'processing' ||
+						campaign.status === 'resending') &&
+						!started && (
+							<Flex gap={20}>
+								<Typography.Text>
+									{__('Campaign is being processed.')}
+								</Typography.Text>
+								<Spin />
 							</Flex>
-						</Card>
-					)}
+						)}
+					{campaign.status === 'completed' &&
+						!started &&
+						campaign.failed_count > 0 && (
+							<Card>
+								<Flex vertical gap={20} align="center">
+									<Typography.Title level={5}>
+										{sprintf(
+											__(
+												'Campaign has been completed. %s emails failed to send.',
+												'quillcrm'
+											),
+											campaign.failed_count
+										)}
+									</Typography.Title>
+									<Flex justify="center">
+										<Button
+											onClick={resendFailed}
+											loading={resending}
+											disabled={resending}
+										>
+											{__(
+												'Resend Failed Emails',
+												'quillcrm'
+											)}
+										</Button>
+									</Flex>
+								</Flex>
+							</Card>
+						)}
 					<Card>
 						<Flex justify="center">
 							<div style={{ maxWidth: 400 }}>
@@ -343,25 +397,53 @@ const Analytics: React.FC = () => {
 					<Flex vertical gap={20}>
 						<Flex vertical gap={10}>
 							<Flex gap={10}>
-								<Typography.Text>{__('Total Recipients', 'quillcrm')}{': '}</Typography.Text>
-								<Typography.Text strong>{campaign.templates_count[template['template_id']]}</Typography.Text>
+								<Typography.Text>
+									{__('Total Recipients', 'quillcrm')}
+									{': '}
+								</Typography.Text>
+								<Typography.Text strong>
+									{
+										campaign.templates_count[
+											template['template_id']
+										]
+									}
+								</Typography.Text>
 							</Flex>
 							<Flex gap={10}>
-								<Typography.Text>{__('From Name', 'quillcrm')}{': '}</Typography.Text>
-								<Typography.Text strong>{template.from_name}</Typography.Text>
+								<Typography.Text>
+									{__('From Name', 'quillcrm')}
+									{': '}
+								</Typography.Text>
+								<Typography.Text strong>
+									{template.from_name}
+								</Typography.Text>
 							</Flex>
 							<Flex gap={10}>
-								<Typography.Text>{__('From Email', 'quillcrm')}{': '}</Typography.Text>
-								<Typography.Text strong>{template.from_email}</Typography.Text>
+								<Typography.Text>
+									{__('From Email', 'quillcrm')}
+									{': '}
+								</Typography.Text>
+								<Typography.Text strong>
+									{template.from_email}
+								</Typography.Text>
 							</Flex>
 							<Flex gap={10}>
-								<Typography.Text>{__('Subject', 'quillcrm')}{': '}</Typography.Text>
-								<Typography.Text strong>{template.subject}</Typography.Text>
+								<Typography.Text>
+									{__('Subject', 'quillcrm')}
+									{': '}
+								</Typography.Text>
+								<Typography.Text strong>
+									{template.subject}
+								</Typography.Text>
 							</Flex>
 						</Flex>
 						<Divider style={{ margin: 0 }} />
 						<Card title={__('Body', 'quillcrm')}>
-							<div dangerouslySetInnerHTML={{ __html: template.body }} />
+							<div
+								dangerouslySetInnerHTML={{
+									__html: template.body,
+								}}
+							/>
 						</Card>
 					</Flex>
 				)}

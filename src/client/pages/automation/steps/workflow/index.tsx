@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useMemo, useEffect } from '@wordpress/element';
+import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
@@ -46,6 +46,7 @@ import AddStep from './add-step';
 import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
 import WebhookFields from './webhook-fields';
 import FormFields from './form-fields';
+import WorkflowVisualization from './reactflow-workflow/WorkflowVisualization';
 
 const Workflow: React.FC = () => {
 	const {
@@ -56,11 +57,12 @@ const Workflow: React.FC = () => {
 		saveAutomation,
 		isSaving: isSavingAutomation,
 		setSteps,
-		updateSettings
+		updateSettings,
 	} = useAutomationContext();
 	const [currentStep, setCurrentStep] = useState<OrganizedStep | null>(null);
 	const [visible, setVisible] = useState<boolean>(false);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
+	const [useReactFlow, setUseReactFlow] = useState<boolean>(true);
 	const { createNotice, setCurrentTrigger } = useDispatch('quillcrm/core');
 
 	useEffect(() => {
@@ -171,19 +173,30 @@ const Workflow: React.FC = () => {
 			const newSteps = [...steps];
 
 			if (step.parent_id) {
-				newSteps.filter((child) => child.parent_id === step.parent_id && child.condition === step.condition).filter((s) => s.id !== step.id).sort((a, b) => a.order - b.order).forEach((child, index) => {
-					const newOrder = index + 1;
-					if (newOrder !== child.order) {
-						updatedOrdersSteps[child.id] = { order: newOrder };
-					}
-				});
+				newSteps
+					.filter(
+						(child) =>
+							child.parent_id === step.parent_id &&
+							child.condition === step.condition
+					)
+					.filter((s) => s.id !== step.id)
+					.sort((a, b) => a.order - b.order)
+					.forEach((child, index) => {
+						const newOrder = index + 1;
+						if (newOrder !== child.order) {
+							updatedOrdersSteps[child.id] = { order: newOrder };
+						}
+					});
 			} else {
-				newSteps.sort((a, b) => a.order - b.order).filter((s) => s.id !== step.id).forEach((step, index) => {
-					const newOrder = index + 1;
-					if (newOrder !== step.order) {
-						updatedOrdersSteps[step.id] = { order: newOrder };
-					}
-				});
+				newSteps
+					.sort((a, b) => a.order - b.order)
+					.filter((s) => s.id !== step.id)
+					.forEach((step, index) => {
+						const newOrder = index + 1;
+						if (newOrder !== step.order) {
+							updatedOrdersSteps[step.id] = { order: newOrder };
+						}
+					});
 			}
 
 			return { updatedOrdersSteps, newSteps };
@@ -281,9 +294,15 @@ const Workflow: React.FC = () => {
 						</div>
 					</Flex>
 				</Card>
-				{step.type !== 'condition' && step.type !== 'end_automation' && (
-					<AddStep setStep={setCurrentStep} prevStep={step ?? null} condition={step.condition} parentId={step.parent_id} />
-				)}
+				{step.type !== 'condition' &&
+					step.type !== 'end_automation' && (
+						<AddStep
+							setStep={setCurrentStep}
+							prevStep={step ?? null}
+							condition={step.condition}
+							parentId={step.parent_id}
+						/>
+					)}
 				{step.type === 'condition' && (
 					<Flex gap={20} style={{ marginTop: 10 }}>
 						<Card
@@ -334,53 +353,76 @@ const Workflow: React.FC = () => {
 					<Typography.Title level={4} style={{ margin: 0 }}>
 						{automation?.name || __('New Automation', 'quillcrm')}
 					</Typography.Title>
-					<Switch
-						checked={automation?.status === 'active'}
-						onChange={(value) =>
-							saveAutomation({
-								status: value ? 'active' : 'inactive',
-							})
-						}
-						loading={isSavingAutomation}
-					/>
+					<Flex gap={20} align="center">
+						<Flex gap={10} align="center">
+							<Typography.Text>
+								{__('Workflow View:', 'quillcrm')}
+							</Typography.Text>
+							<Switch
+								checked={useReactFlow}
+								onChange={setUseReactFlow}
+								checkedChildren={__('Flow', 'quillcrm')}
+								unCheckedChildren={__('List', 'quillcrm')}
+							/>
+						</Flex>
+						<Switch
+							checked={automation?.status === 'active'}
+							onChange={(value) =>
+								saveAutomation({
+									status: value ? 'active' : 'inactive',
+								})
+							}
+							loading={isSavingAutomation}
+						/>
+					</Flex>
 				</Flex>
 			</Card>
 			<Card loading={isLoading}>
 				{automation && (
 					<>
-						<Flex
-							style={{ width: 'auto' }}
-							gap={20}
-							justify="center"
-							align="center"
-							vertical={true}
-						>
+						{useReactFlow ? (
+							<WorkflowVisualization
+								automation={automation}
+								steps={steps}
+								isLoading={isLoading}
+								onStepClick={(step) => setCurrentStep(step)}
+								onTriggerClick={() => setVisible(true)}
+							/>
+						) : (
 							<Flex
-								className="qcrm-automation-workflow"
-								vertical={true}
+								style={{ width: 'auto' }}
 								gap={20}
-								style={{ width: '100%' }}
+								justify="center"
+								align="center"
+								vertical={true}
 							>
-								<div className="qcrm-automation-workflow__item">
-									<Card
-										className="qcrm-automation-workflow__card"
-										hoverable
-										onClick={() => setVisible(true)}
-									>
-										<Flex gap={10}>
-											<div className="qcrm-automation-workflow__card-icon">
-												<RocketOutlined />
-											</div>
-											<div className="qcrm-automation-workflow__card-title">
-												{trigger?.label}
-											</div>
-										</Flex>
-									</Card>
-								</div>
-								<AddStep setStep={setCurrentStep} />
-								{organizedSteps.map(renderStep)}
+								<Flex
+									className="qcrm-automation-workflow"
+									vertical={true}
+									gap={20}
+									style={{ width: '100%' }}
+								>
+									<div className="qcrm-automation-workflow__item">
+										<Card
+											className="qcrm-automation-workflow__card"
+											hoverable
+											onClick={() => setVisible(true)}
+										>
+											<Flex gap={10}>
+												<div className="qcrm-automation-workflow__card-icon">
+													<RocketOutlined />
+												</div>
+												<div className="qcrm-automation-workflow__card-title">
+													{trigger?.label}
+												</div>
+											</Flex>
+										</Card>
+									</div>
+									<AddStep setStep={setCurrentStep} />
+									{organizedSteps.map(renderStep)}
+								</Flex>
 							</Flex>
-						</Flex>
+						)}
 					</>
 				)}
 				{currentStep && (
@@ -398,8 +440,8 @@ const Workflow: React.FC = () => {
 					>
 						{trigger.fields && (
 							<>
-								{automation.trigger === 'webhook_received'
-									? <WebhookFields
+								{automation.trigger === 'webhook_received' ? (
+									<WebhookFields
 										values={automation?.settings || {}}
 										onChange={(value) => {
 											updateAutomation({
@@ -407,34 +449,38 @@ const Workflow: React.FC = () => {
 												settings: value,
 											});
 										}}
-									/> : !trigger?.is_form ? (
-										<Fields
-											fields={trigger.fields}
-											values={automation.settings || {}}
-											onChange={(value) => {
-												updateAutomation({
-													...automation,
-													settings: value,
-												});
-											}}
-										/>
-									) : (
-										<FormFields
-											values={automation?.settings || {}}
-											onChange={(value) => {
-												updateAutomation({
-													...automation,
-													settings: value,
-												});
-											}}
-										/>
-									)}
+									/>
+								) : !trigger?.is_form ? (
+									<Fields
+										fields={trigger.fields}
+										values={automation.settings || {}}
+										onChange={(value) => {
+											updateAutomation({
+												...automation,
+												settings: value,
+											});
+										}}
+									/>
+								) : (
+									<FormFields
+										values={automation?.settings || {}}
+										onChange={(value) => {
+											updateAutomation({
+												...automation,
+												settings: value,
+											});
+										}}
+									/>
+								)}
 							</>
 						)}
 						<div style={{ marginTop: 20 }}>
 							<Field
-								type='switch'
-								label={__('Run Multiple Times (If you want to restart the automation for the same contact)', 'quillcrm')}
+								type="switch"
+								label={__(
+									'Run Multiple Times (If you want to restart the automation for the same contact)',
+									'quillcrm'
+								)}
 								value={automation?.settings?.multiple_runs}
 								onChange={(value) => {
 									updateSettings('multiple_runs', value);

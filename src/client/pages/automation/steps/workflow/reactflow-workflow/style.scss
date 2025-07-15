@@ -1,0 +1,304 @@
+// ReactFlow Workflow Styles
+
+.qcrm-reactflow-workflow {
+	height: 600px;
+	width: 100%;
+	background: #f9f9f9;
+	border: 1px solid #e8e8e8;
+	border-radius: 8px;
+	overflow: hidden;
+
+	.react-flow__viewport {
+		background: transparent;
+	}
+
+	.react-flow__controls {
+		bottom: 20px;
+		left: 20px;
+		
+		button {
+			background: #fff;
+			border: 1px solid #d9d9d9;
+			color: #666;
+			
+			&:hover {
+				background: #f5f5f5;
+				border-color: #40a9ff;
+			}
+		}
+	}
+
+	.react-flow__minimap {
+		background: #fff;
+		border: 1px solid #e8e8e8;
+		border-radius: 4px;
+	}
+
+	.react-flow__attribution {
+		display: none;
+	}
+}
+
+.qcrm-reactflow-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 400px;
+	font-size: 16px;
+	color: #666;
+}
+
+// Custom Node Styles
+.qcrm-reactflow-node {
+	background: #fff;
+	border: 2px solid #e8e8e8;
+	border-radius: 8px;
+	min-width: 180px;
+	padding: 0;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	transition: all 0.2s ease;
+	position: relative;
+	
+	&:hover {
+		border-color: #40a9ff;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	}
+
+	&.selected {
+		border-color: #1890ff;
+		box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+	}
+
+	// Node Header
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 12px 16px 8px;
+		border-bottom: 1px solid #f0f0f0;
+
+		.qcrm-reactflow-node__actions {
+			opacity: 0;
+			transition: opacity 0.2s ease;
+			display: flex;
+			gap: 4px;
+		}
+	}
+
+	&:hover &__header .qcrm-reactflow-node__actions {
+		opacity: 1;
+	}
+
+	// Node Icon
+	&__icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		font-size: 16px;
+		margin-right: 12px;
+	}
+
+	// Node Content
+	&__content {
+		padding: 8px 16px 16px;
+	}
+
+	&__title {
+		font-weight: 600;
+		font-size: 14px;
+		color: #262626;
+		margin-bottom: 4px;
+	}
+
+	&__subtitle {
+		font-size: 12px;
+		color: #8c8c8c;
+	}
+
+	&__warning {
+		margin-top: 8px;
+		font-size: 11px;
+	}
+
+	// Node Type Specific Styles
+	&--trigger {
+		border-color: #1890ff;
+		
+		.qcrm-reactflow-node__icon {
+			background: rgba(24, 144, 255, 0.1);
+			color: #1890ff;
+		}
+	}
+
+	&--action {
+		border-color: #52c41a;
+		
+		.qcrm-reactflow-node__icon {
+			background: rgba(82, 196, 26, 0.1);
+			color: #52c41a;
+		}
+	}
+
+	&--condition {
+		border-color: #faad14;
+		min-width: 200px;
+		
+		.qcrm-reactflow-node__icon {
+			background: rgba(250, 173, 20, 0.1);
+			color: #faad14;
+		}
+
+		.qcrm-reactflow-node__outputs {
+			padding: 0 16px 16px;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.qcrm-reactflow-node__output {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 6px 8px;
+			background: #f9f9f9;
+			border-radius: 4px;
+			font-size: 12px;
+			font-weight: 500;
+
+			&--yes {
+				color: #52c41a;
+				background: rgba(82, 196, 26, 0.1);
+			}
+
+			&--no {
+				color: #ff4d4f;
+				background: rgba(255, 77, 79, 0.1);
+			}
+		}
+
+		.qcrm-reactflow-node__output-label {
+			margin-right: 8px;
+		}
+	}
+
+	&--goal {
+		border-color: #722ed1;
+		
+		.qcrm-reactflow-node__icon {
+			background: rgba(114, 46, 209, 0.1);
+			color: #722ed1;
+		}
+	}
+
+	&--end {
+		border-color: #ff4d4f;
+		
+		.qcrm-reactflow-node__icon {
+			background: rgba(255, 77, 79, 0.1);
+			color: #ff4d4f;
+		}
+	}
+
+	&--add-step {
+		background: transparent;
+		border: 2px dashed #d9d9d9;
+		min-width: auto;
+		width: 60px;
+		height: 60px;
+		padding: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		transition: all 0.2s ease;
+
+		&:hover {
+			border-color: #40a9ff;
+			background: rgba(24, 144, 255, 0.05);
+		}
+
+		.qcrm-reactflow-node__add-button {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	}
+}
+
+// Handle Styles
+.qcrm-reactflow-handle {
+	width: 12px;
+	height: 12px;
+	border: 2px solid #fff;
+	background: #666;
+	
+	&--source {
+		background: #1890ff;
+	}
+
+	&--target {
+		background: #52c41a;
+	}
+
+	&--yes {
+		background: #52c41a;
+		right: -6px;
+		top: 40%;
+	}
+
+	&--no {
+		background: #ff4d4f;
+		right: -6px;
+		top: 60%;
+	}
+
+	&--continue {
+		background: #722ed1;
+	}
+}
+
+// Edge Styles
+.react-flow__edge {
+	.react-flow__edge-path {
+		stroke: #b1b1b7;
+		stroke-width: 2;
+	}
+
+	&.selected .react-flow__edge-path {
+		stroke: #1890ff;
+		stroke-width: 3;
+	}
+
+	.react-flow__edge-text {
+		font-size: 12px;
+		font-weight: 500;
+		fill: #666;
+	}
+}
+
+// Background Pattern
+.react-flow__background {
+	background-color: #fafafa;
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+	.qcrm-reactflow-workflow {
+		height: 400px;
+	}
+
+	.qcrm-reactflow-node {
+		min-width: 140px;
+		
+		&__title {
+			font-size: 13px;
+		}
+
+		&__subtitle {
+			font-size: 11px;
+		}
+	}
+} 

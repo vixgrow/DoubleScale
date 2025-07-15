@@ -71,7 +71,6 @@ export const Layout = (props) => {
 	return (
 		<SlotFillProvider>
 			<SidebarProvider>
-				<div>
 					<Notices />
 					<MergeTagsModal
 						visible={mergeTagsVisible}
@@ -82,7 +81,6 @@ export const Layout = (props) => {
 						<SidebarTrigger />
 						<Controller {...props} />
 					</div>
-				</div>
 			</SidebarProvider>
 		</SlotFillProvider>
 	);

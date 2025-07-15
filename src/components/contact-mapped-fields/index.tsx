@@ -6,7 +6,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Typography, Flex, Input } from 'antd';
 import Select from 'react-select';
 import { find, flatMap } from 'lodash';
 
@@ -16,6 +15,7 @@ import { find, flatMap } from 'lodash';
 import './style.scss';
 import ConfigAPI from '@quillcrm/config';
 import { isObject, map } from 'lodash';
+import { Input } from '@/components/ui/input';
 
 interface ContactMappedFieldsProps {
 	onChange: (value: { [key: string]: string }) => void;
@@ -61,22 +61,18 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 	});
 
 	return (
-		<Flex gap={10} vertical>
-			<Flex gap={20}>
-				<Typography.Text style={{ flex: 1 }} strong>
-					{__('Field')}
-				</Typography.Text>
-				<Typography.Text style={{ flex: 1 }} strong>
-					{__('Contact Field')}
-				</Typography.Text>
-			</Flex>
+		<div className="flex gap-[10px] flex-col">
+			<div className="flex gap-5">
+				<div className="flex-1 text-base">{__('Field')}</div>
+				<div className="flex-1 text-base">{__('Contact Field')}</div>
+			</div>
 			{map(fields, (_, key) => {
 				return (
-					<Flex key={key} gap={20}>
+					<div key={key} className="flex gap-5">
 						<Input
 							value={fields[key].label}
 							disabled
-							style={{ flex: 1 }}
+							className="flex-1"
 						/>
 						<Select
 							onChange={(value) => {
@@ -103,10 +99,10 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 							}}
 							isSearchable={false}
 						/>
-					</Flex>
+					</div>
 				);
 			})}
-		</Flex>
+		</div>
 	);
 };
 

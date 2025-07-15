@@ -1,134 +1,91 @@
 /**
- * WordPress dependencies
+ * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
-
 /**
- * External dependencies
+ * external dependencies
  */
-import React, { useState } from 'react';
-import { CalendarIcon } from 'lucide-react';
-
+import { useState } from 'react';
 /**
- * Internal dependencies
+ * internal dependencies
  */
-import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { CalendarIcon, OutlinedCalendarIcon } from '@quillcrm/components';
 
 interface DateRangePickerProps {
-	startDate: Date | null;
-	endDate: Date | null;
-	onDateRangeChange: (startDate: Date | null, endDate: Date | null) => void;
+	value: { from: Date | null; to: Date | null };
+	onChange: (range: { from: Date | null; to: Date | null }) => void;
 	placeholder?: string;
-	className?: string;
 }
 
 export function DateRangePicker({
-	startDate,
-	endDate,
-	onDateRangeChange,
-	placeholder = 'Select date range',
-	className,
+	value,
+	onChange,
+	placeholder,
 }: DateRangePickerProps) {
-	const [isOpen, setIsOpen] = useState(false);
-	const [tempStartDate, setTempStartDate] = useState<Date | null>(startDate);
-	const [tempEndDate, setTempEndDate] = useState<Date | null>(endDate);
-
-	const handleApply = () => {
-		onDateRangeChange(tempStartDate, tempEndDate);
-		setIsOpen(false);
-	};
-
-	const handleClear = () => {
-		setTempStartDate(null);
-		setTempEndDate(null);
-		onDateRangeChange(null, null);
-		setIsOpen(false);
-	};
+	const [open, setOpen] = useState(false);
 
 	const formatDateRange = () => {
-		if (startDate && endDate) {
-			return `${format(startDate, 'MMM d, yyyy')} - ${format(endDate, 'MMM d, yyyy')}`;
+		if (!value.from)
+			return placeholder || __('Pick a date range', 'quillcrm');
+
+		const fromDate = value.from.toLocaleDateString();
+		const toDate = value.to ? value.to.toLocaleDateString() : '';
+
+		if (value.to) {
+			return `${fromDate} - ${toDate}`;
 		}
-		if (startDate) {
-			return `From ${format(startDate, 'MMM d, yyyy')}`;
-		}
-		if (endDate) {
-			return `Until ${format(endDate, 'MMM d, yyyy')}`;
-		}
-		return placeholder;
+		return fromDate;
 	};
 
-	const handleStartDateSelect = (date: Date | undefined) => {
-		setTempStartDate(date || null);
-		if (date && tempEndDate && date > tempEndDate) {
-			setTempEndDate(null);
+	const handleDateSelect = (range: any) => {
+		onChange(range || { from: null, to: null });
+		if (range?.from && range?.to) {
+			setOpen(false);
 		}
 	};
 
-	const handleEndDateSelect = (date: Date | undefined) => {
-		setTempEndDate(date || null);
+	const clearDateRange = () => {
+		onChange({ from: null, to: null });
+		setOpen(false);
 	};
 
 	return (
-		<Popover open={isOpen} onOpenChange={setIsOpen}>
+		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
-				<Button
-					variant="outline"
-					className={cn(
-						'w-auto justify-start text-left font-normal',
-						!startDate && !endDate && 'text-muted-foreground',
-						className
-					)}
-				>
-					<CalendarIcon className="mr-2 h-4 w-4" />
+				<Button className="justify-between text-left w-[200px] h-9 rounded-xl px-2 py-[20px] bg-accent border-none hover:bg-accent text-[#A1A5B7] font-semibold ">
 					{formatDateRange()}
+					<OutlinedCalendarIcon />
 				</Button>
 			</PopoverTrigger>
 			<PopoverContent className="w-auto p-0" align="start">
-				<div className="p-4">
-					<div className="space-y-4">
-						<div>
-							<label className="text-sm font-medium">
-								{__('Start Date', 'quillcrm')}
-							</label>
-							<Calendar
-								mode="single"
-								selected={tempStartDate || undefined}
-								onSelect={handleStartDateSelect}
-								disabled={(date) =>
-									date > new Date() || (tempEndDate ? date > tempEndDate : false)
-								}
-								initialFocus
-							/>
-						</div>
-						<div>
-							<label className="text-sm font-medium">
-								{__('End Date', 'quillcrm')}
-							</label>
-							<Calendar
-								mode="single"
-								selected={tempEndDate || undefined}
-								onSelect={handleEndDateSelect}
-								disabled={(date) =>
-									date > new Date() || (tempStartDate ? date < tempStartDate : false)
-								}
-							/>
-						</div>
-					</div>
-					<div className="flex justify-between mt-4 pt-4 border-t">
-						<Button variant="outline" onClick={handleClear}>
+				<div className="p-3">
+					<Calendar
+						mode="range"
+						selected={{
+							from: value.from ?? undefined,
+							to: value.to ?? undefined,
+						}}
+						onSelect={handleDateSelect}
+						numberOfMonths={1}
+						initialFocus
+					/>
+					<div className="flex justify-between mt-3 pt-3 border-t">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={clearDateRange}
+						>
 							{__('Clear', 'quillcrm')}
 						</Button>
-						<Button onClick={handleApply}>
-							{__('Apply', 'quillcrm')}
+						<Button size="sm" onClick={() => setOpen(false)}>
+							{__('Close', 'quillcrm')}
 						</Button>
 					</div>
 				</div>

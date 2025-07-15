@@ -6,10 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import {
-	ColumnDef,
-	flexRender,
-} from '@tanstack/react-table';
+import { ColumnDef, flexRender } from '@tanstack/react-table';
 
 /**
  * internal dependencies
@@ -22,7 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import  DataTablePagination  from './data-table-pagination';
+import DataTablePagination from './data-table-pagination';
 import { Filters } from '@quillcrm/components';
 import { useDataTable } from '../../hooks/use-dataTable';
 import { DataTableSearch } from './data-table-search';
@@ -44,16 +41,16 @@ export function DataTable<TData>({
 	config,
 	activeTab,
 	showMainActions = true,
-	showPagination = true
+	showPagination = true,
 }: DataTableProps<TData>) {
-	const {
-		table,
-		globalFilter,
-		setGlobalFilter,
-	} = useDataTable(data, columns, config);
+	const { table, globalFilter, setGlobalFilter } = useDataTable(
+		data,
+		columns,
+		config
+	);
 
 	return (
-		<div className='w-full'>
+		<div className="w-full">
 			{/* Main Actions Row - Optional */}
 			{showMainActions && (
 				<div className="flex items-center justify-between p-5 border rounded-lg my-4 w-full">
@@ -85,17 +82,21 @@ export function DataTable<TData>({
 
 			<div className="rounded-t-md border w-full">
 				<Table>
-					<TableHeader className='bg-[#FAFAFA]'>
+					<TableHeader className="bg-[#FAFAFA]">
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map((header) => (
-									<TableHead key={header.id} className='text-[#09090B]'>
+									<TableHead
+										key={header.id}
+										className="text-[#09090B]"
+									>
 										{header.isPlaceholder
 											? null
 											: flexRender(
-												header.column.columnDef.header,
-												header.getContext()
-											)}
+													header.column.columnDef
+														.header,
+													header.getContext()
+												)}
 									</TableHead>
 								))}
 							</TableRow>
@@ -106,10 +107,15 @@ export function DataTable<TData>({
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									data-state={row.getIsSelected() && 'selected'}
+									data-state={
+										row.getIsSelected() && 'selected'
+									}
 								>
 									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id} className='text-[#09090B]'>
+										<TableCell
+											key={cell.id}
+											className="text-[#09090B]"
+										>
 											{flexRender(
 												cell.column.columnDef.cell,
 												cell.getContext()

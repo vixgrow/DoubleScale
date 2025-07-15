@@ -1,4 +1,10 @@
+/**
+ * external dependencies
+ */
 import { useState, useMemo } from 'react';
+/**
+ * internal dependencies
+ */
 import {
 	ColumnDef,
 	SortingState,
@@ -24,6 +30,31 @@ export function useDataTable<TData>(
 	);
 	const [globalFilter, setGlobalFilter] = useState('');
 
+	// Filter data based on date range
+	const filteredData = useMemo(() => {
+		if (
+			!config.dateRange?.enabled ||
+			(!config.dateRange.value.from && !config.dateRange.value.to)
+		) {
+			return data;
+		}
+
+		return data.filter((item: any) => {
+			const createdAt = new Date(item.created_at);
+			const { from, to } = config.dateRange!.value;
+
+			if (from && to) {
+				return createdAt >= from && createdAt <= to;
+			} else if (from) {
+				return createdAt >= from;
+			} else if (to) {
+				return createdAt <= to;
+			}
+
+			return true;
+		});
+	}, [data, config.dateRange?.value, config.dateRange?.enabled]);
+
 	// Convert selectedKeys to rowSelection format
 	const rowSelection = useMemo(() => {
 		if (!config.selection?.enabled) return {};
@@ -48,7 +79,7 @@ export function useDataTable<TData>(
 	};
 
 	const table = useReactTable({
-		data,
+		data: filteredData,
 		columns,
 		enableRowSelection: config.selection?.enabled || false,
 		getCoreRowModel: getCoreRowModel(),

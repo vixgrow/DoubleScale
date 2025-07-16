@@ -147,6 +147,107 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			};
 		};
 
+		// Helper function to find the bottom-most Y position of nodes in a branch
+		const findBottomMostPosition = (
+			branchSteps: AutomationStep[],
+			parentStep: AutomationStep,
+			level: number,
+			offset: number = 0
+		) => {
+			if (branchSteps.length === 0) {
+				// No children, position below parent
+				const parentPos =
+					savedPositions[parentStep.id.toString()] ||
+					calculatePosition(parentStep.id.toString(), 0, level - 1);
+				return {
+					x: parentPos.x + offset,
+					y: parentPos.y + 180, // Standard spacing below parent
+				};
+			}
+
+			// Find the bottom-most child position
+			let bottomMostY = 0;
+			let bottomMostX = 250; // Default center
+
+			branchSteps.forEach((step, index) => {
+				const stepPos =
+					savedPositions[step.id.toString()] ||
+					calculatePosition(step.id.toString(), index, level, offset);
+				if (stepPos.y > bottomMostY) {
+					bottomMostY = stepPos.y;
+					bottomMostX = stepPos.x;
+				}
+			});
+
+			// Ensure we have a valid position
+			if (bottomMostY === 0) {
+				const parentPos =
+					savedPositions[parentStep.id.toString()] ||
+					calculatePosition(
+						parentStep.id.toString(),
+						0,
+						level - 1,
+						0
+					);
+				return {
+					x: parentPos.x + offset,
+					y: parentPos.y + 180,
+				};
+			}
+
+			return {
+				x: bottomMostX,
+				y: bottomMostY + 180, // Position below the bottom-most child
+			};
+		};
+
+		// Helper function to find position for condition branch add-step nodes
+		const findConditionBranchPosition = (
+			branchSteps: AutomationStep[],
+			parentStep: AutomationStep,
+			condition: 'yes' | 'no',
+			level: number
+		) => {
+			const parentPos =
+				savedPositions[parentStep.id.toString()] ||
+				calculatePosition(parentStep.id.toString(), 0, level - 1);
+
+			if (branchSteps.length === 0) {
+				// No children in this branch - position to the right of condition node
+				const horizontalSpacing = 300;
+				const verticalOffset = condition === 'yes' ? -40 : 40; // Offset yes above, no below
+
+				return {
+					x: parentPos.x + horizontalSpacing,
+					y: parentPos.y + verticalOffset,
+				};
+			}
+
+			// Find the bottom-most child position in this branch
+			let bottomMostY = 0;
+			let bottomMostX = parentPos.x + 300; // Default to right side
+
+			branchSteps.forEach((step, index) => {
+				const stepPos =
+					savedPositions[step.id.toString()] ||
+					calculatePosition(
+						step.id.toString(),
+						index,
+						level,
+						condition === 'yes' ? -100 : 100
+					);
+				if (stepPos.y > bottomMostY) {
+					bottomMostY = stepPos.y;
+					bottomMostX = stepPos.x;
+				}
+			});
+
+			return {
+				x: bottomMostX,
+				y: bottomMostY + 180, // Position below the bottom-most child
+			};
+		};
+
 		// Helper function to recursively process steps and their children
 		const processStepHierarchy = (
 			stepList: AutomationStep[],
@@ -228,10 +329,10 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						},
 					});
 				} else if (stepIndex > 0) {
-					// Connect to previous sibling - only add + button for sequential connections
+					// Connect to previous sibling
 					const prevStep = currentLevelSteps[stepIndex - 1];
 
-					// For condition nodes, use the 'continue' handle from the bottom
+					// Create connection - if previous step is a condition, use the "continue" handle
 					const sourceHandle =
 						prevStep.type === 'condition' ? 'continue' : undefined;
 
@@ -289,14 +390,12 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						yesChildren[yesChildren.length - 1].type !==
 							'end_automation'
 					) {
-						const yesAddPosition = calculatePosition(
-							`add-step-${step.id}-yes`,
-							yesChildren.length,
-							level + 1,
-							-100
+						const yesAddPosition = findConditionBranchPosition(
+							yesChildren,
+							step,
+							'yes',
+							level + 1
 						);
-						yesAddPosition.y =
-							position.y + 150 + yesChildren.length * 180;
 
 						initialNodes.push({
 							id: `add-step-${step.id}-yes`,
@@ -361,14 +460,12 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						noChildren[noChildren.length - 1].type !==
 							'end_automation'
 					) {
-						const noAddPosition = calculatePosition(
-							`add-step-${step.id}-no`,
-							noChildren.length,
-							level + 1,
-							100
+						const noAddPosition = findConditionBranchPosition(
+							noChildren,
+							step,
+							'no',
+							level + 1
 						);
-						noAddPosition.y =
-							position.y + 150 + noChildren.length * 180;
 
 						initialNodes.push({
 							id: `add-step-${step.id}-no`,
@@ -458,10 +555,44 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			rootSteps.length === 0 ||
 			rootSteps[rootSteps.length - 1].type !== 'end_automation'
 		) {
-			const finalAddPosition = calculatePosition(
-				'add-step-final',
-				rootSteps.length
-			);
+			// Find the bottom-most position among all nodes to place the final add-step
+			let finalAddPosition;
+			if (rootSteps.length === 0) {
+				// No root steps, position below trigger
+				const triggerPos = savedPositions['trigger'] || {
+					x: 250,
+					y: 50,
+				};
+				finalAddPosition = {
+					x: triggerPos.x,
+					y: triggerPos.y + 180,
+				};
+			} else {
+				// Find the absolute bottom-most node position across all branches
+				let bottomMostY = 0;
+				let bottomMostX = 250; // Default center
+
+				// Check all nodes (including nested ones) to find the bottom-most position
+				const allSteps = [...steps];
+				allSteps.forEach((step) => {
+					const stepPos =
+						savedPositions[step.id.toString()] ||
+						calculatePosition(
+							step.id.toString(),
+							step.order - 1,
+							0
+						);
+					if (stepPos.y > bottomMostY) {
+						bottomMostY = stepPos.y;
+						bottomMostX = stepPos.x;
+					}
+				});
+
+				finalAddPosition = {
+					x: bottomMostX,
+					y: bottomMostY + 180,
+				};
+			}
 			initialNodes.push({
 				id: 'add-step-final',
 				type: 'add_step',
@@ -483,7 +614,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					? rootSteps[rootSteps.length - 1]
 					: undefined;
 
-			// For condition nodes, use the 'continue' handle from the bottom
+			// If last step is a condition, use the "continue" handle
 			const sourceHandle =
 				lastRootStep?.type === 'condition' ? 'continue' : undefined;
 

@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
 /**
  * external dependencies
  */
@@ -16,6 +15,7 @@ import {
 	CustomFieldsGroups,
 	CustomField,
 	CustomFieldsGroup,
+	NoticeMessage,
 } from '@quillcrm/client';
 
 export const useCustomFields = () => {
@@ -29,7 +29,15 @@ export const useCustomFields = () => {
 		groups: [],
 	});
 
-	const { createNotice } = useDispatch('quillcrm/core');
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+
+	const showNotice = (noticeData: NoticeMessage) => {
+		setNotice(noticeData);
+	};
+
+	const closeNotice = () => {
+		setNotice(null);
+	};
 
 	const fetchGroups = async () => {
 		try {
@@ -54,7 +62,7 @@ export const useCustomFields = () => {
 				error: error.message,
 				groups: [],
 			});
-			createNotice({
+			showNotice({
 				type: 'error',
 				message:
 					error.message ||
@@ -97,7 +105,7 @@ export const useCustomFields = () => {
 				}),
 			}));
 
-			createNotice({
+			showNotice({
 				type: 'success',
 				message: isNew
 					? __('Custom field added', 'quillcrm')
@@ -105,7 +113,7 @@ export const useCustomFields = () => {
 			});
 			return true;
 		} catch (error: any) {
-			createNotice({
+			showNotice({
 				type: 'error',
 				message: error.message,
 			});
@@ -135,12 +143,12 @@ export const useCustomFields = () => {
 				}),
 			}));
 
-			createNotice({
+			showNotice({
 				type: 'success',
 				message: __('Field deleted', 'quillcrm'),
 			});
 		} catch (error: any) {
-			createNotice({
+			showNotice({
 				type: 'error',
 				message: error.message,
 			});
@@ -160,13 +168,13 @@ export const useCustomFields = () => {
 				groups: [...prev.groups, response],
 			}));
 
-			createNotice({
+			showNotice({
 				type: 'success',
 				message: __('Group added', 'quillcrm'),
 			});
 			return true;
 		} catch (error: any) {
-			createNotice({
+			showNotice({
 				type: 'error',
 				message: error.message,
 			});
@@ -222,13 +230,13 @@ export const useCustomFields = () => {
 					.filter((group) => group.id !== groupId), // Remove the deleted group
 			}));
 
-			createNotice({
+			showNotice({
 				type: 'success',
 				message: __('Group deleted successfully', 'quillcrm'),
 			});
 			return true;
 		} catch (error: any) {
-			createNotice({
+			showNotice({
 				type: 'error',
 				message:
 					error.message || __('Failed to delete group', 'quillcrm'),
@@ -282,6 +290,8 @@ export const useCustomFields = () => {
 
 	return {
 		...state,
+		notice,
+		closeNotice,
 		moveField,
 		fetchGroups,
 		saveField,

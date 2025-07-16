@@ -230,10 +230,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				} else if (stepIndex > 0) {
 					// Connect to previous sibling - only add + button for sequential connections
 					const prevStep = currentLevelSteps[stepIndex - 1];
+
+					// For condition nodes, use the 'continue' handle from the bottom
+					const sourceHandle =
+						prevStep.type === 'condition' ? 'continue' : undefined;
+
 					initialEdges.push({
 						id: `${prevStep.id}-to-${step.id}`,
 						source: prevStep.id.toString(),
 						target: step.id.toString(),
+						sourceHandle,
 						type: 'addStepEdge',
 						data: {
 							sourceStep: prevStep,
@@ -476,10 +482,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				rootSteps.length > 0
 					? rootSteps[rootSteps.length - 1]
 					: undefined;
+
+			// For condition nodes, use the 'continue' handle from the bottom
+			const sourceHandle =
+				lastRootStep?.type === 'condition' ? 'continue' : undefined;
+
 			initialEdges.push({
 				id: `${sourceId}-to-add-final`,
 				source: sourceId,
 				target: 'add-step-final',
+				sourceHandle,
 				type: 'addStepEdge',
 				data: {
 					sourceStep: lastRootStep,

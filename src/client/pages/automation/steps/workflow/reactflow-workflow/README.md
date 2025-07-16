@@ -100,7 +100,8 @@ All node components follow a consistent pattern with:
 
 - **Purpose**: Represents conditional branching logic
 - **Features**:
-    - Multiple output handles (yes/no paths)
+    - Multiple output handles (yes/no paths from right side)
+    - Bottom "continue" handle for sequential flow after condition
     - Condition configuration display
     - Branch management
     - Complex flow control

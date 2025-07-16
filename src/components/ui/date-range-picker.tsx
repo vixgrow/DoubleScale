@@ -16,7 +16,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
-import { CalendarIcon, OutlinedCalendarIcon } from '@quillcrm/components';
+import { OutlinedCalendarIcon } from '@quillcrm/components';
 
 interface DateRangePickerProps {
 	value: { from: Date | null; to: Date | null };
@@ -46,9 +46,6 @@ export function DateRangePicker({
 
 	const handleDateSelect = (range: any) => {
 		onChange(range || { from: null, to: null });
-		if (range?.from && range?.to) {
-			setOpen(false);
-		}
 	};
 
 	const clearDateRange = () => {
@@ -74,7 +71,7 @@ export function DateRangePicker({
 						}}
 						onSelect={handleDateSelect}
 						numberOfMonths={1}
-						initialFocus
+						autoFocus
 					/>
 					<div className="flex justify-between mt-3 pt-3 border-t">
 						<Button

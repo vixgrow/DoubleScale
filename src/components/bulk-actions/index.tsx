@@ -24,7 +24,7 @@ import {
 	RemoveTagIcon,
 	AddRemoveListsModal,
 	AddRemoveTagsModal,
-	DeleteModal
+	DeleteModal,
 } from '@quillcrm/components';
 
 interface BulkActionSelectProps {

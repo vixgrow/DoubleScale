@@ -652,6 +652,12 @@ export interface DataTableConfig<TData> {
 		onApplyFilters: () => void;
 		isApplying: boolean;
 	};
+	dateRange?: {
+		enabled: boolean;
+		value: { from: Date | null; to: Date | null };
+		onDateChange: (range: { from: Date | null; to: Date | null }) => void;
+		placeholder?: string;
+	};
 }
 
 export type NoticeMessage = {

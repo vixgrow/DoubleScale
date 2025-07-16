@@ -77,7 +77,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [tags, setTags] = useState<ContactTag[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
-	const [page,setPage] = useState<number>(1);
+	const [page, setPage] = useState<number>(1);
 	const [keyword, setKeyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedTag, setSelectedTag] = useState<ContactTag | null>(null);
@@ -92,6 +92,21 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+
+	const [dateRange, setDateRange] = useState<{
+		from: Date | null;
+		to: Date | null;
+	}>({
+		from: null,
+		to: null,
+	});
+
+	useEffect(() => {
+		if (dateRange.from || dateRange.to) {
+			setPage(1); // Reset to first page when filtering
+			fetchTags();
+		}
+	}, [dateRange]);
 
 	// Helper function to show notice
 	const showNotice = (type: 'success' | 'error', message: string) => {
@@ -341,6 +356,12 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			onActionChange: setBulkAction,
 			onExecuteAction: doBulkAction,
 			activeTab: activeTab,
+		},
+		dateRange: {
+			enabled: true,
+			value: dateRange,
+			onDateChange: setDateRange,
+			placeholder: __('Date Range', 'quillcrm'),
 		},
 	};
 

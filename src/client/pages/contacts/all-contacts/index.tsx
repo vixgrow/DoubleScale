@@ -114,6 +114,21 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 			last_name: '',
 		});
 
+		const [dateRange, setDateRange] = useState<{
+			from: Date | null;
+			to: Date | null;
+		}>({
+			from: null,
+			to: null,
+		});
+
+		useEffect(() => {
+			if (dateRange.from || dateRange.to) {
+				setPage(1); // Reset to first page when filtering
+				fetchContacts();
+			}
+		}, [dateRange]);
+
 		// Expose methods to parent component
 		useImperativeHandle(ref, () => ({
 			openCreateContactModal: () => {
@@ -659,6 +674,12 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 					fetchContacts();
 				},
 				isApplying: isFiltering,
+			},
+			dateRange: {
+				enabled: true,
+				value: dateRange,
+				onDateChange: setDateRange,
+				placeholder: __('Date Range', 'quillcrm'),
 			},
 		};
 

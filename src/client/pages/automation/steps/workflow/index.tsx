@@ -46,7 +46,7 @@ import AddStep from './add-step';
 import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
 import WebhookFields from './webhook-fields';
 import FormFields from './form-fields';
-import WorkflowVisualization from './reactflow-workflow/WorkflowVisualization';
+import ReactFlowWorkflow from './reactflow-workflow';
 
 const Workflow: React.FC = () => {
 	const {
@@ -365,15 +365,20 @@ const Workflow: React.FC = () => {
 								unCheckedChildren={__('List', 'quillcrm')}
 							/>
 						</Flex>
-						<Switch
-							checked={automation?.status === 'active'}
-							onChange={(value) =>
-								saveAutomation({
-									status: value ? 'active' : 'inactive',
-								})
-							}
-							loading={isSavingAutomation}
-						/>
+						<Flex gap={10} align="center">
+							<Typography.Text>
+								{__('Status:', 'quillcrm')}
+							</Typography.Text>
+							<Switch
+								checked={automation?.status === 'active'}
+								onChange={(value) =>
+									saveAutomation({
+										status: value ? 'active' : 'inactive',
+									})
+								}
+								loading={isSavingAutomation}
+							/>
+						</Flex>
 					</Flex>
 				</Flex>
 			</Card>
@@ -381,10 +386,7 @@ const Workflow: React.FC = () => {
 				{automation && (
 					<>
 						{useReactFlow ? (
-							<WorkflowVisualization
-								automation={automation}
-								steps={steps}
-								isLoading={isLoading}
+							<ReactFlowWorkflow
 								onStepClick={(step) => setCurrentStep(step)}
 								onTriggerClick={() => setVisible(true)}
 							/>

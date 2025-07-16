@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useCallback } from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -15,24 +15,35 @@ import '@xyflow/react/dist/style.css';
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
 import type { OrganizedStep } from '@quillcrm/client';
-import WorkflowVisualization from './WorkflowVisualization';
+import WorkflowVisualization from './workflow-visualization';
 
-const ReactFlowWorkflow: React.FC = () => {
+interface ReactFlowWorkflowProps {
+	onStepClick?: (step: OrganizedStep) => void;
+	onTriggerClick?: () => void;
+}
+
+const ReactFlowWorkflow: React.FC<ReactFlowWorkflowProps> = ({
+	onStepClick,
+	onTriggerClick,
+}) => {
 	const { automation, steps, isLoading } = useAutomationContext();
-	const [currentStep, setCurrentStep] = useState<OrganizedStep | null>(null);
 
-	// Handle step clicks - open the appropriate modal
-	const handleStepClick = useCallback((step: OrganizedStep) => {
-		setCurrentStep(step);
-		// Trigger modal opening logic here
-		// This should integrate with the existing modal system
-	}, []);
+	// Handle step clicks - delegate to parent component
+	const handleStepClick = useCallback(
+		(step: OrganizedStep) => {
+			if (onStepClick) {
+				onStepClick(step);
+			}
+		},
+		[onStepClick]
+	);
 
-	// Handle trigger clicks
+	// Handle trigger clicks - delegate to parent component
 	const handleTriggerClick = useCallback(() => {
-		// Trigger modal opening logic here
-		// This should integrate with the existing trigger modal system
-	}, []);
+		if (onTriggerClick) {
+			onTriggerClick();
+		}
+	}, [onTriggerClick]);
 
 	return (
 		<div className="qcrm-reactflow-container">

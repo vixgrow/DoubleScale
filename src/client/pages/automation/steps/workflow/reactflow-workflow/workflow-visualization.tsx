@@ -34,13 +34,13 @@ import type {
 	OrganizedStep,
 } from '@quillcrm/client';
 import { useAutomationContext } from '../../../state/context';
-import TriggerNode from './nodes/TriggerNode';
-import ActionNode from './nodes/ActionNode';
-import ConditionNode from './nodes/ConditionNode';
-import GoalNode from './nodes/GoalNode';
-import EndNode from './nodes/EndNode';
-import AddStepNode from './nodes/AddStepNode';
-import AddStepEdge from './edges/AddStepEdge';
+import TriggerNode from './nodes/trigger-node';
+import ActionNode from './nodes/action-node';
+import ConditionNode from './nodes/condition-node';
+import GoalNode from './nodes/goal-node';
+import EndNode from './nodes/end-node';
+import AddStepNode from './nodes/add-step-node';
+import AddStepEdge from './edges/add-step-edge';
 
 // Register custom node types
 const nodeTypes = {

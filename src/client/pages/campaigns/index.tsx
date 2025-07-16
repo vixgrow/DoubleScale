@@ -23,11 +23,10 @@ import {
  */
 import './style.scss';
 import { Campaign, CampaignsResponse } from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
 import { DataTable } from '../../../components/ui/data-table';
-import { columns } from './columns';
+import { campaignColumns } from './columns';
 import { PageHeader, PlusIcon } from '../../../components';
 
 const Campaigns: React.FC = () => {
@@ -43,12 +42,20 @@ const Campaigns: React.FC = () => {
 	const [keyword, setKeyword] = useState<string>('');
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
+	const [dateRange, setDateRange] = useState<{
+		from: Date | null;
+		to: Date | null;
+	}>({
+		from: null,
+		to: null,
+	});
+
 	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		fetchCampaigns();
-	}, [page, perPage]);
+	}, [page, perPage, dateRange]);
 
 	const fetchCampaigns = async () => {
 		setLoading(true);
@@ -59,6 +66,8 @@ const Campaigns: React.FC = () => {
 					page,
 					per_page: perPage,
 					keyword,
+					from: dateRange.from?.toISOString(),
+					to: dateRange.to?.toISOString(),
 				}),
 			})) as CampaignsResponse;
 
@@ -170,6 +179,12 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
+	const columns = campaignColumns({
+		onDelete: deleteCampaign,
+		duplicate: duplicateCampaign,
+		navigate: navigate,
+	});
+
 	return (
 		<div className="qcrm-campaigns">
 			<PageHeader
@@ -195,13 +210,18 @@ const Campaigns: React.FC = () => {
 						selectedKeys: selectedRowKeys,
 						onSelectionChange: setSelectedRowKeys,
 					},
-					// bulkActions: {
-					// 	enabled: true,
-					// 	currentAction: bulkAction,
-					// 	onActionChange: (value) => setBulkAction(value),
-					// 	onExecuteAction: (value) => setBulkAction(value),
-					// 	activeTab: 'all',
-					// },
+					bulkActions: {
+						enabled: true,
+						currentAction: bulkAction,
+						onActionChange: (value) => setBulkAction(value),
+						onExecuteAction: () => deleteSelected(),
+						activeTab: 'all',
+					},
+					dateRange: {
+						enabled: true,
+						value: dateRange,
+						onDateChange: setDateRange,
+					},
 				}}
 			/>
 		</div>

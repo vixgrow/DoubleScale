@@ -25,7 +25,9 @@ module.exports = {
 			'@quillcrm/config': path.resolve(__dirname, 'src/config'),
 			'@quillcrm/client': path.resolve(__dirname, 'src/client/index.tsx'),
 			'@quillcrm/components': path.resolve(__dirname, 'src/components'),
+			'@quillcrm/hooks': path.resolve(__dirname, 'src/hooks'),
 			'@quillcrm/utils': path.resolve(__dirname, 'src/utils'),
+			'@quillcrm/assets': path.resolve(__dirname, 'assets'),
 		},
 		fallback: {
 			'react/jsx-runtime': 'react/jsx-runtime.js',

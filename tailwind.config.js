@@ -105,13 +105,13 @@ module.exports = {
 	},
 	safelist: [
 		// Gray
-		'bg-gray-100',
-		'text-gray-600',
-		'dark:bg-gray-100',
-		'dark:text-gray-600',
 		'bg-gray-200',
-		'text-gray-700',
+		'text-gray-600',
 		'dark:bg-gray-200',
+		'dark:text-gray-600',
+		'bg-gray-300',
+		'text-gray-700',
+		'dark:bg-gray-300',
 		'dark:text-gray-700',
 
 		// Green

@@ -743,6 +743,10 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		);
 	}
 
+	// Debug logging
+	console.log('ReactFlow nodes:', nodesState.length, nodesState);
+	console.log('ReactFlow edges:', edgesState.length, edgesState);
+
 	return (
 		<div className="qcrm-reactflow-workflow">
 			<ReactFlow
@@ -758,25 +762,41 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			>
 				<Background />
 				<Controls />
-				<MiniMap
-					nodeStrokeWidth={3}
-					nodeColor={(node) => {
-						switch (node.type) {
-							case 'trigger':
-								return '#1890ff';
-							case 'action':
-								return '#52c41a';
-							case 'condition':
-								return '#faad14';
-							case 'goal':
-								return '#722ed1';
-							case 'end_automation':
-								return '#f5222d';
-							default:
-								return '#d9d9d9';
-						}
-					}}
-				/>
+				{/* Only show MiniMap when there are nodes */}
+				{nodesState.length > 0 && (
+					<MiniMap
+						nodeStrokeWidth={3}
+						nodeColor={(node) => {
+							switch (node.type) {
+								case 'trigger':
+									return '#1890ff';
+								case 'action':
+									return '#52c41a';
+								case 'condition':
+									return '#faad14';
+								case 'goal':
+									return '#722ed1';
+								case 'end_automation':
+									return '#f5222d';
+								case 'add_step':
+									return '#d9d9d9';
+								default:
+									return '#d9d9d9';
+							}
+						}}
+						nodeStrokeColor="#666"
+						maskColor="rgba(240, 240, 240, 0.6)"
+						style={{
+							height: 120,
+							width: 200,
+							border: '1px solid #e8e8e8',
+							borderRadius: '4px',
+						}}
+						zoomable
+						pannable
+						position="bottom-right"
+					/>
+				)}
 			</ReactFlow>
 		</div>
 	);

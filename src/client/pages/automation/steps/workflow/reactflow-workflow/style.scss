@@ -2,11 +2,13 @@
 
 .qcrm-reactflow-workflow {
 	height: 600px;
+	min-height: 400px;
 	width: 100%;
 	background: #f9f9f9;
 	border: 1px solid #e8e8e8;
 	border-radius: 8px;
 	overflow: hidden;
+	position: relative;
 
 	.react-flow__viewport {
 		background: transparent;
@@ -29,9 +31,35 @@
 	}
 
 	.react-flow__minimap {
-		background: #fff;
-		border: 1px solid #e8e8e8;
-		border-radius: 4px;
+		background: #fff !important;
+		border: 1px solid #e8e8e8 !important;
+		border-radius: 4px !important;
+		bottom: 20px !important;
+		right: 20px !important;
+		z-index: 1000 !important;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+		opacity: 1 !important;
+		visibility: visible !important;
+		display: block !important;
+		position: absolute !important;
+		
+		.react-flow__minimap-mask {
+			fill: rgba(24, 144, 255, 0.1) !important;
+			stroke: #1890ff !important;
+			stroke-width: 2 !important;
+		}
+		
+		.react-flow__minimap-node {
+			fill: #e1e1e1 !important;
+			stroke: #b1b1b7 !important;
+			stroke-width: 1 !important;
+		}
+		
+		svg {
+			display: block !important;
+			width: 100% !important;
+			height: 100% !important;
+		}
 	}
 
 	.react-flow__attribution {

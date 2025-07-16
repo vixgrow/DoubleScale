@@ -18,6 +18,7 @@ import { Button, Popconfirm } from 'antd';
  */
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep } from '@quillcrm/client';
+import NodeContextMenu from '../components/node-context-menu';
 
 interface EndNodeData {
 	step: AutomationStep;
@@ -102,51 +103,53 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	return (
-		<div className="qcrm-reactflow-node qcrm-reactflow-node--end">
-			<Handle
-				type="target"
-				position={Position.Top}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
-			/>
+		<NodeContextMenu onDelete={handleDelete} disabled={false}>
+			<div className="qcrm-reactflow-node qcrm-reactflow-node--end">
+				<Handle
+					type="target"
+					position={Position.Top}
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+				/>
 
-			<div className="qcrm-reactflow-node__header">
-				<div className="qcrm-reactflow-node__icon">
-					<DisconnectOutlined />
+				<div className="qcrm-reactflow-node__header">
+					<div className="qcrm-reactflow-node__icon">
+						<DisconnectOutlined />
+					</div>
+					<div className="qcrm-reactflow-node__actions">
+						<Popconfirm
+							title={__('Are you sure?', 'quillcrm')}
+							onConfirm={handleDeleteWithStopPropagation}
+							okText={__('Yes', 'quillcrm')}
+							cancelText={__('No', 'quillcrm')}
+							onCancel={(e) => e?.stopPropagation()}
+							onOpenChange={(open, e) => {
+								if (e) {
+									e.stopPropagation();
+								}
+							}}
+						>
+							<Button
+								type="text"
+								size="small"
+								icon={<DeleteOutlined />}
+								danger
+								loading={isDeleting}
+								onClick={(e) => e.stopPropagation()}
+							/>
+						</Popconfirm>
+					</div>
 				</div>
-				<div className="qcrm-reactflow-node__actions">
-					<Popconfirm
-						title={__('Are you sure?', 'quillcrm')}
-						onConfirm={handleDeleteWithStopPropagation}
-						okText={__('Yes', 'quillcrm')}
-						cancelText={__('No', 'quillcrm')}
-						onCancel={(e) => e?.stopPropagation()}
-						onOpenChange={(open, e) => {
-							if (e) {
-								e.stopPropagation();
-							}
-						}}
-					>
-						<Button
-							type="text"
-							size="small"
-							icon={<DeleteOutlined />}
-							danger
-							loading={isDeleting}
-							onClick={(e) => e.stopPropagation()}
-						/>
-					</Popconfirm>
+
+				<div className="qcrm-reactflow-node__content">
+					<div className="qcrm-reactflow-node__title">
+						{__('End Automation', 'quillcrm')}
+					</div>
+					<div className="qcrm-reactflow-node__subtitle">
+						{__('Stop', 'quillcrm')}
+					</div>
 				</div>
 			</div>
-
-			<div className="qcrm-reactflow-node__content">
-				<div className="qcrm-reactflow-node__title">
-					{__('End Automation', 'quillcrm')}
-				</div>
-				<div className="qcrm-reactflow-node__subtitle">
-					{__('Stop', 'quillcrm')}
-				</div>
-			</div>
-		</div>
+		</NodeContextMenu>
 	);
 };
 

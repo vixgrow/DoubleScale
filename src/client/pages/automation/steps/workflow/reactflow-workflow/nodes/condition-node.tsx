@@ -22,6 +22,7 @@ import { Button, Popconfirm } from 'antd';
  */
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+import NodeContextMenu from '../components/node-context-menu';
 
 interface ConditionNodeData {
 	step: AutomationStep;
@@ -116,94 +117,96 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	return (
-		<div className="qcrm-reactflow-node qcrm-reactflow-node--condition">
-			<Handle
-				type="target"
-				position={Position.Top}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
-			/>
+		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
+			<div className="qcrm-reactflow-node qcrm-reactflow-node--condition">
+				<Handle
+					type="target"
+					position={Position.Top}
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+				/>
 
-			<div className="qcrm-reactflow-node__header">
-				<div className="qcrm-reactflow-node__icon">
-					<BranchesOutlined />
-				</div>
-				<div className="qcrm-reactflow-node__actions">
-					<Button
-						type="text"
-						size="small"
-						icon={<EditOutlined />}
-						onClick={(e) => {
-							e.stopPropagation();
-							handleEdit();
-						}}
-					/>
-					<Popconfirm
-						title={__('Are you sure?', 'quillcrm')}
-						onConfirm={handleDeleteWithStopPropagation}
-						okText={__('Yes', 'quillcrm')}
-						cancelText={__('No', 'quillcrm')}
-						onCancel={(e) => e?.stopPropagation()}
-						onOpenChange={(open, e) => {
-							if (e) {
-								e.stopPropagation();
-							}
-						}}
-					>
+				<div className="qcrm-reactflow-node__header">
+					<div className="qcrm-reactflow-node__icon">
+						<BranchesOutlined />
+					</div>
+					<div className="qcrm-reactflow-node__actions">
 						<Button
 							type="text"
 							size="small"
-							icon={<DeleteOutlined />}
-							danger
-							loading={isDeleting}
-							onClick={(e) => e.stopPropagation()}
+							icon={<EditOutlined />}
+							onClick={(e) => {
+								e.stopPropagation();
+								handleEdit();
+							}}
 						/>
-					</Popconfirm>
+						<Popconfirm
+							title={__('Are you sure?', 'quillcrm')}
+							onConfirm={handleDeleteWithStopPropagation}
+							okText={__('Yes', 'quillcrm')}
+							cancelText={__('No', 'quillcrm')}
+							onCancel={(e) => e?.stopPropagation()}
+							onOpenChange={(open, e) => {
+								if (e) {
+									e.stopPropagation();
+								}
+							}}
+						>
+							<Button
+								type="text"
+								size="small"
+								icon={<DeleteOutlined />}
+								danger
+								loading={isDeleting}
+								onClick={(e) => e.stopPropagation()}
+							/>
+						</Popconfirm>
+					</div>
 				</div>
-			</div>
 
-			<div className="qcrm-reactflow-node__content">
-				<div className="qcrm-reactflow-node__title">
-					{__('Condition', 'quillcrm')}
+				<div className="qcrm-reactflow-node__content">
+					<div className="qcrm-reactflow-node__title">
+						{__('Condition', 'quillcrm')}
+					</div>
+					<div className="qcrm-reactflow-node__subtitle">
+						{__('If/Then', 'quillcrm')}
+					</div>
 				</div>
-				<div className="qcrm-reactflow-node__subtitle">
-					{__('If/Then', 'quillcrm')}
-				</div>
-			</div>
 
-			{/* Multiple outputs for Yes/No branches */}
-			<div className="qcrm-reactflow-node__outputs">
-				<div className="qcrm-reactflow-node__output qcrm-reactflow-node__output--yes">
-					<span className="qcrm-reactflow-node__output-label">
-						{__('Yes', 'quillcrm')}
-					</span>
-					<Handle
-						type="source"
-						position={Position.Right}
-						id="yes"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--yes"
-					/>
+				{/* Multiple outputs for Yes/No branches */}
+				<div className="qcrm-reactflow-node__outputs">
+					<div className="qcrm-reactflow-node__output qcrm-reactflow-node__output--yes">
+						<span className="qcrm-reactflow-node__output-label">
+							{__('Yes', 'quillcrm')}
+						</span>
+						<Handle
+							type="source"
+							position={Position.Right}
+							id="yes"
+							className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--yes"
+						/>
+					</div>
+					<div className="qcrm-reactflow-node__output qcrm-reactflow-node__output--no">
+						<span className="qcrm-reactflow-node__output-label">
+							{__('No', 'quillcrm')}
+						</span>
+						<Handle
+							type="source"
+							position={Position.Right}
+							id="no"
+							className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--no"
+						/>
+					</div>
 				</div>
-				<div className="qcrm-reactflow-node__output qcrm-reactflow-node__output--no">
-					<span className="qcrm-reactflow-node__output-label">
-						{__('No', 'quillcrm')}
-					</span>
-					<Handle
-						type="source"
-						position={Position.Right}
-						id="no"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--no"
-					/>
-				</div>
-			</div>
 
-			{/* Bottom handle for sequential flow */}
-			<Handle
-				type="source"
-				position={Position.Bottom}
-				id="continue"
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--continue"
-			/>
-		</div>
+				{/* Bottom handle for sequential flow */}
+				<Handle
+					type="source"
+					position={Position.Bottom}
+					id="continue"
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--continue"
+				/>
+			</div>
+		</NodeContextMenu>
 	);
 };
 

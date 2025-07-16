@@ -89,7 +89,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			id: 'trigger',
 			type: 'trigger',
 			position: triggerPosition,
-			data: { automation },
+			data: { automation, onTriggerClick },
 		});
 
 		if (!steps || steps.length === 0) {
@@ -144,60 +144,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			return {
 				x: baseX + level * horizontalSpacing + offset,
 				y: baseY + index * verticalSpacing,
-			};
-		};
-
-		// Helper function to find the bottom-most Y position of nodes in a branch
-		const findBottomMostPosition = (
-			branchSteps: AutomationStep[],
-			parentStep: AutomationStep,
-			level: number,
-			offset: number = 0
-		) => {
-			if (branchSteps.length === 0) {
-				// No children, position below parent
-				const parentPos =
-					savedPositions[parentStep.id.toString()] ||
-					calculatePosition(parentStep.id.toString(), 0, level - 1);
-				return {
-					x: parentPos.x + offset,
-					y: parentPos.y + 180, // Standard spacing below parent
-				};
-			}
-
-			// Find the bottom-most child position
-			let bottomMostY = 0;
-			let bottomMostX = 250; // Default center
-
-			branchSteps.forEach((step, index) => {
-				const stepPos =
-					savedPositions[step.id.toString()] ||
-					calculatePosition(step.id.toString(), index, level, offset);
-				if (stepPos.y > bottomMostY) {
-					bottomMostY = stepPos.y;
-					bottomMostX = stepPos.x;
-				}
-			});
-
-			// Ensure we have a valid position
-			if (bottomMostY === 0) {
-				const parentPos =
-					savedPositions[parentStep.id.toString()] ||
-					calculatePosition(
-						parentStep.id.toString(),
-						0,
-						level - 1,
-						0
-					);
-				return {
-					x: parentPos.x + offset,
-					y: parentPos.y + 180,
-				};
-			}
-
-			return {
-				x: bottomMostX,
-				y: bottomMostY + 180, // Position below the bottom-most child
 			};
 		};
 

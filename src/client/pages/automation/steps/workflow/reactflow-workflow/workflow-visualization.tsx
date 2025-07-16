@@ -336,15 +336,18 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						yesChildren[yesChildren.length - 1].type !==
 							'end_automation'
 					) {
-						const yesAddPosition = findConditionBranchPosition(
-							yesChildren,
-							step,
-							'yes',
-							level + 1
-						);
+						const yesAddId = `add-step-${step.id}-yes`;
+						const yesAddPosition =
+							savedPositions[yesAddId] ||
+							findConditionBranchPosition(
+								yesChildren,
+								step,
+								'yes',
+								level + 1
+							);
 
 						initialNodes.push({
-							id: `add-step-${step.id}-yes`,
+							id: yesAddId,
 							type: 'add_step',
 							position: yesAddPosition,
 							data: {
@@ -406,15 +409,18 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						noChildren[noChildren.length - 1].type !==
 							'end_automation'
 					) {
-						const noAddPosition = findConditionBranchPosition(
-							noChildren,
-							step,
-							'no',
-							level + 1
-						);
+						const noAddId = `add-step-${step.id}-no`;
+						const noAddPosition =
+							savedPositions[noAddId] ||
+							findConditionBranchPosition(
+								noChildren,
+								step,
+								'no',
+								level + 1
+							);
 
 						initialNodes.push({
-							id: `add-step-${step.id}-no`,
+							id: noAddId,
 							type: 'add_step',
 							position: noAddPosition,
 							data: {
@@ -501,7 +507,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			rootSteps.length === 0 ||
 			rootSteps[rootSteps.length - 1].type !== 'end_automation'
 		) {
-			// Find the bottom-most position among all nodes to place the final add-step
+			// Position the final add-step based on the last root step, not the bottommost node
 			let finalAddPosition;
 			if (rootSteps.length === 0) {
 				// No root steps, position below trigger
@@ -514,35 +520,30 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					y: triggerPos.y + 180,
 				};
 			} else {
-				// Find the absolute bottom-most node position across all branches
-				let bottomMostY = 0;
-				let bottomMostX = 250; // Default center
-
-				// Check all nodes (including nested ones) to find the bottom-most position
-				const allSteps = [...steps];
-				allSteps.forEach((step) => {
-					const stepPos =
-						savedPositions[step.id.toString()] ||
-						calculatePosition(
-							step.id.toString(),
-							step.order - 1,
-							0
-						);
-					if (stepPos.y > bottomMostY) {
-						bottomMostY = stepPos.y;
-						bottomMostX = stepPos.x;
-					}
-				});
+				// Position based on the last root step in the main flow
+				const lastRootStep = rootSteps[rootSteps.length - 1];
+				const lastRootStepPos =
+					savedPositions[lastRootStep.id.toString()] ||
+					calculatePosition(
+						lastRootStep.id.toString(),
+						rootSteps.length - 1,
+						0
+					);
 
 				finalAddPosition = {
-					x: bottomMostX,
-					y: bottomMostY + 180,
+					x: lastRootStepPos.x,
+					y: lastRootStepPos.y + 260,
 				};
 			}
+
+			// Check for saved position for final add-step node
+			const finalAddId = 'add-step-final';
+			const finalSavedPosition = savedPositions[finalAddId];
+
 			initialNodes.push({
-				id: 'add-step-final',
+				id: finalAddId,
 				type: 'add_step',
-				position: finalAddPosition,
+				position: finalSavedPosition || finalAddPosition,
 				data: {
 					parentId: null,
 					condition: null,

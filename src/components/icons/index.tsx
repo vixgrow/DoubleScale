@@ -40,3 +40,4 @@ export { default as ImportProgressIcon } from './import-progress';
 export { default as InstallIcon } from './install';
 export { default as OutlinedCalendarIcon } from './outlined-calendar';
 export { default as SettingsOutlinedIcon } from './settings-outlined';
+export { default as ViewOutlinedIcon } from './view-outlined';

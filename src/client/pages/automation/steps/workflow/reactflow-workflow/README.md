@@ -96,12 +96,12 @@ All node components follow a consistent pattern with:
     - Configuration management
     - Top/bottom handles for chaining
 
-#### `condition-node.tsx` (211 lines)
+#### `condition-node.tsx` (206 lines)
 
 - **Purpose**: Represents conditional branching logic
 - **Features**:
-    - Multiple output handles (yes/no paths from right side)
-    - Bottom "continue" handle for sequential flow after condition
+    - Two output handles (yes/no paths from right side only)
+    - No sequential flow - conditions only branch, don't continue
     - Condition configuration display
     - Branch management
     - Complex flow control
@@ -142,6 +142,8 @@ All node components follow a consistent pattern with:
     - **Inline Step Addition**: Click to add steps between existing nodes
     - **Step Type Selection**: Popover with action/condition/goal options
     - **Order Management**: Automatically handles step ordering and hierarchy
+    - **Parent-Child Context**: Preserves condition branch context when inserting steps
+    - **Smart Positioning**: Correctly inserts steps in the same branch as source/target
     - **Real-time Updates**: Immediately reflects changes in the workflow
     - **Conditional Paths**: Supports branching logic for conditions
 

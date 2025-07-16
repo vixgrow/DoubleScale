@@ -6,8 +6,8 @@ import { find, flatMap } from 'lodash';
 /**
  * Internal dependencies
  */
+import type { Action, Goal, Rule, Trigger } from '@quillcrm/config';
 import ConfigAPI from '@quillcrm/config';
-import type { Trigger, Action, Goal, Rule } from '@quillcrm/config';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
@@ -129,3 +129,41 @@ export const formatDate = (date: string, type: string = 'hour') => {
 			return new Date(date).toLocaleTimeString();
 	}
 };
+
+export function getTimeAgo(dateString: string): string {
+	const now = new Date();
+	const date = new Date(dateString);
+	const diffInMs = now.getTime() - date.getTime();
+	const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+	const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+	const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+	const diffInWeeks = Math.floor(diffInDays / 7);
+	const diffInMonths = Math.floor(diffInDays / 30);
+
+	if (diffInMinutes < 1) return 'Just now';
+	if (diffInMinutes < 60)
+		return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+	if (diffInHours < 24)
+		return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+	if (diffInDays < 7)
+		return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+	if (diffInWeeks < 4)
+		return `${diffInWeeks} week${diffInWeeks > 1 ? 's' : ''} ago`;
+	if (diffInMonths <= 2)
+		return `${diffInMonths} month${diffInMonths > 1 ? 's' : ''} ago`;
+
+	// Fallback to full format
+	return (
+		date.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+		}) +
+		' ' +
+		date.toLocaleTimeString('en-US', {
+			hour: 'numeric',
+			minute: '2-digit',
+			hour12: true,
+		})
+	);
+}

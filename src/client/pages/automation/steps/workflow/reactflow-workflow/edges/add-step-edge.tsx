@@ -47,49 +47,29 @@ const updateStepOrderRecursive = (
 	const newSteps = [...steps];
 	let currentStepOrder = order;
 
-	if (parentId > 0) {
-		newSteps
-			.filter(
-				(step) =>
+	// Filter steps to update based on parent_id and condition
+	const stepsToUpdate = newSteps
+		.filter((step) => {
+			if (parentId > 0) {
+				// Child steps - same parent and condition
+				return (
 					step.parent_id === parentId && step.condition === condition
-			)
-			.sort((a, b) => a.order - b.order)
-			.forEach((child, index) => {
-				let newOrder = index + 1;
+				);
+			} else {
+				// Root level steps
+				return !step.parent_id;
+			}
+		})
+		.sort((a, b) => a.order - b.order);
 
-				if (currentStepOrder === child.order) {
-					currentStepOrder = child.order;
-				}
-
-				if (child.order >= order) {
-					newOrder = newOrder + 1;
-				}
-
-				if (newOrder !== child.order) {
-					child.order = newOrder;
-					updatedSteps[child.id] = { order: newOrder };
-				}
-			});
-	} else {
-		newSteps
-			.sort((a, b) => a.order - b.order)
-			.forEach((step, index) => {
-				let newOrder = index + 1;
-
-				if (currentStepOrder === step.order) {
-					currentStepOrder = step.order;
-				}
-
-				if (step.order >= order) {
-					newOrder = newOrder + 1;
-				}
-
-				if (newOrder !== step.order) {
-					step.order = newOrder;
-					updatedSteps[step.id] = { order: newOrder };
-				}
-			});
-	}
+	// Update orders for steps that come at or after the insertion point
+	stepsToUpdate.forEach((step) => {
+		if (step.order >= order) {
+			const newOrder = step.order + 1;
+			step.order = newOrder;
+			updatedSteps[step.id] = { order: newOrder };
+		}
+	});
 
 	return { newSteps, updatedSteps, currentStepOrder };
 };
@@ -170,42 +150,91 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 
 		if (targetStep) {
 			// Adding between two steps, use target step's order
+			// This will push the target step and all subsequent steps down by 1
 			return targetStep.order;
 		}
 
-		// Adding at the end, so next order
-		return sourceStep.order + 1;
+		// Adding at the end, so next order after source step
+		// Need to find the highest order in the same branch
+		const parentId = sourceStep.parent_id || 0;
+		const branchCondition = sourceStep.condition || null;
+
+		const sameBranchSteps = steps.filter((step) => {
+			if (parentId === 0) {
+				// Root level steps
+				return !step.parent_id;
+			} else {
+				// Child steps - same parent and condition
+				return (
+					step.parent_id === parentId &&
+					step.condition === branchCondition
+				);
+			}
+		});
+
+		const maxOrder = Math.max(...sameBranchSteps.map((s) => s.order), 0);
+		return maxOrder + 1;
 	};
 
 	const handleStepSelection = async (type: string) => {
 		setLoading(true);
 
-		const order = getNewStepOrder();
+		// First, determine parent-child relationships
+		let parentId = 0;
+		let stepCondition: string | undefined = undefined;
+
+		if (sourceStep && condition) {
+			parentId = sourceStep.id;
+			stepCondition = condition;
+		} else if (sourceStep && sourceStep.parent_id) {
+			// If sourceStep has a parent, the new step should also have the same parent and condition
+			parentId = sourceStep.parent_id;
+			stepCondition = sourceStep.condition || undefined;
+		} else if (targetStep && targetStep.parent_id) {
+			// If targetStep has a parent, the new step should also have the same parent and condition
+			parentId = targetStep.parent_id;
+			stepCondition = targetStep.condition || undefined;
+		}
+
+		// Calculate order: if we have targetStep, insert before it, otherwise add at end
+		let order: number;
+		if (targetStep) {
+			order = targetStep.order;
+		} else {
+			// Find the highest order in the same branch
+			const sameBranchSteps = steps.filter((step) => {
+				if (parentId === 0) {
+					return !step.parent_id;
+				} else {
+					return (
+						step.parent_id === parentId &&
+						step.condition === stepCondition
+					);
+				}
+			});
+			order = Math.max(...sameBranchSteps.map((s) => s.order), 0) + 1;
+		}
+
 		const stepData = {
 			automation_id: automation.id,
 			type,
-			status: 'active', // Use 'active' instead of 'draft' to persist after refresh
+			status: 'active',
 			order,
-		} as AutomationStep;
+		} as Partial<AutomationStep>;
+
+		if (parentId > 0) {
+			stepData.parent_id = parentId;
+		}
+		if (stepCondition) {
+			stepData.condition = stepCondition;
+		}
 
 		if (type === 'condition') {
 			stepData.action = 'condition';
 		}
 
-		// Handle parent-child relationships
-		if (sourceStep && condition) {
-			stepData.parent_id = sourceStep.id;
-			stepData.condition = condition;
-		}
-
-		const parentId = stepData.parent_id || 0;
 		const { newSteps, updatedSteps, currentStepOrder } =
-			updateStepOrderRecursive(
-				steps,
-				parentId,
-				order,
-				condition || undefined
-			);
+			updateStepOrderRecursive(steps, parentId, order, stepCondition);
 
 		const requestData = {
 			...stepData,

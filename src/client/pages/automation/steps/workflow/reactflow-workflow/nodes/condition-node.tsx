@@ -196,7 +196,7 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 				</div>
 			</div>
 
-			{/* Bottom handle for continuing after condition */}
+			{/* Bottom handle for sequential flow */}
 			<Handle
 				type="source"
 				position={Position.Bottom}

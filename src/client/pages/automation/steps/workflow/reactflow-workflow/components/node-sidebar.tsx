@@ -14,7 +14,7 @@ import {
 	TrophyOutlined,
 	DisconnectOutlined,
 	PlusCircleOutlined,
-	EyeOutlined,
+	EditOutlined,
 } from '@ant-design/icons';
 import { Button, List, Typography, Space, Badge, Tooltip } from 'antd';
 import { Node } from '@xyflow/react';
@@ -200,7 +200,12 @@ const NodeSidebar: React.FC<NodeSidebarProps> = ({
 						renderItem={(node) => (
 							<List.Item
 								className="qcrm-node-sidebar__item"
-								onClick={() => handleNodeClick(node)}
+								onClick={(e) => {
+									e.stopPropagation();
+									if (onNodeClick) {
+										onNodeClick(node.id);
+									}
+								}}
 							>
 								<List.Item.Meta
 									avatar={getNodeIcon(node.type || 'default')}
@@ -240,13 +245,8 @@ const NodeSidebar: React.FC<NodeSidebarProps> = ({
 									<Button
 										type="text"
 										size="small"
-										icon={<EyeOutlined />}
-										onClick={(e) => {
-											e.stopPropagation();
-											if (onNodeClick) {
-												onNodeClick(node.id);
-											}
-										}}
+										icon={<EditOutlined />}
+										onClick={() => handleNodeClick(node)}
 									/>
 								</Tooltip>
 							</List.Item>

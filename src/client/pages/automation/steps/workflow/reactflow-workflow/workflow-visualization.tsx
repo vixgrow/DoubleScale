@@ -599,7 +599,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		if (isInitialLoadRef.current) {
 			setTimeout(() => {
 				isInitialLoadRef.current = false;
-			}, 1000);
+			}, 500); // Reduced initial load delay
 		}
 	}, [nodes, setNodes]);
 
@@ -648,8 +648,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				const new_ = positions[nodeId];
 				return (
 					!current ||
-					Math.abs(current.x - new_.x) > 1 ||
-					Math.abs(current.y - new_.y) > 1
+					Math.abs(current.x - new_.x) > 2 || // Slightly increased threshold to reduce API calls
+					Math.abs(current.y - new_.y) > 2
 				);
 			});
 
@@ -665,13 +665,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					},
 				};
 
-				await apiFetch({
+				// Don't await the API call to avoid blocking the UI
+				apiFetch({
 					path: `/qc/v1/automations/${automation.id}`,
 					method: 'POST',
 					data: updatedAutomation,
+				}).catch((error) => {
+					console.error('Failed to save node positions:', error);
 				});
 
-				// Only update context when there are actual changes
+				// Update context immediately for responsive feel
 				updateAutomation(updatedAutomation);
 			} catch (error) {
 				console.error('Failed to save node positions:', error);
@@ -684,44 +687,47 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	const debouncedSavePositions = useCallback(
 		debounce((nodes: Node[]) => {
 			saveNodePositions(nodes);
-		}, 800), // Increased debounce time to reduce API calls and improve performance
+		}, 300), // Reduced debounce time for more responsive saving
 		[saveNodePositions]
 	);
 
 	// Handle node changes (including position updates)
 	const handleNodesChange = useCallback(
 		(changes: any[]) => {
+			// Apply changes immediately for responsive UI
 			onNodesChange(changes);
 
-			// Check for different types of changes
-			const hasPositionChange = changes.some(
-				(change) => change.type === 'position' && change.position
-			);
-			const hasDragStart = changes.some(
-				(change) => change.type === 'select' && change.selected
-			);
+			// Check for drag end to save positions
 			const hasDragEnd = changes.some(
-				(change) => change.type === 'position' && !change.dragging
+				(change) =>
+					change.type === 'position' && change.dragging === false
 			);
 
-			// Track dragging state
-			if (hasDragStart) {
+			// Track dragging state more precisely
+			const isDragStart = changes.some(
+				(change) =>
+					change.type === 'position' && change.dragging === true
+			);
+
+			if (isDragStart) {
 				isDraggingRef.current = true;
 			}
+
 			if (hasDragEnd) {
 				isDraggingRef.current = false;
-			}
-
-			// Only save positions when drag is complete and not during initial load
-			if (
-				hasPositionChange &&
-				!isDraggingRef.current &&
-				!isInitialLoadRef.current
-			) {
-				debouncedSavePositions(nodesState);
+				// Save positions immediately when drag ends (not during initial load)
+				if (!isInitialLoadRef.current) {
+					// Get current nodes state for saving
+					setTimeout(() => {
+						setNodes((currentNodes) => {
+							debouncedSavePositions(currentNodes);
+							return currentNodes;
+						});
+					}, 0);
+				}
 			}
 		},
-		[onNodesChange, debouncedSavePositions, nodesState]
+		[onNodesChange, debouncedSavePositions, setNodes]
 	);
 
 	// Save positions when nodes structure changes (new steps added/removed) with debounce
@@ -730,7 +736,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			// Use debounced save for structure changes too to avoid performance issues
 			const timeoutId = setTimeout(() => {
 				saveNodePositions(nodes);
-			}, 300); // Slightly longer delay for structure changes
+			}, 150); // Reduced delay for structure changes
 
 			return () => clearTimeout(timeoutId);
 		}
@@ -760,6 +766,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				edgeTypes={edgeTypes}
 				fitView
 				fitViewOptions={{ padding: 0.2 }}
+				nodesDraggable={true}
+				nodesConnectable={false}
+				elementsSelectable={true}
+				selectNodesOnDrag={false}
+				panOnDrag={true}
+				zoomOnScroll={true}
+				zoomOnPinch={true}
+				deleteKeyCode={null}
 			>
 				<Background />
 				<Controls />

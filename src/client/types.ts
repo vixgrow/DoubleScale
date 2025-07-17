@@ -622,6 +622,8 @@ export interface DataTableConfig<TData> {
 	};
 	search?: {
 		placeholder?: string;
+		onChange?: (value: string) => void;
+		value?: string;
 	};
 	selection?: {
 		enabled: boolean;

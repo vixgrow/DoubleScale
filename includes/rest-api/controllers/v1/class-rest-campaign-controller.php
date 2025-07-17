@@ -375,6 +375,7 @@ class REST_Campaign_Controller extends REST_Controller
 	public function get_items($request)
 	{
 		try {
+			$keywords = $request->get_param('keywords') ? $request->get_param('keywords') : null;
 			$per_page = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
 			$page = $request->get_param('page') ? $request->get_param('page') : 1;
 			$from = $request->get_param('from') ? $request->get_param('from') : null;
@@ -382,6 +383,10 @@ class REST_Campaign_Controller extends REST_Controller
 
 			$query = Campaign_Model::query();
 
+			// Apply keywords filter
+			if ($keywords) {
+				$query->where('name', 'like', '%' . $keywords . '%');
+			}
 			// Apply date range filter
 			if ($from) {
 				$query->where('created_at', '>=', $from);

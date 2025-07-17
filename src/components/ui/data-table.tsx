@@ -49,14 +49,26 @@ export function DataTable<TData>({
 		config
 	);
 
+	const handleSearchChange = (value: string) => {
+		if (config.search?.onChange) {
+			config.search.onChange(value);
+		} else {
+			setGlobalFilter(value);
+		}
+	};
+
 	return (
 		<div className="w-full">
 			{/* Main Actions Row - Optional */}
 			{showMainActions && (
 				<div className="flex items-center justify-between p-5 border rounded-lg my-4 w-full">
 					<DataTableSearch
-						value={globalFilter}
-						onChange={setGlobalFilter}
+						value={
+							config.search?.onChange
+								? config.search?.value || ''
+								: globalFilter
+						}
+						onChange={handleSearchChange}
 						placeholder={config.search?.placeholder}
 					/>
 

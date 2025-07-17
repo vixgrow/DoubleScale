@@ -22,7 +22,12 @@ import { Node } from '@xyflow/react';
 /**
  * Internal dependencies
  */
-import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+import type {
+	AutomationStep,
+	OrganizedStep,
+	Automation,
+} from '@quillcrm/client';
+import { getTrigger } from '@quillcrm/utils';
 
 const { Title, Text } = Typography;
 
@@ -64,8 +69,15 @@ const NodeSidebar: React.FC<NodeSidebarProps> = ({
 	// Get the display name for each node type
 	const getNodeName = (node: Node) => {
 		switch (node.type) {
-			case 'trigger':
+			case 'trigger': {
+				// Get trigger information from node data
+				const automation = node.data?.automation as Automation;
+				if (automation?.trigger) {
+					const trigger = getTrigger(automation.trigger);
+					return trigger?.label || __('Trigger', 'quillcrm');
+				}
 				return __('Trigger', 'quillcrm');
+			}
 			case 'action': {
 				const step = steps.find((s) => s.id.toString() === node.id);
 				if (step?.action) {

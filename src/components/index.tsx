@@ -1,4 +1,5 @@
 export * from './icons';
+export * from './table';
 export { default as NavBar } from './navbar';
 export { default as TagField } from './tag-field';
 export { default as ListField } from './list-field';
@@ -14,7 +15,7 @@ export { default as MergeTagsModal } from './merge-tags';
 export { default as PageHeader } from './page-header';
 export { default as PageTabs } from './page-tabs';
 export { default as BulkActionSelect } from './bulk-actions';
-export { default as CustomDialogHeader } from './dialog-header';  
+export { default as CustomDialogHeader } from './dialog-header';
 export { default as NoticeBanner } from './notice-banner';
 export { default as AddRemoveListsModal } from './add-remove-list-modal';
 export { default as AddRemoveTagsModal } from './add-remove-tag-modal';

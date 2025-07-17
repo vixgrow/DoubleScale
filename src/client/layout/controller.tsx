@@ -22,7 +22,7 @@ import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
 import CustomFields from '../pages/contacts/custom-fields';
-import Campaigns from '../pages/campaings';
+import Campaigns from '../pages/campaigns';
 import Campaign from '../pages/campaign';
 import Forms from '../pages/forms';
 import Form from '../pages/form';

@@ -696,3 +696,18 @@ export interface DeleteGroupDialogProps {
 	groups: CustomFieldsGroup[];
 	onDelete: (groupId: number, newGroupId?: number) => Promise<boolean>;
 }
+
+
+export const CAMPAIGN_STATUS = {
+	DRAFT: 'draft',
+	INACTIVE: 'inactive',
+	ACTIVE: 'active',
+	SCHEDULED: 'schedule',
+	PROCESSING: 'processing',
+	COMPLETED: 'completed',
+	RESENDING: 'resending',
+	PAUSED: 'paused',
+	CANCELLED: 'cancelled',
+} as const;
+
+export type CampaignStatus = typeof CAMPAIGN_STATUS[keyof typeof CAMPAIGN_STATUS];

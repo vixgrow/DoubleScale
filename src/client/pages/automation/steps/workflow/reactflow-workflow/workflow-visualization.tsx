@@ -20,6 +20,7 @@ import {
 	Controls,
 	MiniMap,
 	EdgeTypes,
+	useReactFlow,
 } from '@xyflow/react';
 import { debounce } from 'lodash';
 import '@xyflow/react/dist/style.css';
@@ -41,6 +42,7 @@ import GoalNode from './nodes/goal-node';
 import EndNode from './nodes/end-node';
 import AddStepNode from './nodes/add-step-node';
 import AddStepEdge from './edges/add-step-edge';
+import NodeSidebar from './components/node-sidebar';
 
 // Register custom node types
 const nodeTypes = {
@@ -75,6 +77,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	const { updateAutomation } = useAutomationContext();
 	const isInitialLoadRef = useRef(true);
 	const isDraggingRef = useRef(false);
+	const { fitView, getNode } = useReactFlow();
 	// Create nodes and edges from steps with proper hierarchical handling
 	const { nodes, edges } = useMemo(() => {
 		const initialNodes: Node[] = [];
@@ -89,7 +92,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			id: 'trigger',
 			type: 'trigger',
 			position: triggerPosition,
-			data: { automation },
+			data: { automation, onTriggerClick },
 		});
 
 		if (!steps || steps.length === 0) {
@@ -144,60 +147,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			return {
 				x: baseX + level * horizontalSpacing + offset,
 				y: baseY + index * verticalSpacing,
-			};
-		};
-
-		// Helper function to find the bottom-most Y position of nodes in a branch
-		const findBottomMostPosition = (
-			branchSteps: AutomationStep[],
-			parentStep: AutomationStep,
-			level: number,
-			offset: number = 0
-		) => {
-			if (branchSteps.length === 0) {
-				// No children, position below parent
-				const parentPos =
-					savedPositions[parentStep.id.toString()] ||
-					calculatePosition(parentStep.id.toString(), 0, level - 1);
-				return {
-					x: parentPos.x + offset,
-					y: parentPos.y + 180, // Standard spacing below parent
-				};
-			}
-
-			// Find the bottom-most child position
-			let bottomMostY = 0;
-			let bottomMostX = 250; // Default center
-
-			branchSteps.forEach((step, index) => {
-				const stepPos =
-					savedPositions[step.id.toString()] ||
-					calculatePosition(step.id.toString(), index, level, offset);
-				if (stepPos.y > bottomMostY) {
-					bottomMostY = stepPos.y;
-					bottomMostX = stepPos.x;
-				}
-			});
-
-			// Ensure we have a valid position
-			if (bottomMostY === 0) {
-				const parentPos =
-					savedPositions[parentStep.id.toString()] ||
-					calculatePosition(
-						parentStep.id.toString(),
-						0,
-						level - 1,
-						0
-					);
-				return {
-					x: parentPos.x + offset,
-					y: parentPos.y + 180,
-				};
-			}
-
-			return {
-				x: bottomMostX,
-				y: bottomMostY + 180, // Position below the bottom-most child
 			};
 		};
 
@@ -390,15 +339,18 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						yesChildren[yesChildren.length - 1].type !==
 							'end_automation'
 					) {
-						const yesAddPosition = findConditionBranchPosition(
-							yesChildren,
-							step,
-							'yes',
-							level + 1
-						);
+						const yesAddId = `add-step-${step.id}-yes`;
+						const yesAddPosition =
+							savedPositions[yesAddId] ||
+							findConditionBranchPosition(
+								yesChildren,
+								step,
+								'yes',
+								level + 1
+							);
 
 						initialNodes.push({
-							id: `add-step-${step.id}-yes`,
+							id: yesAddId,
 							type: 'add_step',
 							position: yesAddPosition,
 							data: {
@@ -460,15 +412,18 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						noChildren[noChildren.length - 1].type !==
 							'end_automation'
 					) {
-						const noAddPosition = findConditionBranchPosition(
-							noChildren,
-							step,
-							'no',
-							level + 1
-						);
+						const noAddId = `add-step-${step.id}-no`;
+						const noAddPosition =
+							savedPositions[noAddId] ||
+							findConditionBranchPosition(
+								noChildren,
+								step,
+								'no',
+								level + 1
+							);
 
 						initialNodes.push({
-							id: `add-step-${step.id}-no`,
+							id: noAddId,
 							type: 'add_step',
 							position: noAddPosition,
 							data: {
@@ -555,7 +510,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			rootSteps.length === 0 ||
 			rootSteps[rootSteps.length - 1].type !== 'end_automation'
 		) {
-			// Find the bottom-most position among all nodes to place the final add-step
+			// Position the final add-step based on the last root step, not the bottommost node
 			let finalAddPosition;
 			if (rootSteps.length === 0) {
 				// No root steps, position below trigger
@@ -568,35 +523,30 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					y: triggerPos.y + 180,
 				};
 			} else {
-				// Find the absolute bottom-most node position across all branches
-				let bottomMostY = 0;
-				let bottomMostX = 250; // Default center
-
-				// Check all nodes (including nested ones) to find the bottom-most position
-				const allSteps = [...steps];
-				allSteps.forEach((step) => {
-					const stepPos =
-						savedPositions[step.id.toString()] ||
-						calculatePosition(
-							step.id.toString(),
-							step.order - 1,
-							0
-						);
-					if (stepPos.y > bottomMostY) {
-						bottomMostY = stepPos.y;
-						bottomMostX = stepPos.x;
-					}
-				});
+				// Position based on the last root step in the main flow
+				const lastRootStep = rootSteps[rootSteps.length - 1];
+				const lastRootStepPos =
+					savedPositions[lastRootStep.id.toString()] ||
+					calculatePosition(
+						lastRootStep.id.toString(),
+						rootSteps.length - 1,
+						0
+					);
 
 				finalAddPosition = {
-					x: bottomMostX,
-					y: bottomMostY + 180,
+					x: lastRootStepPos.x,
+					y: lastRootStepPos.y + 260,
 				};
 			}
+
+			// Check for saved position for final add-step node
+			const finalAddId = 'add-step-final';
+			const finalSavedPosition = savedPositions[finalAddId];
+
 			initialNodes.push({
-				id: 'add-step-final',
+				id: finalAddId,
 				type: 'add_step',
-				position: finalAddPosition,
+				position: finalSavedPosition || finalAddPosition,
 				data: {
 					parentId: null,
 					condition: null,
@@ -652,7 +602,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		if (isInitialLoadRef.current) {
 			setTimeout(() => {
 				isInitialLoadRef.current = false;
-			}, 1000);
+			}, 500); // Reduced initial load delay
 		}
 	}, [nodes, setNodes]);
 
@@ -683,6 +633,21 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		[onStepClick, onTriggerClick, steps]
 	);
 
+	// Handle focus on specific node from sidebar
+	const handleFocusNode = useCallback(
+		(nodeId: string) => {
+			const node = getNode(nodeId);
+			if (node) {
+				fitView({
+					nodes: [node],
+					duration: 800,
+					padding: 0.3,
+				});
+			}
+		},
+		[getNode, fitView]
+	);
+
 	// Save node positions when they change
 	const saveNodePositions = useCallback(
 		async (nodes: Node[]) => {
@@ -701,8 +666,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				const new_ = positions[nodeId];
 				return (
 					!current ||
-					Math.abs(current.x - new_.x) > 1 ||
-					Math.abs(current.y - new_.y) > 1
+					Math.abs(current.x - new_.x) > 2 || // Slightly increased threshold to reduce API calls
+					Math.abs(current.y - new_.y) > 2
 				);
 			});
 
@@ -718,13 +683,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					},
 				};
 
-				await apiFetch({
+				// Don't await the API call to avoid blocking the UI
+				apiFetch({
 					path: `/qc/v1/automations/${automation.id}`,
 					method: 'POST',
 					data: updatedAutomation,
+				}).catch((error) => {
+					console.error('Failed to save node positions:', error);
 				});
 
-				// Only update context when there are actual changes
+				// Update context immediately for responsive feel
 				updateAutomation(updatedAutomation);
 			} catch (error) {
 				console.error('Failed to save node positions:', error);
@@ -737,44 +705,47 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	const debouncedSavePositions = useCallback(
 		debounce((nodes: Node[]) => {
 			saveNodePositions(nodes);
-		}, 800), // Increased debounce time to reduce API calls and improve performance
+		}, 300), // Reduced debounce time for more responsive saving
 		[saveNodePositions]
 	);
 
 	// Handle node changes (including position updates)
 	const handleNodesChange = useCallback(
 		(changes: any[]) => {
+			// Apply changes immediately for responsive UI
 			onNodesChange(changes);
 
-			// Check for different types of changes
-			const hasPositionChange = changes.some(
-				(change) => change.type === 'position' && change.position
-			);
-			const hasDragStart = changes.some(
-				(change) => change.type === 'select' && change.selected
-			);
+			// Check for drag end to save positions
 			const hasDragEnd = changes.some(
-				(change) => change.type === 'position' && !change.dragging
+				(change) =>
+					change.type === 'position' && change.dragging === false
 			);
 
-			// Track dragging state
-			if (hasDragStart) {
+			// Track dragging state more precisely
+			const isDragStart = changes.some(
+				(change) =>
+					change.type === 'position' && change.dragging === true
+			);
+
+			if (isDragStart) {
 				isDraggingRef.current = true;
 			}
+
 			if (hasDragEnd) {
 				isDraggingRef.current = false;
-			}
-
-			// Only save positions when drag is complete and not during initial load
-			if (
-				hasPositionChange &&
-				!isDraggingRef.current &&
-				!isInitialLoadRef.current
-			) {
-				debouncedSavePositions(nodesState);
+				// Save positions immediately when drag ends (not during initial load)
+				if (!isInitialLoadRef.current) {
+					// Get current nodes state for saving
+					setTimeout(() => {
+						setNodes((currentNodes) => {
+							debouncedSavePositions(currentNodes);
+							return currentNodes;
+						});
+					}, 0);
+				}
 			}
 		},
-		[onNodesChange, debouncedSavePositions, nodesState]
+		[onNodesChange, debouncedSavePositions, setNodes]
 	);
 
 	// Save positions when nodes structure changes (new steps added/removed) with debounce
@@ -783,7 +754,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			// Use debounced save for structure changes too to avoid performance issues
 			const timeoutId = setTimeout(() => {
 				saveNodePositions(nodes);
-			}, 300); // Slightly longer delay for structure changes
+			}, 150); // Reduced delay for structure changes
 
 			return () => clearTimeout(timeoutId);
 		}
@@ -797,41 +768,82 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		);
 	}
 
+	// Debug logging
+	console.log('ReactFlow nodes:', nodesState.length, nodesState);
+	console.log('ReactFlow edges:', edgesState.length, edgesState);
+
 	return (
 		<div className="qcrm-reactflow-workflow">
-			<ReactFlow
-				nodes={nodesState}
-				edges={edgesState}
-				onNodesChange={handleNodesChange}
-				onEdgesChange={onEdgesChange}
-				onNodeClick={onNodeClick}
-				nodeTypes={nodeTypes}
-				edgeTypes={edgeTypes}
-				fitView
-				fitViewOptions={{ padding: 0.2 }}
-			>
-				<Background />
-				<Controls />
-				<MiniMap
-					nodeStrokeWidth={3}
-					nodeColor={(node) => {
-						switch (node.type) {
-							case 'trigger':
-								return '#1890ff';
-							case 'action':
-								return '#52c41a';
-							case 'condition':
-								return '#faad14';
-							case 'goal':
-								return '#722ed1';
-							case 'end_automation':
-								return '#f5222d';
-							default:
-								return '#d9d9d9';
-						}
-					}}
-				/>
-			</ReactFlow>
+			<div className="qcrm-reactflow-workflow__layout">
+				<div className="qcrm-reactflow-workflow__sidebar">
+					<NodeSidebar
+						nodes={nodesState}
+						steps={steps}
+						onNodeClick={handleFocusNode}
+						onStepClick={onStepClick}
+						onTriggerClick={onTriggerClick}
+					/>
+				</div>
+				<div className="qcrm-reactflow-workflow__canvas">
+					<ReactFlow
+						nodes={nodesState}
+						edges={edgesState}
+						onNodesChange={handleNodesChange}
+						onEdgesChange={onEdgesChange}
+						onNodeClick={onNodeClick}
+						nodeTypes={nodeTypes}
+						edgeTypes={edgeTypes}
+						fitView
+						fitViewOptions={{ padding: 0.2 }}
+						nodesDraggable={true}
+						nodesConnectable={false}
+						elementsSelectable={true}
+						selectNodesOnDrag={false}
+						panOnDrag={true}
+						zoomOnScroll={true}
+						zoomOnPinch={true}
+						deleteKeyCode={null}
+					>
+						<Background />
+						<Controls />
+						{/* Only show MiniMap when there are nodes */}
+						{nodesState.length > 0 && (
+							<MiniMap
+								nodeStrokeWidth={3}
+								nodeColor={(node) => {
+									switch (node.type) {
+										case 'trigger':
+											return '#1890ff';
+										case 'action':
+											return '#52c41a';
+										case 'condition':
+											return '#faad14';
+										case 'goal':
+											return '#722ed1';
+										case 'end_automation':
+											return '#f5222d';
+										case 'add_step':
+											return '#d9d9d9';
+										default:
+											return '#d9d9d9';
+									}
+								}}
+								nodeStrokeColor="#666"
+								maskColor="rgba(240, 240, 240, 0.6)"
+								style={{
+									height: 120,
+									width: 200,
+									border: '1px solid #e8e8e8',
+									borderRadius: '4px',
+								}}
+								zoomable
+								pannable
+								position="bottom-right"
+							/>
+						)}
+					</ReactFlow>
+				</div>
+			</div>
 		</div>
 	);
 };

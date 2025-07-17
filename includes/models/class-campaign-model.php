@@ -15,11 +15,13 @@ use QuillCRM\Models\Campaign_Email_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
+use QuillCRM\Managers\Campaign_Status_Manager;
 
 /**
  * Campaign_Model class
  */
-class Campaign_Model extends Model {
+class Campaign_Model extends Model
+{
 
 	/**
 	 * Table name
@@ -101,8 +103,9 @@ class Campaign_Model extends Model {
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
-	public function emails() {
-		return $this->hasMany( Campaign_Email_Model::class, 'campaign_id', 'id' );
+	public function emails()
+	{
+		return $this->hasMany(Campaign_Email_Model::class, 'campaign_id', 'id');
 	}
 
 	/**
@@ -113,8 +116,9 @@ class Campaign_Model extends Model {
 	 *
 	 * @return mixed
 	 */
-	public function get_setting( $key, $default = null ) {
-		return isset( $this->settings[ $key ] ) ? $this->settings[ $key ] : $default;
+	public function get_setting($key, $default = null)
+	{
+		return isset($this->settings[$key]) ? $this->settings[$key] : $default;
 	}
 
 	/**
@@ -124,50 +128,51 @@ class Campaign_Model extends Model {
 	 *
 	 * @return array
 	 */
-	public function get_templates() {
+	public function get_templates()
+	{
 		// Get the templates
-		$templates = $this->get_setting( 'templates', array() );
+		$templates = $this->get_setting('templates', array());
 
-		foreach ( $templates as $index => $template ) {
-			$template_id  = $template['template_id'] ?? null;
-			$from_name    = $template['from_name'] ?? null;
-			$from_email   = $template['from_email'] ?? null;
-			$reply_to     = $template['reply_to'] ?? null;
-			$subject      = $template['subject'] ?? null;
+		foreach ($templates as $index => $template) {
+			$template_id = $template['template_id'] ?? null;
+			$from_name = $template['from_name'] ?? null;
+			$from_email = $template['from_email'] ?? null;
+			$reply_to = $template['reply_to'] ?? null;
+			$subject = $template['subject'] ?? null;
 			$preview_text = $template['preview_text'] ?? null;
-			$body         = $template['body'] ?? 'This is a test email';
-			$enable_utm   = $template['enable_utm'] ?? false;
-			$utm_source   = $template['utm_source'] ?? null;
-			$utm_medium   = $template['utm_medium'] ?? null;
+			$body = $template['body'] ?? 'This is a test email';
+			$enable_utm = $template['enable_utm'] ?? false;
+			$utm_source = $template['utm_source'] ?? null;
+			$utm_medium = $template['utm_medium'] ?? null;
 			$utm_campaign = $template['utm_campaign'] ?? null;
-			$utm_term     = $template['utm_term'] ?? null;
-			$utm_content  = $template['utm_content'] ?? null;
-			$hidden       = $template['hidden'] ?? 1;
-			$template     = Template_Model::createOrUpdate(
+			$utm_term = $template['utm_term'] ?? null;
+			$utm_content = $template['utm_content'] ?? null;
+			$hidden = $template['hidden'] ?? 1;
+			$template = Template_Model::createOrUpdate(
 				$template_id,
 				array(
-					'name'     => __( 'Campaign Template', 'quillcrm' ),
-					'type'     => 'email',
-					'subject'  => $subject ?? '',
-					'body'     => $body ?? '',
+					'name' => __('Campaign Template', 'quillcrm'),
+					'type' => 'email',
+					'subject' => $subject ?? '',
+					'body' => $body ?? '',
 					'settings' => array(
-						'from_name'    => $from_name,
-						'from_email'   => $from_email,
-						'reply_to'     => $reply_to,
+						'from_name' => $from_name,
+						'from_email' => $from_email,
+						'reply_to' => $reply_to,
 						'preview_text' => $preview_text,
-						'enable_utm'   => $enable_utm,
-						'utm_source'   => $utm_source,
-						'utm_medium'   => $utm_medium,
+						'enable_utm' => $enable_utm,
+						'utm_source' => $utm_source,
+						'utm_medium' => $utm_medium,
 						'utm_campaign' => $utm_campaign,
-						'utm_term'     => $utm_term,
-						'utm_content'  => $utm_content,
+						'utm_term' => $utm_term,
+						'utm_content' => $utm_content,
 					),
-					'hidden'   => $hidden,
+					'hidden' => $hidden,
 				)
 			);
 
 			// Update the template id
-			$templates[ $index ]['template_id'] = $template->id;
+			$templates[$index]['template_id'] = $template->id;
 		}
 
 		return $templates;
@@ -180,29 +185,68 @@ class Campaign_Model extends Model {
 	 *
 	 * @return void
 	 */
-	public function attach_counts( $campaign ) {
-		$filters             = $campaign->get_setting( 'filters', array() );
-		$campaign_recipients = Contact_Model::where( 'status', 'subscribed' );
-		if ( ! empty( $filters ) ) {
-			$contact_filters     = new Contact_Filters_Process( $campaign_recipients, $filters );
+	public function attach_counts($campaign)
+	{
+		$filters = $campaign->get_setting('filters', array());
+		$campaign_recipients = Contact_Model::where('status', 'subscribed');
+		if (!empty($filters)) {
+			$contact_filters = new Contact_Filters_Process($campaign_recipients, $filters);
 			$campaign_recipients = $contact_filters->filter();
 		}
 
 		// Templates count
 		$templates_count = array();
-		foreach ( $campaign->settings['templates'] ?? array() ?? array() as $template ) {
+		foreach ($campaign->settings['templates'] ?? array() ?? array() as $template) {
 			$template_id = $template['template_id'] ?? null;
-			if ( $template_id ) {
-				$templates_count[ $template_id ] = $campaign->emails()->where( 'template_id', $template_id )->count();
+			if ($template_id) {
+				$templates_count[$template_id] = $campaign->emails()->where('template_id', $template_id)->count();
 			}
 		}
 
 		$campaign->templates_count = $templates_count;
-		$campaign->contacts_count  = $campaign_recipients->count();
-		$campaign->sent_count      = $campaign->emails()->where( 'status', 'sent' )->count();
-		$campaign->failed_count    = $campaign->emails()->where( 'status', 'failed' )->count();
-		$campaign->opened_count    = $campaign->emails()->where( 'clicked', 1 )->count();
-		$campaign->clicked_count   = $campaign->emails()->where( 'opened', 1 )->count();
+		$campaign->contacts_count = $campaign_recipients->count();
+		$campaign->sent_count = $campaign->emails()->where('status', 'sent')->count();
+		$campaign->failed_count = $campaign->emails()->where('status', 'failed')->count();
+		$campaign->opened_count = $campaign->emails()->where('clicked', 1)->count();
+		$campaign->clicked_count = $campaign->emails()->where('opened', 1)->count();
+	}
+
+	/**
+	 * Get status manager
+	 * 
+	 * @return Campaign_Status_Manager
+	 */
+	protected function get_status_manager()
+	{
+		return Campaign_Status_Manager::instance();
+	}
+
+
+	/**
+	 * Get status label
+	 *
+	 * @return string
+	 */
+	public function get_status_label()
+	{
+		$labels = $this->get_status_manager()->get_status_labels();
+		return $labels[$this->status] ?? $this->status;
+	}
+
+	/**
+	 * Validate status before setting
+	 *
+	 * @param string $value
+	 */
+	public function setStatusAttribute($value)
+	{
+		$manager = $this->get_status_manager();
+
+		if (!$manager->is_valid_status($value)) {
+			throw new \InvalidArgumentException("Invalid campaign status: {$value}");
+		}
+
+		$this->attributes['status'] = $value;
 	}
 
 	/**
@@ -212,12 +256,13 @@ class Campaign_Model extends Model {
 	 *
 	 * @return void
 	 */
-	public static function boot() {
+	public static function boot()
+	{
 		parent::boot();
 
 		// Save templates when saving the campaign
 		static::saving(
-			function( $campaign ) {
+			function ($campaign) {
 				// Retrieve the settings attribute
 				$settings = $campaign->settings;
 
@@ -227,27 +272,27 @@ class Campaign_Model extends Model {
 				$campaign->settings = $settings;
 
 				// Remove the contacts count, sent count, opened count and clicked count
-				unset( $campaign->templates_count );
-				unset( $campaign->contacts_count );
-				unset( $campaign->sent_count );
-				unset( $campaign->failed_count );
-				unset( $campaign->opened_count );
-				unset( $campaign->clicked_count );
+				unset($campaign->templates_count);
+				unset($campaign->contacts_count);
+				unset($campaign->sent_count);
+				unset($campaign->failed_count);
+				unset($campaign->opened_count);
+				unset($campaign->clicked_count);
 			}
 		);
 
 		// Delete the campaign templates when deleting the campaign
 		static::deleting(
-			function( $campaign ) {
+			function ($campaign) {
 				// Get the templates
 				$templates = $campaign->get_templates();
 
 				// Delete the templates
-				foreach ( $templates as $template ) {
+				foreach ($templates as $template) {
 					$template_id = $template['template_id'] ?? null;
-					if ( $template_id ) {
-						$template = Template_Model::find( $template_id );
-						if ( $template ) {
+					if ($template_id) {
+						$template = Template_Model::find($template_id);
+						if ($template) {
 							$template->delete();
 						}
 					}
@@ -256,14 +301,14 @@ class Campaign_Model extends Model {
 		);
 
 		static::retrieved(
-			function ( $campaign ) {
-				$campaign->attach_counts( $campaign );
+			function ($campaign) {
+				$campaign->attach_counts($campaign);
 			}
 		);
 
 		static::saved(
-			function ( $campaign ) {
-				$campaign->attach_counts( $campaign );
+			function ($campaign) {
+				$campaign->attach_counts($campaign);
 			}
 		);
 	}

@@ -103,5 +103,56 @@ module.exports = {
 			},
 		},
 	},
+	safelist: [
+		// Gray
+		'bg-gray-200',
+		'text-gray-600',
+		'dark:bg-gray-200',
+		'dark:text-gray-600',
+		'bg-gray-300',
+		'text-gray-700',
+		'dark:bg-gray-300',
+		'dark:text-gray-700',
+
+		// Green
+		'bg-green-100',
+		'text-green-600',
+		'dark:bg-green-100',
+		'dark:text-green-600',
+		'bg-green-200',
+		'text-green-700',
+		'dark:bg-green-200',
+		'dark:text-green-700',
+
+		// Blue
+		'bg-blue-100',
+		'text-blue-600',
+		'dark:bg-blue-100',
+		'dark:text-blue-600',
+
+		// Amber
+		'bg-amber-100',
+		'text-amber-600',
+		'dark:bg-amber-100',
+		'dark:text-amber-600',
+
+		// Fuchsia
+		'bg-fuchsia-100',
+		'text-fuchsia-600',
+		'dark:bg-fuchsia-100',
+		'dark:text-fuchsia-600',
+
+		// Orange
+		'bg-orange-100',
+		'text-orange-600',
+		'dark:bg-orange-100',
+		'dark:text-orange-600',
+
+		// Red
+		'bg-red-100',
+		'text-red-600',
+		'dark:bg-red-100',
+		'dark:text-red-600',
+	],
 	plugins: [require('tailwindcss-animate')],
 };

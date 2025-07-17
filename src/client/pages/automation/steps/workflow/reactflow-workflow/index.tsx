@@ -7,6 +7,7 @@ import { useCallback } from '@wordpress/element';
 /**
  * External dependencies
  */
+import { ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 /**
@@ -47,13 +48,15 @@ const ReactFlowWorkflow: React.FC<ReactFlowWorkflowProps> = ({
 
 	return (
 		<div className="qcrm-reactflow-container">
-			<WorkflowVisualization
-				automation={automation || undefined}
-				steps={steps}
-				isLoading={isLoading}
-				onStepClick={handleStepClick}
-				onTriggerClick={handleTriggerClick}
-			/>
+			<ReactFlowProvider>
+				<WorkflowVisualization
+					automation={automation || undefined}
+					steps={steps}
+					isLoading={isLoading}
+					onStepClick={handleStepClick}
+					onTriggerClick={handleTriggerClick}
+				/>
+			</ReactFlowProvider>
 		</div>
 	);
 };

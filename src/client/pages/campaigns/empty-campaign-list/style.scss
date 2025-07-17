@@ -1,0 +1,24 @@
+.ordered-list {
+	list-style: none;
+	counter-reset: num;
+}
+
+.ordered-list li {
+	display: flex;
+	align-items: start;
+	gap: 6px;
+	counter-increment: num;
+	margin-bottom: 1em;
+	font-size: 16px;
+}
+
+.ordered-list li::before {
+	content: counter(num);
+	padding: 2px 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #1e3a8a;
+	background-color: #d1d7e7;
+	border-radius: 50%;
+}

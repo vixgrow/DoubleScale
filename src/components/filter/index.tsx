@@ -9,10 +9,9 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import { Button, Input, DatePicker } from 'antd';
+import { DatePicker } from 'antd';
 import en from 'antd/es/date-picker/locale/en_US';
 import dayjs from 'dayjs';
-import { DeleteOutlined } from '@ant-design/icons';
 import { map, isEmpty, isArray, isObject, isString } from 'lodash';
 import Select from 'react-select';
 
@@ -26,6 +25,9 @@ import type {
 	ReactSelectOptions,
 	Response,
 } from '@quillcrm/client';
+import { Button } from '@/components/ui/button';
+import { DeleteIcon } from '@quillcrm/components';
+import { Input } from '@/components/ui/input';
 
 interface FilterProps {
 	filterSettings: FilterSettings;
@@ -81,7 +83,7 @@ const Filter: React.FC<FilterProps> = ({
 	return (
 		<div className="qcrm-filter">
 			<div className="qcrm-filter-row">
-				<div className="qcrm-filter-row-item">
+				<div className="qcrm-filter-row-item text-[#6E6E6E]">
 					{filterSettings.name}
 				</div>
 				{filterSettings.operators && (
@@ -105,12 +107,35 @@ const Filter: React.FC<FilterProps> = ({
 							})
 						)}
 						isSearchable={false}
+						styles={{
+							control: (base) => ({
+								...base,
+								width: '250px',
+								height: '48px',
+								minHeight: '48px',
+								borderRadius: '8px',
+							}),
+							indicatorsContainer: (base) => ({
+								...base,
+								height: '48px',
+							}),
+							valueContainer: (base) => ({
+								...base,
+								height: '48px',
+								padding: '0 8px',
+							}),
+							singleValue: (base) => ({
+								...base,
+								lineHeight: '48px',
+							}),
+						}}
 					/>
 				)}
 				{filterSettings.type === 'text' && (
 					<Input
 						value={filter.value}
 						onChange={(e) => onChange('value', e.target.value)}
+						className="h-[48px] w-[250px]"
 					/>
 				)}
 				{filterSettings.type === 'select' &&
@@ -140,6 +165,28 @@ const Filter: React.FC<FilterProps> = ({
 								})
 							)}
 							isSearchable={false}
+							styles={{
+								control: (base) => ({
+									...base,
+									width: '250px',
+									height: '48px',
+									minHeight: '48px',
+									borderRadius: '8px',
+								}),
+								indicatorsContainer: (base) => ({
+									...base,
+									height: '48px',
+								}),
+								valueContainer: (base) => ({
+									...base,
+									height: '48px',
+									padding: '0 8px',
+								}),
+								singleValue: (base) => ({
+									...base,
+									lineHeight: '48px',
+								}),
+							}}
 						/>
 					)}
 				{filterSettings.type === 'select' &&
@@ -163,6 +210,28 @@ const Filter: React.FC<FilterProps> = ({
 							isLoading={loading}
 							onInputChange={(value) => setKeyword(value)}
 							isMulti={true}
+							styles={{
+								control: (base) => ({
+									...base,
+									width: '250px',
+									height: '48px',
+									minHeight: '48px',
+									borderRadius: '8px',
+								}),
+								indicatorsContainer: (base) => ({
+									...base,
+									height: '48px',
+								}),
+								valueContainer: (base) => ({
+									...base,
+									height: '48px',
+									padding: '0 8px',
+								}),
+								singleValue: (base) => ({
+									...base,
+									lineHeight: '48px',
+								}),
+							}}
 						/>
 					)}
 				{filterSettings.type === 'date' && (
@@ -178,10 +247,16 @@ const Filter: React.FC<FilterProps> = ({
 											: null
 									}
 									onChange={(value) => {
-										const newValue = isArray(filter.value) ? filter.value : [];
-										newValue[0] = dayjs(value).format('YYYY-MM-DD');
+										const newValue = isArray(filter.value)
+											? filter.value
+											: [];
+										newValue[0] =
+											dayjs(value).format('YYYY-MM-DD');
 										if (isEmpty(newValue[1])) {
-											newValue[1] = dayjs(value).format('YYYY-MM-DD');
+											newValue[1] =
+												dayjs(value).format(
+													'YYYY-MM-DD'
+												);
 										}
 										onChange('value', newValue);
 									}}
@@ -196,10 +271,16 @@ const Filter: React.FC<FilterProps> = ({
 											: null
 									}
 									onChange={(value) => {
-										const newValue = isArray(filter.value) ? filter.value : [];
-										newValue[1] = dayjs(value).format('YYYY-MM-DD');
+										const newValue = isArray(filter.value)
+											? filter.value
+											: [];
+										newValue[1] =
+											dayjs(value).format('YYYY-MM-DD');
 										if (isEmpty(newValue[0])) {
-											newValue[0] = dayjs(value).format('YYYY-MM-DD');
+											newValue[0] =
+												dayjs(value).format(
+													'YYYY-MM-DD'
+												);
 										}
 										onChange('value', newValue);
 									}}
@@ -209,10 +290,17 @@ const Filter: React.FC<FilterProps> = ({
 						) : (
 							<DatePicker
 								value={
-									!isEmpty(filter.value) ? isArray(filter.value) ? dayjs(filter.value[0]) : dayjs(filter.value) : null
+									!isEmpty(filter.value)
+										? isArray(filter.value)
+											? dayjs(filter.value[0])
+											: dayjs(filter.value)
+										: null
 								}
 								onChange={(value) =>
-									onChange('value', dayjs(value).format('YYYY-MM-DD'))
+									onChange(
+										'value',
+										dayjs(value).format('YYYY-MM-DD')
+									)
 								}
 								locale={en}
 							/>
@@ -220,10 +308,12 @@ const Filter: React.FC<FilterProps> = ({
 					</>
 				)}
 				<Button
-					danger
-					onClick={() => onRemove()}
-					icon={<DeleteOutlined />}
-				/>
+					size="icon"
+					onClick={onRemove}
+					className="bg-transparent shadow-none border-none p-0 text-destructive"
+				>
+					<DeleteIcon width={24} height={24} />
+				</Button>
 			</div>
 		</div>
 	);

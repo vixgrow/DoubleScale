@@ -4,11 +4,10 @@
 	width: 100%;
 	margin-bottom: 20px;
 	.qcrm-filter-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr 1fr 1fr;
+		display: flex;
 		align-items: center;
-		border-bottom: 1px solid #e8e8e8;
-		gap: 10px;
+		justify-content: center;
+		gap: 15px;
 		padding: 10px 0;
 	}
 }

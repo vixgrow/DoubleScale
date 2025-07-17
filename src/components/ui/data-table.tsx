@@ -20,8 +20,7 @@ import {
 	TableRow,
 } from '@/components/ui/table';
 import DataTablePagination from './data-table-pagination';
-import { Filters } from '@quillcrm/components';
-import { useDataTable } from '../../hooks/use-dataTable';
+import { useDataTable } from '@quillcrm/hooks/use-dataTable';
 import { DataTableSearch } from './data-table-search';
 import { DataTableActions } from './data-table-actions';
 import { DataTableConfig } from '@quillcrm/client';
@@ -64,18 +63,6 @@ export function DataTable<TData>({
 						table={table}
 						config={config}
 						activeTab={activeTab}
-					/>
-				</div>
-			)}
-
-			{/* Advanced Filters Panel */}
-			{config.filters?.enabled && config.filters.showFilters && (
-				<div className="mb-4 p-4 border rounded-lg bg-muted/50">
-					<Filters
-						filters={config.filters.currentFilters}
-						onChange={config.filters.onFiltersChange}
-						onApply={config.filters.onApplyFilters}
-						isApplying={config.filters.isApplying}
 					/>
 				</div>
 			)}

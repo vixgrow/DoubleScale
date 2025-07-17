@@ -22,9 +22,11 @@ import {
 	ColumnsIcon,
 	FiltersIcon,
 	BulkActionSelect,
+	FiltersDialog
 } from '@quillcrm/components';
 import { DataTableConfig } from '@quillcrm/client';
 import { DateRangePicker } from './date-range-picker';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 
 interface DataTableActionsProps<TData> {
 	table: Table<TData>;
@@ -70,18 +72,23 @@ export function DataTableActions<TData>({
 
 			{/* Advanced Filters Button */}
 			{config.filters?.enabled && (
-				<Button
-					onClick={() =>
-						config.filters?.onToggleFilters(
-							!config.filters.showFilters
-						)
-					}
-					variant="tertiary"
-					className=" font-semibold px-4 text-[#3B82F6]"
-				>
-					<FiltersIcon />
-					{__('Advanced Filters', 'quillcrm')}
-				</Button>
+				<Dialog>
+					<DialogTrigger asChild>
+						<Button
+							variant="tertiary"
+							className="font-semibold px-4 text-[#3B82F6]"
+						>
+							<FiltersIcon />
+							{__('Advanced Filters', 'quillcrm')}
+						</Button>
+					</DialogTrigger>
+					<FiltersDialog
+						filters={config.filters.currentFilters}
+						onChange={config.filters.onFiltersChange}
+						onApply={config.filters.onApplyFilters}
+						isApplying={config.filters.isApplying}
+					/>
+				</Dialog>
 			)}
 
 			{/* Manage Columns Dropdown */}

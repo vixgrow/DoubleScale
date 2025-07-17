@@ -20,6 +20,7 @@ import {
 	Controls,
 	MiniMap,
 	EdgeTypes,
+	useReactFlow,
 } from '@xyflow/react';
 import { debounce } from 'lodash';
 import '@xyflow/react/dist/style.css';
@@ -41,6 +42,7 @@ import GoalNode from './nodes/goal-node';
 import EndNode from './nodes/end-node';
 import AddStepNode from './nodes/add-step-node';
 import AddStepEdge from './edges/add-step-edge';
+import NodeSidebar from './components/node-sidebar';
 
 // Register custom node types
 const nodeTypes = {
@@ -75,6 +77,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	const { updateAutomation } = useAutomationContext();
 	const isInitialLoadRef = useRef(true);
 	const isDraggingRef = useRef(false);
+	const { fitView, getNode } = useReactFlow();
 	// Create nodes and edges from steps with proper hierarchical handling
 	const { nodes, edges } = useMemo(() => {
 		const initialNodes: Node[] = [];
@@ -630,6 +633,21 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		[onStepClick, onTriggerClick, steps]
 	);
 
+	// Handle focus on specific node from sidebar
+	const handleFocusNode = useCallback(
+		(nodeId: string) => {
+			const node = getNode(nodeId);
+			if (node) {
+				fitView({
+					nodes: [node],
+					duration: 800,
+					padding: 0.3,
+				});
+			}
+		},
+		[getNode, fitView]
+	);
+
 	// Save node positions when they change
 	const saveNodePositions = useCallback(
 		async (nodes: Node[]) => {
@@ -756,63 +774,76 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 	return (
 		<div className="qcrm-reactflow-workflow">
-			<ReactFlow
-				nodes={nodesState}
-				edges={edgesState}
-				onNodesChange={handleNodesChange}
-				onEdgesChange={onEdgesChange}
-				onNodeClick={onNodeClick}
-				nodeTypes={nodeTypes}
-				edgeTypes={edgeTypes}
-				fitView
-				fitViewOptions={{ padding: 0.2 }}
-				nodesDraggable={true}
-				nodesConnectable={false}
-				elementsSelectable={true}
-				selectNodesOnDrag={false}
-				panOnDrag={true}
-				zoomOnScroll={true}
-				zoomOnPinch={true}
-				deleteKeyCode={null}
-			>
-				<Background />
-				<Controls />
-				{/* Only show MiniMap when there are nodes */}
-				{nodesState.length > 0 && (
-					<MiniMap
-						nodeStrokeWidth={3}
-						nodeColor={(node) => {
-							switch (node.type) {
-								case 'trigger':
-									return '#1890ff';
-								case 'action':
-									return '#52c41a';
-								case 'condition':
-									return '#faad14';
-								case 'goal':
-									return '#722ed1';
-								case 'end_automation':
-									return '#f5222d';
-								case 'add_step':
-									return '#d9d9d9';
-								default:
-									return '#d9d9d9';
-							}
-						}}
-						nodeStrokeColor="#666"
-						maskColor="rgba(240, 240, 240, 0.6)"
-						style={{
-							height: 120,
-							width: 200,
-							border: '1px solid #e8e8e8',
-							borderRadius: '4px',
-						}}
-						zoomable
-						pannable
-						position="bottom-right"
+			<div className="qcrm-reactflow-workflow__layout">
+				<div className="qcrm-reactflow-workflow__sidebar">
+					<NodeSidebar
+						nodes={nodesState}
+						steps={steps}
+						onNodeClick={handleFocusNode}
+						onStepClick={onStepClick}
+						onTriggerClick={onTriggerClick}
 					/>
-				)}
-			</ReactFlow>
+				</div>
+				<div className="qcrm-reactflow-workflow__canvas">
+					<ReactFlow
+						nodes={nodesState}
+						edges={edgesState}
+						onNodesChange={handleNodesChange}
+						onEdgesChange={onEdgesChange}
+						onNodeClick={onNodeClick}
+						nodeTypes={nodeTypes}
+						edgeTypes={edgeTypes}
+						fitView
+						fitViewOptions={{ padding: 0.2 }}
+						nodesDraggable={true}
+						nodesConnectable={false}
+						elementsSelectable={true}
+						selectNodesOnDrag={false}
+						panOnDrag={true}
+						zoomOnScroll={true}
+						zoomOnPinch={true}
+						deleteKeyCode={null}
+					>
+						<Background />
+						<Controls />
+						{/* Only show MiniMap when there are nodes */}
+						{nodesState.length > 0 && (
+							<MiniMap
+								nodeStrokeWidth={3}
+								nodeColor={(node) => {
+									switch (node.type) {
+										case 'trigger':
+											return '#1890ff';
+										case 'action':
+											return '#52c41a';
+										case 'condition':
+											return '#faad14';
+										case 'goal':
+											return '#722ed1';
+										case 'end_automation':
+											return '#f5222d';
+										case 'add_step':
+											return '#d9d9d9';
+										default:
+											return '#d9d9d9';
+									}
+								}}
+								nodeStrokeColor="#666"
+								maskColor="rgba(240, 240, 240, 0.6)"
+								style={{
+									height: 120,
+									width: 200,
+									border: '1px solid #e8e8e8',
+									borderRadius: '4px',
+								}}
+								zoomable
+								pannable
+								position="bottom-right"
+							/>
+						)}
+					</ReactFlow>
+				</div>
+			</div>
 		</div>
 	);
 };

@@ -242,12 +242,16 @@ const NodeSidebar: React.FC<NodeSidebarProps> = ({
 								<Tooltip
 									title={__('Focus on canvas', 'quillcrm')}
 								>
-									<Button
-										type="text"
-										size="small"
-										icon={<EditOutlined />}
-										onClick={() => handleNodeClick(node)}
-									/>
+									{node.type !== 'end_automation' && (
+										<Button
+											type="text"
+											size="small"
+											icon={<EditOutlined />}
+											onClick={() =>
+												handleNodeClick(node)
+											}
+										/>
+									)}
 								</Tooltip>
 							</List.Item>
 						)}

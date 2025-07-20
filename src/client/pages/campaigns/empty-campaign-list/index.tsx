@@ -11,14 +11,13 @@ import { PlayIcon } from '@/components';
 // @ts-ignore
 import EmptyCampaignListImage from '@quillcrm/assets/images/campaign.png';
 import './style.scss';
+import { CampaignModalStep } from '@quillcrm/client';
 
 interface EmptyCampaignListProps {
-	setVisible: (visible: boolean) => void;
+	setStep: (step: CampaignModalStep) => void;
 }
 
-const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
-	setVisible,
-}) => {
+const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({ setStep }) => {
 	return (
 		<div className="flex items-center justify-center border border-gray-200 rounded-lg py-28 px-10">
 			<div className="flex items-center justify-center gap-24">
@@ -61,7 +60,7 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 						</li>
 					</ol>
 					<div className="flex gap-4 items-center">
-						<Button onClick={() => setVisible(true)}>
+						<Button onClick={() => setStep('campaign-types')}>
 							{__('Create Campaign', 'quillcrm')}
 						</Button>
 						<Button variant="secondaryDeepBlue">

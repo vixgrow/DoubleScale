@@ -254,23 +254,19 @@ const ExportModal: React.FC<Props> = ({ open, onClose }) => {
 															<div className="rounded-2xl">
 																<div
 																	style={{
-																		borderWidth:
-																			'1px',
-																		borderStyle:
-																			'solid',
+																		marginTop:
+																			'5px',
+																		border: '1px solid transparent',
+																		borderRadius:
+																			'10px',
+																		padding:
+																			'20px',
+																		backgroundImage:
+																			'linear-gradient(white, white), linear-gradient(90deg, #1e3a8a 61.06%, #3b82f6 100%)',
 																		backgroundOrigin:
 																			'border-box',
 																		backgroundClip:
-																			'content-box, border-box',
-                                                                        backgroundImage: 'linear-gradient(white, white), linear-gradient(to right, #1E3A8A, #3B82F6) 1',
-																		borderRadius:
-																			'0.5rem',
-																		overflow:
-																			'hidden',
-																		padding:
-																			'20px',
-																		marginTop:
-																			'5px',
+																			'padding-box, border-box',
 																	}}
 																>
 																	{!isFiltering &&

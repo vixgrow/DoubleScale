@@ -383,6 +383,7 @@ class REST_Campaign_Controller extends REST_Controller
 
 			$query = Campaign_Model::query();
 
+			$total_count = $query->count();
 			// Apply keywords filter
 			if ($keywords) {
 				$query->where('name', 'like', '%' . $keywords . '%');
@@ -394,11 +395,13 @@ class REST_Campaign_Controller extends REST_Controller
 			if ($to) {
 				$query->where('created_at', '<=', $to);
 			}
-
 			$campaigns = $query->orderBy('created_at', 'desc')
 				->paginate($per_page, array('*'), 'page', $page);
 
-			return new WP_REST_Response($campaigns, 200);
+			return new WP_REST_Response(
+				$campaigns->toArray() + ['total_count' => $total_count],
+				200
+			);
 		} catch (\Exception $e) {
 			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}

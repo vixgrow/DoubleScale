@@ -375,7 +375,7 @@ class REST_Campaign_Controller extends REST_Controller
 	public function get_items($request)
 	{
 		try {
-			$keyword = $request->get_param('keyword') ? $request->get_param('keyword') : '';
+			$keywords = $request->get_param('keywords') ? $request->get_param('keywords') : null;
 			$per_page = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
 			$page = $request->get_param('page') ? $request->get_param('page') : 1;
 			$from = $request->get_param('from') ? $request->get_param('from') : null;
@@ -383,11 +383,11 @@ class REST_Campaign_Controller extends REST_Controller
 
 			$query = Campaign_Model::query();
 
-			// Apply keyword filter
-			if ($keyword) {
-				$query->where('name', 'LIKE', '%' . $keyword . '%');
+			$total_count = $query->count();
+			// Apply keywords filter
+			if ($keywords) {
+				$query->where('name', 'like', '%' . $keywords . '%');
 			}
-
 			// Apply date range filter
 			if ($from) {
 				$query->where('created_at', '>=', $from);
@@ -395,11 +395,13 @@ class REST_Campaign_Controller extends REST_Controller
 			if ($to) {
 				$query->where('created_at', '<=', $to);
 			}
-
 			$campaigns = $query->orderBy('created_at', 'desc')
 				->paginate($per_page, array('*'), 'page', $page);
 
-			return new WP_REST_Response($campaigns, 200);
+			return new WP_REST_Response(
+				$campaigns->toArray() + ['total_count' => $total_count],
+				200
+			);
 		} catch (\Exception $e) {
 			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}

@@ -8,40 +8,35 @@ import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
 
 /**
- * External dependencies
- */
-
-import {
-	EditOutlined,
-	DeleteOutlined,
-	CopyOutlined,
-	MoreOutlined,
-} from '@ant-design/icons';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
-import { Campaign, CampaignsResponse } from '@quillcrm/client';
+import {
+	Campaign,
+	CampaignModalStep,
+	CampaignsResponse,
+} from '@quillcrm/client';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
-import { convertDate } from '@quillcrm/utils';
-import { DataTable } from '../../../components/ui/data-table';
+import { DataTable } from '@/components/ui/data-table';
 import { campaignColumns } from './columns';
-import { PageHeader, PlusIcon } from '../../../components';
+import { PageHeader, PlusIcon } from '@/components';
+import DataTablePagination from '@/components/ui/data-table-pagination';
+import EmptyCampaignList from './empty-campaign-list';
+import AddCampaign from './add-campaign';
 
 const Campaigns: React.FC = () => {
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(true); // TODO: Use the loading for the table and the create campaign component
+	const [campaignType, setCampaignType] = useState<string>('');
+	const [keywords, setKeywords] = useState<string>('');
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(10);
-	const [total, setTotal] = useState(0);
+	const [hasRecords, setHasRecords] = useState<boolean>(false);
+	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-	const [visible, setVisible] = useState<boolean>(false);
-	const [isAdding, setIsAdding] = useState<boolean>(false);
-	const [name, setName] = useState<string>('');
-	const [keyword, setKeyword] = useState<string>('');
+	const [isAdding, setIsAdding] = useState<boolean>(false); // TODO: Use the is Adding for the submit button
 	const [bulkAction, setBulkAction] = useState<string>('');
-	const [isApplying, setIsApplying] = useState<boolean>(false);
+	const [isApplying, setIsApplying] = useState<boolean>(false); // TODO: Use the is Applying for the bulk actions
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
@@ -49,13 +44,14 @@ const Campaigns: React.FC = () => {
 		from: null,
 		to: null,
 	});
+	const [step, setStep] = useState<CampaignModalStep>(null);
 
 	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		fetchCampaigns();
-	}, [page, perPage, dateRange]);
+	}, [page, perPage, dateRange, keywords]);
 
 	const fetchCampaigns = async () => {
 		setLoading(true);
@@ -65,14 +61,14 @@ const Campaigns: React.FC = () => {
 				path: addQueryArgs('/qc/v1/campaigns', {
 					page,
 					per_page: perPage,
-					keyword,
 					from: dateRange.from?.toISOString(),
 					to: dateRange.to?.toISOString(),
+					keywords,
 				}),
 			})) as CampaignsResponse;
-
 			setCampaigns(response.data);
-			setTotal(response.total);
+			setTotalRecords(response.total);
+			setHasRecords(response.total_count > 0);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -83,7 +79,7 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
-	const addCampaign = async () => {
+	const addCampaign = async (name: string) => {
 		if (!name) {
 			createNotice({
 				type: 'error',
@@ -99,14 +95,16 @@ const Campaigns: React.FC = () => {
 				method: 'POST',
 				data: {
 					name: name,
+					settings: {
+						ab_test: campaignType === 'ab_test',
+					},
 					description: __('New campaign', 'quillcrm'),
 					status: 'draft',
 				},
 			})) as Campaign;
 
 			setCampaigns([...campaigns, response]);
-			setName('');
-			setVisible(false);
+			setStep(null);
 			navigate(getToLink(`campaigns/${response.id}`));
 		} catch (error: any) {
 			createNotice({
@@ -114,7 +112,7 @@ const Campaigns: React.FC = () => {
 				message: error.message,
 			});
 		} finally {
-			setIsAdding(false);
+			setStep(null);
 		}
 	};
 
@@ -185,6 +183,37 @@ const Campaigns: React.FC = () => {
 		navigate: navigate,
 	});
 
+	const serverSideTable = {
+		getState: () => ({
+			pagination: {
+				pageIndex: page - 1, // Convert to 0-indexed for TanStack Table
+				pageSize: perPage,
+			},
+		}),
+		getPageCount: () => Math.ceil(totalRecords / perPage),
+		getFilteredSelectedRowModel: () => ({ rows: [] }),
+		getFilteredRowModel: () => ({ rows: Array(totalRecords).fill({}) }),
+		setPageSize: (size: number) => {
+			setPerPage(size);
+			setPage(1); // Reset to first page when changing page size
+		},
+		setPageIndex: (index: number) => {
+			setPage(index + 1); // Convert from 0-indexed to 1-indexed
+		},
+		getCanPreviousPage: () => page > 1,
+		getCanNextPage: () => page < Math.ceil(totalRecords / perPage),
+		previousPage: () => {
+			if (page > 1) {
+				setPage(page - 1);
+			}
+		},
+		nextPage: () => {
+			if (page < Math.ceil(totalRecords / perPage)) {
+				setPage(page + 1);
+			}
+		},
+	};
+
 	return (
 		<div className="qcrm-campaigns">
 			<PageHeader
@@ -194,35 +223,54 @@ const Campaigns: React.FC = () => {
 					{
 						label: __('Create Campaign', 'quillcrm'),
 						icon: <PlusIcon />,
-						onClick: () => setVisible(true),
+						onClick: () => setStep('campaign-types'),
 					},
 				]}
 			/>
-			<DataTable
-				columns={columns}
-				data={campaigns}
-				config={{
-					search: {
-						placeholder: __('Search', 'quillcrm'),
-					},
-					selection: {
-						enabled: true,
-						selectedKeys: selectedRowKeys,
-						onSelectionChange: setSelectedRowKeys,
-					},
-					bulkActions: {
-						enabled: true,
-						currentAction: bulkAction,
-						onActionChange: (value) => setBulkAction(value),
-						onExecuteAction: () => deleteSelected(),
-						activeTab: 'all',
-					},
-					dateRange: {
-						enabled: true,
-						value: dateRange,
-						onDateChange: setDateRange,
-					},
-				}}
+
+			{hasRecords ? (
+				<>
+					<DataTable
+						columns={columns}
+						data={campaigns}
+						showPagination={false}
+						config={{
+							search: {
+								placeholder: __('Search', 'quillcrm'),
+								onChange: (value) => setKeywords(value),
+								value: keywords,
+							},
+							selection: {
+								enabled: true,
+								selectedKeys: selectedRowKeys,
+								onSelectionChange: setSelectedRowKeys,
+							},
+							bulkActions: {
+								enabled: true,
+								currentAction: bulkAction,
+								onActionChange: (value) => setBulkAction(value),
+								onExecuteAction: () => deleteSelected(),
+								activeTab: 'all',
+							},
+							dateRange: {
+								enabled: true,
+								value: dateRange,
+								onDateChange: setDateRange,
+							},
+						}}
+					/>
+					<DataTablePagination table={serverSideTable} />
+				</>
+			) : (
+				<EmptyCampaignList setStep={setStep} />
+			)}
+
+			<AddCampaign
+				setCampaignType={setCampaignType}
+				campaignType={campaignType}
+				setStep={setStep}
+				step={step}
+				addCampaign={addCampaign}
 			/>
 		</div>
 	);

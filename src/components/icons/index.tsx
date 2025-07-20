@@ -43,3 +43,6 @@ export { default as GradientFilterIcon } from './gradient-filter';
 export { default as SettingsOutlinedIcon } from './settings-outlined';
 export { default as ViewOutlinedIcon } from './view-outlined';
 export { default as GradientColumnsIcon } from './gradient-columns';
+export { default as PlayIcon } from './play';
+export { default as EnvelopeIcon } from './envelope';
+export { default as RepeatIcon } from './repeat';

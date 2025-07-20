@@ -98,7 +98,7 @@ const Filters: React.FC<FiltersProps> = ({
 							placeholder={__('Select group', 'quillcrm')}
 						/>
 					</SelectTrigger>
-					<SelectContent>
+					<SelectContent className="z-[1700000]">
 						{map(filtersGroups, (group, key) => (
 							<SelectItem key={key} value={key}>
 								{group.name}
@@ -117,7 +117,7 @@ const Filters: React.FC<FiltersProps> = ({
 							placeholder={__('Select filter', 'quillcrm')}
 						/>
 					</SelectTrigger>
-					<SelectContent>
+					<SelectContent className="z-[1700000]">
 						{selectedGroup &&
 							map(
 								filtersGroups[selectedGroup].filters,

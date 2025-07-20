@@ -42,3 +42,4 @@ export { default as OutlinedCalendarIcon } from './outlined-calendar';
 export { default as GradientFilterIcon } from './gradient-filter';
 export { default as SettingsOutlinedIcon } from './settings-outlined';
 export { default as ViewOutlinedIcon } from './view-outlined';
+export { default as GradientColumnsIcon } from './gradient-columns';

@@ -180,7 +180,7 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 						</span>
 						<Handle
 							type="source"
-							position={Position.Right}
+							position={Position.Left}
 							id="yes"
 							className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--yes"
 						/>

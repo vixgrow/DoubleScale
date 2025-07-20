@@ -28,6 +28,7 @@ import type {
 	Automation,
 } from '@quillcrm/client';
 import { getTrigger } from '@quillcrm/utils';
+import LayoutButton from './layout-button';
 
 const { Title, Text } = Typography;
 
@@ -185,6 +186,56 @@ const NodeSidebar: React.FC<NodeSidebarProps> = ({
 					style={{ backgroundColor: '#1890ff' }}
 				/>
 			</div>
+
+			{/* Quick Layout Actions */}
+			{displayNodes.length > 1 && (
+				<div
+					className="qcrm-node-sidebar__layout-actions"
+					style={{
+						padding: '8px 16px',
+						borderBottom: '1px solid #f0f0f0',
+					}}
+				>
+					<Title
+						level={5}
+						style={{
+							margin: '0 0 8px 0',
+							fontSize: '12px',
+							textTransform: 'uppercase',
+							color: '#666',
+						}}
+					>
+						{__('Quick Layout', 'quillcrm')}
+					</Title>
+					<div
+						style={{
+							display: 'flex',
+							gap: '4px',
+							flexWrap: 'wrap',
+						}}
+					>
+						<LayoutButton
+							algorithm="dagre"
+							direction="TB"
+							size="small"
+							iconOnly
+						/>
+						<LayoutButton
+							algorithm="dagre"
+							direction="LR"
+							size="small"
+							iconOnly
+						/>
+						<LayoutButton
+							algorithm="elk"
+							direction="TB"
+							size="small"
+							iconOnly
+							type="dashed"
+						/>
+					</div>
+				</div>
+			)}
 
 			<div className="qcrm-node-sidebar__content">
 				{displayNodes.length === 0 ? (

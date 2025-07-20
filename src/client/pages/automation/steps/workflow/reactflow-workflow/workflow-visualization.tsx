@@ -2,7 +2,13 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useMemo, useCallback, useEffect, useRef } from '@wordpress/element';
+import {
+	useMemo,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -20,7 +26,6 @@ import {
 	Controls,
 	MiniMap,
 	EdgeTypes,
-	useReactFlow,
 } from '@xyflow/react';
 import { debounce } from 'lodash';
 import '@xyflow/react/dist/style.css';
@@ -42,7 +47,8 @@ import GoalNode from './nodes/goal-node';
 import EndNode from './nodes/end-node';
 import AddStepNode from './nodes/add-step-node';
 import AddStepEdge from './edges/add-step-edge';
-import NodeSidebar from './components/node-sidebar';
+import LayoutControls from './components/layout-controls';
+import { LayoutAlgorithm, LayoutDirection, useAutoLayout } from './auto-layout';
 
 // Register custom node types
 const nodeTypes = {
@@ -77,7 +83,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	const { updateAutomation } = useAutomationContext();
 	const isInitialLoadRef = useRef(true);
 	const isDraggingRef = useRef(false);
-	const { fitView, getNode } = useReactFlow();
+	// Track previous node count to detect additions/deletions
+	const prevNodeCountRef = useRef(0);
+	const shouldTriggerLayoutRef = useRef(false);
 	// Create nodes and edges from steps with proper hierarchical handling
 	const { nodes, edges } = useMemo(() => {
 		const initialNodes: Node[] = [];
@@ -593,6 +601,43 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	const [nodesState, setNodes, onNodesChange] = useNodesState(nodes);
 	const [edgesState, setEdges, onEdgesChange] = useEdgesState(edges);
 
+	// Layout
+	const { layout } = useAutoLayout();
+	const [isLoadingLayout, setIsLoadingLayout] = useState(false);
+	const [currentAlgorithm, setCurrentAlgorithm] =
+		useState<LayoutAlgorithm>('dagre');
+	const [currentDirection, setCurrentDirection] =
+		useState<LayoutDirection>('TB');
+
+	// Handle layout execution
+	const handleLayout = async (
+		algorithm?: LayoutAlgorithm,
+		direction?: LayoutDirection,
+		customOptions?: any
+	) => {
+		setIsLoadingLayout(true);
+		try {
+			const alg = algorithm || currentAlgorithm;
+			const dir = direction || currentDirection;
+
+			if (algorithm) setCurrentAlgorithm(algorithm);
+			if (direction) setCurrentDirection(direction);
+
+			await layout({
+				algorithm: alg,
+				direction: dir,
+				nodeSpacing: 100,
+				rankSpacing: 150,
+				edgeSpacing: 50,
+				...customOptions,
+			});
+		} catch (error) {
+			console.error('Layout failed:', error);
+		} finally {
+			setIsLoadingLayout(false);
+		}
+	};
+
 	// Sync ReactFlow state with computed values when they change
 	useEffect(() => {
 		// Immediately update nodes when the computed nodes change
@@ -631,21 +676,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			}
 		},
 		[onStepClick, onTriggerClick, steps]
-	);
-
-	// Handle focus on specific node from sidebar
-	const handleFocusNode = useCallback(
-		(nodeId: string) => {
-			const node = getNode(nodeId);
-			if (node) {
-				fitView({
-					nodes: [node],
-					duration: 800,
-					padding: 0.3,
-				});
-			}
-		},
-		[getNode, fitView]
 	);
 
 	// Save node positions when they change
@@ -760,6 +790,34 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		}
 	}, [nodes.length, automation]); // Remove saveNodePositions from deps to prevent unnecessary re-renders
 
+	// Track node count changes and trigger auto-layout when nodes are added/deleted
+	useEffect(() => {
+		const currentNodeCount = nodes.length;
+		const prevNodeCount = prevNodeCountRef.current;
+
+		// Skip on initial load and when count doesn't change
+		if (isInitialLoadRef.current || prevNodeCount === 0) {
+			prevNodeCountRef.current = currentNodeCount;
+			return;
+		}
+
+		// If node count changed (addition or deletion), trigger auto-layout
+		if (currentNodeCount !== prevNodeCount && !isDraggingRef.current) {
+			shouldTriggerLayoutRef.current = true;
+			// Small delay to ensure nodes are properly positioned before layout
+			const timeoutId = setTimeout(() => {
+				if (shouldTriggerLayoutRef.current) {
+					handleLayout();
+					shouldTriggerLayoutRef.current = false;
+				}
+			}, 200);
+
+			return () => clearTimeout(timeoutId);
+		}
+
+		prevNodeCountRef.current = currentNodeCount;
+	}, [nodes.length, handleLayout]);
+
 	if (isLoading) {
 		return (
 			<div className="qcrm-reactflow-loading">
@@ -775,15 +833,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	return (
 		<div className="qcrm-reactflow-workflow">
 			<div className="qcrm-reactflow-workflow__layout">
-				<div className="qcrm-reactflow-workflow__sidebar">
-					<NodeSidebar
-						nodes={nodesState}
-						steps={steps}
-						onNodeClick={handleFocusNode}
-						onStepClick={onStepClick}
-						onTriggerClick={onTriggerClick}
-					/>
-				</div>
 				<div className="qcrm-reactflow-workflow__canvas">
 					<ReactFlow
 						nodes={nodesState}
@@ -806,6 +855,36 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					>
 						<Background />
 						<Controls />
+
+						{/* Layout Controls Panel */}
+						{nodesState.length > 1 && (
+							<div
+								className="qcrm-layout-controls-panel"
+								style={{
+									position: 'absolute',
+									top: '20px',
+									left: '50%',
+									transform: 'translateX(-50%)',
+									zIndex: 1000,
+									background: 'rgba(255, 255, 255, 0.95)',
+									backdropFilter: 'blur(10px)',
+									padding: '12px 16px',
+									borderRadius: '8px',
+									border: '1px solid #e8e8e8',
+									boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+								}}
+							>
+								<LayoutControls
+									handleLayout={handleLayout}
+									isLoadingLayout={isLoadingLayout}
+									currentAlgorithm={currentAlgorithm}
+									setCurrentAlgorithm={setCurrentAlgorithm}
+									currentDirection={currentDirection}
+									setCurrentDirection={setCurrentDirection}
+								/>
+							</div>
+						)}
+
 						{/* Only show MiniMap when there are nodes */}
 						{nodesState.length > 0 && (
 							<MiniMap

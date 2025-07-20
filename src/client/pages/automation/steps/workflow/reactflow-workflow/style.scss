@@ -350,43 +350,75 @@
 
 	&--condition {
 		border-color: #faad14;
-		min-width: 200px;
+		min-width: 180px;
+		position: relative;
 		
 		.qcrm-reactflow-node__icon {
 			background: rgba(250, 173, 20, 0.1);
 			color: #faad14;
 		}
 
-		.qcrm-reactflow-node__outputs {
-			padding: 0 16px 16px;
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
+		// Add labels for the handles - improved positioning
+		&::before {
+			content: "Yes";
+			position: absolute;
+			left: -42px;
+			top: 50%;
+			transform: translateY(-50%);
+			font-size: 11px;
+			font-weight: 700;
+			color: #389e0d;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(246, 255, 237, 0.95));
+			padding: 3px 7px;
+			border-radius: 6px;
+			border: 1.5px solid #52c41a;
+			z-index: 1000;
+			box-shadow: 
+				0 2px 8px rgba(82, 196, 26, 0.2),
+				0 1px 3px rgba(0, 0, 0, 0.1);
+			white-space: nowrap;
+			pointer-events: none;
+			backdrop-filter: blur(2px);
+			transition: all 0.2s ease;
 		}
 
-		.qcrm-reactflow-node__output {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			padding: 6px 8px;
-			background: #f9f9f9;
-			border-radius: 4px;
-			font-size: 12px;
-			font-weight: 500;
-
-			&--yes {
-				color: #52c41a;
-				background: rgba(82, 196, 26, 0.1);
-			}
-
-			&--no {
-				color: #ff4d4f;
-				background: rgba(255, 77, 79, 0.1);
-			}
+		&::after {
+			content: "No";
+			position: absolute;
+			right: -35px;
+			top: 50%;
+			transform: translateY(-50%);
+			font-size: 11px;
+			font-weight: 700;
+			color: #cf1322;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 241, 240, 0.95));
+			padding: 3px 7px;
+			border-radius: 6px;
+			border: 1.5px solid #ff4d4f;
+			z-index: 1000;
+			box-shadow: 
+				0 2px 8px rgba(255, 77, 79, 0.2),
+				0 1px 3px rgba(0, 0, 0, 0.1);
+			white-space: nowrap;
+			pointer-events: none;
+			backdrop-filter: blur(2px);
+			transition: all 0.2s ease;
 		}
 
-		.qcrm-reactflow-node__output-label {
-			margin-right: 8px;
+		// Add hover effect for the entire condition node
+		&:hover {
+			&::before, &::after {
+				transform: translateY(-50%) scale(1.05);
+				box-shadow: 
+					0 4px 12px rgba(82, 196, 26, 0.25),
+					0 2px 6px rgba(0, 0, 0, 0.15);
+			}
+
+			&::after {
+				box-shadow: 
+					0 4px 12px rgba(255, 77, 79, 0.25),
+					0 2px 6px rgba(0, 0, 0, 0.15);
+			}
 		}
 	}
 
@@ -434,12 +466,13 @@
 	}
 }
 
-// Handle Styles
+// Handle Styles - Force centered positioning
 .qcrm-reactflow-handle {
-	width: 12px;
-	height: 12px;
+	width: 12px !important;
+	height: 12px !important;
 	border: 2px solid #fff;
 	background: #666;
+	border-radius: 50%;
 	
 	&--source {
 		background: #1890ff;
@@ -451,19 +484,198 @@
 
 	&--yes {
 		background: #52c41a;
-		right: -6px;
-		top: 40%;
+		border-radius: 50% 50% 50% 0;
+		transform: rotate(-45deg) !important;
+		width: 12px !important;
+		height: 12px !important;
+		border: 2px solid #fff;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 	}
 
 	&--no {
 		background: #ff4d4f;
-		right: -6px;
-		top: 60%;
+		width: 12px !important;
+		height: 12px !important;
+		border-radius: 0;
+		clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+		border: 2px solid #fff;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 	}
 
-	&--continue {
-		background: #722ed1;
+
+}
+
+// Force all handles to be properly centered with maximum specificity
+.qcrm-reactflow-workflow .react-flow .react-flow__handle,
+.qcrm-reactflow-workflow .react-flow__handle,
+.react-flow .react-flow__handle,
+.react-flow__handle {
+	// Reset default positioning with extreme specificity
+	position: absolute !important;
+	
+	&.react-flow__handle-top,
+	&[data-handlepos="top"] {
+		top: -6px !important;
+		left: 50% !important;
+		right: auto !important;
+		bottom: auto !important;
+		transform: translateX(-50%) !important;
+		margin: 0 !important;
 	}
+	
+	&.react-flow__handle-bottom,
+	&[data-handlepos="bottom"] {
+		bottom: -6px !important;
+		left: 50% !important;
+		top: auto !important;
+		right: auto !important;
+		transform: translateX(-50%) !important;
+		margin: 0 !important;
+	}
+	
+	&.react-flow__handle-left,
+	&[data-handlepos="left"] {
+		left: -6px !important;
+		top: 50% !important;
+		right: auto !important;
+		bottom: auto !important;
+		transform: translateY(-50%) !important;
+		margin: 0 !important;
+	}
+	
+	&.react-flow__handle-right,
+	&[data-handlepos="right"] {
+		right: -6px !important;
+		top: 50% !important;
+		left: auto !important;
+		bottom: auto !important;
+		transform: translateY(-50%) !important;
+		margin: 0 !important;
+	}
+}
+
+// Alternative approach using attribute selectors for ReactFlow handles
+[class*="react-flow__handle"] {
+	&[data-handlepos="top"] {
+		top: -6px !important;
+		left: 50% !important;
+		transform: translateX(-50%) !important;
+	}
+	
+	&[data-handlepos="bottom"] {
+		bottom: -6px !important;
+		left: 50% !important;
+		transform: translateX(-50%) !important;
+	}
+	
+	&[data-handlepos="left"] {
+		left: -6px !important;
+		top: 50% !important;
+		transform: translateY(-50%) !important;
+	}
+	
+	&[data-handlepos="right"] {
+		right: -6px !important;
+		top: 50% !important;
+		transform: translateY(-50%) !important;
+	}
+}
+
+// Special positioning for condition node handles to maintain their shapes
+.qcrm-reactflow-workflow .qcrm-reactflow-node--condition .react-flow__handle {
+	&.react-flow__handle-left.qcrm-reactflow-handle--yes {
+		transform: translateY(-50%) rotate(-45deg) !important;
+		left: -6px !important;
+	}
+	
+	&.react-flow__handle-right.qcrm-reactflow-handle--no {
+		transform: translateY(-50%) !important;
+		right: -6px !important;
+	}
+	
+
+}
+
+// Ensure proper spacing between condition node labels and handles
+.qcrm-reactflow-node--condition {
+	// Fine-tune label positioning relative to handles
+	&::before {
+		// Yes label positioned relative to left handle
+		left: -42px; // Handle is at -6px, so label is 36px further left
+	}
+
+	&::after {
+		// No label positioned relative to right handle  
+		right: -35px; // Handle is at -6px, so label is 29px further right
+	}
+}
+
+// ReactFlow v12.8+ CSS Variables Override for Handle Positioning
+:root {
+	--xy-handle-size: 12px;
+}
+
+// Ultra high specificity override for ReactFlow v12.8+
+html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__handle,
+.qcrm-reactflow-workflow [data-id] .react-flow__handle,
+.react-flow .react-flow__handle {
+	// Reset all positioning
+	position: absolute !important;
+	inset: initial !important;
+	margin: 0 !important;
+	
+	// Handle dimensions
+	width: var(--xy-handle-size) !important;
+	height: var(--xy-handle-size) !important;
+	
+	// Top handles - perfectly centered horizontally
+	&[data-handlepos="top"] {
+		top: calc(var(--xy-handle-size) / -2) !important;
+		left: 50% !important;
+		right: auto !important;
+		bottom: auto !important;
+		transform: translateX(-50%) !important;
+	}
+	
+	// Bottom handles - perfectly centered horizontally
+	&[data-handlepos="bottom"] {
+		bottom: calc(var(--xy-handle-size) / -2) !important;
+		left: 50% !important;
+		top: auto !important;
+		right: auto !important;
+		transform: translateX(-50%) !important;
+	}
+	
+	// Left handles - perfectly centered vertically
+	&[data-handlepos="left"] {
+		left: calc(var(--xy-handle-size) / -2) !important;
+		top: 50% !important;
+		right: auto !important;
+		bottom: auto !important;
+		transform: translateY(-50%) !important;
+		
+		// Special case for condition yes handle
+		&.qcrm-reactflow-handle--yes {
+			transform: translateY(-50%) rotate(-45deg) !important;
+		}
+	}
+	
+	// Right handles - perfectly centered vertically  
+	&[data-handlepos="right"] {
+		right: calc(var(--xy-handle-size) / -2) !important;
+		top: 50% !important;
+		left: auto !important;
+		bottom: auto !important;
+		transform: translateY(-50%) !important;
+	}
+}
+
+// Alternative approach using ReactFlow's own CSS variables if available
+.qcrm-reactflow-workflow {
+	--xy-handle-top: 50%;
+	--xy-handle-bottom: 50%;
+	--xy-handle-left: 50%;
+	--xy-handle-right: 50%;
 }
 
 // Edge Styles
@@ -480,8 +692,32 @@
 
 	.react-flow__edge-text {
 		font-size: 12px;
-		font-weight: 500;
-		fill: #666;
+		font-weight: 600;
+		fill: #333;
+		text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
+		dominant-baseline: middle;
+		text-anchor: middle;
+	}
+
+	// Improved styling for Yes/No edge labels
+	&[data-label*="Yes"] .react-flow__edge-text,
+	&[data-label*="yes"] .react-flow__edge-text {
+		fill: #389e0d;
+		font-weight: 700;
+		text-shadow: 
+			0 1px 3px rgba(255, 255, 255, 0.9),
+			0 0 8px rgba(82, 196, 26, 0.3);
+		font-size: 13px;
+	}
+
+	&[data-label*="No"] .react-flow__edge-text,
+	&[data-label*="no"] .react-flow__edge-text {
+		fill: #cf1322;
+		font-weight: 700;
+		text-shadow: 
+			0 1px 3px rgba(255, 255, 255, 0.9),
+			0 0 8px rgba(255, 77, 79, 0.3);
+		font-size: 13px;
 	}
 }
 
@@ -532,6 +768,53 @@
 
 		&__subtitle {
 			font-size: 11px;
+		}
+
+		// Adjust Yes/No labels for smaller screens
+		&--condition {
+			&::before {
+				left: -38px;
+				font-size: 10px;
+				padding: 1px 4px;
+			}
+
+			&::after {
+				right: -30px;
+				font-size: 10px;
+				padding: 1px 4px;
+			}
+		}
+	}
+
+	// Smaller edge text on mobile
+	.react-flow__edge {
+		.react-flow__edge-text {
+			font-size: 11px;
+		}
+	}
+}
+
+// Extra small screens
+@media (max-width: 480px) {
+	.qcrm-reactflow-node {
+		&--condition {
+			&::before {
+				left: -35px;
+				font-size: 9px;
+				padding: 1px 3px;
+			}
+
+			&::after {
+				right: -27px;
+				font-size: 9px;
+				padding: 1px 3px;
+			}
+		}
+	}
+
+	.react-flow__edge {
+		.react-flow__edge-text {
+			font-size: 10px;
 		}
 	}
 } 

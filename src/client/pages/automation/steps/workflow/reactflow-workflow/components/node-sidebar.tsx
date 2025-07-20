@@ -28,7 +28,6 @@ import type {
 	Automation,
 } from '@quillcrm/client';
 import { getTrigger } from '@quillcrm/utils';
-import LayoutButton from './layout-button';
 
 const { Title, Text } = Typography;
 
@@ -207,33 +206,6 @@ const NodeSidebar: React.FC<NodeSidebarProps> = ({
 					>
 						{__('Quick Layout', 'quillcrm')}
 					</Title>
-					<div
-						style={{
-							display: 'flex',
-							gap: '4px',
-							flexWrap: 'wrap',
-						}}
-					>
-						<LayoutButton
-							algorithm="dagre"
-							direction="TB"
-							size="small"
-							iconOnly
-						/>
-						<LayoutButton
-							algorithm="dagre"
-							direction="LR"
-							size="small"
-							iconOnly
-						/>
-						<LayoutButton
-							algorithm="elk"
-							direction="TB"
-							size="small"
-							iconOnly
-							type="dashed"
-						/>
-					</div>
 				</div>
 			)}
 

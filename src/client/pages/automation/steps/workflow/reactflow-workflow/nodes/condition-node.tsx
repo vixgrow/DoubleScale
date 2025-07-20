@@ -168,42 +168,23 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 						{__('Condition', 'quillcrm')}
 					</div>
 					<div className="qcrm-reactflow-node__subtitle">
-						{__('If/Then', 'quillcrm')}
+						{step.settings?.condition_name ||
+							__('If/Then Logic', 'quillcrm')}
 					</div>
 				</div>
 
-				{/* Multiple outputs for Yes/No branches */}
-				<div className="qcrm-reactflow-node__outputs">
-					<div className="qcrm-reactflow-node__output qcrm-reactflow-node__output--yes">
-						<span className="qcrm-reactflow-node__output-label">
-							{__('Yes', 'quillcrm')}
-						</span>
-						<Handle
-							type="source"
-							position={Position.Left}
-							id="yes"
-							className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--yes"
-						/>
-					</div>
-					<div className="qcrm-reactflow-node__output qcrm-reactflow-node__output--no">
-						<span className="qcrm-reactflow-node__output-label">
-							{__('No', 'quillcrm')}
-						</span>
-						<Handle
-							type="source"
-							position={Position.Right}
-							id="no"
-							className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--no"
-						/>
-					</div>
-				</div>
-
-				{/* Bottom handle for sequential flow */}
+				{/* Only yes and no handles - no continue handle */}
 				<Handle
 					type="source"
-					position={Position.Bottom}
-					id="continue"
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--continue"
+					position={Position.Left}
+					id="yes"
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--yes"
+				/>
+				<Handle
+					type="source"
+					position={Position.Right}
+					id="no"
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--no"
 				/>
 			</div>
 		</NodeContextMenu>

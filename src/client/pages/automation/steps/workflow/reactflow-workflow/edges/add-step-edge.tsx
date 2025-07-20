@@ -23,6 +23,7 @@ import {
 	getBezierPath,
 	EdgeLabelRenderer,
 	BaseEdge,
+	Position,
 } from '@xyflow/react';
 
 /**
@@ -34,7 +35,7 @@ import { useAutomationContext } from '../../../../state/context';
 interface AddStepEdgeData {
 	sourceStep?: AutomationStep;
 	targetStep?: AutomationStep;
-	condition?: string;
+	condition?: 'yes' | 'no' | string;
 }
 
 const updateStepOrderRecursive = (
@@ -99,11 +100,30 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		return null;
 	}
 
-	// Don't show plus button if target is an AddStepNode (these have their own + button)
-	const shouldShowPlusButton = !target?.startsWith('add-step');
+	// Don't show add-step-edge functionality if:
+	// 1. Target is an AddStepNode (these have their own + button)
+	// 2. Source step is a condition node (they only have yes/no branches)
+	const shouldShowAddStepEdge =
+		!target?.startsWith('add-step') &&
+		!(sourceStep && sourceStep.type === 'condition');
 
-	if (!shouldShowPlusButton) {
-		// Just render a regular edge without the plus button
+	// For condition nodes, completely remove add-step functionality
+	if (sourceStep && sourceStep.type === 'condition') {
+		// Determine correct positions for condition edges
+		let correctSourcePosition = sourcePosition || Position.Bottom;
+		let correctTargetPosition = targetPosition || Position.Top;
+
+		// For condition nodes, use the appropriate handle position
+		const edgeData = data as AddStepEdgeData;
+		if (edgeData && edgeData.condition) {
+			if (edgeData.condition === 'yes') {
+				correctSourcePosition = Position.Left;
+			} else if (edgeData.condition === 'no') {
+				correctSourcePosition = Position.Right;
+			}
+		}
+
+		// Return a simple edge without any add-step functionality
 		return (
 			<BaseEdge
 				id={id}
@@ -111,10 +131,31 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 					getBezierPath({
 						sourceX,
 						sourceY,
-						sourcePosition,
+						sourcePosition: correctSourcePosition,
 						targetX,
 						targetY,
-						targetPosition,
+						targetPosition: correctTargetPosition,
+					})[0]
+				}
+				style={style}
+				markerEnd={markerEnd}
+			/>
+		);
+	}
+
+	if (!shouldShowAddStepEdge) {
+		// For other cases where we don't show the plus button
+		return (
+			<BaseEdge
+				id={id}
+				path={
+					getBezierPath({
+						sourceX,
+						sourceY,
+						sourcePosition: sourcePosition || Position.Bottom,
+						targetX,
+						targetY,
+						targetPosition: targetPosition || Position.Top,
 					})[0]
 				}
 				style={style}
@@ -268,13 +309,35 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		}
 	};
 
+	// Determine the correct source and target positions based on edge data
+	const getCorrectSourcePosition = (): Position => {
+		const edgeData = data as AddStepEdgeData;
+		if (
+			edgeData &&
+			edgeData.sourceStep &&
+			edgeData.sourceStep.type === 'condition'
+		) {
+			if (edgeData.condition === 'yes') {
+				return Position.Left;
+			} else if (edgeData.condition === 'no') {
+				return Position.Right;
+			}
+		}
+		return sourcePosition || Position.Bottom;
+	};
+
+	const getCorrectTargetPosition = (): Position => {
+		// For target nodes, usually top unless specified otherwise
+		return targetPosition || Position.Top;
+	};
+
 	const [edgePath, labelX, labelY] = getBezierPath({
 		sourceX,
 		sourceY,
-		sourcePosition,
+		sourcePosition: getCorrectSourcePosition(),
 		targetX,
 		targetY,
-		targetPosition,
+		targetPosition: getCorrectTargetPosition(),
 	});
 
 	const handleAddStep = (e: React.MouseEvent) => {

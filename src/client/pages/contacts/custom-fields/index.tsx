@@ -36,6 +36,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			groups,
 			notice,
 			closeNotice,
+			showNotice,
 			fetchGroups,
 			saveField,
 			deleteField,
@@ -70,7 +71,10 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			openCreateGroupModal: () => setAddGroupVisible(true),
 			openCreateFieldModal: () => {
 				if (groups.length === 0) {
-					// You might want to show a notice here too instead of using createNotice
+					showNotice({
+						type: 'error',
+						message: __('Please create a group first before adding fields', 'quillcrm'),
+					});
 					return;
 				}
 				setSelectedField(null);
@@ -159,16 +163,16 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			);
 		}
 
-		if (groups.length === 0) {
-			return (
-				<div className="custom-fields-empty">
-					<p>{__('No custom fields groups found', 'quillcrm')}</p>
-					<Button onClick={() => setAddGroupVisible(true)}>
-						{__('Create First Group', 'quillcrm')}
-					</Button>
-				</div>
-			);
-		}
+		// if (groups.length === 0) {
+		// 	return (
+		// 		<div className="custom-fields-empty">
+		// 			<p>{__('No custom fields groups found', 'quillcrm')}</p>
+		// 			<Button onClick={() => setAddGroupVisible(true)}>
+		// 				{__('Create First Group', 'quillcrm')}
+		// 			</Button>
+		// 		</div>
+		// 	);
+		// }
 
 		return (
 			<div className="custom-fields mt-5">

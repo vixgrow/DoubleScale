@@ -23,6 +23,7 @@ import {
 	Field,
 	ImportProgressIcon,
 	InstallIcon,
+	LoadingSpinner,
 } from '@quillcrm/components';
 import { useEffect } from 'react';
 import ConfigAPI from '@quillcrm/config';
@@ -55,19 +56,31 @@ import {
 	CircleX,
 	ArrowUpLeft,
 } from 'lucide-react';
-import LoadingSpinner from './loading-spin';
+//@ts-ignore
 import csvIcon from '../../../../assets/images/csv/csv.png';
+//@ts-ignore
 import wpusersIcon from '../../../../assets/images/wordpress/wordpress-icon.png';
+//@ts-ignore
 import wcCustomersIcon from '../../../../assets/images/woocoomerce/woo-icon.png';
+//@ts-ignore
 import funnelkitIcon from '../../../../assets/images/funnelkit/funnelkit-icon.png';
+//@ts-ignore
 import fluentcrmIcon from '../../../../assets/images/fluent-crm/fluent-icon.png';
+//@ts-ignore
 import mailerliteIcon from '../../../../assets/images/mailer-lite/mailer-icon.png';
+//@ts-ignore
 import activecampaignIcon from '../../../../assets/images/active-campaign/active-icon.png';
+//@ts-ignore
 import wpusersLogo from '../../../../assets/images/wordpress/wordpress.png';
+//@ts-ignore
 import wcCustomersLogo from '../../../../assets/images/woocoomerce/woocommerce.png';
+//@ts-ignore
 import funnelkitLogo from '../../../../assets/images/funnelkit/funnelkit.png';
+//@ts-ignore
 import fluentcrmLogo from '../../../../assets/images/fluent-crm/fluentcrm.png';
+//@ts-ignore
 import mailerliteLogo from '../../../../assets/images/mailer-lite/mailer.png';
+//@ts-ignore
 import activecampaignLogo from '../../../../assets/images/active-campaign/activecampaign.png';
 
 interface Props {
@@ -720,11 +733,11 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 								value={
 									count > 0
 										? parseInt(
-											(
-												(offset / count) *
-												100
-											).toFixed(2)
-										)
+												(
+													(offset / count) *
+													100
+												).toFixed(2)
+											)
 										: 0
 								}
 								className="w-full"
@@ -990,35 +1003,35 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 										{(() => {
 											const filteredFields = sourceData
 												? Object.entries(
-													sourceData
-												).filter(([key, field]) => {
-													if (
-														source !== 'csv' &&
-														(field.type ===
-															'file' ||
-															field.type ===
-															'contact_mapped_fields')
-													) {
-														return false;
-													}
+														sourceData
+													).filter(([key, field]) => {
+														if (
+															source !== 'csv' &&
+															(field.type ===
+																'file' ||
+																field.type ===
+																	'contact_mapped_fields')
+														) {
+															return false;
+														}
 
-													if (
-														[
-															'wpusers',
-															'wc_customers',
-														].includes(
-															source
-														) &&
-														(field.type ===
-															'lists_mapping' ||
-															field.type ===
-															'tags_mapping')
-													) {
-														return false;
-													}
+														if (
+															[
+																'wpusers',
+																'wc_customers',
+															].includes(
+																source
+															) &&
+															(field.type ===
+																'lists_mapping' ||
+																field.type ===
+																	'tags_mapping')
+														) {
+															return false;
+														}
 
-													return true;
-												})
+														return true;
+													})
 												: [];
 
 											if (filteredFields.length === 0)
@@ -1101,22 +1114,22 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 														'wpusers',
 														'wc_customers',
 													].includes(source) && (
-															<Field
-																label={__(
-																	'Status',
-																	'quillcrm'
-																)}
-																type="select"
-																value={newStatus}
-																onChange={
-																	setNewStatus
-																}
-																options={
-																	statusOptions
-																}
-																required={false}
-															/>
-														)}
+														<Field
+															label={__(
+																'Status',
+																'quillcrm'
+															)}
+															type="select"
+															value={newStatus}
+															onChange={
+																setNewStatus
+															}
+															options={
+																statusOptions
+															}
+															required={false}
+														/>
+													)}
 
 													<div className="flex gap-3 items-center">
 														<Field
@@ -1212,7 +1225,7 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 											sourceData,
 											(field, key) =>
 												field.type ===
-												'contact_mapped_fields' &&
+													'contact_mapped_fields' &&
 												getFieldContent(field, key)
 										)}
 									</div>
@@ -1256,14 +1269,14 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 									'wpusers',
 									'wc_customers_customers',
 								].includes(source) && (
-										<Field
-											label={__('Status', 'quillcrm')}
-											type="select"
-											value={newStatus}
-											onChange={setNewStatus}
-											options={statusOptions}
-										/>
-									)}
+									<Field
+										label={__('Status', 'quillcrm')}
+										type="select"
+										value={newStatus}
+										onChange={setNewStatus}
+										options={statusOptions}
+									/>
+								)}
 
 								<div className="flex gap-3 items-center">
 									<Field
@@ -1357,12 +1370,13 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 												setSource(s.value)
 											}
 											className={`relative p-4 cursor-pointer transition-all shadow-none border-2 duration-200 
-          ${isSelected
-													? 'border-[#274C77]'
-													: s.disabled
-														? 'border-[#E2EAF380] bg-gray-50 cursor-not-allowed opacity-50'
-														: 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-												}`}
+          ${
+				isSelected
+					? 'border-[#274C77]'
+					: s.disabled
+						? 'border-[#E2EAF380] bg-gray-50 cursor-not-allowed opacity-50'
+						: 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+			}`}
 										>
 											<div className="flex items-center space-x-4">
 												<div>{s.icon}</div>

@@ -24,19 +24,14 @@ import { getFilterBySlug } from '@quillcrm/utils';
 import ConfigAPI from '@quillcrm/config';
 import type { FiltersGroup } from '@quillcrm/config';
 import FilterItem from '../filter';
-import {
-	PlusIcon,
-} from '@quillcrm/components';
+import { PlusIcon } from '@quillcrm/components';
 
 interface FiltersProps {
 	filters: FilterType[];
 	onChange: (filters: FilterType[]) => void;
 }
 
-const Filters: React.FC<FiltersProps> = ({
-	filters,
-	onChange,
-}) => {
+const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 	const [selectedGroup, setSelectedGroup] = useState<string>('');
 	const [selectedFilter, setSelectedFilter] = useState<string>('');
 	const filtersGroups = ConfigAPI.getFiltersGroups();
@@ -73,12 +68,14 @@ const Filters: React.FC<FiltersProps> = ({
 
 	return (
 		<div
-			className="space-y-3 mt-4"
 			style={{
-				borderWidth: '1px',
-				borderStyle: 'solid',
-				borderImage: 'linear-gradient(to right, #1E3A8A, #3B82F6) 1',
-				borderRadius: '0.5rem',
+				marginTop: '5px',
+				border: '1px solid transparent',
+				borderRadius: '10px',
+				backgroundImage:
+					'linear-gradient(white, white), linear-gradient(90deg, #1e3a8a 61.06%, #3b82f6 100%)',
+				backgroundOrigin: 'border-box',
+				backgroundClip: 'padding-box, border-box',
 			}}
 		>
 			{/* Header with Add Filter */}
@@ -143,10 +140,10 @@ const Filters: React.FC<FiltersProps> = ({
 			{/* Divider */}
 			<div
 				style={{
-					borderTopWidth: '2px',
-					borderTopStyle: 'dashed',
-					borderImage:
-						'linear-gradient(to right, #1E3A8A, #3B82F6) 1',
+					height: '1px',
+					width: '100%',
+					marginTop: '20px',
+					backgroundImage: 'repeating-linear-gradient(to right, #1E3A8A 0, #1E3A8A 10px, transparent 5px, transparent 12px)',
 				}}
 			></div>
 

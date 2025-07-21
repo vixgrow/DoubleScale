@@ -292,6 +292,7 @@ export const useCustomFields = () => {
 		...state,
 		notice,
 		closeNotice,
+		showNotice,
 		moveField,
 		fetchGroups,
 		saveField,

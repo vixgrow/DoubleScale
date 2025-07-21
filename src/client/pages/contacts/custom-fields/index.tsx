@@ -11,7 +11,7 @@ import { Skeleton } from 'antd';
 /**
  * internal dependencies
  */
-import { useCustomFields } from '@quillcrm/hooks/use-customFields';
+import { useCustomFields } from './use-customFields';
 import {
 	CustomFieldsRef,
 	CustomFieldsProps,

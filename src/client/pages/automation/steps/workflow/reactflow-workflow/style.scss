@@ -349,75 +349,159 @@
 	}
 
 	&--condition {
-		border-color: #faad14;
-		min-width: 180px;
+		border: 2px solid transparent;
+		background: linear-gradient(white, white) padding-box,
+					linear-gradient(135deg, #ff9f40, #ffd54f, #ffcc02) border-box;
+		min-width: 220px;
+		max-width: 280px;
 		position: relative;
-		
-		.qcrm-reactflow-node__icon {
-			background: rgba(250, 173, 20, 0.1);
-			color: #faad14;
-		}
+		border-radius: 16px;
+		overflow: visible;
+		box-shadow: 
+			0 4px 20px rgba(255, 159, 64, 0.15),
+			0 2px 8px rgba(0, 0, 0, 0.08);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-		// Add labels for the handles - improved positioning
-		&::before {
-			content: "Yes";
-			position: absolute;
-			left: -42px;
-			top: 50%;
-			transform: translateY(-50%);
-			font-size: 11px;
-			font-weight: 700;
-			color: #389e0d;
-			background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(246, 255, 237, 0.95));
-			padding: 3px 7px;
-			border-radius: 6px;
-			border: 1.5px solid #52c41a;
-			z-index: 1000;
-			box-shadow: 
-				0 2px 8px rgba(82, 196, 26, 0.2),
-				0 1px 3px rgba(0, 0, 0, 0.1);
-			white-space: nowrap;
-			pointer-events: none;
-			backdrop-filter: blur(2px);
-			transition: all 0.2s ease;
-		}
-
-		&::after {
-			content: "No";
-			position: absolute;
-			right: -35px;
-			top: 50%;
-			transform: translateY(-50%);
-			font-size: 11px;
-			font-weight: 700;
-			color: #cf1322;
-			background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 241, 240, 0.95));
-			padding: 3px 7px;
-			border-radius: 6px;
-			border: 1.5px solid #ff4d4f;
-			z-index: 1000;
-			box-shadow: 
-				0 2px 8px rgba(255, 77, 79, 0.2),
-				0 1px 3px rgba(0, 0, 0, 0.1);
-			white-space: nowrap;
-			pointer-events: none;
-			backdrop-filter: blur(2px);
-			transition: all 0.2s ease;
-		}
-
-		// Add hover effect for the entire condition node
 		&:hover {
-			&::before, &::after {
-				transform: translateY(-50%) scale(1.05);
-				box-shadow: 
-					0 4px 12px rgba(82, 196, 26, 0.25),
-					0 2px 6px rgba(0, 0, 0, 0.15);
+			transform: translateY(-2px);
+			box-shadow: 
+				0 8px 30px rgba(255, 159, 64, 0.25),
+				0 4px 12px rgba(0, 0, 0, 0.12);
+		}
+
+		// Enhanced diamond icon container
+		.qcrm-reactflow-condition__icon-container {
+			display: flex;
+			justify-content: center;
+			margin-bottom: 8px;
+		}
+
+		.qcrm-reactflow-condition__diamond {
+			width: 56px;
+			height: 56px;
+			background: linear-gradient(135deg, #ff9f40, #ffc107);
+			border-radius: 12px;
+			transform: rotate(45deg);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			box-shadow: 
+				0 4px 16px rgba(255, 159, 64, 0.3),
+				inset 0 1px 2px rgba(255, 255, 255, 0.3);
+			position: relative;
+			margin: 0 auto;
+
+			&::before {
+				content: '';
+				position: absolute;
+				inset: 2px;
+				background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+				border-radius: 8px;
 			}
 
-			&::after {
+			.qcrm-reactflow-condition__icon {
+				transform: rotate(-45deg);
+				font-size: 18px;
+				color: white;
+				text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+				z-index: 1;
+			}
+		}
+
+		// Enhanced content styling
+		.qcrm-reactflow-condition__content {
+			text-align: center;
+			padding: 0 16px 16px;
+		}
+
+		.qcrm-reactflow-condition__description {
+			margin-top: 8px;
+		}
+
+		.qcrm-reactflow-condition__name {
+			font-size: 13px;
+			font-weight: 600;
+			color: #262626;
+			background: linear-gradient(135deg, #ff9f40, #ffc107);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			line-height: 1.4;
+		}
+
+		.qcrm-reactflow-condition__placeholder {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 6px;
+			font-size: 12px;
+			color: #8c8c8c;
+			font-style: italic;
+
+			.qcrm-reactflow-condition__question-icon {
+				color: #ff9f40;
+				font-size: 14px;
+			}
+		}
+
+
+
+		// Enhanced action buttons
+		.qcrm-reactflow-condition__action-btn {
+			border-radius: 8px;
+			transition: all 0.2s ease;
+			border: 1px solid transparent;
+
+			&:hover {
+				background: rgba(255, 159, 64, 0.1);
+				border-color: #ff9f40;
+				transform: scale(1.05);
+			}
+
+			&--danger:hover {
+				background: rgba(255, 77, 79, 0.1);
+				border-color: #ff4d4f;
+			}
+		}
+
+		// Enhanced handles
+		.qcrm-reactflow-condition__handle {
+			width: 14px;
+			height: 14px;
+			border: 3px solid white;
+			border-radius: 50%;
+			transition: all 0.2s ease;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+			&.qcrm-reactflow-handle--yes {
+				background: linear-gradient(135deg, #52c41a, #73d13d);
 				box-shadow: 
-					0 4px 12px rgba(255, 77, 79, 0.25),
-					0 2px 6px rgba(0, 0, 0, 0.15);
+					0 0 0 2px rgba(82, 196, 26, 0.2),
+					0 2px 8px rgba(82, 196, 26, 0.3);
+			}
+
+			&.qcrm-reactflow-handle--no {
+				background: linear-gradient(135deg, #ff4d4f, #ff7875);
+				box-shadow: 
+					0 0 0 2px rgba(255, 77, 79, 0.2),
+					0 2px 8px rgba(255, 77, 79, 0.3);
+			}
+
+			&:hover {
+				transform: scale(1.2);
+				box-shadow: 
+					0 0 0 4px rgba(255, 255, 255, 0.8),
+					0 4px 12px rgba(0, 0, 0, 0.2);
+			}
+		}
+
+		// Enhanced hover effect for the entire node
+		&:hover {
+			.qcrm-reactflow-condition__diamond {
+				transform: rotate(45deg) scale(1.05);
+				box-shadow: 
+					0 6px 20px rgba(255, 159, 64, 0.4),
+					inset 0 1px 2px rgba(255, 255, 255, 0.4);
 			}
 		}
 	}
@@ -683,11 +767,17 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 	.react-flow__edge-path {
 		stroke: #b1b1b7;
 		stroke-width: 2;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	&.selected .react-flow__edge-path {
 		stroke: #1890ff;
 		stroke-width: 3;
+	}
+
+	&:hover .react-flow__edge-path {
+		stroke-width: 3;
+		filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.2));
 	}
 
 	.react-flow__edge-text {
@@ -697,27 +787,151 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 		text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
 		dominant-baseline: middle;
 		text-anchor: middle;
+		transition: all 0.2s ease;
 	}
 
-	// Improved styling for Yes/No edge labels
-	&[data-label*="Yes"] .react-flow__edge-text,
-	&[data-label*="yes"] .react-flow__edge-text {
-		fill: #389e0d;
-		font-weight: 700;
-		text-shadow: 
-			0 1px 3px rgba(255, 255, 255, 0.9),
-			0 0 8px rgba(82, 196, 26, 0.3);
-		font-size: 13px;
+	// Enhanced styling for Yes branch edges
+	&[data-label*="Yes"] {
+		.react-flow__edge-path {
+			stroke: #52c41a;
+			stroke-width: 3;
+			stroke-dasharray: none;
+			filter: drop-shadow(0 2px 4px rgba(82, 196, 26, 0.3));
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.react-flow__edge-text {
+			fill: #fff;
+			font-weight: 900;
+			font-size: 13px;
+			text-shadow: 
+				0 1px 2px rgba(0, 0, 0, 0.5),
+				0 0 8px rgba(82, 196, 26, 0.6);
+		}
+
+		&:hover .react-flow__edge-path {
+			stroke: #73d13d;
+			stroke-width: 4;
+			filter: drop-shadow(0 4px 8px rgba(82, 196, 26, 0.4));
+		}
+
+		&:hover .react-flow__edge-text {
+			transform: scale(1.1);
+			text-shadow: 
+				0 2px 4px rgba(0, 0, 0, 0.6),
+				0 0 12px rgba(82, 196, 26, 0.8);
+		}
 	}
 
-	&[data-label*="No"] .react-flow__edge-text,
-	&[data-label*="no"] .react-flow__edge-text {
-		fill: #cf1322;
-		font-weight: 700;
-		text-shadow: 
-			0 1px 3px rgba(255, 255, 255, 0.9),
-			0 0 8px rgba(255, 77, 79, 0.3);
-		font-size: 13px;
+	// Enhanced styling for No branch edges
+	&[data-label*="No"] {
+		.react-flow__edge-path {
+			stroke: #ff4d4f;
+			stroke-width: 3;
+			stroke-dasharray: none;
+			filter: drop-shadow(0 2px 4px rgba(255, 77, 79, 0.3));
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+
+		.react-flow__edge-text {
+			fill: #fff;
+			font-weight: 900;
+			font-size: 13px;
+			text-shadow: 
+				0 1px 2px rgba(0, 0, 0, 0.5),
+				0 0 8px rgba(255, 77, 79, 0.6);
+		}
+
+		&:hover .react-flow__edge-path {
+			stroke: #ff7875;
+			stroke-width: 4;
+			filter: drop-shadow(0 4px 8px rgba(255, 77, 79, 0.4));
+		}
+
+		&:hover .react-flow__edge-text {
+			transform: scale(1.1);
+			text-shadow: 
+				0 2px 4px rgba(0, 0, 0, 0.6),
+				0 0 12px rgba(255, 77, 79, 0.8);
+		}
+	}
+
+	// Special styling for condition edges (those coming from condition nodes)
+	&[id*="condition"] {
+		.react-flow__edge-path {
+			stroke-linecap: round;
+			stroke-linejoin: round;
+		}
+	}
+
+	// Animated edge effects for condition branches
+	&[data-label*="Yes"], &[data-label*="No"] {
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			pointer-events: none;
+			animation: conditionEdgePulse 2s ease-in-out infinite;
+		}
+	}
+}
+
+// Keyframe animation for condition edge pulse effect
+@keyframes conditionEdgePulse {
+	0%, 100% {
+		opacity: 0.8;
+	}
+	50% {
+		opacity: 1;
+	}
+}
+
+// Enhanced styling for custom condition edges
+.qcrm-condition-edge {
+	&--yes {
+		.react-flow__edge-path {
+			stroke: #52c41a;
+			stroke-width: 3;
+			filter: drop-shadow(0 2px 6px rgba(82, 196, 26, 0.4));
+		}
+
+		&:hover .react-flow__edge-path {
+			stroke: #73d13d;
+			stroke-width: 4;
+			filter: drop-shadow(0 4px 10px rgba(82, 196, 26, 0.5));
+		}
+	}
+
+	&--no {
+		.react-flow__edge-path {
+			stroke: #ff4d4f;
+			stroke-width: 3;
+			filter: drop-shadow(0 2px 6px rgba(255, 77, 79, 0.4));
+		}
+
+		&:hover .react-flow__edge-path {
+			stroke: #ff7875;
+			stroke-width: 4;
+			filter: drop-shadow(0 4px 10px rgba(255, 77, 79, 0.5));
+		}
+	}
+}
+
+// Enhanced condition edge labels
+.qcrm-condition-edge-label {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+	&--yes:hover {
+		transform: translate(-50%, -50%) scale(1.1);
+		box-shadow: 0 4px 12px rgba(82, 196, 26, 0.6);
+	}
+
+	&--no:hover {
+		transform: translate(-50%, -50%) scale(1.1);
+		box-shadow: 0 4px 12px rgba(255, 77, 79, 0.6);
 	}
 }
 
@@ -770,18 +984,31 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 			font-size: 11px;
 		}
 
-		// Adjust Yes/No labels for smaller screens
+		// Adjust condition node for smaller screens
 		&--condition {
-			&::before {
-				left: -38px;
-				font-size: 10px;
-				padding: 1px 4px;
+			min-width: 180px;
+			max-width: 220px;
+
+			.qcrm-reactflow-condition__diamond {
+				width: 44px;
+				height: 44px;
+
+				.qcrm-reactflow-condition__icon {
+					font-size: 14px;
+				}
 			}
 
-			&::after {
-				right: -30px;
+			.qcrm-reactflow-condition__branch-label {
 				font-size: 10px;
-				padding: 1px 4px;
+				padding: 4px 8px;
+
+				&--yes {
+					left: -45px;
+				}
+
+				&--no {
+					right: -40px;
+				}
 			}
 		}
 	}
@@ -798,16 +1025,29 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 @media (max-width: 480px) {
 	.qcrm-reactflow-node {
 		&--condition {
-			&::before {
-				left: -35px;
-				font-size: 9px;
-				padding: 1px 3px;
+			min-width: 160px;
+			max-width: 200px;
+
+			.qcrm-reactflow-condition__diamond {
+				width: 36px;
+				height: 36px;
+
+				.qcrm-reactflow-condition__icon {
+					font-size: 12px;
+				}
 			}
 
-			&::after {
-				right: -27px;
+			.qcrm-reactflow-condition__branch-label {
 				font-size: 9px;
-				padding: 1px 3px;
+				padding: 3px 6px;
+
+				&--yes {
+					left: -40px;
+				}
+
+				&--no {
+					right: -35px;
+				}
 			}
 		}
 	}

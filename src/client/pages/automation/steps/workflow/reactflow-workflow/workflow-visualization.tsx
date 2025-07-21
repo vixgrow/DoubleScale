@@ -27,7 +27,7 @@ import {
 	MiniMap,
 	EdgeTypes,
 } from '@xyflow/react';
-import { debounce } from 'lodash';
+
 import '@xyflow/react/dist/style.css';
 
 /**
@@ -47,6 +47,7 @@ import GoalNode from './nodes/goal-node';
 import EndNode from './nodes/end-node';
 import AddStepNode from './nodes/add-step-node';
 import AddStepEdge from './edges/add-step-edge';
+import ConditionEdge from './edges/condition-edge';
 import { useAutoLayout } from './auto-layout';
 
 // Register custom node types
@@ -62,6 +63,7 @@ const nodeTypes = {
 // Register custom edge types
 const edgeTypes: EdgeTypes = {
 	addStepEdge: AddStepEdge,
+	conditionEdge: ConditionEdge,
 };
 
 interface WorkflowVisualizationProps {
@@ -80,13 +82,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	onTriggerClick,
 }) => {
 	const { updateAutomation } = useAutomationContext();
-	const isInitialLoadRef = useRef(true);
-	const isDraggingRef = useRef(false);
+	// const isInitialLoadRef = useRef(true);
 	// Track previous node count to detect additions/deletions
-	const prevNodeCountRef = useRef(0);
-	const shouldTriggerLayoutRef = useRef(false);
+	// const prevNodeCountRef = useRef(0);
 	// Create nodes and edges from steps with proper hierarchical handling
-	const { nodes, edges } = useMemo(() => {
+
+	// Set up ReactFlow state - initialize with computed values
+	const [nodesState, setNodes, onNodesChange] = useNodesState<Node>([]);
+	const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+
+	useEffect(() => {
 		const initialNodes: Node[] = [];
 		const initialEdges: Edge[] = [];
 
@@ -130,99 +135,18 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				},
 			});
 
-			return { nodes: initialNodes, edges: initialEdges };
+			setNodes(initialNodes);
+			setEdges(initialEdges);
+			return;
 		}
 
-		// Helper function to calculate positions with fallback to saved positions
-		const calculatePosition = (
+		// Helper function to get saved position or default fallback
+		const getNodePosition = (
 			nodeId: string,
-			index: number,
-			level: number = 0,
-			offset: number = 0,
-			condition?: string
+			fallbackX = 250,
+			fallbackY = 200
 		) => {
-			// Check if we have a saved position first
-			if (savedPositions[nodeId]) {
-				return savedPositions[nodeId];
-			}
-
-			// Fallback to calculated position
-			const baseX = 250; // Center position
-			const baseY = 200;
-			const verticalSpacing = 180;
-			const horizontalSpacing = 300;
-
-			// Calculate horizontal offset based on condition
-			let horizontalOffset = 0;
-			if (condition === 'yes') {
-				// Position yes condition nodes to the left
-				horizontalOffset = -horizontalSpacing;
-			} else if (condition === 'no') {
-				// Position no condition nodes to the right
-				horizontalOffset = horizontalSpacing;
-			}
-			// Normal nodes stay in center (horizontalOffset = 0)
-
-			return {
-				x:
-					baseX +
-					level * horizontalSpacing +
-					offset +
-					horizontalOffset,
-				y: baseY + index * verticalSpacing,
-			};
-		};
-
-		// Helper function to find position for condition branch add-step nodes
-		const findConditionBranchPosition = (
-			branchSteps: AutomationStep[],
-			parentStep: AutomationStep,
-			condition: 'yes' | 'no',
-			level: number
-		) => {
-			const parentPos =
-				savedPositions[parentStep.id.toString()] ||
-				calculatePosition(parentStep.id.toString(), 0, level - 1);
-
-			if (branchSteps.length === 0) {
-				// No children in this branch - position based on condition
-				const horizontalSpacing = 300;
-				const verticalOffset = condition === 'yes' ? -40 : 40; // Offset yes above, no below
-				const horizontalOffset =
-					condition === 'yes'
-						? -horizontalSpacing
-						: horizontalSpacing;
-
-				return {
-					x: parentPos.x + horizontalOffset,
-					y: parentPos.y + verticalOffset,
-				};
-			}
-
-			// Find the bottom-most child position in this branch
-			let bottomMostY = 0;
-			let bottomMostX = parentPos.x + (condition === 'yes' ? -300 : 300); // Left for yes, right for no
-
-			branchSteps.forEach((step, index) => {
-				const stepPos =
-					savedPositions[step.id.toString()] ||
-					calculatePosition(
-						step.id.toString(),
-						index,
-						level,
-						0,
-						condition
-					);
-				if (stepPos.y > bottomMostY) {
-					bottomMostY = stepPos.y;
-					bottomMostX = stepPos.x;
-				}
-			});
-
-			return {
-				x: bottomMostX,
-				y: bottomMostY + 180, // Position below the bottom-most child
-			};
+			return savedPositions[nodeId] || { x: fallbackX, y: fallbackY };
 		};
 
 		// Helper function to recursively process steps and their children
@@ -247,13 +171,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			let currentIndex = startIndex;
 
 			currentLevelSteps.forEach((step, stepIndex) => {
-				const position = calculatePosition(
-					step.id.toString(),
-					currentIndex,
-					level,
-					0,
-					condition || undefined
-				);
+				const position = getNodePosition(step.id.toString());
 
 				// Add step node
 				initialNodes.push({
@@ -290,17 +208,18 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						condition === 'yes'
 							? __('Yes', 'quillcrm')
 							: __('No', 'quillcrm');
-					const parentStep = stepList.find((s) => s.id === parentId);
+
 					initialEdges.push({
 						id: `${parentId}-${condition}-to-${step.id}`,
 						source: parentId.toString(),
 						target: step.id.toString(),
 						sourceHandle: condition,
-						type: 'straight', // Use straight edge for condition branches
+						type: 'conditionEdge', // Use custom condition edge for branches
 						label,
-						style: {
-							stroke: condition === 'yes' ? '#52c41a' : '#ff4d4f',
-							strokeWidth: 2,
+						data: {
+							condition,
+							sourceStep: stepList.find((s) => s.id === parentId),
+							targetStep: step,
 						},
 						markerEnd: {
 							type: MarkerType.ArrowClosed,
@@ -365,24 +284,19 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						)
 						.sort((a, b) => a.order - b.order);
 
-					// Only add step node for yes branch if no children OR last child is end_automation
+					// Always add step node for yes branch unless last child is end_automation or condition
 					const lastYesChild =
 						yesChildren.length > 0
 							? yesChildren[yesChildren.length - 1]
 							: null;
 					const shouldAddYesStep =
-						!lastYesChild || lastYesChild.type === 'end_automation';
+						!lastYesChild ||
+						(lastYesChild.type !== 'end_automation' &&
+							lastYesChild.type !== 'condition');
 
 					if (shouldAddYesStep) {
 						const yesAddId = `add-step-${step.id}-yes`;
-						const yesAddPosition =
-							savedPositions[yesAddId] ||
-							findConditionBranchPosition(
-								yesChildren,
-								step,
-								'yes',
-								level + 1
-							);
+						const yesAddPosition = getNodePosition(yesAddId);
 
 						initialNodes.push({
 							id: yesAddId,
@@ -409,14 +323,20 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							source: sourceId,
 							target: `add-step-${step.id}-yes`,
 							sourceHandle,
-							type: 'straight', // Use straight edge for condition to add-step connections
+							type: !lastYesChild
+								? 'conditionEdge'
+								: 'addStepEdge', // Use condition edge for direct condition connections
 							label,
-							style: !lastYesChild
+							data: !lastYesChild
 								? {
-										stroke: '#52c41a',
-										strokeWidth: 2,
+										condition: 'yes',
+										sourceStep: step,
+										targetStep: undefined,
 									}
-								: undefined,
+								: {
+										sourceStep: lastYesChild,
+										targetStep: undefined,
+									},
 							markerEnd: !lastYesChild
 								? {
 										type: MarkerType.ArrowClosed,
@@ -426,24 +346,19 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						});
 					}
 
-					// Only add step node for no branch if no children OR last child is end_automation
+					// Always add step node for no branch unless last child is end_automation or condition
 					const lastNoChild =
 						noChildren.length > 0
 							? noChildren[noChildren.length - 1]
 							: null;
 					const shouldAddNoStep =
-						!lastNoChild || lastNoChild.type === 'end_automation';
+						!lastNoChild ||
+						(lastNoChild.type !== 'end_automation' &&
+							lastNoChild.type !== 'condition');
 
 					if (shouldAddNoStep) {
 						const noAddId = `add-step-${step.id}-no`;
-						const noAddPosition =
-							savedPositions[noAddId] ||
-							findConditionBranchPosition(
-								noChildren,
-								step,
-								'no',
-								level + 1
-							);
+						const noAddPosition = getNodePosition(noAddId);
 
 						initialNodes.push({
 							id: noAddId,
@@ -470,14 +385,20 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							source: sourceId,
 							target: `add-step-${step.id}-no`,
 							sourceHandle,
-							type: 'straight', // Use straight edge for condition to add-step connections
+							type: !lastNoChild
+								? 'conditionEdge'
+								: 'addStepEdge', // Use condition edge for direct condition connections
 							label,
-							style: !lastNoChild
+							data: !lastNoChild
 								? {
-										stroke: '#ff4d4f',
-										strokeWidth: 2,
+										condition: 'no',
+										sourceStep: step,
+										targetStep: undefined,
 									}
-								: undefined,
+								: {
+										sourceStep: lastNoChild,
+										targetStep: undefined,
+									},
 							markerEnd: !lastNoChild
 								? {
 										type: MarkerType.ArrowClosed,
@@ -522,7 +443,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			(lastRootStep &&
 				lastRootStep.type !== 'end_automation' &&
 				lastRootStep.type !== 'condition');
-
 		if (shouldAddFinalStep) {
 			// Position the final add-step based on the last root step, not the bottommost node
 			let finalAddPosition;
@@ -538,13 +458,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				};
 			} else if (lastRootStep) {
 				// Position based on the last root step in the main flow
-				const lastRootStepPos =
-					savedPositions[lastRootStep.id.toString()] ||
-					calculatePosition(
-						lastRootStep.id.toString(),
-						rootSteps.length - 1,
-						0
-					);
+				const lastRootStepPos = getNodePosition(
+					lastRootStep.id.toString()
+				);
 
 				finalAddPosition = {
 					x: lastRootStepPos.x,
@@ -599,103 +515,110 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			}
 		}
 
-		return { nodes: initialNodes, edges: initialEdges };
+		// Apply auto-layout before setting nodes if no saved positions exist
+		const applyLayoutAndSetNodes = async () => {
+			// Check if we have any saved positions for step nodes (excluding trigger)
+			const hasExistingPositions = steps.some(
+				(step) => savedPositions[step.id.toString()]
+			);
+
+			console.log('hasExistingPositions', hasExistingPositions);
+			console.log('steps', steps.length);
+			console.log('initialNodes', initialNodes.length);
+
+			// Only auto-layout if there are no existing saved positions and we have steps
+			if (
+				!hasExistingPositions &&
+				steps.length > 0 &&
+				initialNodes.length > 1
+			) {
+				try {
+					// Apply layout to get better positioned nodes
+					const layoutResult = await useAutoLayout(
+						[...initialNodes],
+						[...initialEdges]
+					);
+
+					console.log('layoutResult', layoutResult);
+
+					if (layoutResult) {
+						setNodes(layoutResult.nodes);
+						setEdges(layoutResult.edges);
+						// Save the new positions immediately
+						// saveNodePositions(layoutResult.nodes, 'initial_layout');
+						return;
+					}
+				} catch (error) {
+					console.error('Failed to apply initial layout:', error);
+				}
+			}
+
+			// Fallback: set nodes without layout
+			setNodes(initialNodes);
+			setEdges(initialEdges);
+		};
+
+		applyLayoutAndSetNodes();
 	}, [
 		automation?.id,
 		automation?.settings?.reactflow_positions,
 		steps,
 		onStepClick,
+		onTriggerClick,
 	]);
 
-	// Set up ReactFlow state - initialize with computed values
-	const [nodesState, setNodes, onNodesChange] = useNodesState(nodes);
-	const [edgesState, setEdges, onEdgesChange] = useEdgesState(edges);
+	// Save node positions when they change
+	const saveNodePositions = useCallback(
+		async (nodes: Node[], reason?: string) => {
+			if (!automation) return;
 
-	// Layout
-	const { layout } = useAutoLayout();
-	const [isLoadingLayout, setIsLoadingLayout] = useState(false);
-
-	// Handle layout execution with smart settings for condition nodes
-	const handleLayout = async (customOptions?: any) => {
-		setIsLoadingLayout(true);
-		try {
-			// Check if we have condition nodes for optimized spacing
-			const hasConditions = nodes.some(
-				(node) => node.type === 'condition'
-			);
-
-			// Smart layout settings based on workflow complexity
-			const smartSettings = hasConditions
-				? {
-						nodeSpacing: 120, // More space between nodes with conditions
-						rankSpacing: 180, // More vertical space for branches
-						edgeSpacing: 60, // More edge spacing for cleaner routing
-					}
-				: {
-						nodeSpacing: 100,
-						rankSpacing: 150,
-						edgeSpacing: 50,
-					};
-
-			// Custom smooth layout without aggressive fitView
-			await layoutSmooth({
-				...smartSettings,
-				...customOptions,
+			const positions: Record<string, { x: number; y: number }> = {};
+			nodes.forEach((node) => {
+				positions[node.id] = node.position;
 			});
 
-			// Save positions after layout completes
-			setTimeout(() => {
-				setNodes((currentNodes) => {
-					savePositionsImmediate(currentNodes, 'layout');
-					return currentNodes;
-				});
-			}, 600); // Wait for layout animation to complete
-		} catch (error) {
-			console.error('Layout failed:', error);
-		} finally {
-			setIsLoadingLayout(false);
-		}
-	};
+			// Check if positions have actually changed to avoid unnecessary saves
+			const currentPositions =
+				automation.settings?.reactflow_positions || {};
+			const hasChanges = Object.keys(positions).some((nodeId) => {
+				const current = currentPositions[nodeId];
+				const new_ = positions[nodeId];
+				return (
+					!current ||
+					Math.abs(current.x - new_.x) > 2 || // Threshold to reduce API calls
+					Math.abs(current.y - new_.y) > 2
+				);
+			});
 
-	// Smooth layout function that doesn't cause jarring zoom changes
-	const layoutSmooth = useCallback(
-		async (options: any) => {
-			const currentNodes = nodesState;
-			const currentEdges = edgesState;
-
-			if (currentNodes.length <= 1) {
-				return;
-			}
+			if (!hasChanges) return;
 
 			try {
-				// Use the layout but prevent aggressive zoom changes
-				await layout({
-					...options,
-					preserveViewport: true, // Custom option we'll handle
+				// Update automation settings with new positions
+				const updatedAutomation = {
+					...automation,
+					settings: {
+						...automation.settings,
+						reactflow_positions: positions,
+					},
+				};
+
+				// Don't await the API call to avoid blocking the UI
+				apiFetch({
+					path: `/qc/v1/automations/${automation.id}`,
+					method: 'POST',
+					data: updatedAutomation,
+				}).catch((error) => {
+					console.error('Failed to save node positions:', error);
 				});
 
-				// Only do subtle fitView for new nodes, not aggressive zooming
-				requestAnimationFrame(() => {
-					// Much gentler viewport adjustment
-					// fitView({ padding: 0.2, duration: 300, maxZoom: 1.2 });
-				});
+				// Update context immediately for responsive feel
+				updateAutomation(updatedAutomation);
 			} catch (error) {
-				console.error('Smooth layout failed:', error);
-				throw error;
+				console.error('Failed to save node positions:', error);
 			}
 		},
-		[nodesState, edgesState]
+		[automation, updateAutomation]
 	);
-
-	// Sync ReactFlow state with computed values when they change
-	useEffect(() => {
-		// Immediately update nodes when the computed nodes change
-		setNodes(nodes);
-	}, [nodes, setNodes]);
-
-	useEffect(() => {
-		setEdges(edges);
-	}, [edges, setEdges]);
 
 	// Handle node clicks
 	const onNodeClick: NodeMouseHandler = useCallback(
@@ -720,293 +643,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		[onStepClick, onTriggerClick, steps]
 	);
 
-	// Save node positions when they change
-	const saveNodePositions = useCallback(
-		async (nodes: Node[], reason?: string) => {
-			if (!automation) return;
-
-			const positions: Record<string, { x: number; y: number }> = {};
-			nodes.forEach((node) => {
-				positions[node.id] = node.position;
-			});
-
-			// Check if positions have actually changed to avoid unnecessary saves
-			const currentPositions =
-				automation.settings?.reactflow_positions || {};
-			const hasChanges = Object.keys(positions).some((nodeId) => {
-				const current = currentPositions[nodeId];
-				const new_ = positions[nodeId];
-				return (
-					!current ||
-					Math.abs(current.x - new_.x) > 2 || // Slightly increased threshold to reduce API calls
-					Math.abs(current.y - new_.y) > 2
-				);
-			});
-
-			if (!hasChanges) return;
-
-			try {
-				// Update automation settings with new positions
-				const updatedAutomation = {
-					...automation,
-					settings: {
-						...automation.settings,
-						reactflow_positions: positions,
-					},
-				};
-
-				console.log(
-					`💾 Saving positions (${reason || 'general'}):`,
-					positions
-				);
-
-				// Don't await the API call to avoid blocking the UI
-				apiFetch({
-					path: `/qc/v1/automations/${automation.id}`,
-					method: 'POST',
-					data: updatedAutomation,
-				}).catch((error) => {
-					console.error('Failed to save node positions:', error);
-				});
-
-				// Update context immediately for responsive feel
-				updateAutomation(updatedAutomation);
-			} catch (error) {
-				console.error('Failed to save node positions:', error);
-			}
-		},
-		[automation, updateAutomation]
-	);
-
-	// Immediate position saving for layout and structural changes
-	const savePositionsImmediate = useCallback(
-		(nodes: Node[], reason: string) => {
-			saveNodePositions(nodes, reason);
-		},
-		[saveNodePositions]
-	);
-
-	// Debounced position saving to avoid too many API calls for drag operations
-	const debouncedSavePositions = useCallback(
-		debounce((nodes: Node[], reason?: string) => {
-			saveNodePositions(nodes, reason || 'drag');
-		}, 300), // Reduced debounce time for more responsive saving
-		[saveNodePositions]
-	);
-
-	// Handle node changes (including position updates)
+	// Handle node changes
 	const handleNodesChange = useCallback(
 		(changes: any[]) => {
-			// Apply changes immediately for responsive UI
 			onNodesChange(changes);
-
-			// Check for drag end to save positions
-			const hasDragEnd = changes.some(
-				(change) =>
-					change.type === 'position' && change.dragging === false
-			);
-
-			// Track dragging state more precisely
-			const isDragStart = changes.some(
-				(change) =>
-					change.type === 'position' && change.dragging === true
-			);
-
-			if (isDragStart) {
-				isDraggingRef.current = true;
-			}
-
-			if (hasDragEnd) {
-				isDraggingRef.current = false;
-				// Save positions immediately when drag ends (not during initial load)
-				if (!isInitialLoadRef.current) {
-					// Get current nodes state for saving
-					setTimeout(() => {
-						setNodes((currentNodes) => {
-							debouncedSavePositions(currentNodes, 'drag-end');
-							return currentNodes;
-						});
-					}, 0);
-				}
-			}
 		},
-		[onNodesChange, debouncedSavePositions, setNodes]
+		[onNodesChange]
 	);
-
-	// SMOOTH auto-layout when steps are added (optimized for UX)
-	useEffect(() => {
-		if (
-			steps.length > 0 &&
-			automation &&
-			!isInitialLoadRef.current &&
-			!isLoadingLayout
-		) {
-			console.log('🚀 Steps changed - triggering SMOOTH auto-layout');
-
-			// Trigger smooth layout with preserved viewport
-			const smoothLayoutId = setTimeout(() => {
-				if (!isDraggingRef.current && !isLoadingLayout) {
-					console.log('⚡ Executing smooth layout for new step');
-					setIsLoadingLayout(true);
-					layoutSmooth({
-						preserveViewport: true, // Prevent jarring zoom changes
-					})
-						.then(() => {
-							// Save positions after smooth layout
-							setTimeout(() => {
-								setNodes((currentNodes) => {
-									savePositionsImmediate(
-										currentNodes,
-										'smooth-step-layout'
-									);
-									return currentNodes;
-								});
-								setIsLoadingLayout(false);
-							}, 400); // Shorter wait for smoother experience
-						})
-						.catch((error) => {
-							console.error('Smooth layout failed:', error);
-							setIsLoadingLayout(false);
-						});
-				}
-			}, 100); // Slight delay for smoother experience
-
-			return () => clearTimeout(smoothLayoutId);
-		}
-	}, [steps.length, automation?.id]); // Only depend on steps length and automation ID, not the entire objects
-
-	// Save positions when nodes structure changes (fallback)
-	useEffect(() => {
-		if (
-			nodes.length > 0 &&
-			automation &&
-			!isInitialLoadRef.current &&
-			!isLoadingLayout
-		) {
-			// Immediate save for structure changes to ensure positions are persisted
-			const timeoutId = setTimeout(() => {
-				if (!isLoadingLayout) {
-					savePositionsImmediate(nodes, 'structure-change');
-				}
-			}, 200); // Short delay to allow nodes to settle
-
-			return () => clearTimeout(timeoutId);
-		}
-	}, [nodes.length, automation?.id]); // Only depend on length and automation ID
-
-	// Initial layout on first load - only if no saved positions exist
-	useEffect(() => {
-		if (nodes.length > 1 && isInitialLoadRef.current) {
-			const savedPositions =
-				automation?.settings?.reactflow_positions || {};
-
-			// Check if we have saved positions for actual workflow nodes (not just add-step nodes)
-			const workflowNodeIds = nodes
-				.filter((node) => !node.id.startsWith('add-step'))
-				.map((node) => node.id);
-			const hasSavedPositions = workflowNodeIds.some(
-				(nodeId) => savedPositions[nodeId]
-			);
-
-			const timeoutId = setTimeout(() => {
-				if (isInitialLoadRef.current) {
-					if (!hasSavedPositions) {
-						console.log(
-							'Applying initial layout for',
-							nodes.length,
-							'nodes (no saved positions found)'
-						);
-						handleLayout().then(() => {
-							// Save positions after initial layout
-							setTimeout(() => {
-								setNodes((currentNodes) => {
-									savePositionsImmediate(
-										currentNodes,
-										'initial-layout'
-									);
-									return currentNodes;
-								});
-							}, 700);
-						});
-					} else {
-						console.log(
-							'Skipping initial layout - using saved positions for',
-							nodes.length,
-							'nodes'
-						);
-					}
-					isInitialLoadRef.current = false;
-				}
-			}, 500); // Give time for nodes to render
-
-			return () => clearTimeout(timeoutId);
-		}
-	}, [
-		nodes.length,
-		handleLayout,
-		savePositionsImmediate,
-		setNodes,
-		automation?.settings?.reactflow_positions,
-	]);
-
-	// Track node count changes and trigger auto-layout when nodes are added/deleted
-	useEffect(() => {
-		const currentNodeCount = nodes.length;
-		const prevNodeCount = prevNodeCountRef.current;
-
-		// Skip if this is the initial load or first time setting the count
-		if (isInitialLoadRef.current || prevNodeCount === 0) {
-			prevNodeCountRef.current = currentNodeCount;
-			return;
-		}
-
-		// Only trigger layout if node count actually changed and we're not dragging and not already loading
-		if (
-			currentNodeCount !== prevNodeCount &&
-			!isDraggingRef.current &&
-			!isLoadingLayout
-		) {
-			console.log(
-				'🔄 Node count changed - triggering gentle secondary layout'
-			);
-			shouldTriggerLayoutRef.current = true;
-
-			const timeoutId = setTimeout(() => {
-				if (shouldTriggerLayoutRef.current && !isLoadingLayout) {
-					setIsLoadingLayout(true);
-					// Use smooth layout for secondary trigger too
-					layoutSmooth({
-						preserveViewport: true, // Keep viewport stable
-					})
-						.then(() => {
-							// Save after smooth secondary layout
-							setTimeout(() => {
-								setNodes((currentNodes) => {
-									savePositionsImmediate(
-										currentNodes,
-										'gentle-secondary-layout'
-									);
-									return currentNodes;
-								});
-								setIsLoadingLayout(false);
-							}, 400); // Shorter wait time
-						})
-						.catch((error) => {
-							console.error(
-								'Secondary smooth layout failed:',
-								error
-							);
-							setIsLoadingLayout(false);
-						});
-					shouldTriggerLayoutRef.current = false;
-				}
-			}, 200); // Longer delay to avoid conflicts with primary layout
-
-			return () => clearTimeout(timeoutId);
-		}
-
-		prevNodeCountRef.current = currentNodeCount;
-	}, [nodes.length]); // Only depend on nodes length to avoid circular dependencies
 
 	if (isLoading) {
 		return (
@@ -1015,10 +658,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			</div>
 		);
 	}
-
-	// Debug logging
-	console.log('ReactFlow nodes:', nodesState.length, nodesState);
-	console.log('ReactFlow edges:', edgesState.length, edgesState);
 
 	return (
 		<div className="qcrm-reactflow-workflow">
@@ -1032,16 +671,11 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						onNodeClick={onNodeClick}
 						nodeTypes={nodeTypes}
 						edgeTypes={edgeTypes}
-						defaultEdgeOptions={{
-							type: 'straight',
-							style: { strokeWidth: 2 },
-							markerEnd: { type: MarkerType.ArrowClosed },
-						}}
 						fitView
 						fitViewOptions={{ padding: 0.2 }}
-						nodesDraggable={false}
 						nodesConnectable={false}
 						elementsSelectable={true}
+						nodesDraggable={false}
 						selectNodesOnDrag={false}
 						panOnDrag={true}
 						zoomOnScroll={true}

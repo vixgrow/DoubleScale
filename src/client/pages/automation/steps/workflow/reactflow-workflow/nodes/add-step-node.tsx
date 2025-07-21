@@ -9,7 +9,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Flex, Popover, Spin, Popconfirm } from 'antd';
+import { Button, Flex, Popover, Spin } from 'antd';
 import {
 	TrophyOutlined,
 	BranchesOutlined,
@@ -24,7 +24,7 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
  * Internal dependencies
  */
 import { useAutomationContext } from '../../../../state/context';
-import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+import type { AutomationStep } from '@quillcrm/client';
 
 interface AddStepNodeData {
 	parentId?: number | null;

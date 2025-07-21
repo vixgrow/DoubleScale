@@ -1,12 +1,7 @@
 /**
- * WordPress dependencies
- */
-import { useCallback, useMemo } from '@wordpress/element';
-
-/**
  * External dependencies
  */
-import { Node, Edge, useReactFlow, Position } from '@xyflow/react';
+import { Node, Edge, Position } from '@xyflow/react';
 import ELK from 'elkjs/lib/elk.bundled.js';
 
 /**
@@ -112,6 +107,7 @@ const layoutWithELK = async (
 
     const graph = createElkGraph(nodes, edges, options);
 
+
     try {
         const layoutedGraph = await elk.layout(graph);
 
@@ -142,47 +138,24 @@ const layoutWithELK = async (
 /**
  * Auto layout hook
  */
-export const useAutoLayout = () => {
-    const { getNodes, getEdges, setNodes, setEdges, fitView } = useReactFlow();
+export const useAutoLayout = async (nodes: Node[], edges: Edge[]) => {
 
-    // Memoize the layout function to prevent unnecessary re-renders
-    const layout = useCallback(async (options: LayoutOptions) => {
-        const nodes = getNodes();
-        const edges = getEdges();
+    // Early returns for edge cases
+    if (nodes.length <= 1) {
+        return { nodes, edges };
+    }
 
-        // Early returns for edge cases
-        if (nodes.length <= 1) {
-            return;
-        }
+    try {
+        const { nodes: layoutedNodes, edges: layoutedEdges } = await layoutWithELK(
+            nodes,
+            edges,
+            DEFAULT_LAYOUT_OPTIONS
+        );
+        // Return the layouted results for the caller
+        return { nodes: layoutedNodes, edges: layoutedEdges };
 
-        // Merge with defaults
-        const layoutOptions: Required<LayoutOptions> = {
-            ...DEFAULT_LAYOUT_OPTIONS,
-            ...options,
-        };
-
-        try {
-            const { nodes: layoutedNodes, edges: layoutedEdges } = await layoutWithELK(
-                nodes,
-                edges,
-                layoutOptions
-            );
-
-            setNodes(layoutedNodes);
-            setEdges(layoutedEdges);
-
-            // Only fit view if it's not a smooth layout (prevent jarring zoom)
-            if (!options.preserveViewport) {
-                requestAnimationFrame(() => {
-                    fitView({ padding: 0.2, duration: 300, maxZoom: 1.5 });
-                });
-            }
-
-        } catch (error) {
-            console.error('❌ Auto-layout failed:', error);
-            throw error;
-        }
-    }, [getNodes, getEdges, setNodes, setEdges, fitView]);
-
-    return useMemo(() => ({ layout }), [layout]);
-}; 
+    } catch (error) {
+        console.error('❌ Auto-layout failed:', error);
+        throw error;
+    }
+}

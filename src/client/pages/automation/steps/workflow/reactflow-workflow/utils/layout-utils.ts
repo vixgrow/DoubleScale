@@ -9,7 +9,7 @@ import { Node } from '@xyflow/react';
 export const NODE_DIMENSIONS = {
     trigger: { width: 200, height: 80 },
     action: { width: 220, height: 90 },
-    condition: { width: 240, height: 100 },
+    condition: { width: 280, height: 120 },
     goal: { width: 200, height: 80 },
     end_automation: { width: 180, height: 70 },
     add_step: { width: 120, height: 50 },
@@ -23,8 +23,9 @@ export const getNodeDimensions = (node: Node) => {
     const nodeType = node.type as keyof typeof NODE_DIMENSIONS || 'default';
     const defaultDims = NODE_DIMENSIONS[nodeType] || NODE_DIMENSIONS.default;
 
-    return {
+    const obj = {
         width: node.measured?.width || node.width || defaultDims.width,
         height: node.measured?.height || node.height || defaultDims.height,
-    };
+    }
+    return obj;
 }; 

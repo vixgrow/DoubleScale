@@ -104,7 +104,8 @@ export const reorderStep = async (
     direction: 'up' | 'down',
     steps: AutomationStep[],
     setSteps: (steps: AutomationStep[]) => void,
-    createNotice: (notice: { type: string; message: string }) => void
+    createNotice: (notice: { type: string; message: string }) => void,
+    clearPositions?: () => void
 ): Promise<boolean> => {
     try {
         const { newSteps, updatedSteps } = calculateStepReorder(steps, step, direction);
@@ -126,6 +127,11 @@ export const reorderStep = async (
 
         // Update local state
         setSteps(newSteps);
+
+        // Clear saved positions so workflow will re-layout with new order
+        if (clearPositions) {
+            clearPositions();
+        }
 
         createNotice({
             type: 'success',

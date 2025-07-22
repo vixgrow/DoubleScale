@@ -2,13 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useMemo,
-	useCallback,
-	useEffect,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -82,10 +76,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	onTriggerClick,
 }) => {
 	const { updateAutomation } = useAutomationContext();
-	// const isInitialLoadRef = useRef(true);
-	// Track previous node count to detect additions/deletions
-	// const prevNodeCountRef = useRef(0);
-	// Create nodes and edges from steps with proper hierarchical handling
 
 	// Set up ReactFlow state - initialize with computed values
 	const [nodesState, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -140,14 +130,196 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			return;
 		}
 
-		// Helper function to get saved position or default fallback
+		// Enhanced positioning system for nested conditions
+		// This algorithm calculates proper spacing and positioning for complex nested condition structures
+		// by recursively calculating the width requirements of each branch and positioning nodes
+		// to prevent overlaps and provide clean, readable layouts
+		const calculateBranchWidth = (
+			stepList: AutomationStep[],
+			parentId: number | null,
+			condition: string | null,
+			level: number = 0
+		): number => {
+			const branchSteps = stepList
+				.filter((step) => {
+					if (parentId === null) {
+						return !step.parent_id;
+					}
+					return (
+						step.parent_id === parentId &&
+						step.condition === condition
+					);
+				})
+				.sort((a, b) => a.order - b.order);
+
+			if (branchSteps.length === 0) {
+				return 280; // Minimum width for empty branch
+			}
+
+			let maxWidth = 280; // Base node width
+
+			branchSteps.forEach((step) => {
+				if (step.type === 'condition') {
+					// Calculate width needed for both yes and no branches
+					const yesWidth = calculateBranchWidth(
+						stepList,
+						step.id,
+						'yes',
+						level + 1
+					);
+					const noWidth = calculateBranchWidth(
+						stepList,
+						step.id,
+						'no',
+						level + 1
+					);
+					const conditionWidth = yesWidth + noWidth + 100; // 100px spacing between branches
+					maxWidth = Math.max(maxWidth, conditionWidth);
+				}
+			});
+
+			return maxWidth;
+		};
+
+		// Position calculator that considers nested structure
+		const positionMap = new Map<string, { x: number; y: number }>();
+
+		const calculatePositions = (
+			stepList: AutomationStep[],
+			parentId: number | null = null,
+			condition: string | null = null,
+			level: number = 0,
+			centerX: number = 250,
+			startY: number = 200
+		): number => {
+			// Return the final Y position
+			const branchSteps = stepList
+				.filter((step) => {
+					if (parentId === null) {
+						return !step.parent_id;
+					}
+					return (
+						step.parent_id === parentId &&
+						step.condition === condition
+					);
+				})
+				.sort((a, b) => a.order - b.order);
+
+			let currentY = startY;
+
+			branchSteps.forEach((step, stepIndex) => {
+				const stepId = step.id.toString();
+
+				if (step.type === 'condition') {
+					// For condition nodes, calculate positions for children first
+					const yesWidth = calculateBranchWidth(
+						stepList,
+						step.id,
+						'yes',
+						level + 1
+					);
+					const noWidth = calculateBranchWidth(
+						stepList,
+						step.id,
+						'no',
+						level + 1
+					);
+
+					// Position condition node at center
+					positionMap.set(stepId, { x: centerX, y: currentY });
+
+					// Calculate child positions
+					const childY = currentY + 320; // More space below condition
+					const totalChildWidth = yesWidth + noWidth + 100; // 100px between branches
+
+					// Position yes branch to the left and get its end Y position
+					const yesX = centerX - totalChildWidth / 2 + yesWidth / 2;
+					const yesEndY = calculatePositions(
+						stepList,
+						step.id,
+						'yes',
+						level + 1,
+						yesX,
+						childY
+					);
+
+					// Position no branch to the right and get its end Y position
+					const noX = centerX + totalChildWidth / 2 - noWidth / 2;
+					const noEndY = calculatePositions(
+						stepList,
+						step.id,
+						'no',
+						level + 1,
+						noX,
+						childY
+					);
+
+					// Use the actual end positions from the child branches
+					const maxBranchEndY = Math.max(yesEndY, noEndY);
+
+					// Set currentY to be after the condition branches with more spacing
+					currentY = Math.max(currentY + 400, maxBranchEndY + 150);
+				} else {
+					// For non-condition nodes, position normally
+					positionMap.set(stepId, { x: centerX, y: currentY });
+					currentY += 250; // Increased spacing between regular steps
+				}
+			});
+
+			return currentY; // Return the final Y position
+		};
+
+		// Helper function to get saved position or calculated position
 		const getNodePosition = (
 			nodeId: string,
 			fallbackX = 250,
-			fallbackY = 200
+			fallbackY = 200,
+			step?: AutomationStep,
+			stepIndex?: number
 		) => {
-			return savedPositions[nodeId] || { x: fallbackX, y: fallbackY };
+			// If we have a saved position, use it
+			if (savedPositions[nodeId]) {
+				return savedPositions[nodeId];
+			}
+
+			// Check if we have a calculated position
+			if (positionMap.has(nodeId)) {
+				return positionMap.get(nodeId)!;
+			}
+
+			// Fallback to old logic for edge cases
+			if (step && step.parent_id && step.condition) {
+				const parentId = step.parent_id.toString();
+				const parentPosition =
+					savedPositions[parentId] || positionMap.get(parentId);
+
+				if (parentPosition) {
+					// Enhanced positioning that considers nesting level
+					const baseY = parentPosition.y + 320; // Increased spacing below parent
+					const branchWidth = calculateBranchWidth(
+						steps,
+						step.parent_id,
+						step.condition
+					);
+					const branchOffset =
+						step.condition === 'yes'
+							? -branchWidth / 2
+							: branchWidth / 2;
+					const stepOffset = (stepIndex || 0) * 250; // Increased spacing between steps in same branch
+
+					return {
+						x: parentPosition.x + branchOffset,
+						y: baseY + stepOffset,
+					};
+				}
+			}
+
+			// Default fallback
+			return { x: fallbackX, y: fallbackY };
 		};
+
+		// Calculate all positions first
+		calculatePositions(steps);
 
 		// Helper function to recursively process steps and their children
 		const processStepHierarchy = (
@@ -171,7 +343,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			let currentIndex = startIndex;
 
 			currentLevelSteps.forEach((step, stepIndex) => {
-				const position = getNodePosition(step.id.toString());
+				const position = getNodePosition(
+					step.id.toString(),
+					250,
+					200,
+					step,
+					stepIndex
+				);
 
 				// Add step node
 				initialNodes.push({
@@ -186,6 +364,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								onStepClick(stepData);
 							}
 						},
+						clearSavedPositions, // Pass the clear function to nodes
 					},
 				});
 
@@ -285,7 +464,28 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					if (yesChildren.length === 0) {
 						// Create a "Yes" edge to an add-step node for empty yes branch
 						const yesAddId = `add-step-${step.id}-yes-empty`;
-						const yesAddPosition = getNodePosition(yesAddId);
+						const conditionPos = getNodePosition(
+							step.id.toString()
+						);
+						const yesWidth = calculateBranchWidth(
+							stepList,
+							step.id,
+							'yes'
+						);
+						const noWidth = calculateBranchWidth(
+							stepList,
+							step.id,
+							'no'
+						);
+						const totalChildWidth = yesWidth + noWidth + 100;
+
+						const yesAddPosition = savedPositions[yesAddId] || {
+							x:
+								conditionPos.x -
+								totalChildWidth / 2 +
+								yesWidth / 2, // Properly positioned in yes branch
+							y: conditionPos.y + 320, // Below condition with more spacing
+						};
 
 						initialNodes.push({
 							id: yesAddId,
@@ -317,7 +517,28 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					if (noChildren.length === 0) {
 						// Create a "No" edge to an add-step node for empty no branch
 						const noAddId = `add-step-${step.id}-no-empty`;
-						const noAddPosition = getNodePosition(noAddId);
+						const conditionPos = getNodePosition(
+							step.id.toString()
+						);
+						const yesWidth = calculateBranchWidth(
+							stepList,
+							step.id,
+							'yes'
+						);
+						const noWidth = calculateBranchWidth(
+							stepList,
+							step.id,
+							'no'
+						);
+						const totalChildWidth = yesWidth + noWidth + 100;
+
+						const noAddPosition = savedPositions[noAddId] || {
+							x:
+								conditionPos.x +
+								totalChildWidth / 2 -
+								noWidth / 2, // Properly positioned in no branch
+							y: conditionPos.y + 320, // Below condition with more spacing
+						};
 
 						initialNodes.push({
 							id: noAddId,
@@ -361,7 +582,28 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 					if (shouldAddYesStep) {
 						const yesAddId = `add-step-${step.id}-yes`;
-						const yesAddPosition = getNodePosition(yesAddId);
+						const conditionPos = getNodePosition(
+							step.id.toString()
+						);
+						const yesWidth = calculateBranchWidth(
+							stepList,
+							step.id,
+							'yes'
+						);
+						const noWidth = calculateBranchWidth(
+							stepList,
+							step.id,
+							'no'
+						);
+						const totalChildWidth = yesWidth + noWidth + 100;
+
+						const yesAddPosition = savedPositions[yesAddId] || {
+							x:
+								conditionPos.x -
+								totalChildWidth / 2 +
+								yesWidth / 2, // Properly positioned in yes branch
+							y: conditionPos.y + 320 + yesChildren.length * 250, // Below last yes child with increased spacing
+						};
 
 						initialNodes.push({
 							id: yesAddId,
@@ -422,7 +664,28 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 					if (shouldAddNoStep) {
 						const noAddId = `add-step-${step.id}-no`;
-						const noAddPosition = getNodePosition(noAddId);
+						const conditionPos = getNodePosition(
+							step.id.toString()
+						);
+						const yesWidth = calculateBranchWidth(
+							stepList,
+							step.id,
+							'yes'
+						);
+						const noWidth = calculateBranchWidth(
+							stepList,
+							step.id,
+							'no'
+						);
+						const totalChildWidth = yesWidth + noWidth + 100;
+
+						const noAddPosition = savedPositions[noAddId] || {
+							x:
+								conditionPos.x +
+								totalChildWidth / 2 -
+								noWidth / 2, // Properly positioned in no branch
+							y: conditionPos.y + 320 + noChildren.length * 250, // Below last no child with increased spacing
+						};
 
 						initialNodes.push({
 							id: noAddId,
@@ -515,7 +778,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				};
 				finalAddPosition = {
 					x: triggerPos.x,
-					y: triggerPos.y + 180,
+					y: triggerPos.y + 250,
 				};
 			} else if (lastRootStep) {
 				// Position based on the last root step in the main flow
@@ -525,7 +788,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 				finalAddPosition = {
 					x: lastRootStepPos.x,
-					y: lastRootStepPos.y + 260,
+					y: lastRootStepPos.y + 250,
 				};
 			}
 
@@ -576,74 +839,110 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			}
 		}
 
-		// Check if we have asymmetric condition branches that would break layout
-		// Since we now handle single-branch conditions better, we only consider it asymmetric
-		// if there are significant layout differences that could break the auto-layout
-		const hasAsymmetricConditions = steps.some((step) => {
-			if (step.type !== 'condition') return false;
-
-			const yesChildren = steps.filter(
-				(s) => s.parent_id === step.id && s.condition === 'yes'
-			);
-			const noChildren = steps.filter(
-				(s) => s.parent_id === step.id && s.condition === 'no'
-			);
-
-			// Only consider it asymmetric if there's a large difference in branch complexity
-			// that could break the layout algorithm
-			const yesDepth = getMaxDepth(yesChildren, steps);
-			const noDepth = getMaxDepth(noChildren, steps);
-
-			return Math.abs(yesDepth - noDepth) > 2; // Allow small differences
-		});
-
-		// Helper function to calculate branch depth
-		function getMaxDepth(
-			branchSteps: AutomationStep[],
-			allSteps: AutomationStep[]
-		): number {
-			if (branchSteps.length === 0) return 0;
-
-			let maxDepth = 1;
-			branchSteps.forEach((step) => {
-				if (step.type === 'condition') {
-					const childYes = allSteps.filter(
-						(s) => s.parent_id === step.id && s.condition === 'yes'
-					);
-					const childNo = allSteps.filter(
-						(s) => s.parent_id === step.id && s.condition === 'no'
-					);
-					const yesDepth = getMaxDepth(childYes, allSteps);
-					const noDepth = getMaxDepth(childNo, allSteps);
-					maxDepth = Math.max(
-						maxDepth,
-						1 + Math.max(yesDepth, noDepth)
-					);
-				}
-			});
-
-			return maxDepth;
-		}
-
 		// Apply auto-layout before setting nodes if no saved positions exist
 		const applyLayoutAndSetNodes = async () => {
 			// Check if we have any saved positions for step nodes (excluding trigger)
-			const hasExistingPositions = steps.some(
+
+			console.log('savedPositions', savedPositions);
+			console.log('steps', steps);
+
+			// Check if ALL current steps have saved positions
+			const hasExistingPositions = steps.every(
 				(step) => savedPositions[step.id.toString()]
 			);
 
-			console.log('hasExistingPositions', hasExistingPositions);
-			console.log('steps', steps.length);
-			console.log('initialNodes', initialNodes.length);
-			console.log('hasAsymmetricConditions', hasAsymmetricConditions);
+			// Check if there are orphaned positions (positions for non-existent steps)
+			const currentStepIds = new Set([
+				'trigger',
+				...steps.map((step) => step.id.toString()),
+				'add-step-initial',
+				'add-step-final',
+			]);
 
-			// Only auto-layout if there are no existing saved positions, we have steps,
-			// and we don't have asymmetric conditions (which break the layout)
+			const hasOrphanedPositions = Object.keys(savedPositions).some(
+				(nodeId) => {
+					// Skip add-step nodes as they're dynamic
+					if (nodeId.startsWith('add-step')) return false;
+					return !currentStepIds.has(nodeId);
+				}
+			);
+
+			// Force auto-layout if we have orphaned positions
+			const shouldForceLayout = hasOrphanedPositions;
+
+			console.log(
+				'hasExistingPositions (ALL steps have positions)',
+				hasExistingPositions
+			);
+			console.log('hasOrphanedPositions', hasOrphanedPositions);
+			console.log('shouldForceLayout', shouldForceLayout);
+			console.log('steps.length > 0', steps.length > 0);
+			console.log('initialNodes.length > 1', initialNodes.length > 1);
+
+			// Debug individual step positions
+			let stepsWithPositions = 0;
+			steps.forEach((step) => {
+				const stepId = step.id.toString();
+				const hasPosition = !!savedPositions[stepId];
+				if (hasPosition) stepsWithPositions++;
+				console.log(
+					`Step ${stepId} (${step.type}): has saved position = ${hasPosition}`,
+					savedPositions[stepId]
+				);
+			});
+			console.log(
+				`Summary: ${stepsWithPositions}/${steps.length} steps have saved positions`
+			);
+
+			// Check if this has complex nested conditions that should use our custom positioning
+			const hasNestedConditions = steps.some((step) => {
+				if (step.type !== 'condition') return false;
+				// Check if any step is a child of this condition and is also a condition
+				return steps.some(
+					(child) =>
+						child.parent_id === step.id &&
+						child.type === 'condition'
+				);
+			});
+
+			// Also check for multiple condition levels
+			const maxConditionDepth = steps.reduce((maxDepth, step) => {
+				if (step.type !== 'condition') return maxDepth;
+				let depth = 0;
+				let currentStep = step;
+				while (currentStep.parent_id) {
+					const parent = steps.find(
+						(s) => s.id === currentStep.parent_id
+					);
+					if (parent && parent.type === 'condition') {
+						depth++;
+						currentStep = parent;
+					} else {
+						break;
+					}
+				}
+				return Math.max(maxDepth, depth);
+			}, 0);
+
+			console.log('hasNestedConditions', hasNestedConditions);
+			console.log('maxConditionDepth', maxConditionDepth);
+			console.log(
+				'Will run auto-layout?',
+				(shouldForceLayout || !hasExistingPositions) &&
+					steps.length > 0 &&
+					initialNodes.length > 1 &&
+					!hasNestedConditions &&
+					maxConditionDepth === 0
+			);
+
+			// Only auto-layout if there are no existing saved positions OR we have orphaned positions,
+			// we have steps, we have multiple nodes, AND we don't have complex nested conditions
 			if (
-				!hasExistingPositions &&
+				(shouldForceLayout || !hasExistingPositions) &&
 				steps.length > 0 &&
 				initialNodes.length > 1 &&
-				!hasAsymmetricConditions
+				!hasNestedConditions &&
+				maxConditionDepth === 0
 			) {
 				try {
 					// Apply layout to get better positioned nodes
@@ -652,13 +951,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						[...initialEdges]
 					);
 
-					console.log('layoutResult', layoutResult);
-
 					if (layoutResult) {
 						setNodes(layoutResult.nodes);
 						setEdges(layoutResult.edges);
-						// Save the new positions immediately
-						// saveNodePositions(layoutResult.nodes, 'initial_layout');
+						// Save the automatically arranged positions
+						setTimeout(() => {
+							saveNodePositions(layoutResult.nodes);
+						}, 500); // Delay to ensure nodes are rendered
 						return;
 					}
 				} catch (error) {
@@ -667,6 +966,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			}
 
 			// Fallback: set nodes without layout (safer for asymmetric conditions)
+			// This prevents branch interference when adding steps to only one condition branch
 			setNodes(initialNodes);
 			setEdges(initialEdges);
 		};
@@ -680,9 +980,40 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		onTriggerClick,
 	]);
 
+	// Clear saved positions to force re-layout
+	const clearSavedPositions = useCallback(async () => {
+		if (!automation) return;
+
+		console.log(
+			'Clearing saved positions to force re-layout after reorder'
+		);
+
+		try {
+			const updatedAutomation = {
+				...automation,
+				settings: {
+					...automation.settings,
+					reactflow_positions: {}, // Clear all positions
+				},
+			};
+
+			// Update automation settings
+			await apiFetch({
+				path: `/qc/v1/automations/${automation.id}`,
+				method: 'POST',
+				data: updatedAutomation,
+			});
+
+			// Update context immediately
+			updateAutomation(updatedAutomation);
+		} catch (error) {
+			console.error('Failed to clear saved positions:', error);
+		}
+	}, [automation, updateAutomation]);
+
 	// Save node positions when they change
 	const saveNodePositions = useCallback(
-		async (nodes: Node[], reason?: string) => {
+		async (nodes: Node[]) => {
 			if (!automation) return;
 
 			const positions: Record<string, { x: number; y: number }> = {};
@@ -703,7 +1034,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				);
 			});
 
-			if (!hasChanges) return;
+			if (!hasChanges) {
+				console.log('No position changes detected, skipping save');
+				return;
+			}
+
+			console.log('Saving node positions...', {
+				totalNodes: nodes.length,
+			});
 
 			try {
 				// Update automation settings with new positions

@@ -23,9 +23,10 @@ import { PageHeader, PlusIcon } from '@/components';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable'; // Import the hook
 
 const Campaigns: React.FC = () => {
-	const [loading, setLoading] = useState(true); // TODO: Use the loading for the table and the create campaign component
+	const [loading, setLoading] = useState(true);
 	const [campaignType, setCampaignType] = useState<string>('');
 	const [keywords, setKeywords] = useState<string>('');
 	const [page, setPage] = useState(1);
@@ -34,9 +35,9 @@ const Campaigns: React.FC = () => {
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-	const [isAdding, setIsAdding] = useState<boolean>(false); // TODO: Use the is Adding for the submit button
+	const [isAdding, setIsAdding] = useState<boolean>(false);
 	const [bulkAction, setBulkAction] = useState<string>('');
-	const [isApplying, setIsApplying] = useState<boolean>(false); // TODO: Use the is Applying for the bulk actions
+	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
@@ -48,6 +49,15 @@ const Campaigns: React.FC = () => {
 
 	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
+
+	// Use the reusable hook
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
+	});
 
 	useEffect(() => {
 		fetchCampaigns();
@@ -182,37 +192,6 @@ const Campaigns: React.FC = () => {
 		duplicate: duplicateCampaign,
 		navigate: navigate,
 	});
-
-	const serverSideTable = {
-		getState: () => ({
-			pagination: {
-				pageIndex: page - 1, // Convert to 0-indexed for TanStack Table
-				pageSize: perPage,
-			},
-		}),
-		getPageCount: () => Math.ceil(totalRecords / perPage),
-		getFilteredSelectedRowModel: () => ({ rows: [] }),
-		getFilteredRowModel: () => ({ rows: Array(totalRecords).fill({}) }),
-		setPageSize: (size: number) => {
-			setPerPage(size);
-			setPage(1); // Reset to first page when changing page size
-		},
-		setPageIndex: (index: number) => {
-			setPage(index + 1); // Convert from 0-indexed to 1-indexed
-		},
-		getCanPreviousPage: () => page > 1,
-		getCanNextPage: () => page < Math.ceil(totalRecords / perPage),
-		previousPage: () => {
-			if (page > 1) {
-				setPage(page - 1);
-			}
-		},
-		nextPage: () => {
-			if (page < Math.ceil(totalRecords / perPage)) {
-				setPage(page + 1);
-			}
-		},
-	};
 
 	return (
 		<div className="qcrm-campaigns">

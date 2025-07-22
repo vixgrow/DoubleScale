@@ -536,6 +536,7 @@ export type Response = {
 
 export type ContactsResponse = Response & {
 	data: Contact[];
+	total_count: number;
 };
 
 export type ListsResponse = Response & {

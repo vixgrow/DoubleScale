@@ -73,6 +73,31 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/reorder',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'reorder_step' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'direction'     => array(
+							'description' => __( 'Direction to move the step (up or down)', 'quillcrm' ),
+							'type'        => 'string',
+							'enum'        => array( 'up', 'down' ),
+							'required'    => true,
+						),
+						'updated_steps' => array(
+							'description' => __( 'Array of steps with updated orders', 'quillcrm' ),
+							'type'        => 'object',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -312,6 +337,46 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			return new WP_REST_Response( null, 204 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_automation_step_delete_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Reorder an Automation Step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function reorder_step( $request ) {
+		try {
+			$step_id       = $request->get_param( 'id' );
+			$direction     = $request->get_param( 'direction' );
+			$updated_steps = $request->get_param( 'updated_steps' ) ?? array();
+
+			$automation_step = Automation_Step_Model::find( $step_id );
+
+			if ( ! $automation_step ) {
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Validate direction
+			if ( ! in_array( $direction, array( 'up', 'down' ), true ) ) {
+				return new WP_Error( 'rest_automation_step_invalid_direction', __( 'Invalid direction. Must be "up" or "down"', 'quillcrm' ), array( 'status' => 400 ) );
+			}
+
+			// Update the orders based on the frontend calculations
+			if ( ! empty( $updated_steps ) ) {
+				$this->update_orders( $updated_steps );
+			}
+
+			// Return the updated step
+			$automation_step = Automation_Step_Model::find( $step_id );
+
+			return new WP_REST_Response( $automation_step, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'rest_automation_step_reorder_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 

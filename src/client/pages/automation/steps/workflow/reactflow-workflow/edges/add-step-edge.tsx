@@ -169,52 +169,10 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			label: __('Action', 'quillcrm'),
 			icon: <ThunderboltOutlined />,
 		},
-		condition: {
-			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
-		},
 		goal: {
 			label: __('Goal', 'quillcrm'),
 			icon: <TrophyOutlined />,
 		},
-		end_automation: {
-			label: __('End Automation', 'quillcrm'),
-			icon: <DisconnectOutlined />,
-		},
-	};
-
-	const getNewStepOrder = () => {
-		if (!sourceStep) {
-			// Adding after trigger, so first step
-			return 1;
-		}
-
-		if (targetStep) {
-			// Adding between two steps, use target step's order
-			// This will push the target step and all subsequent steps down by 1
-			return targetStep.order;
-		}
-
-		// Adding at the end, so next order after source step
-		// Need to find the highest order in the same branch
-		const parentId = sourceStep.parent_id || 0;
-		const branchCondition = sourceStep.condition || null;
-
-		const sameBranchSteps = steps.filter((step) => {
-			if (parentId === 0) {
-				// Root level steps
-				return !step.parent_id;
-			} else {
-				// Child steps - same parent and condition
-				return (
-					step.parent_id === parentId &&
-					step.condition === branchCondition
-				);
-			}
-		});
-
-		const maxOrder = Math.max(...sameBranchSteps.map((s) => s.order), 0);
-		return maxOrder + 1;
 	};
 
 	const handleStepSelection = async (type: string) => {

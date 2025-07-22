@@ -221,10 +221,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							sourceStep: stepList.find((s) => s.id === parentId),
 							targetStep: step,
 						},
-						markerEnd: {
-							type: MarkerType.ArrowClosed,
-							color: condition === 'yes' ? '#52c41a' : '#ff4d4f',
-						},
+						markerEnd: MarkerType.ArrowClosed,
 					});
 				} else if (stepIndex > 0) {
 					// Connect to previous sibling - but skip if previous step is a condition
@@ -270,7 +267,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						noStartIndex
 					);
 
-					// Add add-step nodes for condition branches if they don't end with end_automation
+					// Ensure condition edges exist for both branches, even if empty
 					const yesChildren = stepList
 						.filter(
 							(s) =>
@@ -284,15 +281,83 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						)
 						.sort((a, b) => a.order - b.order);
 
-					// Always add step node for yes branch unless last child is end_automation or condition
+					// Create condition edges for empty branches to ensure "Yes"/"No" labels always appear
+					if (yesChildren.length === 0) {
+						// Create a "Yes" edge to an add-step node for empty yes branch
+						const yesAddId = `add-step-${step.id}-yes-empty`;
+						const yesAddPosition = getNodePosition(yesAddId);
+
+						initialNodes.push({
+							id: yesAddId,
+							type: 'add_step',
+							position: yesAddPosition,
+							data: {
+								parentId: step.id,
+								condition: 'yes',
+								prevStep: null,
+							},
+						});
+
+						initialEdges.push({
+							id: `${step.id}-yes-to-empty-add`,
+							source: step.id.toString(),
+							target: yesAddId,
+							sourceHandle: 'yes',
+							type: 'conditionEdge',
+							label: __('Yes', 'quillcrm'),
+							data: {
+								condition: 'yes',
+								sourceStep: step,
+								targetStep: undefined,
+							},
+							markerEnd: MarkerType.ArrowClosed,
+						});
+					}
+
+					if (noChildren.length === 0) {
+						// Create a "No" edge to an add-step node for empty no branch
+						const noAddId = `add-step-${step.id}-no-empty`;
+						const noAddPosition = getNodePosition(noAddId);
+
+						initialNodes.push({
+							id: noAddId,
+							type: 'add_step',
+							position: noAddPosition,
+							data: {
+								parentId: step.id,
+								condition: 'no',
+								prevStep: null,
+							},
+						});
+
+						initialEdges.push({
+							id: `${step.id}-no-to-empty-add`,
+							source: step.id.toString(),
+							target: noAddId,
+							sourceHandle: 'no',
+							type: 'conditionEdge',
+							label: __('No', 'quillcrm'),
+							data: {
+								condition: 'no',
+								sourceStep: step,
+								targetStep: undefined,
+							},
+							markerEnd: MarkerType.ArrowClosed,
+						});
+					}
+
+					// Add continuation add-step nodes for branches that have children
 					const lastYesChild =
 						yesChildren.length > 0
 							? yesChildren[yesChildren.length - 1]
 							: null;
+
+					// Only add continuation add-step for yes branch if it has children and needs continuation
 					const shouldAddYesStep =
-						!lastYesChild ||
-						(lastYesChild.type !== 'end_automation' &&
-							lastYesChild.type !== 'condition');
+						yesChildren.length > 0 &&
+						(!lastYesChild ||
+							(lastYesChild.type !== 'end_automation' &&
+								lastYesChild.type !== 'condition'));
 
 					if (shouldAddYesStep) {
 						const yesAddId = `add-step-${step.id}-yes`;
@@ -338,23 +403,22 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 										targetStep: undefined,
 									},
 							markerEnd: !lastYesChild
-								? {
-										type: MarkerType.ArrowClosed,
-										color: '#52c41a',
-									}
+								? MarkerType.ArrowClosed
 								: undefined,
 						});
 					}
 
-					// Always add step node for no branch unless last child is end_automation or condition
+					// Only add continuation add-step for no branch if it has children and needs continuation
 					const lastNoChild =
 						noChildren.length > 0
 							? noChildren[noChildren.length - 1]
 							: null;
+
 					const shouldAddNoStep =
-						!lastNoChild ||
-						(lastNoChild.type !== 'end_automation' &&
-							lastNoChild.type !== 'condition');
+						noChildren.length > 0 &&
+						(!lastNoChild ||
+							(lastNoChild.type !== 'end_automation' &&
+								lastNoChild.type !== 'condition'));
 
 					if (shouldAddNoStep) {
 						const noAddId = `add-step-${step.id}-no`;
@@ -400,10 +464,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 										targetStep: undefined,
 									},
 							markerEnd: !lastNoChild
-								? {
-										type: MarkerType.ArrowClosed,
-										color: '#ff4d4f',
-									}
+								? MarkerType.ArrowClosed
 								: undefined,
 						});
 					}
@@ -515,6 +576,55 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			}
 		}
 
+		// Check if we have asymmetric condition branches that would break layout
+		// Since we now handle single-branch conditions better, we only consider it asymmetric
+		// if there are significant layout differences that could break the auto-layout
+		const hasAsymmetricConditions = steps.some((step) => {
+			if (step.type !== 'condition') return false;
+
+			const yesChildren = steps.filter(
+				(s) => s.parent_id === step.id && s.condition === 'yes'
+			);
+			const noChildren = steps.filter(
+				(s) => s.parent_id === step.id && s.condition === 'no'
+			);
+
+			// Only consider it asymmetric if there's a large difference in branch complexity
+			// that could break the layout algorithm
+			const yesDepth = getMaxDepth(yesChildren, steps);
+			const noDepth = getMaxDepth(noChildren, steps);
+
+			return Math.abs(yesDepth - noDepth) > 2; // Allow small differences
+		});
+
+		// Helper function to calculate branch depth
+		function getMaxDepth(
+			branchSteps: AutomationStep[],
+			allSteps: AutomationStep[]
+		): number {
+			if (branchSteps.length === 0) return 0;
+
+			let maxDepth = 1;
+			branchSteps.forEach((step) => {
+				if (step.type === 'condition') {
+					const childYes = allSteps.filter(
+						(s) => s.parent_id === step.id && s.condition === 'yes'
+					);
+					const childNo = allSteps.filter(
+						(s) => s.parent_id === step.id && s.condition === 'no'
+					);
+					const yesDepth = getMaxDepth(childYes, allSteps);
+					const noDepth = getMaxDepth(childNo, allSteps);
+					maxDepth = Math.max(
+						maxDepth,
+						1 + Math.max(yesDepth, noDepth)
+					);
+				}
+			});
+
+			return maxDepth;
+		}
+
 		// Apply auto-layout before setting nodes if no saved positions exist
 		const applyLayoutAndSetNodes = async () => {
 			// Check if we have any saved positions for step nodes (excluding trigger)
@@ -525,12 +635,15 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			console.log('hasExistingPositions', hasExistingPositions);
 			console.log('steps', steps.length);
 			console.log('initialNodes', initialNodes.length);
+			console.log('hasAsymmetricConditions', hasAsymmetricConditions);
 
-			// Only auto-layout if there are no existing saved positions and we have steps
+			// Only auto-layout if there are no existing saved positions, we have steps,
+			// and we don't have asymmetric conditions (which break the layout)
 			if (
 				!hasExistingPositions &&
 				steps.length > 0 &&
-				initialNodes.length > 1
+				initialNodes.length > 1 &&
+				!hasAsymmetricConditions
 			) {
 				try {
 					// Apply layout to get better positioned nodes
@@ -553,7 +666,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				}
 			}
 
-			// Fallback: set nodes without layout
+			// Fallback: set nodes without layout (safer for asymmetric conditions)
 			setNodes(initialNodes);
 			setEdges(initialEdges);
 		};

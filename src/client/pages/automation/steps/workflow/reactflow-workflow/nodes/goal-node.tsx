@@ -24,6 +24,7 @@ import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
 import { getGoal } from '@quillcrm/utils';
 import NodeContextMenu from '../components/node-context-menu';
+import StepReorderControls from '../components/step-reorder-controls';
 
 interface GoalNodeData {
 	step: AutomationStep;
@@ -128,6 +129,9 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 					position={Position.Top}
 					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
+
+				{/* Step Reorder Controls */}
+				<StepReorderControls step={step} />
 
 				<div className="qcrm-reactflow-node__header">
 					<div className="qcrm-reactflow-node__icon">

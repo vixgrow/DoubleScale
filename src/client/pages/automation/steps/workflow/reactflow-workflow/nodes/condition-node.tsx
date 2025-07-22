@@ -131,6 +131,8 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 
+				{/* Step Reorder Controls */}
+
 				{/* Enhanced condition node header with diamond shape accent */}
 				<div className="qcrm-reactflow-node__header">
 					<div className="qcrm-reactflow-condition__icon-container">

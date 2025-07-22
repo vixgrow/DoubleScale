@@ -44,47 +44,31 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 	const condition = edgeData?.condition || (label === 'Yes' ? 'yes' : 'no');
 	const isYes = condition === 'yes';
 
-	// Determine the best path type based on positions
-	const usesSmoothStep =
-		sourcePosition === Position.Left || sourcePosition === Position.Right;
+	// Use getSmoothStepPath for consistent routing with ELK's orthogonal layout
+	const [edgePath, labelX, labelY] = getSmoothStepPath({
+		sourceX,
+		sourceY,
+		sourcePosition: sourcePosition || Position.Left,
+		targetX,
+		targetY,
+		targetPosition: targetPosition || Position.Top,
+		borderRadius: 0, // Sharp corners for clean orthogonal look
+	});
 
-	const [edgePath, labelX, labelY] = usesSmoothStep
-		? getSmoothStepPath({
-				sourceX,
-				sourceY,
-				sourcePosition: sourcePosition || Position.Left,
-				targetX,
-				targetY,
-				targetPosition: targetPosition || Position.Top,
-				borderRadius: 20,
-			})
-		: getBezierPath({
-				sourceX,
-				sourceY,
-				sourcePosition: sourcePosition || Position.Left,
-				targetX,
-				targetY,
-				targetPosition: targetPosition || Position.Top,
-			});
-
-	// Enhanced styling based on condition
+	// Enhanced styling based on condition with clear color differentiation
 	const edgeStyle = {
 		...style,
-		stroke: isYes ? '#52c41a' : '#ff4d4f',
+		stroke: isYes ? '#52c41a' : '#ff4d4f', // Green for Yes, Red for No
 		strokeWidth: 3,
-		strokeLinecap: 'round' as const,
-		strokeLinejoin: 'round' as const,
-		filter: `drop-shadow(0 2px 4px ${isYes ? 'rgba(82, 196, 26, 0.3)' : 'rgba(255, 77, 79, 0.3)'})`,
+		strokeLinecap: 'square' as const, // Use square caps for proper connection
+		strokeLinejoin: 'miter' as const, // Use miter joins for sharp corners
+		filter: `drop-shadow(0 2px 4px ${isYes ? 'rgba(82, 196, 26, 0.4)' : 'rgba(255, 77, 79, 0.4)'})`,
 		transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+		strokeDasharray: isYes ? 'none' : '8 4', // Solid line for Yes, dashed for No
 	};
 
-	// Enhanced marker end
-	const enhancedMarkerEnd = {
-		type: markerEnd?.type || 'arrowclosed',
-		color: isYes ? '#52c41a' : '#ff4d4f',
-		width: 20,
-		height: 20,
-	};
+	// Use the provided markerEnd or undefined for clean rendering
+	const enhancedMarkerEnd = markerEnd;
 
 	const displayLabel =
 		label || (isYes ? __('Yes', 'quillcrm') : __('No', 'quillcrm'));
@@ -108,14 +92,16 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 						fontWeight: 900,
 						color: '#fff',
 						background: isYes
-							? 'linear-gradient(135deg, #52c41a, #73d13d)'
-							: 'linear-gradient(135deg, #ff4d4f, #ff7875)',
+							? 'linear-gradient(135deg, #52c41a, #73d13d)' // Bright green gradient for Yes
+							: 'linear-gradient(135deg, #ff4d4f, #ff7875)', // Bright red gradient for No
 						padding: '4px 10px',
 						borderRadius: '12px',
 						boxShadow: isYes
-							? '0 2px 8px rgba(82, 196, 26, 0.4)'
-							: '0 2px 8px rgba(255, 77, 79, 0.4)',
-						border: '2px solid rgba(255, 255, 255, 0.8)',
+							? '0 2px 8px rgba(82, 196, 26, 0.5)' // Stronger green shadow for Yes
+							: '0 2px 8px rgba(255, 77, 79, 0.5)', // Stronger red shadow for No
+						border: isYes
+							? '2px solid rgba(82, 196, 26, 0.3)' // Green border for Yes
+							: '2px solid rgba(255, 77, 79, 0.3)', // Red border for No
 						backdropFilter: 'blur(4px)',
 						textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
 						transition: 'all 0.2s ease',

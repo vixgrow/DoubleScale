@@ -14,6 +14,8 @@ import { DataTable } from '@/components/ui/data-table';
 import { useContactsContext } from '../contexts';
 import { useContactsAPI } from '../useContactsAPI';
 import { useContactsColumns } from '../columns';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
 
 interface ContactsTableProps {
 	activeTab?: string;
@@ -38,6 +40,12 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 		setPage,
 		dateRange,
 		setDateRange,
+		page,
+		perPage,
+		totalRecords,
+		setPerPage,
+		keywords,
+		setKeywords,
 	} = useContactsContext();
 
 	const { fetchContacts, doBulkAction } = useContactsAPI();
@@ -48,12 +56,22 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 		fetchContacts();
 	};
 
+	const serverSideTable = useServerSideTable({
+			page,
+			perPage,
+			totalRecords,
+			setPage,
+			setPerPage,
+		});
+
 	const tableConfig: DataTableConfig<any> = {
 		manageColumns: {
 			enabled: true,
 		},
 		search: {
 			placeholder: __('Search contacts...', 'quillcrm'),
+			onChange: (value) => setKeywords(value),
+			value: keywords,
 		},
 		selection: {
 			enabled: true,
@@ -94,12 +112,15 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 	};
 
 	return (
+		<>
 		<DataTable
 			columns={columns}
 			data={data}
-			showPagination={true}
+			showPagination={false}
 			config={tableConfig}
 			activeTab={activeTab}
 		/>
+		<DataTablePagination table={serverSideTable} />
+		</>
 	);
 };

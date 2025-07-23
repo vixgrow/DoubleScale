@@ -26,6 +26,9 @@ export const useContactsAPI = () => {
 		dateRange,
 		contact,
 		selectedRowKeys,
+		keywords,
+		totalRecords,
+		setTotalRecords,
 		setLoading,
 		setData,
 		setTotal,
@@ -45,11 +48,14 @@ export const useContactsAPI = () => {
 					page,
 					per_page: perPage,
 					filters: filters,
+					from: dateRange.from?.toISOString(),
+					to: dateRange.to?.toISOString(),
+					keywords,
 				}),
 				method: 'GET',
 			})) as ContactsResponse;
 
-			response.total && setTotal(response.total);
+			response.total && setTotalRecords(response.total);
 			response.data && setData(response.data);
 		} catch (error) {
 			showNotice('error', __('Failed to fetch contacts', 'quillcrm'));
@@ -258,15 +264,15 @@ export const useContactsAPI = () => {
 	// Auto-fetch when dependencies change
 	useEffect(() => {
 		fetchContacts();
-	}, [page, perPage]);
+	}, [page, perPage, dateRange, keywords]);
 
-	useEffect(() => {
-		if (dateRange.from || dateRange.to) {
-			// Reset to first page when filtering
-			// setPage(1); // Commented to avoid circular dependency
-			fetchContacts();
-		}
-	}, [dateRange]);
+	// useEffect(() => {
+	// 	if (dateRange.from || dateRange.to) {
+	// 		// Reset to first page when filtering
+	// 		// setPage(1); // Commented to avoid circular dependency
+	// 		fetchContacts();
+	// 	}
+	// }, [dateRange]);
 
 	return {
 		fetchContacts,

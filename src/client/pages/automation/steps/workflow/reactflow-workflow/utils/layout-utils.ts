@@ -9,7 +9,7 @@ import { Node } from '@xyflow/react';
 export const NODE_DIMENSIONS = {
     trigger: { width: 200, height: 80 },
     action: { width: 220, height: 90 },
-    condition: { width: 280, height: 180 },
+    condition: { width: 320, height: 200 }, // Increased condition node size for better spacing
     goal: { width: 200, height: 80 },
     end_automation: { width: 180, height: 70 },
     add_step: { width: 120, height: 50 },

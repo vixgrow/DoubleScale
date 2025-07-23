@@ -20,7 +20,6 @@ import {
 	Edge,
 	useNodesState,
 	useEdgesState,
-	MarkerType,
 	NodeMouseHandler,
 	Background,
 	Controls,
@@ -159,11 +158,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				})
 				.sort((a, b) => a.order - b.order);
 
+			// Calculate minimum width based on level and content with increased base
+			const baseWidth = 400; // Increased base width for better spacing
+			const levelMultiplier = 1 + level * 0.4; // Better spacing per level
+			const minWidth = baseWidth * levelMultiplier;
+
 			if (branchSteps.length === 0) {
-				return 280; // Minimum width for empty branch
+				return minWidth; // Minimum width for empty branch
 			}
 
-			let maxWidth = 280; // Base node width
+			let maxWidth = minWidth;
 
 			branchSteps.forEach((step) => {
 				if (step.type === 'condition') {
@@ -180,12 +184,34 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						'no',
 						level + 1
 					);
-					const conditionWidth = yesWidth + noWidth + 100; // 100px spacing between branches
-					maxWidth = Math.max(maxWidth, conditionWidth);
+
+					// Enhanced spacing calculation with better branch separation
+					const branchSpacing = Math.max(200, 80 + level * 40); // Better spacing with depth
+					const conditionWidth = yesWidth + noWidth + branchSpacing;
+
+					// Ensure minimum width for readability
+					const adjustedWidth = Math.max(conditionWidth, minWidth);
+					maxWidth = Math.max(maxWidth, adjustedWidth);
 				}
 			});
 
-			return maxWidth;
+			// Add extra padding for complex branches with increased padding
+			const complexityPadding = level > 0 ? 150 + level * 75 : 75;
+			const finalWidth = maxWidth + complexityPadding;
+
+			// Debug logging for width calculations
+			console.log(
+				`calculateBranchWidth - Parent: ${parentId}, Condition: ${condition}, Level: ${level}`,
+				{
+					branchStepsCount: branchSteps.length,
+					minWidth,
+					maxWidth,
+					complexityPadding,
+					finalWidth,
+				}
+			);
+
+			return finalWidth;
 		};
 
 		// Position calculator that considers nested structure
@@ -235,12 +261,27 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					// Position condition node at center
 					positionMap.set(stepId, { x: centerX, y: currentY });
 
-					// Calculate child positions with level-aware spacing
-					// Increase spacing for nested conditions to avoid visual confusion
-					const baseSpacing = 320;
-					const levelMultiplier = 1 + level * 0.2; // 20% more spacing per level
+					// Calculate child positions with improved spacing - increased significantly for better readability
+					const baseSpacing = 450; // Significantly increased base spacing for condition children
+					const levelMultiplier = 1 + level * 0.6; // More aggressive spacing per level
 					const childY = currentY + baseSpacing * levelMultiplier;
-					const totalChildWidth = yesWidth + noWidth + 100; // 100px between branches
+
+					// Enhanced branch spacing calculation with better separation
+					const branchGap = Math.max(300, 150 + level * 60); // Increased gap based on level
+					const totalChildWidth = yesWidth + noWidth + branchGap;
+
+					// Debug logging for branch calculations
+					console.log(
+						`Condition step ${step.id} at level ${level}:`,
+						{
+							yesWidth,
+							noWidth,
+							branchGap,
+							totalChildWidth,
+							centerX,
+							childY,
+						}
+					);
 
 					// Position yes branch to the left and get its end Y position
 					const yesX = centerX - totalChildWidth / 2 + yesWidth / 2;
@@ -267,18 +308,18 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					// Use the actual end positions from the child branches
 					const maxBranchEndY = Math.max(yesEndY, noEndY);
 
-					// Set currentY to be after the condition branches with level-aware spacing
-					const baseBottomSpacing = 400;
-					const mergeSpacing = 150;
-					const levelSpacing = level * 50; // Extra spacing for each nesting level
+					// Enhanced merge spacing calculation with significantly more space
+					const baseBottomSpacing = 600; // Significantly increased base spacing to avoid crowding
+					const mergeSpacing = Math.max(300, 200 + level * 50); // Increased dynamic merge spacing
+					const levelSpacing = level * 120; // Much more spacing for each nesting level
 					currentY = Math.max(
 						currentY + baseBottomSpacing + levelSpacing,
 						maxBranchEndY + mergeSpacing + levelSpacing
 					);
 				} else {
-					// For non-condition nodes, position normally
+					// For non-condition nodes, position normally with increased spacing
 					positionMap.set(stepId, { x: centerX, y: currentY });
-					currentY += 250; // Increased spacing between regular steps
+					currentY += 300; // Increased spacing between regular steps for better clarity
 				}
 			});
 
@@ -310,8 +351,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					savedPositions[parentId] || positionMap.get(parentId);
 
 				if (parentPosition) {
-					// Enhanced positioning that considers nesting level
-					const baseY = parentPosition.y + 320; // Increased spacing below parent
+					// Enhanced positioning that considers nesting level with better spacing
+					const baseY = parentPosition.y + 450; // Significantly increased spacing below parent
 					const branchWidth = calculateBranchWidth(
 						steps,
 						step.parent_id,
@@ -321,7 +362,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						step.condition === 'yes'
 							? -branchWidth / 2
 							: branchWidth / 2;
-					const stepOffset = (stepIndex || 0) * 250; // Increased spacing between steps in same branch
+					const stepOffset = (stepIndex || 0) * 350; // Increased spacing between steps in same branch
 
 					return {
 						x: parentPosition.x + branchOffset,
@@ -546,8 +587,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${step.id}-to-yes-merge-direct`,
 							source: step.id.toString(),
 							target: mergeId,
-							sourceHandle: 'yes',
-							targetHandle: 'left',
+							sourceHandle: 'yes', // Explicitly use 'yes' handle (left side)
+							targetHandle: 'top', // Connect to top handle of merge node
 							type: 'addStepEdge',
 							label: __('Yes', 'quillcrm'),
 							animated: false,
@@ -561,12 +602,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								targetStep: { id: mergeId, type: 'merge' },
 								label: __('Yes', 'quillcrm'),
 							},
-							markerEnd: {
-								type: MarkerType.ArrowClosed,
-								color: '#52c41a',
-								width: 12,
-								height: 12,
-							},
 							className:
 								'qcrm-condition-edge qcrm-condition-edge--yes',
 						});
@@ -577,7 +612,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${step.id}-to-yes-${firstYesChild.id}`,
 							source: step.id.toString(),
 							target: firstYesChild.id.toString(),
-							sourceHandle: 'yes',
+							sourceHandle: 'yes', // Explicitly use 'yes' handle (left side)
+							targetHandle: null, // Let target use default top handle
 							type: 'conditionEdge',
 							label: __('Yes', 'quillcrm'),
 							animated: false,
@@ -591,12 +627,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								targetStep: firstYesChild,
 								label: __('Yes', 'quillcrm'),
 							},
-							markerEnd: {
-								type: MarkerType.ArrowClosed,
-								color: '#52c41a',
-								width: 12,
-								height: 12,
-							},
 							className:
 								'qcrm-condition-edge qcrm-condition-edge--yes',
 						});
@@ -608,7 +638,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${lastYesChild.id}-to-merge`,
 							source: lastYesChild.id.toString(),
 							target: mergeId,
-							targetHandle: 'left', // Connect to left handle of merge node
+							targetHandle: 'top', // Connect to top handle of merge node
 							type: 'addStepEdge',
 							style: {
 								stroke: '#52c41a',
@@ -628,8 +658,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${step.id}-to-no-merge-direct`,
 							source: step.id.toString(),
 							target: mergeId,
-							sourceHandle: 'no',
-							targetHandle: 'right',
+							sourceHandle: 'no', // Explicitly use 'no' handle (right side)
+							targetHandle: 'top', // Connect to top handle of merge node
 							type: 'addStepEdge',
 							label: __('No', 'quillcrm'),
 							animated: false,
@@ -643,12 +673,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								targetStep: { id: mergeId, type: 'merge' },
 								label: __('No', 'quillcrm'),
 							},
-							markerEnd: {
-								type: MarkerType.ArrowClosed,
-								color: '#ff4d4f',
-								width: 12,
-								height: 12,
-							},
 							className:
 								'qcrm-condition-edge qcrm-condition-edge--no',
 						});
@@ -659,7 +683,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${step.id}-to-no-${firstNoChild.id}`,
 							source: step.id.toString(),
 							target: firstNoChild.id.toString(),
-							sourceHandle: 'no',
+							sourceHandle: 'no', // Explicitly use 'no' handle (right side)
+							targetHandle: null, // Let target use default top handle
 							type: 'conditionEdge',
 							label: __('No', 'quillcrm'),
 							animated: false,
@@ -673,12 +698,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								targetStep: firstNoChild,
 								label: __('No', 'quillcrm'),
 							},
-							markerEnd: {
-								type: MarkerType.ArrowClosed,
-								color: '#ff4d4f',
-								width: 12,
-								height: 12,
-							},
 							className:
 								'qcrm-condition-edge qcrm-condition-edge--no',
 						});
@@ -689,7 +708,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${lastNoChild.id}-to-merge`,
 							source: lastNoChild.id.toString(),
 							target: mergeId,
-							targetHandle: 'right', // Connect to right handle of merge node
+							targetHandle: 'top', // Connect to top handle of merge node
 							type: 'addStepEdge',
 							style: {
 								stroke: '#ff4d4f',
@@ -1223,13 +1242,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								strokeWidth: 2,
 								strokeLinecap: 'round',
 								strokeLinejoin: 'round',
-							},
-							markerEnd: {
-								type: MarkerType.ArrowClosed,
-								color: '#8c8c8c',
-								width: 16,
-								height: 16,
-								strokeWidth: 1,
 							},
 						}}
 						elevateEdgesOnSelect={true}

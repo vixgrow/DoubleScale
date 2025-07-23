@@ -289,27 +289,44 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			{/* For merge nodes, we have multiple target handles */}
 			{isMerge ? (
 				<>
+					{/* Central top handle for incoming connections */}
+					<Handle
+						type="target"
+						position={Position.Top}
+						id="top"
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--target qcrm-reactflow-handle--merge-input"
+						style={{
+							top: -6,
+							left: '50%',
+							transform: 'translateX(-50%)',
+						}}
+					/>
+					{/* Hidden handles for left/right connections but positioned centrally */}
 					<Handle
 						type="target"
 						position={Position.Left}
 						id="left"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
-						style={{ left: -6 }}
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--target qcrm-reactflow-handle--merge-hidden"
+						style={{
+							left: '50%',
+							top: '50%',
+							transform: 'translate(-50%, -50%)',
+							opacity: 0,
+							pointerEvents: 'none',
+						}}
 					/>
 					<Handle
 						type="target"
 						position={Position.Right}
 						id="right"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
-						style={{ right: -6 }}
-					/>
-					{/* Add top handle for cases where branches merge from above */}
-					<Handle
-						type="target"
-						position={Position.Top}
-						id="top"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
-						style={{ top: -6 }}
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--target qcrm-reactflow-handle--merge-hidden"
+						style={{
+							right: '50%',
+							top: '50%',
+							transform: 'translate(50%, -50%)',
+							opacity: 0,
+							pointerEvents: 'none',
+						}}
 					/>
 				</>
 			) : (
@@ -361,19 +378,23 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 					overlayStyle={{ zIndex: 9999 }}
 					destroyTooltipOnHide
 				>
-					<div
-						className="qcrm-reactflow-merge__content qcrm-reactflow-merge__add-step-content"
+					<Button
+						type="primary"
+						shape="circle"
+						size="small"
+						icon={<PlusOutlined />}
 						onClick={handleAddStepClick}
 						title={__('Add step after merge', 'quillcrm')}
-						style={{ cursor: 'pointer' }}
-					>
-						<div className="qcrm-reactflow-merge__icon">
-							<PlusOutlined style={{ fontSize: '18px' }} />
-						</div>
-						<div className="qcrm-reactflow-merge__label">
-							{__('Add Step', 'quillcrm')}
-						</div>
-					</div>
+						className="qcrm-merge-add-button"
+						style={{
+							boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+							border: 'none',
+							width: '32px',
+							height: '32px',
+							background: '#1890ff',
+							borderColor: '#1890ff',
+						}}
+					/>
 				</Popover>
 			) : (
 				<div className="qcrm-reactflow-merge__content">

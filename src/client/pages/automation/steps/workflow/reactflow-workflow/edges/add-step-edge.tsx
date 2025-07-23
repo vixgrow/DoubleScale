@@ -14,7 +14,6 @@ import {
 	PlusOutlined,
 	TrophyOutlined,
 	BranchesOutlined,
-	DisconnectOutlined,
 	ThunderboltOutlined,
 } from '@ant-design/icons';
 import { map } from 'lodash';
@@ -87,7 +86,6 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 	targetPosition,
 	style = {},
 	data,
-	markerEnd,
 	target,
 }) => {
 	const { sourceStep, targetStep, condition } =
@@ -117,6 +115,17 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 
 	if (!shouldShowAddStepEdge) {
 		// For other cases where we don't show the plus button
+		const edgeStyle = {
+			...style,
+			stroke:
+				condition === 'yes'
+					? '#52c41a'
+					: condition === 'no'
+						? '#ff4d4f'
+						: '#d9d9d9',
+			strokeWidth: 2,
+		};
+
 		return (
 			<BaseEdge
 				id={id}
@@ -130,8 +139,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 						targetPosition: targetPosition || Position.Top,
 					})[0]
 				}
-				style={style}
-				markerEnd={markerEnd}
+				style={edgeStyle}
 			/>
 		);
 	}
@@ -312,12 +320,14 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			edgeData.sourceStep &&
 			edgeData.sourceStep.type === 'condition'
 		) {
+			// For condition nodes, use the specific handle based on condition
 			if (edgeData.condition === 'yes') {
-				return Position.Left;
+				return Position.Left; // Yes branch from left handle
 			} else if (edgeData.condition === 'no') {
-				return Position.Right;
+				return Position.Right; // No branch from right handle
 			}
 		}
+		// For all other cases, use bottom handle
 		return sourcePosition || Position.Bottom;
 	};
 
@@ -340,14 +350,21 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		setPopoverVisible(!popoverVisible);
 	};
 
+	// Create custom styling for edges based on condition
+	const edgeStyle = {
+		...style,
+		stroke:
+			condition === 'yes'
+				? '#52c41a'
+				: condition === 'no'
+					? '#ff4d4f'
+					: '#d9d9d9',
+		strokeWidth: 2,
+	};
+
 	return (
 		<>
-			<BaseEdge
-				id={id}
-				path={edgePath}
-				style={style}
-				markerEnd={markerEnd}
-			/>
+			<BaseEdge id={id} path={edgePath} style={edgeStyle} />
 			<EdgeLabelRenderer>
 				<div
 					style={{

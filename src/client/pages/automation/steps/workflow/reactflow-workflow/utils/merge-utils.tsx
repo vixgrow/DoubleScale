@@ -30,7 +30,6 @@ export interface BranchConnection {
  * Creates merge node connection information for condition branches
  */
 export const createMergeConnections = (
-	conditionStep: any,
 	yesChildren: any[],
 	noChildren: any[]
 ): {
@@ -77,34 +76,31 @@ export const calculateMergePosition = (
 	noChildren: any[],
 	getNodePosition: (nodeId: string) => { x: number; y: number }
 ): { x: number; y: number } => {
-	let maxBranchY = conditionPosition.y + 300;
+	let maxBranchY = conditionPosition.y + 500; // Increased minimum spacing below condition
 
 	// Check deepest position in both branches
 	if (yesChildren.length > 0) {
 		const lastYesChild = yesChildren[yesChildren.length - 1];
 		const lastYesPos = getNodePosition(lastYesChild.id.toString());
-		maxBranchY = Math.max(maxBranchY, lastYesPos.y + 150);
+		maxBranchY = Math.max(maxBranchY, lastYesPos.y + 200); // Increased spacing after last child
 	}
 
 	if (noChildren.length > 0) {
 		const lastNoChild = noChildren[noChildren.length - 1];
 		const lastNoPos = getNodePosition(lastNoChild.id.toString());
-		maxBranchY = Math.max(maxBranchY, lastNoPos.y + 150);
+		maxBranchY = Math.max(maxBranchY, lastNoPos.y + 200); // Increased spacing after last child
 	}
 
 	return {
 		x: conditionPosition.x, // Center below condition
-		y: maxBranchY + 50, // Below the longest branch
+		y: maxBranchY + 100, // Increased spacing below the longest branch
 	};
 };
 
 /**
  * Determines if a merge node should connect to a subsequent workflow step
  */
-export const shouldConnectMergeToNext = (
-	nextSteps: any[],
-	currentMergeId: string
-): boolean => {
+export const shouldConnectMergeToNext = (nextSteps: any[]): boolean => {
 	// Check if there are any subsequent steps after this condition
 	return nextSteps.length > 0;
 };

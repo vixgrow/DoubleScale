@@ -15,7 +15,7 @@ import {
 	BranchesOutlined,
 	DisconnectOutlined,
 	ThunderboltOutlined,
-	PlusCircleOutlined,
+	PlusOutlined,
 } from '@ant-design/icons';
 import { map } from 'lodash';
 import { Handle, Position, NodeProps } from '@xyflow/react';
@@ -191,7 +191,18 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	return (
-		<div className="qcrm-reactflow-node qcrm-reactflow-node--add-step">
+		<div
+			className="qcrm-reactflow-node qcrm-reactflow-node--add-step"
+			style={{
+				width: 'auto',
+				height: 'auto',
+				minWidth: 'auto',
+				padding: '0',
+				background: 'transparent',
+				border: 'none',
+				boxShadow: 'none',
+			}}
+		>
 			<Handle
 				type="target"
 				position={Position.Top}
@@ -211,7 +222,9 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 										key={key}
 										icon={type.icon}
 										onClick={() => handleStepSelection(key)}
-										style={{ justifyContent: 'flex-start' }}
+										style={{
+											justifyContent: 'flex-start',
+										}}
 									>
 										{type.label}
 									</Button>
@@ -221,15 +234,22 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 					</>
 				}
 			>
-				<div className="qcrm-reactflow-node__add-button">
+				<div
+					style={{
+						pointerEvents: 'all',
+					}}
+					className="qcrm-edge-add-button"
+				>
 					<Button
 						type="primary"
-						icon={
-							<PlusCircleOutlined style={{ fontSize: '24px' }} />
-						}
 						shape="circle"
-						size="large"
-						style={{ width: '60px', height: '60px' }}
+						size="small"
+						icon={<PlusOutlined />}
+						title={__('Add step here', 'quillcrm')}
+						style={{
+							boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+							border: 'none',
+						}}
 					/>
 				</div>
 			</Popover>

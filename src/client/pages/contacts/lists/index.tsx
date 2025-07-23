@@ -24,6 +24,8 @@ import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
 import { getListColumns } from './columns';
 import { ListDialog } from './lists-dialog';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import DataTablePagination from '@/components/ui/data-table-pagination';
 
 export interface ListsRef {
 	openCreateListModal: () => void;
@@ -38,6 +40,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
+	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [keyword, setKeyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedList, setSelectedList] = useState<ContactList | null>(null);
@@ -75,6 +78,15 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		return true;
 	};
 
+	// Use the reusable hook
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
+	});
+
 	// API functions
 	const fetchLists = async () => {
 		setLoading(true);
@@ -83,11 +95,14 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				path: addQueryArgs('/qc/v1/lists', {
 					per_page: perPage,
 					page,
+					from: dateRange.from?.toISOString(),
+					to: dateRange.to?.toISOString(),
 					keyword,
 				}),
 			})) as ListsResponse;
 
 			setLists(response.data);
+			setTotalRecords(response.total);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -215,14 +230,14 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	// Effects
 	useEffect(() => {
 		fetchLists();
-	}, [page, perPage, keyword]);
+	}, [page, perPage, keyword, dateRange]);
 
-	useEffect(() => {
-		if (dateRange.from || dateRange.to) {
-			setPage(1);
-			fetchLists();
-		}
-	}, [dateRange]);
+	// useEffect(() => {
+	// 	if (dateRange.from || dateRange.to) {
+	// 		setPage(1);
+	// 		fetchLists();
+	// 	}
+	// }, [dateRange]);
 
 	// Imperative handle
 	useImperativeHandle(ref, () => ({
@@ -234,7 +249,11 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 
 	const tableConfig: DataTableConfig<ContactList> = {
 		manageColumns: { enabled: false },
-		search: { placeholder: __('Search Lists', 'quillcrm') },
+		search: {
+			placeholder: __('Search Lists', 'quillcrm'),
+			onChange: (value) => setKeyword(value),
+			value: keyword,
+		},
 		selection: {
 			enabled: true,
 			selectedKeys: selectedRowKeys,
@@ -263,7 +282,13 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			)}
 
 			{/* Data Table */}
-			<DataTable columns={columns} data={lists} config={tableConfig} />
+			<DataTable
+				columns={columns}
+				data={lists}
+				config={tableConfig}
+				showPagination={false}
+			/>
+			<DataTablePagination table={serverSideTable} />
 
 			{/* Dialog */}
 			<ListDialog

@@ -26,6 +26,8 @@ import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
 import { TagsDialog } from './tags-dialog';
 import { useTagsColumns } from './columns';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import DataTablePagination from '@/components/ui/data-table-pagination';
 
 export interface TagsRef {
 	openCreateTagModal: () => void;
@@ -41,6 +43,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
 	const [keyword, setKeyword] = useState<string>('');
+	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedTag, setSelectedTag] = useState<ContactTag | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -63,12 +66,12 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		to: null,
 	});
 
-	useEffect(() => {
-		if (dateRange.from || dateRange.to) {
-			setPage(1); // Reset to first page when filtering
-			fetchTags();
-		}
-	}, [dateRange]);
+	// useEffect(() => {
+	// 	if (dateRange.from || dateRange.to) {
+	// 		setPage(1); // Reset to first page when filtering
+	// 		fetchTags();
+	// 	}
+	// }, [dateRange]);
 
 	// Helper function to show notice
 	const showNotice = (type: 'success' | 'error', message: string) => {
@@ -91,6 +94,15 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		},
 	}));
 
+	// Use the reusable hook
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
+	});
+
 	const fetchTags = async () => {
 		setLoading(true);
 
@@ -99,11 +111,14 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				path: addQueryArgs('/qc/v1/tags', {
 					per_page: perPage,
 					page,
+					from: dateRange.from?.toISOString(),
+					to: dateRange.to?.toISOString(),
 					keyword,
 				}),
 			})) as TagsResponse;
 
 			setTags(response.data);
+			setTotalRecords(response.total);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -113,7 +128,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 	useEffect(() => {
 		fetchTags();
-	}, [page, perPage, keyword]);
+	}, [page, perPage, keyword, dateRange]);
 
 	const createTag = async () => {
 		if (!validate(tag)) {
@@ -236,6 +251,8 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		},
 		search: {
 			placeholder: __('Search Tags', 'quillcrm'),
+			onChange: (value) => setKeyword(value),
+			value: keyword,
 		},
 		selection: {
 			enabled: true,
@@ -264,7 +281,13 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				<NoticeBanner notice={notice} closeNotice={closeNotice} />
 			)}
 
-			<DataTable columns={columns} data={tags} config={tableConfig} />
+			<DataTable
+				columns={columns}
+				data={tags}
+				config={tableConfig}
+				showPagination={false}
+			/>
+			<DataTablePagination table={serverSideTable} />
 
 			<TagsDialog
 				visible={visible}

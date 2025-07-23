@@ -63,14 +63,16 @@ const updateStepOrderRecursive = (
 		})
 		.sort((a, b) => a.order - b.order);
 
-	// Update orders for steps that come at or after the insertion point
-	stepsToUpdate.forEach((step) => {
-		if (step.order >= order) {
-			const newOrder = step.order + 1;
-			step.order = newOrder;
-			updatedSteps[step.id] = { order: newOrder };
-		}
-	});
+	// If we're inserting at a specific position, update orders for steps that come at or after
+	if (stepsToUpdate.length > 0) {
+		stepsToUpdate.forEach((step) => {
+			if (step.order >= order) {
+				const newOrder = step.order + 1;
+				step.order = newOrder;
+				updatedSteps[step.id] = { order: newOrder };
+			}
+		});
+	}
 
 	return { newSteps, updatedSteps, currentStepOrder };
 };
@@ -100,48 +102,18 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		return null;
 	}
 
-	// Don't show add-step-edge functionality if:
-	// 1. Target is an AddStepNode (these have their own + button)
-	// 2. Source step is a condition node (they only have yes/no branches)
-	const shouldShowAddStepEdge =
-		!target?.startsWith('add-step') &&
-		!(sourceStep && sourceStep.type === 'condition');
-
-	// For condition nodes, completely remove add-step functionality
-	if (sourceStep && sourceStep.type === 'condition') {
-		// Determine correct positions for condition edges
-		let correctSourcePosition = sourcePosition || Position.Bottom;
-		let correctTargetPosition = targetPosition || Position.Top;
-
-		// For condition nodes, use the appropriate handle position
-		const edgeData = data as AddStepEdgeData;
-		if (edgeData && edgeData.condition) {
-			if (edgeData.condition === 'yes') {
-				correctSourcePosition = Position.Left;
-			} else if (edgeData.condition === 'no') {
-				correctSourcePosition = Position.Right;
-			}
-		}
-
-		// Return a simple edge without any add-step functionality
-		return (
-			<BaseEdge
-				id={id}
-				path={
-					getBezierPath({
-						sourceX,
-						sourceY,
-						sourcePosition: correctSourcePosition,
-						targetX,
-						targetY,
-						targetPosition: correctTargetPosition,
-					})[0]
-				}
-				style={style}
-				markerEnd={markerEnd}
-			/>
-		);
-	}
+	// Show add-step button on most edges except:
+	// 1. Edges TO add-step nodes (would be redundant)
+	// 2. Edges FROM merge nodes TO next steps (merge nodes handle their own add-step functionality)
+	// 3. Structural edges without proper step data
+	const shouldShowAddStepEdge = Boolean(
+		// Don't show on edges going TO add-step nodes
+		!(target && target.startsWith('add-step')) &&
+			// Don't show on edges FROM merge nodes to next steps (but allow on edges TO merge nodes)
+			!(sourceStep && sourceStep.type === 'merge' && data?.fromMerge) &&
+			// Must have either a source step or be a condition branch
+			(sourceStep || condition)
+	);
 
 	if (!shouldShowAddStepEdge) {
 		// For other cases where we don't show the plus button
@@ -169,6 +141,10 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			label: __('Action', 'quillcrm'),
 			icon: <ThunderboltOutlined />,
 		},
+		condition: {
+			label: __('Condition', 'quillcrm'),
+			icon: <BranchesOutlined />,
+		},
 		goal: {
 			label: __('Goal', 'quillcrm'),
 			icon: <TrophyOutlined />,
@@ -182,14 +158,25 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		let parentId = 0;
 		let stepCondition: string | undefined = undefined;
 
-		if (sourceStep && condition) {
+		if (sourceStep && sourceStep.type === 'condition' && condition) {
+			// Adding step to a condition branch
 			parentId = sourceStep.id;
+			stepCondition = condition;
+		} else if (sourceStep && condition) {
+			// Adding step within an existing condition branch
+			parentId = sourceStep.parent_id || 0;
 			stepCondition = condition;
 		} else if (sourceStep && sourceStep.parent_id) {
 			// If sourceStep has a parent, the new step should also have the same parent and condition
 			parentId = sourceStep.parent_id;
 			stepCondition = sourceStep.condition || undefined;
-		} else if (targetStep && targetStep.parent_id) {
+		} else if (
+			targetStep &&
+			'parent_id' in targetStep &&
+			targetStep.parent_id &&
+			'type' in targetStep &&
+			targetStep.type !== 'merge'
+		) {
 			// If targetStep has a parent, the new step should also have the same parent and condition
 			parentId = targetStep.parent_id;
 			stepCondition = targetStep.condition || undefined;
@@ -197,21 +184,44 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 
 		// Calculate order: if we have targetStep, insert before it, otherwise add at end
 		let order: number;
-		if (targetStep) {
+
+		// Find steps in the same branch to determine proper order
+		const sameBranchSteps = steps.filter((step) => {
+			if (parentId === 0) {
+				return !step.parent_id;
+			} else {
+				return (
+					step.parent_id === parentId &&
+					step.condition === stepCondition
+				);
+			}
+		});
+
+		console.log('Same branch steps:', sameBranchSteps);
+		console.log('Target step:', targetStep);
+
+		if (
+			targetStep &&
+			targetStep.type !== 'merge' &&
+			'order' in targetStep
+		) {
+			// Insert before the target step (only if it's a real automation step with order)
 			order = targetStep.order;
 		} else {
-			// Find the highest order in the same branch
-			const sameBranchSteps = steps.filter((step) => {
-				if (parentId === 0) {
-					return !step.parent_id;
-				} else {
-					return (
-						step.parent_id === parentId &&
-						step.condition === stepCondition
-					);
-				}
-			});
-			order = Math.max(...sameBranchSteps.map((s) => s.order), 0) + 1;
+			// Add at the end of the current branch
+			if (sameBranchSteps.length === 0) {
+				order = 1; // First step in this branch
+			} else {
+				order = Math.max(...sameBranchSteps.map((s) => s.order)) + 1;
+			}
+		}
+
+		console.log('Calculated order:', order);
+
+		// Ensure order is always a valid number
+		if (typeof order !== 'number' || isNaN(order) || order < 1) {
+			console.warn('Invalid order calculated, defaulting to 1:', order);
+			order = 1;
 		}
 
 		const stepData = {
@@ -228,12 +238,34 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			stepData.condition = stepCondition;
 		}
 
+		// Set appropriate action based on step type
 		if (type === 'condition') {
 			stepData.action = 'condition';
+		} else if (type === 'end_automation') {
+			stepData.action = 'end_automation';
 		}
+		// For 'action' and 'goal' types, leave action empty - will be set when user selects specific action/goal
 
 		const { newSteps, updatedSteps, currentStepOrder } =
 			updateStepOrderRecursive(steps, parentId, order, stepCondition);
+
+		console.log('Step creation debug:', {
+			parentId,
+			stepCondition,
+			order,
+			currentStepOrder,
+			updatedSteps,
+			sameBranchStepsCount: steps.filter((step) => {
+				if (parentId === 0) {
+					return !step.parent_id;
+				} else {
+					return (
+						step.parent_id === parentId &&
+						step.condition === stepCondition
+					);
+				}
+			}).length,
+		});
 
 		const requestData = {
 			...stepData,
@@ -248,6 +280,8 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 				data: requestData,
 			})) as AutomationStep;
 
+			console.log('response', response);
+
 			setUpdatedSteps({});
 			setSteps([...newSteps, response]);
 
@@ -258,9 +292,12 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 
 			setPopoverVisible(false);
 		} catch (error: any) {
+			console.error('Failed to create step:', error);
+			console.error('Request data was:', requestData);
+
 			createNotice({
 				type: 'error',
-				message: error.message,
+				message: error.message || __('Failed to add step', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);

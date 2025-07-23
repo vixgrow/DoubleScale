@@ -44,34 +44,47 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 	const condition = edgeData?.condition || (label === 'Yes' ? 'yes' : 'no');
 	const isYes = condition === 'yes';
 
-	// Use getSmoothStepPath for consistent routing with ELK's orthogonal layout
-	const [edgePath, labelX, labelY] = getSmoothStepPath({
+	// Use getBezierPath for smoother curves that work better with our layout
+	// Auto-detect proper source position based on condition for consistency
+	const correctSourcePosition =
+		condition === 'yes' ? Position.Left : Position.Right;
+	const [edgePath, labelX, labelY] = getBezierPath({
 		sourceX,
 		sourceY,
-		sourcePosition: sourcePosition || Position.Left,
+		sourcePosition: sourcePosition || correctSourcePosition,
 		targetX,
 		targetY,
 		targetPosition: targetPosition || Position.Top,
-		borderRadius: 0, // Sharp corners for clean orthogonal look
+	});
+
+	// Debug logging
+	console.log('ConditionEdge render:', {
+		id,
+		condition,
+		label,
+		edgeData,
+		labelX,
+		labelY,
 	});
 
 	// Enhanced styling based on condition with clear color differentiation
 	const edgeStyle = {
 		...style,
 		stroke: isYes ? '#52c41a' : '#ff4d4f', // Green for Yes, Red for No
-		strokeWidth: 3,
-		strokeLinecap: 'square' as const, // Use square caps for proper connection
-		strokeLinejoin: 'miter' as const, // Use miter joins for sharp corners
-		filter: `drop-shadow(0 2px 4px ${isYes ? 'rgba(82, 196, 26, 0.4)' : 'rgba(255, 77, 79, 0.4)'})`,
-		transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-		strokeDasharray: isYes ? 'none' : '8 4', // Solid line for Yes, dashed for No
+		strokeWidth: 3, // Optimal thickness for clarity
+		strokeLinecap: 'round' as const,
+		strokeLinejoin: 'round' as const,
+		filter: `drop-shadow(0 2px 4px ${isYes ? 'rgba(82, 196, 26, 0.3)' : 'rgba(255, 77, 79, 0.3)'})`,
+		transition: 'all 0.2s ease',
 	};
 
 	// Use the provided markerEnd or undefined for clean rendering
 	const enhancedMarkerEnd = markerEnd;
 
 	const displayLabel =
-		label || (isYes ? __('Yes', 'quillcrm') : __('No', 'quillcrm'));
+		edgeData?.label ||
+		label ||
+		(isYes ? __('Yes', 'quillcrm') : __('No', 'quillcrm'));
 
 	return (
 		<>
@@ -86,30 +99,40 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 				<div
 					style={{
 						position: 'absolute',
-						transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+						left: `${labelX}px`,
+						top: `${labelY}px`,
+						transform: 'translate(-50%, -50%)',
 						pointerEvents: 'none',
-						fontSize: '12px',
-						fontWeight: 900,
+						fontSize: '11px',
+						fontWeight: 600,
 						color: '#fff',
 						background: isYes
-							? 'linear-gradient(135deg, #52c41a, #73d13d)' // Bright green gradient for Yes
-							: 'linear-gradient(135deg, #ff4d4f, #ff7875)', // Bright red gradient for No
-						padding: '4px 10px',
-						borderRadius: '12px',
+							? '#52c41a' // Solid green for Yes
+							: '#ff4d4f', // Solid red for No
+						padding: '3px 8px',
+						borderRadius: '10px',
 						boxShadow: isYes
-							? '0 2px 8px rgba(82, 196, 26, 0.5)' // Stronger green shadow for Yes
-							: '0 2px 8px rgba(255, 77, 79, 0.5)', // Stronger red shadow for No
-						border: isYes
-							? '2px solid rgba(82, 196, 26, 0.3)' // Green border for Yes
-							: '2px solid rgba(255, 77, 79, 0.3)', // Red border for No
-						backdropFilter: 'blur(4px)',
-						textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
-						transition: 'all 0.2s ease',
-						zIndex: 1000,
+							? '0 2px 6px rgba(82, 196, 26, 0.4)' // Softer green shadow for Yes
+							: '0 2px 6px rgba(255, 77, 79, 0.4)', // Softer red shadow for No
+						border: '2px solid rgba(255, 255, 255, 0.9)', // White border for contrast
+						textShadow: '0 1px 1px rgba(0, 0, 0, 0.5)',
+						zIndex: 10000, // Higher z-index to ensure labels appear above all other elements
+						minWidth: '28px',
+						textAlign: 'center',
+						lineHeight: '1.2',
+						fontFamily: 'system-ui, -apple-system, sans-serif',
+						whiteSpace: 'nowrap',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						gap: '3px',
 					}}
 					className={`qcrm-condition-edge-label qcrm-condition-edge-label--${condition}`}
 				>
-					{isYes ? '✓' : '✕'} {displayLabel}
+					<span style={{ fontSize: '9px', fontWeight: 'bold' }}>
+						{isYes ? '✓' : '✕'}
+					</span>
+					<span>{displayLabel}</span>
 				</div>
 			</EdgeLabelRenderer>
 		</>

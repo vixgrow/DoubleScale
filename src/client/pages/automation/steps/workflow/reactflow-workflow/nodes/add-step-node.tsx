@@ -224,9 +224,12 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 				<div className="qcrm-reactflow-node__add-button">
 					<Button
 						type="primary"
-						icon={<PlusCircleOutlined />}
+						icon={
+							<PlusCircleOutlined style={{ fontSize: '24px' }} />
+						}
 						shape="circle"
 						size="large"
+						style={{ width: '60px', height: '60px' }}
 					/>
 				</div>
 			</Popover>

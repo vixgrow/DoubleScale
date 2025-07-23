@@ -4,6 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { useAutoLayout } from './auto-layout';
+import {
+	calculateMergePosition,
+	createMergeNodeData,
+	validateMergeConfiguration,
+} from './utils/merge-utils';
 
 /**
  * External dependencies
@@ -40,9 +46,9 @@ import ConditionNode from './nodes/condition-node';
 import GoalNode from './nodes/goal-node';
 import EndNode from './nodes/end-node';
 import AddStepNode from './nodes/add-step-node';
+import MergeNode from './nodes/merge-node';
 import AddStepEdge from './edges/add-step-edge';
 import ConditionEdge from './edges/condition-edge';
-import { useAutoLayout } from './auto-layout';
 
 // Register custom node types
 const nodeTypes = {
@@ -52,6 +58,7 @@ const nodeTypes = {
 	goal: GoalNode,
 	end_automation: EndNode,
 	add_step: AddStepNode,
+	merge: MergeNode,
 };
 
 // Register custom edge types
@@ -207,7 +214,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 			let currentY = startY;
 
-			branchSteps.forEach((step, stepIndex) => {
+			branchSteps.forEach((step) => {
 				const stepId = step.id.toString();
 
 				if (step.type === 'condition') {
@@ -228,8 +235,11 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					// Position condition node at center
 					positionMap.set(stepId, { x: centerX, y: currentY });
 
-					// Calculate child positions
-					const childY = currentY + 320; // More space below condition
+					// Calculate child positions with level-aware spacing
+					// Increase spacing for nested conditions to avoid visual confusion
+					const baseSpacing = 320;
+					const levelMultiplier = 1 + level * 0.2; // 20% more spacing per level
+					const childY = currentY + baseSpacing * levelMultiplier;
 					const totalChildWidth = yesWidth + noWidth + 100; // 100px between branches
 
 					// Position yes branch to the left and get its end Y position
@@ -257,8 +267,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					// Use the actual end positions from the child branches
 					const maxBranchEndY = Math.max(yesEndY, noEndY);
 
-					// Set currentY to be after the condition branches with more spacing
-					currentY = Math.max(currentY + 400, maxBranchEndY + 150);
+					// Set currentY to be after the condition branches with level-aware spacing
+					const baseBottomSpacing = 400;
+					const mergeSpacing = 150;
+					const levelSpacing = level * 50; // Extra spacing for each nesting level
+					currentY = Math.max(
+						currentY + baseBottomSpacing + levelSpacing,
+						maxBranchEndY + mergeSpacing + levelSpacing
+					);
 				} else {
 					// For non-condition nodes, position normally
 					positionMap.set(stepId, { x: centerX, y: currentY });
@@ -343,6 +359,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			let currentIndex = startIndex;
 
 			currentLevelSteps.forEach((step, stepIndex) => {
+				console.log('step', step);
+				console.log('stepIndex', stepIndex);
 				const position = getNodePosition(
 					step.id.toString(),
 					250,
@@ -382,26 +400,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						},
 					});
 				} else if (stepIndex === 0 && level > 0 && parentId) {
-					// Connect first child to parent with condition label - NO + button on condition branches
-					const label =
-						condition === 'yes'
-							? __('Yes', 'quillcrm')
-							: __('No', 'quillcrm');
-
-					initialEdges.push({
-						id: `${parentId}-${condition}-to-${step.id}`,
-						source: parentId.toString(),
-						target: step.id.toString(),
-						sourceHandle: condition,
-						type: 'conditionEdge', // Use custom condition edge for branches
-						label,
-						data: {
-							condition,
-							sourceStep: stepList.find((s) => s.id === parentId),
-							targetStep: step,
-						},
-						markerEnd: MarkerType.ArrowClosed,
-					});
+					// For first child in condition branch, don't connect directly to parent
+					// Connection will be handled through merge nodes
+					// Skip creating direct edge from condition to first child
 				} else if (stepIndex > 0) {
 					// Connect to previous sibling - but skip if previous step is a condition
 					const prevStep = currentLevelSteps[stepIndex - 1];
@@ -460,276 +461,336 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						)
 						.sort((a, b) => a.order - b.order);
 
-					// Create condition edges for empty branches to ensure "Yes"/"No" labels always appear
+					/**
+					 * Smart Merge Node Implementation
+					 *
+					 * Only create merge nodes when there are subsequent steps that need convergence
+					 * Skip merge nodes for leaf conditions that don't need to reconverge
+					 */
+
+					// Check if there are steps after this condition at the same level that need convergence
+					const hasSubsequentSteps = () => {
+						if (level === 0) {
+							// Root level: check for steps after this condition
+							return stepList.some(
+								(s) => !s.parent_id && s.order > step.order
+							);
+						} else {
+							// Nested level: check for steps after this condition in the same branch
+							return stepList.some(
+								(s) =>
+									s.parent_id === parentId &&
+									s.condition === condition &&
+									s.order > step.order
+							);
+						}
+					};
+
+					// Always create merge nodes for now to maintain compatibility
+					// TODO: Implement smarter merge logic based on hasSubsequentSteps()
+					const conditionPos = getNodePosition(step.id.toString());
+					const yesWidth = calculateBranchWidth(
+						stepList,
+						step.id,
+						'yes'
+					);
+					const noWidth = calculateBranchWidth(
+						stepList,
+						step.id,
+						'no'
+					);
+					const totalChildWidth = yesWidth + noWidth + 100;
+
+					// Calculate optimal merge position using utility
+					const optimalMergePosition = calculateMergePosition(
+						conditionPos,
+						yesChildren,
+						noChildren,
+						getNodePosition
+					);
+
+					// Create single merge node positioned below both branches
+					// Use level-aware naming to ensure unique merge nodes for nested conditions
+					const mergeId = `merge-${step.id}-level-${level}`;
+					const mergePosition =
+						savedPositions[mergeId] || optimalMergePosition;
+
+					// Create enhanced merge node data with level information
+					const mergeNodeData = {
+						...createMergeNodeData(step, yesChildren, noChildren),
+						level, // Pass the current nesting level for visual distinction
+					};
+
+					// Validate merge configuration
+					const validation =
+						validateMergeConfiguration(mergeNodeData);
+					if (!validation.isValid) {
+						console.warn(
+							`Merge node validation warnings for condition ${step.id}:`,
+							validation.warnings
+						);
+					}
+
+					initialNodes.push({
+						id: mergeId,
+						type: 'merge',
+						position: mergePosition,
+						data: mergeNodeData,
+					});
+
+					// Connect condition branches to their respective children or add-steps
+
 					if (yesChildren.length === 0) {
-						// Create a "Yes" edge to an add-step node for empty yes branch
-						const yesAddId = `add-step-${step.id}-yes-empty`;
-						const conditionPos = getNodePosition(
-							step.id.toString()
-						);
-						const yesWidth = calculateBranchWidth(
-							stepList,
-							step.id,
-							'yes'
-						);
-						const noWidth = calculateBranchWidth(
-							stepList,
-							step.id,
-							'no'
-						);
-						const totalChildWidth = yesWidth + noWidth + 100;
-
-						const yesAddPosition = savedPositions[yesAddId] || {
-							x:
-								conditionPos.x -
-								totalChildWidth / 2 +
-								yesWidth / 2, // Properly positioned in yes branch
-							y: conditionPos.y + 320, // Below condition with more spacing
-						};
-
-						initialNodes.push({
-							id: yesAddId,
-							type: 'add_step',
-							position: yesAddPosition,
-							data: {
-								parentId: step.id,
-								condition: 'yes',
-								prevStep: null,
-							},
-						});
-
+						// For empty yes branch, connect directly to merge with add-step functionality on edge
 						initialEdges.push({
-							id: `${step.id}-yes-to-empty-add`,
+							id: `${step.id}-to-yes-merge-direct`,
 							source: step.id.toString(),
-							target: yesAddId,
+							target: mergeId,
 							sourceHandle: 'yes',
-							type: 'conditionEdge',
+							targetHandle: 'left',
+							type: 'addStepEdge',
 							label: __('Yes', 'quillcrm'),
+							animated: false,
+							style: {
+								stroke: '#52c41a',
+								strokeWidth: 4,
+							},
 							data: {
 								condition: 'yes',
 								sourceStep: step,
-								targetStep: undefined,
+								targetStep: { id: mergeId, type: 'merge' },
+								label: __('Yes', 'quillcrm'),
 							},
-							markerEnd: MarkerType.ArrowClosed,
+							markerEnd: {
+								type: MarkerType.ArrowClosed,
+								color: '#52c41a',
+								width: 12,
+								height: 12,
+							},
+							className:
+								'qcrm-condition-edge qcrm-condition-edge--yes',
+						});
+					} else {
+						// Connect condition directly to first yes child
+						const firstYesChild = yesChildren[0];
+						initialEdges.push({
+							id: `${step.id}-to-yes-${firstYesChild.id}`,
+							source: step.id.toString(),
+							target: firstYesChild.id.toString(),
+							sourceHandle: 'yes',
+							type: 'conditionEdge',
+							label: __('Yes', 'quillcrm'),
+							animated: false,
+							style: {
+								stroke: '#52c41a',
+								strokeWidth: 4,
+							},
+							data: {
+								condition: 'yes',
+								sourceStep: step,
+								targetStep: firstYesChild,
+								label: __('Yes', 'quillcrm'),
+							},
+							markerEnd: {
+								type: MarkerType.ArrowClosed,
+								color: '#52c41a',
+								width: 12,
+								height: 12,
+							},
+							className:
+								'qcrm-condition-edge qcrm-condition-edge--yes',
+						});
+
+						// Connect last yes child to merge
+						const lastYesChild =
+							yesChildren[yesChildren.length - 1];
+						initialEdges.push({
+							id: `${lastYesChild.id}-to-merge`,
+							source: lastYesChild.id.toString(),
+							target: mergeId,
+							targetHandle: 'left', // Connect to left handle of merge node
+							type: 'addStepEdge',
+							style: {
+								stroke: '#52c41a',
+								strokeWidth: 2,
+							},
+							data: {
+								sourceStep: lastYesChild,
+								targetStep: { id: mergeId, type: 'merge' },
+								fromBranch: 'yes',
+							},
 						});
 					}
 
 					if (noChildren.length === 0) {
-						// Create a "No" edge to an add-step node for empty no branch
-						const noAddId = `add-step-${step.id}-no-empty`;
-						const conditionPos = getNodePosition(
-							step.id.toString()
-						);
-						const yesWidth = calculateBranchWidth(
-							stepList,
-							step.id,
-							'yes'
-						);
-						const noWidth = calculateBranchWidth(
-							stepList,
-							step.id,
-							'no'
-						);
-						const totalChildWidth = yesWidth + noWidth + 100;
-
-						const noAddPosition = savedPositions[noAddId] || {
-							x:
-								conditionPos.x +
-								totalChildWidth / 2 -
-								noWidth / 2, // Properly positioned in no branch
-							y: conditionPos.y + 320, // Below condition with more spacing
-						};
-
-						initialNodes.push({
-							id: noAddId,
-							type: 'add_step',
-							position: noAddPosition,
-							data: {
-								parentId: step.id,
-								condition: 'no',
-								prevStep: null,
-							},
-						});
-
+						// For empty no branch, connect directly to merge with add-step functionality on edge
 						initialEdges.push({
-							id: `${step.id}-no-to-empty-add`,
+							id: `${step.id}-to-no-merge-direct`,
 							source: step.id.toString(),
-							target: noAddId,
+							target: mergeId,
 							sourceHandle: 'no',
-							type: 'conditionEdge',
+							targetHandle: 'right',
+							type: 'addStepEdge',
 							label: __('No', 'quillcrm'),
+							animated: false,
+							style: {
+								stroke: '#ff4d4f',
+								strokeWidth: 4,
+							},
 							data: {
 								condition: 'no',
 								sourceStep: step,
-								targetStep: undefined,
+								targetStep: { id: mergeId, type: 'merge' },
+								label: __('No', 'quillcrm'),
 							},
-							markerEnd: MarkerType.ArrowClosed,
-						});
-					}
-
-					// Add continuation add-step nodes for branches that have children
-					const lastYesChild =
-						yesChildren.length > 0
-							? yesChildren[yesChildren.length - 1]
-							: null;
-
-					// Only add continuation add-step for yes branch if it has children and needs continuation
-					const shouldAddYesStep =
-						yesChildren.length > 0 &&
-						(!lastYesChild ||
-							(lastYesChild.type !== 'end_automation' &&
-								lastYesChild.type !== 'condition'));
-
-					if (shouldAddYesStep) {
-						const yesAddId = `add-step-${step.id}-yes`;
-						const conditionPos = getNodePosition(
-							step.id.toString()
-						);
-						const yesWidth = calculateBranchWidth(
-							stepList,
-							step.id,
-							'yes'
-						);
-						const noWidth = calculateBranchWidth(
-							stepList,
-							step.id,
-							'no'
-						);
-						const totalChildWidth = yesWidth + noWidth + 100;
-
-						const yesAddPosition = savedPositions[yesAddId] || {
-							x:
-								conditionPos.x -
-								totalChildWidth / 2 +
-								yesWidth / 2, // Properly positioned in yes branch
-							y: conditionPos.y + 320 + yesChildren.length * 250, // Below last yes child with increased spacing
-						};
-
-						initialNodes.push({
-							id: yesAddId,
-							type: 'add_step',
-							position: yesAddPosition,
-							data: {
-								parentId: step.id,
-								condition: 'yes',
-								prevStep: lastYesChild,
+							markerEnd: {
+								type: MarkerType.ArrowClosed,
+								color: '#ff4d4f',
+								width: 12,
+								height: 12,
 							},
+							className:
+								'qcrm-condition-edge qcrm-condition-edge--no',
 						});
-
-						// Connect to last yes child or condition node
-						const sourceId = lastYesChild
-							? lastYesChild.id.toString()
-							: step.id.toString();
-						const sourceHandle = !lastYesChild ? 'yes' : undefined;
-						const label = !lastYesChild
-							? __('Yes', 'quillcrm')
-							: undefined;
-
+					} else if (noChildren.length > 0) {
+						// Connect condition directly to first no child
+						const firstNoChild = noChildren[0];
 						initialEdges.push({
-							id: `${sourceId}-yes-to-add-${step.id}-yes`,
-							source: sourceId,
-							target: `add-step-${step.id}-yes`,
-							sourceHandle,
-							type: !lastYesChild
-								? 'conditionEdge'
-								: 'addStepEdge', // Use condition edge for direct condition connections
-							label,
-							data: !lastYesChild
-								? {
-										condition: 'yes',
-										sourceStep: step,
-										targetStep: undefined,
-									}
-								: {
-										sourceStep: lastYesChild,
-										targetStep: undefined,
-									},
-							markerEnd: !lastYesChild
-								? MarkerType.ArrowClosed
-								: undefined,
-						});
-					}
-
-					// Only add continuation add-step for no branch if it has children and needs continuation
-					const lastNoChild =
-						noChildren.length > 0
-							? noChildren[noChildren.length - 1]
-							: null;
-
-					const shouldAddNoStep =
-						noChildren.length > 0 &&
-						(!lastNoChild ||
-							(lastNoChild.type !== 'end_automation' &&
-								lastNoChild.type !== 'condition'));
-
-					if (shouldAddNoStep) {
-						const noAddId = `add-step-${step.id}-no`;
-						const conditionPos = getNodePosition(
-							step.id.toString()
-						);
-						const yesWidth = calculateBranchWidth(
-							stepList,
-							step.id,
-							'yes'
-						);
-						const noWidth = calculateBranchWidth(
-							stepList,
-							step.id,
-							'no'
-						);
-						const totalChildWidth = yesWidth + noWidth + 100;
-
-						const noAddPosition = savedPositions[noAddId] || {
-							x:
-								conditionPos.x +
-								totalChildWidth / 2 -
-								noWidth / 2, // Properly positioned in no branch
-							y: conditionPos.y + 320 + noChildren.length * 250, // Below last no child with increased spacing
-						};
-
-						initialNodes.push({
-							id: noAddId,
-							type: 'add_step',
-							position: noAddPosition,
+							id: `${step.id}-to-no-${firstNoChild.id}`,
+							source: step.id.toString(),
+							target: firstNoChild.id.toString(),
+							sourceHandle: 'no',
+							type: 'conditionEdge',
+							label: __('No', 'quillcrm'),
+							animated: false,
+							style: {
+								stroke: '#ff4d4f',
+								strokeWidth: 4,
+							},
 							data: {
-								parentId: step.id,
 								condition: 'no',
-								prevStep: lastNoChild,
+								sourceStep: step,
+								targetStep: firstNoChild,
+								label: __('No', 'quillcrm'),
+							},
+							markerEnd: {
+								type: MarkerType.ArrowClosed,
+								color: '#ff4d4f',
+								width: 12,
+								height: 12,
+							},
+							className:
+								'qcrm-condition-edge qcrm-condition-edge--no',
+						});
+
+						// Connect last no child to merge
+						const lastNoChild = noChildren[noChildren.length - 1];
+						initialEdges.push({
+							id: `${lastNoChild.id}-to-merge`,
+							source: lastNoChild.id.toString(),
+							target: mergeId,
+							targetHandle: 'right', // Connect to right handle of merge node
+							type: 'addStepEdge',
+							style: {
+								stroke: '#ff4d4f',
+								strokeWidth: 2,
+							},
+							data: {
+								sourceStep: lastNoChild,
+								targetStep: { id: mergeId, type: 'merge' },
+								fromBranch: 'no',
 							},
 						});
+					}
 
-						// Connect to last no child or condition node
-						const sourceId = lastNoChild
-							? lastNoChild.id.toString()
-							: step.id.toString();
-						const sourceHandle = !lastNoChild ? 'no' : undefined;
-						const label = !lastNoChild
-							? __('No', 'quillcrm')
-							: undefined;
+					// Add continuation add-step functionality to edges after existing children
+					if (yesChildren.length > 0) {
+						const lastYesChild =
+							yesChildren[yesChildren.length - 1];
+						const shouldAddYesStep =
+							lastYesChild.type !== 'end_automation' &&
+							lastYesChild.type !== 'condition';
 
+						if (shouldAddYesStep) {
+							// Modify the edge from last yes child to merge to include add-step functionality
+							const existingEdgeIndex = initialEdges.findIndex(
+								(edge) =>
+									edge.id === `${lastYesChild.id}-to-merge`
+							);
+
+							if (existingEdgeIndex >= 0) {
+								// Update the existing edge to include condition data for add-step functionality
+								initialEdges[existingEdgeIndex].data = {
+									...initialEdges[existingEdgeIndex].data,
+									condition: 'yes',
+									sourceStep: lastYesChild,
+								};
+							}
+						}
+					}
+
+					if (noChildren.length > 0) {
+						const lastNoChild = noChildren[noChildren.length - 1];
+						const shouldAddNoStep =
+							lastNoChild.type !== 'end_automation' &&
+							lastNoChild.type !== 'condition';
+
+						if (shouldAddNoStep) {
+							// Modify the edge from last no child to merge to include add-step functionality
+							const existingEdgeIndex = initialEdges.findIndex(
+								(edge) =>
+									edge.id === `${lastNoChild.id}-to-merge`
+							);
+
+							if (existingEdgeIndex >= 0) {
+								// Update the existing edge to include condition data for add-step functionality
+								initialEdges[existingEdgeIndex].data = {
+									...initialEdges[existingEdgeIndex].data,
+									condition: 'no',
+									sourceStep: lastNoChild,
+								};
+							}
+						}
+					}
+
+					// Check if there are subsequent steps at the same level that need to connect to this merge node
+					const subsequentSteps = stepList
+						.filter((s) => {
+							if (level === 0) {
+								// Root level: steps after this condition
+								return !s.parent_id && s.order > step.order;
+							} else {
+								// Nested level: steps after this condition in the same branch
+								return (
+									s.parent_id === parentId &&
+									s.condition === condition &&
+									s.order > step.order
+								);
+							}
+						})
+						.sort((a, b) => a.order - b.order);
+
+					// If there are subsequent steps, connect merge to the first one
+					if (subsequentSteps.length > 0) {
+						const nextStep = subsequentSteps[0];
 						initialEdges.push({
-							id: `${sourceId}-no-to-add-${step.id}-no`,
-							source: sourceId,
-							target: `add-step-${step.id}-no`,
-							sourceHandle,
-							type: !lastNoChild
-								? 'conditionEdge'
-								: 'addStepEdge', // Use condition edge for direct condition connections
-							label,
-							data: !lastNoChild
-								? {
-										condition: 'no',
-										sourceStep: step,
-										targetStep: undefined,
-									}
-								: {
-										sourceStep: lastNoChild,
-										targetStep: undefined,
-									},
-							markerEnd: !lastNoChild
-								? MarkerType.ArrowClosed
-								: undefined,
+							id: `${mergeId}-to-${nextStep.id}`,
+							source: mergeId,
+							target: nextStep.id.toString(),
+							type: 'addStepEdge',
+							style: {
+								stroke: '#1890ff',
+								strokeWidth: 2,
+							},
+							data: {
+								sourceStep: { id: mergeId, type: 'merge' },
+								targetStep: nextStep,
+								fromMerge: true,
+							},
 						});
+					} else if (level === 0) {
+						// For root-level conditions with no subsequent steps, add final add-step connection
+						// This will be handled by the final add-step logic below
 					}
 
 					// Update current index to continue after nested structure
@@ -754,90 +815,119 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		// Process the entire step hierarchy starting from root
 		const result = processStepHierarchy(steps);
 
-		// Add final add-step node for root level if needed
-		const rootSteps = steps
-			.filter((step) => !step.parent_id)
-			.sort((a, b) => a.order - b.order);
+		function addFinalAddStep() {
+			// Add final add-step node for root level if needed
+			const rootSteps = steps
+				.filter((step) => !step.parent_id)
+				.sort((a, b) => a.order - b.order);
 
-		// Only add final add-step node if the last root step is not a condition or end_automation
-		const lastRootStep =
-			rootSteps.length > 0 ? rootSteps[rootSteps.length - 1] : null;
-		const shouldAddFinalStep =
-			rootSteps.length === 0 ||
-			(lastRootStep &&
-				lastRootStep.type !== 'end_automation' &&
-				lastRootStep.type !== 'condition');
-		if (shouldAddFinalStep) {
-			// Position the final add-step based on the last root step, not the bottommost node
-			let finalAddPosition;
-			if (rootSteps.length === 0) {
-				// No root steps, position below trigger
-				const triggerPos = savedPositions['trigger'] || {
-					x: 250,
-					y: 50,
-				};
-				finalAddPosition = {
-					x: triggerPos.x,
-					y: triggerPos.y + 250,
-				};
-			} else if (lastRootStep) {
-				// Position based on the last root step in the main flow
-				const lastRootStepPos = getNodePosition(
-					lastRootStep.id.toString()
-				);
+			// Only add final add-step node if the last root step is not a condition or end_automation
+			const lastRootStep =
+				rootSteps.length > 0 ? rootSteps[rootSteps.length - 1] : null;
+			const shouldAddFinalStep =
+				rootSteps.length === 0 ||
+				(lastRootStep &&
+					lastRootStep.type !== 'end_automation' &&
+					lastRootStep.type !== 'condition');
+			if (shouldAddFinalStep) {
+				// Position the final add-step based on the last root step, not the bottommost node
+				let finalAddPosition;
+				if (rootSteps.length === 0) {
+					// No root steps, position below trigger
+					const triggerPos = savedPositions['trigger'] || {
+						x: 250,
+						y: 50,
+					};
+					finalAddPosition = {
+						x: triggerPos.x,
+						y: triggerPos.y + 250,
+					};
+				} else if (lastRootStep) {
+					// Position based on the last root step in the main flow
+					const lastRootStepPos = getNodePosition(
+						lastRootStep.id.toString()
+					);
 
-				finalAddPosition = {
-					x: lastRootStepPos.x,
-					y: lastRootStepPos.y + 250,
-				};
-			}
+					finalAddPosition = {
+						x: lastRootStepPos.x,
+						y: lastRootStepPos.y + 250,
+					};
+				}
 
-			// Check for saved position for final add-step node
-			const finalAddId = 'add-step-final';
-			const finalSavedPosition = savedPositions[finalAddId];
+				// Check for saved position for final add-step node
+				const finalAddId = 'add-step-final';
+				const finalSavedPosition = savedPositions[finalAddId];
 
-			if (finalAddPosition) {
-				initialNodes.push({
-					id: finalAddId,
-					type: 'add_step',
-					position: finalSavedPosition || finalAddPosition,
-					data: {
-						parentId: null,
-						condition: null,
-						prevStep: lastRootStep,
-					},
-				});
-
-				// Connect to last root step or trigger (but not if last step is condition)
-				const sourceId = result.lastStepId || 'trigger';
-				const sourceHandle = undefined;
-
-				// Don't create addStepEdge from condition nodes
-				if (lastRootStep && lastRootStep.type === 'condition') {
-					// For condition nodes, use straight edge without add-step functionality
-					initialEdges.push({
-						id: `${sourceId}-to-add-final`,
-						source: sourceId,
-						target: 'add-step-final',
-						sourceHandle,
-						type: 'straight',
-					});
-				} else {
-					// For other step types, use addStepEdge
-					initialEdges.push({
-						id: `${sourceId}-to-add-final`,
-						source: sourceId,
-						target: 'add-step-final',
-						sourceHandle,
-						type: 'addStepEdge',
+				if (finalAddPosition) {
+					initialNodes.push({
+						id: finalAddId,
+						type: 'add_step',
+						position: finalSavedPosition || finalAddPosition,
 						data: {
-							sourceStep: lastRootStep,
-							targetStep: undefined, // adding at end
+							parentId: null,
+							condition: null,
+							prevStep: lastRootStep,
 						},
 					});
+
+					// Connect to last root step or trigger
+					if (lastRootStep && lastRootStep.type === 'condition') {
+						// For root-level condition nodes, connect from the merge node
+						const mergeId = `merge-${lastRootStep.id}-level-0`; // Root level is level 0
+
+						// Check if merge node actually exists (in case we skipped creating it)
+						const mergeNodeExists = initialNodes.some(
+							(node) => node.id === mergeId
+						);
+
+						if (mergeNodeExists) {
+							initialEdges.push({
+								id: `${mergeId}-to-add-final`,
+								source: mergeId,
+								target: 'add-step-final',
+								type: 'addStepEdge',
+								style: {
+									stroke: '#1890ff',
+									strokeWidth: 2,
+								},
+								data: {
+									sourceStep: { id: mergeId, type: 'merge' },
+									targetStep: undefined, // adding at end
+									fromMerge: true,
+								},
+							});
+						} else {
+							// If no merge node, connect directly from the condition
+							initialEdges.push({
+								id: `${lastRootStep.id}-to-add-final`,
+								source: lastRootStep.id.toString(),
+								target: 'add-step-final',
+								type: 'addStepEdge',
+								data: {
+									sourceStep: lastRootStep,
+									targetStep: undefined, // adding at end
+								},
+							});
+						}
+					} else {
+						// For other step types, use addStepEdge
+						const sourceId = result.lastStepId || 'trigger';
+						initialEdges.push({
+							id: `${sourceId}-to-add-final`,
+							source: sourceId,
+							target: 'add-step-final',
+							type: 'addStepEdge',
+							data: {
+								sourceStep: lastRootStep,
+								targetStep: undefined, // adding at end
+							},
+						});
+					}
 				}
 			}
 		}
+
+		addFinalAddStep();
 
 		// Apply auto-layout before setting nodes if no saved positions exist
 		const applyLayoutAndSetNodes = async () => {
@@ -859,6 +949,27 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				'add-step-final',
 			]);
 
+			// Add merge node IDs for condition steps
+			steps.forEach((step) => {
+				if (step.type === 'condition') {
+					// Calculate the level for this condition step
+					let level = 0;
+					let currentStep = step;
+					while (currentStep.parent_id) {
+						const parent = steps.find(
+							(s) => s.id === currentStep.parent_id
+						);
+						if (parent && parent.type === 'condition') {
+							level++;
+							currentStep = parent;
+						} else {
+							break;
+						}
+					}
+					currentStepIds.add(`merge-${step.id}-level-${level}`);
+				}
+			});
+
 			const hasOrphanedPositions = Object.keys(savedPositions).some(
 				(nodeId) => {
 					// Skip add-step nodes as they're dynamic
@@ -870,29 +981,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			// Force auto-layout if we have orphaned positions
 			const shouldForceLayout = hasOrphanedPositions;
 
-			console.log(
-				'hasExistingPositions (ALL steps have positions)',
-				hasExistingPositions
-			);
-			console.log('hasOrphanedPositions', hasOrphanedPositions);
-			console.log('shouldForceLayout', shouldForceLayout);
-			console.log('steps.length > 0', steps.length > 0);
-			console.log('initialNodes.length > 1', initialNodes.length > 1);
-
 			// Debug individual step positions
 			let stepsWithPositions = 0;
 			steps.forEach((step) => {
 				const stepId = step.id.toString();
 				const hasPosition = !!savedPositions[stepId];
 				if (hasPosition) stepsWithPositions++;
-				console.log(
-					`Step ${stepId} (${step.type}): has saved position = ${hasPosition}`,
-					savedPositions[stepId]
-				);
 			});
-			console.log(
-				`Summary: ${stepsWithPositions}/${steps.length} steps have saved positions`
-			);
 
 			// Check if this has complex nested conditions that should use our custom positioning
 			const hasNestedConditions = steps.some((step) => {
@@ -923,17 +1018,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				}
 				return Math.max(maxDepth, depth);
 			}, 0);
-
-			console.log('hasNestedConditions', hasNestedConditions);
-			console.log('maxConditionDepth', maxConditionDepth);
-			console.log(
-				'Will run auto-layout?',
-				(shouldForceLayout || !hasExistingPositions) &&
-					steps.length > 0 &&
-					initialNodes.length > 1 &&
-					!hasNestedConditions &&
-					maxConditionDepth === 0
-			);
 
 			// Only auto-layout if there are no existing saved positions OR we have orphaned positions,
 			// we have steps, we have multiple nodes, AND we don't have complex nested conditions
@@ -977,7 +1061,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		automation?.settings?.reactflow_positions,
 		steps,
 		onStepClick,
-		onTriggerClick,
 	]);
 
 	// Clear saved positions to force re-layout
@@ -1073,7 +1156,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 	// Handle node clicks
 	const onNodeClick: NodeMouseHandler = useCallback(
-		(event, node) => {
+		(_event, node) => {
 			if (node.id === 'trigger' && onTriggerClick) {
 				onTriggerClick();
 			} else if (
@@ -1132,6 +1215,29 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						zoomOnScroll={true}
 						zoomOnPinch={true}
 						deleteKeyCode={null}
+						defaultEdgeOptions={{
+							animated: false,
+							type: 'default',
+							style: {
+								stroke: '#8c8c8c',
+								strokeWidth: 2,
+								strokeLinecap: 'round',
+								strokeLinejoin: 'round',
+							},
+							markerEnd: {
+								type: MarkerType.ArrowClosed,
+								color: '#8c8c8c',
+								width: 16,
+								height: 16,
+								strokeWidth: 1,
+							},
+						}}
+						elevateEdgesOnSelect={true}
+						elevateNodesOnSelect={false}
+						snapToGrid={false}
+						snapGrid={[15, 15]}
+						edgesFocusable={false}
+						edgesReconnectable={false}
 					>
 						<Background />
 						<Controls />

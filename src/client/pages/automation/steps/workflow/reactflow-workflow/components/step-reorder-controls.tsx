@@ -87,7 +87,14 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 			let reason = 'within_branch';
 
 			if (sameBranchSteps.length <= 1) {
-				reason = 'single_step_in_branch';
+				// Only one step in branch - only allow movement if it's a condition step
+				if (step.type === 'condition') {
+					canMoveUp = currentIndex > 0;
+					canMoveDown = currentIndex < sameBranchSteps.length - 1;
+					reason = 'single_condition_in_branch';
+				} else {
+					reason = 'single_step_in_branch';
+				}
 			} else if (adjacency.betweenConditions) {
 				// Step is between two conditions in a branch - very restricted
 				canMoveUp = false;
@@ -102,6 +109,7 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 				canMoveDown = false;
 				reason = 'before_condition_in_branch';
 			}
+			// Note: Condition steps themselves can move freely within branches
 
 			return { canMoveUp, canMoveDown, reason };
 		}
@@ -123,22 +131,22 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 			let reason = 'root_level';
 
 			// Apply restrictions when adjacent to condition nodes at root level
-			if (adjacency.nextIsCondition && step.type !== 'condition') {
-				// Step directly before a condition - cannot move down past it
-				canMoveDown = false;
-				reason = 'before_condition_root';
-			} else if (adjacency.prevIsCondition && step.type !== 'condition') {
-				// Step directly after a condition - cannot move up past it
-				canMoveUp = false;
-				reason = 'after_condition_root';
-			} else if (
-				adjacency.betweenConditions &&
-				step.type !== 'condition'
-			) {
-				// Step between two conditions - cannot move in either direction
-				canMoveUp = false;
-				canMoveDown = false;
-				reason = 'between_conditions_root';
+			// But allow condition nodes themselves to move more freely
+			if (step.type !== 'condition') {
+				if (adjacency.nextIsCondition) {
+					// Step directly before a condition - cannot move down past it
+					canMoveDown = false;
+					reason = 'before_condition_root';
+				} else if (adjacency.prevIsCondition) {
+					// Step directly after a condition - cannot move up past it
+					canMoveUp = false;
+					reason = 'after_condition_root';
+				} else if (adjacency.betweenConditions) {
+					// Step between two conditions - cannot move in either direction
+					canMoveUp = false;
+					canMoveDown = false;
+					reason = 'between_conditions_root';
+				}
 			}
 
 			return { canMoveUp, canMoveDown, reason };
@@ -192,6 +200,11 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 			case 'single_step_in_branch':
 				return __('Only step in this branch', 'quillcrm');
 
+			case 'single_condition_in_branch':
+				return direction === 'up'
+					? __('Move condition up', 'quillcrm')
+					: __('Move condition down', 'quillcrm');
+
 			case 'between_conditions_in_branch':
 				return __(
 					'Cannot move when between conditions in branch',
@@ -231,7 +244,8 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 	};
 
 	// Don't render if step can't be moved in either direction
-	if (!canMoveUp && !canMoveDown) {
+	// Exception: Always show controls for condition steps, even if disabled
+	if (!canMoveUp && !canMoveDown && step.type !== 'condition') {
 		return null;
 	}
 

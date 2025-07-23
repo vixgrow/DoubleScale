@@ -11,10 +11,9 @@ import { useDispatch } from '@wordpress/data';
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import {
-	BranchesOutlined,
+	SettingOutlined,
 	EditOutlined,
 	DeleteOutlined,
-	QuestionCircleOutlined,
 } from '@ant-design/icons';
 import { Button, Popconfirm, Tooltip } from 'antd';
 
@@ -24,14 +23,17 @@ import { Button, Popconfirm, Tooltip } from 'antd';
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
 import NodeContextMenu from '../components/node-context-menu';
+import StepReorderControls from '../components/step-reorder-controls';
 
 interface ConditionNodeData {
 	step: AutomationStep;
 	onStepClick?: (step: OrganizedStep) => void;
+	clearSavedPositions?: () => void;
 }
 
 const ConditionNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, onStepClick } = data as unknown as ConditionNodeData;
+	const { step, onStepClick, clearSavedPositions } =
+		data as unknown as ConditionNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const [isDeleting, setIsDeleting] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -117,10 +119,8 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	// Get condition name for display
-	const conditionName =
-		step.settings?.condition_name || __('If/Then Logic', 'quillcrm');
-	const hasConditionName = step.settings?.condition_name;
+	// Check if condition is configured
+	const isConfigured = step.settings?.condition_name;
 
 	return (
 		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
@@ -131,16 +131,38 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 
-				{/* Step Reorder Controls */}
+				{/* Node content matching the image design */}
+				<div className="qcrm-reactflow-condition__container">
+					{/* Left icon section */}
+					<div className="qcrm-reactflow-condition__icon-section">
+						<SettingOutlined className="qcrm-reactflow-condition__gear-icon" />
+					</div>
 
-				{/* Enhanced condition node header with diamond shape accent */}
-				<div className="qcrm-reactflow-node__header">
-					<div className="qcrm-reactflow-condition__icon-container">
-						<div className="qcrm-reactflow-condition__diamond">
-							<BranchesOutlined className="qcrm-reactflow-condition__icon" />
+					{/* Center content section */}
+					<div className="qcrm-reactflow-condition__content-section">
+						<div className="qcrm-reactflow-condition__title">
+							{__('Condition', 'quillcrm')}
+						</div>
+						<div className="qcrm-reactflow-condition__status">
+							{isConfigured ? (
+								<span className="qcrm-reactflow-condition__configured">
+									{step.settings?.condition_name}
+								</span>
+							) : (
+								<span className="qcrm-reactflow-condition__not-configured">
+									{__('Not Configured', 'quillcrm')}
+								</span>
+							)}
 						</div>
 					</div>
-					<div className="qcrm-reactflow-node__actions">
+
+					{/* Right actions section */}
+					<div className="qcrm-reactflow-condition__actions-section">
+						<StepReorderControls
+							step={step}
+							className="qcrm-reactflow-condition__reorder-controls"
+							clearSavedPositions={clearSavedPositions}
+						/>
 						<Tooltip
 							title={__('Edit Condition', 'quillcrm')}
 							placement="top"
@@ -167,7 +189,7 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 							cancelText={__('Cancel', 'quillcrm')}
 							okButtonProps={{ danger: true }}
 							onCancel={(e) => e?.stopPropagation()}
-							onOpenChange={(open, e) => {
+							onOpenChange={(_, e) => {
 								if (e) {
 									e.stopPropagation();
 								}
@@ -191,39 +213,18 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 					</div>
 				</div>
 
-				{/* Enhanced content area */}
-				<div className="qcrm-reactflow-node__content">
-					<div className="qcrm-reactflow-condition__content">
-						<div className="qcrm-reactflow-node__title">
-							{__('Condition', 'quillcrm')}
-						</div>
-						<div className="qcrm-reactflow-condition__description">
-							{hasConditionName ? (
-								<span className="qcrm-reactflow-condition__name">
-									{conditionName}
-								</span>
-							) : (
-								<span className="qcrm-reactflow-condition__placeholder">
-									<QuestionCircleOutlined className="qcrm-reactflow-condition__question-icon" />
-									{__('Click to set condition', 'quillcrm')}
-								</span>
-							)}
-						</div>
-					</div>
-				</div>
-
-				{/* Enhanced handles with custom styling */}
+				{/* Source handles for yes/no branches */}
 				<Handle
 					type="source"
 					position={Position.Left}
 					id="yes"
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--yes qcrm-reactflow-condition__handle"
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--yes"
 				/>
 				<Handle
 					type="source"
 					position={Position.Right}
 					id="no"
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--no qcrm-reactflow-condition__handle"
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--no"
 				/>
 			</div>
 		</NodeContextMenu>

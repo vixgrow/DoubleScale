@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 /**
  * internal dependencies
  */
@@ -57,12 +57,12 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 	};
 
 	const serverSideTable = useServerSideTable({
-			page,
-			perPage,
-			totalRecords,
-			setPage,
-			setPerPage,
-		});
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
+	});
 
 	const tableConfig: DataTableConfig<any> = {
 		manageColumns: {
@@ -111,16 +111,21 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 		},
 	};
 
+	useEffect(() => {
+		fetchContacts();
+	}, [perPage, page, keywords, filters, dateRange]);
+
 	return (
 		<>
-		<DataTable
-			columns={columns}
-			data={data}
-			showPagination={false}
-			config={tableConfig}
-			activeTab={activeTab}
-		/>
-		<DataTablePagination table={serverSideTable} />
+			<DataTable
+				columns={columns}
+				data={data}
+				showPagination={false}
+				config={tableConfig}
+				activeTab={activeTab}
+				initialPageSize={perPage}
+			/>
+			<DataTablePagination table={serverSideTable} />
 		</>
 	);
 };

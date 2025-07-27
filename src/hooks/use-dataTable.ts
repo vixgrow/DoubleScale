@@ -22,7 +22,7 @@ export function useDataTable<TData>(
 	data: TData[],
 	columns: ColumnDef<TData, any>[],
 	config: DataTableConfig<TData>,
-	initialPageSize?: number | undefined,
+	initialPageSize?: number | undefined
 ) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -94,19 +94,16 @@ export function useDataTable<TData>(
 		onGlobalFilterChange: setGlobalFilter,
 		globalFilterFn: 'includesString',
 		getRowId: (row: any) => row.id?.toString() || '',
-		initialState: initialPageSize
-			? {
-				pagination: {
-					pageSize: initialPageSize,
-				},
-			}
-			: {},
 		state: {
 			sorting,
 			columnFilters,
 			columnVisibility,
 			rowSelection,
 			globalFilter,
+			pagination: {
+				pageSize: initialPageSize || 10,
+				pageIndex: 0,
+			},
 		},
 	});
 

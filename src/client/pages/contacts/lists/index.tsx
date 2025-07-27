@@ -26,6 +26,7 @@ import { getListColumns } from './columns';
 import { ListDialog } from './lists-dialog';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
+import { formatDateForAPI } from '@quillcrm/utils';
 
 export interface ListsRef {
 	openCreateListModal: () => void;
@@ -95,8 +96,8 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				path: addQueryArgs('/qc/v1/lists', {
 					per_page: perPage,
 					page,
-					from: dateRange.from?.toISOString(),
-					to: dateRange.to?.toISOString(),
+					from: formatDateForAPI(dateRange.from),
+					to: formatDateForAPI(dateRange.to),
 					keyword,
 				}),
 			})) as ListsResponse;
@@ -287,6 +288,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				data={lists}
 				config={tableConfig}
 				showPagination={false}
+				initialPageSize={perPage}
 			/>
 			<DataTablePagination table={serverSideTable} />
 

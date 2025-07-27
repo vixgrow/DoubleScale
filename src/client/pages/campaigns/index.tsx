@@ -24,6 +24,7 @@ import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable'; // Import the hook
+import { formatDateForAPI } from '@quillcrm/utils';
 
 const Campaigns: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -71,8 +72,8 @@ const Campaigns: React.FC = () => {
 				path: addQueryArgs('/qc/v1/campaigns', {
 					page,
 					per_page: perPage,
-					from: dateRange.from?.toISOString(),
-					to: dateRange.to?.toISOString(),
+					from: formatDateForAPI(dateRange.from),
+					to: formatDateForAPI(dateRange.to),
 					keywords,
 				}),
 			})) as CampaignsResponse;

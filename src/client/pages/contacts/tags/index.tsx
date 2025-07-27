@@ -28,6 +28,7 @@ import { TagsDialog } from './tags-dialog';
 import { useTagsColumns } from './columns';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
+import { formatDateForAPI } from '@quillcrm/utils';
 
 export interface TagsRef {
 	openCreateTagModal: () => void;
@@ -111,8 +112,8 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				path: addQueryArgs('/qc/v1/tags', {
 					per_page: perPage,
 					page,
-					from: dateRange.from?.toISOString(),
-					to: dateRange.to?.toISOString(),
+					from: formatDateForAPI(dateRange.from),
+					to: formatDateForAPI(dateRange.to),
 					keyword,
 				}),
 			})) as TagsResponse;
@@ -286,6 +287,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				data={tags}
 				config={tableConfig}
 				showPagination={false}
+				initialPageSize={perPage}
 			/>
 			<DataTablePagination table={serverSideTable} />
 

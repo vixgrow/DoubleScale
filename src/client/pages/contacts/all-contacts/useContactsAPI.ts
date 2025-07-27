@@ -14,6 +14,7 @@ import { isEmail } from 'validator';
 import type { Contact, ContactsResponse } from '@quillcrm/client';
 import ConfigAPI from '@quillcrm/config';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
+import { formatDateForAPI } from '@quillcrm/utils';
 import { useContactsContext } from './contexts';
 
 export const useContactsAPI = () => {
@@ -47,8 +48,8 @@ export const useContactsAPI = () => {
 					page,
 					per_page: perPage,
 					filters: filters,
-					from: dateRange.from?.toISOString(),
-					to: dateRange.to?.toISOString(),
+					from: formatDateForAPI(dateRange.from),
+					to: formatDateForAPI(dateRange.to),
 					keywords,
 				}),
 				method: 'GET',

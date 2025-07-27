@@ -9,9 +9,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import { EditOutlined } from '@ant-design/icons';
 import React, { forwardRef, useImperativeHandle } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
 
 /**
  * Internal dependencies
@@ -23,25 +21,13 @@ import type {
 	DataTableConfig,
 	NoticeMessage,
 } from '@quillcrm/client';
-import {
-	CustomDialogHeader,
-	Field,
-	SortIcon,
-	NoticeBanner,
-	GradientTagIcon,
-} from '@quillcrm/components';
-import { convertDate } from '@quillcrm/utils';
+import { NoticeBanner } from '@quillcrm/components';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@quillcrm/components/ui/button';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogFooter,
-} from '@/components/ui/dialog';
+import { TagsDialog } from './tags-dialog';
+import { useTagsColumns } from './columns';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import DataTablePagination from '@/components/ui/data-table-pagination';
 
 export interface TagsRef {
 	openCreateTagModal: () => void;
@@ -51,34 +37,13 @@ interface TagsProps {
 	activeTab?: string;
 }
 
-const selectionColumn: ColumnDef<ContactTag> = {
-	id: 'select',
-	header: ({ table }) => (
-		<Checkbox
-			checked={table.getIsAllPageRowsSelected()}
-			onCheckedChange={(value) =>
-				table.toggleAllPageRowsSelected(!!value)
-			}
-			aria-label="Select all"
-		/>
-	),
-	cell: ({ row }) => (
-		<Checkbox
-			checked={row.getIsSelected()}
-			onCheckedChange={(value) => row.toggleSelected(!!value)}
-			aria-label="Select row"
-		/>
-	),
-	enableSorting: false,
-	enableHiding: false,
-};
-
 const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [tags, setTags] = useState<ContactTag[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
 	const [keyword, setKeyword] = useState<string>('');
+	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedTag, setSelectedTag] = useState<ContactTag | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -101,12 +66,12 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		to: null,
 	});
 
-	useEffect(() => {
-		if (dateRange.from || dateRange.to) {
-			setPage(1); // Reset to first page when filtering
-			fetchTags();
-		}
-	}, [dateRange]);
+	// useEffect(() => {
+	// 	if (dateRange.from || dateRange.to) {
+	// 		setPage(1); // Reset to first page when filtering
+	// 		fetchTags();
+	// 	}
+	// }, [dateRange]);
 
 	// Helper function to show notice
 	const showNotice = (type: 'success' | 'error', message: string) => {
@@ -129,6 +94,15 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		},
 	}));
 
+	// Use the reusable hook
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
+	});
+
 	const fetchTags = async () => {
 		setLoading(true);
 
@@ -137,11 +111,14 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				path: addQueryArgs('/qc/v1/tags', {
 					per_page: perPage,
 					page,
+					from: dateRange.from?.toISOString(),
+					to: dateRange.to?.toISOString(),
 					keyword,
 				}),
 			})) as TagsResponse;
 
 			setTags(response.data);
+			setTotalRecords(response.total);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -151,7 +128,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 	useEffect(() => {
 		fetchTags();
-	}, [page, perPage, keyword]);
+	}, [page, perPage, keyword, dateRange]);
 
 	const createTag = async () => {
 		if (!validate(tag)) {
@@ -257,86 +234,16 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		return true;
 	};
 
-	const columns: ColumnDef<ContactTag>[] = [
-		selectionColumn,
-		{
-			accessorKey: 'name',
-			header: ({ column }) => (
-				<div
-					className="flex items-center gap-1"
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Name', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => <span>{row.original.name}</span>,
-		},
-		{
-			accessorKey: 'description',
-			header: ({ column }) => (
-				<div
-					className="flex items-center gap-1"
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Description', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => row.original.description || '-',
-		},
-		{
-			accessorKey: 'contacts_count',
-			header: ({ column }) => (
-				<div
-					className="flex items-center gap-1"
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Contacts', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => (row.original as any).contacts_count ?? 0,
-		},
-		{
-			accessorKey: 'created_at',
-			header: ({ column }) => (
-				<div
-					className="flex items-center gap-1"
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Created At', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => convertDate(row.original.created_at),
-		},
-		{
-			accessorKey: 'actions',
-			header: () => __('Actions', 'quillcrm'),
-			cell: ({ row }) => (
-				<Button
-					onClick={() => {
-						setSelectedTag(row.original);
-						setVisible(true);
-					}}
-					variant="ghost"
-					className="p-0"
-				>
-					<EditOutlined />
-					{__('Edit', 'quillcrm')}
-				</Button>
-			),
-		},
-	];
+	const handleEditTag = (tag: ContactTag) => {
+		setSelectedTag(tag);
+		setVisible(true);
+	};
+
+	const handleSubmit = () => {
+		selectedTag ? updateTag() : createTag();
+	};
+
+	const columns = useTagsColumns({ onEditTag: handleEditTag });
 
 	const tableConfig: DataTableConfig<ContactTag> = {
 		manageColumns: {
@@ -344,6 +251,8 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		},
 		search: {
 			placeholder: __('Search Tags', 'quillcrm'),
+			onChange: (value) => setKeyword(value),
+			value: keyword,
 		},
 		selection: {
 			enabled: true,
@@ -376,87 +285,20 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				columns={columns}
 				data={tags}
 				config={tableConfig}
-				initialPageSize={perPage}
+				showPagination={false}
 			/>
+			<DataTablePagination table={serverSideTable} />
 
-			<Dialog
-				open={visible}
-				onOpenChange={(open) => {
-					setVisible(open);
-					if (!open) {
-						setSelectedTag(null);
-						setTag({ name: '', description: '' });
-					}
-				}}
-			>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>
-							<CustomDialogHeader
-								title={
-									selectedTag
-										? __('Edit Tag', 'quillcrm')
-										: __('Create Tag', 'quillcrm')
-								}
-								subtitle={__(
-									'Add basic information below to add new Tag',
-									'quillcrm'
-								)}
-								icon={<GradientTagIcon />}
-							/>
-						</DialogTitle>
-					</DialogHeader>
-
-					<div className="qcrm-fields space-y-4 mt-4">
-						<Field
-							label={__('Tag Name', 'quillcrm')}
-							value={selectedTag ? selectedTag.name : tag.name}
-							onChange={(value) => {
-								selectedTag
-									? setSelectedTag({
-											...selectedTag,
-											name: value,
-										})
-									: setTag({ ...tag, name: value });
-							}}
-							type="text"
-						/>
-						<Field
-							label={__('Tag Description', 'quillcrm')}
-							value={
-								selectedTag
-									? (selectedTag.description ?? '')
-									: tag.description
-							}
-							onChange={(value) => {
-								selectedTag
-									? setSelectedTag({
-											...selectedTag,
-											description: value,
-										})
-									: setTag({ ...tag, description: value });
-							}}
-							type="textarea"
-						/>
-					</div>
-
-					<DialogFooter className="mt-6 w-full">
-						<Button
-							onClick={() => {
-								selectedTag ? updateTag() : createTag();
-							}}
-							disabled={isSaving}
-							size="xl"
-							variant="gradient"
-							className="w-full"
-						>
-							{isSaving
-								? __('Submitting...', 'quillcrm')
-								: __('Submit', 'quillcrm')}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<TagsDialog
+				visible={visible}
+				onVisibleChange={setVisible}
+				selectedTag={selectedTag}
+				tag={tag}
+				onTagChange={setTag}
+				onSelectedTagChange={setSelectedTag}
+				onSubmit={handleSubmit}
+				isSaving={isSaving}
+			/>
 		</div>
 	);
 });

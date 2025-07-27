@@ -1,27 +1,28 @@
 /**
  * external dependencies
  */
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 /**
  * internal dependencies
  */
+import { DataTableConfig } from '@quillcrm/client';
 import {
 	ColumnDef,
-	SortingState,
-	VisibilityState,
 	ColumnFiltersState,
 	getCoreRowModel,
+	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
-	getFilteredRowModel,
+	SortingState,
 	useReactTable,
+	VisibilityState,
 } from '@tanstack/react-table';
-import { DataTableConfig } from '@quillcrm/client';
 
 export function useDataTable<TData>(
 	data: TData[],
 	columns: ColumnDef<TData, any>[],
-	config: DataTableConfig<TData>
+	config: DataTableConfig<TData>,
+	initialPageSize?: number | undefined,
 ) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -93,6 +94,13 @@ export function useDataTable<TData>(
 		onGlobalFilterChange: setGlobalFilter,
 		globalFilterFn: 'includesString',
 		getRowId: (row: any) => row.id?.toString() || '',
+		initialState: initialPageSize
+			? {
+				pagination: {
+					pageSize: initialPageSize,
+				},
+			}
+			: {},
 		state: {
 			sorting,
 			columnFilters,

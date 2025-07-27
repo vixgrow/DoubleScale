@@ -32,6 +32,7 @@ interface DataTableProps<TData> {
 	activeTab?: string;
 	showMainActions?: boolean;
 	showPagination?: boolean;
+	initialPageSize?: number | undefined;
 }
 
 export function DataTable<TData>({
@@ -41,11 +42,13 @@ export function DataTable<TData>({
 	activeTab,
 	showMainActions = true,
 	showPagination = true,
+	initialPageSize,
 }: DataTableProps<TData>) {
 	const { table, globalFilter, setGlobalFilter } = useDataTable(
 		data,
 		columns,
-		config
+		config,
+		initialPageSize
 	);
 
 	const handleSearchChange = (value: string) => {

@@ -113,7 +113,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 
 	useEffect(() => {
 		fetchContacts();
-	}, [perPage, page, keywords, filters, dateRange]);
+	}, [perPage, page, keywords, dateRange]);
 
 	return (
 		<>

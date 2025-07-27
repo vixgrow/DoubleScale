@@ -2,20 +2,19 @@
  * wordpress dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 /**
  * external dependencies
  */
-import { useEffect } from 'react';
 import { isEmail } from 'validator';
 /**
  * internal dependencies
  */
-import { useNavigate, getToLink } from '@quillcrm/navigation';
-import type { ContactsResponse, Contact } from '@quillcrm/client';
-import { useContactsContext } from './contexts';
+import type { Contact, ContactsResponse } from '@quillcrm/client';
 import ConfigAPI from '@quillcrm/config';
+import { getToLink, useNavigate } from '@quillcrm/navigation';
+import { useContactsContext } from './contexts';
 
 export const useContactsAPI = () => {
 	const navigate = useNavigate();
@@ -261,10 +260,10 @@ export const useContactsAPI = () => {
 		}
 	};
 
-	// Auto-fetch when dependencies change
-	useEffect(() => {
-		fetchContacts();
-	}, [page, perPage, dateRange, keywords]);
+	// // Auto-fetch when dependencies change
+	// useEffect(() => {
+	// 	fetchContacts();
+	// }, [page, perPage, dateRange, keywords]);
 
 	// useEffect(() => {
 	// 	if (dateRange.from || dateRange.to) {

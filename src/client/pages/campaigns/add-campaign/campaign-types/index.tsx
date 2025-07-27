@@ -78,10 +78,10 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 									{campaignType.icon}
 								</div>
 								<div>
-									<p className="font-semibold text-foreground text-xl mb-1">
+									<p className="font-semibold text-secondary-foreground text-xl mb-1">
 										{campaignType.label}
 									</p>
-									<p className="text-foreground text-sm">
+									<p className="text-secondary-foreground text-sm">
 										{campaignType.description}
 									</p>
 								</div>

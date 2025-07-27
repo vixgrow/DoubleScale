@@ -38,19 +38,26 @@ interface DataTableActionsProps<TData> {
 	table: Table<TData>;
 	config: DataTableConfig<TData>;
 	activeTab?: string;
+	setPage?: (page: number) => void;
 }
 
 export function DataTableActions<TData>({
 	table,
 	config,
 	activeTab,
+	setPage,
 }: DataTableActionsProps<TData>) {
 	return (
 		<div className="flex gap-[10px] items-center">
 			{config.dateRange?.enabled && (
 				<DateRangePicker
 					value={config.dateRange?.value}
-					onChange={config.dateRange?.onDateChange}
+					onChange={(range) => {
+						config.dateRange?.onDateChange(range);
+						if (setPage) {
+							setPage(1);
+						}
+					}}
 					placeholder={config.dateRange?.placeholder}
 				/>
 			)}
@@ -103,7 +110,12 @@ export function DataTableActions<TData>({
 						</DialogHeader>
 						<Filters
 							filters={config.filters?.currentFilters}
-							onChange={config.filters?.onFiltersChange}
+							onChange={(filters) => {
+								config.filters?.onFiltersChange(filters);
+								if (setPage) {
+									setPage(1);
+								}
+							}}
 						/>
 						<DialogFooter>
 							<DialogClose asChild>

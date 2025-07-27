@@ -55,7 +55,7 @@ export const useContactsAPI = () => {
 				method: 'GET',
 			})) as ContactsResponse;
 
-			response.total && setTotalRecords(response.total);
+			setTotalRecords(response.total || 0);
 			response.data && setData(response.data);
 		} catch (error) {
 			showNotice('error', __('Failed to fetch contacts', 'quillcrm'));

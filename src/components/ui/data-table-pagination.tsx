@@ -17,21 +17,20 @@ import {
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 // Mock table interface for demonstration
 interface MockTable {
-	getState: () => ({
+	getState: () => {
 		pagination: {
 			pageIndex: number;
 			pageSize: number;
 		};
-	});
+	};
 	getPageCount: () => number;
-	getFilteredSelectedRowModel: () => ({ rows: any[] });
-	getFilteredRowModel: () => ({ rows: any[] });
+	getFilteredSelectedRowModel: () => { rows: any[] };
+	getFilteredRowModel: () => { rows: any[] };
 	setPageSize: (size: number) => void;
 	setPageIndex: (index: number) => void;
 	getCanPreviousPage: () => boolean;
@@ -77,9 +76,11 @@ export default function DataTablePagination<TData>({
 		const range: number[] = [];
 		const rangeWithDots: (number | string)[] = [];
 
-		for (let i = Math.max(2, currentPage - delta);
+		for (
+			let i = Math.max(2, currentPage - delta);
 			i <= Math.min(totalPages - 1, currentPage + delta);
-			i++) {
+			i++
+		) {
 			range.push(i);
 		}
 
@@ -98,26 +99,31 @@ export default function DataTablePagination<TData>({
 		}
 
 		// Remove duplicates
-		return rangeWithDots.filter((item, index, arr) =>
-			index === 0 || item !== arr[index - 1]
+		return rangeWithDots.filter(
+			(item, index, arr) => index === 0 || item !== arr[index - 1]
 		);
 	};
 
 	const visiblePages = getVisiblePages();
-
+	console.log(table.getFilteredRowModel().rows);
 	return (
 		<div className="flex items-center justify-between px-4 pt-3 pb-8 rounded-b-md border">
 			{/* Left side - Results info */}
 			<div className="flex items-center text-sm text-gray-700 space-x-2">
-				<span className='text-[#3F3F46]'>
-					Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalResults)} of {totalResults} results
+				<span className="text-[#3F3F46]">
+					Showing {Math.min(currentPage * pageSize, totalResults)} of{' '}
+					{totalResults} results
 				</span>
 				{/* Per page selector */}
 				<div className="flex items-center mr-6 border rounded-lg">
-					<span className="text-sm text-[#71717A] border-r py-2 px-3">Per page</span>
+					<span className="text-sm text-[#71717A] border-r py-2 px-3">
+						Per page
+					</span>
 					<Select
 						value={String(pageSize)}
-						onValueChange={(value) => table.setPageSize(Number(value))}
+						onValueChange={(value) =>
+							table.setPageSize(Number(value))
+						}
 					>
 						<SelectTrigger className="w-20 outline-none border-none ml-0 pr-4">
 							<SelectValue placeholder="Page Size" />
@@ -130,7 +136,6 @@ export default function DataTablePagination<TData>({
 							))}
 						</SelectContent>
 					</Select>
-
 				</div>
 			</div>
 
@@ -154,11 +159,14 @@ export default function DataTablePagination<TData>({
 							<span className="px-2 text-gray-500">...</span>
 						) : (
 							<button
-								onClick={() => table.setPageIndex(Number(page) - 1)}
-								className={`flex items-center justify-center w-8 h-8 border-x border-[#E4E4E7] text-sm font-medium ${page === currentPage
-									? 'bg-[#FAFAFA] text-[#547D29]'
-									: 'bg-white text-[#3F3F46] hover:bg-gray-50'
-									}`}
+								onClick={() =>
+									table.setPageIndex(Number(page) - 1)
+								}
+								className={`flex items-center justify-center w-8 h-8 border-x border-[#E4E4E7] text-sm font-medium ${
+									page === currentPage
+										? 'bg-[#FAFAFA] text-[#547D29]'
+										: 'bg-white text-[#3F3F46] hover:bg-gray-50'
+								}`}
 							>
 								{page}
 							</button>

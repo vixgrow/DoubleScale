@@ -78,7 +78,7 @@ const Campaigns: React.FC = () => {
 				}),
 			})) as CampaignsResponse;
 			setCampaigns(response.data);
-			setTotalRecords(response.total);
+			setTotalRecords(response.total || 0);
 			setHasRecords(response.total_count > 0);
 		} catch (error) {
 			createNotice({
@@ -215,6 +215,7 @@ const Campaigns: React.FC = () => {
 						data={campaigns}
 						showPagination={false}
 						initialPageSize={perPage}
+						setPage={setPage}
 						config={{
 							search: {
 								placeholder: __('Search', 'quillcrm'),

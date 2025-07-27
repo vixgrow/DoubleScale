@@ -70,7 +70,12 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 		},
 		search: {
 			placeholder: __('Search contacts...', 'quillcrm'),
-			onChange: (value) => setKeywords(value),
+			onChange: (value) => {
+				setKeywords(value);
+				if (page > 1) {
+					setPage(1);
+				}
+			},
 			value: keywords,
 		},
 		selection: {
@@ -106,7 +111,12 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 		dateRange: {
 			enabled: true,
 			value: dateRange,
-			onDateChange: setDateRange,
+			onDateChange: (range) => {
+				setDateRange(range);
+				if (page > 1) {
+					setPage(1);
+				}
+			},
 			placeholder: __('Date Range', 'quillcrm'),
 		},
 	};
@@ -124,6 +134,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 				config={tableConfig}
 				activeTab={activeTab}
 				initialPageSize={perPage}
+				setPage={setPage}
 			/>
 			<DataTablePagination table={serverSideTable} />
 		</>

@@ -103,7 +103,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			})) as ListsResponse;
 
 			setLists(response.data);
-			setTotalRecords(response.total);
+			setTotalRecords(response.total || 0);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -289,6 +289,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				config={tableConfig}
 				showPagination={false}
 				initialPageSize={perPage}
+				setPage={setPage}
 			/>
 			<DataTablePagination table={serverSideTable} />
 

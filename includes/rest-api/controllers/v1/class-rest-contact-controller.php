@@ -781,20 +781,29 @@ class REST_Contact_Controller extends REST_Controller
 		try {
 			$per_page = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
 			$page = $request->get_param('page') ? $request->get_param('page') : 1;
-			$keyword = $request->get_param('keyword') ?? '';
+			$keywords = $request->get_param('keywords') ?? '';
 			$filters = $request->get_param('filters');
 			$subscribed = $request->get_param('subscribed') ?? false;
+			$from = $request->get_param('from') ?? null;
+			$to = $request->get_param('to') ?? null;
 			$query = Contact_Model::query();
 
 			$total_count = $query->count();
-			if ('' !== $keyword) {
+			if ('' !== $keywords) {
 				$contacts = $query->with('lists', 'tags', 'custom_fields', 'notes')
-					->where('first_name', 'like', '%' . $keyword . '%')
-					->orWhere('last_name', 'like', '%' . $keyword . '%')
-					->orWhere('email', 'like', '%' . $keyword . '%')
-					->orWhere('phone', 'like', '%' . $keyword . '%');
+					->where('first_name', 'like', '%' . $keywords . '%')
+					->orWhere('last_name', 'like', '%' . $keywords . '%')
+					->orWhere('email', 'like', '%' . $keywords . '%')
+					->orWhere('phone', 'like', '%' . $keywords . '%');
 			} else {
 				$contacts = $query->with('lists', 'tags', 'custom_fields', 'notes');
+			}
+
+			if ($from) {
+				$query->where('created_at', '>=', $from);
+			}
+			if ($to) {
+				$query->where('created_at', '<=', $to);
 			}
 
 			if ($filters) {

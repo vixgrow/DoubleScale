@@ -374,7 +374,12 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				<NoticeBanner notice={notice} closeNotice={closeNotice} />
 			)}
 
-			<DataTable columns={columns} data={lists} config={tableConfig} />
+			<DataTable
+				columns={columns}
+				data={lists}
+				config={tableConfig}
+				initialPageSize={perPage}
+			/>
 
 			<Dialog
 				open={visible}

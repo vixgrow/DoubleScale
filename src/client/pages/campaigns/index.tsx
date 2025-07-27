@@ -213,6 +213,7 @@ const Campaigns: React.FC = () => {
 						columns={columns}
 						data={campaigns}
 						showPagination={false}
+						initialPageSize={perPage}
 						config={{
 							search: {
 								placeholder: __('Search', 'quillcrm'),

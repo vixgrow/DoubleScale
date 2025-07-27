@@ -693,6 +693,7 @@ const AllContacts = forwardRef<AllContactsRef, AllContactsProps>(
 					data={data}
 					config={tableConfig}
 					activeTab={activeTab}
+					initialPageSize={perPage}
 				/>
 
 				{/* Create Contact Modal */}

@@ -372,7 +372,12 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				<NoticeBanner notice={notice} closeNotice={closeNotice} />
 			)}
 
-			<DataTable columns={columns} data={tags} config={tableConfig} />
+			<DataTable
+				columns={columns}
+				data={tags}
+				config={tableConfig}
+				initialPageSize={perPage}
+			/>
 
 			<Dialog
 				open={visible}

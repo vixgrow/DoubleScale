@@ -150,7 +150,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			const branchSteps = stepList
 				.filter((step) => {
 					if (parentId === null) {
-						return !step.parent_id;
+						return !step.parent_id || step.parent_id === 0;
 					}
 					return (
 						step.parent_id === parentId &&
@@ -160,8 +160,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				.sort((a, b) => a.order - b.order);
 
 			// Calculate minimum width based on level and content with increased base
-			const baseWidth = 400; // Increased base width for better spacing
-			const levelMultiplier = 1 + level * 0.4; // Better spacing per level
+			const baseWidth = 200; // Increased base width for better spacing
+			const levelMultiplier = 1 + level * 0.1; // Better spacing per level
 			const minWidth = baseWidth * levelMultiplier;
 
 			if (branchSteps.length === 0) {
@@ -200,18 +200,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			const complexityPadding = level > 0 ? 150 + level * 75 : 75;
 			const finalWidth = maxWidth + complexityPadding;
 
-			// Debug logging for width calculations
-			console.log(
-				`calculateBranchWidth - Parent: ${parentId}, Condition: ${condition}, Level: ${level}`,
-				{
-					branchStepsCount: branchSteps.length,
-					minWidth,
-					maxWidth,
-					complexityPadding,
-					finalWidth,
-				}
-			);
-
 			return finalWidth;
 		};
 
@@ -230,7 +218,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			const branchSteps = stepList
 				.filter((step) => {
 					if (parentId === null) {
-						return !step.parent_id;
+						return !step.parent_id || step.parent_id === 0;
 					}
 					return (
 						step.parent_id === parentId &&
@@ -241,7 +229,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 			let currentY = startY;
 
-			branchSteps.forEach((step) => {
+			branchSteps.forEach((step, stepIndex) => {
 				const stepId = step.id.toString();
 
 				if (step.type === 'condition') {
@@ -259,13 +247,17 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						level + 1
 					);
 
+					// For condition nodes, use the step index to calculate proper Y position
+					// This ensures conditions are positioned correctly regardless of other steps
+					const conditionY = startY + stepIndex * 300;
+
 					// Position condition node at center
-					positionMap.set(stepId, { x: centerX, y: currentY });
+					positionMap.set(stepId, { x: centerX, y: conditionY });
 
 					// Calculate child positions with improved spacing - increased significantly for better readability
 					const baseSpacing = 450; // Significantly increased base spacing for condition children
 					const levelMultiplier = 1 + level * 0.6; // More aggressive spacing per level
-					const childY = currentY + baseSpacing * levelMultiplier;
+					const childY = conditionY + baseSpacing * levelMultiplier;
 
 					// Enhanced branch spacing calculation with better separation
 					const branchGap = Math.max(300, 150 + level * 60); // Increased gap based on level
@@ -314,7 +306,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					const mergeSpacing = Math.max(300, 200 + level * 50); // Increased dynamic merge spacing
 					const levelSpacing = level * 120; // Much more spacing for each nesting level
 					currentY = Math.max(
-						currentY + baseBottomSpacing + levelSpacing,
+						conditionY + baseBottomSpacing + levelSpacing,
 						maxBranchEndY + mergeSpacing + levelSpacing
 					);
 				} else {
@@ -353,7 +345,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 				if (parentPosition) {
 					// Enhanced positioning that considers nesting level with better spacing
-					const baseY = parentPosition.y + 450; // Significantly increased spacing below parent
+					const baseY = parentPosition.y + 200; // Significantly increased spacing below parent
 					const branchWidth = calculateBranchWidth(
 						steps,
 						step.parent_id,
@@ -363,7 +355,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						step.condition === 'yes'
 							? -branchWidth / 2
 							: branchWidth / 2;
-					const stepOffset = (stepIndex || 0) * 350; // Increased spacing between steps in same branch
+					const stepOffset = (stepIndex || 0) * 300; // Increased spacing between steps in same branch
 
 					return {
 						x: parentPosition.x + branchOffset,
@@ -391,7 +383,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			const currentLevelSteps = stepList
 				.filter(
 					(step) =>
-						(parentId === null && !step.parent_id) ||
+						(parentId === null &&
+							(!step.parent_id || step.parent_id === 0)) ||
 						(parentId !== null &&
 							step.parent_id === parentId &&
 							step.condition === condition)
@@ -399,10 +392,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				.sort((a, b) => a.order - b.order);
 
 			let currentIndex = startIndex;
+			const conditionStepsToProcess: Array<{
+				step: AutomationStep;
+				level: number;
+				yesChildren: AutomationStep[];
+				noChildren: AutomationStep[];
+			}> = [];
 
 			currentLevelSteps.forEach((step, stepIndex) => {
-				console.log('step', step);
-				console.log('stepIndex', stepIndex);
 				const position = getNodePosition(
 					step.id.toString(),
 					250,
@@ -470,6 +467,20 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 				// Handle condition step children recursively
 				if (step.type === 'condition') {
+					// First, process all children and get their info
+					const yesChildren = stepList
+						.filter(
+							(s) =>
+								s.parent_id === step.id && s.condition === 'yes'
+						)
+						.sort((a, b) => a.order - b.order);
+					const noChildren = stepList
+						.filter(
+							(s) =>
+								s.parent_id === step.id && s.condition === 'no'
+						)
+						.sort((a, b) => a.order - b.order);
+
 					// Process yes children
 					const yesResult = processStepHierarchy(
 						stepList,
@@ -488,28 +499,35 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						0
 					);
 
-					// Ensure condition edges exist for both branches, even if empty
-					const yesChildren = stepList
-						.filter(
-							(s) =>
-								s.parent_id === step.id && s.condition === 'yes'
-						)
-						.sort((a, b) => a.order - b.order);
-					const noChildren = stepList
-						.filter(
-							(s) =>
-								s.parent_id === step.id && s.condition === 'no'
-						)
-						.sort((a, b) => a.order - b.order);
+					// Store condition step info for later merge node creation
+					conditionStepsToProcess.push({
+						step,
+						level,
+						yesChildren,
+						noChildren,
+					});
 
+					// Update current index to continue after nested structure
+					currentIndex =
+						Math.max(yesResult.lastIndex, noResult.lastIndex) + 1;
+				} else {
+					currentIndex++;
+				}
+			});
+
+			// Now create merge nodes for all condition steps after children are positioned
+			conditionStepsToProcess.forEach(
+				({ step, level, yesChildren, noChildren }) => {
 					const conditionPos = getNodePosition(step.id.toString());
 
-					// Calculate optimal merge position using utility
+					// Calculate optimal merge position using utility - now all children are positioned
 					const optimalMergePosition = calculateMergePosition(
 						conditionPos,
 						yesChildren,
 						noChildren,
-						getNodePosition
+						getNodePosition,
+						stepList, // Pass all steps for recursive depth calculation
+						level // Pass current level for nested merge node tracking
 					);
 
 					// Create single merge node positioned below both branches
@@ -604,13 +622,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							const childConditionLevel = level + 1;
 							const childMergeId = `merge-${lastYesChild.id}-level-${childConditionLevel}`;
 
-							// Connect from child's merge node to parent's merge node
+							// Connect from child's merge node to parent's merge node using default edge type (no add-step functionality)
 							initialEdges.push({
 								id: `${childMergeId}-to-merge`,
 								source: childMergeId,
 								target: mergeId,
 								targetHandle: 'top', // Connect to top handle of merge node
-								type: 'addStepEdge',
+								type: 'default', // Use default edge type instead of addStepEdge to prevent add-step functionality
 								style: {
 									stroke: '#52c41a',
 									strokeWidth: 2,
@@ -709,13 +727,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							const childConditionLevel = level + 1;
 							const childMergeId = `merge-${lastNoChild.id}-level-${childConditionLevel}`;
 
-							// Connect from child's merge node to parent's merge node
+							// Connect from child's merge node to parent's merge node using default edge type (no add-step functionality)
 							initialEdges.push({
 								id: `${childMergeId}-to-merge`,
 								source: childMergeId,
 								target: mergeId,
 								targetHandle: 'top', // Connect to top handle of merge node
-								type: 'addStepEdge',
+								type: 'default', // Use default edge type instead of addStepEdge to prevent add-step functionality
 								style: {
 									stroke: '#ff4d4f',
 									strokeWidth: 2,
@@ -828,7 +846,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${mergeId}-to-${nextStep.id}`,
 							source: mergeId,
 							target: nextStep.id.toString(),
-							type: 'addStepEdge',
+							type: 'default', // Use default edge type to prevent add-step functionality between merge and regular steps
 							style: {
 								stroke: '#1890ff',
 								strokeWidth: 2,
@@ -843,14 +861,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						// For root-level conditions with no subsequent steps, add final add-step connection
 						// This will be handled by the final add-step logic below
 					}
-
-					// Update current index to continue after nested structure
-					currentIndex =
-						Math.max(yesResult.lastIndex, noResult.lastIndex) + 1;
-				} else {
-					currentIndex++;
 				}
-			});
+			);
 
 			return {
 				lastIndex: currentIndex,
@@ -864,12 +876,12 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		};
 
 		// Process the entire step hierarchy starting from root
-		const result = processStepHierarchy(steps);
+		const result = processStepHierarchy(steps, null, null, 0, 0);
 
 		function addFinalAddStep() {
 			// Add final add-step node for root level if needed
 			const rootSteps = steps
-				.filter((step) => !step.parent_id)
+				.filter((step) => !step.parent_id || step.parent_id === 0)
 				.sort((a, b) => a.order - b.order);
 
 			// Only add final add-step node if the last root step is not a condition or end_automation
@@ -1051,6 +1063,11 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				);
 			});
 
+			// Check if there are ANY condition nodes that need custom positioning
+			const hasConditionNodes = steps.some(
+				(step) => step.type === 'condition'
+			);
+
 			// Also check for multiple condition levels
 			const maxConditionDepth = steps.reduce((maxDepth, step) => {
 				if (step.type !== 'condition') return maxDepth;
@@ -1071,13 +1088,12 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			}, 0);
 
 			// Only auto-layout if there are no existing saved positions OR we have orphaned positions,
-			// we have steps, we have multiple nodes, AND we don't have complex nested conditions
+			// we have steps, we have multiple nodes, AND we don't have ANY condition nodes
 			if (
 				(shouldForceLayout || !hasExistingPositions) &&
 				steps.length > 0 &&
 				initialNodes.length > 1 &&
-				!hasNestedConditions &&
-				maxConditionDepth === 0
+				!hasConditionNodes
 			) {
 				try {
 					// Apply layout to get better positioned nodes

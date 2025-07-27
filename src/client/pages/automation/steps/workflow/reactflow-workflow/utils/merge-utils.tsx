@@ -74,26 +74,117 @@ export const calculateMergePosition = (
 	conditionPosition: { x: number; y: number },
 	yesChildren: any[],
 	noChildren: any[],
-	getNodePosition: (nodeId: string) => { x: number; y: number }
+	getNodePosition: (nodeId: string) => { x: number; y: number },
+	allSteps?: any[],
+	level?: number
 ): { x: number; y: number } => {
 	let maxBranchY = conditionPosition.y + 500; // Increased minimum spacing below condition
 
-	// Check deepest position in both branches
-	if (yesChildren.length > 0) {
-		const lastYesChild = yesChildren[yesChildren.length - 1];
-		const lastYesPos = getNodePosition(lastYesChild.id.toString());
-		maxBranchY = Math.max(maxBranchY, lastYesPos.y + 200); // Increased spacing after last child
-	}
+	// Helper function to recursively find the deepest descendant in a branch
+	const findDeepestDescendant = (
+		children: any[],
+		branchType: 'yes' | 'no'
+	): { y: number; nodeId?: string } => {
+		if (children.length === 0) {
+			return { y: conditionPosition.y + 300 }; // Default spacing for empty branch
+		}
 
-	if (noChildren.length > 0) {
-		const lastNoChild = noChildren[noChildren.length - 1];
-		const lastNoPos = getNodePosition(lastNoChild.id.toString());
-		maxBranchY = Math.max(maxBranchY, lastNoPos.y + 200); // Increased spacing after last child
-	}
+		let deepestY = conditionPosition.y;
+		let deepestNodeId: string | undefined;
+
+		children.forEach((child) => {
+			// Safely get child position with fallback
+			let childPos;
+			try {
+				childPos = getNodePosition(child.id.toString());
+			} catch (error) {
+				// If position doesn't exist, skip this child
+				console.warn(
+					`Position not found for child ${child.id}, skipping...`
+				);
+				return;
+			}
+
+			// Check if this child is deeper than current deepest
+			if (childPos && childPos.y > deepestY) {
+				deepestY = childPos.y;
+				deepestNodeId = child.id.toString();
+			}
+
+			// If this child is a condition step, also check its merge node position
+			if (child.type === 'condition' && allSteps && level !== undefined) {
+				const childLevel = level + 1;
+				const childMergeId = `merge-${child.id}-level-${childLevel}`;
+
+				// Try to get the merge node position if it exists - but don't fail if it doesn't
+				let childMergePos;
+				try {
+					childMergePos = getNodePosition(childMergeId);
+					if (childMergePos && childMergePos.y > deepestY) {
+						deepestY = childMergePos.y;
+						deepestNodeId = childMergeId;
+					}
+				} catch (error) {
+					// Merge node position doesn't exist yet - this is normal during creation
+					// Just continue without it
+				}
+
+				// Recursively check the children of this condition
+				if (allSteps) {
+					const grandYesChildren = allSteps
+						.filter(
+							(s) =>
+								s.parent_id === child.id &&
+								s.condition === 'yes'
+						)
+						.sort((a, b) => a.order - b.order);
+					const grandNoChildren = allSteps
+						.filter(
+							(s) =>
+								s.parent_id === child.id && s.condition === 'no'
+						)
+						.sort((a, b) => a.order - b.order);
+
+					const yesDeepest = findDeepestDescendant(
+						grandYesChildren,
+						'yes'
+					);
+					const noDeepest = findDeepestDescendant(
+						grandNoChildren,
+						'no'
+					);
+
+					if (yesDeepest.y > deepestY) {
+						deepestY = yesDeepest.y;
+						deepestNodeId = yesDeepest.nodeId;
+					}
+					if (noDeepest.y > deepestY) {
+						deepestY = noDeepest.y;
+						deepestNodeId = noDeepest.nodeId;
+					}
+				}
+			}
+		});
+
+		return { y: deepestY, nodeId: deepestNodeId };
+	};
+
+	// Find the deepest descendant in both branches
+	const yesDeepest = findDeepestDescendant(yesChildren, 'yes');
+	const noDeepest = findDeepestDescendant(noChildren, 'no');
+
+	// Use the deeper of the two branches
+	const deepestY = Math.max(yesDeepest.y, noDeepest.y);
+
+	// Ensure minimum spacing below condition and below the deepest descendant
+	maxBranchY = Math.max(
+		conditionPosition.y + 500, // Minimum spacing below condition
+		deepestY + 300 // Spacing below deepest descendant (increased from 200)
+	);
 
 	return {
 		x: conditionPosition.x, // Center below condition
-		y: maxBranchY + 100, // Increased spacing below the longest branch
+		y: maxBranchY + 100, // Additional spacing below the longest branch
 	};
 };
 

@@ -75,12 +75,6 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 				(s) => s.id === step.id
 			);
 
-			const adjacency = findAdjacentConditions(
-				step,
-				sameBranchSteps,
-				currentIndex
-			);
-
 			// Special restrictions for steps between conditions in branches
 			let canMoveUp = currentIndex > 0;
 			let canMoveDown = currentIndex < sameBranchSteps.length - 1;
@@ -95,21 +89,7 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 				} else {
 					reason = 'single_step_in_branch';
 				}
-			} else if (adjacency.betweenConditions) {
-				// Step is between two conditions in a branch - very restricted
-				canMoveUp = false;
-				canMoveDown = false;
-				reason = 'between_conditions_in_branch';
-			} else if (adjacency.prevIsCondition && step.type !== 'condition') {
-				// Non-condition step directly after a condition in branch - restricted upward movement
-				canMoveUp = false;
-				reason = 'after_condition_in_branch';
-			} else if (adjacency.nextIsCondition && step.type !== 'condition') {
-				// Non-condition step directly before a condition in branch - restricted downward movement
-				canMoveDown = false;
-				reason = 'before_condition_in_branch';
 			}
-			// Note: Condition steps themselves can move freely within branches
 
 			return { canMoveUp, canMoveDown, reason };
 		}
@@ -120,35 +100,10 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 				.filter((s) => !s.parent_id)
 				.sort((a, b) => a.order - b.order);
 			const currentIndex = rootSteps.findIndex((s) => s.id === step.id);
-			const adjacency = findAdjacentConditions(
-				step,
-				rootSteps,
-				currentIndex
-			);
 
 			let canMoveUp = currentIndex > 0;
 			let canMoveDown = currentIndex < rootSteps.length - 1;
 			let reason = 'root_level';
-
-			// Apply restrictions when adjacent to condition nodes at root level
-			// But allow condition nodes themselves to move more freely
-			if (step.type !== 'condition') {
-				if (adjacency.nextIsCondition) {
-					// Step directly before a condition - cannot move down past it
-					canMoveDown = false;
-					reason = 'before_condition_root';
-				} else if (adjacency.prevIsCondition) {
-					// Step directly after a condition - cannot move up past it
-					canMoveUp = false;
-					reason = 'after_condition_root';
-				} else if (adjacency.betweenConditions) {
-					// Step between two conditions - cannot move in either direction
-					canMoveUp = false;
-					canMoveDown = false;
-					reason = 'between_conditions_root';
-				}
-			}
-
 			return { canMoveUp, canMoveDown, reason };
 		}
 
@@ -243,9 +198,9 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 		}
 	};
 
-	// Don't render if step can't be moved in either direction
-	// Exception: Always show controls for condition steps, even if disabled
-	if (!canMoveUp && !canMoveDown && step.type !== 'condition') {
+	// Always show controls for condition steps, even if they can't move
+	// For other steps, only show if they can move in at least one direction
+	if (step.type !== 'condition' && !canMoveUp && !canMoveDown) {
 		return null;
 	}
 

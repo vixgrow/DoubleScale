@@ -131,6 +131,12 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 
+				{/* Step Reorder Controls */}
+				<StepReorderControls
+					step={step}
+					clearSavedPositions={clearSavedPositions}
+				/>
+
 				{/* Node content matching the image design */}
 				<div className="qcrm-reactflow-condition__container">
 					{/* Left icon section */}
@@ -158,11 +164,6 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 
 					{/* Right actions section */}
 					<div className="qcrm-reactflow-condition__actions-section">
-						<StepReorderControls
-							step={step}
-							className="qcrm-reactflow-condition__reorder-controls"
-							clearSavedPositions={clearSavedPositions}
-						/>
 						<Tooltip
 							title={__('Edit Condition', 'quillcrm')}
 							placement="top"

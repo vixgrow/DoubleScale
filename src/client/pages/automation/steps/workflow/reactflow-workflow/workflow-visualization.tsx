@@ -247,9 +247,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						level + 1
 					);
 
-					// For condition nodes, use the step index to calculate proper Y position
-					// This ensures conditions are positioned correctly regardless of other steps
-					const conditionY = startY + stepIndex * 300;
+					// For condition nodes, use currentY to ensure proper spacing after previous condition branches
+					// This prevents overlapping when multiple condition nodes are in the same branch
+					const conditionY = currentY;
 
 					// Position condition node at center
 					positionMap.set(stepId, { x: centerX, y: conditionY });

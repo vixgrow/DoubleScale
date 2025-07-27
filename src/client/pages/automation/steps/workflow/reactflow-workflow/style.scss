@@ -357,7 +357,7 @@
 		height: auto !important;
 		position: relative;
 		border-radius: 8px;
-		overflow: hidden;
+		overflow: visible; // Allow reorder controls to show outside the node
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 		transition: all 0.2s ease;
 
@@ -426,33 +426,7 @@
 			opacity: 0;
 			transition: opacity 0.2s ease;
 
-			.qcrm-reactflow-condition__reorder-controls {
-				display: flex;
-				flex-direction: column;
-				gap: 2px;
-				margin-right: 4px;
-				
-				.qcrm-step-reorder-controls__button {
-					padding: 2px 4px;
-					font-size: 10px;
-					line-height: 1;
-					min-width: auto;
-					height: auto;
-					border: none;
-					background: transparent;
-					color: #666;
-					
-					&:hover:not(:disabled) {
-						color: #1890ff;
-						background: rgba(24, 144, 255, 0.1);
-					}
-					
-					&:disabled {
-						color: #d9d9d9;
-						cursor: not-allowed;
-					}
-				}
-			}
+
 
 			.qcrm-reactflow-condition__action-btn {
 				border: none;
@@ -703,13 +677,12 @@
 	position: absolute;
 	top: 50%;
 	right: -40px; // Position outside the node box
-	transform: translateY(-50%); // Center vertically
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
 	opacity: 0;
 	visibility: hidden;
-	transform: translateY(-50%) translateX(10px); // Start slightly to the right
+	transform: translateY(-50%) translateX(10px); // Start slightly to the right (center vertically and offset horizontally)
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	z-index: 10;
 	
@@ -771,6 +744,10 @@
 			transform: translateY(-50%) translateX(0); // Slide in to final position
 		}
 	}
+	
+
+	
+
 	
 	// Don't show reorder controls on certain node types
 	&--trigger,

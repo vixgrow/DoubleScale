@@ -19,13 +19,15 @@ import { Button, Popconfirm } from 'antd';
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep } from '@quillcrm/client';
 import NodeContextMenu from '../components/node-context-menu';
+import StepReorderControls from '../components/step-reorder-controls';
 
 interface EndNodeData {
 	step: AutomationStep;
+	clearSavedPositions?: () => void;
 }
 
 const EndNode: React.FC<NodeProps> = ({ data }) => {
-	const { step } = data as unknown as EndNodeData;
+	const { step, clearSavedPositions } = data as unknown as EndNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const [isDeleting, setIsDeleting] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -111,6 +113,12 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 
+				{/* Step Reorder Controls */}
+				<StepReorderControls
+					step={step}
+					clearSavedPositions={clearSavedPositions}
+				/>
+
 				<div className="qcrm-reactflow-node__header">
 					<div className="qcrm-reactflow-node__icon">
 						<DisconnectOutlined />
@@ -122,7 +130,7 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 							okText={__('Yes', 'quillcrm')}
 							cancelText={__('No', 'quillcrm')}
 							onCancel={(e) => e?.stopPropagation()}
-							onOpenChange={(open, e) => {
+							onOpenChange={(_, e) => {
 								if (e) {
 									e.stopPropagation();
 								}

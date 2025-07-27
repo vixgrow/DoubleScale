@@ -160,7 +160,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				.sort((a, b) => a.order - b.order);
 
 			// Calculate minimum width based on level and content with increased base
-			const baseWidth = 200; // Increased base width for better spacing
+			const baseWidth = 120; // Increased base width for better spacing
 			const levelMultiplier = 1 + level * 0.1; // Better spacing per level
 			const minWidth = baseWidth * levelMultiplier;
 
@@ -187,7 +187,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					);
 
 					// Enhanced spacing calculation with better branch separation
-					const branchSpacing = Math.max(200, 80 + level * 40); // Better spacing with depth
+					const branchSpacing = Math.max(120, 80 + level * 40); // Better spacing with depth
 					const conditionWidth = yesWidth + noWidth + branchSpacing;
 
 					// Ensure minimum width for readability

@@ -54,7 +54,6 @@ const getHandlePositions = () => ({
  */
 const createElkGraph = (nodes: Node[], edges: Edge[], options: Required<LayoutOptions>) => {
     const { nodeSpacing, rankSpacing, edgeSpacing } = options;
-    const hasConditions = nodes.some(node => node.type === 'condition');
 
     return {
         id: 'root',

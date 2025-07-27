@@ -226,6 +226,13 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 					id="no"
 					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--no"
 				/>
+				{/* Default bottom handle for connecting to parent merge nodes */}
+				<Handle
+					type="source"
+					position={Position.Bottom}
+					id="default"
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--default"
+				/>
 			</div>
 		</NodeContextMenu>
 	);

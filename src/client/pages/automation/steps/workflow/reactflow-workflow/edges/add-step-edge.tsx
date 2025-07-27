@@ -157,6 +157,10 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			label: __('Goal', 'quillcrm'),
 			icon: <TrophyOutlined />,
 		},
+		end_automation: {
+			label: __('End Automation', 'quillcrm'),
+			icon: <BranchesOutlined />,
+		},
 	};
 
 	const handleStepSelection = async (type: string) => {

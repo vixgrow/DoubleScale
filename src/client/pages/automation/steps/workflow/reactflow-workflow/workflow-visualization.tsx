@@ -146,6 +146,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			condition: string | null,
 			level: number = 0
 		): number => {
+			// Get all steps that belong to this branch
 			const branchSteps = stepList
 				.filter((step) => {
 					if (parentId === null) {
@@ -478,14 +479,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						0
 					);
 
-					// Process no children - position them below yes children
-					const noStartIndex = yesResult.lastIndex + 1;
+					// Process no children
 					const noResult = processStepHierarchy(
 						stepList,
 						step.id,
 						'no',
 						level + 1,
-						noStartIndex
+						0
 					);
 
 					// Ensure condition edges exist for both branches, even if empty
@@ -502,45 +502,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						)
 						.sort((a, b) => a.order - b.order);
 
-					/**
-					 * Smart Merge Node Implementation
-					 *
-					 * Only create merge nodes when there are subsequent steps that need convergence
-					 * Skip merge nodes for leaf conditions that don't need to reconverge
-					 */
-
-					// Check if there are steps after this condition at the same level that need convergence
-					const hasSubsequentSteps = () => {
-						if (level === 0) {
-							// Root level: check for steps after this condition
-							return stepList.some(
-								(s) => !s.parent_id && s.order > step.order
-							);
-						} else {
-							// Nested level: check for steps after this condition in the same branch
-							return stepList.some(
-								(s) =>
-									s.parent_id === parentId &&
-									s.condition === condition &&
-									s.order > step.order
-							);
-						}
-					};
-
-					// Always create merge nodes for now to maintain compatibility
-					// TODO: Implement smarter merge logic based on hasSubsequentSteps()
 					const conditionPos = getNodePosition(step.id.toString());
-					const yesWidth = calculateBranchWidth(
-						stepList,
-						step.id,
-						'yes'
-					);
-					const noWidth = calculateBranchWidth(
-						stepList,
-						step.id,
-						'no'
-					);
-					const totalChildWidth = yesWidth + noWidth + 100;
 
 					// Calculate optimal merge position using utility
 					const optimalMergePosition = calculateMergePosition(
@@ -634,22 +596,57 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						// Connect last yes child to merge
 						const lastYesChild =
 							yesChildren[yesChildren.length - 1];
-						initialEdges.push({
-							id: `${lastYesChild.id}-to-merge`,
-							source: lastYesChild.id.toString(),
-							target: mergeId,
-							targetHandle: 'top', // Connect to top handle of merge node
-							type: 'addStepEdge',
-							style: {
-								stroke: '#52c41a',
-								strokeWidth: 2,
-							},
-							data: {
-								sourceStep: lastYesChild,
-								targetStep: { id: mergeId, type: 'merge' },
-								fromBranch: 'yes',
-							},
-						});
+
+						// For condition nodes, connect from their merge node instead of directly
+						// For regular nodes, connect directly to parent merge
+						if (lastYesChild.type === 'condition') {
+							// Calculate the level of the child condition to get its merge node ID
+							const childConditionLevel = level + 1;
+							const childMergeId = `merge-${lastYesChild.id}-level-${childConditionLevel}`;
+
+							// Connect from child's merge node to parent's merge node
+							initialEdges.push({
+								id: `${childMergeId}-to-merge`,
+								source: childMergeId,
+								target: mergeId,
+								targetHandle: 'top', // Connect to top handle of merge node
+								type: 'addStepEdge',
+								style: {
+									stroke: '#52c41a',
+									strokeWidth: 2,
+								},
+								data: {
+									sourceStep: {
+										id: childMergeId,
+										type: 'merge',
+									},
+									targetStep: { id: mergeId, type: 'merge' },
+									fromBranch: 'yes',
+									fromChildMerge: true,
+								},
+							});
+						} else {
+							// For non-condition nodes, connect directly to parent merge
+							const edgeConfig: any = {
+								id: `${lastYesChild.id}-to-merge`,
+								source: lastYesChild.id.toString(),
+								target: mergeId,
+								targetHandle: 'top', // Connect to top handle of merge node
+								type: 'addStepEdge',
+								style: {
+									stroke: '#52c41a',
+									strokeWidth: 2,
+								},
+								data: {
+									sourceStep: lastYesChild,
+									targetStep: { id: mergeId, type: 'merge' },
+									fromBranch: 'yes',
+								},
+							};
+
+							edgeConfig.sourceHandle = undefined;
+							initialEdges.push(edgeConfig);
+						}
 					}
 
 					if (noChildren.length === 0) {
@@ -704,22 +701,57 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 						// Connect last no child to merge
 						const lastNoChild = noChildren[noChildren.length - 1];
-						initialEdges.push({
-							id: `${lastNoChild.id}-to-merge`,
-							source: lastNoChild.id.toString(),
-							target: mergeId,
-							targetHandle: 'top', // Connect to top handle of merge node
-							type: 'addStepEdge',
-							style: {
-								stroke: '#ff4d4f',
-								strokeWidth: 2,
-							},
-							data: {
-								sourceStep: lastNoChild,
-								targetStep: { id: mergeId, type: 'merge' },
-								fromBranch: 'no',
-							},
-						});
+
+						// For condition nodes, connect from their merge node instead of directly
+						// For regular nodes, connect directly to parent merge
+						if (lastNoChild.type === 'condition') {
+							// Calculate the level of the child condition to get its merge node ID
+							const childConditionLevel = level + 1;
+							const childMergeId = `merge-${lastNoChild.id}-level-${childConditionLevel}`;
+
+							// Connect from child's merge node to parent's merge node
+							initialEdges.push({
+								id: `${childMergeId}-to-merge`,
+								source: childMergeId,
+								target: mergeId,
+								targetHandle: 'top', // Connect to top handle of merge node
+								type: 'addStepEdge',
+								style: {
+									stroke: '#ff4d4f',
+									strokeWidth: 2,
+								},
+								data: {
+									sourceStep: {
+										id: childMergeId,
+										type: 'merge',
+									},
+									targetStep: { id: mergeId, type: 'merge' },
+									fromBranch: 'no',
+									fromChildMerge: true,
+								},
+							});
+						} else {
+							// For non-condition nodes, connect directly to parent merge
+							const edgeConfig: any = {
+								id: `${lastNoChild.id}-to-merge`,
+								source: lastNoChild.id.toString(),
+								target: mergeId,
+								targetHandle: 'top', // Connect to top handle of merge node
+								type: 'addStepEdge',
+								style: {
+									stroke: '#ff4d4f',
+									strokeWidth: 2,
+								},
+								data: {
+									sourceStep: lastNoChild,
+									targetStep: { id: mergeId, type: 'merge' },
+									fromBranch: 'no',
+								},
+							};
+
+							edgeConfig.sourceHandle = undefined;
+							initialEdges.push(edgeConfig);
+						}
 					}
 
 					// Add continuation add-step functionality to edges after existing children

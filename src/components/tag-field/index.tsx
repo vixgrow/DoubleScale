@@ -9,15 +9,18 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import { Tag as AntTag, Flex } from 'antd';
 import AsyncSelect from 'react-select/async';
-import { isObject, map } from 'lodash';
-
 /**
  * Internal dependencies
  */
 import './style.scss';
 import type { Tag, TagsResponse } from '@quillcrm/client';
+import { Tag as Tags } from '@quillcrm/components';
+
+interface SelectOption {
+	label: string;
+	value: number;
+}
 
 interface Props {
 	value: number[];
@@ -27,7 +30,10 @@ interface Props {
 const TagField = ({ value, onChange }: Props) => {
 	const [savedTags, setSavedTags] = useState<Tag[]>([]);
 
-	const fetchTags = async (keyword = '', ids: number[] = []) => {
+	const fetchTags = async (
+		keyword = '',
+		ids: number[] = []
+	): Promise<SelectOption[]> => {
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/tags', {
@@ -55,10 +61,10 @@ const TagField = ({ value, onChange }: Props) => {
 	}, []);
 
 	return (
-		<Flex vertical={true} gap={10}>
-			<Flex justify="space-between" gap={10}>
-				<Flex vertical={true} gap={10} style={{ flex: 1 }}>
-					<AsyncSelect
+		<div className="flex flex-col gap-[10px]">
+			<div className="flex justify-between gap-[10px]">
+				<div className="flex flex-1 flex-col gap-[10px]">
+					<AsyncSelect<SelectOption, false>
 						loadOptions={(inputValue, callback) => {
 							fetchTags(inputValue).then((data) => {
 								if (!data) {
@@ -68,9 +74,9 @@ const TagField = ({ value, onChange }: Props) => {
 							});
 						}}
 						defaultOptions
-						value={''}
-						onChange={(val) => {
-							if (!isObject(val)) {
+						value={null}
+						onChange={(val: SelectOption | null) => {
+							if (!val) {
 								return;
 							}
 
@@ -90,31 +96,31 @@ const TagField = ({ value, onChange }: Props) => {
 						}}
 					/>
 					{value && (
-						<Flex gap={10}>
-							{map(value, (tag_id) => (
-								<AntTag
-									key={tag_id}
-									closable
-									onClose={() => {
-										const newTags = value.filter(
-											(tag) => tag !== tag_id
-										);
+						<div className="flex gap-[10px]">
+							{value.map((tag_id) => {
+								const tag = savedTags.find(
+									(item) => item.id === tag_id
+								);
+								if (!tag) return null;
 
-										onChange(newTags);
-									}}
-								>
-									{
-										savedTags.find(
-											(tag) => tag.id === tag_id
-										)?.name
-									}
-								</AntTag>
-							))}
-						</Flex>
+								return (
+									<Tags
+										key={tag_id}
+										label={tag.name}
+										onClose={() => {
+											const newTags = value.filter(
+												(id) => id !== tag_id
+											);
+											onChange(newTags);
+										}}
+									/>
+								);
+							})}
+						</div>
 					)}
-				</Flex>
-			</Flex>
-		</Flex>
+				</div>
+			</div>
+		</div>
 	);
 };
 

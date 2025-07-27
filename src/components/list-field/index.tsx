@@ -9,15 +9,19 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import { Tag as AntTag, Flex } from 'antd';
 import AsyncSelect from 'react-select/async';
-import { isObject, map } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import type { List, ListsResponse } from '@quillcrm/client';
+import { Tag } from '@quillcrm/components';
+
+interface SelectOption {
+	label: string;
+	value: number;
+}
 
 interface Props {
 	value: number[];
@@ -27,7 +31,10 @@ interface Props {
 const ListField = ({ value, onChange }: Props) => {
 	const [savedLists, setSavedLists] = useState<List[]>([]);
 
-	const fetchLists = async (keyword = '', ids: number[] = []) => {
+	const fetchLists = async (
+		keyword = '',
+		ids: number[] = []
+	): Promise<SelectOption[]> => {
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/lists', {
@@ -57,10 +64,10 @@ const ListField = ({ value, onChange }: Props) => {
 	return (
 		<div className="qcrm-field">
 			<div className="qcrm-field-input">
-				<Flex vertical={true} gap={10}>
-					<Flex justify="space-between" gap={10}>
-						<Flex vertical={true} gap={10} style={{ flex: 1 }}>
-							<AsyncSelect
+				<div className="flex flex-col gap-[10px]">
+					<div className="flex justify-between gap-[10px]">
+						<div className="flex flex-col gap-[10px] flex-1">
+							<AsyncSelect<SelectOption, false>
 								loadOptions={(inputValue, callback) => {
 									fetchLists(inputValue).then((data) => {
 										if (!data) {
@@ -71,9 +78,9 @@ const ListField = ({ value, onChange }: Props) => {
 									});
 								}}
 								defaultOptions
-								value={''}
-								onChange={(val) => {
-									if (!isObject(val)) {
+								value={null}
+								onChange={(val: SelectOption | null) => {
+									if (!val) {
 										return;
 									}
 
@@ -93,32 +100,33 @@ const ListField = ({ value, onChange }: Props) => {
 								}}
 							/>
 							{value && (
-								<Flex gap={10}>
-									{map(value, (list_id) => (
-										<AntTag
-											key={list_id}
-											closable
-											onClose={() => {
-												const newLists = value.filter(
-													(list) => list !== list_id
-												);
+								<div className="flex gap-[10px]">
+									{value.map((list_id) => {
+										const list = savedLists.find(
+											(item) => item.id === list_id
+										);
+										if (!list) return null;
 
-												onChange(newLists);
-											}}
-										>
-											{
-												savedLists.find(
-													(list) =>
-														list.id === list_id
-												)?.name
-											}
-										</AntTag>
-									))}
-								</Flex>
+										return (
+											<Tag
+												key={list_id}
+												label={list.name}
+												onClose={() => {
+													const newLists =
+														value.filter(
+															(id) =>
+																id !== list_id
+														);
+													onChange(newLists);
+												}}
+											/>
+										);
+									})}
+								</div>
 							)}
-						</Flex>
-					</Flex>
-				</Flex>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	);

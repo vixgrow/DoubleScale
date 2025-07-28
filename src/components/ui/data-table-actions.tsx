@@ -33,6 +33,7 @@ import {
 	DialogFooter,
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useState } from 'react';
 
 interface DataTableActionsProps<TData> {
 	table: Table<TData>;
@@ -47,6 +48,46 @@ export function DataTableActions<TData>({
 	activeTab,
 	setPage,
 }: DataTableActionsProps<TData>) {
+	const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({});
+	const [isColumnsDialogOpen, setIsColumnsDialogOpen] = useState(false);
+
+	// Initialize column visibility state when dialog opens
+	const handleDialogOpen = () => {
+		const currentVisibility: Record<string, boolean> = {};
+		table.getAllColumns().forEach(column => {
+			if (column.getCanHide()) {
+				currentVisibility[column.id] = column.getIsVisible();
+			}
+		});
+		setColumnVisibility(currentVisibility);
+		setIsColumnsDialogOpen(true);
+	};
+
+	// Handle column visibility changes in temporary state
+	const handleColumnToggle = (columnId: string, checked: boolean) => {
+		setColumnVisibility(prev => ({
+			...prev,
+			[columnId]: checked
+		}));
+	};
+
+	// Apply changes when submit is clicked
+	const handleSubmitColumns = () => {
+		Object.entries(columnVisibility).forEach(([columnId, isVisible]) => {
+			const column = table.getColumn(columnId);
+			if (column) {
+				column.toggleVisibility(isVisible);
+			}
+		});
+
+		// Call config callback if provided
+		if (config.manageColumns?.onSubmit) {
+			config.manageColumns.onSubmit(columnVisibility);
+		}
+
+		setIsColumnsDialogOpen(false);
+	};
+
 	return (
 		<div className="flex gap-[10px] items-center">
 			{config.dateRange?.enabled && (
@@ -72,10 +113,10 @@ export function DataTableActions<TData>({
 					doBulkAction={config.bulkActions?.onExecuteAction}
 					setSelectedLists={
 						config.bulkActions.lists?.onSelectionChange ||
-						(() => {})
+						(() => { })
 					}
 					setSelectedTags={
-						config.bulkActions.tags?.onSelectionChange || (() => {})
+						config.bulkActions.tags?.onSelectionChange || (() => { })
 					}
 					selectedLists={config.bulkActions.lists?.selected || []}
 					selectedTags={config.bulkActions.tags?.selected || []}
@@ -138,9 +179,12 @@ export function DataTableActions<TData>({
 
 			{/* Manage Columns Dropdown */}
 			{config.manageColumns?.enabled && (
-				<Dialog>
+				<Dialog open={isColumnsDialogOpen} onOpenChange={setIsColumnsDialogOpen}>
 					<DialogTrigger asChild>
-						<Button className="bg-secondary border-secondary text-white hover:bg-secondary/80 hover:text-primary-foreground">
+						<Button
+							className="bg-secondary border-secondary text-white hover:bg-secondary/80 hover:text-primary-foreground"
+							onClick={handleDialogOpen}
+						>
 							<ColumnsIcon />
 							{__('Manage Columns', 'quillcrm')}
 						</Button>
@@ -171,9 +215,9 @@ export function DataTableActions<TData>({
 									>
 										<Checkbox
 											id={`col-${column.id}`}
-											checked={column.getIsVisible()}
+											checked={columnVisibility[column.id] ?? column.getIsVisible()}
 											onCheckedChange={(value) =>
-												column.toggleVisibility(!!value)
+												handleColumnToggle(column.id, !!value)
 											}
 										/>
 										<label
@@ -189,6 +233,7 @@ export function DataTableActions<TData>({
 						<DialogFooter className="mt-6">
 							<DialogClose asChild>
 								<Button
+									onClick={handleSubmitColumns}
 									className="w-full"
 									variant="gradient"
 									size="xl"

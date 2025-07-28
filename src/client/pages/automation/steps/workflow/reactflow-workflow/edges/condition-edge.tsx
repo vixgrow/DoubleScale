@@ -56,16 +56,6 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 		targetPosition: correctTargetPosition, // Always use the correct target position
 	});
 
-	// Debug logging
-	console.log('ConditionEdge render:', {
-		id,
-		condition,
-		label,
-		edgeData,
-		labelX,
-		labelY,
-	});
-
 	// Enhanced styling based on condition with clear color differentiation
 	const edgeStyle = {
 		...style,

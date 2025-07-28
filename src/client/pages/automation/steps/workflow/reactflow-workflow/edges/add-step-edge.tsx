@@ -209,9 +209,6 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			}
 		});
 
-		console.log('Same branch steps:', sameBranchSteps);
-		console.log('Target step:', targetStep);
-
 		if (
 			targetStep &&
 			targetStep.type !== 'merge' &&
@@ -227,8 +224,6 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 				order = Math.max(...sameBranchSteps.map((s) => s.order)) + 1;
 			}
 		}
-
-		console.log('Calculated order:', order);
 
 		// Ensure order is always a valid number
 		if (typeof order !== 'number' || isNaN(order) || order < 1) {
@@ -261,24 +256,6 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		const { newSteps, updatedSteps, currentStepOrder } =
 			updateStepOrderRecursive(steps, parentId, order, stepCondition);
 
-		console.log('Step creation debug:', {
-			parentId,
-			stepCondition,
-			order,
-			currentStepOrder,
-			updatedSteps,
-			sameBranchStepsCount: steps.filter((step) => {
-				if (parentId === 0) {
-					return !step.parent_id;
-				} else {
-					return (
-						step.parent_id === parentId &&
-						step.condition === stepCondition
-					);
-				}
-			}).length,
-		});
-
 		const requestData = {
 			...stepData,
 			order: currentStepOrder,
@@ -291,8 +268,6 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 				method: 'POST',
 				data: requestData,
 			})) as AutomationStep;
-
-			console.log('response', response);
 
 			setUpdatedSteps({});
 			setSteps([...newSteps, response]);

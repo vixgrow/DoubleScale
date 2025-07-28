@@ -212,16 +212,7 @@ export const createMergeNodeData = (
 		noChildCount: noChildren.length,
 		hasYesBranch: yesChildren.length > 0,
 		hasNoBranch: noChildren.length > 0,
-		onMergeClick: () => {
-			console.log(
-				`Merge node clicked for condition ${conditionStep.id}`,
-				{
-					yesSteps: yesChildren.length,
-					noSteps: noChildren.length,
-					conditionStep: conditionStep,
-				}
-			);
-		},
+		onMergeClick: () => {},
 	};
 };
 

@@ -126,15 +126,6 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			return;
 		}
 
-		console.log('Merge node handleStepSelection called', {
-			type,
-			conditionStep,
-			level,
-			parentId,
-			yesChildCount,
-			noChildCount,
-		});
-
 		setLoading(true);
 
 		// Steps after merge should be positioned correctly based on the merge context
@@ -183,12 +174,6 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			targetOrder = Math.max(...rootSteps.map((s) => s.order), 0) + 1;
 		}
 
-		console.log('Calculated step placement', {
-			targetParentId,
-			targetCondition,
-			targetOrder,
-		});
-
 		const stepData = {
 			automation_id: automation.id,
 			type,
@@ -220,16 +205,12 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			updated_steps: updatedSteps,
 		};
 
-		console.log('Creating step with data', requestData);
-
 		try {
 			const response = (await apiFetch({
 				path: `/qc/v1/automation-steps`,
 				method: 'POST',
 				data: requestData,
 			})) as AutomationStep;
-
-			console.log('Step created successfully', response);
 
 			setUpdatedSteps({});
 			setSteps([...newSteps, response]);
@@ -255,11 +236,6 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 	const handleAddStepClick = (e: React.MouseEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
-		console.log('Add step clicked on merge node', {
-			popoverVisible,
-			isMerge,
-			conditionStep,
-		});
 		setPopoverVisible(!popoverVisible);
 	};
 
@@ -344,7 +320,6 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 					trigger="click"
 					open={popoverVisible}
 					onOpenChange={(visible) => {
-						console.log('Popover visibility changed', visible);
 						setPopoverVisible(visible);
 					}}
 					content={
@@ -358,10 +333,6 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 											icon={type.icon}
 											onClick={(e) => {
 												e.stopPropagation();
-												console.log(
-													'Button clicked',
-													key
-												);
 												handleStepSelection(key);
 											}}
 											style={{

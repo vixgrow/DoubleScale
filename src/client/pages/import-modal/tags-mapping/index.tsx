@@ -7,14 +7,6 @@ import { __ } from '@wordpress/i18n';
  */
 import { Field } from '@quillcrm/components';
 import { Switch } from '@quillcrm/components/ui/switch';
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@quillcrm/components/ui/table';
 
 interface TagsMappingProps {
 	tags: string[];
@@ -39,22 +31,22 @@ const TagsMapping: React.FC<TagsMappingProps> = ({
 	};
 
 	return (
-		<Table>
-			<TableHeader>
-				<TableRow>
-					<TableHead className="w-1/3">
-						{__('Source Tag', 'quillcrm')}
-					</TableHead>
-					<TableHead className="w-1/3">
-						{__('Assign to (QuillCRM)', 'quillcrm')}
-					</TableHead>
-					<TableHead className="w-1/3">
-						{__('Auto Create', 'quillcrm')}
-					</TableHead>
-				</TableRow>
-			</TableHeader>
+		<div className="w-full">
+			{/* Header */}
+			<div className="grid grid-cols-3 gap-4 p-4 border-b font-medium bg-gray-50">
+				<div className="text-sm font-semibold">
+					{__('Source Tag', 'quillcrm')}
+				</div>
+				<div className="text-sm font-semibold">
+					{__('Assign to (QuillCRM)', 'quillcrm')}
+				</div>
+				<div className="text-sm font-semibold">
+					{__('Auto Create', 'quillcrm')}
+				</div>
+			</div>
 
-			<TableBody>
+			{/* Body */}
+			<div className="divide-y">
 				{tags.map((tagItem) => {
 					const record = { tag: tagItem };
 					const assigned = mapping.find(
@@ -62,14 +54,17 @@ const TagsMapping: React.FC<TagsMappingProps> = ({
 					);
 
 					return (
-						<TableRow key={record.tag}>
+						<div
+							key={record.tag}
+							className="grid grid-cols-3 gap-4 p-4 items-center"
+						>
 							{/* Source Tag */}
-							<TableCell>{record.tag}</TableCell>
+							<div className="text-sm">{record.tag}</div>
 
 							{/* Assign to QuillCRM */}
-							<TableCell>
+							<div>
 								{getOrAddTagToMapped(record.tag).auto ? (
-									<div>
+									<div className="text-sm text-gray-600">
 										{__(
 											'Tag will be created automatically',
 											'quillcrm'
@@ -102,10 +97,10 @@ const TagsMapping: React.FC<TagsMappingProps> = ({
 										}}
 									/>
 								)}
-							</TableCell>
+							</div>
 
 							{/* Auto Create */}
-							<TableCell>
+							<div>
 								<Switch
 									checked={assigned?.auto}
 									onCheckedChange={(value) => {
@@ -126,12 +121,12 @@ const TagsMapping: React.FC<TagsMappingProps> = ({
 										}
 									}}
 								/>
-							</TableCell>
-						</TableRow>
+							</div>
+						</div>
 					);
 				})}
-			</TableBody>
-		</Table>
+			</div>
+		</div>
 	);
 };
 export default TagsMapping;

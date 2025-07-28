@@ -6,14 +6,6 @@ import { __ } from '@wordpress/i18n';
  * internal dependencies
  */
 import { Field } from '@quillcrm/components';
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 
 interface ListsMappingProps {
@@ -43,22 +35,22 @@ const ListsMapping: React.FC<ListsMappingProps> = ({
 	};
 
 	return (
-		<Table>
-			<TableHeader>
-				<TableRow>
-					<TableHead className="w-1/3">
-						{__('Source List', 'quillcrm')}
-					</TableHead>
-					<TableHead className="w-1/3">
-						{__('Assign to (QuillCRM)', 'quillcrm')}
-					</TableHead>
-					<TableHead className="w-1/3">
-						{__('Auto Create', 'quillcrm')}
-					</TableHead>
-				</TableRow>
-			</TableHeader>
+		<div className="w-full">
+			{/* Header */}
+			<div className="grid grid-cols-3 gap-4 p-4 border-b font-medium bg-gray-50">
+				<div className="text-sm font-semibold">
+					{__('Source List', 'quillcrm')}
+				</div>
+				<div className="text-sm font-semibold">
+					{__('Assign to (QuillCRM)', 'quillcrm')}
+				</div>
+				<div className="text-sm font-semibold">
+					{__('Auto Create', 'quillcrm')}
+				</div>
+			</div>
 
-			<TableBody>
+			{/* Body */}
+			<div className="divide-y">
 				{lists.map((listItem) => {
 					const record = { list: listItem };
 					const assigned = mapping.find(
@@ -66,14 +58,17 @@ const ListsMapping: React.FC<ListsMappingProps> = ({
 					);
 
 					return (
-						<TableRow key={record.list}>
+						<div
+							key={record.list}
+							className="grid grid-cols-3 gap-4 p-4 items-center"
+						>
 							{/* Source List */}
-							<TableCell>{record.list}</TableCell>
+							<div className="text-sm">{record.list}</div>
 
 							{/* Assign to QuillCRM */}
-							<TableCell>
+							<div>
 								{assigned?.auto ? (
-									<div>
+									<div className="text-sm text-gray-600">
 										{__(
 											'List will be created automatically',
 											'quillcrm'
@@ -108,10 +103,10 @@ const ListsMapping: React.FC<ListsMappingProps> = ({
 										}}
 									/>
 								)}
-							</TableCell>
+							</div>
 
 							{/* Auto Create */}
-							<TableCell>
+							<div>
 								<Switch
 									checked={assigned?.auto}
 									onCheckedChange={(value) => {
@@ -132,12 +127,12 @@ const ListsMapping: React.FC<ListsMappingProps> = ({
 										}
 									}}
 								/>
-							</TableCell>
-						</TableRow>
+							</div>
+						</div>
 					);
 				})}
-			</TableBody>
-		</Table>
+			</div>
+		</div>
 	);
 };
 export default ListsMapping;

@@ -137,7 +137,7 @@ export const useContactsAPI = () => {
 			showNotice(
 				'success',
 				__(
-					'Your Contact ( contact ) was successfully added to list (list name)  — check it out!',
+					'Contacts were successfully added to list  — check it out!',
 					'quillcrm'
 				)
 			);
@@ -262,19 +262,6 @@ export const useContactsAPI = () => {
 				break;
 		}
 	};
-
-	// // Auto-fetch when dependencies change
-	// useEffect(() => {
-	// 	fetchContacts();
-	// }, [page, perPage, dateRange, keywords]);
-
-	// useEffect(() => {
-	// 	if (dateRange.from || dateRange.to) {
-	// 		// Reset to first page when filtering
-	// 		// setPage(1); // Commented to avoid circular dependency
-	// 		fetchContacts();
-	// 	}
-	// }, [dateRange]);
 
 	return {
 		fetchContacts,

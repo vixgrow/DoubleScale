@@ -128,7 +128,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 
 		setLoading(true);
 
-		// Steps after merge should be positioned correctly based on the merge context
+		// Steps after merge should be positioned immediately after the merge point
 		// For root-level merges, add to root level
 		// For nested merges, add to the appropriate parent level
 		let targetParentId = 0;
@@ -141,37 +141,44 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			targetParentId = conditionStep.parent_id || 0;
 			targetCondition = conditionStep.condition || undefined;
 
-			// Find steps at the same level and after this condition
-			const sameLevelSteps = steps.filter((step) => {
-				if (targetParentId === 0) {
-					return !step.parent_id && step.order > conditionStep.order;
-				} else {
-					return (
-						step.parent_id === targetParentId &&
-						step.condition === targetCondition &&
-						step.order > conditionStep.order
-					);
-				}
-			});
+			// Find the maximum order among all steps in both branches of this condition
+			// This includes both 'yes' and 'no' condition steps
+			const conditionBranchSteps = steps.filter(
+				(step) =>
+					step.parent_id === conditionStep.id &&
+					(step.condition === 'yes' || step.condition === 'no')
+			);
 
-			targetOrder =
-				sameLevelSteps.length > 0
-					? Math.min(...sameLevelSteps.map((s) => s.order))
-					: Math.max(
-							...steps
-								.filter((step) =>
-									targetParentId === 0
-										? !step.parent_id
-										: step.parent_id === targetParentId &&
-											step.condition === targetCondition
-								)
-								.map((s) => s.order),
-							0
-						) + 1;
+			// Get the highest order from the condition branches
+			const maxBranchOrder =
+				conditionBranchSteps.length > 0
+					? Math.max(...conditionBranchSteps.map((s) => s.order))
+					: conditionStep.order;
+
+			// New step should come right after the merge point (after all branch steps)
+			targetOrder = maxBranchOrder + 1;
 		} else {
-			// Root level merge - add to root level
-			const rootSteps = steps.filter((step) => !step.parent_id);
-			targetOrder = Math.max(...rootSteps.map((s) => s.order), 0) + 1;
+			// Root level merge - find the position after the condition step and its branches
+			if (conditionStep) {
+				// Find all steps that belong to this condition's branches
+				const conditionBranchSteps = steps.filter(
+					(step) =>
+						step.parent_id === conditionStep.id &&
+						(step.condition === 'yes' || step.condition === 'no')
+				);
+
+				// Get the highest order from the condition branches
+				const maxBranchOrder =
+					conditionBranchSteps.length > 0
+						? Math.max(...conditionBranchSteps.map((s) => s.order))
+						: conditionStep.order;
+
+				targetOrder = maxBranchOrder + 1;
+			} else {
+				// Fallback: add to end of root level
+				const rootSteps = steps.filter((step) => !step.parent_id);
+				targetOrder = Math.max(...rootSteps.map((s) => s.order), 0) + 1;
+			}
 		}
 
 		const stepData = {

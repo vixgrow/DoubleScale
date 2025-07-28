@@ -20,39 +20,28 @@ import csvIcon from '../../../../../assets/images/csv/csv.png';
 
 const ImportProgress: React.FC = () => {
 	const { state } = useImportContext();
-	const { source, count, offset, importing } = state;
+	const { source, count, offset, importing, showingCompletion } = state;
 	const importers = ConfigAPI.getImporters();
 	const importer = importers[source] || null;
 
 	// Fix the progress calculation
 	const progressPercentage = React.useMemo(() => {
-		if (!importing) return 0;
 		if (count === 0) return 0;
-
-		// Make sure we have valid numbers
+		if (showingCompletion) return 100; // Always 100% when showing completion
 		const validOffset = Math.max(0, offset || 0);
 		const validCount = Math.max(1, count || 1);
-
 		return Math.min(100, Math.round((validOffset / validCount) * 100));
-	}, [count, offset, importing]);
-
-	// Debug logging
-	React.useEffect(() => {
-		console.log('ImportProgress state:', {
-			importing,
-			count,
-			offset,
-			progressPercentage,
-		});
-	}, [importing, count, offset, progressPercentage]);
+	}, [count, offset, showingCompletion]);
 
 	return (
 		<div className="w-full h-full flex flex-col items-start justify-start">
 			<p className="text-[#09090B] text-2xl text-start">
-				{__(
-					`Importing ${importer?.name || source} Contacts`,
-					'quillcrm'
-				)}
+				{showingCompletion
+					? __(`Import Completed!`, 'quillcrm')
+					: __(
+							`Importing ${importer?.name || source} Contacts`,
+							'quillcrm'
+						)}
 			</p>
 			<span className="text-lg text-[#71717A]">
 				{__(
@@ -75,34 +64,34 @@ const ImportProgress: React.FC = () => {
 						)}
 					</div>
 					<CardTitle className="text-2xl text-[#09090B] font-normal">
-						{importing
+						{importing && progressPercentage < 100
 							? __('Importing Contacts...', 'quillcrm')
-							: __('Import Completed', 'quillcrm')}
+							: __('Import Completed!', 'quillcrm')}
 					</CardTitle>
 				</CardHeader>
 
 				<CardContent className="space-y-4">
 					<div className="flex justify-center gap-2 items-center text-lg text-[#71717A]">
-						{importing && (
+						{importing && progressPercentage < 100 && (
 							<div className="flex justify-center">
 								<LoadingSpinner size={24} />
 							</div>
 						)}
 						<span>
-							{importing
+							{importing && progressPercentage < 100
 								? __('In Progress', 'quillcrm')
-								: __('Completed', 'quillcrm')}
+								: __('Completed Successfully!', 'quillcrm')}
 						</span>
 					</div>
 
 					<div className="text-center text-sm text-[#71717A]">
-						{importing
+						{importing && progressPercentage < 100
 							? __(
 									'Please wait while we import your contacts...',
 									'quillcrm'
 								)
 							: __(
-									'You will be redirected to contacts list shortly.',
+									'All contacts have been imported successfully. You will be redirected shortly.',
 									'quillcrm'
 								)}
 					</div>

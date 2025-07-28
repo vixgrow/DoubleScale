@@ -33,6 +33,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 		currentStep,
 		source,
 		importing,
+		showingCompletion, // Add this
 		isFetching,
 		sourceData,
 		fileData,
@@ -46,12 +47,15 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 	const handleImportContacts = async () => {
 		const success = await importContacts();
 		if (success) {
+			// Wait for the completion display to finish
+			await new Promise((resolve) => setTimeout(resolve, 2500));
 			resetState();
 			onImportComplete();
 		}
 	};
 
-	if (importing) {
+	// Show progress if importing OR showing completion
+	if (importing || showingCompletion) {
 		return <ImportProgress />;
 	}
 

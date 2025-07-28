@@ -1,26 +1,27 @@
 /**
  * wordpress dependencies
  */
-import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
+import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 /**
  * external dependencies
  */
-import { useEffect } from 'react';
 import { isEmpty, trim } from 'lodash';
+import { useEffect } from 'react';
 /**
  * internal dependencies
  */
-import { useImportContext } from './contexts';
 import ConfigAPI from '@quillcrm/config';
+import { useImportContext } from './contexts';
 
 export const useImportActions = () => {
 	const { state, dispatch } = useImportContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 	const importers = ConfigAPI.getImporters();
 	const importer = importers[state.source] || null;
+
 
 	const validateCredentials = () => {
 		if (!importer) {
@@ -82,11 +83,11 @@ export const useImportActions = () => {
 		}
 	};
 
-	const importContacts = async (currentOffset = 0): Promise<boolean> => {
+	const startImport = async (currentOffset = 0): Promise<boolean> => {
 		dispatch({ type: 'SET_IMPORTING', payload: true });
 
 		try {
-			const response = (await apiFetch({
+			const response = await apiFetch({
 				path: addQueryArgs('/qc/v1/import-export/import'),
 				method: 'POST',
 				data: {
@@ -99,7 +100,7 @@ export const useImportActions = () => {
 					...state.values,
 					credentials: state.credentials,
 				},
-			})) as {
+			}) as {
 				total: number;
 				offset: number;
 				status: string;
@@ -109,52 +110,92 @@ export const useImportActions = () => {
 			console.log('Import response:', {
 				total: response.total,
 				offset: response.offset,
-				processed: response.processed,
 				status: response.status,
 			});
 
-			// Update count and offset immediately when we get the response
+			// Update progress
 			dispatch({ type: 'SET_COUNT', payload: response.total });
 			dispatch({ type: 'SET_OFFSET', payload: response.offset });
 
 			if (response.status === 'in_progress') {
-				const progress = Math.min(
-					100,
-					Math.round((response.offset / response.total) * 100)
-				);
-				console.log(`Import progress: ${progress}%`);
-
-				// Add a small delay to allow UI to update, then continue polling
-				await new Promise((resolve) => setTimeout(resolve, 1000));
-				return await importContacts(response.offset);
+				// Continue with next batch after a short delay
+				setTimeout(() => startImport(response.offset), 1000);
+				return true;
 			} else {
-				console.log('Import completed');
-				createNotice({
-					type: 'success',
-					message: __('Import completed', 'quillcrm'),
-				});
-				dispatch({ type: 'SET_IMPORTING', payload: false });
-				// Don't reset count and offset immediately - let the UI show 100% completion
-				setTimeout(() => {
-					dispatch({ type: 'SET_COUNT', payload: 0 });
-					dispatch({ type: 'SET_OFFSET', payload: 0 });
-				}, 2000); // Show completion for 2 seconds
-				return true; // Signal completion
+				// Import completed - ensure 100% is shown
+				dispatch({ type: 'SET_COUNT', payload: response.total });
+				dispatch({ type: 'SET_OFFSET', payload: response.total });
+				handleImportComplete();
+				return true;
 			}
 		} catch (error: any) {
-			console.error('Import error:', error);
-			createNotice({
-				type: 'error',
-				message:
-					error.message ||
-					__('Failed to import contacts', 'quillcrm'),
-			});
-			dispatch({ type: 'SET_IMPORTING', payload: false });
-			dispatch({ type: 'SET_COUNT', payload: 0 });
-			dispatch({ type: 'SET_OFFSET', payload: 0 });
+			handleImportError(error);
 			return false;
 		}
 	};
+
+
+
+	const handleImportComplete = () => {
+		console.log('Import completed');
+
+		createNotice({
+			type: 'success',
+			message: __('Import completed', 'quillcrm'),
+		});
+
+		// First set importing to false
+		dispatch({ type: 'SET_IMPORTING', payload: false });
+
+		// Use requestAnimationFrame to ensure the 100% progress renders
+		// before showing the completion state
+		requestAnimationFrame(() => {
+			dispatch({ type: 'SET_SHOWING_COMPLETION', payload: true });
+
+			// Show completion for 2 seconds before resetting
+			setTimeout(() => {
+				dispatch({ type: 'SET_SHOWING_COMPLETION', payload: false });
+				dispatch({ type: 'SET_COUNT', payload: 0 });
+				dispatch({ type: 'SET_OFFSET', payload: 0 });
+			}, 2000);
+		});
+	};
+
+	const handleImportError = (error: any) => {
+		console.error('Import error:', error);
+
+		createNotice({
+			type: 'error',
+			message: error.message || __('Failed to import contacts', 'quillcrm'),
+		});
+
+		dispatch({ type: 'SET_IMPORTING', payload: false });
+		dispatch({ type: 'SET_COUNT', payload: 0 });
+		dispatch({ type: 'SET_OFFSET', payload: 0 });
+	};
+
+	const cancelImport = async () => {
+		try {
+			await apiFetch({
+				path: '/qc/v1/import-export/import/cancel',
+				method: 'POST',
+				data: { source: state.source },
+			});
+		} catch (error) {
+			console.error('Cancel import error:', error);
+		} finally {
+			dispatch({ type: 'SET_IMPORTING', payload: false });
+			dispatch({ type: 'SET_COUNT', payload: 0 });
+			dispatch({ type: 'SET_OFFSET', payload: 0 });
+		}
+	};
+
+	// Cleanup on unmount
+	useEffect(() => {
+		return () => {
+			// Cleanup if needed
+		};
+	}, []);
 
 	useEffect(() => {
 		getSourceData();
@@ -163,6 +204,7 @@ export const useImportActions = () => {
 	return {
 		validateCredentials,
 		getSourceData,
-		importContacts,
+		importContacts: startImport, // Rename for clarity
+		cancelImport,
 	};
 };

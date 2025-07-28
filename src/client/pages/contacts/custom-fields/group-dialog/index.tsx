@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 /**
  * internal dependencies
  */
@@ -32,15 +32,20 @@ export const GroupDialog: React.FC<GroupDialogProps> = ({
 	const [name, setName] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
+	// Reset form when dialog opens
+	useEffect(() => {
+		if (visible) {
+			setName('');
+		}
+	}, [visible]);
+
 	const handleSubmit = async () => {
 		if (!name) return;
 
 		setIsSubmitting(true);
-		const success = await onSave(name);
-		if (success) {
-			setName('');
-			onClose();
-		}
+		await onSave(name);
+		setName('');
+		onClose();
 		setIsSubmitting(false);
 	};
 

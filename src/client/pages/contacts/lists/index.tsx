@@ -135,8 +135,10 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				)
 			);
 		} catch (error: any) {
+			setVisible(false);
 			showNotice('error', error.message);
 		} finally {
+			setVisible(false);
 			setIsSaving(false);
 		}
 	};
@@ -163,8 +165,10 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			setSelectedList(null);
 			showNotice('success', __('List updated successfully', 'quillcrm'));
 		} catch (error: any) {
+			setVisible(false);
 			showNotice('error', error.message);
 		} finally {
+			setVisible(false);
 			setIsSaving(false);
 		}
 	};

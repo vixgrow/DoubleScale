@@ -31,7 +31,7 @@ interface BulkActionSelectProps {
 	bulkAction: string;
 	setBulkAction: (value: string) => void;
 	selectedRowKeys: string[];
-	doBulkAction: (action: string, data?: any) => void; // Modified to accept optional data
+	doBulkAction: (action: string, data?: any) => void;
 	setSelectedLists: (lists: string[]) => void;
 	setSelectedTags: (tags: string[]) => void;
 	selectedLists: string[];
@@ -52,7 +52,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 }) => {
 	const [isListModalOpen, setIsListModalOpen] = useState(false);
 	const [isTagModalOpen, setIsTagModalOpen] = useState(false);
-	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // New state for delete modal
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [modalMode, setModalMode] = useState<'add' | 'remove'>('add');
 
 	const handleAction = (value: string) => {
@@ -68,7 +68,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 
 		// Handle different actions
 		if (value === 'delete') {
-			setIsDeleteModalOpen(true); // Show confirmation modal instead of immediate action
+			setIsDeleteModalOpen(true);
 		} else if (value === 'add_to_list') {
 			setModalMode('add');
 			setIsListModalOpen(true);
@@ -91,7 +91,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 
 	const handleDeleteModalClose = () => {
 		setIsDeleteModalOpen(false);
-		setBulkAction(''); // Reset bulk action when modal is closed
+		setBulkAction('');
 	};
 
 	const handleListModalSubmit = (lists: number[]) => {
@@ -120,12 +120,12 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 
 	const handleListModalClose = () => {
 		setIsListModalOpen(false);
-		// Don't reset selectedLists here for remove operations
+		setBulkAction('');
 	};
 
 	const handleTagModalClose = () => {
 		setIsTagModalOpen(false);
-		// Don't reset selectedTags here for remove operations
+		setBulkAction(''); 
 	};
 
 	// Define bulk actions based on active tab

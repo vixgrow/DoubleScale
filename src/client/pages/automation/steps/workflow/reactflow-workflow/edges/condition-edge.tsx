@@ -41,22 +41,58 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 	const condition = edgeData?.condition || (label === 'Yes' ? 'yes' : 'no');
 	const isYes = condition === 'yes';
 
-	// Use getBezierPath for smoother curves that work better with our layout
-	// Auto-detect proper source position based on condition for consistency
-	// Always use the correct handle positions regardless of the provided sourcePosition
-	const correctSourcePosition =
-		condition === 'yes' ? Position.Left : Position.Right;
+	// Create distinct curves for Yes/No branches from single source handle
+	const correctSourcePosition = Position.Bottom;
 	const correctTargetPosition = targetPosition || Position.Top;
-	const [edgePath, labelX, labelY] = getBezierPath({
-		sourceX,
-		sourceY,
-		sourcePosition: correctSourcePosition, // Always use the correct source position
-		targetX,
-		targetY,
-		targetPosition: correctTargetPosition, // Always use the correct target position
-	});
 
-	// Enhanced styling based on condition with clear color differentiation
+	// Calculate the horizontal distance and create pronounced curves
+	const horizontalDistance = Math.abs(targetX - sourceX);
+
+	// Create wider, more semantic curves for clear visual separation
+	let adjustedSourceX = sourceX;
+	let adjustedTargetX = targetX;
+	let adjustedSourceY = sourceY;
+
+	// Create semantic directional curves from single handle
+	const verticalOffset = 80; // Vertical offset for dramatic curves
+	const sourceSpread = 120; // How much to spread the curves at the source
+	const semanticOffset = Math.max(150, horizontalDistance * 0.6);
+
+	if (isYes) {
+		// Yes branch: Always curve LEFT regardless of target position
+		adjustedSourceX = sourceX - sourceSpread; // Start left from center
+		adjustedTargetX =
+			targetX < sourceX ? targetX : targetX - semanticOffset; // Ensure left positioning
+		adjustedSourceY = sourceY + verticalOffset;
+	} else {
+		// No branch: Always curve RIGHT regardless of target position
+		adjustedSourceX = sourceX + sourceSpread; // Start right from center
+		adjustedTargetX =
+			targetX > sourceX ? targetX : targetX + semanticOffset; // Ensure right positioning
+		adjustedSourceY = sourceY + verticalOffset;
+	}
+
+	// Use higher curvature for more pronounced, semantic curves from single point
+	const dynamicCurvature = Math.min(1.2, 0.8 + horizontalDistance / 300);
+
+	// Create custom path that starts from center handle and branches out
+	const controlPointOffset = 60; // Distance from source to first control point
+	const branchDirection = isYes ? -1 : 1; // Left for Yes, Right for No
+
+	// First control point: slight offset from center handle
+	const cp1X = sourceX + branchDirection * 30;
+	const cp1Y = sourceY + controlPointOffset;
+
+	// Second control point: more dramatic branching
+	const cp2X = adjustedTargetX;
+	const cp2Y = targetY - 60;
+
+	// Create custom cubic bezier path from center to target with proper branching
+	const edgePath = `M ${sourceX} ${sourceY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${adjustedTargetX} ${targetY - 10}`;
+
+	// Calculate label position at midpoint of curve
+	const labelX = (sourceX + cp1X + cp2X + adjustedTargetX) / 4;
+	const labelY = (sourceY + cp1Y + cp2Y + (targetY - 10)) / 4; // Enhanced styling based on condition with clear color differentiation
 	const edgeStyle = {
 		...style,
 		stroke: isYes ? '#52c41a' : '#ff4d4f', // Green for Yes, Red for No

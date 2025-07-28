@@ -92,8 +92,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		async (stepId: string) => {
 			if (!automation || !steps) return;
 
-			console.log('Deleting step:', stepId);
-
 			try {
 				// Find the step to delete
 				const stepToDelete = steps.find(
@@ -159,8 +157,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 				// Update context with the refreshed automation
 				updateAutomation(updatedAutomation);
-
-				console.log('Step deleted successfully');
 			} catch (error) {
 				console.error('Failed to delete step:', error);
 				// You might want to show a user-friendly error message here
@@ -172,10 +168,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	// Clear saved positions to force re-layout
 	const clearSavedPositions = useCallback(async () => {
 		if (!automation) return;
-
-		console.log(
-			'Clearing saved positions to force re-layout after reorder'
-		);
 
 		try {
 			const updatedAutomation = {
@@ -273,9 +265,19 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				.sort((a, b) => a.order - b.order);
 
 			// Calculate minimum width based on level and content with increased base
-			const baseWidth = 120; // Increased base width for better spacing
-			const levelMultiplier = 1 + level * 0.1; // Better spacing per level
+			const baseWidth = 300; // Increased base width for better spacing
+			const levelMultiplier = 1 + level * 0.3; // Better spacing per level
 			const minWidth = baseWidth * levelMultiplier;
+
+			// Debug logging for branch calculations
+			console.log(`--- calculateBranchWidth Debug ---`);
+			console.log(
+				`Parent ID: ${parentId}, Condition: ${condition}, Level: ${level}`
+			);
+			console.log(`Branch steps count: ${branchSteps.length}`);
+			console.log(`Base width: ${baseWidth}px`);
+			console.log(`Level multiplier: ${levelMultiplier}`);
+			console.log(`Minimum width for branch: ${minWidth}px`);
 
 			if (branchSteps.length === 0) {
 				return minWidth; // Minimum width for empty branch
@@ -312,6 +314,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			// Add extra padding for complex branches with increased padding
 			const complexityPadding = level > 0 ? 150 + level * 75 : 75;
 			const finalWidth = maxWidth + complexityPadding;
+
+			console.log('calculateBranchWidth', {
+				level: level,
+				branchSteps: branchSteps.length,
+				maxWidth: maxWidth,
+				complexityPadding: complexityPadding,
+				finalWidth: finalWidth,
+			});
 
 			return finalWidth;
 		};
@@ -634,14 +644,56 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				({ step, level, yesChildren, noChildren }) => {
 					const conditionPos = getNodePosition(step.id.toString());
 
-					// Calculate optimal merge position using utility - now all children are positioned
+					// Calculate the branch center positions using the same logic as calculatePositions
+					const yesWidth = calculateBranchWidth(
+						stepList,
+						step.id,
+						'yes',
+						level + 1
+					);
+					const noWidth = calculateBranchWidth(
+						stepList,
+						step.id,
+						'no',
+						level + 1
+					);
+					const branchGap = Math.max(300, 150 + level * 60);
+					const totalChildWidth = yesWidth + noWidth + branchGap;
+
+					console.log('calculatePositions', {
+						level: level,
+						yesChildren: yesChildren.length,
+						noChildren: noChildren.length,
+						yesWidth: yesWidth,
+						noWidth: noWidth,
+						branchGap: branchGap,
+						totalChildWidth: totalChildWidth,
+						conditionPos: conditionPos,
+					});
+
+					// Calculate exact branch center positions
+					const yesX =
+						conditionPos.x - totalChildWidth / 2 + yesWidth / 2;
+					const noX =
+						conditionPos.x + totalChildWidth / 2 - noWidth / 2;
+					const branchCenterX = (yesX + noX) / 2; // True center between branches
+
+					// Log the calculated positions
+					console.log('calculatePositions', {
+						yesX: yesX,
+						noX: noX,
+						branchCenterX: branchCenterX,
+					});
+
+					// Calculate optimal merge position with correct centering
 					const optimalMergePosition = calculateMergePosition(
 						conditionPos,
 						yesChildren,
 						noChildren,
 						getNodePosition,
 						stepList, // Pass all steps for recursive depth calculation
-						level // Pass current level for nested merge node tracking
+						level, // Pass current level for nested merge node tracking
+						branchCenterX // Pass the calculated center position
 					);
 
 					// Create single merge node positioned below both branches
@@ -681,7 +733,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${step.id}-to-yes-merge-direct`,
 							source: step.id.toString(),
 							target: mergeId,
-							sourceHandle: 'yes', // Explicitly use 'yes' handle (left side)
+							sourceHandle: 'bottom', // Use single bottom handle for both branches
 							targetHandle: 'top', // Connect to top handle of merge node
 							type: 'addStepEdge',
 							label: __('Yes', 'quillcrm'),
@@ -706,7 +758,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${step.id}-to-yes-${firstYesChild.id}`,
 							source: step.id.toString(),
 							target: firstYesChild.id.toString(),
-							sourceHandle: 'yes', // Explicitly use 'yes' handle (left side)
+							sourceHandle: 'bottom', // Use single bottom handle for both branches
 							targetHandle: null, // Let target use default top handle
 							type: 'conditionEdge',
 							label: __('Yes', 'quillcrm'),
@@ -787,7 +839,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${step.id}-to-no-merge-direct`,
 							source: step.id.toString(),
 							target: mergeId,
-							sourceHandle: 'no', // Explicitly use 'no' handle (right side)
+							sourceHandle: 'bottom', // Use single bottom handle for both branches
 							targetHandle: 'top', // Connect to top handle of merge node
 							type: 'addStepEdge',
 							label: __('No', 'quillcrm'),
@@ -812,7 +864,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							id: `${step.id}-to-no-${firstNoChild.id}`,
 							source: step.id.toString(),
 							target: firstNoChild.id.toString(),
-							sourceHandle: 'no', // Explicitly use 'no' handle (right side)
+							sourceHandle: 'bottom', // Use single bottom handle for both branches
 							targetHandle: null, // Let target use default top handle
 							type: 'conditionEdge',
 							label: __('No', 'quillcrm'),
@@ -1110,9 +1162,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		const applyLayoutAndSetNodes = async () => {
 			// Check if we have any saved positions for step nodes (excluding trigger)
 
-			console.log('savedPositions', savedPositions);
-			console.log('steps', steps);
-
 			// Check if ALL current steps have saved positions
 			const hasExistingPositions = steps.every(
 				(step) => savedPositions[step.id.toString()]
@@ -1273,10 +1322,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				console.log('No position changes detected, skipping save');
 				return;
 			}
-
-			console.log('Saving node positions...', {
-				totalNodes: nodes.length,
-			});
 
 			try {
 				// Update automation settings with new positions

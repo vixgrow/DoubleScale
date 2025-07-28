@@ -167,18 +167,13 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 					)}
 				/>
 
-				{/* Source handles for yes/no branches */}
+				{/* Single source handle for both yes/no branches */}
 				<Handle
 					type="source"
-					position={Position.Left}
-					id="yes"
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--yes"
-				/>
-				<Handle
-					type="source"
-					position={Position.Right}
-					id="no"
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--no"
+					position={Position.Bottom}
+					id="bottom"
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--condition"
+					style={{ left: '50%', transform: 'translateX(-50%)' }}
 				/>
 			</div>
 		</NodeContextMenu>

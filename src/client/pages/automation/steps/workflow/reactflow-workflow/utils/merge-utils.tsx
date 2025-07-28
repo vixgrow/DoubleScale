@@ -76,19 +76,21 @@ export const calculateMergePosition = (
 	noChildren: any[],
 	getNodePosition: (nodeId: string) => { x: number; y: number },
 	allSteps?: any[],
-	level?: number
+	level?: number,
+	branchCenterX?: number
 ): { x: number; y: number } => {
 	let maxBranchY = conditionPosition.y + 500; // Increased minimum spacing below condition
 
 	// Helper function to recursively find the deepest descendant in a branch
 	const findDeepestDescendant = (
 		children: any[]
-	): { y: number; nodeId?: string } => {
+	): { y: number; x: number; nodeId?: string } => {
 		if (children.length === 0) {
-			return { y: conditionPosition.y + 300 }; // Default spacing for empty branch
+			return { y: conditionPosition.y + 300, x: conditionPosition.x }; // Default spacing for empty branch
 		}
 
 		let deepestY = conditionPosition.y;
+		let deepestX = conditionPosition.x;
 		let deepestNodeId: string | undefined;
 
 		children.forEach((child) => {
@@ -107,6 +109,7 @@ export const calculateMergePosition = (
 			// Check if this child is deeper than current deepest
 			if (childPos && childPos.y > deepestY) {
 				deepestY = childPos.y;
+				deepestX = childPos.x;
 				deepestNodeId = child.id.toString();
 			}
 
@@ -121,6 +124,7 @@ export const calculateMergePosition = (
 					childMergePos = getNodePosition(childMergeId);
 					if (childMergePos && childMergePos.y > deepestY) {
 						deepestY = childMergePos.y;
+						deepestX = childMergePos.x;
 						deepestNodeId = childMergeId;
 					}
 				} catch (error) {
@@ -149,17 +153,19 @@ export const calculateMergePosition = (
 
 					if (yesDeepest.y > deepestY) {
 						deepestY = yesDeepest.y;
+						deepestX = yesDeepest.x;
 						deepestNodeId = yesDeepest.nodeId;
 					}
 					if (noDeepest.y > deepestY) {
 						deepestY = noDeepest.y;
+						deepestX = noDeepest.x;
 						deepestNodeId = noDeepest.nodeId;
 					}
 				}
 			}
 		});
 
-		return { y: deepestY, nodeId: deepestNodeId };
+		return { y: deepestY, x: deepestX, nodeId: deepestNodeId };
 	};
 
 	// Find the deepest descendant in both branches
@@ -184,8 +190,20 @@ export const calculateMergePosition = (
 		equalizedBranchHeight + 400 // Increased spacing below the equalized branch height
 	);
 
+	// Use the provided branch center X position if available, otherwise calculate it
+	let centerX = branchCenterX || conditionPosition.x; // Use provided center or default to condition center
+
+	// If no branch center was provided, calculate it from actual branch positions
+	if (!branchCenterX && (yesChildren.length > 0 || noChildren.length > 0)) {
+		const yesX =
+			yesChildren.length > 0 ? yesDeepest.x : conditionPosition.x - 200; // Default left if empty
+		const noX =
+			noChildren.length > 0 ? noDeepest.x : conditionPosition.x + 200; // Default right if empty
+		centerX = (yesX + noX) / 2; // True center between branches
+	}
+
 	const finalPosition = {
-		x: conditionPosition.x, // Center below condition
+		x: centerX, // Center between Yes and No branches
 		y: maxBranchY + 150, // Additional spacing below the equalized branches
 	};
 

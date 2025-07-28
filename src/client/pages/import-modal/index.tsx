@@ -9,7 +9,12 @@ import React from 'react';
 /**
  * internal dependencies
  */
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { ImportProvider, useImportContext } from './contexts';
 import SourceSelector from './source-selector';
@@ -40,31 +45,38 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 	};
 
 	return (
-		<div>
-			<div className="flex items-center justify-between">
-				<h1 className="text-3xl font-normal text-[#09090B]">
-					{__('Import Contacts', 'quillcrm')}
-				</h1>
-				<div className="text-base text-[#979797] pr-12">
-					{source === 'csv'
-						? `Step ${currentStep} of 2`
-						: 'Step 1 of 1'}
+		<>
+			<DialogHeader>
+				<DialogTitle>
+					<div className="flex items-center justify-between">
+						<h1 className="text-3xl font-normal text-[#09090B]">
+							{__('Import Contacts', 'quillcrm')}
+						</h1>
+						<div className="text-base text-[#979797] pr-12">
+							{source === 'csv'
+								? `Step ${currentStep} of 2`
+								: 'Step 1 of 1'}
+						</div>
+					</div>
+				</DialogTitle>
+			</DialogHeader>
+			<div>
+				<div className="flex h-full gap-5">
+					<div className="w-2/5">
+						<SourceSelector />
+					</div>
+
+					<Card className="w-3/5 shadow-none rounded-[20px]">
+						<SourceHeader />
+						<CardContent className="p-8">
+							<MainContent
+								onImportComplete={handleImportComplete}
+							/>
+						</CardContent>
+					</Card>
 				</div>
 			</div>
-
-			<div className="flex h-full gap-5 mt-8">
-				<div className="w-2/5">
-					<SourceSelector />
-				</div>
-
-				<Card className="w-3/5 shadow-none rounded-[20px]">
-					<SourceHeader />
-					<CardContent className="p-8">
-						<MainContent onImportComplete={handleImportComplete} />
-					</CardContent>
-				</Card>
-			</div>
-		</div>
+		</>
 	);
 };
 

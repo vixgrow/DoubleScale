@@ -7,7 +7,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * external dependencies
  */
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { CircleX } from 'lucide-react';
 
 /**
@@ -29,16 +29,37 @@ import { useImportContext } from '../contexts';
 //@ts-ignore
 import csvIcon from '../../../../../assets/images/csv/csv.png';
 
+// Utility function to format file size
+const formatFileSize = (bytes: number): string => {
+	if (bytes === 0) return '0 Bytes';
+	const k = 1024;
+	const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
 const CsvUpload: React.FC = () => {
 	const { state, dispatch, updateValues } = useImportContext();
 	const { fileData, isFetching, isUploading, uploadProgress } = state;
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	// Store file information locally
+	const [fileInfo, setFileInfo] = useState<{
+		file: File | null;
+		uploadedSize: number;
+	}>({
+		file: null,
+		uploadedSize: 0,
+	});
 
 	const uploadFile = async (file: File) => {
 		const formData = new FormData();
 		formData.append('file', file);
 		dispatch({ type: 'SET_IS_UPLOADING', payload: true });
 		dispatch({ type: 'SET_UPLOAD_PROGRESS', payload: 0 });
+
+		// Store file info for size display
+		setFileInfo({ file, uploadedSize: 0 });
 
 		try {
 			// Simulate progress for fetch (since fetch doesn't support upload progress natively)
@@ -49,6 +70,12 @@ const CsvUpload: React.FC = () => {
 					return;
 				}
 				currentProgress += 10;
+				// Update uploaded size based on progress
+				const uploadedBytes = (currentProgress / 100) * file.size;
+				setFileInfo((prev) => ({
+					...prev,
+					uploadedSize: uploadedBytes,
+				}));
 				dispatch({
 					type: 'SET_UPLOAD_PROGRESS',
 					payload: currentProgress,
@@ -63,6 +90,7 @@ const CsvUpload: React.FC = () => {
 
 			clearInterval(progressSimulation);
 			dispatch({ type: 'SET_UPLOAD_PROGRESS', payload: 100 });
+			setFileInfo((prev) => ({ ...prev, uploadedSize: file.size }));
 
 			// Small delay to show 100% completion
 			setTimeout(() => {
@@ -119,6 +147,7 @@ const CsvUpload: React.FC = () => {
 
 	const removeFile = () => {
 		dispatch({ type: 'SET_FILE_DATA', payload: null });
+		setFileInfo({ file: null, uploadedSize: 0 });
 		updateValues('file_name', '');
 	};
 
@@ -153,57 +182,64 @@ const CsvUpload: React.FC = () => {
 		</div>
 	);
 
-	const renderFileCard = () => (
-		<div className="flex flex-col items-center">
-			<Card className="w-full p-8 rounded-xl shadow-none">
-				<CardHeader className="p-0 mb-2 flex flex-row items-center justify-between">
-					<span className="text-3xl text-[#292D32] truncate">
-						{fileData?.file_name}
-					</span>
-					<div
-						onClick={removeFile}
-						className="cursor-pointer text-[#292D32]"
-					>
-						{isUploading ? (
-							<CircleX className="w-[30px] h-[30px]" />
-						) : (
-							<DeleteIcon width={30} height={30} />
-						)}
-					</div>
-				</CardHeader>
+	const renderFileCard = () => {
+		const totalSize = fileInfo.file
+			? formatFileSize(fileInfo.file.size)
+			: '';
+		const uploadedSize = formatFileSize(fileInfo.uploadedSize);
 
-				<CardContent className="p-0">
-					{isUploading ? (
-						<>
+		return (
+			<div className="flex flex-col items-center">
+				<Card className="w-full p-8 rounded-xl shadow-none">
+					<CardHeader className="p-0 mb-2 flex flex-row items-center justify-between">
+						<span className="text-3xl text-[#292D32] truncate">
+							{fileData?.file_name}
+						</span>
+						<div
+							onClick={removeFile}
+							className="cursor-pointer text-[#292D32]"
+						>
+							{isUploading ? (
+								<CircleX className="w-[30px] h-[30px]" />
+							) : (
+								<DeleteIcon width={30} height={30} />
+							)}
+						</div>
+					</CardHeader>
+
+					<CardContent className="p-0">
+						{isUploading ? (
+							<>
+								<div className="flex items-center gap-2 text-2xl text-[#3EBF8F] mt-2">
+									<div className="text-[#A9ACB4]">
+										{uploadedSize} of {totalSize} •
+									</div>
+									<LoadingSpinner size={24} />
+									<div className="text-[#292D32]">
+										{__('Uploading...', 'quillcrm')}
+									</div>
+								</div>
+								<Progress
+									value={uploadProgress}
+									className="w-full h-2"
+								/>
+							</>
+						) : (
 							<div className="flex items-center gap-2 text-2xl text-[#3EBF8F] mt-2">
 								<div className="text-[#A9ACB4]">
-									60 KB of 92O KB •
+									{totalSize} •
 								</div>
-								<LoadingSpinner size={24} />
+								<CheckCircleIcon />
 								<div className="text-[#292D32]">
-									{__('Uploading...', 'quillcrm')}
+									{__('Completed', 'quillcrm')}
 								</div>
 							</div>
-							<Progress
-								value={uploadProgress}
-								className="w-full h-2"
-							/>
-						</>
-					) : (
-						<div className="flex items-center gap-2 text-2xl text-[#3EBF8F] mt-2">
-							<div className="text-[#A9ACB4]">
-								60 KB of 92O KB •
-							</div>
-							<CheckCircleIcon />
-							<div className="text-[#292D32]">
-								{__('Completed', 'quillcrm')}
-							</div>
-						</div>
-					)}
-				</CardContent>
-			</Card>
-		</div>
-	);
+						)}
+					</CardContent>
+				</Card>
+			</div>
+		);
+	};
 
 	return (
 		<div>

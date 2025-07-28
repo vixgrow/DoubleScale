@@ -82,8 +82,7 @@ export const calculateMergePosition = (
 
 	// Helper function to recursively find the deepest descendant in a branch
 	const findDeepestDescendant = (
-		children: any[],
-		branchType: 'yes' | 'no'
+		children: any[]
 	): { y: number; nodeId?: string } => {
 		if (children.length === 0) {
 			return { y: conditionPosition.y + 300 }; // Default spacing for empty branch
@@ -145,14 +144,8 @@ export const calculateMergePosition = (
 						)
 						.sort((a, b) => a.order - b.order);
 
-					const yesDeepest = findDeepestDescendant(
-						grandYesChildren,
-						'yes'
-					);
-					const noDeepest = findDeepestDescendant(
-						grandNoChildren,
-						'no'
-					);
+					const yesDeepest = findDeepestDescendant(grandYesChildren);
+					const noDeepest = findDeepestDescendant(grandNoChildren);
 
 					if (yesDeepest.y > deepestY) {
 						deepestY = yesDeepest.y;
@@ -170,22 +163,33 @@ export const calculateMergePosition = (
 	};
 
 	// Find the deepest descendant in both branches
-	const yesDeepest = findDeepestDescendant(yesChildren, 'yes');
-	const noDeepest = findDeepestDescendant(noChildren, 'no');
+	const yesDeepest = findDeepestDescendant(yesChildren);
+	const noDeepest = findDeepestDescendant(noChildren);
 
-	// Use the deeper of the two branches
-	const deepestY = Math.max(yesDeepest.y, noDeepest.y);
+	// Use the deeper of the two branches - this ensures both branches have the same effective height
+	// If one branch is empty, it should still extend to match the height of the non-empty branch
+	let equalizedBranchHeight = Math.max(yesDeepest.y, noDeepest.y);
 
-	// Ensure minimum spacing below condition and below the deepest descendant
-	maxBranchY = Math.max(
-		conditionPosition.y + 500, // Minimum spacing below condition
-		deepestY + 300 // Spacing below deepest descendant (increased from 200)
+	// Ensure minimum branch height even when both branches are empty
+	const minimumBranchHeight = conditionPosition.y + 450; // Increased minimum for better visual balance
+	equalizedBranchHeight = Math.max(
+		equalizedBranchHeight,
+		minimumBranchHeight
 	);
 
-	return {
+	// Ensure minimum spacing below condition and below the equalized branch height
+	// This ensures the merge node appears below BOTH branches, regardless of their individual heights
+	maxBranchY = Math.max(
+		conditionPosition.y + 700, // Increased minimum spacing below condition
+		equalizedBranchHeight + 400 // Increased spacing below the equalized branch height
+	);
+
+	const finalPosition = {
 		x: conditionPosition.x, // Center below condition
-		y: maxBranchY + 100, // Additional spacing below the longest branch
+		y: maxBranchY + 150, // Additional spacing below the equalized branches
 	};
+
+	return finalPosition;
 };
 
 /**

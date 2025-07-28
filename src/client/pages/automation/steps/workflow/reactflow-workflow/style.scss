@@ -258,12 +258,15 @@
 .qcrm-reactflow-node {
 	background: #fff;
 	border: 2px solid #e8e8e8;
-	border-radius: 8px;
-	min-width: 180px;
-	padding: 0;
+	border-radius: 12px;
+	min-width: 200px;
+	padding: 16px;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	transition: all 0.2s ease;
 	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 12px;
 	
 	&:hover {
 		border-color: #40a9ff;
@@ -303,27 +306,30 @@
 		justify-content: center;
 		width: 32px;
 		height: 32px;
-		border-radius: 50%;
+		border-radius: 4px;
 		font-size: 16px;
-		margin-right: 12px;
+		flex-shrink: 0;
 	}
 
 	// Node Content
 	&__content {
-		padding: 8px 16px 16px;
-		flex-shrink: 0; // Prevent content from shrinking
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
 	}
 
 	&__title {
 		font-weight: 600;
 		font-size: 14px;
 		color: #262626;
-		margin-bottom: 4px;
+		line-height: 1.4;
 	}
 
 	&__subtitle {
 		font-size: 12px;
 		color: #8c8c8c;
+		line-height: 1.3;
 	}
 
 	&__warning {
@@ -333,123 +339,417 @@
 
 	// Node Type Specific Styles
 	&--trigger {
-		border-color: #1890ff;
+		border: 2px solid #d9d9d9;
+		background: #ffffff;
+		min-width: 280px;
+		position: relative;
 		
 		.qcrm-reactflow-node__icon {
-			background: rgba(24, 144, 255, 0.1);
-			color: #1890ff;
+			box-sizing: border-box;
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+			align-items: center;
+			padding: 10px;
+			gap: 12px;
+			width: 50px;
+			height: 50px;
+			background: #EFEFEF;
+			border: 1.23985px solid rgba(213, 213, 213, 0.4);
+			border-radius: 4.95941px;
+			flex: none;
+			order: 0;
+			flex-grow: 0;
+			color: #000000;
+			font-size: 14px;
+			position: relative;
+			
+			svg {
+				position: static;
+				width: 15.75px;
+				height: 22.75px;
+			}
+		}
+
+		.qcrm-reactflow-node__title {
+			color: #262626;
+			font-weight: 600;
+			font-size: 15px;
+		}
+
+		.qcrm-reactflow-node__subtitle {
+			color: #8c8c8c;
+			font-size: 13px;
+		}
+
+		// Three dots dropdown button
+		.qcrm-reactflow-node__actions {
+			position: absolute;
+			top: 50%;
+			right: 20px;
+			transform: translateY(-50%);
+			opacity: 1; // Always visible like in the image
+			z-index: 10;
+
+			.qcrm-reactflow-node__actions-btn {
+				background: transparent;
+				border: none;
+				color: #8c8c8c;
+				padding: 8px;
+				height: auto;
+				width: auto;
+				box-shadow: none;
+				border-radius: 6px;
+				transition: all 0.2s ease;
+				
+				&:hover, &:focus {
+					background: rgba(0, 0, 0, 0.08);
+					color: #595959;
+					border: none;
+					box-shadow: none;
+				}
+				
+				.anticon {
+					font-size: 22px;
+					line-height: 1;
+					font-weight: bold;
+				}
+			}
+		}
+
+		&:hover {
+			border-color: #b7b7b7;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		}
+
+		&.selected {
+			border-color: #b7b7b7;
+			box-shadow: 0 0 0 2px rgba(183, 183, 183, 0.2);
 		}
 	}
 
 	&--action {
-		border-color: #52c41a;
+		border: 2px solid #d9d9d9;
+		background: #ffffff;
+		min-width: 280px;
+		position: relative;
 		
 		.qcrm-reactflow-node__icon {
-			background: rgba(82, 196, 26, 0.1);
+			box-sizing: border-box;
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+			align-items: center;
+			padding: 10px;
+			gap: 12px;
+			width: 50px;
+			height: 50px;
+			background: #EFEFEF;
+			border: 1.23985px solid rgba(213, 213, 213, 0.4);
+			border-radius: 4.95941px;
+			flex: none;
+			order: 0;
+			flex-grow: 0;
+			color: #000000;
+			font-size: 14px;
+			position: relative;
+			
+			svg {
+				position: static;
+				width: 15.75px;
+				height: 22.75px;
+			}
+		}
+
+		.qcrm-reactflow-node__title {
+			color: #262626;
+			font-weight: 600;
+			font-size: 15px;
+		}
+
+		.qcrm-reactflow-node__subtitle {
+			color: #8c8c8c;
+			font-size: 13px;
+		}
+
+		// Action configuration status
+		.qcrm-reactflow-action__configured {
 			color: #52c41a;
+			font-weight: 500;
+		}
+
+		.qcrm-reactflow-action__not-configured {
+			color: #ff4d4f;
+			font-weight: 500;
+		}
+
+		// Three dots dropdown button
+		.qcrm-reactflow-node__actions {
+			position: absolute;
+			top: 50%;
+			right: 20px;
+			transform: translateY(-50%);
+			opacity: 1; // Always visible like in the image
+			z-index: 10;
+
+			.qcrm-reactflow-node__actions-btn {
+				background: transparent;
+				border: none;
+				color: #8c8c8c;
+				padding: 8px;
+				height: auto;
+				width: auto;
+				box-shadow: none;
+				border-radius: 6px;
+				transition: all 0.2s ease;
+				
+				&:hover, &:focus {
+					background: rgba(0, 0, 0, 0.08);
+					color: #595959;
+					border: none;
+					box-shadow: none;
+				}
+				
+				.anticon {
+					font-size: 22px;
+					line-height: 1;
+					font-weight: bold;
+				}
+			}
+		}
+
+		&:hover {
+			border-color: #b7b7b7;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		}
+
+		&.selected {
+			border-color: #b7b7b7;
+			box-shadow: 0 0 0 2px rgba(183, 183, 183, 0.2);
 		}
 	}
 
 	&--condition {
-		border: 1px solid #d9d9d9;
-		background: white;
-		width: 200px !important;
-		height: auto !important;
+		border: 2px solid #d9d9d9;
+		background: #ffffff;
+		min-width: 280px;
 		position: relative;
-		border-radius: 8px;
-		overflow: visible; // Allow reorder controls to show outside the node
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		transition: all 0.2s ease;
-
-		&:hover {
-			border-color: #40a9ff;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		}
-
-		// Container layout matching the image
-		.qcrm-reactflow-condition__container {
+		overflow: visible; // Allow three dots to show outside the node
+		padding-right: 60px; // Add extra space for the three dots menu
+		
+		.qcrm-reactflow-node__icon {
+			box-sizing: border-box;
 			display: flex;
+			flex-direction: row;
+			justify-content: center;
 			align-items: center;
-			padding: 12px;
+			padding: 10px;
 			gap: 12px;
+			width: 50px;
+			height: 50px;
+			background: #EFEFEF;
+			border: 1.23985px solid rgba(213, 213, 213, 0.4);
+			border-radius: 4.95941px;
+			flex: none;
+			order: 0;
+			flex-grow: 0;
+			color: #000000;
+			font-size: 14px;
+			position: relative;
+			
+			svg {
+				position: static;
+				width: 28px;
+				height: 28px;
+			}
 		}
 
-		// Left icon section
-		.qcrm-reactflow-condition__icon-section {
+		.qcrm-reactflow-node__content {
+			flex: 1;
+			margin-right: 20px; // Extra margin to prevent overlap with three dots
+			overflow: hidden; // Prevent text overflow
+		}
+
+		.qcrm-reactflow-node__title {
+			color: #262626;
+			font-weight: 600;
+			font-size: 15px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.qcrm-reactflow-node__subtitle {
+			color: #8c8c8c;
+			font-size: 13px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		// Condition configuration status
+		.qcrm-reactflow-condition__configured {
+			color: #52c41a;
+			font-weight: 500;
+		}
+
+		.qcrm-reactflow-condition__not-configured {
+			color: #ff4d4f;
+			font-weight: 500;
+		}
+
+		// Three dots dropdown button
+		.qcrm-reactflow-node__actions {
+			position: absolute;
+			top: 50%;
+			right: 12px;
+			transform: translateY(-50%);
+			opacity: 1; // Always visible like in the image
+			z-index: 10;
+			width: 40px; // Fixed width
+			height: 40px; // Fixed height
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			width: 32px;
-			height: 32px;
-			background: #f5f5f5;
-			border-radius: 6px;
-			flex-shrink: 0;
 
-			.qcrm-reactflow-condition__gear-icon {
-				font-size: 16px;
-				color: #666;
-			}
-		}
-
-		// Center content section
-		.qcrm-reactflow-condition__content-section {
-			flex: 1;
-			min-width: 0;
-
-			.qcrm-reactflow-condition__title {
-				font-size: 14px;
-				font-weight: 600;
-				color: #262626;
-				margin-bottom: 2px;
-			}
-
-			.qcrm-reactflow-condition__status {
-				font-size: 12px;
-
-				.qcrm-reactflow-condition__configured {
-					color: #52c41a;
-					font-weight: 500;
-				}
-
-				.qcrm-reactflow-condition__not-configured {
-					color: #ff4d4f;
-					font-weight: 500;
-				}
-			}
-		}
-
-		// Right actions section
-		.qcrm-reactflow-condition__actions-section {
-			display: flex;
-			gap: 4px;
-			flex-shrink: 0;
-			opacity: 0;
-			transition: opacity 0.2s ease;
-
-
-
-			.qcrm-reactflow-condition__action-btn {
+			.qcrm-reactflow-node__actions-btn {
+				background: transparent;
 				border: none;
+				color: #8c8c8c;
+				padding: 6px;
+				height: 32px;
+				width: 32px;
 				box-shadow: none;
+				border-radius: 6px;
+				transition: all 0.2s ease;
+				display: flex;
+				align-items: center;
+				justify-content: center;
 				
-				&:hover {
-					background: rgba(24, 144, 255, 0.1);
-					color: #1890ff;
+				&:hover, &:focus {
+					background: rgba(0, 0, 0, 0.08);
+					color: #595959;
+					border: none;
+					box-shadow: none;
+				}
+				
+				.anticon {
+					font-size: 18px;
+					line-height: 1;
+					font-weight: bold;
 				}
 			}
 		}
 
-		&:hover .qcrm-reactflow-condition__actions-section {
-			opacity: 1;
+		&:hover {
+			border-color: #b7b7b7;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		}
+
+		&.selected {
+			border-color: #b7b7b7;
+			box-shadow: 0 0 0 2px rgba(183, 183, 183, 0.2);
 		}
 	}
 
 	&--goal {
-		border-color: #722ed1;
+		border: 2px solid #d9d9d9;
+		background: #ffffff;
+		min-width: 280px;
+		position: relative;
 		
 		.qcrm-reactflow-node__icon {
-			background: rgba(114, 46, 209, 0.1);
-			color: #722ed1;
+			box-sizing: border-box;
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+			align-items: center;
+			padding: 10px;
+			gap: 12px;
+			width: 50px;
+			height: 50px;
+			background: #EFEFEF;
+			border: 1.23985px solid rgba(213, 213, 213, 0.4);
+			border-radius: 4.95941px;
+			flex: none;
+			order: 0;
+			flex-grow: 0;
+			color: #000000;
+			font-size: 14px;
+			position: relative;
+			
+			svg {
+				position: static;
+				width: 28px;
+				height: 29px;
+			}
+		}
+
+		.qcrm-reactflow-node__title {
+			color: #262626;
+			font-weight: 600;
+			font-size: 15px;
+		}
+
+		.qcrm-reactflow-node__subtitle {
+			color: #8c8c8c;
+			font-size: 13px;
+		}
+
+		// Goal configuration status
+		.qcrm-reactflow-goal__configured {
+			color: #52c41a;
+			font-weight: 500;
+		}
+
+		.qcrm-reactflow-goal__not-configured {
+			color: #ff4d4f;
+			font-weight: 500;
+		}
+
+		// Three dots dropdown button
+		.qcrm-reactflow-node__actions {
+			position: absolute;
+			top: 50%;
+			right: 20px;
+			transform: translateY(-50%);
+			opacity: 1; // Always visible like in the image
+			z-index: 10;
+
+			.qcrm-reactflow-node__actions-btn {
+				background: transparent;
+				border: none;
+				color: #8c8c8c;
+				padding: 8px;
+				height: auto;
+				width: auto;
+				box-shadow: none;
+				border-radius: 6px;
+				transition: all 0.2s ease;
+				
+				&:hover, &:focus {
+					background: rgba(0, 0, 0, 0.08);
+					color: #595959;
+					border: none;
+					box-shadow: none;
+				}
+				
+				.anticon {
+					font-size: 22px;
+					line-height: 1;
+					font-weight: bold;
+				}
+			}
+		}
+
+		&:hover {
+			border-color: #b7b7b7;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		}
+
+		&.selected {
+			border-color: #b7b7b7;
+			box-shadow: 0 0 0 2px rgba(183, 183, 183, 0.2);
 		}
 	}
 

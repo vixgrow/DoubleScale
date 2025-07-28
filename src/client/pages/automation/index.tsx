@@ -117,7 +117,7 @@ const Automation: React.FC = () => {
 			<Tabs
 				defaultActiveKey="inautomationation"
 				activeKey={tab || 'workflow'}
-				tabPosition="left"
+				tabPosition="top"
 				tabBarStyle={{ width: 200 }}
 				items={tabItems}
 				onChange={(key) => {

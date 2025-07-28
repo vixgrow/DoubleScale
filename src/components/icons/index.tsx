@@ -51,3 +51,5 @@ export { default as BuilderArrowIcon } from './builder-arrow';
 export { default as WandOutlinedIcon } from './wand-outlined';
 export { default as ArrowRightWhiteIcon } from './arrow-right-white';
 export { default as ArrowLeftWhiteIcon } from './arrow-left';
+export { default as ThreeDotsIcon } from './three-dots';
+export { default as DisactivateIcon } from './disactivate';

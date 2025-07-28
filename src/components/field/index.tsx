@@ -6,12 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Typography, DatePicker } from 'antd';
-
-import en from 'antd/es/date-picker/locale/en_US';
-import dayjs from 'dayjs';
-import type { InputProps } from 'antd';
-import { map, isEmpty, isObject } from 'lodash';
+import { map, isObject } from 'lodash';
 import Select from 'react-select';
 
 /**
@@ -23,11 +18,13 @@ import type { ReactSelectOptions } from '@quillcrm/client';
 import ContactMappedFields from '../contact-mapped-fields';
 import MappedFields from '../mapped-fields';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import APISelect from '../api-select';
 import APIMappedFields from '../api-mapped-fields';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface FieldProps {
 	label?: string;
@@ -35,7 +32,7 @@ interface FieldProps {
 	options?: ReactSelectOptions;
 	onChange: (value: any) => void;
 	value: any;
-	status?: InputProps['status'];
+	status?: 'error' | 'warning' | 'success';
 	fields?: {
 		[key: string]: {
 			label: string;
@@ -98,7 +95,10 @@ const Field: React.FC<FieldProps> = ({
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
 					type={type}
-					className={`h-12 ${status === 'error' ? 'border-red-500 focus:ring-red-500' : ''}`}
+					className={cn(
+						'h-12',
+						status === 'error' && 'border-red-500 focus-visible:ring-red-500'
+					)}
 				/>
 			);
 			break;
@@ -107,11 +107,9 @@ const Field: React.FC<FieldProps> = ({
 				<Textarea
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
-					className={
-						status === 'error'
-							? 'border-red-500 focus:ring-red-500'
-							: ''
-					}
+					className={cn(
+						status === 'error' && 'border-red-500 focus-visible:ring-red-500'
+					)}
 				/>
 			);
 			break;
@@ -122,8 +120,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-									(option) => option.value === value
-								)
+								(option) => option.value === value
+							)
 							: null
 					}
 					onChange={(value) => {
@@ -174,11 +172,12 @@ const Field: React.FC<FieldProps> = ({
 		case 'date':
 			fieldContent = (
 				<DatePicker
-					value={!isEmpty(value) ? dayjs(value) : null}
-					onChange={(value) =>
-						onChange(dayjs(value).format('YYYY-MM-DD'))
-					}
-					locale={en}
+					value={value}
+					onChange={(dateValue) => onChange(dateValue)}
+					error={status === 'error'}
+					required={required}
+					placeholder="Select a date"
+					outputFormat="iso"
 				/>
 			);
 			break;
@@ -234,7 +233,7 @@ const Field: React.FC<FieldProps> = ({
 			)}
 			<div className="qcrm-field-input">{fieldContent}</div>
 			{helperText && (
-				<Typography.Text type="secondary">{helperText}</Typography.Text>
+				<div className='text-ghost'>{helperText}</div>
 			)}
 		</div>
 	);

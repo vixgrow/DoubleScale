@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 
@@ -50,7 +50,9 @@ const Filter: React.FC<FilterProps> = ({
 	const [loading, setLoading] = useState<boolean>(true);
 	const [keyword, setKeyword] = useState<string>('');
 
-	const fetchOptions = async () => {
+	const fetchOptions = useCallback(async () => {
+		if (!filterSettings.is_dynamic) return;
+
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
@@ -72,13 +74,11 @@ const Filter: React.FC<FilterProps> = ({
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [filterSettings.is_dynamic, filterSettings.dynamic_args, keyword, filter.value]);
 
 	useEffect(() => {
-		if (filterSettings.is_dynamic) {
-			fetchOptions();
-		}
-	}, [keyword]);
+		fetchOptions();
+	}, [fetchOptions]);
 
 	return (
 		<div className="qcrm-filter">
@@ -152,10 +152,7 @@ const Filter: React.FC<FilterProps> = ({
 									return;
 								}
 
-								onChange('operator', value.value);
-								setTimeout(() => {
-									onChange('value', '');
-								}, 0);
+								onChange('value', value.value); // Fixed: was changing operator instead of value
 							}}
 							options={map(
 								filterSettings.options,

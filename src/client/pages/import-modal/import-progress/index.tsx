@@ -11,8 +11,7 @@ import React from 'react';
  */
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ImportProgressIcon } from '@quillcrm/components';
-import LoadingSpinner from '../loading-spin';
+import { ImportProgressIcon, LoadingSpinner } from '@quillcrm/components';
 import { useImportContext } from '../contexts';
 import ConfigAPI from '@quillcrm/config';
 //@ts-ignore

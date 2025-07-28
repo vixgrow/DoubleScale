@@ -23,8 +23,11 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { CheckCircleIcon, DeleteIcon } from '@quillcrm/components';
-import LoadingSpinner from '../loading-spin';
+import {
+	CheckCircleIcon,
+	DeleteIcon,
+	LoadingSpinner,
+} from '@quillcrm/components';
 import { useImportContext } from '../contexts';
 //@ts-ignore
 import csvIcon from '../../../../../assets/images/csv/csv.png';

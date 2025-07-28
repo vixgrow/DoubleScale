@@ -46,3 +46,8 @@ export { default as GradientColumnsIcon } from './gradient-columns';
 export { default as PlayIcon } from './play';
 export { default as EnvelopeIcon } from './envelope';
 export { default as RepeatIcon } from './repeat';
+export { default as CategoryIcon } from './category';
+export { default as BuilderArrowIcon } from './builder-arrow';
+export { default as WandOutlinedIcon } from './wand-outlined';
+export { default as ArrowRightWhiteIcon } from './arrow-right-white';
+export { default as ArrowLeftWhiteIcon } from './arrow-left';

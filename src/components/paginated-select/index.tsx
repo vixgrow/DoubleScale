@@ -15,6 +15,7 @@ import Select from 'react-select';
  * Internal dependencies
  */
 import { Tag } from '@quillcrm/components';
+import './style.scss';
 
 interface SelectOption {
 	label: string;

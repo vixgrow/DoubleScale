@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import { useState } from 'react';
+import { uniq, flatten } from 'lodash';
 /**
  * internal dependencies
  */
@@ -37,6 +38,7 @@ interface BulkActionSelectProps {
 	selectedLists: string[];
 	selectedTags: string[];
 	activeTab?: string;
+	data: any[]; // <-- add data from context
 }
 
 const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
@@ -49,6 +51,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 	selectedLists,
 	selectedTags,
 	activeTab,
+	data, // <-- add data from context
 }) => {
 	const [isListModalOpen, setIsListModalOpen] = useState(false);
 	const [isTagModalOpen, setIsTagModalOpen] = useState(false);
@@ -125,7 +128,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 
 	const handleTagModalClose = () => {
 		setIsTagModalOpen(false);
-		setBulkAction(''); 
+		setBulkAction('');
 	};
 
 	// Define bulk actions based on active tab
@@ -192,6 +195,32 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 
 	const availableActions = getBulkActionsForTab();
 
+	// Compute all unique list IDs assigned to selected contacts
+	const assignedListIds = uniq(
+		flatten(
+			data
+				.filter((contact) =>
+					selectedRowKeys.includes(contact.id.toString())
+				)
+				.map((contact) =>
+					contact.lists ? contact.lists.map((l) => l.id) : []
+				)
+		)
+	);
+
+	// Compute all unique tag IDs assigned to selected contacts
+	const assignedTagIds = uniq(
+		flatten(
+			data
+				.filter((contact) =>
+					selectedRowKeys.includes(contact.id.toString())
+				)
+				.map((contact) =>
+					contact.tags ? contact.tags.map((t) => t.id) : []
+				)
+		)
+	);
+
 	return (
 		<>
 			<div className="flex gap-4 flex-wrap">
@@ -232,9 +261,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				selectedCount={selectedRowKeys.length}
 				mode={modalMode}
 				initialSelectedLists={
-					modalMode === 'remove'
-						? selectedLists.map((id) => Number(id))
-						: []
+					modalMode === 'add' ? assignedListIds : []
 				}
 			/>
 
@@ -245,11 +272,7 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 				onSubmit={handleTagModalSubmit}
 				selectedCount={selectedRowKeys.length}
 				mode={modalMode}
-				initialSelectedTags={
-					modalMode === 'remove'
-						? selectedTags.map((id) => Number(id))
-						: []
-				}
+				initialSelectedTags={modalMode === 'add' ? assignedTagIds : []}
 			/>
 		</>
 	);

@@ -48,13 +48,15 @@ export function DataTableActions<TData>({
 	activeTab,
 	setPage,
 }: DataTableActionsProps<TData>) {
-	const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({});
+	const [columnVisibility, setColumnVisibility] = useState<
+		Record<string, boolean>
+	>({});
 	const [isColumnsDialogOpen, setIsColumnsDialogOpen] = useState(false);
 
 	// Initialize column visibility state when dialog opens
 	const handleDialogOpen = () => {
 		const currentVisibility: Record<string, boolean> = {};
-		table.getAllColumns().forEach(column => {
+		table.getAllColumns().forEach((column) => {
 			if (column.getCanHide()) {
 				currentVisibility[column.id] = column.getIsVisible();
 			}
@@ -65,9 +67,9 @@ export function DataTableActions<TData>({
 
 	// Handle column visibility changes in temporary state
 	const handleColumnToggle = (columnId: string, checked: boolean) => {
-		setColumnVisibility(prev => ({
+		setColumnVisibility((prev) => ({
 			...prev,
-			[columnId]: checked
+			[columnId]: checked,
 		}));
 	};
 
@@ -107,16 +109,19 @@ export function DataTableActions<TData>({
 				<BulkActionSelect
 					bulkAction={config.bulkActions?.currentAction}
 					setBulkAction={config.bulkActions?.onActionChange}
-					selectedRowKeys={config.selection!.selectedKeys.map((key) =>
-						key.toString()
-					)}
+					selectedRowKeys={
+						config.selection?.selectedKeys.map((key) =>
+							key.toString()
+						) || []
+					}
+					data={table.getRowModel().rows.map((row) => row.original)}
 					doBulkAction={config.bulkActions?.onExecuteAction}
 					setSelectedLists={
 						config.bulkActions.lists?.onSelectionChange ||
-						(() => { })
+						(() => {})
 					}
 					setSelectedTags={
-						config.bulkActions.tags?.onSelectionChange || (() => { })
+						config.bulkActions.tags?.onSelectionChange || (() => {})
 					}
 					selectedLists={config.bulkActions.lists?.selected || []}
 					selectedTags={config.bulkActions.tags?.selected || []}
@@ -179,7 +184,10 @@ export function DataTableActions<TData>({
 
 			{/* Manage Columns Dropdown */}
 			{config.manageColumns?.enabled && (
-				<Dialog open={isColumnsDialogOpen} onOpenChange={setIsColumnsDialogOpen}>
+				<Dialog
+					open={isColumnsDialogOpen}
+					onOpenChange={setIsColumnsDialogOpen}
+				>
 					<DialogTrigger asChild>
 						<Button
 							className="bg-secondary border-secondary text-white hover:bg-secondary/80 hover:text-primary-foreground"
@@ -215,9 +223,15 @@ export function DataTableActions<TData>({
 									>
 										<Checkbox
 											id={`col-${column.id}`}
-											checked={columnVisibility[column.id] ?? column.getIsVisible()}
+											checked={
+												columnVisibility[column.id] ??
+												column.getIsVisible()
+											}
 											onCheckedChange={(value) =>
-												handleColumnToggle(column.id, !!value)
+												handleColumnToggle(
+													column.id,
+													!!value
+												)
 											}
 										/>
 										<label

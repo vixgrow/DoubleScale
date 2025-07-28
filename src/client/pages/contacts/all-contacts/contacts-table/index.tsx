@@ -16,6 +16,7 @@ import { useContactsAPI } from '../useContactsAPI';
 import { useContactsColumns } from '../columns';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
+import BulkActionSelect from '@quillcrm/components/bulk-actions';
 
 interface ContactsTableProps {
 	activeTab?: string;
@@ -137,6 +138,18 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 				setPage={setPage}
 			/>
 			<DataTablePagination table={serverSideTable} />
+			<BulkActionSelect
+				bulkAction={bulkAction}
+				setBulkAction={setBulkAction}
+				selectedRowKeys={selectedRowKeys.map(String)}
+				doBulkAction={doBulkAction}
+				setSelectedLists={setSelectedLists}
+				setSelectedTags={setSelectedTags}
+				selectedLists={selectedLists}
+				selectedTags={selectedTags}
+				activeTab={activeTab}
+				data={data}
+			/>
 		</>
 	);
 };

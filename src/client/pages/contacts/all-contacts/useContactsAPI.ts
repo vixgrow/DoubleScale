@@ -36,6 +36,7 @@ export const useContactsAPI = () => {
 		setIsSaving,
 		showNotice,
 		setSelectedRowKeys,
+		setCreateContactVisible,
 		setBulkAction,
 		setIsApplying,
 	} = useContactsContext();
@@ -82,6 +83,7 @@ export const useContactsAPI = () => {
 
 			navigate(getToLink(`contacts/${response.id}`));
 		} catch (error: any) {
+			setCreateContactVisible(false);
 			showNotice(
 				'error',
 				error.message || __('Failed to create Contact', 'quillcrm')

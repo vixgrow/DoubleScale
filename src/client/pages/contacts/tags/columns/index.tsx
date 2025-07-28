@@ -12,8 +12,7 @@ import { ColumnDef } from '@tanstack/react-table';
  * Internal dependencies
  */
 import type { Tag as ContactTag } from '@quillcrm/client';
-import { EditIcon, SortIcon } from '@quillcrm/components';
-import { convertDate } from '@quillcrm/utils';
+import { EditIcon, SortIcon, TimeAgoCell } from '@quillcrm/components';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@quillcrm/components/ui/button';
 
@@ -106,7 +105,7 @@ export const useTagsColumns = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => convertDate(row.original.created_at),
+			cell: ({ row }) => <TimeAgoCell value={row.getValue('created_at')} />,
 		},
 		{
 			accessorKey: 'actions',

@@ -66,6 +66,7 @@ export const GroupDialog: React.FC<GroupDialogProps> = ({
 						value={name}
 						onChange={setName}
 						type="text"
+						placeholder={__('Enter Group Name', 'quillcrm')}
 					/>
 				</div>
 

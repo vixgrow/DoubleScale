@@ -83,6 +83,7 @@ export const TagsDialog: React.FC<TagsDialogProps> = ({
 								: onTagChange({ ...tag, name: value });
 						}}
 						type="text"
+						placeholder={__('Enter Tag Name', 'quillcrm')}
 					/>
 					<Field
 						label={__('Tag Description', 'quillcrm')}
@@ -100,6 +101,7 @@ export const TagsDialog: React.FC<TagsDialogProps> = ({
 								: onTagChange({ ...tag, description: value });
 						}}
 						type="textarea"
+						placeholder={__('Enter Tag description', 'quillcrm')}
 					/>
 				</div>
 

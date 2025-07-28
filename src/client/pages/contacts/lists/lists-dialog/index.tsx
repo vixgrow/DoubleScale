@@ -93,6 +93,7 @@ export const ListDialog: React.FC<ListDialogProps> = ({
 						value={selectedList ? selectedList.name : list.name}
 						onChange={handleNameChange}
 						type="text"
+						placeholder={__('Enter List Name', 'quillcrm')}
 					/>
 					<Field
 						label={__('List Description', 'quillcrm')}
@@ -103,6 +104,7 @@ export const ListDialog: React.FC<ListDialogProps> = ({
 						}
 						onChange={handleDescriptionChange}
 						type="textarea"
+						placeholder={__('Enter List Description', 'quillcrm')}
 					/>
 				</div>
 

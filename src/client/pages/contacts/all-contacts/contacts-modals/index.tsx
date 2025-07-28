@@ -68,6 +68,7 @@ export const CreateContactModal: React.FC = () => {
 				<div className="qcrm-fields space-y-4">
 					<Field
 						label={__('First Name', 'quillcrm')}
+						placeholder={__('Enter First Name', 'quillcrm')}
 						value={contact.first_name}
 						onChange={(value) =>
 							setContact({
@@ -87,6 +88,7 @@ export const CreateContactModal: React.FC = () => {
 							})
 						}
 						type="text"
+						placeholder={__('Enter Last Name', 'quillcrm')}
 					/>
 					<Field
 						label={__('Email', 'quillcrm')}
@@ -98,6 +100,7 @@ export const CreateContactModal: React.FC = () => {
 							})
 						}
 						type="email"
+						placeholder={__('Enter Email', 'quillcrm')}
 					/>
 				</div>
 

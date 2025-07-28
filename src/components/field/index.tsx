@@ -43,6 +43,7 @@ interface FieldProps {
 	required?: boolean;
 	helperText?: string;
 	style?: React.CSSProperties;
+	placeholder?:string;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -58,6 +59,7 @@ const Field: React.FC<FieldProps> = ({
 	helperText,
 	required,
 	style,
+	placeholder,
 }) => {
 	let fieldContent;
 
@@ -99,6 +101,7 @@ const Field: React.FC<FieldProps> = ({
 						'h-12',
 						status === 'error' && 'border-red-500 focus-visible:ring-red-500'
 					)}
+					placeholder={placeholder}
 				/>
 			);
 			break;
@@ -110,6 +113,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						status === 'error' && 'border-red-500 focus-visible:ring-red-500'
 					)}
+					placeholder={placeholder}
 				/>
 			);
 			break;
@@ -131,6 +135,7 @@ const Field: React.FC<FieldProps> = ({
 						onChange(value.value);
 					}}
 					options={selectOptions}
+					placeholder={placeholder}
 				/>
 			);
 			break;
@@ -150,6 +155,7 @@ const Field: React.FC<FieldProps> = ({
 						value?.includes(option.value)
 					)}
 					isMulti
+					placeholder={placeholder}
 				/>
 			);
 			break;

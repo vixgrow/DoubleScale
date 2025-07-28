@@ -87,6 +87,7 @@ export const DeleteGroupDialog: React.FC<DeleteGroupDialogProps> = ({
                 value: group.id,
               }))}
               required
+              placeholder={__('Select Group', 'quillcrm')}
             />
           )}
         </div>

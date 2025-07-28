@@ -111,6 +111,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 							setFormData({ ...formData, name: value })
 						}
 						type="text"
+						placeholder={__('Enter Field Name', 'quillcrm')}
 					/>
 
 					<Field
@@ -121,6 +122,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 						}
 						type="select"
 						options={typesOptions}
+						placeholder={__('Select Field Type', 'quillcrm')}
 					/>
 
 					<Field
@@ -131,6 +133,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 						}
 						type="select"
 						options={groupOptions}
+						placeholder={__('Select Field Group', 'quillcrm')}
 					/>
 				</div>
 

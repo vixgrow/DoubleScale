@@ -43,6 +43,7 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
                             type={field.type}
                             value={credentials[key]}
                             onChange={(value) => updateCredentials(key, value)}
+                            placeholder={field.label}
                         />
                     ))}
                 </CardContent>

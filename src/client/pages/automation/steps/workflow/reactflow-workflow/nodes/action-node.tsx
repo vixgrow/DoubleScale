@@ -7,9 +7,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { Button, Dropdown, Popconfirm, type MenuProps } from 'antd';
-import { MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -20,7 +18,10 @@ import type {
 	OrganizedStep,
 } from '@quillcrm/client';
 import NodeContextMenu from '../components/node-context-menu';
+import NodeActionsDropdown from '../components/node-actions-dropdown';
 import StepReorderControls from '../components/step-reorder-controls';
+import { useAutomationContext } from '../../../../state/context';
+import { useDispatch } from '@wordpress/data';
 
 interface ActionNodeData {
 	step: AutomationStep;
@@ -31,9 +32,10 @@ interface ActionNodeData {
 }
 
 const ActionNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, onStepClick, clearSavedPositions, onDeleteStep } =
+	const { step, onStepClick, clearSavedPositions } =
 		data as unknown as ActionNodeData;
-	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+	const { steps, setSteps } = useAutomationContext();
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const ActionIcon = () => (
 		<svg
@@ -61,34 +63,72 @@ const ActionNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	const handleDelete = () => {
-		if (onDeleteStep) {
-			onDeleteStep(step.id.toString());
+	const getNewSteps = () => {
+		const updatedOrdersSteps = {};
+		const newSteps = [...steps];
+
+		if (step.parent_id) {
+			newSteps
+				.filter(
+					(child) =>
+						child.parent_id === step.parent_id &&
+						child.condition === step.condition
+				)
+				.filter((s) => s.id !== step.id)
+				.sort((a, b) => a.order - b.order)
+				.forEach((child, index) => {
+					const newOrder = index + 1;
+					if (newOrder !== child.order) {
+						updatedOrdersSteps[child.id] = { order: newOrder };
+					}
+				});
+		} else {
+			newSteps
+				.sort((a, b) => a.order - b.order)
+				.filter((s) => s.id !== step.id)
+				.forEach((stepItem, index) => {
+					const newOrder = index + 1;
+					if (newOrder !== stepItem.order) {
+						updatedOrdersSteps[stepItem.id] = { order: newOrder };
+					}
+				});
 		}
+
+		return { updatedOrdersSteps, newSteps };
 	};
 
-	// Create dropdown menu items
-	const menuItems: MenuProps['items'] = [
-		{
-			key: 'edit',
-			label: __('Edit Action', 'quillcrm'),
-			icon: <EditOutlined />,
-			onClick: () => handleEdit(),
-		},
-		{
-			key: 'delete',
-			label: __('Delete Action', 'quillcrm'),
-			icon: <DeleteOutlined />,
-			onClick: () => setShowDeleteConfirm(true),
-			danger: true,
-		},
-	];
+	const handleDelete = async () => {
+		const { newSteps, updatedOrdersSteps } = getNewSteps();
+
+		try {
+			await apiFetch({
+				path: `/qc/v1/automation-steps/${step.id}`,
+				method: 'DELETE',
+				data: {
+					updated_steps: updatedOrdersSteps,
+				},
+			});
+
+			const updatedSteps = newSteps.filter((s) => s.id !== step.id);
+			setSteps(updatedSteps);
+
+			createNotice({
+				type: 'success',
+				message: __('Step deleted', 'quillcrm'),
+			});
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	};
 
 	// Check if action is configured
 	const isConfigured = step.settings?.action_name;
 
 	return (
-		<NodeContextMenu onEdit={handleEdit} showDelete={false}>
+		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
 			<div className="qcrm-reactflow-node qcrm-reactflow-node--action">
 				<Handle
 					type="target"
@@ -126,64 +166,17 @@ const ActionNode: React.FC<NodeProps> = ({ data }) => {
 				</div>
 
 				{/* Three dots dropdown menu */}
-				<div
-					className="qcrm-reactflow-node__actions"
-					style={{
-						position: 'absolute',
-						top: '50%',
-						right: '16px',
-						transform: 'translateY(-50%)',
-						zIndex: 10,
-						width: '40px',
-						height: '40px',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-					}}
-				>
-					<Popconfirm
-						title={__('Delete this action?', 'quillcrm')}
-						description={__(
-							'This will remove the action from your workflow.',
-							'quillcrm'
-						)}
-						open={showDeleteConfirm}
-						onConfirm={() => {
-							handleDelete();
-							setShowDeleteConfirm(false);
-						}}
-						onCancel={() => setShowDeleteConfirm(false)}
-						okText={__('Delete', 'quillcrm')}
-						cancelText={__('Cancel', 'quillcrm')}
-						okButtonProps={{ danger: true }}
-					>
-						<Dropdown
-							menu={{ items: menuItems }}
-							trigger={['click']}
-							placement="bottomRight"
-						>
-							<Button
-								type="text"
-								size="small"
-								icon={<MoreOutlined />}
-								onClick={(e) => e.stopPropagation()}
-								style={{
-									background: 'transparent',
-									border: 'none',
-									color: '#8c8c8c',
-									padding: '6px',
-									height: '32px',
-									width: '32px',
-									boxShadow: 'none',
-									borderRadius: '6px',
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-								}}
-							/>
-						</Dropdown>
-					</Popconfirm>
-				</div>
+				<NodeActionsDropdown
+					onEdit={handleEdit}
+					onDelete={handleDelete}
+					editLabel={__('Edit Action', 'quillcrm')}
+					deleteLabel={__('Delete Action', 'quillcrm')}
+					deleteTitle={__('Delete this action?', 'quillcrm')}
+					deleteDescription={__(
+						'This will remove the action from your workflow.',
+						'quillcrm'
+					)}
+				/>
 
 				<Handle
 					type="source"

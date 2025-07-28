@@ -754,11 +754,57 @@
 	}
 
 	&--end {
-		border-color: #ff4d4f;
+		border: 2px solid #d9d9d9;
+		background: #ffffff;
+		min-width: 280px;
+		position: relative;
 		
 		.qcrm-reactflow-node__icon {
+			box-sizing: border-box;
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+			align-items: center;
+			padding: 10px;
+			gap: 12px;
+			width: 50px;
+			height: 50px;
 			background: rgba(255, 77, 79, 0.1);
+			border: 1.23985px solid rgba(255, 77, 79, 0.4);
+			border-radius: 4.95941px;
+			flex: none;
+			order: 0;
+			flex-grow: 0;
 			color: #ff4d4f;
+			font-size: 14px;
+			position: relative;
+			
+			svg {
+				position: static;
+				width: 15.75px;
+				height: 22.75px;
+			}
+		}
+
+		.qcrm-reactflow-node__title {
+			color: #262626;
+			font-weight: 600;
+			font-size: 15px;
+		}
+
+		.qcrm-reactflow-node__subtitle {
+			color: #8c8c8c;
+			font-size: 13px;
+		}
+
+		&:hover {
+			border-color: #40a9ff;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+
+		&.selected {
+			border-color: #1890ff;
+			box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 		}
 	}
 

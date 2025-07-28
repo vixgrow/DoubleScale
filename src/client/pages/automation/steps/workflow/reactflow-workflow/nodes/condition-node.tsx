@@ -9,9 +9,6 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
-import { Button, Popconfirm, Dropdown, type MenuProps } from 'antd';
-import { useState } from 'react';
 
 /**
  * Internal dependencies
@@ -19,6 +16,7 @@ import { useState } from 'react';
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
 import NodeContextMenu from '../components/node-context-menu';
+import NodeActionsDropdown from '../components/node-actions-dropdown';
 import StepReorderControls from '../components/step-reorder-controls';
 
 interface ConditionNodeData {
@@ -32,7 +30,6 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 		data as unknown as ConditionNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
-	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
 	const handleEdit = () => {
 		if (onStepClick) {
@@ -104,28 +101,11 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	// Create dropdown menu items
-	const menuItems: MenuProps['items'] = [
-		{
-			key: 'edit',
-			label: __('Edit Condition', 'quillcrm'),
-			icon: <EditOutlined />,
-			onClick: () => handleEdit(),
-		},
-		{
-			key: 'delete',
-			label: __('Delete Condition', 'quillcrm'),
-			icon: <DeleteOutlined />,
-			onClick: () => setShowDeleteConfirm(true),
-			danger: true,
-		},
-	];
-
 	// Check if condition is configured
 	const isConfigured = step.settings?.condition_name;
 
 	return (
-		<NodeContextMenu onEdit={handleEdit} showDelete={false}>
+		<NodeContextMenu onEdit={handleEdit} onDelete={handleDeleteStep}>
 			<div className="qcrm-reactflow-node qcrm-reactflow-node--condition">
 				<Handle
 					type="target"
@@ -175,64 +155,17 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 				</div>
 
 				{/* Three dots dropdown menu */}
-				<div
-					className="qcrm-reactflow-node__actions"
-					style={{
-						position: 'absolute',
-						top: '50%',
-						right: '16px',
-						transform: 'translateY(-50%)',
-						zIndex: 10,
-						width: '40px',
-						height: '40px',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-					}}
-				>
-					<Popconfirm
-						title={__('Delete this condition?', 'quillcrm')}
-						description={__(
-							'This will also remove all connected steps in both branches.',
-							'quillcrm'
-						)}
-						open={showDeleteConfirm}
-						onConfirm={() => {
-							handleDeleteStep();
-							setShowDeleteConfirm(false);
-						}}
-						onCancel={() => setShowDeleteConfirm(false)}
-						okText={__('Delete', 'quillcrm')}
-						cancelText={__('Cancel', 'quillcrm')}
-						okButtonProps={{ danger: true }}
-					>
-						<Dropdown
-							menu={{ items: menuItems }}
-							trigger={['click']}
-							placement="bottomRight"
-						>
-							<Button
-								type="text"
-								size="small"
-								icon={<MoreOutlined />}
-								onClick={(e) => e.stopPropagation()}
-								style={{
-									background: 'transparent',
-									border: 'none',
-									color: '#8c8c8c',
-									padding: '6px',
-									height: '32px',
-									width: '32px',
-									boxShadow: 'none',
-									borderRadius: '6px',
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-								}}
-							/>
-						</Dropdown>
-					</Popconfirm>
-				</div>
+				<NodeActionsDropdown
+					onEdit={handleEdit}
+					onDelete={handleDeleteStep}
+					editLabel={__('Edit Condition', 'quillcrm')}
+					deleteLabel={__('Delete Condition', 'quillcrm')}
+					deleteTitle={__('Delete this condition?', 'quillcrm')}
+					deleteDescription={__(
+						'This will also remove all connected steps in both branches.',
+						'quillcrm'
+					)}
+				/>
 
 				{/* Source handles for yes/no branches */}
 				<Handle

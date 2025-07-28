@@ -87,6 +87,119 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	const [nodesState, setNodes, onNodesChange] = useNodesState<Node>([]);
 	const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
+	// Delete a step from the automation
+	const onDeleteStep = useCallback(
+		async (stepId: string) => {
+			if (!automation || !steps) return;
+
+			console.log('Deleting step:', stepId);
+
+			try {
+				// Find the step to delete
+				const stepToDelete = steps.find(
+					(s) => s.id.toString() === stepId
+				);
+				if (!stepToDelete) {
+					console.error('Step not found:', stepId);
+					return;
+				}
+
+				// Calculate updated orders for remaining steps similar to other nodes
+				const updatedOrdersSteps: Record<string, { order: number }> =
+					{};
+
+				if (stepToDelete.parent_id) {
+					// For child steps, reorder siblings
+					steps
+						.filter(
+							(s) =>
+								s.parent_id === stepToDelete.parent_id &&
+								s.condition === stepToDelete.condition
+						)
+						.filter((s) => s.id !== stepToDelete.id)
+						.sort((a, b) => a.order - b.order)
+						.forEach((child, index) => {
+							const newOrder = index + 1;
+							if (newOrder !== child.order) {
+								updatedOrdersSteps[child.id] = {
+									order: newOrder,
+								};
+							}
+						});
+				} else {
+					// For root steps, reorder all root steps
+					steps
+						.filter((s) => !s.parent_id || s.parent_id === 0)
+						.filter((s) => s.id !== stepToDelete.id)
+						.sort((a, b) => a.order - b.order)
+						.forEach((step, index) => {
+							const newOrder = index + 1;
+							if (newOrder !== step.order) {
+								updatedOrdersSteps[step.id] = {
+									order: newOrder,
+								};
+							}
+						});
+				}
+
+				// Make API call to delete the step using the correct endpoint
+				await apiFetch({
+					path: `/qc/v1/automation-steps/${stepId}`,
+					method: 'DELETE',
+					data: {
+						updated_steps: updatedOrdersSteps,
+					},
+				});
+
+				// Refresh the automation data after deletion
+				const updatedAutomation = (await apiFetch({
+					path: `/qc/v1/automations/${automation.id}`,
+					method: 'GET',
+				})) as Automation;
+
+				// Update context with the refreshed automation
+				updateAutomation(updatedAutomation);
+
+				console.log('Step deleted successfully');
+			} catch (error) {
+				console.error('Failed to delete step:', error);
+				// You might want to show a user-friendly error message here
+			}
+		},
+		[automation, steps, updateAutomation]
+	);
+
+	// Clear saved positions to force re-layout
+	const clearSavedPositions = useCallback(async () => {
+		if (!automation) return;
+
+		console.log(
+			'Clearing saved positions to force re-layout after reorder'
+		);
+
+		try {
+			const updatedAutomation = {
+				...automation,
+				settings: {
+					...automation.settings,
+					reactflow_positions: {}, // Clear all positions
+				},
+			};
+
+			// Update automation settings
+			await apiFetch({
+				path: `/qc/v1/automations/${automation.id}`,
+				method: 'POST',
+				data: updatedAutomation,
+			});
+
+			// Update context immediately
+			updateAutomation(updatedAutomation);
+		} catch (error) {
+			console.error('Failed to clear saved positions:', error);
+		}
+	}, [automation, updateAutomation]);
+
 	useEffect(() => {
 		const initialNodes: Node[] = [];
 		const initialEdges: Edge[] = [];
@@ -422,6 +535,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							}
 						},
 						clearSavedPositions, // Pass the clear function to nodes
+						onDeleteStep, // Pass the delete function to nodes
 					},
 				});
 
@@ -1106,9 +1220,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						setNodes(layoutResult.nodes);
 						setEdges(layoutResult.edges);
 						// Save the automatically arranged positions
-						setTimeout(() => {
-							saveNodePositions(layoutResult.nodes);
-						}, 500); // Delay to ensure nodes are rendered
+						// setTimeout(() => {
+						// 	saveNodePositions(layoutResult.nodes);
+						// }, 500); // Delay to ensure nodes are rendered
 						return;
 					}
 				} catch (error) {
@@ -1128,38 +1242,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		automation?.settings?.reactflow_positions,
 		steps,
 		onStepClick,
+		onDeleteStep,
+		clearSavedPositions,
 	]);
-
-	// Clear saved positions to force re-layout
-	const clearSavedPositions = useCallback(async () => {
-		if (!automation) return;
-
-		console.log(
-			'Clearing saved positions to force re-layout after reorder'
-		);
-
-		try {
-			const updatedAutomation = {
-				...automation,
-				settings: {
-					...automation.settings,
-					reactflow_positions: {}, // Clear all positions
-				},
-			};
-
-			// Update automation settings
-			await apiFetch({
-				path: `/qc/v1/automations/${automation.id}`,
-				method: 'POST',
-				data: updatedAutomation,
-			});
-
-			// Update context immediately
-			updateAutomation(updatedAutomation);
-		} catch (error) {
-			console.error('Failed to clear saved positions:', error);
-		}
-	}, [automation, updateAutomation]);
 
 	// Save node positions when they change
 	const saveNodePositions = useCallback(

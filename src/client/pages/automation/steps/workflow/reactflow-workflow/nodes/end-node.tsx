@@ -10,7 +10,7 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { DisconnectOutlined, DeleteOutlined } from '@ant-design/icons';
+import { PoweroffOutlined, DeleteOutlined } from '@ant-design/icons';
 import { Button, Popconfirm } from 'antd';
 
 /**
@@ -20,6 +20,7 @@ import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep } from '@quillcrm/client';
 import NodeContextMenu from '../components/node-context-menu';
 import StepReorderControls from '../components/step-reorder-controls';
+import NodeActionsDropdown from '../components/node-actions-dropdown';
 
 interface EndNodeData {
 	step: AutomationStep;
@@ -121,32 +122,21 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 
 				<div className="qcrm-reactflow-node__header">
 					<div className="qcrm-reactflow-node__icon">
-						<DisconnectOutlined />
-					</div>
-					<div className="qcrm-reactflow-node__actions">
-						<Popconfirm
-							title={__('Are you sure?', 'quillcrm')}
-							onConfirm={handleDeleteWithStopPropagation}
-							okText={__('Yes', 'quillcrm')}
-							cancelText={__('No', 'quillcrm')}
-							onCancel={(e) => e?.stopPropagation()}
-							onOpenChange={(_, e) => {
-								if (e) {
-									e.stopPropagation();
-								}
-							}}
-						>
-							<Button
-								type="text"
-								size="small"
-								icon={<DeleteOutlined />}
-								danger
-								loading={isDeleting}
-								onClick={(e) => e.stopPropagation()}
-							/>
-						</Popconfirm>
+						<PoweroffOutlined />
 					</div>
 				</div>
+
+				{/* Three dots dropdown menu */}
+				<NodeActionsDropdown
+					onDelete={handleDelete}
+					showEdit={false}
+					deleteLabel={__('Delete End Node', 'quillcrm')}
+					deleteTitle={__('Delete this end node?', 'quillcrm')}
+					deleteDescription={__(
+						'This action cannot be undone.',
+						'quillcrm'
+					)}
+				/>
 
 				<div className="qcrm-reactflow-node__content">
 					<div className="qcrm-reactflow-node__title">

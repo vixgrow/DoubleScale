@@ -9,8 +9,6 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { EditOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Popconfirm, type MenuProps } from 'antd';
 
 /**
  * Internal dependencies
@@ -19,6 +17,7 @@ import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
 import { getGoal } from '@quillcrm/utils';
 import NodeContextMenu from '../components/node-context-menu';
+import NodeActionsDropdown from '../components/node-actions-dropdown';
 import StepReorderControls from '../components/step-reorder-controls';
 
 interface GoalNodeData {
@@ -123,37 +122,6 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	// Create dropdown menu items
-	const menuItems: MenuProps['items'] = [
-		{
-			key: 'edit',
-			label: __('Edit Goal', 'quillcrm'),
-			icon: <EditOutlined />,
-			onClick: () => handleEdit(),
-		},
-		{
-			key: 'delete',
-			label: (
-				<Popconfirm
-					title={__('Delete this goal?', 'quillcrm')}
-					description={__(
-						'This will remove the goal from your workflow.',
-						'quillcrm'
-					)}
-					onConfirm={handleDelete}
-					okText={__('Delete', 'quillcrm')}
-					cancelText={__('Cancel', 'quillcrm')}
-					okButtonProps={{ danger: true }}
-				>
-					<span style={{ color: '#ff4d4f' }}>
-						<DeleteOutlined style={{ marginRight: 8 }} />
-						{__('Delete Goal', 'quillcrm')}
-					</span>
-				</Popconfirm>
-			),
-		},
-	];
-
 	return (
 		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
 			<div className="qcrm-reactflow-node qcrm-reactflow-node--goal">
@@ -193,47 +161,17 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 				</div>
 
 				{/* Three dots dropdown menu */}
-				<div
-					className="qcrm-reactflow-node__actions"
-					style={{
-						position: 'absolute',
-						top: '50%',
-						right: '16px',
-						transform: 'translateY(-50%)',
-						zIndex: 10,
-						width: '40px',
-						height: '40px',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-					}}
-				>
-					<Dropdown
-						menu={{ items: menuItems }}
-						trigger={['click']}
-						placement="bottomRight"
-					>
-						<Button
-							type="text"
-							size="small"
-							icon={<MoreOutlined />}
-							onClick={(e) => e.stopPropagation()}
-							style={{
-								background: 'transparent',
-								border: 'none',
-								color: '#8c8c8c',
-								padding: '6px',
-								height: '32px',
-								width: '32px',
-								boxShadow: 'none',
-								borderRadius: '6px',
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-							}}
-						/>
-					</Dropdown>
-				</div>
+				<NodeActionsDropdown
+					onEdit={handleEdit}
+					onDelete={handleDelete}
+					editLabel={__('Edit Goal', 'quillcrm')}
+					deleteLabel={__('Delete Goal', 'quillcrm')}
+					deleteTitle={__('Delete this goal?', 'quillcrm')}
+					deleteDescription={__(
+						'This will remove the goal from your workflow.',
+						'quillcrm'
+					)}
+				/>
 
 				<Handle
 					type="source"

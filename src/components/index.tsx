@@ -21,4 +21,5 @@ export { default as AddRemoveListsModal } from './add-remove-list-modal';
 export { default as AddRemoveTagsModal } from './add-remove-tag-modal';
 export { default as Tag } from './tag';
 export { default as DeleteModal } from './delete-modal';
-export { default as LoadingSpinner } from "./loading-spin";
+export { default as PaginatedSelect } from './paginated-select';
+export { default as LoadingSpinner } from './loading-spin';

@@ -138,7 +138,6 @@ export const FieldTable: React.FC<FieldTableProps> = ({
 			enableSorting: false,
 		},
 	];
-	
 
 	return (
 		<DataTable

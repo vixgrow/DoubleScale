@@ -375,11 +375,11 @@ class REST_Campaign_Controller extends REST_Controller
 	public function get_items($request)
 	{
 		try {
-			$keywords = $request->get_param('keywords') ? $request->get_param('keywords') : null;
-			$per_page = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
-			$page = $request->get_param('page') ? $request->get_param('page') : 1;
-			$from = $request->get_param('from') ? $request->get_param('from') : null;
-			$to = $request->get_param('to') ? $request->get_param('to') : null;
+			$keywords = $request->get_param('keywords') ?? null;
+			$per_page = $request->get_param('per_page') ?? 10;
+			$page = $request->get_param('page') ?? 1;
+			$from = $request->get_param('from') ?? null;
+			$to = $request->get_param('to') ?? null;
 
 			$query = Campaign_Model::query();
 

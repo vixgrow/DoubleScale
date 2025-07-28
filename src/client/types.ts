@@ -536,6 +536,7 @@ export type Response = {
 
 export type ContactsResponse = Response & {
 	data: Contact[];
+	total_count: number;
 };
 
 export type ListsResponse = Response & {
@@ -620,6 +621,7 @@ export type Log = {
 export interface DataTableConfig<TData> {
 	manageColumns?: {
 		enabled: boolean;
+		onSubmit?: (columnVisibility: Record<string, boolean>) => void;
 	};
 	search?: {
 		placeholder?: string;

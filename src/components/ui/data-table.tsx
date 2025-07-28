@@ -32,6 +32,8 @@ interface DataTableProps<TData> {
 	activeTab?: string;
 	showMainActions?: boolean;
 	showPagination?: boolean;
+	initialPageSize?: number | undefined;
+	setPage: (page: number) => void;
 }
 
 export function DataTable<TData>({
@@ -41,11 +43,14 @@ export function DataTable<TData>({
 	activeTab,
 	showMainActions = true,
 	showPagination = true,
+	initialPageSize,
+	setPage,
 }: DataTableProps<TData>) {
 	const { table, globalFilter, setGlobalFilter } = useDataTable(
 		data,
 		columns,
-		config
+		config,
+		initialPageSize
 	);
 
 	const handleSearchChange = (value: string) => {
@@ -54,6 +59,7 @@ export function DataTable<TData>({
 		} else {
 			setGlobalFilter(value);
 		}
+		setPage(1);
 	};
 
 	return (
@@ -75,6 +81,7 @@ export function DataTable<TData>({
 						table={table}
 						config={config}
 						activeTab={activeTab}
+						setPage={setPage}
 					/>
 				</div>
 			)}

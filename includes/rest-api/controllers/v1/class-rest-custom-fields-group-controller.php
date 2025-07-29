@@ -21,7 +21,8 @@ use QuillCRM\Models\Custom_Fields_Group_Model;
 /**
  * Custom_Fields_Group_Controller class
  */
-class REST_Custom_Fields_Group_Controller extends REST_Controller {
+class REST_Custom_Fields_Group_Controller extends REST_Controller
+{
 
 	/**
 	 * REST Base
@@ -37,21 +38,22 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @since 1.0.0
 	 */
-	public function register_routes() {
+	public function register_routes()
+	{
 
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'methods' => WP_REST_Server::READABLE,
+					'callback' => array($this, 'get_items'),
+					'permission_callback' => array($this, 'get_items_permissions_check'),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'create_item' ),
-					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'methods' => WP_REST_Server::CREATABLE,
+					'callback' => array($this, 'create_item'),
+					'permission_callback' => array($this, 'create_item_permissions_check'),
 				),
 			)
 		);
@@ -61,24 +63,24 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'methods' => WP_REST_Server::READABLE,
+					'callback' => array($this, 'get_item'),
+					'permission_callback' => array($this, 'get_item_permissions_check'),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'update_item' ),
-					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'methods' => WP_REST_Server::EDITABLE,
+					'callback' => array($this, 'update_item'),
+					'permission_callback' => array($this, 'update_item_permissions_check'),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => array( $this, 'delete_item' ),
-					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-					'args'                => array(
+					'methods' => WP_REST_Server::DELETABLE,
+					'callback' => array($this, 'delete_item'),
+					'permission_callback' => array($this, 'delete_item_permissions_check'),
+					'args' => array(
 						'new_group_id' => array(
-							'description' => __( 'New group id to move the fields.', 'quillcrm' ),
-							'type'        => 'integer',
-							'required'    => true,
+							'description' => __('New group id to move the fields.', 'quillcrm'),
+							'type' => 'integer',
+							'required' => true,
 						),
 					),
 				),
@@ -92,15 +94,15 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 			array(
 				'args' => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'quillcrm' ),
-						'type'        => 'integer',
-						'required'    => true,
+						'description' => __('Unique identifier for the resource.', 'quillcrm'),
+						'type' => 'integer',
+						'required' => true,
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_fields' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'methods' => WP_REST_Server::READABLE,
+					'callback' => array($this, 'get_fields'),
+					'permission_callback' => array($this, 'get_item_permissions_check'),
 				),
 			)
 		);
@@ -113,43 +115,44 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return array
 	 */
-	public function get_item_schema() {
+	public function get_item_schema()
+	{
 		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'custom_fields_group',
-			'type'       => 'object',
+			'$schema' => 'http://json-schema.org/draft-04/schema#',
+			'title' => 'custom_fields_group',
+			'type' => 'object',
 			'properties' => array(
-				'id'         => array(
-					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
-					'type'        => 'integer',
-					'readonly'    => true,
+				'id' => array(
+					'description' => __('Unique identifier for the object.', 'quillcrm'),
+					'type' => 'integer',
+					'readonly' => true,
 				),
-				'name'       => array(
-					'description'  => __( 'Name of the custom fields group.', 'quillcrm' ),
-					'type'         => 'string',
-					'required'     => true,
+				'name' => array(
+					'description' => __('Name of the custom fields group.', 'quillcrm'),
+					'type' => 'string',
+					'required' => true,
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'slug'       => array(
-					'description'  => __( 'Slug of the custom fields group.', 'quillcrm' ),
-					'type'         => 'string',
+				'slug' => array(
+					'description' => __('Slug of the custom fields group.', 'quillcrm'),
+					'type' => 'string',
 					'args_options' => array(
 						'sanitize_callback' => 'sanitize_title',
 					),
 				),
 				'created_at' => array(
-					'type'        => 'string',
+					'type' => 'string',
 					'description' => 'Created at',
-					'context'     => array( 'view', 'edit', 'embed' ),
-					'readonly'    => true,
+					'context' => array('view', 'edit', 'embed'),
+					'readonly' => true,
 				),
 				'updated_at' => array(
-					'type'        => 'string',
+					'type' => 'string',
 					'description' => 'Updated at',
-					'context'     => array( 'view', 'edit', 'embed' ),
-					'readonly'    => true,
+					'context' => array('view', 'edit', 'embed'),
+					'readonly' => true,
 				),
 			),
 		);
@@ -164,13 +167,14 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function get_items( $request ) {
+	public function get_items($request)
+	{
 		try {
-			$groups = Custom_Fields_Group_Model::with( 'custom_fields' )->get();
+			$groups = Custom_Fields_Group_Model::with('custom_fields')->get();
 
-			return new WP_REST_Response( $groups, 200 );
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_REST_Response($groups, 200);
+		} catch (\Exception $e) {
+			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}
 	}
 
@@ -183,18 +187,19 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function get_item( $request ) {
+	public function get_item($request)
+	{
 		try {
-			$group_id = $request->get_param( 'id' );
-			$group    = Custom_Fields_Group_Model::find( $group_id );
+			$group_id = $request->get_param('id');
+			$group = Custom_Fields_Group_Model::find($group_id);
 
-			if ( ! $group ) {
-				return new WP_Error( 'error', __( 'Custom fields group not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			if (!$group) {
+				return new WP_Error('error', __('Custom fields group not found.', 'quillcrm'), array('status' => 404));
 			}
 
-			return new WP_REST_Response( $group, 200 );
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_REST_Response($group, 200);
+		} catch (\Exception $e) {
+			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}
 	}
 
@@ -207,20 +212,21 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function get_fields( $request ) {
+	public function get_fields($request)
+	{
 		try {
-			$group_id = $request->get_param( 'id' );
-			$group    = Custom_Fields_Group_Model::find( $group_id );
+			$group_id = $request->get_param('id');
+			$group = Custom_Fields_Group_Model::find($group_id);
 
-			if ( ! $group ) {
-				return new WP_Error( 'error', __( 'Custom fields group not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			if (!$group) {
+				return new WP_Error('error', __('Custom fields group not found.', 'quillcrm'), array('status' => 404));
 			}
 
 			$fields = $group->custom_fields;
 
-			return new WP_REST_Response( $fields, 200 );
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_REST_Response($fields, 200);
+		} catch (\Exception $e) {
+			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}
 	}
 
@@ -233,15 +239,16 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function create_item( $request ) {
+	public function create_item($request)
+	{
 		try {
-			$data                 = $this->prepare_group( $request );
-			$group                = Custom_Fields_Group_Model::create( $data );
+			$data = $this->prepare_group($request);
+			$group = Custom_Fields_Group_Model::create($data);
 			$group->custom_fields = array();
 
-			return new WP_REST_Response( $group, 201 );
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_REST_Response($group, 201);
+		} catch (\Exception $e) {
+			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}
 	}
 
@@ -254,24 +261,25 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function update_item( $request ) {
+	public function update_item($request)
+	{
 		try {
-			$group_id = $request->get_param( 'id' );
-			$group    = Custom_Fields_Group_Model::find( $group_id );
+			$group_id = $request->get_param('id');
+			$group = Custom_Fields_Group_Model::find($group_id);
 
-			if ( ! $group ) {
-				return new WP_Error( 'error', __( 'Custom fields group not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			if (!$group) {
+				return new WP_Error('error', __('Custom fields group not found.', 'quillcrm'), array('status' => 404));
 			}
 
-			$group_data = $this->prepare_group( $request );
+			$group_data = $this->prepare_group($request);
 
-			$group->update( $group_data );
+			$group->update($group_data);
 
-			$group = Custom_Fields_Group_Model::find( $group_id );
+			$group = Custom_Fields_Group_Model::find($group_id);
 
-			return new WP_REST_Response( $group, 200 );
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_REST_Response($group, 200);
+		} catch (\Exception $e) {
+			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}
 	}
 
@@ -284,27 +292,28 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function delete_item( $request ) {
+	public function delete_item($request)
+	{
 		try {
-			$group_id = $request->get_param( 'id' );
-			$group    = Custom_Fields_Group_Model::find( $group_id );
+			$group_id = $request->get_param('id');
+			$group = Custom_Fields_Group_Model::find($group_id);
 
-			if ( ! $group ) {
-				return new WP_Error( 'error', __( 'Custom fields group not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			if (!$group) {
+				return new WP_Error('error', __('Custom fields group not found.', 'quillcrm'), array('status' => 404));
 			}
 
 			// First move all the fields to the the given group.
-			$new_group_id = $request->get_param( 'new_group_id' ) ? $request->get_param( 'new_group_id' ) : 0;
+			$new_group_id = $request->get_param('new_group_id') ? $request->get_param('new_group_id') : 0;
 
-			if ( $new_group_id ) {
-				$new_group = Custom_Fields_Group_Model::find( $new_group_id );
+			if ($new_group_id) {
+				$new_group = Custom_Fields_Group_Model::find($new_group_id);
 
-				if ( ! $new_group ) {
-					return new WP_Error( 'error', __( 'New group not found.', 'quillcrm' ), array( 'status' => 404 ) );
+				if (!$new_group) {
+					return new WP_Error('error', __('New group not found.', 'quillcrm'), array('status' => 404));
 				}
 
 				$fields = $group->custom_fields;
-				foreach ( $fields as $field ) {
+				foreach ($fields as $field) {
 					$field->group_id = $new_group_id; // Update the foreign key
 					$field->save(); // Save the updated field
 				}
@@ -314,12 +323,12 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 
 			return new WP_REST_Response(
 				array(
-					'message' => __( 'Custom fields group deleted.', 'quillcrm' ),
+					'message' => __('Custom fields group deleted.', 'quillcrm'),
 				),
 				204
 			);
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		} catch (\Exception $e) {
+			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}
 	}
 
@@ -332,8 +341,9 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return bool
 	 */
-	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+	public function get_items_permissions_check($request)
+	{
+		return current_user_can('manage_options');
 	}
 
 	/**
@@ -345,8 +355,9 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return bool
 	 */
-	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+	public function get_item_permissions_check($request)
+	{
+		return current_user_can('manage_options');
 	}
 
 	/**
@@ -358,8 +369,9 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return bool
 	 */
-	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+	public function create_item_permissions_check($request)
+	{
+		return current_user_can('manage_options');
 	}
 
 	/**
@@ -371,8 +383,9 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return bool
 	 */
-	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+	public function update_item_permissions_check($request)
+	{
+		return current_user_can('manage_options');
 	}
 
 	/**
@@ -384,8 +397,9 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return bool
 	 */
-	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+	public function delete_item_permissions_check($request)
+	{
+		return current_user_can('manage_options');
 	}
 
 	/**
@@ -397,15 +411,16 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 	 *
 	 * @return array $group The group model.
 	 */
-	protected function prepare_group( $request ) {
+	protected function prepare_group($request)
+	{
 		$group = array(
-			'name' => $request->get_param( 'name' ),
-			'slug' => $request->get_param( 'slug' ),
+			'name' => $request->get_param('name'),
+			'slug' => $request->get_param('slug'),
 		);
 
-		foreach ( $group as $key => $value ) {
-			if ( ! $value ) {
-				unset( $group[ $key ] );
+		foreach ($group as $key => $value) {
+			if (!$value) {
+				unset($group[$key]);
 			}
 		}
 

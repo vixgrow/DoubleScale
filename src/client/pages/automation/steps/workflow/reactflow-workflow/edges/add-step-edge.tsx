@@ -47,31 +47,28 @@ const updateStepOrderRecursive = (
 	const newSteps = [...steps];
 	let currentStepOrder = order;
 
-	// Filter steps to update based on parent_id and condition
-	const stepsToUpdate = newSteps
-		.filter((step) => {
-			if (parentId > 0) {
-				// Child steps - same parent and condition
-				return (
-					step.parent_id === parentId && step.condition === condition
-				);
-			} else {
-				// Root level steps
-				return !step.parent_id;
-			}
-		})
-		.sort((a, b) => a.order - b.order);
+	// Find steps that need to be reordered
+	const stepsToUpdate = newSteps.filter((step) => {
+		if (parentId === 0) {
+			return !step.parent_id && step.order >= order;
+		} else {
+			return (
+				step.parent_id === parentId &&
+				step.condition === condition &&
+				step.order >= order
+			);
+		}
+	});
 
-	// If we're inserting at a specific position, update orders for steps that come at or after
-	if (stepsToUpdate.length > 0) {
-		stepsToUpdate.forEach((step) => {
-			if (step.order >= order) {
-				const newOrder = step.order + 1;
-				step.order = newOrder;
-				updatedSteps[step.id] = { order: newOrder };
-			}
-		});
-	}
+	// Sort steps by order to ensure proper sequential updating
+	stepsToUpdate.sort((a, b) => a.order - b.order);
+
+	// Update their orders - shift all steps forward by 1
+	stepsToUpdate.forEach((step) => {
+		const newOrder = step.order + 1;
+		updatedSteps[step.id] = { order: newOrder };
+		step.order = newOrder;
+	});
 
 	return { newSteps, updatedSteps, currentStepOrder };
 };
@@ -171,15 +168,15 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		let stepCondition: string | undefined = undefined;
 
 		if (sourceStep && sourceStep.type === 'condition' && condition) {
-			// Adding step to a condition branch
+			// Adding step to a condition branch (direct child of condition)
 			parentId = sourceStep.id;
 			stepCondition = condition;
-		} else if (sourceStep && condition) {
-			// Adding step within an existing condition branch
-			parentId = sourceStep.parent_id || 0;
+		} else if (sourceStep && condition && sourceStep.parent_id) {
+			// Adding step within an existing condition branch (sibling of sourceStep)
+			parentId = sourceStep.parent_id;
 			stepCondition = condition;
 		} else if (sourceStep && sourceStep.parent_id) {
-			// If sourceStep has a parent, the new step should also have the same parent and condition
+			// If sourceStep has a parent, the new step should be a sibling with same parent and condition
 			parentId = sourceStep.parent_id;
 			stepCondition = sourceStep.condition || undefined;
 		} else if (
@@ -189,9 +186,13 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			'type' in targetStep &&
 			targetStep.type !== 'merge'
 		) {
-			// If targetStep has a parent, the new step should also have the same parent and condition
+			// If targetStep has a parent, the new step should be a sibling with same parent and condition
 			parentId = targetStep.parent_id;
 			stepCondition = targetStep.condition || undefined;
+		} else if (condition) {
+			// Edge case: we have a condition but no clear parent context
+			// This might happen in some edge scenarios - keep as root level but preserve condition
+			stepCondition = condition;
 		}
 
 		// Calculate order: if we have targetStep, insert before it, otherwise add at end
@@ -212,10 +213,27 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		if (
 			targetStep &&
 			targetStep.type !== 'merge' &&
-			'order' in targetStep
+			'order' in targetStep &&
+			typeof targetStep.order === 'number'
 		) {
 			// Insert before the target step (only if it's a real automation step with order)
 			order = targetStep.order;
+		} else if (
+			sourceStep &&
+			'order' in sourceStep &&
+			typeof sourceStep.order === 'number'
+		) {
+			// Insert after the source step
+			const stepsAfterSource = sameBranchSteps.filter(
+				(step) => step.order > sourceStep.order
+			);
+			if (stepsAfterSource.length > 0) {
+				// Insert before the first step after source
+				order = Math.min(...stepsAfterSource.map((s) => s.order));
+			} else {
+				// No steps after source, add at the end
+				order = sourceStep.order + 1;
+			}
 		} else {
 			// Add at the end of the current branch
 			if (sameBranchSteps.length === 0) {

@@ -270,14 +270,11 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			const minWidth = baseWidth * levelMultiplier;
 
 			// Debug logging for branch calculations
-			console.log(`--- calculateBranchWidth Debug ---`);
-			console.log(
-				`Parent ID: ${parentId}, Condition: ${condition}, Level: ${level}`
-			);
-			console.log(`Branch steps count: ${branchSteps.length}`);
-			console.log(`Base width: ${baseWidth}px`);
-			console.log(`Level multiplier: ${levelMultiplier}`);
-			console.log(`Minimum width for branch: ${minWidth}px`);
+			console.log('calculateBranchWidth', {
+				level: level,
+				branchSteps: branchSteps.length,
+				minWidth: minWidth,
+			});
 
 			if (branchSteps.length === 0) {
 				return minWidth; // Minimum width for empty branch

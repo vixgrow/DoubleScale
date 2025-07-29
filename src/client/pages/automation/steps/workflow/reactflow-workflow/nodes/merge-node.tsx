@@ -108,13 +108,14 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			}
 		});
 
-		// Update their orders
+		// Sort steps by order to ensure proper sequential updating
+		stepsToUpdate.sort((a, b) => a.order - b.order);
+
+		// Update their orders - shift all steps forward by 1
 		stepsToUpdate.forEach((step) => {
-			if (step.order >= order) {
-				const newOrder = step.order + 1;
-				updatedSteps[step.id] = { order: newOrder };
-				step.order = newOrder;
-			}
+			const newOrder = step.order + 1;
+			updatedSteps[step.id] = { order: newOrder };
+			step.order = newOrder;
 		});
 
 		return { newSteps, updatedSteps, currentStepOrder };
@@ -141,39 +142,52 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			targetParentId = conditionStep.parent_id || 0;
 			targetCondition = conditionStep.condition || undefined;
 
-			// Find the maximum order among all steps in both branches of this condition
-			// This includes both 'yes' and 'no' condition steps
-			const conditionBranchSteps = steps.filter(
+			// Find all steps at the target parent level that come after the condition step
+			const siblingSteps = steps.filter(
 				(step) =>
-					step.parent_id === conditionStep.id &&
-					(step.condition === 'yes' || step.condition === 'no')
+					step.parent_id === targetParentId &&
+					step.condition === targetCondition &&
+					step.order > conditionStep.order
 			);
 
-			// Get the highest order from the condition branches
-			const maxBranchOrder =
-				conditionBranchSteps.length > 0
-					? Math.max(...conditionBranchSteps.map((s) => s.order))
-					: conditionStep.order;
-
-			// New step should come right after the merge point (after all branch steps)
-			targetOrder = maxBranchOrder + 1;
+			// New step should be positioned after the condition and all its branches
+			// but before any existing sibling steps that come after
+			if (siblingSteps.length > 0) {
+				targetOrder = Math.min(...siblingSteps.map((s) => s.order));
+			} else {
+				// No siblings after condition, find the next available order
+				const allSiblingsAtLevel = steps.filter(
+					(step) =>
+						step.parent_id === targetParentId &&
+						step.condition === targetCondition
+				);
+				targetOrder =
+					allSiblingsAtLevel.length > 0
+						? Math.max(...allSiblingsAtLevel.map((s) => s.order)) +
+							1
+						: conditionStep.order + 1;
+			}
 		} else {
 			// Root level merge - find the position after the condition step and its branches
 			if (conditionStep) {
-				// Find all steps that belong to this condition's branches
-				const conditionBranchSteps = steps.filter(
+				// Find all root-level steps that come after the condition step
+				const rootStepsAfterCondition = steps.filter(
 					(step) =>
-						step.parent_id === conditionStep.id &&
-						(step.condition === 'yes' || step.condition === 'no')
+						!step.parent_id && step.order > conditionStep.order
 				);
 
-				// Get the highest order from the condition branches
-				const maxBranchOrder =
-					conditionBranchSteps.length > 0
-						? Math.max(...conditionBranchSteps.map((s) => s.order))
-						: conditionStep.order;
-
-				targetOrder = maxBranchOrder + 1;
+				// New step should be positioned immediately after the condition's branches
+				// but before any existing root steps that come after
+				if (rootStepsAfterCondition.length > 0) {
+					targetOrder = Math.min(
+						...rootStepsAfterCondition.map((s) => s.order)
+					);
+				} else {
+					// No root steps after condition, add at the end
+					const rootSteps = steps.filter((step) => !step.parent_id);
+					targetOrder =
+						Math.max(...rootSteps.map((s) => s.order), 0) + 1;
+				}
 			} else {
 				// Fallback: add to end of root level
 				const rootSteps = steps.filter((step) => !step.parent_id);
@@ -204,7 +218,12 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 		}
 
 		const { newSteps, updatedSteps, currentStepOrder } =
-			updateStepOrderRecursive(steps, targetParentId, targetOrder);
+			updateStepOrderRecursive(
+				steps,
+				targetParentId,
+				targetOrder,
+				targetCondition
+			);
 
 		const requestData = {
 			...stepData,

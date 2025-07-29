@@ -42,49 +42,28 @@ const updateStepOrderRecursive = (
 	const newSteps = [...steps];
 	let currentStepOrder = order;
 
-	if (parentId > 0) {
-		newSteps
-			.filter(
-				(step) =>
-					step.parent_id === parentId && step.condition === condition
-			)
-			.sort((a, b) => a.order - b.order)
-			.forEach((child, index) => {
-				let newOrder = index + 1;
+	// Find steps that need to be reordered
+	const stepsToUpdate = newSteps.filter((step) => {
+		if (parentId === 0) {
+			return !step.parent_id && step.order >= order;
+		} else {
+			return (
+				step.parent_id === parentId &&
+				step.condition === condition &&
+				step.order >= order
+			);
+		}
+	});
 
-				if (currentStepOrder === child.order) {
-					currentStepOrder = child.order;
-				}
+	// Sort steps by order to ensure proper sequential updating
+	stepsToUpdate.sort((a, b) => a.order - b.order);
 
-				if (child.order >= order) {
-					newOrder = newOrder + 1;
-				}
-
-				if (newOrder !== child.order) {
-					child.order = newOrder;
-					updatedSteps[child.id] = { order: newOrder };
-				}
-			});
-	} else {
-		newSteps
-			.sort((a, b) => a.order - b.order)
-			.forEach((step, index) => {
-				let newOrder = index + 1;
-
-				if (currentStepOrder === step.order) {
-					currentStepOrder = step.order;
-				}
-
-				if (step.order >= order) {
-					newOrder = newOrder + 1;
-				}
-
-				if (newOrder !== step.order) {
-					step.order = newOrder;
-					updatedSteps[step.id] = { order: newOrder };
-				}
-			});
-	}
+	// Update their orders - shift all steps forward by 1
+	stepsToUpdate.forEach((step) => {
+		const newOrder = step.order + 1;
+		updatedSteps[step.id] = { order: newOrder };
+		step.order = newOrder;
+	});
 
 	return { newSteps, updatedSteps, currentStepOrder };
 };
@@ -121,21 +100,50 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	const getNewStepOrder = () => {
-		if (!parentId && !prevStep) {
-			return 1;
+		// Find steps in the same branch to determine proper order
+		const sameBranchSteps = steps.filter((step) => {
+			if (!parentId || parentId === 0) {
+				return !step.parent_id;
+			} else {
+				return (
+					step.parent_id === parentId && step.condition === condition
+				);
+			}
+		});
+
+		if (prevStep && typeof prevStep.order === 'number') {
+			// Insert after the previous step
+			const stepsAfterPrev = sameBranchSteps.filter(
+				(step) => step.order > prevStep.order
+			);
+			if (stepsAfterPrev.length > 0) {
+				// Insert before the first step after prevStep
+				return Math.min(...stepsAfterPrev.map((s) => s.order));
+			} else {
+				// No steps after prevStep, add at the end
+				return prevStep.order + 1;
+			}
 		}
 
-		if (prevStep) {
-			return prevStep.order + 1;
+		// No prevStep specified, add at the end of the current branch
+		if (sameBranchSteps.length === 0) {
+			return 1; // First step in this branch
+		} else {
+			return Math.max(...sameBranchSteps.map((s) => s.order)) + 1;
 		}
-
-		return 1;
 	};
 
 	const handleStepSelection = async (type: string) => {
 		setLoading(true);
 
 		const order = getNewStepOrder();
+
+		// Ensure order is always a valid number
+		if (typeof order !== 'number' || isNaN(order) || order < 1) {
+			console.warn('Invalid order calculated, defaulting to 1:', order);
+			setLoading(false);
+			return;
+		}
 		const stepData = {
 			automation_id: automation.id,
 			type,
@@ -143,9 +151,13 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 			order,
 		} as AutomationStep;
 
+		// Set appropriate action based on step type
 		if (type === 'condition') {
 			stepData.action = 'condition';
+		} else if (type === 'end_automation') {
+			stepData.action = 'end_automation';
 		}
+		// For 'action' and 'goal' types, leave action empty - will be set when user selects specific action/goal
 
 		if (parentId && condition) {
 			stepData.parent_id = parentId;
@@ -181,9 +193,12 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 				message: __('Step added', 'quillcrm'),
 			});
 		} catch (error: any) {
+			console.error('Failed to create step:', error);
+			console.error('Request data was:', requestData);
+
 			createNotice({
 				type: 'error',
-				message: error.message,
+				message: error.message || __('Failed to add step', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);

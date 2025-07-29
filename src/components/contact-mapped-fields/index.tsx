@@ -96,6 +96,10 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 									...styles,
 									flex: 1,
 								}),
+								menu: (base: any) => ({
+									...base,
+									color: 'black',
+								}),
 							}}
 							isSearchable={false}
 						/>

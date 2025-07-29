@@ -248,6 +248,10 @@ const PaginatedSelect = ({
 										backgroundColor: 'transparent',
 									}),
 								}),
+								menu: (base: any) => ({
+									...base,
+									color: 'black',
+								}),
 							}}
 							components={{
 								LoadingMessage: () => (

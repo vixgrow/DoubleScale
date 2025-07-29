@@ -82,6 +82,12 @@ const SelectField: React.FC<SelectFieldProps> = ({
 					onChange(value.value);
 				}}
 				value={options.find((option) => option.value === value)}
+				styles={{
+					menu: (base: any) => ({
+						...base,
+						color: 'black',
+					}),
+				}}
 			/>
 		</div>
 	);

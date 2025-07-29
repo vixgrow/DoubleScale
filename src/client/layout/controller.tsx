@@ -155,7 +155,7 @@ registerAdminPage('link-triggers', {
 	path: 'link-triggers',
 	component: () => <LinkTriggers />,
 	label: __('Link Triggers', 'quillcrm'),
-	hidden: true,
+	icon: <ToolsIcon />,
 });
 
 registerAdminPage('link-trigger', {
@@ -221,12 +221,12 @@ registerAdminPage('emails-analytics', {
 	hidden: true,
 });
 
-registerAdminPage('tools', {
-	path: 'tools',
-	component: () => <Tools />,
-	label: __('Tools', 'quillcrm'),
-	icon: <ToolsIcon />,
-});
+// registerAdminPage('tools', {
+// 	path: 'tools',
+// 	component: () => <Tools />,
+// 	label: __('Tools', 'quillcrm'),
+// 	icon: <ToolsIcon />,
+// });
 
 registerAdminPage('settings', {
 	path: 'settings',

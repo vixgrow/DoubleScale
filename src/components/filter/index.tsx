@@ -74,7 +74,12 @@ const Filter: React.FC<FilterProps> = ({
 		} finally {
 			setLoading(false);
 		}
-	}, [filterSettings.is_dynamic, filterSettings.dynamic_args, keyword, filter.value]);
+	}, [
+		filterSettings.is_dynamic,
+		filterSettings.dynamic_args,
+		keyword,
+		filter.value,
+	]);
 
 	useEffect(() => {
 		fetchOptions();
@@ -127,6 +132,10 @@ const Filter: React.FC<FilterProps> = ({
 							singleValue: (base) => ({
 								...base,
 								lineHeight: '48px',
+							}),
+							menu: (base: any) => ({
+								...base,
+								color: 'black',
 							}),
 						}}
 					/>
@@ -183,6 +192,10 @@ const Filter: React.FC<FilterProps> = ({
 									...base,
 									lineHeight: '48px',
 								}),
+								menu: (base: any) => ({
+									...base,
+									color: 'black',
+								}),
 							}}
 						/>
 					)}
@@ -227,6 +240,10 @@ const Filter: React.FC<FilterProps> = ({
 								singleValue: (base) => ({
 									...base,
 									lineHeight: '48px',
+								}),
+								menu: (base: any) => ({
+									...base,
+									color: 'black',
 								}),
 							}}
 						/>

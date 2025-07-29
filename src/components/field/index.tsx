@@ -43,7 +43,7 @@ interface FieldProps {
 	required?: boolean;
 	helperText?: string;
 	style?: React.CSSProperties;
-	placeholder?:string;
+	placeholder?: string;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -99,7 +99,8 @@ const Field: React.FC<FieldProps> = ({
 					type={type}
 					className={cn(
 						'h-12',
-						status === 'error' && 'border-red-500 focus-visible:ring-red-500'
+						status === 'error' &&
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 				/>
@@ -111,7 +112,8 @@ const Field: React.FC<FieldProps> = ({
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
 					className={cn(
-						status === 'error' && 'border-red-500 focus-visible:ring-red-500'
+						status === 'error' &&
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 				/>
@@ -124,8 +126,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-								(option) => option.value === value
-							)
+									(option) => option.value === value
+								)
 							: null
 					}
 					onChange={(value) => {
@@ -136,6 +138,12 @@ const Field: React.FC<FieldProps> = ({
 					}}
 					options={selectOptions}
 					placeholder={placeholder}
+					styles={{
+						menu: (base: any) => ({
+							...base,
+							color: 'black',
+						}),
+					}}
 				/>
 			);
 			break;
@@ -156,6 +164,12 @@ const Field: React.FC<FieldProps> = ({
 					)}
 					isMulti
 					placeholder={placeholder}
+					styles={{
+						menu: (base: any) => ({
+							...base,
+							color: 'black',
+						}),
+					}}
 				/>
 			);
 			break;
@@ -238,9 +252,7 @@ const Field: React.FC<FieldProps> = ({
 				</div>
 			)}
 			<div className="qcrm-field-input">{fieldContent}</div>
-			{helperText && (
-				<div className='text-ghost'>{helperText}</div>
-			)}
+			{helperText && <div className="text-ghost">{helperText}</div>}
 		</div>
 	);
 };

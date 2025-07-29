@@ -193,6 +193,16 @@ class Rest_Form_Controller extends REST_Controller {
 					'type' => 'integer',
 				),
 			),
+			'from' => array(
+				'description' => __( 'Start date for filtering forms.', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+			'to' => array(
+				'description' => __( 'End date for filtering forms.', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
 		);
 	}
 
@@ -211,16 +221,24 @@ class Rest_Form_Controller extends REST_Controller {
 			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 			$ids      = $request->get_param( 'ids' ) ? $request->get_param( 'ids' ) : array();
+			$from     = $request->get_param( 'from' ) ?? null;
+			$to       = $request->get_param( 'to' ) ?? null;
+
+			$query = Form_Model::query();
 
 			if ( ! empty( $ids ) ) {
-				$forms = Form_Model::whereIn( 'id', $ids )->get();
+				$forms = $query->whereIn( 'id', $ids )->get();
 			} else {
 				if ( $keyword ) {
-					$forms = Form_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )
-					->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
-				} else {
-					$forms = Form_Model::orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+					$query->where( 'name', 'LIKE', '%' . $keyword . '%' );
 				}
+				if ( $from ) {
+					$query->where( 'created_at', '>=', $from );
+				}
+				if ( $to ) {
+					$query->where( 'created_at', '<=', $to );
+				}
+				$forms = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			}
 
 			return new WP_REST_Response( $forms, 200 );

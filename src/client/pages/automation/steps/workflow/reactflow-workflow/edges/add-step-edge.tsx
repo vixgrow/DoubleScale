@@ -99,13 +99,10 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 
 	// Show add-step button on most edges except:
 	// 1. Edges TO add-step nodes (would be redundant)
-	// 2. Edges FROM merge nodes TO next steps (merge nodes handle their own add-step functionality)
-	// 3. Structural edges without proper step data
+	// 2. Structural edges without proper step data
 	const shouldShowAddStepEdge = Boolean(
 		// Don't show on edges going TO add-step nodes
 		!(target && target.startsWith('add-step')) &&
-			// Don't show on edges FROM merge nodes to next steps (but allow on edges TO merge nodes)
-			!(sourceStep && sourceStep.type === 'merge' && data?.fromMerge) &&
 			// Must have either a source step or be a condition branch
 			(sourceStep || condition)
 	);

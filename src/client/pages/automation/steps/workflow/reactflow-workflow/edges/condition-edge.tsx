@@ -48,51 +48,29 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 	// Calculate the horizontal distance and create pronounced curves
 	const horizontalDistance = Math.abs(targetX - sourceX);
 
-	// Create wider, more semantic curves for clear visual separation
-	let adjustedSourceX = sourceX;
-	let adjustedTargetX = targetX;
-	let adjustedSourceY = sourceY;
+	// Create symmetric curves for both Yes and No branches
+	const branchDirection = isYes ? -1 : 1; // Left for Yes (-1), Right for No (1)
 
-	// Create semantic directional curves from single handle
-	const verticalOffset = 80; // Vertical offset for dramatic curves
-	const sourceSpread = 120; // How much to spread the curves at the source
-	const semanticOffset = Math.max(150, horizontalDistance * 0.6);
+	// Symmetric curve parameters to ensure equal heights
+	const horizontalSpread = 60; // How far to spread horizontally from center
+	const curveHeight = 80; // Consistent curve height for both branches
+	const targetOffset = 20; // Small offset for target positioning
 
-	if (isYes) {
-		// Yes branch: Always curve LEFT regardless of target position
-		adjustedSourceX = sourceX - sourceSpread; // Start left from center
-		adjustedTargetX =
-			targetX < sourceX ? targetX : targetX - semanticOffset; // Ensure left positioning
-		adjustedSourceY = sourceY + verticalOffset;
-	} else {
-		// No branch: Always curve RIGHT regardless of target position
-		adjustedSourceX = sourceX + sourceSpread; // Start right from center
-		adjustedTargetX =
-			targetX > sourceX ? targetX : targetX + semanticOffset; // Ensure right positioning
-		adjustedSourceY = sourceY + verticalOffset;
-	}
+	// Calculate symmetric control points
+	const cp1X = sourceX + branchDirection * horizontalSpread;
+	const cp1Y = sourceY + curveHeight;
 
-	// Use higher curvature for more pronounced, semantic curves from single point
-	const dynamicCurvature = Math.min(1.2, 0.8 + horizontalDistance / 300);
+	const cp2X = targetX + branchDirection * targetOffset;
+	const cp2Y = targetY - curveHeight;
 
-	// Create custom path that starts from center handle and branches out
-	const controlPointOffset = 60; // Distance from source to first control point
-	const branchDirection = isYes ? -1 : 1; // Left for Yes, Right for No
+	// Create symmetric cubic bezier path for both branches
+	const edgePath = `M ${sourceX} ${sourceY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${targetX} ${targetY}`;
 
-	// First control point: slight offset from center handle
-	const cp1X = sourceX + branchDirection * 30;
-	const cp1Y = sourceY + controlPointOffset;
+	// Calculate label position at the peak of the curve (symmetric for both branches)
+	const labelX = (sourceX + cp1X + cp2X + targetX) / 4;
+	const labelY = (sourceY + cp1Y + cp2Y + targetY) / 4;
 
-	// Second control point: more dramatic branching
-	const cp2X = adjustedTargetX;
-	const cp2Y = targetY - 60;
-
-	// Create custom cubic bezier path from center to target with proper branching
-	const edgePath = `M ${sourceX} ${sourceY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${adjustedTargetX} ${targetY - 10}`;
-
-	// Calculate label position at midpoint of curve
-	const labelX = (sourceX + cp1X + cp2X + adjustedTargetX) / 4;
-	const labelY = (sourceY + cp1Y + cp2Y + (targetY - 10)) / 4; // Enhanced styling based on condition with clear color differentiation
+	// Enhanced styling based on condition with clear color differentiation
 	const edgeStyle = {
 		...style,
 		stroke: '#D7D7DA', // Unified color for all conditions

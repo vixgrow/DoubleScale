@@ -303,6 +303,27 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 							transform: 'translateX(-50%)',
 						}}
 					/>
+					{/* Yes and No handles for condition branch connections */}
+					<Handle
+						type="target"
+						position={Position.Left}
+						id="yes"
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--target qcrm-reactflow-handle--merge-yes"
+						style={{
+							left: -6,
+							top: '30%',
+						}}
+					/>
+					<Handle
+						type="target"
+						position={Position.Right}
+						id="no"
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--target qcrm-reactflow-handle--merge-no"
+						style={{
+							right: -6,
+							top: '30%',
+						}}
+					/>
 					{/* Hidden handles for left/right connections but positioned centrally */}
 					<Handle
 						type="target"

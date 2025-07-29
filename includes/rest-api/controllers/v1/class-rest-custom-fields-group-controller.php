@@ -87,6 +87,33 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller
 			)
 		);
 
+		// Duplicate route - POST to duplicate a group
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/duplicate',
+			array(
+				'args' => array(
+					'id' => array(
+						'description' => __('Unique identifier for the resource to duplicate.', 'quillcrm'),
+						'type' => 'integer',
+						'required' => true,
+					),
+				),
+				array(
+					'methods' => WP_REST_Server::CREATABLE,
+					'callback' => array($this, 'duplicate_item'),
+					'permission_callback' => array($this, 'create_item_permissions_check'),
+					'args' => array(
+						'name' => array(
+							'description' => __('Name for the duplicated group.', 'quillcrm'),
+							'type' => 'string',
+							'required' => false,
+						),
+					),
+				),
+			)
+		);
+
 		// Get fields for a group.
 		register_rest_route(
 			$this->namespace,
@@ -327,6 +354,65 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller
 				),
 				204
 			);
+		} catch (\Exception $e) {
+			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+		}
+	}
+
+	/**
+	 * Duplicate item
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function duplicate_item($request)
+	{
+		try {
+			$group_id = $request->get_param('id');
+			$original_group = Custom_Fields_Group_Model::with('custom_fields')->find($group_id);
+
+			if (!$original_group) {
+				return new WP_Error('error', __('Custom fields group not found.', 'quillcrm'), array('status' => 404));
+			}
+
+			// Prepare data for the new group
+			$new_name = $request->get_param('name') ?: $original_group->name . ' (Copy)';
+			$new_slug = $request->get_param('slug') ?: $original_group->slug . '-copy';
+
+			// Ensure unique slug
+			$counter = 1;
+			$base_slug = $new_slug;
+			while (Custom_Fields_Group_Model::where('slug', $new_slug)->exists()) {
+				$new_slug = $base_slug . '-' . $counter;
+				$counter++;
+			}
+
+			// Create the duplicate group
+			$duplicate_data = array(
+				'name' => $new_name,
+				'slug' => $new_slug,
+			);
+
+			$duplicate_group = Custom_Fields_Group_Model::create($duplicate_data);
+
+			// Duplicate associated custom fields if they exist
+			if (!empty($original_group->custom_fields)) {
+				foreach ($original_group->custom_fields as $field) {
+					$field_data = $field->toArray();
+					unset($field_data['id']); // Remove the original ID
+					$field_data['group_id'] = $duplicate_group->id; // Set new group ID
+
+					Custom_Field_Model::create($field_data);
+				}
+			}
+
+			// Reload the group with its fields
+			$duplicate_group = Custom_Fields_Group_Model::with('custom_fields')->find($duplicate_group->id);
+
+			return new WP_REST_Response($duplicate_group, 201);
 		} catch (\Exception $e) {
 			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}

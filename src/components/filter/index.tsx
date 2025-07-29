@@ -9,10 +9,8 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import { DatePicker } from 'antd';
-import en from 'antd/es/date-picker/locale/en_US';
 import dayjs from 'dayjs';
-import { map, isEmpty, isArray, isObject, isString } from 'lodash';
+import { map, isEmpty, isArray, isObject } from 'lodash';
 import Select from 'react-select';
 
 /**
@@ -28,6 +26,8 @@ import type {
 import { Button } from '@/components/ui/button';
 import { DeleteIcon } from '@quillcrm/components';
 import { Input } from '@/components/ui/input';
+import { DateRangePicker } from '../ui/date-range-picker';
+import { DatePicker } from '@/components/ui/date-picker';
 
 interface FilterProps {
 	filterSettings: FilterSettings;
@@ -50,6 +50,8 @@ const Filter: React.FC<FilterProps> = ({
 	const [loading, setLoading] = useState<boolean>(true);
 	const [keyword, setKeyword] = useState<string>('');
 
+	const datePickerClassName =
+		'rounded-md border border-input px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-sm bg-background h-12';
 	const fetchOptions = useCallback(async () => {
 		if (!filterSettings.is_dynamic) return;
 
@@ -251,72 +253,52 @@ const Filter: React.FC<FilterProps> = ({
 				{filterSettings.type === 'date' && (
 					<>
 						{filter.operator === 'within' ? (
-							<>
-								<DatePicker
-									value={
-										!isEmpty(filter.value)
-											? isString(filter.value)
-												? dayjs(filter.value)
-												: dayjs(filter.value[0])
-											: null
+							<DateRangePicker
+								className={datePickerClassName}
+								value={{
+									from:
+										!isEmpty(filter.value) &&
+										isArray(filter.value) &&
+										filter.value[0]
+											? new Date(filter.value[0])
+											: null,
+									to:
+										!isEmpty(filter.value) &&
+										isArray(filter.value) &&
+										filter.value[1]
+											? new Date(filter.value[1])
+											: null,
+								}}
+								onChange={(range) => {
+									const newValue: string[] = [];
+									if (range.from) {
+										newValue[0] = dayjs(range.from).format(
+											'YYYY-MM-DD'
+										);
 									}
-									onChange={(value) => {
-										const newValue = isArray(filter.value)
-											? filter.value
-											: [];
-										newValue[0] =
-											dayjs(value).format('YYYY-MM-DD');
-										if (isEmpty(newValue[1])) {
-											newValue[1] =
-												dayjs(value).format(
-													'YYYY-MM-DD'
-												);
-										}
-										onChange('value', newValue);
-									}}
-									locale={en}
-								/>
-								<DatePicker
-									value={
-										!isEmpty(filter.value)
-											? isString(filter.value)
-												? dayjs(filter.value)
-												: dayjs(filter.value[1])
-											: null
+									if (range.to) {
+										newValue[1] = dayjs(range.to).format(
+											'YYYY-MM-DD'
+										);
 									}
-									onChange={(value) => {
-										const newValue = isArray(filter.value)
-											? filter.value
-											: [];
-										newValue[1] =
-											dayjs(value).format('YYYY-MM-DD');
-										if (isEmpty(newValue[0])) {
-											newValue[0] =
-												dayjs(value).format(
-													'YYYY-MM-DD'
-												);
-										}
-										onChange('value', newValue);
-									}}
-									locale={en}
-								/>
-							</>
+									onChange('value', newValue);
+								}}
+								placeholder={__(
+									'Select date range',
+									'quillcrm'
+								)}
+							/>
 						) : (
 							<DatePicker
+								buttonClassName={datePickerClassName}
 								value={
-									!isEmpty(filter.value)
-										? isArray(filter.value)
-											? dayjs(filter.value[0])
-											: dayjs(filter.value)
-										: null
+									!isEmpty(filter.value) ? filter.value : ''
 								}
-								onChange={(value) =>
-									onChange(
-										'value',
-										dayjs(value).format('YYYY-MM-DD')
-									)
-								}
-								locale={en}
+								onChange={(value) => {
+									onChange('value', value);
+								}}
+								placeholder={__('Select date', 'quillcrm')}
+								outputFormat="display"
 							/>
 						)}
 					</>

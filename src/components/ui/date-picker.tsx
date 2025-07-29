@@ -1,171 +1,139 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { CalendarIcon } from "@quillcrm/components"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Input } from "@/components/ui/input"
+import * as React from 'react';
+import { OutlinedCalendarIcon } from '@quillcrm/components';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover-dialog';
 
 interface DatePickerProps {
-    value?: string | Date | null;
-    onChange: (value: string) => void;
-    placeholder?: string;
-    disabled?: boolean;
-    className?: string;
-    error?: boolean;
-    required?: boolean;
-    outputFormat?: 'iso' | 'display'; // 'iso' for YYYY-MM-DD, 'display' for formatted text
+	value?: string | Date | null;
+	onChange: (value: string) => void;
+	placeholder?: string;
+	disabled?: boolean;
+	className?: string;
+	buttonClassName?: string;
+	error?: boolean;
+	required?: boolean;
+	outputFormat?: 'iso' | 'display'; // 'iso' for YYYY-MM-DD, 'display' for formatted text
 }
 
 function formatDate(date: Date | undefined) {
-    if (!date) {
-        return ""
-    }
+	if (!date) {
+		return '';
+	}
 
-    return date.toLocaleDateString("en-US", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-    })
+	return date.toLocaleDateString('en-US', {
+		day: '2-digit',
+		month: 'long',
+		year: 'numeric',
+	});
 }
 
 function isValidDate(date: Date | undefined) {
-    if (!date) {
-        return false
-    }
-    return !isNaN(date.getTime())
+	if (!date) {
+		return false;
+	}
+	return !isNaN(date.getTime());
 }
 
 function parseDate(value: string | Date | null | undefined): Date | undefined {
-    if (!value) return undefined;
+	if (!value) return undefined;
 
-    if (value instanceof Date) {
-        return isValidDate(value) ? value : undefined;
-    }
+	if (value instanceof Date) {
+		return isValidDate(value) ? value : undefined;
+	}
 
-    if (typeof value === 'string') {
-        const date = new Date(value);
-        return isValidDate(date) ? date : undefined;
-    }
+	if (typeof value === 'string') {
+		const date = new Date(value);
+		return isValidDate(date) ? date : undefined;
+	}
 
-    return undefined;
+	return undefined;
 }
 
 export function DatePicker({
-    value,
-    onChange,
-    placeholder = "Select a date",
-    disabled = false,
-    className,
-    error = false,
-    required = false,
-    outputFormat = 'iso'
+	value,
+	onChange,
+	placeholder = 'Select a date',
+	disabled = false,
+	className,
+	outputFormat = 'iso',
+	buttonClassName,
 }: DatePickerProps) {
-    const [open, setOpen] = React.useState(false)
+	const [open, setOpen] = React.useState(false);
 
-    // Parse the initial value
-    const initialDate = React.useMemo(() => parseDate(value), [value]);
-    const [date, setDate] = React.useState<Date | undefined>(initialDate)
-    const [month, setMonth] = React.useState<Date | undefined>(initialDate || new Date())
-    const [inputValue, setInputValue] = React.useState(formatDate(initialDate))
+	// Parse the initial value
+	const initialDate = React.useMemo(() => parseDate(value), [value]);
+	const [date, setDate] = React.useState<Date | undefined>(initialDate);
+	const [month, setMonth] = React.useState<Date | undefined>(
+		initialDate || new Date()
+	);
+	const [inputValue, setInputValue] = React.useState(formatDate(initialDate));
 
-    // Update internal state when value prop changes
-    React.useEffect(() => {
-        const parsedDate = parseDate(value);
-        setDate(parsedDate);
-        setInputValue(formatDate(parsedDate));
-        if (parsedDate) {
-            setMonth(parsedDate);
-        }
-    }, [value]);
+	// Update internal state when value prop changes
+	React.useEffect(() => {
+		const parsedDate = parseDate(value);
+		setDate(parsedDate);
+		setInputValue(formatDate(parsedDate));
+		if (parsedDate) {
+			setMonth(parsedDate);
+		}
+	}, [value]);
 
-    const handleInputChange = (inputValue: string) => {
-        setInputValue(inputValue);
-        const parsedDate = new Date(inputValue);
+	const handleDateSelect = (selectedDate: Date | undefined) => {
+		setDate(selectedDate);
+		setInputValue(formatDate(selectedDate));
+		setOpen(false);
 
-        if (isValidDate(parsedDate)) {
-            setDate(parsedDate);
-            setMonth(parsedDate);
+		// Call onChange with the appropriate format
+		if (selectedDate) {
+			const outputValue =
+				outputFormat === 'iso'
+					? selectedDate.toISOString().split('T')[0] // YYYY-MM-DD
+					: formatDate(selectedDate);
+			onChange(outputValue);
+		} else {
+			onChange('');
+		}
+	};
 
-            // Call onChange with the appropriate format
-            const outputValue = outputFormat === 'iso'
-                ? parsedDate.toISOString().split('T')[0] // YYYY-MM-DD
-                : formatDate(parsedDate);
-            onChange(outputValue);
-        } else if (inputValue === '') {
-            setDate(undefined);
-            onChange('');
-        }
-    };
-
-    const handleDateSelect = (selectedDate: Date | undefined) => {
-        setDate(selectedDate);
-        setInputValue(formatDate(selectedDate));
-        setOpen(false);
-
-        // Call onChange with the appropriate format
-        if (selectedDate) {
-            const outputValue = outputFormat === 'iso'
-                ? selectedDate.toISOString().split('T')[0] // YYYY-MM-DD
-                : formatDate(selectedDate);
-            onChange(outputValue);
-        } else {
-            onChange('');
-        }
-    };
-
-    return (
-        <div className={cn("relative flex gap-2", className)}>
-            <Input
-                value={inputValue}
-                placeholder={placeholder}
-                disabled={disabled}
-                className={cn(
-                    "bg-background pr-10 h-12",
-                    error && "border-red-500 focus-visible:ring-red-500"
-                )}
-                onChange={(e) => handleInputChange(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === "ArrowDown" && !disabled) {
-                        e.preventDefault()
-                        setOpen(true)
-                    }
-                }}
-            />
-            <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        disabled={disabled}
-                        className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
-                    >
-                        <CalendarIcon />
-                        <span className="sr-only">Select date</span>
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                    className="w-auto overflow-hidden p-0"
-                    align="end"
-                    alignOffset={-8}
-                    sideOffset={10}
-                >
-                    <Calendar
-                        mode="single"
-                        selected={date}
-                        captionLayout="dropdown"
-                        month={month}
-                        onMonthChange={setMonth}
-                        onSelect={handleDateSelect}
-                        disabled={disabled}
-                    />
-                </PopoverContent>
-            </Popover>
-        </div>
-    )
+	return (
+		<div className={cn('relative flex gap-2', className)}>
+			<Popover open={open} onOpenChange={setOpen}>
+				<PopoverTrigger asChild>
+					<Button
+						className={cn(
+							'justify-between text-left w-[200px] h-9 rounded-xl px-2 py-[20px] bg-accent hover:bg-accent text-[#A1A5B7] font-semibold',
+							buttonClassName
+						)}
+					>
+						{inputValue ? inputValue : placeholder}
+						<OutlinedCalendarIcon />
+					</Button>
+				</PopoverTrigger>
+				<PopoverContent
+					className="w-auto overflow-hidden p-0"
+					align="end"
+					alignOffset={-8}
+					sideOffset={10}
+				>
+					<Calendar
+						mode="single"
+						selected={date}
+						captionLayout="dropdown"
+						month={month}
+						onMonthChange={setMonth}
+						onSelect={handleDateSelect}
+						disabled={disabled}
+					/>
+				</PopoverContent>
+			</Popover>
+		</div>
+	);
 }

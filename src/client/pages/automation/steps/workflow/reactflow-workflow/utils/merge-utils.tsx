@@ -44,7 +44,7 @@ export const createMergeConnections = (
 						yesChildren[yesChildren.length - 1].id.toString(),
 					targetHandle: 'left',
 					edgeStyle: {
-						stroke: '#52c41a',
+						stroke: '#D7D7DA',
 						strokeWidth: 2,
 					},
 				}
@@ -58,7 +58,7 @@ export const createMergeConnections = (
 						noChildren[noChildren.length - 1].id.toString(),
 					targetHandle: 'right',
 					edgeStyle: {
-						stroke: '#ff4d4f',
+						stroke: '#D7D7DA',
 						strokeWidth: 2,
 					},
 				}

@@ -114,12 +114,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		// For other cases where we don't show the plus button
 		const edgeStyle = {
 			...style,
-			stroke:
-				condition === 'yes'
-					? '#52c41a'
-					: condition === 'no'
-						? '#ff4d4f'
-						: '#d9d9d9',
+			stroke: '#D7D7DA', // Unified color for all edges
 			strokeWidth: 2,
 		};
 
@@ -350,12 +345,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 	// Create custom styling for edges based on condition
 	const edgeStyle = {
 		...style,
-		stroke:
-			condition === 'yes'
-				? '#52c41a'
-				: condition === 'no'
-					? '#ff4d4f'
-					: '#d9d9d9',
+		stroke: '#D7D7DA', // Unified color for all edges
 		strokeWidth: 2,
 	};
 

@@ -95,7 +95,7 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 	const labelY = (sourceY + cp1Y + cp2Y + (targetY - 10)) / 4; // Enhanced styling based on condition with clear color differentiation
 	const edgeStyle = {
 		...style,
-		stroke: isYes ? '#52c41a' : '#ff4d4f', // Green for Yes, Red for No
+		stroke: '#D7D7DA', // Unified color for all conditions
 		strokeWidth: 1, // Slightly reduced thickness for cleaner look
 		strokeLinecap: 'round' as const,
 		strokeLinejoin: 'round' as const,
@@ -126,14 +126,10 @@ const ConditionEdge: React.FC<EdgeProps> = ({
 						fontSize: '10px',
 						fontWeight: 600,
 						color: '#fff',
-						background: isYes
-							? '#52c41a' // Solid green for Yes
-							: '#ff4d4f', // Solid red for No
+						background: '#D7D7DA', // Unified background color
 						padding: '2px 6px',
 						borderRadius: '8px',
-						boxShadow: isYes
-							? '0 1px 3px rgba(82, 196, 26, 0.3)' // Softer green shadow for Yes
-							: '0 1px 3px rgba(255, 77, 79, 0.3)', // Softer red shadow for No
+						boxShadow: '0 1px 3px rgba(215, 215, 218, 0.3)', // Unified shadow color
 						border: '1px solid rgba(255, 255, 255, 0.8)', // White border for contrast
 						textShadow: '0 1px 1px rgba(0, 0, 0, 0.3)',
 						zIndex: 10000, // Higher z-index to ensure labels appear above all other elements

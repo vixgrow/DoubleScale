@@ -272,13 +272,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			const levelMultiplier = 1 + level * 0.3; // Better spacing per level
 			const minWidth = baseWidth * levelMultiplier;
 
-			// Debug logging for branch calculations
-			console.log('calculateBranchWidth', {
-				level: level,
-				branchSteps: branchSteps.length,
-				minWidth: minWidth,
-			});
-
 			if (branchSteps.length === 0) {
 				return minWidth; // Minimum width for empty branch
 			}
@@ -314,14 +307,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			// Add extra padding for complex branches with increased padding
 			const complexityPadding = level > 0 ? 150 + level * 75 : 75;
 			const finalWidth = maxWidth + complexityPadding;
-
-			console.log('calculateBranchWidth', {
-				level: level,
-				branchSteps: branchSteps.length,
-				maxWidth: maxWidth,
-				complexityPadding: complexityPadding,
-				finalWidth: finalWidth,
-			});
 
 			return finalWidth;
 		};
@@ -385,19 +370,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					// Enhanced branch spacing calculation with better separation
 					const branchGap = Math.max(300, 150 + level * 60); // Increased gap based on level
 					const totalChildWidth = yesWidth + noWidth + branchGap;
-
-					// Debug logging for branch calculations
-					console.log(
-						`Condition step ${step.id} at level ${level}:`,
-						{
-							yesWidth,
-							noWidth,
-							branchGap,
-							totalChildWidth,
-							centerX,
-							childY,
-						}
-					);
 
 					// Position yes branch to the left and get its end Y position
 					const yesX = centerX - totalChildWidth / 2 + yesWidth / 2;
@@ -607,18 +579,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				// Handle condition step children recursively
 				if (step.type === 'condition') {
 					// Debug: Log the condition step and all available steps
-					console.log('=== CONDITION STEP ANALYSIS ===');
-					console.log('Condition step ID:', step.id);
-					console.log(
-						'All steps:',
-						stepList.map((s) => ({
-							id: s.id,
-							type: s.type,
-							parent_id: s.parent_id,
-							condition: s.condition,
-							order: s.order,
-						}))
-					);
 
 					// First, process all children and get their info
 					const yesChildren = stepList
@@ -633,28 +593,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								s.parent_id === step.id && s.condition === 'no'
 						)
 						.sort((a, b) => a.order - b.order);
-
-					console.log(
-						'Yes children found:',
-						yesChildren.length,
-						yesChildren.map((s) => ({
-							id: s.id,
-							type: s.type,
-							parent_id: s.parent_id,
-							condition: s.condition,
-						}))
-					);
-					console.log(
-						'No children found:',
-						noChildren.length,
-						noChildren.map((s) => ({
-							id: s.id,
-							type: s.type,
-							parent_id: s.parent_id,
-							condition: s.condition,
-						}))
-					);
-					console.log('=== END CONDITION ANALYSIS ===');
 
 					// Store condition step info for immediate processing
 					conditionStepsToProcess.push({
@@ -847,13 +785,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						data: mergeNodeData,
 					});
 
-					console.log('Created merge node:', {
-						mergeId,
-						position: mergePosition,
-						level,
-						stepId: step.id,
-					});
-
 					// NOW: Process the children to create their nodes and edges AFTER merge node exists
 					processStepHierarchy(
 						stepList,
@@ -992,37 +923,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						const lastYesChild =
 							yesChildren[yesChildren.length - 1];
 
-						console.log('Connecting last yes child to merge:', {
-							lastYesChildId: lastYesChild.id,
-							lastYesChildType: lastYesChild.type,
-							mergeId: mergeId,
-						});
-
 						if (lastYesChild.type === 'condition') {
 							// For child conditions, we don't connect them directly here
 							// The connection will be handled by the post-processing function
 							// This prevents duplicate edges to the same merge node
-							console.log(
-								'Skipping direct child condition connection - will be handled in post-processing:',
-								{
-									childConditionId: lastYesChild.id,
-									parentMergeId: mergeId,
-									branch: 'yes',
-								}
-							);
 						} else {
 							// For regular steps, always connect to the parent merge
 							// Child condition merges will be handled separately in post-processing
-							console.log(
-								'Creating regular step to merge edge (Yes branch):',
-								{
-									stepId: lastYesChild.id,
-									stepType: lastYesChild.type,
-									mergeId: mergeId,
-									edgeId: `${lastYesChild.id}-to-merge`,
-								}
-							);
-
 							// Validate that both source and target nodes exist
 							const sourceExists = initialNodes.some(
 								(node) => node.id === lastYesChild.id.toString()
@@ -1030,13 +937,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							const targetExists = initialNodes.some(
 								(node) => node.id === mergeId
 							);
-
-							console.log('Edge validation (Yes branch):', {
-								sourceNodeExists: sourceExists,
-								targetNodeExists: targetExists,
-								sourceId: lastYesChild.id.toString(),
-								targetId: mergeId,
-							});
 
 							if (sourceExists && targetExists) {
 								initialEdges.push({
@@ -1058,13 +958,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 										fromBranch: 'yes',
 									},
 								});
-								console.log(
-									'✅ Yes branch edge created successfully'
-								);
 							} else {
-								console.error(
-									'❌ Failed to create Yes branch edge - missing nodes'
-								);
 							}
 						}
 					}
@@ -1153,24 +1047,10 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						// Connect last no child to merge
 						const lastNoChild = noChildren[noChildren.length - 1];
 
-						console.log('Connecting last no child to merge:', {
-							lastNoChildId: lastNoChild.id,
-							lastNoChildType: lastNoChild.type,
-							mergeId: mergeId,
-						});
-
 						if (lastNoChild.type === 'condition') {
 							// For child conditions, we don't connect them directly here
 							// The connection will be handled by the post-processing function
 							// This prevents duplicate edges to the same merge node
-							console.log(
-								'Skipping direct child condition connection - will be handled in post-processing:',
-								{
-									childConditionId: lastNoChild.id,
-									parentMergeId: mergeId,
-									branch: 'no',
-								}
-							);
 						} else {
 							// For regular steps, connect to the parent merge
 							// But check if there are any child conditions after this step
@@ -1181,27 +1061,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							);
 
 							if (childConditionsAfter.length > 0) {
-								console.log(
-									'Regular step has child conditions after it - skip direct connection',
-									{
-										stepId: lastNoChild.id,
-										childConditionsAfter:
-											childConditionsAfter.map(
-												(c) => c.id
-											),
-									}
-								);
 							} else {
 								// Safe to connect regular step to merge
-								console.log(
-									'Creating regular step to merge edge (No branch):',
-									{
-										stepId: lastNoChild.id,
-										stepType: lastNoChild.type,
-										mergeId: mergeId,
-										edgeId: `${lastNoChild.id}-to-merge`,
-									}
-								);
 
 								// Validate that both source and target nodes exist
 								const sourceExists = initialNodes.some(
@@ -1211,13 +1072,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								const targetExists = initialNodes.some(
 									(node) => node.id === mergeId
 								);
-
-								console.log('Edge validation (No branch):', {
-									sourceNodeExists: sourceExists,
-									targetNodeExists: targetExists,
-									sourceId: lastNoChild.id.toString(),
-									targetId: mergeId,
-								});
 
 								if (sourceExists && targetExists) {
 									initialEdges.push({
@@ -1239,13 +1093,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 											fromBranch: 'no',
 										},
 									});
-									console.log(
-										'✅ No branch edge created successfully'
-									);
 								} else {
-									console.error(
-										'❌ Failed to create No branch edge - missing nodes'
-									);
 								}
 							}
 						}
@@ -1269,15 +1117,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					// Store information about subsequent steps for later processing
 					// We'll handle connections after all merge nodes are created
 					if (subsequentSteps.length > 0) {
-						console.log('Found subsequent steps for condition:', {
-							conditionId: step.id,
-							mergeId,
-							level,
-							subsequentSteps: subsequentSteps.map((s) => ({
-								id: s.id,
-								type: s.type,
-							})),
-						});
 					}
 				}
 			);
@@ -1365,39 +1204,11 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							// If there are steps after this child condition, don't connect directly to parent
 							// The subsequent steps should handle the connection chain
 							if (stepsAfterChildCondition.length > 0) {
-								console.log(
-									'Child condition has subsequent steps - skipping direct parent connection:',
-									{
-										childMergeId,
-										parentMergeId,
-										condition: conditionStep.condition,
-										level,
-										subsequentSteps:
-											stepsAfterChildCondition.map(
-												(s) => ({
-													id: s.id,
-													type: s.type,
-												})
-											),
-									}
-								);
 							} else {
 								// No subsequent steps, safe to connect directly to parent merge
 								// Determine which handle on the parent merge to connect to
 								// This should match the condition branch this child belongs to
 								const targetHandle = conditionStep.condition;
-
-								console.log(
-									'Creating child-to-parent merge connection (no subsequent steps):',
-									{
-										childMergeId,
-										parentMergeId,
-										condition: conditionStep.condition,
-										level,
-										edgeId,
-										targetHandle,
-									}
-								);
 
 								initialEdges.push({
 									id: edgeId,
@@ -1424,24 +1235,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								});
 							}
 						} else if (edgeExists) {
-							console.log(
-								'Skipped duplicate child-to-parent merge edge:',
-								{
-									edgeId,
-									childMergeId,
-									parentMergeId,
-								}
-							);
 						} else {
-							console.log(
-								'Missing nodes for child-to-parent merge connection:',
-								{
-									childMergeExists,
-									parentMergeExists,
-									childMergeId,
-									parentMergeId,
-								}
-							);
 						}
 					}
 				}
@@ -1499,18 +1293,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						);
 
 						if (mergeExists && !edgeExists) {
-							console.log(
-								'Connecting child merge to subsequent step:',
-								{
-									childMergeId,
-									nextStepId: nextStep.id,
-									nextStepType: nextStep.type,
-									condition: conditionStep.condition,
-									level,
-									edgeId,
-								}
-							);
-
 							initialEdges.push({
 								id: edgeId,
 								source: childMergeId,
@@ -1604,18 +1386,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 									);
 
 									if (!edgeExists) {
-										console.log(
-											'Connecting last branch step to parent merge:',
-											{
-												stepId: lastNonConditionStep.id,
-												stepType:
-													lastNonConditionStep.type,
-												parentMergeId,
-												branchCondition,
-												edgeId,
-											}
-										);
-
 										initialEdges.push({
 											id: edgeId,
 											source: lastNonConditionStep.id.toString(),
@@ -1673,18 +1443,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 											!edgeExists &&
 											trulyLastStep.type !== 'condition'
 										) {
-											console.log(
-												'Connecting truly last branch step to parent merge:',
-												{
-													stepId: trulyLastStep.id,
-													stepType:
-														trulyLastStep.type,
-													parentMergeId,
-													branchCondition,
-													edgeId,
-												}
-											);
-
 											initialEdges.push({
 												id: edgeId,
 												source: trulyLastStep.id.toString(),
@@ -1742,18 +1500,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				// Calculate the level for this last condition
 				let conditionLevel = level + 1;
 				const lastConditionMergeId = `merge-${lastCondition.id}-level-${conditionLevel}`;
-
-				console.log('Found last condition in branch:', {
-					parentConditionId,
-					condition,
-					lastConditionId: lastCondition.id,
-					lastConditionMergeId,
-					branchSteps: branchSteps.map((s) => ({
-						id: s.id,
-						type: s.type,
-						order: s.order,
-					})),
-				});
 
 				return lastConditionMergeId;
 			}
@@ -1828,15 +1574,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							// If there are child merges, they will handle the connection to this merge
 							// and this merge should not directly connect to subsequent steps
 							if (yesLastMerge || noLastMerge) {
-								console.log(
-									'Root merge has child merges - connection will be handled by child merges:',
-									{
-										mergeId,
-										yesLastMerge,
-										noLastMerge,
-										nextStepId: nextStep.id,
-									}
-								);
 							} else {
 								// No child merges, safe to connect directly
 								const edgeId = `${mergeId}-to-${nextStep.id}`;
@@ -1863,28 +1600,10 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 											fromMerge: true,
 										},
 									});
-
-									console.log(
-										'Connected root merge to subsequent step (no child merges):',
-										{
-											edgeId,
-											mergeId,
-											nextStepId: nextStep.id,
-											level,
-										}
-									);
 								}
 							}
 						} else {
 							// For child conditions, the connection will flow through parent merge
-							console.log(
-								'Child merge will flow through parent merge:',
-								{
-									childMergeId: mergeId,
-									level,
-									nextStepId: nextStep.id,
-								}
-							);
 						}
 					}
 				}
@@ -1930,17 +1649,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						0
 					);
 
-					console.log(
-						'Analyzing final connections for root condition:',
-						{
-							rootConditionId: rootCondition.id,
-							nextStepId: nextStep.id,
-							rootMergeId,
-							yesLastMerge,
-							noLastMerge,
-						}
-					);
-
 					// If there are no child merges, the root merge should connect to the next step
 					if (!yesLastMerge && !noLastMerge) {
 						const edgeId = `${rootMergeId}-to-${nextStep.id}`;
@@ -1967,15 +1675,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 									fromMerge: true,
 								},
 							});
-
-							console.log(
-								'Connected root merge to subsequent step (final pass):',
-								{
-									edgeId,
-									rootMergeId,
-									nextStepId: nextStep.id,
-								}
-							);
 						}
 					} else {
 						// There are child merges, so the flow goes:
@@ -2006,17 +1705,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 									fromMerge: true,
 								},
 							});
-
-							console.log(
-								'Connected root merge to subsequent step (with child merges):',
-								{
-									edgeId,
-									rootMergeId,
-									nextStepId: nextStep.id,
-									yesLastMerge,
-									noLastMerge,
-								}
-							);
 						}
 					}
 				}
@@ -2048,31 +1736,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			// Replace with unique edges
 			initialEdges.length = 0;
 			initialEdges.push(...uniqueEdges);
-
-			console.log('Edge deduplication complete:', {
-				originalCount:
-					edgeMap.size + (initialEdges.length - uniqueEdges.length),
-				finalCount: uniqueEdges.length,
-				duplicatesRemoved: initialEdges.length - uniqueEdges.length,
-			});
 		}
 
 		removeDuplicateEdges();
-
-		// Debug: Log all created edges to help identify missing connections
-		console.log('=== EDGE CREATION SUMMARY ===');
-		console.log('Total edges created:', initialEdges.length);
-		const mergeEdges = initialEdges.filter(
-			(edge) =>
-				edge.id.includes('-to-merge') || edge.target.includes('merge-')
-		);
-		console.log('Edges connecting to merge nodes:', mergeEdges.length);
-		mergeEdges.forEach((edge) => {
-			console.log(
-				`  - ${edge.id}: ${edge.source} -> ${edge.target} (handle: ${edge.targetHandle})`
-			);
-		});
-		console.log('=== END EDGE SUMMARY ===');
 
 		function addFinalAddStep() {
 			// Add final add-step node for root level if needed
@@ -2299,9 +1965,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						setNodes(layoutResult.nodes);
 						setEdges(layoutResult.edges);
 						// Save the automatically arranged positions
-						// setTimeout(() => {
-						// 	saveNodePositions(layoutResult.nodes);
-						// }, 500); // Delay to ensure nodes are rendered
+						setTimeout(() => {
+							saveNodePositions(layoutResult.nodes);
+						}, 500); // Delay to ensure nodes are rendered
 						return;
 					}
 				} catch (error) {
@@ -2401,30 +2067,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					(current.yes > previous.yes || current.no > previous.no)
 				) {
 					shouldClearPositions = true;
-					console.log(
-						`Condition ${conditionId} got new children: ${JSON.stringify({ previous, current })}`
-					);
 				}
 			});
 
 			if (shouldClearPositions) {
-				console.log(
-					'Detected children added to conditions, clearing positions for better merge layout'
-				);
 				clearSavedPositions();
 			}
 		}
 
 		setPreviousStepStructure(structureSignature);
 	}, [steps, clearSavedPositions, previousStepStructure]);
-
-	useEffect(() => {
-		console.log('Node State', nodesState);
-	}, [nodesState]);
-
-	useEffect(() => {
-		console.log('Edges State', edgesState);
-	}, [edgesState]);
 
 	// Save node positions when they change
 	const saveNodePositions = useCallback(

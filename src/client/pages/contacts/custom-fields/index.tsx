@@ -6,7 +6,13 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { DndContext } from '@dnd-kit/core';
+import {
+	DndContext,
+	DragOverlay,
+	PointerSensor,
+	useSensor,
+	useSensors,
+} from '@dnd-kit/core';
 import { Skeleton } from 'antd';
 /**
  * internal dependencies
@@ -24,9 +30,26 @@ import { FieldDialog } from './field-dialog';
 import { GroupDialog } from './group-dialog';
 import { DeleteGroupDialog } from './delete-group-dialog';
 import { FieldTable } from './field-table';
+import { DragOverlayRow } from './drag-overlay-row';
 import ConfigAPI from '@quillcrm/config';
 import { Button } from '@/components/ui/button';
 import { NoticeBanner } from '@quillcrm/components';
+
+// Custom modifier to center the drag overlay on the move icon
+const centerOnDragHandle = ({ transform }) => {
+	// Calculate the offset to center the move icon under the cursor
+	// The move icon is approximately 85% from the left edge of the row
+	// For a 600px wide row, this puts the move icon at ~510px from the left
+	// So we need to offset by about -510px to center it under the cursor
+	const dragOverlayWidth = 600; // min-w-[600px] from DragOverlayRow
+	const moveIconPosition = dragOverlayWidth * -0.1; // Move icon is ~85% from left
+
+	return {
+		...transform,
+		x: transform.x - moveIconPosition,
+		y: transform.y - 12,
+	};
+};
 
 export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 	({ activeTab }, ref) => {
@@ -55,6 +78,9 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		const [globalFilter, setGlobalFilter] = useState('');
 		const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 		const [bulkAction, setBulkAction] = useState('');
+		const [activeField, setActiveField] = useState<CustomField | null>(
+			null
+		);
 
 		// Add date range state
 		const [dateRange, setDateRange] = useState<{
@@ -67,13 +93,25 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 
 		const customFieldsTypes = ConfigAPI.getCustomFieldsTypes();
 
+		// Configure sensors for better drag behavior
+		const sensors = useSensors(
+			useSensor(PointerSensor, {
+				activationConstraint: {
+					distance: 8, // Require 8px of movement before drag starts
+				},
+			})
+		);
+
 		useImperativeHandle(ref, () => ({
 			openCreateGroupModal: () => setAddGroupVisible(true),
 			openCreateFieldModal: () => {
 				if (groups.length === 0) {
 					showNotice({
 						type: 'error',
-						message: __('Please create a group first before adding fields', 'quillcrm'),
+						message: __(
+							'Please create a group first before adding fields',
+							'quillcrm'
+						),
 					});
 					return;
 				}
@@ -163,17 +201,6 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			);
 		}
 
-		// if (groups.length === 0) {
-		// 	return (
-		// 		<div className="custom-fields-empty">
-		// 			<p>{__('No custom fields groups found', 'quillcrm')}</p>
-		// 			<Button onClick={() => setAddGroupVisible(true)}>
-		// 				{__('Create First Group', 'quillcrm')}
-		// 			</Button>
-		// 		</div>
-		// 	);
-		// }
-
 		return (
 			<div className="custom-fields mt-5">
 				{/* Notice Banner */}
@@ -218,7 +245,16 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 				{/* Groups List */}
 				<div className="flex flex-col gap-[10px]">
 					<DndContext
+						sensors={sensors}
+						onDragStart={({ active }) => {
+							const activeData = active.data.current;
+							if (activeData?.type === 'field') {
+								setActiveField(activeData.field);
+							}
+						}}
 						onDragEnd={async ({ active, over }) => {
+							setActiveField(null);
+
 							if (!over) return;
 
 							// Check if the drag actually moved to a different location
@@ -322,6 +358,22 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 								</DroppableGroup>
 							);
 						})}
+
+						<DragOverlay
+							adjustScale={false}
+							dropAnimation={null}
+							style={{
+								cursor: 'grabbing',
+							}}
+							modifiers={[centerOnDragHandle]}
+						>
+							{activeField ? (
+								<DragOverlayRow
+									field={activeField}
+									fieldTypes={customFieldsTypes}
+								/>
+							) : null}
+						</DragOverlay>
 					</DndContext>
 				</div>
 

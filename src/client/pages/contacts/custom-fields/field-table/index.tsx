@@ -16,6 +16,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { EditIcon, DeleteIcon, SortIcon } from '@quillcrm/components';
 import { CustomField } from '@quillcrm/client';
 import { DraggableField } from '../draggable-field';
+import { MoveIcon } from '@quillcrm/components';
 
 interface FieldTableProps {
 	fields: CustomField[];
@@ -70,7 +71,9 @@ export const FieldTable: React.FC<FieldTableProps> = ({
 				</div>
 			),
 			cell: ({ row }) => (
-				<div className="font-medium">{row.original.name}</div>
+				<div className="flex items-center gap-2">
+					<div className="font-medium">{row.original.name}</div>
+				</div>
 			),
 		},
 		{
@@ -113,7 +116,14 @@ export const FieldTable: React.FC<FieldTableProps> = ({
 			cell: ({ row }) => (
 				<div className="flex gap-2">
 					<DraggableField field={row.original}>
-						<div />
+						<Button
+							size="sm"
+							variant="outline"
+							className="text-[#292D32] border-accent shadow-none hover:bg-gray-50 p-2 cursor-grab active:cursor-grabbing"
+							title={__('Move field', 'quillcrm')}
+						>
+							<MoveIcon width={16} height={16} />
+						</Button>
 					</DraggableField>
 					<Button
 						size="sm"
@@ -152,6 +162,7 @@ export const FieldTable: React.FC<FieldTableProps> = ({
 			}}
 			showMainActions={false}
 			showPagination={false}
+			setPage={() => {}} // No-op since pagination is disabled
 		/>
 	);
 };

@@ -172,15 +172,13 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 					type="source"
 					position={Position.Bottom}
 					id="yes"
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--condition qcrm-reactflow-handle--yes"
-					style={{ left: '30%', transform: 'translateX(-50%)' }}
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 				<Handle
 					type="source"
 					position={Position.Bottom}
 					id="no"
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source qcrm-reactflow-handle--condition qcrm-reactflow-handle--no"
-					style={{ left: '70%', transform: 'translateX(-50%)' }}
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 			</div>
 		</NodeContextMenu>

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useAutoLayout } from './auto-layout';
 import {
@@ -425,12 +425,27 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					const maxBranchEndY = Math.max(yesEndY, noEndY);
 
 					// Enhanced merge spacing calculation with significantly more space
-					const baseBottomSpacing = 600; // Significantly increased base spacing to avoid crowding
+					// Also check for any nested conditions in children to ensure proper spacing
+					const hasNestedConditions = stepList.some(
+						(s) => s.parent_id === step.id && s.type === 'condition'
+					);
+
+					const baseBottomSpacing = hasNestedConditions ? 800 : 600; // Extra space for nested conditions
 					const mergeSpacing = Math.max(300, 200 + level * 50); // Increased dynamic merge spacing
 					const levelSpacing = level * 120; // Much more spacing for each nesting level
+					const nestedConditionSpacing = hasNestedConditions
+						? 400
+						: 0; // Additional space for nested structures
+
 					currentY = Math.max(
-						conditionY + baseBottomSpacing + levelSpacing,
-						maxBranchEndY + mergeSpacing + levelSpacing
+						conditionY +
+							baseBottomSpacing +
+							levelSpacing +
+							nestedConditionSpacing,
+						maxBranchEndY +
+							mergeSpacing +
+							levelSpacing +
+							nestedConditionSpacing
 					);
 				} else {
 					// For non-condition nodes, position normally with increased spacing
@@ -742,22 +757,79 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					// Find the bottommost Y position among all children in both branches
 					let maxChildY = Math.max(yesPosition.y, noPosition.y) + 150; // Start with branch positions
 
-					// Check yes children positions
-					yesChildren.forEach((child) => {
-						const childPos = getNodePosition(child.id.toString());
-						maxChildY = Math.max(maxChildY, childPos.y + 100);
-					});
+					// Recursively calculate the bottom-most Y position including nested conditions
+					const calculateMaxYInBranch = (
+						branchSteps: AutomationStep[]
+					): number => {
+						let maxY = 0;
+						branchSteps.forEach((child) => {
+							const childPos = getNodePosition(
+								child.id.toString()
+							);
+							maxY = Math.max(maxY, childPos.y + 100);
 
-					// Check no children positions
-					noChildren.forEach((child) => {
-						const childPos = getNodePosition(child.id.toString());
-						maxChildY = Math.max(maxChildY, childPos.y + 100);
-					});
+							// If this child is a condition, also check its merge node position
+							if (child.type === 'condition') {
+								const childMergeId = `merge-${child.id}-level-${level + 1}`;
+								// Calculate where this child's merge would be positioned
+								const childYesChildren = stepList.filter(
+									(s) =>
+										s.parent_id === child.id &&
+										s.condition === 'yes'
+								);
+								const childNoChildren = stepList.filter(
+									(s) =>
+										s.parent_id === child.id &&
+										s.condition === 'no'
+								);
+
+								// Recursively calculate the max Y for this child's branches
+								const childYesMaxY =
+									calculateMaxYInBranch(childYesChildren);
+								const childNoMaxY =
+									calculateMaxYInBranch(childNoChildren);
+								const childMaxBranchY = Math.max(
+									childYesMaxY,
+									childNoMaxY
+								);
+
+								// Add spacing for the child's merge node
+								const childMergeY = Math.max(
+									childPos.y + 600,
+									childMaxBranchY + 200
+								);
+								maxY = Math.max(maxY, childMergeY);
+							}
+						});
+						return maxY;
+					};
+
+					// Check yes children positions (including nested conditions)
+					const yesMaxY = calculateMaxYInBranch(yesChildren);
+					maxChildY = Math.max(maxChildY, yesMaxY);
+
+					// Check no children positions (including nested conditions)
+					const noMaxY = calculateMaxYInBranch(noChildren);
+					maxChildY = Math.max(maxChildY, noMaxY);
 
 					// Position merge node below all children with proper spacing
 					const actualBranchCenterX =
 						(yesPosition.x + noPosition.x) / 2;
-					const mergeY = maxChildY + 200; // Position merge well below all children
+
+					// Calculate merge position with extra spacing for nested conditions
+					const baseSpacing = 200;
+					const nestingMultiplier = level * 100; // More space per nesting level
+					const hasNestedConditionsInBranch = [
+						...yesChildren,
+						...noChildren,
+					].some((child) => child.type === 'condition');
+					const nestedSpacing = hasNestedConditionsInBranch ? 300 : 0;
+
+					const mergeY =
+						maxChildY +
+						baseSpacing +
+						nestingMultiplier +
+						nestedSpacing;
 
 					const optimalMergePosition = {
 						x: actualBranchCenterX,
@@ -1445,7 +1517,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								target: nextStep.id.toString(),
 								type: 'default',
 								style: {
-									stroke: '#1890ff',
+									stroke: '#D7D7DA',
 									strokeWidth: 2,
 								},
 								data: {
@@ -1779,7 +1851,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 										target: nextStep.id.toString(),
 										type: 'default',
 										style: {
-											stroke: '#1890ff',
+											stroke: '#D7D7DA',
 											strokeWidth: 2,
 										},
 										data: {
@@ -1883,7 +1955,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								target: nextStep.id.toString(),
 								type: 'default',
 								style: {
-									stroke: '#1890ff',
+									stroke: '#D7D7DA',
 									strokeWidth: 2,
 								},
 								data: {
@@ -1922,7 +1994,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								target: nextStep.id.toString(),
 								type: 'default',
 								style: {
-									stroke: '#1890ff',
+									stroke: '#D7D7DA',
 									strokeWidth: 2,
 								},
 								data: {
@@ -2074,7 +2146,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								target: 'add-step-final',
 								type: 'addStepEdge',
 								style: {
-									stroke: '#1890ff',
+									stroke: '#D7D7DA',
 									strokeWidth: 2,
 								},
 								data: {
@@ -2253,6 +2325,99 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		clearSavedPositions,
 	]);
 
+	// Detect significant structural changes and auto-clear positions for better layout
+	const [previousStepStructure, setPreviousStepStructure] =
+		useState<string>('');
+
+	useEffect(() => {
+		if (!steps || steps.length === 0) return;
+
+		// Create a signature of the step structure including nesting and step counts per branch
+		const conditionSteps = steps.filter(
+			(step) => step.type === 'condition'
+		);
+		const structureSignature = conditionSteps
+			.map((condition) => {
+				const yesChildren = steps.filter(
+					(s) => s.parent_id === condition.id && s.condition === 'yes'
+				);
+				const noChildren = steps.filter(
+					(s) => s.parent_id === condition.id && s.condition === 'no'
+				);
+				return `${condition.id}:${condition.parent_id || 0}:${yesChildren.length}:${noChildren.length}`;
+			})
+			.sort()
+			.join('|');
+
+		// If structure has changed significantly, clear positions for re-layout
+		if (
+			previousStepStructure &&
+			previousStepStructure !== structureSignature
+		) {
+			// Check if children were added to any existing condition
+			const currentCounts = new Map<
+				number,
+				{ yes: number; no: number }
+			>();
+			const previousCounts = new Map<
+				number,
+				{ yes: number; no: number }
+			>();
+
+			// Parse current structure
+			conditionSteps.forEach((condition) => {
+				const yesCount = steps.filter(
+					(s) => s.parent_id === condition.id && s.condition === 'yes'
+				).length;
+				const noCount = steps.filter(
+					(s) => s.parent_id === condition.id && s.condition === 'no'
+				).length;
+				currentCounts.set(condition.id, { yes: yesCount, no: noCount });
+			});
+
+			// Parse previous structure
+			if (previousStepStructure) {
+				previousStepStructure.split('|').forEach((entry) => {
+					const [conditionId, , yesCount, noCount] = entry.split(':');
+					if (
+						conditionId &&
+						yesCount !== undefined &&
+						noCount !== undefined
+					) {
+						previousCounts.set(parseInt(conditionId), {
+							yes: parseInt(yesCount),
+							no: parseInt(noCount),
+						});
+					}
+				});
+			}
+
+			// Check if any condition got new children (which affects merge positioning)
+			let shouldClearPositions = false;
+			currentCounts.forEach((current, conditionId) => {
+				const previous = previousCounts.get(conditionId);
+				if (
+					previous &&
+					(current.yes > previous.yes || current.no > previous.no)
+				) {
+					shouldClearPositions = true;
+					console.log(
+						`Condition ${conditionId} got new children: ${JSON.stringify({ previous, current })}`
+					);
+				}
+			});
+
+			if (shouldClearPositions) {
+				console.log(
+					'Detected children added to conditions, clearing positions for better merge layout'
+				);
+				clearSavedPositions();
+			}
+		}
+
+		setPreviousStepStructure(structureSignature);
+	}, [steps, clearSavedPositions, previousStepStructure]);
+
 	useEffect(() => {
 		console.log('Node State', nodesState);
 	}, [nodesState]);
@@ -2382,7 +2547,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							animated: false,
 							type: 'default',
 							style: {
-								stroke: '#8c8c8c',
+								stroke: '#D7D7DA',
 								strokeWidth: 2,
 								strokeLinecap: 'round',
 								strokeLinejoin: 'round',

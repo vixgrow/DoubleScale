@@ -66,14 +66,14 @@
 		position: absolute !important;
 		
 		.react-flow__minimap-mask {
-			fill: rgba(24, 144, 255, 0.1) !important;
-			stroke: #1890ff !important;
+			fill: rgba(215, 215, 218, 0.1) !important;
+			stroke: #D7D7DA !important;
 			stroke-width: 2 !important;
 		}
 		
 		.react-flow__minimap-node {
 			fill: #e1e1e1 !important;
-			stroke: #b1b1b7 !important;
+			stroke: #D7D7DA !important;
 			stroke-width: 2 !important;
 		}
 		
@@ -1065,15 +1065,15 @@
 	border-radius: 50%;
 	
 	&--source {
-		background: #1890ff;
+		background: #DEDFEA;
 	}
 
 	&--target {
-		background: #52c41a;
+		background: #DEDFEA;
 	}
 
 	&--yes {
-		background: #52c41a;
+		background: #DEDFEA;
 		border-radius: 50% 50% 50% 0;
 		transform: rotate(-45deg) !important;
 		width: 12px !important;
@@ -1083,7 +1083,7 @@
 	}
 
 	&--no {
-		background: #ff4d4f;
+		background: #DEDFEA;
 		width: 12px !important;
 		height: 12px !important;
 		border-radius: 0;
@@ -1260,17 +1260,15 @@
 // Special positioning for condition node handles to maintain their shapes
 .qcrm-reactflow-workflow .qcrm-reactflow-node--condition .react-flow__handle {
 	&.react-flow__handle-left.qcrm-reactflow-handle--yes {
-		transform: translateY(-50%) !important;
 		left: -7px !important;
 		top: 50% !important;
-		background: #52c41a !important;
+		background: #DEDFEA !important;
 	}
 	
 	&.react-flow__handle-right.qcrm-reactflow-handle--no {
-		transform: translateY(-50%) !important;
 		right: -7px !important;
 		top: 50% !important;
-		background: #ff4d4f !important;
+		background: #DEDFEA !important;
 	}
 
 	// New bottom positioned Yes/No handles
@@ -1279,8 +1277,7 @@
 		left: 30% !important;
 		top: auto !important;
 		right: auto !important;
-		transform: translateX(-50%) !important;
-		background: #52c41a !important;
+		background: #DEDFEA !important;
 	}
 	
 	&.react-flow__handle-bottom.qcrm-reactflow-handle--no {
@@ -1288,8 +1285,7 @@
 		left: 70% !important;
 		top: auto !important;
 		right: auto !important;
-		transform: translateX(-50%) !important;
-		background: #ff4d4f !important;
+		background: #DEDFEA !important;
 	}
 }
 
@@ -1317,7 +1313,6 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 		left: 50% !important;
 		right: auto !important;
 		bottom: auto !important;
-		transform: translateX(-50%) !important;
 	}
 	
 	// Bottom handles - perfectly centered horizontally
@@ -1326,7 +1321,6 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 		left: 50% !important;
 		top: auto !important;
 		right: auto !important;
-		transform: translateX(-50%) !important;
 	}
 	
 	// Left handles - perfectly centered vertically
@@ -1335,12 +1329,6 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 		top: 50% !important;
 		right: auto !important;
 		bottom: auto !important;
-		transform: translateY(-50%) !important;
-		
-		// Special case for condition yes handle
-		&.qcrm-reactflow-handle--yes {
-			transform: translateY(-50%) rotate(-45deg) !important;
-		}
 	}
 	
 	// Right handles - perfectly centered vertically  
@@ -1349,7 +1337,6 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 		top: 50% !important;
 		left: auto !important;
 		bottom: auto !important;
-		transform: translateY(-50%) !important;
 	}
 }
 
@@ -1364,13 +1351,13 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 // Edge Styles
 .react-flow__edge {
 	.react-flow__edge-path {
-		stroke: #b1b1b7;
+		stroke: #D7D7DA;
 		stroke-width: 2;
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	&.selected .react-flow__edge-path {
-		stroke: #1890ff;
+		stroke: #D7D7DA;
 		stroke-width: 2;
 	}
 
@@ -1414,9 +1401,9 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 
 		&.qcrm-condition-edge--yes {
 			.react-flow__edge-path {
-				stroke: #52c41a !important;
+				stroke: #D7D7DA !important;
 				stroke-width: 2 !important;
-				filter: drop-shadow(0 2px 8px rgba(82, 196, 26, 0.6)) !important;
+				filter: drop-shadow(0 2px 8px rgba(215, 215, 218, 0.6)) !important;
 			}
 			
 			.react-flow__edge-text {
@@ -1426,9 +1413,9 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 
 		&.qcrm-condition-edge--no {
 			.react-flow__edge-path {
-				stroke: #ff4d4f !important;
+				stroke: #D7D7DA !important;
 				stroke-width: 2 !important;
-				filter: drop-shadow(0 2px 8px rgba(255, 77, 79, 0.6)) !important;
+				filter: drop-shadow(0 2px 8px rgba(215, 215, 218, 0.6)) !important;
 			}
 			
 			.react-flow__edge-text {
@@ -1437,25 +1424,25 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 		}
 
 		&:hover.qcrm-condition-edge--yes .react-flow__edge-path {
-			stroke: #73d13d !important;
+			stroke: #D7D7DA !important;
 			stroke-width: 2 !important;
-			filter: drop-shadow(0 4px 12px rgba(82, 196, 26, 0.8)) !important;
+			filter: drop-shadow(0 4px 12px rgba(215, 215, 218, 0.8)) !important;
 		}
 
 		&:hover.qcrm-condition-edge--no .react-flow__edge-path {
-			stroke: #ff7875 !important;
+			stroke: #D7D7DA !important;
 			stroke-width: 2 !important;
-			filter: drop-shadow(0 4px 12px rgba(255, 77, 79, 0.8)) !important;
+			filter: drop-shadow(0 4px 12px rgba(215, 215, 218, 0.8)) !important;
 		}
 	}
 
 	// Enhanced styling for Yes branch edges
 	&[data-label*="Yes"] {
 		.react-flow__edge-path {
-			stroke: #52c41a;
+			stroke: #D7D7DA;
 			stroke-width: 2;
 			stroke-dasharray: none;
-			filter: drop-shadow(0 2px 4px rgba(82, 196, 26, 0.3));
+			filter: drop-shadow(0 2px 4px rgba(215, 215, 218, 0.3));
 			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		}
 
@@ -1465,13 +1452,13 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 			font-size: 13px;
 			text-shadow: 
 				0 1px 2px rgba(0, 0, 0, 0.5),
-				0 0 8px rgba(82, 196, 26, 0.6);
+				0 0 8px rgba(215, 215, 218, 0.6);
 		}
 
 		&:hover .react-flow__edge-path {
-			stroke: #73d13d;
+			stroke: #D7D7DA;
 			stroke-width: 2;
-			filter: drop-shadow(0 4px 8px rgba(82, 196, 26, 0.4));
+			filter: drop-shadow(0 4px 8px rgba(215, 215, 218, 0.4));
 		}
 
 		&:hover .react-flow__edge-text {
@@ -1485,10 +1472,10 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 	// Enhanced styling for No branch edges
 	&[data-label*="No"] {
 		.react-flow__edge-path {
-			stroke: #ff4d4f;
+			stroke: #D7D7DA;
 			stroke-width: 2;
 			stroke-dasharray: none;
-			filter: drop-shadow(0 2px 4px rgba(255, 77, 79, 0.3));
+			filter: drop-shadow(0 2px 4px rgba(215, 215, 218, 0.3));
 			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		}
 
@@ -1498,20 +1485,20 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 			font-size: 13px;
 			text-shadow: 
 				0 1px 2px rgba(0, 0, 0, 0.5),
-				0 0 8px rgba(255, 77, 79, 0.6);
+				0 0 8px rgba(215, 215, 218, 0.6);
 		}
 
 		&:hover .react-flow__edge-path {
-			stroke: #ff7875;
+			stroke: #D7D7DA;
 			stroke-width: 2;
-			filter: drop-shadow(0 4px 8px rgba(255, 77, 79, 0.4));
+			filter: drop-shadow(0 4px 8px rgba(215, 215, 218, 0.4));
 		}
 
 		&:hover .react-flow__edge-text {
 			transform: scale(1.1);
 			text-shadow: 
 				0 2px 4px rgba(0, 0, 0, 0.6),
-				0 0 12px rgba(255, 77, 79, 0.8);
+				0 0 12px rgba(215, 215, 218, 0.8);
 		}
 	}
 
@@ -1552,29 +1539,29 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 .qcrm-condition-edge {
 	&--yes {
 		.react-flow__edge-path {
-			stroke: #52c41a !important;
+			stroke: #D7D7DA !important;
 			stroke-width: 2 !important;
-			filter: drop-shadow(0 2px 8px rgba(82, 196, 26, 0.6)) !important;
+			filter: drop-shadow(0 2px 8px rgba(215, 215, 218, 0.6)) !important;
 		}
 
 		&:hover .react-flow__edge-path {
-			stroke: #73d13d !important;
+			stroke: #D7D7DA !important;
 			stroke-width: 2 !important;
-			filter: drop-shadow(0 4px 12px rgba(82, 196, 26, 0.8)) !important;
+			filter: drop-shadow(0 4px 12px rgba(215, 215, 218, 0.8)) !important;
 		}
 	}
 
 	&--no {
 		.react-flow__edge-path {
-			stroke: #ff4d4f !important;
+			stroke: #D7D7DA !important;
 			stroke-width: 2 !important;
-			filter: drop-shadow(0 2px 8px rgba(255, 77, 79, 0.6)) !important;
+			filter: drop-shadow(0 2px 8px rgba(215, 215, 218, 0.6)) !important;
 		}
 
 		&:hover .react-flow__edge-path {
-			stroke: #ff7875 !important;
+			stroke: #D7D7DA !important;
 			stroke-width: 2 !important;
-			filter: drop-shadow(0 4px 12px rgba(255, 77, 79, 0.8)) !important;
+			filter: drop-shadow(0 4px 12px rgba(215, 215, 218, 0.8)) !important;
 		}
 	}
 }
@@ -1795,7 +1782,7 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 .react-flow__edge {
 	&.react-flow__edge-default {
 		.react-flow__edge-path {
-			stroke: #8c8c8c;
+			stroke: #D7D7DA;
 			stroke-width: 2;
 			stroke-linecap: round;
 			stroke-linejoin: round;
@@ -1803,7 +1790,7 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 		}
 		
 		&:hover .react-flow__edge-path {
-			stroke: #1890ff;
+			stroke: #D7D7DA;
 			stroke-width: 2;
 		}
 	}
@@ -1819,11 +1806,11 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 		}
 		
 		&--yes .react-flow__edge-path {
-			stroke: #52c41a;
+			stroke: #D7D7DA;
 		}
 		
 		&--no .react-flow__edge-path {
-			stroke: #ff4d4f;
+			stroke: #D7D7DA;
 		}
 		
 		&:hover .react-flow__edge-path {
@@ -1834,14 +1821,14 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 	// Special styling for edges connecting to merge nodes
 	&[target*="merge"] {
 		.react-flow__edge-path {
-			stroke: #1890ff;
+			stroke: #D7D7DA;
 			stroke-width: 2;
 			stroke-linecap: round;
 			transition: all 0.3s ease;
 		}
 
 		&:hover .react-flow__edge-path {
-			stroke: #40a9ff;
+			stroke: #D7D7DA;
 			stroke-width: 2;
 		}
 	}

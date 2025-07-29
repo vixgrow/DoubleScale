@@ -29,7 +29,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@quillcrm/components/ui/dropdown-menu';
-import { convertDate } from '@quillcrm/utils';
+import { deleteText } from '@udecode/plate-common';
 
 export const selectionColumn: ColumnDef<Form> = {
 	id: 'select',
@@ -53,7 +53,7 @@ export const selectionColumn: ColumnDef<Form> = {
 	enableHiding: false,
 };
 
-export function getColumns({ formTypes, navigate, duplicate, onDelete }) {
+export function getColumns({ formTypes, navigate, duplicate, onDelete, onToggleStatus }) {
 	const columns: ColumnDef<Form>[] = [
 		selectionColumn,
 		{
@@ -117,11 +117,10 @@ export function getColumns({ formTypes, navigate, duplicate, onDelete }) {
 			cell: ({ row }) => (
 				<div
 					className={`capitalize rounded-xl py-1 px-3 text-xs w-fit
-				${
-					row.original.status === 'active'
-						? 'bg-[#EFFFF5] text-[#16A34A]'
-						: 'bg-[#EF44444A] text-destructive'
-				}
+				${row.original.status === 'active'
+							? 'bg-[#EFFFF5] text-[#16A34A]'
+							: 'bg-[#EF44444A] text-destructive'
+						}
 			`}
 				>
 					{row.original.status}
@@ -186,10 +185,10 @@ export function getColumns({ formTypes, navigate, duplicate, onDelete }) {
 									{__('Setup', 'quillcrm')}
 								</DropdownMenuItem>
 								<DropdownMenuItem
-									onClick={() => duplicate(campaign.id)}
+									onClick={() => onToggleStatus(campaign.id, campaign.status)}
 								>
 									<DisactivateIcon />
-									{__('Disactivate', 'quillcrm')}
+									{campaign.status === 'active' ? __('Deactivate', 'quillcrm') : __('Activate', 'quillcrm')}
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									onClick={() => {
@@ -206,7 +205,7 @@ export function getColumns({ formTypes, navigate, duplicate, onDelete }) {
 									{__('View', 'quillcrm')}
 								</DropdownMenuItem>
 								<DropdownMenuItem
-									onClick={() => onDelete(campaign.id)}
+									onClick={() => onDelete(row.original.id)}
 									className="text-red-500 hover:text-red-500 focus:text-red-500"
 								>
 									<DeleteIcon />

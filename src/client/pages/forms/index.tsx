@@ -16,7 +16,7 @@ import { __ } from '@wordpress/i18n';
 import './style.scss';
 import type {
 	Forms,
-	Form,
+	Form as FormData,
 	FormsResponse,
 	DataTableConfig,
 	NoticeMessage,
@@ -24,20 +24,16 @@ import type {
 import { useNavigate } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
 import { PageHeader, PlusIcon, NoticeBanner } from '@quillcrm/components';
-import CreateFormDialog from './create-form-dialog';
 import { DataTable } from '@/components/ui/data-table';
 import { getColumns } from './columns';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import { formatDateForAPI } from '@quillcrm/utils';
 import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
+import Form from '../form';
 
 const duplicate = (id: string) => {
 	// TODO: Implement duplicate logic
 	console.log('Duplicate', id);
-};
-const onDelete = (id: string) => {
-	// TODO: Implement delete logic
-	console.log('Delete', id);
 };
 
 const FormsList: React.FC = () => {
@@ -48,9 +44,10 @@ const FormsList: React.FC = () => {
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [keyword, setKeyword] = useState('');
-	const [dialogOpen, setDialogOpen] = useState(false);
+	const [showCreateForm, setShowCreateForm] = useState(false);
 	const formTypes = ConfigAPI.getForms();
 	const [bulkAction, setBulkAction] = useState('');
+	const [deactivating, setDeactivating] = useState(false);
 	const [isApplying, setIsApplying] = useState(false);
 	const navigate = useNavigate();
 
@@ -83,6 +80,11 @@ const FormsList: React.FC = () => {
 		setNotice(null);
 	};
 
+	// Handle form creation success
+	const handleFormCreated = (message: string) => {
+		showNotice('success', message);
+	};
+
 	const fetchForms = async () => {
 		setLoading(true);
 		try {
@@ -94,11 +96,10 @@ const FormsList: React.FC = () => {
 					to: formatDateForAPI(dateRange.to),
 					keyword,
 				}),
-				 method: 'GET',
+				method: 'GET',
 			})) as FormsResponse;
 			setForms(response.data);
 			setTotalRecords(response.total || 0);
-
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -136,14 +137,46 @@ const FormsList: React.FC = () => {
 		}
 	};
 
+	const deleteForm = async (id: number) => {
+		try {
+			await apiFetch({
+				path: `/qc/v1/forms/${id}`,
+				method: 'DELETE',
+			});
+
+			fetchForms();
+		} catch (error: any) {
+			showNotice('error', error.message);
+		}
+	};
+
+	const activateDeactivateForm = async (
+		id: number,
+		currentStatus: string
+	) => {
+		try {
+			await apiFetch({
+				path: `/qc/v1/forms/${id}`,
+				method: 'POST',
+				data: {
+					status: currentStatus === 'active' ? 'inactive' : 'active',
+				},
+			});
+			fetchForms();
+		} catch (error: any) {
+			showNotice('error', error.message);
+		}
+	};
+
 	const columns = getColumns({
 		formTypes,
-		navigate,
+		navigate: navigate,
 		duplicate,
-		onDelete,
+		onDelete: deleteForm,
+		onToggleStatus: activateDeactivateForm,
 	});
 
-	const tableConfig: DataTableConfig<Form> = {
+	const tableConfig: DataTableConfig<FormData> = {
 		search: {
 			placeholder: __('Search Forms', 'quillcrm'),
 			onChange: (value) => setKeyword(value),
@@ -167,6 +200,7 @@ const FormsList: React.FC = () => {
 			placeholder: __('Date Range', 'quillcrm'),
 		},
 	};
+
 	return (
 		<div className="qcrm-forms-list">
 			<PageHeader
@@ -175,7 +209,7 @@ const FormsList: React.FC = () => {
 				actions={[
 					{
 						label: __('Create Forms', 'quillcrm'),
-						onClick: () => setDialogOpen(true),
+						onClick: () => setShowCreateForm(true),
 						type: 'primary',
 						icon: <PlusIcon />,
 					},
@@ -197,7 +231,16 @@ const FormsList: React.FC = () => {
 				<DataTablePagination table={serverSideTable} />
 			</div>
 
-			<CreateFormDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+			{showCreateForm && (
+				<Form
+					isNewForm={true}
+					onClose={() => {
+						setShowCreateForm(false);
+						fetchForms();
+					}}
+					onSuccess={handleFormCreated}
+				/>
+			)}
 		</div>
 	);
 };

@@ -308,20 +308,22 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 						type="target"
 						position={Position.Left}
 						id="yes"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target qcrm-reactflow-handle--merge-yes"
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 						style={{
 							left: -6,
-							top: '30%',
+							top: '50%',
+							transform: 'translateY(-50%)',
 						}}
 					/>
 					<Handle
 						type="target"
 						position={Position.Right}
 						id="no"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target qcrm-reactflow-handle--merge-no"
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 						style={{
 							right: -6,
-							top: '30%',
+							top: '50%',
+							transform: 'translateY(-50%)',
 						}}
 					/>
 					{/* Hidden handles for left/right connections but positioned centrally */}
@@ -329,7 +331,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 						type="target"
 						position={Position.Left}
 						id="left"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target qcrm-reactflow-handle--merge-hidden"
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 						style={{
 							left: '50%',
 							top: '50%',
@@ -342,7 +344,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 						type="target"
 						position={Position.Right}
 						id="right"
-						className="qcrm-reactflow-handle qcrm-reactflow-handle--target qcrm-reactflow-handle--merge-hidden"
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 						style={{
 							right: '50%',
 							top: '50%',
@@ -428,7 +430,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			<Handle
 				type="source"
 				position={Position.Bottom}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+				className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				style={{ bottom: -6 }}
 			/>
 		</div>

@@ -78,7 +78,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 				<Handle
 					type="source"
 					position={Position.Bottom}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 			</div>
 		</NodeContextMenu>

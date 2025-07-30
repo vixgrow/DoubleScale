@@ -107,20 +107,13 @@ export const useImportActions = () => {
 				processed: number;
 			};
 
-			console.log('Import response:', {
-				total: response.total,
-				offset: response.offset,
-				status: response.status,
-			});
-
 			// Update progress
 			dispatch({ type: 'SET_COUNT', payload: response.total });
 			dispatch({ type: 'SET_OFFSET', payload: response.offset });
 
 			if (response.status === 'in_progress') {
-				// Continue with next batch after a short delay
-				setTimeout(() => startImport(response.offset), 1000);
-				return true;
+				// ✅ FIX: Directly await the next batch (no setTimeout)
+				return await startImport(response.offset);
 			} else {
 				// Import completed - ensure 100% is shown
 				dispatch({ type: 'SET_COUNT', payload: response.total });

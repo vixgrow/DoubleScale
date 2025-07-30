@@ -47,8 +47,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 	const handleImportContacts = async () => {
 		const success = await importContacts();
 		if (success) {
-			// Wait for the completion display to finish
-			await new Promise((resolve) => setTimeout(resolve, 2500));
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 			resetState();
 			onImportComplete();
 		}

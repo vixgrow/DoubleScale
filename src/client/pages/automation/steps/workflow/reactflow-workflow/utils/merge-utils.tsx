@@ -237,34 +237,3 @@ export const createMergeNodeData = (
 		onMergeClick: () => {},
 	};
 };
-
-/**
- * Validates merge node configuration
- */
-export const validateMergeConfiguration = (
-	mergeData: any
-): { isValid: boolean; warnings: string[] } => {
-	const warnings: string[] = [];
-	let isValid = true;
-
-	if (!mergeData.hasYesBranch && !mergeData.hasNoBranch) {
-		warnings.push(
-			'Both branches are empty - consider simplifying the condition'
-		);
-		isValid = false;
-	}
-
-	if (mergeData.hasYesBranch && !mergeData.hasNoBranch) {
-		warnings.push(
-			'No branch is empty - consider adding steps or removing the condition'
-		);
-	}
-
-	if (!mergeData.hasYesBranch && mergeData.hasNoBranch) {
-		warnings.push(
-			'Yes branch is empty - consider adding steps or inverting the condition'
-		);
-	}
-
-	return { isValid, warnings };
-};

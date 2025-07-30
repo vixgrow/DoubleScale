@@ -258,13 +258,6 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	// Add step popover click handler with proper event handling
-	const handleAddStepClick = (e: React.MouseEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		setPopoverVisible(!popoverVisible);
-	};
-
 	// Generate a helpful tooltip for merge nodes
 	const getMergeTooltip = () => {
 		if (!isMerge) return '';

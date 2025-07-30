@@ -783,40 +783,6 @@
 			opacity: 1;
 		}
 
-		&-yes {
-			border-color: #52c41a;
-			background: linear-gradient(135deg, #52c41a, #73d13d);
-			color: white;
-
-			&:hover {
-				border-color: #389e0d;
-				background: linear-gradient(135deg, #389e0d, #52c41a);
-				box-shadow: 0 6px 20px rgba(82, 196, 26, 0.5);
-			}
-
-			.qcrm-reactflow-merge__content {
-				color: white;
-				text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-			}
-		}
-
-		&-no {
-			border-color: #ff4d4f;
-			background: linear-gradient(135deg, #ff4d4f, #ff7875);
-			color: white;
-
-			&:hover {
-				border-color: #cf1322;
-				background: linear-gradient(135deg, #cf1322, #ff4d4f);
-				box-shadow: 0 6px 20px rgba(255, 77, 79, 0.5);
-			}
-
-			.qcrm-reactflow-merge__content {
-				color: white;
-				text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-			}
-		}
-
 		&-merge {
 			// Reset merge node to simple button style like add-step-edge
 			border: none;

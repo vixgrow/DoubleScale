@@ -4,11 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { useAutoLayout } from './auto-layout';
 import {
 	calculateMergePosition,
 	createMergeNodeData,
-	validateMergeConfiguration,
 } from './utils/merge-utils';
 
 /**
@@ -210,6 +208,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		const nodeWidth = 280;
 		// the width of the add step node
 		const addStepWidth = 30;
+		// the width of the yes and no nodes
+		const nodeYesNoWidth = 80;
 		// start X position of the nodes
 		const startX = 250;
 		// start Trigger node Y position
@@ -635,7 +635,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				({ step, level, yesChildren, noChildren }) => {
 					const conditionPos = getNodePosition(step.id.toString());
 
-					// Calculate the branch center positions using the same logic as calculatePositions
 					const yesWidth = calculateBranchWidth(
 						stepList,
 						step.id,
@@ -648,33 +647,12 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						'no',
 						level + 1
 					);
-					const branchGap = Math.max(300, 150 + level * 60);
-					const totalChildWidth = yesWidth + noWidth + branchGap;
 
-					// Calculate exact branch center positions
-					const yesX =
-						conditionPos.x - totalChildWidth / 2 + yesWidth / 2;
-					const noX =
-						conditionPos.x + totalChildWidth / 2 - noWidth / 2;
-
-					// Create single merge node positioned below both branches
-					const mergeId = `merge-${step.id}-level-${level}`;
-
-					// Create enhanced merge node data with level information
-					const mergeNodeData = {
-						...createMergeNodeData(step, yesChildren, noChildren),
-						level, // Pass the current nesting level for visual distinction
-					};
-
-					// Validate merge configuration
-					const validation =
-						validateMergeConfiguration(mergeNodeData);
-					if (!validation.isValid) {
-						console.warn(
-							`Merge node validation warnings for condition ${step.id}:`,
-							validation.warnings
-						);
-					}
+					const center =
+						conditionPos.x + nodeWidth / 2 - nodeYesNoWidth / 2;
+					const maxWidth = Math.max(yesWidth, noWidth);
+					const yesX = center - maxWidth / 2;
+					const noX = center + maxWidth / 2;
 
 					// Always create Yes/No branch nodes for semantic branching
 					const yesNodeId = `branch-yes-${step.id}`;
@@ -711,6 +689,15 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							conditionStep: step,
 						},
 					});
+
+					// Create single merge node positioned below both branches
+					const mergeId = `merge-${step.id}-level-${level}`;
+
+					// Create enhanced merge node data with level information
+					const mergeNodeData = {
+						...createMergeNodeData(step, yesChildren, noChildren),
+						level, // Pass the current nesting level for visual distinction
+					};
 
 					// Calculate merge position based on actual children positions
 					// Find the bottommost Y position among all children in both branches
@@ -791,7 +778,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						nestedSpacing;
 
 					const optimalMergePosition = {
-						x: actualBranchCenterX,
+						x: actualBranchCenterX + addStepWidth / 2,
 						y: mergeY,
 					};
 
@@ -866,7 +853,10 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						const yesAddStepPosition = savedPositions[
 							yesAddStepId
 						] || {
-							x: yesPosition.x,
+							x:
+								yesPosition.x +
+								nodeYesNoWidth / 2 -
+								addStepWidth / 2,
 							y: yesPosition.y + 150,
 						};
 
@@ -991,7 +981,10 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						const noAddStepPosition = savedPositions[
 							noAddStepId
 						] || {
-							x: noPosition.x,
+							x:
+								noPosition.x +
+								nodeYesNoWidth / 2 -
+								addStepWidth / 2,
 							y: noPosition.y + 150,
 						};
 
@@ -1118,26 +1111,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								}
 							}
 						}
-					}
-
-					// Check if there are subsequent steps at the same level that need to connect to this merge node
-					const subsequentSteps = stepList
-						.filter((s) => {
-							if (level === 0) {
-								return !s.parent_id && s.order > step.order;
-							} else {
-								return (
-									s.parent_id === parentId &&
-									s.condition === condition &&
-									s.order > step.order
-								);
-							}
-						})
-						.sort((a, b) => a.order - b.order);
-
-					// Store information about subsequent steps for later processing
-					// We'll handle connections after all merge nodes are created
-					if (subsequentSteps.length > 0) {
 					}
 				}
 			);

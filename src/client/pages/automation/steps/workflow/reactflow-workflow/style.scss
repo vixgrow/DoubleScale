@@ -39,12 +39,12 @@
 	.react-flow__controls {
 		bottom: 20px;
 		left: 20px;
-		
+
 		button {
 			background: #fff;
 			border: 1px solid #d9d9d9;
 			color: #666;
-			
+
 			&:hover {
 				background: #f5f5f5;
 				border-color: #40a9ff;
@@ -64,19 +64,19 @@
 		visibility: visible !important;
 		display: block !important;
 		position: absolute !important;
-		
+
 		.react-flow__minimap-mask {
 			fill: rgba(215, 215, 218, 0.1) !important;
-			stroke: #D7D7DA !important;
+			stroke: #d7d7da !important;
 			stroke-width: 2 !important;
 		}
-		
+
 		.react-flow__minimap-node {
 			fill: #e1e1e1 !important;
-			stroke: #D7D7DA !important;
+			stroke: #d7d7da !important;
 			stroke-width: 2 !important;
 		}
-		
+
 		svg {
 			display: block !important;
 			width: 100% !important;
@@ -89,162 +89,7 @@
 	}
 }
 
-// Layout Controls Styles
-.qcrm-layout-controls {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	
-	.ant-btn {
-		border-radius: 6px;
-		transition: all 0.2s ease-in-out;
-		
-		&:hover {
-			transform: translateY(-1px);
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		}
-	}
-	
-	.ant-btn-primary {
-		background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-		border: none;
-		
-		&:hover {
-			background: linear-gradient(135deg, #096dd9 0%, #0050b3 100%);
-		}
-	}
-	
-	.ant-dropdown-trigger {
-		border: 1px solid #d9d9d9;
-		
-		&:hover {
-			border-color: #40a9ff;
-		}
-	}
-}
-
-.qcrm-layout-controls-panel {
-	animation: slideInDown 0.3s ease-out;
-	
-	@keyframes slideInDown {
-		from {
-			opacity: 0;
-			transform: translateX(-50%) translateY(-10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(-50%) translateY(0);
-		}
-	}
-}
-
-// Node Sidebar Styles
-.qcrm-node-sidebar {
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-	
-	&__header {
-		padding: 16px;
-		border-bottom: 1px solid #f0f0f0;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		background: #fafafa;
-		
-		.ant-typography {
-			color: #262626;
-			font-weight: 600;
-		}
-	}
-	
-	&__content {
-		flex: 1;
-		overflow-y: auto;
-		padding: 8px 0;
-		
-		.ant-list {
-			background: transparent;
-		}
-		
-		.ant-list-item {
-			border-bottom: 1px solid #f0f0f0;
-			margin: 0;
-			padding: 12px 16px;
-			cursor: pointer;
-			transition: all 0.2s ease;
-			
-			&:hover {
-				background: #f5f5f5;
-			}
-			
-			&:last-child {
-				border-bottom: none;
-			}
-		}
-		
-		.ant-list-item-meta {
-			.ant-list-item-meta-avatar {
-				.anticon {
-					font-size: 16px;
-				}
-			}
-			
-			.ant-list-item-meta-title {
-				margin-bottom: 2px;
-				font-size: 13px;
-				line-height: 1.3;
-			}
-			
-			.ant-list-item-meta-description {
-				margin-bottom: 0;
-				font-size: 11px;
-			}
-		}
-		
-		.ant-list-item-action {
-			margin-left: 8px;
-			
-			.ant-btn {
-				border: none;
-				box-shadow: none;
-				
-				&:hover {
-					background: rgba(24, 144, 255, 0.1);
-					color: #1890ff;
-				}
-			}
-		}
-	}
-	
-	&__empty {
-		padding: 32px 16px;
-		text-align: center;
-		color: #8c8c8c;
-	}
-	
-	&__item {
-		.ant-space {
-			width: 100%;
-		}
-		
-		.ant-typography {
-			color: #262626;
-			
-			&.ant-typography-ellipsis {
-				max-width: 140px;
-			}
-		}
-		
-		.ant-badge-status {
-			.ant-badge-status-dot {
-				width: 6px;
-				height: 6px;
-			}
-		}
-	}
-}
-
+// Loading State Styles
 .qcrm-reactflow-loading {
 	display: flex;
 	align-items: center;
@@ -259,7 +104,7 @@
 	background: #fff;
 	border: 2px solid #e8e8e8;
 	border-radius: 12px;
-	min-width: 200px;
+	width: 280px;
 	padding: 16px;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	transition: all 0.2s ease;
@@ -267,7 +112,7 @@
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	
+
 	&:hover {
 		border-color: #40a9ff;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -341,9 +186,9 @@
 	&--trigger {
 		border: 2px solid #d9d9d9;
 		background: #ffffff;
-		min-width: 280px;
+		width: 280px;
 		position: relative;
-		
+
 		.qcrm-reactflow-node__icon {
 			box-sizing: border-box;
 			display: flex;
@@ -354,7 +199,7 @@
 			gap: 12px;
 			width: 50px;
 			height: 50px;
-			background: #EFEFEF;
+			background: #efefef;
 			border: 1.23985px solid rgba(213, 213, 213, 0.4);
 			border-radius: 4.95941px;
 			flex: none;
@@ -363,7 +208,7 @@
 			color: #000000;
 			font-size: 14px;
 			position: relative;
-			
+
 			svg {
 				position: static;
 				width: 15.75px;
@@ -401,14 +246,15 @@
 				box-shadow: none;
 				border-radius: 6px;
 				transition: all 0.2s ease;
-				
-				&:hover, &:focus {
+
+				&:hover,
+				&:focus {
 					background: rgba(0, 0, 0, 0.08);
 					color: #595959;
 					border: none;
 					box-shadow: none;
 				}
-				
+
 				.anticon {
 					font-size: 22px;
 					line-height: 1;
@@ -431,9 +277,9 @@
 	&--action {
 		border: 2px solid #d9d9d9;
 		background: #ffffff;
-		min-width: 280px;
+		width: 280px;
 		position: relative;
-		
+
 		.qcrm-reactflow-node__icon {
 			box-sizing: border-box;
 			display: flex;
@@ -444,7 +290,7 @@
 			gap: 12px;
 			width: 50px;
 			height: 50px;
-			background: #EFEFEF;
+			background: #efefef;
 			border: 1.23985px solid rgba(213, 213, 213, 0.4);
 			border-radius: 4.95941px;
 			flex: none;
@@ -453,7 +299,7 @@
 			color: #000000;
 			font-size: 14px;
 			position: relative;
-			
+
 			svg {
 				position: static;
 				width: 15.75px;
@@ -502,14 +348,15 @@
 				box-shadow: none;
 				border-radius: 6px;
 				transition: all 0.2s ease;
-				
-				&:hover, &:focus {
+
+				&:hover,
+				&:focus {
 					background: rgba(0, 0, 0, 0.08);
 					color: #595959;
 					border: none;
 					box-shadow: none;
 				}
-				
+
 				.anticon {
 					font-size: 22px;
 					line-height: 1;
@@ -532,11 +379,11 @@
 	&--condition {
 		border: 2px solid #d9d9d9;
 		background: #ffffff;
-		min-width: 280px;
+		width: 280px;
 		position: relative;
 		overflow: visible; // Allow three dots to show outside the node
 		padding-right: 60px; // Add extra space for the three dots menu
-		
+
 		.qcrm-reactflow-node__icon {
 			box-sizing: border-box;
 			display: flex;
@@ -547,7 +394,7 @@
 			gap: 12px;
 			width: 50px;
 			height: 50px;
-			background: #EFEFEF;
+			background: #efefef;
 			border: 1.23985px solid rgba(213, 213, 213, 0.4);
 			border-radius: 4.95941px;
 			flex: none;
@@ -556,7 +403,7 @@
 			color: #000000;
 			font-size: 14px;
 			position: relative;
-			
+
 			svg {
 				position: static;
 				width: 28px;
@@ -625,14 +472,15 @@
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				
-				&:hover, &:focus {
+
+				&:hover,
+				&:focus {
 					background: rgba(0, 0, 0, 0.08);
 					color: #595959;
 					border: none;
 					box-shadow: none;
 				}
-				
+
 				.anticon {
 					font-size: 18px;
 					line-height: 1;
@@ -655,9 +503,9 @@
 	&--goal {
 		border: 2px solid #d9d9d9;
 		background: #ffffff;
-		min-width: 280px;
+		width: 280px;
 		position: relative;
-		
+
 		.qcrm-reactflow-node__icon {
 			box-sizing: border-box;
 			display: flex;
@@ -668,7 +516,7 @@
 			gap: 12px;
 			width: 50px;
 			height: 50px;
-			background: #EFEFEF;
+			background: #efefef;
 			border: 1.23985px solid rgba(213, 213, 213, 0.4);
 			border-radius: 4.95941px;
 			flex: none;
@@ -677,7 +525,7 @@
 			color: #000000;
 			font-size: 14px;
 			position: relative;
-			
+
 			svg {
 				position: static;
 				width: 28px;
@@ -726,14 +574,15 @@
 				box-shadow: none;
 				border-radius: 6px;
 				transition: all 0.2s ease;
-				
-				&:hover, &:focus {
+
+				&:hover,
+				&:focus {
 					background: rgba(0, 0, 0, 0.08);
 					color: #595959;
 					border: none;
 					box-shadow: none;
 				}
-				
+
 				.anticon {
 					font-size: 22px;
 					line-height: 1;
@@ -756,9 +605,9 @@
 	&--end {
 		border: 2px solid #d9d9d9;
 		background: #ffffff;
-		min-width: 280px;
+		width: 280px;
 		position: relative;
-		
+
 		.qcrm-reactflow-node__icon {
 			box-sizing: border-box;
 			display: flex;
@@ -769,20 +618,20 @@
 			gap: 12px;
 			width: 50px;
 			height: 50px;
-			background: rgba(255, 77, 79, 0.1);
-			border: 1.23985px solid rgba(255, 77, 79, 0.4);
+			background: #efefef;
+			border: 1.23985px solid rgba(213, 213, 213, 0.4);
 			border-radius: 4.95941px;
 			flex: none;
 			order: 0;
 			flex-grow: 0;
-			color: #ff4d4f;
+			color: #000000;
 			font-size: 14px;
 			position: relative;
-			
+
 			svg {
 				position: static;
-				width: 15.75px;
-				height: 22.75px;
+				width: 28px;
+				height: 29px;
 			}
 		}
 
@@ -797,21 +646,56 @@
 			font-size: 13px;
 		}
 
+		// Three dots dropdown button
+		.qcrm-reactflow-node__actions {
+			position: absolute;
+			top: 50%;
+			right: 20px;
+			transform: translateY(-50%);
+			opacity: 1; // Always visible like in the image
+			z-index: 10;
+
+			.qcrm-reactflow-node__actions-btn {
+				background: transparent;
+				border: none;
+				color: #8c8c8c;
+				padding: 8px;
+				height: auto;
+				width: auto;
+				box-shadow: none;
+				border-radius: 6px;
+				transition: all 0.2s ease;
+
+				&:hover,
+				&:focus {
+					background: rgba(0, 0, 0, 0.08);
+					color: #595959;
+					border: none;
+					box-shadow: none;
+				}
+
+				.anticon {
+					font-size: 22px;
+					line-height: 1;
+					font-weight: bold;
+				}
+			}
+		}
+
 		&:hover {
-			border-color: #40a9ff;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			border-color: #b7b7b7;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 		}
 
 		&.selected {
-			border-color: #1890ff;
-			box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+			border-color: #b7b7b7;
+			box-shadow: 0 0 0 2px rgba(183, 183, 183, 0.2);
 		}
 	}
 
 	&--add-step {
 		background: #1890ff;
 		border: 2px solid #fff;
-		min-width: auto;
 		width: 60px;
 		height: 60px;
 		padding: 0;
@@ -845,7 +729,6 @@
 	&--merge {
 		background: #fff;
 		border: 3px solid;
-		min-width: auto;
 		width: 45px;
 		height: 45px;
 		padding: 0;
@@ -864,23 +747,33 @@
 		}
 
 		&:before {
-			content: '';
+			content: "";
 			position: absolute;
 			inset: -2px;
 			border-radius: 50%;
 			padding: 2px;
-			background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
-			mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+			background: linear-gradient(
+				135deg,
+				rgba(255, 255, 255, 0.8),
+				rgba(255, 255, 255, 0.2)
+			);
+			mask:
+				linear-gradient(#fff 0 0) content-box,
+				linear-gradient(#fff 0 0);
 			mask-composite: exclude;
 		}
 
 		// Enhanced visual feedback for merge convergence
 		&:after {
-			content: '';
+			content: "";
 			position: absolute;
 			inset: -8px;
 			border-radius: 50%;
-			background: radial-gradient(circle, transparent 70%, rgba(24, 144, 255, 0.1) 100%);
+			background: radial-gradient(
+				circle,
+				transparent 70%,
+				rgba(24, 144, 255, 0.1) 100%
+			);
 			opacity: 0;
 			transition: opacity 0.3s ease;
 			pointer-events: none;
@@ -957,7 +850,6 @@
 		border-radius: 50%;
 		width: 80px;
 		height: 80px;
-		min-width: 80px;
 		padding: 0;
 		display: flex;
 		align-items: center;
@@ -967,12 +859,12 @@
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 		cursor: pointer;
-		
+
 		&--yes {
 			background: #f6ffed;
 			border: 2px solid #52c41a;
 			color: #52c41a;
-			
+
 			&:hover {
 				border-color: #73d13d;
 				background: #f0ffea;
@@ -986,12 +878,12 @@
 				box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
 			}
 		}
-		
+
 		&--no {
 			background: #fff1f0;
 			border: 2px solid #ff4d4f;
 			color: #ff4d4f;
-			
+
 			&:hover {
 				border-color: #ff7875;
 				background: #ffe7e7;
@@ -1006,6 +898,23 @@
 			}
 		}
 	}
+
+	// Show reorder controls on node hover
+	&:hover {
+		.qcrm-step-reorder-controls {
+			opacity: 1;
+			visibility: visible;
+			transform: translateY(-50%) translateX(0); // Slide in to final position
+		}
+	}
+
+	// Don't show reorder controls on certain node types
+	&--trigger,
+	&--add-step {
+		.qcrm-step-reorder-controls {
+			display: none !important;
+		}
+	}
 }
 
 // Merge node content styles
@@ -1015,14 +924,14 @@
 	align-items: center;
 	justify-content: center;
 	text-align: center;
-	
+
 	.qcrm-reactflow-merge__icon {
 		font-size: 16px;
 		margin-bottom: 1px;
 		font-weight: 900;
 		line-height: 1;
 	}
-	
+
 	.qcrm-reactflow-merge__label {
 		font-size: 8px;
 		font-weight: 700;
@@ -1040,16 +949,16 @@
 	justify-content: center;
 	width: 100%;
 	height: 100%;
-	
+
 	.qcrm-reactflow-branch__label {
 		font-weight: 600;
 		font-size: 14px;
 		text-align: center;
-		
+
 		&--yes {
 			color: #52c41a;
 		}
-		
+
 		&--no {
 			color: #ff4d4f;
 		}
@@ -1058,41 +967,8 @@
 
 // Handle Styles - Force centered positioning
 .qcrm-reactflow-handle {
-	width: 12px !important;
-	height: 12px !important;
-	border: 2px solid #fff;
-	background: #666;
-	border-radius: 50%;
-	
-	&--source {
-		background: #DEDFEA;
-	}
-
-	&--target {
-		background: #DEDFEA;
-	}
-
-	&--yes {
-		background: #DEDFEA;
-		border-radius: 50% 50% 50% 0;
-		transform: rotate(-45deg) !important;
-		width: 12px !important;
-		height: 12px !important;
-		border: 2px solid #fff;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-	&--no {
-		background: #DEDFEA;
-		width: 12px !important;
-		height: 12px !important;
-		border-radius: 0;
-		clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-		border: 2px solid #fff;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-
-
+	border: none !important;
+	background: transparent;
 }
 
 // Step Reorder Controls - Show on hover, positioned outside node on the right
@@ -1108,7 +984,7 @@
 	transform: translateY(-50%) translateX(10px); // Start slightly to the right (center vertically and offset horizontally)
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	z-index: 10;
-	
+
 	.qcrm-step-reorder-controls__button {
 		background: rgba(255, 255, 255, 0.98);
 		border: 1px solid #d9d9d9;
@@ -1120,500 +996,42 @@
 		justify-content: center;
 		box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 		backdrop-filter: blur(4px);
-		
+
 		&:hover:not(:disabled) {
 			background: #f0f8ff;
 			border-color: #40a9ff;
 			transform: scale(1.05);
 			box-shadow: 0 4px 12px rgba(64, 169, 255, 0.3);
 		}
-		
+
 		&:disabled {
 			opacity: 0.4;
 			cursor: not-allowed;
 			background: rgba(255, 255, 255, 0.7);
 		}
-		
+
 		&--up {
 			.anticon {
 				font-size: 12px;
 				color: #1890ff;
 			}
-			
+
 			&:hover:not(:disabled) .anticon {
 				color: #096dd9;
 			}
 		}
-		
+
 		&--down {
 			.anticon {
 				font-size: 12px;
 				color: #1890ff;
 			}
-			
+
 			&:hover:not(:disabled) .anticon {
 				color: #096dd9;
 			}
 		}
 	}
-}
-
-// Show reorder controls on node hover
-.qcrm-reactflow-node {
-	&:hover {
-		.qcrm-step-reorder-controls {
-			opacity: 1;
-			visibility: visible;
-			transform: translateY(-50%) translateX(0); // Slide in to final position
-		}
-	}
-	
-
-	
-
-	
-	// Don't show reorder controls on certain node types
-	&--trigger,
-	&--add-step {
-		.qcrm-step-reorder-controls {
-			display: none !important;
-		}
-	}
-}
-
-// Force all handles to be properly centered with maximum specificity
-.qcrm-reactflow-workflow .react-flow .react-flow__handle,
-.qcrm-reactflow-workflow .react-flow__handle,
-.react-flow .react-flow__handle,
-.react-flow__handle {
-	// Reset default positioning with extreme specificity
-	position: absolute !important;
-	
-	&.react-flow__handle-top,
-	&[data-handlepos="top"] {
-		top: -6px !important;
-		left: 50% !important;
-		right: auto !important;
-		bottom: auto !important;
-		transform: translateX(-50%) !important;
-		margin: 0 !important;
-	}
-	
-	&.react-flow__handle-bottom,
-	&[data-handlepos="bottom"] {
-		bottom: -6px !important;
-		left: 50% !important;
-		top: auto !important;
-		right: auto !important;
-		transform: translateX(-50%) !important;
-		margin: 0 !important;
-	}
-	
-	&.react-flow__handle-left,
-	&[data-handlepos="left"] {
-		left: -6px !important;
-		top: 50% !important;
-		right: auto !important;
-		bottom: auto !important;
-		transform: translateY(-50%) !important;
-		margin: 0 !important;
-	}
-	
-	&.react-flow__handle-right,
-	&[data-handlepos="right"] {
-		right: -6px !important;
-		top: 50% !important;
-		left: auto !important;
-		bottom: auto !important;
-		transform: translateY(-50%) !important;
-		margin: 0 !important;
-	}
-}
-
-// Alternative approach using attribute selectors for ReactFlow handles
-[class*="react-flow__handle"] {
-	&[data-handlepos="top"] {
-		top: -6px !important;
-		left: 50% !important;
-		transform: translateX(-50%) !important;
-	}
-	
-	&[data-handlepos="bottom"] {
-		bottom: -6px !important;
-		left: 50% !important;
-		transform: translateX(-50%) !important;
-	}
-	
-	&[data-handlepos="left"] {
-		left: -6px !important;
-		top: 50% !important;
-		transform: translateY(-50%) !important;
-	}
-	
-	&[data-handlepos="right"] {
-		right: -6px !important;
-		top: 50% !important;
-		transform: translateY(-50%) !important;
-	}
-}
-
-// Special positioning for condition node handles to maintain their shapes
-.qcrm-reactflow-workflow .qcrm-reactflow-node--condition .react-flow__handle {
-	&.react-flow__handle-left.qcrm-reactflow-handle--yes {
-		left: -7px !important;
-		top: 50% !important;
-		background: #DEDFEA !important;
-	}
-	
-	&.react-flow__handle-right.qcrm-reactflow-handle--no {
-		right: -7px !important;
-		top: 50% !important;
-		background: #DEDFEA !important;
-	}
-
-	// New bottom positioned Yes/No handles
-	&.react-flow__handle-bottom.qcrm-reactflow-handle--yes {
-		bottom: calc(var(--xy-handle-size) / -2) !important;
-		left: 30% !important;
-		top: auto !important;
-		right: auto !important;
-		background: #DEDFEA !important;
-	}
-	
-	&.react-flow__handle-bottom.qcrm-reactflow-handle--no {
-		bottom: calc(var(--xy-handle-size) / -2) !important;
-		left: 70% !important;
-		top: auto !important;
-		right: auto !important;
-		background: #DEDFEA !important;
-	}
-}
-
-// ReactFlow v12.8+ CSS Variables Override for Handle Positioning
-:root {
-	--xy-handle-size: 12px;
-}
-
-// Ultra high specificity override for ReactFlow v12.8+
-html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__handle,
-.qcrm-reactflow-workflow [data-id] .react-flow__handle,
-.react-flow .react-flow__handle {
-	// Reset all positioning
-	position: absolute !important;
-	inset: initial !important;
-	margin: 0 !important;
-	
-	// Handle dimensions
-	width: var(--xy-handle-size) !important;
-	height: var(--xy-handle-size) !important;
-	
-	// Top handles - perfectly centered horizontally
-	&[data-handlepos="top"] {
-		top: calc(var(--xy-handle-size) / -2) !important;
-		left: 50% !important;
-		right: auto !important;
-		bottom: auto !important;
-	}
-	
-	// Bottom handles - perfectly centered horizontally
-	&[data-handlepos="bottom"] {
-		bottom: calc(var(--xy-handle-size) / -2) !important;
-		left: 50% !important;
-		top: auto !important;
-		right: auto !important;
-	}
-	
-	// Left handles - perfectly centered vertically
-	&[data-handlepos="left"] {
-		left: calc(var(--xy-handle-size) / -2) !important;
-		top: 50% !important;
-		right: auto !important;
-		bottom: auto !important;
-	}
-	
-	// Right handles - perfectly centered vertically  
-	&[data-handlepos="right"] {
-		right: calc(var(--xy-handle-size) / -2) !important;
-		top: 50% !important;
-		left: auto !important;
-		bottom: auto !important;
-	}
-}
-
-// Alternative approach using ReactFlow's own CSS variables if available
-.qcrm-reactflow-workflow {
-	--xy-handle-top: 50%;
-	--xy-handle-bottom: 50%;
-	--xy-handle-left: 50%;
-	--xy-handle-right: 50%;
-}
-
-// Edge Styles
-.react-flow__edge {
-	.react-flow__edge-path {
-		stroke: #D7D7DA;
-		stroke-width: 2;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	&.selected .react-flow__edge-path {
-		stroke: #D7D7DA;
-		stroke-width: 2;
-	}
-
-	&:hover .react-flow__edge-path {
-		stroke-width: 2;
-		filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.2));
-	}
-
-	.react-flow__edge-text {
-		font-size: 12px;
-		font-weight: 600;
-		fill: #333;
-		text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
-		dominant-baseline: middle;
-		text-anchor: middle;
-		transition: all 0.2s ease;
-		
-		// Force visibility for condition edge labels
-		opacity: 1 !important;
-		visibility: visible !important;
-		display: block !important;
-	}
-
-	// Force condition edge styling with higher specificity
-	&.qcrm-condition-edge {
-		.react-flow__edge-path {
-			stroke-linecap: round !important;
-			stroke-linejoin: round !important;
-			transition: all 0.3s ease !important;
-		}
-		
-		.react-flow__edge-text {
-			font-size: 12px !important;
-			font-weight: 700 !important;
-			fill: #fff !important;
-			opacity: 1 !important;
-			visibility: visible !important;
-			display: block !important;
-			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
-		}
-
-		&.qcrm-condition-edge--yes {
-			.react-flow__edge-path {
-				stroke: #D7D7DA !important;
-				stroke-width: 2 !important;
-				filter: drop-shadow(0 2px 8px rgba(215, 215, 218, 0.6)) !important;
-			}
-			
-			.react-flow__edge-text {
-				fill: #fff !important;
-			}
-		}
-
-		&.qcrm-condition-edge--no {
-			.react-flow__edge-path {
-				stroke: #D7D7DA !important;
-				stroke-width: 2 !important;
-				filter: drop-shadow(0 2px 8px rgba(215, 215, 218, 0.6)) !important;
-			}
-			
-			.react-flow__edge-text {
-				fill: #fff !important;
-			}
-		}
-
-		&:hover.qcrm-condition-edge--yes .react-flow__edge-path {
-			stroke: #D7D7DA !important;
-			stroke-width: 2 !important;
-			filter: drop-shadow(0 4px 12px rgba(215, 215, 218, 0.8)) !important;
-		}
-
-		&:hover.qcrm-condition-edge--no .react-flow__edge-path {
-			stroke: #D7D7DA !important;
-			stroke-width: 2 !important;
-			filter: drop-shadow(0 4px 12px rgba(215, 215, 218, 0.8)) !important;
-		}
-	}
-
-	// Enhanced styling for Yes branch edges
-	&[data-label*="Yes"] {
-		.react-flow__edge-path {
-			stroke: #D7D7DA;
-			stroke-width: 2;
-			stroke-dasharray: none;
-			filter: drop-shadow(0 2px 4px rgba(215, 215, 218, 0.3));
-			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		}
-
-		.react-flow__edge-text {
-			fill: #fff;
-			font-weight: 900;
-			font-size: 13px;
-			text-shadow: 
-				0 1px 2px rgba(0, 0, 0, 0.5),
-				0 0 8px rgba(215, 215, 218, 0.6);
-		}
-
-		&:hover .react-flow__edge-path {
-			stroke: #D7D7DA;
-			stroke-width: 2;
-			filter: drop-shadow(0 4px 8px rgba(215, 215, 218, 0.4));
-		}
-
-		&:hover .react-flow__edge-text {
-			transform: scale(1.1);
-			text-shadow: 
-				0 2px 4px rgba(0, 0, 0, 0.6),
-				0 0 12px rgba(82, 196, 26, 0.8);
-		}
-	}
-
-	// Enhanced styling for No branch edges
-	&[data-label*="No"] {
-		.react-flow__edge-path {
-			stroke: #D7D7DA;
-			stroke-width: 2;
-			stroke-dasharray: none;
-			filter: drop-shadow(0 2px 4px rgba(215, 215, 218, 0.3));
-			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		}
-
-		.react-flow__edge-text {
-			fill: #fff;
-			font-weight: 900;
-			font-size: 13px;
-			text-shadow: 
-				0 1px 2px rgba(0, 0, 0, 0.5),
-				0 0 8px rgba(215, 215, 218, 0.6);
-		}
-
-		&:hover .react-flow__edge-path {
-			stroke: #D7D7DA;
-			stroke-width: 2;
-			filter: drop-shadow(0 4px 8px rgba(215, 215, 218, 0.4));
-		}
-
-		&:hover .react-flow__edge-text {
-			transform: scale(1.1);
-			text-shadow: 
-				0 2px 4px rgba(0, 0, 0, 0.6),
-				0 0 12px rgba(215, 215, 218, 0.8);
-		}
-	}
-
-	// Special styling for condition edges (those coming from condition nodes)
-	&[id*="condition"] {
-		.react-flow__edge-path {
-			stroke-linecap: round;
-			stroke-linejoin: round;
-		}
-	}
-
-	// Animated edge effects for condition branches
-	&[data-label*="Yes"], &[data-label*="No"] {
-		&::before {
-			content: '';
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			pointer-events: none;
-			animation: conditionEdgePulse 2s ease-in-out infinite;
-		}
-	}
-}
-
-// Keyframe animation for condition edge pulse effect
-@keyframes conditionEdgePulse {
-	0%, 100% {
-		opacity: 0.8;
-	}
-	50% {
-		opacity: 1;
-	}
-}
-
-// Enhanced styling for custom condition edges
-.qcrm-condition-edge {
-	&--yes {
-		.react-flow__edge-path {
-			stroke: #D7D7DA !important;
-			stroke-width: 2 !important;
-			filter: drop-shadow(0 2px 8px rgba(215, 215, 218, 0.6)) !important;
-		}
-
-		&:hover .react-flow__edge-path {
-			stroke: #D7D7DA !important;
-			stroke-width: 2 !important;
-			filter: drop-shadow(0 4px 12px rgba(215, 215, 218, 0.8)) !important;
-		}
-	}
-
-	&--no {
-		.react-flow__edge-path {
-			stroke: #D7D7DA !important;
-			stroke-width: 2 !important;
-			filter: drop-shadow(0 2px 8px rgba(215, 215, 218, 0.6)) !important;
-		}
-
-		&:hover .react-flow__edge-path {
-			stroke: #D7D7DA !important;
-			stroke-width: 2 !important;
-			filter: drop-shadow(0 4px 12px rgba(215, 215, 218, 0.8)) !important;
-		}
-	}
-}
-
-// Enhanced condition edge labels with better visibility
-.qcrm-condition-edge-label {
-	position: absolute !important;
-	z-index: 10000 !important; // Ensure labels are always on top
-	pointer-events: none !important;
-	user-select: none !important;
-	
-	// Force visibility and proper rendering
-	opacity: 1 !important;
-	visibility: visible !important;
-	display: flex !important;
-	
-	&--yes {
-		background: #52c41a !important;
-		color: white !important;
-		
-		&:hover {
-			transform: translate(-50%, -50%) scale(1.1) !important;
-			box-shadow: 0 4px 12px rgba(82, 196, 26, 0.9) !important;
-		}
-	}
-
-	&--no {
-		background: #ff4d4f !important;
-		color: white !important;
-		
-		&:hover {
-			transform: translate(-50%, -50%) scale(1.1) !important;
-			box-shadow: 0 4px 12px rgba(255, 77, 79, 0.9) !important;
-		}
-	}
-}
-
-// Subtle pulse animation for edge labels
-@keyframes labelPulse {
-	0%, 100% {
-		opacity: 0.95;
-		transform: translate(-50%, -50%) scale(1);
-	}
-	50% {
-		opacity: 1;
-		transform: translate(-50%, -50%) scale(1.02);
-	}
-}
-
-// Background Pattern
-.react-flow__background {
-	background-color: #fafafa;
 }
 
 // Context Menu Styles
@@ -1643,80 +1061,10 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 	}
 }
 
-// Responsive Design
-@media (max-width: 768px) {
-	.qcrm-reactflow-workflow {
-		height: 400px;
-	}
-
-	.qcrm-reactflow-node {
-		min-width: 140px;
-		
-		&__title {
-			font-size: 13px;
-		}
-
-		&__subtitle {
-			font-size: 11px;
-		}
-
-		// Adjust condition node for smaller screens
-		&--condition {
-			min-width: 180px;
-			max-width: 220px;
-
-			.qcrm-reactflow-condition__diamond {
-				width: 44px;
-				height: 44px;
-
-				.qcrm-reactflow-condition__icon {
-					font-size: 14px;
-				}
-			}
-		}
-	}
-
-	// Smaller edge text on mobile
-	.react-flow__edge {
-		.react-flow__edge-text {
-			font-size: 11px;
-		}
-	}
-}
-
-// Extra small screens
-@media (max-width: 480px) {
-	.qcrm-reactflow-node {
-		&--condition {
-			min-width: 160px;
-			max-width: 200px;
-
-			.qcrm-reactflow-condition__diamond {
-				width: 36px;
-				height: 36px;
-
-				.qcrm-reactflow-condition__icon {
-					font-size: 12px;
-				}
-			}
-
-
-		}
-	}
-
-	.react-flow__edge {
-		.react-flow__edge-text {
-			font-size: 10px;
-		}
-	}
-}
-
-// ===== EDGE STYLING IMPROVEMENTS =====
-
 // Add Step Edge Button Styling
 .qcrm-edge-add-button {
 	z-index: 1000;
-	
+
 	.ant-btn {
 		background: #1890ff;
 		border: 2px solid #fff;
@@ -1728,28 +1076,28 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 		justify-content: center;
 		box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
 		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		
+
 		&:hover {
 			background: #096dd9;
 			border-color: #fff;
 			transform: scale(1.1);
 			box-shadow: 0 6px 16px rgba(24, 144, 255, 0.6);
 		}
-		
+
 		&:active {
 			transform: scale(0.95);
 		}
-		
+
 		.anticon {
 			font-size: 14px;
 			line-height: 1;
 		}
 	}
-	
+
 	// Popover styling
 	.ant-popover {
 		z-index: 2000;
-		
+
 		.ant-popover-content {
 			.ant-popover-inner {
 				padding: 8px;
@@ -1758,217 +1106,22 @@ html body .qcrm-reactflow-workflow .react-flow .react-flow__node .react-flow__ha
 			}
 		}
 	}
-	
+
 	// Step type buttons
 	.ant-btn-default {
 		border: 1px solid #d9d9d9;
 		color: #595959;
 		background: #fff;
-		
+
 		&:hover {
 			border-color: #1890ff;
 			color: #1890ff;
 			background: #f0f8ff;
 		}
-		
+
 		.anticon {
 			margin-right: 8px;
 			font-size: 16px;
-		}
-	}
-}
-
-// Enhanced Edge Styling
-.react-flow__edge {
-	&.react-flow__edge-default {
-		.react-flow__edge-path {
-			stroke: #D7D7DA;
-			stroke-width: 2;
-			stroke-linecap: round;
-			stroke-linejoin: round;
-			transition: stroke 0.2s ease, stroke-width 0.2s ease;
-		}
-		
-		&:hover .react-flow__edge-path {
-			stroke: #D7D7DA;
-			stroke-width: 2;
-		}
-	}
-	
-	// Condition edges
-	&.qcrm-condition-edge {
-		.react-flow__edge-path {
-			stroke-width: 2;
-			stroke-linecap: round;
-			stroke-linejoin: round;
-			filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-			transition: stroke-width 0.2s ease;
-		}
-		
-		&--yes .react-flow__edge-path {
-			stroke: #D7D7DA;
-		}
-		
-		&--no .react-flow__edge-path {
-			stroke: #D7D7DA;
-		}
-		
-		&:hover .react-flow__edge-path {
-			stroke-width: 2;
-		}
-	}
-
-	// Special styling for edges connecting to merge nodes
-	&[target*="merge"] {
-		.react-flow__edge-path {
-			stroke: #D7D7DA;
-			stroke-width: 2;
-			stroke-linecap: round;
-			transition: all 0.3s ease;
-		}
-
-		&:hover .react-flow__edge-path {
-			stroke: #D7D7DA;
-			stroke-width: 2;
-		}
-	}
-
-	// Special styling for edges from merge nodes
-	&[source*="merge"] {
-		.react-flow__edge-path {
-			stroke: #1890ff;
-			stroke-width: 2;
-			stroke-linecap: round;
-			transition: all 0.3s ease;
-		}
-
-		&:hover .react-flow__edge-path {
-			stroke: #40a9ff;
-			stroke-width: 2;
-		}
-	}
-}
-
-// Condition Edge Labels
-.qcrm-condition-edge-label {
-	user-select: none;
-	pointer-events: none;
-	
-	&--yes {
-		background: #52c41a !important;
-		border: 2px solid rgba(255, 255, 255, 0.9) !important;
-	}
-	
-	&--no {
-		background: #ff4d4f !important;
-		border: 2px solid rgba(255, 255, 255, 0.9) !important;
-	}
-}
-
-// Edge markers (arrow heads) - Improved Design
-.react-flow__edge {
-	.react-flow__arrowhead {
-		fill: #8c8c8c;
-		stroke: #8c8c8c;
-		stroke-width: 2;
-	}
-	
-	&.qcrm-condition-edge {
-		&--yes .react-flow__arrowhead {
-			fill: #52c41a;
-			stroke: #389e0d;
-			stroke-width: 2;
-		}
-		
-		&--no .react-flow__arrowhead {
-			fill: #ff4d4f;
-			stroke: #cf1322;
-			stroke-width: 2;
-		}
-	}
-	
-	&:hover .react-flow__arrowhead {
-		fill: #1890ff;
-		stroke: #096dd9;
-		stroke-width: 2;
-	}
-}
-
-// Custom arrow marker definitions for better design
-.react-flow__marker {
-	&.react-flow__arrowclosed {
-		path {
-			fill: inherit;
-			stroke: inherit;
-			stroke-width: inherit;
-		}
-	}
-}
-
-// ===== MERGE NODE ADD-STEP STYLING =====
-
-.qcrm-reactflow-merge__add-step {
-	position: relative;
-	
-	.ant-btn {
-		background: #52c41a !important;
-		border: 2px solid #fff !important;
-		color: #fff !important;
-		width: 24px !important;
-		height: 24px !important;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		box-shadow: 0 4px 12px rgba(82, 196, 26, 0.4) !important;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		
-		&:hover {
-			background: #389e0d !important;
-			border-color: #fff !important;
-			transform: scale(1.1);
-			box-shadow: 0 6px 16px rgba(82, 196, 26, 0.6) !important;
-		}
-		
-		&:active {
-			transform: scale(0.95);
-		}
-		
-		.anticon {
-			font-size: 12px;
-			line-height: 1;
-		}
-	}
-	
-	// Popover styling for merge node
-	.ant-popover {
-		z-index: 9999 !important;
-		
-		.ant-popover-content {
-			.ant-popover-inner {
-				padding: 8px;
-				border-radius: 8px;
-				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-			}
-		}
-		
-		.ant-popover-arrow {
-			z-index: 10000;
-		}
-	}
-}
-
-// Additional styling for merge node positioning
-.qcrm-reactflow-node--merge-merge {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	
-	.qcrm-merge-add-button {
-		position: relative;
-		z-index: 10;
-		
-		&:hover {
-			transform: scale(1.1);
 		}
 	}
 }

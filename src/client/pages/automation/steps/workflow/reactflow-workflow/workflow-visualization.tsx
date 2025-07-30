@@ -196,14 +196,35 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	}, [automation, updateAutomation]);
 
 	useEffect(() => {
+		console.log(nodesState);
+	}, [nodesState]);
+
+	useEffect(() => {
+		console.log(edgesState);
+	}, [edgesState]);
+
+	useEffect(() => {
 		const initialNodes: Node[] = [];
 		const initialEdges: Edge[] = [];
+		// the width of node
+		const nodeWidth = 280;
+		// the width of the add step node
+		const addStepWidth = 30;
+		// start X position of the nodes
+		const startX = 250;
+		// start Trigger node Y position
+		const startY = 50;
+		// The distance between nodes
+		const incrementY = 250;
 
 		// Get saved positions from automation settings
 		const savedPositions = automation?.settings?.reactflow_positions || {};
 
 		// Always add trigger node at the top
-		const triggerPosition = savedPositions['trigger'] || { x: 250, y: 50 };
+		const triggerPosition = savedPositions['trigger'] || {
+			x: startX,
+			y: startY,
+		};
 		initialNodes.push({
 			id: 'trigger',
 			type: 'trigger',
@@ -212,11 +233,11 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		});
 
 		if (!steps || steps.length === 0) {
-			// Show initial add step node when no steps exist
 			const addStepPosition = savedPositions['add-step-initial'] || {
-				x: 250,
-				y: 200,
+				x: triggerPosition.x + nodeWidth / 2 - addStepWidth / 2,
+				y: triggerPosition.y + incrementY,
 			};
+
 			initialNodes.push({
 				id: 'add-step-initial',
 				type: 'add_step',
@@ -234,8 +255,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				target: 'add-step-initial',
 				type: 'addStepEdge',
 				data: {
-					sourceStep: undefined, // trigger
-					targetStep: undefined, // adding first step
+					sourceStep: undefined,
+					targetStep: undefined,
 				},
 			});
 
@@ -319,8 +340,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			parentId: number | null = null,
 			condition: string | null = null,
 			level: number = 0,
-			centerX: number = 250,
-			startY: number = 200
+			startX: number,
+			startY: number
 		): number => {
 			// Return the final Y position
 			const branchSteps = stepList
@@ -357,10 +378,10 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 					// For condition nodes, use currentY to ensure proper spacing after previous condition branches
 					// This prevents overlapping when multiple condition nodes are in the same branch
-					const conditionY = currentY;
+					const conditionY = currentY + incrementY;
 
 					// Position condition node at center
-					positionMap.set(stepId, { x: centerX, y: conditionY });
+					positionMap.set(stepId, { x: startX, y: conditionY });
 
 					// Calculate child positions with improved spacing - increased significantly for better readability
 					const baseSpacing = 450; // Significantly increased base spacing for condition children
@@ -372,7 +393,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					const totalChildWidth = yesWidth + noWidth + branchGap;
 
 					// Position yes branch to the left and get its end Y position
-					const yesX = centerX - totalChildWidth / 2 + yesWidth / 2;
+					const yesX = startX - totalChildWidth / 2 + yesWidth / 2;
 					const yesEndY = calculatePositions(
 						stepList,
 						step.id,
@@ -383,7 +404,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					);
 
 					// Position no branch to the right and get its end Y position
-					const noX = centerX + totalChildWidth / 2 - noWidth / 2;
+					const noX = startX + totalChildWidth / 2 - noWidth / 2;
 					const noEndY = calculatePositions(
 						stepList,
 						step.id,
@@ -421,8 +442,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					);
 				} else {
 					// For non-condition nodes, position normally with increased spacing
-					positionMap.set(stepId, { x: centerX, y: currentY });
-					currentY += 300; // Increased spacing between regular steps for better clarity
+					currentY += incrementY; // Increased spacing between regular steps for better clarity
+					positionMap.set(stepId, { x: startX, y: currentY });
 				}
 			});
 
@@ -432,8 +453,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		// Helper function to get saved position or calculated position
 		const getNodePosition = (
 			nodeId: string,
-			fallbackX = 250,
-			fallbackY = 200,
+			fallbackX = startX,
+			fallbackY = startY,
 			step?: AutomationStep,
 			stepIndex?: number
 		) => {
@@ -479,7 +500,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		};
 
 		// Calculate all positions first
-		calculatePositions(steps);
+		calculatePositions(steps, null, null, 0, startX, startY);
 
 		// Helper function to recursively process steps and their children
 		const processStepHierarchy = (
@@ -512,8 +533,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			currentLevelSteps.forEach((step, stepIndex) => {
 				const position = getNodePosition(
 					step.id.toString(),
-					250,
-					200,
+					startX,
+					startY,
 					step,
 					stepIndex
 				);
@@ -545,7 +566,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						target: step.id.toString(),
 						type: 'addStepEdge',
 						data: {
-							sourceStep: undefined, // trigger
+							sourceStep: { id: 'trigger', type: 'trigger' }, // trigger
 							targetStep: step,
 						},
 					});
@@ -1754,18 +1775,18 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				(lastRootStep &&
 					lastRootStep.type !== 'end_automation' &&
 					lastRootStep.type !== 'condition');
+
 			if (shouldAddFinalStep) {
-				// Position the final add-step based on the last root step, not the bottommost node
-				let finalAddPosition;
+				let finalAddPosition = {};
 				if (rootSteps.length === 0) {
 					// No root steps, position below trigger
 					const triggerPos = savedPositions['trigger'] || {
-						x: 250,
-						y: 50,
+						x: startX,
+						y: startY,
 					};
 					finalAddPosition = {
-						x: triggerPos.x,
-						y: triggerPos.y + 250,
+						x: triggerPos.x + nodeWidth / 2 - addStepWidth / 2,
+						y: triggerPos.y + incrementY,
 					};
 				} else if (lastRootStep) {
 					// Position based on the last root step in the main flow
@@ -1774,18 +1795,17 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					);
 
 					finalAddPosition = {
-						x: lastRootStepPos.x,
-						y: lastRootStepPos.y + 250,
+						x: lastRootStepPos.x + nodeWidth / 2 - addStepWidth / 2,
+						y: lastRootStepPos.y + incrementY,
 					};
 				}
 
 				// Check for saved position for final add-step node
-				const finalAddId = 'add-step-final';
-				const finalSavedPosition = savedPositions[finalAddId];
+				const finalSavedPosition = savedPositions['add-step-final'];
 
 				if (finalAddPosition) {
 					initialNodes.push({
-						id: finalAddId,
+						id: 'add-step-final',
 						type: 'add_step',
 						position: finalSavedPosition || finalAddPosition,
 						data: {
@@ -1851,137 +1871,10 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				}
 			}
 		}
-
 		addFinalAddStep();
 
-		// Apply auto-layout before setting nodes if no saved positions exist
-		const applyLayoutAndSetNodes = async () => {
-			// Check if we have any saved positions for step nodes (excluding trigger)
-
-			// Check if ALL current steps have saved positions
-			const hasExistingPositions = steps.every(
-				(step) => savedPositions[step.id.toString()]
-			);
-
-			// Check if there are orphaned positions (positions for non-existent steps)
-			const currentStepIds = new Set([
-				'trigger',
-				...steps.map((step) => step.id.toString()),
-				'add-step-initial',
-				'add-step-final',
-			]);
-
-			// Add merge node IDs for condition steps
-			steps.forEach((step) => {
-				if (step.type === 'condition') {
-					// Calculate the level for this condition step
-					let level = 0;
-					let currentStep = step;
-					while (currentStep.parent_id) {
-						const parent = steps.find(
-							(s) => s.id === currentStep.parent_id
-						);
-						if (parent && parent.type === 'condition') {
-							level++;
-							currentStep = parent;
-						} else {
-							break;
-						}
-					}
-					currentStepIds.add(`merge-${step.id}-level-${level}`);
-				}
-			});
-
-			const hasOrphanedPositions = Object.keys(savedPositions).some(
-				(nodeId) => {
-					// Skip add-step nodes as they're dynamic
-					if (nodeId.startsWith('add-step')) return false;
-					return !currentStepIds.has(nodeId);
-				}
-			);
-
-			// Force auto-layout if we have orphaned positions
-			const shouldForceLayout = hasOrphanedPositions;
-
-			// Debug individual step positions
-			let stepsWithPositions = 0;
-			steps.forEach((step) => {
-				const stepId = step.id.toString();
-				const hasPosition = !!savedPositions[stepId];
-				if (hasPosition) stepsWithPositions++;
-			});
-
-			// Check if this has complex nested conditions that should use our custom positioning
-			const hasNestedConditions = steps.some((step) => {
-				if (step.type !== 'condition') return false;
-				// Check if any step is a child of this condition and is also a condition
-				return steps.some(
-					(child) =>
-						child.parent_id === step.id &&
-						child.type === 'condition'
-				);
-			});
-
-			// Check if there are ANY condition nodes that need custom positioning
-			const hasConditionNodes = steps.some(
-				(step) => step.type === 'condition'
-			);
-
-			// Also check for multiple condition levels
-			const maxConditionDepth = steps.reduce((maxDepth, step) => {
-				if (step.type !== 'condition') return maxDepth;
-				let depth = 0;
-				let currentStep = step;
-				while (currentStep.parent_id) {
-					const parent = steps.find(
-						(s) => s.id === currentStep.parent_id
-					);
-					if (parent && parent.type === 'condition') {
-						depth++;
-						currentStep = parent;
-					} else {
-						break;
-					}
-				}
-				return Math.max(maxDepth, depth);
-			}, 0);
-
-			// Only auto-layout if there are no existing saved positions OR we have orphaned positions,
-			// we have steps, we have multiple nodes, AND we don't have ANY condition nodes
-			if (
-				(shouldForceLayout || !hasExistingPositions) &&
-				steps.length > 0 &&
-				initialNodes.length > 1 &&
-				!hasConditionNodes
-			) {
-				try {
-					// Apply layout to get better positioned nodes
-					const layoutResult = await useAutoLayout(
-						[...initialNodes],
-						[...initialEdges]
-					);
-
-					if (layoutResult) {
-						setNodes(layoutResult.nodes);
-						setEdges(layoutResult.edges);
-						// Save the automatically arranged positions
-						setTimeout(() => {
-							saveNodePositions(layoutResult.nodes);
-						}, 500); // Delay to ensure nodes are rendered
-						return;
-					}
-				} catch (error) {
-					console.error('Failed to apply initial layout:', error);
-				}
-			}
-
-			// Fallback: set nodes without layout (safer for asymmetric conditions)
-			// This prevents branch interference when adding steps to only one condition branch
-			setNodes(initialNodes);
-			setEdges(initialEdges);
-		};
-
-		applyLayoutAndSetNodes();
+		setNodes(initialNodes);
+		setEdges(initialEdges);
 	}, [
 		automation?.id,
 		automation?.settings?.reactflow_positions,

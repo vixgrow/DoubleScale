@@ -10,8 +10,7 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { PoweroffOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Button, Popconfirm } from 'antd';
+import { PoweroffOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
@@ -32,6 +31,10 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 	const { steps, setSteps } = useAutomationContext();
 	const [isDeleting, setIsDeleting] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
+
+	const endIcon = () => {
+		return <PoweroffOutlined />;
+	};
 
 	const getNewSteps = () => {
 		const updatedOrdersSteps = {};
@@ -98,13 +101,6 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	const handleDeleteWithStopPropagation = (e?: React.MouseEvent) => {
-		if (e) {
-			e.stopPropagation();
-		}
-		handleDelete();
-	};
-
 	return (
 		<NodeContextMenu onDelete={handleDelete} disabled={false}>
 			<div className="qcrm-reactflow-node qcrm-reactflow-node--end">
@@ -120,11 +116,7 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 					clearSavedPositions={clearSavedPositions}
 				/>
 
-				<div className="qcrm-reactflow-node__header">
-					<div className="qcrm-reactflow-node__icon">
-						<PoweroffOutlined />
-					</div>
-				</div>
+				<div className="qcrm-reactflow-node__icon">{endIcon()}</div>
 
 				{/* Three dots dropdown menu */}
 				<NodeActionsDropdown

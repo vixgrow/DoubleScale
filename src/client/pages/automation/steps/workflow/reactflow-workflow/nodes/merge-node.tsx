@@ -398,23 +398,24 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 					overlayStyle={{ zIndex: 9999 }}
 					destroyTooltipOnHide
 				>
-					<Button
-						type="primary"
-						shape="circle"
-						size="small"
-						icon={<PlusOutlined />}
-						onClick={handleAddStepClick}
-						title={__('Add step after merge', 'quillcrm')}
-						className="qcrm-merge-add-button"
+					<div
 						style={{
-							boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-							border: 'none',
-							width: '32px',
-							height: '32px',
-							background: '#1890ff',
-							borderColor: '#1890ff',
+							pointerEvents: 'all',
 						}}
-					/>
+						className="qcrm-edge-add-button"
+					>
+						<Button
+							type="primary"
+							shape="circle"
+							size="small"
+							icon={<PlusOutlined />}
+							title={__('Add step here', 'quillcrm')}
+							style={{
+								boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+								border: 'none',
+							}}
+						/>
+					</div>
 				</Popover>
 			) : (
 				<div className="qcrm-reactflow-merge__content">
@@ -430,7 +431,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			<Handle
 				type="source"
 				position={Position.Bottom}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+				className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
 				style={{ bottom: -6 }}
 			/>
 		</div>

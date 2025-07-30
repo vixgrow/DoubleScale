@@ -7,13 +7,13 @@ import { Node } from '@xyflow/react';
  * Node type dimensions configuration
  */
 export const NODE_DIMENSIONS = {
-    trigger: { width: 200, height: 80 },
-    action: { width: 220, height: 90 },
-    condition: { width: 200, height: 120 },
-    goal: { width: 200, height: 80 },
-    end_automation: { width: 180, height: 70 },
-    add_step: { width: 120, height: 50 },
-    default: { width: 200, height: 80 },
+    trigger: { width: 280, height: 80 },
+    action: { width: 280, height: 80 },
+    condition: { width: 280, height: 80 },
+    goal: { width: 280, height: 80 },
+    end_automation: { width: 280, height: 80 },
+    add_step: { width: 280, height: 80 },
+    default: { width: 280, height: 80 },
 } as const;
 
 /**

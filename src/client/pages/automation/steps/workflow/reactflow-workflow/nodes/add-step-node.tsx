@@ -272,7 +272,7 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 			<Handle
 				type="source"
 				position={Position.Bottom}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+				className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
 			/>
 		</div>
 	);

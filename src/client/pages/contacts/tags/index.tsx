@@ -158,8 +158,10 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				)
 			);
 		} catch (error: any) {
+			setVisible(false);
 			showNotice('error', error.message);
 		} finally {
+			setVisible(false);
 			setIsSaving(false);
 		}
 	};
@@ -184,8 +186,10 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			setSelectedTag(null);
 			showNotice('success', __('Tag updated successfully', 'quillcrm'));
 		} catch (error: any) {
+			setVisible(false);
 			showNotice('error', error.message);
 		} finally {
+			setVisible(false);
 			setIsSaving(false);
 		}
 	};

@@ -170,6 +170,14 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		});
 
 		const mockGlobalTable = {
+			getRowModel: () => ({
+				rows: filteredFields.map((field) => ({
+					original: field,
+					id: field.id.toString(),
+				})),
+			}),
+			getAllColumns: () => [],
+			getColumn: () => null,
 			getFilteredSelectedRowModel: () => ({
 				rows: filteredFields
 					.filter((field) => selectedRowKeys.includes(field.id))

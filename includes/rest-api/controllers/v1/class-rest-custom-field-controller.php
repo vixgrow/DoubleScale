@@ -54,6 +54,21 @@ class REST_Custom_Field_Controller extends REST_Controller
 					'callback' => array($this, 'create_item'),
 					'permission_callback' => array($this, 'create_item_permissions_check'),
 				),
+				array(
+					'methods' => WP_REST_Server::DELETABLE,
+					'callback' => array($this, 'delete_items'),
+					'permission_callback' => array($this, 'delete_items_permissions_check'),
+					'args' => array(
+						'ids' => array(
+							'description' => __('Custom field IDs.', 'quillcrm'),
+							'type' => 'array',
+							'items' => array(
+								'type' => 'integer',
+							),
+							'required' => true,
+						),
+					),
+				),
 			)
 		);
 
@@ -320,6 +335,39 @@ class REST_Custom_Field_Controller extends REST_Controller
 	}
 
 	/**
+	 * Delete multiple custom fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_items($request)
+	{
+		try {
+			$ids = $request->get_param('ids');
+
+			if (empty($ids)) {
+				return new WP_Error('rest_custom_field_delete_items', __('No custom field IDs provided', 'quillcrm'), array('status' => 400));
+			}
+
+			$custom_fields = Custom_Field_Model::whereIn('id', $ids)->get();
+
+			if ($custom_fields->isEmpty()) {
+				return new WP_Error('rest_custom_field_delete_items', __('Custom fields not found', 'quillcrm'), array('status' => 404));
+			}
+
+			// Delete the custom fields using whereIn and delete method
+			Custom_Field_Model::whereIn('id', $ids)->delete();
+
+			return new WP_REST_Response(null, 204);
+		} catch (\Exception $e) {
+			return new WP_Error('rest_custom_field_delete_items', $e->getMessage(), array('status' => 500));
+		}
+	}
+
+	/**
 	 * Check if a given request has access to get items
 	 *
 	 * @since 1.0.0
@@ -385,6 +433,20 @@ class REST_Custom_Field_Controller extends REST_Controller
 	 * @return bool
 	 */
 	public function delete_item_permissions_check($request)
+	{
+		return current_user_can('manage_options');
+	}
+
+	/**
+	 * Check if a given request has access to delete multiple custom fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function delete_items_permissions_check($request)
 	{
 		return current_user_can('manage_options');
 	}

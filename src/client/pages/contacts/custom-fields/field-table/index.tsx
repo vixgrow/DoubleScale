@@ -13,7 +13,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import { EditIcon, DeleteIcon, SortIcon } from '@quillcrm/components';
+import { EditIcon, DeleteIcon, SortIcon, TimeAgoCell } from '@quillcrm/components';
 import { CustomField } from '@quillcrm/client';
 import { DraggableField } from '../draggable-field';
 import { MoveIcon } from '@quillcrm/components';
@@ -108,7 +108,7 @@ export const FieldTable: React.FC<FieldTableProps> = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => <div>{row.original.created_at}</div>,
+			cell: ({ row }) => <TimeAgoCell value={row.getValue('created_at')} />,
 		},
 		{
 			accessorKey: 'actions',

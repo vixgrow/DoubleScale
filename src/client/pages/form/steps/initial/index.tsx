@@ -6,38 +6,23 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Button, Input, Card, Typography, Select } from 'antd';
-import { map, keys } from 'lodash';
+import { map } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
 import { useFormContext } from '../../state/context';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
 import AjaxSelect from '../ajax-select';
+import { Field } from '@quillcrm/components';
+import FormTypeSelector from '../form-types-cards';
 
 const Initial: React.FC = () => {
-	const { form, updateForm, isLoading, saveForm, isSaving } =
-		useFormContext();
-	const navigate = useNavigate();
+	const { form, updateForm } = useFormContext();
 	const { getForms } = ConfigAPI;
 	const forms = getForms();
 	const formOptions = form ? forms[form?.form_type]?.options : {};
-
-	const save = async () => {
-		if (!form) {
-			return;
-		}
-
-		try {
-			await saveForm();
-			navigate(getToLink(`forms/${form.id}/settings`));
-		} catch (error) {
-			console.error(error);
-		}
-	};
 
 	const checkConditions = (conditions) => {
 		if (!conditions) {
@@ -83,58 +68,32 @@ const Initial: React.FC = () => {
 		}
 	};
 
+	const handleFormTypeSelect = (value: string) => {
+		updateForm({
+			form_type: value,
+		});
+	};
+
 	return (
-		<Card loading={isLoading}>
+		<div>
 			{form && (
-				<>
-					<div className="qcrm-fields">
-						<div className="qcrm-field">
-							<div className="qcrm-field-label">
-								<Typography.Text>
-									{__('Name', 'quillcrm')}
-								</Typography.Text>
-							</div>
-							<div className="qcrm-field-input">
-								<Input
-									value={form.name}
-									onChange={(e) => {
-										updateForm({
-											name: e.target.value,
-										});
-									}}
-								/>
-							</div>
-						</div>
-						<div
-							className="qcrm-field"
-							style={{
-								flexDirection: 'row',
-								alignItems: 'center',
-								marginBottom: 20,
+				<div className="qcrm-fields">
+					<div className="text-[#09090B] font-bold text-2xl">
+						{__('Basic Information', 'quillcrm')}
+					</div>
+					<div className="flex gap-5 items-start">
+						<Field
+							label={__('Form Name', 'quillcrm')}
+							value={form.name}
+							onChange={(value) => {
+								updateForm({
+									name: value,
+								});
 							}}
-						>
-							<div className="qcrm-field-label">
-								<Typography.Text>
-									{__('Select Form Type', 'quillcrm')}
-								</Typography.Text>
-							</div>
-							<div className="qcrm-field-input">
-								<Select
-									style={{ width: 200 }}
-									value={form.form_type}
-									onChange={(value) => {
-										updateForm({
-											form_type: value,
-										});
-									}}
-									options={map(keys(forms), (key) => ({
-										value: key,
-										label: forms[key].label,
-										disabled: !forms[key].is_enabled
-									}))}
-								/>
-							</div>
-						</div>
+							type="text"
+							placeholder={__('Enter Form Name', 'quillcrm')}
+							required={true}
+						/>
 						{form.form_type &&
 							map(formOptions, (options, key) => {
 								const {
@@ -169,18 +128,17 @@ const Initial: React.FC = () => {
 								}
 							})}
 					</div>
-					<div className="qcrm-actions">
-						<Button
-							type="primary"
-							loading={isSaving}
-							onClick={save}
-						>
-							{__('Next', 'quillcrm')}
-						</Button>
+
+					<div className="mt-5">
+						<FormTypeSelector
+							forms={forms}
+							selectedType={form.form_type}
+							onSelect={handleFormTypeSelect}
+						/>
 					</div>
-				</>
+				</div>
 			)}
-		</Card>
+		</div>
 	);
 };
 

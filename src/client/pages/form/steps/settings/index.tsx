@@ -8,7 +8,6 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Card, Typography, Flex, Switch } from 'antd';
 import { map, mapValues } from 'lodash';
 
 /**
@@ -19,11 +18,13 @@ import { useFormContext } from '../../state/context';
 import ConfigAPI from '@quillcrm/config';
 import type { Form } from '@quillcrm/config';
 import type { MappedFields } from '@quillcrm/client';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { ListField, TagField, ContactMappedFields } from '@quillcrm/components';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 const Settings: React.FC = () => {
-	const { form, saveForm, updateSettings } = useFormContext();
+	const { form, updateSettings } = useFormContext();
 	const { getForms } = ConfigAPI;
 	const forms = getForms();
 	const fieldsSettings = form
@@ -34,10 +35,7 @@ const Settings: React.FC = () => {
 	>(null);
 	const [isFetching, setIsFetching] = useState(true);
 	const { getAjaxUrl, getNonce } = ConfigAPI;
-	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
-	const [isSaving, setIsSaving] = useState(false);
-	const [isActivating, setIsActivating] = useState(false);
 
 	const getFormFields = async () => {
 		if (!form || !fieldsSettings) {
@@ -64,9 +62,7 @@ const Settings: React.FC = () => {
 				throw new Error(data.data);
 			}
 
-			setFormFields(
-				data.data as Form['fields_settings']['fields']
-			);
+			setFormFields(data.data as Form['fields_settings']['fields']);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -82,218 +78,135 @@ const Settings: React.FC = () => {
 	}, [form?.form_id]);
 
 	const settings = form?.data || null;
-	const mappedFields = settings ? settings?.mapped_fields : {};
-
-	const save = async (status) => {
-		if (!form) {
-			return;
-		}
-
-		if (status === 'active') {
-			setIsActivating(true);
-		} else {
-			setIsSaving(true);
-		}
-
-		try {
-			await saveForm({
-				status: status,
-			});
-			if (status === 'active') {
-				navigate(getToLink(`forms/${form.id}/overview`));
-			} else {
-				navigate(getToLink(`forms`));
-			}
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to save form', 'quillcrm'),
-			});
-		} finally {
-			if (status === 'active') {
-				setIsActivating(false);
-			} else {
-				setIsSaving(false);
-			}
-		}
-	};
+	const mappedFields = settings ? settings.mapped_fields : {};
 
 	return (
-		<Card loading={isFetching}>
-			{form && (
-				<>
-					{!isFetching && (
-						<>
-							<div className="qcrm-fields">
-								<div className="qcrm-field">
-									<div className="qcrm-field-label">
-										<Typography.Text>
-											{__('Map fields', 'quillcrm')}
-										</Typography.Text>
-									</div>
-									{formFields && (
-										<ContactMappedFields
-											values={mappedFields}
-											onChange={(value: MappedFields) => {
-												updateSettings(
-													'mapped_fields',
-													value
-												);
+		<div>
+			{form && !isFetching && (
+				<div className="qcrm-fields">
+					<div className="qcrm-field">
+						{formFields && (
+							<ContactMappedFields
+								values={mappedFields}
+								onChange={(value: MappedFields) => {
+									updateSettings('mapped_fields', value);
+								}}
+								fields={mapValues(formFields, (name) => ({
+									label: name,
+								}))}
+							/>
+						)}
+					</div>
+
+					<div className="qcrm-field">
+						<div className="text-[#09090B] font-bold text-2xl my-5">
+							{__('Contact', 'quillcrm')}
+						</div>
+						<div className="qcrm-field-input">
+							<div className="flex flex-col gap-5">
+								<div className="flex justify-between gap-[10px]">
+									<div className="flex flex-col gap-[10px] flex-1">
+										<div className="flex text-[#09090B] font-normal text-base">
+											{__('Lists')}{' '}
+											<span className="text-red-600">
+												*
+											</span>
+										</div>
+										<ListField
+											value={settings?.lists || []}
+											onChange={(value) => {
+												updateSettings('lists', value);
 											}}
-											fields={mapValues(
-												formFields,
-												(name) => ({ label: name })
-											)}
 										/>
-									)}
-								</div>
-								<div className="qcrm-field">
-									<div className="qcrm-field-label">
-										<Typography.Text>
-											{__('Contact', 'quillcrm')}
-										</Typography.Text>
 									</div>
-									<div className="qcrm-field-input">
-										<Flex vertical={true} gap={10}>
-											<Flex
-												justify="space-between"
-												gap={10}
-											>
-												<Flex
-													vertical={true}
-													gap={10}
-													style={{ flex: 1 }}
-												>
-													<Typography.Text>
-														{__(
-															'Lists',
-															'quillcrm'
-														)}
-													</Typography.Text>
-													<ListField
-														value={
-															settings?.lists ||
-															[]
-														}
-														onChange={(value) => {
-															updateSettings(
-																'lists',
-																value
-															);
-														}}
-													/>
-												</Flex>
-												<Flex
-													vertical={true}
-													gap={10}
-													style={{ flex: 1 }}
-												>
-													<Typography.Text>
-														{__('Tags', 'quillcrm')}
-													</Typography.Text>
-													<TagField
-														value={
-															settings?.tags || []
-														}
-														onChange={(value) => {
-															updateSettings(
-																'tags',
-																value
-															);
-														}}
-													/>
-												</Flex>
-											</Flex>
-											<Flex
-												gap={10}
-												justify="space-between"
-											>
-												<Typography.Text>
-													{__(
-														'Update existing contact',
-														'quillcrm'
-													)}
-												</Typography.Text>
-												<Switch
-													checked={
-														settings?.update_existing_contact
-													}
-													onChange={(value) => {
-														updateSettings(
-															'update_existing_contact',
-															value
-														);
-													}}
-												/>
-											</Flex>
-											<Flex
-												gap={10}
-												justify="space-between"
-											>
-												<Typography.Text>
-													{__(
-														'Update blank fields',
-														'quillcrm'
-													)}
-												</Typography.Text>
-												<Switch
-													checked={
-														settings?.update_blank_fields
-													}
-													onChange={(value) => {
-														updateSettings(
-															'update_blank_fields',
-															value
-														);
-													}}
-												/>
-											</Flex>
-											<Flex
-												gap={10}
-												justify="space-between"
-											>
-												<Typography.Text>
-													{__(
-														'Mark as Subscribed',
-														'quillcrm'
-													)}
-												</Typography.Text>
-												<Switch
-													checked={
-														settings?.mark_as_subscribed
-													}
-													onChange={(value) => {
-														updateSettings(
-															'mark_as_subscribed',
-															value
-														);
-													}}
-												/>
-											</Flex>
-										</Flex>
+									<div className="flex flex-col flex-1 gap-[10px]">
+										<div className="flex text-[#09090B] font-normal text-base">
+											{__('Tags')}{' '}
+											<span className="text-red-600">
+												*
+											</span>
+										</div>
+										<TagField
+											value={settings?.tags || []}
+											onChange={(value) => {
+												updateSettings('tags', value);
+											}}
+										/>
 									</div>
 								</div>
+
+								<Card className='shadow-none pt-6'>
+									<CardContent className="space-y-2">
+										<div className="flex items-center justify-between">
+											<Label className="text-base text-[#09090B]">
+												{__(
+													'Update existing contact',
+													'quillcrm'
+												)}
+											</Label>
+											<Switch
+												checked={
+													settings?.update_existing_contact ||
+													false
+												}
+												onCheckedChange={(value) =>
+													updateSettings(
+														'update_existing_contact',
+														value
+													)
+												}
+											/>
+										</div>
+
+										<div className="flex items-center justify-between">
+											<Label className="text-base text-[#09090B]">
+												{__(
+													'Update blank fields',
+													'quillcrm'
+												)}
+											</Label>
+											<Switch
+												checked={
+													settings?.update_blank_fields ||
+													false
+												}
+												onCheckedChange={(value) =>
+													updateSettings(
+														'update_blank_fields',
+														value
+													)
+												}
+											/>
+										</div>
+
+										<div className="flex items-center justify-between">
+											<Label className="text-base text-[#09090B]">
+												{__(
+													'Mark as Subscribed',
+													'quillcrm'
+												)}
+											</Label>
+											<Switch
+												checked={
+													settings?.mark_as_subscribed ||
+													false
+												}
+												onCheckedChange={(value) =>
+													updateSettings(
+														'mark_as_subscribed',
+														value
+													)
+												}
+											/>
+										</div>
+									</CardContent>
+								</Card>
 							</div>
-							<div className="qcrm-actions">
-								<Button
-									loading={isSaving}
-									onClick={() => save('inactive')}
-								>
-									{__('Save as draft', 'quillcrm')}
-								</Button>
-								<Button
-									type="primary"
-									loading={isActivating}
-									onClick={() => save('active')}
-								>
-									{__('Activate', 'quillcrm')}
-								</Button>
-							</div>
-						</>
-					)}
-				</>
+						</div>
+					</div>
+				</div>
 			)}
-		</Card>
+		</div>
 	);
 };
 

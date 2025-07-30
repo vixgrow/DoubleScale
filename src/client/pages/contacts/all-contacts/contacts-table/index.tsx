@@ -16,6 +16,7 @@ import { useContactsAPI } from '../useContactsAPI';
 import { useContactsColumns } from '../columns';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
+import BulkActionSelect from '@quillcrm/components/bulk-actions';
 
 interface ContactsTableProps {
 	activeTab?: string;

@@ -5,43 +5,85 @@ import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { Table, Tag as AntTag, Input, Button, Modal, Flex, Select } from 'antd';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Forms, Form, FormsResponse } from '@quillcrm/client';
-import { NavLink, getToLink, useNavigate } from '@quillcrm/navigation';
+import type {
+	Forms,
+	Form as FormData,
+	FormsResponse,
+	DataTableConfig,
+	NoticeMessage,
+} from '@quillcrm/client';
+import { useNavigate } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
-import { Field } from '@quillcrm/components';
-import { convertDate } from '@quillcrm/utils';
-import { isEmpty } from 'validator';
+import { PageHeader, PlusIcon, NoticeBanner } from '@quillcrm/components';
+import { DataTable } from '@/components/ui/data-table';
+import { getColumns } from './columns';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { formatDateForAPI } from '@quillcrm/utils';
+import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
+import Form from '../form';
 
-const { Column } = Table;
+const duplicate = (id: string) => {
+	// TODO: Implement duplicate logic
+	console.log('Duplicate', id);
+};
+
 const FormsList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(10);
-	const [total, setTotal] = useState(0);
-	const [data, setData] = useState<Forms>([]);
+	const [forms, setForms] = useState<Forms>([]);
+	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [keyword, setKeyword] = useState('');
-	const [visible, setVisible] = useState(false);
-	const [isSaving, setIsSaving] = useState(false);
-	const [form, setForm] = useState({
-		name: '',
-	});
-	const forms = ConfigAPI.getForms();
-	const navigate = useNavigate();
-	const { createNotice } = useDispatch('quillcrm/core');
+	const [showCreateForm, setShowCreateForm] = useState(false);
+	const formTypes = ConfigAPI.getForms();
 	const [bulkAction, setBulkAction] = useState('');
+	const [deactivating, setDeactivating] = useState(false);
 	const [isApplying, setIsApplying] = useState(false);
+	const navigate = useNavigate();
+
+	// Notice state
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+
+	const [dateRange, setDateRange] = useState<{
+		from: Date | null;
+		to: Date | null;
+	}>({
+		from: null,
+		to: null,
+	});
+
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
+	});
+
+	// Helper function to show notice
+	const showNotice = (type: 'success' | 'error', message: string) => {
+		setNotice({ type, message });
+	};
+
+	// Helper function to close notice
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Handle form creation success
+	const handleFormCreated = (message: string) => {
+		showNotice('success', message);
+	};
 
 	const fetchForms = async () => {
 		setLoading(true);
@@ -50,55 +92,30 @@ const FormsList: React.FC = () => {
 				path: addQueryArgs('/qc/v1/forms', {
 					page,
 					per_page: perPage,
+					from: formatDateForAPI(dateRange.from),
+					to: formatDateForAPI(dateRange.to),
 					keyword,
 				}),
 				method: 'GET',
 			})) as FormsResponse;
-
-			response.total && setTotal(response.total);
-			response.data && setData(response.data);
+			setForms(response.data);
+			setTotalRecords(response.total || 0);
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	const createForm = async () => {
-		if (isEmpty(form.name, { ignore_whitespace: true })) {
-			createNotice({
-				type: 'error',
-				message: __('Form name is required', 'quillcrm'),
-			});
-			return;
-		}
-		setIsSaving(true);
-		try {
-			const response = (await apiFetch({
-				path: '/qc/v1/forms',
-				method: 'POST',
-				data: form,
-			})) as Form;
-
-			navigate(getToLink(`forms/${response.id}`));
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsSaving(false);
-		}
-	};
-
 	useEffect(() => {
 		fetchForms();
-	}, [page, perPage]);
+	}, [page, perPage, dateRange, keyword]);
 
 	const deleteSelected = async () => {
+		if (selectedRowKeys.length === 0) {
+			return;
+		}
+
 		setIsApplying(true);
 		try {
 			await apiFetch({
@@ -109,171 +126,121 @@ const FormsList: React.FC = () => {
 				},
 			});
 
-			createNotice({
-				type: 'success',
-				message: __('Forms deleted', 'quillcrm'),
-			});
+			showNotice('success', __('Forms deleted', 'quillcrm'));
 			setSelectedRowKeys([]);
+			setBulkAction('');
 			fetchForms();
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setIsApplying(false);
 		}
 	};
 
+	const deleteForm = async (id: number) => {
+		try {
+			await apiFetch({
+				path: `/qc/v1/forms/${id}`,
+				method: 'DELETE',
+			});
+
+			fetchForms();
+		} catch (error: any) {
+			showNotice('error', error.message);
+		}
+	};
+
+	const activateDeactivateForm = async (
+		id: number,
+		currentStatus: string
+	) => {
+		try {
+			await apiFetch({
+				path: `/qc/v1/forms/${id}`,
+				method: 'POST',
+				data: {
+					status: currentStatus === 'active' ? 'inactive' : 'active',
+				},
+			});
+			fetchForms();
+		} catch (error: any) {
+			showNotice('error', error.message);
+		}
+	};
+
+	const columns = getColumns({
+		formTypes,
+		navigate: navigate,
+		duplicate,
+		onDelete: deleteForm,
+		onToggleStatus: activateDeactivateForm,
+	});
+
+	const tableConfig: DataTableConfig<FormData> = {
+		search: {
+			placeholder: __('Search Forms', 'quillcrm'),
+			onChange: (value) => setKeyword(value),
+			value: keyword,
+		},
+		selection: {
+			enabled: true,
+			selectedKeys: selectedRowKeys,
+			onSelectionChange: setSelectedRowKeys,
+		},
+		bulkActions: {
+			enabled: true,
+			currentAction: bulkAction,
+			onActionChange: setBulkAction,
+			onExecuteAction: () => deleteSelected(),
+		},
+		dateRange: {
+			enabled: true,
+			value: dateRange,
+			onDateChange: setDateRange,
+			placeholder: __('Date Range', 'quillcrm'),
+		},
+	};
+
 	return (
 		<div className="qcrm-forms-list">
-			<Flex
-				className="qcrm-contacts-list__actions"
-				justify="space-between"
-			>
-				<Flex gap={10}>
-					<Flex gap={10}>
-						<Select
-							options={[
-								{
-									label: __('Bulk Actions', 'quillcrm'),
-									value: '',
-								},
-								{
-									label: __('Delete', 'quillcrm'),
-									value: 'delete',
-								},
-							]}
-							value={bulkAction}
-							onChange={(value) => setBulkAction(value)}
-							disabled={selectedRowKeys.length === 0}
-						/>
-						<Button
-							type="primary"
-							onClick={() => {
-								if (bulkAction === 'delete') {
-									deleteSelected();
-								}
-							}}
-							disabled={selectedRowKeys.length === 0}
-							loading={isApplying}
-						>
-							{__('Apply', 'quillcrm')}
-						</Button>
-					</Flex>
-					<Input.Search
-						placeholder={__('Search', 'quillcrm')}
-						allowClear
-						onSearch={() => {
-							fetchForms();
-						}}
-						onChange={(e) => setKeyword(e.target.value)}
-						styles={{
-							affixWrapper: {
-								padding: '4px 5px',
-							},
-							input: {
-								minHeight: 'auto',
-							},
-						}}
-					/>
-				</Flex>
-				<Button type="primary" onClick={() => setVisible(true)}>
-					{__('Create Form', 'quillcrm')}
-				</Button>
-			</Flex>
-			<Table
-				dataSource={data}
-				rowKey="id"
-				loading={loading}
-				pagination={{
-					current: page,
-					pageSize: perPage,
-					total,
-					onChange: (page, pageSize) => {
-						setPage(page);
-						setPerPage(pageSize);
+			<PageHeader
+				title={__('Forms List', 'quillcrm')}
+				subtitle={__('Forms', 'quillcrm')}
+				actions={[
+					{
+						label: __('Create Forms', 'quillcrm'),
+						onClick: () => setShowCreateForm(true),
+						type: 'primary',
+						icon: <PlusIcon />,
 					},
-				}}
-				rowSelection={{
-					selectedRowKeys,
-					onChange: (selectedRowKeys) =>
-						setSelectedRowKeys(selectedRowKeys),
-				}}
-			>
-				<Column
-					title={__('Name')}
-					dataIndex="name"
-					key="name"
-					render={(_, record: Form) => (
-						<NavLink
-							to={
-								record.status === 'active'
-									? `forms/${record.id}/overview`
-									: `forms/${record.id}`
-							}
-						>
-							{record.name}
-						</NavLink>
-					)}
+				]}
+			/>
+			{notice && (
+				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+			)}
+
+			<div className="qcrm-contacts-forms-list__actions">
+				<DataTable
+					columns={columns}
+					data={forms}
+					config={tableConfig}
+					showPagination={false}
+					initialPageSize={perPage}
+					setPage={setPage}
 				/>
-				<Column
-					title={__('Type')}
-					dataIndex="form_type"
-					key="form_type"
-					render={(_, record: Form) =>
-						forms[record.form_type]?.label || ''
-					}
+				<DataTablePagination table={serverSideTable} />
+			</div>
+
+			{showCreateForm && (
+				<Form
+					isNewForm={true}
+					onClose={() => {
+						setShowCreateForm(false);
+						fetchForms();
+					}}
+					onSuccess={handleFormCreated}
 				/>
-				<Column
-					title={__('Form ID')}
-					dataIndex="form_id"
-					key="form_id"
-				/>
-				<Column
-					title={__('Status')}
-					dataIndex="status"
-					key="status"
-					render={(status) => (
-						<AntTag color={status === 'active' ? 'green' : 'red'}>
-							{status}
-						</AntTag>
-					)}
-				/>
-				<Column
-					title={__('Created At')}
-					dataIndex="created_at"
-					key="created_at"
-					render={(text) => convertDate(text)}
-				/>
-				<Column
-					title={__('Updated At')}
-					dataIndex="updated_at"
-					key="updated_at"
-					render={(text) => convertDate(text)}
-				/>
-			</Table>
-			<Modal
-				title={__('Create Form', 'quillcrm')}
-				open={visible}
-				onOk={createForm}
-				onCancel={() => setVisible(false)}
-				confirmLoading={isSaving}
-			>
-				<div className="qcrm-fields">
-					<Field
-						label={__('Name', 'quillcrm')}
-						value={form.name}
-						onChange={(value) =>
-							setForm({
-								...form,
-								name: value,
-							})
-						}
-						type="text"
-					/>
-				</div>
-			</Modal>
+			)}
 		</div>
 	);
 };

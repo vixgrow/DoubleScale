@@ -10,8 +10,7 @@ import { ColumnDef } from '@tanstack/react-table';
  * internal dependencies
  */
 import type { List as ContactList } from '@quillcrm/client';
-import { EditIcon, SortIcon } from '@quillcrm/components';
-import { convertDate } from '@quillcrm/utils';
+import { EditIcon, SortIcon, TimeAgoCell } from '@quillcrm/components';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@quillcrm/components/ui/button';
 
@@ -104,7 +103,7 @@ export const getListColumns = ({
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => convertDate(row.original.created_at),
+			cell: ({ row }) => <TimeAgoCell value={row.getValue('created_at')} />,
 		},
 		{
 			accessorKey: 'actions',

@@ -13,7 +13,7 @@ import type { Contact } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
 import { Checkbox } from '@/components/ui/checkbox';
-import { SortIcon, ViewIcon } from '@quillcrm/components';
+import { SortIcon, TimeAgoCell, ViewIcon } from '@quillcrm/components';
 import { useContactOrderDetails } from '../useContactsAPI';
 
 export const selectionColumn: ColumnDef<Contact> = {
@@ -209,7 +209,7 @@ export const useContactsColumns = () => {
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => convertDate(row.original.created_at),
+			cell: ({ row }) => <TimeAgoCell value={row.getValue('created_at')} />,
 		},
 		{
 			accessorKey: 'view',

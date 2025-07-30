@@ -63,6 +63,8 @@ const LinkTriggerField = ({ value, onChange }: Props) => {
 					<Flex justify="space-between" gap={10}>
 						<Flex vertical={true} gap={10} style={{ flex: 1 }}>
 							<AsyncSelect
+								className="react-select-container"
+								classNamePrefix="react-select"
 								loadOptions={(inputValue, callback) => {
 									fetchLinkTriggers(inputValue).then(
 										(data) => {

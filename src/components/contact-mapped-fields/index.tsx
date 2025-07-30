@@ -75,6 +75,8 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 							className="flex-1"
 						/>
 						<Select
+							className="react-select-container"
+							classNamePrefix="react-select"
 							onChange={(value) => {
 								if (!isObject(value)) {
 									return;

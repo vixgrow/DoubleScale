@@ -75,6 +75,8 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 			</div>
 			<div className="qcrm-field-input">
 				<AsyncSelect
+					className="react-select-container"
+					classNamePrefix="react-select"
 					loadOptions={(_inputValue, callback) => {
 						fetchOptions().then((data) => {
 							if (!data) {

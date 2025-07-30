@@ -213,6 +213,8 @@ const PaginatedSelect = ({
 				<div className="flex justify-between gap-[10px]">
 					<div className="flex flex-col gap-[10px] flex-1">
 						<Select<SelectOption, false>
+							className="react-select-container"
+							classNamePrefix="react-select"
 							options={optionsWithLoading}
 							value={null}
 							onChange={(val: SelectOption | null) => {

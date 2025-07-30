@@ -26,7 +26,14 @@ interface Props {
 	values: { [key: string]: any };
 }
 
-const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug, values, onChange }) => {
+const AjaxSelect: React.FC<Props> = ({
+	label,
+	ajax_action,
+	parent,
+	slug,
+	values,
+	onChange,
+}) => {
 	const { getAjaxUrl, getNonce } = ConfigAPI;
 	const [formOptions, setFormOptions] = useState({});
 
@@ -75,6 +82,8 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug, values,
 			</div>
 			<div className="qcrm-field-input">
 				<AsyncSelect
+					className="react-select-container"
+					classNamePrefix="react-select"
 					loadOptions={(_inputValue, callback) => {
 						fetchOptions().then((data) => {
 							if (!data) {

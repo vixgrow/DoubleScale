@@ -123,6 +123,8 @@ const Field: React.FC<FieldProps> = ({
 			const selectOptions = options || [];
 			fieldContent = (
 				<Select
+					className="react-select-container"
+					classNamePrefix="react-select"
 					value={
 						value
 							? selectOptions.find(

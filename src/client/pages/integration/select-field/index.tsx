@@ -73,6 +73,8 @@ const SelectField: React.FC<SelectFieldProps> = ({
 	return (
 		<div className="qcrm-integration-select-field">
 			<Select
+				className="react-select-container"
+				classNamePrefix="react-select"
 				isLoading={isLoading}
 				options={options}
 				onChange={(value) => {

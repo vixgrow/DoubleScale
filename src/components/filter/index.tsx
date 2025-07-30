@@ -95,6 +95,8 @@ const Filter: React.FC<FilterProps> = ({
 				</div>
 				{filterSettings.operators && (
 					<Select
+						className="react-select-container"
+						classNamePrefix="react-select"
 						value={{
 							label: filterSettings.operators[filter.operator],
 							value: filter.operator,

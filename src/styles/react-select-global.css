@@ -11,9 +11,9 @@
 }
 
 /* Remove box-shadow and outline from all react-select inputs */
-.react-select__input input,
-.react-select__input input:focus,
-.react-select__input input:active {
+.react-select__input,
+.react-select__input:focus,
+.react-select__input:active {
 	box-shadow: none !important;
 	outline: none !important;
 }

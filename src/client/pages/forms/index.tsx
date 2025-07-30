@@ -31,11 +31,6 @@ import { formatDateForAPI } from '@quillcrm/utils';
 import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
 import Form from '../form';
 
-const duplicate = (id: string) => {
-	// TODO: Implement duplicate logic
-	console.log('Duplicate', id);
-};
-
 const FormsList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
@@ -82,6 +77,8 @@ const FormsList: React.FC = () => {
 
 	// Handle form creation success
 	const handleFormCreated = (message: string) => {
+		setShowCreateForm(false);
+		fetchForms();
 		showNotice('success', message);
 	};
 
@@ -162,6 +159,14 @@ const FormsList: React.FC = () => {
 					status: currentStatus === 'active' ? 'inactive' : 'active',
 				},
 			});
+
+			showNotice(
+				'success',
+				currentStatus === 'active'
+					? __('Form deactivated', 'quillcrm')
+					: __('Form activated', 'quillcrm')
+			);
+
 			fetchForms();
 		} catch (error: any) {
 			showNotice('error', error.message);
@@ -171,7 +176,6 @@ const FormsList: React.FC = () => {
 	const columns = getColumns({
 		formTypes,
 		navigate: navigate,
-		duplicate,
 		onDelete: deleteForm,
 		onToggleStatus: activateDeactivateForm,
 	});

@@ -42,7 +42,6 @@ const FormsList: React.FC = () => {
 	const [showCreateForm, setShowCreateForm] = useState(false);
 	const formTypes = ConfigAPI.getForms();
 	const [bulkAction, setBulkAction] = useState('');
-	const [deactivating, setDeactivating] = useState(false);
 	const [isApplying, setIsApplying] = useState(false);
 	const navigate = useNavigate();
 

@@ -232,17 +232,9 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		}
 	};
 
-	// Effects
 	useEffect(() => {
 		fetchLists();
 	}, [page, perPage, keyword, dateRange]);
-
-	// useEffect(() => {
-	// 	if (dateRange.from || dateRange.to) {
-	// 		setPage(1);
-	// 		fetchLists();
-	// 	}
-	// }, [dateRange]);
 
 	// Imperative handle
 	useImperativeHandle(ref, () => ({
@@ -290,6 +282,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 			<DataTable
 				columns={columns}
 				data={lists}
+				activeTab={activeTab}
 				config={tableConfig}
 				showPagination={false}
 				initialPageSize={perPage}

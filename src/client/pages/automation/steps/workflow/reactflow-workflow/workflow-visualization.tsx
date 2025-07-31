@@ -288,9 +288,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				})
 				.sort((a, b) => a.order - b.order);
 
-			// Calculate minimum width based on level and content with increased base
-			const baseWidth = 300; // Increased base width for better spacing
-			const levelMultiplier = 1 + level * 0.3; // Better spacing per level
+			// Calculate minimum width based on level and content - reduced for tighter layout
+			const baseWidth = 200; // Reasonable base width
+			const levelMultiplier = 1 + level * 0.2; // Reduced multiplier for level spacing
 			const minWidth = baseWidth * levelMultiplier;
 
 			if (branchSteps.length === 0) {
@@ -315,8 +315,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						level + 1
 					);
 
-					// Enhanced spacing calculation with better branch separation
-					const branchSpacing = Math.max(120, 80 + level * 40); // Better spacing with depth
+					// Reduced spacing calculation for tighter layout
+					const branchSpacing = Math.max(100, 60 + level * 20); // Reduced spacing
 					const conditionWidth = yesWidth + noWidth + branchSpacing;
 
 					// Ensure minimum width for readability
@@ -325,8 +325,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				}
 			});
 
-			// Add extra padding for complex branches with increased padding
-			const complexityPadding = level > 0 ? 150 + level * 75 : 75;
+			// Reduced padding for tighter layout
+			const complexityPadding = level > 0 ? 50 + level * 30 : 40;
 			const finalWidth = maxWidth + complexityPadding;
 
 			return finalWidth;
@@ -383,13 +383,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					// Position condition node at center
 					positionMap.set(stepId, { x: startX, y: conditionY });
 
-					// Calculate child positions with improved spacing - increased significantly for better readability
-					const baseSpacing = 450; // Significantly increased base spacing for condition children
-					const levelMultiplier = 1 + level * 0.6; // More aggressive spacing per level
+					// Calculate child positions with reduced spacing for tighter layout
+					const baseSpacing = 200; // Reduced base spacing
+					const levelMultiplier = 1 + level * 0.3; // Reduced multiplier
 					const childY = conditionY + baseSpacing * levelMultiplier;
 
-					// Enhanced branch spacing calculation with better separation
-					const branchGap = Math.max(300, 150 + level * 60); // Increased gap based on level
+					// Reduced branch spacing calculation
+					const branchGap = Math.max(150, 80 + level * 30); // Reduced gap
 					const totalChildWidth = yesWidth + noWidth + branchGap;
 
 					// Position yes branch to the left and get its end Y position
@@ -417,18 +417,18 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					// Use the actual end positions from the child branches
 					const maxBranchEndY = Math.max(yesEndY, noEndY);
 
-					// Enhanced merge spacing calculation with significantly more space
+					// Reduced merge spacing calculation with much tighter spacing
 					// Also check for any nested conditions in children to ensure proper spacing
 					const hasNestedConditions = stepList.some(
 						(s) => s.parent_id === step.id && s.type === 'condition'
 					);
 
-					const baseBottomSpacing = hasNestedConditions ? 800 : 600; // Extra space for nested conditions
-					const mergeSpacing = Math.max(300, 200 + level * 50); // Increased dynamic merge spacing
-					const levelSpacing = level * 120; // Much more spacing for each nesting level
+					const baseBottomSpacing = hasNestedConditions ? 300 : 250; // Much reduced spacing
+					const mergeSpacing = Math.max(150, 100 + level * 25); // Reduced dynamic spacing
+					const levelSpacing = level * 50; // Much reduced spacing per level
 					const nestedConditionSpacing = hasNestedConditions
-						? 400
-						: 0; // Additional space for nested structures
+						? 100
+						: 0; // Reduced additional space
 
 					currentY = Math.max(
 						conditionY +
@@ -475,8 +475,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					savedPositions[parentId] || positionMap.get(parentId);
 
 				if (parentPosition) {
-					// Enhanced positioning that considers nesting level with better spacing
-					const baseY = parentPosition.y + 200; // Significantly increased spacing below parent
+					// Reasonable positioning that considers nesting level
+					const baseY = parentPosition.y + 150; // Reasonable spacing below parent
 					const branchWidth = calculateBranchWidth(
 						steps,
 						step.parent_id,
@@ -501,6 +501,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 		// Calculate all positions first
 		calculatePositions(steps, null, null, 0, startX, startY);
+
+		console.log('Position Map', positionMap);
 
 		// Helper function to recursively process steps and their children
 		const processStepHierarchy = (
@@ -648,8 +650,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						level + 1
 					);
 
-					const center =
+					let center =
 						conditionPos.x + nodeWidth / 2 - nodeYesNoWidth / 2;
+					console.log('Center', center);
 					const maxWidth = Math.max(yesWidth, noWidth);
 					const yesX = center - maxWidth / 2;
 					const noX = center + maxWidth / 2;
@@ -701,7 +704,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 					// Calculate merge position based on actual children positions
 					// Find the bottommost Y position among all children in both branches
-					let maxChildY = Math.max(yesPosition.y, noPosition.y) + 150; // Start with branch positions
+					let maxChildY = Math.max(yesPosition.y, noPosition.y) + 120; // Start with branch positions
 
 					// Recursively calculate the bottom-most Y position including nested conditions
 					const calculateMaxYInBranch = (
@@ -741,8 +744,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 								// Add spacing for the child's merge node
 								const childMergeY = Math.max(
-									childPos.y + 600,
-									childMaxBranchY + 200
+									childPos.y + 250, // Reduced spacing
+									childMaxBranchY + 100 // Reduced spacing
 								);
 								maxY = Math.max(maxY, childMergeY);
 							}
@@ -758,18 +761,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					const noMaxY = calculateMaxYInBranch(noChildren);
 					maxChildY = Math.max(maxChildY, noMaxY);
 
-					// Position merge node below all children with proper spacing
-					const actualBranchCenterX =
-						(yesPosition.x + noPosition.x) / 2;
+					center = conditionPos.x + nodeWidth / 2 - addStepWidth / 2;
 
-					// Calculate merge position with extra spacing for nested conditions
-					const baseSpacing = 200;
-					const nestingMultiplier = level * 100; // More space per nesting level
+					// Calculate merge position with reduced spacing for nested conditions
+					const baseSpacing = 120; // Reduced base spacing
+					const nestingMultiplier = level * 10; // Reduced multiplier per level
 					const hasNestedConditionsInBranch = [
 						...yesChildren,
 						...noChildren,
 					].some((child) => child.type === 'condition');
-					const nestedSpacing = hasNestedConditionsInBranch ? 300 : 0;
+					const nestedSpacing = hasNestedConditionsInBranch ? 150 : 0; // Reduced nested spacing
 
 					const mergeY =
 						maxChildY +
@@ -778,9 +779,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						nestedSpacing;
 
 					const optimalMergePosition = {
-						x: actualBranchCenterX + addStepWidth / 2,
+						x: center,
 						y: mergeY,
 					};
+
+					console.log(
+						'Merge Position for step',
+						optimalMergePosition
+					);
 
 					const mergePosition =
 						savedPositions[mergeId] || optimalMergePosition;

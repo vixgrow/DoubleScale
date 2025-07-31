@@ -253,11 +253,17 @@ const Form: React.FC<FormProps> = ({
 				{
 					label: __('Form Information', 'quillcrm'),
 				},
+				{
+					label: __('Form Settings', 'quillcrm'),
+				},
 			]
 		: [
 				{
-					label: __('Create Forms', 'quillcrm'),
+					label: __('Edit Form', 'quillcrm'),
 					href: 'forms',
+				},
+				{
+					label: __('Form Information', 'quillcrm'),
 				},
 				{
 					label: __('Form Settings', 'quillcrm'),

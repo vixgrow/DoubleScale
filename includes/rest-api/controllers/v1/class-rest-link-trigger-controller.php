@@ -45,25 +45,27 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => array(
-						'keyword'  => array(
-							'description' => __( 'Keyword to search.', 'quillcrm' ),
-							'type'        => 'string',
-						),
-						'per_page' => array(
-							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
-							'type'        => 'integer',
-						),
-						'page'     => array(
-							'description' => __( 'Page number.', 'quillcrm' ),
-							'type'        => 'integer',
-						),
-					),
+					'args'                => $this->get_collection_params(),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_items' ),
+					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
+					'args'                => array(
+						'ids' => array(
+							'description' => __( 'IDs of the link triggers.', 'quillcrm' ),
+							'type'        => 'array',
+							'items'       => array(
+								'type' => 'integer',
+							),
+							'required'    => true,
+						),
+					),
 				),
 			)
 		);
@@ -94,6 +96,50 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 				),
 			)
+		);
+	}
+
+	/**
+	 * Get collection params
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		return array(
+			'keyword'  => array(
+				'description'       => __( 'Limit results to those matching a string.', 'quillcrm' ),
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'per_page' => array(
+				'description' => __( 'Number of items to return in one page.', 'quillcrm' ),
+				'type'        => 'integer',
+				'default'     => 10,
+			),
+			'page'     => array(
+				'description' => __( 'Current page of the collection.', 'quillcrm' ),
+				'type'        => 'integer',
+				'default'     => 1,
+			),
+			'ids'      => array(
+				'description' => __( 'IDs of the link triggers.', 'quillcrm' ),
+				'type'        => 'array',
+				'items'       => array(
+					'type' => 'integer',
+				),
+			),
+			'from'     => array(
+				'description' => __( 'Start date for filtering link triggers.', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+			'to'       => array(
+				'description' => __( 'End date for filtering link triggers.', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
 		);
 	}
 
@@ -173,17 +219,55 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
-		$keyword  = $request->get_param( 'keyword' );
-		$per_page = $request->get_param( 'per_page' ) ?: 10;
-		$page     = $request->get_param( 'page' ) ?: 1;
+		try {
+			$keyword  = $request->get_param( 'keyword' ) ? $request->get_param( 'keyword' ) : '';
+			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$ids      = $request->get_param( 'ids' ) ? $request->get_param( 'ids' ) : array();
+			$from     = $request->get_param( 'from' ) ?? null;
+			$to       = $request->get_param( 'to' ) ?? null;
 
-		if ( $keyword ) {
-			$link_triggers = Link_Trigger_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), $page );
-		} else {
-			$link_triggers = Link_Trigger_Model::orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), $page );
+			$query = Link_Trigger_Model::query();
+
+			if ( ! empty( $ids ) ) {
+				$link_triggers = $query->whereIn( 'id', $ids )->get();
+			} else {
+				if ( $keyword ) {
+					$query->where( 'name', 'LIKE', '%' . $keyword . '%' );
+				}
+				if ( $from ) {
+					$query->where( 'created_at', '>=', $from );
+				}
+				if ( $to ) {
+					$query->where( 'created_at', '<=', $to );
+				}
+				$link_triggers = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			}
+
+			return new WP_REST_Response( $link_triggers, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'quillcrm_link_trigger_get_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
 
-		return new WP_REST_Response( $link_triggers );
+	/**
+	 * Delete items
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_items( $request ) {
+		try {
+			$link_trigger_ids = $request->get_param( 'ids' );
+			Link_Trigger_Model::whereIn( 'id', $link_trigger_ids )->delete();
+
+			return new WP_REST_Response( null, 204 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'quillcrm_link_trigger_bulk_delete_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
 	}
 
 	/**
@@ -196,15 +280,19 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
-		$id = $request->get_param( 'id' );
+		try {
+			$id = $request->get_param( 'id' );
 
-		$link_trigger = Link_Trigger_Model::find( $id );
+			$link_trigger = Link_Trigger_Model::find( $id );
 
-		if ( ! $link_trigger ) {
-			return new WP_Error( 'quillcrm_link_trigger_not_found', __( 'Link trigger not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			if ( ! $link_trigger ) {
+				return new WP_Error( 'quillcrm_link_trigger_not_found', __( 'Link trigger not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			return new WP_REST_Response( $link_trigger, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'quillcrm_link_trigger_get_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
-
-		return new WP_REST_Response( $link_trigger );
 	}
 
 	/**
@@ -221,7 +309,7 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 			$link_trigger_data = $this->prepare_link_trigger( $request );
 			$link_trigger      = Link_Trigger_Model::create( $link_trigger_data );
 
-			return new WP_REST_Response( $link_trigger );
+			return new WP_REST_Response( $link_trigger, 201 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'quillcrm_link_trigger_create_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -237,19 +325,19 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
-		$id = $request->get_param( 'id' );
-
-		$link_trigger = Link_Trigger_Model::find( $id );
-
-		if ( ! $link_trigger ) {
-			return new WP_Error( 'quillcrm_link_trigger_not_found', __( 'Link trigger not found.', 'quillcrm' ), array( 'status' => 404 ) );
-		}
-
 		try {
+			$id = $request->get_param( 'id' );
+
+			$link_trigger = Link_Trigger_Model::find( $id );
+
+			if ( ! $link_trigger ) {
+				return new WP_Error( 'quillcrm_link_trigger_not_found', __( 'Link trigger not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
 			$link_trigger_data = $this->prepare_link_trigger( $request );
 			$link_trigger->update( $link_trigger_data );
 
-			return new WP_REST_Response( $link_trigger );
+			return new WP_REST_Response( $link_trigger, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'quillcrm_link_trigger_update_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -265,15 +353,15 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		$id = $request->get_param( 'id' );
-
-		$link_trigger = Link_Trigger_Model::find( $id );
-
-		if ( ! $link_trigger ) {
-			return new WP_Error( 'quillcrm_link_trigger_not_found', __( 'Link trigger not found.', 'quillcrm' ), array( 'status' => 404 ) );
-		}
-
 		try {
+			$id = $request->get_param( 'id' );
+
+			$link_trigger = Link_Trigger_Model::find( $id );
+
+			if ( ! $link_trigger ) {
+				return new WP_Error( 'quillcrm_link_trigger_not_found', __( 'Link trigger not found.', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
 			$link_trigger->delete();
 
 			return new WP_REST_Response( null, 204 );
@@ -334,7 +422,6 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 		return current_user_can( 'manage_options' );
 	}
 
-
 	/**
 	 * Create item permissions check
 	 *
@@ -371,6 +458,19 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Delete items permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function delete_items_permissions_check( $request ) {
 		return current_user_can( 'manage_options' );
 	}
 }

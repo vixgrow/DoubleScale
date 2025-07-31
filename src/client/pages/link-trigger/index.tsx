@@ -8,11 +8,6 @@ import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
 
 /**
- * External dependencies
- */
-import { Flex, Typography } from 'antd';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
@@ -26,7 +21,6 @@ import {
 } from '@quillcrm/client';
 import { useParams, useNavigate, getToLink } from '@quillcrm/navigation';
 import {
-	Field,
 	NoticeBanner,
 	PanelLayout,
 	PanelSettings,
@@ -35,6 +29,7 @@ import {
 } from '@quillcrm/components';
 import { Button } from '@quillcrm/components/ui/button';
 import { isEmpty } from 'validator';
+import LinkTriggerForm from './link-trigger-form';
 
 interface LinkTriggerProps {
 	isNewLinkTrigger?: boolean;
@@ -63,7 +58,6 @@ const LinkTrigger: React.FC<LinkTriggerProps> = ({
 		auto_login: false,
 	};
 	const { createNotice } = useDispatch('quillcrm/core');
-	const isEditMode = !isNewLinkTrigger;
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
@@ -232,25 +226,24 @@ const LinkTrigger: React.FC<LinkTriggerProps> = ({
 
 			setLinkTrigger(response);
 
-			// Show success message and handle navigation
+			// Handle post-save actions first
+			if (isNewLinkTrigger) {
+				onClose?.();
+				if (!onClose) {
+					navigate(getToLink(`link-triggers/${response.id}`));
+				}
+			} else {
+				// For update operations, close modal immediately
+				onClose?.();
+			}
+
+			// Show success message and call success callback
 			const successMessage = isNewLinkTrigger
 				? __('Link trigger created successfully', 'quillcrm')
 				: __('Link trigger updated successfully', 'quillcrm');
 
+			onSuccess?.(successMessage);
 			showNotice('success', successMessage);
-
-			// Handle post-save actions
-			if (isNewLinkTrigger) {
-				if (onClose) {
-					onClose();
-				} else {
-					navigate(getToLink(`link-triggers/${response.id}`));
-				}
-
-				if (onSuccess) {
-					onSuccess(successMessage);
-				}
-			}
 
 			return response;
 		} catch (error: any) {
@@ -270,11 +263,16 @@ const LinkTrigger: React.FC<LinkTriggerProps> = ({
 		setLinkTrigger({ ...link, settings: newSettings });
 	};
 
+	const handleUpdateLink = (updates: Partial<LinkTriggerType>) => {
+		if (!link) return;
+		setLinkTrigger({ ...link, ...updates });
+	};
+
 	const handleSave = async () => {
 		try {
 			await saveLink();
 		} catch (error: any) {
-			// Error already handled in saveLink
+			showNotice('error', error.message);
 		}
 	};
 
@@ -349,91 +347,11 @@ const LinkTrigger: React.FC<LinkTriggerProps> = ({
 					className="w-full"
 				>
 					{link && (
-						<div className="qcrm-fields">
-							<div className="flex gap-5">
-								<Field
-									label={__('Name', 'quillcrm')}
-									value={link.name}
-									onChange={(value) =>
-										setLinkTrigger({ ...link, name: value })
-									}
-									type="text"
-									required
-								/>
-								<Field
-									label={__('Redirect URL', 'quillcrm')}
-									value={settings.redirect_url}
-									onChange={(value) =>
-										updateSettings({ redirect_url: value })
-									}
-									type="url"
-								/>
-							</div>
-							<div className="flex flex-col gap-5 mt-5">
-								<div className="text-[#09090B] font-bold text-2xl">
-									{__('Contact', 'quillcrm')}
-								</div>
-								<div className="flex gap-5">
-									<Field
-										label={__('Add to List', 'quillcrm')}
-										value={settings.add_lists}
-										onChange={(value) =>
-											updateSettings({ add_lists: value })
-										}
-										type="lists"
-										required={true}
-									/>
-									<Field
-										label={__('Add Tags', 'quillcrm')}
-										value={settings.add_tags}
-										onChange={(value) =>
-											updateSettings({ add_tags: value })
-										}
-										type="tags"
-										required={true}
-									/>
-								</div>
-								<div className="flex gap-5">
-									<Field
-										label={__(
-											'Remove from List',
-											'quillcrm'
-										)}
-										value={settings.remove_lists}
-										onChange={(value) =>
-											updateSettings({
-												remove_lists: value,
-											})
-										}
-										type="lists"
-										required={true}
-									/>
-									<Field
-										label={__('Remove Tags', 'quillcrm')}
-										value={settings.remove_tags}
-										onChange={(value) =>
-											updateSettings({
-												remove_tags: value,
-											})
-										}
-										type="tags"
-										required={true}
-									/>
-								</div>
-							</div>
-							<div className="flex items-end gap-4 w-fit">
-								<div className="font-bold w-52 text-[#09090B] text-xl">
-									{__('Auto Login', 'quillcrm')}
-								</div>
-								<Field
-									value={settings.auto_login}
-									onChange={(value) =>
-										updateSettings({ auto_login: value })
-									}
-									type="switch"
-								/>
-							</div>
-						</div>
+						<LinkTriggerForm
+							link={link}
+							onUpdateLink={handleUpdateLink}
+							onUpdateSettings={updateSettings}
+						/>
 					)}
 				</PanelSettings>
 			</div>

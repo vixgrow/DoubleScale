@@ -2,12 +2,9 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	calculateMergePosition,
-	createMergeNodeData,
-} from './utils/merge-utils';
+import { createMergeNodeData } from './utils/merge-utils';
 
 /**
  * External dependencies
@@ -1821,93 +1818,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		onDeleteStep,
 		clearSavedPositions,
 	]);
-
-	// Detect significant structural changes and auto-clear positions for better layout
-	const [previousStepStructure, setPreviousStepStructure] =
-		useState<string>('');
-
-	useEffect(() => {
-		if (!steps || steps.length === 0) return;
-
-		// Create a signature of the step structure including nesting and step counts per branch
-		const conditionSteps = steps.filter(
-			(step) => step.type === 'condition'
-		);
-		const structureSignature = conditionSteps
-			.map((condition) => {
-				const yesChildren = steps.filter(
-					(s) => s.parent_id === condition.id && s.condition === 'yes'
-				);
-				const noChildren = steps.filter(
-					(s) => s.parent_id === condition.id && s.condition === 'no'
-				);
-				return `${condition.id}:${condition.parent_id || 0}:${yesChildren.length}:${noChildren.length}`;
-			})
-			.sort()
-			.join('|');
-
-		// If structure has changed significantly, clear positions for re-layout
-		if (
-			previousStepStructure &&
-			previousStepStructure !== structureSignature
-		) {
-			// Check if children were added to any existing condition
-			const currentCounts = new Map<
-				number,
-				{ yes: number; no: number }
-			>();
-			const previousCounts = new Map<
-				number,
-				{ yes: number; no: number }
-			>();
-
-			// Parse current structure
-			conditionSteps.forEach((condition) => {
-				const yesCount = steps.filter(
-					(s) => s.parent_id === condition.id && s.condition === 'yes'
-				).length;
-				const noCount = steps.filter(
-					(s) => s.parent_id === condition.id && s.condition === 'no'
-				).length;
-				currentCounts.set(condition.id, { yes: yesCount, no: noCount });
-			});
-
-			// Parse previous structure
-			if (previousStepStructure) {
-				previousStepStructure.split('|').forEach((entry) => {
-					const [conditionId, , yesCount, noCount] = entry.split(':');
-					if (
-						conditionId &&
-						yesCount !== undefined &&
-						noCount !== undefined
-					) {
-						previousCounts.set(parseInt(conditionId), {
-							yes: parseInt(yesCount),
-							no: parseInt(noCount),
-						});
-					}
-				});
-			}
-
-			// Check if any condition got new children (which affects merge positioning)
-			let shouldClearPositions = false;
-			currentCounts.forEach((current, conditionId) => {
-				const previous = previousCounts.get(conditionId);
-				if (
-					previous &&
-					(current.yes > previous.yes || current.no > previous.no)
-				) {
-					shouldClearPositions = true;
-				}
-			});
-
-			if (shouldClearPositions) {
-				clearSavedPositions();
-			}
-		}
-
-		setPreviousStepStructure(structureSignature);
-	}, [steps, clearSavedPositions, previousStepStructure]);
 
 	// Save node positions when they change
 	const saveNodePositions = useCallback(

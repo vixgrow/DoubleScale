@@ -454,9 +454,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		const getNodePosition = (
 			nodeId: string,
 			fallbackX = startX,
-			fallbackY = startY,
-			step?: AutomationStep,
-			stepIndex?: number
+			fallbackY = startY
 		) => {
 			// If we have a saved position, use it
 			if (savedPositions[nodeId]) {
@@ -467,42 +465,11 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			if (positionMap.has(nodeId)) {
 				return positionMap.get(nodeId)!;
 			}
-
-			// Fallback to old logic for edge cases
-			if (step && step.parent_id && step.condition) {
-				const parentId = step.parent_id.toString();
-				const parentPosition =
-					savedPositions[parentId] || positionMap.get(parentId);
-
-				if (parentPosition) {
-					// Reasonable positioning that considers nesting level
-					const baseY = parentPosition.y + 150; // Reasonable spacing below parent
-					const branchWidth = calculateBranchWidth(
-						steps,
-						step.parent_id,
-						step.condition
-					);
-					const branchOffset =
-						step.condition === 'yes'
-							? -branchWidth / 2
-							: branchWidth / 2;
-					const stepOffset = (stepIndex || 0) * 300; // Increased spacing between steps in same branch
-
-					return {
-						x: parentPosition.x + branchOffset,
-						y: baseY + stepOffset,
-					};
-				}
-			}
-
-			// Default fallback
 			return { x: fallbackX, y: fallbackY };
 		};
 
 		// Calculate all positions first
 		calculatePositions(steps, null, null, 0, startX, startY);
-
-		console.log('Position Map', positionMap);
 
 		// Helper function to recursively process steps and their children
 		const processStepHierarchy = (
@@ -536,9 +503,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				const position = getNodePosition(
 					step.id.toString(),
 					startX,
-					startY,
-					step,
-					stepIndex
+					startY
 				);
 
 				// Add step node
@@ -652,7 +617,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 					let center =
 						conditionPos.x + nodeWidth / 2 - nodeYesNoWidth / 2;
-					console.log('Center', center);
 					const maxWidth = Math.max(yesWidth, noWidth);
 					const yesX = center - maxWidth / 2;
 					const noX = center + maxWidth / 2;
@@ -782,11 +746,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						x: center,
 						y: mergeY,
 					};
-
-					console.log(
-						'Merge Position for step',
-						optimalMergePosition
-					);
 
 					const mergePosition =
 						savedPositions[mergeId] || optimalMergePosition;

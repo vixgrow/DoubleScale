@@ -99,7 +99,7 @@
 	color: #666;
 }
 
-// Custom Node Styles
+// Base node styles
 .qcrm-reactflow-node {
 	background: #fff;
 	border: 2px solid #e8e8e8;
@@ -130,7 +130,7 @@
 		justify-content: space-between;
 		padding: 12px 16px 8px;
 		border-bottom: 1px solid #f0f0f0;
-		flex-shrink: 0; // Prevent header from shrinking
+		flex-shrink: 0;
 
 		.qcrm-reactflow-node__actions {
 			opacity: 0;
@@ -144,16 +144,27 @@
 		opacity: 1;
 	}
 
-	// Node Icon
+	// Common icon styles for all node types
 	&__icon {
+		box-sizing: border-box;
 		display: flex;
-		align-items: center;
 		justify-content: center;
-		width: 32px;
-		height: 32px;
-		border-radius: 4px;
-		font-size: 16px;
+		align-items: center;
+		padding: 10px;
+		width: 50px;
+		height: 50px;
+		background: #efefef;
+		border: 1.23985px solid rgba(213, 213, 213, 0.4);
+		border-radius: 4.95941px;
 		flex-shrink: 0;
+		color: #000000;
+		font-size: 14px;
+
+		svg {
+			position: static;
+			width: 28px;
+			height: 28px;
+		}
 	}
 
 	// Node Content
@@ -166,13 +177,13 @@
 
 	&__title {
 		font-weight: 600;
-		font-size: 14px;
+		font-size: 15px;
 		color: #262626;
 		line-height: 1.4;
 	}
 
 	&__subtitle {
-		font-size: 12px;
+		font-size: 13px;
 		color: #8c8c8c;
 		line-height: 1.3;
 	}
@@ -182,86 +193,49 @@
 		font-size: 11px;
 	}
 
-	// Node Type Specific Styles
-	&--trigger {
+	// Common three dots dropdown styles
+	&__actions {
+		position: absolute;
+		top: 50%;
+		right: 20px;
+		transform: translateY(-50%);
+		opacity: 1;
+		z-index: 10;
+
+		&-btn {
+			background: transparent;
+			border: none;
+			color: #8c8c8c;
+			padding: 8px;
+			height: auto;
+			width: auto;
+			box-shadow: none;
+			border-radius: 6px;
+			transition: all 0.2s ease;
+
+			&:hover,
+			&:focus {
+				background: rgba(0, 0, 0, 0.08);
+				color: #595959;
+				border: none;
+				box-shadow: none;
+			}
+
+			.anticon {
+				font-size: 22px;
+				line-height: 1;
+				font-weight: bold;
+			}
+		}
+	}
+
+	// Common hover and selected states for standard nodes
+	&--trigger,
+	&--action,
+	&--goal,
+	&--end {
 		border: 2px solid #d9d9d9;
 		background: #ffffff;
-		width: 280px;
-		position: relative;
-
-		.qcrm-reactflow-node__icon {
-			box-sizing: border-box;
-			display: flex;
-			flex-direction: row;
-			justify-content: center;
-			align-items: center;
-			padding: 10px;
-			gap: 12px;
-			width: 50px;
-			height: 50px;
-			background: #efefef;
-			border: 1.23985px solid rgba(213, 213, 213, 0.4);
-			border-radius: 4.95941px;
-			flex: none;
-			order: 0;
-			flex-grow: 0;
-			color: #000000;
-			font-size: 14px;
-			position: relative;
-
-			svg {
-				position: static;
-				width: 15.75px;
-				height: 22.75px;
-			}
-		}
-
-		.qcrm-reactflow-node__title {
-			color: #262626;
-			font-weight: 600;
-			font-size: 15px;
-		}
-
-		.qcrm-reactflow-node__subtitle {
-			color: #8c8c8c;
-			font-size: 13px;
-		}
-
-		// Three dots dropdown button
-		.qcrm-reactflow-node__actions {
-			position: absolute;
-			top: 50%;
-			right: 20px;
-			transform: translateY(-50%);
-			opacity: 1; // Always visible like in the image
-			z-index: 10;
-
-			.qcrm-reactflow-node__actions-btn {
-				background: transparent;
-				border: none;
-				color: #8c8c8c;
-				padding: 8px;
-				height: auto;
-				width: auto;
-				box-shadow: none;
-				border-radius: 6px;
-				transition: all 0.2s ease;
-
-				&:hover,
-				&:focus {
-					background: rgba(0, 0, 0, 0.08);
-					color: #595959;
-					border: none;
-					box-shadow: none;
-				}
-
-				.anticon {
-					font-size: 22px;
-					line-height: 1;
-					font-weight: bold;
-				}
-			}
-		}
 
 		&:hover {
 			border-color: #b7b7b7;
@@ -274,48 +248,18 @@
 		}
 	}
 
+	// Node Type Specific Styles
+	&--trigger {
+		.qcrm-reactflow-node__icon svg {
+			width: 15.75px;
+			height: 22.75px;
+		}
+	}
+
 	&--action {
-		border: 2px solid #d9d9d9;
-		background: #ffffff;
-		width: 280px;
-		position: relative;
-
-		.qcrm-reactflow-node__icon {
-			box-sizing: border-box;
-			display: flex;
-			flex-direction: row;
-			justify-content: center;
-			align-items: center;
-			padding: 10px;
-			gap: 12px;
-			width: 50px;
-			height: 50px;
-			background: #efefef;
-			border: 1.23985px solid rgba(213, 213, 213, 0.4);
-			border-radius: 4.95941px;
-			flex: none;
-			order: 0;
-			flex-grow: 0;
-			color: #000000;
-			font-size: 14px;
-			position: relative;
-
-			svg {
-				position: static;
-				width: 15.75px;
-				height: 22.75px;
-			}
-		}
-
-		.qcrm-reactflow-node__title {
-			color: #262626;
-			font-weight: 600;
-			font-size: 15px;
-		}
-
-		.qcrm-reactflow-node__subtitle {
-			color: #8c8c8c;
-			font-size: 13px;
+		.qcrm-reactflow-node__icon svg {
+			width: 15.75px;
+			height: 22.75px;
 		}
 
 		// Action configuration status
@@ -328,107 +272,26 @@
 			color: #ff4d4f;
 			font-weight: 500;
 		}
-
-		// Three dots dropdown button
-		.qcrm-reactflow-node__actions {
-			position: absolute;
-			top: 50%;
-			right: 20px;
-			transform: translateY(-50%);
-			opacity: 1; // Always visible like in the image
-			z-index: 10;
-
-			.qcrm-reactflow-node__actions-btn {
-				background: transparent;
-				border: none;
-				color: #8c8c8c;
-				padding: 8px;
-				height: auto;
-				width: auto;
-				box-shadow: none;
-				border-radius: 6px;
-				transition: all 0.2s ease;
-
-				&:hover,
-				&:focus {
-					background: rgba(0, 0, 0, 0.08);
-					color: #595959;
-					border: none;
-					box-shadow: none;
-				}
-
-				.anticon {
-					font-size: 22px;
-					line-height: 1;
-					font-weight: bold;
-				}
-			}
-		}
-
-		&:hover {
-			border-color: #b7b7b7;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-		}
-
-		&.selected {
-			border-color: #b7b7b7;
-			box-shadow: 0 0 0 2px rgba(183, 183, 183, 0.2);
-		}
 	}
 
 	&--condition {
 		border: 2px solid #d9d9d9;
 		background: #ffffff;
-		width: 280px;
-		position: relative;
-		overflow: visible; // Allow three dots to show outside the node
-		padding-right: 60px; // Add extra space for the three dots menu
-
-		.qcrm-reactflow-node__icon {
-			box-sizing: border-box;
-			display: flex;
-			flex-direction: row;
-			justify-content: center;
-			align-items: center;
-			padding: 10px;
-			gap: 12px;
-			width: 50px;
-			height: 50px;
-			background: #efefef;
-			border: 1.23985px solid rgba(213, 213, 213, 0.4);
-			border-radius: 4.95941px;
-			flex: none;
-			order: 0;
-			flex-grow: 0;
-			color: #000000;
-			font-size: 14px;
-			position: relative;
-
-			svg {
-				position: static;
-				width: 28px;
-				height: 28px;
-			}
-		}
+		overflow: visible;
+		padding-right: 60px;
 
 		.qcrm-reactflow-node__content {
-			flex: 1;
-			margin-right: 20px; // Extra margin to prevent overlap with three dots
-			overflow: hidden; // Prevent text overflow
+			margin-right: 20px;
+			overflow: hidden;
 		}
 
 		.qcrm-reactflow-node__title {
-			color: #262626;
-			font-weight: 600;
-			font-size: 15px;
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
 		}
 
 		.qcrm-reactflow-node__subtitle {
-			color: #8c8c8c;
-			font-size: 13px;
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
@@ -445,46 +308,25 @@
 			font-weight: 500;
 		}
 
-		// Three dots dropdown button
+		// Override actions positioning for condition
 		.qcrm-reactflow-node__actions {
-			position: absolute;
-			top: 50%;
 			right: 12px;
-			transform: translateY(-50%);
-			opacity: 1; // Always visible like in the image
-			z-index: 10;
-			width: 40px; // Fixed width
-			height: 40px; // Fixed height
+			width: 40px;
+			height: 40px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 
-			.qcrm-reactflow-node__actions-btn {
-				background: transparent;
-				border: none;
-				color: #8c8c8c;
+			&-btn {
 				padding: 6px;
 				height: 32px;
 				width: 32px;
-				box-shadow: none;
-				border-radius: 6px;
-				transition: all 0.2s ease;
 				display: flex;
 				align-items: center;
 				justify-content: center;
 
-				&:hover,
-				&:focus {
-					background: rgba(0, 0, 0, 0.08);
-					color: #595959;
-					border: none;
-					box-shadow: none;
-				}
-
 				.anticon {
 					font-size: 18px;
-					line-height: 1;
-					font-weight: bold;
 				}
 			}
 		}
@@ -501,47 +343,9 @@
 	}
 
 	&--goal {
-		border: 2px solid #d9d9d9;
-		background: #ffffff;
-		width: 280px;
-		position: relative;
-
-		.qcrm-reactflow-node__icon {
-			box-sizing: border-box;
-			display: flex;
-			flex-direction: row;
-			justify-content: center;
-			align-items: center;
-			padding: 10px;
-			gap: 12px;
-			width: 50px;
-			height: 50px;
-			background: #efefef;
-			border: 1.23985px solid rgba(213, 213, 213, 0.4);
-			border-radius: 4.95941px;
-			flex: none;
-			order: 0;
-			flex-grow: 0;
-			color: #000000;
-			font-size: 14px;
-			position: relative;
-
-			svg {
-				position: static;
-				width: 28px;
-				height: 29px;
-			}
-		}
-
-		.qcrm-reactflow-node__title {
-			color: #262626;
-			font-weight: 600;
-			font-size: 15px;
-		}
-
-		.qcrm-reactflow-node__subtitle {
-			color: #8c8c8c;
-			font-size: 13px;
+		.qcrm-reactflow-node__icon svg {
+			width: 28px;
+			height: 29px;
 		}
 
 		// Goal configuration status
@@ -554,142 +358,12 @@
 			color: #ff4d4f;
 			font-weight: 500;
 		}
-
-		// Three dots dropdown button
-		.qcrm-reactflow-node__actions {
-			position: absolute;
-			top: 50%;
-			right: 20px;
-			transform: translateY(-50%);
-			opacity: 1; // Always visible like in the image
-			z-index: 10;
-
-			.qcrm-reactflow-node__actions-btn {
-				background: transparent;
-				border: none;
-				color: #8c8c8c;
-				padding: 8px;
-				height: auto;
-				width: auto;
-				box-shadow: none;
-				border-radius: 6px;
-				transition: all 0.2s ease;
-
-				&:hover,
-				&:focus {
-					background: rgba(0, 0, 0, 0.08);
-					color: #595959;
-					border: none;
-					box-shadow: none;
-				}
-
-				.anticon {
-					font-size: 22px;
-					line-height: 1;
-					font-weight: bold;
-				}
-			}
-		}
-
-		&:hover {
-			border-color: #b7b7b7;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-		}
-
-		&.selected {
-			border-color: #b7b7b7;
-			box-shadow: 0 0 0 2px rgba(183, 183, 183, 0.2);
-		}
 	}
 
 	&--end {
-		border: 2px solid #d9d9d9;
-		background: #ffffff;
-		width: 280px;
-		position: relative;
-
-		.qcrm-reactflow-node__icon {
-			box-sizing: border-box;
-			display: flex;
-			flex-direction: row;
-			justify-content: center;
-			align-items: center;
-			padding: 10px;
-			gap: 12px;
-			width: 50px;
-			height: 50px;
-			background: #efefef;
-			border: 1.23985px solid rgba(213, 213, 213, 0.4);
-			border-radius: 4.95941px;
-			flex: none;
-			order: 0;
-			flex-grow: 0;
-			color: #000000;
-			font-size: 14px;
-			position: relative;
-
-			svg {
-				position: static;
-				width: 28px;
-				height: 29px;
-			}
-		}
-
-		.qcrm-reactflow-node__title {
-			color: #262626;
-			font-weight: 600;
-			font-size: 15px;
-		}
-
-		.qcrm-reactflow-node__subtitle {
-			color: #8c8c8c;
-			font-size: 13px;
-		}
-
-		// Three dots dropdown button
-		.qcrm-reactflow-node__actions {
-			position: absolute;
-			top: 50%;
-			right: 20px;
-			transform: translateY(-50%);
-			opacity: 1; // Always visible like in the image
-			z-index: 10;
-
-			.qcrm-reactflow-node__actions-btn {
-				background: transparent;
-				border: none;
-				color: #8c8c8c;
-				padding: 8px;
-				height: auto;
-				width: auto;
-				box-shadow: none;
-				border-radius: 6px;
-				transition: all 0.2s ease;
-
-				&:hover,
-				&:focus {
-					background: rgba(0, 0, 0, 0.08);
-					color: #595959;
-					border: none;
-					box-shadow: none;
-				}
-
-				.anticon {
-					font-size: 22px;
-					line-height: 1;
-					font-weight: bold;
-				}
-			}
-		}
-
-		&:hover {
-			border-color: #b7b7b7;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-		}
-
-		&.selected {
-			border-color: #b7b7b7;
-			box-shadow: 0 0 0 2px rgba(183, 183, 183, 0.2);
+		.qcrm-reactflow-node__icon svg {
+			width: 28px;
+			height: 29px;
 		}
 	}
 
@@ -763,7 +437,6 @@
 			mask-composite: exclude;
 		}
 
-		// Enhanced visual feedback for merge convergence
 		&:after {
 			content: "";
 			position: absolute;
@@ -784,7 +457,6 @@
 		}
 
 		&-merge {
-			// Reset merge node to simple button style like add-step-edge
 			border: none;
 			background: transparent;
 			padding: 0;
@@ -804,7 +476,6 @@
 				display: none;
 			}
 
-			// Style the add-step button inside merge node
 			.qcrm-merge-add-button {
 				position: relative;
 				z-index: 10;
@@ -870,11 +541,11 @@
 		.qcrm-step-reorder-controls {
 			opacity: 1;
 			visibility: visible;
-			transform: translateY(-50%) translateX(0); // Slide in to final position
+			transform: translateY(-50%) translateX(0);
 		}
 	}
 
-	// Don't show reorder controls on certain node types
+	// Hide reorder controls on certain node types
 	&--trigger,
 	&--add-step {
 		.qcrm-step-reorder-controls {

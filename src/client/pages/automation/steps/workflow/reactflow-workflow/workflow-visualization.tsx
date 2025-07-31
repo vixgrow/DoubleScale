@@ -207,7 +207,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		const addStepWidth = 30;
 		// the width of the yes and no nodes
 		const nodeYesNoWidth = 80;
-		// start X position of the nodes
+		// start Trigger node X position
 		const startX = 250;
 		// start Trigger node Y position
 		const startY = 50;
@@ -262,10 +262,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			return;
 		}
 
-		// Enhanced positioning system for nested conditions
 		// This algorithm calculates proper spacing and positioning for complex nested condition structures
-		// by recursively calculating the width requirements of each branch and positioning nodes
-		// to prevent overlaps and provide clean, readable layouts
 		const calculateBranchWidth = (
 			stepList: AutomationStep[],
 			parentId: number | null,

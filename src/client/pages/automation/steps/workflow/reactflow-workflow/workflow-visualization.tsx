@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { createMergeNodeData } from './utils/merge-utils';
 
@@ -207,7 +207,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		const addStepWidth = 30;
 		// the width of the yes and no nodes
 		const nodeYesNoWidth = 80;
-		// start Trigger node X position
+		// start X position of the nodes
 		const startX = 250;
 		// start Trigger node Y position
 		const startY = 50;
@@ -448,7 +448,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		const getNodePosition = (
 			nodeId: string,
 			fallbackX = startX,
-			fallbackY = startY
+			fallbackY = startY,
+			step?: AutomationStep,
+			stepIndex?: number
 		) => {
 			// If we have a saved position, use it
 			if (savedPositions[nodeId]) {
@@ -459,6 +461,35 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			if (positionMap.has(nodeId)) {
 				return positionMap.get(nodeId)!;
 			}
+
+			// Fallback to old logic for edge cases
+			if (step && step.parent_id && step.condition) {
+				const parentId = step.parent_id.toString();
+				const parentPosition =
+					savedPositions[parentId] || positionMap.get(parentId);
+
+				if (parentPosition) {
+					// Reasonable positioning that considers nesting level
+					const baseY = parentPosition.y + 150; // Reasonable spacing below parent
+					const branchWidth = calculateBranchWidth(
+						steps,
+						step.parent_id,
+						step.condition
+					);
+					const branchOffset =
+						step.condition === 'yes'
+							? -branchWidth / 2
+							: branchWidth / 2;
+					const stepOffset = (stepIndex || 0) * 300; // Increased spacing between steps in same branch
+
+					return {
+						x: parentPosition.x + branchOffset,
+						y: baseY + stepOffset,
+					};
+				}
+			}
+
+			// Default fallback
 			return { x: fallbackX, y: fallbackY };
 		};
 
@@ -497,7 +528,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				const position = getNodePosition(
 					step.id.toString(),
 					startX,
-					startY
+					startY,
+					step,
+					stepIndex
 				);
 
 				// Add step node

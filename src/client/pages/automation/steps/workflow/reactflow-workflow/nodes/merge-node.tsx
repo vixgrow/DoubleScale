@@ -13,7 +13,6 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
 import {
 	CheckOutlined,
 	CloseOutlined,
-	NodeIndexOutlined,
 	PlusOutlined,
 	TrophyOutlined,
 	BranchesOutlined,
@@ -42,7 +41,6 @@ interface MergeNodeData {
 const MergeNode: React.FC<NodeProps> = ({ data }) => {
 	const {
 		condition,
-		parentId,
 		conditionStep,
 		yesChildCount,
 		noChildCount,

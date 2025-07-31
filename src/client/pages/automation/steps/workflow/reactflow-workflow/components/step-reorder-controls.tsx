@@ -35,30 +35,6 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 
 	// Enhanced logic to check if step can move considering condition branches and complex scenarios
 	const getStepMoveability = () => {
-		// Helper function to find adjacent condition nodes
-		const findAdjacentConditions = (
-			currentStep: AutomationStep,
-			contextSteps: AutomationStep[],
-			currentIndex: number
-		) => {
-			const prevStep =
-				currentIndex > 0 ? contextSteps[currentIndex - 1] : null;
-			const nextStep =
-				currentIndex < contextSteps.length - 1
-					? contextSteps[currentIndex + 1]
-					: null;
-
-			return {
-				prevIsCondition: prevStep?.type === 'condition',
-				nextIsCondition: nextStep?.type === 'condition',
-				betweenConditions:
-					prevStep?.type === 'condition' &&
-					nextStep?.type === 'condition',
-				prevStep,
-				nextStep,
-			};
-		};
-
 		// If step is under a condition (has parent_id and condition),
 		// it can only move within that specific branch
 		if (step.parent_id && step.condition) {

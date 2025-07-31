@@ -90,7 +90,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 
 	return (
 		<div
-			className="qcrm-reactflow-node__actions"
+			className="qcrm-reactflow-node__dropdown"
 			onClick={(e) => {
 				e.stopPropagation();
 				e.preventDefault();
@@ -100,18 +100,6 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 			}}
 			onMouseUp={(e) => {
 				e.stopPropagation();
-			}}
-			style={{
-				position: 'absolute',
-				top: '50%',
-				right: '16px',
-				transform: 'translateY(-50%)',
-				zIndex: 10,
-				width: '40px',
-				height: '40px',
-				display: 'flex',
-				alignItems: 'center',
-				justifyContent: 'center',
 			}}
 		>
 			<Dropdown
@@ -123,6 +111,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 				placement="bottomRight"
 			>
 				<Button
+					className="qcrm-reactflow-node__dropdown-btn"
 					type="text"
 					size="small"
 					icon={<MoreOutlined />}
@@ -132,19 +121,6 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 					}}
 					onMouseDown={(e) => {
 						e.stopPropagation();
-					}}
-					style={{
-						background: 'transparent',
-						border: 'none',
-						color: '#8c8c8c',
-						padding: '6px',
-						height: '32px',
-						width: '32px',
-						boxShadow: 'none',
-						borderRadius: '6px',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
 					}}
 				/>
 			</Dropdown>

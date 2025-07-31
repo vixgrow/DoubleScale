@@ -229,6 +229,33 @@
 		}
 	}
 
+	&__dropdown {
+		position: absolute;
+		top: 50%;
+		right: 16px;
+		transform: translateY(-50%);
+		z-index: 10;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&-btn {
+			background: transparent;
+			border: none;
+			color: #8c8c8c;
+			padding: 6px;
+			height: 32px;
+			width: 32px;
+			box-shadow: none;
+			border-radius: 6px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	}
+
 	// Common hover and selected states for standard nodes
 	&--trigger,
 	&--action,

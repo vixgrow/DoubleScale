@@ -54,3 +54,6 @@ export { default as ArrowLeftWhiteIcon } from './arrow-left';
 export { default as ThreeDotsIcon } from './three-dots';
 export { default as DisactivateIcon } from './disactivate';
 export { default as CreateFormsIcon } from './create-forms';
+export { default as UndoIcon } from './undo';
+export { default as RedoIcon } from './redo';
+export { default as PreviewIcon } from './preview';

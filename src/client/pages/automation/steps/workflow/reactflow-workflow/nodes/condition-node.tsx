@@ -22,12 +22,10 @@ import StepReorderControls from '../components/step-reorder-controls';
 interface ConditionNodeData {
 	step: AutomationStep;
 	onStepClick?: (step: OrganizedStep) => void;
-	clearSavedPositions?: () => void;
 }
 
 const ConditionNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, onStepClick, clearSavedPositions } =
-		data as unknown as ConditionNodeData;
+	const { step, onStepClick } = data as unknown as ConditionNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -132,10 +130,7 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 				/>
 
 				{/* Step Reorder Controls */}
-				<StepReorderControls
-					step={step}
-					clearSavedPositions={clearSavedPositions}
-				/>
+				<StepReorderControls step={step} />
 
 				<div className="qcrm-reactflow-node__icon">
 					{conditionIcon()}

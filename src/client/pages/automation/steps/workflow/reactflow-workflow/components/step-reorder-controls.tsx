@@ -21,13 +21,11 @@ import type { AutomationStep } from '@quillcrm/client';
 interface StepReorderControlsProps {
 	step: AutomationStep;
 	className?: string;
-	clearSavedPositions?: () => void;
 }
 
 const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 	step,
 	className = '',
-	clearSavedPositions,
 }) => {
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -99,14 +97,7 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 		setIsMoving(direction);
 
 		try {
-			await reorderStep(
-				step,
-				direction,
-				steps,
-				setSteps,
-				createNotice,
-				clearSavedPositions
-			);
+			await reorderStep(step, direction, steps, setSteps, createNotice);
 		} finally {
 			setIsMoving(null);
 		}

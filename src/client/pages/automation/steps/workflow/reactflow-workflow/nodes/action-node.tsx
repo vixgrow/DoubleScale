@@ -27,13 +27,11 @@ interface ActionNodeData {
 	step: AutomationStep;
 	automation: Automation;
 	onStepClick?: (step: OrganizedStep) => void;
-	clearSavedPositions?: () => void;
 	onDeleteStep?: (stepId: string) => void;
 }
 
 const ActionNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, onStepClick, clearSavedPositions } =
-		data as unknown as ActionNodeData;
+	const { step, onStepClick } = data as unknown as ActionNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -137,10 +135,7 @@ const ActionNode: React.FC<NodeProps> = ({ data }) => {
 				/>
 
 				{/* Step Reorder Controls */}
-				<StepReorderControls
-					step={step}
-					clearSavedPositions={clearSavedPositions}
-				/>
+				<StepReorderControls step={step} />
 
 				<div className="qcrm-reactflow-node__icon">
 					<ActionIcon />

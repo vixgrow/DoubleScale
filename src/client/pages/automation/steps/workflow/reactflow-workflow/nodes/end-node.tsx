@@ -23,11 +23,10 @@ import NodeActionsDropdown from '../components/node-actions-dropdown';
 
 interface EndNodeData {
 	step: AutomationStep;
-	clearSavedPositions?: () => void;
 }
 
 const EndNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, clearSavedPositions } = data as unknown as EndNodeData;
+	const { step } = data as unknown as EndNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const [isDeleting, setIsDeleting] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -111,10 +110,7 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 				/>
 
 				{/* Step Reorder Controls */}
-				<StepReorderControls
-					step={step}
-					clearSavedPositions={clearSavedPositions}
-				/>
+				<StepReorderControls step={step} />
 
 				<div className="qcrm-reactflow-node__icon">{endIcon()}</div>
 

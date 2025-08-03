@@ -2,9 +2,8 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { use } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -19,7 +18,6 @@ import {
 	Background,
 	Controls,
 	MiniMap,
-	EdgeTypes,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -35,404 +33,22 @@ import type {
 import { useAutomationContext } from '../../../state/context';
 import { createMergeNodeData } from './utils/merge-utils';
 
-// Node components
-import TriggerNode from './nodes/trigger-node';
-import ActionNode from './nodes/action-node';
-import ConditionNode from './nodes/condition-node';
-import GoalNode from './nodes/goal-node';
-import EndNode from './nodes/end-node';
-import AddStepNode from './nodes/add-step-node';
-import MergeNode from './nodes/merge-node';
-import BranchNode from './nodes/branch-node';
+// Configuration constants
+import { LAYOUT_CONSTANTS, EDGE_STYLES } from './config';
 
-// Edge components
-import AddStepEdge from './edges/add-step-edge';
-import ConditionEdge from './edges/condition-edge';
+// Types and Interfaces
+import { WorkflowVisualizationProps, NODE_TYPES, EDGE_TYPES } from './types';
 
-/**
- * Constants
- */
-const LAYOUT_CONSTANTS = {
-	NODE_WIDTH: 280,
-	ADD_STEP_WIDTH: 30,
-	NODE_YES_NO_WIDTH: 80,
-	START_X: 250,
-	START_Y: 50,
-	INCREMENT_Y: 250,
-	EDGE_STROKE_WIDTH: 2,
-	CONDITION_EDGE_STROKE_WIDTH: 3,
-	MINIMAP_HEIGHT: 120,
-	MINIMAP_WIDTH: 200,
-	POSITION_THRESHOLD: 2,
-} as const;
+// Helper functions
+import {
+	getNodePosition,
+	calculateBranchWidth,
+	calculatePositions,
+	removeDuplicateEdges,
+} from './utils/helper';
 
-const SPACING_CONSTANTS = {
-	BASE_WIDTH: 200,
-	BRANCH_SPACING: 150,
-	BASE_SPACING: 200,
-	MERGE_SPACING: 120,
-	NESTED_SPACING: 150,
-	LEVEL_MULTIPLIER: 0.2,
-	COMPLEXITY_PADDING: 40,
-} as const;
-
-const EDGE_STYLES = {
-	DEFAULT: {
-		stroke: '#D7D7DA',
-		strokeWidth: LAYOUT_CONSTANTS.EDGE_STROKE_WIDTH,
-		strokeLinecap: 'round' as const,
-		strokeLinejoin: 'round' as const,
-	},
-	CONDITION: {
-		stroke: '#D7D7DA',
-		strokeWidth: LAYOUT_CONSTANTS.CONDITION_EDGE_STROKE_WIDTH,
-	},
-} as const;
-
-/**
- * Types and Interfaces
- */
-interface WorkflowVisualizationProps {
-	automation?: Automation;
-	steps?: AutomationStep[];
-	isLoading?: boolean;
-	onStepClick?: (step: OrganizedStep) => void;
-	onTriggerClick?: () => void;
-}
-
-interface PositionCalculationParams {
-	stepList: AutomationStep[];
-	parentId: number | null;
-	condition: string | null;
-	level: number;
-	startX: number;
-	startY: number;
-}
-
-interface ProcessStepHierarchyParams {
-	stepList: AutomationStep[];
-	parentId?: number | null;
-	condition?: string | null;
-	level?: number;
-	startIndex?: number;
-}
-
-interface ProcessStepHierarchyResult {
-	lastIndex: number;
-	lastStepId?: string;
-}
-
-/**
- * Node and Edge type registrations
- */
-const nodeTypes = {
-	trigger: TriggerNode,
-	action: ActionNode,
-	condition: ConditionNode,
-	goal: GoalNode,
-	end_automation: EndNode,
-	add_step: AddStepNode,
-	merge: MergeNode,
-	branch: BranchNode,
-};
-
-const edgeTypes: EdgeTypes = {
-	addStepEdge: AddStepEdge,
-	conditionEdge: ConditionEdge,
-};
-
-/**
- * Utility Functions
- */
-const calculateBranchWidth = (
-	stepList: AutomationStep[],
-	parentId: number | null,
-	condition: string | null,
-	level: number = 0
-): number => {
-	const branchSteps = stepList
-		.filter((step) => {
-			if (parentId === null) {
-				return !step.parent_id || step.parent_id === 0;
-			}
-			return step.parent_id === parentId && step.condition === condition;
-		})
-		.sort((a, b) => a.order - b.order);
-
-	const baseWidth = SPACING_CONSTANTS.BASE_WIDTH;
-	const levelMultiplier = 1 + level * SPACING_CONSTANTS.LEVEL_MULTIPLIER;
-	const minWidth = baseWidth * levelMultiplier;
-
-	if (branchSteps.length === 0) {
-		return minWidth;
-	}
-
-	let maxWidth = minWidth;
-
-	branchSteps.forEach((step) => {
-		if (step.type === 'condition') {
-			const yesWidth = calculateBranchWidth(
-				stepList,
-				step.id,
-				'yes',
-				level + 1
-			);
-			const noWidth = calculateBranchWidth(
-				stepList,
-				step.id,
-				'no',
-				level + 1
-			);
-			const branchSpacing = Math.max(100, 60 + level * 20);
-			const conditionWidth = yesWidth + noWidth + branchSpacing;
-			const adjustedWidth = Math.max(conditionWidth, minWidth);
-			maxWidth = Math.max(maxWidth, adjustedWidth);
-		}
-	});
-
-	const complexityPadding =
-		level > 0 ? 50 + level * 30 : SPACING_CONSTANTS.COMPLEXITY_PADDING;
-	return maxWidth + complexityPadding;
-};
-
-const calculatePositions = (
-	{
-		stepList,
-		parentId = null,
-		condition = null,
-		level = 0,
-		startX,
-		startY,
-	}: PositionCalculationParams,
-	positionMap: Map<string, { x: number; y: number }>
-): number => {
-	const branchSteps = stepList
-		.filter((step) => {
-			if (parentId === null) {
-				return !step.parent_id || step.parent_id === 0;
-			}
-			return step.parent_id === parentId && step.condition === condition;
-		})
-		.sort((a, b) => a.order - b.order);
-
-	let currentY = startY;
-
-	branchSteps.forEach((step) => {
-		const stepId = step.id.toString();
-
-		if (step.type === 'condition') {
-			const yesWidth = calculateBranchWidth(
-				stepList,
-				step.id,
-				'yes',
-				level + 1
-			);
-			const noWidth = calculateBranchWidth(
-				stepList,
-				step.id,
-				'no',
-				level + 1
-			);
-			const conditionY = currentY + LAYOUT_CONSTANTS.INCREMENT_Y;
-
-			positionMap.set(stepId, { x: startX, y: conditionY });
-
-			const baseSpacing = SPACING_CONSTANTS.BASE_SPACING;
-			const levelMultiplier = 1 + level * 0.3;
-			const childY = conditionY + baseSpacing * levelMultiplier;
-			const branchGap = Math.max(
-				SPACING_CONSTANTS.BRANCH_SPACING,
-				80 + level * 30
-			);
-			const totalChildWidth = yesWidth + noWidth + branchGap;
-
-			const yesX = startX - totalChildWidth / 2 + yesWidth / 2;
-			const yesEndY = calculatePositions(
-				{
-					stepList,
-					parentId: step.id,
-					condition: 'yes',
-					level: level + 1,
-					startX: yesX,
-					startY: childY,
-				},
-				positionMap
-			);
-
-			const noX = startX + totalChildWidth / 2 - noWidth / 2;
-			const noEndY = calculatePositions(
-				{
-					stepList,
-					parentId: step.id,
-					condition: 'no',
-					level: level + 1,
-					startX: noX,
-					startY: childY,
-				},
-				positionMap
-			);
-
-			const maxBranchEndY = Math.max(yesEndY, noEndY);
-			const hasNestedConditions = stepList.some(
-				(s) => s.parent_id === step.id && s.type === 'condition'
-			);
-			const baseBottomSpacing = hasNestedConditions ? 300 : 250;
-			const mergeSpacing = Math.max(
-				SPACING_CONSTANTS.BRANCH_SPACING,
-				100 + level * 25
-			);
-			const levelSpacing = level * 50;
-			const nestedConditionSpacing = hasNestedConditions ? 100 : 0;
-
-			currentY = Math.max(
-				conditionY +
-					baseBottomSpacing +
-					levelSpacing +
-					nestedConditionSpacing,
-				maxBranchEndY +
-					mergeSpacing +
-					levelSpacing +
-					nestedConditionSpacing
-			);
-		} else {
-			currentY += LAYOUT_CONSTANTS.INCREMENT_Y;
-			positionMap.set(stepId, { x: startX, y: currentY });
-		}
-	});
-
-	return currentY;
-};
-
-const getNodePosition = (
-	nodeId: string,
-	savedPositions: Record<string, { x: number; y: number }>,
-	positionMap: Map<string, { x: number; y: number }>,
-	steps: AutomationStep[],
-	fallbackX = LAYOUT_CONSTANTS.START_X,
-	fallbackY = LAYOUT_CONSTANTS.START_Y,
-	step?: AutomationStep,
-	stepIndex?: number
-) => {
-	if (savedPositions[nodeId]) {
-		return savedPositions[nodeId];
-	}
-
-	if (positionMap.has(nodeId)) {
-		return positionMap.get(nodeId)!;
-	}
-
-	if (step && step.parent_id && step.condition) {
-		const parentId = step.parent_id.toString();
-		const parentPosition =
-			savedPositions[parentId] || positionMap.get(parentId);
-
-		if (parentPosition) {
-			const baseY = parentPosition.y + 150;
-			const branchWidth = calculateBranchWidth(
-				steps,
-				step.parent_id,
-				step.condition
-			);
-			const branchOffset =
-				step.condition === 'yes' ? -branchWidth / 2 : branchWidth / 2;
-			const stepOffset = (stepIndex || 0) * 300;
-
-			return {
-				x: parentPosition.x + branchOffset,
-				y: baseY + stepOffset,
-			};
-		}
-	}
-
-	return { x: fallbackX, y: fallbackY };
-};
-
-const findLastMergeInBranch = (
-	steps: AutomationStep[],
-	parentConditionId: number,
-	condition: string,
-	level: number
-): string | null => {
-	const branchSteps = steps
-		.filter(
-			(s) =>
-				s.parent_id === parentConditionId && s.condition === condition
-		)
-		.sort((a, b) => a.order - b.order);
-
-	if (branchSteps.length === 0) return null;
-
-	const lastCondition = branchSteps
-		.filter((s) => s.type === 'condition')
-		.sort((a, b) => b.order - a.order)[0];
-
-	if (lastCondition) {
-		const conditionLevel = level + 1;
-		return `merge-${lastCondition.id}-level-${conditionLevel}`;
-	}
-
-	return null;
-};
-
-const removeDuplicateEdges = (edges: Edge[]): Edge[] => {
-	const edgeMap = new Map<string, number>();
-	const uniqueEdges: Edge[] = [];
-
-	edges.forEach((edge, index) => {
-		const key = `${edge.source}-${edge.target}-${edge.targetHandle || 'default'}`;
-
-		if (edgeMap.has(key)) {
-			console.warn('Removing duplicate edge:', {
-				edgeId: edge.id,
-				key,
-				duplicateOf: edgeMap.get(key),
-			});
-		} else {
-			edgeMap.set(key, index);
-			uniqueEdges.push(edge);
-		}
-	});
-
-	return uniqueEdges;
-};
-
-const createEdge = (
-	id: string,
-	source: string,
-	target: string,
-	type: string = 'default',
-	options: Partial<Edge> = {}
-): Edge => ({
-	id,
-	source,
-	target,
-	type,
-	style: EDGE_STYLES.DEFAULT,
-	...options,
-});
-
-const createConditionEdge = (
-	id: string,
-	source: string,
-	target: string,
-	condition: 'yes' | 'no',
-	sourceStep: any,
-	targetStep: any
-): Edge => ({
-	id,
-	source,
-	target,
-	sourceHandle: condition,
-	type: 'conditionEdge',
-	label: __(condition === 'yes' ? 'Yes' : 'No', 'quillcrm'),
-	style: EDGE_STYLES.CONDITION,
-	data: {
-		condition,
-		sourceStep,
-		targetStep,
-	},
-	className: `qcrm-condition-edge qcrm-condition-edge--${condition}`,
-});
+// NodeProcess component
+import { initializeTrigger, addFinalAddStep } from './utils/node-process';
 
 /**
  * Main Component
@@ -531,33 +147,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		[automation, steps, updateAutomation]
 	);
 
-	// Clear saved positions to force re-layout
-	const clearSavedPositions = useCallback(async () => {
-		if (!automation) return;
-
-		try {
-			const updatedAutomation = {
-				...automation,
-				settings: {
-					...automation.settings,
-					reactflow_positions: {}, // Clear all positions
-				},
-			};
-
-			// Update automation settings
-			await apiFetch({
-				path: `/qc/v1/automations/${automation.id}`,
-				method: 'POST',
-				data: updatedAutomation,
-			});
-
-			// Update context immediately
-			updateAutomation(updatedAutomation);
-		} catch (error) {
-			console.error('Failed to clear saved positions:', error);
-		}
-	}, [automation, updateAutomation]);
-
 	// ========== DEBUG EFFECTS ==========
 	useEffect(() => {
 		console.log('Nodes State:', nodesState);
@@ -587,50 +176,22 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		// Get saved positions from automation settings
 		const savedPositions = automation?.settings?.reactflow_positions || {};
 
-		// Always add trigger node at the top
-		const triggerPosition = savedPositions['trigger'] || {
-			x: startX,
-			y: startY,
-		};
-		initialNodes.push({
-			id: 'trigger',
-			type: 'trigger',
-			position: triggerPosition,
-			data: { automation, onTriggerClick },
-		});
-
-		if (!steps || steps.length === 0) {
-			const addStepPosition = savedPositions['add-step-initial'] || {
-				x: triggerPosition.x + nodeWidth / 2 - addStepWidth / 2,
-				y: triggerPosition.y + incrementY,
-			};
-
-			initialNodes.push({
-				id: 'add-step-initial',
-				type: 'add_step',
-				position: addStepPosition,
-				data: {
-					parentId: null,
-					condition: null,
-					prevStep: null,
-				},
-			});
-
-			initialEdges.push({
-				id: 'trigger-to-add',
-				source: 'trigger',
-				target: 'add-step-initial',
-				type: 'addStepEdge',
-				data: {
-					sourceStep: undefined,
-					targetStep: undefined,
-				},
-			});
-
-			setNodes(initialNodes);
-			setEdges(initialEdges);
-			return;
-		}
+		// Initialize trigger node
+		initializeTrigger(
+			automation,
+			steps,
+			setNodes,
+			setEdges,
+			initialNodes,
+			initialEdges,
+			startX,
+			startY,
+			incrementY,
+			nodeWidth,
+			addStepWidth,
+			onTriggerClick,
+			savedPositions
+		);
 
 		// Use the extracted calculateBranchWidth utility function
 
@@ -720,7 +281,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								onStepClick(stepData);
 							}
 						},
-						clearSavedPositions, // Pass the clear function to nodes
 						onDeleteStep, // Pass the delete function to nodes
 					},
 				});
@@ -1396,8 +956,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 									},
 								});
 							}
-						} else if (edgeExists) {
-						} else {
 						}
 					}
 				}
@@ -1880,117 +1438,20 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		initialEdges.length = 0;
 		initialEdges.push(...uniqueEdges);
 
-		function addFinalAddStep() {
-			// Add final add-step node for root level if needed
-			const rootSteps = steps
-				.filter((step) => !step.parent_id || step.parent_id === 0)
-				.sort((a, b) => a.order - b.order);
-
-			// Only add final add-step node if the last root step is not a condition or end_automation
-			const lastRootStep =
-				rootSteps.length > 0 ? rootSteps[rootSteps.length - 1] : null;
-			const shouldAddFinalStep =
-				rootSteps.length === 0 ||
-				(lastRootStep &&
-					lastRootStep.type !== 'end_automation' &&
-					lastRootStep.type !== 'condition');
-
-			if (shouldAddFinalStep) {
-				let finalAddPosition = {};
-				if (rootSteps.length === 0) {
-					// No root steps, position below trigger
-					const triggerPos = savedPositions['trigger'] || {
-						x: startX,
-						y: startY,
-					};
-					finalAddPosition = {
-						x: triggerPos.x + nodeWidth / 2 - addStepWidth / 2,
-						y: triggerPos.y + incrementY,
-					};
-				} else if (lastRootStep) {
-					// Position based on the last root step in the main flow
-					const lastRootStepPos = getNodePositionLocal(
-						lastRootStep.id.toString()
-					);
-
-					finalAddPosition = {
-						x: lastRootStepPos.x + nodeWidth / 2 - addStepWidth / 2,
-						y: lastRootStepPos.y + incrementY,
-					};
-				}
-
-				// Check for saved position for final add-step node
-				const finalSavedPosition = savedPositions['add-step-final'];
-
-				if (finalAddPosition) {
-					initialNodes.push({
-						id: 'add-step-final',
-						type: 'add_step',
-						position: finalSavedPosition || finalAddPosition,
-						data: {
-							parentId: null,
-							condition: null,
-							prevStep: lastRootStep,
-						},
-					});
-
-					// Connect to last root step or trigger
-					if (lastRootStep && lastRootStep.type === 'condition') {
-						// For root-level condition nodes, connect from the merge node
-						const mergeId = `merge-${lastRootStep.id}-level-0`; // Root level is level 0
-
-						// Check if merge node actually exists (in case we skipped creating it)
-						const mergeNodeExists = initialNodes.some(
-							(node) => node.id === mergeId
-						);
-
-						if (mergeNodeExists) {
-							initialEdges.push({
-								id: `${mergeId}-to-add-final`,
-								source: mergeId,
-								target: 'add-step-final',
-								type: 'addStepEdge',
-								style: {
-									stroke: '#D7D7DA',
-									strokeWidth: 2,
-								},
-								data: {
-									sourceStep: { id: mergeId, type: 'merge' },
-									targetStep: undefined, // adding at end
-									fromMerge: true,
-								},
-							});
-						} else {
-							// If no merge node, connect directly from the condition
-							initialEdges.push({
-								id: `${lastRootStep.id}-to-add-final`,
-								source: lastRootStep.id.toString(),
-								target: 'add-step-final',
-								type: 'addStepEdge',
-								data: {
-									sourceStep: lastRootStep,
-									targetStep: undefined, // adding at end
-								},
-							});
-						}
-					} else {
-						// For other step types, use addStepEdge
-						const sourceId = result.lastStepId || 'trigger';
-						initialEdges.push({
-							id: `${sourceId}-to-add-final`,
-							source: sourceId,
-							target: 'add-step-final',
-							type: 'addStepEdge',
-							data: {
-								sourceStep: lastRootStep,
-								targetStep: undefined, // adding at end
-							},
-						});
-					}
-				}
-			}
-		}
-		addFinalAddStep();
+		// Add final add-step node for root level if needed
+		addFinalAddStep(
+			steps,
+			initialNodes,
+			initialEdges,
+			startX,
+			startY,
+			incrementY,
+			nodeWidth,
+			addStepWidth,
+			savedPositions,
+			getNodePositionLocal,
+			result
+		);
 
 		setNodes(initialNodes);
 		setEdges(initialEdges);
@@ -2000,7 +1461,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		steps,
 		onStepClick,
 		onDeleteStep,
-		clearSavedPositions,
 	]);
 
 	// ========== POSITION MANAGEMENT ==========
@@ -2116,8 +1576,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						onNodesChange={handleNodesChange}
 						onEdgesChange={onEdgesChange}
 						onNodeClick={onNodeClick}
-						nodeTypes={nodeTypes}
-						edgeTypes={edgeTypes}
+						nodeTypes={NODE_TYPES}
+						edgeTypes={EDGE_TYPES}
 						fitView
 						fitViewOptions={{ padding: 0.2 }}
 						nodesConnectable={false}

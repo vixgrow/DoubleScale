@@ -23,12 +23,10 @@ import StepReorderControls from '../components/step-reorder-controls';
 interface GoalNodeData {
 	step: AutomationStep;
 	onStepClick?: (step: OrganizedStep) => void;
-	clearSavedPositions?: () => void;
 }
 
 const GoalNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, onStepClick, clearSavedPositions } =
-		data as unknown as GoalNodeData;
+	const { step, onStepClick } = data as unknown as GoalNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -132,10 +130,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 				/>
 
 				{/* Step Reorder Controls */}
-				<StepReorderControls
-					step={step}
-					clearSavedPositions={clearSavedPositions}
-				/>
+				<StepReorderControls step={step} />
 
 				<div className="qcrm-reactflow-node__icon">
 					<GoalIcon />

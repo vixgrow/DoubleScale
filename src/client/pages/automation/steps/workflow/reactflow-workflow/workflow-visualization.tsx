@@ -153,15 +153,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		[automation, steps, updateAutomation]
 	);
 
-	// ========== DEBUG EFFECTS ==========
-	useEffect(() => {
-		console.log('Nodes State:', nodesState);
-	}, [nodesState]);
-
-	useEffect(() => {
-		console.log('Edges State:', edgesState);
-	}, [edgesState]);
-
 	// ========== MAIN LAYOUT EFFECT ==========
 	useEffect(() => {
 		const initialNodes: Node[] = [];
@@ -301,73 +292,72 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 
 		setNodes(initialNodes);
 		setEdges(initialEdges);
-	}, [
-		automation?.id,
-		automation?.settings?.reactflow_positions,
-		steps,
-		onStepClick,
-		onDeleteStep,
-	]);
+
+		// saveNodePositions(initialNodes);
+	}, [automation?.id, steps, onStepClick, onDeleteStep]);
 
 	// ========== POSITION MANAGEMENT ==========
 
 	// Save node positions when they change
-	const saveNodePositions = useCallback(
-		async (nodes: Node[]) => {
-			if (!automation) return;
+	const saveNodePositions = async (nodes: Node[]) => {
+		if (!automation) return;
 
-			const positions: Record<string, { x: number; y: number }> = {};
-			nodes.forEach((node) => {
-				positions[node.id] = node.position;
-			});
+		const positions: Record<string, { x: number; y: number }> = {};
+		nodes.forEach((node) => {
+			positions[node.id] = node.position;
+		});
 
-			// Check if positions have actually changed to avoid unnecessary saves
-			const currentPositions =
-				automation.settings?.reactflow_positions || {};
-			const hasChanges = Object.keys(positions).some((nodeId) => {
-				const current = currentPositions[nodeId];
-				const new_ = positions[nodeId];
-				return (
-					!current ||
-					Math.abs(current.x - new_.x) >
-						LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
-					Math.abs(current.y - new_.y) >
-						LAYOUT_CONSTANTS.POSITION_THRESHOLD
-				);
-			});
+		console.log('Positions:', positions);
+		console.log('Nodes:', nodes);
+		console.log('Positions Length:', Object.keys(positions).length);
+		console.log('Nodes Length:', nodes.length);
 
-			if (!hasChanges) {
-				console.log('No position changes detected, skipping save');
-				return;
-			}
+		// Check if positions have actually changed to avoid unnecessary saves
+		const currentPositions = automation.settings?.reactflow_positions || {};
 
-			try {
-				// Update automation settings with new positions
-				const updatedAutomation = {
-					...automation,
-					settings: {
-						...automation.settings,
-						reactflow_positions: positions,
-					},
-				};
+		// Use 'some()' instead of 'every()' to detect if ANY position has changed
+		const hasChanges = Object.keys(positions).some((nodeId) => {
+			const current = currentPositions[nodeId];
+			const new_ = positions[nodeId];
+			return (
+				!current ||
+				Math.abs(current.x - new_.x) >
+					LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
+				Math.abs(current.y - new_.y) >
+					LAYOUT_CONSTANTS.POSITION_THRESHOLD
+			);
+		});
 
-				// Don't await the API call to avoid blocking the UI
-				apiFetch({
-					path: `/qc/v1/automations/${automation.id}`,
-					method: 'POST',
-					data: updatedAutomation,
-				}).catch((error) => {
-					console.error('Failed to save node positions:', error);
-				});
+		if (!hasChanges) {
+			console.log('No position changes detected, skipping save');
+			return;
+		}
 
-				// Update context immediately for responsive feel
-				updateAutomation(updatedAutomation);
-			} catch (error) {
+		try {
+			// Update automation settings with new positions
+			const updatedAutomation = {
+				...automation,
+				settings: {
+					...automation.settings,
+					reactflow_positions: positions,
+				},
+			};
+
+			// Don't await the API call to avoid blocking the UI
+			apiFetch({
+				path: `/qc/v1/automations/${automation.id}`,
+				method: 'POST',
+				data: updatedAutomation,
+			}).catch((error) => {
 				console.error('Failed to save node positions:', error);
-			}
-		},
-		[automation, updateAutomation]
-	);
+			});
+
+			// Update context immediately for responsive feel
+			updateAutomation(updatedAutomation);
+		} catch (error) {
+			console.error('Failed to save node positions:', error);
+		}
+	};
 
 	// ========== EVENT HANDLERS ==========
 

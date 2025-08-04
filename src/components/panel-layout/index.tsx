@@ -61,7 +61,10 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 
 			{/* Footer Section - Fixed */}
 			<div className="flex-none pb-6 bg-white mt-10">
-				<Progress value={progressValue} className="rounded-none h-3" />
+				<Progress
+					value={progressValue}
+					className="rounded-none h-4 bg-muted [&>div]:bg-primary/15 [&>div]:from-primary/15 [&>div]:to-primary/15"
+				/>
 				<div className="py-6 flex justify-between items-center px-8">
 					{onBack && (
 						<Button

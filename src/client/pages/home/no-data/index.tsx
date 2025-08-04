@@ -1,0 +1,17 @@
+/**
+ * wordpress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+/**
+ * internal dependencies
+ */
+import { NoDataIcon } from '@quillcrm/components';
+
+export const EmptyState: React.FC = () => {
+	return (
+		<div className="flex flex-col justify-center items-center gap-5">
+			<NoDataIcon />
+			{__('No Data Available', 'quillcrm')}
+		</div>
+	);
+};

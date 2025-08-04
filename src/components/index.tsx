@@ -30,3 +30,5 @@ export { default as FormField } from './form-field';
 export { default as FeedBuilder } from './FeedBuilder';
 export { default as PaginatedSelect } from './paginated-select';
 export { default as LoadingSpinner } from './loading-spin';
+export { default as DashboardSmallCard } from './dashboard-small-card';
+export { default as DashboardContentCard } from './dashboard-content-card';

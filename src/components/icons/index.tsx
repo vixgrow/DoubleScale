@@ -59,3 +59,6 @@ export { default as SubscribersIcon } from './subscribers';
 export { default as UnsubscribersIcon } from './unsubscribers';
 export { default as RefreshIcon } from './refresh';
 export { default as NoDataIcon } from './no-data';
+export { default as MailSentIcon } from './mail-sent';
+export { default as MailClickedIcon } from './mail-clicked';
+export { default as MailOpenedIcon } from './mail-opened';

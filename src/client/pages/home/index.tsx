@@ -23,6 +23,7 @@ const Dashboard: React.FC = () => {
 	const [data, setData] = useState<DashboardData | null>(null);
 	const [loading, setLoading] = useState(true);
 	const { createNotice } = useDispatch('quillcrm/core');
+	console.log('Dashboard component rendered:',data);
 
 	const tabTitles = {
 		user: __('User Dashboard', 'quillcrm'),
@@ -97,7 +98,7 @@ const Dashboard: React.FC = () => {
 					},
 					{
 						value: 'emails',
-						children: <EmailAnalytics />,
+						children: <EmailAnalytics EmailsData={data.recent_emails}/>,
 					},
 					{
 						value: 'cart',

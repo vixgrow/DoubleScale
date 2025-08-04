@@ -10,9 +10,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Card, Flex, Skeleton, Typography } from 'antd';
 import dayjs from 'dayjs';
-import { MailOutlined, EyeOutlined, LinkOutlined } from '@ant-design/icons';
 import { map } from 'lodash';
 import {
 	Chart as ChartJS,
@@ -42,12 +40,19 @@ ChartJS.register(
  * Internal dependencies
  */
 import './style.scss';
-import type { EmailsAnalytics as EmailAnalyticsData } from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
-import { convertDate, formatDate } from '@quillcrm/utils';
-import { DateFilter } from '@quillcrm/components';
+import type {
+	DashboardData,
+	EmailsAnalytics as EmailAnalyticsData,
+} from '@quillcrm/client';
+import { EmailStatsCards } from './email-stats-cards';
+import { Skeleton } from '@/components/ui/skeleton';
+import { RecentEmailsTable } from './recent-emails-list';
 
-const EmailAnalytics: React.FC = () => {
+interface EmailAnalyticsProps {
+	EmailsData: DashboardData['recent_emails'];
+}
+
+const EmailAnalytics: React.FC<EmailAnalyticsProps> = ({ EmailsData }) => {
 	const [data, setData] = useState<EmailAnalyticsData | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [interval, setInterval] = useState<string>('today');
@@ -82,59 +87,23 @@ const EmailAnalytics: React.FC = () => {
 	}, []);
 
 	if (!data || loading) {
-		return <Skeleton active />;
+		return (
+			<div className="space-y-4 p-4">
+				<Skeleton className="h-6 w-1/3" />
+				<Skeleton className="h-4 w-full" />
+				<Skeleton className="h-4 w-5/6" />
+				<Skeleton className="h-4 w-4/6" />
+			</div>
+		);
 	}
 
 	return (
-		<Flex gap={20} vertical>
-			<Flex gap={20}>
-				<Card className="qcrm-dashboard-card">
-					<Flex gap={10} vertical>
-						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
-								<MailOutlined style={{ fontSize: 16 }} />
-							</div>
-							<Typography.Text strong>
-								{__('Total Sent', 'quillcrm')}
-							</Typography.Text>
-						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
-							{data.total}
-						</Typography.Text>
-					</Flex>
-				</Card>
-				<Card className="qcrm-dashboard-card">
-					<Flex gap={10} vertical>
-						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
-								<EyeOutlined style={{ fontSize: 16 }} />
-							</div>
-							<Typography.Text strong>
-								{__('Total Opened', 'quillcrm')}
-							</Typography.Text>
-						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
-							{data.total_opened || 0}
-						</Typography.Text>
-					</Flex>
-				</Card>
-				<Card className="qcrm-dashboard-card">
-					<Flex gap={10} vertical>
-						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
-								<LinkOutlined style={{ fontSize: 16 }} />
-							</div>
-							<Typography.Text strong>
-								{__('Total Clicked', 'quillcrm')}
-							</Typography.Text>
-						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
-							{data.total_clicked || 0}
-						</Typography.Text>
-					</Flex>
-				</Card>
-			</Flex>
-			<DateFilter
+		<div className="flex flex-col gap-5 mt-5">
+			<EmailStatsCards data={data} />
+
+			<RecentEmailsTable emails={EmailsData} />
+
+			{/* <DateFilter
 				interval={interval}
 				startDate={startDate}
 				endDate={endDate}
@@ -199,8 +168,8 @@ const EmailAnalytics: React.FC = () => {
 						height={70}
 					/>
 				</Card>
-			</Flex>
-		</Flex>
+			</Flex> */}
+		</div>
 	);
 };
 

@@ -90,7 +90,14 @@ const ContactAnalytics: React.FC<ContactAnalyticsProps> = ({
 	}, []);
 
 	if (!data || loading) {
-		return <Skeleton />;
+		return (
+			<div className="space-y-4 p-4">
+				<Skeleton className="h-6 w-1/3" />
+				<Skeleton className="h-4 w-full" />
+				<Skeleton className="h-4 w-5/6" />
+				<Skeleton className="h-4 w-4/6" />
+			</div>
+		);
 	}
 
 	return (

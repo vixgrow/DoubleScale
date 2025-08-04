@@ -62,7 +62,9 @@ export const UnsubscribedContactsTable: React.FC<
 						<TableBody>
 							{contacts.map((contact, index) => (
 								<TableRow key={contact.id}>
-									<TableCell>{index + 1}</TableCell>
+									<TableCell className="text-[#A1A5B7] text-sm font-semibold">
+										{index + 1}
+									</TableCell>
 									<TableCell>
 										<div className="flex items-start gap-3">
 											<div className="bg-[#E1E3EA] text-gray-700 font-semibold text-base rounded-full p-2 flex items-center justify-center uppercase">

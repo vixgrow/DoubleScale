@@ -54,3 +54,8 @@ export { default as ArrowLeftWhiteIcon } from './arrow-left';
 export { default as ThreeDotsIcon } from './three-dots';
 export { default as DisactivateIcon } from './disactivate';
 export { default as CreateFormsIcon } from './create-forms';
+export { default as TotalContactsIcon } from './total-contacts';
+export { default as SubscribersIcon } from './subscribers';
+export { default as UnsubscribersIcon } from './unsubscribers';
+export { default as RefreshIcon } from './refresh';
+export { default as NoDataIcon } from './no-data';

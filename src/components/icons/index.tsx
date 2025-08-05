@@ -65,3 +65,8 @@ export { default as MailOpenedIcon } from './mail-opened';
 export { default as RevenueIcon } from './revenue';
 export { default as OrdersIcon } from './orders';
 export { default as ManageIcon } from './manage';
+export { default as EmailTemplatesIcon } from './email-templates';
+export { default as TotalTagsIcon } from './total-tags';
+export { default as TotalCampaignsIcon } from './total-campaigns';
+export { default as ActiveAutomationIcon } from './active-automation';
+export { default as OutlineReportsIcon } from './outline-reports';

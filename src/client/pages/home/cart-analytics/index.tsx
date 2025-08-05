@@ -42,12 +42,22 @@ ChartJS.register(
  * Internal dependencies
  */
 import './style.scss';
-import type { CartAnalytics as CartAnalyticsData } from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
+import type {
+	CartAnalytics as CartAnalyticsData,
+	DashboardData,
+} from '@quillcrm/client';
 import { convertDate, formatDate } from '@quillcrm/utils';
 import { DateFilter } from '@quillcrm/components';
+import { CartStatsCards } from './cart-stats-card';
+import { RecoveredCartsTable } from './recovered-carts-list';
+import { RecentCartsTable } from './recent-carts-list';
+import { CartsChart } from './cart-chart';
 
-const CartAnalytics: React.FC = () => {
+interface CartAnalyticsProps {
+	CartData: DashboardData;
+}
+
+const CartAnalytics: React.FC<CartAnalyticsProps> = ({ CartData }) => {
 	const [data, setData] = useState<CartAnalyticsData | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [interval, setInterval] = useState<string>('today');
@@ -86,40 +96,27 @@ const CartAnalytics: React.FC = () => {
 	}
 
 	return (
-		<Flex gap={20} vertical>
-			<Flex gap={20}>
-				<Card className="qcrm-dashboard-card">
-					<Flex gap={10} vertical>
-						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
-								<UserOutlined style={{ fontSize: 16 }} />
-							</div>
-							<Typography.Text strong>
-								{__('Total Carts', 'quillcrm')}
-							</Typography.Text>
-						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
-							{data.total.carts}
-						</Typography.Text>
-					</Flex>
-				</Card>
-				<Card className="qcrm-dashboard-card">
-					<Flex gap={10} vertical>
-						<Flex gap={10}>
-							<div className="qcrm-dashboard-card-icon">
-								<MailOutlined style={{ fontSize: 16 }} />
-							</div>
-							<Typography.Text strong>
-								{__('Total Revenue', 'quillcrm')}
-							</Typography.Text>
-						</Flex>
-						<Typography.Text className="qcrm-dashboard-card-value">
-							{data.total.revenue}
-						</Typography.Text>
-					</Flex>
-				</Card>
-			</Flex>
-			<DateFilter
+		<div className="flex flex-col gap-5 mt-5">
+			<CartStatsCards data={data} total_orders={CartData.total_orders} />
+
+			<RecoveredCartsTable
+				recovered_carts={CartData.recent_recoverd_carts}
+			/>
+			<div className="flex gap-5">
+				<RecentCartsTable carts={Object.values(data.carts).flat()} />
+				<CartsChart
+					data={data}
+					interval={interval}
+					startDate={startDate}
+					endDate={endDate}
+					onIntervalChange={setInterval}
+					onChangeFromDate={setStartDate}
+					onChangeToDate={setEndDate}
+					onSubmit={fetchCartAnalytics}
+				/>
+			</div>
+
+			{/* <DateFilter
 				interval={interval}
 				startDate={startDate}
 				endDate={endDate}
@@ -243,8 +240,8 @@ const CartAnalytics: React.FC = () => {
 						height={100}
 					/>
 				</Card>
-			</Flex>
-		</Flex>
+			</Flex> */}
+		</div>
 	);
 };
 

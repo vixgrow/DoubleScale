@@ -102,7 +102,7 @@ const Dashboard: React.FC = () => {
 					},
 					{
 						value: 'cart',
-						children: <CartAnalytics />,
+						children: <CartAnalytics CartData={data}/>,
 					},
 				]}
 			/>

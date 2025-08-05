@@ -57,3 +57,4 @@ export { default as CreateFormsIcon } from './create-forms';
 export { default as UndoIcon } from './undo';
 export { default as RedoIcon } from './redo';
 export { default as PreviewIcon } from './preview';
+export { default as DragDropIcon } from './drag-drop';

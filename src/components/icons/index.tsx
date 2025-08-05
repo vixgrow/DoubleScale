@@ -62,3 +62,6 @@ export { default as NoDataIcon } from './no-data';
 export { default as MailSentIcon } from './mail-sent';
 export { default as MailClickedIcon } from './mail-clicked';
 export { default as MailOpenedIcon } from './mail-opened';
+export { default as RevenueIcon } from './revenue';
+export { default as OrdersIcon } from './orders';
+export { default as ManageIcon } from './manage';

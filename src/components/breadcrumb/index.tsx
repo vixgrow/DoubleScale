@@ -20,7 +20,7 @@ export default function BreadcrumbComponent({
 			<BreadcrumbList>
 				{items.map((item, index) => (
 					<>
-						<BreadcrumbItem key={index}>
+						<BreadcrumbItem key={index} className="mb-0">
 							{index === items.length - 1 ? (
 								<BreadcrumbPage className="text-primary">
 									{item.label}

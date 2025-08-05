@@ -17,8 +17,7 @@ import type { Template } from '@quillcrm/client';
 import React, { useRef, useState } from 'react';
 import { Field } from '@quillcrm/components';
 import { isEmail, isEmpty } from 'validator';
-import TemplateBuilder from '../template-builder';
-
+// import TemplateBuilder from '../template-builder';
 
 interface Props {
 	template: Template;
@@ -33,7 +32,6 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 
 	const { from_name, from_email, subject, body } = template;
 	const { createNotice } = useDispatch('quillcrm/core');
-
 
 	const sendTestEmail = async () => {
 		if (!validate()) {
@@ -122,16 +120,15 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 		return true;
 	};
 
-	if (isBuilderVisible) {
-		return (
+	// if (isBuilderVisible) {
+	// 	return (
 
-			<TemplateBuilder
-				updateTemplate={updateTemplate}
-				onClose={() => setIsBuilderVisible(false)}
-			/>
-		);
-	}
-
+	// 		<TemplateBuilder
+	// 			updateTemplate={updateTemplate}
+	// 			onClose={() => setIsBuilderVisible(false)}
+	// 		/>
+	// 	);
+	// }
 
 	return (
 		<Card>
@@ -289,9 +286,13 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 							justify="center"
 							style={{ height: '100%' }}
 						>
-							<Button type="primary" size="large" onClick={() => {
-								setIsBuilderVisible(true);
-							}}>
+							<Button
+								type="primary"
+								size="large"
+								onClick={() => {
+									setIsBuilderVisible(true);
+								}}
+							>
 								{__('Create with email designer', 'quillcrm')}
 							</Button>
 						</Flex>
@@ -302,8 +303,12 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 				<Popconfirm
 					title={__('Test Email', 'quillcrm')}
 					trigger="click"
-					description={(
-						<Flex className="qcrm-fields" justify='start' style={{ width: 400, padding: '10px 20px' }}>
+					description={
+						<Flex
+							className="qcrm-fields"
+							justify="start"
+							style={{ width: 400, padding: '10px 20px' }}
+						>
 							<Field
 								label={__('To Email', 'quillcrm')}
 								value={toEmail}
@@ -311,7 +316,7 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 								type="email"
 							/>
 						</Flex>
-					)}
+					}
 					onConfirm={sendTestEmail}
 					okText={__('Send', 'quillcrm')}
 					icon={null}

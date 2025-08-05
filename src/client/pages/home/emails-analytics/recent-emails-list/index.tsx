@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 /**
  * internal dependencies
  */
-import { DashboardContentCard } from '@quillcrm/components';
+import { DashboardContentCard, ManageIcon } from '@quillcrm/components';
 import { NavLink } from '@quillcrm/navigation';
 import {
 	Table,
@@ -112,7 +112,10 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 										<NavLink
 											to={`contacts/${email.contact_id}`}
 										>
-											{__('Manage', 'quillcrm')}
+											<div className="flex items-center gap-2">
+												<ManageIcon />
+												{__('Manage', 'quillcrm')}
+											</div>
 										</NavLink>
 									</TableCell>
 								</TableRow>

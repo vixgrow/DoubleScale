@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 /**
  * internal dependencies
  */
-import { DashboardContentCard } from '@quillcrm/components';
+import { DashboardContentCard, ManageIcon } from '@quillcrm/components';
 import { NavLink } from '@quillcrm/navigation';
 import {
 	Table,
@@ -95,7 +95,10 @@ export const UnsubscribedContactsTable: React.FC<
 									</TableCell>
 									<TableCell className="text-[#3F3F46] font-semibold text-sm">
 										<NavLink to={`contacts/${contact.id}`}>
-											{__('Manage', 'quillcrm')}
+											<div className="flex items-center gap-2">
+												<ManageIcon />
+												{__('Manage', 'quillcrm')}
+											</div>
 										</NavLink>
 									</TableCell>
 								</TableRow>

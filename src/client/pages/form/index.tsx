@@ -54,6 +54,7 @@ const Form: React.FC<FormProps> = ({
 	const [isSaving, setIsSaving] = useState(false);
 	const [currentStep, setCurrentStep] = useState(0);
 	const navigate = useNavigate();
+	const isEditMode = !isNewForm;
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
@@ -171,38 +172,41 @@ const Form: React.FC<FormProps> = ({
 		return form;
 	};
 
+	// Modify the handleNext function in the Form component
 	const handleNext = async () => {
 		if (currentStep === 0) {
-			// Validate first step
 			if (!form?.name || !form?.form_type) {
 				showNotice(
 					'error',
-					__('Please fill in all required fields', 'quillcrm')
+					__('Please fill required fields', 'quillcrm')
 				);
 				return;
 			}
-
 			try {
-				// Save form data and move to next step
 				await saveForm();
 				setCurrentStep(1);
 			} catch (error: any) {
 				showNotice('error', error.message);
 			}
 		} else if (currentStep === 1) {
-			// Complete the form creation/update
 			try {
-				await saveForm({ status: 'active' });
+				const savedForm = await saveForm({ status: 'active' });
 
-				// Notify parent component of success
-				if (isNewForm && onSuccess) {
-					onSuccess(__('Form created successfully', 'quillcrm'));
-				}
+				// Show updated notice
+				showNotice(
+					'success',
+					__('Form updated successfully', 'quillcrm')
+				);
 
-				if (isNewForm && onClose) {
+				// Close the form after activation
+				if (onClose) {
 					onClose();
 				} else {
-					navigate(getToLink(`forms/${form?.id}/overview`));
+					navigate(getToLink('forms'));
+				}
+
+				if (onSuccess) {
+					onSuccess(__('Form updated', 'quillcrm'));
 				}
 			} catch (error: any) {
 				showNotice('error', error.message);
@@ -210,11 +214,19 @@ const Form: React.FC<FormProps> = ({
 		}
 	};
 
+	// Modify the handleBack function to handle cancellation properly
 	const handleBack = () => {
 		if (currentStep > 0) {
 			setCurrentStep(currentStep - 1);
-		} else if (isNewForm && onClose) {
-			onClose();
+		} else {
+			// For existing forms, navigate back to forms list
+			if (!isNewForm) {
+				navigate(getToLink('forms'));
+			}
+			// For new forms in modal, just close
+			if (isNewForm && onClose) {
+				onClose();
+			}
 		}
 	};
 
@@ -241,11 +253,17 @@ const Form: React.FC<FormProps> = ({
 				{
 					label: __('Form Information', 'quillcrm'),
 				},
+				{
+					label: __('Form Settings', 'quillcrm'),
+				},
 			]
 		: [
 				{
-					label: __('Create Forms', 'quillcrm'),
+					label: __('Edit Form', 'quillcrm'),
 					href: 'forms',
+				},
+				{
+					label: __('Form Information', 'quillcrm'),
 				},
 				{
 					label: __('Form Settings', 'quillcrm'),
@@ -269,9 +287,6 @@ const Form: React.FC<FormProps> = ({
 				...$actions,
 			}}
 		>
-			{notice && (
-				<NoticeBanner notice={notice} closeNotice={closeNotice} />
-			)}
 			<PanelLayout
 				items={breadcrumbItems}
 				panelbtns={[
@@ -288,16 +303,21 @@ const Form: React.FC<FormProps> = ({
 				nextLabel={
 					currentStep === 1
 						? __('Activate', 'quillcrm')
-						: __('Create Form', 'quillcrm')
+						: isEditMode
+							? __('Update Form', 'quillcrm')
+							: __('Create Form', 'quillcrm')
 				}
 				backLabel={
-					currentStep === 0 && isNewForm
+					currentStep === 0 || isNewForm
 						? __('Cancel', 'quillcrm')
 						: __('Back', 'quillcrm')
 				}
 				showSaveDraft={true}
 				isLoading={isSaving}
 			>
+				{notice && (
+					<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				)}
 				<div className="flex gap-6">
 					<PanelSettings
 						title={stepTitles[currentStep]}

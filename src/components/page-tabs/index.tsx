@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 type TabListItem = {
 	value: string;
 	label: string;
-	icon: React.ReactNode;
+	icon?: React.ReactNode;
 };
 
 type TabContent = {
@@ -28,7 +28,11 @@ const PageTabs: React.FC<PageTabsProps> = ({
 	onValueChange,
 }) => {
 	return (
-		<Tabs defaultValue={defaultValue} className={className} onValueChange={onValueChange}>
+		<Tabs
+			defaultValue={defaultValue}
+			className={className}
+			onValueChange={onValueChange}
+		>
 			<div className="border px-5 py-3 rounded-lg">
 				<TabsList className="bg-transparent text-foreground gap-3">
 					{tabsList.map((tab) => (
@@ -37,7 +41,7 @@ const PageTabs: React.FC<PageTabsProps> = ({
 							value={tab.value}
 							className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 						>
-							{tab.icon}
+							{tab?.icon}
 							{__(tab.label, '@quillcrm')}
 						</TabsTrigger>
 					))}

@@ -11,7 +11,6 @@ import { isEmpty } from 'lodash';
  */
 import {
 	DashboardContentCard,
-	TimeAgoCell,
 	ViewOutlinedIcon,
 } from '@quillcrm/components';
 import { NavLink } from '@quillcrm/navigation';

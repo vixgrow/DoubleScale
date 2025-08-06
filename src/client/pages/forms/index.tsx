@@ -141,6 +141,7 @@ const FormsList: React.FC = () => {
 			});
 
 			fetchForms();
+			showNotice('success', __('Form deleted', 'quillcrm'));
 		} catch (error: any) {
 			showNotice('error', error.message);
 		}

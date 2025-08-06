@@ -78,18 +78,22 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
 										{campaign.name}
 									</TableCell>
-                                    <TableCell className={`text-sm my-2 capitalize rounded-lg py-1 px-3 ${campaign.status == "archived" ? "text-[#50CD89] bg-[#E2FFEF]" : "bg-[#EBEBEB] text-[#616161]"}`}>
-										{campaign.status}
+									<TableCell>
+										<div
+											className={`text-sm w-fit capitalize rounded-lg py-1 px-3 ${campaign.status == 'archived' ? 'text-[#50CD89] bg-[#E2FFEF]' : 'bg-[#EBEBEB] text-[#616161]'}`}
+										>
+											{campaign.status}
+										</div>
 									</TableCell>
 									<TableCell className="text-[#A1A5B7] font-semibold text-sm">
 										Labels
 									</TableCell>
-                                    <TableCell className="text-[#A1A5B7] font-semibold text-sm">
+									<TableCell className="text-[#A1A5B7] font-semibold text-sm">
 										<TimeAgoCell
 											value={campaign.created_at}
 										/>
 									</TableCell>
-                                    <TableCell className="text-[#A1A5B7] font-semibold text-sm">
+									<TableCell className="text-[#A1A5B7] font-semibold text-sm">
 										{campaign.sent_count}
 									</TableCell>
 									<TableCell className="text-[#3F3F46] font-semibold text-sm flex items-center gap-2">

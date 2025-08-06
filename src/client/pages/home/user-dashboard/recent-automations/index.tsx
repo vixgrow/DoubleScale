@@ -80,8 +80,12 @@ export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
 									<TableCell className="text-[#A1A5B7] font-semibold text-sm">
 										Labels
 									</TableCell>
-									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-										{automation.status}
+									<TableCell>
+										<div
+											className={`text-sm w-fit capitalize rounded-lg py-1 px-3 ${automation.status == 'active' ? 'text-[#50CD89] bg-[#E2FFEF]' : 'bg-[#EF44444A] text-destructive'}`}
+										>
+											{automation.status}
+										</div>
 									</TableCell>
 									<TableCell className="text-[#3F3F46] font-semibold text-sm flex items-center gap-2">
 										<NavLink

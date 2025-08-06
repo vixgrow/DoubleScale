@@ -27,17 +27,6 @@ interface RecentEmailsTableProps {
 	emails: DashboardData['recent_emails'];
 }
 
-const getStatusClasses = (status: string) => {
-	switch (status.toLowerCase()) {
-		case 'sent':
-			return 'text-[#50CD89] bg-[#E2FFEF]';
-		case 'draft':
-			return 'text-[#616161] bg-[#EBEBEB]';
-		default:
-			return 'text-[#616161] bg-[#EBEBEB]';
-	}
-};
-
 export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 	emails,
 }) => {
@@ -103,10 +92,12 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
 										1024
 									</TableCell>
-									<TableCell
-										className={`text-xs font-semibold px-2 py-1 rounded-md w-fit ${getStatusClasses(email.status)}`}
-									>
-										{email.status}
+									<TableCell>
+										<div
+											className={`text-sm w-fit capitalize rounded-lg py-1 px-3 ${email.status == 'sent' ? 'text-[#50CD89] bg-[#E2FFEF]' : 'bg-[#EBEBEB] text-[#616161]'}`}
+										>
+											{email.status}
+										</div>
 									</TableCell>
 									<TableCell className="text-[#3F3F46] font-semibold text-sm">
 										<NavLink

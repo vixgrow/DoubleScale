@@ -20,6 +20,8 @@ interface DroppableGroupProps {
 	fieldsCount: number;
 	deletable: boolean;
 	onDelete: () => void;
+	onEdit: () => void;
+	onDuplicate: () => void;
 	children: React.ReactNode;
 }
 
@@ -29,6 +31,8 @@ export const DroppableGroup: React.FC<DroppableGroupProps> = ({
 	fieldsCount,
 	deletable,
 	onDelete,
+	onEdit,
+	onDuplicate,
 	children,
 }) => {
 	const { setNodeRef, isOver } = useDroppable({
@@ -51,10 +55,16 @@ export const DroppableGroup: React.FC<DroppableGroupProps> = ({
 			<div className="custom-fields-group-header flex justify-between items-center">
 				<div className="custom-fields-group-title">{title}</div>
 				<div className="flex gap-6 items-center border-l pl-6">
-					<Button className="text-[#292D32] shadow-none border-none bg-transparent hover:bg-transparent p-0">
+					<Button
+						onClick={onDuplicate}
+						className="text-[#292D32] shadow-none border-none bg-transparent hover:bg-transparent p-0"
+					>
 						<CopyIcon />
 					</Button>
-					<Button className="text-[#292D32] shadow-none border-none bg-transparent hover:bg-transparent p-0">
+					<Button
+						onClick={onEdit}
+						className="text-[#292D32] shadow-none border-none bg-transparent hover:bg-transparent p-0"
+					>
 						<EditIcon />
 					</Button>
 					{deletable && (

@@ -10,8 +10,6 @@ import { useDraggable } from '@dnd-kit/core';
 /**
  * internal dependencies
  */
-import { Button } from '@/components/ui/button';
-import { MoveIcon } from '@quillcrm/components';
 import { CustomField } from '@quillcrm/client';
 
 interface DraggableFieldProps {

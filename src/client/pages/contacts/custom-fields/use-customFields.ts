@@ -29,6 +29,8 @@ export const useCustomFields = () => {
 		groups: [],
 	});
 
+	const [isUpdated, setIsUpdated] = useState(false);
+
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
 	const showNotice = (noticeData: NoticeMessage) => {
@@ -111,6 +113,7 @@ export const useCustomFields = () => {
 					? __('Custom field added', 'quillcrm')
 					: __('Custom field updated', 'quillcrm'),
 			});
+			setIsUpdated(true);
 			return true;
 		} catch (error: any) {
 			showNotice({
@@ -155,6 +158,37 @@ export const useCustomFields = () => {
 		}
 	};
 
+	// New function for bulk delete
+	const deleteSelectedFields = async (fieldIds: number[]) => {
+		try {
+			await apiFetch({
+				path: '/qc/v1/custom-fields',
+				method: 'DELETE',
+				data: { ids: fieldIds },
+			});
+
+			setState((prev) => ({
+				...prev,
+				groups: prev.groups.map((group) => ({
+					...group,
+					custom_fields: group.custom_fields.filter(
+						(field) => !fieldIds.includes(field.id)
+					),
+				})),
+			}));
+
+			showNotice({
+				type: 'success',
+				message: __('Selected fields deleted', 'quillcrm'),
+			});
+		} catch (error: any) {
+			showNotice({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	};
+
 	const saveGroup = async (name: string) => {
 		try {
 			const response = (await apiFetch({
@@ -177,6 +211,64 @@ export const useCustomFields = () => {
 			showNotice({
 				type: 'error',
 				message: error.message,
+			});
+			return false;
+		}
+	};
+
+	const updateGroup = async (groupId: number, name: string) => {
+		try {
+			const response = (await apiFetch({
+				path: `/qc/v1/custom-fields-groups/${groupId}`,
+				method: 'PUT',
+				data: { name }, // Only send name, no slug
+			})) as CustomFieldsGroup;
+
+			setState((prev) => ({
+				...prev,
+				groups: prev.groups.map((group) =>
+					group.id === groupId ? { ...group, ...response } : group
+				),
+			}));
+
+			showNotice({
+				type: 'success',
+				message: __('Group updated', 'quillcrm'),
+			});
+			return true;
+		} catch (error: any) {
+			showNotice({
+				type: 'error',
+				message: error.message,
+			});
+			return false;
+		}
+	};
+
+	const duplicateGroup = async (groupId: number, name?: string) => {
+		try {
+			const response = (await apiFetch({
+				path: `/qc/v1/custom-fields-groups/${groupId}/duplicate`,
+				method: 'POST',
+				data: { name },
+			})) as CustomFieldsGroup;
+
+			setState((prev) => ({
+				...prev,
+				groups: [...prev.groups, response],
+			}));
+
+			showNotice({
+				type: 'success',
+				message: __('Group duplicated successfully', 'quillcrm'),
+			});
+			return true;
+		} catch (error: any) {
+			showNotice({
+				type: 'error',
+				message:
+					error.message ||
+					__('Failed to duplicate group', 'quillcrm'),
 			});
 			return false;
 		}
@@ -286,7 +378,7 @@ export const useCustomFields = () => {
 
 	useEffect(() => {
 		fetchGroups();
-	}, []);
+	}, [isUpdated]);
 
 	return {
 		...state,
@@ -297,7 +389,10 @@ export const useCustomFields = () => {
 		fetchGroups,
 		saveField,
 		deleteField,
+		deleteSelectedFields,
 		saveGroup,
+		updateGroup,
+		duplicateGroup,
 		deleteGroup,
 	};
 };

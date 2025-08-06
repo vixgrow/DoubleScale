@@ -292,7 +292,7 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller
 	{
 		try {
 			$group_id = $request->get_param('id');
-			$group = Custom_Fields_Group_Model::find($group_id);
+			$group = Custom_Fields_Group_Model::with('custom_fields')->find($group_id);
 
 			if (!$group) {
 				return new WP_Error('error', __('Custom fields group not found.', 'quillcrm'), array('status' => 404));
@@ -302,9 +302,10 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller
 
 			$group->update($group_data);
 
-			$group = Custom_Fields_Group_Model::find($group_id);
+			// Return the updated group with its fields
+			$updated_group = Custom_Fields_Group_Model::with('custom_fields')->find($group_id);
 
-			return new WP_REST_Response($group, 200);
+			return new WP_REST_Response($updated_group, 200);
 		} catch (\Exception $e) {
 			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}
@@ -403,7 +404,18 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller
 				foreach ($original_group->custom_fields as $field) {
 					$field_data = $field->toArray();
 					unset($field_data['id']); // Remove the original ID
+					unset($field_data['created_at']); // Remove created_at
+					unset($field_data['updated_at']); // Remove updated_at
+					
 					$field_data['group_id'] = $duplicate_group->id; // Set new group ID
+					
+					// Generate unique field name if necessary
+					$original_name = $field_data['name'];
+					$counter = 1;
+					while (Custom_Field_Model::where('name', $field_data['name'])->exists()) {
+						$field_data['name'] = $original_name . ' (Copy ' . $counter . ')';
+						$counter++;
+					}
 
 					Custom_Field_Model::create($field_data);
 				}

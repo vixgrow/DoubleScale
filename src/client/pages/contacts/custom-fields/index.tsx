@@ -22,6 +22,7 @@ import {
 	CustomFieldsRef,
 	CustomFieldsProps,
 	CustomField,
+	CustomFieldsGroup,
 } from '@quillcrm/client';
 import { DataTableSearch } from '@/components/ui/data-table-search';
 import { DataTableActions } from '@/components/ui/data-table-actions';
@@ -63,7 +64,10 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			fetchGroups,
 			saveField,
 			deleteField,
+			deleteSelectedFields, // Add this from the hook
 			saveGroup,
+			updateGroup,
+			duplicateGroup,
 			deleteGroup,
 			moveField,
 		} = useCustomFields();
@@ -72,6 +76,9 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		const [addGroupVisible, setAddGroupVisible] = useState(false);
 		const [deleteGroupVisible, setDeleteGroupVisible] = useState(false);
 		const [selectedField, setSelectedField] = useState<CustomField | null>(
+			null
+		);
+		const [editingGroup, setEditingGroup] = useState<CustomFieldsGroup | null>(
 			null
 		);
 		const [deleteGroupId, setDeleteGroupId] = useState(0);
@@ -103,9 +110,12 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		);
 
 		useImperativeHandle(ref, () => ({
-			openCreateGroupModal: () => setAddGroupVisible(true),
+			openCreateGroupModal: () => {
+				setEditingGroup(null);
+				setAddGroupVisible(true);
+			},
 			openCreateFieldModal: () => {
-				if (groups.length === 0) {
+				if (!groups || groups.length === 0) {
 					showNotice({
 						type: 'error',
 						message: __(
@@ -122,18 +132,46 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 
 		const handleBulkAction = async (action: string) => {
 			if (action === 'delete') {
-				const selectedFields = groups
-					.flatMap((group) => group.custom_fields)
-					.filter((field) => selectedRowKeys.includes(field.id));
-
-				for (const field of selectedFields) {
-					await deleteField(field);
-				}
+				// Convert selectedRowKeys to numbers
+				const fieldIds = selectedRowKeys.map(key => Number(key));
+				await deleteSelectedFields(fieldIds);
 				setSelectedRowKeys([]);
 			}
 		};
 
-		const allFields = groups.flatMap((group) => group.custom_fields);
+		const handleEditGroup = (group: CustomFieldsGroup) => {
+			setEditingGroup(group);
+			setAddGroupVisible(true);
+		};
+
+		const handleDuplicateGroup = async (group: CustomFieldsGroup) => {
+			// Generate a unique copy name by checking existing group names
+			let copyCounter = 1;
+			let newName = `${group.name} (Copy)`;
+
+			// Keep checking until we find a unique name
+			while (groups?.some(g => g.name === newName)) {
+				copyCounter++;
+				newName = `${group.name} (Copy ${copyCounter})`;
+			}
+
+			await duplicateGroup(group.id, newName);
+		};
+
+		const handleGroupDialogSave = async (name: string) => {
+			return await saveGroup(name);
+		};
+
+		const handleGroupDialogUpdate = async (groupId: number, name: string) => {
+			return await updateGroup(groupId, name);
+		};
+
+		const handleGroupDialogClose = () => {
+			setAddGroupVisible(false);
+			setEditingGroup(null);
+		};
+
+		const allFields = groups?.flatMap((group) => group.custom_fields || []) || [];
 
 		// Enhanced filtering with date range
 		const filteredFields = allFields.filter((field) => {
@@ -285,9 +323,9 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 							}
 						}}
 					>
-						{groups.map((group) => {
+						{(groups || []).map((group) => {
 							const groupFilteredFields =
-								group.custom_fields.filter((field) => {
+								(group.custom_fields || []).filter((field) => {
 									// Text filter
 									const matchesText =
 										globalFilter === '' ||
@@ -340,9 +378,9 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 									id={`group-${group.id}`}
 									title={group.name}
 									fieldsCount={groupFilteredFields.length}
-									deletable={groups.length > 1}
+									deletable={(groups || []).length > 1}
 									onDelete={() => {
-										if (group.custom_fields.length > 0) {
+										if ((group.custom_fields || []).length > 0) {
 											// Group has fields - show dialog to move fields
 											setDeleteGroupId(group.id);
 											setDeleteGroupVisible(true);
@@ -351,6 +389,8 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 											deleteGroup(group.id);
 										}
 									}}
+									onEdit={() => handleEditGroup(group)}
+									onDuplicate={() => handleDuplicateGroup(group)}
 								>
 									<FieldTable
 										fields={groupFilteredFields}
@@ -397,15 +437,17 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 
 				<GroupDialog
 					visible={addGroupVisible}
-					onClose={() => setAddGroupVisible(false)}
-					onSave={saveGroup}
+					onClose={handleGroupDialogClose}
+					onSave={handleGroupDialogSave}
+					onUpdate={handleGroupDialogUpdate}
+					editingGroup={editingGroup}
 				/>
 
 				<DeleteGroupDialog
 					visible={deleteGroupVisible}
 					onClose={() => setDeleteGroupVisible(false)}
 					groupId={deleteGroupId}
-					groups={groups.filter(
+					groups={(groups || []).filter(
 						(group) => group.id !== deleteGroupId
 					)}
 					onDelete={deleteGroup}

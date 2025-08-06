@@ -8,50 +8,70 @@ import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 
 /**
- * External dependencies
- */
-import {
-	Table,
-	Tag as AntTag,
-	Modal,
-	Input,
-	Button,
-	Popover,
-	Flex,
-	Select,
-} from 'antd';
-import { MoreOutlined } from '@ant-design/icons';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
-import type { LinkTrigger, LinkTriggersResponse } from '@quillcrm/client';
-import { NavLink, useNavigate, getToLink } from '@quillcrm/navigation';
-import { Field } from '@quillcrm/components';
-import { convertDate } from '@quillcrm/utils';
-import { isEmpty } from 'validator';
-
-const { Column } = Table;
+import type {
+	LinkTrigger,
+	LinkTriggersResponse,
+	NoticeMessage,
+} from '@quillcrm/client';
+import { NoticeBanner, PageHeader, PlusIcon } from '@quillcrm/components';
+import { formatDateForAPI } from '@quillcrm/utils';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { DataTable } from '@/components/ui/data-table';
+import DataTablePagination from '@/components/ui/data-table-pagination';
+import { getColumns } from './columns';
+import LinkTriggerComponent from '../link-trigger'; // Adjust path as needed
 
 const LinkTriggerList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(10);
-	const [total, setTotal] = useState(0);
+	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [data, setData] = useState<LinkTrigger[]>([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-	const [visible, setVisible] = useState(false);
-	const [isSaving, setIsSaving] = useState(false);
-	const [link, setLinkTrigger] = useState({
-		name: '',
-		status: 'inactive',
-	});
+	const [showCreateForm, setShowCreateForm] = useState(false);
 	const [keyword, setKeyword] = useState('');
-	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [bulkAction, setBulkAction] = useState('');
 	const [isApplying, setIsApplying] = useState(false);
+
+	// Notice state
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+
+	const [dateRange, setDateRange] = useState<{
+		from: Date | null;
+		to: Date | null;
+	}>({
+		from: null,
+		to: null,
+	});
+
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
+	});
+
+	// Helper function to show notice
+	const showNotice = (type: 'success' | 'error', message: string) => {
+		setNotice({ type, message });
+	};
+
+	// Helper function to close notice
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Handle link trigger creation success
+	const handleLinkTriggerCreated = (message: string) => {
+		setShowCreateForm(false);
+		fetchLinks();
+		showNotice('success', message);
+	};
 
 	const fetchLinks = async () => {
 		setLoading(true);
@@ -60,18 +80,16 @@ const LinkTriggerList: React.FC = () => {
 				path: addQueryArgs('/qc/v1/link-triggers', {
 					page,
 					per_page: perPage,
+					from: formatDateForAPI(dateRange.from),
+					to: formatDateForAPI(dateRange.to),
 					keyword,
 				}),
 				method: 'GET',
 			})) as LinkTriggersResponse;
-
-			response.total && setTotal(response.total);
-			response.data && setData(response.data);
+			setData(response.data);
+			setTotalRecords(response.total || 0);
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice('error', error.message);
 		} finally {
 			setLoading(false);
 		}
@@ -79,36 +97,7 @@ const LinkTriggerList: React.FC = () => {
 
 	useEffect(() => {
 		fetchLinks();
-	}, [page, perPage]);
-
-	const createLinkTrigger = async () => {
-		if (isEmpty(link.name, { ignore_whitespace: true })) {
-			createNotice({
-				type: 'error',
-				message: __('Link trigger name is required', 'quillcrm'),
-			});
-			return;
-		}
-		setIsSaving(true);
-
-		try {
-			const response = (await apiFetch({
-				path: '/qc/v1/link-triggers',
-				method: 'POST',
-				data: link,
-			})) as LinkTrigger;
-
-			setVisible(false);
-			navigate(getToLink(`link-triggers/${response.id}`));
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsSaving(false);
-		}
-	};
+	}, [page, perPage, dateRange, keyword]);
 
 	const deleteSelected = async () => {
 		setIsApplying(true);
@@ -121,11 +110,9 @@ const LinkTriggerList: React.FC = () => {
 				},
 			});
 
-			createNotice({
-				type: 'success',
-				message: __('Link triggers deleted', 'quillcrm'),
-			});
+			showNotice('success', __('Link Triggers deleted', 'quillcrm'));
 			setSelectedRowKeys([]);
+			setBulkAction('');
 			fetchLinks();
 		} catch (error: any) {
 			createNotice({
@@ -137,158 +124,74 @@ const LinkTriggerList: React.FC = () => {
 		}
 	};
 
+	const tableConfig = {
+		search: {
+			placeholder: __('Search Link Triggers', 'quillcrm'),
+			onChange: (value) => setKeyword(value),
+			value: keyword,
+		},
+		selection: {
+			enabled: true,
+			selectedKeys: selectedRowKeys,
+			onSelectionChange: setSelectedRowKeys,
+		},
+		bulkActions: {
+			enabled: true,
+			currentAction: bulkAction,
+			onActionChange: setBulkAction,
+			onExecuteAction: () => deleteSelected(),
+		},
+		dateRange: {
+			enabled: true,
+			value: dateRange,
+			onDateChange: setDateRange,
+			placeholder: __('Date Range', 'quillcrm'),
+		},
+	};
+
+	// If showing create form, render the LinkTrigger component in create mode
+	if (showCreateForm) {
+		return (
+			<LinkTriggerComponent
+				isNewLinkTrigger={true}
+				onClose={() => {
+					setShowCreateForm(false);
+					fetchLinks();
+				}}
+				onSuccess={handleLinkTriggerCreated}
+			/>
+		);
+	}
+
 	return (
 		<div className="qcrm-link-trigger-list">
-			<Flex
-				className="qcrm-contacts-list__actions"
-				justify="space-between"
-			>
-				<Flex gap={10}>
-					<Flex gap={10}>
-						<Select
-							options={[
-								{
-									label: __('Bulk Actions', 'quillcrm'),
-									value: '',
-								},
-								{
-									label: __('Delete', 'quillcrm'),
-									value: 'delete',
-								},
-							]}
-							value={bulkAction}
-							onChange={(value) => setBulkAction(value)}
-							disabled={selectedRowKeys.length === 0}
-						/>
-						<Button
-							type="primary"
-							onClick={() => {
-								if (bulkAction === 'delete') {
-									deleteSelected();
-								}
-							}}
-							disabled={selectedRowKeys.length === 0}
-							loading={isApplying}
-						>
-							{__('Apply', 'quillcrm')}
-						</Button>
-					</Flex>
-					<Input.Search
-						placeholder={__('Search', 'quillcrm')}
-						allowClear
-						onSearch={() => {
-							fetchLinks();
-						}}
-						onChange={(e) => setKeyword(e.target.value)}
-						styles={{
-							affixWrapper: {
-								padding: '4px 5px',
-							},
-							input: {
-								minHeight: 'auto',
-							},
-						}}
-					/>
-				</Flex>
-				<Button type="primary" onClick={() => setVisible(true)}>
-					{__('Create Link', 'quillcrm')}
-				</Button>
-			</Flex>
-			<Table
-				dataSource={data}
-				rowKey="id"
-				loading={loading}
-				pagination={{
-					current: page,
-					pageSize: perPage,
-					total: total,
-					onChange: (page, perPage) => {
-						setPage(page);
-						setPerPage(perPage);
+			<PageHeader
+				title={__('Link Triggers List', 'quillcrm')}
+				subtitle={__('Link Triggers', 'quillcrm')}
+				actions={[
+					{
+						label: __('Create Link', 'quillcrm'),
+						onClick: () => setShowCreateForm(true),
+						type: 'primary',
+						icon: <PlusIcon />,
 					},
-				}}
-				rowSelection={{
-					selectedRowKeys,
-					onChange: (selectedRowKeys) =>
-						setSelectedRowKeys(selectedRowKeys),
-				}}
-			>
-				<Column
-					title={__('Name', 'quillcrm')}
-					dataIndex="name"
-					key="name"
-					render={(_, record: LinkTrigger) => (
-						<Flex>
-							<Popover
-								content={
-									<Button
-										type="link"
-										onClick={() => {
-											navigator.clipboard.writeText(
-												record.full_url
-											);
-										}}
-									>
-										{__('Copy', 'quillcrm')}
-									</Button>
-								}
-								trigger="click"
-							>
-								<MoreOutlined />
-							</Popover>
-							<NavLink to={`link-triggers/${record.id}`}>
-								{record.name}
-							</NavLink>
-						</Flex>
-					)}
+				]}
+			/>
+			{notice && (
+				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+			)}
+
+			<div className="qcrm-link-triggers-list__actions">
+				<DataTable
+					columns={getColumns()}
+					data={data}
+					config={tableConfig}
+					showPagination={false}
+					initialPageSize={perPage}
+					setPage={setPage}
 				/>
-				<Column
-					title={__('Status', 'quillcrm')}
-					dataIndex="status"
-					key="status"
-					sorter={(a: LinkTrigger, b: LinkTrigger) =>
-						a.status.localeCompare(b.status)
-					}
-					render={(status) => (
-						<AntTag color={status === 'active' ? 'green' : 'red'}>
-							{status}
-						</AntTag>
-					)}
-				/>
-				<Column
-					title={__('Clicks', 'quillcrm')}
-					dataIndex="click_count"
-					key="click_count"
-					render={(click_count) => click_count || 0}
-				/>
-				<Column
-					title={__('Created At', 'quillcrm')}
-					dataIndex="created_at"
-					key="created_at"
-					sorter={(a: LinkTrigger, b: LinkTrigger) =>
-						a.created_at.localeCompare(b.created_at)
-					}
-					render={(created_at) => convertDate(created_at)}
-				/>
-			</Table>
-			<Modal
-				title={__('Create Link Trigger', 'quillcrm')}
-				open={visible}
-				onOk={createLinkTrigger}
-				onCancel={() => setVisible(false)}
-				confirmLoading={isSaving}
-			>
-				<div className="qcrm-fields">
-					<Field
-						label={__('Name', 'quillcrm')}
-						value={link.name}
-						onChange={(value) =>
-							setLinkTrigger({ ...link, name: value })
-						}
-						type="text"
-					/>
-				</div>
-			</Modal>
+				<DataTablePagination table={serverSideTable} />
+			</div>
 		</div>
 	);
 };

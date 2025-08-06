@@ -29,6 +29,8 @@ export const useCustomFields = () => {
 		groups: [],
 	});
 
+	const [isUpdated, setIsUpdated] = useState(false);
+
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
 	const showNotice = (noticeData: NoticeMessage) => {
@@ -111,6 +113,7 @@ export const useCustomFields = () => {
 					? __('Custom field added', 'quillcrm')
 					: __('Custom field updated', 'quillcrm'),
 			});
+			setIsUpdated(true);
 			return true;
 		} catch (error: any) {
 			showNotice({
@@ -375,7 +378,7 @@ export const useCustomFields = () => {
 
 	useEffect(() => {
 		fetchGroups();
-	}, []);
+	}, [isUpdated]);
 
 	return {
 		...state,

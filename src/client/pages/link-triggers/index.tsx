@@ -16,8 +16,7 @@ import type {
 	LinkTriggersResponse,
 	NoticeMessage,
 } from '@quillcrm/client';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { Field, NoticeBanner, PageHeader, PlusIcon } from '@quillcrm/components';
+import { NoticeBanner, PageHeader, PlusIcon } from '@quillcrm/components';
 import { formatDateForAPI } from '@quillcrm/utils';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import { DataTable } from '@/components/ui/data-table';
@@ -34,7 +33,6 @@ const LinkTriggerList: React.FC = () => {
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [showCreateForm, setShowCreateForm] = useState(false);
 	const [keyword, setKeyword] = useState('');
-	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [bulkAction, setBulkAction] = useState('');
 	const [isApplying, setIsApplying] = useState(false);

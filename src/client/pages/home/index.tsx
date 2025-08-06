@@ -23,7 +23,7 @@ const Dashboard: React.FC = () => {
 	const [data, setData] = useState<DashboardData | null>(null);
 	const [loading, setLoading] = useState(true);
 	const { createNotice } = useDispatch('quillcrm/core');
-	console.log('Dashboard component rendered:',data);
+	console.log('Dashboard component rendered:', data);
 
 	const tabTitles = {
 		user: __('User Dashboard', 'quillcrm'),
@@ -55,7 +55,14 @@ const Dashboard: React.FC = () => {
 	}, []);
 
 	if (!data || loading) {
-		return <Skeleton />;
+		return (
+			<div className="space-y-4 p-4">
+				<Skeleton className="h-6 w-1/3" />
+				<Skeleton className="h-4 w-full" />
+				<Skeleton className="h-4 w-5/6" />
+				<Skeleton className="h-4 w-4/6" />
+			</div>
+		);
 	}
 
 	return (
@@ -98,11 +105,13 @@ const Dashboard: React.FC = () => {
 					},
 					{
 						value: 'emails',
-						children: <EmailAnalytics EmailsData={data.recent_emails}/>,
+						children: (
+							<EmailAnalytics EmailsData={data.recent_emails} />
+						),
 					},
 					{
 						value: 'cart',
-						children: <CartAnalytics CartData={data}/>,
+						children: <CartAnalytics CartData={data} />,
 					},
 				]}
 			/>

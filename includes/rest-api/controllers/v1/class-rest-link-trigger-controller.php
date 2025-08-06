@@ -223,26 +223,21 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 			$keyword  = $request->get_param( 'keyword' ) ? $request->get_param( 'keyword' ) : '';
 			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$ids      = $request->get_param( 'ids' ) ? $request->get_param( 'ids' ) : array();
 			$from     = $request->get_param( 'from' ) ?? null;
 			$to       = $request->get_param( 'to' ) ?? null;
 
 			$query = Link_Trigger_Model::query();
 
-			if ( ! empty( $ids ) ) {
-				$link_triggers = $query->whereIn( 'id', $ids )->get();
-			} else {
-				if ( $keyword ) {
-					$query->where( 'name', 'LIKE', '%' . $keyword . '%' );
-				}
-				if ( $from ) {
-					$query->where( 'created_at', '>=', $from );
-				}
-				if ( $to ) {
-					$query->where( 'created_at', '<=', $to );
-				}
-				$link_triggers = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			if ( $keyword ) {
+				$query->where( 'name', 'LIKE', '%' . $keyword . '%' );
 			}
+			if ( $from ) {
+				$query->where( 'created_at', '>=', $from );
+			}
+			if ( $to ) {
+				$query->where( 'created_at', '<=', $to );
+			}
+			$link_triggers = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $link_triggers, 200 );
 		} catch ( Exception $e ) {

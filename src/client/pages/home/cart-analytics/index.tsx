@@ -106,7 +106,7 @@ const CartAnalytics: React.FC<CartAnalyticsProps> = ({ CartData }) => {
 				recovered_carts={CartData.recent_recoverd_carts}
 			/>
 			<div className="flex gap-5">
-				<RecentCartsTable carts={Object.values(data.carts).flat()} />
+				<RecentCartsTable carts={CartData.recent_abandoned_carts} />
 				<CartsChart
 					data={data}
 					interval={interval}

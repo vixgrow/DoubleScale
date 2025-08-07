@@ -108,12 +108,10 @@ export const RecoveredCartsTable: React.FC<RecoveredCartsTableProps> = ({
 										)}
 									</TableCell>
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-										{Object.values(cart.items)
-											.map((item) => item.key)
-											.join(', ')}
+										{Array.isArray(cart.items) && cart.items.map((item: any) => item?.product?.name).join(', ')}
 									</TableCell>
 									<TableCell className="text-[#50CD89] font-bold text-sm">
-										{cart.total}
+										{cart.total} {cart.currency}
 									</TableCell>
 									<TableCell className="text-[#3F3F46] font-semibold text-sm">
 										<NavLink

@@ -11,6 +11,7 @@ import { isEmpty } from 'lodash';
  */
 import {
 	DashboardContentCard,
+	TimeAgoCell,
 	ViewOutlinedIcon,
 } from '@quillcrm/components';
 import { NavLink } from '@quillcrm/navigation';
@@ -22,11 +23,11 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import type { AbandonedCart } from '@quillcrm/client';
+import type { DashboardData } from '@quillcrm/client';
 import { EmptyState } from '../../no-data';
 
 interface RecentCartsTableProps {
-	carts?: AbandonedCart[];
+	carts: DashboardData['recent_abandoned_carts'];
 }
 
 const getStatusClasses = (status: string) => {
@@ -86,38 +87,34 @@ export const RecentCartsTable: React.FC<RecentCartsTableProps> = ({
 											{index + 1}
 										</TableCell>
 										<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-											email
+											{cart.email}
 										</TableCell>
-										<TableCell
-											className={`text-xs font-semibold px-2 py-1 rounded-md w-fit ${getStatusClasses('done')}`}
-										>
-											cart.status
+										<TableCell>
+											<div
+												className={`text-sm w-fit capitalize rounded-lg py-1 px-3 ${getStatusClasses('done')}`}
+											>
+												{cart.status}
+											</div>
 										</TableCell>
 										<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-											{/* <TimeAgoCell
+											<TimeAgoCell
 												value={cart.created_at}
-											/> */}created_at
+											/>
 										</TableCell>
 										<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-											{/* {Object.values(cart.items)
-												.map(
-													(item) =>
-														(
-															item as {
-																key: string;
-															}
-														).key
-												)
-												.join(', ')} */}
-												items...
+											{Array.isArray(cart.items) &&
+												cart.items
+													.map(
+														(item: any) =>
+															item?.product?.name
+													)
+													.join(', ')}
 										</TableCell>
 										<TableCell className="text-[#50CD89] font-semibold text-sm">
-											{/* {cart.total} */}total
+											{cart.total} {cart.currency}
 										</TableCell>
 										<TableCell className="text-[#3F3F46] font-semibold text-sm">
-											<NavLink
-												to={`abandoned-carts`}
-											>
+											<NavLink to={`abandoned-carts`}>
 												<div className="flex items-center gap-2">
 													<ViewOutlinedIcon
 														width={14}

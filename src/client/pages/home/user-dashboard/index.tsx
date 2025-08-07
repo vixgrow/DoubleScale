@@ -1,15 +1,11 @@
 /**
  * WordPress dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
+
 /**
  * external dependencies
  */
-import dayjs from 'dayjs';
 import {
 	Chart as ChartJS,
 	LineController,
@@ -34,94 +30,55 @@ ChartJS.register(
 	BarElement,
 	Filler
 );
+
 /**
  * Internal dependencies
  */
-import type {
-	DashboardData,
-	ContactAnalytics,
-	CartAnalytics,
-} from '@quillcrm/client';
+import type { DashboardData } from '@quillcrm/client';
 import ConfigAPI from '@quillcrm/config';
 import { DashboardCards } from './dashboard-cards';
-import { RecentContactsList } from '../contacts-analytics/recent-contacts-list';
-import { ContactAnalyticsChart } from '../contacts-analytics/contacts-chart';
+import { RecentContactsList } from '../recent-contacts-list';
+import { ContactAnalyticsChart } from '../contacts-chart';
 import { RecentAutomationsTable } from './recent-automations';
 import { QuickLinks } from './quick-links';
 import { RecentCampaignsTable } from './RecentCampaignsTable';
-import { CartsChart } from '../cart-analytics/cart-chart';
+import { CartsChart } from '../cart-chart';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useContactAnalytics, useCartAnalytics } from '../use-analytics';
 
 interface UserDashboardProps {
-	data: DashboardData;
+	dashboardData: DashboardData;
 }
 
-const UserDashboard: React.FC<UserDashboardProps> = ({ data }) => {
+const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 	const isWooCommerceActive = ConfigAPI.isWoocommerceActive();
 
-	const [contactsData, setContactsData] = useState<ContactAnalytics | null>(
-		null
-	);
-	const [cartsData, setCartsData] = useState<CartAnalytics | null>(null);
-	const [loading, setLoading] = useState(true);
-	const [interval, setInterval] = useState<string>('today');
-	const [startDate, setStartDate] = useState<Date>(new Date());
-	const [endDate, setEndDate] = useState<Date>(new Date());
-	const { createNotice } = useDispatch('quillcrm/core');
+	// Use separate hooks for contact and cart analytics with their own state
+	const {
+		data: contactsData,
+		loading: contactsLoading,
+		interval: contactsInterval,
+		startDate: contactsStartDate,
+		endDate: contactsEndDate,
+		setInterval: setContactsInterval,
+		setStartDate: setContactsStartDate,
+		setEndDate: setContactsEndDate,
+		refetch: refetchContacts,
+	} = useContactAnalytics();
 
-	const fetchContactAnalytics = async () => {
-		setLoading(true);
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts/analytics', {
-					interval,
-					start_date: dayjs(startDate).format('YYYY-MM-DD'),
-					end_date: dayjs(endDate).format('YYYY-MM-DD'),
-				}),
-			})) as ContactAnalytics;
+	const {
+		data: cartsData,
+		loading: cartsLoading,
+		interval: cartsInterval,
+		startDate: cartsStartDate,
+		endDate: cartsEndDate,
+		setInterval: setCartsInterval,
+		setStartDate: setCartsStartDate,
+		setEndDate: setCartsEndDate,
+		refetch: refetchCarts,
+	} = useCartAnalytics();
 
-			setContactsData(response);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Error fetching analytics data', 'quillcrm'),
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchContactAnalytics();
-	}, []);
-
-	const fetchCartAnalytics = async () => {
-		setLoading(true);
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/abandoned-carts/analytics', {
-					interval,
-					start_date: dayjs(startDate).format('YYYY-MM-DD'),
-					end_date: dayjs(endDate).format('YYYY-MM-DD'),
-				}),
-			})) as CartAnalytics;
-
-			setCartsData(response);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Error fetching analytics data', 'quillcrm'),
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchCartAnalytics();
-	}, []);
-
-	if (!contactsData || !cartsData || loading) {
+	if (!contactsData || !cartsData || contactsLoading || cartsLoading) {
 		return (
 			<div className="space-y-4 p-4">
 				<Skeleton className="h-6 w-1/3" />
@@ -134,37 +91,37 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ data }) => {
 
 	return (
 		<div className="flex flex-col gap-5 mt-5">
-			<DashboardCards data={data} />
+			<DashboardCards data={dashboardData} />
 			<div className="flex gap-5">
-				<RecentContactsList contacts={data.recent_contacts} />
+				<RecentContactsList contacts={dashboardData.recent_contacts} />
 				<ContactAnalyticsChart
 					data={contactsData}
-					interval={interval}
-					startDate={startDate}
-					endDate={endDate}
-					onIntervalChange={setInterval}
-					onChangeFromDate={setStartDate}
-					onChangeToDate={setEndDate}
-					onSubmit={fetchContactAnalytics}
+					interval={contactsInterval}
+					startDate={contactsStartDate}
+					endDate={contactsEndDate}
+					onIntervalChange={setContactsInterval}
+					onChangeFromDate={setContactsStartDate}
+					onChangeToDate={setContactsEndDate}
+					onSubmit={refetchContacts}
 				/>
 			</div>
 
 			<div className="flex gap-5">
-				<RecentAutomationsTable automations={data.top_automations} />
+				<RecentAutomationsTable automations={dashboardData.top_automations} />
 				<QuickLinks />
 			</div>
 
 			<div className="flex gap-5">
-				<RecentCampaignsTable campaigns={data.top_campaigns} />
+				<RecentCampaignsTable campaigns={dashboardData.top_campaigns} />
 				<CartsChart
 					data={cartsData}
-					interval={interval}
-					startDate={startDate}
-					endDate={endDate}
-					onIntervalChange={setInterval}
-					onChangeFromDate={setStartDate}
-					onChangeToDate={setEndDate}
-					onSubmit={fetchCartAnalytics}
+					interval={cartsInterval}
+					startDate={cartsStartDate}
+					endDate={cartsEndDate}
+					onIntervalChange={setCartsInterval}
+					onChangeFromDate={setCartsStartDate}
+					onChangeToDate={setCartsEndDate}
+					onSubmit={refetchCarts}
 				/>
 			</div>
 		</div>

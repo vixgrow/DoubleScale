@@ -13,7 +13,7 @@ import { User } from 'lucide-react';
 import { DashboardContentCard } from '@quillcrm/components';
 import { NavLink } from '@quillcrm/navigation';
 import type { DashboardData } from '@quillcrm/client';
-import { EmptyState } from '../../no-data';
+import { EmptyState } from '../no-data';
 
 interface RecentContactsListProps {
 	contacts: DashboardData['recent_contacts'];

@@ -12,7 +12,6 @@ import { isEmpty } from 'lodash';
 import {
 	DashboardContentCard,
 	ManageIcon,
-	OutlineReportsIcon,
 	TimeAgoCell,
 } from '@quillcrm/components';
 import { NavLink } from '@quillcrm/navigation';
@@ -36,7 +35,7 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 }) => {
 	return (
 		<DashboardContentCard
-			title={__('Recent Automations', 'quillcrm')}
+			title={__('Recent Campaigns', 'quillcrm')}
 			className="w-2/3"
 		>
 			{isEmpty(campaigns) ? (

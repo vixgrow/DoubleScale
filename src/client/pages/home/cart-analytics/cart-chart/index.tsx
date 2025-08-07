@@ -1,19 +1,16 @@
 /**
  * wordpress dependencies
  */
-import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import { map } from 'lodash';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 /**
  * internal dependencies
  */
 import { DashboardContentCard, DateFilter } from '@quillcrm/components';
-import { formatDate, convertDate } from '@quillcrm/utils';
 import type { CartAnalytics } from '@quillcrm/client';
 
 // Register Chart.js components for doughnut chart
@@ -65,10 +62,7 @@ export const CartsChart: React.FC<CartsChartProps> = ({
 	const { pendingTotal, paidTotal } = calculateRevenueTotals();
 
 	const chartData = {
-		labels: [
-			__('Paid', 'quillcrm'),
-			__('Pending', 'quillcrm'),
-		],
+		labels: [__('Paid', 'quillcrm'), __('Pending', 'quillcrm')],
 		datasets: [
 			{
 				data: [paidTotal, pendingTotal],

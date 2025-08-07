@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 /**
  * internal dependencies
  */
-import { DashboardContentCard, ViewOutlinedIcon } from '@quillcrm/components';
+import { DashboardContentCard, TimeAgoCell, ViewOutlinedIcon } from '@quillcrm/components';
 import { NavLink } from '@quillcrm/navigation';
 import {
 	Table,
@@ -91,10 +91,7 @@ export const RecoveredCartsTable: React.FC<RecoveredCartsTableProps> = ({
 										</div>
 									</TableCell>
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-										{format(
-											new Date(cart.updated_at),
-											'yyyy-MM-dd HH:mm'
-										)}
+										<TimeAgoCell value={cart.updated_at}/>
 									</TableCell>
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
 										{format(

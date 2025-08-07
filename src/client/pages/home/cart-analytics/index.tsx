@@ -10,10 +10,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Card, Flex, Skeleton, Typography } from 'antd';
-import { UserOutlined, MailOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { map } from 'lodash';
 import {
 	Chart as ChartJS,
 	LineController,
@@ -25,7 +22,6 @@ import {
 	Tooltip,
 	BarElement,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
 
 ChartJS.register(
 	LineController,
@@ -46,12 +42,11 @@ import type {
 	CartAnalytics as CartAnalyticsData,
 	DashboardData,
 } from '@quillcrm/client';
-import { convertDate, formatDate } from '@quillcrm/utils';
-import { DateFilter } from '@quillcrm/components';
 import { CartStatsCards } from './cart-stats-card';
 import { RecoveredCartsTable } from './recovered-carts-list';
 import { RecentCartsTable } from './recent-carts-list';
 import { CartsChart } from './cart-chart';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface CartAnalyticsProps {
 	CartData: DashboardData;
@@ -86,13 +81,21 @@ const CartAnalytics: React.FC<CartAnalyticsProps> = ({ CartData }) => {
 			setLoading(false);
 		}
 	};
+	console.log(data)
 
 	useEffect(() => {
 		fetchCartAnalytics();
 	}, []);
 
 	if (!data || loading) {
-		return <Skeleton active />;
+		return (
+			<div className="space-y-4 p-4">
+				<Skeleton className="h-6 w-1/3" />
+				<Skeleton className="h-4 w-full" />
+				<Skeleton className="h-4 w-5/6" />
+				<Skeleton className="h-4 w-4/6" />
+			</div>
+		);
 	}
 
 	return (

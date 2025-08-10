@@ -36,7 +36,7 @@ const TemplateCard = ({
 			style={style}
 			{...listeners}
 			{...attributes}
-			className="w-full h-full bg-primary-foreground rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-2 cursor-grab hover:cursor-grabbing hover:border-blue-300 transition-colors"
+			className="w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-2 cursor-grab hover:cursor-grabbing hover:border-blue-300 transition-colors"
 			key={item.value || blockType}
 		>
 			<DragDropIcon />

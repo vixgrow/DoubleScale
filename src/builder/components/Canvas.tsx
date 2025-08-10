@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import {
@@ -20,10 +20,15 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { blocksRegistry } from '../blocks/BlockRegister';
+import AddNewSectionModal from './AddNewSectionModal';
+//@ts-ignore
+import emailBuilder from '../../../assets/images/email-builder.png';
+import { ColumnsLayout } from '@quillcrm/components';
 
 const Canvas = () => {
 	const dispatch = useDispatch();
 	const sensors = useSensors(useSensor(PointerSensor));
+	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
 
@@ -76,9 +81,22 @@ const Canvas = () => {
 		dispatch(STORE_KEY).addSection(newSection);
 	};
 
+	const handleOpenModal = () => {
+		setIsModalOpen(true);
+	};
+
+	const handleCloseModal = () => {
+		setIsModalOpen(false);
+	};
+
+	const handleSectionSelect = () => {
+		addNewSection();
+		setIsModalOpen(false);
+	};
+
 	return (
 		<div className="flex-1 p-4 overflow-auto">
-			<div className="max-w-2xl mx-auto">
+			<div className="max-w-3xl mx-auto">
 				{/* Email Template Container */}
 				<div className="bg-white shadow-lg rounded-lg overflow-hidden">
 					<DndContext
@@ -93,24 +111,32 @@ const Canvas = () => {
 							{sections.length === 0 ? (
 								<div className="text-center py-16 px-8">
 									<div className="text-muted-foreground mb-4">
-										<div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-											<Plus className="w-8 h-8" />
+										<div className="size-full mx-auto mb-4 flex items-center justify-center">
+											<img
+												src={emailBuilder}
+												alt="email-builder.png"
+											/>
 										</div>
-										<h3 className="text-lg font-semibold mb-2">
+										<p className="text-2xl text-secondary-foreground font-medium leading-10 text-center">
 											{__(
-												'Start Building Your Email',
+												'There are no sections at the moment. Start adding',
 												'quillcrm'
 											)}
-										</h3>
-										<p className="text-sm">
+											<br />
 											{__(
-												'Add your first section to get started.',
+												'sections and controlling elements.',
 												'quillcrm'
 											)}
 										</p>
 									</div>
-									<Button onClick={addNewSection}>
-										{__('Add Section', 'quillcrm')}
+									<Button
+										onClick={handleOpenModal}
+										variant="gradient"
+										size="lg"
+										className='px-5'
+									>
+										<ColumnsLayout/>
+										{__('Add New Section', 'quillcrm')}
 									</Button>
 								</div>
 							) : (
@@ -127,7 +153,7 @@ const Canvas = () => {
 										<Button
 											variant="outline"
 											className="w-full"
-											onClick={addNewSection}
+											onClick={handleOpenModal}
 										>
 											<Plus className="w-4 h-4 mr-2" />
 											{__('Add Section', 'quillcrm')}
@@ -143,6 +169,13 @@ const Canvas = () => {
 					</DndContext>
 				</div>
 			</div>
+
+			{/* Add New Section Modal */}
+			<AddNewSectionModal
+				isOpen={isModalOpen}
+				onClose={handleCloseModal}
+				onSectionSelect={handleSectionSelect}
+			/>
 		</div>
 	);
 };

@@ -156,6 +156,7 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 		? Object.entries(sourceData).filter(([key, field]) => {
 				if (
 					source !== 'csv' &&
+					source !== 'mailerlite' &&
 					(field.type === 'file' ||
 						field.type === 'contact_mapped_fields')
 				) {
@@ -167,6 +168,11 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 					(field.type === 'lists_mapping' ||
 						field.type === 'tags_mapping')
 				) {
+					return false;
+				}
+
+				// HubSpot only has lists, no tags
+				if (source === 'hubspot' && field.type === 'tags_mapping') {
 					return false;
 				}
 

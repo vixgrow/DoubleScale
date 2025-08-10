@@ -36,6 +36,17 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 
 	const { validateCredentials, getSourceData } = useImportActions();
 
+	// Debug logging for step navigation
+	console.log('StepNavigation Debug:', {
+		currentStep,
+		source,
+		sourceData: !!sourceData,
+		canValidate: validateCredentials(),
+		isFetching,
+		isUploading,
+		importing,
+	});
+
 	const canProceedToStep2 = () => {
 		if (!importer) return false;
 		if (source !== 'csv') return false;
@@ -59,20 +70,51 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 	if (currentStep === 1) {
 		return (
 			<div className="mt-10 flex justify-end">
-				{['mailerlite', 'activecampaign'].includes(source) ? (
-					<Button
-						onClick={getSourceData}
-						disabled={
-							!validateCredentials() ||
-							isFetching ||
-							isUploading ||
-							importing
-						}
-						className="flex items-center space-x-2"
-					>
-						<span>{__('Fetch Data', 'quillcrm')}</span>
-						<ArrowRight className="w-4 h-4" />
-					</Button>
+				{['mailerlite', 'activecampaign', 'hubspot'].includes(
+					source
+				) ? (
+					<>
+						{!sourceData ? (
+							/* Credentials validation step */
+							<Button
+								onClick={() => {
+									console.log(
+										'Connect & Fetch Data button clicked'
+									);
+									getSourceData();
+								}}
+								disabled={
+									!validateCredentials() ||
+									isFetching ||
+									isUploading ||
+									importing
+								}
+								className="flex items-center space-x-2"
+							>
+								<span>
+									{isFetching
+										? __('Validating...', 'quillcrm')
+										: __(
+												'Connect & Fetch Data',
+												'quillcrm'
+											)}
+								</span>
+								<ArrowRight className="w-4 h-4" />
+							</Button>
+						) : (
+							/* Field mapping step for integrations */
+							<Button
+								onClick={onImportContacts}
+								disabled={
+									isFetching || isUploading || importing
+								}
+								className="flex items-center space-x-2"
+							>
+								<span>{__('Import Contacts', 'quillcrm')}</span>
+								<ArrowRight className="w-4 h-4" />
+							</Button>
+						)}
+					</>
 				) : (
 					<Button
 						onClick={handleNext}

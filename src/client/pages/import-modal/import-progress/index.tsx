@@ -58,6 +58,10 @@ const ImportProgress: React.FC = () => {
 								alt="Default"
 								className="w-16 h-16"
 							/>
+						) : source === 'hubspot' ? (
+							<div className="w-16 h-16 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+								HS
+							</div>
 						) : (
 							<ImportProgressIcon />
 						)}

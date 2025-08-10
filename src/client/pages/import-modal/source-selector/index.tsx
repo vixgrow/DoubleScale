@@ -82,6 +82,11 @@ const SourceSelector: React.FC = () => {
 					className="w-10 h-10"
 				/>
 			),
+			hubspot: (
+				<div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+					HS
+				</div>
+			),
 		};
 		return (
 			iconMap[sourceKey] || (
@@ -95,7 +100,7 @@ const SourceSelector: React.FC = () => {
 		value: slug,
 		disabled: !importer.is_active,
 		icon: getSourceIcon(slug),
-		requiresCredentials: ['mailerlite', 'activecampaign'].includes(slug),
+		requiresCredentials: ['mailerlite', 'activecampaign', 'hubspot'].includes(slug),
 	}));
 
 	const handleSourceChange = (newSource: string) => {

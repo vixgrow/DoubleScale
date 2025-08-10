@@ -42,6 +42,7 @@ import EmailAnalytics from '../pages/emails-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 import Tools from '../pages/tools';
+import EmailBuilder from '../../builder';
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -227,6 +228,13 @@ registerAdminPage('emails-analytics', {
 // 	label: __('Tools', 'quillcrm'),
 // 	icon: <ToolsIcon />,
 // });
+
+registerAdminPage('email-builder', {
+	path: 'email-builder',
+	component: () => <EmailBuilder />,
+	label: __('Email Builder', 'quillcrm'),
+	icon: <CampaignsIcon />, // Using campaigns icon for now
+});
 
 registerAdminPage('settings', {
 	path: 'settings',

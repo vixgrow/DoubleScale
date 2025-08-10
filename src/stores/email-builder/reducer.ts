@@ -1,0 +1,253 @@
+import type { Reducer } from 'redux';
+
+import {
+  ADD_BLOCK,
+  ADD_SECTION,
+  CLEAR_SELECTION,
+  DELETE_BLOCK,
+  DELETE_SECTION,
+  MOVE_BLOCK,
+  RESET_BUILDER,
+  SELECT_BLOCK,
+  SET_BUILDER_STATE,
+  UPDATE_BLOCK,
+  UPDATE_SECTION
+} from './constants';
+
+import type {
+  EmailBlock,
+  EmailBuilderActionTypes,
+  EmailBuilderState,
+  EmailSection
+} from './types';
+
+// Initial state
+const initialState: EmailBuilderState = {
+  sections: [],
+  selectedBlockId: null,
+  selectedSectionId: null,
+  selectedColumnId: null,
+  draggedBlock: null,
+  history: {
+    past: [],
+    present: [],
+    future: []
+  }
+};
+
+// Helper function to find and update a block
+const updateBlockInSections = (
+  sections: EmailSection[],
+  blockId: string,
+  updater: (block: EmailBlock) => EmailBlock
+): EmailSection[] => {
+  return sections.map(section => ({
+    ...section,
+    columns: section.columns.map(column => ({
+      ...column,
+      blocks: column.blocks.map(block =>
+        block.id === blockId ? updater(block) : block
+      )
+    }))
+  }));
+};
+
+// Helper function to remove a block from sections
+const removeBlockFromSections = (sections: EmailSection[], blockId: string): EmailSection[] => {
+  return sections.map(section => ({
+    ...section,
+    columns: section.columns.map(column => ({
+      ...column,
+      blocks: column.blocks.filter(block => block.id !== blockId)
+    }))
+  }));
+};
+
+// Helper function to add history entry
+const addToHistory = (state: EmailBuilderState, newSections: EmailSection[]): EmailBuilderState => {
+  return {
+    ...state,
+    sections: newSections,
+    history: {
+      past: [...state.history.past, state.sections],
+      present: newSections,
+      future: [] // Clear future when new action is performed
+    }
+  };
+};
+
+const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
+  state = initialState,
+  action
+): EmailBuilderState => {
+  switch (action.type) {
+    case ADD_BLOCK: {
+      const { sectionId, columnId, block, index } = action.payload;
+
+      const newSections = state.sections.map(section => {
+        if (section.id !== sectionId) return section;
+
+        return {
+          ...section,
+          columns: section.columns.map(column => {
+            if (column.id !== columnId) return column;
+
+            const newBlocks = [...column.blocks];
+            const insertIndex = index !== undefined ? index : newBlocks.length;
+            newBlocks.splice(insertIndex, 0, block);
+
+            return {
+              ...column,
+              blocks: newBlocks
+            };
+          })
+        };
+      });
+
+      return addToHistory(state, newSections);
+    }
+
+    case UPDATE_BLOCK: {
+      const { blockId, props } = action.payload;
+
+      const newSections = updateBlockInSections(state.sections, blockId, block => ({
+        ...block,
+        props: { ...block.props, ...props }
+      }));
+
+      return addToHistory(state, newSections);
+    }
+
+    case DELETE_BLOCK: {
+      const { blockId } = action.payload;
+      const newSections = removeBlockFromSections(state.sections, blockId);
+
+      return {
+        ...addToHistory(state, newSections),
+        selectedBlockId: state.selectedBlockId === blockId ? null : state.selectedBlockId
+      };
+    }
+
+    case MOVE_BLOCK: {
+      const { blockId, fromSectionId, fromColumnId, toSectionId, toColumnId, toIndex } = action.payload;
+
+      // First, find and remove the block
+      let blockToMove: EmailBlock | null = null;
+      const sectionsAfterRemoval = state.sections.map(section => {
+        if (section.id !== fromSectionId) return section;
+
+        return {
+          ...section,
+          columns: section.columns.map(column => {
+            if (column.id !== fromColumnId) return column;
+
+            const blockIndex = column.blocks.findIndex(block => block.id === blockId);
+            if (blockIndex !== -1) {
+              blockToMove = column.blocks[blockIndex];
+              return {
+                ...column,
+                blocks: column.blocks.filter(block => block.id !== blockId)
+              };
+            }
+            return column;
+          })
+        };
+      });
+
+      if (!blockToMove) return state;
+
+      // Then, add the block to the new location
+      const newSections = sectionsAfterRemoval.map(section => {
+        if (section.id !== toSectionId) return section;
+
+        return {
+          ...section,
+          columns: section.columns.map(column => {
+            if (column.id !== toColumnId) return column;
+
+            const newBlocks = [...column.blocks];
+            newBlocks.splice(toIndex, 0, blockToMove!);
+
+            return {
+              ...column,
+              blocks: newBlocks
+            };
+          })
+        };
+      });
+
+      return addToHistory(state, newSections);
+    }
+
+    case SELECT_BLOCK: {
+      const { blockId, sectionId, columnId } = action.payload;
+      return {
+        ...state,
+        selectedBlockId: blockId,
+        selectedSectionId: sectionId || state.selectedSectionId,
+        selectedColumnId: columnId || state.selectedColumnId
+      };
+    }
+
+    case CLEAR_SELECTION: {
+      return {
+        ...state,
+        selectedBlockId: null,
+        selectedSectionId: null,
+        selectedColumnId: null
+      };
+    }
+
+    case ADD_SECTION: {
+      const { section, index } = action.payload;
+      const newSections = [...state.sections];
+      const insertIndex = index !== undefined ? index : newSections.length;
+      newSections.splice(insertIndex, 0, section);
+
+      return addToHistory(state, newSections);
+    }
+
+    case DELETE_SECTION: {
+      const { sectionId } = action.payload;
+      const newSections = state.sections.filter(section => section.id !== sectionId);
+
+      return {
+        ...addToHistory(state, newSections),
+        selectedSectionId: state.selectedSectionId === sectionId ? null : state.selectedSectionId
+      };
+    }
+
+    case UPDATE_SECTION: {
+      const { sectionId, styles } = action.payload;
+      const newSections = state.sections.map(section =>
+        section.id === sectionId
+          ? { ...section, styles: { ...section.styles, ...styles } }
+          : section
+      );
+
+      return addToHistory(state, newSections);
+    }
+
+    case SET_BUILDER_STATE: {
+      const { sections } = action.payload;
+      return {
+        ...state,
+        sections,
+        history: {
+          ...state.history,
+          present: sections
+        }
+      };
+    }
+
+    case RESET_BUILDER: {
+      return initialState;
+    }
+
+    default:
+      return state;
+  }
+};
+
+export default reducer;
+export type State = EmailBuilderState; 

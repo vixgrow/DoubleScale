@@ -1,57 +1,149 @@
-// components/Canvas.jsx
-import { useSelector, useDispatch } from 'react-redux';
+import React from 'react';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 import {
 	DndContext,
 	closestCenter,
 	useSensor,
 	useSensors,
 	PointerSensor,
+	DragOverlay,
 } from '@dnd-kit/core';
 import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-// import { reorderBlocks, selectBlock } from '../store/builderSlice';
-// import { SortableItem } from './SortableItem';
-// import { BlockRenderer } from './BlockRenderer';
+import { STORE_KEY } from '../../stores/email-builder/constants';
+import { EmailSection } from '../../stores/email-builder/types';
+import SectionRenderer from './SectionRenderer';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+import { blocksRegistry } from '../blocks/BlockRegister';
 
 const Canvas = () => {
-	// const blocks = useSelector((state) => state.builder.blocks);
-	// const dispatch = useDispatch();
-	// const sensors = useSensors(useSensor(PointerSensor));
+	const dispatch = useDispatch();
+	const sensors = useSensors(useSensor(PointerSensor));
 
-	// const handleDragEnd = (event) => {
-	// 	const { active, over } = event;
-	// 	if (active.id !== over.id) {
-	// 		const oldIndex = blocks.findIndex((b) => b.id === active.id);
-	// 		const newIndex = blocks.findIndex((b) => b.id === over.id);
-	// 		dispatch(reorderBlocks({ fromIndex: oldIndex, toIndex: newIndex }));
-	// 	}
-	// };
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+
+	const handleDragEnd = (event: any) => {
+		const { active, over } = event;
+
+		if (!over || active.id === over.id) return;
+
+		// Handle dropping new blocks from sidebar
+		if (active.data?.current?.type === 'template') {
+			const { blockType } = active.data.current;
+			const overData = over.data?.current;
+
+			if (overData?.type === 'column') {
+				const { sectionId, columnId } = overData;
+
+				// Create new block
+				const newBlock = {
+					id: uuidv4(),
+					type: blockType,
+					props: blocksRegistry[blockType]?.defaultProps || {},
+				};
+
+				dispatch(STORE_KEY).addBlock(sectionId, columnId, newBlock);
+				return;
+			}
+		}
+
+		// Handle block reordering within canvas
+		// This is a simplified version - you might want to implement more complex logic
+		console.log('Drag ended:', { active: active.id, over: over.id });
+	};
+
+	const addNewSection = () => {
+		const newSection: EmailSection = {
+			id: uuidv4(),
+			columns: [
+				{
+					id: uuidv4(),
+					width: 100,
+					blocks: [],
+				},
+			],
+			styles: {
+				backgroundColor: '#ffffff',
+				padding: '20px',
+			},
+		};
+
+		dispatch(STORE_KEY).addSection(newSection);
+	};
 
 	return (
-		<DndContext
-			// sensors={sensors}
-			collisionDetection={closestCenter}
-			// onDragEnd={handleDragEnd}
-		>
-			hey
-			{/* <SortableContext
-				items={blocks.map((b) => b.id)}
-				strategy={verticalListSortingStrategy}
-			>
-				<div style={{ flex: 1, padding: 20, background: '#f5f5f5' }}>
-					{blocks.map((block) => (
-						<SortableItem key={block.id} id={block.id}>
-							<BlockRenderer
-								block={block}
-								onClick={() => dispatch(selectBlock(block.id))}
-							/>
-						</SortableItem>
-					))}
+		<div className="flex-1 p-4 overflow-auto">
+			<div className="max-w-2xl mx-auto">
+				{/* Email Template Container */}
+				<div className="bg-white shadow-lg rounded-lg overflow-hidden">
+					<DndContext
+						sensors={sensors}
+						collisionDetection={closestCenter}
+						onDragEnd={handleDragEnd}
+					>
+						<SortableContext
+							items={sections.map((s) => s.id)}
+							strategy={verticalListSortingStrategy}
+						>
+							{sections.length === 0 ? (
+								<div className="text-center py-16 px-8">
+									<div className="text-muted-foreground mb-4">
+										<div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+											<Plus className="w-8 h-8" />
+										</div>
+										<h3 className="text-lg font-semibold mb-2">
+											{__(
+												'Start Building Your Email',
+												'quillcrm'
+											)}
+										</h3>
+										<p className="text-sm">
+											{__(
+												'Add your first section to get started.',
+												'quillcrm'
+											)}
+										</p>
+									</div>
+									<Button onClick={addNewSection}>
+										{__('Add Section', 'quillcrm')}
+									</Button>
+								</div>
+							) : (
+								<>
+									{sections.map((section) => (
+										<SectionRenderer
+											key={section.id}
+											section={section}
+										/>
+									))}
+
+									{/* Add Section Button */}
+									<div className="p-4 border-t border-dashed border-border">
+										<Button
+											variant="outline"
+											className="w-full"
+											onClick={addNewSection}
+										>
+											<Plus className="w-4 h-4 mr-2" />
+											{__('Add Section', 'quillcrm')}
+										</Button>
+									</div>
+								</>
+							)}
+						</SortableContext>
+
+						<DragOverlay>
+							{/* Render dragged item here */}
+						</DragOverlay>
+					</DndContext>
 				</div>
-			</SortableContext> */}
-		</DndContext>
+			</div>
+		</div>
 	);
 };
 

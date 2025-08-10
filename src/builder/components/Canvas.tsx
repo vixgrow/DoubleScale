@@ -133,9 +133,9 @@ const Canvas = () => {
 										onClick={handleOpenModal}
 										variant="gradient"
 										size="lg"
-										className='px-5'
+										className="px-5"
 									>
-										<ColumnsLayout/>
+										<ColumnsLayout />
 										{__('Add New Section', 'quillcrm')}
 									</Button>
 								</div>
@@ -152,11 +152,10 @@ const Canvas = () => {
 									<div className="p-4 border-t border-dashed border-border">
 										<Button
 											variant="outline"
-											className="w-full"
+											className="w-full shadow-none border-dashed border-primary text-primary bg-transparent"
 											onClick={handleOpenModal}
 										>
-											<Plus className="w-4 h-4 mr-2" />
-											{__('Add Section', 'quillcrm')}
+											{__('Add New Section', 'quillcrm')}
 										</Button>
 									</div>
 								</>

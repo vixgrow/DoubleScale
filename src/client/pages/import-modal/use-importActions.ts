@@ -111,15 +111,6 @@ export const useImportActions = () => {
 			})) as { [key: string]: any };
 
 			dispatch({ type: 'SET_SOURCE_DATA', payload: response });
-
-			// Success feedback
-			createNotice({
-				type: 'success',
-				message: __(
-					'Successfully connected! Configure your import settings below.',
-					'quillcrm'
-				),
-			});
 		} catch (error: any) {
 			// Platform-specific error handling
 			let errorMessage = error.message;
@@ -355,7 +346,10 @@ export const useImportActions = () => {
 	}, []);
 
 	useEffect(() => {
-		getSourceData();
+		// Only fetch source data if we have a valid source and we're not in completion state
+		if (state.source && !state.showingCompletion) {
+			getSourceData();
+		}
 	}, [state.source]);
 
 	return {

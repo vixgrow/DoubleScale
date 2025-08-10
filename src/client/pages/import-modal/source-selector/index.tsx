@@ -35,6 +35,8 @@ import fluentcrmIcon from '../../../../../assets/images/fluent-crm/fluent-icon.p
 import mailerliteIcon from '../../../../../assets/images/mailer-lite/mailer-icon.png';
 //@ts-ignore
 import activecampaignIcon from '../../../../../assets/images/active-campaign/active-icon.png';
+//@ts-ignore
+import hubspotIcon from '../../../../../assets/images/hubspot/hubspot -icon.png';
 
 const SourceSelector: React.FC = () => {
 	const { state, dispatch } = useImportContext();
@@ -83,9 +85,11 @@ const SourceSelector: React.FC = () => {
 				/>
 			),
 			hubspot: (
-				<div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-					HS
-				</div>
+				<img
+					src={hubspotIcon}
+					alt="HubSpot"
+					className="w-10 h-10"
+				/>
 			),
 		};
 		return (

@@ -16,6 +16,8 @@ import { useImportContext } from '../contexts';
 import ConfigAPI from '@quillcrm/config';
 //@ts-ignore
 import csvIcon from '../../../../../assets/images/csv/csv.png';
+//@ts-ignore
+import hubspotIcon from '../../../../../assets/images/hubspot/hubspot -icon.png';
 
 const ImportProgress: React.FC = () => {
 	const { state } = useImportContext();
@@ -55,13 +57,15 @@ const ImportProgress: React.FC = () => {
 						{source === 'csv' ? (
 							<img
 								src={csvIcon}
-								alt="Default"
+								alt="CSV"
 								className="w-16 h-16"
 							/>
 						) : source === 'hubspot' ? (
-							<div className="w-16 h-16 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-								HS
-							</div>
+							<img
+								src={hubspotIcon}
+								alt="HubSpot"
+								className="w-16 h-16"
+							/>
 						) : (
 							<ImportProgressIcon />
 						)}

@@ -8,7 +8,7 @@ const BlockSidebar = () => {
 	const tabStyles =
 		'data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#1E3A8A] data-[state=active]:to-[#3B82F6] data-[state=active]:text-primary-foreground px-7 py-3.5 rounded-xl';
 	return (
-		<div className="bg-primary-foreground w-full max-w-[300px] align-center py-4 rounded-r-md h-full">
+		<div className="bg-white w-full max-w-[300px] align-center py-4 h-full">
 			<Tabs defaultValue="elements" className="w-full">
 				<div className="border-b border-border w-full flex flex-col items-center pb-4">
 					<TabsList className="px-4 h-16">

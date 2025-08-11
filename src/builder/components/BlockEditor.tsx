@@ -67,7 +67,7 @@ const BlockEditor: React.FC = () => {
 				</Button>
 			</div>
 
-			<div className="space-y-4 px-4 pb-4">
+			<div className="space-y-4 p-4">
 				<blockDefinition.Editor
 					props={selectedBlock.props}
 					onChange={handlePropsChange}

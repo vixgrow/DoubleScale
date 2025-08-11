@@ -47,11 +47,17 @@ const BlockEditor: React.FC = () => {
 	};
 
 	return (
-		<div className="w-80 bg-background border-l border-border p-4">
-			<div className="flex items-center justify-between mb-4">
-				<h3 className="text-lg font-semibold">
-					{blockDefinition.name || __('Block Settings', 'quillcrm')}
-				</h3>
+		<div className="w-80 bg-background border-l border-border rounded-l-xl">
+			<div className="flex items-center justify-between border-b-2 px-4 pt-5 pb-4">
+				<div className="flex items-center gap-2">
+					<div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-lg text-white">
+						<blockDefinition.icon />
+					</div>
+					<h3 className="text-base font-semibold text-primary">
+						{blockDefinition.name || __('Block', 'quillcrm')}{' '}
+						{__('Settings', 'quillcrm')}
+					</h3>
+				</div>
 				<Button
 					variant="ghost"
 					size="sm"
@@ -61,14 +67,14 @@ const BlockEditor: React.FC = () => {
 				</Button>
 			</div>
 
-			<div className="space-y-4">
+			<div className="space-y-4 px-4 pb-4">
 				<blockDefinition.Editor
 					props={selectedBlock.props}
 					onChange={handlePropsChange}
 				/>
 			</div>
 
-			<div className="mt-6 pt-4 border-t border-border">
+			<div className="mt-6 pt-4 px-4 border-t border-border">
 				<Button
 					variant="destructive"
 					size="sm"

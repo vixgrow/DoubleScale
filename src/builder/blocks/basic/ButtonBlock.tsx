@@ -1,38 +1,11 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@/components/ui/button';
+import { ButtonBlockIcon } from '@quillcrm/components';
 
 export const ButtonBlock = {
 	type: 'button',
 	name: __('Button', 'quillcrm'),
-	icon: () => (
-		<div className="flex items-center justify-center">
-			<svg
-				width="40"
-				height="24"
-				viewBox="0 0 40 24"
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<rect
-					x="0.5"
-					y="0.5"
-					width="39"
-					height="23"
-					rx="3.5"
-					fill="white"
-				/>
-				<rect
-					x="0.5"
-					y="0.5"
-					width="39"
-					height="23"
-					rx="3.5"
-					stroke="#616161"
-				/>
-				<rect x="8" y="9" width="24" height="6" rx="3" fill="#616161" />
-			</svg>
-		</div>
-	),
+	icon: ButtonBlockIcon,
 	defaultProps: {
 		text: 'Click Here',
 		url: '#',

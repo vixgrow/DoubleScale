@@ -80,3 +80,4 @@ export { default as AlignTopIcon } from './align-top';
 export { default as AlignBottomIcon } from './align-bottom';
 export { default as AlignHorizontalCenterIcon } from './align-horizontal-center';
 export { default as AlignVerticalCenterIcon } from './align-vertical-center';
+export { default as CursorIcon } from './cursor';

@@ -1,11 +1,19 @@
-import { useState } from 'react';
+/**
+ * wordpress dependencies
+ */
 import { __ } from '@wordpress/i18n';
+/**
+ * external dependencies
+ */
+import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
+/**
+ * internal dependencies
+ */
 import PreheaderLibrary from '../blocks/libraries/Preheader';
 import HeaderLibrary from '../blocks/libraries/Header';
 import HeroImageLibrary from '../blocks/libraries/HeroImage';
 import EmailBodyLibrary from '../blocks/libraries/EmailBody';
-
 
 const FooterLayout = () => (
 	<div className="p-4">
@@ -101,17 +109,19 @@ const LayoutItems = () => {
 						<div
 							key={item.id}
 							onClick={() => handleItemClick(item.id)}
-							className={`flex items-center justify-between w-full px-4 py-3 rounded-md cursor-pointer transition-colors ${activeSidebar === item.id
-								? 'text-primary font-bold'
-								: 'text-muted-foreground'
-								}`}
+							className={`flex items-center justify-between w-full px-4 py-3 rounded-md cursor-pointer transition-colors ${
+								activeSidebar === item.id
+									? 'text-primary font-bold'
+									: 'text-muted-foreground'
+							}`}
 						>
 							<span className="text-base">{item.title}</span>
 							<ChevronRight
-								className={`transition-transform ${activeSidebar === item.id
-									? 'rotate-180'
-									: ''
-									}`}
+								className={`transition-transform ${
+									activeSidebar === item.id
+										? 'rotate-180'
+										: ''
+								}`}
 							/>
 						</div>
 					))}
@@ -120,7 +130,7 @@ const LayoutItems = () => {
 
 			{/* Sidebar */}
 			{activeSidebar && (
-				<div className="absolute -top-44 -right-[333px] w-72 h-auto z-20 bg-white">
+				<div className="absolute -top-44 -right-[333px] w-72 h-full overflow-y-scroll z-20 bg-white">
 					<div className="flex items-center justify-center px-8 pt-7">
 						<h2 className="text-base font-bold text-primary border-b-2 text-center w-full pb-4">
 							{

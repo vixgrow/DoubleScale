@@ -81,3 +81,6 @@ export { default as AlignBottomIcon } from './align-bottom';
 export { default as AlignHorizontalCenterIcon } from './align-horizontal-center';
 export { default as AlignVerticalCenterIcon } from './align-vertical-center';
 export { default as CursorIcon } from './cursor';
+export { default as GlobalEmailSettingsIcon } from './global-email-settings';
+export { default as ColorPaletteIcon } from './color-palette';
+export { default as FileUploadIcon } from './file-upload';

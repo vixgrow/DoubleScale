@@ -17,13 +17,13 @@ import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailSection } from '../../stores/email-builder/types';
 import SectionRenderer from './SectionRenderer';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { blocksRegistry } from '../blocks/BlockRegister';
 import AddNewSectionModal from './AddNewSectionModal';
 //@ts-ignore
 import emailBuilder from '../../../assets/images/email-builder.png';
 import { ColumnsLayout } from '@quillcrm/components';
+import { LayoutTemplate } from '../types';
 
 const Canvas = () => {
 	const dispatch = useDispatch();
@@ -62,16 +62,14 @@ const Canvas = () => {
 		console.log('Drag ended:', { active: active.id, over: over.id });
 	};
 
-	const addNewSection = () => {
+	const addNewSection = (sectionType: LayoutTemplate) => {
 		const newSection: EmailSection = {
 			id: uuidv4(),
-			columns: [
-				{
-					id: uuidv4(),
-					width: 100,
-					blocks: [],
-				},
-			],
+			columns: sectionType.number.map((width) => ({
+				id: uuidv4(),
+				width,
+				blocks: [],
+			})),
 			styles: {
 				backgroundColor: '#ffffff',
 				padding: '20px',
@@ -89,8 +87,8 @@ const Canvas = () => {
 		setIsModalOpen(false);
 	};
 
-	const handleSectionSelect = () => {
-		addNewSection();
+	const handleSectionSelect = (sectionType: LayoutTemplate) => {
+		addNewSection(sectionType);
 		setIsModalOpen(false);
 	};
 

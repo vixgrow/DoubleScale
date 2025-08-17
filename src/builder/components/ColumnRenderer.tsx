@@ -54,6 +54,9 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 				min-h-24 p-4 border-r border-dashed border-gray-200 last:border-r-0
 				${isOver ? 'bg-blue-50' : ''}
 			`}
+			style={{
+				width: `${100 / column.width}%`,
+			}}
 		>
 			<SortableContext
 				items={column.blocks.map((b) => b.id)}

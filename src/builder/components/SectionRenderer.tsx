@@ -86,14 +86,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 			)}
 
 			{/* Section Content */}
-			<div
-				className="grid"
-				style={{
-					gridTemplateColumns: section.columns
-						.map((col) => `${col.width}%`)
-						.join(' '),
-				}}
-			>
+			<div className="flex">
 				{section.columns.map((column) => (
 					<ColumnRenderer
 						key={column.id}

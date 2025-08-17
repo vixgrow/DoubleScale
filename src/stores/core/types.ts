@@ -11,13 +11,21 @@ import type { FunctionKeys } from 'utility-types';
 /**
  * Internal Dependencies.
  */
-import { SETUP_STORE, ADD_NOTICE, DELETE_NOTICE, SET_MERGE_TAGS_VISIBLE, SET_CURRENT_TRIGGER } from './constants';
+import {
+	SETUP_STORE,
+	ADD_NOTICE,
+	DELETE_NOTICE,
+	SET_MERGE_TAGS_VISIBLE,
+	SET_CURRENT_TRIGGER,
+	SET_MERGE_TAG_CALLBACK,
+} from './constants';
 
 export type CorePureState = {
 	notices: Notices;
 	initialAccountData: InitialAccountData;
 	mergeTagsVisible: boolean;
 	currentTrigger: string;
+	mergeTagCallback?: ((tagValue: string) => void) | null;
 };
 
 export type InitialAccountData = {
@@ -59,12 +67,18 @@ export type setCurrentTrigger = {
 	trigger: string;
 };
 
+export type setMergeTagCallback = {
+	type: typeof SET_MERGE_TAG_CALLBACK;
+	callback: ((tagValue: string) => void) | null;
+};
+
 export type CoreActionTypes =
 	| setupStoreAction
 	| addNote
 	| deleteNote
 	| setMergeTagsVisible
 	| setCurrentTrigger
+	| setMergeTagCallback
 	| ReturnType<() => { type: 'NOOP' }>;
 
 /**
@@ -75,8 +89,8 @@ export type CoreActionTypes =
 
 export type SelectFromMap<S extends Record<string, unknown>> = {
 	[selector in FunctionKeys<S>]: S[selector] extends (...args: any[]) => any
-	? (...args: TailParameters<S[selector]>) => ReturnType<S[selector]>
-	: never;
+		? (...args: TailParameters<S[selector]>) => ReturnType<S[selector]>
+		: never;
 };
 
 /**

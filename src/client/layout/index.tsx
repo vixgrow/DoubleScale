@@ -62,11 +62,18 @@ const Notices: React.FC = () => {
 };
 
 export const Layout = (props) => {
-	const { mergeTagsVisible } = useSelect((select) => ({
+	const { mergeTagsVisible, mergeTagCallback } = useSelect((select) => ({
 		mergeTagsVisible: select('quillcrm/core').getMergeTagsVisible(),
+		mergeTagCallback: select('quillcrm/core').getMergeTagCallback(),
 	}));
-	const { setMergeTagsVisible } = useDispatch('quillcrm/core');
+	const { setMergeTagsVisible, setMergeTagCallback } = useDispatch('quillcrm/core');
 	console.log(mergeTagsVisible, 'mergeTagsVisible');
+
+	const handleCloseMergeTags = () => {
+		setMergeTagsVisible(false);
+		// Clear the callback when closing
+		setMergeTagCallback(null);
+	};
 
 	return (
 		<SlotFillProvider>
@@ -74,7 +81,8 @@ export const Layout = (props) => {
 				<Notices />
 				<MergeTagsModal
 					visible={mergeTagsVisible}
-					onClose={() => setMergeTagsVisible(false)}
+					onClose={handleCloseMergeTags}
+					onInsertTag={mergeTagCallback || undefined}
 				/>
 				<div className="qcrm-layout__main">
 					<NavBar />

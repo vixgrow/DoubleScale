@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button';
 import { __ } from '@wordpress/i18n';
 import { layoutsStyles } from '../data/layouts';
 import { DragDropIcon } from '@quillcrm/components';
+import { LayoutTemplate } from '../types';
 
 interface AddNewSectionModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSectionSelect: (sectionType: string) => void;
+	onSectionSelect: (sectionType: LayoutTemplate) => void;
 }
 
 const AddNewSectionModal: React.FC<AddNewSectionModalProps> = ({
@@ -21,7 +22,7 @@ const AddNewSectionModal: React.FC<AddNewSectionModalProps> = ({
 	onClose,
 	onSectionSelect,
 }) => {
-	const handleSectionSelect = (sectionType: string) => {
+	const handleSectionSelect = (sectionType: LayoutTemplate) => {
 		onSectionSelect(sectionType);
 	};
 
@@ -48,7 +49,7 @@ const AddNewSectionModal: React.FC<AddNewSectionModalProps> = ({
 							key={`${layout.value}-${index}`}
 							variant="outline"
 							className="h-auto p-4 flex flex-col items-start gap-2 hover:bg-accent/50"
-							onClick={() => handleSectionSelect(layout.value)}
+							onClick={() => handleSectionSelect(layout)}
 						>
 							<div
 								className="w-full h-full flex flex-col items-center justify-center text-muted-foreground p-4 gap-2"

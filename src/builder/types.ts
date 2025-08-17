@@ -24,6 +24,6 @@ export interface BuilderState {
 
 export interface LayoutTemplate {
   name: string;
-  columns: number[];
+  number: number[];
   value: string;
 } 

@@ -19,11 +19,22 @@ export interface TextBlockProps {
 	bold: boolean;
 	italic: boolean;
 	underline: boolean;
+	'line-through': boolean;
+	lineHeight: string;
 	letterSpacing: string;
 	borderRadius: string;
 	borderWidth: string;
-	borderColor: string;
+	linkColor: string;
 	backgroundColor: string;
+	textAlign: string;
+	listType: string;
+	headingStyle: string;
+	padding: {
+		top: number,
+		right: number,
+		bottom: number,
+		left: number,
+	},
 }
 
 export const TextBlock = {
@@ -40,11 +51,22 @@ export const TextBlock = {
 		bold: false,
 		italic: false,
 		underline: false,
+		'line-through': false,
+		lineHeight: '1.5',
 		letterSpacing: '0px',
 		borderRadius: '0px',
 		borderWidth: '0px',
-		borderColor: '#333',
+		linkColor: '#333',
 		backgroundColor: '#fff',
+		textAlign: 'left',
+		listType: 'none',
+		headingStyle: 'p',
+		padding: {
+			top: 4,
+			right: 8,
+			bottom: 4,
+			left: 8,
+		},
 	} as TextBlockProps,
 	Renderer: TextRenderer,
 	Editor: TextEditor,

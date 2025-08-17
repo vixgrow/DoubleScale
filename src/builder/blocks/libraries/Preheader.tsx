@@ -1,4 +1,14 @@
+/**
+ * wordpress dependencies
+ */
 import { __ } from '@wordpress/i18n';
+/**
+ * external dependencies
+ */
+
+/**
+ * internal dependencies
+ */
 
 const PreheaderLibrary = () => {
 	return (

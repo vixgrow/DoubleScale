@@ -1,5 +1,15 @@
-import { CursorIcon } from '@quillcrm/components';
+/**
+ * wordpress dependencies
+ */
 import { __ } from '@wordpress/i18n';
+/**
+ * external dependencies
+ */
+
+/**
+ * internal dependencies
+ */
+import { CursorIcon } from '@quillcrm/components';
 
 const HeaderLibrary = () => {
 	return (

@@ -1,15 +1,15 @@
-import { TextBlock } from './basic/TextBlock';
-import { ImageBlock } from './basic/ImageBlock';
-import { ButtonBlock } from './basic/ButtonBlock';
-import { DividerBlock } from './basic/DividerBlock';
-import { SocialMediaBlock } from './basic/SocialMediaBlock';
-import { HtmlBlock } from './basic/HtmlBlock';
-import { TimerBlock } from './basic/TimerBlock';
-import { VideoBlock } from './basic/VideoBlock';
-import { TableBlock } from './basic/TableBlock';
-import { SignatureBlock } from './basic/SignatureBlock';
-import { BannerBlock } from './basic/BannerBlock';
-import { MenuBlock } from './basic/MenuBlock';
+import TextBlock from './basic/TextBlock';
+import ImageBlock from './basic/ImageBlock';
+import ButtonBlock from './basic/ButtonBlock';
+import DividerBlock from './basic/DividerBlock';
+import SocialMediaBlock from './basic/SocialMediaBlock';
+import TimerBlock from './basic/TimerBlock';
+import VideoBlock from './basic/VideoBlock';
+import TableBlock from './basic/TableBlock';
+import SignatureBlock from './basic/SignatureBlock';
+import BannerBlock from './basic/BannerBlock';
+import MenuBlock from './basic/MenuBlock';
+import HtmlBlock from './basic/HtmlBlock';
 
 export const blocksRegistry = {
 	image: ImageBlock,

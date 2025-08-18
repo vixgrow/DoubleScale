@@ -27,7 +27,7 @@ const Sections = () => {
 		<div
 			className="py-4 grid gap-4"
 			style={{
-				gridTemplateColumns: 'auto auto',
+				gridTemplateColumns: '50% 50%',
 			}}
 		>
 			{Object.entries(blocksRegistry).map(([key, block]) => (

@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailColumn } from '../../stores/email-builder/types';
 import BlockRenderer from './BlockRenderer';
+// @ts-ignore
+import dropIcon from '../../../assets/images/drop-icon.png';
 
 interface ColumnRendererProps {
 	column: EmailColumn;
@@ -51,7 +53,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 		<div
 			ref={setNodeRef}
 			className={`
-				min-h-24 p-4 border-r border-dashed border-gray-200 last:border-r-0
+				min-h-24 p-4
 				${isOver ? 'bg-blue-50' : ''}
 			`}
 			style={{
@@ -63,23 +65,18 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 				strategy={verticalListSortingStrategy}
 			>
 				{column.blocks.length === 0 ? (
-					<div className="text-center py-8">
-						<div className="text-muted-foreground mb-4">
-							<Plus className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-							<p className="text-sm">
-								{__(
-									'Drop blocks here or click to add',
-									'quillcrm'
-								)}
+					<div className="bg-[#EBF4FB] rounded-md text-center p-8">
+						<div className="text-muted-foreground flex flex-col items-center gap-2">
+							<img
+								src={dropIcon}
+								alt="Drop Icon"
+								width={24}
+								height={24}
+							/>
+							<p className="text-sm text-secondary">
+								{__('Drop Content Here', 'quillcrm')}
 							</p>
 						</div>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={addTextBlock}
-						>
-							{__('Add Text Block', 'quillcrm')}
-						</Button>
 					</div>
 				) : (
 					<>

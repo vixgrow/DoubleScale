@@ -8,7 +8,14 @@ import type { Reducer } from 'redux';
 /**
  * Internal Dependencies.
  */
-import { SETUP_STORE, ADD_NOTICE, DELETE_NOTICE, SET_MERGE_TAGS_VISIBLE, SET_CURRENT_TRIGGER } from './constants';
+import {
+	SETUP_STORE,
+	ADD_NOTICE,
+	DELETE_NOTICE,
+	SET_MERGE_TAGS_VISIBLE,
+	SET_CURRENT_TRIGGER,
+	SET_MERGE_TAG_CALLBACK,
+} from './constants';
 import { CorePureState, CoreActionTypes } from './types';
 
 // Initial State
@@ -17,6 +24,7 @@ const initialState: CorePureState = {
 	initialAccountData: {},
 	mergeTagsVisible: false,
 	currentTrigger: '',
+	mergeTagCallback: null,
 };
 
 // Reducer.
@@ -83,6 +91,14 @@ const reducer: Reducer<CorePureState, CoreActionTypes> = (
 			return {
 				...state,
 				currentTrigger: trigger,
+			};
+		}
+		case SET_MERGE_TAG_CALLBACK: {
+			const { callback } = action;
+
+			return {
+				...state,
+				mergeTagCallback: callback,
 			};
 		}
 		default:

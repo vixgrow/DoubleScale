@@ -5,8 +5,17 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
+
+// WordPress media library types
+declare global {
+	interface Window {
+		wp: {
+			media: (options: any) => any;
+		};
+	}
+}
 /**
  * internal dependencies
  */
@@ -22,7 +31,7 @@ import {
 } from '@quillcrm/components/ui/select';
 
 interface BackgroundImage {
-	file: File;
+	id: number;
 	name: string;
 	url: string;
 	size: number;
@@ -47,10 +56,102 @@ const BackgroundSettings: React.FC<{
 		backgroundSize: 'cover',
 	});
 
+	// Check if WordPress media library is available when component mounts
+	useEffect(() => {
+		console.log('BackgroundSettings mounted. Checking wp.media availability...');
+		console.log('window.wp:', typeof window.wp);
+		console.log('window.wp?.media:', typeof window.wp?.media);
+
+		// Wait a bit for WordPress to fully load
+		const timer = setTimeout(() => {
+			console.log('After delay - window.wp:', typeof window.wp);
+			console.log('After delay - window.wp?.media:', typeof window.wp?.media);
+		}, 1000);
+
+		return () => clearTimeout(timer);
+	}, []);
+
 	const handleInputChange = (field: keyof Settings, value: any) => {
 		setSettings((prev) => ({ ...prev, [field]: value }));
 	};
 
+	const openMediaLibrary = () => {
+		// Check if wp.media is available
+		if (typeof window.wp !== 'undefined' && window.wp.media) {
+			console.log('WordPress media library is available, opening media frame...');
+			// Create the media frame
+			const frame = window.wp.media({
+				title: __('Select Background Image', 'quillcrm'),
+				button: {
+					text: __('Use this image', 'quillcrm'),
+				},
+				multiple: false,
+				library: {
+					type: 'image'
+				}
+			});
+
+			// When an image is selected, run a callback
+			frame.on('select', function () {
+				// Get media attachment details from the frame state
+				const attachment = frame.state().get('selection').first().toJSON();
+
+				setSettings((prev) => ({
+					...prev,
+					backgroundImage: {
+						id: attachment.id,
+						name: attachment.filename || attachment.title,
+						url: attachment.url,
+						size: attachment.filesizeInBytes || 0,
+					},
+				}));
+			});
+
+			// Open the modal
+			frame.open();
+		} else {
+			console.error('WordPress media library is not available. wp object:', typeof window.wp, 'wp.media:', typeof window.wp?.media);
+			// Fallback to native file input if wp.media is not available
+			document.getElementById('bg-upload')?.click();
+		}
+	};
+
+	const handleReplaceImage = () => {
+		// Same logic for replacing image
+		if (typeof window.wp !== 'undefined' && window.wp.media) {
+			const frame = window.wp.media({
+				title: __('Replace Background Image', 'quillcrm'),
+				button: {
+					text: __('Use this image', 'quillcrm'),
+				},
+				multiple: false,
+				library: {
+					type: 'image'
+				}
+			});
+
+			frame.on('select', function () {
+				const attachment = frame.state().get('selection').first().toJSON();
+
+				setSettings((prev) => ({
+					...prev,
+					backgroundImage: {
+						id: attachment.id,
+						name: attachment.filename || attachment.title,
+						url: attachment.url,
+						size: attachment.filesizeInBytes || 0,
+					},
+				}));
+			});
+
+			frame.open();
+		} else {
+			console.error('WordPress media library is not available');
+			document.getElementById('bg-replace')?.click();
+		}
+	};
+
+	// Fallback file upload handler for when wp.media is not available
 	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
@@ -61,7 +162,7 @@ const BackgroundSettings: React.FC<{
 					setSettings((prev) => ({
 						...prev,
 						backgroundImage: {
-							file,
+							id: 0, // No ID for local files
 							name: file.name,
 							url: result,
 							size: file.size,
@@ -138,25 +239,22 @@ const BackgroundSettings: React.FC<{
 							</div>
 						</div>
 						<div className="flex gap-2 mt-2">
-							<input
+							{/* Hidden fallback input */}
+							<Input
 								type="file"
 								accept="image/*"
 								className="hidden"
 								id="bg-replace"
 								onChange={handleFileUpload}
 							/>
-							<label htmlFor="bg-replace">
-								<Button
-									variant="outline"
-									size="sm"
-									className="text-sm text-primary shadow-none"
-									asChild
-								>
-									<label htmlFor="bg-replace">
-										{__('Replace', 'quillcrm')}
-									</label>
-								</Button>
-							</label>
+							<Button
+								variant="outline"
+								size="sm"
+								className="text-sm text-primary shadow-none"
+								onClick={handleReplaceImage}
+							>
+								{__('Replace', 'quillcrm')}
+							</Button>
 							<Button
 								variant="outline"
 								size="sm"
@@ -169,14 +267,15 @@ const BackgroundSettings: React.FC<{
 					</div>
 				) : (
 					<div className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors">
-						<input
+						{/* Hidden fallback input */}
+						<Input
 							type="file"
 							onChange={handleFileUpload}
 							accept="image/*"
 							className="hidden"
 							id="bg-upload"
 						/>
-						<label htmlFor="bg-upload" className="cursor-pointer">
+						<div className="cursor-pointer" onClick={openMediaLibrary}>
 							<div className="flex flex-col items-center justify-center">
 								<div className="text-primary bg-accent rounded-full p-2 mb-2">
 									<FileUploadIcon />
@@ -193,7 +292,7 @@ const BackgroundSettings: React.FC<{
 									{__('(Max. File size: 25 MB)', 'quillcrm')}
 								</div>
 							</div>
-						</label>
+						</div>
 					</div>
 				)}
 

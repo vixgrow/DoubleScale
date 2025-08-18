@@ -1,5 +1,15 @@
-import { ImageBlockIcon } from '@quillcrm/components';
+/**
+ * wordpress dependencies
+ */
 import { __ } from '@wordpress/i18n';
+/**
+ * external dependencies
+ */
+
+/**
+ * internal dependencies
+ */
+import { ImageBlockIcon } from '@quillcrm/components';
 
 const HeroImageLibrary = () => {
 	return (

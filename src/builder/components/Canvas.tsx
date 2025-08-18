@@ -93,8 +93,13 @@ const Canvas = () => {
 	};
 
 	return (
-		<div className="flex-1 p-4 overflow-auto">
-			<div className="max-w-3xl mx-auto">
+		<div className="flex-1 p-4 pt-20 overflow-auto">
+			<div className="max-w-3xl mx-auto relative">
+				{sections.length > 0 && (
+					<div className="p-2 bg-primary w-fit rounded-t-xl absolute -top-9 left-0 text-white">
+						{__('Email Page', 'quillcrm')}
+					</div>
+				)}
 				{/* Email Template Container */}
 				<div className="bg-white shadow-lg rounded-lg overflow-hidden">
 					<DndContext

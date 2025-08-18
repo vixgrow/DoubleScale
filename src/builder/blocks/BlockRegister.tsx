@@ -3,7 +3,7 @@ import { ImageBlock } from './basic/ImageBlock';
 import { ButtonBlock } from './basic/ButtonBlock';
 import { DividerBlock } from './basic/DividerBlock';
 import { SocialMediaBlock } from './basic/SocialMediaBlock';
-import { HtmlBLock } from './basic/HtmlBlock';
+import { HtmlBlock } from './basic/HtmlBlock';
 import { TimerBlock } from './basic/TimerBlock';
 import { VideoBlock } from './basic/VideoBlock';
 import { TableBlock } from './basic/TableBlock';
@@ -17,7 +17,7 @@ export const blocksRegistry = {
 	button: ButtonBlock,
 	divider: DividerBlock,
 	social_media: SocialMediaBlock,
-	html: HtmlBLock,
+	html: HtmlBlock,
 	timer: TimerBlock,
 	video: VideoBlock,
 	table: TableBlock,

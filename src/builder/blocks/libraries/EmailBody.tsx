@@ -1,4 +1,14 @@
+/**
+ * wordpress dependencies
+ */
 import { __ } from '@wordpress/i18n';
+/**
+ * external dependencies
+ */
+
+/**
+ * internal dependencies
+ */
 
 const EmailBodyLibrary = () => {
 	return (
@@ -145,7 +155,7 @@ const EmailBodyLibrary = () => {
 					<div className="text-white w-fit bg-primary py-2 px-8 rounded-lg">
 						{__('Click here', 'quillcrm')}
 					</div>
-                    <div className="text-white w-fit bg-secondary py-2 px-8 rounded-lg">
+					<div className="text-white w-fit bg-secondary py-2 px-8 rounded-lg">
 						{__('Click here', 'quillcrm')}
 					</div>
 				</div>

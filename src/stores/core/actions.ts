@@ -6,7 +6,14 @@ import type { InitialPayload } from '@quillcrm/config';
 /**
  * Internal Dependencies.
  */
-import { SETUP_STORE, ADD_NOTICE, DELETE_NOTICE, SET_MERGE_TAGS_VISIBLE, SET_CURRENT_TRIGGER } from './constants';
+import {
+	SETUP_STORE,
+	ADD_NOTICE,
+	DELETE_NOTICE,
+	SET_MERGE_TAGS_VISIBLE,
+	SET_CURRENT_TRIGGER,
+	SET_MERGE_TAG_CALLBACK,
+} from './constants';
 import { CoreActionTypes, Notice } from './types';
 
 /**
@@ -46,9 +53,7 @@ export const deleteNotice = (id: string): CoreActionTypes => ({
  * @param {boolean} visible Visibility.
  * @returns {CoreActionTypes} Set Merge Tags Visibility Action.
  */
-export const setMergeTagsVisible = (
-	visible: boolean
-): CoreActionTypes => ({
+export const setMergeTagsVisible = (visible: boolean): CoreActionTypes => ({
 	type: SET_MERGE_TAGS_VISIBLE,
 	visible,
 });
@@ -58,9 +63,14 @@ export const setMergeTagsVisible = (
  * @param {string} trigger Trigger.
  * @returns {CoreActionTypes} Set Current Trigger Action.
  */
-export const setCurrentTrigger = (
-	trigger: string
-): CoreActionTypes => ({
+export const setCurrentTrigger = (trigger: string): CoreActionTypes => ({
 	type: SET_CURRENT_TRIGGER,
 	trigger,
+});
+
+export const setMergeTagCallback = (
+	callback: ((tagValue: string) => void) | null
+): CoreActionTypes => ({
+	type: SET_MERGE_TAG_CALLBACK,
+	callback,
 });

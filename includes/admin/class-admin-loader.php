@@ -199,6 +199,11 @@ class Admin_Loader {
 		// RTL styles.
 		wp_style_add_data( 'qcrm-admin', 'rtl', 'replace' );
 		wp_style_add_data( 'qcrm-admin-extra', 'rtl', 'replace' );
+
+		// Enqueue WordPress media library for admin pages that need it
+		if ( self::is_admin_page() ) {
+			wp_enqueue_media();
+		}
 	}
 
 	/**
@@ -233,6 +238,9 @@ class Admin_Loader {
 			.s11 { fill: url(#g8) }'
 		);
 		wp_enqueue_script( 'jquery' );
+		
+		// Ensure media library is available for the page
+		wp_enqueue_media();
 
 		?>
 		<div class="quillcrm-wrap">

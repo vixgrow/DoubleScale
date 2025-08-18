@@ -16,7 +16,7 @@ export interface VideoBlockProps {
 	align: string;
 }
 
-export const VideoBlock = {
+const VideoBlock = {
 	type: 'video',
 	name: __('Video', 'quillcrm'),
 	icon: VideoBlockIcon,
@@ -29,3 +29,5 @@ export const VideoBlock = {
 	Renderer: VideoBlockRenderer,
 	Editor: VideoBlockEditor,
 };
+
+export default VideoBlock;

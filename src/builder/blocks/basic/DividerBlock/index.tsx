@@ -16,7 +16,7 @@ export interface DividerBlockProps {
 	margin: string;
 }
 
-export const DividerBlock = {
+const DividerBlock = {
 	type: 'divider' as const,
 	name: __('Divider', 'quillcrm'),
 	icon: DividerBlockIcon,
@@ -29,3 +29,5 @@ export const DividerBlock = {
 	Renderer: DividerRenderer,
 	Editor: DividerEditor,
 };
+
+export default DividerBlock;

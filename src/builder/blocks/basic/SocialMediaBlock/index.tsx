@@ -16,7 +16,7 @@ export interface SocialMediaBlockProps {
 	align: string;
 }
 
-export const SocialMediaBlock = {
+const SocialMediaBlock = {
 	type: 'social_media',
 	name: __('Social Media', 'quillcrm'),
 	icon: SocialMediaBlockIcon,
@@ -29,3 +29,5 @@ export const SocialMediaBlock = {
 	Renderer: SocialMediaBlockRenderer,
 	Editor: SocialMediaBlockEditor,
 };
+
+export default SocialMediaBlock;

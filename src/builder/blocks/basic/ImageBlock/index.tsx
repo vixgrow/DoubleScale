@@ -16,7 +16,7 @@ export interface ImageBlockProps {
 	align: string;
 }
 
-export const ImageBlock = {
+const ImageBlock = {
 	type: 'image',
 	name: __('Image', 'quillcrm'),
 	icon: ImageBlockIcon,
@@ -29,3 +29,5 @@ export const ImageBlock = {
 	Renderer: ImageBlockRenderer,
 	Editor: ImageBlockEditor,
 };
+
+export default ImageBlock;

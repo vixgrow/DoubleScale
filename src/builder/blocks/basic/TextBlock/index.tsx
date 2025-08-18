@@ -30,14 +30,14 @@ export interface TextBlockProps {
 	listType: string;
 	headingStyle: string;
 	padding: {
-		top: number,
-		right: number,
-		bottom: number,
-		left: number,
-	},
+		top: number;
+		right: number;
+		bottom: number;
+		left: number;
+	};
 }
 
-export const TextBlock = {
+const TextBlock = {
 	type: 'text',
 	name: __('Text', 'quillcrm'),
 	icon: TextBlockIcon,
@@ -71,3 +71,5 @@ export const TextBlock = {
 	Renderer: TextRenderer,
 	Editor: TextEditor,
 };
+
+export default TextBlock;

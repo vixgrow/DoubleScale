@@ -16,7 +16,7 @@ export interface HtmlBlockProps {
 	align: string;
 }
 
-export const HtmlBlock = {
+const HtmlBlock = {
 	type: 'html' as const,
 	name: __('HTML', 'quillcrm'),
 	icon: HtmlBlockIcon,
@@ -29,3 +29,5 @@ export const HtmlBlock = {
 	Renderer: HtmlBlockRenderer,
 	Editor: HtmlBlockEditor,
 };
+
+export default HtmlBlock;

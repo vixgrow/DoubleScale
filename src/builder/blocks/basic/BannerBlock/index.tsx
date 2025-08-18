@@ -16,7 +16,7 @@ export interface BannerBlockProps {
 	align: string;
 }
 
-export const BannerBlock = {
+const BannerBlock = {
 	type: 'banner' as const,
 	name: __('Banner', 'quillcrm'),
 	icon: BannerBlockIcon,
@@ -29,3 +29,5 @@ export const BannerBlock = {
 	Renderer: BannerRenderer,
 	Editor: BannerEditor,
 };
+
+export default BannerBlock;

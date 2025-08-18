@@ -16,7 +16,7 @@ export interface TableBlockProps {
 	align: string;
 }
 
-export const TableBlock = {
+const TableBlock = {
 	type: 'table',
 	name: __('Table', 'quillcrm'),
 	icon: TableBlockIcon,
@@ -29,3 +29,5 @@ export const TableBlock = {
 	Renderer: TableBlockRenderer,
 	Editor: TableBlockEditor,
 };
+
+export default TableBlock;

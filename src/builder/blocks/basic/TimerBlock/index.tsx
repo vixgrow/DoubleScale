@@ -16,7 +16,7 @@ export interface TimerBlockProps {
 	align: string;
 }
 
-export const TimerBlock = {
+const TimerBlock = {
 	type: 'timer',
 	name: __('Timer', 'quillcrm'),
 	icon: TimerBlockIcon,
@@ -29,3 +29,5 @@ export const TimerBlock = {
 	Renderer: TimerBlockRenderer,
 	Editor: TimerBlockEditor,
 };
+
+export default TimerBlock;

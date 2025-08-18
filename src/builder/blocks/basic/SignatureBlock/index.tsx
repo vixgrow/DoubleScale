@@ -16,7 +16,7 @@ export interface SignatureBlockProps {
 	align: string;
 }
 
-export const SignatureBlock = {
+const SignatureBlock = {
 	type: 'signature',
 	name: __('Signature', 'quillcrm'),
 	icon: SignatureBlockIcon,
@@ -29,3 +29,5 @@ export const SignatureBlock = {
 	Renderer: SignatureBlockRenderer,
 	Editor: SignatureBlockEditor,
 };
+
+export default SignatureBlock;

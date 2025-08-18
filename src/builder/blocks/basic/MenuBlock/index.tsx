@@ -16,7 +16,7 @@ export interface MenuBlockProps {
 	align: string;
 }
 
-export const MenuBlock = {
+const MenuBlock = {
 	type: 'menu',
 	name: __('Menu', 'quillcrm'),
 	icon: MenuBlockIcon,
@@ -29,3 +29,5 @@ export const MenuBlock = {
 	Renderer: MenuBlockRenderer,
 	Editor: MenuBlockEditor,
 };
+
+export default MenuBlock;

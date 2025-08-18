@@ -19,7 +19,7 @@ export interface ButtonBlockProps {
 	align: string;
 }
 
-export const ButtonBlock = {
+const ButtonBlock = {
 	type: 'button' as const,
 	name: __('Button', 'quillcrm'),
 	icon: ButtonBlockIcon,
@@ -35,3 +35,5 @@ export const ButtonBlock = {
 	Renderer: ButtonRenderer,
 	Editor: ButtonEditor,
 };
+
+export default ButtonBlock;

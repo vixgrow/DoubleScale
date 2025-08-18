@@ -6,7 +6,12 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React, { useState, useEffect } from 'react';
-import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import {
+	AlignLeft,
+	AlignCenter,
+	AlignRight,
+	ExternalLinkIcon,
+} from 'lucide-react';
 /**
  * internal dependencies
  */
@@ -318,7 +323,10 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 
 			{/* Link Input */}
 			<div className="flex flex-col gap-2 text-[#333333]">
-				<label className="text-sm">{__('Link', 'quillcrm')}</label>
+				<div className="flex items-center justify-between">
+					<label className="text-sm">{__('Link', 'quillcrm')}</label>
+					<ExternalLinkIcon className="size-5" />
+				</div>
 				<Input
 					type="url"
 					value={props.link}

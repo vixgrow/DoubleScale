@@ -13,10 +13,14 @@ export interface ButtonBlockProps {
 	text: string;
 	url: string;
 	backgroundColor: string;
-	textColor: string;
-	borderRadius: string;
-	padding: string;
+	padding: {
+		top: number;
+		right: number;
+		bottom: number;
+		left: number;
+	};
 	align: string;
+	buttonStyle: 'primary' | 'secondary' | 'tertiary';
 }
 
 const ButtonBlock = {
@@ -27,10 +31,14 @@ const ButtonBlock = {
 		text: 'Click Here',
 		url: '#',
 		backgroundColor: '#007cba',
-		textColor: '#ffffff',
-		borderRadius: '4px',
-		padding: '12px 24px',
+		padding: {
+			top: 12,
+			right: 24,
+			bottom: 12,
+			left: 24,
+		},
 		align: 'center',
+		buttonStyle: 'primary',
 	} as ButtonBlockProps,
 	Renderer: ButtonRenderer,
 	Editor: ButtonEditor,

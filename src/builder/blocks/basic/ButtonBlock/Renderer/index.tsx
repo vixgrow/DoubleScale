@@ -9,34 +9,80 @@
 /**
  * internal dependencies
  */
+import { ButtonBlockProps } from '..';
 
 export interface ButtonRendererProps {
-    props: {
-        text: string;
-        url: string;
-        backgroundColor: string;
-        textColor: string;
-        borderRadius: string;
-        padding: string;
-        align: string;
-    };
+    props: ButtonBlockProps;
 }
 
-export const ButtonRenderer = ({ props }: ButtonRendererProps) => (
-    <div style={{ textAlign: props.align as 'left' | 'center' | 'right' | 'justify' }}>
-        <a
-            href={props.url}
-            style={{
-                display: 'inline-block',
-                backgroundColor: props.backgroundColor,
-                color: props.textColor,
-                padding: props.padding,
-                borderRadius: props.borderRadius,
-                textDecoration: 'none',
-                fontFamily: 'Arial, sans-serif',
-            }}
-        >
-            {props.text}
-        </a>
-    </div>
-);
+export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
+    // Convert padding object to CSS string
+    const paddingString = `${props.padding.top}px ${props.padding.right}px ${props.padding.bottom}px ${props.padding.left}px`;
+
+    // Build button style based on button style type
+    const getButtonStyle = () => {
+        const baseStyle: React.CSSProperties = {
+            display: 'inline-block',
+            padding: paddingString,
+        };
+
+        // Add full width when alignment is 'full'
+        if (props.align === 'full') {
+            baseStyle.width = '100%';
+            baseStyle.display = 'block';
+        }
+
+        switch (props.buttonStyle) {
+            case 'primary':
+                return {
+                    ...baseStyle,
+                    backgroundColor: props.backgroundColor,
+                };
+            case 'secondary':
+                return {
+                    ...baseStyle,
+                    backgroundColor: 'transparent',
+                    color: props.backgroundColor,
+                    border: `2px solid ${props.backgroundColor}`,
+                };
+            case 'tertiary':
+                return {
+                    ...baseStyle,
+                    backgroundColor: 'transparent',
+                };
+            default:
+                return baseStyle;
+        }
+    };
+
+    // Handle alignment
+    const getAlignment = () => {
+        switch (props.align) {
+            case 'left':
+                return 'left';
+            case 'center':
+                return 'center';
+            case 'right':
+                return 'right';
+            case 'full':
+                return 'center';
+            default:
+                return 'center';
+        }
+    };
+
+    const containerStyle: React.CSSProperties = {
+        textAlign: getAlignment() as 'left' | 'center' | 'right',
+        width: props.align === 'full' ? '100%' : 'auto',
+    };
+
+    const buttonStyle = getButtonStyle();
+
+    return (
+        <div style={containerStyle}>
+            <a href={props.url} style={buttonStyle}>
+                {props.text}
+            </a>
+        </div>
+    );
+};

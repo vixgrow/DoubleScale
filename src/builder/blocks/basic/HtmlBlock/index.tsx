@@ -11,9 +11,14 @@ import { HtmlBlockEditor } from './Editor';
 
 export interface HtmlBlockProps {
 	content: string;
-	fontSize: number;
-	color: string;
-	align: string;
+	customCss: string;
+	width: string;
+	padding?: {
+		top: number;
+		right: number;
+		bottom: number;
+		left: number;
+	};
 }
 
 const HtmlBlock = {
@@ -21,10 +26,15 @@ const HtmlBlock = {
 	name: __('HTML', 'quillcrm'),
 	icon: HtmlBlockIcon,
 	defaultProps: {
-		content: 'Your text here',
-		fontSize: 16,
-		color: '#333',
-		align: 'center',
+		content: '',
+		customCss: '',
+		width: '100',
+		padding: {
+			top: 0,
+			right: 0,
+			bottom: 0,
+			left: 0,
+		},
 	} as HtmlBlockProps,
 	Renderer: HtmlBlockRenderer,
 	Editor: HtmlBlockEditor,

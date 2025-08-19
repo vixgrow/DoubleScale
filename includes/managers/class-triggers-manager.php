@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Triggers Manager
  * This class is responsible for handling the triggers
@@ -18,6 +19,8 @@ use QuillCRM\Managers\Forms_Manager;
  * Triggers class
  */
 final class Triggers_Manager {
+
+
 
 	/**
 	 * Registed triggers
@@ -137,74 +140,84 @@ final class Triggers_Manager {
 	 * @return array
 	 */
 	public function set_sources() {
-		$this->sources = array(
-			'crm'         => array(
-				'label'  => __( 'CRM', 'quillcrm' ),
-				'groups' => array(
-					'contact'       => array(
-						'label'    => __( 'Contact', 'quillcrm' ),
-						'triggers' => array(),
-					),
-					'link_triggers' => array(
-						'label'    => __( 'Link Triggers', 'quillcrm' ),
-						'triggers' => array(),
-					),
-					'webhooks'      => array(
-						'label'    => __( 'Webhooks', 'quillcrm' ),
-						'triggers' => array(),
-					),
-				),
-			),
-			'woocommerce' => array(
-				'label'       => __( 'WooCommerce', 'quillcrm' ),
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
-				'groups'      => array(
-					'order' => array(
-						'label'    => __( 'Order', 'quillcrm' ),
-						'triggers' => array(),
-					),
-					'cart'  => array(
-						'label'    => __( 'Abandoned Cart', 'quillcrm' ),
-						'triggers' => array(),
-					),
-				),
-			),
-			'wp'          => array(
-				'label'  => __( 'WordPress', 'quillcrm' ),
-				'groups' => array(
-					'user' => array(
-						'label'    => __( 'User', 'quillcrm' ),
-						'triggers' => array(),
-					),
-				),
-			),
-			'lms'         => array(
-				'label'  => __( 'LMS', 'quillcrm' ),
-				'groups' => array(
-					'learndash' => array(
-						'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
-						'label'       => __( 'LearnDash', 'quillcrm' ),
-						'triggers'    => array(),
-					),
-				),
-			),
-			'memberpress' => array(
-				'label'  => __( 'MemberPress', 'quillcrm' ),
-				'groups' => array(
-					'memberpress' => array(
-						'is_disabled' => ! quillcrm_is_plugin_active( 'memberpress/memberpress.php' ),
-						'label'       => __( 'MemberPress', 'quillcrm' ),
-						'triggers'    => array(),
-					),
-				),
-			),
-			'forms'       => array(
-				'label'  => __( 'Forms', 'quillcrm' ),
-				'groups' => array(),
-			),
-		);
+		 $this->sources = array(
+			 'crm'         => array(
+				 'label'  => __( 'CRM', 'quillcrm' ),
+				 'groups' => array(
+					 'contact'       => array(
+						 'label'    => __( 'Contact', 'quillcrm' ),
+						 'triggers' => array(),
+					 ),
+					 'link_triggers' => array(
+						 'label'    => __( 'Link Triggers', 'quillcrm' ),
+						 'triggers' => array(),
+					 ),
+					 'webhooks'      => array(
+						 'label'    => __( 'Webhooks', 'quillcrm' ),
+						 'triggers' => array(),
+					 ),
+				 ),
+			 ),
+			 'woocommerce' => array(
+				 'label'       => __( 'WooCommerce', 'quillcrm' ),
+				 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				 'groups'      => array(
+					 'order' => array(
+						 'label'    => __( 'Order', 'quillcrm' ),
+						 'triggers' => array(),
+					 ),
+					 'cart'  => array(
+						 'label'    => __( 'Abandoned Cart', 'quillcrm' ),
+						 'triggers' => array(),
+					 ),
+				 ),
+			 ),
+			 'wp'          => array(
+				 'label'  => __( 'WordPress', 'quillcrm' ),
+				 'groups' => array(
+					 'user' => array(
+						 'label'    => __( 'User', 'quillcrm' ),
+						 'triggers' => array(),
+					 ),
+				 ),
+			 ),
+			 'lms'         => array(
+				 'label'  => __( 'LMS', 'quillcrm' ),
+				 'groups' => array(
+					 'learndash' => array(
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
+						 'label'       => __( 'LearnDash', 'quillcrm' ),
+						 'triggers'    => array(),
+					 ),
+				 ),
+			 ),
+			 'memberpress' => array(
+				 'label'  => __( 'MemberPress', 'quillcrm' ),
+				 'groups' => array(
+					 'memberpress' => array(
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'memberpress/memberpress.php' ),
+						 'label'       => __( 'MemberPress', 'quillcrm' ),
+						 'triggers'    => array(),
+					 ),
+				 ),
+			 ),
+			 'booking'     => array(
+				 'label'  => __( 'Booking', 'quillcrm' ),
+				 'groups' => array(
+					 'quillbooking' => array(
+						 'is_disabled' => ! $this->is_quillbooking_active(),
+						 'label'       => __( 'QuillBooking', 'quillcrm' ),
+						 'triggers'    => array(),
+					 ),
+				 ),
+			 ),
+			 'forms'       => array(
+				 'label'  => __( 'Forms', 'quillcrm' ),
+				 'groups' => array(),
+			 ),
+		 );
 
-		$this->sources = apply_filters( 'quillcrm_triggers_sources', $this->sources );
+		 $this->sources = apply_filters( 'quillcrm_triggers_sources', $this->sources );
 	}
 
 	/**
@@ -233,11 +246,27 @@ final class Triggers_Manager {
 	}
 
 	/**
+	 * Check if QuillBooking plugin is active
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	private function is_quillbooking_active() {
+		 // Check if QuillBooking plugin is active
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		}
+
+		return \is_plugin_active( 'QuillBooking/quillbooking.php' ) || class_exists( 'QuillBooking\Plugin' );
+	}
+
+	/**
 	 * Get sources
 	 *
 	 * @return array
 	 */
 	public function get_sources() {
-		return $this->sources;
+		 return $this->sources;
 	}
 }

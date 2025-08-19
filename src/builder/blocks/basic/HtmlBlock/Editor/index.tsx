@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import { useState } from 'react';
-import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 /**
  * internal dependencies
@@ -21,7 +20,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import {
 	Dialog,
 	DialogContent,
@@ -29,13 +27,6 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
 import { HtmlBlockProps } from '..';
 
 export interface HtmlBlockEditorProps {

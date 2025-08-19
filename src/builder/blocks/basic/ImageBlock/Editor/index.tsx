@@ -195,7 +195,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 	const handleDeleteImage = () => {
 		setImageData(null);
 		onChange({
-			src: 'https://via.placeholder.com/400x200?text=Image',
+			src: '',
 			alt: 'Image',
 		});
 	};
@@ -222,9 +222,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 					)}
 				</p>
 
-				{imageData ||
-				props.src !==
-					'https://via.placeholder.com/400x200?text=Image' ? (
+				{imageData || (props.src && props.src.trim() !== '') ? (
 					<div className="border rounded-lg p-4 flex items-center justify-between">
 						<div className="flex items-center gap-3">
 							<img
@@ -426,7 +424,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.align === 'left' &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
+							'bg-[#C6DFF366] border border-primary rounded-l-lg'
 						)}
 						onClick={() => onChange({ align: 'left' })}
 					/>
@@ -434,7 +432,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.align === 'center' &&
-								'bg-[#C6DFF366] border border-primary'
+							'bg-[#C6DFF366] border border-primary'
 						)}
 						onClick={() => onChange({ align: 'center' })}
 					/>
@@ -442,7 +440,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.align === 'right' &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
+							'bg-[#C6DFF366] border border-primary rounded-r-lg'
 						)}
 						onClick={() => onChange({ align: 'right' })}
 					/>
@@ -458,7 +456,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 							className={cn(
 								'py-2 px-2 w-full text-center cursor-pointer',
 								props.borderRadius === '0' &&
-									'bg-[#C6DFF366] border border-primary rounded-lg'
+								'bg-[#C6DFF366] border border-primary rounded-lg'
 							)}
 							onClick={() =>
 								onChange({
@@ -473,7 +471,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 							className={cn(
 								'py-2 px-2 w-full text-center cursor-pointer',
 								props.borderRadius === '8' &&
-									'bg-[#C6DFF366] border border-primary rounded-lg'
+								'bg-[#C6DFF366] border border-primary rounded-lg'
 							)}
 							onClick={() =>
 								onChange({
@@ -488,7 +486,7 @@ export const ImageBlockEditor: React.FC<ImageBlockEditorProps> = ({
 							className={cn(
 								'py-2 px-2 w-full text-center cursor-pointer',
 								props.borderRadius === '9999' &&
-									'bg-[#C6DFF366] border border-primary rounded-lg'
+								'bg-[#C6DFF366] border border-primary rounded-lg'
 							)}
 							onClick={() =>
 								onChange({

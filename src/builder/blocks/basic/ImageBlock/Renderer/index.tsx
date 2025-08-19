@@ -5,17 +5,22 @@
 /**
  * external dependencies
  */
+import React, { useState } from 'react';
 
 /**
  * internal dependencies
  */
 import { ImageBlockProps } from '..';
+import { ImageBlockIcon } from '@quillcrm/components';
 
 export interface ImageBlockRendererProps {
 	props: ImageBlockProps;
 }
 
 export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({ props }) => {
+	const [imageError, setImageError] = useState(false);
+	const [imageLoaded, setImageLoaded] = useState(false);
+
 	const containerStyle: React.CSSProperties = {
 		backgroundColor: props.backgroundColor,
 		padding: `${props.padding.top}px ${props.padding.right}px ${props.padding.bottom}px ${props.padding.left}px`,
@@ -37,13 +42,49 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({ props })
 		display: 'inline-block',
 	};
 
-	const imageElement = (
-		<img
-			src={props.src}
-			alt={props.alt}
-			style={imageStyle}
-		/>
-	);
+	const placeholderStyle: React.CSSProperties = {
+		width: props.width,
+		height: props.height === 'auto' ? '200px' : props.height,
+		maxWidth: '100%',
+		borderRadius: `${props.borderRadius}px`,
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: '#F5F5F580',
+		color: '#6B7280',
+		fontSize: '14px',
+		fontWeight: '500',
+	};
+
+	const handleImageError = () => {
+		setImageError(true);
+	};
+
+	const handleImageLoad = () => {
+		setImageLoaded(true);
+	};
+
+	const renderImageElement = () => {
+		if (!props.src || imageError) {
+			return (
+				<div style={placeholderStyle}>
+					<ImageBlockIcon width={57} height={57} />
+				</div>
+			);
+		}
+
+		return (
+			<img
+				src={props.src}
+				alt={props.alt}
+				style={imageStyle}
+				onError={handleImageError}
+				onLoad={handleImageLoad}
+			/>
+		);
+	};
+
+	const imageElement = renderImageElement();
 
 	return (
 		<div style={wrapperStyle}>

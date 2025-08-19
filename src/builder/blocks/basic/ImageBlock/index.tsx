@@ -32,7 +32,7 @@ const ImageBlock = {
 	name: __('Image', 'quillcrm'),
 	icon: ImageBlockIcon,
 	defaultProps: {
-		src: 'https://via.placeholder.com/400x200?text=Image',
+		src: '',
 		alt: 'Image',
 		width: '100%',
 		height: 'auto',

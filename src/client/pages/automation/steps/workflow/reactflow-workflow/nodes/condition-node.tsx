@@ -117,8 +117,11 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	// Check if condition is configured
-	const isConfigured = step.settings?.condition_name;
+	// Check if condition is configured - a condition is configured if it has rules
+	const isConfigured =
+		step.settings &&
+		Array.isArray(step.settings) &&
+		step.settings.length > 0;
 
 	return (
 		<NodeContextMenu onEdit={handleEdit} onDelete={handleDeleteStep}>
@@ -146,7 +149,7 @@ const ConditionNode: React.FC<NodeProps> = ({ data }) => {
 					<div className="qcrm-reactflow-node__subtitle">
 						{isConfigured ? (
 							<span className="qcrm-reactflow-condition__configured">
-								{step.settings?.condition_name}
+								{__('Configured', 'quillcrm')}
 							</span>
 						) : (
 							<span className="qcrm-reactflow-condition__not-configured">

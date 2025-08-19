@@ -22,6 +22,7 @@ import NodeActionsDropdown from '../components/node-actions-dropdown';
 import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
+import { getAction } from '@quillcrm/utils';
 
 interface ActionNodeData {
 	step: AutomationStep;
@@ -122,8 +123,12 @@ const ActionNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	// Check if action is configured
-	const isConfigured = step.settings?.action_name;
+	// Check if action is configured - an action is configured if it has an action slug
+	const isConfigured = !!step.action;
+
+	// Get action details for display
+	const actionData = isConfigured ? getAction(step.action) : null;
+	const actionName = actionData?.label || step.action;
 
 	return (
 		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
@@ -150,7 +155,7 @@ const ActionNode: React.FC<NodeProps> = ({ data }) => {
 					<div className="qcrm-reactflow-node__subtitle">
 						{isConfigured ? (
 							<span className="qcrm-reactflow-action__configured">
-								{step.settings?.action_name}
+								{actionName}
 							</span>
 						) : (
 							<span className="qcrm-reactflow-action__not-configured">

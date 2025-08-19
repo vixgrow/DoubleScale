@@ -52,6 +52,8 @@ const API_Select = ({ endpoint, value, onChange, multiple = false }: Props) => {
 			<Flex justify="space-between" gap={10}>
 				<Flex vertical={true} gap={10} style={{ flex: 1 }}>
 					<AsyncSelect
+						className="react-select-container"
+						classNamePrefix="react-select"
 						isLoading={loading}
 						defaultOptions
 						cacheOptions

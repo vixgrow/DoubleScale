@@ -56,6 +56,25 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 		}
 	}, [field, groups]);
 
+	// Reset form when dialog opens
+	useEffect(() => {
+		if (visible) {
+			if (field) {
+				setFormData({
+					name: field.name,
+					type: field.type,
+					group_id: field.group_id,
+				});
+			} else {
+				setFormData({
+					name: '',
+					type: '',
+					group_id: groups[0]?.id || 0,
+				});
+			}
+		}
+	}, [visible, field, groups]);
+
 	const typesOptions = map(keys(fieldTypes), (type) => ({
 		label: fieldTypes[type].name,
 		value: type,
@@ -77,10 +96,8 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 			? ({ ...formData } as CustomField)
 			: ({ ...field, ...formData } as CustomField);
 
-		const success = await onSave(fieldData, isNew);
-		if (success) {
-			onClose();
-		}
+		await onSave(fieldData, isNew);
+		onClose();
 		setIsSubmitting(false);
 	};
 
@@ -95,8 +112,8 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 								field
 									? __('Edit the field information below.')
 									: __(
-											'Add basic information below to add new Field.'
-										)
+										'Add basic information below to add new Field.'
+									)
 							}
 							icon={<GradientGroupIcon />}
 						/>
@@ -111,6 +128,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 							setFormData({ ...formData, name: value })
 						}
 						type="text"
+						placeholder={__('Enter Field Name', 'quillcrm')}
 					/>
 
 					<Field
@@ -121,6 +139,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 						}
 						type="select"
 						options={typesOptions}
+						placeholder={__('Select Field Type', 'quillcrm')}
 					/>
 
 					<Field
@@ -131,6 +150,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 						}
 						type="select"
 						options={groupOptions}
+						placeholder={__('Select Field Group', 'quillcrm')}
 					/>
 				</div>
 

@@ -23,6 +23,8 @@ const buttonVariants = cva(
 				link: 'text-primary underline-offset-4 hover:underline',
 				gradient:
 					'bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] text-primary-foreground',
+				secondaryDeepBlue:
+					'border border-[#274C77] text-[#274C77] shadow-sm',
 			},
 			size: {
 				default: 'h-9 rounded-xl px-6 py-[20px]',

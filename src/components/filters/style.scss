@@ -1,0 +1,81 @@
+.filters-container {
+	margin-top: 5px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background-image:
+		linear-gradient(white, white),
+		linear-gradient(90deg, #1e3a8a 61.06%, #3b82f6 100%);
+	background-origin: border-box;
+	background-clip: padding-box, border-box;
+}
+
+.filters-header {
+	@apply flex items-center gap-3 justify-center py-6;
+
+	.filters-title {
+		@apply text-sm font-bold text-[#3B82F6];
+	}
+
+	input:focus {
+		box-shadow: none !important;
+	}
+
+	.group-select,
+	.filter-select {
+		// Additional custom styling for react-select if needed
+		.react-select__control {
+			box-shadow: none !important;
+
+			&:hover {
+				border-color: #3b82f6;
+			}
+
+			&--is-focused {
+				border-color: #3b82f6;
+			}
+		}
+
+		.react-select__option {
+			&--is-focused {
+				background-color: #f3f4f6;
+			}
+
+			&--is-selected {
+				background-color: #3b82f6;
+			}
+		}
+	}
+
+	.add-filter-btn {
+		@apply bg-secondary;
+
+		&:disabled {
+			@apply opacity-50 cursor-not-allowed;
+		}
+	}
+}
+
+.filters-divider {
+	height: 1px;
+	width: 100%;
+	margin-top: 20px;
+	background-image: repeating-linear-gradient(
+		to right,
+		#1e3a8a 0,
+		#1e3a8a 10px,
+		transparent 5px,
+		transparent 12px
+	);
+}
+
+.active-filters {
+	@apply space-y-2 py-6;
+
+	.filters-list {
+		@apply space-y-2;
+	}
+
+	.no-filters-message {
+		@apply text-sm text-center text-muted-foreground;
+	}
+}

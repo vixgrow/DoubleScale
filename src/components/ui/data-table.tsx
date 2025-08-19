@@ -32,6 +32,8 @@ interface DataTableProps<TData> {
 	activeTab?: string;
 	showMainActions?: boolean;
 	showPagination?: boolean;
+	initialPageSize?: number | undefined;
+	setPage: (page: number) => void;
 }
 
 export function DataTable<TData>({
@@ -41,12 +43,24 @@ export function DataTable<TData>({
 	activeTab,
 	showMainActions = true,
 	showPagination = true,
+	initialPageSize,
+	setPage,
 }: DataTableProps<TData>) {
 	const { table, globalFilter, setGlobalFilter } = useDataTable(
 		data,
 		columns,
-		config
+		config,
+		initialPageSize
 	);
+
+	const handleSearchChange = (value: string) => {
+		if (config.search?.onChange) {
+			config.search.onChange(value);
+		} else {
+			setGlobalFilter(value);
+		}
+		setPage(1);
+	};
 
 	return (
 		<div className="w-full">
@@ -54,8 +68,12 @@ export function DataTable<TData>({
 			{showMainActions && (
 				<div className="flex items-center justify-between p-5 border rounded-lg my-4 w-full">
 					<DataTableSearch
-						value={globalFilter}
-						onChange={setGlobalFilter}
+						value={
+							config.search?.onChange
+								? config.search?.value || ''
+								: globalFilter
+						}
+						onChange={handleSearchChange}
 						placeholder={config.search?.placeholder}
 					/>
 
@@ -63,6 +81,7 @@ export function DataTable<TData>({
 						table={table}
 						config={config}
 						activeTab={activeTab}
+						setPage={setPage}
 					/>
 				</div>
 			)}

@@ -73,6 +73,8 @@ const SelectField: React.FC<SelectFieldProps> = ({
 	return (
 		<div className="qcrm-integration-select-field">
 			<Select
+				className="react-select-container"
+				classNamePrefix="react-select"
 				isLoading={isLoading}
 				options={options}
 				onChange={(value) => {
@@ -82,6 +84,12 @@ const SelectField: React.FC<SelectFieldProps> = ({
 					onChange(value.value);
 				}}
 				value={options.find((option) => option.value === value)}
+				styles={{
+					menu: (base: any) => ({
+						...base,
+						color: 'black',
+					}),
+				}}
 			/>
 		</div>
 	);

@@ -8,7 +8,6 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Card, Tabs } from 'antd';
 import { isString } from 'lodash';
 
 /**
@@ -17,12 +16,29 @@ import { isString } from 'lodash';
 import './style.scss';
 import { useCampaignContext } from '../../state/context';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { Template } from '@quillcrm/components';
+import {
+	Breadcrumb,
+	CategoryIcon,
+	FeedBuilder,
+	FormField,
+	PanelLayout,
+	PanelSettings,
+	PlayIcon,
+	Template,
+} from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
 import type { Template as TemplateType } from '@quillcrm/client';
 import { isEmail } from 'validator';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import EmailBuilderSelection from './email-builder-selection';
 
 const Templates: React.FC = () => {
+	const [emailBuilderSelectionVisible, setEmailBuilderSelectionVisible] =
+		useState(false);
 	const { campaign, isLoading, saveCampaign, isSaving } =
 		useCampaignContext();
 	const navigate = useNavigate();
@@ -84,13 +100,13 @@ const Templates: React.FC = () => {
 		const newTemplates = templates ? [...templates] : [];
 		newTemplates[index] = newTemplates[index]
 			? {
-				...newTemplates[index],
-				...data,
-			}
+					...newTemplates[index],
+					...data,
+				}
 			: {
-				...defaultTemplate,
-				...data,
-			};
+					...defaultTemplate,
+					...data,
+				};
 
 		setTemplates(newTemplates);
 	};
@@ -188,59 +204,139 @@ const Templates: React.FC = () => {
 	};
 
 	return (
-		<Card loading={isLoading}>
-			{campaign && (
-				<>
-					<div className="qcrm-templates">
-						<Tabs
-							tabPosition="top"
-							type="editable-card"
-							tabBarGutter={20}
-							tabBarStyle={{ marginBottom: 0 }}
-							items={tabList}
-							onEdit={(key, action) => {
-								if (action === 'add') {
-									addTemplate();
-								} else {
-									if (!isString(key)) {
-										return;
-									}
-									const id = parseInt(key);
-									removeTemplate(id);
-								}
-							}}
-							hideAdd={
-								templates.length >= 3 ||
-								!campaign?.settings.ab_test
-							}
-							activeKey={currentTab.toString()}
-							onChange={(key) => setCurrentTab(Number(key))}
-						/>
-					</div>
-					<div className="qcrm-actions">
-						<Button
-							type="default"
-							onClick={() =>
-								navigate(
-									getToLink(
-										`campaigns/${campaign.id}/information`
-									)
-								)
-							}
-						>
-							{__('Back', 'quillcrm')}
-						</Button>
-						<Button
-							type="primary"
-							onClick={save}
-							loading={isSaving}
-						>
-							{__('Next', 'quillcrm')}
-						</Button>
-					</div>
-				</>
-			)}
-		</Card>
+		<div>
+			<PanelLayout
+				items={[
+					{
+						label: __('Create Campaign', 'quillcrm'),
+						href: 'campaigns',
+					},
+					{
+						label: campaign?.settings.ab_test
+							? __('A/B Test Campaign', 'quillcrm')
+							: __('Standard Campaign', 'quillcrm'),
+					},
+				]}
+				panelbtns={[
+					<Button variant="secondaryDeepBlue">
+						<PlayIcon />
+						{__('Watch Tutorial', 'quillcrm')}
+					</Button>,
+				]}
+				totalSteps={tabList.length}
+				currentStep={currentTab}
+			>
+				<div className="flex gap-6">
+					<PanelSettings
+						title={__('Campaign Template', 'quillcrm')}
+						description={__(
+							'Name your campaign to help you remember what its about. only you will see this.',
+							'quillcrm'
+						)}
+						icon={<CategoryIcon />}
+						className="w-1/2"
+					>
+						<div>
+							<FormField
+								label={__('From Name', 'quillcrm')}
+								required={true}
+							>
+								<Input
+									placeholder={__('Name here', 'quillcrm')}
+								/>
+							</FormField>
+
+							<FormField
+								label={__('From Name', 'quillcrm')}
+								required={true}
+							>
+								<Input
+									placeholder={__('Name here', 'quillcrm')}
+								/>
+							</FormField>
+
+							<FormField
+								label={__('From Email', 'quillcrm')}
+								required={true}
+							>
+								<Input
+									type="email"
+									placeholder={__(
+										'name@gmail.com',
+										'quillcrm'
+									)}
+								/>
+							</FormField>
+
+							<FormField
+								label={__('Reply To', 'quillcrm')}
+								required={true}
+							>
+								<Input
+									type="email"
+									placeholder={__(
+										'name@gmail.com',
+										'quillcrm'
+									)}
+								/>
+							</FormField>
+
+							<FormField
+								label={__('Subject', 'quillcrm')}
+								required={true}
+							>
+								<Input
+									placeholder={__('Subject here', 'quillcrm')}
+								/>
+							</FormField>
+
+							<FormField
+								label={__('Preview Text', 'quillcrm')}
+								required={true}
+							>
+								<Textarea
+									placeholder={__(
+										'Preview text here',
+										'quillcrm'
+									)}
+								/>
+							</FormField>
+
+							<Separator />
+
+							<div className="py-4">
+								<div className="flex items-center justify-between mb-4">
+									<div>
+										<p className="text-lg font-semibold text-foreground">
+											{__('Enable UTM', 'quillcrm')}
+										</p>
+										<p>
+											{__(
+												'A UTM (Urchin Tracking Module) code is a snippet of text added to the end of a URL to track the metrics and performance of a specific digital marketing campaign',
+												'quillcrm'
+											)}
+										</p>
+									</div>
+									<Switch />
+								</div>
+
+								<Button variant="default">
+									{__('Send Test Email', 'quillcrm')}
+								</Button>
+							</div>
+						</div>
+					</PanelSettings>
+
+					<FeedBuilder
+						setVisibile={setEmailBuilderSelectionVisible}
+					/>
+				</div>
+			</PanelLayout>
+			<EmailBuilderSelection
+				setVisible={setEmailBuilderSelectionVisible}
+				visible={emailBuilderSelectionVisible}
+			/>
+		</div>
 	);
 };
 

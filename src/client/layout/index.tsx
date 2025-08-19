@@ -71,16 +71,16 @@ export const Layout = (props) => {
 	return (
 		<SlotFillProvider>
 			<SidebarProvider>
-					<Notices />
-					<MergeTagsModal
-						visible={mergeTagsVisible}
-						onClose={() => setMergeTagsVisible(false)}
-					/>
-					<div className="qcrm-layout__main">
-						<NavBar />
-						<SidebarTrigger />
-						<Controller {...props} />
-					</div>
+				<Notices />
+				<MergeTagsModal
+					visible={mergeTagsVisible}
+					onClose={() => setMergeTagsVisible(false)}
+				/>
+				<div className="qcrm-layout__main">
+					<NavBar />
+					<SidebarTrigger />
+					<Controller {...props} />
+				</div>
 			</SidebarProvider>
 		</SlotFillProvider>
 	);

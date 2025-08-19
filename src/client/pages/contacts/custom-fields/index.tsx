@@ -6,16 +6,23 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { DndContext } from '@dnd-kit/core';
+import {
+	DndContext,
+	DragOverlay,
+	PointerSensor,
+	useSensor,
+	useSensors,
+} from '@dnd-kit/core';
 import { Skeleton } from 'antd';
 /**
  * internal dependencies
  */
-import { useCustomFields } from '@quillcrm/hooks/use-customFields';
+import { useCustomFields } from './use-customFields';
 import {
 	CustomFieldsRef,
 	CustomFieldsProps,
 	CustomField,
+	CustomFieldsGroup,
 } from '@quillcrm/client';
 import { DataTableSearch } from '@/components/ui/data-table-search';
 import { DataTableActions } from '@/components/ui/data-table-actions';
@@ -24,9 +31,26 @@ import { FieldDialog } from './field-dialog';
 import { GroupDialog } from './group-dialog';
 import { DeleteGroupDialog } from './delete-group-dialog';
 import { FieldTable } from './field-table';
+import { DragOverlayRow } from './drag-overlay-row';
 import ConfigAPI from '@quillcrm/config';
 import { Button } from '@/components/ui/button';
 import { NoticeBanner } from '@quillcrm/components';
+
+// Custom modifier to center the drag overlay on the move icon
+const centerOnDragHandle = ({ transform }) => {
+	// Calculate the offset to center the move icon under the cursor
+	// The move icon is approximately 85% from the left edge of the row
+	// For a 600px wide row, this puts the move icon at ~510px from the left
+	// So we need to offset by about -510px to center it under the cursor
+	const dragOverlayWidth = 600; // min-w-[600px] from DragOverlayRow
+	const moveIconPosition = dragOverlayWidth * -0.1; // Move icon is ~85% from left
+
+	return {
+		...transform,
+		x: transform.x - moveIconPosition,
+		y: transform.y - 12,
+	};
+};
 
 export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 	({ activeTab }, ref) => {
@@ -36,10 +60,14 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			groups,
 			notice,
 			closeNotice,
+			showNotice,
 			fetchGroups,
 			saveField,
 			deleteField,
+			deleteSelectedFields, // Add this from the hook
 			saveGroup,
+			updateGroup,
+			duplicateGroup,
 			deleteGroup,
 			moveField,
 		} = useCustomFields();
@@ -50,10 +78,16 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		const [selectedField, setSelectedField] = useState<CustomField | null>(
 			null
 		);
+		const [editingGroup, setEditingGroup] = useState<CustomFieldsGroup | null>(
+			null
+		);
 		const [deleteGroupId, setDeleteGroupId] = useState(0);
 		const [globalFilter, setGlobalFilter] = useState('');
 		const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 		const [bulkAction, setBulkAction] = useState('');
+		const [activeField, setActiveField] = useState<CustomField | null>(
+			null
+		);
 
 		// Add date range state
 		const [dateRange, setDateRange] = useState<{
@@ -66,11 +100,29 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 
 		const customFieldsTypes = ConfigAPI.getCustomFieldsTypes();
 
+		// Configure sensors for better drag behavior
+		const sensors = useSensors(
+			useSensor(PointerSensor, {
+				activationConstraint: {
+					distance: 8, // Require 8px of movement before drag starts
+				},
+			})
+		);
+
 		useImperativeHandle(ref, () => ({
-			openCreateGroupModal: () => setAddGroupVisible(true),
+			openCreateGroupModal: () => {
+				setEditingGroup(null);
+				setAddGroupVisible(true);
+			},
 			openCreateFieldModal: () => {
-				if (groups.length === 0) {
-					// You might want to show a notice here too instead of using createNotice
+				if (!groups || groups.length === 0) {
+					showNotice({
+						type: 'error',
+						message: __(
+							'Please create a group first before adding fields',
+							'quillcrm'
+						),
+					});
 					return;
 				}
 				setSelectedField(null);
@@ -80,18 +132,46 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 
 		const handleBulkAction = async (action: string) => {
 			if (action === 'delete') {
-				const selectedFields = groups
-					.flatMap((group) => group.custom_fields)
-					.filter((field) => selectedRowKeys.includes(field.id));
-
-				for (const field of selectedFields) {
-					await deleteField(field);
-				}
+				// Convert selectedRowKeys to numbers
+				const fieldIds = selectedRowKeys.map(key => Number(key));
+				await deleteSelectedFields(fieldIds);
 				setSelectedRowKeys([]);
 			}
 		};
 
-		const allFields = groups.flatMap((group) => group.custom_fields);
+		const handleEditGroup = (group: CustomFieldsGroup) => {
+			setEditingGroup(group);
+			setAddGroupVisible(true);
+		};
+
+		const handleDuplicateGroup = async (group: CustomFieldsGroup) => {
+			// Generate a unique copy name by checking existing group names
+			let copyCounter = 1;
+			let newName = `${group.name} (Copy)`;
+
+			// Keep checking until we find a unique name
+			while (groups?.some(g => g.name === newName)) {
+				copyCounter++;
+				newName = `${group.name} (Copy ${copyCounter})`;
+			}
+
+			await duplicateGroup(group.id, newName);
+		};
+
+		const handleGroupDialogSave = async (name: string) => {
+			return await saveGroup(name);
+		};
+
+		const handleGroupDialogUpdate = async (groupId: number, name: string) => {
+			return await updateGroup(groupId, name);
+		};
+
+		const handleGroupDialogClose = () => {
+			setAddGroupVisible(false);
+			setEditingGroup(null);
+		};
+
+		const allFields = groups?.flatMap((group) => group.custom_fields || []) || [];
 
 		// Enhanced filtering with date range
 		const filteredFields = allFields.filter((field) => {
@@ -128,6 +208,14 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		});
 
 		const mockGlobalTable = {
+			getRowModel: () => ({
+				rows: filteredFields.map((field) => ({
+					original: field,
+					id: field.id.toString(),
+				})),
+			}),
+			getAllColumns: () => [],
+			getColumn: () => null,
 			getFilteredSelectedRowModel: () => ({
 				rows: filteredFields
 					.filter((field) => selectedRowKeys.includes(field.id))
@@ -154,17 +242,6 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 					</p>
 					<Button onClick={fetchGroups}>
 						{__('Retry', 'quillcrm')}
-					</Button>
-				</div>
-			);
-		}
-
-		if (groups.length === 0) {
-			return (
-				<div className="custom-fields-empty">
-					<p>{__('No custom fields groups found', 'quillcrm')}</p>
-					<Button onClick={() => setAddGroupVisible(true)}>
-						{__('Create First Group', 'quillcrm')}
 					</Button>
 				</div>
 			);
@@ -214,7 +291,16 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 				{/* Groups List */}
 				<div className="flex flex-col gap-[10px]">
 					<DndContext
+						sensors={sensors}
+						onDragStart={({ active }) => {
+							const activeData = active.data.current;
+							if (activeData?.type === 'field') {
+								setActiveField(activeData.field);
+							}
+						}}
 						onDragEnd={async ({ active, over }) => {
+							setActiveField(null);
+
 							if (!over) return;
 
 							// Check if the drag actually moved to a different location
@@ -237,9 +323,9 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 							}
 						}}
 					>
-						{groups.map((group) => {
+						{(groups || []).map((group) => {
 							const groupFilteredFields =
-								group.custom_fields.filter((field) => {
+								(group.custom_fields || []).filter((field) => {
 									// Text filter
 									const matchesText =
 										globalFilter === '' ||
@@ -292,9 +378,9 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 									id={`group-${group.id}`}
 									title={group.name}
 									fieldsCount={groupFilteredFields.length}
-									deletable={groups.length > 1}
+									deletable={(groups || []).length > 1}
 									onDelete={() => {
-										if (group.custom_fields.length > 0) {
+										if ((group.custom_fields || []).length > 0) {
 											// Group has fields - show dialog to move fields
 											setDeleteGroupId(group.id);
 											setDeleteGroupVisible(true);
@@ -303,6 +389,8 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 											deleteGroup(group.id);
 										}
 									}}
+									onEdit={() => handleEditGroup(group)}
+									onDuplicate={() => handleDuplicateGroup(group)}
 								>
 									<FieldTable
 										fields={groupFilteredFields}
@@ -318,6 +406,22 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 								</DroppableGroup>
 							);
 						})}
+
+						<DragOverlay
+							adjustScale={false}
+							dropAnimation={null}
+							style={{
+								cursor: 'grabbing',
+							}}
+							modifiers={[centerOnDragHandle]}
+						>
+							{activeField ? (
+								<DragOverlayRow
+									field={activeField}
+									fieldTypes={customFieldsTypes}
+								/>
+							) : null}
+						</DragOverlay>
 					</DndContext>
 				</div>
 
@@ -333,15 +437,17 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 
 				<GroupDialog
 					visible={addGroupVisible}
-					onClose={() => setAddGroupVisible(false)}
-					onSave={saveGroup}
+					onClose={handleGroupDialogClose}
+					onSave={handleGroupDialogSave}
+					onUpdate={handleGroupDialogUpdate}
+					editingGroup={editingGroup}
 				/>
 
 				<DeleteGroupDialog
 					visible={deleteGroupVisible}
 					onClose={() => setDeleteGroupVisible(false)}
 					groupId={deleteGroupId}
-					groups={groups.filter(
+					groups={(groups || []).filter(
 						(group) => group.id !== deleteGroupId
 					)}
 					onDelete={deleteGroup}

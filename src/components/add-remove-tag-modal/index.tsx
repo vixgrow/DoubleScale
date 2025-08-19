@@ -168,6 +168,8 @@ const AddRemoveTagsModal: React.FC<AddRemoveTagsModalProps> = ({
 							<span className="text-red-600">*</span>
 						</label>
 						<AsyncSelect<SelectOption>
+							className="react-select-container"
+							classNamePrefix="react-select"
 							key={isOpen ? 'open' : 'closed'} // Force re-render when modal opens
 							loadOptions={(inputValue, callback) => {
 								fetchTags(inputValue).then((data) => {
@@ -205,7 +207,7 @@ const AddRemoveTagsModal: React.FC<AddRemoveTagsModalProps> = ({
 					</div>
 
 					{selectedTags.length > 0 && (
-						<div className='flex gap-2 flex-wrap'>
+						<div className="flex gap-2 flex-wrap">
 							{map(selectedTags, (tagId) => (
 								<Tag
 									key={tagId}

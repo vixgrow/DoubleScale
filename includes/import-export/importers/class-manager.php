@@ -19,6 +19,7 @@ use QuillCRM\Import_Export\Importers\WPUsers;
 use QuillCRM\Import_Export\Importers\WC_Customers;
 use QuillCRM\Import_Export\Importers\ActiveCampaign;
 use QuillCRM\Import_Export\Importers\MailerLite;
+use QuillCRM\Import_Export\Importers\HubSpot;
 use Exception;
 
 /**
@@ -92,6 +93,7 @@ class Manager {
 			new WC_Customers(),
 			new ActiveCampaign(),
 			new MailerLite(),
+			new HubSpot(),
 		);
 
 		foreach ( $importers as $importer ) {

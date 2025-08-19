@@ -178,6 +178,8 @@ const AddRemoveListsModal: React.FC<AddRemoveListsModalProps> = ({
 							<span className="text-red-600">*</span>
 						</label>
 						<AsyncSelect<SelectOption>
+							className="react-select-container"
+							classNamePrefix="react-select"
 							key={isOpen ? 'open' : 'closed'} // Force re-render when modal opens
 							loadOptions={(inputValue, callback) => {
 								fetchLists(inputValue).then((data) => {
@@ -218,7 +220,7 @@ const AddRemoveListsModal: React.FC<AddRemoveListsModalProps> = ({
 					</div>
 
 					{selectedLists.length > 0 && (
-						<div className='flex gap-2 flex-wrap'>
+						<div className="flex gap-2 flex-wrap">
 							{map(selectedLists, (listId) => (
 								<Tag
 									key={listId}

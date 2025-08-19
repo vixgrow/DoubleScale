@@ -175,7 +175,9 @@ const Contact: React.FC = () => {
 			return;
 		}
 
-		const newLists = lists.filter((list) => selectedLists.includes(list.id));
+		const newLists = lists.filter((list) =>
+			selectedLists.includes(list.id)
+		);
 		if (isEmpty(newLists)) {
 			return;
 		}
@@ -188,8 +190,7 @@ const Contact: React.FC = () => {
 				data: {
 					lists: [...contact.lists, ...newLists].filter(
 						(list, index, self) =>
-							index ===
-							self.findIndex((t) => t.id === list.id)
+							index === self.findIndex((t) => t.id === list.id)
 					),
 				},
 			});
@@ -198,8 +199,7 @@ const Contact: React.FC = () => {
 				...contact,
 				lists: [...contact.lists, ...newLists].filter(
 					(list, index, self) =>
-						index ===
-						self.findIndex((t) => t.id === list.id)
+						index === self.findIndex((t) => t.id === list.id)
 				),
 			});
 		} catch (error: any) {
@@ -436,14 +436,21 @@ const Contact: React.FC = () => {
 													<div
 														style={{
 															display: 'flex',
-															flexDirection: 'column',
+															flexDirection:
+																'column',
 															gap: 8,
 														}}
 													>
 														<Select
-															value={contact.status}
-															style={{ width: 200 }}
-															onChange={(value) => {
+															value={
+																contact.status
+															}
+															style={{
+																width: 200,
+															}}
+															onChange={(
+																value
+															) => {
 																setContact({
 																	...contact,
 																	status: value,
@@ -476,7 +483,9 @@ const Contact: React.FC = () => {
 															</Select.Option>
 														</Select>
 														<Button
-															onClick={updateContact}
+															onClick={
+																updateContact
+															}
 															type="primary"
 															loading={isUpdating}
 														>
@@ -508,8 +517,11 @@ const Contact: React.FC = () => {
 												)}
 												onConfirm={sendOptInEmail}
 											>
-												<Button size='small'>
-													{__('Send Opt-in Email', 'quillcrm')}
+												<Button size="small">
+													{__(
+														'Send Opt-in Email',
+														'quillcrm'
+													)}
 												</Button>
 											</Popconfirm>
 										)}
@@ -613,6 +625,8 @@ const Contact: React.FC = () => {
 					<div className="qcrm-fields">
 						<div className="qcrm-field">
 							<AsyncSelect
+								className="react-select-container"
+								classNamePrefix="react-select"
 								isMulti
 								value={selectedTags.map((tag) => ({
 									label: tags.find((t) => t.id === tag)?.name,

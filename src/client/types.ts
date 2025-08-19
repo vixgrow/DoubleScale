@@ -536,6 +536,7 @@ export type Response = {
 
 export type ContactsResponse = Response & {
 	data: Contact[];
+	total_count: number;
 };
 
 export type ListsResponse = Response & {
@@ -552,6 +553,7 @@ export type AutomationsResponse = Response & {
 
 export type CampaignsResponse = Response & {
 	data: Campaign[];
+	total_count: number;
 };
 
 export type CampaignEmailsResponse = Response & {
@@ -619,9 +621,12 @@ export type Log = {
 export interface DataTableConfig<TData> {
 	manageColumns?: {
 		enabled: boolean;
+		onSubmit?: (columnVisibility: Record<string, boolean>) => void;
 	};
 	search?: {
 		placeholder?: string;
+		onChange?: (value: string) => void;
+		value?: string;
 	};
 	selection?: {
 		enabled: boolean;
@@ -711,3 +716,5 @@ export const CAMPAIGN_STATUS = {
 } as const;
 
 export type CampaignStatus = typeof CAMPAIGN_STATUS[keyof typeof CAMPAIGN_STATUS];
+
+export type CampaignModalStep = 'campaign-types' | 'campaign-name' | null;

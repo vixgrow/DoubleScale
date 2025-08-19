@@ -27,6 +27,7 @@ import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import { Campaign as CampaignType } from '@quillcrm/client';
 import Overview from './overview';
+import Template from '../template';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
@@ -168,7 +169,9 @@ const Campaign: React.FC = () => {
 
 	const isOverview =
 		(campaign.status === 'schedule' && tab === 'overview') ||
-		(['processing', 'completed', 'resending'].includes(campaign.status) ? true : false);
+		(['processing', 'completed', 'resending'].includes(campaign.status)
+			? true
+			: false);
 
 	return (
 		<Provider
@@ -182,7 +185,10 @@ const Campaign: React.FC = () => {
 				...$actions,
 			}}
 		>
-			{!['processing', 'completed', 'resending'].includes(campaign.status) &&
+			<TemplatesStep />
+			{/* {!['processing', 'completed', 'resending'].includes(
+				campaign.status
+			) &&
 				tab !== 'overview' && (
 					<Tabs
 						defaultActiveKey="information"
@@ -197,7 +203,7 @@ const Campaign: React.FC = () => {
 						}}
 					/>
 				)}
-			{isOverview && <Overview />}
+			{isOverview && <Overview />} */}
 		</Provider>
 	);
 };

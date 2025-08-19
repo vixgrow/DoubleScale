@@ -63,8 +63,13 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 	return (
 		<div className="flex gap-[10px] flex-col">
 			<div className="flex gap-5">
-				<div className="flex-1 text-base">{__('Field')}</div>
-				<div className="flex-1 text-base">{__('Contact Field')}</div>
+				<div className="flex flex-1 text-[#09090B] font-normal text-base">
+					{__('Field')} <span className="text-red-600">*</span>
+				</div>
+				<div className="flex flex-1 pl-5 text-[#09090B] font-normal text-base">
+					{__('Contact Field')}{' '}
+					<span className="text-red-600">*</span>
+				</div>
 			</div>
 			{map(fields, (_, key) => {
 				return (
@@ -75,6 +80,8 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 							className="flex-1"
 						/>
 						<Select
+							className="react-select-container"
+							classNamePrefix="react-select"
 							onChange={(value) => {
 								if (!isObject(value)) {
 									return;
@@ -95,6 +102,10 @@ const ContactMappedFields: React.FC<ContactMappedFieldsProps> = ({
 								container: (styles) => ({
 									...styles,
 									flex: 1,
+								}),
+								menu: (base: any) => ({
+									...base,
+									color: 'black',
 								}),
 							}}
 							isSearchable={false}

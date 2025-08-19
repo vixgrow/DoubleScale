@@ -70,11 +70,13 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 
 	return (
 		<div className="qcrm-field">
-			<div className="qcrm-field-label">
-				<Typography.Text>{label}</Typography.Text>
+			<div className="qcrm-field-label text-[#09090B] font-normal text-base">
+				{label} <span className="text-red-600">*</span>
 			</div>
 			<div className="qcrm-field-input">
 				<AsyncSelect
+					className="react-select-container"
+					classNamePrefix="react-select"
 					loadOptions={(_inputValue, callback) => {
 						fetchOptions().then((data) => {
 							if (!data) {
@@ -103,6 +105,27 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 						});
 					}}
 					cacheOptions={false}
+					styles={{
+						control: (base) => ({
+							...base,
+							minHeight: 48,
+							height: 48,
+						}),
+						valueContainer: (base) => ({
+							...base,
+							height: 48,
+							padding: '0 8px',
+						}),
+						input: (base) => ({
+							...base,
+							margin: 0,
+							padding: 0,
+						}),
+						indicatorsContainer: (base) => ({
+							...base,
+							height: 48,
+						}),
+					}}
 				/>
 			</div>
 		</div>

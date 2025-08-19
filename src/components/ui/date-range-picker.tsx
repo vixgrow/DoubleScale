@@ -15,19 +15,22 @@ import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from '@/components/ui/popover';
+} from '@/components/ui/popover-dialog';
 import { OutlinedCalendarIcon } from '@quillcrm/components';
+import { cn } from '@/lib/utils';
 
 interface DateRangePickerProps {
 	value: { from: Date | null; to: Date | null };
 	onChange: (range: { from: Date | null; to: Date | null }) => void;
 	placeholder?: string;
+	className?: string;
 }
 
 export function DateRangePicker({
 	value,
 	onChange,
 	placeholder,
+	className,
 }: DateRangePickerProps) {
 	const [open, setOpen] = useState(false);
 
@@ -56,7 +59,12 @@ export function DateRangePicker({
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
-				<Button className="justify-between text-left w-[200px] h-9 rounded-xl px-2 py-[20px] bg-accent border-none hover:bg-accent text-[#A1A5B7] font-semibold ">
+				<Button
+					className={cn(
+						'justify-between text-left w-[200px] h-9 rounded-xl px-2 py-[20px] bg-accent hover:bg-accent text-[#A1A5B7] font-semibold',
+						className
+					)}
+				>
 					{formatDateRange()}
 					<OutlinedCalendarIcon />
 				</Button>

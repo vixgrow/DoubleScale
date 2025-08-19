@@ -1,0 +1,134 @@
+/* Global React Select Styles - Apply to all react-select components */
+/* Maximum specificity overrides */
+
+/* Remove box-shadow from all react-select controls in all states */
+.react-select__control,
+.react-select__control:hover,
+.react-select__control--is-focused,
+.react-select__control--is-disabled,
+.react-select__control--menu-is-open {
+	box-shadow: none !important;
+}
+
+/* Remove box-shadow and outline from all react-select inputs */
+.react-select__input,
+.react-select__input:focus,
+.react-select__input:active {
+	box-shadow: none !important;
+	outline: none !important;
+}
+
+/* Ensure all react-select menus have black text */
+.react-select__menu,
+.react-select__menu-list {
+	color: black !important;
+}
+
+/* Ensure all menu options have black text - maximum specificity */
+body .react-select__option,
+body .react-select__menu .react-select__option,
+body .react-select__menu-list .react-select__option,
+.react-select__option,
+.react-select__menu .react-select__option,
+.react-select__menu-list .react-select__option,
+div[class*="react-select"] .react-select__option {
+	color: black !important;
+}
+
+/* Keep selected items with white text for contrast */
+body .react-select__option--is-selected,
+body .react-select__menu .react-select__option--is-selected,
+body .react-select__menu-list .react-select__option--is-selected,
+.react-select__option--is-selected,
+.react-select__menu .react-select__option--is-selected,
+.react-select__menu-list .react-select__option--is-selected,
+div[class*="react-select"] .react-select__option--is-selected {
+	color: white !important;
+	background-color: #3b82f6 !important;
+}
+
+/* Ensure focused options have black text */
+body .react-select__option--is-focused:not(.react-select__option--is-selected),
+body
+	.react-select__menu
+	.react-select__option--is-focused:not(.react-select__option--is-selected),
+body
+	.react-select__menu-list
+	.react-select__option--is-focused:not(.react-select__option--is-selected),
+.react-select__option--is-focused,
+.react-select__menu .react-select__option--is-focused,
+.react-select__menu-list .react-select__option--is-focused,
+div[class*="react-select"]
+	.react-select__option--is-focused:not(.react-select__option--is-selected) {
+	color: black !important;
+	background-color: #f3f4f6 !important;
+}
+
+/* Focused and selected option should have white text */
+body .react-select__option--is-focused.react-select__option--is-selected,
+body
+	.react-select__menu
+	.react-select__option--is-focused.react-select__option--is-selected,
+.react-select__option--is-focused.react-select__option--is-selected,
+.react-select__menu
+	.react-select__option--is-focused.react-select__option--is-selected {
+	color: white !important;
+	background-color: #3b82f6 !important;
+}
+
+/* Disabled options should be gray */
+body .react-select__option--is-disabled,
+body .react-select__menu .react-select__option--is-disabled,
+.react-select__option--is-disabled,
+.react-select__menu .react-select__option--is-disabled {
+	color: #9ca3af !important;
+}
+
+/* Ensure single value text is black */
+body .react-select__single-value,
+.react-select__single-value {
+	color: black !important;
+}
+
+/* Ensure multi-value labels are black */
+body .react-select__multi-value__label,
+.react-select__multi-value__label {
+	color: black !important;
+}
+
+/* Ensure placeholder text is visible */
+body .react-select__placeholder,
+.react-select__placeholder {
+	color: #6b7280 !important;
+}
+
+/* Ensure no-options and loading messages are black */
+body .react-select__no-options-message,
+body .react-select__loading-message,
+.react-select__no-options-message,
+.react-select__loading-message {
+	color: black !important;
+}
+
+/* Remove any residual box-shadows from indicators */
+.react-select__dropdown-indicator:hover,
+.react-select__clear-indicator:hover {
+	background-color: transparent !important;
+	box-shadow: none !important;
+}
+
+/* Override any potential Tailwind or other CSS framework conflicts */
+[class*="react-select"] * {
+	color: inherit !important;
+}
+
+/* Force black text on all non-selected options */
+[class*="react-select"]
+	.react-select__option:not(.react-select__option--is-selected) {
+	color: black !important;
+}
+
+/* Force white text on selected options */
+[class*="react-select"] .react-select__option--is-selected {
+	color: white !important;
+}

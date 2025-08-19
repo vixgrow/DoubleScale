@@ -13,7 +13,12 @@ import Select from 'react-select';
  * Internal dependencies
  */
 import './style.scss';
-import { ListField, TagField, LinkTriggerField } from '@quillcrm/components';
+import {
+	ListField,
+	TagField,
+	LinkTriggerField,
+	DynamicKeyValueInput,
+} from '@quillcrm/components';
 import type { ReactSelectOptions } from '@quillcrm/client';
 import ContactMappedFields from '../contact-mapped-fields';
 import MappedFields from '../mapped-fields';
@@ -44,6 +49,18 @@ interface FieldProps {
 	helperText?: string;
 	style?: React.CSSProperties;
 	placeholder?: string;
+	settings?: {
+		max_pairs?: number;
+		key_placeholder?: string;
+		value_placeholder?: string;
+		key_label?: string;
+		value_label?: string;
+		allow_empty?: boolean;
+		button_text?: string;
+		ajax_action?: string;
+		variant?: 'primary' | 'secondary' | 'danger';
+		size?: 'small' | 'medium' | 'large';
+	};
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -60,6 +77,7 @@ const Field: React.FC<FieldProps> = ({
 	required,
 	style,
 	placeholder,
+	settings,
 }) => {
 	let fieldContent;
 
@@ -238,6 +256,22 @@ const Field: React.FC<FieldProps> = ({
 					onChange={onChange}
 					values={value}
 					fields={fields || {}}
+				/>
+			);
+			break;
+		case 'dynamic_keyvalue':
+			fieldContent = (
+				<DynamicKeyValueInput
+					value={value || []}
+					onChange={onChange}
+					maxPairs={settings?.max_pairs || 10}
+					keyPlaceholder={settings?.key_placeholder || placeholder}
+					valuePlaceholder={
+						settings?.value_placeholder || placeholder
+					}
+					keyLabel={settings?.key_label || 'Key'}
+					valueLabel={settings?.value_label || 'Value'}
+					allowEmpty={settings?.allow_empty || false}
 				/>
 			);
 			break;

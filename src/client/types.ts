@@ -262,6 +262,16 @@ export type MappedFields = {
 	[key: string]: string;
 };
 
+export type KeyValuePair = {
+	id: string;
+	key: string;
+	value: string;
+};
+
+export type DynamicKeyValueData = {
+	[key: string]: any;
+};
+
 type FormData = {
 	mapped_fields: MappedFields;
 	[key: string]: any;

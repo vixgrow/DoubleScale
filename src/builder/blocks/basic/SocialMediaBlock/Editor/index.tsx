@@ -60,6 +60,8 @@ export interface SocialMediaBlockEditorProps {
 		iconSize: 'small' | 'medium' | 'large';
 		align: 'left' | 'center' | 'right';
 		shape: 'circle' | 'square' | 'rounded';
+		colorMode: 'original' | 'colored';
+		color: string;
 		padding: {
 			top: number;
 			right: number;
@@ -99,7 +101,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 				...props.platforms,
 				[platformKey]: {
 					...props.platforms[
-						platformKey as keyof typeof props.platforms
+					platformKey as keyof typeof props.platforms
 					],
 					enabled,
 				},
@@ -113,7 +115,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 				...props.platforms,
 				[platformKey]: {
 					...props.platforms[
-						platformKey as keyof typeof props.platforms
+					platformKey as keyof typeof props.platforms
 					],
 					link,
 				},
@@ -145,7 +147,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						const IconComponent = platform.icon;
 						const platformData =
 							props.platforms[
-								platform.key as keyof typeof props.platforms
+							platform.key as keyof typeof props.platforms
 							];
 
 						return (
@@ -199,7 +201,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.iconSize === 'small' &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
+							'bg-[#C6DFF366] border border-primary rounded-l-lg'
 						)}
 						onClick={() => onChange({ iconSize: 'small' })}
 					>
@@ -209,7 +211,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.iconSize === 'medium' &&
-								'bg-[#C6DFF366] border border-primary'
+							'bg-[#C6DFF366] border border-primary'
 						)}
 						onClick={() => onChange({ iconSize: 'medium' })}
 					>
@@ -219,7 +221,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.iconSize === 'large' &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
+							'bg-[#C6DFF366] border border-primary rounded-r-lg'
 						)}
 						onClick={() => onChange({ iconSize: 'large' })}
 					>
@@ -238,7 +240,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.align === 'left' &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
+							'bg-[#C6DFF366] border border-primary rounded-l-lg'
 						)}
 						onClick={() => onChange({ align: 'left' })}
 					/>
@@ -246,7 +248,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.align === 'center' &&
-								'bg-[#C6DFF366] border border-primary'
+							'bg-[#C6DFF366] border border-primary'
 						)}
 						onClick={() => onChange({ align: 'center' })}
 					/>
@@ -254,7 +256,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.align === 'right' &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
+							'bg-[#C6DFF366] border border-primary rounded-r-lg'
 						)}
 						onClick={() => onChange({ align: 'right' })}
 					/>
@@ -271,7 +273,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.shape === 'circle' &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
+							'bg-[#C6DFF366] border border-primary rounded-l-lg'
 						)}
 						onClick={() => onChange({ shape: 'circle' })}
 					>
@@ -281,7 +283,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.shape === 'rounded' &&
-								'bg-[#C6DFF366] border border-primary'
+							'bg-[#C6DFF366] border border-primary'
 						)}
 						onClick={() => onChange({ shape: 'rounded' })}
 					>
@@ -291,13 +293,62 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.shape === 'square' &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
+							'bg-[#C6DFF366] border border-primary rounded-r-lg'
 						)}
 						onClick={() => onChange({ shape: 'square' })}
 					>
 						{__('Square', 'quillcrm')}
 					</div>
 				</div>
+			</div>
+
+			{/* Icon Color */}
+			<div className="flex flex-col gap-2 text-[#333333]">
+				<div className="text-sm font-medium">
+					{__('Icon Color', 'quillcrm')}
+				</div>
+				<div className="flex items-center justify-between border rounded-lg">
+					<div
+						className={cn(
+							'py-2 px-4 w-full text-center cursor-pointer text-sm',
+							props.colorMode === 'original' &&
+							'bg-[#C6DFF366] border border-primary rounded-l-lg'
+						)}
+						onClick={() => onChange({ colorMode: 'original', color: '' })}
+					>
+						{__('Original', 'quillcrm')}
+					</div>
+					<div
+						className={cn(
+							'py-2 px-4 w-full text-center cursor-pointer text-sm',
+							props.colorMode === 'colored' &&
+							'bg-[#C6DFF366] border border-primary rounded-r-lg'
+						)}
+						onClick={() => onChange({ colorMode: 'colored' })}
+					>
+						{__('Colored', 'quillcrm')}
+					</div>
+				</div>
+				{props.colorMode === 'colored' && (
+					<div className="flex items-center gap-2 border rounded-lg px-2">
+						<Input
+							id="icon-color"
+							type="text"
+							value={props.color}
+							onChange={(e) => onChange({ color: e.target.value })}
+							className="rounded-lg"
+							style={{ border: 0 }}
+							placeholder="#000000"
+						/>
+						<Input
+							type="color"
+							value={props.color}
+							onChange={(e) => onChange({ color: e.target.value })}
+							className="w-10 h-10 p-1 rounded-lg"
+							style={{ border: 0 }}
+						/>
+					</div>
+				)}
 			</div>
 
 			{/* Padding */}

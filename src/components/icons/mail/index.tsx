@@ -1,6 +1,6 @@
 import { IconProps } from '@quillcrm/config';
 
-const MailIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'circle' }) => {
+const MailIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'circle', color }) => {
 	const getBorderRadius = () => {
 		switch (shape) {
 			case 'circle':
@@ -28,7 +28,7 @@ const MailIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'circl
 				height="47"
 				rx={getBorderRadius()}
 				ry={getBorderRadius()}
-				fill="black"
+				fill={color || "black"}
 			/>
 			<path
 				d="M12 14C10.8954 14 10 14.8954 10 16V16.1615L24 25.7865L38 16.1615V16C38 14.8954 37.1046 14 36 14H12Z"

@@ -31,6 +31,8 @@ export interface SocialMediaBlockProps {
 	iconSize: 'small' | 'medium' | 'large';
 	align: 'left' | 'center' | 'right';
 	shape: 'circle' | 'square' | 'rounded';
+	colorMode: 'original' | 'colored';
+	color: string;
 	padding: {
 		top: number;
 		right: number;
@@ -65,6 +67,8 @@ const SocialMediaBlock = {
 		iconSize: 'medium',
 		align: 'center',
 		shape: 'circle',
+		colorMode: 'original',
+		color: '',
 		padding: {
 			top: 16,
 			right: 16,

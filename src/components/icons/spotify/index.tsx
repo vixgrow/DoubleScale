@@ -1,6 +1,6 @@
 import { IconProps } from '@quillcrm/config';
 
-const SpotifyIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'circle' }) => {
+const SpotifyIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'circle', color }) => {
 	const getBorderRadius = () => {
 		switch (shape) {
 			case 'circle':
@@ -28,7 +28,7 @@ const SpotifyIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'ci
 				height="47"
 				rx={getBorderRadius()}
 				ry={getBorderRadius()}
-				fill="#65D46E"
+				fill={color || "#65D46E"}
 			/>
 			<path
 				fill-rule="evenodd"

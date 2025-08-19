@@ -1,6 +1,6 @@
 import { IconProps } from '@quillcrm/config';
 
-const DiscordIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'circle' }) => {
+const DiscordIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'circle', color }) => {
 	const getBorderRadius = () => {
 		switch (shape) {
 			case 'circle':
@@ -28,7 +28,7 @@ const DiscordIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'ci
 				height="47"
 				rx={getBorderRadius()}
 				ry={getBorderRadius()}
-				fill="#5865F2"
+				fill={color || "#5865F2"}
 			/>
 			<path
 				xmlns="http://www.w3.org/2000/svg"

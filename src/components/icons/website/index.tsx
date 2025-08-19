@@ -1,6 +1,6 @@
 import { IconProps } from '@quillcrm/config';
 
-const WebsiteIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'circle' }) => {
+const WebsiteIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'circle', color }) => {
 	const getBorderRadius = () => {
 		switch (shape) {
 			case 'circle':
@@ -28,7 +28,7 @@ const WebsiteIcon: React.FC<IconProps> = ({ width = 24, height = 24, shape = 'ci
 				height="47"
 				rx={getBorderRadius()}
 				ry={getBorderRadius()}
-				fill="black"
+				fill={color || "black"}
 			/>
 			<path
 				d="M30.0295 25H18.0623C18.1085 26.4061 18.2511 27.7478 18.4732 29H29.6186C29.8407 27.7478 29.9833 26.4061 30.0295 25Z"

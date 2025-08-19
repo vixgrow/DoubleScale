@@ -52,6 +52,8 @@ export interface SocialMediaBlockRendererProps {
 		iconSize: 'small' | 'medium' | 'large';
 		align: 'left' | 'center' | 'right';
 		shape: 'circle' | 'square' | 'rounded';
+		colorMode: 'original' | 'colored';
+		color: string;
 		padding: {
 			top: number;
 			right: number;
@@ -130,7 +132,7 @@ export const SocialMediaBlockRenderer: React.FC<
 					{enabledPlatforms.map(([platformKey, platformData]) => {
 						const IconComponent =
 							socialMediaIcons[
-								platformKey as keyof typeof socialMediaIcons
+							platformKey as keyof typeof socialMediaIcons
 							];
 
 						if (!IconComponent) {
@@ -153,6 +155,7 @@ export const SocialMediaBlockRenderer: React.FC<
 									width={iconSize.width}
 									height={iconSize.height}
 									shape={props.shape}
+									color={props.colorMode === 'colored' ? props.color : undefined}
 								/>
 							</a>
 						);

@@ -10,10 +10,21 @@ import { VideoBlockRenderer } from './Renderer';
 import { VideoBlockEditor } from './Editor';
 
 export interface VideoBlockProps {
-	content: string;
-	fontSize: number;
-	color: string;
+	videoUrl: string;
+	imageUrl: string;
+	alt: string;
+	width: string;
+	height: string;
 	align: string;
+	backgroundColor: string;
+	padding: {
+		top: number;
+		right: number;
+		bottom: number;
+		left: number;
+	};
+	borderRadius: string;
+	shape: string;
 }
 
 const VideoBlock = {
@@ -21,10 +32,21 @@ const VideoBlock = {
 	name: __('Video', 'quillcrm'),
 	icon: VideoBlockIcon,
 	defaultProps: {
-		content: 'Your text here',
-		fontSize: 16,
-		color: '#333',
+		videoUrl: '',
+		imageUrl: '',
+		alt: 'Video',
+		width: '100%',
+		height: 'auto',
 		align: 'center',
+		backgroundColor: '#000000',
+		padding: {
+			top: 0,
+			right: 0,
+			bottom: 0,
+			left: 0,
+		},
+		borderRadius: '0',
+		shape: 'rectangle',
 	} as VideoBlockProps,
 	Renderer: VideoBlockRenderer,
 	Editor: VideoBlockEditor,

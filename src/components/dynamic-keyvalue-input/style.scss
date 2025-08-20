@@ -6,7 +6,7 @@
 	}
 
 	&__labels {
-		@apply grid grid-cols-[1fr_1fr_auto] gap-3 items-center;
+		@apply grid grid-cols-[1fr_2fr_auto] gap-3 items-center;
 	}
 
 	&__label {
@@ -26,7 +26,7 @@
 	}
 
 	&__pair {
-		@apply grid grid-cols-[1fr_1fr_auto] gap-3 items-center;
+		@apply grid grid-cols-[1fr_2fr_auto] gap-3 items-center;
 	}
 
 	&__inputs {
@@ -54,10 +54,7 @@
 
 	&__remove-btn {
 		@apply inline-flex items-center justify-center w-8 h-8;
-		@apply text-red-600 hover:text-red-800 hover:bg-red-50;
-		@apply border border-transparent hover:border-red-200;
-		@apply rounded-md transition-colors duration-200;
-		@apply disabled:opacity-50 disabled:cursor-not-allowed;
+		@apply text-red-600;
 	}
 
 	&__remove-icon {
@@ -73,15 +70,15 @@
 	}
 
 	&__actions {
-		@apply flex items-center justify-between pt-2 border-t border-gray-200;
+		@apply flex items-center justify-between pt-2;
 	}
 
 	&__add-btn {
 		@apply inline-flex items-center gap-2 px-4 py-2;
-		@apply text-sm font-medium text-blue-600 hover:text-blue-800;
-		@apply bg-blue-50 hover:bg-blue-100;
-		@apply border border-blue-200 hover:border-blue-300;
-		@apply rounded-md transition-colors duration-200;
+		@apply text-sm font-medium;
+		color: #fff;
+		background-color: #6d78d8;
+		border-radius: 5px;
 		@apply disabled:opacity-50 disabled:cursor-not-allowed;
 		@apply disabled:hover:bg-blue-50 disabled:hover:text-blue-600;
 	}
@@ -124,27 +121,12 @@
 			}
 		}
 
-		&__remove-btn {
-			@apply text-red-400 hover:text-red-300 hover:bg-red-900/20;
-			@apply hover:border-red-700;
-		}
-
 		&__empty {
 			@apply border-gray-600;
 		}
 
 		&__empty-text {
 			@apply text-gray-400;
-		}
-
-		&__actions {
-			@apply border-gray-700;
-		}
-
-		&__add-btn {
-			@apply text-blue-400 hover:text-blue-300;
-			@apply bg-blue-900/20 hover:bg-blue-900/30;
-			@apply border-blue-700 hover:border-blue-600;
 		}
 
 		&__limit-text {

@@ -13,7 +13,13 @@ import Select from 'react-select';
  * Internal dependencies
  */
 import './style.scss';
-import { ListField, TagField, LinkTriggerField } from '@quillcrm/components';
+import {
+	ListField,
+	TagField,
+	LinkTriggerField,
+	DynamicKeyValueInput,
+	TestButton,
+} from '@quillcrm/components';
 import type { ReactSelectOptions } from '@quillcrm/client';
 import ContactMappedFields from '../contact-mapped-fields';
 import MappedFields from '../mapped-fields';
@@ -44,6 +50,11 @@ interface FieldProps {
 	helperText?: string;
 	style?: React.CSSProperties;
 	placeholder?: string;
+	settings?: {
+		ajax_action?: string;
+		button_text?: string;
+	};
+	allValues?: { [key: string]: any };
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -60,6 +71,8 @@ const Field: React.FC<FieldProps> = ({
 	required,
 	style,
 	placeholder,
+	settings,
+	allValues,
 }) => {
 	let fieldContent;
 
@@ -238,6 +251,27 @@ const Field: React.FC<FieldProps> = ({
 					onChange={onChange}
 					values={value}
 					fields={fields || {}}
+				/>
+			);
+			break;
+		case 'dynamic_keyvalue':
+			fieldContent = (
+				<DynamicKeyValueInput
+					value={value || []}
+					onChange={onChange}
+					keyPlaceholder={__('Enter key', 'quillcrm')}
+					valuePlaceholder={__('Enter value', 'quillcrm')}
+				/>
+			);
+			break;
+		case 'button':
+		case 'test_button':
+			fieldContent = (
+				<TestButton
+					label={label}
+					settings={settings}
+					allValues={allValues}
+					onResult={(result) => onChange(result || value)}
 				/>
 			);
 			break;

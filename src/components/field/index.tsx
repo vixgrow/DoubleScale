@@ -18,6 +18,7 @@ import {
 	TagField,
 	LinkTriggerField,
 	DynamicKeyValueInput,
+	TestButton,
 } from '@quillcrm/components';
 import type { ReactSelectOptions } from '@quillcrm/client';
 import ContactMappedFields from '../contact-mapped-fields';
@@ -50,17 +51,10 @@ interface FieldProps {
 	style?: React.CSSProperties;
 	placeholder?: string;
 	settings?: {
-		max_pairs?: number;
-		key_placeholder?: string;
-		value_placeholder?: string;
-		key_label?: string;
-		value_label?: string;
-		allow_empty?: boolean;
-		button_text?: string;
 		ajax_action?: string;
-		variant?: 'primary' | 'secondary' | 'danger';
-		size?: 'small' | 'medium' | 'large';
+		button_text?: string;
 	};
+	allValues?: { [key: string]: any };
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -78,6 +72,7 @@ const Field: React.FC<FieldProps> = ({
 	style,
 	placeholder,
 	settings,
+	allValues,
 }) => {
 	let fieldContent;
 
@@ -264,14 +259,19 @@ const Field: React.FC<FieldProps> = ({
 				<DynamicKeyValueInput
 					value={value || []}
 					onChange={onChange}
-					maxPairs={settings?.max_pairs || 10}
-					keyPlaceholder={settings?.key_placeholder || placeholder}
-					valuePlaceholder={
-						settings?.value_placeholder || placeholder
-					}
-					keyLabel={settings?.key_label || 'Key'}
-					valueLabel={settings?.value_label || 'Value'}
-					allowEmpty={settings?.allow_empty || false}
+					keyPlaceholder={__('Enter key', 'quillcrm')}
+					valuePlaceholder={__('Enter value', 'quillcrm')}
+				/>
+			);
+			break;
+		case 'button':
+		case 'test_button':
+			fieldContent = (
+				<TestButton
+					label={label}
+					settings={settings}
+					allValues={allValues}
+					onResult={(result) => onChange(result || value)}
 				/>
 			);
 			break;

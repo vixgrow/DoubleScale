@@ -316,14 +316,14 @@ export const BannerEditor: React.FC<BannerBlockEditorProps> = ({
             {/* Rotation Controls */}
             <div className="flex justify-between items-center text-[#333333]">
                 <label className="text-sm">{__('Rotation', 'quillcrm')}</label>
-                <div className="flex items-center gap-2 border rounded-lg">
+                <div className="flex items-center gap-2 border rounded-lg p-1">
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleRotationChange('left')}
-                        className="flex-1 shadow-none border-none pl-4 pr-0"
+                        className="flex-1 shadow-none"
                     >
-                        <Minus className="w-4 h-4" />
+                        <Minus className="w-4 h-4 text-[#333333]" />
                     </Button>
                     <Input
                         type="text"
@@ -341,9 +341,9 @@ export const BannerEditor: React.FC<BannerBlockEditorProps> = ({
                         variant="outline"
                         size="sm"
                         onClick={() => handleRotationChange('right')}
-                        className="flex-1 shadow-none border-none pr-4 pl-0"
+                        className="flex-1 shadow-none"
                     >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-4 h-4 text-[#333333] " />
                     </Button>
                 </div>
             </div>

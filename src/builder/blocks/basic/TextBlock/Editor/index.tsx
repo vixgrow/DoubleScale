@@ -62,7 +62,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 		<div className="grid gap-5">
 			<div className="flex flex-col gap-2">
 				<div className="flex justify-between items-center text-[#333333]">
-					<div>{__('Insert Tag', 'quillcrm')}</div>
+					<div>{__('Text Content', 'quillcrm')}</div>
 					<div
 						className="cursor-pointer hover:opacity-80"
 						onClick={handleMergeTagClick}

@@ -11,8 +11,6 @@ import {
     AlignCenter,
     AlignRight,
     ExternalLinkIcon,
-    RotateCcw,
-    RotateCw,
     Plus,
     Minus,
 } from 'lucide-react';

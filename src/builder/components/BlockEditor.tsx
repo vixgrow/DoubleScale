@@ -2,7 +2,7 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 /**
  * external dependencies
  */
@@ -18,11 +18,12 @@ import { GlobalEmailSettingsIcon } from '@quillcrm/components';
 import GlobalEmailSettings from './GlobalEmailSettings';
 import BackgroundSettings from './BackgroudSettings';
 import ButtonSettings from './ButtonSettings';
+import { useBuilder } from '../context/BuilderContext';
 
 type ViewState = 'main' | 'background' | 'button';
 
 const BlockEditor: React.FC = () => {
-	const dispatch = useDispatch();
+	const { updateBlock, clearSelection, deleteBlock } = useBuilder();
 	const [currentView, setCurrentView] = useState<ViewState>('main');
 
 	const selectedBlock = useSelect(
@@ -37,7 +38,7 @@ const BlockEditor: React.FC = () => {
 
 	const handlePropsChange = (newProps: Record<string, any>) => {
 		if (selectedBlock) {
-			dispatch(STORE_KEY).updateBlock(selectedBlock.id, newProps);
+			updateBlock(selectedBlock.id, newProps);
 		}
 	};
 
@@ -80,9 +81,7 @@ const BlockEditor: React.FC = () => {
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={() =>
-									dispatch(STORE_KEY).clearSelection()
-								}
+								onClick={() => clearSelection()}
 							>
 								<X className="h-4 w-4" />
 							</Button>
@@ -124,10 +123,8 @@ const BlockEditor: React.FC = () => {
 								size="sm"
 								className="w-full"
 								onClick={() => {
-									dispatch(STORE_KEY).deleteBlock(
-										selectedBlock.id
-									);
-									dispatch(STORE_KEY).clearSelection();
+									deleteBlock(selectedBlock.id);
+									clearSelection();
 								}}
 							>
 								{__('Delete Block', 'quillcrm')}

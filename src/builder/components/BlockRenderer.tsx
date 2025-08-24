@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { __ } from '@wordpress/i18n';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
 import { blocksRegistry } from '../blocks/BlockRegister';
+import { useBuilder } from '../context/BuilderContext';
 
 interface BlockRendererProps {
 	block: EmailBlock;
@@ -20,7 +21,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 	sectionId,
 	columnId,
 }) => {
-	const dispatch = useDispatch();
+	const { selectBlock, deleteBlock } = useBuilder();
 
 	const {
 		attributes,
@@ -47,12 +48,12 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 
 	const handleBlockClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		dispatch(STORE_KEY).selectBlock(block.id, sectionId, columnId);
+		selectBlock(block.id, sectionId, columnId);
 	};
 
 	const handleDeleteBlock = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		dispatch(STORE_KEY).deleteBlock(block.id);
+		deleteBlock(block.id);
 	};
 
 	if (!blockDefinition) {
@@ -101,7 +102,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			{/* Block Content */}
 			<div className="p-2">
 				{blockDefinition.Renderer ? (
-					<blockDefinition.Renderer props={block.props} />
+					<blockDefinition.Renderer props={block.props as any} />
 				) : (
 					<div className="text-muted-foreground">
 						{__('No renderer available', 'quillcrm')}

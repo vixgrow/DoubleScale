@@ -43,7 +43,7 @@ const TextBlock = {
 	icon: TextBlockIcon,
 	defaultProps: {
 		content: 'Your text here',
-		hyperlink: 'https;//',
+		hyperlink: 'https://',
 		fontSize: 16,
 		color: '#333',
 		align: 'center',

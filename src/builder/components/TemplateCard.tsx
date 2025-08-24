@@ -1,4 +1,3 @@
-import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { DragDropIcon } from '@/components/icons';
 
@@ -7,28 +6,34 @@ const TemplateCard = ({
 	type,
 	blockType,
 	onCreateBlock,
+	isDragOverlay = false,
 }: {
 	item: any;
 	type: 'layout' | 'element';
 	blockType?: string;
 	onCreateBlock?: () => any;
+	isDragOverlay?: boolean;
 }) => {
-	const { attributes, listeners, setNodeRef, transform, isDragging } =
-		useDraggable({
-			id: `template-${blockType || item.value}`,
-			data: {
-				type: 'template',
-				blockType: blockType,
-				item: item,
-			},
-		});
+	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+		id: `template-${blockType || item.id}`,
+		data: {
+			type: type,
+			blockType: blockType || item.id,
+			item: item,
+		},
+		disabled: isDragOverlay,
+	});
 
 	const style = {
-		transform: transform
-			? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-			: undefined,
-		opacity: isDragging ? 0.5 : 1,
+		opacity: isDragging && !isDragOverlay ? 0.5 : 1,
+		zIndex: isDragging ? 1000 : 1,
 	};
+
+	const baseClasses =
+		'w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-2 transition-colors';
+	const interactiveClasses = isDragOverlay
+		? 'cursor-grabbing border-blue-300 shadow-xl'
+		: 'cursor-grab hover:cursor-grabbing hover:border-blue-300';
 
 	return (
 		<div
@@ -36,7 +41,7 @@ const TemplateCard = ({
 			style={style}
 			{...listeners}
 			{...attributes}
-			className="w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-2 cursor-grab hover:cursor-grabbing hover:border-blue-300 transition-colors"
+			className={`${baseClasses} ${interactiveClasses}`}
 			key={item.value || blockType}
 		>
 			<DragDropIcon />

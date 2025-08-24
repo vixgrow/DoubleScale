@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { __ } from '@wordpress/i18n';
@@ -8,13 +8,14 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailSection } from '../../stores/email-builder/types';
 import ColumnRenderer from './ColumnRenderer';
+import { useBuilder } from '../context/BuilderContext';
 
 interface SectionRendererProps {
 	section: EmailSection;
 }
 
 const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
-	const dispatch = useDispatch();
+	const { selectBlock, deleteSection } = useBuilder();
 
 	const {
 		attributes,
@@ -40,12 +41,12 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 	const handleSectionClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		dispatch(STORE_KEY).selectBlock('', section.id);
+		selectBlock('', section.id);
 	};
 
 	const handleDeleteSection = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		dispatch(STORE_KEY).deleteSection(section.id);
+		deleteSection(section.id);
 	};
 
 	return (

@@ -1,6 +1,8 @@
+import { BlockType } from '../../builder/types';
+
 export interface EmailBlock {
   id: string;
-  type: 'text' | 'image' | 'button' | 'divider' | 'spacer';
+  type: BlockType;
   props: Record<string, any>;
   styles?: Record<string, any>;
 }

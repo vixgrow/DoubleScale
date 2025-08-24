@@ -1,7 +1,7 @@
 /**
  * external dependencies
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
 	DndContext,
 	closestCenter,
@@ -9,9 +9,10 @@ import {
 	useSensors,
 	PointerSensor,
 	DragOverlay,
+	DragStartEvent,
+	DragEndEvent,
 } from '@dnd-kit/core';
-import { useDispatch } from '@wordpress/data';
-import { v4 as uuidv4 } from 'uuid';
+import { snapCenterToCursor } from '@dnd-kit/modifiers';
 /**
  * internal dependencies
  */
@@ -19,40 +20,45 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import BlockEditor from './components/BlockEditor';
-import { STORE_KEY } from '../stores/email-builder/constants';
-import { blocksRegistry } from './blocks/BlockRegister';
+import TemplateCard from './components/TemplateCard';
+import { BuilderProvider, useBuilder } from './context/BuilderContext';
 
-const Builder: React.FC = () => {
-	const dispatch = useDispatch();
+const BuilderContent: React.FC = () => {
+	const { addNewSection, addNewBlock } = useBuilder();
 	const sensors = useSensors(useSensor(PointerSensor));
+	const [activeItem, setActiveItem] = useState<any>(null);
 
-	const handleDragEnd = (event: any) => {
+	const handleDragStart = (event: DragStartEvent) => {
+		const { active } = event;
+		setActiveItem(active.data.current);
+	};
+
+	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
+		setActiveItem(null);
 
 		if (!over || active.id === over.id) return;
 
+		console.log('active', active);
+		console.log('over', over);
+
 		// Handle dropping new blocks from sidebar
-		if (active.data?.current?.type === 'template') {
+		if (active.data?.current?.type === 'element') {
 			const { blockType } = active.data.current;
 			const overData = over.data?.current;
 
 			if (overData?.type === 'column') {
 				const { sectionId, columnId } = overData;
-
-				// Create new block
-				const newBlock = {
-					id: uuidv4(),
-					type: blockType,
-					props: blocksRegistry[blockType]?.defaultProps || {},
-				};
-
-				dispatch(STORE_KEY).addBlock(sectionId, columnId, newBlock);
+				addNewBlock(sectionId, columnId, blockType);
 				return;
 			}
 		}
 
-		// Handle block reordering within canvas
-		// This is a simplified version - you might want to implement more complex logic
+		// Handle dropping new sections
+		if (active.data?.current?.type === 'layout') {
+			addNewSection(active.data.current.item);
+		}
+
 		console.log('Drag ended:', { active: active.id, over: over.id });
 	};
 
@@ -66,15 +72,36 @@ const Builder: React.FC = () => {
 				<DndContext
 					sensors={sensors}
 					collisionDetection={closestCenter}
+					onDragStart={handleDragStart}
 					onDragEnd={handleDragEnd}
+					modifiers={[snapCenterToCursor]}
 				>
 					<Sidebar />
 					<Canvas />
-					<DragOverlay>{/* Render dragged item here */}</DragOverlay>
+					<DragOverlay>
+						{activeItem ? (
+							<div className="opacity-90 transform rotate-3 shadow-lg">
+								<TemplateCard
+									item={activeItem.item}
+									type={activeItem.type}
+									blockType={activeItem.blockType}
+									isDragOverlay={true}
+								/>
+							</div>
+						) : null}
+					</DragOverlay>
 				</DndContext>
 				<BlockEditor />
 			</div>
 		</div>
+	);
+};
+
+const Builder: React.FC = () => {
+	return (
+		<BuilderProvider>
+			<BuilderContent />
+		</BuilderProvider>
 	);
 };
 

@@ -1,9 +1,11 @@
 export interface Block {
   id: string;
-  type: 'text' | 'image' | 'button' | 'divider';
+  type: BlockType;
   content: any;
   styles?: Record<string, any>;
 }
+
+export type BlockType = 'text' | 'image' | 'button' | 'divider';
 
 export interface Section {
   id: string;

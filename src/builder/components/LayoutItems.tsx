@@ -14,42 +14,9 @@ import PreheaderLibrary from '../blocks/libraries/Preheader';
 import HeaderLibrary from '../blocks/libraries/Header';
 import HeroImageLibrary from '../blocks/libraries/HeroImage';
 import EmailBodyLibrary from '../blocks/libraries/EmailBody';
-
-const FooterLayout = () => (
-	<div className="p-4">
-		<h3 className="font-semibold mb-2">
-			{__('Footer Layout', 'quillcrm')}
-		</h3>
-		<p className="text-sm text-muted-foreground">
-			{__('Configure your footer layout options', 'quillcrm')}
-		</p>
-		{/* Add your footer layout content here */}
-	</div>
-);
-
-const ImageGallery = () => (
-	<div className="p-4">
-		<h3 className="font-semibold mb-2">
-			{__('Image Gallery Layout', 'quillcrm')}
-		</h3>
-		<p className="text-sm text-muted-foreground">
-			{__('Configure your grid layout options', 'quillcrm')}
-		</p>
-		{/* Add your grid layout content here */}
-	</div>
-);
-
-const ProductListing = () => (
-	<div className="p-4">
-		<h3 className="font-semibold mb-2">
-			{__('Product Listing Layout', 'quillcrm')}
-		</h3>
-		<p className="text-sm text-muted-foreground">
-			{__('Create your custom layout', 'quillcrm')}
-		</p>
-		{/* Add your custom layout content here */}
-	</div>
-);
+import FooterLibrary from '../blocks/libraries/Footer';
+import ImageGalleryLibrary from '../blocks/libraries/ImageGallery';
+import ProductListingLibrary from '../blocks/libraries/ProductListing';
 
 const LayoutItems = () => {
 	const [activeSidebar, setActiveSidebar] = useState(null);
@@ -78,17 +45,17 @@ const LayoutItems = () => {
 		{
 			id: 'product-listing',
 			title: __('Product Listing', 'quillcrm'),
-			component: ProductListing,
+			component: ProductListingLibrary,
 		},
 		{
 			id: 'image-gallery',
 			title: __('Image Gallery', 'quillcrm'),
-			component: ImageGallery,
+			component: ImageGalleryLibrary,
 		},
 		{
 			id: 'footer',
 			title: __('Footer', 'quillcrm'),
-			component: FooterLayout,
+			component: FooterLibrary,
 		},
 	];
 

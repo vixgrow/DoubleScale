@@ -15,7 +15,9 @@ const HeroImageLibrary = () => {
 	return (
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Standard Hero', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Standard Hero', 'quillcrm')}
+				</label>
 				<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 					<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
 						<ImageBlockIcon />
@@ -36,7 +38,9 @@ const HeroImageLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Extended Hero', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Extended Hero', 'quillcrm')}
+				</label>
 				<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 					<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
 						<ImageBlockIcon />
@@ -65,7 +69,9 @@ const HeroImageLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title + Image', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Title + Image', 'quillcrm')}
+				</label>
 				<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 					<div className="text-[#141B34] text-sm font-bold">
 						{__('Title 1', 'quillcrm')}
@@ -89,7 +95,9 @@ const HeroImageLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Side by Side Image + Text', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Side by Side Image + Text', 'quillcrm')}
+				</label>
 				<div className="flex gap-2 justify-center items-center border rounded-lg p-2 w-full">
 					<div className="text-[#616161] bg-muted w-1/2 h-full flex items-center justify-center">
 						<ImageBlockIcon />

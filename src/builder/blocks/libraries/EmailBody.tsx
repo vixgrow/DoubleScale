@@ -14,7 +14,7 @@ const EmailBodyLibrary = () => {
 	return (
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title 1', 'quillcrm')}</div>
+				<label className="text-sm">{__('Title 1', 'quillcrm')}</label>
 				<div className="flex flex-col gap-2 items-start border rounded-lg p-3 text-[10px]">
 					<div className="text-[#141B34] text-sm">
 						{__('heading 1', 'quillcrm')}
@@ -29,7 +29,7 @@ const EmailBodyLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title 2', 'quillcrm')}</div>
+				<label className="text-sm">{__('Title 2', 'quillcrm')}</label>
 				<div className="flex flex-col gap-2 items-start border rounded-lg p-3 text-[10px]">
 					<div className="text-[#9197A4]">
 						{__(
@@ -44,7 +44,7 @@ const EmailBodyLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title 3', 'quillcrm')}</div>
+				<label className="text-sm">{__('Title 3', 'quillcrm')}</label>
 				<div className="flex items-center justify-center border rounded-lg p-2 text-[10px]">
 					<div className="text-[#141B34] text-sm font-bold">
 						{__('Title 1', 'quillcrm')}
@@ -53,7 +53,7 @@ const EmailBodyLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title 4', 'quillcrm')}</div>
+				<label className="text-sm">{__('Title 4', 'quillcrm')}</label>
 				<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-3 text-sm text-[#141B34]">
 					<div className="font-bold">{__('title 1', 'quillcrm')}</div>
 					<div className="text-center">
@@ -66,7 +66,9 @@ const EmailBodyLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title & Button 1', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Title & Button 1', 'quillcrm')}
+				</label>
 				<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 					<div className="text-[#141B34] font-bold text-sm">
 						{__('heading 1', 'quillcrm')}
@@ -84,7 +86,9 @@ const EmailBodyLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title & Button 2', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Title & Button 2', 'quillcrm')}
+				</label>
 				<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 					<div className="text-[#141B34] font-bold text-sm">
 						{__('heading 1', 'quillcrm')}
@@ -102,7 +106,9 @@ const EmailBodyLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title & Button 3', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Title & Button 3', 'quillcrm')}
+				</label>
 				<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 					<div className="text-[#141B34] font-bold text-sm">
 						{__('heading 1', 'quillcrm')}
@@ -120,7 +126,9 @@ const EmailBodyLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title & Button 4', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Title & Button 4', 'quillcrm')}
+				</label>
 				<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 					<div className="text-[#9197A4]">
 						{__(
@@ -138,7 +146,9 @@ const EmailBodyLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title & Button 5', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Title & Button 5', 'quillcrm')}
+				</label>
 				<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-2 text-[10px]">
 					<div className="text-[#9197A4]">
 						{__('title 1', 'quillcrm')}
@@ -162,7 +172,9 @@ const EmailBodyLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Title, Paragraph & Button', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Title, Paragraph & Button', 'quillcrm')}
+				</label>
 				<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 					<div className="text-[#9197A4]">
 						{__('title 1', 'quillcrm')}

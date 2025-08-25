@@ -17,7 +17,8 @@ use QuillCRM\Automations\Integrations\ActiveCampaign\API;
 /**
  * ActiveCampaign Importer class
  */
-class ActiveCampaign extends Importer {
+class ActiveCampaign extends Importer
+{
 
 	/**
 	 * Name
@@ -41,41 +42,32 @@ class ActiveCampaign extends Importer {
 	protected $is_integration = true;
 
 	/**
+	 * Cached lists
+	 *
+	 * @var array|null
+	 */
+	private $cached_lists = null;
+
+	/**
+	 * Cached tags
+	 *
+	 * @var array|null
+	 */
+	private $cached_tags = null;
+
+	/**
 	 * Run importer
 	 */
-	public function run() {
-		$api   = $this->get_api();
-		$lists = $api->get_lists();
-		if ( ! $lists['success'] ) {
-			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign: Error fetching lists', 'quillcrm' ),
-				array(
-					'code'     => 'activecampaign_get_lists',
-					'response' => $lists,
-				)
-			);
-			throw new \Exception( __( 'Error fetching lists', 'quillcrm' ) );
-		}
-		$lists_array = array();
-		foreach ( $lists['data']['lists'] as $list ) {
-			$lists_array[ $list['id'] ] = $list['name'];
-		}
+	public function run()
+	{
+		$api = $this->get_api();
 
-		$tags = $api->get_tags();
-		if ( ! $tags['success'] ) {
-			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign: Error fetching tags', 'quillcrm' ),
-				array(
-					'code'     => 'activecampaign_get_tags',
-					'response' => $tags,
-				)
-			);
-			throw new \Exception( __( 'Error fetching tags', 'quillcrm' ) );
-		}
-		$tags_array = array();
-		foreach ( $tags['data']['tags'] as $tag ) {
-			$tags_array[ $tag['id'] ] = $tag['tag'];
-		}
+		// Cache metadata once at start to avoid repeated API calls
+		$this->cache_metadata($api);
+
+		// Get cached lists and tags arrays
+		$lists_array = $this->cached_lists;
+		$tags_array = $this->cached_tags;
 
 		$mapping = array(
 			'first_name' => 'firstName',
@@ -156,11 +148,60 @@ class ActiveCampaign extends Importer {
 	}
 
 	/**
+	 * Cache metadata once per import session
+	 *
+	 * @param API $api ActiveCampaign API instance.
+	 *
+	 * @return void
+	 */
+	private function cache_metadata($api)
+	{
+		if ($this->cached_lists === null) {
+			$lists_response = $api->get_lists();
+			if ($lists_response['success']) {
+				$this->cached_lists = array();
+				foreach ($lists_response['data']['lists'] as $list) {
+					$this->cached_lists[$list['id']] = $list['name'];
+				}
+			} else {
+				quillcrm_get_logger()->error(
+					__('ActiveCampaign: Error fetching lists', 'quillcrm'),
+					array(
+						'code' => 'activecampaign_get_lists',
+						'response' => $lists_response,
+					)
+				);
+				throw new \Exception(__('Error fetching lists', 'quillcrm'));
+			}
+		}
+
+		if ($this->cached_tags === null) {
+			$tags_response = $api->get_tags();
+			if ($tags_response['success']) {
+				$this->cached_tags = array();
+				foreach ($tags_response['data']['tags'] as $tag) {
+					$this->cached_tags[$tag['id']] = $tag['tag'];
+				}
+			} else {
+				quillcrm_get_logger()->error(
+					__('ActiveCampaign: Error fetching tags', 'quillcrm'),
+					array(
+						'code' => 'activecampaign_get_tags',
+						'response' => $tags_response,
+					)
+				);
+				throw new \Exception(__('Error fetching tags', 'quillcrm'));
+			}
+		}
+	}
+
+	/**
 	 * Credentials
 	 *
 	 * @return array
 	 */
-	public function get_credentials() {
+	public function get_credentials()
+	{
 		return array(
 			'api_key' => array(
 				'label' => __( 'API Key', 'quillcrm' ),
@@ -178,29 +219,41 @@ class ActiveCampaign extends Importer {
 	 *
 	 * @return array
 	 */
-	public function get_lists() {
-		$api      = $this->get_api();
-		$response = $api->get_lists();
-		if ( ! $response['success'] ) {
+	public function get_lists()
+	{
+		try {
+			$api = $this->get_api();
+			$response = $api->get_lists();
+			if (!$response['success']) {
+				quillcrm_get_logger()->error(
+					__('ActiveCampaign: Error fetching lists', 'quillcrm'),
+					array(
+						'code' => 'activecampaign_get_lists',
+						'response' => $response,
+					)
+				);
+				return array();
+			}
+
+			$options = array();
+			foreach ($response['data']['lists'] as $list) {
+				$options[] = array(
+					'key' => $list['id'],
+					'label' => $list['name'],
+				);
+			}
+
+			return $options;
+		} catch (\Exception $e) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign: Error fetching lists', 'quillcrm' ),
+				__('ActiveCampaign: Exception fetching lists', 'quillcrm'),
 				array(
-					'code'     => 'activecampaign_get_lists',
-					'response' => $response,
+					'code' => 'activecampaign_get_lists_exception',
+					'error' => $e->getMessage(),
 				)
 			);
-			throw new \Exception( __( 'Error fetching lists', 'quillcrm' ) );
+			return array();
 		}
-
-		$options = array();
-		foreach ( $response['data']['lists'] as $list ) {
-			$options[] = array(
-				'key'   => $list['id'],
-				'label' => $list['name'],
-			);
-		}
-
-		return $options;
 	}
 
 	/**
@@ -208,29 +261,41 @@ class ActiveCampaign extends Importer {
 	 *
 	 * @return array
 	 */
-	public function get_tags() {
-		$api      = $this->get_api();
-		$response = $api->get_tags();
-		if ( ! $response['success'] ) {
+	public function get_tags()
+	{
+		try {
+			$api = $this->get_api();
+			$response = $api->get_tags();
+			if (!$response['success']) {
+				quillcrm_get_logger()->error(
+					__('ActiveCampaign: Error fetching tags', 'quillcrm'),
+					array(
+						'code' => 'activecampaign_get_tags',
+						'response' => $response,
+					)
+				);
+				return array();
+			}
+
+			$options = array();
+			foreach ($response['data']['tags'] as $tag) {
+				$options[] = array(
+					'key' => $tag['id'],
+					'label' => $tag['tag'],
+				);
+			}
+
+			return $options;
+		} catch (\Exception $e) {
 			quillcrm_get_logger()->error(
-				__( 'ActiveCampaign: Error fetching tags', 'quillcrm' ),
+				__('ActiveCampaign: Exception fetching tags', 'quillcrm'),
 				array(
-					'code'     => 'activecampaign_get_tags',
-					'response' => $response,
+					'code' => 'activecampaign_get_tags_exception',
+					'error' => $e->getMessage(),
 				)
 			);
-			throw new \Exception( __( 'Error fetching tags', 'quillcrm' ) );
+			return array();
 		}
-
-		$options = array();
-		foreach ( $response['data']['tags'] as $tag ) {
-			$options[] = array(
-				'key'   => $tag['id'],
-				'label' => $tag['tag'],
-			);
-		}
-
-		return $options;
 	}
 
 	/**
@@ -239,7 +304,8 @@ class ActiveCampaign extends Importer {
 	 * @throws Exception
 	 * @return API
 	 */
-	public function get_api() {
+	public function get_api()
+	{
 		if ( empty( $this->credentials['api_key'] ) || empty( $this->credentials['api_url'] ) ) {
 			throw new \Exception( __( 'API Key and API URL are required.', 'quillcrm' ) );
 		}
@@ -251,7 +317,8 @@ class ActiveCampaign extends Importer {
 	 *
 	 * @return array
 	 */
-	public function get_fields() {
+	public function get_fields()
+	{
 		return array(
 			'lists_mapping' => array(
 				'type'    => 'lists_mapping',

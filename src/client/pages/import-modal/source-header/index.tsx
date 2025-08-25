@@ -29,6 +29,8 @@ import mailerliteLogo from '../../../../../assets/images/mailer-lite/mailer.png'
 import activecampaignLogo from '../../../../../assets/images/active-campaign/activecampaign.png';
 //@ts-ignore
 import hubspotLogo from '../../../../../assets/images/hubspot/hubspot.png';
+//@ts-ignore
+import pipedriveLogo from '../../../../../assets/images/pipedrive/pipedrive.png';
 
 const SourceHeader: React.FC = () => {
 	const { state } = useImportContext();
@@ -74,6 +76,11 @@ const SourceHeader: React.FC = () => {
 		hubspot: {
 			src: hubspotLogo,
 			alt: 'HubSpot',
+			className: 'h-8 w-auto',
+		},
+		pipedrive: {
+			src: pipedriveLogo,
+			alt: 'Pipedrive',
 			className: 'h-8 w-auto',
 		},
 	};

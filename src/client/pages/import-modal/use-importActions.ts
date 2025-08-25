@@ -26,7 +26,9 @@ export const useImportActions = () => {
 	useEffect(() => {
 		if (
 			importer?.is_integration &&
-			['mailerlite', 'activecampaign', 'hubspot'].includes(state.source)
+			['mailerlite', 'activecampaign', 'hubspot', 'pipedrive'].includes(
+				state.source
+			)
 		) {
 			console.log(
 				'Resetting sourceData for integration importer:',
@@ -46,6 +48,7 @@ export const useImportActions = () => {
 			'mailerlite',
 			'activecampaign',
 			'hubspot',
+			'pipedrive'
 		].includes(currentSource);
 
 		if (!requiresCredentials) {
@@ -194,6 +197,7 @@ export const useImportActions = () => {
 				data: {
 					source: state.source,
 					offset: currentOffset,
+					cursor: state.cursor, // Add cursor support
 					lists: state.assignedLists,
 					tags: state.assignedTags,
 					status: state.newStatus,
@@ -204,6 +208,7 @@ export const useImportActions = () => {
 			})) as {
 				total: number;
 				offset: number;
+				cursor?: string; // Add cursor to response type
 				status: string;
 				processed: number;
 			};
@@ -211,6 +216,11 @@ export const useImportActions = () => {
 			// Update progress
 			dispatch({ type: 'SET_COUNT', payload: response.total });
 			dispatch({ type: 'SET_OFFSET', payload: response.offset });
+
+			// Update cursor if present (for cursor-based pagination)
+			if (response.cursor !== undefined) {
+				dispatch({ type: 'SET_CURSOR', payload: response.cursor });
+			}
 
 			if (response.status === 'in_progress') {
 				// ✅ FIX: Directly await the next batch (no setTimeout)
@@ -249,6 +259,7 @@ export const useImportActions = () => {
 				dispatch({ type: 'SET_SHOWING_COMPLETION', payload: false });
 				dispatch({ type: 'SET_COUNT', payload: 0 });
 				dispatch({ type: 'SET_OFFSET', payload: 0 });
+				dispatch({ type: 'SET_CURSOR', payload: null });
 			}, 2000);
 		});
 	};
@@ -320,6 +331,7 @@ export const useImportActions = () => {
 		dispatch({ type: 'SET_IMPORTING', payload: false });
 		dispatch({ type: 'SET_COUNT', payload: 0 });
 		dispatch({ type: 'SET_OFFSET', payload: 0 });
+		dispatch({ type: 'SET_CURSOR', payload: null });
 	};
 
 	const cancelImport = async () => {
@@ -335,6 +347,7 @@ export const useImportActions = () => {
 			dispatch({ type: 'SET_IMPORTING', payload: false });
 			dispatch({ type: 'SET_COUNT', payload: 0 });
 			dispatch({ type: 'SET_OFFSET', payload: 0 });
+			dispatch({ type: 'SET_CURSOR', payload: null });
 		}
 	};
 

@@ -36,8 +36,9 @@ import mailerliteIcon from '../../../../../assets/images/mailer-lite/mailer-icon
 //@ts-ignore
 import activecampaignIcon from '../../../../../assets/images/active-campaign/active-icon.png';
 //@ts-ignore
-import hubspotIcon from '../../../../../assets/images/hubspot/hubspot -icon.png';
-
+import hubspotIcon from '../../../../../assets/images/hubspot/hubspot-icon.png';
+//@ts-ignore
+import pipedriveIcon from '../../../../../assets/images/pipedrive/pipedrive-icon.png';
 const SourceSelector: React.FC = () => {
 	const { state, dispatch } = useImportContext();
 	const { source } = state;
@@ -85,9 +86,12 @@ const SourceSelector: React.FC = () => {
 				/>
 			),
 			hubspot: (
+				<img src={hubspotIcon} alt="HubSpot" className="w-10 h-10" />
+			),
+			pipedrive: (
 				<img
-					src={hubspotIcon}
-					alt="HubSpot"
+					src={pipedriveIcon}
+					alt="Pipedrive"
 					className="w-10 h-10"
 				/>
 			),
@@ -104,7 +108,12 @@ const SourceSelector: React.FC = () => {
 		value: slug,
 		disabled: !importer.is_active,
 		icon: getSourceIcon(slug),
-		requiresCredentials: ['mailerlite', 'activecampaign', 'hubspot'].includes(slug),
+		requiresCredentials: [
+			'mailerlite',
+			'activecampaign',
+			'hubspot',
+			'pipedrive',
+		].includes(slug),
 	}));
 
 	const handleSourceChange = (newSource: string) => {

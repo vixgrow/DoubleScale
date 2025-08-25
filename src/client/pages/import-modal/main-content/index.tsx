@@ -89,6 +89,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 								'mailerlite',
 								'activecampaign',
 								'hubspot',
+								'pipedrive'
 							].includes(source) &&
 							importer.credentials &&
 							Object.keys(importer.credentials || {}).length >
@@ -113,6 +114,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 								'mailerlite',
 								'activecampaign',
 								'hubspot',
+								'pipedrive'
 							].includes(source) &&
 							importer.credentials &&
 							Object.keys(importer.credentials || {}).length >
@@ -139,6 +141,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 								'mailerlite',
 								'activecampaign',
 								'hubspot',
+								'pipedrive'
 							].includes(source) && (
 								<div className="space-y-6">
 									<FieldMapping importer={importer} />

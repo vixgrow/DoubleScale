@@ -60,6 +60,22 @@ const ApiCredentials: React.FC<ApiCredentialsProps> = ({ importer }) => {
                 }
                 break;
             }
+            case 'pipedrive': {
+                const { api_domain, api_token } = credentials;
+                if (api_domain && !api_domain.includes('.pipedrive.com')) {
+                    return {
+                        isValid: false,
+                        message: __('API Domain should be in format: yourcompany.pipedrive.com (without https://)', 'quillcrm')
+                    };
+                }
+                if (api_token && api_token.length < 30) {
+                    return {
+                        isValid: false,
+                        message: __('Pipedrive API token appears to be too short. Please verify your token.', 'quillcrm')
+                    };
+                }
+                break;
+            }
         }
         return { isValid: true, message: '' };
     }, []);
@@ -157,6 +173,12 @@ const CredentialField: React.FC<CredentialFieldProps> = ({
         if (fieldKey === 'access_token' && source === 'hubspot') {
             return __('Private App access token from HubSpot Developer settings. Requires crm.objects.contacts.read and crm.lists.read scopes.', 'quillcrm');
         }
+        if (fieldKey === 'api_domain' && source === 'pipedrive') {
+            return __('Your Pipedrive company domain without https:// (e.g., yourcompany.pipedrive.com)', 'quillcrm');
+        }
+        if (fieldKey === 'api_token' && source === 'pipedrive') {
+            return __('Personal API token from Settings > Personal preferences > API in your Pipedrive account', 'quillcrm');
+        }
         return null;
     };
 
@@ -247,6 +269,16 @@ const PLATFORM_INSTRUCTIONS: Record<string, PlatformInstructions> = {
         ],
         docUrl: 'https://developers.hubspot.com/docs/api/private-apps',
         docText: __('HubSpot Private Apps Documentation', 'quillcrm'),
+    },
+    pipedrive: {
+        steps: [
+            __('Sign in to your Pipedrive account', 'quillcrm'),
+            __('Go to Settings → Personal preferences → API', 'quillcrm'),
+            __('Copy your Personal API token', 'quillcrm'),
+            __('Note your company domain from the browser URL (e.g., yourcompany.pipedrive.com)', 'quillcrm'),
+        ],
+        docUrl: 'https://developers.pipedrive.com/docs/api/v1',
+        docText: __('Pipedrive API Documentation', 'quillcrm'),
     },
 };
 

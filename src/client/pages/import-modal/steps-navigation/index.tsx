@@ -70,9 +70,12 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 	if (currentStep === 1) {
 		return (
 			<div className="mt-10 flex justify-end">
-				{['mailerlite', 'activecampaign', 'hubspot'].includes(
-					source
-				) ? (
+				{[
+					'mailerlite',
+					'activecampaign',
+					'hubspot',
+					'pipedrive',
+				].includes(source) ? (
 					<>
 						{!sourceData ? (
 							/* Credentials validation step */

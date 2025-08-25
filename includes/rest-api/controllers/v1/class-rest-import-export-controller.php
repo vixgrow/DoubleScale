@@ -375,6 +375,7 @@ class Rest_Import_Export_Controller extends REST_Controller
 	{
 		$source = $request->get_param('source') ?? 'csv';
 		$offset = $request->get_param('offset') ?? 0;
+		$cursor = $request->get_param('cursor') ?? null;
 		$file_name = $request->get_param('file_name') ?? '';
 		$mapping = $request->get_param('mapping') ?? array();
 		$lists_mapping = $request->get_param('lists_mapping') ?? array();
@@ -388,6 +389,7 @@ class Rest_Import_Export_Controller extends REST_Controller
 
 		$args = array(
 			'offset' => $offset,
+			'cursor' => $cursor,
 			'status' => $status,
 			'update_existing' => $update_existing,
 			'lists_mapping' => $lists_mapping,

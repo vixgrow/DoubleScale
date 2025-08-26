@@ -14,7 +14,9 @@ const PreheaderLibrary = () => {
 	return (
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Text & Link', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Text & Link', 'quillcrm')}
+				</label>
 				<div className="flex gap-1 items-center border rounded-lg p-3 text-[10px]">
 					<div className="text-[#9197A4]">
 						{__('If you cannot see images, Please', 'quillcrm')}
@@ -26,7 +28,9 @@ const PreheaderLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<div>{__('Text & Button', 'quillcrm')}</div>
+				<label className="text-sm">
+					{__('Text & Button', 'quillcrm')}
+				</label>
 				<div className="flex gap-1 items-center border rounded-lg p-2 text-[10px]">
 					<div className="text-[#9197A4]">
 						{__('If you cannot see images, Please', 'quillcrm')}

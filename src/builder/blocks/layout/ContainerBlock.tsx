@@ -9,7 +9,12 @@ import { ChevronDown } from 'lucide-react';
 import Sections from '../../components/Sections';
 import LayoutItems from '../../components/LayoutItems';
 
-const ContainerBlock = () => {
+interface ContainerBlockProps {
+	activeSidebar?: any;
+	setActiveSidebar?: (sidebar: any) => void;
+}
+
+const ContainerBlock = ({ activeSidebar, setActiveSidebar }: ContainerBlockProps) => {
 	const defaultStyle =
 		'flex flex-row items-center justify-center w-full bg-secondary text-primary-foreground px-4 py-3 rounded-md text-base cursor-pointer';
 
@@ -23,7 +28,7 @@ const ContainerBlock = () => {
 					</div>
 				</CollapsibleTrigger>
 				<CollapsibleContent>
-					<LayoutItems />
+					<LayoutItems activeSidebar={activeSidebar} setActiveSidebar={setActiveSidebar} />
 				</CollapsibleContent>
 			</Collapsible>
 

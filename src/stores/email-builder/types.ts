@@ -106,6 +106,14 @@ export interface UpdateSectionAction {
   };
 }
 
+export interface ReorderSectionsAction {
+  type: 'REORDER_SECTIONS';
+  payload: {
+    activeSectionId: string;
+    overSectionId: string;
+  };
+}
+
 export interface SetBuilderStateAction {
   type: 'SET_BUILDER_STATE';
   payload: {
@@ -127,5 +135,6 @@ export type EmailBuilderActionTypes =
   | AddSectionAction
   | DeleteSectionAction
   | UpdateSectionAction
+  | ReorderSectionsAction
   | SetBuilderStateAction
   | ResetBuilderAction; 

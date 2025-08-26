@@ -30,7 +30,16 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 		transform,
 		transition,
 		isDragging,
-	} = useSortable({ id: block.id });
+	} = useSortable({
+		id: block.id,
+		data: {
+			type: 'block',
+			blockId: block.id,
+			sectionId: sectionId,
+			columnId: columnId,
+			block: block,
+		},
+	});
 
 	const style = {
 		transform: CSS.Transform.toString(transform),

@@ -12,6 +12,7 @@ export const CLEAR_SELECTION = 'CLEAR_SELECTION';
 export const ADD_SECTION = 'ADD_SECTION';
 export const DELETE_SECTION = 'DELETE_SECTION';
 export const UPDATE_SECTION = 'UPDATE_SECTION';
+export const REORDER_SECTIONS = 'REORDER_SECTIONS';
 
 // Column actions
 export const ADD_COLUMN = 'ADD_COLUMN';

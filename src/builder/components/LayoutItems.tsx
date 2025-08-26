@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 /**
  * internal dependencies
@@ -18,9 +17,12 @@ import FooterLibrary from '../blocks/libraries/Footer';
 import ImageGalleryLibrary from '../blocks/libraries/ImageGallery';
 import ProductListingLibrary from '../blocks/libraries/ProductListing';
 
-const LayoutItems = () => {
-	const [activeSidebar, setActiveSidebar] = useState(null);
+interface LayoutItemsProps {
+	activeSidebar?: any;
+	setActiveSidebar?: (sidebar: any) => void;
+}
 
+const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 	const layoutItems = [
 		{
 			id: 'preheader',
@@ -60,58 +62,34 @@ const LayoutItems = () => {
 	];
 
 	const handleItemClick = (itemId) => {
-		setActiveSidebar(activeSidebar === itemId ? null : itemId);
+		const selectedItem = layoutItems.find((item) => item.id === itemId);
+		if (activeSidebar?.id === itemId) {
+			setActiveSidebar?.(null);
+		} else {
+			setActiveSidebar?.(selectedItem);
+		}
 	};
 
-	const ActiveComponent = activeSidebar
-		? layoutItems.find((item) => item.id === activeSidebar)?.component
-		: null;
-
 	return (
-		<div className="relative">
-			{/* Main content area */}
-			<div className="flex-1">
-				<div className="space-y-2 p-4">
-					{layoutItems.map((item) => (
-						<div
-							key={item.id}
-							onClick={() => handleItemClick(item.id)}
-							className={`flex items-center justify-between w-full px-4 py-3 rounded-md cursor-pointer transition-colors ${
-								activeSidebar === item.id
-									? 'text-primary font-bold'
-									: 'text-muted-foreground'
+		<div className="space-y-2 p-4">
+			{layoutItems.map((item) => (
+				<div
+					key={item.id}
+					onClick={() => handleItemClick(item.id)}
+					className={`flex items-center justify-between w-full px-4 py-3 rounded-md cursor-pointer transition-colors ${activeSidebar?.id === item.id
+						? 'text-primary font-bold'
+						: 'text-muted-foreground'
+						}`}
+				>
+					<span className="text-base">{item.title}</span>
+					<ChevronRight
+						className={`transition-transform ${activeSidebar?.id === item.id
+							? 'rotate-180'
+							: ''
 							}`}
-						>
-							<span className="text-base">{item.title}</span>
-							<ChevronRight
-								className={`transition-transform ${
-									activeSidebar === item.id
-										? 'rotate-180'
-										: ''
-								}`}
-							/>
-						</div>
-					))}
+					/>
 				</div>
-			</div>
-
-			{/* Sidebar */}
-			{activeSidebar && (
-				<div className="absolute -top-44 -right-[333px] w-72 h-full overflow-y-scroll z-20 bg-white">
-					<div className="flex items-center justify-center px-8 pt-7">
-						<h2 className="text-base font-bold text-primary border-b-2 text-center w-full pb-4">
-							{
-								layoutItems.find(
-									(item) => item.id === activeSidebar
-								)?.title
-							}
-						</h2>
-					</div>
-					<div className="overflow-y-auto p-4">
-						{ActiveComponent && <ActiveComponent />}
-					</div>
-				</div>
-			)}
+			))}
 		</div>
 	);
 };

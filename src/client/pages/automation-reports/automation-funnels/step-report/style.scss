@@ -1,0 +1,322 @@
+.step-report-container {
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+
+	.step-report-header {
+		padding: 24px 24px 0 24px;
+		border-bottom: 1px solid #e1e5e9;
+		margin-bottom: 24px;
+
+		h3 {
+			margin: 0 0 8px 0;
+			font-size: 20px;
+			font-weight: 600;
+			color: #333;
+		}
+
+		p {
+			margin: 0 0 16px 0;
+			color: #666;
+			font-size: 14px;
+		}
+	}
+
+	.overview-stats {
+		padding: 0 24px 24px 24px;
+
+		.overview-card {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			padding: 24px;
+			border-radius: 12px;
+
+			h4 {
+				margin: 0 0 16px 0;
+				font-size: 18px;
+				font-weight: 600;
+			}
+
+			.overview-metrics {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+				gap: 20px;
+
+				.metric {
+					text-align: center;
+
+					.metric-label {
+						display: block;
+						font-size: 12px;
+						opacity: 0.9;
+						margin-bottom: 4px;
+					}
+
+					.metric-value {
+						display: block;
+						font-size: 24px;
+						font-weight: 700;
+
+						&.excellent {
+							color: #4ade80;
+						}
+						&.good {
+							color: #60a5fa;
+						}
+						&.average {
+							color: #fbbf24;
+						}
+						&.poor {
+							color: #ef4444;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.step-report-table {
+		padding: 0 24px;
+		overflow-x: auto;
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			background: white;
+			border-radius: 8px;
+			overflow: hidden;
+
+			thead {
+				background: #f8f9fa;
+
+				th {
+					padding: 16px 12px;
+					text-align: left;
+					font-weight: 600;
+					color: #333;
+					border-bottom: 2px solid #e1e5e9;
+					font-size: 13px;
+					text-transform: uppercase;
+					letter-spacing: 0.5px;
+				}
+			}
+
+			tbody {
+				tr {
+					&:nth-child(even) {
+						background: #f8f9fa;
+					}
+
+					&:hover {
+						background: #e3f2fd;
+						transform: translateY(-1px);
+						box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+						transition: all 0.2s ease;
+					}
+
+					td {
+						padding: 16px 12px;
+						border-bottom: 1px solid #e1e5e9;
+						vertical-align: middle;
+
+						&.step-name {
+							.step-info {
+								display: flex;
+								align-items: center;
+								gap: 12px;
+
+								.step-number {
+									background: #007cba;
+									color: white;
+									width: 24px;
+									height: 24px;
+									border-radius: 50%;
+									display: flex;
+									align-items: center;
+									justify-content: center;
+									font-size: 12px;
+									font-weight: 600;
+									flex-shrink: 0;
+								}
+
+								.step-title {
+									font-weight: 500;
+									color: #333;
+								}
+							}
+						}
+
+						&.contacts-entered,
+						&.contacts-completed {
+							font-weight: 600;
+							color: #333;
+							text-align: center;
+						}
+
+						&.completion-rate {
+							text-align: center;
+
+							.rate-badge {
+								padding: 4px 8px;
+								border-radius: 12px;
+								font-size: 12px;
+								font-weight: 600;
+
+								&.excellent {
+									background: #dcfce7;
+									color: #16a34a;
+								}
+
+								&.good {
+									background: #dbeafe;
+									color: #2563eb;
+								}
+
+								&.average {
+									background: #fef3c7;
+									color: #d97706;
+								}
+
+								&.poor {
+									background: #fee2e2;
+									color: #dc2626;
+								}
+							}
+						}
+
+						&.drop-off-rate {
+							text-align: center;
+
+							.drop-off-badge {
+								background: #fee2e2;
+								color: #dc2626;
+								padding: 4px 8px;
+								border-radius: 12px;
+								font-size: 12px;
+								font-weight: 600;
+							}
+						}
+
+						&.average-time {
+							color: #666;
+							font-size: 14px;
+						}
+
+						&.performance {
+							.performance-indicator {
+								.warning-indicator {
+									color: #d97706;
+									font-size: 12px;
+									font-weight: 500;
+								}
+
+								.success-indicator {
+									color: #16a34a;
+									font-size: 12px;
+									font-weight: 500;
+								}
+
+								.caution-indicator {
+									color: #dc2626;
+									font-size: 12px;
+									font-weight: 500;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.insights-section {
+		padding: 24px;
+		background: #f8f9fa;
+		border-top: 1px solid #e1e5e9;
+
+		h4 {
+			margin: 0 0 16px 0;
+			font-size: 18px;
+			font-weight: 600;
+			color: #333;
+		}
+
+		.insights-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+			gap: 16px;
+
+			.insight-card {
+				background: white;
+				padding: 20px;
+				border-radius: 8px;
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+				border-left: 4px solid #007cba;
+
+				&.bottleneck {
+					border-left-color: #dc2626;
+				}
+
+				&.performance {
+					border-left-color: #16a34a;
+				}
+
+				&.recommendation {
+					border-left-color: #d97706;
+				}
+
+				h5 {
+					margin: 0 0 8px 0;
+					font-size: 14px;
+					font-weight: 600;
+					color: #333;
+				}
+
+				p {
+					margin: 0;
+					font-size: 13px;
+					color: #666;
+					line-height: 1.5;
+				}
+			}
+		}
+	}
+
+	// Responsive Design
+	@media (max-width: 768px) {
+		.step-report-header,
+		.overview-stats,
+		.step-report-table,
+		.insights-section {
+			padding-left: 16px;
+			padding-right: 16px;
+		}
+
+		.overview-stats .overview-card .overview-metrics {
+			grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+			gap: 12px;
+		}
+
+		.step-report-table {
+			table {
+				font-size: 12px;
+
+				th,
+				td {
+					padding: 12px 8px;
+				}
+
+				.step-info {
+					flex-direction: column;
+					align-items: flex-start !important;
+					gap: 4px !important;
+				}
+			}
+		}
+
+		.insights-section .insights-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+}

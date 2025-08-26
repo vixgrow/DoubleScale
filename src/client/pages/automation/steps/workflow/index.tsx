@@ -354,7 +354,7 @@ const Workflow: React.FC = () => {
 						{automation?.name || __('New Automation', 'quillcrm')}
 					</Typography.Title>
 					<Flex gap={20} align="center">
-						<Flex gap={10} align="center">
+						{/* <Flex gap={10} align="center">
 							<Typography.Text>
 								{__('Workflow View:', 'quillcrm')}
 							</Typography.Text>
@@ -364,7 +364,7 @@ const Workflow: React.FC = () => {
 								checkedChildren={__('Flow', 'quillcrm')}
 								unCheckedChildren={__('List', 'quillcrm')}
 							/>
-						</Flex>
+						</Flex> */}
 						<Flex gap={10} align="center">
 							<Typography.Text>
 								{__('Status:', 'quillcrm')}

@@ -28,7 +28,10 @@ const ContainerBlock = ({ activeSidebar, setActiveSidebar }: ContainerBlockProps
 					</div>
 				</CollapsibleTrigger>
 				<CollapsibleContent>
-					<LayoutItems activeSidebar={activeSidebar} setActiveSidebar={setActiveSidebar} />
+					<LayoutItems
+						activeSidebar={activeSidebar}
+						setActiveSidebar={setActiveSidebar}
+					/>
 				</CollapsibleContent>
 			</Collapsible>
 

@@ -16,19 +16,27 @@ import { LayoutTemplate } from '../types';
 import { useDroppable } from '@dnd-kit/core';
 import { useBuilder } from '../context/BuilderContext';
 
-const Canvas = () => {
+interface CanvasProps {
+	// No props needed since we're using the store
+}
+
+const Canvas = ({ }: CanvasProps) => {
 	const { addNewSection } = useBuilder();
 	const [isModalOpen, setIsModalOpen] = useState(false);
+
 	const { isOver: isOverCanvas, setNodeRef: setNodeRefCanvas } = useDroppable(
 		{
 			id: 'canvas',
 			data: {
-				acceptes: ['template'],
+				acceptes: ['template', 'library-template'],
 			},
 		}
 	);
 	const { isOver, setNodeRef } = useDroppable({
 		id: 'canvas-blocks',
+		data: {
+			acceptes: ['template', 'library-template'],
+		},
 	});
 	const style = {
 		color: isOver ? 'green' : undefined,
@@ -52,7 +60,7 @@ const Canvas = () => {
 	return (
 		<div className="flex-1 p-4 pt-20 overflow-auto">
 			<div className="max-w-3xl mx-auto relative">
-				{sections.length > 0 && (
+				{(sections.length > 0) && (
 					<div className="p-2 bg-primary w-fit rounded-t-xl absolute -top-9 left-0 text-white">
 						{__('Email Page', 'quillcrm')}
 					</div>
@@ -89,7 +97,7 @@ const Canvas = () => {
 										)}
 										<br />
 										{__(
-											'sections and controlling elements.',
+											'Or drag blocks from the library',
 											'quillcrm'
 										)}
 									</p>
@@ -106,6 +114,7 @@ const Canvas = () => {
 							</div>
 						) : (
 							<>
+								{/* Render sections */}
 								{sections.map((section) => (
 									<SectionRenderer
 										key={section.id}

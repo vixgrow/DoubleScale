@@ -18,6 +18,13 @@ interface BuilderContextType {
 		blockType: BlockType,
 		index?: number
 	) => void;
+	addNewBlockWithProps: (
+		sectionId: string,
+		columnId: string,
+		blockType: BlockType,
+		props: Record<string, any>,
+		index?: number
+	) => void;
 	updateBlock: (blockId: string, props: Record<string, any>) => void;
 	deleteBlock: (blockId: string) => void;
 
@@ -66,6 +73,21 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode }> = ({
 		dispatch(STORE_KEY).addBlock(sectionId, columnId, newBlock, index);
 	};
 
+	const addNewBlockWithProps = (
+		sectionId: string,
+		columnId: string,
+		blockType: BlockType,
+		props: Record<string, any>,
+		index?: number
+	) => {
+		const newBlock: EmailBlock = {
+			id: uuidv4(),
+			type: blockType,
+			props: props,
+		};
+		dispatch(STORE_KEY).addBlock(sectionId, columnId, newBlock, index);
+	};
+
 	const updateBlock = (blockId: string, props: Record<string, any>) => {
 		dispatch(STORE_KEY).updateBlock(blockId, props);
 	};
@@ -95,6 +117,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode }> = ({
 			value={{
 				addNewSection,
 				addNewBlock,
+				addNewBlockWithProps,
 				updateBlock,
 				deleteBlock,
 				deleteSection,

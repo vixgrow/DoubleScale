@@ -10,6 +10,7 @@ import SignatureBlock from './basic/SignatureBlock';
 import BannerBlock from './basic/BannerBlock';
 import MenuBlock from './basic/MenuBlock';
 import HtmlBlock from './basic/HtmlBlock';
+import PreheaderBlock from './basic/PreheaderBlock';
 
 export const blocksRegistry = {
 	image: ImageBlock,
@@ -24,4 +25,5 @@ export const blocksRegistry = {
 	signature: SignatureBlock,
 	banner: BannerBlock,
 	menu: MenuBlock,
+	preheader: PreheaderBlock,
 };

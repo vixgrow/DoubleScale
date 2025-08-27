@@ -42,7 +42,7 @@ const TextBlock = {
 	name: __('Text', 'quillcrm'),
 	icon: TextBlockIcon,
 	defaultProps: {
-		content: 'Your text here',
+		content: '<p>Your text here</p>',
 		hyperlink: 'https://',
 		fontSize: 16,
 		color: '#333',
@@ -57,7 +57,7 @@ const TextBlock = {
 		borderRadius: '0px',
 		borderWidth: '0px',
 		linkColor: '#333',
-		backgroundColor: '#fff',
+		backgroundColor: 'transparent',
 		textAlign: 'left',
 		listType: 'none',
 		headingStyle: 'p',

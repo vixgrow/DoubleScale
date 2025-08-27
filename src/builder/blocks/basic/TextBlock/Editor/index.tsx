@@ -11,8 +11,6 @@ import {
 	AlignCenter,
 	AlignRight,
 	AlignJustify,
-	List,
-	ListOrdered,
 	Bold,
 	ExternalLink,
 	Italic,
@@ -40,6 +38,7 @@ import {
 } from '@/components/ui/select';
 import { TextBlockProps } from '..';
 import { useDispatch } from '@wordpress/data';
+import { RichTextEditor } from './RichTextEditor';
 
 export interface TextEditorProps {
 	props: TextBlockProps;
@@ -70,15 +69,11 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						<MergeTagsIcon />
 					</div>
 				</div>
-				<Input
-					type="text"
-					value={props.content}
-					onChange={(e) => onChange({ content: e.target.value })}
-					className="pr-8 h-10"
-					style={{
-						borderColor: '#e5e5e5',
-						borderRadius: '0.5rem',
-					}}
+				<RichTextEditor
+					content={props.content}
+					onChange={(content) => onChange({ content })}
+					fontSize={props.fontSize}
+					fontFamily={props.fontFamily}
 				/>
 			</div>
 
@@ -106,7 +101,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.bold &&
-							'bg-[#C6DFF366] border border-primary rounded-l-lg'
+								'bg-[#C6DFF366] border border-primary rounded-l-lg'
 						)}
 						onClick={() => onChange({ bold: !props.bold })}
 					/>
@@ -114,7 +109,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.italic &&
-							'bg-[#C6DFF366] border border-primary'
+								'bg-[#C6DFF366] border border-primary'
 						)}
 						onClick={() => onChange({ italic: !props.italic })}
 					/>
@@ -122,7 +117,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props['line-through'] &&
-							'bg-[#C6DFF366] border border-primary'
+								'bg-[#C6DFF366] border border-primary'
 						)}
 						onClick={() =>
 							onChange({ 'line-through': !props['line-through'] })
@@ -132,7 +127,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.underline &&
-							'bg-[#C6DFF366] border border-primary rounded-r-lg'
+								'bg-[#C6DFF366] border border-primary rounded-r-lg'
 						)}
 						onClick={() =>
 							onChange({ underline: !props.underline })
@@ -148,7 +143,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.textAlign === 'left' &&
-							'bg-[#C6DFF366] border border-primary rounded-l-lg'
+								'bg-[#C6DFF366] border border-primary rounded-l-lg'
 						)}
 						onClick={() => onChange({ textAlign: 'left' })}
 					/>
@@ -156,7 +151,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.textAlign === 'center' &&
-							'bg-[#C6DFF366] border border-primary'
+								'bg-[#C6DFF366] border border-primary'
 						)}
 						onClick={() => onChange({ textAlign: 'center' })}
 					/>
@@ -164,7 +159,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.textAlign === 'right' &&
-							'bg-[#C6DFF366] border border-primary'
+								'bg-[#C6DFF366] border border-primary'
 						)}
 						onClick={() => onChange({ textAlign: 'right' })}
 					/>
@@ -172,41 +167,9 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						className={cn(
 							'size-12 py-3 px-5 w-full cursor-pointer',
 							props.textAlign === 'justify' &&
-							'bg-[#C6DFF366] border border-primary rounded-r-lg'
+								'bg-[#C6DFF366] border border-primary rounded-r-lg'
 						)}
 						onClick={() => onChange({ textAlign: 'justify' })}
-					/>
-				</div>
-			</div>
-
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('List Style', 'quillcrm')}</div>
-				<div className="flex items-center justify-between border rounded-lg">
-					<div
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer flex items-center justify-center',
-							props.listType === 'none' &&
-							'bg-[#C6DFF366] border border-primary rounded-l-lg'
-						)}
-						onClick={() => onChange({ listType: 'none' })}
-					>
-						<span className="text-sm font-medium">None</span>
-					</div>
-					<List
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.listType === 'ul' &&
-							'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ listType: 'ul' })}
-					/>
-					<ListOrdered
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.listType === 'ol' &&
-							'bg-[#C6DFF366] border border-primary rounded-r-lg'
-						)}
-						onClick={() => onChange({ listType: 'ol' })}
 					/>
 				</div>
 			</div>
@@ -215,9 +178,7 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 				<div>{__('Text Style', 'quillcrm')}</div>
 				<Select
 					value={props.headingStyle}
-					onValueChange={(value) =>
-						onChange({ headingStyle: value })
-					}
+					onValueChange={(value) => onChange({ headingStyle: value })}
 				>
 					<SelectTrigger className="w-full rounded-lg border-border h-10">
 						<SelectValue

@@ -7,6 +7,7 @@ import {
   DELETE_BLOCK,
   DELETE_SECTION,
   MOVE_BLOCK,
+  REORDER_SECTIONS,
   RESET_BUILDER,
   SELECT_BLOCK,
   SET_BUILDER_STATE,
@@ -224,6 +225,25 @@ const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
           ? { ...section, styles: { ...section.styles, ...styles } }
           : section
       );
+
+      return addToHistory(state, newSections);
+    }
+
+    case REORDER_SECTIONS: {
+      const { activeSectionId, overSectionId } = action.payload;
+
+      // Find the indices of the sections
+      const activeSectionIndex = state.sections.findIndex(section => section.id === activeSectionId);
+      const overSectionIndex = state.sections.findIndex(section => section.id === overSectionId);
+
+      if (activeSectionIndex === -1 || overSectionIndex === -1) {
+        return state;
+      }
+
+      // Create a new array with reordered sections
+      const newSections = [...state.sections];
+      const [movedSection] = newSections.splice(activeSectionIndex, 1);
+      newSections.splice(overSectionIndex, 0, movedSection);
 
       return addToHistory(state, newSections);
     }

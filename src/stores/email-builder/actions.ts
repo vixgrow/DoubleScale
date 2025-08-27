@@ -5,6 +5,7 @@ import {
   DELETE_BLOCK,
   DELETE_SECTION,
   MOVE_BLOCK,
+  REORDER_SECTIONS,
   RESET_BUILDER,
   SELECT_BLOCK,
   SET_BUILDER_STATE,
@@ -94,6 +95,14 @@ export const updateSection = (
 ): EmailBuilderActionTypes => ({
   type: UPDATE_SECTION,
   payload: { sectionId, styles }
+});
+
+export const reorderSections = (
+  activeSectionId: string,
+  overSectionId: string
+): EmailBuilderActionTypes => ({
+  type: REORDER_SECTIONS,
+  payload: { activeSectionId, overSectionId }
 });
 
 // Builder actions

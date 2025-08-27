@@ -10,6 +10,7 @@ interface BuilderContextType {
 	// Section operations
 	addNewSection: (sectionType: LayoutTemplate) => void;
 	deleteSection: (sectionId: string) => void;
+	reorderSections: (activeSectionId: string, overSectionId: string) => void;
 
 	// Block operations
 	addNewBlock: (
@@ -27,6 +28,14 @@ interface BuilderContextType {
 	) => void;
 	updateBlock: (blockId: string, props: Record<string, any>) => void;
 	deleteBlock: (blockId: string) => void;
+	moveBlock: (
+		blockId: string,
+		fromSectionId: string,
+		fromColumnId: string,
+		toSectionId: string,
+		toColumnId: string,
+		toIndex: number
+	) => void;
 
 	// Selection operations
 	selectBlock: (
@@ -100,6 +109,31 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode }> = ({
 		dispatch(STORE_KEY).deleteSection(sectionId);
 	};
 
+	const reorderSections = (
+		activeSectionId: string,
+		overSectionId: string
+	) => {
+		dispatch(STORE_KEY).reorderSections(activeSectionId, overSectionId);
+	};
+
+	const moveBlock = (
+		blockId: string,
+		fromSectionId: string,
+		fromColumnId: string,
+		toSectionId: string,
+		toColumnId: string,
+		toIndex: number
+	) => {
+		dispatch(STORE_KEY).moveBlock(
+			blockId,
+			fromSectionId,
+			fromColumnId,
+			toSectionId,
+			toColumnId,
+			toIndex
+		);
+	};
+
 	const selectBlock = (
 		blockId: string,
 		sectionId?: string,
@@ -120,7 +154,9 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode }> = ({
 				addNewBlockWithProps,
 				updateBlock,
 				deleteBlock,
+				moveBlock,
 				deleteSection,
+				reorderSections,
 				selectBlock,
 				clearSelection,
 			}}

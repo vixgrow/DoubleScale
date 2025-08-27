@@ -24,7 +24,14 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 		transform,
 		transition,
 		isDragging,
-	} = useSortable({ id: section.id });
+	} = useSortable({
+		id: section.id,
+		data: {
+			type: 'section',
+			sectionId: section.id,
+			section: section,
+		},
+	});
 
 	const style = {
 		transform: CSS.Transform.toString(transform),

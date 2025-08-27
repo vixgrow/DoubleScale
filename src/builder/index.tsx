@@ -4,7 +4,6 @@
 import React, { useState } from 'react';
 import {
 	DndContext,
-	closestCenter,
 	useSensor,
 	useSensors,
 	PointerSensor,
@@ -13,6 +12,9 @@ import {
 	DragEndEvent,
 	TouchSensor,
 	KeyboardSensor,
+	pointerWithin,
+	closestCenter,
+	CollisionDetection,
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 /**
@@ -26,7 +28,8 @@ import TemplateCard from './components/TemplateCard';
 import { BuilderProvider, useBuilder } from './context/BuilderContext';
 
 const BuilderContent: React.FC = () => {
-	const { addNewSection, addNewBlock, addNewBlockWithProps } = useBuilder();
+	const { addNewSection, addNewBlock, addNewBlockWithProps, reorderSections, moveBlock } =
+		useBuilder();
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: {
@@ -43,10 +46,65 @@ const BuilderContent: React.FC = () => {
 	);
 	const [activeItem, setActiveItem] = useState<any>(null);
 
+	// Custom collision detection that prioritizes sections when dragging sections and columns when dragging blocks
+	const customCollisionDetection: CollisionDetection = (args) => {
+		const { active, droppableContainers } = args;
+
+		// If we're dragging a section, only consider other sections for collision
+		if (active.data?.current?.type === 'section') {
+			const sectionContainers = Array.from(
+				droppableContainers.values()
+			).filter(
+				(container) => container.data?.current?.type === 'section'
+			);
+
+			// Use closestCenter for section-to-section collision detection
+			return closestCenter({
+				...args,
+				droppableContainers: sectionContainers,
+			});
+		}
+
+		// If we're dragging a block or element from sidebar, only consider columns for collision
+		if (
+			active.data?.current?.type === 'block' ||
+			active.data?.current?.type === 'element'
+		) {
+			const columnContainers = Array.from(
+				droppableContainers.values()
+			).filter((container) => container.data?.current?.type === 'column');
+
+			// Use closestCenter for block-to-column collision detection
+			return closestCenter({
+				...args,
+				droppableContainers: columnContainers,
+			});
+		}
+
+		// For all other drag operations, use the default pointerWithin
+		return pointerWithin(args);
+	};
+
 	const handleDragStart = (event: DragStartEvent) => {
 		const { active } = event;
 		console.log('Drag started:', active);
 		console.log('Active data:', active.data?.current);
+
+		// Check if this is a section being sorted (from useSortable)
+		if (active.data?.current?.type === 'section') {
+			// This is a section being sorted - don't set activeItem
+			setActiveItem(null);
+			return;
+		}
+
+		// Check if this is a block being sorted (from useSortable)
+		if (active.data?.current?.type === 'block') {
+			// This is a block being sorted - don't set activeItem for drag overlay
+			setActiveItem(null);
+			return;
+		}
+
+		// This is a template card being dragged from sidebar (from useDraggable)
 		setActiveItem(active.data.current);
 	};
 
@@ -129,6 +187,81 @@ const BuilderContent: React.FC = () => {
 			}
 		}
 
+		// Handle section reordering (when dragging sections to reorder them)
+		if (
+			active.data?.current?.type === 'section' &&
+			over.data?.current?.type === 'section'
+		) {
+			// This is section reordering
+			const activeSectionId = active.data.current.sectionId;
+			const overSectionId = over.data.current.sectionId;
+			reorderSections(activeSectionId, overSectionId);
+			return;
+		}
+
+		// Handle block reordering (when dragging blocks between columns)
+		if (active.data?.current?.type === 'block') {
+			const activeData = active.data.current;
+			const overData = over.data?.current;
+
+			// Moving block to a different column
+			if (overData?.type === 'column') {
+				const { sectionId: toSectionId, columnId: toColumnId } =
+					overData;
+				const {
+					blockId,
+					sectionId: fromSectionId,
+					columnId: fromColumnId,
+				} = activeData;
+
+				// Only move if it's actually moving to a different column
+				if (
+					fromSectionId !== toSectionId ||
+					fromColumnId !== toColumnId
+				) {
+					moveBlock(
+						blockId,
+						fromSectionId,
+						fromColumnId,
+						toSectionId,
+						toColumnId,
+						0
+					);
+				}
+				return;
+			}
+
+			// Moving block within the same column or to a different position
+			if (overData?.type === 'block') {
+				const { sectionId: toSectionId, columnId: toColumnId } =
+					overData;
+				const {
+					blockId,
+					sectionId: fromSectionId,
+					columnId: fromColumnId,
+				} = activeData;
+
+				// For block-to-block drops, we'll put the block right after the target block
+				const toIndex = 1; // Put after the target block
+
+				if (
+					fromSectionId !== toSectionId ||
+					fromColumnId !== toColumnId ||
+					active.id !== over.id
+				) {
+					moveBlock(
+						blockId,
+						fromSectionId,
+						fromColumnId,
+						toSectionId,
+						toColumnId,
+						toIndex
+					);
+				}
+				return;
+			}
+		}
+
 		// Handle dropping new blocks from sidebar
 		if (active.data?.current?.type === 'element') {
 			const { blockType } = active.data.current;
@@ -192,14 +325,26 @@ const BuilderContent: React.FC = () => {
 			>
 				<DndContext
 					sensors={sensors}
-					collisionDetection={closestCenter}
+					collisionDetection={customCollisionDetection}
 					onDragStart={handleDragStart}
 					onDragEnd={handleDragEnd}
 					modifiers={[snapCenterToCursor]}
 				>
 					<Sidebar />
 					<Canvas />
-					<DragOverlay>{renderDragOverlay()}</DragOverlay>
+			
+					<DragOverlay>
+						{activeItem && activeItem.item ? (
+							<div className="opacity-90 transform rotate-3 shadow-lg">
+								<TemplateCard
+									item={activeItem.item}
+									type={activeItem.type}
+									blockType={activeItem.blockType}
+									isDragOverlay={true}
+								/>
+							</div>
+						) : null}
+					</DragOverlay>
 				</DndContext>
 				<BlockEditor />
 			</div>

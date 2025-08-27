@@ -1,5 +1,7 @@
 import React from 'react';
+import apiFetch from '@wordpress/api-fetch';
 import './style.scss';
+import { __ } from '@wordpress/i18n';
 
 interface StepReportProps {
 	automation?: any;
@@ -10,238 +12,200 @@ interface StepData {
 	contactsEntered: number;
 	contactsCompleted: number;
 	completionRate: number;
-	averageTime: string;
 	dropOffRate: number;
 }
 
-class StepReport extends React.Component<StepReportProps> {
-	getStepData = (): StepData[] => {
-		return [
-			{
-				stepName: 'Entrance',
-				contactsEntered: 8,
-				contactsCompleted: 8,
-				completionRate: 100,
-				averageTime: '0 min',
-				dropOffRate: 0,
-			},
-			{
-				stepName: 'Apply List #1',
-				contactsEntered: 8,
-				contactsCompleted: 7,
-				completionRate: 88,
-				averageTime: '5 min',
-				dropOffRate: 12,
-			},
-			{
-				stepName: 'Apply List #2',
-				contactsEntered: 7,
-				contactsCompleted: 6,
-				completionRate: 86,
-				averageTime: '3 min',
-				dropOffRate: 14,
-			},
-			{
-				stepName: 'Check Condition',
-				contactsEntered: 6,
-				contactsCompleted: 5,
-				completionRate: 83,
-				averageTime: '2 min',
-				dropOffRate: 17,
-			},
-			{
-				stepName: 'Apply List #3',
-				contactsEntered: 5,
-				contactsCompleted: 4,
-				completionRate: 80,
-				averageTime: '4 min',
-				dropOffRate: 20,
-			},
-			{
-				stepName: 'Wait X Days/Hours',
-				contactsEntered: 4,
-				contactsCompleted: 1,
-				completionRate: 25,
-				averageTime: '24 hrs',
-				dropOffRate: 75,
-			},
-			{
-				stepName: 'Apply List #4',
-				contactsEntered: 1,
-				contactsCompleted: 1,
-				completionRate: 100,
-				averageTime: '1 min',
-				dropOffRate: 0,
-			},
-		];
+interface StepsReportResponse {
+	steps: StepData[];
+	total_contacts: number;
+	overall_conversion: number;
+	automation: {
+		id: number;
+		name: string;
+	};
+}
+
+interface CircularProgressProps {
+	percentage: number;
+	size?: number;
+	strokeWidth?: number;
+	color?: string;
+	showCheckmark?: boolean;
+}
+
+const CircularProgress: React.FC<CircularProgressProps> = ({
+	percentage,
+	size = 120,
+	strokeWidth = 8,
+	color = '#4F8EF7',
+	showCheckmark = false,
+}) => {
+	const radius = (size - strokeWidth) / 2;
+	const circumference = radius * 2 * Math.PI;
+	const strokeDasharray = circumference;
+	const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+	return (
+		<div
+			className="circular-progress"
+			style={{ width: size, height: size }}
+		>
+			<svg width={size} height={size} className="circular-progress-svg">
+				<circle
+					className="circular-progress-background"
+					cx={size / 2}
+					cy={size / 2}
+					r={radius}
+					strokeWidth={strokeWidth}
+				/>
+				<circle
+					className="circular-progress-foreground"
+					cx={size / 2}
+					cy={size / 2}
+					r={radius}
+					strokeWidth={strokeWidth}
+					style={{
+						strokeDasharray,
+						strokeDashoffset,
+						stroke: color,
+					}}
+				/>
+			</svg>
+			<div className="circular-progress-text">
+				{showCheckmark ? (
+					<span className="checkmark">✓</span>
+				) : (
+					<span className="percentage">{percentage}%</span>
+				)}
+			</div>
+		</div>
+	);
+};
+
+const StepReport: React.FC<StepReportProps> = ({ automation }) => {
+	const [stepData, setStepData] = React.useState<StepData[]>([]);
+	const [overallConversion, setOverallConversion] = React.useState<number>(0);
+	const [loading, setLoading] = React.useState<boolean>(true);
+	const [error, setError] = React.useState<string | null>(null);
+
+	React.useEffect(() => {
+		const fetchStepData = async () => {
+			if (!automation?.id) {
+				setLoading(false);
+				return;
+			}
+
+			try {
+				setLoading(true);
+				const response = (await apiFetch({
+					path: `/qc/v1/automation-reports/${automation.id}/steps-report`,
+					method: 'GET',
+				})) as StepsReportResponse;
+
+				if (response.steps && Array.isArray(response.steps)) {
+					setStepData(response.steps);
+					setOverallConversion(response.overall_conversion || 0);
+				} else {
+					setError('Invalid response format');
+				}
+			} catch (err) {
+				console.error('Error fetching step data:', err);
+				setError('Failed to fetch step data');
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchStepData();
+	}, [automation?.id]);
+
+	const getProgressColor = (rate: number): string => {
+		if (rate >= 90) return '#4F8EF7'; // Blue for excellent
+		if (rate >= 70) return '#4F8EF7'; // Blue for good
+		if (rate >= 50) return '#52C41A'; // Green for average
+		if (rate >= 30) return '#FAAD14'; // Orange for below average
+		return '#FF4D4F'; // Red for poor
 	};
 
-	getCompletionRateClass = (rate: number): string => {
-		if (rate >= 90) return 'excellent';
-		if (rate >= 70) return 'good';
-		if (rate >= 50) return 'average';
-		return 'poor';
-	};
-
-	render() {
-		const stepData = this.getStepData();
-		const totalEntered = stepData[0]?.contactsEntered || 0;
-		const totalCompleted =
-			stepData[stepData.length - 1]?.contactsCompleted || 0;
-		const overallConversion =
-			totalEntered > 0 ? (totalCompleted / totalEntered) * 100 : 0;
-
+	if (loading) {
 		return (
 			<div className="step-report-container">
-				<div className="step-report-header">
-					<h3>Step-by-Step Performance Analysis</h3>
-					<p>
-						Detailed breakdown of how contacts progress through each
-						automation step
-					</p>
-				</div>
-
-				<div className="overview-stats">
-					<div className="overview-card">
-						<h4>Overall Performance</h4>
-						<div className="overview-metrics">
-							<div className="metric">
-								<span className="metric-label">
-									Total Entered
-								</span>
-								<span className="metric-value">
-									{totalEntered}
-								</span>
-							</div>
-							<div className="metric">
-								<span className="metric-label">
-									Total Completed
-								</span>
-								<span className="metric-value">
-									{totalCompleted}
-								</span>
-							</div>
-							<div className="metric">
-								<span className="metric-label">
-									Conversion Rate
-								</span>
-								<span
-									className={`metric-value ${this.getCompletionRateClass(overallConversion)}`}
-								>
-									{overallConversion.toFixed(1)}%
-								</span>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div className="step-report-table">
-					<table>
-						<thead>
-							<tr>
-								<th>Step Name</th>
-								<th>Contacts Entered</th>
-								<th>Contacts Completed</th>
-								<th>Completion Rate</th>
-								<th>Drop-off Rate</th>
-								<th>Average Time</th>
-								<th>Performance</th>
-							</tr>
-						</thead>
-						<tbody>
-							{stepData.map((step, index) => (
-								<tr key={index}>
-									<td className="step-name">
-										<div className="step-info">
-											<span className="step-number">
-												{index + 1}
-											</span>
-											<span className="step-title">
-												{step.stepName}
-											</span>
-										</div>
-									</td>
-									<td className="contacts-entered">
-										{step.contactsEntered}
-									</td>
-									<td className="contacts-completed">
-										{step.contactsCompleted}
-									</td>
-									<td className="completion-rate">
-										<span
-											className={`rate-badge ${this.getCompletionRateClass(step.completionRate)}`}
-										>
-											{step.completionRate}%
-										</span>
-									</td>
-									<td className="drop-off-rate">
-										{step.dropOffRate > 0 && (
-											<span className="drop-off-badge">
-												{step.dropOffRate}%
-											</span>
-										)}
-									</td>
-									<td className="average-time">
-										{step.averageTime}
-									</td>
-									<td className="performance">
-										<div className="performance-indicator">
-											{step.dropOffRate > 50 && (
-												<span className="warning-indicator">
-													⚠️ High Drop-off
-												</span>
-											)}
-											{step.completionRate >= 90 && (
-												<span className="success-indicator">
-													✅ Excellent
-												</span>
-											)}
-											{step.completionRate < 50 &&
-												step.dropOffRate <= 50 && (
-													<span className="caution-indicator">
-														⚡ Needs Attention
-													</span>
-												)}
-										</div>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-
-				<div className="insights-section">
-					<h4>Key Insights</h4>
-					<div className="insights-grid">
-						<div className="insight-card bottleneck">
-							<h5>🔍 Biggest Bottleneck</h5>
-							<p>
-								The "Wait X Days/Hours" step has a 75% drop-off
-								rate. Consider reducing the wait time or adding
-								engagement content.
-							</p>
-						</div>
-						<div className="insight-card performance">
-							<h5>📈 Best Performing</h5>
-							<p>
-								The "Entrance" and final "Apply List" steps have
-								excellent completion rates. Use similar
-								strategies for other steps.
-							</p>
-						</div>
-						<div className="insight-card recommendation">
-							<h5>💡 Recommendation</h5>
-							<p>
-								Focus on optimizing the wait step and the
-								condition check to improve overall funnel
-								performance.
-							</p>
-						</div>
-					</div>
-				</div>
+				<div className="loading-state">Loading step data...</div>
 			</div>
 		);
 	}
-}
+
+	if (error) {
+		return (
+			<div className="step-report-container">
+				<div className="error-state">Error: {error}</div>
+			</div>
+		);
+	}
+
+	if (stepData.length === 0) {
+		return (
+			<div className="step-report-container">
+				<div className="empty-state">No step data available</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="step-report-container">
+			<div className="step-grid">
+				{stepData.map((step, index) => (
+					<div key={index} className="step-card">
+						<div className="step-progress">
+							<CircularProgress
+								percentage={step.completionRate}
+								color={getProgressColor(step.completionRate)}
+								size={120}
+								strokeWidth={8}
+							/>
+						</div>
+						<div className="step-info">
+							<h3 className="step-title">{step.stepName}</h3>
+							<div className="step-stats">
+								<div className="stat-row">
+									<span className="stat-icon">👥</span>
+									<span className="stat-value">
+										{step.contactsEntered}
+									</span>
+									<span className="stat-label">
+										{step.completionRate}%
+									</span>
+									{step.dropOffRate > 0 && (
+										<span className="drop-indicator">
+											↓ {step.dropOffRate}%
+										</span>
+									)}
+								</div>
+							</div>
+						</div>
+					</div>
+				))}
+				{/* overall conversion */}
+				<div className="step-card">
+					<div className="step-progress">
+						<CircularProgress
+							percentage={100}
+							color={getProgressColor(100)}
+							size={120}
+							strokeWidth={8}
+							showCheckmark={true}
+						/>
+					</div>
+					<div className="step-info">
+						<h3 className="step-title">
+							{__('Overall Conversion Rate', 'quillcrm')}:{' '}
+							{overallConversion}%
+						</h3>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
 
 export default StepReport;

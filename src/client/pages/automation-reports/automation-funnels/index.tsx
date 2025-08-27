@@ -5,6 +5,8 @@ import StepReport from './step-report';
 import EmailAnalytics from './email-analytics';
 import './style.scss';
 import { __ } from '@wordpress/i18n';
+import { convertDate } from '@quillcrm/utils';
+import { NavLink } from '@quillcrm/navigation';
 
 interface AutomationFunnelProps {
 	automation: Automation;
@@ -47,14 +49,18 @@ class AutomationFunnel extends React.Component<
 		return (
 			<div className="qcrm-automation-reports__automation-funnels">
 				<div className="qcrm-automation-reports__automation-funnels__header">
-					<h1>{__('Automation Funnels', 'quillcrm')}</h1>
 					<div className="funnel-info">
-						<span>List Applied (Created at 2025-08-26)</span>
+						<NavLink to={`automations`}>
+							{__('Automation Funnels', 'quillcrm')}
+						</NavLink>
 						<span>/</span>
-						<span>Subscribers</span>
-						<button className="re-apply-btn">
-							Re-apply New Steps
-						</button>
+						<NavLink
+							to={`automations/${this.props.automation?.id}`}
+						>
+							{this.props.automation?.name} (
+							{__('Created at', 'quillcrm')}:{' '}
+							{convertDate(this.props.automation?.created_at)})
+						</NavLink>
 					</div>
 				</div>
 
@@ -64,13 +70,13 @@ class AutomationFunnel extends React.Component<
 							className={`tab-button ${activeTab === 'chart-report' ? 'active' : ''}`}
 							onClick={() => this.handleTabClick('chart-report')}
 						>
-							Chart Report
+							{__('Chart Report', 'quillcrm')}
 						</button>
 						<button
 							className={`tab-button ${activeTab === 'step-report' ? 'active' : ''}`}
 							onClick={() => this.handleTabClick('step-report')}
 						>
-							Step Report
+							{__('Step Report', 'quillcrm')}
 						</button>
 						<button
 							className={`tab-button ${activeTab === 'email-analytics' ? 'active' : ''}`}
@@ -78,7 +84,7 @@ class AutomationFunnel extends React.Component<
 								this.handleTabClick('email-analytics')
 							}
 						>
-							Emails Analytics
+							{__('Emails Analytics', 'quillcrm')}
 						</button>
 					</div>
 

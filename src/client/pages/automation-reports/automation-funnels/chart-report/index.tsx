@@ -11,6 +11,8 @@ import {
 	Legend,
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
+import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 import './style.scss';
 
 ChartJS.register(
@@ -28,21 +30,85 @@ interface ChartReportProps {
 	automation?: any;
 }
 
-class ChartReport extends React.Component<ChartReportProps> {
+interface ChartReportState {
+	funnelData: any[];
+	loading: boolean;
+	error: string | null;
+}
+
+class ChartReport extends React.Component<ChartReportProps, ChartReportState> {
+	constructor(props: ChartReportProps) {
+		super(props);
+		this.state = {
+			funnelData: [],
+			loading: true,
+			error: null,
+		};
+	}
+
+	componentDidMount() {
+		this.fetchFunnelData();
+	}
+
+	componentDidUpdate(prevProps: ChartReportProps) {
+		if (prevProps.automation?.id !== this.props.automation?.id) {
+			this.fetchFunnelData();
+		}
+	}
+
+	fetchFunnelData = async () => {
+		if (!this.props.automation?.id) {
+			this.setState({
+				funnelData: [],
+				loading: false,
+				error: null,
+			});
+			return;
+		}
+
+		try {
+			this.setState({ loading: true, error: null });
+
+			const response = (await apiFetch({
+				path: `/qc/v1/automation-reports/${this.props.automation.id}/get-chart-report`,
+			})) as any;
+
+			this.setState({
+				funnelData: response.funnel_data || [],
+				loading: false,
+				error: null,
+			});
+		} catch (error: any) {
+			console.error('Failed to fetch funnel data:', error);
+			this.setState({
+				funnelData: [],
+				loading: false,
+				error:
+					error.message ||
+					__('Failed to fetch funnel data', 'quillcrm'),
+			});
+		}
+	};
+
 	getChartData = () => {
-		const chartData = [
-			{ label: 'Entrance', value: 8, percentage: 100 },
-			{ label: 'Apply List', value: 7, percentage: 88 },
-			{ label: 'Apply List', value: 6, percentage: 75 },
-			{ label: 'Check Condition', value: 5, percentage: 63 },
-			{ label: 'Apply List', value: 4, percentage: 50 },
-			{ label: 'Apply List', value: 1, percentage: 13 },
-			{ label: 'Wait X Days/Hours', value: 1, percentage: 13 },
-			{ label: 'Apply List', value: 1, percentage: 13 },
-		];
+		const { funnelData } = this.state;
+
+		// Fallback data if no real data is available
+		const chartData =
+			funnelData.length > 0
+				? funnelData
+				: [
+						{
+							label: __('No data available', 'quillcrm'),
+							value: 0,
+							percentage: 0,
+						},
+					];
 
 		return {
-			labels: chartData.map((item) => item.label),
+			labels: chartData.map(
+				(item) => item.label + ' ' + item.percentage + '%'
+			),
 			datasets: [
 				{
 					type: 'bar' as const,
@@ -117,36 +183,10 @@ class ChartReport extends React.Component<ChartReportProps> {
 				},
 			},
 			scales: {
-				x: {
-					display: true,
-					title: {
-						display: true,
-						text: 'Funnel Steps',
-						font: {
-							size: 14,
-							weight: 'bold' as const,
-						},
-					},
-					ticks: {
-						maxRotation: 45,
-						minRotation: 0,
-					},
-					grid: {
-						display: false,
-					},
-				},
 				y: {
 					type: 'linear' as const,
 					display: true,
 					position: 'left' as const,
-					title: {
-						display: true,
-						text: 'Number of Contacts',
-						font: {
-							size: 14,
-							weight: 'bold' as const,
-						},
-					},
 					beginAtZero: true,
 					grid: {
 						color: 'rgba(0, 0, 0, 0.1)',
@@ -156,16 +196,7 @@ class ChartReport extends React.Component<ChartReportProps> {
 					type: 'linear' as const,
 					display: true,
 					position: 'right' as const,
-					title: {
-						display: true,
-						text: 'Conversion Rate (%)',
-						font: {
-							size: 14,
-							weight: 'bold' as const,
-						},
-					},
 					beginAtZero: true,
-					max: 100,
 					grid: {
 						drawOnChartArea: false,
 					},
@@ -175,13 +206,28 @@ class ChartReport extends React.Component<ChartReportProps> {
 	};
 
 	render() {
+		const { loading, error } = this.state;
+
+		if (loading) {
+			return (
+				<div className="chart-report-container">
+					<div className="loading-spinner">
+						{__('Loading funnel data...', 'quillcrm')}
+					</div>
+				</div>
+			);
+		}
+
+		if (error) {
+			return (
+				<div className="chart-report-container">
+					<div className="error-message">{error}</div>
+				</div>
+			);
+		}
+
 		return (
 			<div className="chart-report-container">
-				<div className="chart-report-header">
-					<h3>Automation Funnel Performance</h3>
-					<p>Track how contacts move through your automation steps</p>
-				</div>
-
 				<div className="chart-wrapper">
 					<Chart
 						type="bar"
@@ -189,37 +235,6 @@ class ChartReport extends React.Component<ChartReportProps> {
 						options={this.getChartOptions()}
 						height={400}
 					/>
-				</div>
-
-				<div className="chart-summary">
-					<div className="summary-stats">
-						<div className="stat-item">
-							<span className="stat-label">
-								Total Contacts Entered:
-							</span>
-							<span className="stat-value">8</span>
-						</div>
-						<div className="stat-item">
-							<span className="stat-label">
-								Contacts Completed:
-							</span>
-							<span className="stat-value">1</span>
-						</div>
-						<div className="stat-item">
-							<span className="stat-label">
-								Overall Conversion Rate:
-							</span>
-							<span className="stat-value">12.5%</span>
-						</div>
-						<div className="stat-item">
-							<span className="stat-label">
-								Biggest Drop-off:
-							</span>
-							<span className="stat-value">
-								Apply List → Wait X Days/Hours (75%)
-							</span>
-						</div>
-					</div>
 				</div>
 			</div>
 		);

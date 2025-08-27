@@ -28,6 +28,7 @@ import {
 	DeleteOutlined,
 } from '@ant-design/icons';
 import { isEmpty } from 'lodash';
+import { ChartLineIcon } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -47,6 +48,7 @@ import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
 import WebhookFields from './webhook-fields';
 import FormFields from './form-fields';
 import ReactFlowWorkflow from './reactflow-workflow';
+import { NavLink } from '@quillcrm/navigation';
 
 const Workflow: React.FC = () => {
 	const {
@@ -365,6 +367,14 @@ const Workflow: React.FC = () => {
 								unCheckedChildren={__('List', 'quillcrm')}
 							/>
 						</Flex> */}
+						<Flex gap={10} align="center">
+							<ChartLineIcon size={16} />
+							<NavLink
+								to={`automations/${automation?.id}/reports`}
+							>
+								{__('View Reports', 'quillcrm')}
+							</NavLink>
+						</Flex>
 						<Flex gap={10} align="center">
 							<Typography.Text>
 								{__('Status:', 'quillcrm')}

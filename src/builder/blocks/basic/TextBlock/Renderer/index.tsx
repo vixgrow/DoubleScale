@@ -54,9 +54,56 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 		props.content.includes('<') &&
 		props.content.includes('>');
 
+	// Clean content to remove conflicting font styles
+	const getCleanContent = () => {
+		if (!isHtmlContent) return props.content;
+
+		// Remove inline font-size and font-family styles that might conflict
+		let cleanContent = props.content;
+		cleanContent = cleanContent.replace(
+			/style\s*=\s*"[^"]*font-size[^"]*"/gi,
+			''
+		);
+		cleanContent = cleanContent.replace(
+			/style\s*=\s*"[^"]*font-family[^"]*"/gi,
+			''
+		);
+		cleanContent = cleanContent.replace(
+			/style\s*=\s*'[^']*font-size[^']*'/gi,
+			''
+		);
+		cleanContent = cleanContent.replace(
+			/style\s*=\s*'[^']*font-family[^']*'/gi,
+			''
+		);
+		// Clean up empty style attributes
+		cleanContent = cleanContent.replace(/style\s*=\s*""\s*/gi, '');
+		cleanContent = cleanContent.replace(/style\s*=\s*''\s*/gi, '');
+
+		return cleanContent;
+	};
+
 	const content = (
 		<>
 			<style>{`
+				.text-block-renderer {
+					font-size: ${getFontSize()}px !important;
+					font-family: ${props.fontFamily} !important;
+				}
+				.text-block-renderer * {
+					font-size: ${getFontSize()}px !important;
+					font-family: ${props.fontFamily} !important;
+				}
+				.text-block-renderer p,
+				.text-block-renderer div,
+				.text-block-renderer span,
+				.text-block-renderer strong,
+				.text-block-renderer em,
+				.text-block-renderer u,
+				.text-block-renderer strike {
+					font-size: ${getFontSize()}px !important;
+					font-family: ${props.fontFamily} !important;
+				}
 				.text-block-renderer ul {
 					list-style-type: disc !important;
 					padding-left: 20px !important;
@@ -77,17 +124,11 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 					font-size: ${getFontSize()}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
-				.text-block-renderer * {
+				/* Override any inline styles that might be applied */
+				.text-block-renderer [style*="font-size"] {
 					font-size: ${getFontSize()}px !important;
-					font-family: ${props.fontFamily} !important;
 				}
-				.text-block-renderer p {
-					font-size: ${getFontSize()}px !important;
-					font-family: ${props.fontFamily} !important;
-					margin: 0 !important;
-				}
-				.text-block-renderer div {
-					font-size: ${getFontSize()}px !important;
+				.text-block-renderer [style*="font-family"] {
 					font-family: ${props.fontFamily} !important;
 				}
 			`}</style>
@@ -124,7 +165,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 			>
 				{isHtmlContent ? (
 					<div
-						dangerouslySetInnerHTML={{ __html: props.content }}
+						dangerouslySetInnerHTML={{ __html: getCleanContent() }}
 						style={{
 							fontSize: 'inherit',
 							fontFamily: 'inherit',
@@ -142,7 +183,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 							color: 'inherit',
 						}}
 					>
-						{props.content}
+						{getCleanContent()}
 					</ElementType>
 				)}
 			</div>

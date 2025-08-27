@@ -146,6 +146,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 								!newListItem.textContent?.trim()
 							) {
 								newListItem.innerHTML = '<br>';
+								// Apply font styles to new list item
+								newListItem.style.fontSize = `${fontSize}px`;
+								newListItem.style.fontFamily = fontFamily;
 								// Position cursor at start of list item
 								const listRange = document.createRange();
 								listRange.setStart(newListItem, 0);
@@ -163,6 +166,26 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 		if (editorRef.current) {
 			onChange(editorRef.current.innerHTML);
+
+			// Apply font styles to any newly created content
+			setTimeout(() => {
+				const allElements = editorRef.current!.querySelectorAll('*');
+				allElements.forEach((element: Element) => {
+					const htmlElement = element as HTMLElement;
+					if (
+						!htmlElement.style.fontSize ||
+						htmlElement.style.fontSize === ''
+					) {
+						htmlElement.style.fontSize = `${fontSize}px`;
+					}
+					if (
+						!htmlElement.style.fontFamily ||
+						htmlElement.style.fontFamily === ''
+					) {
+						htmlElement.style.fontFamily = fontFamily;
+					}
+				});
+			}, 50);
 		}
 	};
 
@@ -284,7 +307,24 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		<div className={cn('relative', className)}>
 			{/* Inline styles for comprehensive font control */}
 			<style>{`
+				.rich-text-editor-content {
+					font-family: ${fontFamily} !important;
+					font-size: ${fontSize}px !important;
+				}
 				.rich-text-editor-content * {
+					font-family: ${fontFamily} !important;
+					font-size: ${fontSize}px !important;
+				}
+				.rich-text-editor-content p {
+					font-family: ${fontFamily} !important;
+					font-size: ${fontSize}px !important;
+					margin: 0 !important;
+				}
+				.rich-text-editor-content div {
+					font-family: ${fontFamily} !important;
+					font-size: ${fontSize}px !important;
+				}
+				.rich-text-editor-content span {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
@@ -292,15 +332,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					list-style-type: disc !important;
 					padding-left: 20px !important;
 					margin: 10px 0 !important;
+					font-family: ${fontFamily} !important;
+					font-size: ${fontSize}px !important;
 				}
 				.rich-text-editor-content ol {
 					list-style-type: decimal !important;
 					padding-left: 20px !important;
 					margin: 10px 0 !important;
+					font-family: ${fontFamily} !important;
+					font-size: ${fontSize}px !important;
 				}
 				.rich-text-editor-content li {
 					display: list-item !important;
 					margin: 5px 0 !important;
+					font-family: ${fontFamily} !important;
+					font-size: ${fontSize}px !important;
 				}
 			`}</style>
 

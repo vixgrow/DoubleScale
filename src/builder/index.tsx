@@ -11,6 +11,8 @@ import {
 	DragStartEvent,
 	DragEndEvent,
 	pointerWithin,
+	closestCenter,
+	CollisionDetection,
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
 /**
@@ -28,6 +30,45 @@ const BuilderContent: React.FC = () => {
 		useBuilder();
 	const sensors = useSensors(useSensor(PointerSensor));
 	const [activeItem, setActiveItem] = useState<any>(null);
+
+	// Custom collision detection that prioritizes sections when dragging sections and columns when dragging blocks
+	const customCollisionDetection: CollisionDetection = (args) => {
+		const { active, droppableContainers } = args;
+
+		// If we're dragging a section, only consider other sections for collision
+		if (active.data?.current?.type === 'section') {
+			const sectionContainers = Array.from(
+				droppableContainers.values()
+			).filter(
+				(container) => container.data?.current?.type === 'section'
+			);
+
+			// Use closestCenter for section-to-section collision detection
+			return closestCenter({
+				...args,
+				droppableContainers: sectionContainers,
+			});
+		}
+
+		// If we're dragging a block or element from sidebar, only consider columns for collision
+		if (
+			active.data?.current?.type === 'block' ||
+			active.data?.current?.type === 'element'
+		) {
+			const columnContainers = Array.from(
+				droppableContainers.values()
+			).filter((container) => container.data?.current?.type === 'column');
+
+			// Use closestCenter for block-to-column collision detection
+			return closestCenter({
+				...args,
+				droppableContainers: columnContainers,
+			});
+		}
+
+		// For all other drag operations, use the default pointerWithin
+		return pointerWithin(args);
+	};
 
 	const handleDragStart = (event: DragStartEvent) => {
 		const { active } = event;
@@ -163,7 +204,7 @@ const BuilderContent: React.FC = () => {
 			>
 				<DndContext
 					sensors={sensors}
-					collisionDetection={pointerWithin}
+					collisionDetection={customCollisionDetection}
 					onDragStart={handleDragStart}
 					onDragEnd={handleDragEnd}
 					modifiers={[snapCenterToCursor]}

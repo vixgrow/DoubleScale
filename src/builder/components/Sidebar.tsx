@@ -8,7 +8,7 @@ import ContainerBlock from '../blocks/layout/ContainerBlock';
 interface SidebarItem {
 	id: string;
 	title: string;
-	component: React.ComponentType;
+	component: React.ComponentType<any>;
 }
 
 const BlockSidebar = () => {
@@ -31,7 +31,10 @@ const BlockSidebar = () => {
 				</div>
 				<div className="py-6 px-9">
 					<TabsContent value="elements">
-						<ContainerBlock activeSidebar={activeSidebar} setActiveSidebar={setActiveSidebar} />
+						<ContainerBlock
+							activeSidebar={activeSidebar}
+							setActiveSidebar={setActiveSidebar}
+						/>
 					</TabsContent>
 					<TabsContent value="layouts">
 						<ColumnBlock />

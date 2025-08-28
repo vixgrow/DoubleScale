@@ -32,6 +32,7 @@ class Process_Automation {
 
 
 
+
 	/**
 	 * Automation
 	 *
@@ -144,9 +145,6 @@ class Process_Automation {
 	 * @return void
 	 */
 	public function process_step( $step, $automation_contact_id ) {
-		xdebug_break();
-		error_log( 'Process Step: ' . $step->id . ' Automation Contact ID: ' . $automation_contact_id );
-
 		// If this step has a parent_id > 0, it's a child of a condition step
 		// We need to verify that the parent condition has been processed first
 		if ( $step->parent_id > 0 ) {

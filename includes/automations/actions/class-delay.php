@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Delay Action
  *
@@ -20,6 +21,7 @@ use QuillCRM\QuillCRM;
  * Delay Action
  */
 class Delay extends Action {
+
 
 	/**
 	 * Action Name
@@ -100,7 +102,7 @@ class Delay extends Action {
 				break;
 		}
 
-		QuillCRM::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation, $next_step->id, $automation_contact->id );
+		QuillCRM::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation->id, $next_step->id, $automation_contact->id );
 
 		return true;
 	}
@@ -151,7 +153,6 @@ class Delay extends Action {
 			),
 		);
 	}
-
 }
 
 Delay::instance();

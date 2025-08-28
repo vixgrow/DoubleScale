@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import './style.scss';
 import { __ } from '@wordpress/i18n';
@@ -83,12 +83,12 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
 };
 
 const StepReport: React.FC<StepReportProps> = ({ automation }) => {
-	const [stepData, setStepData] = React.useState<StepData[]>([]);
-	const [overallConversion, setOverallConversion] = React.useState<number>(0);
-	const [loading, setLoading] = React.useState<boolean>(true);
-	const [error, setError] = React.useState<string | null>(null);
+	const [stepData, setStepData] = useState<StepData[]>([]);
+	const [overallConversion, setOverallConversion] = useState<number>(0);
+	const [loading, setLoading] = useState<boolean>(true);
+	const [error, setError] = useState<string | null>(null);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const fetchStepData = async () => {
 			if (!automation?.id) {
 				setLoading(false);

@@ -41,7 +41,7 @@ class Core {
 		// Admin email address.
 		$admin_email = get_option( 'admin_email' );
 		$ajax_url    = admin_url( 'admin-ajax.php' );
-		$nonce       = wp_create_nonce( 'quillcrm-admin' );
+		$nonce       = wp_create_nonce( 'wp_rest' );
 
 		wp_add_inline_script(
 			'qcrm-config',

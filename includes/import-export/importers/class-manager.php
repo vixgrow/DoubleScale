@@ -21,6 +21,7 @@ use QuillCRM\Import_Export\Importers\ActiveCampaign;
 use QuillCRM\Import_Export\Importers\MailerLite;
 use QuillCRM\Import_Export\Importers\HubSpot;
 use QuillCRM\Import_Export\Importers\Pipedrive;
+use QuillCRM\Import_Export\Importers\GoHighLevel;
 use Exception;
 
 /**
@@ -96,6 +97,7 @@ class Manager {
 			new MailerLite(),
 			new HubSpot(),
 			new Pipedrive(),
+			new GoHighLevel(),
 		);
 
 		foreach ( $importers as $importer ) {

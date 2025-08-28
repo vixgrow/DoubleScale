@@ -95,19 +95,37 @@ class Pipedrive extends Importer
 		}
 		$mapping = array_flip($this->mapping);
 
+		// For cursor-based pagination, we need to track total count differently
+		// Get first page to estimate total count
 		$first_page_response = $api->get_persons_first_page();
-				
-		if (!$first_page_response['success']) {
+		
+		
+		if (empty($first_page_response['success']) || $first_page_response['success'] !== true) {
 			$error_message = __('Pipedrive: Error fetching persons', 'quillcrm');
+			$response_code = $first_page_response['code'] ?? 0;
+			
+			// Provide more specific error messages based on response code
+			if ($response_code === 401) {
+				$error_message = __('Pipedrive API Token is invalid or expired. Please verify your credentials.', 'quillcrm');
+			} elseif ($response_code === 403) {
+				$error_message = __('Pipedrive API access denied. Please check your token permissions.', 'quillcrm');
+			} elseif ($response_code === 404) {
+				$error_message = __('Pipedrive API endpoint not found. Please verify your domain format.', 'quillcrm');
+			} elseif (in_array($response_code, [0, 500, 502, 503, 504])) {
+				$error_message = __('Pipedrive API connection failed. Please check your domain and try again.', 'quillcrm');
+			}
+			
 			$error_details = array(
 				'code' => 'pipedrive_get_persons_first_page',
 				'response' => $first_page_response,
+				'response_code' => $response_code,
 			);
 
 			quillcrm_get_logger()->error($error_message, $error_details);
 			throw new \Exception($error_message);
 		}
 
+		// Count total items by iterating through all pages
 		$total = 0;
 		$cursor = null;
 		
@@ -124,6 +142,7 @@ class Pipedrive extends Importer
 			
 		} while ($cursor && $total < 10000); // Safety limit
 
+		error_log('Pipedrive v2: Calculated total count: ' . $total);
 
 		if ($total === 0) {
 			return array(
@@ -222,6 +241,19 @@ class Pipedrive extends Importer
 		);
 	}
 
+	/**
+	 * Fetch persons batch from Pipedrive (legacy v1 method for backward compatibility)
+	 *
+	 * @param API $api    Pipedrive API instance.
+	 * @param int $offset Current offset.
+	 *
+	 * @return array
+	 */
+	private function fetch_persons_batch($api, $offset)
+	{
+		// This method is no longer used in v2 API but kept for compatibility
+		return array();
+	}
 
 	/**
 	 * Process individual Pipedrive person
@@ -240,7 +272,9 @@ class Pipedrive extends Importer
 		$processed['last_name'] = $person['last_name'] ?? '';
 		$processed['phone'] = $this->get_primary_phone($person);
 
+		// Handle Pipedrive v2 API status mapping (strict boolean values)
 		$is_active = $person['active_flag'] ?? true;
+		// v2 API uses strict boolean values, not 1/0
 		if (is_bool($is_active)) {
 			$processed['status'] = $is_active ? 'subscribed' : 'unsubscribed';
 		} else {
@@ -250,7 +284,8 @@ class Pipedrive extends Importer
 
 		// Process organization/company info
 		$processed['company'] = '';
-
+		// In v2 API, org_id is just an integer, not an object with name
+		// We could potentially fetch org details, but for now leave empty
 		if (!empty($person['org_id']) && is_array($person['org_id']) && !empty($person['org_id']['name'])) {
 			$processed['company'] = $person['org_id']['name'];
 		}
@@ -263,8 +298,9 @@ class Pipedrive extends Importer
 			}
 		}
 
-		$processed['lists'] = $this->get_person_labels($person);
-		$processed['tags'] = $this->get_person_stage_tags($person);
+		// Set lists and tags - keep lists empty, add simple tags for organization
+		$processed['lists'] = '';  // No automatic list assignment
+		$processed['tags'] = $this->get_person_tags($person);
 
 		return $processed;
 	}
@@ -278,7 +314,9 @@ class Pipedrive extends Importer
 	 */
 	private function get_primary_email($person)
 	{
+		// Pipedrive API v2 stores emails in 'emails' array
 		if (!empty($person['emails']) && is_array($person['emails'])) {
+			// Return the first/primary email
 			return $person['emails'][0]['value'] ?? '';
 		}
 		// Fallback for legacy 'email' field
@@ -302,7 +340,9 @@ class Pipedrive extends Importer
 	{
 		$phone = '';
 		
+		// Pipedrive API v2 stores phones in 'phones' array
 		if (!empty($person['phones']) && is_array($person['phones'])) {
+			// Return the first/primary phone
 			$phone = $person['phones'][0]['value'] ?? '';
 		}
 		// Fallback for legacy 'phone' field
@@ -314,6 +354,8 @@ class Pipedrive extends Importer
 			}
 		}
 		
+		// Clean phone number - remove dashes, spaces, parentheses, and other non-numeric characters
+		// Keep only digits and + sign for international numbers
 		if (!empty($phone)) {
 			$phone = preg_replace('/[^\d+]/', '', $phone);
 		}
@@ -321,43 +363,37 @@ class Pipedrive extends Importer
 		return $phone;
 	}
 
+
 	/**
-	 * Get person labels as lists
+	 * Get person tags from Pipedrive data
 	 *
 	 * @param array $person Pipedrive person data.
 	 *
 	 * @return string
 	 */
-	private function get_person_labels($person)
-	{
-		$labels = array();
-		
-		// Pipedrive has labels for persons
-		if (!empty($person['label'])) {
-			$labels[] = $person['label'];
-		}
-
-		return implode(',', $labels);
-	}
-
-	/**
-	 * Get person stage information as tags
-	 *
-	 * @param array $person Pipedrive person data.
-	 *
-	 * @return string
-	 */
-	private function get_person_stage_tags($person)
+	private function get_person_tags($person)
 	{
 		$tags = array();
 
+		// Add owner information as tag for assignment tracking
 		if (!empty($person['owner_id'])) {
-			if (is_array($person['owner_id']) && !empty($person['owner_id']['name'])) {
-				$tags[] = 'Owner: ' . $person['owner_id']['name'];
-			} else {
-				$tags[] = 'Owner ID: ' . $person['owner_id'];
+			$tags[] = 'pipedrive-owner-' . $person['owner_id'];
+		}
+
+		// Add organization information if available
+		if (!empty($person['org_id'])) {
+			$tags[] = 'pipedrive-org-' . $person['org_id'];
+		}
+
+		// Add labels if available (v2 API uses label_ids array)
+		if (!empty($person['label_ids']) && is_array($person['label_ids'])) {
+			foreach ($person['label_ids'] as $label_id) {
+				$tags[] = 'pipedrive-label-' . $label_id;
 			}
 		}
+
+		// Add Pipedrive source identifier
+		$tags[] = 'imported-from-pipedrive';
 
 		return implode(',', $tags);
 	}
@@ -433,91 +469,6 @@ class Pipedrive extends Importer
 		return new API($api_domain, $api_token);
 	}
 
-	/**
-	 * Get Pipedrive pipelines for mapping
-	 *
-	 * @return array
-	 */
-	public function get_pipelines()
-	{
-		try {
-			$api = $this->get_api();
-			$response = $api->get_pipelines();
-
-			if (!$response['success']) {
-				quillcrm_get_logger()->error(
-					__('Pipedrive: Error fetching pipelines', 'quillcrm'),
-					array(
-						'code' => 'pipedrive_get_pipelines',
-						'response' => $response,
-					)
-				);
-				return array();
-			}
-
-			$options = array();
-			foreach ($response['data']['data'] ?? array() as $pipeline) {
-				$options[] = array(
-					'key' => $pipeline['id'],
-					'label' => $pipeline['name'],
-				);
-			}
-
-			return $options;
-		} catch (\Exception $e) {
-			quillcrm_get_logger()->error(
-				__('Pipedrive: Exception fetching pipelines', 'quillcrm'),
-				array(
-					'code' => 'pipedrive_get_pipelines_exception',
-					'error' => $e->getMessage(),
-				)
-			);
-			return array();
-		}
-	}
-
-	/**
-	 * Get Pipedrive stages for mapping
-	 *
-	 * @return array
-	 */
-	public function get_stages()
-	{
-		try {
-			$api = $this->get_api();
-			$response = $api->get_stages();
-
-			if (!$response['success']) {
-				quillcrm_get_logger()->error(
-					__('Pipedrive: Error fetching stages', 'quillcrm'),
-					array(
-						'code' => 'pipedrive_get_stages',
-						'response' => $response,
-					)
-				);
-				return array();
-			}
-
-			$options = array();
-			foreach ($response['data']['data'] ?? array() as $stage) {
-				$options[] = array(
-					'key' => $stage['id'],
-					'label' => $stage['name'],
-				);
-			}
-
-			return $options;
-		} catch (\Exception $e) {
-			quillcrm_get_logger()->error(
-				__('Pipedrive: Exception fetching stages', 'quillcrm'),
-				array(
-					'code' => 'pipedrive_get_stages_exception',
-					'error' => $e->getMessage(),
-				)
-			);
-			return array();
-		}
-	}
 
 	/**
 	 * Get fields configuration for the importer
@@ -526,19 +477,18 @@ class Pipedrive extends Importer
 	 */
 	public function get_fields()
 	{
-		return array(
-			'lists_mapping' => array(
-				'type' => 'lists_mapping',
-				'label' => __('Lists', 'quillcrm'),
-				'description' => __('Map Pipedrive pipelines to QuillCRM lists', 'quillcrm'),
-				'options' => $this->get_pipelines(),
-			),
-			'tags_mapping' => array(
-				'type' => 'tags_mapping',
-				'label' => __('Tags', 'quillcrm'),
-				'description' => __('Map Pipedrive stages to QuillCRM tags', 'quillcrm'),
-				'options' => $this->get_stages(),
-			),
-		);
+		try {
+			$api = $this->get_api();
+			$test_response = $api->get_persons_first_page();
+			
+			if (empty($test_response['success']) || $test_response['success'] !== true) {
+				throw new \Exception(__('Invalid Pipedrive credentials. Please verify your API Domain and Token.', 'quillcrm'));
+			}
+		} catch (\Exception $e) {
+			// Re-throw the exception so the REST API catches it and returns error
+			throw $e;
+		}
+		
+		return array();
 	}
 }

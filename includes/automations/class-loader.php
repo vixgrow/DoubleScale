@@ -22,16 +22,6 @@ use QuillCRM\Automations\Process_Automation;
  */
 final class Loader {
 
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Class Instance.
 	 *
@@ -136,7 +126,7 @@ final class Loader {
 				if ( $args && count( $args ) >= 3 ) {
 					list($automation, $step_id, $contact_id) = $args;
 				} else {
-					throw new Exception( 'Failed to retrieve arguments from meta_id: ' . $automation['meta_id'] );
+					throw new Exception( 'Failed to retrieve arguments from meta_id: ' . $automation );
 				}
 			}
 

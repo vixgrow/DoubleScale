@@ -23,16 +23,6 @@ use QuillCRM\Automations\Conditions\Process as Process_Conditions;
  */
 class Process_Automation {
 
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Automation
 	 *
@@ -148,8 +138,7 @@ class Process_Automation {
 		// If this step has a parent_id > 0, it's a child of a condition step
 		// We need to verify that the parent condition has been processed first
 		if ( $step->parent_id > 0 ) {
-			$automation_contact = Automation_Contact_Model::findOrFail( $automation_contact_id );
-			$parent_step        = $this->automation->steps()->where( 'id', $step->parent_id )->first();
+			$parent_step = $this->automation->steps()->where( 'id', $step->parent_id )->first();
 
 			if ( $parent_step && $parent_step->type === 'condition' ) {
 				// Check if the parent condition has been processed

@@ -39,6 +39,9 @@ import activecampaignIcon from '../../../../../assets/images/active-campaign/act
 import hubspotIcon from '../../../../../assets/images/hubspot/hubspot-icon.png';
 //@ts-ignore
 import pipedriveIcon from '../../../../../assets/images/pipedrive/pipedrive-icon.png';
+//@ts-ignore
+import gohighlevelIcon from '../../../../../assets/images/gohighlevel/gohighlevel-icon.png';
+
 const SourceSelector: React.FC = () => {
 	const { state, dispatch } = useImportContext();
 	const { source } = state;
@@ -95,6 +98,13 @@ const SourceSelector: React.FC = () => {
 					className="w-10 h-10"
 				/>
 			),
+			gohighlevel: (
+				<img
+					src={gohighlevelIcon}
+					alt="GoHighLevel"
+					className="w-10 h-10"
+				/>
+			),
 		};
 		return (
 			iconMap[sourceKey] || (
@@ -113,6 +123,7 @@ const SourceSelector: React.FC = () => {
 			'activecampaign',
 			'hubspot',
 			'pipedrive',
+			'gohighlevel',
 		].includes(slug),
 	}));
 

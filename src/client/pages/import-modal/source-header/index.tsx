@@ -31,6 +31,8 @@ import activecampaignLogo from '../../../../../assets/images/active-campaign/act
 import hubspotLogo from '../../../../../assets/images/hubspot/hubspot.png';
 //@ts-ignore
 import pipedriveLogo from '../../../../../assets/images/pipedrive/pipedrive.png';
+//@ts-ignore
+import gohighlevelLogo from '../../../../../assets/images/gohighlevel/gohighlevel.png';
 
 const SourceHeader: React.FC = () => {
 	const { state } = useImportContext();
@@ -81,6 +83,11 @@ const SourceHeader: React.FC = () => {
 		pipedrive: {
 			src: pipedriveLogo,
 			alt: 'Pipedrive',
+			className: 'h-8 w-auto',
+		},
+		gohighlevel: {
+			src: gohighlevelLogo,
+			alt: 'GoHighLevel',
 			className: 'h-8 w-auto',
 		},
 	};

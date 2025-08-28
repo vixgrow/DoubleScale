@@ -70,12 +70,9 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 	if (currentStep === 1) {
 		return (
 			<div className="mt-10 flex justify-end">
-				{[
-					'mailerlite',
-					'activecampaign',
-					'hubspot',
-					'pipedrive',
-				].includes(source) ? (
+				{['mailerlite', 'activecampaign', 'hubspot', 'pipedrive', 'gohighlevel'].includes(
+					source
+				) ? (
 					<>
 						{!sourceData ? (
 							/* Credentials validation step */
@@ -106,16 +103,33 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 							</Button>
 						) : (
 							/* Field mapping step for integrations */
-							<Button
-								onClick={onImportContacts}
-								disabled={
-									isFetching || isUploading || importing
-								}
-								className="flex items-center space-x-2"
-							>
-								<span>{__('Import Contacts', 'quillcrm')}</span>
-								<ArrowRight className="w-4 h-4" />
-							</Button>
+							<div className="flex justify-between w-full">
+								<Button
+									variant="outline"
+									onClick={() => {
+										console.log('Back button clicked - resetting sourceData');
+										// Reset sourceData to go back to credentials step
+										dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+										// Also reset any fetching state
+										dispatch({ type: 'SET_IS_FETCHING', payload: false });
+									}}
+									disabled={importing}
+									className="flex items-center space-x-2 border-[#1E3A8A] bg-[#FAFAFA] text-[#1E3A8A]"
+								>
+									<ArrowLeft className="w-4 h-4" />
+									<span>{__('Back', 'quillcrm')}</span>
+								</Button>
+								<Button
+									onClick={onImportContacts}
+									disabled={
+										isFetching || isUploading || importing
+									}
+									className="flex items-center space-x-2"
+								>
+									<span>{__('Import Contacts', 'quillcrm')}</span>
+									<ArrowRight className="w-4 h-4" />
+								</Button>
+							</div>
 						)}
 					</>
 				) : (

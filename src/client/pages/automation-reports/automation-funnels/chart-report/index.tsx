@@ -1,21 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	Line,
-	XAxis,
-	YAxis,
-	CartesianGrid,
-	ComposedChart,
-	ResponsiveContainer,
-} from 'recharts';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
+import { Line, XAxis, YAxis, CartesianGrid, ComposedChart } from 'recharts';
+import { Card, CardContent } from '@/components/ui/card';
 import {
 	ChartConfig,
 	ChartContainer,
@@ -77,33 +64,7 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 
 	const getChartData = () => {
 		// Fallback data if no real data is available
-		const chartData =
-			funnelData.length > 0
-				? funnelData
-				: [
-						{
-							label: __('Email Sent', 'quillcrm'),
-							value: 100,
-							percentage: 100,
-						},
-						{
-							label: __('Opened', 'quillcrm'),
-							value: 75,
-							percentage: 75,
-						},
-						{
-							label: __('Clicked', 'quillcrm'),
-							value: 30,
-							percentage: 30,
-						},
-						{
-							label: __('Converted', 'quillcrm'),
-							value: 15,
-							percentage: 15,
-						},
-					];
-
-		console.log('chartData', chartData);
+		const chartData = funnelData.length > 0 ? funnelData : [];
 		// Transform data for Recharts format
 		return chartData.map((item) => ({
 			name: item.label,
@@ -153,17 +114,6 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 	return (
 		<div className="chart-report-container">
 			<Card>
-				<CardHeader>
-					<CardTitle>
-						{__('Automation Funnel Report', 'quillcrm')}
-					</CardTitle>
-					<CardDescription>
-						{__(
-							'Contact flow and conversion rates through automation steps',
-							'quillcrm'
-						)}
-					</CardDescription>
-				</CardHeader>
 				<CardContent className="p-6">
 					<ChartContainer
 						config={chartConfig}
@@ -173,8 +123,8 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 							data={chartData}
 							margin={{
 								top: 20,
-								right: 30,
-								left: 20,
+								right: 60,
+								left: 60,
 								bottom: 80,
 							}}
 						>
@@ -190,12 +140,14 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 								yAxisId="left"
 								orientation="left"
 								tick={{ fontSize: 12 }}
+								width={50}
 							/>
 							<YAxis
 								yAxisId="right"
 								orientation="right"
 								tick={{ fontSize: 12 }}
 								domain={[0, 100]}
+								width={50}
 							/>
 							<ChartTooltip
 								content={
@@ -212,6 +164,7 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 								fill="var(--color-contacts)"
 								name="contacts"
 								radius={[4, 4, 0, 0]}
+								maxBarSize={60}
 							/>
 							<Line
 								yAxisId="right"
@@ -225,6 +178,7 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 									r: 6,
 								}}
 								name="conversionRate"
+								connectNulls={true}
 							/>
 						</ComposedChart>
 					</ChartContainer>

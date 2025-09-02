@@ -105,6 +105,18 @@ class Block_Registry {
 	 * Register default blocks
 	 */
 	protected function register_default_blocks() {
-		
+		$this->register_block( new \QuillCRM\Emails\Blocks\Text_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Button_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Image_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Divider_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\HTML_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Social_Media_Block() );
+
+		/**
+		 * Hook for registering additional email blocks
+		 *
+		 * @param Block_Registry $this Registry instance
+		 */
+		do_action( 'quillcrm_register_email_blocks', $this );
 	}
 }

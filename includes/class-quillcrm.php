@@ -34,6 +34,7 @@ use Illuminate\Translation\ArrayLoader;
 use Illuminate\Validation\Factory as ValidatorFactory;
 use QuillCRM\Custom_Metabox;
 use QuillCRM\Log_Handlers\Log_Handler_DB;
+use QuillCRM\Emails\Email_Builder;
 
 /**
  * QuillCRM Main Class.
@@ -212,6 +213,7 @@ final class QuillCRM {
 		Filters_Manager::instance();
 		Importers_Manager::instance();
 		Custom_Metabox::get_instance();
+		Email_Builder::instance();
 	}
 
 	/**

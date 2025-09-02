@@ -6,8 +6,6 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import { useDraggable } from '@dnd-kit/core';
-import { useBuilder } from '../../context/BuilderContext';
-
 /**
  * internal dependencies
  */
@@ -16,8 +14,6 @@ import { CursorIcon } from '@quillcrm/components';
 import logo from '../../../../assets/images/header-logo.png';
 
 const HeaderLibrary = () => {
-	const { addNewBlockWithProps } = useBuilder();
-
 	// Logo template - single image block with centered logo
 	const logoTemplate = {
 		type: 'single-logo',

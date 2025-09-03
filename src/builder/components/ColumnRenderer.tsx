@@ -1,12 +1,21 @@
-import React from 'react';
+/**
+ * wordpress dependencies
+ */
 import { useDispatch } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
+/**
+ * external dependencies
+ */
+import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { __ } from '@wordpress/i18n';
 import { Plus } from 'lucide-react';
+/**
+ * internal dependencies
+ */
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailColumn } from '../../stores/email-builder/types';
@@ -49,6 +58,34 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 		dispatch(STORE_KEY).addBlock(sectionId, column.id, newBlock);
 	};
 
+	// Check if this column has inline layout blocks (for logo+button)
+	const inlineBlocks = column.blocks.filter(
+		(block) => block.props?.inlineLayout
+	);
+	const hasInlineLayout = inlineBlocks.length > 0;
+
+	// Group blocks by containerId for inline layout
+	const groupedBlocks = hasInlineLayout
+		? column.blocks.reduce(
+				(groups, block) => {
+					if (block.props?.containerId) {
+						if (!groups[block.props.containerId]) {
+							groups[block.props.containerId] = [];
+						}
+						groups[block.props.containerId].push(block);
+					} else {
+						// Regular blocks go to a special group
+						if (!groups['regular']) {
+							groups['regular'] = [];
+						}
+						groups['regular'].push(block);
+					}
+					return groups;
+				},
+				{} as Record<string, any[]>
+			)
+		: { regular: column.blocks };
+
 	return (
 		<div
 			ref={setNodeRef}
@@ -80,14 +117,38 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 					</div>
 				) : (
 					<>
-						{column.blocks.map((block) => (
-							<BlockRenderer
-								key={block.id}
-								block={block}
-								sectionId={sectionId}
-								columnId={column.id}
-							/>
-						))}
+						{Object.entries(groupedBlocks).map(
+							([groupId, blocks]) => {
+								// If this is an inline layout group (not 'regular'), render in flex container
+								if (groupId !== 'regular') {
+									return (
+										<div
+											key={groupId}
+											className="flex justify-between items-center w-full gap-4 mb-4"
+										>
+											{blocks.map((block) => (
+												<BlockRenderer
+													key={block.id}
+													block={block}
+													sectionId={sectionId}
+													columnId={column.id}
+												/>
+											))}
+										</div>
+									);
+								}
+
+								// Regular blocks render normally
+								return blocks.map((block) => (
+									<BlockRenderer
+										key={block.id}
+										block={block}
+										sectionId={sectionId}
+										columnId={column.id}
+									/>
+								));
+							}
+						)}
 
 						{/* Add Block Button */}
 						<div className="mt-4 pt-4 border-t border-dashed border-gray-200">

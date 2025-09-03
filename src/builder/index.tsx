@@ -28,8 +28,13 @@ import TemplateCard from './components/TemplateCard';
 import { BuilderProvider, useBuilder } from './context/BuilderContext';
 
 const BuilderContent: React.FC = () => {
-	const { addNewSection, addNewBlock, addNewBlockWithProps, reorderSections, moveBlock } =
-		useBuilder();
+	const {
+		addNewSection,
+		addNewBlock,
+		addNewBlockWithProps,
+		reorderSections,
+		moveBlock,
+	} = useBuilder();
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: {
@@ -138,50 +143,135 @@ const BuilderContent: React.FC = () => {
 				);
 
 				// Add the template as a single block
-				if (template.type === 'preheader') {
-					console.log(
-						'Creating single block for template:',
-						template
-					);
+				console.log('Creating single block for template:', template);
 
-					// Use the new addNewBlockWithProps function to add the single block with custom props
-					if (
-						overData.type === 'column' &&
-						overData.sectionId &&
-						overData.columnId
-					) {
-						console.log(
-							'Adding single block to column with props:',
-							template.props
-						);
-						addNewBlockWithProps(
-							overData.sectionId,
-							overData.columnId,
-							template.type,
-							template.props
-						);
-					} else if (
-						overData.type === 'section' &&
-						overData.sectionId
-					) {
-						// If dropping into a section (not a specific column), add to the first column
-						console.log(
-							'Adding single block to section with props:',
-							template.props
-						);
-						addNewBlockWithProps(
-							overData.sectionId,
-							'column-1',
-							template.type,
-							template.props
-						);
-					}
+				// Use the new addNewBlockWithProps function to add the single block with custom props
+				if (
+					overData.type === 'column' &&
+					overData.sectionId &&
+					overData.columnId
+				) {
+					console.log(
+						'Adding single block to column with props:',
+						template.props
+					);
+					addNewBlockWithProps(
+						overData.sectionId,
+						overData.columnId,
+						template.type,
+						template.props
+					);
+				} else if (overData.type === 'section' && overData.sectionId) {
+					// If dropping into a section (not a specific column), add to the first column
+					console.log(
+						'Adding single block to section with props:',
+						template.props
+					);
+					addNewBlockWithProps(
+						overData.sectionId,
+						'column-1',
+						template.type,
+						template.props
+					);
 				}
 				return;
 			} else {
 				// If trying to drop on canvas or other invalid areas, ignore it
 				console.log(
 					'Library template dropped on invalid area - ignoring'
+				);
+				return;
+			}
+		}
+
+		// Handle dropping header templates - ONLY into sections/columns
+		if (active.data?.current?.type === 'header-template') {
+			const template = active.data.current.template;
+			console.log('Header template detected:', template);
+
+			// ONLY allow dropping into sections or columns
+			const overData = over.data?.current;
+			if (overData?.type === 'column' || overData?.type === 'section') {
+				console.log(
+					'Dropping header template into section/column:',
+					overData
+				);
+
+				// Get section and column IDs
+				let sectionId, columnId;
+				if (
+					overData.type === 'column' &&
+					overData.sectionId &&
+					overData.columnId
+				) {
+					sectionId = overData.sectionId;
+					columnId = overData.columnId;
+				} else if (overData.type === 'section' && overData.sectionId) {
+					sectionId = overData.sectionId;
+					columnId = 'column-1';
+				}
+
+				if (sectionId && columnId) {
+					// Add multiple blocks based on template type
+					if (template.type === 'logo-button' && template.layout) {
+						// For logo+button template, create a special container with flex justify-between
+						console.log(
+							'Creating logo+button layout with flex justify-between'
+						);
+
+						// Create a special container block that will hold both logo and button inline
+						const containerBlockId = `container-${Date.now()}`;
+
+						// Add the logo block first with special inline properties
+						addNewBlockWithProps(
+							sectionId,
+							columnId,
+							template.blocks[0].type,
+							{
+								...template.blocks[0].props,
+								width: 'auto', // Logo gets auto width like other options
+								align: 'left',
+								// Add a special property to identify this as part of inline layout
+								inlineLayout: true,
+								containerId: containerBlockId,
+							}
+						);
+
+						// Add the button block second with special inline properties
+						addNewBlockWithProps(
+							sectionId,
+							columnId,
+							template.blocks[1].type,
+							{
+								...template.blocks[1].props,
+								width: '50%',
+								align: 'right',
+								// Add a special property to identify this as part of inline layout
+								inlineLayout: true,
+								containerId: containerBlockId,
+							}
+						);
+					} else {
+						// For other templates, add blocks normally
+						template.blocks.forEach((block, index) => {
+							console.log(
+								`Adding block ${index + 1} to column:`,
+								block
+							);
+							addNewBlockWithProps(
+								sectionId,
+								columnId,
+								block.type,
+								block.props
+							);
+						});
+					}
+				}
+				return;
+			} else {
+				// If trying to drop on canvas or other invalid areas, ignore it
+				console.log(
+					'Header template dropped on invalid area - ignoring'
 				);
 				return;
 			}
@@ -299,6 +389,37 @@ const BuilderContent: React.FC = () => {
 			);
 		}
 
+		// Handle header template overlay
+		if (activeItem.type === 'header-template') {
+			const template = activeItem.template;
+			let title = '';
+
+			switch (template.type) {
+				case 'single-logo':
+					title = 'Logo';
+					break;
+				case 'logo-navigation':
+					title = 'Logo + Navigation';
+					break;
+				case 'logo-button':
+					title = 'Logo + Button';
+					break;
+				default:
+					title = 'Header Template';
+			}
+
+			return (
+				<div className="opacity-90 transform rotate-3 shadow-lg bg-white rounded-md border border-blue-300 p-4">
+					<div className="text-sm font-medium text-gray-700">
+						{title}
+					</div>
+					<div className="text-xs text-gray-500 mt-1">
+						Header Template
+					</div>
+				</div>
+			);
+		}
+
 		// Handle existing template overlays
 		if (activeItem.item) {
 			return (
@@ -332,7 +453,7 @@ const BuilderContent: React.FC = () => {
 				>
 					<Sidebar />
 					<Canvas />
-			
+
 					<DragOverlay>
 						{activeItem && activeItem.item ? (
 							<div className="opacity-90 transform rotate-3 shadow-lg">

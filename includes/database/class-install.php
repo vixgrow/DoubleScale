@@ -31,6 +31,11 @@ use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
 use QuillCRM\Database\Migrations\Link_Triggers_Table;
 use QuillCRM\Database\Migrations\Abandoned_Carts_Table;
 use QuillCRM\Database\Migrations\Logs_Table;
+use QuillCRM\Database\Migrations\Pipelines_Table;
+use QuillCRM\Database\Migrations\Pipeline_Stages_Table;
+use QuillCRM\Database\Migrations\Deals_Table;
+use QuillCRM\Database\Migrations\Deal_Activities_Table;
+use QuillCRM\Database\Migrations\Activity_Comments_Table;
 
 /**
  * Install class
@@ -72,6 +77,11 @@ class Install {
 				'link_triggers'                     => Link_Triggers_Table::class,
 				'abandoned_carts'                   => Abandoned_Carts_Table::class,
 				'logs'                              => Logs_Table::class,
+				'pipelines'                         => Pipelines_Table::class,
+				'pipeline_stages'                   => Pipeline_Stages_Table::class,
+				'deals'                             => Deals_Table::class,
+				'deal_activities'                   => Deal_Activities_Table::class,
+				'activity_comments'                 => Activity_Comments_Table::class,
 			)
 		);
 

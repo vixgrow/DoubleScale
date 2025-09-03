@@ -1,0 +1,56 @@
+.chart-report-container {
+	// Responsive adjustments for the chart container
+	.recharts-wrapper {
+		max-width: 100%;
+
+		.recharts-cartesian-axis-tick {
+			text {
+				font-size: 11px;
+				fill: hsl(var(--muted-foreground));
+			}
+		}
+
+		.recharts-cartesian-grid {
+			line {
+				stroke: hsl(var(--border));
+				opacity: 0.5;
+			}
+		}
+
+		.recharts-legend-wrapper {
+			.recharts-legend-item {
+				.recharts-legend-item-text {
+					color: hsl(var(--foreground));
+					font-size: 14px;
+				}
+			}
+		}
+	}
+
+	// Responsive Design
+	@media (max-width: 768px) {
+		.recharts-wrapper {
+			.recharts-cartesian-axis-tick {
+				text {
+					font-size: 10px;
+				}
+			}
+		}
+	}
+
+	// Loading and error states
+	.loading-spinner,
+	.error-message {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 400px;
+		padding: 2rem;
+		text-align: center;
+		color: hsl(var(--muted-foreground));
+	}
+
+	.error-message {
+		color: hsl(var(--destructive));
+	}
+}

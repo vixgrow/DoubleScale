@@ -70,10 +70,13 @@ const BuilderContent: React.FC = () => {
 			});
 		}
 
-		// If we're dragging a block or element from sidebar, only consider columns for collision
+		// If we're dragging a block, element, or template from sidebar, only consider columns for collision
 		if (
 			active.data?.current?.type === 'block' ||
-			active.data?.current?.type === 'element'
+			active.data?.current?.type === 'element' ||
+			active.data?.current?.type === 'library-template' ||
+			active.data?.current?.type === 'header-template' ||
+			active.data?.current?.type === 'email-body-template'
 		) {
 			const columnContainers = Array.from(
 				droppableContainers.values()
@@ -290,6 +293,74 @@ const BuilderContent: React.FC = () => {
 			}
 		}
 
+		// Handle dropping email body templates - ONLY into sections/columns
+		if (active.data?.current?.type === 'email-body-template') {
+			const template = active.data.current.template;
+			console.log('Email body template detected:', template);
+
+			// ONLY allow dropping into sections or columns
+			const overData = over.data?.current;
+			if (overData?.type === 'column' || overData?.type === 'section') {
+				console.log(
+					'Dropping email body template into section/column:',
+					overData
+				);
+
+				// Get section and column IDs
+				let sectionId, columnId;
+				if (
+					overData.type === 'column' &&
+					overData.sectionId &&
+					overData.columnId
+				) {
+					sectionId = overData.sectionId;
+					columnId = overData.columnId;
+				} else if (overData.type === 'section' && overData.sectionId) {
+					sectionId = overData.sectionId;
+					columnId = 'column-1';
+				}
+
+				if (sectionId && columnId) {
+					// Check if this is an email body template with multiple blocks
+					if (template.blocks && Array.isArray(template.blocks)) {
+						console.log('Creating multiple blocks from email body template:', template.blocks);
+
+						// Add each block from the template
+						template.blocks.forEach((blockConfig) => {
+							// Add template layout information to the block props
+							const blockProps = {
+								...blockConfig.props,
+								templateLayout: template.layout?.[blockConfig.props.containerId] || null,
+							};
+
+							addNewBlockWithProps(
+								sectionId,
+								columnId,
+								blockConfig.type,
+								blockProps
+							);
+						});
+					} else {
+						// Fallback: Add the template as a single block
+						console.log('Creating single block for email body template:', template);
+						addNewBlockWithProps(
+							sectionId,
+							columnId,
+							template.type,
+							template.props || {}
+						);
+					}
+				}
+				return;
+			} else {
+				// If trying to drop on canvas or other invalid areas, ignore it
+				console.log(
+					'Email body template dropped on invalid area - ignoring'
+				);
+				return;
+			}
+		}
+
 		// Handle section reordering (when dragging sections to reorder them)
 		if (
 			active.data?.current?.type === 'section' &&
@@ -428,6 +499,52 @@ const BuilderContent: React.FC = () => {
 					</div>
 					<div className="text-xs text-gray-500 mt-1">
 						Header Template
+					</div>
+				</div>
+			);
+		}
+
+		// Handle email body template overlay
+		if (activeItem.type === 'email-body-template') {
+			const template = activeItem.template;
+			let title = '';
+
+			switch (template.type) {
+				case 'title-1':
+					title = 'Title 1';
+					break;
+				case 'title-2':
+					title = 'Title 2';
+					break;
+				case 'title-3':
+					title = 'Title 3';
+					break;
+				case 'title-4':
+					title = 'Title 4';
+					break;
+				case 'title-button-1':
+					title = 'Title & Button 1';
+					break;
+				case 'title-button-2':
+					title = 'Title & Button 2';
+					break;
+				case 'title-button-5':
+					title = 'Title & Button 5';
+					break;
+				case 'title-paragraph-button':
+					title = 'Title, Paragraph & Button';
+					break;
+				default:
+					title = 'Email Body Template';
+			}
+
+			return (
+				<div className="opacity-90 transform rotate-3 shadow-lg bg-white rounded-md border border-blue-300 p-4">
+					<div className="text-sm font-medium text-gray-700">
+						{title}
+					</div>
+					<div className="text-xs text-gray-500 mt-1">
+						Email Body Template
 					</div>
 				</div>
 			);

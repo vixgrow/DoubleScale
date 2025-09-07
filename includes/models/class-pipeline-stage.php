@@ -83,7 +83,7 @@ class Pipeline_Stage extends Model {
 	public $rules = array(
 		'pipeline_id' => 'required|integer',
 		'name' => 'required|string|max:255',
-		'color' => 'nullable|regex:/^#([a-f0-9]{6}|[a-f0-9]{3})$/i',
+		'color' => 'nullable|string|size:7',
 		'sort_order' => 'nullable|integer',
 		'win_probability' => 'nullable|numeric|between:0,100',
 	);
@@ -99,7 +99,7 @@ class Pipeline_Stage extends Model {
 		'pipeline_id.required' => 'Pipeline ID is required.',
 		'name.required' => 'Stage name is required.',
 		'name.max' => 'Stage name must not exceed 255 characters.',
-		'color.regex' => 'Color must be a valid hex color code.',
+		'color.size' => 'Color must be a valid hex color code (7 characters).',
 		'win_probability.between' => 'Win probability must be between 0 and 100.',
 	);
 

@@ -57,7 +57,7 @@ class Campaign_Emails_Table extends Migration {
             contact_id BIGINT(20) NOT NULL,
             template_id BIGINT(20) NOT NULL,
             hash_key VARCHAR(255) NOT NULL,
-            email VARCHAR(255) NOT NULL,
+            email TEXT NOT NULL,
             opened TINYINT(1) DEFAULT 0,
             clicked TINYINT(1) DEFAULT 0,
             status VARCHAR(255),

@@ -1,10 +1,11 @@
-import React, { createContext, useContext } from 'react';
-import { useDispatch } from '@wordpress/data';
+import React, { createContext, useContext, useState } from 'react';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { v4 as uuidv4 } from 'uuid';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailSection, EmailBlock } from '../../stores/email-builder/types';
 import { BlockType, LayoutTemplate } from '../types';
 import { blocksRegistry } from '../blocks/BlockRegister';
+import * as emailBuilderApi from '../../api/email-builder-api';
 
 interface BuilderContextType {
 	// Section operations
@@ -44,13 +45,32 @@ interface BuilderContextType {
 		columnId?: string
 	) => void;
 	clearSelection: () => void;
+
+	// Template operations
+	saveTemplate: (name: string, subject?: string) => Promise<any>;
+	updateTemplate: (
+		id: number,
+		name: string,
+		subject?: string
+	) => Promise<any>;
+
+	// State
+	saving: boolean;
+	error: Error | null;
 }
+
 const BuilderContext = createContext<BuilderContextType | undefined>(undefined);
 
-export const BuilderProvider: React.FC<{ children: React.ReactNode }> = ({
-	children,
-}) => {
+export const BuilderProvider: React.FC<{
+	children: React.ReactNode;
+	templateId?: number;
+}> = ({ children, templateId }) => {
 	const dispatch = useDispatch();
+	const [saving, setSaving] = useState(false);
+	const [error, setError] = useState<Error | null>(null);
+
+	// Get the current sections from the store
+	const sections = useSelect((select) => select(STORE_KEY).getSections());
 
 	const addNewSection = (sectionType: LayoutTemplate) => {
 		const newSection: EmailSection = {
@@ -146,6 +166,64 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode }> = ({
 		dispatch(STORE_KEY).clearSelection();
 	};
 
+	// Save the current template to the backend
+	const saveTemplate = async (name: string, subject = '') => {
+		try {
+			setSaving(true);
+			setError(null);
+
+			const template = {
+				name,
+				subject,
+				body: JSON.stringify(sections),
+				type: 'email',
+				settings: JSON.stringify({
+					backgroundColor: '#f7f7f7',
+					canvasColor: '#ffffff',
+					textColor: '#000000',
+					fontFamily: 'Arial, sans-serif',
+				}),
+			};
+
+			const response = await emailBuilderApi.createTemplate(template);
+			return response;
+		} catch (error: any) {
+			setError(error);
+			throw error;
+		} finally {
+			setSaving(false);
+		}
+	};
+
+	// Update an existing template
+	const updateTemplate = async (id: number, name: string, subject = '') => {
+		try {
+			setSaving(true);
+			setError(null);
+
+			const template = {
+				name,
+				subject,
+				body: JSON.stringify(sections),
+				type: 'email',
+				settings: JSON.stringify({
+					backgroundColor: '#f7f7f7',
+					canvasColor: '#ffffff',
+					textColor: '#000000',
+					fontFamily: 'Arial, sans-serif',
+				}),
+			};
+
+			const response = await emailBuilderApi.updateTemplate(id, template);
+			return response;
+		} catch (error: any) {
+			setError(error);
+			throw error;
+		} finally {
+			setSaving(false);
+		}
+	};
+
 	return (
 		<BuilderContext.Provider
 			value={{
@@ -159,6 +237,10 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode }> = ({
 				reorderSections,
 				selectBlock,
 				clearSelection,
+				saveTemplate,
+				updateTemplate,
+				saving,
+				error,
 			}}
 		>
 			{children}

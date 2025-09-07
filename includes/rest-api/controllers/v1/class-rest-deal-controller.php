@@ -10,7 +10,7 @@
 namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Abstracts\REST_Controller;
-use QuillCRM\Models\Deal;
+use QuillCRM\Models\Deal_Model;
 use QuillCRM\Managers\Deal_Manager;
 use WP_Error;
 use WP_REST_Request;
@@ -251,9 +251,9 @@ class REST_Deal_Controller extends REST_Controller
 		$with_relationships = $request->get_param( 'with_relationships' );
 
 		if ( $with_relationships ) {
-			$deal = Deal::with( array( 'contact', 'pipeline', 'stage', 'owner', 'activities' ) )->find( $deal_id );
+			$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner', 'activities' ) )->find( $deal_id );
 		} else {
-			$deal = Deal::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
+			$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
 		}
 
 		if ( ! $deal ) {
@@ -374,7 +374,7 @@ class REST_Deal_Controller extends REST_Controller
 			return new WP_Error( 'move_failed', 'Failed to move deal to stage', array( 'status' => 500 ) );
 		}
 
-		$deal = Deal::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
+		$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
 		$data = $this->prepare_item_for_response( $deal, $request );
 
 		return new WP_REST_Response( $data, 200 );
@@ -399,7 +399,7 @@ class REST_Deal_Controller extends REST_Controller
 			return new WP_Error( 'move_failed', 'Failed to move deal to pipeline', array( 'status' => 500 ) );
 		}
 
-		$deal = Deal::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
+		$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
 		$data = $this->prepare_item_for_response( $deal, $request );
 
 		return new WP_REST_Response( $data, 200 );
@@ -422,7 +422,7 @@ class REST_Deal_Controller extends REST_Controller
 			return new WP_Error( 'update_failed', 'Failed to mark deal as won', array( 'status' => 500 ) );
 		}
 
-		$deal = Deal::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
+		$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
 		$data = $this->prepare_item_for_response( $deal, $request );
 
 		return new WP_REST_Response( $data, 200 );
@@ -446,7 +446,7 @@ class REST_Deal_Controller extends REST_Controller
 			return new WP_Error( 'update_failed', 'Failed to mark deal as lost', array( 'status' => 500 ) );
 		}
 
-		$deal = Deal::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
+		$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
 		$data = $this->prepare_item_for_response( $deal, $request );
 
 		return new WP_REST_Response( $data, 200 );
@@ -469,7 +469,7 @@ class REST_Deal_Controller extends REST_Controller
 			return new WP_Error( 'update_failed', 'Failed to reopen deal', array( 'status' => 500 ) );
 		}
 
-		$deal = Deal::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
+		$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
 		$data = $this->prepare_item_for_response( $deal, $request );
 
 		return new WP_REST_Response( $data, 200 );

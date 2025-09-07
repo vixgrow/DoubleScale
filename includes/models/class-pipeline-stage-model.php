@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Pipeline_Stage
+ * Class Pipeline_Stage_Model
  * This class is responsible for handling the pipeline stage model
  *
  * @since 1.0.0
@@ -13,9 +13,9 @@ namespace QuillCRM\Models;
 use WPEloquent\Eloquent\Model;
 
 /**
- * Pipeline_Stage class
+ * Pipeline_Stage_Model class
  */
-class Pipeline_Stage extends Model {
+class Pipeline_Stage_Model extends Model {
 
 	/**
 	 * Table name
@@ -111,7 +111,7 @@ class Pipeline_Stage extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function pipeline() {
-		return $this->belongsTo( Pipeline::class, 'pipeline_id', 'id' );
+		return $this->belongsTo( Pipeline_Model::class, 'pipeline_id', 'id' );
 	}
 
 	/**
@@ -122,7 +122,7 @@ class Pipeline_Stage extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function deals() {
-		return $this->hasMany( Deal::class, 'stage_id', 'id' );
+		return $this->hasMany( Deal_Model::class, 'stage_id', 'id' );
 	}
 
 	/**
@@ -133,7 +133,7 @@ class Pipeline_Stage extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function active_deals() {
-		return $this->hasMany( Deal::class, 'stage_id', 'id' )->where( 'status', 'open' );
+		return $this->hasMany( Deal_Model::class, 'stage_id', 'id' )->where( 'status', 'open' );
 	}
 
 	/**
@@ -182,7 +182,7 @@ class Pipeline_Stage extends Model {
 		static::deleting(
 			function( $stage ) {
 				// Move all deals to the first stage of the same pipeline
-				$first_stage = Pipeline_Stage::where( 'pipeline_id', $stage->pipeline_id )
+				$first_stage = Pipeline_Stage_Model::where( 'pipeline_id', $stage->pipeline_id )
 					->where( 'id', '!=', $stage->id )
 					->orderBy( 'sort_order' )
 					->first();

@@ -10,8 +10,8 @@
 namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Abstracts\REST_Controller;
-use QuillCRM\Models\Pipeline;
-use QuillCRM\Models\Pipeline_Stage;
+use QuillCRM\Models\Pipeline_Model;
+use QuillCRM\Models\Pipeline_Stage_Model;
 use QuillCRM\Managers\Pipeline_Manager;
 use WP_Error;
 use WP_REST_Request;
@@ -164,7 +164,7 @@ class REST_Pipeline_Controller extends REST_Controller
 		if ( $with_stages ) {
 			$pipelines = Pipeline_Manager::instance()->get_pipelines_with_stages();
 		} else {
-			$pipelines = Pipeline::orderBy( 'sort_order' )->get();
+			$pipelines = Pipeline_Model::orderBy( 'sort_order' )->get();
 		}
 
 		$data = array();
@@ -199,9 +199,9 @@ class REST_Pipeline_Controller extends REST_Controller
 		if ( $with_stats ) {
 			$pipeline = Pipeline_Manager::instance()->get_pipeline_with_stats( $pipeline_id );
 		} elseif ( $with_stages ) {
-			$pipeline = Pipeline::with( 'stages' )->find( $pipeline_id );
+			$pipeline = Pipeline_Model::with( 'stages' )->find( $pipeline_id );
 		} else {
-			$pipeline = Pipeline::find( $pipeline_id );
+			$pipeline = Pipeline_Model::find( $pipeline_id );
 		}
 
 		if ( ! $pipeline ) {
@@ -250,7 +250,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 */
 	public function update_item( $request ) {
 		$pipeline_id = $request->get_param( 'id' );
-		$pipeline = Pipeline::find( $pipeline_id );
+		$pipeline = Pipeline_Model::find( $pipeline_id );
 
 		if ( ! $pipeline ) {
 			return new WP_Error( 'pipeline_not_found', 'Pipeline not found', array( 'status' => 404 ) );
@@ -309,7 +309,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	public function get_stages( $request ) {
 		$pipeline_id = $request->get_param( 'pipeline_id' );
 		
-		$pipeline = Pipeline::with( 'stages' )->find( $pipeline_id );
+		$pipeline = Pipeline_Model::with( 'stages' )->find( $pipeline_id );
 
 		if ( ! $pipeline ) {
 			return new WP_Error( 'pipeline_not_found', 'Pipeline not found', array( 'status' => 404 ) );
@@ -367,7 +367,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 */
 	public function update_stage( $request ) {
 		$stage_id = $request->get_param( 'stage_id' );
-		$stage = Pipeline_Stage::find( $stage_id );
+		$stage = Pipeline_Stage_Model::find( $stage_id );
 
 		if ( ! $stage ) {
 			return new WP_Error( 'stage_not_found', 'Stage not found', array( 'status' => 404 ) );
@@ -410,7 +410,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 */
 	public function delete_stage( $request ) {
 		$stage_id = $request->get_param( 'stage_id' );
-		$stage = Pipeline_Stage::find( $stage_id );
+		$stage = Pipeline_Stage_Model::find( $stage_id );
 
 		if ( ! $stage ) {
 			return new WP_Error( 'stage_not_found', 'Stage not found', array( 'status' => 404 ) );

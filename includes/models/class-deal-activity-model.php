@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Deal_Activity
+ * Class Deal_Activity_Model
  * This class is responsible for handling the deal activity model
  *
  * @since 1.0.0
@@ -13,9 +13,9 @@ namespace QuillCRM\Models;
 use WPEloquent\Eloquent\Model;
 
 /**
- * Deal_Activity class
+ * Deal_Activity_Model class
  */
-class Deal_Activity extends Model {
+class Deal_Activity_Model extends Model {
 
 	/**
 	 * Table name
@@ -104,7 +104,7 @@ class Deal_Activity extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function deal() {
-		return $this->belongsTo( Deal::class, 'deal_id', 'id' );
+		return $this->belongsTo( Deal_Model::class, 'deal_id', 'id' );
 	}
 
 	/**
@@ -126,7 +126,7 @@ class Deal_Activity extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function comments() {
-		return $this->hasMany( Activity_Comment::class, 'activity_id', 'id' )->orderBy( 'created_at', 'asc' );
+		return $this->hasMany( Activity_Comment_Model::class, 'activity_id', 'id' )->orderBy( 'created_at', 'asc' );
 	}
 
 	/**
@@ -144,8 +144,8 @@ class Deal_Activity extends Model {
 				return sprintf( '%s created this deal', $user_name );
 			
 			case 'stage_changed':
-				$old_stage = Pipeline_Stage::find( $this->data['old_stage_id'] ?? 0 );
-				$new_stage = Pipeline_Stage::find( $this->data['new_stage_id'] ?? 0 );
+				$old_stage = Pipeline_Stage_Model::find( $this->data['old_stage_id'] ?? 0 );
+				$new_stage = Pipeline_Stage_Model::find( $this->data['new_stage_id'] ?? 0 );
 				return sprintf( 
 					'%s moved deal from "%s" to "%s"', 
 					$user_name,

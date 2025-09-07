@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Activity_Comment
+ * Class Activity_Comment_Model
  * This class is responsible for handling the activity comment model
  *
  * @since 1.0.0
@@ -13,9 +13,9 @@ namespace QuillCRM\Models;
 use WPEloquent\Eloquent\Model;
 
 /**
- * Activity_Comment class
+ * Activity_Comment_Model class
  */
-class Activity_Comment extends Model {
+class Activity_Comment_Model extends Model {
 
 	/**
 	 * Table name
@@ -92,7 +92,7 @@ class Activity_Comment extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function activity() {
-		return $this->belongsTo( Deal_Activity::class, 'activity_id', 'id' );
+		return $this->belongsTo( Deal_Activity_Model::class, 'activity_id', 'id' );
 	}
 
 	/**
@@ -115,8 +115,8 @@ class Activity_Comment extends Model {
 	 */
 	public function deal() {
 		return $this->hasOneThrough( 
-			Deal::class, 
-			Deal_Activity::class,
+			Deal_Model::class, 
+			Deal_Activity_Model::class,
 			'id',     // Foreign key on Deal_Activity table
 			'id',     // Foreign key on Deal table
 			'activity_id', // Local key on Activity_Comment table

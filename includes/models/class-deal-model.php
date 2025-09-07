@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Deal
+ * Class Deal_Model
  * This class is responsible for handling the deal model
  *
  * @since 1.0.0
@@ -14,9 +14,9 @@ use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\Contact_Model;
 
 /**
- * Deal class
+ * Deal_Model class
  */
-class Deal extends Model {
+class Deal_Model extends Model {
 
 	/**
 	 * Table name
@@ -140,7 +140,7 @@ class Deal extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function pipeline() {
-		return $this->belongsTo( Pipeline::class, 'pipeline_id', 'id' );
+		return $this->belongsTo( Pipeline_Model::class, 'pipeline_id', 'id' );
 	}
 
 	/**
@@ -151,7 +151,7 @@ class Deal extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function stage() {
-		return $this->belongsTo( Pipeline_Stage::class, 'stage_id', 'id' );
+		return $this->belongsTo( Pipeline_Stage_Model::class, 'stage_id', 'id' );
 	}
 
 	/**
@@ -173,7 +173,7 @@ class Deal extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function activities() {
-		return $this->hasMany( Deal_Activity::class, 'deal_id', 'id' )->orderBy( 'created_at', 'desc' );
+		return $this->hasMany( Deal_Activity_Model::class, 'deal_id', 'id' )->orderBy( 'created_at', 'desc' );
 	}
 
 	/**
@@ -242,7 +242,7 @@ class Deal extends Model {
 
 		if ( $saved ) {
 			// Log the stage change activity
-			Deal_Activity::create( array(
+			Deal_Activity_Model::create( array(
 				'deal_id' => $this->id,
 				'activity_type' => 'stage_changed',
 				'data' => wp_json_encode( array(
@@ -273,7 +273,7 @@ class Deal extends Model {
 		$saved = $this->save();
 
 		if ( $saved ) {
-			Deal_Activity::create( array(
+			Deal_Activity_Model::create( array(
 				'deal_id' => $this->id,
 				'activity_type' => 'status_changed',
 				'data' => wp_json_encode( array(
@@ -305,7 +305,7 @@ class Deal extends Model {
 		$saved = $this->save();
 
 		if ( $saved ) {
-			Deal_Activity::create( array(
+			Deal_Activity_Model::create( array(
 				'deal_id' => $this->id,
 				'activity_type' => 'status_changed',
 				'data' => wp_json_encode( array(
@@ -334,7 +334,7 @@ class Deal extends Model {
 		static::created(
 			function( $deal ) {
 				// Log deal creation activity
-				Deal_Activity::create( array(
+				Deal_Activity_Model::create( array(
 					'deal_id' => $deal->id,
 					'activity_type' => 'created',
 					'data' => wp_json_encode( array(
@@ -355,7 +355,7 @@ class Deal extends Model {
 				
 				// Log value changes
 				if ( isset( $changes['value'] ) ) {
-					Deal_Activity::create( array(
+					Deal_Activity_Model::create( array(
 						'deal_id' => $deal->id,
 						'activity_type' => 'value_changed',
 						'data' => wp_json_encode( array(

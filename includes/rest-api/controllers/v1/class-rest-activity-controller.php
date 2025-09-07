@@ -163,9 +163,9 @@ class REST_Activity_Controller extends REST_Controller
 		$with_comments = $request->get_param( 'with_comments' );
 
 		if ( $with_comments ) {
-			$activity = Deal_Activity::with( array( 'user', 'comments.user', 'deal' ) )->find( $activity_id );
+			$activity = Deal_Activity_Model::with( array( 'user', 'comments.user', 'deal' ) )->find( $activity_id );
 		} else {
-			$activity = Deal_Activity::with( array( 'user', 'deal' ) )->find( $activity_id );
+			$activity = Deal_Activity_Model::with( array( 'user', 'deal' ) )->find( $activity_id );
 		}
 
 		if ( ! $activity ) {
@@ -315,7 +315,7 @@ class REST_Activity_Controller extends REST_Controller
 	public function get_comments( $request ) {
 		$activity_id = $request->get_param( 'activity_id' );
 		
-		$activity = Deal_Activity::with( 'comments.user' )->find( $activity_id );
+		$activity = Deal_Activity_Model::with( 'comments.user' )->find( $activity_id );
 
 		if ( ! $activity ) {
 			return new WP_Error( 'activity_not_found', 'Activity not found', array( 'status' => 404 ) );

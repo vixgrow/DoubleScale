@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Pipeline
+ * Class Pipeline_Model
  * This class is responsible for handling the pipeline model
  *
  * @since 1.0.0
@@ -13,9 +13,9 @@ namespace QuillCRM\Models;
 use WPEloquent\Eloquent\Model;
 
 /**
- * Pipeline class
+ * Pipeline_Model class
  */
-class Pipeline extends Model {
+class Pipeline_Model extends Model {
 
 	/**
 	 * Table name
@@ -92,7 +92,7 @@ class Pipeline extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function stages() {
-		return $this->hasMany( Pipeline_Stage::class, 'pipeline_id', 'id' )->orderBy( 'sort_order' );
+		return $this->hasMany( Pipeline_Stage_Model::class, 'pipeline_id', 'id' )->orderBy( 'sort_order' );
 	}
 
 	/**
@@ -103,7 +103,7 @@ class Pipeline extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function deals() {
-		return $this->hasMany( Deal::class, 'pipeline_id', 'id' );
+		return $this->hasMany( Deal_Model::class, 'pipeline_id', 'id' );
 	}
 
 	/**
@@ -114,7 +114,7 @@ class Pipeline extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function active_deals() {
-		return $this->hasMany( Deal::class, 'pipeline_id', 'id' )->where( 'status', 'open' );
+		return $this->hasMany( Deal_Model::class, 'pipeline_id', 'id' )->where( 'status', 'open' );
 	}
 
 	/**

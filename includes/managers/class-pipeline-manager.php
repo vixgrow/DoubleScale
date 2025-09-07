@@ -66,6 +66,23 @@ final class Pipeline_Manager {
 	}
 
 	/**
+	 * Get default pipeline stages
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	private function get_default_stages() {
+		return array(
+			array( 'name' => 'Lead', 'color' => '#e74c3c', 'win_probability' => 10.0 ),
+			array( 'name' => 'Qualified', 'color' => '#f39c12', 'win_probability' => 25.0 ),
+			array( 'name' => 'Proposal', 'color' => '#f1c40f', 'win_probability' => 50.0 ),
+			array( 'name' => 'Negotiation', 'color' => '#2ecc71', 'win_probability' => 75.0 ),
+			array( 'name' => 'Closed Won', 'color' => '#27ae60', 'win_probability' => 100.0 ),
+		);
+	}
+
+	/**
 	 * Create default pipeline if none exists
 	 *
 	 * @since 1.0.0
@@ -77,13 +94,7 @@ final class Pipeline_Manager {
 			$this->create_pipeline_with_stages(
 				'Sales Pipeline',
 				'Default sales pipeline',
-				array(
-					array( 'name' => 'Lead', 'color' => '#e74c3c', 'win_probability' => 10.0 ),
-					array( 'name' => 'Qualified', 'color' => '#f39c12', 'win_probability' => 25.0 ),
-					array( 'name' => 'Proposal', 'color' => '#f1c40f', 'win_probability' => 50.0 ),
-					array( 'name' => 'Negotiation', 'color' => '#2ecc71', 'win_probability' => 75.0 ),
-					array( 'name' => 'Closed Won', 'color' => '#27ae60', 'win_probability' => 100.0 ),
-				)
+				$this->get_default_stages()
 			);
 		}
 	}
@@ -108,11 +119,7 @@ final class Pipeline_Manager {
 			) );
 
 			if ( empty( $stages ) ) {
-				$stages = array(
-					array( 'name' => 'New', 'color' => '#6d78d8', 'win_probability' => 10.0 ),
-					array( 'name' => 'In Progress', 'color' => '#f39c12', 'win_probability' => 50.0 ),
-					array( 'name' => 'Closed', 'color' => '#2ecc71', 'win_probability' => 100.0 ),
-				);
+				$stages = $this->get_default_stages();
 			}
 
 			$sort_order = 0;

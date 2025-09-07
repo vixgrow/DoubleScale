@@ -142,37 +142,50 @@ const BuilderContent: React.FC = () => {
 					overData
 				);
 
-				// Add the template as a single block
-				console.log('Creating single block for template:', template);
-
-				// Use the new addNewBlockWithProps function to add the single block with custom props
+				// Get section and column IDs
+				let sectionId, columnId;
 				if (
 					overData.type === 'column' &&
 					overData.sectionId &&
 					overData.columnId
 				) {
-					console.log(
-						'Adding single block to column with props:',
-						template.props
-					);
-					addNewBlockWithProps(
-						overData.sectionId,
-						overData.columnId,
-						template.type,
-						template.props
-					);
+					sectionId = overData.sectionId;
+					columnId = overData.columnId;
 				} else if (overData.type === 'section' && overData.sectionId) {
-					// If dropping into a section (not a specific column), add to the first column
-					console.log(
-						'Adding single block to section with props:',
-						template.props
-					);
-					addNewBlockWithProps(
-						overData.sectionId,
-						'column-1',
-						template.type,
-						template.props
-					);
+					sectionId = overData.sectionId;
+					columnId = 'column-1';
+				}
+
+				if (sectionId && columnId) {
+					// Check if this is a hero template with multiple blocks
+					if (template.blocks && Array.isArray(template.blocks)) {
+						console.log('Creating multiple blocks from hero template:', template.blocks);
+
+						// Add each block from the template
+						template.blocks.forEach((blockConfig) => {
+							// Add template layout information to the block props
+							const blockProps = {
+								...blockConfig.props,
+								templateLayout: template.layout?.[blockConfig.props.containerId] || null,
+							};
+
+							addNewBlockWithProps(
+								sectionId,
+								columnId,
+								blockConfig.type,
+								blockProps
+							);
+						});
+					} else {
+						// Fallback: Add the template as a single block
+						console.log('Creating single block for template:', template);
+						addNewBlockWithProps(
+							sectionId,
+							columnId,
+							template.type,
+							template.props || {}
+						);
+					}
 				}
 				return;
 			} else {

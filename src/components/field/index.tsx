@@ -76,6 +76,10 @@ const Field: React.FC<FieldProps> = ({
 }) => {
 	let fieldContent;
 
+	if (type === 'boolean') {
+		type = 'switch';
+	}
+
 	switch (type) {
 		case 'lists':
 			fieldContent = (
@@ -163,14 +167,13 @@ const Field: React.FC<FieldProps> = ({
 			);
 			break;
 		case 'multiselect':
-			const multiOptions = map(options, (label, value) => ({
-				label,
-				value,
-			}));
+			const multiOptions = options || [];
 			fieldContent = (
 				<Select
-					onChange={(value) => {
-						const values = value.map((val) => val.value);
+					onChange={(selectedOptions) => {
+						const values = selectedOptions
+							? selectedOptions.map((val) => val.value)
+							: [];
 						onChange(values);
 					}}
 					options={multiOptions}

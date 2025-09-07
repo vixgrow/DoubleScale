@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Contact_Model
  * This class is responsible for handling the contact model
@@ -25,6 +26,9 @@ use QuillCRM\Utils;
  * Contact_Model class
  */
 class Contact_Model extends Model {
+
+
+
 
 	/**
 	 * Table name
@@ -135,7 +139,9 @@ class Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function custom_fields() {
-		return $this->belongsToMany( Custom_Field_Model::class, 'quillcrm_contact_custom_field_relationship', 'contact_id', 'custom_field_id' )->withPivot( 'value' );
+		return $this->belongsToMany( Custom_Field_Model::class, 'quillcrm_custom_field_relationship', 'entity_id', 'custom_field_id' )
+			->withPivot( 'value' )
+			->wherePivot( 'entity_type', 'contact' );
 	}
 
 	/**
@@ -157,7 +163,7 @@ class Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function campaign_emails() {
-		return $this->hasMany( Campaign_Email_Model::class, 'contact_id', 'id' );
+		 return $this->hasMany( Campaign_Email_Model::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -219,7 +225,7 @@ class Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function automation_contacts() {
-		return $this->hasMany( Automation_Contact_Model::class, 'contact_id', 'id' );
+		 return $this->hasMany( Automation_Contact_Model::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -348,10 +354,10 @@ class Contact_Model extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		parent::boot();
+		 parent::boot();
 
 		static::deleting(
-			function( $contact ) {
+			function ( $contact ) {
 				$contact->notes()->delete();
 
 				// Delete the contact from the automation contacts
@@ -360,7 +366,7 @@ class Contact_Model extends Model {
 		);
 
 		parent::saved(
-			function( $contact ) {
+			function ( $contact ) {
 				if ( $contact->status == 'unsubscribed' ) {
 					do_action( 'quillcrm_contact_unsubscribed', $contact );
 				} else {
@@ -372,7 +378,7 @@ class Contact_Model extends Model {
 		// Attach revenue to the contact if woo commerce is active in retreving contact.
 		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			parent::retrieved(
-				function( $contact ) {
+				function ( $contact ) {
 					$orders  = $contact->orders;
 					$revenue = 0;
 
@@ -390,13 +396,13 @@ class Contact_Model extends Model {
 
 		// Save templates when saving the campaign
 		static::saving(
-			function( $contact ) {
+			function ( $contact ) {
 				unset( $contact->revenue );
 			}
 		);
 
 		static::creating(
-			function( $contact ) {
+			function ( $contact ) {
 				$contact->hash_id = Utils::generate_hash_key();
 			}
 		);

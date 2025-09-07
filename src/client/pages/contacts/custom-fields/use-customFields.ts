@@ -46,7 +46,9 @@ export const useCustomFields = () => {
 			setState((prev) => ({ ...prev, loading: true, error: null }));
 
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/custom-fields-groups'),
+				path: addQueryArgs('/qc/v1/custom-fields-groups', {
+					scope: 'contact',
+				}),
 			})) as CustomFieldsGroups;
 
 			if (!Array.isArray(response)) {
@@ -83,7 +85,10 @@ export const useCustomFields = () => {
 			const response = (await apiFetch({
 				path,
 				method,
-				data: field,
+				data: {
+					...field,
+					scope: 'contact',
+				},
 			})) as CustomField;
 
 			setState((prev) => ({
@@ -194,7 +199,10 @@ export const useCustomFields = () => {
 			const response = (await apiFetch({
 				path: '/qc/v1/custom-fields-groups',
 				method: 'POST',
-				data: { name },
+				data: {
+					name,
+					scope: 'contact',
+				},
 			})) as CustomFieldsGroup;
 
 			setState((prev) => ({
@@ -347,7 +355,7 @@ export const useCustomFields = () => {
 						...group,
 						custom_fields: [
 							...group.custom_fields,
-							{ ...field, group_id: newGroupId },
+							{ ...field, group_id: newGroupId, scope: 'contact' },
 						],
 					};
 				}
@@ -368,7 +376,7 @@ export const useCustomFields = () => {
 			await apiFetch({
 				path: `/qc/v1/custom-fields/${field.id}`,
 				method: 'PUT',
-				data: { ...field, group_id: newGroupId },
+				data: { ...field, group_id: newGroupId, scope: 'contact' },
 			});
 		} catch (error) {
 			// Revert if API call fails

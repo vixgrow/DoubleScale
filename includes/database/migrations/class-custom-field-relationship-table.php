@@ -1,7 +1,8 @@
 <?php
+
 /**
- * Class Contact_Custom_Field_Relationship_Table
- * This class is responsible for handling the contact custom field relationship table
+ * Class Custom_Field_Relationship_Table
+ * This class is responsible for handling the custom field relationship table
  *
  * @since 1.0.0
  *
@@ -11,9 +12,10 @@
 namespace QuillCRM\Database\Migrations;
 
 /**
- * Contact_Custom_Field_Relationship_Table class
+ * Custom_Field_Relationship_Table class
  */
-class Contact_Custom_Field_Relationship_Table extends Migration {
+class Custom_Field_Relationship_Table extends Migration {
+
 
 	/**
 	 * Table name
@@ -22,7 +24,7 @@ class Contact_Custom_Field_Relationship_Table extends Migration {
 	 *
 	 * @since 1.0.0
 	 */
-	public $table_name = 'contact_custom_field_relationship';
+	public $table_name = 'custom_field_relationship';
 
 	/**
 	 * Get query
@@ -33,7 +35,8 @@ class Contact_Custom_Field_Relationship_Table extends Migration {
 	 */
 	public function get_query() {
 		$query = 'id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-            contact_id BIGINT(20) UNSIGNED NOT NULL,
+            entity_id BIGINT(20) UNSIGNED NOT NULL,
+            entity_type VARCHAR(255) NOT NULL,
             custom_field_id BIGINT(20) UNSIGNED NOT NULL,
             value TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

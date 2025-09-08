@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Custom_Field_Model
  * This class is responsible for handling the custom field model
@@ -18,6 +19,7 @@ use QuillCRM\Models\Custom_Fields_Group_Model;
  * Custom_Field_Model class
  */
 class Custom_Field_Model extends Model {
+
 
 	/**
 	 * Table name
@@ -50,6 +52,7 @@ class Custom_Field_Model extends Model {
 		'type',
 		'attributes',
 		'group_id',
+		'scope',
 		'created_at',
 		'updated_at',
 	);
@@ -62,6 +65,7 @@ class Custom_Field_Model extends Model {
 	protected $casts = array(
 		'attributes' => 'array',
 		'group_id'   => 'integer',
+		'scope'      => 'string',
 	);
 
 	/**
@@ -73,6 +77,7 @@ class Custom_Field_Model extends Model {
 		'name'     => 'required',
 		'type'     => 'required',
 		'group_id' => 'required',
+		'scope'    => 'required',
 	);
 
 	/**
@@ -84,6 +89,7 @@ class Custom_Field_Model extends Model {
 		'name.required'     => 'Custom field name is required',
 		'type.required'     => 'Custom field type is required',
 		'group_id.required' => 'Custom field group ID is required',
+		'scope.required'    => 'Custom field scope is required',
 	);
 
 	/**
@@ -114,7 +120,8 @@ class Custom_Field_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function contacts() {
-		return $this->belongsToMany( Contact_Model::class, 'quillcrm_contact_custom_field_relationship', 'custom_field_id', 'contact_id' );
+		return $this->belongsToMany( Contact_Model::class, 'quillcrm_custom_field_relationship', 'custom_field_id', 'contact_id' )
+			->wherePivot( 'entity_type', 'contact' );
 	}
 
 	/**
@@ -127,8 +134,16 @@ class Custom_Field_Model extends Model {
 	 * @return bool
 	 */
 	public function validate_value( $value ) {
+		xdebug_break();
 		switch ( $this->type ) {
+			case 'boolean':
+				if ( $value === 'false' || $value === 'true' ) {
+					return true;
+				}
+				return false;
 			case 'text':
+				return is_string( $value );
+			case 'textarea':
 				return is_string( $value );
 			case 'number':
 				return is_numeric( $value );
@@ -140,12 +155,19 @@ class Custom_Field_Model extends Model {
 				return preg_match( '/^[0-9\-\(\)\/\+\s]*$/', $value );
 			case 'url':
 				return filter_var( $value, FILTER_VALIDATE_URL );
+			case 'checkbox':
+				if ( $value === 'false' || $value === 'true' ) {
+					return true;
+				}
+				return false;
 			case 'select':
-				return in_array( $value, $this->attributes );
+				$attributes = $this['attributes'];
+				return in_array( $value, $attributes );
 			case 'multiselect':
-				$values = explode( ',', $value );
+				$values     = explode( ',', $value );
+				$attributes = $this['attributes'];
 				foreach ( $values as $val ) {
-					if ( ! in_array( $val, $this->attributes ) ) {
+					if ( ! in_array( $val, $attributes ) ) {
 						return false;
 					}
 				}
@@ -177,10 +199,10 @@ class Custom_Field_Model extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		parent::boot();
+		 parent::boot();
 
 		static::creating(
-			function( $field ) {
+			function ( $field ) {
 				$field->slug = Str::slug( $field->name );
 
 				if ( static::where( 'slug', $field->slug )->exists() ) {
@@ -195,10 +217,9 @@ class Custom_Field_Model extends Model {
 
 		// Delete the custom field relationships when the custom field is deleted
 		static::deleting(
-			function( $field ) {
+			function ( $field ) {
 				$field->contacts()->detach();
 			}
 		);
 	}
-
 }

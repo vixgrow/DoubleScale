@@ -1,8 +1,7 @@
 <?php
-
 /**
- * Class Custom_Fields_Table
- * This class is responsible for handling the Custom_Fields table
+ * Class Pipelines_Table
+ * This class is responsible for handling the Pipelines table
  *
  * @since 1.0.0
  *
@@ -12,10 +11,9 @@
 namespace QuillCRM\Database\Migrations;
 
 /**
- * Custom_Fields Table class
+ * Pipelines Table class
  */
-class Custom_Fields_Table extends Migration {
-
+class Pipelines_Table extends Migration {
 
 	/**
 	 * Table name
@@ -24,7 +22,7 @@ class Custom_Fields_Table extends Migration {
 	 *
 	 * @since 1.0.0
 	 */
-	public $table_name = 'custom_fields';
+	public $table_name = 'pipelines';
 
 	/**
 	 * Get query
@@ -34,17 +32,14 @@ class Custom_Fields_Table extends Migration {
 	 * @return string
 	 */
 	public function get_query() {
-		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
+		$query = 'id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			name VARCHAR(255) NOT NULL,
-			slug VARCHAR(255) NOT NULL,
-			type VARCHAR(255) NOT NULL,
-			attributes TEXT,
-			group_id BIGINT(20) NOT NULL,
-			scope VARCHAR(255) NOT NULL,
+			description TEXT,
+			sort_order INT DEFAULT 0,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),
-			UNIQUE KEY slug (slug)';
+			INDEX idx_sort_order (sort_order)';
 
 		return $query;
 	}

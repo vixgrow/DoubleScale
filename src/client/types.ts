@@ -158,6 +158,7 @@ export type CustomFieldsGroup = {
 	id: number;
 	name: string;
 	slug: string;
+	scope: string;
 	created_at: string;
 	updated_at: string;
 	custom_fields: CustomField[];

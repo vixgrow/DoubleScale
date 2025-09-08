@@ -2,6 +2,7 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 /**
  * external dependencies
  */
@@ -33,11 +34,14 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 	fieldTypes,
 	onSave,
 }) => {
+	const { createNotice } = useDispatch('quillcrm/core');
 	const [formData, setFormData] = useState<Partial<CustomField>>({
 		name: '',
 		type: '',
 		group_id: groups[0]?.id || 0,
+		attributes: null,
 	});
+	const [options, setOptions] = useState<string[]>(['']);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	useEffect(() => {
@@ -46,13 +50,24 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 				name: field.name,
 				type: field.type,
 				group_id: field.group_id,
+				attributes: field.attributes,
 			});
+			// Load existing options if field has them
+			if (field.attributes && Array.isArray(field.attributes)) {
+				setOptions(
+					field.attributes.length > 0 ? field.attributes : ['']
+				);
+			} else {
+				setOptions(['']);
+			}
 		} else {
 			setFormData({
 				name: '',
 				type: '',
 				group_id: groups[0]?.id || 0,
+				attributes: null,
 			});
+			setOptions(['']);
 		}
 	}, [field, groups]);
 
@@ -64,13 +79,24 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 					name: field.name,
 					type: field.type,
 					group_id: field.group_id,
+					attributes: field.attributes,
 				});
+				// Load existing options if field has them
+				if (field.attributes && Array.isArray(field.attributes)) {
+					setOptions(
+						field.attributes.length > 0 ? field.attributes : ['']
+					);
+				} else {
+					setOptions(['']);
+				}
 			} else {
 				setFormData({
 					name: '',
 					type: '',
 					group_id: groups[0]?.id || 0,
+					attributes: null,
 				});
+				setOptions(['']);
 			}
 		}
 	}, [visible, field, groups]);
@@ -85,16 +111,70 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 		value: group.id,
 	}));
 
+	// Helper functions for options management
+	const addOption = () => {
+		setOptions([...options, '']);
+	};
+
+	const removeOption = (index: number) => {
+		if (options.length > 1) {
+			const newOptions = options.filter((_, i) => i !== index);
+			setOptions(newOptions);
+		}
+	};
+
+	const updateOption = (index: number, value: string) => {
+		const newOptions = [...options];
+		newOptions[index] = value;
+		setOptions(newOptions);
+	};
+
+	// Check if current field type needs options
+	const needsOptions =
+		formData.type === 'select' || formData.type === 'multiselect';
+
+	// Reset options when field type changes
+	useEffect(() => {
+		if (!needsOptions) {
+			setOptions(['']);
+		}
+	}, [formData.type, needsOptions]);
+
 	const handleSubmit = async () => {
 		if (!formData.name || !formData.type || !formData.group_id) {
+			createNotice({
+				type: 'error',
+				message: __('Please fill all the required fields', 'quillcrm'),
+			});
+			setIsSubmitting(false);
 			return;
+		}
+
+		// Validate options for select/multiselect fields
+		if (needsOptions) {
+			const validOptions = options.filter(
+				(option) => option.trim() !== ''
+			);
+			if (validOptions.length === 0) {
+				createNotice({
+					type: 'error',
+					message: __('Please add at least one option', 'quillcrm'),
+				});
+				setIsSubmitting(false);
+				return;
+			}
 		}
 
 		setIsSubmitting(true);
 		const isNew = !field;
-		const fieldData = isNew
-			? ({ ...formData } as CustomField)
-			: ({ ...field, ...formData } as CustomField);
+
+		// Prepare field data with options as attributes
+		const fieldData = {
+			...(isNew ? formData : { ...field, ...formData }),
+			attributes: needsOptions
+				? options.filter((option) => option.trim() !== '')
+				: null,
+		} as CustomField;
 
 		await onSave(fieldData, isNew);
 		onClose();
@@ -112,8 +192,8 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 								field
 									? __('Edit the field information below.')
 									: __(
-										'Add basic information below to add new Field.'
-									)
+											'Add basic information below to add new Field.'
+										)
 							}
 							icon={<GradientGroupIcon />}
 						/>
@@ -152,6 +232,58 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 						options={groupOptions}
 						placeholder={__('Select Field Group', 'quillcrm')}
 					/>
+
+					{/* Options field for select/multiselect types */}
+					{needsOptions && (
+						<div className="space-y-2">
+							<label className="text-sm font-medium text-gray-900">
+								{__('Field Value Options', 'quillcrm')}
+							</label>
+							<div className="space-y-2">
+								{options.map((option, index) => (
+									<div
+										key={index}
+										className="flex gap-2 items-center"
+									>
+										<Field
+											value={option}
+											onChange={(value) =>
+												updateOption(index, value)
+											}
+											type="text"
+											placeholder={__(
+												`Option ${index + 1}`,
+												'quillcrm'
+											)}
+											style={{ flex: 1 }}
+										/>
+										{options.length > 1 && (
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												onClick={() =>
+													removeOption(index)
+												}
+												className="px-3"
+											>
+												×
+											</Button>
+										)}
+									</div>
+								))}
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									onClick={addOption}
+									className="w-full"
+								>
+									{__('+ Add Option', 'quillcrm')}
+								</Button>
+							</div>
+						</div>
+					)}
 				</div>
 
 				<DialogFooter className="mt-6 w-full">

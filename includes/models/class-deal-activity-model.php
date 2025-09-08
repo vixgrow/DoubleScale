@@ -11,6 +11,7 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
+use QuillCRM\Models\User_Model;
 
 /**
  * Deal_Activity_Model class
@@ -115,7 +116,7 @@ class Deal_Activity_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function user() {
-		return $this->belongsTo( 'WP_User', 'user_id', 'ID' );
+		return $this->belongsTo( User_Model::class, 'user_id', 'ID' );
 	}
 
 	/**
@@ -281,7 +282,7 @@ class Deal_Activity_Model extends Model {
 		static::creating(
 			function( $activity ) {
 				if ( ! $activity->created_at ) {
-					$activity->created_at = now();
+					$activity->created_at = current_time( 'mysql' );
 				}
 			}
 		);

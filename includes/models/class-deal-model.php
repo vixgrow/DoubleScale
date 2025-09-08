@@ -12,6 +12,7 @@ namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\User_Model;
 
 /**
  * Deal_Model class
@@ -162,7 +163,7 @@ class Deal_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function owner() {
-		return $this->belongsTo( 'WP_User', 'owner_id', 'ID' );
+		return $this->belongsTo( User_Model::class, 'owner_id', 'ID' );
 	}
 
 	/**
@@ -201,7 +202,7 @@ class Deal_Model extends Model {
 			return null;
 		}
 
-		return now()->diffInDays( $this->expected_close_date, false );
+		return (new \DateTime())->diff($this->expected_close_date)->days * (($this->expected_close_date > new \DateTime()) ? 1 : -1);
 	}
 
 	/**
@@ -269,7 +270,7 @@ class Deal_Model extends Model {
 	 */
 	public function markAsWon( $user_id = null ) {
 		$this->status = 'won';
-		$this->won_time = now();
+		$this->won_time = current_time('mysql');
 		$saved = $this->save();
 
 		if ( $saved ) {
@@ -300,7 +301,7 @@ class Deal_Model extends Model {
 	 */
 	public function markAsLost( $reason = '', $user_id = null ) {
 		$this->status = 'lost';
-		$this->lost_time = now();
+		$this->lost_time = current_time('mysql');
 		$this->lost_reason = $reason;
 		$saved = $this->save();
 

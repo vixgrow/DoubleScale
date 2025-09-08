@@ -11,6 +11,7 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
+use QuillCRM\Models\User_Model;
 
 /**
  * Activity_Comment_Model class
@@ -103,7 +104,7 @@ class Activity_Comment_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function user() {
-		return $this->belongsTo( 'WP_User', 'user_id', 'ID' );
+		return $this->belongsTo( User_Model::class, 'user_id', 'ID' );
 	}
 
 	/**

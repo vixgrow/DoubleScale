@@ -409,7 +409,7 @@ final class Deal_Manager {
 	public function get_overdue_deals( $owner_id = null ) {
 		$query = Deal_Model::with( array( 'contact', 'pipeline', 'stage' ) )
 			->where( 'status', 'open' )
-			->where( 'expected_close_date', '<', now()->format( 'Y-m-d' ) )
+			->where( 'expected_close_date', '<', current_time( 'Y-m-d' ) )
 			->whereNotNull( 'expected_close_date' );
 
 		if ( $owner_id ) {

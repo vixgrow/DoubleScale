@@ -11,11 +11,11 @@
 namespace QuillCRM\Managers;
 
 use Exception;
-use QuillCRM\Models\Deal;
-use QuillCRM\Models\Deal_Activity;
+use QuillCRM\Models\Deal_Model;
+use QuillCRM\Models\Deal_Activity_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Pipeline;
-use QuillCRM\Models\Pipeline_Stage;
+use QuillCRM\Models\Pipeline_Model;
+use QuillCRM\Models\Pipeline_Stage_Model;
 
 /**
  * Deal_Manager class
@@ -91,7 +91,7 @@ final class Deal_Manager {
 			}
 
 			// Validate pipeline and stage
-			$stage = Pipeline_Stage::where( 'id', $data['stage_id'] )
+			$stage = Pipeline_Stage_Model::where( 'id', $data['stage_id'] )
 				->where( 'pipeline_id', $data['pipeline_id'] )
 				->first();
 			
@@ -107,7 +107,7 @@ final class Deal_Manager {
 				'owner_id' => get_current_user_id(),
 			), $data );
 
-			$deal = Deal::create( $deal_data );
+			$deal = Deal_Model::create( $deal_data );
 
 			do_action( 'quillcrm_deal_created_by_manager', $deal );
 
@@ -130,7 +130,7 @@ final class Deal_Manager {
 	 * @return Deal|null
 	 */
 	public function update_deal( $deal_id, $data ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return null;
@@ -138,7 +138,7 @@ final class Deal_Manager {
 
 		// If stage is being changed, validate it belongs to the pipeline
 		if ( isset( $data['stage_id'] ) && $data['stage_id'] != $deal->stage_id ) {
-			$stage = Pipeline_Stage::where( 'id', $data['stage_id'] )
+			$stage = Pipeline_Stage_Model::where( 'id', $data['stage_id'] )
 				->where( 'pipeline_id', $deal->pipeline_id )
 				->first();
 			
@@ -167,7 +167,7 @@ final class Deal_Manager {
 	 * @return bool
 	 */
 	public function move_deal_to_stage( $deal_id, $stage_id, $user_id = null ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return false;
@@ -189,8 +189,8 @@ final class Deal_Manager {
 	 * @return bool
 	 */
 	public function move_deal_to_pipeline( $deal_id, $pipeline_id, $stage_id = null, $user_id = null ) {
-		$deal = Deal::find( $deal_id );
-		$target_pipeline = Pipeline::with( 'stages' )->find( $pipeline_id );
+		$deal = Deal_Model::find( $deal_id );
+		$target_pipeline = Pipeline_Model::with( 'stages' )->find( $pipeline_id );
 		
 		if ( ! $deal || ! $target_pipeline ) {
 			return false;
@@ -214,7 +214,7 @@ final class Deal_Manager {
 
 		if ( $saved ) {
 			// Log the pipeline change activity
-			Deal_Activity::create( array(
+			Deal_Activity_Model::create( array(
 				'deal_id' => $deal->id,
 				'activity_type' => 'stage_changed',
 				'data' => wp_json_encode( array(
@@ -243,7 +243,7 @@ final class Deal_Manager {
 	 * @return bool
 	 */
 	public function mark_deal_as_won( $deal_id, $user_id = null ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return false;
@@ -264,7 +264,7 @@ final class Deal_Manager {
 	 * @return bool
 	 */
 	public function mark_deal_as_lost( $deal_id, $reason = '', $user_id = null ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return false;
@@ -284,7 +284,7 @@ final class Deal_Manager {
 	 * @return bool
 	 */
 	public function reopen_deal( $deal_id, $user_id = null ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal || $deal->status === 'open' ) {
 			return false;
@@ -297,7 +297,7 @@ final class Deal_Manager {
 		$saved = $deal->save();
 
 		if ( $saved ) {
-			Deal_Activity::create( array(
+			Deal_Activity_Model::create( array(
 				'deal_id' => $deal->id,
 				'activity_type' => 'status_changed',
 				'data' => wp_json_encode( array(
@@ -325,7 +325,7 @@ final class Deal_Manager {
 	 * @return \Illuminate\Pagination\LengthAwarePaginator
 	 */
 	public function get_deals_with_filters( $filters = array(), $per_page = 20, $page = 1 ) {
-		$query = Deal::with( array( 'contact', 'pipeline', 'stage', 'owner' ) );
+		$query = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) );
 
 		// Filter by pipeline
 		if ( ! empty( $filters['pipeline_id'] ) ) {
@@ -407,9 +407,9 @@ final class Deal_Manager {
 	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
 	public function get_overdue_deals( $owner_id = null ) {
-		$query = Deal::with( array( 'contact', 'pipeline', 'stage' ) )
+		$query = Deal_Model::with( array( 'contact', 'pipeline', 'stage' ) )
 			->where( 'status', 'open' )
-			->where( 'expected_close_date', '<', now()->format( 'Y-m-d' ) )
+			->where( 'expected_close_date', '<', current_time( 'Y-m-d' ) )
 			->whereNotNull( 'expected_close_date' );
 
 		if ( $owner_id ) {
@@ -430,7 +430,7 @@ final class Deal_Manager {
 	 * @return array
 	 */
 	public function get_deal_statistics( $user_id = null, $filters = array() ) {
-		$query = Deal::query();
+		$query = Deal_Model::query();
 
 		if ( $user_id ) {
 			$query->where( 'owner_id', $user_id );
@@ -507,7 +507,7 @@ final class Deal_Manager {
 	 * @return bool
 	 */
 	public function delete_deal( $deal_id ) {
-		$deal = Deal::with( 'activities' )->find( $deal_id );
+		$deal = Deal_Model::with( 'activities' )->find( $deal_id );
 		
 		if ( ! $deal ) {
 			return false;

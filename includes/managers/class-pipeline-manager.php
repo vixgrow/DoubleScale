@@ -11,8 +11,8 @@
 namespace QuillCRM\Managers;
 
 use Exception;
-use QuillCRM\Models\Pipeline;
-use QuillCRM\Models\Pipeline_Stage;
+use QuillCRM\Models\Pipeline_Model;
+use QuillCRM\Models\Pipeline_Stage_Model;
 
 /**
  * Pipeline_Manager class
@@ -66,6 +66,23 @@ final class Pipeline_Manager {
 	}
 
 	/**
+	 * Get default pipeline stages
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	private function get_default_stages() {
+		return array(
+			array( 'name' => 'Lead', 'color' => '#e74c3c', 'win_probability' => 10.0 ),
+			array( 'name' => 'Qualified', 'color' => '#f39c12', 'win_probability' => 25.0 ),
+			array( 'name' => 'Proposal', 'color' => '#f1c40f', 'win_probability' => 50.0 ),
+			array( 'name' => 'Negotiation', 'color' => '#2ecc71', 'win_probability' => 75.0 ),
+			array( 'name' => 'Closed Won', 'color' => '#27ae60', 'win_probability' => 100.0 ),
+		);
+	}
+
+	/**
 	 * Create default pipeline if none exists
 	 *
 	 * @since 1.0.0
@@ -73,17 +90,11 @@ final class Pipeline_Manager {
 	 * @return void
 	 */
 	public function create_default_pipeline() {
-		if ( Pipeline::count() === 0 ) {
+		if ( Pipeline_Model::count() === 0 ) {
 			$this->create_pipeline_with_stages(
 				'Sales Pipeline',
 				'Default sales pipeline',
-				array(
-					array( 'name' => 'Lead', 'color' => '#e74c3c', 'win_probability' => 10.0 ),
-					array( 'name' => 'Qualified', 'color' => '#f39c12', 'win_probability' => 25.0 ),
-					array( 'name' => 'Proposal', 'color' => '#f1c40f', 'win_probability' => 50.0 ),
-					array( 'name' => 'Negotiation', 'color' => '#2ecc71', 'win_probability' => 75.0 ),
-					array( 'name' => 'Closed Won', 'color' => '#27ae60', 'win_probability' => 100.0 ),
-				)
+				$this->get_default_stages()
 			);
 		}
 	}
@@ -101,23 +112,19 @@ final class Pipeline_Manager {
 	 */
 	public function create_pipeline_with_stages( $name, $description = '', $stages = array() ) {
 		try {
-			$pipeline = Pipeline::create( array(
+			$pipeline = Pipeline_Model::create( array(
 				'name' => $name,
 				'description' => $description,
-				'sort_order' => Pipeline::max( 'sort_order' ) + 1,
+				'sort_order' => Pipeline_Model::max( 'sort_order' ) + 1,
 			) );
 
 			if ( empty( $stages ) ) {
-				$stages = array(
-					array( 'name' => 'New', 'color' => '#6d78d8', 'win_probability' => 10.0 ),
-					array( 'name' => 'In Progress', 'color' => '#f39c12', 'win_probability' => 50.0 ),
-					array( 'name' => 'Closed', 'color' => '#2ecc71', 'win_probability' => 100.0 ),
-				);
+				$stages = $this->get_default_stages();
 			}
 
 			$sort_order = 0;
 			foreach ( $stages as $stage_data ) {
-				Pipeline_Stage::create( array(
+				Pipeline_Stage_Model::create( array(
 					'pipeline_id' => $pipeline->id,
 					'name' => $stage_data['name'],
 					'color' => $stage_data['color'] ?? '#6d78d8',
@@ -144,7 +151,7 @@ final class Pipeline_Manager {
 	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
 	public function get_pipelines_with_stages() {
-		return Pipeline::with( 'stages' )->orderBy( 'sort_order' )->get();
+		return Pipeline_Model::with( 'stages' )->orderBy( 'sort_order' )->get();
 	}
 
 	/**
@@ -157,7 +164,7 @@ final class Pipeline_Manager {
 	 * @return Pipeline|null
 	 */
 	public function get_pipeline_with_stats( $pipeline_id ) {
-		return Pipeline::with( array( 
+		return Pipeline_Model::with( array( 
 			'stages' => function( $query ) {
 				$query->withCount( 'active_deals' );
 			},
@@ -176,7 +183,7 @@ final class Pipeline_Manager {
 	 * @return Pipeline|null
 	 */
 	public function duplicate_pipeline( $pipeline_id, $new_name = '' ) {
-		$original = Pipeline::with( 'stages' )->find( $pipeline_id );
+		$original = Pipeline_Model::with( 'stages' )->find( $pipeline_id );
 		
 		if ( ! $original ) {
 			return null;
@@ -186,14 +193,14 @@ final class Pipeline_Manager {
 			$new_name = $original->name . ' (Copy)';
 		}
 
-		$new_pipeline = Pipeline::create( array(
+		$new_pipeline = Pipeline_Model::create( array(
 			'name' => $new_name,
 			'description' => $original->description,
-			'sort_order' => Pipeline::max( 'sort_order' ) + 1,
+			'sort_order' => Pipeline_Model::max( 'sort_order' ) + 1,
 		) );
 
 		foreach ( $original->stages as $stage ) {
-			Pipeline_Stage::create( array(
+			Pipeline_Stage_Model::create( array(
 				'pipeline_id' => $new_pipeline->id,
 				'name' => $stage->name,
 				'color' => $stage->color,
@@ -219,7 +226,7 @@ final class Pipeline_Manager {
 	public function update_pipeline_sort_order( $pipeline_ids ) {
 		try {
 			foreach ( $pipeline_ids as $index => $pipeline_id ) {
-				Pipeline::where( 'id', $pipeline_id )
+				Pipeline_Model::where( 'id', $pipeline_id )
 					->update( array( 'sort_order' => $index ) );
 			}
 			
@@ -247,7 +254,7 @@ final class Pipeline_Manager {
 	 * @return Pipeline_Stage|null
 	 */
 	public function add_stage( $pipeline_id, $name, $color = '#6d78d8', $win_probability = 0.0, $position = null ) {
-		$pipeline = Pipeline::find( $pipeline_id );
+		$pipeline = Pipeline_Model::find( $pipeline_id );
 		
 		if ( ! $pipeline ) {
 			return null;
@@ -263,7 +270,7 @@ final class Pipeline_Manager {
 				->increment( 'sort_order' );
 		}
 
-		$stage = Pipeline_Stage::create( array(
+		$stage = Pipeline_Stage_Model::create( array(
 			'pipeline_id' => $pipeline_id,
 			'name' => $name,
 			'color' => $color,
@@ -289,7 +296,7 @@ final class Pipeline_Manager {
 	public function update_stage_sort_order( $pipeline_id, $stage_ids ) {
 		try {
 			foreach ( $stage_ids as $index => $stage_id ) {
-				Pipeline_Stage::where( 'id', $stage_id )
+				Pipeline_Stage_Model::where( 'id', $stage_id )
 					->where( 'pipeline_id', $pipeline_id )
 					->update( array( 'sort_order' => $index ) );
 			}
@@ -315,7 +322,7 @@ final class Pipeline_Manager {
 	 * @return bool
 	 */
 	public function delete_pipeline( $pipeline_id, $move_deals_to_pipeline_id = null ) {
-		$pipeline = Pipeline::with( array( 'deals', 'stages' ) )->find( $pipeline_id );
+		$pipeline = Pipeline_Model::with( array( 'deals', 'stages' ) )->find( $pipeline_id );
 		
 		if ( ! $pipeline ) {
 			return false;
@@ -324,7 +331,7 @@ final class Pipeline_Manager {
 		// If there are deals, we need to move them or prevent deletion
 		if ( $pipeline->deals->count() > 0 ) {
 			if ( $move_deals_to_pipeline_id ) {
-				$target_pipeline = Pipeline::with( 'stages' )->find( $move_deals_to_pipeline_id );
+				$target_pipeline = Pipeline_Model::with( 'stages' )->find( $move_deals_to_pipeline_id );
 				
 				if ( $target_pipeline && $target_pipeline->stages->count() > 0 ) {
 					$first_stage = $target_pipeline->stages->first();
@@ -364,7 +371,7 @@ final class Pipeline_Manager {
 	 * @return array
 	 */
 	public function get_pipeline_analytics( $pipeline_id, $filters = array() ) {
-		$pipeline = Pipeline::with( array( 
+		$pipeline = Pipeline_Model::with( array( 
 			'stages',
 			'deals' => function( $query ) use ( $filters ) {
 				if ( isset( $filters['date_from'] ) ) {

@@ -77,6 +77,8 @@ const BuilderContent: React.FC = () => {
 			active.data?.current?.type === 'library-template' ||
 			active.data?.current?.type === 'header-template' ||
 			active.data?.current?.type === 'email-body-template' ||
+			active.data?.current?.type === 'hero-image-template' ||
+			active.data?.current?.type === 'image-gallery-template' ||
 			active.data?.current?.type === 'footer-template'
 		) {
 			const columnContainers = Array.from(
@@ -251,6 +253,8 @@ const BuilderContent: React.FC = () => {
 								// Add a special property to identify this as part of inline layout
 								inlineLayout: true,
 								containerId: containerBlockId,
+								// Pass the template layout information to the block
+								templateLayout: template.layout,
 							}
 						);
 
@@ -266,6 +270,8 @@ const BuilderContent: React.FC = () => {
 								// Add a special property to identify this as part of inline layout
 								inlineLayout: true,
 								containerId: containerBlockId,
+								// Pass the template layout information to the block
+								templateLayout: template.layout,
 							}
 						);
 					} else {
@@ -426,6 +432,68 @@ const BuilderContent: React.FC = () => {
 				console.log(
 					'Footer template dropped on invalid area - ignoring'
 				);
+				return;
+			}
+		}
+
+		// Handle dropping image gallery templates - ONLY into sections/columns
+		if (active.data?.current?.type === 'image-gallery-template') {
+			const template = active.data.current.template;
+			console.log('Image gallery template detected:', template);
+
+			// ONLY allow dropping into sections or columns
+			const overData = over.data?.current;
+			if (overData?.type === 'column' || overData?.type === 'section') {
+				console.log(
+					'Dropping image gallery template into section/column:',
+					overData
+				);
+
+				// Get section and column IDs
+				let sectionId, columnId;
+				if (
+					overData.type === 'column' &&
+					overData.sectionId &&
+					overData.columnId
+				) {
+					sectionId = overData.sectionId;
+					columnId = overData.columnId;
+				} else if (overData.type === 'section' && overData.sectionId) {
+					sectionId = overData.sectionId;
+					columnId = 'column-1';
+				}
+
+				if (sectionId && columnId) {
+					// Check if this is an image gallery template with multiple blocks
+					if (template.blocks && Array.isArray(template.blocks)) {
+						console.log('Creating multiple blocks from image gallery template:', template.blocks);
+
+						// Add each block from the template
+						template.blocks.forEach((blockConfig) => {
+							// Add template layout information to the block props
+							const blockProps = {
+								...blockConfig.props,
+								templateLayout: template.layout?.[blockConfig.props.containerId] || null,
+							};
+
+							addNewBlockWithProps(
+								sectionId,
+								columnId,
+								blockConfig.type,
+								blockProps
+							);
+						});
+					} else {
+						// Fallback: Add the template as a single block
+						console.log('Creating single block for image gallery template:', template);
+						addNewBlockWithProps(
+							sectionId,
+							columnId,
+							'image',
+							template.props || {}
+						);
+					}
+				}
 				return;
 			}
 		}
@@ -645,6 +713,46 @@ const BuilderContent: React.FC = () => {
 					</div>
 					<div className="text-xs text-gray-500 mt-1">
 						Footer Template
+					</div>
+				</div>
+			);
+		}
+
+		// Handle image gallery template overlay
+		if (activeItem.type === 'image-gallery-template') {
+			const template = activeItem.template;
+			let title = '';
+
+			switch (template.type) {
+				case 'grid-1':
+					title = 'Grid 1';
+					break;
+				case 'grid-2':
+					title = 'Grid 2';
+					break;
+				case 'grid-3':
+					title = 'Grid 3';
+					break;
+				case 'grid-4':
+					title = 'Grid 4';
+					break;
+				case 'grid-5':
+					title = 'Grid 5';
+					break;
+				case 'grid-6':
+					title = 'Grid 6';
+					break;
+				default:
+					title = 'Image Gallery';
+			}
+
+			return (
+				<div className="opacity-90 transform rotate-3 shadow-lg bg-white rounded-md border border-blue-300 p-4">
+					<div className="text-sm font-medium text-gray-700">
+						{title}
+					</div>
+					<div className="text-xs text-gray-500 mt-1">
+						Image Gallery Template
 					</div>
 				</div>
 			);

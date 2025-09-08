@@ -76,7 +76,8 @@ const BuilderContent: React.FC = () => {
 			active.data?.current?.type === 'element' ||
 			active.data?.current?.type === 'library-template' ||
 			active.data?.current?.type === 'header-template' ||
-			active.data?.current?.type === 'email-body-template'
+			active.data?.current?.type === 'email-body-template' ||
+			active.data?.current?.type === 'footer-template'
 		) {
 			const columnContainers = Array.from(
 				droppableContainers.values()
@@ -361,6 +362,74 @@ const BuilderContent: React.FC = () => {
 			}
 		}
 
+		// Handle dropping footer templates - ONLY into sections/columns
+		if (active.data?.current?.type === 'footer-template') {
+			const template = active.data.current.template;
+			console.log('Footer template detected:', template);
+
+			// ONLY allow dropping into sections or columns
+			const overData = over.data?.current;
+			if (overData?.type === 'column' || overData?.type === 'section') {
+				console.log(
+					'Dropping footer template into section/column:',
+					overData
+				);
+
+				// Get section and column IDs
+				let sectionId, columnId;
+				if (
+					overData.type === 'column' &&
+					overData.sectionId &&
+					overData.columnId
+				) {
+					sectionId = overData.sectionId;
+					columnId = overData.columnId;
+				} else if (overData.type === 'section' && overData.sectionId) {
+					sectionId = overData.sectionId;
+					columnId = 'column-1';
+				}
+
+				if (sectionId && columnId) {
+					// Check if this is a footer template with multiple blocks
+					if (template.blocks && Array.isArray(template.blocks)) {
+						console.log('Creating multiple blocks from footer template:', template.blocks);
+
+						// Add each block from the template
+						template.blocks.forEach((blockConfig) => {
+							// Add template layout information to the block props
+							const blockProps = {
+								...blockConfig.props,
+								templateLayout: template.layout?.[blockConfig.props.containerId] || null,
+							};
+
+							addNewBlockWithProps(
+								sectionId,
+								columnId,
+								blockConfig.type,
+								blockProps
+							);
+						});
+					} else {
+						// Fallback: Add the template as a single block
+						console.log('Creating single block for footer template:', template);
+						addNewBlockWithProps(
+							sectionId,
+							columnId,
+							template.type,
+							template.props || {}
+						);
+					}
+				}
+				return;
+			} else {
+				// If trying to drop on canvas or other invalid areas, ignore it
+				console.log(
+					'Footer template dropped on invalid area - ignoring'
+				);
+				return;
+			}
+		}
+
 		// Handle section reordering (when dragging sections to reorder them)
 		if (
 			active.data?.current?.type === 'section' &&
@@ -545,6 +614,37 @@ const BuilderContent: React.FC = () => {
 					</div>
 					<div className="text-xs text-gray-500 mt-1">
 						Email Body Template
+					</div>
+				</div>
+			);
+		}
+
+		// Handle footer template overlay
+		if (activeItem.type === 'footer-template') {
+			const template = activeItem.template;
+			let title = '';
+
+			switch (template.type) {
+				case 'centered-footer':
+					title = 'Centered Footer';
+					break;
+				case 'centered-footer-items':
+					title = 'Centered Footer & Items';
+					break;
+				case 'basic-footer':
+					title = 'Basic Footer';
+					break;
+				default:
+					title = 'Footer Template';
+			}
+
+			return (
+				<div className="opacity-90 transform rotate-3 shadow-lg bg-white rounded-md border border-blue-300 p-4">
+					<div className="text-sm font-medium text-gray-700">
+						{title}
+					</div>
+					<div className="text-xs text-gray-500 mt-1">
+						Footer Template
 					</div>
 				</div>
 			);

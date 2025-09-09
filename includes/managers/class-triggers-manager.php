@@ -22,6 +22,7 @@ final class Triggers_Manager {
 
 
 
+
 	/**
 	 * Registed triggers
 	 *
@@ -154,6 +155,10 @@ final class Triggers_Manager {
 					 ),
 					 'webhooks'      => array(
 						 'label'    => __( 'Webhooks', 'quillcrm' ),
+						 'triggers' => array(),
+					 ),
+					 'deal'          => array(
+						 'label'    => __( 'Deal', 'quillcrm' ),
 						 'triggers' => array(),
 					 ),
 				 ),

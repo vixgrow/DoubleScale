@@ -49,6 +49,8 @@ final class QuillCRM {
 
 
 
+
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -293,6 +295,12 @@ final class QuillCRM {
 
 		// Load all automations booking triggers files
 		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/booking/quillbooking/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations deal triggers files
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
 		foreach ( $triggers_files as $file ) {
 			require $file;
 		}

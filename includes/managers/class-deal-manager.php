@@ -33,6 +33,8 @@ final class Deal_Manager {
 
 
 
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -273,8 +275,13 @@ final class Deal_Manager {
 		if ( ! $deal ) {
 			return false;
 		}
+		$old_status = $deal->status;
 
-		return $deal->markAsWon( $user_id );
+		$won = $deal->markAsWon( $user_id );
+		if ( $won ) {
+			do_action( 'quillcrm_deal_status_changed', $deal->contact, $deal, $old_status, 'won' );
+		}
+		return $won;
 	}
 
 	/**
@@ -294,8 +301,12 @@ final class Deal_Manager {
 		if ( ! $deal ) {
 			return false;
 		}
-
-		return $deal->markAsLost( $reason, $user_id );
+		$old_status = $deal->status;
+		$lost       = $deal->markAsLost( $reason, $user_id );
+		if ( $lost ) {
+			do_action( 'quillcrm_deal_status_changed', $deal->contact, $deal, $old_status, 'lost' );
+		}
+		return $lost;
 	}
 
 	/**
@@ -314,7 +325,7 @@ final class Deal_Manager {
 		if ( ! $deal || $deal->status === 'open' ) {
 			return false;
 		}
-
+		$old_status        = $deal->status;
 		$deal->status      = 'open';
 		$deal->won_time    = null;
 		$deal->lost_time   = null;
@@ -337,6 +348,7 @@ final class Deal_Manager {
 			);
 
 			do_action( 'quillcrm_deal_reopened', $deal );
+			do_action( 'quillcrm_deal_status_changed', $deal->contact, $deal, $old_status, 'open' );
 		}
 
 		return $saved;

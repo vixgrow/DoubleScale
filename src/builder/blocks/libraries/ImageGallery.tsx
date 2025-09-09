@@ -23,10 +23,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 1',
 					width: '100%',
-					height: 'auto',
+					height: '336px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 4, bottom: 0, left: 0 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -40,10 +40,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 2',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 0, bottom: 4, left: 4 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -57,10 +57,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 3',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 0, bottom: 0, left: 4 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -82,107 +82,107 @@ const ImageGalleryLibrary = () => {
 			width: '100%',
 		},
 		blocks: [
-			// Column 1: Single image (33.33% width)
+			// Column 1: Single image (50% width)
 			{
 				type: 'image',
 				props: {
 					src: '',
 					alt: 'Gallery Image 1',
 					width: '100%',
-					height: 'auto',
+					height: '336px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 0, left: 0 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
 					inlineLayout: true,
 					containerId: 'grid2-container',
-					flexBasis: '33.33%',
+					flexBasis: '50%',
 					flexGrow: 0,
 					flexShrink: 0,
 				},
 			},
-			// Column 2: First image (33.33% width)
+			// Column 2: First image (25% width)
 			{
 				type: 'image',
 				props: {
 					src: '',
 					alt: 'Gallery Image 2',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 4, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
 					inlineLayout: true,
 					containerId: 'grid2-container',
-					flexBasis: '33.33%',
+					flexBasis: '25%',
 					flexGrow: 0,
 					flexShrink: 0,
 				},
 			},
-			// Column 3: First image (33.33% width)
+			// Column 3: First image (25% width)
 			{
 				type: 'image',
 				props: {
 					src: '',
 					alt: 'Gallery Image 3',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 0, bottom: 4, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
 					inlineLayout: true,
 					containerId: 'grid2-container',
-					flexBasis: '33.33%',
+					flexBasis: '25%',
 					flexGrow: 0,
 					flexShrink: 0,
 				},
 			},
-			// Column 2: Second image (33.33% width)
+			// Column 2: Second image (25% width)
 			{
 				type: 'image',
 				props: {
 					src: '',
 					alt: 'Gallery Image 4',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 2, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
 					inlineLayout: true,
 					containerId: 'grid2-container',
-					flexBasis: '33.33%',
+					flexBasis: '25%',
 					flexGrow: 0,
 					flexShrink: 0,
 				},
 			},
-			// Column 3: Second image (33.33% width)
+			// Column 3: Second image (25% width)
 			{
 				type: 'image',
 				props: {
 					src: '',
 					alt: 'Gallery Image 5',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 0, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
 					inlineLayout: true,
 					containerId: 'grid2-container',
-					flexBasis: '33.33%',
+					flexBasis: '25%',
 					flexGrow: 0,
 					flexShrink: 0,
 				},
@@ -208,10 +208,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 1',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 4, left: 0 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -229,10 +229,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 2',
 					width: '100%',
-					height: 'auto',
+					height: '336px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -250,10 +250,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 3',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 0, bottom: 4, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -271,10 +271,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 4',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 2, bottom: 0, left: 0 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -292,10 +292,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 5',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 0, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -327,10 +327,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 1',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 4, left: 0 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -348,10 +348,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 2',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 4, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -369,10 +369,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 3',
 					width: '100%',
-					height: 'auto',
+					height: '336px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 0, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -390,10 +390,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 4',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 2, bottom: 0, left: 0 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -411,10 +411,10 @@ const ImageGalleryLibrary = () => {
 					src: '',
 					alt: 'Gallery Image 5',
 					width: '100%',
-					height: 'auto',
+					height: '150px',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 2, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -449,7 +449,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 4, left: 0 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -470,7 +470,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 4, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -491,7 +491,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 0, bottom: 4, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -512,7 +512,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 2, bottom: 0, left: 0 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -533,7 +533,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 2, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -554,7 +554,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 0, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -589,7 +589,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 4, left: 0 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -610,7 +610,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 4, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -631,7 +631,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 2, bottom: 4, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -652,7 +652,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 0, right: 0, bottom: 4, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -673,7 +673,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 2, bottom: 0, left: 0 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -694,7 +694,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 2, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -715,7 +715,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 2, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -736,7 +736,7 @@ const ImageGalleryLibrary = () => {
 					height: 'auto',
 					align: 'center',
 					backgroundColor: 'transparent',
-					padding: { top: 4, right: 0, bottom: 0, left: 2 },
+					padding: { top: 0, right: 0, bottom: 0, left: 0 },
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
@@ -753,8 +753,11 @@ const ImageGalleryLibrary = () => {
 	return (
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className='text-sm'>{__('Grid 1', 'quillcrm')}</label>
-				<DraggableTemplate template={grid1Template} id="image-gallery-grid-1">
+				<label className="text-sm">{__('Grid 1', 'quillcrm')}</label>
+				<DraggableTemplate
+					template={grid1Template}
+					id="image-gallery-grid-1"
+				>
 					<div className="flex gap-1 h-full items-center border rounded-lg p-3">
 						<div className="text-[#616161] bg-muted w-1/2 h-full py-6 flex items-center justify-center">
 							<ImageBlockIcon />
@@ -772,8 +775,11 @@ const ImageGalleryLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className='text-sm'>{__('Grid 2', 'quillcrm')}</label>
-				<DraggableTemplate template={grid2Template} id="image-gallery-grid-2">
+				<label className="text-sm">{__('Grid 2', 'quillcrm')}</label>
+				<DraggableTemplate
+					template={grid2Template}
+					id="image-gallery-grid-2"
+				>
 					<div className="flex gap-1 h-full items-center border rounded-lg p-3">
 						<div className="text-[#616161] bg-muted w-1/2 h-full py-6 flex items-center justify-center">
 							<ImageBlockIcon />
@@ -799,8 +805,11 @@ const ImageGalleryLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className='text-sm'>{__('Grid 3', 'quillcrm')}</label>
-				<DraggableTemplate template={grid3Template} id="image-gallery-grid-3">
+				<label className="text-sm">{__('Grid 3', 'quillcrm')}</label>
+				<DraggableTemplate
+					template={grid3Template}
+					id="image-gallery-grid-3"
+				>
 					<div className="flex gap-1 h-full items-center border rounded-lg p-3">
 						<div className="flex flex-col gap-1 w-1/4">
 							<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
@@ -826,8 +835,11 @@ const ImageGalleryLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className='text-sm'>{__('Grid 4', 'quillcrm')}</label>
-				<DraggableTemplate template={grid4Template} id="image-gallery-grid-4">
+				<label className="text-sm">{__('Grid 4', 'quillcrm')}</label>
+				<DraggableTemplate
+					template={grid4Template}
+					id="image-gallery-grid-4"
+				>
 					<div className="flex gap-1 h-full items-center border rounded-lg p-3">
 						<div className="flex flex-col gap-1 w-1/4">
 							<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
@@ -853,8 +865,11 @@ const ImageGalleryLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className='text-sm'>{__('Grid 5', 'quillcrm')}</label>
-				<DraggableTemplate template={grid5Template} id="image-gallery-grid-5">
+				<label className="text-sm">{__('Grid 5', 'quillcrm')}</label>
+				<DraggableTemplate
+					template={grid5Template}
+					id="image-gallery-grid-5"
+				>
 					<div className="flex gap-1 items-center border rounded-lg p-3">
 						<div className="flex flex-col gap-1 w-1/3">
 							<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
@@ -885,8 +900,11 @@ const ImageGalleryLibrary = () => {
 			</div>
 
 			<div className="flex flex-col gap-1 text-[#333333]">
-				<label className='text-sm'>{__('Grid 6', 'quillcrm')}</label>
-				<DraggableTemplate template={grid6Template} id="image-gallery-grid-6">
+				<label className="text-sm">{__('Grid 6', 'quillcrm')}</label>
+				<DraggableTemplate
+					template={grid6Template}
+					id="image-gallery-grid-6"
+				>
 					<div className="flex gap-1 items-center border rounded-lg p-3">
 						<div className="flex flex-col gap-1 w-1/4">
 							<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">

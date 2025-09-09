@@ -31,6 +31,8 @@ final class Deal_Manager {
 
 
 
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -158,10 +160,13 @@ final class Deal_Manager {
 			}
 		}
 
+		$old_value = $deal->value;
+
 		$deal->fill( $data );
 		$deal->save();
 
 		do_action( 'quillcrm_deal_updated_by_manager', $deal );
+		do_action( 'quillcrm_deal_value_changed', $deal->contact, $deal, $old_value, $data['value'] );
 
 		return $deal;
 	}

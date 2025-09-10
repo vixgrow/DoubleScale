@@ -10,6 +10,11 @@ interface DealValueChangeProps {
 }
 
 const DealValueChange = ({ value, onChange }: DealValueChangeProps) => {
+	const anyValue = 'any-value';
+	const specificValue = 'specific-value';
+	const labelForAnyValue = __('Any Value', 'quillcrm');
+	const labelForSpecificValue = __('Specific Value', 'quillcrm');
+	const placeholderForSelect = __('Select option', 'quillcrm');
 	const conditionOptions = [
 		{
 			label: __('Equal To', 'quillcrm'),
@@ -34,24 +39,24 @@ const DealValueChange = ({ value, onChange }: DealValueChangeProps) => {
 
 	// Determine if current condition is "any-value" or a specific condition
 	const isAnyValue =
-		value?.condition === 'any-value' ||
+		value?.condition === anyValue ||
 		typeof value?.condition === 'undefined';
 	const isSpecificValue = conditionOptions.some(
 		(option) => option.value === value?.condition
 	);
 	const radioValue = isAnyValue
-		? 'any-value'
+		? anyValue
 		: isSpecificValue
-			? 'specific-value'
+			? specificValue
 			: '';
 
 	const handleRadioChange = (selectedValue: string) => {
-		if (selectedValue === 'any-value') {
+		if (selectedValue === anyValue) {
 			onChange({
-				condition: 'any-value',
-				value: 'any-value',
+				condition: anyValue,
+				value: anyValue,
 			});
-		} else if (selectedValue === 'specific-value') {
+		} else if (selectedValue === specificValue) {
 			// Default to first condition option if switching to specific value
 			onChange({
 				condition:
@@ -75,29 +80,29 @@ const DealValueChange = ({ value, onChange }: DealValueChangeProps) => {
 						<Input
 							type="radio"
 							name={`value-type-${id}`}
-							value="any-value"
-							checked={radioValue === 'any-value'}
+							value={anyValue}
+							checked={radioValue === anyValue}
 							onChange={(e) => handleRadioChange(e.target.value)}
 							className="form-radio"
 						/>
-						<span>{__('Any Value', 'quillcrm')}</span>
+						<span>{labelForAnyValue}</span>
 					</label>
 					<label className="flex items-center gap-2">
 						<Input
 							type="radio"
 							name={`value-type-${id}`}
-							value="specific-value"
-							checked={radioValue === 'specific-value'}
+							value={specificValue}
+							checked={radioValue === specificValue}
 							onChange={(e) => handleRadioChange(e.target.value)}
 							className="form-radio"
 						/>
-						<span>{__('Specific Value', 'quillcrm')}</span>
+						<span>{labelForSpecificValue}</span>
 					</label>
 				</div>
 			</div>
 
 			{/* Show condition selector and value input only for specific-value */}
-			{radioValue === 'specific-value' && (
+			{radioValue === specificValue && (
 				<div className="flex gap-2">
 					<Select
 						className="react-select-container w-1/2"
@@ -117,7 +122,7 @@ const DealValueChange = ({ value, onChange }: DealValueChangeProps) => {
 							});
 						}}
 						options={conditionOptions}
-						placeholder={__('Select condition', 'quillcrm')}
+						placeholder={placeholderForSelect}
 						styles={{
 							menu: (base: any) => ({
 								...base,
@@ -135,7 +140,7 @@ const DealValueChange = ({ value, onChange }: DealValueChangeProps) => {
 							})
 						}
 						type="number"
-						placeholder={__('Enter value', 'quillcrm')}
+						placeholder={placeholderForSelect}
 					/>
 				</div>
 			)}

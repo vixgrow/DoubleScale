@@ -14,6 +14,11 @@ interface DealOwnerChangeProps {
 const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 	const [users, setUsers] = useState<any[]>([]);
 	const [loadingUsers, setLoadingUsers] = useState(false);
+	const anyValue = 'any-value';
+	const specificValue = 'specific-value';
+	const labelForAnyOwner = __('Any Owner', 'quillcrm');
+	const labelForSpecificOwner = __('Specific Owner', 'quillcrm');
+	const placeholderForSelect = __('Select option', 'quillcrm');
 
 	const conditionOptions = [
 		{
@@ -41,15 +46,19 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 				}));
 				setUsers(users);
 
-				// Set first user as default if no owner_id is set and we're in specific-value mode
+				// If a specific condition is already chosen but owner_id is missing, set first user
+				const hasSpecificCondition =
+					typeof value?.condition === 'string' &&
+					conditionOptions.some(
+						(opt) => opt.value === value?.condition
+					);
 				if (
 					users.length > 0 &&
-					value?.condition !== 'any-value' &&
+					hasSpecificCondition &&
 					!value?.owner_id
 				) {
 					onChange({
-						condition:
-							value?.condition || conditionOptions[0].value,
+						condition: value?.condition as string,
 						owner_id: users[0].value,
 					});
 				}
@@ -68,25 +77,27 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 
 	// Determine if current condition is "any-value" or a specific condition
 	const isAnyValue =
-		value?.condition === 'any-value' ||
+		value?.condition === anyValue ||
 		typeof value?.condition === 'undefined';
+
+	// Debug logs removed
 
 	const isSpecificValue = conditionOptions.some(
 		(option) => option.value === value?.condition
 	);
 	const radioValue = isAnyValue
-		? 'any-value'
+		? anyValue
 		: isSpecificValue
-			? 'specific-value'
+			? specificValue
 			: '';
 
 	const handleRadioChange = (selectedValue: string) => {
-		if (selectedValue === 'any-value') {
+		if (selectedValue === anyValue) {
 			onChange({
-				condition: 'any-value',
-				owner_id: 'any-value',
+				condition: anyValue,
+				owner_id: anyValue,
 			});
-		} else if (selectedValue === 'specific-value') {
+		} else if (selectedValue === specificValue) {
 			// Default to first condition option if switching to specific value
 			onChange({
 				condition:
@@ -111,29 +122,29 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 						<Input
 							type="radio"
 							name={`owner-type-${id}`}
-							value="any-value"
-							checked={radioValue === 'any-value'}
+							value={anyValue}
+							checked={radioValue === anyValue}
 							onChange={(e) => handleRadioChange(e.target.value)}
 							className="form-radio"
 						/>
-						<span>{__('Any Owner', 'quillcrm')}</span>
+						<span>{labelForAnyOwner}</span>
 					</label>
 					<label className="flex items-center gap-2">
 						<Input
 							type="radio"
 							name={`owner-type-${id}`}
-							value="specific-value"
-							checked={radioValue === 'specific-value'}
+							value={specificValue}
+							checked={radioValue === specificValue}
 							onChange={(e) => handleRadioChange(e.target.value)}
 							className="form-radio"
 						/>
-						<span>{__('Specific Owner', 'quillcrm')}</span>
+						<span>{labelForSpecificOwner}</span>
 					</label>
 				</div>
 			</div>
 
 			{/* Show condition selector and value input only for specific-value */}
-			{radioValue === 'specific-value' && (
+			{radioValue === specificValue && (
 				<div className="flex gap-2">
 					<Select
 						className="react-select-container w-1/2"
@@ -153,7 +164,7 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 							});
 						}}
 						options={conditionOptions}
-						placeholder={__('Select condition', 'quillcrm')}
+						placeholder={placeholderForSelect}
 						styles={{
 							menu: (base: any) => ({
 								...base,
@@ -187,7 +198,7 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 						placeholder={
 							loadingUsers
 								? __('Loading users...', 'quillcrm')
-								: __('Select owner', 'quillcrm')
+								: placeholderForSelect
 						}
 						isLoading={loadingUsers}
 						styles={{

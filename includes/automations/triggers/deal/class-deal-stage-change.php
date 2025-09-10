@@ -13,10 +13,19 @@ use QuillCRM\Models\Automation_Model;
  */
 class Deal_Stage_Change extends Trigger {
 
+	/**
+	 * Default Value Pipeline
+	 *
+	 * @var string
+	 */
+	public $Default_Value_Pipeline = 'any-pipeline';
 
-
-
-
+	/**
+	 * Default Value Stage
+	 *
+	 * @var string
+	 */
+	public $Default_Value_Stage = 'any-stage';
 
 	/**
 	 * Trigger Name
@@ -91,9 +100,9 @@ class Deal_Stage_Change extends Trigger {
 		$new_stage_id = $args['data']['new_stage_id'];
 
 		// Get automation settings with default values
-		$automation_pipeline_id  = $automation->get_setting( 'pipeline', 'any-pipeline' );
-		$automation_old_stage_id = $automation->get_setting( 'old_stage', 'any-stage' );
-		$automation_new_stage_id = $automation->get_setting( 'new_stage', 'any-stage' );
+		$automation_pipeline_id  = $automation->get_setting( 'pipeline', $this->Default_Value_Pipeline );
+		$automation_old_stage_id = $automation->get_setting( 'old_stage', $this->Default_Value_Stage );
+		$automation_new_stage_id = $automation->get_setting( 'new_stage', $this->Default_Value_Stage );
 
 		if ( $old_stage_id === $new_stage_id ) {
 			return false;
@@ -102,9 +111,9 @@ class Deal_Stage_Change extends Trigger {
 		// Case 1: {"pipeline":"any-pipeline","old_stage":"any-stage","new_stage":"any-stage"}
 		// All conditions are "any" - trigger for all deals regardless of pipeline or stages
 		if (
-			$automation_pipeline_id === 'any-pipeline' &&
-			$automation_old_stage_id === 'any-stage' &&
-			$automation_new_stage_id === 'any-stage'
+			$automation_pipeline_id === $this->Default_Value_Pipeline &&
+			$automation_old_stage_id === $this->Default_Value_Stage &&
+			$automation_new_stage_id === $this->Default_Value_Stage
 		) {
 			return true;
 		}
@@ -112,9 +121,9 @@ class Deal_Stage_Change extends Trigger {
 		// Case 2: {"pipeline":"value","old_stage":"any-stage","new_stage":"any-stage"}
 		// Specific pipeline, any old stage, any new stage
 		if (
-			$automation_pipeline_id !== 'any-pipeline' &&
-			$automation_old_stage_id === 'any-stage' &&
-			$automation_new_stage_id === 'any-stage'
+			$automation_pipeline_id !== $this->Default_Value_Pipeline &&
+			$automation_old_stage_id === $this->Default_Value_Stage &&
+			$automation_new_stage_id === $this->Default_Value_Stage
 		) {
 			return $deal->pipeline_id == $automation_pipeline_id;
 		}
@@ -122,9 +131,9 @@ class Deal_Stage_Change extends Trigger {
 		// Case 3: {"pipeline":"value","old_stage":"value","new_stage":"any-stage"}
 		// Specific pipeline, specific old stage, any new stage
 		if (
-			$automation_pipeline_id !== 'any-pipeline' &&
-			$automation_old_stage_id !== 'any-stage' &&
-			$automation_new_stage_id === 'any-stage'
+			$automation_pipeline_id !== $this->Default_Value_Pipeline &&
+			$automation_old_stage_id !== $this->Default_Value_Stage &&
+			$automation_new_stage_id === $this->Default_Value_Stage
 		) {
 			return $deal->pipeline_id == $automation_pipeline_id &&
 				$old_stage_id == $automation_old_stage_id;
@@ -133,9 +142,9 @@ class Deal_Stage_Change extends Trigger {
 		// Case 4: {"pipeline":"value","old_stage":"any-stage","new_stage":"value"}
 		// Specific pipeline, any old stage, specific new stage
 		if (
-			$automation_pipeline_id !== 'any-pipeline' &&
-			$automation_old_stage_id === 'any-stage' &&
-			$automation_new_stage_id !== 'any-stage'
+			$automation_pipeline_id !== $this->Default_Value_Pipeline &&
+			$automation_old_stage_id === $this->Default_Value_Stage &&
+			$automation_new_stage_id !== $this->Default_Value_Stage
 		) {
 			return $deal->pipeline_id == $automation_pipeline_id &&
 				$new_stage_id == $automation_new_stage_id;
@@ -144,9 +153,9 @@ class Deal_Stage_Change extends Trigger {
 		// Case 5: {"pipeline":"value","old_stage":"value","new_stage":"value"}
 		// All conditions are specific values
 		if (
-			$automation_pipeline_id !== 'any-pipeline' &&
-			$automation_old_stage_id !== 'any-stage' &&
-			$automation_new_stage_id !== 'any-stage'
+			$automation_pipeline_id !== $this->Default_Value_Pipeline &&
+			$automation_old_stage_id !== $this->Default_Value_Stage &&
+			$automation_new_stage_id !== $this->Default_Value_Stage
 		) {
 			return $deal->pipeline_id == $automation_pipeline_id &&
 				$old_stage_id == $automation_old_stage_id &&
@@ -195,7 +204,7 @@ class Deal_Stage_Change extends Trigger {
 				'type'          => 'deal_stage_change',
 				'endpoint'      => 'pipelines',
 				'multiple'      => false,
-				'default-value' => 'any-pipeline',
+				'default-value' => $this->Default_Value_Pipeline,
 			),
 			'old_stage' => array(
 				'label'         => \__( 'Old Stage', 'quillcrm' ),
@@ -203,7 +212,7 @@ class Deal_Stage_Change extends Trigger {
 				'endpoint'      => 'pipeline-stages',
 				'parent'        => 'pipeline',
 				'multiple'      => false,
-				'default-value' => 'any-stage',
+				'default-value' => $this->Default_Value_Stage,
 			),
 			'new_stage' => array(
 				'label'         => \__( 'New Stage', 'quillcrm' ),
@@ -211,7 +220,7 @@ class Deal_Stage_Change extends Trigger {
 				'endpoint'      => 'pipeline-stages',
 				'parent'        => 'pipeline',
 				'multiple'      => false,
-				'default-value' => 'any-stage',
+				'default-value' => $this->Default_Value_Stage,
 			),
 		);
 	}

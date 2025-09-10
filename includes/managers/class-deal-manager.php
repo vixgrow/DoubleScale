@@ -35,6 +35,9 @@ final class Deal_Manager {
 
 
 
+
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -145,6 +148,7 @@ final class Deal_Manager {
 	 * @return Deal|null
 	 */
 	public function update_deal( $deal_id, $data ) {
+		xdebug_break();
 		$deal = Deal_Model::find( $deal_id );
 
 		if ( ! $deal ) {
@@ -162,13 +166,15 @@ final class Deal_Manager {
 			}
 		}
 
-		$old_value = $deal->value;
+		$old_value    = $deal->value;
+		$old_owner_id = $deal->owner_id;
 
 		$deal->fill( $data );
 		$deal->save();
 
 		do_action( 'quillcrm_deal_updated_by_manager', $deal );
 		do_action( 'quillcrm_deal_value_changed', $deal->contact, $deal, $old_value, $data['value'] );
+		do_action( 'quillcrm_deal_owner_changed', $deal->contact, $deal, $old_owner_id, $data['owner_id'] );
 
 		return $deal;
 	}

@@ -33,6 +33,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
 import DealStageChange from '../deal-stage-change';
 import DealValueChange from '../deal-value-change';
+import DealOwnerChange from '../deal-owner-change';
 
 interface FieldProps {
 	label?: string;
@@ -111,6 +112,14 @@ const Field: React.FC<FieldProps> = ({
 		case 'deal_value_change':
 			fieldContent = (
 				<DealValueChange
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'deal_owner_change':
+			fieldContent = (
+				<DealOwnerChange
 					value={value}
 					onChange={(value) => onChange(value)}
 				/>

@@ -12,6 +12,7 @@ class Deal_Status_Change extends Trigger {
 
 
 
+
 	/**
 	 * Trigger Name
 	 *
@@ -96,7 +97,6 @@ class Deal_Status_Change extends Trigger {
 	 * @return bool
 	 */
 	public function is_processable( Automation_Model $automation, $args ) {
-		xdebug_break();
 		$status = $automation->get_setting( 'status', '' );
 		if ( $args['data']['new_status'] === $args['data']['old_status'] ) {
 			return false;

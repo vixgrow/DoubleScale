@@ -33,9 +33,11 @@ const DealValueChange = ({ value, onChange }: DealValueChangeProps) => {
 	const id = Math.random().toString(36).substring(2, 15);
 
 	// Determine if current condition is "any-value" or a specific condition
-	const isAnyValue = value.condition === 'any-value';
+	const isAnyValue =
+		value?.condition === 'any-value' ||
+		typeof value?.condition === 'undefined';
 	const isSpecificValue = conditionOptions.some(
-		(option) => option.value === value.condition
+		(option) => option.value === value?.condition
 	);
 	const radioValue = isAnyValue
 		? 'any-value'
@@ -53,13 +55,13 @@ const DealValueChange = ({ value, onChange }: DealValueChangeProps) => {
 			// Default to first condition option if switching to specific value
 			onChange({
 				condition:
-					value.condition &&
+					value?.condition &&
 					conditionOptions.some(
-						(opt) => opt.value === value.condition
+						(opt) => opt.value === value?.condition
 					)
-						? value.condition
+						? value?.condition
 						: conditionOptions[0].value,
-				value: value.value || '',
+				value: value?.value || '',
 			});
 		}
 	};
@@ -102,7 +104,7 @@ const DealValueChange = ({ value, onChange }: DealValueChangeProps) => {
 						classNamePrefix="react-select"
 						value={
 							conditionOptions.find(
-								(option) => option.value === value.condition
+								(option) => option.value === value?.condition
 							) || null
 						}
 						onChange={(selectedOption) => {

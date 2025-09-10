@@ -9,7 +9,14 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Models\Pipeline_Model;
 
-class Update_Title_Deal extends Action {
+class Update_Stage_Deal extends Action {
+
+
+
+
+
+
+
 
 
 
@@ -19,21 +26,21 @@ class Update_Title_Deal extends Action {
 	 *
 	 * @var string
 	 */
-	public $name = 'Update Title Deal';
+	public $name = 'Update Stage Deal';
 
 	/**
 	 * Action Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'update_title_deal';
+	public $slug = 'update_stage_deal';
 
 	/**
 	 * Action Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This action will update the title of a deal.';
+	public $description = 'This action will update the stage of a deal.';
 
 
 	/**
@@ -62,13 +69,14 @@ class Update_Title_Deal extends Action {
 
 
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
-		$effects  = $step->get_setting( 'effects' );
-		$pipeline = $step->get_setting( 'pipeline' );
-		$title    = $step->get_setting( 'title' );
-		$deals    = Deal_Model::query();
+		$old_pipeline = $step->get_setting( 'old_pipeline' );
+		$new_stage    = $step->get_setting( 'new_stage' );
+		$effects      = $step->get_setting( 'effects' );
+		$new_pipeline = $step->get_setting( 'pipeline' );
+		$deals        = Deal_Model::query();
 
-		if ( $pipeline !== 'any-pipeline' ) {
-			$deals = $deals->where( 'pipeline_id', $pipeline );
+		if ( $old_pipeline !== 'any-pipeline' ) {
+			$deals = $deals->where( 'pipeline_id', $old_pipeline );
 		}
 
 		if ( $effects === 'all-deals-contact' ) {
@@ -84,7 +92,8 @@ class Update_Title_Deal extends Action {
 		$deals = $deals->get();
 
 		foreach ( $deals as $deal ) {
-			$deal->title = $title;
+			$deal->pipeline_id = $new_pipeline;
+			$deal->stage_id    = $new_stage;
 			$deal->save();
 		}
 
@@ -102,16 +111,27 @@ class Update_Title_Deal extends Action {
 	 */
 	public function get_fields() {
 		return array(
-			'title'    => array(
-				'label' => __( 'Deal Title', 'quillcrm' ),
-				'type'  => 'text',
+			'pipeline'     => array(
+				'label'         => __( 'New pipeline', 'quillcrm' ),
+				'type'          => 'pipeline_stage_change',
+				'endpoint'      => 'pipelines',
+				'multiple'      => false,
+				'default-value' => '',
 			),
-			'effects'  => array(
+			'new_stage'    => array(
+				'label'         => __( 'New stage', 'quillcrm' ),
+				'type'          => 'pipeline_stage_change',
+				'endpoint'      => 'pipeline-stages',
+				'parent'        => 'pipeline',
+				'multiple'      => false,
+				'default-value' => '',
+			),
+			'effects'      => array(
 				'label'   => __( 'Effects', 'quillcrm' ),
 				'type'    => 'select',
 				'options' => $this->get_effects_options(),
 			),
-			'pipeline' => array(
+			'old_pipeline' => array(
 				'label'   => __( 'Pipeline', 'quillcrm' ),
 				'type'    => 'select',
 				'options' => $this->get_pipelines_options(),
@@ -141,12 +161,12 @@ class Update_Title_Deal extends Action {
 	 * @return array
 	 */
 	public function get_effects_options() {
-		 return array(
-			 'all-deals-contact'      => __( 'All deals for this contact', 'quillcrm' ),
-			 'all-open-deals-contact' => __( 'All open deals for this contact', 'quillcrm' ),
-			 'all-won-deals-contact'  => __( 'All won deals for this contact', 'quillcrm' ),
-			 'all-lost-deals-contact' => __( 'All lost deals for this contact', 'quillcrm' ),
-		 );
+		return array(
+			'all-deals-contact'      => __( 'All deals for this contact', 'quillcrm' ),
+			'all-open-deals-contact' => __( 'All open deals for this contact', 'quillcrm' ),
+			'all-won-deals-contact'  => __( 'All won deals for this contact', 'quillcrm' ),
+			'all-lost-deals-contact' => __( 'All lost deals for this contact', 'quillcrm' ),
+		);
 	}
 
 	/**
@@ -158,15 +178,19 @@ class Update_Title_Deal extends Action {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'title'    => array(
+				'pipeline'     => array(
+					'type'     => 'integer',
+					'required' => true,
+				),
+				'new_stage'    => array(
+					'type'     => 'integer',
+					'required' => true,
+				),
+				'effects'      => array(
 					'type'     => 'string',
 					'required' => true,
 				),
-				'effects'  => array(
-					'type'     => 'string',
-					'required' => true,
-				),
-				'pipeline' => array(
+				'old_pipeline' => array(
 					'type'     => 'string',
 					'required' => true,
 				),
@@ -175,4 +199,4 @@ class Update_Title_Deal extends Action {
 	}
 }
 
-Update_Title_Deal::instance();
+Update_Stage_Deal::instance();

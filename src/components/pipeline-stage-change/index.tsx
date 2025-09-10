@@ -26,7 +26,7 @@ interface Props {
 	defaultValue?: string;
 }
 
-const DealStageChange = ({
+const PipelineStageChange = ({
 	endpoint,
 	value,
 	onChange,
@@ -174,4 +174,4 @@ const DealStageChange = ({
 	);
 };
 
-export default DealStageChange;
+export default PipelineStageChange;

@@ -38,6 +38,8 @@ final class Deal_Manager {
 
 
 
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -121,7 +123,7 @@ final class Deal_Manager {
 					'value'    => 0.00,
 					'currency' => 'USD',
 					'status'   => 'open',
-					'owner_id' => get_current_user_id(),
+					'owner_id' => $data['owner_id'] || get_current_user_id(),
 				),
 				$data
 			);
@@ -148,7 +150,6 @@ final class Deal_Manager {
 	 * @return Deal|null
 	 */
 	public function update_deal( $deal_id, $data ) {
-		xdebug_break();
 		$deal = Deal_Model::find( $deal_id );
 
 		if ( ! $deal ) {

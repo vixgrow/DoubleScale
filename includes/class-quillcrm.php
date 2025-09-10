@@ -51,6 +51,7 @@ final class QuillCRM {
 
 
 
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -332,6 +333,12 @@ final class QuillCRM {
 			require $file;
 		}
 		// }
+
+		// Load all automations deal actions files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
 
 		// Load all contact merge tags files
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/contact/class-*.php' );

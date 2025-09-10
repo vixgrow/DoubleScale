@@ -31,7 +31,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
-import DealStageChange from '../deal-stage-change';
+import PipelineStageChange from '../pipeline-stage-change';
 import DealValueChange from '../deal-value-change';
 import DealOwnerChange from '../deal-owner-change';
 
@@ -96,16 +96,15 @@ const Field: React.FC<FieldProps> = ({
 				/>
 			);
 			break;
-		case 'deal_stage_change':
+		case 'pipeline_stage_change':
 			fieldContent = (
-				<DealStageChange
+				<PipelineStageChange
 					endpoint={endpoint || ''}
-					multiple={multiple || false}
+					value={value}
+					onChange={(value) => onChange(value)}
 					parent={parent}
 					allValues={allValues}
 					defaultValue={defaultValue}
-					value={value}
-					onChange={(value) => onChange(value)}
 				/>
 			);
 			break;
@@ -271,9 +270,6 @@ const Field: React.FC<FieldProps> = ({
 					value={value}
 					endpoint={endpoint || ''}
 					multiple={multiple || false}
-					parent={parent}
-					allValues={allValues}
-					defaultValue={defaultValue}
 				/>
 			);
 			break;

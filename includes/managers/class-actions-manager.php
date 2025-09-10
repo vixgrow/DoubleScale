@@ -23,6 +23,7 @@ final class Actions_Manager {
 
 
 
+
 	/**
 	 * Registed actions
 	 *
@@ -139,6 +140,10 @@ final class Actions_Manager {
 				 'groups' => array(
 					 'contact' => array(
 						 'label'   => __( 'Contact', 'quillcrm' ),
+						 'actions' => array(),
+					 ),
+					 'deal'    => array(
+						 'label'   => __( 'Deal', 'quillcrm' ),
 						 'actions' => array(),
 					 ),
 				 ),

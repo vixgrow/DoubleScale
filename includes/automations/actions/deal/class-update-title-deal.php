@@ -12,6 +12,7 @@ use QuillCRM\Models\Pipeline_Model;
 class Update_Title_Deal extends Action {
 
 
+
 	/**
 	 * Action Name
 	 *
@@ -60,7 +61,6 @@ class Update_Title_Deal extends Action {
 
 
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
-		xdebug_break();
 		$effects  = $step->get_setting( 'effects' );
 		$pipeline = $step->get_setting( 'pipeline' );
 		$title    = $step->get_setting( 'title' );

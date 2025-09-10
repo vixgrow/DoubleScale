@@ -21,6 +21,7 @@ use QuillCRM\Models\Custom_Fields_Group_Model;
 class Custom_Field_Model extends Model {
 
 
+
 	/**
 	 * Table name
 	 *
@@ -134,7 +135,6 @@ class Custom_Field_Model extends Model {
 	 * @return bool
 	 */
 	public function validate_value( $value ) {
-		xdebug_break();
 		switch ( $this->type ) {
 			case 'boolean':
 				if ( $value === 'false' || $value === 'true' ) {

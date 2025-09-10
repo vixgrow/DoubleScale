@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Deal
+ * Class Deal_Model
  * This class is responsible for handling the deal model
  *
  * @since 1.0.0
@@ -12,11 +12,12 @@ namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\User_Model;
 
 /**
- * Deal class
+ * Deal_Model class
  */
-class Deal extends Model {
+class Deal_Model extends Model {
 
 	/**
 	 * Table name
@@ -140,7 +141,7 @@ class Deal extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function pipeline() {
-		return $this->belongsTo( Pipeline::class, 'pipeline_id', 'id' );
+		return $this->belongsTo( Pipeline_Model::class, 'pipeline_id', 'id' );
 	}
 
 	/**
@@ -151,7 +152,7 @@ class Deal extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function stage() {
-		return $this->belongsTo( Pipeline_Stage::class, 'stage_id', 'id' );
+		return $this->belongsTo( Pipeline_Stage_Model::class, 'stage_id', 'id' );
 	}
 
 	/**
@@ -162,7 +163,7 @@ class Deal extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function owner() {
-		return $this->belongsTo( 'WP_User', 'owner_id', 'ID' );
+		return $this->belongsTo( User_Model::class, 'owner_id', 'ID' );
 	}
 
 	/**
@@ -173,7 +174,7 @@ class Deal extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function activities() {
-		return $this->hasMany( Deal_Activity::class, 'deal_id', 'id' )->orderBy( 'created_at', 'desc' );
+		return $this->hasMany( Deal_Activity_Model::class, 'deal_id', 'id' )->orderBy( 'created_at', 'desc' );
 	}
 
 	/**
@@ -201,7 +202,7 @@ class Deal extends Model {
 			return null;
 		}
 
-		return now()->diffInDays( $this->expected_close_date, false );
+		return (new \DateTime())->diff($this->expected_close_date)->days * (($this->expected_close_date > new \DateTime()) ? 1 : -1);
 	}
 
 	/**
@@ -242,7 +243,7 @@ class Deal extends Model {
 
 		if ( $saved ) {
 			// Log the stage change activity
-			Deal_Activity::create( array(
+			Deal_Activity_Model::create( array(
 				'deal_id' => $this->id,
 				'activity_type' => 'stage_changed',
 				'data' => wp_json_encode( array(
@@ -269,11 +270,11 @@ class Deal extends Model {
 	 */
 	public function markAsWon( $user_id = null ) {
 		$this->status = 'won';
-		$this->won_time = now();
+		$this->won_time = current_time('mysql');
 		$saved = $this->save();
 
 		if ( $saved ) {
-			Deal_Activity::create( array(
+			Deal_Activity_Model::create( array(
 				'deal_id' => $this->id,
 				'activity_type' => 'status_changed',
 				'data' => wp_json_encode( array(
@@ -300,12 +301,12 @@ class Deal extends Model {
 	 */
 	public function markAsLost( $reason = '', $user_id = null ) {
 		$this->status = 'lost';
-		$this->lost_time = now();
+		$this->lost_time = current_time('mysql');
 		$this->lost_reason = $reason;
 		$saved = $this->save();
 
 		if ( $saved ) {
-			Deal_Activity::create( array(
+			Deal_Activity_Model::create( array(
 				'deal_id' => $this->id,
 				'activity_type' => 'status_changed',
 				'data' => wp_json_encode( array(
@@ -334,7 +335,7 @@ class Deal extends Model {
 		static::created(
 			function( $deal ) {
 				// Log deal creation activity
-				Deal_Activity::create( array(
+				Deal_Activity_Model::create( array(
 					'deal_id' => $deal->id,
 					'activity_type' => 'created',
 					'data' => wp_json_encode( array(
@@ -355,7 +356,7 @@ class Deal extends Model {
 				
 				// Log value changes
 				if ( isset( $changes['value'] ) ) {
-					Deal_Activity::create( array(
+					Deal_Activity_Model::create( array(
 						'deal_id' => $deal->id,
 						'activity_type' => 'value_changed',
 						'data' => wp_json_encode( array(

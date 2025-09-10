@@ -11,9 +11,9 @@
 namespace QuillCRM\Managers;
 
 use Exception;
-use QuillCRM\Models\Deal;
-use QuillCRM\Models\Deal_Activity;
-use QuillCRM\Models\Activity_Comment;
+use QuillCRM\Models\Deal_Model;
+use QuillCRM\Models\Deal_Activity_Model;
+use QuillCRM\Models\Activity_Comment_Model;
 
 /**
  * Activity_Manager class
@@ -78,7 +78,7 @@ final class Activity_Manager {
 	 * @return Deal_Activity|null
 	 */
 	public function add_note( $deal_id, $note, $user_id = null ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return null;
@@ -88,7 +88,7 @@ final class Activity_Manager {
 			return null;
 		}
 
-		$activity = Deal_Activity::create( array(
+		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'note_added',
 			'data' => wp_json_encode( array( 'note' => wp_kses_post( $note ) ) ),
@@ -112,7 +112,7 @@ final class Activity_Manager {
 	 * @return Deal_Activity|null
 	 */
 	public function log_email( $deal_id, $email_data, $user_id = null ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return null;
@@ -132,7 +132,7 @@ final class Activity_Manager {
 			$sanitized_data['campaign_id'] = intval( $email_data['campaign_id'] );
 		}
 
-		$activity = Deal_Activity::create( array(
+		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'email_sent',
 			'data' => wp_json_encode( $sanitized_data ),
@@ -156,7 +156,7 @@ final class Activity_Manager {
 	 * @return Deal_Activity|null
 	 */
 	public function log_call( $deal_id, $call_data, $user_id = null ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return null;
@@ -173,7 +173,7 @@ final class Activity_Manager {
 			$sanitized_data['phone_number'] = sanitize_text_field( $call_data['phone_number'] );
 		}
 
-		$activity = Deal_Activity::create( array(
+		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'call_logged',
 			'data' => wp_json_encode( $sanitized_data ),
@@ -197,7 +197,7 @@ final class Activity_Manager {
 	 * @return Deal_Activity|null
 	 */
 	public function schedule_meeting( $deal_id, $meeting_data, $user_id = null ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return null;
@@ -215,7 +215,7 @@ final class Activity_Manager {
 			$sanitized_data['attendees'] = array_map( 'sanitize_email', $meeting_data['attendees'] );
 		}
 
-		$activity = Deal_Activity::create( array(
+		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'meeting_scheduled',
 			'data' => wp_json_encode( $sanitized_data ),
@@ -240,13 +240,13 @@ final class Activity_Manager {
 	 * @return \Illuminate\Pagination\LengthAwarePaginator|null
 	 */
 	public function get_deal_activities( $deal_id, $filters = array(), $per_page = 20, $page = 1 ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return null;
 		}
 
-		$query = Deal_Activity::with( array( 'user', 'comments.user' ) )
+		$query = Deal_Activity_Model::with( array( 'user', 'comments.user' ) )
 			->where( 'deal_id', $deal_id );
 
 		// Filter by activity type
@@ -291,7 +291,7 @@ final class Activity_Manager {
 	 * @return Activity_Comment|null
 	 */
 	public function add_comment( $activity_id, $content, $user_id = null ) {
-		$activity = Deal_Activity::find( $activity_id );
+		$activity = Deal_Activity_Model::find( $activity_id );
 		
 		if ( ! $activity ) {
 			return null;
@@ -301,7 +301,7 @@ final class Activity_Manager {
 			return null;
 		}
 
-		$comment = Activity_Comment::create( array(
+		$comment = Activity_Comment_Model::create( array(
 			'activity_id' => $activity_id,
 			'content' => wp_kses_post( $content ),
 			'user_id' => $user_id ?: get_current_user_id(),
@@ -324,7 +324,7 @@ final class Activity_Manager {
 	 * @return Activity_Comment|null
 	 */
 	public function update_comment( $comment_id, $content, $user_id = null ) {
-		$comment = Activity_Comment::find( $comment_id );
+		$comment = Activity_Comment_Model::find( $comment_id );
 		
 		if ( ! $comment ) {
 			return null;
@@ -354,7 +354,7 @@ final class Activity_Manager {
 	 * @return bool
 	 */
 	public function delete_comment( $comment_id, $user_id = null ) {
-		$comment = Activity_Comment::find( $comment_id );
+		$comment = Activity_Comment_Model::find( $comment_id );
 		
 		if ( ! $comment ) {
 			return false;
@@ -387,13 +387,13 @@ final class Activity_Manager {
 	 * @return array
 	 */
 	public function get_deal_timeline( $deal_id, $limit = 50 ) {
-		$deal = Deal::find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return array();
 		}
 
-		$activities = Deal_Activity::with( array( 'user', 'comments.user' ) )
+		$activities = Deal_Activity_Model::with( array( 'user', 'comments.user' ) )
 			->where( 'deal_id', $deal_id )
 			->orderBy( 'created_at', 'desc' )
 			->limit( $limit )
@@ -432,7 +432,7 @@ final class Activity_Manager {
 	 * @return array
 	 */
 	public function get_activity_statistics( $filters = array() ) {
-		$query = Deal_Activity::query();
+		$query = Deal_Activity_Model::query();
 
 		// Filter by deal
 		if ( ! empty( $filters['deal_id'] ) ) {
@@ -492,7 +492,7 @@ final class Activity_Manager {
 		$deleted_count = 0;
 		
 		foreach ( $activity_ids as $activity_id ) {
-			$activity = Deal_Activity::find( $activity_id );
+			$activity = Deal_Activity_Model::find( $activity_id );
 			
 			if ( $activity ) {
 				// Check permissions if needed

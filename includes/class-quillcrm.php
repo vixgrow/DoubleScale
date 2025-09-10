@@ -30,6 +30,9 @@ use QuillCRM\Abandoned_Cart\Abandoned_Cart;
 use QuillCRM\Managers\Custom_Fields_Manager;
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
+use QuillCRM\Managers\Pipeline_Manager;
+use QuillCRM\Managers\Deal_Manager;
+use QuillCRM\Managers\Activity_Manager;
 use Illuminate\Translation\Translator;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Validation\Factory as ValidatorFactory;
@@ -43,6 +46,8 @@ use QuillCRM\Log_Handlers\Log_Handler_DB;
  * @since 1.0.0
  */
 final class QuillCRM {
+
+
 
 
 
@@ -215,6 +220,9 @@ final class QuillCRM {
 		Filters_Manager::instance();
 		Importers_Manager::instance();
 		Custom_Metabox::get_instance();
+		Pipeline_Manager::instance();
+		Deal_Manager::instance();
+		Activity_Manager::instance();
 	}
 
 	/**
@@ -287,6 +295,12 @@ final class QuillCRM {
 
 		// Load all automations booking triggers files
 		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/booking/quillbooking/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations deal triggers files
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
 		foreach ( $triggers_files as $file ) {
 			require $file;
 		}

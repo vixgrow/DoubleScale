@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { map, isObject } from 'lodash';
+import { isObject } from 'lodash';
 import Select from 'react-select';
 
 /**
@@ -31,6 +31,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
+import DealStageChange from '../deal-stage-change';
+import DealValueChange from '../deal-value-change';
+import DealOwnerChange from '../deal-owner-change';
 
 interface FieldProps {
 	label?: string;
@@ -54,7 +57,9 @@ interface FieldProps {
 		ajax_action?: string;
 		button_text?: string;
 	};
+	parent?: string;
 	allValues?: { [key: string]: any };
+	defaultValue?: string;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -72,7 +77,9 @@ const Field: React.FC<FieldProps> = ({
 	style,
 	placeholder,
 	settings,
+	parent,
 	allValues,
+	defaultValue,
 }) => {
 	let fieldContent;
 
@@ -85,6 +92,35 @@ const Field: React.FC<FieldProps> = ({
 			fieldContent = (
 				<ListField
 					value={value || []}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'deal_stage_change':
+			fieldContent = (
+				<DealStageChange
+					endpoint={endpoint || ''}
+					multiple={multiple || false}
+					parent={parent}
+					allValues={allValues}
+					defaultValue={defaultValue}
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'deal_value_change':
+			fieldContent = (
+				<DealValueChange
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'deal_owner_change':
+			fieldContent = (
+				<DealOwnerChange
+					value={value}
 					onChange={(value) => onChange(value)}
 				/>
 			);
@@ -235,6 +271,9 @@ const Field: React.FC<FieldProps> = ({
 					value={value}
 					endpoint={endpoint || ''}
 					multiple={multiple || false}
+					parent={parent}
+					allValues={allValues}
+					defaultValue={defaultValue}
 				/>
 			);
 			break;

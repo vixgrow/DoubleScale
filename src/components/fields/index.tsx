@@ -22,10 +22,12 @@ type FieldType = {
 		};
 	};
 	endpoint?: string;
+	parent?: string;
 	settings?: {
 		ajax_action?: string;
 		button_text?: string;
 	};
+	'default-value'?: string;
 };
 
 type FieldsType = {
@@ -70,13 +72,10 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 						fields={field.fields}
 						endpoint={field.endpoint}
 						multiple={field.multiple}
+						parent={field.parent}
 						settings={field.settings}
-						allValues={
-							field.type === 'button' ||
-							field.type === 'test_button'
-								? values
-								: undefined
-						}
+						allValues={values}
+						defaultValue={field['default-value']}
 					/>
 				);
 			})}

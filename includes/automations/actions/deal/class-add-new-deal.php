@@ -2,14 +2,17 @@
 
 namespace QuillCRM\Automations\Actions\Deal;
 
-use QuillCRM\Abstracts\Action;
+
 use QuillCRM\Managers\Deal_Manager;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\User_Model;
 
-class Add_New_Deal extends Action {
+
+// Use global function via fully-qualified call when needed.
+
+class Add_New_Deal extends Base_Deal_Action {
+
 
 
 	/**
@@ -84,27 +87,27 @@ class Add_New_Deal extends Action {
 	public function get_fields() {
 		return array(
 			'title'    => array(
-				'label' => __( 'Deal Title', 'quillcrm' ),
+				'label' => $this->t( 'Deal Title' ),
 				'type'  => 'text',
 			),
 			'value'    => array(
-				'label' => __( 'Deal Value', 'quillcrm' ),
+				'label' => $this->t( 'Deal Value' ),
 				'type'  => 'number',
 			),
 			'owner'    => array(
-				'label'   => __( 'Owner', 'quillcrm' ),
+				'label'   => $this->t( 'Owner' ),
 				'type'    => 'select',
 				'options' => $this->get_users_options(),
 			),
 			'pipeline' => array(
-				'label'         => __( 'Pipeline', 'quillcrm' ),
+				'label'         => $this->t( 'Pipeline' ),
 				'type'          => 'pipeline_stage_change',
 				'endpoint'      => 'pipelines',
 				'multiple'      => false,
 				'default-value' => '',
 			),
 			'stage'    => array(
-				'label'         => __( 'Stage', 'quillcrm' ),
+				'label'         => $this->t( 'Stage' ),
 				'type'          => 'pipeline_stage_change',
 				'endpoint'      => 'pipeline-stages',
 				'parent'        => 'pipeline',
@@ -120,12 +123,7 @@ class Add_New_Deal extends Action {
 	 * @return array
 	 */
 	public function get_users_options() {
-		$users   = User_Model::all();
-		$options = array();
-		foreach ( $users as $user ) {
-			$options[ $user->ID ] = $user->display_name;
-		}
-		return $options;
+		return parent::get_users_options();
 	}
 
 

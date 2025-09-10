@@ -2,14 +2,14 @@
 
 namespace QuillCRM\Automations\Actions\Deal;
 
-use QuillCRM\Abstracts\Action;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Deal_Model;
-use QuillCRM\Models\Pipeline_Model;
 
-class Update_Title_Deal extends Action {
+// Use global function via fully-qualified call when needed.
+
+class Update_Title_Deal extends Base_Deal_Action {
+
 
 
 
@@ -62,29 +62,17 @@ class Update_Title_Deal extends Action {
 
 
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
-		$effects  = $step->get_setting( 'effects' );
-		$pipeline = $step->get_setting( 'pipeline' );
-		$title    = $step->get_setting( 'title' );
-		$deals    = Deal_Model::query();
-
-		if ( $pipeline !== 'any-pipeline' ) {
-			$deals = $deals->where( 'pipeline_id', $pipeline );
-		}
-
-		if ( $effects === 'all-deals-contact' ) {
-			$deals = $deals->where( 'contact_id', $automation_contact->contact->id );
-		} elseif ( $effects === 'all-open-deals-contact' ) {
-			$deals = $deals->where( 'contact_id', $automation_contact->contact->id )->where( 'status', 'open' );
-		} elseif ( $effects === 'all-won-deals-contact' ) {
-			$deals = $deals->where( 'contact_id', $automation_contact->contact->id )->where( 'status', 'won' );
-		} elseif ( $effects === 'all-lost-deals-contact' ) {
-			$deals = $deals->where( 'contact_id', $automation_contact->contact->id )->where( 'status', 'lost' );
-		}
-
-		$deals = $deals->get();
+		$title = $step->get_setting( 'title' );
+		$deals = $this->build_target_deals_query(
+			array(
+				'effects'  => $step->get_setting( 'effects' ),
+				'pipeline' => $step->get_setting( 'pipeline' ),
+			),
+			$automation_contact
+		)->get();
 
 		foreach ( $deals as $deal ) {
-			$deal->title = $title;
+			$deal->setAttribute( 'title', $title );
 			$deal->save();
 		}
 
@@ -103,16 +91,16 @@ class Update_Title_Deal extends Action {
 	public function get_fields() {
 		return array(
 			'title'    => array(
-				'label' => __( 'Deal Title', 'quillcrm' ),
+				'label' => $this->t( 'Deal Title' ),
 				'type'  => 'text',
 			),
 			'effects'  => array(
-				'label'   => __( 'Effects', 'quillcrm' ),
+				'label'   => $this->t( 'Effects' ),
 				'type'    => 'select',
 				'options' => $this->get_effects_options(),
 			),
 			'pipeline' => array(
-				'label'   => __( 'Pipeline', 'quillcrm' ),
+				'label'   => $this->t( 'Pipeline' ),
 				'type'    => 'select',
 				'options' => $this->get_pipelines_options(),
 			),
@@ -125,14 +113,7 @@ class Update_Title_Deal extends Action {
 	 * @return array
 	 */
 	public function get_pipelines_options() {
-		$pipelines = Pipeline_Model::all();
-		$options   = array(
-			'any-pipeline' => __( 'Any Pipeline', 'quillcrm' ),
-		);
-		foreach ( $pipelines as $pipeline ) {
-			$options[ $pipeline->id ] = $pipeline->name;
-		}
-		return $options;
+		return parent::get_pipelines_options();
 	}
 
 	/**
@@ -141,12 +122,7 @@ class Update_Title_Deal extends Action {
 	 * @return array
 	 */
 	public function get_effects_options() {
-		 return array(
-			 'all-deals-contact'      => __( 'All deals for this contact', 'quillcrm' ),
-			 'all-open-deals-contact' => __( 'All open deals for this contact', 'quillcrm' ),
-			 'all-won-deals-contact'  => __( 'All won deals for this contact', 'quillcrm' ),
-			 'all-lost-deals-contact' => __( 'All lost deals for this contact', 'quillcrm' ),
-		 );
+		 return parent::get_effects_options();
 	}
 
 	/**

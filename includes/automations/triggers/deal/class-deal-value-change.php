@@ -15,23 +15,12 @@ use QuillCRM\Models\Contact_Model;
 
 class Deal_Value_Change extends Trigger {
 
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Deal Value Change';
+	public $name = 'Deal Value changes';
 
 	/**
 	 * Trigger Slug

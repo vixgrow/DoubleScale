@@ -12,14 +12,12 @@ use QuillCRM\Models\Automation_Contact_Model;
 
 class Update_Owner_Deal extends Base_Deal_Action {
 
-
-
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Update Owner Deal';
+	public $name = 'Update a deal owner';
 
 	/**
 	 * Action Slug
@@ -72,7 +70,7 @@ class Update_Owner_Deal extends Base_Deal_Action {
 		)->get();
 
 		foreach ( $deals as $deal ) {
-			$deal->setAttribute( 'owner_id', $owner );
+			$deal->owner_id = $owner;
 			$deal->save();
 		}
 

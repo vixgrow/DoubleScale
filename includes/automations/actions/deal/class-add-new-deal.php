@@ -13,14 +13,12 @@ use QuillCRM\Models\Automation_Contact_Model;
 
 class Add_New_Deal extends Base_Deal_Action {
 
-
-
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Add New Deal';
+	public $name = 'Add a deal';
 
 	/**
 	 * Action Slug

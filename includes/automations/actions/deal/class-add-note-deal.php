@@ -2,88 +2,74 @@
 
 namespace QuillCRM\Automations\Actions\Deal;
 
-
+use QuillCRM\Managers\Activity_Manager;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
+use QuillCRM\Models\Deal_Activity_Model;
 
-// Use global function via fully-qualified call when needed.
-
-class Update_Status_Deal extends Base_Deal_Action {
-
-
-
-
-
-
-
+class Add_Note_Deal extends Base_Deal_Action {
 
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Update a deal status';
+	public $name = 'Add a deal note';
 
 	/**
 	 * Action Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'update_status_deal';
+	public $slug = 'add_note_deal';
 
 	/**
 	 * Action Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This action will update the status of a deal.';
-
-
-	/**
-	 * Action Attributes
-	 *
-	 * @var array
-	 */
-	public $attributes = array();
-
+	public $description = 'This action will add a note to a deal.';
 
 	/**
-	 * Action Source
+	 * Source
 	 *
 	 * @var string
 	 */
 	public $source = 'crm';
 
-
 	/**
-	 * Action Group
+	 * Tigger Group
 	 *
 	 * @var string
 	 */
 	public $group = 'deal';
 
-
-
+	/**
+	 * Process Action
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Automation_Model         $automation Automation Model.
+	 * @param Automation_Step_Model    $step Automation Step Model.
+	 * @param Automation_Contact_Model $contact Contact Model.
+	 *
+	 * @return bool
+	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
-		$status = $step->get_setting( 'status' );
-		$deals  = $this->build_target_deals_query(
+		$note  = $step->get_setting( 'note' );
+		$deals = $this->build_target_deals_query(
 			array(
 				'effects'  => $step->get_setting( 'effects' ),
 				'pipeline' => $step->get_setting( 'pipeline' ),
 			),
 			$automation_contact
 		)->get();
-
 		foreach ( $deals as $deal ) {
-			$deal->status = $status;
-			$deal->save();
+			Activity_Manager::instance()->add_note( $deal->id, $note );
 		}
-
 		return true;
 	}
-
-
 
 	/**
 	 * Get fields
@@ -94,14 +80,9 @@ class Update_Status_Deal extends Base_Deal_Action {
 	 */
 	public function get_fields() {
 		return array(
-			'status'   => array(
-				'label'   => $this->t( 'Deal Status' ),
-				'type'    => 'select',
-				'options' => array(
-					'open' => $this->t( 'Open' ),
-					'won'  => $this->t( 'Won' ),
-					'lost' => $this->t( 'Lost' ),
-				),
+			'note'     => array(
+				'label' => $this->t( 'Deal Note' ),
+				'type'  => 'textarea',
 			),
 			'effects'  => array(
 				'label'   => $this->t( 'Effects' ),
@@ -116,23 +97,6 @@ class Update_Status_Deal extends Base_Deal_Action {
 		);
 	}
 
-	/**
-	 * Get users options
-	 *
-	 * @return array
-	 */
-	public function get_pipelines_options() {
-		return parent::get_pipelines_options();
-	}
-
-	/**
-	 * Get effects options
-	 *
-	 * @return array
-	 */
-	public function get_effects_options() {
-		 return parent::get_effects_options();
-	}
 
 	/**
 	 * Get attributes schema
@@ -143,7 +107,7 @@ class Update_Status_Deal extends Base_Deal_Action {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'status'   => array(
+				'note'     => array(
 					'type'     => 'string',
 					'required' => true,
 				),
@@ -160,4 +124,4 @@ class Update_Status_Deal extends Base_Deal_Action {
 	}
 }
 
-Update_Status_Deal::instance();
+Add_Note_Deal::instance();

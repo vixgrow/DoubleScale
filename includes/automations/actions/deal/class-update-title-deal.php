@@ -14,12 +14,14 @@ class Update_Title_Deal extends Base_Deal_Action {
 
 
 
+
+
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Update Title Deal';
+	public $name = 'Update a deal title';
 
 	/**
 	 * Action Slug
@@ -72,7 +74,7 @@ class Update_Title_Deal extends Base_Deal_Action {
 		)->get();
 
 		foreach ( $deals as $deal ) {
-			$deal->setAttribute( 'title', $title );
+			$deal->title = $title;
 			$deal->save();
 		}
 

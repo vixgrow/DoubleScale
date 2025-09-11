@@ -18,12 +18,13 @@ class Deal_Owner_Change extends Trigger {
 
 
 
+
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Deal Owner Change';
+	public $name = 'Deal Owner changes';
 
 	/**
 	 * Trigger Slug

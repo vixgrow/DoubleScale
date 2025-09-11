@@ -14,6 +14,7 @@ use QuillCRM\Models\Automation_Model;
 class Deal_Stage_Change extends Trigger {
 
 
+
 	/**
 	 * Default Value Pipeline
 	 *
@@ -33,7 +34,7 @@ class Deal_Stage_Change extends Trigger {
 	 *
 	 * @var string
 	 */
-	public $name = 'Deal Stage Change';
+	public $name = 'Deal Stage changes';
 
 	/**
 	 * Trigger Slug

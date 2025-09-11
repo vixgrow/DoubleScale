@@ -11,14 +11,12 @@ use QuillCRM\Models\Automation_Contact_Model;
 
 class Update_Value_Deal extends Base_Deal_Action {
 
-
-
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Update Value Deal';
+	public $name = 'Update a deal value';
 
 	/**
 	 * Action Slug
@@ -72,18 +70,19 @@ class Update_Value_Deal extends Base_Deal_Action {
 		)->get();
 
 		foreach ( $deals as $deal ) {
-			$currentValue = (float) $deal->getAttribute( 'value' );
+			$currentValue = (float) $deal->value;
+			$newValue     = 0;
 			if ( $value_setting === 'set-value-deal' ) {
-				$deal->setAttribute( 'value', $value );
+				$newValue = $value;
 			} elseif ( $value_setting === 'add-value-deal' ) {
-				$deal->setAttribute( 'value', $currentValue + $value );
+				$newValue = $currentValue + $value;
 			} elseif ( $value_setting === 'subtract-value-deal' ) {
 				$newValue = $currentValue - $value;
 				if ( $newValue < 0 ) {
 					$newValue = 0;
 				}
-				$deal->setAttribute( 'value', $newValue );
 			}
+			$deal->value = $newValue;
 			$deal->save();
 		}
 

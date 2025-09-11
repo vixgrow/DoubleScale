@@ -15,12 +15,14 @@ class Update_Stage_Deal extends Base_Deal_Action {
 
 
 
+
+
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Update Stage Deal';
+	public $name = 'Update a deal stage';
 
 	/**
 	 * Action Slug
@@ -79,8 +81,8 @@ class Update_Stage_Deal extends Base_Deal_Action {
 		)->get();
 
 		foreach ( $deals as $deal ) {
-			$deal->setAttribute( 'pipeline_id', $new_pipeline );
-			$deal->setAttribute( 'stage_id', $new_stage );
+			$deal->pipeline_id = $new_pipeline;
+			$deal->stage_id    = $new_stage;
 			$deal->save();
 		}
 

@@ -1,9 +1,18 @@
+/**
+ * wordpress dependencies
+ */
 import { useDispatch } from '@wordpress/data';
+/**
+ * external dependencies
+ */
+import { v4 as uuidv4 } from 'uuid';
+/**
+ * internal dependencies
+ */
 import { blocksRegistry } from '../blocks/BlockRegister';
 import TemplateCard from './TemplateCard';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
-import { v4 as uuidv4 } from 'uuid';
 
 const Sections = () => {
 	const dispatch = useDispatch();
@@ -30,15 +39,17 @@ const Sections = () => {
 				gridTemplateColumns: '50% 50%',
 			}}
 		>
-			{Object.entries(blocksRegistry).map(([key, block]) => (
-				<TemplateCard
-					key={key}
-					item={block}
-					type="element"
-					blockType={key}
-					onCreateBlock={() => handleBlockDrop(key)}
-				/>
-			))}
+			{Object.entries(blocksRegistry)
+				.filter(([key]) => key !== 'preheader')
+				.map(([key, block]) => (
+					<TemplateCard
+						key={key}
+						item={block}
+						type="element"
+						blockType={key}
+						onCreateBlock={() => handleBlockDrop(key)}
+					/>
+				))}
 		</div>
 	);
 };

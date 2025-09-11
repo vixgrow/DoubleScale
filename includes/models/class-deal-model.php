@@ -14,11 +14,23 @@ namespace QuillCRM\Models;
 use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\User_Model;
+use QuillCRM\Models\Custom_Field_Model;
+use WP_Error;
+use Exception;
 
 /**
  * Deal_Model class
  */
 class Deal_Model extends Model {
+
+
+
+
+
+
+
+
+
 
 
 	/**
@@ -205,6 +217,83 @@ class Deal_Model extends Model {
 		}
 
 		return ( new \DateTime() )->diff( $this->expected_close_date )->days * ( ( $this->expected_close_date > new \DateTime() ) ? 1 : -1 );
+	}
+
+
+	/**
+	 * Get the custom fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+	 */
+	public function custom_fields() {
+		return $this->belongsToMany( Custom_Field_Model::class, 'quillcrm_custom_field_relationship', 'entity_id', 'custom_field_id' )
+			->withPivot( 'value' )
+			->wherePivot( 'entity_type', 'deal' );
+	}
+
+
+	/**
+	 * Get the deal custom field value
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $custom_field_id Custom field ID
+	 *
+	 * @return string
+	 */
+	public function get_custom_field( $custom_field_id ) {
+		$custom_field = $this->custom_fields->where( 'id', $custom_field_id )->first();
+		if ( $custom_field ) {
+			return $custom_field->pivot->value ?? '';
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * Sync custom fields to deal
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $custom_fields Custom fields.
+	 *
+	 * @return void|WP_Error
+	 */
+	public function sync_custom_fields( $custom_fields ) {
+		try {
+			if ( $custom_fields ) {
+				$custom_fields_arr = array();
+
+				foreach ( $custom_fields as $custom_field ) {
+					$custom_field_model = Custom_Field_Model::find( $custom_field['custom_field_id'] );
+					if ( ! $custom_field_model ) {
+						continue;
+					}
+					$validated = $custom_field_model->validate_value( $custom_field['value'] );
+
+					if ( ! $validated ) {
+						continue;
+					}
+
+					// convert value if array to string like "1,2,3"
+					if ( is_array( $custom_field['value'] ) ) {
+						$custom_field['value'] = implode( ',', $custom_field['value'] );
+					}
+
+					$custom_fields_arr[ $custom_field['custom_field_id'] ] = array(
+						'value'       => $custom_field['value'],
+						'entity_type' => 'deal',
+					);
+				}
+
+				$this->custom_fields()->sync( $custom_fields_arr );
+			}
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
 	}
 
 	/**

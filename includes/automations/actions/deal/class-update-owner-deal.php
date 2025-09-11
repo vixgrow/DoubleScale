@@ -12,6 +12,8 @@ use QuillCRM\Models\Automation_Contact_Model;
 
 class Update_Owner_Deal extends Base_Deal_Action {
 
+
+
 	/**
 	 * Action Name
 	 *
@@ -63,7 +65,7 @@ class Update_Owner_Deal extends Base_Deal_Action {
 		$owner = $step->get_setting( 'owner' );
 		$deals = $this->build_target_deals_query(
 			array(
-				'effects'  => $step->get_setting( 'effects' ),
+				'affects'  => $step->get_setting( 'affects' ),
 				'pipeline' => $step->get_setting( 'pipeline' ),
 			),
 			$automation_contact
@@ -93,8 +95,8 @@ class Update_Owner_Deal extends Base_Deal_Action {
 				'type'    => 'select',
 				'options' => $this->get_users_options(),
 			),
-			'effects'  => array(
-				'label'   => $this->t( 'Effects' ),
+			'affects'  => array(
+				'label'   => $this->t( 'Affects' ),
 				'type'    => 'select',
 				'options' => $this->get_effects_options(),
 			),
@@ -151,7 +153,7 @@ class Update_Owner_Deal extends Base_Deal_Action {
 					'type'     => 'string',
 					'required' => true,
 				),
-				'effects'  => array(
+				'affects'  => array(
 					'type'     => 'string',
 					'required' => true,
 				),

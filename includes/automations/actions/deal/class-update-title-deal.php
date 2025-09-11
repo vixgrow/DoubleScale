@@ -16,6 +16,8 @@ class Update_Title_Deal extends Base_Deal_Action {
 
 
 
+
+
 	/**
 	 * Action Name
 	 *
@@ -67,7 +69,7 @@ class Update_Title_Deal extends Base_Deal_Action {
 		$title = $step->get_setting( 'title' );
 		$deals = $this->build_target_deals_query(
 			array(
-				'effects'  => $step->get_setting( 'effects' ),
+				'affects'  => $step->get_setting( 'affects' ),
 				'pipeline' => $step->get_setting( 'pipeline' ),
 			),
 			$automation_contact
@@ -96,8 +98,8 @@ class Update_Title_Deal extends Base_Deal_Action {
 				'label' => $this->t( 'Deal Title' ),
 				'type'  => 'text',
 			),
-			'effects'  => array(
-				'label'   => $this->t( 'Effects' ),
+			'affects'  => array(
+				'label'   => $this->t( 'Affects' ),
 				'type'    => 'select',
 				'options' => $this->get_effects_options(),
 			),
@@ -140,7 +142,7 @@ class Update_Title_Deal extends Base_Deal_Action {
 					'type'     => 'string',
 					'required' => true,
 				),
-				'effects'  => array(
+				'affects'  => array(
 					'type'     => 'string',
 					'required' => true,
 				),

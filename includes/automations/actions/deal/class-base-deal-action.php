@@ -15,6 +15,7 @@ abstract class Base_Deal_Action extends Action {
 
 
 
+
 	/**
 	 * Translate helper that is linter-safe in namespaced context.
 	 *
@@ -38,7 +39,7 @@ abstract class Base_Deal_Action extends Action {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	protected function build_target_deals_query( $settings, Automation_Contact_Model $automation_contact, $pipelineKey = 'pipeline' ) {
-		$effects  = is_array( $settings ) ? ( $settings['effects'] ?? null ) : null;
+		$effects  = is_array( $settings ) ? ( $settings['affects'] ?? null ) : null;
 		$pipeline = is_array( $settings ) ? ( $settings[ $pipelineKey ] ?? null ) : null;
 		$deals    = Deal_Model::query();
 
@@ -81,12 +82,12 @@ abstract class Base_Deal_Action extends Action {
 	 * @return array
 	 */
 	public function get_effects_options() {
-		return array(
-			'all-deals-contact'      => $this->t( 'All deals for this contact' ),
-			'all-open-deals-contact' => $this->t( 'All open deals for this contact' ),
-			'all-won-deals-contact'  => $this->t( 'All won deals for this contact' ),
-			'all-lost-deals-contact' => $this->t( 'All lost deals for this contact' ),
-		);
+		 return array(
+			 'all-deals-contact'      => $this->t( 'All deals for this contact' ),
+			 'all-open-deals-contact' => $this->t( 'All open deals for this contact' ),
+			 'all-won-deals-contact'  => $this->t( 'All won deals for this contact' ),
+			 'all-lost-deals-contact' => $this->t( 'All lost deals for this contact' ),
+		 );
 	}
 
 	/**

@@ -11,6 +11,8 @@ use QuillCRM\Models\Automation_Contact_Model;
 
 class Update_Value_Deal extends Base_Deal_Action {
 
+
+
 	/**
 	 * Action Name
 	 *
@@ -63,7 +65,7 @@ class Update_Value_Deal extends Base_Deal_Action {
 		$value         = $step->get_setting( 'value' );
 		$deals         = $this->build_target_deals_query(
 			array(
-				'effects'  => $step->get_setting( 'effects' ),
+				'affects'  => $step->get_setting( 'affects' ),
 				'pipeline' => $step->get_setting( 'pipeline' ),
 			),
 			$automation_contact
@@ -113,8 +115,8 @@ class Update_Value_Deal extends Base_Deal_Action {
 				'label' => $this->t( 'Deal Value' ),
 				'type'  => 'number',
 			),
-			'effects'       => array(
-				'label'   => $this->t( 'Effects' ),
+			'affects'       => array(
+				'label'   => $this->t( 'Affects' ),
 				'type'    => 'select',
 				'options' => $this->get_effects_options(),
 			),
@@ -161,7 +163,7 @@ class Update_Value_Deal extends Base_Deal_Action {
 					'type'     => 'number',
 					'required' => true,
 				),
-				'effects'       => array(
+				'affects'       => array(
 					'type'     => 'string',
 					'required' => true,
 				),

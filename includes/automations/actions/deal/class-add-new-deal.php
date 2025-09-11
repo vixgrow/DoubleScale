@@ -13,6 +13,7 @@ use QuillCRM\Models\Automation_Contact_Model;
 
 class Add_New_Deal extends Base_Deal_Action {
 
+
 	/**
 	 * Action Name
 	 *
@@ -108,7 +109,6 @@ class Add_New_Deal extends Base_Deal_Action {
 				'label'         => $this->t( 'Stage' ),
 				'type'          => 'pipeline_stage_change',
 				'endpoint'      => 'pipeline-stages',
-				'parent'        => 'pipeline',
 				'multiple'      => false,
 				'default-value' => '',
 			),

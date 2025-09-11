@@ -34,6 +34,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import PipelineStageChange from '../pipeline-stage-change';
 import DealValueChange from '../deal-value-change';
 import DealOwnerChange from '../deal-owner-change';
+import DealCustomFieldChange from '../deal-custom-field-change';
 
 interface FieldProps {
 	label?: string;
@@ -57,7 +58,6 @@ interface FieldProps {
 		ajax_action?: string;
 		button_text?: string;
 	};
-	parent?: string;
 	allValues?: { [key: string]: any };
 	defaultValue?: string;
 }
@@ -77,7 +77,6 @@ const Field: React.FC<FieldProps> = ({
 	style,
 	placeholder,
 	settings,
-	parent,
 	allValues,
 	defaultValue,
 }) => {
@@ -102,9 +101,17 @@ const Field: React.FC<FieldProps> = ({
 					endpoint={endpoint || ''}
 					value={value}
 					onChange={(value) => onChange(value)}
-					parent={parent}
 					allValues={allValues}
 					defaultValue={defaultValue}
+				/>
+			);
+			break;
+		case 'deal_custom_field_change':
+			fieldContent = (
+				<DealCustomFieldChange
+					value={Array.isArray(value) ? value : []}
+					onChange={(value) => onChange(value)}
+					options={options}
 				/>
 			);
 			break;

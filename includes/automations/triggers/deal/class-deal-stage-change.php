@@ -15,6 +15,7 @@ class Deal_Stage_Change extends Trigger {
 
 
 
+
 	/**
 	 * Default Value Pipeline
 	 *
@@ -212,7 +213,6 @@ class Deal_Stage_Change extends Trigger {
 				'label'         => \__( 'Old Stage', 'quillcrm' ),
 				'type'          => 'pipeline_stage_change',
 				'endpoint'      => 'pipeline-stages',
-				'parent'        => 'pipeline',
 				'multiple'      => false,
 				'default-value' => $this->Default_Value_Stage,
 			),
@@ -220,7 +220,6 @@ class Deal_Stage_Change extends Trigger {
 				'label'         => \__( 'New Stage', 'quillcrm' ),
 				'type'          => 'pipeline_stage_change',
 				'endpoint'      => 'pipeline-stages',
-				'parent'        => 'pipeline',
 				'multiple'      => false,
 				'default-value' => $this->Default_Value_Stage,
 			),

@@ -18,6 +18,8 @@ class Update_Status_Deal extends Base_Deal_Action {
 
 
 
+
+
 	/**
 	 * Action Name
 	 *
@@ -69,7 +71,7 @@ class Update_Status_Deal extends Base_Deal_Action {
 		$status = $step->get_setting( 'status' );
 		$deals  = $this->build_target_deals_query(
 			array(
-				'effects'  => $step->get_setting( 'effects' ),
+				'affects'  => $step->get_setting( 'affects' ),
 				'pipeline' => $step->get_setting( 'pipeline' ),
 			),
 			$automation_contact
@@ -103,8 +105,8 @@ class Update_Status_Deal extends Base_Deal_Action {
 					'lost' => $this->t( 'Lost' ),
 				),
 			),
-			'effects'  => array(
-				'label'   => $this->t( 'Effects' ),
+			'affects'  => array(
+				'label'   => $this->t( 'Affects' ),
 				'type'    => 'select',
 				'options' => $this->get_effects_options(),
 			),
@@ -147,7 +149,7 @@ class Update_Status_Deal extends Base_Deal_Action {
 					'type'     => 'string',
 					'required' => true,
 				),
-				'effects'  => array(
+				'affects'  => array(
 					'type'     => 'string',
 					'required' => true,
 				),

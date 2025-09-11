@@ -21,7 +21,6 @@ interface Props {
 	endpoint: string;
 	value: string;
 	onChange: (value: string) => void;
-	parent?: string;
 	allValues?: { [key: string]: any };
 	defaultValue?: string;
 }
@@ -30,7 +29,6 @@ const PipelineStageChange = ({
 	endpoint,
 	value,
 	onChange,
-	parent: _parent,
 	allValues,
 	defaultValue,
 }: Props) => {

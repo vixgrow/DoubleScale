@@ -17,6 +17,9 @@ class Update_Stage_Deal extends Base_Deal_Action {
 
 
 
+
+
+
 	/**
 	 * Action Name
 	 *
@@ -71,7 +74,7 @@ class Update_Stage_Deal extends Base_Deal_Action {
 
 		$deals = $this->build_target_deals_query(
 			array(
-				'effects'      => $step->get_setting( 'effects' ),
+				'affects'      => $step->get_setting( 'affects' ),
 				// For the filtering of "old" pipeline we must use 'old_pipeline' key
 				// instead of the default 'pipeline'.
 				'old_pipeline' => $old_pipeline,
@@ -111,12 +114,11 @@ class Update_Stage_Deal extends Base_Deal_Action {
 				'label'         => $this->t( 'New stage' ),
 				'type'          => 'pipeline_stage_change',
 				'endpoint'      => 'pipeline-stages',
-				'parent'        => 'pipeline',
 				'multiple'      => false,
 				'default-value' => '',
 			),
-			'effects'      => array(
-				'label'   => $this->t( 'Effects' ),
+			'affects'      => array(
+				'label'   => $this->t( 'Affects' ),
 				'type'    => 'select',
 				'options' => $this->get_effects_options(),
 			),
@@ -163,7 +165,7 @@ class Update_Stage_Deal extends Base_Deal_Action {
 					'type'     => 'integer',
 					'required' => true,
 				),
-				'effects'      => array(
+				'affects'      => array(
 					'type'     => 'string',
 					'required' => true,
 				),

@@ -22,6 +22,7 @@ class Custom_Field_Model extends Model {
 
 
 
+
 	/**
 	 * Table name
 	 *
@@ -164,7 +165,9 @@ class Custom_Field_Model extends Model {
 				$attributes = $this['attributes'];
 				return in_array( $value, $attributes );
 			case 'multiselect':
-				$values     = explode( ',', $value );
+				if ( ! is_array( $value ) ) {
+					$values = explode( ',', $value );
+				}
 				$attributes = $this['attributes'];
 				foreach ( $values as $val ) {
 					if ( ! in_array( $val, $attributes ) ) {

@@ -35,11 +35,9 @@ import { LAYOUT_CONSTANTS, EDGE_STYLES } from './config';
 import { WorkflowVisualizationProps, NODE_TYPES, EDGE_TYPES } from './types';
 
 // Helper functions
-import {
-	getNodePosition,
-	calculatePositions,
-	removeDuplicateEdges,
-} from './utils/helper';
+import { getNodePosition, calculatePositions } from './utils/position-utils';
+import { removeDuplicateEdges } from './utils/edge-utils';
+import { deleteStep } from './utils/step-utils';
 
 // NodeProcess component
 import { initializeTrigger, addFinalAddStep } from './utils/node-process';
@@ -90,50 +88,12 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 					return;
 				}
 
-				// Calculate updated orders for remaining steps similar to other nodes
-				const updatedOrdersSteps: Record<string, { order: number }> =
-					{};
-
-				if (stepToDelete.parent_id) {
-					// For child steps, reorder siblings
-					steps
-						.filter(
-							(s) =>
-								s.parent_id === stepToDelete.parent_id &&
-								s.condition === stepToDelete.condition
-						)
-						.filter((s) => s.id !== stepToDelete.id)
-						.sort((a, b) => a.order - b.order)
-						.forEach((child, index) => {
-							const newOrder = index + 1;
-							if (newOrder !== child.order) {
-								updatedOrdersSteps[child.id] = {
-									order: newOrder,
-								};
-							}
-						});
-				} else {
-					// For root steps, reorder all root steps
-					steps
-						.filter((s) => !s.parent_id || s.parent_id === 0)
-						.filter((s) => s.id !== stepToDelete.id)
-						.sort((a, b) => a.order - b.order)
-						.forEach((step, index) => {
-							const newOrder = index + 1;
-							if (newOrder !== step.order) {
-								updatedOrdersSteps[step.id] = {
-									order: newOrder,
-								};
-							}
-						});
-				}
-
 				// Make API call to delete the step using the correct endpoint
 				await apiFetch({
 					path: `/qc/v1/automation-steps/${stepId}`,
 					method: 'DELETE',
 					data: {
-						updated_steps: updatedOrdersSteps,
+						updated_steps: {},
 					},
 				});
 
@@ -189,8 +149,6 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			onTriggerClick,
 			savedPositions
 		);
-
-		// Use the extracted calculateBranchWidth utility function
 
 		// Position calculator that considers nested structure
 		const positionMap = new Map<string, { x: number; y: number }>();

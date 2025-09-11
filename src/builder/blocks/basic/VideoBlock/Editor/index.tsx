@@ -5,50 +5,21 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import React, { useState, useEffect } from 'react';
-import {
-	AlignLeft,
-	AlignCenter,
-	AlignRight,
-	PlayIcon,
-} from 'lucide-react';
+import { PlayIcon } from 'lucide-react';
 /**
  * internal dependencies
  */
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { DeleteIcon, FileUploadIcon } from '@quillcrm/components';
-import {
-	PaddingBottomIcon,
-	PaddingLeftIcon,
-	PaddingRightIcon,
-	PaddingTopIcon,
-} from '@quillcrm/components';
-import { cn } from '@/lib/utils';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
 import { VideoBlockProps } from '..';
-
-// WordPress media library types
-declare global {
-	interface Window {
-		wp: {
-			media: (options: any) => any;
-		};
-	}
-}
-
-interface ImageData {
-	id: number;
-	name: string;
-	url: string;
-	size: number;
-}
+import {
+	AlignmentControl,
+	PaddingControl,
+	ColorPickerControl,
+	ShapeSelectorControl,
+	WidthHeightControl,
+	ImageUploadControl,
+	AltTextInput,
+} from '../../shared';
 
 export interface VideoBlockEditorProps {
 	props: VideoBlockProps;
@@ -59,175 +30,14 @@ export const VideoBlockEditor: React.FC<VideoBlockEditorProps> = ({
 	props,
 	onChange,
 }) => {
-	const [imageData, setImageData] = useState<ImageData | null>(null);
-
-	// Check if WordPress media library is available when component mounts
-	useEffect(() => {
-		console.log(
-			'VideoBlockEditor mounted. Checking wp.media availability...'
-		);
-		console.log('window.wp:', typeof window.wp);
-		console.log('window.wp?.media:', typeof window.wp?.media);
-	}, []);
-
-	// Initialize imageData when props.imageUrl changes
-	useEffect(() => {
-		console.log('VideoBlockEditor props:', props);
-		console.log('Current imageData:', imageData);
-		if (props.imageUrl && props.imageUrl.trim() !== '' && !imageData) {
-			setImageData({
-				id: 0,
-				name: props.alt || 'Video thumbnail',
-				url: props.imageUrl,
-				size: 0,
-			});
-		}
-	}, [props.imageUrl, props.alt, imageData]);
-
-	const openMediaLibrary = () => {
-		// Check if wp.media is available
-		if (typeof window.wp !== 'undefined' && window.wp.media) {
-			console.log(
-				'WordPress media library is available, opening media frame...'
-			);
-			// Create the media frame
-			const frame = window.wp.media({
-				title: __('Select Image', 'quillcrm'),
-				button: {
-					text: __('Use this image', 'quillcrm'),
-				},
-				multiple: false,
-				library: {
-					type: 'image',
-				},
-			});
-
-			// When an image is selected, run a callback
-			frame.on('select', function () {
-				// Get media attachment details from the frame state
-				const attachment = frame
-					.state()
-					.get('selection')
-					.first()
-					.toJSON();
-
-				setImageData({
-					id: attachment.id,
-					name: attachment.filename || attachment.title,
-					url: attachment.url,
-					size: attachment.filesizeInBytes || 0,
-				});
-
-				onChange({
-					imageUrl: attachment.url,
-					alt: attachment.alt || attachment.title || 'Video thumbnail',
-				});
-			});
-
-			// Open the modal
-			frame.open();
-		} else {
-			console.error(
-				'WordPress media library is not available. wp object:',
-				typeof window.wp,
-				'wp.media:',
-				typeof window.wp?.media
-			);
-			// Fallback to native file input if wp.media is not available
-			document.getElementById('video-thumbnail-upload')?.click();
-		}
-	};
-
-	const handleReplaceImage = () => {
-		// Same logic for replacing image
-		if (typeof window.wp !== 'undefined' && window.wp.media) {
-			const frame = window.wp.media({
-				title: __('Replace Image', 'quillcrm'),
-				button: {
-					text: __('Use this image', 'quillcrm'),
-				},
-				multiple: false,
-				library: {
-					type: 'image',
-				},
-			});
-
-			frame.on('select', function () {
-				const attachment = frame
-					.state()
-					.get('selection')
-					.first()
-					.toJSON();
-
-				setImageData({
-					id: attachment.id,
-					name: attachment.filename || attachment.title,
-					url: attachment.url,
-					size: attachment.filesizeInBytes || 0,
-				});
-
-				onChange({
-					imageUrl: attachment.url,
-					alt: attachment.alt || attachment.title || 'Video thumbnail',
-				});
-			});
-
-			frame.open();
-		} else {
-			console.error('WordPress media library is not available');
-			document.getElementById('video-thumbnail-replace')?.click();
-		}
-	};
-
-	// Fallback file upload handler for when wp.media is not available
-	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				const result = event.target?.result;
-				if (typeof result === 'string') {
-					setImageData({
-						id: 0, // No ID for local files
-						name: file.name,
-						url: result,
-						size: file.size,
-					});
-
-					onChange({
-						imageUrl: result,
-						alt: file.name,
-					});
-				}
-			};
-			reader.readAsDataURL(file);
-		}
-		// Reset the input value to allow re-uploading the same file
-		e.target.value = '';
-	};
-
-	const handleDeleteImage = () => {
-		setImageData(null);
-		onChange({
-			imageUrl: '',
-			alt: 'Video thumbnail',
-		});
-	};
-
-	const formatFileSize = (bytes: number) => {
-		if (bytes === 0) return '0 Bytes';
-		const k = 1024;
-		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-	};
-
 	return (
 		<div className="grid gap-5">
 			{/* Video URL Input */}
 			<div className="flex flex-col gap-2 text-[#333333]">
 				<div className="flex items-center justify-between">
-					<label className="text-sm">{__('Video URL', 'quillcrm')}</label>
+					<label className="text-sm">
+						{__('Video URL', 'quillcrm')}
+					</label>
 					<PlayIcon className="size-5" />
 				</div>
 				<Input
@@ -244,422 +54,80 @@ export const VideoBlockEditor: React.FC<VideoBlockEditorProps> = ({
 			</div>
 
 			{/* Video Thumbnail Upload Section */}
-			<div>
-				<h2 className="text-[#333333] mb-2">
-					{__('Video Thumbnail', 'quillcrm')}
-				</h2>
-				<p className="text-xs text-[#616161] mb-4">
-					{__(
-						'Upload an image that will appear as the video thumbnail.',
-						'quillcrm'
-					)}
-				</p>
-
-				{(imageData || props.imageUrl) && props.imageUrl.trim() !== '' ? (
-					<div className="border rounded-lg p-4 flex items-center justify-between">
-						<div className="flex items-center gap-3">
-							<img
-								src={props.imageUrl}
-								alt={props.alt}
-								className="w-8 h-8 object-cover"
-							/>
-							<div>
-								<h4 className="text-sm text-[#333333] w-16 truncate">
-									{imageData?.name || props.alt}
-								</h4>
-								{imageData && (
-									<p className="text-xs text-[#6D6D6D]">
-										{formatFileSize(imageData.size)}
-									</p>
-								)}
-							</div>
-						</div>
-						<div className="flex gap-2 mt-2">
-							{/* Hidden fallback input */}
-							<Input
-								type="file"
-								accept="image/*"
-								className="hidden"
-								id="video-thumbnail-replace"
-								onChange={handleFileUpload}
-							/>
-							<Button
-								variant="outline"
-								size="sm"
-								className="text-sm text-primary shadow-none"
-								onClick={handleReplaceImage}
-							>
-								{__('Replace', 'quillcrm')}
-							</Button>
-							<Button
-								variant="outline"
-								size="sm"
-								className="text-destructive shadow-none"
-								onClick={handleDeleteImage}
-							>
-								<DeleteIcon width={16} height={16} />
-							</Button>
-						</div>
-					</div>
-				) : (
-					<div className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors">
-						{/* Hidden fallback input */}
-						<Input
-							type="file"
-							onChange={handleFileUpload}
-							accept="image/*"
-							className="hidden"
-							id="video-thumbnail-upload"
-						/>
-						<div
-							className="cursor-pointer"
-							onClick={openMediaLibrary}
-						>
-							<div className="flex flex-col items-center justify-center">
-								<div className="text-primary bg-accent rounded-full p-2 mb-2">
-									<FileUploadIcon />
-								</div>
-								<div className="flex items-center gap-1">
-									<div className="text-primary">
-										{__('Click to Upload', 'quillcrm')}
-									</div>
-									<div className="text-sm text-[#353535]">
-										{__('or drag and drop', 'quillcrm')}
-									</div>
-								</div>
-								<div className="text-xs text-[#353535]">
-									{__('(Max. File size: 25 MB)', 'quillcrm')}
-								</div>
-							</div>
-						</div>
-					</div>
+			<ImageUploadControl
+				label={__('Video Thumbnail', 'quillcrm')}
+				description={__(
+					'Upload an image that will appear as the video thumbnail.',
+					'quillcrm'
 				)}
-			</div>
+				value={props.imageUrl}
+				alt={props.alt}
+				onChange={({ src, alt }) => onChange({ imageUrl: src, alt })}
+				uploadId="video-thumbnail"
+				placeholder="Describe the video"
+			/>
 
 			{/* Alt Text */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<label className="text-sm">{__('Alt Text', 'quillcrm')}</label>
-				<Input
-					type="text"
-					value={props.alt}
-					onChange={(e) => onChange({ alt: e.target.value })}
-					className="h-10"
-					style={{
-						borderColor: '#e5e5e5',
-						borderRadius: '0.5rem',
-					}}
-					placeholder="Describe the video"
-				/>
-			</div>
+			<AltTextInput
+				value={props.alt}
+				onChange={(alt) => onChange({ alt })}
+				placeholder="Describe the video"
+			/>
 
 			{/* Width and Height */}
-			<div className="flex gap-3 items-center w-full">
-				<div className="flex flex-col gap-1 text-[#333333] w-1/2">
-					<label className="text-sm">{__('Width', 'quillcrm')}</label>
-					<Select
-						value={props.width}
-						onValueChange={(value) => onChange({ width: value })}
-					>
-						<SelectTrigger className="rounded-lg border-border h-10">
-							<SelectValue
-								placeholder={__('Select width', 'quillcrm')}
-							/>
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="100%">
-								{__('100%', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="75%">
-								{__('75%', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="50%">
-								{__('50%', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="25%">
-								{__('25%', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="800px">
-								{__('800px', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="600px">
-								{__('600px', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="400px">
-								{__('400px', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="300px">
-								{__('300px', 'quillcrm')}
-							</SelectItem>
-						</SelectContent>
-					</Select>
-				</div>
-				<div className="flex flex-col gap-1 text-[#333333] w-1/2">
-					<label className="text-sm">
-						{__('Height', 'quillcrm')}
-					</label>
-					<Select
-						value={props.height}
-						onValueChange={(value) => onChange({ height: value })}
-					>
-						<SelectTrigger className="rounded-lg border-border h-10">
-							<SelectValue
-								placeholder={__('Select height', 'quillcrm')}
-							/>
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="auto">
-								{__('Auto', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="600px">
-								{__('600px', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="400px">
-								{__('400px', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="300px">
-								{__('300px', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="200px">
-								{__('200px', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="150px">
-								{__('150px', 'quillcrm')}
-							</SelectItem>
-						</SelectContent>
-					</Select>
-				</div>
-			</div>
+			<WidthHeightControl
+				width={props.width}
+				height={props.height}
+				onWidthChange={(width) => onChange({ width })}
+				onHeightChange={(height) => onChange({ height })}
+				widthOptions={[
+					{ value: '100%', label: __('100%', 'quillcrm') },
+					{ value: '75%', label: __('75%', 'quillcrm') },
+					{ value: '50%', label: __('50%', 'quillcrm') },
+					{ value: '25%', label: __('25%', 'quillcrm') },
+					{ value: '800px', label: __('800px', 'quillcrm') },
+					{ value: '600px', label: __('600px', 'quillcrm') },
+					{ value: '400px', label: __('400px', 'quillcrm') },
+					{ value: '300px', label: __('300px', 'quillcrm') },
+				]}
+				heightOptions={[
+					{ value: 'auto', label: __('Auto', 'quillcrm') },
+					{ value: '600px', label: __('600px', 'quillcrm') },
+					{ value: '400px', label: __('400px', 'quillcrm') },
+					{ value: '300px', label: __('300px', 'quillcrm') },
+					{ value: '200px', label: __('200px', 'quillcrm') },
+					{ value: '150px', label: __('150px', 'quillcrm') },
+				]}
+			/>
 
 			{/* Alignment */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('Alignment on desktop', 'quillcrm')}</div>
-				<div className="flex items-center justify-between border rounded-lg">
-					<AlignLeft
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'left' &&
-							'bg-[#C6DFF366] border border-primary rounded-l-lg'
-						)}
-						onClick={() => onChange({ align: 'left' })}
-					/>
-					<AlignCenter
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'center' &&
-							'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ align: 'center' })}
-					/>
-					<AlignRight
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'right' &&
-							'bg-[#C6DFF366] border border-primary rounded-r-lg'
-						)}
-						onClick={() => onChange({ align: 'right' })}
-					/>
-				</div>
-			</div>
+			<AlignmentControl
+				value={props.align as 'left' | 'center' | 'right' | 'full'}
+				onChange={(align) => onChange({ align })}
+			/>
 
 			{/* Shape and Border Radius */}
-			<div className="flex gap-3 items-end w-full">
-				<div className="flex flex-col gap-2 text-[#333333] w-2/3">
-					<label className="text-sm">{__('Shape', 'quillcrm')}</label>
-					<div className="flex items-center justify-between border rounded-lg">
-						<div
-							className={cn(
-								'py-2 px-2 w-full text-center cursor-pointer',
-								props.borderRadius === '0' &&
-								'bg-[#C6DFF366] border border-primary rounded-lg'
-							)}
-							onClick={() =>
-								onChange({
-									borderRadius: '0',
-									shape: 'rectangle',
-								})
-							}
-						>
-							<div className="bg-accent py-3 px-5"></div>
-						</div>
-						<div
-							className={cn(
-								'py-2 px-2 w-full text-center cursor-pointer',
-								props.borderRadius === '8' &&
-								'bg-[#C6DFF366] border border-primary rounded-lg'
-							)}
-							onClick={() =>
-								onChange({
-									borderRadius: '8',
-									shape: 'rounded',
-								})
-							}
-						>
-							<div className="bg-accent py-3 px-5 rounded-lg"></div>
-						</div>
-						<div
-							className={cn(
-								'py-2 px-2 w-full text-center cursor-pointer',
-								props.borderRadius === '9999' &&
-								'bg-[#C6DFF366] border border-primary rounded-lg'
-							)}
-							onClick={() =>
-								onChange({
-									borderRadius: '9999',
-									shape: 'circle',
-								})
-							}
-						>
-							<div className="bg-accent py-3 px-5 rounded-full"></div>
-						</div>
-					</div>
-				</div>
-				<div className="w-1/3">
-					<div className="relative flex items-center">
-						<Input
-							type="text"
-							value={props.borderRadius}
-							onChange={(e) =>
-								onChange({ borderRadius: e.target.value })
-							}
-							className="pr-8 h-[43.2px]"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-							}}
-						/>
-						<span className="absolute right-3 text-gray-400">
-							px
-						</span>
-					</div>
-				</div>
-			</div>
+			<ShapeSelectorControl
+				value={props.borderRadius}
+				onChange={(borderRadius) => onChange({ borderRadius })}
+				onShapeChange={(shape) => onChange({ shape })}
+			/>
 
 			{/* Background Color */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('Background Color', 'quillcrm')}</div>
-				<div className="flex items-center gap-2 border rounded-lg px-2">
-					<Input
-						id="bg-color"
-						type="text"
-						value={props.backgroundColor}
-						onChange={(e) =>
-							onChange({ backgroundColor: e.target.value })
-						}
-						className="rounded-lg"
-						style={{ border: 0 }}
-					/>
-					<Input
-						type="color"
-						value={props.backgroundColor}
-						onChange={(e) =>
-							onChange({ backgroundColor: e.target.value })
-						}
-						className="w-10 h-10 p-1 rounded-lg"
-						style={{ border: 0 }}
-					/>
-				</div>
-			</div>
+			<ColorPickerControl
+				value={props.backgroundColor}
+				onChange={(backgroundColor) => onChange({ backgroundColor })}
+				label={__('Background Color', 'quillcrm')}
+				id="bg-color"
+			/>
 
 			{/* Padding */}
-			<div>
-				<label className="text-sm text-[#333333] mb-2 block">
-					{__('Padding', 'quillcrm')}
-				</label>
-				<div className="flex gap-2">
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingLeftIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.left || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										left: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingRightIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.right || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										right: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingTopIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.top || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										top: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingBottomIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.bottom || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										bottom: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-				</div>
-			</div>
+			<PaddingControl
+				value={
+					props.padding || { top: 0, right: 0, bottom: 0, left: 0 }
+				}
+				onChange={(padding) => onChange({ padding })}
+			/>
 		</div>
 	);
 };

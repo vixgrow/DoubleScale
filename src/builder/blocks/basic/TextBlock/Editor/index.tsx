@@ -6,29 +6,10 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React from 'react';
-import {
-	AlignLeft,
-	AlignCenter,
-	AlignRight,
-	AlignJustify,
-	Bold,
-	ExternalLink,
-	Italic,
-	Strikethrough,
-	Underline,
-} from 'lucide-react';
 /**
  * internal dependencies
  */
-import {
-	MergeTagsIcon,
-	PaddingBottomIcon,
-	PaddingLeftIcon,
-	PaddingRightIcon,
-	PaddingTopIcon,
-} from '@quillcrm/components';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { MergeTagsIcon } from '@quillcrm/components';
 import {
 	Select,
 	SelectContent,
@@ -39,6 +20,16 @@ import {
 import { TextBlockProps } from '..';
 import { useDispatch } from '@wordpress/data';
 import { RichTextEditor } from './RichTextEditor';
+import {
+	LinkInput,
+	FontControl,
+	TextFormattingControl,
+	AlignmentControl,
+	ColorPickerControl,
+	PaddingControl,
+	LetterSpacingControl,
+	TextStyleControl,
+} from '../../shared';
 
 export interface TextEditorProps {
 	props: TextBlockProps;
@@ -77,171 +68,50 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 				/>
 			</div>
 
-			<div className="flex flex-col gap-2">
-				<div className="flex justify-between items-center text-[#333333]">
-					<div>{__('Link URL', 'quillcrm')}</div>
-					<ExternalLink className="size-5" />
-				</div>
-				<Input
-					type="text"
-					value={props.hyperlink}
-					onChange={(e) => onChange({ hyperlink: e.target.value })}
-					className="pr-8 h-10"
-					style={{
-						borderColor: '#e5e5e5',
-						borderRadius: '0.5rem',
-					}}
-				/>
-			</div>
+			<LinkInput
+				label={__('Link URL', 'quillcrm')}
+				value={props.hyperlink}
+				onChange={(hyperlink) => onChange({ hyperlink })}
+				placeholder="https://example.com"
+			/>
 
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('Decoration', 'quillcrm')}</div>
-				<div className="flex items-center justify-between border rounded-lg">
-					<Bold
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.bold &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
-						)}
-						onClick={() => onChange({ bold: !props.bold })}
-					/>
-					<Italic
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.italic &&
-								'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ italic: !props.italic })}
-					/>
-					<Strikethrough
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props['line-through'] &&
-								'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() =>
-							onChange({ 'line-through': !props['line-through'] })
-						}
-					/>
-					<Underline
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.underline &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
-						)}
-						onClick={() =>
-							onChange({ underline: !props.underline })
-						}
-					/>
-				</div>
-			</div>
+			<TextFormattingControl
+				value={{
+					bold: props.bold,
+					italic: props.italic,
+					underline: props.underline,
+					strikethrough: props['line-through'],
+				}}
+				onChange={(updates) => {
+					const newProps: Partial<TextBlockProps> = {};
+					if ('bold' in updates) newProps.bold = updates.bold;
+					if ('italic' in updates) newProps.italic = updates.italic;
+					if ('underline' in updates)
+						newProps.underline = updates.underline;
+					if ('strikethrough' in updates)
+						newProps['line-through'] = updates.strikethrough;
+					onChange(newProps);
+				}}
+			/>
 
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('Text Alignment', 'quillcrm')}</div>
-				<div className="flex items-center justify-between border rounded-lg">
-					<AlignLeft
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.textAlign === 'left' &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
-						)}
-						onClick={() => onChange({ textAlign: 'left' })}
-					/>
-					<AlignCenter
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.textAlign === 'center' &&
-								'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ textAlign: 'center' })}
-					/>
-					<AlignRight
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.textAlign === 'right' &&
-								'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ textAlign: 'right' })}
-					/>
-					<AlignJustify
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.textAlign === 'justify' &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
-						)}
-						onClick={() => onChange({ textAlign: 'justify' })}
-					/>
-				</div>
-			</div>
+			<AlignmentControl
+				value={props.textAlign as 'left' | 'center' | 'right' | 'full'}
+				onChange={(value) => onChange({ textAlign: value })}
+				label={__('Text Alignment', 'quillcrm')}
+				includeFull={true}
+			/>
 
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('Text Style', 'quillcrm')}</div>
-				<Select
-					value={props.headingStyle}
-					onValueChange={(value) => onChange({ headingStyle: value })}
-				>
-					<SelectTrigger className="w-full rounded-lg border-border h-10">
-						<SelectValue
-							placeholder={__('Select heading style', 'quillcrm')}
-						/>
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="h1">H1 Style</SelectItem>
-						<SelectItem value="h2">H2 Style</SelectItem>
-						<SelectItem value="h3">H3 Style</SelectItem>
-						<SelectItem value="p">Paragraph Style</SelectItem>
-						<SelectItem value="small">Footnote Style</SelectItem>
-					</SelectContent>
-				</Select>
-			</div>
+			<TextStyleControl
+				value={props.headingStyle}
+				onChange={(headingStyle) => onChange({ headingStyle })}
+			/>
 
-			<div className="flex gap-3 items-center w-full">
-				<div className="flex flex-col gap-2 text-[#333333] w-2/3">
-					<div>{__('Font', 'quillcrm')}</div>
-					<Select
-						value={props.fontFamily}
-						onValueChange={(value) =>
-							onChange({ fontFamily: value })
-						}
-					>
-						<SelectTrigger className="w-full rounded-lg border-border h-10">
-							<SelectValue
-								placeholder={__('Select font', 'quillcrm')}
-							/>
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="Arial">Arial</SelectItem>
-							<SelectItem value="'Times New Roman', serif">
-								Times New Roman
-							</SelectItem>
-							<SelectItem value="'Courier New', monospace">
-								Courier New
-							</SelectItem>
-							<SelectItem value="Georgia, serif">
-								Georgia
-							</SelectItem>
-							<SelectItem value="'Helvetica Neue', Helvetica, sans-serif">
-								Helvetica
-							</SelectItem>
-						</SelectContent>
-					</Select>
-				</div>
-				<div className="flex flex-col gap-2 text-[#333333] w-1/3">
-					<div>{__('Size', 'quillcrm')}</div>
-					<Input
-						type="number"
-						value={props.fontSize}
-						onChange={(e) =>
-							onChange({ fontSize: parseInt(e.target.value) })
-						}
-						className="pr-8 h-10"
-						style={{
-							borderColor: '#e5e5e5',
-							borderRadius: '0.5rem',
-						}}
-					/>
-				</div>
-			</div>
+			<FontControl
+				fontFamily={props.fontFamily}
+				fontSize={props.fontSize}
+				onFontFamilyChange={(fontFamily) => onChange({ fontFamily })}
+				onFontSizeChange={(fontSize) => onChange({ fontSize })}
+			/>
 			<div className="flex gap-3 items-center w-full">
 				<div className="flex flex-col gap-2 text-[#333333] w-1/2">
 					<div>{__('Line Height', 'quillcrm')}</div>
@@ -268,244 +138,42 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						</SelectContent>
 					</Select>
 				</div>
-				<div className="flex flex-col gap-2 w-1/2">
-					<div className="text-[#333333]">
-						{__('Letter Spacing', 'quillcrm')}
-					</div>
-					<Select
-						value={props.letterSpacing}
-						onValueChange={(value) =>
-							onChange({ letterSpacing: value })
-						}
-					>
-						<SelectTrigger className="w-full border-border h-10">
-							<SelectValue
-								placeholder={__('Select spacing', 'quillcrm')}
-							/>
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="-1px">-1px</SelectItem>
-							<SelectItem value="0px">Normal</SelectItem>
-							<SelectItem value="1px">1px</SelectItem>
-							<SelectItem value="2px">2px</SelectItem>
-							<SelectItem value="3px">3px</SelectItem>
-							<SelectItem value="4px">4px</SelectItem>
-							<SelectItem value="5px">5px</SelectItem>
-							<SelectItem value="6px">6px</SelectItem>
-							<SelectItem value="7px">7px</SelectItem>
-							<SelectItem value="8px">8px</SelectItem>
-							<SelectItem value="9px">9px</SelectItem>
-							<SelectItem value="10px">10px</SelectItem>
-							<SelectItem value="11px">11px</SelectItem>
-							<SelectItem value="12px">12px</SelectItem>
-							<SelectItem value="13px">13px</SelectItem>
-							<SelectItem value="14px">14px</SelectItem>
-							<SelectItem value="15px">15px</SelectItem>
-							<SelectItem value="16px">16px</SelectItem>
-							<SelectItem value="17px">17px</SelectItem>
-							<SelectItem value="18px">18px</SelectItem>
-							<SelectItem value="19px">19px</SelectItem>
-							<SelectItem value="20px">20px</SelectItem>
-							<SelectItem value="21px">21px</SelectItem>
-							<SelectItem value="22px">22px</SelectItem>
-							<SelectItem value="23px">23px</SelectItem>
-							<SelectItem value="24px">24px</SelectItem>
-							<SelectItem value="25px">25px</SelectItem>
-							<SelectItem value="26px">26px</SelectItem>
-							<SelectItem value="27px">27px</SelectItem>
-							<SelectItem value="28px">28px</SelectItem>
-							<SelectItem value="29px">29px</SelectItem>
-							<SelectItem value="30px">30px</SelectItem>
-							<SelectItem value="31px">31px</SelectItem>
-							<SelectItem value="32px">32px</SelectItem>
-							<SelectItem value="33px">33px</SelectItem>
-							<SelectItem value="34px">34px</SelectItem>
-							<SelectItem value="35px">35px</SelectItem>
-							<SelectItem value="36px">36px</SelectItem>
-							<SelectItem value="37px">37px</SelectItem>
-							<SelectItem value="38px">38px</SelectItem>
-							<SelectItem value="39px">39px</SelectItem>
-							<SelectItem value="40px">40px</SelectItem>
-							<SelectItem value="41px">41px</SelectItem>
-							<SelectItem value="42px">42px</SelectItem>
-							<SelectItem value="43px">43px</SelectItem>
-							<SelectItem value="44px">44px</SelectItem>
-							<SelectItem value="45px">45px</SelectItem>
-							<SelectItem value="46px">46px</SelectItem>
-						</SelectContent>
-					</Select>
-				</div>
+				<LetterSpacingControl
+					value={props.letterSpacing}
+					onChange={(letterSpacing) => onChange({ letterSpacing })}
+					className="w-1/2"
+				/>
 			</div>
 
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('Text Color', 'quillcrm')}</div>
-				<div className="flex items-center gap-2 border rounded-lg px-2">
-					<Input
-						id="text-color"
-						type="text"
-						value={props.color}
-						onChange={(e) => onChange({ color: e.target.value })}
-						className="rounded-lg"
-						style={{ border: 0 }}
-					/>
-					<Input
-						type="color"
-						value={props.color}
-						onChange={(e) => onChange({ color: e.target.value })}
-						className="w-10 h-10 p-1 rounded-lg"
-						style={{ border: 0 }}
-					/>
-				</div>
-			</div>
+			<ColorPickerControl
+				value={props.color}
+				onChange={(color) => onChange({ color })}
+				label={__('Text Color', 'quillcrm')}
+				id="text-color"
+			/>
 
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('Background Color', 'quillcrm')}</div>
-				<div className="flex items-center gap-2 border rounded-lg px-2">
-					<Input
-						id="bg-color"
-						type="text"
-						value={props.backgroundColor}
-						onChange={(e) =>
-							onChange({ backgroundColor: e.target.value })
-						}
-						className="rounded-lg"
-						style={{ border: 0 }}
-					/>
-					<Input
-						type="color"
-						value={props.backgroundColor}
-						onChange={(e) =>
-							onChange({ backgroundColor: e.target.value })
-						}
-						className="w-10 h-10 p-1 rounded-lg"
-						style={{ border: 0 }}
-					/>
-				</div>
-			</div>
+			<ColorPickerControl
+				value={props.backgroundColor}
+				onChange={(backgroundColor) => onChange({ backgroundColor })}
+				label={__('Background Color', 'quillcrm')}
+				id="bg-color"
+			/>
 
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('Link Color', 'quillcrm')}</div>
-				<div className="flex items-center gap-2 border rounded-lg px-2">
-					<Input
-						id="link-color"
-						type="text"
-						value={props.linkColor}
-						onChange={(e) =>
-							onChange({ linkColor: e.target.value })
-						}
-						className="rounded-lg"
-						style={{ border: 0 }}
-					/>
-					<Input
-						type="color"
-						value={props.linkColor}
-						onChange={(e) =>
-							onChange({ linkColor: e.target.value })
-						}
-						className="w-10 h-10 p-1 rounded-lg"
-						style={{ border: 0 }}
-					/>
-				</div>
-			</div>
-			<div>
-				<label className="text-sm text-[#333333] mb-2 block">
-					{__('Padding', 'quillcrm')}
-				</label>
-				<div className="flex gap-2">
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingLeftIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.left || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										left: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingRightIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.right || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										right: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingTopIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.top || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										top: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingBottomIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.bottom || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										bottom: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-				</div>
-			</div>
+			<ColorPickerControl
+				value={props.linkColor}
+				onChange={(linkColor) => onChange({ linkColor })}
+				label={__('Link Color', 'quillcrm')}
+				id="link-color"
+			/>
+			<PaddingControl
+				value={{
+					top: props.padding?.top || 0,
+					right: props.padding?.right || 0,
+					bottom: props.padding?.bottom || 0,
+					left: props.padding?.left || 0,
+				}}
+				onChange={(padding) => onChange({ padding })}
+			/>
 		</div>
 	);
 };

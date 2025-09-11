@@ -16,6 +16,9 @@ abstract class Base_Deal_Action extends Action {
 
 
 
+
+
+
 	/**
 	 * Translate helper that is linter-safe in namespaced context.
 	 *
@@ -55,6 +58,10 @@ abstract class Base_Deal_Action extends Action {
 			$deals = $deals->where( 'contact_id', $automation_contact->contact->id )->where( 'status', 'won' );
 		} elseif ( $effects === 'all-lost-deals-contact' ) {
 			$deals = $deals->where( 'contact_id', $automation_contact->contact->id )->where( 'status', 'lost' );
+		} elseif ( $effects === 'most-recent-deal-contact' ) {
+			$deals = $deals->where( 'contact_id', $automation_contact->contact->id )->orderBy( 'created_at', 'desc' )->limit( 1 );
+		} elseif ( $effects === 'most-recently-updated-deal-contact' ) {
+			$deals = $deals->where( 'contact_id', $automation_contact->contact->id )->orderBy( 'updated_at', 'desc' )->limit( 1 );
 		}
 
 		return $deals;
@@ -83,10 +90,12 @@ abstract class Base_Deal_Action extends Action {
 	 */
 	public function get_effects_options() {
 		 return array(
-			 'all-deals-contact'      => $this->t( 'All deals for this contact' ),
-			 'all-open-deals-contact' => $this->t( 'All open deals for this contact' ),
-			 'all-won-deals-contact'  => $this->t( 'All won deals for this contact' ),
-			 'all-lost-deals-contact' => $this->t( 'All lost deals for this contact' ),
+			 'most-recent-deal-contact'           => $this->t( 'Most recent deal for this contact' ),
+			 'most-recently-updated-deal-contact' => $this->t( 'Most recently updated deal for this contact' ),
+			 'all-deals-contact'                  => $this->t( 'All deals for this contact' ),
+			 'all-open-deals-contact'             => $this->t( 'All open deals for this contact' ),
+			 'all-won-deals-contact'              => $this->t( 'All won deals for this contact' ),
+			 'all-lost-deals-contact'             => $this->t( 'All lost deals for this contact' ),
 		 );
 	}
 

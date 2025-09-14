@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import { Bold, ChevronLeft, Italic, Underline } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 /**
  * internal dependencies
  */
@@ -26,6 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@quillcrm/components/ui/select';
+import { useButtonSettings } from '../context/ButtonSettingsContext';
 
 type ButtonType = 'primary' | 'secondary' | 'tertiary';
 
@@ -35,25 +36,20 @@ interface ButtonEditorProps {
 }
 
 const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
-	const [settings, setSettings] = useState({
-		font: 'Arial',
-		size: 14,
-		letterSpacing: '0px',
-		borderRadius: 0,
-		textColor: '#FFFFFF',
-		backgroundColor: '#1E3A8A',
-		borderWidth: 1,
-		borderColor: '#1E3A8A',
-		padding: {
-			top: 4,
-			right: 8,
-			bottom: 4,
-			left: 8,
-		},
-		bold: false,
-		italic: false,
-		underline: false,
-	});
+	const { getButtonSettings, updateButtonSettings } = useButtonSettings();
+	const [settings, setSettings] = useState(getButtonSettings(buttonType));
+
+	// Update local state when global settings change
+	useEffect(() => {
+		setSettings(getButtonSettings(buttonType));
+	}, [buttonType, getButtonSettings]);
+
+	// Update global settings when local state changes
+	const updateSettings = (newSettings: Partial<typeof settings>) => {
+		const updatedSettings = { ...settings, ...newSettings };
+		setSettings(updatedSettings);
+		updateButtonSettings(buttonType, updatedSettings);
+	};
 
 	const getButtonTitle = () => {
 		switch (buttonType) {
@@ -86,11 +82,10 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 			border:
 				buttonType === 'tertiary'
 					? 'none'
-					: `${settings.borderWidth}px solid ${
-							buttonType === 'secondary'
-								? settings.backgroundColor
-								: settings.borderColor
-						}`,
+					: `${settings.borderWidth}px solid ${buttonType === 'secondary'
+						? settings.backgroundColor
+						: settings.borderColor
+					}`,
 			borderRadius: `${settings.borderRadius}px`,
 			padding: `${settings.padding.top * 2}px ${settings.padding.right * 4}px ${settings.padding.bottom * 2}px ${settings.padding.left * 4}px`,
 			fontWeight: settings.bold ? 'bold' : 'normal',
@@ -146,10 +141,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 						<Select
 							value={settings.font}
 							onValueChange={(value) =>
-								setSettings((prev) => ({
-									...prev,
-									font: value,
-								}))
+								updateSettings({ font: value })
 							}
 						>
 							<SelectTrigger className="w-full rounded-lg border-border h-10">
@@ -188,10 +180,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 										/\D/g,
 										''
 									);
-									setSettings((prev) => ({
-										...prev,
-										size: val === '' ? 0 : Number(val),
-									}));
+									updateSettings({ size: val === '' ? 0 : Number(val) });
 								}}
 								className="pr-8 h-10"
 								style={{
@@ -214,10 +203,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 					<Select
 						value={settings.letterSpacing}
 						onValueChange={(value) =>
-							setSettings((prev) => ({
-								...prev,
-								letterSpacing: value,
-							}))
+							updateSettings({ letterSpacing: value })
 						}
 					>
 						<SelectTrigger className="w-full border-border h-10">
@@ -289,13 +275,10 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								className={cn(
 									'py-2 px-2 w-full text-center cursor-pointer',
 									settings.borderRadius === 0 &&
-										'bg-[#C6DFF366] border border-primary rounded-lg'
+									'bg-[#C6DFF366] border border-primary rounded-lg'
 								)}
 								onClick={() =>
-									setSettings((prev) => ({
-										...prev,
-										borderRadius: 0,
-									}))
+									updateSettings({ borderRadius: 0 })
 								}
 							>
 								<div className="bg-accent py-3 px-5"></div>
@@ -304,13 +287,10 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								className={cn(
 									'py-2 px-2 w-full text-center cursor-pointer',
 									settings.borderRadius === 8 &&
-										'bg-[#C6DFF366] border border-primary rounded-lg'
+									'bg-[#C6DFF366] border border-primary rounded-lg'
 								)}
 								onClick={() =>
-									setSettings((prev) => ({
-										...prev,
-										borderRadius: 8,
-									}))
+									updateSettings({ borderRadius: 8 })
 								}
 							>
 								<div className="bg-accent py-3 px-5 rounded-lg"></div>
@@ -319,13 +299,10 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								className={cn(
 									'py-2 px-2 w-full text-center cursor-pointer',
 									settings.borderRadius === 9999 &&
-										'bg-[#C6DFF366] border border-primary rounded-lg'
+									'bg-[#C6DFF366] border border-primary rounded-lg'
 								)}
 								onClick={() =>
-									setSettings((prev) => ({
-										...prev,
-										borderRadius: 9999,
-									}))
+									updateSettings({ borderRadius: 9999 })
 								}
 							>
 								<div className="bg-accent py-3 px-5 rounded-full"></div>
@@ -342,11 +319,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 										/\D/g,
 										''
 									);
-									setSettings((prev) => ({
-										...prev,
-										borderRadius:
-											val === '' ? 0 : parseInt(val, 10),
-									}));
+									updateSettings({ borderRadius: val === '' ? 0 : parseInt(val, 10) });
 								}}
 								className="pr-8 h-[43.2px]"
 								style={{
@@ -371,39 +344,30 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 							className={cn(
 								'size-12 py-3 px-5 w-full cursor-pointer text-[#141B34]',
 								settings.bold &&
-									'bg-[#C6DFF366] border border-primary rounded-l-lg'
+								'bg-[#C6DFF366] border border-primary rounded-l-lg'
 							)}
 							onClick={() =>
-								setSettings((prev) => ({
-									...prev,
-									bold: !prev.bold,
-								}))
+								updateSettings({ bold: !settings.bold })
 							}
 						/>
 						<Italic
 							className={cn(
 								'size-12 py-3 px-5 w-full cursor-pointer text-[#141B34]',
 								settings.italic &&
-									'bg-[#C6DFF366] border border-primary'
+								'bg-[#C6DFF366] border border-primary'
 							)}
 							onClick={() =>
-								setSettings((prev) => ({
-									...prev,
-									italic: !prev.italic,
-								}))
+								updateSettings({ italic: !settings.italic })
 							}
 						/>
 						<Underline
 							className={cn(
 								'size-12 py-3 px-5 w-full cursor-pointer text-[#141B34]',
 								settings.underline &&
-									'bg-[#C6DFF366] border border-primary rounded-r-lg'
+								'bg-[#C6DFF366] border border-primary rounded-r-lg'
 							)}
 							onClick={() =>
-								setSettings((prev) => ({
-									...prev,
-									underline: !prev.underline,
-								}))
+								updateSettings({ underline: !settings.underline })
 							}
 						/>
 					</div>
@@ -420,10 +384,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 							type="text"
 							value={settings.textColor}
 							onChange={(e) =>
-								setSettings((prev) => ({
-									...prev,
-									textColor: e.target.value,
-								}))
+								updateSettings({ textColor: e.target.value })
 							}
 							className="rounded-lg"
 							style={{ border: 0 }}
@@ -432,10 +393,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 							type="color"
 							value={settings.textColor}
 							onChange={(e) =>
-								setSettings((prev) => ({
-									...prev,
-									textColor: e.target.value,
-								}))
+								updateSettings({ textColor: e.target.value })
 							}
 							className="w-10 h-10 p-1 rounded-lg"
 							style={{ border: 0 }}
@@ -454,10 +412,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 							type="text"
 							value={settings.backgroundColor}
 							onChange={(e) =>
-								setSettings((prev) => ({
-									...prev,
-									backgroundColor: e.target.value,
-								}))
+								updateSettings({ backgroundColor: e.target.value })
 							}
 							className="rounded-lg"
 							style={{ border: 0 }}
@@ -466,10 +421,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 							type="color"
 							value={settings.backgroundColor}
 							onChange={(e) =>
-								setSettings((prev) => ({
-									...prev,
-									backgroundColor: e.target.value,
-								}))
+								updateSettings({ backgroundColor: e.target.value })
 							}
 							className="w-10 h-10 p-1 rounded-lg"
 							style={{ border: 0 }}
@@ -489,10 +441,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 							onChange={(e) => {
 								// Allow only digits
 								const val = e.target.value.replace(/\D/g, '');
-								setSettings((prev) => ({
-									...prev,
-									borderWidth: val === '' ? 0 : Number(val),
-								}));
+								updateSettings({ borderWidth: val === '' ? 0 : Number(val) });
 							}}
 							className="pr-8 h-10"
 							style={{
@@ -517,10 +466,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 							type="text"
 							value={settings.borderColor}
 							onChange={(e) =>
-								setSettings((prev) => ({
-									...prev,
-									borderColor: e.target.value,
-								}))
+								updateSettings({ borderColor: e.target.value })
 							}
 							className="rounded-lg"
 							style={{ border: 0 }}
@@ -529,10 +475,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 							type="color"
 							value={settings.borderColor}
 							onChange={(e) =>
-								setSettings((prev) => ({
-									...prev,
-									borderColor: e.target.value,
-								}))
+								updateSettings({ borderColor: e.target.value })
 							}
 							className="w-10 h-10 p-1 rounded-lg"
 							style={{ border: 0 }}
@@ -554,13 +497,12 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								type="number"
 								value={settings.padding.left}
 								onChange={(e) =>
-									setSettings((prev) => ({
-										...prev,
+									updateSettings({
 										padding: {
-											...prev.padding,
+											...settings.padding,
 											left: parseInt(e.target.value),
 										},
-									}))
+									})
 								}
 								className="h-10"
 								style={{
@@ -578,13 +520,12 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								type="number"
 								value={settings.padding.right}
 								onChange={(e) =>
-									setSettings((prev) => ({
-										...prev,
+									updateSettings({
 										padding: {
-											...prev.padding,
+											...settings.padding,
 											right: parseInt(e.target.value),
 										},
-									}))
+									})
 								}
 								className="h-10"
 								style={{
@@ -602,13 +543,12 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								type="number"
 								value={settings.padding.top}
 								onChange={(e) =>
-									setSettings((prev) => ({
-										...prev,
+									updateSettings({
 										padding: {
-											...prev.padding,
+											...settings.padding,
 											top: parseInt(e.target.value),
 										},
-									}))
+									})
 								}
 								className="h-10"
 								style={{
@@ -626,13 +566,12 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								type="number"
 								value={settings.padding.bottom}
 								onChange={(e) =>
-									setSettings((prev) => ({
-										...prev,
+									updateSettings({
 										padding: {
-											...prev.padding,
+											...settings.padding,
 											bottom: parseInt(e.target.value),
 										},
-									}))
+									})
 								}
 								className="h-10"
 								style={{

@@ -10,27 +10,37 @@
  * internal dependencies
  */
 import { ButtonBlockProps } from '..';
+import { useButtonSettings } from '../../../../context/ButtonSettingsContext';
 
 export interface ButtonRendererProps {
 	props: ButtonBlockProps;
 }
 
 export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
-	// Safely access padding properties with defaults
-	const buttonPadding = props.padding || { top: 8, right: 12, bottom: 8, left: 12 };
-	const containerPadding = props.containerPadding || { top: 0, right: 0, bottom: 0, left: 0 };
+	const { getButtonSettings } = useButtonSettings();
 
-	// Convert button padding object to CSS string
-	const buttonPaddingString = `${buttonPadding.top}px ${buttonPadding.right}px ${buttonPadding.bottom}px ${buttonPadding.left}px`;
+	// Safely access container padding with defaults
+	const containerPadding = props.containerPadding || { top: 0, right: 0, bottom: 0, left: 0 };
 
 	// Convert container padding object to CSS string
 	const containerPaddingString = `${containerPadding.top}px ${containerPadding.right}px ${containerPadding.bottom}px ${containerPadding.left}px`;
 
-	// Build button style based on button style type
+	// Get global button settings for the current button type
+	const buttonSettings = getButtonSettings(props.buttonStyle);
+
+	// Build button style based on button style type and global settings
 	const getButtonStyle = () => {
 		const baseStyle: React.CSSProperties = {
 			display: 'inline-block',
-			padding: buttonPaddingString,
+			fontFamily: buttonSettings.font,
+			fontSize: `${buttonSettings.size}px`,
+			letterSpacing: buttonSettings.letterSpacing,
+			borderRadius: `${buttonSettings.borderRadius}px`,
+			fontWeight: buttonSettings.bold ? 'bold' : 'normal',
+			fontStyle: buttonSettings.italic ? 'italic' : 'normal',
+			textDecoration: buttonSettings.underline ? 'underline' : 'none',
+			// No padding on button itself - removed as requested
+			// No background color on button itself - removed as requested
 		};
 
 		// Add full width when alignment is 'full'
@@ -39,23 +49,32 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 			baseStyle.display = 'block';
 		}
 
+		// Add padding from global button settings
+		const paddingString = `${buttonSettings.padding.top * 2}px ${buttonSettings.padding.right * 4}px ${buttonSettings.padding.bottom * 2}px ${buttonSettings.padding.left * 4}px`;
+		baseStyle.padding = paddingString;
+
+		// Apply button type specific styling based on global settings
 		switch (props.buttonStyle) {
 			case 'primary':
 				return {
 					...baseStyle,
-					backgroundColor: props.backgroundColor,
+					color: buttonSettings.textColor,
+					backgroundColor: buttonSettings.backgroundColor,
+					border: `${buttonSettings.borderWidth}px solid ${buttonSettings.borderColor}`,
 				};
 			case 'secondary':
 				return {
 					...baseStyle,
+					color: buttonSettings.backgroundColor,
 					backgroundColor: 'transparent',
-					color: props.backgroundColor,
-					border: `2px solid ${props.backgroundColor}`,
+					border: `${buttonSettings.borderWidth}px solid ${buttonSettings.backgroundColor}`,
 				};
 			case 'tertiary':
 				return {
 					...baseStyle,
+					color: buttonSettings.backgroundColor,
 					backgroundColor: 'transparent',
+					border: 'none',
 				};
 			default:
 				return baseStyle;
@@ -89,7 +108,10 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 
 	return (
 		<div style={containerStyle}>
-			<a href={props.url} style={buttonStyle}>
+			<a
+				href={props.url}
+				style={buttonStyle}
+			>
 				{props.text}
 			</a>
 		</div>

@@ -17,35 +17,23 @@ import {
 	Eye,
 	Edit3,
 	MoreVertical,
+	Target,
+	Percent,
 } from 'lucide-react';
 
 /**
  * Internal dependencies
  */
+import { Deal } from '../../types';
 import './style.scss';
 
 interface DealCardProps {
-	deal: {
-		id: number;
-		title: string;
-		value: number;
-		currency: string;
-		stage_id: number;
-		contact?: {
-			first_name: string;
-			last_name: string;
-		};
-		expected_close_date?: string;
-		is_overdue: boolean;
-		days_until_close: number | null;
-		owner?: {
-			display_name: string;
-		};
-	};
+	deal: Deal;
 	isDragging: boolean;
-	onCardClick: (deal: any) => void;
-	onDealEdit?: (deal: any) => void;
+	onCardClick: (deal: Deal) => void;
+	onDealEdit?: (deal: Deal) => void;
 	stageColor?: string;
+	stageProbability?: number;
 	style?: React.CSSProperties;
 }
 
@@ -55,6 +43,7 @@ export const DealCard: React.FC<DealCardProps> = ({
 	onCardClick,
 	onDealEdit,
 	stageColor,
+	stageProbability,
 	style: customStyle = {},
 }) => {
 	const {
@@ -103,9 +92,18 @@ export const DealCard: React.FC<DealCardProps> = ({
 
 	// Format currency value
 	const formattedValue = useMemo(() => {
-		const symbol = deal.currency === 'USD' ? '$' : deal.currency;
-		return `${symbol}${deal.value.toLocaleString()}`;
-	}, [deal.value, deal.currency]);
+		return `$${deal.value.toLocaleString()}`;
+	}, [deal.value]);
+
+	// Calculate effective probability
+	const effectiveProbability = useMemo(() => {
+		return deal.probability ?? stageProbability ?? 0;
+	}, [deal.probability, stageProbability]);
+
+	// Format weighted value
+	const formattedWeightedValue = useMemo(() => {
+		return `$${deal.weighted_value.toLocaleString()}`;
+	}, [deal.weighted_value]);
 
 	const handleCardClick = (e: React.MouseEvent) => {
 		// Don't trigger if clicking on drag handle
@@ -143,6 +141,23 @@ export const DealCard: React.FC<DealCardProps> = ({
 					<div className="deal-value">
 						<DollarSign size={14} />
 						<span>{formattedValue}</span>
+					</div>
+					{/* Probability Information */}
+					<div className="deal-probability">
+						<div className="probability-row">
+							<Percent size={12} />
+							<span className="probability-value">
+								{effectiveProbability.toFixed(0)}%
+							</span>
+						</div>
+					</div>
+					{/* Weighted Value */}
+					<div className="deal-weighted-value">
+						<Target size={12} />
+						<span className="weighted-label">
+							{__('Weighted:', 'quillcrm')}{' '}
+							{formattedWeightedValue}
+						</span>
 					</div>
 				</div>
 

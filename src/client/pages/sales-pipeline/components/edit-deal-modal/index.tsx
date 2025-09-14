@@ -23,6 +23,7 @@ import dayjs from 'dayjs';
  * Internal dependencies
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
+import { Deal } from '../../types';
 import './style.scss';
 
 const { Option } = Select;
@@ -31,7 +32,7 @@ export interface EditDealModalProps {
 	visible: boolean;
 	onClose: () => void;
 	onSuccess: () => void;
-	deal: any | null;
+	deal: Deal | null;
 	pipelines: any[];
 }
 
@@ -41,7 +42,6 @@ interface DealFormData {
 	pipeline_id: number;
 	stage_id: number;
 	value?: number;
-	currency: string;
 	expected_close_date?: string;
 	probability?: number;
 	source?: string;
@@ -100,7 +100,6 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				pipeline_id: deal.pipeline_id,
 				stage_id: deal.stage_id,
 				value: deal.value,
-				currency: deal.currency || 'USD',
 				expected_close_date: deal.expected_close_date
 					? dayjs(deal.expected_close_date)
 					: null,
@@ -207,7 +206,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				pipeline_id: values.pipeline_id,
 				stage_id: values.stage_id,
 				value: values.value || 0,
-				currency: values.currency,
+				currency: 'USD',
 				expected_close_date: values.expected_close_date
 					? dayjs(values.expected_close_date).format('YYYY-MM-DD')
 					: null,
@@ -431,23 +430,6 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 								style={{ width: '100%' }}
 								prefix={<DollarOutlined />}
 							/>
-						</Form.Item>
-
-						<Form.Item
-							name="currency"
-							label={__('Currency', 'quillcrm')}
-							className="form-item-half"
-							initialValue="USD"
-						>
-							<Select
-								placeholder={__('Select currency', 'quillcrm')}
-							>
-								<Option value="USD">USD ($)</Option>
-								<Option value="EUR">EUR (€)</Option>
-								<Option value="GBP">GBP (£)</Option>
-								<Option value="CAD">CAD ($)</Option>
-								<Option value="AUD">AUD ($)</Option>
-							</Select>
 						</Form.Item>
 					</div>
 

@@ -13,57 +13,7 @@ import { debounce } from 'lodash';
  * Internal dependencies
  */
 import { handleApiError, ERROR_MESSAGES } from '../utils/error-handler';
-
-interface Pipeline {
-	id: number;
-	name: string;
-	description: string;
-	stages: Array<{
-		id: number;
-		name: string;
-		color: string;
-		sort_order: number;
-		win_probability: number;
-		total_value?: number;
-		deal_count?: number;
-	}>;
-}
-
-interface Deal {
-	id: number;
-	title: string;
-	value: number;
-	currency: string;
-	stage_id: number;
-	pipeline_id: number;
-	contact?: {
-		id: number;
-		first_name: string;
-		last_name: string;
-		email: string;
-	};
-	expected_close_date?: string;
-	status: 'open' | 'won' | 'lost';
-	is_overdue: boolean;
-	days_until_close: number | null;
-	owner?: {
-		id: number;
-		display_name: string;
-		email: string;
-	};
-	created_at: string;
-	updated_at: string;
-}
-
-interface Filters {
-	search: string;
-	ownerId: number | null;
-	dateRange: {
-		from: Date | null;
-		to: Date | null;
-	};
-	status: 'open' | 'won' | 'lost' | 'all';
-}
+import { Deal, Pipeline, Filters } from '../types';
 
 interface UsePipelineDataReturn {
 	pipelines: Pipeline[];

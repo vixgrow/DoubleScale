@@ -25,6 +25,8 @@ final class Deal_Manager {
 
 
 
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -177,14 +179,14 @@ final class Deal_Manager {
 	 *
 	 * @return bool
 	 */
-	public function move_deal_to_stage( $deal_id, $stage_id, $user_id = null ) {
+	public function move_deal_to_stage( $deal_id, $stage_id, $user_id = null, $update_probability = false ) {
 		$deal = Deal_Model::with( 'contact' )->find( $deal_id );
 
 		if ( ! $deal ) {
 			return false;
 		}
 		$old_stage_id = $deal->stage_id;
-		$moved        = $deal->moveToStage( $stage_id, $user_id );
+		$moved        = $deal->moveToStage( $stage_id, $user_id, $update_probability );
 
 		if ( $moved ) {
 			do_action( 'quillcrm_deal_stage_changed', $deal->contact, $deal, $old_stage_id, $stage_id );

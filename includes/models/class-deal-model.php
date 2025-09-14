@@ -34,6 +34,9 @@ class Deal_Model extends Model {
 
 
 
+
+
+
 	/**
 	 * Table name
 	 *
@@ -286,7 +289,8 @@ class Deal_Model extends Model {
 				$custom_fields_arr = array();
 
 				foreach ( $custom_fields as $custom_field ) {
-					$custom_field_model = Custom_Field_Model::find( $custom_field['custom_field_id'] );
+					$custom_field_id    = $custom_field['custom_field_id'] ?? $custom_field['id'];
+					$custom_field_model = Custom_Field_Model::find( $custom_field_id );
 					if ( ! $custom_field_model ) {
 						continue;
 					}
@@ -301,7 +305,7 @@ class Deal_Model extends Model {
 						$custom_field['value'] = implode( ',', $custom_field['value'] );
 					}
 
-					$custom_fields_arr[ $custom_field['custom_field_id'] ] = array(
+					$custom_fields_arr[ $custom_field_id ] = array(
 						'value'       => $custom_field['value'],
 						'entity_type' => 'deal',
 					);
@@ -388,7 +392,7 @@ class Deal_Model extends Model {
 				)
 			);
 
-			do_action( 'quillcrm_deal_stage_changed', $this, $old_stage_id, $stage_id );
+			do_action( 'quillcrm_deal_stage_changed', $this->contact, $this, $old_stage_id, $stage_id );
 			Deal_Activity_Model::create(
 				array(
 					'deal_id'       => $this->id,

@@ -26,19 +26,23 @@ import {
 import { Button } from '@/components/ui/button';
 import { CustomField, FieldDialogProps } from '@quillcrm/client';
 
-export const FieldDialog: React.FC<FieldDialogProps> = ({
+export const FieldDialog: React.FC<
+	FieldDialogProps & { currentScope?: string }
+> = ({
 	visible,
 	onClose,
 	field,
 	groups,
 	fieldTypes,
 	onSave,
+	currentScope = 'contact',
 }) => {
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [formData, setFormData] = useState<Partial<CustomField>>({
 		name: '',
 		type: '',
 		group_id: groups[0]?.id || 0,
+		scope: currentScope,
 		attributes: null,
 	});
 	const [options, setOptions] = useState<string[]>(['']);
@@ -50,6 +54,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 				name: field.name,
 				type: field.type,
 				group_id: field.group_id,
+				scope: currentScope, // Use the current scope from props
 				attributes: field.attributes,
 			});
 			// Load existing options if field has them
@@ -65,6 +70,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 				name: '',
 				type: '',
 				group_id: groups[0]?.id || 0,
+				scope: '',
 				attributes: null,
 			});
 			setOptions(['']);
@@ -79,6 +85,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 					name: field.name,
 					type: field.type,
 					group_id: field.group_id,
+					scope: field.scope,
 					attributes: field.attributes,
 				});
 				// Load existing options if field has them
@@ -94,6 +101,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 					name: '',
 					type: '',
 					group_id: groups[0]?.id || 0,
+					scope: currentScope,
 					attributes: null,
 				});
 				setOptions(['']);
@@ -140,8 +148,21 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 		}
 	}, [formData.type, needsOptions]);
 
+	// Update scope when currentScope changes
+	useEffect(() => {
+		setFormData((prev) => ({
+			...prev,
+			scope: currentScope,
+		}));
+	}, [currentScope]);
+
 	const handleSubmit = async () => {
-		if (!formData.name || !formData.type || !formData.group_id) {
+		if (
+			!formData.name ||
+			!formData.type ||
+			!formData.group_id ||
+			!formData.scope
+		) {
 			createNotice({
 				type: 'error',
 				message: __('Please fill all the required fields', 'quillcrm'),
@@ -174,6 +195,7 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 			attributes: needsOptions
 				? options.filter((option) => option.trim() !== '')
 				: null,
+			scope: formData.scope,
 		} as CustomField;
 
 		await onSave(fieldData, isNew);
@@ -210,6 +232,16 @@ export const FieldDialog: React.FC<FieldDialogProps> = ({
 						type="text"
 						placeholder={__('Enter Field Name', 'quillcrm')}
 					/>
+
+					{/* Scope is now passed from parent component */}
+					<div className="flex items-center gap-2 py-2">
+						<span className="text-sm font-medium text-gray-500">
+							{__('Scope:', 'quillcrm')}
+						</span>
+						<span className="text-sm font-medium capitalize">
+							{formData.scope}
+						</span>
+					</div>
 
 					<Field
 						label={__('Type', 'quillcrm')}

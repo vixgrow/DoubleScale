@@ -21,7 +21,7 @@ import Contacts from '../pages/contacts';
 import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
-import CustomFields from '../pages/contacts/custom-fields';
+import CustomFields from '../pages/custom-fields';
 import Campaigns from '../pages/campaigns';
 import Campaign from '../pages/campaign';
 import Forms from '../pages/forms';
@@ -53,6 +53,7 @@ import {
 	IntegrationsIcon,
 	SettingsIcon,
 	ToolsIcon,
+	CustomFieldsIcon,
 } from '@quillcrm/components';
 
 // Import Lucide React icon for pipeline
@@ -110,7 +111,7 @@ registerAdminPage('custom-fields', {
 	path: 'custom-fields',
 	component: () => <CustomFields />,
 	label: __('Custom Fields', 'quillcrm'),
-	hidden: true,
+	icon: <CustomFieldsIcon />,
 });
 
 registerAdminPage('campaigns', {

@@ -5,7 +5,12 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, {
+	forwardRef,
+	useImperativeHandle,
+	useState,
+	useEffect,
+} from 'react';
 import {
 	DndContext,
 	DragOverlay,
@@ -24,6 +29,7 @@ import {
 	CustomField,
 	CustomFieldsGroup,
 } from '@quillcrm/client';
+import { PlusIcon } from '@quillcrm/components';
 import { DataTableSearch } from '@/components/ui/data-table-search';
 import { DataTableActions } from '@/components/ui/data-table-actions';
 import { DroppableGroup } from './droppable-group';
@@ -35,6 +41,13 @@ import { DragOverlayRow } from './drag-overlay-row';
 import ConfigAPI from '@quillcrm/config';
 import { Button } from '@/components/ui/button';
 import { NoticeBanner } from '@quillcrm/components';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 
 // Custom modifier to center the drag overlay on the move icon
 const centerOnDragHandle = ({ transform }) => {
@@ -53,7 +66,17 @@ const centerOnDragHandle = ({ transform }) => {
 };
 
 export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
-	({ activeTab }, ref) => {
+	({ activeTab, scope: propScope = 'contact' }, ref) => {
+		// Use scope from props but keep state for internal changes if needed
+		const [scope, setScope] = useState<string>(propScope);
+
+		// Update scope state when prop changes
+		useEffect(() => {
+			if (propScope !== scope) {
+				setScope(propScope);
+			}
+		}, [propScope]);
+
 		const {
 			loading,
 			error,
@@ -64,13 +87,13 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			fetchGroups,
 			saveField,
 			deleteField,
-			deleteSelectedFields, // Add this from the hook
+			deleteSelectedFields,
 			saveGroup,
 			updateGroup,
 			duplicateGroup,
 			deleteGroup,
 			moveField,
-		} = useCustomFields();
+		} = useCustomFields(scope);
 
 		const [visible, setVisible] = useState(false);
 		const [addGroupVisible, setAddGroupVisible] = useState(false);
@@ -158,6 +181,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		};
 
 		const handleGroupDialogSave = async (name: string) => {
+			// The scope is already set in the useCustomFields hook
 			return await saveGroup(name);
 		};
 
@@ -165,6 +189,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			groupId: number,
 			name: string
 		) => {
+			// The scope is already set in the useCustomFields hook
 			return await updateGroup(groupId, name);
 		};
 
@@ -172,6 +197,15 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			setAddGroupVisible(false);
 			setEditingGroup(null);
 		};
+
+		// Effect to refetch groups when scope changes
+		useEffect(() => {
+			fetchGroups();
+			// Reset UI state when scope changes
+			setSelectedRowKeys([]);
+			setGlobalFilter('');
+			setDateRange({ from: null, to: null });
+		}, [scope]);
 
 		const allFields =
 			groups?.flatMap((group) => group.custom_fields || []) || [];
@@ -259,11 +293,78 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 
 				{/* Global Actions */}
 				<div className="flex items-center justify-between p-5 border rounded-lg my-4 w-full">
-					<DataTableSearch
-						value={globalFilter}
-						onChange={setGlobalFilter}
-						placeholder={__('Search all fields...', 'quillcrm')}
-					/>
+					<div className="flex items-center gap-2">
+						<DataTableSearch
+							value={globalFilter}
+							onChange={setGlobalFilter}
+							placeholder={__('Search all fields...', 'quillcrm')}
+						/>
+
+						{/* Scope indicator */}
+						<div className="flex items-center gap-2">
+							<Select
+								value={scope}
+								onValueChange={(value) => {
+									// Update scope state
+									setScope(value);
+									// Reset selected rows when changing scope
+									setSelectedRowKeys([]);
+									// Fetch groups for the new scope
+									fetchGroups();
+								}}
+							>
+								<SelectTrigger className="w-[180px]">
+									<SelectValue
+										placeholder={__(
+											'Select scope',
+											'quillcrm'
+										)}
+									/>
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="contact">
+										{__('Contact', 'quillcrm')}
+									</SelectItem>
+									<SelectItem value="deal">
+										{__('Deal', 'quillcrm')}
+									</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div className="flex items-center gap-2">
+							<Button
+								variant="tertiary"
+								onClick={() => {
+									if (!groups || groups.length === 0) {
+										showNotice({
+											type: 'error',
+											message: __(
+												'Please create a group first before adding fields',
+												'quillcrm'
+											),
+										});
+										return;
+									}
+									setSelectedField(null);
+									setVisible(true);
+								}}
+								className="flex items-center gap-1"
+							>
+								<PlusIcon /> {__('Add Field', 'quillcrm')}
+							</Button>
+
+							<Button
+								onClick={() => {
+									setEditingGroup(null);
+									setAddGroupVisible(true);
+								}}
+								className="flex items-center gap-1"
+							>
+								<PlusIcon /> {__('Add Group', 'quillcrm')}
+							</Button>
+						</div>
+					</div>
 
 					<DataTableActions
 						table={mockGlobalTable as any}
@@ -438,6 +539,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 					groups={groups}
 					fieldTypes={customFieldsTypes}
 					onSave={saveField}
+					currentScope={scope}
 				/>
 
 				<GroupDialog
@@ -446,6 +548,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 					onSave={handleGroupDialogSave}
 					onUpdate={handleGroupDialogUpdate}
 					editingGroup={editingGroup}
+					currentScope={scope}
 				/>
 
 				<DeleteGroupDialog

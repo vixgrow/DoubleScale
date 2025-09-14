@@ -28,20 +28,23 @@ interface GroupDialogProps {
 	visible: boolean;
 	onClose: () => void;
 	onSave: (name: string) => Promise<boolean>;
-	onUpdate: (groupId: number, name: string) => Promise<boolean>; // Removed slug parameter
+	onUpdate: (groupId: number, name: string) => Promise<boolean>;
 	editingGroup?: CustomFieldsGroup | null;
 }
 
-export const GroupDialog: React.FC<GroupDialogProps> = ({
+export const GroupDialog: React.FC<
+	GroupDialogProps & { currentScope?: string }
+> = ({
 	visible,
 	onClose,
 	onSave,
 	onUpdate,
 	editingGroup = null,
+	currentScope = 'contact',
 }) => {
 	const [name, setName] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
-
+	const [scope, setScope] = useState(currentScope);
 	const isEditing = !!editingGroup;
 
 	// Reset form when dialog opens or when editing group changes
@@ -49,11 +52,13 @@ export const GroupDialog: React.FC<GroupDialogProps> = ({
 		if (visible) {
 			if (editingGroup) {
 				setName(editingGroup.name || '');
+				setScope(currentScope); // Always use the current scope from props
 			} else {
 				setName('');
+				setScope(currentScope);
 			}
 		}
-	}, [visible, editingGroup]);
+	}, [visible, editingGroup, currentScope]);
 
 	const handleSubmit = async () => {
 		if (!name.trim()) return;
@@ -62,7 +67,7 @@ export const GroupDialog: React.FC<GroupDialogProps> = ({
 
 		let success = false;
 		if (isEditing && editingGroup) {
-			success = await onUpdate(editingGroup.id, name.trim()); // Only pass name
+			success = await onUpdate(editingGroup.id, name.trim()); // Only pass name and id
 		} else {
 			success = await onSave(name.trim());
 		}
@@ -86,11 +91,21 @@ export const GroupDialog: React.FC<GroupDialogProps> = ({
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader
-							title={isEditing ? __('Edit Group', 'quillcrm') : __('Add Group', 'quillcrm')}
+							title={
+								isEditing
+									? __('Edit Group', 'quillcrm')
+									: __('Add Group', 'quillcrm')
+							}
 							subtitle={
 								isEditing
-									? __('Update the group information below.', 'quillcrm')
-									: __('Add basic information below to add new Group.', 'quillcrm')
+									? __(
+											'Update the group information below.',
+											'quillcrm'
+										)
+									: __(
+											'Add basic information below to add new Group.',
+											'quillcrm'
+										)
 							}
 							icon={<GradientGroupIcon />}
 						/>
@@ -107,18 +122,33 @@ export const GroupDialog: React.FC<GroupDialogProps> = ({
 					/>
 				</div>
 
+				<div className="qcrm-fields space-y-4">
+					{/* Scope is now passed from parent component */}
+					<div className="flex items-center gap-2 py-2">
+						<span className="text-sm font-medium text-gray-500">
+							{__('Scope:', 'quillcrm')}
+						</span>
+						<span className="text-sm font-medium capitalize">
+							{scope}
+						</span>
+					</div>
+				</div>
+
 				<DialogFooter className="mt-6 w-full">
 					<Button
 						onClick={handleSubmit}
-						disabled={isSubmitting || !name.trim()}
+						disabled={isSubmitting || !name.trim() || !scope.trim()}
 						size="xl"
 						variant="gradient"
 						className="w-full"
 					>
 						{isSubmitting
-							? (isEditing ? __('Updating...', 'quillcrm') : __('Adding...', 'quillcrm'))
-							: (isEditing ? __('Update', 'quillcrm') : __('Add', 'quillcrm'))
-						}
+							? isEditing
+								? __('Updating...', 'quillcrm')
+								: __('Adding...', 'quillcrm')
+							: isEditing
+								? __('Update', 'quillcrm')
+								: __('Add', 'quillcrm')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

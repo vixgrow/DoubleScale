@@ -13,7 +13,7 @@ import { Button, Skeleton, Typography, Collapse } from 'antd';
  */
 import './style.scss';
 import { useContactContext } from '../state/context';
-import { useCustomFields } from '../../contacts/custom-fields/use-customFields';
+import { useCustomFields } from '../../custom-fields/use-customFields';
 import Field from '@quillcrm/components/field';
 
 const Profile: React.FC = () => {

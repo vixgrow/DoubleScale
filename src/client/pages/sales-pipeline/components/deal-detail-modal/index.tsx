@@ -46,6 +46,7 @@ import { useDealOperations } from '../../hooks/use-deal-operations';
 import { DealActivities } from '../deal-activities';
 import { Deal } from '../../types';
 import './style.scss';
+import { DealCustomFields } from '../deal-custom-fields';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -543,6 +544,11 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 							key: 'activities',
 							label: __('Activities', 'quillcrm'),
 							children: <DealActivities dealId={deal.id} />,
+						},
+						{
+							key: 'custom-fields',
+							label: __('Custom Fields', 'quillcrm'),
+							children: <DealCustomFields deal={deal} />,
 						},
 					]}
 				/>

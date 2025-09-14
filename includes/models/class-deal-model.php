@@ -52,6 +52,7 @@ class Deal_Model extends Model {
 		'value',
 		'currency',
 		'expected_close_date',
+		'probability',
 		'status',
 		'owner_id',
 		'source',
@@ -80,6 +81,7 @@ class Deal_Model extends Model {
 	 */
 	protected $casts = array(
 		'value' => 'float',
+		'probability' => 'float',
 		'expected_close_date' => 'date',
 		'won_time' => 'datetime',
 		'lost_time' => 'datetime',
@@ -99,8 +101,9 @@ class Deal_Model extends Model {
 		'stage_id' => 'required|integer',
 		'value' => 'nullable|numeric|min:0',
 		'currency' => 'nullable|string|size:3',
+		'probability' => 'nullable|numeric|between:0,100',
 		'status' => 'required|in:open,won,lost',
-		'owner_id' => 'nullable|integer',
+		'owner_id' => 'nullable|integer|min:1',
 	);
 
 	/**
@@ -119,7 +122,10 @@ class Deal_Model extends Model {
 		'value.numeric' => 'Deal value must be a number.',
 		'value.min' => 'Deal value cannot be negative.',
 		'currency.size' => 'Currency must be a 3-letter code.',
+		'probability.numeric' => 'Probability must be a number.',
+		'probability.between' => 'Probability must be between 0 and 100.',
 		'status.in' => 'Status must be open, won, or lost.',
+		'owner_id.min' => 'Owner ID must be a positive number.',
 	);
 
 	/**
@@ -206,7 +212,7 @@ class Deal_Model extends Model {
 	}
 
 	/**
-	 * Get weighted value based on stage win probability
+	 * Get weighted value based on deal or stage win probability
 	 *
 	 * @since 1.0.0
 	 *
@@ -218,7 +224,9 @@ class Deal_Model extends Model {
 			return 0;
 		}
 
-		return $this->value * ( $stage->win_probability / 100 );
+		// Use deal's custom probability if set, otherwise use stage default
+		$probability = $this->probability ?? $stage->win_probability;
+		return $this->value * ( $probability / 100 );
 	}
 
 	/**
@@ -235,7 +243,7 @@ class Deal_Model extends Model {
 		$old_stage_id = $this->stage_id;
 		
 		if ( $old_stage_id == $stage_id ) {
-			return false;
+			return true;
 		}
 
 		$this->stage_id = $stage_id;
@@ -246,10 +254,10 @@ class Deal_Model extends Model {
 			Deal_Activity_Model::create( array(
 				'deal_id' => $this->id,
 				'activity_type' => 'stage_changed',
-				'data' => wp_json_encode( array(
+				'data' => array(
 					'old_stage_id' => $old_stage_id,
 					'new_stage_id' => $stage_id,
-				) ),
+				),
 				'user_id' => $user_id,
 			) );
 
@@ -277,9 +285,9 @@ class Deal_Model extends Model {
 			Deal_Activity_Model::create( array(
 				'deal_id' => $this->id,
 				'activity_type' => 'status_changed',
-				'data' => wp_json_encode( array(
+				'data' => array(
 					'status' => 'won',
-				) ),
+				),
 				'user_id' => $user_id,
 			) );
 
@@ -309,10 +317,10 @@ class Deal_Model extends Model {
 			Deal_Activity_Model::create( array(
 				'deal_id' => $this->id,
 				'activity_type' => 'status_changed',
-				'data' => wp_json_encode( array(
+				'data' => array(
 					'status' => 'lost',
 					'reason' => $reason,
-				) ),
+				),
 				'user_id' => $user_id,
 			) );
 
@@ -338,11 +346,11 @@ class Deal_Model extends Model {
 				Deal_Activity_Model::create( array(
 					'deal_id' => $deal->id,
 					'activity_type' => 'created',
-					'data' => wp_json_encode( array(
+					'data' => array(
 						'title' => $deal->title,
 						'value' => $deal->value,
 						'currency' => $deal->currency,
-					) ),
+					),
 					'user_id' => get_current_user_id(),
 				) );
 
@@ -359,10 +367,10 @@ class Deal_Model extends Model {
 					Deal_Activity_Model::create( array(
 						'deal_id' => $deal->id,
 						'activity_type' => 'value_changed',
-						'data' => wp_json_encode( array(
+						'data' => array(
 							'old_value' => $deal->getOriginal( 'value' ),
 							'new_value' => $changes['value'],
-						) ),
+						),
 						'user_id' => get_current_user_id(),
 					) );
 				}

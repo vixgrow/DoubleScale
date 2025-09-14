@@ -26,6 +26,7 @@ import Canvas from './components/Canvas';
 import BlockEditor from './components/BlockEditor';
 import TemplateCard from './components/TemplateCard';
 import { BuilderProvider, useBuilder } from './context/BuilderContext';
+import { ButtonSettingsProvider } from './context/ButtonSettingsContext';
 
 const BuilderContent: React.FC = () => {
 	const {
@@ -177,7 +178,7 @@ const BuilderContent: React.FC = () => {
 								...blockConfig.props,
 								templateLayout:
 									template.layout?.[
-										blockConfig.props.containerId
+									blockConfig.props.containerId
 									] || null,
 							};
 
@@ -351,7 +352,7 @@ const BuilderContent: React.FC = () => {
 								...blockConfig.props,
 								templateLayout:
 									template.layout?.[
-										blockConfig.props.containerId
+									blockConfig.props.containerId
 									] || null,
 							};
 
@@ -428,7 +429,7 @@ const BuilderContent: React.FC = () => {
 								...blockConfig.props,
 								templateLayout:
 									template.layout?.[
-										blockConfig.props.containerId
+									blockConfig.props.containerId
 									] || null,
 							};
 
@@ -505,7 +506,7 @@ const BuilderContent: React.FC = () => {
 								...blockConfig.props,
 								templateLayout:
 									template.layout?.[
-										blockConfig.props.containerId
+									blockConfig.props.containerId
 									] || null,
 							};
 
@@ -701,8 +702,8 @@ const BuilderContent: React.FC = () => {
 				case 'title-button-2':
 					title = 'Title & Button 2';
 					break;
-				case 'title-button-5':
-					title = 'Title & Button 5';
+				case 'title-2-buttons':
+					title = 'Title & 2 Buttons';
 					break;
 				case 'title-paragraph-button':
 					title = 'Title, Paragraph & Button';
@@ -850,9 +851,11 @@ const BuilderContent: React.FC = () => {
 
 const Builder: React.FC = () => {
 	return (
-		<BuilderProvider>
-			<BuilderContent />
-		</BuilderProvider>
+		<ButtonSettingsProvider>
+			<BuilderProvider>
+				<BuilderContent />
+			</BuilderProvider>
+		</ButtonSettingsProvider>
 	);
 };
 

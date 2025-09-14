@@ -12,13 +12,6 @@ import { ButtonEditor } from './Editor';
 export interface ButtonBlockProps {
 	text: string;
 	url: string;
-	backgroundColor: string;
-	padding: {
-		top: number;
-		right: number;
-		bottom: number;
-		left: number;
-	};
 	containerPadding: {
 		top: number;
 		right: number;
@@ -37,13 +30,6 @@ const ButtonBlock = {
 	defaultProps: {
 		text: 'Click Here',
 		url: '#',
-		backgroundColor: '#007cba',
-		padding: {
-			top: 12,
-			right: 24,
-			bottom: 12,
-			left: 24,
-		},
 		containerPadding: {
 			top: 0,
 			right: 0,

@@ -101,14 +101,31 @@ class Email_Renderer {
 
 		// Process all sections
 		if ( isset( $content['sections'] ) && is_array( $content['sections'] ) ) {
+			// Structure with explicit 'sections' property
 			foreach ( $content['sections'] as $section ) {
 				$html .= $this->render_section( $section, $merge_tags );
 			}
-		} else {
-			// Handle flat content structure (no sections)
-			foreach ( $content as $block ) {
-				if ( isset( $block['type'] ) ) {
-					$html .= $this->render_block( $block, $merge_tags );
+		} elseif ( is_array( $content ) ) {
+			// Check if this is an array of section objects
+			$is_section_array = false;
+			foreach ( $content as $item ) {
+				if ( is_array( $item ) && isset( $item['columns'] ) ) {
+					$is_section_array = true;
+					break;
+				}
+			}
+
+			if ( $is_section_array ) {
+				// Content is an array of section objects (each with id, columns, styles)
+				foreach ( $content as $section ) {
+					$html .= $this->render_section( $section, $merge_tags );
+				}
+			} else {
+				// Handle flat content structure (no sections)
+				foreach ( $content as $block ) {
+					if ( isset( $block['type'] ) ) {
+						$html .= $this->render_block( $block, $merge_tags );
+					}
 				}
 			}
 		}

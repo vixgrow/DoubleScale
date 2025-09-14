@@ -40,17 +40,17 @@ class Button_Block extends Email_Block {
 	 */
 	public function get_default_props(): array {
 		return array(
-			'text'            => 'Click Here',
-			'url'             => '#',
-			'backgroundColor' => '#007cba',
-			'padding'         => array(
-				'top'    => 12,
-				'right'  => 24,
-				'bottom' => 12,
-				'left'   => 24,
+			'text'                     => 'Click Here',
+			'url'                      => '#',
+			'containerPadding'         => array(
+				'top'    => 0,
+				'right'  => 0,
+				'bottom' => 0,
+				'left'   => 0,
 			),
-			'align'           => 'center',
-			'buttonStyle'     => 'primary',
+			'containerBackgroundColor' => 'transparent',
+			'align'                    => 'center',
+			'buttonStyle'              => 'primary',
 		);
 	}
 

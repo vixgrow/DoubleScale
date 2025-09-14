@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Automations Loader
  * This class is responsible for loading the Automations
@@ -55,6 +56,30 @@ final class Loader {
 	}
 
 	/**
+	 * Get meta arguments from database
+	 *
+	 * @param int $meta_id Meta ID
+	 * @return array|false
+	 */
+	private function get_meta_args( $meta_id ) {
+		global $wpdb;
+
+		$meta = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}quillcrm_task_meta WHERE ID = %d",
+				$meta_id
+			),
+			ARRAY_A
+		);
+
+		if ( ! $meta || empty( $meta['value'] ) ) {
+			return false;
+		}
+
+		return maybe_unserialize( $meta['value'] );
+	}
+
+	/**
 	 * Load Hooks
 	 *
 	 * @since 1.0.0
@@ -88,13 +113,31 @@ final class Loader {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Automation_Model $automation The automation model.
-	 * @param int              $step_id      The step.
-	 * @param int              $contact_id      The contact.
+	 * @param Automation_Model|int $automation The automation model or meta_id integer.
+	 * @param int                  $step_id      The step.
+	 * @param int                  $contact_id      The contact.
 	 * @return void
 	 */
-	public function process_automation_step( $automation, $step_id, $contact_id ) {
+	public function process_automation_step( $automation, $step_id = null, $contact_id = null ) {
 		try {
+			// if this below condition is true this meaning i get args from meta_id from database and automation is integer from that meta_id
+			if ( is_numeric( $automation ) && $step_id == null && $contact_id == null ) {
+				$args = $this->get_meta_args( $automation );
+				if ( $args && count( $args ) >= 3 ) {
+					list($automation, $step_id, $contact_id) = $args;
+				} else {
+					throw new Exception( 'Failed to retrieve arguments from meta_id: ' . $automation );
+				}
+			}
+
+			// after this i will check that i can get Automation_Model from $automation
+			if ( ! $automation instanceof Automation_Model ) {
+				$automation = Automation_Model::findOrFail( $automation );
+				if ( ! $automation ) {
+					throw new Exception( 'Automation not found' );
+				}
+			}
+
 			$step               = Automation_Step_Model::findOrFail( $step_id );
 			$automation_process = new Process_Automation( $automation );
 			$automation_process->process_step( $step, $contact_id );

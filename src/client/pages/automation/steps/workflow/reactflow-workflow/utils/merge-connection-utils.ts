@@ -5,6 +5,146 @@
 
 import type { Node, Edge } from '@xyflow/react';
 import type { AutomationStep } from '@quillcrm/client';
+import { createEdge, EdgeType, addEdgeIfNotExists, findConditionLevel } from './edge-utils';
+
+/**
+ * Find steps in a specific branch of a condition
+ * 
+ * @param steps All steps in the workflow
+ * @param parentConditionId Parent condition ID
+ * @param condition Branch condition ('yes' or 'no')
+ * @returns Steps in the specified branch
+ */
+const getBranchSteps = (
+    steps: AutomationStep[],
+    parentConditionId: number,
+    condition: string
+): AutomationStep[] => {
+    return steps
+        .filter(
+            (s) => s.parent_id === parentConditionId && s.condition === condition
+        )
+        .sort((a, b) => a.order - b.order);
+};
+
+/**
+ * Generate merge node ID for a condition at a specific level
+ * 
+ * @param conditionId Condition step ID
+ * @param level Nesting level
+ * @returns Merge node ID
+ */
+const getMergeNodeId = (conditionId: number | string, level: number): string => {
+    return `merge-${conditionId}-level-${level}`;
+};
+
+/**
+ * Find the last merge node in a branch that should connect to the parent merge
+ * 
+ * @param steps All steps in the workflow
+ * @param parentConditionId Parent condition ID
+ * @param condition Branch condition ('yes' or 'no')
+ * @param level Nesting level
+ * @returns ID of the last merge node in the branch, or null if none
+ */
+function findLastMergeInBranch(
+    steps: AutomationStep[],
+    parentConditionId: number,
+    condition: string,
+    level: number
+): string | null {
+    // Get all steps in this branch
+    const branchSteps = getBranchSteps(steps, parentConditionId, condition);
+
+    if (branchSteps.length === 0) return null;
+
+    // Find the last condition in this branch
+    const lastCondition = branchSteps
+        .filter((s) => s.type === 'condition')
+        .sort((a, b) => b.order - a.order)[0]; // Get the condition with highest order
+
+    if (lastCondition) {
+        // Calculate the level for this last condition
+        const conditionLevel = level + 1;
+        return getMergeNodeId(lastCondition.id, conditionLevel);
+    }
+
+    return null;
+}
+
+/**
+ * Connect nodes with validation
+ * 
+ * @param initialNodes Array of nodes
+ * @param initialEdges Array of edges
+ * @param sourceId Source node ID
+ * @param targetId Target node ID
+ * @param edgeOptions Edge options
+ * @returns Whether the edge was created
+ */
+const connectNodesIfValid = (
+    initialNodes: Node[],
+    initialEdges: Edge[],
+    sourceId: string,
+    targetId: string,
+    edgeOptions: {
+        edgeId: string;
+        edgeType?: EdgeType;
+        sourceHandle?: string;
+        targetHandle?: string;
+        sourceStep?: any;
+        targetStep?: any;
+        fromBranch?: string;
+        fromChildMerge?: boolean;
+        fromMerge?: boolean;
+        label?: string;
+        className?: string;
+    }
+): boolean => {
+    const {
+        edgeId,
+        edgeType = EdgeType.DEFAULT,
+        sourceHandle,
+        targetHandle,
+        sourceStep,
+        targetStep,
+        fromBranch,
+        fromChildMerge,
+        fromMerge,
+        label,
+        className
+    } = edgeOptions;
+
+    // Check if source and target nodes exist
+    const sourceExists = initialNodes.some((node) => node.id === sourceId);
+    const targetExists = initialNodes.some((node) => node.id === targetId);
+    const edgeExists = initialEdges.some((edge) => edge.id === edgeId);
+
+    if (sourceExists && targetExists && !edgeExists) {
+        const edge = createEdge(
+            edgeId,
+            sourceId,
+            targetId,
+            edgeType,
+            sourceStep,
+            targetStep,
+            {
+                sourceHandle,
+                targetHandle,
+                label,
+                className,
+                fromBranch,
+                fromChildMerge,
+                fromMerge
+            }
+        );
+
+        initialEdges.push(edge);
+        return true;
+    }
+
+    return false;
+}
 
 /**
  * Post-process to ensure all child condition merge nodes connect to their parent merge nodes
@@ -18,44 +158,20 @@ export function connectChildMergesToParentMerges(
 
     conditionSteps.forEach((conditionStep) => {
         // Find the level of this condition step
-        let level = 0;
-        let currentStep = conditionStep;
-        while (currentStep.parent_id) {
-            const parent = steps.find((s) => s.id === currentStep.parent_id);
-            if (parent && parent.type === 'condition') {
-                level++;
-                currentStep = parent;
-            } else {
-                break;
-            }
-        }
+        const level = findConditionLevel(steps, conditionStep);
 
         // Only process child conditions (level > 0)
         if (level > 0 && conditionStep.parent_id) {
             const parentCondition = steps.find(
                 (s) => s.id === conditionStep.parent_id
             );
+
             if (parentCondition && parentCondition.type === 'condition') {
-                const childMergeId = `merge-${conditionStep.id}-level-${level}`;
+                const childMergeId = getMergeNodeId(conditionStep.id, level);
                 const parentLevel = level - 1;
-                const parentMergeId = `merge-${parentCondition.id}-level-${parentLevel}`;
-
-                // Check if this child merge node exists and parent merge node exists
-                const childMergeExists = initialNodes.some(
-                    (node) => node.id === childMergeId
-                );
-                const parentMergeExists = initialNodes.some(
-                    (node) => node.id === parentMergeId
-                );
-
-                // Check if edge already exists
-                const edgeId = `${childMergeId}-to-parent-merge`;
-                const edgeExists = initialEdges.some(
-                    (edge) => edge.id === edgeId
-                );
+                const parentMergeId = getMergeNodeId(parentCondition.id, parentLevel);
 
                 // Check if there are steps after this child condition that should be connected first
-                // Find steps in the same branch after this condition
                 const stepsAfterChildCondition = steps
                     .filter(
                         (s) =>
@@ -66,40 +182,32 @@ export function connectChildMergesToParentMerges(
                     .sort((a, b) => a.order - b.order);
 
                 // Connect child merge to parent merge for proper flow
-                if (childMergeExists && parentMergeExists && !edgeExists) {
-                    // If there are steps after this child condition, don't connect directly to parent
-                    // The subsequent steps should handle the connection chain
-                    if (stepsAfterChildCondition.length > 0) {
-                    } else {
-                        // No subsequent steps, safe to connect directly to parent merge
-                        // Determine which handle on the parent merge to connect to
-                        // This should match the condition branch this child belongs to
-                        const targetHandle = conditionStep.condition;
+                if (stepsAfterChildCondition.length === 0) {
+                    // No subsequent steps, safe to connect directly to parent merge
+                    // Determine which handle on the parent merge to connect to
+                    // This should match the condition branch this child belongs to
+                    const targetHandle = conditionStep.condition;
 
-                        initialEdges.push({
-                            id: edgeId,
-                            source: childMergeId,
-                            target: parentMergeId,
+                    connectNodesIfValid(
+                        initialNodes,
+                        initialEdges,
+                        childMergeId,
+                        parentMergeId,
+                        {
+                            edgeId: `${childMergeId}-to-parent-merge`,
                             targetHandle: targetHandle,
-                            type: 'default',
-                            style: {
-                                stroke: '#D7D7DA',
-                                strokeWidth: 2,
+                            sourceStep: {
+                                id: childMergeId,
+                                type: 'merge',
                             },
-                            data: {
-                                sourceStep: {
-                                    id: childMergeId,
-                                    type: 'merge',
-                                },
-                                targetStep: {
-                                    id: parentMergeId,
-                                    type: 'merge',
-                                },
-                                fromBranch: conditionStep.condition,
-                                fromChildMerge: true,
+                            targetStep: {
+                                id: parentMergeId,
+                                type: 'merge',
                             },
-                        });
-                    }
+                            fromBranch: conditionStep.condition,
+                            fromChildMerge: true
+                        }
+                    );
                 }
             }
         }
@@ -118,21 +226,11 @@ export function connectChildMergesToSubsequentSteps(
 
     conditionSteps.forEach((conditionStep) => {
         // Find the level of this condition step
-        let level = 0;
-        let currentStep = conditionStep;
-        while (currentStep.parent_id) {
-            const parent = steps.find((s) => s.id === currentStep.parent_id);
-            if (parent && parent.type === 'condition') {
-                level++;
-                currentStep = parent;
-            } else {
-                break;
-            }
-        }
+        const level = findConditionLevel(steps, conditionStep);
 
         // Only process child conditions (level > 0)
         if (level > 0 && conditionStep.parent_id) {
-            const childMergeId = `merge-${conditionStep.id}-level-${level}`;
+            const childMergeId = getMergeNodeId(conditionStep.id, level);
 
             // Find steps after this child condition in the same branch
             const stepsAfterChildCondition = steps
@@ -146,36 +244,22 @@ export function connectChildMergesToSubsequentSteps(
 
             if (stepsAfterChildCondition.length > 0) {
                 const nextStep = stepsAfterChildCondition[0];
-                const edgeId = `${childMergeId}-to-${nextStep.id}`;
 
-                // Check if this merge node exists and edge doesn't already exist
-                const mergeExists = initialNodes.some(
-                    (node) => node.id === childMergeId
-                );
-                const edgeExists = initialEdges.some(
-                    (edge) => edge.id === edgeId
-                );
-
-                if (mergeExists && !edgeExists) {
-                    initialEdges.push({
-                        id: edgeId,
-                        source: childMergeId,
-                        target: nextStep.id.toString(),
-                        type: 'default',
-                        style: {
-                            stroke: '#D7D7DA',
-                            strokeWidth: 2,
+                connectNodesIfValid(
+                    initialNodes,
+                    initialEdges,
+                    childMergeId,
+                    nextStep.id.toString(),
+                    {
+                        edgeId: `${childMergeId}-to-${nextStep.id}`,
+                        sourceStep: {
+                            id: childMergeId,
+                            type: 'merge',
                         },
-                        data: {
-                            sourceStep: {
-                                id: childMergeId,
-                                type: 'merge',
-                            },
-                            targetStep: nextStep,
-                            fromChildMerge: true,
-                        },
-                    });
-                }
+                        targetStep: nextStep,
+                        fromChildMerge: true
+                    }
+                );
             }
         }
     });
@@ -199,32 +283,13 @@ export function connectLastStepsToParentMerge(
 
         if (hasChildConditions) {
             // Find the level of this condition step
-            let level = 0;
-            let currentStep = conditionStep;
-            while (currentStep.parent_id) {
-                const parent = steps.find(
-                    (s) => s.id === currentStep.parent_id
-                );
-                if (parent && parent.type === 'condition') {
-                    level++;
-                    currentStep = parent;
-                } else {
-                    break;
-                }
-            }
-
-            const parentMergeId = `merge-${conditionStep.id}-level-${level}`;
+            const level = findConditionLevel(steps, conditionStep);
+            const parentMergeId = getMergeNodeId(conditionStep.id, level);
 
             // Process each branch (yes/no)
             ['yes', 'no'].forEach((branchCondition) => {
                 // Get all steps in this branch
-                const branchSteps = steps
-                    .filter(
-                        (s) =>
-                            s.parent_id === conditionStep.id &&
-                            s.condition === branchCondition
-                    )
-                    .sort((a, b) => a.order - b.order);
+                const branchSteps = getBranchSteps(steps, conditionStep.id, branchCondition);
 
                 if (branchSteps.length > 0) {
                     // Find the last non-condition step in this branch
@@ -241,35 +306,25 @@ export function connectLastStepsToParentMerge(
                         );
 
                         // If this is truly the last step (no child conditions after it)
-                        // OR if there are child conditions but they have subsequent steps
                         if (childConditionsAfter.length === 0) {
                             // This step should connect to parent merge
-                            const edgeId = `${lastNonConditionStep.id}-to-parent-merge`;
-                            const edgeExists = initialEdges.some(
-                                (edge) => edge.id === edgeId
-                            );
-
-                            if (!edgeExists) {
-                                initialEdges.push({
-                                    id: edgeId,
-                                    source: lastNonConditionStep.id.toString(),
-                                    target: parentMergeId,
+                            connectNodesIfValid(
+                                initialNodes,
+                                initialEdges,
+                                lastNonConditionStep.id.toString(),
+                                parentMergeId,
+                                {
+                                    edgeId: `${lastNonConditionStep.id}-to-parent-merge`,
                                     targetHandle: branchCondition,
-                                    type: 'addStepEdge',
-                                    style: {
-                                        stroke: '#D7D7DA',
-                                        strokeWidth: 2,
+                                    edgeType: EdgeType.ADD_STEP,
+                                    sourceStep: lastNonConditionStep,
+                                    targetStep: {
+                                        id: parentMergeId,
+                                        type: 'merge',
                                     },
-                                    data: {
-                                        sourceStep: lastNonConditionStep,
-                                        targetStep: {
-                                            id: parentMergeId,
-                                            type: 'merge',
-                                        },
-                                        fromBranch: branchCondition,
-                                    },
-                                });
-                            }
+                                    fromBranch: branchCondition
+                                }
+                            );
                         } else {
                             // There are child conditions after this step
                             // Check if those child conditions have subsequent steps
@@ -286,36 +341,26 @@ export function connectLastStepsToParentMerge(
 
                             if (hasSubsequentStepsAfterChildConditions) {
                                 // Find the truly last step in the branch
-                                const trulyLastStep =
-                                    branchSteps[branchSteps.length - 1];
-                                const edgeId = `${trulyLastStep.id}-to-parent-merge`;
-                                const edgeExists = initialEdges.some(
-                                    (edge) => edge.id === edgeId
-                                );
+                                const trulyLastStep = branchSteps[branchSteps.length - 1];
 
-                                if (
-                                    !edgeExists &&
-                                    trulyLastStep.type !== 'condition'
-                                ) {
-                                    initialEdges.push({
-                                        id: edgeId,
-                                        source: trulyLastStep.id.toString(),
-                                        target: parentMergeId,
-                                        targetHandle: branchCondition,
-                                        type: 'addStepEdge',
-                                        style: {
-                                            stroke: '#D7D7DA',
-                                            strokeWidth: 2,
-                                        },
-                                        data: {
+                                if (trulyLastStep.type !== 'condition') {
+                                    connectNodesIfValid(
+                                        initialNodes,
+                                        initialEdges,
+                                        trulyLastStep.id.toString(),
+                                        parentMergeId,
+                                        {
+                                            edgeId: `${trulyLastStep.id}-to-parent-merge`,
+                                            targetHandle: branchCondition,
+                                            edgeType: EdgeType.ADD_STEP,
                                             sourceStep: trulyLastStep,
                                             targetStep: {
                                                 id: parentMergeId,
                                                 type: 'merge',
                                             },
-                                            fromBranch: branchCondition,
-                                        },
-                                    });
+                                            fromBranch: branchCondition
+                                        }
+                                    );
                                 }
                             }
                         }
@@ -324,41 +369,6 @@ export function connectLastStepsToParentMerge(
             });
         }
     });
-}
-
-/**
- * Helper function to find the last merge node in a branch that should connect to the parent merge
- */
-function findLastMergeInBranch(
-    steps: AutomationStep[],
-    parentConditionId: number,
-    condition: string,
-    level: number
-): string | null {
-    // Get all steps in this branch
-    const branchSteps = steps
-        .filter(
-            (s) =>
-                s.parent_id === parentConditionId && s.condition === condition
-        )
-        .sort((a, b) => a.order - b.order);
-
-    if (branchSteps.length === 0) return null;
-
-    // Find the last condition in this branch
-    const lastCondition = branchSteps
-        .filter((s) => s.type === 'condition')
-        .sort((a, b) => b.order - a.order)[0]; // Get the condition with highest order
-
-    if (lastCondition) {
-        // Calculate the level for this last condition
-        let conditionLevel = level + 1;
-        const lastConditionMergeId = `merge-${lastCondition.id}-level-${conditionLevel}`;
-
-        return lastConditionMergeId;
-    }
-
-    return null;
 }
 
 /**
@@ -373,19 +383,8 @@ export function connectMergesToSubsequentSteps(
 
     conditionSteps.forEach((conditionStep) => {
         // Find the level of this condition step
-        let level = 0;
-        let currentStep = conditionStep;
-        while (currentStep.parent_id) {
-            const parent = steps.find((s) => s.id === currentStep.parent_id);
-            if (parent && parent.type === 'condition') {
-                level++;
-                currentStep = parent;
-            } else {
-                break;
-            }
-        }
-
-        const mergeId = `merge-${conditionStep.id}-level-${level}`;
+        const level = findConditionLevel(steps, conditionStep);
+        const mergeId = getMergeNodeId(conditionStep.id, level);
 
         // Find subsequent steps at the same level
         const subsequentSteps = steps
@@ -427,39 +426,24 @@ export function connectMergesToSubsequentSteps(
                         level
                     );
 
-                    // If there are child merges, they will handle the connection to this merge
-                    // and this merge should not directly connect to subsequent steps
-                    if (yesLastMerge || noLastMerge) {
-                    } else {
-                        // No child merges, safe to connect directly
-                        const edgeId = `${mergeId}-to-${nextStep.id}`;
-                        const edgeExists = initialEdges.some(
-                            (edge) => edge.id === edgeId
+                    // If there are no child merges, safe to connect directly
+                    if (!yesLastMerge && !noLastMerge) {
+                        connectNodesIfValid(
+                            initialNodes,
+                            initialEdges,
+                            mergeId,
+                            nextStep.id.toString(),
+                            {
+                                edgeId: `${mergeId}-to-${nextStep.id}`,
+                                sourceStep: {
+                                    id: mergeId,
+                                    type: 'merge',
+                                },
+                                targetStep: nextStep,
+                                fromMerge: true
+                            }
                         );
-
-                        if (!edgeExists) {
-                            initialEdges.push({
-                                id: edgeId,
-                                source: mergeId,
-                                target: nextStep.id.toString(),
-                                type: 'default',
-                                style: {
-                                    stroke: '#D7D7DA',
-                                    strokeWidth: 2,
-                                },
-                                data: {
-                                    sourceStep: {
-                                        id: mergeId,
-                                        type: 'merge',
-                                    },
-                                    targetStep: nextStep,
-                                    fromMerge: true,
-                                },
-                            });
-                        }
                     }
-                } else {
-                    // For child conditions, the connection will flow through parent merge
                 }
             }
         }
@@ -494,7 +478,7 @@ export function connectFinalMergeToSubsequentSteps(
 
         if (subsequentSteps.length > 0) {
             const nextStep = subsequentSteps[0];
-            const rootMergeId = `merge-${rootCondition.id}-level-0`;
+            const rootMergeId = getMergeNodeId(rootCondition.id, 0);
 
             // Find the deepest merge nodes in each branch that should connect to the root merge
             const yesLastMerge = findLastMergeInBranch(
@@ -510,64 +494,23 @@ export function connectFinalMergeToSubsequentSteps(
                 0
             );
 
-            // If there are no child merges, the root merge should connect to the next step
-            if (!yesLastMerge && !noLastMerge) {
-                const edgeId = `${rootMergeId}-to-${nextStep.id}`;
-                const edgeExists = initialEdges.some(
-                    (edge) => edge.id === edgeId
-                );
-
-                if (!edgeExists) {
-                    initialEdges.push({
-                        id: edgeId,
-                        source: rootMergeId,
-                        target: nextStep.id.toString(),
-                        type: 'default',
-                        style: {
-                            stroke: '#D7D7DA',
-                            strokeWidth: 2,
-                        },
-                        data: {
-                            sourceStep: {
-                                id: rootMergeId,
-                                type: 'merge',
-                            },
-                            targetStep: nextStep,
-                            fromMerge: true,
-                        },
-                    });
+            // Connect root merge to subsequent step regardless of child merges
+            // The child-to-root connections are already handled separately
+            connectNodesIfValid(
+                initialNodes,
+                initialEdges,
+                rootMergeId,
+                nextStep.id.toString(),
+                {
+                    edgeId: `${rootMergeId}-to-${nextStep.id}`,
+                    sourceStep: {
+                        id: rootMergeId,
+                        type: 'merge',
+                    },
+                    targetStep: nextStep,
+                    fromMerge: true
                 }
-            } else {
-                // There are child merges, so the flow goes:
-                // child merges → root merge → subsequent step
-                // The child-to-root connections are already handled
-                // Now ensure root merge connects to subsequent step
-                const edgeId = `${rootMergeId}-to-${nextStep.id}`;
-                const edgeExists = initialEdges.some(
-                    (edge) => edge.id === edgeId
-                );
-
-                if (!edgeExists) {
-                    initialEdges.push({
-                        id: edgeId,
-                        source: rootMergeId,
-                        target: nextStep.id.toString(),
-                        type: 'default',
-                        style: {
-                            stroke: '#D7D7DA',
-                            strokeWidth: 2,
-                        },
-                        data: {
-                            sourceStep: {
-                                id: rootMergeId,
-                                type: 'merge',
-                            },
-                            targetStep: nextStep,
-                            fromMerge: true,
-                        },
-                    });
-                }
-            }
+            );
         }
     });
 }

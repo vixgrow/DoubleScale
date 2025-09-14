@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Automation_Step_Model
  * This class is responsible for handling the Automation Step model
@@ -16,6 +17,7 @@ use WPEloquent\Eloquent\Model;
  * Automation_Step_Model class
  */
 class Automation_Step_Model extends Model {
+
 
 	/**
 	 * Table name
@@ -146,6 +148,20 @@ class Automation_Step_Model extends Model {
 	}
 
 	/**
+	 * Get attribute
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $key Key.
+	 * @param mixed  $default Default.
+	 *
+	 * @return mixed
+	 */
+	public function get_attribute( $key, $default = null ) {
+		return $this->settings[ $key ] ?? $default;
+	}
+
+	/**
 	 * Boot
 	 *
 	 * @since 1.0.0
@@ -153,7 +169,7 @@ class Automation_Step_Model extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		parent::boot();
+		 parent::boot();
 
 		// If step type is conditiion, delete all children.
 		static::deleting(

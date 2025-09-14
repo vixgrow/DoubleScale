@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Contact_Fields
  *
@@ -13,12 +14,21 @@ use QuillCRM\Fields\Types\Text_Field;
 use QuillCRM\Fields\Types\Boolean_Field;
 use QuillCRM\Fields\Types\Email_Field;
 use QuillCRM\Fields\Types\Number_Field;
+use QuillCRM\Fields\Types\URL_Field;
+use QuillCRM\Fields\Types\Phone_Field;
+use QuillCRM\Fields\Types\Date_Field;
+use QuillCRM\Fields\Types\Textarea_Field;
+use QuillCRM\Fields\Types\Select_Field;
+use QuillCRM\Fields\Types\Multiselect_Field;
+use QuillCRM\Fields\Types\Checkbox_Field;
 use QuillCRM\Models\Custom_Field_Model;
 
 /**
  * Contact_Fields class
  */
 class Contact_Fields {
+
+
 
 	/**
 	 * Fields
@@ -33,10 +43,17 @@ class Contact_Fields {
 	 * @var array
 	 */
 	protected $types = array(
-		'text'    => Text_Field::class,
-		'boolean' => Boolean_Field::class,
-		'email'   => Email_Field::class,
-		'number'  => Number_Field::class,
+		'text'        => Text_Field::class,
+		'boolean'     => Boolean_Field::class,
+		'email'       => Email_Field::class,
+		'number'      => Number_Field::class,
+		'url'         => URL_Field::class,
+		'phone'       => Phone_Field::class,
+		'date'        => Date_Field::class,
+		'textarea'    => Textarea_Field::class,
+		'select'      => Select_Field::class,
+		'multiselect' => Multiselect_Field::class,
+		'checkbox'    => Checkbox_Field::class,
 	);
 
 	/**

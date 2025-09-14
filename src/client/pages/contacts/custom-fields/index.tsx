@@ -78,9 +78,8 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		const [selectedField, setSelectedField] = useState<CustomField | null>(
 			null
 		);
-		const [editingGroup, setEditingGroup] = useState<CustomFieldsGroup | null>(
-			null
-		);
+		const [editingGroup, setEditingGroup] =
+			useState<CustomFieldsGroup | null>(null);
 		const [deleteGroupId, setDeleteGroupId] = useState(0);
 		const [globalFilter, setGlobalFilter] = useState('');
 		const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -133,7 +132,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		const handleBulkAction = async (action: string) => {
 			if (action === 'delete') {
 				// Convert selectedRowKeys to numbers
-				const fieldIds = selectedRowKeys.map(key => Number(key));
+				const fieldIds = selectedRowKeys.map((key) => Number(key));
 				await deleteSelectedFields(fieldIds);
 				setSelectedRowKeys([]);
 			}
@@ -150,7 +149,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			let newName = `${group.name} (Copy)`;
 
 			// Keep checking until we find a unique name
-			while (groups?.some(g => g.name === newName)) {
+			while (groups?.some((g) => g.name === newName)) {
 				copyCounter++;
 				newName = `${group.name} (Copy ${copyCounter})`;
 			}
@@ -162,7 +161,10 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			return await saveGroup(name);
 		};
 
-		const handleGroupDialogUpdate = async (groupId: number, name: string) => {
+		const handleGroupDialogUpdate = async (
+			groupId: number,
+			name: string
+		) => {
 			return await updateGroup(groupId, name);
 		};
 
@@ -171,7 +173,8 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			setEditingGroup(null);
 		};
 
-		const allFields = groups?.flatMap((group) => group.custom_fields || []) || [];
+		const allFields =
+			groups?.flatMap((group) => group.custom_fields || []) || [];
 
 		// Enhanced filtering with date range
 		const filteredFields = allFields.filter((field) => {
@@ -324,53 +327,50 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 						}}
 					>
 						{(groups || []).map((group) => {
-							const groupFilteredFields =
-								(group.custom_fields || []).filter((field) => {
-									// Text filter
-									const matchesText =
-										globalFilter === '' ||
-										field.name
-											.toLowerCase()
-											.includes(
-												globalFilter.toLowerCase()
-											) ||
-										customFieldsTypes[field.type]?.name
-											.toLowerCase()
-											.includes(
-												globalFilter.toLowerCase()
-											);
+							const groupFilteredFields = (
+								group.custom_fields || []
+							).filter((field) => {
+								// Text filter
+								const matchesText =
+									globalFilter === '' ||
+									field.name
+										.toLowerCase()
+										.includes(globalFilter.toLowerCase()) ||
+									customFieldsTypes[field.type]?.name
+										.toLowerCase()
+										.includes(globalFilter.toLowerCase());
 
-									// Date range filter
-									const matchesDateRange = (() => {
-										if (!dateRange.from && !dateRange.to)
-											return true;
-
-										const fieldDate = new Date(
-											field.created_at
-										);
-										const fromDate = dateRange.from
-											? new Date(dateRange.from)
-											: null;
-										const toDate = dateRange.to
-											? new Date(dateRange.to)
-											: null;
-
-										if (fromDate && toDate) {
-											return (
-												fieldDate >= fromDate &&
-												fieldDate <= toDate
-											);
-										} else if (fromDate) {
-											return fieldDate >= fromDate;
-										} else if (toDate) {
-											return fieldDate <= toDate;
-										}
-
+								// Date range filter
+								const matchesDateRange = (() => {
+									if (!dateRange.from && !dateRange.to)
 										return true;
-									})();
 
-									return matchesText && matchesDateRange;
-								});
+									const fieldDate = new Date(
+										field.created_at
+									);
+									const fromDate = dateRange.from
+										? new Date(dateRange.from)
+										: null;
+									const toDate = dateRange.to
+										? new Date(dateRange.to)
+										: null;
+
+									if (fromDate && toDate) {
+										return (
+											fieldDate >= fromDate &&
+											fieldDate <= toDate
+										);
+									} else if (fromDate) {
+										return fieldDate >= fromDate;
+									} else if (toDate) {
+										return fieldDate <= toDate;
+									}
+
+									return true;
+								})();
+
+								return matchesText && matchesDateRange;
+							});
 
 							return (
 								<DroppableGroup
@@ -380,7 +380,10 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 									fieldsCount={groupFilteredFields.length}
 									deletable={(groups || []).length > 1}
 									onDelete={() => {
-										if ((group.custom_fields || []).length > 0) {
+										if (
+											(group.custom_fields || []).length >
+											0
+										) {
 											// Group has fields - show dialog to move fields
 											setDeleteGroupId(group.id);
 											setDeleteGroupVisible(true);
@@ -390,7 +393,9 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 										}
 									}}
 									onEdit={() => handleEditGroup(group)}
-									onDuplicate={() => handleDuplicateGroup(group)}
+									onDuplicate={() =>
+										handleDuplicateGroup(group)
+									}
 								>
 									<FieldTable
 										fields={groupFilteredFields}

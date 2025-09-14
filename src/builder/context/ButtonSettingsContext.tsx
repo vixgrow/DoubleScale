@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import apiFetch from '@wordpress/api-fetch';
 
 type ButtonType = 'primary' | 'secondary' | 'tertiary';
 
@@ -57,22 +58,70 @@ export const ButtonSettingsProvider: React.FC<{ children: React.ReactNode }> = (
         tertiary: defaultSettings,
     });
 
-    // Load settings from localStorage on mount
+    // Load settings from database and localStorage on mount
     useEffect(() => {
-        const savedSettings = localStorage.getItem('quillcrm-button-settings');
-        if (savedSettings) {
+        const loadSettings = async () => {
             try {
-                const parsed = JSON.parse(savedSettings);
-                setButtonSettings(parsed);
+                // First try to load from database
+                console.log('Loading button settings from database...');
+                const response = await apiFetch({
+                    path: '/qc/v1/settings',
+                });
+
+                console.log('Settings API response:', response);
+
+                if (response && (response as any).button_settings) {
+                    console.log('Found button settings in database:', (response as any).button_settings);
+                    setButtonSettings((response as any).button_settings);
+                    return;
+                } else {
+                    console.log('No button settings found in database, using localStorage fallback');
+                }
             } catch (error) {
-                console.error('Failed to parse button settings from localStorage:', error);
+                console.error('Failed to load button settings from database:', error);
             }
-        }
+
+            // Fallback to localStorage
+            const savedSettings = localStorage.getItem('quillcrm-button-settings');
+            if (savedSettings) {
+                try {
+                    const parsed = JSON.parse(savedSettings);
+                    setButtonSettings(parsed);
+                } catch (error) {
+                    console.error('Failed to parse button settings from localStorage:', error);
+                }
+            }
+        };
+
+        loadSettings();
     }, []);
 
     // Save settings to localStorage whenever they change
     useEffect(() => {
         localStorage.setItem('quillcrm-button-settings', JSON.stringify(buttonSettings));
+    }, [buttonSettings]);
+
+    // Save settings to database whenever they change
+    useEffect(() => {
+        const saveToDatabase = async () => {
+            try {
+                console.log('Saving button settings to database:', buttonSettings);
+                const response = await apiFetch({
+                    path: '/qc/v1/settings',
+                    method: 'POST',
+                    data: {
+                        button_settings: buttonSettings
+                    }
+                });
+                console.log('Button settings saved successfully:', response);
+            } catch (error) {
+                console.error('Failed to save button settings to database:', error);
+            }
+        };
+
+        // Debounce the save to avoid too many API calls
+        const timeoutId = setTimeout(saveToDatabase, 1000);
+        return () => clearTimeout(timeoutId);
     }, [buttonSettings]);
 
     const updateButtonSettings = (buttonType: ButtonType, settings: Partial<ButtonSettings>) => {

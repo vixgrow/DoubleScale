@@ -13,6 +13,9 @@ use QuillCRM\Models\Automation_Model;
  */
 class Deal_Stage_Change extends Trigger {
 
+
+
+
 	/**
 	 * Default Value Pipeline
 	 *
@@ -32,7 +35,7 @@ class Deal_Stage_Change extends Trigger {
 	 *
 	 * @var string
 	 */
-	public $name = 'Deal Stage Change';
+	public $name = 'Deal Stage changes';
 
 	/**
 	 * Trigger Slug
@@ -201,24 +204,22 @@ class Deal_Stage_Change extends Trigger {
 		return array(
 			'pipeline'  => array(
 				'label'         => \__( 'Pipeline', 'quillcrm' ),
-				'type'          => 'deal_stage_change',
+				'type'          => 'pipeline_stage_change',
 				'endpoint'      => 'pipelines',
 				'multiple'      => false,
 				'default-value' => $this->Default_Value_Pipeline,
 			),
 			'old_stage' => array(
 				'label'         => \__( 'Old Stage', 'quillcrm' ),
-				'type'          => 'deal_stage_change',
+				'type'          => 'pipeline_stage_change',
 				'endpoint'      => 'pipeline-stages',
-				'parent'        => 'pipeline',
 				'multiple'      => false,
 				'default-value' => $this->Default_Value_Stage,
 			),
 			'new_stage' => array(
 				'label'         => \__( 'New Stage', 'quillcrm' ),
-				'type'          => 'deal_stage_change',
+				'type'          => 'pipeline_stage_change',
 				'endpoint'      => 'pipeline-stages',
-				'parent'        => 'pipeline',
 				'multiple'      => false,
 				'default-value' => $this->Default_Value_Stage,
 			),

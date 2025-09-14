@@ -31,9 +31,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
-import DealStageChange from '../deal-stage-change';
+import PipelineStageChange from '../pipeline-stage-change';
 import DealValueChange from '../deal-value-change';
 import DealOwnerChange from '../deal-owner-change';
+import DealCustomFieldChange from '../deal-custom-field-change';
 
 interface FieldProps {
 	label?: string;
@@ -57,7 +58,6 @@ interface FieldProps {
 		ajax_action?: string;
 		button_text?: string;
 	};
-	parent?: string;
 	allValues?: { [key: string]: any };
 	defaultValue?: string;
 }
@@ -77,7 +77,6 @@ const Field: React.FC<FieldProps> = ({
 	style,
 	placeholder,
 	settings,
-	parent,
 	allValues,
 	defaultValue,
 }) => {
@@ -96,16 +95,23 @@ const Field: React.FC<FieldProps> = ({
 				/>
 			);
 			break;
-		case 'deal_stage_change':
+		case 'pipeline_stage_change':
 			fieldContent = (
-				<DealStageChange
+				<PipelineStageChange
 					endpoint={endpoint || ''}
-					multiple={multiple || false}
-					parent={parent}
-					allValues={allValues}
-					defaultValue={defaultValue}
 					value={value}
 					onChange={(value) => onChange(value)}
+					allValues={allValues}
+					defaultValue={defaultValue}
+				/>
+			);
+			break;
+		case 'deal_custom_field_change':
+			fieldContent = (
+				<DealCustomFieldChange
+					value={Array.isArray(value) ? value : []}
+					onChange={(value) => onChange(value)}
+					options={options}
 				/>
 			);
 			break;
@@ -271,9 +277,6 @@ const Field: React.FC<FieldProps> = ({
 					value={value}
 					endpoint={endpoint || ''}
 					multiple={multiple || false}
-					parent={parent}
-					allValues={allValues}
-					defaultValue={defaultValue}
 				/>
 			);
 			break;

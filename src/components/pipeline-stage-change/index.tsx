@@ -21,16 +21,14 @@ interface Props {
 	endpoint: string;
 	value: string;
 	onChange: (value: string) => void;
-	parent?: string;
 	allValues?: { [key: string]: any };
 	defaultValue?: string;
 }
 
-const DealStageChange = ({
+const PipelineStageChange = ({
 	endpoint,
 	value,
 	onChange,
-	parent: _parent,
 	allValues,
 	defaultValue,
 }: Props) => {
@@ -174,4 +172,4 @@ const DealStageChange = ({
 	);
 };
 
-export default DealStageChange;
+export default PipelineStageChange;

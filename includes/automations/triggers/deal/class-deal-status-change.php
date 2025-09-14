@@ -9,16 +9,12 @@ use QuillCRM\Models\Automation_Model;
 class Deal_Status_Change extends Trigger {
 
 
-
-
-
-
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Deal Status Change';
+	public $name = 'Deal Status changes';
 
 	/**
 	 * Trigger Slug
@@ -66,7 +62,7 @@ class Deal_Status_Change extends Trigger {
 
 
 	public function __construct() {
-		parent::__construct();
+		 parent::__construct();
 	}
 
 	public function load_hooks() {

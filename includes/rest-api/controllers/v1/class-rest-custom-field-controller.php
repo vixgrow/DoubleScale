@@ -17,11 +17,18 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Custom_Field_Model;
+use Illuminate\Support\Str;
 
 /**
  * Custom_Field_Controller class
  */
 class REST_Custom_Field_Controller extends REST_Controller {
+
+
+
+
+
+
 
 	/**
 	 * REST Base
@@ -242,9 +249,38 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 */
 	public function create_item( $request ) {
 		try {
+			xdebug_break();
 			$custom_field_data = $this->prepare_custom_field( $request );
 
-			$custom_field = Custom_Field_Model::create( $custom_field_data );
+			// Ensure we have a slug in the data
+			if ( ! isset( $custom_field_data['slug'] ) || empty( $custom_field_data['slug'] ) ) {
+				// Use the same Str class that's used in the model
+				$slug = Str::slug( $custom_field_data['name'] );
+				if ( empty( $slug ) ) {
+					$slug = 'custom-field-' . time();
+				}
+
+				if ( Custom_Field_Model::where( 'slug', $slug )->exists() ) {
+					return new WP_Error( 'rest_custom_field_create_item', __( 'Slug already exists', 'quillcrm' ), array( 'status' => 400 ) );
+				}
+
+				$custom_field_data['slug'] = $slug;
+			}
+
+			try {
+				// Create the custom field
+				$custom_field = Custom_Field_Model::create( $custom_field_data );
+
+				// Check if the custom field was created successfully
+				if ( ! $custom_field || ! isset( $custom_field->id ) || $custom_field->id === 0 ) {
+					return new WP_Error( 'rest_custom_field_create_item', __( 'Failed to create custom field', 'quillcrm' ), array( 'status' => 500 ) );
+				}
+
+				// Refresh the model from database to ensure we have the correct data
+				$custom_field = Custom_Field_Model::find( $custom_field->id );
+			} catch ( \Exception $e ) {
+				return new WP_Error( 'rest_custom_field_create_item', $e->getMessage(), array( 'status' => 500 ) );
+			}
 
 			return new WP_REST_Response( $custom_field, 201 );
 		} catch ( \Exception $e ) {

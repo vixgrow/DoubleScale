@@ -18,12 +18,14 @@ class Deal_Owner_Change extends Trigger {
 
 
 
+
+
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Deal Owner Change';
+	public $name = 'Deal Owner changes';
 
 	/**
 	 * Trigger Slug
@@ -105,7 +107,6 @@ class Deal_Owner_Change extends Trigger {
 	 * @return bool
 	 */
 	public function is_processable( Automation_Model $automation, $args ) {
-		xdebug_break();
 		$automation_from_owner = $automation->get_setting( 'from' ) ?? array();
 		$automation_to_owner   = $automation->get_setting( 'to' ) ?? array();
 		$old_owner             = (string) ( $args['data']['old_owner_id'] ?? '' );

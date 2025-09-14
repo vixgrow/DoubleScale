@@ -22,7 +22,6 @@ type FieldType = {
 		};
 	};
 	endpoint?: string;
-	parent?: string;
 	settings?: {
 		ajax_action?: string;
 		button_text?: string;
@@ -72,7 +71,6 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 						fields={field.fields}
 						endpoint={field.endpoint}
 						multiple={field.multiple}
-						parent={field.parent}
 						settings={field.settings}
 						allValues={values}
 						defaultValue={field['default-value']}

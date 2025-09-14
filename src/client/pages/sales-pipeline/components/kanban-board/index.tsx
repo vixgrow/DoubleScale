@@ -27,6 +27,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { PipelineColumn } from '../pipeline-column';
 import { DealCard } from '../deal-card';
 import { useDealOperations } from '../../hooks/use-deal-operations';
+import { Deal } from '../../types';
 import './style.scss';
 
 interface KanbanBoardProps {
@@ -41,28 +42,11 @@ interface KanbanBoardProps {
 			win_probability: number;
 		}>;
 	};
-	deals: Array<{
-		id: number;
-		title: string;
-		value: number;
-		currency: string;
-		stage_id: number;
-		contact?: {
-			first_name: string;
-			last_name: string;
-		};
-		expected_close_date?: string;
-		is_overdue: boolean;
-		days_until_close: number | null;
-		weighted_value: number;
-		owner?: {
-			display_name: string;
-		};
-	}>;
+	deals: Deal[];
 	onRefresh: () => void;
 	updateDealOptimistically: (dealId: number, updates: any) => void;
 	onDealView?: (dealId: number) => void;
-	onDealEdit?: (deal: any) => void;
+	onDealEdit?: (deal: Deal) => void;
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -167,36 +151,75 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 			return;
 		}
 
+		const currentStage = pipeline.stages.find(
+			(stage) =>
+				parseInt(String(stage.id)) ===
+				parseInt(String(draggedDeal.stage_id))
+		);
+
 		const targetStage = pipeline.stages.find(
 			(stage) =>
 				parseInt(String(stage.id)) === parseInt(String(targetStageId))
 		);
 
-		if (!targetStage) {
-			console.log('Target stage not found');
+		if (!targetStage || !currentStage) {
+			console.log('Target or current stage not found');
 			return;
 		}
 
+		// Check if deal has custom probability
+		const hasCustomProbability =
+			draggedDeal.probability !== null &&
+			draggedDeal.probability !== undefined;
+
+		if (hasCustomProbability) {
+			// Deal has custom probability - preserve it automatically (no modal)
+			await performDealMove(
+				draggedDeal.id,
+				targetStageId,
+				false,
+				draggedDeal,
+				targetStage
+			);
+		} else {
+			// Deal has no custom probability - automatically sync to new stage probability
+			await performDealMove(
+				draggedDeal.id,
+				targetStageId,
+				true,
+				draggedDeal,
+				targetStage
+			);
+		}
+	};
+
+	const performDealMove = async (
+		dealId: number,
+		targetStageId: number,
+		updateProbability: boolean,
+		deal: any,
+		targetStage: any
+	) => {
 		// Optimistically update the deal's stage
-		updateDealOptimistically(draggedDeal.id, { stage_id: targetStageId });
+		updateDealOptimistically(dealId, { stage_id: targetStageId });
 
 		try {
 			console.log(
-				`Moving deal ${draggedDeal.id} to stage ${targetStageId}`
+				`Moving deal ${dealId} to stage ${targetStageId} with updateProbability: ${updateProbability}`
 			);
-			await moveDealToStage(draggedDeal.id, targetStageId);
+			await moveDealToStage(dealId, targetStageId, updateProbability);
 
 			if (createNotice) {
 				createNotice({
 					type: 'success',
 					message: __(
-						`Deal "${draggedDeal.title}" moved to "${targetStage.name}"`,
+						`Deal "${deal.title}" moved to "${targetStage.name}"`,
 						'quillcrm'
 					),
 				});
 			} else {
 				console.log(
-					`Success: Deal "${draggedDeal.title}" moved to "${targetStage.name}"`
+					`Success: Deal "${deal.title}" moved to "${targetStage.name}"`
 				);
 			}
 
@@ -205,8 +228,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 			console.error('Failed to move deal:', error);
 
 			// Rollback the optimistic update
-			updateDealOptimistically(draggedDeal.id, {
-				stage_id: draggedDeal.stage_id,
+			updateDealOptimistically(dealId, {
+				stage_id: deal.stage_id,
 			});
 
 			if (createNotice) {
@@ -299,6 +322,11 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 									pipeline.stages.find(
 										(s) => s.id === activeDeal.stage_id
 									)?.color
+								}
+								stageProbability={
+									pipeline.stages.find(
+										(s) => s.id === activeDeal.stage_id
+									)?.win_probability
 								}
 							/>
 						</div>

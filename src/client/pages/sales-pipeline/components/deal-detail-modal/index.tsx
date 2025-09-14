@@ -44,6 +44,7 @@ import {
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { DealActivities } from '../deal-activities';
+import { Deal } from '../../types';
 import './style.scss';
 
 const { Title, Text, Paragraph } = Typography;
@@ -54,46 +55,6 @@ interface DealDetailModalProps {
 	onClose: () => void;
 	onUpdate?: () => void;
 	onEdit?: (deal: Deal) => void;
-}
-
-interface Deal {
-	id: number;
-	title: string;
-	value: number;
-	currency: string;
-	probability: number | null;
-	status: string;
-	expected_close_date: string | null;
-	is_overdue: boolean;
-	days_until_close: number | null;
-	weighted_value: number;
-	source: string | null;
-	lost_reason: string | null;
-	won_time: string | null;
-	lost_time: string | null;
-	created_at: string;
-	updated_at: string;
-	contact: {
-		id: number;
-		first_name: string;
-		last_name: string;
-		email: string;
-	} | null;
-	pipeline: {
-		id: number;
-		name: string;
-	} | null;
-	stage: {
-		id: number;
-		name: string;
-		color: string;
-		win_probability: number;
-	} | null;
-	owner: {
-		id: number;
-		display_name: string;
-		email: string;
-	} | null;
 }
 
 export const DealDetailModal: React.FC<DealDetailModalProps> = ({
@@ -356,7 +317,7 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 											}
 										>
 											{formatDate(
-												deal.expected_close_date
+												deal.expected_close_date || null
 											)}
 										</Text>
 										{deal.is_overdue && (

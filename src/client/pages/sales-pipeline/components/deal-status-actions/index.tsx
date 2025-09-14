@@ -23,10 +23,11 @@ import {
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { DealStatusBadge } from '../deal-status-badge';
+import { Deal } from '../../types';
 import './style.scss';
 
 interface DealStatusActionsProps {
-	deal: any;
+	deal: Deal;
 	onStatusChange?: () => void;
 	showCurrentStatus?: boolean;
 	layout?: 'horizontal' | 'vertical' | 'dropdown';

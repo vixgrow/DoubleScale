@@ -22,7 +22,11 @@ interface DealOperationsReturn {
 		perPage?: number,
 		page?: number
 	) => Promise<any>;
-	moveDealToStage: (dealId: number, stageId: number) => Promise<void>;
+	moveDealToStage: (
+		dealId: number,
+		stageId: number,
+		updateProbability?: boolean
+	) => Promise<void>;
 	moveDealToPipeline: (
 		dealId: number,
 		pipelineId: number,
@@ -120,14 +124,25 @@ export const useDealOperations = (): DealOperationsReturn => {
 	 * Move deal to a different stage within the same pipeline
 	 */
 	const moveDealToStage = useCallback(
-		async (dealId: number, stageId: number) => {
+		async (
+			dealId: number,
+			stageId: number,
+			updateProbability: boolean = false
+		) => {
 			try {
+				const data: any = {
+					stage_id: stageId,
+				};
+
+				// Include update_probability parameter if specified
+				if (updateProbability) {
+					data.update_probability = true;
+				}
+
 				await apiFetch({
 					path: `/qc/v1/deals/${dealId}/move-stage`,
 					method: 'PATCH',
-					data: {
-						stage_id: stageId,
-					},
+					data,
 				});
 			} catch (error) {
 				const errorMessage = handleApiError(

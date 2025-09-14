@@ -37,7 +37,6 @@ interface DealFormData {
 	contact_id: number;
 	stage_id: number;
 	value?: number;
-	currency: string;
 	expected_close_date?: string;
 	probability?: number;
 	source?: string;
@@ -78,7 +77,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 			const dealData = {
 				...values,
 				pipeline_id: pipeline.id,
-				currency: values.currency || 'USD',
+				currency: 'USD',
 				expected_close_date: values.expected_close_date
 					? new Date(values.expected_close_date)
 							.toISOString()
@@ -127,7 +126,6 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		if (defaultStageId && visible) {
 			form.setFieldsValue({
 				stage_id: defaultStageId,
-				currency: 'USD',
 			});
 		}
 	}, [defaultStageId, visible]);
@@ -198,7 +196,6 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 				onFinish={handleSubmit}
 				key={visible ? 'deal-form' : 'hidden'}
 				initialValues={{
-					currency: 'USD',
 					stage_id: defaultStageId,
 				}}
 			>
@@ -284,35 +281,29 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 								`${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 							}
 							parser={(value) => {
-								const parsed = value ? value.replace(/\$\s?|(,*)/g, '') : '';
+								const parsed = value
+									? value.replace(/\$\s?|(,*)/g, '')
+									: '';
 								return parsed as any;
 							}}
 						/>
-					</Form.Item>
-
-					<Form.Item
-						name="currency"
-						label={__('Currency', 'quillcrm')}
-						className="form-item-half"
-					>
-						<Select placeholder={__('Select currency', 'quillcrm')}>
-							<Option value="USD">USD ($)</Option>
-							<Option value="EUR">EUR (€)</Option>
-							<Option value="GBP">GBP (£)</Option>
-							<Option value="CAD">CAD (C$)</Option>
-							<Option value="AUD">AUD (A$)</Option>
-						</Select>
 					</Form.Item>
 				</div>
 
 				<Form.Item
 					name="probability"
 					label={__('Win Probability (%)', 'quillcrm')}
-					help={__('Override the default stage probability. Leave empty to use stage default.', 'quillcrm')}
+					help={__(
+						'Override the default stage probability. Leave empty to use stage default.',
+						'quillcrm'
+					)}
 				>
 					<InputNumber
 						style={{ width: '100%' }}
-						placeholder={__('Enter win probability (0-100)', 'quillcrm')}
+						placeholder={__(
+							'Enter win probability (0-100)',
+							'quillcrm'
+						)}
 						min={0}
 						max={100}
 						step={5}

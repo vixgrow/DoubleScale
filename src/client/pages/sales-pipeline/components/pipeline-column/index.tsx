@@ -13,6 +13,7 @@ import { useDroppable } from '@dnd-kit/core';
  * Internal dependencies
  */
 import { DealCard } from '../deal-card';
+import { Deal } from '../../types';
 import './style.scss';
 
 interface PipelineColumnProps {
@@ -23,27 +24,10 @@ interface PipelineColumnProps {
 		sort_order: number;
 		win_probability: number;
 	};
-	deals: Array<{
-		id: number;
-		title: string;
-		value: number;
-		currency: string;
-		stage_id: number;
-		contact?: {
-			first_name: string;
-			last_name: string;
-		};
-		expected_close_date?: string;
-		is_overdue: boolean;
-		days_until_close: number | null;
-		weighted_value: number;
-		owner?: {
-			display_name: string;
-		};
-	}>;
+	deals: Deal[];
 	isOver: boolean;
 	onDealView?: (dealId: number) => void;
-	onDealEdit?: (deal: any) => void;
+	onDealEdit?: (deal: Deal) => void;
 }
 
 export const PipelineColumn: React.FC<PipelineColumnProps> = ({
@@ -66,7 +50,9 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	const columnStats = useMemo(() => {
 		const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);
 		const weightedValue = deals.reduce((sum, deal) => {
-			return sum + deal.value * (stage.win_probability / 100);
+			// Use deal-specific probability if available, otherwise use stage default
+			const probability = deal.probability ?? stage.win_probability;
+			return sum + deal.value * (probability / 100);
 		}, 0);
 		const overdueCount = deals.filter((deal) => deal.is_overdue).length;
 
@@ -157,6 +143,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 								}}
 								onDealEdit={onDealEdit}
 								stageColor={stage.color}
+								stageProbability={stage.win_probability}
 								style={
 									{
 										'--stage-color': stage.color,

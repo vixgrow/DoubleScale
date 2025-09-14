@@ -217,12 +217,12 @@ final class Deal_Manager {
 			Deal_Activity_Model::create( array(
 				'deal_id' => $deal->id,
 				'activity_type' => 'stage_changed',
-				'data' => wp_json_encode( array(
+				'data' => array(
 					'old_pipeline_id' => $old_pipeline_id,
 					'new_pipeline_id' => $pipeline_id,
 					'old_stage_id' => $old_stage_id,
 					'new_stage_id' => $stage_id,
-				) ),
+				),
 				'user_id' => $user_id ?: get_current_user_id(),
 			) );
 
@@ -300,10 +300,10 @@ final class Deal_Manager {
 			Deal_Activity_Model::create( array(
 				'deal_id' => $deal->id,
 				'activity_type' => 'status_changed',
-				'data' => wp_json_encode( array(
+				'data' => array(
 					'status' => 'open',
 					'action' => 'reopened',
-				) ),
+				),
 				'user_id' => $user_id ?: get_current_user_id(),
 			) );
 

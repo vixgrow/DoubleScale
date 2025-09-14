@@ -6,19 +6,11 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React, { useState } from 'react';
-import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 /**
  * internal dependencies
  */
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-	PaddingBottomIcon,
-	PaddingLeftIcon,
-	PaddingRightIcon,
-	PaddingTopIcon,
-} from '@quillcrm/components';
-import { cn } from '@/lib/utils';
+import { AlignmentControl, PaddingControl } from '../../shared';
 import { MenuBlockProps, MenuItem } from '..';
 import { MenuList } from './MenuList';
 import { SingleItemEditor } from './SingleItemEditor';
@@ -138,138 +130,16 @@ export const MenuBlockEditor: React.FC<MenuBlockEditorProps> = ({
 			<div className="border-t border-gray-200"></div>
 
 			{/* Alignment */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<label className="text-sm">
-					{__('Alignment on desktop', 'quillcrm')}
-				</label>
-				<div className="flex items-center justify-between border rounded-lg">
-					<AlignLeft
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'left' &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
-						)}
-						onClick={() => onChange({ align: 'left' })}
-					/>
-					<AlignCenter
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'center' &&
-								'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ align: 'center' })}
-					/>
-					<AlignRight
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'right' &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
-						)}
-						onClick={() => onChange({ align: 'right' })}
-					/>
-				</div>
-			</div>
+			<AlignmentControl
+				value={props.align as 'left' | 'center' | 'right' | 'full'}
+				onChange={(value) => onChange({ align: value })}
+			/>
 
 			{/* Padding Controls - For whole menu section */}
-			<div>
-				<label className="text-sm text-[#333333] mb-2 block">
-					{__('Padding', 'quillcrm')}
-				</label>
-				<div className="flex gap-2">
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingLeftIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.left || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...props.padding,
-										left: parseInt(e.target.value) || 0,
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingRightIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.right || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...props.padding,
-										right: parseInt(e.target.value) || 0,
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingTopIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.top || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...props.padding,
-										top: parseInt(e.target.value) || 0,
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingBottomIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.bottom || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...props.padding,
-										bottom: parseInt(e.target.value) || 0,
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-				</div>
-			</div>
+			<PaddingControl
+				value={props.padding}
+				onChange={(value) => onChange({ padding: value })}
+			/>
 		</div>
 	);
 };

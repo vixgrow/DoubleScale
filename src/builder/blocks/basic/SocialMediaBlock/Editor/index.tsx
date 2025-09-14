@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils';
  */
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import {
 	FacebookIcon,
 	InstagramIcon,
@@ -31,11 +30,12 @@ import {
 	TiktokIcon,
 	DiscordIcon,
 	LinkedinIcon,
-	PaddingLeftIcon,
-	PaddingRightIcon,
-	PaddingTopIcon,
-	PaddingBottomIcon,
 } from '@quillcrm/components';
+import {
+	AlignmentControl,
+	PaddingControl,
+	ColorPickerControl,
+} from '../../shared';
 
 export interface SocialMediaBlockEditorProps {
 	props: {
@@ -101,7 +101,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 				...props.platforms,
 				[platformKey]: {
 					...props.platforms[
-					platformKey as keyof typeof props.platforms
+						platformKey as keyof typeof props.platforms
 					],
 					enabled,
 				},
@@ -115,22 +115,10 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 				...props.platforms,
 				[platformKey]: {
 					...props.platforms[
-					platformKey as keyof typeof props.platforms
+						platformKey as keyof typeof props.platforms
 					],
 					link,
 				},
-			},
-		});
-	};
-
-	const handlePaddingChange = (
-		direction: keyof typeof props.padding,
-		value: number
-	) => {
-		onChange({
-			padding: {
-				...(props.padding || {}),
-				[direction]: value,
 			},
 		});
 	};
@@ -147,7 +135,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						const IconComponent = platform.icon;
 						const platformData =
 							props.platforms[
-							platform.key as keyof typeof props.platforms
+								platform.key as keyof typeof props.platforms
 							];
 
 						return (
@@ -201,7 +189,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.iconSize === 'small' &&
-							'bg-[#C6DFF366] border border-primary rounded-l-lg'
+								'bg-[#C6DFF366] border border-primary rounded-l-lg'
 						)}
 						onClick={() => onChange({ iconSize: 'small' })}
 					>
@@ -211,7 +199,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.iconSize === 'medium' &&
-							'bg-[#C6DFF366] border border-primary'
+								'bg-[#C6DFF366] border border-primary'
 						)}
 						onClick={() => onChange({ iconSize: 'medium' })}
 					>
@@ -221,7 +209,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.iconSize === 'large' &&
-							'bg-[#C6DFF366] border border-primary rounded-r-lg'
+								'bg-[#C6DFF366] border border-primary rounded-r-lg'
 						)}
 						onClick={() => onChange({ iconSize: 'large' })}
 					>
@@ -231,37 +219,14 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 			</div>
 
 			{/* Alignment */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div className="text-sm font-medium">
-					{__('Alignment on desktop', 'quillcrm')}
-				</div>
-				<div className="flex items-center justify-between border rounded-lg">
-					<AlignLeft
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'left' &&
-							'bg-[#C6DFF366] border border-primary rounded-l-lg'
-						)}
-						onClick={() => onChange({ align: 'left' })}
-					/>
-					<AlignCenter
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'center' &&
-							'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ align: 'center' })}
-					/>
-					<AlignRight
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'right' &&
-							'bg-[#C6DFF366] border border-primary rounded-r-lg'
-						)}
-						onClick={() => onChange({ align: 'right' })}
-					/>
-				</div>
-			</div>
+			<AlignmentControl
+				value={props.align}
+				onChange={(align) => {
+					if (align !== 'full') {
+						onChange({ align });
+					}
+				}}
+			/>
 
 			{/* Shape */}
 			<div className="flex flex-col gap-2 text-[#333333]">
@@ -273,7 +238,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.shape === 'circle' &&
-							'bg-[#C6DFF366] border border-primary rounded-l-lg'
+								'bg-[#C6DFF366] border border-primary rounded-l-lg'
 						)}
 						onClick={() => onChange({ shape: 'circle' })}
 					>
@@ -283,7 +248,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.shape === 'rounded' &&
-							'bg-[#C6DFF366] border border-primary'
+								'bg-[#C6DFF366] border border-primary'
 						)}
 						onClick={() => onChange({ shape: 'rounded' })}
 					>
@@ -293,7 +258,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.shape === 'square' &&
-							'bg-[#C6DFF366] border border-primary rounded-r-lg'
+								'bg-[#C6DFF366] border border-primary rounded-r-lg'
 						)}
 						onClick={() => onChange({ shape: 'square' })}
 					>
@@ -312,9 +277,11 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.colorMode === 'original' &&
-							'bg-[#C6DFF366] border border-primary rounded-l-lg'
+								'bg-[#C6DFF366] border border-primary rounded-l-lg'
 						)}
-						onClick={() => onChange({ colorMode: 'original', color: '' })}
+						onClick={() =>
+							onChange({ colorMode: 'original', color: '' })
+						}
 					>
 						{__('Original', 'quillcrm')}
 					</div>
@@ -322,7 +289,7 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 						className={cn(
 							'py-2 px-4 w-full text-center cursor-pointer text-sm',
 							props.colorMode === 'colored' &&
-							'bg-[#C6DFF366] border border-primary rounded-r-lg'
+								'bg-[#C6DFF366] border border-primary rounded-r-lg'
 						)}
 						onClick={() => onChange({ colorMode: 'colored' })}
 					>
@@ -330,119 +297,23 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 					</div>
 				</div>
 				{props.colorMode === 'colored' && (
-					<div className="flex items-center gap-2 border rounded-lg px-2">
-						<Input
-							id="icon-color"
-							type="text"
-							value={props.color}
-							onChange={(e) => onChange({ color: e.target.value })}
-							className="rounded-lg"
-							style={{ border: 0 }}
-							placeholder="#000000"
-						/>
-						<Input
-							type="color"
-							value={props.color}
-							onChange={(e) => onChange({ color: e.target.value })}
-							className="w-10 h-10 p-1 rounded-lg"
-							style={{ border: 0 }}
-						/>
-					</div>
+					<ColorPickerControl
+						value={props.color}
+						onChange={(color) => onChange({ color })}
+						label=""
+						id="icon-color"
+						placeholder="#000000"
+					/>
 				)}
 			</div>
 
 			{/* Padding */}
-			<div>
-				<label className="text-sm text-[#333333] mb-2 block">
-					{__('Padding', 'quillcrm')}
-				</label>
-				<div className="flex gap-2">
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingLeftIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.left || 0}
-							onChange={(e) =>
-								handlePaddingChange(
-									'left',
-									parseInt(e.target.value) || 0
-								)
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingRightIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.right || 0}
-							onChange={(e) =>
-								handlePaddingChange(
-									'right',
-									parseInt(e.target.value) || 0
-								)
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingTopIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.top || 0}
-							onChange={(e) =>
-								handlePaddingChange(
-									'top',
-									parseInt(e.target.value) || 0
-								)
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingBottomIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.bottom || 0}
-							onChange={(e) =>
-								handlePaddingChange(
-									'bottom',
-									parseInt(e.target.value) || 0
-								)
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-				</div>
-			</div>
+			<PaddingControl
+				value={
+					props.padding || { top: 0, right: 0, bottom: 0, left: 0 }
+				}
+				onChange={(padding) => onChange({ padding })}
+			/>
 		</div>
 	);
 };

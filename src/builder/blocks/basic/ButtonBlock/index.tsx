@@ -19,6 +19,13 @@ export interface ButtonBlockProps {
 		bottom: number;
 		left: number;
 	};
+	containerPadding: {
+		top: number;
+		right: number;
+		bottom: number;
+		left: number;
+	};
+	containerBackgroundColor: string;
 	align: string;
 	buttonStyle: 'primary' | 'secondary' | 'tertiary';
 }
@@ -37,6 +44,13 @@ const ButtonBlock = {
 			bottom: 12,
 			left: 24,
 		},
+		containerPadding: {
+			top: 0,
+			right: 0,
+			bottom: 0,
+			left: 0,
+		},
+		containerBackgroundColor: 'transparent',
 		align: 'center',
 		buttonStyle: 'primary',
 	} as ButtonBlockProps,

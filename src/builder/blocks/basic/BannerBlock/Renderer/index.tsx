@@ -25,7 +25,7 @@ export const BannerRenderer: React.FC<BannerBlockRendererProps> = ({
 
 	const containerStyle: React.CSSProperties = {
 		backgroundColor: props.backgroundColor,
-		padding: `${props.padding.top}px ${props.padding.right}px ${props.padding.bottom}px ${props.padding.left}px`,
+		padding: `${(props.padding?.top || 0)}px ${(props.padding?.right || 0)}px ${(props.padding?.bottom || 0)}px ${(props.padding?.left || 0)}px`,
 		borderRadius: `${props.borderRadius}px`,
 		display: 'inline-block',
 		maxWidth: '100%',

@@ -2,27 +2,9 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
-/**
- * external dependencies
- */
-import {
-	AlignLeft,
-	AlignCenter,
-	AlignRight,
-} from 'lucide-react';
 /**
  * internal dependencies
  */
-import {
-	MergeTagsIcon,
-	PaddingBottomIcon,
-	PaddingLeftIcon,
-	PaddingRightIcon,
-	PaddingTopIcon,
-} from '@quillcrm/components';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import {
 	Select,
 	SelectContent,
@@ -31,6 +13,12 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { ButtonBlockProps } from '..';
+import {
+	AlignmentControl,
+	PaddingControl,
+	ColorPickerControl,
+	InputWithMergeTags,
+} from '../../shared';
 
 export interface ButtonEditorProps {
 	props: ButtonBlockProps;
@@ -38,65 +26,26 @@ export interface ButtonEditorProps {
 }
 
 export const ButtonEditor = ({ props, onChange }: ButtonEditorProps) => {
-	const { setMergeTagsVisible, setMergeTagCallback } =
-		useDispatch('quillcrm/core');
-
-	const handleMergeTagClick = (field: 'text' | 'url') => {
-		setMergeTagCallback((tagValue: string) => {
-			onChange({ [field]: props[field] + tagValue });
-		});
-		setMergeTagsVisible(true);
-	};
-
 	return (
 		<div className="grid gap-5">
 			{/* Button Text with Merge Tags */}
-			<div className="flex flex-col gap-2">
-				<div className="flex justify-between items-center text-[#333333]">
-					<div>{__('Button Text', 'quillcrm')}</div>
-					<div
-						className="cursor-pointer hover:opacity-80"
-						onClick={() => handleMergeTagClick('text')}
-					>
-						<MergeTagsIcon />
-					</div>
-				</div>
-				<Input
-					type="text"
-					value={props.text}
-					onChange={(e) => onChange({ text: e.target.value })}
-					className="pr-8 h-10"
-					style={{
-						borderColor: '#e5e5e5',
-						borderRadius: '0.5rem',
-					}}
-					placeholder="Click Here"
-				/>
-			</div>
+			<InputWithMergeTags
+				label={__('Button Text', 'quillcrm')}
+				value={props.text}
+				onChange={(text) => onChange({ text })}
+				placeholder="Click Here"
+				fieldName="text"
+			/>
 
 			{/* Link URL with Merge Tags */}
-			<div className="flex flex-col gap-2">
-				<div className="flex justify-between items-center text-[#333333]">
-					<div>{__('Link URL', 'quillcrm')}</div>
-					<div
-						className="cursor-pointer hover:opacity-80"
-						onClick={() => handleMergeTagClick('url')}
-					>
-						<MergeTagsIcon />
-					</div>
-				</div>
-				<Input
-					type="text"
-					value={props.url}
-					onChange={(e) => onChange({ url: e.target.value })}
-					className="pr-8 h-10"
-					style={{
-						borderColor: '#e5e5e5',
-						borderRadius: '0.5rem',
-					}}
-					placeholder="https://example.com"
-				/>
-			</div>
+			<InputWithMergeTags
+				label={__('Link URL', 'quillcrm')}
+				value={props.url}
+				onChange={(url) => onChange({ url })}
+				placeholder="https://example.com"
+				type="url"
+				fieldName="url"
+			/>
 
 			{/* Button Style */}
 			<div className="flex flex-col gap-2 text-[#333333]">
@@ -132,172 +81,35 @@ export const ButtonEditor = ({ props, onChange }: ButtonEditorProps) => {
 			</div>
 
 			{/* Alignment */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('Alignment on desktop', 'quillcrm')}</div>
-				<div className="flex items-center justify-between border rounded-lg">
-					<AlignLeft
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'left' &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
-						)}
-						onClick={() => onChange({ align: 'left' })}
-					/>
-					<AlignCenter
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'center' &&
-								'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ align: 'center' })}
-					/>
-					<AlignRight
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer',
-							props.align === 'right' &&
-								'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ align: 'right' })}
-					/>
-					<div
-						className={cn(
-							'size-12 py-3 px-5 w-full cursor-pointer flex items-center justify-center',
-							props.align === 'full' &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
-						)}
-						onClick={() => onChange({ align: 'full' })}
-					>
-						<span className="text-sm font-medium">Full</span>
-					</div>
-				</div>
-			</div>
+			<AlignmentControl
+				value={props.align as 'left' | 'center' | 'right' | 'full'}
+				onChange={(align) => onChange({ align })}
+				includeFull={true}
+			/>
 
-			{/* Colors */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div>{__('Background Color', 'quillcrm')}</div>
-				<div className="flex items-center gap-2 border rounded-lg px-2">
-					<Input
-						id="bg-color"
-						type="text"
-						value={props.backgroundColor}
-						onChange={(e) =>
-							onChange({ backgroundColor: e.target.value })
-						}
-						className="rounded-lg"
-						style={{ border: 0 }}
-					/>
-					<Input
-						type="color"
-						value={props.backgroundColor}
-						onChange={(e) =>
-							onChange({ backgroundColor: e.target.value })
-						}
-						className="w-10 h-10 p-1 rounded-lg"
-						style={{ border: 0 }}
-					/>
-				</div>
-			</div>
+			{/* Container Colors */}
+			<ColorPickerControl
+				value={props.containerBackgroundColor}
+				onChange={(containerBackgroundColor) =>
+					onChange({ containerBackgroundColor })
+				}
+				label={__('Background Color', 'quillcrm')}
+				id="container-bg-color"
+			/>
 
-			{/* Padding */}
-			<div>
-				<label className="text-sm text-[#333333] mb-2 block">
-					{__('Padding', 'quillcrm')}
-				</label>
-				<div className="flex gap-2">
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingLeftIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.left || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										left: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingRightIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.right || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										right: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingTopIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.top || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										top: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-					<div className="relative flex items-center">
-						<div className="absolute left-2 text-[#333333]">
-							<PaddingBottomIcon />
-						</div>
-						<Input
-							type="number"
-							value={props.padding?.bottom || 0}
-							onChange={(e) =>
-								onChange({
-									padding: {
-										...(props.padding || {}),
-										bottom: parseInt(e.target.value),
-									},
-								})
-							}
-							className="h-10"
-							style={{
-								borderColor: '#e5e5e5',
-								borderRadius: '0.5rem',
-								paddingLeft: '32px',
-							}}
-						/>
-					</div>
-				</div>
-			</div>
+			{/* Container Padding */}
+			<PaddingControl
+				value={
+					props.containerPadding || {
+						top: 0,
+						right: 0,
+						bottom: 0,
+						left: 0,
+					}
+				}
+				onChange={(containerPadding) => onChange({ containerPadding })}
+				label={__('Padding', 'quillcrm')}
+			/>
 		</div>
 	);
 };

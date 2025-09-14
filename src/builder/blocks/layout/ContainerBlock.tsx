@@ -38,7 +38,7 @@ const ContainerBlock = ({ activeSidebar, setActiveSidebar }: ContainerBlockProps
 			<Collapsible defaultOpen className="group/collapsible">
 				<CollapsibleTrigger asChild>
 					<div className={defaultStyle}>
-						{__('Sections', 'quillcrm')}
+						{__('Blocks', 'quillcrm')}
 						<ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
 					</div>
 				</CollapsibleTrigger>

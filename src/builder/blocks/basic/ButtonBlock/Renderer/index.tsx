@@ -16,11 +16,15 @@ export interface ButtonRendererProps {
 }
 
 export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
+	// Safely access padding properties with defaults
+	const buttonPadding = props.padding || { top: 8, right: 12, bottom: 8, left: 12 };
+	const containerPadding = props.containerPadding || { top: 0, right: 0, bottom: 0, left: 0 };
+
 	// Convert button padding object to CSS string
-	const buttonPaddingString = `${props.padding.top}px ${props.padding.right}px ${props.padding.bottom}px ${props.padding.left}px`;
+	const buttonPaddingString = `${buttonPadding.top}px ${buttonPadding.right}px ${buttonPadding.bottom}px ${buttonPadding.left}px`;
 
 	// Convert container padding object to CSS string
-	const containerPaddingString = `${props.containerPadding.top}px ${props.containerPadding.right}px ${props.containerPadding.bottom}px ${props.containerPadding.left}px`;
+	const containerPaddingString = `${containerPadding.top}px ${containerPadding.right}px ${containerPadding.bottom}px ${containerPadding.left}px`;
 
 	// Build button style based on button style type
 	const getButtonStyle = () => {

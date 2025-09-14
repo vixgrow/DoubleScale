@@ -165,14 +165,20 @@ const BuilderContent: React.FC = () => {
 				if (sectionId && columnId) {
 					// Check if this is a hero template with multiple blocks
 					if (template.blocks && Array.isArray(template.blocks)) {
-						console.log('Creating multiple blocks from hero template:', template.blocks);
+						console.log(
+							'Creating multiple blocks from hero template:',
+							template.blocks
+						);
 
 						// Add each block from the template
 						template.blocks.forEach((blockConfig) => {
 							// Add template layout information to the block props
 							const blockProps = {
 								...blockConfig.props,
-								templateLayout: template.layout?.[blockConfig.props.containerId] || null,
+								templateLayout:
+									template.layout?.[
+										blockConfig.props.containerId
+									] || null,
 							};
 
 							addNewBlockWithProps(
@@ -184,7 +190,10 @@ const BuilderContent: React.FC = () => {
 						});
 					} else {
 						// Fallback: Add the template as a single block
-						console.log('Creating single block for template:', template);
+						console.log(
+							'Creating single block for template:',
+							template
+						);
 						addNewBlockWithProps(
 							sectionId,
 							columnId,
@@ -330,14 +339,20 @@ const BuilderContent: React.FC = () => {
 				if (sectionId && columnId) {
 					// Check if this is an email body template with multiple blocks
 					if (template.blocks && Array.isArray(template.blocks)) {
-						console.log('Creating multiple blocks from email body template:', template.blocks);
+						console.log(
+							'Creating multiple blocks from email body template:',
+							template.blocks
+						);
 
 						// Add each block from the template
 						template.blocks.forEach((blockConfig) => {
 							// Add template layout information to the block props
 							const blockProps = {
 								...blockConfig.props,
-								templateLayout: template.layout?.[blockConfig.props.containerId] || null,
+								templateLayout:
+									template.layout?.[
+										blockConfig.props.containerId
+									] || null,
 							};
 
 							addNewBlockWithProps(
@@ -349,7 +364,10 @@ const BuilderContent: React.FC = () => {
 						});
 					} else {
 						// Fallback: Add the template as a single block
-						console.log('Creating single block for email body template:', template);
+						console.log(
+							'Creating single block for email body template:',
+							template
+						);
 						addNewBlockWithProps(
 							sectionId,
 							columnId,
@@ -398,14 +416,20 @@ const BuilderContent: React.FC = () => {
 				if (sectionId && columnId) {
 					// Check if this is a footer template with multiple blocks
 					if (template.blocks && Array.isArray(template.blocks)) {
-						console.log('Creating multiple blocks from footer template:', template.blocks);
+						console.log(
+							'Creating multiple blocks from footer template:',
+							template.blocks
+						);
 
 						// Add each block from the template
 						template.blocks.forEach((blockConfig) => {
 							// Add template layout information to the block props
 							const blockProps = {
 								...blockConfig.props,
-								templateLayout: template.layout?.[blockConfig.props.containerId] || null,
+								templateLayout:
+									template.layout?.[
+										blockConfig.props.containerId
+									] || null,
 							};
 
 							addNewBlockWithProps(
@@ -417,7 +441,10 @@ const BuilderContent: React.FC = () => {
 						});
 					} else {
 						// Fallback: Add the template as a single block
-						console.log('Creating single block for footer template:', template);
+						console.log(
+							'Creating single block for footer template:',
+							template
+						);
 						addNewBlockWithProps(
 							sectionId,
 							columnId,
@@ -466,14 +493,20 @@ const BuilderContent: React.FC = () => {
 				if (sectionId && columnId) {
 					// Check if this is an image gallery template with multiple blocks
 					if (template.blocks && Array.isArray(template.blocks)) {
-						console.log('Creating multiple blocks from image gallery template:', template.blocks);
+						console.log(
+							'Creating multiple blocks from image gallery template:',
+							template.blocks
+						);
 
 						// Add each block from the template
 						template.blocks.forEach((blockConfig) => {
 							// Add template layout information to the block props
 							const blockProps = {
 								...blockConfig.props,
-								templateLayout: template.layout?.[blockConfig.props.containerId] || null,
+								templateLayout:
+									template.layout?.[
+										blockConfig.props.containerId
+									] || null,
 							};
 
 							addNewBlockWithProps(
@@ -485,7 +518,10 @@ const BuilderContent: React.FC = () => {
 						});
 					} else {
 						// Fallback: Add the template as a single block
-						console.log('Creating single block for image gallery template:', template);
+						console.log(
+							'Creating single block for image gallery template:',
+							template
+						);
 						addNewBlockWithProps(
 							sectionId,
 							columnId,
@@ -604,7 +640,7 @@ const BuilderContent: React.FC = () => {
 						'Text & Link'
 					</div>
 					<div className="text-xs text-gray-500 mt-1">
-						Library Template
+						Preheader Template
 					</div>
 				</div>
 			);
@@ -793,7 +829,8 @@ const BuilderContent: React.FC = () => {
 					<Canvas />
 
 					<DragOverlay>
-						{activeItem && activeItem.item ? (
+						{renderDragOverlay()}
+						{/* {activeItem && activeItem.item ? (
 							<div className="opacity-90 transform rotate-3 shadow-lg">
 								<TemplateCard
 									item={activeItem.item}
@@ -802,7 +839,7 @@ const BuilderContent: React.FC = () => {
 									isDragOverlay={true}
 								/>
 							</div>
-						) : null}
+						) : null} */}
 					</DragOverlay>
 				</DndContext>
 				<BlockEditor />

@@ -236,28 +236,49 @@ class Deal_Model extends Model {
 	 *
 	 * @param int $stage_id New stage ID
 	 * @param int|null $user_id User making the change
+	 * @param bool $update_probability Whether to update deal probability to match new stage (default: false to preserve custom values)
 	 *
 	 * @return bool
-	 */
-	public function moveToStage( $stage_id, $user_id = null ) {
+	 * 
+	*/
+	public function moveToStage( $stage_id, $user_id = null, $update_probability = false ) {
 		$old_stage_id = $this->stage_id;
 		
 		if ( $old_stage_id == $stage_id ) {
 			return true;
 		}
 
+		$old_probability = $this->probability;
 		$this->stage_id = $stage_id;
+		
+		// Optionally update probability to match new stage
+		if ( $update_probability ) {
+			$new_stage = Pipeline_Stage_Model::find( $stage_id );
+			if ( $new_stage ) {
+				$this->probability = $new_stage->win_probability;
+			}
+		}
+		
 		$saved = $this->save();
 
 		if ( $saved ) {
+			// Prepare activity data
+			$activity_data = array(
+				'old_stage_id' => $old_stage_id,
+				'new_stage_id' => $stage_id,
+			);
+			
+			// Include probability change if it was updated
+			if ( $update_probability && $old_probability !== $this->probability ) {
+				$activity_data['old_probability'] = $old_probability;
+				$activity_data['new_probability'] = $this->probability;
+			}
+			
 			// Log the stage change activity
 			Deal_Activity_Model::create( array(
 				'deal_id' => $this->id,
 				'activity_type' => 'stage_changed',
-				'data' => array(
-					'old_stage_id' => $old_stage_id,
-					'new_stage_id' => $stage_id,
-				),
+				'data' => $activity_data,
 				'user_id' => $user_id,
 			) );
 

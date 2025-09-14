@@ -163,17 +163,18 @@ final class Deal_Manager {
 	 * @param int $deal_id Deal ID
 	 * @param int $stage_id Target stage ID
 	 * @param int|null $user_id User performing the action
+	 * @param bool $update_probability Whether to update deal probability to match new stage
 	 *
 	 * @return bool
 	 */
-	public function move_deal_to_stage( $deal_id, $stage_id, $user_id = null ) {
+	public function move_deal_to_stage( $deal_id, $stage_id, $user_id = null, $update_probability = false ) {
 		$deal = Deal_Model::find( $deal_id );
 		
 		if ( ! $deal ) {
 			return false;
 		}
 
-		return $deal->moveToStage( $stage_id, $user_id );
+		return $deal->moveToStage( $stage_id, $user_id, $update_probability );
 	}
 
 	/**
@@ -453,6 +454,12 @@ final class Deal_Manager {
 
 		$total_value = $deals->where( 'status', 'open' )->sum( 'value' );
 		$won_value = $deals->where( 'status', 'won' )->sum( 'value' );
+		
+		// Calculate weighted value for open deals
+		$weighted_value = 0;
+		foreach ( $deals->where( 'status', 'open' ) as $deal ) {
+			$weighted_value += $deal->weighted_value;
+		}
 
 		return array(
 			'total_deals' => $total_deals,
@@ -462,6 +469,7 @@ final class Deal_Manager {
 			'win_rate' => $total_deals > 0 ? round( ( $won_deals / $total_deals ) * 100, 2 ) : 0,
 			'total_value' => $total_value,
 			'won_value' => $won_value,
+			'weighted_value' => $weighted_value,
 			'average_deal_value' => $total_deals > 0 ? round( $total_value / $total_deals, 2 ) : 0,
 			'conversion_rate' => $total_deals > 0 ? round( ( ( $won_deals + $lost_deals ) / $total_deals ) * 100, 2 ) : 0,
 		);

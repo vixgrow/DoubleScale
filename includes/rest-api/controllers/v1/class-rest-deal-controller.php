@@ -379,6 +379,7 @@ class REST_Deal_Controller extends REST_Controller
 	public function move_to_stage( $request ) {
 		$deal_id = $request->get_param( 'id' );
 		$stage_id = intval( $request->get_param( 'stage_id' ) );
+		$update_probability = $request->get_param( 'update_probability' ) ? true : false;
 		$user_id = get_current_user_id();
 
 		// Load the deal first to check current stage
@@ -395,7 +396,7 @@ class REST_Deal_Controller extends REST_Controller
 			return new WP_REST_Response( $data, 200 );
 		}
 
-		$moved = Deal_Manager::instance()->move_deal_to_stage( $deal_id, $stage_id, $user_id );
+		$moved = Deal_Manager::instance()->move_deal_to_stage( $deal_id, $stage_id, $user_id, $update_probability );
 
 		if ( ! $moved ) {
 			return new WP_Error( 'move_failed', 'Failed to move deal to stage', array( 'status' => 500 ) );

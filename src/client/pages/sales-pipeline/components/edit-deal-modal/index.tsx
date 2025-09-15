@@ -23,6 +23,7 @@ import dayjs from 'dayjs';
  * Internal dependencies
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
+import { useUsers } from '../../hooks/use-users';
 import { Deal } from '../../types';
 import './style.scss';
 
@@ -55,12 +56,6 @@ interface Contact {
 	email: string;
 }
 
-interface Owner {
-	id: number;
-	display_name: string;
-	email: string;
-}
-
 export const EditDealModal: React.FC<EditDealModalProps> = ({
 	visible,
 	onClose,
@@ -71,8 +66,16 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
-	const [owners, setOwners] = useState<Owner[]>([]);
 	const [contactSearchLoading, setContactSearchLoading] = useState(false);
+
+	// Use shared users hook
+	const {
+		users: owners,
+		loading: ownersLoading,
+		loadUsers: loadOwners,
+		searchUsers: searchOwners,
+		ensureUserIncluded,
+	} = useUsers();
 	const [selectedPipelineId, setSelectedPipelineId] = useState<number | null>(
 		null
 	);
@@ -88,55 +91,92 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 		return pipeline?.stages || [];
 	}, [selectedPipelineId, pipelines]);
 
-	// Initialize form when deal changes
+	// Load initial contacts when modal opens
 	useEffect(() => {
-		if (deal && visible) {
+		if (visible) {
+			fetchInitialContacts();
+		}
+	}, [visible]);
+
+	// Initialize form when deal changes - with proper timing
+	useEffect(() => {
+		if (deal && visible && pipelines.length > 0) {
+			// Set selectedPipelineId first
 			setSelectedPipelineId(deal.pipeline_id);
 
-			// Set form values
-			form.setFieldsValue({
-				title: deal.title,
-				contact_id: deal.contact?.id,
-				pipeline_id: deal.pipeline_id,
-				stage_id: deal.stage_id,
-				value: deal.value,
-				expected_close_date: deal.expected_close_date
-					? dayjs(deal.expected_close_date)
-					: null,
-				probability: deal.probability,
-				source: deal.source,
-				owner_id: deal.owner?.id,
-			});
+			// Wait for next tick to ensure pipeline stages are computed
+			setTimeout(() => {
+				// Set form values with proper data types
+				form.setFieldsValue({
+					title: deal.title,
+					contact_id: deal.contact?.id,
+					pipeline_id: Number(deal.pipeline_id), // Ensure number type
+					stage_id: Number(deal.stage_id), // Ensure number type
+					value: deal.value,
+					expected_close_date: deal.expected_close_date
+						? dayjs(deal.expected_close_date)
+						: null,
+					probability: deal.probability,
+					source: deal.source,
+					owner_id: deal.owner?.id
+						? Number(deal.owner.id)
+						: undefined,
+				});
+			}, 0);
 
-			// Set current contact in the list
-			if (deal.contact) {
-				setContacts([deal.contact]);
-			}
-
-			// Set current owner in the list
-			if (deal.owner) {
-				setOwners([deal.owner]);
-			}
+			// Load initial owners list
+			fetchInitialOwners();
 		}
-	}, [deal, visible, form]);
+	}, [deal, visible, form, pipelines]);
 
 	// Reset state when modal closes
 	useEffect(() => {
 		if (!visible) {
 			setContacts([]);
-			setOwners([]);
 			setSelectedPipelineId(null);
+			form.resetFields();
 		}
-	}, [visible]);
+	}, [visible, form]);
+
+	// Fetch initial contacts (recent contacts + current contact)
+	const fetchInitialContacts = useCallback(async () => {
+		setContactSearchLoading(true);
+		try {
+			const response = await apiFetch({
+				path: '/qc/v1/contacts?per_page=20&sort_by=updated_at&sort_order=desc',
+			});
+
+			const contactsData = Array.isArray(response)
+				? response
+				: (response as any)?.data || (response as any)?.items || [];
+
+			// Ensure current deal's contact is included if not in recent list
+			let finalContacts = [...contactsData];
+			if (
+				deal?.contact &&
+				!finalContacts.find((c) => c.id === deal.contact?.id)
+			) {
+				finalContacts.unshift(deal.contact);
+			}
+
+			setContacts(finalContacts);
+		} catch (error) {
+			console.error('Failed to fetch initial contacts:', error);
+			// Fallback to current contact only
+			if (deal?.contact) {
+				setContacts([deal.contact]);
+			}
+		} finally {
+			setContactSearchLoading(false);
+		}
+	}, [deal?.contact]);
 
 	// Fetch contacts with search
 	const fetchContacts = useCallback(
 		debounce(async (searchTerm: string) => {
 			if (!searchTerm || searchTerm.length < 2) {
-				// Keep current contact if no search
-				if (deal?.contact) {
-					setContacts([deal.contact]);
-				}
+				// Reload initial contacts when search is cleared
+				fetchInitialContacts();
 				return;
 			}
 
@@ -163,36 +203,18 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				setContactSearchLoading(false);
 			}
 		}, 300),
-		[deal?.contact, createNotice]
+		[fetchInitialContacts, createNotice]
 	);
 
-	// Fetch owners (users)
-	const fetchOwners = useCallback(
-		debounce(async (searchTerm: string) => {
-			if (!searchTerm || searchTerm.length < 2) {
-				// Keep current owner if no search
-				if (deal?.owner) {
-					setOwners([deal.owner]);
-				}
-				return;
-			}
+	// Fetch initial owners using our custom users endpoint
+	const fetchInitialOwners = useCallback(async () => {
+		await loadOwners();
 
-			try {
-				const response = await apiFetch({
-					path: `/qc/v1/users?search=${encodeURIComponent(searchTerm)}&per_page=20`,
-				});
-
-				const ownersData = Array.isArray(response)
-					? response
-					: (response as any)?.data || (response as any)?.items || [];
-
-				setOwners(ownersData);
-			} catch (error) {
-				console.error('Failed to fetch owners:', error);
-			}
-		}, 300),
-		[deal?.owner]
-	);
+		// Ensure current deal's owner is included
+		if (deal?.owner) {
+			ensureUserIncluded(deal.owner);
+		}
+	}, [deal?.owner, loadOwners, ensureUserIncluded]);
 
 	const handleSubmit = async (values: DealFormData) => {
 		if (!deal) return;
@@ -323,18 +345,26 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 						<Select
 							showSearch
 							placeholder={__(
-								'Search and select contact',
+								'Select or search contacts',
 								'quillcrm'
 							)}
 							notFoundContent={
 								contactSearchLoading
 									? __('Loading...', 'quillcrm')
-									: __('No contacts found', 'quillcrm')
+									: __(
+											'No contacts found - try searching',
+											'quillcrm'
+										)
 							}
 							filterOption={false}
 							onSearch={fetchContacts}
 							loading={contactSearchLoading}
 							suffixIcon={<UserOutlined />}
+							onDropdownVisibleChange={(open) => {
+								if (open && contacts.length === 0) {
+									fetchInitialContacts();
+								}
+							}}
 						>
 							{contacts.map((contact) => (
 								<Option key={contact.id} value={contact.id}>
@@ -484,19 +514,28 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 							<Select
 								showSearch
 								placeholder={__(
-									'Search and select owner',
+									'Select or search users',
 									'quillcrm'
 								)}
 								notFoundContent={__(
-									'No users found',
+									'No users found - try searching',
 									'quillcrm'
 								)}
 								filterOption={false}
-								onSearch={fetchOwners}
+								onSearch={searchOwners}
+								loading={ownersLoading}
 								allowClear
+								onDropdownVisibleChange={(open) => {
+									if (open && owners.length === 0) {
+										fetchInitialOwners();
+									}
+								}}
 							>
 								{owners.map((owner) => (
-									<Option key={owner.id} value={owner.id}>
+									<Option
+										key={owner.id}
+										value={Number(owner.id)}
+									>
 										{owner.display_name} ({owner.email})
 									</Option>
 								))}

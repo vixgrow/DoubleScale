@@ -1,5 +1,4 @@
 <?php
-
 /**
  * REST API: Deal controller
  *
@@ -13,7 +12,6 @@ namespace QuillCRM\REST_API\Controllers\V1;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Managers\Deal_Manager;
-use QuillCRM\Models\Custom_Field_Model;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,17 +20,8 @@ use WP_REST_Server;
 /**
  * Deal REST Controller class
  */
-class REST_Deal_Controller extends REST_Controller {
-
-
-
-
-
-
-
-
-
-
+class REST_Deal_Controller extends REST_Controller
+{
 
 
 
@@ -51,8 +40,9 @@ class REST_Deal_Controller extends REST_Controller {
 	 *
 	 * @since 1.0.0
 	 */
-	public function register_routes() {
-		 // Deals endpoints
+	public function register_routes()
+	{
+		// Deals endpoints
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -202,32 +192,29 @@ class REST_Deal_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		$filters = array(
-			'pipeline_id'         => $request->get_param( 'pipeline_id' ),
-			'stage_id'            => $request->get_param( 'stage_id' ),
-			'status'              => $request->get_param( 'status' ),
-			'owner_id'            => $request->get_param( 'owner_id' ),
-			'contact_id'          => $request->get_param( 'contact_id' ),
-			'value_min'           => $request->get_param( 'value_min' ),
-			'value_max'           => $request->get_param( 'value_max' ),
-			'date_from'           => $request->get_param( 'date_from' ),
-			'date_to'             => $request->get_param( 'date_to' ),
+			'pipeline_id'        => $request->get_param( 'pipeline_id' ),
+			'stage_id'           => $request->get_param( 'stage_id' ),
+			'status'             => $request->get_param( 'status' ),
+			'owner_id'           => $request->get_param( 'owner_id' ),
+			'contact_id'         => $request->get_param( 'contact_id' ),
+			'value_min'          => $request->get_param( 'value_min' ),
+			'value_max'          => $request->get_param( 'value_max' ),
+			'date_from'          => $request->get_param( 'date_from' ),
+			'date_to'            => $request->get_param( 'date_to' ),
 			'expected_close_from' => $request->get_param( 'expected_close_from' ),
-			'expected_close_to'   => $request->get_param( 'expected_close_to' ),
-			'search'              => $request->get_param( 'search' ),
-			'sort_by'             => $request->get_param( 'sort_by' ),
-			'sort_order'          => $request->get_param( 'sort_order' ),
+			'expected_close_to'  => $request->get_param( 'expected_close_to' ),
+			'search'             => $request->get_param( 'search' ),
+			'sort_by'            => $request->get_param( 'sort_by' ),
+			'sort_order'         => $request->get_param( 'sort_order' ),
 		);
 
 		$per_page = $request->get_param( 'per_page' ) ?: 20;
-		$page     = $request->get_param( 'page' ) ?: 1;
+		$page = $request->get_param( 'page' ) ?: 1;
 
 		// Remove null values
-		$filters = array_filter(
-			$filters,
-			function ( $value ) {
-				return $value !== null && $value !== '';
-			}
-		);
+		$filters = array_filter( $filters, function( $value ) {
+			return $value !== null && $value !== '';
+		} );
 
 		$deals = Deal_Manager::instance()->get_deals_with_filters( $filters, $per_page, $page );
 
@@ -237,7 +224,7 @@ class REST_Deal_Controller extends REST_Controller {
 		}
 
 		$response = new WP_REST_Response( $data, 200 );
-
+		
 		// Add pagination headers
 		$response->header( 'X-Total-Count', $deals->total() );
 		$response->header( 'X-Total-Pages', $deals->lastPage() );
@@ -254,13 +241,13 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ) {
-		$deal_id            = $request->get_param( 'id' );
+		$deal_id = $request->get_param( 'id' );
 		$with_relationships = $request->get_param( 'with_relationships' );
 
 		if ( $with_relationships ) {
-			$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner', 'activities', 'custom_fields' ) )->find( $deal_id );
+			$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner', 'activities' ) )->find( $deal_id );
 		} else {
-			$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner', 'custom_fields' ) )->find( $deal_id );
+			$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
 		}
 
 		if ( ! $deal ) {
@@ -290,25 +277,22 @@ class REST_Deal_Controller extends REST_Controller {
 		}
 
 		$data = array(
-			'title'               => sanitize_text_field( $request->get_param( 'title' ) ),
-			'contact_id'          => intval( $request->get_param( 'contact_id' ) ),
-			'pipeline_id'         => intval( $request->get_param( 'pipeline_id' ) ),
-			'stage_id'            => intval( $request->get_param( 'stage_id' ) ),
-			'value'               => floatval( $request->get_param( 'value' ) ),
-			'currency'            => sanitize_text_field( $request->get_param( 'currency' ) ),
+			'title'              => sanitize_text_field( $request->get_param( 'title' ) ),
+			'contact_id'         => intval( $request->get_param( 'contact_id' ) ),
+			'pipeline_id'        => intval( $request->get_param( 'pipeline_id' ) ),
+			'stage_id'           => intval( $request->get_param( 'stage_id' ) ),
+			'value'              => floatval( $request->get_param( 'value' ) ),
+			'currency'           => sanitize_text_field( $request->get_param( 'currency' ) ),
 			'expected_close_date' => sanitize_text_field( $request->get_param( 'expected_close_date' ) ),
-			'probability'         => $request->get_param( 'probability' ) !== null ? floatval( $request->get_param( 'probability' ) ) : null,
-			'owner_id'            => $owner_id ? intval( $owner_id ) : null,
-			'source'              => sanitize_text_field( $request->get_param( 'source' ) ),
+			'probability'        => $request->get_param( 'probability' ) !== null ? floatval( $request->get_param( 'probability' ) ) : null,
+			'owner_id'           => $owner_id ? intval( $owner_id ) : null,
+			'source'             => sanitize_text_field( $request->get_param( 'source' ) ),
 		);
 
 		// Remove empty values
-		$data = array_filter(
-			$data,
-			function ( $value ) {
-				return $value !== null && $value !== '';
-			}
-		);
+		$data = array_filter( $data, function( $value ) {
+			return $value !== null && $value !== '';
+		} );
 
 		$deal = Deal_Manager::instance()->create_deal( $data );
 
@@ -327,8 +311,6 @@ class REST_Deal_Controller extends REST_Controller {
 		return new WP_REST_Response( $response_data, 201 );
 	}
 
-
-
 	/**
 	 * Update one deal
 	 *
@@ -339,7 +321,7 @@ class REST_Deal_Controller extends REST_Controller {
 	public function update_item( $request ) {
 
 		$deal_id = $request->get_param( 'id' );
-		$data    = array();
+		$data = array();
 
 		// Validate owner_id if being updated
 		$owner_id = $request->get_param( 'owner_id' );
@@ -411,10 +393,10 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function move_to_stage( $request ) {
-		$deal_id            = $request->get_param( 'id' );
-		$stage_id           = intval( $request->get_param( 'stage_id' ) );
+		$deal_id = $request->get_param( 'id' );
+		$stage_id = intval( $request->get_param( 'stage_id' ) );
 		$update_probability = $request->get_param( 'update_probability' ) ? true : false;
-		$user_id            = get_current_user_id();
+		$user_id = get_current_user_id();
 
 		// Load the deal first to check current stage
 		$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
@@ -425,7 +407,7 @@ class REST_Deal_Controller extends REST_Controller {
 
 		// Check if the deal is already in the target stage
 		if ( $deal->stage_id == $stage_id ) {
-			$data            = $this->prepare_item_for_response( $deal, $request );
+			$data = $this->prepare_item_for_response( $deal, $request );
 			$data['message'] = 'Deal is already in this stage';
 			return new WP_REST_Response( $data, 200 );
 		}
@@ -451,10 +433,10 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function move_to_pipeline( $request ) {
-		$deal_id     = $request->get_param( 'id' );
+		$deal_id = $request->get_param( 'id' );
 		$pipeline_id = intval( $request->get_param( 'pipeline_id' ) );
-		$stage_id    = $request->get_param( 'stage_id' ) ? intval( $request->get_param( 'stage_id' ) ) : null;
-		$user_id     = get_current_user_id();
+		$stage_id = $request->get_param( 'stage_id' ) ? intval( $request->get_param( 'stage_id' ) ) : null;
+		$user_id = get_current_user_id();
 
 		$moved = Deal_Manager::instance()->move_deal_to_pipeline( $deal_id, $pipeline_id, $stage_id, $user_id );
 
@@ -500,7 +482,7 @@ class REST_Deal_Controller extends REST_Controller {
 	 */
 	public function mark_as_lost( $request ) {
 		$deal_id = $request->get_param( 'id' );
-		$reason  = sanitize_textarea_field( $request->get_param( 'reason' ) );
+		$reason = sanitize_textarea_field( $request->get_param( 'reason' ) );
 		$user_id = get_current_user_id();
 
 		$updated = Deal_Manager::instance()->mark_deal_as_lost( $deal_id, $reason, $user_id );
@@ -557,15 +539,12 @@ class REST_Deal_Controller extends REST_Controller {
 		);
 
 		$per_page = $request->get_param( 'per_page' ) ?: 20;
-		$page     = $request->get_param( 'page' ) ?: 1;
+		$page = $request->get_param( 'page' ) ?: 1;
 
 		// Remove null values
-		$filters = array_filter(
-			$filters,
-			function ( $value ) {
-				return $value !== null && $value !== '';
-			}
-		);
+		$filters = array_filter( $filters, function( $value ) {
+			return $value !== null && $value !== '';
+		} );
 
 		$activities = \QuillCRM\Managers\Activity_Manager::instance()->get_deal_activities( $deal_id, $filters, $per_page, $page );
 
@@ -579,7 +558,7 @@ class REST_Deal_Controller extends REST_Controller {
 		}
 
 		$response = new WP_REST_Response( $data, 200 );
-
+		
 		// Add pagination headers
 		$response->header( 'X-Total-Count', $activities->total() );
 		$response->header( 'X-Total-Pages', $activities->lastPage() );
@@ -623,12 +602,9 @@ class REST_Deal_Controller extends REST_Controller {
 		);
 
 		// Remove null values
-		$filters = array_filter(
-			$filters,
-			function ( $value ) {
-				return $value !== null && $value !== '';
-			}
-		);
+		$filters = array_filter( $filters, function( $value ) {
+			return $value !== null && $value !== '';
+		} );
 
 		$statistics = Deal_Manager::instance()->get_deal_statistics( $user_id, $filters );
 
@@ -644,7 +620,7 @@ class REST_Deal_Controller extends REST_Controller {
 	 */
 	public function bulk_update( $request ) {
 		$deal_ids = $request->get_param( 'deal_ids' );
-		$data     = $request->get_param( 'data' );
+		$data = $request->get_param( 'data' );
 
 		if ( ! is_array( $deal_ids ) || empty( $deal_ids ) ) {
 			return new WP_Error( 'invalid_data', 'Deal IDs array is required', array( 'status' => 400 ) );
@@ -662,7 +638,7 @@ class REST_Deal_Controller extends REST_Controller {
 			}
 		}
 
-		$user_id       = get_current_user_id();
+		$user_id = get_current_user_id();
 		$updated_count = Deal_Manager::instance()->bulk_update_deals( $deal_ids, $data, $user_id );
 
 		return new WP_REST_Response( array( 'updated_count' => $updated_count ), 200 );
@@ -671,7 +647,7 @@ class REST_Deal_Controller extends REST_Controller {
 	/**
 	 * Prepare the item for the REST response
 	 *
-	 * @param Deal            $deal Deal object.
+	 * @param Deal $deal Deal object.
 	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return array
@@ -760,13 +736,13 @@ class REST_Deal_Controller extends REST_Controller {
 	 */
 	protected function prepare_activity_for_response( $activity ) {
 		$data = array(
-			'id'                => $activity->id,
-			'deal_id'           => $activity->deal_id,
-			'activity_type'     => $activity->activity_type,
-			'data'              => $activity->data,
-			'user_id'           => $activity->user_id,
+			'id'               => $activity->id,
+			'deal_id'          => $activity->deal_id,
+			'activity_type'    => $activity->activity_type,
+			'data'             => $activity->data,
+			'user_id'          => $activity->user_id,
 			'formatted_message' => $activity->formatted_message,
-			'created_at'        => $activity->created_at,
+			'created_at'       => $activity->created_at,
 		);
 
 		if ( $activity->relationLoaded( 'user' ) && $activity->user ) {

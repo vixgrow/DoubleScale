@@ -129,9 +129,9 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 		if (!visible) {
 			setContacts([]);
 			setSelectedPipelineId(null);
-			form.resetFields();
+			// Note: form.resetFields() not needed here because destroyOnClose={true} handles form cleanup
 		}
-	}, [visible, form]);
+	}, [visible]);
 
 	// Fetch initial contacts (recent contacts + current contact)
 	const fetchInitialContacts = useCallback(async () => {

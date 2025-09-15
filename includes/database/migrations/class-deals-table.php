@@ -40,6 +40,7 @@ class Deals_Table extends Migration {
 			value DECIMAL(10,2) DEFAULT 0.00,
 			currency VARCHAR(3) DEFAULT "USD",
 			expected_close_date DATE NULL,
+			probability DECIMAL(5,2) NULL,
 			status ENUM("open","won","lost") DEFAULT "open",
 			owner_id BIGINT(20) UNSIGNED NULL,
 			source VARCHAR(100),

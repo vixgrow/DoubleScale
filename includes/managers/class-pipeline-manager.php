@@ -396,12 +396,9 @@ final class Pipeline_Manager {
 		$won_value = $pipeline->deals->where( 'status', 'won' )->sum( 'value' );
 		$weighted_value = 0;
 
-		// Calculate weighted value
+		// Calculate weighted value using individual deal calculations
 		foreach ( $pipeline->deals->where( 'status', 'open' ) as $deal ) {
-			$stage = $pipeline->stages->where( 'id', $deal->stage_id )->first();
-			if ( $stage ) {
-				$weighted_value += $deal->value * ( $stage->win_probability / 100 );
-			}
+			$weighted_value += $deal->weighted_value;
 		}
 
 		return array(

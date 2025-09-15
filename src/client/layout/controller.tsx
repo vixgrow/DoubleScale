@@ -33,7 +33,6 @@ import Templates from '../pages/templates';
 import Template from '../pages/template';
 import Automations from '../pages/automations';
 import Automation from '../pages/automation';
-import AutomationReports from '../pages/automation-reports';
 import AbandonedCartsList from '../pages/abandond-carts';
 import Setting from '../pages/settings';
 import Dashboard from '../pages/home';
@@ -42,7 +41,7 @@ import ContactAnalytics from '../pages/contacts-analytics';
 import EmailAnalytics from '../pages/emails-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
-import Tools from '../pages/tools';
+import SalesPipeline from '../pages/sales-pipeline';
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -54,6 +53,9 @@ import {
 	SettingsIcon,
 	ToolsIcon,
 } from '@quillcrm/components';
+
+// Import Lucide React icon for pipeline
+import { TrendingUp } from 'lucide-react';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -124,6 +126,13 @@ registerAdminPage('campaign', {
 	hidden: true,
 });
 
+registerAdminPage('sales-pipeline', {
+	path: 'sales-pipeline',
+	component: () => <SalesPipeline />,
+	label: __('Sales Pipeline', 'quillcrm'),
+	icon: <TrendingUp size={20} />,
+});
+
 registerAdminPage('automations', {
 	path: 'automations',
 	component: () => <Automations />,
@@ -135,13 +144,6 @@ registerAdminPage('automation', {
 	path: 'automations/:id/:tab?',
 	component: () => <Automation />,
 	label: __('Automation', 'quillcrm'),
-	hidden: true,
-});
-
-registerAdminPage('automation-reports', {
-	path: 'automations/:id/reports',
-	component: () => <AutomationReports />,
-	label: __('Automation Reports', 'quillcrm'),
 	hidden: true,
 });
 

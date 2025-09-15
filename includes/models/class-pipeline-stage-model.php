@@ -159,14 +159,18 @@ class Pipeline_Stage_Model extends Model {
 	}
 
 	/**
-	 * Get weighted value (value * win probability)
+	 * Get weighted value (sum of individual deal weighted values)
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return float
 	 */
 	public function getWeightedValueAttribute() {
-		return $this->total_value * ( $this->win_probability / 100 );
+		$weighted_total = 0;
+		foreach ( $this->active_deals as $deal ) {
+			$weighted_total += $deal->weighted_value;
+		}
+		return $weighted_total;
 	}
 
 	/**

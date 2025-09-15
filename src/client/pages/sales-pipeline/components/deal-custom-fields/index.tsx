@@ -173,114 +173,116 @@ export const DealCustomFields: React.FC<DealCustomFieldsProps> = ({ deal }) => {
 			<div className="qcrm-deal-custom-fields qcrm-fields">
 				{groups && groups.length > 0 ? (
 					groups.map((group) => (
-						<div
-							key={group.id}
-							style={{
-								border: '1px solid #f0f0f0',
-								backgroundColor: '#F7FAFC',
-								borderRadius: '5px',
-								padding: '10px',
-								marginBottom: '10px',
-								marginTop: '10px',
-							}}
-						>
+						<>
 							{group.custom_fields &&
 								group.custom_fields.length > 0 && (
-									<>
-										<div
-											className="qcrm-field-group-title"
-											style={{
-												marginBottom: '5px',
-											}}
-										>
-											<Typography.Title level={5}>
-												{group.name}
-											</Typography.Title>
-										</div>
-										{group.custom_fields.map(
-											(customField) => {
-												const fieldValue =
-													getCustomFieldValue(
-														customField.id,
-														customField.type
-													);
+									<div
+										key={group.id}
+										style={{
+											border: '1px solid #f0f0f0',
+											backgroundColor: '#F7FAFC',
+											borderRadius: '5px',
+											padding: '10px',
+											marginBottom: '10px',
+											marginTop: '10px',
+										}}
+									>
+										<>
+											<div
+												className="qcrm-field-group-title"
+												style={{
+													marginBottom: '5px',
+												}}
+											>
+												<Typography.Title level={5}>
+													{group.name}
+												</Typography.Title>
+											</div>
+											{group.custom_fields.map(
+												(customField) => {
+													const fieldValue =
+														getCustomFieldValue(
+															customField.id,
+															customField.type
+														);
 
-												// Get formatted value for multiselect
-												const formattedValue =
-													customField.type ===
-													'multiselect'
-														? getMultiselectValue(
-																fieldValue as string
+													// Get formatted value for multiselect
+													const formattedValue =
+														customField.type ===
+														'multiselect'
+															? getMultiselectValue(
+																	fieldValue as string
+																)
+															: fieldValue;
+
+													// Get options for select/multiselect fields
+													const fieldOptions = [
+														'select',
+														'multiselect',
+													].includes(customField.type)
+														? getFieldOptions(
+																customField
 															)
-														: fieldValue;
+														: undefined;
 
-												// Get options for select/multiselect fields
-												const fieldOptions = [
-													'select',
-													'multiselect',
-												].includes(customField.type)
-													? getFieldOptions(
-															customField
-														)
-													: undefined;
-
-												return (
-													<div
-														key={customField.id}
-														className="qcrm-field inline"
-													>
-														<div className="qcrm-field-label">
-															<Typography.Text>
-																{
-																	customField.name
-																}
-															</Typography.Text>
-															{customField.type && (
-																<Typography.Text
-																	type="secondary"
-																	style={{
-																		fontSize:
-																			'11px',
-																		fontStyle:
-																			'italic',
-																	}}
-																>
-																	(
+													return (
+														<div
+															key={customField.id}
+															className="qcrm-field inline"
+														>
+															<div className="qcrm-field-label">
+																<Typography.Text>
 																	{
+																		customField.name
+																	}
+																</Typography.Text>
+																{customField.type && (
+																	<Typography.Text
+																		type="secondary"
+																		style={{
+																			fontSize:
+																				'11px',
+																			fontStyle:
+																				'italic',
+																		}}
+																	>
+																		(
+																		{
+																			customField.type
+																		}
+																		)
+																	</Typography.Text>
+																)}
+															</div>
+															<div className="qcrm-field-input">
+																<Field
+																	type={
 																		customField.type
 																	}
-																	)
-																</Typography.Text>
-															)}
-														</div>
-														<div className="qcrm-field-input">
-															<Field
-																type={
-																	customField.type
-																}
-																value={
-																	formattedValue
-																}
-																options={
-																	fieldOptions
-																}
-																onChange={(
-																	value
-																) =>
-																	updateCustomFieldValue(
-																		customField.id,
+																	value={
+																		formattedValue
+																	}
+																	options={
+																		fieldOptions
+																	}
+																	onChange={(
 																		value
-																	)
-																}
-															/>
+																	) =>
+																		updateCustomFieldValue(
+																			customField.id,
+																			value
+																		)
+																	}
+																/>
+															</div>
 														</div>
-													</div>
-												);
-											}
-										)}
-									</>
+													);
+												}
+											)}
+										</>
+									</div>
 								)}
-						</div>
+						</>
 					))
 				) : (
 					<div className="qcrm-field">

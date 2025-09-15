@@ -12,6 +12,7 @@ namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\User_Model;
+use QuillCRM\Models\Pipeline_Stage_Model;
 
 /**
  * Deal_Activity_Model class

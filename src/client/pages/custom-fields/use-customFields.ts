@@ -18,7 +18,7 @@ import {
 	NoticeMessage,
 } from '@quillcrm/client';
 
-export const useCustomFields = () => {
+export const useCustomFields = (scope: string = 'contact') => {
 	const [state, setState] = useState<{
 		loading: boolean;
 		error: string | null;
@@ -47,7 +47,7 @@ export const useCustomFields = () => {
 
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/custom-fields-groups', {
-					scope: 'contact',
+					scope,
 				}),
 			})) as CustomFieldsGroups;
 
@@ -87,7 +87,7 @@ export const useCustomFields = () => {
 				method,
 				data: {
 					...field,
-					scope: 'contact',
+					scope,
 				},
 			})) as CustomField;
 
@@ -201,7 +201,7 @@ export const useCustomFields = () => {
 				method: 'POST',
 				data: {
 					name,
-					scope: 'contact',
+					scope,
 				},
 			})) as CustomFieldsGroup;
 
@@ -355,7 +355,7 @@ export const useCustomFields = () => {
 						...group,
 						custom_fields: [
 							...group.custom_fields,
-							{ ...field, group_id: newGroupId, scope: 'contact' },
+							{ ...field, group_id: newGroupId, scope },
 						],
 					};
 				}
@@ -376,7 +376,7 @@ export const useCustomFields = () => {
 			await apiFetch({
 				path: `/qc/v1/custom-fields/${field.id}`,
 				method: 'PUT',
-				data: { ...field, group_id: newGroupId, scope: 'contact' },
+				data: { ...field, group_id: newGroupId, scope },
 			});
 		} catch (error) {
 			// Revert if API call fails

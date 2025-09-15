@@ -91,7 +91,7 @@ final class Activity_Manager {
 		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'note_added',
-			'data' => wp_json_encode( array( 'note' => wp_kses_post( $note ) ) ),
+			'data' => array( 'note' => wp_kses_post( $note ) ),
 			'user_id' => $user_id ?: get_current_user_id(),
 		) );
 
@@ -135,7 +135,7 @@ final class Activity_Manager {
 		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'email_sent',
-			'data' => wp_json_encode( $sanitized_data ),
+			'data' => $sanitized_data,
 			'user_id' => $user_id ?: get_current_user_id(),
 		) );
 
@@ -176,7 +176,7 @@ final class Activity_Manager {
 		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'call_logged',
-			'data' => wp_json_encode( $sanitized_data ),
+			'data' => $sanitized_data,
 			'user_id' => $user_id ?: get_current_user_id(),
 		) );
 
@@ -218,7 +218,7 @@ final class Activity_Manager {
 		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'meeting_scheduled',
-			'data' => wp_json_encode( $sanitized_data ),
+			'data' => $sanitized_data,
 			'user_id' => $user_id ?: get_current_user_id(),
 		) );
 
@@ -374,52 +374,6 @@ final class Activity_Manager {
 		}
 
 		return $deleted;
-	}
-
-	/**
-	 * Get activity timeline for deal (activities + comments)
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $deal_id Deal ID
-	 * @param int $limit Number of items to return
-	 *
-	 * @return array
-	 */
-	public function get_deal_timeline( $deal_id, $limit = 50 ) {
-		$deal = Deal_Model::find( $deal_id );
-		
-		if ( ! $deal ) {
-			return array();
-		}
-
-		$activities = Deal_Activity_Model::with( array( 'user', 'comments.user' ) )
-			->where( 'deal_id', $deal_id )
-			->orderBy( 'created_at', 'desc' )
-			->limit( $limit )
-			->get();
-
-		$timeline = array();
-
-		foreach ( $activities as $activity ) {
-			$timeline[] = array(
-				'type' => 'activity',
-				'id' => $activity->id,
-				'activity_type' => $activity->activity_type,
-				'message' => $activity->formatted_message,
-				'data' => $activity->data,
-				'user' => $activity->user,
-				'created_at' => $activity->created_at,
-				'comments' => $activity->comments->toArray(),
-			);
-		}
-
-		// Sort timeline by date (most recent first)
-		usort( $timeline, function( $a, $b ) {
-			return $b['created_at'] <=> $a['created_at'];
-		} );
-
-		return array_slice( $timeline, 0, $limit );
 	}
 
 	/**

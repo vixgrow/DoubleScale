@@ -1,0 +1,169 @@
+.deal-status-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+
+	.current-status {
+		display: flex;
+		align-items: center;
+	}
+
+	.status-actions {
+		display: flex;
+		align-items: center;
+	}
+
+	// Button styling
+	.status-action-btn {
+		font-weight: 500;
+		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
+		overflow: hidden;
+
+		&:before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(
+				90deg,
+				transparent,
+				rgba(255, 255, 255, 0.2),
+				transparent
+			);
+			transition: left 0.5s;
+		}
+
+		&:hover:before {
+			left: 100%;
+		}
+
+		&:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+
+		&:active {
+			transform: translateY(0);
+		}
+
+		// Status-specific button styling
+		&.status-won-btn {
+			background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+			border: none;
+
+			&:hover {
+				background: linear-gradient(135deg, #389e0d 0%, #52c41a 100%);
+				box-shadow: 0 4px 12px rgba(82, 196, 26, 0.4);
+			}
+		}
+
+		&.status-lost-btn {
+			&:hover {
+				box-shadow: 0 4px 12px rgba(255, 77, 79, 0.4);
+			}
+		}
+
+		&.status-reopen-btn {
+			background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+			border-color: #1890ff;
+			color: white;
+
+			&:hover {
+				background: linear-gradient(135deg, #0958d9 0%, #1890ff 100%);
+				border-color: #0958d9;
+				color: white;
+				box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+			}
+		}
+	}
+
+	// Layout variations
+	&.deal-status-actions-vertical {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+
+		.status-actions {
+			width: 100%;
+		}
+
+		.status-action-btn {
+			width: 100%;
+			justify-content: flex-start;
+		}
+	}
+
+	&.deal-status-actions-horizontal {
+		flex-direction: row;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+}
+
+// Responsive design
+@media (max-width: 768px) {
+	.deal-status-actions {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 8px;
+
+		.current-status {
+			align-self: center;
+		}
+
+		.status-actions {
+			justify-content: center;
+		}
+
+		.status-action-btn {
+			flex: 1;
+			min-width: 120px;
+		}
+	}
+}
+
+// Small screen optimizations
+@media (max-width: 480px) {
+	.deal-status-actions {
+		.status-action-btn {
+			font-size: 12px;
+			padding: 6px 12px;
+
+			&:hover {
+				transform: none;
+			}
+		}
+	}
+}
+
+// Animation for loading states
+.status-action-btn {
+	&.ant-btn-loading {
+		&:before {
+			display: none;
+		}
+	}
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+	.deal-status-actions {
+		.status-action-btn {
+			border-width: 2px;
+			font-weight: 600;
+
+			&.status-won-btn {
+				background: #52c41a;
+				border-color: #389e0d;
+			}
+
+			&.status-reopen-btn {
+				background: #1890ff;
+				border-color: #0958d9;
+			}
+		}
+	}
+}

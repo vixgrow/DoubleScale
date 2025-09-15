@@ -1,0 +1,184 @@
+.deal-detail-modal {
+	.ant-modal-body {
+		padding: 16px;
+	}
+
+	.loading-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 200px;
+	}
+
+	.deal-overview {
+		.deal-info-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 16px;
+			margin-bottom: 16px;
+
+			.info-item {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+
+				.ant-typography-title {
+					margin-bottom: 0;
+				}
+
+				&:has(.overdue-date) {
+					.overdue-date {
+						display: flex;
+						align-items: center;
+						gap: 8px;
+						color: #ef4444;
+
+						.text-red-600 {
+							color: #dc2626;
+						}
+					}
+				}
+			}
+		}
+
+		.contact-section,
+		.pipeline-section,
+		.owner-section {
+			margin-bottom: 16px;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}
+
+		.contact-header {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 16px;
+
+			.ant-typography-title {
+				margin-bottom: 0;
+			}
+		}
+
+		.pipeline-info,
+		.owner-info {
+			display: flex;
+			align-items: flex-start;
+			gap: 8px;
+			margin-bottom: 12px;
+
+			svg {
+				margin-top: 2px;
+				color: #6b7280;
+			}
+		}
+
+		.deal-actions {
+			display: flex;
+			gap: 8px;
+			margin-top: 24px;
+			padding-top: 16px;
+			border-top: 1px solid #f0f0f0;
+			flex-wrap: wrap;
+
+			.ant-btn {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+		}
+	}
+
+	.no-data {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 100px;
+	}
+
+	// Overdue styling consistency
+	.overdue-date {
+		.ant-badge {
+			.ant-badge-count {
+				font-size: 10px;
+				padding: 0 4px;
+				height: 16px;
+				line-height: 16px;
+				border-radius: 8px;
+			}
+		}
+	}
+
+	// Responsive design
+	@media (max-width: 768px) {
+		.ant-modal {
+			width: 95% !important;
+			max-width: none;
+		}
+
+		.deal-overview {
+			.deal-info-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.deal-actions {
+				flex-direction: column;
+
+				.ant-btn {
+					width: 100%;
+					justify-content: center;
+				}
+			}
+		}
+	}
+
+	// Tab content spacing
+	.ant-tabs-content-holder {
+		.ant-tabs-content {
+			padding-top: 16px;
+		}
+	}
+
+	// Status tag styling
+	.ant-tag {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	// Card styling
+	.ant-card {
+		.ant-card-head {
+			padding: 12px 16px;
+			min-height: auto;
+
+			.ant-card-head-title {
+				padding: 0;
+				font-size: 14px;
+				font-weight: 600;
+			}
+		}
+
+		.ant-card-body {
+			padding: 16px;
+		}
+	}
+
+	// Typography adjustments
+	.ant-typography {
+		&.ant-typography-title {
+			&.h4 {
+				font-size: 18px;
+				font-weight: 600;
+			}
+
+			&.h5 {
+				font-size: 16px;
+				font-weight: 500;
+				margin-bottom: 4px;
+			}
+		}
+	}
+}

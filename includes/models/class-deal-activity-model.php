@@ -174,16 +174,80 @@ class Deal_Activity_Model extends Model {
 				return sprintf( '%s changed deal status to %s', $user_name, $status );
 			
 			case 'note_added':
-				return sprintf( '%s added a note', $user_name );
+				$content = $this->data['content'] ?? '';
+				
+				$message = sprintf( '%s added a note', $user_name );
+				
+				if ( ! empty( $content ) ) {
+					// Show first 50 characters of the note
+					$preview = strlen( $content ) > 50 ? substr( $content, 0, 50 ) . '...' : $content;
+					$message .= sprintf( ': "%s"', $preview );
+				}
+				
+				return $message;
 			
 			case 'email_sent':
-				return sprintf( '%s sent an email', $user_name );
+				$subject = $this->data['subject'] ?? '';
+				$contact_ids = $this->data['contact_ids'] ?? [];
+				
+				// Get contact names
+				$contact_names = [];
+				if ( ! empty( $contact_ids ) && is_array( $contact_ids ) ) {
+					$contacts = Contact_Model::whereIn( 'id', $contact_ids )->get();
+					$contact_names = $contacts->map( function( $contact ) {
+						return trim( $contact->first_name . ' ' . $contact->last_name );
+					} )->filter()->toArray();
+				}
+				
+				$message = sprintf( '%s sent an email', $user_name );
+				
+				if ( ! empty( $subject ) ) {
+					$message .= sprintf( ' with subject "%s"', $subject );
+				}
+				
+				if ( ! empty( $contact_names ) ) {
+					if ( count( $contact_names ) === 1 ) {
+						$message .= sprintf( ' to %s', $contact_names[0] );
+					} else {
+						$last_contact = array_pop( $contact_names );
+						$message .= sprintf( ' to %s and %s', implode( ', ', $contact_names ), $last_contact );
+					}
+				}
+				
+				return $message;
 			
 			case 'call_logged':
-				return sprintf( '%s logged a call', $user_name );
+				$outcome = $this->data['outcome'] ?? '';
+				$duration = $this->data['duration'] ?? null;
+				
+				$message = sprintf( '%s logged a call', $user_name );
+				
+				if ( ! empty( $outcome ) ) {
+					$message .= sprintf( ' with outcome: %s', $outcome );
+				}
+				
+				if ( $duration ) {
+					$message .= sprintf( ' (Duration: %d minutes)', $duration );
+				}
+				
+				return $message;
 			
 			case 'meeting_scheduled':
-				return sprintf( '%s scheduled a meeting', $user_name );
+				$title = $this->data['title'] ?? '';
+				$scheduled_at = $this->data['scheduled_at'] ?? '';
+				
+				$message = sprintf( '%s scheduled a meeting', $user_name );
+				
+				if ( ! empty( $title ) ) {
+					$message .= sprintf( ' "%s"', $title );
+				}
+				
+				if ( ! empty( $scheduled_at ) ) {
+					$formatted_date = date( 'M j, Y \a\t g:i A', strtotime( $scheduled_at ) );
+					$message .= sprintf( ' for %s', $formatted_date );
+				}
+				
+				return $message;
 			
 			default:
 				return sprintf( '%s performed an action', $user_name );

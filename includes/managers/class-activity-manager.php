@@ -120,16 +120,13 @@ final class Activity_Manager {
 
 		$sanitized_data = array(
 			'subject' => sanitize_text_field( $email_data['subject'] ?? '' ),
-			'recipient' => sanitize_email( $email_data['recipient'] ?? '' ),
 			'sent_at' => $email_data['sent_at'] ?? current_time( 'mysql' ),
 		);
 
-		if ( isset( $email_data['template_id'] ) ) {
-			$sanitized_data['template_id'] = intval( $email_data['template_id'] );
-		}
-
-		if ( isset( $email_data['campaign_id'] ) ) {
-			$sanitized_data['campaign_id'] = intval( $email_data['campaign_id'] );
+		// Handle multiple contact references
+		if ( isset( $email_data['contact_ids'] ) && is_array( $email_data['contact_ids'] ) ) {
+			$contact_ids = array_map( 'intval', $email_data['contact_ids'] );
+			$sanitized_data['contact_ids'] = $contact_ids;
 		}
 
 		$activity = Deal_Activity_Model::create( array(

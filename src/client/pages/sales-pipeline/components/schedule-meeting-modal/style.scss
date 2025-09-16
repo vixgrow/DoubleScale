@@ -1,0 +1,68 @@
+.schedule-meeting-modal {
+	.schedule-meeting-modal-title {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+
+		svg {
+			color: #722ed1;
+		}
+	}
+
+	.deal-context {
+		background: #f5f5f5;
+		padding: 12px;
+		border-radius: 6px;
+		margin-bottom: 16px;
+
+		.deal-label {
+			font-weight: 500;
+			color: #666;
+			margin-right: 8px;
+		}
+
+		.deal-title {
+			font-weight: 600;
+			color: #262626;
+		}
+	}
+
+	.form-row {
+		display: flex;
+		gap: 16px;
+
+		.form-item-half {
+			flex: 1;
+		}
+	}
+
+	.ant-form-item-label > label {
+		font-weight: 500;
+	}
+
+	.ant-form-item-extra {
+		color: #8c8c8c;
+		font-size: 12px;
+	}
+
+	.ant-input,
+	.ant-select,
+	.ant-picker {
+		&:focus,
+		&:focus-within,
+		&.ant-select-focused,
+		&.ant-picker-focused {
+			border-color: #722ed1;
+			box-shadow: 0 0 0 2px rgba(114, 46, 209, 0.2);
+		}
+	}
+
+	.ant-select-selector {
+		&:focus,
+		&:focus-within {
+			border-color: #722ed1 !important;
+			box-shadow: 0 0 0 2px rgba(114, 46, 209, 0.2) !important;
+		}
+	}
+}
+

@@ -208,8 +208,9 @@ final class Activity_Manager {
 			'description' => wp_kses_post( $meeting_data['description'] ?? '' ),
 		);
 
-		if ( isset( $meeting_data['attendees'] ) && is_array( $meeting_data['attendees'] ) ) {
-			$sanitized_data['attendees'] = array_map( 'sanitize_email', $meeting_data['attendees'] );
+		if ( isset( $meeting_data['attendee_contact_ids'] ) && is_array( $meeting_data['attendee_contact_ids'] ) ) {
+			$contact_ids = array_map( 'intval', $meeting_data['attendee_contact_ids'] );
+			$sanitized_data['attendee_contact_ids'] = $contact_ids;
 		}
 
 		$activity = Deal_Activity_Model::create( array(

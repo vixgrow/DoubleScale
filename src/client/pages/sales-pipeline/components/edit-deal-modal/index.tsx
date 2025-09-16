@@ -3,13 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
  */
-import { Modal, Form, Input, Select, InputNumber, DatePicker } from 'antd';
+import { Modal, Form, Input, Select, InputNumber, DatePicker, message } from 'antd';
 import {
 	UserOutlined,
 	DollarOutlined,
@@ -81,8 +80,6 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	);
 
 	const { updateDeal } = useDealOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
 
 	// Get stages for selected pipeline
 	const availableStages = useMemo(() => {
@@ -188,17 +185,12 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				setContacts(contactsData);
 			} catch (error) {
 				console.error('Failed to fetch contacts:', error);
-				if (createNotice) {
-					createNotice({
-						type: 'error',
-						message: __('Failed to load contacts', 'quillcrm'),
-					});
-				}
+				message.error(__('Failed to load contacts', 'quillcrm'));
 			} finally {
 				setContactSearchLoading(false);
 			}
 		}, 300),
-		[fetchInitialContacts, createNotice]
+		[fetchInitialContacts]
 	);
 
 	// Fetch initial owners using our custom users endpoint
@@ -234,28 +226,18 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 
 			await updateDeal(deal.id, updateData);
 
-			if (createNotice) {
-				createNotice({
-					type: 'success',
-					message: __(
-						`Deal "${values.title}" updated successfully!`,
-						'quillcrm'
-					),
-				});
-			}
+			message.success(
+				__(`Deal "${values.title}" updated successfully!`, 'quillcrm')
+			);
 
 			onSuccess();
 			onClose();
 		} catch (error) {
-			if (createNotice) {
-				createNotice({
-					type: 'error',
-					message:
-						error instanceof Error
-							? error.message
-							: __('Failed to update deal', 'quillcrm'),
-				});
-			}
+			message.error(
+				error instanceof Error
+					? error.message
+					: __('Failed to update deal', 'quillcrm')
+			);
 		} finally {
 			setLoading(false);
 		}

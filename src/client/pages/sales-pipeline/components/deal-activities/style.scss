@@ -1,4 +1,32 @@
 .deal-activities {
+	.activity-actions {
+		margin-bottom: 16px;
+		padding: 12px;
+		background: #fafafa;
+		border-radius: 6px;
+		border: 1px solid #f0f0f0;
+
+		.ant-space {
+			width: 100%;
+			justify-content: flex-start;
+		}
+
+		.ant-btn {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+
+			&[type="primary"] {
+				background: #1890ff;
+				border-color: #1890ff;
+
+				&:hover {
+					background: #40a9ff;
+					border-color: #40a9ff;
+				}
+			}
+		}
+	}
 	.activities-filters {
 		padding: 16px 0;
 		border-bottom: 1px solid #f0f0f0;
@@ -56,6 +84,125 @@
 
 						.value-change {
 							font-size: 12px;
+						}
+
+						.call-notes {
+							font-size: 13px;
+							line-height: 1.4;
+						}
+
+						.note-content {
+							font-size: 13px;
+							line-height: 1.4;
+
+							.note-content-header {
+								display: flex;
+								align-items: center;
+								gap: 8px;
+								margin-bottom: 8px;
+								color: #52c41a;
+
+								svg {
+									color: #52c41a;
+								}
+							}
+
+							.note-text {
+								background: #f6ffed;
+								border: 1px solid #b7eb8f;
+								border-radius: 6px;
+								padding: 12px;
+								color: #333;
+								white-space: pre-wrap;
+								line-height: 1.5;
+							}
+						}
+
+						.meeting-details {
+							font-size: 13px;
+							line-height: 1.4;
+
+							.meeting-details-header {
+								display: flex;
+								align-items: center;
+								gap: 8px;
+								margin-bottom: 12px;
+								color: #1890ff;
+
+								svg {
+									color: #1890ff;
+								}
+							}
+
+							.meeting-details-grid {
+								display: grid;
+								grid-template-columns: 1fr 1fr;
+								gap: 8px 16px;
+								margin-bottom: 8px;
+
+								@media (max-width: 768px) {
+									grid-template-columns: 1fr;
+									gap: 8px;
+								}
+							}
+
+							.meeting-detail-item {
+								display: flex;
+								flex-direction: column;
+								gap: 2px;
+
+								.detail-label {
+									font-weight: 500;
+									color: #666;
+									font-size: 12px;
+									text-transform: uppercase;
+									letter-spacing: 0.5px;
+								}
+
+								.detail-value {
+									font-size: 13px;
+									color: #333;
+
+									.attendees-list {
+										display: flex;
+										flex-wrap: wrap;
+										gap: 4px;
+
+										.attendee-tag {
+											background: #e6f7ff;
+											color: #0050b3;
+											padding: 2px 8px;
+											border-radius: 12px;
+											font-size: 11px;
+											font-weight: 500;
+											border: 1px solid #91d5ff;
+										}
+									}
+								}
+							}
+
+							.meeting-description {
+								margin-top: 12px;
+								padding-top: 12px;
+								border-top: 1px solid #f0f0f0;
+
+								.detail-label {
+									font-weight: 500;
+									color: #666;
+									font-size: 12px;
+									text-transform: uppercase;
+									letter-spacing: 0.5px;
+									margin-bottom: 6px;
+									display: block;
+								}
+
+								.description-text {
+									font-size: 13px;
+									line-height: 1.5;
+									color: #333;
+									white-space: pre-wrap;
+								}
+							}
 						}
 					}
 

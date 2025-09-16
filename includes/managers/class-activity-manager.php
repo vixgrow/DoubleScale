@@ -14,6 +14,7 @@ use Exception;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Models\Deal_Activity_Model;
 use QuillCRM\Models\Activity_Comment_Model;
+use QuillCRM\Models\Contact_Model;
 
 /**
  * Activity_Manager class
@@ -91,7 +92,7 @@ final class Activity_Manager {
 		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'note_added',
-			'data' => array( 'note' => wp_kses_post( $note ) ),
+			'data' => array( 'content' => wp_kses_post( $note ) ),
 			'user_id' => $user_id ?: get_current_user_id(),
 		) );
 
@@ -120,16 +121,22 @@ final class Activity_Manager {
 
 		$sanitized_data = array(
 			'subject' => sanitize_text_field( $email_data['subject'] ?? '' ),
-			'recipient' => sanitize_email( $email_data['recipient'] ?? '' ),
 			'sent_at' => $email_data['sent_at'] ?? current_time( 'mysql' ),
 		);
 
-		if ( isset( $email_data['template_id'] ) ) {
-			$sanitized_data['template_id'] = intval( $email_data['template_id'] );
-		}
-
-		if ( isset( $email_data['campaign_id'] ) ) {
-			$sanitized_data['campaign_id'] = intval( $email_data['campaign_id'] );
+		// Handle multiple contact references
+		if ( isset( $email_data['contact_ids'] ) && is_array( $email_data['contact_ids'] ) ) {
+			$contact_ids = array_map( 'intval', $email_data['contact_ids'] );
+			$sanitized_data['contact_ids'] = $contact_ids;
+			
+			// Also store contact emails for display
+			if ( ! empty( $contact_ids ) ) {
+				$contacts = Contact_Model::whereIn( 'id', $contact_ids )->get();
+				$contact_emails = $contacts->map( function( $contact ) {
+					return $contact->email;
+				} )->filter()->toArray();
+				$sanitized_data['contact_emails'] = $contact_emails;
+			}
 		}
 
 		$activity = Deal_Activity_Model::create( array(
@@ -211,8 +218,18 @@ final class Activity_Manager {
 			'description' => wp_kses_post( $meeting_data['description'] ?? '' ),
 		);
 
-		if ( isset( $meeting_data['attendees'] ) && is_array( $meeting_data['attendees'] ) ) {
-			$sanitized_data['attendees'] = array_map( 'sanitize_email', $meeting_data['attendees'] );
+		if ( isset( $meeting_data['attendee_contact_ids'] ) && is_array( $meeting_data['attendee_contact_ids'] ) ) {
+			$contact_ids = array_map( 'intval', $meeting_data['attendee_contact_ids'] );
+			$sanitized_data['attendee_contact_ids'] = $contact_ids;
+			
+			// Also store contact names for display
+			if ( ! empty( $contact_ids ) ) {
+				$contacts = Contact_Model::whereIn( 'id', $contact_ids )->get();
+				$contact_names = $contacts->map( function( $contact ) {
+					return trim( $contact->first_name . ' ' . $contact->last_name );
+				} )->filter()->toArray();
+				$sanitized_data['attendee_names'] = $contact_names;
+			}
 		}
 
 		$activity = Deal_Activity_Model::create( array(

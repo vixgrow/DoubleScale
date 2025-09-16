@@ -130,7 +130,7 @@ registerAdminPage('campaign', {
 registerAdminPage('sales-pipeline', {
 	path: 'sales-pipeline',
 	component: () => <SalesPipeline />,
-	label: __('Sales Pipeline', 'quillcrm'),
+	label: __('Pipelines', 'quillcrm'),
 	icon: <TrendingUp size={20} />,
 });
 

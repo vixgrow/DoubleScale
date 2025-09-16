@@ -177,13 +177,64 @@ class Deal_Activity_Model extends Model {
 				return sprintf( '%s added a note', $user_name );
 			
 			case 'email_sent':
-				return sprintf( '%s sent an email', $user_name );
+				$subject = $this->data['subject'] ?? '';
+				$contact_emails = $this->data['contact_emails'] ?? [];
+				
+				$message = sprintf( '%s sent an email', $user_name );
+				
+				if ( ! empty( $subject ) ) {
+					$message .= sprintf( ' with subject "%s"', $subject );
+				}
+				
+				if ( ! empty( $contact_emails ) ) {
+					if ( count( $contact_emails ) === 1 ) {
+						$message .= sprintf( ' to %s', $contact_emails[0] );
+					} else {
+						$last_email = array_pop( $contact_emails );
+						$message .= sprintf( ' to %s and %s', implode( ', ', $contact_emails ), $last_email );
+					}
+				}
+				
+				return $message;
 			
 			case 'call_logged':
-				return sprintf( '%s logged a call', $user_name );
+				$outcome = $this->data['outcome'] ?? '';
+				$duration = $this->data['duration'] ?? null;
+				$phone_number = $this->data['phone_number'] ?? '';
+				$notes = $this->data['notes'] ?? '';
+				
+				$message = sprintf( '%s logged a call', $user_name );
+				
+				if ( ! empty( $phone_number ) ) {
+					$message .= sprintf( ' to %s', $phone_number );
+				}
+				
+				if ( ! empty( $outcome ) ) {
+					$message .= sprintf( ' with outcome: %s', $outcome );
+				}
+				
+				if ( $duration ) {
+					$message .= sprintf( ' (Duration: %d minutes)', $duration );
+				}
+				
+				return $message;
 			
 			case 'meeting_scheduled':
-				return sprintf( '%s scheduled a meeting', $user_name );
+				$title = $this->data['title'] ?? '';
+				$scheduled_at = $this->data['scheduled_at'] ?? '';
+				
+				$message = sprintf( '%s scheduled a meeting', $user_name );
+				
+				if ( ! empty( $title ) ) {
+					$message .= sprintf( ' "%s"', $title );
+				}
+				
+				if ( ! empty( $scheduled_at ) ) {
+					$formatted_date = date( 'M j, Y \a\t g:i A', strtotime( $scheduled_at ) );
+					$message .= sprintf( ' for %s', $formatted_date );
+				}
+				
+				return $message;
 			
 			default:
 				return sprintf( '%s performed an action', $user_name );
@@ -205,7 +256,7 @@ class Deal_Activity_Model extends Model {
 		return self::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'note_added',
-			'data' => array( 'note' => $note ),
+			'data' => array( 'content' => $note ),
 			'user_id' => $user_id ?: get_current_user_id(),
 		) );
 	}

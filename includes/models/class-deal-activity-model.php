@@ -178,23 +178,20 @@ class Deal_Activity_Model extends Model {
 			
 			case 'email_sent':
 				$subject = $this->data['subject'] ?? '';
-				$contact_emails = $this->data['contact_emails'] ?? [];
-				
+				$contact_email = $this->data['contact_email'] ?? '';
+				$contact_name = $this->data['contact_name'] ?? '';
+
 				$message = sprintf( '%s sent an email', $user_name );
-				
+
 				if ( ! empty( $subject ) ) {
 					$message .= sprintf( ' with subject "%s"', $subject );
 				}
-				
-				if ( ! empty( $contact_emails ) ) {
-					if ( count( $contact_emails ) === 1 ) {
-						$message .= sprintf( ' to %s', $contact_emails[0] );
-					} else {
-						$last_email = array_pop( $contact_emails );
-						$message .= sprintf( ' to %s and %s', implode( ', ', $contact_emails ), $last_email );
-					}
+
+				if ( ! empty( $contact_email ) ) {
+					$recipient = ! empty( $contact_name ) ? $contact_name : $contact_email;
+					$message .= sprintf( ' to %s', $recipient );
 				}
-				
+
 				return $message;
 			
 			case 'call_logged':
@@ -222,18 +219,23 @@ class Deal_Activity_Model extends Model {
 			case 'meeting_scheduled':
 				$title = $this->data['title'] ?? '';
 				$scheduled_at = $this->data['scheduled_at'] ?? '';
-				
+				$attendee_name = $this->data['primary_attendee_name'] ?? '';
+
 				$message = sprintf( '%s scheduled a meeting', $user_name );
-				
+
 				if ( ! empty( $title ) ) {
 					$message .= sprintf( ' "%s"', $title );
 				}
-				
+
+				if ( ! empty( $attendee_name ) ) {
+					$message .= sprintf( ' with %s', $attendee_name );
+				}
+
 				if ( ! empty( $scheduled_at ) ) {
 					$formatted_date = date( 'M j, Y \a\t g:i A', strtotime( $scheduled_at ) );
 					$message .= sprintf( ' for %s', $formatted_date );
 				}
-				
+
 				return $message;
 			
 			default:

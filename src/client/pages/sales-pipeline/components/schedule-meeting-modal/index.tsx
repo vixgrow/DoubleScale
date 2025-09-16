@@ -15,8 +15,6 @@ import dayjs from 'dayjs';
  * Internal dependencies
  */
 import { useActivityOperations } from '../../hooks/use-activity-operations';
-import { useContacts } from '../../hooks/use-contacts';
-import { Contact } from '../../../../types';
 import './style.scss';
 
 const { TextArea } = Input;
@@ -36,7 +34,6 @@ interface MeetingFormData {
 	duration: number;
 	location: string;
 	description: string;
-	attendee_contact_ids?: number[];
 }
 
 export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
@@ -48,13 +45,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 }) => {
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
-	const [selectedContacts, setSelectedContacts] = useState<Contact[]>([]);
 	const { scheduleMeeting } = useActivityOperations();
-	const {
-		contacts,
-		loading: contactsLoading,
-		searchContacts,
-	} = useContacts();
 
 	const handleSubmit = async (values: any) => {
 		setLoading(true);
@@ -67,7 +58,6 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 				duration: values.duration || 60,
 				location: values.location || '',
 				description: values.description || '',
-				attendee_contact_ids: values.attendee_contact_ids || [],
 			};
 
 			await scheduleMeeting(dealId, meetingData);
@@ -75,7 +65,6 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 			message.success(__('Meeting scheduled successfully!', 'quillcrm'));
 
 			form.resetFields();
-			setSelectedContacts([]);
 			onSuccess();
 			onClose();
 		} catch (error) {
@@ -91,15 +80,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 
 	const handleCancel = () => {
 		form.resetFields();
-		setSelectedContacts([]);
 		onClose();
-	};
-
-	const handleContactsChange = (contactIds: number[]) => {
-		const selectedContactsList = contactIds
-			.map((id) => contacts.find((c) => c.id === id))
-			.filter(Boolean) as Contact[];
-		setSelectedContacts(selectedContactsList);
 	};
 
 	return (
@@ -222,48 +203,6 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 							'quillcrm'
 						)}
 					/>
-				</Form.Item>
-
-				<Form.Item
-					name="attendee_contact_ids"
-					label={__('Attendees (Optional)', 'quillcrm')}
-					extra={__(
-						'Select contacts who will attend this meeting',
-						'quillcrm'
-					)}
-				>
-					<Select
-						mode="multiple"
-						showSearch
-						placeholder={__(
-							'Search and select attendees...',
-							'quillcrm'
-						)}
-						loading={contactsLoading}
-						onSearch={searchContacts}
-						onChange={handleContactsChange}
-						filterOption={false}
-						notFoundContent={
-							contactsLoading
-								? __('Loading...', 'quillcrm')
-								: __('No contacts found', 'quillcrm')
-						}
-						maxTagCount="responsive"
-					>
-						{contacts.map((contact) => (
-							<Select.Option key={contact.id} value={contact.id}>
-								<div>
-									<strong>
-										{contact.first_name} {contact.last_name}
-									</strong>
-									<br />
-									<small style={{ color: '#666' }}>
-										{contact.email}
-									</small>
-								</div>
-							</Select.Option>
-						))}
-					</Select>
 				</Form.Item>
 
 				<Form.Item

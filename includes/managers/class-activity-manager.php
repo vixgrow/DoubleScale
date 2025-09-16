@@ -107,14 +107,14 @@ final class Activity_Manager {
 	 * @since 1.0.0
 	 *
 	 * @param int $deal_id Deal ID
-	 * @param array $email_data Email data (subject, recipient, etc.)
+	 * @param array $email_data Email data (subject, sent_at, etc.)
 	 * @param int|null $user_id User ID
 	 *
 	 * @return Deal_Activity|null
 	 */
 	public function log_email( $deal_id, $email_data, $user_id = null ) {
-		$deal = Deal_Model::find( $deal_id );
-		
+		$deal = Deal_Model::with( 'contact' )->find( $deal_id );
+
 		if ( ! $deal ) {
 			return null;
 		}
@@ -124,19 +124,11 @@ final class Activity_Manager {
 			'sent_at' => $email_data['sent_at'] ?? current_time( 'mysql' ),
 		);
 
-		// Handle multiple contact references
-		if ( isset( $email_data['contact_ids'] ) && is_array( $email_data['contact_ids'] ) ) {
-			$contact_ids = array_map( 'intval', $email_data['contact_ids'] );
-			$sanitized_data['contact_ids'] = $contact_ids;
-			
-			// Also store contact emails for display
-			if ( ! empty( $contact_ids ) ) {
-				$contacts = Contact_Model::whereIn( 'id', $contact_ids )->get();
-				$contact_emails = $contacts->map( function( $contact ) {
-					return $contact->email;
-				} )->filter()->toArray();
-				$sanitized_data['contact_emails'] = $contact_emails;
-			}
+		// Automatically use the deal's primary contact
+		if ( $deal->contact ) {
+			$sanitized_data['contact_id'] = $deal->contact->id;
+			$sanitized_data['contact_email'] = $deal->contact->email;
+			$sanitized_data['contact_name'] = trim( $deal->contact->first_name . ' ' . $deal->contact->last_name );
 		}
 
 		$activity = Deal_Activity_Model::create( array(
@@ -198,14 +190,14 @@ final class Activity_Manager {
 	 * @since 1.0.0
 	 *
 	 * @param int $deal_id Deal ID
-	 * @param array $meeting_data Meeting data
+	 * @param array $meeting_data Meeting data (title, scheduled_at, duration, location, description)
 	 * @param int|null $user_id User ID
 	 *
 	 * @return Deal_Activity|null
 	 */
 	public function schedule_meeting( $deal_id, $meeting_data, $user_id = null ) {
-		$deal = Deal_Model::find( $deal_id );
-		
+		$deal = Deal_Model::with( 'contact' )->find( $deal_id );
+
 		if ( ! $deal ) {
 			return null;
 		}
@@ -218,18 +210,11 @@ final class Activity_Manager {
 			'description' => wp_kses_post( $meeting_data['description'] ?? '' ),
 		);
 
-		if ( isset( $meeting_data['attendee_contact_ids'] ) && is_array( $meeting_data['attendee_contact_ids'] ) ) {
-			$contact_ids = array_map( 'intval', $meeting_data['attendee_contact_ids'] );
-			$sanitized_data['attendee_contact_ids'] = $contact_ids;
-			
-			// Also store contact names for display
-			if ( ! empty( $contact_ids ) ) {
-				$contacts = Contact_Model::whereIn( 'id', $contact_ids )->get();
-				$contact_names = $contacts->map( function( $contact ) {
-					return trim( $contact->first_name . ' ' . $contact->last_name );
-				} )->filter()->toArray();
-				$sanitized_data['attendee_names'] = $contact_names;
-			}
+		// Automatically use the deal's primary contact as the attendee
+		if ( $deal->contact ) {
+			$sanitized_data['primary_attendee_id'] = $deal->contact->id;
+			$sanitized_data['primary_attendee_name'] = trim( $deal->contact->first_name . ' ' . $deal->contact->last_name );
+			$sanitized_data['primary_attendee_email'] = $deal->contact->email;
 		}
 
 		$activity = Deal_Activity_Model::create( array(

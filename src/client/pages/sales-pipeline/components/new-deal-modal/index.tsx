@@ -67,6 +67,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		loading: ownersLoading,
 		loadUsers: loadOwners,
 		searchUsers: searchOwners,
+		ensureUserIncluded,
 	} = useUsers();
 	const { createDeal } = useDealOperations();
 
@@ -74,6 +75,11 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		if (!pipeline) {
 			message.error(__('Please select a pipeline first.', 'quillcrm'));
 			return;
+		}
+
+		// Ensure owner_id is set as fallback
+		if (!values.owner_id && defaultOwnerId) {
+			values.owner_id = defaultOwnerId;
 		}
 
 		setLoading(true);
@@ -120,18 +126,56 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		return sortedStages[0].id;
 	}, [pipeline?.stages]);
 
-	// Update form values when pipeline changes
+	// Get current user as default owner
+	const [currentUserId, setCurrentUserId] = useState<number | undefined>(undefined);
+
+	// Get current user ID from WordPress
+	useEffect(() => {
+		const fetchCurrentUser = async () => {
+			try {
+				// Try global object first
+				const globalUserId = (window as any)?.qcData?.currentUser?.id;
+				if (globalUserId) {
+					setCurrentUserId(Number(globalUserId));
+					return;
+				}
+
+				// Fallback to WordPress API
+				const response = await apiFetch({
+					path: '/wp/v2/users/me',
+				});
+				if (response && (response as any).id) {
+					setCurrentUserId(Number((response as any).id));
+				}
+			} catch (error) {
+				console.error('Failed to get current user:', error);
+				// Final fallback - will be handled by backend
+				setCurrentUserId(undefined);
+			}
+		};
+
+		fetchCurrentUser();
+	}, []);
+
+	const defaultOwnerId = useMemo(() => {
+		return currentUserId;
+	}, [currentUserId]);
+
+	// Update form values when pipeline changes or current user is loaded
 	useEffect(() => {
 		if (defaultStageId && visible) {
-			// Get current user ID from WordPress global
-			const currentUserId = (window as any)?.qcData?.currentUser?.id;
-
-			form.setFieldsValue({
+			const values: any = {
 				stage_id: defaultStageId,
-				owner_id: currentUserId ? Number(currentUserId) : undefined,
-			});
+			};
+
+			// Only set owner_id if we have a valid current user
+			if (defaultOwnerId) {
+				values.owner_id = defaultOwnerId;
+			}
+
+			form.setFieldsValue(values);
 		}
-	}, [defaultStageId, visible]);
+	}, [defaultStageId, defaultOwnerId, visible, form]);
 
 	// Load initial contacts
 	const loadContacts = useCallback(async (searchTerm = '') => {
@@ -176,6 +220,39 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		}
 	}, [visible, loadContacts, loadOwners]);
 
+	// Ensure current user is in the owners list when loaded
+	useEffect(() => {
+		if (currentUserId && owners.length > 0) {
+			const currentUserExists = owners.find(
+				(owner) => Number(owner.id) === Number(currentUserId)
+			);
+
+			if (!currentUserExists) {
+				// If current user not in list, we need to fetch it
+				const ensureCurrentUser = async () => {
+					try {
+						const response = await apiFetch({
+							path: `/wp/v2/users/${currentUserId}`,
+						});
+						if (response && (response as any).id) {
+							const currentUser = {
+								id: Number((response as any).id),
+								display_name: (response as any).name || `User ${currentUserId}`,
+								email: (response as any).email || '',
+							};
+							// Use the hook's method to ensure user is included
+							ensureUserIncluded(currentUser);
+						}
+					} catch (error) {
+						console.error('Failed to fetch current user details:', error);
+					}
+				};
+
+				ensureCurrentUser();
+			}
+		}
+	}, [currentUserId, owners, ensureUserIncluded]);
+
 	return (
 		<Modal
 			title={
@@ -201,6 +278,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 				key={visible ? 'deal-form' : 'hidden'}
 				initialValues={{
 					stage_id: defaultStageId,
+					owner_id: defaultOwnerId,
 				}}
 			>
 				<Form.Item
@@ -253,9 +331,14 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 								: __('No contacts found', 'quillcrm')
 						}
 						onSearch={debouncedLoadContacts}
+						optionLabelProp="label"
 					>
 						{contacts.map((contact) => (
-							<Option key={contact.id} value={contact.id}>
+							<Option
+								key={contact.id}
+								value={contact.id}
+								label={`${contact.first_name} ${contact.last_name}`.trim()}
+							>
 								<div className="contact-option">
 									<span className="contact-name">
 										{contact.first_name} {contact.last_name}

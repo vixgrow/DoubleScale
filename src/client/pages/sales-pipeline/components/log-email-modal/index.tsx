@@ -7,7 +7,7 @@ import { useState } from '@wordpress/element';
 /**
  * External dependencies
  */
-import { Modal, Form, Input, Button, DatePicker, Select, message } from 'antd';
+import { Modal, Form, Input, Button, DatePicker, message } from 'antd';
 import { Mail } from 'lucide-react';
 import dayjs from 'dayjs';
 
@@ -15,8 +15,6 @@ import dayjs from 'dayjs';
  * Internal dependencies
  */
 import { useActivityOperations } from '../../hooks/use-activity-operations';
-import { useContacts } from '../../hooks/use-contacts';
-import { Contact } from '../../../../types';
 import './style.scss';
 
 interface LogEmailModalProps {
@@ -29,7 +27,6 @@ interface LogEmailModalProps {
 
 interface EmailFormData {
 	subject: string;
-	contact_ids: number[]; // Multiple contact selection
 	sent_at: string;
 }
 
@@ -42,20 +39,13 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 }) => {
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
-	const [selectedContacts, setSelectedContacts] = useState<Contact[]>([]);
 	const { logEmail } = useActivityOperations();
-	const {
-		contacts,
-		loading: contactsLoading,
-		searchContacts,
-	} = useContacts();
 
 	const handleSubmit = async (values: any) => {
 		setLoading(true);
 		try {
 			const emailData: EmailFormData = {
 				subject: values.subject,
-				contact_ids: values.contact_ids || [],
 				sent_at: values.sent_at
 					? dayjs(values.sent_at).format('YYYY-MM-DD HH:mm:ss')
 					: dayjs().format('YYYY-MM-DD HH:mm:ss'),
@@ -68,7 +58,6 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 			onSuccess();
 			onClose();
 			form.resetFields();
-			setSelectedContacts([]);
 		} catch (error) {
 			message.error(
 				error instanceof Error
@@ -82,15 +71,7 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 
 	const handleCancel = () => {
 		form.resetFields();
-		setSelectedContacts([]);
 		onClose();
-	};
-
-	const handleContactsChange = (contactIds: number[]) => {
-		const selectedContactsList = contactIds
-			.map((id) => contacts.find((c) => c.id === id))
-			.filter(Boolean) as Contact[];
-		setSelectedContacts(selectedContactsList);
 	};
 
 	return (
@@ -155,71 +136,16 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 					/>
 				</Form.Item>
 
-				<div className="form-row">
-					<Form.Item
-						name="contact_ids"
-						label={__('Recipients', 'quillcrm')}
-						rules={[
-							{
-								required: true,
-								message: __(
-									'Please select at least one contact',
-									'quillcrm'
-								),
-							},
-						]}
-						className="form-item-half"
-					>
-						<Select
-							mode="multiple"
-							showSearch
-							placeholder={__(
-								'Search and select contacts...',
-								'quillcrm'
-							)}
-							loading={contactsLoading}
-							onSearch={searchContacts}
-							onChange={handleContactsChange}
-							filterOption={false}
-							notFoundContent={
-								contactsLoading
-									? __('Loading...', 'quillcrm')
-									: __('No contacts found', 'quillcrm')
-							}
-							maxTagCount="responsive"
-						>
-							{contacts.map((contact) => (
-								<Select.Option
-									key={contact.id}
-									value={contact.id}
-								>
-									<div>
-										<strong>
-											{contact.first_name}{' '}
-											{contact.last_name}
-										</strong>
-										<br />
-										<small style={{ color: '#666' }}>
-											{contact.email}
-										</small>
-									</div>
-								</Select.Option>
-							))}
-						</Select>
-					</Form.Item>
-
-					<Form.Item
-						name="sent_at"
-						label={__('Sent Date & Time', 'quillcrm')}
-						className="form-item-half"
-					>
-						<DatePicker
-							showTime
-							format="YYYY-MM-DD HH:mm"
-							style={{ width: '100%' }}
-						/>
-					</Form.Item>
-				</div>
+				<Form.Item
+					name="sent_at"
+					label={__('Sent Date & Time', 'quillcrm')}
+				>
+					<DatePicker
+						showTime
+						format="YYYY-MM-DD HH:mm"
+						style={{ width: '100%' }}
+					/>
+				</Form.Item>
 			</Form>
 		</Modal>
 	);

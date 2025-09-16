@@ -14,6 +14,7 @@ use Exception;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Models\Deal_Activity_Model;
 use QuillCRM\Models\Activity_Comment_Model;
+use QuillCRM\Models\Contact_Model;
 
 /**
  * Activity_Manager class
@@ -211,6 +212,15 @@ final class Activity_Manager {
 		if ( isset( $meeting_data['attendee_contact_ids'] ) && is_array( $meeting_data['attendee_contact_ids'] ) ) {
 			$contact_ids = array_map( 'intval', $meeting_data['attendee_contact_ids'] );
 			$sanitized_data['attendee_contact_ids'] = $contact_ids;
+			
+			// Also store contact names for display
+			if ( ! empty( $contact_ids ) ) {
+				$contacts = Contact_Model::whereIn( 'id', $contact_ids )->get();
+				$contact_names = $contacts->map( function( $contact ) {
+					return trim( $contact->first_name . ' ' . $contact->last_name );
+				} )->filter()->toArray();
+				$sanitized_data['attendee_names'] = $contact_names;
+			}
 		}
 
 		$activity = Deal_Activity_Model::create( array(

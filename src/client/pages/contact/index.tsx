@@ -297,12 +297,26 @@ const Contact: React.FC = () => {
 	};
 
 	const updateContact = async () => {
+		if (!contact) {
+			return;
+		}
+
 		setIsUpdating(true);
 		try {
+			// Prepare the data with properly formatted custom fields
+			const contactData = {
+				...contact,
+				custom_fields:
+					contact.custom_fields?.map((customField) => ({
+						id: customField.id,
+						value: customField.pivot?.value || '', // Send only id and value
+					})) || [],
+			};
+
 			const response = await apiFetch({
 				path: `/qc/v1/contacts/${id}`,
 				method: 'POST',
-				data: contact,
+				data: contactData,
 			});
 
 			setContact(response as ContactType);
@@ -311,6 +325,7 @@ const Contact: React.FC = () => {
 				message: __('Contact updated successfully', 'quillcrm'),
 			});
 		} catch (error: any) {
+			console.error('Update contact error:', error);
 			createNotice({
 				type: 'error',
 				message: error.message,

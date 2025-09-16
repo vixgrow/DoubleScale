@@ -1,0 +1,224 @@
+.qcrm-automation-reports {
+	padding: 24px;
+	background: #f5f5f5;
+	min-height: 100vh;
+
+	&__header {
+		background: white;
+		padding: 24px;
+		border-radius: 8px;
+		margin-bottom: 24px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+	}
+
+	&__title-section {
+		margin-bottom: 20px;
+	}
+
+	&__filters {
+		padding-top: 20px;
+		border-top: 1px solid #f0f0f0;
+	}
+
+	&__stats {
+		margin-bottom: 24px;
+
+		.ant-card {
+			border-radius: 8px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+			.ant-statistic {
+				.ant-statistic-title {
+					color: #666;
+					font-size: 14px;
+					margin-bottom: 8px;
+				}
+
+				.ant-statistic-content {
+					font-size: 24px;
+					font-weight: 600;
+				}
+			}
+		}
+	}
+
+	&__table {
+		border-radius: 8px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+		.ant-card-body {
+			padding: 24px;
+		}
+
+		.ant-table {
+			.ant-table-thead > tr > th {
+				background: #fafafa;
+				border-bottom: 2px solid #f0f0f0;
+				font-weight: 600;
+				color: #333;
+			}
+
+			.ant-table-tbody > tr > td {
+				border-bottom: 1px solid #f5f5f5;
+				padding: 16px;
+			}
+
+			.ant-table-tbody > tr:hover > td {
+				background: #f9f9f9;
+			}
+		}
+
+		.ant-pagination {
+			margin-top: 24px;
+			text-align: right;
+		}
+	}
+
+	// Responsive design
+	@media (max-width: 768px) {
+		padding: 16px;
+
+		&__header {
+			padding: 16px;
+		}
+
+		&__title-section {
+			flex-direction: column;
+			align-items: flex-start !important;
+			gap: 16px;
+		}
+
+		&__filters {
+			flex-direction: column;
+			gap: 12px;
+
+			.ant-picker {
+				width: 100%;
+			}
+		}
+
+		&__stats {
+			.ant-col {
+				margin-bottom: 16px;
+			}
+		}
+
+		&__table {
+			.ant-card-body {
+				padding: 16px;
+			}
+
+			.ant-table {
+				.ant-table-thead > tr > th,
+				.ant-table-tbody > tr > td {
+					padding: 12px 8px;
+					font-size: 12px;
+				}
+			}
+
+			.ant-pagination {
+				text-align: center;
+
+				.ant-pagination-options {
+					display: none;
+				}
+			}
+		}
+	}
+
+	// Status indicators
+	.status-completed {
+		color: #52c41a;
+	}
+
+	.status-failed {
+		color: #ff4d4f;
+	}
+
+	.status-pending {
+		color: #1890ff;
+	}
+
+	// Loading states
+	.ant-spin-nested-loading {
+		min-height: 200px;
+	}
+
+	// Empty states
+	.ant-empty {
+		margin: 60px 0;
+	}
+
+	// Tooltips and help text
+	.help-text {
+		color: #8c8c8c;
+		font-size: 12px;
+		margin-top: 4px;
+	}
+
+	// Progress indicators
+	.progress-indicator {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+
+		.progress-bar {
+			flex: 1;
+			height: 4px;
+			background: #f0f0f0;
+			border-radius: 2px;
+			overflow: hidden;
+
+			.progress-fill {
+				height: 100%;
+				background: #1890ff;
+				transition: width 0.3s ease;
+
+				&.completed {
+					background: #52c41a;
+				}
+
+				&.failed {
+					background: #ff4d4f;
+				}
+			}
+		}
+
+		.progress-text {
+			font-size: 12px;
+			color: #666;
+			white-space: nowrap;
+		}
+	}
+}
+
+// Dark theme adjustments
+.qcrm-automation-reports {
+	&.dark-theme {
+		background: #1f1f1f;
+
+		&__header,
+		&__stats .ant-card,
+		&__table {
+			background: #2d2d2d;
+			border-color: #3d3d3d;
+		}
+
+		.ant-table {
+			.ant-table-thead > tr > th {
+				background: #3d3d3d;
+				border-color: #4d4d4d;
+				color: #fff;
+			}
+
+			.ant-table-tbody > tr > td {
+				border-color: #3d3d3d;
+				color: #fff;
+			}
+
+			.ant-table-tbody > tr:hover > td {
+				background: #3d3d3d;
+			}
+		}
+	}
+}

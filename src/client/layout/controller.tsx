@@ -21,7 +21,7 @@ import Contacts from '../pages/contacts';
 import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
-import CustomFields from '../pages/contacts/custom-fields';
+import CustomFields from '../pages/custom-fields';
 import Campaigns from '../pages/campaigns';
 import Campaign from '../pages/campaign';
 import Forms from '../pages/forms';
@@ -41,7 +41,7 @@ import ContactAnalytics from '../pages/contacts-analytics';
 import EmailAnalytics from '../pages/emails-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
-import Tools from '../pages/tools';
+import SalesPipeline from '../pages/sales-pipeline';
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -52,7 +52,11 @@ import {
 	IntegrationsIcon,
 	SettingsIcon,
 	ToolsIcon,
+	CustomFieldsIcon,
 } from '@quillcrm/components';
+
+// Import Lucide React icon for pipeline
+import { TrendingUp } from 'lucide-react';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -106,7 +110,7 @@ registerAdminPage('custom-fields', {
 	path: 'custom-fields',
 	component: () => <CustomFields />,
 	label: __('Custom Fields', 'quillcrm'),
-	hidden: true,
+	icon: <CustomFieldsIcon />,
 });
 
 registerAdminPage('campaigns', {
@@ -121,6 +125,13 @@ registerAdminPage('campaign', {
 	component: () => <Campaign />,
 	label: __('Campaign', 'quillcrm'),
 	hidden: true,
+});
+
+registerAdminPage('sales-pipeline', {
+	path: 'sales-pipeline',
+	component: () => <SalesPipeline />,
+	label: __('Sales Pipeline', 'quillcrm'),
+	icon: <TrendingUp size={20} />,
 });
 
 registerAdminPage('automations', {

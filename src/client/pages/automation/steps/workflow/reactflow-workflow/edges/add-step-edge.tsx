@@ -70,6 +70,27 @@ const updateStepOrderRecursive = (
 		step.order = newOrder;
 	});
 
+	// Also update any root-level steps that come after this parent condition
+	// to maintain proper flow ordering
+	if (parentId > 0) {
+		const parentStep = steps.find((step) => step.id === parentId);
+		if (
+			parentStep &&
+			'order' in parentStep &&
+			typeof parentStep.order === 'number'
+		) {
+			const rootStepsAfterParent = newSteps.filter(
+				(step) => !step.parent_id && step.order > parentStep.order
+			);
+			rootStepsAfterParent.forEach((step) => {
+				if (!updatedSteps[step.id]) {
+					updatedSteps[step.id] = { order: step.order + 1 };
+					step.order = step.order + 1;
+				}
+			});
+		}
+	}
+
 	return { newSteps, updatedSteps, currentStepOrder };
 };
 

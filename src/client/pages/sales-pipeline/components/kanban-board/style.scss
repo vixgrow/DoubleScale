@@ -1,0 +1,52 @@
+.kanban-board {
+	.pipeline-stats {
+		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+		
+		.stat-item {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+		}
+	}
+
+	.kanban-columns {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+		gap: 24px;
+		min-height: 600px;
+		padding: 16px 0;
+
+		@media (max-width: 768px) {
+			grid-template-columns: 1fr;
+			gap: 16px;
+		}
+	}
+
+	.drag-overlay {
+		transform: rotate(5deg);
+		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		cursor: grabbing;
+
+		.deal-card {
+			border: 2px solid #3b82f6;
+			background: #fefefe;
+		}
+	}
+}
+
+// Animation keyframes for smooth transitions
+@keyframes dealMove {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.02);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+.deal-moving {
+	animation: dealMove 0.3s ease-in-out;
+}

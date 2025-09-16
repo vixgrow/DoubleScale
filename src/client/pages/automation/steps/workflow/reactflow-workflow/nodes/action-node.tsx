@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import apiFetch from '@wordpress/api-fetch';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -22,6 +22,7 @@ import NodeActionsDropdown from '../components/node-actions-dropdown';
 import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
+import { deleteStep } from '../utils/step-utils';
 import { getAction } from '@quillcrm/utils';
 
 interface ActionNodeData {
@@ -31,8 +32,10 @@ interface ActionNodeData {
 	onDeleteStep?: (stepId: string) => void;
 }
 
-const ActionNode: React.FC<NodeProps> = ({ data }) => {
+const ActionNode: React.FC<NodeProps> = (props) => {
+	const { data } = props;
 	const { step, onStepClick } = data as unknown as ActionNodeData;
+
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -53,6 +56,21 @@ const ActionNode: React.FC<NodeProps> = ({ data }) => {
 		</svg>
 	);
 
+	// Check if action is configured - an action is configured if it has an action slug
+	const isConfigured = !!step.action;
+
+	// Get action details for display
+	const actionData = isConfigured ? getAction(step.action) : null;
+	const actionName = actionData?.label || step.action;
+
+	const subtitle = isConfigured ? (
+		<span className="qcrm-reactflow-action__configured">{actionName}</span>
+	) : (
+		<span className="qcrm-reactflow-action__not-configured">
+			{__('Not Configured', 'quillcrm')}
+		</span>
+	);
+
 	const handleEdit = () => {
 		if (onStepClick) {
 			onStepClick({
@@ -62,73 +80,9 @@ const ActionNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	const getNewSteps = () => {
-		const updatedOrdersSteps = {};
-		const newSteps = [...steps];
-
-		if (step.parent_id) {
-			newSteps
-				.filter(
-					(child) =>
-						child.parent_id === step.parent_id &&
-						child.condition === step.condition
-				)
-				.filter((s) => s.id !== step.id)
-				.sort((a, b) => a.order - b.order)
-				.forEach((child, index) => {
-					const newOrder = index + 1;
-					if (newOrder !== child.order) {
-						updatedOrdersSteps[child.id] = { order: newOrder };
-					}
-				});
-		} else {
-			newSteps
-				.sort((a, b) => a.order - b.order)
-				.filter((s) => s.id !== step.id)
-				.forEach((stepItem, index) => {
-					const newOrder = index + 1;
-					if (newOrder !== stepItem.order) {
-						updatedOrdersSteps[stepItem.id] = { order: newOrder };
-					}
-				});
-		}
-
-		return { updatedOrdersSteps, newSteps };
-	};
-
 	const handleDelete = async () => {
-		const { newSteps, updatedOrdersSteps } = getNewSteps();
-
-		try {
-			await apiFetch({
-				path: `/qc/v1/automation-steps/${step.id}`,
-				method: 'DELETE',
-				data: {
-					updated_steps: updatedOrdersSteps,
-				},
-			});
-
-			const updatedSteps = newSteps.filter((s) => s.id !== step.id);
-			setSteps(updatedSteps);
-
-			createNotice({
-				type: 'success',
-				message: __('Step deleted', 'quillcrm'),
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		}
+		await deleteStep(step.id.toString(), steps, setSteps, createNotice);
 	};
-
-	// Check if action is configured - an action is configured if it has an action slug
-	const isConfigured = !!step.action;
-
-	// Get action details for display
-	const actionData = isConfigured ? getAction(step.action) : null;
-	const actionName = actionData?.label || step.action;
 
 	return (
 		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
@@ -153,15 +107,7 @@ const ActionNode: React.FC<NodeProps> = ({ data }) => {
 						{__('Start Workflow (Action)', 'quillcrm')}
 					</div>
 					<div className="qcrm-reactflow-node__subtitle">
-						{isConfigured ? (
-							<span className="qcrm-reactflow-action__configured">
-								{actionName}
-							</span>
-						) : (
-							<span className="qcrm-reactflow-action__not-configured">
-								{__('Not Configured', 'quillcrm')}
-							</span>
-						)}
+						{subtitle}
 					</div>
 				</div>
 

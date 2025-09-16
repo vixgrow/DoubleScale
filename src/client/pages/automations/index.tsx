@@ -39,6 +39,7 @@ import type { TriggersGroup } from '@quillcrm/config';
 import { Field } from '@quillcrm/components';
 import { isEmpty } from 'validator';
 import { convertDate } from '@quillcrm/utils';
+import { ChartLineIcon } from 'lucide-react';
 
 const { Column } = Table;
 
@@ -380,6 +381,27 @@ const AutomationsList: React.FC = () => {
 					dataIndex="updated_at"
 					key="updated_at"
 					render={(date) => convertDate(date)}
+				/>
+				{/* reports */}
+				<Column
+					title={__('Actions', 'quillcrm')}
+					dataIndex="actions"
+					key="actions"
+					render={(_, record: Automation) => (
+						<Button
+							type="link"
+							onClick={() =>
+								navigate(
+									getToLink(
+										`automations/${record.id}/reports`
+									)
+								)
+							}
+						>
+							<ChartLineIcon size={16} />
+							{__('Reports', 'quillcrm')}
+						</Button>
+					)}
 				/>
 			</Table>
 			<Modal

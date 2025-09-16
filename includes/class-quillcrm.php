@@ -30,6 +30,9 @@ use QuillCRM\Abandoned_Cart\Abandoned_Cart;
 use QuillCRM\Managers\Custom_Fields_Manager;
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
+use QuillCRM\Managers\Pipeline_Manager;
+use QuillCRM\Managers\Deal_Manager;
+use QuillCRM\Managers\Activity_Manager;
 use Illuminate\Translation\Translator;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Validation\Factory as ValidatorFactory;
@@ -43,6 +46,11 @@ use QuillCRM\Log_Handlers\Log_Handler_DB;
  * @since 1.0.0
  */
 final class QuillCRM {
+
+
+
+
+
 
 
 
@@ -217,6 +225,9 @@ final class QuillCRM {
 		Custom_Metabox::get_instance();
 		\QuillCRM\OAuth\GoHighLevel_OAuth::init();
 		new \QuillCRM\Admin\OAuth_Settings();
+		Pipeline_Manager::instance();
+		Deal_Manager::instance();
+		Activity_Manager::instance();
 	}
 
 	/**
@@ -293,6 +304,12 @@ final class QuillCRM {
 			require $file;
 		}
 
+		// Load all automations deal triggers files
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
 		foreach ( $actions_files as $file ) {
@@ -320,6 +337,19 @@ final class QuillCRM {
 			require $file;
 		}
 		// }
+
+		// Load all automations deal actions files
+		// First load the base class
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-base-deal-action.php';
+
+		// Then load all other deal action files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			// Skip the base class as we've already loaded it
+			if ( basename( $file ) !== 'class-base-deal-action.php' ) {
+				require $file;
+			}
+		}
 
 		// Load all contact merge tags files
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/contact/class-*.php' );

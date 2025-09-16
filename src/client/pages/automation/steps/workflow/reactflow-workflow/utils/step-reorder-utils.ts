@@ -28,7 +28,7 @@ export const calculateStepReorder = (
                 step.condition === stepToMove.condition
             );
         } else {
-            return !step.parent_id;
+            return !step.parent_id || step.parent_id === 0;
         }
     }).sort((a, b) => a.order - b.order);
 
@@ -83,7 +83,7 @@ export const canMoveStep = (
         if (step.parent_id) {
             return s.parent_id === step.parent_id && s.condition === step.condition;
         } else {
-            return !s.parent_id;
+            return !s.parent_id || s.parent_id === 0;
         }
     }).sort((a, b) => a.order - b.order);
 

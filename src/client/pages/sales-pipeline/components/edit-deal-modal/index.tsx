@@ -3,13 +3,20 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
  */
-import { Modal, Form, Input, Select, InputNumber, DatePicker } from 'antd';
+import {
+	Modal,
+	Form,
+	Input,
+	Select,
+	InputNumber,
+	DatePicker,
+	message,
+} from 'antd';
 import {
 	UserOutlined,
 	DollarOutlined,
@@ -81,8 +88,6 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	);
 
 	const { updateDeal } = useDealOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
 
 	// Get stages for selected pipeline
 	const availableStages = useMemo(() => {
@@ -102,14 +107,16 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	useEffect(() => {
 		if (deal && visible && pipelines.length > 0) {
 			// Set selectedPipelineId first
-			setSelectedPipelineId(deal.pipeline_id);
+			setSelectedPipelineId(deal.pipeline?.id || 0);
 
 			// Set form values with proper data types
 			form.setFieldsValue({
 				title: deal.title,
 				contact_id: deal.contact?.id,
-				pipeline_id: Number(deal.pipeline_id), // Ensure number type
-				stage_id: Number(deal.stage_id), // Ensure number type
+				pipeline_id: deal.pipeline?.id
+					? Number(deal.pipeline.id)
+					: undefined,
+				stage_id: deal.stage?.id ? Number(deal.stage.id) : undefined,
 				value: deal.value,
 				expected_close_date: deal.expected_close_date
 					? dayjs(deal.expected_close_date)
@@ -188,17 +195,12 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				setContacts(contactsData);
 			} catch (error) {
 				console.error('Failed to fetch contacts:', error);
-				if (createNotice) {
-					createNotice({
-						type: 'error',
-						message: __('Failed to load contacts', 'quillcrm'),
-					});
-				}
+				message.error(__('Failed to load contacts', 'quillcrm'));
 			} finally {
 				setContactSearchLoading(false);
 			}
 		}, 300),
-		[fetchInitialContacts, createNotice]
+		[fetchInitialContacts]
 	);
 
 	// Fetch initial owners using our custom users endpoint
@@ -227,35 +229,30 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				expected_close_date: values.expected_close_date
 					? dayjs(values.expected_close_date).format('YYYY-MM-DD')
 					: null,
-				probability: values.probability,
+				// Explicitly handle probability: undefined/empty should become null to revert to stage default
+				probability:
+					values.probability !== undefined &&
+					values.probability !== null
+						? values.probability
+						: null,
 				source: values.source,
 				owner_id: values.owner_id,
 			};
 
 			await updateDeal(deal.id, updateData);
 
-			if (createNotice) {
-				createNotice({
-					type: 'success',
-					message: __(
-						`Deal "${values.title}" updated successfully!`,
-						'quillcrm'
-					),
-				});
-			}
+			message.success(
+				__(`Deal "${values.title}" updated successfully!`, 'quillcrm')
+			);
 
 			onSuccess();
 			onClose();
 		} catch (error) {
-			if (createNotice) {
-				createNotice({
-					type: 'error',
-					message:
-						error instanceof Error
-							? error.message
-							: __('Failed to update deal', 'quillcrm'),
-				});
-			}
+			message.error(
+				error instanceof Error
+					? error.message
+					: __('Failed to update deal', 'quillcrm')
+			);
 		} finally {
 			setLoading(false);
 		}

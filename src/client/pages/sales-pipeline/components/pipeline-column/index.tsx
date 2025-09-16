@@ -26,6 +26,7 @@ interface PipelineColumnProps {
 	};
 	deals: Deal[];
 	isOver: boolean;
+	activeDealId?: string | null;
 	onDealView?: (dealId: number) => void;
 	onDealEdit?: (deal: Deal) => void;
 }
@@ -34,6 +35,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	stage,
 	deals,
 	isOver,
+	activeDealId,
 	onDealView,
 	onDealEdit,
 }) => {
@@ -133,28 +135,32 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 					</div>
 				) : (
 					<div className="deals-list">
-						{deals.map((deal, index) => (
-							<DealCard
-								key={deal.id}
-								deal={deal}
-								isDragging={false}
-								onCardClick={(dealData) => {
-									onDealView?.(dealData.id);
-								}}
-								onDealEdit={onDealEdit}
-								stageColor={stage.color}
-								stageProbability={stage.win_probability}
-								style={
-									{
-										'--stage-color': stage.color,
-										marginBottom:
-											index < deals.length - 1
-												? '12px'
-												: '0',
-									} as React.CSSProperties
-								}
-							/>
-						))}
+						{deals.map((deal, index) => {
+							const isDragging =
+								activeDealId === `deal-${deal.id}`;
+							return (
+								<DealCard
+									key={deal.id}
+									deal={deal}
+									isDragging={isDragging}
+									onCardClick={(dealData) => {
+										onDealView?.(dealData.id);
+									}}
+									onDealEdit={onDealEdit}
+									stageColor={stage.color}
+									stageProbability={stage.win_probability}
+									style={
+										{
+											'--stage-color': stage.color,
+											marginBottom:
+												index < deals.length - 1
+													? '12px'
+													: '0',
+										} as React.CSSProperties
+									}
+								/>
+							);
+						})}
 					</div>
 				)}
 			</div>

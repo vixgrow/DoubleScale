@@ -342,14 +342,17 @@ class REST_Deal_Controller extends REST_Controller {
 
 		foreach ( $fields as $field ) {
 			$value = $request->get_param( $field );
-			if ( $value !== null ) {
+			// Special handling for probability - allow explicit null to revert to stage default
+			if ( $field === 'probability' && $request->has_param( $field ) ) {
+				$data[ $field ] = $value !== null ? floatval( $value ) : null;
+			} elseif ( $value !== null ) {
 				if ( $field === 'title' || $field === 'currency' || $field === 'source' ) {
 					$data[ $field ] = sanitize_text_field( $value );
 				} elseif ( $field === 'expected_close_date' ) {
 					$data[ $field ] = sanitize_text_field( $value );
 				} elseif ( in_array( $field, array( 'contact_id', 'pipeline_id', 'stage_id', 'owner_id' ) ) ) {
 					$data[ $field ] = intval( $value );
-				} elseif ( $field === 'value' || $field === 'probability' ) {
+				} elseif ( $field === 'value' ) {
 					$data[ $field ] = floatval( $value );
 				}
 			}

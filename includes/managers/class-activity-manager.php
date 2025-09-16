@@ -14,6 +14,7 @@ use Exception;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Models\Deal_Activity_Model;
 use QuillCRM\Models\Activity_Comment_Model;
+use QuillCRM\Models\Contact_Model;
 
 /**
  * Activity_Manager class
@@ -91,7 +92,7 @@ final class Activity_Manager {
 		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'note_added',
-			'data' => array( 'note' => wp_kses_post( $note ) ),
+			'data' => array( 'content' => wp_kses_post( $note ) ),
 			'user_id' => $user_id ?: get_current_user_id(),
 		) );
 
@@ -106,30 +107,28 @@ final class Activity_Manager {
 	 * @since 1.0.0
 	 *
 	 * @param int $deal_id Deal ID
-	 * @param array $email_data Email data (subject, recipient, etc.)
+	 * @param array $email_data Email data (subject, sent_at, etc.)
 	 * @param int|null $user_id User ID
 	 *
 	 * @return Deal_Activity|null
 	 */
 	public function log_email( $deal_id, $email_data, $user_id = null ) {
-		$deal = Deal_Model::find( $deal_id );
-		
+		$deal = Deal_Model::with( 'contact' )->find( $deal_id );
+
 		if ( ! $deal ) {
 			return null;
 		}
 
 		$sanitized_data = array(
 			'subject' => sanitize_text_field( $email_data['subject'] ?? '' ),
-			'recipient' => sanitize_email( $email_data['recipient'] ?? '' ),
 			'sent_at' => $email_data['sent_at'] ?? current_time( 'mysql' ),
 		);
 
-		if ( isset( $email_data['template_id'] ) ) {
-			$sanitized_data['template_id'] = intval( $email_data['template_id'] );
-		}
-
-		if ( isset( $email_data['campaign_id'] ) ) {
-			$sanitized_data['campaign_id'] = intval( $email_data['campaign_id'] );
+		// Automatically use the deal's primary contact
+		if ( $deal->contact ) {
+			$sanitized_data['contact_id'] = $deal->contact->id;
+			$sanitized_data['contact_email'] = $deal->contact->email;
+			$sanitized_data['contact_name'] = trim( $deal->contact->first_name . ' ' . $deal->contact->last_name );
 		}
 
 		$activity = Deal_Activity_Model::create( array(
@@ -191,14 +190,14 @@ final class Activity_Manager {
 	 * @since 1.0.0
 	 *
 	 * @param int $deal_id Deal ID
-	 * @param array $meeting_data Meeting data
+	 * @param array $meeting_data Meeting data (title, scheduled_at, duration, location, description)
 	 * @param int|null $user_id User ID
 	 *
 	 * @return Deal_Activity|null
 	 */
 	public function schedule_meeting( $deal_id, $meeting_data, $user_id = null ) {
-		$deal = Deal_Model::find( $deal_id );
-		
+		$deal = Deal_Model::with( 'contact' )->find( $deal_id );
+
 		if ( ! $deal ) {
 			return null;
 		}
@@ -211,8 +210,11 @@ final class Activity_Manager {
 			'description' => wp_kses_post( $meeting_data['description'] ?? '' ),
 		);
 
-		if ( isset( $meeting_data['attendees'] ) && is_array( $meeting_data['attendees'] ) ) {
-			$sanitized_data['attendees'] = array_map( 'sanitize_email', $meeting_data['attendees'] );
+		// Automatically use the deal's primary contact as the attendee
+		if ( $deal->contact ) {
+			$sanitized_data['primary_attendee_id'] = $deal->contact->id;
+			$sanitized_data['primary_attendee_name'] = trim( $deal->contact->first_name . ' ' . $deal->contact->last_name );
+			$sanitized_data['primary_attendee_email'] = $deal->contact->email;
 		}
 
 		$activity = Deal_Activity_Model::create( array(

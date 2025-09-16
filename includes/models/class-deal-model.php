@@ -308,9 +308,6 @@ class Deal_Model extends Model {
 		// Use deal's custom probability if set, otherwise use stage default
 		$probability = $this->probability ?? $stage->win_probability;
 		return $this->value * ( $probability / 100 );
-		// Use deal's custom probability if set, otherwise use stage default
-		$probability = $this->probability ?? $stage->win_probability;
-		return $this->value * ( $probability / 100 );
 	}
 
 	/**
@@ -367,7 +364,7 @@ class Deal_Model extends Model {
 				)
 			);
 
-			do_action( 'quillcrm_deal_stage_changed', $this, $old_stage_id, $stage_id );
+			do_action( 'quillcrm_deal_stage_changed', $this->contact, $this, $old_stage_id, $stage_id );
 		}
 
 		return $saved;

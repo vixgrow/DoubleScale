@@ -26,6 +26,9 @@ import Canvas from './components/Canvas';
 import BlockEditor from './components/BlockEditor';
 import TemplateCard from './components/TemplateCard';
 import { BuilderProvider, useBuilder } from './context/BuilderContext';
+import { useDispatch } from '@wordpress/data';
+import { STORE_KEY } from '../stores/email-builder/constants';
+import { v4 as uuidv4 } from 'uuid';
 
 const BuilderContent: React.FC = () => {
 	const {
@@ -35,6 +38,7 @@ const BuilderContent: React.FC = () => {
 		reorderSections,
 		moveBlock,
 	} = useBuilder();
+	const dispatch = useDispatch();
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: {
@@ -70,16 +74,35 @@ const BuilderContent: React.FC = () => {
 			});
 		}
 
-		// If we're dragging a block, element, or template from sidebar, only consider columns for collision
+		// If we're dragging a library template, ONLY consider canvas for collision
 		if (
-			active.data?.current?.type === 'block' ||
-			active.data?.current?.type === 'element' ||
 			active.data?.current?.type === 'library-template' ||
 			active.data?.current?.type === 'header-template' ||
 			active.data?.current?.type === 'email-body-template' ||
 			active.data?.current?.type === 'hero-image-template' ||
 			active.data?.current?.type === 'image-gallery-template' ||
 			active.data?.current?.type === 'footer-template'
+		) {
+			// Only allow dropping on canvas
+			const canvasContainers = Array.from(
+				droppableContainers.values()
+			).filter(
+				(container) =>
+					container.id === 'canvas' ||
+					container.id === 'canvas-blocks'
+			);
+
+			// Use pointerWithin for canvas detection
+			return pointerWithin({
+				...args,
+				droppableContainers: canvasContainers,
+			});
+		}
+
+		// If we're dragging a block or element, only consider columns for collision
+		if (
+			active.data?.current?.type === 'block' ||
+			active.data?.current?.type === 'element'
 		) {
 			const columnContainers = Array.from(
 				droppableContainers.values()
@@ -135,76 +158,84 @@ const BuilderContent: React.FC = () => {
 
 		console.log('Processing drop...');
 
-		// Handle dropping library templates - ONLY into sections/columns
+		// Handle dropping library templates directly as sections
 		if (active.data?.current?.type === 'library-template') {
 			const template = active.data.current.template;
 			console.log('Library template detected:', template);
 
-			// ONLY allow dropping into sections or columns
+			// Check if this is a drop on the canvas or canvas-blocks
 			const overData = over.data?.current;
-			if (overData?.type === 'column' || overData?.type === 'section') {
-				console.log(
-					'Dropping library template into section/column:',
-					overData
-				);
+			if (
+				over.id === 'canvas' ||
+				over.id === 'canvas-blocks' ||
+				overData?.acceptes?.includes('library-template')
+			) {
+				console.log('Creating new section for library template');
 
-				// Get section and column IDs
-				let sectionId, columnId;
-				if (
-					overData.type === 'column' &&
-					overData.sectionId &&
-					overData.columnId
-				) {
-					sectionId = overData.sectionId;
-					columnId = overData.columnId;
-				} else if (overData.type === 'section' && overData.sectionId) {
-					sectionId = overData.sectionId;
-					columnId = 'column-1';
-				}
+				// Create a new section with this template
+				const newSection = {
+					id: uuidv4(),
+					columns: [
+						{
+							id: uuidv4(),
+							width: 1,
+							blocks: [],
+						},
+					],
+					styles: {
+						backgroundColor: '#fff',
+						padding: '20px',
+					},
+				};
 
-				if (sectionId && columnId) {
-					// Check if this is a hero template with multiple blocks
-					if (template.blocks && Array.isArray(template.blocks)) {
-						console.log(
-							'Creating multiple blocks from hero template:',
-							template.blocks
-						);
+				// Add the section
+				dispatch(STORE_KEY).addSection(newSection);
 
-						// Add each block from the template
-						template.blocks.forEach((blockConfig) => {
-							// Add template layout information to the block props
-							const blockProps = {
-								...blockConfig.props,
-								templateLayout:
-									template.layout?.[
-										blockConfig.props.containerId
-									] || null,
-							};
+				// Get the section and column IDs
+				const sectionId = newSection.id;
+				const columnId = newSection.columns[0].id;
 
-							addNewBlockWithProps(
-								sectionId,
-								columnId,
-								blockConfig.type,
-								blockProps
-							);
-						});
-					} else {
-						// Fallback: Add the template as a single block
-						console.log(
-							'Creating single block for template:',
-							template
-						);
+				// Add blocks from template to this section
+				if (template.blocks && Array.isArray(template.blocks)) {
+					console.log(
+						'Creating multiple blocks from template:',
+						template.blocks
+					);
+
+					// Add each block from the template
+					template.blocks.forEach((blockConfig) => {
+						// Add template layout information to the block props
+						const blockProps = {
+							...blockConfig.props,
+							templateLayout:
+								template.layout?.[
+									blockConfig.props.containerId
+								] || null,
+						};
+
 						addNewBlockWithProps(
 							sectionId,
 							columnId,
-							template.type,
-							template.props || {}
+							blockConfig.type,
+							blockProps
 						);
-					}
+					});
+				} else {
+					// Fallback: Add the template as a single block
+					console.log(
+						'Creating single block for template:',
+						template
+					);
+					addNewBlockWithProps(
+						sectionId,
+						columnId,
+						template.type,
+						template.props || {}
+					);
 				}
 				return;
 			} else {
-				// If trying to drop on canvas or other invalid areas, ignore it
+				// Should never get here since collision detection restricts drops
 				console.log(
 					'Library template dropped on invalid area - ignoring'
 				);
@@ -212,96 +243,104 @@ const BuilderContent: React.FC = () => {
 			}
 		}
 
-		// Handle dropping header templates - ONLY into sections/columns
+		// Handle dropping header templates directly as sections
 		if (active.data?.current?.type === 'header-template') {
 			const template = active.data.current.template;
 			console.log('Header template detected:', template);
 
-			// ONLY allow dropping into sections or columns
+			// Check if this is a drop on the canvas or canvas-blocks
 			const overData = over.data?.current;
-			if (overData?.type === 'column' || overData?.type === 'section') {
-				console.log(
-					'Dropping header template into section/column:',
-					overData
-				);
+			if (
+				over.id === 'canvas' ||
+				over.id === 'canvas-blocks' ||
+				overData?.acceptes?.includes('library-template')
+			) {
+				console.log('Creating new section for header template');
 
-				// Get section and column IDs
-				let sectionId, columnId;
-				if (
-					overData.type === 'column' &&
-					overData.sectionId &&
-					overData.columnId
-				) {
-					sectionId = overData.sectionId;
-					columnId = overData.columnId;
-				} else if (overData.type === 'section' && overData.sectionId) {
-					sectionId = overData.sectionId;
-					columnId = 'column-1';
-				}
+				// Create a new section with this template
+				const newSection = {
+					id: uuidv4(),
+					columns: [
+						{
+							id: uuidv4(),
+							width: 1,
+							blocks: [],
+						},
+					],
+					styles: {
+						backgroundColor: '#fff',
+						padding: '20px',
+					},
+				};
 
-				if (sectionId && columnId) {
-					// Add multiple blocks based on template type
-					if (template.type === 'logo-button' && template.layout) {
-						// For logo+button template, create a special container with flex justify-between
+				// Add the section
+				dispatch(STORE_KEY).addSection(newSection);
+
+				// Get the section and column IDs
+				const sectionId = newSection.id;
+				const columnId = newSection.columns[0].id;
+
+				// Add blocks based on template type
+				if (template.type === 'logo-button' && template.layout) {
+					// For logo+button template, create a special container with flex justify-between
+					console.log(
+						'Creating logo+button layout with flex justify-between'
+					);
+
+					// Create a special container block that will hold both logo and button inline
+					const containerBlockId = `container-${Date.now()}`;
+
+					// Add the logo block first with special inline properties
+					addNewBlockWithProps(
+						sectionId,
+						columnId,
+						template.blocks[0].type,
+						{
+							...template.blocks[0].props,
+							width: 'auto', // Logo gets auto width like other options
+							align: 'left',
+							// Add a special property to identify this as part of inline layout
+							inlineLayout: true,
+							containerId: containerBlockId,
+							// Pass the template layout information to the block
+							templateLayout: template.layout,
+						}
+					);
+
+					// Add the button block second with special inline properties
+					addNewBlockWithProps(
+						sectionId,
+						columnId,
+						template.blocks[1].type,
+						{
+							...template.blocks[1].props,
+							width: '50%',
+							align: 'right',
+							// Add a special property to identify this as part of inline layout
+							inlineLayout: true,
+							containerId: containerBlockId,
+							// Pass the template layout information to the block
+							templateLayout: template.layout,
+						}
+					);
+				} else {
+					// For other templates, add blocks normally
+					template.blocks.forEach((block, index) => {
 						console.log(
-							'Creating logo+button layout with flex justify-between'
+							`Adding block ${index + 1} to column:`,
+							block
 						);
-
-						// Create a special container block that will hold both logo and button inline
-						const containerBlockId = `container-${Date.now()}`;
-
-						// Add the logo block first with special inline properties
 						addNewBlockWithProps(
 							sectionId,
 							columnId,
-							template.blocks[0].type,
-							{
-								...template.blocks[0].props,
-								width: 'auto', // Logo gets auto width like other options
-								align: 'left',
-								// Add a special property to identify this as part of inline layout
-								inlineLayout: true,
-								containerId: containerBlockId,
-								// Pass the template layout information to the block
-								templateLayout: template.layout,
-							}
+							block.type,
+							block.props
 						);
-
-						// Add the button block second with special inline properties
-						addNewBlockWithProps(
-							sectionId,
-							columnId,
-							template.blocks[1].type,
-							{
-								...template.blocks[1].props,
-								width: '50%',
-								align: 'right',
-								// Add a special property to identify this as part of inline layout
-								inlineLayout: true,
-								containerId: containerBlockId,
-								// Pass the template layout information to the block
-								templateLayout: template.layout,
-							}
-						);
-					} else {
-						// For other templates, add blocks normally
-						template.blocks.forEach((block, index) => {
-							console.log(
-								`Adding block ${index + 1} to column:`,
-								block
-							);
-							addNewBlockWithProps(
-								sectionId,
-								columnId,
-								block.type,
-								block.props
-							);
-						});
-					}
+					});
 				}
 				return;
 			} else {
-				// If trying to drop on canvas or other invalid areas, ignore it
+				// Should never get here since collision detection restricts drops
 				console.log(
 					'Header template dropped on invalid area - ignoring'
 				);
@@ -309,76 +348,84 @@ const BuilderContent: React.FC = () => {
 			}
 		}
 
-		// Handle dropping email body templates - ONLY into sections/columns
+		// Handle dropping email body templates directly as sections
 		if (active.data?.current?.type === 'email-body-template') {
 			const template = active.data.current.template;
 			console.log('Email body template detected:', template);
 
-			// ONLY allow dropping into sections or columns
+			// Check if this is a drop on the canvas or canvas-blocks
 			const overData = over.data?.current;
-			if (overData?.type === 'column' || overData?.type === 'section') {
-				console.log(
-					'Dropping email body template into section/column:',
-					overData
-				);
+			if (
+				over.id === 'canvas' ||
+				over.id === 'canvas-blocks' ||
+				overData?.acceptes?.includes('library-template')
+			) {
+				console.log('Creating new section for email body template');
 
-				// Get section and column IDs
-				let sectionId, columnId;
-				if (
-					overData.type === 'column' &&
-					overData.sectionId &&
-					overData.columnId
-				) {
-					sectionId = overData.sectionId;
-					columnId = overData.columnId;
-				} else if (overData.type === 'section' && overData.sectionId) {
-					sectionId = overData.sectionId;
-					columnId = 'column-1';
-				}
+				// Create a new section with this template
+				const newSection = {
+					id: uuidv4(),
+					columns: [
+						{
+							id: uuidv4(),
+							width: 1,
+							blocks: [],
+						},
+					],
+					styles: {
+						backgroundColor: '#fff',
+						padding: '20px',
+					},
+				};
 
-				if (sectionId && columnId) {
-					// Check if this is an email body template with multiple blocks
-					if (template.blocks && Array.isArray(template.blocks)) {
-						console.log(
-							'Creating multiple blocks from email body template:',
-							template.blocks
-						);
+				// Add the section
+				dispatch(STORE_KEY).addSection(newSection);
 
-						// Add each block from the template
-						template.blocks.forEach((blockConfig) => {
-							// Add template layout information to the block props
-							const blockProps = {
-								...blockConfig.props,
-								templateLayout:
-									template.layout?.[
-										blockConfig.props.containerId
-									] || null,
-							};
+				// Get the section and column IDs
+				const sectionId = newSection.id;
+				const columnId = newSection.columns[0].id;
 
-							addNewBlockWithProps(
-								sectionId,
-								columnId,
-								blockConfig.type,
-								blockProps
-							);
-						});
-					} else {
-						// Fallback: Add the template as a single block
-						console.log(
-							'Creating single block for email body template:',
-							template
-						);
+				// Check if this is an email body template with multiple blocks
+				if (template.blocks && Array.isArray(template.blocks)) {
+					console.log(
+						'Creating multiple blocks from email body template:',
+						template.blocks
+					);
+
+					// Add each block from the template
+					template.blocks.forEach((blockConfig) => {
+						// Add template layout information to the block props
+						const blockProps = {
+							...blockConfig.props,
+							templateLayout:
+								template.layout?.[
+									blockConfig.props.containerId
+								] || null,
+						};
+
 						addNewBlockWithProps(
 							sectionId,
 							columnId,
-							template.type,
-							template.props || {}
+							blockConfig.type,
+							blockProps
 						);
-					}
+					});
+				} else {
+					// Fallback: Add the template as a single block
+					console.log(
+						'Creating single block for email body template:',
+						template
+					);
+					addNewBlockWithProps(
+						sectionId,
+						columnId,
+						template.type,
+						template.props || {}
+					);
 				}
 				return;
 			} else {
-				// If trying to drop on canvas or other invalid areas, ignore it
+				// Should never get here since collision detection restricts drops
 				console.log(
 					'Email body template dropped on invalid area - ignoring'
 				);
@@ -386,76 +433,84 @@ const BuilderContent: React.FC = () => {
 			}
 		}
 
-		// Handle dropping footer templates - ONLY into sections/columns
+		// Handle dropping footer templates directly as sections
 		if (active.data?.current?.type === 'footer-template') {
 			const template = active.data.current.template;
 			console.log('Footer template detected:', template);
 
-			// ONLY allow dropping into sections or columns
+			// Check if this is a drop on the canvas or canvas-blocks
 			const overData = over.data?.current;
-			if (overData?.type === 'column' || overData?.type === 'section') {
-				console.log(
-					'Dropping footer template into section/column:',
-					overData
-				);
+			if (
+				over.id === 'canvas' ||
+				over.id === 'canvas-blocks' ||
+				overData?.acceptes?.includes('library-template')
+			) {
+				console.log('Creating new section for footer template');
 
-				// Get section and column IDs
-				let sectionId, columnId;
-				if (
-					overData.type === 'column' &&
-					overData.sectionId &&
-					overData.columnId
-				) {
-					sectionId = overData.sectionId;
-					columnId = overData.columnId;
-				} else if (overData.type === 'section' && overData.sectionId) {
-					sectionId = overData.sectionId;
-					columnId = 'column-1';
-				}
+				// Create a new section with this template
+				const newSection = {
+					id: uuidv4(),
+					columns: [
+						{
+							id: uuidv4(),
+							width: 1,
+							blocks: [],
+						},
+					],
+					styles: {
+						backgroundColor: '#fff',
+						padding: '20px',
+					},
+				};
 
-				if (sectionId && columnId) {
-					// Check if this is a footer template with multiple blocks
-					if (template.blocks && Array.isArray(template.blocks)) {
-						console.log(
-							'Creating multiple blocks from footer template:',
-							template.blocks
-						);
+				// Add the section
+				dispatch(STORE_KEY).addSection(newSection);
 
-						// Add each block from the template
-						template.blocks.forEach((blockConfig) => {
-							// Add template layout information to the block props
-							const blockProps = {
-								...blockConfig.props,
-								templateLayout:
-									template.layout?.[
-										blockConfig.props.containerId
-									] || null,
-							};
+				// Get the section and column IDs
+				const sectionId = newSection.id;
+				const columnId = newSection.columns[0].id;
 
-							addNewBlockWithProps(
-								sectionId,
-								columnId,
-								blockConfig.type,
-								blockProps
-							);
-						});
-					} else {
-						// Fallback: Add the template as a single block
-						console.log(
-							'Creating single block for footer template:',
-							template
-						);
+				// Check if this is a footer template with multiple blocks
+				if (template.blocks && Array.isArray(template.blocks)) {
+					console.log(
+						'Creating multiple blocks from footer template:',
+						template.blocks
+					);
+
+					// Add each block from the template
+					template.blocks.forEach((blockConfig) => {
+						// Add template layout information to the block props
+						const blockProps = {
+							...blockConfig.props,
+							templateLayout:
+								template.layout?.[
+									blockConfig.props.containerId
+								] || null,
+						};
+
 						addNewBlockWithProps(
 							sectionId,
 							columnId,
-							template.type,
-							template.props || {}
+							blockConfig.type,
+							blockProps
 						);
-					}
+					});
+				} else {
+					// Fallback: Add the template as a single block
+					console.log(
+						'Creating single block for footer template:',
+						template
+					);
+					addNewBlockWithProps(
+						sectionId,
+						columnId,
+						template.type,
+						template.props || {}
+					);
 				}
 				return;
 			} else {
-				// If trying to drop on canvas or other invalid areas, ignore it
+				// Should never get here since collision detection restricts drops
 				console.log(
 					'Footer template dropped on invalid area - ignoring'
 				);
@@ -463,73 +518,87 @@ const BuilderContent: React.FC = () => {
 			}
 		}
 
-		// Handle dropping image gallery templates - ONLY into sections/columns
+		// Handle dropping image gallery templates directly as sections
 		if (active.data?.current?.type === 'image-gallery-template') {
 			const template = active.data.current.template;
 			console.log('Image gallery template detected:', template);
 
-			// ONLY allow dropping into sections or columns
+			// Check if this is a drop on the canvas or canvas-blocks
 			const overData = over.data?.current;
-			if (overData?.type === 'column' || overData?.type === 'section') {
-				console.log(
-					'Dropping image gallery template into section/column:',
-					overData
-				);
+			if (
+				over.id === 'canvas' ||
+				over.id === 'canvas-blocks' ||
+				overData?.acceptes?.includes('library-template')
+			) {
+				console.log('Creating new section for image gallery template');
 
-				// Get section and column IDs
-				let sectionId, columnId;
-				if (
-					overData.type === 'column' &&
-					overData.sectionId &&
-					overData.columnId
-				) {
-					sectionId = overData.sectionId;
-					columnId = overData.columnId;
-				} else if (overData.type === 'section' && overData.sectionId) {
-					sectionId = overData.sectionId;
-					columnId = 'column-1';
-				}
+				// Create a new section with this template
+				const newSection = {
+					id: uuidv4(),
+					columns: [
+						{
+							id: uuidv4(),
+							width: 1,
+							blocks: [],
+						},
+					],
+					styles: {
+						backgroundColor: '#fff',
+						padding: '20px',
+					},
+				};
 
-				if (sectionId && columnId) {
-					// Check if this is an image gallery template with multiple blocks
-					if (template.blocks && Array.isArray(template.blocks)) {
-						console.log(
-							'Creating multiple blocks from image gallery template:',
-							template.blocks
-						);
+				// Add the section
+				dispatch(STORE_KEY).addSection(newSection);
 
-						// Add each block from the template
-						template.blocks.forEach((blockConfig) => {
-							// Add template layout information to the block props
-							const blockProps = {
-								...blockConfig.props,
-								templateLayout:
-									template.layout?.[
-										blockConfig.props.containerId
-									] || null,
-							};
+				// Get the section and column IDs
+				const sectionId = newSection.id;
+				const columnId = newSection.columns[0].id;
 
-							addNewBlockWithProps(
-								sectionId,
-								columnId,
-								blockConfig.type,
-								blockProps
-							);
-						});
-					} else {
-						// Fallback: Add the template as a single block
-						console.log(
-							'Creating single block for image gallery template:',
-							template
-						);
+				// Check if this is an image gallery template with multiple blocks
+				if (template.blocks && Array.isArray(template.blocks)) {
+					console.log(
+						'Creating multiple blocks from image gallery template:',
+						template.blocks
+					);
+
+					// Add each block from the template
+					template.blocks.forEach((blockConfig) => {
+						// Add template layout information to the block props
+						const blockProps = {
+							...blockConfig.props,
+							templateLayout:
+								template.layout?.[
+									blockConfig.props.containerId
+								] || null,
+						};
+
 						addNewBlockWithProps(
 							sectionId,
 							columnId,
-							'image',
-							template.props || {}
+							blockConfig.type,
+							blockProps
 						);
-					}
+					});
+				} else {
+					// Fallback: Add the template as a single block
+					console.log(
+						'Creating single block for image gallery template:',
+						template
+					);
+					addNewBlockWithProps(
+						sectionId,
+						columnId,
+						'image',
+						template.props || {}
+					);
 				}
+				return;
+			} else {
+				// Should never get here since collision detection restricts drops
+				console.log(
+					'Image gallery template dropped on invalid area - ignoring'
+				);
 				return;
 			}
 		}

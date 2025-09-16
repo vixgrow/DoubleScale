@@ -184,25 +184,34 @@ const Campaign: React.FC = () => {
 				...$actions,
 			}}
 		>
-			<TemplatesStep />
-
-			{!['processing', 'completed', 'resending'].includes(
-				campaign.status
-			) &&
-				tab !== 'overview' && (
-					<Tabs
-						defaultActiveKey="information"
-						activeKey={tab === 'overview' ? 'information' : tab}
-						tabPosition="left"
-						tabBarStyle={{ width: 200 }}
-						items={tabItems}
-						onChange={(key) => {
-							if (canGoNext(key)) {
-								navigate(getToLink(`campaigns/${id}/${key}`));
-							}
-						}}
-					/>
-				)}
+			{/* Render the selected tab component based on the current tab */}
+			{tab === 'template' ? (
+				<TemplatesStep />
+			) : (
+				<>
+					{!['processing', 'completed', 'resending'].includes(
+						campaign.status
+					) &&
+						tab !== 'overview' && (
+							<Tabs
+								defaultActiveKey="information"
+								activeKey={
+									tab === 'overview' ? 'information' : tab
+								}
+								tabPosition="left"
+								tabBarStyle={{ width: 200 }}
+								items={tabItems}
+								onChange={(key) => {
+									if (canGoNext(key)) {
+										navigate(
+											getToLink(`campaigns/${id}/${key}`)
+										);
+									}
+								}}
+							/>
+						)}
+				</>
+			)}
 			{isOverview && <Overview />}
 		</Provider>
 	);

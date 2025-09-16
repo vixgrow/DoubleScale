@@ -69,7 +69,8 @@ const HeroImageLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering of the text in terms of font choice and font size.</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering of the text in terms of font choice and font size.</p>',
 					hyperlink: '',
 					fontSize: 16,
 					color: '#9197A4',
@@ -172,7 +173,8 @@ const HeroImageLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.</p>',
 					hyperlink: '',
 					fontSize: 16,
 					color: '#9197A4',
@@ -378,7 +380,8 @@ const HeroImageLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering of the text in terms of font choice and font size.</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering of the text in terms of font choice and font size.</p>',
 					hyperlink: '',
 					fontSize: 16,
 					color: '#9197A4',
@@ -439,7 +442,7 @@ const HeroImageLibrary = () => {
 					backgroundColor: 'transparent',
 					padding: {
 						top: 0,
-						right: 10,
+						right: 0,
 						bottom: 0,
 						left: 0,
 					},
@@ -517,7 +520,8 @@ const HeroImageLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering of the text in terms of font choice and font size.</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview of the rendering of the text in terms of font choice and font size.</p>',
 					hyperlink: '',
 					fontSize: 16,
 					color: '#9197A4',
@@ -573,7 +577,10 @@ const HeroImageLibrary = () => {
 				<label className="text-sm">
 					{__('Standard Hero', 'quillcrm')}
 				</label>
-				<DraggableTemplate template={standardHeroTemplate} id="hero-standard">
+				<DraggableTemplate
+					template={standardHeroTemplate}
+					id="hero-standard"
+				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 						<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
 							<ImageBlockIcon />
@@ -598,7 +605,10 @@ const HeroImageLibrary = () => {
 				<label className="text-sm">
 					{__('Extended Hero', 'quillcrm')}
 				</label>
-				<DraggableTemplate template={extendedHeroTemplate} id="hero-extended">
+				<DraggableTemplate
+					template={extendedHeroTemplate}
+					id="hero-extended"
+				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 						<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
 							<ImageBlockIcon />
@@ -631,7 +641,10 @@ const HeroImageLibrary = () => {
 				<label className="text-sm">
 					{__('Title + Image', 'quillcrm')}
 				</label>
-				<DraggableTemplate template={titleImageTemplate} id="hero-title-image">
+				<DraggableTemplate
+					template={titleImageTemplate}
+					id="hero-title-image"
+				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 						<div className="text-[#141B34] text-sm font-bold">
 							{__('Title 1', 'quillcrm')}
@@ -659,7 +672,10 @@ const HeroImageLibrary = () => {
 				<label className="text-sm">
 					{__('Side by Side Image + Text', 'quillcrm')}
 				</label>
-				<DraggableTemplate template={sideBySideTemplate} id="hero-side-by-side">
+				<DraggableTemplate
+					template={sideBySideTemplate}
+					id="hero-side-by-side"
+				>
 					<div className="flex gap-5 items-center border rounded-lg p-2 w-full">
 						<div className="text-[#616161] bg-muted w-1/2 h-full py-20 flex items-center justify-center">
 							<ImageBlockIcon />
@@ -719,5 +735,3 @@ const DraggableTemplate = ({ template, id, children }) => {
 };
 
 export default HeroImageLibrary;
-
-

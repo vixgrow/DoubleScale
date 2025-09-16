@@ -28,7 +28,7 @@ import {
 	Template,
 } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
-import type { Template as TemplateType } from '@quillcrm/client';
+import type { Template as TemplateType } from '../../../../types';
 import { isEmail } from 'validator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,19 +47,24 @@ const Templates: React.FC = () => {
 	const navigate = useNavigate();
 	const adminEmail = ConfigAPI.getAdminEmail();
 	const blogName = ConfigAPI.getBlogName();
+	// Using template table structure
 	const defaultTemplate = {
-		from_name: blogName,
-		from_email: adminEmail,
-		reply_to: adminEmail,
-		preview_text: '',
+		name: __('New Email', 'quillcrm'),
+		type: 'email',
 		subject: __('New Email', 'quillcrm'),
 		body: 'Email body',
-		enable_utm: false,
-		utm_source: '',
-		utm_medium: '',
-		utm_name: '',
-		utm_term: '',
-		utm_content: '',
+		settings: {
+			from_name: blogName,
+			from_email: adminEmail,
+			reply_to: adminEmail,
+			preview_text: '',
+			enable_utm: false,
+			utm_source: '',
+			utm_medium: '',
+			utm_name: '',
+			utm_term: '',
+			utm_content: '',
+		},
 	};
 	const [templates, setTemplates] = useState<TemplateType[]>(
 		campaign?.settings.templates || []
@@ -179,7 +184,7 @@ const Templates: React.FC = () => {
 			return false;
 		}
 
-		if (!template.from_name) {
+		if (!template.settings?.from_name) {
 			createNotice({
 				type: 'error',
 				message: __('From name is required', 'quillcrm'),
@@ -187,7 +192,7 @@ const Templates: React.FC = () => {
 			return false;
 		}
 
-		if (!template.from_email) {
+		if (!template.settings?.from_email) {
 			createNotice({
 				type: 'error',
 				message: __('From email is required', 'quillcrm'),
@@ -195,7 +200,7 @@ const Templates: React.FC = () => {
 			return false;
 		}
 
-		if (!isEmail(template.from_email)) {
+		if (!isEmail(template.settings.from_email)) {
 			createNotice({
 				type: 'error',
 				message: __('From email is not valid', 'quillcrm'),
@@ -302,10 +307,17 @@ const Templates: React.FC = () => {
 							>
 								<Input
 									placeholder={__('Name here', 'quillcrm')}
-									value={templates[currentTab]?.from_name}
+									value={
+										templates[currentTab]?.settings
+											?.from_name
+									}
 									onChange={(e) =>
 										updateTemplate(currentTab, {
-											from_name: e.target.value,
+											settings: {
+												...(templates[currentTab]
+													?.settings || {}),
+												from_name: e.target.value,
+											},
 										})
 									}
 								/>
@@ -321,10 +333,17 @@ const Templates: React.FC = () => {
 										'name@gmail.com',
 										'quillcrm'
 									)}
-									value={templates[currentTab]?.from_email}
+									value={
+										templates[currentTab]?.settings
+											?.from_email
+									}
 									onChange={(e) =>
 										updateTemplate(currentTab, {
-											from_email: e.target.value,
+											settings: {
+												...(templates[currentTab]
+													?.settings || {}),
+												from_email: e.target.value,
+											},
 										})
 									}
 								/>
@@ -340,10 +359,17 @@ const Templates: React.FC = () => {
 										'name@gmail.com',
 										'quillcrm'
 									)}
-									value={templates[currentTab]?.reply_to}
+									value={
+										templates[currentTab]?.settings
+											?.reply_to
+									}
 									onChange={(e) =>
 										updateTemplate(currentTab, {
-											reply_to: e.target.value,
+											settings: {
+												...(templates[currentTab]
+													?.settings || {}),
+												reply_to: e.target.value,
+											},
 										})
 									}
 								/>
@@ -373,10 +399,17 @@ const Templates: React.FC = () => {
 										'Preview text here',
 										'quillcrm'
 									)}
-									value={templates[currentTab]?.preview_text}
+									value={
+										templates[currentTab]?.settings
+											?.preview_text
+									}
 									onChange={(e) =>
 										updateTemplate(currentTab, {
-											preview_text: e.target.value,
+											settings: {
+												...(templates[currentTab]
+													?.settings || {}),
+												preview_text: e.target.value,
+											},
 										})
 									}
 								/>
@@ -399,17 +432,23 @@ const Templates: React.FC = () => {
 									</div>
 									<Switch
 										checked={
-											templates[currentTab]?.enable_utm
+											templates[currentTab]?.settings
+												?.enable_utm
 										}
 										onCheckedChange={(checked) =>
 											updateTemplate(currentTab, {
-												enable_utm: checked,
+												settings: {
+													...(templates[currentTab]
+														?.settings || {}),
+													enable_utm: checked,
+												},
 											})
 										}
 									/>
 								</div>
 
-								{templates[currentTab]?.enable_utm && (
+								{templates[currentTab]?.settings
+									?.enable_utm && (
 									<div className="space-y-4">
 										<div className="grid grid-cols-2 gap-4">
 											<FormField
@@ -426,15 +465,23 @@ const Templates: React.FC = () => {
 													)}
 													value={
 														templates[currentTab]
+															?.settings
 															?.utm_source
 													}
 													onChange={(e) =>
 														updateTemplate(
 															currentTab,
 															{
-																utm_source:
-																	e.target
-																		.value,
+																settings: {
+																	...(templates[
+																		currentTab
+																	]
+																		?.settings ||
+																		{}),
+																	utm_source:
+																		e.target
+																			.value,
+																},
 															}
 														)
 													}
@@ -454,15 +501,23 @@ const Templates: React.FC = () => {
 													)}
 													value={
 														templates[currentTab]
+															?.settings
 															?.utm_medium
 													}
 													onChange={(e) =>
 														updateTemplate(
 															currentTab,
 															{
-																utm_medium:
-																	e.target
-																		.value,
+																settings: {
+																	...(templates[
+																		currentTab
+																	]
+																		?.settings ||
+																		{}),
+																	utm_medium:
+																		e.target
+																			.value,
+																},
 															}
 														)
 													}
@@ -484,15 +539,22 @@ const Templates: React.FC = () => {
 													)}
 													value={
 														templates[currentTab]
-															?.utm_name
+															?.settings?.utm_name
 													}
 													onChange={(e) =>
 														updateTemplate(
 															currentTab,
 															{
-																utm_name:
-																	e.target
-																		.value,
+																settings: {
+																	...(templates[
+																		currentTab
+																	]
+																		?.settings ||
+																		{}),
+																	utm_name:
+																		e.target
+																			.value,
+																},
 															}
 														)
 													}
@@ -511,15 +573,22 @@ const Templates: React.FC = () => {
 													)}
 													value={
 														templates[currentTab]
-															?.utm_term
+															?.settings?.utm_term
 													}
 													onChange={(e) =>
 														updateTemplate(
 															currentTab,
 															{
-																utm_term:
-																	e.target
-																		.value,
+																settings: {
+																	...(templates[
+																		currentTab
+																	]
+																		?.settings ||
+																		{}),
+																	utm_term:
+																		e.target
+																			.value,
+																},
 															}
 														)
 													}
@@ -539,12 +608,17 @@ const Templates: React.FC = () => {
 												)}
 												value={
 													templates[currentTab]
-														?.utm_content
+														?.settings?.utm_content
 												}
 												onChange={(e) =>
 													updateTemplate(currentTab, {
-														utm_content:
-															e.target.value,
+														settings: {
+															...(templates[
+																currentTab
+															]?.settings || {}),
+															utm_content:
+																e.target.value,
+														},
 													})
 												}
 											/>

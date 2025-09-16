@@ -167,18 +167,25 @@ export type CustomFieldsGroup = {
 export type CustomFieldsGroups = CustomFieldsGroup[];
 
 export type Template = {
-	from_name: string;
-	from_email: string;
-	reply_to: string;
+	id?: number;
+	name: string;
+	type: string;
 	subject: string;
-	preview_text: string;
 	body: string;
-	enable_utm: boolean;
-	utm_source: string;
-	utm_medium: string;
-	utm_name: string;
-	utm_term: string;
-	utm_content: string;
+	settings: {
+		from_name: string;
+		from_email: string;
+		reply_to: string;
+		preview_text: string;
+		enable_utm: boolean;
+		utm_source: string;
+		utm_medium: string;
+		utm_name: string;
+		utm_term: string;
+		utm_content: string;
+	};
+	created_at?: string;
+	updated_at?: string;
 };
 
 type CampaignSettings = {

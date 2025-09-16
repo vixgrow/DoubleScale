@@ -28,7 +28,7 @@ import {
 	Template,
 } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
-import type { Template as TemplateType } from '../../../../types';
+import type { Template as TemplateType } from '@quillcrm/client';
 import { isEmail } from 'validator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

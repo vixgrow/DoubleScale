@@ -31,7 +31,6 @@ import './style.scss';
 
 const { Text } = Typography;
 const { TextArea } = Input;
-const { Panel } = Collapse;
 
 interface ActivityCommentsProps {
 	activityId: number;
@@ -300,73 +299,76 @@ export const ActivityComments: React.FC<ActivityCommentsProps> = ({
 		</List.Item>
 	);
 
+	const collapseItems = [
+		{
+			key: 'comments',
+			label: (
+				<div className="comments-header">
+					<MessageSquare size={16} />
+					<span>
+						{comments.length > 0
+							? `${comments.length} ${__('comment(s)', 'quillcrm')}`
+							: __('Comments', 'quillcrm')}
+					</span>
+				</div>
+			),
+			children: (
+				<div className="comments-content">
+					{/* Add Comment Form */}
+					<div className="add-comment-form">
+						<TextArea
+							value={newComment}
+							onChange={(e) => setNewComment(e.target.value)}
+							placeholder={__('Add a comment...', 'quillcrm')}
+							rows={2}
+							maxLength={500}
+							showCount
+						/>
+						<div className="add-comment-actions">
+							<Button
+								type="primary"
+								size="small"
+								icon={<Send size={14} />}
+								loading={addingComment}
+								disabled={!newComment.trim()}
+								onClick={handleAddComment}
+							>
+								{__('Add Comment', 'quillcrm')}
+							</Button>
+						</div>
+					</div>
+
+					{/* Comments List */}
+					{loading ? (
+						<div className="comments-loading">
+							<Spin />
+						</div>
+					) : comments.length > 0 ? (
+						<List
+							className="comments-list"
+							dataSource={comments}
+							renderItem={renderComment}
+						/>
+					) : (
+						<Empty
+							description={__('No comments yet', 'quillcrm')}
+							image={Empty.PRESENTED_IMAGE_SIMPLE}
+							className="comments-empty"
+						/>
+					)}
+				</div>
+			),
+			className: 'comments-panel',
+		},
+	];
+
 	return (
 		<div className="activity-comments">
 			<Collapse
 				ghost
+				items={collapseItems}
 				onChange={(keys) => setExpanded(keys.includes('comments'))}
-			>
-				<Panel
-					header={
-						<div className="comments-header">
-							<MessageSquare size={16} />
-							<span>
-								{comments.length > 0
-									? `${comments.length} ${__('comment(s)', 'quillcrm')}`
-									: __('Comments', 'quillcrm')}
-							</span>
-						</div>
-					}
-					key="comments"
-					className="comments-panel"
-				>
-					<div className="comments-content">
-						{/* Add Comment Form */}
-						<div className="add-comment-form">
-							<TextArea
-								value={newComment}
-								onChange={(e) => setNewComment(e.target.value)}
-								placeholder={__('Add a comment...', 'quillcrm')}
-								rows={2}
-								maxLength={500}
-								showCount
-							/>
-							<div className="add-comment-actions">
-								<Button
-									type="primary"
-									size="small"
-									icon={<Send size={14} />}
-									loading={addingComment}
-									disabled={!newComment.trim()}
-									onClick={handleAddComment}
-								>
-									{__('Add Comment', 'quillcrm')}
-								</Button>
-							</div>
-						</div>
-
-						{/* Comments List */}
-						{loading ? (
-							<div className="comments-loading">
-								<Spin />
-							</div>
-						) : comments.length > 0 ? (
-							<List
-								className="comments-list"
-								dataSource={comments}
-								renderItem={renderComment}
-							/>
-						) : (
-							<Empty
-								description={__('No comments yet', 'quillcrm')}
-								image={Empty.PRESENTED_IMAGE_SIMPLE}
-								className="comments-empty"
-							/>
-						)}
-					</div>
-				</Panel>
-			</Collapse>
+			/>
 		</div>
 	);
 };
-

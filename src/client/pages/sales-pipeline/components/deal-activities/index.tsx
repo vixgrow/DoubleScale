@@ -241,7 +241,6 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 									color={getActivityColor(
 										activity.activity_type
 									)}
-									size="small"
 								>
 									{activity.activity_type
 										.replace('_', ' ')
@@ -257,6 +256,7 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 						<div className="activity-content">
 							<Text>{activity.formatted_message}</Text>
 
+							{/* Show value changes for deal updates */}
 							{activity.data &&
 								activity.data.old_value &&
 								activity.data.new_value && (
@@ -284,6 +284,28 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 												>
 													{activity.data.new_value}
 												</Text>
+											</Text>
+										</div>
+									</div>
+								)}
+
+							{/* Show call notes for call activities */}
+							{activity.activity_type === 'call_logged' &&
+								activity.data &&
+								activity.data.notes && (
+									<div className="activity-data">
+										<div className="call-notes">
+											<Text strong>
+												{__('Call Notes:', 'quillcrm')}
+											</Text>
+											<br />
+											<Text
+												style={{
+													marginTop: 4,
+													display: 'block',
+												}}
+											>
+												{activity.data.notes}
 											</Text>
 										</div>
 									</div>

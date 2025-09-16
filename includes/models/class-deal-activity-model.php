@@ -219,8 +219,14 @@ class Deal_Activity_Model extends Model {
 			case 'call_logged':
 				$outcome = $this->data['outcome'] ?? '';
 				$duration = $this->data['duration'] ?? null;
+				$phone_number = $this->data['phone_number'] ?? '';
+				$notes = $this->data['notes'] ?? '';
 				
 				$message = sprintf( '%s logged a call', $user_name );
+				
+				if ( ! empty( $phone_number ) ) {
+					$message .= sprintf( ' to %s', $phone_number );
+				}
 				
 				if ( ! empty( $outcome ) ) {
 					$message .= sprintf( ' with outcome: %s', $outcome );

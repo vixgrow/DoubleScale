@@ -229,13 +229,6 @@ registerAdminPage('emails-analytics', {
 // 	icon: <ToolsIcon />,
 // });
 
-registerAdminPage('email-builder', {
-	path: 'email-builder',
-	component: () => <EmailBuilder />,
-	label: __('Email Builder', 'quillcrm'),
-	icon: <CampaignsIcon />, // Using campaigns icon for now
-});
-
 registerAdminPage('settings', {
 	path: 'settings',
 	component: () => <Setting />,

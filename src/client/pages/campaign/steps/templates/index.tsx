@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
@@ -39,6 +40,8 @@ import EmailBuilderSelection from './email-builder-selection';
 const Templates: React.FC = () => {
 	const [emailBuilderSelectionVisible, setEmailBuilderSelectionVisible] =
 		useState(false);
+	const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
+	const [testEmailAddress, setTestEmailAddress] = useState('');
 	const { campaign, isLoading, saveCampaign, isSaving } =
 		useCampaignContext();
 	const navigate = useNavigate();
@@ -203,6 +206,62 @@ const Templates: React.FC = () => {
 		return true;
 	};
 
+	const sendTestEmail = async () => {
+		if (!templates[currentTab]) {
+			return;
+		}
+
+		// Validate the current template before sending
+		if (!validate(templates[currentTab])) {
+			return;
+		}
+
+		// Ask for test email address if not provided
+		const emailAddress =
+			testEmailAddress ||
+			prompt(__('Enter test email address:', 'quillcrm'));
+		if (!emailAddress) {
+			return;
+		}
+
+		if (!isEmail(emailAddress)) {
+			createNotice({
+				type: 'error',
+				message: __('Please enter a valid email address', 'quillcrm'),
+			});
+			return;
+		}
+
+		setTestEmailAddress(emailAddress);
+		setIsSendingTestEmail(true);
+
+		try {
+			await apiFetch({
+				path: '/qc/v1/emails/send-test',
+				method: 'POST',
+				data: {
+					template: templates[currentTab],
+					email: emailAddress,
+					campaign_id: campaign?.id,
+				},
+			});
+
+			createNotice({
+				type: 'success',
+				message: __('Test email sent successfully', 'quillcrm'),
+			});
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message:
+					error.message ||
+					__('Failed to send test email', 'quillcrm'),
+			});
+		} finally {
+			setIsSendingTestEmail(false);
+		}
+	};
+
 	return (
 		<div>
 			<PanelLayout
@@ -243,15 +302,12 @@ const Templates: React.FC = () => {
 							>
 								<Input
 									placeholder={__('Name here', 'quillcrm')}
-								/>
-							</FormField>
-
-							<FormField
-								label={__('From Name', 'quillcrm')}
-								required={true}
-							>
-								<Input
-									placeholder={__('Name here', 'quillcrm')}
+									value={templates[currentTab]?.from_name}
+									onChange={(e) =>
+										updateTemplate(currentTab, {
+											from_name: e.target.value,
+										})
+									}
 								/>
 							</FormField>
 
@@ -265,6 +321,12 @@ const Templates: React.FC = () => {
 										'name@gmail.com',
 										'quillcrm'
 									)}
+									value={templates[currentTab]?.from_email}
+									onChange={(e) =>
+										updateTemplate(currentTab, {
+											from_email: e.target.value,
+										})
+									}
 								/>
 							</FormField>
 
@@ -278,6 +340,12 @@ const Templates: React.FC = () => {
 										'name@gmail.com',
 										'quillcrm'
 									)}
+									value={templates[currentTab]?.reply_to}
+									onChange={(e) =>
+										updateTemplate(currentTab, {
+											reply_to: e.target.value,
+										})
+									}
 								/>
 							</FormField>
 
@@ -287,6 +355,12 @@ const Templates: React.FC = () => {
 							>
 								<Input
 									placeholder={__('Subject here', 'quillcrm')}
+									value={templates[currentTab]?.subject}
+									onChange={(e) =>
+										updateTemplate(currentTab, {
+											subject: e.target.value,
+										})
+									}
 								/>
 							</FormField>
 
@@ -299,6 +373,12 @@ const Templates: React.FC = () => {
 										'Preview text here',
 										'quillcrm'
 									)}
+									value={templates[currentTab]?.preview_text}
+									onChange={(e) =>
+										updateTemplate(currentTab, {
+											preview_text: e.target.value,
+										})
+									}
 								/>
 							</FormField>
 
@@ -317,12 +397,172 @@ const Templates: React.FC = () => {
 											)}
 										</p>
 									</div>
-									<Switch />
+									<Switch
+										checked={
+											templates[currentTab]?.enable_utm
+										}
+										onCheckedChange={(checked) =>
+											updateTemplate(currentTab, {
+												enable_utm: checked,
+											})
+										}
+									/>
 								</div>
 
-								<Button variant="default">
-									{__('Send Test Email', 'quillcrm')}
-								</Button>
+								{templates[currentTab]?.enable_utm && (
+									<div className="space-y-4">
+										<div className="grid grid-cols-2 gap-4">
+											<FormField
+												label={__(
+													'UTM Source',
+													'quillcrm'
+												)}
+												required={true}
+											>
+												<Input
+													placeholder={__(
+														'Source',
+														'quillcrm'
+													)}
+													value={
+														templates[currentTab]
+															?.utm_source
+													}
+													onChange={(e) =>
+														updateTemplate(
+															currentTab,
+															{
+																utm_source:
+																	e.target
+																		.value,
+															}
+														)
+													}
+												/>
+											</FormField>
+											<FormField
+												label={__(
+													'UTM Medium',
+													'quillcrm'
+												)}
+												required={true}
+											>
+												<Input
+													placeholder={__(
+														'Medium',
+														'quillcrm'
+													)}
+													value={
+														templates[currentTab]
+															?.utm_medium
+													}
+													onChange={(e) =>
+														updateTemplate(
+															currentTab,
+															{
+																utm_medium:
+																	e.target
+																		.value,
+															}
+														)
+													}
+												/>
+											</FormField>
+										</div>
+										<div className="grid grid-cols-2 gap-4">
+											<FormField
+												label={__(
+													'UTM Name',
+													'quillcrm'
+												)}
+												required={true}
+											>
+												<Input
+													placeholder={__(
+														'Name',
+														'quillcrm'
+													)}
+													value={
+														templates[currentTab]
+															?.utm_name
+													}
+													onChange={(e) =>
+														updateTemplate(
+															currentTab,
+															{
+																utm_name:
+																	e.target
+																		.value,
+															}
+														)
+													}
+												/>
+											</FormField>
+											<FormField
+												label={__(
+													'UTM Term',
+													'quillcrm'
+												)}
+											>
+												<Input
+													placeholder={__(
+														'Term',
+														'quillcrm'
+													)}
+													value={
+														templates[currentTab]
+															?.utm_term
+													}
+													onChange={(e) =>
+														updateTemplate(
+															currentTab,
+															{
+																utm_term:
+																	e.target
+																		.value,
+															}
+														)
+													}
+												/>
+											</FormField>
+										</div>
+										<FormField
+											label={__(
+												'UTM Content',
+												'quillcrm'
+											)}
+										>
+											<Input
+												placeholder={__(
+													'Content',
+													'quillcrm'
+												)}
+												value={
+													templates[currentTab]
+														?.utm_content
+												}
+												onChange={(e) =>
+													updateTemplate(currentTab, {
+														utm_content:
+															e.target.value,
+													})
+												}
+											/>
+										</FormField>
+									</div>
+								)}
+
+								<div className="mt-4">
+									<Button
+										variant="default"
+										onClick={sendTestEmail}
+										disabled={isSendingTestEmail}
+									>
+										{isSendingTestEmail
+											? __('Sending...', 'quillcrm')
+											: __('Send Test Email', 'quillcrm')}
+									</Button>
+								</div>
 							</div>
 						</div>
 					</PanelSettings>

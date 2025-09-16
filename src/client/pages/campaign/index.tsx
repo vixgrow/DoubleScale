@@ -27,9 +27,6 @@ import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import { Campaign as CampaignType } from '@quillcrm/client';
 import Overview from './overview';
-import Template from '../template';
-import { TemplateBuilder } from '@/components';
-import Builder from '../../../builder';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
@@ -187,9 +184,9 @@ const Campaign: React.FC = () => {
 				...$actions,
 			}}
 		>
-			{/* <TemplatesStep /> */}
-			<Builder />
-			{/* {!['processing', 'completed', 'resending'].includes(
+			<TemplatesStep />
+
+			{!['processing', 'completed', 'resending'].includes(
 				campaign.status
 			) &&
 				tab !== 'overview' && (
@@ -206,7 +203,7 @@ const Campaign: React.FC = () => {
 						}}
 					/>
 				)}
-			{isOverview && <Overview />} */}
+			{isOverview && <Overview />}
 		</Provider>
 	);
 };

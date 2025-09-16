@@ -146,7 +146,7 @@ const SalesPipeline: React.FC = () => {
 			<div className="sales-pipeline-loading">
 				<PageHeader
 					title={__('Loading...', 'quillcrm')}
-					subtitle={__('Sales Pipeline', 'quillcrm')}
+					subtitle={__('Pipelines', 'quillcrm')}
 					actions={[]}
 				/>
 				<div className="mt-6">
@@ -161,7 +161,7 @@ const SalesPipeline: React.FC = () => {
 			<div className="sales-pipeline-error">
 				<PageHeader
 					title={__('Error loading pipeline data', 'quillcrm')}
-					subtitle={__('Sales Pipeline', 'quillcrm')}
+					subtitle={__('Pipelines', 'quillcrm')}
 					actions={[
 						{
 							label: __('Retry', 'quillcrm'),
@@ -188,7 +188,7 @@ const SalesPipeline: React.FC = () => {
 						? selectedPipeline.name
 						: __('Select a pipeline', 'quillcrm')
 				}
-				subtitle={__('Sales Pipeline', 'quillcrm')}
+				subtitle={__('Pipelines', 'quillcrm')}
 				actions={headerActions}
 			/>
 

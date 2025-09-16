@@ -16,6 +16,7 @@ class Deal_Stage_Change extends Trigger {
 
 
 
+
 	/**
 	 * Default Value Pipeline
 	 *
@@ -84,7 +85,7 @@ class Deal_Stage_Change extends Trigger {
 	 * @return void
 	 */
 	public function load_hooks(): void {
-		\add_action( 'quillcrm_deal_stage_changed', array( $this, 'deal_stage_changed' ), 10, 4 );
+		\add_action( 'quillcrm_automation_deal_stage_changed', array( $this, 'deal_stage_changed' ), 10, 4 );
 	}
 
 	/**

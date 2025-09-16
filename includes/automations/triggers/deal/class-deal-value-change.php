@@ -15,6 +15,7 @@ use QuillCRM\Models\Contact_Model;
 
 class Deal_Value_Change extends Trigger {
 
+
 	/**
 	 * Trigger Name
 	 *
@@ -65,7 +66,7 @@ class Deal_Value_Change extends Trigger {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'quillcrm_deal_value_changed', array( $this, 'deal_value_changed' ), 10, 4 );
+		add_action( 'quillcrm_automation_deal_value_changed', array( $this, 'deal_value_changed' ), 10, 4 );
 	}
 
 	/**

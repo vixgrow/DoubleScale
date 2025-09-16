@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Deal_Manager
  * This class is responsible for handling deal management
@@ -21,6 +22,15 @@ use QuillCRM\Models\Pipeline_Stage_Model;
  * Deal_Manager class
  */
 final class Deal_Manager {
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * Class Instance.
@@ -94,25 +104,27 @@ final class Deal_Manager {
 			$stage = Pipeline_Stage_Model::where( 'id', $data['stage_id'] )
 				->where( 'pipeline_id', $data['pipeline_id'] )
 				->first();
-			
+
 			if ( ! $stage ) {
 				throw new Exception( 'Invalid pipeline or stage' );
 			}
 
 			// Set defaults
-			$deal_data = array_merge( array(
-				'value' => 0.00,
-				'currency' => 'USD',
-				'status' => 'open',
-				'owner_id' => get_current_user_id(),
-			), $data );
+			$deal_data = array_merge(
+				array(
+					'value'    => 0.00,
+					'currency' => 'USD',
+					'status'   => 'open',
+					'owner_id' => get_current_user_id(),
+				),
+				$data
+			);
 
 			$deal = Deal_Model::create( $deal_data );
 
 			do_action( 'quillcrm_deal_created_by_manager', $deal );
 
 			return $deal;
-
 		} catch ( Exception $e ) {
 			error_log( 'QuillCRM Deal Manager Error: ' . $e->getMessage() );
 			return null;
@@ -124,24 +136,27 @@ final class Deal_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
+	 * @param int   $deal_id Deal ID
 	 * @param array $data Updated data
 	 *
 	 * @return Deal|null
 	 */
 	public function update_deal( $deal_id, $data ) {
 		$deal = Deal_Model::find( $deal_id );
-		
+
 		if ( ! $deal ) {
 			return null;
 		}
-
+		$old_owner_id = $deal->owner_id;
+		$new_owner_id = $data['owner_id'];
+		$old_value    = $deal->value;
+		$new_value    = $data['value'];
 		// If stage is being changed, validate it belongs to the pipeline
 		if ( isset( $data['stage_id'] ) && $data['stage_id'] != $deal->stage_id ) {
 			$stage = Pipeline_Stage_Model::where( 'id', $data['stage_id'] )
 				->where( 'pipeline_id', $deal->pipeline_id )
 				->first();
-			
+
 			if ( ! $stage ) {
 				unset( $data['stage_id'] );
 			}
@@ -151,6 +166,8 @@ final class Deal_Manager {
 		$deal->save();
 
 		do_action( 'quillcrm_deal_updated_by_manager', $deal );
+		do_action( 'quillcrm_automation_deal_owner_changed', $deal->contact, $deal, $old_owner_id, $new_owner_id );
+		do_action( 'quillcrm_automation_deal_value_changed', $deal->contact, $deal, $old_value, $new_value );
 
 		return $deal;
 	}
@@ -160,21 +177,26 @@ final class Deal_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
-	 * @param int $stage_id Target stage ID
+	 * @param int      $deal_id Deal ID
+	 * @param int      $stage_id Target stage ID
 	 * @param int|null $user_id User performing the action
-	 * @param bool $update_probability Whether to update deal probability to match new stage
+	 * @param bool     $update_probability Whether to update deal probability to match new stage
 	 *
 	 * @return bool
 	 */
 	public function move_deal_to_stage( $deal_id, $stage_id, $user_id = null, $update_probability = false ) {
 		$deal = Deal_Model::find( $deal_id );
-		
+
 		if ( ! $deal ) {
 			return false;
 		}
-
-		return $deal->moveToStage( $stage_id, $user_id, $update_probability );
+		$old_stage_id = $deal->stage_id;
+		$new_stage_id = $stage_id;
+		$move         = $deal->moveToStage( $stage_id, $user_id, $update_probability );
+		if ( $move ) {
+			do_action( 'quillcrm_automation_deal_stage_changed', $deal->contact, $deal, $old_stage_id, $new_stage_id );
+		}
+		return $move;
 	}
 
 	/**
@@ -182,17 +204,17 @@ final class Deal_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
-	 * @param int $pipeline_id Target pipeline ID
+	 * @param int      $deal_id Deal ID
+	 * @param int      $pipeline_id Target pipeline ID
 	 * @param int|null $stage_id Target stage ID (null = first stage)
 	 * @param int|null $user_id User performing the action
 	 *
 	 * @return bool
 	 */
 	public function move_deal_to_pipeline( $deal_id, $pipeline_id, $stage_id = null, $user_id = null ) {
-		$deal = Deal_Model::find( $deal_id );
+		$deal            = Deal_Model::find( $deal_id );
 		$target_pipeline = Pipeline_Model::with( 'stages' )->find( $pipeline_id );
-		
+
 		if ( ! $deal || ! $target_pipeline ) {
 			return false;
 		}
@@ -207,25 +229,27 @@ final class Deal_Manager {
 		}
 
 		$old_pipeline_id = $deal->pipeline_id;
-		$old_stage_id = $deal->stage_id;
+		$old_stage_id    = $deal->stage_id;
 
 		$deal->pipeline_id = $pipeline_id;
-		$deal->stage_id = $stage_id;
-		$saved = $deal->save();
+		$deal->stage_id    = $stage_id;
+		$saved             = $deal->save();
 
 		if ( $saved ) {
 			// Log the pipeline change activity
-			Deal_Activity_Model::create( array(
-				'deal_id' => $deal->id,
-				'activity_type' => 'stage_changed',
-				'data' => array(
-					'old_pipeline_id' => $old_pipeline_id,
-					'new_pipeline_id' => $pipeline_id,
-					'old_stage_id' => $old_stage_id,
-					'new_stage_id' => $stage_id,
-				),
-				'user_id' => $user_id ?: get_current_user_id(),
-			) );
+			Deal_Activity_Model::create(
+				array(
+					'deal_id'       => $deal->id,
+					'activity_type' => 'stage_changed',
+					'data'          => array(
+						'old_pipeline_id' => $old_pipeline_id,
+						'new_pipeline_id' => $pipeline_id,
+						'old_stage_id'    => $old_stage_id,
+						'new_stage_id'    => $stage_id,
+					),
+					'user_id'       => $user_id ?: get_current_user_id(),
+				)
+			);
 
 			do_action( 'quillcrm_deal_pipeline_changed', $deal, $old_pipeline_id, $pipeline_id );
 		}
@@ -238,19 +262,23 @@ final class Deal_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
+	 * @param int      $deal_id Deal ID
 	 * @param int|null $user_id User performing the action
 	 *
 	 * @return bool
 	 */
 	public function mark_deal_as_won( $deal_id, $user_id = null ) {
 		$deal = Deal_Model::find( $deal_id );
-		
+
 		if ( ! $deal ) {
 			return false;
 		}
-
-		return $deal->markAsWon( $user_id );
+		$old_status = $deal->status;
+		$marked     = $deal->markAsWon( $user_id );
+		if ( $marked ) {
+			do_action( 'quillcrm_automation_deal_status_changed', $deal->contact, $deal, $old_status, 'won' );
+		}
+		return $marked;
 	}
 
 	/**
@@ -258,20 +286,24 @@ final class Deal_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
-	 * @param string $reason Reason for losing the deal
+	 * @param int      $deal_id Deal ID
+	 * @param string   $reason Reason for losing the deal
 	 * @param int|null $user_id User performing the action
 	 *
 	 * @return bool
 	 */
 	public function mark_deal_as_lost( $deal_id, $reason = '', $user_id = null ) {
 		$deal = Deal_Model::find( $deal_id );
-		
+
 		if ( ! $deal ) {
 			return false;
 		}
-
-		return $deal->markAsLost( $reason, $user_id );
+		$old_status = $deal->status;
+		$marked     = $deal->markAsLost( $reason, $user_id );
+		if ( $marked ) {
+			do_action( 'quillcrm_automation_deal_status_changed', $deal->contact, $deal, $old_status, 'lost' );
+		}
+		return $marked;
 	}
 
 	/**
@@ -279,36 +311,40 @@ final class Deal_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
+	 * @param int      $deal_id Deal ID
 	 * @param int|null $user_id User performing the action
 	 *
 	 * @return bool
 	 */
 	public function reopen_deal( $deal_id, $user_id = null ) {
 		$deal = Deal_Model::find( $deal_id );
-		
+
 		if ( ! $deal || $deal->status === 'open' ) {
 			return false;
 		}
 
-		$deal->status = 'open';
-		$deal->won_time = null;
-		$deal->lost_time = null;
+		$old_status        = $deal->status;
+		$deal->status      = 'open';
+		$deal->won_time    = null;
+		$deal->lost_time   = null;
 		$deal->lost_reason = null;
-		$saved = $deal->save();
+		$saved             = $deal->save();
 
 		if ( $saved ) {
-			Deal_Activity_Model::create( array(
-				'deal_id' => $deal->id,
-				'activity_type' => 'status_changed',
-				'data' => array(
-					'status' => 'open',
-					'action' => 'reopened',
-				),
-				'user_id' => $user_id ?: get_current_user_id(),
-			) );
+			Deal_Activity_Model::create(
+				array(
+					'deal_id'       => $deal->id,
+					'activity_type' => 'status_changed',
+					'data'          => array(
+						'status' => 'open',
+						'action' => 'reopened',
+					),
+					'user_id'       => $user_id ?: get_current_user_id(),
+				)
+			);
 
 			do_action( 'quillcrm_deal_reopened', $deal );
+			do_action( 'quillcrm_automation_deal_status_changed', $deal->contact, $deal, $old_status, 'open' );
 		}
 
 		return $saved;
@@ -320,8 +356,8 @@ final class Deal_Manager {
 	 * @since 1.0.0
 	 *
 	 * @param array $filters Filter criteria
-	 * @param int $per_page Results per page
-	 * @param int $page Page number
+	 * @param int   $per_page Results per page
+	 * @param int   $page Page number
 	 *
 	 * @return \Illuminate\Pagination\LengthAwarePaginator
 	 */
@@ -380,18 +416,23 @@ final class Deal_Manager {
 		// Search in title or contact name
 		if ( ! empty( $filters['search'] ) ) {
 			$search_term = '%' . $filters['search'] . '%';
-			$query->where( function( $q ) use ( $search_term ) {
-				$q->where( 'title', 'LIKE', $search_term )
-				  ->orWhereHas( 'contact', function( $contact_query ) use ( $search_term ) {
-					  $contact_query->where( 'first_name', 'LIKE', $search_term )
-						->orWhere( 'last_name', 'LIKE', $search_term )
-						->orWhere( 'email', 'LIKE', $search_term );
-				  } );
-			} );
+			$query->where(
+				function ( $q ) use ( $search_term ) {
+					$q->where( 'title', 'LIKE', $search_term )
+						->orWhereHas(
+							'contact',
+							function ( $contact_query ) use ( $search_term ) {
+								$contact_query->where( 'first_name', 'LIKE', $search_term )
+									->orWhere( 'last_name', 'LIKE', $search_term )
+									->orWhere( 'email', 'LIKE', $search_term );
+							}
+						);
+				}
+			);
 		}
 
 		// Sort options
-		$sort_by = $filters['sort_by'] ?? 'created_at';
+		$sort_by    = $filters['sort_by'] ?? 'created_at';
 		$sort_order = $filters['sort_order'] ?? 'desc';
 		$query->orderBy( $sort_by, $sort_order );
 
@@ -426,7 +467,7 @@ final class Deal_Manager {
 	 * @since 1.0.0
 	 *
 	 * @param int|null $user_id User ID (null for overall)
-	 * @param array $filters Additional filters
+	 * @param array    $filters Additional filters
 	 *
 	 * @return array
 	 */
@@ -448,13 +489,13 @@ final class Deal_Manager {
 		$deals = $query->get();
 
 		$total_deals = $deals->count();
-		$won_deals = $deals->where( 'status', 'won' )->count();
-		$lost_deals = $deals->where( 'status', 'lost' )->count();
-		$open_deals = $deals->where( 'status', 'open' )->count();
+		$won_deals   = $deals->where( 'status', 'won' )->count();
+		$lost_deals  = $deals->where( 'status', 'lost' )->count();
+		$open_deals  = $deals->where( 'status', 'open' )->count();
 
 		$total_value = $deals->where( 'status', 'open' )->sum( 'value' );
-		$won_value = $deals->where( 'status', 'won' )->sum( 'value' );
-		
+		$won_value   = $deals->where( 'status', 'won' )->sum( 'value' );
+
 		// Calculate weighted value for open deals
 		$weighted_value = 0;
 		foreach ( $deals->where( 'status', 'open' ) as $deal ) {
@@ -462,16 +503,16 @@ final class Deal_Manager {
 		}
 
 		return array(
-			'total_deals' => $total_deals,
-			'won_deals' => $won_deals,
-			'lost_deals' => $lost_deals,
-			'open_deals' => $open_deals,
-			'win_rate' => $total_deals > 0 ? round( ( $won_deals / $total_deals ) * 100, 2 ) : 0,
-			'total_value' => $total_value,
-			'won_value' => $won_value,
-			'weighted_value' => $weighted_value,
+			'total_deals'        => $total_deals,
+			'won_deals'          => $won_deals,
+			'lost_deals'         => $lost_deals,
+			'open_deals'         => $open_deals,
+			'win_rate'           => $total_deals > 0 ? round( ( $won_deals / $total_deals ) * 100, 2 ) : 0,
+			'total_value'        => $total_value,
+			'won_value'          => $won_value,
+			'weighted_value'     => $weighted_value,
 			'average_deal_value' => $total_deals > 0 ? round( $total_value / $total_deals, 2 ) : 0,
-			'conversion_rate' => $total_deals > 0 ? round( ( ( $won_deals + $lost_deals ) / $total_deals ) * 100, 2 ) : 0,
+			'conversion_rate'    => $total_deals > 0 ? round( ( ( $won_deals + $lost_deals ) / $total_deals ) * 100, 2 ) : 0,
 		);
 	}
 
@@ -480,8 +521,8 @@ final class Deal_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $deal_ids Array of deal IDs
-	 * @param array $data Data to update
+	 * @param array    $deal_ids Array of deal IDs
+	 * @param array    $data Data to update
 	 * @param int|null $user_id User performing the action
 	 *
 	 * @return int Number of updated deals
@@ -492,7 +533,7 @@ final class Deal_Manager {
 		}
 
 		$updated_count = 0;
-		
+
 		foreach ( $deal_ids as $deal_id ) {
 			$deal = $this->update_deal( $deal_id, $data );
 			if ( $deal ) {
@@ -516,7 +557,7 @@ final class Deal_Manager {
 	 */
 	public function delete_deal( $deal_id ) {
 		$deal = Deal_Model::with( 'activities' )->find( $deal_id );
-		
+
 		if ( ! $deal ) {
 			return false;
 		}

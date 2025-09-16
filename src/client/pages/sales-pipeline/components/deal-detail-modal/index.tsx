@@ -543,7 +543,12 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 						{
 							key: 'activities',
 							label: __('Activities', 'quillcrm'),
-							children: <DealActivities dealId={deal.id} />,
+							children: (
+								<DealActivities
+									dealId={deal.id}
+									dealTitle={deal.title}
+								/>
+							),
 						},
 						{
 							key: 'custom-fields',

@@ -1,4 +1,32 @@
 .deal-activities {
+	.activity-actions {
+		margin-bottom: 16px;
+		padding: 12px;
+		background: #fafafa;
+		border-radius: 6px;
+		border: 1px solid #f0f0f0;
+
+		.ant-space {
+			width: 100%;
+			justify-content: flex-start;
+		}
+
+		.ant-btn {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+
+			&[type="primary"] {
+				background: #1890ff;
+				border-color: #1890ff;
+
+				&:hover {
+					background: #40a9ff;
+					border-color: #40a9ff;
+				}
+			}
+		}
+	}
 	.activities-filters {
 		padding: 16px 0;
 		border-bottom: 1px solid #f0f0f0;

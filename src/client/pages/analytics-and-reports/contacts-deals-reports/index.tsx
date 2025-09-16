@@ -14,6 +14,8 @@ import {
 	CaretUpOutlined,
 	CaretDownOutlined,
 } from '@ant-design/icons';
+import { useReportFilters } from '../../../../hooks/useReportFilters';
+import ReportFilters from '../../../../components/reports/ReportFilters';
 
 interface ContactsDealsReportsProps {
 	contacts_created: number;
@@ -47,11 +49,25 @@ const ContactsDealsReports: React.FC = () => {
 	});
 	const [loading, setLoading] = useState(false);
 
+	// Use the custom hook for filters
+	const {
+		filters,
+		setFilters,
+		filterOptions,
+		showFilters,
+		setShowFilters,
+		buildQueryParams,
+		clearFilters,
+	} = useReportFilters();
+
 	const fetchContactsDealsReports = async () => {
 		setLoading(true);
 		try {
+			const queryParams = buildQueryParams();
+			const path = `/qc/v1/reports/contacts-deals${queryParams ? `?${queryParams}` : ''}`;
+
 			const response = (await apiFetch({
-				path: '/qc/v1/reports/contacts-deals',
+				path,
 			})) as ContactsDealsReportsProps;
 
 			// Ensure all properties exist in the response
@@ -78,9 +94,18 @@ const ContactsDealsReports: React.FC = () => {
 		}
 	};
 
+	// Apply filters
+	const applyFilters = () => {
+		fetchContactsDealsReports();
+	};
+
 	useEffect(() => {
 		fetchContactsDealsReports();
 	}, []);
+
+	useEffect(() => {
+		fetchContactsDealsReports();
+	}, [filters]);
 
 	if (loading) {
 		return <Skeleton active />;
@@ -88,6 +113,23 @@ const ContactsDealsReports: React.FC = () => {
 
 	return (
 		<div>
+			{/* Filters Section */}
+			<ReportFilters
+				title={__('Contacts & Deals Reports', 'quillcrm')}
+				filters={filters}
+				setFilters={setFilters}
+				filterOptions={filterOptions}
+				showFilters={showFilters}
+				setShowFilters={setShowFilters}
+				clearFilters={clearFilters}
+				applyFilters={applyFilters}
+				showDateRange={true}
+				showOwner={true}
+				showPipeline={true}
+				showStatus={true}
+				showContact={true}
+			/>
+
 			<Flex
 				gap={20}
 				vertical
@@ -106,7 +148,14 @@ const ContactsDealsReports: React.FC = () => {
 					)}
 				</Typography.Title>
 				<Typography.Text type="secondary">
-					{__('Date range: In the last 30 days', 'quillcrm')}{' '}
+					{filters.dateRange &&
+					filters.dateRange[0] &&
+					filters.dateRange[1]
+						? `${__('Date range:', 'quillcrm')} ${filters.dateRange[0].format('MMM DD, YYYY')} - ${filters.dateRange[1].format('MMM DD, YYYY')}`
+						: __(
+								'Date range: In the last 30 days',
+								'quillcrm'
+							)}{' '}
 					&nbsp;&nbsp; {__('Compared To: Year before', 'quillcrm')}
 				</Typography.Text>
 				<Flex gap={20} style={{ marginTop: 20 }} wrap="wrap">

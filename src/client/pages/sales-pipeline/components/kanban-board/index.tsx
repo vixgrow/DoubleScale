@@ -51,7 +51,6 @@ interface KanbanBoardProps {
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	pipeline,
 	deals,
-	onRefresh,
 	updateDealOptimistically,
 	onDealView,
 	onDealEdit,
@@ -63,7 +62,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: {
-				distance: 8, // Require 8px of movement before drag starts
+				distance: 3, // Reduce distance to make drag more responsive
 			},
 		}),
 		useSensor(KeyboardSensor, {
@@ -78,7 +77,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 				// Handle both string and number stage IDs
 				const stageDeals = deals.filter(
 					(deal) =>
-						parseInt(String(deal.stage_id)) ===
+						parseInt(String(deal.stage?.id)) ===
 						parseInt(String(stage.id))
 				);
 				acc[stage.id] = stageDeals;
@@ -98,7 +97,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	}, [activeId, deals]);
 
 	const handleDragStart = ({ active }: DragStartEvent) => {
-		console.log('Drag started:', active.id, active.data);
 		const activeData = active.data.current;
 		if (activeData?.type === 'deal') {
 			setActiveId(String(active.id));
@@ -135,14 +133,14 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 			targetStageId = overData.stageId;
 		} else if (overData?.type === 'deal') {
 			// Dropped on another deal - move to that deal's stage
-			targetStageId = overData.deal.stage_id;
+			targetStageId = overData.deal.stage?.id;
 		}
 
 		// Handle type coercion for stage ID comparison
 		if (
 			!targetStageId ||
 			parseInt(String(targetStageId)) ===
-				parseInt(String(draggedDeal.stage_id))
+				parseInt(String(draggedDeal.stage?.id))
 		) {
 			console.log('No stage change needed');
 			return;
@@ -151,7 +149,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		const currentStage = pipeline.stages.find(
 			(stage) =>
 				parseInt(String(stage.id)) ===
-				parseInt(String(draggedDeal.stage_id))
+				parseInt(String(draggedDeal.stage?.id))
 		);
 
 		const targetStage = pipeline.stages.find(
@@ -194,8 +192,25 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		updateProbability: boolean,
 		deal: Deal
 	) => {
-		// Optimistically update the deal's stage
-		updateDealOptimistically(dealId, { stage_id: targetStageId });
+		// Find the target stage object for optimistic update
+		const targetStage = pipeline.stages.find(
+			(stage) => stage.id === targetStageId
+		);
+
+		if (!targetStage) {
+			console.error('Target stage not found:', targetStageId);
+			return;
+		}
+
+		// Optimistically update the deal's stage object
+		updateDealOptimistically(dealId, {
+			stage: {
+				id: targetStage.id,
+				name: targetStage.name,
+				color: targetStage.color,
+				win_probability: targetStage.win_probability,
+			},
+		});
 
 		try {
 			console.log(
@@ -209,7 +224,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
 			// Rollback the optimistic update
 			updateDealOptimistically(dealId, {
-				stage_id: deal.stage_id,
+				stage: deal.stage,
 			});
 
 			alert(__('Failed to move deal. Please try again.', 'quillcrm'));
@@ -274,6 +289,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								stage={stage}
 								deals={dealsByStage[stage.id] || []}
 								isOver={false} // Will be enhanced with collision detection
+								activeDealId={activeId}
 								onDealView={onDealView}
 								onDealEdit={onDealEdit}
 							/>
@@ -290,12 +306,12 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								onCardClick={() => {}} // No-op during drag
 								stageColor={
 									pipeline.stages.find(
-										(s) => s.id === activeDeal.stage_id
+										(s) => s.id === activeDeal.stage?.id
 									)?.color
 								}
 								stageProbability={
 									pipeline.stages.find(
-										(s) => s.id === activeDeal.stage_id
+										(s) => s.id === activeDeal.stage?.id
 									)?.win_probability
 								}
 							/>

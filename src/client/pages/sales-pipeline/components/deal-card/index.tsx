@@ -5,6 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 
 /**
+ * React dependencies
+ */
+import React from 'react';
+
+/**
  * External dependencies
  */
 import { useDraggable } from '@dnd-kit/core';
@@ -56,7 +61,7 @@ export const DealCard: React.FC<DealCardProps> = ({
 		data: {
 			type: 'deal',
 			deal: deal,
-			currentStageId: deal.stage_id,
+			currentStageId: deal.stage?.id,
 		},
 	});
 
@@ -106,8 +111,7 @@ export const DealCard: React.FC<DealCardProps> = ({
 	}, [deal.weighted_value]);
 
 	const handleCardClick = (e: React.MouseEvent) => {
-		// Don't trigger if clicking on drag handle
-		if ((e.target as HTMLElement).closest('.drag-handle')) {
+		if (isDraggging || (e.target as HTMLElement).closest('.drag-handle')) {
 			return;
 		}
 		onCardClick(deal);

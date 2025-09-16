@@ -3,12 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { Modal, Form, Input, Button, DatePicker, Select } from 'antd';
+import { Modal, Form, Input, Button, DatePicker, Select, message } from 'antd';
 import { Calendar } from 'lucide-react';
 import dayjs from 'dayjs';
 
@@ -56,8 +55,6 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 		loading: contactsLoading,
 		searchContacts,
 	} = useContacts();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
 
 	const handleSubmit = async (values: any) => {
 		setLoading(true);
@@ -75,27 +72,18 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 
 			await scheduleMeeting(dealId, meetingData);
 
-			if (createNotice) {
-				createNotice({
-					type: 'success',
-					message: __('Meeting scheduled successfully!', 'quillcrm'),
-				});
-			}
+			message.success(__('Meeting scheduled successfully!', 'quillcrm'));
 
 			form.resetFields();
 			setSelectedContacts([]);
 			onSuccess();
 			onClose();
 		} catch (error) {
-			if (createNotice) {
-				createNotice({
-					type: 'error',
-					message:
-						error instanceof Error
-							? error.message
-							: __('Failed to schedule meeting', 'quillcrm'),
-				});
-			}
+			message.error(
+				error instanceof Error
+					? error.message
+					: __('Failed to schedule meeting', 'quillcrm')
+			);
 		} finally {
 			setLoading(false);
 		}

@@ -3,12 +3,11 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { Modal, Form, Input, Button } from 'antd';
+import { Modal, Form, Input, Button, message } from 'antd';
 import { MessageSquare } from 'lucide-react';
 
 /**
@@ -37,34 +36,23 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
 	const { addNote } = useActivityOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
 
 	const handleSubmit = async (values: { note: string }) => {
 		setLoading(true);
 		try {
 			await addNote(dealId, values.note);
 
-			if (createNotice) {
-				createNotice({
-					type: 'success',
-					message: __('Note added successfully!', 'quillcrm'),
-				});
-			}
+			message.success(__('Note added successfully!', 'quillcrm'));
 
 			form.resetFields();
 			onSuccess();
 			onClose();
 		} catch (error) {
-			if (createNotice) {
-				createNotice({
-					type: 'error',
-					message:
-						error instanceof Error
-							? error.message
-							: __('Failed to add note', 'quillcrm'),
-				});
-			}
+			message.error(
+				error instanceof Error
+					? error.message
+					: __('Failed to add note', 'quillcrm')
+			);
 		} finally {
 			setLoading(false);
 		}

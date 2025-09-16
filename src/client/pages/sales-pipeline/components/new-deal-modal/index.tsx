@@ -3,13 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
  */
-import { Modal, Form, Input, Select, InputNumber, DatePicker } from 'antd';
+import { Modal, Form, Input, Select, InputNumber, DatePicker, message } from 'antd';
 import {
 	UserOutlined,
 	DollarOutlined,
@@ -70,14 +69,10 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		searchUsers: searchOwners,
 	} = useUsers();
 	const { createDeal } = useDealOperations();
-	const { createNotice } = useDispatch('quillcrm/core');
 
 	const handleSubmit = async (values: DealFormData) => {
 		if (!pipeline) {
-			createNotice({
-				type: 'error',
-				message: __('Please select a pipeline first.', 'quillcrm'),
-			});
+			message.error(__('Please select a pipeline first.', 'quillcrm'));
 			return;
 		}
 
@@ -96,21 +91,16 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 
 			await createDeal(dealData);
 
-			createNotice({
-				type: 'success',
-				message: __('Deal created successfully!', 'quillcrm'),
-			});
+			message.success(__('Deal created successfully!', 'quillcrm'));
 
 			form.resetFields();
 			onClose();
 			onSuccess();
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message:
-					error?.message ||
-					__('Failed to create deal. Please try again.', 'quillcrm'),
-			});
+			message.error(
+				error?.message ||
+					__('Failed to create deal. Please try again.', 'quillcrm')
+			);
 		} finally {
 			setLoading(false);
 		}

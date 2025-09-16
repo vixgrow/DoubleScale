@@ -3,23 +3,20 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { Modal, Form, Input, Button, DatePicker, Select } from 'antd';
+import { Modal, Form, Input, Button, DatePicker, Select, message } from 'antd';
 import { Mail } from 'lucide-react';
 import dayjs from 'dayjs';
-
-const { TextArea } = Input;
 
 /**
  * Internal dependencies
  */
 import { useActivityOperations } from '../../hooks/use-activity-operations';
 import { useContacts } from '../../hooks/use-contacts';
-import { Contact } from '../../../types';
+import { Contact } from '../../../../types';
 import './style.scss';
 
 interface LogEmailModalProps {
@@ -52,8 +49,6 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 		loading: contactsLoading,
 		searchContacts,
 	} = useContacts();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
 
 	const handleSubmit = async (values: any) => {
 		setLoading(true);
@@ -68,27 +63,18 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 
 			await logEmail(dealId, emailData);
 
-			if (createNotice) {
-				createNotice({
-					type: 'success',
-					message: __('Email logged successfully!', 'quillcrm'),
-				});
-			}
+			message.success(__('Email logged successfully!', 'quillcrm'));
 
 			onSuccess();
 			onClose();
 			form.resetFields();
 			setSelectedContacts([]);
 		} catch (error) {
-			if (createNotice) {
-				createNotice({
-					type: 'error',
-					message:
-						error instanceof Error
-							? error.message
-							: __('Failed to log email', 'quillcrm'),
-				});
-			}
+			message.error(
+				error instanceof Error
+					? error.message
+					: __('Failed to log email', 'quillcrm')
+			);
 		} finally {
 			setLoading(false);
 		}

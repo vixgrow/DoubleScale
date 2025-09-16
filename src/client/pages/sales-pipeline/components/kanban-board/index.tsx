@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useMemo } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -59,8 +58,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 }) => {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const { moveDealToStage } = useDealOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
 
 	// Configure sensors for better accessibility and UX
 	const sensors = useSensors(
@@ -178,8 +175,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 				draggedDeal.id,
 				targetStageId,
 				false,
-				draggedDeal,
-				targetStage
+				draggedDeal
 			);
 		} else {
 			// Deal has no custom probability - automatically sync to new stage probability
@@ -187,8 +183,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 				draggedDeal.id,
 				targetStageId,
 				true,
-				draggedDeal,
-				targetStage
+				draggedDeal
 			);
 		}
 	};
@@ -197,8 +192,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		dealId: number,
 		targetStageId: number,
 		updateProbability: boolean,
-		deal: any,
-		targetStage: any
+		deal: Deal
 	) => {
 		// Optimistically update the deal's stage
 		updateDealOptimistically(dealId, { stage_id: targetStageId });
@@ -209,20 +203,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 			);
 			await moveDealToStage(dealId, targetStageId, updateProbability);
 
-			if (createNotice) {
-				createNotice({
-					type: 'success',
-					message: __(
-						`Deal "${deal.title}" moved to "${targetStage.name}"`,
-						'quillcrm'
-					),
-				});
-			} else {
-				console.log(
-					`Success: Deal "${deal.title}" moved to "${targetStage.name}"`
-				);
-			}
-
 			// No need to refresh - optimistic update already applied
 		} catch (error) {
 			console.error('Failed to move deal:', error);
@@ -232,17 +212,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 				stage_id: deal.stage_id,
 			});
 
-			if (createNotice) {
-				createNotice({
-					type: 'error',
-					message: __(
-						'Failed to move deal. Please try again.',
-						'quillcrm'
-					),
-				});
-			} else {
-				alert(__('Failed to move deal. Please try again.', 'quillcrm'));
-			}
+			alert(__('Failed to move deal. Please try again.', 'quillcrm'));
 		}
 	};
 

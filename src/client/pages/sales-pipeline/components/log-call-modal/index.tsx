@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -16,6 +15,7 @@ import {
 	Select,
 	TimePicker,
 	DatePicker,
+	message,
 } from 'antd';
 import { Phone } from 'lucide-react';
 import dayjs from 'dayjs';
@@ -55,8 +55,6 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
 	const { logCall } = useActivityOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
 
 	const handleSubmit = async (values: any) => {
 		setLoading(true);
@@ -73,26 +71,17 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 
 			await logCall(dealId, callData);
 
-			if (createNotice) {
-				createNotice({
-					type: 'success',
-					message: __('Call logged successfully!', 'quillcrm'),
-				});
-			}
+			message.success(__('Call logged successfully!', 'quillcrm'));
 
 			form.resetFields();
 			onSuccess();
 			onClose();
 		} catch (error) {
-			if (createNotice) {
-				createNotice({
-					type: 'error',
-					message:
-						error instanceof Error
-							? error.message
-							: __('Failed to log call', 'quillcrm'),
-				});
-			}
+			message.error(
+				error instanceof Error
+					? error.message
+					: __('Failed to log call', 'quillcrm')
+			);
 		} finally {
 			setLoading(false);
 		}

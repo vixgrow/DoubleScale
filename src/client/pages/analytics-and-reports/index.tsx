@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import ContactsDealsReports from './contacts-deals-reports';
 import DealsReportsByDate from './deals-reports-by-date';
+import DealsReportsLeaderboard from './deals-reports-leaderboard';
 
 /**
  * External dependencies
@@ -19,6 +20,7 @@ const AnalyticsAndReports: React.FC = () => {
 			<h2 className="text-2xl font-bold">Analytics and Reports</h2>
 			<ContactsDealsReports />
 			<DealsReportsByDate />
+			<DealsReportsLeaderboard />
 		</div>
 	);
 };

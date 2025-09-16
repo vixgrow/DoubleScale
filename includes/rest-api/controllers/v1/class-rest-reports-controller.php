@@ -13,12 +13,20 @@ namespace QuillCRM\REST_API\Controllers\V1;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Deal_Model;
+use QuillCRM\Models\User_Model;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 class Rest_Reports_Controller extends REST_Controller {
+
+
+
+
+
+
+
 
 
 	/**
@@ -56,6 +64,18 @@ class Rest_Reports_Controller extends REST_Controller {
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'get_deals_by_date_reports' ),
 					'args'     => $this->get_deals_by_date_params(),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/deals-leaderboard',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_deals_leaderboard_reports' ),
+					'args'     => $this->get_reports_filter_params(),
 				),
 			)
 		);
@@ -113,6 +133,74 @@ class Rest_Reports_Controller extends REST_Controller {
 			200
 		);
 	}
+
+
+	/**
+	 * Get deals leaderboard reports
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_deals_leaderboard_reports( $request ) {
+		$filters = $this->get_filters_from_request( $request );
+
+		$deals_leaderboard = array();
+		$all_owners        = User_Model::all();
+
+		foreach ( $all_owners as $owner ) {
+			$owner_data = $this->get_deals_leaderboard( $filters, $owner->ID );
+
+			// Only include owners who have deals
+			if ( $owner_data['total_deals'] > 0 ) {
+				$deals_leaderboard[] = array(
+					'owner_id'     => $owner->ID,
+					'owner_name'   => $owner->display_name,
+					'won_amount'   => $owner_data['total_value'],
+					'lost_amount'  => 0, // You may want to add this calculation
+					'total_amount' => $owner_data['total_value'],
+					'won_count'    => $owner_data['total_deals'],
+					'lost_count'   => 0, // You may want to add this calculation
+					'total_count'  => $owner_data['total_deals'],
+				);
+			}
+		}
+
+		return new WP_REST_Response(
+			array(
+				'deals_leaderboard' => $deals_leaderboard,
+				'filters'           => $filters,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Get deals leaderboard for an owner
+	 *
+	 * @param array $filters Filters array.
+	 * @param int   $owner_id Owner ID.
+	 * @return array Deals leaderboard.
+	 */
+	private function get_deals_leaderboard( $filters, $owner_id ) {
+		$deals_leaderboard = array(
+			'total_deals'          => 0,
+			'total_value'          => 0,
+			'total_weighted_value' => 0,
+		);
+
+		$deals = $this->get_filters_to_apply( $filters )->where( 'owner_id', $owner_id )->where( 'status', 'won' )->get();
+
+		foreach ( $deals as $deal ) {
+			$deals_leaderboard['total_deals']++;
+			$deals_leaderboard['total_value']          += $deal->value;
+			$deals_leaderboard['total_weighted_value'] += $deal->weighted_value;
+		}
+
+		return $deals_leaderboard;
+	}
+
+
+
 
 	/**
 	 * Get collection parameters for deals by date endpoint

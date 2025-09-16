@@ -60,8 +60,6 @@ const DealsReportsByDate: React.FC = () => {
 				path: `/qc/v1/reports/deals-by-date?${fullParams}`,
 			})) as DealsReportsByDateResponse;
 
-			console.log('response', response);
-
 			setData(response);
 		} catch (error) {
 			console.error('Error fetching deals reports:', error);

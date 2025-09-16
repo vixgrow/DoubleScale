@@ -29,6 +29,7 @@ class Rest_Reports_Controller extends REST_Controller {
 
 
 
+
 	/**
 	 * Route base.
 	 *
@@ -188,7 +189,7 @@ class Rest_Reports_Controller extends REST_Controller {
 			'total_weighted_value' => 0,
 		);
 
-		$deals = $this->get_filters_to_apply( $filters )->where( 'owner_id', $owner_id )->where( 'status', 'won' )->get();
+		$deals = $this->get_filters_to_apply( $filters )->where( 'owner_id', $owner_id )->whereIn( 'status', array( 'won', 'lost' ) )->get();
 
 		foreach ( $deals as $deal ) {
 			$deals_leaderboard['total_deals']++;

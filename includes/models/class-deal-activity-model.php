@@ -174,17 +174,7 @@ class Deal_Activity_Model extends Model {
 				return sprintf( '%s changed deal status to %s', $user_name, $status );
 			
 			case 'note_added':
-				$content = $this->data['content'] ?? '';
-				
-				$message = sprintf( '%s added a note', $user_name );
-				
-				if ( ! empty( $content ) ) {
-					// Show first 50 characters of the note
-					$preview = strlen( $content ) > 50 ? substr( $content, 0, 50 ) . '...' : $content;
-					$message .= sprintf( ': "%s"', $preview );
-				}
-				
-				return $message;
+				return sprintf( '%s added a note', $user_name );
 			
 			case 'email_sent':
 				$subject = $this->data['subject'] ?? '';
@@ -266,7 +256,7 @@ class Deal_Activity_Model extends Model {
 		return self::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'note_added',
-			'data' => array( 'note' => $note ),
+			'data' => array( 'content' => $note ),
 			'user_id' => $user_id ?: get_current_user_id(),
 		) );
 	}

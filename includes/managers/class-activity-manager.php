@@ -92,7 +92,7 @@ final class Activity_Manager {
 		$activity = Deal_Activity_Model::create( array(
 			'deal_id' => $deal_id,
 			'activity_type' => 'note_added',
-			'data' => array( 'note' => wp_kses_post( $note ) ),
+			'data' => array( 'content' => wp_kses_post( $note ) ),
 			'user_id' => $user_id ?: get_current_user_id(),
 		) );
 

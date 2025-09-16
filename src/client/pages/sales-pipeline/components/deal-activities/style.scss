@@ -95,11 +95,85 @@
 							font-size: 13px;
 							line-height: 1.4;
 
-							.meeting-detail-item {
-								margin-top: 6px;
+							.meeting-details-header {
+								display: flex;
+								align-items: center;
+								gap: 8px;
+								margin-bottom: 12px;
+								color: #1890ff;
 
-								&:first-child {
-									margin-top: 4px;
+								svg {
+									color: #1890ff;
+								}
+							}
+
+							.meeting-details-grid {
+								display: grid;
+								grid-template-columns: 1fr 1fr;
+								gap: 8px 16px;
+								margin-bottom: 8px;
+
+								@media (max-width: 768px) {
+									grid-template-columns: 1fr;
+									gap: 8px;
+								}
+							}
+
+							.meeting-detail-item {
+								display: flex;
+								flex-direction: column;
+								gap: 2px;
+
+								.detail-label {
+									font-weight: 500;
+									color: #666;
+									font-size: 12px;
+									text-transform: uppercase;
+									letter-spacing: 0.5px;
+								}
+
+								.detail-value {
+									font-size: 13px;
+									color: #333;
+
+									.attendees-list {
+										display: flex;
+										flex-wrap: wrap;
+										gap: 4px;
+
+										.attendee-tag {
+											background: #e6f7ff;
+											color: #0050b3;
+											padding: 2px 8px;
+											border-radius: 12px;
+											font-size: 11px;
+											font-weight: 500;
+											border: 1px solid #91d5ff;
+										}
+									}
+								}
+							}
+
+							.meeting-description {
+								margin-top: 12px;
+								padding-top: 12px;
+								border-top: 1px solid #f0f0f0;
+
+								.detail-label {
+									font-weight: 500;
+									color: #666;
+									font-size: 12px;
+									text-transform: uppercase;
+									letter-spacing: 0.5px;
+									margin-bottom: 6px;
+									display: block;
+								}
+
+								.description-text {
+									font-size: 13px;
+									line-height: 1.5;
+									color: #333;
+									white-space: pre-wrap;
 								}
 							}
 						}

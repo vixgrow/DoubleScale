@@ -317,97 +317,124 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 								(activity.data.location ||
 									activity.data.duration ||
 									activity.data.description ||
-									activity.data.attendee_contact_ids) && (
+									activity.data.attendee_names?.length >
+										0) && (
 									<div className="activity-data">
 										<div className="meeting-details">
-											<Text strong>
-												{__(
-													'Meeting Details:',
-													'quillcrm'
-												)}
-											</Text>
+											<div className="meeting-details-header">
+												<Calendar size={16} />
+												<Text strong>
+													{__(
+														'Meeting Details',
+														'quillcrm'
+													)}
+												</Text>
+											</div>
 
-											{activity.data.duration && (
-												<div className="meeting-detail-item">
-													<Text type="secondary">
-														{__(
-															'Duration:',
-															'quillcrm'
-														)}{' '}
-														{activity.data.duration}{' '}
-														{__(
-															'minutes',
-															'quillcrm'
-														)}
-													</Text>
-												</div>
-											)}
-
-											{activity.data.location && (
-												<div className="meeting-detail-item">
-													<Text type="secondary">
-														{__(
-															'Location:',
-															'quillcrm'
-														)}{' '}
-														{activity.data.location}
-													</Text>
-												</div>
-											)}
-
-											{activity.data
-												.attendee_contact_ids &&
-												activity.data
-													.attendee_contact_ids
-													.length > 0 && (
+											<div className="meeting-details-grid">
+												{activity.data.duration && (
 													<div className="meeting-detail-item">
-														<Text type="secondary">
-															{__(
-																'Attendees:',
-																'quillcrm'
-															)}{' '}
-															{(() => {
-																// Get contact names from contact IDs
-																const attendeeNames =
-																	activity.data.attendee_contact_ids
-																		.map(
-																			(
-																				id: number
-																			) => {
-																				// This would need to be populated from the backend
-																				// For now, show contact IDs until we enhance the backend
-																				return `Contact ${id}`;
-																			}
-																		)
-																		.join(
-																			', '
-																		);
-																return attendeeNames;
-															})()}
-														</Text>
+														<div className="detail-label">
+															<Text type="secondary">
+																{__(
+																	'Duration',
+																	'quillcrm'
+																)}
+															</Text>
+														</div>
+														<div className="detail-value">
+															<Text>
+																{
+																	activity
+																		.data
+																		.duration
+																}{' '}
+																{__(
+																	'minutes',
+																	'quillcrm'
+																)}
+															</Text>
+														</div>
 													</div>
 												)}
 
+												{activity.data.location && (
+													<div className="meeting-detail-item">
+														<div className="detail-label">
+															<Text type="secondary">
+																{__(
+																	'Location',
+																	'quillcrm'
+																)}
+															</Text>
+														</div>
+														<div className="detail-value">
+															<Text>
+																{
+																	activity
+																		.data
+																		.location
+																}
+															</Text>
+														</div>
+													</div>
+												)}
+
+												{activity.data.attendee_names &&
+													activity.data.attendee_names
+														.length > 0 && (
+														<div className="meeting-detail-item">
+															<div className="detail-label">
+																<Text type="secondary">
+																	{__(
+																		'Attendees',
+																		'quillcrm'
+																	)}
+																</Text>
+															</div>
+															<div className="detail-value">
+																<div className="attendees-list">
+																	{activity.data.attendee_names.map(
+																		(
+																			name: string,
+																			index: number
+																		) => (
+																			<span
+																				key={
+																					index
+																				}
+																				className="attendee-tag"
+																			>
+																				{
+																					name
+																				}
+																			</span>
+																		)
+																	)}
+																</div>
+															</div>
+														</div>
+													)}
+											</div>
+
 											{activity.data.description && (
-												<div className="meeting-detail-item">
-													<Text type="secondary">
-														{__(
-															'Description:',
-															'quillcrm'
-														)}
-													</Text>
-													<br />
-													<Text
-														style={{
-															marginTop: 4,
-															display: 'block',
-														}}
-													>
-														{
-															activity.data
-																.description
-														}
-													</Text>
+												<div className="meeting-description">
+													<div className="detail-label">
+														<Text type="secondary">
+															{__(
+																'Description',
+																'quillcrm'
+															)}
+														</Text>
+													</div>
+													<div className="detail-value">
+														<Text className="description-text">
+															{
+																activity.data
+																	.description
+															}
+														</Text>
+													</div>
 												</div>
 											)}
 										</div>

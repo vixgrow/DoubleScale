@@ -173,7 +173,7 @@ class API extends Integration_API
 	 */
 	public function get_lists()
 	{
-		return $this->get('contacts/v1/lists');
+		return $this->get('crm/v3/lists');
 	}
 
 	/**
@@ -187,10 +187,10 @@ class API extends Integration_API
 	public function add_contact_to_list($contact_id, $list_id)
 	{
 		$body = array(
-			'vids' => array($contact_id),
+			'objectIds' => array($contact_id),
 		);
 
-		return $this->post("contacts/v1/lists/$list_id/add", $body);
+		return $this->post("crm/v3/lists/$list_id/memberships/add", $body);
 	}
 
 	/**
@@ -204,10 +204,10 @@ class API extends Integration_API
 	public function remove_contact_from_list($contact_id, $list_id)
 	{
 		$body = array(
-			'vids' => array($contact_id),
+			'objectIds' => array($contact_id),
 		);
 
-		return $this->post("contacts/v1/lists/$list_id/remove", $body);
+		return $this->post("crm/v3/lists/$list_id/memberships/remove", $body);
 	}
 
 	/**
@@ -261,14 +261,14 @@ class API extends Integration_API
 	}
 
 	/**
-	 * Get contacts batch for import
+	 * Get contacts batch for import with cursor-based pagination
 	 *
-	 * @param int $offset Offset (converted to after parameter for HubSpot pagination).
-	 * @param int $limit Limit (max 100 for HubSpot).
+	 * @param string|null $after Cursor for pagination (HubSpot's 'after' parameter).
+	 * @param int         $limit Limit (max 100 for HubSpot).
 	 *
 	 * @return array
 	 */
-	public function get_contacts_batch($offset = 0, $limit = 20)
+	public function get_contacts_batch($after = null, $limit = 20)
 	{
 		$params = array(
 			'limit' => min($limit, 100),
@@ -276,11 +276,9 @@ class API extends Integration_API
 			'associations' => array('lists'),
 		);
 
-		// Convert numeric offset to cursor-based pagination
-		// For simplicity, we'll use offset directly as HubSpot supports both approaches
-		if ($offset > 0) {
-			// Use limit * page calculation for consistent pagination
-			$params['after'] = (string) $offset;
+		// Use HubSpot's cursor-based pagination
+		if (!empty($after)) {
+			$params['after'] = $after;
 		}
 
 		return $this->get('crm/v3/objects/contacts', $params);
@@ -295,7 +293,7 @@ class API extends Integration_API
 	 */
 	public function get_all_lists($count = 250)
 	{
-		return $this->get('contacts/v1/lists', array('count' => min($count, 250)));
+		return $this->get('crm/v3/lists', array('count' => min($count, 250)));
 	}
 
 	/**

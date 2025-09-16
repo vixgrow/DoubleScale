@@ -201,6 +201,20 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
+				'oauth' => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'gohighlevel_client_id' => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+						'gohighlevel_client_secret' => array(
+							'type'    => 'string',
+							'default' => '',
+						),
+					),
+				),
 			),
 		);
 		return $schema;

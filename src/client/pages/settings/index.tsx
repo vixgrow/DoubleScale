@@ -10,7 +10,7 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Tabs, Card, Button, Flex, Typography, Divider } from 'antd';
-import { UserOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { UserOutlined, UnorderedListOutlined, LinkOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
@@ -19,6 +19,7 @@ import './style.scss';
 import type { Settings } from '@quillcrm/client';
 import { Field } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
+import GoHighLevelOAuthSettings from './components/gohighlevel-oauth-settings';
 
 const SettingsPage: React.FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -105,6 +106,28 @@ const SettingsPage: React.FC = () => {
 			icon: <UnorderedListOutlined />,
 			children: settings && (
 				<CartSettings settings={settings} onChange={setSettings} />
+			),
+		},
+		{
+			key: 'integrations',
+			label: __('Integrations', 'quillcrm'),
+			icon: <LinkOutlined />,
+			children: (
+				<div className="integrations-settings">
+					<GoHighLevelOAuthSettings
+						initialSettings={{
+							client_id: settings?.gohighlevel_client_id || '',
+							client_secret: settings?.gohighlevel_client_secret || ''
+						}}
+						onSettingsChange={(data) => {
+							setSettings(prev => ({
+								...prev,
+								gohighlevel_client_id: data.client_id,
+								gohighlevel_client_secret: data.client_secret
+							}));
+						}}
+					/>
+				</div>
 			),
 		},
 	];

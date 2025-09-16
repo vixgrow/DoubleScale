@@ -55,7 +55,7 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 						<div className="text-base text-[#979797] pr-12">
 							{source === 'csv'
 								? `Step ${currentStep} of 2`
-								: ['mailerlite', 'activecampaign', 'hubspot'].includes(source)
+								: ['mailerlite', 'activecampaign', 'hubspot', 'pipedrive', 'gohighlevel'].includes(source)
 								? state.sourceData
 									? 'Step 2 of 2'
 									: 'Step 1 of 2'

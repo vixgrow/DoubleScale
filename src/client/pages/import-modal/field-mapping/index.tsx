@@ -191,10 +191,21 @@ const FieldMapping: React.FC<FieldMappingProps> = ({ importer }) => {
 					{__(`${importer.name} Data Import Tool`, 'quillcrm')}
 				</CardTitle>
 				<div className="text-lg text-[#71717A]">
-					{__(
-						'Select the column field you want to Mapping it on the system to import. ',
-						'quillcrm'
-					)}
+					{source === 'csv' 
+						? __(
+							'Select the column field you want to map it on the system to import.',
+							'quillcrm'
+						)
+						: source === 'pipedrive'
+						? __(
+							'Configure how Pipedrive data will be imported into QuillCRM.',
+							'quillcrm'
+						)
+						: __(
+							'Configure how your data will be imported into QuillCRM.',
+							'quillcrm'
+						)
+					}
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-6">

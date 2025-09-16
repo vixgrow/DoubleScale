@@ -100,6 +100,13 @@ abstract class Importer
 	protected $offset;
 
 	/**
+	 * Cursor (for cursor-based pagination)
+	 *
+	 * @var string|null
+	 */
+	protected $cursor;
+
+	/**
 	 * Update existing
 	 *
 	 * @var bool
@@ -143,6 +150,7 @@ abstract class Importer
 		$this->lists_mapping = $args['lists_mapping'] ?? array();
 		$this->tags_mapping = $args['tags_mapping'] ?? array();
 		$this->offset = $args['offset'] ?? 0;
+		$this->cursor = $args['cursor'] ?? null;
 		$this->lists = $args['lists'] ?? array();
 		$this->tags = $args['tags'] ?? array();
 		$this->credentials = $args['credentials'] ?? array();
@@ -378,6 +386,58 @@ abstract class Importer
 		$result = array(
 			'offset' => $offset,
 			'status' => $offset >= $total ? 'completed' : 'in_progress',
+			'total' => $total,
+		);
+
+		return $result;
+	}
+
+	/**
+	 * Import with cursor-based pagination
+	 *
+	 * @param int      $total
+	 * @param int      $offset Starting offset (for compatibility)
+	 * @param callable $get_subscribers_callback
+	 * @param array    $mapping
+	 * @return array
+	 */
+	public function import_with_cursor($total, $offset, $get_subscribers_callback, $mapping)
+	{
+		$processed_in_session = 0;
+		$current_offset = $offset;
+		$cursor = $this->cursor; // Use the cursor from constructor
+
+		while ($this->get_current_execution_time() < $this->max_execution_time && !Utils::is_memory_limit_reached()) {
+			// Usleep is used to prevent the server from crashing
+			usleep(1000000);
+
+			$batch_result = $get_subscribers_callback($cursor);
+			if (empty($batch_result['contacts'])) {
+				break;
+			}
+
+			foreach ($batch_result['contacts'] as $subscriber) {
+				$this->import_contact($subscriber, $mapping);
+				$processed_in_session++;
+				$current_offset++;
+			}
+
+			// Update cursor for next iteration
+			$cursor = $batch_result['next_cursor'] ?? null;
+
+			// Store cursor for next session (this would need to be persisted in real implementation)
+			$this->cursor = $cursor;
+
+			// Check if we have a next cursor or if we've processed everything
+			if (empty($cursor) || $current_offset >= $total) {
+				break;
+			}
+		}
+
+		$result = array(
+			'offset' => $current_offset,
+			'cursor' => $cursor, // Include cursor for next request
+			'status' => empty($cursor) || $current_offset >= $total ? 'completed' : 'in_progress',
 			'total' => $total,
 		);
 

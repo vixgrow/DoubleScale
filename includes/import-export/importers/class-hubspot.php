@@ -97,19 +97,12 @@ class HubSpot extends Importer
 			);
 		}
 
-		if ($this->offset > $total) {
-			return array(
-				'total' => $total,
-				'status' => 'completed',
-				'offset' => $total,
-			);
-		}
-
-		$result = $this->import_with_offset(
+		// Use cursor-based pagination for HubSpot
+		$result = $this->import_with_cursor(
 			$total,
 			$this->offset,
-			function ($offset) use ($api) {
-				return $this->fetch_contacts_batch($api, $offset);
+			function ($cursor) use ($api) {
+				return $this->fetch_contacts_batch($api, $cursor);
 			},
 			$mapping
 		);
@@ -146,23 +139,22 @@ class HubSpot extends Importer
 	}
 
 	/**
-	 * Fetch contacts batch from HubSpot
+	 * Fetch contacts batch from HubSpot with cursor-based pagination
 	 *
-	 * @param API $api HubSpot API instance.
-	 * @param int $offset Current offset.
+	 * @param API         $api HubSpot API instance.
+	 * @param string|null $cursor Current cursor.
 	 *
 	 * @return array
 	 */
-	private function fetch_contacts_batch($api, $offset)
+	private function fetch_contacts_batch($api, $cursor)
 	{
-		// Calculate the cursor for HubSpot's after parameter
-		// Since HubSpot uses cursor-based pagination, we approximate with offset calculation
-		$hubspot_offset = $offset;
-
-		$response = $api->get_contacts_batch($hubspot_offset, 20);
+		$response = $api->get_contacts_batch($cursor, 20);
 
 		if (!$response['success'] || empty($response['data']['results'])) {
-			return array();
+			return array(
+				'contacts' => array(),
+				'next_cursor' => null,
+			);
 		}
 
 		$contacts = array();
@@ -171,7 +163,13 @@ class HubSpot extends Importer
 			$contacts[] = $processed_contact;
 		}
 
-		return $contacts;
+		// Extract next cursor from HubSpot's paging information
+		$next_cursor = $response['data']['paging']['next']['after'] ?? null;
+
+		return array(
+			'contacts' => $contacts,
+			'next_cursor' => $next_cursor,
+		);
 	}
 
 	/**

@@ -128,6 +128,15 @@ final class Activity_Manager {
 		if ( isset( $email_data['contact_ids'] ) && is_array( $email_data['contact_ids'] ) ) {
 			$contact_ids = array_map( 'intval', $email_data['contact_ids'] );
 			$sanitized_data['contact_ids'] = $contact_ids;
+			
+			// Also store contact emails for display
+			if ( ! empty( $contact_ids ) ) {
+				$contacts = Contact_Model::whereIn( 'id', $contact_ids )->get();
+				$contact_emails = $contacts->map( function( $contact ) {
+					return $contact->email;
+				} )->filter()->toArray();
+				$sanitized_data['contact_emails'] = $contact_emails;
+			}
 		}
 
 		$activity = Deal_Activity_Model::create( array(

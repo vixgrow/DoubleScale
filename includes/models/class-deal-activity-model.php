@@ -188,16 +188,7 @@ class Deal_Activity_Model extends Model {
 			
 			case 'email_sent':
 				$subject = $this->data['subject'] ?? '';
-				$contact_ids = $this->data['contact_ids'] ?? [];
-				
-				// Get contact names
-				$contact_names = [];
-				if ( ! empty( $contact_ids ) && is_array( $contact_ids ) ) {
-					$contacts = Contact_Model::whereIn( 'id', $contact_ids )->get();
-					$contact_names = $contacts->map( function( $contact ) {
-						return trim( $contact->first_name . ' ' . $contact->last_name );
-					} )->filter()->toArray();
-				}
+				$contact_emails = $this->data['contact_emails'] ?? [];
 				
 				$message = sprintf( '%s sent an email', $user_name );
 				
@@ -205,12 +196,12 @@ class Deal_Activity_Model extends Model {
 					$message .= sprintf( ' with subject "%s"', $subject );
 				}
 				
-				if ( ! empty( $contact_names ) ) {
-					if ( count( $contact_names ) === 1 ) {
-						$message .= sprintf( ' to %s', $contact_names[0] );
+				if ( ! empty( $contact_emails ) ) {
+					if ( count( $contact_emails ) === 1 ) {
+						$message .= sprintf( ' to %s', $contact_emails[0] );
 					} else {
-						$last_contact = array_pop( $contact_names );
-						$message .= sprintf( ' to %s and %s', implode( ', ', $contact_names ), $last_contact );
+						$last_email = array_pop( $contact_emails );
+						$message .= sprintf( ' to %s and %s', implode( ', ', $contact_emails ), $last_email );
 					}
 				}
 				

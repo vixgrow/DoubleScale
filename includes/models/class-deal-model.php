@@ -362,7 +362,7 @@ class Deal_Model extends Model {
 				'user_id' => $user_id,
 			) );
 
-			do_action( 'quillcrm_deal_stage_changed', $this, $old_stage_id, $stage_id );
+			do_action( 'quillcrm_deal_stage_changed', $this->contact, $this, $old_stage_id, $stage_id );
 		}
 
 		return $saved;

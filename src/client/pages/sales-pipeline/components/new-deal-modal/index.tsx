@@ -21,6 +21,7 @@ import { debounce } from 'lodash';
  * Internal dependencies
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
+import { useUsers } from '../../hooks/use-users';
 import './style.scss';
 
 const { Option } = Select;
@@ -60,6 +61,14 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	const [loading, setLoading] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactsLoading, setContactsLoading] = useState(false);
+
+	// Use shared users hook
+	const {
+		users: owners,
+		loading: ownersLoading,
+		loadUsers: loadOwners,
+		searchUsers: searchOwners,
+	} = useUsers();
 	const { createDeal } = useDealOperations();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -124,8 +133,12 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	// Update form values when pipeline changes
 	useEffect(() => {
 		if (defaultStageId && visible) {
+			// Get current user ID from WordPress global
+			const currentUserId = (window as any)?.qcData?.currentUser?.id;
+
 			form.setFieldsValue({
 				stage_id: defaultStageId,
+				owner_id: currentUserId ? Number(currentUserId) : undefined,
 			});
 		}
 	}, [defaultStageId, visible]);
@@ -165,12 +178,13 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		[loadContacts]
 	);
 
-	// Load contacts when modal opens
+	// Load contacts and owners when modal opens
 	useEffect(() => {
 		if (visible) {
 			loadContacts();
+			loadOwners();
 		}
-	}, [visible, loadContacts]);
+	}, [visible, loadContacts, loadOwners]);
 
 	return (
 		<Modal
@@ -265,6 +279,39 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 					</Select>
 				</Form.Item>
 
+				<Form.Item
+					name="owner_id"
+					label={__('Deal Owner', 'quillcrm')}
+					rules={[
+						{
+							required: true,
+							message: __(
+								'Please select a deal owner',
+								'quillcrm'
+							),
+						},
+					]}
+				>
+					<Select
+						placeholder={__(
+							'Search and select a deal owner',
+							'quillcrm'
+						)}
+						showSearch
+						filterOption={false}
+						notFoundContent={__('No users found', 'quillcrm')}
+						onSearch={searchOwners}
+						loading={ownersLoading}
+						allowClear
+					>
+						{owners.map((owner) => (
+							<Option key={owner.id} value={Number(owner.id)}>
+								{owner.display_name} ({owner.email})
+							</Option>
+						))}
+					</Select>
+				</Form.Item>
+
 				<div className="form-row">
 					<Form.Item
 						name="value"
@@ -311,7 +358,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 						parser={(value) => {
 							const parsed = value ? value.replace('%', '') : '';
 							const result = parseFloat(parsed) || 0;
-							return Math.min(Math.max(result, 0), 100);
+							return Math.min(Math.max(result, 0), 100) as any;
 						}}
 					/>
 				</Form.Item>

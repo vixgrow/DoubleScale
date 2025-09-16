@@ -17,7 +17,11 @@ import ConfigAPI from '@quillcrm/config';
 //@ts-ignore
 import csvIcon from '../../../../../assets/images/csv/csv.png';
 //@ts-ignore
-import hubspotIcon from '../../../../../assets/images/hubspot/hubspot -icon.png';
+import hubspotIcon from '../../../../../assets/images/hubspot/hubspot-icon.png';
+//@ts-ignore
+import pipedriveIcon from '../../../../../assets/images/pipedrive/pipedrive-icon.png';
+//@ts-ignore
+import gohighlevelIcon from '../../../../../assets/images/gohighlevel/gohighlevel-icon.png';
 
 const ImportProgress: React.FC = () => {
 	const { state } = useImportContext();
@@ -64,6 +68,18 @@ const ImportProgress: React.FC = () => {
 							<img
 								src={hubspotIcon}
 								alt="HubSpot"
+								className="w-16 h-16"
+							/>
+						) : source === 'pipedrive' ? (
+							<img
+								src={pipedriveIcon}
+								alt="Pipedrive"
+								className="w-16 h-16"
+							/>
+						) : source === 'gohighlevel' ? (
+							<img
+								src={gohighlevelIcon}
+								alt="GoHighLevel"
 								className="w-16 h-16"
 							/>
 						) : (

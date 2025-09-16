@@ -27,6 +27,11 @@ final class Deal_Manager {
 
 
 
+
+
+
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -110,7 +115,7 @@ final class Deal_Manager {
 					'value'    => 0.00,
 					'currency' => 'USD',
 					'status'   => 'open',
-					'owner_id' => $data['owner_id'] || get_current_user_id(),
+					'owner_id' => get_current_user_id(),
 				),
 				$data
 			);
@@ -142,7 +147,10 @@ final class Deal_Manager {
 		if ( ! $deal ) {
 			return null;
 		}
-
+		$old_owner_id = $deal->owner_id;
+		$new_owner_id = $data['owner_id'];
+		$old_value    = $deal->value;
+		$new_value    = $data['value'];
 		// If stage is being changed, validate it belongs to the pipeline
 		if ( isset( $data['stage_id'] ) && $data['stage_id'] != $deal->stage_id ) {
 			$stage = Pipeline_Stage_Model::where( 'id', $data['stage_id'] )
@@ -154,15 +162,12 @@ final class Deal_Manager {
 			}
 		}
 
-		$old_value    = $deal->value;
-		$old_owner_id = $deal->owner_id;
-
 		$deal->fill( $data );
 		$deal->save();
 
 		do_action( 'quillcrm_deal_updated_by_manager', $deal );
-		do_action( 'quillcrm_deal_value_changed', $deal->contact, $deal, $old_value, $data['value'] );
-		do_action( 'quillcrm_deal_owner_changed', $deal->contact, $deal, $old_owner_id, $data['owner_id'] );
+		do_action( 'quillcrm_automation_deal_owner_changed', $deal->contact, $deal, $old_owner_id, $new_owner_id );
+		do_action( 'quillcrm_automation_deal_value_changed', $deal->contact, $deal, $old_value, $new_value );
 
 		return $deal;
 	}
@@ -180,18 +185,18 @@ final class Deal_Manager {
 	 * @return bool
 	 */
 	public function move_deal_to_stage( $deal_id, $stage_id, $user_id = null, $update_probability = false ) {
-		$deal = Deal_Model::with( 'contact' )->find( $deal_id );
+		$deal = Deal_Model::find( $deal_id );
 
 		if ( ! $deal ) {
 			return false;
 		}
 		$old_stage_id = $deal->stage_id;
-		$moved        = $deal->moveToStage( $stage_id, $user_id, $update_probability );
-
-		if ( $moved ) {
-			do_action( 'quillcrm_deal_stage_changed', $deal->contact, $deal, $old_stage_id, $stage_id );
+		$new_stage_id = $stage_id;
+		$move         = $deal->moveToStage( $stage_id, $user_id, $update_probability );
+		if ( $move ) {
+			do_action( 'quillcrm_automation_deal_stage_changed', $deal->contact, $deal, $old_stage_id, $new_stage_id );
 		}
-		return $moved;
+		return $move;
 	}
 
 	/**
@@ -236,13 +241,11 @@ final class Deal_Manager {
 				array(
 					'deal_id'       => $deal->id,
 					'activity_type' => 'stage_changed',
-					'data'          => wp_json_encode(
-						array(
-							'old_pipeline_id' => $old_pipeline_id,
-							'new_pipeline_id' => $pipeline_id,
-							'old_stage_id'    => $old_stage_id,
-							'new_stage_id'    => $stage_id,
-						)
+					'data'          => array(
+						'old_pipeline_id' => $old_pipeline_id,
+						'new_pipeline_id' => $pipeline_id,
+						'old_stage_id'    => $old_stage_id,
+						'new_stage_id'    => $stage_id,
 					),
 					'user_id'       => $user_id ?: get_current_user_id(),
 				)
@@ -271,12 +274,11 @@ final class Deal_Manager {
 			return false;
 		}
 		$old_status = $deal->status;
-
-		$won = $deal->markAsWon( $user_id );
-		if ( $won ) {
-			do_action( 'quillcrm_deal_status_changed', $deal->contact, $deal, $old_status, 'won' );
+		$marked     = $deal->markAsWon( $user_id );
+		if ( $marked ) {
+			do_action( 'quillcrm_automation_deal_status_changed', $deal->contact, $deal, $old_status, 'won' );
 		}
-		return $won;
+		return $marked;
 	}
 
 	/**
@@ -297,11 +299,11 @@ final class Deal_Manager {
 			return false;
 		}
 		$old_status = $deal->status;
-		$lost       = $deal->markAsLost( $reason, $user_id );
-		if ( $lost ) {
-			do_action( 'quillcrm_deal_status_changed', $deal->contact, $deal, $old_status, 'lost' );
+		$marked     = $deal->markAsLost( $reason, $user_id );
+		if ( $marked ) {
+			do_action( 'quillcrm_automation_deal_status_changed', $deal->contact, $deal, $old_status, 'lost' );
 		}
-		return $lost;
+		return $marked;
 	}
 
 	/**
@@ -320,6 +322,7 @@ final class Deal_Manager {
 		if ( ! $deal || $deal->status === 'open' ) {
 			return false;
 		}
+
 		$old_status        = $deal->status;
 		$deal->status      = 'open';
 		$deal->won_time    = null;
@@ -332,18 +335,16 @@ final class Deal_Manager {
 				array(
 					'deal_id'       => $deal->id,
 					'activity_type' => 'status_changed',
-					'data'          => wp_json_encode(
-						array(
-							'status' => 'open',
-							'action' => 'reopened',
-						)
+					'data'          => array(
+						'status' => 'open',
+						'action' => 'reopened',
 					),
 					'user_id'       => $user_id ?: get_current_user_id(),
 				)
 			);
 
 			do_action( 'quillcrm_deal_reopened', $deal );
-			do_action( 'quillcrm_deal_status_changed', $deal->contact, $deal, $old_status, 'open' );
+			do_action( 'quillcrm_automation_deal_status_changed', $deal->contact, $deal, $old_status, 'open' );
 		}
 
 		return $saved;

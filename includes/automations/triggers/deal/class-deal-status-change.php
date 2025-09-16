@@ -9,6 +9,7 @@ use QuillCRM\Models\Automation_Model;
 class Deal_Status_Change extends Trigger {
 
 
+
 	/**
 	 * Trigger Name
 	 *
@@ -66,7 +67,7 @@ class Deal_Status_Change extends Trigger {
 	}
 
 	public function load_hooks() {
-		add_action( 'quillcrm_deal_status_changed', array( $this, 'deal_status_changed' ), 10, 4 );
+		add_action( 'quillcrm_automation_deal_status_changed', array( $this, 'deal_status_changed' ), 10, 4 );
 	}
 
 	public function deal_status_changed( $contact, $deal, $old_status, $new_status ) {

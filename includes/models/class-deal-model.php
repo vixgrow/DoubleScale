@@ -14,27 +14,11 @@ namespace QuillCRM\Models;
 use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\User_Model;
-use QuillCRM\Models\Custom_Field_Model;
-use WP_Error;
-use Exception;
 
 /**
  * Deal_Model class
  */
 class Deal_Model extends Model {
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	/**
@@ -100,7 +84,6 @@ class Deal_Model extends Model {
 	protected $casts = array(
 		'value'               => 'float',
 		'probability'         => 'float',
-		'value'               => 'float',
 		'expected_close_date' => 'date',
 		'won_time'            => 'datetime',
 		'lost_time'           => 'datetime',
@@ -123,11 +106,6 @@ class Deal_Model extends Model {
 		'probability' => 'nullable|numeric|between:0,100',
 		'status'      => 'required|in:open,won,lost',
 		'owner_id'    => 'nullable|integer|min:1',
-		'stage_id'    => 'required|integer',
-		'value'       => 'nullable|numeric|min:0',
-		'currency'    => 'nullable|string|size:3',
-		'status'      => 'required|in:open,won,lost',
-		'owner_id'    => 'nullable|integer',
 	);
 
 	/**
@@ -145,16 +123,10 @@ class Deal_Model extends Model {
 		'stage_id.required'    => 'Stage is required.',
 		'value.numeric'        => 'Deal value must be a number.',
 		'value.min'            => 'Deal value cannot be negative.',
-		'currency.size'        => 'Currency must be a 3-letter code.',
 		'probability.numeric'  => 'Probability must be a number.',
 		'probability.between'  => 'Probability must be between 0 and 100.',
 		'status.in'            => 'Status must be open, won, or lost.',
 		'owner_id.min'         => 'Owner ID must be a positive number.',
-		'stage_id.required'    => 'Stage is required.',
-		'value.numeric'        => 'Deal value must be a number.',
-		'value.min'            => 'Deal value cannot be negative.',
-		'currency.size'        => 'Currency must be a 3-letter code.',
-		'status.in'            => 'Status must be open, won, or lost.',
 	);
 
 	/**
@@ -240,7 +212,6 @@ class Deal_Model extends Model {
 		return ( new \DateTime() )->diff( $this->expected_close_date )->days * ( ( $this->expected_close_date > new \DateTime() ) ? 1 : -1 );
 	}
 
-
 	/**
 	 * Get the custom fields
 	 *
@@ -291,22 +262,23 @@ class Deal_Model extends Model {
 				foreach ( $custom_fields as $custom_field ) {
 					$custom_field_id    = $custom_field['custom_field_id'] ?? $custom_field['id'];
 					$custom_field_model = Custom_Field_Model::find( $custom_field_id );
+					$value              = $custom_field['value'] ?? $custom_field['pivot']['value'];
 					if ( ! $custom_field_model ) {
 						continue;
 					}
-					$validated = $custom_field_model->validate_value( $custom_field['value'] );
+					$validated = $custom_field_model->validate_value( $value );
 
 					if ( ! $validated ) {
 						continue;
 					}
 
 					// convert value if array to string like "1,2,3"
-					if ( is_array( $custom_field['value'] ) ) {
-						$custom_field['value'] = implode( ',', $custom_field['value'] );
+					if ( is_array( $value ) ) {
+						$custom_field['value'] = implode( ',', $value );
 					}
 
 					$custom_fields_arr[ $custom_field_id ] = array(
-						'value'       => $custom_field['value'],
+						'value'       => $value,
 						'entity_type' => 'deal',
 					);
 				}
@@ -321,6 +293,7 @@ class Deal_Model extends Model {
 
 	/**
 	 * Get weighted value based on stage win probability
+	 * Get weighted value based on deal or stage win probability
 	 *
 	 * @since 1.0.0
 	 *
@@ -332,6 +305,9 @@ class Deal_Model extends Model {
 			return 0;
 		}
 
+		// Use deal's custom probability if set, otherwise use stage default
+		$probability = $this->probability ?? $stage->win_probability;
+		return $this->value * ( $probability / 100 );
 		// Use deal's custom probability if set, otherwise use stage default
 		$probability = $this->probability ?? $stage->win_probability;
 		return $this->value * ( $probability / 100 );
@@ -367,7 +343,6 @@ class Deal_Model extends Model {
 		}
 
 		$saved = $this->save();
-		$saved = $this->save();
 
 		if ( $saved ) {
 			// Prepare activity data
@@ -392,20 +367,7 @@ class Deal_Model extends Model {
 				)
 			);
 
-			do_action( 'quillcrm_deal_stage_changed', $this->contact, $this, $old_stage_id, $stage_id );
-			Deal_Activity_Model::create(
-				array(
-					'deal_id'       => $this->id,
-					'activity_type' => 'stage_changed',
-					'data'          => wp_json_encode(
-						array(
-							'old_stage_id' => $old_stage_id,
-							'new_stage_id' => $stage_id,
-						)
-					),
-					'user_id'       => $user_id,
-				)
-			);
+			do_action( 'quillcrm_deal_stage_changed', $this, $old_stage_id, $stage_id );
 		}
 
 		return $saved;
@@ -432,18 +394,6 @@ class Deal_Model extends Model {
 					'activity_type' => 'status_changed',
 					'data'          => array(
 						'status' => 'won',
-					),
-					'user_id'       => $user_id,
-				)
-			);
-			Deal_Activity_Model::create(
-				array(
-					'deal_id'       => $this->id,
-					'activity_type' => 'status_changed',
-					'data'          => wp_json_encode(
-						array(
-							'status' => 'won',
-						)
 					),
 					'user_id'       => $user_id,
 				)
@@ -483,19 +433,6 @@ class Deal_Model extends Model {
 					'user_id'       => $user_id,
 				)
 			);
-			Deal_Activity_Model::create(
-				array(
-					'deal_id'       => $this->id,
-					'activity_type' => 'status_changed',
-					'data'          => wp_json_encode(
-						array(
-							'status' => 'lost',
-							'reason' => $reason,
-						)
-					),
-					'user_id'       => $user_id,
-				)
-			);
 
 			do_action( 'quillcrm_deal_lost', $this );
 		}
@@ -528,20 +465,6 @@ class Deal_Model extends Model {
 						'user_id'       => get_current_user_id(),
 					)
 				);
-				Deal_Activity_Model::create(
-					array(
-						'deal_id'       => $deal->id,
-						'activity_type' => 'created',
-						'data'          => wp_json_encode(
-							array(
-								'title'    => $deal->title,
-								'value'    => $deal->value,
-								'currency' => $deal->currency,
-							)
-						),
-						'user_id'       => get_current_user_id(),
-					)
-				);
 
 				do_action( 'quillcrm_deal_created', $deal );
 			}
@@ -560,19 +483,6 @@ class Deal_Model extends Model {
 							'data'          => array(
 								'old_value' => $deal->getOriginal( 'value' ),
 								'new_value' => $changes['value'],
-							),
-							'user_id'       => get_current_user_id(),
-						)
-					);
-					Deal_Activity_Model::create(
-						array(
-							'deal_id'       => $deal->id,
-							'activity_type' => 'value_changed',
-							'data'          => wp_json_encode(
-								array(
-									'old_value' => $deal->getOriginal( 'value' ),
-									'new_value' => $changes['value'],
-								)
 							),
 							'user_id'       => get_current_user_id(),
 						)

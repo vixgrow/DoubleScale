@@ -13,7 +13,6 @@ namespace QuillCRM\REST_API\Controllers\V1;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Managers\Deal_Manager;
-use QuillCRM\Models\Custom_Field_Model;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -23,15 +22,6 @@ use WP_REST_Server;
  * Deal REST Controller class
  */
 class REST_Deal_Controller extends REST_Controller {
-
-
-
-
-
-
-
-
-
 
 
 
@@ -326,8 +316,6 @@ class REST_Deal_Controller extends REST_Controller {
 
 		return new WP_REST_Response( $response_data, 201 );
 	}
-
-
 
 	/**
 	 * Update one deal

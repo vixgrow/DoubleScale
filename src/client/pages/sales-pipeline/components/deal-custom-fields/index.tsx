@@ -5,9 +5,10 @@ import Field from '@quillcrm/components/field';
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { useState, useEffect } from 'react';
 import { useDispatch } from '@wordpress/data';
+import { Deal } from '../../types';
 
 interface DealCustomFieldsProps {
-	deal: any;
+	deal: Deal;
 }
 
 export const DealCustomFields: React.FC<DealCustomFieldsProps> = ({ deal }) => {
@@ -296,10 +297,11 @@ export const DealCustomFields: React.FC<DealCustomFieldsProps> = ({ deal }) => {
 			<div style={{ marginTop: '20px' }}>
 				<Button
 					type="primary"
-					onClick={() => {
-						updateDeal(deal.id, {
+					onClick={async () => {
+						await updateDeal(deal.id, {
 							custom_fields: updatedCustomFields,
 						});
+
 						if (createNotice) {
 							createNotice({
 								type: 'success',

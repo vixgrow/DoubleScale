@@ -20,6 +20,7 @@ class Deal_Owner_Change extends Trigger {
 
 
 
+
 	/**
 	 * Trigger Name
 	 *
@@ -70,7 +71,7 @@ class Deal_Owner_Change extends Trigger {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'quillcrm_deal_owner_changed', array( $this, 'deal_owner_changed' ), 10, 4 );
+		add_action( 'quillcrm_automation_deal_owner_changed', array( $this, 'deal_owner_changed' ), 10, 4 );
 	}
 
 	/**

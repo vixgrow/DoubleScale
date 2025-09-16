@@ -308,9 +308,6 @@ class Deal_Model extends Model {
 		// Use deal's custom probability if set, otherwise use stage default
 		$probability = $this->probability ?? $stage->win_probability;
 		return $this->value * ( $probability / 100 );
-		// Use deal's custom probability if set, otherwise use stage default
-		$probability = $this->probability ?? $stage->win_probability;
-		return $this->value * ( $probability / 100 );
 	}
 
 	/**

@@ -311,10 +311,112 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 									</div>
 								)}
 
+							{/* Show meeting details for meeting activities */}
+							{activity.activity_type === 'meeting_scheduled' &&
+								activity.data &&
+								(activity.data.location ||
+									activity.data.duration ||
+									activity.data.description ||
+									activity.data.attendee_contact_ids) && (
+									<div className="activity-data">
+										<div className="meeting-details">
+											<Text strong>
+												{__(
+													'Meeting Details:',
+													'quillcrm'
+												)}
+											</Text>
+
+											{activity.data.duration && (
+												<div className="meeting-detail-item">
+													<Text type="secondary">
+														{__(
+															'Duration:',
+															'quillcrm'
+														)}{' '}
+														{activity.data.duration}{' '}
+														{__(
+															'minutes',
+															'quillcrm'
+														)}
+													</Text>
+												</div>
+											)}
+
+											{activity.data.location && (
+												<div className="meeting-detail-item">
+													<Text type="secondary">
+														{__(
+															'Location:',
+															'quillcrm'
+														)}{' '}
+														{activity.data.location}
+													</Text>
+												</div>
+											)}
+
+											{activity.data
+												.attendee_contact_ids &&
+												activity.data
+													.attendee_contact_ids
+													.length > 0 && (
+													<div className="meeting-detail-item">
+														<Text type="secondary">
+															{__(
+																'Attendees:',
+																'quillcrm'
+															)}{' '}
+															{(() => {
+																// Get contact names from contact IDs
+																const attendeeNames =
+																	activity.data.attendee_contact_ids
+																		.map(
+																			(
+																				id: number
+																			) => {
+																				// This would need to be populated from the backend
+																				// For now, show contact IDs until we enhance the backend
+																				return `Contact ${id}`;
+																			}
+																		)
+																		.join(
+																			', '
+																		);
+																return attendeeNames;
+															})()}
+														</Text>
+													</div>
+												)}
+
+											{activity.data.description && (
+												<div className="meeting-detail-item">
+													<Text type="secondary">
+														{__(
+															'Description:',
+															'quillcrm'
+														)}
+													</Text>
+													<br />
+													<Text
+														style={{
+															marginTop: 4,
+															display: 'block',
+														}}
+													>
+														{
+															activity.data
+																.description
+														}
+													</Text>
+												</div>
+											)}
+										</div>
+									</div>
+								)}
+
 							{/* Activity Comments */}
 							<ActivityComments
 								activityId={activity.id}
-								activityType={activity.activity_type}
 								initialComments={activity.comments || []}
 							/>
 						</div>

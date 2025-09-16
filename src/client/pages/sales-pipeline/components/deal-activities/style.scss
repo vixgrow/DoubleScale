@@ -90,6 +90,19 @@
 							font-size: 13px;
 							line-height: 1.4;
 						}
+
+						.meeting-details {
+							font-size: 13px;
+							line-height: 1.4;
+
+							.meeting-detail-item {
+								margin-top: 6px;
+
+								&:first-child {
+									margin-top: 4px;
+								}
+							}
+						}
 					}
 
 					.activity-comments {

@@ -17,7 +17,6 @@ import {
 	Spin,
 	Empty,
 	Popconfirm,
-	Space,
 	Collapse,
 } from 'antd';
 import { MessageSquare, Edit, Trash2, User, Send } from 'lucide-react';
@@ -34,7 +33,6 @@ const { TextArea } = Input;
 
 interface ActivityCommentsProps {
 	activityId: number;
-	activityType: string;
 	initialComments?: any[];
 }
 
@@ -56,7 +54,6 @@ interface Comment {
 
 export const ActivityComments: React.FC<ActivityCommentsProps> = ({
 	activityId,
-	activityType,
 	initialComments = [],
 }) => {
 	const [comments, setComments] = useState<Comment[]>(initialComments);

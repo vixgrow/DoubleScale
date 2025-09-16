@@ -56,46 +56,6 @@ export type Contact = {
 	})[];
 };
 
-export type Deal = {
-	id: number;
-	title: string;
-	value: number;
-	currency: string;
-	probability: number | null;
-	status: string;
-	expected_close_date: string | null;
-	is_overdue: boolean;
-	days_until_close: number | null;
-	weighted_value: number;
-	source: string | null;
-	lost_reason: string | null;
-	won_time: string | null;
-	lost_time: string | null;
-	created_at: string;
-	updated_at: string;
-	contact: {
-		id: number;
-		first_name: string;
-		last_name: string;
-		email: string;
-	} | null;
-	pipeline: {
-		id: number;
-		name: string;
-	} | null;
-	stage: {
-		id: number;
-		name: string;
-		color: string;
-		win_probability: number;
-	} | null;
-	owner: {
-		id: number;
-		display_name: string;
-		email: string;
-	} | null;
-	custom_fields: CustomField[];
-}
 
 export type Order = {
 	id: number;
@@ -192,9 +152,15 @@ export type CustomField = {
 	attributes: any | null; // Adjust the type if the structure of attributes is known
 	group_id: number;
 	scope: string;
+	pivot: {
+		entity_id: string;
+		custom_field_id: string;
+		value: string;
+	};
 	created_at: string;
 	updated_at: string;
 };
+
 
 export type CustomFieldsGroup = {
 	id: number;

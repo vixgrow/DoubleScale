@@ -1,47 +1,46 @@
 /**
  * Shared types for the sales pipeline module
  */
-
+import { CustomField } from '../../../types';
 export interface Deal {
 	id: number;
 	title: string;
 	value: number;
 	currency: string;
-	stage_id: number;
-	pipeline_id: number;
-	probability?: number;
+	probability: number | null;
+	status: string;
+	expected_close_date: string | null;
+	is_overdue: boolean;
+	days_until_close: number | null;
 	weighted_value: number;
-	contact?: {
+	source: string | null;
+	lost_reason: string | null;
+	won_time: string | null;
+	lost_time: string | null;
+	created_at: string;
+	updated_at: string;
+	contact: {
 		id: number;
 		first_name: string;
 		last_name: string;
 		email: string;
 	} | null;
-	expected_close_date?: string | null;
-	status: 'open' | 'won' | 'lost';
-	is_overdue: boolean;
-	days_until_close: number | null;
-	owner?: {
-		id: number;
-		display_name: string;
-		email: string;
-	} | null;
-	source?: string | null;
-	lost_reason?: string | null;
-	won_time?: string | null;
-	lost_time?: string | null;
-	created_at: string;
-	updated_at: string;
-	pipeline?: {
+	pipeline: {
 		id: number;
 		name: string;
 	} | null;
-	stage?: {
+	stage: {
 		id: number;
 		name: string;
 		color: string;
 		win_probability: number;
 	} | null;
+	owner: {
+		id: number;
+		display_name: string;
+		email: string;
+	} | null;
+	custom_fields: CustomField[];
 }
 
 export interface Pipeline {

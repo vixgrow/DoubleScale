@@ -311,6 +311,27 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 									</div>
 								)}
 
+							{/* Show note content for note activities */}
+							{activity.activity_type === 'note_added' &&
+								activity.data &&
+								activity.data.content && (
+									<div className="activity-data">
+										<div className="note-content">
+											<div className="note-content-header">
+												<MessageSquare size={16} />
+												<Text strong>
+													{__('Note', 'quillcrm')}
+												</Text>
+											</div>
+											<div className="note-text">
+												<Text>
+													{activity.data.content}
+												</Text>
+											</div>
+										</div>
+									</div>
+								)}
+
 							{/* Show meeting details for meeting activities */}
 							{activity.activity_type === 'meeting_scheduled' &&
 								activity.data &&

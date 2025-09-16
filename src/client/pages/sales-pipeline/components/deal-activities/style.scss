@@ -91,6 +91,33 @@
 							line-height: 1.4;
 						}
 
+						.note-content {
+							font-size: 13px;
+							line-height: 1.4;
+
+							.note-content-header {
+								display: flex;
+								align-items: center;
+								gap: 8px;
+								margin-bottom: 8px;
+								color: #52c41a;
+
+								svg {
+									color: #52c41a;
+								}
+							}
+
+							.note-text {
+								background: #f6ffed;
+								border: 1px solid #b7eb8f;
+								border-radius: 6px;
+								padding: 12px;
+								color: #333;
+								white-space: pre-wrap;
+								line-height: 1.5;
+							}
+						}
+
 						.meeting-details {
 							font-size: 13px;
 							line-height: 1.4;

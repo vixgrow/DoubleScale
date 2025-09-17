@@ -28,6 +28,25 @@ class Rest_Reports_Controller extends REST_Controller {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/**
 	 * Route base.
 	 *
@@ -74,6 +93,18 @@ class Rest_Reports_Controller extends REST_Controller {
 				array(
 					'methods'  => WP_REST_Server::READABLE,
 					'callback' => array( $this, 'get_deals_leaderboard_reports' ),
+					'args'     => $this->get_reports_filter_params(),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/sales-rep',
+			array(
+				array(
+					'methods'  => WP_REST_Server::READABLE,
+					'callback' => array( $this, 'get_sales_rep_reports' ),
 					'args'     => $this->get_reports_filter_params(),
 				),
 			)
@@ -198,6 +229,123 @@ class Rest_Reports_Controller extends REST_Controller {
 		return $deals_leaderboard;
 	}
 
+	/**
+	 * Get sales rep reports
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function get_sales_rep_reports( $request ) {
+		$filters             = $this->get_filters_from_request( $request );
+		$date_ranges         = $this->get_report_date_ranges( $filters );
+		$filters['owner_id'] = $filters['owner_id'] ?? get_current_user_id();
+
+		$sale_info        = $this->get_sale_info( $filters );
+		$cards_statistics = $this->get_cards_statistics( $filters, $date_ranges );
+		$data             = array(
+			'sale_info'        => $sale_info,
+			'cards_statistics' => $cards_statistics,
+		);
+
+		return new WP_REST_Response(
+			$data,
+			200
+		);
+	}
+
+
+	private function get_sale_info( $filters ) {
+		$sale_info = array();
+		// sale info
+		$sale_info['id']    = User_Model::find( $filters['owner_id'] ?? get_current_user_id() )->ID;
+		$sale_info['name']  = User_Model::find( $filters['owner_id'] ?? get_current_user_id() )->display_name;
+		$sale_info['email'] = User_Model::find( $filters['owner_id'] ?? get_current_user_id() )->user_email;
+		return $sale_info;
+	}
+
+	private function get_cards_statistics( $filters, $date_ranges ) {
+		$cards_statistics = array();
+		// total deals close number
+		$cards_statistics['total_deals_close_won_number'] = $this->count_deals_by_status( $date_ranges['current_start'], $date_ranges['current_end'], 'won', $filters );
+		// total deals close won value
+		$cards_statistics['total_deals_close_won_value'] = $this->get_deals_by_status_price( $date_ranges['current_start'], $date_ranges['current_end'], 'won', $filters );
+		// total deals close lost number
+		$cards_statistics['total_deals_close_lost_number'] = $this->count_deals_by_status( $date_ranges['current_start'], $date_ranges['current_end'], 'lost', $filters );
+		// total deals close lost value
+		$cards_statistics['total_deals_close_lost_value'] = $this->get_deals_by_status_price( $date_ranges['current_start'], $date_ranges['current_end'], 'lost', $filters );
+		// total deals close number
+		$cards_statistics['total_deals_close_number'] = $cards_statistics['total_deals_close_won_number'] + $cards_statistics['total_deals_close_lost_number'];
+		// total deals close value
+		$cards_statistics['total_deals_close_value'] = $cards_statistics['total_deals_close_won_value'] + $cards_statistics['total_deals_close_lost_value'];
+		if ( $cards_statistics['total_deals_close_number'] > 0 ) {
+			// performance rate for number
+			$cards_statistics['performance_rate_number'] = round( $cards_statistics['total_deals_close_won_number'] / $cards_statistics['total_deals_close_number'] * 100, 2 );
+			// performance rate for value
+			$cards_statistics['performance_rate_value'] = round( $cards_statistics['total_deals_close_won_value'] / $cards_statistics['total_deals_close_value'] * 100, 2 );
+		} else {
+			$cards_statistics['performance_rate_number'] = 0;
+			$cards_statistics['performance_rate_value']  = 0;
+		}
+
+		return array(
+			'total_deals_close_number'      => array(
+				'label'   => 'Total Deals Close',
+				'value'   => $cards_statistics['total_deals_close_number'],
+				'change'  => 0,
+				'isArrow' => $cards_statistics['total_deals_close_number_change'] >= 0,
+				'isColor' => $cards_statistics['total_deals_close_number_change'] >= 0,
+			),
+			'total_deals_close_won_number'  => array(
+				'label'   => 'Total Deals Close Won',
+				'value'   => $cards_statistics['total_deals_close_won_number'],
+				'change'  => 0,
+				'isArrow' => $cards_statistics['total_deals_close_won_number_change'] >= 0,
+				'isColor' => $cards_statistics['total_deals_close_won_number_change'] >= 0,
+			),
+			'total_deals_close_won_value'   => array(
+				'label'   => 'Total Deals Close Won Value',
+				'value'   => $cards_statistics['total_deals_close_won_value'],
+				'change'  => 0,
+				'isArrow' => $cards_statistics['total_deals_close_won_value_change'] >= 0,
+				'isColor' => $cards_statistics['total_deals_close_won_value_change'] >= 0,
+			),
+			'total_deals_close_lost_number' => array(
+				'label'   => 'Total Deals Close Lost Number',
+				'value'   => $cards_statistics['total_deals_close_lost_number'],
+				'change'  => 0,
+				'isArrow' => $cards_statistics['total_deals_close_lost_number_change'] >= 0,
+				'isColor' => $cards_statistics['total_deals_close_lost_number_change'] < 0,
+			),
+			'total_deals_close_lost_value'  => array(
+				'label'   => 'Total Deals Close Lost Value',
+				'value'   => $cards_statistics['total_deals_close_lost_value'],
+				'change'  => 0,
+				'isArrow' => $cards_statistics['total_deals_close_lost_value_change'] >= 0,
+				'isColor' => $cards_statistics['total_deals_close_lost_value_change'] < 0,
+			),
+			'total_deals_close_value'       => array(
+				'label'   => 'Total Deals Close Value',
+				'value'   => $cards_statistics['total_deals_close_value'],
+				'change'  => 0,
+				'isArrow' => $cards_statistics['total_deals_close_value_change'] >= 0,
+				'isColor' => $cards_statistics['total_deals_close_value_change'] >= 0,
+			),
+			'performance_rate_number'       => array(
+				'label'   => 'Performance Rate Number',
+				'value'   => $cards_statistics['performance_rate_number'],
+				'change'  => 0,
+				'isArrow' => $cards_statistics['performance_rate_number_change'] >= 0,
+				'isColor' => $cards_statistics['performance_rate_number_change'] >= 0,
+			),
+			'performance_rate_value'        => array(
+				'label'   => 'Performance Rate Value',
+				'value'   => $cards_statistics['performance_rate_value'],
+				'change'  => 0,
+				'isArrow' => $cards_statistics['performance_rate_value_change'] >= 0,
+				'isColor' => $cards_statistics['performance_rate_value_change'] >= 0,
+			),
+		);
+	}
 
 
 

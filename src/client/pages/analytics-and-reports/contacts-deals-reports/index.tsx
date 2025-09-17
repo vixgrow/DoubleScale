@@ -187,7 +187,7 @@ const ContactsDealsReports: React.FC = () => {
 									{data.contacts_created.toLocaleString()}
 								</div>
 								<div className="flex items-center gap-2 pt-1">
-									{data.contacts_created_change > 0 ? (
+									{data.contacts_created_change >= 0 ? (
 										<CaretUpOutlined className="text-green-500" />
 									) : (
 										<CaretDownOutlined className="text-red-500" />
@@ -195,7 +195,7 @@ const ContactsDealsReports: React.FC = () => {
 									<span
 										className={cn(
 											'text-sm',
-											data.contacts_created_change > 0
+											data.contacts_created_change >= 0
 												? 'text-green-500'
 												: 'text-red-500'
 										)}
@@ -226,7 +226,7 @@ const ContactsDealsReports: React.FC = () => {
 									{data.contacts_worked.toLocaleString()}
 								</div>
 								<div className="flex items-center gap-2 pt-1">
-									{data.contacts_worked_change > 0 ? (
+									{data.contacts_worked_change >= 0 ? (
 										<CaretUpOutlined className="text-green-500" />
 									) : (
 										<CaretDownOutlined className="text-red-500" />
@@ -234,7 +234,7 @@ const ContactsDealsReports: React.FC = () => {
 									<span
 										className={cn(
 											'text-sm',
-											data.contacts_worked_change > 0
+											data.contacts_worked_change >= 0
 												? 'text-green-500'
 												: 'text-red-500'
 										)}
@@ -265,7 +265,7 @@ const ContactsDealsReports: React.FC = () => {
 									{data.deals_created.toLocaleString()}
 								</div>
 								<div className="flex items-center gap-2 pt-1">
-									{data.deals_created_change > 0 ? (
+									{data.deals_created_change >= 0 ? (
 										<CaretUpOutlined className="text-green-500" />
 									) : (
 										<CaretDownOutlined className="text-red-500" />
@@ -273,7 +273,7 @@ const ContactsDealsReports: React.FC = () => {
 									<span
 										className={cn(
 											'text-sm',
-											data.deals_created_change > 0
+											data.deals_created_change >= 0
 												? 'text-green-500'
 												: 'text-red-500'
 										)}
@@ -304,7 +304,7 @@ const ContactsDealsReports: React.FC = () => {
 									{data.deals_won.toLocaleString()}
 								</div>
 								<div className="flex items-center gap-2 pt-1">
-									{data.deals_won_change > 0 ? (
+									{data.deals_won_change >= 0 ? (
 										<CaretUpOutlined className="text-green-500" />
 									) : (
 										<CaretDownOutlined className="text-red-500" />
@@ -312,7 +312,7 @@ const ContactsDealsReports: React.FC = () => {
 									<span
 										className={cn(
 											'text-sm',
-											data.deals_won_change > 0
+											data.deals_won_change >= 0
 												? 'text-green-500'
 												: 'text-red-500'
 										)}
@@ -345,7 +345,7 @@ const ContactsDealsReports: React.FC = () => {
 								</div>
 								<div className="flex items-center gap-2 pt-1">
 									{/* For velocity, lower is usually better */}
-									{data.deals_won_value_change < 0 ? (
+									{data.deals_won_value_change >= 0 ? (
 										<CaretUpOutlined className="text-green-500" />
 									) : (
 										<CaretDownOutlined className="text-red-500" />
@@ -353,7 +353,7 @@ const ContactsDealsReports: React.FC = () => {
 									<span
 										className={cn(
 											'text-sm',
-											data.deals_won_value_change < 0
+											data.deals_won_value_change >= 0
 												? 'text-green-500'
 												: 'text-red-500'
 										)}
@@ -384,15 +384,15 @@ const ContactsDealsReports: React.FC = () => {
 									{data.deals_lost.toLocaleString()}
 								</div>
 								<div className="flex items-center gap-2 pt-1">
-									{data.deals_lost_change > 0 ? (
-										<CaretUpOutlined className="text-green-500" />
+									{data.deals_lost_change < 0 ? (
+										<CaretDownOutlined className="text-green-500" />
 									) : (
-										<CaretDownOutlined className="text-red-500" />
+										<CaretUpOutlined className="text-red-500" />
 									)}
 									<span
 										className={cn(
 											'text-sm',
-											data.deals_lost_change > 0
+											data.deals_lost_change < 0
 												? 'text-green-500'
 												: 'text-red-500'
 										)}
@@ -424,11 +424,10 @@ const ContactsDealsReports: React.FC = () => {
 									{__('USD', 'quillcrm')}
 								</div>
 								<div className="flex items-center gap-2 pt-1">
-									{/* For velocity, lower is usually better */}
 									{data.deals_lost_value_change < 0 ? (
-										<CaretUpOutlined className="text-green-500" />
+										<CaretDownOutlined className="text-green-500" />
 									) : (
-										<CaretDownOutlined className="text-red-500" />
+										<CaretUpOutlined className="text-red-500" />
 									)}
 									<span
 										className={cn(
@@ -465,11 +464,10 @@ const ContactsDealsReports: React.FC = () => {
 									{__('days', 'quillcrm')}
 								</div>
 								<div className="flex items-center gap-2 pt-1">
-									{/* For time metrics, negative change is usually good */}
 									{data.deals_avg_time_change < 0 ? (
-										<CaretUpOutlined className="text-green-500" />
+										<CaretDownOutlined className="text-green-500" />
 									) : (
-										<CaretDownOutlined className="text-red-500" />
+										<CaretUpOutlined className="text-red-500" />
 									)}
 									<span
 										className={cn(

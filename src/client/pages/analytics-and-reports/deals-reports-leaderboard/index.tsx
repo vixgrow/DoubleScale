@@ -67,8 +67,6 @@ const DealsReportsLeaderboard: React.FC = () => {
 				path,
 			})) as DealsReportsLeaderboardProps;
 
-			console.log('response', response);
-
 			setData(response);
 		} catch (error) {
 			console.error('Error fetching deals reports leaderboard:', error);

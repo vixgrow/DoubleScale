@@ -18,6 +18,25 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { __ } from '@wordpress/i18n';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
 import ReportFilters from '../../../../components/reports/ReportFilters';
+import { Chart } from 'react-chartjs-2';
+import {
+	Chart as ChartJS,
+	CategoryScale,
+	LinearScale,
+	BarElement,
+	Title,
+	Tooltip as ChartTooltip,
+	Legend,
+} from 'chart.js';
+
+ChartJS.register(
+	CategoryScale,
+	LinearScale,
+	BarElement,
+	Title,
+	ChartTooltip,
+	Legend
+);
 
 interface DealData {
 	date: string;
@@ -40,8 +59,6 @@ const DealsReportsByDate: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [daysBack, setDaysBack] = useState(30);
 	const [frequency, setFrequency] = useState('daily');
-	const [hoveredBar, setHoveredBar] = useState<DealData | null>(null);
-	const [hoveredPosition, setHoveredPosition] = useState({ x: 0, y: 0 });
 
 	// Use the custom hook for filters
 	const {
@@ -91,13 +108,6 @@ const DealsReportsByDate: React.FC = () => {
 		fetchDealsReportsByDate(daysBack, frequency);
 	};
 
-	// Calculate chart dimensions and max value
-	const chartData = data?.deals_by_date || [];
-	const maxValue = Math.max(...chartData.map((d) => d.total), 1);
-	const chartHeight = 300;
-	const chartWidth = Math.max(chartData.length * 60, 800);
-	const barWidth = Math.min(50, (chartWidth - 100) / chartData.length);
-
 	// Format date for display based on frequency
 	const formatDate = (dateStr: string, freq: string = frequency) => {
 		if (freq === 'weekly') {
@@ -136,21 +146,107 @@ const DealsReportsByDate: React.FC = () => {
 		return dateStr;
 	};
 
-	// Calculate percentages for tooltip
-	const calculatePercentage = (value: number, total: number) => {
-		return total > 0 ? Math.round((value / total) * 100) : 0;
-	};
+	// Prepare chart data for Chart.js
+	const getChartData = () => {
+		const chartData = data?.deals_by_date || [];
 
-	// Handle bar hover
-	const handleBarHover = (deal: DealData, event: React.MouseEvent) => {
-		if (deal.total > 0) {
-			setHoveredBar(deal);
-			setHoveredPosition({ x: event.clientX, y: event.clientY });
+		if (chartData.length === 0) {
+			return {
+				labels: [],
+				datasets: [],
+			};
 		}
+
+		return {
+			labels: chartData.map((deal) => formatDate(deal.date, frequency)),
+			datasets: [
+				{
+					label: __('Open', 'quillcrm'),
+					data: chartData.map((deal) => deal.open),
+					backgroundColor: '#fca5a5', // red-300
+					borderColor: '#ef4444', // red-500
+					borderWidth: 1,
+				},
+				{
+					label: __('Won', 'quillcrm'),
+					data: chartData.map((deal) => deal.won),
+					backgroundColor: '#22d3ee', // cyan-400
+					borderColor: '#0891b2', // cyan-600
+					borderWidth: 1,
+				},
+				{
+					label: __('Lost', 'quillcrm'),
+					data: chartData.map((deal) => deal.lost),
+					backgroundColor: '#a78bfa', // violet-400
+					borderColor: '#7c3aed', // violet-600
+					borderWidth: 1,
+				},
+			],
+		};
 	};
 
-	const handleBarLeave = () => {
-		setHoveredBar(null);
+	// Chart options
+	const chartOptions = {
+		responsive: true,
+		maintainAspectRatio: false,
+		scales: {
+			x: {
+				stacked: true,
+				title: {
+					display: true,
+					text: __('Create Date', 'quillcrm'),
+				},
+			},
+			y: {
+				stacked: true,
+				beginAtZero: true,
+				title: {
+					display: true,
+					text: __('Count of Deals', 'quillcrm'),
+				},
+			},
+		},
+		plugins: {
+			legend: {
+				display: true,
+				position: 'top' as const,
+			},
+			tooltip: {
+				mode: 'index' as const,
+				intersect: false,
+				callbacks: {
+					footer: function (tooltipItems: any[]) {
+						let total = 0;
+						tooltipItems.forEach(function (tooltipItem) {
+							total += tooltipItem.parsed.y;
+						});
+						return __('Total: ', 'quillcrm') + total;
+					},
+					afterBody: function (tooltipItems: any[]) {
+						if (tooltipItems.length > 0) {
+							const total = tooltipItems.reduce(
+								(sum: number, item: any) => sum + item.parsed.y,
+								0
+							);
+							return tooltipItems.map((item: any) => {
+								const percentage =
+									total > 0
+										? Math.round(
+												(item.parsed.y / total) * 100
+											)
+										: 0;
+								return `${item.dataset.label}: ${percentage}%`;
+							});
+						}
+						return [];
+					},
+				},
+			},
+		},
+		interaction: {
+			mode: 'index' as const,
+			intersect: false,
+		},
 	};
 
 	return (
@@ -258,28 +354,6 @@ const DealsReportsByDate: React.FC = () => {
 								</div>
 							</div>
 						</div>
-
-						{/* Legend */}
-						<div className="flex gap-6 mb-5">
-							<div className="flex items-center gap-2">
-								<div className="w-3 h-3 bg-red-300 rounded-full" />
-								<span className="text-sm text-gray-700">
-									{__('Open', 'quillcrm')}
-								</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<div className="w-3 h-3 bg-cyan-400 rounded-full" />
-								<span className="text-sm text-gray-700">
-									{__('Won', 'quillcrm')}
-								</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<div className="w-3 h-3 bg-violet-400 rounded-full" />
-								<span className="text-sm text-gray-700">
-									{__('Lost', 'quillcrm')}
-								</span>
-							</div>
-						</div>
 					</div>
 
 					{loading ? (
@@ -289,272 +363,12 @@ const DealsReportsByDate: React.FC = () => {
 							</span>
 						</div>
 					) : (
-						<div className="relative">
-							{/* Chart Container */}
-							<div className="overflow-x-auto border border-gray-200 rounded-lg p-5">
-								<svg
-									width={chartWidth}
-									height={chartHeight + 60}
-									className="block"
-								>
-									{/* Y-axis labels */}
-									{Array.from({ length: 6 }, (_, i) => {
-										const value = Math.ceil(
-											(maxValue / 5) * i
-										);
-										const y =
-											chartHeight - (i * chartHeight) / 5;
-										return (
-											<g key={i}>
-												<text
-													x={40}
-													y={y + 5}
-													textAnchor="end"
-													fontSize="12"
-													fill="#666"
-												>
-													{value}
-												</text>
-												<line
-													x1={50}
-													y1={y}
-													x2={chartWidth - 20}
-													y2={y}
-													stroke="#f0f0f0"
-													strokeWidth={1}
-												/>
-											</g>
-										);
-									})}
-
-									{/* Bars */}
-									{chartData.map((deal, index) => {
-										const x = 60 + index * (barWidth + 10);
-										const total = deal.total;
-
-										if (total === 0) {
-											return (
-												<g key={deal.date}>
-													{/* X-axis label */}
-													<text
-														x={x + barWidth / 2}
-														y={chartHeight + 20}
-														textAnchor="middle"
-														fontSize="11"
-														fill="#666"
-														transform={`rotate(-45, ${x + barWidth / 2}, ${chartHeight + 20})`}
-													>
-														{formatDate(
-															deal.date,
-															frequency
-														)}
-													</text>
-												</g>
-											);
-										}
-
-										const scale = chartHeight / maxValue;
-										const lostHeight =
-											(deal.lost / total) * total * scale;
-										const wonHeight =
-											(deal.won / total) * total * scale;
-										const openHeight =
-											(deal.open / total) * total * scale;
-
-										let currentY = chartHeight;
-
-										return (
-											<g key={deal.date}>
-												{/* Lost section */}
-												{deal.lost > 0 && (
-													<rect
-														x={x}
-														y={
-															currentY -
-															lostHeight
-														}
-														width={barWidth}
-														height={lostHeight}
-														fill="#a78bfa"
-														cursor="pointer"
-														onMouseEnter={(e) =>
-															handleBarHover(
-																deal,
-																e
-															)
-														}
-														onMouseLeave={
-															handleBarLeave
-														}
-													/>
-												)}
-
-												{/* Won section */}
-												{deal.won > 0 && (
-													<rect
-														x={x}
-														y={
-															currentY -
-															lostHeight -
-															wonHeight
-														}
-														width={barWidth}
-														height={wonHeight}
-														fill="#22d3ee"
-														cursor="pointer"
-														onMouseEnter={(e) =>
-															handleBarHover(
-																deal,
-																e
-															)
-														}
-														onMouseLeave={
-															handleBarLeave
-														}
-													/>
-												)}
-
-												{/* Open section */}
-												{deal.open > 0 && (
-													<rect
-														x={x}
-														y={
-															currentY -
-															lostHeight -
-															wonHeight -
-															openHeight
-														}
-														width={barWidth}
-														height={openHeight}
-														fill="#fca5a5"
-														cursor="pointer"
-														onMouseEnter={(e) =>
-															handleBarHover(
-																deal,
-																e
-															)
-														}
-														onMouseLeave={
-															handleBarLeave
-														}
-													/>
-												)}
-
-												{/* Total label on top of bar */}
-												{total > 0 && (
-													<text
-														x={x + barWidth / 2}
-														y={
-															currentY -
-															lostHeight -
-															wonHeight -
-															openHeight -
-															8
-														}
-														textAnchor="middle"
-														fontSize="12"
-														fontWeight="bold"
-														fill="#333"
-													>
-														{total}
-													</text>
-												)}
-
-												{/* X-axis label */}
-												<text
-													x={x + barWidth / 2}
-													y={chartHeight + 20}
-													textAnchor="middle"
-													fontSize="11"
-													fill="#666"
-													transform={`rotate(-45, ${x + barWidth / 2}, ${chartHeight + 20})`}
-												>
-													{formatDate(
-														deal.date,
-														frequency
-													)}
-												</text>
-											</g>
-										);
-									})}
-
-									{/* Y-axis title */}
-									<text
-										x={15}
-										y={chartHeight / 2}
-										textAnchor="middle"
-										fontSize="12"
-										fill="#666"
-										transform={`rotate(-90, 15, ${chartHeight / 2})`}
-									>
-										{__('Count of Deals', 'quillcrm')}
-									</text>
-
-									{/* X-axis title */}
-									<text
-										x={chartWidth / 2}
-										y={chartHeight + 50}
-										textAnchor="middle"
-										fontSize="12"
-										fill="#666"
-									>
-										{__('Create Date', 'quillcrm')}
-									</text>
-								</svg>
-							</div>
-
-							{/* Tooltip */}
-							{hoveredBar && (
-								<div
-									className="fixed bg-gray-800 text-white p-3 rounded-md text-xs z-50 pointer-events-none shadow-lg"
-									style={{
-										left: hoveredPosition.x + 10,
-										top: hoveredPosition.y - 10,
-									}}
-								>
-									<div className="font-bold mb-2">
-										{formatDate(hoveredBar.date, frequency)}
-									</div>
-									<div className="mb-1">
-										<span className="text-red-300">● </span>
-										{__('Open:', 'quillcrm')}{' '}
-										{hoveredBar.open} (
-										{calculatePercentage(
-											hoveredBar.open,
-											hoveredBar.total
-										)}
-										%)
-									</div>
-									<div className="mb-1">
-										<span className="text-cyan-400">
-											●{' '}
-										</span>
-										{__('Won:', 'quillcrm')}{' '}
-										{hoveredBar.won} (
-										{calculatePercentage(
-											hoveredBar.won,
-											hoveredBar.total
-										)}
-										%)
-									</div>
-									<div className="mb-2">
-										<span className="text-violet-400">
-											●{' '}
-										</span>
-										{__('Lost:', 'quillcrm')}{' '}
-										{hoveredBar.lost} (
-										{calculatePercentage(
-											hoveredBar.lost,
-											hoveredBar.total
-										)}
-										%)
-									</div>
-									<div className="font-bold border-t border-gray-600 pt-1">
-										{__('Totals:', 'quillcrm')}{' '}
-										{hoveredBar.total}
-									</div>
-								</div>
-							)}
+						<div style={{ height: '400px', width: '100%' }}>
+							<Chart
+								type="bar"
+								data={getChartData()}
+								options={chartOptions}
+							/>
 						</div>
 					)}
 				</CardContent>

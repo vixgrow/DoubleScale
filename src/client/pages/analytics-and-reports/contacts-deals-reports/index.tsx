@@ -1,8 +1,7 @@
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from 'react';
-import { Flex, Skeleton, Typography } from 'antd';
-import Card from 'antd/es/card/Card';
-import { CardContent } from '../../../../components/ui/card';
+import { Card, CardContent } from '../../../../components/ui/card';
+import { Skeleton } from '../../../../components/ui/skeleton';
 import { __ } from '@wordpress/i18n';
 import {
 	UserOutlined,
@@ -10,12 +9,13 @@ import {
 	PlusCircleOutlined,
 	TrophyOutlined,
 	ClockCircleOutlined,
-	ThunderboltOutlined,
 	CaretUpOutlined,
 	CaretDownOutlined,
+	DollarOutlined,
 } from '@ant-design/icons';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
 import ReportFilters from '../../../../components/reports/ReportFilters';
+import { cn } from '../../../../lib/utils';
 
 interface ContactsDealsReportsProps {
 	contacts_created: number;
@@ -26,10 +26,14 @@ interface ContactsDealsReportsProps {
 	deals_created_change: number;
 	deals_won: number;
 	deals_won_change: number;
+	deals_won_value: number;
+	deals_won_value_change: number;
+	deals_lost: number;
+	deals_lost_change: number;
+	deals_lost_value: number;
+	deals_lost_value_change: number;
 	deals_avg_time: number;
 	deals_avg_time_change: number;
-	deal_velocity: number;
-	deal_velocity_change: number;
 }
 
 const ContactsDealsReports: React.FC = () => {
@@ -42,10 +46,14 @@ const ContactsDealsReports: React.FC = () => {
 		deals_created_change: 0,
 		deals_won: 0,
 		deals_won_change: 0,
+		deals_won_value: 0,
+		deals_won_value_change: 0,
+		deals_lost: 0,
+		deals_lost_change: 0,
+		deals_lost_value: 0,
+		deals_lost_value_change: 0,
 		deals_avg_time: 0,
 		deals_avg_time_change: 0,
-		deal_velocity: 0,
-		deal_velocity_change: 0,
 	});
 	const [loading, setLoading] = useState(false);
 
@@ -80,10 +88,14 @@ const ContactsDealsReports: React.FC = () => {
 				deals_created_change: response.deals_created_change || 0,
 				deals_won: response.deals_won || 0,
 				deals_won_change: response.deals_won_change || 0,
+				deals_won_value: response.deals_won_value || 0,
+				deals_won_value_change: response.deals_won_value_change || 0,
+				deals_lost: response.deals_lost || 0,
+				deals_lost_change: response.deals_lost_change || 0,
+				deals_lost_value: response.deals_lost_value || 0,
+				deals_lost_value_change: response.deals_lost_value_change || 0,
 				deals_avg_time: response.deals_avg_time || 0,
 				deals_avg_time_change: response.deals_avg_time_change || 0,
-				deal_velocity: response.deal_velocity || 0,
-				deal_velocity_change: response.deal_velocity_change || 0,
 			};
 
 			setData(processedData);
@@ -108,11 +120,20 @@ const ContactsDealsReports: React.FC = () => {
 	}, [filters]);
 
 	if (loading) {
-		return <Skeleton active />;
+		return (
+			<div className="space-y-4">
+				<Skeleton className="h-8 w-full" />
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{Array.from({ length: 6 }).map((_, i) => (
+						<Skeleton key={i} className="h-32 w-full" />
+					))}
+				</div>
+			</div>
+		);
 	}
 
 	return (
-		<div>
+		<div className="space-y-6">
 			{/* Filters Section */}
 			<ReportFilters
 				title={__('Contacts & Deals Reports', 'quillcrm')}
@@ -130,24 +151,14 @@ const ContactsDealsReports: React.FC = () => {
 				showContact={true}
 			/>
 
-			<Flex
-				gap={20}
-				vertical
-				style={{
-					marginTop: 20,
-					border: '1px solid #f0f0f0',
-					borderRadius: 10,
-					padding: 20,
-					backgroundColor: '#f0f0f0',
-				}}
-			>
-				<Typography.Title level={5}>
+			<div className="bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200/80 rounded-xl p-6 space-y-6 shadow-sm">
+				<h3 className="text-xl font-bold text-gray-900 tracking-tight">
 					{__(
 						'Contacts created and worked totals with deals created and won totals',
 						'quillcrm'
 					)}
-				</Typography.Title>
-				<Typography.Text type="secondary">
+				</h3>
+				<p className="text-sm text-gray-600/80 font-medium">
 					{filters.dateRange &&
 					filters.dateRange[0] &&
 					filters.dateRange[1]
@@ -157,340 +168,328 @@ const ContactsDealsReports: React.FC = () => {
 								'quillcrm'
 							)}{' '}
 					&nbsp;&nbsp; {__('Compared To: Year before', 'quillcrm')}
-				</Typography.Text>
-				<Flex gap={20} style={{ marginTop: 20 }} wrap="wrap">
+				</p>
+
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 					{/* Contacts Created */}
-					<Card style={{ flex: 1 }}>
-						<CardContent>
-							<Flex gap={10} vertical>
-								<Flex gap={10}>
-									<div className="qcrm-dashboard-card-icon">
-										<UserOutlined
-											style={{ fontSize: 16 }}
-										/>
+					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
+						<CardContent className="p-6 space-y-4">
+							<div className="flex flex-col gap-4">
+								<div className="flex items-center gap-3 pb-1">
+									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg">
+										<UserOutlined className="text-base text-blue-600" />
 									</div>
-									<Typography.Text strong>
+									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
 										{__('CONTACTS CREATED', 'quillcrm')}
-									</Typography.Text>
-								</Flex>
-								<Typography.Text
-									className="qcrm-analytics-count"
-									style={{
-										fontSize: 28,
-										fontWeight: 'bold',
-										color: '#0891b2',
-									}}
-								>
+									</span>
+								</div>
+								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
 									{data.contacts_created.toLocaleString()}
-								</Typography.Text>
-								<Flex align="center">
+								</div>
+								<div className="flex items-center gap-2 pt-1">
 									{data.contacts_created_change > 0 ? (
-										<CaretUpOutlined
-											style={{ color: '#10b981' }}
-										/>
+										<CaretUpOutlined className="text-green-500" />
 									) : (
-										<CaretDownOutlined
-											style={{ color: '#ef4444' }}
-										/>
+										<CaretDownOutlined className="text-red-500" />
 									)}
-									<Typography.Text
-										style={{
-											color:
-												data.contacts_created_change > 0
-													? '#10b981'
-													: '#ef4444',
-										}}
+									<span
+										className={cn(
+											'text-sm',
+											data.contacts_created_change > 0
+												? 'text-green-500'
+												: 'text-red-500'
+										)}
 									>
 										{Math.abs(
 											data.contacts_created_change
 										).toFixed(2)}
 										%
-									</Typography.Text>
-								</Flex>
-							</Flex>
+									</span>
+								</div>
+							</div>
 						</CardContent>
 					</Card>
 
 					{/* Contacts Worked */}
-					<Card style={{ flex: 1 }}>
-						<CardContent>
-							<Flex gap={10} vertical>
-								<Flex gap={10}>
-									<div className="qcrm-dashboard-card-icon">
-										<CheckCircleOutlined
-											style={{ fontSize: 16 }}
-										/>
+					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
+						<CardContent className="p-6 space-y-4">
+							<div className="flex flex-col gap-4">
+								<div className="flex items-center gap-3 pb-1">
+									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-lg">
+										<CheckCircleOutlined className="text-base text-green-600" />
 									</div>
-									<Typography.Text strong>
+									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
 										{__('CONTACTS WORKED', 'quillcrm')}
-									</Typography.Text>
-								</Flex>
-								<Typography.Text
-									className="qcrm-analytics-count"
-									style={{
-										fontSize: 28,
-										fontWeight: 'bold',
-										color: '#0891b2',
-									}}
-								>
+									</span>
+								</div>
+								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
 									{data.contacts_worked.toLocaleString()}
-								</Typography.Text>
-								<Flex align="center">
+								</div>
+								<div className="flex items-center gap-2 pt-1">
 									{data.contacts_worked_change > 0 ? (
-										<CaretUpOutlined
-											style={{ color: '#10b981' }}
-										/>
+										<CaretUpOutlined className="text-green-500" />
 									) : (
-										<CaretDownOutlined
-											style={{ color: '#ef4444' }}
-										/>
+										<CaretDownOutlined className="text-red-500" />
 									)}
-									<Typography.Text
-										style={{
-											color:
-												data.contacts_worked_change > 0
-													? '#10b981'
-													: '#ef4444',
-										}}
+									<span
+										className={cn(
+											'text-sm',
+											data.contacts_worked_change > 0
+												? 'text-green-500'
+												: 'text-red-500'
+										)}
 									>
 										{Math.abs(
 											data.contacts_worked_change
 										).toFixed(2)}
 										%
-									</Typography.Text>
-								</Flex>
-							</Flex>
+									</span>
+								</div>
+							</div>
 						</CardContent>
 					</Card>
 
-					<Flex
-						gap={20}
-						style={{ marginTop: 20, width: '100%' }}
-						wrap="wrap"
-					>
-						{/* New Deals Created */}
-						<Card style={{ flex: 1 }}>
-							<CardContent>
-								<Flex gap={10} vertical>
-									<Flex gap={10}>
-										<div className="qcrm-dashboard-card-icon">
-											<PlusCircleOutlined
-												style={{ fontSize: 16 }}
-											/>
-										</div>
-										<Typography.Text strong>
-											{__(
-												'NEW DEALS CREATED',
-												'quillcrm'
-											)}
-										</Typography.Text>
-									</Flex>
-									<Typography.Text
-										className="qcrm-analytics-count"
-										style={{
-											fontSize: 28,
-											fontWeight: 'bold',
-											color: '#0891b2',
-										}}
-									>
-										{data.deals_created.toLocaleString()}
-									</Typography.Text>
-									<Flex align="center">
-										{data.deals_created_change > 0 ? (
-											<CaretUpOutlined
-												style={{ color: '#10b981' }}
-											/>
-										) : (
-											<CaretDownOutlined
-												style={{ color: '#ef4444' }}
-											/>
+					{/* New Deals Created */}
+					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
+						<CardContent className="p-6 space-y-4">
+							<div className="flex flex-col gap-4">
+								<div className="flex items-center gap-3 pb-1">
+									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-100 rounded-lg">
+										<PlusCircleOutlined className="text-base text-purple-600" />
+									</div>
+									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
+										{__('NEW DEALS CREATED', 'quillcrm')}
+									</span>
+								</div>
+								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
+									{data.deals_created.toLocaleString()}
+								</div>
+								<div className="flex items-center gap-2 pt-1">
+									{data.deals_created_change > 0 ? (
+										<CaretUpOutlined className="text-green-500" />
+									) : (
+										<CaretDownOutlined className="text-red-500" />
+									)}
+									<span
+										className={cn(
+											'text-sm',
+											data.deals_created_change > 0
+												? 'text-green-500'
+												: 'text-red-500'
 										)}
-										<Typography.Text
-											style={{
-												color:
-													data.deals_created_change >
-													0
-														? '#10b981'
-														: '#ef4444',
-											}}
-										>
-											{Math.abs(
-												data.deals_created_change
-											).toFixed(2)}
-											%
-										</Typography.Text>
-									</Flex>
-								</Flex>
-							</CardContent>
-						</Card>
+									>
+										{Math.abs(
+											data.deals_created_change
+										).toFixed(2)}
+										%
+									</span>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
 
-						{/* Deals Closed Won */}
-						<Card style={{ flex: 1 }}>
-							<CardContent>
-								<Flex gap={10} vertical>
-									<Flex gap={10}>
-										<div className="qcrm-dashboard-card-icon">
-											<TrophyOutlined
-												style={{ fontSize: 16 }}
-											/>
-										</div>
-										<Typography.Text strong>
-											{__('DEALS CLOSED WON', 'quillcrm')}
-										</Typography.Text>
-									</Flex>
-									<Typography.Text
-										className="qcrm-analytics-count"
-										style={{
-											fontSize: 28,
-											fontWeight: 'bold',
-											color: '#0891b2',
-										}}
-									>
-										{data.deals_won.toLocaleString()}
-									</Typography.Text>
-									<Flex align="center">
-										{data.deals_won_change > 0 ? (
-											<CaretUpOutlined
-												style={{ color: '#10b981' }}
-											/>
-										) : (
-											<CaretDownOutlined
-												style={{ color: '#ef4444' }}
-											/>
+					{/* Deals Closed Won */}
+					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
+						<CardContent className="p-6 space-y-4">
+							<div className="flex flex-col gap-4">
+								<div className="flex items-center gap-3 pb-1">
+									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-yellow-50 to-amber-50 border border-yellow-100 rounded-lg">
+										<TrophyOutlined className="text-base text-yellow-600" />
+									</div>
+									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
+										{__('DEALS CLOSED WON', 'quillcrm')}
+									</span>
+								</div>
+								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
+									{data.deals_won.toLocaleString()}
+								</div>
+								<div className="flex items-center gap-2 pt-1">
+									{data.deals_won_change > 0 ? (
+										<CaretUpOutlined className="text-green-500" />
+									) : (
+										<CaretDownOutlined className="text-red-500" />
+									)}
+									<span
+										className={cn(
+											'text-sm',
+											data.deals_won_change > 0
+												? 'text-green-500'
+												: 'text-red-500'
 										)}
-										<Typography.Text
-											style={{
-												color:
-													data.deals_won_change > 0
-														? '#10b981'
-														: '#ef4444',
-											}}
-										>
-											{Math.abs(
-												data.deals_won_change
-											).toFixed(2)}
-											%
-										</Typography.Text>
-									</Flex>
-								</Flex>
-							</CardContent>
-						</Card>
+									>
+										{Math.abs(
+											data.deals_won_change
+										).toFixed(2)}
+										%
+									</span>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
 
-						{/* Deals Average Time */}
-						<Card style={{ flex: 1 }}>
-							<CardContent>
-								<Flex gap={10} vertical>
-									<Flex gap={10}>
-										<div className="qcrm-dashboard-card-icon">
-											<ClockCircleOutlined
-												style={{ fontSize: 16 }}
-											/>
-										</div>
-										<Typography.Text strong>
-											{__(
-												'DEALS AVERAGE TIME',
-												'quillcrm'
-											)}
-										</Typography.Text>
-									</Flex>
-									<Typography.Text
-										className="qcrm-analytics-count"
-										style={{
-											fontSize: 28,
-											fontWeight: 'bold',
-											color: '#0891b2',
-										}}
-									>
-										{data.deals_avg_time}{' '}
-										{__('days', 'quillcrm')}
-									</Typography.Text>
-									<Flex align="center">
-										{/* For time metrics, negative change is usually good */}
-										{data.deals_avg_time_change < 0 ? (
-											<CaretUpOutlined
-												style={{ color: '#10b981' }}
-											/>
-										) : (
-											<CaretDownOutlined
-												style={{ color: '#ef4444' }}
-											/>
+					{/* Deals Won Value */}
+					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
+						<CardContent className="p-6 space-y-4">
+							<div className="flex flex-col gap-4">
+								<div className="flex items-center gap-3 pb-1">
+									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-100 rounded-lg">
+										<DollarOutlined className="text-base text-emerald-600" />
+									</div>
+									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
+										{__('DEALS WON VALUE', 'quillcrm')}
+									</span>
+								</div>
+								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
+									{data.deals_won_value.toLocaleString()}{' '}
+									{__('USD', 'quillcrm')}
+								</div>
+								<div className="flex items-center gap-2 pt-1">
+									{/* For velocity, lower is usually better */}
+									{data.deals_won_value_change < 0 ? (
+										<CaretUpOutlined className="text-green-500" />
+									) : (
+										<CaretDownOutlined className="text-red-500" />
+									)}
+									<span
+										className={cn(
+											'text-sm',
+											data.deals_won_value_change < 0
+												? 'text-green-500'
+												: 'text-red-500'
 										)}
-										<Typography.Text
-											style={{
-												color:
-													data.deals_avg_time_change <
-													0
-														? '#10b981'
-														: '#ef4444',
-											}}
-										>
-											{Math.abs(
-												data.deals_avg_time_change
-											).toFixed(2)}
-											%
-										</Typography.Text>
-									</Flex>
-								</Flex>
-							</CardContent>
-						</Card>
+									>
+										{Math.abs(
+											data.deals_won_value_change
+										).toFixed(2)}
+										%
+									</span>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
 
-						{/* Deal Velocity */}
-						<Card style={{ flex: 1 }}>
-							<CardContent>
-								<Flex gap={10} vertical>
-									<Flex gap={10}>
-										<div className="qcrm-dashboard-card-icon">
-											<ThunderboltOutlined
-												style={{ fontSize: 16 }}
-											/>
-										</div>
-										<Typography.Text strong>
-											{__('DEAL VELOCITY', 'quillcrm')}
-										</Typography.Text>
-									</Flex>
-									<Typography.Text
-										className="qcrm-analytics-count"
-										style={{
-											fontSize: 28,
-											fontWeight: 'bold',
-											color: '#0891b2',
-										}}
-									>
-										{data.deal_velocity}{' '}
-										{__('days', 'quillcrm')}
-									</Typography.Text>
-									<Flex align="center">
-										{/* For velocity, lower is usually better */}
-										{data.deal_velocity_change < 0 ? (
-											<CaretUpOutlined
-												style={{ color: '#10b981' }}
-											/>
-										) : (
-											<CaretDownOutlined
-												style={{ color: '#ef4444' }}
-											/>
+					{/* Deals Closed Lost */}
+					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
+						<CardContent className="p-6 space-y-4">
+							<div className="flex flex-col gap-4">
+								<div className="flex items-center gap-3 pb-1">
+									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-red-50 to-rose-50 border border-red-100 rounded-lg">
+										<TrophyOutlined className="text-base text-red-600" />
+									</div>
+									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
+										{__('DEALS CLOSED LOST', 'quillcrm')}
+									</span>
+								</div>
+								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
+									{data.deals_lost.toLocaleString()}
+								</div>
+								<div className="flex items-center gap-2 pt-1">
+									{data.deals_lost_change > 0 ? (
+										<CaretUpOutlined className="text-green-500" />
+									) : (
+										<CaretDownOutlined className="text-red-500" />
+									)}
+									<span
+										className={cn(
+											'text-sm',
+											data.deals_lost_change > 0
+												? 'text-green-500'
+												: 'text-red-500'
 										)}
-										<Typography.Text
-											style={{
-												color:
-													data.deal_velocity_change <
-													0
-														? '#10b981'
-														: '#ef4444',
-											}}
-										>
-											{Math.abs(
-												data.deal_velocity_change
-											).toFixed(2)}
-											%
-										</Typography.Text>
-									</Flex>
-								</Flex>
-							</CardContent>
-						</Card>
-					</Flex>
-				</Flex>
-			</Flex>
+									>
+										{Math.abs(
+											data.deals_lost_change
+										).toFixed(2)}
+										%
+									</span>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+
+					{/* Deals Lost Value */}
+					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
+						<CardContent className="p-6 space-y-4">
+							<div className="flex flex-col gap-4">
+								<div className="flex items-center gap-3 pb-1">
+									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-red-50 to-rose-50 border border-red-100 rounded-lg">
+										<DollarOutlined className="text-base text-red-600" />
+									</div>
+									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
+										{__('DEALS LOST VALUE', 'quillcrm')}
+									</span>
+								</div>
+								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
+									{data.deals_lost_value.toLocaleString()}{' '}
+									{__('USD', 'quillcrm')}
+								</div>
+								<div className="flex items-center gap-2 pt-1">
+									{/* For velocity, lower is usually better */}
+									{data.deals_lost_value_change < 0 ? (
+										<CaretUpOutlined className="text-green-500" />
+									) : (
+										<CaretDownOutlined className="text-red-500" />
+									)}
+									<span
+										className={cn(
+											'text-sm',
+											data.deals_lost_value_change < 0
+												? 'text-green-500'
+												: 'text-red-500'
+										)}
+									>
+										{Math.abs(
+											data.deals_lost_value_change
+										).toFixed(2)}
+										%
+									</span>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+
+					{/* Deals Average Time */}
+					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
+						<CardContent className="p-6 space-y-4">
+							<div className="flex flex-col gap-4">
+								<div className="flex items-center gap-3 pb-1">
+									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-lg">
+										<ClockCircleOutlined className="text-base text-indigo-600" />
+									</div>
+									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
+										{__('DEALS AVERAGE TIME', 'quillcrm')}
+									</span>
+								</div>
+								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
+									{data.deals_avg_time}{' '}
+									{__('days', 'quillcrm')}
+								</div>
+								<div className="flex items-center gap-2 pt-1">
+									{/* For time metrics, negative change is usually good */}
+									{data.deals_avg_time_change < 0 ? (
+										<CaretUpOutlined className="text-green-500" />
+									) : (
+										<CaretDownOutlined className="text-red-500" />
+									)}
+									<span
+										className={cn(
+											'text-sm',
+											data.deals_avg_time_change < 0
+												? 'text-green-500'
+												: 'text-red-500'
+										)}
+									>
+										{Math.abs(
+											data.deals_avg_time_change
+										).toFixed(2)}
+										%
+									</span>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</div>
 		</div>
 	);
 };

@@ -1,13 +1,23 @@
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from 'react';
-import { Card, Select, Typography, Flex, Tooltip } from 'antd';
+import { Card, CardContent } from '../../../../components/ui/card';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '../../../../components/ui/select';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '../../../../components/ui/tooltip';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { __ } from '@wordpress/i18n';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
 import ReportFilters from '../../../../components/reports/ReportFilters';
-
-const { Title, Text } = Typography;
-const { Option } = Select;
 
 interface DealData {
 	date: string;
@@ -144,7 +154,7 @@ const DealsReportsByDate: React.FC = () => {
 	};
 
 	return (
-		<div style={{ padding: '24px' }}>
+		<div className="p-6 space-y-6">
 			{/* Filters Section */}
 			<ReportFilters
 				title={__('Deal Reports by Date - Filters', 'quillcrm')}
@@ -163,174 +173,293 @@ const DealsReportsByDate: React.FC = () => {
 			/>
 
 			<Card>
-				<div style={{ marginBottom: '24px' }}>
-					<Flex
-						justify="space-between"
-						align="center"
-						style={{ marginBottom: '16px' }}
-					>
-						<Flex align="center" gap={8}>
-							<Title level={4} style={{ margin: 0 }}>
-								{__(
-									'Deal totals by create date with status breakdown',
-									'quillcrm'
-								)}
-							</Title>
-							<Tooltip
-								title={__(
-									'Shows the number of deals created each day, grouped by their current status',
-									'quillcrm'
-								)}
-							>
-								<InfoCircleOutlined style={{ color: '#666' }} />
-							</Tooltip>
-						</Flex>
-						<Flex gap={16}>
-							<div>
-								<Text strong>
-									{__('Date range:', 'quillcrm')}{' '}
-								</Text>
-								<Select
-									value={daysBack}
-									onChange={setDaysBack}
-									style={{ width: 120 }}
-									size="small"
-								>
-									<Option value={7}>
-										{__('Last 7 days', 'quillcrm')}
-									</Option>
-									<Option value={14}>
-										{__('Last 14 days', 'quillcrm')}
-									</Option>
-									<Option value={30}>
-										{__('Last 30 days', 'quillcrm')}
-									</Option>
-									<Option value={60}>
-										{__('Last 60 days', 'quillcrm')}
-									</Option>
-									<Option value={90}>
-										{__('Last 90 days', 'quillcrm')}
-									</Option>
-								</Select>
+				<CardContent className="p-6">
+					<div className="mb-6">
+						<div className="flex justify-between items-center mb-4">
+							<div className="flex items-center gap-2">
+								<h4 className="text-lg font-semibold text-gray-900 m-0">
+									{__(
+										'Deal totals by create date with status breakdown',
+										'quillcrm'
+									)}
+								</h4>
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger>
+											<InfoCircleOutlined className="text-gray-500" />
+										</TooltipTrigger>
+										<TooltipContent>
+											<p>
+												{__(
+													'Shows the number of deals created each day, grouped by their current status',
+													'quillcrm'
+												)}
+											</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
 							</div>
-							<div>
-								<Text strong>
-									{__('Frequency:', 'quillcrm')}{' '}
-								</Text>
-								<Select
-									value={frequency}
-									onChange={setFrequency}
-									style={{ width: 100 }}
-									size="small"
-								>
-									<Option value="daily">
-										{__('Daily', 'quillcrm')}
-									</Option>
-									<Option value="weekly">
-										{__('Weekly', 'quillcrm')}
-									</Option>
-									<Option value="monthly">
-										{__('Monthly', 'quillcrm')}
-									</Option>
-								</Select>
+							<div className="flex gap-4">
+								<div className="flex flex-col gap-1">
+									<span className="text-sm font-medium text-gray-700">
+										{__('Date range:', 'quillcrm')}
+									</span>
+									<Select
+										value={daysBack.toString()}
+										onValueChange={(value) =>
+											setDaysBack(parseInt(value))
+										}
+									>
+										<SelectTrigger className="w-32">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="7">
+												{__('Last 7 days', 'quillcrm')}
+											</SelectItem>
+											<SelectItem value="14">
+												{__('Last 14 days', 'quillcrm')}
+											</SelectItem>
+											<SelectItem value="30">
+												{__('Last 30 days', 'quillcrm')}
+											</SelectItem>
+											<SelectItem value="60">
+												{__('Last 60 days', 'quillcrm')}
+											</SelectItem>
+											<SelectItem value="90">
+												{__('Last 90 days', 'quillcrm')}
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+								<div className="flex flex-col gap-1">
+									<span className="text-sm font-medium text-gray-700">
+										{__('Frequency:', 'quillcrm')}
+									</span>
+									<Select
+										value={frequency}
+										onValueChange={setFrequency}
+									>
+										<SelectTrigger className="w-28">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="daily">
+												{__('Daily', 'quillcrm')}
+											</SelectItem>
+											<SelectItem value="weekly">
+												{__('Weekly', 'quillcrm')}
+											</SelectItem>
+											<SelectItem value="monthly">
+												{__('Monthly', 'quillcrm')}
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
 							</div>
-						</Flex>
-					</Flex>
+						</div>
 
-					{/* Legend */}
-					<Flex gap={24} style={{ marginBottom: '20px' }}>
-						<Flex align="center" gap={8}>
-							<div
-								style={{
-									width: 12,
-									height: 12,
-									backgroundColor: '#fca5a5',
-									borderRadius: '50%',
-								}}
-							/>
-							<Text>{__('Open', 'quillcrm')}</Text>
-						</Flex>
-						<Flex align="center" gap={8}>
-							<div
-								style={{
-									width: 12,
-									height: 12,
-									backgroundColor: '#22d3ee',
-									borderRadius: '50%',
-								}}
-							/>
-							<Text>{__('Won', 'quillcrm')}</Text>
-						</Flex>
-						<Flex align="center" gap={8}>
-							<div
-								style={{
-									width: 12,
-									height: 12,
-									backgroundColor: '#a78bfa',
-									borderRadius: '50%',
-								}}
-							/>
-							<Text>{__('Lost', 'quillcrm')}</Text>
-						</Flex>
-					</Flex>
-				</div>
-
-				{loading ? (
-					<div style={{ textAlign: 'center', padding: '60px' }}>
-						<Text>{__('Loading...', 'quillcrm')}</Text>
+						{/* Legend */}
+						<div className="flex gap-6 mb-5">
+							<div className="flex items-center gap-2">
+								<div className="w-3 h-3 bg-red-300 rounded-full" />
+								<span className="text-sm text-gray-700">
+									{__('Open', 'quillcrm')}
+								</span>
+							</div>
+							<div className="flex items-center gap-2">
+								<div className="w-3 h-3 bg-cyan-400 rounded-full" />
+								<span className="text-sm text-gray-700">
+									{__('Won', 'quillcrm')}
+								</span>
+							</div>
+							<div className="flex items-center gap-2">
+								<div className="w-3 h-3 bg-violet-400 rounded-full" />
+								<span className="text-sm text-gray-700">
+									{__('Lost', 'quillcrm')}
+								</span>
+							</div>
+						</div>
 					</div>
-				) : (
-					<div style={{ position: 'relative' }}>
-						{/* Chart Container */}
-						<div
-							style={{
-								overflowX: 'auto',
-								border: '1px solid #f0f0f0',
-								borderRadius: '8px',
-								padding: '20px',
-							}}
-						>
-							<svg
-								width={chartWidth}
-								height={chartHeight + 60}
-								style={{ display: 'block' }}
-							>
-								{/* Y-axis labels */}
-								{Array.from({ length: 6 }, (_, i) => {
-									const value = Math.ceil((maxValue / 5) * i);
-									const y =
-										chartHeight - (i * chartHeight) / 5;
-									return (
-										<g key={i}>
-											<text
-												x={40}
-												y={y + 5}
-												textAnchor="end"
-												fontSize="12"
-												fill="#666"
-											>
-												{value}
-											</text>
-											<line
-												x1={50}
-												y1={y}
-												x2={chartWidth - 20}
-												y2={y}
-												stroke="#f0f0f0"
-												strokeWidth={1}
-											/>
-										</g>
-									);
-								})}
 
-								{/* Bars */}
-								{chartData.map((deal, index) => {
-									const x = 60 + index * (barWidth + 10);
-									const total = deal.total;
+					{loading ? (
+						<div className="text-center py-15">
+							<span className="text-gray-600">
+								{__('Loading...', 'quillcrm')}
+							</span>
+						</div>
+					) : (
+						<div className="relative">
+							{/* Chart Container */}
+							<div className="overflow-x-auto border border-gray-200 rounded-lg p-5">
+								<svg
+									width={chartWidth}
+									height={chartHeight + 60}
+									className="block"
+								>
+									{/* Y-axis labels */}
+									{Array.from({ length: 6 }, (_, i) => {
+										const value = Math.ceil(
+											(maxValue / 5) * i
+										);
+										const y =
+											chartHeight - (i * chartHeight) / 5;
+										return (
+											<g key={i}>
+												<text
+													x={40}
+													y={y + 5}
+													textAnchor="end"
+													fontSize="12"
+													fill="#666"
+												>
+													{value}
+												</text>
+												<line
+													x1={50}
+													y1={y}
+													x2={chartWidth - 20}
+													y2={y}
+													stroke="#f0f0f0"
+													strokeWidth={1}
+												/>
+											</g>
+										);
+									})}
 
-									if (total === 0) {
+									{/* Bars */}
+									{chartData.map((deal, index) => {
+										const x = 60 + index * (barWidth + 10);
+										const total = deal.total;
+
+										if (total === 0) {
+											return (
+												<g key={deal.date}>
+													{/* X-axis label */}
+													<text
+														x={x + barWidth / 2}
+														y={chartHeight + 20}
+														textAnchor="middle"
+														fontSize="11"
+														fill="#666"
+														transform={`rotate(-45, ${x + barWidth / 2}, ${chartHeight + 20})`}
+													>
+														{formatDate(
+															deal.date,
+															frequency
+														)}
+													</text>
+												</g>
+											);
+										}
+
+										const scale = chartHeight / maxValue;
+										const lostHeight =
+											(deal.lost / total) * total * scale;
+										const wonHeight =
+											(deal.won / total) * total * scale;
+										const openHeight =
+											(deal.open / total) * total * scale;
+
+										let currentY = chartHeight;
+
 										return (
 											<g key={deal.date}>
+												{/* Lost section */}
+												{deal.lost > 0 && (
+													<rect
+														x={x}
+														y={
+															currentY -
+															lostHeight
+														}
+														width={barWidth}
+														height={lostHeight}
+														fill="#a78bfa"
+														cursor="pointer"
+														onMouseEnter={(e) =>
+															handleBarHover(
+																deal,
+																e
+															)
+														}
+														onMouseLeave={
+															handleBarLeave
+														}
+													/>
+												)}
+
+												{/* Won section */}
+												{deal.won > 0 && (
+													<rect
+														x={x}
+														y={
+															currentY -
+															lostHeight -
+															wonHeight
+														}
+														width={barWidth}
+														height={wonHeight}
+														fill="#22d3ee"
+														cursor="pointer"
+														onMouseEnter={(e) =>
+															handleBarHover(
+																deal,
+																e
+															)
+														}
+														onMouseLeave={
+															handleBarLeave
+														}
+													/>
+												)}
+
+												{/* Open section */}
+												{deal.open > 0 && (
+													<rect
+														x={x}
+														y={
+															currentY -
+															lostHeight -
+															wonHeight -
+															openHeight
+														}
+														width={barWidth}
+														height={openHeight}
+														fill="#fca5a5"
+														cursor="pointer"
+														onMouseEnter={(e) =>
+															handleBarHover(
+																deal,
+																e
+															)
+														}
+														onMouseLeave={
+															handleBarLeave
+														}
+													/>
+												)}
+
+												{/* Total label on top of bar */}
+												{total > 0 && (
+													<text
+														x={x + barWidth / 2}
+														y={
+															currentY -
+															lostHeight -
+															wonHeight -
+															openHeight -
+															8
+														}
+														textAnchor="middle"
+														fontSize="12"
+														fontWeight="bold"
+														fill="#333"
+													>
+														{total}
+													</text>
+												)}
+
 												{/* X-axis label */}
 												<text
 													x={x + barWidth / 2}
@@ -347,214 +476,88 @@ const DealsReportsByDate: React.FC = () => {
 												</text>
 											</g>
 										);
-									}
+									})}
 
-									const scale = chartHeight / maxValue;
-									const lostHeight =
-										(deal.lost / total) * total * scale;
-									const wonHeight =
-										(deal.won / total) * total * scale;
-									const openHeight =
-										(deal.open / total) * total * scale;
+									{/* Y-axis title */}
+									<text
+										x={15}
+										y={chartHeight / 2}
+										textAnchor="middle"
+										fontSize="12"
+										fill="#666"
+										transform={`rotate(-90, 15, ${chartHeight / 2})`}
+									>
+										{__('Count of Deals', 'quillcrm')}
+									</text>
 
-									let currentY = chartHeight;
-
-									return (
-										<g key={deal.date}>
-											{/* Lost section */}
-											{deal.lost > 0 && (
-												<rect
-													x={x}
-													y={currentY - lostHeight}
-													width={barWidth}
-													height={lostHeight}
-													fill="#a78bfa"
-													cursor="pointer"
-													onMouseEnter={(e) =>
-														handleBarHover(deal, e)
-													}
-													onMouseLeave={
-														handleBarLeave
-													}
-												/>
-											)}
-
-											{/* Won section */}
-											{deal.won > 0 && (
-												<rect
-													x={x}
-													y={
-														currentY -
-														lostHeight -
-														wonHeight
-													}
-													width={barWidth}
-													height={wonHeight}
-													fill="#22d3ee"
-													cursor="pointer"
-													onMouseEnter={(e) =>
-														handleBarHover(deal, e)
-													}
-													onMouseLeave={
-														handleBarLeave
-													}
-												/>
-											)}
-
-											{/* Open section */}
-											{deal.open > 0 && (
-												<rect
-													x={x}
-													y={
-														currentY -
-														lostHeight -
-														wonHeight -
-														openHeight
-													}
-													width={barWidth}
-													height={openHeight}
-													fill="#fca5a5"
-													cursor="pointer"
-													onMouseEnter={(e) =>
-														handleBarHover(deal, e)
-													}
-													onMouseLeave={
-														handleBarLeave
-													}
-												/>
-											)}
-
-											{/* Total label on top of bar */}
-											{total > 0 && (
-												<text
-													x={x + barWidth / 2}
-													y={
-														currentY -
-														lostHeight -
-														wonHeight -
-														openHeight -
-														8
-													}
-													textAnchor="middle"
-													fontSize="12"
-													fontWeight="bold"
-													fill="#333"
-												>
-													{total}
-												</text>
-											)}
-
-											{/* X-axis label */}
-											<text
-												x={x + barWidth / 2}
-												y={chartHeight + 20}
-												textAnchor="middle"
-												fontSize="11"
-												fill="#666"
-												transform={`rotate(-45, ${x + barWidth / 2}, ${chartHeight + 20})`}
-											>
-												{formatDate(
-													deal.date,
-													frequency
-												)}
-											</text>
-										</g>
-									);
-								})}
-
-								{/* Y-axis title */}
-								<text
-									x={15}
-									y={chartHeight / 2}
-									textAnchor="middle"
-									fontSize="12"
-									fill="#666"
-									transform={`rotate(-90, 15, ${chartHeight / 2})`}
-								>
-									{__('Count of Deals', 'quillcrm')}
-								</text>
-
-								{/* X-axis title */}
-								<text
-									x={chartWidth / 2}
-									y={chartHeight + 50}
-									textAnchor="middle"
-									fontSize="12"
-									fill="#666"
-								>
-									{__('Create Date', 'quillcrm')}
-								</text>
-							</svg>
-						</div>
-
-						{/* Tooltip */}
-						{hoveredBar && (
-							<div
-								style={{
-									position: 'fixed',
-									left: hoveredPosition.x + 10,
-									top: hoveredPosition.y - 10,
-									backgroundColor: '#1f2937',
-									color: 'white',
-									padding: '12px',
-									borderRadius: '6px',
-									fontSize: '12px',
-									zIndex: 1000,
-									boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-									pointerEvents: 'none',
-								}}
-							>
-								<div
-									style={{
-										fontWeight: 'bold',
-										marginBottom: '8px',
-									}}
-								>
-									{formatDate(hoveredBar.date, frequency)}
-								</div>
-								<div style={{ marginBottom: '4px' }}>
-									<span style={{ color: '#fca5a5' }}>● </span>
-									{__('Open:', 'quillcrm')} {hoveredBar.open}{' '}
-									(
-									{calculatePercentage(
-										hoveredBar.open,
-										hoveredBar.total
-									)}
-									%)
-								</div>
-								<div style={{ marginBottom: '4px' }}>
-									<span style={{ color: '#22d3ee' }}>● </span>
-									{__('Won:', 'quillcrm')} {hoveredBar.won} (
-									{calculatePercentage(
-										hoveredBar.won,
-										hoveredBar.total
-									)}
-									%)
-								</div>
-								<div style={{ marginBottom: '8px' }}>
-									<span style={{ color: '#a78bfa' }}>● </span>
-									{__('Lost:', 'quillcrm')} {hoveredBar.lost}{' '}
-									(
-									{calculatePercentage(
-										hoveredBar.lost,
-										hoveredBar.total
-									)}
-									%)
-								</div>
-								<div
-									style={{
-										fontWeight: 'bold',
-										borderTop: '1px solid #374151',
-										paddingTop: '4px',
-									}}
-								>
-									{__('Totals:', 'quillcrm')}{' '}
-									{hoveredBar.total}
-								</div>
+									{/* X-axis title */}
+									<text
+										x={chartWidth / 2}
+										y={chartHeight + 50}
+										textAnchor="middle"
+										fontSize="12"
+										fill="#666"
+									>
+										{__('Create Date', 'quillcrm')}
+									</text>
+								</svg>
 							</div>
-						)}
-					</div>
-				)}
+
+							{/* Tooltip */}
+							{hoveredBar && (
+								<div
+									className="fixed bg-gray-800 text-white p-3 rounded-md text-xs z-50 pointer-events-none shadow-lg"
+									style={{
+										left: hoveredPosition.x + 10,
+										top: hoveredPosition.y - 10,
+									}}
+								>
+									<div className="font-bold mb-2">
+										{formatDate(hoveredBar.date, frequency)}
+									</div>
+									<div className="mb-1">
+										<span className="text-red-300">● </span>
+										{__('Open:', 'quillcrm')}{' '}
+										{hoveredBar.open} (
+										{calculatePercentage(
+											hoveredBar.open,
+											hoveredBar.total
+										)}
+										%)
+									</div>
+									<div className="mb-1">
+										<span className="text-cyan-400">
+											●{' '}
+										</span>
+										{__('Won:', 'quillcrm')}{' '}
+										{hoveredBar.won} (
+										{calculatePercentage(
+											hoveredBar.won,
+											hoveredBar.total
+										)}
+										%)
+									</div>
+									<div className="mb-2">
+										<span className="text-violet-400">
+											●{' '}
+										</span>
+										{__('Lost:', 'quillcrm')}{' '}
+										{hoveredBar.lost} (
+										{calculatePercentage(
+											hoveredBar.lost,
+											hoveredBar.total
+										)}
+										%)
+									</div>
+									<div className="font-bold border-t border-gray-600 pt-1">
+										{__('Totals:', 'quillcrm')}{' '}
+										{hoveredBar.total}
+									</div>
+								</div>
+							)}
+						</div>
+					)}
+				</CardContent>
 			</Card>
 		</div>
 	);

@@ -1,22 +1,21 @@
 import React from 'react';
-import {
-	Flex,
-	Typography,
-	Select,
-	DatePicker,
-	Button,
-	Space,
-	Card,
-} from 'antd';
-import { FilterOutlined } from '@ant-design/icons';
 import { __ } from '@wordpress/i18n';
+import dayjs from 'dayjs';
 import {
 	ReportFilters as ReportFiltersType,
 	FilterOptions,
 } from '../../hooks/useReportFilters';
-
-const { RangePicker } = DatePicker;
-const { Option } = Select;
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import FiltersIcon from '@/components/icons/filters';
 
 interface ReportFiltersProps {
 	// Filter state
@@ -60,234 +59,261 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 }) => {
 	return (
 		<Card style={{ marginBottom: 20, ...style }} className={className}>
-			<Flex
-				justify="space-between"
-				align="center"
-				style={{ marginBottom: showFilters ? 16 : 0 }}
-			>
-				<Typography.Title level={5} style={{ margin: 0 }}>
-					{title}
-				</Typography.Title>
-				<Button
-					icon={<FilterOutlined />}
-					onClick={() => setShowFilters(!showFilters)}
-					type={showFilters ? 'primary' : 'default'}
-				>
-					{__('Filters', 'quillcrm')}
-				</Button>
-			</Flex>
-
-			{showFilters && (
+			<CardContent className="p-4">
 				<div
-					style={{
-						borderTop: '1px solid #f0f0f0',
-						paddingTop: 16,
-					}}
+					className="flex justify-between items-center"
+					style={{ marginBottom: showFilters ? 16 : 0 }}
 				>
-					<Space wrap size="middle">
-						{/* Date Range Filter */}
-						{showDateRange && (
-							<div>
-								<Typography.Text
-									strong
-									style={{
-										display: 'block',
-										marginBottom: 4,
-									}}
-								>
-									{__('Date Range', 'quillcrm')}
-								</Typography.Text>
-								<RangePicker
-									value={filters.dateRange}
-									onChange={(dates) =>
-										setFilters({
-											...filters,
-											dateRange: dates,
-										})
-									}
-									format="YYYY-MM-DD"
-									style={{ width: 240 }}
-								/>
-							</div>
-						)}
-
-						{/* Owner Filter */}
-						{showOwner && (
-							<div>
-								<Typography.Text
-									strong
-									style={{
-										display: 'block',
-										marginBottom: 4,
-									}}
-								>
-									{__('Owner', 'quillcrm')}
-								</Typography.Text>
-								<Select
-									value={filters.ownerId}
-									onChange={(value) =>
-										setFilters({
-											...filters,
-											ownerId: value,
-										})
-									}
-									placeholder={__('Select Owner', 'quillcrm')}
-									allowClear
-									style={{ width: 160 }}
-								>
-									{filterOptions.owners?.map((owner) => (
-										<Option key={owner.id} value={owner.id}>
-											{owner.display_name}
-										</Option>
-									))}
-								</Select>
-							</div>
-						)}
-
-						{/* Pipeline Filter */}
-						{showPipeline && (
-							<div>
-								<Typography.Text
-									strong
-									style={{
-										display: 'block',
-										marginBottom: 4,
-									}}
-								>
-									{__('Pipeline', 'quillcrm')}
-								</Typography.Text>
-								<Select
-									value={filters.pipelineId}
-									onChange={(value) =>
-										setFilters({
-											...filters,
-											pipelineId: value,
-										})
-									}
-									placeholder={__(
-										'Select Pipeline',
-										'quillcrm'
-									)}
-									allowClear
-									style={{ width: 160 }}
-								>
-									{filterOptions.pipelines?.map(
-										(pipeline) => (
-											<Option
-												key={pipeline.id}
-												value={pipeline.id}
-											>
-												{pipeline.name}
-											</Option>
-										)
-									)}
-								</Select>
-							</div>
-						)}
-
-						{/* Status Filter */}
-						{showStatus && (
-							<div>
-								<Typography.Text
-									strong
-									style={{
-										display: 'block',
-										marginBottom: 4,
-									}}
-								>
-									{__('Status', 'quillcrm')}
-								</Typography.Text>
-								<Select
-									value={filters.status}
-									onChange={(value) =>
-										setFilters({
-											...filters,
-											status: value,
-										})
-									}
-									placeholder={__(
-										'Select Status',
-										'quillcrm'
-									)}
-									allowClear
-									style={{ width: 120 }}
-								>
-									<Option value="open">
-										{__('Open', 'quillcrm')}
-									</Option>
-									<Option value="won">
-										{__('Won', 'quillcrm')}
-									</Option>
-									<Option value="lost">
-										{__('Lost', 'quillcrm')}
-									</Option>
-								</Select>
-							</div>
-						)}
-
-						{/* Contact Filter */}
-						{showContact && (
-							<div>
-								<Typography.Text
-									strong
-									style={{
-										display: 'block',
-										marginBottom: 4,
-									}}
-								>
-									{__('Contact', 'quillcrm')}
-								</Typography.Text>
-								<Select
-									value={filters.contactId}
-									onChange={(value) =>
-										setFilters({
-											...filters,
-											contactId: value,
-										})
-									}
-									placeholder={__(
-										'Select Contact',
-										'quillcrm'
-									)}
-									allowClear
-									style={{ width: 160 }}
-								>
-									{filterOptions.contacts?.map((contact) => (
-										<Option
-											key={contact.id}
-											value={contact.id}
-										>
-											{contact.first_name}{' '}
-											{contact.last_name}
-										</Option>
-									))}
-								</Select>
-							</div>
-						)}
-
-						{/* Action Buttons */}
-						<div>
-							<Typography.Text
-								strong
-								style={{
-									display: 'block',
-									marginBottom: 4,
-								}}
-							>
-								{__('Actions', 'quillcrm')}
-							</Typography.Text>
-							<Space>
-								<Button onClick={clearFilters}>
-									{__('Clear', 'quillcrm')}
-								</Button>
-								<Button type="primary" onClick={applyFilters}>
-									{__('Apply', 'quillcrm')}
-								</Button>
-							</Space>
-						</div>
-					</Space>
+					<h3 className="text-lg font-semibold leading-none tracking-tight m-0">
+						{title}
+					</h3>
+					<Button
+						onClick={() => setShowFilters(!showFilters)}
+						variant={showFilters ? 'default' : 'outline'}
+						className="flex items-center gap-2"
+					>
+						<FiltersIcon />
+						{__('Filters', 'quillcrm')}
+					</Button>
 				</div>
-			)}
+
+				{showFilters && (
+					<div className="border-t border-gray-200 pt-4">
+						<div className="flex flex-wrap gap-4">
+							{/* Date Range Filter */}
+							{showDateRange && (
+								<div>
+									<label className="block text-sm font-medium mb-1">
+										{__('Date Range', 'quillcrm')}
+									</label>
+									<DateRangePicker
+										value={
+											filters.dateRange
+												? {
+														from: filters
+															.dateRange[0]
+															? filters.dateRange[0].toDate()
+															: null,
+														to: filters.dateRange[1]
+															? filters.dateRange[1].toDate()
+															: null,
+													}
+												: { from: null, to: null }
+										}
+										onChange={(range) =>
+											setFilters({
+												...filters,
+												dateRange:
+													range.from && range.to
+														? [
+																dayjs(
+																	range.from
+																),
+																dayjs(range.to),
+															]
+														: null,
+											})
+										}
+										className="w-60"
+									/>
+								</div>
+							)}
+
+							{/* Owner Filter */}
+							{showOwner && (
+								<div>
+									<label className="block text-sm font-medium mb-1">
+										{__('Owner', 'quillcrm')}
+									</label>
+									<Select
+										value={
+											filters.ownerId?.toString() ??
+											undefined
+										}
+										onValueChange={(value) =>
+											setFilters({
+												...filters,
+												ownerId: value
+													? parseInt(value)
+													: null,
+											})
+										}
+									>
+										<SelectTrigger className="w-40">
+											<SelectValue
+												placeholder={__(
+													'Select Owner',
+													'quillcrm'
+												)}
+											/>
+										</SelectTrigger>
+										<SelectContent>
+											{filterOptions.owners?.map(
+												(owner) => (
+													<SelectItem
+														key={owner.id}
+														value={owner.id.toString()}
+													>
+														{owner.display_name}
+													</SelectItem>
+												)
+											)}
+										</SelectContent>
+									</Select>
+								</div>
+							)}
+
+							{/* Pipeline Filter */}
+							{showPipeline && (
+								<div>
+									<label className="block text-sm font-medium mb-1">
+										{__('Pipeline', 'quillcrm')}
+									</label>
+									<Select
+										value={
+											filters.pipelineId?.toString() ??
+											undefined
+										}
+										onValueChange={(value) =>
+											setFilters({
+												...filters,
+												pipelineId: value
+													? parseInt(value)
+													: null,
+											})
+										}
+									>
+										<SelectTrigger className="w-40">
+											<SelectValue
+												placeholder={__(
+													'Select Pipeline',
+													'quillcrm'
+												)}
+											/>
+										</SelectTrigger>
+										<SelectContent>
+											{filterOptions.pipelines?.map(
+												(pipeline) => (
+													<SelectItem
+														key={pipeline.id}
+														value={pipeline.id.toString()}
+													>
+														{pipeline.name}
+													</SelectItem>
+												)
+											)}
+										</SelectContent>
+									</Select>
+								</div>
+							)}
+
+							{/* Status Filter */}
+							{showStatus && (
+								<div>
+									<label className="block text-sm font-medium mb-1">
+										{__('Status', 'quillcrm')}
+									</label>
+									<Select
+										value={filters.status ?? undefined}
+										onValueChange={(value) =>
+											setFilters({
+												...filters,
+												status: value,
+											})
+										}
+									>
+										<SelectTrigger className="w-30">
+											<SelectValue
+												placeholder={__(
+													'Select Status',
+													'quillcrm'
+												)}
+											/>
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="open">
+												{__('Open', 'quillcrm')}
+											</SelectItem>
+											<SelectItem value="won">
+												{__('Won', 'quillcrm')}
+											</SelectItem>
+											<SelectItem value="lost">
+												{__('Lost', 'quillcrm')}
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+							)}
+
+							{/* Contact Filter */}
+							{showContact && (
+								<div>
+									<label className="block text-sm font-medium mb-1">
+										{__('Contact', 'quillcrm')}
+									</label>
+									<Select
+										value={
+											filters.contactId?.toString() ??
+											undefined
+										}
+										onValueChange={(value) =>
+											setFilters({
+												...filters,
+												contactId: value
+													? parseInt(value)
+													: null,
+											})
+										}
+									>
+										<SelectTrigger className="w-40">
+											<SelectValue
+												placeholder={__(
+													'Select Contact',
+													'quillcrm'
+												)}
+											/>
+										</SelectTrigger>
+										<SelectContent>
+											{filterOptions.contacts?.map(
+												(contact) => (
+													<SelectItem
+														key={contact.id}
+														value={contact.id.toString()}
+													>
+														{contact.first_name}{' '}
+														{contact.last_name}
+													</SelectItem>
+												)
+											)}
+										</SelectContent>
+									</Select>
+								</div>
+							)}
+
+							{/* Action Buttons */}
+							<div>
+								<label className="block text-sm font-medium mb-1">
+									{__('Actions', 'quillcrm')}
+								</label>
+								<div className="flex gap-2">
+									<Button
+										onClick={clearFilters}
+										variant="outline"
+									>
+										{__('Clear', 'quillcrm')}
+									</Button>
+									<Button
+										onClick={applyFilters}
+										variant="default"
+									>
+										{__('Apply', 'quillcrm')}
+									</Button>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
+			</CardContent>
 		</Card>
 	);
 };

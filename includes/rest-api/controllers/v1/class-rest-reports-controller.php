@@ -22,6 +22,12 @@ use WP_REST_Server;
 class Rest_Reports_Controller extends REST_Controller {
 
 
+
+
+
+
+
+
 	/**
 	 * Route base.
 	 *
@@ -409,14 +415,16 @@ class Rest_Reports_Controller extends REST_Controller {
 		);
 
 		// Deals won metrics
-		$deals_won_current  = $this->count_deals_won(
+		$deals_won_current  = $this->count_deals_by_status(
 			$date_ranges['current_start'],
 			$date_ranges['current_end'],
+			'won',
 			$filters
 		);
-		$deals_won_previous = $this->count_deals_won(
+		$deals_won_previous = $this->count_deals_by_status(
 			$date_ranges['previous_start'],
 			$date_ranges['previous_end'],
+			'won',
 			$filters
 		);
 		$deals_won_change   = $this->calculate_percentage_change(
@@ -424,11 +432,69 @@ class Rest_Reports_Controller extends REST_Controller {
 			$deals_won_previous
 		);
 
+		$deals_won_current_price  = $this->get_deals_by_status_price(
+			$date_ranges['current_start'],
+			$date_ranges['current_end'],
+			'won',
+			$filters
+		);
+		$deals_won_previous_price = $this->get_deals_by_status_price(
+			$date_ranges['previous_start'],
+			$date_ranges['previous_end'],
+			'won',
+			$filters
+		);
+		$deals_won_change_price   = $this->calculate_percentage_change(
+			$deals_won_current_price,
+			$deals_won_previous_price
+		);
+
+		$deals_lost_current  = $this->count_deals_by_status(
+			$date_ranges['current_start'],
+			$date_ranges['current_end'],
+			'lost',
+			$filters
+		);
+		$deals_lost_previous = $this->count_deals_by_status(
+			$date_ranges['previous_start'],
+			$date_ranges['previous_end'],
+			'lost',
+			$filters
+		);
+		$deals_lost_change   = $this->calculate_percentage_change(
+			$deals_lost_current,
+			$deals_lost_previous
+		);
+
+		// deal lost value metrics
+		$deals_lost_current_price  = $this->get_deals_by_status_price(
+			$date_ranges['current_start'],
+			$date_ranges['current_end'],
+			'lost',
+			$filters
+		);
+		$deals_lost_previous_price = $this->get_deals_by_status_price(
+			$date_ranges['previous_start'],
+			$date_ranges['previous_end'],
+			'lost',
+			$filters
+		);
+		$deals_lost_change_price   = $this->calculate_percentage_change(
+			$deals_lost_current_price,
+			$deals_lost_previous_price
+		);
+
 		return array(
-			'deals_created'        => $deals_created_current,
-			'deals_created_change' => round( $deals_created_change, 2 ),
-			'deals_won'            => $deals_won_current,
-			'deals_won_change'     => round( $deals_won_change, 2 ),
+			'deals_created'           => $deals_created_current,
+			'deals_created_change'    => round( $deals_created_change, 2 ),
+			'deals_won'               => $deals_won_current,
+			'deals_won_change'        => round( $deals_won_change, 2 ),
+			'deals_won_value'         => $deals_won_current_price,
+			'deals_won_value_change'  => round( $deals_won_change_price, 2 ),
+			'deals_lost'              => $deals_lost_current,
+			'deals_lost_change'       => round( $deals_lost_change, 2 ),
+			'deals_lost_value'        => $deals_lost_current_price,
+			'deals_lost_value_change' => round( $deals_lost_change_price, 2 ),
 		);
 	}
 
@@ -456,14 +522,9 @@ class Rest_Reports_Controller extends REST_Controller {
 			$avg_time_previous
 		);
 
-		// Deal velocity is the same as average time in this implementation
-		$velocity_change = $avg_time_change;
-
 		return array(
 			'deals_avg_time'        => round( $avg_time_current ),
 			'deals_avg_time_change' => round( $avg_time_change, 2 ),
-			'deal_velocity'         => round( $avg_time_current ),
-			'deal_velocity_change'  => round( $velocity_change, 2 ),
 		);
 	}
 
@@ -634,12 +695,28 @@ class Rest_Reports_Controller extends REST_Controller {
 	 * @param array  $filters Optional filters array.
 	 * @return int Deal count
 	 */
-	private function count_deals_won( $start_date, $end_date, $filters = array() ) {
-		$query = $this->get_filters_to_apply( $filters )->where( 'status', 'won' )
-			->where( 'won_time', '>=', $start_date )
-			->where( 'won_time', '<=', $end_date );
+	private function count_deals_by_status( $start_date, $end_date, $status, $filters = array() ) {
+		$query = $this->get_filters_to_apply( $filters )->where( 'status', $status )
+			->where( $status . '_time', '>=', $start_date )
+			->where( $status . '_time', '<=', $end_date );
 
 		return $query->count();
+	}
+
+	/**
+	 * Get deals won price in date range
+	 *
+	 * @param string $start_date Start date.
+	 * @param string $end_date End date.
+	 * @param array  $filters Optional filters array.
+	 * @return float Deal price
+	 */
+	private function get_deals_by_status_price( $start_date, $end_date, $status, $filters = array() ) {
+		$query = $this->get_filters_to_apply( $filters )->where( 'status', $status )
+			->where( $status . '_time', '>=', $start_date )
+			->where( $status . '_time', '<=', $end_date );
+
+		return $query->sum( 'value' );
 	}
 
 	/**

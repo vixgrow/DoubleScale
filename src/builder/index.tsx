@@ -31,6 +31,15 @@ import { STORE_KEY } from '../stores/email-builder/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { ButtonSettingsProvider } from './context/ButtonSettingsContext';
 
+// Utility function to add template layout to block props
+const addTemplateLayoutToBlockProps = (blockConfig, template) => {
+	return {
+		...blockConfig.props,
+		templateLayout:
+			template.layout?.[blockConfig.props.containerId] || null,
+	};
+};
+
 const BuilderContent: React.FC = () => {
 	const {
 		addNewSection,
@@ -206,13 +215,10 @@ const BuilderContent: React.FC = () => {
 					// Add each block from the template
 					template.blocks.forEach((blockConfig) => {
 						// Add template layout information to the block props
-						const blockProps = {
-							...blockConfig.props,
-							templateLayout:
-								template.layout?.[
-									blockConfig.props.containerId
-								] || null,
-						};
+						const blockProps = addTemplateLayoutToBlockProps(
+							blockConfig,
+							template
+						);
 
 						addNewBlockWithProps(
 							sectionId,
@@ -396,13 +402,10 @@ const BuilderContent: React.FC = () => {
 					// Add each block from the template
 					template.blocks.forEach((blockConfig) => {
 						// Add template layout information to the block props
-						const blockProps = {
-							...blockConfig.props,
-							templateLayout:
-								template.layout?.[
-									blockConfig.props.containerId
-								] || null,
-						};
+						const blockProps = addTemplateLayoutToBlockProps(
+							blockConfig,
+							template
+						);
 
 						addNewBlockWithProps(
 							sectionId,
@@ -481,13 +484,10 @@ const BuilderContent: React.FC = () => {
 					// Add each block from the template
 					template.blocks.forEach((blockConfig) => {
 						// Add template layout information to the block props
-						const blockProps = {
-							...blockConfig.props,
-							templateLayout:
-								template.layout?.[
-									blockConfig.props.containerId
-								] || null,
-						};
+						const blockProps = addTemplateLayoutToBlockProps(
+							blockConfig,
+							template
+						);
 
 						addNewBlockWithProps(
 							sectionId,
@@ -566,13 +566,10 @@ const BuilderContent: React.FC = () => {
 					// Add each block from the template
 					template.blocks.forEach((blockConfig) => {
 						// Add template layout information to the block props
-						const blockProps = {
-							...blockConfig.props,
-							templateLayout:
-								template.layout?.[
-									blockConfig.props.containerId
-								] || null,
-						};
+						const blockProps = addTemplateLayoutToBlockProps(
+							blockConfig,
+							template
+						);
 
 						addNewBlockWithProps(
 							sectionId,

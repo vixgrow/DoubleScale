@@ -416,9 +416,9 @@ const EmailBodyLibrary = () => {
 		],
 	};
 
-	// Title & Button 5 template - creates 5 blocks: lorem text, heading, lorem text, primary button, secondary button
+	// Title & 2 Buttons template - creates 5 blocks: lorem text, heading, lorem text, primary button, secondary button
 	const titleButton5Template = {
-		type: 'title-button-5',
+		type: 'title-2-buttons',
 		blocks: [
 			{
 				type: 'text',
@@ -632,7 +632,7 @@ const EmailBodyLibrary = () => {
 					listType: 'none',
 					headingStyle: 'p',
 					padding: {
-						top: 0,	
+						top: 0,
 						right: 0,
 						bottom: 0,
 						left: 0,
@@ -767,9 +767,9 @@ const EmailBodyLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
-					{__('Title & Button 5', 'quillcrm')}
+					{__('Title & 2 Buttons', 'quillcrm')}
 				</label>
-				<DraggableTemplate template={titleButton5Template} id="email-body-title-button-5">
+				<DraggableTemplate template={titleButton5Template} id="email-body-title-2-buttons">
 					<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-2 text-[10px]">
 						<div className="text-[#9197A4]">
 							{__('title 1', 'quillcrm')}

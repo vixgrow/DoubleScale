@@ -201,6 +201,11 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
+				'button_settings' => array(
+					'type'                 => 'object',
+					'additionalProperties' => true,
+					'default'              => array(),
+				),
 			),
 		);
 		return $schema;
@@ -219,9 +224,14 @@ class REST_Settings_Controller extends REST_Controller {
 
 		$result = array();
 		foreach ( $this->get_schema()['properties'] as $group_key => $group_schema ) {
-			$result[ $group_key ] = array();
-			foreach ( $group_schema['properties'] as $setting_key => $setting_schema ) {
-				$result[ $group_key ][ $setting_key ] = $settings[ $group_key ][ $setting_key ] ?? $setting_schema['default'];
+			if ( $group_key === 'button_settings' ) {
+				// Handle button_settings specially since it's not a structured schema
+				$result[ $group_key ] = $settings[ $group_key ] ?? $group_schema['default'];
+			} else {
+				$result[ $group_key ] = array();
+				foreach ( $group_schema['properties'] as $setting_key => $setting_schema ) {
+					$result[ $group_key ][ $setting_key ] = $settings[ $group_key ][ $setting_key ] ?? $setting_schema['default'];
+				}
 			}
 		}
 

@@ -29,6 +29,7 @@ import { BuilderProvider, useBuilder } from './context/BuilderContext';
 import { useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../stores/email-builder/constants';
 import { v4 as uuidv4 } from 'uuid';
+import { ButtonSettingsProvider } from './context/ButtonSettingsContext';
 
 const BuilderContent: React.FC = () => {
 	const {
@@ -770,8 +771,8 @@ const BuilderContent: React.FC = () => {
 				case 'title-button-2':
 					title = 'Title & Button 2';
 					break;
-				case 'title-button-5':
-					title = 'Title & Button 5';
+				case 'title-2-buttons':
+					title = 'Title & 2 Buttons';
 					break;
 				case 'title-paragraph-button':
 					title = 'Title, Paragraph & Button';
@@ -919,9 +920,11 @@ const BuilderContent: React.FC = () => {
 
 const Builder: React.FC = () => {
 	return (
-		<BuilderProvider>
-			<BuilderContent />
-		</BuilderProvider>
+		<ButtonSettingsProvider>
+			<BuilderProvider>
+				<BuilderContent />
+			</BuilderProvider>
+		</ButtonSettingsProvider>
 	);
 };
 

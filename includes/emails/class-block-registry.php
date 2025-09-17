@@ -108,6 +108,7 @@ class Block_Registry {
 		$this->register_block( new \QuillCRM\Emails\Blocks\Text_Block() );
 		$this->register_block( new \QuillCRM\Emails\Blocks\Button_Block() );
 		$this->register_block( new \QuillCRM\Emails\Blocks\Image_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Banner_Block() );
 		$this->register_block( new \QuillCRM\Emails\Blocks\Divider_Block() );
 		$this->register_block( new \QuillCRM\Emails\Blocks\HTML_Block() );
 		$this->register_block( new \QuillCRM\Emails\Blocks\Social_Media_Block() );

@@ -222,6 +222,13 @@ registerAdminPage('emails-analytics', {
 	hidden: true,
 });
 
+registerAdminPage('builder', {
+	path: 'builder',
+	component: () => <EmailBuilder />,
+	label: __('Builder', 'quillcrm'),
+	hidden: true,
+});
+
 // registerAdminPage('tools', {
 // 	path: 'tools',
 // 	component: () => <Tools />,

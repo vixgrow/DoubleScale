@@ -74,154 +74,53 @@ export const ProductSelectionDialog: React.FC<ProductSelectionDialogProps> = ({
 	const [searchTerm, setSearchTerm] = useState('');
 	const [error, setError] = useState<string | null>(null);
 
-	// Fetch WooCommerce products
+	// Fetch WooCommerce products using single endpoint
 	const fetchProducts = async (search = '') => {
 		setLoading(true);
 		setError(null);
 		console.log('🔍 Fetching products with search:', search);
 
 		try {
-			// Try WooCommerce REST API v3 first (most reliable)
-			console.log('🔄 Trying WooCommerce API v3...');
+			// Use WooCommerce REST API v3 as the single endpoint
+			const data = await apiFetch({
+				path: `/wc/v3/products?per_page=20&status=publish${search ? `&search=${encodeURIComponent(search)}` : ''}`,
+			});
 
-			let data;
-			try {
-				data = await apiFetch({
-					path: `/wc/v3/products?per_page=20&status=publish${search ? `&search=${encodeURIComponent(search)}` : ''}`,
-				});
-				console.log('✅ Success with WooCommerce API v3');
-			} catch (wcError) {
-				console.log(
-					'❌ WooCommerce API v3 failed, trying WordPress REST API...'
-				);
+			console.log('📦 Raw API response:', data);
 
-				// Fallback to WordPress REST API for product post type
-				try {
-					data = await apiFetch({
-						path: `/wp/v2/product?per_page=20&status=publish&_embed=true${search ? `&search=${encodeURIComponent(search)}` : ''}`,
-					});
-					console.log('✅ Success with WordPress product endpoint');
-				} catch (wpError) {
-					console.log(
-						'❌ WordPress product endpoint failed, trying posts endpoint...'
-					);
-
-					// Final fallback to posts endpoint with product type filter
-					data = await apiFetch({
-						path: `/wp/v2/posts?per_page=20&status=publish&type=product&_embed=true${search ? `&search=${encodeURIComponent(search)}` : ''}`,
-					});
-					console.log('✅ Success with WordPress posts endpoint');
-				}
-			}
-
-			if (data) {
-				console.log('📦 Raw API response:', data);
-
-				let transformedProducts: WooCommerceProduct[] = [];
-
-				// Check if this is WooCommerce API response or WordPress API response
-				if (Array.isArray(data)) {
-					if (data.length > 0 && data[0].price !== undefined) {
-						// This looks like WooCommerce API data
-						console.log('🔄 Processing WooCommerce API data');
-						transformedProducts = data.map((product: any) => ({
-							id: product.id,
-							name: product.name,
-							price:
-								stripHtmlTags(product.price_html) ||
-								`${product.price} ${product.currency || 'EGP'}`,
-							regular_price: product.regular_price,
-							sale_price: product.sale_price,
-							images: product.images || [],
-							short_description: product.short_description
-								? product.short_description
-										.replace(/<[^>]*>/g, '')
-										.substring(0, 100)
-								: '',
-							permalink: product.permalink,
-						}));
-					} else {
-						// This looks like WordPress posts API data
-						console.log('🔄 Processing WordPress posts API data');
-						transformedProducts = data.map((post: any) => {
-							const featuredImage =
-								post._embedded?.['wp:featuredmedia']?.[0];
-							return {
-								id: post.id,
-								name:
-									post.title?.rendered || 'Untitled Product',
-								price: 'Price not available', // WordPress API doesn't include WooCommerce price meta by default
-								regular_price: '',
-								sale_price: '',
-								images: featuredImage
-									? [
-											{
-												src:
-													featuredImage.source_url ||
-													'',
-												alt:
-													featuredImage.alt_text ||
-													post.title?.rendered ||
-													'',
-											},
-										]
-									: [],
-								short_description: post.excerpt?.rendered
-									? post.excerpt.rendered
-											.replace(/<[^>]*>/g, '')
-											.substring(0, 100)
-									: '',
-								permalink: post.link || '#',
-							};
-						});
-					}
-				}
+			if (Array.isArray(data)) {
+				const transformedProducts: WooCommerceProduct[] = data.map((product: any) => ({
+					id: product.id,
+					name: product.name,
+					price: stripHtmlTags(product.price_html) || `${product.price} ${product.currency || 'EGP'}`,
+					regular_price: product.regular_price,
+					sale_price: product.sale_price,
+					images: product.images || [],
+					short_description: product.short_description
+						? product.short_description.replace(/<[^>]*>/g, '').substring(0, 100)
+						: '',
+					permalink: product.permalink,
+				}));
 
 				console.log('📦 Transformed products:', transformedProducts);
 				setProducts(transformedProducts);
 
 				if (transformedProducts.length === 0) {
-					setError(
-						'No products found. Make sure WooCommerce is installed and you have published products.'
-					);
+					setError('No products found. Make sure WooCommerce is installed and you have published products.');
 				}
+			} else {
+				setError('Invalid response format from WooCommerce API.');
 			}
 		} catch (error) {
 			console.error('❌ Error fetching products:', error);
 			setError(
 				error instanceof Error
 					? error.message
-					: 'Unknown error occurred'
+					: 'Failed to fetch products. Please ensure WooCommerce is installed and activated.'
 			);
 
-			// Create enhanced fallback products
-			console.log('🔄 Using fallback products...');
-			const fallbackProducts: WooCommerceProduct[] = [
-				{
-					id: 1,
-					name: 'Sample Product 1',
-					price: '25.00 EGP',
-					regular_price: '25.00',
-					sale_price: '',
-					images: [],
-					short_description:
-						'This is a sample product for demonstration purposes.',
-					permalink: '#',
-				},
-				{
-					id: 2,
-					name: 'Sample Product 2',
-					price: '40.00 EGP',
-					regular_price: '50.00',
-					sale_price: '40.00',
-					images: [],
-					short_description:
-						'Another sample product with sale price.',
-					permalink: '#',
-				},
-			];
-
-			setProducts(fallbackProducts);
+			// Set empty products array instead of fallback
+			setProducts([]);
 		} finally {
 			setLoading(false);
 		}
@@ -281,15 +180,6 @@ export const ProductSelectionDialog: React.FC<ProductSelectionDialogProps> = ({
 				</DialogHeader>
 
 				<div className="space-y-4">
-					{/* Error Display */}
-					{error && (
-						<div className="bg-red-50 border border-red-200 rounded-lg p-3">
-							<div className="text-red-800 text-sm">
-								<strong>Error:</strong> {error}
-							</div>
-						</div>
-					)}
-
 					{/* Search Input */}
 					<div className="relative">
 						<Input
@@ -315,7 +205,7 @@ export const ProductSelectionDialog: React.FC<ProductSelectionDialogProps> = ({
 								</div>
 								<div className="text-xs text-gray-400 text-center max-w-md">
 									{__(
-										'Make sure WooCommerce is installed and activated with published products. Check the console for API debugging information.',
+										'Make sure WooCommerce is installed and activated with published products.',
 										'quillcrm'
 									)}
 								</div>
@@ -369,7 +259,7 @@ export const ProductSelectionDialog: React.FC<ProductSelectionDialogProps> = ({
 												<span className="text-sm font-semibold text-green-600">
 													{stripHtmlTags(
 														product.sale_price ||
-															product.price
+														product.price
 													)}
 												</span>
 												{product.sale_price &&

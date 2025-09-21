@@ -1,5 +1,5 @@
 import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent } from '../../../../components/ui/card';
 import {
 	Select,
@@ -71,42 +71,38 @@ const DealsReportsByDate: React.FC = () => {
 		clearFilters,
 	} = useReportFilters();
 
-	const fetchDealsReportsByDate = async (
-		days: number = 30,
-		freq: string = 'daily'
-	) => {
-		setLoading(true);
-		try {
-			const filterParams = buildQueryParams();
-			const baseParams = `days_back=${days}&frequency=${freq}`;
-			const fullParams = filterParams
-				? `${baseParams}&${filterParams}`
-				: baseParams;
+	const fetchDealsReportsByDate = useCallback(
+		async (days: number = 30, freq: string = 'daily') => {
+			setLoading(true);
+			try {
+				const filterParams = buildQueryParams();
+				const baseParams = `days_back=${days}&frequency=${freq}`;
+				const fullParams = filterParams
+					? `${baseParams}&${filterParams}`
+					: baseParams;
 
-			const response = (await apiFetch({
-				path: `/qc/v1/reports/deals-by-date?${fullParams}`,
-			})) as DealsReportsByDateResponse;
+				const response = (await apiFetch({
+					path: `/qc/v1/reports/deals-by-date?${fullParams}`,
+				})) as DealsReportsByDateResponse;
 
-			setData(response);
-		} catch (error) {
-			console.error('Error fetching deals reports:', error);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchDealsReportsByDate(daysBack, frequency);
-	}, [daysBack, frequency]);
+				setData(response);
+			} catch (error) {
+				console.error('Error fetching deals reports:', error);
+			} finally {
+				setLoading(false);
+			}
+		},
+		[buildQueryParams, daysBack, frequency]
+	);
 
 	useEffect(() => {
 		fetchDealsReportsByDate(daysBack, frequency);
-	}, [filters]);
+	}, [fetchDealsReportsByDate]);
 
 	// Apply filters
-	const applyFilters = () => {
+	const applyFilters = useCallback(() => {
 		fetchDealsReportsByDate(daysBack, frequency);
-	};
+	}, [fetchDealsReportsByDate]);
 
 	// Format date for display based on frequency
 	const formatDate = (dateStr: string, freq: string = frequency) => {
@@ -253,6 +249,7 @@ const DealsReportsByDate: React.FC = () => {
 		<div className="p-6 space-y-6">
 			{/* Filters Section */}
 			<ReportFilters
+				key={`filters-${JSON.stringify(filters)}`}
 				title={__('Deal Reports by Date - Filters', 'quillcrm')}
 				filters={filters}
 				setFilters={setFilters}
@@ -261,6 +258,7 @@ const DealsReportsByDate: React.FC = () => {
 				setShowFilters={setShowFilters}
 				clearFilters={clearFilters}
 				applyFilters={applyFilters}
+				showPredefinedDateRange={false}
 				showDateRange={false}
 				showOwner={true}
 				showPipeline={true}

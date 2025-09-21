@@ -48,6 +48,9 @@ export const getPredefinedDateRange = (
         case 'last_quarter':
             const lastQuarterDate = now.subtract(3, 'month');
             return getQuarterRange(lastQuarterDate);
+        case 'custom_date_range':
+            // Return null for custom date range - user will set it manually
+            return null;
         default:
             return null;
     }
@@ -73,7 +76,8 @@ export const usePredefinedPeriod = (
                     }
                 }
             }
-            return '';
+            // If no predefined period matches, it's a custom date range
+            return 'custom_date_range';
         },
         []
     );

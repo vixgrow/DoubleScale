@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import dayjs from 'dayjs';
 import {
@@ -67,6 +67,9 @@ const PredefinedDateRangeFilter: React.FC<PredefinedDateRangeFilterProps> = ({
 				</SelectItem>
 				<SelectItem value="last_quarter">
 					{__('Last Quarter', 'quillcrm')}
+				</SelectItem>
+				<SelectItem value="custom_date_range">
+					{__('Custom Date Range', 'quillcrm')}
 				</SelectItem>
 			</SelectContent>
 		</Select>
@@ -200,6 +203,9 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 					...filters,
 					dateRange,
 				});
+			} else if (value === 'custom_date_range') {
+				// Don't clear the date range when switching to custom
+				// The user will set it via the custom date picker
 			}
 		},
 		[filters, setFilters, setSelectedPeriod]
@@ -207,15 +213,22 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 
 	const handleCustomDateChange = useCallback(
 		(range: { from: Date | null; to: Date | null }) => {
+			const newDateRange: [dayjs.Dayjs, dayjs.Dayjs] | null =
+				range.from && range.to
+					? [dayjs(range.from), dayjs(range.to)]
+					: null;
+
 			setFilters({
 				...filters,
-				dateRange:
-					range.from && range.to
-						? [dayjs(range.from), dayjs(range.to)]
-						: null,
+				dateRange: newDateRange,
 			});
+
+			// When user manually sets a custom date, update the selected period
+			if (newDateRange) {
+				setSelectedPeriod('custom_date_range');
+			}
 		},
-		[filters, setFilters]
+		[filters, setFilters, setSelectedPeriod]
 	);
 
 	const handleClearFilters = useCallback(() => {
@@ -275,6 +288,8 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 				: { from: null, to: null },
 		[filters.dateRange]
 	);
+
+	useEffect(() => {}, [filters, applyFilters]);
 
 	return (
 		<Card style={{ marginBottom: 20, ...style }} className={className}>

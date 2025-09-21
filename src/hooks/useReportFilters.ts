@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import dayjs from 'dayjs';
 
@@ -34,7 +34,7 @@ export const useReportFilters = () => {
     const [showFilters, setShowFilters] = useState(false);
 
     // Helper function to build query parameters
-    const buildQueryParams = () => {
+    const buildQueryParams = useCallback(() => {
         const params = new URLSearchParams();
 
         if (filters.dateRange && filters.dateRange[0] && filters.dateRange[1]) {
@@ -62,7 +62,7 @@ export const useReportFilters = () => {
         }
 
         return params.toString();
-    };
+    }, [filters]);
 
     // Fetch dropdown options
     const fetchFilterOptions = async () => {
@@ -70,7 +70,7 @@ export const useReportFilters = () => {
             // Fetch owners (users)
             const usersResponse = await apiFetch({
                 path: '/wp/v2/users',
-            });
+            }) as any[];
 
             const owners = usersResponse?.map((user: any) => ({
                 id: user.id,
@@ -81,7 +81,7 @@ export const useReportFilters = () => {
             // Fetch pipelines
             const pipelinesResponse = await apiFetch({
                 path: '/qc/v1/pipelines',
-            });
+            }) as any[];
 
             const pipelines = pipelinesResponse?.map((pipeline: any) => ({
                 id: pipeline.id,
@@ -91,7 +91,7 @@ export const useReportFilters = () => {
             // Fetch contacts
             const contactsResponse = await apiFetch({
                 path: '/qc/v1/contacts',
-            });
+            }) as any;
 
             const contacts = contactsResponse?.data?.map((contact: any) => ({
                 id: contact.id,
@@ -110,7 +110,7 @@ export const useReportFilters = () => {
     };
 
     // Clear filters
-    const clearFilters = () => {
+    const clearFilters = useCallback(() => {
         setFilters({
             dateRange: null,
             ownerId: null,
@@ -118,7 +118,7 @@ export const useReportFilters = () => {
             status: null,
             contactId: null,
         });
-    };
+    }, []);
 
     // Initialize filter options on mount
     useEffect(() => {

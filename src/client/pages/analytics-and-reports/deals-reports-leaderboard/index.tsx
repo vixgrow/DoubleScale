@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Flex, Skeleton, Typography, Card } from 'antd';
-import { CardContent } from '../../../../components/ui/card';
+import { useEffect, useState, useCallback } from 'react';
+import { Skeleton } from '../../../../components/ui/skeleton';
 import { __ } from '@wordpress/i18n';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
 import ReportFilters from '../../../../components/reports/ReportFilters';
 import apiFetch from '@wordpress/api-fetch';
 import { Chart } from 'react-chartjs-2';
+import { Card, CardContent } from '../../../../components/ui/card';
 import {
 	Chart as ChartJS,
 	CategoryScale,
@@ -57,7 +57,7 @@ const DealsReportsLeaderboard: React.FC = () => {
 		clearFilters,
 	} = useReportFilters();
 
-	const fetchDealsReportsLeaderboard = async () => {
+	const fetchDealsReportsLeaderboard = useCallback(async () => {
 		setLoading(true);
 		try {
 			const queryParams = buildQueryParams();
@@ -73,20 +73,16 @@ const DealsReportsLeaderboard: React.FC = () => {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [buildQueryParams]);
 
 	useEffect(() => {
 		fetchDealsReportsLeaderboard();
-	}, []);
-
-	useEffect(() => {
-		fetchDealsReportsLeaderboard();
-	}, [filters]);
+	}, [fetchDealsReportsLeaderboard]);
 
 	// Apply filters
-	const applyFilters = () => {
+	const applyFilters = useCallback(() => {
 		fetchDealsReportsLeaderboard();
-	};
+	}, [fetchDealsReportsLeaderboard]);
 
 	// Prepare chart data
 	const getChartData = () => {
@@ -182,6 +178,7 @@ const DealsReportsLeaderboard: React.FC = () => {
 		<div>
 			{/* Filters Section */}
 			<ReportFilters
+				key={`filters-${JSON.stringify(filters)}`}
 				title={__(
 					'Deal leaderboard - amount closed by rep',
 					'quillcrm'
@@ -193,6 +190,7 @@ const DealsReportsLeaderboard: React.FC = () => {
 				setShowFilters={setShowFilters}
 				clearFilters={clearFilters}
 				applyFilters={applyFilters}
+				showPredefinedDateRange={false}
 				showDateRange={false}
 				showOwner={true}
 				showPipeline={true}
@@ -204,24 +202,24 @@ const DealsReportsLeaderboard: React.FC = () => {
 			<Card style={{ marginTop: 20 }}>
 				<CardContent>
 					<div style={{ marginBottom: 16 }}>
-						<Typography.Text type="secondary">
+						<p className="text-sm text-gray-600/80 font-medium">
 							{__(
 								'Showing deal values closed by each sales representative',
 								'quillcrm'
 							)}
-						</Typography.Text>
+						</p>
 						<br />
-						<Typography.Text type="secondary">
+						<p className="text-sm text-gray-600/80 font-medium">
 							🔸{' '}
 							{__(
 								'Y-axis: Sales Rep Names | X-axis: Deal Values ($)',
 								'quillcrm'
 							)}
-						</Typography.Text>
+						</p>
 					</div>
 
 					{loading ? (
-						<Skeleton active paragraph={{ rows: 8 }} />
+						<Skeleton className="h-8 w-full" />
 					) : (
 						<div style={{ height: '500px', width: '100%' }}>
 							<Chart

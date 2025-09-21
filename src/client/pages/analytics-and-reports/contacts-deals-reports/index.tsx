@@ -1,5 +1,5 @@
 import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent } from '../../../../components/ui/card';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { __ } from '@wordpress/i18n';
@@ -68,7 +68,7 @@ const ContactsDealsReports: React.FC = () => {
 		clearFilters,
 	} = useReportFilters();
 
-	const fetchContactsDealsReports = async () => {
+	const fetchContactsDealsReports = useCallback(async () => {
 		setLoading(true);
 		try {
 			const queryParams = buildQueryParams();
@@ -99,43 +99,27 @@ const ContactsDealsReports: React.FC = () => {
 			};
 
 			setData(processedData);
-			setLoading(false);
 		} catch (error) {
 			console.error(error);
+		} finally {
 			setLoading(false);
 		}
-	};
+	}, [buildQueryParams]);
 
 	// Apply filters
-	const applyFilters = () => {
+	const applyFilters = useCallback(() => {
 		fetchContactsDealsReports();
-	};
+	}, [fetchContactsDealsReports]);
 
 	useEffect(() => {
 		fetchContactsDealsReports();
-	}, []);
-
-	useEffect(() => {
-		fetchContactsDealsReports();
-	}, [filters]);
-
-	if (loading) {
-		return (
-			<div className="space-y-4">
-				<Skeleton className="h-8 w-full" />
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-					{Array.from({ length: 6 }).map((_, i) => (
-						<Skeleton key={i} className="h-32 w-full" />
-					))}
-				</div>
-			</div>
-		);
-	}
+	}, [fetchContactsDealsReports]);
 
 	return (
 		<div className="space-y-6">
 			{/* Filters Section */}
 			<ReportFilters
+				key={`filters-${JSON.stringify(filters)}`}
 				title={__('Contacts & Deals Reports', 'quillcrm')}
 				filters={filters}
 				setFilters={setFilters}
@@ -144,6 +128,7 @@ const ContactsDealsReports: React.FC = () => {
 				setShowFilters={setShowFilters}
 				clearFilters={clearFilters}
 				applyFilters={applyFilters}
+				showPredefinedDateRange={true}
 				showDateRange={true}
 				showOwner={true}
 				showPipeline={true}
@@ -170,323 +155,164 @@ const ContactsDealsReports: React.FC = () => {
 					&nbsp;&nbsp; {__('Compared To: Year before', 'quillcrm')}
 				</p>
 
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-					{/* Contacts Created */}
-					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
-						<CardContent className="p-6 space-y-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-center gap-3 pb-1">
-									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg">
-										<UserOutlined className="text-base text-blue-600" />
-									</div>
-									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
-										{__('CONTACTS CREATED', 'quillcrm')}
-									</span>
-								</div>
-								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
-									{data.contacts_created.toLocaleString()}
-								</div>
-								<div className="flex items-center gap-2 pt-1">
-									{data.contacts_created_change >= 0 ? (
-										<CaretUpOutlined className="text-green-500" />
-									) : (
-										<CaretDownOutlined className="text-red-500" />
-									)}
-									<span
-										className={cn(
-											'text-sm',
-											data.contacts_created_change >= 0
-												? 'text-green-500'
-												: 'text-red-500'
-										)}
-									>
-										{Math.abs(
-											data.contacts_created_change
-										).toFixed(2)}
-										%
-									</span>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
+				{loading ? (
+					<Skeleton className="h-8 w-full" />
+				) : (
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+						{[
+							{
+								key: 'contacts_created',
+								title: __('CONTACTS CREATED', 'quillcrm'),
+								value: data.contacts_created,
+								change: data.contacts_created_change,
+								icon: UserOutlined,
+								iconBg: 'from-blue-50 to-indigo-50',
+								iconBorder: 'border-blue-100',
+								iconColor: 'text-blue-600',
+								suffix: '',
+								changeLogic: 'standard', // positive is good
+							},
+							{
+								key: 'contacts_worked',
+								title: __('CONTACTS WORKED', 'quillcrm'),
+								value: data.contacts_worked,
+								change: data.contacts_worked_change,
+								icon: CheckCircleOutlined,
+								iconBg: 'from-green-50 to-emerald-50',
+								iconBorder: 'border-green-100',
+								iconColor: 'text-green-600',
+								suffix: '',
+								changeLogic: 'standard',
+							},
+							{
+								key: 'deals_created',
+								title: __('NEW DEALS CREATED', 'quillcrm'),
+								value: data.deals_created,
+								change: data.deals_created_change,
+								icon: PlusCircleOutlined,
+								iconBg: 'from-purple-50 to-violet-50',
+								iconBorder: 'border-purple-100',
+								iconColor: 'text-purple-600',
+								suffix: '',
+								changeLogic: 'standard',
+							},
+							{
+								key: 'deals_won',
+								title: __('DEALS CLOSED WON', 'quillcrm'),
+								value: data.deals_won,
+								change: data.deals_won_change,
+								icon: TrophyOutlined,
+								iconBg: 'from-yellow-50 to-amber-50',
+								iconBorder: 'border-yellow-100',
+								iconColor: 'text-yellow-600',
+								suffix: '',
+								changeLogic: 'standard',
+							},
+							{
+								key: 'deals_won_value',
+								title: __('DEALS WON VALUE', 'quillcrm'),
+								value: data.deals_won_value,
+								change: data.deals_won_value_change,
+								icon: DollarOutlined,
+								iconBg: 'from-emerald-50 to-green-50',
+								iconBorder: 'border-emerald-100',
+								iconColor: 'text-emerald-600',
+								suffix: ` ${__('USD', 'quillcrm')}`,
+								changeLogic: 'standard',
+							},
+							{
+								key: 'deals_lost',
+								title: __('DEALS CLOSED LOST', 'quillcrm'),
+								value: data.deals_lost,
+								change: data.deals_lost_change,
+								icon: TrophyOutlined,
+								iconBg: 'from-red-50 to-rose-50',
+								iconBorder: 'border-red-100',
+								iconColor: 'text-red-600',
+								suffix: '',
+								changeLogic: 'inverse', // negative is good for lost deals
+							},
+							{
+								key: 'deals_lost_value',
+								title: __('DEALS LOST VALUE', 'quillcrm'),
+								value: data.deals_lost_value,
+								change: data.deals_lost_value_change,
+								icon: DollarOutlined,
+								iconBg: 'from-red-50 to-rose-50',
+								iconBorder: 'border-red-100',
+								iconColor: 'text-red-600',
+								suffix: ` ${__('USD', 'quillcrm')}`,
+								changeLogic: 'inverse',
+							},
+							{
+								key: 'deals_avg_time',
+								title: __('DEALS AVERAGE TIME', 'quillcrm'),
+								value: data.deals_avg_time,
+								change: data.deals_avg_time_change,
+								icon: ClockCircleOutlined,
+								iconBg: 'from-indigo-50 to-blue-50',
+								iconBorder: 'border-indigo-100',
+								iconColor: 'text-indigo-600',
+								suffix: ` ${__('days', 'quillcrm')}`,
+								changeLogic: 'inverse', // lower time is better
+							},
+						].map((card) => {
+							const isPositiveChange =
+								card.changeLogic === 'standard'
+									? card.change >= 0
+									: card.change < 0;
+							const IconComponent = card.icon;
 
-					{/* Contacts Worked */}
-					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
-						<CardContent className="p-6 space-y-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-center gap-3 pb-1">
-									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-lg">
-										<CheckCircleOutlined className="text-base text-green-600" />
-									</div>
-									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
-										{__('CONTACTS WORKED', 'quillcrm')}
-									</span>
-								</div>
-								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
-									{data.contacts_worked.toLocaleString()}
-								</div>
-								<div className="flex items-center gap-2 pt-1">
-									{data.contacts_worked_change >= 0 ? (
-										<CaretUpOutlined className="text-green-500" />
-									) : (
-										<CaretDownOutlined className="text-red-500" />
-									)}
-									<span
-										className={cn(
-											'text-sm',
-											data.contacts_worked_change >= 0
-												? 'text-green-500'
-												: 'text-red-500'
-										)}
-									>
-										{Math.abs(
-											data.contacts_worked_change
-										).toFixed(2)}
-										%
-									</span>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* New Deals Created */}
-					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
-						<CardContent className="p-6 space-y-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-center gap-3 pb-1">
-									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-100 rounded-lg">
-										<PlusCircleOutlined className="text-base text-purple-600" />
-									</div>
-									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
-										{__('NEW DEALS CREATED', 'quillcrm')}
-									</span>
-								</div>
-								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
-									{data.deals_created.toLocaleString()}
-								</div>
-								<div className="flex items-center gap-2 pt-1">
-									{data.deals_created_change >= 0 ? (
-										<CaretUpOutlined className="text-green-500" />
-									) : (
-										<CaretDownOutlined className="text-red-500" />
-									)}
-									<span
-										className={cn(
-											'text-sm',
-											data.deals_created_change >= 0
-												? 'text-green-500'
-												: 'text-red-500'
-										)}
-									>
-										{Math.abs(
-											data.deals_created_change
-										).toFixed(2)}
-										%
-									</span>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Deals Closed Won */}
-					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
-						<CardContent className="p-6 space-y-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-center gap-3 pb-1">
-									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-yellow-50 to-amber-50 border border-yellow-100 rounded-lg">
-										<TrophyOutlined className="text-base text-yellow-600" />
-									</div>
-									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
-										{__('DEALS CLOSED WON', 'quillcrm')}
-									</span>
-								</div>
-								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
-									{data.deals_won.toLocaleString()}
-								</div>
-								<div className="flex items-center gap-2 pt-1">
-									{data.deals_won_change >= 0 ? (
-										<CaretUpOutlined className="text-green-500" />
-									) : (
-										<CaretDownOutlined className="text-red-500" />
-									)}
-									<span
-										className={cn(
-											'text-sm',
-											data.deals_won_change >= 0
-												? 'text-green-500'
-												: 'text-red-500'
-										)}
-									>
-										{Math.abs(
-											data.deals_won_change
-										).toFixed(2)}
-										%
-									</span>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Deals Won Value */}
-					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
-						<CardContent className="p-6 space-y-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-center gap-3 pb-1">
-									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-100 rounded-lg">
-										<DollarOutlined className="text-base text-emerald-600" />
-									</div>
-									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
-										{__('DEALS WON VALUE', 'quillcrm')}
-									</span>
-								</div>
-								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
-									{data.deals_won_value.toLocaleString()}{' '}
-									{__('USD', 'quillcrm')}
-								</div>
-								<div className="flex items-center gap-2 pt-1">
-									{/* For velocity, lower is usually better */}
-									{data.deals_won_value_change >= 0 ? (
-										<CaretUpOutlined className="text-green-500" />
-									) : (
-										<CaretDownOutlined className="text-red-500" />
-									)}
-									<span
-										className={cn(
-											'text-sm',
-											data.deals_won_value_change >= 0
-												? 'text-green-500'
-												: 'text-red-500'
-										)}
-									>
-										{Math.abs(
-											data.deals_won_value_change
-										).toFixed(2)}
-										%
-									</span>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Deals Closed Lost */}
-					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
-						<CardContent className="p-6 space-y-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-center gap-3 pb-1">
-									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-red-50 to-rose-50 border border-red-100 rounded-lg">
-										<TrophyOutlined className="text-base text-red-600" />
-									</div>
-									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
-										{__('DEALS CLOSED LOST', 'quillcrm')}
-									</span>
-								</div>
-								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
-									{data.deals_lost.toLocaleString()}
-								</div>
-								<div className="flex items-center gap-2 pt-1">
-									{data.deals_lost_change < 0 ? (
-										<CaretDownOutlined className="text-green-500" />
-									) : (
-										<CaretUpOutlined className="text-red-500" />
-									)}
-									<span
-										className={cn(
-											'text-sm',
-											data.deals_lost_change < 0
-												? 'text-green-500'
-												: 'text-red-500'
-										)}
-									>
-										{Math.abs(
-											data.deals_lost_change
-										).toFixed(2)}
-										%
-									</span>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Deals Lost Value */}
-					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
-						<CardContent className="p-6 space-y-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-center gap-3 pb-1">
-									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-red-50 to-rose-50 border border-red-100 rounded-lg">
-										<DollarOutlined className="text-base text-red-600" />
-									</div>
-									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
-										{__('DEALS LOST VALUE', 'quillcrm')}
-									</span>
-								</div>
-								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
-									{data.deals_lost_value.toLocaleString()}{' '}
-									{__('USD', 'quillcrm')}
-								</div>
-								<div className="flex items-center gap-2 pt-1">
-									{data.deals_lost_value_change < 0 ? (
-										<CaretDownOutlined className="text-green-500" />
-									) : (
-										<CaretUpOutlined className="text-red-500" />
-									)}
-									<span
-										className={cn(
-											'text-sm',
-											data.deals_lost_value_change < 0
-												? 'text-green-500'
-												: 'text-red-500'
-										)}
-									>
-										{Math.abs(
-											data.deals_lost_value_change
-										).toFixed(2)}
-										%
-									</span>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Deals Average Time */}
-					<Card className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm">
-						<CardContent className="p-6 space-y-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-center gap-3 pb-1">
-									<div className="qcrm-dashboard-card-icon p-2 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-lg">
-										<ClockCircleOutlined className="text-base text-indigo-600" />
-									</div>
-									<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
-										{__('DEALS AVERAGE TIME', 'quillcrm')}
-									</span>
-								</div>
-								<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
-									{data.deals_avg_time}{' '}
-									{__('days', 'quillcrm')}
-								</div>
-								<div className="flex items-center gap-2 pt-1">
-									{data.deals_avg_time_change < 0 ? (
-										<CaretDownOutlined className="text-green-500" />
-									) : (
-										<CaretUpOutlined className="text-red-500" />
-									)}
-									<span
-										className={cn(
-											'text-sm',
-											data.deals_avg_time_change < 0
-												? 'text-green-500'
-												: 'text-red-500'
-										)}
-									>
-										{Math.abs(
-											data.deals_avg_time_change
-										).toFixed(2)}
-										%
-									</span>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				</div>
+							return (
+								<Card
+									key={card.key}
+									className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm"
+								>
+									<CardContent className="p-6 space-y-4">
+										<div className="flex flex-col gap-4">
+											<div className="flex items-center gap-3 pb-1">
+												<div
+													className={`qcrm-dashboard-card-icon p-2 bg-gradient-to-br ${card.iconBg} border ${card.iconBorder} rounded-lg`}
+												>
+													<IconComponent
+														className={`text-base ${card.iconColor}`}
+													/>
+												</div>
+												<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
+													{card.title}
+												</span>
+											</div>
+											<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
+												{card.value.toLocaleString()}
+												{card.suffix}
+											</div>
+											<div className="flex items-center gap-2 pt-1">
+												{isPositiveChange ? (
+													<CaretUpOutlined className="text-green-500" />
+												) : (
+													<CaretDownOutlined className="text-red-500" />
+												)}
+												<span
+													className={cn(
+														'text-sm',
+														isPositiveChange
+															? 'text-green-500'
+															: 'text-red-500'
+													)}
+												>
+													{Math.abs(
+														card.change
+													).toFixed(2)}
+													%
+												</span>
+											</div>
+										</div>
+									</CardContent>
+								</Card>
+							);
+						})}
+					</div>
+				)}
 			</div>
 		</div>
 	);

@@ -73,6 +73,31 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/reorder',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'reorder_step' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'direction'     => array(
+							'description' => __( 'Direction to move the step (up or down)', 'quillcrm' ),
+							'type'        => 'string',
+							'enum'        => array( 'up', 'down' ),
+							'required'    => true,
+						),
+						'updated_steps' => array(
+							'description' => __( 'Array of steps with updated orders', 'quillcrm' ),
+							'type'        => 'object',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -212,13 +237,21 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function create_item( $request ) {
+		error_log( 'Step data: ' . print_r( $request->get_json_params(), true ) );
 		try {
-			$step_data       = $this->prepare_step( $request );
-			$updated_steps   = $request->get_param( 'updated_steps' ) ?? array();
+			$step_data     = $this->prepare_step( $request );
+			$updated_steps = $request->get_param( 'updated_steps' ) ?? array();
+
+			error_log( 'Prepared step data: ' . print_r( $step_data, true ) );
+			error_log( 'Updated steps: ' . print_r( $updated_steps, true ) );
+
 			$automation_step = Automation_Step_Model::create( $step_data );
 
 			if ( ! empty( $updated_steps ) ) {
+				error_log( 'Updating orders for ' . count( $updated_steps ) . ' steps' );
 				$this->update_orders( $updated_steps );
+			} else {
+				error_log( 'No steps to update orders for' );
 			}
 
 			$automation_step = Automation_Step_Model::find( $automation_step->id );
@@ -316,6 +349,46 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Reorder an Automation Step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function reorder_step( $request ) {
+		try {
+			$step_id       = $request->get_param( 'id' );
+			$direction     = $request->get_param( 'direction' );
+			$updated_steps = $request->get_param( 'updated_steps' ) ?? array();
+
+			$automation_step = Automation_Step_Model::find( $step_id );
+
+			if ( ! $automation_step ) {
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Validate direction
+			if ( ! in_array( $direction, array( 'up', 'down' ), true ) ) {
+				return new WP_Error( 'rest_automation_step_invalid_direction', __( 'Invalid direction. Must be "up" or "down"', 'quillcrm' ), array( 'status' => 400 ) );
+			}
+
+			// Update the orders based on the frontend calculations
+			if ( ! empty( $updated_steps ) ) {
+				$this->update_orders( $updated_steps );
+			}
+
+			// Return the updated step
+			$automation_step = Automation_Step_Model::find( $step_id );
+
+			return new WP_REST_Response( $automation_step, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'rest_automation_step_reorder_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
 	 * Update orders of the steps
 	 *
 	 * @since 1.0.0
@@ -357,10 +430,18 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			'order'         => $request->get_param( 'order' ),
 		);
 
+		// Remove empty values but preserve 0 values for numeric fields
 		foreach ( $step_data as $key => $value ) {
-			if ( empty( $value ) ) {
+			if ( is_null( $value ) || ( '' === $value ) ) {
 				unset( $step_data[ $key ] );
 			}
+		}
+
+		// Ensure order is always a valid positive integer
+		if ( isset( $step_data['order'] ) ) {
+			$step_data['order'] = max( 1, intval( $step_data['order'] ) );
+		} else {
+			$step_data['order'] = 1; // Default order if not provided
 		}
 
 		return $step_data;

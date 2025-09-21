@@ -384,7 +384,10 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 							{__('GDPR Consent', 'quillcrm')}
 						</Typography.Title>
 						<Field
-							label={__('Inform customers that their will be recieving marketing emails', 'quillcrm')}
+							label={__(
+								'Inform customers that their will be recieving marketing emails',
+								'quillcrm'
+							)}
 							value={gdpr_compliance}
 							onChange={(value) =>
 								handleFieldChange('gdpr_compliance', value)
@@ -402,7 +405,10 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 									type="textarea"
 								/>
 								<Typography.Text type="secondary">
-									{__('Use {{no_thanks text="No Thanks"}} to add a no thanks link', 'quillcrm')}
+									{__(
+										'Use {{no_thanks text="No Thanks"}} to add a no thanks link',
+										'quillcrm'
+									)}
 								</Typography.Text>
 							</>
 						)}
@@ -426,12 +432,18 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 									type="lists"
 								/>
 								<Typography.Text type="secondary">
-									{__('The selected tag(s) will be added when cart is abandoned. The tag(s) will be automatically removed when cart recovers', 'quillcrm')}
+									{__(
+										'The selected tag(s) will be added when cart is abandoned. The tag(s) will be automatically removed when cart recovers',
+										'quillcrm'
+									)}
 								</Typography.Text>
 							</Flex>
 							<Flex vertical gap={10}>
 								<Field
-									label={__('Add Tags on Cart Abandoned', 'quillcrm')}
+									label={__(
+										'Add Tags on Cart Abandoned',
+										'quillcrm'
+									)}
 									value={tags}
 									onChange={(value) =>
 										handleFieldChange('tags', value)
@@ -439,7 +451,10 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 									type="tags"
 								/>
 								<Typography.Text type="secondary">
-									{__('The selected tag(s) will be added when cart is abandoned. The tag(s) will be automatically removed when cart recovers', 'quillcrm')}
+									{__(
+										'The selected tag(s) will be added when cart is abandoned. The tag(s) will be automatically removed when cart recovers',
+										'quillcrm'
+									)}
 								</Typography.Text>
 							</Flex>
 						</Flex>
@@ -449,7 +464,10 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 							</Typography.Title>
 							<Flex vertical gap={10}>
 								<Field
-									label={__('Add Lists on Cart Lost', 'quillcrm')}
+									label={__(
+										'Add Lists on Cart Lost',
+										'quillcrm'
+									)}
 									value={lost_lists}
 									onChange={(value) =>
 										handleFieldChange('lost_lists', value)
@@ -457,12 +475,18 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 									type="lists"
 								/>
 								<Typography.Text type="secondary">
-									{__('The selected tag(s) will be added when cart is lost. The tag(s) will be automatically removed when cart recovers', 'quillcrm')}
+									{__(
+										'The selected tag(s) will be added when cart is lost. The tag(s) will be automatically removed when cart recovers',
+										'quillcrm'
+									)}
 								</Typography.Text>
 							</Flex>
 							<Flex vertical gap={10}>
 								<Field
-									label={__('Add Tags on Cart Lost', 'quillcrm')}
+									label={__(
+										'Add Tags on Cart Lost',
+										'quillcrm'
+									)}
 									value={lost_tags}
 									onChange={(value) =>
 										handleFieldChange('lost_tags', value)
@@ -470,7 +494,10 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 									type="tags"
 								/>
 								<Typography.Text type="secondary">
-									{__('The selected tag(s) will be added when cart is lost. The tag(s) will be automatically removed when cart recovers', 'quillcrm')}
+									{__(
+										'The selected tag(s) will be added when cart is lost. The tag(s) will be automatically removed when cart recovers',
+										'quillcrm'
+									)}
 								</Typography.Text>
 							</Flex>
 						</Flex>

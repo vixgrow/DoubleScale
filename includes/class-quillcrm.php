@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Main class: class QuillCRM
  *
@@ -29,6 +30,9 @@ use QuillCRM\Abandoned_Cart\Abandoned_Cart;
 use QuillCRM\Managers\Custom_Fields_Manager;
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
+use QuillCRM\Managers\Pipeline_Manager;
+use QuillCRM\Managers\Deal_Manager;
+use QuillCRM\Managers\Activity_Manager;
 use Illuminate\Translation\Translator;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Validation\Factory as ValidatorFactory;
@@ -43,6 +47,13 @@ use QuillCRM\Emails\Email_Builder;
  * @since 1.0.0
  */
 final class QuillCRM {
+
+
+
+
+
+
+
 
 	/**
 	 * Campaigns tasks
@@ -213,7 +224,14 @@ final class QuillCRM {
 		Filters_Manager::instance();
 		Importers_Manager::instance();
 		Custom_Metabox::get_instance();
+<<<<<<< HEAD
 		Email_Builder::instance();
+=======
+		\QuillCRM\OAuth\GoHighLevel_OAuth::init();
+		Pipeline_Manager::instance();
+		Deal_Manager::instance();
+		Activity_Manager::instance();
+>>>>>>> main
 	}
 
 	/**
@@ -222,7 +240,7 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	private function init_hooks() {
-		// Register log handlers.
+		 // Register log handlers.
 		add_filter( 'quillcrm_register_log_handlers', array( $this, 'register_log_handlers' ) );
 	}
 
@@ -262,7 +280,7 @@ final class QuillCRM {
 
 		// Load all automations learndash triggers files
 		// if ( quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) ) {
-			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/learndash/class-*.php' );
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/learndash/class-*.php' );
 		foreach ( $triggers_files as $file ) {
 			require $file;
 		}
@@ -270,7 +288,7 @@ final class QuillCRM {
 
 		// Load all automations memberpress triggers files
 		// if ( quillcrm_is_plugin_active( 'memberpress/memberpress.php' ) ) {
-			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/memberpress/class-*.php' );
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/memberpress/class-*.php' );
 		foreach ( $triggers_files as $file ) {
 			require $file;
 		}
@@ -278,11 +296,23 @@ final class QuillCRM {
 
 		// Load all automations edd triggers files
 		// if ( quillcrm_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ) ) {
-			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/edd/class-*.php' );
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/edd/class-*.php' );
 		foreach ( $triggers_files as $file ) {
 			require $file;
 		}
 		// }
+
+		// Load all automations booking triggers files
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/booking/quillbooking/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations deal triggers files
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
 
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
@@ -292,7 +322,7 @@ final class QuillCRM {
 
 		// Load all automations woocommerce actions files
 		// if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-			$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/woocommerce/class-*.php' );
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/woocommerce/class-*.php' );
 		foreach ( $actions_files as $file ) {
 			require $file;
 		}
@@ -306,11 +336,24 @@ final class QuillCRM {
 
 		// Load all automations learndash actions files
 		// if ( quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) ) {
-			$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/learndash/class-*.php' );
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/learndash/class-*.php' );
 		foreach ( $actions_files as $file ) {
 			require $file;
 		}
 		// }
+
+		// Load all automations deal actions files
+		// First load the base class
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-base-deal-action.php';
+
+		// Then load all other deal action files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			// Skip the base class as we've already loaded it
+			if ( basename( $file ) !== 'class-base-deal-action.php' ) {
+				require $file;
+			}
+		}
 
 		// Load all contact merge tags files
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/contact/class-*.php' );
@@ -367,7 +410,6 @@ final class QuillCRM {
 	 * @since 2.13.3
 	 */
 	public function flush_rewrite_rules() {
-
 		if ( ! $option = get_option( 'quillcrm-flush-rewrite-rules' ) ) {
 			return false;
 		}
@@ -376,11 +418,9 @@ final class QuillCRM {
 
 			flush_rewrite_rules();
 			update_option( 'quillcrm-flush-rewrite-rules', 0 );
-
 		}
 
 		return true;
-
 	}
 
 	/**

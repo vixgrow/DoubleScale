@@ -56,6 +56,7 @@ export type Contact = {
 	})[];
 };
 
+
 export type Order = {
 	id: number;
 	status: string;
@@ -150,14 +151,22 @@ export type CustomField = {
 	type: string;
 	attributes: any | null; // Adjust the type if the structure of attributes is known
 	group_id: number;
+	scope: string;
+	pivot: {
+		entity_id: string;
+		custom_field_id: string;
+		value: string;
+	};
 	created_at: string;
 	updated_at: string;
 };
+
 
 export type CustomFieldsGroup = {
 	id: number;
 	name: string;
 	slug: string;
+	scope: string;
 	created_at: string;
 	updated_at: string;
 	custom_fields: CustomField[];
@@ -267,6 +276,16 @@ export type FiltersGroups = {
 
 export type MappedFields = {
 	[key: string]: string;
+};
+
+export type KeyValuePair = {
+	id: string;
+	key: string;
+	value: string;
+};
+
+export type DynamicKeyValueData = {
+	[key: string]: any;
 };
 
 type FormData = {
@@ -684,6 +703,7 @@ export interface CustomFieldsRef {
 
 export interface CustomFieldsProps {
 	activeTab?: string;
+	scope?: string; // Add scope parameter with default 'contact'
 }
 
 export interface FieldDialogProps {
@@ -698,7 +718,7 @@ export interface FieldDialogProps {
 export interface GroupDialogProps {
 	visible: boolean;
 	onClose: () => void;
-	onSave: (name: string) => Promise<boolean>;
+	onSave: (name: string, scope: string) => Promise<boolean>;
 }
 
 export interface DeleteGroupDialogProps {

@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Menu, Dropdown, Modal } from 'antd';
+import { Dropdown, Modal } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 

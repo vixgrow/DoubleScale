@@ -9,6 +9,7 @@ export interface ImportState {
 	count: number;
 	source: string;
 	offset: number;
+	cursor: string | null; // Add cursor for pagination
 	fileData: {
 		file_name: string;
 		header_columns: string[];
@@ -34,6 +35,7 @@ type ImportAction =
 	| { type: 'SET_COUNT'; payload: number }
 	| { type: 'SET_SOURCE'; payload: string }
 	| { type: 'SET_OFFSET'; payload: number }
+	| { type: 'SET_CURSOR'; payload: string | null } // Add cursor action
 	| { type: 'SET_FILE_DATA'; payload: ImportState['fileData'] }
 	| { type: 'SET_IS_FETCHING'; payload: boolean }
 	| { type: 'SET_SOURCE_DATA'; payload: ImportState['sourceData'] }
@@ -54,6 +56,7 @@ const initialState: ImportState = {
 	count: 0,
 	source: 'csv',
 	offset: 0,
+	cursor: null, // Add cursor to initial state
 	fileData: null,
 	isFetching: false,
 	sourceData: null,
@@ -81,6 +84,8 @@ function importReducer(state: ImportState, action: ImportAction): ImportState {
 			return { ...state, source: action.payload };
 		case 'SET_OFFSET':
 			return { ...state, offset: action.payload };
+		case 'SET_CURSOR':
+			return { ...state, cursor: action.payload };
 		case 'SET_FILE_DATA':
 			return { ...state, fileData: action.payload };
 		case 'SET_IS_FETCHING':

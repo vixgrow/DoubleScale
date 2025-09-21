@@ -22,6 +22,11 @@ type FieldType = {
 		};
 	};
 	endpoint?: string;
+	settings?: {
+		ajax_action?: string;
+		button_text?: string;
+	};
+	'default-value'?: string;
 };
 
 type FieldsType = {
@@ -66,6 +71,9 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 						fields={field.fields}
 						endpoint={field.endpoint}
 						multiple={field.multiple}
+						settings={field.settings}
+						allValues={values}
+						defaultValue={field['default-value']}
 					/>
 				);
 			})}

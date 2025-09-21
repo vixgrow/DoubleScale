@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Tasks
  *
@@ -8,7 +9,6 @@
 
 namespace QuillCRM;
 
-use Throwable;
 
 /**
  * Tasks class
@@ -55,7 +55,7 @@ class Tasks {
 		self::$initialized = true;
 		add_action(
 			'action_scheduler_deleted_action',
-			function( $action_id ) {
+			function ( $action_id ) {
 				self::delete_meta( array( 'action_id' => $action_id ) );
 			}
 		);
@@ -125,8 +125,8 @@ class Tasks {
 	 * @return integer|false
 	 */
 	public function schedule_single( $timestamp, $hook, ...$args ) {
-		$this->enqueue_sync( $hook, ...$args );
-		return;
+		// $this->enqueue_sync( $hook, ...$args );
+		// return;
 		// add args meta.
 		$meta_id = $this->add_meta( "{$this->group}_$hook", $args );
 		if ( ! $meta_id ) {
@@ -261,5 +261,4 @@ class Tasks {
 			$where
 		);
 	}
-
 }

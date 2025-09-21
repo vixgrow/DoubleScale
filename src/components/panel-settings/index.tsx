@@ -24,7 +24,7 @@ const PanelSettings: React.FC<{
 				icon={icon}
 				iconVariant={iconVariant}
 			/>
-			<div className=" rounded-b-2xl px-16 border border-t-0 border-gray-200 py-6">
+			<div className=" rounded-b-2xl px-8 border border-t-0 border-gray-200 py-4">
 				{children}
 			</div>
 		</div>

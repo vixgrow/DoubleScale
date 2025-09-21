@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Automation_Model
  * This class is responsible for handling the Automation model
@@ -16,6 +17,7 @@ use WPEloquent\Eloquent\Model;
  * Automation_Model class
  */
 class Automation_Model extends Model {
+
 
 	/**
 	 * Table name
@@ -196,20 +198,64 @@ class Automation_Model extends Model {
 	}
 
 	/**
-	 * Get next step
+	 * Get Next Step
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $order Step order
+	 * @param object $step Automation Step.
 	 *
-	 * @return Automation_Step_Model
+	 * @return object|bool
 	 */
-	public function get_next_step( $order ) {
-		return $this->steps()
+	public function get_next_step( $step ) {
+		// For root level steps, get the next root level step
+		if ( 0 == $step->parent_id ) {
+			return $this->steps()
+				->where( 'status', 'active' )
+				->where( 'parent_id', 0 )
+				->where( 'order', '>', $step->order )
+				->orderBy( 'order', 'asc' )
+				->first();
+		}
+
+		// For branch steps, first look for next step in the same branch
+		$next_step = $this->steps()
 			->where( 'status', 'active' )
-			->where( 'order', '>', $order )
+			->where( 'parent_id', $step->parent_id )
+			->where( 'condition', $step->condition )
+			->where( 'order', '>', $step->order )
 			->orderBy( 'order', 'asc' )
 			->first();
+
+		// If no more steps in this branch, we need to find what comes after the condition block
+		if ( ! $next_step ) {
+			// Get the parent condition step
+			$parent_step = $this->steps()
+				->where( 'id', $step->parent_id )
+				->first();
+
+			if ( $parent_step ) {
+				// If parent condition is also nested, find next step in its parent context
+				if ( $parent_step->parent_id > 0 ) {
+					$next_step = $this->steps()
+						->where( 'status', 'active' )
+						->where( 'parent_id', $parent_step->parent_id )
+						->where( 'condition', $parent_step->condition )
+						->where( 'order', '>', $parent_step->order )
+						->orderBy( 'order', 'asc' )
+						->first();
+				} else {
+					// Parent condition is at root level, find next root level step
+					$next_step = $this->steps()
+						->where( 'status', 'active' )
+						->where( 'parent_id', 0 )
+						->where( 'order', '>', $parent_step->order )
+						->orderBy( 'order', 'asc' )
+						->first();
+				}
+			}
+		}
+
+		return $next_step;
 	}
 
 	/**
@@ -250,10 +296,10 @@ class Automation_Model extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		parent::boot();
+		 parent::boot();
 
 		self::deleting(
-			function( $automation ) {
+			function ( $automation ) {
 				$automation->contacts()->delete();
 				$automation->steps()->delete();
 				$automation->processes()->delete();
@@ -262,7 +308,7 @@ class Automation_Model extends Model {
 
 		// Delete draft steps will retrerive the automation
 		self::retrieved(
-			function( $automation ) {
+			function ( $automation ) {
 				$automation->steps()
 					->where( 'status', 'draft' )
 					->delete();

@@ -46,7 +46,7 @@ export const InputWithMergeTags: React.FC<InputWithMergeTagsProps> = ({
     return (
         <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center text-[#333333]">
-                <div>{label}</div>
+                <label className="text-sm">{label}</label>
                 <div
                     className="cursor-pointer hover:opacity-80"
                     onClick={handleMergeTagClick}

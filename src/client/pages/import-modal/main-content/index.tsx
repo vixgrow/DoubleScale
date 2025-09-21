@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
  * external dependencies
  */
 import React from 'react';
-import { map, isEmpty } from 'lodash';
+import { map } from 'lodash';
 /**
  * internal dependencies
  */
@@ -53,6 +53,24 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 		}
 	};
 
+	// Debug logging for step flow
+	console.log('Import Modal Debug:', {
+		source,
+		importer: !!importer,
+		importerIsIntegration: importer?.is_integration,
+		importerFields: importer?.fields ? Object.keys(importer.fields) : [],
+		hasCredentials:
+			importer?.credentials &&
+			Object.keys(importer.credentials || {}).length > 0,
+		sourceData: sourceData,
+		sourceDataExists: !!sourceData,
+		sourceDataIsEmpty: sourceData && Object.keys(sourceData).length === 0,
+		currentStep,
+		isFetching,
+		importing,
+		userCredentials: state.credentials,
+	});
+
 	// Show progress if importing OR showing completion
 	if (importing || showingCompletion) {
 		return <ImportProgress />;
@@ -67,19 +85,69 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 					<div>
 						{isFetching && <Skeleton className="h-40 w-full" />}
 
+						{/* Integration-based importers: Show credentials first */}
 						{importer &&
-							['mailerlite', 'activecampaign'].includes(source) &&
-							!isEmpty(importer.credentials) &&
+							[
+								'mailerlite',
+								'activecampaign',
+								'hubspot',
+								'pipedrive',
+								'gohighlevel',
+							].includes(source) &&
+							importer.credentials &&
+							Object.keys(importer.credentials || {}).length >
+								0 &&
 							!importing &&
-							!isFetching && (
-								<ApiCredentials importer={importer} />
+							!isFetching &&
+							!sourceData && (
+								<div>
+									<h3 className="text-lg font-semibold mb-4">
+										{__(
+											'Step 1: Enter API Credentials',
+											'quillcrm'
+										)}
+									</h3>
+									<ApiCredentials importer={importer} />
+								</div>
 							)}
 
+						{/* Integration-based importers: Show field mapping after credentials validated */}
+						{importer &&
+							[
+								'mailerlite',
+								'activecampaign',
+								'hubspot',
+								'pipedrive',
+								'gohighlevel',
+							].includes(source) &&
+							importer.credentials &&
+							Object.keys(importer.credentials || {}).length >
+								0 &&
+							!importing &&
+							!isFetching &&
+							sourceData && (
+								<div className="space-y-6">
+									<h3 className="text-lg font-semibold mb-4">
+										{__(
+											'Step 2: Configure Import Settings',
+											'quillcrm'
+										)}
+									</h3>
+									<FieldMapping importer={importer} />
+									<ContactProfile />
+								</div>
+							)}
+
+						{/* Other importers: Show field mapping directly */}
 						{!importing &&
 							!isFetching &&
-							!['mailerlite', 'activecampaign'].includes(
-								source
-							) && (
+							![
+								'mailerlite',
+								'activecampaign',
+								'hubspot',
+								'pipedrive',
+								'gohighlevel',
+							].includes(source) && (
 								<div className="space-y-6">
 									<FieldMapping importer={importer} />
 									<ContactProfile />

@@ -6,14 +6,20 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { map, isObject } from 'lodash';
+import { isObject } from 'lodash';
 import Select from 'react-select';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { ListField, TagField, LinkTriggerField } from '@quillcrm/components';
+import {
+	ListField,
+	TagField,
+	LinkTriggerField,
+	DynamicKeyValueInput,
+	TestButton,
+} from '@quillcrm/components';
 import type { ReactSelectOptions } from '@quillcrm/client';
 import ContactMappedFields from '../contact-mapped-fields';
 import MappedFields from '../mapped-fields';
@@ -25,6 +31,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
+import PipelineStageChange from '../pipeline-stage-change';
+import DealValueChange from '../deal-value-change';
+import DealOwnerChange from '../deal-owner-change';
+import DealCustomFieldChange from '../deal-custom-field-change';
 
 interface FieldProps {
 	label?: string;
@@ -44,6 +54,12 @@ interface FieldProps {
 	helperText?: string;
 	style?: React.CSSProperties;
 	placeholder?: string;
+	settings?: {
+		ajax_action?: string;
+		button_text?: string;
+	};
+	allValues?: { [key: string]: any };
+	defaultValue?: string;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -60,14 +76,57 @@ const Field: React.FC<FieldProps> = ({
 	required,
 	style,
 	placeholder,
+	settings,
+	allValues,
+	defaultValue,
 }) => {
 	let fieldContent;
+
+	if (type === 'boolean') {
+		type = 'switch';
+	}
 
 	switch (type) {
 		case 'lists':
 			fieldContent = (
 				<ListField
 					value={value || []}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'pipeline_stage_change':
+			fieldContent = (
+				<PipelineStageChange
+					endpoint={endpoint || ''}
+					value={value}
+					onChange={(value) => onChange(value)}
+					allValues={allValues}
+					defaultValue={defaultValue}
+				/>
+			);
+			break;
+		case 'deal_custom_field_change':
+			fieldContent = (
+				<DealCustomFieldChange
+					value={Array.isArray(value) ? value : []}
+					onChange={(value) => onChange(value)}
+					options={options}
+				/>
+			);
+			break;
+		case 'deal_value_change':
+			fieldContent = (
+				<DealValueChange
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'deal_owner_change':
+			fieldContent = (
+				<DealOwnerChange
+					value={value}
 					onChange={(value) => onChange(value)}
 				/>
 			);
@@ -150,14 +209,13 @@ const Field: React.FC<FieldProps> = ({
 			);
 			break;
 		case 'multiselect':
-			const multiOptions = map(options, (label, value) => ({
-				label,
-				value,
-			}));
+			const multiOptions = options || [];
 			fieldContent = (
 				<Select
-					onChange={(value) => {
-						const values = value.map((val) => val.value);
+					onChange={(selectedOptions) => {
+						const values = selectedOptions
+							? selectedOptions.map((val) => val.value)
+							: [];
 						onChange(values);
 					}}
 					options={multiOptions}
@@ -238,6 +296,27 @@ const Field: React.FC<FieldProps> = ({
 					onChange={onChange}
 					values={value}
 					fields={fields || {}}
+				/>
+			);
+			break;
+		case 'dynamic_keyvalue':
+			fieldContent = (
+				<DynamicKeyValueInput
+					value={value || []}
+					onChange={onChange}
+					keyPlaceholder={__('Enter key', 'quillcrm')}
+					valuePlaceholder={__('Enter value', 'quillcrm')}
+				/>
+			);
+			break;
+		case 'button':
+		case 'test_button':
+			fieldContent = (
+				<TestButton
+					label={label}
+					settings={settings}
+					allValues={allValues}
+					onResult={(result) => onChange(result || value)}
 				/>
 			);
 			break;

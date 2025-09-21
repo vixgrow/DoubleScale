@@ -67,13 +67,6 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		to: null,
 	});
 
-	// useEffect(() => {
-	// 	if (dateRange.from || dateRange.to) {
-	// 		setPage(1); // Reset to first page when filtering
-	// 		fetchTags();
-	// 	}
-	// }, [dateRange]);
-
 	// Helper function to show notice
 	const showNotice = (type: 'success' | 'error', message: string) => {
 		setNotice({ type, message });
@@ -289,6 +282,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 			<DataTable
 				columns={columns}
 				data={tags}
+				activeTab={activeTab}
 				config={tableConfig}
 				showPagination={false}
 				initialPageSize={perPage}

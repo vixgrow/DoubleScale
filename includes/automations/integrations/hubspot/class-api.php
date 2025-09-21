@@ -15,7 +15,8 @@ use QuillCRM\Abstracts\Integration_API;
 /**
  * Hubspot API class
  */
-class API extends Integration_API {
+class API extends Integration_API
+{
 
 	/**
 	 * Access token
@@ -33,8 +34,9 @@ class API extends Integration_API {
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct( $access_token ) {
-		$this->endpoint     = 'https://api.hubapi.com';
+	public function __construct($access_token)
+	{
+		$this->endpoint = 'https://api.hubapi.com';
 		$this->access_token = $access_token;
 	}
 
@@ -43,8 +45,9 @@ class API extends Integration_API {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_companies() {
-		return $this->get( 'crm/v3/objects/companies' );
+	public function get_companies()
+	{
+		return $this->get('crm/v3/objects/companies');
 	}
 
 	/**
@@ -54,8 +57,9 @@ class API extends Integration_API {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function create_contact( $data ) {
-		return $this->post( 'crm/v3/objects/contacts', $data );
+	public function create_contact($data)
+	{
+		return $this->post('crm/v3/objects/contacts', $data);
 	}
 
 	/**
@@ -65,37 +69,38 @@ class API extends Integration_API {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_contact_by_email( $email ) {
+	public function get_contact_by_email($email)
+	{
 		$body = array(
 			'filterGroups' => array(
 				array(
 					'filters' => array(
 						array(
 							'propertyName' => 'email',
-							'operator'     => 'EQ',
-							'value'        => $email,
+							'operator' => 'EQ',
+							'value' => $email,
 						),
 					),
 				),
 			),
-			'sorts'        => array(
+			'sorts' => array(
 				'vid',
 			),
-			'query'        => $email,
-			'properties'   => array(
+			'query' => $email,
+			'properties' => array(
 				'vid',
 			),
-			'limit'        => 1,
-			'after'        => 0,
+			'limit' => 1,
+			'after' => 0,
 		);
 
-		$contacts = $this->post( 'crm/v3/objects/contacts/search', $body );
+		$contacts = $this->post('crm/v3/objects/contacts/search', $body);
 
-		if ( $contacts['success'] && ! empty( $contacts['data'] ) ) {
-			return $this->prepare_response( true, 200, $contacts['data']['results'][0] );
+		if ($contacts['success'] && !empty($contacts['data'])) {
+			return $this->prepare_response(true, 200, $contacts['data']['results'][0]);
 		}
 
-		return $this->prepare_response( false, 404, array() );
+		return $this->prepare_response(false, 404, array());
 	}
 
 	/**
@@ -105,15 +110,16 @@ class API extends Integration_API {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_or_create_contact( $data ) {
-		$email   = $data['properties']['email'];
-		$contact = $this->get_contact_by_email( $email );
+	public function get_or_create_contact($data)
+	{
+		$email = $data['properties']['email'];
+		$contact = $this->get_contact_by_email($email);
 
-		if ( $contact['success'] ) {
+		if ($contact['success']) {
 			return $contact;
 		}
 
-		return $this->create_contact( $data );
+		return $this->create_contact($data);
 	}
 
 	/**
@@ -123,16 +129,17 @@ class API extends Integration_API {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function create_or_update_contact( $data ) {
-		$email   = $data['properties']['email'];
-		$contact = $this->get_contact_by_email( $email );
+	public function create_or_update_contact($data)
+	{
+		$email = $data['properties']['email'];
+		$contact = $this->get_contact_by_email($email);
 
-		if ( $contact['success'] ) {
+		if ($contact['success']) {
 			$contact_id = $contact['data']['id'];
-			return $this->update_contact( $contact_id, $data );
+			return $this->update_contact($contact_id, $data);
 		}
 
-		return $this->create_contact( $data );
+		return $this->create_contact($data);
 	}
 
 	/**
@@ -143,8 +150,9 @@ class API extends Integration_API {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function update_contact( $contact_id, $data ) {
-		return $this->patch( "crm/v3/objects/contacts/$contact_id", $data );
+	public function update_contact($contact_id, $data)
+	{
+		return $this->patch("crm/v3/objects/contacts/$contact_id", $data);
 	}
 
 
@@ -153,8 +161,9 @@ class API extends Integration_API {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_fields() {
-		return $this->get( 'crm/v3/properties/contacts' );
+	public function get_fields()
+	{
+		return $this->get('crm/v3/properties/contacts');
 	}
 
 	/**
@@ -162,8 +171,9 @@ class API extends Integration_API {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_lists() {
-		return $this->get( 'contacts/v1/lists' );
+	public function get_lists()
+	{
+		return $this->get('crm/v3/lists');
 	}
 
 	/**
@@ -174,12 +184,13 @@ class API extends Integration_API {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function add_contact_to_list( $contact_id, $list_id ) {
+	public function add_contact_to_list($contact_id, $list_id)
+	{
 		$body = array(
-			'vids' => array( $contact_id ),
+			'objectIds' => array($contact_id),
 		);
 
-		return $this->post( "contacts/v1/lists/$list_id/add", $body );
+		return $this->post("crm/v3/lists/$list_id/memberships/add", $body);
 	}
 
 	/**
@@ -190,12 +201,109 @@ class API extends Integration_API {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function remove_contact_from_list( $contact_id, $list_id ) {
+	public function remove_contact_from_list($contact_id, $list_id)
+	{
 		$body = array(
-			'vids' => array( $contact_id ),
+			'objectIds' => array($contact_id),
 		);
 
-		return $this->post( "contacts/v1/lists/$list_id/remove", $body );
+		return $this->post("crm/v3/lists/$list_id/memberships/remove", $body);
+	}
+
+	/**
+	 * Get contacts count
+	 *
+	 * @return array
+	 */
+	public function get_contacts_count()
+	{
+		// Use HubSpot's search API to get an accurate count
+		$search_body = array(
+			'filterGroups' => array(),
+			'sorts' => array(),
+			'query' => '',
+			'properties' => array('firstname'), // Just get one property to minimize data
+			'limit' => 1,
+		);
+
+		$response = $this->post('crm/v3/objects/contacts/search', $search_body);
+
+		// If the search was successful, extract total from the response
+		if ($response['success'] && isset($response['data'])) {
+			$data = $response['data'];
+
+			// HubSpot search API returns total in the response
+			if (isset($data['total'])) {
+				return $response;
+			}
+
+			// If no total field, check if we have results
+			if (isset($data['results']) && is_array($data['results'])) {
+				// If we have results, we'll do a fallback to simple contacts API
+				$fallback_response = $this->get('crm/v3/objects/contacts', array('limit' => 100));
+
+				if ($fallback_response['success'] && isset($fallback_response['data']['results'])) {
+					// Estimate based on results - if we get 100 results, there are likely more
+					$results_count = count($fallback_response['data']['results']);
+					$estimated_total = $results_count < 100 ? $results_count : $results_count * 10; // Conservative estimate
+
+					$response['data']['total'] = $estimated_total;
+					return $response;
+				}
+			}
+
+			// If no results at all, return 0
+			$response['data']['total'] = 0;
+			return $response;
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Get contacts batch for import with cursor-based pagination
+	 *
+	 * @param string|null $after Cursor for pagination (HubSpot's 'after' parameter).
+	 * @param int         $limit Limit (max 100 for HubSpot).
+	 *
+	 * @return array
+	 */
+	public function get_contacts_batch($after = null, $limit = 20)
+	{
+		$params = array(
+			'limit' => min($limit, 100),
+			'properties' => array('firstname', 'lastname', 'email', 'phone', 'company', 'hs_lead_status', 'createdate', 'lastmodifieddate'),
+			'associations' => array('lists'),
+		);
+
+		// Use HubSpot's cursor-based pagination
+		if (!empty($after)) {
+			$params['after'] = $after;
+		}
+
+		return $this->get('crm/v3/objects/contacts', $params);
+	}
+
+	/**
+	 * Get all lists with pagination support
+	 *
+	 * @param int $count Number of lists to retrieve (max 250).
+	 *
+	 * @return array
+	 */
+	public function get_all_lists($count = 250)
+	{
+		return $this->get('crm/v3/lists', array('count' => min($count, 250)));
+	}
+
+	/**
+	 * Get contact properties (custom fields)
+	 *
+	 * @return array
+	 */
+	public function get_contact_properties()
+	{
+		return $this->get('crm/v3/properties/contacts');
 	}
 
 	/**
@@ -206,15 +314,16 @@ class API extends Integration_API {
 	 * @param string|null $body Body.
 	 * @return array|WP_Error
 	 */
-	public function request_remote( $method, $path, $body = null ) {
+	public function request_remote($method, $path, $body = null)
+	{
 		return wp_remote_request(
 			"{$this->endpoint}/$path",
 			array(
-				'method'  => $method,
-				'body'    => $body,
+				'method' => $method,
+				'body' => $body,
 				'headers' => array(
-					'Accept'        => 'application/json',
-					'Content-Type'  => 'application/json; charset=' . get_option( 'blog_charset' ),
+					'Accept' => 'application/json',
+					'Content-Type' => 'application/json; charset=' . get_option('blog_charset'),
 					'Authorization' => 'Bearer ' . $this->access_token,
 				),
 				'timeout' => 30,

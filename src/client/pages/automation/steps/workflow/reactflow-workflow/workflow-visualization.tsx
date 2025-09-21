@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useMemo, useCallback, useEffect, useRef } from '@wordpress/element';
+import { useCallback, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -14,59 +14,49 @@ import {
 	Edge,
 	useNodesState,
 	useEdgesState,
-	MarkerType,
 	NodeMouseHandler,
 	Background,
 	Controls,
 	MiniMap,
-	EdgeTypes,
-	useReactFlow,
 } from '@xyflow/react';
-import { debounce } from 'lodash';
 import '@xyflow/react/dist/style.css';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type {
-	Automation,
-	AutomationStep,
-	OrganizedStep,
-} from '@quillcrm/client';
+import type { Automation, AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../state/context';
-import TriggerNode from './nodes/trigger-node';
-import ActionNode from './nodes/action-node';
-import ConditionNode from './nodes/condition-node';
-import GoalNode from './nodes/goal-node';
-import EndNode from './nodes/end-node';
-import AddStepNode from './nodes/add-step-node';
-import AddStepEdge from './edges/add-step-edge';
-import NodeSidebar from './components/node-sidebar';
 
-// Register custom node types
-const nodeTypes = {
-	trigger: TriggerNode,
-	action: ActionNode,
-	condition: ConditionNode,
-	goal: GoalNode,
-	end_automation: EndNode,
-	add_step: AddStepNode,
-};
+// Configuration constants
+import { LAYOUT_CONSTANTS, EDGE_STYLES } from './config';
 
-// Register custom edge types
-const edgeTypes: EdgeTypes = {
-	addStepEdge: AddStepEdge,
-};
+// Types and Interfaces
+import { WorkflowVisualizationProps, NODE_TYPES, EDGE_TYPES } from './types';
 
-interface WorkflowVisualizationProps {
-	automation?: Automation;
-	steps?: AutomationStep[];
-	isLoading?: boolean;
-	onStepClick?: (step: OrganizedStep) => void;
-	onTriggerClick?: () => void;
-}
+// Helper functions
+import { getNodePosition, calculatePositions } from './utils/position-utils';
+import { removeDuplicateEdges } from './utils/edge-utils';
+import { deleteStep } from './utils/step-utils';
 
+// NodeProcess component
+import { initializeTrigger, addFinalAddStep } from './utils/node-process';
+
+// StepHierarchy component
+import { processStepHierarchy } from './utils/step-hierarchy';
+
+// Connection utilities
+import {
+	connectChildMergesToParentMerges,
+	connectChildMergesToSubsequentSteps,
+	connectLastStepsToParentMerge,
+	connectMergesToSubsequentSteps,
+	connectFinalMergeToSubsequentSteps,
+} from './utils/merge-connection-utils';
+
+/**
+ * Main Component
+ */
 const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	automation,
 	steps = [],
@@ -74,545 +64,264 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	onStepClick,
 	onTriggerClick,
 }) => {
+	// ========== CONTEXT AND STATE ==========
 	const { updateAutomation } = useAutomationContext();
-	const isInitialLoadRef = useRef(true);
-	const isDraggingRef = useRef(false);
-	const { fitView, getNode } = useReactFlow();
-	// Create nodes and edges from steps with proper hierarchical handling
-	const { nodes, edges } = useMemo(() => {
+
+	// ReactFlow state management
+	const [nodesState, setNodes, onNodesChange] = useNodesState<Node>([]);
+	const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+
+	// ========== AUTOMATION OPERATIONS ==========
+
+	// Delete a step from the automation
+	const onDeleteStep = useCallback(
+		async (stepId: string) => {
+			if (!automation || !steps) return;
+
+			try {
+				// Find the step to delete
+				const stepToDelete = steps.find(
+					(s) => s.id.toString() === stepId
+				);
+				if (!stepToDelete) {
+					console.error('Step not found:', stepId);
+					return;
+				}
+
+				// Make API call to delete the step using the correct endpoint
+				await apiFetch({
+					path: `/qc/v1/automation-steps/${stepId}`,
+					method: 'DELETE',
+					data: {
+						updated_steps: {},
+					},
+				});
+
+				// Refresh the automation data after deletion
+				const updatedAutomation = (await apiFetch({
+					path: `/qc/v1/automations/${automation.id}`,
+					method: 'GET',
+				})) as Automation;
+
+				// Update context with the refreshed automation
+				updateAutomation(updatedAutomation);
+			} catch (error) {
+				console.error('Failed to delete step:', error);
+				// You might want to show a user-friendly error message here
+			}
+		},
+		[automation, steps, updateAutomation]
+	);
+
+	// ========== MAIN LAYOUT EFFECT ==========
+	useEffect(() => {
 		const initialNodes: Node[] = [];
 		const initialEdges: Edge[] = [];
+		// the width of node
+		const nodeWidth = LAYOUT_CONSTANTS.NODE_WIDTH;
+		// the width of the add step node
+		const addStepWidth = LAYOUT_CONSTANTS.ADD_STEP_WIDTH;
+		// the width of the yes and no nodes
+		const nodeYesNoWidth = LAYOUT_CONSTANTS.NODE_YES_NO_WIDTH;
+		// start X position of the nodes
+		const startX = LAYOUT_CONSTANTS.START_X;
+		// start Trigger node Y position
+		const startY = LAYOUT_CONSTANTS.START_Y;
+		// The distance between nodes
+		const incrementY = LAYOUT_CONSTANTS.INCREMENT_Y;
 
 		// Get saved positions from automation settings
 		const savedPositions = automation?.settings?.reactflow_positions || {};
 
-		// Always add trigger node at the top
-		const triggerPosition = savedPositions['trigger'] || { x: 250, y: 50 };
-		initialNodes.push({
-			id: 'trigger',
-			type: 'trigger',
-			position: triggerPosition,
-			data: { automation, onTriggerClick },
-		});
+		// Initialize trigger node
+		initializeTrigger(
+			automation,
+			steps,
+			setNodes,
+			setEdges,
+			initialNodes,
+			initialEdges,
+			startX,
+			startY,
+			incrementY,
+			nodeWidth,
+			addStepWidth,
+			onTriggerClick,
+			savedPositions
+		);
 
-		if (!steps || steps.length === 0) {
-			// Show initial add step node when no steps exist
-			const addStepPosition = savedPositions['add-step-initial'] || {
-				x: 250,
-				y: 200,
-			};
-			initialNodes.push({
-				id: 'add-step-initial',
-				type: 'add_step',
-				position: addStepPosition,
-				data: {
-					parentId: null,
-					condition: null,
-					prevStep: null,
-				},
-			});
+		// Position calculator that considers nested structure
+		const positionMap = new Map<string, { x: number; y: number }>();
 
-			initialEdges.push({
-				id: 'trigger-to-add',
-				source: 'trigger',
-				target: 'add-step-initial',
-				type: 'addStepEdge',
-				data: {
-					sourceStep: undefined, // trigger
-					targetStep: undefined, // adding first step
-				},
-			});
-
-			return { nodes: initialNodes, edges: initialEdges };
-		}
-
-		// Helper function to calculate positions with fallback to saved positions
-		const calculatePosition = (
+		// Helper function to get saved position or calculated position
+		const getNodePositionLocal = (
 			nodeId: string,
-			index: number,
-			level: number = 0,
-			offset: number = 0
+			fallbackX = startX,
+			fallbackY = startY,
+			step?: AutomationStep,
+			stepIndex?: number
 		) => {
-			// Check if we have a saved position first
-			if (savedPositions[nodeId]) {
-				return savedPositions[nodeId];
-			}
-
-			// Fallback to calculated position
-			const baseX = 250;
-			const baseY = 200;
-			const verticalSpacing = 180;
-			const horizontalSpacing = 300;
-
-			return {
-				x: baseX + level * horizontalSpacing + offset,
-				y: baseY + index * verticalSpacing,
-			};
+			return getNodePosition(
+				nodeId,
+				savedPositions,
+				positionMap,
+				steps,
+				fallbackX,
+				fallbackY,
+				step,
+				stepIndex
+			);
 		};
 
-		// Helper function to find position for condition branch add-step nodes
-		const findConditionBranchPosition = (
-			branchSteps: AutomationStep[],
-			parentStep: AutomationStep,
-			condition: 'yes' | 'no',
-			level: number
-		) => {
-			const parentPos =
-				savedPositions[parentStep.id.toString()] ||
-				calculatePosition(parentStep.id.toString(), 0, level - 1);
-
-			if (branchSteps.length === 0) {
-				// No children in this branch - position to the right of condition node
-				const horizontalSpacing = 300;
-				const verticalOffset = condition === 'yes' ? -40 : 40; // Offset yes above, no below
-
-				return {
-					x: parentPos.x + horizontalSpacing,
-					y: parentPos.y + verticalOffset,
-				};
-			}
-
-			// Find the bottom-most child position in this branch
-			let bottomMostY = 0;
-			let bottomMostX = parentPos.x + 300; // Default to right side
-
-			branchSteps.forEach((step, index) => {
-				const stepPos =
-					savedPositions[step.id.toString()] ||
-					calculatePosition(
-						step.id.toString(),
-						index,
-						level,
-						condition === 'yes' ? -100 : 100
-					);
-				if (stepPos.y > bottomMostY) {
-					bottomMostY = stepPos.y;
-					bottomMostX = stepPos.x;
-				}
-			});
-
-			return {
-				x: bottomMostX,
-				y: bottomMostY + 180, // Position below the bottom-most child
-			};
-		};
-
-		// Helper function to recursively process steps and their children
-		const processStepHierarchy = (
-			stepList: AutomationStep[],
-			parentId: number | null = null,
-			condition: string | null = null,
-			level: number = 0,
-			startIndex: number = 0
-		): { lastIndex: number; lastStepId?: string } => {
-			// Get steps for current level
-			const currentLevelSteps = stepList
-				.filter(
-					(step) =>
-						(parentId === null && !step.parent_id) ||
-						(parentId !== null &&
-							step.parent_id === parentId &&
-							step.condition === condition)
-				)
-				.sort((a, b) => a.order - b.order);
-
-			let currentIndex = startIndex;
-
-			currentLevelSteps.forEach((step, stepIndex) => {
-				const position = calculatePosition(
-					step.id.toString(),
-					currentIndex,
-					level
-				);
-
-				// Add step node
-				initialNodes.push({
-					id: step.id.toString(),
-					type: step.type,
-					position,
-					data: {
-						step,
-						automation,
-						onStepClick: (stepData: OrganizedStep) => {
-							if (onStepClick) {
-								onStepClick(stepData);
-							}
-						},
-					},
-				});
-
-				// Connect to parent
-				if (currentIndex === 0 && level === 0) {
-					// Connect first root step to trigger
-					initialEdges.push({
-						id: `trigger-to-${step.id}`,
-						source: 'trigger',
-						target: step.id.toString(),
-						type: 'addStepEdge',
-						data: {
-							sourceStep: undefined, // trigger
-							targetStep: step,
-						},
-					});
-				} else if (stepIndex === 0 && level > 0 && parentId) {
-					// Connect first child to parent with condition label - NO + button on condition branches
-					const label =
-						condition === 'yes'
-							? __('Yes', 'quillcrm')
-							: __('No', 'quillcrm');
-					const parentStep = stepList.find((s) => s.id === parentId);
-					initialEdges.push({
-						id: `${parentId}-${condition}-to-${step.id}`,
-						source: parentId.toString(),
-						target: step.id.toString(),
-						sourceHandle: condition,
-						type: 'smoothstep', // Use regular edge for condition branches
-						label,
-						style: {
-							stroke: condition === 'yes' ? '#52c41a' : '#ff4d4f',
-							strokeWidth: 2,
-						},
-						markerEnd: {
-							type: MarkerType.ArrowClosed,
-							color: condition === 'yes' ? '#52c41a' : '#ff4d4f',
-						},
-					});
-				} else if (stepIndex > 0) {
-					// Connect to previous sibling
-					const prevStep = currentLevelSteps[stepIndex - 1];
-
-					// Create connection - if previous step is a condition, use the "continue" handle
-					const sourceHandle =
-						prevStep.type === 'condition' ? 'continue' : undefined;
-
-					initialEdges.push({
-						id: `${prevStep.id}-to-${step.id}`,
-						source: prevStep.id.toString(),
-						target: step.id.toString(),
-						sourceHandle,
-						type: 'addStepEdge',
-						data: {
-							sourceStep: prevStep,
-							targetStep: step,
-						},
-					});
-				}
-
-				// Handle condition step children recursively
-				if (step.type === 'condition') {
-					// Process yes children
-					const yesResult = processStepHierarchy(
-						stepList,
-						step.id,
-						'yes',
-						level + 1,
-						0
-					);
-
-					// Process no children - position them below yes children
-					const noStartIndex = yesResult.lastIndex + 1;
-					const noResult = processStepHierarchy(
-						stepList,
-						step.id,
-						'no',
-						level + 1,
-						noStartIndex
-					);
-
-					// Add add-step nodes for condition branches if they don't end with end_automation
-					const yesChildren = stepList
-						.filter(
-							(s) =>
-								s.parent_id === step.id && s.condition === 'yes'
-						)
-						.sort((a, b) => a.order - b.order);
-					const noChildren = stepList
-						.filter(
-							(s) =>
-								s.parent_id === step.id && s.condition === 'no'
-						)
-						.sort((a, b) => a.order - b.order);
-
-					// Add step node for yes branch if no children or last child is not end_automation
-					if (
-						yesChildren.length === 0 ||
-						yesChildren[yesChildren.length - 1].type !==
-							'end_automation'
-					) {
-						const yesAddId = `add-step-${step.id}-yes`;
-						const yesAddPosition =
-							savedPositions[yesAddId] ||
-							findConditionBranchPosition(
-								yesChildren,
-								step,
-								'yes',
-								level + 1
-							);
-
-						initialNodes.push({
-							id: yesAddId,
-							type: 'add_step',
-							position: yesAddPosition,
-							data: {
-								parentId: step.id,
-								condition: 'yes',
-								prevStep:
-									yesChildren.length > 0
-										? yesChildren[yesChildren.length - 1]
-										: null,
-							},
-						});
-
-						// Connect to last yes child or condition node
-						const sourceId =
-							yesChildren.length > 0
-								? yesChildren[
-										yesChildren.length - 1
-									].id.toString()
-								: step.id.toString();
-						const sourceHandle =
-							yesChildren.length === 0 ? 'yes' : undefined;
-						const label =
-							yesChildren.length === 0
-								? __('Yes', 'quillcrm')
-								: undefined;
-
-						initialEdges.push({
-							id: `${sourceId}-yes-to-add-${step.id}-yes`,
-							source: sourceId,
-							target: `add-step-${step.id}-yes`,
-							sourceHandle,
-							type: 'addStepEdge',
-							label,
-							style:
-								yesChildren.length === 0
-									? {
-											stroke: '#52c41a',
-											strokeWidth: 2,
-										}
-									: undefined,
-							markerEnd:
-								yesChildren.length === 0
-									? {
-											type: MarkerType.ArrowClosed,
-											color: '#52c41a',
-										}
-									: undefined,
-							data: {
-								sourceStep: step,
-								targetStep: undefined, // adding to yes branch
-								condition: 'yes',
-							},
-						});
-					}
-
-					// Add step node for no branch if no children or last child is not end_automation
-					if (
-						noChildren.length === 0 ||
-						noChildren[noChildren.length - 1].type !==
-							'end_automation'
-					) {
-						const noAddId = `add-step-${step.id}-no`;
-						const noAddPosition =
-							savedPositions[noAddId] ||
-							findConditionBranchPosition(
-								noChildren,
-								step,
-								'no',
-								level + 1
-							);
-
-						initialNodes.push({
-							id: noAddId,
-							type: 'add_step',
-							position: noAddPosition,
-							data: {
-								parentId: step.id,
-								condition: 'no',
-								prevStep:
-									noChildren.length > 0
-										? noChildren[noChildren.length - 1]
-										: null,
-							},
-						});
-
-						// Connect to last no child or condition node
-						const sourceId =
-							noChildren.length > 0
-								? noChildren[
-										noChildren.length - 1
-									].id.toString()
-								: step.id.toString();
-						const sourceHandle =
-							noChildren.length === 0 ? 'no' : undefined;
-						const label =
-							noChildren.length === 0
-								? __('No', 'quillcrm')
-								: undefined;
-
-						initialEdges.push({
-							id: `${sourceId}-no-to-add-${step.id}-no`,
-							source: sourceId,
-							target: `add-step-${step.id}-no`,
-							sourceHandle,
-							type: 'addStepEdge',
-							label,
-							style:
-								noChildren.length === 0
-									? {
-											stroke: '#ff4d4f',
-											strokeWidth: 2,
-										}
-									: undefined,
-							markerEnd:
-								noChildren.length === 0
-									? {
-											type: MarkerType.ArrowClosed,
-											color: '#ff4d4f',
-										}
-									: undefined,
-							data: {
-								sourceStep: step,
-								targetStep: undefined, // adding to no branch
-								condition: 'no',
-							},
-						});
-					}
-
-					// Update current index to continue after nested structure
-					currentIndex =
-						Math.max(yesResult.lastIndex, noResult.lastIndex) + 1;
-				} else {
-					currentIndex++;
-				}
-			});
-
-			return {
-				lastIndex: currentIndex,
-				lastStepId:
-					currentLevelSteps.length > 0
-						? currentLevelSteps[
-								currentLevelSteps.length - 1
-							].id.toString()
-						: undefined,
-			};
-		};
+		// Calculate all positions first for the root steps
+		calculatePositions(
+			{
+				stepList: steps,
+				parentId: null,
+				condition: null,
+				level: 0,
+				startX,
+				startY,
+			},
+			positionMap
+		);
 
 		// Process the entire step hierarchy starting from root
-		const result = processStepHierarchy(steps);
+		const result = processStepHierarchy(
+			steps,
+			initialNodes,
+			initialEdges,
+			automation!,
+			onStepClick,
+			onDeleteStep,
+			getNodePositionLocal as (
+				nodeId: string,
+				fallbackX?: number,
+				fallbackY?: number,
+				step?: AutomationStep,
+				stepIndex?: number
+			) => { x: number; y: number },
+			startX,
+			startY,
+			nodeWidth,
+			nodeYesNoWidth,
+			addStepWidth,
+			savedPositions,
+			null,
+			null,
+			0,
+			0
+		);
+
+		// Post-process to ensure all child condition merge nodes connect to their parent merge nodes
+		connectChildMergesToParentMerges(steps, initialNodes, initialEdges);
+
+		// Connect child merge nodes to subsequent steps in the same branch
+		connectChildMergesToSubsequentSteps(steps, initialNodes, initialEdges);
+
+		// Connect the last step in each branch to the parent merge node
+		connectLastStepsToParentMerge(steps, initialNodes, initialEdges);
+
+		// Connect merge nodes to subsequent steps after all merge hierarchies are established
+		connectMergesToSubsequentSteps(steps, initialNodes, initialEdges);
+
+		// Final pass: Connect the appropriate merge nodes to subsequent root-level steps
+		connectFinalMergeToSubsequentSteps(steps, initialNodes, initialEdges);
+
+		// Remove duplicate edges
+		const uniqueEdges = removeDuplicateEdges(initialEdges);
+		initialEdges.length = 0;
+		initialEdges.push(...uniqueEdges);
 
 		// Add final add-step node for root level if needed
-		const rootSteps = steps
-			.filter((step) => !step.parent_id)
-			.sort((a, b) => a.order - b.order);
+		addFinalAddStep(
+			steps,
+			initialNodes,
+			initialEdges,
+			startX,
+			startY,
+			incrementY,
+			nodeWidth,
+			addStepWidth,
+			savedPositions,
+			getNodePositionLocal,
+			result
+		);
 
-		if (
-			rootSteps.length === 0 ||
-			rootSteps[rootSteps.length - 1].type !== 'end_automation'
-		) {
-			// Position the final add-step based on the last root step, not the bottommost node
-			let finalAddPosition;
-			if (rootSteps.length === 0) {
-				// No root steps, position below trigger
-				const triggerPos = savedPositions['trigger'] || {
-					x: 250,
-					y: 50,
-				};
-				finalAddPosition = {
-					x: triggerPos.x,
-					y: triggerPos.y + 180,
-				};
-			} else {
-				// Position based on the last root step in the main flow
-				const lastRootStep = rootSteps[rootSteps.length - 1];
-				const lastRootStepPos =
-					savedPositions[lastRootStep.id.toString()] ||
-					calculatePosition(
-						lastRootStep.id.toString(),
-						rootSteps.length - 1,
-						0
-					);
+		setNodes(initialNodes);
+		setEdges(initialEdges);
 
-				finalAddPosition = {
-					x: lastRootStepPos.x,
-					y: lastRootStepPos.y + 260,
-				};
-			}
+		// saveNodePositions(initialNodes);
+	}, [automation?.id, steps, onStepClick, onDeleteStep]);
 
-			// Check for saved position for final add-step node
-			const finalAddId = 'add-step-final';
-			const finalSavedPosition = savedPositions[finalAddId];
+	// ========== POSITION MANAGEMENT ==========
 
-			initialNodes.push({
-				id: finalAddId,
-				type: 'add_step',
-				position: finalSavedPosition || finalAddPosition,
-				data: {
-					parentId: null,
-					condition: null,
-					prevStep:
-						rootSteps.length > 0
-							? rootSteps[rootSteps.length - 1]
-							: null,
-				},
-			});
+	// Save node positions when they change
+	const saveNodePositions = async (nodes: Node[]) => {
+		if (!automation) return;
 
-			// Connect to last root step or trigger
-			const sourceId = result.lastStepId || 'trigger';
-			const lastRootStep =
-				rootSteps.length > 0
-					? rootSteps[rootSteps.length - 1]
-					: undefined;
+		const positions: Record<string, { x: number; y: number }> = {};
+		nodes.forEach((node) => {
+			positions[node.id] = node.position;
+		});
 
-			// If last step is a condition, use the "continue" handle
-			const sourceHandle =
-				lastRootStep?.type === 'condition' ? 'continue' : undefined;
+		console.log('Positions:', positions);
+		console.log('Nodes:', nodes);
+		console.log('Positions Length:', Object.keys(positions).length);
+		console.log('Nodes Length:', nodes.length);
 
-			initialEdges.push({
-				id: `${sourceId}-to-add-final`,
-				source: sourceId,
-				target: 'add-step-final',
-				sourceHandle,
-				type: 'addStepEdge',
-				data: {
-					sourceStep: lastRootStep,
-					targetStep: undefined, // adding at end
-				},
-			});
+		// Check if positions have actually changed to avoid unnecessary saves
+		const currentPositions = automation.settings?.reactflow_positions || {};
+
+		// Use 'some()' instead of 'every()' to detect if ANY position has changed
+		const hasChanges = Object.keys(positions).some((nodeId) => {
+			const current = currentPositions[nodeId];
+			const new_ = positions[nodeId];
+			return (
+				!current ||
+				Math.abs(current.x - new_.x) >
+					LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
+				Math.abs(current.y - new_.y) >
+					LAYOUT_CONSTANTS.POSITION_THRESHOLD
+			);
+		});
+
+		if (!hasChanges) {
+			console.log('No position changes detected, skipping save');
+			return;
 		}
 
-		return { nodes: initialNodes, edges: initialEdges };
-	}, [
-		automation?.id,
-		automation?.settings?.reactflow_positions,
-		steps,
-		onStepClick,
-	]);
+		try {
+			// Update automation settings with new positions
+			const updatedAutomation = {
+				...automation,
+				settings: {
+					...automation.settings,
+					reactflow_positions: positions,
+				},
+			};
 
-	// Set up ReactFlow state - initialize with computed values
-	const [nodesState, setNodes, onNodesChange] = useNodesState(nodes);
-	const [edgesState, setEdges, onEdgesChange] = useEdgesState(edges);
+			// Don't await the API call to avoid blocking the UI
+			apiFetch({
+				path: `/qc/v1/automations/${automation.id}`,
+				method: 'POST',
+				data: updatedAutomation,
+			}).catch((error) => {
+				console.error('Failed to save node positions:', error);
+			});
 
-	// Sync ReactFlow state with computed values when they change
-	useEffect(() => {
-		// Immediately update nodes when the computed nodes change
-		setNodes(nodes);
-
-		// Mark initial load as complete after first render
-		if (isInitialLoadRef.current) {
-			setTimeout(() => {
-				isInitialLoadRef.current = false;
-			}, 500); // Reduced initial load delay
+			// Update context immediately for responsive feel
+			updateAutomation(updatedAutomation);
+		} catch (error) {
+			console.error('Failed to save node positions:', error);
 		}
-	}, [nodes, setNodes]);
+	};
 
-	useEffect(() => {
-		setEdges(edges);
-	}, [edges, setEdges]);
+	// ========== EVENT HANDLERS ==========
 
 	// Handle node clicks
 	const onNodeClick: NodeMouseHandler = useCallback(
-		(event, node) => {
+		(_event, node) => {
 			if (node.id === 'trigger' && onTriggerClick) {
 				onTriggerClick();
 			} else if (
@@ -633,132 +342,15 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		[onStepClick, onTriggerClick, steps]
 	);
 
-	// Handle focus on specific node from sidebar
-	const handleFocusNode = useCallback(
-		(nodeId: string) => {
-			const node = getNode(nodeId);
-			if (node) {
-				fitView({
-					nodes: [node],
-					duration: 800,
-					padding: 0.3,
-				});
-			}
-		},
-		[getNode, fitView]
-	);
-
-	// Save node positions when they change
-	const saveNodePositions = useCallback(
-		async (nodes: Node[]) => {
-			if (!automation) return;
-
-			const positions: Record<string, { x: number; y: number }> = {};
-			nodes.forEach((node) => {
-				positions[node.id] = node.position;
-			});
-
-			// Check if positions have actually changed to avoid unnecessary saves
-			const currentPositions =
-				automation.settings?.reactflow_positions || {};
-			const hasChanges = Object.keys(positions).some((nodeId) => {
-				const current = currentPositions[nodeId];
-				const new_ = positions[nodeId];
-				return (
-					!current ||
-					Math.abs(current.x - new_.x) > 2 || // Slightly increased threshold to reduce API calls
-					Math.abs(current.y - new_.y) > 2
-				);
-			});
-
-			if (!hasChanges) return;
-
-			try {
-				// Update automation settings with new positions
-				const updatedAutomation = {
-					...automation,
-					settings: {
-						...automation.settings,
-						reactflow_positions: positions,
-					},
-				};
-
-				// Don't await the API call to avoid blocking the UI
-				apiFetch({
-					path: `/qc/v1/automations/${automation.id}`,
-					method: 'POST',
-					data: updatedAutomation,
-				}).catch((error) => {
-					console.error('Failed to save node positions:', error);
-				});
-
-				// Update context immediately for responsive feel
-				updateAutomation(updatedAutomation);
-			} catch (error) {
-				console.error('Failed to save node positions:', error);
-			}
-		},
-		[automation, updateAutomation]
-	);
-
-	// Debounced position saving to avoid too many API calls for drag operations
-	const debouncedSavePositions = useCallback(
-		debounce((nodes: Node[]) => {
-			saveNodePositions(nodes);
-		}, 300), // Reduced debounce time for more responsive saving
-		[saveNodePositions]
-	);
-
-	// Handle node changes (including position updates)
+	// Handle node changes
 	const handleNodesChange = useCallback(
 		(changes: any[]) => {
-			// Apply changes immediately for responsive UI
 			onNodesChange(changes);
-
-			// Check for drag end to save positions
-			const hasDragEnd = changes.some(
-				(change) =>
-					change.type === 'position' && change.dragging === false
-			);
-
-			// Track dragging state more precisely
-			const isDragStart = changes.some(
-				(change) =>
-					change.type === 'position' && change.dragging === true
-			);
-
-			if (isDragStart) {
-				isDraggingRef.current = true;
-			}
-
-			if (hasDragEnd) {
-				isDraggingRef.current = false;
-				// Save positions immediately when drag ends (not during initial load)
-				if (!isInitialLoadRef.current) {
-					// Get current nodes state for saving
-					setTimeout(() => {
-						setNodes((currentNodes) => {
-							debouncedSavePositions(currentNodes);
-							return currentNodes;
-						});
-					}, 0);
-				}
-			}
 		},
-		[onNodesChange, debouncedSavePositions, setNodes]
+		[onNodesChange]
 	);
 
-	// Save positions when nodes structure changes (new steps added/removed) with debounce
-	useEffect(() => {
-		if (nodes.length > 0 && automation && !isInitialLoadRef.current) {
-			// Use debounced save for structure changes too to avoid performance issues
-			const timeoutId = setTimeout(() => {
-				saveNodePositions(nodes);
-			}, 150); // Reduced delay for structure changes
-
-			return () => clearTimeout(timeoutId);
-		}
-	}, [nodes.length, automation]); // Remove saveNodePositions from deps to prevent unnecessary re-renders
+	// ========== RENDER LOGIC ==========
 
 	if (isLoading) {
 		return (
@@ -768,22 +360,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		);
 	}
 
-	// Debug logging
-	console.log('ReactFlow nodes:', nodesState.length, nodesState);
-	console.log('ReactFlow edges:', edgesState.length, edgesState);
-
 	return (
 		<div className="qcrm-reactflow-workflow">
 			<div className="qcrm-reactflow-workflow__layout">
-				<div className="qcrm-reactflow-workflow__sidebar">
-					<NodeSidebar
-						nodes={nodesState}
-						steps={steps}
-						onNodeClick={handleFocusNode}
-						onStepClick={onStepClick}
-						onTriggerClick={onTriggerClick}
-					/>
-				</div>
 				<div className="qcrm-reactflow-workflow__canvas">
 					<ReactFlow
 						nodes={nodesState}
@@ -791,21 +370,33 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						onNodesChange={handleNodesChange}
 						onEdgesChange={onEdgesChange}
 						onNodeClick={onNodeClick}
-						nodeTypes={nodeTypes}
-						edgeTypes={edgeTypes}
+						nodeTypes={NODE_TYPES}
+						edgeTypes={EDGE_TYPES}
 						fitView
 						fitViewOptions={{ padding: 0.2 }}
-						nodesDraggable={true}
 						nodesConnectable={false}
 						elementsSelectable={true}
+						nodesDraggable={false}
 						selectNodesOnDrag={false}
 						panOnDrag={true}
 						zoomOnScroll={true}
 						zoomOnPinch={true}
 						deleteKeyCode={null}
+						defaultEdgeOptions={{
+							animated: false,
+							type: 'default',
+							style: EDGE_STYLES.DEFAULT,
+						}}
+						elevateEdgesOnSelect={true}
+						elevateNodesOnSelect={false}
+						snapToGrid={false}
+						snapGrid={[15, 15]}
+						edgesFocusable={false}
+						edgesReconnectable={false}
 					>
 						<Background />
 						<Controls />
+
 						{/* Only show MiniMap when there are nodes */}
 						{nodesState.length > 0 && (
 							<MiniMap
@@ -831,8 +422,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 								nodeStrokeColor="#666"
 								maskColor="rgba(240, 240, 240, 0.6)"
 								style={{
-									height: 120,
-									width: 200,
+									height: LAYOUT_CONSTANTS.MINIMAP_HEIGHT,
+									width: LAYOUT_CONSTANTS.MINIMAP_WIDTH,
 									border: '1px solid #e8e8e8',
 									borderRadius: '4px',
 								}}

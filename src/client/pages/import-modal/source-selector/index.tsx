@@ -35,6 +35,12 @@ import fluentcrmIcon from '../../../../../assets/images/fluent-crm/fluent-icon.p
 import mailerliteIcon from '../../../../../assets/images/mailer-lite/mailer-icon.png';
 //@ts-ignore
 import activecampaignIcon from '../../../../../assets/images/active-campaign/active-icon.png';
+//@ts-ignore
+import hubspotIcon from '../../../../../assets/images/hubspot/hubspot-icon.png';
+//@ts-ignore
+import pipedriveIcon from '../../../../../assets/images/pipedrive/pipedrive-icon.png';
+//@ts-ignore
+import gohighlevelIcon from '../../../../../assets/images/gohighlevel/gohighlevel-icon.png';
 
 const SourceSelector: React.FC = () => {
 	const { state, dispatch } = useImportContext();
@@ -82,6 +88,23 @@ const SourceSelector: React.FC = () => {
 					className="w-10 h-10"
 				/>
 			),
+			hubspot: (
+				<img src={hubspotIcon} alt="HubSpot" className="w-10 h-10" />
+			),
+			pipedrive: (
+				<img
+					src={pipedriveIcon}
+					alt="Pipedrive"
+					className="w-10 h-10"
+				/>
+			),
+			gohighlevel: (
+				<img
+					src={gohighlevelIcon}
+					alt="GoHighLevel"
+					className="w-10 h-10"
+				/>
+			),
 		};
 		return (
 			iconMap[sourceKey] || (
@@ -95,7 +118,13 @@ const SourceSelector: React.FC = () => {
 		value: slug,
 		disabled: !importer.is_active,
 		icon: getSourceIcon(slug),
-		requiresCredentials: ['mailerlite', 'activecampaign'].includes(slug),
+		requiresCredentials: [
+			'mailerlite',
+			'activecampaign',
+			'hubspot',
+			'pipedrive',
+			'gohighlevel',
+		].includes(slug),
 	}));
 
 	const handleSourceChange = (newSource: string) => {

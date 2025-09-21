@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Custom_Fields_Group_Model
  * This class is responsible for handling the custom fields group model
@@ -18,6 +19,7 @@ use QuillCRM\Models\Custom_Field_Model;
  * Custom_Fields_Group_Model class
  */
 class Custom_Fields_Group_Model extends Model {
+
 
 	/**
 	 * Table name
@@ -47,6 +49,7 @@ class Custom_Fields_Group_Model extends Model {
 	protected $fillable = array(
 		'name',
 		'slug',
+		'scope',
 		'created_at',
 		'updated_at',
 	);
@@ -66,7 +69,8 @@ class Custom_Fields_Group_Model extends Model {
 	 * @var array
 	 */
 	protected $rules = array(
-		'name' => 'required',
+		'name'  => 'required',
+		'scope' => 'required',
 	);
 
 	/**
@@ -75,7 +79,8 @@ class Custom_Fields_Group_Model extends Model {
 	 * @var array
 	 */
 	protected $messages = array(
-		'name.required' => 'Group name is required',
+		'name.required'  => 'Group name is required',
+		'scope.required' => 'Group scope is required',
 	);
 
 	/**
@@ -95,11 +100,10 @@ class Custom_Fields_Group_Model extends Model {
 	 * @since 1.0.0
 	 */
 	public static function boot() {
-
-		parent::boot();
+		 parent::boot();
 
 		static::creating(
-			function( $group ) {
+			function ( $group ) {
 				$group->slug = Str::slug( $group->name );
 			}
 		);

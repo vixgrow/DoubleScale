@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Delay Action
  *
@@ -20,6 +21,8 @@ use QuillCRM\QuillCRM;
  * Delay Action
  */
 class Delay extends Action {
+
+
 
 	/**
 	 * Action Name
@@ -83,7 +86,7 @@ class Delay extends Action {
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		// Schedule the next step after 2 minutes
-		$next_step = $automation->get_next_step( $step->order );
+		$next_step = $automation->get_next_step( $step );
 		$time      = null;
 		$delay     = $step->get_attribute( 'delay' );
 		$unit      = $step->get_attribute( 'unit' );
@@ -100,7 +103,7 @@ class Delay extends Action {
 				break;
 		}
 
-		QuillCRM::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation, $next_step->id, $automation_contact->id );
+		QuillCRM::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation->id, $next_step->id, $automation_contact->id );
 
 		return true;
 	}
@@ -151,7 +154,6 @@ class Delay extends Action {
 			),
 		);
 	}
-
 }
 
 Delay::instance();

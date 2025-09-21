@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Custom_Fields_Table
  * This class is responsible for handling the Custom_Fields table
@@ -14,6 +15,7 @@ namespace QuillCRM\Database\Migrations;
  * Custom_Fields Table class
  */
 class Custom_Fields_Table extends Migration {
+
 
 	/**
 	 * Table name
@@ -38,6 +40,7 @@ class Custom_Fields_Table extends Migration {
 			type VARCHAR(255) NOT NULL,
 			attributes TEXT,
 			group_id BIGINT(20) NOT NULL,
+			scope VARCHAR(255) NOT NULL,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),

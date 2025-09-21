@@ -29,7 +29,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@quillcrm/components/ui/dropdown-menu';
-import { deleteText } from '@udecode/plate-common';
 
 export const selectionColumn: ColumnDef<Form> = {
 	id: 'select',
@@ -53,7 +52,7 @@ export const selectionColumn: ColumnDef<Form> = {
 	enableHiding: false,
 };
 
-export function getColumns({ formTypes, navigate, duplicate, onDelete, onToggleStatus }) {
+export function getColumns({ formTypes, navigate, onDelete, onToggleStatus }) {
 	const columns: ColumnDef<Form>[] = [
 		selectionColumn,
 		{
@@ -117,10 +116,11 @@ export function getColumns({ formTypes, navigate, duplicate, onDelete, onToggleS
 			cell: ({ row }) => (
 				<div
 					className={`capitalize rounded-xl py-1 px-3 text-xs w-fit
-				${row.original.status === 'active'
-							? 'bg-[#EFFFF5] text-[#16A34A]'
-							: 'bg-[#EF44444A] text-destructive'
-						}
+				${
+					row.original.status === 'active'
+						? 'bg-[#EFFFF5] text-[#16A34A]'
+						: 'bg-[#EF44444A] text-destructive'
+				}
 			`}
 				>
 					{row.original.status}
@@ -165,7 +165,7 @@ export function getColumns({ formTypes, navigate, duplicate, onDelete, onToggleS
 			accessorKey: 'actions',
 			header: () => __('Actions', 'quillcrm'),
 			cell: ({ row }) => {
-				const campaign = row.original;
+				const form = row.original;
 				return (
 					<div className="text-start">
 						<DropdownMenu>
@@ -176,36 +176,30 @@ export function getColumns({ formTypes, navigate, duplicate, onDelete, onToggleS
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
 								<DropdownMenuItem
-									onClick={() => duplicate(campaign.id)}
-								>
-									<SettingsOutlinedIcon
-										width={16}
-										height={16}
-									/>
-									{__('Setup', 'quillcrm')}
-								</DropdownMenuItem>
-								<DropdownMenuItem
-									onClick={() => onToggleStatus(campaign.id, campaign.status)}
+									onClick={() =>
+										onToggleStatus(form.id, form.status)
+									}
 								>
 									<DisactivateIcon />
-									{campaign.status === 'active' ? __('Deactivate', 'quillcrm') : __('Activate', 'quillcrm')}
+									{form.status === 'active'
+										? __('Deactivate', 'quillcrm')
+										: __('Activate', 'quillcrm')}
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									onClick={() => {
-										navigate(
-											getToLink(
-												row.original.status === 'active'
-													? `forms/${row.original.id}/overview`
-													: `forms/${row.original.id}`
-											)
-										);
+										// Navigate based on form status
+										const targetUrl =
+											form.status === 'active'
+												? `forms/${form.id}/overview`
+												: `forms/${form.id}`;
+										navigate(getToLink(targetUrl));
 									}}
 								>
 									<ViewOutlinedIcon />
 									{__('View', 'quillcrm')}
 								</DropdownMenuItem>
 								<DropdownMenuItem
-									onClick={() => onDelete(row.original.id)}
+									onClick={() => onDelete(form.id)}
 									className="text-red-500 hover:text-red-500 focus:text-red-500"
 								>
 									<DeleteIcon />

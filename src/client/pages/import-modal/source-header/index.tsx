@@ -27,6 +27,12 @@ import fluentcrmLogo from '../../../../../assets/images/fluent-crm/fluentcrm.png
 import mailerliteLogo from '../../../../../assets/images/mailer-lite/mailer.png';
 //@ts-ignore
 import activecampaignLogo from '../../../../../assets/images/active-campaign/activecampaign.png';
+//@ts-ignore
+import hubspotLogo from '../../../../../assets/images/hubspot/hubspot.png';
+//@ts-ignore
+import pipedriveLogo from '../../../../../assets/images/pipedrive/pipedrive.png';
+//@ts-ignore
+import gohighlevelLogo from '../../../../../assets/images/gohighlevel/gohighlevel.png';
 
 const SourceHeader: React.FC = () => {
 	const { state } = useImportContext();
@@ -68,6 +74,21 @@ const SourceHeader: React.FC = () => {
 			src: activecampaignLogo,
 			alt: 'ActiveCampaign',
 			className: 'h-8 w-[195px]',
+		},
+		hubspot: {
+			src: hubspotLogo,
+			alt: 'HubSpot',
+			className: 'h-8 w-auto',
+		},
+		pipedrive: {
+			src: pipedriveLogo,
+			alt: 'Pipedrive',
+			className: 'h-8 w-auto',
+		},
+		gohighlevel: {
+			src: gohighlevelLogo,
+			alt: 'GoHighLevel',
+			className: 'h-8 w-auto',
 		},
 	};
 

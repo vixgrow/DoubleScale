@@ -31,3 +31,5 @@ export { default as FeedBuilder } from './FeedBuilder';
 export { default as PaginatedSelect } from './paginated-select';
 export { default as LoadingSpinner } from './loading-spin';
 export { default as ListTagFilter } from './list-tag-filter';
+export { default as DynamicKeyValueInput } from './dynamic-keyvalue-input';
+export { default as TestButton } from './test-button';

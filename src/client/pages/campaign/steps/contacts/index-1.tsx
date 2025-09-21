@@ -19,15 +19,7 @@ import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useCampaignContext } from '../../state/context';
 import type { Filter as FilterType, ContactsResponse } from '@quillcrm/client';
-import {
-	Filters,
-	PanelLayout,
-	PanelSettings,
-	TeamIcon,
-} from '@quillcrm/components';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { ListTagFilter } from '@quillcrm/components';
+import { Filters } from '@quillcrm/components';
 
 const Contacts: React.FC = () => {
 	const { campaign, isLoading, saveCampaign, isSaving, updateSettings } =
@@ -40,7 +32,6 @@ const Contacts: React.FC = () => {
 
 	const [loading, setLoading] = useState(true);
 	const [total, setTotal] = useState(0);
-	const [filterBy, setFilterBy] = useState('list-tags');
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchContacts = async () => {
@@ -68,15 +59,8 @@ const Contacts: React.FC = () => {
 		}
 	};
 
-	const fetchList = async () => {
-		const response = await apiFetch({
-			path: '/qc/v1/lists',
-		});
-		console.log(response);
-	};
 	useEffect(() => {
 		fetchContacts();
-		fetchList();
 	}, []);
 
 	const save = async () => {
@@ -88,75 +72,10 @@ const Contacts: React.FC = () => {
 	};
 
 	return (
-		<PanelLayout
-			items={[]}
-			totalSteps={1}
-			currentStep={0}
-			onNext={save}
-			onBack={() => navigate(getToLink(`campaigns`))}
-		>
+		<Card loading={isLoading}>
 			{campaign && (
 				<>
-					<div className="flex gap-6">
-						<PanelSettings
-							title={__('Recipients', 'quillcrm')}
-							description={__(
-								'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
-								'quillcrm'
-							)}
-							icon={<TeamIcon />}
-							className="w-1/2"
-						>
-							<div className="space-y-6">
-								<div>
-									<p className="text-base font-bold mb-2">
-										{__('Filter By', 'quillcrm')}
-									</p>
-									<RadioGroup
-										value={filterBy}
-										onValueChange={setFilterBy}
-										className="flex gap-4"
-									>
-										<div className="flex items-center space-x-4 w-1/2 border border-gray-600 rounded-lg py-2 px-3 cursor-pointer">
-											<RadioGroupItem
-												value="list-tags"
-												id="list-tags"
-											/>
-											<Label htmlFor="list-tags">
-												{__(
-													'List and Tags',
-													'quillcrm'
-												)}
-											</Label>
-										</div>
-										<div className="flex items-center space-x-4 w-1/2">
-											<RadioGroupItem
-												value="advanced"
-												id="advanced"
-											/>
-											<Label htmlFor="advanced">
-												{__(
-													'Advanced Filter',
-													'quillcrm'
-												)}
-											</Label>
-										</div>
-									</RadioGroup>
-								</div>
-								{filterBy === 'list-tags' && <ListTagFilter />}
-								{filterBy === 'advanced' && (
-									<Filters
-										filters={filters}
-										onChange={setFilters}
-										onApply={fetchContacts}
-										isApplying={loading}
-									/>
-								)}
-							</div>
-						</PanelSettings>
-					</div>
-
-					{/* <Flex
+					<Flex
 						justify="space-between"
 						align="center"
 						style={{ marginBottom: 20 }}
@@ -194,7 +113,12 @@ const Contacts: React.FC = () => {
 							</div>
 						</div>
 					</Flex>
-				
+					<Filters
+						filters={filters}
+						onChange={setFilters}
+						onApply={fetchContacts}
+						isApplying={loading}
+					/>
 					<div className="qcrm-actions">
 						<Button
 							onClick={() =>
@@ -214,10 +138,10 @@ const Contacts: React.FC = () => {
 						>
 							{__('Next', 'quillcrm')}
 						</Button>
-					</div> */}
+					</div>
 				</>
 			)}
-		</PanelLayout>
+		</Card>
 	);
 };
 

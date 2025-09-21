@@ -100,3 +100,4 @@ export { default as SnapchatIcon } from './snapchat';
 export { default as DiscordIcon } from './discord';
 export { default as SoundCloudIcon } from './soundcloud';
 export { default as MediumIcon } from './medium';
+export { default as ProductBlockIcon } from './product-block';

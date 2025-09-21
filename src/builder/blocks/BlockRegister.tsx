@@ -11,6 +11,7 @@ import BannerBlock from './basic/BannerBlock';
 import MenuBlock from './basic/MenuBlock';
 import HtmlBlock from './basic/HtmlBlock';
 import PreheaderBlock from './basic/PreheaderBlock';
+import ProductBlock from './basic/ProductBlock';
 
 export const blocksRegistry = {
 	image: ImageBlock,
@@ -26,4 +27,5 @@ export const blocksRegistry = {
 	banner: BannerBlock,
 	menu: MenuBlock,
 	preheader: PreheaderBlock,
+	product: ProductBlock,
 };

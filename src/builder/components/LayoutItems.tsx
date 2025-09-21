@@ -15,7 +15,6 @@ import HeroImageLibrary from '../blocks/libraries/HeroImage';
 import EmailBodyLibrary from '../blocks/libraries/EmailBody';
 import FooterLibrary from '../blocks/libraries/Footer';
 import ImageGalleryLibrary from '../blocks/libraries/ImageGallery';
-import ProductListingLibrary from '../blocks/libraries/ProductListing';
 
 interface LayoutItemsProps {
 	activeSidebar?: any;
@@ -43,11 +42,6 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 			id: 'email-body',
 			title: __('Email Body', 'quillcrm'),
 			component: EmailBodyLibrary,
-		},
-		{
-			id: 'product-listing',
-			title: __('Product Listing', 'quillcrm'),
-			component: ProductListingLibrary,
 		},
 		{
 			id: 'image-gallery',

@@ -21,12 +21,25 @@ import {
 	usePredefinedPeriod,
 	getPredefinedDateRange,
 } from './hooks/usePredefinedPeriod';
+import { SOURCE_OPTIONS } from '../../config/types/config-data';
 
 // Constants
 const STATUS_OPTIONS = [
 	{ value: 'open', label: __('Open', 'quillcrm') },
 	{ value: 'won', label: __('Won', 'quillcrm') },
 	{ value: 'lost', label: __('Lost', 'quillcrm') },
+] as const;
+
+const PREDEFINED_DATE_RANGE_OPTIONS = [
+	{ value: 'today', label: __('Today', 'quillcrm') },
+	{ value: 'this_week', label: __('This Week', 'quillcrm') },
+	{ value: 'this_month', label: __('This Month', 'quillcrm') },
+	{ value: 'this_quarter', label: __('This Quarter', 'quillcrm') },
+	{ value: 'ytd', label: __('YTD', 'quillcrm') },
+	{ value: 'last_week', label: __('Last Week', 'quillcrm') },
+	{ value: 'last_month', label: __('Last Month', 'quillcrm') },
+	{ value: 'last_quarter', label: __('Last Quarter', 'quillcrm') },
+	{ value: 'custom_date_range', label: __('Custom Date Range', 'quillcrm') },
 ] as const;
 
 // PredefinedDateRangeFilter component
@@ -48,29 +61,11 @@ const PredefinedDateRangeFilter: React.FC<PredefinedDateRangeFilterProps> = ({
 				<SelectValue placeholder={__('Select Period', 'quillcrm')} />
 			</SelectTrigger>
 			<SelectContent>
-				<SelectItem value="today">{__('Today', 'quillcrm')}</SelectItem>
-				<SelectItem value="this_week">
-					{__('This Week', 'quillcrm')}
-				</SelectItem>
-				<SelectItem value="this_month">
-					{__('This Month', 'quillcrm')}
-				</SelectItem>
-				<SelectItem value="this_quarter">
-					{__('This Quarter', 'quillcrm')}
-				</SelectItem>
-				<SelectItem value="ytd">{__('YTD', 'quillcrm')}</SelectItem>
-				<SelectItem value="last_week">
-					{__('Last Week', 'quillcrm')}
-				</SelectItem>
-				<SelectItem value="last_month">
-					{__('Last Month', 'quillcrm')}
-				</SelectItem>
-				<SelectItem value="last_quarter">
-					{__('Last Quarter', 'quillcrm')}
-				</SelectItem>
-				<SelectItem value="custom_date_range">
-					{__('Custom Date Range', 'quillcrm')}
-				</SelectItem>
+				{PREDEFINED_DATE_RANGE_OPTIONS.map((option) => (
+					<SelectItem key={option.value} value={option.value}>
+						{option.label}
+					</SelectItem>
+				))}
 			</SelectContent>
 		</Select>
 	</div>
@@ -113,6 +108,32 @@ const StatusFilter: React.FC<StatusFilterProps> = ({ value, onChange }) => (
 				{STATUS_OPTIONS.map((status) => (
 					<SelectItem key={status.value} value={status.value}>
 						{status.label}
+					</SelectItem>
+				))}
+			</SelectContent>
+		</Select>
+	</div>
+);
+
+// SourceFilter component
+interface SourceFilterProps {
+	value: string | undefined;
+	onChange: (value: string) => void;
+}
+
+const SourceFilter: React.FC<SourceFilterProps> = ({ value, onChange }) => (
+	<div>
+		<label className="block text-sm font-medium mb-1">
+			{__('Deal Source', 'quillcrm')}
+		</label>
+		<Select value={value} onValueChange={onChange}>
+			<SelectTrigger className="w-40">
+				<SelectValue placeholder={__('Select Source', 'quillcrm')} />
+			</SelectTrigger>
+			<SelectContent>
+				{SOURCE_OPTIONS.map((source) => (
+					<SelectItem key={source.value} value={source.value}>
+						{source.label}
 					</SelectItem>
 				))}
 			</SelectContent>
@@ -163,6 +184,7 @@ interface ReportFiltersProps {
 	showPipeline?: boolean;
 	showStatus?: boolean;
 	showContact?: boolean;
+	showSource?: boolean;
 
 	// Optional styling
 	style?: React.CSSProperties;
@@ -186,6 +208,7 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 	showPipeline = true,
 	showStatus = true,
 	showContact = true,
+	showSource = true,
 	style,
 	className,
 }) => {
@@ -272,6 +295,16 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 			setFilters({
 				...filters,
 				contactId: value ? parseInt(value) : null,
+			});
+		},
+		[filters, setFilters]
+	);
+
+	const handleSourceChange = useCallback(
+		(value: string) => {
+			setFilters({
+				...filters,
+				source: value,
 			});
 		},
 		[filters, setFilters]
@@ -380,6 +413,14 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 									renderOptionText={(contact) =>
 										`${contact.first_name} ${contact.last_name}`
 									}
+								/>
+							)}
+
+							{/* Source Filter */}
+							{showSource && (
+								<SourceFilter
+									value={filters.source ?? undefined}
+									onChange={handleSourceChange}
 								/>
 							)}
 

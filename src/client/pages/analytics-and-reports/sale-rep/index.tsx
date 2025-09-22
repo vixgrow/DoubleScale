@@ -139,6 +139,7 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 				setShowFilters={setShowFilters}
 				clearFilters={clearFilters}
 				applyFilters={applyFilters}
+				showSource={false}
 				showOwner={false}
 				showPipeline={false}
 				showStatus={false}

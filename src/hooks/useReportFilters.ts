@@ -8,6 +8,7 @@ export interface ReportFilters {
     pipelineId: number | null;
     status: string | null;
     contactId: number | null;
+    source: string | null;
 }
 
 export interface FilterOptions {
@@ -23,6 +24,7 @@ export const useReportFilters = () => {
         pipelineId: null,
         status: null,
         contactId: null,
+        source: null,
     });
 
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -59,6 +61,10 @@ export const useReportFilters = () => {
 
         if (filters.contactId) {
             params.append('contact_id', filters.contactId.toString());
+        }
+
+        if (filters.source) {
+            params.append('source', filters.source);
         }
 
         return params.toString();
@@ -117,6 +123,7 @@ export const useReportFilters = () => {
             pipelineId: null,
             status: null,
             contactId: null,
+            source: null,
         });
     }, []);
 

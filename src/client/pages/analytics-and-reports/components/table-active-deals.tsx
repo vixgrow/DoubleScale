@@ -1,0 +1,292 @@
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+	Table,
+	TableHeader,
+	TableBody,
+	TableRow,
+	TableCell,
+	TableHead,
+} from '@/components/ui/table';
+import { useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import apiFetch from '@wordpress/api-fetch';
+import { Skeleton } from 'antd';
+
+interface Deal {
+	id: string;
+	name: string;
+	value: string;
+	stage: string;
+	stage_color: string;
+	closeDate: string;
+	timeInStage: string;
+	lastActivity: string;
+}
+
+interface PaginationInfo {
+	total: number;
+	per_page: number;
+	current_page: number;
+	total_pages: number;
+	has_next: boolean;
+	has_prev: boolean;
+}
+
+const TableActiveDeals = ({
+	ownerId,
+	filters,
+	queryParams,
+}: {
+	ownerId: number | null;
+	filters: any;
+	queryParams: string;
+}) => {
+	const [searchTerm, setSearchTerm] = useState('');
+	const [deals, setDeals] = useState<Deal[]>([]);
+	const [pagination, setPagination] = useState<PaginationInfo>({
+		total: 0,
+		per_page: 10,
+		current_page: 1,
+		total_pages: 0,
+		has_next: false,
+		has_prev: false,
+	});
+	const [isLoading, setIsLoading] = useState(false);
+
+	const fetchDeals = async (page: number = 1, search: string = '') => {
+		setIsLoading(true);
+		try {
+			const newQueryParams = new URLSearchParams({
+				page: page.toString(),
+				per_page: pagination.per_page.toString(),
+				...(search && { search }),
+				...(ownerId && { owner_id: ownerId.toString() }),
+			});
+
+			const response = (await apiFetch({
+				path: `/qc/v1/reports/sales-rep/active-deals?${newQueryParams}&${queryParams}`,
+			})) as {
+				active_deals: Deal[];
+				pagination: PaginationInfo;
+			};
+
+			setDeals(response.active_deals);
+			setPagination(response.pagination);
+		} catch (error) {
+			console.error('Error fetching deals:', error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		fetchDeals(1, searchTerm);
+	}, [searchTerm, filters]);
+
+	const handlePageChange = (newPage: number) => {
+		if (newPage >= 1 && newPage <= pagination.total_pages) {
+			fetchDeals(newPage, searchTerm);
+		}
+	};
+
+	const handlePerPageChange = (newPerPage: number) => {
+		setPagination((prev) => ({ ...prev, per_page: newPerPage }));
+		fetchDeals(1, searchTerm);
+	};
+
+	return (
+		<Card>
+			<CardHeader>
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+					<CardTitle>
+						Active Deals
+						{pagination.total > 0 && (
+							<span className="text-sm font-normal text-gray-500 ml-2">
+								({pagination.total} total)
+							</span>
+						)}
+					</CardTitle>
+					<div className="flex items-center gap-4">
+						<div className="relative">
+							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+							<input
+								type="text"
+								placeholder="Search deals..."
+								className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+								value={searchTerm}
+								onChange={(e) => setSearchTerm(e.target.value)}
+							/>
+						</div>
+						<select
+							value={pagination.per_page}
+							onChange={(e) =>
+								handlePerPageChange(Number(e.target.value))
+							}
+							className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+						>
+							<option value={5}>5 per page</option>
+							<option value={10}>10 per page</option>
+							<option value={25}>25 per page</option>
+							<option value={50}>50 per page</option>
+						</select>
+					</div>
+				</div>
+			</CardHeader>
+			<CardContent>
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>Deal Name</TableHead>
+							<TableHead>Value</TableHead>
+							<TableHead>Stage</TableHead>
+							<TableHead>Close Date</TableHead>
+							<TableHead>Time in Stage</TableHead>
+							<TableHead>Last Activity</TableHead>
+						</TableRow>
+					</TableHeader>
+					{isLoading ? (
+						<TableBody>
+							<Skeleton active paragraph={{ rows: 6 }} />
+						</TableBody>
+					) : (
+						<TableBody>
+							{deals.length === 0 ? (
+								<TableRow>
+									<TableCell
+										colSpan={6}
+										className="text-center py-8 text-gray-500"
+									>
+										{searchTerm
+											? 'No deals found matching your search.'
+											: 'No active deals found.'}
+									</TableCell>
+								</TableRow>
+							) : (
+								deals.map((deal) => (
+									<TableRow key={deal.id}>
+										<TableCell className="font-semibold">
+											{deal.name}
+										</TableCell>
+										<TableCell className="font-semibold">
+											{deal.value}
+										</TableCell>
+										<TableCell>
+											<Badge
+												style={{
+													backgroundColor:
+														deal.stage_color,
+													border: 'none',
+												}}
+											>
+												{deal.stage}
+											</Badge>
+										</TableCell>
+										<TableCell>{deal.closeDate}</TableCell>
+										<TableCell>
+											{deal.timeInStage || 'N/A'}
+										</TableCell>
+										<TableCell>
+											{deal.lastActivity}
+										</TableCell>
+									</TableRow>
+								))
+							)}
+						</TableBody>
+					)}
+				</Table>
+
+				{/* Pagination Controls */}
+				{pagination.total_pages > 1 && (
+					<div className="flex items-center justify-between mt-4 pt-4 border-t">
+						<div className="text-sm text-gray-500">
+							Showing{' '}
+							{(pagination.current_page - 1) *
+								pagination.per_page +
+								1}{' '}
+							to{' '}
+							{Math.min(
+								pagination.current_page * pagination.per_page,
+								pagination.total
+							)}{' '}
+							of {pagination.total} results
+						</div>
+
+						<div className="flex items-center gap-2">
+							<button
+								onClick={() =>
+									handlePageChange(
+										pagination.current_page - 1
+									)
+								}
+								disabled={!pagination.has_prev}
+								className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								<ChevronLeft className="w-4 h-4" />
+								Previous
+							</button>
+
+							<div className="flex items-center gap-1">
+								{Array.from(
+									{ length: pagination.total_pages },
+									(_, i) => i + 1
+								)
+									.filter((page) => {
+										const current = pagination.current_page;
+										return (
+											page === 1 ||
+											page === pagination.total_pages ||
+											(page >= current - 1 &&
+												page <= current + 1)
+										);
+									})
+									.map((page, index, array) => (
+										<div
+											key={page}
+											className="flex items-center"
+										>
+											{index > 0 &&
+												array[index - 1] !==
+													page - 1 && (
+													<span className="px-2 text-gray-400">
+														...
+													</span>
+												)}
+											<button
+												onClick={() =>
+													handlePageChange(page)
+												}
+												className={`px-3 py-2 text-sm rounded-lg ${
+													page ===
+													pagination.current_page
+														? 'bg-blue-500 text-white'
+														: 'border border-gray-200 hover:bg-gray-50'
+												}`}
+											>
+												{page}
+											</button>
+										</div>
+									))}
+							</div>
+
+							<button
+								onClick={() =>
+									handlePageChange(
+										pagination.current_page + 1
+									)
+								}
+								disabled={!pagination.has_next}
+								className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								Next
+								<ChevronRight className="w-4 h-4" />
+							</button>
+						</div>
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
+};
+
+export default TableActiveDeals;

@@ -30,6 +30,7 @@ class REST_Custom_Field_Controller extends REST_Controller {
 
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -249,7 +250,6 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 */
 	public function create_item( $request ) {
 		try {
-			xdebug_break();
 			$custom_field_data = $this->prepare_custom_field( $request );
 
 			// Ensure we have a slug in the data

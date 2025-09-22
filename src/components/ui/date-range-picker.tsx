@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 /**
  * internal dependencies
  */
@@ -33,26 +33,56 @@ export function DateRangePicker({
 	className,
 }: DateRangePickerProps) {
 	const [open, setOpen] = useState(false);
+	// Internal state to manage the selection without triggering parent re-renders
+	const [internalRange, setInternalRange] = useState<{
+		from: Date | null;
+		to: Date | null;
+	}>(value);
+
+	// Update internal state when the external value changes (e.g., when filters are cleared)
+	useEffect(() => {
+		setInternalRange(value);
+	}, [value]);
 
 	const formatDateRange = () => {
-		if (!value.from)
+		if (!internalRange.from)
 			return placeholder || __('Pick a date range', 'quillcrm');
 
-		const fromDate = value.from.toLocaleDateString();
-		const toDate = value.to ? value.to.toLocaleDateString() : '';
+		const fromDate = internalRange.from.toLocaleDateString();
+		const toDate = internalRange.to
+			? internalRange.to.toLocaleDateString()
+			: '';
 
-		if (value.to) {
+		if (internalRange.to) {
 			return `${fromDate} - ${toDate}`;
 		}
 		return fromDate;
 	};
 
 	const handleDateSelect = (range: any) => {
-		onChange(range || { from: null, to: null });
+		const newRange = range || { from: null, to: null };
+
+		// Update internal state immediately for UI feedback
+		setInternalRange(newRange);
+
+		// Only call onChange (which triggers parent re-render) when:
+		// 1. Both dates are selected (complete range)
+		// 2. Range is cleared (both null)
+		// 3. Only 'from' is selected and 'to' is explicitly null (not same as from)
+		const isCompleteRange =
+			newRange.from && newRange.to && newRange.from !== newRange.to;
+		const isCleared = !newRange.from && !newRange.to;
+
+		if (isCompleteRange || isCleared) {
+			onChange(newRange);
+			setOpen(false);
+		}
 	};
 
 	const clearDateRange = () => {
-		onChange({ from: null, to: null });
+		const clearedRange = { from: null, to: null };
+		setInternalRange(clearedRange);
+		onChange(clearedRange);
 		setOpen(false);
 	};
 
@@ -74,8 +104,8 @@ export function DateRangePicker({
 					<Calendar
 						mode="range"
 						selected={{
-							from: value.from ?? undefined,
-							to: value.to ?? undefined,
+							from: internalRange.from ?? undefined,
+							to: internalRange.to ?? undefined,
 						}}
 						onSelect={handleDateSelect}
 						numberOfMonths={1}

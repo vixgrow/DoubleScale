@@ -5,6 +5,7 @@ import {
 	CardHeader,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { __ } from '@wordpress/i18n';
 
 import CardsStatistics, {
 	CardsStatisticsProps,
@@ -32,55 +33,57 @@ const SalesRepCard = ({
 	rep: SalesRepCardProps;
 	onClick: () => void;
 }) => {
-	const getStatusColor = (ranking: string) => {
-		switch (ranking) {
-			case 'TOP 1':
-				return 'bg-green-100 text-green-800';
-			case 'ON TRACK':
-				return 'bg-yellow-100 text-yellow-800';
-			case 'AT RISK':
-				return 'bg-red-100 text-red-800';
-			default:
-				return 'bg-gray-100 text-gray-800';
-		}
-	};
+	// const getStatusColor = (ranking: string) => {
+	// 	switch (ranking) {
+	// 		case 'TOP 1':
+	// 			return 'bg-green-100 text-green-800';
+	// 		case 'ON TRACK':
+	// 			return 'bg-yellow-100 text-yellow-800';
+	// 		case 'AT RISK':
+	// 			return 'bg-red-100 text-red-800';
+	// 		default:
+	// 			return 'bg-gray-100 text-gray-800';
+	// 	}
+	// };
 
-	const getAvatarColor = (ranking: string) => {
-		switch (ranking) {
-			case 'TOP 1':
-				return 'bg-purple-500';
-			case 'ON TRACK':
-				return 'bg-blue-500';
-			case 'AT RISK':
-				return 'bg-green-500';
-			default:
-				return 'bg-gray-500';
-		}
-	};
+	// const getAvatarColor = (ranking: string) => {
+	// 	switch (ranking) {
+	// 		case 'TOP 1':
+	// 			return 'bg-purple-500';
+	// 		case 'ON TRACK':
+	// 			return 'bg-blue-500';
+	// 		case 'AT RISK':
+	// 			return 'bg-green-500';
+	// 		default:
+	// 			return 'bg-gray-500';
+	// 	}
+	// };
 
-	const getBorderColor = (ranking: string) => {
-		switch (ranking) {
-			case 'TOP 1':
-				return 'border-purple-200';
-			case 'ON TRACK':
-				return 'border-yellow-200';
-			case 'AT RISK':
-				return 'border-red-200';
-			default:
-				return 'border-gray-200';
-		}
-	};
+	// const getBorderColor = (ranking: string) => {
+	// 	switch (ranking) {
+	// 		case 'TOP 1':
+	// 			return 'border-purple-200';
+	// 		case 'ON TRACK':
+	// 			return 'border-yellow-200';
+	// 		case 'AT RISK':
+	// 			return 'border-red-200';
+	// 		default:
+	// 			return 'border-gray-200';
+	// 	}
+	// };
 
 	return (
 		<Card
-			className={`border-2 ${getBorderColor(rep.ranking)} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
+			// className={`border-2 ${getBorderColor(rep.ranking)} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
+			className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
 			onClick={onClick}
 		>
 			<CardHeader className="pb-4">
 				<div className="flex items-start justify-between gap-3">
 					<div className="flex items-center gap-3 min-w-0 flex-1">
 						<div
-							className={`w-12 h-12 rounded-full ${getAvatarColor(rep.ranking)} flex items-center justify-center text-white font-semibold flex-shrink-0`}
+							// className={`w-12 h-12 rounded-full ${getAvatarColor(rep.ranking)} flex items-center justify-center text-white font-semibold flex-shrink-0`}
+							className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0"
 						>
 							{rep.name.charAt(0).toUpperCase()}
 						</div>
@@ -93,12 +96,13 @@ const SalesRepCard = ({
 							</p>
 						</div>
 					</div>
-					<Badge
+					{/* <Badge
 						variant="outline"
-						className={`${getStatusColor(rep.ranking)} border-0 flex-shrink-0`}
+						// className={`${getStatusColor(rep.ranking)} border-0 flex-shrink-0`}
+						className="border-0 flex-shrink-0"
 					>
 						{rep.ranking}
-					</Badge>
+					</Badge> */}
 				</div>
 			</CardHeader>
 
@@ -144,7 +148,7 @@ const SalesRepCard = ({
 
 			<CardFooter className="pt-4 border-t border-gray-100 justify-center">
 				<span className="text-sm text-gray-500">
-					Last activity: {rep.lastActivity}
+					{__('Last activity:', 'quillcrm')} {rep.lastActivity}
 				</span>
 			</CardFooter>
 		</Card>

@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { __ } from '@wordpress/i18n';
 import dayjs from 'dayjs';
 import {
@@ -288,8 +288,6 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 				: { from: null, to: null },
 		[filters.dateRange]
 	);
-
-	useEffect(() => {}, [filters, applyFilters]);
 
 	return (
 		<Card style={{ marginBottom: 20, ...style }} className={className}>

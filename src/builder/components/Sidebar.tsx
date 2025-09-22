@@ -54,6 +54,7 @@ const BlockSidebar = () => {
 					<div className="overflow-y-auto p-4 flex-1">
 						<activeSidebar.component />
 					</div>
+
 				</div>
 			)}
 		</div>

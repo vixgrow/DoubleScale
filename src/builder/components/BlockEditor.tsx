@@ -14,16 +14,17 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { blocksRegistry } from '../blocks/BlockRegister';
-import { GlobalEmailSettingsIcon } from '@quillcrm/components';
+import { GlobalEmailSettingsIcon, LayoutSettingsIcon } from '@quillcrm/components';
 import GlobalEmailSettings from './GlobalEmailSettings';
 import BackgroundSettings from './BackgroudSettings';
 import ButtonSettings from './ButtonSettings';
+import LayoutSettings from '../blocks/layout/LayoutSettings';
 import { useBuilder } from '../context/BuilderContext';
 
-type ViewState = 'main' | 'background' | 'button';
+type ViewState = 'main' | 'background' | 'button' | 'layout';
 
 const BlockEditor: React.FC = () => {
-	const { updateBlock, clearSelection, deleteBlock } = useBuilder();
+	const { updateBlock, clearSelection, deleteBlock, isTemplateSection, updateSection } = useBuilder();
 	const [currentView, setCurrentView] = useState<ViewState>('main');
 
 	const selectedBlock = useSelect(
@@ -36,6 +37,11 @@ const BlockEditor: React.FC = () => {
 		[]
 	);
 
+	const selectedSectionId = useSelect(
+		(select) => select(STORE_KEY).getSelectedSectionId(),
+		[]
+	);
+
 	const handlePropsChange = (newProps: Record<string, any>) => {
 		if (selectedBlock) {
 			updateBlock(selectedBlock.id, newProps);
@@ -44,6 +50,7 @@ const BlockEditor: React.FC = () => {
 
 	// Determine what to show in the header
 	const isBlockSelected = !!selectedBlockId;
+	const isTemplateSectionSelected = !!selectedSectionId && isTemplateSection(selectedSectionId);
 	const blockDefinition = selectedBlock
 		? blocksRegistry[selectedBlock.type]
 		: null;
@@ -55,11 +62,13 @@ const BlockEditor: React.FC = () => {
 
 	return (
 		<div className="w-80 bg-background border-l border-border rounded-l-xl">
-			{/* Show background settings, button settings, or regular content */}
+			{/* Show background settings, button settings, layout settings, or regular content */}
 			{currentView === 'background' ? (
 				<BackgroundSettings onBack={handleBackFromSettings} />
 			) : currentView === 'button' ? (
 				<ButtonSettings onBack={handleBackFromSettings} />
+			) : currentView === 'layout' ? (
+				<LayoutSettings />
 			) : (
 				<>
 					<div className="flex items-center justify-between border-b-2 px-4 pt-5 pb-4">
@@ -67,6 +76,8 @@ const BlockEditor: React.FC = () => {
 							<div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-lg text-white">
 								{isBlockSelected && blockDefinition?.icon ? (
 									<blockDefinition.icon />
+								) : isTemplateSectionSelected ? (
+									<LayoutSettingsIcon />
 								) : (
 									<GlobalEmailSettingsIcon />
 								)}
@@ -74,7 +85,9 @@ const BlockEditor: React.FC = () => {
 							<h3 className="text-base font-semibold text-primary">
 								{isBlockSelected && blockDefinition?.name
 									? `${blockDefinition.name} ${__('Settings', 'quillcrm')}`
-									: __('Global Email Settings', 'quillcrm')}
+									: isTemplateSectionSelected
+										? __('Layout Settings', 'quillcrm')
+										: __('Global Email Settings', 'quillcrm')}
 							</h3>
 						</div>
 						{isBlockSelected && (
@@ -104,6 +117,23 @@ const BlockEditor: React.FC = () => {
 									)}
 								</p>
 							)
+						) : isTemplateSectionSelected ? (
+							// Show LayoutSettings for template sections
+							<LayoutSettings
+								sectionId={selectedSectionId}
+								onSettingsChange={(settings) => {
+									// Convert LayoutSettingsData to section styles
+									const sectionStyles = {
+										backgroundColor: settings.backgroundColor,
+										backgroundImage: settings.backgroundImage ? `url(${settings.backgroundImage.url})` : undefined,
+										backgroundRepeat: settings.backgroundRepeat,
+										backgroundSize: settings.backgroundSize,
+										backgroundPosition: settings.backgroundPosition,
+										padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
+									};
+									updateSection(selectedSectionId, sectionStyles);
+								}}
+							/>
 						) : (
 							<GlobalEmailSettings
 								onShowBackgroundSettings={() =>

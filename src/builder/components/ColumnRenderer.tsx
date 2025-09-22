@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailColumn } from '../../stores/email-builder/types';
 import BlockRenderer from './BlockRenderer';
+import { useBuilder } from '../context/BuilderContext';
 // @ts-ignore
 import dropIcon from '../../../assets/images/drop-icon.png';
 
@@ -33,6 +34,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 	sectionId,
 }) => {
 	const dispatch = useDispatch();
+	const { isTemplateSection } = useBuilder();
 
 	const { isOver, setNodeRef } = useDroppable({
 		id: `column-${column.id}`,
@@ -597,18 +599,20 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 							return renderedBlocks;
 						})()}
 
-						{/* Add Block Button */}
-						<div className="mt-4 pt-4 border-t border-dashed border-gray-200">
-							<Button
-								variant="ghost"
-								size="sm"
-								className="w-full text-muted-foreground"
-								onClick={addTextBlock}
-							>
-								<Plus className="w-4 h-4 mr-2" />
-								{__('Add Block', 'quillcrm')}
-							</Button>
-						</div>
+						{/* Add Block Button - Only show for non-template sections */}
+						{!isTemplateSection(sectionId) && (
+							<div className="mt-4 pt-4 border-t border-dashed border-gray-200">
+								<Button
+									variant="ghost"
+									size="sm"
+									className="w-full text-muted-foreground"
+									onClick={addTextBlock}
+								>
+									<Plus className="w-4 h-4 mr-2" />
+									{__('Add Block', 'quillcrm')}
+								</Button>
+							</div>
+						)}
 					</>
 				)}
 			</SortableContext>

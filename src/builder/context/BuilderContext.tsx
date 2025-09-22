@@ -46,6 +46,11 @@ interface BuilderContextType {
 	) => void;
 	clearSelection: () => void;
 
+	// Template section operations
+	isTemplateSection: (sectionId: string) => boolean;
+	selectTemplateSection: (sectionId: string) => void;
+	updateSection: (sectionId: string, styles: Record<string, any>) => void;
+
 	// Template operations
 	saveTemplate: (name: string, subject?: string) => Promise<any>;
 	updateTemplate: (
@@ -166,6 +171,48 @@ export const BuilderProvider: React.FC<{
 		dispatch(STORE_KEY).clearSelection();
 	};
 
+	// Check if a section contains template blocks
+	const isTemplateSection = (sectionId: string) => {
+		const section = sections.find(s => s.id === sectionId);
+		if (!section) return false;
+
+		// Check if any block in any column has templateLayout property
+		// OR if the section was created from a library template (has specific block patterns)
+		const hasTemplateLayout = section.columns.some(column =>
+			column.blocks.some(block =>
+				block.props?.templateLayout !== undefined
+			)
+		);
+
+		// Also check for template patterns (Header, Preheader, etc.)
+		const hasTemplatePattern = section.columns.some(column =>
+			column.blocks.some(block => {
+				// Check for Header template patterns
+				if (block.type === 'image' && block.props?.alt === 'Company Logo') return true;
+				// Check for Preheader template patterns  
+				if (block.type === 'preheader') return true;
+				// Check for other template patterns
+				if (block.props?.templateType) return true;
+				return false;
+			})
+		);
+
+		return hasTemplateLayout || hasTemplatePattern;
+	};
+
+	// Select a template section (for layout settings)
+	const selectTemplateSection = (sectionId: string) => {
+		// Clear any existing selection first
+		dispatch(STORE_KEY).clearSelection();
+		// Select the section for template editing
+		dispatch(STORE_KEY).selectBlock('', sectionId);
+	};
+
+	// Update section styles
+	const updateSection = (sectionId: string, styles: Record<string, any>) => {
+		dispatch(STORE_KEY).updateSection(sectionId, styles);
+	};
+
 	// Save the current template to the backend
 	const saveTemplate = async (name: string, subject = '') => {
 		try {
@@ -237,6 +284,9 @@ export const BuilderProvider: React.FC<{
 				reorderSections,
 				selectBlock,
 				clearSelection,
+				isTemplateSection,
+				selectTemplateSection,
+				updateSection,
 				saveTemplate,
 				updateTemplate,
 				saving,

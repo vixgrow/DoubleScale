@@ -15,7 +15,7 @@ interface SectionRendererProps {
 }
 
 const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
-	const { selectBlock, deleteSection } = useBuilder();
+	const { selectBlock, deleteSection, isTemplateSection, selectTemplateSection } = useBuilder();
 
 	const {
 		attributes,
@@ -48,7 +48,12 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 	const handleSectionClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		selectBlock('', section.id);
+		// If this is a template section, use selectTemplateSection to show LayoutSettings
+		if (isTemplateSection(section.id)) {
+			selectTemplateSection(section.id);
+		} else {
+			selectBlock('', section.id);
+		}
 	};
 
 	const handleDeleteSection = (e: React.MouseEvent) => {

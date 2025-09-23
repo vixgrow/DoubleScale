@@ -16,7 +16,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Campaign_Email_Model;
+use QuillCRM\Models\Campaign_Message_Model;
 use QuillCRM\Models\Abandoned_Cart_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Campaign_Model;
@@ -68,12 +68,12 @@ class REST_General_Controller extends REST_Controller {
 	 */
 	public function get_dashboard( WP_REST_Request $request ) {
 		$total_contacts               = Contact_Model::count();
-		$total_sent_emails            = Campaign_Email_Model::where( 'status', 'sent' )->count();
+		$total_sent_emails            = Campaign_Message_Model::emails()->where( 'status', 'sent' )->count();
 		$recent_contacts              = Contact_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$recent_unsubscribed_contacts = Contact_Model::where( 'status', 'unsubscribed' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_campaigns                = Campaign_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_automations              = Automation_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
-		$recent_emails                = Campaign_Email_Model::with( 'template' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
+		$recent_emails                = Campaign_Message_Model::emails()->with( 'template' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 
 		$response = array(
 			'total_contacts'               => $total_contacts,

@@ -1,0 +1,580 @@
+<?php
+/**
+ * Abstract Campaign Controller
+ * Base class for all campaign REST controllers
+ *
+ * @since 1.0.0
+ * @package QuillCRM
+ */
+
+namespace QuillCRM\Abstracts;
+
+use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
+use QuillCRM\Utils;
+use QuillCRM\Abstracts\REST_Controller;
+use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Services\Campaign_Analytics;
+use QuillCRM\Managers\Campaign_Status_Manager;
+
+/**
+ * Abstract_Campaign_Controller class
+ */
+abstract class Abstract_Campaign_Controller extends REST_Controller
+{
+    /**
+     * Campaign type (email, sms)
+     *
+     * @var string
+     */
+    protected $campaign_type;
+
+    /**
+     * Analytics service
+     *
+     * @var Campaign_Analytics
+     */
+    protected $analytics;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->analytics = Campaign_Analytics::instance();
+    }
+
+    /**
+     * Get campaign query - must be implemented by child classes
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    abstract protected function get_campaign_query();
+
+    /**
+     * Get campaign message query - must be implemented by child classes
+     *
+     * @param int $campaign_id
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    abstract protected function get_campaign_message_query($campaign_id);
+
+    /**
+     * Send test message - must be implemented by child classes
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    abstract public function send_test_message($request);
+
+    /**
+     * Register common routes
+     *
+     * @return void
+     */
+    protected function register_common_routes()
+    {
+        // Main CRUD routes
+        register_rest_route(
+            $this->namespace,
+            '/' . $this->rest_base,
+            array(
+                array(
+                    'methods' => WP_REST_Server::READABLE,
+                    'callback' => array($this, 'get_items'),
+                    'permission_callback' => array($this, 'get_items_permissions_check'),
+                    'args' => $this->get_collection_params(),
+                ),
+                array(
+                    'methods' => WP_REST_Server::CREATABLE,
+                    'callback' => array($this, 'create_item'),
+                    'permission_callback' => array($this, 'create_item_permissions_check'),
+                ),
+                array(
+                    'methods' => WP_REST_Server::DELETABLE,
+                    'callback' => array($this, 'delete_items'),
+                    'permission_callback' => array($this, 'delete_items_permissions_check'),
+                    'args' => array(
+                        'ids' => array(
+                            'description' => __('The ids of the items to delete.', 'quillcrm'),
+                            'type' => 'array',
+                            'items' => array('type' => 'integer'),
+                            'required' => true,
+                        ),
+                    ),
+                ),
+            )
+        );
+
+        // Individual item routes
+        register_rest_route(
+            $this->namespace,
+            '/' . $this->rest_base . '/(?P<id>[\d]+)',
+            array(
+                'args' => array(
+                    'id' => array(
+                        'description' => __('Unique identifier for the object.', 'quillcrm'),
+                        'type' => 'integer',
+                    ),
+                ),
+                array(
+                    'methods' => WP_REST_Server::READABLE,
+                    'callback' => array($this, 'get_item'),
+                    'permission_callback' => array($this, 'get_item_permissions_check'),
+                ),
+                array(
+                    'methods' => WP_REST_Server::EDITABLE,
+                    'callback' => array($this, 'update_item'),
+                    'permission_callback' => array($this, 'update_item_permissions_check'),
+                ),
+                array(
+                    'methods' => WP_REST_Server::DELETABLE,
+                    'callback' => array($this, 'delete_item'),
+                    'permission_callback' => array($this, 'delete_item_permissions_check'),
+                ),
+            )
+        );
+
+        // Analytics route
+        register_rest_route(
+            $this->namespace,
+            '/' . $this->rest_base . '/analytics',
+            array(
+                array(
+                    'methods' => WP_REST_Server::READABLE,
+                    'callback' => array($this, 'get_analytics'),
+                    'permission_callback' => array($this, 'get_analytics_permissions_check'),
+                    'args' => $this->get_analytics_params(),
+                ),
+            )
+        );
+
+        // Duplicate route
+        register_rest_route(
+            $this->namespace,
+            '/' . $this->rest_base . '/(?P<id>[\d]+)/duplicate',
+            array(
+                'args' => array(
+                    'id' => array(
+                        'description' => __('Unique identifier for the object.', 'quillcrm'),
+                        'type' => 'integer',
+                    ),
+                ),
+                array(
+                    'methods' => WP_REST_Server::CREATABLE,
+                    'callback' => array($this, 'duplicate_item'),
+                    'permission_callback' => array($this, 'create_item_permissions_check'),
+                ),
+            )
+        );
+
+        // Campaign messages route
+        register_rest_route(
+            $this->namespace,
+            '/' . $this->rest_base . '/(?P<id>[\d]+)/messages',
+            array(
+                'args' => array(
+                    'id' => array(
+                        'description' => __('The id of the campaign.', 'quillcrm'),
+                        'type' => 'integer',
+                        'required' => true,
+                    ),
+                ),
+                array(
+                    'methods' => WP_REST_Server::READABLE,
+                    'callback' => array($this, 'get_campaign_messages'),
+                    'permission_callback' => array($this, 'get_item_permissions_check'),
+                    'args' => array(
+                        'per_page' => array(
+                            'description' => __('The number of items to return per page.', 'quillcrm'),
+                            'type' => 'integer',
+                            'default' => 10,
+                        ),
+                        'page' => array(
+                            'description' => __('The page number.', 'quillcrm'),
+                            'type' => 'integer',
+                            'default' => 1,
+                        ),
+                        'status' => array(
+                            'description' => __('Filter messages by status.', 'quillcrm'),
+                            'type' => 'string',
+                            'enum' => array('pending', 'sent', 'failed'),
+                        ),
+                    ),
+                ),
+            )
+        );
+    }
+
+    /**
+     * Get all campaigns
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function get_items($request)
+    {
+        try {
+            $keywords = $request->get_param('keywords') ?? null;
+            $per_page = $request->get_param('per_page') ?? 10;
+            $page = $request->get_param('page') ?? 1;
+            $from = $request->get_param('from') ?? null;
+            $to = $request->get_param('to') ?? null;
+
+            $query = $this->get_campaign_query();
+            $total_count = $query->count();
+
+            // Apply filters
+            if ($keywords) {
+                $query->where('name', 'like', '%' . $keywords . '%');
+            }
+            if ($from) {
+                $query->where('created_at', '>=', $from);
+            }
+            if ($to) {
+                $query->where('created_at', '<=', $to);
+            }
+
+            $campaigns = $query->orderBy('created_at', 'desc')
+                ->paginate($per_page, array('*'), 'page', $page);
+
+            return new WP_REST_Response(
+                $campaigns->toArray() + array('total_count' => $total_count),
+                200
+            );
+        } catch (\Exception $e) {
+            return new WP_Error('error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Get single campaign
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function get_item($request)
+    {
+        try {
+            $campaign_id = $request->get_param('id');
+            $campaign = $this->get_campaign_query()->find($campaign_id);
+
+            if (!$campaign) {
+                return new WP_Error('error', sprintf(__('%s Campaign not found', 'quillcrm'), ucfirst($this->campaign_type)), array('status' => 404));
+            }
+
+            return new WP_REST_Response($campaign, 200);
+        } catch (\Exception $e) {
+            return new WP_Error('error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Create campaign
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function create_item($request)
+    {
+        try {
+            $campaign_data = $this->prepare_campaign($request);
+            $campaign_data['settings']['type'] = $this->campaign_type;
+            $campaign = Campaign_Model::create($campaign_data);
+
+            return new WP_REST_Response($campaign, 201);
+        } catch (\Exception $e) {
+            return new WP_Error('error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Update campaign
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function update_item($request)
+    {
+        try {
+            $campaign_id = $request->get_param('id');
+            $campaign = $this->get_campaign_query()->find($campaign_id);
+
+            if (!$campaign) {
+                return new WP_Error('error', sprintf(__('%s Campaign not found', 'quillcrm'), ucfirst($this->campaign_type)), array('status' => 404));
+            }
+
+            $campaign_data = $this->prepare_campaign($request);
+            $campaign->update($campaign_data);
+
+            return new WP_REST_Response($campaign, 200);
+        } catch (\Exception $e) {
+            return new WP_Error('error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Delete campaign
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function delete_item($request)
+    {
+        try {
+            $campaign_id = $request->get_param('id');
+            $campaign = $this->get_campaign_query()->find($campaign_id);
+
+            if (!$campaign) {
+                return new WP_Error('error', sprintf(__('%s Campaign not found', 'quillcrm'), ucfirst($this->campaign_type)), array('status' => 404));
+            }
+
+            $campaign->delete();
+
+            return new WP_REST_Response(null, 204);
+        } catch (\Exception $e) {
+            return new WP_Error('error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Delete multiple campaigns
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function delete_items($request)
+    {
+        try {
+            $campaign_ids = $request->get_param('ids');
+            $campaigns = $this->get_campaign_query()->whereIn('id', $campaign_ids)->get();
+
+            if ($campaigns->isEmpty()) {
+                return new WP_Error('error', sprintf(__('%s Campaigns not found', 'quillcrm'), ucfirst($this->campaign_type)), array('status' => 404));
+            }
+
+            Campaign_Model::destroy($campaign_ids);
+
+            return new WP_REST_Response(null, 204);
+        } catch (\Exception $e) {
+            return new WP_Error('error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Duplicate campaign
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function duplicate_item($request)
+    {
+        try {
+            $campaign_id = $request->get_param('id');
+            $campaign = $this->get_campaign_query()->find($campaign_id);
+
+            if (!$campaign) {
+                return new WP_Error('error', sprintf(__('%s Campaign not found', 'quillcrm'), ucfirst($this->campaign_type)), array('status' => 404));
+            }
+
+            $campaign_data = $campaign->toArray();
+            unset($campaign_data['id'], $campaign_data['created_at'], $campaign_data['updated_at']);
+
+            $campaign_data['status'] = 'draft';
+            $campaign_data['name'] = $campaign_data['name'] . ' - Copy';
+            $new_campaign = Campaign_Model::create($campaign_data);
+
+            return new WP_REST_Response($new_campaign, 201);
+        } catch (\Exception $e) {
+            return new WP_Error('error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Get campaign messages
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function get_campaign_messages($request)
+    {
+        try {
+            $campaign_id = $request->get_param('id');
+            $per_page = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
+            $page = $request->get_param('page') ? $request->get_param('page') : 1;
+            $status = $request->get_param('status') ? $request->get_param('status') : '';
+
+            $query = $this->get_campaign_message_query($campaign_id);
+
+            // Apply status filter if provided
+            if ($status) {
+                switch ($status) {
+                    case 'failed':
+                        $query->where('status', 'failed');
+                        break;
+                    case 'sent':
+                        $query->where('status', 'sent');
+                        break;
+                    case 'pending':
+                        $query->where('status', 'pending');
+                        break;
+                }
+            }
+
+            $campaign_messages = $query->with('contact', 'template')
+                ->paginate($per_page, array('*'), 'page', $page);
+
+            return new WP_REST_Response($campaign_messages->toArray(), 200);
+        } catch (\Exception $e) {
+            return new WP_Error('error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Get analytics
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return WP_REST_Response
+     */
+    public function get_analytics($request)
+    {
+        try {
+            $interval = $request->get_param('interval') ?: 'last_30_days';
+            $start_date = $request->get_param('start_date') ?: '';
+            $end_date = $request->get_param('end_date') ?: '';
+
+            $analytics = $this->analytics->get_analytics($this->campaign_type, $interval, $start_date, $end_date);
+
+            return new WP_REST_Response($analytics, 200);
+        } catch (\Exception $e) {
+            return new WP_Error('error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Prepare campaign data
+     *
+     * @param WP_REST_Request $request
+     *
+     * @return array
+     */
+    protected function prepare_campaign($request)
+    {
+        $campaign_data = array(
+            'name' => $request->get_param('name'),
+            'description' => $request->get_param('description'),
+            'status' => $request->get_param('status'),
+            'settings' => $request->get_param('settings'),
+            'count' => $request->get_param('count'),
+            'execute_at' => $request->get_param('execute_at'),
+        );
+
+        foreach ($campaign_data as $key => $value) {
+            if (empty($value) && $value !== 0) {
+                unset($campaign_data[$key]);
+            }
+        }
+
+        return $campaign_data;
+    }
+
+    	/**
+	 * Get collection parameters
+	 *
+	 * @return array
+	 */
+	public function get_collection_params()
+    {
+        return array(
+            'keyword' => array(
+                'description' => __('The keyword to search for.', 'quillcrm'),
+                'type' => 'string',
+            ),
+            'per_page' => array(
+                'description' => __('The number of items to return per page.', 'quillcrm'),
+                'type' => 'integer',
+                'default' => 10,
+            ),
+            'page' => array(
+                'description' => __('The page number.', 'quillcrm'),
+                'type' => 'integer',
+                'default' => 1,
+            ),
+        );
+    }
+
+    	/**
+	 * Get analytics parameters
+	 *
+	 * @return array
+	 */
+	public function get_analytics_params()
+    {
+        return array(
+            'interval' => array(
+                'description' => __('Interval for the analytics.', 'quillcrm'),
+                'type' => 'string',
+                'enum' => array('custom', 'today', 'yesterday', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year', 'last_year'),
+                'required' => false,
+            ),
+            'start_date' => array(
+                'description' => __('Start date for the analytics.', 'quillcrm'),
+                'type' => 'string',
+                'format' => 'date',
+            ),
+            'end_date' => array(
+                'description' => __('End date for the analytics.', 'quillcrm'),
+                'type' => 'string',
+                'format' => 'date',
+            ),
+        );
+    }
+
+    /**
+     * Permission checks - all return the same for campaigns
+     */
+    public function get_items_permissions_check($request) { return current_user_can('manage_options'); }
+    public function get_item_permissions_check($request) { return current_user_can('manage_options'); }
+    public function create_item_permissions_check($request) { return current_user_can('manage_options'); }
+    public function update_item_permissions_check($request) { return current_user_can('manage_options'); }
+    public function delete_item_permissions_check($request) { return current_user_can('manage_options'); }
+    public function delete_items_permissions_check($request) { return current_user_can('manage_options'); }
+    public function get_analytics_permissions_check($request) { return current_user_can('manage_options'); }
+
+    /**
+     * Validate campaign status
+     *
+     * @param string $status
+     * @param WP_REST_Request $request
+     * @param string $param
+     *
+     * @return bool|WP_Error
+     */
+    public function validate_campaign_status($status, $request, $param)
+    {
+        $status_manager = Campaign_Status_Manager::instance();
+
+        if (!$status_manager->is_valid_status($status)) {
+            return new WP_Error(
+                'invalid_campaign_status',
+                sprintf(__('Invalid campaign status: %s', 'quillcrm'), $status),
+                array('status' => 400)
+            );
+        }
+
+        return true;
+    }
+}

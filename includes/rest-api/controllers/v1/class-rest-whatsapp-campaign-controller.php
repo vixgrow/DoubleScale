@@ -175,7 +175,7 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Twilio_Campaign_Control
 	 */
 	protected function get_campaign_query()
 	{
-		return Campaign_Model::whereRaw("JSON_EXTRACT(settings, '$.type') = ?", [$this->campaign_type]);
+		return Campaign_Model::query()->where('type', $this->campaign_type);
 	}
 
 	/**
@@ -324,16 +324,16 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Twilio_Campaign_Control
 					'default' => Campaign_Status_Manager::DRAFT,
 					'validate_callback' => array($this, 'validate_campaign_status'),
 				),
+				'type' => array(
+					'description' => __('The type of the campaign.', 'quillcrm'),
+					'type' => 'string',
+					'enum' => array('whatsapp'),
+					'default' => 'whatsapp',
+				),
 				'settings' => array(
 					'description' => __('The settings of the WhatsApp campaign.', 'quillcrm'),
 					'type' => 'object',
 					'properties' => array(
-						'type' => array(
-							'description' => __('Campaign type.', 'quillcrm'),
-							'type' => 'string',
-							'enum' => array('whatsapp'),
-							'default' => 'whatsapp',
-						),
 						'whatsapp' => array(
 							'description' => __('WhatsApp specific settings.', 'quillcrm'),
 							'type' => 'object',

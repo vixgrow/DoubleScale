@@ -52,6 +52,7 @@ class Campaign_Model extends Model
 		'name',
 		'description',
 		'status',
+		'type',
 		'settings',
 		'parent_id',
 		'count',
@@ -166,7 +167,7 @@ class Campaign_Model extends Model
 	 */
 	public function get_type()
 	{
-		return $this->get_setting('type', 'email');
+		return $this->type ?? 'email';
 	}
 
 	/**
@@ -551,12 +552,12 @@ class Campaign_Model extends Model
 				// If templates exist in settings, create/update Template_Model records
 				if (isset($settings['templates']) && is_array($settings['templates'])) {
 					$template_ids = $campaign->process_templates($settings['templates']);
-					
+
 					// Store only template IDs in settings and remove full template objects
 					$settings['template_ids'] = $template_ids;
 					unset($settings['templates']);
 				}
-				
+
 				// Set the modified settings back to the model
 				$campaign->settings = $settings;
 

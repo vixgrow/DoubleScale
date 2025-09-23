@@ -286,7 +286,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller
     {
         try {
             $campaign_data = $this->prepare_campaign($request);
-            $campaign_data['settings']['type'] = $this->campaign_type;
+            $campaign_data['type'] = $this->campaign_type;
             $campaign = Campaign_Model::create($campaign_data);
 
             return new WP_REST_Response($campaign, 201);

@@ -183,7 +183,7 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 */
 	protected function get_campaign_query()
 	{
-		return Campaign_Model::whereRaw("JSON_EXTRACT(settings, '$.type') = ?", [$this->campaign_type]);
+		return Campaign_Model::query()->where('type', $this->campaign_type);
 	}
 
 	/**
@@ -340,6 +340,12 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 					'enum' => $status_manager->get_all_statuses(),
 					'default' => Campaign_Status_Manager::DRAFT,
 					'validate_callback' => array($this, 'validate_campaign_status'),
+				),
+				'type' => array(
+					'description' => __('The type of the campaign.', 'quillcrm'),
+					'type' => 'string',
+					'enum' => array('email'),
+					'default' => 'email',
 				),
 				'settings' => array(
 					'description' => __('The settings of the email campaign.', 'quillcrm'),

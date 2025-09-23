@@ -219,7 +219,7 @@ abstract class Abstract_Campaign_Processing
                                    ->whereDate('execute_at', '<=', date('Y-m-d H:i:s'));
                       });
             })
-            ->whereRaw("JSON_EXTRACT(settings, '$.type') = ?", [$this->campaign_type])
+            ->where('type', $this->campaign_type)
             ->orderBy('updated_at', 'asc')
             ->first();
     }
@@ -233,7 +233,7 @@ abstract class Abstract_Campaign_Processing
     protected function process_campaign(Campaign_Model $campaign)
     {
         // Validate that the campaign type matches this processor
-        $campaign_type = $campaign->get_setting('type');
+        $campaign_type = $campaign->get_type();
         if ($campaign_type !== $this->campaign_type) {
             quillcrm_get_logger()->error(
                 __('Campaign type mismatch detected.', 'quillcrm'),

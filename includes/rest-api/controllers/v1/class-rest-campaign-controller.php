@@ -267,7 +267,7 @@ class REST_Campaign_Controller extends REST_Controller
 				if (!in_array($type, ['email', 'sms', 'whatsapp'])) {
 					return new WP_Error('invalid_type', __('Invalid campaign type. Must be email, sms, or whatsapp.', 'quillcrm'), array('status' => 400));
 				}
-				$query->whereRaw("JSON_EXTRACT(settings, '$.type') = ?", [$type]);
+				$query->where('type', $type);
 			}
 
 			// Apply keywords filter
@@ -457,9 +457,9 @@ class REST_Campaign_Controller extends REST_Controller
 			// Get totals by campaign type within the date range
 			$total_campaigns = Campaign_Model::whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59'])->count();
 			$email_campaigns = Campaign_Model::whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59'])
-				->whereRaw("JSON_EXTRACT(settings, '$.type') = ?", ['email'])->count();
+				->where('type', 'email')->count();
 			$sms_campaigns = Campaign_Model::whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59'])
-				->whereRaw("JSON_EXTRACT(settings, '$.type') = ?", ['sms'])->count();
+				->where('type', 'sms')->count();
 
 			$analytics = array(
 				'campaigns' => $campaigns,

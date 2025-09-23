@@ -1,0 +1,307 @@
+<?php
+/**
+ * Campaign Analytics Service
+ * Handles analytics for all campaign types
+ *
+ * @since 1.0.0
+ * @package QuillCRM
+ */
+
+namespace QuillCRM\Services;
+
+use QuillCRM\Utils;
+use QuillCRM\Models\Campaign_Message_Model;
+
+/**
+ * Campaign_Analytics class
+ */
+class Campaign_Analytics
+{
+    /**
+     * Class Instance.
+     *
+     * @since 1.0.0
+     *
+     * @var Campaign_Analytics
+     */
+    private static $instance;
+
+    /**
+     * Campaign_Analytics Instance.
+     *
+     * Instantiates or reuses an instance of Campaign_Analytics.
+     *
+     * @since  1.0.0
+     * @static
+     *
+     * @return self - Single instance
+     */
+    public static function instance()
+    {
+        if (!self::$instance) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
+     * Get model query for campaign type
+     *
+     * @param string $type Campaign type ('email', 'sms', 'whatsapp')
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function get_model_query($type)
+    {
+        switch ($type) {
+            case 'email':
+                return Campaign_Message_Model::emails();
+            case 'sms':
+                return Campaign_Message_Model::sms();
+            case 'whatsapp':
+                return Campaign_Message_Model::whatsapp();
+            default:
+                throw new \InvalidArgumentException("Unsupported campaign type: {$type}");
+        }
+    }
+
+    /**
+     * Get analytics data for campaign type
+     *
+     * @param string $type Campaign type ('email', 'sms')
+     * @param string $interval Analytics interval
+     * @param string $start_date Start date
+     * @param string $end_date End date
+     *
+     * @return array Analytics data
+     */
+    public function get_analytics($type, $interval = 'last_30_days', $start_date = '', $end_date = '')
+    {
+        $query = $this->get_model_query($type);
+
+        if ('custom' !== $interval) {
+            $start_date = Utils::get_start_date($interval, $start_date);
+            $end_date = Utils::get_end_date($interval, $end_date);
+        }
+
+        $dates = Utils::get_dates_between_dates($start_date, $end_date);
+        $date_type = $dates['type'] ?? 'hour';
+        $data = array();
+
+        foreach ($dates['dates'] as $date) {
+            switch ($date_type) {
+                case 'hour':
+                    $end_hour = date('Y-m-d H:i:s', strtotime($date . ' +1 hour'));
+                    $data[$date] = $query->whereBetween('created_at', array($date, $end_hour))->count();
+                    break;
+                case 'day':
+                    $start_of_day = $date . ' 00:00:00';
+                    $end_of_day = $date . ' 23:59:59';
+                    $data[$date] = $query->whereBetween('created_at', array($start_of_day, $end_of_day))->count();
+                    break;
+                case 'month':
+                    $start_of_month = date('Y-m-01 00:00:00', strtotime($date));
+                    $end_of_month = date('Y-m-t 23:59:59', strtotime($date));
+                    $data[$date] = $query->whereBetween('created_at', array($start_of_month, $end_of_month))->count();
+                    break;
+                case 'year':
+                    $start_of_year = date('Y-01-01 00:00:00', strtotime($date));
+                    $end_of_year = date('Y-12-31 23:59:59', strtotime($date));
+                    $data[$date] = $query->whereBetween('created_at', array($start_of_year, $end_of_year))->count();
+                    break;
+            }
+        }
+
+        $totals = $this->get_total_stats($type, $start_date, $end_date);
+
+        return array(
+            $type => $data,
+            'data' => $dates,
+        ) + $totals;
+    }
+
+    /**
+     * Get total statistics for campaign type
+     *
+     * @param string $type Campaign type ('email', 'sms')
+     * @param string $start_date Start date for filtering (optional)
+     * @param string $end_date End date for filtering (optional)
+     *
+     * @return array Total statistics
+     */
+    public function get_total_stats($type, $start_date = null, $end_date = null)
+    {
+        // Create base query with optional date filtering
+        $base_query = $this->get_model_query($type);
+        if ($start_date && $end_date) {
+            $base_query->whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59']);
+        }
+
+        $stats = array(
+            'total' => (clone $base_query)->count(),
+            'sent' => (clone $base_query)->where('status', 'sent')->count(),
+            'failed' => (clone $base_query)->where('status', 'failed')->count(),
+            'pending' => (clone $base_query)->where('status', 'pending')->count(),
+        );
+
+        return $this->add_type_specific_stats($stats, $type, null, $start_date, $end_date);
+    }
+
+    /**
+     * Get campaign-specific statistics
+     *
+     * @param string $type Campaign type ('email', 'sms')
+     * @param int    $campaign_id Campaign ID
+     *
+     * @return array Campaign statistics
+     */
+    public function get_campaign_stats($type, $campaign_id)
+    {
+        $query = $this->get_model_query($type);
+
+        $stats = array(
+            'total' => $query->where('campaign_id', $campaign_id)->count(),
+            'sent' => $query->where('campaign_id', $campaign_id)->where('status', 'sent')->count(),
+            'failed' => $query->where('campaign_id', $campaign_id)->where('status', 'failed')->count(),
+            'pending' => $query->where('campaign_id', $campaign_id)->where('status', 'pending')->count(),
+        );
+
+        return $this->add_type_specific_stats($stats, $type, $campaign_id);
+    }
+
+    /**
+     * Add type-specific statistics to base stats
+     *
+     * @param array  $stats Base statistics
+     * @param string $type Campaign type ('email', 'sms')
+     * @param int    $campaign_id Optional campaign ID for filtering
+     * @param string $start_date Optional start date for filtering
+     * @param string $end_date Optional end date for filtering
+     *
+     * @return array Enhanced statistics with type-specific data
+     */
+    protected function add_type_specific_stats($stats, $type, $campaign_id = null, $start_date = null, $end_date = null)
+    {
+        if ($type === 'email') {
+            $base_query = $campaign_id ? $this->get_model_query($type)->where('campaign_id', $campaign_id) : $this->get_model_query($type);
+            
+            // Apply date range filter if provided
+            if ($start_date && $end_date) {
+                $base_query->whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59']);
+            }
+            
+            $stats['opened'] = (clone $base_query)->where('opened', 1)->count();
+            $stats['clicked'] = (clone $base_query)->where('clicked', 1)->count();
+        } elseif ($type === 'sms') {
+            $base_query = $campaign_id ? $this->get_model_query($type)->where('campaign_id', $campaign_id) : $this->get_model_query($type);
+            
+            // Apply date range filter if provided
+            if ($start_date && $end_date) {
+                $base_query->whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59']);
+            }
+            
+            $stats['clicked'] = (clone $base_query)->where('clicked', 1)->count();
+            
+            // Calculate rates using centralized method
+            $stats = $this->calculate_sms_rates($stats);
+        } elseif ($type === 'whatsapp') {
+            $base_query = $campaign_id ? $this->get_model_query($type)->where('campaign_id', $campaign_id) : $this->get_model_query($type);
+            
+            // Apply date range filter if provided
+            if ($start_date && $end_date) {
+                $base_query->whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59']);
+            }
+            
+            $stats['clicked'] = (clone $base_query)->where('clicked', 1)->count();
+            
+            // Calculate WhatsApp-specific rates
+            $stats = $this->calculate_whatsapp_rates($stats);
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Calculate SMS-specific rates (Simplified)
+     *
+     * @param array $stats Base statistics
+     *
+     * @return array Statistics with calculated rates
+     */
+    protected function calculate_sms_rates($stats)
+    {
+        $stats['click_rate'] = $stats['sent'] > 0 
+            ? round(($stats['clicked'] / $stats['sent']) * 100, 2) 
+            : 0;
+
+        return $stats;
+    }
+
+    /**
+     * Calculate WhatsApp-specific rates (Simplified)
+     *
+     * @param array $stats Base statistics
+     *
+     * @return array Statistics with calculated rates
+     */
+    protected function calculate_whatsapp_rates($stats)
+    {
+        $stats['click_rate'] = $stats['sent'] > 0 
+            ? round(($stats['clicked'] / $stats['sent']) * 100, 2) 
+            : 0;
+
+        return $stats;
+    }
+
+    /**
+     * Get time-series analytics for campaign
+     *
+     * @param int    $campaign_id Campaign ID
+     * @param string $type Campaign type ('email', 'sms')
+     * @param string $period Time period ('hour', 'day', 'week', 'month')
+     * @param int    $limit Number of periods to return
+     *
+     * @return array Time-series analytics data
+     */
+    public function get_campaign_time_series($campaign_id, $type, $period = 'day', $limit = 30)
+    {
+        $query = $this->get_model_query($type);
+        
+        $date_formats = array(
+            'hour' => '%Y-%m-%d %H:00:00',
+            'day' => '%Y-%m-%d',
+            'week' => '%Y-%u',
+            'month' => '%Y-%m',
+        );
+
+        $format = $date_formats[$period] ?? $date_formats['day'];
+
+        $select_fields = "
+            DATE_FORMAT(sent_at, '{$format}') as period,
+            COUNT(*) as total_sent,
+            SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) as sent,
+            SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed
+        ";
+
+        if ($type === 'email') {
+            $select_fields .= ",
+                SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened,
+                SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked
+            ";
+        } elseif ($type === 'sms') {
+            $select_fields .= ",
+                SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked
+            ";
+        }
+
+        $results = $query->selectRaw($select_fields)
+            ->where('campaign_id', $campaign_id)
+            ->whereNotNull('sent_at')
+            ->groupBy('period')
+            ->orderBy('period', 'DESC')
+            ->limit($limit)
+            ->get();
+
+        return $results->toArray();
+    }
+}

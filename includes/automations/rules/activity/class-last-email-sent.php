@@ -13,7 +13,7 @@ namespace QuillCRM\Automations\Rules\Activity;
 
 use QuillCRM\Abstracts\Rule;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Campaign_Email_Model;
+use QuillCRM\Models\Campaign_Message_Model;
 use QuillCRM\Managers\Rules_Manager;
 
 /**
@@ -68,7 +68,7 @@ class Last_Email_Sent extends Rule {
 	 */
 	public function get_value( $automation_contact ) {
 		$contact        = $automation_contact->contact;
-		$campaign_email = Campaign_Email_Model::where( 'contact_id', $contact->id )
+		$campaign_email = Campaign_Message_Model::emails()->where( 'contact_id', $contact->id )
 			->orderBy( 'created_at', 'desc' )
 			->first();
 

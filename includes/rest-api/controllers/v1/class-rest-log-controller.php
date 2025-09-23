@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API: Log Controller
  *
@@ -11,6 +12,7 @@ namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Log_Handlers\Log_Handler_DB;
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,6 +24,7 @@ use WP_REST_Server;
  * @since 1.6.0
  */
 class REST_Log_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -165,19 +168,6 @@ class REST_Log_Controller extends REST_Controller {
 		exit;
 	}
 
-	/**
-	 * Check if a given request has access to get all items.
-	 *
-	 * @since 1.6.0
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return WP_Error|bool
-	 */
-	public function get_items_permissions_check( $request ) {
-		$capability = 'manage_options';
-		return current_user_can( $capability, $request );
-	}
 
 	/**
 	 * Delete items from the collection
@@ -199,19 +189,7 @@ class REST_Log_Controller extends REST_Controller {
 		return new WP_REST_Response( array( 'success' => $deleted ), 200 );
 	}
 
-	/**
-	 * Delete items permission check
-	 *
-	 * @since 1.6.0
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return WP_Error|bool
-	 */
-	public function delete_items_permissions_check( $request ) {
-		$capability = 'manage_options';
-		return current_user_can( $capability, $request );
-	}
+
 
 	/**
 	 * Delete one item from the collection
@@ -242,8 +220,32 @@ class REST_Log_Controller extends REST_Controller {
 	 * @return WP_Error|bool
 	 */
 	public function delete_item_permissions_check( $request ) {
-		$capability = 'manage_options';
-		return current_user_can( $capability, $request );
+		return Permissions::has_crm_manager_access();
 	}
 
+	/**
+	 * Check if a given request has access to get all items.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_Error|bool
+	 */
+	public function get_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Delete items permission check
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_Error|bool
+	 */
+	public function delete_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
 }

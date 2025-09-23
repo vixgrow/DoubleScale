@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API: Pipeline controller
  *
@@ -13,6 +14,7 @@ use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Pipeline_Model;
 use QuillCRM\Models\Pipeline_Stage_Model;
 use QuillCRM\Managers\Pipeline_Manager;
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -21,8 +23,8 @@ use WP_REST_Server;
 /**
  * Pipeline REST Controller class
  */
-class REST_Pipeline_Controller extends REST_Controller
-{
+class REST_Pipeline_Controller extends REST_Controller {
+
 
 	/**
 	 * Route base.
@@ -36,9 +38,8 @@ class REST_Pipeline_Controller extends REST_Controller
 	 *
 	 * @since 1.0.0
 	 */
-	public function register_routes()
-	{
-		// Pipelines endpoints
+	public function register_routes() {
+		 // Pipelines endpoints
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -159,7 +160,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 */
 	public function get_items( $request ) {
 		$with_stages = $request->get_param( 'with_stages' );
-		$with_stats = $request->get_param( 'with_stats' );
+		$with_stats  = $request->get_param( 'with_stats' );
 
 		if ( $with_stages ) {
 			$pipelines = Pipeline_Manager::instance()->get_pipelines_with_stages();
@@ -170,14 +171,14 @@ class REST_Pipeline_Controller extends REST_Controller
 		$data = array();
 		foreach ( $pipelines as $pipeline ) {
 			$pipeline_data = $this->prepare_item_for_response( $pipeline, $request );
-			
+
 			if ( $with_stats ) {
 				$pipeline_data['stats'] = array(
 					'total_value' => $pipeline->total_value,
-					'deal_count' => $pipeline->deal_count,
+					'deal_count'  => $pipeline->deal_count,
 				);
 			}
-			
+
 			$data[] = $pipeline_data;
 		}
 
@@ -194,7 +195,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	public function get_item( $request ) {
 		$pipeline_id = $request->get_param( 'id' );
 		$with_stages = $request->get_param( 'with_stages' );
-		$with_stats = $request->get_param( 'with_stats' );
+		$with_stats  = $request->get_param( 'with_stats' );
 
 		if ( $with_stats ) {
 			$pipeline = Pipeline_Manager::instance()->get_pipeline_with_stats( $pipeline_id );
@@ -221,9 +222,9 @@ class REST_Pipeline_Controller extends REST_Controller
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function create_item( $request ) {
-		$name = sanitize_text_field( $request->get_param( 'name' ) );
+		$name        = sanitize_text_field( $request->get_param( 'name' ) );
 		$description = sanitize_textarea_field( $request->get_param( 'description' ) );
-		$stages = $request->get_param( 'stages' );
+		$stages      = $request->get_param( 'stages' );
 
 		if ( empty( $name ) ) {
 			return new WP_Error( 'missing_name', 'Pipeline name is required', array( 'status' => 400 ) );
@@ -250,15 +251,15 @@ class REST_Pipeline_Controller extends REST_Controller
 	 */
 	public function update_item( $request ) {
 		$pipeline_id = $request->get_param( 'id' );
-		$pipeline = Pipeline_Model::find( $pipeline_id );
+		$pipeline    = Pipeline_Model::find( $pipeline_id );
 
 		if ( ! $pipeline ) {
 			return new WP_Error( 'pipeline_not_found', 'Pipeline not found', array( 'status' => 404 ) );
 		}
 
-		$name = $request->get_param( 'name' );
+		$name        = $request->get_param( 'name' );
 		$description = $request->get_param( 'description' );
-		$sort_order = $request->get_param( 'sort_order' );
+		$sort_order  = $request->get_param( 'sort_order' );
 
 		if ( ! empty( $name ) ) {
 			$pipeline->name = sanitize_text_field( $name );
@@ -287,7 +288,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function delete_item( $request ) {
-		$pipeline_id = $request->get_param( 'id' );
+		$pipeline_id   = $request->get_param( 'id' );
 		$move_deals_to = $request->get_param( 'move_deals_to' );
 
 		$deleted = Pipeline_Manager::instance()->delete_pipeline( $pipeline_id, $move_deals_to );
@@ -308,7 +309,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 */
 	public function get_stages( $request ) {
 		$pipeline_id = $request->get_param( 'pipeline_id' );
-		
+
 		$pipeline = Pipeline_Model::with( 'stages' )->find( $pipeline_id );
 
 		if ( ! $pipeline ) {
@@ -331,22 +332,22 @@ class REST_Pipeline_Controller extends REST_Controller
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function create_stage( $request ) {
-		$pipeline_id = $request->get_param( 'pipeline_id' );
-		$name = sanitize_text_field( $request->get_param( 'name' ) );
-		$color = sanitize_text_field( $request->get_param( 'color' ) );
+		$pipeline_id     = $request->get_param( 'pipeline_id' );
+		$name            = sanitize_text_field( $request->get_param( 'name' ) );
+		$color           = sanitize_text_field( $request->get_param( 'color' ) );
 		$win_probability = floatval( $request->get_param( 'win_probability' ) );
-		$position = $request->get_param( 'position' );
+		$position        = $request->get_param( 'position' );
 
 		if ( empty( $name ) ) {
 			return new WP_Error( 'missing_name', 'Stage name is required', array( 'status' => 400 ) );
 		}
 
-		$stage = Pipeline_Manager::instance()->add_stage( 
-			$pipeline_id, 
-			$name, 
-			$color ?: '#6d78d8', 
-			$win_probability ?: 0.0, 
-			$position 
+		$stage = Pipeline_Manager::instance()->add_stage(
+			$pipeline_id,
+			$name,
+			$color ?: '#6d78d8',
+			$win_probability ?: 0.0,
+			$position
 		);
 
 		if ( ! $stage ) {
@@ -367,16 +368,16 @@ class REST_Pipeline_Controller extends REST_Controller
 	 */
 	public function update_stage( $request ) {
 		$stage_id = $request->get_param( 'stage_id' );
-		$stage = Pipeline_Stage_Model::find( $stage_id );
+		$stage    = Pipeline_Stage_Model::find( $stage_id );
 
 		if ( ! $stage ) {
 			return new WP_Error( 'stage_not_found', 'Stage not found', array( 'status' => 404 ) );
 		}
 
-		$name = $request->get_param( 'name' );
-		$color = $request->get_param( 'color' );
+		$name            = $request->get_param( 'name' );
+		$color           = $request->get_param( 'color' );
 		$win_probability = $request->get_param( 'win_probability' );
-		$sort_order = $request->get_param( 'sort_order' );
+		$sort_order      = $request->get_param( 'sort_order' );
 
 		if ( ! empty( $name ) ) {
 			$stage->name = sanitize_text_field( $name );
@@ -410,7 +411,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 */
 	public function delete_stage( $request ) {
 		$stage_id = $request->get_param( 'stage_id' );
-		$stage = Pipeline_Stage_Model::find( $stage_id );
+		$stage    = Pipeline_Stage_Model::find( $stage_id );
 
 		if ( ! $stage ) {
 			return new WP_Error( 'stage_not_found', 'Stage not found', array( 'status' => 404 ) );
@@ -434,7 +435,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 */
 	public function get_analytics( $request ) {
 		$pipeline_id = $request->get_param( 'id' );
-		$filters = array();
+		$filters     = array();
 
 		if ( $request->get_param( 'date_from' ) ) {
 			$filters['date_from'] = sanitize_text_field( $request->get_param( 'date_from' ) );
@@ -462,7 +463,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 */
 	public function duplicate_pipeline( $request ) {
 		$pipeline_id = $request->get_param( 'id' );
-		$new_name = sanitize_text_field( $request->get_param( 'name' ) );
+		$new_name    = sanitize_text_field( $request->get_param( 'name' ) );
 
 		$new_pipeline = Pipeline_Manager::instance()->duplicate_pipeline( $pipeline_id, $new_name );
 
@@ -502,7 +503,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	/**
 	 * Prepare the item for the REST response
 	 *
-	 * @param Pipeline $pipeline Pipeline object.
+	 * @param Pipeline        $pipeline Pipeline object.
 	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return array
@@ -557,7 +558,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 * @return bool
 	 */
 	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -568,7 +569,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 * @return bool
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -579,7 +580,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 * @return bool
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -590,7 +591,7 @@ class REST_Pipeline_Controller extends REST_Controller
 	 * @return bool
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -601,6 +602,6 @@ class REST_Pipeline_Controller extends REST_Controller
 	 * @return bool
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 }

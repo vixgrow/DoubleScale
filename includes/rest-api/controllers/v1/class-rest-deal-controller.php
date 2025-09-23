@@ -13,6 +13,7 @@ namespace QuillCRM\REST_API\Controllers\V1;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Managers\Deal_Manager;
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,11 +23,6 @@ use WP_REST_Server;
  * Deal REST Controller class
  */
 class REST_Deal_Controller extends REST_Controller {
-
-
-
-
-
 
 
 	/**
@@ -774,60 +770,7 @@ class REST_Deal_Controller extends REST_Controller {
 		return $data;
 	}
 
-	/**
-	 * Check if user can access deals
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool
-	 */
-	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
 
-	/**
-	 * Check if user can access single deal
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool
-	 */
-	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Check if user can create deals
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool
-	 */
-	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Check if user can update deals
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool
-	 */
-	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Check if user can delete deals
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool
-	 */
-	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
 
 	/**
 	 * Validate owner_id parameter
@@ -869,5 +812,60 @@ class REST_Deal_Controller extends REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Check if user can access deals
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function get_items_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Check if user can access single deal
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function get_item_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Check if user can create deals
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function create_item_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Check if user can update deals
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function update_item_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Check if user can delete deals
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function delete_item_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
 	}
 }

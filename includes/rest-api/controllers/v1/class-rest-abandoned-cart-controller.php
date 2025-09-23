@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rest_Abandoned_Cart_Controller
  * This class is responsible for handling the Automation Contact REST API
@@ -17,11 +18,13 @@ use WP_REST_Server;
 use QuillCRM\Utils;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Abandoned_Cart_Model;
+use QuillCRM\Permissions;
 
 /**
  * Rest_Abandoned_Cart_Controller class
  */
 class Rest_Abandoned_Cart_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -153,18 +156,7 @@ class Rest_Abandoned_Cart_Controller extends REST_Controller {
 		}
 	}
 
-	/**
-	 * Get items permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
+
 
 	/**
 	 * Delete items
@@ -190,18 +182,7 @@ class Rest_Abandoned_Cart_Controller extends REST_Controller {
 		}
 	}
 
-	/**
-	 * Delete items permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function delete_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
+
 
 	/**
 	 * Get analytics
@@ -291,6 +272,32 @@ class Rest_Abandoned_Cart_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_analytics_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Delete items permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function delete_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Get items permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function get_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 }

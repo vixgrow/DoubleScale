@@ -11,6 +11,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -35,6 +36,7 @@ use QuillCRM\Models\Automation_Contact_Processes_Model;
  * REST_Automation_Reports_Controller class
  */
 class REST_Automation_Reports_Controller extends REST_Controller {
+
 
 
 	/**
@@ -352,6 +354,6 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

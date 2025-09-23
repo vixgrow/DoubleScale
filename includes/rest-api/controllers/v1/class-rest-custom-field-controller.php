@@ -11,6 +11,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -23,12 +24,6 @@ use Illuminate\Support\Str;
  * Custom_Field_Controller class
  */
 class REST_Custom_Field_Controller extends REST_Controller {
-
-
-
-
-
-
 
 
 	/**
@@ -410,7 +405,7 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -423,7 +418,7 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -436,7 +431,7 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -449,7 +444,7 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -462,7 +457,7 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -475,6 +470,6 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function delete_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API: Activity controller
  *
@@ -13,6 +14,7 @@ use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Deal_Activity;
 use QuillCRM\Models\Activity_Comment;
 use QuillCRM\Managers\Activity_Manager;
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -21,8 +23,8 @@ use WP_REST_Server;
 /**
  * Activity REST Controller class
  */
-class REST_Activity_Controller extends REST_Controller
-{
+class REST_Activity_Controller extends REST_Controller {
+
 
 	/**
 	 * Route base.
@@ -36,9 +38,8 @@ class REST_Activity_Controller extends REST_Controller
 	 *
 	 * @since 1.0.0
 	 */
-	public function register_routes()
-	{
-		// Activity endpoints
+	public function register_routes() {
+		 // Activity endpoints
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
@@ -159,7 +160,7 @@ class REST_Activity_Controller extends REST_Controller
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ) {
-		$activity_id = $request->get_param( 'id' );
+		$activity_id   = $request->get_param( 'id' );
 		$with_comments = $request->get_param( 'with_comments' );
 
 		if ( $with_comments ) {
@@ -186,7 +187,7 @@ class REST_Activity_Controller extends REST_Controller
 	 */
 	public function add_note( $request ) {
 		$deal_id = intval( $request->get_param( 'deal_id' ) );
-		$note = sanitize_textarea_field( $request->get_param( 'note' ) );
+		$note    = sanitize_textarea_field( $request->get_param( 'note' ) );
 		$user_id = get_current_user_id();
 
 		if ( empty( $deal_id ) ) {
@@ -217,9 +218,9 @@ class REST_Activity_Controller extends REST_Controller
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function log_email( $request ) {
-		$deal_id = intval( $request->get_param( 'deal_id' ) );
+		$deal_id    = intval( $request->get_param( 'deal_id' ) );
 		$email_data = $request->get_param( 'email_data' );
-		$user_id = get_current_user_id();
+		$user_id    = get_current_user_id();
 
 		if ( empty( $deal_id ) ) {
 			return new WP_Error( 'missing_deal_id', 'Deal ID is required', array( 'status' => 400 ) );
@@ -249,9 +250,9 @@ class REST_Activity_Controller extends REST_Controller
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function log_call( $request ) {
-		$deal_id = intval( $request->get_param( 'deal_id' ) );
+		$deal_id   = intval( $request->get_param( 'deal_id' ) );
 		$call_data = $request->get_param( 'call_data' );
-		$user_id = get_current_user_id();
+		$user_id   = get_current_user_id();
 
 		if ( empty( $deal_id ) ) {
 			return new WP_Error( 'missing_deal_id', 'Deal ID is required', array( 'status' => 400 ) );
@@ -281,9 +282,9 @@ class REST_Activity_Controller extends REST_Controller
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function schedule_meeting( $request ) {
-		$deal_id = intval( $request->get_param( 'deal_id' ) );
+		$deal_id      = intval( $request->get_param( 'deal_id' ) );
 		$meeting_data = $request->get_param( 'meeting_data' );
-		$user_id = get_current_user_id();
+		$user_id      = get_current_user_id();
 
 		if ( empty( $deal_id ) ) {
 			return new WP_Error( 'missing_deal_id', 'Deal ID is required', array( 'status' => 400 ) );
@@ -314,7 +315,7 @@ class REST_Activity_Controller extends REST_Controller
 	 */
 	public function get_comments( $request ) {
 		$activity_id = $request->get_param( 'activity_id' );
-		
+
 		$activity = Deal_Activity_Model::with( 'comments.user' )->find( $activity_id );
 
 		if ( ! $activity ) {
@@ -338,8 +339,8 @@ class REST_Activity_Controller extends REST_Controller
 	 */
 	public function add_comment( $request ) {
 		$activity_id = intval( $request->get_param( 'activity_id' ) );
-		$content = sanitize_textarea_field( $request->get_param( 'content' ) );
-		$user_id = get_current_user_id();
+		$content     = sanitize_textarea_field( $request->get_param( 'content' ) );
+		$user_id     = get_current_user_id();
 
 		if ( empty( $activity_id ) ) {
 			return new WP_Error( 'missing_activity_id', 'Activity ID is required', array( 'status' => 400 ) );
@@ -370,8 +371,8 @@ class REST_Activity_Controller extends REST_Controller
 	 */
 	public function update_comment( $request ) {
 		$comment_id = intval( $request->get_param( 'comment_id' ) );
-		$content = sanitize_textarea_field( $request->get_param( 'content' ) );
-		$user_id = get_current_user_id();
+		$content    = sanitize_textarea_field( $request->get_param( 'content' ) );
+		$user_id    = get_current_user_id();
 
 		if ( empty( $comment_id ) ) {
 			return new WP_Error( 'missing_comment_id', 'Comment ID is required', array( 'status' => 400 ) );
@@ -402,7 +403,7 @@ class REST_Activity_Controller extends REST_Controller
 	 */
 	public function delete_comment( $request ) {
 		$comment_id = intval( $request->get_param( 'comment_id' ) );
-		$user_id = get_current_user_id();
+		$user_id    = get_current_user_id();
 
 		if ( empty( $comment_id ) ) {
 			return new WP_Error( 'missing_comment_id', 'Comment ID is required', array( 'status' => 400 ) );
@@ -433,9 +434,12 @@ class REST_Activity_Controller extends REST_Controller
 		);
 
 		// Remove null values
-		$filters = array_filter( $filters, function( $value ) {
-			return $value !== null && $value !== '';
-		} );
+		$filters = array_filter(
+			$filters,
+			function ( $value ) {
+				return $value !== null && $value !== '';
+			}
+		);
 
 		$statistics = Activity_Manager::instance()->get_activity_statistics( $filters );
 
@@ -451,7 +455,7 @@ class REST_Activity_Controller extends REST_Controller
 	 */
 	public function bulk_delete( $request ) {
 		$activity_ids = $request->get_param( 'activity_ids' );
-		$user_id = get_current_user_id();
+		$user_id      = get_current_user_id();
 
 		if ( ! is_array( $activity_ids ) || empty( $activity_ids ) ) {
 			return new WP_Error( 'invalid_data', 'Activity IDs array is required', array( 'status' => 400 ) );
@@ -465,20 +469,20 @@ class REST_Activity_Controller extends REST_Controller
 	/**
 	 * Prepare the item for the REST response
 	 *
-	 * @param Deal_Activity $activity Activity object.
+	 * @param Deal_Activity   $activity Activity object.
 	 * @param WP_REST_Request $request Request object.
 	 *
 	 * @return array
 	 */
 	public function prepare_item_for_response( $activity, $request ) {
 		$data = array(
-			'id'               => $activity->id,
-			'deal_id'          => $activity->deal_id,
-			'activity_type'    => $activity->activity_type,
-			'data'             => $activity->data,
-			'user_id'          => $activity->user_id,
+			'id'                => $activity->id,
+			'deal_id'           => $activity->deal_id,
+			'activity_type'     => $activity->activity_type,
+			'data'              => $activity->data,
+			'user_id'           => $activity->user_id,
 			'formatted_message' => $activity->formatted_message,
-			'created_at'       => $activity->created_at,
+			'created_at'        => $activity->created_at,
 		);
 
 		// Include relationships if loaded
@@ -516,14 +520,14 @@ class REST_Activity_Controller extends REST_Controller
 	 */
 	protected function prepare_comment_for_response( $comment ) {
 		$data = array(
-			'id'                 => $comment->id,
-			'activity_id'        => $comment->activity_id,
-			'user_id'            => $comment->user_id,
-			'content'            => $comment->content,
-			'formatted_content'  => $comment->formatted_content,
-			'time_ago'           => $comment->time_ago,
-			'created_at'         => $comment->created_at,
-			'updated_at'         => $comment->updated_at,
+			'id'                => $comment->id,
+			'activity_id'       => $comment->activity_id,
+			'user_id'           => $comment->user_id,
+			'content'           => $comment->content,
+			'formatted_content' => $comment->formatted_content,
+			'time_ago'          => $comment->time_ago,
+			'created_at'        => $comment->created_at,
+			'updated_at'        => $comment->updated_at,
 		);
 
 		if ( $comment->relationLoaded( 'user' ) && $comment->user ) {
@@ -545,7 +549,7 @@ class REST_Activity_Controller extends REST_Controller
 	 * @return bool
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -556,7 +560,7 @@ class REST_Activity_Controller extends REST_Controller
 	 * @return bool
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -567,7 +571,7 @@ class REST_Activity_Controller extends REST_Controller
 	 * @return bool
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -578,6 +582,6 @@ class REST_Activity_Controller extends REST_Controller
 	 * @return bool
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 }

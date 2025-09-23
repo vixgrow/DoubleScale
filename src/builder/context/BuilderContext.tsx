@@ -176,7 +176,7 @@ export const BuilderProvider: React.FC<{
 		dispatch(STORE_KEY).clearSelection();
 	};
 
-	// Check if a section contains template blocks
+	// Check if a section contains template blocks or is a layout section
 	const isTemplateSection = (sectionId: string) => {
 		const section = sections.find(s => s.id === sectionId);
 		if (!section) return false;
@@ -202,7 +202,11 @@ export const BuilderProvider: React.FC<{
 			})
 		);
 
-		return hasTemplateLayout || hasTemplatePattern;
+		// Check if this is a layout section (one column, two column, etc.)
+		// Layout sections should have layout settings available
+		const isLayoutSection = section.columns.length > 0;
+
+		return hasTemplateLayout || hasTemplatePattern || isLayoutSection;
 	};
 
 	// Select a template section (for layout settings)

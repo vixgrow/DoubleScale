@@ -14,8 +14,12 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
 use QuillCRM\Tasks;
-use QuillCRM\Campaign\Processing as Campaign_Processing;
+use QuillCRM\Campaign\Email_Processing;
+use QuillCRM\Campaign\SMS_Processing;
+use QuillCRM\Campaign\WhatsApp_Processing;
 use QuillCRM\Tracking\Email as Email_Tracking;
+use QuillCRM\Tracking\SMS as SMS_Tracking;
+use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
@@ -135,12 +139,24 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	public function register_tasks() {
-		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_campaigns' ) === false ) {
-			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_campaigns' );
+		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_email_campaigns' ) === false ) {
+			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_email_campaigns' );
+		}
+
+		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_sms_campaigns' ) === false ) {
+			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_sms_campaigns' );
+		}
+
+		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_whatsapp_campaigns' ) === false ) {
+			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_whatsapp_campaigns' );
 		}
 
 		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily3' ) === false ) {
 			$this->daily_tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'quillcrm_daily3' );
+		}
+
+		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily4' ) === false ) {
+			$this->daily_tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'quillcrm_daily4' );
 		}
 	}
 
@@ -210,8 +226,12 @@ final class QuillCRM {
 		Admin::instance();
 		Admin_Loader::instance();
 		REST_API::instance();
-		Campaign_Processing::instance();
+		Email_Processing::instance();
+		SMS_Processing::instance();
+		WhatsApp_Processing::instance();
 		Email_Tracking::instance();
+		SMS_Tracking::instance();
+		WhatsApp_Tracking::instance();
 		Link_Triggers::instance();
 		Subscription_Manage::instance();
 		Forms_Manager::instance();

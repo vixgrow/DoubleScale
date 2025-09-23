@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState } from 'react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { v4 as uuidv4 } from 'uuid';
 import { STORE_KEY } from '../../stores/email-builder/constants';
-import { EmailSection, EmailBlock } from '../../stores/email-builder/types';
+import { EmailSection, EmailBlock, GlobalEmailSettings } from '../../stores/email-builder/types';
 import { BlockType, LayoutTemplate } from '../types';
 import { blocksRegistry } from '../blocks/BlockRegister';
 import * as emailBuilderApi from '../../api/email-builder-api';
@@ -59,6 +59,10 @@ interface BuilderContextType {
 		subject?: string
 	) => Promise<any>;
 
+	// Global settings operations
+	updateGlobalSettings: (settings: Partial<GlobalEmailSettings>) => void;
+	getGlobalSettings: () => GlobalEmailSettings;
+
 	// State
 	saving: boolean;
 	error: Error | null;
@@ -74,8 +78,9 @@ export const BuilderProvider: React.FC<{
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<Error | null>(null);
 
-	// Get the current sections from the store
+	// Get the current sections and global settings from the store
 	const sections = useSelect((select) => select(STORE_KEY).getSections());
+	const globalSettings = useSelect((select) => select(STORE_KEY).getGlobalSettings());
 
 	const addNewSection = (sectionType: LayoutTemplate) => {
 		const newSection: EmailSection = {
@@ -213,6 +218,15 @@ export const BuilderProvider: React.FC<{
 		dispatch(STORE_KEY).updateSection(sectionId, styles);
 	};
 
+	// Global settings operations
+	const updateGlobalSettings = (settings: Partial<GlobalEmailSettings>) => {
+		dispatch(STORE_KEY).updateGlobalSettings(settings);
+	};
+
+	const getGlobalSettings = () => {
+		return globalSettings;
+	};
+
 	// Save the current template to the backend
 	const saveTemplate = async (name: string, subject = '') => {
 		try {
@@ -224,12 +238,7 @@ export const BuilderProvider: React.FC<{
 				subject,
 				body: JSON.stringify(sections),
 				type: 'email',
-				settings: JSON.stringify({
-					backgroundColor: '#f7f7f7',
-					canvasColor: '#ffffff',
-					textColor: '#000000',
-					fontFamily: 'Arial, sans-serif',
-				}),
+				settings: JSON.stringify(globalSettings),
 			};
 
 			const response = await emailBuilderApi.createTemplate(template);
@@ -253,12 +262,7 @@ export const BuilderProvider: React.FC<{
 				subject,
 				body: JSON.stringify(sections),
 				type: 'email',
-				settings: JSON.stringify({
-					backgroundColor: '#f7f7f7',
-					canvasColor: '#ffffff',
-					textColor: '#000000',
-					fontFamily: 'Arial, sans-serif',
-				}),
+				settings: JSON.stringify(globalSettings),
 			};
 
 			const response = await emailBuilderApi.updateTemplate(id, template);
@@ -289,6 +293,8 @@ export const BuilderProvider: React.FC<{
 				updateSection,
 				saveTemplate,
 				updateTemplate,
+				updateGlobalSettings,
+				getGlobalSettings,
 				saving,
 				error,
 			}}

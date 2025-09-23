@@ -1,86 +1,121 @@
-import type { EmailBlock, EmailBuilderState, EmailColumn, EmailSection } from './types';
+import type {
+	EmailBlock,
+	EmailBuilderState,
+	EmailColumn,
+	EmailSection,
+	GlobalEmailSettings,
+} from './types';
 
 // Section selectors
 export const getSections = (state: EmailBuilderState): EmailSection[] => {
-  return state.sections;
+	return state.sections;
 };
 
-export const getSectionById = (state: EmailBuilderState, sectionId: string): EmailSection | undefined => {
-  return state.sections.find(section => section.id === sectionId);
+export const getSectionById = (
+	state: EmailBuilderState,
+	sectionId: string
+): EmailSection | undefined => {
+	return state.sections.find((section) => section.id === sectionId);
 };
 
 // Column selectors
-export const getColumnById = (state: EmailBuilderState, sectionId: string, columnId: string): EmailColumn | undefined => {
-  const section = getSectionById(state, sectionId);
-  return section?.columns.find(column => column.id === columnId);
+export const getColumnById = (
+	state: EmailBuilderState,
+	sectionId: string,
+	columnId: string
+): EmailColumn | undefined => {
+	const section = getSectionById(state, sectionId);
+	return section?.columns.find((column) => column.id === columnId);
 };
 
 // Block selectors
 export const getAllBlocks = (state: EmailBuilderState): EmailBlock[] => {
-  const blocks: EmailBlock[] = [];
+	const blocks: EmailBlock[] = [];
 
-  state.sections.forEach(section => {
-    section.columns.forEach(column => {
-      blocks.push(...column.blocks);
-    });
-  });
+	state.sections.forEach((section) => {
+		section.columns.forEach((column) => {
+			blocks.push(...column.blocks);
+		});
+	});
 
-  return blocks;
+	return blocks;
 };
 
-export const getBlockById = (state: EmailBuilderState, blockId: string): EmailBlock | undefined => {
-  return getAllBlocks(state).find(block => block.id === blockId);
+export const getBlockById = (
+	state: EmailBuilderState,
+	blockId: string
+): EmailBlock | undefined => {
+	return getAllBlocks(state).find((block) => block.id === blockId);
 };
 
 export const getBlockLocation = (state: EmailBuilderState, blockId: string) => {
-  for (const section of state.sections) {
-    for (const column of section.columns) {
-      const blockIndex = column.blocks.findIndex(block => block.id === blockId);
-      if (blockIndex !== -1) {
-        return {
-          sectionId: section.id,
-          columnId: column.id,
-          blockIndex
-        };
-      }
-    }
-  }
-  return null;
+	for (const section of state.sections) {
+		for (const column of section.columns) {
+			const blockIndex = column.blocks.findIndex(
+				(block) => block.id === blockId
+			);
+			if (blockIndex !== -1) {
+				return {
+					sectionId: section.id,
+					columnId: column.id,
+					blockIndex,
+				};
+			}
+		}
+	}
+	return null;
 };
 
 // Selection selectors
 export const getSelectedBlockId = (state: EmailBuilderState): string | null => {
-  return state.selectedBlockId;
+	return state.selectedBlockId;
 };
 
-export const getSelectedBlock = (state: EmailBuilderState): EmailBlock | undefined => {
-  if (!state.selectedBlockId) return undefined;
-  return getBlockById(state, state.selectedBlockId);
+export const getSelectedBlock = (
+	state: EmailBuilderState
+): EmailBlock | undefined => {
+	if (!state.selectedBlockId) return undefined;
+	return getBlockById(state, state.selectedBlockId);
 };
 
-export const getSelectedSectionId = (state: EmailBuilderState): string | null => {
-  return state.selectedSectionId;
+export const getSelectedSectionId = (
+	state: EmailBuilderState
+): string | null => {
+	return state.selectedSectionId;
 };
 
-export const getSelectedSection = (state: EmailBuilderState): EmailSection | undefined => {
-  if (!state.selectedSectionId) return undefined;
-  return getSectionById(state, state.selectedSectionId);
+export const getSelectedSection = (
+	state: EmailBuilderState
+): EmailSection | undefined => {
+	if (!state.selectedSectionId) return undefined;
+	return getSectionById(state, state.selectedSectionId);
 };
 
-export const getSelectedColumnId = (state: EmailBuilderState): string | null => {
-  return state.selectedColumnId;
+export const getSelectedColumnId = (
+	state: EmailBuilderState
+): string | null => {
+	return state.selectedColumnId;
 };
 
 // Drag & Drop selectors
-export const getDraggedBlock = (state: EmailBuilderState): EmailBlock | null => {
-  return state.draggedBlock;
+export const getDraggedBlock = (
+	state: EmailBuilderState
+): EmailBlock | null => {
+	return state.draggedBlock;
 };
 
 // History selectors
 export const canUndo = (state: EmailBuilderState): boolean => {
-  return state.history.past.length > 0;
+	return state.history.past.length > 0;
 };
 
 export const canRedo = (state: EmailBuilderState): boolean => {
-  return state.history.future.length > 0;
-}; 
+	return state.history.future.length > 0;
+};
+
+// Global settings selectors
+export const getGlobalSettings = (
+	state: EmailBuilderState
+): GlobalEmailSettings => {
+	return state.globalSettings;
+};

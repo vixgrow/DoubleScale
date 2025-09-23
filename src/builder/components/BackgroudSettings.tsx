@@ -5,13 +5,14 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
 
 // WordPress media library types
 declare global {
 	interface Window {
 		wp: {
+
 			media: (options: any) => any;
 		};
 	}
@@ -29,32 +30,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@quillcrm/components/ui/select';
+import { useBuilder } from '../context/BuilderContext';
 
-interface BackgroundImage {
-	id: number;
-	name: string;
-	url: string;
-	size: number;
-}
-
-interface Settings {
-	backgroundColor: string;
-	canvasColor: string;
-	backgroundImage: BackgroundImage | null;
-	backgroundRepeat: string;
-	backgroundSize: string;
-}
 
 const BackgroundSettings: React.FC<{
 	onBack: () => void;
 }> = ({ onBack }) => {
-	const [settings, setSettings] = useState<Settings>({
-		backgroundColor: '#E3E5E8',
-		canvasColor: '#627281',
-		backgroundImage: null,
-		backgroundRepeat: 'no-repeat',
-		backgroundSize: 'cover',
-	});
+	const { updateGlobalSettings, getGlobalSettings } = useBuilder();
+	const settings = getGlobalSettings();
 
 	// Check if WordPress media library is available when component mounts
 	useEffect(() => {
@@ -71,8 +54,8 @@ const BackgroundSettings: React.FC<{
 		return () => clearTimeout(timer);
 	}, []);
 
-	const handleInputChange = (field: keyof Settings, value: any) => {
-		setSettings((prev) => ({ ...prev, [field]: value }));
+	const handleInputChange = (field: string, value: any) => {
+		updateGlobalSettings({ [field]: value });
 	};
 
 	const openMediaLibrary = () => {
@@ -96,15 +79,14 @@ const BackgroundSettings: React.FC<{
 				// Get media attachment details from the frame state
 				const attachment = frame.state().get('selection').first().toJSON();
 
-				setSettings((prev) => ({
-					...prev,
+				updateGlobalSettings({
 					backgroundImage: {
 						id: attachment.id,
 						name: attachment.filename || attachment.title,
 						url: attachment.url,
 						size: attachment.filesizeInBytes || 0,
 					},
-				}));
+				});
 			});
 
 			// Open the modal
@@ -133,15 +115,14 @@ const BackgroundSettings: React.FC<{
 			frame.on('select', function () {
 				const attachment = frame.state().get('selection').first().toJSON();
 
-				setSettings((prev) => ({
-					...prev,
+				updateGlobalSettings({
 					backgroundImage: {
 						id: attachment.id,
 						name: attachment.filename || attachment.title,
 						url: attachment.url,
 						size: attachment.filesizeInBytes || 0,
 					},
-				}));
+				});
 			});
 
 			frame.open();
@@ -159,15 +140,14 @@ const BackgroundSettings: React.FC<{
 			reader.onload = (event) => {
 				const result = event.target?.result;
 				if (typeof result === 'string') {
-					setSettings((prev) => ({
-						...prev,
+					updateGlobalSettings({
 						backgroundImage: {
 							id: 0, // No ID for local files
 							name: file.name,
 							url: result,
 							size: file.size,
 						},
-					}));
+					});
 				}
 			};
 			reader.readAsDataURL(file);
@@ -177,7 +157,7 @@ const BackgroundSettings: React.FC<{
 	};
 
 	const handleDeleteImage = () => {
-		setSettings((prev) => ({ ...prev, backgroundImage: null }));
+		updateGlobalSettings({ backgroundImage: null });
 	};
 
 	const formatFileSize = (bytes: number) => {
@@ -363,40 +343,6 @@ const BackgroundSettings: React.FC<{
 					</div>
 				)}
 
-				{/* Background color */}
-				<div className="space-y-2">
-					<div className="text-sm text-[#333333]">
-						{__('Background Color', 'quillcrm')}
-					</div>
-					<div className="flex items-center gap-2 border rounded-lg px-2">
-						<Input
-							id="bg-color"
-							type="text"
-							value={settings.backgroundColor}
-							onChange={(e) =>
-								handleInputChange(
-									'backgroundColor',
-									e.target.value
-								)
-							}
-							className="rounded-lg"
-							style={{ border: 0 }}
-						/>
-						<Input
-							type="color"
-							value={settings.backgroundColor}
-							onChange={(e) =>
-								handleInputChange(
-									'backgroundColor',
-									e.target.value
-								)
-							}
-							className="w-10 h-10 p-1 rounded-lg"
-							style={{ border: 0 }}
-						/>
-					</div>
-				</div>
-
 				{/* Canvas color */}
 				<div className="space-y-2">
 					<div className="text-sm text-[#333333]">
@@ -426,19 +372,6 @@ const BackgroundSettings: React.FC<{
 				</div>
 			</div>
 
-			{/* Save/Apply Button */}
-			<div className="mt-6 pt-4 px-4 border-t border-border">
-				<Button
-					className="w-full h-10"
-					onClick={() => {
-						// Handle saving background settings
-						console.log('Saving background settings:', settings);
-						onBack();
-					}}
-				>
-					{__('Apply Changes', 'quillcrm')}
-				</Button>
-			</div>
 		</div>
 	);
 };

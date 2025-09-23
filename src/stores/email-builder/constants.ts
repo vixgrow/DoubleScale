@@ -21,4 +21,5 @@ export const UPDATE_COLUMN = 'UPDATE_COLUMN';
 
 // Builder actions
 export const SET_BUILDER_STATE = 'SET_BUILDER_STATE';
-export const RESET_BUILDER = 'RESET_BUILDER'; 
+export const RESET_BUILDER = 'RESET_BUILDER';
+export const UPDATE_GLOBAL_SETTINGS = 'UPDATE_GLOBAL_SETTINGS';

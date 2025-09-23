@@ -11,6 +11,7 @@ import { ChevronRight } from 'lucide-react';
  */
 import { Input } from '@/components/ui/input';
 import { ColorPaletteIcon } from '@quillcrm/components';
+import { useBuilder } from '../context/BuilderContext';
 
 interface GlobalEmailSettingsProps {
 	onShowBackgroundSettings: () => void;
@@ -21,6 +22,8 @@ const GlobalEmailSettings: React.FC<GlobalEmailSettingsProps> = ({
 	onShowBackgroundSettings,
 	onShowButtonSettings,
 }) => {
+	const { updateGlobalSettings, getGlobalSettings } = useBuilder();
+	const globalSettings = getGlobalSettings();
 	return (
 		<div className="grid gap-5">
 			<div className="flex flex-col gap-2">
@@ -32,6 +35,8 @@ const GlobalEmailSettings: React.FC<GlobalEmailSettingsProps> = ({
 					min={1}
 					className="w-full h-12 rounded-lg"
 					placeholder={__('600', 'quillcrm')}
+					value={globalSettings.canvasWidth}
+					onChange={(e) => updateGlobalSettings({ canvasWidth: parseInt(e.target.value) || 600 })}
 				/>
 				<div className="text-[#616161] text-xs">
 					{__('We recommend using a 600-700px width', 'quillcrm')}

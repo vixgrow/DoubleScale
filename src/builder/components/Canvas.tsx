@@ -21,7 +21,7 @@ interface CanvasProps {
 }
 
 const Canvas = ({ }: CanvasProps) => {
-	const { addNewSection } = useBuilder();
+	const { addNewSection, getGlobalSettings } = useBuilder();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const { isOver: isOverCanvas, setNodeRef: setNodeRefCanvas } = useDroppable(
@@ -43,6 +43,7 @@ const Canvas = ({ }: CanvasProps) => {
 	};
 
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	const globalSettings = getGlobalSettings();
 
 	const handleOpenModal = () => {
 		setIsModalOpen(true);
@@ -59,7 +60,10 @@ const Canvas = ({ }: CanvasProps) => {
 
 	return (
 		<div className="flex-1 p-4 pt-20 overflow-auto">
-			<div className="max-w-3xl mx-auto relative">
+			<div
+				className="mx-auto relative"
+				style={{ maxWidth: `${globalSettings.canvasWidth}px` }}
+			>
 				{(sections.length > 0) && (
 					<div className="p-2 bg-primary w-fit rounded-t-xl absolute -top-9 left-0 text-white">
 						{__('Email Page', 'quillcrm')}
@@ -69,9 +73,12 @@ const Canvas = ({ }: CanvasProps) => {
 				<div
 					ref={setNodeRefCanvas}
 					style={{
-						backgroundColor: isOverCanvas ? 'red' : undefined,
+						backgroundColor: isOverCanvas ? 'red' : globalSettings.canvasColor,
+						backgroundImage: globalSettings.backgroundImage ? `url(${globalSettings.backgroundImage.url})` : undefined,
+						backgroundRepeat: globalSettings.backgroundRepeat,
+						backgroundSize: globalSettings.backgroundSize,
 					}}
-					className="bg-white shadow-lg rounded-lg overflow-hidden"
+					className="shadow-lg rounded-lg overflow-hidden"
 				>
 					<SortableContext
 						items={sections.map((s) => s.id)}

@@ -102,3 +102,4 @@ export { default as SoundCloudIcon } from './soundcloud';
 export { default as MediumIcon } from './medium';
 export { default as TeamIcon } from './team';
 export { default as ProductBlockIcon } from './product-block';
+export { default as InfoIcon } from './info';

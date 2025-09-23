@@ -77,6 +77,7 @@ registerAdminPage('dashboard', {
 	component: () => <Dashboard />,
 	label: __('Dashboard', 'quillcrm'),
 	icon: <DashboardIcon />,
+	requiredCapability: 'quillcrm_crm_manager',
 });
 
 registerAdminPage('contacts', {
@@ -84,6 +85,7 @@ registerAdminPage('contacts', {
 	component: () => <Contacts />,
 	label: __('Contacts', 'quillcrm'),
 	icon: <ContactsIcon />,
+	requiredCapability: 'quillcrm_crm_manager',
 });
 
 registerAdminPage('contact', {
@@ -98,6 +100,7 @@ registerAdminPage('lists', {
 	component: () => <Lists />,
 	label: __('Lists', 'quillcrm'),
 	hidden: true,
+	requiredCapability: 'quillcrm_crm_manager',
 });
 
 registerAdminPage('tags', {
@@ -112,6 +115,7 @@ registerAdminPage('custom-fields', {
 	component: () => <CustomFields />,
 	label: __('Custom Fields', 'quillcrm'),
 	icon: <CustomFieldsIcon />,
+	requiredCapability: 'quillcrm_deal_owner',
 });
 
 registerAdminPage('campaigns', {
@@ -119,6 +123,7 @@ registerAdminPage('campaigns', {
 	component: () => <Campaigns />,
 	label: __('Campaigns', 'quillcrm'),
 	icon: <CampaignsIcon />,
+	requiredCapability: 'quillcrm_crm_manager',
 });
 
 registerAdminPage('campaign', {
@@ -133,6 +138,7 @@ registerAdminPage('sales-pipeline', {
 	component: () => <SalesPipeline />,
 	label: __('Pipelines', 'quillcrm'),
 	icon: <TrendingUp size={20} />,
+	requiredCapability: 'quillcrm_deal_owner',
 });
 
 registerAdminPage('automations', {
@@ -140,6 +146,7 @@ registerAdminPage('automations', {
 	component: () => <Automations />,
 	label: __('Automations', 'quillcrm'),
 	icon: <AutomationsIcon />,
+	requiredCapability: 'quillcrm_crm_manager',
 });
 
 registerAdminPage('automation', {
@@ -154,6 +161,7 @@ registerAdminPage('forms', {
 	component: () => <Forms />,
 	label: __('Forms', 'quillcrm'),
 	icon: <FormsIcon />,
+	requiredCapability: 'quillcrm_crm_manager',
 });
 
 registerAdminPage('form', {
@@ -168,6 +176,7 @@ registerAdminPage('link-triggers', {
 	component: () => <LinkTriggers />,
 	label: __('Link Triggers', 'quillcrm'),
 	icon: <ToolsIcon />,
+	requiredCapability: 'quillcrm_crm_manager',
 });
 
 registerAdminPage('link-trigger', {
@@ -182,6 +191,7 @@ registerAdminPage('integrations', {
 	component: () => <Integrations />,
 	label: __('Integrations', 'quillcrm'),
 	icon: <IntegrationsIcon />,
+	requiredCapability: 'quillcrm_crm_manager',
 });
 
 registerAdminPage('templates', {
@@ -210,6 +220,7 @@ registerAdminPage('analytics-and-reports', {
 	component: () => <AnalyticsAndReports />,
 	label: __('Analytics and Reports', 'quillcrm'),
 	icon: <AnalyticsReportsIcon />,
+	requiredCapability: 'quillcrm_deal_owner',
 });
 
 registerAdminPage('cart-analytics', {
@@ -252,6 +263,7 @@ registerAdminPage('settings', {
 	component: () => <Setting />,
 	label: __('Settings', 'quillcrm'),
 	icon: <SettingsIcon />,
+	requiredCapability: 'quillcrm_crm_manager',
 });
 
 registerAdminPage('debug', {

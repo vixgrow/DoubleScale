@@ -7,5 +7,6 @@ export type PageSettings = {
 	label: string;
 	icon?: React.ReactNode;
 	hidden?: boolean;
+	requiredCapability?: string;
 };
 export type Pages = Record<string, PageSettings>;

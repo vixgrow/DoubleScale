@@ -2,6 +2,7 @@
  * QuillCRM dependencies
  */
 import { getAdminPages, useNavigate, getToLink } from '@quillcrm/navigation';
+import Config from '@quillcrm/config';
 /**
  * WordPress dependencies
  */
@@ -35,6 +36,21 @@ interface NavBarProps {
 	defaultSelectedPath?: string;
 }
 
+/**
+ * Check if user has the required capability for a page
+ */
+const hasRequiredCapability = (requiredCapability?: string): boolean => {
+	if (!requiredCapability) {
+		return true; // No capability required
+	}
+
+	const userCapabilities = Config.getUserCapabilities();
+	return (
+		userCapabilities[requiredCapability as keyof typeof userCapabilities] ||
+		false
+	);
+};
+
 const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const navigate = useNavigate();
 	const [selectedKey, setSelectedKey] = useState<string>(defaultSelectedPath);
@@ -44,9 +60,12 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		const pages = getAdminPages();
 		const allItems: NavigationItem[] = [];
 
-		// Convert pages object to array and filter out hidden items and root path
+		// Convert pages object to array and filter out hidden items, items without access, and root path
 		Object.entries(pages).forEach(([_, item]) => {
-			if (!item.hidden) {
+			if (
+				!item.hidden &&
+				hasRequiredCapability(item.requiredCapability)
+			) {
 				allItems.push({
 					path: item.path,
 					label: item.label,

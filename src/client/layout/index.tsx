@@ -28,6 +28,7 @@ import { notification } from 'antd';
  */
 import { NavBar } from '@quillcrm/components';
 import { Controller } from './controller';
+import ProtectedRoute from './protected-route';
 import './style.scss';
 import { MergeTagsModal } from '@quillcrm/components';
 import {
@@ -66,7 +67,8 @@ export const Layout = (props) => {
 		mergeTagsVisible: select('quillcrm/core').getMergeTagsVisible(),
 		mergeTagCallback: select('quillcrm/core').getMergeTagCallback(),
 	}));
-	const { setMergeTagsVisible, setMergeTagCallback } = useDispatch('quillcrm/core');
+	const { setMergeTagsVisible, setMergeTagCallback } =
+		useDispatch('quillcrm/core');
 	console.log(mergeTagsVisible, 'mergeTagsVisible');
 
 	const handleCloseMergeTags = () => {
@@ -87,7 +89,9 @@ export const Layout = (props) => {
 				<div className="qcrm-layout__main">
 					<NavBar />
 					<SidebarTrigger />
-					<Controller {...props} />
+					<ProtectedRoute page={props.page}>
+						<Controller {...props} />
+					</ProtectedRoute>
 				</div>
 			</SidebarProvider>
 		</SlotFillProvider>

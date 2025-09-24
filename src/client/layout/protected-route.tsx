@@ -7,8 +7,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import Config from '@quillcrm/config';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 
 interface ProtectedRouteProps {
 	page: {
@@ -19,25 +19,11 @@ interface ProtectedRouteProps {
 }
 
 /**
- * Check if user has the required capability for a page
- */
-const hasRequiredCapability = (requiredCapability?: string): boolean => {
-	if (!requiredCapability) {
-		return true; // No capability required
-	}
-
-	const userCapabilities = Config.getUserCapabilities();
-	return (
-		userCapabilities[requiredCapability as keyof typeof userCapabilities] ||
-		false
-	);
-};
-
-/**
  * Protected route component that checks if user has required permissions
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ page, children }) => {
 	const navigate = useNavigate();
+	const { hasRequiredCapability } = useCapabilities();
 
 	useEffect(() => {
 		if (

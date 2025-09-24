@@ -2,7 +2,7 @@
  * QuillCRM dependencies
  */
 import { getAdminPages, useNavigate, getToLink } from '@quillcrm/navigation';
-import Config from '@quillcrm/config';
+import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 /**
  * WordPress dependencies
  */
@@ -36,24 +36,10 @@ interface NavBarProps {
 	defaultSelectedPath?: string;
 }
 
-/**
- * Check if user has the required capability for a page
- */
-const hasRequiredCapability = (requiredCapability?: string): boolean => {
-	if (!requiredCapability) {
-		return true; // No capability required
-	}
-
-	const userCapabilities = Config.getUserCapabilities();
-	return (
-		userCapabilities[requiredCapability as keyof typeof userCapabilities] ||
-		false
-	);
-};
-
 const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const navigate = useNavigate();
 	const [selectedKey, setSelectedKey] = useState<string>(defaultSelectedPath);
+	const { hasRequiredCapability } = useCapabilities();
 
 	// Memoize the filtered items to avoid recalculation on every render
 	const { dashboardItem, crmItems } = useMemo(() => {

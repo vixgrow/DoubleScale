@@ -26,6 +26,16 @@ use WP_REST_Server;
 class REST_Pipeline_Controller extends REST_Controller {
 
 
+
+
+
+
+
+
+
+
+
+
 	/**
 	 * Route base.
 	 *
@@ -124,7 +134,7 @@ class REST_Pipeline_Controller extends REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_analytics' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'permission_callback' => array( $this, 'get_analytics_permissions_check' ),
 			)
 		);
 
@@ -162,10 +172,17 @@ class REST_Pipeline_Controller extends REST_Controller {
 		$with_stages = $request->get_param( 'with_stages' );
 		$with_stats  = $request->get_param( 'with_stats' );
 
+		$pipelines = Pipeline_Model::query();
+
+		if ( Permissions::is_deal_owner() ) {
+			$pipeline_ids = Pipeline_Manager::instance()->get_pipeline_ids_for_owner( get_current_user_id() );
+			$pipelines    = $pipelines->whereIn( 'id', $pipeline_ids );
+		}
+
 		if ( $with_stages ) {
-			$pipelines = Pipeline_Manager::instance()->get_pipelines_with_stages();
+			$pipelines = $pipelines->with( 'stages' )->orderBy( 'sort_order' )->get();
 		} else {
-			$pipelines = Pipeline_Model::orderBy( 'sort_order' )->get();
+			$pipelines = $pipelines->orderBy( 'sort_order' )->get();
 		}
 
 		$data = array();
@@ -196,6 +213,13 @@ class REST_Pipeline_Controller extends REST_Controller {
 		$pipeline_id = $request->get_param( 'id' );
 		$with_stages = $request->get_param( 'with_stages' );
 		$with_stats  = $request->get_param( 'with_stats' );
+
+		if ( Permissions::is_deal_owner() ) {
+			$pipeline_ids = Pipeline_Manager::instance()->get_pipeline_ids_for_owner( get_current_user_id() );
+			if ( ! in_array( $pipeline_id, $pipeline_ids ) ) {
+				return new WP_Error( 'pipeline_not_found', 'Pipeline not found', array( 'status' => 404 ) );
+			}
+		}
 
 		if ( $with_stats ) {
 			$pipeline = Pipeline_Manager::instance()->get_pipeline_with_stats( $pipeline_id );
@@ -550,6 +574,8 @@ class REST_Pipeline_Controller extends REST_Controller {
 		);
 	}
 
+
+
 	/**
 	 * Check if user can access pipelines
 	 *
@@ -580,7 +606,7 @@ class REST_Pipeline_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function create_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -591,7 +617,7 @@ class REST_Pipeline_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function update_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -602,6 +628,17 @@ class REST_Pipeline_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if user can access pipeline analytics
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function get_analytics_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 }

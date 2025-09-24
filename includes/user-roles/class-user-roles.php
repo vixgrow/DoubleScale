@@ -23,12 +23,6 @@ namespace QuillCRM\User_Roles;
 final class User_Roles {
 
 
-
-
-
-
-
-
 	public const PREFIX        = 'quillcrm_';
 	public const CRM_MANAGER   = self::PREFIX . 'crm_manager';
 	public const DEAL_OWNER    = self::PREFIX . 'deal_owner';
@@ -146,7 +140,7 @@ final class User_Roles {
 				'quillcrm_view_contacts',    // View contacts
 				'quillcrm_view_deals',       // View deals
 				'quillcrm_view_activities',  // View activities
-				'read', // for wordpress
+				'read',                     // For Wordpress
 			),
 			User_Roles::DEAL_OWNER  => array(
 				'quillcrm_edit_own_deals',     // Edit own deals
@@ -164,6 +158,7 @@ final class User_Roles {
 				'quillcrm_view_reports',       // View reports
 				'quillcrm_export_data',        // Export data
 				'quillcrm_import_data',        // Import data
+				'list_users',                  // For Wordpress List users
 			),
 		);
 	}

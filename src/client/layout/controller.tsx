@@ -115,7 +115,7 @@ registerAdminPage('custom-fields', {
 	component: () => <CustomFields />,
 	label: __('Custom Fields', 'quillcrm'),
 	icon: <CustomFieldsIcon />,
-	requiredCapability: 'quillcrm_deal_owner',
+	requiredCapability: 'quillcrm_crm_manager',
 });
 
 registerAdminPage('campaigns', {

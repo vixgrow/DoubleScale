@@ -11,9 +11,10 @@
 namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Abstracts\REST_Controller;
-use QuillCRM\Models\Deal_Activity;
-use QuillCRM\Models\Activity_Comment;
+use QuillCRM\Models\Deal_Activity_Model;
+use QuillCRM\Models\Activity_Comment_Model;
 use QuillCRM\Managers\Activity_Manager;
+use QuillCRM\Models\Deal_Model;
 use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
@@ -24,6 +25,8 @@ use WP_REST_Server;
  * Activity REST Controller class
  */
 class REST_Activity_Controller extends REST_Controller {
+
+
 
 
 	/**
@@ -167,6 +170,12 @@ class REST_Activity_Controller extends REST_Controller {
 			$activity = Deal_Activity_Model::with( array( 'user', 'comments.user', 'deal' ) )->find( $activity_id );
 		} else {
 			$activity = Deal_Activity_Model::with( array( 'user', 'deal' ) )->find( $activity_id );
+		}
+
+		if ( Permissions::is_deal_owner() ) {
+			if ( $activity->deal->owner_id != get_current_user_id() ) {
+				return new WP_Error( 'activity_not_found', 'Activity not found', array( 'status' => 404 ) );
+			}
 		}
 
 		if ( ! $activity ) {
@@ -317,6 +326,13 @@ class REST_Activity_Controller extends REST_Controller {
 		$activity_id = $request->get_param( 'activity_id' );
 
 		$activity = Deal_Activity_Model::with( 'comments.user' )->find( $activity_id );
+		$deal     = Deal_Model::find( $activity->deal_id );
+
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != get_current_user_id() ) {
+				return new WP_Error( 'activity_not_found', 'Activity not found', array( 'status' => 404 ) );
+			}
+		}
 
 		if ( ! $activity ) {
 			return new WP_Error( 'activity_not_found', 'Activity not found', array( 'status' => 404 ) );

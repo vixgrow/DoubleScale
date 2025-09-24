@@ -18,12 +18,13 @@ use WP_REST_Server;
 use QuillCRM\Utils;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Abandoned_Cart_Model;
-use QuillCRM\Permissions;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * Rest_Abandoned_Cart_Controller class
  */
 class Rest_Abandoned_Cart_Controller extends REST_Controller {
+
 
 
 	/**

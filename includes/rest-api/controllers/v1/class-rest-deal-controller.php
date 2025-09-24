@@ -25,6 +25,18 @@ use WP_REST_Server;
 class REST_Deal_Controller extends REST_Controller {
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 	/**
 	 * Route base.
 	 *
@@ -99,7 +111,7 @@ class REST_Deal_Controller extends REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'move_to_pipeline' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				'permission_callback' => array( $this, 'update_item_pipeline_permissions_check' ),
 			)
 		);
 
@@ -174,7 +186,7 @@ class REST_Deal_Controller extends REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'bulk_update' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				'permission_callback' => array( $this, 'update_items_permissions_check' ),
 			)
 		);
 	}
@@ -251,6 +263,12 @@ class REST_Deal_Controller extends REST_Controller {
 
 		if ( ! $deal ) {
 			return new WP_Error( 'deal_not_found', 'Deal not found', array( 'status' => 404 ) );
+		}
+
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != get_current_user_id() ) {
+				return new WP_Error( 'deal_not_found', 'Deal not found', array( 'status' => 404 ) );
+			}
 		}
 
 		$data = $this->prepare_item_for_response( $deal, $request );
@@ -844,7 +862,7 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function create_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -866,6 +884,28 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if user can update deals
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function update_item_pipeline_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if user can update deals
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function update_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 }

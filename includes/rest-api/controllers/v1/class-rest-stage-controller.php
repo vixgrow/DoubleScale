@@ -12,7 +12,6 @@ namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Pipeline_Stage_Model;
-use QuillCRM\Models\Deal_Model;
 use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
@@ -23,6 +22,8 @@ use WP_REST_Server;
  * Stage REST Controller class
  */
 class REST_Stage_Controller extends REST_Controller {
+
+
 
 
 	/**
@@ -345,7 +346,7 @@ class REST_Stage_Controller extends REST_Controller {
 	 * @return WP_Error|bool
 	 */
 	public function update_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -355,6 +356,6 @@ class REST_Stage_Controller extends REST_Controller {
 	 * @return WP_Error|bool
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_crm_manager_access();
 	}
 }

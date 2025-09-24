@@ -26,6 +26,7 @@ use Illuminate\Support\Str;
 class REST_Custom_Field_Controller extends REST_Controller {
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -405,7 +406,7 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function get_items_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -418,7 +419,7 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function get_item_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**

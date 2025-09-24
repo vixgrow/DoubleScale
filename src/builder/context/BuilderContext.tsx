@@ -11,6 +11,9 @@ interface BuilderContextType {
 	// Section operations
 	addNewSection: (sectionType: LayoutTemplate) => void;
 	deleteSection: (sectionId: string) => void;
+	duplicateSection: (sectionId: string) => void;
+	moveSectionUp: (sectionId: string) => void;
+	moveSectionDown: (sectionId: string) => void;
 	reorderSections: (activeSectionId: string, overSectionId: string) => void;
 
 	// Block operations
@@ -137,6 +140,46 @@ export const BuilderProvider: React.FC<{
 
 	const deleteSection = (sectionId: string) => {
 		dispatch(STORE_KEY).deleteSection(sectionId);
+	};
+
+	const duplicateSection = (sectionId: string) => {
+		const sectionToDuplicate = sections.find(s => s.id === sectionId);
+		if (!sectionToDuplicate) return;
+
+		// Create a deep copy of the section with new IDs
+		const duplicatedSection: EmailSection = {
+			id: uuidv4(),
+			columns: sectionToDuplicate.columns.map(column => ({
+				id: uuidv4(),
+				width: column.width,
+				blocks: column.blocks.map(block => ({
+					id: uuidv4(),
+					type: block.type,
+					props: { ...block.props }
+				}))
+			})),
+			styles: { ...sectionToDuplicate.styles }
+		};
+
+		// Find the index of the original section and insert the duplicate after it
+		const originalIndex = sections.findIndex(s => s.id === sectionId);
+		dispatch(STORE_KEY).addSection(duplicatedSection, originalIndex + 1);
+	};
+
+	const moveSectionUp = (sectionId: string) => {
+		const currentIndex = sections.findIndex(s => s.id === sectionId);
+		if (currentIndex > 0) {
+			const targetSectionId = sections[currentIndex - 1].id;
+			dispatch(STORE_KEY).reorderSections(sectionId, targetSectionId);
+		}
+	};
+
+	const moveSectionDown = (sectionId: string) => {
+		const currentIndex = sections.findIndex(s => s.id === sectionId);
+		if (currentIndex < sections.length - 1) {
+			const targetSectionId = sections[currentIndex + 1].id;
+			dispatch(STORE_KEY).reorderSections(sectionId, targetSectionId);
+		}
 	};
 
 	const reorderSections = (
@@ -289,6 +332,9 @@ export const BuilderProvider: React.FC<{
 				deleteBlock,
 				moveBlock,
 				deleteSection,
+				duplicateSection,
+				moveSectionUp,
+				moveSectionDown,
 				reorderSections,
 				selectBlock,
 				clearSelection,

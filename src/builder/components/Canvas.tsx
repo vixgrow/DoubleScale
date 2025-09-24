@@ -78,7 +78,7 @@ const Canvas = ({ }: CanvasProps) => {
 						backgroundRepeat: globalSettings.backgroundRepeat,
 						backgroundSize: globalSettings.backgroundSize,
 					}}
-					className="shadow-lg rounded-lg overflow-hidden"
+					className="shadow-lg rounded-lg"
 				>
 					<SortableContext
 						items={sections.map((s) => s.id)}

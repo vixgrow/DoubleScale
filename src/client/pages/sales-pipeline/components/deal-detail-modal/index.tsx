@@ -47,6 +47,7 @@ import { DealActivities } from '../deal-activities';
 import { Deal } from '../../types';
 import './style.scss';
 import { DealCustomFields } from '../deal-custom-fields';
+import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -71,6 +72,8 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 
 	const { getDeal, markDealAsWon, markDealAsLost, reopenDeal, deleteDeal } =
 		useDealOperations();
+
+	const { isDealOwner } = useCapabilities();
 
 	// Fetch deal data when modal opens
 	useEffect(() => {
@@ -475,43 +478,45 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 						</Button>
 					)}
 
-					<Button
-						danger
-						type="text"
-						icon={<Archive size={16} />}
-						onClick={() => {
-							// Handle delete - should show confirmation modal
-							Modal.confirm({
-								title: __('Delete Deal?', 'quillcrm'),
-								content: __(
-									'This action cannot be undone.',
-									'quillcrm'
-								),
-								onOk: async () => {
-									try {
-										await deleteDeal(deal.id);
-										message.success(
-											__(
-												'Deal deleted successfully',
-												'quillcrm'
-											)
-										);
-										onClose();
-										onUpdate?.();
-									} catch (error) {
-										message.error(
-											__(
-												'Failed to delete deal',
-												'quillcrm'
-											)
-										);
-									}
-								},
-							});
-						}}
-					>
-						{__('Delete', 'quillcrm')}
-					</Button>
+					{!isDealOwner() && (
+						<Button
+							danger
+							type="text"
+							icon={<Archive size={16} />}
+							onClick={() => {
+								// Handle delete - should show confirmation modal
+								Modal.confirm({
+									title: __('Delete Deal?', 'quillcrm'),
+									content: __(
+										'This action cannot be undone.',
+										'quillcrm'
+									),
+									onOk: async () => {
+										try {
+											await deleteDeal(deal.id);
+											message.success(
+												__(
+													'Deal deleted successfully',
+													'quillcrm'
+												)
+											);
+											onClose();
+											onUpdate?.();
+										} catch (error) {
+											message.error(
+												__(
+													'Failed to delete deal',
+													'quillcrm'
+												)
+											);
+										}
+									},
+								});
+							}}
+						>
+							{__('Delete', 'quillcrm')}
+						</Button>
+					)}
 				</div>
 			</div>
 		);

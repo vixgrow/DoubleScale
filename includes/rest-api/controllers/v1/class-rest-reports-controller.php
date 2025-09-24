@@ -29,6 +29,7 @@ class Rest_Reports_Controller extends REST_Controller {
 
 
 
+
 	/**
 	 * Route base.
 	 *
@@ -1475,7 +1476,7 @@ class Rest_Reports_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_contacts_deals_reports_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -1485,7 +1486,7 @@ class Rest_Reports_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_deals_by_date_reports_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -1495,7 +1496,7 @@ class Rest_Reports_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_deals_leaderboard_reports_permissions_check( $request ) {
-		return Permissions::has_deal_owner_access();
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**

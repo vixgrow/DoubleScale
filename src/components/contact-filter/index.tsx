@@ -78,6 +78,7 @@ interface ContactFilterSectionProps {
 	title: string;
 	description: string;
 	onReset?: () => void;
+	onChange?: (rows: FilterRow[]) => void;
 }
 
 // Define the exposed ref interface
@@ -88,7 +89,7 @@ export interface ContactFilterRef {
 export const ContactFilterSection = forwardRef<
 	ContactFilterRef,
 	ContactFilterSectionProps
->(({ title, description, onReset }, ref) => {
+>(({ title, description, onReset, onChange }, ref) => {
 	const [rows, setRows] = useState<FilterRow[]>([
 		{ id: 1, list: 'all', tag: 'all' },
 	]);
@@ -198,25 +199,39 @@ export const ContactFilterSection = forwardRef<
 	}, []);
 
 	const addRow = () => {
-		setRows([...rows, { id: Date.now(), list: 'all', tag: 'all' }]);
+		const newRows = [...rows, { id: Date.now(), list: 'all', tag: 'all' }];
+		setRows(newRows);
+		if (onChange) {
+			onChange(newRows);
+		}
 	};
 
 	const removeRow = (id: number) => {
-		setRows(rows.filter((row) => row.id !== id));
+		const newRows = rows.filter((row) => row.id !== id);
+		setRows(newRows);
+		if (onChange) {
+			onChange(newRows);
+		}
 	};
 
 	const updateRow = (id: number, field: 'list' | 'tag', value: string) => {
-		setRows(
-			rows.map((row) =>
-				row.id === id ? { ...row, [field]: value } : row
-			)
+		const newRows = rows.map((row) =>
+			row.id === id ? { ...row, [field]: value } : row
 		);
+		setRows(newRows);
+		if (onChange) {
+			onChange(newRows);
+		}
 	};
 
 	// Function to reset all filters to default state
 	const resetFilters = () => {
 		// Reset rows to single default row
-		setRows([{ id: 1, list: 'all', tag: 'all' }]);
+		const defaultRows = [{ id: 1, list: 'all', tag: 'all' }];
+		setRows(defaultRows);
+		if (onChange) {
+			onChange(defaultRows);
+		}
 
 		// If parent component provided an onReset callback, call it
 		if (onReset && typeof onReset === 'function') {

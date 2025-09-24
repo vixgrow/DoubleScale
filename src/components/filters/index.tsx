@@ -2,12 +2,17 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useCallback, useEffect } from '@wordpress/element';
+import { useState, useMemo, useCallback } from '@wordpress/element';
+
+/**
+ * External dependencies
+ */
+import { map } from 'lodash';
 
 /**
  * Internal dependencies
  */
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
 	Select,
 	SelectContent,
@@ -15,365 +20,200 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { Info, Trash2, Plus } from 'lucide-react';
 import type { Filter as FilterType } from '@quillcrm/client';
+import { getFilterBySlug } from '@quillcrm/utils';
 import ConfigAPI from '@quillcrm/config';
-import './style.scss';
+import FilterItem from '../filter';
+import { PlusIcon, InfoIcon } from '@quillcrm/components';
 
 interface FiltersProps {
 	filters: FilterType[];
 	onChange: (filters: FilterType[]) => void;
 }
 
-interface FilterGroup {
-	id: string;
-	type: 'and' | 'or';
-	filters: FilterType[];
-}
-
-interface FilterField {
-	label: string;
-	value: string;
-}
-
 const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
-	// Filter groups (AND/OR)
-	const [filterGroups, setFilterGroups] = useState<FilterGroup[]>([
-		{ id: 'and-group', type: 'and', filters: [] },
-		{ id: 'or-group', type: 'or', filters: [] },
-	]);
-
-	// Temporary filter selection state (for the selection dropdowns)
-	const [selectedGroupField, setSelectedGroupField] =
-		useState<string>('contact');
+	const [selectedGroup, setSelectedGroup] = useState<string>('');
 	const [selectedFilter, setSelectedFilter] = useState<string>('');
 
-	// Get filter groups configuration
 	const filtersGroups = ConfigAPI.getFiltersGroups();
 
-	// Initialize filters from props
-	useEffect(() => {
-		if (filters.length > 0 && filterGroups[0].filters.length === 0) {
-			setFilterGroups([
-				{ ...filterGroups[0], filters: [...filters] },
-				{ ...filterGroups[1], filters: [] },
-			]);
-		}
-	}, [filters, filterGroups]);
-
-	// Get available filter fields based on the selected group
-	const getFilterFields = (groupSlug: string): FilterField[] => {
-		if (!filtersGroups[groupSlug]?.filters) return [];
-
-		return Object.entries(filtersGroups[groupSlug].filters).map(
-			([key, filter]: [string, any]) => ({
+	// Memoized options to prevent unnecessary re-renders
+	const groupOptions = useMemo(
+		() =>
+			map(filtersGroups, (group, key) => ({
 				value: key,
-				label: filter.name || key,
-			})
-		);
-	};
-
-	// Get filter options (possible operators)
-	const getFilterOperators = (): FilterField[] => {
-		return [
-			{ value: 'is', label: __('Is', 'quillcrm') },
-			{ value: 'is_not', label: __('Is not', 'quillcrm') },
-			{ value: 'includes', label: __('Includes', 'quillcrm') },
-			{ value: 'not_includes', label: __('Not includes', 'quillcrm') },
-		];
-	};
-
-	// Event handlers
-	const handleAddFilter = useCallback(
-		(groupId: string) => {
-			if (!selectedGroupField || !selectedFilter) return;
-
-			const groupIndex = filterGroups.findIndex((g) => g.id === groupId);
-			if (groupIndex === -1) return;
-
-			const newFilter: FilterType = {
-				group: selectedGroupField,
-				filter: selectedFilter,
-				operator: 'includes',
-				value: '',
-			};
-
-			const updatedGroups = [...filterGroups];
-			updatedGroups[groupIndex] = {
-				...updatedGroups[groupIndex],
-				filters: [...updatedGroups[groupIndex].filters, newFilter],
-			};
-
-			setFilterGroups(updatedGroups);
-			onChange(updatedGroups.flatMap((g) => g.filters));
-
-			// Reset selection after adding
-			setSelectedFilter('');
-		},
-		[filterGroups, onChange, selectedGroupField, selectedFilter]
+				label: group.name,
+			})),
+		[filtersGroups]
 	);
 
+	const filterOptions = useMemo(
+		() =>
+			selectedGroup
+				? map(filtersGroups[selectedGroup].filters, (filter, key) => ({
+						value: key,
+						label: filter.name,
+					}))
+				: [],
+		[filtersGroups, selectedGroup]
+	);
+
+	// Event handlers
+	const handleAddFilter = useCallback(() => {
+		if (!selectedGroup || !selectedFilter) return;
+
+		const newFilter: FilterType = {
+			group: selectedGroup,
+			filter: selectedFilter,
+			operator: 'is',
+			value: '',
+		};
+
+		onChange([...filters, newFilter]);
+		setSelectedGroup('');
+		setSelectedFilter('');
+	}, [selectedGroup, selectedFilter, filters, onChange]);
+
 	const handleRemoveFilter = useCallback(
-		(groupId: string, filterIndex: number) => {
-			const groupIndex = filterGroups.findIndex((g) => g.id === groupId);
-			if (groupIndex === -1) return;
-
-			const updatedGroups = [...filterGroups];
-			updatedGroups[groupIndex].filters = updatedGroups[
-				groupIndex
-			].filters.filter((_, i) => i !== filterIndex);
-
-			setFilterGroups(updatedGroups);
-			onChange(updatedGroups.flatMap((g) => g.filters));
+		(index: number) => {
+			const newFilters = [...filters];
+			newFilters.splice(index, 1);
+			onChange(newFilters);
 		},
-		[filterGroups, onChange]
+		[filters, onChange]
 	);
 
 	const handleFilterChange = useCallback(
-		(
-			groupId: string,
-			filterIndex: number,
-			key: keyof FilterType,
-			value: any
-		) => {
-			const groupIndex = filterGroups.findIndex((g) => g.id === groupId);
-			if (groupIndex === -1) return;
-
-			const updatedGroups = [...filterGroups];
-			updatedGroups[groupIndex].filters[filterIndex] = {
-				...updatedGroups[groupIndex].filters[filterIndex],
+		(index: number, key: string, value: any) => {
+			const newFilters = [...filters];
+			newFilters[index] = {
+				...newFilters[index],
 				[key]: value,
 			};
-
-			setFilterGroups(updatedGroups);
-			onChange(updatedGroups.flatMap((g) => g.filters));
+			onChange(newFilters);
 		},
-		[filterGroups, onChange]
+		[filters, onChange]
 	);
 
-	const handleClearFilters = useCallback(() => {
-		const emptyGroups = filterGroups.map((g) => ({ ...g, filters: [] }));
-		setFilterGroups(emptyGroups);
-		onChange([]);
-	}, [filterGroups, onChange]);
+	const handleGroupChange = useCallback((value: string) => {
+		setSelectedGroup(value);
+		setSelectedFilter('');
+	}, []);
+
+	const handleFilterSelectChange = useCallback((value: string) => {
+		setSelectedFilter(value);
+	}, []);
 
 	return (
-		<div className="filters-container">
-			{/* Header */}
-			<h3 className="text-lg font-semibold">
-				{__('Select Custom Contacts By Advanced Filters', 'quillcrm')}
-			</h3>
-			<p className="text-sm text-muted-foreground mb-6">
-				{__(
-					'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
-					'quillcrm'
-				)}
-			</p>
+		<Card>
+			<CardContent className="p-5">
+				{/* Header with Add Filter */}
+				<div className="flex items-center justify-between gap-3 pb-3">
+					<h3 className="font-bold text-lg w-[15%]">
+						{__('And', 'quillcrm')}
+					</h3>
 
-			{/* Filter Groups */}
-			{filterGroups.map((group) => (
-				<div
-					key={group.id}
-					className="mb-6 border rounded-md shadow-sm"
-				>
-					{/* Group Header with Dropdowns */}
-					<div className="p-4 border-b">
-						<div className="flex items-center justify-between mb-2">
-							<div className="font-medium">
-								{group.type === 'and'
-									? __('And', 'quillcrm')
-									: __('Or', 'quillcrm')}
-							</div>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="text-blue-500"
-								onClick={() => handleAddFilter(group.id)}
-								disabled={
-									!selectedGroupField || !selectedFilter
-								}
-							>
-								<Plus className="h-5 w-5" />
-							</Button>
-						</div>
+					<div className="w-[85%] flex items-center gap-3">
+						<Select
+							value={selectedGroup}
+							onValueChange={handleGroupChange}
+						>
+							<SelectTrigger className="border-gray-300 focus:border-[#3B82F6] focus:ring-[#3B82F6]">
+								<SelectValue
+									placeholder={__('Select group', 'quillcrm')}
+								/>
+							</SelectTrigger>
+							<SelectContent>
+								{groupOptions.map((option) => (
+									<SelectItem
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 
-						<div className="flex gap-2">
-							{/* Group Field Selector */}
-							<Select
-								value={selectedGroupField}
-								onValueChange={setSelectedGroupField}
-							>
-								<SelectTrigger className="w-[180px]">
-									<SelectValue
-										placeholder={__('Contact', 'quillcrm')}
-									/>
-								</SelectTrigger>
-								<SelectContent>
-									{Object.entries(filtersGroups).map(
-										([key, g]: [string, any]) => (
-											<SelectItem key={key} value={key}>
-												{g.name}
-											</SelectItem>
-										)
-									)}
-								</SelectContent>
-							</Select>
-
-							{/* Filter Field Selector */}
-							<Select
-								value={selectedFilter}
-								onValueChange={setSelectedFilter}
-							>
-								<SelectTrigger className="w-[180px]">
-									<SelectValue
-										placeholder={__(
-											'General Properties',
-											'quillcrm'
-										)}
-									/>
-								</SelectTrigger>
-								<SelectContent>
-									{getFilterFields(selectedGroupField).map(
-										(field) => (
-											<SelectItem
-												key={field.value}
-												value={field.value}
-											>
-												{field.label}
-											</SelectItem>
-										)
-									)}
-								</SelectContent>
-							</Select>
-						</div>
-
-						{/* Info Message */}
-						{group.filters.length === 0 && group.type === 'and' && (
-							<div className="flex items-center text-xs text-blue-600 mt-2">
-								<Info className="h-3 w-3 mr-1" />
-								<span>
-									{__(
-										'This Add New Filter To Narrow Down Your Contact Based On Different Prosperities. Is Required By Default',
+						<Select
+							value={selectedFilter}
+							onValueChange={handleFilterSelectChange}
+							disabled={!selectedGroup}
+						>
+							<SelectTrigger className="border-gray-300 focus:border-[#3B82F6] focus:ring-[#3B82F6] disabled:opacity-50">
+								<SelectValue
+									placeholder={__(
+										'Select filter',
 										'quillcrm'
 									)}
-								</span>
-							</div>
-						)}
+								/>
+							</SelectTrigger>
+							<SelectContent>
+								{filterOptions.map((option) => (
+									<SelectItem
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</div>
 
-					{/* Active Filters */}
-					<div className="p-4 space-y-3">
-						{group.filters.map((filter, filterIndex) => (
-							<div
-								key={`${group.id}-${filter.filter}-${filterIndex}`}
-								className="flex items-center gap-2"
-							>
-								{/* Field Label */}
-								<div className="w-24 text-sm">
-									{filterIndex === 0 && group.type === 'and'
-										? __('City', 'quillcrm')
-										: filterIndex === 1 &&
-											  group.type === 'and'
-											? __('Last Name', 'quillcrm')
-											: group.type === 'or'
-												? __('Lists', 'quillcrm')
-												: filtersGroups[filter.group]
-														?.filters[filter.filter]
-														?.name || filter.filter}
-								</div>
+					<div
+						onClick={handleAddFilter}
+						className={`cursor-pointer ${!selectedFilter ? 'opacity-50 cursor-not-allowed' : ''} text-secondary`}
+					>
+						<PlusIcon width={20} height={20} />
+					</div>
+				</div>
 
-								{/* Operator */}
-								<div className="w-[180px]">
-									<Select
-										value={filter.operator}
-										onValueChange={(value) =>
+				{/* Divider */}
+				<div className="text-secondary flex items-center gap-2 font-bold">
+					<InfoIcon />
+					{__(
+						'This add new filter to narrow down your contact based on different prosperities. is required by default',
+						'quillcrm'
+					)}
+				</div>
+
+				{/* Active Filters */}
+				<div className="space-y-2 py-6">
+					{filters.length > 0 ? (
+						<div className="space-y-2">
+							{filters.map((filter, index) => {
+								const filterSettings = getFilterBySlug(
+									filter.filter,
+									filter.group
+								);
+								return (
+									<FilterItem
+										key={`${filter.group}-${filter.filter}-${index}`}
+										filterSettings={filterSettings}
+										filter={filter}
+										onChange={(key, value) =>
 											handleFilterChange(
-												group.id,
-												filterIndex,
-												'operator',
+												index,
+												key,
 												value
 											)
 										}
-									>
-										<SelectTrigger>
-											<SelectValue
-												placeholder={__(
-													'Includes',
-													'quillcrm'
-												)}
-											/>
-										</SelectTrigger>
-										<SelectContent>
-											{getFilterOperators().map((op) => (
-												<SelectItem
-													key={op.value}
-													value={op.value}
-												>
-													{op.label}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-								</div>
-
-								{/* Value Input */}
-								<div className="flex-1">
-									<input
-										type="text"
-										value={filter.value || ''}
-										onChange={(e) =>
-											handleFilterChange(
-												group.id,
-												filterIndex,
-												'value',
-												e.target.value
-											)
+										onRemove={() =>
+											handleRemoveFilter(index)
 										}
-										placeholder={
-											group.type === 'and' &&
-											filterIndex === 0
-												? 'New York'
-												: group.type === 'and' &&
-													  filterIndex === 1
-													? 'David'
-													: group.type === 'or'
-														? 'Campaign1'
-														: ''
-										}
-										className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
 									/>
-								</div>
-
-								{/* Delete Button */}
-								<Button
-									variant="ghost"
-									size="icon"
-									onClick={() =>
-										handleRemoveFilter(
-											group.id,
-											filterIndex
-										)
-									}
-									className="text-red-500"
-								>
-									<Trash2 className="h-4 w-4" />
-								</Button>
-							</div>
-						))}
-					</div>
+								);
+							})}
+						</div>
+					) : (
+						<p className="text-sm text-center text-muted-foreground">
+							{__('No filters applied', 'quillcrm')}
+						</p>
+					)}
 				</div>
-			))}
-
-			{/* Action buttons */}
-			<div className="flex gap-3 mt-6">
-				<Button className="bg-blue-700 hover:bg-blue-800">
-					{__('Filter', 'quillcrm')}
-				</Button>
-				<Button variant="outline" onClick={handleClearFilters}>
-					{__('Clear Filters', 'quillcrm')}
-				</Button>
-			</div>
-		</div>
+			</CardContent>
+		</Card>
 	);
 };
 

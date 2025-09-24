@@ -35,7 +35,7 @@ const initialState: EmailBuilderState = {
 		backgroundImage: null,
 		backgroundRepeat: 'no-repeat',
 		backgroundSize: 'cover',
-		canvasWidth: 600,
+		canvasWidth: 650,
 	},
 	history: {
 		past: [],

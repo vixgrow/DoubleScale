@@ -101,10 +101,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 		>
 			{/* Section Controls */}
 			{isSelected && (
-				<div className="absolute -top-[1.5px] -bottom-[1.5px] -left-[43px] grid items-center gap-1 bg-white shadow-md rounded-l-xl p-2 border-2 border-blue-500"
-				style={{
-					height:"-webkit-fill-available",
-				}}
+				<div className="absolute -top-[1.5px] h-[189.5px] -left-[43px] grid items-center gap-1 bg-white shadow-md rounded-l-xl p-2 border-2 border-blue-500"
 				>
 					<Button
 						variant="ghost"

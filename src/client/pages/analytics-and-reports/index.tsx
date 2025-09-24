@@ -6,50 +6,67 @@ import ContactsDealsReports from './contacts-deals-reports';
 import DealsReportsByDate from './deals-reports-by-date';
 import DealsReportsLeaderboard from './deals-reports-leaderboard';
 import SalesRep from './sales-rep';
+import SalesRepDetailView from './sale-rep';
 
 /**
  * External dependencies
  */
-import { useState } from 'react';
 import { BarChartOutlined, UserOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
  */
 import PageTabs from '../../../components/page-tabs';
+import { useCapabilities } from '../../../hooks/use-capabilities';
 
 const AnalyticsAndReports: React.FC = () => {
-	const [activeTab, setActiveTab] = useState('deals');
+	const { isDealOwner } = useCapabilities();
 
-	const tabsList = [
-		{
-			value: 'deals',
-			label: 'Deals',
-			icon: <BarChartOutlined />,
-		},
-		{
-			value: 'sales-rep',
-			label: 'Sales Rep',
-			icon: <UserOutlined />,
-		},
-	];
+	// Configure tabs based on user capabilities
+	const tabsList = isDealOwner()
+		? [
+				{
+					value: 'my-reports',
+					label: 'My Reports',
+					icon: <BarChartOutlined />,
+				},
+			]
+		: [
+				{
+					value: 'deals',
+					label: 'Deals',
+					icon: <BarChartOutlined />,
+				},
+				{
+					value: 'sales-rep',
+					label: 'Sales Rep',
+					icon: <UserOutlined />,
+				},
+			];
 
-	const tabsContent = [
-		{
-			value: 'deals',
-			children: (
-				<div className="space-y-6">
-					<ContactsDealsReports />
-					<DealsReportsByDate />
-					<DealsReportsLeaderboard />
-				</div>
-			),
-		},
-		{
-			value: 'sales-rep',
-			children: <SalesRep />,
-		},
-	];
+	const tabsContent = isDealOwner()
+		? [
+				{
+					value: 'my-reports',
+					children: <SalesRepDetailView />,
+				},
+			]
+		: [
+				{
+					value: 'deals',
+					children: (
+						<div className="space-y-6">
+							<ContactsDealsReports />
+							<DealsReportsByDate />
+							<DealsReportsLeaderboard />
+						</div>
+					),
+				},
+				{
+					value: 'sales-rep',
+					children: <SalesRep />,
+				},
+			];
 
 	return (
 		<div className="space-y-6">
@@ -57,10 +74,10 @@ const AnalyticsAndReports: React.FC = () => {
 				{__('Analytics and Reports', 'quillcrm')}
 			</h2>
 			<PageTabs
-				defaultValue="deals"
+				defaultValue={isDealOwner() ? 'my-reports' : 'deals'}
 				tabsList={tabsList}
 				tabsContent={tabsContent}
-				onValueChange={setActiveTab}
+				onValueChange={() => {}}
 			/>
 		</div>
 	);

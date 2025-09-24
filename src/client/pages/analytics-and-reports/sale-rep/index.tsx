@@ -100,7 +100,12 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 		try {
 			const queryParams = buildQueryParams();
 			setQueryParams(queryParams);
-			const apiPath = `/qc/v1/reports/sales-rep?owner_id=${ownerId}${queryParams ? `&${queryParams}` : ''}`;
+			let apiPath = '';
+			if (ownerId) {
+				apiPath = `/qc/v1/reports/sales-rep?owner_id=${ownerId}${queryParams ? `&${queryParams}` : ''}`;
+			} else {
+				apiPath = `/qc/v1/reports/sales-rep${queryParams ? `?${queryParams}` : ''}`;
+			}
 
 			const response = (await apiFetch({
 				path: apiPath,

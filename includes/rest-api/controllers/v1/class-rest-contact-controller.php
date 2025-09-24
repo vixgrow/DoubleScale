@@ -37,6 +37,8 @@ class REST_Contact_Controller extends REST_Controller {
 
 
 
+
+
 	/**
 	 * REST Base
 	 *
@@ -1471,7 +1473,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return bool $response Permission check result.
 	 */
 	public function get_items_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -1536,7 +1538,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return bool $response Permission check result.
 	 */
 	public function get_item_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**

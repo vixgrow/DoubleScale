@@ -20,12 +20,6 @@ namespace QuillCRM\User_Roles;
  */
 final class Permissions {
 
-
-
-
-
-
-
 	/**
 	 * Check if user is a CRM Manager/Admin
 	 *
@@ -36,7 +30,7 @@ final class Permissions {
 	 */
 	public static function is_crm_manager( $user_id = null ) {
 		$user_role = self::get_user_role( $user_id );
-		return in_array( $user_role, array( User_Roles::CRM_MANAGER ) ) ? true : false;
+		return in_array( $user_role, array( User_Roles::CRM_MANAGER, User_Roles::ADMINISTRATOR ) ) ? true : false;
 	}
 
 	/**

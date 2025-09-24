@@ -34,6 +34,7 @@ class Core {
 
 
 
+
 	/**
 	 * Set admin config
 	 *
@@ -49,8 +50,8 @@ class Core {
 
 		// Get current user capabilities for role-based access control
 		$user_capabilities = array(
-			'quillcrm_crm_manager' => Permissions::has_crm_manager_access(),
-			'quillcrm_deal_owner'  => Permissions::has_deal_owner_access(),
+			'quillcrm_crm_manager' => Permissions::is_crm_manager(),
+			'quillcrm_deal_owner'  => Permissions::is_deal_owner(),
 		);
 
 		wp_add_inline_script(

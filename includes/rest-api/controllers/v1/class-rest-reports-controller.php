@@ -23,13 +23,6 @@ use WP_REST_Server;
 class Rest_Reports_Controller extends REST_Controller {
 
 
-
-
-
-
-
-
-
 	/**
 	 * Route base.
 	 *
@@ -1527,5 +1520,15 @@ class Rest_Reports_Controller extends REST_Controller {
 	 */
 	public function get_sales_rep_active_deals_reports_permissions_check( $request ) {
 		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Get all sales rep reports permissions check
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function get_all_sales_rep_reports_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 }

@@ -90,7 +90,7 @@ const BlockEditor: React.FC = () => {
 										: __('Global Email Settings', 'quillcrm')}
 							</h3>
 						</div>
-						{isBlockSelected && (
+						{(isBlockSelected || isTemplateSectionSelected) && (
 							<Button
 								variant="ghost"
 								size="sm"

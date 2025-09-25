@@ -3,28 +3,25 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
+import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { Input } from '@/components/ui/input';
-import type {
-	Contact,
-	ContactsResponse,
-	Filter as FilterType,
-} from '@quillcrm/client';
+import type { Filter as FilterType } from '@quillcrm/client';
 import { SearchIcon } from 'lucide-react';
+import { STORE_KEY } from '@/stores/contacts';
 
 interface ContactListProps {
 	filters?: FilterType[];
-	total?: number;
 	loading?: boolean;
 	searchPlaceholder?: string;
 	maxHeight?: number;
 	shouldFetch?: boolean;
 	onFetchComplete?: () => void;
+	onTotalChange?: (total: number) => void;
+	onLoadingChange?: (loading: boolean) => void;
 }
 
 // Helper function to generate contact initials
@@ -56,49 +53,74 @@ const getAvatarColor = (name: string): string => {
 
 const ContactList: React.FC<ContactListProps> = ({
 	filters = [],
-	total = 0,
 	loading = false,
 	searchPlaceholder = __('Search Recipients', 'quillcrm'),
 	maxHeight = 0,
 	shouldFetch = false,
 	onFetchComplete,
+	onTotalChange,
+	onLoadingChange,
 }) => {
-	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [searchTerm, setSearchTerm] = useState('');
-	const [isLoading, setIsLoading] = useState(false);
 
-	const fetchContacts = async (search = '') => {
-		setIsLoading(true);
+	// Get data from store
+	const { contacts, total, isLoadingContacts, contactsError } = useSelect(
+		(select: any) => {
+			const store = select(STORE_KEY);
+			return {
+				contacts: store.getContacts(),
+				total: store.getContactsTotal(),
+				isLoadingContacts: store.isLoadingContacts(),
+				contactsError: store.getContactsError(),
+			};
+		},
+		[]
+	);
+
+	// Store actions
+	const { fetchContacts, setFilters, setSearchKeywords } = useDispatch(
+		STORE_KEY
+	) as any;
+
+	// Fetch contacts using store action
+	const handleFetchContacts = async (search = '') => {
 		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts', {
-					per_page: 50,
-					page: 1,
-					filters: filters,
-					subscribed: true,
-					keywords: search,
-				}),
-				method: 'GET',
-				parse: true,
-			})) as ContactsResponse;
-
-			if (response.data) {
-				setContacts(response.data);
-			}
+			await fetchContacts({
+				filters,
+				keywords: search,
+				page: 1,
+				perPage: 50,
+				subscribed: true,
+			});
 		} catch (error) {
 			console.error('Failed to fetch contacts:', error);
-		} finally {
-			setIsLoading(false);
 		}
 	};
 
+	// Notify parent components of state changes
 	useEffect(() => {
-		fetchContacts(searchTerm);
-	}, []);
+		if (onTotalChange) {
+			onTotalChange(total);
+		}
+	}, [total, onTotalChange]);
 
 	useEffect(() => {
+		if (onLoadingChange) {
+			onLoadingChange(isLoadingContacts);
+		}
+	}, [isLoadingContacts, onLoadingChange]);
+
+	// Initial fetch on component mount
+	useEffect(() => {
+		handleFetchContacts(searchTerm);
+	}, []);
+
+	// Refetch when shouldFetch is true (when apply filters is clicked)
+	useEffect(() => {
 		if (shouldFetch) {
-			fetchContacts(searchTerm);
+			// Update store filters
+			setFilters(filters);
+			handleFetchContacts(searchTerm);
 			if (onFetchComplete) {
 				onFetchComplete();
 			}
@@ -109,12 +131,15 @@ const ContactList: React.FC<ContactListProps> = ({
 	useEffect(() => {
 		if (searchTerm !== '') {
 			const timeoutId = setTimeout(() => {
-				fetchContacts(searchTerm);
+				setSearchKeywords(searchTerm);
+				handleFetchContacts(searchTerm);
 			}, 300);
 
 			return () => clearTimeout(timeoutId);
 		} else if (searchTerm === '') {
-			fetchContacts('');
+			// If search is cleared, fetch without search term
+			setSearchKeywords('');
+			handleFetchContacts('');
 		}
 		// Return undefined for other cases
 		return undefined;
@@ -167,11 +192,15 @@ const ContactList: React.FC<ContactListProps> = ({
 
 			{/* Contacts List - make it fill remaining space but scroll content */}
 			<div className="space-y-3 overflow-y-auto flex-1 min-h-0 mt-3">
-				{isLoading || loading ? (
+				{isLoadingContacts || loading ? (
 					<div className="flex items-center justify-center py-8">
 						<div className="text-gray-500">
 							{__('Loading contacts...', 'quillcrm')}
 						</div>
+					</div>
+				) : contactsError ? (
+					<div className="flex items-center justify-center py-8">
+						<div className="text-red-500">{contactsError}</div>
 					</div>
 				) : contacts.length === 0 ? (
 					<div className="flex items-center justify-center py-8">

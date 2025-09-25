@@ -3,9 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useRef } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -13,7 +10,7 @@ import { useDispatch } from '@wordpress/data';
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useCampaignContext } from '../../state/context';
-import type { Filter as FilterType, ContactsResponse } from '@quillcrm/client';
+import type { Filter as FilterType } from '@quillcrm/client';
 import {
 	ContactList,
 	PanelLayout,
@@ -32,43 +29,13 @@ const Contacts: React.FC = () => {
 		updateSettings('filters', newFilters);
 	};
 
-	const [loading, setLoading] = useState(true);
 	const [total, setTotal] = useState(0);
 	const [filterBy, setFilterBy] = useState('list-tags');
 	const [isApplying, setIsApplying] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
 	const [panelHeight, setPanelHeight] = useState<number>(0);
 	const panelRef = useRef<HTMLDivElement>(null);
-	const { createNotice } = useDispatch('quillcrm/core');
-
-	const fetchContactsTotal = async (): Promise<void> => {
-		setLoading(true);
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts', {
-					per_page: 1,
-					page: 1,
-					filters: filters,
-					subscribed: true,
-				}),
-				method: 'GET',
-				parse: true,
-			})) as ContactsResponse;
-
-			setTotal(response.total);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to fetch contacts total', 'quillcrm'),
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchContactsTotal();
-	}, []);
 
 	// Measure and sync panel height
 	useEffect(() => {
@@ -94,11 +61,10 @@ const Contacts: React.FC = () => {
 		return () => {
 			resizeObserver.disconnect();
 		};
-	}, [filterBy, filters, loading, isApplying]); // Re-measure when content changes
+	}, [filterBy, filters, isApplying]); // Re-measure when content changes
 
 	// Handle apply filters action
 	const handleApplyFilters = async (): Promise<void> => {
-		await fetchContactsTotal();
 		setShouldFetchContacts(true);
 	};
 
@@ -174,7 +140,7 @@ const Contacts: React.FC = () => {
 											'Total Contacts based on filters',
 											'quillcrm'
 										)}
-										:
+										: {total.toLocaleString()}
 									</div>
 								</div>
 
@@ -183,7 +149,7 @@ const Contacts: React.FC = () => {
 										filters={filters}
 										setFilters={setFilters}
 										fetchContacts={handleApplyFilters}
-										loading={loading}
+										loading={isLoading}
 										onApplyingChange={setIsApplying}
 									/>
 								)}
@@ -192,7 +158,7 @@ const Contacts: React.FC = () => {
 										filters={filters}
 										setFilters={setFilters}
 										fetchContacts={handleApplyFilters}
-										loading={loading}
+										loading={isLoading}
 										onApplyingChange={setIsApplying}
 									/>
 								)}
@@ -203,11 +169,12 @@ const Contacts: React.FC = () => {
 					{/* Contact List Component */}
 					<ContactList
 						filters={filters}
-						total={total}
-						loading={loading || isApplying}
+						loading={isApplying}
 						maxHeight={panelHeight}
 						shouldFetch={shouldFetchContacts}
 						onFetchComplete={() => setShouldFetchContacts(false)}
+						onTotalChange={setTotal}
+						onLoadingChange={setIsLoading}
 					/>
 				</div>
 			)}

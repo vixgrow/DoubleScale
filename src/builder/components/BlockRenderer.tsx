@@ -3,12 +3,13 @@ import { useSelect } from '@wordpress/data';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { __ } from '@wordpress/i18n';
-import { Trash2, GripVertical } from 'lucide-react';
+import { GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
 import { blocksRegistry } from '../blocks/BlockRegister';
 import { useBuilder } from '../context/BuilderContext';
+import { DeleteIcon } from '@quillcrm/components';
 
 interface BlockRendererProps {
 	block: EmailBlock;
@@ -79,31 +80,31 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			style={style}
 			{...attributes}
 			className={`
-				relative mb-4 group cursor-pointer border-2 border-transparent 
-				hover:border-blue-200 transition-colors rounded
-				${isSelected ? 'border-blue-400' : ''}
+				relative mb-4 group cursor-pointer border-2
+				hover:border-blue-300 transition-colors
+				${isSelected ? 'border-blue-500' : 'border-transparent'}
 			`}
 			onClick={handleBlockClick}
 		>
 			{/* Block Controls */}
 			{isSelected && (
-				<div className="absolute -top-8 left-0 flex items-center gap-2 bg-white shadow-md rounded px-2 py-1 text-xs z-10">
+				<div className="absolute -top-8 -left-[1.5px] flex items-center gap-2 bg-white shadow-md rounded-t-xl px-2 py-1 text-sm z-10 border-2 border-blue-500">
 					<div
 						{...listeners}
-						className="cursor-grab hover:cursor-grabbing flex items-center text-muted-foreground"
+						className="cursor-grab hover:cursor-grabbing flex items-center text-secondary-foreground"
 					>
-						<GripVertical className="w-3 h-3" />
+						<GripVertical className="w-4 h-4" />
 					</div>
-					<span className="text-muted-foreground">
+					<span className="text-secondary-foreground">
 						{blockDefinition.name || block.type}
 					</span>
 					<Button
 						variant="ghost"
 						size="sm"
-						className="h-5 w-5 p-0 text-red-500 hover:text-red-700"
+						className="h-5 w-5 p-0 text-secondary-foreground hover:text-red-700"
 						onClick={handleDeleteBlock}
 					>
-						<Trash2 className="w-3 h-3" />
+						<DeleteIcon />
 					</Button>
 				</div>
 			)}

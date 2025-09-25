@@ -225,14 +225,13 @@ export const BuilderProvider: React.FC<{
 		if (!section) return false;
 
 		// Check if any block in any column has templateLayout property
-		// OR if the section was created from a library template (has specific block patterns)
 		const hasTemplateLayout = section.columns.some(column =>
 			column.blocks.some(block =>
 				block.props?.templateLayout !== undefined
 			)
 		);
 
-		// Also check for template patterns (Header, Preheader, etc.)
+		// Check for template patterns (Header, Preheader, etc.)
 		const hasTemplatePattern = section.columns.some(column =>
 			column.blocks.some(block => {
 				// Check for Header template patterns
@@ -241,15 +240,16 @@ export const BuilderProvider: React.FC<{
 				if (block.type === 'preheader') return true;
 				// Check for other template patterns
 				if (block.props?.templateType) return true;
+				// Check for Footer template patterns
+				if (block.type === 'text' && block.props?.content?.includes('©')) return true;
+				// Check for Email Body template patterns
+				if (block.type === 'text' && block.props?.content?.includes('Welcome')) return true;
 				return false;
 			})
 		);
 
-		// Check if this is a layout section (one column, two column, etc.)
-		// Layout sections should have layout settings available
-		const isLayoutSection = section.columns.length > 0;
-
-		return hasTemplateLayout || hasTemplatePattern || isLayoutSection;
+		// Only return true if it's actually a template section
+		return hasTemplateLayout || hasTemplatePattern;
 	};
 
 	// Select a template section (for layout settings)

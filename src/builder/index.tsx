@@ -26,10 +26,11 @@ import Canvas from './components/Canvas';
 import BlockEditor from './components/BlockEditor';
 import TemplateCard from './components/TemplateCard';
 import { BuilderProvider, useBuilder } from './context/BuilderContext';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { STORE_KEY } from '../stores/email-builder/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { ButtonSettingsProvider } from './context/ButtonSettingsContext';
+import { blocksRegistry } from './blocks/BlockRegister';
 
 // Utility function to add template layout to block props
 const addTemplateLayoutToBlockProps = (blockConfig, template) => {
@@ -37,6 +38,8 @@ const addTemplateLayoutToBlockProps = (blockConfig, template) => {
 		...blockConfig.props,
 		templateLayout:
 			template.layout?.[blockConfig.props.containerId] || null,
+		// Add a marker to identify this as a template block
+		templateType: template.type || 'library-template',
 	};
 };
 
@@ -49,6 +52,7 @@ const BuilderContent: React.FC = () => {
 		moveBlock,
 	} = useBuilder();
 	const dispatch = useDispatch();
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: {
@@ -109,16 +113,33 @@ const BuilderContent: React.FC = () => {
 			});
 		}
 
-		// If we're dragging a block or element, only consider columns for collision
-		if (
-			active.data?.current?.type === 'block' ||
-			active.data?.current?.type === 'element'
-		) {
+		// If we're dragging a block, consider both columns and other blocks for collision
+		if (active.data?.current?.type === 'block') {
 			const columnContainers = Array.from(
 				droppableContainers.values()
 			).filter((container) => container.data?.current?.type === 'column');
 
-			// Use closestCenter for block-to-column collision detection
+			const blockContainers = Array.from(
+				droppableContainers.values()
+			).filter((container) => container.data?.current?.type === 'block');
+
+			// Combine column and block containers for collision detection
+			const allContainers = [...columnContainers, ...blockContainers];
+
+			// Use pointerWithin for more precise positioning when dragging blocks
+			return pointerWithin({
+				...args,
+				droppableContainers: allContainers,
+			});
+		}
+
+		// If we're dragging an element, only consider columns for collision
+		if (active.data?.current?.type === 'element') {
+			const columnContainers = Array.from(
+				droppableContainers.values()
+			).filter((container) => container.data?.current?.type === 'column');
+
+			// Use closestCenter for element-to-column collision detection
 			return closestCenter({
 				...args,
 				droppableContainers: columnContainers,
@@ -143,8 +164,8 @@ const BuilderContent: React.FC = () => {
 
 		// Check if this is a block being sorted (from useSortable)
 		if (active.data?.current?.type === 'block') {
-			// This is a block being sorted - don't set activeItem for drag overlay
-			setActiveItem(null);
+			// This is a block being sorted - set activeItem for drag overlay
+			setActiveItem(active.data.current);
 			return;
 		}
 
@@ -613,10 +634,13 @@ const BuilderContent: React.FC = () => {
 			return;
 		}
 
-		// Handle block reordering (when dragging blocks between columns)
+		// Handle block reordering (when dragging blocks between columns or within same column)
 		if (active.data?.current?.type === 'block') {
 			const activeData = active.data.current;
 			const overData = over.data?.current;
+
+			console.log('Block drag end - Active data:', activeData);
+			console.log('Block drag end - Over data:', overData);
 
 			// Moving block to a different column
 			if (overData?.type === 'column') {
@@ -627,6 +651,38 @@ const BuilderContent: React.FC = () => {
 					sectionId: fromSectionId,
 					columnId: fromColumnId,
 				} = activeData;
+
+				console.log('Moving block to column:', {
+					fromSectionId,
+					fromColumnId,
+					toSectionId,
+					toColumnId
+				});
+
+				// Check if the target section is a template section
+				const targetSection = sections.find(s => s.id === toSectionId);
+				if (targetSection) {
+					const hasTemplateLayout = targetSection.columns.some(column =>
+						column.blocks.some(block =>
+							block.props?.templateLayout !== undefined
+						)
+					);
+					const hasTemplatePattern = targetSection.columns.some(column =>
+						column.blocks.some(block => {
+							if (block.type === 'image' && block.props?.alt === 'Company Logo') return true;
+							if (block.type === 'preheader') return true;
+							if (block.props?.templateType) return true;
+							if (block.type === 'text' && block.props?.content?.includes('©')) return true;
+							if (block.type === 'text' && block.props?.content?.includes('Welcome')) return true;
+							return false;
+						})
+					);
+
+					if (hasTemplateLayout || hasTemplatePattern) {
+						console.log('Cannot drop block on template section - section is locked');
+						return;
+					}
+				}
 
 				// Only move if it's actually moving to a different column
 				if (
@@ -645,6 +701,13 @@ const BuilderContent: React.FC = () => {
 				return;
 			}
 
+			// If no valid drop target found, try to find the closest column
+			if (!overData) {
+				console.log('No valid drop target found, attempting to find closest column');
+				// This is a fallback - in most cases this shouldn't happen
+				return;
+			}
+
 			// Moving block within the same column or to a different position
 			if (overData?.type === 'block') {
 				const { sectionId: toSectionId, columnId: toColumnId } =
@@ -655,22 +718,79 @@ const BuilderContent: React.FC = () => {
 					columnId: fromColumnId,
 				} = activeData;
 
-				// For block-to-block drops, we'll put the block right after the target block
-				const toIndex = 1; // Put after the target block
+				console.log('Block-to-block reordering:', {
+					fromSectionId,
+					fromColumnId,
+					toSectionId,
+					toColumnId,
+					blockId,
+					targetBlockId: over.id
+				});
 
+				// Get the target block index
+				const targetSection = sections.find(s => s.id === toSectionId);
+				const targetColumn = targetSection?.columns.find(c => c.id === toColumnId);
+				const targetBlockIndex = targetColumn?.blocks.findIndex(b => b.id === over.id) || 0;
+
+				// Calculate the correct index for insertion
+				let toIndex = targetBlockIndex;
+
+				// If moving within the same column, we need to adjust the index
+				if (fromSectionId === toSectionId && fromColumnId === toColumnId) {
+					const fromBlockIndex = targetColumn?.blocks.findIndex(b => b.id === blockId) || 0;
+
+					console.log('Same column reordering debug:', {
+						fromBlockIndex,
+						targetBlockIndex,
+						blockId,
+						targetBlockId: over.id,
+						direction: fromBlockIndex < targetBlockIndex ? 'down' : 'up',
+						calculatedIndex: targetBlockIndex
+					});
+
+					// For same-column reordering, let's try a simpler approach
+					// Just place the block at the target position
+					toIndex = targetBlockIndex;
+				} else {
+					// Moving to different column, insert after target
+					console.log('Cross-column reordering - inserting after target');
+					toIndex = targetBlockIndex + 1;
+				}
+
+				console.log('Final insertion index:', toIndex);
+
+				// Only move if it's actually a different position
 				if (
 					fromSectionId !== toSectionId ||
 					fromColumnId !== toColumnId ||
 					active.id !== over.id
 				) {
-					moveBlock(
+					console.log('Executing moveBlock with index:', toIndex);
+					console.log('Move details:', {
 						blockId,
 						fromSectionId,
 						fromColumnId,
 						toSectionId,
 						toColumnId,
-						toIndex
-					);
+						toIndex,
+						targetBlockIndex
+					});
+
+					try {
+						moveBlock(
+							blockId,
+							fromSectionId,
+							fromColumnId,
+							toSectionId,
+							toColumnId,
+							toIndex
+						);
+						console.log('moveBlock executed successfully');
+					} catch (error) {
+						console.error('Error executing moveBlock:', error);
+					}
+				} else {
+					console.log('No move needed - same position');
 				}
 				return;
 			}
@@ -683,6 +803,32 @@ const BuilderContent: React.FC = () => {
 
 			if (overData?.type === 'column') {
 				const { sectionId, columnId } = overData;
+
+				// Check if the target section is a template section
+				const targetSection = sections.find(s => s.id === sectionId);
+				if (targetSection) {
+					const hasTemplateLayout = targetSection.columns.some(column =>
+						column.blocks.some(block =>
+							block.props?.templateLayout !== undefined
+						)
+					);
+					const hasTemplatePattern = targetSection.columns.some(column =>
+						column.blocks.some(block => {
+							if (block.type === 'image' && block.props?.alt === 'Company Logo') return true;
+							if (block.type === 'preheader') return true;
+							if (block.props?.templateType) return true;
+							if (block.type === 'text' && block.props?.content?.includes('©')) return true;
+							if (block.type === 'text' && block.props?.content?.includes('Welcome')) return true;
+							return false;
+						})
+					);
+
+					if (hasTemplateLayout || hasTemplatePattern) {
+						console.log('Cannot drop new block on template section - section is locked');
+						return;
+					}
+				}
+
 				addNewBlock(sectionId, columnId, blockType);
 				return;
 			}
@@ -698,6 +844,23 @@ const BuilderContent: React.FC = () => {
 
 	const renderDragOverlay = () => {
 		if (!activeItem) return null;
+
+		// Handle block overlay
+		if (activeItem.type === 'block') {
+			const block = activeItem.block;
+			const blockDefinition = blocksRegistry[block.type];
+
+			return (
+				<div className="opacity-90 transform rotate-3 shadow-lg w-48">
+					<TemplateCard
+						item={blockDefinition}
+						type="element"
+						blockType={block.type}
+						isDragOverlay={true}
+					/>
+				</div>
+			);
+		}
 
 		// Handle library template overlay
 		if (activeItem.type === 'library-template') {

@@ -105,6 +105,10 @@ export const getDraggedBlock = (
 };
 
 // History selectors
+export const getHistory = (state: EmailBuilderState) => {
+	return state.history;
+};
+
 export const canUndo = (state: EmailBuilderState): boolean => {
 	return state.history.past.length > 0;
 };

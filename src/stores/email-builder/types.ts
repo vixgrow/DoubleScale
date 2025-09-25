@@ -146,6 +146,14 @@ export interface UpdateGlobalSettingsAction {
 	};
 }
 
+export interface UndoAction {
+	type: 'UNDO';
+}
+
+export interface RedoAction {
+	type: 'REDO';
+}
+
 export type EmailBuilderActionTypes =
 	| AddBlockAction
 	| UpdateBlockAction
@@ -159,4 +167,6 @@ export type EmailBuilderActionTypes =
 	| ReorderSectionsAction
 	| SetBuilderStateAction
 	| ResetBuilderAction
-	| UpdateGlobalSettingsAction;
+	| UpdateGlobalSettingsAction
+	| UndoAction
+	| RedoAction;

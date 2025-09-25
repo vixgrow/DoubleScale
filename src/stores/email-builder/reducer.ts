@@ -14,6 +14,8 @@ import {
 	UPDATE_BLOCK,
 	UPDATE_SECTION,
 	UPDATE_GLOBAL_SETTINGS,
+	UNDO,
+	REDO,
 } from './constants';
 
 import type {
@@ -317,6 +319,46 @@ const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
 				globalSettings: {
 					...state.globalSettings,
 					...settings,
+				},
+			};
+		}
+
+		case UNDO: {
+			const { past, present, future } = state.history;
+			if (past.length === 0) {
+				return state; // Nothing to undo
+			}
+
+			const previous = past[past.length - 1];
+			const newPast = past.slice(0, past.length - 1);
+
+			return {
+				...state,
+				sections: previous,
+				history: {
+					past: newPast,
+					present: previous,
+					future: [present, ...future],
+				},
+			};
+		}
+
+		case REDO: {
+			const { past, present, future } = state.history;
+			if (future.length === 0) {
+				return state; // Nothing to redo
+			}
+
+			const next = future[0];
+			const newFuture = future.slice(1);
+
+			return {
+				...state,
+				sections: next,
+				history: {
+					past: [...past, present],
+					present: next,
+					future: newFuture,
 				},
 			};
 		}

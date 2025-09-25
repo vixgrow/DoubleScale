@@ -66,6 +66,12 @@ interface BuilderContextType {
 	updateGlobalSettings: (settings: Partial<GlobalEmailSettings>) => void;
 	getGlobalSettings: () => GlobalEmailSettings;
 
+	// History operations
+	undo: () => void;
+	redo: () => void;
+	canUndo: boolean;
+	canRedo: boolean;
+
 	// State
 	saving: boolean;
 	error: Error | null;
@@ -84,6 +90,7 @@ export const BuilderProvider: React.FC<{
 	// Get the current sections and global settings from the store
 	const sections = useSelect((select) => select(STORE_KEY).getSections());
 	const globalSettings = useSelect((select) => select(STORE_KEY).getGlobalSettings());
+	const history = useSelect((select) => select(STORE_KEY).getHistory());
 
 	const addNewSection = (sectionType: LayoutTemplate) => {
 		const newSection: EmailSection = {
@@ -274,6 +281,18 @@ export const BuilderProvider: React.FC<{
 		return globalSettings;
 	};
 
+	// History operations
+	const undo = () => {
+		dispatch(STORE_KEY).undo();
+	};
+
+	const redo = () => {
+		dispatch(STORE_KEY).redo();
+	};
+
+	const canUndo = history.past.length > 0;
+	const canRedo = history.future.length > 0;
+
 	// Save the current template to the backend
 	const saveTemplate = async (name: string, subject = '') => {
 		try {
@@ -345,6 +364,10 @@ export const BuilderProvider: React.FC<{
 				updateTemplate,
 				updateGlobalSettings,
 				getGlobalSettings,
+				undo,
+				redo,
+				canUndo,
+				canRedo,
 				saving,
 				error,
 			}}

@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const Header: React.FC = () => {
-	const { saveTemplate, saving } = useBuilder();
+	const { saveTemplate, saving, undo, redo, canUndo, canRedo } = useBuilder();
 	const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [name, setName] = useState('');
 	const [subject, setSubject] = useState('');
@@ -57,10 +57,22 @@ const Header: React.FC = () => {
 					/>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button variant="outline" className="px-3">
+					<Button
+						variant="outline"
+						className="px-3"
+						onClick={undo}
+						disabled={!canUndo}
+						title={__('Undo last action', 'quillcrm')}
+					>
 						<UndoIcon />
 					</Button>
-					<Button variant="outline" className="px-3">
+					<Button
+						variant="outline"
+						className="px-3"
+						onClick={redo}
+						disabled={!canRedo}
+						title={__('Redo last action', 'quillcrm')}
+					>
 						<RedoIcon />
 					</Button>
 					<Button

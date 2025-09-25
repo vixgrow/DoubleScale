@@ -12,6 +12,8 @@ import {
 	UPDATE_BLOCK,
 	UPDATE_SECTION,
 	UPDATE_GLOBAL_SETTINGS,
+	UNDO,
+	REDO,
 } from './constants';
 
 import type {
@@ -124,4 +126,13 @@ export const updateGlobalSettings = (
 ): EmailBuilderActionTypes => ({
 	type: UPDATE_GLOBAL_SETTINGS,
 	payload: { settings },
+});
+
+// History actions
+export const undo = (): EmailBuilderActionTypes => ({
+	type: UNDO,
+});
+
+export const redo = (): EmailBuilderActionTypes => ({
+	type: REDO,
 });

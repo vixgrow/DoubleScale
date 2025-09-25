@@ -23,3 +23,7 @@ export const UPDATE_COLUMN = 'UPDATE_COLUMN';
 export const SET_BUILDER_STATE = 'SET_BUILDER_STATE';
 export const RESET_BUILDER = 'RESET_BUILDER';
 export const UPDATE_GLOBAL_SETTINGS = 'UPDATE_GLOBAL_SETTINGS';
+
+// History actions
+export const UNDO = 'UNDO';
+export const REDO = 'REDO';

@@ -35,8 +35,9 @@ export const getContact = (state: ContactsPureState, contactId: number): Contact
  */
 export const getContacts = (state: ContactsPureState): Contact[] => {
   const { filters, keywords, pagination } = state;
-  const queryKey = generateQueryKey(filters, keywords, pagination.page, pagination.perPage);
-  const query = state.queries[queryKey];
+  // Use base query key (page 1) to get the accumulated contact list for infinite scroll
+  const baseQueryKey = generateQueryKey(filters, keywords, 1, pagination.perPage);
+  const query = state.queries[baseQueryKey];
 
   if (!query) {
     return [];
@@ -226,4 +227,19 @@ export const getCurrentPage = (state: ContactsPureState): number => {
  */
 export const getTotalPages = (state: ContactsPureState): number => {
   return state.pagination.totalPages;
+};
+
+/**
+ * Get full contacts state (for actions that need access to state)
+ */
+export const getContactsState = (state: ContactsPureState): ContactsPureState => {
+  return state;
+};
+
+/**
+ * Check if there are more contacts to load
+ */
+export const hasMoreContacts = (state: ContactsPureState): boolean => {
+  const { pagination } = state;
+  return pagination.page < pagination.totalPages;
 };

@@ -303,3 +303,30 @@ export const invalidateQuery = (queryKey?: string) => ({
 export const invalidateAllQueries = () => ({
   type: INVALIDATE_QUERY,
 });
+
+/**
+ * Load more contacts for infinite scroll
+ */
+export const loadMoreContacts = (options: {
+  filters?: FilterType[];
+  keywords?: string;
+  subscribed?: boolean;
+} = {}) => async ({ select, dispatch }: any) => {
+  const state = select.getContactsState();
+  const { pagination } = state;
+  
+  // Don't load if already loading or no more pages
+  if (state.loading.fetchingContacts || pagination.page >= pagination.totalPages) {
+    return;
+  }
+
+  const nextPage = pagination.page + 1;
+  
+  // Use existing fetchContacts but with next page
+  return dispatch.fetchContacts({
+    ...options,
+    page: nextPage,
+    perPage: pagination.perPage,
+    forceRefresh: true, // Don't use cache for pagination
+  });
+};

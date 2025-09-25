@@ -88,6 +88,13 @@ const reducer: Reducer<ContactsPureState, ContactsActionTypes> = (
       // Calculate total pages
       const totalPages = Math.ceil(total / pagination.perPage);
 
+      // For infinite scroll, we need to generate a base query key (page 1) to track the main list
+      const baseQueryKey = JSON.stringify({ filters, keywords, page: 1, perPage: pagination.perPage });
+      const existingQuery = state.queries[baseQueryKey];
+
+      // Determine if this is loading more contacts (page > 1) or a fresh load
+      const isLoadingMore = pagination.page > 1;
+
       return {
         ...state,
         contacts: {
@@ -107,8 +114,10 @@ const reducer: Reducer<ContactsPureState, ContactsActionTypes> = (
         },
         queries: {
           ...state.queries,
-          [queryKey]: {
-            contacts: contacts.map(c => c.id),
+          [baseQueryKey]: {
+            contacts: isLoadingMore && existingQuery
+              ? [...existingQuery.contacts, ...contacts.map(c => c.id)]
+              : contacts.map(c => c.id),
             total,
             lastFetch: Date.now(),
             filters,

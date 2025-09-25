@@ -21,6 +21,7 @@ interface ButtonSettings {
     bold: boolean;
     italic: boolean;
     underline: boolean;
+    strikethrough: boolean;
 }
 
 interface ButtonSettingsContextType {
@@ -47,6 +48,7 @@ const defaultSettings: ButtonSettings = {
     bold: false,
     italic: false,
     underline: false,
+    strikethrough: false,
 };
 
 const ButtonSettingsContext = createContext<ButtonSettingsContextType | undefined>(undefined);

@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import { Bold, ChevronLeft, Italic, Underline } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useState, useEffect } from 'react';
 /**
  * internal dependencies
@@ -13,20 +13,14 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import {
-	PaddingBottomIcon,
-	PaddingLeftIcon,
-	PaddingRightIcon,
-	PaddingTopIcon,
-} from '@quillcrm/components';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@quillcrm/components/ui/select';
 import { useButtonSettings } from '../context/ButtonSettingsContext';
+import {
+	FontControl,
+	LetterSpacingControl,
+	TextFormattingControl,
+	ColorPickerControl,
+	PaddingControl
+} from '../blocks/basic/shared';
 
 type ButtonType = 'primary' | 'secondary' | 'tertiary';
 
@@ -90,7 +84,10 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 			padding: `${settings.padding.top * 2}px ${settings.padding.right * 4}px ${settings.padding.bottom * 2}px ${settings.padding.left * 4}px`,
 			fontWeight: settings.bold ? 'bold' : 'normal',
 			fontStyle: settings.italic ? 'italic' : 'normal',
-			textDecoration: settings.underline ? 'underline' : 'none',
+			textDecoration: [
+				settings.underline ? 'underline' : '',
+				settings.strikethrough ? 'line-through' : ''
+			].filter(Boolean).join(' ') || 'none',
 		};
 
 		return style;
@@ -133,136 +130,18 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 				</div>
 
 				{/* Font and Size */}
-				<div className="flex gap-3 items-center w-full">
-					<div className="flex flex-col gap-1 text-[#333333] w-1/2">
-						<label className="text-sm">
-							{__('Font', 'quillcrm')}
-						</label>
-						<Select
-							value={settings.font}
-							onValueChange={(value) =>
-								updateSettings({ font: value })
-							}
-						>
-							<SelectTrigger className="w-full rounded-lg border-border h-10">
-								<SelectValue
-									placeholder={__('Select font', 'quillcrm')}
-								/>
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="Arial">Arial</SelectItem>
-								<SelectItem value="'Times New Roman', serif">
-									Times New Roman
-								</SelectItem>
-								<SelectItem value="'Courier New', monospace">
-									Courier New
-								</SelectItem>
-								<SelectItem value="Georgia, serif">
-									Georgia
-								</SelectItem>
-								<SelectItem value="'Helvetica Neue', Helvetica, sans-serif">
-									Helvetica
-								</SelectItem>
-							</SelectContent>
-						</Select>
-					</div>
-					<div className="flex flex-col gap-1 text-[#333333] w-1/2">
-						<label className="text-sm">
-							{__('Size', 'quillcrm')}
-						</label>
-						<div className="relative flex items-center">
-							<Input
-								type="text"
-								value={settings.size}
-								onChange={(e) => {
-									// Allow only digits
-									const val = e.target.value.replace(
-										/\D/g,
-										''
-									);
-									updateSettings({ size: val === '' ? 0 : Number(val) });
-								}}
-								className="pr-8 h-10"
-								style={{
-									borderColor: '#e5e5e5',
-									borderRadius: '0.5rem',
-								}}
-							/>
-							<span className="absolute right-3 text-gray-400">
-								px
-							</span>
-						</div>
-					</div>
-				</div>
+				<FontControl
+					fontFamily={settings.font}
+					fontSize={settings.size}
+					onFontFamilyChange={(font) => updateSettings({ font })}
+					onFontSizeChange={(size) => updateSettings({ size })}
+				/>
 
 				{/* Letter Spacing */}
-				<div>
-					<label className="text-sm text-[#333333] mb-1 block">
-						{__('Letter Spacing', 'quillcrm')}
-					</label>
-					<Select
-						value={settings.letterSpacing}
-						onValueChange={(value) =>
-							updateSettings({ letterSpacing: value })
-						}
-					>
-						<SelectTrigger className="w-full border-border h-10">
-							<SelectValue
-								placeholder={__('Select spacing', 'quillcrm')}
-							/>
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="-1px">-1px</SelectItem>
-							<SelectItem value="0px">Normal</SelectItem>
-							<SelectItem value="1px">1px</SelectItem>
-							<SelectItem value="2px">2px</SelectItem>
-							<SelectItem value="3px">3px</SelectItem>
-							<SelectItem value="4px">4px</SelectItem>
-							<SelectItem value="5px">5px</SelectItem>
-							<SelectItem value="6px">6px</SelectItem>
-							<SelectItem value="7px">7px</SelectItem>
-							<SelectItem value="8px">8px</SelectItem>
-							<SelectItem value="9px">9px</SelectItem>
-							<SelectItem value="10px">10px</SelectItem>
-							<SelectItem value="11px">11px</SelectItem>
-							<SelectItem value="12px">12px</SelectItem>
-							<SelectItem value="13px">13px</SelectItem>
-							<SelectItem value="14px">14px</SelectItem>
-							<SelectItem value="15px">15px</SelectItem>
-							<SelectItem value="16px">16px</SelectItem>
-							<SelectItem value="17px">17px</SelectItem>
-							<SelectItem value="18px">18px</SelectItem>
-							<SelectItem value="19px">19px</SelectItem>
-							<SelectItem value="20px">20px</SelectItem>
-							<SelectItem value="21px">21px</SelectItem>
-							<SelectItem value="22px">22px</SelectItem>
-							<SelectItem value="23px">23px</SelectItem>
-							<SelectItem value="24px">24px</SelectItem>
-							<SelectItem value="25px">25px</SelectItem>
-							<SelectItem value="26px">26px</SelectItem>
-							<SelectItem value="27px">27px</SelectItem>
-							<SelectItem value="28px">28px</SelectItem>
-							<SelectItem value="29px">29px</SelectItem>
-							<SelectItem value="30px">30px</SelectItem>
-							<SelectItem value="31px">31px</SelectItem>
-							<SelectItem value="32px">32px</SelectItem>
-							<SelectItem value="33px">33px</SelectItem>
-							<SelectItem value="34px">34px</SelectItem>
-							<SelectItem value="35px">35px</SelectItem>
-							<SelectItem value="36px">36px</SelectItem>
-							<SelectItem value="37px">37px</SelectItem>
-							<SelectItem value="38px">38px</SelectItem>
-							<SelectItem value="39px">39px</SelectItem>
-							<SelectItem value="40px">40px</SelectItem>
-							<SelectItem value="41px">41px</SelectItem>
-							<SelectItem value="42px">42px</SelectItem>
-							<SelectItem value="43px">43px</SelectItem>
-							<SelectItem value="44px">44px</SelectItem>
-							<SelectItem value="45px">45px</SelectItem>
-							<SelectItem value="46px">46px</SelectItem>
-						</SelectContent>
-					</Select>
-				</div>
+				<LetterSpacingControl
+					value={settings.letterSpacing}
+					onChange={(value) => updateSettings({ letterSpacing: value })}
+				/>
 
 				{/* Shape and Border */}
 				<div className="flex gap-3 items-end w-full">
@@ -335,99 +214,31 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 				</div>
 
 				{/* Decoration */}
-				<div>
-					<label className="text-sm text-[#333333] mb-2 block">
-						{__('Decoration', 'quillcrm')}
-					</label>
-					<div className="flex items-center justify-between border rounded-lg">
-						<Bold
-							className={cn(
-								'size-12 py-3 px-5 w-full cursor-pointer text-[#141B34]',
-								settings.bold &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
-							)}
-							onClick={() =>
-								updateSettings({ bold: !settings.bold })
-							}
-						/>
-						<Italic
-							className={cn(
-								'size-12 py-3 px-5 w-full cursor-pointer text-[#141B34]',
-								settings.italic &&
-								'bg-[#C6DFF366] border border-primary'
-							)}
-							onClick={() =>
-								updateSettings({ italic: !settings.italic })
-							}
-						/>
-						<Underline
-							className={cn(
-								'size-12 py-3 px-5 w-full cursor-pointer text-[#141B34]',
-								settings.underline &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
-							)}
-							onClick={() =>
-								updateSettings({ underline: !settings.underline })
-							}
-						/>
-					</div>
-				</div>
+				<TextFormattingControl
+					value={{
+						bold: settings.bold,
+						italic: settings.italic,
+						underline: settings.underline,
+						strikethrough: settings.strikethrough,
+					}}
+					onChange={(updates) => updateSettings(updates)}
+				/>
 
 				{/* Text Color */}
-				<div>
-					<label className="text-sm text-[#333333] mb-2 block">
-						{__('Text color', 'quillcrm')}
-					</label>
-					<div className="flex items-center gap-2 border rounded-lg px-2">
-						<Input
-							id="text-color"
-							type="text"
-							value={settings.textColor}
-							onChange={(e) =>
-								updateSettings({ textColor: e.target.value })
-							}
-							className="rounded-lg"
-							style={{ border: 0 }}
-						/>
-						<Input
-							type="color"
-							value={settings.textColor}
-							onChange={(e) =>
-								updateSettings({ textColor: e.target.value })
-							}
-							className="w-10 h-10 p-1 rounded-lg"
-							style={{ border: 0 }}
-						/>
-					</div>
-				</div>
+				<ColorPickerControl
+					label={__('Text color', 'quillcrm')}
+					value={settings.textColor}
+					onChange={(value) => updateSettings({ textColor: value })}
+					id="text-color"
+				/>
 
 				{/* Background Color */}
-				<div>
-					<label className="text-sm text-[#333333] mb-2 block">
-						{__('Background color', 'quillcrm')}
-					</label>
-					<div className="flex items-center gap-2 border rounded-lg px-2">
-						<Input
-							id="bg-color"
-							type="text"
-							value={settings.backgroundColor}
-							onChange={(e) =>
-								updateSettings({ backgroundColor: e.target.value })
-							}
-							className="rounded-lg"
-							style={{ border: 0 }}
-						/>
-						<Input
-							type="color"
-							value={settings.backgroundColor}
-							onChange={(e) =>
-								updateSettings({ backgroundColor: e.target.value })
-							}
-							className="w-10 h-10 p-1 rounded-lg"
-							style={{ border: 0 }}
-						/>
-					</div>
-				</div>
+				<ColorPickerControl
+					label={__('Background color', 'quillcrm')}
+					value={settings.backgroundColor}
+					onChange={(value) => updateSettings({ backgroundColor: value })}
+					id="bg-color"
+				/>
 
 				{/* Border Width */}
 				<div>
@@ -456,133 +267,18 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 				</div>
 
 				{/* Border Color */}
-				<div>
-					<label className="text-sm text-[#333333] mb-2 block">
-						{__('Border color', 'quillcrm')}
-					</label>
-					<div className="flex items-center gap-2 border rounded-lg px-2">
-						<Input
-							id="border-color"
-							type="text"
-							value={settings.borderColor}
-							onChange={(e) =>
-								updateSettings({ borderColor: e.target.value })
-							}
-							className="rounded-lg"
-							style={{ border: 0 }}
-						/>
-						<Input
-							type="color"
-							value={settings.borderColor}
-							onChange={(e) =>
-								updateSettings({ borderColor: e.target.value })
-							}
-							className="w-10 h-10 p-1 rounded-lg"
-							style={{ border: 0 }}
-						/>
-					</div>
-				</div>
+				<ColorPickerControl
+					label={__('Border color', 'quillcrm')}
+					value={settings.borderColor}
+					onChange={(value) => updateSettings({ borderColor: value })}
+					id="border-color"
+				/>
 
 				{/* Padding */}
-				<div>
-					<label className="text-sm text-[#333333] mb-2 block">
-						{__('Padding', 'quillcrm')}
-					</label>
-					<div className="flex gap-2">
-						<div className="relative flex items-center">
-							<div className="absolute left-2 text-[#333333]">
-								<PaddingLeftIcon />
-							</div>
-							<Input
-								type="number"
-								value={settings.padding.left}
-								onChange={(e) =>
-									updateSettings({
-										padding: {
-											...settings.padding,
-											left: parseInt(e.target.value),
-										},
-									})
-								}
-								className="h-10"
-								style={{
-									borderColor: '#e5e5e5',
-									borderRadius: '0.5rem',
-									paddingLeft: '32px',
-								}}
-							/>
-						</div>
-						<div className="relative flex items-center">
-							<div className="absolute left-2 text-[#333333]">
-								<PaddingRightIcon />
-							</div>
-							<Input
-								type="number"
-								value={settings.padding.right}
-								onChange={(e) =>
-									updateSettings({
-										padding: {
-											...settings.padding,
-											right: parseInt(e.target.value),
-										},
-									})
-								}
-								className="h-10"
-								style={{
-									borderColor: '#e5e5e5',
-									borderRadius: '0.5rem',
-									paddingLeft: '32px',
-								}}
-							/>
-						</div>
-						<div className="relative flex items-center">
-							<div className="absolute left-2 text-[#333333]">
-								<PaddingTopIcon />
-							</div>
-							<Input
-								type="number"
-								value={settings.padding.top}
-								onChange={(e) =>
-									updateSettings({
-										padding: {
-											...settings.padding,
-											top: parseInt(e.target.value),
-										},
-									})
-								}
-								className="h-10"
-								style={{
-									borderColor: '#e5e5e5',
-									borderRadius: '0.5rem',
-									paddingLeft: '32px',
-								}}
-							/>
-						</div>
-						<div className="relative flex items-center">
-							<div className="absolute left-2 text-[#333333]">
-								<PaddingBottomIcon />
-							</div>
-							<Input
-								type="number"
-								value={settings.padding.bottom}
-								onChange={(e) =>
-									updateSettings({
-										padding: {
-											...settings.padding,
-											bottom: parseInt(e.target.value),
-										},
-									})
-								}
-								className="h-10"
-								style={{
-									borderColor: '#e5e5e5',
-									borderRadius: '0.5rem',
-									paddingLeft: '32px',
-								}}
-							/>
-						</div>
-					</div>
-				</div>
+				<PaddingControl
+					value={settings.padding}
+					onChange={(value) => updateSettings({ padding: value })}
+				/>
 			</div>
 		</div>
 	);

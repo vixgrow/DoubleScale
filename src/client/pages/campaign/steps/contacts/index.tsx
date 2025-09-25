@@ -13,11 +13,7 @@ import { useDispatch } from '@wordpress/data';
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useCampaignContext } from '../../state/context';
-import type {
-	Filter as FilterType,
-	ContactsResponse,
-	Contact,
-} from '@quillcrm/client';
+import type { Filter as FilterType, ContactsResponse } from '@quillcrm/client';
 import {
 	ContactList,
 	PanelLayout,
@@ -40,12 +36,12 @@ const Contacts: React.FC = () => {
 	const [total, setTotal] = useState(0);
 	const [filterBy, setFilterBy] = useState('list-tags');
 	const [isApplying, setIsApplying] = useState(false);
-	const [contacts, setContacts] = useState<Contact[]>([]);
+	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
 	const [panelHeight, setPanelHeight] = useState<number>(0);
 	const panelRef = useRef<HTMLDivElement>(null);
 	const { createNotice } = useDispatch('quillcrm/core');
 
-	const fetchContacts = async () => {
+	const fetchContactsTotal = async (): Promise<void> => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
@@ -60,11 +56,10 @@ const Contacts: React.FC = () => {
 			})) as ContactsResponse;
 
 			setTotal(response.total);
-			setContacts(response.data);
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch contacts', 'quillcrm'),
+				message: __('Failed to fetch contacts total', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);
@@ -72,7 +67,7 @@ const Contacts: React.FC = () => {
 	};
 
 	useEffect(() => {
-		fetchContacts();
+		fetchContactsTotal();
 	}, []);
 
 	// Measure and sync panel height
@@ -100,6 +95,12 @@ const Contacts: React.FC = () => {
 			resizeObserver.disconnect();
 		};
 	}, [filterBy, filters, loading, isApplying]); // Re-measure when content changes
+
+	// Handle apply filters action
+	const handleApplyFilters = async (): Promise<void> => {
+		await fetchContactsTotal();
+		setShouldFetchContacts(true);
+	};
 
 	const save = async () => {
 		if (!campaign) {
@@ -181,7 +182,7 @@ const Contacts: React.FC = () => {
 									<ListTagFilter
 										filters={filters}
 										setFilters={setFilters}
-										fetchContacts={fetchContacts}
+										fetchContacts={handleApplyFilters}
 										loading={loading}
 										onApplyingChange={setIsApplying}
 									/>
@@ -190,7 +191,7 @@ const Contacts: React.FC = () => {
 									<AdvancedFilter
 										filters={filters}
 										setFilters={setFilters}
-										fetchContacts={fetchContacts}
+										fetchContacts={handleApplyFilters}
 										loading={loading}
 										onApplyingChange={setIsApplying}
 									/>
@@ -205,6 +206,8 @@ const Contacts: React.FC = () => {
 						total={total}
 						loading={loading || isApplying}
 						maxHeight={panelHeight}
+						shouldFetch={shouldFetchContacts}
+						onFetchComplete={() => setShouldFetchContacts(false)}
 					/>
 				</div>
 			)}

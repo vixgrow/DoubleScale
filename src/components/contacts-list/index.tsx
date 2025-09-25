@@ -23,6 +23,8 @@ interface ContactListProps {
 	loading?: boolean;
 	searchPlaceholder?: string;
 	maxHeight?: number;
+	shouldFetch?: boolean;
+	onFetchComplete?: () => void;
 }
 
 // Helper function to generate contact initials
@@ -58,6 +60,8 @@ const ContactList: React.FC<ContactListProps> = ({
 	loading = false,
 	searchPlaceholder = __('Search Recipients', 'quillcrm'),
 	maxHeight = 0,
+	shouldFetch = false,
+	onFetchComplete,
 }) => {
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [searchTerm, setSearchTerm] = useState('');
@@ -90,15 +94,30 @@ const ContactList: React.FC<ContactListProps> = ({
 
 	useEffect(() => {
 		fetchContacts(searchTerm);
-	}, [filters, searchTerm]);
+	}, []);
+
+	useEffect(() => {
+		if (shouldFetch) {
+			fetchContacts(searchTerm);
+			if (onFetchComplete) {
+				onFetchComplete();
+			}
+		}
+	}, [shouldFetch, filters]);
 
 	// Debounce search
 	useEffect(() => {
-		const timeoutId = setTimeout(() => {
-			fetchContacts(searchTerm);
-		}, 300);
+		if (searchTerm !== '') {
+			const timeoutId = setTimeout(() => {
+				fetchContacts(searchTerm);
+			}, 300);
 
-		return () => clearTimeout(timeoutId);
+			return () => clearTimeout(timeoutId);
+		} else if (searchTerm === '') {
+			fetchContacts('');
+		}
+		// Return undefined for other cases
+		return undefined;
 	}, [searchTerm]);
 
 	return (

@@ -83,52 +83,55 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 		return cleanContent;
 	};
 
+	// Generate unique class name for this renderer instance
+	const rendererId = `text-block-renderer-${Math.random().toString(36).substr(2, 9)}`;
+
 	const content = (
 		<>
 			<style>{`
-				.text-block-renderer {
+				.${rendererId} {
 					font-size: ${getFontSize()}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
-				.text-block-renderer * {
+				.${rendererId} * {
 					font-size: ${getFontSize()}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
-				.text-block-renderer p,
-				.text-block-renderer div,
-				.text-block-renderer span,
-				.text-block-renderer strong,
-				.text-block-renderer em,
-				.text-block-renderer u,
-				.text-block-renderer strike {
+				.${rendererId} p,
+				.${rendererId} div,
+				.${rendererId} span,
+				.${rendererId} strong,
+				.${rendererId} em,
+				.${rendererId} u,
+				.${rendererId} strike {
 					font-size: ${getFontSize()}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
-				.text-block-renderer ul {
+				.${rendererId} ul {
 					list-style-type: disc !important;
 					padding-left: 20px !important;
 					margin: 10px 0 !important;
 					font-size: ${getFontSize()}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
-				.text-block-renderer ol {
+				.${rendererId} ol {
 					list-style-type: decimal !important;
 					padding-left: 20px !important;
 					margin: 10px 0 !important;
 					font-size: ${getFontSize()}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
-				.text-block-renderer li {
+				.${rendererId} li {
 					display: list-item !important;
 					margin: 5px 0 !important;
 					font-size: ${getFontSize()}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
 				/* Override any inline styles that might be applied */
-				.text-block-renderer [style*="font-size"] {
+				.${rendererId} [style*="font-size"] {
 					font-size: ${getFontSize()}px !important;
 				}
-				.text-block-renderer [style*="font-family"] {
+				.${rendererId} [style*="font-family"] {
 					font-family: ${props.fontFamily} !important;
 				}
 			`}</style>
@@ -161,7 +164,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 						'--text-font-family': props.fontFamily,
 					} as React.CSSProperties
 				}
-				className="text-block-renderer"
+				className={rendererId}
 			>
 				{isHtmlContent ? (
 					<div

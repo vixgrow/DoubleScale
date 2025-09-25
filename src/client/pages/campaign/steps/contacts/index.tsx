@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
@@ -41,6 +41,8 @@ const Contacts: React.FC = () => {
 	const [filterBy, setFilterBy] = useState('list-tags');
 	const [isApplying, setIsApplying] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
+	const [panelHeight, setPanelHeight] = useState<number>(0);
+	const panelRef = useRef<HTMLDivElement>(null);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchContacts = async () => {
@@ -73,6 +75,32 @@ const Contacts: React.FC = () => {
 		fetchContacts();
 	}, []);
 
+	// Measure and sync panel height
+	useEffect(() => {
+		const measureHeight = () => {
+			if (panelRef.current) {
+				const height = panelRef.current.offsetHeight;
+				setPanelHeight(height);
+			}
+		};
+
+		// Initial measurement
+		measureHeight();
+
+		// Set up ResizeObserver to watch for height changes
+		const resizeObserver = new ResizeObserver(() => {
+			measureHeight();
+		});
+
+		if (panelRef.current) {
+			resizeObserver.observe(panelRef.current);
+		}
+
+		return () => {
+			resizeObserver.disconnect();
+		};
+	}, [filterBy, filters, loading, isApplying]); // Re-measure when content changes
+
 	const save = async () => {
 		if (!campaign) {
 			return;
@@ -90,8 +118,8 @@ const Contacts: React.FC = () => {
 			onBack={() => navigate(getToLink(`campaigns`))}
 		>
 			{campaign && (
-				<>
-					<div className="flex gap-6">
+				<div className="flex gap-6 items-start">
+					<div ref={panelRef} className="w-[55%]">
 						<PanelSettings
 							title={__('Recipients', 'quillcrm')}
 							description={__(
@@ -99,7 +127,7 @@ const Contacts: React.FC = () => {
 								'quillcrm'
 							)}
 							icon={<TeamIcon />}
-							className="w-[55%]"
+							className="flex flex-col"
 						>
 							<div className="space-y-6">
 								<div>
@@ -169,15 +197,16 @@ const Contacts: React.FC = () => {
 								)}
 							</div>
 						</PanelSettings>
-
-						{/* Contact List Component */}
-						<ContactList
-							filters={filters}
-							total={total}
-							loading={loading || isApplying}
-						/>
 					</div>
-				</>
+
+					{/* Contact List Component */}
+					<ContactList
+						filters={filters}
+						total={total}
+						loading={loading || isApplying}
+						maxHeight={panelHeight}
+					/>
+				</div>
 			)}
 		</PanelLayout>
 	);

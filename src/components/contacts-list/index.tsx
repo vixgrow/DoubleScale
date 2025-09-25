@@ -22,6 +22,7 @@ interface ContactListProps {
 	total?: number;
 	loading?: boolean;
 	searchPlaceholder?: string;
+	maxHeight?: number;
 }
 
 // Helper function to generate contact initials
@@ -56,6 +57,7 @@ const ContactList: React.FC<ContactListProps> = ({
 	total = 0,
 	loading = false,
 	searchPlaceholder = __('Search Recipients', 'quillcrm'),
+	maxHeight = 0,
 }) => {
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [searchTerm, setSearchTerm] = useState('');
@@ -100,9 +102,15 @@ const ContactList: React.FC<ContactListProps> = ({
 	}, [searchTerm]);
 
 	return (
-		<div className="w-[45%] bg-white rounded-lg border border-gray-200 p-6 flex flex-col gap-3">
+		<div
+			className="w-[45%] bg-white rounded-lg border border-gray-200 p-6 flex flex-col"
+			style={{
+				height: maxHeight > 0 ? `${maxHeight}px` : 'auto',
+				maxHeight: maxHeight > 0 ? `${maxHeight}px` : 'none',
+			}}
+		>
 			{/* Header */}
-			<div className="flex items-center justify-between gap-4">
+			<div className="flex items-center justify-between gap-4 flex-shrink-0">
 				<div className="w-1/2">
 					<div className="flex items-center gap-2 mb-1">
 						<h3 className="text-lg font-semibold text-gray-900">
@@ -121,7 +129,7 @@ const ContactList: React.FC<ContactListProps> = ({
 				</div>
 
 				{/* Search */}
-				<div className="w-1/2 h-full flex items-center gap-2 bg-gray-100 p-3 rounded-lg">
+				<div className="w-1/2 flex items-center gap-2 bg-gray-100 p-3 rounded-lg">
 					<SearchIcon className="text-gray-400" />
 					<Input
 						type="text"
@@ -138,8 +146,8 @@ const ContactList: React.FC<ContactListProps> = ({
 				</div>
 			</div>
 
-			{/* Contacts List */}
-			<div className="space-y-3 overflow-y-scroll">
+			{/* Contacts List - make it fill remaining space but scroll content */}
+			<div className="space-y-3 overflow-y-auto flex-1 min-h-0 mt-3">
 				{isLoading || loading ? (
 					<div className="flex items-center justify-center py-8">
 						<div className="text-gray-500">

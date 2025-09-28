@@ -17,18 +17,15 @@ interface SectionRendererProps {
 
 const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 	const {
-		selectBlock,
 		deleteSection,
 		duplicateSection,
 		moveSectionUp,
 		moveSectionDown,
-		isTemplateSection,
 		selectTemplateSection
 	} = useBuilder();
 
 	const {
 		attributes,
-		listeners,
 		setNodeRef,
 		transform,
 		transition,
@@ -57,12 +54,8 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 	const handleSectionClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		// If this is a template section, use selectTemplateSection to show LayoutSettings
-		if (isTemplateSection(section.id)) {
-			selectTemplateSection(section.id);
-		} else {
-			selectBlock('', section.id);
-		}
+		// All sections should open LayoutSettings when clicked, just like template sections
+		selectTemplateSection(section.id);
 	};
 
 	const handleDeleteSection = (e: React.MouseEvent) => {
@@ -110,7 +103,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 						onClick={handleDeleteSection}
 						title={__('Delete', 'quillcrm')}
 					>
-						<DeleteIcon width={24} height={24}/>
+						<DeleteIcon width={24} height={24} />
 					</Button>
 					<div className='border-b-2 border-accent'></div>
 					<Button
@@ -120,7 +113,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 						onClick={handleDuplicateSection}
 						title={__('Duplicate', 'quillcrm')}
 					>
-						<CopyIcon width={24} height={24}/>
+						<CopyIcon width={24} height={24} />
 					</Button>
 					<div className='border-b-2 border-accent'></div>
 					<Button

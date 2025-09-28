@@ -50,6 +50,7 @@ const BlockEditor: React.FC = () => {
 
 	// Determine what to show in the header
 	const isBlockSelected = !!selectedBlockId;
+	const isSectionSelected = !!selectedSectionId;
 	const isTemplateSectionSelected = !!selectedSectionId && isTemplateSection(selectedSectionId);
 	const blockDefinition = selectedBlock
 		? blocksRegistry[selectedBlock.type]
@@ -76,7 +77,7 @@ const BlockEditor: React.FC = () => {
 							<div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-lg text-white">
 								{isBlockSelected && blockDefinition?.icon ? (
 									<blockDefinition.icon />
-								) : isTemplateSectionSelected ? (
+								) : isSectionSelected ? (
 									<LayoutSettingsIcon />
 								) : (
 									<GlobalEmailSettingsIcon />
@@ -85,12 +86,12 @@ const BlockEditor: React.FC = () => {
 							<h3 className="text-base font-semibold text-primary">
 								{isBlockSelected && blockDefinition?.name
 									? `${blockDefinition.name} ${__('Settings', 'quillcrm')}`
-									: isTemplateSectionSelected
+									: isSectionSelected
 										? __('Layout Settings', 'quillcrm')
 										: __('Global Email Settings', 'quillcrm')}
 							</h3>
 						</div>
-						{(isBlockSelected || isTemplateSectionSelected) && (
+						{(isBlockSelected || isSectionSelected) && (
 							<Button
 								variant="ghost"
 								size="sm"
@@ -117,8 +118,8 @@ const BlockEditor: React.FC = () => {
 									)}
 								</p>
 							)
-						) : isTemplateSectionSelected ? (
-							// Show LayoutSettings for template sections
+						) : isSectionSelected ? (
+							// Show LayoutSettings for all sections
 							<LayoutSettings
 								sectionId={selectedSectionId}
 								onSettingsChange={(settings) => {

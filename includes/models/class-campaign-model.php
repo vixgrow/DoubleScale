@@ -11,7 +11,7 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
-use QuillCRM\Models\Campaign_Message_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
@@ -106,7 +106,8 @@ class Campaign_Model extends Model
 	 */
 	public function messages()
 	{
-		return $this->hasMany(Campaign_Message_Model::class, 'campaign_id', 'id');
+		return $this->hasMany(Tracking_Model::class, 'source_id', 'id')
+			->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN);
 	}
 
 	/**

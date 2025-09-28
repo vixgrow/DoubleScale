@@ -6,7 +6,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * external dependencies
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 /**
  * internal dependencies
@@ -41,6 +41,13 @@ const BlockEditor: React.FC = () => {
 		(select) => select(STORE_KEY).getSelectedSectionId(),
 		[]
 	);
+
+	// Automatically reset view to 'main' when a block or section is selected
+	useEffect(() => {
+		if (selectedBlockId || selectedSectionId) {
+			setCurrentView('main');
+		}
+	}, [selectedBlockId, selectedSectionId]);
 
 	const handlePropsChange = (newProps: Record<string, any>) => {
 		if (selectedBlock) {

@@ -177,8 +177,6 @@ export const TimerBlockEditor: React.FC<TimerBlockEditorProps> = ({
 				onFontFamilyChange={(digitsFontFamily) => onChange({ digitsFontFamily })}
 				onFontSizeChange={(digitsFontSize) => onChange({ digitsFontSize })}
 				className="w-full"
-				fontSizeMin={8}
-				fontSizeMax={72}
 			/>
 
 			{/* Digits Color */}
@@ -196,8 +194,6 @@ export const TimerBlockEditor: React.FC<TimerBlockEditorProps> = ({
 				onFontFamilyChange={(separatorFontFamily) => onChange({ separatorFontFamily })}
 				onFontSizeChange={(separatorFontSize) => onChange({ separatorFontSize })}
 				className="w-full"
-				fontSizeMin={8}
-				fontSizeMax={72}
 			/>
 
 			{/* Separator Color */}

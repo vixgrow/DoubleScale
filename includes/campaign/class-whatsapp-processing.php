@@ -11,7 +11,7 @@ namespace QuillCRM\Campaign;
 
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Campaign_Message_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
 use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
@@ -50,9 +50,9 @@ class WhatsApp_Processing extends Abstract_Campaign_Processing
      *
      * @return int
      */
-    protected function get_campaign_mode()
+    protected function get_message_mode()
     {
-        return Campaign_Message_Model::MODE_WHATSAPP;
+        return Tracking_Model::MODE_WHATSAPP;
     }
 
     /**
@@ -71,10 +71,10 @@ class WhatsApp_Processing extends Abstract_Campaign_Processing
      *
      * @param array $message_data Prepared message data
      * @param Contact_Model $contact Contact model
-     * @param Campaign_Message_Model $campaign_message Campaign message record
+     * @param Tracking_Model $campaign_message Campaign tracking record
      * @return array Result array with 'success' boolean and optional data
      */
-    protected function send_message($message_data, Contact_Model $contact, Campaign_Message_Model $campaign_message)
+    protected function send_message($message_data, Contact_Model $contact, Tracking_Model $campaign_message)
     {
         try {
             // Prepare WhatsApp message data

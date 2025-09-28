@@ -11,7 +11,7 @@ namespace QuillCRM\Campaign;
 
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Campaign_Message_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
@@ -54,9 +54,9 @@ class Email_Processing extends Abstract_Campaign_Processing
      *
      * @return int
      */
-    protected function get_campaign_mode()
+    protected function get_message_mode()
     {
-        return Campaign_Message_Model::MODE_EMAIL;
+        return Tracking_Model::MODE_EMAIL;
     }
 
     /**
@@ -75,21 +75,30 @@ class Email_Processing extends Abstract_Campaign_Processing
      *
      * @param array $message_data Prepared message data
      * @param Contact_Model $contact Contact model
-     * @param Campaign_Message_Model $campaign_message Campaign message record
+     * @param Tracking_Model $campaign_message Campaign tracking record
      * @return array Result array with 'success' boolean and optional data
      */
-    protected function send_message($message_data, Contact_Model $contact, Campaign_Message_Model $campaign_message)
+    protected function send_message($message_data, Contact_Model $contact, Tracking_Model $campaign_message)
     {
+        $template = null;
+        $emails = null;
+
         try {
             // Validate recipient email
             if (!filter_var($contact->email, FILTER_VALIDATE_EMAIL)) {
                 throw new \Exception("Invalid email address: {$contact->email}");
             }
 
+            // Get template to access from_email settings early for debugging
+            $template = $campaign_message->template;
+
+            // Build email message first
+            $email_message = $this->build_email_message($campaign_message, $contact, $message_data['body']);
+
             // Build complete email message with footer
             $complete_message = sprintf(
                 '%s%s',
-                $this->build_email_message($campaign_message, $contact, $message_data['body']),
+                $email_message,
                 $this->build_email_footer($campaign_message, $contact)
             );
 
@@ -97,6 +106,13 @@ class Email_Processing extends Abstract_Campaign_Processing
             $complete_message = $this->add_email_click_tracking($complete_message, $campaign_message->hash_key, $contact);
 
             $emails = new Emails();
+                        // Set from_email and from_name from template if available
+            if ($template && $template->get_setting('from_email')) {
+                $emails->from_address = $template->get_setting('from_email');
+            }
+            if ($template && $template->get_setting('from_name')) {
+                $emails->from_name = $template->get_setting('from_name');
+            }
             $result = $emails->send(
                 $contact->email,
                 $message_data['subject'],
@@ -111,19 +127,35 @@ class Email_Processing extends Abstract_Campaign_Processing
             }
 
             return array('success' => true, 'message_id' => $result);
-            
+
         } catch (\Exception $e) {
-            quillcrm_get_logger()->error(
-                __('Email send error.', 'quillcrm'),
-                array(
-                    'code' => 'email_send_error',
-                    'error' => $e->getMessage(),
-                    'contact_id' => $contact->id,
-                    'campaign_message_id' => $campaign_message->id,
-                    'recipient' => $contact->email,
-                )
+            // Enhanced error logging with debugging information
+            $debug_info = array(
+                'code' => 'email_send_error',
+                'error' => $e->getMessage(),
+                'contact_id' => $contact->id,
+                'campaign_message_id' => $campaign_message->id,
+                'recipient' => $contact->email,
+                'template_id' => $campaign_message->template_id,
+                'from_address' => $emails->from_address ?? 'not set',
+                'from_name' => $emails->from_name ?? 'not set',
+                'admin_email' => get_option('admin_email'),
+                'quillsmtp_active' => class_exists('QuillSMTP\\QuillSMTP'),
+                'wp_mail_available' => function_exists('wp_mail'),
+                'template_settings' => $template ? json_encode($template->settings) : 'no template'
             );
-            return array('success' => false, 'error' => $e->getMessage());
+
+            quillcrm_get_logger()->error(
+                __('Email send error with debug info.', 'quillcrm'),
+                $debug_info
+            );
+
+            // Also log to WordPress debug log for immediate visibility
+            if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+                error_log('QuillCRM Email Send Error: ' . json_encode($debug_info));
+            }
+
+            return array('success' => false, 'error' => $e->getMessage(), 'debug' => $debug_info);
         }
     }
 
@@ -224,12 +256,12 @@ class Email_Processing extends Abstract_Campaign_Processing
     /**
      * Build email message
      *
-     * @param Campaign_Message_Model $campaign_email
+     * @param Tracking_Model $campaign_email
      * @param Contact_Model $contact
      * @param string $message
      * @return string
      */
-    protected function build_email_message(Campaign_Message_Model $campaign_email, Contact_Model $contact, $message = '')
+    protected function build_email_message(Tracking_Model $campaign_email, Contact_Model $contact, $message = '')
     {
         // Add open email image 1x1
         $message .= sprintf(
@@ -243,24 +275,22 @@ class Email_Processing extends Abstract_Campaign_Processing
     /**
      * Build email footer
      *
-     * @param Campaign_Message_Model $campaign_email
+     * @param Tracking_Model $campaign_email
      * @param Contact_Model $contact
      * @return string
      */
-    protected function build_email_footer(Campaign_Message_Model $campaign_email, Contact_Model $contact)
+    protected function build_email_footer(Tracking_Model $campaign_email, Contact_Model $contact)
     {
         $footer = '';
 
-        // Add preview image 1x1
+        // Add tracking pixel 1x1
         $footer .= sprintf(
             '<img src="%s" width="1" height="1" style="width:1px;height:1px;" />',
-            home_url('?quillcrm=email_preview&hash_key=' . $campaign_email->hash_key)
+            home_url('?quillcrm=email_open&hash_key=' . $campaign_email->hash_key)
         );
 
-        $email_footer = $this->settings['email_footer'] ?? $this->default_email_footer();
-
-        // Add unsubscribe link
-        $footer .= $email_footer;
+            $email_footer = $this->settings['email_footer'] ?? $this->default_email_footer();
+            $footer .= $email_footer;
 
         return $footer;
     }

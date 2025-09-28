@@ -11,7 +11,8 @@ namespace QuillCRM\Abstracts;
 
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Campaign_Message_Model;
+use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Services\Campaign_Rate_Limiter;
@@ -119,9 +120,9 @@ abstract class Abstract_Campaign_Processing
     /**
      * Get campaign message mode - must be implemented by child classes
      *
-     * @return int Campaign_Message_Model mode constant
+     * @return int Tracking_Model mode constant
      */
-    abstract protected function get_campaign_mode();
+    abstract protected function get_message_mode();
 
     /**
      * Get recipient field from contact - must be implemented by child classes
@@ -136,10 +137,10 @@ abstract class Abstract_Campaign_Processing
      *
      * @param array $message_data Prepared message data
      * @param Contact_Model $contact Contact model
-     * @param Campaign_Message_Model $campaign_message Campaign message record
+     * @param Tracking_Model $campaign_message Campaign tracking record
      * @return array Result array with 'success' boolean and optional data
      */
-    abstract protected function send_message($message_data, Contact_Model $contact, Campaign_Message_Model $campaign_message);
+    abstract protected function send_message($message_data, Contact_Model $contact, Tracking_Model $campaign_message);
 
     /**
      * Get tracking class - must be implemented by child classes
@@ -147,6 +148,27 @@ abstract class Abstract_Campaign_Processing
      * @return string Tracking class name
      */
     abstract protected function get_tracking_class();
+
+    /**
+     * Get source type for messages - can be overridden by child classes
+     *
+     * @return int Source type constant
+     */
+    protected function get_source_type()
+    {
+        return Message_Source_Types::CAMPAIGN;
+    }
+
+    /**
+     * Get source ID for messages - can be overridden by child classes
+     *
+     * @param Campaign_Model $campaign
+     * @return int Source ID
+     */
+    protected function get_source_id(Campaign_Model $campaign)
+    {
+        return $campaign->id;
+    }
 
     /**
      * Process campaigns - unified logic for all types
@@ -285,11 +307,18 @@ abstract class Abstract_Campaign_Processing
             }
 
             foreach ($contacts as $contact) {
-                $result = $this->add_campaign_message($campaign, $contact, $last_contact_offset);
-                if ($result) {
-                    $last_contact_offset++;
+                // Get fresh offset each time to ensure database consistency
+                $current_offset = get_option("quillcrm_{$this->campaign_type}_campaigns_last_contact_offset_{$campaign->id}", 0);
+
+                $result = $this->add_message($campaign, $contact, $current_offset);
+                if (!$result) {
+                    // If message failed to add, break to avoid infinite loop
+                    break;
                 }
             }
+
+            // Update the loop condition variable with fresh database value
+            $last_contact_offset = get_option("quillcrm_{$this->campaign_type}_campaigns_last_contact_offset_{$campaign->id}", 0);
         }
 
         // Final completion check
@@ -309,7 +338,7 @@ abstract class Abstract_Campaign_Processing
      * @param int            $last_contact_offset
      * @return bool
      */
-    protected function add_campaign_message(Campaign_Model $campaign, Contact_Model $contact, $last_contact_offset)
+    protected function add_message(Campaign_Model $campaign, Contact_Model $contact, $last_contact_offset)
     {
         try {
             // Get recipient field (email or phone)
@@ -339,16 +368,17 @@ abstract class Abstract_Campaign_Processing
             }
 
             $campaign_message_data = array(
-                'campaign_id' => $campaign->id,
                 'contact_id' => $contact->id,
                 'template_id' => $template_id,
-                'mode' => $this->get_campaign_mode(),
+                'mode' => $this->get_message_mode(),
+                'source_type' => $this->get_source_type(),
+                'source_id' => $this->get_source_id($campaign),
                 'recipient' => $recipient,
                 'status' => 'pending',
                 'hash_key' => Utils::generate_hash_key(),
             );
 
-            $campaign_message = Campaign_Message_Model::create($campaign_message_data);
+            $campaign_message = Tracking_Model::create($campaign_message_data);
 
             // Update last contact offset
             update_option("quillcrm_{$this->campaign_type}_campaigns_last_contact_offset_{$campaign->id}", intval($last_contact_offset) + 1);
@@ -388,10 +418,10 @@ abstract class Abstract_Campaign_Processing
      *
      * @param Campaign_Model $campaign
      * @param Contact_Model  $contact
-     * @param Campaign_Message_Model $campaign_message
+     * @param Tracking_Model $campaign_message
      * @return void
      */
-    public function process_campaign_message(Campaign_Model $campaign, Contact_Model $contact, Campaign_Message_Model $campaign_message)
+    public function process_campaign_message(Campaign_Model $campaign, Contact_Model $contact, Tracking_Model $campaign_message)
     {
         // Check if memory limit is reached
         if (Utils::is_memory_limit_reached()) {
@@ -439,10 +469,10 @@ abstract class Abstract_Campaign_Processing
      *
      * @param \QuillCRM\Models\Template_Model $template
      * @param Contact_Model $contact
-     * @param Campaign_Message_Model $campaign_message
+     * @param Tracking_Model $campaign_message
      * @return array Prepared message data
      */
-    protected function prepare_message_content($template, Contact_Model $contact, Campaign_Message_Model $campaign_message)
+    protected function prepare_message_content($template, Contact_Model $contact, Tracking_Model $campaign_message)
     {
         $subject = $template->subject ?? '';
         $message = $template->body ?? $this->get_default_campaign_content();
@@ -526,11 +556,11 @@ abstract class Abstract_Campaign_Processing
     /**
      * Handle send result - unified logic for all types
      *
-     * @param Campaign_Message_Model $campaign_message
+     * @param Tracking_Model $campaign_message
      * @param array $result Send result
      * @return void
      */
-    protected function handle_send_result(Campaign_Message_Model $campaign_message, $result)
+    protected function handle_send_result(Tracking_Model $campaign_message, $result)
     {
         if ($result && $result['success']) {
             $campaign_message->status = 'sent';
@@ -539,6 +569,26 @@ abstract class Abstract_Campaign_Processing
             do_action("quillcrm_{$this->campaign_type}_send_after", $this);
         } else {
             $campaign_message->status = 'failed';
+
+            // Log error details if available
+            if (isset($result['error'])) {
+                quillcrm_get_logger()->error(
+                    sprintf(__('%s message failed: %s', 'quillcrm'), ucfirst($this->campaign_type), $result['error']),
+                    array(
+                        'campaign_id' => $campaign_message->source_id,
+                        'contact_id' => $campaign_message->contact_id,
+                        'error' => $result['error']
+                    )
+                );
+            }
+
+            // Log additional debug info if available
+            if (isset($result['debug'])) {
+                quillcrm_get_logger()->debug(
+                    sprintf(__('%s message failed with debug info', 'quillcrm'), ucfirst($this->campaign_type)),
+                    $result['debug']
+                );
+            }
         }
 
         $campaign_message->save();
@@ -580,7 +630,7 @@ abstract class Abstract_Campaign_Processing
      *
      * @param Campaign_Model $campaign
      * @param Contact_Model $contact
-     * @param Campaign_Message_Model $campaign_message
+     * @param Tracking_Model $campaign_message
      * @return void
      */
     protected function log_external_api_connection_error($campaign, $contact, $campaign_message)
@@ -603,7 +653,7 @@ abstract class Abstract_Campaign_Processing
      *
      * @param Campaign_Model $campaign
      * @param Contact_Model $contact
-     * @param Campaign_Message_Model $campaign_message
+     * @param Tracking_Model $campaign_message
      * @return void
      */
     protected function log_campaign_processing_result($campaign, $contact, $campaign_message)
@@ -624,7 +674,7 @@ abstract class Abstract_Campaign_Processing
      *
      * @param Campaign_Model $campaign
      * @param Contact_Model $contact
-     * @param Campaign_Message_Model $campaign_message
+     * @param Tracking_Model $campaign_message
      * @param \Exception $exception
      * @return void
      */

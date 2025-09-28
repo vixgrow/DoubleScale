@@ -274,7 +274,8 @@ abstract class Abstract_Twilio_Tracking
 				quillcrm_get_logger()->info("{$this->campaign_type} click tracked", [
 					'campaign_record_id' => $campaign_record->id,
 					'contact_id' => $campaign_record->contact_id,
-					'campaign_id' => $campaign_record->campaign_id,
+					'source_id' => $campaign_record->source_id,
+					'source_type' => $campaign_record->source_type,
 					'code' => "{$this->campaign_type}_click_tracked"
 				]);
 

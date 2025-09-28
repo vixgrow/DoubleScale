@@ -113,7 +113,12 @@ class Text_Block extends Email_Block {
 
 		$style_string = $this->build_style_string( $styles );
 
-		return "<div style=\"{$style_string}\">{$content}</div>";
+		// Use table structure for better email client compatibility
+		return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
+			<tr>
+				<td style=\"{$style_string}\">{$content}</td>
+			</tr>
+		</table>";
 	}
 }
 

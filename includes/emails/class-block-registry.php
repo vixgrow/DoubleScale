@@ -112,6 +112,13 @@ class Block_Registry {
 		$this->register_block( new \QuillCRM\Emails\Blocks\Divider_Block() );
 		$this->register_block( new \QuillCRM\Emails\Blocks\HTML_Block() );
 		$this->register_block( new \QuillCRM\Emails\Blocks\Social_Media_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Timer_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Video_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Table_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Signature_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Menu_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Preheader_Block() );
+		$this->register_block( new \QuillCRM\Emails\Blocks\Product_Block() );
 
 		/**
 		 * Hook for registering additional email blocks

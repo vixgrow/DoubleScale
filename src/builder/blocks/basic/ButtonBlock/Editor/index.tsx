@@ -18,6 +18,7 @@ import {
 	PaddingControl,
 	ColorPickerControl,
 	InputWithMergeTags,
+	LinkInput,
 } from '../../shared';
 
 export interface ButtonEditorProps {
@@ -37,14 +38,12 @@ export const ButtonEditor = ({ props, onChange }: ButtonEditorProps) => {
 				fieldName="text"
 			/>
 
-			{/* Link URL with Merge Tags */}
-			<InputWithMergeTags
+			{/* Link URL */}
+			<LinkInput
 				label={__('Link URL', 'quillcrm')}
 				value={props.url}
 				onChange={(url) => onChange({ url })}
 				placeholder="https://example.com"
-				type="url"
-				fieldName="url"
 			/>
 
 			{/* Button Style */}

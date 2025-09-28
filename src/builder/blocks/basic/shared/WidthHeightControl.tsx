@@ -52,10 +52,6 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 		{ value: '75%', label: __('75%', 'quillcrm') },
 		{ value: '50%', label: __('50%', 'quillcrm') },
 		{ value: '25%', label: __('25%', 'quillcrm') },
-		{ value: '800px', label: __('800px', 'quillcrm') },
-		{ value: '600px', label: __('600px', 'quillcrm') },
-		{ value: '400px', label: __('400px', 'quillcrm') },
-		{ value: '300px', label: __('300px', 'quillcrm') },
 	];
 
 	// Default height options if not provided

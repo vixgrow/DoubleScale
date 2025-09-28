@@ -45,9 +45,9 @@ class Divider_Block extends Email_Block {
 			'backgroundColor' => 'transparent',
 			'style'           => 'solid',
 			'padding'         => array(
-				'top'    => 10,
+				'top'    => 0,
 				'right'  => 0,
-				'bottom' => 10,
+				'bottom' => 0,
 				'left'   => 0,
 			),
 			'align'           => 'center',

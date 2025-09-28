@@ -514,6 +514,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						fontSize: `${fontSize}px`,
 						fontFamily: fontFamily,
 						lineHeight: '1.5',
+						maxWidth: '287.2px',
 						// Force font inheritance for all child elements
 						'--font-size': `${fontSize}px`,
 						'--font-family': fontFamily,

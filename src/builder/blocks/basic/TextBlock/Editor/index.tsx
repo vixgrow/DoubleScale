@@ -63,8 +63,6 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 				<RichTextEditor
 					content={props.content}
 					onChange={(content) => onChange({ content })}
-					fontSize={props.fontSize}
-					fontFamily={props.fontFamily}
 				/>
 			</div>
 
@@ -90,6 +88,31 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 						newProps.underline = updates.underline;
 					if ('strikethrough' in updates)
 						newProps['line-through'] = updates.strikethrough;
+
+					// Clear HTML formatting from content when using TextFormattingControl
+					// This ensures props-based formatting takes precedence
+					let cleanContent = props.content;
+					if (cleanContent && cleanContent.includes('<')) {
+						// Remove formatting tags but preserve the text content
+						cleanContent = cleanContent
+							.replace(/<\/?(b|strong)>/gi, '')
+							.replace(/<\/?(i|em)>/gi, '')
+							.replace(/<\/?(u)>/gi, '')
+							.replace(/<\/?(s|strike|del)>/gi, '')
+							.replace(/style\s*=\s*"[^"]*font-weight[^"]*"/gi, '')
+							.replace(/style\s*=\s*"[^"]*font-style[^"]*"/gi, '')
+							.replace(/style\s*=\s*"[^"]*text-decoration[^"]*"/gi, '')
+							.replace(/style\s*=\s*'[^']*font-weight[^']*'/gi, '')
+							.replace(/style\s*=\s*'[^']*font-style[^']*'/gi, '')
+							.replace(/style\s*=\s*'[^']*text-decoration[^']*'/gi, '')
+							.replace(/style\s*=\s*""\s*/gi, '')
+							.replace(/style\s*=\s*''\s*/gi, '')
+							.replace(/\s*style\s*=\s*""/gi, '')
+							.replace(/\s*style\s*=\s*''/gi, '');
+
+						newProps.content = cleanContent;
+					}
+
 					onChange(newProps);
 				}}
 			/>

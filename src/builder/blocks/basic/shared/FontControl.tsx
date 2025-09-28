@@ -20,8 +20,6 @@ export interface FontControlProps {
     onFontFamilyChange: (fontFamily: string) => void;
     onFontSizeChange: (fontSize: number) => void;
     className?: string;
-    fontSizeMin?: number;
-    fontSizeMax?: number;
 }
 
 const FONT_FAMILIES = [
@@ -38,8 +36,6 @@ export const FontControl: React.FC<FontControlProps> = ({
     onFontFamilyChange,
     onFontSizeChange,
     className,
-    fontSizeMin = 8,
-    fontSizeMax = 72,
 }) => {
     return (
         <div className={className}>
@@ -73,16 +69,18 @@ export const FontControl: React.FC<FontControlProps> = ({
                     <Input
                         type="number"
                         value={fontSize}
-                        onChange={(e) =>
-                            onFontSizeChange(parseInt(e.target.value) || fontSizeMin)
-                        }
+                        onChange={(e) => {
+                            const value = parseInt(e.target.value) || 8;
+                            const clampedValue = Math.min(Math.max(value, 8), 72);
+                            onFontSizeChange(clampedValue);
+                        }}
                         className="pr-8 h-10"
                         style={{
                             borderColor: '#e5e5e5',
                             borderRadius: '0.5rem',
                         }}
-                        min={fontSizeMin}
-                        max={fontSizeMax}
+                        min={8}
+                        max={72}
                     />
                 </div>
             </div>

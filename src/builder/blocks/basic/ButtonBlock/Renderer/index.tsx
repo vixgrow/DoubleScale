@@ -39,6 +39,11 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 			fontWeight: buttonSettings.bold ? 'bold' : 'normal',
 			fontStyle: buttonSettings.italic ? 'italic' : 'normal',
 			textDecoration: buttonSettings.underline ? 'underline' : 'none',
+			// Text wrapping and overflow handling
+			whiteSpace: 'normal',
+			wordWrap: 'break-word',
+			overflowWrap: 'break-word',
+			maxWidth: '100%',
 			// No padding on button itself - removed as requested
 			// No background color on button itself - removed as requested
 		};
@@ -102,6 +107,9 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 		width: props.align === 'full' ? '100%' : 'auto',
 		padding: containerPaddingString,
 		backgroundColor: props.containerBackgroundColor,
+		// Ensure container doesn't overflow
+		overflow: 'hidden',
+		wordWrap: 'break-word',
 	};
 
 	const buttonStyle = getButtonStyle();

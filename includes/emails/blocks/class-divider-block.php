@@ -117,9 +117,14 @@ class Divider_Block extends Email_Block {
 
 		$hr_style = $this->build_style_string( $hr_styles );
 
-		return "<div style=\"{$container_style}\">
-			<hr style=\"{$hr_style}\" />
-		</div>";
+		// Use table structure for better email client compatibility
+		return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
+			<tr>
+				<td style=\"{$container_style}\">
+					<hr style=\"{$hr_style}\" />
+				</td>
+			</tr>
+		</table>";
 	}
 }
 

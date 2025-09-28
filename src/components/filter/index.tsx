@@ -10,8 +10,7 @@ import { addQueryArgs } from '@wordpress/url';
  * External dependencies
  */
 import dayjs from 'dayjs';
-import { map, isEmpty, isArray, isObject } from 'lodash';
-import Select from 'react-select';
+import { map, isEmpty, isArray } from 'lodash';
 
 /**
  * Internal dependencies
@@ -23,11 +22,18 @@ import type {
 	ReactSelectOptions,
 	Response,
 } from '@quillcrm/client';
-import { Button } from '@/components/ui/button';
 import { DeleteIcon } from '@quillcrm/components';
 import { Input } from '@/components/ui/input';
 import { DateRangePicker } from '../ui/date-range-picker';
 import { DatePicker } from '@/components/ui/date-picker';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 interface FilterProps {
 	filterSettings: FilterSettings;
@@ -51,7 +57,7 @@ const Filter: React.FC<FilterProps> = ({
 	const [keyword, setKeyword] = useState<string>('');
 
 	const datePickerClassName =
-		'rounded-md border border-input px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-sm bg-background h-12';
+		'rounded-md border border-input px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-sm bg-background';
 	const fetchOptions = useCallback(async () => {
 		if (!filterSettings.is_dynamic) return;
 
@@ -90,228 +96,159 @@ const Filter: React.FC<FilterProps> = ({
 	return (
 		<div className="qcrm-filter">
 			<div className="qcrm-filter-row">
-				<div className="qcrm-filter-row-item text-[#6E6E6E]">
+				<div className="w-[15%] text-muted-foreground font-medium">
 					{filterSettings.name}
 				</div>
-				{filterSettings.operators && (
-					<Select
-						className="react-select-container"
-						classNamePrefix="react-select"
-						value={{
-							label: filterSettings.operators[filter.operator],
-							value: filter.operator,
-						}}
-						onChange={(value) => {
-							if (!isObject(value)) {
-								return;
-							}
-
-							onChange('operator', value.value);
-						}}
-						options={map(
-							filterSettings.operators,
-							(label, value) => ({
-								label,
-								value,
-							})
-						)}
-						isSearchable={false}
-						styles={{
-							control: (base) => ({
-								...base,
-								width: '250px',
-								height: '48px',
-								minHeight: '48px',
-								borderRadius: '8px',
-							}),
-							indicatorsContainer: (base) => ({
-								...base,
-								height: '48px',
-							}),
-							valueContainer: (base) => ({
-								...base,
-								height: '48px',
-								padding: '0 8px',
-							}),
-							singleValue: (base) => ({
-								...base,
-								lineHeight: '48px',
-							}),
-							menu: (base: any) => ({
-								...base,
-								color: 'black',
-							}),
-						}}
-					/>
-				)}
-				{filterSettings.type === 'text' && (
-					<Input
-						value={filter.value}
-						onChange={(e) => onChange('value', e.target.value)}
-						className="h-[48px] w-[250px]"
-					/>
-				)}
-				{filterSettings.type === 'select' &&
-					!filterSettings.is_dynamic && (
+				<div className="w-[85%] flex items-center gap-3">
+					{filterSettings.operators && (
 						<Select
-							value={{
-								label:
-									filterSettings.options[filter.value] ||
-									filter.value,
-								value: filter.value,
-							}}
-							onChange={(value) => {
-								if (!isObject(value)) {
-									return;
+							value={filter.operator}
+							onValueChange={(value) =>
+								onChange('operator', value)
+							}
+						>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								{map(
+									filterSettings.operators,
+									(label, value) => (
+										<SelectItem key={value} value={value}>
+											{label}
+										</SelectItem>
+									)
+								)}
+							</SelectContent>
+						</Select>
+					)}
+					{filterSettings.type === 'text' && (
+						<Input
+							value={filter.value}
+							onChange={(e) => onChange('value', e.target.value)}
+						/>
+					)}
+					{filterSettings.type === 'select' &&
+						!filterSettings.is_dynamic && (
+							<Select
+								value={filter.value}
+								onValueChange={(value) =>
+									onChange('value', value)
 								}
-
-								onChange('value', value.value); // Fixed: was changing operator instead of value
-							}}
-							options={map(
-								filterSettings.options,
-								(label, value) => ({
-									label,
-									value,
-								})
-							)}
-							isSearchable={false}
-							styles={{
-								control: (base) => ({
-									...base,
-									width: '250px',
-									height: '48px',
-									minHeight: '48px',
-									borderRadius: '8px',
-								}),
-								indicatorsContainer: (base) => ({
-									...base,
-									height: '48px',
-								}),
-								valueContainer: (base) => ({
-									...base,
-									height: '48px',
-									padding: '0 8px',
-								}),
-								singleValue: (base) => ({
-									...base,
-									lineHeight: '48px',
-								}),
-								menu: (base: any) => ({
-									...base,
-									color: 'black',
-								}),
-							}}
-						/>
-					)}
-				{filterSettings.type === 'select' &&
-					filterSettings.is_dynamic && (
-						<Select
-							value={map(filter.value, (value) => ({
-								label:
-									options.find(
-										(option) => option.value === value
-									)?.label || value,
-								value,
-							}))}
-							onChange={(value) =>
-								onChange(
-									'value',
-									map(value, (item) => item.value)
-								)
-							}
-							options={options}
-							isSearchable={true}
-							isLoading={loading}
-							onInputChange={(value) => setKeyword(value)}
-							isMulti={true}
-							styles={{
-								control: (base) => ({
-									...base,
-									width: '250px',
-									height: '48px',
-									minHeight: '48px',
-									borderRadius: '8px',
-								}),
-								indicatorsContainer: (base) => ({
-									...base,
-									height: '48px',
-								}),
-								valueContainer: (base) => ({
-									...base,
-									height: '48px',
-									padding: '0 8px',
-								}),
-								singleValue: (base) => ({
-									...base,
-									lineHeight: '48px',
-								}),
-								menu: (base: any) => ({
-									...base,
-									color: 'black',
-								}),
-							}}
-						/>
-					)}
-				{filterSettings.type === 'date' && (
-					<>
-						{filter.operator === 'within' ? (
-							<DateRangePicker
-								className={datePickerClassName}
-								value={{
-									from:
-										!isEmpty(filter.value) &&
-										isArray(filter.value) &&
-										filter.value[0]
-											? new Date(filter.value[0])
-											: null,
-									to:
-										!isEmpty(filter.value) &&
-										isArray(filter.value) &&
-										filter.value[1]
-											? new Date(filter.value[1])
-											: null,
-								}}
-								onChange={(range) => {
-									const newValue: string[] = [];
-									if (range.from) {
-										newValue[0] = dayjs(range.from).format(
-											'YYYY-MM-DD'
-										);
-									}
-									if (range.to) {
-										newValue[1] = dayjs(range.to).format(
-											'YYYY-MM-DD'
-										);
-									}
-									onChange('value', newValue);
-								}}
+							>
+								<SelectTrigger>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{map(
+										filterSettings.options,
+										(label, value) => (
+											<SelectItem
+												key={value}
+												value={value}
+											>
+												{label}
+											</SelectItem>
+										)
+									)}
+								</SelectContent>
+							</Select>
+						)}
+					{filterSettings.type === 'select' &&
+						filterSettings.is_dynamic && (
+							<MultiSelect
+								options={options.map((option) => ({
+									label: option.label,
+									value: String(option.value),
+								}))}
+								selected={map(filter.value, (value) => ({
+									label:
+										options.find(
+											(option) =>
+												String(option.value) ===
+												String(value)
+										)?.label || String(value),
+									value: String(value),
+								}))}
+								onChange={(selectedOptions) =>
+									onChange(
+										'value',
+										selectedOptions.map(
+											(item) => item.value
+										)
+									)
+								}
+								isLoading={loading}
+								onSearchChange={(value) => setKeyword(value)}
 								placeholder={__(
-									'Select date range',
+									'Select options...',
 									'quillcrm'
 								)}
-							/>
-						) : (
-							<DatePicker
-								buttonClassName={datePickerClassName}
-								value={
-									!isEmpty(filter.value) ? filter.value : ''
-								}
-								onChange={(value) => {
-									onChange('value', value);
-								}}
-								placeholder={__('Select date', 'quillcrm')}
-								outputFormat="display"
+								searchPlaceholder={__('Search...', 'quillcrm')}
 							/>
 						)}
-					</>
-				)}
-				<Button
-					size="icon"
+					{filterSettings.type === 'date' && (
+						<>
+							{filter.operator === 'within' ? (
+								<DateRangePicker
+									className={datePickerClassName}
+									value={{
+										from:
+											!isEmpty(filter.value) &&
+											isArray(filter.value) &&
+											filter.value[0]
+												? new Date(filter.value[0])
+												: null,
+										to:
+											!isEmpty(filter.value) &&
+											isArray(filter.value) &&
+											filter.value[1]
+												? new Date(filter.value[1])
+												: null,
+									}}
+									onChange={(range) => {
+										const newValue: string[] = [];
+										if (range.from) {
+											newValue[0] = dayjs(
+												range.from
+											).format('YYYY-MM-DD');
+										}
+										if (range.to) {
+											newValue[1] = dayjs(
+												range.to
+											).format('YYYY-MM-DD');
+										}
+										onChange('value', newValue);
+									}}
+									placeholder={__(
+										'Select date range',
+										'quillcrm'
+									)}
+								/>
+							) : (
+								<DatePicker
+									buttonClassName={datePickerClassName}
+									value={
+										!isEmpty(filter.value)
+											? filter.value
+											: ''
+									}
+									onChange={(value) => {
+										onChange('value', value);
+									}}
+									placeholder={__('Select date', 'quillcrm')}
+									outputFormat="display"
+								/>
+							)}
+						</>
+					)}
+				</div>
+				<div
 					onClick={onRemove}
-					className="bg-transparent shadow-none border-none p-0 text-destructive"
+					className="text-destructive hover:text-destructive cursor-pointer"
 				>
-					<DeleteIcon width={24} height={24} />
-				</Button>
+					<DeleteIcon width={20} height={20} />
+				</div>
 			</div>
 		</div>
 	);

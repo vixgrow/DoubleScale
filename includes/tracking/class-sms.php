@@ -10,7 +10,7 @@
 
 namespace QuillCRM\Tracking;
 
-use QuillCRM\Models\Campaign_Message_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Twilio_Tracking;
 
@@ -136,7 +136,7 @@ class SMS extends Abstract_Twilio_Tracking
      */
     protected function get_campaign_model_class()
     {
-        return Campaign_Message_Model::class;
+        return Tracking_Model::class;
     }
 
     /**
@@ -147,7 +147,7 @@ class SMS extends Abstract_Twilio_Tracking
      */
     protected function get_campaign_mode()
     {
-        return Campaign_Message_Model::MODE_SMS;
+        return Tracking_Model::MODE_SMS;
     }
 
     /**

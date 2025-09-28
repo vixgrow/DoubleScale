@@ -11,7 +11,7 @@
 namespace QuillCRM\Tracking;
 
 use QuillCRM\Models\Link_Trigger_Model;
-use QuillCRM\Models\Campaign_Message_Model;
+use QuillCRM\Models\Tracking_Model;
 
 /**
  * Link Triggers
@@ -79,8 +79,8 @@ class Link_Triggers {
 			$link_trigger->save();
 
 			$track_id       = isset( $_GET['track-id'] ) ? sanitize_text_field( wp_unslash( $_GET['track-id'] ) ) : '';
-			$campaign_email = Campaign_Message_Model::where( 'hash_key', $track_id )
-				->where('mode', Campaign_Message_Model::MODE_EMAIL)
+		$campaign_email = Tracking_Model::where( 'hash_key', $track_id )
+			->where('mode', Tracking_Model::MODE_EMAIL)
 				->first();
 			if ( ! $campaign_email ) {
 				wp_redirect( $redirect_url );

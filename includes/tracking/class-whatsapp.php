@@ -10,7 +10,7 @@
 
 namespace QuillCRM\Tracking;
 
-use QuillCRM\Models\Campaign_Message_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Twilio_Tracking;
 
@@ -117,7 +117,7 @@ class WhatsApp extends Abstract_Twilio_Tracking
      *
      * @since 1.0.0
      *
-     * @param Campaign_Message_Model $campaign_record Campaign WhatsApp record
+     * @param Tracking_Model $campaign_record Campaign WhatsApp tracking record
      * @param string $status Delivery status
      * @param string $error_code Error code if any
      * @param string $error_message Error message if any
@@ -176,7 +176,7 @@ class WhatsApp extends Abstract_Twilio_Tracking
      */
     protected function get_campaign_model_class()
     {
-        return Campaign_Message_Model::class;
+        return Tracking_Model::class;
     }
 
     /**
@@ -187,7 +187,7 @@ class WhatsApp extends Abstract_Twilio_Tracking
      */
     protected function get_campaign_mode()
     {
-        return Campaign_Message_Model::MODE_WHATSAPP;
+        return Tracking_Model::MODE_WHATSAPP;
     }
 
     /**

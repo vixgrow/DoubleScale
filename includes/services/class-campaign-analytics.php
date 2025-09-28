@@ -10,7 +10,8 @@
 namespace QuillCRM\Services;
 
 use QuillCRM\Utils;
-use QuillCRM\Models\Campaign_Message_Model;
+use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Constants\Message_Source_Types;
 
 /**
  * Campaign_Analytics class
@@ -55,11 +56,11 @@ class Campaign_Analytics
     {
         switch ($type) {
             case 'email':
-                return Campaign_Message_Model::emails();
+                return Tracking_Model::emails();
             case 'sms':
-                return Campaign_Message_Model::sms();
+                return Tracking_Model::sms();
             case 'whatsapp':
-                return Campaign_Message_Model::whatsapp();
+                return Tracking_Model::whatsapp();
             default:
                 throw new \InvalidArgumentException("Unsupported campaign type: {$type}");
         }
@@ -151,7 +152,7 @@ class Campaign_Analytics
      * Get campaign-specific statistics
      *
      * @param string $type Campaign type ('email', 'sms')
-     * @param int    $campaign_id Campaign ID
+     * @param int    $campaign_id Campaign ID (maps to source_id in tracking)
      *
      * @return array Campaign statistics
      */
@@ -160,10 +161,10 @@ class Campaign_Analytics
         $query = $this->get_model_query($type);
 
         $stats = array(
-            'total' => $query->where('campaign_id', $campaign_id)->count(),
-            'sent' => $query->where('campaign_id', $campaign_id)->where('status', 'sent')->count(),
-            'failed' => $query->where('campaign_id', $campaign_id)->where('status', 'failed')->count(),
-            'pending' => $query->where('campaign_id', $campaign_id)->where('status', 'pending')->count(),
+            'total' => $query->where('source_id', $campaign_id)->where('source_type', Message_Source_Types::CAMPAIGN)->count(),
+            'sent' => $query->where('source_id', $campaign_id)->where('source_type', Message_Source_Types::CAMPAIGN)->where('status', 'sent')->count(),
+            'failed' => $query->where('source_id', $campaign_id)->where('source_type', Message_Source_Types::CAMPAIGN)->where('status', 'failed')->count(),
+            'pending' => $query->where('source_id', $campaign_id)->where('source_type', Message_Source_Types::CAMPAIGN)->where('status', 'pending')->count(),
         );
 
         return $this->add_type_specific_stats($stats, $type, $campaign_id);
@@ -174,7 +175,7 @@ class Campaign_Analytics
      *
      * @param array  $stats Base statistics
      * @param string $type Campaign type ('email', 'sms')
-     * @param int    $campaign_id Optional campaign ID for filtering
+     * @param int    $campaign_id Optional campaign ID for filtering (maps to source_id in tracking)
      * @param string $start_date Optional start date for filtering
      * @param string $end_date Optional end date for filtering
      *
@@ -183,7 +184,7 @@ class Campaign_Analytics
     protected function add_type_specific_stats($stats, $type, $campaign_id = null, $start_date = null, $end_date = null)
     {
         if ($type === 'email') {
-            $base_query = $campaign_id ? $this->get_model_query($type)->where('campaign_id', $campaign_id) : $this->get_model_query($type);
+            $base_query = $campaign_id ? $this->get_model_query($type)->where('source_id', $campaign_id)->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN) : $this->get_model_query($type);
             
             // Apply date range filter if provided
             if ($start_date && $end_date) {
@@ -193,7 +194,7 @@ class Campaign_Analytics
             $stats['opened'] = (clone $base_query)->where('opened', 1)->count();
             $stats['clicked'] = (clone $base_query)->where('clicked', 1)->count();
         } elseif ($type === 'sms') {
-            $base_query = $campaign_id ? $this->get_model_query($type)->where('campaign_id', $campaign_id) : $this->get_model_query($type);
+            $base_query = $campaign_id ? $this->get_model_query($type)->where('source_id', $campaign_id)->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN) : $this->get_model_query($type);
             
             // Apply date range filter if provided
             if ($start_date && $end_date) {
@@ -205,7 +206,7 @@ class Campaign_Analytics
             // Calculate rates using centralized method
             $stats = $this->calculate_sms_rates($stats);
         } elseif ($type === 'whatsapp') {
-            $base_query = $campaign_id ? $this->get_model_query($type)->where('campaign_id', $campaign_id) : $this->get_model_query($type);
+            $base_query = $campaign_id ? $this->get_model_query($type)->where('source_id', $campaign_id)->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN) : $this->get_model_query($type);
             
             // Apply date range filter if provided
             if ($start_date && $end_date) {
@@ -256,7 +257,7 @@ class Campaign_Analytics
     /**
      * Get time-series analytics for campaign
      *
-     * @param int    $campaign_id Campaign ID
+     * @param int    $campaign_id Campaign ID (maps to source_id in tracking)
      * @param string $type Campaign type ('email', 'sms')
      * @param string $period Time period ('hour', 'day', 'week', 'month')
      * @param int    $limit Number of periods to return
@@ -295,7 +296,8 @@ class Campaign_Analytics
         }
 
         $results = $query->selectRaw($select_fields)
-            ->where('campaign_id', $campaign_id)
+            ->where('source_id', $campaign_id)
+            ->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN)
             ->whereNotNull('sent_at')
             ->groupBy('period')
             ->orderBy('period', 'DESC')

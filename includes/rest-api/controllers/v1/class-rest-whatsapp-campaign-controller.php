@@ -18,7 +18,7 @@ use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Twilio_Campaign_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Campaign_Message_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Managers\Integrations_Manager;
 use QuillCRM\Managers\Campaign_Status_Manager;
@@ -187,7 +187,7 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Twilio_Campaign_Control
 	 */
 	protected function get_campaign_message_query($campaign_id)
 	{
-		return Campaign_Message_Model::whatsapp()->where('campaign_id', $campaign_id);
+		return Tracking_Model::whatsapp()->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN)->where('source_id', $campaign_id);
 	}
 
 	/**

@@ -18,7 +18,7 @@ use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Campaign_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Campaign_Message_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Managers\Campaign_Status_Manager;
@@ -195,7 +195,7 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 */
 	protected function get_campaign_message_query($campaign_id)
 	{
-		return Campaign_Message_Model::emails()->where('campaign_id', $campaign_id);
+		return Tracking_Model::emails()->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN)->where('source_id', $campaign_id);
 	}
 
 	/**

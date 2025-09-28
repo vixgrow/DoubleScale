@@ -101,22 +101,20 @@ class Image_Block extends Email_Block {
 			</div>';
 		}
 
-		// Output with optional link wrapper
-		$output = "<div style=\"{$container_style}\">";
+		// Build image content
+		$image_content = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$img_style}\" />";
 
+		// Wrap in link if specified
 		if ( $link ) {
-			$output .= "<a href=\"{$link}\" target=\"_blank\" style=\"text-decoration:none;border:0;\">";
+			$image_content = "<a href=\"{$link}\" target=\"_blank\" style=\"text-decoration:none;border:0;\">{$image_content}</a>";
 		}
 
-		$output .= "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$img_style}\" />";
-
-		if ( $link ) {
-			$output .= '</a>';
-		}
-
-		$output .= '</div>';
-
-		return $output;
+		// Use table structure for better email client compatibility
+		return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
+			<tr>
+				<td align=\"{$props['align']}\" style=\"{$container_style}\">{$image_content}</td>
+			</tr>
+		</table>";
 	}
 }
 

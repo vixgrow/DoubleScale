@@ -110,9 +110,14 @@ class HTML_Block extends Email_Block {
 			$style_tag = "<style>#{$unique_id} * { {$custom_css} }</style>";
 		}
 
-		return "{$style_tag}<div style=\"{$container_style}\">
-			<div id=\"{$unique_id}\">{$content}</div>
-		</div>";
+		// Use table structure for better email client compatibility
+		return "{$style_tag}<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
+			<tr>
+				<td style=\"{$container_style}\">
+					<div id=\"{$unique_id}\">{$content}</div>
+				</td>
+			</tr>
+		</table>";
 	}
 }
 

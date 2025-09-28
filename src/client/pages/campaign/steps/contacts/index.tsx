@@ -2,15 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
-
-/**
- * External dependencies
- */
-import { Button, Card, Badge, Flex, Typography, Spin } from 'antd';
+import { useState, useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -18,66 +10,63 @@ import { Button, Card, Badge, Flex, Typography, Spin } from 'antd';
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useCampaignContext } from '../../state/context';
-import type { Filter as FilterType, ContactsResponse } from '@quillcrm/client';
+import type { Filter as FilterType } from '@quillcrm/client';
 import {
-	Filters,
+	ContactList,
 	PanelLayout,
 	PanelSettings,
 	TeamIcon,
 } from '@quillcrm/components';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ListTagFilter } from '@quillcrm/components';
+import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
 
 const Contacts: React.FC = () => {
-	const { campaign, isLoading, saveCampaign, isSaving, updateSettings } =
-		useCampaignContext();
+	const { campaign, saveCampaign, updateSettings } = useCampaignContext();
 	const navigate = useNavigate();
 	const filters = campaign?.settings.filters || [];
 	const setFilters = (newFilters: FilterType[]) => {
 		updateSettings('filters', newFilters);
 	};
 
-	const [loading, setLoading] = useState(true);
 	const [total, setTotal] = useState(0);
 	const [filterBy, setFilterBy] = useState('list-tags');
-	const { createNotice } = useDispatch('quillcrm/core');
+	const [isApplying, setIsApplying] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
+	const [panelHeight, setPanelHeight] = useState<number>(0);
+	const panelRef = useRef<HTMLDivElement>(null);
 
-	const fetchContacts = async () => {
-		setLoading(true);
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts', {
-					per_page: 1,
-					page: 1,
-					filters: filters,
-					subscribed: true,
-				}),
-				method: 'GET',
-				parse: true,
-			})) as ContactsResponse;
-
-			setTotal(response.total);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to fetch contacts', 'quillcrm'),
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const fetchList = async () => {
-		const response = await apiFetch({
-			path: '/qc/v1/lists',
-		});
-		console.log(response);
-	};
+	// Measure and sync panel height
 	useEffect(() => {
-		fetchContacts();
-		fetchList();
-	}, []);
+		const measureHeight = () => {
+			if (panelRef.current) {
+				const height = panelRef.current.offsetHeight;
+				setPanelHeight(height);
+			}
+		};
+
+		// Initial measurement
+		measureHeight();
+
+		// Set up ResizeObserver to watch for height changes
+		const resizeObserver = new ResizeObserver(() => {
+			measureHeight();
+		});
+
+		if (panelRef.current) {
+			resizeObserver.observe(panelRef.current);
+		}
+
+		return () => {
+			resizeObserver.disconnect();
+		};
+	}, [filterBy, filters, isApplying]); // Re-measure when content changes
+
+	// Handle apply filters action
+	const handleApplyFilters = async (): Promise<void> => {
+		setShouldFetchContacts(true);
+	};
 
 	const save = async () => {
 		if (!campaign) {
@@ -96,8 +85,8 @@ const Contacts: React.FC = () => {
 			onBack={() => navigate(getToLink(`campaigns`))}
 		>
 			{campaign && (
-				<>
-					<div className="flex gap-6">
+				<div className="flex gap-6 items-start">
+					<div ref={panelRef} className="w-[55%]">
 						<PanelSettings
 							title={__('Recipients', 'quillcrm')}
 							description={__(
@@ -105,7 +94,7 @@ const Contacts: React.FC = () => {
 								'quillcrm'
 							)}
 							icon={<TeamIcon />}
-							className="w-1/2"
+							className="flex flex-col"
 						>
 							<div className="space-y-6">
 								<div>
@@ -143,79 +132,51 @@ const Contacts: React.FC = () => {
 										</div>
 									</RadioGroup>
 								</div>
-								{filterBy === 'list-tags' && <ListTagFilter />}
-								{filterBy === 'advanced' && (
-									<Filters
+
+								{/* Contact Count Display */}
+								<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+									<div className="text-sm font-medium text-gray-700">
+										{__(
+											'Total Contacts based on filters',
+											'quillcrm'
+										)}
+										: {total.toLocaleString()}
+									</div>
+								</div>
+
+								{filterBy === 'list-tags' && (
+									<ListTagFilter
 										filters={filters}
-										onChange={setFilters}
-										onApply={fetchContacts}
-										isApplying={loading}
+										setFilters={setFilters}
+										fetchContacts={handleApplyFilters}
+										loading={isLoading}
+										onApplyingChange={setIsApplying}
+									/>
+								)}
+								{filterBy === 'advanced' && (
+									<AdvancedFilter
+										filters={filters}
+										setFilters={setFilters}
+										fetchContacts={handleApplyFilters}
+										loading={isLoading}
+										onApplyingChange={setIsApplying}
 									/>
 								)}
 							</div>
 						</PanelSettings>
 					</div>
 
-					{/* <Flex
-						justify="space-between"
-						align="center"
-						style={{ marginBottom: 20 }}
-					>
-						<Flex vertical gap={10}>
-							<Typography.Title level={4}>
-								{__('Recipient Selection', 'quillcrm')}
-							</Typography.Title>
-							<Typography.Text>
-								{__(
-									'Select the contacts to send the campaign to',
-									'quillcrm'
-								)}
-							</Typography.Text>
-						</Flex>
-						<div className="qcrm-contacts">
-							<div className="qcrm-contacts-total">
-								{__(
-									'Total Contacts based on filters',
-									'quillcrm'
-								)}
-								:{' '}
-								{!loading && (
-									<Badge
-										count={total}
-										style={{
-											backgroundColor: '#52c41a',
-											color: '#fff',
-											marginLeft: '10px',
-										}}
-										showZero
-									/>
-								)}
-								{loading && <Spin />}
-							</div>
-						</div>
-					</Flex>
-				
-					<div className="qcrm-actions">
-						<Button
-							onClick={() =>
-								navigate(
-									getToLink(
-										`campaigns/${campaign.id}/template`
-									)
-								)
-							}
-						>
-							{__('Back', 'quillcrm')}
-						</Button>
-						<Button
-							type="primary"
-							onClick={() => save()}
-							loading={isSaving}
-						>
-							{__('Next', 'quillcrm')}
-						</Button>
-					</div> */}
-				</>
+					{/* Contact List Component */}
+					<ContactList
+						filters={filters}
+						loading={isApplying}
+						maxHeight={panelHeight}
+						shouldFetch={shouldFetchContacts}
+						onFetchComplete={() => setShouldFetchContacts(false)}
+						onTotalChange={setTotal}
+						onLoadingChange={setIsLoading}
+					/>
+				</div>
 			)}
 		</PanelLayout>
 	);

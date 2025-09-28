@@ -77,45 +77,45 @@ class Button_Block extends Email_Block {
 				'bottom' => 4,
 				'left'   => 8,
 			),
-			'bold'      => false,
-			'italic'    => false,
-			'underline' => false,
+			'bold'            => false,
+			'italic'          => false,
+			'underline'       => false,
 		);
 
 		// Load settings from database
 		$saved_settings = \QuillCRM\Settings::get( 'button_settings', array() );
-		
+
 		// Debug logging (remove in production)
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			error_log( 'Button Block Debug - Button Style: ' . $button_style );
 			error_log( 'Button Block Debug - Saved Settings: ' . print_r( $saved_settings, true ) );
 		}
-		
+
 		if ( ! empty( $saved_settings ) && is_array( $saved_settings ) ) {
 			// Get settings for the specific button style
 			$style_settings = isset( $saved_settings[ $button_style ] ) ? $saved_settings[ $button_style ] : array();
-			
+
 			// Debug logging
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				error_log( 'Button Block Debug - Style Settings: ' . print_r( $style_settings, true ) );
 			}
-			
+
 			// Merge with defaults to ensure all properties exist
 			$merged_settings = wp_parse_args( $style_settings, $default_settings );
-			
+
 			// Debug logging
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				error_log( 'Button Block Debug - Final Settings: ' . print_r( $merged_settings, true ) );
 			}
-			
+
 			return $merged_settings;
 		}
-		
+
 		// Debug logging
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			error_log( 'Button Block Debug - Using default settings' );
 		}
-		
+
 		return $default_settings;
 	}
 
@@ -136,7 +136,7 @@ class Button_Block extends Email_Block {
 
 		// Container style based on alignment, background, and padding
 		$container_padding = $this->format_padding( $props['containerPadding'] );
-		
+
 		// Handle alignment properly
 		$text_align = 'center'; // default
 		if ( $props['align'] === 'left' ) {
@@ -146,12 +146,12 @@ class Button_Block extends Email_Block {
 		} elseif ( $props['align'] === 'center' || $props['align'] === 'full' ) {
 			$text_align = 'center';
 		}
-		
+
 		$container_style = $this->build_style_string(
 			array(
 				'background-color' => $props['containerBackgroundColor'],
-				'padding' => $container_padding,
-				'width' => $props['align'] === 'full' ? '100%' : 'auto',
+				'padding'          => $container_padding,
+				'width'            => $props['align'] === 'full' ? '100%' : 'auto',
 			)
 		);
 
@@ -197,28 +197,57 @@ class Button_Block extends Email_Block {
 
 		$button_style = $this->build_style_string( $button_styles );
 
-		// For email client compatibility, use a table-based button
-		// Create a wrapper table for proper alignment
+		// For email client compatibility, use a table-based button structure
 		$wrapper_table_style = 'width: 100%; border-collapse: collapse;';
-		$button_cell_style = '';
-		$button_table_style = '';
-		
+
+		// Alignment styles for the button cell
+		$button_cell_align = 'center';
+		switch ( $props['align'] ) {
+			case 'left':
+				$button_cell_align = 'left';
+				break;
+			case 'right':
+				$button_cell_align = 'right';
+				break;
+			case 'full':
+				$button_cell_align = 'center';
+				break;
+			default:
+				$button_cell_align = 'center';
+		}
+
+		$button_cell_style = $this->build_style_string(
+			array(
+				'text-align' => $button_cell_align,
+				'padding'    => $this->format_padding( $props['containerPadding'] ),
+			)
+		);
+
+		// Inner button table for MSO compatibility
+		$button_table_style = $this->build_style_string(
+			array(
+				'display'         => 'inline-block',
+				'border-collapse' => 'separate',
+				'line-height'     => '100%',
+			)
+		);
+
 		// Set alignment styles
 		if ( $props['align'] === 'full' ) {
-			$button_cell_style = 'width: 100%; text-align: center;';
+			$button_cell_style  = 'width: 100%; text-align: center;';
 			$button_table_style = 'width: 100%;';
 		} elseif ( $props['align'] === 'left' ) {
-			$button_cell_style = 'text-align: left; width: auto;';
+			$button_cell_style  = 'text-align: left; width: auto;';
 			$button_table_style = 'width: auto;';
 		} elseif ( $props['align'] === 'right' ) {
-			$button_cell_style = 'text-align: right; width: auto;';
+			$button_cell_style  = 'text-align: right; width: auto;';
 			$button_table_style = 'width: auto;';
 		} else {
 			// center
-			$button_cell_style = 'text-align: center; width: auto;';
+			$button_cell_style  = 'text-align: center; width: auto;';
 			$button_table_style = 'width: auto; margin: 0 auto;';
 		}
-		
+
 		return "
 		<div style=\"{$container_style}\">
 			<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"{$wrapper_table_style}\">

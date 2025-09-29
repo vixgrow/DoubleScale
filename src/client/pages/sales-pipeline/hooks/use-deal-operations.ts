@@ -32,9 +32,6 @@ interface DealOperationsReturn {
 		pipelineId: number,
 		stageId?: number
 	) => Promise<void>;
-	markDealAsWon: (dealId: number) => Promise<void>;
-	markDealAsLost: (dealId: number, reason?: string) => Promise<void>;
-	reopenDeal: (dealId: number) => Promise<void>;
 	updateDeal: (dealId: number, data: Partial<any>) => Promise<void>;
 	deleteDeal: (dealId: number) => Promise<void>;
 	createDeal: (dealData: any) => Promise<any>;
@@ -184,71 +181,6 @@ export const useDealOperations = (): DealOperationsReturn => {
 		[]
 	);
 
-	/**
-	 * Mark deal as won
-	 */
-	const markDealAsWon = useCallback(async (dealId: number) => {
-		try {
-			await apiFetch({
-				path: `/qc/v1/deals/${dealId}/mark-won`,
-				method: 'PUT',
-			});
-		} catch (error) {
-			const errorMessage = handleApiError(
-				'mark deal as won',
-				error,
-				ERROR_MESSAGES.MARK_WON
-			);
-			throw new Error(errorMessage);
-		}
-	}, []);
-
-	/**
-	 * Mark deal as lost
-	 */
-	const markDealAsLost = useCallback(
-		async (dealId: number, reason?: string) => {
-			try {
-				const data: any = {};
-				if (reason) {
-					data.reason = reason;
-				}
-
-				await apiFetch({
-					path: `/qc/v1/deals/${dealId}/mark-lost`,
-					method: 'PUT',
-					data,
-				});
-			} catch (error) {
-				const errorMessage = handleApiError(
-					'mark deal as lost',
-					error,
-					ERROR_MESSAGES.MARK_LOST
-				);
-				throw new Error(errorMessage);
-			}
-		},
-		[]
-	);
-
-	/**
-	 * Reopen a closed deal
-	 */
-	const reopenDeal = useCallback(async (dealId: number) => {
-		try {
-			await apiFetch({
-				path: `/qc/v1/deals/${dealId}/reopen`,
-				method: 'PUT',
-			});
-		} catch (error) {
-			const errorMessage = handleApiError(
-				'reopen deal',
-				error,
-				ERROR_MESSAGES.REOPEN_DEAL
-			);
-			throw new Error(errorMessage);
-		}
-	}, []);
 
 	/**
 	 * Update deal data
@@ -346,9 +278,6 @@ export const useDealOperations = (): DealOperationsReturn => {
 		getDealActivities,
 		moveDealToStage,
 		moveDealToPipeline,
-		markDealAsWon,
-		markDealAsLost,
-		reopenDeal,
 		updateDeal,
 		deleteDeal,
 		createDeal,

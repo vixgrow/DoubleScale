@@ -21,6 +21,8 @@ use QuillCRM\Models\User_Model;
 class Deal_Model extends Model {
 
 
+
+
 	/**
 	 * Table name
 	 *
@@ -496,5 +498,23 @@ class Deal_Model extends Model {
 				$deal->activities()->delete();
 			}
 		);
+	}
+
+	/**
+	 * Get status according to stage probability
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param float $stage_probability Stage win probability
+	 *
+	 * @return string
+	 */
+	public static function get_status_from_probability( $stage_probability ) {
+		if ( $stage_probability == 100 ) {
+			return 'won';
+		} elseif ( $stage_probability == 0 ) {
+			return 'lost';
+		}
+		return 'open';
 	}
 }

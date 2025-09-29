@@ -24,6 +24,7 @@ use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
 use QuillCRM\User_Roles\Permissions;
+use QuillCRM\Managers\Pipeline_Manager;
 
 /**
  * Core Class
@@ -31,6 +32,7 @@ use QuillCRM\User_Roles\Permissions;
  * @since 1.0.0
  */
 class Core {
+
 
 
 
@@ -77,7 +79,8 @@ class Core {
 				'qcrm.config.setSiteUrl( "' . site_url() . '" );' .
 				'qcrm.config.setMergeTags( ' . wp_json_encode( Merge_Tags_Manager::instance()->get_groups() ) . ');' .
 				'qcrm.config.setImporters( ' . wp_json_encode( Importers_Manager::instance()->get_options() ) . ');' .
-				'qcrm.config.setUserCapabilities( ' . wp_json_encode( $user_capabilities ) . ');'
+				'qcrm.config.setUserCapabilities( ' . wp_json_encode( $user_capabilities ) . ');' .
+				'qcrm.config.setDefaultStages( ' . wp_json_encode( Pipeline_Manager::instance()->get_default_stages() ) . ');'
 		);
 	}
 }

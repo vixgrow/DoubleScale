@@ -15,12 +15,17 @@ use Exception;
 use QuillCRM\Models\Pipeline_Model;
 use QuillCRM\Models\Pipeline_Stage_Model;
 use QuillCRM\Models\Deal_Model;
-use QuillCRM\User_Roles\Permissions;
 
 /**
  * Pipeline_Manager class
  */
 final class Pipeline_Manager {
+
+
+
+
+
+
 
 
 
@@ -78,34 +83,39 @@ final class Pipeline_Manager {
 	 *
 	 * @return array
 	 */
-	private function get_default_stages() {
-		 return array(
-			 array(
-				 'name'            => 'Lead',
-				 'color'           => '#e74c3c',
-				 'win_probability' => 10.0,
-			 ),
-			 array(
-				 'name'            => 'Qualified',
-				 'color'           => '#f39c12',
-				 'win_probability' => 25.0,
-			 ),
-			 array(
-				 'name'            => 'Proposal',
-				 'color'           => '#f1c40f',
-				 'win_probability' => 50.0,
-			 ),
-			 array(
-				 'name'            => 'Negotiation',
-				 'color'           => '#2ecc71',
-				 'win_probability' => 75.0,
-			 ),
-			 array(
-				 'name'            => 'Closed Won',
-				 'color'           => '#27ae60',
-				 'win_probability' => 100.0,
-			 ),
-		 );
+	public function get_default_stages() {
+		return array(
+			array(
+				'name'            => 'Lead',
+				'color'           => '#e74c3c',
+				'win_probability' => 10.0,
+			),
+			array(
+				'name'            => 'Qualified',
+				'color'           => '#f39c12',
+				'win_probability' => 25.0,
+			),
+			array(
+				'name'            => 'Proposal',
+				'color'           => '#f1c40f',
+				'win_probability' => 50.0,
+			),
+			array(
+				'name'            => 'Negotiation',
+				'color'           => '#2ecc71',
+				'win_probability' => 75.0,
+			),
+			array(
+				'name'            => 'Closed Won',
+				'color'           => '#27ae60',
+				'win_probability' => 100.0,
+			),
+			array(
+				'name'            => 'Closed Lost',
+				'color'           => '#e74c3c',
+				'win_probability' => 0.0,
+			),
+		);
 	}
 
 	/**

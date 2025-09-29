@@ -37,6 +37,8 @@ class REST_Deal_Controller extends REST_Controller {
 
 
 
+
+
 	/**
 	 * Route base.
 	 *
@@ -301,7 +303,7 @@ class REST_Deal_Controller extends REST_Controller {
 			'value'               => floatval( $request->get_param( 'value' ) ),
 			'currency'            => sanitize_text_field( $request->get_param( 'currency' ) ),
 			'expected_close_date' => sanitize_text_field( $request->get_param( 'expected_close_date' ) ),
-			'probability'         => $request->get_param( 'probability' ) !== null ? floatval( $request->get_param( 'probability' ) ) : null,
+			// 'probability'         => $request->get_param( 'probability' ) !== null ? floatval( $request->get_param( 'probability' ) ) : null,
 			'owner_id'            => $owner_id ? intval( $owner_id ) : null,
 			'source'              => sanitize_text_field( $request->get_param( 'source' ) ),
 		);
@@ -352,14 +354,15 @@ class REST_Deal_Controller extends REST_Controller {
 			}
 		}
 
-		$fields = array( 'title', 'contact_id', 'pipeline_id', 'stage_id', 'value', 'currency', 'expected_close_date', 'probability', 'owner_id', 'source' );
-
+		// $fields = array( 'title', 'contact_id', 'pipeline_id', 'stage_id', 'value', 'currency', 'expected_close_date', 'probability', 'owner_id', 'source' );
+		$fields = array( 'title', 'contact_id', 'pipeline_id', 'stage_id', 'value', 'currency', 'expected_close_date', 'owner_id', 'source' );
 		foreach ( $fields as $field ) {
 			$value = $request->get_param( $field );
 			// Special handling for probability - allow explicit null to revert to stage default
-			if ( $field === 'probability' && $request->has_param( $field ) ) {
-				$data[ $field ] = $value !== null ? floatval( $value ) : null;
-			} elseif ( $value !== null ) {
+			// if ( $field === 'probability' && $request->has_param( $field ) ) {
+			// $data[ $field ] = $value !== null ? floatval( $value ) : null;
+			// }
+			if ( $value !== null ) {
 				if ( $field === 'title' || $field === 'currency' || $field === 'source' ) {
 					$data[ $field ] = sanitize_text_field( $value );
 				} elseif ( $field === 'expected_close_date' ) {

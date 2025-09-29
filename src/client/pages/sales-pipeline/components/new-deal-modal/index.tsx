@@ -48,7 +48,7 @@ interface DealFormData {
 	stage_id: number;
 	value?: number;
 	expected_close_date?: string;
-	probability?: number;
+	// probability?: number;
 	source?: string;
 	owner_id?: number;
 }
@@ -417,7 +417,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 					</Form.Item>
 				</div>
 
-				<Form.Item
+				{/* <Form.Item
 					name="probability"
 					label={__('Win Probability (%)', 'quillcrm')}
 					help={__(
@@ -441,7 +441,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 							return Math.min(Math.max(result, 0), 100) as any;
 						}}
 					/>
-				</Form.Item>
+				</Form.Item> */}
 
 				{pipeline?.stages && pipeline.stages.length > 0 && (
 					<Form.Item

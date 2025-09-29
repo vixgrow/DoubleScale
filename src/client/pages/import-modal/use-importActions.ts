@@ -375,14 +375,7 @@ export const useImportActions = () => {
 		// before showing the completion state
 		requestAnimationFrame(() => {
 			dispatch({ type: 'SET_SHOWING_COMPLETION', payload: true });
-
-			// Show completion for 2 seconds before resetting
-			setTimeout(() => {
-				dispatch({ type: 'SET_SHOWING_COMPLETION', payload: false });
-				dispatch({ type: 'SET_COUNT', payload: 0 });
-				dispatch({ type: 'SET_OFFSET', payload: 0 });
-				dispatch({ type: 'SET_CURSOR', payload: null });
-			}, 2000);
+			// Don't automatically reset the completion state - let the modal handle closing
 		});
 	};
 

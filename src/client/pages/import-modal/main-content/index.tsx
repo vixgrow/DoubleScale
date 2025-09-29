@@ -28,7 +28,7 @@ interface MainContentProps {
 }
 
 const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
-	const { state, updateValues, resetState } = useImportContext();
+	const { state, updateValues } = useImportContext();
 	const {
 		currentStep,
 		source,
@@ -47,9 +47,9 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 	const handleImportContacts = async () => {
 		const success = await importContacts();
 		if (success) {
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			resetState();
-			onImportComplete();
+			// Call onImportComplete first to refresh the contacts data
+			await onImportComplete();
+			// The modal will close automatically via onImportComplete -> handleClose
 		}
 	};
 
@@ -96,7 +96,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 							].includes(source) &&
 							importer.credentials &&
 							Object.keys(importer.credentials || {}).length >
-								0 &&
+							0 &&
 							!importing &&
 							!isFetching &&
 							!sourceData && (
@@ -122,7 +122,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 							].includes(source) &&
 							importer.credentials &&
 							Object.keys(importer.credentials || {}).length >
-								0 &&
+							0 &&
 							!importing &&
 							!isFetching &&
 							sourceData && (
@@ -187,7 +187,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 										sourceData,
 										(field, key) =>
 											field.type ===
-												'contact_mapped_fields' && (
+											'contact_mapped_fields' && (
 												<div
 													key={key}
 													className="space-y-3"
@@ -199,20 +199,20 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 														fields={
 															fileData
 																? fileData.header_columns.reduce(
-																		(
-																			acc,
+																	(
+																		acc,
+																		field
+																	) => {
+																		acc[
 																			field
-																		) => {
-																			acc[
-																				field
-																			] =
-																				{
-																					label: field,
-																				};
-																			return acc;
-																		},
-																		{}
-																	)
+																		] =
+																		{
+																			label: field,
+																		};
+																		return acc;
+																	},
+																	{}
+																)
 																: field.options
 														}
 														values={

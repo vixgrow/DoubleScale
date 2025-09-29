@@ -126,14 +126,19 @@ export const ContactsImportModal: React.FC = () => {
 	const { importModalVisible, setImportModalVisible } = useContactsContext();
 	const { fetchContacts } = useContactsAPI();
 
-	const handleCompleted = () => {
-		fetchContacts();
+	const handleCompleted = async () => {
+		// Refresh the contacts data immediately after import completion
+		await fetchContacts();
+	};
+
+	const handleClose = () => {
+		setImportModalVisible(false);
 	};
 
 	return (
 		<ImportModal
 			open={importModalVisible}
-			onClose={() => setImportModalVisible(false)}
+			onClose={handleClose}
 			onCompleted={handleCompleted}
 		/>
 	);

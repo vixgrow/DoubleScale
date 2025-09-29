@@ -287,6 +287,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				showPagination={false}
 				initialPageSize={perPage}
 				setPage={setPage}
+				loading={loading}
 			/>
 			<DataTablePagination table={serverSideTable} />
 

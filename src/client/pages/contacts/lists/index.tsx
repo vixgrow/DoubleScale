@@ -287,6 +287,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				showPagination={false}
 				initialPageSize={perPage}
 				setPage={setPage}
+				loading={loading}
 			/>
 			<DataTablePagination table={serverSideTable} />
 

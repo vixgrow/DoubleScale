@@ -29,7 +29,7 @@ import {
 	CustomField,
 	CustomFieldsGroup,
 } from '@quillcrm/client';
-import { PageHeader, PlusIcon } from '@quillcrm/components';
+import { PageHeader, PlusIcon, GradientGroupIcon } from '@quillcrm/components';
 import { DataTableSearch } from '@/components/ui/data-table-search';
 import { DataTableActions } from '@/components/ui/data-table-actions';
 import { DroppableGroup } from './droppable-group';
@@ -391,143 +391,173 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 
 				{/* Groups List - Only show when not loading */}
 				{!loading && (
-					<div className="flex flex-col gap-[10px]">
-						<DndContext
-							sensors={sensors}
-							onDragStart={({ active }) => {
-								const activeData = active.data.current;
-								if (activeData?.type === 'field') {
-									setActiveField(activeData.field);
-								}
-							}}
-							onDragEnd={async ({ active, over }) => {
-								setActiveField(null);
-
-								if (!over) return;
-
-								// Check if the drag actually moved to a different location
-								if (active.id === over.id) return;
-
-								const activeData = active.data.current;
-								const overData = over.data.current;
-
-								if (
-									activeData?.type === 'field' &&
-									overData?.type === 'group'
-								) {
-									const field = activeData.field;
-									const groupId = parseInt(overData.groupId);
-
-									// Additional check: don't move if it's already in the same group
-									if (field.group_id === groupId) return;
-
-									await moveField(field, groupId);
-								}
-							}}
-						>
-							{(groups || []).map((group) => {
-								const groupFilteredFields = (
-									group.custom_fields || []
-								).filter((field) => {
-									// Text filter
-									const matchesText =
-										globalFilter === '' ||
-										field.name
-											.toLowerCase()
-											.includes(globalFilter.toLowerCase()) ||
-										customFieldsTypes[field.type]?.name
-											.toLowerCase()
-											.includes(globalFilter.toLowerCase());
-
-									// Date range filter
-									const matchesDateRange = (() => {
-										if (!dateRange.from && !dateRange.to)
-											return true;
-
-										const fieldDate = new Date(
-											field.created_at
-										);
-										const fromDate = dateRange.from
-											? new Date(dateRange.from)
-											: null;
-										const toDate = dateRange.to
-											? new Date(dateRange.to)
-											: null;
-
-										if (fromDate && toDate) {
-											return (
-												fieldDate >= fromDate &&
-												fieldDate <= toDate
-											);
-										} else if (fromDate) {
-											return fieldDate >= fromDate;
-										} else if (toDate) {
-											return fieldDate <= toDate;
-										}
-
-										return true;
-									})();
-
-									return matchesText && matchesDateRange;
-								});
-
-								return (
-									<DroppableGroup
-										key={group.id}
-										id={`group-${group.id}`}
-										title={group.name}
-										fieldsCount={groupFilteredFields.length}
-										deletable={(groups || []).length > 1}
-										onDelete={() => {
-											if (
-												(group.custom_fields || []).length >
-												0
-											) {
-												// Group has fields - show dialog to move fields
-												setDeleteGroupId(group.id);
-												setDeleteGroupVisible(true);
-											} else {
-												// Empty group - delete directly without newGroupId
-												deleteGroup(group.id);
-											}
+					<>
+						{/* Empty State - Show when no groups exist */}
+						{(!groups || groups.length === 0) ? (
+							<div className="flex flex-col items-center justify-center py-16 px-4">
+								{/* TODO: change it to no-data icon when we add dashboard to main */}
+								<div className="flex flex-col items-center space-y-4">
+									<GradientGroupIcon width={64} height={64} />
+									<div className="text-center space-y-2">
+										<h3 className="text-lg font-medium text-gray-900">
+											{__('No custom field groups yet', 'quillcrm')}
+										</h3>
+										<p className="text-sm text-gray-500 max-w-md">
+											{__('Create your first group to start organizing your custom fields.', 'quillcrm')}
+										</p>
+									</div>
+									<Button
+										onClick={() => {
+											setEditingGroup(null);
+											setAddGroupVisible(true);
 										}}
-										onEdit={() => handleEditGroup(group)}
-										onDuplicate={() =>
-											handleDuplicateGroup(group)
-										}
+										className="mt-4"
 									>
-										<FieldTable
-											fields={groupFilteredFields}
-											fieldTypes={customFieldsTypes}
-											selectedRowKeys={selectedRowKeys}
-											onSelectionChange={setSelectedRowKeys}
-											onEdit={(field) => {
-												setSelectedField(field);
-												setVisible(true);
-											}}
-											onDelete={deleteField}
-										/>
-									</DroppableGroup>
-								);
-							})}
+										<PlusIcon />
+										{__('Create Group', 'quillcrm')}
+									</Button>
+								</div>
+							</div>
+						) : (
+							<div className="flex flex-col gap-[10px]">
+								<DndContext
+									sensors={sensors}
+									onDragStart={({ active }) => {
+										const activeData = active.data.current;
+										if (activeData?.type === 'field') {
+											setActiveField(activeData.field);
+										}
+									}}
+									onDragEnd={async ({ active, over }) => {
+										setActiveField(null);
 
-							<DragOverlay
-								adjustScale={false}
-								dropAnimation={null}
-								style={{
-									cursor: 'grabbing',
-								}}
-								modifiers={[centerOnDragHandle]}
-							>
-								{activeField ? (
-									<DragOverlayRow
-										field={activeField}
-										fieldTypes={customFieldsTypes}
-									/>
-								) : null}
-							</DragOverlay>
-						</DndContext>
-					</div>
+										if (!over) return;
+
+										// Check if the drag actually moved to a different location
+										if (active.id === over.id) return;
+
+										const activeData = active.data.current;
+										const overData = over.data.current;
+
+										if (
+											activeData?.type === 'field' &&
+											overData?.type === 'group'
+										) {
+											const field = activeData.field;
+											const groupId = parseInt(overData.groupId);
+
+											// Additional check: don't move if it's already in the same group
+											if (field.group_id === groupId) return;
+
+											await moveField(field, groupId);
+										}
+									}}
+								>
+									{(groups || []).map((group) => {
+										const groupFilteredFields = (
+											group.custom_fields || []
+										).filter((field) => {
+											// Text filter
+											const matchesText =
+												globalFilter === '' ||
+												field.name
+													.toLowerCase()
+													.includes(globalFilter.toLowerCase()) ||
+												customFieldsTypes[field.type]?.name
+													.toLowerCase()
+													.includes(globalFilter.toLowerCase());
+
+											// Date range filter
+											const matchesDateRange = (() => {
+												if (!dateRange.from && !dateRange.to)
+													return true;
+
+												const fieldDate = new Date(
+													field.created_at
+												);
+												const fromDate = dateRange.from
+													? new Date(dateRange.from)
+													: null;
+												const toDate = dateRange.to
+													? new Date(dateRange.to)
+													: null;
+
+												if (fromDate && toDate) {
+													return (
+														fieldDate >= fromDate &&
+														fieldDate <= toDate
+													);
+												} else if (fromDate) {
+													return fieldDate >= fromDate;
+												} else if (toDate) {
+													return fieldDate <= toDate;
+												}
+
+												return true;
+											})();
+
+											return matchesText && matchesDateRange;
+										});
+
+										return (
+											<DroppableGroup
+												key={group.id}
+												id={`group-${group.id}`}
+												title={group.name}
+												fieldsCount={groupFilteredFields.length}
+												deletable={(groups || []).length > 1}
+												onDelete={() => {
+													if (
+														(group.custom_fields || []).length >
+														0
+													) {
+														// Group has fields - show dialog to move fields
+														setDeleteGroupId(group.id);
+														setDeleteGroupVisible(true);
+													} else {
+														// Empty group - delete directly without newGroupId
+														deleteGroup(group.id);
+													}
+												}}
+												onEdit={() => handleEditGroup(group)}
+												onDuplicate={() =>
+													handleDuplicateGroup(group)
+												}
+											>
+												<FieldTable
+													fields={groupFilteredFields}
+													fieldTypes={customFieldsTypes}
+													selectedRowKeys={selectedRowKeys}
+													onSelectionChange={setSelectedRowKeys}
+													onEdit={(field) => {
+														setSelectedField(field);
+														setVisible(true);
+													}}
+													onDelete={deleteField}
+												/>
+											</DroppableGroup>
+										);
+									})}
+
+									<DragOverlay
+										adjustScale={false}
+										dropAnimation={null}
+										style={{
+											cursor: 'grabbing',
+										}}
+										modifiers={[centerOnDragHandle]}
+									>
+										{activeField ? (
+											<DragOverlayRow
+												field={activeField}
+												fieldTypes={customFieldsTypes}
+											/>
+										) : null}
+									</DragOverlay>
+								</DndContext>
+							</div>
+						)}
+					</>
 				)}
 
 				{/* Dialogs */}

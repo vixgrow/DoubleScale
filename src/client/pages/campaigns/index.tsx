@@ -208,7 +208,7 @@ const Campaigns: React.FC = () => {
 				]}
 			/>
 
-			{hasRecords ? (
+			{loading || hasRecords ? (
 				<>
 					<DataTable
 						columns={columns}
@@ -216,6 +216,7 @@ const Campaigns: React.FC = () => {
 						showPagination={false}
 						initialPageSize={perPage}
 						setPage={setPage}
+						loading={loading}
 						config={{
 							search: {
 								placeholder: __('Search', 'quillcrm'),

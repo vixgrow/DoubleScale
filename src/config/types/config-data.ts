@@ -24,6 +24,12 @@ export type ConfigData = Record<string, unknown> & {
 	isLmsActive: boolean;
 	mergeTags: AutomationMergeTags;
 	importers: Importers;
+	userCapabilities: UserCapabilities;
+};
+
+export type UserCapabilities = {
+	quillcrm_crm_manager: boolean;
+	quillcrm_deal_owner: boolean;
 };
 
 export type Importers = {

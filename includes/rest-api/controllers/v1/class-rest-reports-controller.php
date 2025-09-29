@@ -14,14 +14,13 @@ use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Deal_Activity_Model;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Models\Pipeline_Model;
-use QuillCRM\Models\User_Model;
+use QuillCRM\User_Roles\Permissions;
+use QuillCRM\User_Roles\User_Roles;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 class Rest_Reports_Controller extends REST_Controller {
-
-
 
 
 
@@ -46,9 +45,10 @@ class Rest_Reports_Controller extends REST_Controller {
 			'/' . $this->rest_base . '/contacts-deals',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_contacts_deals_reports' ),
-					'args'     => $this->get_reports_filter_params(),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_contacts_deals_reports' ),
+					'permission_callback' => array( $this, 'get_contacts_deals_reports_permissions_check' ),
+					'args'                => $this->get_reports_filter_params(),
 				),
 			)
 		);
@@ -58,9 +58,10 @@ class Rest_Reports_Controller extends REST_Controller {
 			'/' . $this->rest_base . '/deals-by-date',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_deals_by_date_reports' ),
-					'args'     => $this->get_deals_by_date_params(),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_deals_by_date_reports' ),
+					'permission_callback' => array( $this, 'get_deals_by_date_reports_permissions_check' ),
+					'args'                => $this->get_deals_by_date_params(),
 				),
 			)
 		);
@@ -70,9 +71,10 @@ class Rest_Reports_Controller extends REST_Controller {
 			'/' . $this->rest_base . '/deals-leaderboard',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_deals_leaderboard_reports' ),
-					'args'     => $this->get_reports_filter_params(),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_deals_leaderboard_reports' ),
+					'permission_callback' => array( $this, 'get_deals_leaderboard_reports_permissions_check' ),
+					'args'                => $this->get_reports_filter_params(),
 				),
 			)
 		);
@@ -82,9 +84,10 @@ class Rest_Reports_Controller extends REST_Controller {
 			'/' . $this->rest_base . '/sales-rep',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_sales_rep_reports' ),
-					'args'     => $this->get_reports_filter_params(),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_sales_rep_reports' ),
+					'permission_callback' => array( $this, 'get_sales_rep_reports_permissions_check' ),
+					'args'                => $this->get_reports_filter_params(),
 				),
 			)
 		);
@@ -94,9 +97,10 @@ class Rest_Reports_Controller extends REST_Controller {
 			'/' . $this->rest_base . '/sales-rep/pipeline-stages',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_sales_rep_pipeline_stages_reports' ),
-					'args'     => $this->get_reports_filter_params(),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_sales_rep_pipeline_stages_reports' ),
+					'permission_callback' => array( $this, 'get_sales_rep_pipeline_stages_reports_permissions_check' ),
+					'args'                => $this->get_reports_filter_params(),
 				),
 			)
 		);
@@ -106,9 +110,10 @@ class Rest_Reports_Controller extends REST_Controller {
 			'/' . $this->rest_base . '/sales-rep/active-deals',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_sales_rep_active_deals_reports' ),
-					'args'     => $this->get_reports_filter_params(),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_sales_rep_active_deals_reports' ),
+					'permission_callback' => array( $this, 'get_sales_rep_active_deals_reports_permissions_check' ),
+					'args'                => $this->get_reports_filter_params(),
 				),
 			)
 		);
@@ -118,9 +123,10 @@ class Rest_Reports_Controller extends REST_Controller {
 			'/' . $this->rest_base . '/all-sales-rep',
 			array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_all_sales_rep_reports' ),
-					'args'     => $this->get_reports_filter_params(),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_all_sales_rep_reports' ),
+					'permission_callback' => array( $this, 'get_all_sales_rep_reports_permissions_check' ),
+					'args'                => $this->get_reports_filter_params(),
 				),
 			)
 		);
@@ -190,7 +196,16 @@ class Rest_Reports_Controller extends REST_Controller {
 		$filters = $this->get_filters_from_request( $request );
 
 		$deals_leaderboard = array();
-		$all_owners        = User_Model::all();
+		// Get only CRM users and administrators
+		$all_owners = get_users(
+			array(
+				'role__in' => array(
+					User_Roles::CRM_MANAGER,
+					User_Roles::DEAL_OWNER,
+					User_Roles::ADMINISTRATOR,
+				),
+			)
+		);
 
 		foreach ( $all_owners as $owner ) {
 			$owner_data = $this->get_deals_leaderboard( $filters, $owner->ID );
@@ -380,9 +395,18 @@ class Rest_Reports_Controller extends REST_Controller {
 	 * @return WP_REST_Response Response object.
 	 */
 	public function get_all_sales_rep_reports( $request ) {
-		$filters           = $this->get_filters_from_request( $request );
-		$date_ranges       = $this->get_report_date_ranges( $filters );
-		$users             = User_Model::all();
+		$filters     = $this->get_filters_from_request( $request );
+		$date_ranges = $this->get_report_date_ranges( $filters );
+		// Get only CRM users and administrators
+		$users             = get_users(
+			array(
+				'role__in' => array(
+					User_Roles::CRM_MANAGER,
+					User_Roles::DEAL_OWNER,
+					User_Roles::ADMINISTRATOR,
+				),
+			)
+		);
 		$sales_rep_reports = array();
 
 		// Collect all user data first
@@ -515,10 +539,15 @@ class Rest_Reports_Controller extends REST_Controller {
 	 */
 	private function get_sale_info( $filters ) {
 		$sale_info = array();
-		// sale info
-		$sale_info['id']    = User_Model::find( $filters['owner_id'] ?? get_current_user_id() )->ID;
-		$sale_info['name']  = User_Model::find( $filters['owner_id'] ?? get_current_user_id() )->display_name;
-		$sale_info['email'] = User_Model::find( $filters['owner_id'] ?? get_current_user_id() )->user_email;
+		$user_id   = $filters['owner_id'] ?? get_current_user_id();
+		$user      = get_user_by( 'ID', $user_id );
+
+		if ( $user ) {
+			$sale_info['id']    = $user->ID;
+			$sale_info['name']  = $user->display_name;
+			$sale_info['email'] = $user->user_email;
+		}
+
 		return $sale_info;
 	}
 
@@ -1152,7 +1181,6 @@ class Rest_Reports_Controller extends REST_Controller {
 	 * @return array Deals data grouped by date
 	 */
 	private function get_deals_by_create_date( $days_back, $frequency, $filters = array() ) {
-		xdebug_break();
 		$current_date = current_time( 'mysql' );
 		$start_date   = date( 'Y-m-d', strtotime( "-{$days_back} days", strtotime( $current_date ) ) );
 		$end_date     = date( 'Y-m-d', strtotime( $current_date ) );
@@ -1457,5 +1485,75 @@ class Rest_Reports_Controller extends REST_Controller {
 		}
 
 		return $query;
+	}
+
+	/**
+	 * Get contacts deals reports permissions check
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function get_contacts_deals_reports_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Get deals by date reports permissions check
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function get_deals_by_date_reports_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Get deals leaderboard reports permissions check
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function get_deals_leaderboard_reports_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Get sales rep reports permissions check
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function get_sales_rep_reports_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Get sales rep pipeline stages reports permissions check
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function get_sales_rep_pipeline_stages_reports_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Get sales rep active deals reports permissions check
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function get_sales_rep_active_deals_reports_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Get all sales rep reports permissions check
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function get_all_sales_rep_reports_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 }

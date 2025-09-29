@@ -4,7 +4,7 @@ import './style.scss';
 import Select from 'react-select';
 import { isObject } from 'lodash';
 import { Input } from '@/components/ui/input';
-import apiFetch from '@wordpress/api-fetch';
+import { UserService } from '../../services/user-service';
 
 interface DealOwnerChangeProps {
 	value: { condition: string; owner_id: string };
@@ -36,14 +36,8 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 		const fetchUsers = async () => {
 			setLoadingUsers(true);
 			try {
-				const response: any = await apiFetch({
-					path: '/wp/v2/users',
-				});
-				// make map in here for the response
-				const users = response.map((user: any) => ({
-					label: user.name,
-					value: user.id.toString(),
-				}));
+				// Use centralized service
+				const users = await UserService.getUsersForSelect();
 				setUsers(users);
 
 				// If a specific condition is already chosen but owner_id is missing, set first user

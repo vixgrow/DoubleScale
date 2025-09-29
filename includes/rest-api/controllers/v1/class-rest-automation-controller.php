@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rest_Automation_Controller
  * This class is responsible for handling the Automation REST API
@@ -24,11 +25,13 @@ use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Managers\Goals_Manager;
 use QuillCRM\Managers\Forms_Manager;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * Rest_Automation_Controller class
  */
 class Rest_Automation_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -273,56 +276,56 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'automation',
-			'type'       => 'object',
-			'properties' => array(
-				'id'         => array(
-					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
-					'type'        => 'integer',
-					'readonly'    => true,
-				),
-				'name'       => array(
-					'description' => __( 'The name of the automation.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'trigger'    => array(
-					'description' => __( 'The trigger of the automation.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'status'     => array(
-					'description' => __( 'The status of the automation.', 'quillcrm' ),
-					'type'        => 'string',
-					'enum'        => array( 'active', 'inactive' ),
-					'default'     => 'active',
-				),
-				'settings'   => array(
-					'description' => __( 'The settings of the automation.', 'quillcrm' ),
-					'type'        => 'object',
-				),
-				'created_at' => array(
-					'description' => __( 'The date the automation was created.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'readonly'    => true,
-				),
-				'updated_at' => array(
-					'description' => __( 'The date the automation was last updated.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'readonly'    => true,
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'automation',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'id'         => array(
+					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'readonly'    => true,
+				 ),
+				 'name'       => array(
+					 'description' => __( 'The name of the automation.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'trigger'    => array(
+					 'description' => __( 'The trigger of the automation.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'status'     => array(
+					 'description' => __( 'The status of the automation.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'enum'        => array( 'active', 'inactive' ),
+					 'default'     => 'active',
+				 ),
+				 'settings'   => array(
+					 'description' => __( 'The settings of the automation.', 'quillcrm' ),
+					 'type'        => 'object',
+				 ),
+				 'created_at' => array(
+					 'description' => __( 'The date the automation was created.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'readonly'    => true,
+				 ),
+				 'updated_at' => array(
+					 'description' => __( 'The date the automation was last updated.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'readonly'    => true,
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -455,7 +458,7 @@ class Rest_Automation_Controller extends REST_Controller {
 
 			if ( $keyword ) {
 				$automations = Automation_Model::where( 'name', 'like', '%' . $keyword . '%' )
-				->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+					->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			} else {
 				$automations = Automation_Model::orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			}
@@ -713,7 +716,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -726,7 +729,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -739,7 +742,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -752,7 +755,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -765,7 +768,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -778,6 +781,6 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

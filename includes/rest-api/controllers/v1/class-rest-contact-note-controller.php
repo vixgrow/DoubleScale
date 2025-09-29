@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rest_Contact_Note_Controller
  * This class is responsible for handling the contact note rest api
@@ -10,6 +11,7 @@
 
 namespace QuillCRM\Rest_Api\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -21,6 +23,7 @@ use QuillCRM\Models\Contact_Note_Model;
  * Contact_Note_Controller class
  */
 class Rest_Contact_Note_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -37,7 +40,6 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
-
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -86,56 +88,56 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'contact',
-			'type'       => 'object',
-			'properties' => array(
-				'id'         => array(
-					'type'        => 'integer',
-					'description' => 'Unique identifier for the object.',
-					'readonly'    => true,
-				),
-				'contact_id' => array(
-					'type'        => 'integer',
-					'description' => 'Contact ID',
-				),
-				'title'      => array(
-					'type'        => 'string',
-					'description' => 'Title',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'type'       => array(
-					'type'        => 'string',
-					'description' => 'Type',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'note'       => array(
-					'type'        => 'string',
-					'description' => 'Note',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'created_at' => array(
-					'type'        => 'string',
-					'description' => 'Created at',
-					'readonly'    => true,
-				),
-				'updated_at' => array(
-					'type'        => 'string',
-					'description' => 'Updated at',
-					'readonly'    => true,
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'contact',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'id'         => array(
+					 'type'        => 'integer',
+					 'description' => 'Unique identifier for the object.',
+					 'readonly'    => true,
+				 ),
+				 'contact_id' => array(
+					 'type'        => 'integer',
+					 'description' => 'Contact ID',
+				 ),
+				 'title'      => array(
+					 'type'        => 'string',
+					 'description' => 'Title',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'type'       => array(
+					 'type'        => 'string',
+					 'description' => 'Type',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'note'       => array(
+					 'type'        => 'string',
+					 'description' => 'Note',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'created_at' => array(
+					 'type'        => 'string',
+					 'description' => 'Created at',
+					 'readonly'    => true,
+				 ),
+				 'updated_at' => array(
+					 'type'        => 'string',
+					 'description' => 'Updated at',
+					 'readonly'    => true,
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -295,7 +297,7 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -308,7 +310,7 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -321,7 +323,7 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -334,7 +336,7 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -347,6 +349,6 @@ class Rest_Contact_Note_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

@@ -63,7 +63,7 @@ const initialState: ImportState = {
 	credentials: {},
 	assignedLists: [],
 	assignedTags: [],
-	newStatus: 'unverified',
+	newStatus: 'subscribed',
 	updateExisting: false,
 	uploadProgress: 0,
 	isUploading: false,

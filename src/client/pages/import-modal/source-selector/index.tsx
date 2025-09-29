@@ -44,7 +44,7 @@ import gohighlevelIcon from '../../../../../assets/images/gohighlevel/gohighleve
 
 const SourceSelector: React.FC = () => {
 	const { state, dispatch } = useImportContext();
-	const { source } = state;
+	const { source, importing } = state;
 	const importers = ConfigAPI.getImporters();
 
 	const getSourceIcon = (sourceKey: string) => {
@@ -128,6 +128,11 @@ const SourceSelector: React.FC = () => {
 	}));
 
 	const handleSourceChange = (newSource: string) => {
+		// Prevent source change when importing is in progress
+		if (importing) {
+			return;
+		}
+
 		dispatch({ type: 'SET_SOURCE', payload: newSource });
 		dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 
@@ -157,21 +162,23 @@ const SourceSelector: React.FC = () => {
 			<CardContent className="p-0 space-y-3">
 				{sources.map((s) => {
 					const isSelected = source === s.value;
+					const isLocked = importing && !isSelected;
 
 					return (
 						<Card
 							key={s.value}
 							onClick={() =>
-								!s.disabled && handleSourceChange(s.value)
+								!s.disabled && !importing && handleSourceChange(s.value)
 							}
-							className={`relative p-4 cursor-pointer transition-all shadow-none border-2 duration-200 
-                ${
-					isSelected
-						? 'border-[#274C77]'
-						: s.disabled
-							? 'border-[#E2EAF380] bg-gray-50 cursor-not-allowed opacity-50'
-							: 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-				}`}
+							className={`relative p-4 transition-all shadow-none border-2 duration-200 
+                ${isSelected
+									? 'border-[#274C77] cursor-pointer'
+									: s.disabled
+										? 'border-[#E2EAF380] bg-gray-50 cursor-not-allowed opacity-50'
+										: isLocked
+											? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+											: 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 cursor-pointer'
+								}`}
 						>
 							<div className="flex items-center space-x-4">
 								<div>{s.icon}</div>
@@ -189,7 +196,7 @@ const SourceSelector: React.FC = () => {
 										</p>
 									</div>
 
-									{s.disabled && (
+									{s.disabled && !['wpfunnelkit', 'fluentcrm'].includes(s.value) && (
 										<Button className="bg-[#3B82F6] rounded-full text-xs px-2 py-1">
 											<InstallIcon />
 											{__('INSTALL NOW', 'quillcrm')}

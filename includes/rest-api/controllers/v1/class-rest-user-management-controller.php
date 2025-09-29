@@ -23,6 +23,7 @@ class REST_User_Management_Controller extends REST_Controller {
 
 
 
+
 	/**
 	 * Route base.
 	 *
@@ -45,6 +46,51 @@ class REST_User_Management_Controller extends REST_Controller {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_crm_users' ),
 					'permission_callback' => array( $this, 'check_admin_permissions' ),
+				),
+			)
+		);
+
+		// Get CRM users for frontend (with search and pagination)
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/users/frontend',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_crm_users_frontend' ),
+					'permission_callback' => array( $this, 'check_deal_owner_permissions' ),
+					'args'                => array(
+						'search'   => array(
+							'description'       => 'Search term for user name or email',
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'per_page' => array(
+							'description' => 'Number of users per page',
+							'type'        => 'integer',
+							'default'     => 50,
+							'minimum'     => 1,
+							'maximum'     => 100,
+						),
+						'page'     => array(
+							'description' => 'Page number',
+							'type'        => 'integer',
+							'default'     => 1,
+							'minimum'     => 1,
+						),
+						'orderby'  => array(
+							'description' => 'Order by field',
+							'type'        => 'string',
+							'default'     => 'display_name',
+							'enum'        => array( 'display_name', 'user_email', 'ID' ),
+						),
+						'order'    => array(
+							'description' => 'Order direction',
+							'type'        => 'string',
+							'default'     => 'asc',
+							'enum'        => array( 'asc', 'desc' ),
+						),
+					),
 				),
 			)
 		);
@@ -156,6 +202,81 @@ class REST_User_Management_Controller extends REST_Controller {
 		}
 
 		return new WP_REST_Response( $formatted_users, 200 );
+	}
+
+	/**
+	 * Get CRM users for frontend with search and pagination
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_crm_users_frontend( $request ) {
+		$search   = $request->get_param( 'search' );
+		$per_page = $request->get_param( 'per_page' ) ?: 50;
+		$page     = $request->get_param( 'page' ) ?: 1;
+		$orderby  = $request->get_param( 'orderby' ) ?: 'display_name';
+		$order    = $request->get_param( 'order' ) ?: 'asc';
+
+		// Build user query arguments
+		$user_args = array(
+			'role__in' => array(
+				User_Roles::CRM_MANAGER,
+				User_Roles::DEAL_OWNER,
+				User_Roles::ADMINISTRATOR,
+			),
+			'number'   => $per_page,
+			'offset'   => ( $page - 1 ) * $per_page,
+			'orderby'  => $orderby,
+			'order'    => strtoupper( $order ),
+			'fields'   => 'all',
+		);
+
+		// Add search functionality
+		if ( ! empty( $search ) && strlen( $search ) >= 2 ) {
+			$user_args['search']         = '*' . esc_attr( $search ) . '*';
+			$user_args['search_columns'] = array( 'user_login', 'user_email', 'display_name' );
+		}
+
+		// Get users
+		$users = get_users( $user_args );
+
+		// Get total count for pagination (without limit)
+		$count_args = $user_args;
+		unset( $count_args['number'] );
+		unset( $count_args['offset'] );
+		$count_args['fields'] = 'ID';
+		$total_users          = count( get_users( $count_args ) );
+
+		$formatted_users = array();
+		foreach ( $users as $user ) {
+			$formatted_users[] = array(
+				'id'           => (int) $user->ID,
+				'name'         => $user->display_name,
+				'display_name' => $user->display_name,
+				'email'        => $user->user_email,
+				'username'     => $user->user_login,
+			);
+		}
+
+		// Calculate pagination info
+		$total_pages = ceil( $total_users / $per_page );
+
+		return new WP_REST_Response(
+			array(
+				'users'      => $formatted_users,
+				'pagination' => array(
+					'total'        => $total_users,
+					'per_page'     => $per_page,
+					'current_page' => $page,
+					'total_pages'  => $total_pages,
+					'has_next'     => $page < $total_pages,
+					'has_prev'     => $page > 1,
+				),
+			),
+			200
+		);
 	}
 
 	/**
@@ -289,6 +410,16 @@ class REST_User_Management_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function check_admin_permissions( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check deal owner permissions (less restrictive for frontend usage)
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function check_deal_owner_permissions( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 }

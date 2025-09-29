@@ -14,13 +14,15 @@ use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Deal_Activity_Model;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Models\Pipeline_Model;
-use QuillCRM\Models\User_Model;
 use QuillCRM\User_Roles\Permissions;
+use QuillCRM\User_Roles\User_Roles;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 
 class Rest_Reports_Controller extends REST_Controller {
+
+
 
 
 	/**
@@ -194,7 +196,16 @@ class Rest_Reports_Controller extends REST_Controller {
 		$filters = $this->get_filters_from_request( $request );
 
 		$deals_leaderboard = array();
-		$all_owners        = User_Model::all();
+		// Get only CRM users and administrators
+		$all_owners = get_users(
+			array(
+				'role__in' => array(
+					User_Roles::CRM_MANAGER,
+					User_Roles::DEAL_OWNER,
+					User_Roles::ADMINISTRATOR,
+				),
+			)
+		);
 
 		foreach ( $all_owners as $owner ) {
 			$owner_data = $this->get_deals_leaderboard( $filters, $owner->ID );
@@ -384,9 +395,18 @@ class Rest_Reports_Controller extends REST_Controller {
 	 * @return WP_REST_Response Response object.
 	 */
 	public function get_all_sales_rep_reports( $request ) {
-		$filters           = $this->get_filters_from_request( $request );
-		$date_ranges       = $this->get_report_date_ranges( $filters );
-		$users             = User_Model::all();
+		$filters     = $this->get_filters_from_request( $request );
+		$date_ranges = $this->get_report_date_ranges( $filters );
+		// Get only CRM users and administrators
+		$users             = get_users(
+			array(
+				'role__in' => array(
+					User_Roles::CRM_MANAGER,
+					User_Roles::DEAL_OWNER,
+					User_Roles::ADMINISTRATOR,
+				),
+			)
+		);
 		$sales_rep_reports = array();
 
 		// Collect all user data first
@@ -519,10 +539,15 @@ class Rest_Reports_Controller extends REST_Controller {
 	 */
 	private function get_sale_info( $filters ) {
 		$sale_info = array();
-		// sale info
-		$sale_info['id']    = User_Model::find( $filters['owner_id'] ?? get_current_user_id() )->ID;
-		$sale_info['name']  = User_Model::find( $filters['owner_id'] ?? get_current_user_id() )->display_name;
-		$sale_info['email'] = User_Model::find( $filters['owner_id'] ?? get_current_user_id() )->user_email;
+		$user_id   = $filters['owner_id'] ?? get_current_user_id();
+		$user      = get_user_by( 'ID', $user_id );
+
+		if ( $user ) {
+			$sale_info['id']    = $user->ID;
+			$sale_info['name']  = $user->display_name;
+			$sale_info['email'] = $user->user_email;
+		}
+
 		return $sale_info;
 	}
 

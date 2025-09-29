@@ -6,18 +6,12 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Models\Pipeline_Model;
-use QuillCRM\Models\User_Model;
+use QuillCRM\User_Roles\User_Roles;
 
 /**
  * Base utilities for Deal automation actions.
  */
 abstract class Base_Deal_Action extends Action {
-
-
-
-
-
-
 
 	/**
 	 * Translate helper that is linter-safe in namespaced context.
@@ -100,12 +94,24 @@ abstract class Base_Deal_Action extends Action {
 	}
 
 	/**
-	 * Shared users select options.
+	 * Shared users select options (CRM users only).
 	 *
 	 * @return array
 	 */
 	public function get_users_options() {
-		$users   = User_Model::all();
+		// Get only users with CRM roles or administrator role
+		$users = get_users(
+			array(
+				'role__in' => array(
+					User_Roles::CRM_MANAGER,
+					User_Roles::DEAL_OWNER,
+					User_Roles::ADMINISTRATOR,
+				),
+				'orderby'  => 'display_name',
+				'order'    => 'ASC',
+			)
+		);
+
 		$options = array();
 		foreach ( $users as $user ) {
 			$options[ $user->ID ] = $user->display_name;

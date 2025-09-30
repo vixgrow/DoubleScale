@@ -137,27 +137,16 @@ export const createBlocksFromTemplate = (
 
 /**
  * Checks if a section is a template section (locked for editing)
+ * A section is considered a template if any of its blocks have templateType or templateLayout
  */
 export const isTemplateSection = (section: EmailSection): boolean => {
-  const hasTemplateLayout = section.columns.some((column) =>
-    column.blocks.some((block) => block.props?.templateLayout !== undefined)
+  return section.columns.some((column) =>
+    column.blocks.some(
+      (block) =>
+        block.props?.templateType !== undefined ||
+        block.props?.templateLayout !== undefined
+    )
   );
-
-  const hasTemplatePattern = section.columns.some((column) =>
-    column.blocks.some((block) => {
-      if (block.type === 'image' && block.props?.alt === 'Company Logo')
-        return true;
-      if ((block.type as string) === 'preheader') return true;
-      if (block.props?.templateType) return true;
-      if (block.type === 'text' && block.props?.content?.includes('©'))
-        return true;
-      if (block.type === 'text' && block.props?.content?.includes('Welcome'))
-        return true;
-      return false;
-    })
-  );
-
-  return hasTemplateLayout || hasTemplatePattern;
 };
 
 /**

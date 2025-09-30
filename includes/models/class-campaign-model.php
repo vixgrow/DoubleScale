@@ -256,6 +256,25 @@ class Campaign_Model extends Model
 	}
 
 	/**
+	 * Attach templates to campaign settings for API responses
+	 * Converts template_ids back to full template objects
+	 *
+	 * @param Campaign_Model $campaign Campaign model
+	 * @return void
+	 */
+	public function attach_templates($campaign)
+	{
+		// Get templates and add them to settings for frontend
+		$templates = $campaign->get_templates();
+		
+		if (!empty($templates)) {
+			$settings = $campaign->settings;
+			$settings['templates'] = $templates;
+			$campaign->settings = $settings;
+		}
+	}
+
+	/**
 	 * Get template IDs
 	 *
 	 * @since 1.0.0
@@ -476,16 +495,18 @@ class Campaign_Model extends Model
 			}
 		);
 
-		static::retrieved(
-			function ($campaign) {
-				$campaign->attach_counts($campaign);
-			}
-		);
+	static::retrieved(
+		function ($campaign) {
+			$campaign->attach_counts($campaign);
+			$campaign->attach_templates($campaign);
+		}
+	);
 
-		static::saved(
-			function ($campaign) {
-				$campaign->attach_counts($campaign);
-			}
-		);
+	static::saved(
+		function ($campaign) {
+			$campaign->attach_counts($campaign);
+			$campaign->attach_templates($campaign);
+		}
+	);
 	}
 }

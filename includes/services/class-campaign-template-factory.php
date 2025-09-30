@@ -54,17 +54,39 @@ class Campaign_Template_Factory
     public function process_templates_data($templates_data, $campaign_type)
     {
         if (empty($templates_data) || !is_array($templates_data)) {
+            quillcrm_get_logger()->warning('Template processing: Empty or invalid templates_data', [
+                'templates_data' => $templates_data,
+                'campaign_type' => $campaign_type,
+                'code' => 'template_processing_empty_data'
+            ]);
             return array();
         }
 
         $template_ids = array();
 
-        foreach ($templates_data as $template_data) {
+        foreach ($templates_data as $index => $template_data) {
+            quillcrm_get_logger()->info('Processing template', [
+                'index' => $index,
+                'template_data' => $template_data,
+                'campaign_type' => $campaign_type,
+                'code' => 'template_processing_start'
+            ]);
+            
             $template_processor = $this->get_template_processor($campaign_type);
             $template = $template_processor->process($template_data);
 
             if ($template) {
                 $template_ids[] = $template->id;
+                quillcrm_get_logger()->info('Template processed successfully', [
+                    'template_id' => $template->id,
+                    'code' => 'template_processing_success'
+                ]);
+            } else {
+                quillcrm_get_logger()->error('Template processing failed', [
+                    'template_data' => $template_data,
+                    'campaign_type' => $campaign_type,
+                    'code' => 'template_processing_failed'
+                ]);
             }
         }
 
@@ -206,6 +228,10 @@ abstract class Abstract_Template_Processor implements Template_Processor_Interfa
     public function validate(array $template_data)
     {
         if (empty($template_data)) {
+            quillcrm_get_logger()->error('Template validation failed: Empty template data', [
+                'campaign_type' => $this->campaign_type,
+                'code' => 'template_validation_empty'
+            ]);
             return false;
         }
 
@@ -215,11 +241,21 @@ abstract class Abstract_Template_Processor implements Template_Processor_Interfa
             
             // Body is required
             if (empty(trim($body))) {
+                quillcrm_get_logger()->error('Template validation failed: Empty body', [
+                    'campaign_type' => $this->campaign_type,
+                    'template_data' => $template_data,
+                    'code' => 'template_validation_empty_body'
+                ]);
                 return false;
             }
 
             // Validate body length (max 1600 characters)
             if (strlen(wp_strip_all_tags($body)) > 1600) {
+                quillcrm_get_logger()->error('Template validation failed: Body too long', [
+                    'campaign_type' => $this->campaign_type,
+                    'body_length' => strlen(wp_strip_all_tags($body)),
+                    'code' => 'template_validation_body_too_long'
+                ]);
                 return false;
             }
         }
@@ -271,25 +307,45 @@ class Email_Template_Processor extends Abstract_Template_Processor
     {
         // Call parent validation first
         if (!parent::validate($template_data)) {
+            quillcrm_get_logger()->error('Email template validation failed: Parent validation failed', [
+                'template_data' => $template_data,
+                'code' => 'email_template_validation_parent_failed'
+            ]);
             return false;
         }
 
         // Email templates require both subject and body
         if (empty($template_data['subject'])) {
+            quillcrm_get_logger()->error('Email template validation failed: Empty subject', [
+                'template_data' => $template_data,
+                'code' => 'email_template_validation_empty_subject'
+            ]);
             return false;
         }
 
         if (empty($template_data['body'])) {
+            quillcrm_get_logger()->error('Email template validation failed: Empty body', [
+                'template_data' => $template_data,
+                'code' => 'email_template_validation_empty_body'
+            ]);
             return false;
         }
 
-        // Validate from_name is present
-        if (empty($template_data['from_name'])) {
+        // Validate from_name is present in settings (unified structure)
+        if (empty($template_data['settings']['from_name'])) {
+            quillcrm_get_logger()->error('Email template validation failed: Empty from_name in settings', [
+                'template_data' => $template_data,
+                'code' => 'email_template_validation_empty_from_name'
+            ]);
             return false;
         }
 
-        // Validate from_email is present (format is validated by Template_Model)
-        if (empty($template_data['from_email'])) {
+        // Validate from_email is present in settings (unified structure)
+        if (empty($template_data['settings']['from_email'])) {
+            quillcrm_get_logger()->error('Email template validation failed: Empty from_email in settings', [
+                'template_data' => $template_data,
+                'code' => 'email_template_validation_empty_from_email'
+            ]);
             return false;
         }
 

@@ -29,6 +29,7 @@ import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import { Campaign as CampaignType } from '@quillcrm/client';
 import Overview from './overview';
+import { getCampaignEndpoint } from '@quillcrm/utils';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
@@ -76,16 +77,6 @@ const Campaign: React.FC = () => {
 		setIsSaving(true);
 
 		try {
-			// Get the correct endpoint based on campaign type
-			const getCampaignEndpoint = (campaignType: string) => {
-				const endpoints = {
-					email: '/qc/v1/email-campaigns',
-					sms: '/qc/v1/sms-campaigns',
-					whatsapp: '/qc/v1/whatsapp-campaigns',
-				} as const;
-				return endpoints[campaignType as keyof typeof endpoints];
-			};
-
 			const endpoint = getCampaignEndpoint(campaign.type);
 			if (!endpoint) {
 				throw new Error(__('Invalid campaign type', 'quillcrm'));

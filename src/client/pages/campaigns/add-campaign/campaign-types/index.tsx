@@ -13,7 +13,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { EnvelopeIcon, RepeatIcon } from '@/components';
+import { EnvelopeIcon, RepeatIcon, SMSIcon, WhatsAppIcon } from '@/components';
 import ArrowRightIcon from '@/components/icons/arrow-right';
 import { CampaignModalStep } from '@quillcrm/client';
 
@@ -30,20 +30,40 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 }) => {
 	const campaignTypesRows = [
 		{
-			label: __('Standard Campaign', 'quillcrm'),
+			label: __('Email Campaign', 'quillcrm'),
 			description: __(
-				'Create and send a regular email Campaign to your selected subscribers.'
+				'Create and send a regular email campaign to your selected subscribers.',
+				'quillcrm'
 			),
 			type: 'standard',
 			icon: <EnvelopeIcon />,
 		},
 		{
-			label: __('A/B Split Campaign', 'quillcrm'),
+			label: __('A/B Split Email', 'quillcrm'),
 			description: __(
-				'Send two email variations to a Sample group and see which performs better.'
+				'Send two email variations to a sample group and see which performs better.',
+				'quillcrm'
 			),
 			type: 'ab_test',
 			icon: <RepeatIcon />,
+		},
+		{
+			label: __('SMS Campaign', 'quillcrm'),
+			description: __(
+				'Send SMS text messages to your contacts via Twilio.',
+				'quillcrm'
+			),
+			type: 'sms',
+			icon: <SMSIcon />,
+		},
+		{
+			label: __('WhatsApp Campaign', 'quillcrm'),
+			description: __(
+				'Send WhatsApp messages to your contacts via Twilio.',
+				'quillcrm'
+			),
+			type: 'whatsapp',
+			icon: <WhatsAppIcon />,
 		},
 	];
 	return (

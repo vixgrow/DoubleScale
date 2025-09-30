@@ -35,14 +35,7 @@ class SMS_Processing extends Abstract_Campaign_Processing
      */
     public function add_hooks()
     {
-        add_action(
-            'init',
-            function () {
-                QuillCRM::instance()->daily_tasks->register_callback('quillcrm_daily3', array($this, 'reset_daily_count'));
-                QuillCRM::instance()->campaigns_tasks->register_callback('quillcrm_sms_campaigns', array($this, 'process_campaigns'));
-                QuillCRM::instance()->campaigns_tasks->register_callback('process_campaign_sms', array($this, 'process_campaign_message'));
-            }
-        );
+        $this->register_twilio_hooks();
     }
 
     /**
@@ -76,31 +69,7 @@ class SMS_Processing extends Abstract_Campaign_Processing
      */
     protected function send_message($message_data, Contact_Model $contact, Tracking_Model $campaign_message)
     {
-        try {
-            // Prepare SMS data
-            $sms_data = array(
-                'Body' => $message_data['body'],
-                'To' => $campaign_message->recipient,
-            );
-
-            // Add StatusCallback if webhook URL is available
-            $webhook_url = SMS_Tracking::get_webhook_url();
-            $sms_data = $this->prepare_status_callback($webhook_url, $sms_data);
-
-            // Send SMS
-            $result = $this->external_api->send_sms($sms_data);
-
-            return $result ?? array('success' => false);
-        } catch (\Exception $e) {
-            quillcrm_get_logger()->error(
-                __('SMS send error.', 'quillcrm'),
-                array(
-                    'code' => 'sms_send_error',
-                    'error' => $e->getMessage(),
-                )
-            );
-            return array('success' => false, 'error' => $e->getMessage());
-        }
+        return $this->send_twilio_message($message_data, $contact, $campaign_message);
     }
 
     /**
@@ -110,25 +79,18 @@ class SMS_Processing extends Abstract_Campaign_Processing
      */
     protected function get_tracking_class()
     {
-        return \QuillCRM\Tracking\SMS::class;
+        return SMS_Tracking::class;
     }
 
     /**
-     * Prepare StatusCallback URL for Twilio requests
-     * Excludes StatusCallback for localhost development environments
+     * Call external API - implementation for SMS
      *
-     * @param string $webhook_url The webhook URL to use
-     * @param array $data The message data array to modify
-     * @return array Modified data array
+     * @param array $api_data API data to send
+     * @return array Result from API
      */
-    protected function prepare_status_callback($webhook_url, $data = array())
+    protected function call_external_api($api_data)
     {
-        // Only add StatusCallback for production URLs (not localhost)
-        $site_url = home_url();
-        if (!empty($webhook_url) && strpos($site_url, 'localhost') === false && strpos($site_url, '127.0.0.1') === false) {
-            $data['StatusCallback'] = $webhook_url;
-        }
-
-        return $data;
+        return $this->external_api->send_sms($api_data);
     }
+
 }

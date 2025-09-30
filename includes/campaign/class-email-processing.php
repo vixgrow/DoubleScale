@@ -169,89 +169,6 @@ class Email_Processing extends Abstract_Campaign_Processing
         return \QuillCRM\Tracking\Email::class;
     }
 
-    /**
-     * Handle resending logic - overrides abstract method
-     *
-     * @return bool True if resending was handled
-     */
-    protected function handle_resending()
-    {
-        $resending_campaign = Campaign_Model::where('status', 'resending')->orderBy('updated_at', 'asc')->first();
-        if ($resending_campaign) {
-            $this->resent_failed($resending_campaign);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Resent failed emails
-     *
-     * @param Campaign_Model $campaign
-     * @return void
-     */
-    protected function resent_failed($campaign)
-    {
-        try {
-            $last_email_offset = get_option("quillcrm_campaigns_last_resent_email_offset_{$campaign->id}", 0);
-            $count = $campaign->emails()->where('status', 'failed')->count();
-
-            if ($last_email_offset >= $count) {
-                $campaign->status = 'completed';
-                $campaign->save();
-                update_option("quillcrm_campaigns_last_resent_email_offset_{$campaign->id}", 0);
-                quillcrm_get_logger()->info(
-                    __('Resent failed emails completed.', 'quillcrm'),
-                    array(
-                        'code' => 'resent_failed',
-                        'campaign' => $campaign->id,
-                    )
-                );
-                return;
-            }
-
-            while ($this->get_current_execution_time() < $this->max_execution_time && !Utils::is_memory_limit_reached()) {
-                usleep(1000000);
-
-                if ($last_email_offset >= $count) {
-                    $campaign->status = 'completed';
-                    $campaign->save();
-                    update_option("quillcrm_campaigns_last_resent_email_offset_{$campaign->id}", 0);
-                    break;
-                }
-
-                $max_per_second = $this->settings['max_in_second'] ?? 15;
-                $emails = $campaign->emails()->where('status', 'failed')
-                    ->offset($last_email_offset)
-                    ->limit($max_per_second)
-                    ->get();
-
-                if (!$emails) {
-                    break;
-                }
-
-                foreach ($emails as $email) {
-                    $email->status = 'scheduled';
-                    $email->save();
-                    QuillCRM::instance()->campaigns_tasks->enqueue_sync('process_campaign_email', $campaign, $email->contact, $email);
-                    $last_email_offset++;
-                    update_option("quillcrm_campaigns_last_resent_email_offset_{$campaign->id}", $last_email_offset);
-                }
-            }
-        } catch (\Exception $e) {
-            quillcrm_get_logger()->error(
-                __('Resent failed emails error.', 'quillcrm'),
-                array(
-                    'code' => 'resent_failed',
-                    'error' => array(
-                        'message' => $e->getMessage(),
-                        'code' => $e->getCode(),
-                        'data' => $e->getTrace(),
-                    ),
-                )
-            );
-        }
-    }
 
     /**
      * Build email message
@@ -263,12 +180,7 @@ class Email_Processing extends Abstract_Campaign_Processing
      */
     protected function build_email_message(Tracking_Model $campaign_email, Contact_Model $contact, $message = '')
     {
-        // Add open email image 1x1
-        $message .= sprintf(
-            '<img src="%s" width="1" height="1" style="width:1px;height:1px;" />',
-            home_url('?quillcrm=email_open&hash_key=' . $campaign_email->hash_key)
-        );
-
+        // Note: Tracking pixel is added in build_email_footer() to avoid duplication
         return $message;
     }
 
@@ -283,7 +195,9 @@ class Email_Processing extends Abstract_Campaign_Processing
     {
         $footer = '';
 
-        // Add tracking pixel 1x1
+        // Add tracking pixel 1x1 for email open tracking
+        // Note: This is the ONLY place where the tracking pixel should be added
+        // to avoid duplicate pixels that could cause double-counting of opens
         $footer .= sprintf(
             '<img src="%s" width="1" height="1" style="width:1px;height:1px;" />',
             home_url('?quillcrm=email_open&hash_key=' . $campaign_email->hash_key)

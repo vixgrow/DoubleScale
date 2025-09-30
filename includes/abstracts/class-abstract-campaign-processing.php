@@ -111,6 +111,144 @@ abstract class Abstract_Campaign_Processing
     }
 
     /**
+     * Register Twilio hooks (common for SMS and WhatsApp)
+     * Should be called from add_hooks() in child classes
+     *
+     * @return void
+     */
+    protected function register_twilio_hooks()
+    {
+        $type = $this->campaign_type;
+        $daily_callback_key = $type === 'sms' ? 'quillcrm_daily3' : 'quillcrm_daily4';
+        
+        add_action(
+            'init',
+            function () use ($type, $daily_callback_key) {
+                QuillCRM::instance()->daily_tasks->register_callback($daily_callback_key, array($this, 'reset_daily_count'));
+                QuillCRM::instance()->campaigns_tasks->register_callback("quillcrm_{$type}_campaigns", array($this, 'process_campaigns'));
+                QuillCRM::instance()->campaigns_tasks->register_callback("process_campaign_{$type}", array($this, 'process_campaign_message'));
+            }
+        );
+    }
+
+
+    /**
+     * Send Twilio message (common logic for SMS and WhatsApp)
+     *
+     * @param array $message_data Prepared message data
+     * @param Contact_Model $contact Contact model
+     * @param Tracking_Model $campaign_message Campaign tracking record
+     * @return array Result array with 'success' boolean and optional data
+     */
+    protected function send_twilio_message($message_data, Contact_Model $contact, Tracking_Model $campaign_message)
+    {
+        try {
+            // Prepare message data for Twilio API
+            $api_data = array(
+                'Body' => $message_data['body'],
+                'To' => $campaign_message->recipient,
+            );
+
+            // Add StatusCallback if webhook URL is available
+            $tracking_class = $this->get_tracking_class();
+            $webhook_url = $tracking_class::get_webhook_url();
+            $api_data = $this->prepare_status_callback($webhook_url, $api_data);
+
+            // Call type-specific API method
+            $result = $this->call_external_api($api_data);
+
+            // Handle response (common logic)
+            return $this->handle_twilio_response($result, $campaign_message, $contact);
+        } catch (\Exception $e) {
+            return $this->handle_twilio_error($e);
+        }
+    }
+
+    /**
+     * Call external API - must be implemented by Twilio-based child classes
+     *
+     * @param array $api_data API data to send
+     * @return array Result from API
+     */
+    protected function call_external_api($api_data)
+    {
+        // This method is only used by Twilio-based SMS/WhatsApp processing
+        return array('success' => false, 'error' => 'call_external_api not implemented');
+    }
+
+    /**
+     * Handle Twilio API response (common logic)
+     *
+     * @param array $result API result
+     * @param Tracking_Model $campaign_message Campaign message record
+     * @param Contact_Model $contact Contact model
+     * @return array Processed result
+     */
+    protected function handle_twilio_response($result, Tracking_Model $campaign_message, Contact_Model $contact)
+    {
+        // Store Twilio MessageSid in tracking record for webhook processing
+        if (is_array($result) && isset($result['success']) && $result['success'] && isset($result['data']['sid'])) {
+            $campaign_message->external_id = $result['data']['sid']; // Store MessageSid
+            $campaign_message->status = 'sent'; // Update status
+            $campaign_message->save();
+
+            quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' MessageSid stored for tracking', [
+                'tracking_id' => $campaign_message->id,
+                'message_sid' => $result['data']['sid'],
+                'contact_id' => $contact->id,
+                'code' => "{$this->campaign_type}_message_sid_stored"
+            ]);
+        } else {
+            // Log if MessageSid storage failed
+            quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' MessageSid not found in response', [
+                'tracking_id' => $campaign_message->id,
+                'contact_id' => $contact->id,
+                'result' => $result,
+                'code' => "{$this->campaign_type}_message_sid_missing"
+            ]);
+        }
+
+        return $result ?? array('success' => false);
+    }
+
+    /**
+     * Handle Twilio API error (common logic)
+     *
+     * @param \Exception $e Exception that occurred
+     * @return array Error result
+     */
+    protected function handle_twilio_error(\Exception $e)
+    {
+        quillcrm_get_logger()->error(
+            sprintf(__('%s send error.', 'quillcrm'), ucfirst($this->campaign_type)),
+            array(
+                'code' => "{$this->campaign_type}_send_error",
+                'error' => $e->getMessage(),
+            )
+        );
+        return array('success' => false, 'error' => $e->getMessage());
+    }
+
+    /**
+     * Prepare StatusCallback URL for Twilio requests (common logic)
+     * Excludes StatusCallback for localhost development environments
+     *
+     * @param string $webhook_url The webhook URL to use
+     * @param array $data The message data array to modify
+     * @return array Modified data array
+     */
+    protected function prepare_status_callback($webhook_url, $data = array())
+    {
+        // Only add StatusCallback for production URLs (not localhost)
+        // $site_url = home_url();
+        // if (!empty($webhook_url) && strpos($site_url, 'localhost') === false && strpos($site_url, '127.0.0.1') === false) {
+            $data['StatusCallback'] = $webhook_url;
+        // }
+
+        return $data;
+    }
+
+    /**
      * Add hooks - must be implemented by child classes
      *
      * @return void
@@ -430,8 +568,8 @@ abstract class Abstract_Campaign_Processing
             return;
         }
 
-        // Connect to external API if needed (for Twilio-based services)
-        if ($this->needs_external_api() && !$this->connect_to_external_api()) {
+        // Connect to external API (for Twilio-based services)
+        if (!$this->connect_to_external_api()) {
             $this->log_external_api_connection_error($campaign, $contact, $campaign_message);
             return;
         }
@@ -594,15 +732,6 @@ abstract class Abstract_Campaign_Processing
         $campaign_message->save();
     }
 
-    /**
-     * Check if external API connection is needed
-     *
-     * @return bool
-     */
-    protected function needs_external_api()
-    {
-        return in_array($this->campaign_type, ['sms', 'whatsapp']);
-    }
 
     /**
      * Connect to external API (for Twilio-based services)
@@ -615,7 +744,8 @@ abstract class Abstract_Campaign_Processing
             return true;
         }
 
-        if (!$this->needs_external_api()) {
+        // For email campaigns, no external API needed
+        if ($this->campaign_type === 'email') {
             return true;
         }
 
@@ -725,13 +855,139 @@ abstract class Abstract_Campaign_Processing
     }
 
     /**
-     * Handle resending logic - can be overridden by child classes
+     * Handle resending logic - unified implementation for all campaign types
      *
      * @return bool True if resending was handled
      */
     protected function handle_resending()
     {
+        $resending_campaign = Campaign_Model::where('status', 'resending')
+            ->where('type', $this->campaign_type)
+            ->orderBy('updated_at', 'asc')
+            ->first();
+            
+        if ($resending_campaign) {
+            $this->resend_failed($resending_campaign);
+            return true;
+        }
         return false;
+    }
+
+    /**
+     * Resend failed messages - unified implementation for all campaign types
+     * Uses polymorphic methods to handle type-specific differences
+     *
+     * @param Campaign_Model $campaign
+     * @return void
+     */
+    protected function resend_failed($campaign)
+    {
+        try {
+            $offset_key = "quillcrm_campaigns_last_resent_{$this->campaign_type}_offset_{$campaign->id}";
+            $last_offset = get_option($offset_key, 0);
+            
+            // Get failed messages using type-specific query method
+            $count = $this->get_failed_messages_count($campaign);
+
+            if ($last_offset >= $count) {
+                $this->complete_resending($campaign, $offset_key);
+                return;
+            }
+
+            while ($this->get_current_execution_time() < $this->max_execution_time && !Utils::is_memory_limit_reached()) {
+                usleep(100000); // 0.1 second delay to prevent server overload
+
+                if ($last_offset >= $count) {
+                    $this->complete_resending($campaign, $offset_key);
+                    break;
+                }
+
+                $max_per_second = $this->settings['max_in_second'] ?? $this->get_default_max_per_second();
+                $failed_messages = $this->get_failed_messages($campaign, $last_offset, $max_per_second);
+
+                if ($failed_messages->isEmpty()) {
+                    break;
+                }
+
+                foreach ($failed_messages as $message) {
+                    $message->status = 'scheduled';
+                    $message->save();
+                    QuillCRM::instance()->campaigns_tasks->enqueue_sync(
+                        "process_campaign_{$this->campaign_type}", 
+                        $campaign, 
+                        $message->contact, 
+                        $message
+                    );
+                    $last_offset++;
+                    update_option($offset_key, $last_offset);
+                }
+            }
+        } catch (\Exception $e) {
+            quillcrm_get_logger()->error(
+                sprintf(__('Resent failed %s messages error.', 'quillcrm'), $this->campaign_type),
+                array(
+                    'code' => "resent_failed_{$this->campaign_type}",
+                    'error' => array(
+                        'message' => $e->getMessage(),
+                        'code' => $e->getCode(),
+                        'data' => $e->getTrace(),
+                    ),
+                )
+            );
+        }
+    }
+
+    /**
+     * Complete resending process
+     *
+     * @param Campaign_Model $campaign
+     * @param string $offset_key
+     * @return void
+     */
+    protected function complete_resending($campaign, $offset_key)
+    {
+        $campaign->status = 'completed';
+        $campaign->save();
+        update_option($offset_key, 0);
+        
+        quillcrm_get_logger()->info(
+            sprintf(__('Resent failed %s messages completed.', 'quillcrm'), $this->campaign_type),
+            array(
+                'code' => "resent_failed_{$this->campaign_type}",
+                'campaign' => $campaign->id,
+            )
+        );
+    }
+
+    /**
+     * Get count of failed messages - can be overridden by child classes if needed
+     *
+     * @param Campaign_Model $campaign
+     * @return int
+     */
+    protected function get_failed_messages_count($campaign)
+    {
+        $mode = $this->get_message_mode();
+        return $campaign->messages()->where('mode', $mode)->where('status', 'failed')->count();
+    }
+
+    /**
+     * Get failed messages for resending - can be overridden by child classes if needed
+     *
+     * @param Campaign_Model $campaign
+     * @param int $offset
+     * @param int $limit
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    protected function get_failed_messages($campaign, $offset, $limit)
+    {
+        $mode = $this->get_message_mode();
+        return $campaign->messages()
+            ->where('mode', $mode)
+            ->where('status', 'failed')
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
     }
 
     /**

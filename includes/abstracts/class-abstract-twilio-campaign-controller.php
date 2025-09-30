@@ -62,14 +62,11 @@ abstract class Abstract_Twilio_Campaign_Controller extends Abstract_Campaign_Con
 			// Find contact for merge tag processing
 			$contact = Contact_Model::where('phone', $phone)->first() ?? null;
 
-			// Prepare message data (implemented by child classes)
-			$message_data = $this->prepare_test_message_data($request, $api, $contact);
+		// Prepare message data (implemented by child classes)
+		$message_data = $this->prepare_test_message_data($request, $api, $contact);
 
-			// Add StatusCallback URL for production environments only
-			$message_data = $this->add_status_callback($message_data);
-
-			// Send message using appropriate API method
-			$result = $this->send_twilio_message($api, $message_data);
+		// Send message using appropriate API method
+		$result = $this->send_twilio_message($api, $message_data);
 
 			// Handle result with improved error messages
 			return $this->handle_twilio_result($result);
@@ -77,27 +74,6 @@ abstract class Abstract_Twilio_Campaign_Controller extends Abstract_Campaign_Con
 		} catch (\Exception $e) {
 			return new WP_Error('error', $e->getMessage(), array('status' => 500));
 		}
-	}
-
-	/**
-	 * Add StatusCallback URL to message data
-	 * Common StatusCallback logic for all Twilio services
-	 *
-	 * @param array $message_data Message data array
-	 * @return array Modified message data
-	 */
-	protected function add_status_callback($message_data)
-	{
-		$tracking_class = $this->get_twilio_tracking_class();
-		$webhook_url = $tracking_class::get_webhook_url();
-		$site_url = home_url();
-
-		// Only add StatusCallback for production URLs (not localhost)
-		if (!empty($webhook_url) && strpos($site_url, 'localhost') === false && strpos($site_url, '127.0.0.1') === false) {
-			$message_data['StatusCallback'] = $webhook_url;
-		}
-
-		return $message_data;
 	}
 
 	/**

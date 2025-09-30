@@ -7,7 +7,6 @@ import { useState } from '@wordpress/element';
 /**
  * External dependencies
  */
-import { Typography } from 'antd';
 import { isObject, map } from 'lodash';
 import AsyncSelect from 'react-select/async';
 

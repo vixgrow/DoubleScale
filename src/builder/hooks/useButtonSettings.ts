@@ -1,15 +1,14 @@
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import * as emailBuilderApi from '../../api/email-builder-api';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { ButtonSettings, ButtonType } from '../../stores/email-builder/types';
 
 /**
- * Custom hook to manage button settings with auto-loading and debounced saving
+ * Custom hook to manage button settings
  */
 export const useButtonSettings = () => {
   const dispatch = useDispatch();
-  const saveTimeoutRef = useRef<number | null>(null);
 
   // Get button settings from store
   const buttonSettings = useSelect(
@@ -32,30 +31,6 @@ export const useButtonSettings = () => {
 
     loadSettings();
   }, [dispatch]);
-
-  // Debounced save when button settings change
-  useEffect(() => {
-    // Clear existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    // Set new timeout for debounced save
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        await emailBuilderApi.saveButtonSettings(buttonSettings);
-      } catch (error) {
-        console.error('Error saving button settings:', error);
-      }
-    }, 1000); // 1 second debounce
-
-    // Cleanup on unmount
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [buttonSettings]);
 
   // Helper function to update button settings
   const updateButtonSettings = (

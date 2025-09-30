@@ -3,18 +3,7 @@
  */
 import type { Contact, Filter as FilterType } from '@quillcrm/client';
 import type { ContactsPureState, PaginationState, QueryResult } from './types';
-
-/**
- * Generate a query key for caching
- */
-const generateQueryKey = (
-  filters: FilterType[],
-  keywords: string,
-  page: number,
-  perPage: number
-): string => {
-  return JSON.stringify({ filters, keywords, page, perPage });
-};
+import { generateQueryKey } from './utils';
 
 /**
  * Get all contacts from normalized state

@@ -1,16 +1,15 @@
-import { Component } from 'react';
-import React, { FC } from 'react';
+import type { BlockAttributes, IconRenderer } from '@quillforms/types';
+import React, { Component, FC } from 'react';
 import {
+	ADD_BLOCK_TYPES,
 	SET_BLOCK_ADMIN_SETTINGS,
 	SET_BLOCK_RENDERER_SETTINGS,
-	ADD_BLOCK_TYPES,
-} from './store/constants';
-import type { BlockAttributes, IconRenderer } from '@quillforms/types';
+} from './constants';
 
 interface ControlsProps {
 	id: string;
 	attributes: BlockAttributes | undefined;
-	setAttributes( T: Record< string, unknown > ): void;
+	setAttributes(T: Record<string, unknown>): void;
 }
 
 interface EntryDetailsProps {
@@ -22,14 +21,14 @@ export interface BlockAdminSettings {
 	title?: string;
 	color?: string;
 	icon?: IconRenderer;
-	controls?: React.ComponentType< ControlsProps >;
+	controls?: React.ComponentType<ControlsProps>;
 	logicControl?: FC | Component | JSX.Element;
 	order?: number;
-	getChoices?: ( args: {
+	getChoices?: (args: {
 		id: string;
 		attributes: BlockAttributes;
-	} ) => { label: string; value: string }[];
-	entryDetails?: React.ComponentType< EntryDetailsProps >;
+	}) => { label: string; value: string }[];
+	entryDetails?: React.ComponentType<EntryDetailsProps>;
 }
 
 export interface BlockRendererSettings {
@@ -38,7 +37,7 @@ export interface BlockRendererSettings {
 	mergeTag?: FC | Component | JSX.Element;
 	counterIcon?: FC | Component | JSX.Element;
 	nextBtn?: FC | Component | JSX.Element;
-	getNumericVal?: ( val: any, attributes?: BlockAttributes ) => number;
+	getNumericVal?: (val: any, attributes?: BlockAttributes) => number;
 	isConditionFulfilled?(
 		conditionOperator: string,
 		conditionVal: unknown,
@@ -79,7 +78,7 @@ export interface BlockTypeSettings extends BlockAdminSettings, BlockRendererSett
 		{
 			type: string | string[];
 			default?: unknown;
-			[ x: string ]: unknown;
+			[x: string]: unknown;
 		}
 	>;
 	name?: string;
@@ -92,7 +91,7 @@ export interface BlockTypeInterface extends BlockTypeSettings {
 }
 
 export interface BlocksState {
-	[ name: string ]: BlockTypeSettings;
+	[name: string]: BlockTypeSettings;
 }
 
 /**
@@ -101,7 +100,7 @@ export interface BlocksState {
 
 interface anyAction {
 	type: string;
-	[ x: string ]: unknown;
+	[x: string]: unknown;
 }
 interface setBlockRendererSettingsAction extends anyAction {
 	type: typeof SET_BLOCK_RENDERER_SETTINGS;
@@ -123,4 +122,4 @@ export type BlockActionTypes =
 	| setBlockRendererSettingsAction
 	| setBlockAdminSettingsAction
 	| addBlockTypesAction
-	| ReturnType< () => { type: 'NOOP' } >;
+	| ReturnType<() => { type: 'NOOP' }>;

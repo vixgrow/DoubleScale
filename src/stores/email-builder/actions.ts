@@ -5,18 +5,22 @@ import {
 	DELETE_BLOCK,
 	DELETE_SECTION,
 	MOVE_BLOCK,
+	REDO,
 	REORDER_SECTIONS,
 	RESET_BUILDER,
 	SELECT_BLOCK,
 	SET_BUILDER_STATE,
-	UPDATE_BLOCK,
-	UPDATE_SECTION,
-	UPDATE_GLOBAL_SETTINGS,
+	SET_BUTTON_SETTINGS,
 	UNDO,
-	REDO,
+	UPDATE_BLOCK,
+	UPDATE_BUTTON_SETTINGS,
+	UPDATE_GLOBAL_SETTINGS,
+	UPDATE_SECTION,
 } from './constants';
 
 import type {
+	ButtonSettings,
+	ButtonType,
 	EmailBlock,
 	EmailBuilderActionTypes,
 	EmailSection,
@@ -135,4 +139,20 @@ export const undo = (): EmailBuilderActionTypes => ({
 
 export const redo = (): EmailBuilderActionTypes => ({
 	type: REDO,
+});
+
+// Button settings actions
+export const updateButtonSettings = (
+	buttonType: ButtonType,
+	settings: Partial<ButtonSettings>
+): EmailBuilderActionTypes => ({
+	type: UPDATE_BUTTON_SETTINGS,
+	payload: { buttonType, settings },
+});
+
+export const setButtonSettings = (
+	settings: Record<ButtonType, ButtonSettings>
+): EmailBuilderActionTypes => ({
+	type: SET_BUTTON_SETTINGS,
+	payload: { settings },
 });

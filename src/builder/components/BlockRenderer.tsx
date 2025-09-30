@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
 import { blocksRegistry } from '../blocks/BlockRegister';
-import { useBuilder } from '../context/BuilderContext';
 import { DeleteIcon } from '@quillcrm/components';
+import { useDispatch } from '@wordpress/data';
 
 interface BlockRendererProps {
 	block: EmailBlock;
@@ -22,7 +22,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 	sectionId,
 	columnId,
 }) => {
-	const { selectBlock, deleteBlock } = useBuilder();
+	const dispatch = useDispatch();
 
 	const {
 		attributes,
@@ -58,12 +58,12 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 
 	const handleBlockClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		selectBlock(block.id, sectionId, columnId);
+		dispatch(STORE_KEY).selectBlock(block.id, sectionId, columnId);
 	};
 
 	const handleDeleteBlock = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		deleteBlock(block.id);
+		dispatch(STORE_KEY).deleteBlock(block.id);
 	};
 
 	if (!blockDefinition) {

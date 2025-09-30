@@ -10,7 +10,7 @@
  * internal dependencies
  */
 import { ProductBlockProps } from '..';
-import { useButtonSettings } from '../../../../context/ButtonSettingsContext';
+import { useButtonSettings } from '../../../../hooks/useButtonSettings';
 import { ImageBlockIcon } from '@quillcrm/components';
 
 export interface ProductBlockRendererProps {

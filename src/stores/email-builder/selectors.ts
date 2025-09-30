@@ -1,4 +1,6 @@
 import type {
+	ButtonSettings,
+	ButtonType,
 	EmailBlock,
 	EmailBuilderState,
 	EmailColumn,
@@ -122,4 +124,18 @@ export const getGlobalSettings = (
 	state: EmailBuilderState
 ): GlobalEmailSettings => {
 	return state.globalSettings;
+};
+
+// Button settings selectors
+export const getAllButtonSettings = (
+	state: EmailBuilderState
+): Record<ButtonType, ButtonSettings> => {
+	return state.buttonSettings;
+};
+
+export const getButtonSettings = (
+	state: EmailBuilderState,
+	buttonType: ButtonType
+): ButtonSettings => {
+	return state.buttonSettings[buttonType];
 };

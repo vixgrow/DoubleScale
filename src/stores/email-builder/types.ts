@@ -1,5 +1,28 @@
 import { BlockType } from '../../builder/types';
 
+export type ButtonType = 'primary' | 'secondary' | 'tertiary';
+
+export interface ButtonSettings {
+	font: string;
+	size: number;
+	letterSpacing: string;
+	borderRadius: number;
+	textColor: string;
+	backgroundColor: string;
+	borderWidth: number;
+	borderColor: string;
+	padding: {
+		top: number;
+		right: number;
+		bottom: number;
+		left: number;
+	};
+	bold: boolean;
+	italic: boolean;
+	underline: boolean;
+	strikethrough: boolean;
+}
+
 export interface EmailBlock {
 	id: string;
 	type: BlockType;
@@ -39,6 +62,7 @@ export interface EmailBuilderState {
 	selectedColumnId: string | null;
 	draggedBlock: EmailBlock | null;
 	globalSettings: GlobalEmailSettings;
+	buttonSettings: Record<ButtonType, ButtonSettings>;
 	history: {
 		past: EmailSection[][];
 		present: EmailSection[];
@@ -154,6 +178,21 @@ export interface RedoAction {
 	type: 'REDO';
 }
 
+export interface UpdateButtonSettingsAction {
+	type: 'UPDATE_BUTTON_SETTINGS';
+	payload: {
+		buttonType: ButtonType;
+		settings: Partial<ButtonSettings>;
+	};
+}
+
+export interface SetButtonSettingsAction {
+	type: 'SET_BUTTON_SETTINGS';
+	payload: {
+		settings: Record<ButtonType, ButtonSettings>;
+	};
+}
+
 export type EmailBuilderActionTypes =
 	| AddBlockAction
 	| UpdateBlockAction
@@ -169,4 +208,6 @@ export type EmailBuilderActionTypes =
 	| ResetBuilderAction
 	| UpdateGlobalSettingsAction
 	| UndoAction
-	| RedoAction;
+	| RedoAction
+	| UpdateButtonSettingsAction
+	| SetButtonSettingsAction;

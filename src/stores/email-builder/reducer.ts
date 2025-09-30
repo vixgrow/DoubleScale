@@ -7,15 +7,17 @@ import {
 	DELETE_BLOCK,
 	DELETE_SECTION,
 	MOVE_BLOCK,
+	REDO,
 	REORDER_SECTIONS,
 	RESET_BUILDER,
 	SELECT_BLOCK,
 	SET_BUILDER_STATE,
-	UPDATE_BLOCK,
-	UPDATE_SECTION,
-	UPDATE_GLOBAL_SETTINGS,
+	SET_BUTTON_SETTINGS,
 	UNDO,
-	REDO,
+	UPDATE_BLOCK,
+	UPDATE_BUTTON_SETTINGS,
+	UPDATE_GLOBAL_SETTINGS,
+	UPDATE_SECTION,
 } from './constants';
 
 import type {
@@ -38,6 +40,53 @@ const initialState: EmailBuilderState = {
 		backgroundRepeat: 'no-repeat',
 		backgroundSize: 'cover',
 		canvasWidth: 650,
+	},
+	buttonSettings: {
+		primary: {
+			font: 'Arial, sans-serif',
+			size: 16,
+			letterSpacing: '0px',
+			borderRadius: 4,
+			textColor: '#ffffff',
+			backgroundColor: '#3B82F6',
+			borderWidth: 0,
+			borderColor: '#3B82F6',
+			padding: { top: 6, right: 8, bottom: 6, left: 8 },
+			bold: false,
+			italic: false,
+			underline: false,
+			strikethrough: false,
+		},
+		secondary: {
+			font: 'Arial, sans-serif',
+			size: 16,
+			letterSpacing: '0px',
+			borderRadius: 4,
+			textColor: '#3B82F6',
+			backgroundColor: 'transparent',
+			borderWidth: 1,
+			borderColor: '#3B82F6',
+			padding: { top: 6, right: 8, bottom: 6, left: 8 },
+			bold: false,
+			italic: false,
+			underline: false,
+			strikethrough: false,
+		},
+		tertiary: {
+			font: 'Arial, sans-serif',
+			size: 16,
+			letterSpacing: '0px',
+			borderRadius: 0,
+			textColor: '#3B82F6',
+			backgroundColor: 'transparent',
+			borderWidth: 0,
+			borderColor: 'transparent',
+			padding: { top: 6, right: 8, bottom: 6, left: 8 },
+			bold: false,
+			italic: false,
+			underline: false,
+			strikethrough: false,
+		},
 	},
 	history: {
 		past: [],
@@ -360,6 +409,28 @@ const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
 					present: next,
 					future: newFuture,
 				},
+			};
+		}
+
+		case UPDATE_BUTTON_SETTINGS: {
+			const { buttonType, settings } = action.payload;
+			return {
+				...state,
+				buttonSettings: {
+					...state.buttonSettings,
+					[buttonType]: {
+						...state.buttonSettings[buttonType],
+						...settings,
+					},
+				},
+			};
+		}
+
+		case SET_BUTTON_SETTINGS: {
+			const { settings } = action.payload;
+			return {
+				...state,
+				buttonSettings: settings,
 			};
 		}
 

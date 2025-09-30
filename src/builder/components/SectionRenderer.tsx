@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { __ } from '@wordpress/i18n';
@@ -8,21 +8,16 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailSection } from '../../stores/email-builder/types';
 import ColumnRenderer from './ColumnRenderer';
-import { useBuilder } from '../context/BuilderContext';
 import { CopyIcon, DeleteIcon } from '@quillcrm/components';
+import { v4 as uuidv4 } from 'uuid';
 
 interface SectionRendererProps {
 	section: EmailSection;
 }
 
 const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
-	const {
-		deleteSection,
-		duplicateSection,
-		moveSectionUp,
-		moveSectionDown,
-		selectTemplateSection
-	} = useBuilder();
+	const dispatch = useDispatch();
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
 
 	const {
 		attributes,
@@ -55,27 +50,49 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 	const handleSectionClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		// All sections should open LayoutSettings when clicked, just like template sections
-		selectTemplateSection(section.id);
+		dispatch(STORE_KEY).selectBlock(null, section.id);
 	};
 
 	const handleDeleteSection = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		deleteSection(section.id);
+		dispatch(STORE_KEY).deleteSection(section.id);
 	};
 
 	const handleDuplicateSection = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		duplicateSection(section.id);
+		// Duplicate section logic
+		const newSection = {
+			...section,
+			id: uuidv4(),
+			columns: section.columns.map(col => ({
+				...col,
+				id: uuidv4(),
+				blocks: col.blocks.map(block => ({
+					...block,
+					id: uuidv4(),
+				}))
+			}))
+		};
+		const sectionIndex = sections.findIndex(s => s.id === section.id);
+		dispatch(STORE_KEY).addSection(newSection, sectionIndex + 1);
 	};
 
 	const handleMoveSectionUp = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		moveSectionUp(section.id);
+		const currentIndex = sections.findIndex(s => s.id === section.id);
+		if (currentIndex > 0) {
+			const targetSectionId = sections[currentIndex - 1].id;
+			dispatch(STORE_KEY).reorderSections(section.id, targetSectionId);
+		}
 	};
 
 	const handleMoveSectionDown = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		moveSectionDown(section.id);
+		const currentIndex = sections.findIndex(s => s.id === section.id);
+		if (currentIndex < sections.length - 1) {
+			const targetSectionId = sections[currentIndex + 1].id;
+			dispatch(STORE_KEY).reorderSections(section.id, targetSectionId);
+		}
 	};
 
 	return (

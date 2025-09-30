@@ -2,7 +2,7 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * external dependencies
  */
@@ -19,12 +19,11 @@ import GlobalEmailSettings from './GlobalEmailSettings';
 import BackgroundSettings from './BackgroudSettings';
 import ButtonSettings from './ButtonSettings';
 import LayoutSettings from '../blocks/layout/LayoutSettings';
-import { useBuilder } from '../context/BuilderContext';
 
 type ViewState = 'main' | 'background' | 'button' | 'layout';
 
 const BlockEditor: React.FC = () => {
-	const { updateBlock, clearSelection, deleteBlock, isTemplateSection, updateSection } = useBuilder();
+	const dispatch = useDispatch();
 	const [currentView, setCurrentView] = useState<ViewState>('main');
 
 	const selectedBlock = useSelect(
@@ -51,14 +50,13 @@ const BlockEditor: React.FC = () => {
 
 	const handlePropsChange = (newProps: Record<string, any>) => {
 		if (selectedBlock) {
-			updateBlock(selectedBlock.id, newProps);
+			dispatch(STORE_KEY).updateBlock(selectedBlock.id, newProps);
 		}
 	};
 
 	// Determine what to show in the header
 	const isBlockSelected = !!selectedBlockId;
 	const isSectionSelected = !!selectedSectionId;
-	const isTemplateSectionSelected = !!selectedSectionId && isTemplateSection(selectedSectionId);
 	const blockDefinition = selectedBlock
 		? blocksRegistry[selectedBlock.type]
 		: null;
@@ -102,7 +100,7 @@ const BlockEditor: React.FC = () => {
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={() => clearSelection()}
+								onClick={() => dispatch(STORE_KEY).clearSelection()}
 							>
 								<X className="h-4 w-4" />
 							</Button>
@@ -139,7 +137,7 @@ const BlockEditor: React.FC = () => {
 										backgroundPosition: settings.backgroundPosition,
 										padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
 									};
-									updateSection(selectedSectionId, sectionStyles);
+									dispatch(STORE_KEY).updateSection(selectedSectionId, sectionStyles);
 								}}
 							/>
 						) : (
@@ -161,8 +159,8 @@ const BlockEditor: React.FC = () => {
 								size="sm"
 								className="w-full"
 								onClick={() => {
-									deleteBlock(selectedBlock.id);
-									clearSelection();
+									dispatch(STORE_KEY).deleteBlock(selectedBlock.id);
+									dispatch(STORE_KEY).clearSelection();
 								}}
 							>
 								{__('Delete Block', 'quillcrm')}

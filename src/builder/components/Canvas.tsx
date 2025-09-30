@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import {
 	SortableContext,
@@ -14,14 +14,14 @@ import emailBuilder from '../../../assets/images/email-builder.png';
 import { ColumnsLayout } from '@quillcrm/components';
 import { LayoutTemplate } from '../types';
 import { useDroppable } from '@dnd-kit/core';
-import { useBuilder } from '../context/BuilderContext';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CanvasProps {
 	// No props needed since we're using the store
 }
 
 const Canvas = ({ }: CanvasProps) => {
-	const { addNewSection, getGlobalSettings } = useBuilder();
+	const dispatch = useDispatch();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const { isOver: isOverCanvas, setNodeRef: setNodeRefCanvas } = useDroppable(
@@ -43,7 +43,7 @@ const Canvas = ({ }: CanvasProps) => {
 	};
 
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
-	const globalSettings = getGlobalSettings();
+	const globalSettings = useSelect((select) => select(STORE_KEY).getGlobalSettings(), []);
 
 	const handleOpenModal = () => {
 		setIsModalOpen(true);
@@ -54,7 +54,16 @@ const Canvas = ({ }: CanvasProps) => {
 	};
 
 	const handleSectionSelect = (sectionType: LayoutTemplate) => {
-		addNewSection(sectionType);
+		const newSection = {
+			id: uuidv4(),
+			columns: sectionType.number.map(() => ({
+				id: uuidv4(),
+				width: 100 / sectionType.number.length,
+				blocks: [],
+			})),
+			styles: {},
+		};
+		dispatch(STORE_KEY).addSection(newSection);
 		setIsModalOpen(false);
 	};
 

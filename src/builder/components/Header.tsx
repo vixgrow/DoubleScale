@@ -4,7 +4,9 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PreviewIcon, RedoIcon, UndoIcon } from '@/components/icons';
 import BreadcrumbComponent from '@/components/breadcrumb';
-import { useBuilder } from '../context/BuilderContext';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { STORE_KEY } from '../../stores/email-builder/constants';
+import * as emailBuilderApi from '../../api/email-builder-api';
 import {
 	Dialog,
 	DialogContent,
@@ -16,12 +18,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const Header: React.FC = () => {
-	const { saveTemplate, saving, undo, redo, canUndo, canRedo } = useBuilder();
+	const dispatch = useDispatch();
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	const globalSettings = useSelect((select) => select(STORE_KEY).getGlobalSettings(), []);
+	const buttonSettings = useSelect((select) => select(STORE_KEY).getAllButtonSettings(), []);
+	const canUndo = useSelect((select) => select(STORE_KEY).canUndo(), []);
+	const canRedo = useSelect((select) => select(STORE_KEY).canRedo(), []);
+	
 	const [isSaveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [name, setName] = useState('');
 	const [subject, setSubject] = useState('');
 	const [saveError, setSaveError] = useState<string | null>(null);
 	const [saveSuccess, setSaveSuccess] = useState(false);
+	const [saving, setSaving] = useState(false);
 
 	const handleSave = async () => {
 		try {
@@ -31,7 +40,18 @@ const Header: React.FC = () => {
 			}
 
 			setSaveError(null);
-			await saveTemplate(name, subject);
+			setSaving(true);
+			
+			const data = {
+				name,
+				subject: subject || name,
+				content: JSON.stringify(sections),
+				global_settings: JSON.stringify(globalSettings),
+				button_settings: JSON.stringify(buttonSettings),
+				type: 'email',
+			};
+			
+			await emailBuilderApi.createTemplate(data);
 			setSaveSuccess(true);
 			setTimeout(() => {
 				setSaveSuccess(false);
@@ -41,6 +61,8 @@ const Header: React.FC = () => {
 			setSaveError(
 				error.message || __('Failed to save template', 'quillcrm')
 			);
+		} finally {
+			setSaving(false);
 		}
 	};
 	return (
@@ -60,7 +82,7 @@ const Header: React.FC = () => {
 					<Button
 						variant="outline"
 						className="px-3"
-						onClick={undo}
+						onClick={() => dispatch(STORE_KEY).undo()}
 						disabled={!canUndo}
 						title={__('Undo last action', 'quillcrm')}
 					>
@@ -69,7 +91,7 @@ const Header: React.FC = () => {
 					<Button
 						variant="outline"
 						className="px-3"
-						onClick={redo}
+						onClick={() => dispatch(STORE_KEY).redo()}
 						disabled={!canRedo}
 						title={__('Redo last action', 'quillcrm')}
 					>

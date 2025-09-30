@@ -1,7 +1,7 @@
 /**
  * wordpress dependencies
  */
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
@@ -20,7 +20,6 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailColumn } from '../../stores/email-builder/types';
 import BlockRenderer from './BlockRenderer';
-import { useBuilder } from '../context/BuilderContext';
 // @ts-ignore
 import dropIcon from '../../../assets/images/drop-icon.png';
 
@@ -34,7 +33,18 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 	sectionId,
 }) => {
 	const dispatch = useDispatch();
-	const { isTemplateSection } = useBuilder();
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	
+	const isTemplateSection = (sectionId: string) => {
+		const section = sections.find(s => s.id === sectionId);
+		if (!section) return false;
+		return section.columns.some(column =>
+			column.blocks.some(block =>
+				block.props?.templateLayout !== undefined ||
+				block.props?.templateType !== undefined
+			)
+		);
+	};
 
 	const { isOver, setNodeRef } = useDroppable({
 		id: `column-${column.id}`,
@@ -60,11 +70,6 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 		dispatch(STORE_KEY).addBlock(sectionId, column.id, newBlock);
 	};
 
-	// Check if this column has inline layout blocks (for logo+button)
-	const inlineBlocks = column.blocks.filter(
-		(block) => block.props?.inlineLayout
-	);
-
 	return (
 		<div
 			ref={setNodeRef}
@@ -73,7 +78,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 				${isOver ? 'bg-blue-50' : ''}
 			`}
 			style={{
-				width: `${100 / column.width}%`,
+				width: `${column.width}%`,
 			}}
 		>
 			<SortableContext

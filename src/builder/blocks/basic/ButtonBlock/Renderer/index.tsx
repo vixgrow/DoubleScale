@@ -10,7 +10,7 @@
  * internal dependencies
  */
 import { ButtonBlockProps } from '..';
-import { useButtonSettings } from '../../../../context/ButtonSettingsContext';
+import { useButtonSettings } from '../../../../hooks/useButtonSettings';
 
 export interface ButtonRendererProps {
 	props: ButtonBlockProps;

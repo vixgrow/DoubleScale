@@ -25,12 +25,11 @@ import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import BlockEditor from './components/BlockEditor';
 import TemplateCard from './components/TemplateCard';
-import { BuilderProvider, useBuilder } from './context/BuilderContext';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { STORE_KEY } from '../stores/email-builder/constants';
 import { v4 as uuidv4 } from 'uuid';
-import { ButtonSettingsProvider } from './context/ButtonSettingsContext';
 import { blocksRegistry } from './blocks/BlockRegister';
+import { useButtonSettings } from './hooks/useButtonSettings';
 
 // Utility function to add template layout to block props
 const addTemplateLayoutToBlockProps = (blockConfig, template) => {
@@ -44,15 +43,11 @@ const addTemplateLayoutToBlockProps = (blockConfig, template) => {
 };
 
 const BuilderContent: React.FC = () => {
-	const {
-		addNewSection,
-		addNewBlock,
-		addNewBlockWithProps,
-		reorderSections,
-		moveBlock,
-	} = useBuilder();
 	const dispatch = useDispatch();
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	
+	// Initialize button settings (loads from API on mount)
+	useButtonSettings();
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: {
@@ -209,7 +204,7 @@ const BuilderContent: React.FC = () => {
 					columns: [
 						{
 							id: uuidv4(),
-							width: 1,
+							width: 100,
 							blocks: [],
 						},
 					],
@@ -241,11 +236,14 @@ const BuilderContent: React.FC = () => {
 							template
 						);
 
-						addNewBlockWithProps(
+						dispatch(STORE_KEY).addBlock(
 							sectionId,
 							columnId,
-							blockConfig.type,
-							blockProps
+							{
+								id: uuidv4(),
+								type: blockConfig.type,
+								props: blockProps,
+							}
 						);
 					});
 				} else {
@@ -254,11 +252,14 @@ const BuilderContent: React.FC = () => {
 						'Creating single block for template:',
 						template
 					);
-					addNewBlockWithProps(
+					dispatch(STORE_KEY).addBlock(
 						sectionId,
 						columnId,
-						template.type,
-						template.props || {}
+						{
+							id: uuidv4(),
+							type: template.type,
+							props: template.props || {},
+						}
 					);
 				}
 				return;
@@ -291,7 +292,7 @@ const BuilderContent: React.FC = () => {
 					columns: [
 						{
 							id: uuidv4(),
-							width: 1,
+							width: 100,
 							blocks: [],
 						},
 					],
@@ -319,36 +320,38 @@ const BuilderContent: React.FC = () => {
 					const containerBlockId = `container-${Date.now()}`;
 
 					// Add the logo block first with special inline properties
-					addNewBlockWithProps(
+					dispatch(STORE_KEY).addBlock(
 						sectionId,
 						columnId,
-						template.blocks[0].type,
 						{
-							...template.blocks[0].props,
-							width: 'auto', // Logo gets auto width like other options
-							align: 'left',
-							// Add a special property to identify this as part of inline layout
-							inlineLayout: true,
-							containerId: containerBlockId,
-							// Pass the template layout information to the block
-							templateLayout: template.layout,
+							id: uuidv4(),
+							type: template.blocks[0].type,
+							props: {
+								...template.blocks[0].props,
+								width: 'auto',
+								align: 'left',
+								inlineLayout: true,
+								containerId: containerBlockId,
+								templateLayout: template.layout,
+							},
 						}
 					);
 
 					// Add the button block second with special inline properties
-					addNewBlockWithProps(
+					dispatch(STORE_KEY).addBlock(
 						sectionId,
 						columnId,
-						template.blocks[1].type,
 						{
-							...template.blocks[1].props,
-							width: '50%',
-							align: 'right',
-							// Add a special property to identify this as part of inline layout
-							inlineLayout: true,
-							containerId: containerBlockId,
-							// Pass the template layout information to the block
-							templateLayout: template.layout,
+							id: uuidv4(),
+							type: template.blocks[1].type,
+							props: {
+								...template.blocks[1].props,
+								width: '50%',
+								align: 'right',
+								inlineLayout: true,
+								containerId: containerBlockId,
+								templateLayout: template.layout,
+							},
 						}
 					);
 				} else {
@@ -358,11 +361,14 @@ const BuilderContent: React.FC = () => {
 							`Adding block ${index + 1} to column:`,
 							block
 						);
-						addNewBlockWithProps(
+						dispatch(STORE_KEY).addBlock(
 							sectionId,
 							columnId,
-							block.type,
-							block.props
+							{
+								id: uuidv4(),
+								type: block.type,
+								props: block.props,
+							}
 						);
 					});
 				}
@@ -396,7 +402,7 @@ const BuilderContent: React.FC = () => {
 					columns: [
 						{
 							id: uuidv4(),
-							width: 1,
+							width: 100,
 							blocks: [],
 						},
 					],
@@ -428,11 +434,14 @@ const BuilderContent: React.FC = () => {
 							template
 						);
 
-						addNewBlockWithProps(
+						dispatch(STORE_KEY).addBlock(
 							sectionId,
 							columnId,
-							blockConfig.type,
-							blockProps
+							{
+								id: uuidv4(),
+								type: blockConfig.type,
+								props: blockProps,
+							}
 						);
 					});
 				} else {
@@ -441,11 +450,14 @@ const BuilderContent: React.FC = () => {
 						'Creating single block for email body template:',
 						template
 					);
-					addNewBlockWithProps(
+					dispatch(STORE_KEY).addBlock(
 						sectionId,
 						columnId,
-						template.type,
-						template.props || {}
+						{
+							id: uuidv4(),
+							type: template.type,
+							props: template.props || {},
+						}
 					);
 				}
 				return;
@@ -478,7 +490,7 @@ const BuilderContent: React.FC = () => {
 					columns: [
 						{
 							id: uuidv4(),
-							width: 1,
+							width: 100,
 							blocks: [],
 						},
 					],
@@ -510,11 +522,14 @@ const BuilderContent: React.FC = () => {
 							template
 						);
 
-						addNewBlockWithProps(
+						dispatch(STORE_KEY).addBlock(
 							sectionId,
 							columnId,
-							blockConfig.type,
-							blockProps
+							{
+								id: uuidv4(),
+								type: blockConfig.type,
+								props: blockProps,
+							}
 						);
 					});
 				} else {
@@ -523,11 +538,14 @@ const BuilderContent: React.FC = () => {
 						'Creating single block for footer template:',
 						template
 					);
-					addNewBlockWithProps(
+					dispatch(STORE_KEY).addBlock(
 						sectionId,
 						columnId,
-						template.type,
-						template.props || {}
+						{
+							id: uuidv4(),
+							type: template.type,
+							props: template.props || {},
+						}
 					);
 				}
 				return;
@@ -560,7 +578,7 @@ const BuilderContent: React.FC = () => {
 					columns: [
 						{
 							id: uuidv4(),
-							width: 1,
+							width: 100,
 							blocks: [],
 						},
 					],
@@ -592,11 +610,14 @@ const BuilderContent: React.FC = () => {
 							template
 						);
 
-						addNewBlockWithProps(
+						dispatch(STORE_KEY).addBlock(
 							sectionId,
 							columnId,
-							blockConfig.type,
-							blockProps
+							{
+								id: uuidv4(),
+								type: blockConfig.type,
+								props: blockProps,
+							}
 						);
 					});
 				} else {
@@ -605,11 +626,14 @@ const BuilderContent: React.FC = () => {
 						'Creating single block for image gallery template:',
 						template
 					);
-					addNewBlockWithProps(
+					dispatch(STORE_KEY).addBlock(
 						sectionId,
 						columnId,
-						'image',
-						template.props || {}
+						{
+							id: uuidv4(),
+							type: 'image',
+							props: template.props || {},
+						}
 					);
 				}
 				return;
@@ -630,7 +654,7 @@ const BuilderContent: React.FC = () => {
 			// This is section reordering
 			const activeSectionId = active.data.current.sectionId;
 			const overSectionId = over.data.current.sectionId;
-			reorderSections(activeSectionId, overSectionId);
+			dispatch(STORE_KEY).reorderSections(activeSectionId, overSectionId);
 			return;
 		}
 
@@ -689,7 +713,7 @@ const BuilderContent: React.FC = () => {
 					fromSectionId !== toSectionId ||
 					fromColumnId !== toColumnId
 				) {
-					moveBlock(
+					dispatch(STORE_KEY).moveBlock(
 						blockId,
 						fromSectionId,
 						fromColumnId,
@@ -777,7 +801,7 @@ const BuilderContent: React.FC = () => {
 					});
 
 					try {
-						moveBlock(
+						dispatch(STORE_KEY).moveBlock(
 							blockId,
 							fromSectionId,
 							fromColumnId,
@@ -829,14 +853,35 @@ const BuilderContent: React.FC = () => {
 					}
 				}
 
-				addNewBlock(sectionId, columnId, blockType);
+				const blockDef = blocksRegistry[blockType];
+				if (blockDef) {
+					dispatch(STORE_KEY).addBlock(
+						sectionId,
+						columnId,
+						{
+							id: uuidv4(),
+							type: blockType,
+							props: { ...blockDef.defaultProps },
+						}
+					);
+				}
 				return;
 			}
 		}
 
 		// Handle dropping new sections
 		if (active.data?.current?.type === 'layout') {
-			addNewSection(active.data.current.item);
+			const layoutItem = active.data.current.item;
+			const newSection = {
+				id: uuidv4(),
+				columns: layoutItem.number.map(() => ({
+					id: uuidv4(),
+					width: 100 / layoutItem.number.length,
+					blocks: [],
+				})),
+				styles: {},
+			};
+			dispatch(STORE_KEY).addSection(newSection);
 		}
 
 		console.log('Drag ended:', { active: active.id, over: over.id });
@@ -1079,13 +1124,7 @@ const BuilderContent: React.FC = () => {
 };
 
 const Builder: React.FC = () => {
-	return (
-		<ButtonSettingsProvider>
-			<BuilderProvider>
-				<BuilderContent />
-			</BuilderProvider>
-		</ButtonSettingsProvider>
-	);
+	return <BuilderContent />;
 };
 
 export default Builder;

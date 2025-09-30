@@ -2,6 +2,7 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * external dependencies
  */
@@ -18,25 +19,25 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@quillcrm/components/ui/select';
-import { useBuilder } from '../context/BuilderContext';
 import { ImageUploadControl, ColorPickerControl } from '../blocks/basic/shared';
+import { STORE_KEY } from '../../stores/email-builder/constants';
 
 
 const BackgroundSettings: React.FC<{
 	onBack: () => void;
 }> = ({ onBack }) => {
-	const { updateGlobalSettings, getGlobalSettings } = useBuilder();
-	const settings = getGlobalSettings();
+	const dispatch = useDispatch();
+	const settings = useSelect((select) => select(STORE_KEY).getGlobalSettings(), []);
 
 	const handleInputChange = (field: string, value: any) => {
-		updateGlobalSettings({ [field]: value });
+		dispatch(STORE_KEY).updateGlobalSettings({ [field]: value });
 	};
 
 	const handleImageChange = (updates: { src: string; alt: string }) => {
 		if (updates.src) {
 			// When an image is uploaded, we need to create the backgroundImage object
 			// The ImageUploadControl doesn't provide the full metadata, so we'll use what we have
-			updateGlobalSettings({
+			dispatch(STORE_KEY).updateGlobalSettings({
 				backgroundImage: {
 					id: 0, // Will be updated when using WordPress media library
 					name: updates.alt || 'Background Image',
@@ -46,7 +47,7 @@ const BackgroundSettings: React.FC<{
 			});
 		} else {
 			// When image is deleted
-			updateGlobalSettings({ backgroundImage: null });
+			dispatch(STORE_KEY).updateGlobalSettings({ backgroundImage: null });
 		}
 	};
 

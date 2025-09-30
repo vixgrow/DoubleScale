@@ -50,10 +50,16 @@ class Utils {
 	public static function is_memory_limit_reached() {
 		$memory_limit = self::get_memory_limit();
 		$memory_usage = memory_get_usage( true );
-		$memory_limit = self::convert_to_bytes( $memory_limit );
-		$memory_limit = $memory_limit * 0.75;
+		
+		// Handle unlimited memory (-1)
+		if ( $memory_limit === '-1' ) {
+			return false;
+		}
+		
+		$memory_limit_bytes = self::convert_to_bytes( $memory_limit );
+		$memory_threshold = $memory_limit_bytes * 0.75;
 
-		return $memory_usage >= $memory_limit;
+		return $memory_usage >= $memory_threshold;
 	}
 
 	/**

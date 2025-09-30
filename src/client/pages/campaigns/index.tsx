@@ -24,7 +24,7 @@ import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable'; // Import the hook
-import { formatDateForAPI } from '@quillcrm/utils';
+import { formatDateForAPI, getCampaignEndpoint } from '@quillcrm/utils';
 
 const Campaigns: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -98,11 +98,31 @@ const Campaigns: React.FC = () => {
 			});
 			return;
 		}
+
+		if (!campaignType) {
+			createNotice({
+				type: 'error',
+				message: __('Campaign type is required', 'quillcrm'),
+			});
+			return;
+		}
+
 		setIsAdding(true);
 
 		try {
+			// Determine the correct endpoint based on campaign type
+			// Both 'standard' and 'ab_test' are email campaigns
+			const actualType =
+				campaignType === 'ab_test' || campaignType === 'standard'
+					? 'email'
+					: campaignType;
+			const endpoint = getCampaignEndpoint(actualType);
+			if (!endpoint) {
+				throw new Error(__('Invalid campaign type', 'quillcrm'));
+			}
+
 			const response = (await apiFetch({
-				path: '/qc/v1/campaigns',
+				path: endpoint,
 				method: 'POST',
 				data: {
 					name: name,
@@ -132,10 +152,11 @@ const Campaigns: React.FC = () => {
 
 		try {
 			await apiFetch({
-				path: '/qc/v1/campaigns',
-				method: 'DELETE',
+				path: '/qc/v1/campaigns/bulk',
+				method: 'POST',
 				data: {
-					ids: selectedRowKeys,
+					operation: 'delete',
+					campaign_ids: selectedRowKeys,
 				},
 			});
 
@@ -153,8 +174,19 @@ const Campaigns: React.FC = () => {
 
 	const deleteCampaign = async (id: number) => {
 		try {
+			// Find the campaign to get its type
+			const campaign = campaigns.find((c) => c.id === id);
+			if (!campaign) {
+				throw new Error(__('Campaign not found', 'quillcrm'));
+			}
+
+			const endpoint = getCampaignEndpoint(campaign.type);
+			if (!endpoint) {
+				throw new Error(__('Invalid campaign type', 'quillcrm'));
+			}
+
 			await apiFetch({
-				path: `/qc/v1/campaigns/${id}`,
+				path: `${endpoint}/${id}`,
 				method: 'DELETE',
 			});
 
@@ -174,8 +206,19 @@ const Campaigns: React.FC = () => {
 		});
 
 		try {
+			// Find the campaign to get its type
+			const campaign = campaigns.find((c) => c.id === id);
+			if (!campaign) {
+				throw new Error(__('Campaign not found', 'quillcrm'));
+			}
+
+			const endpoint = getCampaignEndpoint(campaign.type);
+			if (!endpoint) {
+				throw new Error(__('Invalid campaign type', 'quillcrm'));
+			}
+
 			const response = (await apiFetch({
-				path: `/qc/v1/campaigns/${id}/duplicate`,
+				path: `${endpoint}/${id}/duplicate`,
 				method: 'POST',
 			})) as Campaign;
 

@@ -26,7 +26,7 @@ use QuillCRM\Database\Migrations\Tags_Table;
 use QuillCRM\Database\Migrations\Campaigns_Table;
 use QuillCRM\Database\Migrations\Templates_Table;
 use QuillCRM\Database\Migrations\Task_Meta_Table;
-use QuillCRM\Database\Migrations\Campaign_Emails_Table;
+use QuillCRM\Database\Migrations\Tracking_Table;
 use QuillCRM\Database\Migrations\Forms_Table;
 use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
 use QuillCRM\Database\Migrations\Link_Triggers_Table;
@@ -42,7 +42,8 @@ use QuillCRM\User_Roles\User_Roles;
 /**
  * Install class
  */
-class Install {
+class Install
+{
 
 
 
@@ -51,9 +52,10 @@ class Install {
 	 *
 	 * @since 1.0.0
 	 */
-	public static function install() {
+	public static function install()
+	{
 		// Check if we are not already running this routine.
-		if ( 'yes' === get_transient( 'quillcrm_installing' ) ) {
+		if ('yes' === get_transient('quillcrm_installing')) {
 			return;
 		}
 
@@ -75,7 +77,7 @@ class Install {
 				'automation_steps'             => Automation_Steps_Table::class,
 				'automation_contacts'          => Automation_Contacts_Table::class,
 				'task_meta'                    => Task_Meta_Table::class,
-				'campaign_emails'              => Campaign_Emails_Table::class,
+				'tracking'                     => Tracking_Table::class,
 				'forms'                        => Forms_Table::class,
 				'automation_contact_processes' => Automation_Contact_Processes_Table::class,
 				'link_triggers'                => Link_Triggers_Table::class,
@@ -89,8 +91,8 @@ class Install {
 			)
 		);
 
-		foreach ( $tables as $table => $class ) {
-			if ( ! class_exists( $class ) ) {
+		foreach ($tables as $table => $class) {
+			if (!class_exists($class)) {
 				continue;
 			}
 
@@ -100,8 +102,8 @@ class Install {
 		}
 
 		// If we made it till here nothing is running yet, lets set the transient now.
-		set_transient( 'quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10 );
-		delete_transient( 'quillcrm_installing' );
-		do_action( 'quillcrm_installed' );
+		set_transient('quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10);
+		delete_transient('quillcrm_installing');
+		do_action('quillcrm_installed');
 	}
 }

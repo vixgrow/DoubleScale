@@ -56,7 +56,6 @@ export type Contact = {
 	})[];
 };
 
-
 export type Order = {
 	id: number;
 	status: string;
@@ -161,7 +160,6 @@ export type CustomField = {
 	updated_at: string;
 };
 
-
 export type CustomFieldsGroup = {
 	id: number;
 	name: string;
@@ -175,10 +173,11 @@ export type CustomFieldsGroup = {
 // The array type
 export type CustomFieldsGroups = CustomFieldsGroup[];
 
-export type Template = {
+// Email Template Type
+export type EmailTemplate = {
 	id?: number;
 	name: string;
-	type: string;
+	type: 'email';
 	subject: string;
 	body: string;
 	settings: {
@@ -186,16 +185,43 @@ export type Template = {
 		from_email: string;
 		reply_to: string;
 		preview_text: string;
-		enable_utm: boolean;
-		utm_source: string;
-		utm_medium: string;
-		utm_name: string;
-		utm_term: string;
-		utm_content: string;
 	};
 	created_at?: string;
 	updated_at?: string;
 };
+
+// SMS Template Type (for frontend use)
+export type SMSTemplate = {
+	id?: number;
+	name: string;
+	type: 'sms';
+	body: string;
+	subject?: never; // SMS doesn't have subject
+	settings?: {
+		// For UI state management only
+		add_unsubscribe?: boolean;
+	};
+	created_at?: string;
+	updated_at?: string;
+};
+
+// WhatsApp Template Type (for frontend use)
+export type WhatsAppTemplate = {
+	id?: number;
+	name: string;
+	type: 'whatsapp';
+	body: string;
+	subject?: never; // WhatsApp doesn't have subject
+	settings?: {
+		// For UI state management only
+		add_unsubscribe?: boolean;
+	};
+	created_at?: string;
+	updated_at?: string;
+};
+
+// Discriminated Union for all template types
+export type Template = EmailTemplate | SMSTemplate | WhatsAppTemplate;
 
 type CampaignSettings = {
 	templates: Template[];
@@ -216,6 +242,7 @@ export type Campaign = {
 	name: string;
 	description: string;
 	status: string;
+	type: 'email' | 'sms' | 'whatsapp';
 	settings: CampaignSettings;
 	parent_id: string;
 	count: string;
@@ -224,12 +251,22 @@ export type Campaign = {
 	updated_at: string;
 	contacts_count: number;
 	sent_count: number;
-	opened_count: number;
-	clicked_count: number;
 	failed_count: number;
 	templates_count: {
 		[key: string]: number;
 	};
+	// Email-specific analytics
+	opened_count?: number;
+	// Shared analytics (email, SMS, WhatsApp)
+	clicked_count: number;
+	// SMS & WhatsApp analytics
+	pending_count?: number;
+	delivered_count?: number;
+	delivery_rate?: number;
+	click_rate?: number;
+	// WhatsApp-specific analytics
+	read_count?: number;
+	read_rate?: number;
 };
 
 export type Campaigns = Campaign[];
@@ -335,16 +372,15 @@ export type CustomTemplate = {
 	body: string;
 	subject: string;
 	settings: {
-		preview_text: string;
-		from_name: string;
-		from_email: string;
-		reply_to: string;
-		enable_utm: boolean;
-		utm_source: string;
-		utm_medium: string;
-		utm_name: string;
-		utm_term: string;
-		utm_content: string;
+		// Common settings
+		preview_text?: string;
+		from_name?: string;
+		// Email-specific settings
+		from_email?: string;
+		reply_to?: string;
+		// SMS/WhatsApp campaign settings
+		message?: string;
+		add_unsubscribe?: boolean;
 	};
 	created_at: string;
 	updated_at: string;
@@ -729,7 +765,6 @@ export interface DeleteGroupDialogProps {
 	onDelete: (groupId: number, newGroupId?: number) => Promise<boolean>;
 }
 
-
 export const CAMPAIGN_STATUS = {
 	DRAFT: 'draft',
 	INACTIVE: 'inactive',
@@ -742,6 +777,7 @@ export const CAMPAIGN_STATUS = {
 	CANCELLED: 'cancelled',
 } as const;
 
-export type CampaignStatus = typeof CAMPAIGN_STATUS[keyof typeof CAMPAIGN_STATUS];
+export type CampaignStatus =
+	(typeof CAMPAIGN_STATUS)[keyof typeof CAMPAIGN_STATUS];
 
 export type CampaignModalStep = 'campaign-types' | 'campaign-name' | null;

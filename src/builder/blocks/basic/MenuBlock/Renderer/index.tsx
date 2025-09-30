@@ -61,6 +61,8 @@ export const MenuBlockRenderer: React.FC<MenuBlockRendererProps> = ({
 				alignItems: 'center',
 				flexWrap: 'wrap',
 				padding: `${(props.padding?.top || 0) * 2}px ${(props.padding?.right || 0) * 4}px ${(props.padding?.bottom || 0) * 2}px ${(props.padding?.left || 0) * 4}px`,
+				width: '100%',
+				overflow: 'hidden',
 			}}
 			className={getAlignmentStyle()}
 		>
@@ -68,7 +70,13 @@ export const MenuBlockRenderer: React.FC<MenuBlockRendererProps> = ({
 				<a
 					key={item.id}
 					href={item.link}
-					style={getMenuItemStyle(item)}
+					style={{
+						...getMenuItemStyle(item),
+						whiteSpace: 'nowrap',
+						overflow: 'hidden',
+						textOverflow: 'ellipsis',
+						maxWidth: '150px',
+					}}
 					className="text-decoration-none hover:opacity-80 transition-opacity"
 				>
 					{item.name ||

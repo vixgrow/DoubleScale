@@ -175,22 +175,23 @@ const Form: React.FC<FormProps> = ({
 	// Modify the handleNext function in the Form component
 	const handleNext = async () => {
 		if (currentStep === 0) {
-			if (!form?.name || !form?.form_type) {
+			if (!form?.name || !form?.form_type || !form?.form_id) {
 				showNotice(
 					'error',
-					__('Please fill required fields', 'quillcrm')
+					__('Please fill all required fields including form selection', 'quillcrm')
 				);
 				return;
 			}
 			try {
 				await saveForm();
+				closeNotice(); // Clear any existing notices when moving to step 2
 				setCurrentStep(1);
 			} catch (error: any) {
 				showNotice('error', error.message);
 			}
 		} else if (currentStep === 1) {
 			try {
-				const savedForm = await saveForm({ status: 'active' });
+				await saveForm({ status: 'active' });
 
 				// Show updated notice
 				showNotice(
@@ -246,29 +247,29 @@ const Form: React.FC<FormProps> = ({
 
 	const breadcrumbItems = isNewForm
 		? [
-				{
-					label: __('Create Forms', 'quillcrm'),
-					href: 'forms',
-				},
-				{
-					label: __('Form Information', 'quillcrm'),
-				},
-				{
-					label: __('Form Settings', 'quillcrm'),
-				},
-			]
+			{
+				label: __('Create Forms', 'quillcrm'),
+				href: 'forms',
+			},
+			{
+				label: __('Form Information', 'quillcrm'),
+			},
+			{
+				label: __('Form Settings', 'quillcrm'),
+			},
+		]
 		: [
-				{
-					label: __('Edit Form', 'quillcrm'),
-					href: 'forms',
-				},
-				{
-					label: __('Form Information', 'quillcrm'),
-				},
-				{
-					label: __('Form Settings', 'quillcrm'),
-				},
-			];
+			{
+				label: __('Edit Form', 'quillcrm'),
+				href: 'forms',
+			},
+			{
+				label: __('Form Information', 'quillcrm'),
+			},
+			{
+				label: __('Form Settings', 'quillcrm'),
+			},
+		];
 
 	const stepTitles = [
 		__('Form Information', 'quillcrm'),
@@ -308,7 +309,7 @@ const Form: React.FC<FormProps> = ({
 							: __('Create Form', 'quillcrm')
 				}
 				backLabel={
-					currentStep === 0 || isNewForm
+					currentStep === 0
 						? __('Cancel', 'quillcrm')
 						: __('Back', 'quillcrm')
 				}

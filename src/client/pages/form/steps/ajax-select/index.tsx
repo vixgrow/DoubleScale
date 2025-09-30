@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -28,14 +28,26 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 	const { form, updateForm } = useFormContext();
 	const { getAjaxUrl, getNonce } = ConfigAPI;
 	const [formOptions, setFormOptions] = useState({});
+	const previousFormTypeRef = useRef<string | undefined>(form?.form_type);
 
 	// Reset form options when form type changes
 	useEffect(() => {
-		setFormOptions({});
-		// Clear the selected value for this field when form type changes
-		updateForm({
-			[slug]: '',
-		});
+		const currentFormType = form?.form_type;
+		const previousFormType = previousFormTypeRef.current;
+
+		// Only clear values if the form type actually changed
+		if (previousFormType && previousFormType !== currentFormType) {
+			setFormOptions({});
+			// Clear the selected value for this field when form type changes
+			if (form?.[slug]) {
+				updateForm({
+					[slug]: '',
+				});
+			}
+		}
+
+		// Update the ref with the current form type
+		previousFormTypeRef.current = currentFormType;
 	}, [form?.form_type, slug, updateForm]);
 
 	if (!form) return null;
@@ -64,7 +76,7 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 			const data = await response.json();
 
 			setFormOptions(data.data);
-			const options = map(data.data, (value, key) => ({
+			const options = map(data.data, (value: string, key: string) => ({
 				label: value,
 				value: key,
 			}));
@@ -85,6 +97,7 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 				<AsyncSelect
 					className="react-select-container"
 					classNamePrefix="react-select"
+					placeholder={__('Select Option', 'quillcrm')}
 					loadOptions={(_inputValue, callback) => {
 						fetchOptions().then((data) => {
 							if (!data) {
@@ -95,13 +108,12 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 					}}
 					defaultOptions
 					value={
-						map(formOptions, (value, key) => ({
-							label: value,
-							value: key,
-						})).find((option) => option.value == form[slug]) || {
-							label: __('Select Option', 'quillcrm'),
-							value: '',
-						}
+						form[slug] && Object.keys(formOptions).length > 0
+							? map(formOptions, (value: string, key: string) => ({
+								label: value,
+								value: key,
+							})).find((option) => option.value == form[slug]) || null
+							: null
 					}
 					onChange={(val) => {
 						if (!isObject(val)) {

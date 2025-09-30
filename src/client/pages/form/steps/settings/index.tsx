@@ -22,6 +22,7 @@ import { ListField, TagField, ContactMappedFields } from '@quillcrm/components';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import SettingsShimmer from './settings-shimmer';
 
 const Settings: React.FC = () => {
 	const { form, updateSettings } = useFormContext();
@@ -82,7 +83,9 @@ const Settings: React.FC = () => {
 
 	return (
 		<div>
-			{form && !isFetching && (
+			{form && isFetching ? (
+				<SettingsShimmer />
+			) : form && !isFetching ? (
 				<div className="qcrm-fields">
 					<div className="qcrm-field">
 						{formFields && (
@@ -205,7 +208,7 @@ const Settings: React.FC = () => {
 						</div>
 					</div>
 				</div>
-			)}
+			) : null}
 		</div>
 	);
 };

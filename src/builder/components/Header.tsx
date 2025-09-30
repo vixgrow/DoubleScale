@@ -42,16 +42,18 @@ const Header: React.FC = () => {
 			setSaveError(null);
 			setSaving(true);
 			
-			const data = {
-				name,
-				subject: subject || name,
-				content: JSON.stringify(sections),
-				global_settings: JSON.stringify(globalSettings),
-				button_settings: JSON.stringify(buttonSettings),
-				type: 'email',
-			};
-			
-			await emailBuilderApi.createTemplate(data);
+		const data = {
+			name,
+			subject: subject || name,
+			body: JSON.stringify(sections),
+			settings: JSON.stringify({
+				global: globalSettings,
+				buttons: buttonSettings,
+			}),
+			type: 'email',
+		};
+		
+		await emailBuilderApi.createTemplate(data);
 			setSaveSuccess(true);
 			setTimeout(() => {
 				setSaveSuccess(false);

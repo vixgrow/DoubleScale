@@ -13,15 +13,15 @@ import { Button, Card, Flex, Popconfirm } from 'antd';
 /**
  * Internal dependencies
  */
-import type { Template } from '@quillcrm/client';
+import type { EmailTemplate } from '@quillcrm/client';
 import React, { useRef, useState } from 'react';
 import { Field } from '@quillcrm/components';
 import { isEmail, isEmpty } from 'validator';
 // import TemplateBuilder from '../template-builder';
 
 interface Props {
-	template: Template;
-	updateTemplate: (data: Partial<Template>) => void;
+	template: EmailTemplate; // Only use this component for email templates
+	updateTemplate: (data: Partial<EmailTemplate>) => void;
 }
 
 const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
@@ -30,7 +30,9 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 	const [isSending, setIsSending] = React.useState(false);
 	const [isBuilderVisible, setIsBuilderVisible] = React.useState(false);
 
-	const { from_name, from_email, subject, body } = template;
+	// Now type-safe because we know template is EmailTemplate
+	const { settings, subject, body } = template;
+	const { from_name, from_email, reply_to, preview_text } = settings;
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const sendTestEmail = async () => {
@@ -41,13 +43,13 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 		setIsSending(true);
 		try {
 			const response = await apiFetch({
-				path: '/qc/v1/campaigns/send-test-email',
+				path: '/qc/v1/email-campaigns/send-test-email',
 				method: 'POST',
 				data: {
 					email: toEmail,
 					from_name,
 					from_email,
-					reply_to: template.reply_to,
+					reply_to,
 					subject,
 					body,
 				},
@@ -140,7 +142,10 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 							value={from_name}
 							onChange={(value) =>
 								updateTemplate({
-									from_name: value,
+									settings: {
+										...settings,
+										from_name: value,
+									},
 								})
 							}
 							type="text"
@@ -151,7 +156,10 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 							value={from_email}
 							onChange={(value) =>
 								updateTemplate({
-									from_email: value,
+									settings: {
+										...settings,
+										from_email: value,
+									},
 								})
 							}
 							type="email"
@@ -160,10 +168,13 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 					</Flex>
 					<Field
 						label={__('Reply To', 'quillcrm')}
-						value={template.reply_to}
+						value={reply_to}
 						onChange={(value) =>
 							updateTemplate({
-								reply_to: value,
+								settings: {
+									...settings,
+									reply_to: value,
+								},
 							})
 						}
 						type="email"
@@ -181,94 +192,17 @@ const TemplateForm: React.FC<Props> = ({ template, updateTemplate }) => {
 					/>
 					<Field
 						label={__('Preview Text', 'quillcrm')}
-						value={template.preview_text}
+						value={preview_text}
 						onChange={(value) =>
 							updateTemplate({
-								preview_text: value,
+								settings: {
+									...settings,
+									preview_text: value,
+								},
 							})
 						}
 						type="text"
 					/>
-					<Field
-						label={__('Enable UTM', 'quillcrm')}
-						value={template.enable_utm}
-						onChange={(value) =>
-							updateTemplate({
-								enable_utm: value,
-							})
-						}
-						type="switch"
-					/>
-					{template.enable_utm && (
-						<>
-							<Flex gap={20}>
-								<Field
-									label={__('UTM Source', 'quillcrm')}
-									value={template.utm_source}
-									onChange={(value) =>
-										updateTemplate({
-											utm_source: value,
-										})
-									}
-									type="text"
-								/>
-								<Field
-									label={__('UTM Medium', 'quillcrm')}
-									value={template.utm_medium}
-									onChange={(value) =>
-										updateTemplate({
-											utm_medium: value,
-										})
-									}
-									type="text"
-								/>
-							</Flex>
-							<Flex gap={20}>
-								<Field
-									label={__('UTM Medium', 'quillcrm')}
-									value={template.utm_medium}
-									onChange={(value) =>
-										updateTemplate({
-											utm_medium: value,
-										})
-									}
-									type="text"
-								/>
-								<Field
-									label={__('UTM Name', 'quillcrm')}
-									value={template.utm_name}
-									onChange={(value) =>
-										updateTemplate({
-											utm_name: value,
-										})
-									}
-									type="text"
-								/>
-							</Flex>
-							<Flex gap={20}>
-								<Field
-									label={__('UTM Term', 'quillcrm')}
-									value={template.utm_term}
-									onChange={(value) =>
-										updateTemplate({
-											utm_term: value,
-										})
-									}
-									type="text"
-								/>
-								<Field
-									label={__('UTM Content', 'quillcrm')}
-									value={template.utm_content}
-									onChange={(value) =>
-										updateTemplate({
-											utm_content: value,
-										})
-									}
-									type="text"
-								/>
-							</Flex>
-						</>
-					)}
 				</Flex>
 				<Flex style={{ flex: 1 }}>
 					<Card

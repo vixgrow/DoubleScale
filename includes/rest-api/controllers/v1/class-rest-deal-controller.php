@@ -25,6 +25,12 @@ use WP_REST_Server;
 class REST_Deal_Controller extends REST_Controller {
 
 
+
+
+
+
+
+
 	/**
 	 * Route base.
 	 *
@@ -171,6 +177,7 @@ class REST_Deal_Controller extends REST_Controller {
 			'search'              => $request->get_param( 'search' ),
 			'sort_by'             => $request->get_param( 'sort_by' ),
 			'sort_order'          => $request->get_param( 'sort_order' ),
+			'priority'            => $request->get_param( 'priority' ),
 		);
 
 		$per_page = $request->get_param( 'per_page' ) ?: 20;
@@ -259,6 +266,7 @@ class REST_Deal_Controller extends REST_Controller {
 			'currency'            => sanitize_text_field( $request->get_param( 'currency' ) ),
 			'expected_close_date' => sanitize_text_field( $request->get_param( 'expected_close_date' ) ),
 			// 'probability'         => $request->get_param( 'probability' ) !== null ? floatval( $request->get_param( 'probability' ) ) : null,
+			'priority'            => sanitize_text_field( $request->get_param( 'priority' ) ),
 			'owner_id'            => $owner_id ? intval( $owner_id ) : null,
 			'source'              => sanitize_text_field( $request->get_param( 'source' ) ),
 		);
@@ -296,6 +304,7 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function update_item( $request ) {
+		xdebug_break();
 
 		$deal_id = $request->get_param( 'id' );
 		$data    = array();
@@ -310,7 +319,7 @@ class REST_Deal_Controller extends REST_Controller {
 		}
 
 		// $fields = array( 'title', 'contact_id', 'pipeline_id', 'stage_id', 'value', 'currency', 'expected_close_date', 'probability', 'owner_id', 'source' );
-		$fields = array( 'title', 'contact_id', 'pipeline_id', 'stage_id', 'value', 'currency', 'expected_close_date', 'owner_id', 'source' );
+		$fields = array( 'title', 'contact_id', 'pipeline_id', 'stage_id', 'value', 'currency', 'expected_close_date', 'owner_id', 'source', 'priority' );
 		foreach ( $fields as $field ) {
 			$value = $request->get_param( $field );
 			// Special handling for probability - allow explicit null to revert to stage default
@@ -318,7 +327,7 @@ class REST_Deal_Controller extends REST_Controller {
 			// $data[ $field ] = $value !== null ? floatval( $value ) : null;
 			// }
 			if ( $value !== null ) {
-				if ( $field === 'title' || $field === 'currency' || $field === 'source' ) {
+				if ( $field === 'title' || $field === 'currency' || $field === 'source' || $field === 'priority' ) {
 					$data[ $field ] = sanitize_text_field( $value );
 				} elseif ( $field === 'expected_close_date' ) {
 					$data[ $field ] = sanitize_text_field( $value );
@@ -580,6 +589,7 @@ class REST_Deal_Controller extends REST_Controller {
 			'currency'            => $deal->currency,
 			'expected_close_date' => $deal->expected_close_date,
 			'probability'         => $deal->probability,
+			'priority'            => $deal->priority,
 			'status'              => $deal->status,
 			'owner_id'            => $deal->owner_id,
 			'source'              => $deal->source,

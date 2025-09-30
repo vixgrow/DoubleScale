@@ -51,6 +51,8 @@ final class Deal_Manager {
 
 
 
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -355,6 +357,11 @@ final class Deal_Manager {
 			$query->where( 'status', $filters['status'] );
 		}
 
+		// Filter by priority
+		if ( ! empty( $filters['priority'] ) ) {
+			$query->where( 'priority', $filters['priority'] );
+		}
+
 		if ( Permissions::is_deal_owner() ) {
 			$query = $query->where( 'owner_id', get_current_user_id() );
 		}
@@ -558,5 +565,30 @@ final class Deal_Manager {
 		}
 
 		return $deleted;
+	}
+
+
+	/**
+	 * Get deal priorities
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_deal_priorities() {
+		 return array(
+			 'low'    => array(
+				 'label' => __( 'Low', 'quillcrm' ),
+				 'color' => '#2ecc71',
+			 ),
+			 'medium' => array(
+				 'label' => __( 'Medium', 'quillcrm' ),
+				 'color' => '#f1c40f',
+			 ),
+			 'high'   => array(
+				 'label' => __( 'High', 'quillcrm' ),
+				 'color' => '#e74c3c',
+			 ),
+		 );
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Deals_Table
  * This class is responsible for handling the Deals table
@@ -14,6 +15,7 @@ namespace QuillCRM\Database\Migrations;
  * Deals Table class
  */
 class Deals_Table extends Migration {
+
 
 	/**
 	 * Table name
@@ -41,6 +43,7 @@ class Deals_Table extends Migration {
 			currency VARCHAR(3) DEFAULT "USD",
 			expected_close_date DATE NULL,
 			probability DECIMAL(5,2) NULL,
+			priority ENUM("low","medium","high") DEFAULT "low",
 			status ENUM("open","won","lost") DEFAULT "open",
 			owner_id BIGINT(20) UNSIGNED NULL,
 			source VARCHAR(100),

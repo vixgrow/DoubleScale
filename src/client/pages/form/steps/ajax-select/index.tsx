@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -28,6 +28,15 @@ const AjaxSelect: React.FC<Props> = ({ label, ajax_action, parent, slug }) => {
 	const { form, updateForm } = useFormContext();
 	const { getAjaxUrl, getNonce } = ConfigAPI;
 	const [formOptions, setFormOptions] = useState({});
+
+	// Reset form options when form type changes
+	useEffect(() => {
+		setFormOptions({});
+		// Clear the selected value for this field when form type changes
+		updateForm({
+			[slug]: '',
+		});
+	}, [form?.form_type, slug, updateForm]);
 
 	if (!form) return null;
 

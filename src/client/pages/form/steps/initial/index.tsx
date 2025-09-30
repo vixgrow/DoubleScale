@@ -118,7 +118,7 @@ const Initial: React.FC = () => {
 											<AjaxSelect
 												label={label}
 												ajax_action={ajax_action}
-												key={key}
+												key={`${form.form_type}-${key}`}
 												parent={parent}
 												slug={key}
 											/>

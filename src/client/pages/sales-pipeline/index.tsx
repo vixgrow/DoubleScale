@@ -35,6 +35,7 @@ type Filters = {
 		to: Date | null;
 	};
 	status: 'open' | 'won' | 'lost' | 'all';
+	priority: string | null;
 };
 
 const SalesPipeline: React.FC = () => {
@@ -56,6 +57,7 @@ const SalesPipeline: React.FC = () => {
 		ownerId: null,
 		dateRange: { from: null, to: null },
 		status: 'open',
+		priority: null,
 	});
 
 	const { isDealOwner } = useCapabilities();

@@ -34,6 +34,7 @@ import { useUsers } from '../../hooks/use-users';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 import { Deal } from '../../types';
 import './style.scss';
+import ConfigAPI from '@quillcrm/config';
 
 const { Option } = Select;
 
@@ -55,6 +56,7 @@ interface DealFormData {
 	// probability?: number;
 	source?: string;
 	owner_id?: number;
+	priority?: string;
 }
 
 interface Contact {
@@ -90,6 +92,10 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 
 	const { updateDeal } = useDealOperations();
 	const { isDealOwner } = useCapabilities();
+
+	const priorities = useMemo(() => {
+		return ConfigAPI.getDealPriorities();
+	}, []);
 
 	// Check if current user is restricted (deal owner)
 	const isRestrictedUser = isDealOwner();
@@ -128,6 +134,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 					: null,
 				probability: deal.probability,
 				source: deal.source,
+				priority: deal.priority,
 			};
 
 			// Only set contact_id, pipeline_id and owner_id for non-restricted users
@@ -252,6 +259,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				// 		? values.probability
 				// 		: null,
 				source: values.source,
+				priority: values.priority,
 			};
 
 			// Only include contact_id, pipeline_id and owner_id if user is not restricted
@@ -483,6 +491,26 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 						</Select>
 					</Form.Item>
 				</div>
+
+				{/* Priority */}
+				<Form.Item name="priority" label={__('Priority', 'quillcrm')}>
+					<Select placeholder={__('Select priority', 'quillcrm')}>
+						{Object.keys(priorities).map((key) => (
+							<Option key={key} value={key}>
+								<div className="stage-option">
+									<span
+										className="stage-color"
+										style={{
+											backgroundColor:
+												priorities[key].color,
+										}}
+									/>
+									<span>{priorities[key].label}</span>
+								</div>
+							</Option>
+						))}
+					</Select>
+				</Form.Item>
 
 				{/* Value & Currency */}
 				<div className="form-row">

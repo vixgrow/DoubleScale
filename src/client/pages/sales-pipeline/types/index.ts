@@ -8,6 +8,7 @@ export interface Deal {
 	value: number;
 	currency: string;
 	probability: number | null;
+	priority: string | null;
 	status: string;
 	expected_close_date: string | null;
 	is_overdue: boolean;
@@ -66,4 +67,5 @@ export interface Filters {
 		to: Date | null;
 	};
 	status: 'open' | 'won' | 'lost' | 'all';
+	priority: string | null;
 }

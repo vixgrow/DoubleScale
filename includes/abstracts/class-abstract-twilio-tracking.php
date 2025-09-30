@@ -98,6 +98,165 @@ abstract class Abstract_Twilio_Tracking
 	abstract protected function get_campaign_mode();
 
 	/**
+	 * Register standard Twilio hooks (common for SMS and WhatsApp)
+	 * Should be called from add_hooks() in child classes
+	 *
+	 * @return void
+	 */
+	protected function register_standard_hooks()
+	{
+		$type = $this->campaign_type;
+		
+		// Webhook handlers
+		add_action("wp_ajax_nopriv_quillcrm_{$type}_webhook", [$this, 'handle_webhook']);
+		add_action("wp_ajax_quillcrm_{$type}_webhook", [$this, 'handle_webhook']);
+		
+		// Click tracking - use generic method instead of dynamic method names
+		add_action('template_redirect', [$this, 'handle_click_tracking_request'], 1);
+	}
+
+	/**
+	 * Handle standard tracking requests (common logic)
+	 *
+	 * @return void
+	 */
+	protected function handle_standard_tracking()
+	{
+		if (!isset($_GET['quillcrm']) || !isset($_GET['hash_key'])) {
+			return;
+		}
+
+		$action = sanitize_text_field($_GET['quillcrm']);
+		$hash_key = sanitize_text_field($_GET['hash_key']);
+		$type = $this->campaign_type;
+
+		switch ($action) {
+			case "{$type}_click":
+				$this->handle_click_tracking($hash_key);
+				break;
+			case "{$type}_unsubscribe":
+				$this->handle_unsubscribe($hash_key);
+				break;
+		}
+	}
+
+	/**
+	 * Process Twilio webhook (common logic for SMS and WhatsApp)
+	 *
+	 * @return void
+	 */
+	protected function process_twilio_webhook()
+	{
+		// Verify webhook signature for security
+		if (!$this->verify_twilio_webhook()) {
+			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook signature verification failed', [
+				'code' => "{$this->campaign_type}_webhook_verification_failed",
+				'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+			]);
+			wp_die('Unauthorized', 'Unauthorized', 401);
+		}
+
+		// Get message identifier from Twilio webhook
+		$message_sid = sanitize_text_field($_POST['MessageSid'] ?? '');
+		$message_status = sanitize_text_field($_POST['MessageStatus'] ?? '');
+		$error_code = sanitize_text_field($_POST['ErrorCode'] ?? '');
+		$error_message = sanitize_text_field($_POST['ErrorMessage'] ?? '');
+
+		if (empty($message_sid) || empty($message_status)) {
+			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook missing required data', [
+				'message_sid' => $message_sid,
+				'message_status' => $message_status,
+				'code' => "{$this->campaign_type}_webhook_missing_data"
+			]);
+			wp_die('Bad Request', 'Bad Request', 400);
+		}
+
+		// Find tracking record by MessageSid
+		$campaign_model_class = $this->get_campaign_model_class();
+		$tracking_record = $campaign_model_class::where('external_id', $message_sid)
+			->where('mode', $this->get_campaign_mode())
+			->first();
+
+		if (!$tracking_record) {
+			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook: tracking record not found', [
+				'message_sid' => $message_sid,
+				'message_status' => $message_status,
+				'code' => "{$this->campaign_type}_webhook_tracking_not_found"
+			]);
+			wp_die('OK'); // Acknowledge but don't process
+		}
+
+		// Log successful webhook processing
+		quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' webhook processing', [
+			'message_sid' => $message_sid,
+			'message_status' => $message_status,
+			'tracking_id' => $tracking_record->id,
+			'code' => "{$this->campaign_type}_webhook_processed"
+		]);
+
+		// Update tracking record status based on webhook data
+		$this->update_delivery_status($tracking_record, $message_status, $error_code, $error_message);
+
+		wp_die('OK'); // Acknowledge successful processing
+	}
+
+	/**
+	 * Update delivery status for tracking record
+	 * Centralized status update logic with campaign-type-specific handling
+	 *
+	 * @param object $tracking_record Tracking record
+	 * @param string $status Delivery status from Twilio
+	 * @param string $error_code Error code if any
+	 * @param string $error_message Error message if any
+	 * @return void
+	 */
+	protected function update_delivery_status($tracking_record, $status, $error_code = '', $error_message = '')
+	{
+		$previous_status = $tracking_record->status;
+
+		// Handle status updates
+		switch ($status) {
+			case 'sent':
+				$tracking_record->status = 'sent';
+				$tracking_record->sent_at = current_time('mysql');
+				break;
+			case 'delivered':
+				$tracking_record->status = 'delivered';
+				break;
+			case 'read':
+				// WhatsApp-specific status
+				if ($this->campaign_type === 'whatsapp') {
+					$tracking_record->status = 'read';
+				}
+				break;
+			case 'failed':
+			case 'undelivered':
+				$tracking_record->status = 'failed';
+				break;
+		}
+
+		$tracking_record->save();
+
+		// Log status update
+		quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' delivery status updated', [
+			'tracking_record_id' => $tracking_record->id,
+			'previous_status' => $previous_status,
+			'new_status' => $status,
+			'contact_id' => $tracking_record->contact_id,
+			'source_id' => $tracking_record->source_id,
+			'source_type' => $tracking_record->source_type,
+			'error_code' => $error_code,
+			'error_message' => $error_message,
+			'code' => "{$this->campaign_type}_delivery_status_updated"
+		]);
+
+		// Trigger delivery status hooks
+		do_action("quillcrm_{$this->campaign_type}_delivery_status_updated", $tracking_record, $status, $previous_status);
+	}
+
+
+
+	/**
 	 * Verify Twilio webhook signature
 	 * Common signature verification logic for all Twilio webhooks
 	 *
@@ -139,51 +298,27 @@ abstract class Abstract_Twilio_Tracking
 	}
 
 	/**
-	 * Process webhook data and update delivery status (Simplified)
-	 * Simplified webhook processing for common features only
+	 * Handle click tracking request from template_redirect hook
+	 * Centralized method that checks for campaign type and processes click tracking
 	 *
 	 * @return void
 	 */
-	protected function process_webhook()
+	public function handle_click_tracking_request()
 	{
-		// For simplified implementation, we don't use complex webhook processing
-		// Just acknowledge the webhook and return OK
-		wp_die('OK');
-	}
-
-	/**
-	 * Update delivery status for campaign record (Simplified)
-	 * Basic status update for common features only
-	 *
-	 * @param mixed $campaign_record Campaign record (SMS or WhatsApp model)
-	 * @param string $status Delivery status
-	 * @param string $error_code Error code if any
-	 * @param string $error_message Error message if any
-	 * @return void
-	 */
-	protected function update_delivery_status($campaign_record, $status, $error_code = '', $error_message = '')
-	{
-		// Simplified: Only update basic status
-		switch ($status) {
-			case 'sent':
-				$campaign_record->status = 'sent';
-				$campaign_record->sent_at = current_time('mysql');
-				break;
-			case 'failed':
-				$campaign_record->status = 'failed';
-				break;
+		$expected_action = "{$this->campaign_type}_click";
+		
+		if (!isset($_GET['quillcrm']) || $_GET['quillcrm'] !== $expected_action) {
+			return;
 		}
 
-		$campaign_record->save();
+		if (!isset($_GET['hash_key']) || !isset($_GET['original'])) {
+			return;
+		}
 
-		quillcrm_get_logger()->info("{$this->campaign_type} status updated", [
-			'campaign_record_id' => $campaign_record->id,
-			'new_status' => $status,
-			'code' => "{$this->campaign_type}_status_update"
-		]);
+		$hash_key = sanitize_text_field($_GET['hash_key']);
+		$original_url = urldecode($_GET['original']);
 
-		// Trigger status hooks
-		do_action("quillcrm_{$this->campaign_type}_status_updated", $campaign_record, $status);
+		$this->handle_click_tracking($hash_key, $original_url);
 	}
 
 	/**
@@ -279,20 +414,11 @@ abstract class Abstract_Twilio_Tracking
 					'code' => "{$this->campaign_type}_click_tracked"
 				]);
 
-				// Trigger click automation if enabled
-				do_action("quillcrm_{$this->campaign_type}_clicked", $campaign_record);
-			}
+			// Trigger click automation if enabled
+			do_action("quillcrm_{$this->campaign_type}_clicked", $campaign_record);
+		}
 
-			// Auto-login if enabled
-			$contact = $campaign_record->contact;
-			if ($contact && $contact->user_id) {
-				$auto_login = apply_filters("quillcrm_{$this->campaign_type}_auto_login", true, $campaign_record);
-				if ($auto_login) {
-					wp_set_auth_cookie($contact->user_id);
-				}
-			}
-
-			// Redirect to original URL
+		// Redirect to original URL
 			if ($original_url) {
 				wp_redirect($original_url);
 				exit;

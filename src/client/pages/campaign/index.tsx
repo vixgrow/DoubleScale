@@ -10,9 +10,7 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { useReducer, useRef } from 'react';
-import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
-import { Tabs, Skeleton } from 'antd';
-import { CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { useNavigate, useParams } from '@quillcrm/navigation';
 
 /**
  * Internal dependencies
@@ -21,10 +19,10 @@ import './style.scss';
 import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
-import InitialStep from './steps/initial';
 import TemplatesStep from './steps/templates';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
+import BuilderStep from '../../../builder';
 import { Campaign as CampaignType } from '@quillcrm/client';
 import Overview from './overview';
 
@@ -90,6 +88,12 @@ const Campaign: React.FC = () => {
 		}
 	};
 
+
+	if (!campaign) {
+		//TODO: change for shimmer
+		return false;
+	}
+
 	const canGoNext = (nextTab: string) => {
 		if (!campaign) {
 			return false;
@@ -111,60 +115,6 @@ const Campaign: React.FC = () => {
 		return canGo;
 	};
 
-	// Switch to the new tab items
-	const tabItems = [
-		{
-			key: 'information',
-			label: __('Information', 'quillcrm'),
-			children: <InitialStep />,
-			icon:
-				tab === 'information' || !tab ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-		},
-		{
-			key: 'template',
-			label: __('Template', 'quillcrm'),
-			children: <TemplatesStep />,
-			icon:
-				tab === 'template' ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-			disabled: !canGoNext('template'),
-		},
-		{
-			key: 'contacts',
-			label: __('Contacts', 'quillcrm'),
-			children: <ContactsStep />,
-			icon:
-				tab === 'contacts' ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-			disabled: !canGoNext('contacts'),
-		},
-		{
-			key: 'review',
-			label: __('Review', 'quillcrm'),
-			children: <ReviewStep />,
-			icon:
-				tab === 'review' ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-			disabled: !canGoNext('review'),
-		},
-	];
-
-	if (!campaign) {
-		return <Skeleton active />;
-	}
 
 	const isOverview =
 		(campaign.status === 'schedule' && tab === 'overview') ||
@@ -185,33 +135,14 @@ const Campaign: React.FC = () => {
 			}}
 		>
 			{/* Render the selected tab component based on the current tab */}
-			{tab === 'template' ? (
-				<TemplatesStep />
-			) : (
-				<>
-					{!['processing', 'completed', 'resending'].includes(
-						campaign.status
-					) &&
-						tab !== 'overview' && (
-							<Tabs
-								defaultActiveKey="information"
-								activeKey={
-									tab === 'overview' ? 'information' : tab
-								}
-								tabPosition="left"
-								tabBarStyle={{ width: 200 }}
-								items={tabItems}
-								onChange={(key) => {
-									if (canGoNext(key)) {
-										navigate(
-											getToLink(`campaigns/${id}/${key}`)
-										);
-									}
-								}}
-							/>
-						)}
-				</>
-			)}
+			{(tab === 'template' || tab === null) && (
+				<TemplatesStep />)}
+			{tab === 'contacts' && (
+				<ContactsStep />)}
+			{tab === 'review' && (
+				<ReviewStep />)}
+			{tab === 'builder' && (
+				<BuilderStep />)}
 			{isOverview && <Overview />}
 		</Provider>
 	);

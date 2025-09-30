@@ -139,33 +139,34 @@ const Templates: React.FC = () => {
 		navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 	};
 
-	const templatesSettings = [
-		{
-			title: __('Template', 'quillcrm'),
-			closable: false,
-		},
-		{
-			title: __('A Variant', 'quillcrm'),
-		},
-		{
-			title: __('B Variant', 'quillcrm'),
-		},
-	];
+	// const templatesSettings = [
+	// 	{
+	// 		title: __('Template', 'quillcrm'),
+	// 		closable: false,
+	// 	},
+	// 	{
+	// 		title: __('A Variant', 'quillcrm'),
+	// 	},
+	// 	{
+	// 		title: __('B Variant', 'quillcrm'),
+	// 	},
+	// ];
 
-	const tabs = campaign?.settings.ab_test
-		? templates
-		: [templates[0] ?? defaultTemplate];
-	const tabList = tabs.map((template, index) => ({
-		key: index.toString(),
-		label: templatesSettings[index].title,
-		children: (
-			<Template
-				template={template}
-				updateTemplate={(data) => updateTemplate(index, data)}
-			/>
-		),
-		closable: templatesSettings[index].closable ?? true,
-	}));
+	// const tabs = campaign?.settings.ab_test
+	// 	? templates
+	// 	: [templates[0] ?? defaultTemplate];
+	// const tabList = tabs.map((template, index) => ({
+	// 	key: index.toString(),
+	// 	label: templatesSettings[index].title,
+	// 	children: (
+	// 		<Template
+	// 			template={template}
+	// 			updateTemplate={(data) => updateTemplate(index, data)}
+	// 		/>
+	// 	),
+	// 	closable: templatesSettings[index].closable ?? true,
+	// }));
+	const tabLength = 4;
 
 	const validate = (template: Partial<TemplateType>) => {
 		if (!template.subject) {
@@ -287,8 +288,18 @@ const Templates: React.FC = () => {
 						{__('Watch Tutorial', 'quillcrm')}
 					</Button>,
 				]}
-				totalSteps={tabList.length}
+				totalSteps={tabLength}
 				currentStep={currentTab}
+				onNext={() => {
+					if (currentTab + 1 < tabLength) {
+						setCurrentTab(currentTab + 1);
+					}
+				}}
+				onBack={() => {
+					if (currentTab - 1 >= 0) {
+						setCurrentTab(currentTab - 1);
+					}
+				}}
 			>
 				<div className="flex gap-6">
 					<PanelSettings
@@ -649,6 +660,7 @@ const Templates: React.FC = () => {
 			<EmailBuilderSelection
 				setVisible={setEmailBuilderSelectionVisible}
 				visible={emailBuilderSelectionVisible}
+				campaign={campaign}
 			/>
 		</div>
 	);

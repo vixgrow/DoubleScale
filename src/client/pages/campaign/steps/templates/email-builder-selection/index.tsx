@@ -16,16 +16,21 @@ import {
 	DialogPortal,
 } from '@/components/ui/dialog';
 import { EnvelopeIcon, RepeatIcon } from '@/components';
+import { getToLink, useNavigate } from '@quillcrm/navigation';
+import type { Campaign } from '@quillcrm/client';
 
 interface CampaignTypesProps {
 	setVisible: (visible: boolean) => void;
 	visible: boolean;
+	campaign: Campaign | null;
 }
 
 const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 	setVisible,
 	visible,
+	campaign,
 }) => {
+	const navigate = useNavigate();
 	const campaignTypesRows = [
 		{
 			label: __('Start From Scratch', 'quillcrm'),
@@ -34,6 +39,9 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 			),
 			type: 'blank',
 			icon: <EnvelopeIcon />,
+			onClick: () => {
+				navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+			},
 		},
 		{
 			label: __('Choose A Pre-built Template', 'quillcrm'),
@@ -42,6 +50,9 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 			),
 			type: 'pre-built',
 			icon: <RepeatIcon />,
+			onClick: () => {
+				navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+			},
 		},
 		{
 			label: __('Generate With AI', 'quillcrm'),
@@ -51,6 +62,9 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 			),
 			type: 'ai',
 			icon: <RepeatIcon />,
+			onClick: () => {
+				navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+			},
 		},
 	];
 	return (
@@ -81,7 +95,7 @@ const EmailBuilderSelection: React.FC<CampaignTypesProps> = ({
 								className="flex flex-col justify-between items-center py-6 px-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-secondary-background hover:border-primary hover:transition-all hover:duration-300"
 								key={campaignType.type}
 								onClick={() => {
-									setVisible(false);
+									campaignType.onClick();
 								}}
 							>
 								<div className="bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] text-primary-foreground p-3 rounded-xl">

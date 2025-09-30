@@ -116,7 +116,7 @@ const Campaigns: React.FC = () => {
 
 			setCampaigns([...campaigns, response]);
 			setStep(null);
-			navigate(getToLink(`campaigns/${response.id}`));
+			navigate(getToLink(`campaigns/${response.id}/template`));
 		} catch (error: any) {
 			createNotice({
 				type: 'error',

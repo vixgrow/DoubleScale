@@ -67,8 +67,7 @@ class Template_Model extends Model {
 	 * @var array
 	 */
 	protected $rules = array(
-		'name'                => 'required',
-		'settings.from_email' => 'email',
+		'name' => 'required',
 	);
 
 	/**
@@ -89,6 +88,22 @@ class Template_Model extends Model {
 	 * @since 1.0.0
 	 */
 	public $timestamps = true;
+
+	/**
+	 * Get validation rules dynamically based on template type
+	 *
+	 * @return array
+	 */
+	public function getRules() {
+		$rules = $this->rules;
+		
+		// Only validate from_email for email templates
+		if ($this->type === 'email') {
+			$rules['settings.from_email'] = 'email';
+		}
+		
+		return $rules;
+	}
 
 	/**
 	 * Get setting

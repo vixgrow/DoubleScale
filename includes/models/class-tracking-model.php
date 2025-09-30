@@ -62,9 +62,10 @@ class Tracking_Model extends Model
 		'source_type',    // Campaign/Automation/Manual
 		'source_id',      // ID of the source (campaign_id, automation_id, etc.)
 		'recipient',      // Email address or phone number
+		'external_id',    // Twilio MessageSid, email provider ID, etc.
 		'opened',         // Open tracking (emails only)
 		'clicked',        // Click tracking
-		'status',         // sent/pending/failed
+		'status',         // sent/pending/failed/delivered/read
 		'sent_at',        // When sent
 		'opened_at',      // When opened (emails only)
 		'clicked_at',     // When clicked

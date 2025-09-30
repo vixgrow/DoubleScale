@@ -16,6 +16,8 @@ use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 use QuillCRM\Managers\Campaign_Status_Manager;
+use QuillCRM\Services\Campaign_Template_Factory;
+use QuillCRM\Services\Template_Field_Mapper;
 
 /**
  * Campaign_Model class
@@ -230,44 +232,8 @@ class Campaign_Model extends Model
 		foreach ($template_ids as $template_id) {
 			$template = Template_Model::find($template_id);
 			if ($template) {
-				$template_data = array(
-					'template_id' => $template->id,
-					'name' => $template->name,
-					'body' => $template->body,
-					'type' => $template->type,
-				);
-				
-				if ($campaign_type === 'email') {
-					// Email-specific template data
-					$template_data = array_merge($template_data, array(
-						'subject' => $template->subject,
-						'from_name' => $template->get_setting('from_name'),
-						'from_email' => $template->get_setting('from_email'),
-						'reply_to' => $template->get_setting('reply_to'),
-						'preview_text' => $template->get_setting('preview_text'),
-						'enable_utm' => $template->get_setting('enable_utm'),
-						'utm_source' => $template->get_setting('utm_source'),
-						'utm_medium' => $template->get_setting('utm_medium'),
-						'utm_campaign' => $template->get_setting('utm_campaign'),
-						'utm_term' => $template->get_setting('utm_term'),
-						'utm_content' => $template->get_setting('utm_content'),
-					));
-				} elseif ($campaign_type === 'sms') {
-					// SMS-specific template data
-					$template_data = array_merge($template_data, array(
-						'message' => $template->body,
-						'add_unsubscribe' => $template->get_setting('add_unsubscribe', true),
-					));
-				} elseif ($campaign_type === 'whatsapp') {
-					// WhatsApp-specific template data
-					$template_data = array_merge($template_data, array(
-						'message' => $template->body,
-						'message_type' => $template->get_setting('message_type', 'text'),
-						'media_url' => $template->get_setting('media_url'),
-						'add_unsubscribe' => $template->get_setting('add_unsubscribe', true),
-					));
-				}
-				
+				// Use centralized field mapper for consistent formatting
+				$template_data = Template_Field_Mapper::template_to_array($template, $campaign_type);
 				$templates[] = $template_data;
 			}
 		}
@@ -283,97 +249,10 @@ class Campaign_Model extends Model
 	 */
 	private function process_templates($templates_data)
 	{
-		$template_ids = array();
 		$campaign_type = $this->get_type();
-		
-		foreach ($templates_data as $template_data) {
-			$template_id = $template_data['template_id'] ?? null;
-			$hidden = $template_data['hidden'] ?? 1;
-			
-			if ($campaign_type === 'email') {
-				// Email template processing
-				$from_name = $template_data['from_name'] ?? null;
-				$from_email = $template_data['from_email'] ?? null;
-				$reply_to = $template_data['reply_to'] ?? null;
-				$subject = $template_data['subject'] ?? null;
-				$preview_text = $template_data['preview_text'] ?? null;
-				$body = $template_data['body'] ?? 'This is a test email';
-				$enable_utm = $template_data['enable_utm'] ?? false;
-				$utm_source = $template_data['utm_source'] ?? null;
-				$utm_medium = $template_data['utm_medium'] ?? null;
-				$utm_campaign = $template_data['utm_campaign'] ?? null;
-				$utm_term = $template_data['utm_term'] ?? null;
-				$utm_content = $template_data['utm_content'] ?? null;
-				
-				$template = Template_Model::createOrUpdate(
-					$template_id,
-					array(
-						'name' => $subject ?: __('Email Campaign Template', 'quillcrm'),
-						'type' => $campaign_type,
-						'subject' => $subject ?? '',
-						'body' => $body ?? '',
-						'settings' => array(
-							'from_name' => $from_name,
-							'from_email' => $from_email,
-							'reply_to' => $reply_to,
-							'preview_text' => $preview_text,
-							'enable_utm' => $enable_utm,
-							'utm_source' => $utm_source,
-							'utm_medium' => $utm_medium,
-							'utm_campaign' => $utm_campaign,
-							'utm_term' => $utm_term,
-							'utm_content' => $utm_content,
-						),
-						'hidden' => $hidden,
-					)
-				);
-			} elseif ($campaign_type === 'sms') {
-				// SMS template processing
-				$message = $template_data['message'] ?? 'Hello from QuillCRM!';
-				$name = $template_data['name'] ?? null;
-				$add_unsubscribe = $template_data['add_unsubscribe'] ?? true;
-				
-				$template = Template_Model::createOrUpdate(
-					$template_id,
-					array(
-						'name' => $name ?: __('SMS Campaign Template', 'quillcrm'),
-						'type' => $campaign_type,
-						'subject' => '', // SMS doesn't use subject
-						'body' => $message,
-						'settings' => array(
-							'add_unsubscribe' => $add_unsubscribe,
-						),
-						'hidden' => $hidden,
-					)
-				);
-			} elseif ($campaign_type === 'whatsapp') {
-				$message = $template_data['message'] ?? 'Hello from QuillCRM!';
-				$name = $template_data['name'] ?? null;
-				$message_type = $template_data['message_type'] ?? 'text';
-				$media_url = $template_data['media_url'] ?? null;
-				$add_unsubscribe = $template_data['add_unsubscribe'] ?? true;
+		$template_factory = Campaign_Template_Factory::instance();
 
-				$template = Template_Model::createOrUpdate(
-					$template_id,
-					array(
-						'name' => $name ?: __('WhatsApp Campaign Template', 'quillcrm'),
-						'type' => $campaign_type,
-						'subject' => '', // WhatsApp doesn't use subject
-						'body' => $message,
-						'settings' => array(
-							'message_type' => $message_type,
-							'media_url' => $media_url,
-							'add_unsubscribe' => $add_unsubscribe,
-						),
-						'hidden' => $hidden,
-					)
-				);
-			}
-			
-			$template_ids[] = $template->id;
-		}
-		
-		return $template_ids;
+		return $template_factory->process_templates_data($templates_data, $campaign_type);
 	}
 
 	/**
@@ -467,9 +346,9 @@ class Campaign_Model extends Model
 			$campaign->sent_count = $stats['sent'];
 			$campaign->failed_count = $stats['failed'];
 			$campaign->pending_count = $stats['pending'];
-			$campaign->delivered_count = $stats['delivered'];
+			$campaign->delivered_count = $stats['delivered']; // Now properly provided by analytics
 			$campaign->clicked_count = $stats['clicked'];
-			$campaign->delivery_rate = $stats['delivery_rate'];
+			$campaign->delivery_rate = $stats['delivery_rate']; // Now properly calculated by analytics
 			$campaign->click_rate = $stats['click_rate'];
 		} elseif ($campaign->is_whatsapp_campaign()) {
 			// WhatsApp campaign counts using centralized analytics
@@ -486,11 +365,11 @@ class Campaign_Model extends Model
 			$campaign->sent_count = $stats['sent'];
 			$campaign->failed_count = $stats['failed'];
 			$campaign->pending_count = $stats['pending'];
-			$campaign->delivered_count = $stats['delivered'];
-			$campaign->read_count = $stats['read'];
+			$campaign->delivered_count = $stats['delivered']; // Now properly provided by analytics
+			$campaign->read_count = $stats['read']; // Now properly provided by analytics
 			$campaign->clicked_count = $stats['clicked'];
-			$campaign->delivery_rate = $stats['delivery_rate'];
-			$campaign->read_rate = $stats['read_rate'];
+			$campaign->delivery_rate = $stats['delivery_rate']; // Now properly calculated by analytics
+			$campaign->read_rate = $stats['read_rate']; // Now properly calculated by analytics
 			$campaign->click_rate = $stats['click_rate'];
 		}
 	}

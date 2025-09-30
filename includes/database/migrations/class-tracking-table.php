@@ -64,6 +64,7 @@ class Tracking_Table extends Migration
             opened TINYINT(1) DEFAULT 0 COMMENT "Only for emails",
             clicked TINYINT(1) DEFAULT 0,
             status VARCHAR(255),
+            external_id VARCHAR(255) NULL COMMENT "Twilio MessageSid, email ID, etc.",
             sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             opened_at TIMESTAMP NULL COMMENT "Only for emails",
             clicked_at TIMESTAMP NULL,
@@ -78,6 +79,7 @@ class Tracking_Table extends Migration
             KEY source_id (source_id),
             KEY recipient (recipient),
             KEY status (status),
+            KEY external_id (external_id),
             KEY sent_at (sent_at)';
 
 		return $query;

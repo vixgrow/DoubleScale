@@ -35,6 +35,8 @@ use QuillCRM\REST_API\Controllers\V1\REST_Pipeline_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Deal_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Activity_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Stage_Controller;
+use QuillCRM\REST_API\Controllers\V1\Rest_Reports_Controller;
+use QuillCRM\REST_API\Controllers\V1\REST_User_Management_Controller;
 
 /**
  * REST_API class is mainly responsible for registering routes.
@@ -42,6 +44,8 @@ use QuillCRM\REST_API\Controllers\V1\REST_Stage_Controller;
  * @since 1.0.0
  */
 class REST_API {
+
+
 
 
 
@@ -117,6 +121,8 @@ class REST_API {
 			REST_Deal_Controller::class,
 			REST_Activity_Controller::class,
 			REST_Stage_Controller::class,
+			Rest_Reports_Controller::class,
+			REST_User_Management_Controller::class,
 		);
 
 		foreach ( $controllers as $controller ) {

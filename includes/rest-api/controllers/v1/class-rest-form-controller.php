@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rest_Form_Controller
  * This class is responsible for handling the Form REST API
@@ -10,6 +11,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -21,6 +23,7 @@ use QuillCRM\Models\Form_Model;
  * Rest_Form_Controller class
  */
 class Rest_Form_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -104,62 +107,62 @@ class Rest_Form_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'form',
-			'type'       => 'object',
-			'properties' => array(
-				'id'         => array(
-					'description' => esc_html__( 'Unique identifier for the object.', 'quillcrm' ),
-					'type'        => 'integer',
-				),
-				'name'       => array(
-					'description' => esc_html__( 'Name of the form.', 'quillcrm' ),
-					'type'        => 'string',
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-					'required'    => true,
-				),
-				'form_type'  => array(
-					'description' => esc_html__( 'Type of the form.', 'quillcrm' ),
-					'type'        => 'string',
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'form_id'    => array(
-					'description' => esc_html__( 'ID of the form.', 'quillcrm' ),
-					'type'        => array( 'integer', 'string' ),
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'data'       => array(
-					'description' => esc_html__( 'Data of the form.', 'quillcrm' ),
-					'type'        => 'object',
-				),
-				'status'     => array(
-					'description' => esc_html__( 'Status of the form.', 'quillcrm' ),
-					'type'        => 'string',
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'created_at' => array(
-					'description' => esc_html__( 'Date the object was created.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'readonly'    => true,
-				),
-				'updated_at' => array(
-					'description' => esc_html__( 'Date the object was last modified.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'readonly'    => true,
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'form',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'id'         => array(
+					 'description' => esc_html__( 'Unique identifier for the object.', 'quillcrm' ),
+					 'type'        => 'integer',
+				 ),
+				 'name'       => array(
+					 'description' => esc_html__( 'Name of the form.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+					 'required'    => true,
+				 ),
+				 'form_type'  => array(
+					 'description' => esc_html__( 'Type of the form.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'form_id'    => array(
+					 'description' => esc_html__( 'ID of the form.', 'quillcrm' ),
+					 'type'        => array( 'integer', 'string' ),
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'data'       => array(
+					 'description' => esc_html__( 'Data of the form.', 'quillcrm' ),
+					 'type'        => 'object',
+				 ),
+				 'status'     => array(
+					 'description' => esc_html__( 'Status of the form.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'created_at' => array(
+					 'description' => esc_html__( 'Date the object was created.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'readonly'    => true,
+				 ),
+				 'updated_at' => array(
+					 'description' => esc_html__( 'Date the object was last modified.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'readonly'    => true,
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -193,12 +196,12 @@ class Rest_Form_Controller extends REST_Controller {
 					'type' => 'integer',
 				),
 			),
-			'from' => array(
+			'from'     => array(
 				'description' => __( 'Start date for filtering forms.', 'quillcrm' ),
 				'type'        => 'string',
 				'format'      => 'date',
 			),
-			'to' => array(
+			'to'       => array(
 				'description' => __( 'End date for filtering forms.', 'quillcrm' ),
 				'type'        => 'string',
 				'format'      => 'date',
@@ -396,7 +399,7 @@ class Rest_Form_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -409,7 +412,7 @@ class Rest_Form_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -422,7 +425,7 @@ class Rest_Form_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -435,7 +438,7 @@ class Rest_Form_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -448,7 +451,7 @@ class Rest_Form_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -461,6 +464,6 @@ class Rest_Form_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function delete_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

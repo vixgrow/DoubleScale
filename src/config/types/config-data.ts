@@ -1,3 +1,4 @@
+import { __ } from '@wordpress/i18n';
 import type { InitialPayload } from './initial-payload';
 
 export type ConfigData = Record<string, unknown> & {
@@ -23,6 +24,12 @@ export type ConfigData = Record<string, unknown> & {
 	isLmsActive: boolean;
 	mergeTags: AutomationMergeTags;
 	importers: Importers;
+	userCapabilities: UserCapabilities;
+};
+
+export type UserCapabilities = {
+	quillcrm_crm_manager: boolean;
+	quillcrm_deal_owner: boolean;
 };
 
 export type Importers = {
@@ -326,3 +333,14 @@ export type FiltersGroup = {
 export type FiltersGroups = {
 	contact: FiltersGroup;
 };
+
+export const SOURCE_OPTIONS = [
+	{ value: 'website', label: __('Website', 'quillcrm') },
+	{ value: 'referral', label: __('Referral', 'quillcrm') },
+	{ value: 'social_media', label: __('Social Media', 'quillcrm') },
+	{ value: 'email_campaign', label: __('Email Campaign', 'quillcrm') },
+	{ value: 'cold_call', label: __('Cold Call', 'quillcrm') },
+	{ value: 'trade_show', label: __('Trade Show', 'quillcrm') },
+	{ value: 'partner', label: __('Partner', 'quillcrm') },
+	{ value: 'other', label: __('Other', 'quillcrm') },
+] as const;

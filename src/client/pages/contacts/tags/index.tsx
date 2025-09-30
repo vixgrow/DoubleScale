@@ -226,6 +226,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 	const validate = (tag: Partial<ContactTag>) => {
 		if (isEmpty(tag.name || '', { ignore_whitespace: true })) {
+			setVisible(false);
 			showNotice('error', __('Tag name is required', 'quillcrm'));
 			return false;
 		}
@@ -287,6 +288,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				showPagination={false}
 				initialPageSize={perPage}
 				setPage={setPage}
+				loading={loading}
 			/>
 			<DataTablePagination table={serverSideTable} />
 

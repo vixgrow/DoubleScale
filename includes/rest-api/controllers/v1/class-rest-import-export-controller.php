@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API: Import_Export Controller
  *
@@ -9,6 +10,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use Exception;
 use WP_REST_Request;
@@ -22,8 +24,8 @@ use QuillCRM\Import_Export\Importers\Manager;
 /**
  * Import_Export Controller
  */
-class Rest_Import_Export_Controller extends REST_Controller
-{
+class Rest_Import_Export_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -41,36 +43,35 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return void
 	 */
-	public function register_routes()
-	{
+	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
 			"/{$this->rest_base}/export",
 			array(
 				array(
-					'methods' => WP_REST_Server::CREATABLE,
-					'callback' => array($this, 'export'),
-					'permission_callback' => array($this, 'import_export_permissions_check'),
-					'args' => array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'export' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+					'args'                => array(
 						'file_id' => array(
 							'required' => false,
-							'type' => array('string', 'integer'),
+							'type'     => array( 'string', 'integer' ),
 						),
-						'offset' => array(
+						'offset'  => array(
 							'required' => false,
-							'type' => 'integer',
+							'type'     => 'integer',
 						),
-						'fields' => array(
-							'required' => false,
-							'type' => 'array',
-							'items' => array(
+						'fields'  => array(
+							'required'             => false,
+							'type'                 => 'array',
+							'items'                => array(
 								'type' => 'string',
 							),
 							'additionalProperties' => true,
 						),
 						'filters' => array(
-							'description' => __('Filters to apply.', 'quillcrm'),
-							'type' => 'array',
+							'description' => __( 'Filters to apply.', 'quillcrm' ),
+							'type'        => 'array',
 						),
 					),
 				),
@@ -82,66 +83,66 @@ class Rest_Import_Export_Controller extends REST_Controller
 			"/{$this->rest_base}/import",
 			array(
 				array(
-					'methods' => WP_REST_Server::CREATABLE,
-					'callback' => array($this, 'import'),
-					'permission_callback' => array($this, 'import_export_permissions_check'),
-					'args' => array(
-						'source' => array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'import' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+					'args'                => array(
+						'source'          => array(
 							'required' => true,
-							'type' => 'string',
+							'type'     => 'string',
 						),
-						'offset' => array(
+						'offset'          => array(
 							'required' => false,
-							'type' => 'integer',
+							'type'     => 'integer',
 						),
-						'file_name' => array(
+						'file_name'       => array(
 							'required' => false,
-							'type' => 'string',
+							'type'     => 'string',
 						),
-						'mapping' => array(
-							'required' => false,
-							'type' => 'object',
+						'mapping'         => array(
+							'required'             => false,
+							'type'                 => 'object',
 							'additionalProperties' => true,
 						),
-						'lists_mapping' => array(
+						'lists_mapping'   => array(
 							'required' => false,
-							'type' => 'array',
-							'items' => array(
+							'type'     => 'array',
+							'items'    => array(
 								'type' => 'object',
 							),
 						),
-						'tags_mapping' => array(
+						'tags_mapping'    => array(
 							'required' => false,
-							'type' => 'array',
-							'items' => array(
+							'type'     => 'array',
+							'items'    => array(
 								'type' => 'object',
 							),
 						),
-						'lists' => array(
+						'lists'           => array(
 							'required' => false,
-							'type' => 'array',
-							'items' => array(
+							'type'     => 'array',
+							'items'    => array(
 								'type' => 'number',
 							),
 						),
-						'tags' => array(
+						'tags'            => array(
 							'required' => false,
-							'type' => 'array',
-							'items' => array(
+							'type'     => 'array',
+							'items'    => array(
 								'type' => 'number',
 							),
 						),
-						'status' => array(
+						'status'          => array(
 							'required' => false,
-							'type' => 'string',
+							'type'     => 'string',
 						),
 						'update_existing' => array(
 							'required' => false,
-							'type' => 'boolean',
+							'type'     => 'boolean',
 						),
-						'credentials' => array(
+						'credentials'     => array(
 							'required' => false,
-							'type' => 'object',
+							'type'     => 'object',
 						),
 					),
 				),
@@ -154,9 +155,9 @@ class Rest_Import_Export_Controller extends REST_Controller
 			"/{$this->rest_base}/upload",
 			array(
 				array(
-					'methods' => WP_REST_Server::CREATABLE,
-					'callback' => array($this, 'upload'),
-					'permission_callback' => array($this, 'import_export_permissions_check'),
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'upload' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
 				),
 			)
 		);
@@ -167,13 +168,13 @@ class Rest_Import_Export_Controller extends REST_Controller
 			"/{$this->rest_base}/download",
 			array(
 				array(
-					'methods' => WP_REST_Server::READABLE,
-					'callback' => array($this, 'download'),
-					'permission_callback' => array($this, 'import_export_permissions_check'),
-					'args' => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'download' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+					'args'                => array(
 						'file_id' => array(
 							'required' => true,
-							'type' => 'string',
+							'type'     => 'string',
 						),
 					),
 				),
@@ -191,32 +192,31 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return void
 	 */
-	public function register_importer_routes()
-	{
+	public function register_importer_routes() {
 		$importers = Manager::instance()->get_importers();
-		foreach ($importers as $importer) {
+		foreach ( $importers as $importer ) {
 			register_rest_route(
 				$this->namespace,
 				"/{$this->rest_base}/{$importer->slug}",
 				array(
 					array(
-						'methods' => WP_REST_Server::READABLE,
-						'callback' => function ($request) use ($importer) {
+						'methods'             => WP_REST_Server::READABLE,
+						'callback'            => function ( $request ) use ( $importer ) {
 							try {
-								$credentials = $request->get_param('credentials') ?? array();
-								$importer->set_credentials($credentials);
+								$credentials = $request->get_param( 'credentials' ) ?? array();
+								$importer->set_credentials( $credentials );
 								$fields = $importer->get_fields();
 
-								return new WP_REST_Response($fields, 200);
-							} catch (Exception $e) {
-								return new WP_Error('importer_error', $e->getMessage(), array('status' => 500));
+								return new WP_REST_Response( $fields, 200 );
+							} catch ( Exception $e ) {
+								return new WP_Error( 'importer_error', $e->getMessage(), array( 'status' => 500 ) );
 							}
 						},
-						'permission_callback' => array($this, 'import_export_permissions_check'),
-						'args' => array(
+						'permission_callback' => array( $this, 'import_export_permissions_check' ),
+						'args'                => array(
 							'credentials' => array(
 								'required' => false,
-								'type' => 'object',
+								'type'     => 'object',
 							),
 						),
 					),
@@ -232,26 +232,25 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return void
 	 */
-	public function register_oauth_routes()
-	{
+	public function register_oauth_routes() {
 		// Get OAuth authorization URL
 		register_rest_route(
 			$this->namespace,
 			"/{$this->rest_base}/oauth/authorize",
 			array(
 				array(
-					'methods' => WP_REST_Server::CREATABLE,
-					'callback' => array($this, 'get_oauth_authorization_url'),
-					'permission_callback' => array($this, 'import_export_permissions_check'),
-					'args' => array(
-						'provider' => array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'get_oauth_authorization_url' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+					'args'                => array(
+						'provider'  => array(
 							'required' => true,
-							'type' => 'string',
-							'enum' => array('gohighlevel'),
+							'type'     => 'string',
+							'enum'     => array( 'gohighlevel' ),
 						),
 						'client_id' => array(
 							'required' => true,
-							'type' => 'string',
+							'type'     => 'string',
 						),
 					),
 				),
@@ -264,14 +263,14 @@ class Rest_Import_Export_Controller extends REST_Controller
 			"/{$this->rest_base}/oauth/status",
 			array(
 				array(
-					'methods' => WP_REST_Server::READABLE,
-					'callback' => array($this, 'get_oauth_status'),
-					'permission_callback' => array($this, 'import_export_permissions_check'),
-					'args' => array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_oauth_status' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+					'args'                => array(
 						'provider' => array(
 							'required' => true,
-							'type' => 'string',
-							'enum' => array('gohighlevel'),
+							'type'     => 'string',
+							'enum'     => array( 'gohighlevel' ),
 						),
 					),
 				),
@@ -284,20 +283,19 @@ class Rest_Import_Export_Controller extends REST_Controller
 			"/{$this->rest_base}/oauth/disconnect",
 			array(
 				array(
-					'methods' => WP_REST_Server::DELETABLE,
-					'callback' => array($this, 'disconnect_oauth'),
-					'permission_callback' => array($this, 'import_export_permissions_check'),
-					'args' => array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'disconnect_oauth' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+					'args'                => array(
 						'provider' => array(
 							'required' => true,
-							'type' => 'string',
-							'enum' => array('gohighlevel'),
+							'type'     => 'string',
+							'enum'     => array( 'gohighlevel' ),
 						),
 					),
 				),
 			)
 		);
-
 	}
 
 	/**
@@ -309,26 +307,28 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_oauth_authorization_url($request)
-	{
-		$provider = $request->get_param('provider');
-		
-		$client_id = $request->get_param('client_id');
-		$client_secret = $request->get_param('client_secret');
-		
-		switch ($provider) {
+	public function get_oauth_authorization_url( $request ) {
+		$provider = $request->get_param( 'provider' );
+
+		$client_id     = $request->get_param( 'client_id' );
+		$client_secret = $request->get_param( 'client_secret' );
+
+		switch ( $provider ) {
 			case 'gohighlevel':
-				$auth_url = admin_url('admin.php?quillcrm-ghl=authorize&client_id=' . urlencode($client_id) . '&client_secret=' . urlencode($client_secret));
-				
-				return new WP_REST_Response(array(
-					'authorization_url' => $auth_url
-				), 200);
-				
+				$auth_url = admin_url( 'admin.php?quillcrm-ghl=authorize&client_id=' . urlencode( $client_id ) . '&client_secret=' . urlencode( $client_secret ) );
+
+				return new WP_REST_Response(
+					array(
+						'authorization_url' => $auth_url,
+					),
+					200
+				);
+
 			default:
 				return new WP_Error(
 					'invalid_provider',
-					__('Invalid OAuth provider', 'quillcrm'),
-					array('status' => 400)
+					__( 'Invalid OAuth provider', 'quillcrm' ),
+					array( 'status' => 400 )
 				);
 		}
 	}
@@ -342,31 +342,39 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function get_oauth_status($request)
-	{
-		$provider = $request->get_param('provider');
-		
-		switch ($provider) {
+	public function get_oauth_status( $request ) {
+		$provider = $request->get_param( 'provider' );
+
+		switch ( $provider ) {
 			case 'gohighlevel':
 				$tokens = \QuillCRM\OAuth\GoHighLevel_OAuth::get_stored_tokens();
-				if ($tokens) {
-					return new WP_REST_Response(array(
-						'connected' => true,
-						'connected_at' => $tokens['created_at'],
-						'expires_at' => $tokens['expires_at'],
-						'expires_in' => max(0, $tokens['expires_at'] - time())
-					), 200);
+				if ( $tokens ) {
+					return new WP_REST_Response(
+						array(
+							'connected'    => true,
+							'connected_at' => $tokens['created_at'],
+							'expires_at'   => $tokens['expires_at'],
+							'expires_in'   => max( 0, $tokens['expires_at'] - time() ),
+						),
+						200
+					);
 				} else {
-					return new WP_REST_Response(array(
-						'connected' => false
-					), 200);
+					return new WP_REST_Response(
+						array(
+							'connected' => false,
+						),
+						200
+					);
 				}
-				
+
 			default:
-				return new WP_REST_Response(array(
-					'connected' => false,
-					'error' => 'Invalid provider'
-				), 400);
+				return new WP_REST_Response(
+					array(
+						'connected' => false,
+						'error'     => 'Invalid provider',
+					),
+					400
+				);
 		}
 	}
 
@@ -379,25 +387,30 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function disconnect_oauth($request)
-	{
-		$provider = $request->get_param('provider');
-		
-		switch ($provider) {
+	public function disconnect_oauth( $request ) {
+		$provider = $request->get_param( 'provider' );
+
+		switch ( $provider ) {
 			case 'gohighlevel':
 				$result = \QuillCRM\OAuth\GoHighLevel_OAuth::clear_stored_tokens();
-				return new WP_REST_Response(array(
-					'success' => $result,
-					'message' => $result 
-						? __('GoHighLevel connection cleared', 'quillcrm')
-						: __('No connection to clear', 'quillcrm')
-				), 200);
-				
+				return new WP_REST_Response(
+					array(
+						'success' => $result,
+						'message' => $result
+							? __( 'GoHighLevel connection cleared', 'quillcrm' )
+							: __( 'No connection to clear', 'quillcrm' ),
+					),
+					200
+				);
+
 			default:
-				return new WP_REST_Response(array(
-					'success' => false,
-					'message' => 'Invalid provider'
-				), 400);
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => 'Invalid provider',
+					),
+					400
+				);
 		}
 	}
 
@@ -411,30 +424,29 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function download($request)
-	{
-		$file_id = $request->get_param('file_id');
-		$file = wp_upload_dir()['basedir'] . '/QuillCRM/Import-Export/quillcrm-export-' . $file_id . '.csv';
+	public function download( $request ) {
+		$file_id = $request->get_param( 'file_id' );
+		$file    = wp_upload_dir()['basedir'] . '/QuillCRM/Import-Export/quillcrm-export-' . $file_id . '.csv';
 
-		if (!file_exists($file)) {
-			return new WP_Error('file_not_found', 'File not found', array('status' => 404));
+		if ( ! file_exists( $file ) ) {
+			return new WP_Error( 'file_not_found', 'File not found', array( 'status' => 404 ) );
 		}
 
-		$file_name = basename($file);
-		$file_size = filesize($file);
+		$file_name = basename( $file );
+		$file_size = filesize( $file );
 
 		// Set headers.
-		header('Content-Type: application/csv');
-		header('Content-Disposition: attachment; filename="' . $file_name . '"');
-		header('Content-Length: ' . $file_size);
+		header( 'Content-Type: application/csv' );
+		header( 'Content-Disposition: attachment; filename="' . $file_name . '"' );
+		header( 'Content-Length: ' . $file_size );
 
 		// Check if file exists.
-		if (file_exists($file)) {
+		if ( file_exists( $file ) ) {
 			// Read file.
-			readfile($file);
+			readfile( $file );
 
 			// Delete file.
-			unlink($file);
+			unlink( $file );
 		}
 
 		exit;
@@ -449,26 +461,25 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function export($request)
-	{
-		$file_id = $request->get_param('file_id') ? $request->get_param('file_id') : time();
-		$offset = $request->get_param('offset') ?? 0;
-		$fields = $request->get_param('fields') ?? array();
-		$filters = $request->get_param('filters') ?? array();
+	public function export( $request ) {
+		$file_id = $request->get_param( 'file_id' ) ? $request->get_param( 'file_id' ) : time();
+		$offset  = $request->get_param( 'offset' ) ?? 0;
+		$fields  = $request->get_param( 'fields' ) ?? array();
+		$filters = $request->get_param( 'filters' ) ?? array();
 
 		$args = array(
 			'file_id' => $file_id,
-			'offset' => $offset,
-			'fields' => $fields,
+			'offset'  => $offset,
+			'fields'  => $fields,
 			'filters' => $filters,
 		);
 
-		$exporter = new Export($args);
-		$result = $exporter->export();
+		$exporter = new Export( $args );
+		$result   = $exporter->export();
 
 		$result['file_id'] = $file_id;
 
-		return new WP_REST_Response($result, 200);
+		return new WP_REST_Response( $result, 200 );
 	}
 
 	/**
@@ -480,39 +491,38 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function upload($request)
-	{
+	public function upload( $request ) {
 		$file = $request->get_file_params();
-		if (!$file) {
-			return new WP_Error('no_file', 'No file provided', array('status' => 400));
+		if ( ! $file ) {
+			return new WP_Error( 'no_file', 'No file provided', array( 'status' => 400 ) );
 		}
 
 		// WP Filesystem.
 		global $wp_filesystem;
 
 		// Check if WP Filesystem is loaded.
-		if (empty($wp_filesystem)) {
+		if ( empty( $wp_filesystem ) ) {
 			require_once ABSPATH . '/wp-admin/includes/file.php';
 			WP_Filesystem();
 		}
 
-		if (!Security::prepare_upload_dir()) {
-			return new WP_Error('filesystem_error', 'Failed to create upload directory', array('status' => 500));
+		if ( ! Security::prepare_upload_dir() ) {
+			return new WP_Error( 'filesystem_error', 'Failed to create upload directory', array( 'status' => 500 ) );
 		}
 
 		$upload_dir = Security::get_upload_dir();
-		$file_name = time() . '_' . $file['file']['name'];
-		$file_path = $upload_dir . '/' . $file_name;
+		$file_name  = time() . '_' . $file['file']['name'];
+		$file_path  = $upload_dir . '/' . $file_name;
 
-		if (!$wp_filesystem->move($file['file']['tmp_name'], $file_path)) {
-			return new WP_Error('move_error', 'Failed to move file', array('status' => 500));
+		if ( ! $wp_filesystem->move( $file['file']['tmp_name'], $file_path ) ) {
+			return new WP_Error( 'move_error', 'Failed to move file', array( 'status' => 500 ) );
 		}
 
-		$header_columns = $this->get_header_columns($file_path);
+		$header_columns = $this->get_header_columns( $file_path );
 
 		return new WP_REST_Response(
 			array(
-				'file_name' => $file_name,
+				'file_name'      => $file_name,
 				'header_columns' => $header_columns,
 			),
 			200
@@ -528,11 +538,10 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return array
 	 */
-	public function get_header_columns($file_path)
-	{
-		if (($handle = fopen($file_path, 'r')) !== false) {
-			$column_names = fgetcsv($handle);
-			fclose($handle);
+	public function get_header_columns( $file_path ) {
+		if ( ( $handle = fopen( $file_path, 'r' ) ) !== false ) {
+			$column_names = fgetcsv( $handle );
+			fclose( $handle );
 
 			return $column_names;
 		} else {
@@ -549,45 +558,44 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function import($request)
-	{
-		$source = $request->get_param('source') ?? 'csv';
-		$offset = $request->get_param('offset') ?? 0;
-		$cursor = $request->get_param('cursor') ?? null;
-		$file_name = $request->get_param('file_name') ?? '';
-		$mapping = $request->get_param('mapping') ?? array();
-		$lists_mapping = $request->get_param('lists_mapping') ?? array();
-		$tags_mapping = $request->get_param('tags_mapping') ?? array();
-		$lists = $request->get_param('lists') ?? array();
-		$tags = $request->get_param('tags') ?? array();
-		$status = $request->get_param('status') ?? 'subscribed';
-		$update_existing = $request->get_param('update_existing') ?? false;
-		$credentials = $request->get_param('credentials') ?? array();
-		$result = array();
+	public function import( $request ) {
+		$source          = $request->get_param( 'source' ) ?? 'csv';
+		$offset          = $request->get_param( 'offset' ) ?? 0;
+		$cursor          = $request->get_param( 'cursor' ) ?? null;
+		$file_name       = $request->get_param( 'file_name' ) ?? '';
+		$mapping         = $request->get_param( 'mapping' ) ?? array();
+		$lists_mapping   = $request->get_param( 'lists_mapping' ) ?? array();
+		$tags_mapping    = $request->get_param( 'tags_mapping' ) ?? array();
+		$lists           = $request->get_param( 'lists' ) ?? array();
+		$tags            = $request->get_param( 'tags' ) ?? array();
+		$status          = $request->get_param( 'status' ) ?? 'subscribed';
+		$update_existing = $request->get_param( 'update_existing' ) ?? false;
+		$credentials     = $request->get_param( 'credentials' ) ?? array();
+		$result          = array();
 
 		$args = array(
-			'offset' => $offset,
-			'cursor' => $cursor,
-			'status' => $status,
+			'offset'          => $offset,
+			'cursor'          => $cursor,
+			'status'          => $status,
 			'update_existing' => $update_existing,
-			'lists_mapping' => $lists_mapping,
-			'tags_mapping' => $tags_mapping,
-			'lists' => $lists,
-			'tags' => $tags,
-			'file_name' => $file_name,
-			'mapping' => $mapping,
-			'credentials' => $credentials,
+			'lists_mapping'   => $lists_mapping,
+			'tags_mapping'    => $tags_mapping,
+			'lists'           => $lists,
+			'tags'            => $tags,
+			'file_name'       => $file_name,
+			'mapping'         => $mapping,
+			'credentials'     => $credentials,
 		);
 
 		try {
-			$importer = Manager::instance()->get_importer($source);
-			error_log('args: ' . wp_json_encode($args));
-			$importer = new $importer($args);
-			$result = $importer->import();
+			$importer = Manager::instance()->get_importer( $source );
+			error_log( 'args: ' . wp_json_encode( $args ) );
+			$importer = new $importer( $args );
+			$result   = $importer->import();
 
-			return new WP_REST_Response($result, 200);
-		} catch (Exception $e) {
-			return new WP_Error('import_error', $e->getMessage(), array('status' => 500));
+			return new WP_REST_Response( $result, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'import_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -600,8 +608,7 @@ class Rest_Import_Export_Controller extends REST_Controller
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function import_export_permissions_check($request)
-	{
-		return current_user_can('manage_options');
+	public function import_export_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 }

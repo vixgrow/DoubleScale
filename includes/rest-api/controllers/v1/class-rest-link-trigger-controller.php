@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API: Link Trigger Controller
  *
@@ -9,6 +10,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use Exception;
 use WP_REST_Request;
@@ -21,6 +23,7 @@ use QuillCRM\Models\Link_Trigger_Model;
  * Link Trigger Controller class
  */
 class REST_Link_Trigger_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -151,62 +154,62 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'link_trigger',
-			'type'       => 'object',
-			'properties' => array(
-				'id'          => array(
-					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'embed' ),
-					'readonly'    => true,
-				),
-				'name'        => array(
-					'description' => __( 'Name of the link trigger.', 'quillcrm' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
-				),
-				'hash'        => array(
-					'description' => __( 'Unique hash for the link trigger.', 'quillcrm' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
-					'readonly'    => true,
-				),
-				'status'      => array(
-					'description' => __( 'Status of the link trigger.', 'quillcrm' ),
-					'type'        => 'string',
-					'enum'        => array( 'active', 'inactive' ),
-					'context'     => array( 'view', 'edit', 'embed' ),
-					'default'     => 'active',
-				),
-				'settings'    => array(
-					'description' => __( 'Settings of the link trigger.', 'quillcrm' ),
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit', 'embed' ),
-				),
-				'click_count' => array(
-					'description' => __( 'Click count of the link trigger.', 'quillcrm' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'embed' ),
-					'readonly'    => true,
-				),
-				'created_at'  => array(
-					'description' => __( 'The date the link trigger was created.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
-					'readonly'    => true,
-				),
-				'updated_at'  => array(
-					'description' => __( 'The date the link trigger was last updated.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
-					'readonly'    => true,
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'link_trigger',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'id'          => array(
+					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'context'     => array( 'view', 'edit', 'embed' ),
+					 'readonly'    => true,
+				 ),
+				 'name'        => array(
+					 'description' => __( 'Name of the link trigger.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'context'     => array( 'view', 'edit', 'embed' ),
+				 ),
+				 'hash'        => array(
+					 'description' => __( 'Unique hash for the link trigger.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'context'     => array( 'view', 'edit', 'embed' ),
+					 'readonly'    => true,
+				 ),
+				 'status'      => array(
+					 'description' => __( 'Status of the link trigger.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'enum'        => array( 'active', 'inactive' ),
+					 'context'     => array( 'view', 'edit', 'embed' ),
+					 'default'     => 'active',
+				 ),
+				 'settings'    => array(
+					 'description' => __( 'Settings of the link trigger.', 'quillcrm' ),
+					 'type'        => 'object',
+					 'context'     => array( 'view', 'edit', 'embed' ),
+				 ),
+				 'click_count' => array(
+					 'description' => __( 'Click count of the link trigger.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'context'     => array( 'view', 'edit', 'embed' ),
+					 'readonly'    => true,
+				 ),
+				 'created_at'  => array(
+					 'description' => __( 'The date the link trigger was created.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'context'     => array( 'view', 'edit', 'embed' ),
+					 'readonly'    => true,
+				 ),
+				 'updated_at'  => array(
+					 'description' => __( 'The date the link trigger was last updated.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'context'     => array( 'view', 'edit', 'embed' ),
+					 'readonly'    => true,
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -401,7 +404,7 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -414,7 +417,7 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -427,7 +430,7 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -440,7 +443,7 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -453,7 +456,7 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -466,6 +469,6 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

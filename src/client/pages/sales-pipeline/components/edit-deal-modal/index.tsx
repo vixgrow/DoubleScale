@@ -31,6 +31,7 @@ import dayjs from 'dayjs';
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { useUsers } from '../../hooks/use-users';
+import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 import { Deal } from '../../types';
 import './style.scss';
 
@@ -88,13 +89,21 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	);
 
 	const { updateDeal } = useDealOperations();
+	const { isDealOwner } = useCapabilities();
+
+	// Check if current user is restricted (deal owner)
+	const isRestrictedUser = isDealOwner();
 
 	// Get stages for selected pipeline
 	const availableStages = useMemo(() => {
-		if (!selectedPipelineId) return [];
-		const pipeline = pipelines.find((p) => p.id === selectedPipelineId);
+		// For restricted users, use the deal's current pipeline
+		const pipelineId = isRestrictedUser
+			? deal?.pipeline?.id
+			: selectedPipelineId;
+		if (!pipelineId) return [];
+		const pipeline = pipelines.find((p) => p.id === pipelineId);
 		return pipeline?.stages || [];
-	}, [selectedPipelineId, pipelines]);
+	}, [selectedPipelineId, pipelines, isRestrictedUser, deal?.pipeline?.id]);
 
 	// Load initial contacts when modal opens
 	useEffect(() => {
@@ -110,12 +119,8 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 			setSelectedPipelineId(deal.pipeline?.id || 0);
 
 			// Set form values with proper data types
-			form.setFieldsValue({
+			const formValues: any = {
 				title: deal.title,
-				contact_id: deal.contact?.id,
-				pipeline_id: deal.pipeline?.id
-					? Number(deal.pipeline.id)
-					: undefined,
 				stage_id: deal.stage?.id ? Number(deal.stage.id) : undefined,
 				value: deal.value,
 				expected_close_date: deal.expected_close_date
@@ -123,13 +128,26 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 					: null,
 				probability: deal.probability,
 				source: deal.source,
-				owner_id: deal.owner?.id ? Number(deal.owner.id) : undefined,
-			});
+			};
+
+			// Only set contact_id, pipeline_id and owner_id for non-restricted users
+			// For restricted users, these fields will be disabled inputs showing names
+			if (!isRestrictedUser) {
+				formValues.contact_id = deal.contact?.id;
+				formValues.pipeline_id = deal.pipeline?.id
+					? Number(deal.pipeline.id)
+					: undefined;
+				formValues.owner_id = deal.owner?.id
+					? Number(deal.owner.id)
+					: undefined;
+			}
+
+			form.setFieldsValue(formValues);
 
 			// Load initial owners list
 			fetchInitialOwners();
 		}
-	}, [deal, visible, form, pipelines]);
+	}, [deal, visible, form, pipelines, isRestrictedUser]);
 
 	// Reset state when modal closes
 	useEffect(() => {
@@ -221,8 +239,6 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 			// Prepare update data
 			const updateData: any = {
 				title: values.title,
-				contact_id: values.contact_id,
-				pipeline_id: values.pipeline_id,
 				stage_id: values.stage_id,
 				value: values.value || 0,
 				currency: 'USD',
@@ -236,8 +252,14 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 						? values.probability
 						: null,
 				source: values.source,
-				owner_id: values.owner_id,
 			};
+
+			// Only include contact_id, pipeline_id and owner_id if user is not restricted
+			if (!isRestrictedUser) {
+				updateData.contact_id = values.contact_id;
+				updateData.pipeline_id = values.pipeline_id;
+				updateData.owner_id = values.owner_id;
+			}
 
 			await updateDeal(deal.id, updateData);
 
@@ -320,76 +342,109 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				</Form.Item>
 
 				{/* Contact Selection */}
-				<Form.Item
-					name="contact_id"
-					label={__('Contact', 'quillcrm')}
-					rules={[
-						{
-							required: true,
-							message: __('Please select a contact', 'quillcrm'),
-						},
-					]}
-				>
-					<Select
-						showSearch
-						placeholder={__(
-							'Select or search contacts',
-							'quillcrm'
-						)}
-						notFoundContent={
-							contactSearchLoading
-								? __('Loading...', 'quillcrm')
-								: __(
-										'No contacts found - try searching',
-										'quillcrm'
-									)
-						}
-						filterOption={false}
-						onSearch={fetchContacts}
-						loading={contactSearchLoading}
-						suffixIcon={<UserOutlined />}
-						onDropdownVisibleChange={(open) => {
-							if (open && contacts.length === 0) {
-								fetchInitialContacts();
+				{isRestrictedUser ? (
+					<Form.Item label={__('Contact', 'quillcrm')}>
+						<Input
+							value={
+								deal?.contact
+									? `${deal.contact.first_name} ${deal.contact.last_name} (${deal.contact.email})`
+									: __('No contact', 'quillcrm')
 							}
-						}}
-					>
-						{contacts.map((contact) => (
-							<Option key={contact.id} value={contact.id}>
-								{contact.first_name} {contact.last_name} (
-								{contact.email})
-							</Option>
-						))}
-					</Select>
-				</Form.Item>
-
-				{/* Pipeline & Stage */}
-				<div className="form-row">
+							disabled
+							placeholder={__('Contact (fixed)', 'quillcrm')}
+						/>
+					</Form.Item>
+				) : (
 					<Form.Item
-						name="pipeline_id"
-						label={__('Pipeline', 'quillcrm')}
+						name="contact_id"
+						label={__('Contact', 'quillcrm')}
 						rules={[
 							{
 								required: true,
 								message: __(
-									'Please select a pipeline',
+									'Please select a contact',
 									'quillcrm'
 								),
 							},
 						]}
-						className="form-item-half"
 					>
 						<Select
-							placeholder={__('Select pipeline', 'quillcrm')}
-							onChange={handlePipelineChange}
+							showSearch
+							placeholder={__(
+								'Select or search contacts',
+								'quillcrm'
+							)}
+							notFoundContent={
+								contactSearchLoading
+									? __('Loading...', 'quillcrm')
+									: __(
+											'No contacts found - try searching',
+											'quillcrm'
+										)
+							}
+							filterOption={false}
+							onSearch={fetchContacts}
+							loading={contactSearchLoading}
+							suffixIcon={<UserOutlined />}
+							onDropdownVisibleChange={(open) => {
+								if (open && contacts.length === 0) {
+									fetchInitialContacts();
+								}
+							}}
 						>
-							{pipelines.map((pipeline) => (
-								<Option key={pipeline.id} value={pipeline.id}>
-									{pipeline.name}
+							{contacts.map((contact) => (
+								<Option key={contact.id} value={contact.id}>
+									{contact.first_name} {contact.last_name} (
+									{contact.email})
 								</Option>
 							))}
 						</Select>
 					</Form.Item>
+				)}
+
+				{/* Pipeline & Stage */}
+				<div className="form-row">
+					{isRestrictedUser ? (
+						<Form.Item
+							label={__('Pipeline', 'quillcrm')}
+							className="form-item-half"
+						>
+							<Input
+								value={deal?.pipeline?.name || ''}
+								disabled
+								placeholder={__('Pipeline (fixed)', 'quillcrm')}
+							/>
+						</Form.Item>
+					) : (
+						<Form.Item
+							name="pipeline_id"
+							label={__('Pipeline', 'quillcrm')}
+							rules={[
+								{
+									required: true,
+									message: __(
+										'Please select a pipeline',
+										'quillcrm'
+									),
+								},
+							]}
+							className="form-item-half"
+						>
+							<Select
+								placeholder={__('Select pipeline', 'quillcrm')}
+								onChange={handlePipelineChange}
+							>
+								{pipelines.map((pipeline) => (
+									<Option
+										key={pipeline.id}
+										value={pipeline.id}
+									>
+										{pipeline.name}
+									</Option>
+								))}
+							</Select>
+						</Form.Item>
+					)}
 
 					<Form.Item
 						name="stage_id"
@@ -489,38 +544,60 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 						/>
 					</Form.Item>
 
-					<Form.Item
-						name="owner_id"
-						label={__('Deal Owner', 'quillcrm')}
-						className="form-item-half"
-					>
-						<Select
-							showSearch
-							placeholder={__(
-								'Select or search users',
-								'quillcrm'
-							)}
-							notFoundContent={__(
-								'No users found - try searching',
-								'quillcrm'
-							)}
-							filterOption={false}
-							onSearch={searchOwners}
-							loading={ownersLoading}
-							allowClear
-							onDropdownVisibleChange={(open) => {
-								if (open && owners.length === 0) {
-									fetchInitialOwners();
-								}
-							}}
+					{isRestrictedUser ? (
+						<Form.Item
+							label={__('Deal Owner', 'quillcrm')}
+							className="form-item-half"
 						>
-							{owners.map((owner) => (
-								<Option key={owner.id} value={Number(owner.id)}>
-									{owner.display_name} ({owner.email})
-								</Option>
-							))}
-						</Select>
-					</Form.Item>
+							<Input
+								value={
+									'(' +
+										deal?.owner?.display_name +
+										') ' +
+										deal?.owner?.email ||
+									__('Current User', 'quillcrm')
+								}
+								disabled
+								placeholder={__('Owner (fixed)', 'quillcrm')}
+							/>
+						</Form.Item>
+					) : (
+						<Form.Item
+							name="owner_id"
+							label={__('Deal Owner', 'quillcrm')}
+							className="form-item-half"
+						>
+							<Select
+								showSearch
+								placeholder={__(
+									'Select or search users',
+									'quillcrm'
+								)}
+								notFoundContent={__(
+									'No users found - try searching',
+									'quillcrm'
+								)}
+								filterOption={false}
+								onSearch={searchOwners}
+								loading={ownersLoading}
+								allowClear
+								onDropdownVisibleChange={(open) => {
+									if (open && owners.length === 0) {
+										fetchInitialOwners();
+									}
+								}}
+							>
+								{owners.map((owner) => (
+									<Option
+										key={owner.id}
+										value={Number(owner.id)}
+									>
+										{owner.display_name} ({owner.email})
+									</Option>
+								))}
+							</Select>
+						</Form.Item>
+					)}
 				</div>
 			</Form>
 		</Modal>

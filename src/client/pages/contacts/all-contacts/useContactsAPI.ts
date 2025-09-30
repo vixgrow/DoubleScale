@@ -68,6 +68,7 @@ export const useContactsAPI = () => {
 
 	const createContact = async () => {
 		if (!isEmail(contact.email)) {
+			setCreateContactVisible(false);
 			showNotice('error', __('Invalid email', 'quillcrm'));
 			return;
 		}
@@ -269,8 +270,6 @@ export const useContactsAPI = () => {
 		doBulkAction,
 	};
 };
-
-
 
 export const useContactOrderDetails = () => {
 	const isWooCommerceActive = ConfigAPI.isWoocommerceActive();

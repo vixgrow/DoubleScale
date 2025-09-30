@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API: General Controller
  *
@@ -9,6 +10,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use Exception;
 use WP_REST_Request;
@@ -28,6 +30,7 @@ use QuillCRM\Models\Campaign_Model;
  */
 class REST_General_Controller extends REST_Controller {
 
+
 	/**
 	 * REST Base
 	 *
@@ -43,7 +46,6 @@ class REST_General_Controller extends REST_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
-
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/dashboard',
@@ -110,6 +112,6 @@ class REST_General_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_dashboard_permissions_check( WP_REST_Request $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

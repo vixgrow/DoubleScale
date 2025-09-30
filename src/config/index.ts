@@ -12,6 +12,7 @@ import type {
 	Forms,
 	Importers,
 	Integrations,
+	UserCapabilities,
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
 
@@ -63,6 +64,10 @@ const configData: ConfigData = {
 	isLmsActive: false,
 	mergeTags: {},
 	importers: {},
+	userCapabilities: {
+		quillcrm_crm_manager: false,
+		quillcrm_deal_owner: false,
+	},
 };
 
 /**
@@ -534,6 +539,27 @@ export const setImporters = (data: ConfigData) => (value: Importers) => {
 	data.importers = value;
 };
 
+/**
+ * Get user capabilities
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * 
+ * @returns UserCapabilities
+ */
+export const getUserCapabilities = (data: ConfigData): UserCapabilities => {
+	return data.userCapabilities;
+};
+
+/**
+ * Set user capabilities
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setUserCapabilities = (data: ConfigData) => (value: UserCapabilities) => {
+	data.userCapabilities = value;
+};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -580,6 +606,8 @@ export interface ConfigApi {
 	setIsEddActive: (value: boolean) => void;
 	isLmsActive: () => boolean;
 	setIsLmsActive: (value: boolean) => void;
+	getUserCapabilities: () => UserCapabilities;
+	setUserCapabilities: (value: UserCapabilities) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -628,6 +656,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setIsEddActive = setIsEddActive(data);
 	configApi.isLmsActive = () => isLmsActive(data);
 	configApi.setIsLmsActive = setIsLmsActive(data);
+	configApi.getUserCapabilities = () => getUserCapabilities(data);
+	configApi.setUserCapabilities = setUserCapabilities(data);
 
 	return configApi;
 };

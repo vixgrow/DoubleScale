@@ -8,7 +8,15 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
-import { Modal, Form, Input, Select, InputNumber, DatePicker, message } from 'antd';
+import {
+	Modal,
+	Form,
+	Input,
+	Select,
+	InputNumber,
+	DatePicker,
+	message,
+} from 'antd';
 import {
 	UserOutlined,
 	DollarOutlined,
@@ -21,6 +29,8 @@ import { debounce } from 'lodash';
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { useUsers } from '../../hooks/use-users';
+import { UserService } from '../../../../../services/user-service';
+import { SOURCE_OPTIONS } from '../../../../../config/types/config-data';
 import './style.scss';
 
 const { Option } = Select;
@@ -127,9 +137,11 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	}, [pipeline?.stages]);
 
 	// Get current user as default owner
-	const [currentUserId, setCurrentUserId] = useState<number | undefined>(undefined);
+	const [currentUserId, setCurrentUserId] = useState<number | undefined>(
+		undefined
+	);
 
-	// Get current user ID from WordPress
+	// Get current user ID from WordPress using centralized service
 	useEffect(() => {
 		const fetchCurrentUser = async () => {
 			try {
@@ -140,12 +152,10 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 					return;
 				}
 
-				// Fallback to WordPress API
-				const response = await apiFetch({
-					path: '/wp/v2/users/me',
-				});
-				if (response && (response as any).id) {
-					setCurrentUserId(Number((response as any).id));
+				// Use centralized UserService
+				const currentUser = await UserService.getCurrentUser();
+				if (currentUser) {
+					setCurrentUserId(currentUser.id);
 				}
 			} catch (error) {
 				console.error('Failed to get current user:', error);
@@ -228,23 +238,20 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 			);
 
 			if (!currentUserExists) {
-				// If current user not in list, we need to fetch it
+				// If current user not in list, we need to fetch it using centralized service
 				const ensureCurrentUser = async () => {
 					try {
-						const response = await apiFetch({
-							path: `/wp/v2/users/${currentUserId}`,
-						});
-						if (response && (response as any).id) {
-							const currentUser = {
-								id: Number((response as any).id),
-								display_name: (response as any).name || `User ${currentUserId}`,
-								email: (response as any).email || '',
-							};
+						const currentUser =
+							await UserService.getUserById(currentUserId);
+						if (currentUser) {
 							// Use the hook's method to ensure user is included
 							ensureUserIncluded(currentUser);
 						}
 					} catch (error) {
-						console.error('Failed to fetch current user details:', error);
+						console.error(
+							'Failed to fetch current user details:',
+							error
+						);
 					}
 				};
 
@@ -498,28 +505,11 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 						)}
 						allowClear
 					>
-						<Option value="website">
-							{__('Website', 'quillcrm')}
-						</Option>
-						<Option value="referral">
-							{__('Referral', 'quillcrm')}
-						</Option>
-						<Option value="social_media">
-							{__('Social Media', 'quillcrm')}
-						</Option>
-						<Option value="email_campaign">
-							{__('Email Campaign', 'quillcrm')}
-						</Option>
-						<Option value="cold_call">
-							{__('Cold Call', 'quillcrm')}
-						</Option>
-						<Option value="trade_show">
-							{__('Trade Show', 'quillcrm')}
-						</Option>
-						<Option value="partner">
-							{__('Partner', 'quillcrm')}
-						</Option>
-						<Option value="other">{__('Other', 'quillcrm')}</Option>
+						{SOURCE_OPTIONS.map((source) => (
+							<Option key={source.value} value={source.value}>
+								{source.label}
+							</Option>
+						))}
 					</Select>
 				</Form.Item>
 			</Form>

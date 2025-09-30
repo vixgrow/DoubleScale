@@ -39,6 +39,8 @@ use Illuminate\Validation\Factory as ValidatorFactory;
 use QuillCRM\Custom_Metabox;
 use QuillCRM\Log_Handlers\Log_Handler_DB;
 use QuillCRM\Emails\Email_Builder;
+use QuillCRM\User_Roles\User_Roles;
+
 
 /**
  * QuillCRM Main Class.
@@ -47,11 +49,6 @@ use QuillCRM\Emails\Email_Builder;
  * @since 1.0.0
  */
 final class QuillCRM {
-
-
-
-
-
 
 
 
@@ -229,6 +226,7 @@ final class QuillCRM {
 		Pipeline_Manager::instance();
 		Deal_Manager::instance();
 		Activity_Manager::instance();
+		User_Roles::instance();
 	}
 
 	/**

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Activity_Manager
  * This class is responsible for handling deal activity management
@@ -14,12 +15,13 @@ use Exception;
 use QuillCRM\Models\Deal_Model;
 use QuillCRM\Models\Deal_Activity_Model;
 use QuillCRM\Models\Activity_Comment_Model;
-use QuillCRM\Models\Contact_Model;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * Activity_Manager class
  */
 final class Activity_Manager {
+
 
 	/**
 	 * Class Instance.
@@ -72,29 +74,37 @@ final class Activity_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
-	 * @param string $note Note content
+	 * @param int      $deal_id Deal ID
+	 * @param string   $note Note content
 	 * @param int|null $user_id User ID
 	 *
 	 * @return Deal_Activity|null
 	 */
 	public function add_note( $deal_id, $note, $user_id = null ) {
 		$deal = Deal_Model::find( $deal_id );
-		
+
 		if ( ! $deal ) {
 			return null;
+		}
+
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != get_current_user_id() ) {
+				return null;
+			}
 		}
 
 		if ( empty( $note ) ) {
 			return null;
 		}
 
-		$activity = Deal_Activity_Model::create( array(
-			'deal_id' => $deal_id,
-			'activity_type' => 'note_added',
-			'data' => array( 'content' => wp_kses_post( $note ) ),
-			'user_id' => $user_id ?: get_current_user_id(),
-		) );
+		$activity = Deal_Activity_Model::create(
+			array(
+				'deal_id'       => $deal_id,
+				'activity_type' => 'note_added',
+				'data'          => array( 'content' => wp_kses_post( $note ) ),
+				'user_id'       => $user_id ?: get_current_user_id(),
+			)
+		);
 
 		do_action( 'quillcrm_deal_note_added', $activity, $deal );
 
@@ -106,8 +116,8 @@ final class Activity_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
-	 * @param array $email_data Email data (subject, sent_at, etc.)
+	 * @param int      $deal_id Deal ID
+	 * @param array    $email_data Email data (subject, sent_at, etc.)
 	 * @param int|null $user_id User ID
 	 *
 	 * @return Deal_Activity|null
@@ -119,6 +129,12 @@ final class Activity_Manager {
 			return null;
 		}
 
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != get_current_user_id() ) {
+				return null;
+			}
+		}
+
 		$sanitized_data = array(
 			'subject' => sanitize_text_field( $email_data['subject'] ?? '' ),
 			'sent_at' => $email_data['sent_at'] ?? current_time( 'mysql' ),
@@ -126,17 +142,19 @@ final class Activity_Manager {
 
 		// Automatically use the deal's primary contact
 		if ( $deal->contact ) {
-			$sanitized_data['contact_id'] = $deal->contact->id;
+			$sanitized_data['contact_id']    = $deal->contact->id;
 			$sanitized_data['contact_email'] = $deal->contact->email;
-			$sanitized_data['contact_name'] = trim( $deal->contact->first_name . ' ' . $deal->contact->last_name );
+			$sanitized_data['contact_name']  = trim( $deal->contact->first_name . ' ' . $deal->contact->last_name );
 		}
 
-		$activity = Deal_Activity_Model::create( array(
-			'deal_id' => $deal_id,
-			'activity_type' => 'email_sent',
-			'data' => $sanitized_data,
-			'user_id' => $user_id ?: get_current_user_id(),
-		) );
+		$activity = Deal_Activity_Model::create(
+			array(
+				'deal_id'       => $deal_id,
+				'activity_type' => 'email_sent',
+				'data'          => $sanitized_data,
+				'user_id'       => $user_id ?: get_current_user_id(),
+			)
+		);
 
 		do_action( 'quillcrm_deal_email_logged', $activity, $deal );
 
@@ -148,23 +166,29 @@ final class Activity_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
-	 * @param array $call_data Call data
+	 * @param int      $deal_id Deal ID
+	 * @param array    $call_data Call data
 	 * @param int|null $user_id User ID
 	 *
 	 * @return Deal_Activity|null
 	 */
 	public function log_call( $deal_id, $call_data, $user_id = null ) {
 		$deal = Deal_Model::find( $deal_id );
-		
+
 		if ( ! $deal ) {
 			return null;
 		}
 
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != get_current_user_id() ) {
+				return null;
+			}
+		}
+
 		$sanitized_data = array(
-			'duration' => isset( $call_data['duration'] ) ? intval( $call_data['duration'] ) : null,
-			'outcome' => sanitize_text_field( $call_data['outcome'] ?? '' ),
-			'notes' => wp_kses_post( $call_data['notes'] ?? '' ),
+			'duration'  => isset( $call_data['duration'] ) ? intval( $call_data['duration'] ) : null,
+			'outcome'   => sanitize_text_field( $call_data['outcome'] ?? '' ),
+			'notes'     => wp_kses_post( $call_data['notes'] ?? '' ),
 			'called_at' => $call_data['called_at'] ?? current_time( 'mysql' ),
 		);
 
@@ -172,12 +196,14 @@ final class Activity_Manager {
 			$sanitized_data['phone_number'] = sanitize_text_field( $call_data['phone_number'] );
 		}
 
-		$activity = Deal_Activity_Model::create( array(
-			'deal_id' => $deal_id,
-			'activity_type' => 'call_logged',
-			'data' => $sanitized_data,
-			'user_id' => $user_id ?: get_current_user_id(),
-		) );
+		$activity = Deal_Activity_Model::create(
+			array(
+				'deal_id'       => $deal_id,
+				'activity_type' => 'call_logged',
+				'data'          => $sanitized_data,
+				'user_id'       => $user_id ?: get_current_user_id(),
+			)
+		);
 
 		do_action( 'quillcrm_deal_call_logged', $activity, $deal );
 
@@ -189,8 +215,8 @@ final class Activity_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
-	 * @param array $meeting_data Meeting data (title, scheduled_at, duration, location, description)
+	 * @param int      $deal_id Deal ID
+	 * @param array    $meeting_data Meeting data (title, scheduled_at, duration, location, description)
 	 * @param int|null $user_id User ID
 	 *
 	 * @return Deal_Activity|null
@@ -202,27 +228,35 @@ final class Activity_Manager {
 			return null;
 		}
 
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != get_current_user_id() ) {
+				return null;
+			}
+		}
+
 		$sanitized_data = array(
-			'title' => sanitize_text_field( $meeting_data['title'] ?? '' ),
+			'title'        => sanitize_text_field( $meeting_data['title'] ?? '' ),
 			'scheduled_at' => sanitize_text_field( $meeting_data['scheduled_at'] ?? '' ),
-			'duration' => isset( $meeting_data['duration'] ) ? intval( $meeting_data['duration'] ) : 60,
-			'location' => sanitize_text_field( $meeting_data['location'] ?? '' ),
-			'description' => wp_kses_post( $meeting_data['description'] ?? '' ),
+			'duration'     => isset( $meeting_data['duration'] ) ? intval( $meeting_data['duration'] ) : 60,
+			'location'     => sanitize_text_field( $meeting_data['location'] ?? '' ),
+			'description'  => wp_kses_post( $meeting_data['description'] ?? '' ),
 		);
 
 		// Automatically use the deal's primary contact as the attendee
 		if ( $deal->contact ) {
-			$sanitized_data['primary_attendee_id'] = $deal->contact->id;
-			$sanitized_data['primary_attendee_name'] = trim( $deal->contact->first_name . ' ' . $deal->contact->last_name );
+			$sanitized_data['primary_attendee_id']    = $deal->contact->id;
+			$sanitized_data['primary_attendee_name']  = trim( $deal->contact->first_name . ' ' . $deal->contact->last_name );
 			$sanitized_data['primary_attendee_email'] = $deal->contact->email;
 		}
 
-		$activity = Deal_Activity_Model::create( array(
-			'deal_id' => $deal_id,
-			'activity_type' => 'meeting_scheduled',
-			'data' => $sanitized_data,
-			'user_id' => $user_id ?: get_current_user_id(),
-		) );
+		$activity = Deal_Activity_Model::create(
+			array(
+				'deal_id'       => $deal_id,
+				'activity_type' => 'meeting_scheduled',
+				'data'          => $sanitized_data,
+				'user_id'       => $user_id ?: get_current_user_id(),
+			)
+		);
 
 		do_action( 'quillcrm_deal_meeting_scheduled', $activity, $deal );
 
@@ -234,18 +268,24 @@ final class Activity_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $deal_id Deal ID
+	 * @param int   $deal_id Deal ID
 	 * @param array $filters Filter criteria
-	 * @param int $per_page Results per page
-	 * @param int $page Page number
+	 * @param int   $per_page Results per page
+	 * @param int   $page Page number
 	 *
 	 * @return \Illuminate\Pagination\LengthAwarePaginator|null
 	 */
 	public function get_deal_activities( $deal_id, $filters = array(), $per_page = 20, $page = 1 ) {
 		$deal = Deal_Model::find( $deal_id );
-		
+
 		if ( ! $deal ) {
 			return null;
+		}
+
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != get_current_user_id() ) {
+				return null;
+			}
 		}
 
 		$query = Deal_Activity_Model::with( array( 'user', 'comments.user' ) )
@@ -274,7 +314,7 @@ final class Activity_Manager {
 		}
 
 		// Sort options
-		$sort_by = $filters['sort_by'] ?? 'created_at';
+		$sort_by    = $filters['sort_by'] ?? 'created_at';
 		$sort_order = $filters['sort_order'] ?? 'desc';
 		$query->orderBy( $sort_by, $sort_order );
 
@@ -286,28 +326,37 @@ final class Activity_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $activity_id Activity ID
-	 * @param string $content Comment content
+	 * @param int      $activity_id Activity ID
+	 * @param string   $content Comment content
 	 * @param int|null $user_id User ID
 	 *
 	 * @return Activity_Comment|null
 	 */
 	public function add_comment( $activity_id, $content, $user_id = null ) {
 		$activity = Deal_Activity_Model::find( $activity_id );
-		
+		$deal     = Deal_Model::find( $activity->deal_id );
+
 		if ( ! $activity ) {
 			return null;
+		}
+
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != get_current_user_id() ) {
+				return null;
+			}
 		}
 
 		if ( empty( $content ) ) {
 			return null;
 		}
 
-		$comment = Activity_Comment_Model::create( array(
-			'activity_id' => $activity_id,
-			'content' => wp_kses_post( $content ),
-			'user_id' => $user_id ?: get_current_user_id(),
-		) );
+		$comment = Activity_Comment_Model::create(
+			array(
+				'activity_id' => $activity_id,
+				'content'     => wp_kses_post( $content ),
+				'user_id'     => $user_id ?: get_current_user_id(),
+			)
+		);
 
 		do_action( 'quillcrm_activity_comment_added', $comment, $activity );
 
@@ -319,15 +368,15 @@ final class Activity_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $comment_id Comment ID
-	 * @param string $content New content
+	 * @param int      $comment_id Comment ID
+	 * @param string   $content New content
 	 * @param int|null $user_id User performing the action
 	 *
 	 * @return Activity_Comment|null
 	 */
 	public function update_comment( $comment_id, $content, $user_id = null ) {
 		$comment = Activity_Comment_Model::find( $comment_id );
-		
+
 		if ( ! $comment ) {
 			return null;
 		}
@@ -350,14 +399,14 @@ final class Activity_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $comment_id Comment ID
+	 * @param int      $comment_id Comment ID
 	 * @param int|null $user_id User performing the action
 	 *
 	 * @return bool
 	 */
 	public function delete_comment( $comment_id, $user_id = null ) {
 		$comment = Activity_Comment_Model::find( $comment_id );
-		
+
 		if ( ! $comment ) {
 			return false;
 		}
@@ -412,13 +461,13 @@ final class Activity_Manager {
 
 		$stats = array(
 			'total_activities' => $activities->count(),
-			'notes' => $activities->where( 'activity_type', 'note_added' )->count(),
-			'emails' => $activities->where( 'activity_type', 'email_sent' )->count(),
-			'calls' => $activities->where( 'activity_type', 'call_logged' )->count(),
-			'meetings' => $activities->where( 'activity_type', 'meeting_scheduled' )->count(),
-			'stage_changes' => $activities->where( 'activity_type', 'stage_changed' )->count(),
-			'value_changes' => $activities->where( 'activity_type', 'value_changed' )->count(),
-			'status_changes' => $activities->where( 'activity_type', 'status_changed' )->count(),
+			'notes'            => $activities->where( 'activity_type', 'note_added' )->count(),
+			'emails'           => $activities->where( 'activity_type', 'email_sent' )->count(),
+			'calls'            => $activities->where( 'activity_type', 'call_logged' )->count(),
+			'meetings'         => $activities->where( 'activity_type', 'meeting_scheduled' )->count(),
+			'stage_changes'    => $activities->where( 'activity_type', 'stage_changed' )->count(),
+			'value_changes'    => $activities->where( 'activity_type', 'value_changed' )->count(),
+			'status_changes'   => $activities->where( 'activity_type', 'status_changed' )->count(),
 		);
 
 		// Add activity breakdown by type
@@ -435,7 +484,7 @@ final class Activity_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $activity_ids Array of activity IDs
+	 * @param array    $activity_ids Array of activity IDs
 	 * @param int|null $user_id User performing the action
 	 *
 	 * @return int Number of deleted activities
@@ -446,10 +495,10 @@ final class Activity_Manager {
 		}
 
 		$deleted_count = 0;
-		
+
 		foreach ( $activity_ids as $activity_id ) {
 			$activity = Deal_Activity_Model::find( $activity_id );
-			
+
 			if ( $activity ) {
 				// Check permissions if needed
 				if ( $user_id && ! current_user_can( 'manage_options' ) ) {

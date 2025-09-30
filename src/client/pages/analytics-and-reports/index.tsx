@@ -2,24 +2,85 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import ContactsDealsReports from './contacts-deals-reports';
+import DealsReportsByDate from './deals-reports-by-date';
+import DealsReportsLeaderboard from './deals-reports-leaderboard';
+import SalesRep from './sales-rep';
+import SalesRepDetailView from './sale-rep';
 
 /**
  * External dependencies
  */
-
+import { BarChartOutlined, UserOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
  */
-
+import PageTabs from '../../../components/page-tabs';
+import { useCapabilities } from '../../../hooks/use-capabilities';
 
 const AnalyticsAndReports: React.FC = () => {
-    return (
-        <div className='text-5xl font-bold'>Analytics and Reports</div>
-    );
+	const { isDealOwner } = useCapabilities();
+
+	// Configure tabs based on user capabilities
+	const tabsList = isDealOwner()
+		? [
+				{
+					value: 'my-reports',
+					label: 'My Reports',
+					icon: <BarChartOutlined />,
+				},
+			]
+		: [
+				{
+					value: 'deals',
+					label: 'Deals',
+					icon: <BarChartOutlined />,
+				},
+				{
+					value: 'sales-rep',
+					label: 'Sales Rep',
+					icon: <UserOutlined />,
+				},
+			];
+
+	const tabsContent = isDealOwner()
+		? [
+				{
+					value: 'my-reports',
+					children: <SalesRepDetailView />,
+				},
+			]
+		: [
+				{
+					value: 'deals',
+					children: (
+						<div className="space-y-6">
+							<ContactsDealsReports />
+							<DealsReportsByDate />
+							<DealsReportsLeaderboard />
+						</div>
+					),
+				},
+				{
+					value: 'sales-rep',
+					children: <SalesRep />,
+				},
+			];
+
+	return (
+		<div className="space-y-6">
+			<h2 className="text-2xl font-bold">
+				{__('Analytics and Reports', 'quillcrm')}
+			</h2>
+			<PageTabs
+				defaultValue={isDealOwner() ? 'my-reports' : 'deals'}
+				tabsList={tabsList}
+				tabsContent={tabsContent}
+				onValueChange={() => {}}
+			/>
+		</div>
+	);
 };
 
 export default AnalyticsAndReports;

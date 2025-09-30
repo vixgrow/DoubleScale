@@ -19,6 +19,7 @@ import './style.scss';
 import type { Settings } from '@quillcrm/client';
 import { Field } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
+import Managers from './managers';
 
 const SettingsPage: React.FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -106,6 +107,12 @@ const SettingsPage: React.FC = () => {
 			children: settings && (
 				<CartSettings settings={settings} onChange={setSettings} />
 			),
+		},
+		{
+			key: 'managers',
+			label: __('Managers', 'quillcrm'),
+			icon: <UserOutlined />,
+			children: <Managers />,
 		},
 	];
 

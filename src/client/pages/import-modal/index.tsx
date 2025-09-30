@@ -31,17 +31,25 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 	onClose,
 	onCompleted,
 }) => {
-	const { state, resetState } = useImportContext();
+	const { state, resetState, dispatch } = useImportContext();
 	const { currentStep, source } = state;
 
 	const handleClose = () => {
+		// Reset the completion state first
+		dispatch({ type: 'SET_SHOWING_COMPLETION', payload: false });
+		dispatch({ type: 'SET_COUNT', payload: 0 });
+		dispatch({ type: 'SET_OFFSET', payload: 0 });
+		dispatch({ type: 'SET_CURSOR', payload: null });
+		// Then reset the entire state
 		resetState();
 		onClose();
 	};
 
-	const handleImportComplete = () => {
+	const handleImportComplete = async () => {
+		// Call onCompleted first to refresh the data
+		await onCompleted();
+		// Then close the modal
 		handleClose();
-		onCompleted();
 	};
 
 	return (
@@ -56,10 +64,10 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 							{source === 'csv'
 								? `Step ${currentStep} of 2`
 								: ['mailerlite', 'activecampaign', 'hubspot', 'pipedrive', 'gohighlevel'].includes(source)
-								? state.sourceData
-									? 'Step 2 of 2'
-									: 'Step 1 of 2'
-								: 'Step 1 of 1'}
+									? state.sourceData
+										? 'Step 2 of 2'
+										: 'Step 1 of 2'
+									: 'Step 1 of 1'}
 						</div>
 					</div>
 				</DialogTitle>

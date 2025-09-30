@@ -17,14 +17,12 @@ use QuillCRM\Models\Deal_Activity_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Pipeline_Model;
 use QuillCRM\Models\Pipeline_Stage_Model;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * Deal_Manager class
  */
 final class Deal_Manager {
-
-
-
 
 
 
@@ -147,6 +145,18 @@ final class Deal_Manager {
 		if ( ! $deal ) {
 			return null;
 		}
+
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != get_current_user_id() ) {
+				return null;
+			} else {
+				// Deal owners cannot change these core relationship fields
+				$data['owner_id']    = get_current_user_id();
+				$data['pipeline_id'] = $deal->pipeline_id;
+				$data['contact_id']  = $deal->contact_id;
+			}
+		}
+
 		$old_owner_id = $deal->owner_id;
 		$new_owner_id = $data['owner_id'];
 		$old_value    = $deal->value;
@@ -185,11 +195,19 @@ final class Deal_Manager {
 	 * @return bool
 	 */
 	public function move_deal_to_stage( $deal_id, $stage_id, $user_id = null, $update_probability = false ) {
-		$deal = Deal_Model::find( $deal_id );
+		$deal                  = Deal_Model::find( $deal_id );
+		$pipeline_id_for_stage = Pipeline_Stage_Model::find( $stage_id )->pipeline_id;
 
 		if ( ! $deal ) {
 			return false;
 		}
+
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != $user_id && $deal->pipeline_id != $pipeline_id_for_stage ) {
+				return false;
+			}
+		}
+
 		$old_stage_id = $deal->stage_id;
 		$new_stage_id = $stage_id;
 		$move         = $deal->moveToStage( $stage_id, $user_id, $update_probability );
@@ -273,6 +291,11 @@ final class Deal_Manager {
 		if ( ! $deal ) {
 			return false;
 		}
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != $user_id ) {
+				return false;
+			}
+		}
 		$old_status = $deal->status;
 		$marked     = $deal->markAsWon( $user_id );
 		if ( $marked ) {
@@ -298,6 +321,11 @@ final class Deal_Manager {
 		if ( ! $deal ) {
 			return false;
 		}
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != $user_id ) {
+				return false;
+			}
+		}
 		$old_status = $deal->status;
 		$marked     = $deal->markAsLost( $reason, $user_id );
 		if ( $marked ) {
@@ -321,6 +349,12 @@ final class Deal_Manager {
 
 		if ( ! $deal || $deal->status === 'open' ) {
 			return false;
+		}
+
+		if ( Permissions::is_deal_owner() ) {
+			if ( $deal->owner_id != $user_id ) {
+				return false;
+			}
 		}
 
 		$old_status        = $deal->status;
@@ -379,8 +413,11 @@ final class Deal_Manager {
 			$query->where( 'status', $filters['status'] );
 		}
 
+		if ( Permissions::is_deal_owner() ) {
+			$query = $query->where( 'owner_id', get_current_user_id() );
+		}
 		// Filter by owner
-		if ( ! empty( $filters['owner_id'] ) ) {
+		elseif ( ! empty( $filters['owner_id'] ) ) {
 			$query->where( 'owner_id', $filters['owner_id'] );
 		}
 
@@ -454,6 +491,10 @@ final class Deal_Manager {
 			->where( 'expected_close_date', '<', current_time( 'Y-m-d' ) )
 			->whereNotNull( 'expected_close_date' );
 
+		if ( Permissions::is_deal_owner() ) {
+			$owner_id = get_current_user_id();
+		}
+
 		if ( $owner_id ) {
 			$query->where( 'owner_id', $owner_id );
 		}
@@ -473,6 +514,10 @@ final class Deal_Manager {
 	 */
 	public function get_deal_statistics( $user_id = null, $filters = array() ) {
 		$query = Deal_Model::query();
+
+		if ( Permissions::is_deal_owner() ) {
+			$user_id = get_current_user_id();
+		}
 
 		if ( $user_id ) {
 			$query->where( 'owner_id', $user_id );

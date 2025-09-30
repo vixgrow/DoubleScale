@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rest_Automation_Step_Controller
  * This class is responsible for handling the Automation Step REST API
@@ -10,6 +11,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,6 +24,7 @@ use QuillCRM\Managers\Actions_Manager;
  * Rest_Automation_Step_Controller class
  */
 class Rest_Automation_Step_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -108,89 +111,89 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'automation-step',
-			'type'       => 'object',
-			'properties' => array(
-				'id'            => array(
-					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
-					'type'        => 'integer',
-					'readonly'    => true,
-				),
-				'automation_id' => array(
-					'description' => __( 'The ID of the automation this step belongs to.', 'quillcrm' ),
-					'type'        => 'integer',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
-				),
-				'parent_id'     => array(
-					'description' => __( 'The ID of the parent step.', 'quillcrm' ),
-					'type'        => 'integer',
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
-				),
-				'action'        => array(
-					'description' => __( 'The action of the step.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => false,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'type'          => array(
-					'description' => __( 'The type of the step.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'condition'     => array(
-					'description' => __( 'The condition of the step.', 'quillcrm' ),
-					'type'        => 'string',
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'status'        => array(
-					'description' => __( 'The status of the step.', 'quillcrm' ),
-					'type'        => 'string',
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'settings'      => array(
-					'description' => __( 'The settings of the step.', 'quillcrm' ),
-					'type'        => 'object',
-					'arg_options' => array(
-						'validate_callback' => array( $this, 'validate_item_settings' ),
-					),
-				),
-				'order'         => array(
-					'description' => __( 'Order of the list.', 'quillcrm' ),
-					'type'        => 'integer',
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
-				),
-				'created_at'    => array(
-					'description' => __( 'The date the object was created.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'readonly'    => true,
-				),
-				'updated_at'    => array(
-					'description' => __( 'The date the object was last modified.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'readonly'    => true,
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'automation-step',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'id'            => array(
+					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'readonly'    => true,
+				 ),
+				 'automation_id' => array(
+					 'description' => __( 'The ID of the automation this step belongs to.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'absint',
+					 ),
+				 ),
+				 'parent_id'     => array(
+					 'description' => __( 'The ID of the parent step.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'absint',
+					 ),
+				 ),
+				 'action'        => array(
+					 'description' => __( 'The action of the step.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => false,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'type'          => array(
+					 'description' => __( 'The type of the step.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'condition'     => array(
+					 'description' => __( 'The condition of the step.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'status'        => array(
+					 'description' => __( 'The status of the step.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'settings'      => array(
+					 'description' => __( 'The settings of the step.', 'quillcrm' ),
+					 'type'        => 'object',
+					 'arg_options' => array(
+						 'validate_callback' => array( $this, 'validate_item_settings' ),
+					 ),
+				 ),
+				 'order'         => array(
+					 'description' => __( 'Order of the list.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'absint',
+					 ),
+				 ),
+				 'created_at'    => array(
+					 'description' => __( 'The date the object was created.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'readonly'    => true,
+				 ),
+				 'updated_at'    => array(
+					 'description' => __( 'The date the object was last modified.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'readonly'    => true,
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -457,7 +460,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -470,7 +473,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -483,7 +486,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -496,6 +499,6 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

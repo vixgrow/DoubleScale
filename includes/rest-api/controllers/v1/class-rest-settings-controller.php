@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST_Settings_Controller class.
  *
@@ -10,6 +11,7 @@
 namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Settings;
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,6 +24,7 @@ use QuillCRM\Abstracts\REST_Controller;
  * @since 1.0.0
  */
 class REST_Settings_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -73,7 +76,7 @@ class REST_Settings_Controller extends REST_Controller {
 			'type'                 => 'object',
 			'additionalProperties' => false,
 			'properties'           => array(
-				'business'     => array(
+				'business'        => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -87,7 +90,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'email'        => array(
+				'email'           => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -117,7 +120,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'double_optin' => array(
+				'double_optin'    => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -143,7 +146,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'cart'         => array(
+				'cart'            => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -219,7 +222,7 @@ class REST_Settings_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function get( $request ) { // phpcs:ignore
+	public function get( $request ) 	{ // phpcs:ignore
 		$settings = Settings::get_all();
 
 		$result = array();
@@ -238,17 +241,7 @@ class REST_Settings_Controller extends REST_Controller {
 		return new WP_REST_Response( $result, 200 );
 	}
 
-	/**
-	 * Checks if a given request has access to get settings.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
-	 */
-	public function get_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
+
 
 	/**
 	 * Updates settings.
@@ -273,7 +266,18 @@ class REST_Settings_Controller extends REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function update_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
+	/**
+	 * Checks if a given request has access to get settings.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
+	 */
+	public function get_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
 }

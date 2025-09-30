@@ -106,30 +106,44 @@ const Contacts: React.FC = () => {
 										onValueChange={setFilterBy}
 										className="flex gap-4"
 									>
-										<div className="flex items-center space-x-4 w-1/2 border border-gray-600 rounded-lg py-2 px-3 cursor-pointer">
+										<Label
+											htmlFor="list-tags"
+											className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
+												filterBy === 'list-tags'
+													? 'border-blue-500 bg-blue-50'
+													: 'border-gray-300'
+											}`}
+										>
 											<RadioGroupItem
 												value="list-tags"
 												id="list-tags"
 											/>
-											<Label htmlFor="list-tags">
+											<span>
 												{__(
-													'List and Tags',
+													'Lists and Tags',
 													'quillcrm'
 												)}
-											</Label>
-										</div>
-										<div className="flex items-center space-x-4 w-1/2">
+											</span>
+										</Label>
+										<Label
+											htmlFor="advanced"
+											className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
+												filterBy === 'advanced'
+													? 'border-blue-500 bg-blue-50'
+													: 'border-gray-300'
+											}`}
+										>
 											<RadioGroupItem
 												value="advanced"
 												id="advanced"
 											/>
-											<Label htmlFor="advanced">
+											<span>
 												{__(
 													'Advanced Filter',
 													'quillcrm'
 												)}
-											</Label>
-										</div>
+											</span>
+										</Label>
 									</RadioGroup>
 								</div>
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST Email Builder Controller
  *
@@ -19,11 +20,13 @@ use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Emails\Email_Renderer;
 use QuillCRM\Emails\Block_Registry;
 use QuillCRM\Models\Template_Model;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * REST Email Builder Controller class
  */
 class REST_Email_Builder_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -40,7 +43,7 @@ class REST_Email_Builder_Controller extends REST_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
-		// Email templates endpoints
+		 // Email templates endpoints
 		register_rest_route(
 			$this->namespace,
 			'/email-templates',
@@ -106,14 +109,7 @@ class REST_Email_Builder_Controller extends REST_Controller {
 		);
 	}
 
-	/**
-	 * Check permissions for REST API
-	 *
-	 * @return bool
-	 */
-	public function check_permissions() {
-		return current_user_can( 'edit_posts' );
-	}
+
 
 	/**
 	 * Get templates
@@ -177,7 +173,7 @@ class REST_Email_Builder_Controller extends REST_Controller {
 	 */
 	public function get_template( $request ) {
 		$template_id = (int) $request->get_param( 'id' );
-		$template = Template_Model::find( $template_id );
+		$template    = Template_Model::find( $template_id );
 
 		if ( ! $template ) {
 			return new WP_Error(
@@ -195,7 +191,7 @@ class REST_Email_Builder_Controller extends REST_Controller {
 		if ( $template->settings ) {
 			// If settings is already an array (thanks to model casts), encode and decode it
 			// to ensure consistency with the previous API response format
-			$settings_json = is_array( $template->settings ) ? wp_json_encode( $template->settings ) : $template->settings;
+			$settings_json             = is_array( $template->settings ) ? wp_json_encode( $template->settings ) : $template->settings;
 			$template->parsed_settings = json_decode( $settings_json );
 		}
 
@@ -248,7 +244,7 @@ class REST_Email_Builder_Controller extends REST_Controller {
 			}
 
 			if ( $template->settings ) {
-				$settings_json = is_array( $template->settings ) ? wp_json_encode( $template->settings ) : $template->settings;
+				$settings_json             = is_array( $template->settings ) ? wp_json_encode( $template->settings ) : $template->settings;
 				$template->parsed_settings = json_decode( $settings_json );
 			}
 
@@ -270,7 +266,7 @@ class REST_Email_Builder_Controller extends REST_Controller {
 	 */
 	public function update_template( $request ) {
 		$template_id = (int) $request->get_param( 'id' );
-		$data = $request->get_json_params();
+		$data        = $request->get_json_params();
 
 		// Find the template using the model
 		$template = Template_Model::find( $template_id );
@@ -287,7 +283,7 @@ class REST_Email_Builder_Controller extends REST_Controller {
 			// Update the template with the provided data
 			$template->fill( $data );
 			$template->save();
-			
+
 			// Refresh the template from the database
 			$template->refresh();
 
@@ -297,7 +293,7 @@ class REST_Email_Builder_Controller extends REST_Controller {
 			}
 
 			if ( $template->settings ) {
-				$settings_json = is_array( $template->settings ) ? wp_json_encode( $template->settings ) : $template->settings;
+				$settings_json             = is_array( $template->settings ) ? wp_json_encode( $template->settings ) : $template->settings;
 				$template->parsed_settings = json_decode( $settings_json );
 			}
 
@@ -409,5 +405,14 @@ class REST_Email_Builder_Controller extends REST_Controller {
 		}
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Check permissions for REST API
+	 *
+	 * @return bool
+	 */
+	public function check_permissions() {
+		return Permissions::has_crm_manager_access();
 	}
 }

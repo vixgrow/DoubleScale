@@ -25,20 +25,6 @@ use WP_REST_Server;
 class REST_Deal_Controller extends REST_Controller {
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Route base.
 	 *
@@ -114,37 +100,6 @@ class REST_Deal_Controller extends REST_Controller {
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'move_to_pipeline' ),
 				'permission_callback' => array( $this, 'update_item_pipeline_permissions_check' ),
-			)
-		);
-
-		// Deal status changes
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)/mark-won',
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'mark_as_won' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)/mark-lost',
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'mark_as_lost' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)/reopen',
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'reopen_deal' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
 			)
 		);
 
@@ -468,76 +423,6 @@ class REST_Deal_Controller extends REST_Controller {
 
 		if ( ! $moved ) {
 			return new WP_Error( 'move_failed', 'Failed to move deal to pipeline', array( 'status' => 500 ) );
-		}
-
-		$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
-		$data = $this->prepare_item_for_response( $deal, $request );
-
-		return new WP_REST_Response( $data, 200 );
-	}
-
-	/**
-	 * Mark deal as won
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
-	 */
-	public function mark_as_won( $request ) {
-		$deal_id = $request->get_param( 'id' );
-		$user_id = get_current_user_id();
-
-		$updated = Deal_Manager::instance()->mark_deal_as_won( $deal_id, $user_id );
-
-		if ( ! $updated ) {
-			return new WP_Error( 'update_failed', 'Failed to mark deal as won', array( 'status' => 500 ) );
-		}
-
-		$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
-		$data = $this->prepare_item_for_response( $deal, $request );
-
-		return new WP_REST_Response( $data, 200 );
-	}
-
-	/**
-	 * Mark deal as lost
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
-	 */
-	public function mark_as_lost( $request ) {
-		$deal_id = $request->get_param( 'id' );
-		$reason  = sanitize_textarea_field( $request->get_param( 'reason' ) );
-		$user_id = get_current_user_id();
-
-		$updated = Deal_Manager::instance()->mark_deal_as_lost( $deal_id, $reason, $user_id );
-
-		if ( ! $updated ) {
-			return new WP_Error( 'update_failed', 'Failed to mark deal as lost', array( 'status' => 500 ) );
-		}
-
-		$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );
-		$data = $this->prepare_item_for_response( $deal, $request );
-
-		return new WP_REST_Response( $data, 200 );
-	}
-
-	/**
-	 * Reopen deal
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
-	 */
-	public function reopen_deal( $request ) {
-		$deal_id = $request->get_param( 'id' );
-		$user_id = get_current_user_id();
-
-		$updated = Deal_Manager::instance()->reopen_deal( $deal_id, $user_id );
-
-		if ( ! $updated ) {
-			return new WP_Error( 'update_failed', 'Failed to reopen deal', array( 'status' => 500 ) );
 		}
 
 		$deal = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) )->find( $deal_id );

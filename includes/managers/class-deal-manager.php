@@ -50,6 +50,7 @@ final class Deal_Manager {
 
 
 
+
 	/**
 	 * Class Instance.
 	 *
@@ -324,114 +325,6 @@ final class Deal_Manager {
 		return $saved;
 	}
 
-	/**
-	 * Mark deal as won
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int      $deal_id Deal ID
-	 * @param int|null $user_id User performing the action
-	 *
-	 * @return bool
-	 */
-	public function mark_deal_as_won( $deal_id, $user_id = null ) {
-		$deal = Deal_Model::find( $deal_id );
-
-		if ( ! $deal ) {
-			return false;
-		}
-		if ( Permissions::is_deal_owner() ) {
-			if ( $deal->owner_id != $user_id ) {
-				return false;
-			}
-		}
-		$old_status = $deal->status;
-		$marked     = $deal->markAsWon( $user_id );
-		if ( $marked ) {
-			do_action( 'quillcrm_automation_deal_status_changed', $deal->contact, $deal, $old_status, 'won' );
-		}
-		return $marked;
-	}
-
-	/**
-	 * Mark deal as lost
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int      $deal_id Deal ID
-	 * @param string   $reason Reason for losing the deal
-	 * @param int|null $user_id User performing the action
-	 *
-	 * @return bool
-	 */
-	public function mark_deal_as_lost( $deal_id, $reason = '', $user_id = null ) {
-		$deal = Deal_Model::find( $deal_id );
-
-		if ( ! $deal ) {
-			return false;
-		}
-		if ( Permissions::is_deal_owner() ) {
-			if ( $deal->owner_id != $user_id ) {
-				return false;
-			}
-		}
-		$old_status = $deal->status;
-		$marked     = $deal->markAsLost( $reason, $user_id );
-		if ( $marked ) {
-			do_action( 'quillcrm_automation_deal_status_changed', $deal->contact, $deal, $old_status, 'lost' );
-		}
-		return $marked;
-	}
-
-	/**
-	 * Reopen deal
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int      $deal_id Deal ID
-	 * @param int|null $user_id User performing the action
-	 *
-	 * @return bool
-	 */
-	public function reopen_deal( $deal_id, $user_id = null ) {
-		$deal = Deal_Model::find( $deal_id );
-
-		if ( ! $deal || $deal->status === 'open' ) {
-			return false;
-		}
-
-		if ( Permissions::is_deal_owner() ) {
-			if ( $deal->owner_id != $user_id ) {
-				return false;
-			}
-		}
-
-		$old_status        = $deal->status;
-		$deal->status      = 'open';
-		$deal->won_time    = null;
-		$deal->lost_time   = null;
-		$deal->lost_reason = null;
-		$saved             = $deal->save();
-
-		if ( $saved ) {
-			Deal_Activity_Model::create(
-				array(
-					'deal_id'       => $deal->id,
-					'activity_type' => 'status_changed',
-					'data'          => array(
-						'status' => 'open',
-						'action' => 'reopened',
-					),
-					'user_id'       => $user_id ?: get_current_user_id(),
-				)
-			);
-
-			do_action( 'quillcrm_deal_reopened', $deal );
-			do_action( 'quillcrm_automation_deal_status_changed', $deal->contact, $deal, $old_status, 'open' );
-		}
-
-		return $saved;
-	}
 
 	/**
 	 * Get deals with filters

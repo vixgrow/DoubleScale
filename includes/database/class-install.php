@@ -42,8 +42,8 @@ use QuillCRM\User_Roles\User_Roles;
 /**
  * Install class
  */
-class Install
-{
+class Install {
+
 
 
 
@@ -52,10 +52,9 @@ class Install
 	 *
 	 * @since 1.0.0
 	 */
-	public static function install()
-	{
+	public static function install() {
 		// Check if we are not already running this routine.
-		if ('yes' === get_transient('quillcrm_installing')) {
+		if ( 'yes' === get_transient( 'quillcrm_installing' ) ) {
 			return;
 		}
 
@@ -91,8 +90,8 @@ class Install
 			)
 		);
 
-		foreach ($tables as $table => $class) {
-			if (!class_exists($class)) {
+		foreach ( $tables as $table => $class ) {
+			if ( ! class_exists( $class ) ) {
 				continue;
 			}
 
@@ -102,8 +101,8 @@ class Install
 		}
 
 		// If we made it till here nothing is running yet, lets set the transient now.
-		set_transient('quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10);
-		delete_transient('quillcrm_installing');
-		do_action('quillcrm_installed');
+		set_transient( 'quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10 );
+		delete_transient( 'quillcrm_installing' );
+		do_action( 'quillcrm_installed' );
 	}
 }

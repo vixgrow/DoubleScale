@@ -195,26 +195,29 @@ class Campaign_Analytics
             $stats['clicked'] = (clone $base_query)->where('clicked', 1)->count();
         } elseif ($type === 'sms') {
             $base_query = $campaign_id ? $this->get_model_query($type)->where('source_id', $campaign_id)->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN) : $this->get_model_query($type);
-            
+
             // Apply date range filter if provided
             if ($start_date && $end_date) {
                 $base_query->whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59']);
             }
-            
+
             $stats['clicked'] = (clone $base_query)->where('clicked', 1)->count();
-            
+            $stats['delivered'] = (clone $base_query)->where('status', 'delivered')->count();
+
             // Calculate rates using centralized method
             $stats = $this->calculate_sms_rates($stats);
         } elseif ($type === 'whatsapp') {
             $base_query = $campaign_id ? $this->get_model_query($type)->where('source_id', $campaign_id)->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN) : $this->get_model_query($type);
-            
+
             // Apply date range filter if provided
             if ($start_date && $end_date) {
                 $base_query->whereBetween('created_at', [$start_date . ' 00:00:00', $end_date . ' 23:59:59']);
             }
-            
+
             $stats['clicked'] = (clone $base_query)->where('clicked', 1)->count();
-            
+            $stats['delivered'] = (clone $base_query)->where('status', 'delivered')->count();
+            $stats['read'] = (clone $base_query)->where('status', 'read')->count();
+
             // Calculate WhatsApp-specific rates
             $stats = $this->calculate_whatsapp_rates($stats);
         }
@@ -223,7 +226,7 @@ class Campaign_Analytics
     }
 
     /**
-     * Calculate SMS-specific rates (Simplified)
+     * Calculate SMS-specific rates
      *
      * @param array $stats Base statistics
      *
@@ -231,15 +234,21 @@ class Campaign_Analytics
      */
     protected function calculate_sms_rates($stats)
     {
-        $stats['click_rate'] = $stats['sent'] > 0 
-            ? round(($stats['clicked'] / $stats['sent']) * 100, 2) 
+        // Calculate delivery rate (delivered / sent)
+        $stats['delivery_rate'] = $stats['sent'] > 0
+            ? round(($stats['delivered'] / $stats['sent']) * 100, 2)
+            : 0;
+
+        // Calculate click rate (clicked / sent)
+        $stats['click_rate'] = $stats['sent'] > 0
+            ? round(($stats['clicked'] / $stats['sent']) * 100, 2)
             : 0;
 
         return $stats;
     }
 
     /**
-     * Calculate WhatsApp-specific rates (Simplified)
+     * Calculate WhatsApp-specific rates
      *
      * @param array $stats Base statistics
      *
@@ -247,8 +256,19 @@ class Campaign_Analytics
      */
     protected function calculate_whatsapp_rates($stats)
     {
-        $stats['click_rate'] = $stats['sent'] > 0 
-            ? round(($stats['clicked'] / $stats['sent']) * 100, 2) 
+        // Calculate delivery rate (delivered / sent)
+        $stats['delivery_rate'] = $stats['sent'] > 0
+            ? round(($stats['delivered'] / $stats['sent']) * 100, 2)
+            : 0;
+
+        // Calculate read rate (read / delivered)
+        $stats['read_rate'] = $stats['delivered'] > 0
+            ? round(($stats['read'] / $stats['delivered']) * 100, 2)
+            : 0;
+
+        // Calculate click rate (clicked / sent)
+        $stats['click_rate'] = $stats['sent'] > 0
+            ? round(($stats['clicked'] / $stats['sent']) * 100, 2)
             : 0;
 
         return $stats;

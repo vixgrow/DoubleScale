@@ -53,6 +53,15 @@ final class Deal_Manager {
 
 
 
+
+
+
+
+
+
+
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -202,6 +211,9 @@ final class Deal_Manager {
 		$old_status = $deal->status;
 		$new_status = $data['status'];
 
+		// Update status timestamps using helper method
+		$this->update_status_timestamps( $deal, $new_status, $old_status );
+
 		$deal->fill( $data );
 		$deal->save();
 
@@ -250,6 +262,7 @@ final class Deal_Manager {
 
 		// update status
 		$deal->status = $new_status;
+		$this->update_status_timestamps( $deal, $new_status, $old_status );
 		$deal->save();
 
 		if ( $move ) {
@@ -302,7 +315,8 @@ final class Deal_Manager {
 		$old_status        = $deal->status;
 		$new_status        = $deal->get_status_from_probability( $stage->win_probability );
 		$deal->status      = $new_status;
-		$saved             = $deal->save();
+		$this->update_status_timestamps( $deal, $new_status, $old_status );
+		$saved = $deal->save();
 
 		if ( $saved ) {
 			// Log the pipeline change activity
@@ -565,6 +579,35 @@ final class Deal_Manager {
 		}
 
 		return $deleted;
+	}
+
+	/**
+	 * Update deal status timestamps based on status change
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Deal_Model $deal The deal object
+	 * @param string     $new_status The new status
+	 * @param string     $old_status The old status
+	 *
+	 * @return void
+	 */
+	private function update_status_timestamps( $deal, $new_status, $old_status = null ) {
+		// Only update timestamps if status actually changed
+		if ( $old_status && $new_status === $old_status ) {
+			return;
+		}
+
+		if ( $new_status === 'won' ) {
+			$deal->won_time  = current_time( 'Y-m-d H:i:s' );
+			$deal->lost_time = null;
+		} elseif ( $new_status === 'lost' ) {
+			$deal->lost_time = current_time( 'Y-m-d H:i:s' );
+			$deal->won_time  = null;
+		} elseif ( $new_status === 'open' ) {
+			$deal->won_time  = null;
+			$deal->lost_time = null;
+		}
 	}
 
 

@@ -104,12 +104,12 @@ class REST_SMS_Campaign_Controller extends Abstract_Twilio_Campaign_Controller
 							'type' => 'integer',
 							'default' => 1,
 						),
-						'status' => array(
-							'description' => __('The status of the SMS.', 'quillcrm'),
-							'type' => 'string',
-							'enum' => array('all', 'sent', 'failed', 'pending'),
-							'required' => false,
-						),
+					'status' => array(
+						'description' => __('The status of the SMS.', 'quillcrm'),
+						'type' => 'string',
+						'enum' => array('all', 'sent', 'failed', 'pending', 'delivered', 'clicked'),
+						'required' => false,
+					),
 					),
 				),
 			)
@@ -226,22 +226,23 @@ class REST_SMS_Campaign_Controller extends Abstract_Twilio_Campaign_Controller
 	}
 
 	/**
-	 * Get service-specific error message - override parent method
+	 * Get SMS-specific error messages
+	 * Override parent method to provide SMS-specific error handling
 	 *
-	 * @param string $error_code
-	 * @param string $original_message
-	 * @return string|false
+	 * @param int $error_code Twilio error code
+	 * @param string $original_message Original error message
+	 * @return string|false SMS-specific error message or false if not handled
 	 */
 	protected function get_service_specific_error_message($error_code, $original_message)
 	{
-		switch ($error_code) {
-			case 21266:
-				return 'Cannot send SMS to the same number as the sender. Please use a different phone number.';
-			case 63038:
-				return 'Daily message limit exceeded for this Twilio account. Please check your account limits.';
-			default:
-				return false;
-		}
+		// SMS-specific error codes
+		$sms_errors = array(
+			21612 => 'The "To" phone number is not a valid mobile number for SMS.',
+			21266 => 'Cannot send SMS to the same number as the sender. Please use a different phone number.',
+			63038 => 'Daily SMS limit exceeded for this Twilio account. Please check your account limits or upgrade your plan.',
+		);
+
+		return $sms_errors[$error_code] ?? false;
 	}
 
 	/**

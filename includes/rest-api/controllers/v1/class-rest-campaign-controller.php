@@ -88,6 +88,25 @@ class REST_Campaign_Controller extends REST_Controller
 			)
 		);
 
+		// Individual campaign read (cross-type)
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
+				'args' => array(
+					'id' => array(
+						'description' => __('Unique identifier for the object.', 'quillcrm'),
+						'type' => 'integer',
+					),
+				),
+				array(
+					'methods' => WP_REST_Server::READABLE,
+					'callback' => array($this, 'get_item'),
+					'permission_callback' => array($this, 'get_item_permissions_check'),
+				),
+			)
+		);
+
 		// Analytics route (cross-type)
 		register_rest_route(
 			$this->namespace,
@@ -153,10 +172,11 @@ class REST_Campaign_Controller extends REST_Controller
 			)
 		);
 
-		// Note: Individual campaign CRUD operations moved to type-specific endpoints:
-		// - /email-campaigns/* for email campaign management
-		// - /sms-campaigns/* for SMS campaign management  
-		// - /whatsapp-campaigns/* for WhatsApp campaign management
+		// Note: Individual campaign CRUD operations are handled by type-specific endpoints:
+		// - /qc/v1/email-campaigns/* for email campaign management
+		// - /qc/v1/sms-campaigns/* for SMS campaign management  
+		// - /qc/v1/whatsapp-campaigns/* for WhatsApp campaign management
+		// Frontend should use these endpoints for create, update, delete, and duplicate operations
 	}
 
 	/**
@@ -378,6 +398,31 @@ class REST_Campaign_Controller extends REST_Controller
 
 
 	/**
+	 * Get individual campaign (cross-type)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function get_item($request)
+	{
+		try {
+			$campaign_id = $request->get_param('id');
+			$campaign = Campaign_Model::find($campaign_id);
+
+			if (!$campaign) {
+				return new WP_Error('campaign_not_found', __('Campaign not found.', 'quillcrm'), array('status' => 404));
+			}
+
+			return new WP_REST_Response($campaign, 200);
+		} catch (\Exception $e) {
+			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+		}
+	}
+
+	/**
 	 * Check if a given request has access to get items
 	 *
 	 * @since 1.0.0
@@ -387,6 +432,20 @@ class REST_Campaign_Controller extends REST_Controller
 	 * @return bool $permission The permission
 	 */
 	public function get_items_permissions_check($request)
+	{
+		return current_user_can('manage_options');
+	}
+
+	/**
+	 * Check if a given request has access to get a specific item
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return bool $permission The permission
+	 */
+	public function get_item_permissions_check($request)
 	{
 		return current_user_can('manage_options');
 	}

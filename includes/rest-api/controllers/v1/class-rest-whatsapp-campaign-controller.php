@@ -104,18 +104,12 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Twilio_Campaign_Control
 							'type' => 'integer',
 							'default' => 1,
 						),
-						'status' => array(
-							'description' => __('The status of the WhatsApp message.', 'quillcrm'),
-							'type' => 'string',
-							'enum' => array('all', 'sent', 'failed', 'pending', 'delivered', 'read'),
-							'required' => false,
-						),
-						'message_type' => array(
-							'description' => __('The type of WhatsApp message.', 'quillcrm'),
-							'type' => 'string',
-							'enum' => array('all', 'text', 'media'),
-							'required' => false,
-						),
+					'status' => array(
+						'description' => __('The status of the WhatsApp message.', 'quillcrm'),
+						'type' => 'string',
+						'enum' => array('all', 'sent', 'failed', 'pending', 'delivered', 'read', 'clicked'),
+						'required' => false,
+					),
 					),
 				),
 			)
@@ -140,25 +134,11 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Twilio_Campaign_Control
 							),
 						),
 						'message' => array(
-							'description' => __('The message content for text messages.', 'quillcrm'),
+							'description' => __('The message content for the test.', 'quillcrm'),
 							'type' => 'string',
-							'required' => false,
+							'required' => true,
 							'arg_options' => array(
 								'sanitize_callback' => 'sanitize_textarea_field',
-							),
-						),
-						'message_type' => array(
-							'description' => __('The type of message.', 'quillcrm'),
-							'type' => 'string',
-							'enum' => array('text', 'media'),
-							'default' => 'text',
-						),
-						'media_url' => array(
-							'description' => __('Media URL for media messages.', 'quillcrm'),
-							'type' => 'string',
-							'required' => false,
-							'arg_options' => array(
-								'sanitize_callback' => 'esc_url_raw',
 							),
 						),
 					),
@@ -252,22 +232,24 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Twilio_Campaign_Control
 	}
 
 	/**
-	 * Get service-specific error message - override parent method
+	 * Get WhatsApp-specific error messages
+	 * Override parent method to provide WhatsApp-specific error handling
 	 *
-	 * @param string $error_code
-	 * @param string $original_message
-	 * @return string|false
+	 * @param int $error_code Twilio error code
+	 * @param string $original_message Original error message
+	 * @return string|false WhatsApp-specific error message or false if not handled
 	 */
 	protected function get_service_specific_error_message($error_code, $original_message)
 	{
-		switch ($error_code) {
-			case 63031:
-				return 'Cannot send message to the same number as the sender. Please use a different phone number.';
-			case 21612:
-				return 'WhatsApp messages require the recipient to have messaged your WhatsApp number first, or you must use an approved template.';
-			default:
-				return false;
-		}
+		// WhatsApp-specific error codes
+		$whatsapp_errors = array(
+			21612 => 'WhatsApp 24-hour window restriction: The recipient must have messaged your WhatsApp number within the last 24 hours, or you must use an approved message template.',
+			63031 => 'Cannot send WhatsApp message to the same number as the sender. Please use a different phone number.',
+			63016 => 'WhatsApp template not found or not approved. Please check your Twilio console.',
+			63017 => 'WhatsApp template variables mismatch. Please verify template parameters.',
+		);
+
+		return $whatsapp_errors[$error_code] ?? false;
 	}
 
 	/**

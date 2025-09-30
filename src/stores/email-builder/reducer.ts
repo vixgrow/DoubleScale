@@ -39,7 +39,7 @@ const initialState: EmailBuilderState = {
 		backgroundImage: null,
 		backgroundRepeat: 'no-repeat',
 		backgroundSize: 'cover',
-		canvasWidth: 650,
+		canvasWidth: 700,
 	},
 	buttonSettings: {
 		primary: {

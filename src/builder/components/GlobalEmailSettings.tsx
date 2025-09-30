@@ -35,7 +35,7 @@ const GlobalEmailSettings: React.FC<GlobalEmailSettingsProps> = ({
 					type="number"
 					min={1}
 					className="w-full h-12 rounded-lg"
-					placeholder={__('650', 'quillcrm')}
+					placeholder={__('700', 'quillcrm')}
 					value={globalSettings.canvasWidth}
 					onChange={(e) => dispatch(STORE_KEY).updateGlobalSettings({ canvasWidth: parseInt(e.target.value) || 600 })}
 				/>

@@ -102,8 +102,8 @@ export const DealCard: React.FC<DealCardProps> = ({
 
 	// Calculate effective probability
 	const effectiveProbability = useMemo(() => {
-		return deal.probability ?? stageProbability ?? 0;
-	}, [deal.probability, stageProbability]);
+		return stageProbability ?? 0;
+	}, [stageProbability]);
 
 	// Format weighted value
 	const formattedWeightedValue = useMemo(() => {

@@ -70,8 +70,7 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	const [loading, setLoading] = useState(false);
 	const [activeTab, setActiveTab] = useState('overview');
 
-	const { getDeal, markDealAsWon, markDealAsLost, reopenDeal, deleteDeal } =
-		useDealOperations();
+	const { getDeal, deleteDeal } = useDealOperations();
 
 	const { isDealOwner } = useCapabilities();
 
@@ -94,113 +93,6 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 		} finally {
 			setLoading(false);
 		}
-	};
-
-	const handleMarkAsWon = async () => {
-		if (!deal) return;
-
-		Modal.confirm({
-			title: __('Mark Deal as Won?', 'quillcrm'),
-			content: __(
-				'This will mark the deal as successfully closed. This action can be undone by reopening the deal.',
-				'quillcrm'
-			),
-			okText: __('Mark as Won', 'quillcrm'),
-			cancelText: __('Cancel', 'quillcrm'),
-			onOk: async () => {
-				setLoading(true);
-				try {
-					await markDealAsWon(deal.id);
-					message.success(__('Deal marked as won!', 'quillcrm'));
-					await fetchDealDetails();
-					onUpdate?.();
-				} catch (error) {
-					message.error(__('Failed to mark deal as won', 'quillcrm'));
-				} finally {
-					setLoading(false);
-				}
-			},
-		});
-	};
-
-	const handleMarkAsLost = () => {
-		if (!deal) return;
-
-		// Create a modal with reason input
-		let reasonInput = '';
-
-		Modal.confirm({
-			title: __('Mark Deal as Lost?', 'quillcrm'),
-			content: (
-				<div style={{ marginTop: 16 }}>
-					<p>
-						{__(
-							'This will mark the deal as lost. You can optionally provide a reason.',
-							'quillcrm'
-						)}
-					</p>
-					<Input.TextArea
-						placeholder={__(
-							'Reason for losing the deal (optional)',
-							'quillcrm'
-						)}
-						rows={3}
-						onChange={(e) => (reasonInput = e.target.value)}
-						style={{ marginTop: 12 }}
-					/>
-				</div>
-			),
-			okText: __('Mark as Lost', 'quillcrm'),
-			cancelText: __('Cancel', 'quillcrm'),
-			okButtonProps: { danger: true },
-			onOk: async () => {
-				setLoading(true);
-				try {
-					await markDealAsLost(
-						deal.id,
-						reasonInput.trim() || undefined
-					);
-					message.success(__('Deal marked as lost', 'quillcrm'));
-					await fetchDealDetails();
-					onUpdate?.();
-				} catch (error) {
-					message.error(
-						__('Failed to mark deal as lost', 'quillcrm')
-					);
-				} finally {
-					setLoading(false);
-				}
-			},
-		});
-	};
-
-	const handleReopen = () => {
-		if (!deal) return;
-
-		Modal.confirm({
-			title: __('Reopen Deal?', 'quillcrm'),
-			content: __(
-				'This will reopen the deal and move it back to an active status. You can continue working on this opportunity.',
-				'quillcrm'
-			),
-			okText: __('Reopen Deal', 'quillcrm'),
-			cancelText: __('Cancel', 'quillcrm'),
-			onOk: async () => {
-				setLoading(true);
-				try {
-					await reopenDeal(deal.id);
-					message.success(
-						__('Deal reopened successfully!', 'quillcrm')
-					);
-					await fetchDealDetails();
-					onUpdate?.();
-				} catch (error) {
-					message.error(__('Failed to reopen deal', 'quillcrm'));
-				} finally {
-					setLoading(false);
-				}
-			},
-		});
 	};
 
 	const getStatusColor = (status: string) => {
@@ -444,39 +336,6 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 					>
 						{__('Edit Deal', 'quillcrm')}
 					</Button>
-
-					{deal.status === 'open' && (
-						<>
-							<Button
-								type="primary"
-								style={{ backgroundColor: '#52c41a' }}
-								icon={<CheckCircle size={16} />}
-								onClick={handleMarkAsWon}
-								loading={loading}
-							>
-								{__('Mark as Won', 'quillcrm')}
-							</Button>
-
-							<Button
-								danger
-								icon={<XCircle size={16} />}
-								onClick={handleMarkAsLost}
-								loading={loading}
-							>
-								{__('Mark as Lost', 'quillcrm')}
-							</Button>
-						</>
-					)}
-
-					{(deal.status === 'won' || deal.status === 'lost') && (
-						<Button
-							icon={<RotateCcw size={16} />}
-							onClick={handleReopen}
-							loading={loading}
-						>
-							{__('Reopen Deal', 'quillcrm')}
-						</Button>
-					)}
 
 					{!isDealOwner() && (
 						<Button

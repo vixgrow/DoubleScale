@@ -36,6 +36,8 @@ class REST_Pipeline_Controller extends REST_Controller {
 
 
 
+
+
 	/**
 	 * Route base.
 	 *
@@ -523,6 +525,7 @@ class REST_Pipeline_Controller extends REST_Controller {
 
 		return new WP_REST_Response( array( 'updated' => true ), 200 );
 	}
+
 
 	/**
 	 * Prepare the item for the REST response

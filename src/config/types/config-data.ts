@@ -25,11 +25,18 @@ export type ConfigData = Record<string, unknown> & {
 	mergeTags: AutomationMergeTags;
 	importers: Importers;
 	userCapabilities: UserCapabilities;
+	defaultStages: DefaultStage[];
 };
 
 export type UserCapabilities = {
 	quillcrm_crm_manager: boolean;
 	quillcrm_deal_owner: boolean;
+};
+
+export type DefaultStage = {
+	name: string;
+	color: string;
+	win_probability: number;
 };
 
 export type Importers = {

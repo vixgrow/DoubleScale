@@ -52,7 +52,7 @@ interface DealFormData {
 	stage_id: number;
 	value?: number;
 	expected_close_date?: string;
-	probability?: number;
+	// probability?: number;
 	source?: string;
 	owner_id?: number;
 }
@@ -246,11 +246,11 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 					? dayjs(values.expected_close_date).format('YYYY-MM-DD')
 					: null,
 				// Explicitly handle probability: undefined/empty should become null to revert to stage default
-				probability:
-					values.probability !== undefined &&
-					values.probability !== null
-						? values.probability
-						: null,
+				// probability:
+				// 	values.probability !== undefined &&
+				// 	values.probability !== null
+				// 		? values.probability
+				// 		: null,
 				source: values.source,
 			};
 
@@ -515,7 +515,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 						/>
 					</Form.Item>
 
-					<Form.Item
+					{/* <Form.Item
 						name="probability"
 						label={__('Win Probability (%)', 'quillcrm')}
 						className="form-item-half"
@@ -526,7 +526,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 							style={{ width: '100%' }}
 							placeholder={__('Auto from stage', 'quillcrm')}
 						/>
-					</Form.Item>
+					</Form.Item> */}
 				</div>
 
 				{/* Source & Owner */}

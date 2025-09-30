@@ -21,6 +21,9 @@ use QuillCRM\Models\User_Model;
 class Deal_Model extends Model {
 
 
+
+
+
 	/**
 	 * Table name
 	 *
@@ -370,72 +373,6 @@ class Deal_Model extends Model {
 		return $saved;
 	}
 
-	/**
-	 * Mark deal as won
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int|null $user_id User making the change
-	 *
-	 * @return bool
-	 */
-	public function markAsWon( $user_id = null ) {
-		$this->status   = 'won';
-		$this->won_time = current_time( 'mysql' );
-		$saved          = $this->save();
-
-		if ( $saved ) {
-			Deal_Activity_Model::create(
-				array(
-					'deal_id'       => $this->id,
-					'activity_type' => 'status_changed',
-					'data'          => array(
-						'status' => 'won',
-					),
-					'user_id'       => $user_id,
-				)
-			);
-
-			do_action( 'quillcrm_deal_won', $this );
-		}
-
-		return $saved;
-	}
-
-	/**
-	 * Mark deal as lost
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string   $reason Reason for losing the deal
-	 * @param int|null $user_id User making the change
-	 *
-	 * @return bool
-	 */
-	public function markAsLost( $reason = '', $user_id = null ) {
-		$this->status      = 'lost';
-		$this->lost_time   = current_time( 'mysql' );
-		$this->lost_reason = $reason;
-		$saved             = $this->save();
-
-		if ( $saved ) {
-			Deal_Activity_Model::create(
-				array(
-					'deal_id'       => $this->id,
-					'activity_type' => 'status_changed',
-					'data'          => array(
-						'status' => 'lost',
-						'reason' => $reason,
-					),
-					'user_id'       => $user_id,
-				)
-			);
-
-			do_action( 'quillcrm_deal_lost', $this );
-		}
-
-		return $saved;
-	}
 
 	/**
 	 * Boot method
@@ -496,5 +433,23 @@ class Deal_Model extends Model {
 				$deal->activities()->delete();
 			}
 		);
+	}
+
+	/**
+	 * Get status according to stage probability
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param float $stage_probability Stage win probability
+	 *
+	 * @return string
+	 */
+	public static function get_status_from_probability( $stage_probability ) {
+		if ( $stage_probability == 100 ) {
+			return 'won';
+		} elseif ( $stage_probability == 0 ) {
+			return 'lost';
+		}
+		return 'open';
 	}
 }

@@ -8,6 +8,7 @@ import type {
 	ConfigData,
 	ContactFieldsGroups,
 	CustomFieldsTypes,
+	DefaultStage,
 	FiltersGroups,
 	Forms,
 	Importers,
@@ -68,6 +69,7 @@ const configData: ConfigData = {
 		quillcrm_crm_manager: false,
 		quillcrm_deal_owner: false,
 	},
+	defaultStages: [],
 };
 
 /**
@@ -560,6 +562,27 @@ export const setUserCapabilities = (data: ConfigData) => (value: UserCapabilitie
 	data.userCapabilities = value;
 };
 
+/**
+ * Get default stages
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * 
+ * @returns DefaultStage[]
+ */
+export const getDefaultStages = (data: ConfigData): DefaultStage[] => {
+	return data.defaultStages;
+};
+
+/**
+ * Set default stages
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setDefaultStages = (data: ConfigData) => (value: DefaultStage[]) => {
+	data.defaultStages = value;
+};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -608,6 +631,8 @@ export interface ConfigApi {
 	setIsLmsActive: (value: boolean) => void;
 	getUserCapabilities: () => UserCapabilities;
 	setUserCapabilities: (value: UserCapabilities) => void;
+	getDefaultStages: () => DefaultStage[];
+	setDefaultStages: (value: DefaultStage[]) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -658,6 +683,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setIsLmsActive = setIsLmsActive(data);
 	configApi.getUserCapabilities = () => getUserCapabilities(data);
 	configApi.setUserCapabilities = setUserCapabilities(data);
+	configApi.getDefaultStages = () => getDefaultStages(data);
+	configApi.setDefaultStages = setDefaultStages(data);
 
 	return configApi;
 };

@@ -41,13 +41,14 @@ const TestButton: React.FC<TestButtonProps> = ({
 			body.append('action', settings.ajax_action);
 			body.append('nonce', ConfigAPI.getNonce());
 
-			console.log('All Values', allValues);
-
 			// Include all current step values in the request
 			if (allValues) {
 				// Send webhook_url
 				if (allValues.webhook_url) {
 					body.append('webhook_url', allValues.webhook_url);
+				} else {
+					alert('Webhook URL is required');
+					return;
 				}
 
 				// Send data_fields array

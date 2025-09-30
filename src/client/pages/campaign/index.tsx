@@ -23,6 +23,8 @@ import reducer, { State } from './state/reducer';
 import actions from './state/actions';
 import InitialStep from './steps/initial';
 import TemplatesStep from './steps/templates';
+import SMSTemplateStep from './steps/templates/sms-template';
+import WhatsAppTemplateStep from './steps/templates/whatsapp-template';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import { Campaign as CampaignType } from '@quillcrm/client';
@@ -67,12 +69,31 @@ const Campaign: React.FC = () => {
 	};
 
 	const saveCampaign = async (data: Partial<CampaignType> = {}) => {
+		if (!campaign) {
+			throw new Error(__('Campaign not loaded', 'quillcrm'));
+		}
+
 		setIsSaving(true);
 
 		try {
+			// Get the correct endpoint based on campaign type
+			const getCampaignEndpoint = (campaignType: string) => {
+				const endpoints = {
+					email: '/qc/v1/email-campaigns',
+					sms: '/qc/v1/sms-campaigns',
+					whatsapp: '/qc/v1/whatsapp-campaigns',
+				} as const;
+				return endpoints[campaignType as keyof typeof endpoints];
+			};
+
+			const endpoint = getCampaignEndpoint(campaign.type);
+			if (!endpoint) {
+				throw new Error(__('Invalid campaign type', 'quillcrm'));
+			}
+
 			const response = (await apiFetch({
-				path: `/qc/v1/campaigns/${campaign.id}`,
-				method: 'POST',
+				path: `${endpoint}/${campaign.id}`,
+				method: 'PUT',
 				data: {
 					...campaign,
 					...data,
@@ -80,10 +101,12 @@ const Campaign: React.FC = () => {
 			})) as CampaignType;
 
 			setCampaign(response);
-		} catch (error) {
+
+			return response;
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to save campaign', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
@@ -111,6 +134,19 @@ const Campaign: React.FC = () => {
 		return canGo;
 	};
 
+	// Get the correct template component based on campaign type
+	const getTemplateComponent = () => {
+		switch (campaign?.type) {
+			case 'sms':
+				return <SMSTemplateStep />;
+			case 'whatsapp':
+				return <WhatsAppTemplateStep />;
+			case 'email':
+			default:
+				return <TemplatesStep />;
+		}
+	};
+
 	// Switch to the new tab items
 	const tabItems = [
 		{
@@ -127,7 +163,7 @@ const Campaign: React.FC = () => {
 		{
 			key: 'template',
 			label: __('Template', 'quillcrm'),
-			children: <TemplatesStep />,
+			children: getTemplateComponent(),
 			icon:
 				tab === 'template' ? (
 					<CheckCircleOutlined />
@@ -186,7 +222,7 @@ const Campaign: React.FC = () => {
 		>
 			{/* Render the selected tab component based on the current tab */}
 			{tab === 'template' ? (
-				<TemplatesStep />
+				getTemplateComponent()
 			) : (
 				<>
 					{!['processing', 'completed', 'resending'].includes(

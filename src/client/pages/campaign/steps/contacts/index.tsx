@@ -83,6 +83,82 @@ const Contacts: React.FC = () => {
 		if (!campaign) {
 			return;
 		}
+
+		// Validate that campaign has templates
+		const templates = campaign.settings?.templates;
+		if (!templates || templates.length === 0) {
+			createNotice({
+				type: 'error',
+				message: __(
+					'Please create a template before proceeding',
+					'quillcrm'
+				),
+			});
+			navigate(getToLink(`campaigns/${campaign.id}/template`));
+			return;
+		}
+
+		const template = templates[0];
+
+		if (!template.body || template.body.trim().length === 0) {
+			createNotice({
+				type: 'error',
+				message: __(
+					campaign.type === 'email'
+						? 'Email body is required'
+						: 'Message content is required',
+					'quillcrm'
+				),
+			});
+			navigate(getToLink(`campaigns/${campaign.id}/template`));
+			return;
+		}
+
+		// Email-specific validation
+		if (campaign.type === 'email') {
+			if (!template.subject) {
+				createNotice({
+					type: 'error',
+					message: __('Email subject is required', 'quillcrm'),
+				});
+				navigate(getToLink(`campaigns/${campaign.id}/template`));
+				return;
+			}
+
+			if (!template.settings?.from_name) {
+				createNotice({
+					type: 'error',
+					message: __('From Name is required', 'quillcrm'),
+				});
+				navigate(getToLink(`campaigns/${campaign.id}/template`));
+				return;
+			}
+
+			if (!template.settings?.from_email) {
+				createNotice({
+					type: 'error',
+					message: __('From Email is required', 'quillcrm'),
+				});
+				navigate(getToLink(`campaigns/${campaign.id}/template`));
+				return;
+			}
+		}
+
+		// SMS/WhatsApp validation: max length check
+		if (campaign.type === 'sms' || campaign.type === 'whatsapp') {
+			if (template.body.length > 1600) {
+				createNotice({
+					type: 'error',
+					message: __(
+						'Message is too long. Maximum 1600 characters.',
+						'quillcrm'
+					),
+				});
+				navigate(getToLink(`campaigns/${campaign.id}/template`));
+				return;
+			}
+		}
+
 		await saveCampaign();
 		navigate(getToLink(`campaigns/${campaign.id}/review`));
 	};

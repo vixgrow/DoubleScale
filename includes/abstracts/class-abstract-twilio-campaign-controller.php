@@ -139,44 +139,48 @@ abstract class Abstract_Twilio_Campaign_Controller extends Abstract_Campaign_Con
 	 * Get specific error message based on Twilio error code
 	 * Common error codes for all Twilio services
 	 *
-	 * @param string $error_code Twilio error code
+	 * @param string|int $error_code Twilio error code (can be string or int)
 	 * @param string $original_message Original error message
 	 * @return string User-friendly error message
 	 */
 	protected function get_specific_error_message($error_code, $original_message)
 	{
-		$common_errors = array(
-			21211 => 'Invalid "To" phone number format. Please use E.164 format (e.g., +1234567890).',
-			21609 => 'Invalid webhook URL. This usually happens in local development environments.',
-			21612 => 'The "To" phone number is not a valid mobile number.',
-			21610 => 'Messages to this number are blocked or restricted.',
-			21614 => 'Invalid "From" phone number. Please check your Twilio phone number configuration.',
-			21408 => 'Permission denied. Your account may not have permissions or the number may be restricted.',
-			60200 => 'International messaging permissions required for this destination.',
-			63038 => 'Daily message limit exceeded for this Twilio account. Please check your account limits.',
-		);
+		// Normalize error code to integer for consistent comparison
+		$error_code = (int) $error_code;
 
-		// Check for common errors first
-		if (isset($common_errors[$error_code])) {
-			return $common_errors[$error_code];
-		}
-
-		// Check for service-specific errors
+		// Check for service-specific errors FIRST (allows child classes to override)
 		$service_specific_error = $this->get_service_specific_error_message($error_code, $original_message);
 		if ($service_specific_error) {
 			return $service_specific_error;
 		}
 
+		// Then check common errors (shared across all services)
+		$common_errors = array(
+			21211 => 'Invalid "To" phone number format. Please use E.164 format (e.g., +1234567890).',
+			21609 => 'Invalid webhook URL. This usually happens in local development environments.',
+			21610 => 'Messages to this number are blocked or restricted.',
+			21614 => 'Invalid "From" phone number. Please check your Twilio phone number configuration.',
+			21408 => 'Permission denied. Your account may not have permissions or the number may be restricted.',
+			60200 => 'International messaging permissions required for this destination.',
+			// Note: 21612 is service-specific (different for SMS vs WhatsApp) - handled by child classes
+			// Note: 63038 is SMS-specific - handled by SMS controller
+		);
+
+		if (isset($common_errors[$error_code])) {
+			return $common_errors[$error_code];
+		}
+
 		// Default to generic error with details
-		return 'Failed to send test message: ' . ($original_message ?: 'Unknown error');
+		return 'Failed to send test message: ' . ($original_message ?: 'Unknown error (code: ' . $error_code . ')');
 	}
 
 	/**
 	 * Get service-specific error message - can be overridden by child classes
+	 * IMPORTANT: This is called BEFORE common errors, allowing child classes to override
 	 *
-	 * @param string $error_code Twilio error code
+	 * @param int $error_code Twilio error code (normalized to integer)
 	 * @param string $original_message Original error message
-	 * @return string|false Service-specific error message or false
+	 * @return string|false Service-specific error message or false if not handled
 	 */
 	protected function get_service_specific_error_message($error_code, $original_message)
 	{

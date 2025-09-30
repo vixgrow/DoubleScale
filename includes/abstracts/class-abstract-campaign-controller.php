@@ -172,42 +172,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller
             )
         );
 
-        // Campaign messages route
-        register_rest_route(
-            $this->namespace,
-            '/' . $this->rest_base . '/(?P<id>[\d]+)/messages',
-            array(
-                'args' => array(
-                    'id' => array(
-                        'description' => __('The id of the campaign.', 'quillcrm'),
-                        'type' => 'integer',
-                        'required' => true,
-                    ),
-                ),
-                array(
-                    'methods' => WP_REST_Server::READABLE,
-                    'callback' => array($this, 'get_campaign_messages'),
-                    'permission_callback' => array($this, 'get_item_permissions_check'),
-                    'args' => array(
-                        'per_page' => array(
-                            'description' => __('The number of items to return per page.', 'quillcrm'),
-                            'type' => 'integer',
-                            'default' => 10,
-                        ),
-                        'page' => array(
-                            'description' => __('The page number.', 'quillcrm'),
-                            'type' => 'integer',
-                            'default' => 1,
-                        ),
-                        'status' => array(
-                            'description' => __('Filter messages by status.', 'quillcrm'),
-                            'type' => 'string',
-                            'enum' => array('pending', 'sent', 'failed'),
-                        ),
-                    ),
-                ),
-            )
-        );
+        // Campaign messages route - child controllers should register this with campaign-type-specific status enums
     }
 
     /**
@@ -317,6 +282,11 @@ abstract class Abstract_Campaign_Controller extends REST_Controller
 
             return new WP_REST_Response($campaign, 200);
         } catch (\Exception $e) {
+            $logger = quillcrm_get_logger();
+            $logger->error('Campaign update error: ' . $e->getMessage(), array(
+                'campaign_id' => $campaign_id,
+                'trace' => $e->getTraceAsString()
+            ));
             return new WP_Error('error', $e->getMessage(), array('status' => 500));
         }
     }

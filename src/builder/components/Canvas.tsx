@@ -56,9 +56,9 @@ const Canvas = ({ }: CanvasProps) => {
 	const handleSectionSelect = (sectionType: LayoutTemplate) => {
 		const newSection = {
 			id: uuidv4(),
-			columns: sectionType.number.map(() => ({
+			columns: sectionType.width.map((width) => ({
 				id: uuidv4(),
-				width: 100 / sectionType.number.length,
+				width, // Now using actual percentages directly
 				blocks: [],
 			})),
 			styles: {},

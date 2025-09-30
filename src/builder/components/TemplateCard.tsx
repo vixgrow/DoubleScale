@@ -44,16 +44,16 @@ const TemplateCard = ({
 			className={`${baseClasses} ${interactiveClasses}`}
 			key={item.value || blockType}
 		>
-			<DragDropIcon />
-			<div className="flex flex-row gap-2 items-center justify-center w-full">
-				{type === 'layout' &&
-					item.number?.map((number, index) => (
-						<div
-							key={index}
-							className="w-full h-full bg-border rounded-sm py-4"
-							style={{ width: `${100 / number}%` }}
-						></div>
-					))}
+		<DragDropIcon />
+		<div className="flex flex-row gap-2 items-center justify-center w-full">
+			{type === 'layout' &&
+				item.width?.map((width, index) => (
+					<div
+						key={index}
+						className="w-full h-full bg-border rounded-sm py-4"
+						style={{ width: `${width}%` }}
+					></div>
+				))}
 
 				{type === 'element' && item.icon && (
 					<div>

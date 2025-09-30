@@ -337,11 +337,12 @@ const BuilderContent: React.FC = () => {
 		// Handle dropping new layouts (sections) from sidebar
 		if (active.data?.current?.type === 'layout') {
 			const layoutItem = active.data.current.item;
+			
 			const newSection = {
 				id: uuidv4(),
-				columns: layoutItem.number.map(() => ({
+				columns: layoutItem.width.map((width: number) => ({
 					id: uuidv4(),
-					width: 100 / layoutItem.number.length,
+					width, // Now using actual percentages directly
 					blocks: [],
 				})),
 				styles: {},

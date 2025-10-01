@@ -27,25 +27,6 @@ use QuillCRM\Constants\Message_Source_Types;
 class Send_Campaign_Email extends Action {
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Action Name
 	 *

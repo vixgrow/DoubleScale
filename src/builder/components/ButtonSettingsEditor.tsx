@@ -19,7 +19,7 @@ import {
 	LetterSpacingControl,
 	TextFormattingControl,
 	ColorPickerControl,
-	PaddingControl
+	PaddingControl,
 } from '../blocks/basic/shared';
 
 type ButtonType = 'primary' | 'secondary' | 'tertiary';
@@ -63,31 +63,20 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 			fontFamily: settings.font,
 			fontSize: `${settings.size}px`,
 			letterSpacing: settings.letterSpacing,
-			backgroundColor:
-				buttonType === 'primary'
-					? settings.backgroundColor
-					: buttonType === 'tertiary'
-						? 'white'
-						: 'transparent',
-			color:
-				buttonType === 'primary'
-					? settings.textColor
-					: settings.backgroundColor,
-			border:
-				buttonType === 'tertiary'
-					? 'none'
-					: `${settings.borderWidth}px solid ${buttonType === 'secondary'
-						? settings.backgroundColor
-						: settings.borderColor
-					}`,
+			backgroundColor: settings.backgroundColor,
+			color: settings.textColor,
+			border: `${settings.borderWidth}px solid ${settings.borderColor}`,
 			borderRadius: `${settings.borderRadius}px`,
 			padding: `${settings.padding.top * 2}px ${settings.padding.right * 4}px ${settings.padding.bottom * 2}px ${settings.padding.left * 4}px`,
 			fontWeight: settings.bold ? 'bold' : 'normal',
 			fontStyle: settings.italic ? 'italic' : 'normal',
-			textDecoration: [
-				settings.underline ? 'underline' : '',
-				settings.strikethrough ? 'line-through' : ''
-			].filter(Boolean).join(' ') || 'none',
+			textDecoration:
+				[
+					settings.underline ? 'underline' : '',
+					settings.strikethrough ? 'line-through' : '',
+				]
+					.filter(Boolean)
+					.join(' ') || 'none',
 		};
 
 		return style;
@@ -140,7 +129,9 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 				{/* Letter Spacing */}
 				<LetterSpacingControl
 					value={settings.letterSpacing}
-					onChange={(value) => updateSettings({ letterSpacing: value })}
+					onChange={(value) =>
+						updateSettings({ letterSpacing: value })
+					}
 				/>
 
 				{/* Shape and Border */}
@@ -154,7 +145,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								className={cn(
 									'py-2 px-2 w-full text-center cursor-pointer',
 									settings.borderRadius === 0 &&
-									'bg-[#C6DFF366] border border-primary rounded-lg'
+										'bg-[#C6DFF366] border border-primary rounded-lg'
 								)}
 								onClick={() =>
 									updateSettings({ borderRadius: 0 })
@@ -166,7 +157,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								className={cn(
 									'py-2 px-2 w-full text-center cursor-pointer',
 									settings.borderRadius === 8 &&
-									'bg-[#C6DFF366] border border-primary rounded-lg'
+										'bg-[#C6DFF366] border border-primary rounded-lg'
 								)}
 								onClick={() =>
 									updateSettings({ borderRadius: 8 })
@@ -178,7 +169,7 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 								className={cn(
 									'py-2 px-2 w-full text-center cursor-pointer',
 									settings.borderRadius === 9999 &&
-									'bg-[#C6DFF366] border border-primary rounded-lg'
+										'bg-[#C6DFF366] border border-primary rounded-lg'
 								)}
 								onClick={() =>
 									updateSettings({ borderRadius: 9999 })
@@ -198,7 +189,10 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 										/\D/g,
 										''
 									);
-									updateSettings({ borderRadius: val === '' ? 0 : parseInt(val, 10) });
+									updateSettings({
+										borderRadius:
+											val === '' ? 0 : parseInt(val, 10),
+									});
 								}}
 								className="pr-8 h-[43.2px]"
 								style={{
@@ -236,7 +230,9 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 				<ColorPickerControl
 					label={__('Background color', 'quillcrm')}
 					value={settings.backgroundColor}
-					onChange={(value) => updateSettings({ backgroundColor: value })}
+					onChange={(value) =>
+						updateSettings({ backgroundColor: value })
+					}
 					id="bg-color"
 				/>
 
@@ -252,7 +248,9 @@ const ButtonEditor: React.FC<ButtonEditorProps> = ({ buttonType, onBack }) => {
 							onChange={(e) => {
 								// Allow only digits
 								const val = e.target.value.replace(/\D/g, '');
-								updateSettings({ borderWidth: val === '' ? 0 : Number(val) });
+								updateSettings({
+									borderWidth: val === '' ? 0 : Number(val),
+								});
 							}}
 							className="pr-8 h-10"
 							style={{

@@ -20,7 +20,12 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 	const { getButtonSettings } = useButtonSettings();
 
 	// Safely access container padding with defaults
-	const containerPadding = props.containerPadding || { top: 0, right: 0, bottom: 0, left: 0 };
+	const containerPadding = props.containerPadding || {
+		top: 0,
+		right: 0,
+		bottom: 0,
+		left: 0,
+	};
 
 	// Convert container padding object to CSS string
 	const containerPaddingString = `${containerPadding.top}px ${containerPadding.right}px ${containerPadding.bottom}px ${containerPadding.left}px`;
@@ -70,14 +75,14 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 			case 'secondary':
 				return {
 					...baseStyle,
-					color: buttonSettings.backgroundColor,
+					color: buttonSettings.textColor,
 					backgroundColor: 'transparent',
-					border: `${buttonSettings.borderWidth}px solid ${buttonSettings.backgroundColor}`,
+					border: `${buttonSettings.borderWidth}px solid ${buttonSettings.borderColor}`,
 				};
 			case 'tertiary':
 				return {
 					...baseStyle,
-					color: buttonSettings.backgroundColor,
+					color: buttonSettings.textColor,
 					backgroundColor: 'transparent',
 					border: 'none',
 				};
@@ -116,10 +121,7 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 
 	return (
 		<div style={containerStyle}>
-			<a
-				href={props.url}
-				style={buttonStyle}
-			>
+			<a href={props.url} style={buttonStyle}>
 				{props.text}
 			</a>
 		</div>

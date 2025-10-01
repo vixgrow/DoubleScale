@@ -88,7 +88,6 @@ const Campaign: React.FC = () => {
 		}
 	};
 
-
 	if (!campaign) {
 		//TODO: change for shimmer
 		return false;
@@ -115,7 +114,6 @@ const Campaign: React.FC = () => {
 		return canGo;
 	};
 
-
 	const isOverview =
 		(campaign.status === 'schedule' && tab === 'overview') ||
 		(['processing', 'completed', 'resending'].includes(campaign.status)
@@ -135,14 +133,10 @@ const Campaign: React.FC = () => {
 			}}
 		>
 			{/* Render the selected tab component based on the current tab */}
-			{(tab === 'template' || tab === null) && (
-				<TemplatesStep />)}
-			{tab === 'contacts' && (
-				<ContactsStep />)}
-			{tab === 'review' && (
-				<ReviewStep />)}
-			{tab === 'builder' && (
-				<BuilderStep />)}
+			{(tab === 'template' || !tab) && <TemplatesStep />}
+			{tab === 'contacts' && <ContactsStep />}
+			{tab === 'review' && <ReviewStep />}
+			{tab === 'builder' && <BuilderStep />}
 			{isOverview && <Overview />}
 		</Provider>
 	);

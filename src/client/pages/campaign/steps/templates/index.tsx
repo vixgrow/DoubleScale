@@ -45,18 +45,17 @@ const Templates: React.FC = () => {
 	const { campaign, isLoading, saveCampaign, isSaving } =
 		useCampaignContext();
 	const navigate = useNavigate();
-	const adminEmail = ConfigAPI.getAdminEmail();
-	const blogName = ConfigAPI.getBlogName();
+
 	// Using template table structure
 	const defaultTemplate = {
-		name: __('New Email', 'quillcrm'),
+		name: campaign?.name || __('New Email', 'quillcrm'),
 		type: 'email',
 		subject: __('New Email', 'quillcrm'),
 		body: 'Email body',
 		settings: {
-			from_name: blogName,
-			from_email: adminEmail,
-			reply_to: adminEmail,
+			from_name: '',
+			from_email: '',
+			reply_to: '',
 			preview_text: '',
 			enable_utm: false,
 			utm_source: '',
@@ -139,33 +138,6 @@ const Templates: React.FC = () => {
 		navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 	};
 
-	// const templatesSettings = [
-	// 	{
-	// 		title: __('Template', 'quillcrm'),
-	// 		closable: false,
-	// 	},
-	// 	{
-	// 		title: __('A Variant', 'quillcrm'),
-	// 	},
-	// 	{
-	// 		title: __('B Variant', 'quillcrm'),
-	// 	},
-	// ];
-
-	// const tabs = campaign?.settings.ab_test
-	// 	? templates
-	// 	: [templates[0] ?? defaultTemplate];
-	// const tabList = tabs.map((template, index) => ({
-	// 	key: index.toString(),
-	// 	label: templatesSettings[index].title,
-	// 	children: (
-	// 		<Template
-	// 			template={template}
-	// 			updateTemplate={(data) => updateTemplate(index, data)}
-	// 		/>
-	// 	),
-	// 	closable: templatesSettings[index].closable ?? true,
-	// }));
 	const tabLength = 4;
 
 	const validate = (template: Partial<TemplateType>) => {
@@ -207,6 +179,29 @@ const Templates: React.FC = () => {
 				message: __('From email is not valid', 'quillcrm'),
 			});
 			return false;
+		}
+
+		if (template.settings.enable_utm) {
+			if (!template.settings.utm_source) {
+				createNotice({
+					type: 'error',
+					message: __('UTM Source is required', 'quillcrm'),
+				});
+			}
+
+			if (!template.settings.utm_medium) {
+				createNotice({
+					type: 'error',
+					message: __('UTM Medium is required', 'quillcrm'),
+				});
+			}
+
+			if (!template.settings.utm_name) {
+				createNotice({
+					type: 'error',
+					message: __('UTM Name is required', 'quillcrm'),
+				});
+			}
 		}
 
 		return true;
@@ -268,6 +263,20 @@ const Templates: React.FC = () => {
 		}
 	};
 
+	const handleOpenEmailBuilder = () => {
+		if (!templates[currentTab]) {
+			return;
+		}
+
+		// Validate the current template before opening the modal
+		if (!validate(templates[currentTab])) {
+			return;
+		}
+
+		setEmailBuilderSelectionVisible(true);
+	};
+
+	console.log('templates', templates);
 	return (
 		<div>
 			<PanelLayout
@@ -291,9 +300,9 @@ const Templates: React.FC = () => {
 				totalSteps={tabLength}
 				currentStep={currentTab}
 				onNext={() => {
-					if (currentTab + 1 < tabLength) {
-						setCurrentTab(currentTab + 1);
-					}
+					// if (currentTab + 1 < tabLength) {
+					// 	setCurrentTab(currentTab + 1);
+					// }
 				}}
 				onBack={() => {
 					if (currentTab - 1 >= 0) {
@@ -652,9 +661,7 @@ const Templates: React.FC = () => {
 						</div>
 					</PanelSettings>
 
-					<FeedBuilder
-						setVisibile={setEmailBuilderSelectionVisible}
-					/>
+					<FeedBuilder setVisibile={handleOpenEmailBuilder} />
 				</div>
 			</PanelLayout>
 			<EmailBuilderSelection

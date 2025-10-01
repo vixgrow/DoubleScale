@@ -10,7 +10,7 @@
  * internal dependencies
  */
 import { ProductBlockProps } from '..';
-import { useButtonSettings } from '../../../../context/ButtonSettingsContext';
+import { useButtonSettings } from '../../../../hooks/useButtonSettings';
 import { ImageBlockIcon } from '@quillcrm/components';
 
 export interface ProductBlockRendererProps {
@@ -47,6 +47,11 @@ export const ProductBlockRenderer: React.FC<ProductBlockRendererProps> = ({
 			fontWeight: buttonSettings.bold ? 'bold' : 'normal',
 			fontStyle: buttonSettings.italic ? 'italic' : 'normal',
 			textDecoration: 'none',
+			// Text truncation
+			whiteSpace: 'nowrap',
+			overflow: 'hidden',
+			textOverflow: 'ellipsis',
+			maxWidth: '100%',
 		};
 
 		// Add padding from global button settings
@@ -81,22 +86,23 @@ export const ProductBlockRenderer: React.FC<ProductBlockRendererProps> = ({
 		}
 	};
 
-	// Outer wrapper - always centered
-	const wrapperStyle: React.CSSProperties = {
-		textAlign: 'center',
-		width: '100%',
-	};
-
-	// Inner container with padding and styling
+	// Container with padding and styling - single container like other blocks
 	const containerStyle: React.CSSProperties = {
 		width: props.width,
+		maxWidth: '100%', // Ensure container doesn't exceed canvas width
 		padding: paddingString,
 		border: `1px solid ${props.borderColor}`,
 		borderRadius: '8px',
 		display: 'grid',
 		gap: '16px', // gap-4 equivalent
 		gridTemplateColumns: '1fr',
-		margin: '0 auto', // Center the card within the wrapper
+		margin: '0 auto', // Center the card
+		textAlign: 'center', // Center content
+		// Text wrapping for overflow - same as PreheaderBlock
+		wordWrap: 'break-word',
+		overflowWrap: 'break-word',
+		whiteSpace: 'normal',
+		boxSizing: 'border-box',
 	};
 
 	// Safely access image padding with defaults
@@ -137,6 +143,11 @@ export const ProductBlockRenderer: React.FC<ProductBlockRendererProps> = ({
 		margin: 0,
 		fontSize: '18px',
 		lineHeight: '1.4',
+		// Text truncation
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		maxWidth: '100%',
 	};
 
 	const descriptionStyle: React.CSSProperties = {
@@ -145,6 +156,13 @@ export const ProductBlockRenderer: React.FC<ProductBlockRendererProps> = ({
 		margin: 0,
 		fontSize: '14px',
 		lineHeight: '1.5',
+		// Text wrapping with 2-line truncation
+		display: '-webkit-box',
+		WebkitLineClamp: 2,
+		WebkitBoxOrient: 'vertical',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		maxWidth: '100%',
 	};
 
 	const priceStyle: React.CSSProperties = {
@@ -153,31 +171,34 @@ export const ProductBlockRenderer: React.FC<ProductBlockRendererProps> = ({
 		margin: 0,
 		fontSize: '18px',
 		lineHeight: '1.4',
+		// Text truncation
+		whiteSpace: 'nowrap',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		maxWidth: '100%',
 	};
 
 	const buttonStyle = getButtonStyle();
 
 	return (
-		<div style={wrapperStyle}>
-			<div style={containerStyle}>
-				{props.imageSrc ? (
-					<img
-						src={props.imageSrc}
-						alt={props.imageAlt}
-						style={imageStyle}
-					/>
-				) : (
-					<div style={imagePlaceholderStyle}>
-						<ImageBlockIcon width={57} height={57} />
-					</div>
-				)}
-				<h3 style={titleStyle}>{props.title}</h3>
-				<p style={descriptionStyle}>{props.description}</p>
-				<div style={priceStyle}>{props.price || '0.00 EGP'}</div>
-				<a href={props.buttonLink} style={buttonStyle}>
-					{props.buttonText}
-				</a>
-			</div>
+		<div style={containerStyle}>
+			{props.imageSrc ? (
+				<img
+					src={props.imageSrc}
+					alt={props.imageAlt}
+					style={imageStyle}
+				/>
+			) : (
+				<div style={imagePlaceholderStyle}>
+					<ImageBlockIcon width={57} height={57} />
+				</div>
+			)}
+			<h3 style={titleStyle}>{props.title}</h3>
+			<p style={descriptionStyle}>{props.description}</p>
+			<div style={priceStyle}>{props.price || '0.00 EGP'}</div>
+			<a href={props.buttonLink} style={buttonStyle}>
+				{props.buttonText}
+			</a>
 		</div>
 	);
 };

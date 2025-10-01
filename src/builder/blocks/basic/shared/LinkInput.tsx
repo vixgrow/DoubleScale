@@ -31,6 +31,22 @@ export const LinkInput: React.FC<LinkInputProps> = ({
         borderRadius: '0.5rem',
     },
 }) => {
+    const handleChange = (inputValue: string) => {
+        // If the input is empty, just pass it through
+        if (!inputValue.trim()) {
+            onChange(inputValue);
+            return;
+        }
+
+        // Check if the URL already has a protocol (http:// or https://)
+        const hasProtocol = /^https?:\/\//i.test(inputValue);
+
+        // If no protocol is present and the input is not empty, add https://
+        const processedValue = hasProtocol ? inputValue : `https://${inputValue}`;
+
+        onChange(processedValue);
+    };
+
     return (
         <div className="flex flex-col gap-2 text-[#333333]">
             <div className="flex items-center justify-between">
@@ -40,7 +56,7 @@ export const LinkInput: React.FC<LinkInputProps> = ({
             <Input
                 type="url"
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={(e) => handleChange(e.target.value)}
                 className={className}
                 style={style}
                 placeholder={placeholder}

@@ -66,8 +66,8 @@ class Social_Media_Block extends Email_Block {
 					'link'    => '',
 				),
 				'tiktok'     => array(
-					'enabled' => false,
-					'link'    => '',
+					'enabled' => true,
+					'link'    => 'https://tiktok.com',
 				),
 				'threads'    => array(
 					'enabled' => false,
@@ -112,10 +112,10 @@ class Social_Media_Block extends Email_Block {
 			'colorMode' => 'original',
 			'color'     => '',
 			'padding'   => array(
-				'top'    => 10,
-				'right'  => 10,
-				'bottom' => 10,
-				'left'   => 10,
+				'top'    => 16,
+				'right'  => 16,
+				'bottom' => 16,
+				'left'   => 16,
 			),
 		);
 	}

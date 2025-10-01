@@ -47,6 +47,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [selectedColor, setSelectedColor] = useState('#000000');
+	const [editorId] = useState(() => `rich-text-editor-${Math.random().toString(36).substr(2, 9)}`);
 
 	// Apply font changes when props change
 	useEffect(() => {
@@ -64,6 +65,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				'--editor-font-family',
 				fontFamily
 			);
+
+			// Apply font styles to existing content
+			const allElements = editorRef.current.querySelectorAll('*');
+			allElements.forEach((element: Element) => {
+				const htmlElement = element as HTMLElement;
+				htmlElement.style.fontSize = `${fontSize}px`;
+				htmlElement.style.fontFamily = fontFamily;
+			});
 		}
 	}, [fontSize, fontFamily]);
 
@@ -135,9 +144,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 							const newRange = newSelection.getRangeAt(0);
 							const newParent =
 								newRange.commonAncestorContainer.nodeType ===
-								Node.TEXT_NODE
+									Node.TEXT_NODE
 									? newRange.commonAncestorContainer
-											.parentElement
+										.parentElement
 									: (newRange.commonAncestorContainer as Element);
 
 							const newListItem = newParent?.closest('li');
@@ -305,44 +314,44 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 	return (
 		<div className={cn('relative', className)}>
-			{/* Inline styles for comprehensive font control */}
+			{/* Inline styles for comprehensive font control - scoped to this editor instance */}
 			<style>{`
-				.rich-text-editor-content {
+				.${editorId} {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content * {
+				.${editorId} * {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content p {
+				.${editorId} p {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 					margin: 0 !important;
 				}
-				.rich-text-editor-content div {
+				.${editorId} div {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content span {
+				.${editorId} span {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content ul {
+				.${editorId} ul {
 					list-style-type: disc !important;
 					padding-left: 20px !important;
 					margin: 10px 0 !important;
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content ol {
+				.${editorId} ol {
 					list-style-type: decimal !important;
 					padding-left: 20px !important;
 					margin: 10px 0 !important;
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content li {
+				.${editorId} li {
 					display: list-item !important;
 					margin: 5px 0 !important;
 					font-family: ${fontFamily} !important;
@@ -494,13 +503,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				contentEditable
 				suppressContentEditableWarning
 				className={cn(
-					'rich-text-editor-content',
+					editorId,
 					'min-h-[100px] p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-ring',
 					'prose prose-sm max-w-none',
-					'[&_*]:!font-[inherit] [&_*]:!text-[inherit]',
-					'[&_p]:!font-[inherit] [&_div]:!font-[inherit] [&_span]:!font-[inherit]',
-					'[&_li]:!font-[inherit]',
-					// Don't override list styles - let our custom CSS handle it
 					className
 				)}
 				style={
@@ -509,6 +514,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						fontSize: `${fontSize}px`,
 						fontFamily: fontFamily,
 						lineHeight: '1.5',
+						maxWidth: '287.2px',
 						// Force font inheritance for all child elements
 						'--font-size': `${fontSize}px`,
 						'--font-family': fontFamily,

@@ -26,6 +26,6 @@ export interface BuilderState {
 
 export interface LayoutTemplate {
   name: string;
-  number: number[];
+  width: number[];
   value: string;
 } 

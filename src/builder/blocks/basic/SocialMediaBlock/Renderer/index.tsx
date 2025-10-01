@@ -128,7 +128,7 @@ export const SocialMediaBlockRenderer: React.FC<
 			}}
 		>
 			<div className={cn('flex', alignmentClass)}>
-				<div className="grid grid-cols-6 gap-4">
+				<div className="flex flex-wrap gap-4 justify-center max-w-full" style={{ maxWidth: `${(iconSize.width + 16) * 6}px` }}>
 					{enabledPlatforms.map(([platformKey, platformData]) => {
 						const IconComponent =
 							socialMediaIcons[

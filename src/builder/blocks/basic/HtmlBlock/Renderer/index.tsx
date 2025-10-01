@@ -42,44 +42,16 @@ export const HtmlBlockRenderer: React.FC<HtmlBlockRendererProps> = ({
 		props.content === '<p>Insert your HTML here</p>' ||
 		props.content.trim() === '<p>Insert your HTML here</p>';
 
-	// Parse custom CSS safely
-	const customCssStyle = props.customCss
-		? (() => {
-				try {
-					return JSON.parse(props.customCss);
-				} catch {
-					return {};
-				}
-			})()
-		: {};
-
 	// Generate unique ID for this HTML block
 	const uniqueId = `html-block-${Math.random().toString(36).substr(2, 9)}`;
 
-	// Convert CSS object to CSS string for style tag
-	const cssString = props.customCss
-		? (() => {
-				try {
-					const cssObj = JSON.parse(props.customCss);
-					return Object.entries(cssObj)
-						.map(([key, value]) => {
-							// Convert camelCase to kebab-case
-							const cssKey = key
-								.replace(/([A-Z])/g, '-$1')
-								.toLowerCase();
-							return `${cssKey}: ${value} !important;`;
-						})
-						.join(' ');
-				} catch {
-					return '';
-				}
-			})()
-		: '';
+	// Use CSS string directly
+	const cssString = props.customCss || '';
 
 	return (
 		<div style={containerStyle}>
-			{/* Inject custom CSS with high specificity */}
-			{cssString && <style>{`#${uniqueId} * { ${cssString} }`}</style>}
+			{/* Inject custom CSS */}
+			{cssString && <style>{cssString}</style>}
 			<div
 				style={{
 					width: '100%',
@@ -102,7 +74,6 @@ export const HtmlBlockRenderer: React.FC<HtmlBlockRendererProps> = ({
 						id={uniqueId}
 						dangerouslySetInnerHTML={{ __html: props.content }}
 						style={{
-							...customCssStyle,
 							width: '100%',
 						}}
 					/>

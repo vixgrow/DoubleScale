@@ -22,7 +22,8 @@ import { Label } from '@/components/ui/label';
 import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
 
 const Contacts: React.FC = () => {
-	const { campaign, saveCampaign, updateSettings } = useCampaignContext();
+	const { campaign, saveCampaign, saveCampaignStep, updateSettings } =
+		useCampaignContext();
 	const navigate = useNavigate();
 	const filters = campaign?.settings.filters || [];
 	const setFilters = (newFilters: FilterType[]) => {
@@ -72,8 +73,18 @@ const Contacts: React.FC = () => {
 		if (!campaign) {
 			return;
 		}
-		await saveCampaign();
-		navigate(getToLink(`campaigns/${campaign.id}/review`));
+
+		// Save contacts step data with filters
+		const contactsStepData = {
+			filters: filters,
+			contacts_count: total,
+		};
+
+		// Save the step with contacts data and navigate only if successful
+		const saveSuccess = await saveCampaignStep('review', contactsStepData);
+		if (saveSuccess) {
+			navigate(getToLink(`campaigns/${campaign.id}/review`));
+		}
 	};
 
 	return (
@@ -82,7 +93,20 @@ const Contacts: React.FC = () => {
 			totalSteps={1}
 			currentStep={0}
 			onNext={save}
-			onBack={() => navigate(getToLink(`campaigns`))}
+			onBack={async () => {
+				// Save current contacts data before going back
+				const contactsStepData = {
+					filters: filters,
+					contacts_count: total,
+				};
+				const saveSuccess = await saveCampaignStep(
+					'template',
+					contactsStepData
+				);
+				if (saveSuccess) {
+					navigate(getToLink(`campaigns/${campaign?.id}/template`));
+				}
+			}}
 		>
 			{campaign && (
 				<div className="flex gap-6 items-start">
@@ -106,30 +130,44 @@ const Contacts: React.FC = () => {
 										onValueChange={setFilterBy}
 										className="flex gap-4"
 									>
-										<div className="flex items-center space-x-4 w-1/2 border border-gray-600 rounded-lg py-2 px-3 cursor-pointer">
+										<Label
+											htmlFor="list-tags"
+											className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
+												filterBy === 'list-tags'
+													? 'border-blue-500 bg-blue-50'
+													: 'border-gray-300'
+											}`}
+										>
 											<RadioGroupItem
 												value="list-tags"
 												id="list-tags"
 											/>
-											<Label htmlFor="list-tags">
+											<span>
 												{__(
-													'List and Tags',
+													'Lists and Tags',
 													'quillcrm'
 												)}
-											</Label>
-										</div>
-										<div className="flex items-center space-x-4 w-1/2">
+											</span>
+										</Label>
+										<Label
+											htmlFor="advanced"
+											className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
+												filterBy === 'advanced'
+													? 'border-blue-500 bg-blue-50'
+													: 'border-gray-300'
+											}`}
+										>
 											<RadioGroupItem
 												value="advanced"
 												id="advanced"
 											/>
-											<Label htmlFor="advanced">
+											<span>
 												{__(
 													'Advanced Filter',
 													'quillcrm'
 												)}
-											</Label>
-										</div>
+											</span>
+										</Label>
 									</RadioGroup>
 								</div>
 

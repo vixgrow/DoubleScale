@@ -40,24 +40,30 @@ class Text_Block extends Email_Block {
 	 */
 	public function get_default_props(): array {
 		return array(
-			'content'         => 'Your text here',
+			'content'         => '<p>Your text here</p>',
+			'hyperlink'       => 'https://',
 			'fontSize'        => 16,
 			'color'           => '#333',
-			'align'           => 'left',
-			'fontFamily'      => 'Arial, sans-serif',
+			'align'           => 'center',
+			'fontFamily'      => 'Arial',
 			'bold'            => false,
 			'italic'          => false,
 			'underline'       => false,
 			'line-through'    => false,
 			'lineHeight'      => '1.5',
 			'letterSpacing'   => '0px',
+			'borderRadius'    => '0px',
+			'borderWidth'     => '0px',
+			'linkColor'       => '#333',
 			'backgroundColor' => 'transparent',
 			'textAlign'       => 'left',
+			'listType'        => 'none',
+			'headingStyle'    => 'p',
 			'padding'         => array(
-				'top'    => 10,
-				'right'  => 10,
-				'bottom' => 10,
-				'left'   => 10,
+				'top'    => 4,
+				'right'  => 8,
+				'bottom' => 4,
+				'left'   => 8,
 			),
 		);
 	}

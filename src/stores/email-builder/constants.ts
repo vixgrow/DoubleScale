@@ -21,4 +21,13 @@ export const UPDATE_COLUMN = 'UPDATE_COLUMN';
 
 // Builder actions
 export const SET_BUILDER_STATE = 'SET_BUILDER_STATE';
-export const RESET_BUILDER = 'RESET_BUILDER'; 
+export const RESET_BUILDER = 'RESET_BUILDER';
+export const UPDATE_GLOBAL_SETTINGS = 'UPDATE_GLOBAL_SETTINGS';
+
+// History actions
+export const UNDO = 'UNDO';
+export const REDO = 'REDO';
+
+// Button settings actions
+export const UPDATE_BUTTON_SETTINGS = 'UPDATE_BUTTON_SETTINGS';
+export const SET_BUTTON_SETTINGS = 'SET_BUTTON_SETTINGS';

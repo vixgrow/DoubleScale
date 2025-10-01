@@ -74,7 +74,32 @@ export const ShapeSelectorControl: React.FC<ShapeSelectorControlProps> = ({
                         <Input
                             type="text"
                             value={value}
-                            onChange={(e) => onChange(e.target.value)}
+                            onChange={(e) => {
+                                const inputValue = e.target.value;
+                                // Only allow numbers and empty string
+                                if (inputValue === '' || /^\d+$/.test(inputValue)) {
+                                    // Check if value is within max limit
+                                    const numValue = parseInt(inputValue, 10);
+                                    if (inputValue === '' || (numValue >= 0 && numValue <= 9999)) {
+                                        onChange(inputValue);
+                                    }
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                // Allow: backspace, delete, tab, escape, enter, home, end, left, right, up, down
+                                if ([8, 9, 27, 13, 46, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+                                    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                                    (e.keyCode === 65 && e.ctrlKey === true) ||
+                                    (e.keyCode === 67 && e.ctrlKey === true) ||
+                                    (e.keyCode === 86 && e.ctrlKey === true) ||
+                                    (e.keyCode === 88 && e.ctrlKey === true)) {
+                                    return;
+                                }
+                                // Ensure that it is a number and stop the keypress
+                                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                                    e.preventDefault();
+                                }
+                            }}
                             className="pr-8 h-[43.2px]"
                             style={{
                                 borderColor: '#e5e5e5',

@@ -1,18 +1,18 @@
 /**
  * External dependencies
  */
-import type { Reducer } from 'redux';
 import { keyBy } from 'lodash';
+import type { Reducer } from 'redux';
 
 /**
  * Internal Dependencies
  */
 import {
+	ADD_BLOCK_TYPES,
 	SET_BLOCK_ADMIN_SETTINGS,
 	SET_BLOCK_RENDERER_SETTINGS,
-	ADD_BLOCK_TYPES,
 } from './constants';
-import type { BlockActionTypes, BlocksState } from './src/types';
+import type { BlockActionTypes, BlocksState } from './types';
 
 const initialState: BlocksState = {
 	unknown: {

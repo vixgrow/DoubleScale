@@ -52,6 +52,7 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 		setIsDialogOpen(open);
 	};
 
+
 	return (
 		<Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
@@ -106,7 +107,7 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 					</div>
 					<div className="flex flex-col gap-2 text-[#333333]">
 						<label className="text-sm font-medium">
-							{__('Custom CSS (JSON format)', 'quillcrm')}
+							{__('Custom CSS', 'quillcrm')}
 						</label>
 						<div className="relative flex w-full bg-[#C6DFF3] rounded-lg">
 							{/* Line numbers */}
@@ -122,7 +123,7 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 							<Textarea
 								value={tempCss}
 								onChange={(e) => setTempCss(e.target.value)}
-								placeholder='{"color": "#333", "fontSize": "16px"}'
+								placeholder=".my-class { color: #333; font-size: 16px; }"
 								className="min-h-[200px] font-mono text-sm leading-5 rounded-l-none"
 								style={{
 									border: 'none',
@@ -132,7 +133,7 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 						</div>
 						<p className="text-xs text-gray-500">
 							{__(
-								'Enter CSS properties as JSON object. Example: {"color": "#333", "fontSize": "16px"}',
+								'Enter CSS with selectors and properties. Example: .my-class { color: #333; font-size: 16px; }',
 								'quillcrm'
 							)}
 						</p>

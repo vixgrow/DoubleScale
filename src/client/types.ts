@@ -181,18 +181,18 @@ export type Template = {
 	type: string;
 	subject: string;
 	body: string;
-	settings: {
-		from_name: string;
-		from_email: string;
-		reply_to: string;
-		preview_text: string;
-		enable_utm: boolean;
-		utm_source: string;
-		utm_medium: string;
-		utm_name: string;
-		utm_term: string;
-		utm_content: string;
-	};
+	from_name: string;
+	from_email: string;
+	reply_to: string;
+	preview_text: string;
+	enable_utm: boolean;
+	utm_source: string;
+	utm_medium: string;
+	utm_name: string;
+	utm_term: string;
+	utm_content: string;
+	template_id?: number;
+	hidden?: number;
 	created_at?: string;
 	updated_at?: string;
 };
@@ -202,6 +202,7 @@ type CampaignSettings = {
 	contacts: number[];
 	filters: Filter[];
 	ab_test: boolean;
+	current_step?: string;
 };
 
 export type Filter = {

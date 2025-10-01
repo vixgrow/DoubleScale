@@ -35,7 +35,7 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 	width,
 	height = '',
 	onWidthChange,
-	onHeightChange = () => {},
+	onHeightChange = () => { },
 	widthLabel = __('Width', 'quillcrm'),
 	heightLabel = __('Height', 'quillcrm'),
 	widthOptions,
@@ -52,10 +52,6 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 		{ value: '75%', label: __('75%', 'quillcrm') },
 		{ value: '50%', label: __('50%', 'quillcrm') },
 		{ value: '25%', label: __('25%', 'quillcrm') },
-		{ value: '800px', label: __('800px', 'quillcrm') },
-		{ value: '600px', label: __('600px', 'quillcrm') },
-		{ value: '400px', label: __('400px', 'quillcrm') },
-		{ value: '300px', label: __('300px', 'quillcrm') },
 	];
 
 	// Default height options if not provided
@@ -99,7 +95,17 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 						<Input
 							type="text"
 							value={width}
-							onChange={(e) => onWidthChange(e.target.value)}
+							onChange={(e) => {
+								const value = e.target.value;
+								// Only allow numbers and empty string
+								if (value === '' || /^\d+$/.test(value)) {
+									const numValue = parseInt(value, 10);
+									// Check if value is within range (0-100) or empty
+									if (value === '' || (numValue >= 0 && numValue <= 100)) {
+										onWidthChange(value);
+									}
+								}
+							}}
 							className="pr-8 h-10"
 							style={{
 								borderColor: '#e5e5e5',
@@ -144,7 +150,17 @@ export const WidthHeightControl: React.FC<WidthHeightControlProps> = ({
 							<Input
 								type="text"
 								value={height}
-								onChange={(e) => onHeightChange(e.target.value)}
+								onChange={(e) => {
+									const value = e.target.value;
+									// Only allow numbers and empty string
+									if (value === '' || /^\d+$/.test(value)) {
+										const numValue = parseInt(value, 10);
+										// Check if value is within range (max 20) or empty
+										if (value === '' || numValue <= 20) {
+											onHeightChange(value);
+										}
+									}
+								}}
 								className="pr-8 h-10"
 								style={{
 									borderColor: '#e5e5e5',

@@ -42,7 +42,6 @@ import EmailAnalytics from '../pages/emails-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 import SalesPipeline from '../pages/sales-pipeline';
-import EmailBuilder from '../../builder';
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -241,13 +240,6 @@ registerAdminPage('emails-analytics', {
 	path: 'emails-analytics',
 	component: () => <EmailAnalytics />,
 	label: __('Emails Analytics', 'quillcrm'),
-	hidden: true,
-});
-
-registerAdminPage('builder', {
-	path: 'builder',
-	component: () => <EmailBuilder />,
-	label: __('Builder', 'quillcrm'),
 	hidden: true,
 });
 

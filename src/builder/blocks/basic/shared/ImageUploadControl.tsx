@@ -55,15 +55,23 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
     onRotationChange,
 }) => {
     const [imageData, setImageData] = useState<ImageData | null>(null);
+    const [uniqueUploadId] = useState(() => `${uploadId}-${Math.random().toString(36).substr(2, 9)}`);
+
+    // Reset imageData when value becomes empty
+    useEffect(() => {
+        if (!value || value.trim() === '') {
+            setImageData(null);
+        }
+    }, [value]);
 
     // Check if WordPress media library is available when component mounts
     useEffect(() => {
         console.log(
-            `${uploadId} mounted. Checking wp.media availability...`
+            `${uniqueUploadId} mounted. Checking wp.media availability...`
         );
         console.log('window.wp:', typeof window.wp);
         console.log('window.wp?.media:', typeof window.wp?.media);
-    }, [uploadId]);
+    }, [uniqueUploadId]);
 
     const openMediaLibrary = () => {
         // Check if wp.media is available
@@ -115,7 +123,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
                 typeof window.wp?.media
             );
             // Fallback to native file input if wp.media is not available
-            document.getElementById(`${uploadId}-upload`)?.click();
+            document.getElementById(`${uniqueUploadId}-upload`)?.click();
         }
     };
 
@@ -156,7 +164,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
             frame.open();
         } else {
             console.error('WordPress media library is not available');
-            document.getElementById(`${uploadId}-replace`)?.click();
+            document.getElementById(`${uniqueUploadId}-replace`)?.click();
         }
     };
 
@@ -240,7 +248,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            id={`${uploadId}-replace`}
+                            id={`${uniqueUploadId}-replace`}
                             onChange={handleFileUpload}
                         />
                         <Button
@@ -269,7 +277,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
                         onChange={handleFileUpload}
                         accept="image/*"
                         className="hidden"
-                        id={`${uploadId}-upload`}
+                        id={`${uniqueUploadId}-upload`}
                     />
                     <div
                         className="cursor-pointer"

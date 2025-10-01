@@ -11,8 +11,6 @@ import { useDispatch } from '@wordpress/data';
  */
 import { useReducer, useRef } from 'react';
 import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
-import { Tabs, Skeleton } from 'antd';
-import { CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
@@ -21,10 +19,10 @@ import './style.scss';
 import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
-import InitialStep from './steps/initial';
 import TemplatesStep from './steps/templates';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
+import BuilderStep from '../../../builder';
 import { Campaign as CampaignType } from '@quillcrm/client';
 import Overview from './overview';
 
@@ -46,6 +44,23 @@ const Campaign: React.FC = () => {
 	useEffect(() => {
 		fetchCampaign();
 	}, [id]);
+
+	// Redirect to saved current step when campaign is loaded
+	useEffect(() => {
+		if (campaign && !tab) {
+			const targetStep = campaign.settings?.current_step || 'template';
+			navigate(getToLink(`campaigns/${id}/${targetStep}`), {
+				replace: true,
+			});
+		}
+	}, [campaign, tab, id, navigate]);
+
+	// Save current step when tab changes
+	useEffect(() => {
+		if (campaign && tab && tab !== campaign.settings?.current_step) {
+			saveCampaignStep(tab);
+		}
+	}, [tab, campaign]);
 
 	const fetchCampaign = async () => {
 		setLoading(true);
@@ -90,6 +105,46 @@ const Campaign: React.FC = () => {
 		}
 	};
 
+	const saveCampaignStep = async (step: string, stepData?: any) => {
+		if (!campaign) return false;
+
+		try {
+			const updatedSettings = {
+				...campaign.settings,
+				current_step: step,
+				...stepData, // Merge any additional step-specific data
+			};
+
+			const response = (await apiFetch({
+				path: `/qc/v1/campaigns/${campaign.id}`,
+				method: 'POST',
+				data: {
+					...campaign,
+					settings: updatedSettings,
+				},
+			})) as CampaignType;
+
+			// Update local state with the response
+			setCampaign(response);
+			return true;
+		} catch (error) {
+			console.error('Failed to save current step:', error);
+			createNotice({
+				type: 'error',
+				message: __(
+					'Failed to save step data. Please try again.',
+					'quillcrm'
+				),
+			});
+			return false;
+		}
+	};
+
+	if (!campaign) {
+		//TODO: change for shimmer
+		return false;
+	}
+
 	const canGoNext = (nextTab: string) => {
 		if (!campaign) {
 			return false;
@@ -111,61 +166,6 @@ const Campaign: React.FC = () => {
 		return canGo;
 	};
 
-	// Switch to the new tab items
-	const tabItems = [
-		{
-			key: 'information',
-			label: __('Information', 'quillcrm'),
-			children: <InitialStep />,
-			icon:
-				tab === 'information' || !tab ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-		},
-		{
-			key: 'template',
-			label: __('Template', 'quillcrm'),
-			children: <TemplatesStep />,
-			icon:
-				tab === 'template' ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-			disabled: !canGoNext('template'),
-		},
-		{
-			key: 'contacts',
-			label: __('Contacts', 'quillcrm'),
-			children: <ContactsStep />,
-			icon:
-				tab === 'contacts' ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-			disabled: !canGoNext('contacts'),
-		},
-		{
-			key: 'review',
-			label: __('Review', 'quillcrm'),
-			children: <ReviewStep />,
-			icon:
-				tab === 'review' ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-			disabled: !canGoNext('review'),
-		},
-	];
-
-	if (!campaign) {
-		return <Skeleton active />;
-	}
-
 	const isOverview =
 		(campaign.status === 'schedule' && tab === 'overview') ||
 		(['processing', 'completed', 'resending'].includes(campaign.status)
@@ -181,37 +181,15 @@ const Campaign: React.FC = () => {
 				setIsLoading: setLoading,
 				setIsSaving: setIsSaving,
 				saveCampaign,
+				saveCampaignStep,
 				...$actions,
 			}}
 		>
 			{/* Render the selected tab component based on the current tab */}
-			{tab === 'template' ? (
-				<TemplatesStep />
-			) : (
-				<>
-					{!['processing', 'completed', 'resending'].includes(
-						campaign.status
-					) &&
-						tab !== 'overview' && (
-							<Tabs
-								defaultActiveKey="information"
-								activeKey={
-									tab === 'overview' ? 'information' : tab
-								}
-								tabPosition="left"
-								tabBarStyle={{ width: 200 }}
-								items={tabItems}
-								onChange={(key) => {
-									if (canGoNext(key)) {
-										navigate(
-											getToLink(`campaigns/${id}/${key}`)
-										);
-									}
-								}}
-							/>
-						)}
-				</>
-			)}
+			{tab === 'template' && <TemplatesStep />}
+			{tab === 'contacts' && <ContactsStep />}
+			{tab === 'review' && <ReviewStep />}
+			{tab === 'builder' && <BuilderStep />}
 			{isOverview && <Overview />}
 		</Provider>
 	);

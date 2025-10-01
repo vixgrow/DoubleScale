@@ -42,6 +42,10 @@ class Send_Campaign_Email extends Action {
 
 
 
+
+
+
+
 	/**
 	 * Action Name
 	 *
@@ -94,51 +98,54 @@ class Send_Campaign_Email extends Action {
 	 * @param Automation_Contact_Model $contact Contact Model.
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
-		$campaign_id = $step->get_setting( 'campaign_id' );
-		$campaign    = Campaign_Model::find( $campaign_id );
+		try {
+			$campaign_id = $step->get_setting( 'campaign_id' );
+			$campaign    = Campaign_Model::find( $campaign_id );
 
-		if ( ! $campaign ) {
+			if ( ! $campaign ) {
+				return false;
+			}
+
+			$contact = $automation_contact->contact;
+
+			// Validate contact has email
+			if ( empty( $contact->email ) ) {
+				return false;
+			}
+
+			// Use process_campaign_message for the actual sending
+			$email_processor = Email_Processing::instance();
+			// Get template for campaign (with A/B testing support)
+			$template_id = $email_processor->get_template_for_contact( $campaign, $contact );
+			if ( ! $template_id ) {
+				return false;
+			}
+
+			// Check for existing message to prevent duplicates
+			$existing_message = $this->check_existing_campaign_message( $contact, $template_id );
+			if ( $existing_message ) {
+				return true; // Already sent, skip
+			}
+
+			// Create campaign message tracking record
+			$campaign_message_data = array(
+				'contact_id'  => $contact->id,
+				'template_id' => $template_id,
+				'mode'        => Tracking_Model::MODE_EMAIL,
+				'source_type' => Message_Source_Types::AUTOMATION,
+				'source_id'   => $automation->id,
+				'recipient'   => $contact->email,
+				'status'      => 'pending',
+				'hash_key'    => Utils::generate_hash_key(),
+			);
+
+			$campaign_message = Tracking_Model::create( $campaign_message_data );
+
+			$email_processor->process_campaign_message( $campaign, $contact, $campaign_message );
+			return true;
+		} catch ( \Exception $e ) {
 			return false;
 		}
-
-		$contact = $automation_contact->contact;
-
-		// Validate contact has email
-		if ( empty( $contact->email ) ) {
-			return false;
-		}
-
-		// Get template for campaign (with A/B testing support)
-		$template_id = $this->get_template_id( $campaign, $contact );
-		if ( ! $template_id ) {
-			return false;
-		}
-
-		// Check for existing message to prevent duplicates
-		$existing_message = $this->check_existing_campaign_message( $contact, $template_id );
-		if ( $existing_message ) {
-			return true; // Already sent, skip
-		}
-
-		// Create campaign message tracking record
-		$campaign_message_data = array(
-			'contact_id'  => $contact->id,
-			'template_id' => $template_id,
-			'mode'        => Tracking_Model::MODE_EMAIL,
-			'source_type' => Message_Source_Types::AUTOMATION,
-			'source_id'   => $automation->id,
-			'recipient'   => $contact->email,
-			'status'      => 'pending',
-			'hash_key'    => Utils::generate_hash_key(),
-		);
-
-		$campaign_message = Tracking_Model::create( $campaign_message_data );
-
-		// Use process_campaign_message for the actual sending
-		$email_processor = Email_Processing::instance();
-		$email_processor->process_campaign_message( $campaign, $contact, $campaign_message );
-
-		return true;
 	}
 
 	/**

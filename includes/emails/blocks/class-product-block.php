@@ -247,41 +247,15 @@ class Product_Block extends Email_Block {
 			'padding'         => $this->format_button_padding( $button_settings['padding'] ),
 		);
 
-		// Apply button type specific styling
-		switch ( $button_style ) {
-			case 'primary':
-				return array_merge(
-					$base_style,
-					array(
-						'color'            => $button_settings['textColor'],
-						'background-color' => $button_settings['backgroundColor'],
-						'border'           => $button_settings['borderWidth'] . 'px solid ' . $button_settings['borderColor'],
-					)
-				);
-
-			case 'secondary':
-				return array_merge(
-					$base_style,
-					array(
-						'color'            => $button_settings['backgroundColor'],
-						'background-color' => 'transparent',
-						'border'           => $button_settings['borderWidth'] . 'px solid ' . $button_settings['backgroundColor'],
-					)
-				);
-
-			case 'tertiary':
-				return array_merge(
-					$base_style,
-					array(
-						'color'            => $button_settings['backgroundColor'],
-						'background-color' => 'transparent',
-						'border'           => 'none',
-					)
-				);
-
-			default:
-				return $base_style;
-		}
+		// Apply global button settings (all button types use the same styling)
+		return array_merge(
+			$base_style,
+			array(
+				'color'            => $button_settings['textColor'],
+				'background-color' => $button_settings['backgroundColor'],
+				'border'           => $button_settings['borderWidth'] . 'px solid ' . $button_settings['borderColor'],
+			)
+		);
 	}
 
 	/**

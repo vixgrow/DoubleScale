@@ -58,32 +58,13 @@ export const ProductBlockRenderer: React.FC<ProductBlockRendererProps> = ({
 		const buttonPaddingString = `${buttonSettings.padding.top * 2}px ${buttonSettings.padding.right * 4}px ${buttonSettings.padding.bottom * 2}px ${buttonSettings.padding.left * 4}px`;
 		baseStyle.padding = buttonPaddingString;
 
-		// Apply button type specific styling based on global settings
-		switch (props.buttonStyle) {
-			case 'primary':
-				return {
-					...baseStyle,
-					color: buttonSettings.textColor,
-					backgroundColor: buttonSettings.backgroundColor,
-					border: `${buttonSettings.borderWidth}px solid ${buttonSettings.borderColor}`,
-				};
-			case 'secondary':
-				return {
-					...baseStyle,
-					color: buttonSettings.backgroundColor,
-					backgroundColor: 'transparent',
-					border: `${buttonSettings.borderWidth}px solid ${buttonSettings.backgroundColor}`,
-				};
-			case 'tertiary':
-				return {
-					...baseStyle,
-					color: buttonSettings.backgroundColor,
-					backgroundColor: 'transparent',
-					border: 'none',
-				};
-			default:
-				return baseStyle;
-		}
+		// Apply global button settings (all button types use the same styling)
+		return {
+			...baseStyle,
+			color: buttonSettings.textColor,
+			backgroundColor: buttonSettings.backgroundColor,
+			border: `${buttonSettings.borderWidth}px solid ${buttonSettings.borderColor}`,
+		};
 	};
 
 	// Container with padding and styling - single container like other blocks

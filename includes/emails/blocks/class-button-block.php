@@ -173,27 +173,10 @@ class Button_Block extends Email_Block {
 			'text-align'      => 'center',
 		);
 
-		// Apply button type styling using global settings
-		switch ( $props['buttonStyle'] ) {
-			case 'primary':
-				$button_styles['background-color'] = $global_settings['backgroundColor'];
-				$button_styles['border']           = $global_settings['borderWidth'] . 'px solid ' . $global_settings['borderColor'];
-				$button_styles['color']            = $global_settings['textColor'];
-				break;
-
-			case 'secondary':
-				$button_styles['background-color'] = 'transparent';
-				$button_styles['border']           = $global_settings['borderWidth'] . 'px solid ' . $global_settings['backgroundColor'];
-				$button_styles['color']            = $global_settings['backgroundColor'];
-				break;
-
-			case 'tertiary':
-				$button_styles['background-color'] = 'transparent';
-				$button_styles['border']           = '0';
-				$button_styles['color']            = $global_settings['backgroundColor'];
-				$button_styles['text-decoration']  = 'underline';
-				break;
-		}
+		// Apply global button settings (all button types use the same styling)
+		$button_styles['background-color'] = $global_settings['backgroundColor'];
+		$button_styles['border']           = $global_settings['borderWidth'] . 'px solid ' . $global_settings['borderColor'];
+		$button_styles['color']            = $global_settings['textColor'];
 
 		$button_style = $this->build_style_string( $button_styles );
 

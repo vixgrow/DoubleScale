@@ -384,8 +384,8 @@ class REST_Campaign_Controller extends REST_Controller {
 			$page     = $request->get_param( 'page' ) ?? 1;
 			$from     = $request->get_param( 'from' ) ?? null;
 			$to       = $request->get_param( 'to' ) ?? null;
-
-			$query = Campaign_Model::query();
+			$type     = $request->get_param( 'type' ) ?? null;
+			$query    = Campaign_Model::query();
 
 			// Get total count before applying filters
 			$total_count = $query->count();

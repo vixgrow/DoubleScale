@@ -63,32 +63,13 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 		const paddingString = `${buttonSettings.padding.top * 2}px ${buttonSettings.padding.right * 4}px ${buttonSettings.padding.bottom * 2}px ${buttonSettings.padding.left * 4}px`;
 		baseStyle.padding = paddingString;
 
-		// Apply button type specific styling based on global settings
-		switch (props.buttonStyle) {
-			case 'primary':
-				return {
-					...baseStyle,
-					color: buttonSettings.textColor,
-					backgroundColor: buttonSettings.backgroundColor,
-					border: `${buttonSettings.borderWidth}px solid ${buttonSettings.borderColor}`,
-				};
-			case 'secondary':
-				return {
-					...baseStyle,
-					color: buttonSettings.textColor,
-					backgroundColor: 'transparent',
-					border: `${buttonSettings.borderWidth}px solid ${buttonSettings.borderColor}`,
-				};
-			case 'tertiary':
-				return {
-					...baseStyle,
-					color: buttonSettings.textColor,
-					backgroundColor: 'transparent',
-					border: 'none',
-				};
-			default:
-				return baseStyle;
-		}
+		// Apply global button settings (all button types use the same styling)
+		return {
+			...baseStyle,
+			color: buttonSettings.textColor,
+			backgroundColor: buttonSettings.backgroundColor,
+			border: `${buttonSettings.borderWidth}px solid ${buttonSettings.borderColor}`,
+		};
 	};
 
 	// Handle alignment

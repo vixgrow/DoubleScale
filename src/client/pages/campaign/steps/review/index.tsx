@@ -22,11 +22,13 @@ import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { isEmpty, isString } from 'lodash';
 
 const Review: React.FC = () => {
-	const { campaign, isLoading, saveCampaign, isSaving } =
+	const { campaign, isLoading, saveCampaign, saveCampaignStep, isSaving } =
 		useCampaignContext();
 	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
-	const [runType, setRunType] = useState<string>(campaign && campaign.status !== 'draft' ? campaign.status : 'processing');
+	const [runType, setRunType] = useState<string>(
+		campaign && campaign.status !== 'draft' ? campaign.status : 'processing'
+	);
 	const [executeAt, setExecuteAt] = useState<string>(
 		campaign?.execute_at || new Date().toISOString()
 	);
@@ -61,10 +63,30 @@ const Review: React.FC = () => {
 		}
 
 		try {
-			await saveCampaign(data);
-			navigate(getToLink(`campaigns/${campaign.id}/overview`));
+			// Save review step data
+			const reviewStepData = {
+				run_type: runType,
+				execute_at: runType === 'schedule' ? executeAt : null,
+			};
+
+			// Save the final step data and campaign status
+			const saveSuccess = await saveCampaignStep(
+				'completed',
+				reviewStepData
+			);
+			if (saveSuccess) {
+				await saveCampaign(data);
+				navigate(getToLink(`campaigns/${campaign.id}/overview`));
+			}
 		} catch (error) {
 			console.error(error);
+			createNotice({
+				type: 'error',
+				message: __(
+					'Failed to save campaign. Please try again.',
+					'quillcrm'
+				),
+			});
 		}
 	};
 
@@ -126,13 +148,27 @@ const Review: React.FC = () => {
 					<div className="qcrm-review-actions">
 						<Button
 							type="default"
-							onClick={() =>
-								navigate(
-									getToLink(
-										`campaigns/${campaign.id}/contacts`
-									)
-								)
-							}
+							onClick={async () => {
+								// Save current review data before going back
+								const reviewStepData = {
+									run_type: runType,
+									execute_at:
+										runType === 'schedule'
+											? executeAt
+											: null,
+								};
+								const saveSuccess = await saveCampaignStep(
+									'contacts',
+									reviewStepData
+								);
+								if (saveSuccess) {
+									navigate(
+										getToLink(
+											`campaigns/${campaign.id}/contacts`
+										)
+									);
+								}
+							}}
 						>
 							{__('Back', 'quillcrm')}
 						</Button>

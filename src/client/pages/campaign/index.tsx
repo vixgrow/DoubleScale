@@ -10,7 +10,7 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { useReducer, useRef } from 'react';
-import { useNavigate, useParams } from '@quillcrm/navigation';
+import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
 
 /**
  * Internal dependencies
@@ -44,6 +44,23 @@ const Campaign: React.FC = () => {
 	useEffect(() => {
 		fetchCampaign();
 	}, [id]);
+
+	// Redirect to saved current step when campaign is loaded
+	useEffect(() => {
+		if (campaign && !tab) {
+			const targetStep = campaign.settings?.current_step || 'template';
+			navigate(getToLink(`campaigns/${id}/${targetStep}`), {
+				replace: true,
+			});
+		}
+	}, [campaign, tab, id, navigate]);
+
+	// Save current step when tab changes
+	useEffect(() => {
+		if (campaign && tab && tab !== campaign.settings?.current_step) {
+			saveCampaignStep(tab);
+		}
+	}, [tab, campaign]);
 
 	const fetchCampaign = async () => {
 		setLoading(true);
@@ -88,6 +105,41 @@ const Campaign: React.FC = () => {
 		}
 	};
 
+	const saveCampaignStep = async (step: string, stepData?: any) => {
+		if (!campaign) return false;
+
+		try {
+			const updatedSettings = {
+				...campaign.settings,
+				current_step: step,
+				...stepData, // Merge any additional step-specific data
+			};
+
+			const response = (await apiFetch({
+				path: `/qc/v1/campaigns/${campaign.id}`,
+				method: 'POST',
+				data: {
+					...campaign,
+					settings: updatedSettings,
+				},
+			})) as CampaignType;
+
+			// Update local state with the response
+			setCampaign(response);
+			return true;
+		} catch (error) {
+			console.error('Failed to save current step:', error);
+			createNotice({
+				type: 'error',
+				message: __(
+					'Failed to save step data. Please try again.',
+					'quillcrm'
+				),
+			});
+			return false;
+		}
+	};
+
 	if (!campaign) {
 		//TODO: change for shimmer
 		return false;
@@ -129,11 +181,12 @@ const Campaign: React.FC = () => {
 				setIsLoading: setLoading,
 				setIsSaving: setIsSaving,
 				saveCampaign,
+				saveCampaignStep,
 				...$actions,
 			}}
 		>
 			{/* Render the selected tab component based on the current tab */}
-			{(tab === 'template' || !tab) && <TemplatesStep />}
+			{tab === 'template' && <TemplatesStep />}
 			{tab === 'contacts' && <ContactsStep />}
 			{tab === 'review' && <ReviewStep />}
 			{tab === 'builder' && <BuilderStep />}

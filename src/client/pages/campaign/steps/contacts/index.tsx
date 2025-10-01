@@ -22,7 +22,8 @@ import { Label } from '@/components/ui/label';
 import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
 
 const Contacts: React.FC = () => {
-	const { campaign, saveCampaign, updateSettings } = useCampaignContext();
+	const { campaign, saveCampaign, saveCampaignStep, updateSettings } =
+		useCampaignContext();
 	const navigate = useNavigate();
 	const filters = campaign?.settings.filters || [];
 	const setFilters = (newFilters: FilterType[]) => {
@@ -72,8 +73,18 @@ const Contacts: React.FC = () => {
 		if (!campaign) {
 			return;
 		}
-		await saveCampaign();
-		navigate(getToLink(`campaigns/${campaign.id}/review`));
+
+		// Save contacts step data with filters
+		const contactsStepData = {
+			filters: filters,
+			contacts_count: total,
+		};
+
+		// Save the step with contacts data and navigate only if successful
+		const saveSuccess = await saveCampaignStep('review', contactsStepData);
+		if (saveSuccess) {
+			navigate(getToLink(`campaigns/${campaign.id}/review`));
+		}
 	};
 
 	return (
@@ -82,7 +93,20 @@ const Contacts: React.FC = () => {
 			totalSteps={1}
 			currentStep={0}
 			onNext={save}
-			onBack={() => navigate(getToLink(`campaigns`))}
+			onBack={async () => {
+				// Save current contacts data before going back
+				const contactsStepData = {
+					filters: filters,
+					contacts_count: total,
+				};
+				const saveSuccess = await saveCampaignStep(
+					'template',
+					contactsStepData
+				);
+				if (saveSuccess) {
+					navigate(getToLink(`campaigns/${campaign?.id}/template`));
+				}
+			}}
 		>
 			{campaign && (
 				<div className="flex gap-6 items-start">

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import './style.scss';
 import { __ } from '@wordpress/i18n';
+import { Automation } from '@quillcrm/client';
 
 interface StepReportProps {
-	automation?: any;
+	automation: Automation | null;
 }
 
 interface StepData {
@@ -88,36 +89,36 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 
-	useEffect(() => {
-		const fetchStepData = async () => {
-			if (!automation?.id) {
-				setLoading(false);
-				return;
+	const fetchStepData = useCallback(async () => {
+		if (!automation?.id) {
+			setLoading(false);
+			return;
+		}
+
+		try {
+			setLoading(true);
+			const response = (await apiFetch({
+				path: `/qc/v1/automation-reports/${automation.id}/steps-report`,
+				method: 'GET',
+			})) as StepsReportResponse;
+
+			if (response.steps && Array.isArray(response.steps)) {
+				setStepData(response.steps);
+				setOverallConversion(response.overall_conversion || 0);
+			} else {
+				setError('Invalid response format');
 			}
-
-			try {
-				setLoading(true);
-				const response = (await apiFetch({
-					path: `/qc/v1/automation-reports/${automation.id}/steps-report`,
-					method: 'GET',
-				})) as StepsReportResponse;
-
-				if (response.steps && Array.isArray(response.steps)) {
-					setStepData(response.steps);
-					setOverallConversion(response.overall_conversion || 0);
-				} else {
-					setError('Invalid response format');
-				}
-			} catch (err) {
-				console.error('Error fetching step data:', err);
-				setError('Failed to fetch step data');
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchStepData();
+		} catch (err) {
+			console.error('Error fetching step data:', err);
+			setError('Failed to fetch step data');
+		} finally {
+			setLoading(false);
+		}
 	}, [automation?.id]);
+
+	useEffect(() => {
+		fetchStepData();
+	}, [fetchStepData]);
 
 	const getProgressColor = (rate: number): string => {
 		if (rate >= 90) return '#4F8EF7'; // Blue for excellent

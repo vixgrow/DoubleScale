@@ -33,6 +33,7 @@ import Templates from '../pages/templates';
 import Template from '../pages/template';
 import Automations from '../pages/automations';
 import Automation from '../pages/automation';
+import AutomationReports from '../pages/automation-reports';
 import AbandonedCartsList from '../pages/abandond-carts';
 import Setting from '../pages/settings';
 import Dashboard from '../pages/home';
@@ -153,6 +154,13 @@ registerAdminPage('automation', {
 	path: 'automations/:id/:tab?',
 	component: () => <Automation />,
 	label: __('Automation', 'quillcrm'),
+	hidden: true,
+});
+
+registerAdminPage('automation-reports', {
+	path: 'automations/:id/reports',
+	component: () => <AutomationReports />,
+	label: __('Automation Reports', 'quillcrm'),
 	hidden: true,
 });
 

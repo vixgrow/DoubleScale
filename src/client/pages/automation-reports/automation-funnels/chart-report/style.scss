@@ -1,46 +1,8 @@
 .chart-report-container {
-	// Responsive adjustments for the chart container
-	.recharts-wrapper {
-		max-width: 100%;
-
-		.recharts-cartesian-axis-tick {
-			text {
-				font-size: 11px;
-				fill: hsl(var(--muted-foreground));
-			}
-		}
-
-		.recharts-cartesian-grid {
-			line {
-				stroke: hsl(var(--border));
-				opacity: 0.5;
-			}
-		}
-
-		.recharts-legend-wrapper {
-			.recharts-legend-item {
-				.recharts-legend-item-text {
-					color: hsl(var(--foreground));
-					font-size: 14px;
-				}
-			}
-		}
-	}
-
-	// Responsive Design
-	@media (max-width: 768px) {
-		.recharts-wrapper {
-			.recharts-cartesian-axis-tick {
-				text {
-					font-size: 10px;
-				}
-			}
-		}
-	}
-
 	// Loading and error states
 	.loading-spinner,
-	.error-message {
+	.error-message,
+	.empty-state {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -52,5 +14,49 @@
 
 	.error-message {
 		color: hsl(var(--destructive));
+	}
+
+	.empty-state {
+		color: hsl(var(--muted-foreground));
+		font-style: italic;
+	}
+
+	.chart-summary {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 20px;
+		padding: 10px;
+		background-color: hsl(var(--muted) / 0.3);
+		border-radius: 4px;
+
+		.chart-summary-item {
+			display: flex;
+			align-items: center;
+
+			.label {
+				font-weight: 500;
+				margin-right: 8px;
+			}
+
+			.value {
+				font-weight: 600;
+				font-size: 18px;
+				color: hsl(var(--primary));
+			}
+		}
+	}
+
+	.chart-wrapper {
+		position: relative;
+		height: 400px;
+		width: 100%;
+	}
+
+	// Responsive Design
+	@media (max-width: 768px) {
+		.chart-summary {
+			flex-direction: column;
+			gap: 10px;
+		}
 	}
 }

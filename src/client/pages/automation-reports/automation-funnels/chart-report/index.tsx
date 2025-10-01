@@ -1,33 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Line, XAxis, YAxis, CartesianGrid, ComposedChart } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-	ChartConfig,
-	ChartContainer,
-	ChartTooltip,
-	ChartTooltipContent,
-} from '@/components/ui/chart';
-import { Bar } from 'recharts';
 import './style.scss';
+import { Automation } from '@quillcrm/client';
+import Chart from 'chart.js/auto';
 
 interface ChartReportProps {
-	automation?: any;
+	automation: Automation | null;
 }
 
 interface FunnelDataItem {
 	label: string;
 	value: number;
 	percentage: number;
+	step_id: number | null;
+	step_type: string;
+}
+
+interface FunnelResponse {
+	funnel_data: FunnelDataItem[];
+	total_contacts: number;
+	completion_rate: number;
+	automation: {
+		id: number;
+		name: string;
+	};
 }
 
 const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 	const [funnelData, setFunnelData] = useState<FunnelDataItem[]>([]);
+	const [totalContacts, setTotalContacts] = useState<number>(0);
+	const [completionRate, setCompletionRate] = useState<number>(0);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const chartRef = useRef<HTMLCanvasElement>(null);
+	const chartInstance = useRef<Chart | null>(null);
 
-	const fetchFunnelData = async () => {
+	const fetchFunnelData = useCallback(async () => {
 		if (!automation?.id) {
 			setFunnelData([]);
 			setLoading(false);
@@ -41,11 +51,15 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 
 			const response = (await apiFetch({
 				path: `/qc/v1/automation-reports/${automation.id}/get-chart-report`,
-			})) as any;
+			})) as FunnelResponse;
 
 			console.log('response', response);
 
-			setFunnelData(response.funnel_data || []);
+			if (response.funnel_data) {
+				setFunnelData(response.funnel_data || []);
+				setTotalContacts(response.total_contacts || 0);
+				setCompletionRate(response.completion_rate || 0);
+			}
 			setLoading(false);
 			setError(null);
 		} catch (error: any) {
@@ -56,40 +70,128 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 				error.message || __('Failed to fetch funnel data', 'quillcrm')
 			);
 		}
-	};
+	}, [automation?.id]);
 
 	useEffect(() => {
 		fetchFunnelData();
-	}, [automation?.id]);
+	}, [fetchFunnelData]);
 
-	const getChartData = () => {
-		// Fallback data if no real data is available
-		const chartData = funnelData.length > 0 ? funnelData : [];
-		// Transform data for Recharts format
-		return chartData.map((item) => ({
-			name: item.label,
-			contacts: item.value,
-			conversionRate: item.percentage,
-		}));
-	};
+	useEffect(() => {
+		if (chartRef.current && funnelData.length > 0) {
+			// Destroy existing chart if it exists
+			if (chartInstance.current) {
+				chartInstance.current.destroy();
+			}
 
-	const chartConfig: ChartConfig = {
-		contacts: {
-			label: __('Contacts', 'quillcrm'),
-			color: 'hsl(var(--chart-1))',
-		},
-		conversionRate: {
-			label: __('Conversion Rate', 'quillcrm'),
-			color: 'hsl(var(--chart-2))',
-		},
-	};
+			const labels = funnelData.map((item) => item.label);
+			const contactValues = funnelData.map((item) => item.value);
+			const percentageValues = funnelData.map((item) => item.percentage);
 
-	const formatTooltipValue = (value: any, name: string | number) => {
-		if (name === 'conversionRate') {
-			return [`${value}%`, __('Conversion Rate', 'quillcrm')];
+			const ctx = chartRef.current.getContext('2d');
+
+			if (ctx) {
+				chartInstance.current = new Chart(ctx, {
+					type: 'bar',
+					data: {
+						labels: labels,
+						datasets: [
+							{
+								label: __('Contacts', 'quillcrm'),
+								data: contactValues,
+								backgroundColor: 'rgba(54, 162, 235, 0.5)',
+								borderColor: 'rgba(54, 162, 235, 1)',
+								borderWidth: 1,
+								yAxisID: 'y',
+							},
+							{
+								label: __('Conversion Rate (%)', 'quillcrm'),
+								data: percentageValues,
+								type: 'line',
+								backgroundColor: 'rgba(255, 99, 132, 0.2)',
+								borderColor: 'rgba(255, 99, 132, 1)',
+								borderWidth: 2,
+								pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+								pointBorderColor: '#fff',
+								pointHoverBackgroundColor: '#fff',
+								pointHoverBorderColor: 'rgba(255, 99, 132, 1)',
+								pointRadius: 5,
+								pointHoverRadius: 7,
+								yAxisID: 'y1',
+							},
+						],
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						scales: {
+							y: {
+								type: 'linear',
+								display: true,
+								position: 'left',
+								title: {
+									display: true,
+									text: __('Number of Contacts', 'quillcrm'),
+								},
+							},
+							y1: {
+								type: 'linear',
+								display: true,
+								position: 'right',
+								title: {
+									display: true,
+									text: __('Conversion Rate (%)', 'quillcrm'),
+								},
+								min: 0,
+								max: 100,
+								grid: {
+									drawOnChartArea: false,
+								},
+							},
+						},
+						plugins: {
+							title: {
+								display: true,
+								text: __('Automation Funnel Chart', 'quillcrm'),
+								font: {
+									size: 16,
+								},
+							},
+							subtitle: {
+								display: true,
+								text: __(
+									`Total Contacts: ${totalContacts} | Overall Completion Rate: ${completionRate}%`,
+									'quillcrm'
+								),
+								padding: {
+									bottom: 10,
+								},
+							},
+							tooltip: {
+								callbacks: {
+									label: function (context) {
+										const label =
+											context.dataset.label || '';
+										const value = context.parsed.y;
+										if (label.includes('Conversion')) {
+											return `${label}: ${value}%`;
+										}
+										return `${label}: ${value}`;
+									},
+								},
+							},
+						},
+					},
+				});
+			}
 		}
-		return [`${value} contacts`, __('Contacts', 'quillcrm')];
-	};
+
+		// Cleanup function
+		return () => {
+			if (chartInstance.current) {
+				chartInstance.current.destroy();
+			}
+		};
+	}, [funnelData, totalContacts, completionRate]);
 
 	if (loading) {
 		return (
@@ -109,79 +211,40 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 		);
 	}
 
-	const chartData = getChartData();
+	if (funnelData.length === 0) {
+		return (
+			<div className="chart-report-container">
+				<div className="empty-state">
+					{__('No funnel data available', 'quillcrm')}
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="chart-report-container">
 			<Card>
 				<CardContent className="p-6">
-					<ChartContainer
-						config={chartConfig}
-						className="h-[400px] w-full"
+					<div className="chart-summary">
+						<div className="chart-summary-item">
+							<span className="label">
+								{__('Total Contacts:', 'quillcrm')}
+							</span>
+							<span className="value">{totalContacts}</span>
+						</div>
+						<div className="chart-summary-item">
+							<span className="label">
+								{__('Completion Rate:', 'quillcrm')}
+							</span>
+							<span className="value">{completionRate}%</span>
+						</div>
+					</div>
+					<div
+						className="chart-wrapper"
+						style={{ height: '400px', width: '100%' }}
 					>
-						<ComposedChart
-							data={chartData}
-							margin={{
-								top: 20,
-								right: 60,
-								left: 60,
-								bottom: 80,
-							}}
-						>
-							<CartesianGrid strokeDasharray="3 3" />
-							<XAxis
-								dataKey="name"
-								tick={{ fontSize: 12 }}
-								angle={-45}
-								textAnchor="end"
-								height={80}
-							/>
-							<YAxis
-								yAxisId="left"
-								orientation="left"
-								tick={{ fontSize: 12 }}
-								width={50}
-							/>
-							<YAxis
-								yAxisId="right"
-								orientation="right"
-								tick={{ fontSize: 12 }}
-								domain={[0, 100]}
-								width={50}
-							/>
-							<ChartTooltip
-								content={
-									<ChartTooltipContent
-										formatter={formatTooltipValue}
-										indicator="dot"
-									/>
-								}
-							/>
-
-							<Bar
-								yAxisId="left"
-								dataKey="contacts"
-								fill="var(--color-contacts)"
-								name="contacts"
-								radius={[4, 4, 0, 0]}
-								maxBarSize={60}
-							/>
-							<Line
-								yAxisId="right"
-								type="monotone"
-								dataKey="conversionRate"
-								stroke="var(--color-conversionRate)"
-								strokeWidth={3}
-								dot={{
-									fill: 'var(--color-conversionRate)',
-									strokeWidth: 2,
-									r: 6,
-								}}
-								name="conversionRate"
-								connectNulls={true}
-							/>
-						</ComposedChart>
-					</ChartContainer>
+						<canvas ref={chartRef}></canvas>
+					</div>
 				</CardContent>
 			</Card>
 		</div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Automation } from '@quillcrm/client';
 import ChartReport from './chart-report';
 import StepReport from './step-report';
@@ -9,96 +9,73 @@ import { convertDate } from '@quillcrm/utils';
 import { NavLink } from '@quillcrm/navigation';
 
 interface AutomationFunnelProps {
-	automation: Automation;
+	automation: Automation | null;
 }
 
-interface AutomationFunnelState {
-	activeTab: string;
-}
+const AutomationFunnel: React.FC<AutomationFunnelProps> = ({ automation }) => {
+	const [activeTab, setActiveTab] = useState('chart-report');
 
-class AutomationFunnel extends React.Component<
-	AutomationFunnelProps,
-	AutomationFunnelState
-> {
-	constructor(props: AutomationFunnelProps) {
-		super(props);
-		this.state = {
-			activeTab: 'chart-report',
-		};
-	}
-
-	handleTabClick = (tabName: string) => {
-		this.setState({ activeTab: tabName });
+	const handleTabClick = (tabName: string) => {
+		setActiveTab(tabName);
 	};
 
-	renderChartReport = () => {
-		return <ChartReport automation={this.props.automation} />;
+	const renderChartReport = () => {
+		return <ChartReport automation={automation} />;
 	};
 
-	renderStepReport = () => {
-		return <StepReport automation={this.props.automation} />;
+	const renderStepReport = () => {
+		return <StepReport automation={automation} />;
 	};
 
-	renderEmailAnalytics = () => {
-		return <EmailAnalytics automation={this.props.automation} />;
+	const renderEmailAnalytics = () => {
+		return <EmailAnalytics automation={automation} />;
 	};
 
-	render() {
-		const { activeTab } = this.state;
-
-		return (
-			<div className="qcrm-automation-reports__automation-funnels">
-				<div className="qcrm-automation-reports__automation-funnels__header">
-					<div className="funnel-info">
-						<NavLink to={`automations`}>
-							{__('Automation Funnels', 'quillcrm')}
-						</NavLink>
-						<span>/</span>
-						<NavLink
-							to={`automations/${this.props.automation?.id}`}
-						>
-							{this.props.automation?.name} (
-							{__('Created at', 'quillcrm')}:{' '}
-							{convertDate(this.props.automation?.created_at)})
-						</NavLink>
-					</div>
-				</div>
-
-				<div className="tabs-container">
-					<div className="tabs-header">
-						<button
-							className={`tab-button ${activeTab === 'chart-report' ? 'active' : ''}`}
-							onClick={() => this.handleTabClick('chart-report')}
-						>
-							{__('Chart Report', 'quillcrm')}
-						</button>
-						<button
-							className={`tab-button ${activeTab === 'step-report' ? 'active' : ''}`}
-							onClick={() => this.handleTabClick('step-report')}
-						>
-							{__('Step Report', 'quillcrm')}
-						</button>
-						<button
-							className={`tab-button ${activeTab === 'email-analytics' ? 'active' : ''}`}
-							onClick={() =>
-								this.handleTabClick('email-analytics')
-							}
-						>
-							{__('Emails Analytics', 'quillcrm')}
-						</button>
-					</div>
-
-					<div className="tab-content">
-						{activeTab === 'chart-report' &&
-							this.renderChartReport()}
-						{activeTab === 'step-report' && this.renderStepReport()}
-						{activeTab === 'email-analytics' &&
-							this.renderEmailAnalytics()}
-					</div>
+	return (
+		<div className="qcrm-automation-reports__automation-funnels">
+			<div className="qcrm-automation-reports__automation-funnels__header">
+				<div className="funnel-info">
+					<NavLink to={`automations`}>
+						{__('Automation Funnels', 'quillcrm')}
+					</NavLink>
+					<span>/</span>
+					<NavLink to={`automations/${automation?.id}`}>
+						{automation?.name} ({__('Created at', 'quillcrm')}:{' '}
+						{convertDate(automation?.created_at || '')})
+					</NavLink>
 				</div>
 			</div>
-		);
-	}
-}
+
+			<div className="tabs-container">
+				<div className="tabs-header">
+					<button
+						className={`tab-button ${activeTab === 'chart-report' ? 'active' : ''}`}
+						onClick={() => handleTabClick('chart-report')}
+					>
+						{__('Chart Report', 'quillcrm')}
+					</button>
+					<button
+						className={`tab-button ${activeTab === 'step-report' ? 'active' : ''}`}
+						onClick={() => handleTabClick('step-report')}
+					>
+						{__('Step Report', 'quillcrm')}
+					</button>
+					<button
+						className={`tab-button ${activeTab === 'email-analytics' ? 'active' : ''}`}
+						onClick={() => handleTabClick('email-analytics')}
+					>
+						{__('Emails Analytics', 'quillcrm')}
+					</button>
+				</div>
+
+				<div className="tab-content">
+					{activeTab === 'chart-report' && renderChartReport()}
+					{activeTab === 'step-report' && renderStepReport()}
+					{activeTab === 'email-analytics' && renderEmailAnalytics()}
+				</div>
+			</div>
+		</div>
+	);
+};
 
 export default AutomationFunnel;

@@ -150,7 +150,7 @@ const AddRemoveTagsModal: React.FC<AddRemoveTagsModalProps> = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogContent className="max-w-md">
+			<DialogContent className="max-w-md z-[1700000]">
 				<DialogHeader className="flex flex-row items-center justify-between pb-4">
 					<DialogTitle>
 						<CustomDialogHeader

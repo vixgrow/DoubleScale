@@ -104,3 +104,6 @@ export { default as TeamIcon } from './team';
 export { default as ProductBlockIcon } from './product-block';
 export { default as InfoIcon } from './info';
 export { default as ReloadIcon } from './reload';
+export { default as ClickRateIcon } from './click-rate';
+export { default as OpenRateIcon } from './open-rate';
+export { default as ContactTotalEmailsIcon } from './contact-total-emails';

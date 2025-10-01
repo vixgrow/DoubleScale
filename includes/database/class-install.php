@@ -37,12 +37,12 @@ use QuillCRM\Database\Migrations\Pipeline_Stages_Table;
 use QuillCRM\Database\Migrations\Deals_Table;
 use QuillCRM\Database\Migrations\Deal_Activities_Table;
 use QuillCRM\Database\Migrations\Activity_Comments_Table;
-use QuillCRM\User_Roles\User_Roles;
 
 /**
  * Install class
  */
 class Install {
+
 
 
 

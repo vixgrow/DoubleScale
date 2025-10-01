@@ -18,8 +18,24 @@ use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Integrations_Manager;
 use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Utils;
+use QuillCRM\Campaign\Email_Processing;
+use QuillCRM\Constants\Message_Source_Types;
+
 
 class Send_Campaign_Email extends Action {
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -78,6 +94,50 @@ class Send_Campaign_Email extends Action {
 	 * @param Automation_Contact_Model $contact Contact Model.
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
+		$campaign_id = $step->get_setting( 'campaign_id' );
+		$campaign    = Campaign_Model::find( $campaign_id );
+
+		if ( ! $campaign ) {
+			return false;
+		}
+
+		$contact = $automation_contact->contact;
+
+		// Validate contact has email
+		if ( empty( $contact->email ) ) {
+			return false;
+		}
+
+		// Get template for campaign (with A/B testing support)
+		$template_id = $this->get_template_id( $campaign, $contact );
+		if ( ! $template_id ) {
+			return false;
+		}
+
+		// Check for existing message to prevent duplicates
+		$existing_message = $this->check_existing_campaign_message( $contact, $template_id );
+		if ( $existing_message ) {
+			return true; // Already sent, skip
+		}
+
+		// Create campaign message tracking record
+		$campaign_message_data = array(
+			'contact_id'  => $contact->id,
+			'template_id' => $template_id,
+			'mode'        => Tracking_Model::MODE_EMAIL,
+			'source_type' => Message_Source_Types::AUTOMATION,
+			'source_id'   => $automation->id,
+			'recipient'   => $contact->email,
+			'status'      => 'pending',
+			'hash_key'    => Utils::generate_hash_key(),
+		);
+
+		$campaign_message = Tracking_Model::create( $campaign_message_data );
+
+		// Use process_campaign_message for the actual sending
+		$email_processor = Email_Processing::instance();
+		$email_processor->process_campaign_message( $campaign, $contact, $campaign_message );
+
 		return true;
 	}
 
@@ -117,11 +177,11 @@ class Send_Campaign_Email extends Action {
 			'properties'  => array(
 				'internal_label'       => array(
 					'type'     => 'string',
-					'required' => true,
+					'required' => false,
 				),
 				'internal_description' => array(
 					'type'     => 'string',
-					'required' => true,
+					'required' => false,
 				),
 			),
 			'campaign_id' => array(
@@ -136,9 +196,35 @@ class Send_Campaign_Email extends Action {
 	 *
 	 * @return array
 	 */
-	public function get_campaign_options() {
+	private function get_campaign_options() {
 		$campaigns = Campaign_Model::all();
 		return wp_list_pluck( $campaigns->toArray(), 'name', 'id' );
+	}
+
+	/**
+	 * Check for existing campaign message for a contact.
+	 *
+	 * @param Campaign_Model           $campaign The campaign model.
+	 * @param Automation_Contact_Model $contact The contact model.
+	 * @return Tracking_Model|false The existing message or false if none.
+	 */
+	private function check_existing_campaign_message( $contact, $template_id ) {
+		return Tracking_Model::where( 'contact_id', $contact->id )
+			->where( 'mode', Tracking_Model::MODE_EMAIL )
+			->where( 'template_id', $template_id )
+			->first();
+	}
+
+	/**
+	 * Get the template ID for a specific contact based on campaign settings.
+	 *
+	 * @param Campaign_Model           $campaign The campaign model.
+	 * @param Automation_Contact_Model $contact The contact model.
+	 * @return int|false The template ID or false if no template found.
+	 */
+	private function get_template_id( $campaign, $contact ) {
+		$template_ids = $campaign->get_template_ids();
+		return reset( $template_ids );
 	}
 }
 

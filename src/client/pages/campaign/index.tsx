@@ -20,11 +20,14 @@ import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
 import TemplatesStep from './steps/templates';
+import SMSTemplateStep from './steps/templates/sms-template';
+import WhatsAppTemplateStep from './steps/templates/whatsapp-template';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import BuilderStep from '../../../builder';
 import { Campaign as CampaignType } from '@quillcrm/client';
 import Overview from './overview';
+import { getCampaignEndpoint } from '@quillcrm/utils';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
@@ -82,12 +85,21 @@ const Campaign: React.FC = () => {
 	};
 
 	const saveCampaign = async (data: Partial<CampaignType> = {}) => {
+		if (!campaign) {
+			throw new Error(__('Campaign not loaded', 'quillcrm'));
+		}
+
 		setIsSaving(true);
 
 		try {
+			const endpoint = getCampaignEndpoint(campaign.type);
+			if (!endpoint) {
+				throw new Error(__('Invalid campaign type', 'quillcrm'));
+			}
+
 			const response = (await apiFetch({
-				path: `/qc/v1/campaigns/${campaign.id}`,
-				method: 'POST',
+				path: `${endpoint}/${campaign.id}`,
+				method: 'PUT',
 				data: {
 					...campaign,
 					...data,
@@ -95,10 +107,12 @@ const Campaign: React.FC = () => {
 			})) as CampaignType;
 
 			setCampaign(response);
-		} catch (error) {
+
+			return response;
+		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to save campaign', 'quillcrm'),
+				message: error.message,
 			});
 		} finally {
 			setIsSaving(false);
@@ -166,6 +180,19 @@ const Campaign: React.FC = () => {
 		return canGo;
 	};
 
+	// Get the correct template component based on campaign type
+	const getTemplateComponent = () => {
+		switch (campaign?.type) {
+			case 'sms':
+				return <SMSTemplateStep />;
+			case 'whatsapp':
+				return <WhatsAppTemplateStep />;
+			case 'email':
+			default:
+				return <TemplatesStep />;
+		}
+	};
+
 	const isOverview =
 		(campaign.status === 'schedule' && tab === 'overview') ||
 		(['processing', 'completed', 'resending'].includes(campaign.status)
@@ -186,7 +213,7 @@ const Campaign: React.FC = () => {
 			}}
 		>
 			{/* Render the selected tab component based on the current tab */}
-			{tab === 'template' && <TemplatesStep />}
+			{tab === 'template' && getTemplateComponent()}
 			{tab === 'contacts' && <ContactsStep />}
 			{tab === 'review' && <ReviewStep />}
 			{tab === 'builder' && <BuilderStep />}

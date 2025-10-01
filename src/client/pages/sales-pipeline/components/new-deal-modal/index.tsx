@@ -32,6 +32,7 @@ import { useUsers } from '../../hooks/use-users';
 import { UserService } from '../../../../../services/user-service';
 import { SOURCE_OPTIONS } from '../../../../../config/types/config-data';
 import './style.scss';
+import ConfigAPI from '@quillcrm/config';
 
 const { Option } = Select;
 
@@ -70,6 +71,9 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	const [loading, setLoading] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactsLoading, setContactsLoading] = useState(false);
+	const priorities = useMemo(() => {
+		return ConfigAPI.getDealPriorities();
+	}, []);
 
 	// Use shared users hook
 	const {
@@ -481,6 +485,26 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 						</Select>
 					</Form.Item>
 				)}
+
+				{/* priority */}
+				<Form.Item name="priority" label={__('Priority', 'quillcrm')}>
+					<Select placeholder={__('Select priority', 'quillcrm')}>
+						{Object.keys(priorities).map((key) => (
+							<Option key={key} value={key}>
+								<div className="stage-option">
+									<span
+										className="stage-color"
+										style={{
+											backgroundColor:
+												priorities[key].color,
+										}}
+									/>
+									<span>{priorities[key].label}</span>
+								</div>
+							</Option>
+						))}
+					</Select>
+				</Form.Item>
 
 				<Form.Item
 					name="expected_close_date"

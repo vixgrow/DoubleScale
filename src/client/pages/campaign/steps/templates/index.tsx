@@ -109,8 +109,8 @@ const Templates: React.FC = () => {
 		utm_term: '',
 		utm_content: '',
 	};
-	const [templates, setTemplates] = useState<TemplateType[]>(
-		campaign?.settings.templates || []
+	const [templates, setTemplates] = useState<EmailTemplate[]>(
+		(campaign?.settings.templates as EmailTemplate[]) || []
 	);
 	const [currentTab, setCurrentTab] = useState(0);
 	const { createNotice } = useDispatch('quillcrm/core');

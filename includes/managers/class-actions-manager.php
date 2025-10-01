@@ -24,6 +24,7 @@ final class Actions_Manager {
 
 
 
+
 	/**
 	 * Registed actions
 	 *
@@ -174,6 +175,15 @@ final class Actions_Manager {
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 						 'label'       => __( 'LearnDash', 'quillcrm' ),
 						 'actions'     => array(),
+					 ),
+				 ),
+			 ),
+			 'email'       => array(
+				 'label'  => __( 'Email', 'quillcrm' ),
+				 'groups' => array(
+					 'email' => array(
+						 'label'   => __( 'Email', 'quillcrm' ),
+						 'actions' => array(),
 					 ),
 				 ),
 			 ),

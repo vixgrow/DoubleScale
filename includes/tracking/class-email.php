@@ -10,7 +10,7 @@
 
 namespace QuillCRM\Tracking;
 
-use QuillCRM\Models\Campaign_Email_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\Contact_Model;
 
 /**
@@ -69,7 +69,9 @@ class Email {
 			}
 
 			$hash_key       = isset( $_GET['hash_key'] ) ? sanitize_text_field( $_GET['hash_key'] ) : '';
-			$campaign_email = Campaign_Email_Model::get_by_hash_key( $hash_key );
+		$campaign_email = Tracking_Model::where('hash_key', $hash_key)
+			->where('mode', Tracking_Model::MODE_EMAIL)
+				->first();
 
 			if ( ! $campaign_email ) {
 				return;
@@ -112,16 +114,22 @@ class Email {
 	 */
 	public function email_clicked_tracking() {
 		try {
-			if ( ! isset( $_GET['quillcrm'] ) || $_GET['quillcrm'] !== 'email_click' ) {
-				return;
-			}
+		if ( ! isset( $_GET['quillcrm'] ) || $_GET['quillcrm'] !== 'email_click' ) {
+			return;
+		}
 
-			$hash_key       = isset( $_GET['hash_key'] ) ? sanitize_text_field( $_GET['hash_key'] ) : '';
-			$campaign_email = Campaign_Email_Model::get_by_hash_key( $hash_key );
+		if ( ! isset( $_GET['hash_key'] ) || ! isset( $_GET['original'] ) ) {
+			return;
+		}
 
-			if ( ! $campaign_email ) {
-				return;
-			}
+		$hash_key       = sanitize_text_field( $_GET['hash_key'] );
+		$campaign_email = Tracking_Model::where('hash_key', $hash_key)
+			->where('mode', Tracking_Model::MODE_EMAIL)
+			->first();
+
+		if ( ! $campaign_email ) {
+			return;
+		}
 
 			// Update the email status
 			$campaign_email->update(
@@ -140,8 +148,8 @@ class Email {
 				);
 			}
 
-			$orginal_url = urldecode( $_GET['orginal'] );
-			wp_redirect( $orginal_url );
+		$original_url = urldecode( $_GET['original'] );
+		wp_redirect( $original_url );
 			exit;
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(

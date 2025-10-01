@@ -125,6 +125,18 @@ class Automation_Model extends Model {
 	}
 
 	/**
+	 * Get all automation messages
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function messages() {
+		return $this->hasMany( Tracking_Model::class, 'source_id', 'id' )
+			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::AUTOMATION );
+	}
+
+	/**
 	 * Get all automations by trigger
 	 *
 	 * @since 1.0.0

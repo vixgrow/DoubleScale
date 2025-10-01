@@ -8,6 +8,7 @@ import type {
 	ConfigData,
 	ContactFieldsGroups,
 	CustomFieldsTypes,
+	DealPriority,
 	DefaultStage,
 	FiltersGroups,
 	Forms,
@@ -70,6 +71,7 @@ const configData: ConfigData = {
 		quillcrm_deal_owner: false,
 	},
 	defaultStages: [],
+	dealPriorities: [],
 };
 
 /**
@@ -583,6 +585,27 @@ export const setDefaultStages = (data: ConfigData) => (value: DefaultStage[]) =>
 	data.defaultStages = value;
 };
 
+/**
+ * Get deal priorities
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * 
+ * @returns DealPriority[]
+ */
+export const getDealPriorities = (data: ConfigData): DealPriority[] => {
+	return data.dealPriorities;
+};
+
+/**
+ * Set deal priorities
+ * 
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setDealPriorities = (data: ConfigData) => (value: DealPriority[]) => {
+	data.dealPriorities = value;
+};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -633,6 +656,8 @@ export interface ConfigApi {
 	setUserCapabilities: (value: UserCapabilities) => void;
 	getDefaultStages: () => DefaultStage[];
 	setDefaultStages: (value: DefaultStage[]) => void;
+	getDealPriorities: () => DealPriority[];
+	setDealPriorities: (value: DealPriority[]) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -685,7 +710,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setUserCapabilities = setUserCapabilities(data);
 	configApi.getDefaultStages = () => getDefaultStages(data);
 	configApi.setDefaultStages = setDefaultStages(data);
-
+	configApi.getDealPriorities = () => getDealPriorities(data);
+	configApi.setDealPriorities = setDealPriorities(data);
 	return configApi;
 };
 

@@ -24,6 +24,7 @@ class Deal_Model extends Model {
 
 
 
+
 	/**
 	 * Table name
 	 *
@@ -58,6 +59,7 @@ class Deal_Model extends Model {
 		'currency',
 		'expected_close_date',
 		'probability',
+		'priority',
 		'status',
 		'owner_id',
 		'source',
@@ -107,6 +109,7 @@ class Deal_Model extends Model {
 		'value'       => 'nullable|numeric|min:0',
 		'currency'    => 'nullable|string|size:3',
 		'probability' => 'nullable|numeric|between:0,100',
+		'priority'    => 'nullable|in:low,medium,high',
 		'status'      => 'required|in:open,won,lost',
 		'owner_id'    => 'nullable|integer|min:1',
 	);
@@ -128,6 +131,7 @@ class Deal_Model extends Model {
 		'value.min'            => 'Deal value cannot be negative.',
 		'probability.numeric'  => 'Probability must be a number.',
 		'probability.between'  => 'Probability must be between 0 and 100.',
+		'priority.in'          => 'Priority must be low, medium, or high.',
 		'status.in'            => 'Status must be open, won, or lost.',
 		'owner_id.min'         => 'Owner ID must be a positive number.',
 	);

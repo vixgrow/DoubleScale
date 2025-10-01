@@ -245,13 +245,17 @@ const Templates: React.FC = () => {
 		setIsSendingTestEmail(true);
 
 		try {
+			const template = templates[currentTab];
 			await apiFetch({
-				path: '/qc/v1/emails/send-test',
+				path: '/qc/v1/campaigns/send-test-email',
 				method: 'POST',
 				data: {
-					template: templates[currentTab],
 					email: emailAddress,
-					campaign_id: campaign?.id,
+					subject: template.subject,
+					body: template.body || 'Email body',
+					from_name: template.settings?.from_name,
+					from_email: template.settings?.from_email,
+					reply_to: template.settings?.reply_to,
 				},
 			});
 

@@ -282,6 +282,7 @@ class REST_Campaign_Controller extends REST_Controller {
 				),
 			)
 		);
+
 	}
 
 	/**
@@ -621,7 +622,7 @@ class REST_Campaign_Controller extends REST_Controller {
 			$email      = $request->get_param( 'email' );
 			$subject    = $request->get_param( 'subject' );
 			$body       = $request->get_param( 'body' );
-			$from_name  = $request->get_param( 'from_email' ) ? $request->get_param( 'from_email' ) : get_option( 'blogname' );
+			$from_name  = $request->get_param( 'from_name' ) ? $request->get_param( 'from_name' ) : get_option( 'blogname' );
 			$from_email = $request->get_param( 'from_email' ) ? $request->get_param( 'from_email' ) : get_option( 'admin_email' );
 			$reply_to   = $request->get_param( 'reply_to' );
 
@@ -634,7 +635,7 @@ class REST_Campaign_Controller extends REST_Controller {
 
 			$for_testing_body = "<div>
 					<p>Hi {{contact:first_name}} {{contact:last_name}},</p>
-					<p>Welcom to QuillCRM.</p>
+					<p>Welcome to QuillCRM.</p>
 					<p>Don't want to stay in the loop? We'll be sad to see you go, but you can click here to <a href='{{contact:unsubscribe_link}}' target='_blank'>unsubscribe</a>.</p>
 			</div>";
 
@@ -654,6 +655,7 @@ class REST_Campaign_Controller extends REST_Controller {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
+
 
 	/**
 	 * Prepare the campaign data

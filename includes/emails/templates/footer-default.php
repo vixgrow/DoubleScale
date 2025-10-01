@@ -40,7 +40,11 @@ $background_color = '#e9eaec';
 																<!-- Footer content -->
 																<?php
 																/* translators: %s - link to a site. */
-																$footer = sprintf( esc_html__( 'Sent from %s', 'quillcrm' ), '<a href="' . esc_url( home_url() ) . '" style="color:#bbbbbb;">' . wp_specialchars_decode( get_bloginfo( 'name' ) ) . '</a>' );
+																$site_name = wp_specialchars_decode( get_bloginfo( 'name' ) );
+																if ( empty( $site_name ) ) {
+																	$site_name = parse_url( home_url(), PHP_URL_HOST );
+																}
+																$footer = sprintf( esc_html__( 'Sent from %s', 'quillcrm' ), '<a href="' . esc_url( home_url() ) . '" style="color:#bbbbbb;">' . $site_name . '</a>' );
 																echo apply_filters( 'quillcrm_email_footer_text', $footer );
 																?>
 

@@ -20,15 +20,14 @@ use QuillCRM\Utils;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Campaign_Email_Model;
-use QuillCRM\Managers\Merge_Tags_Manager;
-use QuillCRM\Emails\Emails;
+
 use QuillCRM\Managers\Campaign_Status_Manager;
 
 /**
  * Rest_Campaign_Controller class
  */
 class REST_Campaign_Controller extends REST_Controller {
+
 
 
 	/**
@@ -94,6 +93,7 @@ class REST_Campaign_Controller extends REST_Controller {
 			)
 		);
 
+		// Individual campaign read (cross-type)
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
@@ -122,7 +122,7 @@ class REST_Campaign_Controller extends REST_Controller {
 			)
 		);
 
-		// Duplicate a campaign
+		// Analytics route (cross-type)
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/duplicate',
@@ -223,10 +223,10 @@ class REST_Campaign_Controller extends REST_Controller {
 			)
 		);
 
-		// Send Test Email
+		// Bulk operations route (cross-type)
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/send-test-email',
+			'/' . $this->rest_base . '/bulk',
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -282,6 +282,12 @@ class REST_Campaign_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Note: Individual campaign CRUD operations are handled by type-specific endpoints:
+		// - /qc/v1/email-campaigns/* for email campaign management
+		// - /qc/v1/sms-campaigns/* for SMS campaign management
+		// - /qc/v1/whatsapp-campaigns/* for WhatsApp campaign management
+		// Frontend should use these endpoints for create, update, delete, and duplicate operations
 	}
 
 	/**
@@ -381,11 +387,22 @@ class REST_Campaign_Controller extends REST_Controller {
 
 			$query = Campaign_Model::query();
 
+			// Get total count before applying filters
 			$total_count = $query->count();
+
+			// Apply type filter if specified
+			if ( $type ) {
+				if ( ! in_array( $type, array( 'email', 'sms', 'whatsapp' ) ) ) {
+					return new WP_Error( 'invalid_type', __( 'Invalid campaign type. Must be email, sms, or whatsapp.', 'quillcrm' ), array( 'status' => 400 ) );
+				}
+				$query->where( 'type', $type );
+			}
+
 			// Apply keywords filter
 			if ( $keywords ) {
 				$query->where( 'name', 'like', '%' . $keywords . '%' );
 			}
+
 			// Apply date range filter
 			if ( $from ) {
 				$query->where( 'created_at', '>=', $from );
@@ -405,8 +422,10 @@ class REST_Campaign_Controller extends REST_Controller {
 		}
 	}
 
+
+
 	/**
-	 * Get campaign emails
+	 * Bulk operations on campaigns (cross-type)
 	 *
 	 * @since 1.0.0
 	 *
@@ -447,14 +466,17 @@ class REST_Campaign_Controller extends REST_Controller {
 		}
 	}
 
+
+
+
 	/**
-	 * Get a campaign
+	 * Get individual campaign (cross-type)
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
-	 * @return WP_REST_Response $response The response object
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ) {
 		try {
@@ -782,7 +804,7 @@ class REST_Campaign_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to get a campaign
+	 * Check if a given request has access to get a specific item
 	 *
 	 * @since 1.0.0
 	 *
@@ -795,7 +817,7 @@ class REST_Campaign_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to create a campaign
+	 * Check if a given request has access to bulk operations
 	 *
 	 * @since 1.0.0
 	 *

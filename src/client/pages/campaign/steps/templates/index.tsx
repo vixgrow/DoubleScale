@@ -28,7 +28,7 @@ import {
 	Template,
 } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
-import type { Template as TemplateType } from '@quillcrm/client';
+import type { Template as TemplateType, EmailTemplate } from '@quillcrm/client';
 import { isEmail } from 'validator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,7 +48,7 @@ const Templates: React.FC = () => {
 	const adminEmail = ConfigAPI.getAdminEmail();
 	const blogName = ConfigAPI.getBlogName();
 	// Using template table structure
-	const defaultTemplate = {
+	const defaultTemplate: EmailTemplate = {
 		name: __('New Email', 'quillcrm'),
 		type: 'email',
 		subject: __('New Email', 'quillcrm'),
@@ -58,16 +58,10 @@ const Templates: React.FC = () => {
 			from_email: adminEmail,
 			reply_to: adminEmail,
 			preview_text: '',
-			enable_utm: false,
-			utm_source: '',
-			utm_medium: '',
-			utm_name: '',
-			utm_term: '',
-			utm_content: '',
 		},
 	};
-	const [templates, setTemplates] = useState<TemplateType[]>(
-		campaign?.settings.templates || []
+	const [templates, setTemplates] = useState<EmailTemplate[]>(
+		(campaign?.settings.templates as EmailTemplate[]) || []
 	);
 	const [currentTab, setCurrentTab] = useState(0);
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -100,7 +94,7 @@ const Templates: React.FC = () => {
 		setCurrentTab(0);
 	};
 
-	const updateTemplate = (index: number, data: Partial<TemplateType>) => {
+	const updateTemplate = (index: number, data: Partial<EmailTemplate>) => {
 		if (!campaign) {
 			return;
 		}
@@ -161,13 +155,15 @@ const Templates: React.FC = () => {
 		children: (
 			<Template
 				template={template}
-				updateTemplate={(data) => updateTemplate(index, data)}
+				updateTemplate={(data) =>
+					updateTemplate(index, data as Partial<EmailTemplate>)
+				}
 			/>
 		),
 		closable: templatesSettings[index].closable ?? true,
 	}));
 
-	const validate = (template: Partial<TemplateType>) => {
+	const validate = (template: Partial<EmailTemplate>) => {
 		if (!template.subject) {
 			createNotice({
 				type: 'error',
@@ -287,8 +283,10 @@ const Templates: React.FC = () => {
 						{__('Watch Tutorial', 'quillcrm')}
 					</Button>,
 				]}
-				totalSteps={tabList.length}
-				currentStep={currentTab}
+				totalSteps={1}
+				currentStep={0}
+				onNext={save}
+				onBack={() => navigate(getToLink(`campaigns`))}
 			>
 				<div className="flex gap-6">
 					<PanelSettings
@@ -418,214 +416,6 @@ const Templates: React.FC = () => {
 							<Separator />
 
 							<div className="py-4">
-								<div className="flex items-center justify-between mb-4">
-									<div>
-										<p className="text-lg font-semibold text-foreground">
-											{__('Enable UTM', 'quillcrm')}
-										</p>
-										<p>
-											{__(
-												'A UTM (Urchin Tracking Module) code is a snippet of text added to the end of a URL to track the metrics and performance of a specific digital marketing campaign',
-												'quillcrm'
-											)}
-										</p>
-									</div>
-									<Switch
-										checked={
-											templates[currentTab]?.settings
-												?.enable_utm
-										}
-										onCheckedChange={(checked) =>
-											updateTemplate(currentTab, {
-												settings: {
-													...(templates[currentTab]
-														?.settings || {}),
-													enable_utm: checked,
-												},
-											})
-										}
-									/>
-								</div>
-
-								{templates[currentTab]?.settings
-									?.enable_utm && (
-									<div className="space-y-4">
-										<div className="grid grid-cols-2 gap-4">
-											<FormField
-												label={__(
-													'UTM Source',
-													'quillcrm'
-												)}
-												required={true}
-											>
-												<Input
-													placeholder={__(
-														'Source',
-														'quillcrm'
-													)}
-													value={
-														templates[currentTab]
-															?.settings
-															?.utm_source
-													}
-													onChange={(e) =>
-														updateTemplate(
-															currentTab,
-															{
-																settings: {
-																	...(templates[
-																		currentTab
-																	]
-																		?.settings ||
-																		{}),
-																	utm_source:
-																		e.target
-																			.value,
-																},
-															}
-														)
-													}
-												/>
-											</FormField>
-											<FormField
-												label={__(
-													'UTM Medium',
-													'quillcrm'
-												)}
-												required={true}
-											>
-												<Input
-													placeholder={__(
-														'Medium',
-														'quillcrm'
-													)}
-													value={
-														templates[currentTab]
-															?.settings
-															?.utm_medium
-													}
-													onChange={(e) =>
-														updateTemplate(
-															currentTab,
-															{
-																settings: {
-																	...(templates[
-																		currentTab
-																	]
-																		?.settings ||
-																		{}),
-																	utm_medium:
-																		e.target
-																			.value,
-																},
-															}
-														)
-													}
-												/>
-											</FormField>
-										</div>
-										<div className="grid grid-cols-2 gap-4">
-											<FormField
-												label={__(
-													'UTM Name',
-													'quillcrm'
-												)}
-												required={true}
-											>
-												<Input
-													placeholder={__(
-														'Name',
-														'quillcrm'
-													)}
-													value={
-														templates[currentTab]
-															?.settings?.utm_name
-													}
-													onChange={(e) =>
-														updateTemplate(
-															currentTab,
-															{
-																settings: {
-																	...(templates[
-																		currentTab
-																	]
-																		?.settings ||
-																		{}),
-																	utm_name:
-																		e.target
-																			.value,
-																},
-															}
-														)
-													}
-												/>
-											</FormField>
-											<FormField
-												label={__(
-													'UTM Term',
-													'quillcrm'
-												)}
-											>
-												<Input
-													placeholder={__(
-														'Term',
-														'quillcrm'
-													)}
-													value={
-														templates[currentTab]
-															?.settings?.utm_term
-													}
-													onChange={(e) =>
-														updateTemplate(
-															currentTab,
-															{
-																settings: {
-																	...(templates[
-																		currentTab
-																	]
-																		?.settings ||
-																		{}),
-																	utm_term:
-																		e.target
-																			.value,
-																},
-															}
-														)
-													}
-												/>
-											</FormField>
-										</div>
-										<FormField
-											label={__(
-												'UTM Content',
-												'quillcrm'
-											)}
-										>
-											<Input
-												placeholder={__(
-													'Content',
-													'quillcrm'
-												)}
-												value={
-													templates[currentTab]
-														?.settings?.utm_content
-												}
-												onChange={(e) =>
-													updateTemplate(currentTab, {
-														settings: {
-															...(templates[
-																currentTab
-															]?.settings || {}),
-															utm_content:
-																e.target.value,
-														},
-													})
-												}
-											/>
-										</FormField>
-									</div>
-								)}
-
 								<div className="mt-4">
 									<Button
 										variant="default"

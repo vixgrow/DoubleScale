@@ -18,7 +18,7 @@ use QuillCRM\Models\Custom_Field_Model;
 use QuillCRM\Models\Contact_Note_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\User_Model;
-use QuillCRM\Models\Campaign_Email_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\WC_Order_Model;
 use QuillCRM\Utils;
 
@@ -163,7 +163,7 @@ class Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function campaign_emails() {
-		 return $this->hasMany( Campaign_Email_Model::class, 'contact_id', 'id' );
+		return $this->hasMany( Tracking_Model::class, 'contact_id', 'id' )->emails();
 	}
 
 	/**

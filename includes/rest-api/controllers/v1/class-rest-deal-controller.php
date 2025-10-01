@@ -31,6 +31,7 @@ class REST_Deal_Controller extends REST_Controller {
 
 
 
+
 	/**
 	 * Route base.
 	 *
@@ -304,7 +305,6 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function update_item( $request ) {
-		xdebug_break();
 
 		$deal_id = $request->get_param( 'id' );
 		$data    = array();

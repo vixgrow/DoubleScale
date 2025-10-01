@@ -29,12 +29,6 @@ const Template: React.FC = () => {
 		from_email: '',
 		reply_to: '',
 		preview_text: '',
-		enable_utm: false,
-		utm_source: '',
-		utm_medium: '',
-		utm_name: '',
-		utm_term: '',
-		utm_content: '',
 	};
 
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -190,7 +184,7 @@ const Template: React.FC = () => {
 											type="text"
 											status={
 												template.settings.from_name
-													? ''
+													? undefined
 													: 'error'
 											}
 										/>
@@ -205,7 +199,7 @@ const Template: React.FC = () => {
 											type="email"
 											status={
 												template.settings.from_email
-													? ''
+													? undefined
 													: 'error'
 											}
 										/>
@@ -230,7 +224,11 @@ const Template: React.FC = () => {
 											})
 										}
 										type="text"
-										status={template.subject ? '' : 'error'}
+										status={
+											template.subject
+												? undefined
+												: 'error'
+										}
 									/>
 									<Field
 										label={__('Preview Text', 'quillcrm')}
@@ -242,122 +240,6 @@ const Template: React.FC = () => {
 										}
 										type="text"
 									/>
-									<Field
-										label={__('Enable UTM', 'quillcrm')}
-										value={template.settings.enable_utm}
-										onChange={(value) =>
-											updateSettings({
-												enable_utm: value,
-											})
-										}
-										type="switch"
-									/>
-									{template.settings.enable_utm && (
-										<>
-											<Flex gap={20}>
-												<Field
-													label={__(
-														'UTM Source',
-														'quillcrm'
-													)}
-													value={
-														template.settings
-															.utm_source
-													}
-													onChange={(value) =>
-														updateSettings({
-															utm_source: value,
-														})
-													}
-													type="text"
-												/>
-												<Field
-													label={__(
-														'UTM Medium',
-														'quillcrm'
-													)}
-													value={
-														template.settings
-															.utm_medium
-													}
-													onChange={(value) =>
-														updateSettings({
-															utm_medium: value,
-														})
-													}
-													type="text"
-												/>
-											</Flex>
-											<Flex gap={20}>
-												<Field
-													label={__(
-														'UTM Medium',
-														'quillcrm'
-													)}
-													value={
-														template.settings
-															.utm_medium
-													}
-													onChange={(value) =>
-														updateSettings({
-															utm_medium: value,
-														})
-													}
-													type="text"
-												/>
-												<Field
-													label={__(
-														'UTM Name',
-														'quillcrm'
-													)}
-													value={
-														template.settings
-															.utm_name
-													}
-													onChange={(value) =>
-														updateSettings({
-															utm_name: value,
-														})
-													}
-													type="text"
-												/>
-											</Flex>
-											<Flex gap={20}>
-												<Field
-													label={__(
-														'UTM Term',
-														'quillcrm'
-													)}
-													value={
-														template.settings
-															.utm_term
-													}
-													onChange={(value) =>
-														updateSettings({
-															utm_term: value,
-														})
-													}
-													type="text"
-												/>
-												<Field
-													label={__(
-														'UTM Content',
-														'quillcrm'
-													)}
-													value={
-														template.settings
-															.utm_content
-													}
-													onChange={(value) =>
-														updateSettings({
-															utm_content: value,
-														})
-													}
-													type="text"
-												/>
-											</Flex>
-										</>
-									)}
 								</Flex>
 								<Flex style={{ flex: 1 }}>
 									<Card

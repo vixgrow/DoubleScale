@@ -50,7 +50,7 @@ class Core {
 		 // Admin email address.
 		$admin_email = get_option( 'admin_email' );
 		$ajax_url    = admin_url( 'admin-ajax.php' );
-		$nonce       = wp_create_nonce( 'wp_rest' );
+		$nonce       = wp_create_nonce( 'quillcrm-admin' );
 
 		// Get current user capabilities for role-based access control
 		$user_capabilities = array(

@@ -313,7 +313,7 @@ class Zapier_Webhook extends Action {
 	 */
 	public function ajax_test_webhook() {
 		// Check nonce for security
-		\check_ajax_referer( 'wp_rest', 'nonce' );
+		\check_ajax_referer( 'quillcrm-admin', 'nonce' );
 
 		// Call the test webhook method
 		$result = $this->test_webhook();

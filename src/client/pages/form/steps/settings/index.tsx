@@ -22,6 +22,7 @@ import { ListField, TagField, ContactMappedFields } from '@quillcrm/components';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import SettingsShimmer from './settings-shimmer';
 
 const Settings: React.FC = () => {
 	const { form, updateSettings } = useFormContext();
@@ -82,7 +83,9 @@ const Settings: React.FC = () => {
 
 	return (
 		<div>
-			{form && !isFetching && (
+			{form && isFetching ? (
+				<SettingsShimmer />
+			) : form && !isFetching ? (
 				<div className="qcrm-fields">
 					<div className="qcrm-field">
 						{formFields && (
@@ -107,10 +110,7 @@ const Settings: React.FC = () => {
 								<div className="flex justify-between gap-[10px]">
 									<div className="flex flex-col gap-[10px] flex-1">
 										<div className="flex text-[#09090B] font-normal text-base">
-											{__('Lists')}{' '}
-											<span className="text-red-600">
-												*
-											</span>
+											{__('Lists','quillcrm')}
 										</div>
 										<ListField
 											value={settings?.lists || []}
@@ -121,10 +121,7 @@ const Settings: React.FC = () => {
 									</div>
 									<div className="flex flex-col flex-1 gap-[10px]">
 										<div className="flex text-[#09090B] font-normal text-base">
-											{__('Tags')}{' '}
-											<span className="text-red-600">
-												*
-											</span>
+											{__('Tags','quillcrm')}
 										</div>
 										<TagField
 											value={settings?.tags || []}
@@ -205,7 +202,7 @@ const Settings: React.FC = () => {
 						</div>
 					</div>
 				</div>
-			)}
+			) : null}
 		</div>
 	);
 };

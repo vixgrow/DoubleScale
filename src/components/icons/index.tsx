@@ -108,3 +108,4 @@ export { default as ClickRateIcon } from './click-rate';
 export { default as OpenRateIcon } from './open-rate';
 export { default as ContactTotalEmailsIcon } from './contact-total-emails';
 export { default as OutlinedListIcon } from './outlined-list';
+export { default as OutlinedCustomFieldsIcon } from './outlined-custom-fields';

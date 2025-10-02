@@ -91,12 +91,12 @@ class Campaign_Rate_Limiter
     {
         update_option("quillcrm_daily_{$type}_count", 0);
 
-        quillcrm_get_logger()->info(
-            sprintf(__('Daily %s count reset.', 'quillcrm'), $type),
-            array(
-                'code' => "daily_{$type}_count_reset",
-            )
-        );
+        // quillcrm_get_logger()->info(
+        //     sprintf(__('Daily %s count reset.', 'quillcrm'), $type),
+        //     array(
+        //         'code' => "daily_{$type}_count_reset",
+        //     )
+        // );
     }
 
     /**
@@ -110,15 +110,15 @@ class Campaign_Rate_Limiter
      */
     public function log_daily_limit_reached($type, $daily_count, $max_per_day)
     {
-        quillcrm_get_logger()->info(
-            sprintf(__('Daily %s limit reached.', 'quillcrm'), $type),
-            array(
-                'code' => "daily_{$type}_limit_reached",
-                'data' => array(
-                    "daily_{$type}_count" => $daily_count,
-                    "max_{$type}_per_day" => $max_per_day,
-                ),
-            )
-        );
+        // quillcrm_get_logger()->info(
+        //     sprintf(__('Daily %s limit reached.', 'quillcrm'), $type),
+        //     array(
+        //         'code' => "daily_{$type}_limit_reached",
+        //         'data' => array(
+        //             "daily_{$type}_count" => $daily_count,
+        //             "max_{$type}_per_day" => $max_per_day,
+        //         ),
+        //     )
+        // );
     }
 }

@@ -319,77 +319,121 @@ class Campaign_Model extends Model
 	 */
 	public function attach_counts($campaign)
 	{
+		// Calculate contacts count with type-specific filtering
+		$campaign->contacts_count = $this->get_contacts_count($campaign);
+
+		// Get analytics stats from centralized service
+		$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
+		$stats = $analytics->get_campaign_stats($campaign->type, $campaign->id);
+
+		// Get optimized template counts (single query instead of N queries)
+		$campaign->templates_count = $this->get_template_counts_optimized($campaign);
+
+		// Assign stats based on campaign type
+		$this->assign_campaign_stats($campaign, $stats);
+	}
+
+	/**
+	 * Get contacts count for campaign with type-specific filtering
+	 *
+	 * @param Campaign_Model $campaign campaign model.
+	 *
+	 * @return int Contact count
+	 */
+	private function get_contacts_count($campaign)
+	{
 		$filters = $campaign->get_setting('filters', array());
-		$campaign_recipients = Contact_Model::where('status', 'subscribed');
+		$query = Contact_Model::where('status', 'subscribed');
 
-		// For SMS and WhatsApp campaigns, only include contacts with phone numbers
-		if ($campaign->is_sms_campaign() || $campaign->is_whatsapp_campaign()) {
-			$campaign_recipients = $campaign_recipients->whereNotNull('phone')->where('phone', '!=', '');
-		}
-
-		if (!empty($filters)) {
-			$contact_filters = new Contact_Filters_Process($campaign_recipients, $filters);
-			$campaign_recipients = $contact_filters->filter();
-		}
-
-		$campaign->contacts_count = $campaign_recipients->count();
-
+		// Apply type-specific filtering
 		if ($campaign->is_email_campaign()) {
-			// Email campaign counts using centralized analytics
-			$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
-			$stats = $analytics->get_campaign_stats('email', $campaign->id);
-			
-			// Template counts (email-specific)
-			$templates_count = array();
-			foreach ($campaign->get_template_ids() as $template_id) {
-				$templates_count[$template_id] = $campaign->messages()->emails()->where('template_id', $template_id)->count();
-			}
+			$query->whereNotNull('email')->where('email', '!=', '');
+		} elseif ($campaign->is_sms_campaign() || $campaign->is_whatsapp_campaign()) {
+			$query->whereNotNull('phone')->where('phone', '!=', '');
+		}
 
-			$campaign->templates_count = $templates_count;
-			$campaign->sent_count = $stats['sent'];
-			$campaign->failed_count = $stats['failed'];
-			$campaign->opened_count = $stats['opened'];
-			$campaign->clicked_count = $stats['clicked'];
+		// Apply custom filters if provided
+		if (!empty($filters)) {
+			$contact_filters = new Contact_Filters_Process($query, $filters);
+			$query = $contact_filters->filter();
+		}
+
+		return $query->count();
+	}
+
+	/**
+	 * Get template counts using optimized single query with GROUP BY
+	 * Fixes N+1 query problem - previously ran one COUNT query per template
+	 *
+	 * @param Campaign_Model $campaign campaign model.
+	 *
+	 * @return array Template counts indexed by template_id
+	 */
+	private function get_template_counts_optimized($campaign)
+	{
+		// Map campaign type to tracking mode
+		$mode_map = array(
+			'email' => Tracking_Model::MODE_EMAIL,
+			'sms' => Tracking_Model::MODE_SMS,
+			'whatsapp' => Tracking_Model::MODE_WHATSAPP,
+		);
+
+		$mode = $mode_map[$campaign->type] ?? null;
+		if ($mode === null) {
+			return array();
+		}
+
+		// Single query with GROUP BY instead of N separate queries
+		$counts = $campaign->messages()
+			->where('mode', $mode)
+			->selectRaw('template_id, COUNT(*) as count')
+			->groupBy('template_id')
+			->get()
+			->pluck('count', 'template_id')
+			->toArray();
+
+		// Ensure all template IDs have a count (even if 0)
+		$template_counts = array();
+		foreach ($campaign->get_template_ids() as $template_id) {
+			$template_counts[$template_id] = isset($counts[$template_id]) ? (int) $counts[$template_id] : 0;
+		}
+
+		return $template_counts;
+	}
+
+	/**
+	 * Assign campaign statistics based on type
+	 * Eliminates duplicate code across email/sms/whatsapp branches
+	 *
+	 * @param Campaign_Model $campaign campaign model.
+	 * @param array          $stats Statistics from analytics service.
+	 *
+	 * @return void
+	 */
+	private function assign_campaign_stats($campaign, $stats)
+	{
+		// Common stats for all campaign types
+		$campaign->sent_count = $stats['sent'] ?? 0;
+		$campaign->failed_count = $stats['failed'] ?? 0;
+		$campaign->clicked_count = $stats['clicked'] ?? 0;
+
+		// Type-specific stats
+		if ($campaign->is_email_campaign()) {
+			$campaign->opened_count = $stats['opened'] ?? 0;
+			$campaign->open_rate = $stats['open_rate'] ?? 0;
+			$campaign->click_rate = $stats['click_rate'] ?? 0;
 		} elseif ($campaign->is_sms_campaign()) {
-			// SMS campaign counts using centralized analytics
-			$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
-			$stats = $analytics->get_campaign_stats('sms', $campaign->id);
-			
-			// Template counts (SMS-specific - now supports A/B testing)
-			$templates_count = array();
-			foreach ($campaign->get_template_ids() as $template_id) {
-				$templates_count[$template_id] = $campaign->messages()->sms()->where('template_id', $template_id)->count();
-			}
-
-			$campaign->templates_count = $templates_count;
-			$campaign->sent_count = $stats['sent'];
-			$campaign->failed_count = $stats['failed'];
-			$campaign->pending_count = $stats['pending'];
-			$campaign->delivered_count = $stats['delivered']; // Now properly provided by analytics
-			$campaign->clicked_count = $stats['clicked'];
-			$campaign->delivery_rate = $stats['delivery_rate']; // Now properly calculated by analytics
-			$campaign->click_rate = $stats['click_rate'];
+			$campaign->pending_count = $stats['pending'] ?? 0;
+			$campaign->delivered_count = $stats['delivered'] ?? 0;
+			$campaign->delivery_rate = $stats['delivery_rate'] ?? 0;
+			$campaign->click_rate = $stats['click_rate'] ?? 0;
 		} elseif ($campaign->is_whatsapp_campaign()) {
-			// WhatsApp campaign counts using centralized analytics
-			$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
-			$stats = $analytics->get_campaign_stats('whatsapp', $campaign->id);
-			
-			// Template counts (WhatsApp-specific - now supports A/B testing)
-			$templates_count = array();
-			foreach ($campaign->get_template_ids() as $template_id) {
-				$templates_count[$template_id] = $campaign->messages()->whatsapp()->where('template_id', $template_id)->count();
-			}
-
-			$campaign->templates_count = $templates_count;
-			$campaign->sent_count = $stats['sent'];
-			$campaign->failed_count = $stats['failed'];
-			$campaign->pending_count = $stats['pending'];
-			$campaign->delivered_count = $stats['delivered']; // Now properly provided by analytics
-			$campaign->read_count = $stats['read']; // Now properly provided by analytics
-			$campaign->clicked_count = $stats['clicked'];
-			$campaign->delivery_rate = $stats['delivery_rate']; // Now properly calculated by analytics
-			$campaign->read_rate = $stats['read_rate']; // Now properly calculated by analytics
-			$campaign->click_rate = $stats['click_rate'];
+			$campaign->pending_count = $stats['pending'] ?? 0;
+			$campaign->delivered_count = $stats['delivered'] ?? 0;
+			$campaign->read_count = $stats['read'] ?? 0;
+			$campaign->delivery_rate = $stats['delivery_rate'] ?? 0;
+			$campaign->read_rate = $stats['read_rate'] ?? 0;
+			$campaign->click_rate = $stats['click_rate'] ?? 0;
 		}
 	}
 

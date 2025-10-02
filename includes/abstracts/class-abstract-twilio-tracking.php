@@ -187,12 +187,12 @@ abstract class Abstract_Twilio_Tracking
 		}
 
 		// Log successful webhook processing
-		quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' webhook processing', [
-			'message_sid' => $message_sid,
-			'message_status' => $message_status,
-			'tracking_id' => $tracking_record->id,
-			'code' => "{$this->campaign_type}_webhook_processed"
-		]);
+		// quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' webhook processing', [
+		// 	'message_sid' => $message_sid,
+		// 	'message_status' => $message_status,
+		// 	'tracking_id' => $tracking_record->id,
+		// 	'code' => "{$this->campaign_type}_webhook_processed"
+		// ]);
 
 		// Update tracking record status based on webhook data
 		$this->update_delivery_status($tracking_record, $message_status, $error_code, $error_message);
@@ -238,17 +238,17 @@ abstract class Abstract_Twilio_Tracking
 		$tracking_record->save();
 
 		// Log status update
-		quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' delivery status updated', [
-			'tracking_record_id' => $tracking_record->id,
-			'previous_status' => $previous_status,
-			'new_status' => $status,
-			'contact_id' => $tracking_record->contact_id,
-			'source_id' => $tracking_record->source_id,
-			'source_type' => $tracking_record->source_type,
-			'error_code' => $error_code,
-			'error_message' => $error_message,
-			'code' => "{$this->campaign_type}_delivery_status_updated"
-		]);
+		// quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' delivery status updated', [
+		// 	'tracking_record_id' => $tracking_record->id,
+		// 	'previous_status' => $previous_status,
+		// 	'new_status' => $status,
+		// 	'contact_id' => $tracking_record->contact_id,
+		// 	'source_id' => $tracking_record->source_id,
+		// 	'source_type' => $tracking_record->source_type,
+		// 	'error_code' => $error_code,
+		// 	'error_message' => $error_message,
+		// 	'code' => "{$this->campaign_type}_delivery_status_updated"
+		// ]);
 
 		// Trigger delivery status hooks
 		do_action("quillcrm_{$this->campaign_type}_delivery_status_updated", $tracking_record, $status, $previous_status);
@@ -406,13 +406,13 @@ abstract class Abstract_Twilio_Tracking
 				$campaign_record->clicked_at = current_time('mysql');
 				$campaign_record->save();
 
-				quillcrm_get_logger()->info("{$this->campaign_type} click tracked", [
-					'campaign_record_id' => $campaign_record->id,
-					'contact_id' => $campaign_record->contact_id,
-					'source_id' => $campaign_record->source_id,
-					'source_type' => $campaign_record->source_type,
-					'code' => "{$this->campaign_type}_click_tracked"
-				]);
+				// quillcrm_get_logger()->info("{$this->campaign_type} click tracked", [
+				// 	'campaign_record_id' => $campaign_record->id,
+				// 	'contact_id' => $campaign_record->contact_id,
+				// 	'source_id' => $campaign_record->source_id,
+				// 	'source_type' => $campaign_record->source_type,
+				// 	'code' => "{$this->campaign_type}_click_tracked"
+				// ]);
 
 			// Trigger click automation if enabled
 			do_action("quillcrm_{$this->campaign_type}_clicked", $campaign_record);
@@ -466,11 +466,11 @@ abstract class Abstract_Twilio_Tracking
 				$contact->status = 'unsubscribed';
 				$contact->save();
 
-				quillcrm_get_logger()->info("{$this->campaign_type} unsubscribe processed", [
-					'contact_id' => $contact->id,
-					'campaign_record_id' => $campaign_record->id,
-					'code' => "{$this->campaign_type}_unsubscribe"
-				]);
+				// quillcrm_get_logger()->info("{$this->campaign_type} unsubscribe processed", [
+				// 	'contact_id' => $contact->id,
+				// 	'campaign_record_id' => $campaign_record->id,
+				// 	'code' => "{$this->campaign_type}_unsubscribe"
+				// ]);
 
 				// Trigger unsubscribe automation
 				do_action("quillcrm_{$this->campaign_type}_unsubscribed", $contact, $campaign_record);

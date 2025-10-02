@@ -192,12 +192,12 @@ abstract class Abstract_Campaign_Processing
             $campaign_message->status = 'sent'; // Update status
             $campaign_message->save();
 
-            quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' MessageSid stored for tracking', [
-                'tracking_id' => $campaign_message->id,
-                'message_sid' => $result['data']['sid'],
-                'contact_id' => $contact->id,
-                'code' => "{$this->campaign_type}_message_sid_stored"
-            ]);
+            // quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' MessageSid stored for tracking', [
+            //     'tracking_id' => $campaign_message->id,
+            //     'message_sid' => $result['data']['sid'],
+            //     'contact_id' => $contact->id,
+            //     'code' => "{$this->campaign_type}_message_sid_stored"
+            // ]);
         } else {
             // Log if MessageSid storage failed
             quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' MessageSid not found in response', [
@@ -524,16 +524,16 @@ abstract class Abstract_Campaign_Processing
             // Enqueue processing task
             QuillCRM::instance()->campaigns_tasks->enqueue_sync("process_campaign_{$this->campaign_type}", $campaign, $contact, $campaign_message);
 
-            quillcrm_get_logger()->info(
-                sprintf(__('Campaign %s enqueued.', 'quillcrm'), $this->campaign_type),
-                array(
-                    'code' => "add_campaign_{$this->campaign_type}",
-                    'campaign_message' => array(
-                        'id' => $campaign_message->id,
-                        'hash_key' => $campaign_message->hash_key,
-                    ),
-                )
-            );
+            // quillcrm_get_logger()->info(
+            //     sprintf(__('Campaign %s enqueued.', 'quillcrm'), $this->campaign_type),
+            //     array(
+            //         'code' => "add_campaign_{$this->campaign_type}",
+            //         'campaign_message' => array(
+            //             'id' => $campaign_message->id,
+            //             'hash_key' => $campaign_message->hash_key,
+            //         ),
+            //     )
+            // );
             return true;
         } catch (\Exception $e) {
             quillcrm_get_logger()->error(
@@ -594,7 +594,7 @@ abstract class Abstract_Campaign_Processing
             $this->handle_send_result($campaign_message, $result);
 
             // Log processing result
-            $this->log_campaign_processing_result($campaign, $contact, $campaign_message);
+            // $this->log_campaign_processing_result($campaign, $contact, $campaign_message);
 
         } catch (\Exception $e) {
             // Log processing error
@@ -654,16 +654,16 @@ abstract class Abstract_Campaign_Processing
         $campaign->save();
         update_option("quillcrm_{$this->campaign_type}_campaigns_last_contact_offset_{$campaign->id}", $recipients_count);
         
-        quillcrm_get_logger()->info(
-            sprintf(__('%s Campaign completed.', 'quillcrm'), ucfirst($this->campaign_type)),
-            array(
-                'code' => "{$this->campaign_type}_campaign_completed",
-                'campaign' => array(
-                    'id' => $campaign->id,
-                    'name' => $campaign->name,
-                ),
-            )
-        );
+    //     quillcrm_get_logger()->info(
+    //         sprintf(__('%s Campaign completed.', 'quillcrm'), ucfirst($this->campaign_type)),
+    //         array(
+    //             'code' => "{$this->campaign_type}_campaign_completed",
+    //             'campaign' => array(
+    //                 'id' => $campaign->id,
+    //                 'name' => $campaign->name,
+    //             ),
+    //         )
+    //     );
     }
 
     /**
@@ -786,18 +786,18 @@ abstract class Abstract_Campaign_Processing
      * @param Tracking_Model $campaign_message
      * @return void
      */
-    protected function log_campaign_processing_result($campaign, $contact, $campaign_message)
-    {
-        quillcrm_get_logger()->info(
-            sprintf(__('Campaign %s message processed.', 'quillcrm'), ucfirst($this->campaign_type)),
-            array(
-                'code' => "campaign_{$this->campaign_type}_processed",
-                'status' => $campaign_message->status,
-                'contact_id' => $contact->id,
-                'campaign_id' => $campaign->id,
-            )
-        );
-    }
+    // protected function log_campaign_processing_result($campaign, $contact, $campaign_message)
+    // {
+    //     quillcrm_get_logger()->info(
+    //         sprintf(__('Campaign %s message processed.', 'quillcrm'), ucfirst($this->campaign_type)),
+    //         array(
+    //             'code' => "campaign_{$this->campaign_type}_processed",
+    //             'status' => $campaign_message->status,
+    //             'contact_id' => $contact->id,
+    //             'campaign_id' => $campaign->id,
+    //         )
+    //     );
+    // }
 
     /**
      * Log campaign processing error
@@ -950,13 +950,13 @@ abstract class Abstract_Campaign_Processing
         $campaign->save();
         update_option($offset_key, 0);
         
-        quillcrm_get_logger()->info(
-            sprintf(__('Resent failed %s messages completed.', 'quillcrm'), $this->campaign_type),
-            array(
-                'code' => "resent_failed_{$this->campaign_type}",
-                'campaign' => $campaign->id,
-            )
-        );
+    //     quillcrm_get_logger()->info(
+    //         sprintf(__('Resent failed %s messages completed.', 'quillcrm'), $this->campaign_type),
+    //         array(
+    //             'code' => "resent_failed_{$this->campaign_type}",
+    //             'campaign' => $campaign->id,
+    //         )
+    //     );
     }
 
     /**

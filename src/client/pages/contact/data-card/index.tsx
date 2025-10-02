@@ -12,8 +12,19 @@ import { __ } from '@wordpress/i18n';
  */
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Emails from '../emails';
+import PurchaseHistory from '../purchase-history';
+import Automation from '../automation';
+import Notes from '../notes';
+import { useContactContext } from '../state/context';
 
 const DataCard: React.FC = () => {
+    const { contact } = useContactContext();
+
+    if (!contact) {
+        return null;
+    }
+
     return (
         <Card className="w-2/3 bg-[#F8F8F8] shadow-none p-5">
             <Tabs defaultValue="emails" className='w-full'>
@@ -37,7 +48,7 @@ const DataCard: React.FC = () => {
 
                 <TabsContent value="emails">
                     <CardContent className="pt-6">
-                        {__('Content for Emails', 'quillcrm')}
+                        <Emails contact_id={contact.id} />
                     </CardContent>
                 </TabsContent>
 
@@ -49,19 +60,19 @@ const DataCard: React.FC = () => {
 
                 <TabsContent value="notes">
                     <CardContent className="pt-6">
-                        {__('Content for Notes', 'quillcrm')}
+                        <Notes contact_id={contact.id} />
                     </CardContent>
                 </TabsContent>
 
                 <TabsContent value="automation">
                     <CardContent className="pt-6">
-                        {__('Content for Automation', 'quillcrm')}
+                        <Automation contact_id={contact.id} />
                     </CardContent>
                 </TabsContent>
 
                 <TabsContent value="purchase-history">
                     <CardContent className="pt-6">
-                        {__('Content for Purchase History', 'quillcrm')}
+                        <PurchaseHistory contact_id={contact.id} />
                     </CardContent>
                 </TabsContent>
             </Tabs>

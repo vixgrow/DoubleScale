@@ -10,11 +10,12 @@ import { ColumnDef } from '@tanstack/react-table';
  * internal dependencies
  */
 import type { Contact } from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
 import { SortIcon, TimeAgoCell, ViewIcon } from '@quillcrm/components';
 import { useContactOrderDetails } from '../useContactsAPI';
+import { useContactsContext } from '../contexts';
 
 export const selectionColumn: ColumnDef<Contact> = {
 	id: 'select',
@@ -41,6 +42,7 @@ export const selectionColumn: ColumnDef<Contact> = {
 export const useContactsColumns = () => {
 	const { isWooCommerceActive, getContactOrderDetails } =
 		useContactOrderDetails();
+	const { openContactDialog } = useContactsContext();
 
 	const baseColumns: ColumnDef<Contact>[] = [
 		{
@@ -57,10 +59,14 @@ export const useContactsColumns = () => {
 				</div>
 			),
 			cell: ({ row }) => (
-				<NavLink to={`contacts/${row.original.id}`}>
+				<Button
+					variant="ghost"
+					onClick={() => openContactDialog(row.original.id.toString())}
+					className="h-auto p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
+				>
 					{row.original.first_name || '-'}{' '}
 					{row.original.last_name || '-'}
-				</NavLink>
+				</Button>
 			),
 		},
 		{
@@ -77,9 +83,13 @@ export const useContactsColumns = () => {
 				</div>
 			),
 			cell: ({ row }) => (
-				<NavLink to={`contacts/${row.original.id}`}>
+				<Button
+					variant="ghost"
+					onClick={() => openContactDialog(row.original.id.toString())}
+					className="h-auto p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
+				>
 					{row.original.email}
-				</NavLink>
+				</Button>
 			),
 		},
 		{
@@ -215,14 +225,16 @@ export const useContactsColumns = () => {
 			accessorKey: 'view',
 			header: __('Actions', 'quillcrm'),
 			cell: ({ row }) => (
-				<NavLink to={`contacts/${row.original.id}`}>
-					<div className="flex items-center gap-1 text-[#3F3F46]">
-						<div className="text-[#A1A1AA]">
-							<ViewIcon />
-						</div>
-						View
+				<Button
+					variant="ghost"
+					onClick={() => openContactDialog(row.original.id.toString())}
+					className="h-auto p-0 flex items-center gap-1 text-[#3F3F46] hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
+				>
+					<div className="text-[#A1A1AA]">
+						<ViewIcon />
 					</div>
-				</NavLink>
+					View
+				</Button>
 			),
 		},
 	];

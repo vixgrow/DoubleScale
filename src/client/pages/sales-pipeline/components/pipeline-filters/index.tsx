@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -14,6 +14,8 @@ import { Search, Filter, X, Plus } from 'lucide-react';
  * Internal dependencies
  */
 import './style.scss';
+import ConfigAPI from '@quillcrm/config';
+import { UserService } from '../../../../../services/user-service';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -32,6 +34,7 @@ interface Filters {
 		to: Date | null;
 	};
 	status: 'open' | 'won' | 'lost' | 'all';
+	priority: string | null;
 }
 
 interface PipelineFiltersProps {
@@ -50,6 +53,21 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 	onFiltersChange,
 }) => {
 	const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+
+	const priorities = useMemo(() => {
+		return ConfigAPI.getDealPriorities();
+	}, []);
+
+	const [owners, setOwners] = useState<any[]>([]);
+	const [ownersLoading, setOwnersLoading] = useState(false);
+
+	useEffect(() => {
+		setOwnersLoading(true);
+		UserService.getUsersForSelect().then((owners) => {
+			setOwners(owners);
+			setOwnersLoading(false);
+		});
+	}, []);
 
 	const handleFilterChange = (key: keyof Filters, value: any) => {
 		onFiltersChange({
@@ -71,6 +89,7 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 			ownerId: null,
 			dateRange: { from: null, to: null },
 			status: 'open',
+			priority: null,
 		});
 	};
 
@@ -79,7 +98,8 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 		filters.ownerId ||
 		filters.dateRange.from ||
 		filters.dateRange.to ||
-		filters.status !== 'open';
+		filters.status !== 'open' ||
+		filters.priority !== null;
 
 	return (
 		<div className="pipeline-filters">
@@ -158,6 +178,7 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 											filters.dateRange.to) &&
 											'date',
 										filters.status !== 'open' && 'status',
+										filters.priority !== null && 'priority',
 									].filter(Boolean).length
 								}
 							</span>
@@ -194,10 +215,47 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 									}
 									style={{ width: 200 }}
 									allowClear
+									loading={ownersLoading}
+									notFoundContent={
+										ownersLoading
+											? __(
+													'Loading owners...',
+													'quillcrm'
+												)
+											: __('No owners found', 'quillcrm')
+									}
 								>
-									{/* TODO: Load from API */}
-									<Option value={1}>John Doe</Option>
-									<Option value={2}>Jane Smith</Option>
+									{Object.values(owners).map((owner) => (
+										<Option
+											key={owner.value}
+											value={owner.value}
+										>
+											{owner.label}
+										</Option>
+									))}
+								</Select>
+							</div>
+
+							{/* Priority Filter */}
+							<div className="filter-item">
+								<label>{__('Priority', 'quillcrm')}</label>
+								<Select
+									placeholder={__(
+										'All priorities',
+										'quillcrm'
+									)}
+									value={filters.priority}
+									onChange={(value) =>
+										handleFilterChange('priority', value)
+									}
+									style={{ width: 200 }}
+									allowClear
+								>
+									{Object.keys(priorities).map((key) => (
+										<Option key={key} value={key}>
+											{priorities[key].label}
+										</Option>
+									))}
 								</Select>
 							</div>
 

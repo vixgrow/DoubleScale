@@ -21,6 +21,10 @@ use QuillCRM\Models\User_Model;
 class Deal_Model extends Model {
 
 
+
+
+
+
 	/**
 	 * Table name
 	 *
@@ -55,6 +59,7 @@ class Deal_Model extends Model {
 		'currency',
 		'expected_close_date',
 		'probability',
+		'priority',
 		'status',
 		'owner_id',
 		'source',
@@ -104,6 +109,7 @@ class Deal_Model extends Model {
 		'value'       => 'nullable|numeric|min:0',
 		'currency'    => 'nullable|string|size:3',
 		'probability' => 'nullable|numeric|between:0,100',
+		'priority'    => 'nullable|in:low,medium,high',
 		'status'      => 'required|in:open,won,lost',
 		'owner_id'    => 'nullable|integer|min:1',
 	);
@@ -125,6 +131,7 @@ class Deal_Model extends Model {
 		'value.min'            => 'Deal value cannot be negative.',
 		'probability.numeric'  => 'Probability must be a number.',
 		'probability.between'  => 'Probability must be between 0 and 100.',
+		'priority.in'          => 'Priority must be low, medium, or high.',
 		'status.in'            => 'Status must be open, won, or lost.',
 		'owner_id.min'         => 'Owner ID must be a positive number.',
 	);
@@ -370,72 +377,6 @@ class Deal_Model extends Model {
 		return $saved;
 	}
 
-	/**
-	 * Mark deal as won
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int|null $user_id User making the change
-	 *
-	 * @return bool
-	 */
-	public function markAsWon( $user_id = null ) {
-		$this->status   = 'won';
-		$this->won_time = current_time( 'mysql' );
-		$saved          = $this->save();
-
-		if ( $saved ) {
-			Deal_Activity_Model::create(
-				array(
-					'deal_id'       => $this->id,
-					'activity_type' => 'status_changed',
-					'data'          => array(
-						'status' => 'won',
-					),
-					'user_id'       => $user_id,
-				)
-			);
-
-			do_action( 'quillcrm_deal_won', $this );
-		}
-
-		return $saved;
-	}
-
-	/**
-	 * Mark deal as lost
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string   $reason Reason for losing the deal
-	 * @param int|null $user_id User making the change
-	 *
-	 * @return bool
-	 */
-	public function markAsLost( $reason = '', $user_id = null ) {
-		$this->status      = 'lost';
-		$this->lost_time   = current_time( 'mysql' );
-		$this->lost_reason = $reason;
-		$saved             = $this->save();
-
-		if ( $saved ) {
-			Deal_Activity_Model::create(
-				array(
-					'deal_id'       => $this->id,
-					'activity_type' => 'status_changed',
-					'data'          => array(
-						'status' => 'lost',
-						'reason' => $reason,
-					),
-					'user_id'       => $user_id,
-				)
-			);
-
-			do_action( 'quillcrm_deal_lost', $this );
-		}
-
-		return $saved;
-	}
 
 	/**
 	 * Boot method
@@ -496,5 +437,23 @@ class Deal_Model extends Model {
 				$deal->activities()->delete();
 			}
 		);
+	}
+
+	/**
+	 * Get status according to stage probability
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param float $stage_probability Stage win probability
+	 *
+	 * @return string
+	 */
+	public static function get_status_from_probability( $stage_probability ) {
+		if ( $stage_probability == 100 ) {
+			return 'won';
+		} elseif ( $stage_probability == 0 ) {
+			return 'lost';
+		}
+		return 'open';
 	}
 }

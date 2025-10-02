@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import dayjs from 'dayjs';
+import { UserService } from '../services/user-service';
 
 export interface ReportFilters {
     dateRange: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null;
@@ -73,16 +74,8 @@ export const useReportFilters = () => {
     // Fetch dropdown options
     const fetchFilterOptions = async () => {
         try {
-            // Fetch owners (users)
-            const usersResponse = await apiFetch({
-                path: '/wp/v2/users',
-            }) as any[];
-
-            const owners = usersResponse?.map((user: any) => ({
-                id: user.id,
-                display_name: user.name,
-                email: user.email,
-            })) || [];
+            // Fetch owners (CRM users) using centralized service
+            const owners = await UserService.getUsersForReports();
 
             // Fetch pipelines
             const pipelinesResponse = await apiFetch({

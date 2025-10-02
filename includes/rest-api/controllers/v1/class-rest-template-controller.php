@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class REST_Template_Controller
  * This class is responsible for handling the rest api requests for templates
@@ -10,6 +11,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,6 +24,7 @@ use QuillCRM\Emails\Email_Renderer;
  * REST_Template_Controller class
  */
 class REST_Template_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -121,57 +124,57 @@ class REST_Template_Controller extends REST_Controller {
 	 * @return array $schema The template schema
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'template',
-			'type'       => 'object',
-			'properties' => array(
-				'id'         => array(
-					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
-					'type'        => 'integer',
-					'readonly'    => true,
-				),
-				'name'       => array(
-					'description' => __( 'Name of the template.', 'quillcrm' ),
-					'type'        => 'string',
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'type'       => array(
-					'description' => __( 'Type of the template.', 'quillcrm' ),
-					'type'        => 'string',
-					'enum'        => array( 'email', 'sms' ),
-				),
-				'subject'    => array(
-					'description' => __( 'Subject of the template.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => false,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'body'       => array(
-					'description' => __( 'Body of the template.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => false,
-				),
-				'settings'   => array(
-					'description' => __( 'Settings of the template.', 'quillcrm' ),
-					'type'        => array( 'object', 'null' ),
-				),
-				'created_at' => array(
-					'description' => __( 'Creation time of the template.', 'quillcrm' ),
-					'type'        => 'string',
-					'readonly'    => false,
-				),
-				'updated_at' => array(
-					'description' => __( 'Update time of the template.', 'quillcrm' ),
-					'type'        => 'string',
-					'readonly'    => false,
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'template',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'id'         => array(
+					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'readonly'    => true,
+				 ),
+				 'name'       => array(
+					 'description' => __( 'Name of the template.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'type'       => array(
+					 'description' => __( 'Type of the template.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'enum'        => array( 'email', 'sms' ),
+				 ),
+				 'subject'    => array(
+					 'description' => __( 'Subject of the template.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => false,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'body'       => array(
+					 'description' => __( 'Body of the template.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => false,
+				 ),
+				 'settings'   => array(
+					 'description' => __( 'Settings of the template.', 'quillcrm' ),
+					 'type'        => array( 'object', 'null' ),
+				 ),
+				 'created_at' => array(
+					 'description' => __( 'Creation time of the template.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'readonly'    => false,
+				 ),
+				 'updated_at' => array(
+					 'description' => __( 'Update time of the template.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'readonly'    => false,
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -218,7 +221,7 @@ class REST_Template_Controller extends REST_Controller {
 
 			if ( $keyword ) {
 				$templates = Template_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )->where( 'hidden', 0 )
-				->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+					->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			} else {
 				$templates = Template_Model::where( 'hidden', 0 )->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 			}
@@ -381,83 +384,7 @@ class REST_Template_Controller extends REST_Controller {
 		return $template_data;
 	}
 
-	/**
-	 * Get items permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object
-	 *
-	 * @return bool $permission The permission
-	 */
-	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
 
-	/**
-	 * Get item permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object
-	 *
-	 * @return bool $permission The permission
-	 */
-	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Create item permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object
-	 *
-	 * @return bool $permission The permission
-	 */
-	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Update item permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object
-	 *
-	 * @return bool $permission The permission
-	 */
-	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Delete items permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object
-	 *
-	 * @return bool $permission The permission
-	 */
-	public function delete_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Delete item permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object
-	 *
-	 * @return bool $permission The permission
-	 */
-	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
 
 	/**
 	 * Send a test email using the template
@@ -555,9 +482,86 @@ class REST_Template_Controller extends REST_Controller {
 				),
 				200
 			);
-
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Get items permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return bool $permission The permission
+	 */
+	public function get_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Get item permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return bool $permission The permission
+	 */
+	public function get_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Create item permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return bool $permission The permission
+	 */
+	public function create_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Update item permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return bool $permission The permission
+	 */
+	public function update_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Delete items permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return bool $permission The permission
+	 */
+	public function delete_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Delete item permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return bool $permission The permission
+	 */
+	public function delete_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 }

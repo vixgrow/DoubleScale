@@ -2,15 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
-
-/**
- * External dependencies
- */
-import { Button, Card, Badge, Flex, Typography, Spin } from 'antd';
+import { useState, useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -18,19 +10,19 @@ import { Button, Card, Badge, Flex, Typography, Spin } from 'antd';
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useCampaignContext } from '../../state/context';
-import type { Filter as FilterType, ContactsResponse } from '@quillcrm/client';
+import type { Filter as FilterType } from '@quillcrm/client';
 import {
-	Filters,
+	ContactList,
 	PanelLayout,
 	PanelSettings,
 	TeamIcon,
 } from '@quillcrm/components';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { ListTagFilter } from '@quillcrm/components';
+import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
 
 const Contacts: React.FC = () => {
-	const { campaign, isLoading, saveCampaign, isSaving, updateSettings } =
+	const { campaign, saveCampaign, saveCampaignStep, updateSettings } =
 		useCampaignContext();
 	const navigate = useNavigate();
 	const filters = campaign?.settings.filters || [];
@@ -38,129 +30,61 @@ const Contacts: React.FC = () => {
 		updateSettings('filters', newFilters);
 	};
 
-	const [loading, setLoading] = useState(true);
 	const [total, setTotal] = useState(0);
 	const [filterBy, setFilterBy] = useState('list-tags');
-	const { createNotice } = useDispatch('quillcrm/core');
+	const [isApplying, setIsApplying] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
+	const [panelHeight, setPanelHeight] = useState<number>(0);
+	const panelRef = useRef<HTMLDivElement>(null);
 
-	const fetchContacts = async () => {
-		setLoading(true);
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts', {
-					per_page: 1,
-					page: 1,
-					filters: filters,
-					subscribed: true,
-				}),
-				method: 'GET',
-				parse: true,
-			})) as ContactsResponse;
-
-			setTotal(response.total);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to fetch contacts', 'quillcrm'),
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const fetchList = async () => {
-		const response = await apiFetch({
-			path: '/qc/v1/lists',
-		});
-		console.log(response);
-	};
+	// Measure and sync panel height
 	useEffect(() => {
-		fetchContacts();
-		fetchList();
-	}, []);
+		const measureHeight = () => {
+			if (panelRef.current) {
+				const height = panelRef.current.offsetHeight;
+				setPanelHeight(height);
+			}
+		};
+
+		// Initial measurement
+		measureHeight();
+
+		// Set up ResizeObserver to watch for height changes
+		const resizeObserver = new ResizeObserver(() => {
+			measureHeight();
+		});
+
+		if (panelRef.current) {
+			resizeObserver.observe(panelRef.current);
+		}
+
+		return () => {
+			resizeObserver.disconnect();
+		};
+	}, [filterBy, filters, isApplying]); // Re-measure when content changes
+
+	// Handle apply filters action
+	const handleApplyFilters = async (): Promise<void> => {
+		setShouldFetchContacts(true);
+	};
 
 	const save = async () => {
 		if (!campaign) {
 			return;
 		}
 
-		// Validate that campaign has templates
-		const templates = campaign.settings?.templates;
-		if (!templates || templates.length === 0) {
-			createNotice({
-				type: 'error',
-				message: __(
-					'Please create a template before proceeding',
-					'quillcrm'
-				),
-			});
-			navigate(getToLink(`campaigns/${campaign.id}/template`));
-			return;
+		// Save contacts step data with filters
+		const contactsStepData = {
+			filters: filters,
+			contacts_count: total,
+		};
+
+		// Save the step with contacts data and navigate only if successful
+		const saveSuccess = await saveCampaignStep('review', contactsStepData);
+		if (saveSuccess) {
+			navigate(getToLink(`campaigns/${campaign.id}/review`));
 		}
-
-		const template = templates[0];
-
-		if (!template.body || template.body.trim().length === 0) {
-			createNotice({
-				type: 'error',
-				message: __(
-					campaign.type === 'email'
-						? 'Email body is required'
-						: 'Message content is required',
-					'quillcrm'
-				),
-			});
-			navigate(getToLink(`campaigns/${campaign.id}/template`));
-			return;
-		}
-
-		// Email-specific validation
-		if (campaign.type === 'email') {
-			if (!template.subject) {
-				createNotice({
-					type: 'error',
-					message: __('Email subject is required', 'quillcrm'),
-				});
-				navigate(getToLink(`campaigns/${campaign.id}/template`));
-				return;
-			}
-
-			if (!template.settings?.from_name) {
-				createNotice({
-					type: 'error',
-					message: __('From Name is required', 'quillcrm'),
-				});
-				navigate(getToLink(`campaigns/${campaign.id}/template`));
-				return;
-			}
-
-			if (!template.settings?.from_email) {
-				createNotice({
-					type: 'error',
-					message: __('From Email is required', 'quillcrm'),
-				});
-				navigate(getToLink(`campaigns/${campaign.id}/template`));
-				return;
-			}
-		}
-
-		// SMS/WhatsApp validation: max length check
-		if (campaign.type === 'sms' || campaign.type === 'whatsapp') {
-			if (template.body.length > 1600) {
-				createNotice({
-					type: 'error',
-					message: __(
-						'Message is too long. Maximum 1600 characters.',
-						'quillcrm'
-					),
-				});
-				navigate(getToLink(`campaigns/${campaign.id}/template`));
-				return;
-			}
-		}
-
-		await saveCampaign();
-		navigate(getToLink(`campaigns/${campaign.id}/review`));
 	};
 
 	return (
@@ -169,11 +93,24 @@ const Contacts: React.FC = () => {
 			totalSteps={1}
 			currentStep={0}
 			onNext={save}
-			onBack={() => navigate(getToLink(`campaigns`))}
+			onBack={async () => {
+				// Save current contacts data before going back
+				const contactsStepData = {
+					filters: filters,
+					contacts_count: total,
+				};
+				const saveSuccess = await saveCampaignStep(
+					'template',
+					contactsStepData
+				);
+				if (saveSuccess) {
+					navigate(getToLink(`campaigns/${campaign?.id}/template`));
+				}
+			}}
 		>
 			{campaign && (
-				<>
-					<div className="flex gap-6">
+				<div className="flex gap-6 items-start">
+					<div ref={panelRef} className="w-[55%]">
 						<PanelSettings
 							title={__('Recipients', 'quillcrm')}
 							description={__(
@@ -181,7 +118,7 @@ const Contacts: React.FC = () => {
 								'quillcrm'
 							)}
 							icon={<TeamIcon />}
-							className="w-1/2"
+							className="flex flex-col"
 						>
 							<div className="space-y-6">
 								<div>
@@ -193,105 +130,91 @@ const Contacts: React.FC = () => {
 										onValueChange={setFilterBy}
 										className="flex gap-4"
 									>
-										<div className="flex items-center space-x-4 w-1/2 border border-gray-600 rounded-lg py-2 px-3 cursor-pointer">
+										<Label
+											htmlFor="list-tags"
+											className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
+												filterBy === 'list-tags'
+													? 'border-blue-500 bg-blue-50'
+													: 'border-gray-300'
+											}`}
+										>
 											<RadioGroupItem
 												value="list-tags"
 												id="list-tags"
 											/>
-											<Label htmlFor="list-tags">
+											<span>
 												{__(
-													'List and Tags',
+													'Lists and Tags',
 													'quillcrm'
 												)}
-											</Label>
-										</div>
-										<div className="flex items-center space-x-4 w-1/2">
+											</span>
+										</Label>
+										<Label
+											htmlFor="advanced"
+											className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
+												filterBy === 'advanced'
+													? 'border-blue-500 bg-blue-50'
+													: 'border-gray-300'
+											}`}
+										>
 											<RadioGroupItem
 												value="advanced"
 												id="advanced"
 											/>
-											<Label htmlFor="advanced">
+											<span>
 												{__(
 													'Advanced Filter',
 													'quillcrm'
 												)}
-											</Label>
-										</div>
+											</span>
+										</Label>
 									</RadioGroup>
 								</div>
-								{filterBy === 'list-tags' && <ListTagFilter />}
-								{filterBy === 'advanced' && (
-									<Filters
+
+								{/* Contact Count Display */}
+								<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+									<div className="text-sm font-medium text-gray-700">
+										{__(
+											'Total Contacts based on filters',
+											'quillcrm'
+										)}
+										: {total.toLocaleString()}
+									</div>
+								</div>
+
+								{filterBy === 'list-tags' && (
+									<ListTagFilter
 										filters={filters}
-										onChange={setFilters}
-										onApply={fetchContacts}
-										isApplying={loading}
+										setFilters={setFilters}
+										fetchContacts={handleApplyFilters}
+										loading={isLoading}
+										onApplyingChange={setIsApplying}
+									/>
+								)}
+								{filterBy === 'advanced' && (
+									<AdvancedFilter
+										filters={filters}
+										setFilters={setFilters}
+										fetchContacts={handleApplyFilters}
+										loading={isLoading}
+										onApplyingChange={setIsApplying}
 									/>
 								)}
 							</div>
 						</PanelSettings>
 					</div>
 
-					{/* <Flex
-						justify="space-between"
-						align="center"
-						style={{ marginBottom: 20 }}
-					>
-						<Flex vertical gap={10}>
-							<Typography.Title level={4}>
-								{__('Recipient Selection', 'quillcrm')}
-							</Typography.Title>
-							<Typography.Text>
-								{__(
-									'Select the contacts to send the campaign to',
-									'quillcrm'
-								)}
-							</Typography.Text>
-						</Flex>
-						<div className="qcrm-contacts">
-							<div className="qcrm-contacts-total">
-								{__(
-									'Total Contacts based on filters',
-									'quillcrm'
-								)}
-								:{' '}
-								{!loading && (
-									<Badge
-										count={total}
-										style={{
-											backgroundColor: '#52c41a',
-											color: '#fff',
-											marginLeft: '10px',
-										}}
-										showZero
-									/>
-								)}
-								{loading && <Spin />}
-							</div>
-						</div>
-					</Flex>
-				
-					<div className="qcrm-actions">
-						<Button
-							onClick={() =>
-								navigate(
-									getToLink(
-										`campaigns/${campaign.id}/template`
-									)
-								)
-							}
-						>
-							{__('Back', 'quillcrm')}
-						</Button>
-						<Button
-							type="primary"
-							onClick={() => save()}
-							loading={isSaving}
-						>
-							{__('Next', 'quillcrm')}
-						</Button>
-					</div> */}
-				</>
+					{/* Contact List Component */}
+					<ContactList
+						filters={filters}
+						loading={isApplying}
+						maxHeight={panelHeight}
+						shouldFetch={shouldFetchContacts}
+						onFetchComplete={() => setShouldFetchContacts(false)}
+						onTotalChange={setTotal}
+						onLoadingChange={setIsLoading}
+					/>
+				</div>
 			)}
 		</PanelLayout>
 	);

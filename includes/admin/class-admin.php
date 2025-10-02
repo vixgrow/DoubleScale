@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Admin: Class Admin
  *
@@ -18,6 +19,10 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 class Admin {
+
+
+
+
 
 	/**
 	 * Class Instance.
@@ -63,7 +68,7 @@ class Admin {
 	 * @since 1.0.0
 	 */
 	public function admin_hooks() {
-		add_action( 'admin_menu', array( $this, 'create_admin_menu_pages' ) );
+		 add_action( 'admin_menu', array( $this, 'create_admin_menu_pages' ) );
 	}
 
 	/**
@@ -75,7 +80,7 @@ class Admin {
 		add_menu_page(
 			__( 'QuillCRM', 'quillcrm' ),
 			__( 'QuillCRM', 'quillcrm' ),
-			'manage_options',
+			'quillcrm_access',
 			'quillcrm',
 			array( Admin_Loader::class, 'page_wrapper' ),
 			'data:image/svg+xml;base64,' . base64_encode(
@@ -126,7 +131,7 @@ class Admin {
 			'quillcrm',
 			__( 'Home', 'quillcrm' ),
 			__( 'Home', 'quillcrm' ),
-			'manage_options',
+			'quillcrm_access',
 			'quillcrm',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
@@ -136,7 +141,7 @@ class Admin {
 			'quillcrm',
 			__( 'Contacts', 'quillcrm' ),
 			__( 'Contacts', 'quillcrm' ),
-			'manage_options',
+			'quillcrm_access',
 			'quillcrm&path=contacts',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);

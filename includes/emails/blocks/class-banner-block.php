@@ -57,8 +57,6 @@ class Banner_Block extends Email_Block {
 			'borderRadius'    => '9999',
 			'shape'           => 'circle',
 			'rotation'        => 0,
-			'width'           => '200px',
-			'height'          => 'auto',
 		);
 	}
 
@@ -84,8 +82,6 @@ class Banner_Block extends Email_Block {
 				'padding'          => $this->format_padding( $props['padding'] ),
 				'text-align'       => $props['align'],
 				'border-radius'    => $props['borderRadius'] . 'px',
-				'width'            => $props['width'],
-				'height'           => $props['height'],
 				'max-width'        => '100%',
 				'display'          => 'inline-block',
 				'vertical-align'   => 'top',
@@ -136,26 +132,25 @@ class Banner_Block extends Email_Block {
 		// Use table-based layout for better email compatibility
 		$table_style = $this->build_style_string(
 			array(
-				'width'            => '100%',
-				'max-width'        => '100%',
-				'border-collapse'  => 'collapse',
-				'margin'           => '0',
+				'width'           => '100%',
+				'max-width'       => '100%',
+				'border-collapse' => 'collapse',
+				'margin'          => '0',
 			)
 		);
 
 		$cell_style = $this->build_style_string(
 			array(
-				'padding'    => '0',
-				'text-align' => $text_align,
+				'padding'        => '0',
+				'text-align'     => $text_align,
 				'vertical-align' => 'top',
-				'width'      => '100%',
+				'width'          => '100%',
 			)
 		);
 
 		// Inner container for the banner content
 		$inner_container_style = $this->build_style_string(
 			array(
-				'width'            => $props['width'],
 				'max-width'        => '100%',
 				'background-color' => $props['backgroundColor'],
 				'border-radius'    => $props['borderRadius'] . 'px',
@@ -173,12 +168,12 @@ class Banner_Block extends Email_Block {
 		// Add image if source is provided
 		if ( ! empty( $props['src'] ) ) {
 			$image_html = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$img_style}\" />";
-			
+
 			// Wrap image in link if provided
 			if ( $link ) {
 				$image_html = "<a href=\"{$link}\" target=\"_blank\" style=\"text-decoration:none;border:0;\">{$image_html}</a>";
 			}
-			
+
 			$output .= $image_html;
 		}
 
@@ -192,24 +187,24 @@ class Banner_Block extends Email_Block {
 
 		if ( $should_show_text ) {
 			$text_html = "<p style=\"{$text_style}\">{$content}</p>";
-			
+
 			// Wrap text in link if provided and no image
 			if ( $link && empty( $props['src'] ) ) {
 				$text_html = "<a href=\"{$link}\" target=\"_blank\" style=\"text-decoration:none;color:inherit;\">{$text_html}</a>";
 			}
-			
+
 			$output .= $text_html;
 		}
 
 		// If no content and no image, show placeholder
 		if ( empty( $content ) && empty( $props['src'] ) ) {
-			$output .= "<p style=\"{$text_style}\">" . esc_html__( 'Banner content', 'quillcrm' ) . "</p>";
+			$output .= "<p style=\"{$text_style}\">" . esc_html__( 'Banner content', 'quillcrm' ) . '</p>';
 		}
 
-		$output .= "</div>
+		$output .= '</div>
 				</td>
 			</tr>
-		</table>";
+		</table>';
 
 		return $output;
 	}

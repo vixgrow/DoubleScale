@@ -24,6 +24,25 @@ export type ConfigData = Record<string, unknown> & {
 	isLmsActive: boolean;
 	mergeTags: AutomationMergeTags;
 	importers: Importers;
+	userCapabilities: UserCapabilities;
+	defaultStages: DefaultStage[];
+	dealPriorities: DealPriority[];
+};
+
+export type UserCapabilities = {
+	quillcrm_crm_manager: boolean;
+	quillcrm_deal_owner: boolean;
+};
+
+export type DefaultStage = {
+	name: string;
+	color: string;
+	win_probability: number;
+};
+
+export type DealPriority = {
+	label: string;
+	color: string;
 };
 
 export type Importers = {

@@ -136,7 +136,7 @@ const Campaigns: React.FC = () => {
 
 			setCampaigns([...campaigns, response]);
 			setStep(null);
-			navigate(getToLink(`campaigns/${response.id}`));
+			navigate(getToLink(`campaigns/${response.id}/template`));
 		} catch (error: any) {
 			createNotice({
 				type: 'error',
@@ -251,7 +251,7 @@ const Campaigns: React.FC = () => {
 				]}
 			/>
 
-			{hasRecords ? (
+			{loading || hasRecords ? (
 				<>
 					<DataTable
 						columns={columns}
@@ -259,6 +259,7 @@ const Campaigns: React.FC = () => {
 						showPagination={false}
 						initialPageSize={perPage}
 						setPage={setPage}
+						loading={loading}
 						config={{
 							search: {
 								placeholder: __('Search', 'quillcrm'),

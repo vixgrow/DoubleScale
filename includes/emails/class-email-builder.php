@@ -55,6 +55,13 @@ class Email_Builder {
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-divider-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-html-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-social-media-block.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-timer-block.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-video-block.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-table-block.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-signature-block.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-menu-block.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-preheader-block.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-product-block.php';
 
 		// Include renderer
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/class-email-renderer.php';

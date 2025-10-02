@@ -22,7 +22,6 @@ import {
 	ColorPicker,
 	InputNumber,
 	Tooltip,
-	message,
 } from 'antd';
 import { Plus, Trash2, Info, Palette } from 'lucide-react';
 
@@ -30,6 +29,7 @@ import { Plus, Trash2, Info, Palette } from 'lucide-react';
  * Internal dependencies
  */
 import { usePipelineOperations } from '../../hooks/use-pipeline-operations';
+import ConfigAPI from '@quillcrm/config';
 import './style.scss';
 
 interface Stage {
@@ -44,13 +44,8 @@ interface NewPipelineModalProps {
 	onSuccess: () => void;
 }
 
-const DEFAULT_STAGES: Stage[] = [
-	{ name: 'Lead', color: '#e74c3c', win_probability: 10 },
-	{ name: 'Qualified', color: '#f39c12', win_probability: 25 },
-	{ name: 'Proposal', color: '#f1c40f', win_probability: 50 },
-	{ name: 'Negotiation', color: '#2ecc71', win_probability: 75 },
-	{ name: 'Closed Won', color: '#27ae60', win_probability: 100 },
-];
+// Get default stages from config
+const DEFAULT_STAGES: Stage[] = ConfigAPI.getDefaultStages();
 
 export const NewPipelineModal: React.FC<NewPipelineModalProps> = ({
 	visible,
@@ -264,11 +259,12 @@ export const NewPipelineModal: React.FC<NewPipelineModalProps> = ({
 							<div className="default-stages-info">
 								<p className="info-text">
 									{__(
-										'Using default 5-stage sales pipeline:',
+										`Using default ${DEFAULT_STAGES.length}-stage sales pipeline:`,
 										'quillcrm'
 									)}{' '}
-									Lead → Qualified → Proposal → Negotiation →
-									Closed Won
+									{DEFAULT_STAGES.map(
+										(stage) => stage.name
+									).join(' → ')}
 								</p>
 							</div>
 						)}

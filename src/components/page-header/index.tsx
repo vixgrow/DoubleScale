@@ -44,23 +44,26 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 								onClick,
 								className,
 								disabled,
+								hidden,
 								...rest
 							} = action;
 							return (
-								<Button
-									key={index}
-									onClick={onClick}
-									className={`${className || ''} w-full sm:w-auto min-w-[120px] transition-all duration-200 hover:scale-105 hover:shadow-md`}
-									disabled={disabled}
-									{...rest}
-								>
-									{icon && (
-										<span className="mr-2 btn-icon">
-											{icon}
-										</span>
-									)}
-									{__(label, '@quillcrm')}
-								</Button>
+								!hidden && (
+									<Button
+										key={index}
+										onClick={onClick}
+										className={`${className || ''} w-full sm:w-auto min-w-[120px] transition-all duration-200 hover:scale-105 hover:shadow-md`}
+										disabled={disabled}
+										{...rest}
+									>
+										{icon && (
+											<span className="mr-2 btn-icon">
+												{icon}
+											</span>
+										)}
+										{__(label, '@quillcrm')}
+									</Button>
+								)
 							);
 						})}
 					</div>

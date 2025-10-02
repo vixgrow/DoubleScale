@@ -77,10 +77,7 @@ export const PreheaderRenderer: React.FC<PreheaderRendererProps> = ({ props }) =
         letterSpacing,
     };
 
-    const containerStyle = {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start',
+    const containerStyle: React.CSSProperties = {
         textAlign: textAlign as 'left' | 'center' | 'right',
         padding: padding ? `${padding.top || 0}px ${padding.right || 0}px ${padding.bottom || 0}px ${padding.left || 0}px` : '0',
         fontSize: `${adjustedFontSize}px`,
@@ -88,6 +85,13 @@ export const PreheaderRenderer: React.FC<PreheaderRendererProps> = ({ props }) =
         fontWeight: bold ? 'bold' : 'normal',
         fontStyle: italic ? 'italic' : 'normal',
         letterSpacing,
+        // Text wrapping for overflow
+        wordWrap: 'break-word',
+        overflowWrap: 'break-word' as const,
+        maxWidth: '100%',
+        whiteSpace: 'normal',
+        width: '100%',
+        boxSizing: 'border-box',
     };
 
     // Map heading styles to appropriate HTML elements

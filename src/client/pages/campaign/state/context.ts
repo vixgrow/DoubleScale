@@ -17,6 +17,7 @@ export const CampaignContext = createContext<{
 	setIsSaving: (isSaving: boolean) => void;
 	updateCampaign: (payload: Partial<Campaign>) => void;
 	saveCampaign: (payload?: Partial<Campaign>) => void;
+	saveCampaignStep: (step: string, stepData?: any) => Promise<boolean>;
 	updateSettings: (
 		key: keyof Campaign['settings'],
 		value: Campaign['settings'][keyof Campaign['settings']]
@@ -39,6 +40,9 @@ export const CampaignContext = createContext<{
 	},
 	saveCampaign: (_payload?: Partial<Campaign>) => {
 		throw new Error('saveCampaign() not implemented');
+	},
+	saveCampaignStep: async (_step: string, _stepData?: any) => {
+		throw new Error('saveCampaignStep() not implemented');
 	},
 	updateSettings: (
 		_key: keyof Campaign['settings'],

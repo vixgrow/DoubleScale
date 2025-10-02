@@ -29,8 +29,10 @@ import { debounce } from 'lodash';
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { useUsers } from '../../hooks/use-users';
+import { UserService } from '../../../../../services/user-service';
 import { SOURCE_OPTIONS } from '../../../../../config/types/config-data';
 import './style.scss';
+import ConfigAPI from '@quillcrm/config';
 
 const { Option } = Select;
 
@@ -47,7 +49,7 @@ interface DealFormData {
 	stage_id: number;
 	value?: number;
 	expected_close_date?: string;
-	probability?: number;
+	// probability?: number;
 	source?: string;
 	owner_id?: number;
 }
@@ -69,6 +71,9 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	const [loading, setLoading] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactsLoading, setContactsLoading] = useState(false);
+	const priorities = useMemo(() => {
+		return ConfigAPI.getDealPriorities();
+	}, []);
 
 	// Use shared users hook
 	const {
@@ -140,7 +145,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		undefined
 	);
 
-	// Get current user ID from WordPress
+	// Get current user ID from WordPress using centralized service
 	useEffect(() => {
 		const fetchCurrentUser = async () => {
 			try {
@@ -151,12 +156,10 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 					return;
 				}
 
-				// Fallback to WordPress API
-				const response = await apiFetch({
-					path: '/wp/v2/users/me',
-				});
-				if (response && (response as any).id) {
-					setCurrentUserId(Number((response as any).id));
+				// Use centralized UserService
+				const currentUser = await UserService.getCurrentUser();
+				if (currentUser) {
+					setCurrentUserId(currentUser.id);
 				}
 			} catch (error) {
 				console.error('Failed to get current user:', error);
@@ -239,20 +242,12 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 			);
 
 			if (!currentUserExists) {
-				// If current user not in list, we need to fetch it
+				// If current user not in list, we need to fetch it using centralized service
 				const ensureCurrentUser = async () => {
 					try {
-						const response = await apiFetch({
-							path: `/wp/v2/users/${currentUserId}`,
-						});
-						if (response && (response as any).id) {
-							const currentUser = {
-								id: Number((response as any).id),
-								display_name:
-									(response as any).name ||
-									`User ${currentUserId}`,
-								email: (response as any).email || '',
-							};
+						const currentUser =
+							await UserService.getUserById(currentUserId);
+						if (currentUser) {
 							// Use the hook's method to ensure user is included
 							ensureUserIncluded(currentUser);
 						}
@@ -426,7 +421,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 					</Form.Item>
 				</div>
 
-				<Form.Item
+				{/* <Form.Item
 					name="probability"
 					label={__('Win Probability (%)', 'quillcrm')}
 					help={__(
@@ -450,7 +445,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 							return Math.min(Math.max(result, 0), 100) as any;
 						}}
 					/>
-				</Form.Item>
+				</Form.Item> */}
 
 				{pipeline?.stages && pipeline.stages.length > 0 && (
 					<Form.Item
@@ -490,6 +485,26 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 						</Select>
 					</Form.Item>
 				)}
+
+				{/* priority */}
+				<Form.Item name="priority" label={__('Priority', 'quillcrm')}>
+					<Select placeholder={__('Select priority', 'quillcrm')}>
+						{Object.keys(priorities).map((key) => (
+							<Option key={key} value={key}>
+								<div className="stage-option">
+									<span
+										className="stage-color"
+										style={{
+											backgroundColor:
+												priorities[key].color,
+										}}
+									/>
+									<span>{priorities[key].label}</span>
+								</div>
+							</Option>
+						))}
+					</Select>
+				</Form.Item>
 
 				<Form.Item
 					name="expected_close_date"

@@ -231,6 +231,7 @@ const FormsList: React.FC = () => {
 					showPagination={false}
 					initialPageSize={perPage}
 					setPage={setPage}
+					loading={loading}
 				/>
 				<DataTablePagination table={serverSideTable} />
 			</div>

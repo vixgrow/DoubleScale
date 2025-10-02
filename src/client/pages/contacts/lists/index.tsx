@@ -73,6 +73,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 
 	const validate = (list: Partial<ContactList>) => {
 		if (isEmpty(list.name || '', { ignore_whitespace: true })) {
+			setVisible(false);
 			showNotice('error', __('List name is required', 'quillcrm'));
 			return false;
 		}
@@ -287,6 +288,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				showPagination={false}
 				initialPageSize={perPage}
 				setPage={setPage}
+				loading={loading}
 			/>
 			<DataTablePagination table={serverSideTable} />
 

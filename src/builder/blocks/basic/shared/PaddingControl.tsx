@@ -36,9 +36,20 @@ export const PaddingControl: React.FC<PaddingControlProps> = ({
         direction: keyof PaddingValue,
         newValue: number
     ) => {
+        // Apply min/max constraints based on direction
+        let constrainedValue = newValue;
+
+        if (direction === 'left' || direction === 'right') {
+            // Left and right: min 0, max 120
+            constrainedValue = Math.max(0, Math.min(120, newValue));
+        } else if (direction === 'top' || direction === 'bottom') {
+            // Top and bottom: min 0, max 240
+            constrainedValue = Math.max(0, Math.min(240, newValue));
+        }
+
         onChange({
             ...value,
-            [direction]: newValue,
+            [direction]: constrainedValue,
         });
     };
 
@@ -47,13 +58,15 @@ export const PaddingControl: React.FC<PaddingControlProps> = ({
             <label className="text-sm text-[#333333] mb-2 block">
                 {label}
             </label>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
                 <div className="relative flex items-center">
                     <div className="absolute left-2 text-[#333333]">
                         <PaddingLeftIcon />
                     </div>
                     <Input
                         type="number"
+                        min="0"
+                        max="120"
                         value={value.left || 0}
                         onChange={(e) =>
                             handlePaddingChange('left', parseInt(e.target.value) || 0)
@@ -72,6 +85,8 @@ export const PaddingControl: React.FC<PaddingControlProps> = ({
                     </div>
                     <Input
                         type="number"
+                        min="0"
+                        max="120"
                         value={value.right || 0}
                         onChange={(e) =>
                             handlePaddingChange('right', parseInt(e.target.value) || 0)
@@ -90,6 +105,8 @@ export const PaddingControl: React.FC<PaddingControlProps> = ({
                     </div>
                     <Input
                         type="number"
+                        min="0"
+                        max="240"
                         value={value.top || 0}
                         onChange={(e) =>
                             handlePaddingChange('top', parseInt(e.target.value) || 0)
@@ -108,6 +125,8 @@ export const PaddingControl: React.FC<PaddingControlProps> = ({
                     </div>
                     <Input
                         type="number"
+                        min="0"
+                        max="240"
                         value={value.bottom || 0}
                         onChange={(e) =>
                             handlePaddingChange('bottom', parseInt(e.target.value) || 0)

@@ -11,6 +11,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -23,6 +24,8 @@ use QuillCRM\Models\Custom_Fields_Group_Model;
  * Custom_Fields_Group_Controller class
  */
 class REST_Custom_Fields_Group_Controller extends REST_Controller {
+
+
 
 
 	/**
@@ -436,70 +439,7 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 		}
 	}
 
-	/**
-	 * Get items permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool
-	 */
-	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
 
-	/**
-	 * Get item permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool
-	 */
-	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Create item permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool
-	 */
-	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Update item permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool
-	 */
-	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Delete item permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool
-	 */
-	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
 
 	/**
 	 * Prepare group from request
@@ -524,5 +464,70 @@ class REST_Custom_Fields_Group_Controller extends REST_Controller {
 		}
 
 		return $group;
+	}
+
+	/**
+	 * Get items permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	public function get_items_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Get item permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	public function get_item_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Create item permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	public function create_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Update item permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	public function update_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Delete item permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	public function delete_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 }

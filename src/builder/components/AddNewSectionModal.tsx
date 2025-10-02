@@ -55,19 +55,19 @@ const AddNewSectionModal: React.FC<AddNewSectionModalProps> = ({
 								className="w-full h-full flex flex-col items-center justify-center text-muted-foreground p-4 gap-2"
 								key={layout.value}
 							>
-								<DragDropIcon />
-								<div className="flex flex-row gap-2 items-center justify-center w-full">
-									{layout.number?.map((number, index) => (
-										<div
-											key={index}
-											className="w-full h-full bg-border rounded-sm py-4"
-											style={{
-												width: `${100 / number}%`,
-											}}
-										></div>
-									))}
-								</div>
-								{layout.name}
+							<DragDropIcon />
+							<div className="flex flex-row gap-2 items-center justify-center w-full">
+								{layout.width?.map((width, index) => (
+									<div
+										key={index}
+										className="w-full h-full bg-border rounded-sm py-4"
+										style={{
+											width: `${width}%`,
+										}}
+									></div>
+								))}
+							</div>
+							{layout.name}
 							</div>
 						</Button>
 					))}

@@ -36,6 +36,11 @@ const HeaderLibrary = () => {
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
+					templateLayout: {
+						justifyContent: 'center',
+						alignItems: 'center',
+						width: '100%',
+					},
 				},
 			},
 		],
@@ -63,6 +68,11 @@ const HeaderLibrary = () => {
 					link: '',
 					borderRadius: '0',
 					shape: 'rectangle',
+					templateLayout: {
+						justifyContent: 'flex-start',
+						alignItems: 'center',
+						width: '50%',
+					},
 				},
 			},
 			{
@@ -122,6 +132,11 @@ const HeaderLibrary = () => {
 						left: 8,
 					},
 					align: 'center',
+					templateLayout: {
+						justifyContent: 'flex-end',
+						alignItems: 'center',
+						width: '50%',
+					},
 				},
 			},
 		],

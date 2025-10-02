@@ -3,13 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 /**
- * external dependencies
- */
-import { PlayIcon } from 'lucide-react';
-/**
  * internal dependencies
  */
-import { Input } from '@/components/ui/input';
 import { VideoBlockProps } from '..';
 import {
 	AlignmentControl,
@@ -19,6 +14,7 @@ import {
 	WidthHeightControl,
 	ImageUploadControl,
 	AltTextInput,
+	LinkInput,
 } from '../../shared';
 
 export interface VideoBlockEditorProps {
@@ -33,25 +29,12 @@ export const VideoBlockEditor: React.FC<VideoBlockEditorProps> = ({
 	return (
 		<div className="grid gap-5">
 			{/* Video URL Input */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div className="flex items-center justify-between">
-					<label className="text-sm">
-						{__('Video URL', 'quillcrm')}
-					</label>
-					<PlayIcon className="size-5" />
-				</div>
-				<Input
-					type="url"
-					value={props.videoUrl}
-					onChange={(e) => onChange({ videoUrl: e.target.value })}
-					className="h-10"
-					style={{
-						borderColor: '#e5e5e5',
-						borderRadius: '0.5rem',
-					}}
-					placeholder="https://example.com/video.mp4"
-				/>
-			</div>
+			<LinkInput
+				label={__('Video URL', 'quillcrm')}
+				value={props.videoUrl}
+				onChange={(videoUrl) => onChange({ videoUrl })}
+				placeholder="https://example.com/video.mp4"
+			/>
 
 			{/* Video Thumbnail Upload Section */}
 			<ImageUploadControl
@@ -85,10 +68,6 @@ export const VideoBlockEditor: React.FC<VideoBlockEditorProps> = ({
 					{ value: '75%', label: __('75%', 'quillcrm') },
 					{ value: '50%', label: __('50%', 'quillcrm') },
 					{ value: '25%', label: __('25%', 'quillcrm') },
-					{ value: '800px', label: __('800px', 'quillcrm') },
-					{ value: '600px', label: __('600px', 'quillcrm') },
-					{ value: '400px', label: __('400px', 'quillcrm') },
-					{ value: '300px', label: __('300px', 'quillcrm') },
 				]}
 				heightOptions={[
 					{ value: 'auto', label: __('Auto', 'quillcrm') },

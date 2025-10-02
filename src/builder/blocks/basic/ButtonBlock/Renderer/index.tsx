@@ -10,7 +10,7 @@
  * internal dependencies
  */
 import { ButtonBlockProps } from '..';
-import { useButtonSettings } from '../../../../context/ButtonSettingsContext';
+import { useButtonSettings } from '../../../../hooks/useButtonSettings';
 
 export interface ButtonRendererProps {
 	props: ButtonBlockProps;
@@ -20,7 +20,12 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 	const { getButtonSettings } = useButtonSettings();
 
 	// Safely access container padding with defaults
-	const containerPadding = props.containerPadding || { top: 0, right: 0, bottom: 0, left: 0 };
+	const containerPadding = props.containerPadding || {
+		top: 0,
+		right: 0,
+		bottom: 0,
+		left: 0,
+	};
 
 	// Convert container padding object to CSS string
 	const containerPaddingString = `${containerPadding.top}px ${containerPadding.right}px ${containerPadding.bottom}px ${containerPadding.left}px`;
@@ -39,6 +44,11 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 			fontWeight: buttonSettings.bold ? 'bold' : 'normal',
 			fontStyle: buttonSettings.italic ? 'italic' : 'normal',
 			textDecoration: buttonSettings.underline ? 'underline' : 'none',
+			// Text wrapping and overflow handling
+			whiteSpace: 'normal',
+			wordWrap: 'break-word',
+			overflowWrap: 'break-word',
+			maxWidth: '100%',
 			// No padding on button itself - removed as requested
 			// No background color on button itself - removed as requested
 		};
@@ -53,32 +63,13 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 		const paddingString = `${buttonSettings.padding.top * 2}px ${buttonSettings.padding.right * 4}px ${buttonSettings.padding.bottom * 2}px ${buttonSettings.padding.left * 4}px`;
 		baseStyle.padding = paddingString;
 
-		// Apply button type specific styling based on global settings
-		switch (props.buttonStyle) {
-			case 'primary':
-				return {
-					...baseStyle,
-					color: buttonSettings.textColor,
-					backgroundColor: buttonSettings.backgroundColor,
-					border: `${buttonSettings.borderWidth}px solid ${buttonSettings.borderColor}`,
-				};
-			case 'secondary':
-				return {
-					...baseStyle,
-					color: buttonSettings.backgroundColor,
-					backgroundColor: 'transparent',
-					border: `${buttonSettings.borderWidth}px solid ${buttonSettings.backgroundColor}`,
-				};
-			case 'tertiary':
-				return {
-					...baseStyle,
-					color: buttonSettings.backgroundColor,
-					backgroundColor: 'transparent',
-					border: 'none',
-				};
-			default:
-				return baseStyle;
-		}
+		// Apply global button settings (all button types use the same styling)
+		return {
+			...baseStyle,
+			color: buttonSettings.textColor,
+			backgroundColor: buttonSettings.backgroundColor,
+			border: `${buttonSettings.borderWidth}px solid ${buttonSettings.borderColor}`,
+		};
 	};
 
 	// Handle alignment
@@ -102,16 +93,16 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 		width: props.align === 'full' ? '100%' : 'auto',
 		padding: containerPaddingString,
 		backgroundColor: props.containerBackgroundColor,
+		// Ensure container doesn't overflow
+		overflow: 'hidden',
+		wordWrap: 'break-word',
 	};
 
 	const buttonStyle = getButtonStyle();
 
 	return (
 		<div style={containerStyle}>
-			<a
-				href={props.url}
-				style={buttonStyle}
-			>
+			<a href={props.url} style={buttonStyle}>
 				{props.text}
 			</a>
 		</div>

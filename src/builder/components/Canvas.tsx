@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import {
 	SortableContext,
@@ -14,14 +14,14 @@ import emailBuilder from '../../../assets/images/email-builder.png';
 import { ColumnsLayout } from '@quillcrm/components';
 import { LayoutTemplate } from '../types';
 import { useDroppable } from '@dnd-kit/core';
-import { useBuilder } from '../context/BuilderContext';
+import { v4 as uuidv4 } from 'uuid';
 
 interface CanvasProps {
 	// No props needed since we're using the store
 }
 
 const Canvas = ({ }: CanvasProps) => {
-	const { addNewSection } = useBuilder();
+	const dispatch = useDispatch();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const { isOver: isOverCanvas, setNodeRef: setNodeRefCanvas } = useDroppable(
@@ -43,6 +43,7 @@ const Canvas = ({ }: CanvasProps) => {
 	};
 
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	const globalSettings = useSelect((select) => select(STORE_KEY).getGlobalSettings(), []);
 
 	const handleOpenModal = () => {
 		setIsModalOpen(true);
@@ -53,13 +54,25 @@ const Canvas = ({ }: CanvasProps) => {
 	};
 
 	const handleSectionSelect = (sectionType: LayoutTemplate) => {
-		addNewSection(sectionType);
+		const newSection = {
+			id: uuidv4(),
+			columns: sectionType.width.map((width) => ({
+				id: uuidv4(),
+				width, // Now using actual percentages directly
+				blocks: [],
+			})),
+			styles: {},
+		};
+		dispatch(STORE_KEY).addSection(newSection);
 		setIsModalOpen(false);
 	};
 
 	return (
 		<div className="flex-1 p-4 pt-20 overflow-auto">
-			<div className="max-w-3xl mx-auto relative">
+			<div
+				className="mx-auto relative"
+				style={{ maxWidth: `${globalSettings.canvasWidth}px` }}
+			>
 				{(sections.length > 0) && (
 					<div className="p-2 bg-primary w-fit rounded-t-xl absolute -top-9 left-0 text-white">
 						{__('Email Page', 'quillcrm')}
@@ -69,9 +82,12 @@ const Canvas = ({ }: CanvasProps) => {
 				<div
 					ref={setNodeRefCanvas}
 					style={{
-						backgroundColor: isOverCanvas ? 'red' : undefined,
+						backgroundColor: isOverCanvas ? 'red' : globalSettings.canvasColor,
+						backgroundImage: globalSettings.backgroundImage ? `url(${globalSettings.backgroundImage.url})` : undefined,
+						backgroundRepeat: globalSettings.backgroundRepeat,
+						backgroundSize: globalSettings.backgroundSize,
 					}}
-					className="bg-white shadow-lg rounded-lg overflow-hidden"
+					className="shadow-lg rounded-lg"
 				>
 					<SortableContext
 						items={sections.map((s) => s.id)}

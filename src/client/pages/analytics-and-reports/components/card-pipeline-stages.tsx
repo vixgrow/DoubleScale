@@ -49,11 +49,22 @@ const CardPipelineStages: React.FC<{ ownerId: number | null }> = ({
 	const fetchSalesRepPipelineStages = async () => {
 		setPipelineLoading(true);
 		try {
-			let queryParams = selectedPipelineId
-				? `?pipeline_id=${selectedPipelineId}&owner_id=${ownerId}`
-				: `?owner_id=${ownerId}`;
+			let params = new URLSearchParams();
+
+			if (ownerId) {
+				params.append('owner_id', ownerId.toString());
+			}
+
+			if (selectedPipelineId) {
+				params.append('pipeline_id', selectedPipelineId.toString());
+			}
+
+			const finalQueryString = params.toString()
+				? `?${params.toString()}`
+				: '';
+
 			const response = (await apiFetch({
-				path: `/qc/v1/reports/sales-rep/pipeline-stages${queryParams} `,
+				path: `/qc/v1/reports/sales-rep/pipeline-stages${finalQueryString}`,
 			})) as PipelineStagesResponse;
 
 			if (response.pipeline_stages) {

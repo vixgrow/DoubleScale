@@ -12,6 +12,7 @@ import { useState } from 'react';
  */
 import { Button } from '@/components/ui/button';
 import ButtonEditor from './ButtonSettingsEditor';
+import { useButtonSettings } from '../hooks/useButtonSettings';
 
 type ButtonType = 'primary' | 'secondary' | 'tertiary';
 
@@ -21,6 +22,22 @@ const ButtonSettings: React.FC<{
 	const [selectedButton, setSelectedButton] = useState<ButtonType | null>(
 		null
 	);
+	const { getButtonSettings } = useButtonSettings();
+
+	// Simple preview - just get the settings and apply basic styling
+	const getPreview = (type: ButtonType) => {
+		const s = getButtonSettings(type);
+		return s
+			? {
+					padding: '6px 12px',
+					fontSize: '12px',
+					backgroundColor: s.backgroundColor,
+					color: s.textColor,
+					border: `${s.borderWidth}px solid ${s.borderColor}`,
+					borderRadius: `${s.borderRadius}px`,
+				}
+			: {};
+	};
 
 	// If a button is selected, show the editor
 	if (selectedButton) {
@@ -57,7 +74,7 @@ const ButtonSettings: React.FC<{
 					onClick={() => setSelectedButton('primary')}
 				>
 					<div className="flex items-center gap-[14px]">
-						<div className="bg-primary text-white py-2 px-4 rounded-md text-xs">
+						<div style={getPreview('primary')}>
 							{__('Button', 'quillcrm')}
 						</div>
 						<div>{__('Primary button', 'quillcrm')}</div>
@@ -69,7 +86,7 @@ const ButtonSettings: React.FC<{
 					onClick={() => setSelectedButton('secondary')}
 				>
 					<div className="flex items-center gap-[14px]">
-						<div className="border border-primary text-primary py-2 px-4 rounded-md text-xs">
+						<div style={getPreview('secondary')}>
 							{__('Button', 'quillcrm')}
 						</div>
 						<div>{__('Secondary button', 'quillcrm')}</div>
@@ -81,7 +98,7 @@ const ButtonSettings: React.FC<{
 					onClick={() => setSelectedButton('tertiary')}
 				>
 					<div className="flex items-center gap-[14px]">
-						<div className="bg-white text-primary py-2 px-4 text-xs">
+						<div style={getPreview('tertiary')}>
 							{__('Button', 'quillcrm')}
 						</div>
 						<div>{__('Tertiary button', 'quillcrm')}</div>

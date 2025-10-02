@@ -142,3 +142,36 @@ export const getBlocks = async (): Promise<Block[]> => {
     throw new Error(`Failed to fetch blocks: ${error.message}`);
   }
 };
+
+/**
+ * Get button settings
+ * 
+ * @returns Button settings
+ */
+export const getButtonSettings = async (): Promise<any> => {
+  try {
+    return await apiFetch({
+      path: `${BASE_PATH}/button-settings`
+    });
+  } catch (error: any) {
+    throw new Error(`Failed to fetch button settings: ${error.message}`);
+  }
+};
+
+/**
+ * Save button settings
+ * 
+ * @param settings Button settings to save
+ * @returns Saved button settings
+ */
+export const saveButtonSettings = async (settings: any): Promise<any> => {
+  try {
+    return await apiFetch({
+      path: `${BASE_PATH}/button-settings`,
+      method: 'POST',
+      data: { settings }
+    });
+  } catch (error: any) {
+    throw new Error(`Failed to save button settings: ${error.message}`);
+  }
+};

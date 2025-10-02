@@ -33,3 +33,5 @@ export { default as LoadingSpinner } from './loading-spin';
 export { default as ListTagFilter } from './list-tag-filter';
 export { default as DynamicKeyValueInput } from './dynamic-keyvalue-input';
 export { default as TestButton } from './test-button';
+export { default as AdvancedFilter } from './advanced-filter';
+export { default as ContactList } from './contacts-list';

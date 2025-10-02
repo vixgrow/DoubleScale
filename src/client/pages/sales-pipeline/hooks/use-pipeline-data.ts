@@ -116,6 +116,10 @@ export const usePipelineData = (
 				);
 			}
 
+			if (filters.priority) {
+				params.append('priority', filters.priority);
+			}
+
 			// Add pagination parameters
 			params.append('per_page', '100'); // Show more deals per page for Kanban
 			params.append('page', '1');
@@ -213,9 +217,9 @@ export const usePipelineData = (
 				prevPipelines.map((pipeline) =>
 					pipeline.id === pipelineId
 						? {
-								...pipeline,
-								stages: [...pipeline.stages, newStage],
-							}
+							...pipeline,
+							stages: [...pipeline.stages, newStage],
+						}
 						: pipeline
 				)
 			);
@@ -229,13 +233,13 @@ export const usePipelineData = (
 				prevPipelines.map((pipeline) =>
 					pipeline.id === pipelineId
 						? {
-								...pipeline,
-								stages: pipeline.stages.map((stage) =>
-									stage.id === stageId
-										? { ...stage, ...updates }
-										: stage
-								),
-							}
+							...pipeline,
+							stages: pipeline.stages.map((stage) =>
+								stage.id === stageId
+									? { ...stage, ...updates }
+									: stage
+							),
+						}
 						: pipeline
 				)
 			);
@@ -249,11 +253,11 @@ export const usePipelineData = (
 				prevPipelines.map((pipeline) =>
 					pipeline.id === pipelineId
 						? {
-								...pipeline,
-								stages: pipeline.stages.filter(
-									(stage) => stage.id !== stageId
-								),
-							}
+							...pipeline,
+							stages: pipeline.stages.filter(
+								(stage) => stage.id !== stageId
+							),
+						}
 						: pipeline
 				)
 			);

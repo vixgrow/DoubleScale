@@ -10,6 +10,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use Exception;
 use WP_REST_Request;
@@ -33,6 +34,10 @@ use QuillCRM\Managers\Merge_Tags_Manager;
  * @since 1.0.0
  */
 class REST_Contact_Controller extends REST_Controller {
+
+
+
+
 
 	/**
 	 * REST Base
@@ -673,19 +678,6 @@ class REST_Contact_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to get purchase history
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request
-	 *
-	 * @return bool
-	 */
-	public function get_purchase_history_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
 	 * Get Email Campaigns
 	 *
 	 * @since 1.0.0
@@ -730,18 +722,7 @@ class REST_Contact_Controller extends REST_Controller {
 		}
 	}
 
-	/**
-	 * Check if a given request has access to get email campaigns
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request
-	 *
-	 * @return bool
-	 */
-	public function get_email_campaigns_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
+
 
 	/**
 	 * Get filters
@@ -1048,84 +1029,6 @@ class REST_Contact_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to get items
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool $response Permission check result.
-	 */
-	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Check if a given request has access to create items
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool $response Permission check result.
-	 */
-	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Check if a given request has access to get a specific item
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool $response Permission check result.
-	 */
-	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Check if a given request has access to delete items
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool $response Permission check result.
-	 */
-	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Check if a given request has access to update items
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool $response Permission check result.
-	 */
-	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
-	 * Check if a given request has access to delete items
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 *
-	 * @return bool $response Permission check result.
-	 */
-	public function delete_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
-
-	/**
 	 * Prepare contact from request
 	 *
 	 * @since 1.0.0
@@ -1418,31 +1321,7 @@ class REST_Contact_Controller extends REST_Controller {
 		return $body;
 	}
 
-	/**
-	 * Send optin email permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function send_opt_in_email_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
 
-	/**
-	 * Get analytics permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function get_analytics_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
 
 	/**
 	 * Add to lists
@@ -1477,18 +1356,7 @@ class REST_Contact_Controller extends REST_Controller {
 		}
 	}
 
-	/**
-	 * Add to lists permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function add_to_lists_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
+
 
 	/**
 	 * Remove from lists
@@ -1523,18 +1391,7 @@ class REST_Contact_Controller extends REST_Controller {
 		}
 	}
 
-	/**
-	 * Remove from lists permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function remove_from_lists_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
+
 
 	/**
 	 * Add tags
@@ -1569,18 +1426,7 @@ class REST_Contact_Controller extends REST_Controller {
 		}
 	}
 
-	/**
-	 * Add tags permissions check
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function add_tags_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
+
 
 	/**
 	 * Remove tags
@@ -1615,6 +1461,151 @@ class REST_Contact_Controller extends REST_Controller {
 		}
 	}
 
+	// all permissions checks
+
+	/**
+	 * Check if a given request has access to get items
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool $response Permission check result.
+	 */
+	public function get_items_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Check if a given request has access to create items
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool $response Permission check result.
+	 */
+	public function create_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if a given request has access to delete items
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool $response Permission check result.
+	 */
+	public function delete_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if a given request has access to update items
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool $response Permission check result.
+	 */
+	public function update_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if a given request has access to delete items
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool $response Permission check result.
+	 */
+	public function delete_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if a given request has access to get a specific item
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool $response Permission check result.
+	 */
+	public function get_item_permissions_check( $request ) {
+		return Permissions::has_deal_owner_access();
+	}
+
+	/**
+	 * Send optin email permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function send_opt_in_email_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Get analytics permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function get_analytics_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Add to lists permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function add_to_lists_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Remove from lists permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function remove_from_lists_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Add tags permissions check
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function add_tags_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
 	/**
 	 * Remove tags permissions check
 	 *
@@ -1625,6 +1616,32 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function remove_tags_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if a given request has access to get email campaigns
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return bool
+	 */
+	public function get_email_campaigns_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if a given request has access to get purchase history
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return bool
+	 */
+	public function get_purchase_history_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 }

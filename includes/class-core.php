@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Core
  *
@@ -22,6 +23,9 @@ use QuillCRM\Managers\Goals_Manager;
 use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
+use QuillCRM\User_Roles\Permissions;
+use QuillCRM\Managers\Pipeline_Manager;
+use QuillCRM\Managers\Deal_Manager;
 
 /**
  * Core Class
@@ -29,6 +33,11 @@ use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
  * @since 1.0.0
  */
 class Core {
+
+
+
+
+
 
 	/**
 	 * Set admin config
@@ -38,34 +47,43 @@ class Core {
 	 * @return void
 	 */
 	public static function set_admin_config() {
-		// Admin email address.
+		 // Admin email address.
 		$admin_email = get_option( 'admin_email' );
 		$ajax_url    = admin_url( 'admin-ajax.php' );
 		$nonce       = wp_create_nonce( 'quillcrm-admin' );
 
+		// Get current user capabilities for role-based access control
+		$user_capabilities = array(
+			'quillcrm_crm_manager' => Permissions::is_crm_manager(),
+			'quillcrm_deal_owner'  => Permissions::is_deal_owner(),
+		);
+
 		wp_add_inline_script(
 			'qcrm-config',
 			'qcrm.config.setBlogName("' . get_bloginfo( 'name' ) . '");' .
-			'qcrm.config.setAdminUrl("' . admin_url() . '");' .
-			'qcrm.config.setAdminEmail("' . $admin_email . '");' .
-			'qcrm.config.setAjaxUrl("' . $ajax_url . '");' .
-			'qcrm.config.setNonce("' . $nonce . '");' .
-			'qcrm.config.setPluginDirUrl("' . QUILLCRM_PLUGIN_URL . '");' .
-			'qcrm.config.setForms(' . wp_json_encode( Forms_Manager::instance()->get_options() ) . ');' .
-			'qcrm.config.setFiltersGroups(' . wp_json_encode( Filters_Manager::instance()->get_groups() ) . ');' .
-			'qcrm.config.setCustomFieldsTypes(' . wp_json_encode( Custom_Fields_Manager::instance()->get_options() ) . ');' .
-			'qcrm.config.setContactFieldsGroups(' . wp_json_encode( Utils::get_contact_fields() ) . ');' .
-			'qcrm.config.setIntegrations(' . wp_json_encode( Integrations_Manager::instance()->get_options() ) . ');' .
-			'qcrm.config.setAutomationTriggers(' . wp_json_encode( Triggers_Manager::instance()->get_sources() ) . ');' .
-			'qcrm.config.setAutomationActions(' . wp_json_encode( Actions_Manager::instance()->get_sources() ) . ');' .
-			'qcrm.config.setAutomationGoals(' . wp_json_encode( Goals_Manager::instance()->get_sources() ) . ');' .
-			'qcrm.config.setAutomationRules(' . wp_json_encode( Rules_Manager::instance()->get_groups() ) . ');' .
-			'qcrm.config.setIsWoocommerceActive( ' . quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) . ' );' .
-			'qcrm.config.setIsEddActive( ' . defined( 'EDD_PLUGIN_FILE' ) . ' );' .
-			'qcrm.config.setIsLmsActive( ' . quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) . ' );' .
-			'qcrm.config.setSiteUrl( "' . site_url() . '" );' .
-			'qcrm.config.setMergeTags( ' . wp_json_encode( Merge_Tags_Manager::instance()->get_groups() ) . ');' .
-			'qcrm.config.setImporters( ' . wp_json_encode( Importers_Manager::instance()->get_options() ) . ');'
+				'qcrm.config.setAdminUrl("' . admin_url() . '");' .
+				'qcrm.config.setAdminEmail("' . $admin_email . '");' .
+				'qcrm.config.setAjaxUrl("' . $ajax_url . '");' .
+				'qcrm.config.setNonce("' . $nonce . '");' .
+				'qcrm.config.setPluginDirUrl("' . QUILLCRM_PLUGIN_URL . '");' .
+				'qcrm.config.setForms(' . wp_json_encode( Forms_Manager::instance()->get_options() ) . ');' .
+				'qcrm.config.setFiltersGroups(' . wp_json_encode( Filters_Manager::instance()->get_groups() ) . ');' .
+				'qcrm.config.setCustomFieldsTypes(' . wp_json_encode( Custom_Fields_Manager::instance()->get_options() ) . ');' .
+				'qcrm.config.setContactFieldsGroups(' . wp_json_encode( Utils::get_contact_fields() ) . ');' .
+				'qcrm.config.setIntegrations(' . wp_json_encode( Integrations_Manager::instance()->get_options() ) . ');' .
+				'qcrm.config.setAutomationTriggers(' . wp_json_encode( Triggers_Manager::instance()->get_sources() ) . ');' .
+				'qcrm.config.setAutomationActions(' . wp_json_encode( Actions_Manager::instance()->get_sources() ) . ');' .
+				'qcrm.config.setAutomationGoals(' . wp_json_encode( Goals_Manager::instance()->get_sources() ) . ');' .
+				'qcrm.config.setAutomationRules(' . wp_json_encode( Rules_Manager::instance()->get_groups() ) . ');' .
+				'qcrm.config.setIsWoocommerceActive( ' . quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) . ' );' .
+				'qcrm.config.setIsEddActive( ' . defined( 'EDD_PLUGIN_FILE' ) . ' );' .
+				'qcrm.config.setIsLmsActive( ' . quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) . ' );' .
+				'qcrm.config.setSiteUrl( "' . site_url() . '" );' .
+				'qcrm.config.setMergeTags( ' . wp_json_encode( Merge_Tags_Manager::instance()->get_groups() ) . ');' .
+				'qcrm.config.setImporters( ' . wp_json_encode( Importers_Manager::instance()->get_options() ) . ');' .
+				'qcrm.config.setUserCapabilities( ' . wp_json_encode( $user_capabilities ) . ');' .
+				'qcrm.config.setDefaultStages( ' . wp_json_encode( Pipeline_Manager::instance()->get_default_stages() ) . ');' .
+				'qcrm.config.setDealPriorities( ' . wp_json_encode( Deal_Manager::instance()->get_deal_priorities() ) . ');'
 		);
 	}
 }

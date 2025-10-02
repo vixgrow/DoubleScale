@@ -24,6 +24,7 @@ import { NewPipelineModal } from './components/new-pipeline-modal';
 import { DuplicatePipelineModal } from './components/duplicate-pipeline-modal';
 import { usePipelineData } from './hooks/use-pipeline-data';
 import './styles/enhanced-buttons.scss';
+import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 
 // Import types for proper typing
 type Filters = {
@@ -34,6 +35,7 @@ type Filters = {
 		to: Date | null;
 	};
 	status: 'open' | 'won' | 'lost' | 'all';
+	priority: string | null;
 };
 
 const SalesPipeline: React.FC = () => {
@@ -55,7 +57,10 @@ const SalesPipeline: React.FC = () => {
 		ownerId: null,
 		dateRange: { from: null, to: null },
 		status: 'open',
+		priority: null,
 	});
+
+	const { isDealOwner } = useCapabilities();
 
 	const {
 		pipelines,
@@ -93,6 +98,7 @@ const SalesPipeline: React.FC = () => {
 			onClick: () => {
 				setNewPipelineModalVisible(true);
 			},
+			hidden: isDealOwner(),
 		},
 		{
 			label: __('New Deal', 'quillcrm'),
@@ -107,6 +113,7 @@ const SalesPipeline: React.FC = () => {
 				setNewDealModalVisible(true);
 			},
 			disabled: !selectedPipeline,
+			hidden: isDealOwner(),
 		},
 		{
 			label: __('Duplicate Pipeline', 'quillcrm'),
@@ -124,6 +131,7 @@ const SalesPipeline: React.FC = () => {
 				setDuplicatePipelineModalVisible(true);
 			},
 			disabled: !selectedPipeline,
+			hidden: isDealOwner(),
 		},
 		{
 			label: __('Settings', 'quillcrm'),
@@ -138,6 +146,7 @@ const SalesPipeline: React.FC = () => {
 				setSettingsModalVisible(true);
 			},
 			disabled: !selectedPipeline,
+			hidden: isDealOwner(),
 		},
 	];
 

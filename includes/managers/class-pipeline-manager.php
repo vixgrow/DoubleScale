@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Pipeline_Manager
  * This class is responsible for handling pipeline management
@@ -13,11 +14,21 @@ namespace QuillCRM\Managers;
 use Exception;
 use QuillCRM\Models\Pipeline_Model;
 use QuillCRM\Models\Pipeline_Stage_Model;
+use QuillCRM\Models\Deal_Model;
 
 /**
  * Pipeline_Manager class
  */
 final class Pipeline_Manager {
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * Class Instance.
@@ -72,13 +83,38 @@ final class Pipeline_Manager {
 	 *
 	 * @return array
 	 */
-	private function get_default_stages() {
+	public function get_default_stages() {
 		return array(
-			array( 'name' => 'Lead', 'color' => '#e74c3c', 'win_probability' => 10.0 ),
-			array( 'name' => 'Qualified', 'color' => '#f39c12', 'win_probability' => 25.0 ),
-			array( 'name' => 'Proposal', 'color' => '#f1c40f', 'win_probability' => 50.0 ),
-			array( 'name' => 'Negotiation', 'color' => '#2ecc71', 'win_probability' => 75.0 ),
-			array( 'name' => 'Closed Won', 'color' => '#27ae60', 'win_probability' => 100.0 ),
+			array(
+				'name'            => 'Lead',
+				'color'           => '#e74c3c',
+				'win_probability' => 10.0,
+			),
+			array(
+				'name'            => 'Qualified',
+				'color'           => '#f39c12',
+				'win_probability' => 25.0,
+			),
+			array(
+				'name'            => 'Proposal',
+				'color'           => '#f1c40f',
+				'win_probability' => 50.0,
+			),
+			array(
+				'name'            => 'Negotiation',
+				'color'           => '#2ecc71',
+				'win_probability' => 75.0,
+			),
+			array(
+				'name'            => 'Closed Won',
+				'color'           => '#27ae60',
+				'win_probability' => 100.0,
+			),
+			array(
+				'name'            => 'Closed Lost',
+				'color'           => '#e74c3c',
+				'win_probability' => 0.0,
+			),
 		);
 	}
 
@@ -106,17 +142,19 @@ final class Pipeline_Manager {
 	 *
 	 * @param string $name Pipeline name
 	 * @param string $description Pipeline description
-	 * @param array $stages Array of stage data
+	 * @param array  $stages Array of stage data
 	 *
 	 * @return Pipeline|null
 	 */
 	public function create_pipeline_with_stages( $name, $description = '', $stages = array() ) {
 		try {
-			$pipeline = Pipeline_Model::create( array(
-				'name' => $name,
-				'description' => $description,
-				'sort_order' => Pipeline_Model::max( 'sort_order' ) + 1,
-			) );
+			$pipeline = Pipeline_Model::create(
+				array(
+					'name'        => $name,
+					'description' => $description,
+					'sort_order'  => Pipeline_Model::max( 'sort_order' ) + 1,
+				)
+			);
 
 			if ( empty( $stages ) ) {
 				$stages = $this->get_default_stages();
@@ -124,19 +162,20 @@ final class Pipeline_Manager {
 
 			$sort_order = 0;
 			foreach ( $stages as $stage_data ) {
-				Pipeline_Stage_Model::create( array(
-					'pipeline_id' => $pipeline->id,
-					'name' => $stage_data['name'],
-					'color' => $stage_data['color'] ?? '#6d78d8',
-					'sort_order' => $sort_order++,
-					'win_probability' => $stage_data['win_probability'] ?? 0.0,
-				) );
+				Pipeline_Stage_Model::create(
+					array(
+						'pipeline_id'     => $pipeline->id,
+						'name'            => $stage_data['name'],
+						'color'           => $stage_data['color'] ?? '#6d78d8',
+						'sort_order'      => $sort_order++,
+						'win_probability' => $stage_data['win_probability'] ?? 0.0,
+					)
+				);
 			}
 
 			do_action( 'quillcrm_pipeline_created', $pipeline );
 
 			return $pipeline;
-
 		} catch ( Exception $e ) {
 			error_log( 'QuillCRM Pipeline Manager Error: ' . $e->getMessage() );
 			return null;
@@ -164,12 +203,14 @@ final class Pipeline_Manager {
 	 * @return Pipeline|null
 	 */
 	public function get_pipeline_with_stats( $pipeline_id ) {
-		return Pipeline_Model::with( array( 
-			'stages' => function( $query ) {
-				$query->withCount( 'active_deals' );
-			},
-			'stages.active_deals'
-		) )->find( $pipeline_id );
+		return Pipeline_Model::with(
+			array(
+				'stages' => function ( $query ) {
+					$query->withCount( 'active_deals' );
+				},
+				'stages.active_deals',
+			)
+		)->find( $pipeline_id );
 	}
 
 	/**
@@ -177,14 +218,14 @@ final class Pipeline_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $pipeline_id Pipeline ID to duplicate
+	 * @param int    $pipeline_id Pipeline ID to duplicate
 	 * @param string $new_name New pipeline name
 	 *
 	 * @return Pipeline|null
 	 */
 	public function duplicate_pipeline( $pipeline_id, $new_name = '' ) {
 		$original = Pipeline_Model::with( 'stages' )->find( $pipeline_id );
-		
+
 		if ( ! $original ) {
 			return null;
 		}
@@ -193,20 +234,24 @@ final class Pipeline_Manager {
 			$new_name = $original->name . ' (Copy)';
 		}
 
-		$new_pipeline = Pipeline_Model::create( array(
-			'name' => $new_name,
-			'description' => $original->description,
-			'sort_order' => Pipeline_Model::max( 'sort_order' ) + 1,
-		) );
+		$new_pipeline = Pipeline_Model::create(
+			array(
+				'name'        => $new_name,
+				'description' => $original->description,
+				'sort_order'  => Pipeline_Model::max( 'sort_order' ) + 1,
+			)
+		);
 
 		foreach ( $original->stages as $stage ) {
-			Pipeline_Stage_Model::create( array(
-				'pipeline_id' => $new_pipeline->id,
-				'name' => $stage->name,
-				'color' => $stage->color,
-				'sort_order' => $stage->sort_order,
-				'win_probability' => $stage->win_probability,
-			) );
+			Pipeline_Stage_Model::create(
+				array(
+					'pipeline_id'     => $new_pipeline->id,
+					'name'            => $stage->name,
+					'color'           => $stage->color,
+					'sort_order'      => $stage->sort_order,
+					'win_probability' => $stage->win_probability,
+				)
+			);
 		}
 
 		do_action( 'quillcrm_pipeline_duplicated', $new_pipeline, $original );
@@ -229,11 +274,10 @@ final class Pipeline_Manager {
 				Pipeline_Model::where( 'id', $pipeline_id )
 					->update( array( 'sort_order' => $index ) );
 			}
-			
-			do_action( 'quillcrm_pipeline_sort_order_updated', $pipeline_ids );
-			
-			return true;
 
+			do_action( 'quillcrm_pipeline_sort_order_updated', $pipeline_ids );
+
+			return true;
 		} catch ( Exception $e ) {
 			error_log( 'QuillCRM Pipeline Sort Error: ' . $e->getMessage() );
 			return false;
@@ -245,17 +289,17 @@ final class Pipeline_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $pipeline_id Pipeline ID
-	 * @param string $name Stage name
-	 * @param string $color Stage color
-	 * @param float $win_probability Win probability
+	 * @param int      $pipeline_id Pipeline ID
+	 * @param string   $name Stage name
+	 * @param string   $color Stage color
+	 * @param float    $win_probability Win probability
 	 * @param int|null $position Position in pipeline (null = end)
 	 *
 	 * @return Pipeline_Stage|null
 	 */
 	public function add_stage( $pipeline_id, $name, $color = '#6d78d8', $win_probability = 0.0, $position = null ) {
 		$pipeline = Pipeline_Model::find( $pipeline_id );
-		
+
 		if ( ! $pipeline ) {
 			return null;
 		}
@@ -270,13 +314,15 @@ final class Pipeline_Manager {
 				->increment( 'sort_order' );
 		}
 
-		$stage = Pipeline_Stage_Model::create( array(
-			'pipeline_id' => $pipeline_id,
-			'name' => $name,
-			'color' => $color,
-			'sort_order' => $sort_order,
-			'win_probability' => $win_probability,
-		) );
+		$stage = Pipeline_Stage_Model::create(
+			array(
+				'pipeline_id'     => $pipeline_id,
+				'name'            => $name,
+				'color'           => $color,
+				'sort_order'      => $sort_order,
+				'win_probability' => $win_probability,
+			)
+		);
 
 		do_action( 'quillcrm_pipeline_stage_added', $stage, $pipeline );
 
@@ -288,7 +334,7 @@ final class Pipeline_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $pipeline_id Pipeline ID
+	 * @param int   $pipeline_id Pipeline ID
 	 * @param array $stage_ids Array of stage IDs in new order
 	 *
 	 * @return bool
@@ -300,11 +346,10 @@ final class Pipeline_Manager {
 					->where( 'pipeline_id', $pipeline_id )
 					->update( array( 'sort_order' => $index ) );
 			}
-			
-			do_action( 'quillcrm_stage_sort_order_updated', $pipeline_id, $stage_ids );
-			
-			return true;
 
+			do_action( 'quillcrm_stage_sort_order_updated', $pipeline_id, $stage_ids );
+
+			return true;
 		} catch ( Exception $e ) {
 			error_log( 'QuillCRM Stage Sort Error: ' . $e->getMessage() );
 			return false;
@@ -316,14 +361,14 @@ final class Pipeline_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $pipeline_id Pipeline ID
+	 * @param int      $pipeline_id Pipeline ID
 	 * @param int|null $move_deals_to_pipeline_id Move deals to this pipeline
 	 *
 	 * @return bool
 	 */
 	public function delete_pipeline( $pipeline_id, $move_deals_to_pipeline_id = null ) {
 		$pipeline = Pipeline_Model::with( array( 'deals', 'stages' ) )->find( $pipeline_id );
-		
+
 		if ( ! $pipeline ) {
 			return false;
 		}
@@ -332,15 +377,17 @@ final class Pipeline_Manager {
 		if ( $pipeline->deals->count() > 0 ) {
 			if ( $move_deals_to_pipeline_id ) {
 				$target_pipeline = Pipeline_Model::with( 'stages' )->find( $move_deals_to_pipeline_id );
-				
+
 				if ( $target_pipeline && $target_pipeline->stages->count() > 0 ) {
 					$first_stage = $target_pipeline->stages->first();
-					
+
 					foreach ( $pipeline->deals as $deal ) {
-						$deal->update( array(
-							'pipeline_id' => $move_deals_to_pipeline_id,
-							'stage_id' => $first_stage->id,
-						) );
+						$deal->update(
+							array(
+								'pipeline_id' => $move_deals_to_pipeline_id,
+								'stage_id'    => $first_stage->id,
+							)
+						);
 					}
 				}
 			} else {
@@ -365,35 +412,37 @@ final class Pipeline_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $pipeline_id Pipeline ID
+	 * @param int   $pipeline_id Pipeline ID
 	 * @param array $filters Date filters and other criteria
 	 *
 	 * @return array
 	 */
 	public function get_pipeline_analytics( $pipeline_id, $filters = array() ) {
-		$pipeline = Pipeline_Model::with( array( 
-			'stages',
-			'deals' => function( $query ) use ( $filters ) {
-				if ( isset( $filters['date_from'] ) ) {
-					$query->whereDate( 'created_at', '>=', $filters['date_from'] );
-				}
-				if ( isset( $filters['date_to'] ) ) {
-					$query->whereDate( 'created_at', '<=', $filters['date_to'] );
-				}
-			}
-		) )->find( $pipeline_id );
+		$pipeline = Pipeline_Model::with(
+			array(
+				'stages',
+				'deals' => function ( $query ) use ( $filters ) {
+					if ( isset( $filters['date_from'] ) ) {
+						$query->whereDate( 'created_at', '>=', $filters['date_from'] );
+					}
+					if ( isset( $filters['date_to'] ) ) {
+						$query->whereDate( 'created_at', '<=', $filters['date_to'] );
+					}
+				},
+			)
+		)->find( $pipeline_id );
 
 		if ( ! $pipeline ) {
 			return array();
 		}
 
 		$total_deals = $pipeline->deals->count();
-		$won_deals = $pipeline->deals->where( 'status', 'won' )->count();
-		$lost_deals = $pipeline->deals->where( 'status', 'lost' )->count();
-		$open_deals = $pipeline->deals->where( 'status', 'open' )->count();
+		$won_deals   = $pipeline->deals->where( 'status', 'won' )->count();
+		$lost_deals  = $pipeline->deals->where( 'status', 'lost' )->count();
+		$open_deals  = $pipeline->deals->where( 'status', 'open' )->count();
 
-		$total_value = $pipeline->deals->where( 'status', 'open' )->sum( 'value' );
-		$won_value = $pipeline->deals->where( 'status', 'won' )->sum( 'value' );
+		$total_value    = $pipeline->deals->where( 'status', 'open' )->sum( 'value' );
+		$won_value      = $pipeline->deals->where( 'status', 'won' )->sum( 'value' );
 		$weighted_value = 0;
 
 		// Calculate weighted value using individual deal calculations
@@ -402,15 +451,29 @@ final class Pipeline_Manager {
 		}
 
 		return array(
-			'total_deals' => $total_deals,
-			'won_deals' => $won_deals,
-			'lost_deals' => $lost_deals,
-			'open_deals' => $open_deals,
-			'win_rate' => $total_deals > 0 ? round( ( $won_deals / $total_deals ) * 100, 2 ) : 0,
-			'total_value' => $total_value,
-			'won_value' => $won_value,
-			'weighted_value' => $weighted_value,
+			'total_deals'        => $total_deals,
+			'won_deals'          => $won_deals,
+			'lost_deals'         => $lost_deals,
+			'open_deals'         => $open_deals,
+			'win_rate'           => $total_deals > 0 ? round( ( $won_deals / $total_deals ) * 100, 2 ) : 0,
+			'total_value'        => $total_value,
+			'won_value'          => $won_value,
+			'weighted_value'     => $weighted_value,
 			'average_deal_value' => $total_deals > 0 ? round( $total_value / $total_deals, 2 ) : 0,
 		);
+	}
+
+
+	// get pipelines for sales rep
+	public function get_pipeline_ids_for_owner( $owner_id = null ) {
+		if ( empty( $owner_id ) ) {
+			$owner_id = get_current_user_id();
+		}
+		$pipeline_ids = Deal_Model::where( 'owner_id', $owner_id )
+			->distinct()
+			->pluck( 'pipeline_id' )
+			->toArray();
+
+		return $pipeline_ids;
 	}
 }

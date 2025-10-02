@@ -131,15 +131,16 @@ class Social_Media_Block extends Email_Block {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
-		// Container styles
+		// Container styles (matching frontend)
 		$container_style = $this->build_style_string(
 			array(
 				'padding'    => $this->format_padding( $props['padding'] ),
 				'text-align' => $props['align'],
+				'width'      => '100%',
 			)
 		);
 
-		// Get icon size in pixels
+		// Get icon size in pixels (matching frontend)
 		$icon_size = 32; // Default medium
 		if ( $props['iconSize'] === 'small' ) {
 			$icon_size = 24;
@@ -147,15 +148,15 @@ class Social_Media_Block extends Email_Block {
 			$icon_size = 40;
 		}
 
-		// Get border radius based on shape
+		// Get border radius based on shape (matching frontend)
 		$border_radius = '0';
 		if ( $props['shape'] === 'circle' ) {
 			$border_radius = '50%';
 		} elseif ( $props['shape'] === 'rounded' ) {
-			$border_radius = '4px';
+			$border_radius = '8px';
 		}
 
-		// Find enabled platforms
+		// Find enabled platforms (matching frontend)
 		$enabled_platforms = array();
 		foreach ( $props['platforms'] as $platform => $data ) {
 			if ( ! empty( $data['enabled'] ) && ! empty( $data['link'] ) ) {
@@ -164,18 +165,25 @@ class Social_Media_Block extends Email_Block {
 		}
 
 		if ( empty( $enabled_platforms ) ) {
-			// No platforms enabled, return placeholder
-			return "<div style=\"{$container_style};text-align:center;padding:20px;\">
-				" . esc_html__( 'No social media platforms selected', 'quillcrm' ) . '
-			</div>';
+			// No platforms enabled, return placeholder (matching frontend)
+			return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
+				<tr>
+					<td style=\"{$container_style};text-align:center;padding:20px;\">
+						<span style=\"font-size: 32px; font-weight: 600; color: #1E3A8A;\">" .
+							esc_html__( 'Add social media links', 'quillcrm' ) . '</span>
+					</td>
+				</tr>
+			</table>';
 		}
 
-		// Start with a table for better email compatibility
-		$html = "<div style=\"{$container_style}\">
-			<table cellpadding=\"8\" cellspacing=\"0\" border=\"0\" align=\"{$props['align']}\">
-				<tr>";
+		// Start with a table for better email compatibility (matching frontend)
+		$html = "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
+			<tr>
+				<td style=\"{$container_style}\">
+					<table cellpadding=\"8\" cellspacing=\"0\" border=\"0\" align=\"{$props['align']}\">
+						<tr>";
 
-		// Add each platform icon
+		// Add each platform icon (matching frontend)
 		foreach ( $enabled_platforms as $platform => $data ) {
 			$link = $this->process_merge_tags( $data['link'], $merge_tags );
 
@@ -183,13 +191,17 @@ class Social_Media_Block extends Email_Block {
 			$icon_url = $this->get_social_icon_url( $platform, $props['colorMode'] === 'original', $props['color'] );
 
 			$html .= "<td align=\"center\" valign=\"middle\">
-				<a href=\"{$link}\" target=\"_blank\" style=\"display:inline-block;\">
-					<img src=\"{$icon_url}\" alt=\"{$platform}\" width=\"{$icon_size}\" height=\"{$icon_size}\" style=\"border-radius:{$border_radius};border:0;\" />
+				<a href=\"{$link}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"display:inline-block;text-decoration:none;\">
+					<img src=\"{$icon_url}\" alt=\"{$platform}\" width=\"{$icon_size}\" height=\"{$icon_size}\" style=\"border-radius:{$border_radius};border:0;display:block;\" />
 				</a>
 			</td>";
 		}
 
-		$html .= '</tr></table></div>';
+		$html .= '</tr>
+					</table>
+				</td>
+			</tr>
+		</table>';
 
 		return $html;
 	}

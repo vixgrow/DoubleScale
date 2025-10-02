@@ -66,7 +66,7 @@ class HTML_Block extends Email_Block {
 		// Process the HTML content for merge tags
 		$content = $this->process_merge_tags( $props['content'], $merge_tags );
 
-		// Container style
+		// Container style (matching frontend)
 		$container_style = $this->build_style_string(
 			array(
 				'width'   => $props['width'] . '%',
@@ -74,47 +74,50 @@ class HTML_Block extends Email_Block {
 			)
 		);
 
-		// Try to apply custom CSS if provided and valid
-		$custom_css = '';
-		if ( ! empty( $props['customCss'] ) ) {
-			try {
-				$css_array = json_decode( $props['customCss'], true );
-				if ( is_array( $css_array ) ) {
-					$inline_css = '';
-					foreach ( $css_array as $prop => $value ) {
-						$css_prop    = $this->convert_camel_to_kebab( $prop );
-						$inline_css .= "{$css_prop}: {$value} !important; ";
-					}
-					$custom_css = $inline_css;
-				}
-			} catch ( \Exception $e ) {
-				// Invalid JSON, ignore custom CSS
-			}
-		}
+		// Check if content is empty, default, or just whitespace (matching frontend)
+		$is_default_content = empty( $content ) ||
+			trim( $content ) === '' ||
+			$content === '<p>Insert your HTML here</p>' ||
+			trim( $content ) === '<p>Insert your HTML here</p>';
 
-		// Generate a unique ID for this HTML block to target with CSS
-		$unique_id = 'html-block-' . substr( md5( rand() ), 0, 10 );
+		// Generate unique ID for this HTML block (matching frontend)
+		$unique_id = 'html-block-' . substr( md5( rand() ), 0, 9 );
 
-		// If content is empty, return placeholder
-		if ( empty( $content ) ) {
-			return "<div style=\"{$container_style}\">
-				<div style=\"padding:20px;text-align:center;border:1px dashed #ccc;\">
-					" . esc_html__( 'Add your custom HTML here', 'quillcrm' ) . '
-				</div>
-			</div>';
-		}
+		// Use CSS string directly (matching frontend)
+		$css_string = $props['customCss'] ?? '';
 
-		// Add inline style tag for custom CSS
+		// Inner content style (matching frontend)
+		$inner_style = $this->build_style_string(
+			array(
+				'width'           => '100%',
+				'min-height'      => '50px',
+				'display'         => 'flex',
+				'align-items'     => 'center',
+				'justify-content' => 'center',
+				'color'           => '#666',
+				'font-size'       => '14px',
+			)
+		);
+
+		// Build the output
 		$style_tag = '';
-		if ( ! empty( $custom_css ) ) {
-			$style_tag = "<style>#{$unique_id} * { {$custom_css} }</style>";
+		if ( ! empty( $css_string ) ) {
+			$style_tag = "<style>{$css_string}</style>";
+		}
+
+		$inner_content = '';
+		if ( $is_default_content ) {
+			$inner_content = '<span style="font-size: 32px; font-weight: 600; color: #1E3A8A;">' .
+				esc_html__( 'Add your own html here', 'quillcrm' ) . '</span>';
+		} else {
+			$inner_content = "<div id=\"{$unique_id}\" style=\"width: 100%;\">{$content}</div>";
 		}
 
 		// Use table structure for better email client compatibility
 		return "{$style_tag}<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
 			<tr>
 				<td style=\"{$container_style}\">
-					<div id=\"{$unique_id}\">{$content}</div>
+					<div style=\"{$inner_style}\">{$inner_content}</div>
 				</td>
 			</tr>
 		</table>";

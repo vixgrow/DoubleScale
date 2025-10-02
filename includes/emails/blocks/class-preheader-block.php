@@ -103,18 +103,21 @@ class Preheader_Block extends Email_Block {
 			'letter-spacing'  => $props['letterSpacing'],
 		);
 
-		// Build container styles
+		// Build container styles (matching frontend)
 		$container_styles = array(
-			'display'         => 'flex',
-			'align-items'     => 'center',
-			'justify-content' => $this->get_alignment_justify( $props['textAlign'] ),
-			'text-align'      => $props['textAlign'],
-			'padding'         => $this->format_padding( $props['padding'] ),
-			'font-size'       => $adjusted_font_size . 'px',
-			'font-family'     => $props['fontFamily'],
-			'font-weight'     => ! empty( $props['bold'] ) ? 'bold' : 'normal',
-			'font-style'      => ! empty( $props['italic'] ) ? 'italic' : 'normal',
-			'letter-spacing'  => $props['letterSpacing'],
+			'text-align'     => $props['textAlign'],
+			'padding'        => $this->format_padding( $props['padding'] ),
+			'font-size'      => $adjusted_font_size . 'px',
+			'font-family'    => $props['fontFamily'],
+			'font-weight'    => ! empty( $props['bold'] ) ? 'bold' : 'normal',
+			'font-style'     => ! empty( $props['italic'] ) ? 'italic' : 'normal',
+			'letter-spacing' => $props['letterSpacing'],
+			'word-wrap'      => 'break-word',
+			'overflow-wrap'  => 'break-word',
+			'max-width'      => '100%',
+			'white-space'    => 'normal',
+			'width'          => '100%',
+			'box-sizing'     => 'border-box',
 		);
 
 		$text_style_string      = $this->build_style_string( $text_styles );
@@ -128,11 +131,18 @@ class Preheader_Block extends Email_Block {
 		$display_text      = ! empty( $text ) ? $text : __( 'If you cannot see images, Please', 'quillcrm' );
 		$display_link_text = ! empty( $link_text ) ? $link_text : __( 'Click here', 'quillcrm' );
 
-		return "<{$element_tag} style=\"{$container_style_string}\">
-			<span style=\"{$text_style_string}\">{$display_text}</span>
-			<span style=\"margin-left: 4px; margin-right: 2px;\"> </span>
-			<a href=\"{$link_url}\" style=\"{$link_style_string}\" target=\"_blank\" rel=\"noopener noreferrer\">{$display_link_text}</a>
-		</{$element_tag}>";
+		// Use table structure for better email client compatibility
+		return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
+			<tr>
+				<td>
+					<{$element_tag} style=\"{$container_style_string}\">
+						<span style=\"{$text_style_string}\">{$display_text}</span>
+						<span style=\"margin-left: 4px; margin-right: 2px;\"> </span>
+						<a href=\"{$link_url}\" style=\"{$link_style_string}\" target=\"_blank\" rel=\"noopener noreferrer\">{$display_link_text}</a>
+					</{$element_tag}>
+				</td>
+			</tr>
+		</table>";
 	}
 
 	/**

@@ -26,7 +26,7 @@ import {
 } from '@quillcrm/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
-import { UserIcon, UserRound } from 'lucide-react';
+import { UserRound } from 'lucide-react';
 
 const ContactInformation: React.FC = () => {
 	const { contact, setContact, updateContact, emailAnalytics } =

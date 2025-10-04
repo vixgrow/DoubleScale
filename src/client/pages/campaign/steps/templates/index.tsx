@@ -20,7 +20,7 @@ import {
 	PanelSettings,
 	PlayIcon,
 } from '@quillcrm/components';
-import type { Template as TemplateType } from '@quillcrm/client';
+import type { Template as TemplateType, EmailTemplate } from '@quillcrm/client';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,57 +29,34 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import EmailBuilderSelection from './email-builder-selection';
+import ConfigAPI from '@quillcrm/config';
+import { isEmail } from 'validator';
 
-// Zod validation schema for flat template structure
-const templateSchema = z
-	.object({
-		subject: z.string().min(1, __('Subject is required', 'quillcrm')),
-		body: z.string().min(1, __('Body is required', 'quillcrm')),
-		from_name: z.string().min(1, __('From name is required', 'quillcrm')),
-		from_email: z
-			.string()
-			.min(1, __('From email is required', 'quillcrm'))
-			.email(
-				__(
-					'Please enter a valid email address for From Email',
-					'quillcrm'
-				)
-			),
-		reply_to: z
-			.string()
-			.min(1, __('Reply to email is required', 'quillcrm'))
-			.email(
-				__(
-					'Please enter a valid email address for Reply To',
-					'quillcrm'
-				)
-			),
-		preview_text: z
-			.string()
-			.min(1, __('Preview text is required', 'quillcrm')),
-		enable_utm: z.boolean().optional(),
-		utm_source: z.string().optional(),
-		utm_medium: z.string().optional(),
-		utm_name: z.string().optional(),
-		utm_term: z.string().optional(),
-		utm_content: z.string().optional(),
-	})
-	.refine(
-		(data) => {
-			// If UTM is enabled, require UTM fields
-			if (data.enable_utm) {
-				return !!(data.utm_source && data.utm_medium && data.utm_name);
-			}
-			return true;
-		},
-		{
-			message: __(
-				'All UTM fields are required when UTM is enabled',
+// Zod validation schema for nested template structure
+const templateSchema = z.object({
+	from_name: z.string().min(1, __('From name is required', 'quillcrm')),
+	from_email: z
+		.string()
+		.min(1, __('From email is required', 'quillcrm'))
+		.email(
+			__(
+				'Please enter a valid email address for From Email',
 				'quillcrm'
-			),
-			path: ['utm_source'],
-		}
-	);
+			)
+		),
+	reply_to: z
+		.string()
+		.min(1, __('Reply to email is required', 'quillcrm'))
+		.email(
+			__(
+				'Please enter a valid email address for Reply To',
+				'quillcrm'
+			)
+		),
+	preview_text: z
+		.string()
+		.min(1, __('Preview text is required', 'quillcrm')),
+});
 
 const Templates: React.FC = () => {
 	const [emailBuilderSelectionVisible, setEmailBuilderSelectionVisible] =
@@ -91,23 +68,21 @@ const Templates: React.FC = () => {
 	}>({});
 	const { campaign, saveCampaignStep } = useCampaignContext();
 	const navigate = useNavigate();
+	const adminEmail = ConfigAPI.getAdminEmail();
+	const blogName = ConfigAPI.getBlogName();
 
-	// Using old flat template structure
-	const defaultTemplate = {
+	// Using new unified template structure with flat properties
+	const defaultTemplate: EmailTemplate = {
 		name: campaign?.name || __('New Email', 'quillcrm'),
 		type: 'email',
 		subject: __('New Email', 'quillcrm'),
 		body: 'Email body',
-		from_name: '',
-		from_email: '',
-		reply_to: '',
-		preview_text: '',
-		enable_utm: false,
-		utm_source: '',
-		utm_medium: '',
-		utm_name: '',
-		utm_term: '',
-		utm_content: '',
+		settings: {
+			from_name: blogName,
+			from_email: adminEmail,
+			reply_to: adminEmail,
+			preview_text: '',
+		},
 	};
 	const [templates, setTemplates] = useState<EmailTemplate[]>(
 		(campaign?.settings.templates as EmailTemplate[]) || []
@@ -121,7 +96,29 @@ const Templates: React.FC = () => {
 		}
 	}, []);
 
-	const updateTemplate = (index: number, data: Partial<TemplateType>) => {
+	const addTemplate = () => {
+		if (!campaign) {
+			return;
+		}
+
+		const newTemplates = templates ? [...templates] : [];
+		newTemplates.push(defaultTemplate);
+		setTemplates(newTemplates);
+		setCurrentTab(newTemplates.length - 1);
+	};
+
+	const removeTemplate = (index: number) => {
+		if (!campaign) {
+			return;
+		}
+
+		const newTemplates = templates ? [...templates] : [];
+		newTemplates.splice(index, 1);
+		setTemplates(newTemplates);
+		setCurrentTab(0);
+	};
+
+	const updateTemplate = (index: number, data: Partial<EmailTemplate>) => {
 		if (!campaign) {
 			return;
 		}
@@ -150,8 +147,56 @@ const Templates: React.FC = () => {
 		});
 	};
 
-	const validate = (template: Partial<TemplateType>) => {
-		const result = templateSchema.safeParse(template);
+	const templatesSettings = [
+		{
+			title: __('Template', 'quillcrm'),
+			closable: false,
+		},
+		{
+			title: __('A Variant', 'quillcrm'),
+		},
+		{
+			title: __('B Variant', 'quillcrm'),
+		},
+	];
+
+	const tabs = campaign?.settings.ab_test
+		? templates
+		: [templates[0] ?? defaultTemplate];
+	const tabList = tabs.map((template, index) => ({
+		key: index.toString(),
+		label: templatesSettings[index].title,
+		children: (
+			<Template
+				template={template}
+				updateTemplate={(data) =>
+					updateTemplate(index, data as Partial<EmailTemplate>)
+				}
+			/>
+		),
+		closable: templatesSettings[index].closable ?? true,
+	}));
+
+	const validate = (template: Partial<EmailTemplate>) => {
+		// Check subject and body first
+		if (!template.subject || template.subject.trim() === '') {
+			createNotice({
+				type: 'error',
+				message: __('Subject is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		if (!template.body || template.body.trim() === '') {
+			createNotice({
+				type: 'error',
+				message: __('Body is required', 'quillcrm'),
+			});
+			return false;
+		}
+
+		// Validate settings with Zod
+		const result = templateSchema.safeParse(template.settings);
 
 		if (!result.success) {
 			const errors: { [key: string]: string } = {};
@@ -210,9 +255,9 @@ const Templates: React.FC = () => {
 					email: emailAddress,
 					subject: template.subject,
 					body: template.body || 'Email body',
-					from_name: template.from_name,
-					from_email: template.from_email,
-					reply_to: template.reply_to,
+					from_name: template.settings.from_name,
+					from_email: template.settings.from_email,
+					reply_to: template.settings.reply_to,
 				},
 			});
 
@@ -311,11 +356,14 @@ const Templates: React.FC = () => {
 							>
 								<Input
 									placeholder={__('Name here', 'quillcrm')}
-									value={templates[currentTab]?.from_name}
+									value={templates[currentTab]?.settings.from_name}
 									onChange={(e) => {
 										clearError('from_name');
 										updateTemplate(currentTab, {
-											from_name: e.target.value,
+											settings: {
+												...templates[currentTab]?.settings,
+												from_name: e.target.value,
+											},
 										});
 									}}
 									className={cn(
@@ -340,11 +388,14 @@ const Templates: React.FC = () => {
 										'name@gmail.com',
 										'quillcrm'
 									)}
-									value={templates[currentTab]?.from_email}
+									value={templates[currentTab]?.settings.from_email}
 									onChange={(e) => {
 										clearError('from_email');
 										updateTemplate(currentTab, {
-											from_email: e.target.value,
+											settings: {
+												...templates[currentTab]?.settings,
+												from_email: e.target.value,
+											},
 										});
 									}}
 									className={cn(
@@ -369,11 +420,14 @@ const Templates: React.FC = () => {
 										'name@gmail.com',
 										'quillcrm'
 									)}
-									value={templates[currentTab]?.reply_to}
+									value={templates[currentTab]?.settings.reply_to}
 									onChange={(e) => {
 										clearError('reply_to');
 										updateTemplate(currentTab, {
-											reply_to: e.target.value,
+											settings: {
+												...templates[currentTab]?.settings,
+												reply_to: e.target.value,
+											},
 										});
 									}}
 									className={cn(
@@ -422,11 +476,14 @@ const Templates: React.FC = () => {
 										'Preview text here',
 										'quillcrm'
 									)}
-									value={templates[currentTab]?.preview_text}
+									value={templates[currentTab]?.settings.preview_text}
 									onChange={(e) => {
 										clearError('preview_text');
 										updateTemplate(currentTab, {
-											preview_text: e.target.value,
+											settings: {
+												...templates[currentTab]?.settings,
+												preview_text: e.target.value,
+											},
 										});
 									}}
 									className={cn(
@@ -444,213 +501,6 @@ const Templates: React.FC = () => {
 							<Separator />
 
 							<div className="py-4">
-								<div className="flex items-center justify-between mb-4">
-									<div>
-										<p className="text-lg font-semibold text-foreground">
-											{__('Enable UTM', 'quillcrm')}
-										</p>
-										<p>
-											{__(
-												'A UTM (Urchin Tracking Module) code is a snippet of text added to the end of a URL to track the metrics and performance of a specific digital marketing campaign',
-												'quillcrm'
-											)}
-										</p>
-									</div>
-									<Switch
-										checked={
-											templates[currentTab]?.enable_utm
-										}
-										onCheckedChange={(checked) =>
-											updateTemplate(currentTab, {
-												enable_utm: checked,
-											})
-										}
-									/>
-								</div>
-
-								{templates[currentTab]?.enable_utm && (
-									<div className="space-y-4">
-										<div className="grid grid-cols-2 gap-4">
-											<FormField
-												label={__(
-													'UTM Source',
-													'quillcrm'
-												)}
-												required={true}
-											>
-												<Input
-													placeholder={__(
-														'Source',
-														'quillcrm'
-													)}
-													value={
-														templates[currentTab]
-															?.utm_source
-													}
-													onChange={(e) => {
-														clearError(
-															'utm_source'
-														);
-														updateTemplate(
-															currentTab,
-															{
-																utm_source:
-																	e.target
-																		.value,
-															}
-														);
-													}}
-													className={cn(
-														validationErrors.utm_source &&
-															'!border-red-500 focus-visible:!ring-red-500'
-													)}
-												/>
-												{validationErrors.utm_source && (
-													<p className="text-red-500 text-sm mt-1">
-														{
-															validationErrors.utm_source
-														}
-													</p>
-												)}
-											</FormField>
-											<FormField
-												label={__(
-													'UTM Medium',
-													'quillcrm'
-												)}
-												required={true}
-											>
-												<Input
-													placeholder={__(
-														'Medium',
-														'quillcrm'
-													)}
-													value={
-														templates[currentTab]
-															?.utm_medium
-													}
-													onChange={(e) => {
-														clearError(
-															'utm_medium'
-														);
-														updateTemplate(
-															currentTab,
-															{
-																utm_medium:
-																	e.target
-																		.value,
-															}
-														);
-													}}
-													className={cn(
-														validationErrors.utm_medium &&
-															'!border-red-500 focus-visible:!ring-red-500'
-													)}
-												/>
-												{validationErrors.utm_medium && (
-													<p className="text-red-500 text-sm mt-1">
-														{
-															validationErrors.utm_medium
-														}
-													</p>
-												)}
-											</FormField>
-										</div>
-										<div className="grid grid-cols-2 gap-4">
-											<FormField
-												label={__(
-													'UTM Name',
-													'quillcrm'
-												)}
-												required={true}
-											>
-												<Input
-													placeholder={__(
-														'Name',
-														'quillcrm'
-													)}
-													value={
-														templates[currentTab]
-															?.utm_name
-													}
-													onChange={(e) => {
-														clearError('utm_name');
-														updateTemplate(
-															currentTab,
-															{
-																utm_name:
-																	e.target
-																		.value,
-															}
-														);
-													}}
-													className={cn(
-														validationErrors.utm_name &&
-															'!border-red-500 focus-visible:!ring-red-500'
-													)}
-												/>
-												{validationErrors.utm_name && (
-													<p className="text-red-500 text-sm mt-1">
-														{
-															validationErrors.utm_name
-														}
-													</p>
-												)}
-											</FormField>
-											<FormField
-												label={__(
-													'UTM Term',
-													'quillcrm'
-												)}
-											>
-												<Input
-													placeholder={__(
-														'Term',
-														'quillcrm'
-													)}
-													value={
-														templates[currentTab]
-															?.utm_term
-													}
-													onChange={(e) =>
-														updateTemplate(
-															currentTab,
-															{
-																utm_term:
-																	e.target
-																		.value,
-															}
-														)
-													}
-												/>
-											</FormField>
-										</div>
-										<FormField
-											label={__(
-												'UTM Content',
-												'quillcrm'
-											)}
-										>
-											<Input
-												placeholder={__(
-													'Content',
-													'quillcrm'
-												)}
-												value={
-													templates[currentTab]
-														?.utm_content
-												}
-												onChange={(e) =>
-													updateTemplate(currentTab, {
-														utm_content:
-															e.target.value,
-													})
-												}
-											/>
-										</FormField>
-									</div>
-								)}
-
 								<div className="mt-4">
 									<Button
 										variant="default"

@@ -185,6 +185,12 @@ export type EmailTemplate = {
 		from_email: string;
 		reply_to: string;
 		preview_text: string;
+		enable_utm?: boolean;
+		utm_source?: string;
+		utm_medium?: string;
+		utm_campaign?: string;
+		utm_term?: string;
+		utm_content?: string;
 	};
 	created_at?: string;
 	updated_at?: string;

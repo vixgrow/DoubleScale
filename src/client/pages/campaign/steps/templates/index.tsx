@@ -82,6 +82,12 @@ const Templates: React.FC = () => {
 			from_email: adminEmail,
 			reply_to: adminEmail,
 			preview_text: '',
+			enable_utm: false,
+			utm_source: '',
+			utm_medium: '',
+			utm_campaign: '',
+			utm_term: '',
+			utm_content: '',
 		},
 	};
 	const [templates, setTemplates] = useState<EmailTemplate[]>(
@@ -193,6 +199,43 @@ const Templates: React.FC = () => {
 				message: __('Body is required', 'quillcrm'),
 			});
 			return false;
+		}
+
+		// Validate UTM parameters if enabled
+		if (template.settings?.enable_utm) {
+			if (!template.settings.utm_source?.trim()) {
+				setValidationErrors((prev) => ({
+					...prev,
+					utm_source: __('UTM Source is required when UTM is enabled', 'quillcrm'),
+				}));
+				createNotice({
+					type: 'error',
+					message: __('UTM Source is required when UTM is enabled', 'quillcrm'),
+				});
+				return false;
+			}
+			if (!template.settings.utm_medium?.trim()) {
+				setValidationErrors((prev) => ({
+					...prev,
+					utm_medium: __('UTM Medium is required when UTM is enabled', 'quillcrm'),
+				}));
+				createNotice({
+					type: 'error',
+					message: __('UTM Medium is required when UTM is enabled', 'quillcrm'),
+				});
+				return false;
+			}
+			if (!template.settings.utm_campaign?.trim()) {
+				setValidationErrors((prev) => ({
+					...prev,
+					utm_campaign: __('UTM Campaign is required when UTM is enabled', 'quillcrm'),
+				}));
+				createNotice({
+					type: 'error',
+					message: __('UTM Campaign is required when UTM is enabled', 'quillcrm'),
+				});
+				return false;
+			}
 		}
 
 		// Validate settings with Zod
@@ -497,6 +540,257 @@ const Templates: React.FC = () => {
 									</p>
 								)}
 							</FormField>
+
+							<Separator />
+
+							<div className="py-4">
+								<div className="flex items-center justify-between mb-4">
+									<div>
+										<p className="text-lg font-semibold text-foreground">
+											{__('Enable UTM Parameters', 'quillcrm')}
+										</p>
+										<p className="text-sm text-muted-foreground">
+											{__(
+												'Add UTM tracking parameters to all links in your email for better campaign analytics',
+												'quillcrm'
+											)}
+										</p>
+									</div>
+									<Switch
+										checked={
+											templates[currentTab]?.settings
+												?.enable_utm || false
+										}
+										onCheckedChange={(checked) =>
+											updateTemplate(currentTab, {
+												settings: {
+													...(templates[currentTab]
+														?.settings || {}),
+													enable_utm: checked,
+												},
+											})
+										}
+									/>
+								</div>
+
+								{templates[currentTab]?.settings
+									?.enable_utm && (
+									<div className="space-y-4">
+										<div className="grid grid-cols-2 gap-4">
+											<FormField
+												label={__(
+													'UTM Source',
+													'quillcrm'
+												)}
+												required={true}
+											>
+												<Input
+													placeholder={__(
+														'e.g., newsletter',
+														'quillcrm'
+													)}
+													value={
+														templates[currentTab]
+															?.settings
+															?.utm_source || ''
+													}
+													onChange={(e) => {
+														clearError('utm_source');
+														updateTemplate(
+															currentTab,
+															{
+																settings: {
+																	...(templates[
+																		currentTab
+																	]
+																		?.settings ||
+																		{}),
+																	utm_source:
+																		e.target
+																			.value,
+																},
+															}
+														);
+													}}
+													className={cn(
+														validationErrors.utm_source &&
+															'!border-red-500 focus-visible:!ring-red-500'
+													)}
+												/>
+												{validationErrors.utm_source && (
+													<p className="text-red-500 text-sm mt-1">
+														{
+															validationErrors.utm_source
+														}
+													</p>
+												)}
+											</FormField>
+											<FormField
+												label={__(
+													'UTM Medium',
+													'quillcrm'
+												)}
+												required={true}
+											>
+												<Input
+													placeholder={__(
+														'e.g., email',
+														'quillcrm'
+													)}
+													value={
+														templates[currentTab]
+															?.settings
+															?.utm_medium || ''
+													}
+													onChange={(e) => {
+														clearError('utm_medium');
+														updateTemplate(
+															currentTab,
+															{
+																settings: {
+																	...(templates[
+																		currentTab
+																	]
+																		?.settings ||
+																		{}),
+																	utm_medium:
+																		e.target
+																			.value,
+																},
+															}
+														);
+													}}
+													className={cn(
+														validationErrors.utm_medium &&
+															'!border-red-500 focus-visible:!ring-red-500'
+													)}
+												/>
+												{validationErrors.utm_medium && (
+													<p className="text-red-500 text-sm mt-1">
+														{
+															validationErrors.utm_medium
+														}
+													</p>
+												)}
+											</FormField>
+										</div>
+										<div className="grid grid-cols-2 gap-4">
+											<FormField
+												label={__(
+													'UTM Campaign',
+													'quillcrm'
+												)}
+												required={true}
+											>
+												<Input
+													placeholder={__(
+														'e.g., spring_sale',
+														'quillcrm'
+													)}
+													value={
+														templates[currentTab]
+															?.settings
+															?.utm_campaign || ''
+													}
+													onChange={(e) => {
+														clearError('utm_campaign');
+														updateTemplate(
+															currentTab,
+															{
+																settings: {
+																	...(templates[
+																		currentTab
+																	]
+																		?.settings ||
+																		{}),
+																	utm_campaign:
+																		e.target
+																			.value,
+																},
+															}
+														);
+													}}
+													className={cn(
+														validationErrors.utm_campaign &&
+															'!border-red-500 focus-visible:!ring-red-500'
+													)}
+												/>
+												{validationErrors.utm_campaign && (
+													<p className="text-red-500 text-sm mt-1">
+														{
+															validationErrors.utm_campaign
+														}
+													</p>
+												)}
+											</FormField>
+											<FormField
+												label={__(
+													'UTM Term',
+													'quillcrm'
+												)}
+											>
+												<Input
+													placeholder={__(
+														'e.g., running+shoes',
+														'quillcrm'
+													)}
+													value={
+														templates[currentTab]
+															?.settings
+															?.utm_term || ''
+													}
+													onChange={(e) =>
+														updateTemplate(
+															currentTab,
+															{
+																settings: {
+																	...(templates[
+																		currentTab
+																	]
+																		?.settings ||
+																		{}),
+																	utm_term:
+																		e.target
+																			.value,
+																},
+															}
+														)
+													}
+												/>
+											</FormField>
+										</div>
+										<FormField
+											label={__(
+												'UTM Content',
+												'quillcrm'
+											)}
+										>
+											<Input
+												placeholder={__(
+													'e.g., header_link',
+													'quillcrm'
+												)}
+												value={
+													templates[currentTab]
+														?.settings
+														?.utm_content || ''
+												}
+												onChange={(e) =>
+													updateTemplate(currentTab, {
+														settings: {
+															...(templates[
+																currentTab
+															]?.settings || {}),
+															utm_content:
+																e.target.value,
+														},
+													})
+												}
+											/>
+										</FormField>
+									</div>
+								)}
+							</div>
 
 							<Separator />
 

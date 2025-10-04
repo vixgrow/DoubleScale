@@ -102,8 +102,8 @@ class Email_Processing extends Abstract_Campaign_Processing
                 $this->build_email_footer($campaign_message, $contact)
             );
 
-            // Add click tracking to all links (specific to email)
-            $complete_message = $this->add_email_click_tracking($complete_message, $campaign_message->hash_key, $contact);
+            // Add click tracking to all links (specific to email) and UTM parameters
+            $complete_message = $this->add_email_click_tracking($complete_message, $campaign_message->hash_key, $contact, $template);
 
             $emails = new Emails();
                         // Set from_email and from_name from template if available
@@ -239,9 +239,10 @@ class Email_Processing extends Abstract_Campaign_Processing
      * @param string $message Email message
      * @param string $hash_key Campaign email hash key
      * @param Contact_Model $contact Contact model
+     * @param Template_Model|null $template Template model for UTM parameters
      * @return string
      */
-    protected function add_email_click_tracking($message, $hash_key, Contact_Model $contact)
+    protected function add_email_click_tracking($message, $hash_key, Contact_Model $contact, $template = null)
     {
         // Match all links
         preg_match_all('/<a[^>]+href=([\'"])(?<href>.+?)\1[^>]*>/i', $message, $matches);
@@ -272,12 +273,18 @@ class Email_Processing extends Abstract_Campaign_Processing
                 continue;
             }
 
+            // Add UTM parameters to the original URL if enabled
+            $original_url = $href;
+            if ($template && $template->get_setting('enable_utm', false)) {
+                $original_url = $this->add_utm_parameters($original_url, $template);
+            }
+
             // Add click original link to click tracking
             $click_url = add_query_arg(
                 array(
                     'quillcrm' => 'email_click',
                     'hash_key' => $hash_key,
-                    'original' => urlencode($href),
+                    'original' => urlencode($original_url),
                 ),
                 home_url()
             );
@@ -288,6 +295,52 @@ class Email_Processing extends Abstract_Campaign_Processing
         }
 
         return $message;
+    }
+
+    /**
+     * Add UTM parameters to URL
+     *
+     * @param string $url Original URL
+     * @param Template_Model $template Template with UTM settings
+     * @return string URL with UTM parameters added
+     */
+    protected function add_utm_parameters($url, $template)
+    {
+        // Skip if URL is empty or not a valid external URL
+        if (empty($url) || strpos($url, 'mailto:') === 0 || strpos($url, 'tel:') === 0 || strpos($url, '#') === 0) {
+            return $url;
+        }
+
+        // Get UTM parameters from template settings
+        $utm_params = array();
+
+        if ($utm_source = $template->get_setting('utm_source')) {
+            $utm_params['utm_source'] = $utm_source;
+        }
+
+        if ($utm_medium = $template->get_setting('utm_medium')) {
+            $utm_params['utm_medium'] = $utm_medium;
+        }
+
+        if ($utm_campaign = $template->get_setting('utm_campaign')) {
+            $utm_params['utm_campaign'] = $utm_campaign;
+        }
+
+        if ($utm_term = $template->get_setting('utm_term')) {
+            $utm_params['utm_term'] = $utm_term;
+        }
+
+        if ($utm_content = $template->get_setting('utm_content')) {
+            $utm_params['utm_content'] = $utm_content;
+        }
+
+        // Only add parameters if we have at least source, medium, and campaign
+        if (empty($utm_params['utm_source']) || empty($utm_params['utm_medium']) || empty($utm_params['utm_campaign'])) {
+            return $url;
+        }
+
+        // Add UTM parameters to the URL
+        return add_query_arg($utm_params, $url);
     }
 
     /**

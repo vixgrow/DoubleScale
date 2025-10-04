@@ -31,7 +31,7 @@ class Template_Field_Mapper
             'email' => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
                 'specific_fields' => array('subject'),
-                'settings_fields' => array('from_name', 'from_email', 'reply_to', 'preview_text'),
+                'settings_fields' => array('from_name', 'from_email', 'reply_to', 'preview_text', 'enable_utm', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'),
             ),
             'sms' => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
@@ -76,7 +76,15 @@ class Template_Field_Mapper
         // Add settings object with nested fields
         $settings = array();
         foreach ($config['settings_fields'] as $field) {
-            $default = ($field === 'add_unsubscribe') ? true : null;
+            // Set defaults based on field type
+            $default = null;
+            if ($field === 'add_unsubscribe') {
+                $default = true;
+            } elseif ($field === 'enable_utm') {
+                $default = false;
+            } elseif (strpos($field, 'utm_') === 0) {
+                $default = '';
+            }
             $settings[$field] = $template->get_setting($field, $default);
         }
         $template_data['settings'] = $settings;
@@ -114,9 +122,17 @@ class Template_Field_Mapper
         // Process settings - expect nested settings object
         $settings = array();
         $settings_data = $template_data['settings'] ?? array();
-        
+
         foreach ($config['settings_fields'] as $field) {
-            $default = ($field === 'add_unsubscribe') ? true : null;
+            // Set defaults based on field type
+            $default = null;
+            if ($field === 'add_unsubscribe') {
+                $default = true;
+            } elseif ($field === 'enable_utm') {
+                $default = false;
+            } elseif (strpos($field, 'utm_') === 0) {
+                $default = '';
+            }
             $settings[$field] = $settings_data[$field] ?? $default;
         }
 

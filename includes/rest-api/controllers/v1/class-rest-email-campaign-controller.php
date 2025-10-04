@@ -241,48 +241,8 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 		}
 	}
 
-	/**
-	 * Get email campaign messages
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 *
-	 * @return WP_REST_Response $response The response object
-	 */
-	public function get_campaign_messages($request)
-	{
-		try {
-			$campaign_id = $request->get_param('id');
-			$per_page = $request->get_param('per_page') ?: 10;
-			$page = $request->get_param('page') ?: 1;
-			$status = $request->get_param('status') ?: '';
-
-			$query = $this->get_campaign_message_query($campaign_id);
-
-			switch ($status) {
-				case 'opened':
-					$query->where('opened', 1);
-					break;
-				case 'clicked':
-					$query->where('clicked', 1);
-					break;
-				case 'failed':
-					$query->where('status', 'failed');
-					break;
-				case 'sent':
-					$query->where('status', 'sent');
-					break;
-			}
-
-			$campaign_emails = $query->with('contact', 'template')
-				->paginate($per_page, array('*'), 'page', $page);
-
-			return new WP_REST_Response($campaign_emails, 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
-		}
-	}
+	// get_campaign_messages() is now inherited from Abstract_Campaign_Controller
+	// No override needed - parent implementation handles all status filters including 'opened' and 'clicked'
 
 	/**
 	 * Get default test email content

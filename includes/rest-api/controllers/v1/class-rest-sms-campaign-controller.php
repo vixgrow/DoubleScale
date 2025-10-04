@@ -337,48 +337,7 @@ class REST_SMS_Campaign_Controller extends Abstract_Twilio_Campaign_Controller
 	}
 
 
-
-	/**
-	 * Get SMS campaign messages
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 *
-	 * @return WP_REST_Response $response The response object
-	 */
-	public function get_campaign_messages($request)
-	{
-		try {
-			$campaign_id = $request->get_param('id');
-			$per_page = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
-			$page = $request->get_param('page') ? $request->get_param('page') : 1;
-			$status = $request->get_param('status') ? $request->get_param('status') : '';
-
-			$query = $this->get_campaign_message_query($campaign_id);
-
-			switch ($status) {
-				case 'failed':
-					$query->where('status', 'failed');
-					break;
-				case 'sent':
-					$query->where('status', 'sent');
-					break;
-				case 'pending':
-					$query->where('status', 'pending');
-					break;
-			}
-
-			$campaign_messages = $query->with('contact', 'template')
-				->paginate($per_page, array('*'), 'page', $page);
-
-			return new WP_REST_Response($campaign_messages, 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
-		}
-	}
-
-
-
+	// get_campaign_messages() is now inherited from Abstract_Campaign_Controller
+	// No override needed - parent implementation handles all common status filters
 
 }

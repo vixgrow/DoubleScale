@@ -372,7 +372,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller
     }
 
     /**
-     * Get campaign messages
+     * Get campaign messages - unified implementation for all campaign types
      *
      * @param WP_REST_Request $request
      *
@@ -382,33 +382,62 @@ abstract class Abstract_Campaign_Controller extends REST_Controller
     {
         try {
             $campaign_id = $request->get_param('id');
-            $per_page = $request->get_param('per_page') ? $request->get_param('per_page') : 10;
-            $page = $request->get_param('page') ? $request->get_param('page') : 1;
-            $status = $request->get_param('status') ? $request->get_param('status') : '';
+            $per_page = $request->get_param('per_page') ?: 10;
+            $page = $request->get_param('page') ?: 1;
+            $status = $request->get_param('status') ?: '';
 
             $query = $this->get_campaign_message_query($campaign_id);
 
             // Apply status filter if provided
-            if ($status) {
-                switch ($status) {
-                    case 'failed':
-                        $query->where('status', 'failed');
-                        break;
-                    case 'sent':
-                        $query->where('status', 'sent');
-                        break;
-                    case 'pending':
-                        $query->where('status', 'pending');
-                        break;
-                }
+            if (!empty($status) && $status !== 'all') {
+                $this->apply_message_status_filter($query, $status);
             }
 
             $campaign_messages = $query->with('contact', 'template')
                 ->paginate($per_page, array('*'), 'page', $page);
 
-            return new WP_REST_Response($campaign_messages->toArray(), 200);
+            return new WP_REST_Response($campaign_messages, 200);
         } catch (\Exception $e) {
             return new WP_Error('error', $e->getMessage(), array('status' => 500));
+        }
+    }
+
+    /**
+     * Apply status filter to message query
+     * Can be overridden by child classes for type-specific filtering
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $status
+     * @return void
+     */
+    protected function apply_message_status_filter($query, $status)
+    {
+        // Common status filters across all campaign types
+        switch ($status) {
+            case 'failed':
+                $query->where('status', 'failed');
+                break;
+            case 'sent':
+                $query->where('status', 'sent');
+                break;
+            case 'pending':
+                $query->where('status', 'pending');
+                break;
+            case 'delivered':
+                $query->where('status', 'delivered');
+                break;
+            case 'opened':
+                // Email-specific: check opened column
+                $query->where('opened', 1);
+                break;
+            case 'clicked':
+                // Email-specific: check clicked column
+                $query->where('clicked', 1);
+                break;
+            case 'read':
+                // WhatsApp-specific: check read status
+                $query->where('status', 'read');
+                break;
         }
     }
 

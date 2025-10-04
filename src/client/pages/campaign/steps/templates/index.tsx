@@ -19,6 +19,7 @@ import {
 	PanelLayout,
 	PanelSettings,
 	PlayIcon,
+	Template,
 } from '@quillcrm/components';
 import type { Template as TemplateType, EmailTemplate } from '@quillcrm/client';
 import { z } from 'zod';
@@ -39,23 +40,15 @@ const templateSchema = z.object({
 		.string()
 		.min(1, __('From email is required', 'quillcrm'))
 		.email(
-			__(
-				'Please enter a valid email address for From Email',
-				'quillcrm'
-			)
+			__('Please enter a valid email address for From Email', 'quillcrm')
 		),
 	reply_to: z
 		.string()
 		.min(1, __('Reply to email is required', 'quillcrm'))
 		.email(
-			__(
-				'Please enter a valid email address for Reply To',
-				'quillcrm'
-			)
+			__('Please enter a valid email address for Reply To', 'quillcrm')
 		),
-	preview_text: z
-		.string()
-		.min(1, __('Preview text is required', 'quillcrm')),
+	preview_text: z.string().min(1, __('Preview text is required', 'quillcrm')),
 });
 
 const Templates: React.FC = () => {
@@ -399,12 +392,16 @@ const Templates: React.FC = () => {
 							>
 								<Input
 									placeholder={__('Name here', 'quillcrm')}
-									value={templates[currentTab]?.settings.from_name}
+									value={
+										templates[currentTab]?.settings
+											.from_name
+									}
 									onChange={(e) => {
 										clearError('from_name');
 										updateTemplate(currentTab, {
 											settings: {
-												...templates[currentTab]?.settings,
+												...templates[currentTab]
+													?.settings,
 												from_name: e.target.value,
 											},
 										});
@@ -431,12 +428,16 @@ const Templates: React.FC = () => {
 										'name@gmail.com',
 										'quillcrm'
 									)}
-									value={templates[currentTab]?.settings.from_email}
+									value={
+										templates[currentTab]?.settings
+											.from_email
+									}
 									onChange={(e) => {
 										clearError('from_email');
 										updateTemplate(currentTab, {
 											settings: {
-												...templates[currentTab]?.settings,
+												...templates[currentTab]
+													?.settings,
 												from_email: e.target.value,
 											},
 										});
@@ -463,12 +464,15 @@ const Templates: React.FC = () => {
 										'name@gmail.com',
 										'quillcrm'
 									)}
-									value={templates[currentTab]?.settings.reply_to}
+									value={
+										templates[currentTab]?.settings.reply_to
+									}
 									onChange={(e) => {
 										clearError('reply_to');
 										updateTemplate(currentTab, {
 											settings: {
-												...templates[currentTab]?.settings,
+												...templates[currentTab]
+													?.settings,
 												reply_to: e.target.value,
 											},
 										});
@@ -519,12 +523,16 @@ const Templates: React.FC = () => {
 										'Preview text here',
 										'quillcrm'
 									)}
-									value={templates[currentTab]?.settings.preview_text}
+									value={
+										templates[currentTab]?.settings
+											.preview_text
+									}
 									onChange={(e) => {
 										clearError('preview_text');
 										updateTemplate(currentTab, {
 											settings: {
-												...templates[currentTab]?.settings,
+												...templates[currentTab]
+													?.settings,
 												preview_text: e.target.value,
 											},
 										});

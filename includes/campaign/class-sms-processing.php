@@ -69,7 +69,7 @@ class SMS_Processing extends Abstract_Campaign_Processing
      */
     protected function send_message($message_data, Contact_Model $contact, Tracking_Model $campaign_message)
     {
-        return $this->send_twilio_message($message_data, $contact, $campaign_message);
+        return $this->send_via_provider($message_data, $contact, $campaign_message);
     }
 
     /**
@@ -80,17 +80,6 @@ class SMS_Processing extends Abstract_Campaign_Processing
     protected function get_tracking_class()
     {
         return SMS_Tracking::class;
-    }
-
-    /**
-     * Call external API - implementation for SMS
-     *
-     * @param array $api_data API data to send
-     * @return array Result from API
-     */
-    protected function call_external_api($api_data)
-    {
-        return $this->external_api->send_sms($api_data);
     }
 
 }

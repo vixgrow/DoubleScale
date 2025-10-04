@@ -70,11 +70,13 @@ abstract class Abstract_Campaign_Processing {
 	protected $contact_filter;
 
 	/**
-	 * External API instance (for Twilio-based services)
+	 * Message provider instance
 	 *
-	 * @var mixed
+	 * @since 1.0.0
+	 *
+	 * @var \QuillCRM\Interfaces\Message_Provider_Interface|null
 	 */
-	protected $external_api;
+	protected $message_provider;
 
 	/**
 	 * Class Instance storage.
@@ -131,33 +133,43 @@ abstract class Abstract_Campaign_Processing {
 
 
 	/**
-	 * Send Twilio message (common logic for SMS and WhatsApp)
+	 * Send message via provider (polymorphic for SMS and WhatsApp)
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array          $message_data Prepared message data
 	 * @param Contact_Model  $contact Contact model
 	 * @param Tracking_Model $campaign_message Campaign tracking record
 	 * @return array Result array with 'success' boolean and optional data
 	 */
-	protected function send_twilio_message( $message_data, Contact_Model $contact, Tracking_Model $campaign_message ) {
+	protected function send_via_provider( $message_data, Contact_Model $contact, Tracking_Model $campaign_message ) {
 		try {
-			// Prepare message data for Twilio API
+			// Get message provider
+			$provider = $this->get_message_provider();
+			if ( ! $provider ) {
+				throw new \Exception( sprintf( 'No message provider available for %s', $this->campaign_type ) );
+			}
+
+			// Prepare message data for provider API
 			$api_data = array(
 				'Body' => $message_data['body'],
 				'To'   => $campaign_message->recipient,
 			);
 
-			// Add StatusCallback if webhook URL is available
-			$tracking_class = $this->get_tracking_class();
-			$webhook_url    = $tracking_class::get_webhook_url();
-			$api_data       = $this->prepare_status_callback( $webhook_url, $api_data );
+			// Add StatusCallback if provider supports webhooks
+			$webhook_url = $provider->get_webhook_url( $this->campaign_type );
+			if ( $webhook_url ) {
+				$api_data = $this->prepare_status_callback( $webhook_url, $api_data );
+			}
 
-			// Call type-specific API method
-			$result = $this->call_external_api( $api_data );
+			// Send via provider (polymorphic dispatch)
+			$method = "send_{$this->campaign_type}";
+			$result = $provider->$method( $api_data, $contact );
 
-			// Handle response (common logic)
-			return $this->handle_twilio_response( $result, $campaign_message, $contact );
+			// Handle response
+			return $this->handle_provider_response( $result, $campaign_message, $contact );
 		} catch ( \Exception $e ) {
-			return $this->handle_twilio_error( $e );
+			return $this->handle_provider_error( $e );
 		}
 	}
 
@@ -176,33 +188,35 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Handle Twilio API response (common logic)
+	 * Handle provider API response (common logic)
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param array          $result API result
 	 * @param Tracking_Model $campaign_message Campaign message record
 	 * @param Contact_Model  $contact Contact model
 	 * @return array Processed result
 	 */
-	protected function handle_twilio_response( $result, Tracking_Model $campaign_message, Contact_Model $contact ) {
-		// Store Twilio MessageSid in tracking record for webhook processing
-		if ( is_array( $result ) && isset( $result['success'] ) && $result['success'] && isset( $result['data']['sid'] ) ) {
-			$campaign_message->external_id = $result['data']['sid']; // Store MessageSid
+	protected function handle_provider_response( $result, Tracking_Model $campaign_message, Contact_Model $contact ) {
+		// Store provider's message ID in tracking record for webhook processing
+		if ( is_array( $result ) && isset( $result['success'] ) && $result['success'] && isset( $result['message_id'] ) ) {
+			$campaign_message->external_id = $result['message_id']; // Store provider message ID
 			$campaign_message->status      = 'sent'; // Update status
 			$campaign_message->save();
 
-            // quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' MessageSid stored for tracking', [
+            // quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' Message ID stored for tracking', [
             //     'tracking_id' => $campaign_message->id,
-            //     'message_sid' => $result['data']['sid'],
+            //     'message_id' => $result['message_id'],
             //     'contact_id' => $contact->id,
-            //     'code' => "{$this->campaign_type}_message_sid_stored"
+            //     'code' => "{$this->campaign_type}_message_id_stored"
             // ]);
         } else {
-            // Log if MessageSid storage failed
-            quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' MessageSid not found in response', [
+            // Log if Message ID storage failed
+            quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' Message ID not found in response', [
                 'tracking_id' => $campaign_message->id,
                 'contact_id' => $contact->id,
                 'result' => $result,
-                'code' => "{$this->campaign_type}_message_sid_missing"
+                'code' => "{$this->campaign_type}_message_id_missing"
             ]);
         }
 
@@ -210,12 +224,14 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Handle Twilio API error (common logic)
+	 * Handle provider API error (common logic)
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param \Exception $e Exception that occurred
 	 * @return array Error result
 	 */
-	protected function handle_twilio_error( \Exception $e ) {
+	protected function handle_provider_error( \Exception $e ) {
 		quillcrm_get_logger()->error(
 			sprintf( __( '%s send error.', 'quillcrm' ), ucfirst( $this->campaign_type ) ),
 			array(
@@ -563,10 +579,14 @@ abstract class Abstract_Campaign_Processing {
 			return;
 		}
 
-		// Connect to external API (for Twilio-based services)
-		if ( ! $this->connect_to_external_api() ) {
-			$this->log_external_api_connection_error( $campaign, $contact, $campaign_message );
-			return;
+		// Get message provider (for SMS/WhatsApp campaigns)
+		// Email campaigns skip this check
+		if ( $this->campaign_type !== 'email' ) {
+			$provider = $this->get_message_provider();
+			if ( ! $provider ) {
+				$this->log_provider_connection_error( $campaign, $contact, $campaign_message );
+				return;
+			}
 		}
 
 		try {
@@ -726,42 +746,47 @@ abstract class Abstract_Campaign_Processing {
 
 
 	/**
-	 * Connect to external API (for Twilio-based services)
+	 * Get message provider for this campaign type
 	 *
-	 * @return bool
+	 * @since 1.0.0
+	 *
+	 * @return \QuillCRM\Interfaces\Message_Provider_Interface|null
 	 */
-	protected function connect_to_external_api() {
-		if ( $this->external_api ) {
-			return true;
+	protected function get_message_provider() {
+		if ( $this->message_provider ) {
+			return $this->message_provider;
 		}
 
-		// For email campaigns, no external API needed
+		// Email campaigns don't use provider system yet (MVP)
 		if ( $this->campaign_type === 'email' ) {
-			return true;
+			return null;
 		}
 
-		$twilio             = Integrations_Manager::instance()->get_integration( 'twilio' );
-		$this->external_api = $twilio->connect();
+		// Get provider from registry (MVP: always returns Twilio for SMS/WhatsApp)
+		$this->message_provider = \QuillCRM\Managers\Message_Provider_Registry::instance()
+			->get_provider( $this->campaign_type );
 
-		return (bool) $this->external_api;
+		return $this->message_provider;
 	}
 
 	/**
-	 * Log external API connection error
+	 * Log provider connection error
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param Campaign_Model $campaign
 	 * @param Contact_Model  $contact
 	 * @param Tracking_Model $campaign_message
 	 * @return void
 	 */
-	protected function log_external_api_connection_error( $campaign, $contact, $campaign_message ) {
+	protected function log_provider_connection_error( $campaign, $contact, $campaign_message ) {
 		$campaign_message->status = 'failed';
 		$campaign_message->save();
 
 		quillcrm_get_logger()->error(
-			sprintf( __( 'Failed to connect to external API for %s campaign.', 'quillcrm' ), $this->campaign_type ),
+			sprintf( __( 'Failed to connect to message provider for %s campaign.', 'quillcrm' ), $this->campaign_type ),
 			array(
-				'code'        => 'external_api_connect_failed',
+				'code'        => 'provider_connect_failed',
 				'campaign_id' => $campaign->id,
 				'contact_id'  => $contact->id,
 			)

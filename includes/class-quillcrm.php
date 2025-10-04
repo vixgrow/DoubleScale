@@ -258,6 +258,9 @@ final class QuillCRM {
 	private function init_hooks() {
 		 // Register log handlers.
 		add_filter( 'quillcrm_register_log_handlers', array( $this, 'register_log_handlers' ) );
+
+		// Register message providers
+		add_action( 'quillcrm_loaded', array( $this, 'register_message_providers' ) );
 	}
 
 	/**
@@ -267,6 +270,12 @@ final class QuillCRM {
 	 */
 	private function load_dependencies() {
 		require QUILLCRM_PLUGIN_DIR . 'includes/functions.php';
+
+		// Load message provider system
+		require QUILLCRM_PLUGIN_DIR . 'includes/interfaces/interface-message-provider.php';
+		require QUILLCRM_PLUGIN_DIR . 'includes/abstracts/class-abstract-message-provider.php';
+		require QUILLCRM_PLUGIN_DIR . 'includes/managers/class-message-provider-registry.php';
+		require QUILLCRM_PLUGIN_DIR . 'includes/providers/class-twilio-message-provider.php';
 
 		// Load all integrations files
 		$integrations_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/integrations/**/class-integration.php' );
@@ -454,5 +463,30 @@ final class QuillCRM {
 	public function register_log_handlers( $handlers ) {
 		$handlers[] = new Log_Handler_DB();
 		return $handlers;
+	}
+
+	/**
+	 * Register message providers
+	 *
+	 * Registers default message providers (Twilio for MVP).
+	 * Third-party plugins can add additional providers via the
+	 * 'quillcrm_register_message_providers' action hook.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public function register_message_providers() {
+		// Register Twilio as the default provider for SMS and WhatsApp
+		\QuillCRM\Managers\Message_Provider_Registry::instance()->register(
+			new \QuillCRM\Providers\Twilio_Message_Provider()
+		);
+
+		// Extension point for third-party providers
+		// Example usage:
+		// add_action('quillcrm_register_message_providers', function() {
+		//     Message_Provider_Registry::instance()->register(new Vonage_Message_Provider());
+		// });
+		do_action( 'quillcrm_register_message_providers' );
 	}
 }

@@ -493,11 +493,14 @@ class Campaign_Model extends Model {
 				unset( $campaign->opened_count );
 				unset( $campaign->clicked_count );
 
+				// Remove email-specific calculated properties
+				unset( $campaign->open_rate );
+				unset( $campaign->click_rate );
+
 				// Remove SMS-specific calculated properties
 				unset( $campaign->pending_count );
 				unset( $campaign->delivered_count );
 				unset( $campaign->delivery_rate );
-				unset( $campaign->click_rate );
 
 				// Remove WhatsApp-specific calculated properties
 				unset( $campaign->read_count );

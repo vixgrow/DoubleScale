@@ -9,7 +9,7 @@ import { END_POINT, SEQUENCE_MAIL_TYPE } from '../../constants';
 import {
 	EditSequenceMailProps,
 	SequenceMail,
-	SequenceMailFormData,
+	SequenceMailSettings,
 	SequenceMailRequest,
 } from '../../types';
 
@@ -68,6 +68,13 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 						sunday: false,
 					},
 					add_utm_parameters: false,
+					utm_parameters: {
+						campaign_source: '',
+						campaign_medium: '',
+						campaign_name: '',
+						campaign_term: '',
+						campaign_content: '',
+					},
 					email_body: '',
 				};
 			} else {
@@ -123,7 +130,7 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 		setEmailData(null);
 	};
 
-	const handleSave = async (data: SequenceMailFormData) => {
+	const handleSave = async (data: SequenceMailSettings) => {
 		setLoading(true);
 		try {
 			// Prepare the data for API
@@ -133,19 +140,20 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 				name: data.subject, // Use subject as name for consistency
 				settings: {
 					subject: data.subject,
-					pre_header: data.preHeader,
+					pre_header: data.pre_header,
 					delay: {
 						value: data.delay.value,
 						unit: data.delay.unit.toLowerCase(),
 					},
 					sending_time_range: {
-						from: data.sendingTimeRange.from,
-						to: data.sendingTimeRange.to,
+						from: data.sending_time_range.from,
+						to: data.sending_time_range.to,
 					},
-					enable_specific_days: data.enableSpecificDays,
+					enable_specific_days: data.enable_specific_days,
 					days: data.days,
-					add_utm_parameters: data.addUtmParameters,
-					email_body: data.emailBody,
+					add_utm_parameters: data.add_utm_parameters,
+					utm_parameters: data.utm_parameters,
+					email_body: data.email_body,
 				},
 			};
 
@@ -193,19 +201,20 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 			onSave={handleSave}
 			initialData={{
 				subject: emailData.settings.subject,
-				preHeader: emailData.settings.pre_header,
+				pre_header: emailData.settings.pre_header,
 				delay: {
 					value: emailData.settings.delay.value,
 					unit: emailData.settings.delay.unit,
 				},
-				sendingTimeRange: {
+				sending_time_range: {
 					from: emailData.settings.sending_time_range.from,
 					to: emailData.settings.sending_time_range.to,
 				},
-				enableSpecificDays: emailData.settings.enable_specific_days,
+				enable_specific_days: emailData.settings.enable_specific_days,
 				days: emailData.settings.days,
-				addUtmParameters: emailData.settings.add_utm_parameters,
-				emailBody: emailData.settings.email_body,
+				add_utm_parameters: emailData.settings.add_utm_parameters,
+				utm_parameters: emailData.settings.utm_parameters,
+				email_body: emailData.settings.email_body,
 			}}
 		/>
 	) : null;

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 // Import shadcn UI components
 import {
@@ -20,22 +21,23 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 
 // Import types
-import { SequenceMailModalProps, SequenceMailFormData } from '../../types';
+import { SequenceMailModalProps, SequenceMailSettings } from '../../types';
 
-const defaultData: SequenceMailFormData = {
+const defaultData: SequenceMailSettings = {
 	subject: '',
-	preHeader: '',
+	pre_header: '',
 	delay: {
 		value: 0,
 		unit: 'Minutes',
 	},
-	sendingTimeRange: {
+	sending_time_range: {
 		from: '',
 		to: '',
 	},
-	enableSpecificDays: false,
+	enable_specific_days: false,
 	days: {
 		monday: false,
 		tuesday: false,
@@ -45,8 +47,15 @@ const defaultData: SequenceMailFormData = {
 		saturday: false,
 		sunday: false,
 	},
-	addUtmParameters: false,
-	emailBody: '',
+	add_utm_parameters: false,
+	utm_parameters: {
+		campaign_source: '',
+		campaign_medium: '',
+		campaign_name: '',
+		campaign_term: '',
+		campaign_content: '',
+	},
+	email_body: '',
 };
 
 const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
@@ -56,8 +65,39 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 	initialData = defaultData,
 	onSave,
 }) => {
-	const [formData, setFormData] = useState<SequenceMailFormData>(initialData);
-	const [delayValue, setDelayValue] = useState(initialData.delay.value);
+	// Merge initialData with defaultData to ensure all properties exist
+	const mergedInitialData = {
+		...defaultData,
+		...initialData,
+		utm_parameters: {
+			...defaultData.utm_parameters,
+			...(initialData?.utm_parameters || {}),
+		},
+	};
+
+	const [formData, setFormData] =
+		useState<SequenceMailSettings>(mergedInitialData);
+	const subjectInputRef = useRef<HTMLInputElement>(null);
+	const preHeaderTextareaRef = useRef<HTMLTextAreaElement>(null);
+	const emailBodyTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
+		useDispatch('quillcrm/core');
+
+	// Reset form data when modal opens or initialData changes
+	useEffect(() => {
+		if (isOpen) {
+			const resetData = {
+				...defaultData,
+				...initialData,
+				utm_parameters: {
+					...defaultData.utm_parameters,
+					...(initialData?.utm_parameters || {}),
+				},
+			};
+			setFormData(resetData);
+		}
+	}, [isOpen, initialData]);
 
 	const handleChange = (field: string, value: any) => {
 		setFormData((prev) => ({
@@ -79,8 +119,8 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 	const handleTimeRangeChange = (type: 'from' | 'to', value: string) => {
 		setFormData((prev) => ({
 			...prev,
-			sendingTimeRange: {
-				...prev.sendingTimeRange,
+			sending_time_range: {
+				...prev.sending_time_range,
 				[type]: value,
 			},
 		}));
@@ -96,323 +136,684 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 		}));
 	};
 
+	const handleUtmParameterChange = (field: string, value: string) => {
+		setFormData((prev) => ({
+			...prev,
+			utm_parameters: {
+				...(prev.utm_parameters || {}),
+				[field]: value,
+			},
+		}));
+	};
+
 	const handleSave = () => {
 		onSave(formData);
 		onClose();
 	};
 
 	const handleDecrease = () => {
-		if (delayValue > 0) {
-			const newValue = delayValue - 1;
-			setDelayValue(newValue);
+		if (formData.delay.value > 0) {
+			const newValue = formData.delay.value - 1;
 			handleDelayChange('value', newValue);
 		}
 	};
 
 	const handleIncrease = () => {
-		const newValue = delayValue + 1;
-		setDelayValue(newValue);
+		const newValue = formData.delay.value + 1;
 		handleDelayChange('value', newValue);
+	};
+
+	const handleMergeTagClick = () => {
+		// Set up callback to copy to clipboard instead of inserting
+		setMergeTagCallback((tagValue: string) => {
+			// Copy to clipboard
+			if (navigator.clipboard && window.isSecureContext) {
+				// Use modern clipboard API if available
+				navigator.clipboard
+					.writeText(tagValue)
+					.then(() => {
+						createNotice({
+							type: 'success',
+							message: __(
+								'Merge tag copied to clipboard!',
+								'quillcrm'
+							),
+						});
+					})
+					.catch((err) => {
+						console.error('Failed to copy to clipboard:', err);
+						// Fallback to older method
+						fallbackCopyToClipboard(tagValue);
+					});
+			} else {
+				// Fallback for older browsers or non-secure contexts
+				fallbackCopyToClipboard(tagValue);
+			}
+		});
+		setMergeTagsVisible(true);
+	};
+
+	// Fallback function for copying to clipboard
+	const fallbackCopyToClipboard = (text: string) => {
+		const textArea = document.createElement('textarea');
+		textArea.value = text;
+		textArea.style.position = 'fixed';
+		textArea.style.left = '-999999px';
+		textArea.style.top = '-999999px';
+		document.body.appendChild(textArea);
+		textArea.focus();
+		textArea.select();
+
+		try {
+			document.execCommand('copy');
+			createNotice({
+				type: 'success',
+				message: __('Merge tag copied to clipboard!', 'quillcrm'),
+			});
+		} catch (err) {
+			console.error('Fallback copy failed:', err);
+			createNotice({
+				type: 'error',
+				message: __(
+					'Failed to copy merge tag to clipboard',
+					'quillcrm'
+				),
+			});
+		}
+
+		document.body.removeChild(textArea);
 	};
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="max-w-4xl">
-				<DialogHeader>
-					<DialogTitle>{title}</DialogTitle>
+			<DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+				<DialogHeader className="flex-shrink-0">
+					<DialogTitle>
+						<div className="flex items-center gap-2">
+							<div className="flex-1"> {title} </div>
+							<Button
+								variant="outline"
+								size="sm"
+								className="px-3 py-2 h-10 border-gray-300 hover:bg-blue-50 hover:border-blue-300"
+								onClick={() => handleMergeTagClick()}
+							>
+								{__('Insert merge tags', 'quillcrm')}
+							</Button>
+						</div>
+					</DialogTitle>
 				</DialogHeader>
-				<div className="grid gap-6 py-4">
-					<div className="grid grid-cols-2 gap-6">
-						<div>
-							<Label htmlFor="emailSubject">
-								{__('Email Subject', 'quillcrm')}
-							</Label>
-							<div className="flex mt-1">
-								<Input
-									id="emailSubject"
-									value={formData.subject}
-									onChange={(e) =>
-										handleChange('subject', e.target.value)
-									}
-									className="flex-grow"
-								/>
-								<Button variant="outline" className="ml-2 px-3">
-									<svg
-										width="24"
-										height="24"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-									>
-										<rect
-											x="3"
-											y="3"
-											width="18"
-											height="18"
-											rx="2"
-											ry="2"
-										></rect>
-										<circle
-											cx="8.5"
-											cy="8.5"
-											r="1.5"
-										></circle>
-										<polyline points="21 15 16 10 5 21"></polyline>
-									</svg>
-								</Button>
-								<Button variant="outline" className="ml-2 px-3">
-									<svg
-										width="24"
-										height="24"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-									>
-										<circle cx="12" cy="12" r="1"></circle>
-										<circle cx="19" cy="12" r="1"></circle>
-										<circle cx="5" cy="12" r="1"></circle>
-									</svg>
-								</Button>
-							</div>
-						</div>
-						<div>
-							<Label htmlFor="emailPreHeader">
-								{__('Email Pre-Header', 'quillcrm')}
-							</Label>
-							<Textarea
-								id="emailPreHeader"
-								value={formData.preHeader}
-								onChange={(e) =>
-									handleChange('preHeader', e.target.value)
-								}
-								className="mt-1"
-							/>
-						</div>
-					</div>
-
-					<div className="grid grid-cols-2 gap-6">
-						<div>
-							<Label>{__('Delay', 'quillcrm')}</Label>
-							<div className="flex items-center mt-1">
-								<div className="flex border rounded-md">
-									<Button
-										type="button"
-										variant="ghost"
-										onClick={handleDecrease}
-										className="px-3 border-r"
-									>
-										-
-									</Button>
-									<Input
-										type="number"
-										value={delayValue}
-										onChange={(e) => {
-											const value = parseInt(
-												e.target.value
-											);
-											setDelayValue(value);
-											handleDelayChange('value', value);
-										}}
-										className="w-16 border-0 text-center"
-									/>
-									<Button
-										type="button"
-										variant="ghost"
-										onClick={handleIncrease}
-										className="px-3 border-l"
-									>
-										+
-									</Button>
-								</div>
-								<Select
-									value={formData.delay.unit}
-									onValueChange={(value) =>
-										handleDelayChange('unit', value)
-									}
-								>
-									<SelectTrigger className="ml-2 w-[180px]">
-										<SelectValue placeholder="Select unit" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="Minutes">
-											{__('Minutes', 'quillcrm')}
-										</SelectItem>
-										<SelectItem value="Hours">
-											{__('Hours', 'quillcrm')}
-										</SelectItem>
-										<SelectItem value="Days">
-											{__('Days', 'quillcrm')}
-										</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-							<p className="text-sm text-muted-foreground mt-1">
-								{__(
-									'Set after how many minutes the email will be triggered from the starting date',
-									'quillcrm'
-								)}
-							</p>
-						</div>
-
-						<div>
-							<Label>
-								{__('Sending Time Range', 'quillcrm')}
-							</Label>
-							<div className="flex items-center mt-1">
-								<div className="flex items-center">
-									<svg
-										width="20"
-										height="20"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										strokeWidth="2"
-										strokeLinecap="round"
-										strokeLinejoin="round"
-									>
-										<circle cx="12" cy="12" r="10"></circle>
-										<polyline points="12 6 12 12 16 14"></polyline>
-									</svg>
-									<Input
-										type="time"
-										value={formData.sendingTimeRange.from}
-										onChange={(e) =>
-											handleTimeRangeChange(
-												'from',
-												e.target.value
-											)
-										}
-										className="ml-2 w-24"
-									/>
-								</div>
-								<span className="mx-4">
-									{__('To', 'quillcrm')}
-								</span>
-								<Input
-									type="time"
-									value={formData.sendingTimeRange.to}
-									onChange={(e) =>
-										handleTimeRangeChange(
-											'to',
-											e.target.value
-										)
-									}
-									className="w-24"
-								/>
-							</div>
-							<p className="text-sm text-muted-foreground mt-1">
-								{__(
-									'If you select a time range then FluentCRM schedule the email to that time range',
-									'quillcrm'
-								)}
-							</p>
-						</div>
-					</div>
-
-					<div>
-						<div className="flex items-center space-x-2">
-							<Checkbox
-								id="enableSpecificDays"
-								checked={formData.enableSpecificDays}
-								onCheckedChange={(checked) =>
-									handleChange('enableSpecificDays', checked)
-								}
-							/>
-							<Label htmlFor="enableSpecificDays">
-								{__('Enable Specific Days Only', 'quillcrm')}
-							</Label>
-						</div>
-
-						{formData.enableSpecificDays && (
-							<div className="mt-2">
-								<p className="text-sm mb-2">
-									{__(
-										'Please select allowed days to send emails',
-										'quillcrm'
-									)}
-								</p>
-								<div className="flex flex-wrap gap-4">
-									{Object.entries(formData.days).map(
-										([day, checked]) => (
-											<div
-												key={day}
-												className="flex items-center space-x-2"
+				<div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+					<div className="space-y-6 py-4">
+						{/* Email Subject and Pre-Header Section */}
+						<Card className="border-0 shadow-sm">
+							<CardContent className="p-6">
+								<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+									<div className="space-y-2">
+										<Label
+											htmlFor="emailSubject"
+											className="text-sm font-medium text-gray-700"
+										>
+											{__('Email Subject', 'quillcrm')}
+										</Label>
+										<div className="flex gap-2">
+											<Input
+												id="emailSubject"
+												ref={subjectInputRef}
+												value={formData.subject}
+												onChange={(e) =>
+													handleChange(
+														'subject',
+														e.target.value
+													)
+												}
+												className="flex-1"
+												placeholder={__(
+													'Enter email subject...',
+													'quillcrm'
+												)}
+											/>
+										</div>
+									</div>
+									<div className="space-y-2">
+										<div className="flex items-center justify-between">
+											<Label
+												htmlFor="email_pre_header"
+												className="text-sm font-medium text-gray-700"
 											>
-												<Checkbox
-													id={`day-${day}`}
-													checked={checked}
-													onCheckedChange={(
-														checked
-													) =>
-														handleDayChange(
-															day,
-															!!checked
+												{__(
+													'Email Pre-Header',
+													'quillcrm'
+												)}
+											</Label>
+										</div>
+										<Textarea
+											id="emailPreHeader"
+											ref={preHeaderTextareaRef}
+											value={formData.pre_header}
+											onChange={(e) =>
+												handleChange(
+													'pre_header',
+													e.target.value
+												)
+											}
+											rows={3}
+											placeholder={__(
+												'Enter pre-header text...',
+												'quillcrm'
+											)}
+											className="resize-none"
+										/>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+
+						{/* Timing and Scheduling Section */}
+						<Card className="border-0 shadow-sm">
+							<CardContent className="p-6">
+								<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+									<div className="space-y-2">
+										<Label className="text-sm font-medium text-gray-700">
+											{__('Delay', 'quillcrm')}
+										</Label>
+										<div className="flex items-center gap-2">
+											<div className="flex border rounded-md bg-white">
+												<Button
+													type="button"
+													variant="ghost"
+													onClick={handleDecrease}
+													className="px-3 py-2 border-r hover:bg-gray-50 rounded-l-md rounded-r-none"
+												>
+													-
+												</Button>
+												<Input
+													type="number"
+													value={formData.delay.value}
+													onChange={(e) => {
+														const value =
+															parseInt(
+																e.target.value
+															) || 0;
+														handleDelayChange(
+															'value',
+															value
+														);
+													}}
+													className="w-20 border-0 text-center rounded-none focus:ring-0"
+													min="0"
+												/>
+												<Button
+													type="button"
+													variant="ghost"
+													onClick={handleIncrease}
+													className="px-3 py-2 border-l hover:bg-gray-50 rounded-r-md rounded-l-none"
+												>
+													+
+												</Button>
+											</div>
+											<Select
+												value={formData.delay.unit}
+												onValueChange={(value) =>
+													handleDelayChange(
+														'unit',
+														value
+													)
+												}
+											>
+												<SelectTrigger className="w-[140px]">
+													<SelectValue placeholder="Select unit" />
+												</SelectTrigger>
+												<SelectContent>
+													<SelectItem value="Minutes">
+														{__(
+															'Minutes',
+															'quillcrm'
+														)}
+													</SelectItem>
+													<SelectItem value="Hours">
+														{__(
+															'Hours',
+															'quillcrm'
+														)}
+													</SelectItem>
+													<SelectItem value="Days">
+														{__('Days', 'quillcrm')}
+													</SelectItem>
+												</SelectContent>
+											</Select>
+										</div>
+										<p className="text-xs text-gray-500 mt-1">
+											{__(
+												'Set after how many minutes the email will be triggered from the starting date',
+												'quillcrm'
+											)}
+										</p>
+									</div>
+
+									<div className="space-y-2">
+										<Label className="text-sm font-medium text-gray-700">
+											{__(
+												'Sending Time Range',
+												'quillcrm'
+											)}
+										</Label>
+										<div className="flex items-center gap-3">
+											<div className="flex items-center gap-2">
+												<svg
+													width="16"
+													height="16"
+													viewBox="0 0 24 24"
+													fill="none"
+													stroke="currentColor"
+													strokeWidth="2"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													className="text-gray-400"
+												>
+													<circle
+														cx="12"
+														cy="12"
+														r="10"
+													></circle>
+													<polyline points="12 6 12 12 16 14"></polyline>
+												</svg>
+												<Input
+													type="time"
+													value={
+														formData
+															.sending_time_range
+															.from
+													}
+													onChange={(e) =>
+														handleTimeRangeChange(
+															'from',
+															e.target.value
 														)
 													}
+													className="w-28"
 												/>
-												<Label htmlFor={`day-${day}`}>
-													{__(
-														day
-															.charAt(0)
-															.toUpperCase() +
-															day.slice(1),
-														'quillcrm'
-													)}
-												</Label>
 											</div>
-										)
+											<span className="text-sm text-gray-500 font-medium">
+												{__('To', 'quillcrm')}
+											</span>
+											<Input
+												type="time"
+												value={
+													formData.sending_time_range
+														.to
+												}
+												onChange={(e) =>
+													handleTimeRangeChange(
+														'to',
+														e.target.value
+													)
+												}
+												className="w-28"
+											/>
+										</div>
+										<p className="text-xs text-gray-500 mt-1">
+											{__(
+												'If you select a time range then FluentCRM schedule the email to that time range',
+												'quillcrm'
+											)}
+										</p>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+
+						{/* Advanced Settings Section */}
+						<Card className="border-0 shadow-sm">
+							<CardContent className="p-6">
+								<div>
+									<div className="flex items-center space-x-3">
+										<Checkbox
+											id="enableSpecificDays"
+											checked={
+												formData.enable_specific_days
+											}
+											onCheckedChange={(checked) =>
+												handleChange(
+													'enable_specific_days',
+													checked
+												)
+											}
+											className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+										/>
+										<Label
+											htmlFor="enable_specific_days"
+											className="text-sm font-medium text-gray-700 cursor-pointer"
+										>
+											{__(
+												'Enable Specific Days Only',
+												'quillcrm'
+											)}
+										</Label>
+									</div>
+
+									{formData.enable_specific_days && (
+										<div className="ml-6 space-y-3">
+											<p className="text-sm text-gray-600">
+												{__(
+													'Please select allowed days to send emails',
+													'quillcrm'
+												)}
+											</p>
+											<div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+												{Object.entries(
+													formData.days
+												).map(([day, checked]) => (
+													<div
+														key={day}
+														className="flex items-center space-x-2"
+													>
+														<Checkbox
+															id={`day-${day}`}
+															checked={checked}
+															onCheckedChange={(
+																checked
+															) =>
+																handleDayChange(
+																	day,
+																	!!checked
+																)
+															}
+															className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+														/>
+														<Label
+															htmlFor={`day-${day}`}
+															className="text-sm text-gray-700 cursor-pointer"
+														>
+															{__(
+																day
+																	.charAt(0)
+																	.toUpperCase() +
+																	day.slice(
+																		1
+																	),
+																'quillcrm'
+															)}
+														</Label>
+													</div>
+												))}
+											</div>
+										</div>
 									)}
 								</div>
-							</div>
-						)}
-					</div>
+							</CardContent>
+						</Card>
 
-					<div className="flex items-center space-x-2">
-						<Checkbox
-							id="addUtmParameters"
-							checked={formData.addUtmParameters}
-							onCheckedChange={(checked) =>
-								handleChange('addUtmParameters', !!checked)
-							}
-						/>
-						<Label htmlFor="addUtmParameters">
-							{__('Add UTM Parameters For URLs', 'quillcrm')}
-						</Label>
-					</div>
+						{/* UTM Parameters Section */}
+						<Card className="border-0 shadow-sm">
+							<CardContent className="p-6">
+								<div className="space-y-4">
+									<div className="flex items-center space-x-3">
+										<Checkbox
+											id="addUtmParameters"
+											checked={
+												formData.add_utm_parameters
+											}
+											onCheckedChange={(checked) =>
+												handleChange(
+													'add_utm_parameters',
+													!!checked
+												)
+											}
+											className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+										/>
+										<Label
+											htmlFor="add_utm_parameters"
+											className="text-sm font-medium text-gray-700 cursor-pointer"
+										>
+											{__(
+												'Add UTM Parameters For URLs',
+												'quillcrm'
+											)}
+										</Label>
+									</div>
 
-					<div>
-						<Label>{__('Email Body', 'quillcrm')}</Label>
-						<div className="border rounded-md mt-1 p-4 min-h-[200px] bg-white">
-							<Textarea
-								value={formData.emailBody}
-								onChange={(e) =>
-									handleChange('emailBody', e.target.value)
-								}
-								className="min-h-[200px]"
-							/>
-						</div>
+									{formData.add_utm_parameters && (
+										<div className="ml-6 space-y-4">
+											<p className="text-sm text-gray-600 mb-4">
+												{__(
+													'Configure UTM parameters to track email campaign performance',
+													'quillcrm'
+												)}
+											</p>
+											<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+												<div className="space-y-2">
+													<Label
+														htmlFor="campaignSource"
+														className="text-sm font-medium text-gray-700"
+													>
+														{__(
+															'Campaign Source',
+															'quillcrm'
+														)}
+														<span className="text-red-500 ml-1">
+															*
+														</span>
+													</Label>
+													<Input
+														id="campaignSource"
+														type="text"
+														value={
+															formData
+																.utm_parameters
+																?.campaign_source ||
+															''
+														}
+														onChange={(e) =>
+															handleUtmParameterChange(
+																'campaign_source',
+																e.target.value
+															)
+														}
+														placeholder={__(
+															'The referrer (e.g. google, newsletter)',
+															'quillcrm'
+														)}
+														className="border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+													/>
+												</div>
+
+												<div className="space-y-2">
+													<Label
+														htmlFor="campaignMedium"
+														className="text-sm font-medium text-gray-700"
+													>
+														{__(
+															'Campaign Medium',
+															'quillcrm'
+														)}
+														<span className="text-red-500 ml-1">
+															*
+														</span>
+													</Label>
+													<Input
+														id="campaignMedium"
+														type="text"
+														value={
+															formData
+																.utm_parameters
+																?.campaign_medium ||
+															''
+														}
+														onChange={(e) =>
+															handleUtmParameterChange(
+																'campaign_medium',
+																e.target.value
+															)
+														}
+														placeholder={__(
+															'Marketing medium (e.g. cpc, banner, email)',
+															'quillcrm'
+														)}
+														className="border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+													/>
+												</div>
+
+												<div className="space-y-2">
+													<Label
+														htmlFor="campaignName"
+														className="text-sm font-medium text-gray-700"
+													>
+														{__(
+															'Campaign Name',
+															'quillcrm'
+														)}
+														<span className="text-red-500 ml-1">
+															*
+														</span>
+													</Label>
+													<Input
+														id="campaignName"
+														type="text"
+														value={
+															formData
+																.utm_parameters
+																?.campaign_name ||
+															''
+														}
+														onChange={(e) =>
+															handleUtmParameterChange(
+																'campaign_name',
+																e.target.value
+															)
+														}
+														placeholder={__(
+															'Product, promo code, or slogan (e.g. spring_sale)',
+															'quillcrm'
+														)}
+														className="border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+													/>
+												</div>
+
+												<div className="space-y-2">
+													<Label
+														htmlFor="campaignTerm"
+														className="text-sm font-medium text-gray-700"
+													>
+														{__(
+															'Campaign Term',
+															'quillcrm'
+														)}
+													</Label>
+													<Input
+														id="campaignTerm"
+														type="text"
+														value={
+															formData
+																.utm_parameters
+																?.campaign_term ||
+															''
+														}
+														onChange={(e) =>
+															handleUtmParameterChange(
+																'campaign_term',
+																e.target.value
+															)
+														}
+														placeholder={__(
+															'Identify the paid keywords',
+															'quillcrm'
+														)}
+														className="border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+													/>
+												</div>
+
+												<div className="space-y-2 lg:col-span-2">
+													<Label
+														htmlFor="campaignContent"
+														className="text-sm font-medium text-gray-700"
+													>
+														{__(
+															'Campaign Content',
+															'quillcrm'
+														)}
+													</Label>
+													<Input
+														id="campaignContent"
+														type="text"
+														value={
+															formData
+																.utm_parameters
+																?.campaign_content ||
+															''
+														}
+														onChange={(e) =>
+															handleUtmParameterChange(
+																'campaign_content',
+																e.target.value
+															)
+														}
+														placeholder={__(
+															'Use to differentiate ads',
+															'quillcrm'
+														)}
+														className="border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+													/>
+												</div>
+											</div>
+										</div>
+									)}
+								</div>
+							</CardContent>
+						</Card>
+
+						{/* Email Body Section */}
+						<Card className="border-0 shadow-sm">
+							<CardContent className="p-6">
+								<div className="space-y-3">
+									<div className="flex items-center justify-between">
+										<Label className="text-sm font-medium text-gray-700">
+											{__('Email Body', 'quillcrm')}
+										</Label>
+									</div>
+									<div className="relative">
+										<Textarea
+											ref={emailBodyTextareaRef}
+											value={formData.email_body}
+											onChange={(e) =>
+												handleChange(
+													'email_body',
+													e.target.value
+												)
+											}
+											rows={8}
+											placeholder={__(
+												'Enter your email content here...',
+												'quillcrm'
+											)}
+											className="min-h-[200px] resize-y border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+										/>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
 					</div>
 				</div>
 
-				<div className="flex justify-between">
-					<div>
-						<Button variant="outline" onClick={onClose}>
-							{__('Back', 'quillcrm')}
-						</Button>
-					</div>
-					<div className="flex space-x-2">
-						<Button variant="outline" onClick={onClose}>
+				{/* Footer Actions - Fixed at bottom */}
+				<div className="flex-shrink-0 flex justify-between items-center pt-4 border-t border-gray-100 bg-white">
+					<Button
+						variant="outline"
+						onClick={onClose}
+						className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+					>
+						{__('Back', 'quillcrm')}
+					</Button>
+					<div className="flex gap-3">
+						<Button
+							variant="outline"
+							onClick={onClose}
+							className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50"
+						>
 							{__('Cancel', 'quillcrm')}
 						</Button>
 						<Button
 							onClick={handleSave}
-							className="bg-green-500 hover:bg-green-600 text-white"
+							className="px-8 py-2 bg-green-600 hover:bg-green-700 text-white font-medium shadow-sm"
 						>
 							{__('Save', 'quillcrm')}
 						</Button>

@@ -27,6 +27,13 @@ export interface SequenceMailSettings {
         sunday: boolean;
     };
     add_utm_parameters: boolean;
+    utm_parameters: {
+        campaign_source: string;
+        campaign_medium: string;
+        campaign_name: string;
+        campaign_term: string;
+        campaign_content: string;
+    };
     email_body: string;
 }
 
@@ -86,33 +93,6 @@ export interface SequenceMailStats {
     unsubscribed: number;
 }
 
-/**
- * Form data for sequence mail modal
- */
-export interface SequenceMailFormData {
-    subject: string;
-    preHeader: string;
-    delay: {
-        value: number;
-        unit: string;
-    };
-    sendingTimeRange: {
-        from: string;
-        to: string;
-    };
-    enableSpecificDays: boolean;
-    days: {
-        monday: boolean;
-        tuesday: boolean;
-        wednesday: boolean;
-        thursday: boolean;
-        friday: boolean;
-        saturday: boolean;
-        sunday: boolean;
-    };
-    addUtmParameters: boolean;
-    emailBody: string;
-}
 
 /**
  * Props for SequenceMailModal component
@@ -121,8 +101,8 @@ export interface SequenceMailModalProps {
     isOpen: boolean;
     onClose: () => void;
     title: string;
-    initialData?: SequenceMailFormData;
-    onSave: (data: SequenceMailFormData) => void;
+    initialData?: SequenceMailSettings;
+    onSave: (data: SequenceMailSettings) => void;
 }
 
 /**

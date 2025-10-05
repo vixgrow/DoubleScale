@@ -115,3 +115,7 @@ export { default as ResendIcon } from './resend';
 export { default as NotOpenedIcon } from './not-opened';
 export { default as OpenedIcon } from './opened';
 export { default as GradientEmailIcon } from './gradient-email';
+export { default as NoPurchaseHistoryIcon } from './no-purchase-history';
+export { default as AverageOrderValueIcon } from './average-order-value';
+export { default as TotalRevenueIcon } from './total-revenue';
+export { default as TotalOrdersIcon } from './total-orders';

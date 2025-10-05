@@ -11,88 +11,75 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 const ContactShimmer: React.FC = () => {
     return (
-        <div className="flex h-full gap-[20px]">
+        <div className="flex h-full gap-5">
             {/* Contact Information Card Shimmer */}
-            <Card className="flex-1">
+            <Card className="w-1/3 bg-[#F8F8F8] shadow-none">
                 <CardHeader>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 border-b pb-4">
                         {/* Avatar shimmer */}
-                        <Skeleton className="w-16 h-16 rounded-full" />
-                        <div className="flex-1 space-y-3">
-                            {/* Name shimmer */}
-                            <Skeleton className="h-7 w-48" />
-                            {/* Badge and email shimmer */}
-                            <div className="flex items-center gap-2">
-                                <Skeleton className="h-5 w-20 rounded-full" />
-                                <Skeleton className="h-4 w-40" />
+                        <Skeleton className="w-40 h-28 rounded-full" />
+                        <div className="w-full space-y-2">
+                            {/* Name and status shimmer */}
+                            <div className="flex justify-between items-center gap-2">
+                                <Skeleton className="h-6 w-32" />
+                                <Skeleton className="h-8 w-[120px] rounded" />
+                            </div>
+                            {/* Email shimmer */}
+                            <Skeleton className="h-4 w-40" />
+                            {/* Stats shimmer */}
+                            <div className="flex items-center gap-3 pt-2">
+                                <div className="flex gap-1 items-center border-r pr-3">
+                                    <Skeleton className="w-8 h-8 rounded-full" />
+                                    <Skeleton className="h-4 w-6" />
+                                </div>
+                                <div className="flex gap-1 items-center border-r pr-3">
+                                    <Skeleton className="w-8 h-8 rounded-full" />
+                                    <Skeleton className="h-4 w-8" />
+                                </div>
+                                <div className="flex gap-1 items-center">
+                                    <Skeleton className="w-8 h-8 rounded-full" />
+                                    <Skeleton className="h-4 w-8" />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {/* Contact Details Section */}
-                        <div>
-                            <Skeleton className="h-6 w-32 mb-3" />
-                            <div className="grid grid-cols-1 gap-3">
-                                {Array.from({ length: 4 }).map((_, index) => (
-                                    <div key={index} className="flex justify-between">
-                                        <Skeleton className="h-4 w-20" />
-                                        <Skeleton className="h-4 w-32" />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                <CardContent className="flex flex-col gap-5">
+                    {/* Lists/Tags Cards Section */}
+                    <div className="space-y-3">
+                        <Skeleton className="h-5 w-20" />
+                        <Skeleton className="h-24 w-full rounded-lg" />
+                    </div>
 
-                        {/* Tags Section */}
-                        <div>
-                            <Skeleton className="h-6 w-24 mb-3" />
-                            <div className="flex flex-wrap gap-2">
-                                {Array.from({ length: 3 }).map((_, index) => (
-                                    <Skeleton
-                                        key={index}
-                                        className="h-6 w-16 rounded-full"
-                                    />
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Lists Section */}
-                        <div>
-                            <Skeleton className="h-6 w-24 mb-3" />
-                            <div className="flex flex-wrap gap-2">
-                                {Array.from({ length: 2 }).map((_, index) => (
-                                    <Skeleton
-                                        key={index}
-                                        className="h-6 w-20 rounded-full"
-                                    />
-                                ))}
-                            </div>
-                        </div>
+                    {/* Info Card Section */}
+                    <div className="space-y-3">
+                        <Skeleton className="h-5 w-32" />
+                        <Skeleton className="h-32 w-full rounded-lg" />
                     </div>
                 </CardContent>
             </Card>
 
             {/* Data Card Shimmer */}
-            <Card className="flex-[2]">
+            <Card className="w-2/3 bg-[#F8F8F8] shadow-none p-5">
                 {/* Tabs shimmer */}
-                <div className="w-full flex h-auto p-0 border-b">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                        <div key={index} className="flex-1 p-4">
-                            <Skeleton className="h-4 w-full" />
-                        </div>
+                <div className="bg-transparent gap-5 border-b pb-9 pt-5 flex">
+                    {['Emails', 'Deals', 'Notes', 'Automation', 'Purchase History'].map((tab, index) => (
+                        <Skeleton
+                            key={index}
+                            className="h-9 w-24 rounded-md"
+                        />
                     ))}
                 </div>
 
                 {/* Content shimmer */}
-                <CardContent className="pt-6">
+                <CardContent className="pt-6 px-0">
                     <div className="space-y-4">
-                        <Skeleton className="h-6 w-full" />
-                        <Skeleton className="h-6 w-full" />
-                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-3/4" />
                         <Skeleton className="h-32 w-full mt-4" />
-                        <Skeleton className="h-6 w-full" />
-                        <Skeleton className="h-6 w-2/3" />
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-2/3" />
                     </div>
                 </CardContent>
             </Card>

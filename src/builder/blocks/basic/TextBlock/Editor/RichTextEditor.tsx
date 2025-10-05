@@ -47,7 +47,31 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [selectedColor, setSelectedColor] = useState('#000000');
-	const [editorId] = useState(() => `rich-text-editor-${Math.random().toString(36).substr(2, 9)}`);
+	const [editorId] = useState(
+		() => `rich-text-editor-${Math.random().toString(36).substr(2, 9)}`
+	);
+	const [activeFormats, setActiveFormats] = useState({
+		bold: false,
+		italic: false,
+		underline: false,
+		strikeThrough: false,
+		insertUnorderedList: false,
+		insertOrderedList: false,
+	});
+
+	// Update active formats based on current selection
+	const updateActiveFormats = () => {
+		setActiveFormats({
+			bold: document.queryCommandState('bold'),
+			italic: document.queryCommandState('italic'),
+			underline: document.queryCommandState('underline'),
+			strikeThrough: document.queryCommandState('strikeThrough'),
+			insertUnorderedList: document.queryCommandState(
+				'insertUnorderedList'
+			),
+			insertOrderedList: document.queryCommandState('insertOrderedList'),
+		});
+	};
 
 	// Apply font changes when props change
 	useEffect(() => {
@@ -75,6 +99,41 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			});
 		}
 	}, [fontSize, fontFamily]);
+
+	// Listen for selection changes to update toolbar button states
+	useEffect(() => {
+		const handleSelectionChange = () => {
+			// Only update if the selection is within our editor
+			const selection = window.getSelection();
+			if (
+				selection &&
+				editorRef.current?.contains(selection.anchorNode)
+			) {
+				updateActiveFormats();
+			}
+		};
+
+		// Listen for selection changes
+		document.addEventListener('selectionchange', handleSelectionChange);
+
+		// Also update on mouseup and keyup within the editor
+		const editor = editorRef.current;
+		if (editor) {
+			editor.addEventListener('mouseup', updateActiveFormats);
+			editor.addEventListener('keyup', updateActiveFormats);
+		}
+
+		return () => {
+			document.removeEventListener(
+				'selectionchange',
+				handleSelectionChange
+			);
+			if (editor) {
+				editor.removeEventListener('mouseup', updateActiveFormats);
+				editor.removeEventListener('keyup', updateActiveFormats);
+			}
+		};
+	}, []);
 
 	// Handle content initialization
 	useEffect(() => {
@@ -144,9 +203,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 							const newRange = newSelection.getRangeAt(0);
 							const newParent =
 								newRange.commonAncestorContainer.nodeType ===
-									Node.TEXT_NODE
+								Node.TEXT_NODE
 									? newRange.commonAncestorContainer
-										.parentElement
+											.parentElement
 									: (newRange.commonAncestorContainer as Element);
 
 							const newListItem = newParent?.closest('li');
@@ -194,6 +253,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						htmlElement.style.fontFamily = fontFamily;
 					}
 				});
+				// Update active formats after command execution
+				updateActiveFormats();
 			}, 50);
 		}
 	};
@@ -201,6 +262,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	const handleInput = () => {
 		if (editorRef.current) {
 			onChange(editorRef.current.innerHTML);
+			// Update active formats when content changes
+			updateActiveFormats();
 		}
 	};
 
@@ -292,10 +355,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		}
 	};
 
-	const isCommandActive = (command: string) => {
-		return document.queryCommandState(command);
-	};
-
 	const handleColorChange = (color: string) => {
 		setSelectedColor(color);
 		executeCommand('foreColor', color);
@@ -367,7 +426,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('bold') && 'bg-accent'
+						activeFormats.bold && 'bg-accent'
 					)}
 					onClick={() => executeCommand('bold')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -380,7 +439,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('italic') && 'bg-accent'
+						activeFormats.italic && 'bg-accent'
 					)}
 					onClick={() => executeCommand('italic')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -393,7 +452,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('underline') && 'bg-accent'
+						activeFormats.underline && 'bg-accent'
 					)}
 					onClick={() => executeCommand('underline')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -406,7 +465,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('strikeThrough') && 'bg-accent'
+						activeFormats.strikeThrough && 'bg-accent'
 					)}
 					onClick={() => executeCommand('strikeThrough')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -422,7 +481,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('insertUnorderedList') && 'bg-accent'
+						activeFormats.insertUnorderedList && 'bg-accent'
 					)}
 					onClick={() => executeCommand('insertUnorderedList')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -435,7 +494,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('insertOrderedList') && 'bg-accent'
+						activeFormats.insertOrderedList && 'bg-accent'
 					)}
 					onClick={() => executeCommand('insertOrderedList')}
 					onMouseDown={(e) => e.preventDefault()}

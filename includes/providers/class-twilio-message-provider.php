@@ -152,6 +152,145 @@ class Twilio_Message_Provider extends Abstract_Message_Provider {
 	}
 
 	/**
+	 * Process webhook from Twilio
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $channel Channel type ('sms', 'whatsapp')
+	 * @param array  $webhook_data Raw webhook data from Twilio
+	 * @return array Standardized webhook result
+	 */
+	public function process_webhook( string $channel, array $webhook_data ): array {
+		// Validate channel support
+		if ( ! $this->supports_channel( $channel ) ) {
+			return $this->webhook_error_result( 'Channel not supported' );
+		}
+
+		// Verify Twilio webhook signature for security
+		if ( ! $this->verify_webhook_signature() ) {
+			$this->log(
+				'warning',
+				sprintf( 'Twilio %s webhook signature verification failed', ucfirst( $channel ) ),
+				array(
+					'channel'     => $channel,
+					'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+				)
+			);
+			return $this->webhook_error_result( 'Signature verification failed' );
+		}
+
+		// Extract Twilio webhook fields
+		$message_sid    = $webhook_data['MessageSid'] ?? '';
+		$message_status = $webhook_data['MessageStatus'] ?? '';
+		$error_code     = $webhook_data['ErrorCode'] ?? null;
+		$error_message  = $webhook_data['ErrorMessage'] ?? null;
+
+		// Validate required fields
+		if ( empty( $message_sid ) || empty( $message_status ) ) {
+			$this->log(
+				'warning',
+				sprintf( 'Twilio %s webhook missing required data', ucfirst( $channel ) ),
+				array(
+					'channel'        => $channel,
+					'message_sid'    => $message_sid,
+					'message_status' => $message_status,
+				)
+			);
+			return $this->webhook_error_result( 'Missing required webhook fields' );
+		}
+
+		// Map Twilio status to standard status
+		$standard_status = $this->map_twilio_status( $message_status );
+
+		$this->log(
+			'debug',
+			sprintf( 'Twilio %s webhook processed', ucfirst( $channel ) ),
+			array(
+				'channel'        => $channel,
+				'message_sid'    => $message_sid,
+				'message_status' => $message_status,
+				'standard_status' => $standard_status,
+			)
+		);
+
+		// Return standardized webhook result
+		return $this->webhook_success_result(
+			$message_sid,
+			$standard_status,
+			$error_code,
+			$error_message,
+			array(
+				'twilio_status' => $message_status,
+				'raw_data'      => $webhook_data,
+			)
+		);
+	}
+
+	/**
+	 * Verify Twilio webhook signature
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	private function verify_webhook_signature(): bool {
+		// Get Twilio auth token from integration settings
+		$twilio = Integrations_Manager::instance()->get_integration( 'twilio' );
+
+		if ( ! $twilio ) {
+			return false;
+		}
+
+		$auth_token = $twilio->get_setting( 'auth_token' );
+		if ( ! $auth_token ) {
+			return false;
+		}
+
+		// Get webhook URL and signature
+		$url       = $_SERVER['REQUEST_URI'] ?? '';
+		$signature = $_SERVER['HTTP_X_TWILIO_SIGNATURE'] ?? '';
+
+		if ( ! $signature ) {
+			return false;
+		}
+
+		// Build data string for validation
+		$data = '';
+		ksort( $_POST );
+		foreach ( $_POST as $key => $value ) {
+			$data .= $key . $value;
+		}
+
+		// Calculate expected signature
+		$full_url = home_url( $url );
+		$expected_signature = base64_encode( hash_hmac( 'sha1', $full_url . $data, $auth_token, true ) );
+
+		return hash_equals( $expected_signature, $signature );
+	}
+
+	/**
+	 * Map Twilio status to standard status
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $twilio_status Twilio status string
+	 * @return string Standard status
+	 */
+	private function map_twilio_status( string $twilio_status ): string {
+		$status_map = array(
+			'queued'      => 'pending',
+			'sending'     => 'pending',
+			'sent'        => 'sent',
+			'delivered'   => 'delivered',
+			'read'        => 'read',
+			'failed'      => 'failed',
+			'undelivered' => 'failed',
+		);
+
+		return $status_map[ $twilio_status ] ?? 'unknown';
+	}
+
+	/**
 	 * Get Twilio API instance (lazy loaded)
 	 *
 	 * @since 1.0.0

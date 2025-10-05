@@ -87,4 +87,24 @@ interface Message_Provider_Interface {
 	 * @return string Human-readable provider name (e.g., 'Twilio', 'Vonage SMS')
 	 */
 	public function get_provider_name(): string;
+
+	/**
+	 * Process webhook from provider
+	 *
+	 * Providers receive webhook callbacks with delivery status updates in different formats.
+	 * This method normalizes provider-specific webhook data into a standard format.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $channel Channel type ('sms', 'whatsapp')
+	 * @param array  $webhook_data Raw webhook data from provider ($_POST or $_GET)
+	 * @return array Standardized webhook result with keys:
+	 *               - 'valid' (bool): Whether webhook signature/data is valid
+	 *               - 'message_id' (string|null): Provider's message ID
+	 *               - 'status' (string|null): Delivery status ('sent', 'delivered', 'failed', etc.)
+	 *               - 'error_code' (string|null): Error code if failed
+	 *               - 'error_message' (string|null): Error message if failed
+	 *               - 'metadata' (array): Additional provider-specific data
+	 */
+	public function process_webhook( string $channel, array $webhook_data ): array;
 }

@@ -15,7 +15,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Utils;
-use QuillCRM\Abstracts\Abstract_Twilio_Campaign_Controller;
+use QuillCRM\Abstracts\Abstract_Provider_Campaign_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
@@ -26,7 +26,7 @@ use QuillCRM\Managers\Campaign_Status_Manager;
 /**
  * Rest_WhatsApp_Campaign_Controller class
  */
-class REST_WhatsApp_Campaign_Controller extends Abstract_Twilio_Campaign_Controller
+class REST_WhatsApp_Campaign_Controller extends Abstract_Provider_Campaign_Controller
 {
 
 	/**
@@ -183,24 +183,23 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Twilio_Campaign_Control
 	}
 
 	/**
-	 * Get Twilio tracking class - implementation of abstract method
+	 * Get channel type - implementation of abstract method
 	 *
 	 * @return string
 	 */
-	protected function get_twilio_tracking_class()
+	protected function get_channel_type()
 	{
-		return \QuillCRM\Tracking\WhatsApp::class;
+		return 'whatsapp';
 	}
 
 	/**
 	 * Prepare test message data - implementation of abstract method
 	 *
 	 * @param WP_REST_Request $request
-	 * @param mixed $api
 	 * @param Contact_Model $contact
 	 * @return array
 	 */
-	protected function prepare_test_message_data($request, $api, $contact)
+	protected function prepare_test_message_data($request, $contact)
 	{
 		$phone = $request->get_param('phone');
 		$message = $request->get_param('message');
@@ -210,46 +209,13 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Twilio_Campaign_Control
 		}
 
 		$processed_message = $this->process_merge_tags($message, $contact);
-		
+
 		$whatsapp_data = array(
 			'To' => $phone,
 			'Body' => $processed_message,
 		);
 
 		return $whatsapp_data;
-	}
-
-	/**
-	 * Send message via Twilio API - implementation of abstract method
-	 *
-	 * @param mixed $api
-	 * @param array $message_data
-	 * @return array
-	 */
-	protected function send_twilio_message($api, $message_data)
-	{
-		return $api->send_whatsapp($message_data);
-	}
-
-	/**
-	 * Get WhatsApp-specific error messages
-	 * Override parent method to provide WhatsApp-specific error handling
-	 *
-	 * @param int $error_code Twilio error code
-	 * @param string $original_message Original error message
-	 * @return string|false WhatsApp-specific error message or false if not handled
-	 */
-	protected function get_service_specific_error_message($error_code, $original_message)
-	{
-		// WhatsApp-specific error codes
-		$whatsapp_errors = array(
-			21612 => 'WhatsApp 24-hour window restriction: The recipient must have messaged your WhatsApp number within the last 24 hours, or you must use an approved message template.',
-			63031 => 'Cannot send WhatsApp message to the same number as the sender. Please use a different phone number.',
-			63016 => 'WhatsApp template not found or not approved. Please check your Twilio console.',
-			63017 => 'WhatsApp template variables mismatch. Please verify template parameters.',
-		);
-
-		return $whatsapp_errors[$error_code] ?? false;
 	}
 
 	/**

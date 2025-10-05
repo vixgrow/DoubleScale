@@ -162,6 +162,86 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	}
 
 	/**
+	 * Process webhook from provider
+	 *
+	 * Default implementation that child classes should override with provider-specific logic.
+	 * Returns invalid webhook response by default.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $channel Channel type
+	 * @param array  $webhook_data Raw webhook data
+	 * @return array Webhook processing result
+	 */
+	public function process_webhook( string $channel, array $webhook_data ): array {
+		// Validate channel support
+		if ( ! $this->supports_channel( $channel ) ) {
+			$this->log(
+				'error',
+				sprintf( 'Webhook received for unsupported channel: %s', $channel ),
+				array(
+					'channel'            => $channel,
+					'supported_channels' => $this->supported_channels,
+				)
+			);
+
+			return $this->webhook_error_result( 'Channel not supported' );
+		}
+
+		// Default: webhook processing not implemented
+		$this->log(
+			'warning',
+			sprintf( 'Webhook processing not implemented for provider: %s', $this->provider_name ),
+			array( 'channel' => $channel )
+		);
+
+		return $this->webhook_error_result( 'Webhook processing not implemented' );
+	}
+
+	/**
+	 * Format webhook success result
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string      $message_id Provider's message ID
+	 * @param string      $status Delivery status
+	 * @param string|null $error_code Error code if any
+	 * @param string|null $error_message Error message if any
+	 * @param array       $metadata Additional data
+	 * @return array Standardized webhook result
+	 */
+	protected function webhook_success_result( string $message_id, string $status, ?string $error_code = null, ?string $error_message = null, array $metadata = array()): array {
+		return array(
+			'valid'         => true,
+			'message_id'    => $message_id,
+			'status'        => $status,
+			'error_code'    => $error_code,
+			'error_message' => $error_message,
+			'metadata'      => $metadata,
+		);
+	}
+
+	/**
+	 * Format webhook error result
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $error Error message
+	 * @param array  $metadata Additional error context
+	 * @return array Standardized webhook error result
+	 */
+	protected function webhook_error_result( string $error, array $metadata = array()): array {
+		return array(
+			'valid'         => false,
+			'message_id'    => null,
+			'status'        => null,
+			'error_code'    => null,
+			'error_message' => $error,
+			'metadata'      => $metadata,
+		);
+	}
+
+	/**
 	 * Log provider activity
 	 *
 	 * @since 1.0.0

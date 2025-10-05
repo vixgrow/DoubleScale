@@ -1,7 +1,7 @@
 <?php
 /**
- * Abstract Twilio Tracking
- * Base class for all Twilio-based tracking functionality (SMS, WhatsApp)
+ * Abstract Provider Tracking
+ * Base class for provider-agnostic tracking functionality (SMS, WhatsApp)
  *
  * @since 1.0.0
  * @package QuillCRM
@@ -10,13 +10,14 @@
 namespace QuillCRM\Abstracts;
 
 use QuillCRM\Utils;
+use QuillCRM\Managers\Message_Provider_Registry;
 
 defined('ABSPATH') || exit;
 
 /**
- * Abstract_Twilio_Tracking Class
+ * Abstract_Provider_Tracking Class
  */
-abstract class Abstract_Twilio_Tracking
+abstract class Abstract_Provider_Tracking
 {
 	/**
 	 * Instance storage for child classes
@@ -98,7 +99,7 @@ abstract class Abstract_Twilio_Tracking
 	abstract protected function get_campaign_mode();
 
 	/**
-	 * Register standard Twilio hooks (common for SMS and WhatsApp)
+	 * Register standard provider hooks (common for SMS and WhatsApp)
 	 * Should be called from add_hooks() in child classes
 	 *
 	 * @return void
@@ -141,61 +142,69 @@ abstract class Abstract_Twilio_Tracking
 	}
 
 	/**
-	 * Process Twilio webhook (common logic for SMS and WhatsApp)
+	 * Process provider webhook (common logic for SMS and WhatsApp)
 	 *
 	 * @return void
 	 */
-	protected function process_twilio_webhook()
+	protected function process_provider_webhook()
 	{
-		// Verify webhook signature for security
-		if (!$this->verify_twilio_webhook()) {
-			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook signature verification failed', [
-				'code' => "{$this->campaign_type}_webhook_verification_failed",
-				'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+		// Get provider for this channel
+		$provider = Message_Provider_Registry::instance()->get_provider($this->campaign_type);
+
+		if (!$provider) {
+			quillcrm_get_logger()->error(ucfirst($this->campaign_type) . ' webhook: no provider configured', [
+				'code' => "{$this->campaign_type}_webhook_no_provider",
+				'channel' => $this->campaign_type
 			]);
-			wp_die('Unauthorized', 'Unauthorized', 401);
+			wp_die('Service Unavailable', 'Service Unavailable', 503);
 		}
 
-		// Get message identifier from Twilio webhook
-		$message_sid = sanitize_text_field($_POST['MessageSid'] ?? '');
-		$message_status = sanitize_text_field($_POST['MessageStatus'] ?? '');
-		$error_code = sanitize_text_field($_POST['ErrorCode'] ?? '');
-		$error_message = sanitize_text_field($_POST['ErrorMessage'] ?? '');
+		// Process webhook through provider (handles signature verification and parsing)
+		$webhook_result = $provider->process_webhook($this->campaign_type, $_POST);
 
-		if (empty($message_sid) || empty($message_status)) {
-			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook missing required data', [
-				'message_sid' => $message_sid,
-				'message_status' => $message_status,
+		// Check if webhook is valid
+		if (!isset($webhook_result['valid']) || !$webhook_result['valid']) {
+			$error = $webhook_result['error_message'] ?? 'Invalid webhook';
+			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook validation failed', [
+				'code' => "{$this->campaign_type}_webhook_validation_failed",
+				'error' => $error,
+				'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+			]);
+			wp_die('Bad Request', 'Bad Request', 400);
+		}
+
+		// Extract standardized webhook data
+		$message_id = $webhook_result['message_id'] ?? '';
+		$status = $webhook_result['status'] ?? '';
+		$error_code = $webhook_result['error_code'] ?? '';
+		$error_message = $webhook_result['error_message'] ?? '';
+
+		if (empty($message_id) || empty($status)) {
+			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook missing required fields', [
+				'message_id' => $message_id,
+				'status' => $status,
 				'code' => "{$this->campaign_type}_webhook_missing_data"
 			]);
 			wp_die('Bad Request', 'Bad Request', 400);
 		}
 
-		// Find tracking record by MessageSid
+		// Find tracking record by provider's message ID
 		$campaign_model_class = $this->get_campaign_model_class();
-		$tracking_record = $campaign_model_class::where('external_id', $message_sid)
+		$tracking_record = $campaign_model_class::where('external_id', $message_id)
 			->where('mode', $this->get_campaign_mode())
 			->first();
 
 		if (!$tracking_record) {
 			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook: tracking record not found', [
-				'message_sid' => $message_sid,
-				'message_status' => $message_status,
+				'message_id' => $message_id,
+				'status' => $status,
 				'code' => "{$this->campaign_type}_webhook_tracking_not_found"
 			]);
 			wp_die('OK'); // Acknowledge but don't process
 		}
 
-		// Log successful webhook processing
-		// quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' webhook processing', [
-		// 	'message_sid' => $message_sid,
-		// 	'message_status' => $message_status,
-		// 	'tracking_id' => $tracking_record->id,
-		// 	'code' => "{$this->campaign_type}_webhook_processed"
-		// ]);
-
 		// Update tracking record status based on webhook data
-		$this->update_delivery_status($tracking_record, $message_status, $error_code, $error_message);
+		$this->update_delivery_status($tracking_record, $status, $error_code, $error_message);
 
 		wp_die('OK'); // Acknowledge successful processing
 	}
@@ -252,49 +261,6 @@ abstract class Abstract_Twilio_Tracking
 
 		// Trigger delivery status hooks
 		do_action("quillcrm_{$this->campaign_type}_delivery_status_updated", $tracking_record, $status, $previous_status);
-	}
-
-
-
-	/**
-	 * Verify Twilio webhook signature
-	 * Common signature verification logic for all Twilio webhooks
-	 *
-	 * @return bool
-	 */
-	protected function verify_twilio_webhook()
-	{
-		// Get Twilio auth token from integration settings
-		$twilio_integration = \QuillCRM\Managers\Integrations_Manager::instance()->get_integration('twilio');
-
-		if (!$twilio_integration) {
-			return false;
-		}
-
-		$auth_token = $twilio_integration->get_setting('auth_token');
-		if (!$auth_token) {
-			return false;
-		}
-
-		// Get webhook URL and signature
-		$url = static::get_webhook_url();
-		$signature = $_SERVER['HTTP_X_TWILIO_SIGNATURE'] ?? '';
-
-		if (!$signature) {
-			return false;
-		}
-
-		// Build data string for validation
-		$data = '';
-		ksort($_POST);
-		foreach ($_POST as $key => $value) {
-			$data .= $key . $value;
-		}
-
-		// Calculate expected signature
-		$expected_signature = base64_encode(hash_hmac('sha1', $url . $data, $auth_token, true));
-
-		return hash_equals($expected_signature, $signature);
 	}
 
 	/**

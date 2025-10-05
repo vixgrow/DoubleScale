@@ -11,14 +11,14 @@
 namespace QuillCRM\Tracking;
 
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Abstracts\Abstract_Twilio_Tracking;
+use QuillCRM\Abstracts\Abstract_Provider_Tracking;
 
 defined('ABSPATH') || exit;
 
 /**
  * WhatsApp Tracking Class
  */
-class WhatsApp extends Abstract_Twilio_Tracking
+class WhatsApp extends Abstract_Provider_Tracking
 {
 	/**
 	 * Campaign type
@@ -55,7 +55,7 @@ class WhatsApp extends Abstract_Twilio_Tracking
 	 */
 	public function handle_webhook()
 	{
-		$this->process_twilio_webhook();
+		$this->process_provider_webhook();
 	}
 
 	/**

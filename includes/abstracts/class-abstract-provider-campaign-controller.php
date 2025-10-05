@@ -1,7 +1,7 @@
 <?php
 /**
- * Abstract Twilio Campaign Controller
- * Base class for all Twilio-based campaign REST controllers (SMS, WhatsApp)
+ * Abstract Provider Campaign Controller
+ * Base class for provider-agnostic campaign REST controllers (SMS, WhatsApp)
  *
  * @since 1.0.0
  * @package QuillCRM
@@ -14,33 +14,32 @@ use WP_REST_Request;
 use WP_REST_Response;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
-use QuillCRM\Managers\Integrations_Manager;
+use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Abstracts\Abstract_Campaign_Controller;
 
 /**
- * Abstract_Twilio_Campaign_Controller class
+ * Abstract_Provider_Campaign_Controller class
  */
-abstract class Abstract_Twilio_Campaign_Controller extends Abstract_Campaign_Controller
+abstract class Abstract_Provider_Campaign_Controller extends Abstract_Campaign_Controller
 {
 	/**
-	 * Get Twilio tracking class - must be implemented by child classes
+	 * Get channel type (sms, whatsapp) - must be implemented by child classes
 	 *
-	 * @return string Tracking class name
+	 * @return string Channel type
 	 */
-	abstract protected function get_twilio_tracking_class();
+	abstract protected function get_channel_type();
 
 	/**
 	 * Prepare test message data - must be implemented by child classes
 	 *
 	 * @param WP_REST_Request $request Request object
-	 * @param mixed $api Twilio API instance
 	 * @param Contact_Model $contact Contact for merge tags
-	 * @return array Message data for Twilio API
+	 * @return array Message data for provider
 	 */
-	abstract protected function prepare_test_message_data($request, $api, $contact);
+	abstract protected function prepare_test_message_data($request, $contact);
 
 	/**
-	 * Send test message - common logic for all Twilio services
+	 * Send test message via provider system
 	 *
 	 * @param WP_REST_Request $request Request object
 	 * @return WP_REST_Response|WP_Error
@@ -51,25 +50,31 @@ abstract class Abstract_Twilio_Campaign_Controller extends Abstract_Campaign_Con
 			$phone = $request->get_param('phone');
 			$message = $request->get_param('message');
 
-			// Get Twilio integration
-			$twilio = Integrations_Manager::instance()->get_integration('twilio');
-			$api = $twilio->connect();
+			// Get channel type from child class
+			$channel = $this->get_channel_type();
 
-			if (!$api) {
-				return new WP_Error('error', __('Failed to connect to Twilio', 'quillcrm'), array('status' => 500));
+			// Get provider for this channel from registry
+			$provider = Message_Provider_Registry::instance()->get_provider($channel);
+
+			if (!$provider) {
+				return new WP_Error(
+					'provider_not_available',
+					sprintf(__('No provider configured for %s channel', 'quillcrm'), $channel),
+					array('status' => 500)
+				);
 			}
 
 			// Find contact for merge tag processing
 			$contact = Contact_Model::where('phone', $phone)->first() ?? null;
 
-		// Prepare message data (implemented by child classes)
-		$message_data = $this->prepare_test_message_data($request, $api, $contact);
+			// Prepare message data (implemented by child classes)
+			$message_data = $this->prepare_test_message_data($request, $contact);
 
-		// Send message using appropriate API method
-		$result = $this->send_twilio_message($api, $message_data);
+			// Send message using provider
+			$result = $provider->send_message($channel, $message_data, $contact ?? new Contact_Model());
 
-			// Handle result with improved error messages
-			return $this->handle_twilio_result($result);
+			// Handle result
+			return $this->handle_provider_result($result, $provider);
 
 		} catch (\Exception $e) {
 			return new WP_Error('error', $e->getMessage(), array('status' => 500));
@@ -77,34 +82,22 @@ abstract class Abstract_Twilio_Campaign_Controller extends Abstract_Campaign_Con
 	}
 
 	/**
-	 * Send message via Twilio API - must be implemented by child classes
+	 * Handle provider result
 	 *
-	 * @param mixed $api Twilio API instance
-	 * @param array $message_data Message data
-	 * @return array API result
-	 */
-	abstract protected function send_twilio_message($api, $message_data);
-
-	/**
-	 * Handle Twilio API result with improved error messages
-	 * Common error handling for all Twilio services
-	 *
-	 * @param array $result Twilio API result
+	 * @param array $result Provider result
+	 * @param \QuillCRM\Interfaces\Message_Provider_Interface $provider Provider instance
 	 * @return WP_REST_Response|WP_Error
 	 */
-	protected function handle_twilio_result($result)
+	protected function handle_provider_result($result, $provider)
 	{
-		if (!$result['success']) {
-			$error_details = isset($result['data']) ? $result['data'] : 'No error details';
-			$error_message = 'Failed to send test message';
-			
-			// Provide more specific error messages for common issues
-			if (isset($result['data']['code'])) {
-				$error_message = $this->get_specific_error_message($result['data']['code'], $result['data']['message'] ?? '');
-			} elseif (isset($result['data']['message'])) {
-				$error_message = $this->get_message_based_error($result['data']['message']);
+		if (!isset($result['success']) || !$result['success']) {
+			$error_message = $result['error'] ?? 'Failed to send test message';
+
+			// Check if provider has error details in metadata
+			if (isset($result['metadata']['error_details'])) {
+				$error_message = $this->format_provider_error($result['metadata']['error_details']);
 			}
-			
+
 			return new WP_Error('error', __($error_message, 'quillcrm'), array('status' => 400));
 		}
 
@@ -112,72 +105,22 @@ abstract class Abstract_Twilio_Campaign_Controller extends Abstract_Campaign_Con
 	}
 
 	/**
-	 * Get specific error message based on Twilio error code
-	 * Common error codes for all Twilio services
+	 * Format provider-specific error for user-friendly display
 	 *
-	 * @param string|int $error_code Twilio error code (can be string or int)
-	 * @param string $original_message Original error message
-	 * @return string User-friendly error message
+	 * @param mixed $error_details Provider error details
+	 * @return string Formatted error message
 	 */
-	protected function get_specific_error_message($error_code, $original_message)
+	protected function format_provider_error($error_details)
 	{
-		// Normalize error code to integer for consistent comparison
-		$error_code = (int) $error_code;
-
-		// Check for service-specific errors FIRST (allows child classes to override)
-		$service_specific_error = $this->get_service_specific_error_message($error_code, $original_message);
-		if ($service_specific_error) {
-			return $service_specific_error;
+		if (is_string($error_details)) {
+			return $error_details;
 		}
 
-		// Then check common errors (shared across all services)
-		$common_errors = array(
-			21211 => 'Invalid "To" phone number format. Please use E.164 format (e.g., +1234567890).',
-			21609 => 'Invalid webhook URL. This usually happens in local development environments.',
-			21610 => 'Messages to this number are blocked or restricted.',
-			21614 => 'Invalid "From" phone number. Please check your Twilio phone number configuration.',
-			21408 => 'Permission denied. Your account may not have permissions or the number may be restricted.',
-			60200 => 'International messaging permissions required for this destination.',
-			// Note: 21612 is service-specific (different for SMS vs WhatsApp) - handled by child classes
-			// Note: 63038 is SMS-specific - handled by SMS controller
-		);
-
-		if (isset($common_errors[$error_code])) {
-			return $common_errors[$error_code];
+		if (is_array($error_details) && isset($error_details['message'])) {
+			return $error_details['message'];
 		}
 
-		// Default to generic error with details
-		return 'Failed to send test message: ' . ($original_message ?: 'Unknown error (code: ' . $error_code . ')');
-	}
-
-	/**
-	 * Get service-specific error message - can be overridden by child classes
-	 * IMPORTANT: This is called BEFORE common errors, allowing child classes to override
-	 *
-	 * @param int $error_code Twilio error code (normalized to integer)
-	 * @param string $original_message Original error message
-	 * @return string|false Service-specific error message or false if not handled
-	 */
-	protected function get_service_specific_error_message($error_code, $original_message)
-	{
-		return false;
-	}
-
-	/**
-	 * Get error message based on message content
-	 * Common message-based error handling
-	 *
-	 * @param string $api_message API error message
-	 * @return string User-friendly error message
-	 */
-	protected function get_message_based_error($api_message)
-	{
-		// Common patterns across SMS and WhatsApp
-		if (strpos($api_message, "'To' and 'From' number cannot be the same") !== false) {
-			return 'Cannot send message to the same number as the sender. Please use a different phone number.';
-		}
-
-		return 'Failed to send test message: ' . $api_message;
+		return 'Failed to send test message';
 	}
 
 	/**
@@ -192,7 +135,7 @@ abstract class Abstract_Twilio_Campaign_Controller extends Abstract_Campaign_Con
 
 	/**
 	 * Process merge tags in message content
-	 * Common merge tag processing for all Twilio services
+	 * Common merge tag processing for all providers
 	 *
 	 * @param string $message Message content
 	 * @param Contact_Model $contact Contact for merge tags (can be null)

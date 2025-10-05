@@ -186,6 +186,18 @@ class Message_Provider_Registry {
 	}
 
 	/**
+	 * Get provider by slug
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $provider_slug Provider slug (e.g., 'twilio', 'vonage')
+	 * @return Message_Provider_Interface|null Provider instance or null if not found
+	 */
+	public function get_provider_by_slug( string $provider_slug ): ?Message_Provider_Interface {
+		return $this->providers[ $provider_slug ] ?? null;
+	}
+
+	/**
 	 * Get all registered providers
 	 *
 	 * @since 1.0.0

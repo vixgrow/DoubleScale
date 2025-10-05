@@ -51,6 +51,15 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	protected $supported_channels = array();
 
 	/**
+	 * Cached integration instance
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var mixed
+	 */
+	private $integration;
+
+	/**
 	 * Get provider slug
 	 *
 	 * @since 1.0.0
@@ -82,6 +91,55 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	 */
 	public function supports_channel( string $channel): bool {
 		return in_array( $channel, $this->supported_channels, true );
+	}
+
+	/**
+	 * Get integration instance for this provider
+	 * Uses provider_slug to lookup and cache the integration
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return mixed|null Integration instance or null if not found
+	 */
+	protected function get_integration() {
+		if ( ! $this->integration ) {
+			if ( ! $this->provider_slug ) {
+				$this->log(
+					'error',
+					sprintf( 'Provider slug not set for class: %s', get_class( $this ) ),
+					array( 'code' => 'provider_slug_missing' )
+				);
+				return null;
+			}
+
+			$this->integration = \QuillCRM\Managers\Integrations_Manager::instance()->get_integration( $this->provider_slug );
+
+			if ( ! $this->integration ) {
+				$this->log(
+					'warning',
+					sprintf( 'Integration "%s" not found for provider', $this->provider_slug ),
+					array(
+						'code'          => 'integration_not_found',
+						'provider_slug' => $this->provider_slug,
+					)
+				);
+			}
+		}
+
+		return $this->integration;
+	}
+
+	/**
+	 * Check if provider is configured
+	 * Uses provider_slug to check integration status
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_configured(): bool {
+		$integration = $this->get_integration();
+		return $integration && method_exists( $integration, 'is_connected' ) && $integration->is_connected();
 	}
 
 	/**

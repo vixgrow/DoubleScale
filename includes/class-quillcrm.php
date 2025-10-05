@@ -482,11 +482,6 @@ final class QuillCRM {
 			new \QuillCRM\Providers\Twilio_Message_Provider()
 		);
 
-		// Extension point for third-party providers
-		// Example usage:
-		// add_action('quillcrm_register_message_providers', function() {
-		//     Message_Provider_Registry::instance()->register(new Vonage_Message_Provider());
-		// });
 		do_action( 'quillcrm_register_message_providers' );
 	}
 }

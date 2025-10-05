@@ -13,7 +13,6 @@ use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Abstracts\Abstract_Campaign_Controller;
 
@@ -133,16 +132,6 @@ abstract class Abstract_Provider_Campaign_Controller extends Abstract_Campaign_C
 		return 'Test message sent successfully';
 	}
 
-	/**
-	 * Process merge tags in message content
-	 * Common merge tag processing for all providers
-	 *
-	 * @param string $message Message content
-	 * @param Contact_Model $contact Contact for merge tags (can be null)
-	 * @return string Processed message
-	 */
-	protected function process_merge_tags($message, $contact)
-	{
-		return Merge_Tags_Manager::instance()->process_merge_tags($message, $contact);
-	}
+	// process_merge_tags() is now inherited from Abstract_Campaign_Controller
+	// All campaign types (Email, SMS, WhatsApp) can use the same method
 }

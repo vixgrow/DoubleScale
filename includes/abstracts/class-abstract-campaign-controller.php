@@ -543,6 +543,19 @@ abstract class Abstract_Campaign_Controller extends REST_Controller
     }
 
     /**
+     * Process merge tags in message content
+     * Common merge tag processing for all campaign types (Email, SMS, WhatsApp)
+     *
+     * @param string $message Message content
+     * @param Contact_Model|null $contact Contact for merge tags (can be null)
+     * @return string Processed message
+     */
+    protected function process_merge_tags($message, $contact)
+    {
+        return \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags($message, $contact);
+    }
+
+    /**
      * Permission checks - all return the same for campaigns
      */
     public function get_items_permissions_check($request) { return current_user_can('manage_options'); }

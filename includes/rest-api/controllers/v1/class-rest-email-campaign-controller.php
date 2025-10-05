@@ -19,7 +19,6 @@ use QuillCRM\Abstracts\Abstract_Campaign_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Managers\Campaign_Status_Manager;
 
@@ -228,7 +227,7 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 			$result = $emails->send(
 				$email,
 				$subject,
-				Merge_Tags_Manager::instance()->process_merge_tags($for_testing_body, $contact),
+				$this->process_merge_tags($for_testing_body, $contact),
 			);
 
 			if (!$result) {

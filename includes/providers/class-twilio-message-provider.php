@@ -11,7 +11,6 @@ namespace QuillCRM\Providers;
 
 use QuillCRM\Abstracts\Abstract_Message_Provider;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Managers\Integrations_Manager;
 
 /**
  * Twilio_Message_Provider class
@@ -117,17 +116,8 @@ class Twilio_Message_Provider extends Abstract_Message_Provider {
 		}
 	}
 
-	/**
-	 * Check if Twilio is configured
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return bool
-	 */
-	public function is_configured(): bool {
-		$twilio = Integrations_Manager::instance()->get_integration( 'twilio' );
-		return $twilio && $twilio->is_connected();
-	}
+	// is_configured() is now inherited from Abstract_Message_Provider
+	// It uses $this->get_integration() automatically via provider_slug
 
 	/**
 	 * Get webhook URL for Twilio callbacks
@@ -234,14 +224,14 @@ class Twilio_Message_Provider extends Abstract_Message_Provider {
 	 * @return bool
 	 */
 	private function verify_webhook_signature(): bool {
-		// Get Twilio auth token from integration settings
-		$twilio = Integrations_Manager::instance()->get_integration( 'twilio' );
+		// Get integration instance using provider slug
+		$integration = $this->get_integration();
 
-		if ( ! $twilio ) {
+		if ( ! $integration ) {
 			return false;
 		}
 
-		$auth_token = $twilio->get_setting( 'auth_token' );
+		$auth_token = $integration->get_setting( 'auth_token' );
 		if ( ! $auth_token ) {
 			return false;
 		}
@@ -299,8 +289,8 @@ class Twilio_Message_Provider extends Abstract_Message_Provider {
 	 */
 	private function get_api() {
 		if ( ! $this->api ) {
-			$twilio = Integrations_Manager::instance()->get_integration( 'twilio' );
-			$this->api = $twilio ? $twilio->connect() : null;
+			$integration = $this->get_integration();
+			$this->api = $integration ? $integration->connect() : null;
 		}
 		return $this->api;
 	}

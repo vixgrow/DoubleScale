@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,9 @@ import BreadcrumbComponent from '@/components/breadcrumb';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useAutoSave } from '../hooks/useAutoSave';
+import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
+import { SaveStatusIndicator } from './SaveStatusIndicator';
 
 const Header: React.FC = () => {
 	const dispatch = useDispatch();
@@ -15,73 +18,31 @@ const Header: React.FC = () => {
 		(select: any) => select('quillcrm/campaign').getCampaign(),
 		[]
 	);
-	const { saveCampaignStep } = useDispatch('quillcrm/campaign');
 
-	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
-	const globalSettings = useSelect(
-		(select) => select(STORE_KEY).getGlobalSettings(),
-		[]
-	);
-	const buttonSettings = useSelect(
-		(select) => select(STORE_KEY).getAllButtonSettings(),
-		[]
-	);
-	const existingTemplateData = useSelect(
-		(select: any) => select('quillcrm/campaign').getStepData('template'),
-		[]
-	);
 	const canUndo = useSelect((select) => select(STORE_KEY).canUndo(), []);
 	const canRedo = useSelect((select) => select(STORE_KEY).canRedo(), []);
 
-	const [saving, setSaving] = useState(false);
+	// Use auto-save hook
+	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
+		{
+			interval: 2000, // Auto-save every 2 seconds
+			enabled: true,
+		}
+	);
 
-	const handleSave = async () => {
+	// Use unsaved changes warning
+	useUnsavedChanges({
+		hasUnsavedChanges,
+	});
+
+	const handleSaveAndContinue = async () => {
 		if (!campaign) {
 			return;
 		}
 
-		try {
-			setSaving(true);
-
-			// Create the builder data to save in template's email_body field
-			const builderData = {
-				sections: sections,
-				globalSettings: globalSettings,
-				buttonSettings: buttonSettings,
-			};
-
-			// Get existing template data to preserve all fields
-			const existingTemplate = existingTemplateData?.template || {};
-
-			// Update only the email_body field, preserving all other template fields
-			const templateStepData = {
-				template: {
-					...existingTemplate, // Preserve existing fields (subject, from_email, etc.)
-					email_body: {
-						type: 'builder',
-						value: builderData,
-					},
-					lastModified: new Date().toISOString(),
-				},
-			};
-
-			// Save the template step with builder data and navigate to contacts
-			const saveSuccess = await saveCampaignStep(
-				'template',
-				templateStepData
-			);
-
-			if (saveSuccess) {
-				navigate(getToLink(`campaigns/${campaign.id}/contacts`));
-			} else {
-				console.error('Failed to save builder data');
-				// TODO: Add notification system for error feedback
-			}
-		} catch (error: any) {
-			console.error('Failed to save builder data:', error);
-			// TODO: Add notification system for error feedback
-		} finally {
-			setSaving(false);
+		const saveSuccess = await save();
+		if (saveSuccess) {
+			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 		}
 	};
 	return (
@@ -96,7 +57,14 @@ const Header: React.FC = () => {
 					]}
 				/>
 			</div>
-			<div className="flex items-center gap-2">
+			<div className="flex items-center gap-3">
+				<SaveStatusIndicator
+					isSaving={isSaving}
+					lastSaved={lastSaved}
+					hasUnsavedChanges={hasUnsavedChanges}
+					error={error}
+				/>
+				<div className="h-6 w-px bg-border" />
 				<Button
 					variant="outline"
 					className="px-3"
@@ -115,6 +83,7 @@ const Header: React.FC = () => {
 				>
 					<RedoIcon />
 				</Button>
+				<div className="h-6 w-px bg-border" />
 				<Button
 					variant="outline"
 					className="px-3 text-muted-foreground"
@@ -123,12 +92,21 @@ const Header: React.FC = () => {
 					{__('Preview & test', 'quillcrm')}
 				</Button>
 				<Button
+					variant="outline"
+					className="px-3"
+					onClick={() => save()}
+					disabled={isSaving || !hasUnsavedChanges}
+					title={__('Save now', 'quillcrm')}
+				>
+					{__('Save', 'quillcrm')}
+				</Button>
+				<Button
 					variant="default"
 					className="px-3"
-					onClick={handleSave}
-					disabled={saving}
+					onClick={handleSaveAndContinue}
+					disabled={isSaving}
 				>
-					{saving
+					{isSaving
 						? __('Saving...', 'quillcrm')
 						: __('Save & Continue', 'quillcrm')}
 				</Button>

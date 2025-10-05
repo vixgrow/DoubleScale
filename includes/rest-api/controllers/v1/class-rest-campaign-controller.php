@@ -698,8 +698,9 @@ class REST_Campaign_Controller extends REST_Controller {
 			'execute_at'  => $request->get_param( 'execute_at' ),
 		);
 
+		// Only remove null values, not empty arrays or falsy values that might be valid data
 		foreach ( $campaign_data as $key => $value ) {
-			if ( empty( $value ) ) {
+			if ( is_null( $value ) ) {
 				unset( $campaign_data[ $key ] );
 			}
 		}

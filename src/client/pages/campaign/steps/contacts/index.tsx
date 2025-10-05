@@ -36,30 +36,20 @@ const Contacts: React.FC = () => {
 		[]
 	);
 
-	const filters =
-		existingContactsData?.contacts?.filters ||
-		campaign?.settings.filters ||
-		[];
+	const filters = campaign?.settings.filters || [];
 	const setFilters = (newFilters: FilterType[]) => {
 		updateSettings('filters', newFilters);
 	};
 
-	const [total, setTotal] = useState(
-		existingContactsData?.contacts?.contacts_count || 0
+	const [total, setTotal] = useState(0);
+	const [filterBy, setFilterBy] = useState(
+		existingContactsData?.filter_type || 'list-tags'
 	);
-	const [filterBy, setFilterBy] = useState('list-tags');
 	const [isApplying, setIsApplying] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
 	const [panelHeight, setPanelHeight] = useState<number>(0);
 	const panelRef = useRef<HTMLDivElement>(null);
-
-	// Load existing contacts count when data changes
-	useEffect(() => {
-		if (existingContactsData?.contacts?.contacts_count) {
-			setTotal(existingContactsData.contacts.contacts_count);
-		}
-	}, [existingContactsData]);
 
 	// Measure and sync panel height
 	useEffect(() => {
@@ -97,26 +87,12 @@ const Contacts: React.FC = () => {
 			return;
 		}
 
-		// Save contacts step data - only contacts-specific data
-		const contactsStepData = {
-			contacts: {
-				filters: filters,
-				contacts_count: total,
-				lastModified: new Date().toISOString(),
-			},
-		};
+		// Save just the filter type so we know which tab to open next time
+		await saveCampaignStep('contacts', {
+			filter_type: filterBy,
+		});
 
-		// Save the step with contacts data and navigate only if successful
-		const saveSuccess = await saveCampaignStep(
-			'contacts',
-			contactsStepData
-		);
-		if (saveSuccess) {
-			navigate(getToLink(`campaigns/${campaign.id}/review`));
-		} else {
-			console.error('Failed to save contacts data');
-			// TODO: Add notification system for error feedback
-		}
+		navigate(getToLink(`campaigns/${campaign.id}/review`));
 	};
 
 	return (

@@ -26,6 +26,10 @@ const Header: React.FC = () => {
 		(select) => select(STORE_KEY).getAllButtonSettings(),
 		[]
 	);
+	const existingTemplateData = useSelect(
+		(select: any) => select('quillcrm/campaign').getStepData('template'),
+		[]
+	);
 	const canUndo = useSelect((select) => select(STORE_KEY).canUndo(), []);
 	const canRedo = useSelect((select) => select(STORE_KEY).canRedo(), []);
 
@@ -46,9 +50,13 @@ const Header: React.FC = () => {
 				buttonSettings: buttonSettings,
 			};
 
-			// Update the template's email_body field with builder data
+			// Get existing template data to preserve all fields
+			const existingTemplate = existingTemplateData?.template || {};
+
+			// Update only the email_body field, preserving all other template fields
 			const templateStepData = {
 				template: {
+					...existingTemplate, // Preserve existing fields (subject, from_email, etc.)
 					email_body: {
 						type: 'builder',
 						value: builderData,

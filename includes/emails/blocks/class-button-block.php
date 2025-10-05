@@ -82,7 +82,16 @@ class Button_Block extends Email_Block {
 			'underline'       => false,
 		);
 
-		// Load settings from database
+		// Try to get settings from current email renderer (template-specific)
+		global $quillcrm_email_renderer;
+		if ( isset( $quillcrm_email_renderer ) && method_exists( $quillcrm_email_renderer, 'get_button_settings' ) ) {
+			$template_settings = $quillcrm_email_renderer->get_button_settings( $button_style );
+			if ( ! empty( $template_settings ) ) {
+				return wp_parse_args( $template_settings, $default_settings );
+			}
+		}
+
+		// Fallback to global settings from database
 		$saved_settings = \QuillCRM\Settings::get( 'button_settings', array() );
 
 		if ( ! empty( $saved_settings ) && is_array( $saved_settings ) ) {

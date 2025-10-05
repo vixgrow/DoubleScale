@@ -23,6 +23,13 @@ class Email_Renderer {
 	private $block_registry;
 
 	/**
+	 * Button settings from template
+	 *
+	 * @var array
+	 */
+	private $button_settings = array();
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -69,6 +76,11 @@ class Email_Renderer {
 	 * @return string HTML output
 	 */
 	private function build_email_structure( $content, $settings, $merge_tags ) {
+		// Extract button settings from content if available
+		if ( isset( $content['buttonSettings'] ) && is_array( $content['buttonSettings'] ) ) {
+			$this->button_settings = $content['buttonSettings'];
+		}
+
 		// Default settings
 		$bg_color     = isset( $settings['backgroundColor'] ) ? $settings['backgroundColor'] : '#f7f7f7';
 		$canvas_color = isset( $settings['canvasColor'] ) ? $settings['canvasColor'] : '#ffffff';
@@ -294,6 +306,10 @@ class Email_Renderer {
 			return '<!-- Missing block type -->';
 		}
 
+		// Store current renderer instance globally so blocks can access button settings
+		global $quillcrm_email_renderer;
+		$quillcrm_email_renderer = $this;
+
 		return $this->block_registry->render_block(
 			$block['type'],
 			isset( $block['props'] ) ? $block['props'] : array(),
@@ -327,6 +343,20 @@ class Email_Renderer {
 		}
 
 		return rtrim( $style_string );
+	}
+
+	/**
+	 * Get button settings for a specific button style
+	 *
+	 * @param string $button_style Button style (primary, secondary, tertiary)
+	 * @return array Button settings
+	 */
+	public function get_button_settings( $button_style = 'primary' ) {
+		if ( ! empty( $this->button_settings ) && isset( $this->button_settings[ $button_style ] ) ) {
+			return $this->button_settings[ $button_style ];
+		}
+
+		return array();
 	}
 }
 

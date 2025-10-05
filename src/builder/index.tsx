@@ -47,7 +47,7 @@ const BuilderContent: React.FC = () => {
 		[]
 	);
 
-	// Initialize button settings (loads from API on mount)
+	// Initialize button settings (loads from campaign template data)
 	useButtonSettings();
 
 	// Load existing builder data from template's email_body field
@@ -55,8 +55,7 @@ const BuilderContent: React.FC = () => {
 		const emailBody = existingTemplateData?.template?.email_body;
 
 		if (emailBody?.type === 'builder' && emailBody.value) {
-			const { sections, globalSettings, buttonSettings } =
-				emailBody.value;
+			const { sections, globalSettings } = emailBody.value;
 
 			// Load sections if available
 			if (sections && sections.length > 0) {
@@ -68,10 +67,7 @@ const BuilderContent: React.FC = () => {
 				dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
 			}
 
-			// Load button settings if available
-			if (buttonSettings) {
-				dispatch(STORE_KEY).setButtonSettings(buttonSettings);
-			}
+			// Button settings are loaded by useButtonSettings hook
 		}
 	}, [existingTemplateData, dispatch]);
 

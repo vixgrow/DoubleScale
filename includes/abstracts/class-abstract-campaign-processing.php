@@ -182,9 +182,8 @@ abstract class Abstract_Campaign_Processing {
 				$api_data = $this->prepare_status_callback( $webhook_url, $api_data );
 			}
 
-			// Send via provider (polymorphic dispatch)
-			$method = "send_{$this->campaign_type}";
-			$result = $provider->$method( $api_data, $contact );
+			// Send via provider (unified method)
+			$result = $provider->send_message( $this->campaign_type, $api_data, $contact );
 
 			// Handle response
 			return $this->handle_provider_response( $result, $campaign_message, $contact );

@@ -85,6 +85,47 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	}
 
 	/**
+	 * Send message via specified channel
+	 *
+	 * Default implementation that validates channel support.
+	 * Child classes should override this to implement actual sending logic.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string        $channel Channel type ('sms', 'whatsapp', 'voice', etc.)
+	 * @param array         $data Message data
+	 * @param \QuillCRM\Models\Contact_Model $contact Contact model
+	 * @return array Result array
+	 */
+	public function send_message( string $channel, array $data, \QuillCRM\Models\Contact_Model $contact ): array {
+		// Validate channel support
+		if ( ! $this->supports_channel( $channel ) ) {
+			$this->log(
+				'error',
+				sprintf( 'Provider does not support channel: %s', $channel ),
+				array(
+					'channel'            => $channel,
+					'supported_channels' => $this->supported_channels,
+				)
+			);
+
+			return $this->error_result(
+				sprintf(
+					'Provider "%s" does not support channel "%s". Supported channels: %s',
+					$this->provider_name,
+					$channel,
+					implode( ', ', $this->supported_channels )
+				)
+			);
+		}
+
+		// Child class should override this method to implement actual sending
+		return $this->error_result(
+			sprintf( 'send_message() not implemented for channel: %s', $channel )
+		);
+	}
+
+	/**
 	 * Format success result
 	 *
 	 * @since 1.0.0

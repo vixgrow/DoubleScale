@@ -22,10 +22,15 @@ use QuillCRM\Models\Contact_Model;
 interface Message_Provider_Interface {
 
 	/**
-	 * Send SMS message
+	 * Send message via specified channel
+	 *
+	 * Unified method for sending messages across all channels (SMS, WhatsApp, Voice, etc.)
+	 * This replaces channel-specific methods (send_sms, send_whatsapp) with a single
+	 * flexible interface that supports any messaging channel.
 	 *
 	 * @since 1.0.0
 	 *
+	 * @param string        $channel Channel type ('sms', 'whatsapp', 'voice', etc.)
 	 * @param array         $data Message data including 'Body', 'To', and optional 'StatusCallback'
 	 * @param Contact_Model $contact Contact model for context
 	 * @return array Result array with keys:
@@ -34,22 +39,7 @@ interface Message_Provider_Interface {
 	 *               - 'error' (string|null): Error message if failed
 	 *               - 'metadata' (array): Additional provider-specific data
 	 */
-	public function send_sms( array $data, Contact_Model $contact): array;
-
-	/**
-	 * Send WhatsApp message
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array         $data Message data including 'Body', 'To', and optional 'StatusCallback'
-	 * @param Contact_Model $contact Contact model for context
-	 * @return array Result array with keys:
-	 *               - 'success' (bool): Whether send was successful
-	 *               - 'message_id' (string|null): Provider's message ID
-	 *               - 'error' (string|null): Error message if failed
-	 *               - 'metadata' (array): Additional provider-specific data
-	 */
-	public function send_whatsapp( array $data, Contact_Model $contact): array;
+	public function send_message( string $channel, array $data, Contact_Model $contact ): array;
 
 	/**
 	 * Get provider slug

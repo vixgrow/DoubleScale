@@ -61,72 +61,55 @@ class Twilio_Message_Provider extends Abstract_Message_Provider {
 	private $api;
 
 	/**
-	 * Send SMS via Twilio
+	 * Send message via Twilio (unified method for all channels)
 	 *
 	 * @since 1.0.0
 	 *
+	 * @param string        $channel Channel type ('sms', 'whatsapp')
 	 * @param array         $data Message data
 	 * @param Contact_Model $contact Contact model
 	 * @return array Result array
 	 */
-	public function send_sms( array $data, Contact_Model $contact): array {
+	public function send_message( string $channel, array $data, Contact_Model $contact ): array {
 		try {
+			// Validate channel support
+			if ( ! $this->supports_channel( $channel ) ) {
+				return $this->error_result(
+					sprintf( 'Twilio provider does not support channel: %s', $channel )
+				);
+			}
+
+			// Get Twilio API instance
 			$api = $this->get_api();
 			if ( ! $api ) {
 				return $this->error_result( 'Twilio not configured' );
 			}
 
-			// Call existing Twilio integration
-			$result = $api->send_sms( $data );
+			// Call appropriate Twilio API method based on channel
+			switch ( $channel ) {
+				case 'sms':
+					$result = $api->send_sms( $data );
+					break;
 
-			// Map Twilio response to standard format
-			return $this->map_twilio_response( $result, $contact, 'sms' );
+				case 'whatsapp':
+					$result = $api->send_whatsapp( $data );
+					break;
 
-		} catch ( \Exception $e ) {
-			$this->log(
-				'error',
-				'Twilio SMS send failed',
-				array(
-					'error'      => $e->getMessage(),
-					'contact_id' => $contact->id,
-					'channel'    => 'sms',
-				)
-			);
-
-			return $this->error_result( $e->getMessage() );
-		}
-	}
-
-	/**
-	 * Send WhatsApp via Twilio
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array         $data Message data
-	 * @param Contact_Model $contact Contact model
-	 * @return array Result array
-	 */
-	public function send_whatsapp( array $data, Contact_Model $contact): array {
-		try {
-			$api = $this->get_api();
-			if ( ! $api ) {
-				return $this->error_result( 'Twilio not configured' );
+				default:
+					return $this->error_result( sprintf( 'Unknown channel: %s', $channel ) );
 			}
 
-			// Call existing Twilio integration
-			$result = $api->send_whatsapp( $data );
-
 			// Map Twilio response to standard format
-			return $this->map_twilio_response( $result, $contact, 'whatsapp' );
+			return $this->map_twilio_response( $result, $contact, $channel );
 
 		} catch ( \Exception $e ) {
 			$this->log(
 				'error',
-				'Twilio WhatsApp send failed',
+				sprintf( 'Twilio %s send failed', ucfirst( $channel ) ),
 				array(
+					'channel'    => $channel,
 					'error'      => $e->getMessage(),
 					'contact_id' => $contact->id,
-					'channel'    => 'whatsapp',
 				)
 			);
 

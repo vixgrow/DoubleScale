@@ -14,7 +14,6 @@ import { ConfigProvider } from 'antd';
 import PageLayout from './layout';
 import '../stores';
 export * from './types';
-import '../api/email-editor-blocks';
 import '../styles/react-select-global.css';
 
 const appRoot = document.getElementById('qcrm-admin-root');

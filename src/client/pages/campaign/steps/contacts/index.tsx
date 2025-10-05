@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
  */
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { useCampaignContext } from '../../state/context';
+import { useSelect, useDispatch } from '@wordpress/data';
 import type { Filter as FilterType } from '@quillcrm/client';
 import {
 	ContactList,
@@ -22,21 +22,44 @@ import { Label } from '@/components/ui/label';
 import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
 
 const Contacts: React.FC = () => {
-	const { campaign, saveCampaign, saveCampaignStep, updateSettings } =
-		useCampaignContext();
+	const campaign = useSelect(
+		(select: any) => select('quillcrm/campaign').getCampaign(),
+		[]
+	);
+	const { saveCampaignStep, updateSettings } =
+		useDispatch('quillcrm/campaign');
 	const navigate = useNavigate();
-	const filters = campaign?.settings.filters || [];
+
+	// Get existing step data
+	const existingContactsData = useSelect(
+		(select: any) => select('quillcrm/campaign').getStepData('contacts'),
+		[]
+	);
+
+	const filters =
+		existingContactsData?.contacts?.filters ||
+		campaign?.settings.filters ||
+		[];
 	const setFilters = (newFilters: FilterType[]) => {
 		updateSettings('filters', newFilters);
 	};
 
-	const [total, setTotal] = useState(0);
+	const [total, setTotal] = useState(
+		existingContactsData?.contacts?.contacts_count || 0
+	);
 	const [filterBy, setFilterBy] = useState('list-tags');
 	const [isApplying, setIsApplying] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
 	const [panelHeight, setPanelHeight] = useState<number>(0);
 	const panelRef = useRef<HTMLDivElement>(null);
+
+	// Load existing contacts count when data changes
+	useEffect(() => {
+		if (existingContactsData?.contacts?.contacts_count) {
+			setTotal(existingContactsData.contacts.contacts_count);
+		}
+	}, [existingContactsData]);
 
 	// Measure and sync panel height
 	useEffect(() => {
@@ -74,16 +97,25 @@ const Contacts: React.FC = () => {
 			return;
 		}
 
-		// Save contacts step data with filters
+		// Save contacts step data - only contacts-specific data
 		const contactsStepData = {
-			filters: filters,
-			contacts_count: total,
+			contacts: {
+				filters: filters,
+				contacts_count: total,
+				lastModified: new Date().toISOString(),
+			},
 		};
 
 		// Save the step with contacts data and navigate only if successful
-		const saveSuccess = await saveCampaignStep('review', contactsStepData);
+		const saveSuccess = await saveCampaignStep(
+			'contacts',
+			contactsStepData
+		);
 		if (saveSuccess) {
 			navigate(getToLink(`campaigns/${campaign.id}/review`));
+		} else {
+			console.error('Failed to save contacts data');
+			// TODO: Add notification system for error feedback
 		}
 	};
 
@@ -96,15 +128,24 @@ const Contacts: React.FC = () => {
 			onBack={async () => {
 				// Save current contacts data before going back
 				const contactsStepData = {
-					filters: filters,
-					contacts_count: total,
+					contacts: {
+						filters: filters,
+						contacts_count: total,
+						lastModified: new Date().toISOString(),
+					},
 				};
 				const saveSuccess = await saveCampaignStep(
-					'template',
+					'contacts',
 					contactsStepData
 				);
 				if (saveSuccess) {
-					navigate(getToLink(`campaigns/${campaign?.id}/template`));
+					navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+				} else {
+					// Navigate anyway on back, but log the error
+					console.error(
+						'Failed to save contacts data on back navigation'
+					);
+					navigate(getToLink(`campaigns/${campaign?.id}/builder`));
 				}
 			}}
 		>

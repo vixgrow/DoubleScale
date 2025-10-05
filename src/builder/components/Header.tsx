@@ -6,13 +6,16 @@ import { PreviewIcon, RedoIcon, UndoIcon } from '@/components/icons';
 import BreadcrumbComponent from '@/components/breadcrumb';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
-import { useCampaignContext } from '../../client/pages/campaign/state/context';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 
 const Header: React.FC = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	const { campaign, saveCampaignStep } = useCampaignContext();
+	const campaign = useSelect(
+		(select: any) => select('quillcrm/campaign').getCampaign(),
+		[]
+	);
+	const { saveCampaignStep } = useDispatch('quillcrm/campaign');
 
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
 	const globalSettings = useSelect(
@@ -36,44 +39,39 @@ const Header: React.FC = () => {
 		try {
 			setSaving(true);
 
-			// Create the template data structure that matches the campaign template format
-			const templateData = {
-				name: campaign.name || __('Email Template', 'quillcrm'),
-				type: 'email',
-				subject: campaign.name || __('Email Template', 'quillcrm'),
-				body: JSON.stringify(sections),
-				settings: JSON.stringify({
-					global: globalSettings,
-					buttons: buttonSettings,
-				}),
-				from_name: '',
-				from_email: '',
-				reply_to: '',
-				preview_text: '',
-				enable_utm: false,
-				utm_source: '',
-				utm_medium: '',
-				utm_name: '',
-				utm_term: '',
-				utm_content: '',
+			// Create the builder data to save in template's email_body field
+			const builderData = {
+				sections: sections,
+				globalSettings: globalSettings,
+				buttonSettings: buttonSettings,
 			};
 
-			// Save the template data to the campaign
-			const builderStepData = {
-				templates: [templateData], // Array format to match campaign structure
+			// Update the template's email_body field with builder data
+			const templateStepData = {
+				template: {
+					email_body: {
+						type: 'builder',
+						value: builderData,
+					},
+					lastModified: new Date().toISOString(),
+				},
 			};
 
-			// Save the step with template data and navigate to contacts
+			// Save the template step with builder data and navigate to contacts
 			const saveSuccess = await saveCampaignStep(
-				'contacts',
-				builderStepData
+				'template',
+				templateStepData
 			);
+
 			if (saveSuccess) {
 				navigate(getToLink(`campaigns/${campaign.id}/contacts`));
+			} else {
+				console.error('Failed to save builder data');
+				// TODO: Add notification system for error feedback
 			}
 		} catch (error: any) {
-			console.error('Failed to save template:', error);
-			// You could add a notification system here if available
+			console.error('Failed to save builder data:', error);
+			// TODO: Add notification system for error feedback
 		} finally {
 			setSaving(false);
 		}

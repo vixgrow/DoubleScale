@@ -174,12 +174,18 @@ export type CustomFieldsGroup = {
 export type CustomFieldsGroups = CustomFieldsGroup[];
 
 // Email Template Type
+export type EmailBodyContent = {
+	type: 'rich-text' | 'builder';
+	value: any; // For rich-text: string, for builder: sections/globalSettings/buttonSettings
+};
+
 export type EmailTemplate = {
 	id?: number;
 	name: string;
 	type: 'email';
 	subject: string;
-	body: string;
+	body?: string; // Keep for backward compatibility
+	email_body?: EmailBodyContent;
 
 	from_name: string;
 	from_email: string;

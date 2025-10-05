@@ -1,7 +1,7 @@
 /**
  * external dependencies
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	DndContext,
 	useSensor,
@@ -40,9 +40,41 @@ import {
 const BuilderContent: React.FC = () => {
 	const dispatch = useDispatch();
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
-	
+
+	// Get existing template data from campaign store
+	const existingTemplateData = useSelect(
+		(select: any) => select('quillcrm/campaign').getStepData('template'),
+		[]
+	);
+
 	// Initialize button settings (loads from API on mount)
 	useButtonSettings();
+
+	// Load existing builder data from template's email_body field
+	useEffect(() => {
+		const emailBody = existingTemplateData?.template?.email_body;
+
+		if (emailBody?.type === 'builder' && emailBody.value) {
+			const { sections, globalSettings, buttonSettings } =
+				emailBody.value;
+
+			// Load sections if available
+			if (sections && sections.length > 0) {
+				dispatch(STORE_KEY).setBuilderState(sections);
+			}
+
+			// Load global settings if available
+			if (globalSettings) {
+				dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
+			}
+
+			// Load button settings if available
+			if (buttonSettings) {
+				dispatch(STORE_KEY).setButtonSettings(buttonSettings);
+			}
+		}
+	}, [existingTemplateData, dispatch]);
+
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: {
@@ -197,7 +229,7 @@ const BuilderContent: React.FC = () => {
 			if (handled) {
 				return;
 			}
-				return;
+			return;
 		}
 
 		// Handle section reordering (when dragging sections to reorder them)
@@ -228,9 +260,11 @@ const BuilderContent: React.FC = () => {
 				} = activeData;
 
 				// Check if the target section is a template section
-				const targetSection = sections.find((s) => s.id === toSectionId);
+				const targetSection = sections.find(
+					(s) => s.id === toSectionId
+				);
 				if (targetSection && isTemplateSection(targetSection)) {
-						return;
+					return;
 				}
 
 				// Only move if it's actually moving to a different column
@@ -266,18 +300,24 @@ const BuilderContent: React.FC = () => {
 				} = activeData;
 
 				// Get the target block index
-				const targetSection = sections.find((s) => s.id === toSectionId);
+				const targetSection = sections.find(
+					(s) => s.id === toSectionId
+				);
 				const targetColumn = targetSection?.columns.find(
 					(c) => c.id === toColumnId
 				);
 				const targetBlockIndex =
-					targetColumn?.blocks.findIndex((b) => b.id === over.id) || 0;
+					targetColumn?.blocks.findIndex((b) => b.id === over.id) ||
+					0;
 
 				// Calculate the correct index for insertion
 				let toIndex = targetBlockIndex;
 
 				// If moving within the same column, adjust the index
-				if (fromSectionId === toSectionId && fromColumnId === toColumnId) {
+				if (
+					fromSectionId === toSectionId &&
+					fromColumnId === toColumnId
+				) {
 					// Place block at target position
 					toIndex = targetBlockIndex;
 				} else {
@@ -319,8 +359,8 @@ const BuilderContent: React.FC = () => {
 				// Check if the target section is a template section
 				const targetSection = sections.find((s) => s.id === sectionId);
 				if (targetSection && isTemplateSection(targetSection)) {
-						return;
-					}
+					return;
+				}
 
 				const blockDef = blocksRegistry[blockType];
 				if (blockDef) {
@@ -337,7 +377,7 @@ const BuilderContent: React.FC = () => {
 		// Handle dropping new layouts (sections) from sidebar
 		if (active.data?.current?.type === 'layout') {
 			const layoutItem = active.data.current.item;
-			
+
 			const newSection = {
 				id: uuidv4(),
 				columns: layoutItem.width.map((width: number) => ({

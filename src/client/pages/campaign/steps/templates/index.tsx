@@ -3,14 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { useCampaignContext } from '../../state/context';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import {
 	CategoryIcon,
@@ -20,7 +19,7 @@ import {
 	PanelSettings,
 	PlayIcon,
 } from '@quillcrm/components';
-import type { Template as TemplateType } from '@quillcrm/client';
+import type { EmailTemplate } from '@quillcrm/client';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,15 +88,29 @@ const Templates: React.FC = () => {
 	const [validationErrors, setValidationErrors] = useState<{
 		[key: string]: string;
 	}>({});
-	const { campaign, saveCampaignStep } = useCampaignContext();
+	const campaign = useSelect(
+		(select: any) => select('quillcrm/campaign').getCampaign(),
+		[]
+	);
+	const { saveCampaignStep } = useDispatch('quillcrm/campaign');
 	const navigate = useNavigate();
 
+	// Get existing step data
+	const existingTemplateData = useSelect(
+		(select: any) => select('quillcrm/campaign').getStepData('template'),
+		[]
+	);
+
 	// Using old flat template structure
-	const defaultTemplate = {
+	const defaultTemplate: EmailTemplate = {
 		name: campaign?.name || __('New Email', 'quillcrm'),
-		type: 'email',
+		type: 'email' as const,
 		subject: __('New Email', 'quillcrm'),
-		body: 'Email body',
+		body: 'Email body', // Default rich-text content
+		email_body: {
+			type: 'rich-text',
+			value: 'Email body',
+		},
 		from_name: '',
 		from_email: '',
 		reply_to: '',
@@ -116,12 +129,15 @@ const Templates: React.FC = () => {
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	useEffect(() => {
-		if (templates.length === 0) {
+		// Load existing template data if available
+		if (existingTemplateData?.template) {
+			setTemplates([existingTemplateData.template]);
+		} else if (templates.length === 0) {
 			setTemplates([defaultTemplate]);
 		}
-	}, []);
+	}, [existingTemplateData]);
 
-	const updateTemplate = (index: number, data: Partial<TemplateType>) => {
+	const updateTemplate = (index: number, data: Partial<EmailTemplate>) => {
 		if (!campaign) {
 			return;
 		}
@@ -150,7 +166,7 @@ const Templates: React.FC = () => {
 		});
 	};
 
-	const validate = (template: Partial<TemplateType>) => {
+	const validate = (template: Partial<EmailTemplate>) => {
 		const result = templateSchema.safeParse(template);
 
 		if (!result.success) {
@@ -248,18 +264,50 @@ const Templates: React.FC = () => {
 	const saveTemplateStepAndNavigate = async () => {
 		// Validate current template
 		if (!validate(templates[currentTab])) {
+			createNotice({
+				type: 'error',
+				message: __(
+					'Please fix the validation errors before proceeding',
+					'quillcrm'
+				),
+			});
 			return;
 		}
 
-		// Save template step data
-		const templateStepData = {
-			templates: templates,
-		};
+		try {
+			// Save template step data - only template-specific data
+			const templateStepData = {
+				template: {
+					...templates[currentTab],
+					lastModified: new Date().toISOString(),
+				},
+			};
 
-		// Save the step with template data and navigate only if successful
-		const saveSuccess = await saveCampaignStep('builder', templateStepData);
-		if (saveSuccess) {
-			navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+			// Save the step with template data and navigate only if successful
+			const saveSuccess = await saveCampaignStep(
+				'template',
+				templateStepData
+			);
+			if (saveSuccess) {
+				navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+			} else {
+				createNotice({
+					type: 'error',
+					message: __(
+						'Failed to save template data. Please try again.',
+						'quillcrm'
+					),
+				});
+			}
+		} catch (error) {
+			console.error('Error saving template step:', error);
+			createNotice({
+				type: 'error',
+				message: __(
+					'An error occurred while saving. Please try again.',
+					'quillcrm'
+				),
+			});
 		}
 	};
 

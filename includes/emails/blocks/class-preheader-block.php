@@ -79,7 +79,9 @@ class Preheader_Block extends Email_Block {
 		$link_url  = $this->process_merge_tags( $props['linkUrl'], $merge_tags );
 
 		// Get font size based on heading style
-		$adjusted_font_size = $this->get_adjusted_font_size( $props['fontSize'], $props['headingStyle'] );
+		// Ensure fontSize is an integer (remove 'px' suffix if present)
+		$base_font_size     = is_numeric( $props['fontSize'] ) ? (int) $props['fontSize'] : (int) str_replace( 'px', '', $props['fontSize'] );
+		$adjusted_font_size = $this->get_adjusted_font_size( $base_font_size, $props['headingStyle'] );
 
 		// Build text styles
 		$text_styles = array(

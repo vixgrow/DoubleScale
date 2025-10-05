@@ -82,49 +82,143 @@ class Text_Block extends Email_Block {
 		// Process content for merge tags
 		$content = $this->process_merge_tags( $props['content'], $merge_tags );
 
-		// Build styles
+		// Get font size based on heading style (matches frontend getFontSize)
+		// Ensure fontSize is an integer (remove 'px' suffix if present)
+		$base_font_size = is_numeric( $props['fontSize'] ) ? (int) $props['fontSize'] : (int) str_replace( 'px', '', $props['fontSize'] );
+		$font_size      = $this->get_adjusted_font_size( $base_font_size, $props['headingStyle'] );
+
+		// Check if content has HTML formatting (matches frontend hasHtmlFormatting)
+		$has_html_formatting = $this->has_html_formatting( $content );
+
+		// Build styles (matches frontend div styles)
 		$styles = array(
-			'font-family'      => $props['fontFamily'],
-			'font-size'        => $props['fontSize'] . 'px',
+			'font-size'        => $font_size . 'px',
 			'color'            => $props['color'],
 			'text-align'       => $props['textAlign'],
+			'font-family'      => $props['fontFamily'],
 			'line-height'      => $props['lineHeight'],
 			'letter-spacing'   => $props['letterSpacing'],
+			'border-radius'    => $props['borderRadius'],
+			'border-width'     => $props['borderWidth'],
 			'background-color' => $props['backgroundColor'],
-			'padding'          => $this->format_padding( $props['padding'] ),
+			'padding'          => $this->format_padding_multiplied( $props['padding'] ),
+			'margin'           => '0',
+			'word-wrap'        => 'break-word',
+			'overflow-wrap'    => 'break-word',
+			'max-width'        => '100%',
+			'white-space'      => 'normal',
+			'width'            => '100%',
+			'box-sizing'       => 'border-box',
+			'overflow'         => 'hidden',
 		);
 
-		// Add conditional formatting
-		if ( ! empty( $props['bold'] ) ) {
-			$styles['font-weight'] = 'bold';
-		}
+		// Only apply formatting styles if no HTML formatting exists (matches frontend logic)
+		if ( ! $has_html_formatting ) {
+			if ( ! empty( $props['bold'] ) ) {
+				$styles['font-weight'] = 'bold';
+			} else {
+				$styles['font-weight'] = 'normal';
+			}
 
-		if ( ! empty( $props['italic'] ) ) {
-			$styles['font-style'] = 'italic';
-		}
+			if ( ! empty( $props['italic'] ) ) {
+				$styles['font-style'] = 'italic';
+			} else {
+				$styles['font-style'] = 'normal';
+			}
 
-		// Handle text decoration
-		$text_decoration = array();
-		if ( ! empty( $props['underline'] ) ) {
-			$text_decoration[] = 'underline';
-		}
+			// Handle text decoration
+			$text_decoration = array();
+			if ( ! empty( $props['underline'] ) ) {
+				$text_decoration[] = 'underline';
+			}
+			if ( ! empty( $props['line-through'] ) ) {
+				$text_decoration[] = 'line-through';
+			}
 
-		if ( ! empty( $props['line-through'] ) ) {
-			$text_decoration[] = 'line-through';
-		}
-
-		if ( ! empty( $text_decoration ) ) {
-			$styles['text-decoration'] = implode( ' ', $text_decoration );
+			if ( ! empty( $text_decoration ) ) {
+				$styles['text-decoration'] = implode( ' ', $text_decoration );
+			} else {
+				$styles['text-decoration'] = 'none';
+			}
 		}
 
 		$style_string = $this->build_style_string( $styles );
 
-		// Use table structure for better email client compatibility
-		return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
-			<tr>
-				<td style=\"{$style_string}\">{$content}</td>
-			</tr>
-		</table>";
+		// Get element type based on heading style (matches frontend getElementType)
+		$element_type = $this->get_element_type( $props['headingStyle'] );
+
+		// Simple div structure matching frontend exactly
+		return "<div style=\"{$style_string}\">{$content}</div>";
+	}
+
+	/**
+	 * Get adjusted font size based on heading style (matches frontend getFontSize)
+	 *
+	 * @param int    $font_size Base font size
+	 * @param string $heading_style Heading style
+	 * @return int Adjusted font size
+	 */
+	private function get_adjusted_font_size( int $font_size, string $heading_style ): int {
+		switch ( $heading_style ) {
+			case 'h1':
+				return max( $font_size * 2.5, 24 );
+			case 'h2':
+				return max( $font_size * 2, 20 );
+			case 'h3':
+				return max( $font_size * 1.5, 18 );
+			case 'small':
+				return max( $font_size * 0.8, 12 );
+			default:
+				return $font_size;
+		}
+	}
+
+	/**
+	 * Get element type based on heading style (matches frontend getElementType)
+	 *
+	 * @param string $heading_style Heading style
+	 * @return string HTML element type
+	 */
+	private function get_element_type( string $heading_style ): string {
+		switch ( $heading_style ) {
+			case 'h1':
+			case 'h2':
+			case 'h3':
+				return $heading_style;
+			case 'small':
+				return 'small';
+			default:
+				return 'p';
+		}
+	}
+
+	/**
+	 * Check if content has HTML formatting (matches frontend hasHtmlFormatting)
+	 *
+	 * @param string $content Content to check
+	 * @return bool Whether content has HTML formatting
+	 */
+	private function has_html_formatting( string $content ): bool {
+		return ! empty( $content ) && strpos( $content, '<' ) !== false && strpos( $content, '>' ) !== false;
+	}
+
+	/**
+	 * Format padding with multipliers (matches frontend)
+	 *
+	 * @param array|null $padding Padding object
+	 * @return string CSS padding string
+	 */
+	private function format_padding_multiplied( $padding ) {
+		if ( ! $padding ) {
+			return '0';
+		}
+
+		$top    = isset( $padding['top'] ) ? $padding['top'] * 2 : 0;
+		$right  = isset( $padding['right'] ) ? $padding['right'] * 4 : 0;
+		$bottom = isset( $padding['bottom'] ) ? $padding['bottom'] * 2 : 0;
+		$left   = isset( $padding['left'] ) ? $padding['left'] * 4 : 0;
+
+		return "{$top}px {$right}px {$bottom}px {$left}px";
 	}
 }
 

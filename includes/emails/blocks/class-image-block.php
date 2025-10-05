@@ -72,49 +72,76 @@ class Image_Block extends Email_Block {
 		// Process link for merge tags
 		$link = ! empty( $props['link'] ) ? $this->process_merge_tags( $props['link'], $merge_tags ) : '';
 
-		// Container style
-		$container_style = $this->build_style_string(
+		// Wrapper style (matches frontend wrapperStyle)
+		$wrapper_style = $this->build_style_string(
 			array(
-				'text-align'       => $props['align'],
-				'background-color' => $props['backgroundColor'],
-				'padding'          => $this->format_padding( $props['padding'] ),
+				'text-align' => $props['align'],
+				'width'      => '100%',
 			)
 		);
 
-		// Image style
-		$img_style = $this->build_style_string(
+		// Container style (matches frontend containerStyle)
+		$container_style = $this->build_style_string(
+			array(
+				'background-color' => $props['backgroundColor'],
+				'padding'          => $this->format_padding( $props['padding'] ),
+				'border-radius'    => $props['borderRadius'] . 'px',
+				'display'          => 'block',
+				'max-width'        => '100%',
+			)
+		);
+
+		// Image style (matches frontend imageStyle)
+		$image_style = $this->build_style_string(
 			array(
 				'width'         => $props['width'],
+				'height'        => $props['height'] === 'auto' ? 'auto' : $props['height'],
 				'max-width'     => '100%',
-				'height'        => $props['height'],
 				'border-radius' => $props['borderRadius'] . 'px',
 				'display'       => 'inline-block',
 			)
 		);
 
-		// If no image source, return placeholder
-		if ( empty( $props['src'] ) ) {
-			return "<div style=\"{$container_style}\">
-				<div style=\"width:100px;height:100px;background-color:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:{$props['borderRadius']}px;margin:0 auto;\">
-					" . esc_html__( 'Image', 'quillcrm' ) . '
-				</div>
-			</div>';
+		// Placeholder style (matches frontend placeholderStyle)
+		$placeholder_style = $this->build_style_string(
+			array(
+				'width'            => $props['width'],
+				'height'           => $props['height'] === 'auto' ? '200px' : $props['height'],
+				'max-width'        => '100%',
+				'border-radius'    => $props['borderRadius'] . 'px',
+				'display'          => 'flex',
+				'align-items'      => 'center',
+				'justify-content'  => 'center',
+				'background-color' => '#F5F5F580',
+				'color'            => '#6B7280',
+				'font-size'        => '14px',
+				'font-weight'      => '500',
+			)
+		);
+
+		// Start wrapper div
+		$output  = "<div style=\"{$wrapper_style}\">";
+		$output .= "<div style=\"{$container_style}\">";
+
+		// Render image element
+		if ( ! empty( $props['src'] ) ) {
+			// Render image
+			$image_element = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$image_style}\" />";
+		} else {
+			// Render placeholder (simplified for email - no icon, just text)
+			$image_element = "<div style=\"{$placeholder_style}\">📷</div>";
 		}
 
-		// Build image content
-		$image_content = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$img_style}\" />";
-
-		// Wrap in link if specified
+		// Wrap in link if provided
 		if ( $link ) {
-			$image_content = "<a href=\"{$link}\" target=\"_blank\" style=\"text-decoration:none;border:0;\">{$image_content}</a>";
+			$image_element = "<a href=\"{$link}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"text-decoration:none;\">{$image_element}</a>";
 		}
 
-		// Use table structure for better email client compatibility
-		return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
-			<tr>
-				<td align=\"{$props['align']}\" style=\"{$container_style}\">{$image_content}</td>
-			</tr>
-		</table>";
+		$output .= $image_element;
+		$output .= '</div>';
+		$output .= '</div>';
+
+		return $output;
 	}
 }
 

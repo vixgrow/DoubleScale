@@ -35,7 +35,7 @@ class SMS_Processing extends Abstract_Campaign_Processing
      */
     public function add_hooks()
     {
-        $this->register_twilio_hooks();
+        $this->register_campaign_processing_hooks();
     }
 
     /**

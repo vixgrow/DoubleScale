@@ -39,14 +39,7 @@ class Email_Processing extends Abstract_Campaign_Processing
      */
     public function add_hooks()
     {
-        add_action(
-            'init',
-            function () {
-                QuillCRM::instance()->daily_tasks->register_callback('quillcrm_daily3', array($this, 'reset_daily_count'));
-                QuillCRM::instance()->campaigns_tasks->register_callback('quillcrm_email_campaigns', array($this, 'process_campaigns'));
-                QuillCRM::instance()->campaigns_tasks->register_callback('process_campaign_email', array($this, 'process_campaign_message'));
-            }
-        );
+        $this->register_campaign_processing_hooks();
     }
 
     /**

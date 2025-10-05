@@ -112,14 +112,16 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Register Twilio hooks (common for SMS and WhatsApp)
+	 * Register campaign processing hooks
+	 * Common for all provider-based campaigns (SMS, WhatsApp, Email)
 	 * Should be called from add_hooks() in child classes
 	 *
+	 * @since 1.0.0
 	 * @return void
 	 */
-	protected function register_twilio_hooks() {
+	protected function register_campaign_processing_hooks() {
 		$type               = $this->campaign_type;
-		$daily_callback_key = $type === 'sms' ? 'quillcrm_daily3' : 'quillcrm_daily4';
+		$daily_callback_key = $this->get_daily_callback_key();
 
 		add_action(
 			'init',
@@ -129,6 +131,24 @@ abstract class Abstract_Campaign_Processing {
 				QuillCRM::instance()->campaigns_tasks->register_callback( "process_campaign_{$type}", array( $this, 'process_campaign_message' ) );
 			}
 		);
+	}
+
+	/**
+	 * Get daily callback key for rate limiting
+	 * Maps campaign types to their daily task callback identifiers
+	 *
+	 * @since 1.0.0
+	 * @return string Daily callback key
+	 */
+	protected function get_daily_callback_key() {
+		// Map campaign types to daily callback keys
+		$callbacks = array(
+			'email'    => 'quillcrm_daily3',
+			'sms'      => 'quillcrm_daily3', // Shares with email
+			'whatsapp' => 'quillcrm_daily4',
+		);
+
+		return $callbacks[ $this->campaign_type ] ?? 'quillcrm_daily_' . $this->campaign_type;
 	}
 
 
@@ -757,12 +777,11 @@ abstract class Abstract_Campaign_Processing {
 			return $this->message_provider;
 		}
 
-		// Email campaigns don't use provider system yet (MVP)
 		if ( $this->campaign_type === 'email' ) {
 			return null;
 		}
 
-		// Get provider from registry (MVP: always returns Twilio for SMS/WhatsApp)
+		// Get provider from registry
 		$this->message_provider = \QuillCRM\Managers\Message_Provider_Registry::instance()
 			->get_provider( $this->campaign_type );
 
@@ -801,18 +820,18 @@ abstract class Abstract_Campaign_Processing {
      * @param Tracking_Model $campaign_message
      * @return void
      */
-    // protected function log_campaign_processing_result($campaign, $contact, $campaign_message)
-    // {
-    //     quillcrm_get_logger()->info(
-    //         sprintf(__('Campaign %s message processed.', 'quillcrm'), ucfirst($this->campaign_type)),
-    //         array(
-    //             'code' => "campaign_{$this->campaign_type}_processed",
-    //             'status' => $campaign_message->status,
-    //             'contact_id' => $contact->id,
-    //             'campaign_id' => $campaign->id,
-    //         )
-    //     );
-    // }
+    protected function log_campaign_processing_result($campaign, $contact, $campaign_message)
+    {
+        quillcrm_get_logger()->info(
+            sprintf(__('Campaign %s message processed.', 'quillcrm'), ucfirst($this->campaign_type)),
+            array(
+                'code' => "campaign_{$this->campaign_type}_processed",
+                'status' => $campaign_message->status,
+                'contact_id' => $contact->id,
+                'campaign_id' => $campaign->id,
+            )
+        );
+    }
 
 	/**
 	 * Log campaign processing error

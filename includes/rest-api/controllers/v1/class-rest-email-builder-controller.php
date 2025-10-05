@@ -107,6 +107,24 @@ class REST_Email_Builder_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Button settings endpoint
+		register_rest_route(
+			$this->namespace,
+			'/button-settings',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_button_settings' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'save_button_settings' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
 	}
 
 
@@ -405,6 +423,81 @@ class REST_Email_Builder_Controller extends REST_Controller {
 		}
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Get button settings
+	 *
+	 * @param WP_REST_Request $request Request object
+	 * @return WP_REST_Response Response object
+	 */
+	public function get_button_settings( $request ) {
+		// Get button settings from options
+		$settings = get_option( 'quillcrm_button_settings', array() );
+
+		// Return default settings if none exist
+		if ( empty( $settings ) ) {
+			$settings = array(
+				'primary'   => array(
+					'backgroundColor' => '#0073aa',
+					'textColor'       => '#ffffff',
+					'borderRadius'    => '4px',
+					'padding'         => '12px 24px',
+					'fontSize'        => '16px',
+				),
+				'secondary' => array(
+					'backgroundColor' => '#ffffff',
+					'textColor'       => '#0073aa',
+					'borderRadius'    => '4px',
+					'padding'         => '12px 24px',
+					'fontSize'        => '16px',
+				),
+			);
+		}
+
+		return rest_ensure_response(
+			array(
+				'settings' => $settings,
+			)
+		);
+	}
+
+	/**
+	 * Save button settings
+	 *
+	 * @param WP_REST_Request $request Request object
+	 * @return WP_REST_Response|WP_Error Response object
+	 */
+	public function save_button_settings( $request ) {
+		$data = $request->get_json_params();
+
+		if ( ! isset( $data['settings'] ) ) {
+			return new WP_Error(
+				'missing_settings',
+				__( 'Settings parameter is required', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$settings = $data['settings'];
+
+		// Save settings to options
+		$updated = update_option( 'quillcrm_button_settings', $settings );
+
+		if ( ! $updated && get_option( 'quillcrm_button_settings' ) !== $settings ) {
+			return new WP_Error(
+				'update_failed',
+				__( 'Failed to update button settings', 'quillcrm' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return rest_ensure_response(
+			array(
+				'success'  => true,
+				'settings' => $settings,
+			)
+		);
 	}
 
 	/**

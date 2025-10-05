@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { SaveStatusIndicator } from './SaveStatusIndicator';
+import { SaveAsTemplateDialog } from './SaveAsTemplateDialog';
+import { saveEmailAsTemplate } from '../api/templates';
 
 const Header: React.FC = () => {
 	const dispatch = useDispatch();
@@ -21,6 +23,21 @@ const Header: React.FC = () => {
 
 	const canUndo = useSelect((select) => select(STORE_KEY).canUndo(), []);
 	const canRedo = useSelect((select) => select(STORE_KEY).canRedo(), []);
+
+	// Get builder data for template saving
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	const globalSettings = useSelect(
+		(select) => select(STORE_KEY).getGlobalSettings(),
+		[]
+	);
+	const buttonSettings = useSelect(
+		(select) => select(STORE_KEY).getAllButtonSettings(),
+		[]
+	);
+
+	// State for template dialog
+	const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+	const [isSavingTemplate, setIsSavingTemplate] = useState(false);
 
 	// Use auto-save hook
 	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
@@ -43,6 +60,48 @@ const Header: React.FC = () => {
 		const saveSuccess = await save();
 		if (saveSuccess) {
 			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
+		}
+	};
+
+	const handleSaveAsTemplate = async (templateName: string) => {
+		setIsSavingTemplate(true);
+
+		try {
+			// Prepare builder data
+			const builderData = {
+				sections: sections,
+				globalSettings: globalSettings,
+				buttonSettings: buttonSettings,
+			};
+
+			// Prepare template data
+			const templateData = {
+				name: templateName,
+				type: 'email',
+				subject: '',
+				body: JSON.stringify(builderData),
+				settings: JSON.stringify({
+					type: 'builder',
+					version: '1.0',
+				}),
+				hidden: 0, // Make it visible in templates list
+				category: 'custom',
+				is_pro: 0,
+			};
+
+			// Save template
+			await saveEmailAsTemplate(templateData);
+
+			// Show success message (you can use a toast notification here)
+			console.log('Template saved successfully!');
+
+			// Close dialog
+			setIsTemplateDialogOpen(false);
+		} catch (error: any) {
+			console.error('Error saving template:', error);
+			throw error; // Re-throw to let dialog handle the error
+		} finally {
+			setIsSavingTemplate(false);
 		}
 	};
 	return (
@@ -94,11 +153,11 @@ const Header: React.FC = () => {
 				<Button
 					variant="outline"
 					className="px-3"
-					onClick={() => save()}
-					disabled={isSaving || !hasUnsavedChanges}
-					title={__('Save now', 'quillcrm')}
+					onClick={() => setIsTemplateDialogOpen(true)}
+					disabled={isSavingTemplate}
+					title={__('Save as template', 'quillcrm')}
 				>
-					{__('Save', 'quillcrm')}
+					{__('Save as Template', 'quillcrm')}
 				</Button>
 				<Button
 					variant="default"
@@ -111,6 +170,14 @@ const Header: React.FC = () => {
 						: __('Save & Continue', 'quillcrm')}
 				</Button>
 			</div>
+
+			{/* Save as Template Dialog */}
+			<SaveAsTemplateDialog
+				isOpen={isTemplateDialogOpen}
+				onClose={() => setIsTemplateDialogOpen(false)}
+				onSave={handleSaveAsTemplate}
+				isSaving={isSavingTemplate}
+			/>
 		</div>
 	);
 };

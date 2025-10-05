@@ -205,8 +205,9 @@ class Email_Renderer {
 
 		$section_style_string = $this->build_style_string( $section_styles );
 
-		// Start section table
-		$html = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="' . $section_style_string . '">';
+		// Outer section table wrapper
+		$html  = '<!--[if mso | IE]><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->';
+		$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="' . $section_style_string . '">';
 
 		// Render columns
 		if ( ! empty( $section['columns'] ) ) {
@@ -219,23 +220,24 @@ class Email_Renderer {
 				$total_ratio += $column_width;
 			}
 
+			$column_count = count( $section['columns'] );
+
 			foreach ( $section['columns'] as $column_index => $column ) {
 				$column_width = isset( $column['width'] ) ? $column['width'] : 1;
 
-				// Always calculate width as ratio-based to handle all layout patterns:
-				// [1] = 100%
-				// [1, 1] = 50%, 50%
-				// [2, 1] = 67%, 33%
-				// [3, 1] = 75%, 25%
-				// [1, 2, 1] = 25%, 50%, 25%
-				// etc.
+				// Calculate width as ratio-based to handle all layout patterns
 				$width = ( $column_width / $total_ratio ) * 100;
 				$width = round( $width, 2 );
 
-				// Column styles
+				// Calculate pixel width for Outlook (600px max width container)
+				$pixel_width = round( ( $width / 100 ) * 600 );
+
+				// Column styles - ensuring proper vertical alignment and spacing
 				$column_styles = array(
-					'vertical-align' => 'top',
-					'padding'        => '0',
+					'vertical-align'   => 'top',
+					'padding'          => '0',
+					'mso-table-lspace' => '0pt',
+					'mso-table-rspace' => '0pt',
 				);
 
 				// Add column-specific styles if available
@@ -248,27 +250,35 @@ class Email_Renderer {
 
 				$column_style_string = $this->build_style_string( $column_styles );
 
-				$html .= '<td width="' . $width . '%" style="' . $column_style_string . '">';
+				// Outlook conditional comment for column
+				$html .= '<!--[if mso | IE]><td style="' . $column_style_string . '" width="' . $pixel_width . '"><![endif]-->';
+
+				// Standard column wrapper
+				$html .= '<td width="' . $width . '%" style="' . $column_style_string . '" class="mobile-full-width">';
+
+				// Inner table for blocks (ensures proper stacking)
+				$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';
 
 				// Render blocks in this column
 				if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
-					foreach ( $column['blocks'] as $block ) {
-						// Wrap each block in a table for proper spacing
-						$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">';
+					foreach ( $column['blocks'] as $block_index => $block ) {
 						$html .= '<tr><td style="padding: 10px 0;">';
 						$html .= $this->render_block( $block, $merge_tags );
 						$html .= '</td></tr>';
-						$html .= '</table>';
 					}
 				}
 
-				$html .= '</td>';
+				$html .= '</table>'; // Close inner blocks table
+				$html .= '</td>'; // Close standard column
+				$html .= '<!--[if mso | IE]></td><![endif]-->'; // Close Outlook column
 			}
 
 			$html .= '</tr>';
 		}
 
-		$html .= '</table>';
+		$html .= '</table>'; // Close section table
+		$html .= '<!--[if mso | IE]></td></tr></table><![endif]-->'; // Close Outlook wrapper
+
 		return $html;
 	}
 

@@ -14,6 +14,7 @@ import {
 	DialogContent,
 	DialogFooter,
 	DialogHeader,
+	DialogOverlay,
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -56,16 +57,20 @@ const DeleteModal: React.FC<DeleteConfirmationModalProps> = ({
 				itemType = __('field', 'quillcrm');
 				itemTypePlural = __('fields', 'quillcrm');
 				break;
+			case 'notes':
+				itemType = __('note', 'quillcrm');
+				itemTypePlural = __('notes', 'quillcrm');
+				break;
 			default:
 				itemType = __('item', 'quillcrm');
 				itemTypePlural = __('items', 'quillcrm');
 		}
 
 		const displayType = selectedCount === 1 ? itemType : itemTypePlural;
-		
+
 		return {
 			title: __('Confirm Deletion', 'quillcrm'),
-			message: selectedCount === 1 
+			message: selectedCount === 1
 				? `${__('Do you really want to delete the selected', 'quillcrm')} ${displayType}?`
 				: `${__('Do you really want to delete the selected', 'quillcrm')} ${selectedCount} ${displayType}?`,
 			warning: __('This action cannot be undone.', 'quillcrm')
@@ -81,7 +86,8 @@ const DeleteModal: React.FC<DeleteConfirmationModalProps> = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="max-w-[38rem] p-8">
+			<DialogOverlay className="z-[1800000]" />
+			<DialogContent className="max-w-[38rem] p-8 z-[1800000]">
 				<DialogHeader>
 					<div className="flex flex-col items-center justify-center gap-6">
 						<div className="flex items-center justify-center rounded-3xl p-5 bg-[#FCDADA] text-[#EF4444]">

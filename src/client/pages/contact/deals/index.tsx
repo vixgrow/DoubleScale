@@ -10,21 +10,20 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import './style.scss';
-import type { AutomationContactsResponse } from '@quillcrm/client';
+import type { DealsResponse } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
-import { NoAutomationIcon } from '@quillcrm/components';
+import { NoDealsIcon } from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import { getColumns } from './columns';
 
-interface AutomationProps {
+interface DealsProps {
 	contact_id: number;
 }
 
-const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
-	const { automationContacts, setAutomationContacts } = useContactContext();
+const Deals: React.FC<DealsProps> = ({ contact_id }) => {
+	const { deals, setDeals } = useContactContext();
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
@@ -39,26 +38,26 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 		setPerPage,
 	});
 
-	const fetchAutomationContacts = async () => {
+	const fetchDeals = async () => {
 		setLoading(true);
 
 		try {
 			const response = (await apiFetch({
 				path: addQueryArgs(
-					`/qc/v1/contacts/${contact_id}/automation-contacts`,
+					`/qc/v1/contacts/${contact_id}/deals`,
 					{
 						per_page: perPage,
 						page,
 					}
 				),
-			})) as AutomationContactsResponse;
+			})) as DealsResponse;
 
-			setAutomationContacts(response.data);
+			setDeals(response.data);
 			setTotalRecords(response.total);
 		} catch (error) {
 			createNotice({
 				type: 'error',
-				message: __('Failed to fetch automation', 'quillcrm'),
+				message: __('Failed to fetch deals', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);
@@ -66,36 +65,36 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 	};
 
 	useEffect(() => {
-		fetchAutomationContacts();
+		fetchDeals();
 	}, [page, perPage]);
 
 	const columns = getColumns({
-		onView: (automationContact) => {
+		onView: (deal) => {
 			// TODO: Implement view automation details dialog
-			console.log('View automation:', automationContact);
+			console.log('View deal:', deal);
 		},
 	});
 
 	return (
 		<div className="qcrm-automation flex flex-col gap-5">
 			<h3 className="text-2xl font-semibold">
-				{__('Automation', 'quillcrm')}
+				{__('Deals', 'quillcrm')}
 			</h3>
 			<div>
-				{!loading && (!automationContacts || automationContacts.length === 0) ? (
+				{!loading && (!deals || deals.length === 0) ? (
 					<div className="flex flex-col items-center justify-center py-20 gap-4">
 						<div className="text-gray-400">
-							<NoAutomationIcon width={120} height={120} />
+						 <NoDealsIcon width={120} height={120} />
 						</div>
 						<span className="text-lg text-gray-500 font-medium">
-							{__('No automations found', 'quillcrm')}
+							{__('No deals found', 'quillcrm')}
 						</span>
 					</div>
 				) : (
 					<>
 						<DataTable
 							columns={columns}
-							data={automationContacts || []}
+							data={deals || []}
 							loading={loading}
 							showPagination={false}
 							initialPageSize={perPage}
@@ -111,4 +110,4 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 	);
 };
 
-export default Automation;
+export default Deals;

@@ -93,6 +93,8 @@ const Canvas = ({}: CanvasProps) => {
 							: undefined,
 						backgroundRepeat: globalSettings.backgroundRepeat,
 						backgroundSize: globalSettings.backgroundSize,
+						backgroundPosition:
+							globalSettings.backgroundPosition || 'center',
 					}}
 					className="shadow-lg rounded-lg"
 				>

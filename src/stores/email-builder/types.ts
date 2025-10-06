@@ -52,6 +52,7 @@ export interface GlobalEmailSettings {
 	} | null;
 	backgroundRepeat: string;
 	backgroundSize: string;
+	backgroundPosition: string;
 	canvasWidth: number;
 }
 

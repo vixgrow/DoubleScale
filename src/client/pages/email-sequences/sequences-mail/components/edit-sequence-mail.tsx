@@ -76,6 +76,7 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 						campaign_content: '',
 					},
 					email_body: '',
+					templates: [],
 				};
 			} else {
 				// Ensure all required fields exist
@@ -108,6 +109,11 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 						saturday: false,
 						sunday: false,
 					};
+				}
+
+				// Ensure templates field exists
+				if (!response.settings.templates) {
+					response.settings.templates = [];
 				}
 			}
 
@@ -154,6 +160,7 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 					add_utm_parameters: data.add_utm_parameters,
 					utm_parameters: data.utm_parameters,
 					email_body: data.email_body,
+					templates: data.templates || [],
 				},
 			};
 
@@ -215,6 +222,7 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 				add_utm_parameters: emailData.settings.add_utm_parameters,
 				utm_parameters: emailData.settings.utm_parameters,
 				email_body: emailData.settings.email_body,
+				templates: emailData.settings.templates || [],
 			}}
 		/>
 	) : null;

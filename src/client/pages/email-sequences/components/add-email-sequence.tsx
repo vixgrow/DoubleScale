@@ -4,6 +4,7 @@ import EmailSequenceModal from './email-sequence-modal';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 import { EMAIL_SEQUENCE_TYPE, END_POINT } from '../constants';
+import { EmailSequenceData } from '../types';
 
 interface AddEmailSequenceProps {
 	onSuccess?: () => void;
@@ -27,15 +28,24 @@ const AddEmailSequence: React.FC<AddEmailSequenceProps> = ({
 	const [loading, setLoading] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
-	const handleSubmit = async (name: string) => {
+	const handleSubmit = async (data: EmailSequenceData) => {
 		setLoading(true);
 		try {
+			// Prepare settings object with custom email data if provided
+			const settings: any = {};
+			if (data.setCustomFromNameAndEmail) {
+				settings.from_name = data.fromName;
+				settings.from_email = data.fromEmail;
+				settings.reply_to_name = data.replyToName;
+				settings.reply_to_email = data.replyToEmail;
+			}
+
 			(await apiFetch({
 				path: END_POINT,
 				method: 'POST',
 				data: {
-					name: name,
-					settings: {},
+					name: data.name,
+					settings: settings,
 					description: __('New email sequence', 'quillcrm'),
 					type: EMAIL_SEQUENCE_TYPE,
 					status: 'draft',

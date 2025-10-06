@@ -48,6 +48,7 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 					add_utm_parameters: data.add_utm_parameters,
 					utm_parameters: data.utm_parameters,
 					email_body: data.email_body,
+					templates: data.templates || [],
 				},
 				description: __('New sequence email', 'quillcrm'),
 				status: 'draft',
@@ -116,6 +117,7 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 					campaign_content: '',
 				},
 				email_body: '',
+				templates: [],
 			}}
 		/>
 	);

@@ -56,6 +56,7 @@ const defaultData: SequenceMailSettings = {
 		campaign_content: '',
 	},
 	email_body: '',
+	templates: [],
 };
 
 const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
@@ -73,6 +74,7 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 			...defaultData.utm_parameters,
 			...(initialData?.utm_parameters || {}),
 		},
+		templates: initialData?.templates || defaultData.templates,
 	};
 
 	const [formData, setFormData] =
@@ -94,6 +96,7 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 					...defaultData.utm_parameters,
 					...(initialData?.utm_parameters || {}),
 				},
+				templates: initialData?.templates || defaultData.templates,
 			};
 			setFormData(resetData);
 		}

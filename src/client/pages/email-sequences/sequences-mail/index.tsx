@@ -12,6 +12,7 @@ import { PlusIcon } from 'lucide-react';
 // Import components
 import AddSequenceMail from './components/add-sequence-mail';
 import EditSequenceMail from './components/edit-sequence-mail';
+import SequenceReportsModal from './components/sequence-reports-modal';
 import { END_POINT, SEQUENCE_MAIL_TYPE } from '../constants';
 
 // Import types
@@ -28,6 +29,11 @@ const SequencesMail: React.FC = () => {
 	const [isAddingEmail, setIsAddingEmail] = useState(false);
 	const [isEditingEmail, setIsEditingEmail] = useState(false);
 	const [editingEmailId, setEditingEmailId] = useState<number | null>(null);
+	const [isShowingReports, setIsShowingReports] = useState(false);
+	const [reportingEmailId, setReportingEmailId] = useState<number | null>(
+		null
+	);
+	const [reportingEmailName, setReportingEmailName] = useState<string>('');
 
 	// Fetch sequence emails on component mount
 	useEffect(() => {
@@ -75,13 +81,10 @@ const SequencesMail: React.FC = () => {
 
 	// Helper function to get display stats
 	const getDisplayStats = (email: SequenceMail): SequenceMailStats => {
-		// In a real app, you would get these from the API
-		// For now, we'll just return placeholder values based on the email data
 		return {
-			sent: email.count || 0,
-			opened: 0,
-			clicked: 0,
-			unsubscribed: 0,
+			sent: email.sent || 0,
+			opened: email.opened || 0,
+			click: email.click || 0,
 		};
 	};
 
@@ -156,7 +159,11 @@ const SequencesMail: React.FC = () => {
 	};
 
 	const handleShowReport = (emailId: number) => {
-		window.location.href = `/wp-admin/admin.php?page=quillcrm-email-sequences-reports&sequence_id=${id}&email_id=${emailId}`;
+		// Find the email name for the modal title
+		const email = sequenceEmails.find((e) => e.id === emailId);
+		setReportingEmailId(emailId);
+		setReportingEmailName(email?.name || `Email ${emailId}`);
+		setIsShowingReports(true);
 	};
 
 	const handleAddSequenceEmail = () => {
@@ -360,22 +367,12 @@ const SequencesMail: React.FC = () => {
 									</div>
 									<div className="flex flex-col">
 										<span className="text-lg font-medium">
-											{stats.clicked > 0
-												? stats.clicked
+											{stats.click > 0
+												? stats.click
 												: '--'}
 										</span>
 										<span className="text-sm text-muted-foreground">
 											{__('Clicked', 'quillcrm')}
-										</span>
-									</div>
-									<div className="flex flex-col">
-										<span className="text-lg font-medium">
-											{stats.unsubscribed > 0
-												? stats.unsubscribed
-												: '--'}
-										</span>
-										<span className="text-sm text-muted-foreground">
-											{__('Unsubscribed', 'quillcrm')}
 										</span>
 									</div>
 								</div>
@@ -412,6 +409,17 @@ const SequencesMail: React.FC = () => {
 					sequenceId={id || ''}
 					emailId={editingEmailId}
 					onSuccess={fetchSequenceEmails}
+				/>
+			)}
+
+			{/* Reports Modal */}
+			{reportingEmailId && (
+				<SequenceReportsModal
+					open={isShowingReports}
+					onOpenChange={setIsShowingReports}
+					sequenceId={id || ''}
+					emailId={reportingEmailId}
+					emailName={reportingEmailName}
 				/>
 			)}
 		</div>

@@ -2,6 +2,8 @@
  * Type definitions for Email Sequences module
  */
 
+import { EmailTemplate } from '../../../types';
+
 /**
  * Settings for sequence mail
  */
@@ -35,6 +37,38 @@ export interface SequenceMailSettings {
         campaign_content: string;
     };
     email_body: string;
+    templates: EmailTemplate[];
+}
+
+/**
+ * Data for email sequence
+ */
+
+export interface EmailSequenceData {
+    name: string;
+    fromName: string;
+    fromEmail: string;
+    replyToName: string;
+    replyToEmail: string;
+    setCustomFromNameAndEmail: boolean;
+}
+
+/**
+ * Report data for sequence mail
+ */
+export interface SequenceMailReport extends SequenceMail {
+    open_rate: number;
+    click_rate: number;
+    sent_rate: number;
+    recipients: Array<{
+        id: number;
+        name: string;
+        email: string;
+        status: string;
+        sent_at: string;
+        opened_at?: string;
+        clicked_at?: string;
+    }>;
 }
 
 /**
@@ -53,6 +87,9 @@ export interface SequenceMail {
     updated_at: string;
     type: string;
     contacts_count: number;
+    sent: number;
+    opened: number;
+    click: number;
 }
 
 /**
@@ -72,6 +109,9 @@ export interface EmailSequence {
     type: string;
     contacts_count: number;
     sequences_mail: SequenceMail[];
+    sent: number;
+    opened: number;
+    click: number;
 }
 
 /**
@@ -89,8 +129,7 @@ export interface EmailSequenceListResponse {
 export interface SequenceMailStats {
     sent: number | string;
     opened: number;
-    clicked: number;
-    unsubscribed: number;
+    click: number;
 }
 
 

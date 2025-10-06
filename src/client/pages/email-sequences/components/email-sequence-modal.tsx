@@ -10,13 +10,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { EmailSequenceData } from '../types';
 
 interface EmailSequenceModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	onSubmit: (name: string) => void;
+	onSubmit: (data: EmailSequenceData) => void;
 	title: string;
-	initialValue?: string;
+	initialValue?: Partial<EmailSequenceData>;
 	isLoading?: boolean;
 }
 
@@ -25,47 +27,183 @@ const EmailSequenceModal: React.FC<EmailSequenceModalProps> = ({
 	onOpenChange,
 	onSubmit,
 	title,
-	initialValue = '',
+	initialValue = {},
 	isLoading = false,
 }) => {
-	const [name, setName] = useState(initialValue);
+	const [formData, setFormData] = useState<EmailSequenceData>({
+		name: initialValue.name || '',
+		fromName: initialValue.fromName || '',
+		fromEmail: initialValue.fromEmail || '',
+		replyToName: initialValue.replyToName || '',
+		replyToEmail: initialValue.replyToEmail || '',
+		setCustomFromNameAndEmail:
+			initialValue.setCustomFromNameAndEmail || false,
+	});
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (name.trim()) {
-			onSubmit(name);
+		if (formData.name.trim()) {
+			onSubmit(formData);
 		}
+	};
+
+	const updateFormData = (
+		field: keyof EmailSequenceData,
+		value: string | boolean
+	) => {
+		setFormData((prev) => ({
+			...prev,
+			[field]: value,
+		}));
 	};
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-[600px]">
 				<DialogHeader>
 					<DialogTitle>{title}</DialogTitle>
 				</DialogHeader>
 				<form onSubmit={handleSubmit}>
 					<div className="grid gap-4 py-4">
-						<div className="grid grid-cols-4 items-center gap-4">
-							<Label
-								htmlFor="name"
-								className="text-right col-span-1"
-							>
-								{__('Name', 'quillcrm')}
+						{/* Internal Title */}
+						<div className="grid gap-2">
+							<Label htmlFor="name">
+								{__('Internal Title', 'quillcrm')}
 							</Label>
-							<div className="col-span-3">
-								<Input
-									id="name"
-									placeholder={__(
-										'Enter a name for your email sequence',
-										'quillcrm'
-									)}
-									value={name}
-									onChange={(e) => setName(e.target.value)}
-									autoFocus
-									required
-								/>
-							</div>
+							<Input
+								id="name"
+								placeholder={__(
+									'Enter a name for your email sequence',
+									'quillcrm'
+								)}
+								value={formData.name}
+								onChange={(e) =>
+									updateFormData('name', e.target.value)
+								}
+								autoFocus
+								required
+							/>
 						</div>
+
+						{/* Set Custom From Name and Email Checkbox */}
+						<div className="flex items-center space-x-2">
+							<Checkbox
+								id="setCustomFromNameAndEmail"
+								checked={formData.setCustomFromNameAndEmail}
+								onCheckedChange={(checked) =>
+									updateFormData(
+										'setCustomFromNameAndEmail',
+										checked as boolean
+									)
+								}
+							/>
+							<Label
+								htmlFor="setCustomFromNameAndEmail"
+								className="text-blue-600"
+							>
+								{__(
+									'Set Custom From Name and Email',
+									'quillcrm'
+								)}
+							</Label>
+						</div>
+
+						{/* Custom From Fields - Only show when checkbox is checked */}
+						{formData.setCustomFromNameAndEmail && (
+							<div className="grid gap-4 p-4 bg-gray-50 rounded-lg">
+								{/* From Name and From Email Row */}
+								<div className="grid grid-cols-2 gap-4">
+									<div className="grid gap-2">
+										<Label htmlFor="fromName">
+											{__('From Name', 'quillcrm')}
+										</Label>
+										<Input
+											id="fromName"
+											placeholder={__(
+												'From Name',
+												'quillcrm'
+											)}
+											value={formData.fromName}
+											onChange={(e) =>
+												updateFormData(
+													'fromName',
+													e.target.value
+												)
+											}
+										/>
+									</div>
+									<div className="grid gap-2">
+										<Label htmlFor="fromEmail">
+											{__('From Email', 'quillcrm')}
+										</Label>
+										<Input
+											id="fromEmail"
+											type="email"
+											placeholder={__(
+												'From Email',
+												'quillcrm'
+											)}
+											value={formData.fromEmail}
+											onChange={(e) =>
+												updateFormData(
+													'fromEmail',
+													e.target.value
+												)
+											}
+										/>
+										<p className="text-xs text-gray-500">
+											{__(
+												'Please make sure this email is supported by your SMTP/SES',
+												'quillcrm'
+											)}
+										</p>
+									</div>
+								</div>
+
+								{/* Reply To Name and Reply To Email Row */}
+								<div className="grid grid-cols-2 gap-4">
+									<div className="grid gap-2">
+										<Label htmlFor="replyToName">
+											{__('Reply To Name', 'quillcrm')}
+										</Label>
+										<Input
+											id="replyToName"
+											placeholder={__(
+												'Reply To Name',
+												'quillcrm'
+											)}
+											value={formData.replyToName}
+											onChange={(e) =>
+												updateFormData(
+													'replyToName',
+													e.target.value
+												)
+											}
+										/>
+									</div>
+									<div className="grid gap-2">
+										<Label htmlFor="replyToEmail">
+											{__('Reply To Email', 'quillcrm')}
+										</Label>
+										<Input
+											id="replyToEmail"
+											type="email"
+											placeholder={__(
+												'Reply To Email',
+												'quillcrm'
+											)}
+											value={formData.replyToEmail}
+											onChange={(e) =>
+												updateFormData(
+													'replyToEmail',
+													e.target.value
+												)
+											}
+										/>
+									</div>
+								</div>
+							</div>
+						)}
 					</div>
 					<DialogFooter>
 						<Button
@@ -77,7 +215,7 @@ const EmailSequenceModal: React.FC<EmailSequenceModalProps> = ({
 						</Button>
 						<Button
 							type="submit"
-							disabled={!name.trim() || isLoading}
+							disabled={!formData.name.trim() || isLoading}
 						>
 							{isLoading
 								? __('Saving...', 'quillcrm')
@@ -91,3 +229,4 @@ const EmailSequenceModal: React.FC<EmailSequenceModalProps> = ({
 };
 
 export default EmailSequenceModal;
+export type { EmailSequenceData };

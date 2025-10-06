@@ -226,6 +226,7 @@ const EmailSequences: React.FC = () => {
 				<EditEmailSequence
 					id={editingSequence.id}
 					name={editingSequence.name}
+					settings={editingSequence.settings}
 					isEditing={isEditing}
 					setIsEditing={setIsEditing}
 					onSuccess={() => {

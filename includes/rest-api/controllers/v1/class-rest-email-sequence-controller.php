@@ -2,6 +2,9 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Managers\Email_Sequences_Manager;
+use QuillCRM\Models\Tracking_Model;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -12,12 +15,6 @@ use QuillCRM\Models\Campaign_Model as Email_Sequence_Model;
 use QuillCRM\User_Roles\Permissions;
 
 class REST_Email_Sequence_Controller extends REST_Controller {
-
-
-
-
-
-
 
 
 
@@ -97,8 +94,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 						'settings'    => array(
 							'description'       => __( 'Settings.', 'quillcrm' ),
 							'type'              => 'array',
-							'sanitize_callback' => 'sanitize_text_field',
-
+							'sanitize_callback' => array( $this, 'sanitize_settings' ),
 						),
 					),
 				),
@@ -151,11 +147,30 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'settings' => array(
+							'description'       => __( 'Settings.', 'quillcrm' ),
+							'type'              => 'array',
+							'sanitize_callback' => array( $this, 'sanitize_settings' ),
+						),
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/reports',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item_reports' ),
+					'permission_callback' => array( $this, 'get_item_reports_permissions_check' ),
 				),
 			)
 		);
@@ -204,13 +219,36 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 	public function create_item( $request ) {
 		try {
 			$email_sequence_data = $this->prepare_email_sequence( $request );
-			$parent_id           = $request->get_param( 'parent_id' );
+			if ( isset( $email_sequence_data['settings']['delay'] ) ) {
+				$execute_at                        = Email_Sequences_Manager::instance()->calculate_execution_time( $email_sequence_data['settings']['delay'] );
+				$email_sequence_data['execute_at'] = $execute_at;
+			}
+			$email_sequence_data['execute_at'] = $execute_at;
+
+			if ( empty( $email_sequence_data['settings'] ) || ! is_array( $email_sequence_data['settings'] ) ) {
+				$email_sequence_data['settings'] = array();
+			}
+
+			$parent_id = $request->get_param( 'parent_id' );
 			if ( $parent_id ) {
 				$parent_email_sequence = Email_Sequence_Model::find( $parent_id );
 				if ( ! $parent_email_sequence ) {
 					return new WP_Error( 'error', sprintf( __( '%s Email sequence not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
 				}
+				$email_sequence_data['settings']['templates'] = array(
+					array(
+						'body'     => sanitize_text_field( $email_sequence_data['settings']['email_body'] ?? '' ),
+						'subject'  => sanitize_text_field( $email_sequence_data['settings']['subject'] ?? '' ),
+						'name'     => sanitize_text_field( $email_sequence_data['settings']['name'] ?? '' ),
+						'settings' => array(
+							'from_name'  => sanitize_text_field( $parent_email_sequence['settings']['from_name'] ?? get_bloginfo( 'name' ) ),
+							'from_email' => sanitize_text_field( $parent_email_sequence['settings']['from_email'] ?? get_option( 'admin_email' ) ),
+							'reply_to'   => sanitize_text_field( $parent_email_sequence['settings']['reply_to_email'] ?? get_option( 'admin_email' ) ),
+						),
+					),
+				);
 			}
+
 			$email_sequence = Email_Sequence_Model::create( $email_sequence_data );
 
 			return new WP_REST_Response( $email_sequence, 201 );
@@ -227,6 +265,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 	 * @return WP_REST_Response $response The response object
 	 */
 	public function get_items( $request ) {
+
 		$keywords = $request->get_param( 'keywords' ) ?? null;
 		$per_page = $request->get_param( 'per_page' ) ?? 10;
 		$page     = $request->get_param( 'page' ) ?? 1;
@@ -290,10 +329,29 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 	public function get_item( $request ) {
 		try {
 			$email_sequence_id = $request->get_param( 'id' );
-			$email_sequence    = Email_Sequence_Model::where( 'id', $email_sequence_id )->with( 'sequences_mail' )->first();
+
+			// Fetch sequence with related mails
+			$email_sequence = Email_Sequence_Model::where( 'id', $email_sequence_id )
+				->with( 'sequences_mail' )
+				->first();
 
 			if ( ! $email_sequence ) {
-				return new WP_Error( 'error', sprintf( __( '%s Email sequence not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
+				return new WP_Error(
+					'error',
+					sprintf( __( '%s Email sequence not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ),
+					array( 'status' => 404 )
+				);
+			}
+
+			// Sort sequences_mail by delay in settings
+			if ( $email_sequence->sequences_mail ) {
+				$sorted_sequences = $email_sequence->sequences_mail->sortBy(
+					function ( $item ) {
+						return $this->get_delay_in_minutes( $item->settings );
+					}
+				);
+
+				$email_sequence->setRelation( 'sequences_mail', $sorted_sequences->values() );
 			}
 
 			return new WP_REST_Response( $email_sequence, 200 );
@@ -301,6 +359,56 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
+
+	/**
+	 * Get the email sequence reports
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response $response The response object
+	 */
+	public function get_item_reports( $request ) {
+		try {
+			$email_sequence_id = $request->get_param( 'id' );
+			$email_sequence    = Email_Sequence_Model::find( $email_sequence_id );
+			if ( ! $email_sequence || $email_sequence->parent_id === null || $email_sequence->parent_id <= 0 ) {
+				return new WP_Error( 'error', sprintf( __( '%s Email sequence not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
+			}
+			$parent_email_sequence        = Email_Sequence_Model::find( $email_sequence->parent_id );
+			$total_contacts               = count( $parent_email_sequence->settings['contact_ids'] ?? array() );
+			$email_sequence['sent_rate']  = $email_sequence->sent / $total_contacts * 100;
+			$email_sequence['open_rate']  = $email_sequence->opened / $email_sequence->sent * 100;
+			$email_sequence['click_rate'] = $email_sequence->click / $email_sequence->sent * 100;
+			$contacts                     = Tracking_Model::where( 'source_id', $email_sequence_id )
+				->where( 'source_type', Message_Source_Types::CAMPAIGN )
+				->get();
+			$email_sequence['recipients'] = $contacts->map(
+				function ( $contact ) {
+					return array(
+						'id'         => $contact->contact->id,
+						'name'       => $contact->contact->first_name . ' ' . $contact->contact->last_name,
+						'email'      => $contact->contact->email,
+						'status'     => $contact->status,
+						'sent_at'    => $contact->sent_at,
+						'opened_at'  => $contact->opened_at,
+						'clicked_at' => $contact->clicked_at,
+					);
+				}
+			);
+			return new WP_REST_Response( $email_sequence, 200 );
+		} catch ( \Exception $e ) {
+			$logger = quillcrm_get_logger();
+			$logger->error(
+				'Email sequence reports error: ' . $e->getMessage(),
+				array(
+					'email_sequence_id' => $email_sequence_id,
+					'trace'             => $e->getTraceAsString(),
+				)
+			);
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
 
 	/**
 	 * Update the email sequence
@@ -319,6 +427,12 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			}
 
 			$email_sequence_data = $this->prepare_email_sequence( $request );
+
+			if ( isset( $email_sequence_data['settings']['delay'] ) ) {
+				$execute_at                        = Email_Sequences_Manager::instance()->calculate_execution_time( $email_sequence_data['settings']['delay'] );
+				$email_sequence_data['execute_at'] = $execute_at;
+			}
+			$email_sequence_data['execute_at'] = $execute_at;
 			$email_sequence->update( $email_sequence_data );
 
 			return new WP_REST_Response( $email_sequence, 200 );
@@ -408,6 +522,104 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Get delay in minutes for sorting purposes
+	 *
+	 * @param array|string $settings The settings array or JSON string containing delay information
+	 * @return int Delay in minutes
+	 */
+	private function get_delay_in_minutes( $settings ) {
+		if ( is_string( $settings ) ) {
+			$settings = json_decode( $settings, true );
+		}
+
+		$delay = $settings['delay'] ?? array(
+			'value' => 0,
+			'unit'  => 'minutes',
+		);
+		$value = intval( $delay['value'] ?? 0 );
+		$unit  = strtolower( $delay['unit'] ?? 'minutes' );
+
+		switch ( $unit ) {
+			case 'minutes':
+				return $value;
+			case 'hours':
+				return $value * 60;
+			case 'days':
+				return $value * 60 * 24;
+			default:
+				return $value;
+		}
+	}
+
+
+	/**
+	 * Sanitize settings array
+	 *
+	 * @param array $settings The settings array to sanitize.
+	 *
+	 * @return array The sanitized settings array
+	 */
+	public function sanitize_settings( $settings ) {
+		if ( ! is_array( $settings ) ) {
+			return array();
+		}
+
+		$sanitized = array();
+
+		// Sanitize string fields
+		$string_fields = array( 'subject', 'pre_header', 'email_body', 'from_name', 'from_email', 'reply_to_name', 'reply_to_email' );
+		foreach ( $string_fields as $field ) {
+			if ( isset( $settings[ $field ] ) ) {
+				$sanitized[ $field ] = sanitize_text_field( $settings[ $field ] );
+			}
+		}
+
+		// Sanitize delay object
+		if ( isset( $settings['delay'] ) && is_array( $settings['delay'] ) ) {
+			$sanitized['delay'] = array(
+				'value' => isset( $settings['delay']['value'] ) ? absint( $settings['delay']['value'] ) : 0,
+				'unit'  => isset( $settings['delay']['unit'] ) ? sanitize_text_field( $settings['delay']['unit'] ) : 'minutes',
+			);
+		}
+
+		// Sanitize sending_time_range object
+		if ( isset( $settings['sending_time_range'] ) && is_array( $settings['sending_time_range'] ) ) {
+			$sanitized['sending_time_range'] = array(
+				'from' => isset( $settings['sending_time_range']['from'] ) ? sanitize_text_field( $settings['sending_time_range']['from'] ) : '',
+				'to'   => isset( $settings['sending_time_range']['to'] ) ? sanitize_text_field( $settings['sending_time_range']['to'] ) : '',
+			);
+		}
+
+		// Sanitize boolean fields
+		$boolean_fields = array( 'enable_specific_days', 'add_utm_parameters' );
+		foreach ( $boolean_fields as $field ) {
+			if ( isset( $settings[ $field ] ) ) {
+				$sanitized[ $field ] = (bool) $settings[ $field ];
+			}
+		}
+
+		// Sanitize days object
+		if ( isset( $settings['days'] ) && is_array( $settings['days'] ) ) {
+			$days              = array( 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' );
+			$sanitized['days'] = array();
+			foreach ( $days as $day ) {
+				$sanitized['days'][ $day ] = isset( $settings['days'][ $day ] ) ? (bool) $settings['days'][ $day ] : false;
+			}
+		}
+
+		// Sanitize UTM parameters object
+		if ( isset( $settings['utm_parameters'] ) && is_array( $settings['utm_parameters'] ) ) {
+			$utm_fields                  = array( 'campaign_source', 'campaign_medium', 'campaign_name', 'campaign_term', 'campaign_content' );
+			$sanitized['utm_parameters'] = array();
+			foreach ( $utm_fields as $field ) {
+				$sanitized['utm_parameters'][ $field ] = isset( $settings['utm_parameters'][ $field ] ) ? sanitize_text_field( $settings['utm_parameters'][ $field ] ) : '';
+			}
+		}
+
+		return $sanitized;
+	}
+
+	/**
 	 * Prepare the email sequence data
 	 *
 	 * @param WP_REST_Request $request The request object.
@@ -493,6 +705,17 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 	 * @return bool $permission Whether the user has permission to duplicate the email sequence
 	 */
 	public function duplicate_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if the user has permission to get the email sequence reports
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return bool $permission Whether the user has permission to get the email sequence reports
+	 */
+	public function get_item_reports_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 }

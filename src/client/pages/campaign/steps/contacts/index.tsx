@@ -213,6 +213,7 @@ const Contacts: React.FC = () => {
 						onFetchComplete={() => setShouldFetchContacts(false)}
 						onTotalChange={setTotal}
 						onLoadingChange={setIsLoading}
+						campaignType={campaign?.type}
 					/>
 				</div>
 			)}

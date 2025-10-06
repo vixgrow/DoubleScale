@@ -63,25 +63,30 @@ class REST_Contact_Controller extends REST_Controller {
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
-						'keyword'    => array(
+						'keyword'       => array(
 							'description' => __( 'Keyword to search.', 'quillcrm' ),
 							'type'        => 'string',
 						),
-						'per_page'   => array(
+						'per_page'      => array(
 							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
-						'page'       => array(
+						'page'          => array(
 							'description' => __( 'Page number.', 'quillcrm' ),
 							'type'        => 'integer',
 						),
-						'filters'    => array(
+						'filters'       => array(
 							'description' => __( 'Filters to apply.', 'quillcrm' ),
 							'type'        => 'array',
 						),
-						'subscribed' => array(
+						'subscribed'    => array(
 							'description' => __( 'Subscribed contacts.', 'quillcrm' ),
 							'type'        => 'boolean',
+						),
+						'campaign_type' => array(
+							'description' => __( 'Campaign type for filtering contacts (email, sms, whatsapp).', 'quillcrm' ),
+							'type'        => 'string',
+							'enum'        => array( 'email', 'sms', 'whatsapp' ),
 						),
 					),
 				),
@@ -750,14 +755,15 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$keywords   = $request->get_param( 'keywords' ) ?? '';
-			$filters    = $request->get_param( 'filters' );
-			$subscribed = $request->get_param( 'subscribed' ) ?? false;
-			$from       = $request->get_param( 'from' ) ?? null;
-			$to         = $request->get_param( 'to' ) ?? null;
-			$query      = Contact_Model::query();
+			$per_page      = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page          = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$keywords      = $request->get_param( 'keywords' ) ?? '';
+			$filters       = $request->get_param( 'filters' );
+			$subscribed    = $request->get_param( 'subscribed' ) ?? false;
+			$campaign_type = $request->get_param( 'campaign_type' ) ?? null;
+			$from          = $request->get_param( 'from' ) ?? null;
+			$to            = $request->get_param( 'to' ) ?? null;
+			$query         = Contact_Model::query();
 
 			$total_count = $query->count();
 			if ( '' !== $keywords ) {
@@ -784,6 +790,12 @@ class REST_Contact_Controller extends REST_Controller {
 
 			if ( $subscribed ) {
 				$contacts = $contacts->where( 'status', 'subscribed' );
+			}
+
+			// Apply campaign type filter (email/phone availability)
+			if ( $campaign_type ) {
+				$campaign_contact_filter = \QuillCRM\Services\Campaign_Contact_Filter::instance();
+				$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type );
 			}
 
 			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );

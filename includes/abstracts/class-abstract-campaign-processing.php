@@ -223,12 +223,15 @@ abstract class Abstract_Campaign_Processing {
 			$campaign_message->status      = 'sent'; // Update status
 			$campaign_message->save();
 
-			quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' Message ID stored for tracking', [
-			'tracking_id' => $campaign_message->id,
-			'message_id' => $result['message_id'],
-			'contact_id' => $contact->id,
-			'code' => "{$this->campaign_type}_message_id_stored"
-			]);
+			quillcrm_get_logger()->info(
+				ucfirst( $this->campaign_type ) . ' Message ID stored for tracking',
+				array(
+					'tracking_id' => $campaign_message->id,
+					'message_id'  => $result['message_id'],
+					'contact_id'  => $contact->id,
+					'code'        => "{$this->campaign_type}_message_id_stored",
+				)
+			);
 		} else {
 			// Log if Message ID storage failed
 			quillcrm_get_logger()->warning(
@@ -522,6 +525,8 @@ abstract class Abstract_Campaign_Processing {
 					$this->campaign_type,
 					$this->campaign_type === 'email' ? 'no email' : 'no phone number'
 				);
+				// Increment offset for skipped contact to avoid reprocessing
+				update_option( "quillcrm_{$this->campaign_type}_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
 				return true; // Count as processed to avoid infinite loop
 			}
 
@@ -559,14 +564,14 @@ abstract class Abstract_Campaign_Processing {
 			QuillCRM::instance()->campaigns_tasks->enqueue_sync( "process_campaign_{$this->campaign_type}", $campaign, $contact, $campaign_message );
 
 			quillcrm_get_logger()->info(
-			sprintf(__('Campaign %s enqueued.', 'quillcrm'), $this->campaign_type),
-			array(
-			'code' => "add_campaign_{$this->campaign_type}",
-			'campaign_message' => array(
-			'id' => $campaign_message->id,
-			'hash_key' => $campaign_message->hash_key,
-			),
-			)
+				sprintf( __( 'Campaign %s enqueued.', 'quillcrm' ), $this->campaign_type ),
+				array(
+					'code'             => "add_campaign_{$this->campaign_type}",
+					'campaign_message' => array(
+						'id'       => $campaign_message->id,
+						'hash_key' => $campaign_message->hash_key,
+					),
+				)
 			);
 			return true;
 		} catch ( \Exception $e ) {
@@ -631,7 +636,7 @@ abstract class Abstract_Campaign_Processing {
 			$this->handle_send_result( $campaign_message, $result );
 
 			// Log processing result
-			$this->log_campaign_processing_result($campaign, $contact, $campaign_message);
+			$this->log_campaign_processing_result( $campaign, $contact, $campaign_message );
 
 		} catch ( \Exception $e ) {
 			// Log processing error
@@ -690,14 +695,14 @@ abstract class Abstract_Campaign_Processing {
 		update_option( "quillcrm_{$this->campaign_type}_campaigns_last_contact_offset_{$campaign->id}", $recipients_count );
 
 		quillcrm_get_logger()->info(
-		sprintf(__('%s Campaign completed.', 'quillcrm'), ucfirst($this->campaign_type)),
-		array(
-		'code' => "{$this->campaign_type}_campaign_completed",
-		'campaign' => array(
-		'id' => $campaign->id,
-		'name' => $campaign->name,
-		),
-		)
+			sprintf( __( '%s Campaign completed.', 'quillcrm' ), ucfirst( $this->campaign_type ) ),
+			array(
+				'code'     => "{$this->campaign_type}_campaign_completed",
+				'campaign' => array(
+					'id'   => $campaign->id,
+					'name' => $campaign->name,
+				),
+			)
 		);
 	}
 
@@ -978,11 +983,11 @@ abstract class Abstract_Campaign_Processing {
 		update_option( $offset_key, 0 );
 
 		quillcrm_get_logger()->info(
-		sprintf(__('Resent failed %s messages completed.', 'quillcrm'), $this->campaign_type),
-		array(
-		'code' => "resent_failed_{$this->campaign_type}",
-		'campaign' => $campaign->id,
-		)
+			sprintf( __( 'Resent failed %s messages completed.', 'quillcrm' ), $this->campaign_type ),
+			array(
+				'code'     => "resent_failed_{$this->campaign_type}",
+				'campaign' => $campaign->id,
+			)
 		);
 	}
 

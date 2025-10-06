@@ -303,6 +303,14 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			}
 
 			$campaign_data = $this->prepare_campaign( $request );
+
+			// Recalculate count if filters were updated
+			if ( isset( $campaign_data['settings']['filters'] ) ) {
+				$filters                = $campaign_data['settings']['filters'] ?? array();
+				$contact_filter         = \QuillCRM\Services\Campaign_Contact_Filter::instance();
+				$campaign_data['count'] = $contact_filter->get_contact_count( $this->campaign_type, $filters );
+			}
+
 			$campaign->update( $campaign_data );
 
 			return new WP_REST_Response( $campaign, 200 );

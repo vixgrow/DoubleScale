@@ -44,6 +44,7 @@ export const fetchContacts = (options: {
   perPage?: number;
   subscribed?: boolean;
   forceRefresh?: boolean;
+  campaignType?: string;
 } = {}) => async ({ select, dispatch }: any) => {
   const {
     filters = [],
@@ -52,6 +53,7 @@ export const fetchContacts = (options: {
     perPage = 50,
     subscribed = true,
     forceRefresh = false,
+    campaignType,
   } = options;
 
   const queryKey = generateQueryKey(filters, keywords, page, perPage);
@@ -70,14 +72,21 @@ export const fetchContacts = (options: {
   });
 
   try {
+    const queryParams: Record<string, any> = {
+      per_page: perPage,
+      page,
+      filters,
+      subscribed,
+      keywords,
+    };
+
+    // Add campaign_type if provided
+    if (campaignType) {
+      queryParams.campaign_type = campaignType;
+    }
+
     const response = (await apiFetch({
-      path: addQueryArgs('/qc/v1/contacts', {
-        per_page: perPage,
-        page,
-        filters,
-        subscribed,
-        keywords,
-      }),
+      path: addQueryArgs('/qc/v1/contacts', queryParams),
       method: 'GET',
       parse: true,
     })) as ContactsResponse;
@@ -300,6 +309,7 @@ export const loadMoreContacts = (options: {
   filters?: FilterType[];
   keywords?: string;
   subscribed?: boolean;
+  campaignType?: string;
 } = {}) => async ({ select, dispatch }: any) => {
   const state = select.getContactsState();
   const { pagination } = state;

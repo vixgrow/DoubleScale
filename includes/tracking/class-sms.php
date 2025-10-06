@@ -11,14 +11,14 @@
 namespace QuillCRM\Tracking;
 
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Abstracts\Abstract_Provider_Tracking;
+use QuillCRM\Abstracts\Abstract_Tracking;
 
 defined('ABSPATH') || exit;
 
 /**
  * SMS Tracking Class
  */
-class SMS extends Abstract_Provider_Tracking
+class SMS extends Abstract_Tracking
 {
 	/**
 	 * Campaign type

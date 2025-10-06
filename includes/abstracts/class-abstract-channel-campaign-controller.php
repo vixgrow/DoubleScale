@@ -1,7 +1,10 @@
 <?php
 /**
- * Abstract Provider Campaign Controller
- * Base class for provider-agnostic campaign REST controllers (SMS, WhatsApp)
+ * Abstract Channel Campaign Controller
+ * Base class for channel-specific campaign controllers (SMS, WhatsApp)
+ *
+ * Provides common functionality for campaigns that send via message providers.
+ * Email campaigns extend Abstract_Campaign_Controller directly.
  *
  * @since 1.0.0
  * @package QuillCRM
@@ -17,9 +20,9 @@ use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Abstracts\Abstract_Campaign_Controller;
 
 /**
- * Abstract_Provider_Campaign_Controller class
+ * Abstract_Channel_Campaign_Controller class
  */
-abstract class Abstract_Provider_Campaign_Controller extends Abstract_Campaign_Controller
+abstract class Abstract_Channel_Campaign_Controller extends Abstract_Campaign_Controller
 {
 	/**
 	 * Get channel type (sms, whatsapp) - must be implemented by child classes

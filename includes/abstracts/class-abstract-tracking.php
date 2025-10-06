@@ -1,7 +1,7 @@
 <?php
 /**
- * Abstract Provider Tracking
- * Base class for provider-agnostic tracking functionality (SMS, WhatsApp)
+ * Abstract Tracking
+ * Base class for tracking functionality across all communication types (SMS, WhatsApp, Email)
  *
  * @since 1.0.0
  * @package QuillCRM
@@ -15,9 +15,9 @@ use QuillCRM\Managers\Message_Provider_Registry;
 defined('ABSPATH') || exit;
 
 /**
- * Abstract_Provider_Tracking Class
+ * Abstract_Tracking Class
  */
-abstract class Abstract_Provider_Tracking
+abstract class Abstract_Tracking
 {
 	/**
 	 * Instance storage for child classes

@@ -15,7 +15,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Utils;
-use QuillCRM\Abstracts\Abstract_Provider_Campaign_Controller;
+use QuillCRM\Abstracts\Abstract_Channel_Campaign_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
@@ -26,7 +26,7 @@ use QuillCRM\Managers\Campaign_Status_Manager;
 /**
  * Rest_WhatsApp_Campaign_Controller class
  */
-class REST_WhatsApp_Campaign_Controller extends Abstract_Provider_Campaign_Controller
+class REST_WhatsApp_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 {
 
 	/**

@@ -11,14 +11,14 @@
 namespace QuillCRM\Tracking;
 
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Abstracts\Abstract_Provider_Tracking;
+use QuillCRM\Abstracts\Abstract_Tracking;
 
 defined('ABSPATH') || exit;
 
 /**
  * WhatsApp Tracking Class
  */
-class WhatsApp extends Abstract_Provider_Tracking
+class WhatsApp extends Abstract_Tracking
 {
 	/**
 	 * Campaign type

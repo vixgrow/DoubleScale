@@ -223,21 +223,24 @@ abstract class Abstract_Campaign_Processing {
 			$campaign_message->status      = 'sent'; // Update status
 			$campaign_message->save();
 
-            // quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' Message ID stored for tracking', [
-            //     'tracking_id' => $campaign_message->id,
-            //     'message_id' => $result['message_id'],
-            //     'contact_id' => $contact->id,
-            //     'code' => "{$this->campaign_type}_message_id_stored"
-            // ]);
-        } else {
-            // Log if Message ID storage failed
-            quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' Message ID not found in response', [
-                'tracking_id' => $campaign_message->id,
-                'contact_id' => $contact->id,
-                'result' => $result,
-                'code' => "{$this->campaign_type}_message_id_missing"
-            ]);
-        }
+			quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' Message ID stored for tracking', [
+			'tracking_id' => $campaign_message->id,
+			'message_id' => $result['message_id'],
+			'contact_id' => $contact->id,
+			'code' => "{$this->campaign_type}_message_id_stored"
+			]);
+		} else {
+			// Log if Message ID storage failed
+			quillcrm_get_logger()->warning(
+				ucfirst( $this->campaign_type ) . ' Message ID not found in response',
+				array(
+					'tracking_id' => $campaign_message->id,
+					'contact_id'  => $contact->id,
+					'result'      => $result,
+					'code'        => "{$this->campaign_type}_message_id_missing",
+				)
+			);
+		}
 
 		return $result ?? array( 'success' => false );
 	}
@@ -555,32 +558,32 @@ abstract class Abstract_Campaign_Processing {
 			// Enqueue processing task
 			QuillCRM::instance()->campaigns_tasks->enqueue_sync( "process_campaign_{$this->campaign_type}", $campaign, $contact, $campaign_message );
 
-            // quillcrm_get_logger()->info(
-            //     sprintf(__('Campaign %s enqueued.', 'quillcrm'), $this->campaign_type),
-            //     array(
-            //         'code' => "add_campaign_{$this->campaign_type}",
-            //         'campaign_message' => array(
-            //             'id' => $campaign_message->id,
-            //             'hash_key' => $campaign_message->hash_key,
-            //         ),
-            //     )
-            // );
-            return true;
-        } catch (\Exception $e) {
-            quillcrm_get_logger()->error(
-                sprintf(__('Add campaign %s error.', 'quillcrm'), $this->campaign_type),
-                array(
-                    'code' => "add_campaign_{$this->campaign_type}",
-                    'error' => array(
-                        'message' => $e->getMessage(),
-                        'code' => $e->getCode(),
-                        'data' => $e->getTrace(),
-                    ),
-                )
-            );
-            return false;
-        }
-    }
+			quillcrm_get_logger()->info(
+			sprintf(__('Campaign %s enqueued.', 'quillcrm'), $this->campaign_type),
+			array(
+			'code' => "add_campaign_{$this->campaign_type}",
+			'campaign_message' => array(
+			'id' => $campaign_message->id,
+			'hash_key' => $campaign_message->hash_key,
+			),
+			)
+			);
+			return true;
+		} catch ( \Exception $e ) {
+			quillcrm_get_logger()->error(
+				sprintf( __( 'Add campaign %s error.', 'quillcrm' ), $this->campaign_type ),
+				array(
+					'code'  => "add_campaign_{$this->campaign_type}",
+					'error' => array(
+						'message' => $e->getMessage(),
+						'code'    => $e->getCode(),
+						'data'    => $e->getTrace(),
+					),
+				)
+			);
+			return false;
+		}
+	}
 
 	/**
 	 * Process campaign message - unified logic for all types
@@ -627,14 +630,14 @@ abstract class Abstract_Campaign_Processing {
 			// Handle result
 			$this->handle_send_result( $campaign_message, $result );
 
-            // Log processing result
-            // $this->log_campaign_processing_result($campaign, $contact, $campaign_message);
+			// Log processing result
+			$this->log_campaign_processing_result($campaign, $contact, $campaign_message);
 
-        } catch (\Exception $e) {
-            // Log processing error
-            $this->log_campaign_processing_error($campaign, $contact, $campaign_message, $e);
-        }
-    }
+		} catch ( \Exception $e ) {
+			// Log processing error
+			$this->log_campaign_processing_error( $campaign, $contact, $campaign_message, $e );
+		}
+	}
 
 	/**
 	 * Prepare message content - unified logic for all types
@@ -674,30 +677,29 @@ abstract class Abstract_Campaign_Processing {
 		);
 	}
 
-    /**
-     * Complete campaign
-     *
-     * @param Campaign_Model $campaign
-     * @param int            $recipients_count
-     * @return void
-     */
-    protected function complete_campaign(Campaign_Model $campaign, $recipients_count)
-    {
-        $campaign->status = 'completed';
-        $campaign->save();
-        update_option("quillcrm_{$this->campaign_type}_campaigns_last_contact_offset_{$campaign->id}", $recipients_count);
-        
-    //     quillcrm_get_logger()->info(
-    //         sprintf(__('%s Campaign completed.', 'quillcrm'), ucfirst($this->campaign_type)),
-    //         array(
-    //             'code' => "{$this->campaign_type}_campaign_completed",
-    //             'campaign' => array(
-    //                 'id' => $campaign->id,
-    //                 'name' => $campaign->name,
-    //             ),
-    //         )
-    //     );
-    }
+	/**
+	 * Complete campaign
+	 *
+	 * @param Campaign_Model $campaign
+	 * @param int            $recipients_count
+	 * @return void
+	 */
+	protected function complete_campaign( Campaign_Model $campaign, $recipients_count ) {
+		$campaign->status = 'completed';
+		$campaign->save();
+		update_option( "quillcrm_{$this->campaign_type}_campaigns_last_contact_offset_{$campaign->id}", $recipients_count );
+
+		quillcrm_get_logger()->info(
+		sprintf(__('%s Campaign completed.', 'quillcrm'), ucfirst($this->campaign_type)),
+		array(
+		'code' => "{$this->campaign_type}_campaign_completed",
+		'campaign' => array(
+		'id' => $campaign->id,
+		'name' => $campaign->name,
+		),
+		)
+		);
+	}
 
 	/**
 	 * Get template for contact (A/B testing support)
@@ -811,26 +813,25 @@ abstract class Abstract_Campaign_Processing {
 		);
 	}
 
-    /**
-     * Log campaign processing result
-     *
-     * @param Campaign_Model $campaign
-     * @param Contact_Model $contact
-     * @param Tracking_Model $campaign_message
-     * @return void
-     */
-    protected function log_campaign_processing_result($campaign, $contact, $campaign_message)
-    {
-        quillcrm_get_logger()->info(
-            sprintf(__('Campaign %s message processed.', 'quillcrm'), ucfirst($this->campaign_type)),
-            array(
-                'code' => "campaign_{$this->campaign_type}_processed",
-                'status' => $campaign_message->status,
-                'contact_id' => $contact->id,
-                'campaign_id' => $campaign->id,
-            )
-        );
-    }
+	/**
+	 * Log campaign processing result
+	 *
+	 * @param Campaign_Model $campaign
+	 * @param Contact_Model  $contact
+	 * @param Tracking_Model $campaign_message
+	 * @return void
+	 */
+	protected function log_campaign_processing_result( $campaign, $contact, $campaign_message ) {
+		quillcrm_get_logger()->info(
+			sprintf( __( 'Campaign %s message processed.', 'quillcrm' ), ucfirst( $this->campaign_type ) ),
+			array(
+				'code'        => "campaign_{$this->campaign_type}_processed",
+				'status'      => $campaign_message->status,
+				'contact_id'  => $contact->id,
+				'campaign_id' => $campaign->id,
+			)
+		);
+	}
 
 	/**
 	 * Log campaign processing error
@@ -964,27 +965,26 @@ abstract class Abstract_Campaign_Processing {
 		}
 	}
 
-    /**
-     * Complete resending process
-     *
-     * @param Campaign_Model $campaign
-     * @param string $offset_key
-     * @return void
-     */
-    protected function complete_resending($campaign, $offset_key)
-    {
-        $campaign->status = 'completed';
-        $campaign->save();
-        update_option($offset_key, 0);
-        
-    //     quillcrm_get_logger()->info(
-    //         sprintf(__('Resent failed %s messages completed.', 'quillcrm'), $this->campaign_type),
-    //         array(
-    //             'code' => "resent_failed_{$this->campaign_type}",
-    //             'campaign' => $campaign->id,
-    //         )
-    //     );
-    }
+	/**
+	 * Complete resending process
+	 *
+	 * @param Campaign_Model $campaign
+	 * @param string         $offset_key
+	 * @return void
+	 */
+	protected function complete_resending( $campaign, $offset_key ) {
+		$campaign->status = 'completed';
+		$campaign->save();
+		update_option( $offset_key, 0 );
+
+		quillcrm_get_logger()->info(
+		sprintf(__('Resent failed %s messages completed.', 'quillcrm'), $this->campaign_type),
+		array(
+		'code' => "resent_failed_{$this->campaign_type}",
+		'campaign' => $campaign->id,
+		)
+		);
+	}
 
 	/**
 	 * Get count of failed messages - can be overridden by child classes if needed
@@ -1016,57 +1016,25 @@ abstract class Abstract_Campaign_Processing {
 	}
 
 	/**
-	 * Get default max per day - can be overridden by child classes
+	 * Get default max per day - must be implemented by child classes
 	 *
 	 * @return int
 	 */
-	protected function get_default_max_per_day() {
-		switch ( $this->campaign_type ) {
-			case 'email':
-				return 10000;
-			case 'sms':
-			case 'whatsapp':
-				return 1000;
-			default:
-				return 1000;
-		}
-	}
+	abstract protected function get_default_max_per_day();
 
 	/**
-	 * Get default max per second - can be overridden by child classes
+	 * Get default max per second - must be implemented by child classes
 	 *
 	 * @return int
 	 */
-	protected function get_default_max_per_second() {
-		switch ( $this->campaign_type ) {
-			case 'email':
-				return 15;
-			case 'sms':
-			case 'whatsapp':
-				return 10;
-			default:
-				return 10;
-		}
-	}
+	abstract protected function get_default_max_per_second();
 
 	/**
-	 * Get default campaign content - can be overridden by child classes
+	 * Get default campaign content - must be implemented by child classes
 	 *
 	 * @return string
 	 */
-	protected function get_default_campaign_content() {
-		switch ( $this->campaign_type ) {
-			case 'email':
-				return method_exists( $this, 'get_default_email_content' )
-					? $this->get_default_email_content()
-					: sprintf( __( '<p>Hi {{contact:first_name}} {{contact:last_name}},</p><p>Thank you for subscribing to our updates.</p><p><a href="{{contact:unsubscribe_link}}">Unsubscribe</a></p>', 'quillcrm' ) );
-			case 'sms':
-			case 'whatsapp':
-				return sprintf( __( 'Hi {{contact:first_name}}, thank you for subscribing! Reply STOP to unsubscribe.', 'quillcrm' ) );
-			default:
-				return sprintf( __( 'Hello from QuillCRM!', 'quillcrm' ) );
-		}
-	}
+	abstract protected function get_default_campaign_content();
 
 	/**
 	 * Validate template content comprehensively

@@ -28,6 +28,10 @@ final class Email_Sequences_Manager {
 
 
 
+
+
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -387,50 +391,6 @@ final class Email_Sequences_Manager {
 		}
 	}
 
-	/**
-	 * Schedule the next sequence in the series
-	 *
-	 * @param Campaign_Model $completed_sequence
-	 */
-	private function schedule_next_sequence( Campaign_Model $completed_sequence ) {
-		// Find next sequence in the same parent series
-		$next_sequence = Campaign_Model::where( 'parent_id', $completed_sequence->parent_id )
-			->where( 'type', 'sequence_mail' )
-			->where( 'id', '>', $completed_sequence->id )
-			->where( 'status', 'draft' )
-			->orderBy( 'id', 'asc' )
-			->first();
-
-		if ( $next_sequence ) {
-			$this->schedule_sequence( $next_sequence );
-		}
-	}
-
-	/**
-	 * Schedule a sequence email based on delay settings
-	 *
-	 * @param Campaign_Model $sequence
-	 * @param Campaign_Model $parent_sequence Optional parent sequence for context
-	 */
-	public function schedule_sequence( Campaign_Model $sequence, Campaign_Model $parent_sequence = null ) {
-		$settings = $sequence->settings;
-		$delay    = $settings['delay'] ?? array(
-			'value' => 0,
-			'unit'  => 'Minutes',
-		);
-
-		$sequence->status = 'active';
-		$sequence->save();
-
-		quillcrm_get_logger()->info(
-			'Email sequence scheduled',
-			array(
-				'sequence_id' => $sequence->id,
-				'execute_at'  => $sequence->execute_at,
-				'delay'       => $delay,
-			)
-		);
-	}
 
 	/**
 	 * Calculate execution time based on delay settings
@@ -438,11 +398,11 @@ final class Email_Sequences_Manager {
 	 * @param array $delay
 	 * @return string
 	 */
-	public function calculate_execution_time( $delay ) {
+	public function calculate_execution_time( $delay, $base_time = null ) {
 		$value = intval( $delay['value'] ?? 0 );
 		$unit  = strtolower( $delay['unit'] ?? 'minutes' );
 
-		$time = time();
+		$time = $base_time ?? time();
 
 		switch ( $unit ) {
 			case 'minutes':
@@ -470,27 +430,8 @@ final class Email_Sequences_Manager {
 	 * @return string
 	 */
 	public function calculate_execution_time_from_base( $delay, $base_time ) {
-		$value = intval( $delay['value'] ?? 0 );
-		$unit  = strtolower( $delay['unit'] ?? 'minutes' );
-
 		$time = strtotime( $base_time );
-
-		switch ( $unit ) {
-			case 'minutes':
-				$time = strtotime( "+{$value} minutes", $time );
-				break;
-			case 'hours':
-				$time = strtotime( "+{$value} hours", $time );
-				break;
-			case 'days':
-				$time = strtotime( "+{$value} days", $time );
-				break;
-			default:
-				$time = strtotime( "+{$value} minutes", $time );
-				break;
-		}
-
-		return date( 'Y-m-d H:i:s', $time );
+		return $this->calculate_execution_time( $delay, $time );
 	}
 
 	/**
@@ -580,67 +521,10 @@ final class Email_Sequences_Manager {
 			$parent_sequence->settings = $settings;
 			$parent_sequence->save();
 
-			// Get first sequence mail in the series
-			$first_sequence = Campaign_Model::where( 'parent_id', $sequence_id )
-				->where( 'type', 'sequence_mail' )
-				->orderBy( 'id', 'asc' )
-				->first();
-
-			if ( ! $first_sequence ) {
-				return false;
-			}
-
-			// Activate the first sequence if not already active
-			if ( $first_sequence->status !== 'active' ) {
-				$first_sequence->status = 'active';
-				$first_sequence->save();
-			}
-
 			return true;
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
 				'Start sequence for contact error',
-				array(
-					'sequence_id' => $sequence_id,
-					'contact_id'  => $contact_id,
-					'error'       => $e->getMessage(),
-				)
-			);
-			return false;
-		}
-	}
-
-	/**
-	 * Stop an email sequence for a contact
-	 *
-	 * @param int $sequence_id Parent sequence ID
-	 * @param int $contact_id Contact ID
-	 */
-	public function stop_sequence_for_contact( $sequence_id, $contact_id ) {
-		try {
-			// Cancel all pending sequences for this contact
-			$pending_sequences = Campaign_Model::where( 'parent_id', $sequence_id )
-				->where( 'type', 'sequence_mail' )
-				->where( 'status', 'active' )
-				->get();
-
-			foreach ( $pending_sequences as $sequence ) {
-				// Check if this contact has pending messages
-				$pending_messages = Tracking_Model::where( 'contact_id', $contact_id )
-					->where( 'source_id', $sequence->id )
-					->where( 'status', 'pending' )
-					->get();
-
-				foreach ( $pending_messages as $message ) {
-					$message->status = 'cancelled';
-					$message->save();
-				}
-			}
-
-			return true;
-		} catch ( Exception $e ) {
-			quillcrm_get_logger()->error(
-				'Stop sequence for contact error',
 				array(
 					'sequence_id' => $sequence_id,
 					'contact_id'  => $contact_id,

@@ -223,66 +223,6 @@ class REST_Campaign_Controller extends REST_Controller {
 			)
 		);
 
-		// Bulk operations route (cross-type)
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/bulk',
-			array(
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'send_test_email' ),
-					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => array(
-						'email'      => array(
-							'description' => __( 'The email to send the test email to.', 'quillcrm' ),
-							'type'        => 'string',
-							'required'    => true,
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_email',
-							),
-						),
-						'subject'    => array(
-							'description' => __( 'The subject of the test email.', 'quillcrm' ),
-							'type'        => 'string',
-							'required'    => true,
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_text_field',
-							),
-						),
-						'body'       => array(
-							'description' => __( 'The body of the test email.', 'quillcrm' ),
-							'type'        => 'string',
-							'required'    => true,
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_text_field',
-							),
-						),
-						'from_name'  => array(
-							'description' => __( 'The from name of the test email.', 'quillcrm' ),
-							'type'        => 'string',
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_text_field',
-							),
-						),
-						'from_email' => array(
-							'description' => __( 'The from email of the test email.', 'quillcrm' ),
-							'type'        => 'string',
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_email',
-							),
-						),
-						'reply_to'   => array(
-							'description' => __( 'The reply to of the test email.', 'quillcrm' ),
-							'type'        => 'string',
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_email',
-							),
-						),
-					),
-				),
-			)
-		);
-
 		// Note: Individual campaign CRUD operations are handled by type-specific endpoints:
 		// - /qc/v1/email-campaigns/* for email campaign management
 		// - /qc/v1/sms-campaigns/* for SMS campaign management
@@ -628,55 +568,6 @@ class REST_Campaign_Controller extends REST_Controller {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
-
-	/**
-	 * Send test email
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 *
-	 * @return WP_REST_Response $response The response object
-	 */
-	public function send_test_email( $request ) {
-		try {
-			$email      = $request->get_param( 'email' );
-			$subject    = $request->get_param( 'subject' );
-			$body       = $request->get_param( 'body' );
-			$from_name  = $request->get_param( 'from_name' ) ? $request->get_param( 'from_name' ) : get_option( 'blogname' );
-			$from_email = $request->get_param( 'from_email' ) ? $request->get_param( 'from_email' ) : get_option( 'admin_email' );
-			$reply_to   = $request->get_param( 'reply_to' );
-
-			$emails               = new Emails();
-			$emails->from_address = $from_email;
-			$emails->from_name    = $from_name;
-			if ( ! empty( $reply_to ) ) {
-				$emails->reply_to = $reply_to;
-			}
-
-			$for_testing_body = "<div>
-					<p>Hi {{contact:first_name}} {{contact:last_name}},</p>
-					<p>Welcome to QuillCRM.</p>
-					<p>Don't want to stay in the loop? We'll be sad to see you go, but you can click here to <a href='{{contact:unsubscribe_link}}' target='_blank'>unsubscribe</a>.</p>
-			</div>";
-
-			$contact = Contact_Model::get_by_email( $email ) ?? null;
-			$result  = $emails->send(
-				$email,
-				$subject,
-				Merge_Tags_Manager::instance()->process_merge_tags( $for_testing_body, $contact ),
-			);
-
-			if ( ! $result ) {
-				return new WP_Error( 'error', __( 'Failed to send test email', 'quillcrm' ), array( 'status' => 500 ) );
-			}
-
-			return new WP_REST_Response( array( 'message' => 'Test email sent successfully' ), 200 );
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
-		}
-	}
-
 
 	/**
 	 * Prepare the campaign data

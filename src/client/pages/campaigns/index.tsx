@@ -152,11 +152,10 @@ const Campaigns: React.FC = () => {
 
 		try {
 			await apiFetch({
-				path: '/qc/v1/campaigns/bulk',
-				method: 'POST',
+				path: '/qc/v1/campaigns',
+				method: 'DELETE',
 				data: {
-					operation: 'delete',
-					campaign_ids: selectedRowKeys,
+					ids: selectedRowKeys,
 				},
 			});
 

@@ -15,7 +15,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Utils;
-use QuillCRM\Abstracts\Abstract_Channel_Campaign_Controller;
+use QuillCRM\Abstracts\Abstract_Messaging_Campaign_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
@@ -26,8 +26,8 @@ use QuillCRM\Managers\Campaign_Status_Manager;
 /**
  * Rest_SMS_Campaign_Controller class
  */
-class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
-{
+class REST_SMS_Campaign_Controller extends Abstract_Messaging_Campaign_Controller {
+
 
 	/**
 	 * REST Base
@@ -48,9 +48,8 @@ class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 	/**
 	 * Constructor
 	 */
-	public function __construct()
-	{
-		parent::__construct();
+	public function __construct() {
+		 parent::__construct();
 	}
 
 	/**
@@ -58,9 +57,8 @@ class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 	 *
 	 * @since 1.0.0
 	 */
-	public function register_routes()
-	{
-		// Register common routes from abstract parent
+	public function register_routes() {
+		 // Register common routes from abstract parent
 		$this->register_common_routes();
 
 		// Get SMS campaign messages
@@ -69,47 +67,47 @@ class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/messages',
 			array(
 				'args' => array(
-					'id' => array(
-						'description' => __('Unique identifier for the object.', 'quillcrm'),
-						'type' => 'integer',
+					'id'       => array(
+						'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+						'type'        => 'integer',
 					),
 					'per_page' => array(
-						'description' => __('The number of items to return per page.', 'quillcrm'),
-						'type' => 'integer',
-						'default' => 10,
+						'description' => __( 'The number of items to return per page.', 'quillcrm' ),
+						'type'        => 'integer',
+						'default'     => 10,
 					),
-					'page' => array(
-						'description' => __('The page number.', 'quillcrm'),
-						'type' => 'integer',
-						'default' => 1,
+					'page'     => array(
+						'description' => __( 'The page number.', 'quillcrm' ),
+						'type'        => 'integer',
+						'default'     => 1,
 					),
 				),
 				array(
-					'methods' => WP_REST_Server::READABLE,
-					'callback' => array($this, 'get_campaign_messages'),
-					'permission_callback' => array($this, 'get_item_permissions_check'),
-					'args' => array(
-						'id' => array(
-							'description' => __('The id of the campaign.', 'quillcrm'),
-							'type' => 'integer',
-							'required' => true,
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_campaign_messages' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'id'       => array(
+							'description' => __( 'The id of the campaign.', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
 						),
 						'per_page' => array(
-							'description' => __('The number of items to return per page.', 'quillcrm'),
-							'type' => 'integer',
-							'default' => 10,
+							'description' => __( 'The number of items to return per page.', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => 10,
 						),
-						'page' => array(
-							'description' => __('The page number.', 'quillcrm'),
-							'type' => 'integer',
-							'default' => 1,
+						'page'     => array(
+							'description' => __( 'The page number.', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => 1,
 						),
-					'status' => array(
-						'description' => __('The status of the SMS.', 'quillcrm'),
-						'type' => 'string',
-						'enum' => array('all', 'sent', 'failed', 'pending', 'delivered', 'clicked'),
-						'required' => false,
-					),
+						'status'   => array(
+							'description' => __( 'The status of the SMS.', 'quillcrm' ),
+							'type'        => 'string',
+							'enum'        => array( 'all', 'sent', 'failed', 'pending', 'delivered', 'clicked' ),
+							'required'    => false,
+						),
 					),
 				),
 			)
@@ -121,22 +119,22 @@ class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 			'/' . $this->rest_base . '/send-test-sms',
 			array(
 				array(
-					'methods' => WP_REST_Server::CREATABLE,
-					'callback' => array($this, 'send_test_message'),
-					'permission_callback' => array($this, 'create_item_permissions_check'),
-					'args' => array(
-						'phone' => array(
-							'description' => __('The phone number to send the test SMS to.', 'quillcrm'),
-							'type' => 'string',
-							'required' => true,
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_test_message' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array(
+						'phone'   => array(
+							'description' => __( 'The phone number to send the test SMS to.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
 							'arg_options' => array(
 								'sanitize_callback' => 'sanitize_text_field',
 							),
 						),
 						'message' => array(
-							'description' => __('The message of the test SMS.', 'quillcrm'),
-							'type' => 'string',
-							'required' => true,
+							'description' => __( 'The message of the test SMS.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
 							'arg_options' => array(
 								'sanitize_callback' => 'sanitize_textarea_field',
 							),
@@ -152,9 +150,8 @@ class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	protected function get_campaign_query()
-	{
-		return Campaign_Model::query()->where('type', $this->campaign_type);
+	protected function get_campaign_query() {
+		return Campaign_Model::query()->where( 'type', $this->campaign_type );
 	}
 
 	/**
@@ -164,9 +161,8 @@ class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	protected function get_campaign_message_query($campaign_id)
-	{
-		return Tracking_Model::sms()->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN)->where('source_id', $campaign_id);
+	protected function get_campaign_message_query( $campaign_id ) {
+		return Tracking_Model::sms()->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN )->where( 'source_id', $campaign_id );
 	}
 
 	/**
@@ -176,9 +172,8 @@ class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function send_test_message($request)
-	{
-		return $this->send_test_message_common($request);
+	public function send_test_message( $request ) {
+		return $this->send_test_message_common( $request );
 	}
 
 	/**
@@ -186,28 +181,26 @@ class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 	 *
 	 * @return string
 	 */
-	protected function get_channel_type()
-	{
-		return 'sms';
+	protected function get_channel_type() {
+		 return 'sms';
 	}
 
 	/**
 	 * Prepare test message data - implementation of abstract method
 	 *
 	 * @param WP_REST_Request $request
-	 * @param Contact_Model $contact
+	 * @param Contact_Model   $contact
 	 * @return array
 	 */
-	protected function prepare_test_message_data($request, $contact)
-	{
-		$phone = $request->get_param('phone');
-		$message = $request->get_param('message');
+	protected function prepare_test_message_data( $request, $contact ) {
+		$phone   = $request->get_param( 'phone' );
+		$message = $request->get_param( 'message' );
 
 		// Process merge tags
-		$processed_message = $this->process_merge_tags($message, $contact);
+		$processed_message = $this->process_merge_tags( $message, $contact );
 
 		return array(
-			'To' => $phone,
+			'To'   => $phone,
 			'Body' => $processed_message,
 		);
 	}
@@ -217,8 +210,7 @@ class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 	 *
 	 * @return string
 	 */
-	protected function get_success_message()
-	{
+	protected function get_success_message() {
 		return 'Test SMS sent successfully';
 	}
 
@@ -229,75 +221,74 @@ class REST_SMS_Campaign_Controller extends Abstract_Channel_Campaign_Controller
 	 *
 	 * @return array $schema The SMS campaign schema
 	 */
-	public function get_item_schema()
-	{
-		$status_manager = Campaign_Status_Manager::instance();
+	public function get_item_schema() {
+		 $status_manager = Campaign_Status_Manager::instance();
 
 		return array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title' => 'sms_campaign',
-			'type' => 'object',
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'sms_campaign',
+			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
-					'description' => __('Unique identifier for the object.', 'quillcrm'),
-					'type' => 'integer',
-					'readonly' => true,
+				'id'          => array(
+					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					'type'        => 'integer',
+					'readonly'    => true,
 				),
-				'name' => array(
-					'description' => __('The name of the SMS campaign.', 'quillcrm'),
-					'type' => 'string',
-					'required' => true,
+				'name'        => array(
+					'description' => __( 'The name of the SMS campaign.', 'quillcrm' ),
+					'type'        => 'string',
+					'required'    => true,
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'description' => array(
-					'description' => __('The description of the SMS campaign.', 'quillcrm'),
-					'type' => 'string',
+					'description' => __( 'The description of the SMS campaign.', 'quillcrm' ),
+					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'status' => array(
-					'description' => __('The status of the SMS campaign.', 'quillcrm'),
-					'type' => 'string',
-					'enum' => $status_manager->get_all_statuses(),
-					'default' => Campaign_Status_Manager::DRAFT,
-					'validate_callback' => array($this, 'validate_campaign_status'),
+				'status'      => array(
+					'description'       => __( 'The status of the SMS campaign.', 'quillcrm' ),
+					'type'              => 'string',
+					'enum'              => $status_manager->get_all_statuses(),
+					'default'           => Campaign_Status_Manager::DRAFT,
+					'validate_callback' => array( $this, 'validate_campaign_status' ),
 				),
-				'type' => array(
-					'description' => __('The type of the campaign.', 'quillcrm'),
-					'type' => 'string',
-					'enum' => array('sms'),
-					'default' => 'sms',
+				'type'        => array(
+					'description' => __( 'The type of the campaign.', 'quillcrm' ),
+					'type'        => 'string',
+					'enum'        => array( 'sms' ),
+					'default'     => 'sms',
 				),
-				'settings' => array(
-					'description' => __('The settings of the SMS campaign.', 'quillcrm'),
-					'type' => 'object',
+				'settings'    => array(
+					'description' => __( 'The settings of the SMS campaign.', 'quillcrm' ),
+					'type'        => 'object',
 				),
-				'count' => array(
-					'description' => __('The count of the SMS campaign.', 'quillcrm'),
-					'type' => 'integer',
+				'count'       => array(
+					'description' => __( 'The count of the SMS campaign.', 'quillcrm' ),
+					'type'        => 'integer',
 					'arg_options' => array(
 						'sanitize_callback' => 'absint',
 					),
 				),
-				'execute_at' => array(
-					'description' => __('The execute at of the SMS campaign.', 'quillcrm'),
-					'type' => 'string',
+				'execute_at'  => array(
+					'description' => __( 'The execute at of the SMS campaign.', 'quillcrm' ),
+					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'created_at' => array(
-					'description' => __('The created at of the SMS campaign.', 'quillcrm'),
-					'type' => 'string',
-					'readonly' => true,
+				'created_at'  => array(
+					'description' => __( 'The created at of the SMS campaign.', 'quillcrm' ),
+					'type'        => 'string',
+					'readonly'    => true,
 				),
-				'updated_at' => array(
-					'description' => __('The updated at of the SMS campaign.', 'quillcrm'),
-					'type' => 'string',
-					'readonly' => true,
+				'updated_at'  => array(
+					'description' => __( 'The updated at of the SMS campaign.', 'quillcrm' ),
+					'type'        => 'string',
+					'readonly'    => true,
 				),
 			),
 		);

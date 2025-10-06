@@ -126,3 +126,7 @@ export { default as NoAutomationIcon } from './no-automation';
 export { default as GradientNotesIcon } from './gradient-notes';
 export { default as NoNotesIcon } from './no-notes';
 export { default as NoDealsIcon } from './no-deals';
+export { default as CurrencyIcon } from './currency';
+export { default as CartIcon } from './cart';
+export { default as DoubleOptInIcon } from './double-opt-in';
+export { default as BusinessIcon } from './business';

@@ -19,6 +19,7 @@ use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Emails\Email_Renderer;
+use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * REST_Template_Controller class

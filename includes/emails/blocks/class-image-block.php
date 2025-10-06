@@ -86,8 +86,7 @@ class Image_Block extends Email_Block {
 				'background-color' => $props['backgroundColor'],
 				'padding'          => $this->format_padding( $props['padding'] ),
 				'border-radius'    => $props['borderRadius'] . 'px',
-				'display'          => 'block',
-				'max-width'        => '100%',
+				'display'          => 'inline-block',
 			)
 		);
 
@@ -98,7 +97,9 @@ class Image_Block extends Email_Block {
 				'height'        => $props['height'] === 'auto' ? 'auto' : $props['height'],
 				'max-width'     => '100%',
 				'border-radius' => $props['borderRadius'] . 'px',
-				'display'       => 'inline-block',
+				'display'       => 'block',
+				'border'        => '0',
+				'outline'       => 'none',
 			)
 		);
 
@@ -119,26 +120,27 @@ class Image_Block extends Email_Block {
 			)
 		);
 
-		// Start wrapper div
+		// Simple div structure - already wrapped in table cell by renderer
 		$output  = "<div style=\"{$wrapper_style}\">";
-		$output .= "<div style=\"{$container_style}\">";
+		$output .= "<span style=\"{$container_style}\">";
 
-		// Render image element
+		// Build the image or placeholder
 		if ( ! empty( $props['src'] ) ) {
 			// Render image
-			$image_element = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$image_style}\" />";
+			$image = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$image_style}\" />";
+
+			// Wrap in link if provided
+			if ( $link ) {
+				$output .= "<a href=\"{$link}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"text-decoration:none;display:block;\">{$image}</a>";
+			} else {
+				$output .= $image;
+			}
 		} else {
-			// Render placeholder (simplified for email - no icon, just text)
-			$image_element = "<div style=\"{$placeholder_style}\">📷</div>";
+			// Render placeholder
+			$output .= "<div style=\"{$placeholder_style}\">📷</div>";
 		}
 
-		// Wrap in link if provided
-		if ( $link ) {
-			$image_element = "<a href=\"{$link}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"text-decoration:none;\">{$image_element}</a>";
-		}
-
-		$output .= $image_element;
-		$output .= '</div>';
+		$output .= '</span>';
 		$output .= '</div>';
 
 		return $output;

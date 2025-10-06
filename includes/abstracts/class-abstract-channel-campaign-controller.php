@@ -72,6 +72,12 @@ abstract class Abstract_Channel_Campaign_Controller extends Abstract_Campaign_Co
 			// Prepare message data (implemented by child classes)
 			$message_data = $this->prepare_test_message_data($request, $contact);
 
+			// Add StatusCallback URL for webhook tracking
+			$webhook_url = $provider->get_webhook_url($channel);
+			if ($webhook_url && !isset($message_data['StatusCallback'])) {
+				$message_data['StatusCallback'] = $webhook_url;
+			}
+
 			// Send message using provider
 			$result = $provider->send_message($channel, $message_data, $contact ?? new Contact_Model());
 

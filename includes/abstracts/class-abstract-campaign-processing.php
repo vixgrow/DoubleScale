@@ -273,9 +273,9 @@ abstract class Abstract_Campaign_Processing {
 	 * @return array Modified data array
 	 */
 	protected function prepare_status_callback( $webhook_url, $data = array() ) {
-		// Only add StatusCallback for production URLs (not localhost)
-		$site_url = home_url();
-		if ( ! empty( $webhook_url ) && strpos( $site_url, 'localhost' ) === false && strpos( $site_url, '127.0.0.1' ) === false ) {
+		// $site_url = home_url();
+		// if ( ! empty( $webhook_url ) && strpos( $site_url, 'localhost' ) === false && strpos( $site_url, '127.0.0.1' ) === false ) {
+		if ( ! empty( $webhook_url ) ) {
 			$data['StatusCallback'] = $webhook_url;
 		}
 

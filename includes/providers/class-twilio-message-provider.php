@@ -341,6 +341,12 @@ class Twilio_Message_Provider extends Abstract_Message_Provider {
 			)
 		);
 
-		return $this->error_result( $error, $result );
+		// Pass Twilio error data in metadata for proper error formatting
+		$metadata = array();
+		if ( isset( $result['data'] ) ) {
+			$metadata['error_details'] = $result['data'];
+		}
+
+		return $this->error_result( $error, $metadata );
 	}
 }

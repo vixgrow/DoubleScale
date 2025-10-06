@@ -31,6 +31,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
+import { Slider } from '@/components/ui/slider';
 import PipelineStageChange from '../pipeline-stage-change';
 import DealValueChange from '../deal-value-change';
 import DealOwnerChange from '../deal-owner-change';
@@ -60,6 +61,8 @@ interface FieldProps {
 	};
 	allValues?: { [key: string]: any };
 	defaultValue?: string;
+	min?: number;
+	max?: number;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -79,6 +82,8 @@ const Field: React.FC<FieldProps> = ({
 	settings,
 	allValues,
 	defaultValue,
+	min,
+	max,
 }) => {
 	let fieldContent;
 
@@ -159,7 +164,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500'
+						'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 				/>
@@ -172,7 +177,7 @@ const Field: React.FC<FieldProps> = ({
 					onChange={(e) => onChange(e.target.value)}
 					className={cn('bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500'
+						'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 				/>
@@ -187,8 +192,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-									(option) => option.value === value
-								)
+								(option) => option.value === value
+							)
 							: null
 					}
 					onChange={(value) => {
@@ -247,6 +252,18 @@ const Field: React.FC<FieldProps> = ({
 					checked={value}
 					onCheckedChange={(checked) => onChange(checked)}
 				/>
+			);
+			break;
+		case 'slider':
+			fieldContent = (
+				<div className="w-full">
+					<Slider
+						min={min || 0}
+						max={max || 100}
+						value={[Number(value) || min || 0]}
+						onValueChange={(newValue) => onChange(String(newValue[0]))}
+					/>
+				</div>
 			);
 			break;
 		case 'date':

@@ -17,6 +17,7 @@ import PurchaseHistory from '../purchase-history';
 import Automation from '../automation';
 import Notes from '../notes';
 import { useContactContext } from '../state/context';
+import Deals from '../deals';
 
 const DataCard: React.FC = () => {
     const { contact } = useContactContext();
@@ -54,7 +55,7 @@ const DataCard: React.FC = () => {
 
                 <TabsContent value="deals">
                     <CardContent className="pt-6">
-                        {__('Content for Deals', 'quillcrm')}
+                        <Deals contact_id={contact.id} />
                     </CardContent>
                 </TabsContent>
 

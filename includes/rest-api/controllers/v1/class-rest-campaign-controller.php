@@ -20,7 +20,10 @@ use QuillCRM\Utils;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
-
+use QuillCRM\Models\Template_Model;
+use QuillCRM\Emails\Emails;
+use QuillCRM\Emails\Email_Renderer;
+use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Managers\Campaign_Status_Manager;
 
 /**
@@ -640,12 +643,39 @@ class REST_Campaign_Controller extends REST_Controller {
 	 */
 	public function send_test_email( $request ) {
 		try {
-			$email      = $request->get_param( 'email' );
-			$subject    = $request->get_param( 'subject' );
-			$body       = $request->get_param( 'body' );
-			$from_name  = $request->get_param( 'from_name' ) ? $request->get_param( 'from_name' ) : get_option( 'blogname' );
-			$from_email = $request->get_param( 'from_email' ) ? $request->get_param( 'from_email' ) : get_option( 'admin_email' );
-			$reply_to   = $request->get_param( 'reply_to' );
+			$email       = $request->get_param( 'email' );
+			$subject     = $request->get_param( 'subject' );
+			$body        = $request->get_param( 'body' );
+			$template_id = $request->get_param( 'template_id' );
+			$from_name   = $request->get_param( 'from_name' ) ? $request->get_param( 'from_name' ) : get_option( 'blogname' );
+			$from_email  = $request->get_param( 'from_email' ) ? $request->get_param( 'from_email' ) : get_option( 'admin_email' );
+			$reply_to    = $request->get_param( 'reply_to' );
+
+			// If we have a template_id, get the template and use its subject and settings
+			if ( ! empty( $template_id ) ) {
+				$template = Template_Model::find( $template_id );
+				if ( $template ) {
+					// Use template subject if available
+					if ( ! empty( $template->subject ) ) {
+						$subject = $template->subject;
+					}
+
+					// Use template settings for from_name, from_email, reply_to
+					if ( ! empty( $template->settings ) ) {
+						$settings = is_array( $template->settings ) ? $template->settings : json_decode( $template->settings, true );
+
+						if ( ! empty( $settings['from_name'] ) ) {
+							$from_name = $settings['from_name'];
+						}
+						if ( ! empty( $settings['from_email'] ) && is_email( $settings['from_email'] ) ) {
+							$from_email = $settings['from_email'];
+						}
+						if ( ! empty( $settings['reply_to'] ) && is_email( $settings['reply_to'] ) ) {
+							$reply_to = $settings['reply_to'];
+						}
+					}
+				}
+			}
 
 			$emails               = new Emails();
 			$emails->from_address = $from_email;
@@ -654,17 +684,34 @@ class REST_Campaign_Controller extends REST_Controller {
 				$emails->reply_to = $reply_to;
 			}
 
-			$for_testing_body = "<div>
+			$for_testing_body = ! empty( $body ) ? $body : "<div>
 					<p>Hi {{contact:first_name}} {{contact:last_name}},</p>
 					<p>Welcome to QuillCRM.</p>
 					<p>Don't want to stay in the loop? We'll be sad to see you go, but you can click here to <a href='{{contact:unsubscribe_link}}' target='_blank'>unsubscribe</a>.</p>
 			</div>";
 
 			$contact = Contact_Model::get_by_email( $email ) ?? null;
-			$result  = $emails->send(
+
+			// If body is JSON (from builder) and we have a template_id, render it with Email_Renderer
+			$decoded_body = json_decode( $for_testing_body, true );
+			if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded_body ) && ! empty( $template_id ) ) {
+				// Create merge tags array
+				$merge_tags = $contact ? array( $contact ) : array();
+
+				$email_renderer   = new Email_Renderer();
+				$for_testing_body = $email_renderer->render_template( $template_id, $merge_tags );
+			} else {
+				// Process merge tags for non-builder emails
+				$for_testing_body = Merge_Tags_Manager::instance()->process_merge_tags( $for_testing_body, $contact );
+			}
+
+			// Process subject with merge tags
+			$subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+
+			$result = $emails->send(
 				$email,
 				$subject,
-				Merge_Tags_Manager::instance()->process_merge_tags( $for_testing_body, $contact ),
+				$for_testing_body
 			);
 
 			if ( ! $result ) {

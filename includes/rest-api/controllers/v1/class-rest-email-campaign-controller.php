@@ -18,16 +18,18 @@ use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Campaign_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Emails\Emails;
+use QuillCRM\Emails\Email_Renderer;
 use QuillCRM\Managers\Campaign_Status_Manager;
 
 /**
  * Rest_Email_Campaign_Controller class
  */
-class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
-{
+class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller {
+
 
 	/**
 	 * REST Base
@@ -48,9 +50,8 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	/**
 	 * Constructor
 	 */
-	public function __construct()
-	{
-		parent::__construct();
+	public function __construct() {
+		 parent::__construct();
 	}
 
 	/**
@@ -58,9 +59,8 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 *
 	 * @since 1.0.0
 	 */
-	public function register_routes()
-	{
-		// Register common routes from abstract parent
+	public function register_routes() {
+		 // Register common routes from abstract parent
 		$this->register_common_routes();
 
 		// Get email campaign messages
@@ -69,46 +69,46 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/messages',
 			array(
 				'args' => array(
-					'id' => array(
-						'description' => __('Unique identifier for the object.', 'quillcrm'),
-						'type' => 'integer',
+					'id'       => array(
+						'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+						'type'        => 'integer',
 					),
 					'per_page' => array(
-						'description' => __('The number of items to return per page.', 'quillcrm'),
-						'type' => 'integer',
-						'default' => 10,
+						'description' => __( 'The number of items to return per page.', 'quillcrm' ),
+						'type'        => 'integer',
+						'default'     => 10,
 					),
-					'page' => array(
-						'description' => __('The page number.', 'quillcrm'),
-						'type' => 'integer',
-						'default' => 1,
+					'page'     => array(
+						'description' => __( 'The page number.', 'quillcrm' ),
+						'type'        => 'integer',
+						'default'     => 1,
 					),
 				),
 				array(
-					'methods' => WP_REST_Server::READABLE,
-					'callback' => array($this, 'get_campaign_messages'),
-					'permission_callback' => array($this, 'get_item_permissions_check'),
-					'args' => array(
-						'id' => array(
-							'description' => __('The id of the campaign.', 'quillcrm'),
-							'type' => 'integer',
-							'required' => true,
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_campaign_messages' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'id'       => array(
+							'description' => __( 'The id of the campaign.', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
 						),
 						'per_page' => array(
-							'description' => __('The number of items to return per page.', 'quillcrm'),
-							'type' => 'integer',
-							'default' => 10,
+							'description' => __( 'The number of items to return per page.', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => 10,
 						),
-						'page' => array(
-							'description' => __('The page number.', 'quillcrm'),
-							'type' => 'integer',
-							'default' => 1,
+						'page'     => array(
+							'description' => __( 'The page number.', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => 1,
 						),
-						'status' => array(
-							'description' => __('The status of the email.', 'quillcrm'),
-							'type' => 'string',
-							'enum' => array('all', 'sent', 'opened', 'clicked', 'failed'),
-							'required' => false,
+						'status'   => array(
+							'description' => __( 'The status of the email.', 'quillcrm' ),
+							'type'        => 'string',
+							'enum'        => array( 'all', 'sent', 'opened', 'clicked', 'failed' ),
+							'required'    => false,
 						),
 					),
 				),
@@ -121,51 +121,51 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 			'/' . $this->rest_base . '/send-test-email',
 			array(
 				array(
-					'methods' => WP_REST_Server::CREATABLE,
-					'callback' => array($this, 'send_test_message'),
-					'permission_callback' => array($this, 'create_item_permissions_check'),
-					'args' => array(
-						'email' => array(
-							'description' => __('The email to send the test email to.', 'quillcrm'),
-							'type' => 'string',
-							'required' => true,
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_test_message' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array(
+						'email'      => array(
+							'description' => __( 'The email to send the test email to.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
 							'arg_options' => array(
 								'sanitize_callback' => 'sanitize_email',
 							),
 						),
-						'subject' => array(
-							'description' => __('The subject of the test email.', 'quillcrm'),
-							'type' => 'string',
-							'required' => true,
+						'subject'    => array(
+							'description' => __( 'The subject of the test email.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
 							'arg_options' => array(
 								'sanitize_callback' => 'sanitize_text_field',
 							),
 						),
-						'body' => array(
-							'description' => __('The body of the test email.', 'quillcrm'),
-							'type' => 'string',
-							'required' => true,
+						'body'       => array(
+							'description' => __( 'The body of the test email.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
 							'arg_options' => array(
 								'sanitize_callback' => 'wp_kses_post',
 							),
 						),
-						'from_name' => array(
-							'description' => __('The from name of the test email.', 'quillcrm'),
-							'type' => 'string',
+						'from_name'  => array(
+							'description' => __( 'The from name of the test email.', 'quillcrm' ),
+							'type'        => 'string',
 							'arg_options' => array(
 								'sanitize_callback' => 'sanitize_text_field',
 							),
 						),
 						'from_email' => array(
-							'description' => __('The from email of the test email.', 'quillcrm'),
-							'type' => 'string',
+							'description' => __( 'The from email of the test email.', 'quillcrm' ),
+							'type'        => 'string',
 							'arg_options' => array(
 								'sanitize_callback' => 'sanitize_email',
 							),
 						),
-						'reply_to' => array(
-							'description' => __('The reply to of the test email.', 'quillcrm'),
-							'type' => 'string',
+						'reply_to'   => array(
+							'description' => __( 'The reply to of the test email.', 'quillcrm' ),
+							'type'        => 'string',
 							'arg_options' => array(
 								'sanitize_callback' => 'sanitize_email',
 							),
@@ -181,9 +181,8 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	protected function get_campaign_query()
-	{
-		return Campaign_Model::query()->where('type', $this->campaign_type);
+	protected function get_campaign_query() {
+		return Campaign_Model::query()->where( 'type', $this->campaign_type );
 	}
 
 	/**
@@ -193,9 +192,8 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	protected function get_campaign_message_query($campaign_id)
-	{
-		return Tracking_Model::emails()->where('source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN)->where('source_id', $campaign_id);
+	protected function get_campaign_message_query( $campaign_id ) {
+		return Tracking_Model::emails()->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN )->where( 'source_id', $campaign_id );
 	}
 
 	/**
@@ -205,39 +203,81 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 *
 	 * @return WP_REST_Response
 	 */
-	public function send_test_message($request)
-	{
+	public function send_test_message( $request ) {
 		try {
-			$email = $request->get_param('email');
-			$subject = $request->get_param('subject');
-			$body = $request->get_param('body');
-			$from_name = $request->get_param('from_name') ?: get_option('blogname');
-			$from_email = $request->get_param('from_email') ?: get_option('admin_email');
-			$reply_to = $request->get_param('reply_to');
+			$email       = $request->get_param( 'email' );
+			$subject     = $request->get_param( 'subject' );
+			$body        = $request->get_param( 'body' );
+			$template_id = $request->get_param( 'template_id' );
+			$from_name   = $request->get_param( 'from_name' ) ?: get_option( 'blogname' );
+			$from_email  = $request->get_param( 'from_email' ) ?: get_option( 'admin_email' );
+			$reply_to    = $request->get_param( 'reply_to' );
 
-			$emails = new Emails();
+			// If we have a template_id, get the template and use its subject and settings
+			if ( ! empty( $template_id ) ) {
+				$template = Template_Model::find( $template_id );
+				if ( $template ) {
+					// Use template subject if available
+					if ( ! empty( $template->subject ) ) {
+						$subject = $template->subject;
+					}
+
+					// Use template settings for from_name, from_email, reply_to
+					if ( ! empty( $template->settings ) ) {
+						$settings = is_array( $template->settings ) ? $template->settings : json_decode( $template->settings, true );
+
+						if ( ! empty( $settings['from_name'] ) ) {
+							$from_name = $settings['from_name'];
+						}
+						if ( ! empty( $settings['from_email'] ) && is_email( $settings['from_email'] ) ) {
+							$from_email = $settings['from_email'];
+						}
+						if ( ! empty( $settings['reply_to'] ) && is_email( $settings['reply_to'] ) ) {
+							$reply_to = $settings['reply_to'];
+						}
+					}
+				}
+			}
+
+			$emails               = new Emails();
 			$emails->from_address = $from_email;
-			$emails->from_name = $from_name;
-			if (!empty($reply_to)) {
+			$emails->from_name    = $from_name;
+			if ( ! empty( $reply_to ) ) {
 				$emails->reply_to = $reply_to;
 			}
 
-			$for_testing_body = !empty($body) ? $body : $this->get_default_test_email_content();
+			$for_testing_body = ! empty( $body ) ? $body : $this->get_default_test_email_content();
+			$contact          = Contact_Model::get_by_email( $email ) ?? null;
 
-			$contact = Contact_Model::get_by_email($email) ?? null;
+			// If body is JSON (from builder) and we have a template_id, render it with Email_Renderer
+			$decoded_body = json_decode( $for_testing_body, true );
+			if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded_body ) && ! empty( $template_id ) ) {
+				// Create merge tags array
+				$merge_tags = $contact ? array( $contact ) : array();
+
+				$email_renderer   = new Email_Renderer();
+				$for_testing_body = $email_renderer->render_template( $template_id, $merge_tags );
+			} else {
+				// Process merge tags for non-builder emails
+				$for_testing_body = Merge_Tags_Manager::instance()->process_merge_tags( $for_testing_body, $contact );
+			}
+
+			// Process subject with merge tags
+			$subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+
 			$result = $emails->send(
 				$email,
 				$subject,
-				Merge_Tags_Manager::instance()->process_merge_tags($for_testing_body, $contact),
+				$for_testing_body
 			);
 
-			if (!$result) {
-				return new WP_Error('error', __('Failed to send test email', 'quillcrm'), array('status' => 500));
+			if ( ! $result ) {
+				return new WP_Error( 'error', __( 'Failed to send test email', 'quillcrm' ), array( 'status' => 500 ) );
 			}
 
-			return new WP_REST_Response(array('message' => 'Test email sent successfully'), 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+			return new WP_REST_Response( array( 'message' => 'Test email sent successfully' ), 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -250,37 +290,36 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 *
 	 * @return WP_REST_Response $response The response object
 	 */
-	public function get_campaign_messages($request)
-	{
+	public function get_campaign_messages( $request ) {
 		try {
-			$campaign_id = $request->get_param('id');
-			$per_page = $request->get_param('per_page') ?: 10;
-			$page = $request->get_param('page') ?: 1;
-			$status = $request->get_param('status') ?: '';
+			$campaign_id = $request->get_param( 'id' );
+			$per_page    = $request->get_param( 'per_page' ) ?: 10;
+			$page        = $request->get_param( 'page' ) ?: 1;
+			$status      = $request->get_param( 'status' ) ?: '';
 
-			$query = $this->get_campaign_message_query($campaign_id);
+			$query = $this->get_campaign_message_query( $campaign_id );
 
-			switch ($status) {
+			switch ( $status ) {
 				case 'opened':
-					$query->where('opened', 1);
+					$query->where( 'opened', 1 );
 					break;
 				case 'clicked':
-					$query->where('clicked', 1);
+					$query->where( 'clicked', 1 );
 					break;
 				case 'failed':
-					$query->where('status', 'failed');
+					$query->where( 'status', 'failed' );
 					break;
 				case 'sent':
-					$query->where('status', 'sent');
+					$query->where( 'status', 'sent' );
 					break;
 			}
 
-			$campaign_emails = $query->with('contact', 'template')
-				->paginate($per_page, array('*'), 'page', $page);
+			$campaign_emails = $query->with( 'contact', 'template' )
+				->paginate( $per_page, array( '*' ), 'page', $page );
 
-			return new WP_REST_Response($campaign_emails, 200);
-		} catch (\Exception $e) {
-			return new WP_Error('error', $e->getMessage(), array('status' => 500));
+			return new WP_REST_Response( $campaign_emails, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
@@ -289,13 +328,12 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 *
 	 * @return string
 	 */
-	protected function get_default_test_email_content()
-	{
+	protected function get_default_test_email_content() {
 		$default_content = sprintf(
-			__('<div><p>Hi {{contact:first_name}} {{contact:last_name}},</p><p>Thank you for subscribing to our updates.</p><p>Don\'t want to stay in the loop? We\'ll be sad to see you go, but you can click here to <a href="{{contact:unsubscribe_link}}" target="_blank">unsubscribe</a>.</p></div>', 'quillcrm')
+			__( '<div><p>Hi {{contact:first_name}} {{contact:last_name}},</p><p>Thank you for subscribing to our updates.</p><p>Don\'t want to stay in the loop? We\'ll be sad to see you go, but you can click here to <a href="{{contact:unsubscribe_link}}" target="_blank">unsubscribe</a>.</p></div>', 'quillcrm' )
 		);
-		
-		return apply_filters('quillcrm_default_test_email_content', $default_content);
+
+		return apply_filters( 'quillcrm_default_test_email_content', $default_content );
 	}
 
 	/**
@@ -305,75 +343,74 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 *
 	 * @return array $schema The email campaign schema
 	 */
-	public function get_item_schema()
-	{
-		$status_manager = Campaign_Status_Manager::instance();
+	public function get_item_schema() {
+		 $status_manager = Campaign_Status_Manager::instance();
 
 		return array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title' => 'email_campaign',
-			'type' => 'object',
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'email_campaign',
+			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
-					'description' => __('Unique identifier for the object.', 'quillcrm'),
-					'type' => 'integer',
-					'readonly' => true,
+				'id'          => array(
+					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					'type'        => 'integer',
+					'readonly'    => true,
 				),
-				'name' => array(
-					'description' => __('The name of the email campaign.', 'quillcrm'),
-					'type' => 'string',
-					'required' => true,
+				'name'        => array(
+					'description' => __( 'The name of the email campaign.', 'quillcrm' ),
+					'type'        => 'string',
+					'required'    => true,
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
 				'description' => array(
-					'description' => __('The description of the email campaign.', 'quillcrm'),
-					'type' => 'string',
+					'description' => __( 'The description of the email campaign.', 'quillcrm' ),
+					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'status' => array(
-					'description' => __('The status of the email campaign.', 'quillcrm'),
-					'type' => 'string',
-					'enum' => $status_manager->get_all_statuses(),
-					'default' => Campaign_Status_Manager::DRAFT,
-					'validate_callback' => array($this, 'validate_campaign_status'),
+				'status'      => array(
+					'description'       => __( 'The status of the email campaign.', 'quillcrm' ),
+					'type'              => 'string',
+					'enum'              => $status_manager->get_all_statuses(),
+					'default'           => Campaign_Status_Manager::DRAFT,
+					'validate_callback' => array( $this, 'validate_campaign_status' ),
 				),
-				'type' => array(
-					'description' => __('The type of the campaign.', 'quillcrm'),
-					'type' => 'string',
-					'enum' => array('email'),
-					'default' => 'email',
+				'type'        => array(
+					'description' => __( 'The type of the campaign.', 'quillcrm' ),
+					'type'        => 'string',
+					'enum'        => array( 'email' ),
+					'default'     => 'email',
 				),
-				'settings' => array(
-					'description' => __('The settings of the email campaign.', 'quillcrm'),
-					'type' => 'object',
+				'settings'    => array(
+					'description' => __( 'The settings of the email campaign.', 'quillcrm' ),
+					'type'        => 'object',
 				),
-				'count' => array(
-					'description' => __('The count of the email campaign.', 'quillcrm'),
-					'type' => 'integer',
+				'count'       => array(
+					'description' => __( 'The count of the email campaign.', 'quillcrm' ),
+					'type'        => 'integer',
 					'arg_options' => array(
 						'sanitize_callback' => 'absint',
 					),
 				),
-				'execute_at' => array(
-					'description' => __('The execute at of the email campaign.', 'quillcrm'),
-					'type' => 'string',
+				'execute_at'  => array(
+					'description' => __( 'The execute at of the email campaign.', 'quillcrm' ),
+					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'created_at' => array(
-					'description' => __('The created at of the email campaign.', 'quillcrm'),
-					'type' => 'string',
-					'readonly' => true,
+				'created_at'  => array(
+					'description' => __( 'The created at of the email campaign.', 'quillcrm' ),
+					'type'        => 'string',
+					'readonly'    => true,
 				),
-				'updated_at' => array(
-					'description' => __('The updated at of the email campaign.', 'quillcrm'),
-					'type' => 'string',
-					'readonly' => true,
+				'updated_at'  => array(
+					'description' => __( 'The updated at of the email campaign.', 'quillcrm' ),
+					'type'        => 'string',
+					'readonly'    => true,
 				),
 			),
 		);

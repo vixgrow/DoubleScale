@@ -462,11 +462,12 @@ class REST_Template_Controller extends REST_Controller {
 				$headers[] = 'Reply-To: ' . $reply_to;
 			}
 
-			// Process the subject with merge tags
-			$subject = $template->subject;
-			foreach ( $merge_tags as $tag => $value ) {
-				$subject = str_replace( '{' . $tag . '}', $value, $subject );
-			}
+			// Use template subject and process merge tags using Merge_Tags_Manager
+			$subject = ! empty( $template->subject ) ? $template->subject : 'Test Email';
+
+			// Create a mock contact for merge tag processing
+			$mock_contact = (object) $merge_tags;
+			$subject      = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $mock_contact );
 
 			// Send the email using wp_mail directly
 			$result = wp_mail( $to, $subject, $content, $headers );

@@ -10,6 +10,7 @@
 namespace QuillCRM\Emails;
 
 use QuillCRM\Models\Template_Model;
+use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * Renderer for email templates
@@ -61,8 +62,14 @@ class Email_Renderer {
 		// Get settings - already parsed by model if $casts is working
 		$settings = is_array( $template->settings ) ? $template->settings : ( json_decode( $template->settings, true ) ?: array() );
 
+		// Get preview_text from template and process merge tags
+		$preview_text = ! empty( $template->preview_text ) ? $template->preview_text : '';
+		if ( ! empty( $preview_text ) && ! empty( $merge_tags ) ) {
+			$preview_text = Merge_Tags_Manager::instance()->process_merge_tags( $preview_text, $merge_tags );
+		}
+
 		// Generate HTML for email body
-		$html = $this->build_email_structure( $content, $settings, $merge_tags );
+		$html = $this->build_email_structure( $content, $settings, $merge_tags, $preview_text );
 
 		return $html;
 	}
@@ -70,12 +77,13 @@ class Email_Renderer {
 	/**
 	 * Build email HTML structure
 	 *
-	 * @param array $content Template content
-	 * @param array $settings Template settings
-	 * @param array $merge_tags Merge tags
+	 * @param array  $content Template content
+	 * @param array  $settings Template settings
+	 * @param array  $merge_tags Merge tags
+	 * @param string $preview_text Preview text for email clients
 	 * @return string HTML output
 	 */
-	private function build_email_structure( $content, $settings, $merge_tags ) {
+	private function build_email_structure( $content, $settings, $merge_tags, $preview_text = '' ) {
 		// Extract button settings from content if available
 		if ( isset( $content['buttonSettings'] ) && is_array( $content['buttonSettings'] ) ) {
 			$this->button_settings = $content['buttonSettings'];
@@ -84,6 +92,17 @@ class Email_Renderer {
 		// Default settings
 		$bg_color     = isset( $settings['backgroundColor'] ) ? $settings['backgroundColor'] : '#f7f7f7';
 		$canvas_color = isset( $settings['canvasColor'] ) ? $settings['canvasColor'] : '#ffffff';
+
+		// Generate preheader HTML if preview_text is provided
+		$preheader_html = '';
+		if ( ! empty( $preview_text ) ) {
+			// Add hidden preheader text - this appears in email client previews but not in the email body
+			$preheader_html = '<div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">'
+				. esc_html( $preview_text )
+				// Add invisible characters to push unwanted preview text out of view
+				. str_repeat( '&nbsp;&zwnj;', 50 )
+				. '</div>';
+		}
 
 		// Start with proper email structure using tables for compatibility
 		$html = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
@@ -135,6 +154,7 @@ class Email_Renderer {
 			</style>
 		</head>
 		<body style=\"margin: 0; padding: 0; background-color: {$bg_color};\">
+			{$preheader_html}
 			<!-- Email Wrapper Table -->
 			<table role=\"presentation\" class=\"email-wrapper\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: {$bg_color};\">
 				<tr>

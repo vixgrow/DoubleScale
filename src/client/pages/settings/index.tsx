@@ -20,6 +20,7 @@ import SettingsShimmer from './settings-shimmer';
 import TabsSelection from './tabs-selection';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import CurrenciesSettings from './currencies';
 
 const SettingsPage: React.FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -106,6 +107,10 @@ const SettingsPage: React.FC = () => {
 				);
 			case 'managers':
 				return <Managers />;
+			case 'currencies':
+				return (
+					<CurrenciesSettings settings={settings} onChange={setSettings} />
+				);
 			default:
 				return null;
 		}

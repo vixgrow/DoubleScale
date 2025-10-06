@@ -542,17 +542,19 @@ export type ContactAnalytics = {
 };
 
 export type EmailsAnalytics = {
-	emails: {
-		[date: string]: CampaignEmail[];
+	email: {
+		[date: string]: number;
 	};
 	data: {
 		dates: string[];
-		type: 'hour' | 'day' | 'month';
+		type: 'hour' | 'day' | 'month' | 'year';
 	};
-	total: string;
-	total_sent: number;
-	total_opened: number;
-	total_clicked: number;
+	total: number;
+	sent: number;
+	failed: number;
+	pending: number;
+	opened: number;
+	clicked: number;
 };
 
 export type Settings = {

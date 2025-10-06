@@ -40,10 +40,26 @@ class Table_Block extends Email_Block {
 	 */
 	public function get_default_props(): array {
 		return array(
-			'content'  => 'Your text here',
-			'fontSize' => 16,
-			'color'    => '#333',
-			'align'    => 'center',
+			'tableData'       => array(
+				array( 'Header 1', 'Header 2', 'Header 3' ),
+				array( 'Row 1 Col 1', 'Row 1 Col 2', 'Row 1 Col 3' ),
+				array( 'Row 2 Col 1', 'Row 2 Col 2', 'Row 2 Col 3' ),
+			),
+			'headerBgColor'   => '#f8f9fa',
+			'headerTextColor' => '#333333',
+			'rowBgColor'      => '#ffffff',
+			'rowTextColor'    => '#333333',
+			'borderColor'     => '#dee2e6',
+			'borderWidth'     => 1,
+			'fontSize'        => 14,
+			'fontFamily'      => 'Arial, sans-serif',
+			'padding'         => array(
+				'top'    => 8,
+				'right'  => 12,
+				'bottom' => 8,
+				'left'   => 12,
+			),
+			'align'           => 'center',
 		);
 	}
 
@@ -58,18 +74,80 @@ class Table_Block extends Email_Block {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
-		// Process content for merge tags
-		$content = $this->process_merge_tags( $props['content'], $merge_tags );
-
-		// Build styles
-		$styles = array(
-			'font-size'  => $props['fontSize'] . 'px',
-			'color'      => $props['color'],
-			'text-align' => $props['align'],
+		// Container styles (matching frontend)
+		$container_style = $this->build_style_string(
+			array(
+				'text-align' => $props['align'],
+				'width'      => '100%',
+			)
 		);
 
-		$style_string = $this->build_style_string( $styles );
+		// Table styles (matching frontend)
+		$table_style = $this->build_style_string(
+			array(
+				'border-collapse' => 'collapse',
+				'width'           => '100%',
+				'max-width'       => '100%',
+				'font-family'     => $props['fontFamily'],
+				'font-size'       => $props['fontSize'] . 'px',
+				'border'          => $props['borderWidth'] . 'px solid ' . $props['borderColor'],
+			)
+		);
 
-		return "<p style=\"{$style_string}\">{$content}</p>";
+		// Header cell styles (matching frontend)
+		$header_cell_style = $this->build_style_string(
+			array(
+				'background-color' => $props['headerBgColor'],
+				'color'            => $props['headerTextColor'],
+				'padding'          => $this->format_padding( $props['padding'] ),
+				'border'           => $props['borderWidth'] . 'px solid ' . $props['borderColor'],
+				'font-weight'      => 'bold',
+				'text-align'       => 'left',
+			)
+		);
+
+		// Row cell styles (matching frontend)
+		$row_cell_style = $this->build_style_string(
+			array(
+				'background-color' => $props['rowBgColor'],
+				'color'            => $props['rowTextColor'],
+				'padding'          => $this->format_padding( $props['padding'] ),
+				'border'           => $props['borderWidth'] . 'px solid ' . $props['borderColor'],
+				'text-align'       => 'left',
+			)
+		);
+
+		$table_data = $props['tableData'] ?? array();
+		if ( empty( $table_data ) ) {
+			// Return placeholder (matching frontend)
+			return "<div style=\"{$container_style};text-align:center;padding:20px;\">
+				<span style=\"font-size: 32px; font-weight: 600; color: #1E3A8A;\">" .
+					esc_html__( 'Add table data', 'quillcrm' ) . '</span>
+			</div>';
+		}
+
+		$html = "<div style=\"{$container_style}\">
+			<table style=\"{$table_style}\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">";
+
+		// Render table rows
+		foreach ( $table_data as $row_index => $row ) {
+			$html .= '<tr>';
+
+			if ( is_array( $row ) ) {
+				foreach ( $row as $cell ) {
+					$cell_content = $this->process_merge_tags( $cell, $merge_tags );
+					$cell_style   = $row_index === 0 ? $header_cell_style : $row_cell_style;
+					$cell_tag     = $row_index === 0 ? 'th' : 'td';
+
+					$html .= "<{$cell_tag} style=\"{$cell_style}\">{$cell_content}</{$cell_tag}>";
+				}
+			}
+
+			$html .= '</tr>';
+		}
+
+		$html .= '</table></div>';
+
+		return $html;
 	}
 }

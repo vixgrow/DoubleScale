@@ -48,6 +48,10 @@ export interface ContactsState {
 		last_name: string;
 	};
 
+	// Contact dialog state
+	contactDialogVisible: boolean;
+	selectedContactId: string | null;
+
 	// Notice state
 	notice: NoticeMessage | null;
 }
@@ -82,6 +86,11 @@ export interface ContactsActions {
 	setIsSaving: (saving: boolean) => void;
 	setContact: (contact: ContactsState['contact']) => void;
 
+	// Contact dialog actions
+	setContactDialogVisible: (visible: boolean) => void;
+	setSelectedContactId: (id: string | null) => void;
+	openContactDialog: (id: string) => void;
+
 	// Notice actions
 	setNotice: (notice: NoticeMessage | null) => void;
 	showNotice: (type: 'success' | 'error', message: string) => void;
@@ -110,6 +119,8 @@ const initialState: ContactsState = {
 	exportModalVisible: false,
 	isSaving: false,
 	contact: { email: '', first_name: '', last_name: '' },
+	contactDialogVisible: false,
+	selectedContactId: null,
 	notice: null,
 };
 
@@ -152,6 +163,12 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 			updateState({ exportModalVisible }),
 		setIsSaving: (isSaving) => updateState({ isSaving }),
 		setContact: (contact) => updateState({ contact }),
+		setContactDialogVisible: (contactDialogVisible) =>
+			updateState({ contactDialogVisible }),
+		setSelectedContactId: (selectedContactId) =>
+			updateState({ selectedContactId }),
+		openContactDialog: (id) =>
+			updateState({ selectedContactId: id, contactDialogVisible: true }),
 		setNotice: (notice) => updateState({ notice }),
 		showNotice: (type, message) =>
 			updateState({ notice: { type, message } }),

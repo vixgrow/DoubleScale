@@ -201,30 +201,50 @@ class Product_Block extends Email_Block {
 	 * @return array Button settings
 	 */
 	private function get_global_button_settings( string $button_style = 'primary' ): array {
-		// Get global button settings from QuillCRM settings
-		$settings = get_option( 'quillcrm_button_settings', array() );
-
+		// Default settings matching the frontend ButtonSettingsContext
 		$default_settings = array(
-			'font'            => 'Arial, sans-serif',
-			'size'            => 16,
+			'font'            => 'Arial',
+			'size'            => 14,
 			'letterSpacing'   => '0px',
-			'borderRadius'    => 4,
+			'borderRadius'    => 0,
+			'textColor'       => '#FFFFFF',
+			'backgroundColor' => '#1E3A8A',
+			'borderWidth'     => 1,
+			'borderColor'     => '#1E3A8A',
+			'padding'         => array(
+				'top'    => 4,
+				'right'  => 8,
+				'bottom' => 4,
+				'left'   => 8,
+			),
 			'bold'            => false,
 			'italic'          => false,
 			'underline'       => false,
-			'padding'         => array(
-				'top'    => 2,
-				'right'  => 4,
-				'bottom' => 2,
-				'left'   => 4,
-			),
-			'backgroundColor' => '#007cba',
-			'textColor'       => '#ffffff',
-			'borderColor'     => '#007cba',
-			'borderWidth'     => 1,
 		);
 
-		return wp_parse_args( $settings, $default_settings );
+		// Try to get settings from current email renderer (template-specific)
+		global $quillcrm_email_renderer;
+		if ( isset( $quillcrm_email_renderer ) && method_exists( $quillcrm_email_renderer, 'get_button_settings' ) ) {
+			$template_settings = $quillcrm_email_renderer->get_button_settings( $button_style );
+			if ( ! empty( $template_settings ) ) {
+				return wp_parse_args( $template_settings, $default_settings );
+			}
+		}
+
+		// Fallback to global settings from database
+		$saved_settings = \QuillCRM\Settings::get( 'button_settings', array() );
+
+		if ( ! empty( $saved_settings ) && is_array( $saved_settings ) ) {
+			// Get settings for the specific button style
+			$style_settings = isset( $saved_settings[ $button_style ] ) ? $saved_settings[ $button_style ] : array();
+
+			// Merge with defaults to ensure all properties exist
+			$merged_settings = wp_parse_args( $style_settings, $default_settings );
+
+			return $merged_settings;
+		}
+
+		return $default_settings;
 	}
 
 	/**

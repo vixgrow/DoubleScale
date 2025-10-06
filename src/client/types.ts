@@ -174,24 +174,29 @@ export type CustomFieldsGroup = {
 export type CustomFieldsGroups = CustomFieldsGroup[];
 
 // Email Template Type
+export type EmailBodyContent = {
+	type: 'rich-text' | 'builder';
+	value: any; // For rich-text: string, for builder: sections/globalSettings/buttonSettings
+};
+
 export type EmailTemplate = {
 	id?: number;
 	name: string;
 	type: 'email';
 	subject: string;
-	body: string;
-	settings: {
-		from_name: string;
-		from_email: string;
-		reply_to: string;
-		preview_text: string;
-		enable_utm?: boolean;
-		utm_source?: string;
-		utm_medium?: string;
-		utm_campaign?: string;
-		utm_term?: string;
-		utm_content?: string;
-	};
+	body?: string; // Keep for backward compatibility
+	email_body?: EmailBodyContent;
+
+	from_name: string;
+	from_email: string;
+	reply_to: string;
+	preview_text: string;
+	enable_utm: boolean;
+	utm_source: string;
+	utm_medium: string;
+	utm_name: string;
+	utm_term: string;
+	utm_content: string;
 	created_at?: string;
 	updated_at?: string;
 };
@@ -542,19 +547,17 @@ export type ContactAnalytics = {
 };
 
 export type EmailsAnalytics = {
-	email: {
-		[date: string]: number;
+	emails: {
+		[date: string]: CampaignEmail[];
 	};
 	data: {
 		dates: string[];
-		type: 'hour' | 'day' | 'month' | 'year';
+		type: 'hour' | 'day' | 'month';
 	};
-	total: number;
-	sent: number;
-	failed: number;
-	pending: number;
-	opened: number;
-	clicked: number;
+	total: string;
+	total_sent: number;
+	total_opened: number;
+	total_clicked: number;
 };
 
 export type Settings = {

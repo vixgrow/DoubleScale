@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
  */
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { useCampaignContext } from '../../state/context';
+import { useSelect, useDispatch } from '@wordpress/data';
 import type { Filter as FilterType } from '@quillcrm/client';
 import {
 	ContactList,
@@ -22,16 +22,29 @@ import { Label } from '@/components/ui/label';
 import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
 
 const Contacts: React.FC = () => {
-	const { campaign, saveCampaign, saveCampaignStep, updateSettings } =
-		useCampaignContext();
+	const campaign = useSelect(
+		(select: any) => select('quillcrm/campaign').getCampaign(),
+		[]
+	);
+	const { saveCampaignStep, updateSettings } =
+		useDispatch('quillcrm/campaign');
 	const navigate = useNavigate();
+
+	// Get existing step data
+	const existingContactsData = useSelect(
+		(select: any) => select('quillcrm/campaign').getStepData('contacts'),
+		[]
+	);
+
 	const filters = campaign?.settings.filters || [];
 	const setFilters = (newFilters: FilterType[]) => {
 		updateSettings('filters', newFilters);
 	};
 
 	const [total, setTotal] = useState(0);
-	const [filterBy, setFilterBy] = useState('list-tags');
+	const [filterBy, setFilterBy] = useState(
+		existingContactsData?.filter_type || 'list-tags'
+	);
 	const [isApplying, setIsApplying] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
@@ -74,17 +87,12 @@ const Contacts: React.FC = () => {
 			return;
 		}
 
-		// Save contacts step data with filters
-		const contactsStepData = {
-			filters: filters,
-			contacts_count: total,
-		};
+		// Save just the filter type so we know which tab to open next time
+		await saveCampaignStep('contacts', {
+			filter_type: filterBy,
+		});
 
-		// Save the step with contacts data and navigate only if successful
-		const saveSuccess = await saveCampaignStep('review', contactsStepData);
-		if (saveSuccess) {
-			navigate(getToLink(`campaigns/${campaign.id}/review`));
-		}
+		navigate(getToLink(`campaigns/${campaign.id}/review`));
 	};
 
 	return (
@@ -96,15 +104,24 @@ const Contacts: React.FC = () => {
 			onBack={async () => {
 				// Save current contacts data before going back
 				const contactsStepData = {
-					filters: filters,
-					contacts_count: total,
+					contacts: {
+						filters: filters,
+						contacts_count: total,
+						lastModified: new Date().toISOString(),
+					},
 				};
 				const saveSuccess = await saveCampaignStep(
-					'template',
+					'contacts',
 					contactsStepData
 				);
 				if (saveSuccess) {
-					navigate(getToLink(`campaigns/${campaign?.id}/template`));
+					navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+				} else {
+					// Navigate anyway on back, but log the error
+					console.error(
+						'Failed to save contacts data on back navigation'
+					);
+					navigate(getToLink(`campaigns/${campaign?.id}/builder`));
 				}
 			}}
 		>

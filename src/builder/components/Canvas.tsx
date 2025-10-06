@@ -20,7 +20,7 @@ interface CanvasProps {
 	// No props needed since we're using the store
 }
 
-const Canvas = ({ }: CanvasProps) => {
+const Canvas = ({}: CanvasProps) => {
 	const dispatch = useDispatch();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -43,7 +43,10 @@ const Canvas = ({ }: CanvasProps) => {
 	};
 
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
-	const globalSettings = useSelect((select) => select(STORE_KEY).getGlobalSettings(), []);
+	const globalSettings = useSelect(
+		(select) => select(STORE_KEY).getGlobalSettings(),
+		[]
+	);
 
 	const handleOpenModal = () => {
 		setIsModalOpen(true);
@@ -68,12 +71,12 @@ const Canvas = ({ }: CanvasProps) => {
 	};
 
 	return (
-		<div className="flex-1 p-4 pt-20 overflow-auto">
+		<div className="flex-1 p-4 pt-20 overflow-scroll">
 			<div
 				className="mx-auto relative"
-				style={{ maxWidth: `${globalSettings.canvasWidth}px` }}
+				style={{ width: `${globalSettings.canvasWidth}px` }}
 			>
-				{(sections.length > 0) && (
+				{sections.length > 0 && (
 					<div className="p-2 bg-primary w-fit rounded-t-xl absolute -top-9 left-0 text-white">
 						{__('Email Page', 'quillcrm')}
 					</div>
@@ -82,8 +85,12 @@ const Canvas = ({ }: CanvasProps) => {
 				<div
 					ref={setNodeRefCanvas}
 					style={{
-						backgroundColor: isOverCanvas ? 'red' : globalSettings.canvasColor,
-						backgroundImage: globalSettings.backgroundImage ? `url(${globalSettings.backgroundImage.url})` : undefined,
+						backgroundColor: isOverCanvas
+							? 'red'
+							: globalSettings.canvasColor,
+						backgroundImage: globalSettings.backgroundImage
+							? `url(${globalSettings.backgroundImage.url})`
+							: undefined,
 						backgroundRepeat: globalSettings.backgroundRepeat,
 						backgroundSize: globalSettings.backgroundSize,
 					}}

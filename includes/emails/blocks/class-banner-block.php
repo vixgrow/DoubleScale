@@ -75,136 +75,76 @@ class Banner_Block extends Email_Block {
 		$content = $this->process_merge_tags( $props['content'], $merge_tags );
 		$link    = ! empty( $props['link'] ) ? $this->process_merge_tags( $props['link'], $merge_tags ) : '';
 
-		// Container style with proper sizing
+		// Wrapper style (matches frontend wrapperStyle)
+		$wrapper_style = $this->build_style_string(
+			array(
+				'text-align' => $props['align'],
+				'width'      => '100%',
+			)
+		);
+
+		// Container style (matches frontend containerStyle)
 		$container_style = $this->build_style_string(
 			array(
 				'background-color' => $props['backgroundColor'],
 				'padding'          => $this->format_padding( $props['padding'] ),
-				'text-align'       => $props['align'],
 				'border-radius'    => $props['borderRadius'] . 'px',
-				'max-width'        => '100%',
 				'display'          => 'inline-block',
-				'vertical-align'   => 'top',
+				'max-width'        => '100%',
 			)
 		);
 
-		// Handle alignment properly
-		$text_align = 'center'; // default
-		if ( $props['align'] === 'left' ) {
-			$text_align = 'left';
-		} elseif ( $props['align'] === 'right' ) {
-			$text_align = 'right';
-		} elseif ( $props['align'] === 'center' ) {
-			$text_align = 'center';
-		}
-
-		// Text style
-		$text_style = $this->build_style_string(
+		// Image style (matches frontend imageStyle - fixed 100px size)
+		$image_style = $this->build_style_string(
 			array(
-				'font-size'   => $props['fontSize'] . 'px',
-				'color'       => $props['color'],
-				'margin'      => '0',
-				'line-height' => '1.4',
-				'text-align'  => $text_align,
-			)
-		);
-
-		// Image style with proper sizing and alignment
-		$img_margin = '0 auto';
-		if ( $text_align === 'left' ) {
-			$img_margin = '0 auto 0 0';
-		} elseif ( $text_align === 'right' ) {
-			$img_margin = '0 0 0 auto';
-		}
-
-		$img_style = $this->build_style_string(
-			array(
-				'width'         => '100%',
+				'width'         => '100px',
+				'height'        => '100px',
 				'max-width'     => '100%',
-				'height'        => 'auto',
-				'border-radius' => $props['shape'] === 'circle' ? '50%' : $props['borderRadius'] . 'px',
+				'border-radius' => $props['borderRadius'] . 'px',
 				'display'       => 'block',
-				'margin'        => $img_margin,
 				'transform'     => $props['rotation'] !== 0 ? 'rotate(' . $props['rotation'] . 'deg)' : 'none',
+				'object-fit'    => 'cover',
 			)
 		);
 
-		// Use table-based layout for better email compatibility
-		$table_style = $this->build_style_string(
+		// Placeholder style (matches frontend placeholderStyle)
+		$placeholder_style = $this->build_style_string(
 			array(
-				'width'           => '100%',
+				'width'           => '100px',
+				'height'          => '100px',
 				'max-width'       => '100%',
-				'border-collapse' => 'collapse',
-				'margin'          => '0',
+				'border-radius'   => $props['borderRadius'] . 'px',
+				'display'         => 'flex',
+				'align-items'     => 'center',
+				'justify-content' => 'center',
+				'color'           => '#6B7280',
+				'font-size'       => '14px',
+				'font-weight'     => '500',
+				'margin'          => '0 auto',
 			)
 		);
 
-		$cell_style = $this->build_style_string(
-			array(
-				'padding'        => '0',
-				'text-align'     => $text_align,
-				'vertical-align' => 'top',
-				'width'          => '100%',
-			)
-		);
+		// Start wrapper div
+		$output  = "<div style=\"{$wrapper_style}\">";
+		$output .= "<div style=\"{$container_style}\">";
 
-		// Inner container for the banner content
-		$inner_container_style = $this->build_style_string(
-			array(
-				'max-width'        => '100%',
-				'background-color' => $props['backgroundColor'],
-				'border-radius'    => $props['borderRadius'] . 'px',
-				'padding'          => $this->format_padding( $props['padding'] ),
-				'display'          => 'inline-block',
-				'vertical-align'   => 'top',
-			)
-		);
-
-		$output = "<table style=\"{$table_style}\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
-			<tr>
-				<td style=\"{$cell_style}\">
-					<div style=\"{$inner_container_style}\">";
-
-		// Add image if source is provided
+		// Render banner element
 		if ( ! empty( $props['src'] ) ) {
-			$image_html = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$img_style}\" />";
-
-			// Wrap image in link if provided
-			if ( $link ) {
-				$image_html = "<a href=\"{$link}\" target=\"_blank\" style=\"text-decoration:none;border:0;\">{$image_html}</a>";
-			}
-
-			$output .= $image_html;
+			// Render image
+			$banner_element = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$image_style}\" />";
+		} else {
+			// Render placeholder (simplified for email - no icon, just text)
+			$banner_element = "<div style=\"{$placeholder_style}\">📷</div>";
 		}
 
-		// Add text content only if it's not the default placeholder or if there's no image
-		$should_show_text = false;
-		if ( ! empty( $content ) && $content !== 'Your text here' ) {
-			$should_show_text = true;
-		} elseif ( empty( $props['src'] ) && ! empty( $content ) ) {
-			$should_show_text = true;
+		// Wrap in link if provided
+		if ( $link ) {
+			$banner_element = "<a href=\"{$link}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"text-decoration:none;\">{$banner_element}</a>";
 		}
 
-		if ( $should_show_text ) {
-			$text_html = "<p style=\"{$text_style}\">{$content}</p>";
-
-			// Wrap text in link if provided and no image
-			if ( $link && empty( $props['src'] ) ) {
-				$text_html = "<a href=\"{$link}\" target=\"_blank\" style=\"text-decoration:none;color:inherit;\">{$text_html}</a>";
-			}
-
-			$output .= $text_html;
-		}
-
-		// If no content and no image, show placeholder
-		if ( empty( $content ) && empty( $props['src'] ) ) {
-			$output .= "<p style=\"{$text_style}\">" . esc_html__( 'Banner content', 'quillcrm' ) . '</p>';
-		}
-
-		$output .= '</div>
-				</td>
-			</tr>
-		</table>';
+		$output .= $banner_element;
+		$output .= '</div>';
+		$output .= '</div>';
 
 		return $output;
 	}

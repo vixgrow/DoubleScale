@@ -82,38 +82,26 @@ class Button_Block extends Email_Block {
 			'underline'       => false,
 		);
 
-		// Load settings from database
-		$saved_settings = \QuillCRM\Settings::get( 'button_settings', array() );
-
-		// Debug logging (remove in production)
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			error_log( 'Button Block Debug - Button Style: ' . $button_style );
-			error_log( 'Button Block Debug - Saved Settings: ' . print_r( $saved_settings, true ) );
+		// Try to get settings from current email renderer (template-specific)
+		global $quillcrm_email_renderer;
+		if ( isset( $quillcrm_email_renderer ) && method_exists( $quillcrm_email_renderer, 'get_button_settings' ) ) {
+			$template_settings = $quillcrm_email_renderer->get_button_settings( $button_style );
+			if ( ! empty( $template_settings ) ) {
+				return wp_parse_args( $template_settings, $default_settings );
+			}
 		}
+
+		// Fallback to global settings from database
+		$saved_settings = \QuillCRM\Settings::get( 'button_settings', array() );
 
 		if ( ! empty( $saved_settings ) && is_array( $saved_settings ) ) {
 			// Get settings for the specific button style
 			$style_settings = isset( $saved_settings[ $button_style ] ) ? $saved_settings[ $button_style ] : array();
 
-			// Debug logging
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( 'Button Block Debug - Style Settings: ' . print_r( $style_settings, true ) );
-			}
-
 			// Merge with defaults to ensure all properties exist
 			$merged_settings = wp_parse_args( $style_settings, $default_settings );
 
-			// Debug logging
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( 'Button Block Debug - Final Settings: ' . print_r( $merged_settings, true ) );
-			}
-
 			return $merged_settings;
-		}
-
-		// Debug logging
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			error_log( 'Button Block Debug - Using default settings' );
 		}
 
 		return $default_settings;
@@ -134,119 +122,94 @@ class Button_Block extends Email_Block {
 		$text = $this->process_merge_tags( $props['text'], $merge_tags );
 		$url  = $this->process_merge_tags( $props['url'], $merge_tags );
 
-		// Container style based on alignment, background, and padding
-		$container_padding = $this->format_padding( $props['containerPadding'] );
+		// Get global button settings (matching frontend)
+		$global_settings = $this->get_global_button_settings( $props['buttonStyle'] );
 
-		// Handle alignment properly
-		$text_align = 'center'; // default
-		if ( $props['align'] === 'left' ) {
-			$text_align = 'left';
-		} elseif ( $props['align'] === 'right' ) {
-			$text_align = 'right';
-		} elseif ( $props['align'] === 'center' || $props['align'] === 'full' ) {
-			$text_align = 'center';
+		// Container padding (matches frontend containerPaddingString)
+		$container_padding        = $props['containerPadding'] ?? array(
+			'top'    => 0,
+			'right'  => 0,
+			'bottom' => 0,
+			'left'   => 0,
+		);
+		$container_padding_string = $this->format_padding( $container_padding );
+
+		// Get alignment (matches frontend getAlignment function)
+		$alignment = 'center';
+		switch ( $props['align'] ) {
+			case 'left':
+				$alignment = 'left';
+				break;
+			case 'right':
+				$alignment = 'right';
+				break;
+			case 'full':
+				$alignment = 'center';
+				break;
+			default:
+				$alignment = 'center';
 		}
 
+		// Container style (matches frontend containerStyle)
 		$container_style = $this->build_style_string(
 			array(
-				'background-color' => $props['containerBackgroundColor'],
-				'padding'          => $container_padding,
+				'text-align'       => $alignment,
 				'width'            => $props['align'] === 'full' ? '100%' : 'auto',
+				'padding'          => $container_padding_string,
+				'background-color' => $props['containerBackgroundColor'],
+				'overflow'         => 'hidden',
+				'word-wrap'        => 'break-word',
 			)
 		);
 
-		// Get global button settings (matching frontend defaults)
-		$global_settings = $this->get_global_button_settings( $props['buttonStyle'] );
+		// Button style (matches frontend getButtonStyle function)
+		$button_padding_string = $this->format_button_padding_multiplied( $global_settings['padding'] );
 
-		// Button style
 		$button_styles = array(
-			'display'         => $props['align'] === 'full' ? 'block' : 'inline-block',
-			'width'           => $props['align'] === 'full' ? '100%' : 'auto',
-			'padding'         => $this->format_padding( $global_settings['padding'] ),
-			'font-family'     => $global_settings['font'],
-			'font-size'       => $global_settings['size'] . 'px',
-			'font-weight'     => $global_settings['bold'] ? 'bold' : 'normal',
-			'font-style'      => $global_settings['italic'] ? 'italic' : 'normal',
-			'text-decoration' => $global_settings['underline'] ? 'underline' : 'none',
-			'letter-spacing'  => $global_settings['letterSpacing'],
-			'border-radius'   => $global_settings['borderRadius'] . 'px',
-			'text-align'      => 'center',
+			'display'          => $props['align'] === 'full' ? 'block' : 'inline-block',
+			'font-family'      => $global_settings['font'],
+			'font-size'        => $global_settings['size'] . 'px',
+			'letter-spacing'   => $global_settings['letterSpacing'],
+			'border-radius'    => $global_settings['borderRadius'] . 'px',
+			'font-weight'      => $global_settings['bold'] ? 'bold' : 'normal',
+			'font-style'       => $global_settings['italic'] ? 'italic' : 'normal',
+			'text-decoration'  => $global_settings['underline'] ? 'underline' : 'none',
+			'white-space'      => 'normal',
+			'word-wrap'        => 'break-word',
+			'overflow-wrap'    => 'break-word',
+			'max-width'        => '100%',
+			'padding'          => $button_padding_string,
+			'color'            => $global_settings['textColor'],
+			'background-color' => $global_settings['backgroundColor'],
+			'border'           => $global_settings['borderWidth'] . 'px solid ' . $global_settings['borderColor'],
 		);
 
-		// Apply global button settings (all button types use the same styling)
-		$button_styles['background-color'] = $global_settings['backgroundColor'];
-		$button_styles['border']           = $global_settings['borderWidth'] . 'px solid ' . $global_settings['borderColor'];
-		$button_styles['color']            = $global_settings['textColor'];
+		// Add full width when alignment is 'full'
+		if ( $props['align'] === 'full' ) {
+			$button_styles['width'] = '100%';
+		}
 
 		$button_style = $this->build_style_string( $button_styles );
 
-		// For email client compatibility, use a table-based button structure
-		$wrapper_table_style = 'width: 100%; border-collapse: collapse;';
-
-		// Alignment styles for the button cell
-		$button_cell_align = 'center';
-		switch ( $props['align'] ) {
-			case 'left':
-				$button_cell_align = 'left';
-				break;
-			case 'right':
-				$button_cell_align = 'right';
-				break;
-			case 'full':
-				$button_cell_align = 'center';
-				break;
-			default:
-				$button_cell_align = 'center';
-		}
-
-		$button_cell_style = $this->build_style_string(
-			array(
-				'text-align' => $button_cell_align,
-				'padding'    => $this->format_padding( $props['containerPadding'] ),
-			)
-		);
-
-		// Inner button table for MSO compatibility
-		$button_table_style = $this->build_style_string(
-			array(
-				'display'         => 'inline-block',
-				'border-collapse' => 'separate',
-				'line-height'     => '100%',
-			)
-		);
-
-		// Set alignment styles
-		if ( $props['align'] === 'full' ) {
-			$button_cell_style  = 'width: 100%; text-align: center;';
-			$button_table_style = 'width: 100%;';
-		} elseif ( $props['align'] === 'left' ) {
-			$button_cell_style  = 'text-align: left; width: auto;';
-			$button_table_style = 'width: auto;';
-		} elseif ( $props['align'] === 'right' ) {
-			$button_cell_style  = 'text-align: right; width: auto;';
-			$button_table_style = 'width: auto;';
-		} else {
-			// center
-			$button_cell_style  = 'text-align: center; width: auto;';
-			$button_table_style = 'width: auto; margin: 0 auto;';
-		}
-
-		return "
-		<div style=\"{$container_style}\">
-			<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"{$wrapper_table_style}\">
-				<tr>
-					<td style=\"{$button_cell_style}\">
-						<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\" style=\"{$button_table_style}\">
-							<tr>
-								<td>
-									<a href=\"{$url}\" target=\"_blank\" style=\"{$button_style}\">{$text}</a>
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-			</table>
+		// Simple div structure matching frontend exactly
+		return "<div style=\"{$container_style}\">
+			<a href=\"{$url}\" style=\"{$button_style}\">{$text}</a>
 		</div>";
+	}
+
+	/**
+	 * Format button padding with multipliers (matching frontend)
+	 *
+	 * @param array $padding Padding array
+	 * @return string CSS padding string
+	 */
+	private function format_button_padding_multiplied( array $padding ): string {
+		$top    = ( $padding['top'] ?? 2 ) * 2;
+		$right  = ( $padding['right'] ?? 4 ) * 4;
+		$bottom = ( $padding['bottom'] ?? 2 ) * 2;
+		$left   = ( $padding['left'] ?? 4 ) * 4;
+
+		return "{$top}px {$right}px {$bottom}px {$left}px";
 	}
 }
 

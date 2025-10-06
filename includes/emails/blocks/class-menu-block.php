@@ -93,16 +93,18 @@ class Menu_Block extends Email_Block {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
-		// Build container styles
+		// Build container styles (matching frontend)
 		$container_styles = array(
 			'display'     => 'flex',
 			'gap'         => '16px',
 			'align-items' => 'center',
 			'flex-wrap'   => 'wrap',
-			'padding'     => $this->format_padding( $props['padding'] ),
+			'padding'     => $this->format_padding_multiplied( $props['padding'] ),
+			'width'       => '100%',
+			'overflow'    => 'hidden',
 		);
 
-		// Add alignment class
+		// Add alignment class (matching frontend)
 		$justify_content = $this->get_alignment_justify( $props['align'] );
 		if ( $justify_content ) {
 			$container_styles['justify-content'] = $justify_content;
@@ -115,7 +117,14 @@ class Menu_Block extends Email_Block {
 			$menu_items_html .= $this->render_menu_item( $item, $index, $merge_tags );
 		}
 
-		return "<div style=\"{$container_style_string}\">{$menu_items_html}</div>";
+		// Use table structure for better email client compatibility
+		return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
+			<tr>
+				<td>
+					<div style=\"{$container_style_string}\">{$menu_items_html}</div>
+				</td>
+			</tr>
+		</table>";
 	}
 
 	/**
@@ -131,7 +140,7 @@ class Menu_Block extends Email_Block {
 		$name = $this->process_merge_tags( $item['name'], $merge_tags );
 		$link = $this->process_merge_tags( $item['link'], $merge_tags );
 
-		// Handle text decoration
+		// Handle text decoration (matching frontend)
 		$text_decoration = array();
 		if ( ! empty( $item['underline'] ) ) {
 			$text_decoration[] = 'underline';
@@ -140,7 +149,7 @@ class Menu_Block extends Email_Block {
 			$text_decoration[] = 'line-through';
 		}
 
-		// Build menu item styles
+		// Build menu item styles (matching frontend)
 		$item_styles = array(
 			'font-size'             => $item['fontSize'] . 'px',
 			'color'                 => $item['color'],
@@ -152,6 +161,10 @@ class Menu_Block extends Email_Block {
 			'border-radius'         => $item['borderRadius'] . 'px',
 			'letter-spacing'        => $item['letterSpacing'],
 			'text-decoration-color' => $item['color'],
+			'white-space'           => 'nowrap',
+			'overflow'              => 'hidden',
+			'text-overflow'         => 'ellipsis',
+			'max-width'             => '150px',
 		);
 
 		$item_style_string = $this->build_style_string( $item_styles );
@@ -159,7 +172,7 @@ class Menu_Block extends Email_Block {
 		// Use name or fallback to default
 		$display_name = ! empty( $name ) ? $name : 'MenuItem ' . str_pad( $index + 1, 2, '0', STR_PAD_LEFT );
 
-		return "<a href=\"{$link}\" style=\"{$item_style_string}\">{$display_name}</a>";
+		return "<a href=\"{$link}\" style=\"{$item_style_string}\" class=\"text-decoration-none hover:opacity-80 transition-opacity\">{$display_name}</a>";
 	}
 
 	/**
@@ -178,5 +191,24 @@ class Menu_Block extends Email_Block {
 			default:
 				return 'center';
 		}
+	}
+
+	/**
+	 * Format padding with multipliers (matching frontend)
+	 *
+	 * @param array|null $padding Padding object
+	 * @return string CSS padding string
+	 */
+	private function format_padding_multiplied( $padding ) {
+		if ( ! $padding ) {
+			return '0';
+		}
+
+		$top    = isset( $padding['top'] ) ? $padding['top'] * 2 : 0;
+		$right  = isset( $padding['right'] ) ? $padding['right'] * 4 : 0;
+		$bottom = isset( $padding['bottom'] ) ? $padding['bottom'] * 2 : 0;
+		$left   = isset( $padding['left'] ) ? $padding['left'] * 4 : 0;
+
+		return "{$top}px {$right}px {$bottom}px {$left}px";
 	}
 }

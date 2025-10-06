@@ -31,7 +31,7 @@ const BusinessSettings: React.FC<BusinessSettingsProps> = ({
     };
     return (
         <div className="business-settings qcrm-fields">
-            <div className="text-[#09090B] font-semi text-2xl">{__('Business', 'quillcrm')}</div>
+            <div className="text-[#09090B] font-semibold text-2xl">{__('Business', 'quillcrm')}</div>
             <Field
                 label={__('Business Name', 'quillcrm')}
                 value={business_name || ConfigAPI.getBlogName()}

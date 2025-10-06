@@ -119,3 +119,4 @@ export { default as NoPurchaseHistoryIcon } from './no-purchase-history';
 export { default as AverageOrderValueIcon } from './average-order-value';
 export { default as TotalRevenueIcon } from './total-revenue';
 export { default as TotalOrdersIcon } from './total-orders';
+export { default as NoAutomationIcon } from './no-automation';

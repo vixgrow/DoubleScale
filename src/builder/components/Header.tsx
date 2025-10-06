@@ -42,7 +42,7 @@ const Header: React.FC = () => {
 	// Use auto-save hook
 	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
 		{
-			interval: 2000, // Auto-save every 2 seconds
+			interval: 10000, // Auto-save every 10 seconds
 			enabled: true,
 		}
 	);

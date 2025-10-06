@@ -249,9 +249,19 @@ class Emails {
 		}
 
 		/*
-		 * Generate an HTML email.
-		 */
+		* Generate an HTML email.
+		*/
 
+		// Check if message is already a complete HTML document (from Email_Renderer)
+		$is_complete_html = strpos( $message, '<!DOCTYPE html' ) !== false ||
+					   strpos( $message, '<html' ) !== false;
+
+		if ( $is_complete_html ) {
+			// Message is already a complete HTML document, return as-is
+			return apply_filters( 'quillcrm_email_message', $message, $this );
+		}
+
+		// Process as template-based email
 		ob_start();
 
 		$this->get_template_part( 'header', $this->get_template(), true );
@@ -266,9 +276,7 @@ class Emails {
 
 		$this->get_template_part( 'footer', $this->get_template(), true );
 
-		// Hooks into the email footer.
-		do_action( 'quillcrm_email_footer', $this );
-
+		// Only apply nl2br and make_clickable for template-based emails
 		$message = nl2br( $message );
 
 		$body = ob_get_clean();

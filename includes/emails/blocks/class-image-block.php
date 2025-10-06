@@ -69,7 +69,9 @@ class Image_Block extends Email_Block {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
-		// Process link for merge tags
+		// Process src, alt, and link for merge tags
+		$src  = ! empty( $props['src'] ) ? $this->process_merge_tags( $props['src'], $merge_tags ) : '';
+		$alt  = ! empty( $props['alt'] ) ? $this->process_merge_tags( $props['alt'], $merge_tags ) : '';
 		$link = ! empty( $props['link'] ) ? $this->process_merge_tags( $props['link'], $merge_tags ) : '';
 
 		// Wrapper style (matches frontend wrapperStyle)
@@ -125,13 +127,13 @@ class Image_Block extends Email_Block {
 		$output .= "<span style=\"{$container_style}\">";
 
 		// Build the image or placeholder
-		if ( ! empty( $props['src'] ) ) {
-			// Render image
-			$image = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$image_style}\" />";
+		if ( ! empty( $src ) ) {
+			// Render image with proper URL escaping
+			$image = '<img src="' . esc_url( $src ) . '" alt="' . esc_attr( $alt ) . '" style="' . $image_style . '" border="0" />';
 
 			// Wrap in link if provided
 			if ( $link ) {
-				$output .= "<a href=\"{$link}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"text-decoration:none;display:block;\">{$image}</a>";
+				$output .= '<a href="' . esc_url( $link ) . '" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:block;">' . $image . '</a>';
 			} else {
 				$output .= $image;
 			}

@@ -97,6 +97,15 @@ class Email_Renderer {
 		$background_size     = isset( $global_settings['backgroundSize'] ) ? $global_settings['backgroundSize'] : 'cover';
 		$background_position = isset( $global_settings['backgroundPosition'] ) ? $global_settings['backgroundPosition'] : 'center';
 
+		// Process background image through merge tags if present
+		if ( ! empty( $background_image ) ) {
+			error_log( 'QuillCRM Canvas - Original background image: ' . $background_image );
+			$background_image = Merge_Tags_Manager::instance()->process_merge_tags( $background_image, $merge_tags );
+			error_log( 'QuillCRM Canvas - Processed background image: ' . $background_image );
+		} else {
+			error_log( 'QuillCRM Canvas - No background image found in global settings: ' . print_r( $global_settings, true ) );
+		}
+
 		// Use a light gray for outer wrapper background (email client background)
 		$bg_color = '#f7f7f7';
 
@@ -174,8 +183,8 @@ class Email_Renderer {
 			'max-width'        => $canvas_width . 'px',
 		);
 
-		// Add background image styles if set
-		if ( ! empty( $background_image ) ) {
+		// Add background image styles if set (Gmail-compatible)
+		if ( ! empty( $background_image ) && strpos( $background_image, 'localhost' ) === false ) {
 			$canvas_styles['background-image']    = "url('{$background_image}')";
 			$canvas_styles['background-repeat']   = $background_repeat;
 			$canvas_styles['background-size']     = $background_size;
@@ -184,9 +193,12 @@ class Email_Renderer {
 
 		$canvas_style_string = $this->build_style_string( $canvas_styles );
 
+		// Debug: Log canvas styles
+		error_log( 'QuillCRM Canvas - Canvas styles: ' . $canvas_style_string );
+
 		$html .= "<table role=\"presentation\" class=\"email-container\" width=\"{$canvas_width}\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"{$canvas_style_string}\">
-						<tr>
-							<td style=\"padding: 0;\">";
+					<tr>
+						<td style=\"padding: 0;\">";
 
 		// Process all sections
 		if ( isset( $content['sections'] ) && is_array( $content['sections'] ) ) {

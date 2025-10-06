@@ -71,8 +71,10 @@ class Banner_Block extends Email_Block {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
-		// Process content and link for merge tags
+		// Process content, src, alt, and link for merge tags
 		$content = $this->process_merge_tags( $props['content'], $merge_tags );
+		$src     = ! empty( $props['src'] ) ? $this->process_merge_tags( $props['src'], $merge_tags ) : '';
+		$alt     = ! empty( $props['alt'] ) ? $this->process_merge_tags( $props['alt'], $merge_tags ) : '';
 		$link    = ! empty( $props['link'] ) ? $this->process_merge_tags( $props['link'], $merge_tags ) : '';
 
 		// Wrapper style (matches frontend wrapperStyle)
@@ -129,9 +131,9 @@ class Banner_Block extends Email_Block {
 		$output .= "<div style=\"{$container_style}\">";
 
 		// Render banner element
-		if ( ! empty( $props['src'] ) ) {
+		if ( ! empty( $src ) ) {
 			// Render image
-			$banner_element = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$image_style}\" />";
+			$banner_element = "<img src=\"{$src}\" alt=\"{$alt}\" style=\"{$image_style}\" />";
 		} else {
 			// Render placeholder (simplified for email - no icon, just text)
 			$banner_element = "<div style=\"{$placeholder_style}\">📷</div>";

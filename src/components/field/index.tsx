@@ -157,7 +157,7 @@ const Field: React.FC<FieldProps> = ({
 					onChange={(e) => onChange(e.target.value)}
 					type={type}
 					className={cn(
-						'h-12',
+						'h-12 bg-white',
 						status === 'error' &&
 							'border-red-500 focus-visible:ring-red-500'
 					)}
@@ -170,7 +170,7 @@ const Field: React.FC<FieldProps> = ({
 				<Textarea
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
-					className={cn(
+					className={cn('bg-white',
 						status === 'error' &&
 							'border-red-500 focus-visible:ring-red-500'
 					)}
@@ -182,7 +182,7 @@ const Field: React.FC<FieldProps> = ({
 			const selectOptions = options || [];
 			fieldContent = (
 				<Select
-					className="react-select-container"
+					className="react-select-container bg-white"
 					classNamePrefix="react-select"
 					value={
 						value

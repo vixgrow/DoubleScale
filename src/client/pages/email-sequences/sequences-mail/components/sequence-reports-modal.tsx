@@ -51,52 +51,6 @@ const SequenceReportsModal: React.FC<SequenceReportsModalProps> = ({
 		} catch (error: any) {
 			// If the endpoint doesn't exist yet, show mock data
 			console.warn('Reports endpoint not found, showing mock data');
-			setReportData({
-				id: 1,
-				name: 'Email Report',
-				description: 'Email Report',
-				status: 'active',
-				settings: {} as any,
-				parent_id: '1',
-				count: '1',
-				execute_at: null,
-				created_at: '2025-01-06 09:41:02',
-				updated_at: '2025-01-06 09:41:02',
-				type: 'email',
-				contacts_count: 1,
-				sent: 85,
-				opened: 42,
-				click: 18,
-				open_rate: 49.4,
-				click_rate: 21.2,
-				sent_rate: 2.4,
-				recipients: [
-					{
-						id: 1,
-						name: 'Ahmed Galal',
-						email: 'ahmedgalalmohamed912@gmail.com',
-						status: 'sent',
-						sent_at: '2025-01-06 09:41:02',
-						opened_at: '2025-01-06 10:15:30',
-						clicked_at: '2025-01-06 10:16:45',
-					},
-					{
-						id: 2,
-						name: 'John Doe',
-						email: 'john@example.com',
-						status: 'sent',
-						sent_at: '2025-01-06 09:41:05',
-						opened_at: '2025-01-06 11:20:15',
-					},
-					{
-						id: 3,
-						name: 'Jane Smith',
-						email: 'jane@example.com',
-						status: 'sent',
-						sent_at: '2025-01-06 09:41:08',
-					},
-				],
-			});
 		} finally {
 			setLoading(false);
 		}

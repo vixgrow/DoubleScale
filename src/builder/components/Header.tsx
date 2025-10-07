@@ -82,7 +82,6 @@ const Header: React.FC = () => {
 				body: JSON.stringify(builderData),
 				settings: JSON.stringify({
 					type: 'builder',
-					version: '1.0',
 				}),
 				hidden: 0, // Make it visible in templates list
 				category: 'custom',

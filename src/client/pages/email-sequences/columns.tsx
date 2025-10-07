@@ -39,6 +39,7 @@ interface ColumnProps {
 	onEdit: (id: number, name: string) => void;
 	onDuplicate: (id: number) => void;
 	navigate: (path: string) => void;
+	onShowSubscribers: (id: number, name: string) => void;
 }
 
 export const emailSequenceColumns = ({
@@ -46,6 +47,7 @@ export const emailSequenceColumns = ({
 	onEdit,
 	onDuplicate,
 	navigate,
+	onShowSubscribers,
 }: ColumnProps): ColumnDef<EmailSequence>[] => [
 	{
 		id: 'select',
@@ -95,9 +97,26 @@ export const emailSequenceColumns = ({
 		accessorKey: 'subscriber_count',
 		header: ({ column }) =>
 			SortedHeaderCell({ column, header: __('Subscribers', 'quillcrm') }),
-		cell: ({ row }) => (
-			<FallbackCell value={row.getValue('subscriber_count')} />
-		),
+		cell: ({ row }) => {
+			const sequence = row.original;
+			const subscriberCount = row.getValue('subscriber_count') as string;
+
+			// Extract the number from the subscriber count string (e.g., "5 Subscribers" -> 5)
+			const count = parseInt(subscriberCount.split(' ')[0]) || 0;
+
+			return (
+				<Button
+					variant="ghost"
+					className="h-auto p-0 font-normal text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+					onClick={() =>
+						onShowSubscribers(sequence.id, sequence.name)
+					}
+					disabled={count === 0}
+				>
+					<FallbackCell value={subscriberCount} />
+				</Button>
+			);
+		},
 	},
 	{
 		accessorKey: 'created_at',

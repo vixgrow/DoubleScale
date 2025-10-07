@@ -5,6 +5,7 @@ import { useDispatch } from '@wordpress/data';
 import { addQueryArgs } from '@wordpress/url';
 import AddEmailSequence from './components/add-email-sequence';
 import EditEmailSequence from './components/edit-email-sequence';
+import SubscribersModal from './components/subscribers-modal';
 import { EMAIL_SEQUENCE_TYPE, END_POINT } from './constants';
 import { DataTable } from '@/components/ui/data-table';
 import { emailSequenceColumns } from './columns';
@@ -36,6 +37,12 @@ const EmailSequences: React.FC = () => {
 		from: null,
 		to: null,
 	});
+	const [showSubscribersModal, setShowSubscribersModal] = useState(false);
+	const [selectedSequenceForSubscribers, setSelectedSequenceForSubscribers] =
+		useState<{
+			id: number;
+			name: string;
+		} | null>(null);
 
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -159,11 +166,17 @@ const EmailSequences: React.FC = () => {
 		window.location.href = path;
 	};
 
+	const handleShowSubscribers = (id: number, name: string) => {
+		setSelectedSequenceForSubscribers({ id, name });
+		setShowSubscribersModal(true);
+	};
+
 	const columns = emailSequenceColumns({
 		onDelete: handleDelete,
 		onEdit: handleEdit,
 		onDuplicate: handleDuplicate,
 		navigate: navigate,
+		onShowSubscribers: handleShowSubscribers,
 	});
 
 	return (
@@ -234,6 +247,18 @@ const EmailSequences: React.FC = () => {
 						setEditingSequence(null);
 						setIsEditing(false);
 					}}
+				/>
+			)}
+
+			{selectedSequenceForSubscribers && (
+				<SubscribersModal
+					isOpen={showSubscribersModal}
+					onClose={() => {
+						setShowSubscribersModal(false);
+						setSelectedSequenceForSubscribers(null);
+					}}
+					sequenceId={selectedSequenceForSubscribers.id}
+					sequenceName={selectedSequenceForSubscribers.name}
 				/>
 			)}
 		</div>

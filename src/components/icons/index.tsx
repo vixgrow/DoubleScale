@@ -130,3 +130,5 @@ export { default as CurrencyIcon } from './currency';
 export { default as CartIcon } from './cart';
 export { default as DoubleOptInIcon } from './double-opt-in';
 export { default as BusinessIcon } from './business';
+export { default as CartDisabledIcon } from './cart-disabled';
+export { default as AlertIcon } from './alert';

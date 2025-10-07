@@ -2,10 +2,12 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
+import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 /**
  * Internal dependencies
@@ -37,16 +39,66 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
     onClose,
     contact,
 }) => {
+    const { createNotice } = useDispatch('quillcrm/core');
     const [toEmail, setToEmail] = useState(contact?.email || '');
     const [subject, setSubject] = useState('');
     const [body, setBody] = useState('');
     const [isSending, setIsSending] = useState(false);
 
-    const sendEmail = () => {
+    // Update toEmail when contact changes
+    useEffect(() => {
+        if (contact?.email) {
+            setToEmail(contact.email);
+        }
+    }, [contact]);
+
+    const sendEmail = async () => {
+        if (!contact?.id) {
+            createNotice({
+                type: 'error',
+                message: __('Contact not found', 'quillcrm'),
+            });
+            return;
+        }
+
+        if (!toEmail || !subject || !body) {
+            createNotice({
+                type: 'error',
+                message: __('Please fill in all fields', 'quillcrm'),
+            });
+            return;
+        }
+
         setIsSending(true);
-        console.log({ toEmail, subject, body, contact });
-        // TODO: Implement actual email sending logic
-        setIsSending(false);
+        try {
+            const response = await apiFetch({
+                path: `/qc/v1/contacts/${contact.id}/send-email`,
+                method: 'POST',
+                data: {
+                    to: toEmail,
+                    subject: subject,
+                    body: body,
+                },
+            });
+
+            createNotice({
+                type: 'success',
+                message: __('Email sent successfully!', 'quillcrm'),
+            });
+
+            // Reset form
+            setSubject('');
+            setBody('');
+
+            onClose();
+        } catch (error: any) {
+            createNotice({
+                type: 'error',
+                message: error.message || __('Failed to send email', 'quillcrm'),
+            });
+        } finally {
+            setIsSending(false);
+        }
     };
 
     return (

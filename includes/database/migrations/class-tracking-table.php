@@ -41,8 +41,9 @@ class Tracking_Table extends Migration
 		 * template_id: BIGINT(20) NOT NULL
 		 * hash_key: VARCHAR(255) NOT NULL
 		 * mode: TINYINT(1) NOT NULL COMMENT '1=Email, 2=SMS, 3=WhatsApp'
-		 * source_type: TINYINT(2) NOT NULL DEFAULT 1 COMMENT '1=Campaign, 2=Automation'
+		 * source_type: TINYINT(2) NOT NULL DEFAULT 1 COMMENT '1=Campaign, 2=Automation, 3=Individual'
 		 * source_id: BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'ID of the source (campaign_id or automation_id)'
+		 * author_id: BIGINT(20) UNSIGNED DEFAULT 0 COMMENT 'User ID who sent the message (for individual sends)'
 		 * recipient: VARCHAR(255) NOT NULL COMMENT 'Email address or phone number'
 		 * opened: TINYINT(1) DEFAULT 0 COMMENT 'Only for emails'
 		 * clicked: TINYINT(1) DEFAULT 0
@@ -58,8 +59,9 @@ class Tracking_Table extends Migration
             template_id BIGINT(20) NOT NULL,
             hash_key VARCHAR(255) NOT NULL,
             mode TINYINT(1) NOT NULL COMMENT "1=Email, 2=SMS, 3=WhatsApp",
-            source_type TINYINT(2) NOT NULL DEFAULT 1 COMMENT "1=Campaign, 2=Automation",
+            source_type TINYINT(2) NOT NULL DEFAULT 1 COMMENT "1=Campaign, 2=Automation, 3=Individual",
             source_id BIGINT(20) NOT NULL DEFAULT 0 COMMENT "ID of the source (campaign_id or automation_id)",
+            author_id BIGINT(20) UNSIGNED DEFAULT 0 COMMENT "User ID who sent the message (for individual sends)",
             recipient VARCHAR(255) NOT NULL COMMENT "Email address or phone number",
             opened TINYINT(1) DEFAULT 0 COMMENT "Only for emails",
             clicked TINYINT(1) DEFAULT 0,
@@ -77,6 +79,7 @@ class Tracking_Table extends Migration
             KEY mode (mode),
             KEY source_type (source_type),
             KEY source_id (source_id),
+            KEY author_id (author_id),
             KEY recipient (recipient),
             KEY status (status),
             KEY external_id (external_id),

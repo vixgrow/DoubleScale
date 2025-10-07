@@ -180,6 +180,44 @@ class REST_Contact_Controller extends REST_Controller {
 			)
 		);
 
+		// Send individual email
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/send-email',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_individual_email' ),
+					'permission_callback' => array( $this, 'send_individual_email_permissions_check' ),
+					'args'                => array(
+						'id'      => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+						'to'      => array(
+							'description'       => __( 'Recipient email address.', 'quillcrm' ),
+							'type'              => 'string',
+							'required'          => true,
+							'validate_callback' => function ( $param ) {
+								return is_email( $param );
+							},
+						),
+						'subject' => array(
+							'description' => __( 'Email subject.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+						'body'    => array(
+							'description' => __( 'Email body (HTML supported).', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
 		// Get automation contacts
 		register_rest_route(
 			$this->namespace,
@@ -1317,6 +1355,154 @@ class REST_Contact_Controller extends REST_Controller {
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Send individual email to contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_individual_email( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$to         = $request->get_param( 'to' );
+			$subject    = $request->get_param( 'subject' );
+			$body       = $request->get_param( 'body' );
+
+			// Validate contact exists
+			$contact = Contact_Model::find( $contact_id );
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', __( 'Contact not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Process merge tags
+			$subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+			$body    = Merge_Tags_Manager::instance()->process_merge_tags( $body, $contact );
+
+			// Create tracking entry FIRST (for open/click tracking)
+			$tracking_entry = \QuillCRM\Models\Tracking_Model::create(
+				array(
+					'contact_id'  => $contact->id,
+					'template_id' => 0, // No template for individual emails
+					'hash_key'    => wp_generate_password( 32, false ),
+					'mode'        => \QuillCRM\Models\Tracking_Model::MODE_EMAIL,
+					'source_type' => \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL,
+					'source_id'   => 0, // No campaign/automation
+					'author_id'   => get_current_user_id(), // Track who sent it
+					'recipient'   => $to,
+					'status'      => 'pending',
+				)
+			);
+
+			// Get global email settings
+			$email_settings = Settings::get( 'email', array() );
+
+			// Send email using Emails class
+			$emails               = new Emails();
+			$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
+			$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
+			$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
+
+			// Remove competing filters (FunnelKit pattern)
+			$this->remove_wp_mail_filters();
+
+			// Send the email
+			$result = $emails->send( $to, $subject, $body );
+
+			// Update tracking status
+			if ( $result ) {
+				$tracking_entry->update(
+					array(
+						'status'  => 'sent',
+						'sent_at' => current_time( 'mysql' ),
+					)
+				);
+
+				quillcrm_get_logger()->info(
+					__( 'Individual email sent successfully', 'quillcrm' ),
+					array(
+						'contact_id'   => $contact->id,
+						'tracking_id'  => $tracking_entry->id,
+						'author_id'    => get_current_user_id(),
+						'recipient'    => $to,
+						'subject'      => $subject,
+					)
+				);
+
+				return new WP_REST_Response(
+					array(
+						'success'     => true,
+						'message'     => __( 'Email sent successfully', 'quillcrm' ),
+						'tracking_id' => $tracking_entry->id,
+					),
+					200
+				);
+			} else {
+				$tracking_entry->update( array( 'status' => 'failed' ) );
+
+				quillcrm_get_logger()->error(
+					__( 'Individual email failed to send', 'quillcrm' ),
+					array(
+						'contact_id'  => $contact->id,
+						'tracking_id' => $tracking_entry->id,
+						'author_id'   => get_current_user_id(),
+						'recipient'   => $to,
+						'subject'     => $subject,
+					)
+				);
+
+				return new WP_Error(
+					'send_failed',
+					__( 'Failed to send email. Please check your SMTP settings.', 'quillcrm' ),
+					array( 'status' => 500 )
+				);
+			}
+		} catch ( \Exception $e ) {
+			quillcrm_get_logger()->error(
+				__( 'Individual email send exception', 'quillcrm' ),
+				array(
+					'error'   => $e->getMessage(),
+					'contact' => $contact_id ?? null,
+				)
+			);
+
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Remove competing wp_mail filters (FunnelKit pattern)
+	 * This allows our custom from_email/from_name to work properly
+	 *
+	 * @since 1.0.0
+	 */
+	protected function remove_wp_mail_filters() {
+		// Only remove if not multiple SMTP connections
+		// This prevents breaking setups with multiple SMTP accounts
+		$quillsmtp_settings = get_option( 'quillsmtp_settings', array() );
+		$connections        = $quillsmtp_settings['connections'] ?? array();
+
+		if ( count( $connections ) <= 1 ) {
+			remove_all_filters( 'wp_mail_from' );
+			remove_all_filters( 'wp_mail_from_name' );
+		}
+	}
+
+	/**
+	 * Check permissions for sending individual email
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	public function send_individual_email_permissions_check( $request ) {
+		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
 	}
 
 	/**

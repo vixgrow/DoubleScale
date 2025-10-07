@@ -1078,15 +1078,16 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		// Check for required unsubscribe link in email templates
-		if ( $campaign_type === 'email' && strpos( $template->body, '{{contact:unsubscribe_link}}' ) === false ) {
-			quillcrm_get_logger()->warning(
-				__( 'Email template missing unsubscribe link', 'quillcrm' ),
-				array(
-					'template_id'   => $template->id,
-					'template_name' => $template->name ?? 'Unknown',
-				)
-			);
-		}
+		// Note: Validation disabled - footer automatically adds unsubscribe link via default_email_footer()
+		// if ( $campaign_type === 'email' && strpos( $template->body, '{{contact:unsubscribe_link}}' ) === false ) {
+		// 	quillcrm_get_logger()->warning(
+		// 		__( 'Email template missing unsubscribe link', 'quillcrm' ),
+		// 		array(
+		// 			'template_id'   => $template->id,
+		// 			'template_name' => $template->name ?? 'Unknown',
+		// 		)
+		// 	);
+		// }
 
 		// Validate content length for SMS/WhatsApp
 		if ( in_array( $campaign_type, array( 'sms', 'whatsapp' ) ) ) {

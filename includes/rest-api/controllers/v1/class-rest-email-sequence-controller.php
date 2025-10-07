@@ -17,6 +17,7 @@ use QuillCRM\User_Roles\Permissions;
 class REST_Email_Sequence_Controller extends REST_Controller {
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -227,7 +228,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 							'from_name'    => sanitize_text_field( $parent_email_sequence['settings']['from_name'] ?? get_bloginfo( 'name' ) ),
 							'from_email'   => sanitize_text_field( $parent_email_sequence['settings']['from_email'] ?? get_option( 'admin_email' ) ),
 							'reply_to'     => sanitize_text_field( $parent_email_sequence['settings']['reply_to_email'] ?? get_option( 'admin_email' ) ),
-							'preview_text' => sanitize_text_field( $parent_email_sequence['settings']['pre_header'] ?? '' ),
+							'preview_text' => sanitize_text_field( $email_sequence_data['settings']['pre_header'] ?? '' ),
 						),
 					),
 				);

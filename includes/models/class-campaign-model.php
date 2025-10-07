@@ -25,17 +25,6 @@ use QuillCRM\Services\Template_Field_Mapper;
  */
 class Campaign_Model extends Model {
 
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Table name
 	 *
@@ -172,6 +161,17 @@ class Campaign_Model extends Model {
 	 */
 	public function sequences_mail() {
 		return $this->hasMany( Campaign_Model::class, 'parent_id' )->where( 'type', 'sequence_mail' );
+	}
+
+	/**
+	 * Get parent campaign
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function parent() {
+		return $this->belongsTo( Campaign_Model::class, 'parent_id' );
 	}
 
 

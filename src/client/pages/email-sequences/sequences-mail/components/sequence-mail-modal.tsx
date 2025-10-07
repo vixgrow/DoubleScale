@@ -169,62 +169,14 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 	const handleMergeTagClick = () => {
 		// Set up callback to copy to clipboard instead of inserting
 		setMergeTagCallback((tagValue: string) => {
-			// Copy to clipboard
-			if (navigator.clipboard && window.isSecureContext) {
-				// Use modern clipboard API if available
-				navigator.clipboard
-					.writeText(tagValue)
-					.then(() => {
-						createNotice({
-							type: 'success',
-							message: __(
-								'Merge tag copied to clipboard!',
-								'quillcrm'
-							),
-						});
-					})
-					.catch((err) => {
-						console.error('Failed to copy to clipboard:', err);
-						// Fallback to older method
-						fallbackCopyToClipboard(tagValue);
-					});
-			} else {
-				// Fallback for older browsers or non-secure contexts
-				fallbackCopyToClipboard(tagValue);
-			}
+			// copy to clipboard
+			navigator.clipboard.writeText(tagValue);
+			createNotice({
+				message: __('Merge tag copied to clipboard', 'quillcrm'),
+				type: 'info',
+			});
 		});
 		setMergeTagsVisible(true);
-	};
-
-	// Fallback function for copying to clipboard
-	const fallbackCopyToClipboard = (text: string) => {
-		const textArea = document.createElement('textarea');
-		textArea.value = text;
-		textArea.style.position = 'fixed';
-		textArea.style.left = '-999999px';
-		textArea.style.top = '-999999px';
-		document.body.appendChild(textArea);
-		textArea.focus();
-		textArea.select();
-
-		try {
-			document.execCommand('copy');
-			createNotice({
-				type: 'success',
-				message: __('Merge tag copied to clipboard!', 'quillcrm'),
-			});
-		} catch (err) {
-			console.error('Fallback copy failed:', err);
-			createNotice({
-				type: 'error',
-				message: __(
-					'Failed to copy merge tag to clipboard',
-					'quillcrm'
-				),
-			});
-		}
-
-		document.body.removeChild(textArea);
 	};
 
 	return (

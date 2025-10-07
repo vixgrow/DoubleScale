@@ -166,6 +166,9 @@ const Field: React.FC<FieldProps> = ({
 						status === 'error' &&
 						'border-red-500 focus-visible:ring-red-500'
 					)}
+					style={{
+						borderRadius: '8px',
+					}}
 					placeholder={placeholder}
 				/>
 			);
@@ -180,6 +183,9 @@ const Field: React.FC<FieldProps> = ({
 						'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
+					style={{
+						borderRadius: '8px',
+					}}
 				/>
 			);
 			break;
@@ -205,6 +211,10 @@ const Field: React.FC<FieldProps> = ({
 					options={selectOptions}
 					placeholder={placeholder}
 					styles={{
+						control: (styles) => ({
+							...styles,
+							borderRadius: '8px',
+						}),
 						menu: (base: any) => ({
 							...base,
 							color: 'black',
@@ -230,6 +240,10 @@ const Field: React.FC<FieldProps> = ({
 					isMulti
 					placeholder={placeholder}
 					styles={{
+						control: (styles) => ({
+							...styles,
+							borderRadius: '8px',
+						}),
 						menu: (base: any) => ({
 							...base,
 							color: 'black',

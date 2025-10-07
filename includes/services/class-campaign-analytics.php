@@ -12,6 +12,7 @@ namespace QuillCRM\Services;
 use QuillCRM\Utils;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Tracking_Status;
 
 /**
  * Campaign_Analytics class
@@ -136,7 +137,7 @@ class Campaign_Analytics {
 		}
 
 		// Optimized: Single query with aggregate functions instead of multiple clones
-		$result = $base_query->selectRaw( "COUNT(*) as total, SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) as sent, SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed, SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending" )->first();
+		$result = $base_query->selectRaw( 'COUNT(*) as total, SUM(CASE WHEN status = ' . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as sent, SUM(CASE WHEN status = ' . Tracking_Status::FAILED . ' THEN 1 ELSE 0 END) as failed, SUM(CASE WHEN status = ' . Tracking_Status::PENDING . ' THEN 1 ELSE 0 END) as pending' )->first();
 
 		$stats = array(
 			'total'   => (int) $result->total,
@@ -163,7 +164,7 @@ class Campaign_Analytics {
 		// Optimized: Single query with aggregate functions
 		$result = $query->where( 'source_id', $campaign_id )
 			->where( 'source_type', Message_Source_Types::CAMPAIGN )
-			->selectRaw( "COUNT(*) as total, SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) as sent, SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed, SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending" )
+			->selectRaw( 'COUNT(*) as total, SUM(CASE WHEN status = ' . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as sent, SUM(CASE WHEN status = ' . Tracking_Status::FAILED . ' THEN 1 ELSE 0 END) as failed, SUM(CASE WHEN status = ' . Tracking_Status::PENDING . ' THEN 1 ELSE 0 END) as pending' )
 			->first();
 
 		$stats = array(
@@ -208,18 +209,17 @@ class Campaign_Analytics {
 			$stats['clicked'] = (int) $result->clicked;
 
 		} elseif ( $type === 'sms' ) {
-			$result = $base_query->selectRaw( "SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = 'delivered' THEN 1 ELSE 0 END) as delivered" )->first();
+			$result = $base_query->selectRaw( 'SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = ' . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered' )->first();
 
 			$stats['clicked']   = (int) $result->clicked;
 			$stats['delivered'] = (int) $result->delivered;
 			$stats              = $this->calculate_sms_rates( $stats );
 
 		} elseif ( $type === 'whatsapp' ) {
-			$result = $base_query->selectRaw( "SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = 'delivered' THEN 1 ELSE 0 END) as delivered, SUM(CASE WHEN status = 'read' THEN 1 ELSE 0 END) as read_count" )->first();
+			$result = $base_query->selectRaw( 'SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = ' . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered' )->first();
 
 			$stats['clicked']   = (int) $result->clicked;
 			$stats['delivered'] = (int) $result->delivered;
-			$stats['read']      = (int) $result->read_count;
 			$stats              = $this->calculate_whatsapp_rates( $stats );
 		}
 
@@ -298,8 +298,8 @@ class Campaign_Analytics {
 		$select_fields = "
             DATE_FORMAT(sent_at, '{$format}') as period,
             COUNT(*) as total_sent,
-            SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) as sent,
-            SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed
+            SUM(CASE WHEN status = " . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as sent,
+            SUM(CASE WHEN status = ' . Tracking_Status::FAILED . " THEN 1 ELSE 0 END) as failed
         ";
 
 		if ( $type === 'email' ) {

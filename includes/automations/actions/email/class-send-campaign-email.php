@@ -22,6 +22,7 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Utils;
 use QuillCRM\Campaign\Email_Processing;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Tracking_Status;
 
 
 class Send_Campaign_Email extends Action {
@@ -116,7 +117,7 @@ class Send_Campaign_Email extends Action {
 				'source_type' => Message_Source_Types::AUTOMATION,
 				'source_id'   => $automation->id,
 				'recipient'   => $contact->email,
-				'status'      => 'pending',
+				'status'      => Tracking_Status::PENDING,
 				'hash_key'    => Utils::generate_hash_key(),
 			);
 

@@ -11,6 +11,7 @@ namespace QuillCRM\Abstracts;
 
 use QuillCRM\Utils;
 use QuillCRM\Managers\Message_Provider_Registry;
+use QuillCRM\Constants\Tracking_Status;
 
 defined('ABSPATH') || exit;
 
@@ -226,21 +227,21 @@ abstract class Abstract_Tracking
 		// Handle status updates
 		switch ($status) {
 			case 'sent':
-				$tracking_record->status = 'sent';
+				$tracking_record->status = Tracking_Status::SENT;
 				$tracking_record->sent_at = current_time('mysql');
 				break;
 			case 'delivered':
-				$tracking_record->status = 'delivered';
+				$tracking_record->status = Tracking_Status::DELIVERED;
 				break;
 			case 'read':
-				// WhatsApp-specific status
+				// WhatsApp-specific status (not yet defined in constants, using delivered for now)
 				if ($this->campaign_type === 'whatsapp') {
-					$tracking_record->status = 'read';
+					$tracking_record->status = Tracking_Status::DELIVERED;
 				}
 				break;
 			case 'failed':
 			case 'undelivered':
-				$tracking_record->status = 'failed';
+				$tracking_record->status = Tracking_Status::FAILED;
 				break;
 		}
 

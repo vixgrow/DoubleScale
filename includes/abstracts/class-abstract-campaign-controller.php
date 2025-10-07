@@ -18,6 +18,7 @@ use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Services\Campaign_Analytics;
 use QuillCRM\Managers\Campaign_Status_Manager;
+use QuillCRM\Constants\Tracking_Status;
 
 /**
  * Abstract_Campaign_Controller class
@@ -456,16 +457,16 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 		// Common status filters across all campaign types
 		switch ( $status ) {
 			case 'failed':
-				$query->where( 'status', 'failed' );
+				$query->where( 'status', Tracking_Status::FAILED );
 				break;
 			case 'sent':
-				$query->where( 'status', 'sent' );
+				$query->where( 'status', Tracking_Status::SENT );
 				break;
 			case 'pending':
-				$query->where( 'status', 'pending' );
+				$query->where( 'status', Tracking_Status::PENDING );
 				break;
 			case 'delivered':
-				$query->where( 'status', 'delivered' );
+				$query->where( 'status', Tracking_Status::DELIVERED );
 				break;
 			case 'opened':
 				// Email-specific: check opened column
@@ -475,9 +476,9 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				// Email-specific: check clicked column
 				$query->where( 'clicked', 1 );
 				break;
-			case 'read':
-				// WhatsApp-specific: check read status
-				$query->where( 'status', 'read' );
+			case 'scheduled':
+				// Scheduled messages
+				$query->where( 'status', Tracking_Status::SCHEDULED );
 				break;
 		}
 	}

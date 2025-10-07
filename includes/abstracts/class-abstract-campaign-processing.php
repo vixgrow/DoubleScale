@@ -14,6 +14,7 @@ use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Services\Campaign_Rate_Limiter;
@@ -220,7 +221,7 @@ abstract class Abstract_Campaign_Processing {
 		// Store provider's message ID in tracking record for webhook processing
 		if ( is_array( $result ) && isset( $result['success'] ) && $result['success'] && isset( $result['message_id'] ) ) {
 			$campaign_message->external_id = $result['message_id']; // Store provider message ID
-			$campaign_message->status      = 'sent'; // Update status
+			$campaign_message->status      = Tracking_Status::SENT; // Update status
 			$campaign_message->save();
 
 			quillcrm_get_logger()->info(
@@ -551,7 +552,7 @@ abstract class Abstract_Campaign_Processing {
 				'source_type' => $this->get_source_type(),
 				'source_id'   => $this->get_source_id( $campaign ),
 				'recipient'   => $recipient,
-				'status'      => 'pending',
+				'status'      => Tracking_Status::PENDING,
 				'hash_key'    => Utils::generate_hash_key(),
 			);
 
@@ -739,12 +740,12 @@ abstract class Abstract_Campaign_Processing {
 	 */
 	protected function handle_send_result( Tracking_Model $campaign_message, $result ) {
 		if ( $result && $result['success'] ) {
-			$campaign_message->status  = 'sent';
+			$campaign_message->status  = Tracking_Status::SENT;
 			$campaign_message->sent_at = current_time( 'mysql' );
 
 			do_action( "quillcrm_{$this->campaign_type}_send_after", $this );
 		} else {
-			$campaign_message->status = 'failed';
+			$campaign_message->status = Tracking_Status::FAILED;
 
 			// Log error details if available
 			if ( isset( $result['error'] ) ) {
@@ -805,7 +806,7 @@ abstract class Abstract_Campaign_Processing {
 	 * @return void
 	 */
 	protected function log_provider_connection_error( $campaign, $contact, $campaign_message ) {
-		$campaign_message->status = 'failed';
+		$campaign_message->status = Tracking_Status::FAILED;
 		$campaign_message->save();
 
 		quillcrm_get_logger()->error(
@@ -848,7 +849,7 @@ abstract class Abstract_Campaign_Processing {
 	 * @return void
 	 */
 	protected function log_campaign_processing_error( $campaign, $contact, $campaign_message, $exception ) {
-		$campaign_message->status = 'failed';
+		$campaign_message->status = Tracking_Status::FAILED;
 		$campaign_message->save();
 
 		quillcrm_get_logger()->error(
@@ -942,9 +943,9 @@ abstract class Abstract_Campaign_Processing {
 					break;
 				}
 
-				foreach ( $failed_messages as $message ) {
-					$message->status = 'scheduled';
-					$message->save();
+			foreach ( $failed_messages as $message ) {
+				$message->status = Tracking_Status::SCHEDULED;
+				$message->save();
 					QuillCRM::instance()->campaigns_tasks->enqueue_sync(
 						"process_campaign_{$this->campaign_type}",
 						$campaign,
@@ -999,7 +1000,7 @@ abstract class Abstract_Campaign_Processing {
 	 */
 	protected function get_failed_messages_count( $campaign ) {
 		$mode = $this->get_message_mode();
-		return $campaign->messages()->where( 'mode', $mode )->where( 'status', 'failed' )->count();
+		return $campaign->messages()->where( 'mode', $mode )->where( 'status', Tracking_Status::FAILED )->count();
 	}
 
 	/**
@@ -1014,7 +1015,7 @@ abstract class Abstract_Campaign_Processing {
 		$mode = $this->get_message_mode();
 		return $campaign->messages()
 			->where( 'mode', $mode )
-			->where( 'status', 'failed' )
+			->where( 'status', Tracking_Status::FAILED )
 			->offset( $offset )
 			->limit( $limit )
 			->get();

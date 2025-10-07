@@ -18,6 +18,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Utils;
 use QuillCRM\Abstracts\REST_Controller;
+use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Tag_Model;
@@ -748,7 +749,7 @@ class REST_Contact_Controller extends REST_Controller {
 					'template',
 				)
 			)->paginate( $per_page, array( '*' ), 'page', $page );
-			$total_sent    = $contact->campaign_emails()->where( 'status', 'sent' )->count();
+			$total_sent    = $contact->campaign_emails()->where( 'status', Tracking_Status::SENT )->count();
 			$total_opened  = $contact->campaign_emails()->where( 'opened', 1 )->count();
 			$total_clicked = $contact->campaign_emails()->where( 'clicked', 1 )->count();
 
@@ -1391,58 +1392,58 @@ class REST_Contact_Controller extends REST_Controller {
 					'hash_key'    => wp_generate_password( 32, false ),
 					'mode'        => \QuillCRM\Models\Tracking_Model::MODE_EMAIL,
 					'source_type' => \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL,
-					'source_id'   => 0, // No campaign/automation
-					'author_id'   => get_current_user_id(), // Track who sent it
-					'recipient'   => $to,
-					'status'      => 'pending',
+				'source_id'   => 0, // No campaign/automation
+				'author_id'   => get_current_user_id(), // Track who sent it
+				'recipient'   => $to,
+				'status'      => Tracking_Status::PENDING,
+			)
+		);
+
+		// Get global email settings
+		$email_settings = Settings::get( 'email', array() );
+
+		// Send email using Emails class
+		$emails               = new Emails();
+		$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
+		$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
+		$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
+
+		// Remove competing filters (FunnelKit pattern)
+		$this->remove_wp_mail_filters();
+
+		// Send the email
+		$result = $emails->send( $to, $subject, $body );
+
+		// Update tracking status
+		if ( $result ) {
+			$tracking_entry->update(
+				array(
+					'status'  => Tracking_Status::SENT,
+					'sent_at' => current_time( 'mysql' ),
 				)
 			);
 
-			// Get global email settings
-			$email_settings = Settings::get( 'email', array() );
+			quillcrm_get_logger()->info(
+				__( 'Individual email sent successfully', 'quillcrm' ),
+				array(
+					'contact_id'   => $contact->id,
+					'tracking_id'  => $tracking_entry->id,
+					'author_id'    => get_current_user_id(),
+					'recipient'    => $to,
+					'subject'      => $subject,
+				)
+			);
 
-			// Send email using Emails class
-			$emails               = new Emails();
-			$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
-			$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
-			$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
-
-			// Remove competing filters (FunnelKit pattern)
-			$this->remove_wp_mail_filters();
-
-			// Send the email
-			$result = $emails->send( $to, $subject, $body );
-
-			// Update tracking status
-			if ( $result ) {
-				$tracking_entry->update(
-					array(
-						'status'  => 'sent',
-						'sent_at' => current_time( 'mysql' ),
-					)
-				);
-
-				quillcrm_get_logger()->info(
-					__( 'Individual email sent successfully', 'quillcrm' ),
-					array(
-						'contact_id'   => $contact->id,
-						'tracking_id'  => $tracking_entry->id,
-						'author_id'    => get_current_user_id(),
-						'recipient'    => $to,
-						'subject'      => $subject,
-					)
-				);
-
-				return new WP_REST_Response(
-					array(
-						'success'     => true,
-						'message'     => __( 'Email sent successfully', 'quillcrm' ),
-						'tracking_id' => $tracking_entry->id,
-					),
-					200
-				);
-			} else {
-				$tracking_entry->update( array( 'status' => 'failed' ) );
+			return new WP_REST_Response(
+				array(
+					'success'     => true,
+					'message'     => __( 'Email sent successfully', 'quillcrm' ),
+					'tracking_id' => $tracking_entry->id,
+				),
+				200
+			);
+		} else {
+			$tracking_entry->update( array( 'status' => Tracking_Status::FAILED ) );
 
 				quillcrm_get_logger()->error(
 					__( 'Individual email failed to send', 'quillcrm' ),

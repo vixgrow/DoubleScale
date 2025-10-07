@@ -15,6 +15,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Tracking_Status;
 
 /**
  * Tracking_Model class
@@ -84,6 +85,19 @@ class Tracking_Model extends Model
 		'mode' => 'integer',
 		'source_type' => 'integer',
 		'source_id' => 'integer',
+		'status' => 'integer',
+	);
+
+	/**
+	 * Appends (virtual attributes for API responses)
+	 *
+	 * @var array
+	 */
+	protected $appends = array(
+		'status_name',
+		'status_slug',
+		'status_class',
+		'status_badge_color',
 	);
 
 	/**
@@ -363,7 +377,7 @@ class Tracking_Model extends Model
 	 */
 	public function is_failed()
 	{
-		return $this->status === 'failed';
+		return $this->status === Tracking_Status::FAILED;
 	}
 
 	/**
@@ -373,7 +387,68 @@ class Tracking_Model extends Model
 	 */
 	public function is_sent()
 	{
-		return $this->status === 'sent';
+		return $this->status === Tracking_Status::SENT;
+	}
+
+	/**
+	 * Check if message is pending
+	 *
+	 * @return bool
+	 */
+	public function is_pending()
+	{
+		return $this->status === Tracking_Status::PENDING;
+	}
+
+	/**
+	 * Check if message is delivered
+	 *
+	 * @return bool
+	 */
+	public function is_delivered()
+	{
+		return $this->status === Tracking_Status::DELIVERED;
+	}
+
+
+	/**
+	 * Get status name (accessor for API)
+	 *
+	 * @return string
+	 */
+	public function getStatusNameAttribute()
+	{
+		return Tracking_Status::get_name($this->status);
+	}
+
+	/**
+	 * Get status slug (accessor for API)
+	 *
+	 * @return string
+	 */
+	public function getStatusSlugAttribute()
+	{
+		return Tracking_Status::get_slug($this->status);
+	}
+
+	/**
+	 * Get status CSS class (accessor for UI)
+	 *
+	 * @return string
+	 */
+	public function getStatusClassAttribute()
+	{
+		return Tracking_Status::get_status_class($this->status);
+	}
+
+	/**
+	 * Get status badge color (accessor for Ant Design)
+	 *
+	 * @return string
+	 */
+	public function getStatusBadgeColorAttribute()
+	{
+		return Tracking_Status::get_badge_color($this->status);
 	}
 
 	/**

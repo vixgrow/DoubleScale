@@ -28,15 +28,6 @@ final class Email_Sequences_Manager {
 
 
 
-
-
-
-
-
-
-
-
-
 	/**
 	 * Class Instance.
 	 *
@@ -82,7 +73,6 @@ final class Email_Sequences_Manager {
 	 * Add hooks
 	 */
 	private function add_hooks() {
-		add_action( 'quillcrm_process_email_sequence', array( $this, 'process_sequence_email' ), 10, 3 );
 		add_action(
 			'init',
 			function () {
@@ -160,79 +150,31 @@ final class Email_Sequences_Manager {
 		}
 	}
 
-	/**
-	 * Process a specific sequence email (called by action hook)
-	 *
-	 * @param int $sequence_id
-	 * @param int $contact_id
-	 * @param int $message_id
-	 */
-	public function process_sequence_email( $sequence_id, $contact_id, $message_id ) {
-		try {
-			$sequence = Campaign_Model::find( $sequence_id );
-			$contact  = Contact_Model::find( $contact_id );
-			$message  = Tracking_Model::find( $message_id );
-
-			if ( ! $sequence || ! $contact || ! $message ) {
-				return;
-			}
-
-			// Check if sequence is ready to send
-			if ( ! $this->is_sequence_ready_to_send( $sequence ) ) {
-				// Reschedule for later
-				$this->reschedule_sequence_email( $sequence, $contact, $message );
-				return;
-			}
-
-			// Process the email
-			$this->email_processor->process_campaign_message( $sequence, $contact, $message );
-		} catch ( Exception $e ) {
-			quillcrm_get_logger()->error(
-				'Process sequence email error',
-				array(
-					'sequence_id' => $sequence_id,
-					'contact_id'  => $contact_id,
-					'message_id'  => $message_id,
-					'error'       => $e->getMessage(),
-				)
-			);
-		}
-	}
 
 	/**
 	 * Get sequences that are ready to be sent
 	 *
-	 * @return array
+	 * @return \Illuminate\Support\Collection
 	 */
 	private function get_ready_sequences() {
-		$sequences = Campaign_Model::where( 'type', 'sequence_mail' )
+		// 1. Fetch sequences that are due to execute
+		$sequences = Campaign_Model::query()
+			->where( 'type', 'sequence_mail' )
 			->where( 'execute_at', '<=', current_time( 'mysql' ) )
 			->orderBy( 'execute_at', 'asc' )
 			->get();
 
-		$ready_sequences = array();
-
-		foreach ( $sequences as $sequence ) {
-			if ( $this->has_ready_contacts( $sequence ) ) {
-				$ready_sequences[] = $sequence;
-			}
+		if ( $sequences->isEmpty() ) {
+			return collect();
 		}
+
+		$ready_sequences = $sequences
+			->filter( fn( $sequence) => $this->is_sequence_ready_to_send( $sequence ) )
+			->values();
 
 		return $ready_sequences;
 	}
 
-	/**
-	 * Check if a sequence has contacts ready to receive emails
-	 *
-	 * @param Campaign_Model $sequence
-	 * @return bool
-	 */
-	private function has_ready_contacts( Campaign_Model $sequence ) {
-		// Get contacts for this sequence
-		$contacts = $this->get_sequence_contacts( $sequence )->count();
-
-		return $contacts > 0;
-	}
 
 
 
@@ -245,6 +187,9 @@ final class Email_Sequences_Manager {
 		try {
 			// Get contacts for this sequence
 			$contacts = $this->get_sequence_contacts( $sequence );
+			if ( $contacts->isEmpty() ) {
+				return;
+			}
 
 			foreach ( $contacts as $contact ) {
 				$this->send_sequence_email( $sequence, $contact );
@@ -386,8 +331,7 @@ final class Email_Sequences_Manager {
 			return false; // Not time yet
 		}
 
-		// Check time range and specific days
-		return $this->is_sequence_ready_to_send( $sequence );
+		return true;
 	}
 
 	/**
@@ -520,27 +464,6 @@ final class Email_Sequences_Manager {
 	public function calculate_execution_time_from_base( $delay, $base_time ) {
 		$time = strtotime( $base_time );
 		return $this->calculate_execution_time( $delay, $time );
-	}
-
-
-	/**
-	 * Reschedule a sequence email for later
-	 *
-	 * @param Campaign_Model $sequence
-	 * @param Contact_Model  $contact
-	 * @param Tracking_Model $message
-	 */
-	private function reschedule_sequence_email( Campaign_Model $sequence, Contact_Model $contact, Tracking_Model $message ) {
-		// Schedule to check again in 15 minutes using Action Scheduler
-		$reschedule_time = time() + ( 15 * 60 );
-
-		QuillCRM::instance()->campaigns_tasks->schedule_single(
-			$reschedule_time,
-			'process_email_sequence',
-			$sequence->id,
-			$contact->id,
-			$message->id
-		);
 	}
 }
 

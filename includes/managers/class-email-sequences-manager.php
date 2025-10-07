@@ -32,6 +32,11 @@ final class Email_Sequences_Manager {
 
 
 
+
+
+
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -87,6 +92,48 @@ final class Email_Sequences_Manager {
 	}
 
 	/**
+	 * Start an email sequence for a contact
+	 *
+	 * @param int $sequence_id Parent sequence ID
+	 * @param int $contact_id Contact ID
+	 */
+	public function start_sequence_for_contact( $sequence_id, $contact_id ) {
+		try {
+			$parent_sequence = Campaign_Model::find( $sequence_id );
+			$contact         = Contact_Model::find( $contact_id );
+
+			if ( ! $parent_sequence || ! $contact ) {
+				return false;
+			}
+
+			$settings = $parent_sequence->settings;
+
+			// Add contact to contact_ids if not already there
+			if ( ! in_array( $contact_id, $settings['contact_ids'] ?? array() ) ) {
+				$settings['contact_ids'][] = $contact_id;
+			}
+
+			// Track enrollment time for this contact
+			$settings['contact_enrollments'][ $contact_id ] = current_time( 'mysql' );
+
+			$parent_sequence->settings = $settings;
+			$parent_sequence->save();
+
+			return true;
+		} catch ( Exception $e ) {
+			quillcrm_get_logger()->error(
+				'Start sequence for contact error',
+				array(
+					'sequence_id' => $sequence_id,
+					'contact_id'  => $contact_id,
+					'error'       => $e->getMessage(),
+				)
+			);
+			return false;
+		}
+	}
+
+	/**
 	 * Process pending email sequences
 	 * Called by cron to check and send sequences that are ready
 	 */
@@ -114,12 +161,53 @@ final class Email_Sequences_Manager {
 	}
 
 	/**
+	 * Process a specific sequence email (called by action hook)
+	 *
+	 * @param int $sequence_id
+	 * @param int $contact_id
+	 * @param int $message_id
+	 */
+	public function process_sequence_email( $sequence_id, $contact_id, $message_id ) {
+		try {
+			$sequence = Campaign_Model::find( $sequence_id );
+			$contact  = Contact_Model::find( $contact_id );
+			$message  = Tracking_Model::find( $message_id );
+
+			if ( ! $sequence || ! $contact || ! $message ) {
+				return;
+			}
+
+			// Check if sequence is ready to send
+			if ( ! $this->is_sequence_ready_to_send( $sequence ) ) {
+				// Reschedule for later
+				$this->reschedule_sequence_email( $sequence, $contact, $message );
+				return;
+			}
+
+			// Process the email
+			$this->email_processor->process_campaign_message( $sequence, $contact, $message );
+		} catch ( Exception $e ) {
+			quillcrm_get_logger()->error(
+				'Process sequence email error',
+				array(
+					'sequence_id' => $sequence_id,
+					'contact_id'  => $contact_id,
+					'message_id'  => $message_id,
+					'error'       => $e->getMessage(),
+				)
+			);
+		}
+	}
+
+	/**
 	 * Get sequences that are ready to be sent
 	 *
 	 * @return array
 	 */
 	private function get_ready_sequences() {
 		$sequences = Campaign_Model::where( 'type', 'sequence_mail' )
+			->where( 'execute_at', '<=', current_time( 'mysql' ) )
+			->orderBy( 'execute_at', 'asc' )
 			->get();
 
 		$ready_sequences = array();
@@ -141,16 +229,134 @@ final class Email_Sequences_Manager {
 	 */
 	private function has_ready_contacts( Campaign_Model $sequence ) {
 		// Get contacts for this sequence
-		$contacts = $this->get_sequence_contacts( $sequence );
+		$contacts = $this->get_sequence_contacts( $sequence )->count();
 
-		foreach ( $contacts as $contact ) {
-			if ( $this->is_contact_ready_for_sequence( $sequence, $contact ) ) {
-				return true;
+		return $contacts > 0;
+	}
+
+
+
+	/**
+	 * Process a single email sequence
+	 *
+	 * @param Campaign_Model $sequence
+	 */
+	private function process_sequence( Campaign_Model $sequence ) {
+		try {
+			// Get contacts for this sequence
+			$contacts = $this->get_sequence_contacts( $sequence );
+
+			foreach ( $contacts as $contact ) {
+				$this->send_sequence_email( $sequence, $contact );
 			}
+		} catch ( Exception $e ) {
+			quillcrm_get_logger()->error(
+				'Single email sequence processing error',
+				array(
+					'sequence_id' => $sequence->id,
+					'error'       => $e->getMessage(),
+					'trace'       => $e->getTraceAsString(),
+				)
+			);
+		}
+	}
+
+
+	/**
+	 * Get contacts for a sequence efficiently
+	 *
+	 * @param Campaign_Model $sequence
+	 * @return \Illuminate\Support\Collection
+	 */
+	private function get_sequence_contacts( Campaign_Model $sequence ) {
+		// Get parent sequence to find contacts
+		$parent_sequence = Campaign_Model::find( $sequence->parent_id );
+		if ( ! $parent_sequence ) {
+			return collect(); // empty collection
 		}
 
-		return false;
+		$settings    = $parent_sequence->settings;
+		$contact_ids = $settings['contact_ids'] ?? array();
+
+		// If no contacts defined, return empty collection
+		if ( empty( $contact_ids ) ) {
+			return collect();
+		}
+
+		// Build main contact query excluding already sent contacts
+		$contacts = Contact_Model::whereIn( 'id', $contact_ids )
+			->whereNotIn(
+				'id',
+				function ( $sub ) use ( $sequence ) {
+					$sub->select( 'contact_id' )
+						->from( ( new Tracking_Model )->getTable() )
+						->where( 'source_id', $sequence->id )
+						->where( 'source_type', Message_Source_Types::CAMPAIGN )
+						->where( 'mode', Tracking_Model::MODE_EMAIL );
+				}
+			)
+			->get();
+
+		return $contacts->filter(
+			function ( $contact ) use ( $sequence ) {
+				return $this->is_contact_ready_for_sequence( $sequence, $contact );
+			}
+		);
 	}
+
+
+	/**
+	 * Send sequence email to a contact
+	 *
+	 * @param Campaign_Model $sequence
+	 * @param Contact_Model  $contact
+	 */
+	private function send_sequence_email( Campaign_Model $sequence, Contact_Model $contact ) {
+		try {
+			// Get template for sequence
+			$template_id = $this->email_processor->get_template_for_contact( $sequence, $contact ) ?? 0;
+			if ( ! $template_id ) {
+				return;
+			}
+
+			// Create campaign message tracking record
+			$campaign_message_data = array(
+				'contact_id'  => $contact->id,
+				'template_id' => $template_id,
+				'mode'        => Tracking_Model::MODE_EMAIL,
+				'source_type' => Message_Source_Types::CAMPAIGN,
+				'source_id'   => $sequence->id,
+				'recipient'   => $contact->email,
+				'status'      => 'pending',
+				'hash_key'    => Utils::generate_hash_key(),
+			);
+
+			$campaign_message = Tracking_Model::create( $campaign_message_data );
+
+			// Process and send the email
+			$this->email_processor->process_campaign_message( $sequence, $contact, $campaign_message );
+
+			quillcrm_get_logger()->info(
+				'Email sequence sent successfully',
+				array(
+					'sequence_id' => $sequence->id,
+					'contact_id'  => $contact->id,
+					'message_id'  => $campaign_message->id,
+				)
+			);
+		} catch ( Exception $e ) {
+			quillcrm_get_logger()->error(
+				'Email sequence send error',
+				array(
+					'sequence_id' => $sequence->id,
+					'contact_id'  => $contact->id,
+					'error'       => $e->getMessage(),
+				)
+			);
+		}
+	}
+
+
 
 	/**
 	 * Check if a specific contact is ready to receive a sequence email
@@ -160,16 +366,6 @@ final class Email_Sequences_Manager {
 	 * @return bool
 	 */
 	private function is_contact_ready_for_sequence( Campaign_Model $sequence, Contact_Model $contact ) {
-		// Check if email already sent to this contact for this sequence
-		$existing_message = Tracking_Model::where( 'contact_id', $contact->id )
-			->where( 'source_id', $sequence->id )
-			->where( 'source_type', Message_Source_Types::CAMPAIGN )
-			->where( 'mode', Tracking_Model::MODE_EMAIL )
-			->first();
-
-		if ( $existing_message ) {
-			return false; // Already sent
-		}
 
 		// Get contact's enrollment time for this sequence
 		$enrollment_time = $this->get_contact_enrollment_time( $sequence, $contact );
@@ -283,114 +479,6 @@ final class Email_Sequences_Manager {
 		return $contact_enrollments[ $contact->id ] ?? null;
 	}
 
-	/**
-	 * Process a single email sequence
-	 *
-	 * @param Campaign_Model $sequence
-	 */
-	private function process_sequence( Campaign_Model $sequence ) {
-		try {
-			// Get contacts for this sequence
-			$contacts = $this->get_sequence_contacts( $sequence );
-
-			foreach ( $contacts as $contact ) {
-				if ( $this->is_contact_ready_for_sequence( $sequence, $contact ) ) {
-					$this->send_sequence_email( $sequence, $contact );
-				}
-			}
-		} catch ( Exception $e ) {
-			quillcrm_get_logger()->error(
-				'Single email sequence processing error',
-				array(
-					'sequence_id' => $sequence->id,
-					'error'       => $e->getMessage(),
-					'trace'       => $e->getTraceAsString(),
-				)
-			);
-		}
-	}
-
-
-	/**
-	 * Get contacts for a sequence
-	 *
-	 * @param Campaign_Model $sequence
-	 * @return \Illuminate\Database\Eloquent\Collection
-	 */
-	private function get_sequence_contacts( Campaign_Model $sequence ) {
-		// Get parent sequence to find contacts
-		$parent_sequence = Campaign_Model::find( $sequence->parent_id );
-		if ( ! $parent_sequence ) {
-			return collect( array() );
-		}
-
-		$settings    = $parent_sequence->settings;
-		$contact_ids = $settings['contact_ids'] ?? array();
-		return Contact_Model::whereIn( 'id', $contact_ids )->get();
-	}
-
-	/**
-	 * Send sequence email to a contact
-	 *
-	 * @param Campaign_Model $sequence
-	 * @param Contact_Model  $contact
-	 */
-	private function send_sequence_email( Campaign_Model $sequence, Contact_Model $contact ) {
-		try {
-			// Check if email already sent to this contact for this sequence
-			$existing_message = Tracking_Model::where( 'contact_id', $contact->id )
-				->where( 'source_id', $sequence->id )
-				->where( 'source_type', Message_Source_Types::CAMPAIGN )
-				->where( 'mode', Tracking_Model::MODE_EMAIL )
-				->first();
-
-			if ( $existing_message ) {
-				return; // Already sent
-			}
-
-			// Get template for sequence
-			$template_id = $this->email_processor->get_template_for_contact( $sequence, $contact ) ?? 0;
-			if ( ! $template_id ) {
-				return;
-			}
-
-			// Create campaign message tracking record
-			$campaign_message_data = array(
-				'contact_id'  => $contact->id,
-				'template_id' => $template_id,
-				'mode'        => Tracking_Model::MODE_EMAIL,
-				'source_type' => Message_Source_Types::CAMPAIGN,
-				'source_id'   => $sequence->id,
-				'recipient'   => $contact->email,
-				'status'      => 'pending',
-				'hash_key'    => Utils::generate_hash_key(),
-			);
-
-			$campaign_message = Tracking_Model::create( $campaign_message_data );
-
-			// Process and send the email
-			$this->email_processor->process_campaign_message( $sequence, $contact, $campaign_message );
-
-			quillcrm_get_logger()->info(
-				'Email sequence sent successfully',
-				array(
-					'sequence_id' => $sequence->id,
-					'contact_id'  => $contact->id,
-					'message_id'  => $campaign_message->id,
-				)
-			);
-		} catch ( Exception $e ) {
-			quillcrm_get_logger()->error(
-				'Email sequence send error',
-				array(
-					'sequence_id' => $sequence->id,
-					'contact_id'  => $contact->id,
-					'error'       => $e->getMessage(),
-				)
-			);
-		}
-	}
-
 
 	/**
 	 * Calculate execution time based on delay settings
@@ -434,44 +522,6 @@ final class Email_Sequences_Manager {
 		return $this->calculate_execution_time( $delay, $time );
 	}
 
-	/**
-	 * Process a specific sequence email (called by action hook)
-	 *
-	 * @param int $sequence_id
-	 * @param int $contact_id
-	 * @param int $message_id
-	 */
-	public function process_sequence_email( $sequence_id, $contact_id, $message_id ) {
-		try {
-			$sequence = Campaign_Model::find( $sequence_id );
-			$contact  = Contact_Model::find( $contact_id );
-			$message  = Tracking_Model::find( $message_id );
-
-			if ( ! $sequence || ! $contact || ! $message ) {
-				return;
-			}
-
-			// Check if sequence is ready to send
-			if ( ! $this->is_sequence_ready_to_send( $sequence ) ) {
-				// Reschedule for later
-				$this->reschedule_sequence_email( $sequence, $contact, $message );
-				return;
-			}
-
-			// Process the email
-			$this->email_processor->process_campaign_message( $sequence, $contact, $message );
-		} catch ( Exception $e ) {
-			quillcrm_get_logger()->error(
-				'Process sequence email error',
-				array(
-					'sequence_id' => $sequence_id,
-					'contact_id'  => $contact_id,
-					'message_id'  => $message_id,
-					'error'       => $e->getMessage(),
-				)
-			);
-		}
-	}
 
 	/**
 	 * Reschedule a sequence email for later
@@ -491,48 +541,6 @@ final class Email_Sequences_Manager {
 			$contact->id,
 			$message->id
 		);
-	}
-
-	/**
-	 * Start an email sequence for a contact
-	 *
-	 * @param int $sequence_id Parent sequence ID
-	 * @param int $contact_id Contact ID
-	 */
-	public function start_sequence_for_contact( $sequence_id, $contact_id ) {
-		try {
-			$parent_sequence = Campaign_Model::find( $sequence_id );
-			$contact         = Contact_Model::find( $contact_id );
-
-			if ( ! $parent_sequence || ! $contact ) {
-				return false;
-			}
-
-			$settings = $parent_sequence->settings;
-
-			// Add contact to contact_ids if not already there
-			if ( ! in_array( $contact_id, $settings['contact_ids'] ?? array() ) ) {
-				$settings['contact_ids'][] = $contact_id;
-			}
-
-			// Track enrollment time for this contact
-			$settings['contact_enrollments'][ $contact_id ] = current_time( 'mysql' );
-
-			$parent_sequence->settings = $settings;
-			$parent_sequence->save();
-
-			return true;
-		} catch ( Exception $e ) {
-			quillcrm_get_logger()->error(
-				'Start sequence for contact error',
-				array(
-					'sequence_id' => $sequence_id,
-					'contact_id'  => $contact_id,
-					'error'       => $e->getMessage(),
-				)
-			);
-			return false;
-		}
 	}
 }
 

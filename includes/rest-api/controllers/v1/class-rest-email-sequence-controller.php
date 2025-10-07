@@ -4,6 +4,7 @@ namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Managers\Email_Sequences_Manager;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
 use WP_Error;
 use WP_REST_Request;
@@ -15,6 +16,14 @@ use QuillCRM\Models\Campaign_Model as Email_Sequence_Model;
 use QuillCRM\User_Roles\Permissions;
 
 class REST_Email_Sequence_Controller extends REST_Controller {
+
+
+
+
+
+
+
+
 
 
 
@@ -161,6 +170,18 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 
 		register_rest_route(
 			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/subscribers',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item_subscribers' ),
+					'permission_callback' => array( $this, 'get_item_subscribers_permissions_check' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/duplicate',
 			array(
 				'args' => array(
@@ -274,7 +295,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 		foreach ( $email_sequences as $email_sequence ) {
 			$email_count                      = $email_sequence->sequences_mail()->count();
 			$email_sequence->email_count      = $email_count;
-			$email_sequence->subscriber_count = $email_sequence->count;
+			$email_sequence->subscriber_count = count( $email_sequence->settings['contact_ids'] ?? array() ) . ' ' . __( 'Subscribers', 'quillcrm' );
 		}
 		return new WP_REST_Response( $email_sequences->toArray() + array( 'total_count' => $total_count ), 200 );
 	}
@@ -385,6 +406,63 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			$logger = quillcrm_get_logger();
 			$logger->error(
 				'Email sequence reports error: ' . $e->getMessage(),
+				array(
+					'email_sequence_id' => $email_sequence_id,
+					'trace'             => $e->getTraceAsString(),
+				)
+			);
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Get the email sequence subscribers
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response $response The response object
+	 */
+	public function get_item_subscribers( $request ) {
+		try {
+			$email_sequence_id = $request->get_param( 'id' );
+			$email_sequence    = Email_Sequence_Model::find( $email_sequence_id );
+
+			if ( ! $email_sequence ) {
+				return new WP_Error( 'error', sprintf( __( '%s Email sequence not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
+			}
+
+			// Get contact IDs from sequence settings
+			$contact_ids = $email_sequence->settings['contact_ids'] ?? array();
+
+			if ( empty( $contact_ids ) ) {
+				return new WP_REST_Response( array(), 200 );
+			}
+
+			// Fetch contacts with their details
+			$contacts = Contact_Model::whereIn( 'id', $contact_ids )
+				->get();
+
+			// Format the response
+			$subscribers = $contacts->map(
+				function ( $contact ) {
+					return array(
+						'id'         => $contact->id,
+						'email'      => $contact->email,
+						'first_name' => $contact->first_name,
+						'last_name'  => $contact->last_name,
+						'phone'      => $contact->phone,
+						'status'     => $contact->status,
+						'created_at' => $contact->created_at,
+
+					);
+				}
+			);
+
+			return new WP_REST_Response( $subscribers, 200 );
+		} catch ( \Exception $e ) {
+			$logger = quillcrm_get_logger();
+			$logger->error(
+				'Email sequence subscribers error: ' . $e->getMessage(),
 				array(
 					'email_sequence_id' => $email_sequence_id,
 					'trace'             => $e->getTraceAsString(),
@@ -701,6 +779,18 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 	 * @return bool $permission Whether the user has permission to get the email sequence reports
 	 */
 	public function get_item_reports_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+
+	/**
+	 * Check if the user has permission to get the email sequence subscribers
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return bool $permission Whether the user has permission to get the email sequence subscribers
+	 */
+	public function get_item_subscribers_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 }

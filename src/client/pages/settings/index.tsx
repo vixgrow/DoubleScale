@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
@@ -28,6 +28,8 @@ const SettingsPage: React.FC = () => {
 	const [tab, setTab] = useState<string>('business');
 	const [settings, setSettings] = useState<Settings | null>(null);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const [saveCounter, setSaveCounter] = useState<number>(0);
+	const originalSettingsRef = useRef<Settings | null>(null);
 
 	const fetchSettings = async () => {
 		try {
@@ -35,7 +37,9 @@ const SettingsPage: React.FC = () => {
 				path: '/qc/v1/settings',
 			});
 
-			setSettings(response as Settings);
+			const settingsData = response as Settings;
+			setSettings(settingsData);
+			originalSettingsRef.current = JSON.parse(JSON.stringify(settingsData));
 		} catch (error) {
 			setNotice({
 				type: 'error',
@@ -55,6 +59,10 @@ const SettingsPage: React.FC = () => {
 				data: settings,
 			});
 
+			// Update the original settings ref after successful save
+			originalSettingsRef.current = JSON.parse(JSON.stringify(settings));
+			setSaveCounter((prev) => prev + 1);
+
 			setNotice({
 				type: 'success',
 				message: __('Settings updated successfully', 'quillcrm'),
@@ -72,6 +80,14 @@ const SettingsPage: React.FC = () => {
 	const closeNotice = () => {
 		setNotice(null);
 	};
+
+	// Check if settings have changed
+	const hasChanges = useMemo(() => {
+		if (!settings || !originalSettingsRef.current) {
+			return false;
+		}
+		return JSON.stringify(settings) !== JSON.stringify(originalSettingsRef.current);
+	}, [settings, saveCounter]);
 
 	useEffect(() => {
 		fetchSettings();
@@ -146,7 +162,7 @@ const SettingsPage: React.FC = () => {
 						<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
 							<Button
 								onClick={updateSettings}
-								disabled={isUpdating}
+								disabled={isUpdating || !hasChanges}
 								className="min-w-[120px] rounded-lg px-0"
 								variant="gradient"
 							>

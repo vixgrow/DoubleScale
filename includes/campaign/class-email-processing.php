@@ -30,6 +30,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 
 
 
+
 	/**
 	 * Campaign type
 	 *
@@ -59,7 +60,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return int
 	 */
 	protected function get_message_mode() {
-		return Tracking_Model::MODE_EMAIL;
+		 return Tracking_Model::MODE_EMAIL;
 	}
 
 	/**
@@ -94,9 +95,9 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			$template = $campaign_message->template;
 
 			// solve merge tags
-			$message_data['body']    = Merge_Tags_Manager::instance()->process_merge_tags( $message_data['body'], $contact );
-			$message_data['subject'] = Merge_Tags_Manager::instance()->process_merge_tags( $message_data['subject'], $contact );
-
+			$message_data['body']         = Merge_Tags_Manager::instance()->process_merge_tags( $message_data['body'], $contact );
+			$message_data['subject']      = Merge_Tags_Manager::instance()->process_merge_tags( $message_data['subject'], $contact );
+			$message_data['preview_text'] = Merge_Tags_Manager::instance()->process_merge_tags( $message_data['preview_text'], $contact );
 			// Build email message first
 			$email_message = $this->build_email_message( $campaign_message, $contact, $message_data['body'] );
 
@@ -226,7 +227,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return string
 	 */
 	protected function default_email_footer() {
-		return "<p>Don't want to stay in the loop? We'll be sad to see you go, but you can click here to <a href='{{contact:unsubscribe_link}}'>unsubscribe</a>.</p>";
+		 return "<p>Don't want to stay in the loop? We'll be sad to see you go, but you can click here to <a href='{{contact:unsubscribe_link}}'>unsubscribe</a>.</p>";
 	}
 
 	/**

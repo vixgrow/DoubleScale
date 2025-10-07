@@ -87,8 +87,11 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 		useDispatch('quillcrm/core');
 
 	// Reset form data when modal opens or initialData changes
+	const [wasOpen, setWasOpen] = useState(false);
+
 	useEffect(() => {
-		if (isOpen) {
+		if (isOpen && !wasOpen) {
+			// Only reset when modal is first opened
 			const resetData = {
 				...defaultData,
 				...initialData,
@@ -99,8 +102,12 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 				templates: initialData?.templates || defaultData.templates,
 			};
 			setFormData(resetData);
+			setWasOpen(true);
+		} else if (!isOpen && wasOpen) {
+			// Reset the flag when modal is closed
+			setWasOpen(false);
 		}
-	}, [isOpen, initialData]);
+	}, [isOpen, initialData, wasOpen]);
 
 	const handleChange = (field: string, value: any) => {
 		setFormData((prev) => ({

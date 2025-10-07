@@ -17,23 +17,6 @@ use QuillCRM\User_Roles\Permissions;
 class REST_Email_Sequence_Controller extends REST_Controller {
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * REST Base
 	 *
@@ -239,11 +222,12 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 					array(
 						'body'     => sanitize_text_field( $email_sequence_data['settings']['email_body'] ?? '' ),
 						'subject'  => sanitize_text_field( $email_sequence_data['settings']['subject'] ?? '' ),
-						'name'     => sanitize_text_field( $email_sequence_data['settings']['name'] ?? '' ),
+						'name'     => sanitize_text_field( $email_sequence_data['settings']['subject'] ?? '' ),
 						'settings' => array(
-							'from_name'  => sanitize_text_field( $parent_email_sequence['settings']['from_name'] ?? get_bloginfo( 'name' ) ),
-							'from_email' => sanitize_text_field( $parent_email_sequence['settings']['from_email'] ?? get_option( 'admin_email' ) ),
-							'reply_to'   => sanitize_text_field( $parent_email_sequence['settings']['reply_to_email'] ?? get_option( 'admin_email' ) ),
+							'from_name'    => sanitize_text_field( $parent_email_sequence['settings']['from_name'] ?? get_bloginfo( 'name' ) ),
+							'from_email'   => sanitize_text_field( $parent_email_sequence['settings']['from_email'] ?? get_option( 'admin_email' ) ),
+							'reply_to'     => sanitize_text_field( $parent_email_sequence['settings']['reply_to_email'] ?? get_option( 'admin_email' ) ),
+							'preview_text' => sanitize_text_field( $parent_email_sequence['settings']['pre_header'] ?? '' ),
 						),
 					),
 				);
@@ -376,9 +360,9 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			}
 			$parent_email_sequence        = Email_Sequence_Model::find( $email_sequence->parent_id );
 			$total_contacts               = count( $parent_email_sequence->settings['contact_ids'] ?? array() );
-			$email_sequence['sent_rate']  = $email_sequence->sent / $total_contacts * 100;
-			$email_sequence['open_rate']  = $email_sequence->opened / $email_sequence->sent * 100;
-			$email_sequence['click_rate'] = $email_sequence->click / $email_sequence->sent * 100;
+			$email_sequence['sent_rate']  = $email_sequence->sent / ( $total_contacts > 0 ? $total_contacts : 1 ) * 100;
+			$email_sequence['open_rate']  = $email_sequence->opened / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100;
+			$email_sequence['click_rate'] = $email_sequence->click / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100;
 			$contacts                     = Tracking_Model::where( 'source_id', $email_sequence_id )
 				->where( 'source_type', Message_Source_Types::CAMPAIGN )
 				->get();

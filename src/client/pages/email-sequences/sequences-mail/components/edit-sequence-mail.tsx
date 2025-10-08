@@ -38,8 +38,6 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 				path: END_POINT + `/${emailId}`,
 			});
 
-			console.log('Fetched email data:', response);
-
 			// Handle case where settings might be empty or null
 			const settings = response.settings || {};
 
@@ -160,7 +158,13 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 					add_utm_parameters: data.add_utm_parameters,
 					utm_parameters: data.utm_parameters,
 					email_body: data.email_body,
-					templates: data.templates || [],
+					templates: data.templates || [
+						{
+							name: data.subject,
+							subject: data.subject,
+							body: data.email_body,
+						},
+					],
 				},
 			};
 

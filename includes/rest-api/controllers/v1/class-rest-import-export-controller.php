@@ -347,7 +347,7 @@ class Rest_Import_Export_Controller extends REST_Controller {
 
 		switch ( $provider ) {
 			case 'gohighlevel':
-				$tokens = \QuillCRM\OAuth\GoHighLevel_OAuth::get_stored_tokens();
+				$tokens = \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_stored_tokens();
 				if ( $tokens ) {
 					return new WP_REST_Response(
 						array(
@@ -392,7 +392,7 @@ class Rest_Import_Export_Controller extends REST_Controller {
 
 		switch ( $provider ) {
 			case 'gohighlevel':
-				$result = \QuillCRM\OAuth\GoHighLevel_OAuth::clear_stored_tokens();
+				$result = \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::clear_stored_tokens();
 				return new WP_REST_Response(
 					array(
 						'success' => $result,

@@ -243,7 +243,7 @@ final class QuillCRM {
 		Importers_Manager::instance();
 		Custom_Metabox::get_instance();
 		Email_Builder::instance();
-		\QuillCRM\OAuth\GoHighLevel_OAuth::init();
+		\QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::init();
 		Pipeline_Manager::instance();
 		Deal_Manager::instance();
 		Activity_Manager::instance();

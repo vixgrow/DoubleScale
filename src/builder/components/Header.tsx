@@ -74,22 +74,8 @@ const Header: React.FC = () => {
 				buttonSettings: buttonSettings,
 			};
 
-			// Prepare template data
-			const templateData = {
-				name: templateName,
-				type: 'email',
-				subject: '',
-				body: JSON.stringify(builderData),
-				settings: JSON.stringify({
-					type: 'builder',
-				}),
-				hidden: 0, // Make it visible in templates list
-				category: 'custom',
-				is_pro: 0,
-			};
-
-			// Save template
-			await saveEmailAsTemplate(templateData);
+			// Save template using the API helper
+			await saveEmailAsTemplate(templateName, builderData);
 
 			// Show success message (you can use a toast notification here)
 			console.log('Template saved successfully!');

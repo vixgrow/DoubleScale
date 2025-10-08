@@ -149,26 +149,22 @@ export const deleteTemplate = async (templateId: number): Promise<void> => {
 
 /**
  * Save email as template (for builder "Save as Template" feature)
+ * Saves builder data as a reusable template in the library
  */
-export const saveEmailAsTemplate = async (templateData: {
-  name: string;
-  type: string;
-  subject: string;
-  body: string;
-  settings: any;
-  hidden?: number;
-  category?: string;
-  is_pro?: number;
-}): Promise<any> => {
-  try {
-    const response = await apiFetch({
-      path: '/qc/v1/templates',
-      method: 'POST',
-      data: templateData,
-    });
-
-    return response;
-  } catch (error: any) {
-    throw new Error(error.message || __('Failed to save template', 'quillcrm'));
-  }
+export const saveEmailAsTemplate = async (
+  templateName: string,
+  builderData: { sections: any; globalSettings: any; buttonSettings: any }
+): Promise<EmailTemplate> => {
+  // Use createTemplate with proper structure
+  return createTemplate({
+    name: templateName,
+    type: 'email',
+    subject: '',
+    body: '', // Empty for builder templates
+    preview_text: '',
+    email_body: {
+      type: 'builder',
+      value: builderData,
+    },
+  });
 };

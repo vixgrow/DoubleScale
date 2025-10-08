@@ -21,11 +21,11 @@ defined('ABSPATH') || exit;
 class SMS extends Abstract_Tracking
 {
 	/**
-	 * Campaign type
+	 * Communication channel
 	 *
 	 * @var string
 	 */
-	protected $campaign_type = 'sms';
+	protected $channel = 'sms';
 
 	/**
 	 * Add hooks - implementation of abstract method
@@ -114,12 +114,12 @@ class SMS extends Abstract_Tracking
 	}
 
 	/**
-	 * Get campaign type - implementation of abstract method
+	 * Get channel type - implementation of abstract method
 	 *
 	 * @since 1.0.0
 	 * @return string
 	 */
-	protected static function get_campaign_type()
+	protected static function get_channel_type()
 	{
 		return 'sms';
 	}

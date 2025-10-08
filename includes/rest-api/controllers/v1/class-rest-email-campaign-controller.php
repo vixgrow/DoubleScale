@@ -42,7 +42,7 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 *
 	 * @var string
 	 */
-	protected $campaign_type = 'email';
+	protected $channel = 'email';
 
 	/**
 	 * Constructor

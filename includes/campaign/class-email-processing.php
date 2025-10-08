@@ -25,11 +25,11 @@ use QuillCRM\Models\Template_Model;
 class Email_Processing extends Abstract_Campaign_Processing {
 
 	/**
-	 * Campaign type
+	 * Communication channel
 	 *
 	 * @var string
 	 */
-	protected $campaign_type = 'email';
+	protected $channel = 'email';
 
 	/**
 	 * Add hooks

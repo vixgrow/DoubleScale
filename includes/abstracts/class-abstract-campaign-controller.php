@@ -30,7 +30,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $campaign_type;
+	protected $channel;
 
 	/**
 	 * Analytics service
@@ -259,7 +259,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
-				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response( $campaign, 200 );
@@ -278,7 +278,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	public function create_item( $request ) {
 		try {
 			$campaign_data         = $this->prepare_campaign( $request );
-			$campaign_data['type'] = $this->campaign_type;
+			$campaign_data['type'] = $this->channel;
 			$campaign              = Campaign_Model::create( $campaign_data );
 
 			return new WP_REST_Response( $campaign, 201 );
@@ -300,7 +300,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
-				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
 			$campaign_data = $this->prepare_campaign( $request );
@@ -309,7 +309,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			if ( isset( $campaign_data['settings']['filters'] ) ) {
 				$filters                = $campaign_data['settings']['filters'] ?? array();
 				$contact_filter         = \QuillCRM\Services\Campaign_Contact_Filter::instance();
-				$campaign_data['count'] = $contact_filter->get_contact_count( $this->campaign_type, $filters );
+				$campaign_data['count'] = $contact_filter->get_contact_count( $this->channel, $filters );
 			}
 
 			$campaign->update( $campaign_data );
@@ -341,7 +341,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
-				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
 			$campaign->delete();
@@ -365,7 +365,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaigns    = $this->get_campaign_query()->whereIn( 'id', $campaign_ids )->get();
 
 			if ( $campaigns->isEmpty() ) {
-				return new WP_Error( 'error', sprintf( __( '%s Campaigns not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', sprintf( __( '%s Campaigns not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
 			Campaign_Model::destroy( $campaign_ids );
@@ -389,7 +389,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign    = $this->get_campaign_query()->find( $campaign_id );
 
 			if ( ! $campaign ) {
-				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
+				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
 			$campaign_data = $campaign->toArray();
@@ -500,7 +500,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			// Generate cache key
 			$cache_key = sprintf(
 				'qcrm_analytics_%s_%s_%s_%s',
-				$this->campaign_type,
+				$this->channel,
 				$interval,
 				$start_date,
 				$end_date
@@ -511,7 +511,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 
 			if ( false === $analytics ) {
 				// Cache miss - fetch fresh data
-				$analytics = $this->analytics->get_analytics( $this->campaign_type, $interval, $start_date, $end_date );
+				$analytics = $this->analytics->get_analytics( $this->channel, $interval, $start_date, $end_date );
 
 				// Cache for 5 minutes
 				set_transient( $cache_key, $analytics, 5 * MINUTE_IN_SECONDS );
@@ -545,7 +545,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			// Generate cache key
 			$cache_key = sprintf(
 				'qcrm_timeseries_%s_%d_%s_%d',
-				$this->campaign_type,
+				$this->channel,
 				$campaign_id,
 				$period,
 				$limit
@@ -558,7 +558,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				// Cache miss - fetch fresh data
 				$time_series = $this->analytics->get_campaign_time_series(
 					$campaign_id,
-					$this->campaign_type,
+					$this->channel,
 					$period,
 					$limit
 				);

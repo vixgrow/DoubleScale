@@ -43,7 +43,7 @@ class REST_SMS_Campaign_Controller extends Abstract_Messaging_Campaign_Controlle
 	 *
 	 * @var string
 	 */
-	protected $campaign_type = 'sms';
+	protected $channel = 'sms';
 
 	/**
 	 * Constructor

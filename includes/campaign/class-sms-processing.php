@@ -22,11 +22,11 @@ use QuillCRM\Tracking\SMS as SMS_Tracking;
 class SMS_Processing extends Abstract_Campaign_Processing {
 
 	/**
-	 * Campaign type
+	 * Communication channel
 	 *
 	 * @var string
 	 */
-	protected $campaign_type = 'sms';
+	protected $channel = 'sms';
 
 	/**
 	 * Add hooks

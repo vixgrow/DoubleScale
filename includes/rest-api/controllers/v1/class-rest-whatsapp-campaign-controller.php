@@ -43,7 +43,7 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Messaging_Campaign_Cont
 	 *
 	 * @var string
 	 */
-	protected $campaign_type = 'whatsapp';
+	protected $channel = 'whatsapp';
 
 	/**
 	 * Constructor

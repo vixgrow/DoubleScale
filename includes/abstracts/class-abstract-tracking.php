@@ -28,11 +28,11 @@ abstract class Abstract_Tracking
 	private static $instances = array();
 
 	/**
-	 * Campaign type (sms, whatsapp)
+	 * Communication channel (sms, whatsapp, email)
 	 *
 	 * @var string
 	 */
-	protected $campaign_type;
+	protected $channel;
 
 	/**
 	 * Get instance - implemented by child classes
@@ -107,12 +107,12 @@ abstract class Abstract_Tracking
 	 */
 	protected function register_standard_hooks()
 	{
-		$type = $this->campaign_type;
-		
+		$type = $this->channel;
+
 		// Webhook handlers
 		add_action("wp_ajax_nopriv_quillcrm_{$type}_webhook", [$this, 'handle_webhook']);
 		add_action("wp_ajax_quillcrm_{$type}_webhook", [$this, 'handle_webhook']);
-		
+
 		// Click tracking - use generic method instead of dynamic method names
 		add_action('template_redirect', [$this, 'handle_click_tracking_request'], 1);
 	}
@@ -130,7 +130,7 @@ abstract class Abstract_Tracking
 
 		$action = sanitize_text_field($_GET['quillcrm']);
 		$hash_key = sanitize_text_field($_GET['hash_key']);
-		$type = $this->campaign_type;
+		$type = $this->channel;
 
 		switch ($action) {
 			case "{$type}_click":
@@ -150,24 +150,24 @@ abstract class Abstract_Tracking
 	protected function process_provider_webhook()
 	{
 		// Get provider for this channel
-		$provider = Message_Provider_Registry::instance()->get_provider($this->campaign_type);
+		$provider = Message_Provider_Registry::instance()->get_provider($this->channel);
 
 		if (!$provider) {
-			quillcrm_get_logger()->error(ucfirst($this->campaign_type) . ' webhook: no provider configured', [
-				'code' => "{$this->campaign_type}_webhook_no_provider",
-				'channel' => $this->campaign_type
+			quillcrm_get_logger()->error(ucfirst($this->channel) . ' webhook: no provider configured', [
+				'code' => "{$this->channel}_webhook_no_provider",
+				'channel' => $this->channel
 			]);
 			wp_die('Service Unavailable', 'Service Unavailable', 503);
 		}
 
 		// Process webhook through provider (handles signature verification and parsing)
-		$webhook_result = $provider->process_webhook($this->campaign_type, $_POST);
+		$webhook_result = $provider->process_webhook($this->channel, $_POST);
 
 		// Check if webhook is valid
 		if (!isset($webhook_result['valid']) || !$webhook_result['valid']) {
 			$error = $webhook_result['error_message'] ?? 'Invalid webhook';
-			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook validation failed', [
-				'code' => "{$this->campaign_type}_webhook_validation_failed",
+			quillcrm_get_logger()->warning(ucfirst($this->channel) . ' webhook validation failed', [
+				'code' => "{$this->channel}_webhook_validation_failed",
 				'error' => $error,
 				'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
 			]);
@@ -181,10 +181,10 @@ abstract class Abstract_Tracking
 		$error_message = $webhook_result['error_message'] ?? '';
 
 		if (empty($message_id) || empty($status)) {
-			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook missing required fields', [
+			quillcrm_get_logger()->warning(ucfirst($this->channel) . ' webhook missing required fields', [
 				'message_id' => $message_id,
 				'status' => $status,
-				'code' => "{$this->campaign_type}_webhook_missing_data"
+				'code' => "{$this->channel}_webhook_missing_data"
 			]);
 			wp_die('Bad Request', 'Bad Request', 400);
 		}
@@ -196,10 +196,10 @@ abstract class Abstract_Tracking
 			->first();
 
 		if (!$tracking_record) {
-			quillcrm_get_logger()->warning(ucfirst($this->campaign_type) . ' webhook: tracking record not found', [
+			quillcrm_get_logger()->warning(ucfirst($this->channel) . ' webhook: tracking record not found', [
 				'message_id' => $message_id,
 				'status' => $status,
-				'code' => "{$this->campaign_type}_webhook_tracking_not_found"
+				'code' => "{$this->channel}_webhook_tracking_not_found"
 			]);
 			wp_die('OK'); // Acknowledge but don't process
 		}
@@ -235,7 +235,7 @@ abstract class Abstract_Tracking
 				break;
 			case 'read':
 				// WhatsApp-specific status (not yet defined in constants, using delivered for now)
-				if ($this->campaign_type === 'whatsapp') {
+				if ($this->channel === 'whatsapp') {
 					$tracking_record->status = Tracking_Status::DELIVERED;
 				}
 				break;
@@ -261,18 +261,18 @@ abstract class Abstract_Tracking
 		// ]);
 
 		// Trigger delivery status hooks
-		do_action("quillcrm_{$this->campaign_type}_delivery_status_updated", $tracking_record, $status, $previous_status);
+		do_action("quillcrm_{$this->channel}_delivery_status_updated", $tracking_record, $status, $previous_status);
 	}
 
 	/**
 	 * Handle click tracking request from template_redirect hook
-	 * Centralized method that checks for campaign type and processes click tracking
+	 * Centralized method that checks for channel type and processes click tracking
 	 *
 	 * @return void
 	 */
 	public function handle_click_tracking_request()
 	{
-		$expected_action = "{$this->campaign_type}_click";
+		$expected_action = "{$this->channel}_click";
 		
 		if (!isset($_GET['quillcrm']) || $_GET['quillcrm'] !== $expected_action) {
 			return;
@@ -331,7 +331,7 @@ abstract class Abstract_Tracking
 		], home_url());
 
 		$unsubscribe_text = apply_filters(
-			"quillcrm_" . static::get_campaign_type() . "_unsubscribe_text", 
+			"quillcrm_" . static::get_channel_type() . "_unsubscribe_text",
 			"\n\nTo unsubscribe: {$unsubscribe_url}"
 		);
 
@@ -355,9 +355,9 @@ abstract class Abstract_Tracking
 				->first();
 
 			if (!$campaign_record) {
-				quillcrm_get_logger()->warning("{$this->campaign_type} click tracking: Invalid hash key", [
+				quillcrm_get_logger()->warning("{$this->channel} click tracking: Invalid hash key", [
 					'hash_key' => $hash_key,
-					'code' => "invalid_{$this->campaign_type}_hash_key"
+					'code' => "invalid_{$this->channel}_hash_key"
 				]);
 
 				if ($original_url) {
@@ -373,16 +373,16 @@ abstract class Abstract_Tracking
 				$campaign_record->clicked_at = current_time('mysql');
 				$campaign_record->save();
 
-				// quillcrm_get_logger()->info("{$this->campaign_type} click tracked", [
+				// quillcrm_get_logger()->info("{$this->channel} click tracked", [
 				// 	'campaign_record_id' => $campaign_record->id,
 				// 	'contact_id' => $campaign_record->contact_id,
 				// 	'source_id' => $campaign_record->source_id,
 				// 	'source_type' => $campaign_record->source_type,
-				// 	'code' => "{$this->campaign_type}_click_tracked"
+				// 	'code' => "{$this->channel}_click_tracked"
 				// ]);
 
 			// Trigger click automation if enabled
-			do_action("quillcrm_{$this->campaign_type}_clicked", $campaign_record);
+			do_action("quillcrm_{$this->channel}_clicked", $campaign_record);
 		}
 
 		// Redirect to original URL
@@ -392,10 +392,10 @@ abstract class Abstract_Tracking
 			}
 
 		} catch (\Exception $e) {
-			quillcrm_get_logger()->error("{$this->campaign_type} click tracking error", [
+			quillcrm_get_logger()->error("{$this->channel} click tracking error", [
 				'hash_key' => $hash_key,
 				'error' => $e->getMessage(),
-				'code' => "{$this->campaign_type}_click_error"
+				'code' => "{$this->channel}_click_error"
 			]);
 
 			if ($original_url) {
@@ -421,9 +421,9 @@ abstract class Abstract_Tracking
 				->first();
 
 			if (!$campaign_record) {
-				quillcrm_get_logger()->warning("{$this->campaign_type} unsubscribe: Invalid hash key", [
+				quillcrm_get_logger()->warning("{$this->channel} unsubscribe: Invalid hash key", [
 					'hash_key' => $hash_key,
-					'code' => "invalid_{$this->campaign_type}_hash_key"
+					'code' => "invalid_{$this->channel}_hash_key"
 				]);
 				return;
 			}
@@ -433,26 +433,26 @@ abstract class Abstract_Tracking
 				$contact->status = 'unsubscribed';
 				$contact->save();
 
-				// quillcrm_get_logger()->info("{$this->campaign_type} unsubscribe processed", [
+				// quillcrm_get_logger()->info("{$this->channel} unsubscribe processed", [
 				// 	'contact_id' => $contact->id,
 				// 	'campaign_record_id' => $campaign_record->id,
-				// 	'code' => "{$this->campaign_type}_unsubscribe"
+				// 	'code' => "{$this->channel}_unsubscribe"
 				// ]);
 
 				// Trigger unsubscribe automation
-				do_action("quillcrm_{$this->campaign_type}_unsubscribed", $contact, $campaign_record);
+				do_action("quillcrm_{$this->channel}_unsubscribed", $contact, $campaign_record);
 
 				// Redirect to unsubscribe page
-				$unsubscribe_page = apply_filters("quillcrm_{$this->campaign_type}_unsubscribe_redirect", home_url());
+				$unsubscribe_page = apply_filters("quillcrm_{$this->channel}_unsubscribe_redirect", home_url());
 				wp_redirect($unsubscribe_page);
 				exit;
 			}
 
 		} catch (\Exception $e) {
-			quillcrm_get_logger()->error("{$this->campaign_type} unsubscribe error", [
+			quillcrm_get_logger()->error("{$this->channel} unsubscribe error", [
 				'hash_key' => $hash_key,
 				'error' => $e->getMessage(),
-				'code' => "{$this->campaign_type}_unsubscribe_error"
+				'code' => "{$this->channel}_unsubscribe_error"
 			]);
 		}
 	}
@@ -472,9 +472,9 @@ abstract class Abstract_Tracking
 	abstract protected static function get_unsubscribe_action();
 
 	/**
-	 * Get campaign type - must be implemented by child classes
+	 * Get channel type - must be implemented by child classes
 	 *
 	 * @return string
 	 */
-	abstract protected static function get_campaign_type();
+	abstract protected static function get_channel_type();
 }

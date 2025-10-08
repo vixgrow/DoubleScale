@@ -22,11 +22,11 @@ use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
 class WhatsApp_Processing extends Abstract_Campaign_Processing {
 
 	/**
-	 * Campaign type
+	 * Communication channel
 	 *
 	 * @var string
 	 */
-	protected $campaign_type = 'whatsapp';
+	protected $channel = 'whatsapp';
 
 	/**
 	 * Add hooks

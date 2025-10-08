@@ -130,8 +130,11 @@ const Templates: React.FC = () => {
 
 	useEffect(() => {
 		// Load existing template data if available
-		if (existingTemplateData?.template) {
-			setTemplates([existingTemplateData.template]);
+		if (
+			existingTemplateData &&
+			Object.keys(existingTemplateData).length > 0
+		) {
+			setTemplates([existingTemplateData as EmailTemplate]);
 		} else if (templates.length === 0) {
 			setTemplates([defaultTemplate]);
 		}
@@ -275,12 +278,10 @@ const Templates: React.FC = () => {
 		}
 
 		try {
-			// Save template step data - only template-specific data
+			// Save template step data directly without nesting
 			const templateStepData = {
-				template: {
-					...templates[currentTab],
-					lastModified: new Date().toISOString(),
-				},
+				...templates[currentTab],
+				lastModified: new Date().toISOString(),
 			};
 
 			// Save the step with template data and navigate only if successful

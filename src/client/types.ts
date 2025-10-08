@@ -234,12 +234,57 @@ export type WhatsAppTemplate = {
 // Discriminated Union for all template types
 export type Template = EmailTemplate | SMSTemplate | WhatsAppTemplate;
 
+// Template step data - directly contains template fields without nesting
+export type TemplateStepData = {
+	name?: string;
+	type?: 'email' | 'sms' | 'whatsapp';
+	subject?: string;
+	body?: string;
+	email_body?: {
+		type: 'builder' | 'rich-text';
+		value: any;
+	};
+	from_name?: string;
+	from_email?: string;
+	reply_to?: string;
+	preview_text?: string;
+	enable_utm?: boolean;
+	utm_source?: string;
+	utm_medium?: string;
+	utm_name?: string;
+	utm_term?: string;
+	utm_content?: string;
+	lastModified?: string;
+	[key: string]: any; // Allow additional fields
+};
+
+// Contacts step data
+export type ContactsStepData = {
+	filters?: any[];
+	contacts_count?: number;
+	selected_contacts?: number[];
+	filter_type?: string;
+	lastModified?: string;
+};
+
+// Review step data
+export type ReviewStepData = {
+	send_time?: string;
+	test_emails?: string[];
+	final_review_completed?: boolean;
+	lastModified?: string;
+};
+
 type CampaignSettings = {
 	templates: Template[];
 	contacts: number[];
 	filters: Filter[];
 	ab_test: boolean;
 	current_step?: string;
+	// Flattened step data - each step saves its data directly here
+	template_data?: TemplateStepData;
+	contacts_data?: ContactsStepData;
+	review_data?: ReviewStepData;
 };
 
 export type Filter = {

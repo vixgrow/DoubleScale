@@ -24,7 +24,7 @@ export const useButtonSettings = () => {
 
   // Load button settings from campaign template data
   useEffect(() => {
-    const emailBody = existingTemplateData?.template?.email_body;
+    const emailBody = existingTemplateData?.email_body;
 
     if (emailBody?.type === 'builder' && emailBody.value?.buttonSettings) {
       dispatch(STORE_KEY).setButtonSettings(emailBody.value.buttonSettings);

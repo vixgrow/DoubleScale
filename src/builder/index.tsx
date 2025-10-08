@@ -52,7 +52,7 @@ const BuilderContent: React.FC = () => {
 
 	// Load existing builder data from template's email_body field
 	useEffect(() => {
-		const emailBody = existingTemplateData?.template?.email_body;
+		const emailBody = existingTemplateData?.email_body;
 
 		if (emailBody?.type === 'builder' && emailBody.value) {
 			const { sections, globalSettings } = emailBody.value;

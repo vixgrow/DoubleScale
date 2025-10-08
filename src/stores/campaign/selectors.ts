@@ -40,17 +40,35 @@ export const getCurrentStep = (state: State): string => {
 };
 
 /**
- * Get step data for a specific step
+ * Get step data for a specific step from flattened structure
  */
 export const getStepData = (state: State, step: string): any => {
-  return state.campaign?.settings?.steps?.[step] || {};
+  const settings = state.campaign?.settings;
+  if (!settings) return {};
+
+  // Map step names to their corresponding data fields
+  const stepDataMap: Record<string, string> = {
+    'template': 'template_data',
+    'contacts': 'contacts_data',
+    'review': 'review_data',
+  };
+
+  const dataKey = stepDataMap[step];
+  return dataKey ? (settings as any)[dataKey] || {} : {};
 };
 
 /**
- * Get all step data
+ * Get all step data in a single object
  */
 export const getAllStepData = (state: State): any => {
-  return state.campaign?.settings?.steps || {};
+  const settings = state.campaign?.settings;
+  if (!settings) return {};
+
+  return {
+    template: settings.template_data || {},
+    contacts: settings.contacts_data || {},
+    review: settings.review_data || {},
+  };
 };
 
 /**

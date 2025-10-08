@@ -7,16 +7,16 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type { ExtendedCampaign } from './types';
-import { 
-	SET_CAMPAIGN, 
-	UPDATE_CAMPAIGN, 
-	UPDATE_SETTINGS, 
-	SET_LOADING, 
-	SET_SAVING, 
-	SET_ERROR 
-} from './constants';
 import { getCampaignEndpoint } from '@quillcrm/utils';
+import {
+	SET_CAMPAIGN,
+	SET_ERROR,
+	SET_LOADING,
+	SET_SAVING,
+	UPDATE_CAMPAIGN,
+	UPDATE_SETTINGS
+} from './constants';
+import type { ExtendedCampaign } from './types';
 
 /**
  * Set campaign data
@@ -95,7 +95,7 @@ export const fetchCampaign = (id: string) => async ({ dispatch }: any) => {
  */
 export const saveCampaign = (data: Partial<ExtendedCampaign> = {}) => async ({ select, dispatch }: any) => {
 	const campaign = select.getCampaign();
-	
+
 	if (!campaign) {
 		throw new Error(__('Campaign not loaded', 'quillcrm'));
 	}
@@ -129,11 +129,11 @@ export const saveCampaign = (data: Partial<ExtendedCampaign> = {}) => async ({ s
 };
 
 /**
- * Save campaign step data
+ * Save campaign step data to flattened settings structure
  */
 export const saveCampaignStep = (step: string, stepData?: any) => async ({ select, dispatch }: any) => {
 	const campaign = select.getCampaign();
-	
+
 	if (!campaign) {
 		return false;
 	}
@@ -142,22 +142,33 @@ export const saveCampaignStep = (step: string, stepData?: any) => async ({ selec
 	dispatch(setError(null));
 
 	try {
-		// Get existing step data or initialize empty object
-		const existingSteps = campaign.settings?.steps || {};
-		
-		// Update the specific step data
-		const updatedSteps = {
-			...existingSteps,
-			[step]: {
-				...existingSteps[step], // Preserve existing step data
-				...stepData, // Merge new step data
-			},
+		// Map step names to their corresponding data fields
+		const stepDataMap: Record<string, string> = {
+			'template': 'template_data',
+			'contacts': 'contacts_data',
+			'review': 'review_data',
 		};
 
+		const dataKey = stepDataMap[step];
+
+		if (!dataKey) {
+			throw new Error(__(`Invalid step: ${step}`, 'quillcrm'));
+		}
+
+		// Get existing step data for this specific step
+		const existingStepData = (campaign.settings as any)[dataKey] || {};
+
+		// Merge existing step data with new step data
+		const updatedStepData = {
+			...existingStepData,
+			...stepData,
+		};
+
+		// Update settings with flattened structure
 		const updatedSettings = {
 			...campaign.settings,
 			current_step: step,
-			steps: updatedSteps,
+			[dataKey]: updatedStepData,
 		};
 
 		const response = await apiFetch({

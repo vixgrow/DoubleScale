@@ -81,18 +81,16 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
       };
 
       // Get existing template data to preserve all fields
-      const existingTemplate = existingTemplateData?.template || {};
+      const existingTemplate = existingTemplateData || {};
 
-      // Update only the email_body field
+      // Update only the email_body field - save directly without nesting
       const templateStepData = {
-        template: {
-          ...existingTemplate,
-          email_body: {
-            type: 'builder',
-            value: builderData,
-          },
-          lastModified: new Date().toISOString(),
+        ...existingTemplate,
+        email_body: {
+          type: 'builder',
+          value: builderData,
         },
+        lastModified: new Date().toISOString(),
       };
 
       // Save the template step

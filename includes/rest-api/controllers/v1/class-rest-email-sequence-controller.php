@@ -27,6 +27,9 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 
 
 
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -353,7 +356,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			if ( $email_sequence->sequences_mail ) {
 				$sorted_sequences = $email_sequence->sequences_mail->sortBy(
 					function ( $item ) {
-						return $this->get_delay_in_minutes( $item->settings );
+						return Email_Sequences_Manager::instance()->get_delay_in_minutes( $item->settings );
 					}
 				);
 
@@ -584,35 +587,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 		}
 	}
 
-	/**
-	 * Get delay in minutes for sorting purposes
-	 *
-	 * @param array|string $settings The settings array or JSON string containing delay information
-	 * @return int Delay in minutes
-	 */
-	private function get_delay_in_minutes( $settings ) {
-		if ( is_string( $settings ) ) {
-			$settings = json_decode( $settings, true );
-		}
 
-		$delay = $settings['delay'] ?? array(
-			'value' => 0,
-			'unit'  => 'minutes',
-		);
-		$value = intval( $delay['value'] ?? 0 );
-		$unit  = strtolower( $delay['unit'] ?? 'minutes' );
-
-		switch ( $unit ) {
-			case 'minutes':
-				return $value;
-			case 'hours':
-				return $value * 60;
-			case 'days':
-				return $value * 60 * 24;
-			default:
-				return $value;
-		}
-	}
 
 
 	/**

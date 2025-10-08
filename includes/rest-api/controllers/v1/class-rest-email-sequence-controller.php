@@ -19,6 +19,7 @@ use QuillCRM\User_Roles\Permissions;
 class REST_Email_Sequence_Controller extends REST_Controller {
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -361,9 +362,9 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			}
 			$parent_email_sequence        = Email_Sequence_Model::find( $email_sequence->parent_id );
 			$total_contacts               = count( $parent_email_sequence->settings['contact_ids'] ?? array() );
-			$email_sequence['sent_rate']  = $email_sequence->sent / ( $total_contacts > 0 ? $total_contacts : 1 ) * 100;
-			$email_sequence['open_rate']  = $email_sequence->opened / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100;
-			$email_sequence['click_rate'] = $email_sequence->click / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100;
+			$email_sequence['sent_rate']  = round( ( $email_sequence->sent / ( $total_contacts > 0 ? $total_contacts : 1 ) * 100 ), 2 );
+			$email_sequence['open_rate']  = round( ( $email_sequence->opened / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100 ), 2 );
+			$email_sequence['click_rate'] = round( ( $email_sequence->click / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100 ), 2 );
 			$contacts                     = Tracking_Model::where( 'source_id', $email_sequence_id )
 				->where( 'source_type', Message_Source_Types::CAMPAIGN )
 				->get();

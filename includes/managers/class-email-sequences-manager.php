@@ -22,22 +22,12 @@ use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Campaign\Email_Processing;
 use QuillCRM\Services\Campaign_Rate_Limiter;
 use QuillCRM\Settings;
+use QuillCRM\Managers\Campaign_Status_Manager;
 
 /**
  * Email Sequences Manager class
  */
 final class Email_Sequences_Manager {
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -153,6 +143,11 @@ final class Email_Sequences_Manager {
 			$parent_sequence->settings = $settings;
 			$parent_sequence->save();
 
+			foreach ( $parent_sequence->sequences_mail as $sequence ) {
+				$sequence->status = Campaign_Status_Manager::ACTIVE;
+				$sequence->save();
+			}
+
 			return true;
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
@@ -225,6 +220,7 @@ final class Email_Sequences_Manager {
 		// 1. Fetch sequences that are due to execute
 		$sequences = Campaign_Model::query()
 			->where( 'type', 'sequence_mail' )
+			->where( 'status', Campaign_Status_Manager::ACTIVE )
 			->where( 'execute_at', '<=', current_time( 'mysql' ) )
 			->get();
 
@@ -258,7 +254,10 @@ final class Email_Sequences_Manager {
 		try {
 			// Get contacts for this sequence
 			$contacts = $this->get_sequence_contacts( $sequence );
+
 			if ( $contacts->isEmpty() ) {
+				$sequence->status = Campaign_Status_Manager::COMPLETED;
+				$sequence->save();
 				return;
 			}
 
@@ -315,11 +314,13 @@ final class Email_Sequences_Manager {
 	 * @param \Illuminate\Support\Collection $contacts
 	 */
 	private function process_sequence_contacts_in_batches( Campaign_Model $sequence, $contacts ) {
+
 		$max_per_second   = $this->settings['max_in_second'] ?? $this->get_default_max_per_second();
 		$processed_count  = 0;
 		$batch_start_time = microtime( true );
 
 		foreach ( $contacts as $contact ) {
+
 			// Check if we should stop processing
 			if ( $this->should_stop_processing() ) {
 				break;

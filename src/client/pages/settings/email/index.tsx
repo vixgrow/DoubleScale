@@ -7,8 +7,9 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { Settings } from '@quillcrm/client';
-import { Field } from '@quillcrm/components';
+import { Field, TinyMCEWPEditor } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
+import { Label } from '@quillcrm/components/ui/label';
 
 interface EmailSettingsProps {
     settings: Settings;
@@ -85,14 +86,29 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                     />
                 </div>
                 <div className="w-full">
-                    <Field
-                        label={__('Email Footer', 'quillcrm')}
-                        value={email_footer}
-                        onChange={(value) =>
-                            handleFieldChange('email_footer', value)
-                        }
-                        type="textarea"
-                    />
+                    <Label className="text-[#09090B] font-normal text-base">
+                        {__('Email Footer', 'quillcrm')}
+                    </Label>
+                    <div className="mt-2">
+                        <TinyMCEWPEditor
+                            value={email_footer}
+                            onChange={(content) =>
+                                handleFieldChange('email_footer', content)
+                            }
+                            height={132}
+                            toolbar="bold italic underline strikethrough align bullist numlist link image mergetags"
+                            plugins={[
+                                'advlist',
+                                'lists',
+                                'link',
+                            ]}
+                            init={{
+                                toolbar_mode: 'scrolling',
+                            }}
+                            placeholder={__('Enter email footer content...', 'quillcrm')}
+                            showMergeTags={true}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

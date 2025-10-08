@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { Settings } from '@quillcrm/client';
-import { Field } from '@quillcrm/components';
+import { Field, TinyMCEWPEditor } from '@quillcrm/components';
 import { RadioGroup, RadioGroupItem } from '@quillcrm/components/ui/radio-group';
 import { Label } from '@quillcrm/components/ui/label';
 
@@ -43,23 +43,42 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
             <div className="text-[#09090B] font-semibold text-2xl">
                 {__('Double Optin', 'quillcrm')}
             </div>
-            <div className="flex gap-5 items-center pb-5 border-b">
-                <Field
-                    label={__('Email Subject', 'quillcrm')}
-                    value={email_subject}
-                    onChange={(value) =>
-                        handleFieldChange('email_subject', value)
-                    }
-                    type="text"
-                />
-                <Field
-                    label={__('Email Content', 'quillcrm')}
-                    value={email_content}
-                    onChange={(value) =>
-                        handleFieldChange('email_content', value)
-                    }
-                    type="textarea"
-                />
+            <div className="flex gap-5 items-start pb-5 border-b">
+                <div className="w-full">
+                    <Field
+                        label={__('Email Subject', 'quillcrm')}
+                        value={email_subject}
+                        onChange={(value) =>
+                            handleFieldChange('email_subject', value)
+                        }
+                        type="text"
+                    />
+                </div>
+                <div className="w-full">
+                    <Label className="text-[#09090B] font-normal text-base">
+                        {__('Email Content', 'quillcrm')}
+                    </Label>
+                    <div className="mt-2">
+                        <TinyMCEWPEditor
+                            value={email_content}
+                            onChange={(content) =>
+                                handleFieldChange('email_content', content)
+                            }
+                            height={132}
+                            toolbar="bold italic underline strikethrough align bullist numlist link image mergetags"
+                            plugins={[
+                                'advlist',
+                                'lists',
+                                'link',
+                            ]}
+                            init={{
+                                toolbar_mode: 'scrolling',
+                            }}
+                            placeholder={__('Enter email content...', 'quillcrm')}
+                            showMergeTags={true}
+                        />
+                    </div>
+                </div>
             </div>
             <div className="flex gap-5 items-start w-full">
                 <div className="w-full">
@@ -92,14 +111,31 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
                 </div>
                 <div className="w-full">
                     {after_confirmation === 'message' ? (
-                        <Field
-                            label={__('Confirmation Message', 'quillcrm')}
-                            value={confirmation_message}
-                            onChange={(value) =>
-                                handleFieldChange('confirmation_message', value)
-                            }
-                            type="textarea"
-                        />
+                        <>
+                            <Label className="text-[#09090B] font-normal text-base">
+                                {__('Confirmation Message', 'quillcrm')}
+                            </Label>
+                            <div className="mt-2">
+                                <TinyMCEWPEditor
+                                    value={confirmation_message}
+                                    onChange={(content) =>
+                                        handleFieldChange('confirmation_message', content)
+                                    }
+                                    height={132}
+                                    toolbar="bold italic underline strikethrough align bullist numlist link image mergetags"
+                                    plugins={[
+                                        'advlist',
+                                        'lists',
+                                        'link',
+                                    ]}
+                                    init={{
+                                        toolbar_mode: 'scrolling',
+                                    }}
+                                    placeholder={__('Enter confirmation message...', 'quillcrm')}
+                                    showMergeTags={true}
+                                />
+                            </div>
+                        </>
                     ) : (
                         <Field
                             label={__('Confirmation Redirect', 'quillcrm')}

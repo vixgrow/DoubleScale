@@ -51,6 +51,20 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	protected $supported_channels = array();
 
 	/**
+	 * Mapping of channels to tracking classes
+	 *
+	 * Example: array(
+	 *     'sms' => '\QuillCRM\Tracking\SMS',
+	 *     'whatsapp' => '\QuillCRM\Tracking\WhatsApp',
+	 * )
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var array
+	 */
+	protected $tracking_classes = array();
+
+	/**
 	 * Cached integration instance
 	 *
 	 * @since 1.0.0
@@ -140,6 +154,33 @@ abstract class Abstract_Message_Provider implements Message_Provider_Interface {
 	public function is_configured(): bool {
 		$integration = $this->get_integration();
 		return $integration && method_exists( $integration, 'is_connected' ) && $integration->is_connected();
+	}
+
+	/**
+	 * Get webhook URL for provider callbacks
+	 *
+	 * Default implementation that uses the tracking class mapping.
+	 * Child classes can override if they need custom logic.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $channel Channel type
+	 * @return string|null Webhook URL or null
+	 */
+	public function get_webhook_url( string $channel): ?string {
+		// Check if we have a tracking class for this channel
+		if ( ! isset( $this->tracking_classes[ $channel ] ) ) {
+			return null;
+		}
+
+		$tracking_class = $this->tracking_classes[ $channel ];
+
+		// Return webhook URL if tracking class has the method
+		if ( method_exists( $tracking_class, 'get_webhook_url' ) ) {
+			return $tracking_class::get_webhook_url();
+		}
+
+		return null;
 	}
 
 	/**

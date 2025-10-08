@@ -51,6 +51,18 @@ class Twilio_Message_Provider extends Abstract_Message_Provider {
 	protected $supported_channels = array( 'sms', 'whatsapp' );
 
 	/**
+	 * Mapping of channels to tracking classes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var array
+	 */
+	protected $tracking_classes = array(
+		'sms'      => '\QuillCRM\Tracking\SMS',
+		'whatsapp' => '\QuillCRM\Tracking\WhatsApp',
+	);
+
+	/**
 	 * Twilio API instance (lazy loaded)
 	 *
 	 * @since 1.0.0
@@ -119,27 +131,8 @@ class Twilio_Message_Provider extends Abstract_Message_Provider {
 	// is_configured() is now inherited from Abstract_Message_Provider
 	// It uses $this->get_integration() automatically via provider_slug
 
-	/**
-	 * Get webhook URL for Twilio callbacks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $channel Channel type
-	 * @return string|null Webhook URL or null
-	 */
-	public function get_webhook_url( string $channel): ?string {
-		// Get tracking class for the channel
-		$tracking_class = $channel === 'sms'
-			? \QuillCRM\Tracking\SMS::class
-			: \QuillCRM\Tracking\WhatsApp::class;
-
-		// Return webhook URL if tracking class has one
-		if ( method_exists( $tracking_class, 'get_webhook_url' ) ) {
-			return $tracking_class::get_webhook_url();
-		}
-
-		return null;
-	}
+	// get_webhook_url() is now inherited from Abstract_Message_Provider
+	// It uses $this->tracking_classes mapping automatically
 
 	/**
 	 * Process webhook from Twilio

@@ -7,7 +7,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Providers;
+namespace QuillCRM\Message_Providers;
 
 use QuillCRM\Abstracts\Abstract_Message_Provider;
 use QuillCRM\Models\Contact_Model;

@@ -275,7 +275,7 @@ final class QuillCRM {
 		require QUILLCRM_PLUGIN_DIR . 'includes/interfaces/interface-message-provider.php';
 		require QUILLCRM_PLUGIN_DIR . 'includes/abstracts/class-abstract-message-provider.php';
 		require QUILLCRM_PLUGIN_DIR . 'includes/managers/class-message-provider-registry.php';
-		require QUILLCRM_PLUGIN_DIR . 'includes/providers/class-twilio-message-provider.php';
+		require QUILLCRM_PLUGIN_DIR . 'includes/message-providers/class-twilio-message-provider.php';
 
 		// Load all integrations files
 		$integrations_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/integrations/**/class-integration.php' );
@@ -479,7 +479,7 @@ final class QuillCRM {
 	public function register_message_providers() {
 		// Register Twilio as the default provider for SMS and WhatsApp
 		\QuillCRM\Managers\Message_Provider_Registry::instance()->register(
-			new \QuillCRM\Providers\Twilio_Message_Provider()
+			new \QuillCRM\Message_Providers\Twilio_Message_Provider()
 		);
 
 		do_action( 'quillcrm_register_message_providers' );

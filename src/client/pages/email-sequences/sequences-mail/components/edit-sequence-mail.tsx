@@ -158,13 +158,7 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 					add_utm_parameters: data.add_utm_parameters,
 					utm_parameters: data.utm_parameters,
 					email_body: data.email_body,
-					templates: data.templates || [
-						{
-							name: data.subject,
-							subject: data.subject,
-							body: data.email_body,
-						},
-					],
+					templates: data.templates || [],
 				},
 			};
 

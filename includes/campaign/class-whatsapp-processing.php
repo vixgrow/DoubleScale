@@ -14,7 +14,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
-use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
+use QuillCRM\Tracking\WhatsApp;
 
 /**
  * WhatsApp Campaign Processing class
@@ -74,7 +74,7 @@ class WhatsApp_Processing extends Abstract_Campaign_Processing {
 	 * @return string
 	 */
 	protected function get_tracking_class() {
-		return WhatsApp_Tracking::class;
+		return WhatsApp::class;
 	}
 
 	/**

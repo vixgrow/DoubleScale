@@ -14,7 +14,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
-use QuillCRM\Tracking\SMS as SMS_Tracking;
+use QuillCRM\Tracking\SMS;
 
 /**
  * SMS Campaign Processing class
@@ -74,7 +74,7 @@ class SMS_Processing extends Abstract_Campaign_Processing {
 	 * @return string
 	 */
 	protected function get_tracking_class() {
-		return SMS_Tracking::class;
+		return SMS::class;
 	}
 
 	/**

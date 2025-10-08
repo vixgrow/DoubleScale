@@ -18,6 +18,7 @@ use QuillCRM\Abstracts\Abstract_Campaign_Processing;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Models\Template_Model;
+use QuillCRM\Tracking\Email;
 
 /**
  * Email Campaign Processing class
@@ -166,7 +167,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return string
 	 */
 	protected function get_tracking_class() {
-		return \QuillCRM\Tracking\Email::class;
+		return Email::class;
 	}
 
 	/**

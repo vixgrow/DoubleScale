@@ -12,6 +12,7 @@ namespace QuillCRM\Messaging;
 use WP_Error;
 use QuillCRM\Abstracts\Abstract_Individual_Message_Sender;
 use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Tracking\SMS;
 
 /**
  * SMS_Individual_Sender class
@@ -53,7 +54,7 @@ class SMS_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return string Tracking class name
 	 */
 	protected function get_tracking_class() {
-		return '\QuillCRM\Tracking\SMS';
+		return SMS::class;
 	}
 
 	/**

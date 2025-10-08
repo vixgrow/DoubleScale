@@ -79,10 +79,46 @@ const SequenceReportsModal: React.FC<SequenceReportsModalProps> = ({
 				</Badge>
 			);
 		}
+		if (recipient.status === 'sent') {
+			return (
+				<Badge
+					variant="default"
+					className="flex items-center gap-1 bg-blue-500 text-white"
+				>
+					<Mail size={12} />
+					{__('Sent', 'quillcrm')}
+				</Badge>
+			);
+		}
+		if (recipient.status === 'pending') {
+			return (
+				<Badge
+					variant="default"
+					className="flex items-center gap-1 bg-blue-500 text-white"
+				>
+					<Mail size={12} />
+					{__('Pending', 'quillcrm')}
+				</Badge>
+			);
+		}
+		if (recipient.status === 'failed') {
+			return (
+				<Badge
+					variant="default"
+					className="flex items-center gap-1 bg-red-500 text-white"
+				>
+					<Mail size={12} />
+					{__('Failed', 'quillcrm')}
+				</Badge>
+			);
+		}
 		return (
-			<Badge variant="outline" className="flex items-center gap-1">
+			<Badge
+				variant="default"
+				className="flex items-center gap-1 bg-gray-500 text-white"
+			>
 				<Mail size={12} />
-				{__('Sent', 'quillcrm')}
+				{__('Unknown', 'quillcrm')}
 			</Badge>
 		);
 	};

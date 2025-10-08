@@ -108,7 +108,7 @@
     "dev": "npm run dev-client && npm run dev-config",
     "build": "npm run build-client && npm run build-config",
     "dev-client": "wp-scripts start src/client/index.tsx --output-path=build/client",
-    "build-client": "wp-scripts build src/client/index.tsx --output-path=build/client",
+    "build-client": "NODE_OPTIONS='--max-old-space-size=2048' wp-scripts start src/client/index.tsx --output-path=build/client 2>&1 | grep -v 'Deprecation'",
     "dev-config": "wp-scripts start src/config/index.ts --output-path=build/config",
     "build-config": "wp-scripts build src/config/index.ts --output-path=build/config"
   },

@@ -220,6 +220,66 @@ class REST_Contact_Controller extends REST_Controller {
 			)
 		);
 
+		// Send individual SMS
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/send-sms',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_individual_sms' ),
+					'permission_callback' => array( $this, 'send_individual_sms_permissions_check' ),
+					'args'                => array(
+						'id'      => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+						'to'      => array(
+							'description' => __( 'Recipient phone number (E.164 format: +1234567890).', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+						'message' => array(
+							'description' => __( 'SMS message body (plain text).', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
+		// Send individual WhatsApp
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/send-whatsapp',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_individual_whatsapp' ),
+					'permission_callback' => array( $this, 'send_individual_whatsapp_permissions_check' ),
+					'args'                => array(
+						'id'      => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+						'to'      => array(
+							'description' => __( 'Recipient phone number (E.164 format: +1234567890).', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+						'message' => array(
+							'description' => __( 'WhatsApp message body (plain text).', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
 		// Get automation contacts
 		register_rest_route(
 			$this->namespace,
@@ -391,6 +451,60 @@ class REST_Contact_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_email_campaigns' ),
 					'permission_callback' => array( $this, 'get_email_campaigns_permissions_check' ),
+					'args'                => array(
+						'id'       => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'per_page' => array(
+							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'page'     => array(
+							'description' => __( 'Page number.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
+				),
+			)
+		);
+
+		// Get SMS campaigns
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/sms-campaigns',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_sms_campaigns' ),
+					'permission_callback' => array( $this, 'get_sms_campaigns_permissions_check' ),
+					'args'                => array(
+						'id'       => array(
+							'description' => __( 'Contact ID.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'per_page' => array(
+							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+						'page'     => array(
+							'description' => __( 'Page number.', 'quillcrm' ),
+							'type'        => 'integer',
+						),
+					),
+				),
+			)
+		);
+
+		// Get WhatsApp campaigns
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>\d+)/whatsapp-campaigns',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_whatsapp_campaigns' ),
+					'permission_callback' => array( $this, 'get_whatsapp_campaigns_permissions_check' ),
 					'args'                => array(
 						'id'       => array(
 							'description' => __( 'Contact ID.', 'quillcrm' ),
@@ -767,7 +881,111 @@ class REST_Contact_Controller extends REST_Controller {
 		}
 	}
 
+	/**
+	 * Get SMS Campaigns
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_sms_campaigns( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 
+			$contact = Contact_Model::find( $contact_id );
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
+
+			// Get SMS messages (all types: campaign, automation, individual)
+			$messages = \QuillCRM\Models\Tracking_Model::sms()
+				->where( 'contact_id', $contact_id )
+				->orderBy( 'created_at', 'DESC' )
+				->paginate( $per_page, array( '*' ), 'page', $page );
+
+			// Calculate analytics
+			$total_sent      = \QuillCRM\Models\Tracking_Model::sms()
+				->where( 'contact_id', $contact_id )
+				->where( 'status', Tracking_Status::SENT )
+				->count();
+			$total_failed    = \QuillCRM\Models\Tracking_Model::sms()
+				->where( 'contact_id', $contact_id )
+				->where( 'status', Tracking_Status::FAILED )
+				->count();
+			$total_delivered = \QuillCRM\Models\Tracking_Model::sms()
+				->where( 'contact_id', $contact_id )
+				->where( 'status', Tracking_Status::DELIVERED )
+				->count();
+
+			$result = array(
+				'messages'        => $messages,
+				'total_sent'      => $total_sent,
+				'total_failed'    => $total_failed,
+				'total_delivered' => $total_delivered,
+			);
+
+			return new WP_REST_Response( $result, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Get WhatsApp Campaigns
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_whatsapp_campaigns( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+
+			$contact = Contact_Model::find( $contact_id );
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+			}
+
+			// Get WhatsApp messages (all types: campaign, automation, individual)
+			$messages = \QuillCRM\Models\Tracking_Model::whatsapp()
+				->where( 'contact_id', $contact_id )
+				->orderBy( 'created_at', 'DESC' )
+				->paginate( $per_page, array( '*' ), 'page', $page );
+
+			// Calculate analytics
+			$total_sent      = \QuillCRM\Models\Tracking_Model::whatsapp()
+				->where( 'contact_id', $contact_id )
+				->where( 'status', Tracking_Status::SENT )
+				->count();
+			$total_failed    = \QuillCRM\Models\Tracking_Model::whatsapp()
+				->where( 'contact_id', $contact_id )
+				->where( 'status', Tracking_Status::FAILED )
+				->count();
+			$total_delivered = \QuillCRM\Models\Tracking_Model::whatsapp()
+				->where( 'contact_id', $contact_id )
+				->where( 'status', Tracking_Status::DELIVERED )
+				->count();
+
+			$result = array(
+				'messages'        => $messages,
+				'total_sent'      => $total_sent,
+				'total_failed'    => $total_failed,
+				'total_delivered' => $total_delivered,
+			);
+
+			return new WP_REST_Response( $result, 200 );
+		} catch ( Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
 
 	/**
 	 * Get filters
@@ -1482,6 +1700,268 @@ class REST_Contact_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Send individual SMS to contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_individual_sms( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$to         = $request->get_param( 'to' );
+			$message    = $request->get_param( 'message' );
+
+			// Validate contact exists
+			$contact = Contact_Model::find( $contact_id );
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', __( 'Contact not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Validate recipient phone number (basic check)
+			if ( empty( $to ) || strlen( $to ) < 10 ) {
+				return new WP_Error(
+					'invalid_phone',
+					__( 'Invalid phone number. Use E.164 format: +1234567890', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			// Get provider for SMS channel
+			$provider = \QuillCRM\Managers\Message_Provider_Registry::instance()->get_provider( 'sms' );
+			if ( ! $provider ) {
+				return new WP_Error(
+					'provider_not_configured',
+					__( 'SMS provider not configured. Please configure Twilio or another SMS provider in settings.', 'quillcrm' ),
+					array( 'status' => 500 )
+				);
+			}
+
+			// Create tracking entry FIRST (for click tracking and delivery webhooks)
+			$tracking_entry = \QuillCRM\Models\Tracking_Model::create(
+				array(
+					'contact_id'  => $contact->id,
+					'template_id' => 0, // No template for individual messages
+					'hash_key'    => wp_generate_password( 32, false ),
+					'mode'        => \QuillCRM\Models\Tracking_Model::MODE_SMS,
+					'source_type' => \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL,
+					'source_id'   => 0, // No campaign/automation
+					'author_id'   => get_current_user_id(), // Track who sent it
+					'recipient'   => $to,
+					'status'      => Tracking_Status::PENDING,
+				)
+			);
+
+			// Process merge tags AFTER creating tracking entry
+			$processed_message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
+
+			// Add click tracking to URLs in message (uses shared SMS tracking class)
+			if ( class_exists( '\QuillCRM\Tracking\SMS' ) && method_exists( '\QuillCRM\Tracking\SMS', 'add_click_tracking' ) ) {
+				$processed_message = \QuillCRM\Tracking\SMS::add_click_tracking( $processed_message, $tracking_entry->hash_key );
+			}
+
+			// Prepare message data for provider
+			$message_data = array(
+				'To'   => $to,
+				'Body' => $processed_message,
+			);
+
+			// Add webhook URL for delivery status tracking
+			$webhook_url = $provider->get_webhook_url( 'sms' );
+			if ( $webhook_url ) {
+				$message_data['StatusCallback'] = $webhook_url;
+			}
+
+			// Send message via provider
+			$result = $provider->send_message( 'sms', $message_data, $contact );
+
+			// Validate send result
+			if ( ! isset( $result['success'] ) || ! $result['success'] ) {
+				$error_message = $result['error'] ?? 'SMS sending failed';
+				throw new \Exception( $error_message );
+			}
+
+			// Update tracking status - SMS sent successfully
+			$tracking_entry->update(
+				array(
+					'status'      => Tracking_Status::SENT,
+					'sent_at'     => current_time( 'mysql' ),
+					'external_id' => $result['message_id'] ?? null, // Store provider message ID
+				)
+			);
+
+			quillcrm_get_logger()->info(
+				__( 'Individual SMS sent successfully', 'quillcrm' ),
+				array(
+					'contact_id'   => $contact->id,
+					'tracking_id'  => $tracking_entry->id,
+					'author_id'    => get_current_user_id(),
+					'recipient'    => $to,
+					'provider'     => $provider->get_provider_name(),
+					'external_id'  => $result['message_id'] ?? null,
+				)
+			);
+
+			return new WP_REST_Response(
+				array(
+					'success'     => true,
+					'message'     => __( 'SMS sent successfully', 'quillcrm' ),
+					'tracking_id' => $tracking_entry->id,
+				),
+				200
+			);
+		} catch ( \Exception $e ) {
+			// Update tracking status to failed
+			if ( isset( $tracking_entry ) ) {
+				$tracking_entry->update( array( 'status' => Tracking_Status::FAILED ) );
+			}
+
+			quillcrm_get_logger()->error(
+				__( 'Individual SMS send exception', 'quillcrm' ),
+				array(
+					'error'      => $e->getMessage(),
+					'contact_id' => $contact_id ?? null,
+				)
+			);
+
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
+	 * Send individual WhatsApp message to contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_individual_whatsapp( $request ) {
+		try {
+			$contact_id = $request->get_param( 'id' );
+			$to         = $request->get_param( 'to' );
+			$message    = $request->get_param( 'message' );
+
+			// Validate contact exists
+			$contact = Contact_Model::find( $contact_id );
+			if ( ! $contact ) {
+				return new WP_Error( 'not_found', __( 'Contact not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Validate recipient phone number (basic check)
+			if ( empty( $to ) || strlen( $to ) < 10 ) {
+				return new WP_Error(
+					'invalid_phone',
+					__( 'Invalid phone number. Use E.164 format: +1234567890', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			// Get provider for WhatsApp channel
+			$provider = \QuillCRM\Managers\Message_Provider_Registry::instance()->get_provider( 'whatsapp' );
+			if ( ! $provider ) {
+				return new WP_Error(
+					'provider_not_configured',
+					__( 'WhatsApp provider not configured. Please configure Twilio WhatsApp or another WhatsApp provider in settings.', 'quillcrm' ),
+					array( 'status' => 500 )
+				);
+			}
+
+			// Create tracking entry FIRST (for click tracking and delivery webhooks)
+			$tracking_entry = \QuillCRM\Models\Tracking_Model::create(
+				array(
+					'contact_id'  => $contact->id,
+					'template_id' => 0, // No template for individual messages
+					'hash_key'    => wp_generate_password( 32, false ),
+					'mode'        => \QuillCRM\Models\Tracking_Model::MODE_WHATSAPP,
+					'source_type' => \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL,
+					'source_id'   => 0, // No campaign/automation
+					'author_id'   => get_current_user_id(), // Track who sent it
+					'recipient'   => $to,
+					'status'      => Tracking_Status::PENDING,
+				)
+			);
+
+			// Process merge tags AFTER creating tracking entry
+			$processed_message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
+
+			// Add click tracking to URLs in message (uses shared WhatsApp tracking class)
+			if ( class_exists( '\QuillCRM\Tracking\WhatsApp' ) && method_exists( '\QuillCRM\Tracking\WhatsApp', 'add_click_tracking' ) ) {
+				$processed_message = \QuillCRM\Tracking\WhatsApp::add_click_tracking( $processed_message, $tracking_entry->hash_key );
+			}
+
+			// Prepare message data for provider
+			$message_data = array(
+				'To'   => $to,
+				'Body' => $processed_message,
+			);
+
+			// Add webhook URL for delivery status tracking
+			$webhook_url = $provider->get_webhook_url( 'whatsapp' );
+			if ( $webhook_url ) {
+				$message_data['StatusCallback'] = $webhook_url;
+			}
+
+			// Send message via provider
+			$result = $provider->send_message( 'whatsapp', $message_data, $contact );
+
+			// Validate send result
+			if ( ! isset( $result['success'] ) || ! $result['success'] ) {
+				$error_message = $result['error'] ?? 'WhatsApp sending failed';
+				throw new \Exception( $error_message );
+			}
+
+			// Update tracking status - WhatsApp sent successfully
+			$tracking_entry->update(
+				array(
+					'status'      => Tracking_Status::SENT,
+					'sent_at'     => current_time( 'mysql' ),
+					'external_id' => $result['message_id'] ?? null, // Store provider message ID
+				)
+			);
+
+			quillcrm_get_logger()->info(
+				__( 'Individual WhatsApp sent successfully', 'quillcrm' ),
+				array(
+					'contact_id'   => $contact->id,
+					'tracking_id'  => $tracking_entry->id,
+					'author_id'    => get_current_user_id(),
+					'recipient'    => $to,
+					'provider'     => $provider->get_provider_name(),
+					'external_id'  => $result['message_id'] ?? null,
+				)
+			);
+
+			return new WP_REST_Response(
+				array(
+					'success'     => true,
+					'message'     => __( 'WhatsApp message sent successfully', 'quillcrm' ),
+					'tracking_id' => $tracking_entry->id,
+				),
+				200
+			);
+		} catch ( \Exception $e ) {
+			// Update tracking status to failed
+			if ( isset( $tracking_entry ) ) {
+				$tracking_entry->update( array( 'status' => Tracking_Status::FAILED ) );
+			}
+
+			quillcrm_get_logger()->error(
+				__( 'Individual WhatsApp send exception', 'quillcrm' ),
+				array(
+					'error'      => $e->getMessage(),
+					'contact_id' => $contact_id ?? null,
+				)
+			);
+
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+		}
+	}
+
+	/**
 	 * Remove competing wp_mail filters (FunnelKit pattern)
 	 * This allows our custom from_email/from_name to work properly
 	 *
@@ -1509,6 +1989,58 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function send_individual_email_permissions_check( $request ) {
+		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
+	}
+
+	/**
+	 * Check permissions for sending individual SMS
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	public function send_individual_sms_permissions_check( $request ) {
+		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
+	}
+
+	/**
+	 * Check permissions for sending individual WhatsApp
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	public function send_individual_whatsapp_permissions_check( $request ) {
+		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
+	}
+
+	/**
+	 * Check permissions for getting SMS campaigns
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	public function get_sms_campaigns_permissions_check( $request ) {
+		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
+	}
+
+	/**
+	 * Check permissions for getting WhatsApp campaigns
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return bool
+	 */
+	public function get_whatsapp_campaigns_permissions_check( $request ) {
 		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
 	}
 

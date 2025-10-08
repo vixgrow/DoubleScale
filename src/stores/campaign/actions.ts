@@ -129,7 +129,7 @@ export const saveCampaign = (data: Partial<ExtendedCampaign> = {}) => async ({ s
 };
 
 /**
- * Save campaign step data to flattened settings structure
+ * Save campaign step data
  */
 export const saveCampaignStep = (step: string, stepData?: any) => async ({ select, dispatch }: any) => {
 	const campaign = select.getCampaign();
@@ -142,34 +142,41 @@ export const saveCampaignStep = (step: string, stepData?: any) => async ({ selec
 	dispatch(setError(null));
 
 	try {
-		// Map step names to their corresponding data fields
-		const stepDataMap: Record<string, string> = {
-			'template': 'template_data',
-			'contacts': 'contacts_data',
-			'review': 'review_data',
-		};
+		let updatedSettings = { ...campaign.settings, current_step: step };
 
-		const dataKey = stepDataMap[step];
+		// Handle template step - add template_id to template_ids array
+		if (step === 'template' && stepData?.template_id) {
+			const templateIds = campaign.settings.template_ids || [];
+			// Replace the first template ID or add new one
+			const newTemplateIds = templateIds.length > 0
+				? [stepData.template_id, ...templateIds.slice(1)]
+				: [stepData.template_id];
 
-		if (!dataKey) {
-			throw new Error(__(`Invalid step: ${step}`, 'quillcrm'));
+			updatedSettings.template_ids = newTemplateIds;
+		} else {
+			// Handle other steps - save to their respective data fields
+			const stepDataMap: Record<string, string> = {
+				'contacts': 'contacts_data',
+				'review': 'review_data',
+			};
+
+			const dataKey = stepDataMap[step];
+
+			if (!dataKey) {
+				throw new Error(__(`Invalid step: ${step}`, 'quillcrm'));
+			}
+
+			// Get existing step data for this specific step
+			const existingStepData = (campaign.settings as any)[dataKey] || {};
+
+			// Merge existing step data with new step data
+			const updatedStepData = {
+				...existingStepData,
+				...stepData,
+			};
+
+			(updatedSettings as any)[dataKey] = updatedStepData;
 		}
-
-		// Get existing step data for this specific step
-		const existingStepData = (campaign.settings as any)[dataKey] || {};
-
-		// Merge existing step data with new step data
-		const updatedStepData = {
-			...existingStepData,
-			...stepData,
-		};
-
-		// Update settings with flattened structure
-		const updatedSettings = {
-			...campaign.settings,
-			current_step: step,
-			[dataKey]: updatedStepData,
-		};
 
 		const response = await apiFetch({
 			path: `/qc/v1/campaigns/${campaign.id}`,

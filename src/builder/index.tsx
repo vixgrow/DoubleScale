@@ -41,7 +41,7 @@ const BuilderContent: React.FC = () => {
 	const dispatch = useDispatch();
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
 
-	// Get existing template data from campaign store
+	// Get existing template data from campaign store (contains template_id)
 	const existingTemplateData = useSelect(
 		(select: any) => select('quillcrm/campaign').getStepData('template'),
 		[]
@@ -50,26 +50,44 @@ const BuilderContent: React.FC = () => {
 	// Initialize button settings (loads from campaign template data)
 	useButtonSettings();
 
-	// Load existing builder data from template's email_body field
+	// Load existing builder data from template table
 	useEffect(() => {
-		const emailBody = existingTemplateData?.email_body;
-
-		if (emailBody?.type === 'builder' && emailBody.value) {
-			const { sections, globalSettings } = emailBody.value;
-
-			// Load sections if available
-			if (sections && sections.length > 0) {
-				dispatch(STORE_KEY).setBuilderState(sections);
+		const loadTemplateData = async () => {
+			if (!existingTemplateData?.template_id) {
+				return;
 			}
 
-			// Load global settings if available
-			if (globalSettings) {
-				dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
-			}
+			try {
+				const { getTemplate } = await import('./api/templates');
+				const template = await getTemplate(
+					existingTemplateData.template_id
+				);
+				const emailBody = template.email_body;
 
-			// Button settings are loaded by useButtonSettings hook
-		}
-	}, [existingTemplateData, dispatch]);
+				if (emailBody?.type === 'builder' && emailBody.value) {
+					const { sections, globalSettings } = emailBody.value;
+
+					// Load sections if available
+					if (sections && sections.length > 0) {
+						dispatch(STORE_KEY).setBuilderState(sections);
+					}
+
+					// Load global settings if available
+					if (globalSettings) {
+						dispatch(STORE_KEY).updateGlobalSettings(
+							globalSettings
+						);
+					}
+
+					// Button settings are loaded by useButtonSettings hook
+				}
+			} catch (error) {
+				console.error('Failed to load template:', error);
+			}
+		};
+
+		loadTemplateData();
+	}, [existingTemplateData?.template_id, dispatch]);
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {

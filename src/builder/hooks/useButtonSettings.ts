@@ -16,20 +16,34 @@ export const useButtonSettings = () => {
     []
   );
 
-  // Get existing template data from campaign store
+  // Get existing template data from campaign store (contains template_id)
   const existingTemplateData = useSelect(
     (select: any) => select('quillcrm/campaign').getStepData('template'),
     []
   );
 
-  // Load button settings from campaign template data
+  // Load button settings from template table
   useEffect(() => {
-    const emailBody = existingTemplateData?.email_body;
+    const loadButtonSettings = async () => {
+      if (!existingTemplateData?.template_id) {
+        return;
+      }
 
-    if (emailBody?.type === 'builder' && emailBody.value?.buttonSettings) {
-      dispatch(STORE_KEY).setButtonSettings(emailBody.value.buttonSettings);
-    }
-  }, [existingTemplateData, dispatch]);
+      try {
+        const { getTemplate } = await import('../api/templates');
+        const template = await getTemplate(existingTemplateData.template_id);
+        const emailBody = template.email_body;
+
+        if (emailBody?.type === 'builder' && emailBody.value?.buttonSettings) {
+          dispatch(STORE_KEY).setButtonSettings(emailBody.value.buttonSettings);
+        }
+      } catch (error) {
+        console.error('Failed to load button settings:', error);
+      }
+    };
+
+    loadButtonSettings();
+  }, [existingTemplateData?.template_id, dispatch]);
 
   // Helper function to update button settings
   const updateButtonSettings = (

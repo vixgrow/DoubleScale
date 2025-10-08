@@ -4,30 +4,6 @@
 import type { Campaign } from '@quillcrm/client';
 import { SET_CAMPAIGN, SET_ERROR, SET_LOADING, SET_SAVING, UPDATE_CAMPAIGN, UPDATE_SETTINGS } from './constants';
 
-// Template step data - directly contains template fields without nesting
-export interface TemplateStepData {
-  name?: string;
-  type?: 'email' | 'sms' | 'whatsapp';
-  subject?: string;
-  body?: string;
-  email_body?: {
-    type: 'builder' | 'rich-text';
-    value: any;
-  };
-  from_name?: string;
-  from_email?: string;
-  reply_to?: string;
-  preview_text?: string;
-  enable_utm?: boolean;
-  utm_source?: string;
-  utm_medium?: string;
-  utm_name?: string;
-  utm_term?: string;
-  utm_content?: string;
-  lastModified?: string;
-  [key: string]: any; // Allow additional fields
-}
-
 // Contacts step data
 export interface ContactsStepData {
   filters: any[];
@@ -44,15 +20,16 @@ export interface ReviewStepData {
   lastModified: string;
 }
 
-// Extended Campaign Settings with flattened step data
+// Extended Campaign Settings
 export interface ExtendedCampaignSettings {
   templates: Campaign['settings']['templates'];
   contacts: Campaign['settings']['contacts'];
   filters: Campaign['settings']['filters'];
   ab_test: Campaign['settings']['ab_test'];
   current_step?: Campaign['settings']['current_step'];
-  // Flattened step data - each step saves its data directly here
-  template_data?: TemplateStepData;
+  // Template IDs stored in array (for A/B testing support)
+  template_ids?: number[];
+  // Step-specific data
   contacts_data?: ContactsStepData;
   review_data?: ReviewStepData;
 }

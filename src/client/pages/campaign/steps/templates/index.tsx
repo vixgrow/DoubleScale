@@ -28,6 +28,11 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import EmailBuilderSelection from './email-builder-selection';
+import {
+	createTemplate as createTemplateAPI,
+	updateTemplate as updateTemplateAPI,
+	getTemplate,
+} from '../../../../../builder/api/templates';
 
 // Zod validation schema for flat template structure
 const templateSchema = z
@@ -129,16 +134,30 @@ const Templates: React.FC = () => {
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	useEffect(() => {
-		// Load existing template data if available
-		if (
-			existingTemplateData &&
-			Object.keys(existingTemplateData).length > 0
-		) {
-			setTemplates([existingTemplateData as EmailTemplate]);
-		} else if (templates.length === 0) {
-			setTemplates([defaultTemplate]);
-		}
-	}, [existingTemplateData]);
+		// Load template from template table if we have a template_id
+		const loadTemplate = async () => {
+			if (existingTemplateData?.template_id) {
+				try {
+					const template = await getTemplate(
+						existingTemplateData.template_id
+					);
+					setTemplates([template]);
+				} catch (error: any) {
+					console.error('Failed to load template:', error);
+					createNotice({
+						type: 'error',
+						message: __('Failed to load template', 'quillcrm'),
+					});
+					// Fallback to default template
+					setTemplates([defaultTemplate]);
+				}
+			} else if (templates.length === 0) {
+				setTemplates([defaultTemplate]);
+			}
+		};
+
+		loadTemplate();
+	}, [existingTemplateData?.template_id]);
 
 	const updateTemplate = (index: number, data: Partial<EmailTemplate>) => {
 		if (!campaign) {
@@ -278,17 +297,26 @@ const Templates: React.FC = () => {
 		}
 
 		try {
-			// Save template step data directly without nesting
-			const templateStepData = {
-				...templates[currentTab],
-				lastModified: new Date().toISOString(),
-			};
+			// Create or update template in templates table
+			let savedTemplate: EmailTemplate;
+			const templateData = templates[currentTab];
 
-			// Save the step with template data and navigate only if successful
-			const saveSuccess = await saveCampaignStep(
-				'template',
-				templateStepData
-			);
+			if (templateData.id) {
+				// Update existing template
+				savedTemplate = await updateTemplateAPI(
+					templateData.id,
+					templateData
+				);
+			} else {
+				// Create new template
+				savedTemplate = await createTemplateAPI(templateData);
+			}
+
+			// Save template_id to campaign settings template_ids array
+			const saveSuccess = await saveCampaignStep('template', {
+				template_id: savedTemplate.id!,
+			});
+
 			if (saveSuccess) {
 				navigate(getToLink(`campaigns/${campaign?.id}/builder`));
 			} else {

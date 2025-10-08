@@ -80,24 +80,28 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
         buttonSettings: JSON.parse(currentState).buttonSettings,
       };
 
-      // Get existing template data to preserve all fields
-      const existingTemplate = existingTemplateData || {};
+      // Get template_id from existing template data
+      if (!existingTemplateData?.template_id) {
+        throw new Error('No template ID found. Please save template first.');
+      }
 
-      // Update only the email_body field - save directly without nesting
-      const templateStepData = {
+      // Import template API functions
+      const { getTemplate, updateTemplate } = await import('../api/templates');
+
+      // Fetch the existing template to preserve all fields
+      const existingTemplate = await getTemplate(existingTemplateData.template_id);
+
+      // Update template with email_body in settings
+      await updateTemplate(existingTemplateData.template_id, {
         ...existingTemplate,
         email_body: {
           type: 'builder',
           value: builderData,
         },
-        lastModified: new Date().toISOString(),
-      };
+      });
 
-      // Save the template step
-      const saveSuccess = await saveCampaignStep(
-        'template',
-        templateStepData
-      );
+      // Template ID is already in template_ids array, just mark as success
+      const saveSuccess = true;
 
       if (saveSuccess && isMountedRef.current) {
         const now = new Date();

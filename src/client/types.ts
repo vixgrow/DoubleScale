@@ -179,26 +179,43 @@ export type EmailBodyContent = {
 	value: any; // For rich-text: string, for builder: sections/globalSettings/buttonSettings
 };
 
-export type EmailTemplate = {
-	id?: number;
-	name: string;
-	type: 'email';
-	subject: string;
-	body?: string; // Keep for backward compatibility
-	email_body?: EmailBodyContent;
-
+// Email template settings (stored in settings JSON column)
+export type EmailTemplateSettings = {
 	from_name: string;
 	from_email: string;
 	reply_to: string;
-	preview_text: string;
 	enable_utm: boolean;
 	utm_source: string;
 	utm_medium: string;
 	utm_name: string;
 	utm_term: string;
 	utm_content: string;
+	email_body?: EmailBodyContent;
+};
+
+// Email Template Type (matches database structure)
+export type EmailTemplate = {
+	id?: number;
+	name: string;
+	type: 'email';
+	subject: string;
+	body?: string; // Rich-text content (for simple editor)
+	preview_text: string;
+	settings?: EmailTemplateSettings;
 	created_at?: string;
 	updated_at?: string;
+
+	// Flattened fields for UI convenience (derived from settings)
+	from_name?: string;
+	from_email?: string;
+	reply_to?: string;
+	enable_utm?: boolean;
+	utm_source?: string;
+	utm_medium?: string;
+	utm_name?: string;
+	utm_term?: string;
+	utm_content?: string;
+	email_body?: EmailBodyContent;
 };
 
 // SMS Template Type (for frontend use)
@@ -234,30 +251,6 @@ export type WhatsAppTemplate = {
 // Discriminated Union for all template types
 export type Template = EmailTemplate | SMSTemplate | WhatsAppTemplate;
 
-// Template step data - directly contains template fields without nesting
-export type TemplateStepData = {
-	name?: string;
-	type?: 'email' | 'sms' | 'whatsapp';
-	subject?: string;
-	body?: string;
-	email_body?: {
-		type: 'builder' | 'rich-text';
-		value: any;
-	};
-	from_name?: string;
-	from_email?: string;
-	reply_to?: string;
-	preview_text?: string;
-	enable_utm?: boolean;
-	utm_source?: string;
-	utm_medium?: string;
-	utm_name?: string;
-	utm_term?: string;
-	utm_content?: string;
-	lastModified?: string;
-	[key: string]: any; // Allow additional fields
-};
-
 // Contacts step data
 export type ContactsStepData = {
 	filters?: any[];
@@ -281,8 +274,9 @@ type CampaignSettings = {
 	filters: Filter[];
 	ab_test: boolean;
 	current_step?: string;
-	// Flattened step data - each step saves its data directly here
-	template_data?: TemplateStepData;
+	// Template IDs stored in array (for A/B testing support)
+	template_ids?: number[];
+	// Step-specific data
 	contacts_data?: ContactsStepData;
 	review_data?: ReviewStepData;
 };

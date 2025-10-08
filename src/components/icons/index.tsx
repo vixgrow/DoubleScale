@@ -45,6 +45,7 @@ export { default as ViewOutlinedIcon } from './view-outlined';
 export { default as GradientColumnsIcon } from './gradient-columns';
 export { default as PlayIcon } from './play';
 export { default as EnvelopeIcon } from './envelope';
+export { default as EmailSequenceIcon } from './email-sequence';
 export { default as RepeatIcon } from './repeat';
 export { default as CategoryIcon } from './category';
 export { default as SMSIcon } from './sms';

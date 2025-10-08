@@ -27,6 +27,7 @@ use QuillCRM\Constants\Message_Source_Types;
 class Send_Campaign_Email extends Action {
 
 
+
 	/**
 	 * Action Name
 	 *
@@ -201,18 +202,6 @@ class Send_Campaign_Email extends Action {
 			->where( 'mode', Tracking_Model::MODE_EMAIL )
 			->where( 'template_id', $template_id )
 			->first();
-	}
-
-	/**
-	 * Get the template ID for a specific contact based on campaign settings.
-	 *
-	 * @param Campaign_Model           $campaign The campaign model.
-	 * @param Automation_Contact_Model $contact The contact model.
-	 * @return int|false The template ID or false if no template found.
-	 */
-	private function get_template_id( $campaign, $contact ) {
-		$template_ids = $campaign->get_template_ids();
-		return reset( $template_ids );
 	}
 }
 

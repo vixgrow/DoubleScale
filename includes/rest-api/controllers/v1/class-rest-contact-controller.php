@@ -1381,6 +1381,15 @@ class REST_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'not_found', __( 'Contact not found', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
+			// Validate recipient email address
+			if ( ! filter_var( $to, FILTER_VALIDATE_EMAIL ) ) {
+				return new WP_Error(
+					'invalid_email',
+					__( 'Invalid email address', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+
 			// Create tracking entry FIRST (for open/click tracking)
 			$tracking_entry = \QuillCRM\Models\Tracking_Model::create(
 				array(
@@ -1421,8 +1430,14 @@ class REST_Contact_Controller extends REST_Controller {
 			// Send the email
 			$result = $emails->send( $to, $subject, $body );
 
-		// Update tracking status
-		if ( $result ) {
+			// Validate email send result
+			if ( is_wp_error( $result ) ) {
+				throw new \Exception( 'WP Mail Error: ' . $result->get_error_message() );
+			} elseif ( $result === false || $result === null ) {
+				throw new \Exception( 'Email sending failed - wp_mail returned false' );
+			}
+
+			// Update tracking status - email sent successfully
 			$tracking_entry->update(
 				array(
 					'status'  => Tracking_Status::SENT,
@@ -1449,27 +1464,11 @@ class REST_Contact_Controller extends REST_Controller {
 				),
 				200
 			);
-		} else {
-			$tracking_entry->update( array( 'status' => Tracking_Status::FAILED ) );
-
-				quillcrm_get_logger()->error(
-					__( 'Individual email failed to send', 'quillcrm' ),
-					array(
-						'contact_id'  => $contact->id,
-						'tracking_id' => $tracking_entry->id,
-						'author_id'   => get_current_user_id(),
-						'recipient'   => $to,
-						'subject'     => $subject,
-					)
-				);
-
-				return new WP_Error(
-					'send_failed',
-					__( 'Failed to send email. Please check your SMTP settings.', 'quillcrm' ),
-					array( 'status' => 500 )
-				);
-			}
 		} catch ( \Exception $e ) {
+			// Update tracking status to failed
+			if ( isset( $tracking_entry ) ) {
+				$tracking_entry->update( array( 'status' => Tracking_Status::FAILED ) );
+			}
 			quillcrm_get_logger()->error(
 				__( 'Individual email send exception', 'quillcrm' ),
 				array(

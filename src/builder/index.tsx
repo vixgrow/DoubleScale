@@ -1,7 +1,7 @@
 /**
  * external dependencies
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	DndContext,
 	useSensor,
@@ -25,30 +25,52 @@ import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import BlockEditor from './components/BlockEditor';
 import TemplateCard from './components/TemplateCard';
-import { BuilderProvider, useBuilder } from './context/BuilderContext';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { STORE_KEY } from '../stores/email-builder/constants';
 import { v4 as uuidv4 } from 'uuid';
-import { ButtonSettingsProvider } from './context/ButtonSettingsContext';
-
-// Utility function to add template layout to block props
-const addTemplateLayoutToBlockProps = (blockConfig, template) => {
-	return {
-		...blockConfig.props,
-		templateLayout:
-			template.layout?.[blockConfig.props.containerId] || null,
-	};
-};
+import { blocksRegistry } from './blocks/BlockRegister';
+import { useButtonSettings } from './hooks/useButtonSettings';
+import {
+	handleTemplateDropOnCanvas,
+	isTemplateSection,
+	TemplateType,
+	TemplateConfig,
+} from './utils/dragAndDropHelpers';
 
 const BuilderContent: React.FC = () => {
-	const {
-		addNewSection,
-		addNewBlock,
-		addNewBlockWithProps,
-		reorderSections,
-		moveBlock,
-	} = useBuilder();
 	const dispatch = useDispatch();
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+
+	// Get existing template data from campaign store
+	const existingTemplateData = useSelect(
+		(select: any) => select('quillcrm/campaign').getStepData('template'),
+		[]
+	);
+
+	// Initialize button settings (loads from campaign template data)
+	useButtonSettings();
+
+	// Load existing builder data from template's email_body field
+	useEffect(() => {
+		const emailBody = existingTemplateData?.template?.email_body;
+
+		if (emailBody?.type === 'builder' && emailBody.value) {
+			const { sections, globalSettings } = emailBody.value;
+
+			// Load sections if available
+			if (sections && sections.length > 0) {
+				dispatch(STORE_KEY).setBuilderState(sections);
+			}
+
+			// Load global settings if available
+			if (globalSettings) {
+				dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
+			}
+
+			// Button settings are loaded by useButtonSettings hook
+		}
+	}, [existingTemplateData, dispatch]);
+
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: {
@@ -109,16 +131,33 @@ const BuilderContent: React.FC = () => {
 			});
 		}
 
-		// If we're dragging a block or element, only consider columns for collision
-		if (
-			active.data?.current?.type === 'block' ||
-			active.data?.current?.type === 'element'
-		) {
+		// If we're dragging a block, consider both columns and other blocks for collision
+		if (active.data?.current?.type === 'block') {
 			const columnContainers = Array.from(
 				droppableContainers.values()
 			).filter((container) => container.data?.current?.type === 'column');
 
-			// Use closestCenter for block-to-column collision detection
+			const blockContainers = Array.from(
+				droppableContainers.values()
+			).filter((container) => container.data?.current?.type === 'block');
+
+			// Combine column and block containers for collision detection
+			const allContainers = [...columnContainers, ...blockContainers];
+
+			// Use pointerWithin for more precise positioning when dragging blocks
+			return pointerWithin({
+				...args,
+				droppableContainers: allContainers,
+			});
+		}
+
+		// If we're dragging an element, only consider columns for collision
+		if (active.data?.current?.type === 'element') {
+			const columnContainers = Array.from(
+				droppableContainers.values()
+			).filter((container) => container.data?.current?.type === 'column');
+
+			// Use closestCenter for element-to-column collision detection
 			return closestCenter({
 				...args,
 				droppableContainers: columnContainers,
@@ -143,8 +182,8 @@ const BuilderContent: React.FC = () => {
 
 		// Check if this is a block being sorted (from useSortable)
 		if (active.data?.current?.type === 'block') {
-			// This is a block being sorted - don't set activeItem for drag overlay
-			setActiveItem(null);
+			// This is a block being sorted - set activeItem for drag overlay
+			setActiveItem(active.data.current);
 			return;
 		}
 
@@ -154,451 +193,39 @@ const BuilderContent: React.FC = () => {
 
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
-		console.log('Drag ended - active:', active);
-		console.log('Drag ended - over:', over);
-		console.log('Active data current:', active.data?.current);
-		console.log('Over data current:', over?.data?.current);
-
 		setActiveItem(null);
 
 		if (!over || active.id === over.id) {
-			console.log('No valid drop target or same item');
 			return;
 		}
 
-		console.log('Processing drop...');
+		// Handle all template types with unified logic
+		const templateTypes: TemplateType[] = [
+			'library-template',
+			'header-template',
+			'email-body-template',
+			'footer-template',
+			'image-gallery-template',
+		];
 
-		// Handle dropping library templates directly as sections
-		if (active.data?.current?.type === 'library-template') {
-			const template = active.data.current.template;
-			console.log('Library template detected:', template);
-
-			// Check if this is a drop on the canvas or canvas-blocks
+		const activeType = active.data?.current?.type as TemplateType;
+		if (templateTypes.includes(activeType) && active.data?.current) {
+			const template = active.data.current.template as TemplateConfig;
 			const overData = over.data?.current;
-			if (
-				over.id === 'canvas' ||
-				over.id === 'canvas-blocks' ||
-				overData?.acceptes?.includes('library-template')
-			) {
-				console.log('Creating new section for library template');
 
-				// Create a new section with this template
-				const newSection = {
-					id: uuidv4(),
-					columns: [
-						{
-							id: uuidv4(),
-							width: 1,
-							blocks: [],
-						},
-					],
-					styles: {
-						backgroundColor: '#fff',
-						padding: '20px',
-					},
-				};
+			const handled = handleTemplateDropOnCanvas(
+				template,
+				over.id,
+				overData,
+				(section) => dispatch(STORE_KEY).addSection(section),
+				(sectionId, columnId, block) =>
+					dispatch(STORE_KEY).addBlock(sectionId, columnId, block)
+			);
 
-				// Add the section
-				dispatch(STORE_KEY).addSection(newSection);
-
-				// Get the section and column IDs
-				const sectionId = newSection.id;
-				const columnId = newSection.columns[0].id;
-
-				// Add blocks from template to this section
-				if (template.blocks && Array.isArray(template.blocks)) {
-					console.log(
-						'Creating multiple blocks from template:',
-						template.blocks
-					);
-
-					// Add each block from the template
-					template.blocks.forEach((blockConfig) => {
-						// Add template layout information to the block props
-						const blockProps = addTemplateLayoutToBlockProps(
-							blockConfig,
-							template
-						);
-
-						addNewBlockWithProps(
-							sectionId,
-							columnId,
-							blockConfig.type,
-							blockProps
-						);
-					});
-				} else {
-					// Fallback: Add the template as a single block
-					console.log(
-						'Creating single block for template:',
-						template
-					);
-					addNewBlockWithProps(
-						sectionId,
-						columnId,
-						template.type,
-						template.props || {}
-					);
-				}
-				return;
-			} else {
-				// Should never get here since collision detection restricts drops
-				console.log(
-					'Library template dropped on invalid area - ignoring'
-				);
+			if (handled) {
 				return;
 			}
-		}
-
-		// Handle dropping header templates directly as sections
-		if (active.data?.current?.type === 'header-template') {
-			const template = active.data.current.template;
-			console.log('Header template detected:', template);
-
-			// Check if this is a drop on the canvas or canvas-blocks
-			const overData = over.data?.current;
-			if (
-				over.id === 'canvas' ||
-				over.id === 'canvas-blocks' ||
-				overData?.acceptes?.includes('library-template')
-			) {
-				console.log('Creating new section for header template');
-
-				// Create a new section with this template
-				const newSection = {
-					id: uuidv4(),
-					columns: [
-						{
-							id: uuidv4(),
-							width: 1,
-							blocks: [],
-						},
-					],
-					styles: {
-						backgroundColor: '#fff',
-						padding: '20px',
-					},
-				};
-
-				// Add the section
-				dispatch(STORE_KEY).addSection(newSection);
-
-				// Get the section and column IDs
-				const sectionId = newSection.id;
-				const columnId = newSection.columns[0].id;
-
-				// Add blocks based on template type
-				if (template.type === 'logo-button' && template.layout) {
-					// For logo+button template, create a special container with flex justify-between
-					console.log(
-						'Creating logo+button layout with flex justify-between'
-					);
-
-					// Create a special container block that will hold both logo and button inline
-					const containerBlockId = `container-${Date.now()}`;
-
-					// Add the logo block first with special inline properties
-					addNewBlockWithProps(
-						sectionId,
-						columnId,
-						template.blocks[0].type,
-						{
-							...template.blocks[0].props,
-							width: 'auto', // Logo gets auto width like other options
-							align: 'left',
-							// Add a special property to identify this as part of inline layout
-							inlineLayout: true,
-							containerId: containerBlockId,
-							// Pass the template layout information to the block
-							templateLayout: template.layout,
-						}
-					);
-
-					// Add the button block second with special inline properties
-					addNewBlockWithProps(
-						sectionId,
-						columnId,
-						template.blocks[1].type,
-						{
-							...template.blocks[1].props,
-							width: '50%',
-							align: 'right',
-							// Add a special property to identify this as part of inline layout
-							inlineLayout: true,
-							containerId: containerBlockId,
-							// Pass the template layout information to the block
-							templateLayout: template.layout,
-						}
-					);
-				} else {
-					// For other templates, add blocks normally
-					template.blocks.forEach((block, index) => {
-						console.log(
-							`Adding block ${index + 1} to column:`,
-							block
-						);
-						addNewBlockWithProps(
-							sectionId,
-							columnId,
-							block.type,
-							block.props
-						);
-					});
-				}
-				return;
-			} else {
-				// Should never get here since collision detection restricts drops
-				console.log(
-					'Header template dropped on invalid area - ignoring'
-				);
-				return;
-			}
-		}
-
-		// Handle dropping email body templates directly as sections
-		if (active.data?.current?.type === 'email-body-template') {
-			const template = active.data.current.template;
-			console.log('Email body template detected:', template);
-
-			// Check if this is a drop on the canvas or canvas-blocks
-			const overData = over.data?.current;
-			if (
-				over.id === 'canvas' ||
-				over.id === 'canvas-blocks' ||
-				overData?.acceptes?.includes('library-template')
-			) {
-				console.log('Creating new section for email body template');
-
-				// Create a new section with this template
-				const newSection = {
-					id: uuidv4(),
-					columns: [
-						{
-							id: uuidv4(),
-							width: 1,
-							blocks: [],
-						},
-					],
-					styles: {
-						backgroundColor: '#fff',
-						padding: '20px',
-					},
-				};
-
-				// Add the section
-				dispatch(STORE_KEY).addSection(newSection);
-
-				// Get the section and column IDs
-				const sectionId = newSection.id;
-				const columnId = newSection.columns[0].id;
-
-				// Check if this is an email body template with multiple blocks
-				if (template.blocks && Array.isArray(template.blocks)) {
-					console.log(
-						'Creating multiple blocks from email body template:',
-						template.blocks
-					);
-
-					// Add each block from the template
-					template.blocks.forEach((blockConfig) => {
-						// Add template layout information to the block props
-						const blockProps = addTemplateLayoutToBlockProps(
-							blockConfig,
-							template
-						);
-
-						addNewBlockWithProps(
-							sectionId,
-							columnId,
-							blockConfig.type,
-							blockProps
-						);
-					});
-				} else {
-					// Fallback: Add the template as a single block
-					console.log(
-						'Creating single block for email body template:',
-						template
-					);
-					addNewBlockWithProps(
-						sectionId,
-						columnId,
-						template.type,
-						template.props || {}
-					);
-				}
-				return;
-			} else {
-				// Should never get here since collision detection restricts drops
-				console.log(
-					'Email body template dropped on invalid area - ignoring'
-				);
-				return;
-			}
-		}
-
-		// Handle dropping footer templates directly as sections
-		if (active.data?.current?.type === 'footer-template') {
-			const template = active.data.current.template;
-			console.log('Footer template detected:', template);
-
-			// Check if this is a drop on the canvas or canvas-blocks
-			const overData = over.data?.current;
-			if (
-				over.id === 'canvas' ||
-				over.id === 'canvas-blocks' ||
-				overData?.acceptes?.includes('library-template')
-			) {
-				console.log('Creating new section for footer template');
-
-				// Create a new section with this template
-				const newSection = {
-					id: uuidv4(),
-					columns: [
-						{
-							id: uuidv4(),
-							width: 1,
-							blocks: [],
-						},
-					],
-					styles: {
-						backgroundColor: '#fff',
-						padding: '20px',
-					},
-				};
-
-				// Add the section
-				dispatch(STORE_KEY).addSection(newSection);
-
-				// Get the section and column IDs
-				const sectionId = newSection.id;
-				const columnId = newSection.columns[0].id;
-
-				// Check if this is a footer template with multiple blocks
-				if (template.blocks && Array.isArray(template.blocks)) {
-					console.log(
-						'Creating multiple blocks from footer template:',
-						template.blocks
-					);
-
-					// Add each block from the template
-					template.blocks.forEach((blockConfig) => {
-						// Add template layout information to the block props
-						const blockProps = addTemplateLayoutToBlockProps(
-							blockConfig,
-							template
-						);
-
-						addNewBlockWithProps(
-							sectionId,
-							columnId,
-							blockConfig.type,
-							blockProps
-						);
-					});
-				} else {
-					// Fallback: Add the template as a single block
-					console.log(
-						'Creating single block for footer template:',
-						template
-					);
-					addNewBlockWithProps(
-						sectionId,
-						columnId,
-						template.type,
-						template.props || {}
-					);
-				}
-				return;
-			} else {
-				// Should never get here since collision detection restricts drops
-				console.log(
-					'Footer template dropped on invalid area - ignoring'
-				);
-				return;
-			}
-		}
-
-		// Handle dropping image gallery templates directly as sections
-		if (active.data?.current?.type === 'image-gallery-template') {
-			const template = active.data.current.template;
-			console.log('Image gallery template detected:', template);
-
-			// Check if this is a drop on the canvas or canvas-blocks
-			const overData = over.data?.current;
-			if (
-				over.id === 'canvas' ||
-				over.id === 'canvas-blocks' ||
-				overData?.acceptes?.includes('library-template')
-			) {
-				console.log('Creating new section for image gallery template');
-
-				// Create a new section with this template
-				const newSection = {
-					id: uuidv4(),
-					columns: [
-						{
-							id: uuidv4(),
-							width: 1,
-							blocks: [],
-						},
-					],
-					styles: {
-						backgroundColor: '#fff',
-						padding: '20px',
-					},
-				};
-
-				// Add the section
-				dispatch(STORE_KEY).addSection(newSection);
-
-				// Get the section and column IDs
-				const sectionId = newSection.id;
-				const columnId = newSection.columns[0].id;
-
-				// Check if this is an image gallery template with multiple blocks
-				if (template.blocks && Array.isArray(template.blocks)) {
-					console.log(
-						'Creating multiple blocks from image gallery template:',
-						template.blocks
-					);
-
-					// Add each block from the template
-					template.blocks.forEach((blockConfig) => {
-						// Add template layout information to the block props
-						const blockProps = addTemplateLayoutToBlockProps(
-							blockConfig,
-							template
-						);
-
-						addNewBlockWithProps(
-							sectionId,
-							columnId,
-							blockConfig.type,
-							blockProps
-						);
-					});
-				} else {
-					// Fallback: Add the template as a single block
-					console.log(
-						'Creating single block for image gallery template:',
-						template
-					);
-					addNewBlockWithProps(
-						sectionId,
-						columnId,
-						'image',
-						template.props || {}
-					);
-				}
-				return;
-			} else {
-				// Should never get here since collision detection restricts drops
-				console.log(
-					'Image gallery template dropped on invalid area - ignoring'
-				);
-				return;
-			}
+			return;
 		}
 
 		// Handle section reordering (when dragging sections to reorder them)
@@ -609,11 +236,11 @@ const BuilderContent: React.FC = () => {
 			// This is section reordering
 			const activeSectionId = active.data.current.sectionId;
 			const overSectionId = over.data.current.sectionId;
-			reorderSections(activeSectionId, overSectionId);
+			dispatch(STORE_KEY).reorderSections(activeSectionId, overSectionId);
 			return;
 		}
 
-		// Handle block reordering (when dragging blocks between columns)
+		// Handle block reordering (when dragging blocks between columns or within same column)
 		if (active.data?.current?.type === 'block') {
 			const activeData = active.data.current;
 			const overData = over.data?.current;
@@ -628,12 +255,20 @@ const BuilderContent: React.FC = () => {
 					columnId: fromColumnId,
 				} = activeData;
 
+				// Check if the target section is a template section
+				const targetSection = sections.find(
+					(s) => s.id === toSectionId
+				);
+				if (targetSection && isTemplateSection(targetSection)) {
+					return;
+				}
+
 				// Only move if it's actually moving to a different column
 				if (
 					fromSectionId !== toSectionId ||
 					fromColumnId !== toColumnId
 				) {
-					moveBlock(
+					dispatch(STORE_KEY).moveBlock(
 						blockId,
 						fromSectionId,
 						fromColumnId,
@@ -642,6 +277,11 @@ const BuilderContent: React.FC = () => {
 						0
 					);
 				}
+				return;
+			}
+
+			// If no valid drop target found
+			if (!overData) {
 				return;
 			}
 
@@ -655,22 +295,50 @@ const BuilderContent: React.FC = () => {
 					columnId: fromColumnId,
 				} = activeData;
 
-				// For block-to-block drops, we'll put the block right after the target block
-				const toIndex = 1; // Put after the target block
+				// Get the target block index
+				const targetSection = sections.find(
+					(s) => s.id === toSectionId
+				);
+				const targetColumn = targetSection?.columns.find(
+					(c) => c.id === toColumnId
+				);
+				const targetBlockIndex =
+					targetColumn?.blocks.findIndex((b) => b.id === over.id) ||
+					0;
 
+				// Calculate the correct index for insertion
+				let toIndex = targetBlockIndex;
+
+				// If moving within the same column, adjust the index
+				if (
+					fromSectionId === toSectionId &&
+					fromColumnId === toColumnId
+				) {
+					// Place block at target position
+					toIndex = targetBlockIndex;
+				} else {
+					// Moving to different column, insert after target
+					toIndex = targetBlockIndex + 1;
+				}
+
+				// Only move if it's actually a different position
 				if (
 					fromSectionId !== toSectionId ||
 					fromColumnId !== toColumnId ||
 					active.id !== over.id
 				) {
-					moveBlock(
-						blockId,
-						fromSectionId,
-						fromColumnId,
-						toSectionId,
-						toColumnId,
-						toIndex
-					);
+					try {
+						dispatch(STORE_KEY).moveBlock(
+							blockId,
+							fromSectionId,
+							fromColumnId,
+							toSectionId,
+							toColumnId,
+							toIndex
+						);
+					} catch (error) {
+						console.error('Error executing moveBlock:', error);
+					}
 				}
 				return;
 			}
@@ -683,21 +351,61 @@ const BuilderContent: React.FC = () => {
 
 			if (overData?.type === 'column') {
 				const { sectionId, columnId } = overData;
-				addNewBlock(sectionId, columnId, blockType);
+
+				// Check if the target section is a template section
+				const targetSection = sections.find((s) => s.id === sectionId);
+				if (targetSection && isTemplateSection(targetSection)) {
+					return;
+				}
+
+				const blockDef = blocksRegistry[blockType];
+				if (blockDef) {
+					dispatch(STORE_KEY).addBlock(sectionId, columnId, {
+						id: uuidv4(),
+						type: blockType,
+						props: { ...blockDef.defaultProps },
+					});
+				}
 				return;
 			}
 		}
 
-		// Handle dropping new sections
+		// Handle dropping new layouts (sections) from sidebar
 		if (active.data?.current?.type === 'layout') {
-			addNewSection(active.data.current.item);
-		}
+			const layoutItem = active.data.current.item;
 
-		console.log('Drag ended:', { active: active.id, over: over.id });
+			const newSection = {
+				id: uuidv4(),
+				columns: layoutItem.width.map((width: number) => ({
+					id: uuidv4(),
+					width, // Now using actual percentages directly
+					blocks: [],
+				})),
+				styles: {},
+			};
+			dispatch(STORE_KEY).addSection(newSection);
+		}
 	};
 
 	const renderDragOverlay = () => {
 		if (!activeItem) return null;
+
+		// Handle block overlay
+		if (activeItem.type === 'block') {
+			const block = activeItem.block;
+			const blockDefinition = blocksRegistry[block.type];
+
+			return (
+				<div className="opacity-90 transform rotate-3 shadow-lg w-48">
+					<TemplateCard
+						item={blockDefinition}
+						type="element"
+						blockType={block.type}
+						isDragOverlay={true}
+					/>
+				</div>
+			);
+		}
 
 		// Handle library template overlay
 		if (activeItem.type === 'library-template') {
@@ -916,13 +624,7 @@ const BuilderContent: React.FC = () => {
 };
 
 const Builder: React.FC = () => {
-	return (
-		<ButtonSettingsProvider>
-			<BuilderProvider>
-				<BuilderContent />
-			</BuilderProvider>
-		</ButtonSettingsProvider>
-	);
+	return <BuilderContent />;
 };
 
 export default Builder;

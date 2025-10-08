@@ -4,714 +4,245 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
-import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
 import { useReducer, useRef } from 'react';
-import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
-import {
-	Tabs,
-	Button,
-	Card,
-	Typography,
-	Modal,
-	Select,
-	Avatar,
-	Tag as AntTag,
-	Popover,
-	Popconfirm,
-	Flex,
-} from 'antd';
-import {
-	UserOutlined,
-	PlusSquareFilled,
-	ArrowDownOutlined,
-} from '@ant-design/icons';
-import { isEmpty } from 'lodash';
-import AsyncSelect from 'react-select/async';
+import { useParams } from '@quillcrm/navigation';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import {
-	Contact as ContactType,
-	Tag,
-	List as ContactList,
-	ListsResponse,
-	TagsResponse,
-} from '@quillcrm/client';
-import NotesTab from './notes';
-import ProfileTab from './profile';
-import Automation from './automation';
-import Emails from './emails';
-import PurchaseHistory from './purchase-history';
-import Courses from './courses';
-import { Provider } from './state/context';
+import { Contact as ContactType, NoticeMessage } from '@quillcrm/client';
 import reducer, { State } from './state/reducer';
 import actions from './state/actions';
-import ConfigAPI from '@quillcrm/config';
+import { Provider } from './state/context';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import ContactInformation from './contact-information';
+import DataCard from './data-card';
+import ContactShimmer from './contact-shimmer';
+import { NoticeBanner } from '@quillcrm/components';
+import { ChevronRight } from 'lucide-react';
 
-const Contact: React.FC = () => {
-	const { id, tab } = useParams<{ id: string; tab: string }>();
-	const navigate = useNavigate();
-	const [loading, setLoading] = useState(true);
-	const [isUpdating, setIsUpdating] = useState(false);
-	const [lists, setLists] = useState<ContactList[]>([]);
-	const [tags, setTags] = useState<Tag[]>([]);
-	const [showAddTag, setShowAddTag] = useState(false);
-	const [showAddList, setShowAddList] = useState(false);
-	const [selectedLists, setSelectedLists] = useState<number[]>([]);
-	const [selectedTags, setSelectedTags] = useState<number[]>([]);
-	const [isSavingTags, setIsSavingTags] = useState(false);
-	const [isSavingLists, setIsSavingLists] = useState(false);
-	const [state, dispatch] = useReducer(reducer, {
-		contact: null,
-		notes: [],
-		automationContacts: [],
-		emailAnalytics: null,
-		purchaseHistory: null,
-		courses: [],
-	} as State);
-	const stateRef = useRef<State>(state);
-	stateRef.current = state;
-	const $actions = actions(dispatch);
-	const { setContact } = $actions;
-	const { contact } = state;
-	const isEddActive = ConfigAPI.isEddActive();
-	const isWooActive = ConfigAPI.isWoocommerceActive();
-	const lmsActive = ConfigAPI.isLmsActive();
-	const { createNotice } = useDispatch('quillcrm/core');
+interface ContactProps {
+    contactId?: string;
+    isDialog?: boolean;
+    isOpen?: boolean;
+    onClose?: () => void;
+    onContactUpdate?: (contact: ContactType) => void;
+}
 
-	const fetchLists = async (keyword = '') => {
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/lists', {
-					keyword: keyword,
-					contact_id: id,
-				}),
-			})) as ListsResponse;
+const Contact: React.FC<ContactProps> = ({
+    contactId,
+    isDialog = false,
+    isOpen = true,
+    onClose,
+    onContactUpdate,
+}) => {
+    const { id: urlId } = useParams<{ id: string; tab: string }>();
+    const id = contactId || urlId;
+    const [loading, setLoading] = useState(true);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [showFullPageDialog, setShowFullPageDialog] = useState(isDialog);
+    const [notice, setNotice] = useState<NoticeMessage | null>(null);
+    const [state, dispatch] = useReducer(reducer, {
+        contact: null,
+        notes: [],
+        automationContacts: [],
+        emailAnalytics: null,
+        purchaseHistory: null,
+        courses: [],
+    } as State);
+    const stateRef = useRef<State>(state);
+    stateRef.current = state;
+    const $actions = actions(dispatch);
+    const { setContact, setEmailAnalytics } = $actions;
+    const { contact } = state;
 
-			setLists([...lists, ...response.data]);
+    const fetchContact = async () => {
+        if (!id) {
+            setLoading(false);
+            return;
+        }
 
-			return response.data.map((list) => ({
-				label: list.name,
-				value: list.id,
-			}));
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+        setLoading(true);
+        try {
+            const response = await apiFetch({
+                path: `/qc/v1/contacts/${id}`,
+                method: 'GET',
+            });
 
-			return [];
-		}
-	};
+            setContact(response as ContactType);
 
-	const fetchTags = async (keyword = '') => {
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/tags', {
-					keyword: keyword,
-					contact_id: id,
-				}),
-			})) as TagsResponse;
+            // Fetch email analytics for the contact
+            fetchEmailAnalytics();
+        } catch (error: any) {
+            setNotice({
+                type: 'error',
+                message: error.message,
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
-			setTags([...tags, ...response.data]);
+    const fetchEmailAnalytics = async () => {
+        if (!id) {
+            return;
+        }
 
-			return response.data.map((tag) => ({
-				label: tag.name,
-				value: tag.id,
-			}));
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-			return [];
-		}
-	};
+        try {
+            const response = await apiFetch({
+                path: `/qc/v1/contacts/${id}/email-campaigns?per_page=10&page=1`,
+                method: 'GET',
+            });
 
-	const deleteList = async (listId: number) => {
-		if (!contact) {
-			return;
-		}
+            setEmailAnalytics(response as any);
+        } catch (error: any) {
+            // Silently fail for email analytics
+            console.error('Failed to fetch email analytics:', error);
+        }
+    };
 
-		try {
-			await apiFetch({
-				path: `/qc/v1/contacts/${contact.id}`,
-				method: 'POST',
-				data: {
-					lists: contact.lists.filter((list) => list.id !== listId),
-				},
-			});
+    const updateContact = async (updatedData?: Partial<ContactType>) => {
+        if (!contact) {
+            return;
+        }
 
-			setContact({
-				...contact,
-				lists: contact.lists.filter((list) => list.id !== listId),
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		}
-	};
+        setIsUpdating(true);
+        try {
+            // Merge updated data with current contact
+            const mergedContact = updatedData
+                ? { ...contact, ...updatedData }
+                : contact;
 
-	const addLists = async () => {
-		if (!contact || isEmpty(selectedLists)) {
-			return;
-		}
+            // Prepare the data with properly formatted custom fields
+            const contactData = {
+                ...mergedContact,
+                custom_fields:
+                    mergedContact.custom_fields?.map((customField) => ({
+                        id: customField.id,
+                        value: customField.pivot?.value || '', // Send only id and value
+                    })) || [],
+            };
 
-		// Check if the selected lists are already added to the contact
-		if (
-			selectedLists.every((list) =>
-				contact.lists.some((l) => l.id === list)
-			)
-		) {
-			return;
-		}
+            const response = await apiFetch({
+                path: `/qc/v1/contacts/${id}`,
+                method: 'POST',
+                data: contactData,
+            });
 
-		const newLists = lists.filter((list) =>
-			selectedLists.includes(list.id)
-		);
-		if (isEmpty(newLists)) {
-			return;
-		}
+            const updatedContact = response as ContactType;
+            setContact(updatedContact);
 
-		setIsSavingLists(true);
-		try {
-			await apiFetch({
-				path: `/qc/v1/contacts/${contact.id}`,
-				method: 'POST',
-				data: {
-					lists: [...contact.lists, ...newLists].filter(
-						(list, index, self) =>
-							index === self.findIndex((t) => t.id === list.id)
-					),
-				},
-			});
+            // Notify parent component about the update
+            if (onContactUpdate) {
+                onContactUpdate(updatedContact);
+            }
 
-			setContact({
-				...contact,
-				lists: [...contact.lists, ...newLists].filter(
-					(list, index, self) =>
-						index === self.findIndex((t) => t.id === list.id)
-				),
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsSavingLists(false);
-			setShowAddList(false);
-			setSelectedLists([]);
-		}
-	};
+            setNotice({
+                type: 'success',
+                message: __('Contact updated successfully', 'quillcrm'),
+            });
+        } catch (error: any) {
+            console.error('Update contact error:', error);
+            setNotice({
+                type: 'error',
+                message: error.message,
+            });
+        } finally {
+            setIsUpdating(false);
+        }
+    };
 
-	const deleteTag = async (tagId: number) => {
-		if (!contact) {
-			return;
-		}
+    useEffect(() => {
+        if (id) {
+            fetchContact();
+        } else {
+            setLoading(false);
+        }
+    }, [id]);
 
-		try {
-			await apiFetch({
-				path: `/qc/v1/contacts/${contact.id}`,
-				method: 'POST',
-				data: {
-					tags: contact.tags.filter((tag) => tag.id !== tagId),
-				},
-			});
+    const closeNotice = () => {
+        setNotice(null);
+    };
 
-			setContact({
-				...contact,
-				tags: contact.tags.filter((tag) => tag.id !== tagId),
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		}
-	};
-
-	const addTags = async () => {
-		if (!contact) {
-			return;
-		}
-
-		const newTags = tags.filter((tag) => selectedTags.includes(tag.id));
-		if (isEmpty(newTags)) {
-			return;
-		}
-
-		setIsSavingTags(true);
-
-		try {
-			await apiFetch({
-				path: `/qc/v1/contacts/${contact.id}`,
-				method: 'POST',
-				data: {
-					tags: [...contact.tags, ...newTags],
-				},
-			});
-
-			setContact({
-				...contact,
-				tags: [...contact.tags, ...newTags],
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsSavingTags(false);
-			setShowAddTag(false);
-			setSelectedTags([]);
-		}
-	};
-
-	const fetchContact = async () => {
-		setLoading(true);
-		try {
-			const response = await apiFetch({
-				path: `/qc/v1/contacts/${id}`,
-				method: 'GET',
-			});
-
-			setContact(response as ContactType);
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const updateContact = async () => {
-		if (!contact) {
-			return;
-		}
-
-		setIsUpdating(true);
-		try {
-			// Prepare the data with properly formatted custom fields
-			const contactData = {
-				...contact,
-				custom_fields:
-					contact.custom_fields?.map((customField) => ({
-						id: customField.id,
-						value: customField.pivot?.value || '', // Send only id and value
-					})) || [],
-			};
-
-			const response = await apiFetch({
-				path: `/qc/v1/contacts/${id}`,
-				method: 'POST',
-				data: contactData,
-			});
-
-			setContact(response as ContactType);
-			createNotice({
-				type: 'success',
-				message: __('Contact updated successfully', 'quillcrm'),
-			});
-		} catch (error: any) {
-			console.error('Update contact error:', error);
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsUpdating(false);
-		}
-	};
-
-	const sendOptInEmail = async () => {
-		if (!contact) {
-			return;
-		}
-
-		createNotice({
-			type: 'info',
-			message: __('Sending opt-in email', 'quillcrm'),
-		});
-
-		try {
-			const response = await apiFetch({
-				path: `/qc/v1/contacts/${contact.id}/send-opt-in`,
-				method: 'POST',
-			});
-			console.log(response);
-
-			createNotice({
-				type: 'success',
-				message: __('Opt-in email sent successfully', 'quillcrm'),
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		}
-	};
-
-	useEffect(() => {
-		fetchContact();
-	}, [id]);
-
-	// Switch to the new tab items
-	const tabItems = [
-		{
-			key: 'profile',
-			label: __('Profile', 'quillcrm'),
-			children: <ProfileTab />,
-		},
-		{
-			key: 'emails',
-			label: __('Emails', 'quillcrm'),
-			children: contact && <Emails contact_id={contact.id} />,
-		},
-		{
-			key: 'notes',
-			label: __('Notes', 'quillcrm'),
-			children: contact && <NotesTab contact_id={contact.id} />,
-		},
-		{
-			key: 'automation',
-			label: __('Automation', 'quillcrm'),
-			children: contact && <Automation contact_id={contact.id} />,
-		},
-	];
-
-	if (isWooActive || isEddActive) {
-		tabItems.push({
-			key: 'purchase-history',
-			label: __('Purchase History', 'quillcrm'),
-			children: contact && <PurchaseHistory contact_id={contact.id} />,
-		});
-	}
-
-	if (lmsActive) {
-		tabItems.push({
-			key: 'courses',
-			label: __('Courses', 'quillcrm'),
-			children: contact && <Courses contact_id={contact.id} />,
-		});
-	}
-
-	return (
-		<Provider
-			value={{
-				...state,
-				...$actions,
-				updateContact,
-				isUpdating,
-				isLoading: loading,
-			}}
-		>
-			<div className="qcrm-contact">
-				<Card
-					loading={loading}
-					className="qcrm-contact-overview-card"
-					style={{ width: '100%' }}
-				>
-					{contact && (
-						<div className="qcrm-contact-overview">
-							<div className="qcrm-contact-overview-avatar">
-								<div className="qcrm-contact-overview-avatar">
-									<Avatar
-										size={64}
-										icon={<UserOutlined />}
-										style={{
-											backgroundColor: '#0073aa',
-											color: '#fff',
-										}}
-									/>
-								</div>
-								<div className="qcrm-contact-overview-details">
-									<Typography.Title level={4}>
-										{contact.first_name || '-'}{' '}
-										{contact.last_name || '-'}
-									</Typography.Title>
-									<Flex vertical gap={10}>
-										<Typography.Text>
-											{contact.email}
-											<Popover
-												trigger={['click']}
-												content={
-													<div
-														style={{
-															display: 'flex',
-															flexDirection:
-																'column',
-															gap: 8,
-														}}
-													>
-														<Select
-															value={
-																contact.status
-															}
-															style={{
-																width: 200,
-															}}
-															onChange={(
-																value
-															) => {
-																setContact({
-																	...contact,
-																	status: value,
-																});
-															}}
-														>
-															<Select.Option value="unverified">
-																{__(
-																	'Unverified',
-																	'quillcrm'
-																)}
-															</Select.Option>
-															<Select.Option value="subscribed">
-																{__(
-																	'Subscribed',
-																	'quillcrm'
-																)}
-															</Select.Option>
-															<Select.Option value="unsubscribed">
-																{__(
-																	'Unsubscribed',
-																	'quillcrm'
-																)}
-															</Select.Option>
-															<Select.Option value="bounced">
-																{__(
-																	'Bounced',
-																	'quillcrm'
-																)}
-															</Select.Option>
-														</Select>
-														<Button
-															onClick={
-																updateContact
-															}
-															type="primary"
-															loading={isUpdating}
-														>
-															{__(
-																'Update',
-																'quillcrm'
-															)}
-														</Button>
-													</div>
-												}
-											>
-												<AntTag
-													color="processing"
-													icon={<ArrowDownOutlined />}
-													style={{
-														marginLeft: 8,
-														cursor: 'pointer',
-													}}
-												>
-													{contact.status}
-												</AntTag>
-											</Popover>
-										</Typography.Text>
-										{contact.status === 'unverified' && (
-											<Popconfirm
-												title={__(
-													'Are you sure you want to send an opt-in email?',
-													'quillcrm'
-												)}
-												onConfirm={sendOptInEmail}
-											>
-												<Button size="small">
-													{__(
-														'Send Opt-in Email',
-														'quillcrm'
-													)}
-												</Button>
-											</Popconfirm>
-										)}
-									</Flex>
-								</div>
-							</div>
-							<div className="qcrm-contact-overview-lists-tags">
-								<div className="qcrm-contact-overview-lists">
-									<Typography.Title level={5}>
-										{__('Lists', 'quillcrm')}
-										{':'}
-									</Typography.Title>
-									{!isEmpty(contact.lists) ? (
-										<div>
-											{contact.lists.map((list) => (
-												<AntTag
-													key={list.id}
-													closeIcon
-													onClose={() =>
-														deleteList(list.id)
-													}
-												>
-													{list.name}
-												</AntTag>
-											))}
-										</div>
-									) : (
-										<Typography.Text>
-											{__('No lists found.', 'quillcrm')}
-										</Typography.Text>
-									)}
-									<Button
-										onClick={() => {
-											setShowAddList(true);
-											fetchLists();
-										}}
-										type="link"
-										icon={<PlusSquareFilled />}
-										size="small"
-									>
-										{__('Add List', 'quillcrm')}
-									</Button>
-								</div>
-								<div className="qcrm-contact-overview-tags">
-									<Typography.Title level={5}>
-										{__('Tags', 'quillcrm')}
-										{':'}
-									</Typography.Title>
-									{!isEmpty(contact.tags) ? (
-										<div>
-											{contact.tags.map((tag) => (
-												<AntTag
-													key={tag.id}
-													closeIcon
-													onClose={() =>
-														deleteTag(tag.id)
-													}
-												>
-													{tag.name}
-												</AntTag>
-											))}
-										</div>
-									) : (
-										<Typography.Text>
-											{__('No tags found.', 'quillcrm')}
-										</Typography.Text>
-									)}
-									<Button
-										onClick={() => {
-											setShowAddTag(true);
-											fetchTags();
-										}}
-										type="link"
-										icon={<PlusSquareFilled />}
-										size="small"
-									>
-										{__('Add Tag', 'quillcrm')}
-									</Button>
-								</div>
-							</div>
-						</div>
-					)}
-				</Card>
-				<Tabs
-					defaultActiveKey="profile"
-					activeKey={tab}
-					tabPosition="left"
-					tabBarStyle={{ width: 200 }}
-					items={tabItems}
-					onChange={(key) => {
-						navigate(getToLink(`contacts/${id}/${key}`));
-					}}
-				/>
-				<Modal
-					title={__('Add Tag', 'quillcrm')}
-					open={showAddTag}
-					onOk={() => addTags()}
-					onCancel={() => setShowAddTag(false)}
-					confirmLoading={isSavingTags}
-				>
-					<div className="qcrm-fields">
-						<div className="qcrm-field">
-							<AsyncSelect
-								className="react-select-container"
-								classNamePrefix="react-select"
-								isMulti
-								value={selectedTags.map((tag) => ({
-									label: tags.find((t) => t.id === tag)?.name,
-									value: tag,
-								}))}
-								onChange={(value) => {
-									if (!value || !Array.isArray(value)) {
-										return;
-									}
-
-									const selected = value.map(
-										(val) => val.value
-									);
-
-									setSelectedTags(selected);
-								}}
-								defaultOptions
-								loadOptions={(inputValue, callback) => {
-									fetchTags(inputValue).then((data) => {
-										callback(data);
-									});
-								}}
-								isClearable
-								cacheOptions={false}
-							/>
-						</div>
-					</div>
-				</Modal>
-				<Modal
-					title={__('Add Lists', 'quillcrm')}
-					open={showAddList}
-					onOk={() => addLists()}
-					onCancel={() => setShowAddList(false)}
-					confirmLoading={isSavingLists}
-				>
-					<div className="qcrm-fields">
-						<div className="qcrm-field">
-							<AsyncSelect
-								isMulti
-								value={selectedLists.map((list) => ({
-									label: lists.find((t) => t.id === list)
-										?.name,
-									value: list,
-								}))}
-								onChange={(value) => {
-									if (!Array.isArray(value)) {
-										return;
-									}
-
-									const selected = value.map(
-										(val) => val.value
-									);
-
-									setSelectedLists(selected);
-								}}
-								defaultOptions
-								loadOptions={(inputValue, callback) => {
-									fetchLists(inputValue).then((data) => {
-										callback(data);
-									});
-								}}
-								isClearable
-								cacheOptions={false}
-							/>
-						</div>
-					</div>
-				</Modal>
-			</div>
-		</Provider>
-	);
+    return (
+        <Dialog
+            open={isDialog ? isOpen : showFullPageDialog}
+            onOpenChange={(value) => {
+                if (!value) {
+                    if (isDialog && onClose) {
+                        onClose();
+                    } else {
+                        setShowFullPageDialog(false);
+                    }
+                }
+            }}
+        >
+            <DialogContent
+                className="z-[1600000] w-screen h-screen max-w-none gap-8 overflow-y-auto bg-white rounded-none shadow-none"
+                style={{
+                    paddingTop: '10px',
+                    paddingLeft: '0px',
+                    paddingRight: '0px',
+                }}
+            >
+                <DialogHeader className="pb-0 border-b border-[#E4E7EC]">
+                    <DialogTitle className="px-12 pb-4 pt-2">
+                        <h1 className="text-base font-normal text-[#667085] flex items-center gap-2">
+                            {__('Contacts List', 'quillcrm')}
+                            <ChevronRight className="w-4 h-4 text-[#667085]" />
+                            {__('Contact Details', 'quillcrm')}
+                        </h1>
+                    </DialogTitle>
+                </DialogHeader>
+                {loading ? (
+                    <div className="px-12">
+                        <ContactShimmer />
+                    </div>
+                ) : contact ? (
+                    <Provider
+                        value={{
+                            ...state,
+                            ...$actions,
+                            isLoading: loading,
+                            isUpdating: isUpdating,
+                            updateContact,
+                        }}
+                    >
+                        <div className="px-12">
+                            {notice && (
+                                <NoticeBanner
+                                    notice={notice}
+                                    closeNotice={closeNotice}
+                                />
+                            )}
+                            <div className="flex h-full gap-5">
+                                <ContactInformation />
+                                <DataCard />
+                            </div>
+                        </div>
+                    </Provider>
+                ) : (
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-lg text-red-500">
+                            {!id
+                                ? __('No contact ID provided', 'quillcrm')
+                                : __('Contact not found', 'quillcrm')}
+                        </div>
+                    </div>
+                )}
+            </DialogContent>
+        </Dialog>
+    );
 };
 
 export default Contact;

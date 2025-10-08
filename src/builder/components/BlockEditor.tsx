@@ -2,11 +2,11 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * external dependencies
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 /**
  * internal dependencies
@@ -14,16 +14,16 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { blocksRegistry } from '../blocks/BlockRegister';
-import { GlobalEmailSettingsIcon } from '@quillcrm/components';
+import { GlobalEmailSettingsIcon, LayoutSettingsIcon } from '@quillcrm/components';
 import GlobalEmailSettings from './GlobalEmailSettings';
 import BackgroundSettings from './BackgroudSettings';
 import ButtonSettings from './ButtonSettings';
-import { useBuilder } from '../context/BuilderContext';
+import LayoutSettings from '../blocks/layout/LayoutSettings';
 
-type ViewState = 'main' | 'background' | 'button';
+type ViewState = 'main' | 'background' | 'button' | 'layout';
 
 const BlockEditor: React.FC = () => {
-	const { updateBlock, clearSelection, deleteBlock } = useBuilder();
+	const dispatch = useDispatch();
 	const [currentView, setCurrentView] = useState<ViewState>('main');
 
 	const selectedBlock = useSelect(
@@ -36,14 +36,27 @@ const BlockEditor: React.FC = () => {
 		[]
 	);
 
+	const selectedSectionId = useSelect(
+		(select) => select(STORE_KEY).getSelectedSectionId(),
+		[]
+	);
+
+	// Automatically reset view to 'main' when a block or section is selected
+	useEffect(() => {
+		if (selectedBlockId || selectedSectionId) {
+			setCurrentView('main');
+		}
+	}, [selectedBlockId, selectedSectionId]);
+
 	const handlePropsChange = (newProps: Record<string, any>) => {
 		if (selectedBlock) {
-			updateBlock(selectedBlock.id, newProps);
+			dispatch(STORE_KEY).updateBlock(selectedBlock.id, newProps);
 		}
 	};
 
 	// Determine what to show in the header
 	const isBlockSelected = !!selectedBlockId;
+	const isSectionSelected = !!selectedSectionId;
 	const blockDefinition = selectedBlock
 		? blocksRegistry[selectedBlock.type]
 		: null;
@@ -55,11 +68,13 @@ const BlockEditor: React.FC = () => {
 
 	return (
 		<div className="w-80 bg-background border-l border-border rounded-l-xl">
-			{/* Show background settings, button settings, or regular content */}
+			{/* Show background settings, button settings, layout settings, or regular content */}
 			{currentView === 'background' ? (
 				<BackgroundSettings onBack={handleBackFromSettings} />
 			) : currentView === 'button' ? (
 				<ButtonSettings onBack={handleBackFromSettings} />
+			) : currentView === 'layout' ? (
+				<LayoutSettings />
 			) : (
 				<>
 					<div className="flex items-center justify-between border-b-2 px-4 pt-5 pb-4">
@@ -67,6 +82,8 @@ const BlockEditor: React.FC = () => {
 							<div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-lg text-white">
 								{isBlockSelected && blockDefinition?.icon ? (
 									<blockDefinition.icon />
+								) : isSectionSelected ? (
+									<LayoutSettingsIcon />
 								) : (
 									<GlobalEmailSettingsIcon />
 								)}
@@ -74,14 +91,16 @@ const BlockEditor: React.FC = () => {
 							<h3 className="text-base font-semibold text-primary">
 								{isBlockSelected && blockDefinition?.name
 									? `${blockDefinition.name} ${__('Settings', 'quillcrm')}`
-									: __('Global Email Settings', 'quillcrm')}
+									: isSectionSelected
+										? __('Layout Settings', 'quillcrm')
+										: __('Global Email Settings', 'quillcrm')}
 							</h3>
 						</div>
-						{isBlockSelected && (
+						{(isBlockSelected || isSectionSelected) && (
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={() => clearSelection()}
+								onClick={() => dispatch(STORE_KEY).clearSelection()}
 							>
 								<X className="h-4 w-4" />
 							</Button>
@@ -104,6 +123,23 @@ const BlockEditor: React.FC = () => {
 									)}
 								</p>
 							)
+						) : isSectionSelected ? (
+							// Show LayoutSettings for all sections
+							<LayoutSettings
+								sectionId={selectedSectionId}
+								onSettingsChange={(settings) => {
+									// Convert LayoutSettingsData to section styles
+									const sectionStyles = {
+										backgroundColor: settings.backgroundColor,
+										backgroundImage: settings.backgroundImage ? `url(${settings.backgroundImage.url})` : undefined,
+										backgroundRepeat: settings.backgroundRepeat,
+										backgroundSize: settings.backgroundSize,
+										backgroundPosition: settings.backgroundPosition,
+										padding: `${settings.padding.top}px ${settings.padding.right}px ${settings.padding.bottom}px ${settings.padding.left}px`,
+									};
+									dispatch(STORE_KEY).updateSection(selectedSectionId, sectionStyles);
+								}}
+							/>
 						) : (
 							<GlobalEmailSettings
 								onShowBackgroundSettings={() =>
@@ -123,8 +159,8 @@ const BlockEditor: React.FC = () => {
 								size="sm"
 								className="w-full"
 								onClick={() => {
-									deleteBlock(selectedBlock.id);
-									clearSelection();
+									dispatch(STORE_KEY).deleteBlock(selectedBlock.id);
+									dispatch(STORE_KEY).clearSelection();
 								}}
 							>
 								{__('Delete Block', 'quillcrm')}

@@ -142,3 +142,6 @@ export const getBlocks = async (): Promise<Block[]> => {
     throw new Error(`Failed to fetch blocks: ${error.message}`);
   }
 };
+
+// Button settings are now saved as part of campaign template data
+// No separate API endpoints needed

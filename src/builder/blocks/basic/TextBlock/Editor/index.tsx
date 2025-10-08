@@ -63,36 +63,8 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 				<RichTextEditor
 					content={props.content}
 					onChange={(content) => onChange({ content })}
-					fontSize={props.fontSize}
-					fontFamily={props.fontFamily}
 				/>
 			</div>
-
-			<LinkInput
-				label={__('Link URL', 'quillcrm')}
-				value={props.hyperlink}
-				onChange={(hyperlink) => onChange({ hyperlink })}
-				placeholder="https://example.com"
-			/>
-
-			<TextFormattingControl
-				value={{
-					bold: props.bold,
-					italic: props.italic,
-					underline: props.underline,
-					strikethrough: props['line-through'],
-				}}
-				onChange={(updates) => {
-					const newProps: Partial<TextBlockProps> = {};
-					if ('bold' in updates) newProps.bold = updates.bold;
-					if ('italic' in updates) newProps.italic = updates.italic;
-					if ('underline' in updates)
-						newProps.underline = updates.underline;
-					if ('strikethrough' in updates)
-						newProps['line-through'] = updates.strikethrough;
-					onChange(newProps);
-				}}
-			/>
 
 			<AlignmentControl
 				value={props.textAlign as 'left' | 'center' | 'right' | 'full'}

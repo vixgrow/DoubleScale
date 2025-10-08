@@ -5,8 +5,8 @@ import DividerBlock from './basic/DividerBlock';
 import SocialMediaBlock from './basic/SocialMediaBlock';
 import TimerBlock from './basic/TimerBlock';
 import VideoBlock from './basic/VideoBlock';
-import TableBlock from './basic/TableBlock';
-import SignatureBlock from './basic/SignatureBlock';
+// import TableBlock from './basic/TableBlock';
+// import SignatureBlock from './basic/SignatureBlock';
 import BannerBlock from './basic/BannerBlock';
 import MenuBlock from './basic/MenuBlock';
 import HtmlBlock from './basic/HtmlBlock';
@@ -22,8 +22,8 @@ export const blocksRegistry = {
 	html: HtmlBlock,
 	timer: TimerBlock,
 	video: VideoBlock,
-	table: TableBlock,
-	signature: SignatureBlock,
+	// table: TableBlock,
+	// signature: SignatureBlock,
 	banner: BannerBlock,
 	menu: MenuBlock,
 	preheader: PreheaderBlock,

@@ -31,7 +31,7 @@ export const SingleItemEditor: React.FC<SingleItemEditorProps> = ({
 }) => {
 	return (
 		<div className="border-t pt-5">
-			<h3 className="text-[#333333] text-sm font-semibold mb-4">
+			<h3 className="text-[#333333] text-sm font-semibold mb-4 truncate max-w-[250px]" title={`${__('Edit Menu Item', 'quillcrm')} - ${item.name}`}>
 				{__('Edit Menu Item', 'quillcrm')} - {item.name}
 			</h3>
 
@@ -49,6 +49,7 @@ export const SingleItemEditor: React.FC<SingleItemEditorProps> = ({
 						style={{
 							borderColor: '#e5e5e5',
 							borderRadius: '0.5rem',
+							maxWidth: "287.2px",
 						}}
 						placeholder="Menu item name"
 					/>

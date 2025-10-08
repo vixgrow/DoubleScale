@@ -32,18 +32,7 @@ import {
   UPDATE_CONTACT_SUCCESS,
 } from './constants';
 import type { PaginationState } from './types';
-
-/**
- * Generate a query key for caching
- */
-const generateQueryKey = (
-  filters: FilterType[],
-  keywords: string,
-  page: number,
-  perPage: number
-): string => {
-  return JSON.stringify({ filters, keywords, page, perPage });
-};
+import { generateQueryKey } from './utils';
 
 /**
  * Fetch contacts with optional filters, keywords, and pagination
@@ -314,14 +303,14 @@ export const loadMoreContacts = (options: {
 } = {}) => async ({ select, dispatch }: any) => {
   const state = select.getContactsState();
   const { pagination } = state;
-  
+
   // Don't load if already loading or no more pages
   if (state.loading.fetchingContacts || pagination.page >= pagination.totalPages) {
     return;
   }
 
   const nextPage = pagination.page + 1;
-  
+
   // Use existing fetchContacts but with next page
   return dispatch.fetchContacts({
     ...options,

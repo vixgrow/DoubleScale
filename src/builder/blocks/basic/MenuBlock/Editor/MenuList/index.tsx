@@ -88,16 +88,16 @@ export const MenuList: React.FC<MenuListProps> = ({
                         )}
                         onClick={() => onSelectMenuItem(item.id)}
                     >
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <span className="text-sm font-medium text-gray-500">
+                        <div className="flex items-center justify-between min-w-0">
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <span className="text-sm font-medium text-gray-500 flex-shrink-0">
                                     {index + 1}
                                 </span>
-                                <div className="flex-1">
-                                    <div className="text-sm font-medium text-[#333333]">
+                                <div className="flex-1 min-w-0 overflow-hidden max-w-[200px]">
+                                    <div className="text-sm font-medium text-[#333333] truncate" title={item.name}>
                                         {item.name}
                                     </div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-xs text-gray-500 truncate" title={item.link}>
                                         {item.link}
                                     </div>
                                 </div>
@@ -109,7 +109,7 @@ export const MenuList: React.FC<MenuListProps> = ({
                                     e.stopPropagation();
                                     onRemoveMenuItem(item.id);
                                 }}
-                                className="text-destructive hover:text-destructive"
+                                className="text-destructive hover:text-destructive flex-shrink-0"
                             >
                                 <DeleteIcon />
                             </Button>

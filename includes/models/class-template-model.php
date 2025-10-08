@@ -48,6 +48,12 @@ class Template_Model extends Model {
 		'subject',
 		'body',
 		'settings',
+		'hidden',
+		'preview_text',
+		'thumbnail',
+		'category',
+		'is_pro',
+		'created_by',
 		'created_at',
 		'updated_at',
 	);
@@ -96,12 +102,12 @@ class Template_Model extends Model {
 	 */
 	public function getRules() {
 		$rules = $this->rules;
-		
+
 		// Only validate from_email for email templates
-		if ($this->type === 'email') {
+		if ( $this->type === 'email' ) {
 			$rules['settings.from_email'] = 'email';
 		}
-		
+
 		return $rules;
 	}
 

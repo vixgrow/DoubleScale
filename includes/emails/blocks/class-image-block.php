@@ -69,52 +69,83 @@ class Image_Block extends Email_Block {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
-		// Process link for merge tags
+		// Process src, alt, and link for merge tags
+		$src  = ! empty( $props['src'] ) ? $this->process_merge_tags( $props['src'], $merge_tags ) : '';
+		$alt  = ! empty( $props['alt'] ) ? $this->process_merge_tags( $props['alt'], $merge_tags ) : '';
 		$link = ! empty( $props['link'] ) ? $this->process_merge_tags( $props['link'], $merge_tags ) : '';
 
-		// Container style
+		// Wrapper style (matches frontend wrapperStyle)
+		$wrapper_style = $this->build_style_string(
+			array(
+				'text-align' => $props['align'],
+				'width'      => '100%',
+			)
+		);
+
+		// Container style (matches frontend containerStyle)
 		$container_style = $this->build_style_string(
 			array(
-				'text-align'       => $props['align'],
 				'background-color' => $props['backgroundColor'],
 				'padding'          => $this->format_padding( $props['padding'] ),
+				'border-radius'    => $props['borderRadius'] . 'px',
+				'display'          => 'inline-block',
 			)
 		);
 
-		// Image style
-		$img_style = $this->build_style_string(
+		// Image style (matches frontend imageStyle)
+		$image_style = $this->build_style_string(
 			array(
 				'width'         => $props['width'],
+				'height'        => $props['height'] === 'auto' ? 'auto' : $props['height'],
 				'max-width'     => '100%',
-				'height'        => $props['height'],
 				'border-radius' => $props['borderRadius'] . 'px',
-				'display'       => 'inline-block',
+				'display'       => 'block',
+				'border'        => '0',
+				'outline'       => 'none',
 			)
 		);
 
-		// If no image source, return placeholder
-		if ( empty( $props['src'] ) ) {
-			return "<div style=\"{$container_style}\">
-				<div style=\"width:100px;height:100px;background-color:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:{$props['borderRadius']}px;margin:0 auto;\">
-					" . esc_html__( 'Image', 'quillcrm' ) . '
-				</div>
-			</div>';
+		// Placeholder style (matches frontend placeholderStyle)
+		$placeholder_style = $this->build_style_string(
+			array(
+				'width'            => $props['width'],
+				'height'           => $props['height'] === 'auto' ? '200px' : $props['height'],
+				'max-width'        => '100%',
+				'border-radius'    => $props['borderRadius'] . 'px',
+				'display'          => 'flex',
+				'align-items'      => 'center',
+				'justify-content'  => 'center',
+				'background-color' => '#F5F5F580',
+				'color'            => '#6B7280',
+				'font-size'        => '14px',
+				'font-weight'      => '500',
+			)
+		);
+
+		// Simple div structure - already wrapped in table cell by renderer
+		$output  = "<div style=\"{$wrapper_style}\">";
+		$output .= "<span style=\"{$container_style}\">";
+
+		// Build the image or placeholder
+		if ( ! empty( $src ) ) {
+			// Render image with proper URL escaping
+			$image = '<img src="' . esc_url( $src ) . '" alt="' . esc_attr( $alt ) . '" style="' . $image_style . '" border="0" />';
+
+			// Wrap in link if provided
+			if ( $link ) {
+				$output .= '<a href="' . esc_url( $link ) . '" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:block;">' . $image . '</a>';
+			} else {
+				$output .= $image;
+			}
+		} else {
+			// Render placeholder
+			$output .= "<div style=\"{$placeholder_style}\">📷</div>";
 		}
 
-		// Build image content
-		$image_content = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$img_style}\" />";
+		$output .= '</span>';
+		$output .= '</div>';
 
-		// Wrap in link if specified
-		if ( $link ) {
-			$image_content = "<a href=\"{$link}\" target=\"_blank\" style=\"text-decoration:none;border:0;\">{$image_content}</a>";
-		}
-
-		// Use table structure for better email client compatibility
-		return "<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">
-			<tr>
-				<td align=\"{$props['align']}\" style=\"{$container_style}\">{$image_content}</td>
-			</tr>
-		</table>";
+		return $output;
 	}
 }
 

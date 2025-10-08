@@ -30,6 +30,7 @@ export const InputWithMergeTags: React.FC<InputWithMergeTagsProps> = ({
     style = {
         borderColor: '#e5e5e5',
         borderRadius: '0.5rem',
+        maxWidth:"287.2px"
     },
     fieldName,
 }) => {

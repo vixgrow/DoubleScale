@@ -32,6 +32,7 @@ import {
   UPDATE_CONTACT_SUCCESS,
 } from './constants';
 import { ContactsActionTypes, ContactsPureState } from './types';
+import { generateQueryKey } from './utils';
 
 // Initial State
 const initialState: ContactsPureState = {
@@ -89,7 +90,7 @@ const reducer: Reducer<ContactsPureState, ContactsActionTypes> = (
       const totalPages = Math.ceil(total / pagination.perPage);
 
       // For infinite scroll, we need to generate a base query key (page 1) to track the main list
-      const baseQueryKey = JSON.stringify({ filters, keywords, page: 1, perPage: pagination.perPage });
+      const baseQueryKey = generateQueryKey(filters, keywords, 1, pagination.perPage);
       const existingQuery = state.queries[baseQueryKey];
 
       // Determine if this is loading more contacts (page > 1) or a fresh load

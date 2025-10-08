@@ -2,132 +2,73 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { useReducer, useRef } from 'react';
 import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
-import { Tabs, Skeleton } from 'antd';
-import { CheckCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import { Provider } from './state/context';
-import reducer, { State } from './state/reducer';
-import actions from './state/actions';
-import InitialStep from './steps/initial';
 import TemplatesStep from './steps/templates';
 import SMSTemplateStep from './steps/templates/sms-template';
 import WhatsAppTemplateStep from './steps/templates/whatsapp-template';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
+import BuilderStep from '../../../builder';
 import { Campaign as CampaignType } from '@quillcrm/client';
 import Overview from './overview';
-import { getCampaignEndpoint } from '@quillcrm/utils';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
-	const [state, dispatch] = useReducer(reducer, {
-		campaign: null as CampaignType | null,
-	} as State);
-	const stateRef = useRef<State>(state);
-	stateRef.current = state;
-	const $actions = actions(dispatch);
-	const { setCampaign } = $actions;
-	const { campaign } = state;
-	const [loading, setLoading] = useState<boolean>(true);
-	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const navigate = useNavigate();
+	
+	// Use WordPress data store instead of local state
+	const campaign = useSelect((select: any) => select('quillcrm/campaign').getCampaign(), []);
+	const loading = useSelect((select: any) => select('quillcrm/campaign').isLoading(), []);
+	const saving = useSelect((select: any) => select('quillcrm/campaign').isSaving(), []);
+	const currentStep = useSelect((select: any) => select('quillcrm/campaign').getCurrentStep(), []);
+	
+	const { fetchCampaign, saveCampaignStep } = useDispatch('quillcrm/campaign');
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	useEffect(() => {
-		fetchCampaign();
-	}, [id]);
+		if (id) {
+			fetchCampaign(id);
+		}
+	}, [id, fetchCampaign]);
 
-	const fetchCampaign = async () => {
-		setLoading(true);
-
-		try {
-			const response = (await apiFetch({
-				path: `/qc/v1/campaigns/${id}`,
-			})) as CampaignType;
-
-			setCampaign(response);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to fetch campaign', 'quillcrm'),
+	// Redirect to saved current step when campaign is loaded
+	useEffect(() => {
+		if (campaign && !tab) {
+			const targetStep = currentStep || 'template';
+			navigate(getToLink(`campaigns/${id}/${targetStep}`), {
+				replace: true,
 			});
-		} finally {
-			setLoading(false);
 		}
-	};
+	}, [campaign, tab, id, navigate, currentStep]);
 
-	const saveCampaign = async (data: Partial<CampaignType> = {}) => {
-		if (!campaign) {
-			throw new Error(__('Campaign not loaded', 'quillcrm'));
+	// Save current step when tab changes
+	useEffect(() => {
+		if (campaign && tab && tab !== currentStep) {
+			saveCampaignStep(tab);
 		}
+	}, [tab, campaign, currentStep, saveCampaignStep]);
 
-		setIsSaving(true);
-
-		try {
-			const endpoint = getCampaignEndpoint(campaign.type);
-			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
-			}
-
-			const response = (await apiFetch({
-				path: `${endpoint}/${campaign.id}`,
-				method: 'PUT',
-				data: {
-					...campaign,
-					...data,
-				},
-			})) as CampaignType;
-
-			setCampaign(response);
-
-			return response;
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsSaving(false);
-		}
-	};
-
-	const canGoNext = (nextTab: string) => {
-		if (!campaign) {
-			return false;
-		}
-
-		let canGo = true;
-
-		switch (nextTab) {
-			case 'template':
-				canGo = campaign?.name;
-				break;
-			case 'contacts':
-			case 'review':
-				canGo =
-					campaign.settings?.templates?.length > 0 && campaign?.name;
-				break;
-		}
-
-		return canGo;
-	};
+	// Use store selector for canGoNext logic
+	const canGoNext = useSelect((select: any) => {
+		return (nextTab: string) => select('quillcrm/campaign').canGoToStep(nextTab);
+	}, []);
 
 	// Get the correct template component based on campaign type
 	const getTemplateComponent = () => {
-		switch (campaign?.type) {
+		if (!campaign) return null;
+		
+		switch (campaign.type) {
 			case 'sms':
 				return <SMSTemplateStep />;
 			case 'whatsapp':
@@ -138,109 +79,31 @@ const Campaign: React.FC = () => {
 		}
 	};
 
-	// Switch to the new tab items
-	const tabItems = [
-		{
-			key: 'information',
-			label: __('Information', 'quillcrm'),
-			children: <InitialStep />,
-			icon:
-				tab === 'information' || !tab ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-		},
-		{
-			key: 'template',
-			label: __('Template', 'quillcrm'),
-			children: getTemplateComponent(),
-			icon:
-				tab === 'template' ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-			disabled: !canGoNext('template'),
-		},
-		{
-			key: 'contacts',
-			label: __('Contacts', 'quillcrm'),
-			children: <ContactsStep />,
-			icon:
-				tab === 'contacts' ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-			disabled: !canGoNext('contacts'),
-		},
-		{
-			key: 'review',
-			label: __('Review', 'quillcrm'),
-			children: <ReviewStep />,
-			icon:
-				tab === 'review' ? (
-					<CheckCircleOutlined />
-				) : (
-					<InfoCircleOutlined />
-				),
-			disabled: !canGoNext('review'),
-		},
-	];
+	const isOverview =
+		campaign && (
+			(campaign.status === 'schedule' && tab === 'overview') ||
+			(['processing', 'completed', 'resending'].includes(campaign.status))
+		);
 
-	if (!campaign) {
-		return <Skeleton active />;
+	// Show loading state
+	if (loading) {
+		return <div>Loading...</div>; // TODO: Replace with proper loading component
 	}
 
-	const isOverview =
-		(campaign.status === 'schedule' && tab === 'overview') ||
-		(['processing', 'completed', 'resending'].includes(campaign.status)
-			? true
-			: false);
+	// Show error state or redirect if no campaign
+	if (!campaign) {
+		return <div>Campaign not found</div>; // TODO: Replace with proper error component
+	}
 
 	return (
-		<Provider
-			value={{
-				campaign,
-				isLoading: loading,
-				isSaving,
-				setIsLoading: setLoading,
-				setIsSaving: setIsSaving,
-				saveCampaign,
-				...$actions,
-			}}
-		>
+		<>
 			{/* Render the selected tab component based on the current tab */}
-			{tab === 'template' ? (
-				getTemplateComponent()
-			) : (
-				<>
-					{!['processing', 'completed', 'resending'].includes(
-						campaign.status
-					) &&
-						tab !== 'overview' && (
-							<Tabs
-								defaultActiveKey="information"
-								activeKey={
-									tab === 'overview' ? 'information' : tab
-								}
-								tabPosition="left"
-								tabBarStyle={{ width: 200 }}
-								items={tabItems}
-								onChange={(key) => {
-									if (canGoNext(key)) {
-										navigate(
-											getToLink(`campaigns/${id}/${key}`)
-										);
-									}
-								}}
-							/>
-						)}
-				</>
-			)}
+			{tab === 'template' && getTemplateComponent()}
+			{tab === 'contacts' && <ContactsStep />}
+			{tab === 'review' && <ReviewStep />}
+			{tab === 'builder' && <BuilderStep />}
 			{isOverview && <Overview />}
-		</Provider>
+		</>
 	);
 };
 

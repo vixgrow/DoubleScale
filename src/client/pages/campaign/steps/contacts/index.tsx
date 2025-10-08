@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
  */
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { useCampaignContext } from '../../state/context';
+import { useSelect, useDispatch } from '@wordpress/data';
 import type { Filter as FilterType } from '@quillcrm/client';
 import {
 	ContactList,
@@ -22,15 +22,29 @@ import { Label } from '@/components/ui/label';
 import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
 
 const Contacts: React.FC = () => {
-	const { campaign, saveCampaign, updateSettings } = useCampaignContext();
+	const campaign = useSelect(
+		(select: any) => select('quillcrm/campaign').getCampaign(),
+		[]
+	);
+	const { saveCampaignStep, updateSettings } =
+		useDispatch('quillcrm/campaign');
 	const navigate = useNavigate();
+
+	// Get existing step data
+	const existingContactsData = useSelect(
+		(select: any) => select('quillcrm/campaign').getStepData('contacts'),
+		[]
+	);
+
 	const filters = campaign?.settings.filters || [];
 	const setFilters = (newFilters: FilterType[]) => {
 		updateSettings('filters', newFilters);
 	};
 
 	const [total, setTotal] = useState(0);
-	const [filterBy, setFilterBy] = useState('list-tags');
+	const [filterBy, setFilterBy] = useState(
+		existingContactsData?.filter_type || 'list-tags'
+	);
 	const [isApplying, setIsApplying] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
@@ -73,82 +87,11 @@ const Contacts: React.FC = () => {
 			return;
 		}
 
-		// Validate that campaign has templates
-		const templates = campaign.settings?.templates;
-		if (!templates || templates.length === 0) {
-			createNotice({
-				type: 'error',
-				message: __(
-					'Please create a template before proceeding',
-					'quillcrm'
-				),
-			});
-			navigate(getToLink(`campaigns/${campaign.id}/template`));
-			return;
-		}
+		// Save just the filter type so we know which tab to open next time
+		await saveCampaignStep('contacts', {
+			filter_type: filterBy,
+		});
 
-		const template = templates[0];
-
-		if (!template.body || template.body.trim().length === 0) {
-			createNotice({
-				type: 'error',
-				message: __(
-					campaign.type === 'email'
-						? 'Email body is required'
-						: 'Message content is required',
-					'quillcrm'
-				),
-			});
-			navigate(getToLink(`campaigns/${campaign.id}/template`));
-			return;
-		}
-
-		// Email-specific validation
-		if (campaign.type === 'email') {
-			if (!template.subject) {
-				createNotice({
-					type: 'error',
-					message: __('Email subject is required', 'quillcrm'),
-				});
-				navigate(getToLink(`campaigns/${campaign.id}/template`));
-				return;
-			}
-
-			if (!template.settings?.from_name) {
-				createNotice({
-					type: 'error',
-					message: __('From Name is required', 'quillcrm'),
-				});
-				navigate(getToLink(`campaigns/${campaign.id}/template`));
-				return;
-			}
-
-			if (!template.settings?.from_email) {
-				createNotice({
-					type: 'error',
-					message: __('From Email is required', 'quillcrm'),
-				});
-				navigate(getToLink(`campaigns/${campaign.id}/template`));
-				return;
-			}
-		}
-
-		// SMS/WhatsApp validation: max length check
-		if (campaign.type === 'sms' || campaign.type === 'whatsapp') {
-			if (template.body.length > 1600) {
-				createNotice({
-					type: 'error',
-					message: __(
-						'Message is too long. Maximum 1600 characters.',
-						'quillcrm'
-					),
-				});
-				navigate(getToLink(`campaigns/${campaign.id}/template`));
-				return;
-			}
-		}
-
-		await saveCampaign();
 		navigate(getToLink(`campaigns/${campaign.id}/review`));
 	};
 
@@ -158,7 +101,29 @@ const Contacts: React.FC = () => {
 			totalSteps={1}
 			currentStep={0}
 			onNext={save}
-			onBack={() => navigate(getToLink(`campaigns`))}
+			onBack={async () => {
+				// Save current contacts data before going back
+				const contactsStepData = {
+					contacts: {
+						filters: filters,
+						contacts_count: total,
+						lastModified: new Date().toISOString(),
+					},
+				};
+				const saveSuccess = await saveCampaignStep(
+					'contacts',
+					contactsStepData
+				);
+				if (saveSuccess) {
+					navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+				} else {
+					// Navigate anyway on back, but log the error
+					console.error(
+						'Failed to save contacts data on back navigation'
+					);
+					navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+				}
+			}}
 		>
 			{campaign && (
 				<div className="flex gap-6 items-start">
@@ -182,30 +147,44 @@ const Contacts: React.FC = () => {
 										onValueChange={setFilterBy}
 										className="flex gap-4"
 									>
-										<div className="flex items-center space-x-4 w-1/2 border border-gray-600 rounded-lg py-2 px-3 cursor-pointer">
+										<Label
+											htmlFor="list-tags"
+											className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
+												filterBy === 'list-tags'
+													? 'border-blue-500 bg-blue-50'
+													: 'border-gray-300'
+											}`}
+										>
 											<RadioGroupItem
 												value="list-tags"
 												id="list-tags"
 											/>
-											<Label htmlFor="list-tags">
+											<span>
 												{__(
-													'List and Tags',
+													'Lists and Tags',
 													'quillcrm'
 												)}
-											</Label>
-										</div>
-										<div className="flex items-center space-x-4 w-1/2">
+											</span>
+										</Label>
+										<Label
+											htmlFor="advanced"
+											className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
+												filterBy === 'advanced'
+													? 'border-blue-500 bg-blue-50'
+													: 'border-gray-300'
+											}`}
+										>
 											<RadioGroupItem
 												value="advanced"
 												id="advanced"
 											/>
-											<Label htmlFor="advanced">
+											<span>
 												{__(
 													'Advanced Filter',
 													'quillcrm'
 												)}
-											</Label>
-										</div>
+											</span>
+										</Label>
 									</RadioGroup>
 								</div>
 

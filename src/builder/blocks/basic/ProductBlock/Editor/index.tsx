@@ -45,11 +45,16 @@ export const ProductBlockEditor: React.FC<ProductBlockEditorProps> = ({
 			{/* Product Block Width */}
 			<div className="flex flex-col gap-2 text-[#333333]">
 				<WidthHeightControl
-					width={props.width.replace('%', '')}
-					onWidthChange={(width) => onChange({ width: width + '%' })}
+					width={props.width}
+					onWidthChange={(width) => onChange({ width })}
 					widthLabel={__('Block Width', 'quillcrm')}
-					widthUnit="%"
 					showHeight={false}
+					widthOptions={[
+						{ value: '100%', label: '100%' },
+						{ value: '75%', label: '75%' },
+						{ value: '50%', label: '50%' },
+						{ value: '25%', label: '25%' },
+					]}
 				/>
 			</div>
 
@@ -78,14 +83,6 @@ export const ProductBlockEditor: React.FC<ProductBlockEditorProps> = ({
 						{__('Select from WooCommerce Products', 'quillcrm')}
 					</Button>
 				</ProductSelectionDialog>
-
-				{/* Show selected product info */}
-				{props.title && props.title !== 'Product Title' && (
-					<div className="text-xs text-green-600 bg-green-50 p-2 rounded">
-						{__('WooCommerce Product Selected:', 'quillcrm')}{' '}
-						{props.title}
-					</div>
-				)}
 			</div>
 
 			{/* Image Upload */}

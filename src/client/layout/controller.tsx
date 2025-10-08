@@ -18,7 +18,6 @@ import { motion } from 'framer-motion';
  * Internal dependencies
  */
 import Contacts from '../pages/contacts';
-import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
 import CustomFields from '../pages/custom-fields';
@@ -43,7 +42,6 @@ import EmailAnalytics from '../pages/emails-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 import SalesPipeline from '../pages/sales-pipeline';
-import EmailBuilder from '../../builder';
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -90,13 +88,6 @@ registerAdminPage('contacts', {
 	label: __('Contacts', 'quillcrm'),
 	icon: <ContactsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
-});
-
-registerAdminPage('contact', {
-	path: 'contacts/:id/:tab?',
-	component: () => <Contact />,
-	label: __('Contact', 'quillcrm'),
-	hidden: true,
 });
 
 registerAdminPage('lists', {
@@ -267,13 +258,6 @@ registerAdminPage('emails-analytics', {
 	path: 'emails-analytics',
 	component: () => <EmailAnalytics />,
 	label: __('Emails Analytics', 'quillcrm'),
-	hidden: true,
-});
-
-registerAdminPage('builder', {
-	path: 'builder',
-	component: () => <EmailBuilder />,
-	label: __('Builder', 'quillcrm'),
 	hidden: true,
 });
 

@@ -102,12 +102,16 @@ class Campaign_Template_Factory
      */
     private function get_template_processor($campaign_type)
     {
-        return match ($campaign_type) {
-            'email' => new Email_Template_Processor(),
-            'sms' => new SMS_Template_Processor(),
-            'whatsapp' => new WhatsApp_Template_Processor(),
-            default => throw new \InvalidArgumentException("Unsupported campaign type: {$campaign_type}")
-        };
+        switch ($campaign_type) {
+            case 'email':
+                return new Email_Template_Processor();
+            case 'sms':
+                return new SMS_Template_Processor();
+            case 'whatsapp':
+                return new WhatsApp_Template_Processor();
+            default:
+                throw new \InvalidArgumentException("Unsupported campaign type: {$campaign_type}");
+        }
     }
 }
 

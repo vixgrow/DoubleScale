@@ -79,6 +79,7 @@ interface ContactFilterSectionProps {
 	description: string;
 	onReset?: () => void;
 	onChange?: (rows: FilterRow[]) => void;
+	initialRows?: FilterRow[];
 }
 
 // Define the exposed ref interface
@@ -89,10 +90,12 @@ export interface ContactFilterRef {
 export const ContactFilterSection = forwardRef<
 	ContactFilterRef,
 	ContactFilterSectionProps
->(({ title, description, onReset, onChange }, ref) => {
-	const [rows, setRows] = useState<FilterRow[]>([
-		{ id: 1, list: 'all', tag: 'all' },
-	]);
+>(({ title, description, onReset, onChange, initialRows }, ref) => {
+	const [rows, setRows] = useState<FilterRow[]>(
+		initialRows && initialRows.length > 0 
+			? initialRows 
+			: [{ id: 1, list: 'all', tag: 'all' }]
+	);
 	const [lists, setLists] = useState<List[]>([]);
 	const [tags, setTags] = useState<Tag[]>([]);
 	const [loadingLists, setLoadingLists] = useState<boolean>(false);
@@ -197,6 +200,13 @@ export const ContactFilterSection = forwardRef<
 		fetchLists();
 		fetchTags();
 	}, []);
+
+	// Update rows when initialRows prop changes
+	useEffect(() => {
+		if (initialRows && initialRows.length > 0) {
+			setRows(initialRows);
+		}
+	}, [initialRows]);
 
 	const addRow = () => {
 		const newRows = [...rows, { id: Date.now(), list: 'all', tag: 'all' }];

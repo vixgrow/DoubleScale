@@ -1,7 +1,7 @@
 /**
  * wordpress dependencies
  */
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
@@ -33,6 +33,18 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 	sectionId,
 }) => {
 	const dispatch = useDispatch();
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	
+	const isTemplateSection = (sectionId: string) => {
+		const section = sections.find(s => s.id === sectionId);
+		if (!section) return false;
+		return section.columns.some(column =>
+			column.blocks.some(block =>
+				block.props?.templateLayout !== undefined ||
+				block.props?.templateType !== undefined
+			)
+		);
+	};
 
 	const { isOver, setNodeRef } = useDroppable({
 		id: `column-${column.id}`,
@@ -58,11 +70,6 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 		dispatch(STORE_KEY).addBlock(sectionId, column.id, newBlock);
 	};
 
-	// Check if this column has inline layout blocks (for logo+button)
-	const inlineBlocks = column.blocks.filter(
-		(block) => block.props?.inlineLayout
-	);
-
 	return (
 		<div
 			ref={setNodeRef}
@@ -71,7 +78,7 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 				${isOver ? 'bg-blue-50' : ''}
 			`}
 			style={{
-				width: `${100 / column.width}%`,
+				width: `${column.width}%`,
 			}}
 		>
 			<SortableContext
@@ -597,18 +604,20 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 							return renderedBlocks;
 						})()}
 
-						{/* Add Block Button */}
-						<div className="mt-4 pt-4 border-t border-dashed border-gray-200">
-							<Button
-								variant="ghost"
-								size="sm"
-								className="w-full text-muted-foreground"
-								onClick={addTextBlock}
-							>
-								<Plus className="w-4 h-4 mr-2" />
-								{__('Add Block', 'quillcrm')}
-							</Button>
-						</div>
+						{/* Add Block Button - Only show for non-template sections */}
+						{!isTemplateSection(sectionId) && (
+							<div className="mt-4 pt-4 border-t border-dashed border-gray-200">
+								<Button
+									variant="ghost"
+									size="sm"
+									className="w-full text-muted-foreground"
+									onClick={addTextBlock}
+								>
+									<Plus className="w-4 h-4 mr-2" />
+									{__('Add Block', 'quillcrm')}
+								</Button>
+							</div>
+						)}
 					</>
 				)}
 			</SortableContext>

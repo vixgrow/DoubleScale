@@ -174,18 +174,29 @@ export type CustomFieldsGroup = {
 export type CustomFieldsGroups = CustomFieldsGroup[];
 
 // Email Template Type
+export type EmailBodyContent = {
+	type: 'rich-text' | 'builder';
+	value: any; // For rich-text: string, for builder: sections/globalSettings/buttonSettings
+};
+
 export type EmailTemplate = {
 	id?: number;
 	name: string;
 	type: 'email';
 	subject: string;
-	body: string;
-	settings: {
-		from_name: string;
-		from_email: string;
-		reply_to: string;
-		preview_text: string;
-	};
+	body?: string; // Keep for backward compatibility
+	email_body?: EmailBodyContent;
+
+	from_name: string;
+	from_email: string;
+	reply_to: string;
+	preview_text: string;
+	enable_utm: boolean;
+	utm_source: string;
+	utm_medium: string;
+	utm_name: string;
+	utm_term: string;
+	utm_content: string;
 	created_at?: string;
 	updated_at?: string;
 };
@@ -228,6 +239,7 @@ type CampaignSettings = {
 	contacts: number[];
 	filters: Filter[];
 	ab_test: boolean;
+	current_step?: string;
 };
 
 export type Filter = {

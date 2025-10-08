@@ -26,6 +26,73 @@ export default function ListTagFilter({
 	const [includeData, setIncludeData] = useState<any[]>([]);
 	const [excludeData, setExcludeData] = useState<any[]>([]);
 
+	// Initialize internal state from existing filters
+	useEffect(() => {
+		if (!filters || filters.length === 0) return;
+
+		// Separate filters by type and operator
+		const includeLists = new Set<string>();
+		const includeTags = new Set<string>();
+		const excludeLists = new Set<string>();
+		const excludeTags = new Set<string>();
+
+		filters.forEach((filter) => {
+			if (filter.group !== 'segments') return;
+
+			const value = filter.value?.[0];
+			if (!value) return;
+
+			const isInclude = filter.operator === 'contains';
+
+			if (filter.filter === 'lists_segment') {
+				if (isInclude) {
+					includeLists.add(value.toString());
+				} else {
+					excludeLists.add(value.toString());
+				}
+			} else if (filter.filter === 'tags_segment') {
+				if (isInclude) {
+					includeTags.add(value.toString());
+				} else {
+					excludeTags.add(value.toString());
+				}
+			}
+		});
+
+		// Create rows from the collected lists and tags
+		const includeRows: any[] = [];
+		const excludeRows: any[] = [];
+
+		// For include: create rows for each list/tag combination
+		const maxInclude = Math.max(includeLists.size, includeTags.size, 1);
+		const includeListsArray = Array.from(includeLists);
+		const includeTagsArray = Array.from(includeTags);
+
+		for (let i = 0; i < maxInclude; i++) {
+			includeRows.push({
+				id: Date.now() + i,
+				list: includeListsArray[i] || 'all',
+				tag: includeTagsArray[i] || 'all',
+			});
+		}
+
+		// For exclude: create rows for each list/tag combination
+		const maxExclude = Math.max(excludeLists.size, excludeTags.size, 1);
+		const excludeListsArray = Array.from(excludeLists);
+		const excludeTagsArray = Array.from(excludeTags);
+
+		for (let i = 0; i < maxExclude; i++) {
+			excludeRows.push({
+				id: Date.now() + maxInclude + i,
+				list: excludeListsArray[i] || 'all',
+				tag: excludeTagsArray[i] || 'all',
+			});
+		}
+
+		setIncludeData(includeRows);
+		setExcludeData(excludeRows);
+	}, [filters]);
+
 	// Convert ContactFilterSection data to Filter objects when data changes
 	useEffect(() => {
 		const newFilters: FilterType[] = [];
@@ -144,6 +211,7 @@ export default function ListTagFilter({
 				description="Select List and Tags that you want to send emails for this campaign. You can create multiple row to send to all of them."
 				ref={includeFilterRef}
 				onChange={setIncludeData}
+				initialRows={includeData}
 			/>
 			<div className="border-t border-gray-200"></div>
 			<ContactFilterSection
@@ -151,6 +219,7 @@ export default function ListTagFilter({
 				description="Select List and Tags that you want to Exclude from this campaign. Exclude contacts will be subtracted from your included selection."
 				ref={excludeFilterRef}
 				onChange={setExcludeData}
+				initialRows={excludeData}
 			/>
 
 			<div className="border-t border-gray-200"></div>

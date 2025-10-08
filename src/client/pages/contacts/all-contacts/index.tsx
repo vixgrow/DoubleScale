@@ -13,6 +13,8 @@ import {
 	ContactsImportModal,
 	ContactsExportModal,
 } from './contacts-modals';
+import Contact from '../../contact';
+import type { Contact as ContactType } from '@quillcrm/client';
 
 export interface AllContactsRef {
 	openCreateContactModal: () => void;
@@ -32,6 +34,11 @@ const AllContactsContent = forwardRef<AllContactsRef, AllContactsProps>(
 			setImportModalVisible,
 			setExportModalVisible,
 			setContact,
+			contactDialogVisible,
+			selectedContactId,
+			setContactDialogVisible,
+			data,
+			setData,
 		} = useContactsContext();
 
 		// Expose methods to parent component
@@ -52,6 +59,16 @@ const AllContactsContent = forwardRef<AllContactsRef, AllContactsProps>(
 			},
 		}));
 
+		// Handle contact update callback
+		const handleContactUpdate = (updatedContact: ContactType) => {
+			// Update the contact in the list
+			setData(
+				data.map((contact) =>
+					contact.id === updatedContact.id ? updatedContact : contact
+				)
+			);
+		};
+
 		return (
 			<div className="qcrm-all-contacts w-full">
 				<NoticeSection />
@@ -59,6 +76,13 @@ const AllContactsContent = forwardRef<AllContactsRef, AllContactsProps>(
 				<CreateContactModal />
 				<ContactsImportModal />
 				<ContactsExportModal />
+				<Contact
+					contactId={selectedContactId || undefined}
+					isDialog={true}
+					isOpen={contactDialogVisible}
+					onClose={() => setContactDialogVisible(false)}
+					onContactUpdate={handleContactUpdate}
+				/>
 			</div>
 		);
 	}

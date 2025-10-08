@@ -47,6 +47,31 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [selectedColor, setSelectedColor] = useState('#000000');
+	const [editorId] = useState(
+		() => `rich-text-editor-${Math.random().toString(36).substr(2, 9)}`
+	);
+	const [activeFormats, setActiveFormats] = useState({
+		bold: false,
+		italic: false,
+		underline: false,
+		strikeThrough: false,
+		insertUnorderedList: false,
+		insertOrderedList: false,
+	});
+
+	// Update active formats based on current selection
+	const updateActiveFormats = () => {
+		setActiveFormats({
+			bold: document.queryCommandState('bold'),
+			italic: document.queryCommandState('italic'),
+			underline: document.queryCommandState('underline'),
+			strikeThrough: document.queryCommandState('strikeThrough'),
+			insertUnorderedList: document.queryCommandState(
+				'insertUnorderedList'
+			),
+			insertOrderedList: document.queryCommandState('insertOrderedList'),
+		});
+	};
 
 	// Apply font changes when props change
 	useEffect(() => {
@@ -64,8 +89,51 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				'--editor-font-family',
 				fontFamily
 			);
+
+			// Apply font styles to existing content
+			const allElements = editorRef.current.querySelectorAll('*');
+			allElements.forEach((element: Element) => {
+				const htmlElement = element as HTMLElement;
+				htmlElement.style.fontSize = `${fontSize}px`;
+				htmlElement.style.fontFamily = fontFamily;
+			});
 		}
 	}, [fontSize, fontFamily]);
+
+	// Listen for selection changes to update toolbar button states
+	useEffect(() => {
+		const handleSelectionChange = () => {
+			// Only update if the selection is within our editor
+			const selection = window.getSelection();
+			if (
+				selection &&
+				editorRef.current?.contains(selection.anchorNode)
+			) {
+				updateActiveFormats();
+			}
+		};
+
+		// Listen for selection changes
+		document.addEventListener('selectionchange', handleSelectionChange);
+
+		// Also update on mouseup and keyup within the editor
+		const editor = editorRef.current;
+		if (editor) {
+			editor.addEventListener('mouseup', updateActiveFormats);
+			editor.addEventListener('keyup', updateActiveFormats);
+		}
+
+		return () => {
+			document.removeEventListener(
+				'selectionchange',
+				handleSelectionChange
+			);
+			if (editor) {
+				editor.removeEventListener('mouseup', updateActiveFormats);
+				editor.removeEventListener('keyup', updateActiveFormats);
+			}
+		};
+	}, []);
 
 	// Handle content initialization
 	useEffect(() => {
@@ -185,6 +253,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						htmlElement.style.fontFamily = fontFamily;
 					}
 				});
+				// Update active formats after command execution
+				updateActiveFormats();
 			}, 50);
 		}
 	};
@@ -192,6 +262,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	const handleInput = () => {
 		if (editorRef.current) {
 			onChange(editorRef.current.innerHTML);
+			// Update active formats when content changes
+			updateActiveFormats();
 		}
 	};
 
@@ -283,10 +355,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		}
 	};
 
-	const isCommandActive = (command: string) => {
-		return document.queryCommandState(command);
-	};
-
 	const handleColorChange = (color: string) => {
 		setSelectedColor(color);
 		executeCommand('foreColor', color);
@@ -305,44 +373,44 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 	return (
 		<div className={cn('relative', className)}>
-			{/* Inline styles for comprehensive font control */}
+			{/* Inline styles for comprehensive font control - scoped to this editor instance */}
 			<style>{`
-				.rich-text-editor-content {
+				.${editorId} {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content * {
+				.${editorId} * {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content p {
+				.${editorId} p {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 					margin: 0 !important;
 				}
-				.rich-text-editor-content div {
+				.${editorId} div {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content span {
+				.${editorId} span {
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content ul {
+				.${editorId} ul {
 					list-style-type: disc !important;
 					padding-left: 20px !important;
 					margin: 10px 0 !important;
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content ol {
+				.${editorId} ol {
 					list-style-type: decimal !important;
 					padding-left: 20px !important;
 					margin: 10px 0 !important;
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
 				}
-				.rich-text-editor-content li {
+				.${editorId} li {
 					display: list-item !important;
 					margin: 5px 0 !important;
 					font-family: ${fontFamily} !important;
@@ -358,7 +426,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('bold') && 'bg-accent'
+						activeFormats.bold && 'bg-accent'
 					)}
 					onClick={() => executeCommand('bold')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -371,7 +439,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('italic') && 'bg-accent'
+						activeFormats.italic && 'bg-accent'
 					)}
 					onClick={() => executeCommand('italic')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -384,7 +452,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('underline') && 'bg-accent'
+						activeFormats.underline && 'bg-accent'
 					)}
 					onClick={() => executeCommand('underline')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -397,7 +465,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('strikeThrough') && 'bg-accent'
+						activeFormats.strikeThrough && 'bg-accent'
 					)}
 					onClick={() => executeCommand('strikeThrough')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -413,7 +481,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('insertUnorderedList') && 'bg-accent'
+						activeFormats.insertUnorderedList && 'bg-accent'
 					)}
 					onClick={() => executeCommand('insertUnorderedList')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -426,7 +494,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					size="sm"
 					className={cn(
 						'p-2 h-8 w-8',
-						isCommandActive('insertOrderedList') && 'bg-accent'
+						activeFormats.insertOrderedList && 'bg-accent'
 					)}
 					onClick={() => executeCommand('insertOrderedList')}
 					onMouseDown={(e) => e.preventDefault()}
@@ -494,13 +562,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				contentEditable
 				suppressContentEditableWarning
 				className={cn(
-					'rich-text-editor-content',
+					editorId,
 					'min-h-[100px] p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-ring',
 					'prose prose-sm max-w-none',
-					'[&_*]:!font-[inherit] [&_*]:!text-[inherit]',
-					'[&_p]:!font-[inherit] [&_div]:!font-[inherit] [&_span]:!font-[inherit]',
-					'[&_li]:!font-[inherit]',
-					// Don't override list styles - let our custom CSS handle it
 					className
 				)}
 				style={
@@ -509,6 +573,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						fontSize: `${fontSize}px`,
 						fontFamily: fontFamily,
 						lineHeight: '1.5',
+						maxWidth: '287.2px',
 						// Force font inheritance for all child elements
 						'--font-size': `${fontSize}px`,
 						'--font-family': fontFamily,

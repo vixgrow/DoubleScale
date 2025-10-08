@@ -3,7 +3,7 @@
 /**
  * Class Email Sequences Manager
  * This class is responsible for handling email sequence processing
- * including delay, time range, and specific days scheduling
+ * including delay, time range, and specific days scheduling with rate limiting
  *
  * @since 1.0.0
  *
@@ -20,11 +20,23 @@ use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Campaign\Email_Processing;
+use QuillCRM\Services\Campaign_Rate_Limiter;
+use QuillCRM\Settings;
 
 /**
  * Email Sequences Manager class
  */
 final class Email_Sequences_Manager {
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -43,6 +55,34 @@ final class Email_Sequences_Manager {
 	 * @var Email_Processing
 	 */
 	private $email_processor;
+
+	/**
+	 * Rate limiter service
+	 *
+	 * @var Campaign_Rate_Limiter
+	 */
+	private $rate_limiter;
+
+	/**
+	 * Settings
+	 *
+	 * @var array
+	 */
+	private $settings;
+
+	/**
+	 * Start time
+	 *
+	 * @var float
+	 */
+	private $start_time;
+
+	/**
+	 * Max execution time
+	 *
+	 * @var int
+	 */
+	private $max_execution_time;
 
 	/**
 	 * Manager Instance.
@@ -65,7 +105,10 @@ final class Email_Sequences_Manager {
 	 * Constructor
 	 */
 	private function __construct() {
-		$this->email_processor = Email_Processing::instance();
+		$this->email_processor    = Email_Processing::instance();
+		$this->rate_limiter       = Campaign_Rate_Limiter::instance();
+		$this->settings           = Settings::get( 'email', array() );
+		$this->max_execution_time = Utils::get_max_execution_time();
 		$this->add_hooks();
 	}
 
@@ -124,16 +167,38 @@ final class Email_Sequences_Manager {
 	}
 
 	/**
-	 * Process pending email sequences
+	 * Process pending email sequences with rate limiting
 	 * Called by cron to check and send sequences that are ready
 	 */
 	public function process_pending_sequences() {
+		// xdebug_break();
+		// Check daily rate limit first (same as Abstract_Campaign_Processing)
+		$max_per_day = $this->settings['max_in_day'] ?? $this->get_default_max_per_day();
+
+		if ( $this->rate_limiter->is_daily_limit_reached( 'email', $max_per_day ) ) {
+			$daily_count = $this->rate_limiter->get_daily_count( 'email' );
+			$this->rate_limiter->log_daily_limit_reached( 'email', $daily_count, $max_per_day );
+			return;
+		}
+
+		$this->start_time = microtime( true );
+
+		// Check if memory limit is reached
+		if ( Utils::is_memory_limit_reached() ) {
+			return;
+		}
+
 		try {
 			// Get all sequence mails that are ready to be sent
 			$ready_sequences = $this->get_ready_sequences();
 
 			foreach ( $ready_sequences as $sequence ) {
-				$this->process_sequence( $sequence );
+				// Check limits before processing each sequence
+				if ( $this->should_stop_processing() ) {
+					break;
+				}
+
+				$this->process_sequence_with_rate_limiting( $sequence );
 			}
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
@@ -161,7 +226,6 @@ final class Email_Sequences_Manager {
 		$sequences = Campaign_Model::query()
 			->where( 'type', 'sequence_mail' )
 			->where( 'execute_at', '<=', current_time( 'mysql' ) )
-			->orderBy( 'execute_at', 'asc' )
 			->get();
 
 		if ( $sequences->isEmpty() ) {
@@ -172,6 +236,12 @@ final class Email_Sequences_Manager {
 			->filter( fn( $sequence) => $this->is_sequence_ready_to_send( $sequence ) )
 			->values();
 
+		$ready_sequences = $ready_sequences->sortBy(
+			function ( $item ) {
+				return $this->get_delay_in_minutes( $item->settings );
+			}
+		);
+
 		return $ready_sequences;
 	}
 
@@ -179,11 +249,12 @@ final class Email_Sequences_Manager {
 
 
 	/**
-	 * Process a single email sequence
+	 * Process a single email sequence with rate limiting
+	 * Enhanced version based on Abstract_Campaign_Processing patterns
 	 *
 	 * @param Campaign_Model $sequence
 	 */
-	private function process_sequence( Campaign_Model $sequence ) {
+	private function process_sequence_with_rate_limiting( Campaign_Model $sequence ) {
 		try {
 			// Get contacts for this sequence
 			$contacts = $this->get_sequence_contacts( $sequence );
@@ -191,9 +262,8 @@ final class Email_Sequences_Manager {
 				return;
 			}
 
-			foreach ( $contacts as $contact ) {
-				$this->send_sequence_email( $sequence, $contact );
-			}
+			// Process contacts in batches with rate limiting
+			$this->process_sequence_contacts_in_batches( $sequence, $contacts );
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
 				'Single email sequence processing error',
@@ -204,6 +274,104 @@ final class Email_Sequences_Manager {
 				)
 			);
 		}
+	}
+
+
+	/**
+	 * Get delay in minutes for sorting purposes
+	 *
+	 * @param array|string $settings The settings array or JSON string containing delay information
+	 * @return int Delay in minutes
+	 */
+	public function get_delay_in_minutes( $settings ) {
+		if ( is_string( $settings ) ) {
+			$settings = json_decode( $settings, true );
+		}
+
+		$delay = $settings['delay'] ?? array(
+			'value' => 0,
+			'unit'  => 'minutes',
+		);
+		$value = intval( $delay['value'] ?? 0 );
+		$unit  = strtolower( $delay['unit'] ?? 'minutes' );
+
+		switch ( $unit ) {
+			case 'minutes':
+				return $value;
+			case 'hours':
+				return $value * 60;
+			case 'days':
+				return $value * 60 * 24;
+			default:
+				return $value;
+		}
+	}
+
+
+	/**
+	 * Process sequence contacts in batches with rate limiting
+	 *
+	 * @param Campaign_Model                 $sequence
+	 * @param \Illuminate\Support\Collection $contacts
+	 */
+	private function process_sequence_contacts_in_batches( Campaign_Model $sequence, $contacts ) {
+		$max_per_second   = $this->settings['max_in_second'] ?? $this->get_default_max_per_second();
+		$processed_count  = 0;
+		$batch_start_time = microtime( true );
+
+		foreach ( $contacts as $contact ) {
+			// Check if we should stop processing
+			if ( $this->should_stop_processing() ) {
+				break;
+			}
+
+			// Check daily limit before each send
+			$max_per_day = $this->settings['max_in_day'] ?? $this->get_default_max_per_day();
+			if ( $this->rate_limiter->is_daily_limit_reached( 'email', $max_per_day ) ) {
+				quillcrm_get_logger()->info(
+					'Daily email limit reached during sequence processing',
+					array(
+						'sequence_id' => $sequence->id,
+						'processed'   => $processed_count,
+						'daily_count' => $this->rate_limiter->get_daily_count( 'email' ),
+						'max_per_day' => $max_per_day,
+					)
+				);
+				break;
+			}
+
+			// Send the email
+			$this->send_sequence_email( $sequence, $contact );
+			$processed_count++;
+
+			// Rate limiting: Check if we've reached per-second limit
+			if ( $processed_count >= $max_per_second ) {
+				$batch_elapsed = microtime( true ) - $batch_start_time;
+
+				// If we processed max_per_second emails in less than 1 second, wait
+				if ( $batch_elapsed < 1.0 ) {
+					$sleep_time = (int) ( ( 1.0 - $batch_elapsed ) * 1000000 ); // Convert to microseconds
+					usleep( $sleep_time );
+				}
+
+				// Reset batch counters
+				$processed_count  = 0;
+				$batch_start_time = microtime( true );
+			} else {
+				// Small delay between emails to prevent server overload (same as Abstract_Campaign_Processing)
+				usleep( 100000 ); // 0.1 second
+			}
+		}
+
+		quillcrm_get_logger()->info(
+			'Email sequence batch processing completed',
+			array(
+				'sequence_id'     => $sequence->id,
+				'contacts_total'  => $contacts->count(),
+				'processed_count' => $processed_count,
+				'execution_time'  => $this->get_current_execution_time(),
+			)
+		);
 	}
 
 
@@ -251,7 +419,7 @@ final class Email_Sequences_Manager {
 
 
 	/**
-	 * Send sequence email to a contact
+	 * Send sequence email to a contact with rate limiting integration
 	 *
 	 * @param Campaign_Model $sequence
 	 * @param Contact_Model  $contact
@@ -281,12 +449,16 @@ final class Email_Sequences_Manager {
 			// Process and send the email
 			$this->email_processor->process_campaign_message( $sequence, $contact, $campaign_message );
 
+			// Increment daily count after successful send (same as Abstract_Campaign_Processing)
+			$this->rate_limiter->increment_daily_count( 'email' );
+
 			quillcrm_get_logger()->info(
 				'Email sequence sent successfully',
 				array(
 					'sequence_id' => $sequence->id,
 					'contact_id'  => $contact->id,
 					'message_id'  => $campaign_message->id,
+					'daily_count' => $this->rate_limiter->get_daily_count( 'email' ),
 				)
 			);
 		} catch ( Exception $e ) {
@@ -464,6 +636,62 @@ final class Email_Sequences_Manager {
 	public function calculate_execution_time_from_base( $delay, $base_time ) {
 		$time = strtotime( $base_time );
 		return $this->calculate_execution_time( $delay, $time );
+	}
+
+	/**
+	 * Check if processing should stop based on limits
+	 *
+	 * @return bool True if processing should stop
+	 */
+	private function should_stop_processing() {
+		 // Check execution time limit
+		if ( $this->get_current_execution_time() >= $this->max_execution_time ) {
+			quillcrm_get_logger()->info(
+				'Email sequence processing stopped - execution time limit reached',
+				array(
+					'execution_time' => $this->get_current_execution_time(),
+					'max_time'       => $this->max_execution_time,
+				)
+			);
+			return true;
+		}
+
+		// Check memory limit
+		if ( Utils::is_memory_limit_reached() ) {
+			quillcrm_get_logger()->info(
+				'Email sequence processing stopped - memory limit reached'
+			);
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get current execution time
+	 *
+	 * @return float Execution time in seconds
+	 */
+	private function get_current_execution_time() {
+		 return microtime( true ) - $this->start_time;
+	}
+
+	/**
+	 * Get default max emails per day
+	 *
+	 * @return int
+	 */
+	private function get_default_max_per_day() {
+		return 10000; // Same as email campaigns
+	}
+
+	/**
+	 * Get default max emails per second
+	 *
+	 * @return int
+	 */
+	private function get_default_max_per_second() {
+		 return 15; // Same as email campaigns
 	}
 }
 

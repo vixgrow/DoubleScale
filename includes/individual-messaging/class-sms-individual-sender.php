@@ -1,28 +1,28 @@
 <?php
 /**
- * WhatsApp Individual Message Sender
- * Handles sending individual WhatsApp messages to contacts
+ * SMS Individual Message Sender
+ * Handles sending individual SMS messages to contacts
  *
  * @since 1.0.0
  * @package QuillCRM
  */
 
-namespace QuillCRM\Messaging;
+namespace QuillCRM\Individual_Messaging;
 
 use WP_Error;
 use QuillCRM\Abstracts\Abstract_Individual_Message_Sender;
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Tracking\WhatsApp;
+use QuillCRM\Tracking\SMS;
 
 /**
- * WhatsApp_Individual_Sender class
+ * SMS_Individual_Sender class
  *
- * Concrete implementation for WhatsApp individual message sending.
- * Extends abstract base class with WhatsApp-specific validation and configuration.
+ * Concrete implementation for SMS individual message sending.
+ * Extends abstract base class with SMS-specific validation and configuration.
  *
  * @since 1.0.0
  */
-class WhatsApp_Individual_Sender extends Abstract_Individual_Message_Sender {
+class SMS_Individual_Sender extends Abstract_Individual_Message_Sender {
 
 	/**
 	 * Get channel type
@@ -32,7 +32,7 @@ class WhatsApp_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return string Channel type
 	 */
 	protected function get_channel_type() {
-		return 'whatsapp';
+		return 'sms';
 	}
 
 	/**
@@ -43,7 +43,7 @@ class WhatsApp_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return int Tracking mode constant
 	 */
 	protected function get_tracking_mode() {
-		return Tracking_Model::MODE_WHATSAPP;
+		return Tracking_Model::MODE_SMS;
 	}
 
 	/**
@@ -54,7 +54,7 @@ class WhatsApp_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return string Tracking class name
 	 */
 	protected function get_tracking_class() {
-		return WhatsApp::class;
+		return SMS::class;
 	}
 
 	/**

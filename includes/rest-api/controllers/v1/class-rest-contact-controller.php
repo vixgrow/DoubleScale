@@ -1709,7 +1709,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function send_individual_sms( $request ) {
-		$sender = new \QuillCRM\Messaging\SMS_Individual_Sender();
+		$sender = new \QuillCRM\Individual_Messaging\SMS_Individual_Sender();
 		return $sender->send( $request );
 	}
 
@@ -1723,7 +1723,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function send_individual_whatsapp( $request ) {
-		$sender = new \QuillCRM\Messaging\WhatsApp_Individual_Sender();
+		$sender = new \QuillCRM\Individual_Messaging\WhatsApp_Individual_Sender();
 		return $sender->send( $request );
 	}
 

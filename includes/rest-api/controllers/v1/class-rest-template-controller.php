@@ -482,17 +482,20 @@ class REST_Template_Controller extends REST_Controller {
 	 */
 	public function prepare_template( $request ) {
 		$template_data = array(
-			'name'       => $request->get_param( 'name' ) ?? __( 'New Template', 'quillcrm' ),
-			'type'       => $request->get_param( 'type' ) ?? 'email',
-			'subject'    => $request->get_param( 'subject' ),
-			'body'       => $request->get_param( 'body' ),
-			'settings'   => $request->get_param( 'settings' ),
-			'created_at' => current_time( 'mysql' ),
-			'updated_at' => current_time( 'mysql' ),
+			'name'         => $request->get_param( 'name' ) ?? __( 'New Template', 'quillcrm' ),
+			'type'         => $request->get_param( 'type' ) ?? 'email',
+			'subject'      => $request->get_param( 'subject' ),
+			'body'         => $request->get_param( 'body' ),
+			'settings'     => $request->get_param( 'settings' ),
+			'preview_text' => $request->get_param( 'preview_text' ),
+			'created_at'   => current_time( 'mysql' ),
+			'updated_at'   => current_time( 'mysql' ),
 		);
 
+		// Note: email_body data is now sent directly in the body field as JSON
+
 		foreach ( $template_data as $key => $value ) {
-			if ( empty( $value ) ) {
+			if ( empty( $value ) && $value !== '0' && $value !== 0 ) {
 				unset( $template_data[ $key ] );
 			}
 		}

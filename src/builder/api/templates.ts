@@ -27,9 +27,10 @@ export const prepareTemplateForAPI = (template: Partial<EmailTemplate>) => {
     utm_content: template.utm_content || '',
   };
 
-  // Include email_body in settings if present
+  // Prepare body field - if email_body is provided, store it as JSON in body
+  let bodyContent = template.body || '';
   if (template.email_body) {
-    settings.email_body = template.email_body;
+    bodyContent = JSON.stringify(template.email_body);
   }
 
   // Fields that go into direct columns
@@ -37,7 +38,7 @@ export const prepareTemplateForAPI = (template: Partial<EmailTemplate>) => {
     name: template.name,
     type: template.type || 'email',
     subject: template.subject || '',
-    body: template.body || '', // Rich-text content
+    body: bodyContent, // Store builder data or rich-text content
     preview_text: template.preview_text || '',
     settings,
   };
@@ -71,7 +72,18 @@ export const flattenTemplateSettings = (template: any): EmailTemplate => {
     flattened.utm_name = template.settings.utm_name || '';
     flattened.utm_term = template.settings.utm_term || '';
     flattened.utm_content = template.settings.utm_content || '';
-    flattened.email_body = template.settings.email_body;
+  }
+
+  // Parse email_body from body field if it contains JSON
+  if (template.body) {
+    try {
+      const parsedBody = JSON.parse(template.body);
+      if (parsedBody && typeof parsedBody === 'object' && parsedBody.type === 'builder') {
+        flattened.email_body = parsedBody;
+      }
+    } catch (e) {
+      // If body is not JSON, it's probably rich-text content, leave as is
+    }
   }
 
   return flattened;
@@ -155,16 +167,18 @@ export const saveEmailAsTemplate = async (
   templateName: string,
   builderData: { sections: any; globalSettings: any; buttonSettings: any }
 ): Promise<EmailTemplate> => {
+  // Store builder data directly in body field as JSON
+  const bodyData = {
+    type: 'builder',
+    value: builderData,
+  };
+
   // Use createTemplate with proper structure
   return createTemplate({
     name: templateName,
     type: 'email',
     subject: '',
-    body: '', // Empty for builder templates
+    body: JSON.stringify(bodyData), // Store builder data in body field
     preview_text: '',
-    email_body: {
-      type: 'builder',
-      value: builderData,
-    },
   });
 };

@@ -1709,125 +1709,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function send_individual_sms( $request ) {
-		try {
-			$contact_id = $request->get_param( 'id' );
-			$to         = $request->get_param( 'to' );
-			$message    = $request->get_param( 'message' );
-
-			// Validate contact exists
-			$contact = Contact_Model::find( $contact_id );
-			if ( ! $contact ) {
-				return new WP_Error( 'not_found', __( 'Contact not found', 'quillcrm' ), array( 'status' => 404 ) );
-			}
-
-			// Validate recipient phone number (basic check)
-			if ( empty( $to ) || strlen( $to ) < 10 ) {
-				return new WP_Error(
-					'invalid_phone',
-					__( 'Invalid phone number. Use E.164 format: +1234567890', 'quillcrm' ),
-					array( 'status' => 400 )
-				);
-			}
-
-			// Get provider for SMS channel
-			$provider = \QuillCRM\Managers\Message_Provider_Registry::instance()->get_provider( 'sms' );
-			if ( ! $provider ) {
-				return new WP_Error(
-					'provider_not_configured',
-					__( 'SMS provider not configured. Please configure Twilio or another SMS provider in settings.', 'quillcrm' ),
-					array( 'status' => 500 )
-				);
-			}
-
-			// Create tracking entry FIRST (for click tracking and delivery webhooks)
-			$tracking_entry = \QuillCRM\Models\Tracking_Model::create(
-				array(
-					'contact_id'  => $contact->id,
-					'template_id' => 0, // No template for individual messages
-					'hash_key'    => wp_generate_password( 32, false ),
-					'mode'        => \QuillCRM\Models\Tracking_Model::MODE_SMS,
-					'source_type' => \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL,
-					'source_id'   => 0, // No campaign/automation
-					'author_id'   => get_current_user_id(), // Track who sent it
-					'recipient'   => $to,
-					'status'      => Tracking_Status::PENDING,
-				)
-			);
-
-			// Process merge tags AFTER creating tracking entry
-			$processed_message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
-
-			// Add click tracking to URLs in message (uses shared SMS tracking class)
-			if ( class_exists( '\QuillCRM\Tracking\SMS' ) && method_exists( '\QuillCRM\Tracking\SMS', 'add_click_tracking' ) ) {
-				$processed_message = \QuillCRM\Tracking\SMS::add_click_tracking( $processed_message, $tracking_entry->hash_key );
-			}
-
-			// Prepare message data for provider
-			$message_data = array(
-				'To'   => $to,
-				'Body' => $processed_message,
-			);
-
-			// Add webhook URL for delivery status tracking
-			$webhook_url = $provider->get_webhook_url( 'sms' );
-			if ( $webhook_url ) {
-				$message_data['StatusCallback'] = $webhook_url;
-			}
-
-			// Send message via provider
-			$result = $provider->send_message( 'sms', $message_data, $contact );
-
-			// Validate send result
-			if ( ! isset( $result['success'] ) || ! $result['success'] ) {
-				$error_message = $result['error'] ?? 'SMS sending failed';
-				throw new \Exception( $error_message );
-			}
-
-			// Update tracking status - SMS sent successfully
-			$tracking_entry->update(
-				array(
-					'status'      => Tracking_Status::SENT,
-					'sent_at'     => current_time( 'mysql' ),
-					'external_id' => $result['message_id'] ?? null, // Store provider message ID
-				)
-			);
-
-			quillcrm_get_logger()->info(
-				__( 'Individual SMS sent successfully', 'quillcrm' ),
-				array(
-					'contact_id'   => $contact->id,
-					'tracking_id'  => $tracking_entry->id,
-					'author_id'    => get_current_user_id(),
-					'recipient'    => $to,
-					'provider'     => $provider->get_provider_name(),
-					'external_id'  => $result['message_id'] ?? null,
-				)
-			);
-
-			return new WP_REST_Response(
-				array(
-					'success'     => true,
-					'message'     => __( 'SMS sent successfully', 'quillcrm' ),
-					'tracking_id' => $tracking_entry->id,
-				),
-				200
-			);
-		} catch ( \Exception $e ) {
-			// Update tracking status to failed
-			if ( isset( $tracking_entry ) ) {
-				$tracking_entry->update( array( 'status' => Tracking_Status::FAILED ) );
-			}
-
-			quillcrm_get_logger()->error(
-				__( 'Individual SMS send exception', 'quillcrm' ),
-				array(
-					'error'      => $e->getMessage(),
-					'contact_id' => $contact_id ?? null,
-				)
-			);
-
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
-		}
+		return $this->send_individual_message( $request, 'sms' );
 	}
 
 	/**
@@ -1840,6 +1722,20 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function send_individual_whatsapp( $request ) {
+		return $this->send_individual_message( $request, 'whatsapp' );
+	}
+
+	/**
+	 * Send individual message to contact (shared logic for SMS/WhatsApp)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @param string          $channel Channel type ('sms' or 'whatsapp').
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	protected function send_individual_message( $request, $channel ) {
 		try {
 			$contact_id = $request->get_param( 'id' );
 			$to         = $request->get_param( 'to' );
@@ -1860,15 +1756,29 @@ class REST_Contact_Controller extends REST_Controller {
 				);
 			}
 
-			// Get provider for WhatsApp channel
-			$provider = \QuillCRM\Managers\Message_Provider_Registry::instance()->get_provider( 'whatsapp' );
+			// Get provider for the channel
+			$provider = \QuillCRM\Managers\Message_Provider_Registry::instance()->get_provider( $channel );
 			if ( ! $provider ) {
 				return new WP_Error(
 					'provider_not_configured',
-					__( 'WhatsApp provider not configured. Please configure Twilio WhatsApp or another WhatsApp provider in settings.', 'quillcrm' ),
+					sprintf(
+						/* translators: %s: channel name (SMS or WhatsApp) */
+						__( '%s provider not configured. Please configure Twilio or another provider in settings.', 'quillcrm' ),
+						ucfirst( $channel )
+					),
 					array( 'status' => 500 )
 				);
 			}
+
+			// Get tracking mode based on channel
+			$tracking_mode = $channel === 'sms' 
+				? \QuillCRM\Models\Tracking_Model::MODE_SMS 
+				: \QuillCRM\Models\Tracking_Model::MODE_WHATSAPP;
+
+			// Get tracking class based on channel
+			$tracking_class = $channel === 'sms'
+				? '\QuillCRM\Tracking\SMS'
+				: '\QuillCRM\Tracking\WhatsApp';
 
 			// Create tracking entry FIRST (for click tracking and delivery webhooks)
 			$tracking_entry = \QuillCRM\Models\Tracking_Model::create(
@@ -1876,7 +1786,7 @@ class REST_Contact_Controller extends REST_Controller {
 					'contact_id'  => $contact->id,
 					'template_id' => 0, // No template for individual messages
 					'hash_key'    => wp_generate_password( 32, false ),
-					'mode'        => \QuillCRM\Models\Tracking_Model::MODE_WHATSAPP,
+					'mode'        => $tracking_mode,
 					'source_type' => \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL,
 					'source_id'   => 0, // No campaign/automation
 					'author_id'   => get_current_user_id(), // Track who sent it
@@ -1888,9 +1798,9 @@ class REST_Contact_Controller extends REST_Controller {
 			// Process merge tags AFTER creating tracking entry
 			$processed_message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
 
-			// Add click tracking to URLs in message (uses shared WhatsApp tracking class)
-			if ( class_exists( '\QuillCRM\Tracking\WhatsApp' ) && method_exists( '\QuillCRM\Tracking\WhatsApp', 'add_click_tracking' ) ) {
-				$processed_message = \QuillCRM\Tracking\WhatsApp::add_click_tracking( $processed_message, $tracking_entry->hash_key );
+			// Add click tracking to URLs in message
+			if ( class_exists( $tracking_class ) && method_exists( $tracking_class, 'add_click_tracking' ) ) {
+				$processed_message = $tracking_class::add_click_tracking( $processed_message, $tracking_entry->hash_key );
 			}
 
 			// Prepare message data for provider
@@ -1900,21 +1810,21 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 
 			// Add webhook URL for delivery status tracking
-			$webhook_url = $provider->get_webhook_url( 'whatsapp' );
+			$webhook_url = $provider->get_webhook_url( $channel );
 			if ( $webhook_url ) {
 				$message_data['StatusCallback'] = $webhook_url;
 			}
 
 			// Send message via provider
-			$result = $provider->send_message( 'whatsapp', $message_data, $contact );
+			$result = $provider->send_message( $channel, $message_data, $contact );
 
 			// Validate send result
 			if ( ! isset( $result['success'] ) || ! $result['success'] ) {
-				$error_message = $result['error'] ?? 'WhatsApp sending failed';
+				$error_message = $result['error'] ?? sprintf( '%s sending failed', ucfirst( $channel ) );
 				throw new \Exception( $error_message );
 			}
 
-			// Update tracking status - WhatsApp sent successfully
+			// Update tracking status - message sent successfully
 			$tracking_entry->update(
 				array(
 					'status'      => Tracking_Status::SENT,
@@ -1924,12 +1834,17 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 
 			quillcrm_get_logger()->info(
-				__( 'Individual WhatsApp sent successfully', 'quillcrm' ),
+				sprintf(
+					/* translators: %s: channel name (SMS or WhatsApp) */
+					__( 'Individual %s sent successfully', 'quillcrm' ),
+					ucfirst( $channel )
+				),
 				array(
 					'contact_id'   => $contact->id,
 					'tracking_id'  => $tracking_entry->id,
 					'author_id'    => get_current_user_id(),
 					'recipient'    => $to,
+					'channel'      => $channel,
 					'provider'     => $provider->get_provider_name(),
 					'external_id'  => $result['message_id'] ?? null,
 				)
@@ -1938,7 +1853,11 @@ class REST_Contact_Controller extends REST_Controller {
 			return new WP_REST_Response(
 				array(
 					'success'     => true,
-					'message'     => __( 'WhatsApp message sent successfully', 'quillcrm' ),
+					'message'     => sprintf(
+						/* translators: %s: channel name (SMS or WhatsApp) */
+						__( '%s sent successfully', 'quillcrm' ),
+						ucfirst( $channel )
+					),
 					'tracking_id' => $tracking_entry->id,
 				),
 				200
@@ -1950,10 +1869,15 @@ class REST_Contact_Controller extends REST_Controller {
 			}
 
 			quillcrm_get_logger()->error(
-				__( 'Individual WhatsApp send exception', 'quillcrm' ),
+				sprintf(
+					/* translators: %s: channel name (SMS or WhatsApp) */
+					__( 'Individual %s send exception', 'quillcrm' ),
+					ucfirst( $channel )
+				),
 				array(
 					'error'      => $e->getMessage(),
 					'contact_id' => $contact_id ?? null,
+					'channel'    => $channel,
 				)
 			);
 

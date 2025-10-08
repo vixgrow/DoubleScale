@@ -27,6 +27,7 @@ use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 use QuillCRM\Settings;
 use QuillCRM\Emails\Emails;
+use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
@@ -1380,10 +1381,6 @@ class REST_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'not_found', __( 'Contact not found', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
-			// Process merge tags
-			$subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
-			$body    = Merge_Tags_Manager::instance()->process_merge_tags( $body, $contact );
-
 			// Create tracking entry FIRST (for open/click tracking)
 			$tracking_entry = \QuillCRM\Models\Tracking_Model::create(
 				array(
@@ -1392,27 +1389,37 @@ class REST_Contact_Controller extends REST_Controller {
 					'hash_key'    => wp_generate_password( 32, false ),
 					'mode'        => \QuillCRM\Models\Tracking_Model::MODE_EMAIL,
 					'source_type' => \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL,
-				'source_id'   => 0, // No campaign/automation
-				'author_id'   => get_current_user_id(), // Track who sent it
-				'recipient'   => $to,
-				'status'      => Tracking_Status::PENDING,
-			)
-		);
+					'source_id'   => 0, // No campaign/automation
+					'author_id'   => get_current_user_id(), // Track who sent it
+					'recipient'   => $to,
+					'status'      => Tracking_Status::PENDING,
+				)
+			);
 
-		// Get global email settings
-		$email_settings = Settings::get( 'email', array() );
+			// Process merge tags AFTER creating tracking entry (so we have hash_key)
+			$subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+			$body    = Merge_Tags_Manager::instance()->process_merge_tags( $body, $contact );
 
-		// Send email using Emails class
-		$emails               = new Emails();
-		$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
-		$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
-		$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
+			// Add email footer with tracking pixel and unsubscribe link (shared helper)
+			$body = Email_Tracking_Helper::add_footer_and_tracking( $body, $tracking_entry, $contact );
 
-		// Remove competing filters (FunnelKit pattern)
-		$this->remove_wp_mail_filters();
+			// Add click tracking to all links (shared helper)
+			$body = Email_Tracking_Helper::add_click_tracking( $body, $tracking_entry->hash_key, $contact );
 
-		// Send the email
-		$result = $emails->send( $to, $subject, $body );
+			// Get global email settings
+			$email_settings = Settings::get( 'email', array() );
+
+			// Send email using Emails class
+			$emails               = new Emails();
+			$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
+			$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
+			$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
+
+			// Remove competing filters (FunnelKit pattern)
+			$this->remove_wp_mail_filters();
+
+			// Send the email
+			$result = $emails->send( $to, $subject, $body );
 
 		// Update tracking status
 		if ( $result ) {

@@ -16,6 +16,7 @@ use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
 use QuillCRM\Emails\Emails;
+use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Link_Trigger_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
@@ -81,18 +82,21 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			// Get template to access from_email settings early for debugging
 			$template = $campaign_message->template;
 
-			// Build email message first
-			$email_message = $this->build_email_message( $campaign_message, $contact, $message_data['body'] );
-
-			// Build complete email message with footer
-			$complete_message = sprintf(
-				'%s%s',
-				$email_message,
-				$this->build_email_footer( $campaign_message, $contact )
+			// Build complete email message with footer and tracking (using shared helper)
+			$complete_message = Email_Tracking_Helper::add_footer_and_tracking(
+				$message_data['body'],
+				$campaign_message,
+				$contact,
+				$this->settings
 			);
 
-			// Add click tracking to all links (specific to email) and UTM parameters
-			$complete_message = $this->add_email_click_tracking( $complete_message, $campaign_message->hash_key, $contact, $template );
+			// Add click tracking to all links (using shared helper with UTM support)
+			$complete_message = Email_Tracking_Helper::add_click_tracking(
+				$complete_message,
+				$campaign_message->hash_key,
+				$contact,
+				$template
+			);
 
 			$emails = new Emails();
 						// Set from_email and from_name from template if available

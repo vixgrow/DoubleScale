@@ -25,6 +25,7 @@ use QuillCRM\Services\Template_Field_Mapper;
  */
 class Campaign_Model extends Model {
 
+
 	/**
 	 * Table name
 	 *
@@ -540,7 +541,6 @@ class Campaign_Model extends Model {
 						$template->delete();
 					}
 				}
-				$campaign->sequences_mail()->delete();
 			}
 		);
 

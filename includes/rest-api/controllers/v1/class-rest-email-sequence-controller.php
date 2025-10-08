@@ -20,6 +20,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -297,7 +298,12 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			}
 
 			$email_sequences = Email_Sequence_Model::whereIn( 'id', $email_sequence_ids )->get();
-			$email_sequences->each->delete();
+			foreach ( $email_sequences as $email_sequence ) {
+				$email_sequence->delete();
+				foreach ( $email_sequence->sequences_mail as $sequence_mail ) {
+					$sequence_mail->delete();
+				}
+			}
 
 			return new WP_REST_Response( null, 204 );
 		} catch ( \Exception $e ) {
@@ -525,6 +531,9 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			}
 
 			$email_sequence->delete();
+			foreach ( $email_sequence->sequences_mail as $sequence_mail ) {
+				$sequence_mail->delete();
+			}
 
 			return new WP_REST_Response( null, 204 );
 		} catch ( \Exception $e ) {

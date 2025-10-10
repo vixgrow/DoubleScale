@@ -119,7 +119,7 @@ const Integration: React.FC<IntegrationProps> = ({
 	return (
 		<Dialog open={open} onOpenChange={(value) => !value && onClose()}>
 			<DialogContent
-				className="z-[1600000] w-screen h-screen max-w-none overflow-y-auto bg-white rounded-none shadow-none"
+				className="z-[150000] w-screen h-screen max-w-none overflow-y-auto bg-white rounded-none shadow-none"
 				style={{
 					paddingTop: '10px',
 					paddingLeft: '0px',

@@ -161,8 +161,8 @@ const AddRemoveListsModal: React.FC<AddRemoveListsModalProps> = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogOverlay className="z-[1700000]"/>
-			<DialogContent className="max-w-md z-[1700000]">
+			<DialogOverlay className="z-[150200]"/>
+			<DialogContent className="max-w-md z-[150200]">
 				<DialogHeader className="flex flex-row items-center justify-between pb-4">
 					<DialogTitle>
 						<CustomDialogHeader

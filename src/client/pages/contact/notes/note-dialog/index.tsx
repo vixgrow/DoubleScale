@@ -131,8 +131,8 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogOverlay className="z-[1700000]" />
-            <DialogContent className="max-w-[500px] z-[1700000]">
+            <DialogOverlay className="z-[150200]" />
+            <DialogContent className="max-w-[500px] z-[150200]">
                 <DialogHeader>
                     <DialogTitle>
                         <CustomDialogHeader

@@ -65,11 +65,29 @@
 
 // WordPress media modal adjustments
 .media-modal {
-    z-index: 9999;
+    z-index: 160000 !important;
+    pointer-events: auto !important;
 }
 
 .media-modal-backdrop {
-    z-index: 9998;
+    z-index: 159999 !important;
+    pointer-events: auto !important;
+}
+
+// Ensure WordPress media modal content is always interactive
+.media-frame,
+.media-modal-content,
+.media-frame-content,
+.media-sidebar,
+.media-toolbar {
+    pointer-events: auto !important;
+}
+
+// Override any aria-hidden styles that might block interaction
+.media-modal[aria-hidden="true"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .tox-editor-header {

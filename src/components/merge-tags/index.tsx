@@ -17,6 +17,7 @@ import { filter, map } from 'lodash';
 import {
 	Dialog,
 	DialogContent,
+	DialogOverlay,
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
@@ -61,7 +62,8 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 
 	return (
 		<Dialog open={visible} onOpenChange={() => onClose()}>
-			<DialogContent className="max-w-4xl min-w-[800px]">
+			<DialogOverlay className="z-[150500]" />
+			<DialogContent className="max-w-4xl min-w-[800px] z-[150500]">
 				<DialogHeader>
 					<CustomDialogHeader
 						title={__('Merge Tags', 'quillcrm')}

@@ -188,7 +188,7 @@ const Contact: React.FC<ContactProps> = ({
             }}
         >
             <DialogContent
-                className="z-[1600000] w-screen h-screen max-w-none gap-8 overflow-y-auto bg-white rounded-none shadow-none"
+                className="z-[140000] w-screen h-screen max-w-none gap-8 overflow-y-auto bg-white rounded-none shadow-none"
                 style={{
                     paddingTop: '10px',
                     paddingLeft: '0px',

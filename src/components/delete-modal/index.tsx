@@ -86,8 +86,8 @@ const DeleteModal: React.FC<DeleteConfirmationModalProps> = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogOverlay className="z-[1800000]" />
-			<DialogContent className="max-w-[38rem] p-8 z-[1800000]">
+			<DialogOverlay className="z-[150200]" />
+			<DialogContent className="max-w-[38rem] p-8 z-[150200]">
 				<DialogHeader>
 					<div className="flex flex-col items-center justify-center gap-6">
 						<div className="flex items-center justify-center rounded-3xl p-5 bg-[#FCDADA] text-[#EF4444]">

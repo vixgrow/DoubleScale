@@ -54,7 +54,9 @@ const AutomationsList: React.FC = () => {
 		from: null,
 		to: null,
 	});
-	const [updatingAutomationId, setUpdatingAutomationId] = useState<number | null>(null);
+	const [updatingAutomationId, setUpdatingAutomationId] = useState<
+		number | null
+	>(null);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const navigate = useNavigate();
 
@@ -174,7 +176,10 @@ const AutomationsList: React.FC = () => {
 		navigate(getToLink(`automations/${automation.id}/reports`));
 	};
 
-	const handleStatusChange = async (automation: Automation, newStatus: string) => {
+	const handleStatusChange = async (
+		automation: Automation,
+		newStatus: string
+	) => {
 		setUpdatingAutomationId(automation.id);
 		try {
 			await apiFetch({
@@ -196,7 +201,10 @@ const AutomationsList: React.FC = () => {
 
 			setNotice({
 				type: 'success',
-				message: __('Automation status updated successfully', 'quillcrm'),
+				message: __(
+					'Automation status updated successfully',
+					'quillcrm'
+				),
 			});
 		} catch (error: any) {
 			setNotice({
@@ -269,22 +277,22 @@ const AutomationsList: React.FC = () => {
 					},
 				]}
 			/>
-			<>
-				{/* Notice Banner */}
-				{notice && <NoticeBanner notice={notice} closeNotice={closeNotice} />}
+			{/* Notice Banner */}
+			{notice && (
+				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+			)}
 
-				{/* Data Table */}
-				<DataTable
-					columns={columns}
-					data={data}
-					config={tableConfig}
-					showPagination={false}
-					initialPageSize={perPage}
-					setPage={setPage}
-					loading={loading}
-				/>
-				<DataTablePagination table={serverSideTable} />
-			</>
+			{/* Data Table */}
+			<DataTable
+				columns={columns}
+				data={data}
+				config={tableConfig}
+				showPagination={false}
+				initialPageSize={perPage}
+				setPage={setPage}
+				loading={loading}
+			/>
+			<DataTablePagination table={serverSideTable} />
 
 			<CreateAutomationModal
 				visible={visible}

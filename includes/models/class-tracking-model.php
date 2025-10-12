@@ -147,6 +147,18 @@ class Tracking_Model extends Model
 	}
 
 	/**
+	 * Message relationship (for individual messages)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
+	 */
+	public function message()
+	{
+		return $this->hasOne(Message_Model::class, 'tracking_id');
+	}
+
+	/**
 	 * Get by hash key
 	 *
 	 * @param string $hash_key Hash key.

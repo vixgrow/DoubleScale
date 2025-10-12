@@ -304,6 +304,11 @@ class Campaign_Model extends Model {
 	 */
 	public function attach_counts($campaign)
 	{
+		// Skip if campaign type is not set (e.g., when only selecting specific fields)
+		if (empty($campaign->type)) {
+			return;
+		}
+
 		// Calculate contacts count with type-specific filtering
 		$campaign->contacts_count = $this->get_contacts_count($campaign);
 

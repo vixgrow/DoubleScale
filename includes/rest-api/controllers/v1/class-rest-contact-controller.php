@@ -22,6 +22,7 @@ use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Tag_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\Custom_Field_Model;
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
@@ -385,81 +386,41 @@ class REST_Contact_Controller extends REST_Controller {
 			)
 		);
 
-		// Get email campaigns
+		// ===================================================================
+		// UNIFIED MESSAGES ENDPOINT
+		// ===================================================================
+		// Get all messages (campaigns + individual) for contact by channel
+		// Usage: /contacts/{id}/messages?mode=email (or sms, whatsapp)
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>\d+)/email-campaigns',
+			'/' . $this->rest_base . '/(?P<id>\d+)/messages',
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_email_campaigns' ),
-					'permission_callback' => array( $this, 'get_email_campaigns_permissions_check' ),
+					'callback'            => array( $this, 'get_messages' ),
+					'permission_callback' => array( $this, 'get_messages_permissions_check' ),
 					'args'                => array(
 						'id'       => array(
 							'description' => __( 'Contact ID.', 'quillcrm' ),
 							'type'        => 'integer',
+							'required'    => true,
+						),
+						'mode'     => array(
+							'description' => __( 'Message channel: email, sms, or whatsapp.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => false,
+							'enum'        => array( 'email', 'sms', 'whatsapp' ),
+							'default'     => 'email',
 						),
 						'per_page' => array(
 							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
 							'type'        => 'integer',
+							'default'     => 25,
 						),
 						'page'     => array(
 							'description' => __( 'Page number.', 'quillcrm' ),
 							'type'        => 'integer',
-						),
-					),
-				),
-			)
-		);
-
-		// Get SMS campaigns
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>\d+)/sms-campaigns',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_sms_campaigns' ),
-					'permission_callback' => array( $this, 'get_sms_campaigns_permissions_check' ),
-					'args'                => array(
-						'id'       => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
-							'type'        => 'integer',
-						),
-						'per_page' => array(
-							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
-							'type'        => 'integer',
-						),
-						'page'     => array(
-							'description' => __( 'Page number.', 'quillcrm' ),
-							'type'        => 'integer',
-						),
-					),
-				),
-			)
-		);
-
-		// Get WhatsApp campaigns
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>\d+)/whatsapp-campaigns',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_whatsapp_campaigns' ),
-					'permission_callback' => array( $this, 'get_whatsapp_campaigns_permissions_check' ),
-					'args'                => array(
-						'id'       => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
-							'type'        => 'integer',
-						),
-						'per_page' => array(
-							'description' => __( 'Number of items to fetch.', 'quillcrm' ),
-							'type'        => 'integer',
-						),
-						'page'     => array(
-							'description' => __( 'Page number.', 'quillcrm' ),
-							'type'        => 'integer',
+							'default'     => 1,
 						),
 					),
 				),
@@ -780,154 +741,125 @@ class REST_Contact_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Get Email Campaigns
+	 * Unified endpoint to get ALL messages (campaigns + individual) for contact by channel
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param WP_REST_Request $request
 	 *
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_email_campaigns( $request ) {
+	public function get_messages( $request ) {
 		try {
 			$contact_id = $request->get_param( 'id' );
-			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$mode       = $request->get_param( 'mode' ) ?: 'email';
+			$per_page   = $request->get_param( 'per_page' ) ?: 25;
+			$page       = $request->get_param( 'page' ) ?: 1;
 
+			// Validate contact exists
 			$contact = Contact_Model::find( $contact_id );
 			if ( ! $contact ) {
-				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+				return new WP_Error( 'not_found', __( 'Contact not found', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
-			$campaigns     = $contact->campaign_emails()->with(
+			// Map channel to tracking mode
+			$tracking_mode = null;
+			switch ( $mode ) {
+				case 'email':
+					$tracking_mode = Tracking_Model::MODE_EMAIL;
+					break;
+				case 'sms':
+					$tracking_mode = Tracking_Model::MODE_SMS;
+					break;
+				case 'whatsapp':
+					$tracking_mode = Tracking_Model::MODE_WHATSAPP;
+					break;
+				default:
+					return new WP_Error(
+						'invalid_mode',
+						sprintf( __( 'Invalid mode: %s. Must be email, sms, or whatsapp.', 'quillcrm' ), $mode ),
+						array( 'status' => 400 )
+					);
+			}
+
+		// Get ALL messages (campaigns + individual) for this channel
+		$messages_query = Tracking_Model::where( 'contact_id', $contact_id )
+			->where( 'mode', $tracking_mode )
+			->with(
 				array(
 					'campaign' => function ( $query ) {
-						$query->select( 'id', 'name' );
+						$query->select( 'id', 'name', 'type' );
 					},
-					'template',
+					'template' => function ( $query ) {
+						$query->select( 'id', 'subject', 'body' );
+					},
+					'message', // Include message content for individual messages
 				)
-			)->paginate( $per_page, array( '*' ), 'page', $page );
-			$total_sent    = $contact->campaign_emails()->where( 'status', Tracking_Status::SENT )->count();
-			$total_opened  = $contact->campaign_emails()->where( 'opened', 1 )->count();
-			$total_clicked = $contact->campaign_emails()->where( 'clicked', 1 )->count();
+			)
+			->orderBy( 'created_at', 'desc' );
 
-			$result = array(
-				'emails'        => $campaigns,
-				'total_sent'    => $total_sent,
-				'total_opened'  => $total_opened,
-				'total_clicked' => $total_clicked,
-			);
+			// Execute paginated query
+			$messages = $messages_query->paginate( $per_page, array( '*' ), 'page', $page );
+
+			// Get statistics
+			$total_sent    = Tracking_Model::where( 'contact_id', $contact_id )
+				->where( 'mode', $tracking_mode )
+				->where( 'status', Tracking_Status::SENT )
+				->count();
+			$total_opened  = Tracking_Model::where( 'contact_id', $contact_id )
+				->where( 'mode', $tracking_mode )
+				->where( 'opened', 1 )
+				->count();
+			$total_clicked = Tracking_Model::where( 'contact_id', $contact_id )
+				->where( 'mode', $tracking_mode )
+				->where( 'clicked', 1 )
+				->count();
+
+			// For SMS/WhatsApp, we track "delivered" instead of "opened"
+			if ( $mode === 'sms' || $mode === 'whatsapp' ) {
+				$total_delivered = Tracking_Model::where( 'contact_id', $contact_id )
+					->where( 'mode', $tracking_mode )
+					->where( 'status', Tracking_Status::DELIVERED )
+					->count();
+				$total_failed    = Tracking_Model::where( 'contact_id', $contact_id )
+					->where( 'mode', $tracking_mode )
+					->where( 'status', Tracking_Status::FAILED )
+					->count();
+
+				$result = array(
+					'messages'        => $messages,
+					'total_sent'      => $total_sent,
+					'total_delivered' => $total_delivered,
+					'total_failed'    => $total_failed,
+					'mode'            => $mode,
+				);
+			} else {
+				// Email statistics
+				$result = array(
+					'messages'      => $messages,
+					'total_sent'    => $total_sent,
+					'total_opened'  => $total_opened,
+					'total_clicked' => $total_clicked,
+					'mode'          => $mode,
+				);
+			}
 
 			return new WP_REST_Response( $result, 200 );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
+
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
 	/**
-	 * Get SMS Campaigns
-	 *
-	 * @since 1.0.0
+	 * Permission check for unified messages endpoint
 	 *
 	 * @param WP_REST_Request $request
 	 *
-	 * @return WP_REST_Response
+	 * @return bool
 	 */
-	public function get_sms_campaigns( $request ) {
-		try {
-			$contact_id = $request->get_param( 'id' );
-			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-
-			$contact = Contact_Model::find( $contact_id );
-			if ( ! $contact ) {
-				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
-			}
-
-			// Get SMS messages (all types: campaign, automation, individual)
-			$messages = \QuillCRM\Models\Tracking_Model::sms()
-				->where( 'contact_id', $contact_id )
-				->orderBy( 'created_at', 'DESC' )
-				->paginate( $per_page, array( '*' ), 'page', $page );
-
-			// Calculate analytics
-			$total_sent      = \QuillCRM\Models\Tracking_Model::sms()
-				->where( 'contact_id', $contact_id )
-				->where( 'status', Tracking_Status::SENT )
-				->count();
-			$total_failed    = \QuillCRM\Models\Tracking_Model::sms()
-				->where( 'contact_id', $contact_id )
-				->where( 'status', Tracking_Status::FAILED )
-				->count();
-			$total_delivered = \QuillCRM\Models\Tracking_Model::sms()
-				->where( 'contact_id', $contact_id )
-				->where( 'status', Tracking_Status::DELIVERED )
-				->count();
-
-			$result = array(
-				'messages'        => $messages,
-				'total_sent'      => $total_sent,
-				'total_failed'    => $total_failed,
-				'total_delivered' => $total_delivered,
-			);
-
-			return new WP_REST_Response( $result, 200 );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
-		}
-	}
-
-	/**
-	 * Get WhatsApp Campaigns
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request
-	 *
-	 * @return WP_REST_Response
-	 */
-	public function get_whatsapp_campaigns( $request ) {
-		try {
-			$contact_id = $request->get_param( 'id' );
-			$per_page   = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page       = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-
-			$contact = Contact_Model::find( $contact_id );
-			if ( ! $contact ) {
-				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
-			}
-
-			// Get WhatsApp messages (all types: campaign, automation, individual)
-			$messages = \QuillCRM\Models\Tracking_Model::whatsapp()
-				->where( 'contact_id', $contact_id )
-				->orderBy( 'created_at', 'DESC' )
-				->paginate( $per_page, array( '*' ), 'page', $page );
-
-			// Calculate analytics
-			$total_sent      = \QuillCRM\Models\Tracking_Model::whatsapp()
-				->where( 'contact_id', $contact_id )
-				->where( 'status', Tracking_Status::SENT )
-				->count();
-			$total_failed    = \QuillCRM\Models\Tracking_Model::whatsapp()
-				->where( 'contact_id', $contact_id )
-				->where( 'status', Tracking_Status::FAILED )
-				->count();
-			$total_delivered = \QuillCRM\Models\Tracking_Model::whatsapp()
-				->where( 'contact_id', $contact_id )
-				->where( 'status', Tracking_Status::DELIVERED )
-				->count();
-
-			$result = array(
-				'messages'        => $messages,
-				'total_sent'      => $total_sent,
-				'total_failed'    => $total_failed,
-				'total_delivered' => $total_delivered,
-			);
-
-			return new WP_REST_Response( $result, 200 );
-		} catch ( Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
-		}
+	public function get_messages_permissions_check( $request ) {
+		return current_user_can( 'quillcrm_manage_contacts' );
 	}
 
 	/**
@@ -1576,24 +1508,6 @@ class REST_Contact_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Remove competing wp_mail filters (FunnelKit pattern)
-	 * This allows our custom from_email/from_name to work properly
-	 *
-	 * @since 1.0.0
-	 */
-	protected function remove_wp_mail_filters() {
-		// Only remove if not multiple SMTP connections
-		// This prevents breaking setups with multiple SMTP accounts
-		$quillsmtp_settings = get_option( 'quillsmtp_settings', array() );
-		$connections        = $quillsmtp_settings['connections'] ?? array();
-
-		if ( count( $connections ) <= 1 ) {
-			remove_all_filters( 'wp_mail_from' );
-			remove_all_filters( 'wp_mail_from_name' );
-		}
-	}
-
-	/**
 	 * Check permissions for sending messages (email, SMS, WhatsApp)
 	 *
 	 * @since 1.0.0
@@ -1603,33 +1517,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function send_message_permissions_check( $request ) {
-		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
-	}
-
-	/**
-	 * Check permissions for getting SMS campaigns
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool
-	 */
-	public function get_sms_campaigns_permissions_check( $request ) {
-		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
-	}
-
-	/**
-	 * Check permissions for getting WhatsApp campaigns
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool
-	 */
-	public function get_whatsapp_campaigns_permissions_check( $request ) {
-		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
+		return current_user_can( 'quillcrm_manage_contacts' );
 	}
 
 	/**
@@ -1941,19 +1829,6 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function remove_tags_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
-	}
-
-	/**
-	 * Check if a given request has access to get email campaigns
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request
-	 *
-	 * @return bool
-	 */
-	public function get_email_campaigns_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 

@@ -80,11 +80,12 @@ const SendWhatsAppDialog: React.FC<SendWhatsAppDialogProps> = ({
         setIsSending(true);
         try {
             const response = await apiFetch({
-                path: `/qc/v1/contacts/${contact.id}/send-whatsapp`,
+                path: `/qc/v1/contacts/${contact.id}/send-message`,
                 method: 'POST',
                 data: {
+                    channel: 'whatsapp',
                     to: toPhone,
-                    message: message,
+                    body: message,
                 },
             });
 

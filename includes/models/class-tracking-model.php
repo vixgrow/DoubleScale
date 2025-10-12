@@ -62,6 +62,7 @@ class Tracking_Model extends Model
 		'mode',           // Email/SMS/WhatsApp
 		'source_type',    // Campaign/Automation/Manual
 		'source_id',      // ID of the source (campaign_id, automation_id, etc.)
+		'author_id',      // User who sent the message (for individual sends)
 		'recipient',      // Email address or phone number
 		'external_id',    // Twilio MessageSid, email provider ID, etc.
 		'opened',         // Open tracking (emails only)

@@ -98,18 +98,21 @@ abstract class Abstract_Individual_Message_Sender {
 				return $validation;
 			}
 
-			// Get provider for channel
-			$provider = Message_Provider_Registry::instance()->get_provider( $channel );
-			if ( ! $provider ) {
-				return new WP_Error(
-					'provider_not_configured',
-					sprintf(
-						/* translators: %s: channel name (SMS, WhatsApp, etc.) */
-						__( '%s provider not configured. Please configure a provider in settings.', 'quillcrm' ),
-						ucfirst( $channel )
-					),
-					array( 'status' => 500 )
-				);
+			// Get provider for channel (email uses wp_mail, SMS/WhatsApp use providers)
+			$provider = null;
+			if ( $channel !== 'email' ) {
+				$provider = Message_Provider_Registry::instance()->get_provider( $channel );
+				if ( ! $provider ) {
+					return new WP_Error(
+						'provider_not_configured',
+						sprintf(
+							/* translators: %s: channel name (SMS, WhatsApp, etc.) */
+							__( '%s provider not configured. Please configure a provider in settings.', 'quillcrm' ),
+							ucfirst( $channel )
+						),
+						array( 'status' => 500 )
+					);
+				}
 			}
 
 			// Create tracking entry
@@ -264,7 +267,7 @@ abstract class Abstract_Individual_Message_Sender {
 				'author_id'   => get_current_user_id(),
 				'recipient'   => $to,
 				'channel'     => $this->get_channel_type(),
-				'provider'    => $provider->get_provider_name(),
+				'provider'    => $provider ? $provider->get_provider_name() : 'wp_mail',
 				'external_id' => $result['message_id'] ?? null,
 			)
 		);

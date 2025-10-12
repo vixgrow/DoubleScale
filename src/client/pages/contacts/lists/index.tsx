@@ -119,13 +119,12 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 
 		setIsSaving(true);
 		try {
-			const response = await apiFetch({
+			await apiFetch({
 				path: '/qc/v1/lists',
 				method: 'POST',
 				data: list,
 			});
 
-			setLists([...lists, response as ContactList]);
 			setVisible(false);
 			setList({ name: '', description: '' });
 			showNotice(
@@ -135,6 +134,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 					'quillcrm'
 				)
 			);
+			fetchLists();
 		} catch (error: any) {
 			setVisible(false);
 			showNotice('error', error.message);

@@ -17,6 +17,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Models\Message_Model;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Managers\Merge_Tags_Manager;
@@ -81,7 +82,8 @@ abstract class Abstract_Individual_Message_Sender {
 		try {
 			$contact_id = $request->get_param( 'id' );
 			$to         = $request->get_param( 'to' );
-			$message    = $request->get_param( 'message' );
+			$body       = $request->get_param( 'body' ) ?? $request->get_param( 'message' ); // Support both 'body' and 'message'
+			$subject    = $request->get_param( 'subject' ) ?? null; // Email-only (null for SMS/WhatsApp)
 			$channel    = $this->get_channel_type();
 
 			// Validate contact exists
@@ -114,16 +116,26 @@ abstract class Abstract_Individual_Message_Sender {
 			$tracking_entry = $this->create_tracking_entry( $contact, $to );
 
 			// Process message (merge tags + click tracking)
-			$processed_message = $this->process_message( $message, $contact, $tracking_entry );
+			$processed_subject = $subject ? Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact ) : null;
+			$processed_body    = $this->process_message( $body, $contact, $tracking_entry );
+
+			// Create message record (store original content for audit trail)
+			$message_record = Message_Model::create(
+				array(
+					'tracking_id' => $tracking_entry->id,
+					'subject'     => $processed_subject,
+					'body'        => $processed_body,
+				)
+			);
 
 			// Send message via provider
-			$result = $this->send_via_provider( $provider, $to, $processed_message, $contact );
+			$result = $this->send_via_provider( $provider, $to, $processed_body, $processed_subject, $contact );
 
 			// Handle result
-			return $this->handle_result( $result, $tracking_entry, $provider, $contact, $to );
+			return $this->handle_result( $result, $tracking_entry, $message_record, $provider, $contact, $to );
 
 		} catch ( \Exception $e ) {
-			return $this->handle_error( $e, $tracking_entry ?? null, $contact_id ?? null );
+			return $this->handle_error( $e, $tracking_entry ?? null, $message_record ?? null, $contact_id ?? null );
 		}
 	}
 
@@ -182,17 +194,23 @@ abstract class Abstract_Individual_Message_Sender {
 	 *
 	 * @param \QuillCRM\Interfaces\Message_Provider_Interface $provider Provider instance
 	 * @param string                                          $to Recipient
-	 * @param string                                          $message Processed message
+	 * @param string                                          $body Processed message body
+	 * @param string|null                                     $subject Processed subject (email only)
 	 * @param Contact_Model                                   $contact Contact model
 	 * @return array Provider result
 	 */
-	protected function send_via_provider( $provider, $to, $message, $contact ) {
+	protected function send_via_provider( $provider, $to, $body, $subject, $contact ) {
 		$channel = $this->get_channel_type();
 
 		$message_data = array(
 			'To'   => $to,
-			'Body' => $message,
+			'Body' => $body,
 		);
+
+		// Add subject for email channel
+		if ( $subject && $channel === 'email' ) {
+			$message_data['Subject'] = $subject;
+		}
 
 		// Add webhook URL for delivery status tracking
 		$webhook_url = $provider->get_webhook_url( $channel );
@@ -210,12 +228,13 @@ abstract class Abstract_Individual_Message_Sender {
 	 *
 	 * @param array                                           $result Provider result
 	 * @param Tracking_Model                                  $tracking_entry Tracking record
+	 * @param Message_Model                                   $message_record Message content record
 	 * @param \QuillCRM\Interfaces\Message_Provider_Interface $provider Provider instance
 	 * @param Contact_Model                                   $contact Contact model
 	 * @param string                                          $to Recipient
 	 * @return WP_REST_Response|WP_Error
 	 */
-	protected function handle_result( $result, $tracking_entry, $provider, $contact, $to ) {
+	protected function handle_result( $result, $tracking_entry, $message_record, $provider, $contact, $to ) {
 		// Validate send result
 		if ( ! isset( $result['success'] ) || ! $result['success'] ) {
 			$error_message = $result['error'] ?? sprintf( '%s sending failed', ucfirst( $this->get_channel_type() ) );
@@ -241,6 +260,7 @@ abstract class Abstract_Individual_Message_Sender {
 			array(
 				'contact_id'  => $contact->id,
 				'tracking_id' => $tracking_entry->id,
+				'message_id'  => $message_record->id,
 				'author_id'   => get_current_user_id(),
 				'recipient'   => $to,
 				'channel'     => $this->get_channel_type(),
@@ -258,6 +278,7 @@ abstract class Abstract_Individual_Message_Sender {
 					ucfirst( $this->get_channel_type() )
 				),
 				'tracking_id' => $tracking_entry->id,
+				'message_id'  => $message_record->id,
 			),
 			200
 		);
@@ -270,10 +291,11 @@ abstract class Abstract_Individual_Message_Sender {
 	 *
 	 * @param \Exception          $e Exception that occurred
 	 * @param Tracking_Model|null $tracking_entry Tracking record (if created)
+	 * @param Message_Model|null  $message_record Message record (if created)
 	 * @param int|null            $contact_id Contact ID (if available)
 	 * @return WP_Error
 	 */
-	protected function handle_error( $e, $tracking_entry, $contact_id ) {
+	protected function handle_error( $e, $tracking_entry, $message_record, $contact_id ) {
 		// Update tracking status to failed
 		if ( $tracking_entry ) {
 			$tracking_entry->update( array( 'status' => Tracking_Status::FAILED ) );
@@ -286,9 +308,11 @@ abstract class Abstract_Individual_Message_Sender {
 				ucfirst( $this->get_channel_type() )
 			),
 			array(
-				'error'      => $e->getMessage(),
-				'contact_id' => $contact_id,
-				'channel'    => $this->get_channel_type(),
+				'error'       => $e->getMessage(),
+				'contact_id'  => $contact_id,
+				'channel'     => $this->get_channel_type(),
+				'tracking_id' => $tracking_entry->id ?? null,
+				'message_id'  => $message_record->id ?? null,
 			)
 		);
 

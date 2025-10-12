@@ -182,98 +182,41 @@ class REST_Contact_Controller extends REST_Controller {
 			)
 		);
 
-		// Send individual email
+		// Unified send message endpoint (email, SMS, WhatsApp)
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>\d+)/send-email',
+			'/' . $this->rest_base . '/(?P<id>\d+)/send-message',
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'send_individual_email' ),
-					'permission_callback' => array( $this, 'send_individual_email_permissions_check' ),
+					'callback'            => array( $this, 'send_message' ),
+					'permission_callback' => array( $this, 'send_message_permissions_check' ),
 					'args'                => array(
 						'id'      => array(
 							'description' => __( 'Contact ID.', 'quillcrm' ),
 							'type'        => 'integer',
 							'required'    => true,
 						),
-						'to'      => array(
-							'description'       => __( 'Recipient email address.', 'quillcrm' ),
-							'type'              => 'string',
-							'required'          => true,
-							'validate_callback' => function ( $param ) {
-								return is_email( $param );
-							},
+						'channel' => array(
+							'description' => __( 'Communication channel: email, sms, or whatsapp.', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+							'enum'        => array( 'email', 'sms', 'whatsapp' ),
 						),
-						'subject' => array(
-							'description' => __( 'Email subject.', 'quillcrm' ),
+						'to'      => array(
+							'description' => __( 'Recipient (email address or phone number in E.164 format).', 'quillcrm' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
 						'body'    => array(
-							'description' => __( 'Email body (HTML supported).', 'quillcrm' ),
+							'description' => __( 'Message body (HTML for email, plain text for SMS/WhatsApp).', 'quillcrm' ),
 							'type'        => 'string',
 							'required'    => true,
 						),
-					),
-				),
-			)
-		);
-
-		// Send individual SMS
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>\d+)/send-sms',
-			array(
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'send_individual_sms' ),
-					'permission_callback' => array( $this, 'send_individual_sms_permissions_check' ),
-					'args'                => array(
-						'id'      => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
-							'type'        => 'integer',
-							'required'    => true,
-						),
-						'to'      => array(
-							'description' => __( 'Recipient phone number (E.164 format: +1234567890).', 'quillcrm' ),
+						'subject' => array(
+							'description' => __( 'Email subject (required for email, ignored for SMS/WhatsApp).', 'quillcrm' ),
 							'type'        => 'string',
-							'required'    => true,
-						),
-						'message' => array(
-							'description' => __( 'SMS message body (plain text).', 'quillcrm' ),
-							'type'        => 'string',
-							'required'    => true,
-						),
-					),
-				),
-			)
-		);
-
-		// Send individual WhatsApp
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>\d+)/send-whatsapp',
-			array(
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'send_individual_whatsapp' ),
-					'permission_callback' => array( $this, 'send_individual_whatsapp_permissions_check' ),
-					'args'                => array(
-						'id'      => array(
-							'description' => __( 'Contact ID.', 'quillcrm' ),
-							'type'        => 'integer',
-							'required'    => true,
-						),
-						'to'      => array(
-							'description' => __( 'Recipient phone number (E.164 format: +1234567890).', 'quillcrm' ),
-							'type'        => 'string',
-							'required'    => true,
-						),
-						'message' => array(
-							'description' => __( 'WhatsApp message body (plain text).', 'quillcrm' ),
-							'type'        => 'string',
-							'required'    => true,
+							'required'    => false,
 						),
 					),
 				),
@@ -1578,7 +1521,7 @@ class REST_Contact_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Send individual email to contact
+	 * Send message to contact (unified endpoint for email, SMS, WhatsApp)
 	 *
 	 * @since 1.0.0
 	 *
@@ -1586,144 +1529,49 @@ class REST_Contact_Controller extends REST_Controller {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function send_individual_email( $request ) {
-		try {
-			$contact_id = $request->get_param( 'id' );
-			$to         = $request->get_param( 'to' );
-			$subject    = $request->get_param( 'subject' );
-			$body       = $request->get_param( 'body' );
+	public function send_message( $request ) {
+		$channel = $request->get_param( 'channel' );
 
-			// Validate contact exists
-			$contact = Contact_Model::find( $contact_id );
-			if ( ! $contact ) {
-				return new WP_Error( 'not_found', __( 'Contact not found', 'quillcrm' ), array( 'status' => 404 ) );
-			}
+		// Validate channel parameter
+		if ( ! in_array( $channel, array( 'email', 'sms', 'whatsapp' ), true ) ) {
+			return new WP_Error(
+				'invalid_channel',
+				__( 'Invalid channel. Must be email, sms, or whatsapp.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
 
-			// Validate recipient email address
-			if ( ! filter_var( $to, FILTER_VALIDATE_EMAIL ) ) {
+		// Validate email requires subject
+		if ( $channel === 'email' && empty( $request->get_param( 'subject' ) ) ) {
+			return new WP_Error(
+				'missing_subject',
+				__( 'Subject is required for email messages.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Route to appropriate sender based on channel
+		switch ( $channel ) {
+			case 'email':
+				$sender = new \QuillCRM\Individual_Messaging\Email_Individual_Sender();
+				break;
+
+			case 'sms':
+				$sender = new \QuillCRM\Individual_Messaging\SMS_Individual_Sender();
+				break;
+
+			case 'whatsapp':
+				$sender = new \QuillCRM\Individual_Messaging\WhatsApp_Individual_Sender();
+				break;
+
+			default:
 				return new WP_Error(
-					'invalid_email',
-					__( 'Invalid email address', 'quillcrm' ),
+					'invalid_channel',
+					__( 'Invalid channel specified.', 'quillcrm' ),
 					array( 'status' => 400 )
 				);
-			}
-
-			// Create tracking entry FIRST (for open/click tracking)
-			$tracking_entry = \QuillCRM\Models\Tracking_Model::create(
-				array(
-					'contact_id'  => $contact->id,
-					'template_id' => 0, // No template for individual emails
-					'hash_key'    => wp_generate_password( 32, false ),
-					'mode'        => \QuillCRM\Models\Tracking_Model::MODE_EMAIL,
-					'source_type' => \QuillCRM\Constants\Message_Source_Types::INDIVIDUAL,
-					'source_id'   => 0, // No campaign/automation
-					'author_id'   => get_current_user_id(), // Track who sent it
-					'recipient'   => $to,
-					'status'      => Tracking_Status::PENDING,
-				)
-			);
-
-			// Process merge tags AFTER creating tracking entry (so we have hash_key)
-			$subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
-			$body    = Merge_Tags_Manager::instance()->process_merge_tags( $body, $contact );
-
-			// Add email footer with tracking pixel and unsubscribe link (shared helper)
-			$body = Email_Tracking_Helper::add_footer_and_tracking( $body, $tracking_entry, $contact );
-
-			// Add click tracking to all links (shared helper)
-			$body = Email_Tracking_Helper::add_click_tracking( $body, $tracking_entry->hash_key, $contact );
-
-			// Get global email settings
-			$email_settings = Settings::get( 'email', array() );
-
-			// Send email using Emails class
-			$emails               = new Emails();
-			$emails->from_name    = $email_settings['from_name'] ?? get_bloginfo( 'name' );
-			$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
-			$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
-
-			// Remove competing filters (FunnelKit pattern)
-			$this->remove_wp_mail_filters();
-
-			// Send the email
-			$result = $emails->send( $to, $subject, $body );
-
-			// Validate email send result
-			if ( is_wp_error( $result ) ) {
-				throw new \Exception( 'WP Mail Error: ' . $result->get_error_message() );
-			} elseif ( $result === false || $result === null ) {
-				throw new \Exception( 'Email sending failed - wp_mail returned false' );
-			}
-
-			// Update tracking status - email sent successfully
-			$tracking_entry->update(
-				array(
-					'status'  => Tracking_Status::SENT,
-					'sent_at' => current_time( 'mysql' ),
-				)
-			);
-
-			quillcrm_get_logger()->info(
-				__( 'Individual email sent successfully', 'quillcrm' ),
-				array(
-					'contact_id'   => $contact->id,
-					'tracking_id'  => $tracking_entry->id,
-					'author_id'    => get_current_user_id(),
-					'recipient'    => $to,
-					'subject'      => $subject,
-				)
-			);
-
-			return new WP_REST_Response(
-				array(
-					'success'     => true,
-					'message'     => __( 'Email sent successfully', 'quillcrm' ),
-					'tracking_id' => $tracking_entry->id,
-				),
-				200
-			);
-		} catch ( \Exception $e ) {
-			// Update tracking status to failed
-			if ( isset( $tracking_entry ) ) {
-				$tracking_entry->update( array( 'status' => Tracking_Status::FAILED ) );
-			}
-			quillcrm_get_logger()->error(
-				__( 'Individual email send exception', 'quillcrm' ),
-				array(
-					'error'   => $e->getMessage(),
-					'contact' => $contact_id ?? null,
-				)
-			);
-
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
-	}
 
-	/**
-	 * Send individual SMS to contact
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function send_individual_sms( $request ) {
-		$sender = new \QuillCRM\Individual_Messaging\SMS_Individual_Sender();
-		return $sender->send( $request );
-	}
-
-	/**
-	 * Send individual WhatsApp message to contact
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return WP_REST_Response|WP_Error
-	 */
-	public function send_individual_whatsapp( $request ) {
-		$sender = new \QuillCRM\Individual_Messaging\WhatsApp_Individual_Sender();
 		return $sender->send( $request );
 	}
 
@@ -1746,7 +1594,7 @@ class REST_Contact_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Check permissions for sending individual email
+	 * Check permissions for sending messages (email, SMS, WhatsApp)
 	 *
 	 * @since 1.0.0
 	 *
@@ -1754,33 +1602,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 *
 	 * @return bool
 	 */
-	public function send_individual_email_permissions_check( $request ) {
-		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
-	}
-
-	/**
-	 * Check permissions for sending individual SMS
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool
-	 */
-	public function send_individual_sms_permissions_check( $request ) {
-		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
-	}
-
-	/**
-	 * Check permissions for sending individual WhatsApp
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 *
-	 * @return bool
-	 */
-	public function send_individual_whatsapp_permissions_check( $request ) {
+	public function send_message_permissions_check( $request ) {
 		return current_user_can( Permissions::MANAGE_QUILLCRM_CONTACTS );
 	}
 

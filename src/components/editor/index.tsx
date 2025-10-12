@@ -109,30 +109,7 @@ export interface TinyMCEWPEditorProps {
     showMergeTags?: boolean;
 }
 
-/**
- * TinyMCE Editor Component with WordPress Media Library Integration
- * 
- * This component provides a rich text editor powered by TinyMCE with seamless
- * integration with WordPress media library for image and media uploads.
- * 
- * @example
- * ```tsx
- * import { TinyMCEWPEditor } from '@/components/editor';
- * 
- * function MyComponent() {
- *   const [content, setContent] = useState('');
- *   
- *   return (
- *     <TinyMCEWPEditor
- *       value={content}
- *       onChange={(content) => setContent(content)}
- *       height={400}
- *       placeholder="Start typing..."
- *     />
- *   );
- * }
- * ```
- */
+
 export const TinyMCEWPEditor: React.FC<TinyMCEWPEditorProps> = ({
     value = '',
     onChange,

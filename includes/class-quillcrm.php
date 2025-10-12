@@ -37,6 +37,7 @@ use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
 use QuillCRM\Managers\Pipeline_Manager;
 use QuillCRM\Managers\Deal_Manager;
 use QuillCRM\Managers\Activity_Manager;
+use QuillCRM\Managers\Email_Sequences_Manager;
 use Illuminate\Translation\Translator;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Validation\Factory as ValidatorFactory;
@@ -53,6 +54,7 @@ use QuillCRM\User_Roles\User_Roles;
  * @since 1.0.0
  */
 final class QuillCRM {
+
 
 
 
@@ -147,6 +149,10 @@ final class QuillCRM {
 
 		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_whatsapp_campaigns' ) === false ) {
 			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_whatsapp_campaigns' );
+		}
+
+		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_email_sequences' ) === false ) {
+			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_email_sequences' );
 		}
 
 		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily3' ) === false ) {
@@ -247,6 +253,7 @@ final class QuillCRM {
 		Pipeline_Manager::instance();
 		Deal_Manager::instance();
 		Activity_Manager::instance();
+		Email_Sequences_Manager::instance();
 		User_Roles::instance();
 	}
 

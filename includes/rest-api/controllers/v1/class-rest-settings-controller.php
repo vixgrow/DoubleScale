@@ -152,7 +152,7 @@ class REST_Settings_Controller extends REST_Controller {
 					'properties'           => array(
 						'enable_cart_tracking' => array(
 							'type'    => 'boolean',
-							'default' => true,
+							'default' => false,
 						),
 						'wait_period'          => array(
 							'type'    => 'integer',

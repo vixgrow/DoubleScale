@@ -44,7 +44,7 @@ class Integration extends Integration_Abstract {
 	 *
 	 * @since 1.0.0
 	 */
-	public $description = 'Twilio Integration';
+	public $description = 'Twilio lets apps send and receive messages, make and receive phone calls, and verify users, essentially adding communication features to digital tools.';
 
 	/**
 	 * Option name

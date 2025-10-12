@@ -126,6 +126,11 @@ class REST_Integration_Controller extends REST_Controller {
 	 */
 	public function validate_item_settings( $value, $request, $param ) {
 		try {
+			// Skip validation if settings are empty (disconnecting)
+			if ( empty( $value ) ) {
+				return true;
+			}
+
 			$attributes_schema = $this->get_settings_schema();
 			$validator         = rest_validate_value_from_schema( $value, $attributes_schema, $param );
 
@@ -174,10 +179,17 @@ class REST_Integration_Controller extends REST_Controller {
 	 */
 	public function update( WP_REST_Request $request ) {
 		try {
-			$settings  = $request->get_param( 'settings' ) ?? array();
-			$validator = $this->integration->validate( $settings );
-			if ( ! $validator ) {
-				return new WP_Error( 'rest_invalid_request', __( 'Invalid settings.', 'quillcrm' ), array( 'status' => 400 ) );
+			$settings = $request->get_param( 'settings' ) ?? array();
+
+			// Skip validation if settings are empty (disconnecting)
+			if ( ! empty( $settings ) ) {
+				$validator = $this->integration->validate( $settings );
+				if ( is_wp_error( $validator ) ) {
+					return $validator;
+				}
+				if ( ! $validator ) {
+					return new WP_Error( 'rest_invalid_request', __( 'Invalid settings.', 'quillcrm' ), array( 'status' => 400 ) );
+				}
 			}
 
 			$this->integration->update_settings( $settings );

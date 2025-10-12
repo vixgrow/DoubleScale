@@ -72,6 +72,8 @@ const Initial: React.FC = () => {
 	const handleFormTypeSelect = (value: string) => {
 		updateForm({
 			form_type: value,
+			form_id: '', // Clear form_id when type changes
+			post_id: undefined, // Clear post_id when type changes
 		});
 	};
 

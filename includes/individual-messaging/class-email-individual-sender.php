@@ -131,9 +131,6 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 			$emails->from_address = $email_settings['from_email'] ?? get_option( 'admin_email' );
 			$emails->reply_to     = $email_settings['reply_to'] ?? get_option( 'admin_email' );
 
-			// Remove competing filters
-			$this->remove_wp_mail_filters();
-
 			// Send the email
 			$result = $emails->send( $to, $subject, $body );
 
@@ -160,23 +157,6 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 				'success' => false,
 				'error'   => $e->getMessage(),
 			);
-		}
-	}
-
-	/**
-	 * Remove competing wp_mail filters
-	 * Allows custom from_email/from_name to work properly
-	 *
-	 * @since 1.0.0
-	 */
-	protected function remove_wp_mail_filters() {
-		// Only remove if not multiple SMTP connections
-		$quillsmtp_settings = get_option( 'quillsmtp_settings', array() );
-		$connections        = $quillsmtp_settings['connections'] ?? array();
-
-		if ( count( $connections ) <= 1 ) {
-			remove_all_filters( 'wp_mail_from' );
-			remove_all_filters( 'wp_mail_from_name' );
 		}
 	}
 }

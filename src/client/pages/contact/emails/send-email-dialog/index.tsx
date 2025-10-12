@@ -51,6 +51,18 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
         setIsSending(false);
     };
 
+    const isInteractableElement = (target: HTMLElement) => {
+        const isTinyMCEElement = target.className &&
+            typeof target.className === 'string' &&
+            target.className.includes('tox-');
+
+        return target.closest('.media-modal') ||
+            target.closest('.media-modal-backdrop') ||
+            target.closest('.tox-tinymce-aux') ||
+            target.closest('.tox') ||
+            isTinyMCEElement;
+    };
+
     return (
         <>
             <style>{`
@@ -80,38 +92,12 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
                     onPointerDownOutside={(e) => {
                         // Allow interaction with WordPress media modal and TinyMCE menus
                         const target = e.target as HTMLElement;
-                        // Check if clicking on any TinyMCE UI element
-                        const isTinyMCEElement = target.className &&
-                            typeof target.className === 'string' &&
-                            target.className.includes('tox-');
-
-                        if (
-                            target.closest('.media-modal') ||
-                            target.closest('.media-modal-backdrop') ||
-                            target.closest('.tox-tinymce-aux') ||
-                            target.closest('.tox') ||
-                            isTinyMCEElement
-                        ) {
-                            e.preventDefault();
-                        }
+                        isInteractableElement(target) && e.preventDefault();
                     }}
                     onInteractOutside={(e) => {
                         // Allow interaction with WordPress media modal and TinyMCE menus
                         const target = e.target as HTMLElement;
-                        // Check if clicking on any TinyMCE UI element
-                        const isTinyMCEElement = target.className &&
-                            typeof target.className === 'string' &&
-                            target.className.includes('tox-');
-
-                        if (
-                            target.closest('.media-modal') ||
-                            target.closest('.media-modal-backdrop') ||
-                            target.closest('.tox-tinymce-aux') ||
-                            target.closest('.tox') ||
-                            isTinyMCEElement
-                        ) {
-                            e.preventDefault();
-                        }
+                        isInteractableElement(target) && e.preventDefault();
                     }}
                 >
                     <DialogHeader>

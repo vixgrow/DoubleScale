@@ -2,23 +2,20 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState } from '@wordpress/element';
-import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { useContactContext } from '../state/context';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-table';
 import { TimeAgoCell } from '@quillcrm/components';
 import SendWhatsAppDialog from './send-whatsapp-dialog';
 import { MessageCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { MessageStatsCard } from '../components/message-stats-card';
 import type { ColumnDef } from '@tanstack/react-table';
 
 interface WhatsAppMessage {
@@ -32,80 +29,22 @@ interface WhatsAppMessage {
 	external_id?: string;
 }
 
-interface WhatsAppAnalytics {
-	messages: {
-		data: WhatsAppMessage[];
-		total: number;
-	};
-	total_sent: number;
-	total_failed: number;
-	total_delivered: number;
-}
-
 interface WhatsAppProps {
 	contact_id: number;
 }
 
 const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 	const { contact } = useContactContext();
-	const [whatsappAnalytics, setWhatsAppAnalytics] =
-		useState<WhatsAppAnalytics | null>(null);
-	const [loading, setLoading] = useState<boolean>(true);
-	const [perPage, setPerPage] = useState<number>(10);
-	const [page, setPage] = useState<number>(1);
-	const [total, setTotal] = useState<number>(0);
-	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [showSendWhatsAppModal, setShowSendWhatsAppModal] =
 		useState<boolean>(false);
-	const { createNotice } = useDispatch('quillcrm/core');
 
-	const serverSideTable = useServerSideTable({
-		page,
-		perPage,
-		totalRecords,
-		setPage,
-		setPerPage,
-	});
-
-	const fetchWhatsApp = async () => {
-		setLoading(true);
-
-		try {
-			const response = (await apiFetch({
-				path: addQueryArgs(`/qc/v1/contacts/${contact_id}/messages`, {
-					mode: 'whatsapp',
-					per_page: perPage,
-					page,
-				}),
-			})) as WhatsAppAnalytics;
-
-			if (!response || !response.messages) {
-				createNotice({
-					type: 'error',
-					message: __(
-						'Failed to fetch WhatsApp messages',
-						'quillcrm'
-					),
-				});
-				return;
-			}
-
-			setWhatsAppAnalytics(response);
-			setTotal(response.messages.total);
-			setTotalRecords(response.messages.total);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to fetch WhatsApp messages', 'quillcrm'),
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchWhatsApp();
-	}, [page, perPage]);
+	// Use combined hook for data + table pagination
+	const { loading, messages, analytics, serverSideTable, refetch } =
+		useContactMessagesTable({
+			contactId: contact_id,
+			mode: 'whatsapp',
+			initialPerPage: 10,
+		});
 
 	if (!contact) {
 		return null;
@@ -176,6 +115,10 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 		},
 	];
 
+	const total = analytics?.messages?.total || 0;
+	const totalSent = analytics?.total_sent || 0;
+	const totalFailed = analytics?.total_failed || 0;
+
 	return (
 		<div className="qcrm-whatsapp flex flex-col gap-5">
 			<div className="flex justify-between items-center">
@@ -192,59 +135,37 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 					{__('Send WhatsApp', 'quillcrm')}
 				</Button>
 			</div>
-			{whatsappAnalytics && (
+
+			{/* Statistics Cards */}
+			{analytics && (
 				<div className="flex gap-5">
-					<Card className="flex-1 p-3 shadow-none border-l-green-600 border-l-[3px] border-y-0 border-r-0">
-						<div className="flex justify-between items-center">
-							<div className="flex flex-col">
-								<span className="text-2xl font-semibold">
-									{total}
-								</span>
-								<span className="text-lg text-gray-500 font-medium">
-									{__('Total Messages', 'quillcrm')}
-								</span>
-							</div>
-							<div className="bg-green-50 p-2 rounded-full">
-								<MessageCircle className="w-6 h-6 text-green-600" />
-							</div>
-						</div>
-					</Card>
-					<Card className="flex-1 p-3 shadow-none border-l-green-600 border-l-[3px] border-y-0 border-r-0">
-						<div className="flex justify-between items-center">
-							<div className="flex flex-col">
-								<span className="text-2xl font-semibold">
-									{whatsappAnalytics.total_sent || 0}
-								</span>
-								<span className="text-lg text-gray-500 font-medium">
-									{__('Sent', 'quillcrm')}
-								</span>
-							</div>
-							<div className="bg-green-50 p-2 rounded-full">
-								<CheckCircle2 className="w-6 h-6 text-green-600" />
-							</div>
-						</div>
-					</Card>
-					<Card className="flex-1 p-3 shadow-none border-l-red-600 border-l-[3px] border-y-0 border-r-0">
-						<div className="flex justify-between items-center">
-							<div className="flex flex-col">
-								<span className="text-2xl font-semibold">
-									{whatsappAnalytics.total_failed || 0}
-								</span>
-								<span className="text-lg text-gray-500 font-medium">
-									{__('Failed', 'quillcrm')}
-								</span>
-							</div>
-							<div className="bg-red-50 p-2 rounded-full">
-								<XCircle className="w-6 h-6 text-red-600" />
-							</div>
-						</div>
-					</Card>
+					<MessageStatsCard
+						icon={<MessageCircle className="w-6 h-6 text-green-600" />}
+						value={total}
+						label={__('Total Messages', 'quillcrm')}
+						iconBgClass="bg-green-50"
+						borderColorClass="border-l-green-600"
+					/>
+					<MessageStatsCard
+						icon={<CheckCircle2 className="w-6 h-6 text-green-600" />}
+						value={totalSent}
+						label={__('Sent', 'quillcrm')}
+						iconBgClass="bg-green-50"
+						borderColorClass="border-l-green-600"
+					/>
+					<MessageStatsCard
+						icon={<XCircle className="w-6 h-6 text-red-600" />}
+						value={totalFailed}
+						label={__('Failed', 'quillcrm')}
+						iconBgClass="bg-red-50"
+						borderColorClass="border-l-red-600"
+					/>
 				</div>
 			)}
+
+			{/* Messages Table */}
 			<div>
-				{!loading &&
-				(!whatsappAnalytics?.messages.data ||
-					whatsappAnalytics.messages.data.length === 0) ? (
+				{!loading && messages.length === 0 ? (
 					<div className="flex flex-col items-center justify-center py-20 gap-4">
 						<div className="text-gray-400">
 							<MessageCircle className="w-24 h-24" />
@@ -257,23 +178,24 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 					<>
 						<DataTable
 							columns={columns}
-							data={whatsappAnalytics?.messages.data || []}
+							data={messages}
 							loading={loading}
 							showPagination={false}
-							initialPageSize={perPage}
+							initialPageSize={10}
 							showMainActions={false}
-							setPage={setPage}
 							config={{}}
 						/>
 						<DataTablePagination table={serverSideTable} />
 					</>
 				)}
 			</div>
+
+			{/* Send WhatsApp Dialog */}
 			<SendWhatsAppDialog
 				open={showSendWhatsAppModal}
 				onClose={() => {
 					setShowSendWhatsAppModal(false);
-					fetchWhatsApp(); // Refresh the list after sending
+					refetch(); // Refresh the list after sending
 				}}
 				contact={contact}
 			/>

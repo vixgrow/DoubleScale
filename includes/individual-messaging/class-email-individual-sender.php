@@ -81,8 +81,8 @@ class Email_Individual_Sender {
 			$processed_subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
 			$processed_body    = Merge_Tags_Manager::instance()->process_merge_tags( $body, $contact );
 
-			// Add email footer with tracking pixel and unsubscribe link
-			$processed_body = Email_Tracking_Helper::add_footer_and_tracking( $processed_body, $tracking_entry, $contact );
+			// Add tracking pixel only
+			$processed_body = Email_Tracking_Helper::add_tracking_pixel( $processed_body, $tracking_entry );
 
 			// Add click tracking to all links
 			$processed_body = Email_Tracking_Helper::add_click_tracking( $processed_body, $tracking_entry->hash_key, $contact );

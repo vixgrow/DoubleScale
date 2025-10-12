@@ -21,6 +21,24 @@ use QuillCRM\Settings;
 class Email_Tracking_Helper {
 
 	/**
+	 * Add only tracking pixel (for individual messages without footer/unsubscribe)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string         $body Email body.
+	 * @param Tracking_Model $tracking_entry Tracking entry.
+	 * @return string Email with tracking pixel only
+	 */
+	public static function add_tracking_pixel( $body, Tracking_Model $tracking_entry ) {
+		$tracking_pixel = sprintf(
+			'<img src="%s" width="1" height="1" style="width:1px;height:1px;" alt="" />',
+			home_url( '?quillcrm=email_open&hash_key=' . $tracking_entry->hash_key )
+		);
+
+		return $body . $tracking_pixel;
+	}
+
+	/**
 	 * Add tracking pixel and footer to email body
 	 *
 	 * @param string         $body Email body.
@@ -30,13 +48,8 @@ class Email_Tracking_Helper {
 	 * @return string Complete email with footer
 	 */
 	public static function add_footer_and_tracking( $body, Tracking_Model $tracking_entry, Contact_Model $contact, $settings = array() ) {
-		$footer = '';
-
-		// Add tracking pixel 1x1 for email open tracking
-		$footer .= sprintf(
-			'<img src="%s" width="1" height="1" style="width:1px;height:1px;" />',
-			home_url( '?quillcrm=email_open&hash_key=' . $tracking_entry->hash_key )
-		);
+		// Add tracking pixel
+		$body_with_tracking = self::add_tracking_pixel( $body, $tracking_entry );
 
 		// Get email footer
 		if ( ! empty( $settings['email_footer'] ) ) {
@@ -49,10 +62,8 @@ class Email_Tracking_Helper {
 		// Process merge tags in footer (for unsubscribe link)
 		$email_footer = Merge_Tags_Manager::instance()->process_merge_tags( $email_footer, $contact );
 
-		$footer .= $email_footer;
-
 		// Append footer to body
-		return $body . $footer;
+		return $body_with_tracking . $email_footer;
 	}
 
 	/**

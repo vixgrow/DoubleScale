@@ -91,13 +91,13 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
       // Fetch the existing template to preserve all fields
       const existingTemplate = await getTemplate(existingTemplateData.template_id);
 
-      // Update template with builder data in body field
+      // Update template with builder data in email_body field
       await updateTemplate(existingTemplateData.template_id, {
         ...existingTemplate,
-        body: JSON.stringify({
+        email_body: {
           type: 'builder',
           value: builderData,
-        }),
+        },
       });
 
       // Template ID is already in template_ids array, just mark as success

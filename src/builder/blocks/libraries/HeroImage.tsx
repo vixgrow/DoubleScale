@@ -3,13 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 /**
- * external dependencies
- */
-import { useDraggable } from '@dnd-kit/core';
-/**
  * internal dependencies
  */
 import { ImageBlockIcon } from '@quillcrm/components';
+import { DraggableTemplate } from '../../components/shared/DraggableTemplate';
 
 const HeroImageLibrary = () => {
 	// Standard Hero template - creates 4 blocks: image, heading text, lorem text, button
@@ -700,36 +697,6 @@ const HeroImageLibrary = () => {
 					</div>
 				</DraggableTemplate>
 			</div>
-		</div>
-	);
-};
-
-// Draggable component using dnd-kit
-const DraggableTemplate = ({ template, id, children }) => {
-	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-		id: id,
-		data: {
-			type: 'library-template',
-			template: template,
-		},
-	});
-
-	const style = {
-		opacity: isDragging ? 0.5 : 1,
-		cursor: 'grab',
-	};
-
-	console.log(`DraggableTemplate ${id}:`, { isDragging, template });
-
-	return (
-		<div
-			ref={setNodeRef}
-			style={style}
-			{...listeners}
-			{...attributes}
-			className="hover:border-primary transition-colors"
-		>
-			{children}
 		</div>
 	);
 };

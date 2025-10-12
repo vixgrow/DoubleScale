@@ -9,9 +9,9 @@ import { STORE_KEY } from '../../stores/email-builder/constants';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
+import { useTemplateActions } from '../hooks/useTemplateActions';
 import { SaveStatusIndicator } from './SaveStatusIndicator';
 import { SaveAsTemplateDialog } from './SaveAsTemplateDialog';
-import { saveEmailAsTemplate } from '../api/templates';
 
 const Header: React.FC = () => {
 	const dispatch = useDispatch();
@@ -24,20 +24,10 @@ const Header: React.FC = () => {
 	const canUndo = useSelect((select) => select(STORE_KEY).canUndo(), []);
 	const canRedo = useSelect((select) => select(STORE_KEY).canRedo(), []);
 
-	// Get builder data for template saving
-	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
-	const globalSettings = useSelect(
-		(select) => select(STORE_KEY).getGlobalSettings(),
-		[]
-	);
-	const buttonSettings = useSelect(
-		(select) => select(STORE_KEY).getAllButtonSettings(),
-		[]
-	);
-
-	// State for template dialog
 	const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
-	const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+
+	const { saveAsTemplate, isSaving: isSavingTemplate } =
+		useTemplateActions();
 
 	// Use auto-save hook
 	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
@@ -64,30 +54,8 @@ const Header: React.FC = () => {
 	};
 
 	const handleSaveAsTemplate = async (templateName: string) => {
-		setIsSavingTemplate(true);
-
-		try {
-			// Prepare builder data
-			const builderData = {
-				sections: sections,
-				globalSettings: globalSettings,
-				buttonSettings: buttonSettings,
-			};
-
-			// Save template using the API helper
-			await saveEmailAsTemplate(templateName, builderData);
-
-			// Show success message (you can use a toast notification here)
-			console.log('Template saved successfully!');
-
-			// Close dialog
-			setIsTemplateDialogOpen(false);
-		} catch (error: any) {
-			console.error('Error saving template:', error);
-			throw error; // Re-throw to let dialog handle the error
-		} finally {
-			setIsSavingTemplate(false);
-		}
+		await saveAsTemplate(templateName);
+		setIsTemplateDialogOpen(false);
 	};
 	return (
 		<div className="flex items-center justify-between p-4 bg-primary-foreground border-b border-input">

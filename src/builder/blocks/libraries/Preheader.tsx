@@ -3,9 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 /**
- * external dependencies
+ * internal dependencies
  */
-import { useDraggable } from '@dnd-kit/core';
+import { DraggableTemplate } from '../../components/shared/DraggableTemplate';
 
 const PreheaderLibrary = () => {
 	// Text & Link template
@@ -40,6 +40,7 @@ const PreheaderLibrary = () => {
 				<DraggableTemplate
 					template={textAndLinkTemplate}
 					id="preheader"
+					templateType="preheader"
 				>
 					<div className="flex gap-1 items-center border rounded-lg p-3 text-[10px]">
 						<div className="text-[#9197A4]">
@@ -51,36 +52,6 @@ const PreheaderLibrary = () => {
 					</div>
 				</DraggableTemplate>
 			</div>
-		</div>
-	);
-};
-
-// Draggable component using dnd-kit
-const DraggableTemplate = ({ template, id, children }) => {
-	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-		id: id,
-		data: {
-			type: 'library-template',
-			template: template,
-		},
-	});
-
-	const style = {
-		opacity: isDragging ? 0.5 : 1,
-		cursor: 'grab',
-	};
-
-	console.log(`DraggableTemplate ${id}:`, { isDragging, template });
-
-	return (
-		<div
-			ref={setNodeRef}
-			style={style}
-			{...listeners}
-			{...attributes}
-			className="hover:border-primary transition-colors"
-		>
-			{children}
 		</div>
 	);
 };

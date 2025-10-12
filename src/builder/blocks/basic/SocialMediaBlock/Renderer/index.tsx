@@ -28,6 +28,7 @@ import {
 	DiscordIcon,
 	LinkedinIcon,
 } from '@quillcrm/components';
+import { getFlexJustify } from '@/builder/utils/styleHelpers';
 
 export interface SocialMediaBlockRendererProps {
 	props: {
@@ -95,19 +96,6 @@ const getIconSize = (size: 'small' | 'medium' | 'large') => {
 	}
 };
 
-const getAlignmentClass = (align: 'left' | 'center' | 'right') => {
-	switch (align) {
-		case 'left':
-			return 'justify-start';
-		case 'center':
-			return 'justify-center';
-		case 'right':
-			return 'justify-end';
-		default:
-			return 'justify-center';
-	}
-};
-
 export const SocialMediaBlockRenderer: React.FC<
 	SocialMediaBlockRendererProps
 > = ({ props }) => {
@@ -115,7 +103,7 @@ export const SocialMediaBlockRenderer: React.FC<
 		([_, data]) => data.enabled
 	);
 	const iconSize = getIconSize(props.iconSize);
-	const alignmentClass = getAlignmentClass(props.align);
+	const alignmentClass = getFlexJustify(props.align);
 
 	if (enabledPlatforms.length === 0) {
 		return null;
@@ -128,11 +116,14 @@ export const SocialMediaBlockRenderer: React.FC<
 			}}
 		>
 			<div className={cn('flex', alignmentClass)}>
-				<div className="flex flex-wrap gap-4 justify-center max-w-full" style={{ maxWidth: `${(iconSize.width + 16) * 6}px` }}>
+				<div
+					className="flex flex-wrap gap-4 justify-center max-w-full"
+					style={{ maxWidth: `${(iconSize.width + 16) * 6}px` }}
+				>
 					{enabledPlatforms.map(([platformKey, platformData]) => {
 						const IconComponent =
 							socialMediaIcons[
-							platformKey as keyof typeof socialMediaIcons
+								platformKey as keyof typeof socialMediaIcons
 							];
 
 						if (!IconComponent) {
@@ -155,7 +146,11 @@ export const SocialMediaBlockRenderer: React.FC<
 									width={iconSize.width}
 									height={iconSize.height}
 									shape={props.shape}
-									color={props.colorMode === 'colored' ? props.color : undefined}
+									color={
+										props.colorMode === 'colored'
+											? props.color
+											: undefined
+									}
 								/>
 							</a>
 						);

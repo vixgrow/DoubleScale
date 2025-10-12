@@ -1,16 +1,12 @@
 /**
  * wordpress dependencies
  */
-import { ImageBlockIcon } from '@quillcrm/components';
 import { __ } from '@wordpress/i18n';
-/**
- * external dependencies
- */
-
 /**
  * internal dependencies
  */
-import { useDraggable } from '@dnd-kit/core';
+import { ImageBlockIcon } from '@quillcrm/components';
+import { DraggableTemplate } from '../../components/shared/DraggableTemplate';
 
 const ImageGalleryLibrary = () => {
 	// Grid 1 template - 1 large image + 2 small images
@@ -757,6 +753,7 @@ const ImageGalleryLibrary = () => {
 				<DraggableTemplate
 					template={grid1Template}
 					id="image-gallery-grid-1"
+					templateType="image-gallery"
 				>
 					<div className="flex gap-1 h-full items-center border rounded-lg p-3">
 						<div className="text-[#616161] bg-muted w-1/2 h-full py-6 flex items-center justify-center">
@@ -779,6 +776,7 @@ const ImageGalleryLibrary = () => {
 				<DraggableTemplate
 					template={grid2Template}
 					id="image-gallery-grid-2"
+					templateType="image-gallery"
 				>
 					<div className="flex gap-1 h-full items-center border rounded-lg p-3">
 						<div className="text-[#616161] bg-muted w-1/2 h-full py-6 flex items-center justify-center">
@@ -809,6 +807,7 @@ const ImageGalleryLibrary = () => {
 				<DraggableTemplate
 					template={grid3Template}
 					id="image-gallery-grid-3"
+					templateType="image-gallery"
 				>
 					<div className="flex gap-1 h-full items-center border rounded-lg p-3">
 						<div className="flex flex-col gap-1 w-1/4">
@@ -839,6 +838,7 @@ const ImageGalleryLibrary = () => {
 				<DraggableTemplate
 					template={grid4Template}
 					id="image-gallery-grid-4"
+					templateType="image-gallery"
 				>
 					<div className="flex gap-1 h-full items-center border rounded-lg p-3">
 						<div className="flex flex-col gap-1 w-1/4">
@@ -869,6 +869,7 @@ const ImageGalleryLibrary = () => {
 				<DraggableTemplate
 					template={grid5Template}
 					id="image-gallery-grid-5"
+					templateType="image-gallery"
 				>
 					<div className="flex gap-1 items-center border rounded-lg p-3">
 						<div className="flex flex-col gap-1 w-1/3">
@@ -904,6 +905,7 @@ const ImageGalleryLibrary = () => {
 				<DraggableTemplate
 					template={grid6Template}
 					id="image-gallery-grid-6"
+					templateType="image-gallery"
 				>
 					<div className="flex gap-1 items-center border rounded-lg p-3">
 						<div className="flex flex-col gap-1 w-1/4">
@@ -941,34 +943,6 @@ const ImageGalleryLibrary = () => {
 					</div>
 				</DraggableTemplate>
 			</div>
-		</div>
-	);
-};
-
-// Draggable component using dnd-kit
-const DraggableTemplate = ({ template, id, children }) => {
-	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-		id: id,
-		data: {
-			type: 'image-gallery-template',
-			template: template,
-		},
-	});
-
-	const style = {
-		opacity: isDragging ? 0.5 : 1,
-		cursor: 'grab',
-	};
-
-	return (
-		<div
-			ref={setNodeRef}
-			style={style}
-			{...listeners}
-			{...attributes}
-			className="hover:border-primary transition-colors"
-		>
-			{children}
 		</div>
 	);
 };

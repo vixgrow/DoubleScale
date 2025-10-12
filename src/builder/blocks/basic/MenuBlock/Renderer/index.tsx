@@ -10,6 +10,7 @@
  * internal dependencies
  */
 import { MenuBlockProps } from '..';
+import { getFlexJustify } from '@/builder/utils/styleHelpers';
 
 export interface MenuBlockRendererProps {
 	props: MenuBlockProps;
@@ -41,18 +42,6 @@ export const MenuBlockRenderer: React.FC<MenuBlockRendererProps> = ({
 		};
 	};
 
-	const getAlignmentStyle = () => {
-		switch (props.align) {
-			case 'left':
-				return 'justify-start';
-			case 'right':
-				return 'justify-end';
-			case 'center':
-			default:
-				return 'justify-center';
-		}
-	};
-
 	return (
 		<div
 			style={{
@@ -64,7 +53,7 @@ export const MenuBlockRenderer: React.FC<MenuBlockRendererProps> = ({
 				width: '100%',
 				overflow: 'hidden',
 			}}
-			className={getAlignmentStyle()}
+			className={getFlexJustify(props.align)}
 		>
 			{props.menuItems.map((item, index) => (
 				<a

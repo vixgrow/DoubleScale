@@ -14,7 +14,7 @@ import emailBuilder from '../../../assets/images/email-builder.png';
 import { ColumnsLayout } from '@quillcrm/components';
 import { LayoutTemplate } from '../types';
 import { useDroppable } from '@dnd-kit/core';
-import { v4 as uuidv4 } from 'uuid';
+import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
 
 interface CanvasProps {
 	// No props needed since we're using the store
@@ -57,15 +57,7 @@ const Canvas = ({}: CanvasProps) => {
 	};
 
 	const handleSectionSelect = (sectionType: LayoutTemplate) => {
-		const newSection = {
-			id: uuidv4(),
-			columns: sectionType.width.map((width) => ({
-				id: uuidv4(),
-				width, // Now using actual percentages directly
-				blocks: [],
-			})),
-			styles: {},
-		};
+		const newSection = EmailBuilderService.createSection(sectionType);
 		dispatch(STORE_KEY).addSection(newSection);
 		setIsModalOpen(false);
 	};

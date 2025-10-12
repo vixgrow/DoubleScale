@@ -9,7 +9,7 @@ import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailSection } from '../../stores/email-builder/types';
 import ColumnRenderer from './ColumnRenderer';
 import { CopyIcon, DeleteIcon } from '@quillcrm/components';
-import { v4 as uuidv4 } from 'uuid';
+import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
 
 interface SectionRendererProps {
 	section: EmailSection;
@@ -19,20 +19,15 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 	const dispatch = useDispatch();
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
 
-	const {
-		attributes,
-		setNodeRef,
-		transform,
-		transition,
-		isDragging,
-	} = useSortable({
-		id: section.id,
-		data: {
-			type: 'section',
-			sectionId: section.id,
-			section: section,
-		},
-	});
+	const { attributes, setNodeRef, transform, transition, isDragging } =
+		useSortable({
+			id: section.id,
+			data: {
+				type: 'section',
+				sectionId: section.id,
+				section: section,
+			},
+		});
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
@@ -60,26 +55,14 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 	const handleDuplicateSection = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		// Duplicate section logic
-		const newSection = {
-			...section,
-			id: uuidv4(),
-			columns: section.columns.map(col => ({
-				...col,
-				id: uuidv4(),
-				blocks: col.blocks.map(block => ({
-					...block,
-					id: uuidv4(),
-				}))
-			}))
-		};
-		const sectionIndex = sections.findIndex(s => s.id === section.id);
+		const newSection = EmailBuilderService.duplicateSection(section);
+		const sectionIndex = sections.findIndex((s) => s.id === section.id);
 		dispatch(STORE_KEY).addSection(newSection, sectionIndex + 1);
 	};
 
 	const handleMoveSectionUp = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		const currentIndex = sections.findIndex(s => s.id === section.id);
+		const currentIndex = sections.findIndex((s) => s.id === section.id);
 		if (currentIndex > 0) {
 			const targetSectionId = sections[currentIndex - 1].id;
 			dispatch(STORE_KEY).reorderSections(section.id, targetSectionId);
@@ -88,7 +71,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 
 	const handleMoveSectionDown = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		const currentIndex = sections.findIndex(s => s.id === section.id);
+		const currentIndex = sections.findIndex((s) => s.id === section.id);
 		if (currentIndex < sections.length - 1) {
 			const targetSectionId = sections[currentIndex + 1].id;
 			dispatch(STORE_KEY).reorderSections(section.id, targetSectionId);
@@ -111,8 +94,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 		>
 			{/* Section Controls */}
 			{isSelected && (
-				<div className="absolute -top-[1.5px] h-[189.5px] -left-[43px] grid items-center gap-1 bg-white shadow-md rounded-l-xl p-2 border-2 border-blue-500"
-				>
+				<div className="absolute -top-[1.5px] h-[189.5px] -left-[43px] grid items-center gap-1 bg-white shadow-md rounded-l-xl p-2 border-2 border-blue-500">
 					<Button
 						variant="ghost"
 						size="lg"
@@ -122,7 +104,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 					>
 						<DeleteIcon width={24} height={24} />
 					</Button>
-					<div className='border-b-2 border-accent'></div>
+					<div className="border-b-2 border-accent"></div>
 					<Button
 						variant="ghost"
 						size="lg"
@@ -132,7 +114,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 					>
 						<CopyIcon width={24} height={24} />
 					</Button>
-					<div className='border-b-2 border-accent'></div>
+					<div className="border-b-2 border-accent"></div>
 					<Button
 						variant="ghost"
 						size="lg"
@@ -142,7 +124,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 					>
 						<ArrowUp className="w-6 h-6" />
 					</Button>
-					<div className='border-b-2 border-accent'></div>
+					<div className="border-b-2 border-accent"></div>
 					<Button
 						variant="ghost"
 						size="lg"

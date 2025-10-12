@@ -48,7 +48,8 @@ const EmailBodyLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.</p>',
 					hyperlink: '',
 					fontSize: 12,
 					color: '#9197A4',
@@ -85,7 +86,8 @@ const EmailBodyLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use,</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use,</p>',
 					hyperlink: '',
 					fontSize: 12,
 					color: '#9197A4',
@@ -219,7 +221,8 @@ const EmailBodyLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use,</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use,</p>',
 					hyperlink: '',
 					fontSize: 12,
 					color: '#9197A4',
@@ -286,7 +289,8 @@ const EmailBodyLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.</p>',
 					hyperlink: '',
 					fontSize: 12,
 					color: '#9197A4',
@@ -332,7 +336,6 @@ const EmailBodyLibrary = () => {
 		],
 	};
 
-
 	// Title & Button 2 template - creates 3 blocks: lorem text, heading, button
 	const titleButton2Template = {
 		type: 'title-button-2',
@@ -340,7 +343,8 @@ const EmailBodyLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use.</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use.</p>',
 					hyperlink: '',
 					fontSize: 12,
 					color: '#9197A4',
@@ -483,7 +487,8 @@ const EmailBodyLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use.</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use.</p>',
 					hyperlink: '',
 					fontSize: 12,
 					color: '#9197A4',
@@ -612,7 +617,8 @@ const EmailBodyLibrary = () => {
 			{
 				type: 'text',
 				props: {
-					content: '<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview..Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.</p>',
+					content:
+						'<p>Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview..Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.</p>',
 					hyperlink: '',
 					fontSize: 12,
 					color: '#9197A4',
@@ -662,7 +668,10 @@ const EmailBodyLibrary = () => {
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">{__('Title 1', 'quillcrm')}</label>
-				<DraggableTemplate template={title1Template} id="email-body-title-1">
+				<DraggableTemplate
+					template={title1Template}
+					id="email-body-title-1"
+				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-3 text-[10px]">
 						<div className="text-[#141B34] text-sm">
 							{__('heading 1', 'quillcrm')}
@@ -679,7 +688,10 @@ const EmailBodyLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">{__('Title 2', 'quillcrm')}</label>
-				<DraggableTemplate template={title2Template} id="email-body-title-2">
+				<DraggableTemplate
+					template={title2Template}
+					id="email-body-title-2"
+				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-3 text-[10px]">
 						<div className="text-[#9197A4]">
 							{__(
@@ -696,7 +708,10 @@ const EmailBodyLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">{__('Title 3', 'quillcrm')}</label>
-				<DraggableTemplate template={title3Template} id="email-body-title-3">
+				<DraggableTemplate
+					template={title3Template}
+					id="email-body-title-3"
+				>
 					<div className="flex items-center justify-center border rounded-lg p-2 text-[10px]">
 						<div className="text-[#141B34] text-sm font-bold">
 							{__('Title 1', 'quillcrm')}
@@ -707,9 +722,14 @@ const EmailBodyLibrary = () => {
 
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">{__('Title 4', 'quillcrm')}</label>
-				<DraggableTemplate template={title4Template} id="email-body-title-4">
+				<DraggableTemplate
+					template={title4Template}
+					id="email-body-title-4"
+				>
 					<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-3 text-sm text-[#141B34]">
-						<div className="font-bold">{__('title 1', 'quillcrm')}</div>
+						<div className="font-bold">
+							{__('title 1', 'quillcrm')}
+						</div>
 						<div className="text-center">
 							{__(
 								'Lorem ipsum contains the typefaces more in use,',
@@ -724,7 +744,10 @@ const EmailBodyLibrary = () => {
 				<label className="text-sm">
 					{__('Title & Button 1', 'quillcrm')}
 				</label>
-				<DraggableTemplate template={titleButton1Template} id="email-body-title-button-1">
+				<DraggableTemplate
+					template={titleButton1Template}
+					id="email-body-title-button-1"
+				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 						<div className="text-[#141B34] font-bold text-sm">
 							{__('heading 1', 'quillcrm')}
@@ -742,12 +765,14 @@ const EmailBodyLibrary = () => {
 				</DraggableTemplate>
 			</div>
 
-
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">
 					{__('Title & Button 2', 'quillcrm')}
 				</label>
-				<DraggableTemplate template={titleButton2Template} id="email-body-title-button-2">
+				<DraggableTemplate
+					template={titleButton2Template}
+					id="email-body-title-button-2"
+				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 						<div className="text-[#9197A4]">
 							{__(
@@ -769,7 +794,10 @@ const EmailBodyLibrary = () => {
 				<label className="text-sm">
 					{__('Title & 2 Buttons', 'quillcrm')}
 				</label>
-				<DraggableTemplate template={titleButton5Template} id="email-body-title-2-buttons">
+				<DraggableTemplate
+					template={titleButton5Template}
+					id="email-body-title-2-buttons"
+				>
 					<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-2 text-[10px]">
 						<div className="text-[#9197A4]">
 							{__('title 1', 'quillcrm')}
@@ -797,7 +825,10 @@ const EmailBodyLibrary = () => {
 				<label className="text-sm">
 					{__('Title, Paragraph & Button', 'quillcrm')}
 				</label>
-				<DraggableTemplate template={titleParagraphButtonTemplate} id="email-body-title-paragraph-button">
+				<DraggableTemplate
+					template={titleParagraphButtonTemplate}
+					id="email-body-title-paragraph-button"
+				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 						<div className="text-[#9197A4]">
 							{__('title 1', 'quillcrm')}

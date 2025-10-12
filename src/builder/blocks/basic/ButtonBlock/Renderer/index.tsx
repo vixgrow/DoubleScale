@@ -11,6 +11,7 @@
  */
 import { ButtonBlockProps } from '..';
 import { useButtonSettings } from '../../../../hooks/useButtonSettings';
+import { getTextAlignment } from '@/builder/utils/styleHelpers';
 
 export interface ButtonRendererProps {
 	props: ButtonBlockProps;
@@ -72,28 +73,11 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 		};
 	};
 
-	// Handle alignment
-	const getAlignment = () => {
-		switch (props.align) {
-			case 'left':
-				return 'left';
-			case 'center':
-				return 'center';
-			case 'right':
-				return 'right';
-			case 'full':
-				return 'center';
-			default:
-				return 'center';
-		}
-	};
-
 	const containerStyle: React.CSSProperties = {
-		textAlign: getAlignment() as 'left' | 'center' | 'right',
+		textAlign: getTextAlignment(props.align) as 'left' | 'center' | 'right',
 		width: props.align === 'full' ? '100%' : 'auto',
 		padding: containerPaddingString,
 		backgroundColor: props.containerBackgroundColor,
-		// Ensure container doesn't overflow
 		overflow: 'hidden',
 		wordWrap: 'break-word',
 	};

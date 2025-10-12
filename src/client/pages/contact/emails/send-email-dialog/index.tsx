@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 /**
  * Internal dependencies
@@ -16,8 +16,8 @@ import {
     DialogContent,
     DialogFooter,
     DialogHeader,
-    DialogTitle,
     DialogOverlay,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import {
     CustomDialogHeader,
@@ -51,9 +51,52 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
         setIsSending(false);
     };
 
+    const isInteractableElement = (target: HTMLElement) => {
+        if (!target) return false;
+
+        const isTinyMCEElement = target.className &&
+            typeof target.className === 'string' &&
+            target.className.includes('tox-');
+
+        // Check if target is inside TinyMCE dialogs or WordPress media modal
+        return !!(
+            target.closest('.media-modal') ||
+            target.closest('.media-modal-backdrop') ||
+            target.closest('.tox-tinymce-aux') ||
+            target.closest('.tox-dialog-wrap') ||
+            target.closest('.tox-dialog') ||
+            target.closest('.tox-menu') ||
+            target.closest('.tox-collection') ||
+            target.closest('.tox') ||
+            isTinyMCEElement
+        );
+    };
+
+    // Disable Radix focus trap when TinyMCE dialogs are open
+    useEffect(() => {
+        if (!open) return;
+
+        const handleFocusTrap = (e: FocusEvent) => {
+            const target = e.target as HTMLElement;
+            if (isInteractableElement(target)) {
+                e.stopPropagation();
+            }
+        };
+
+        // Listen for focus events at capture phase to intercept before Radix
+        document.addEventListener('focusin', handleFocusTrap, true);
+        document.addEventListener('focusout', handleFocusTrap, true);
+
+        return () => {
+            document.removeEventListener('focusin', handleFocusTrap, true);
+            document.removeEventListener('focusout', handleFocusTrap, true);
+        };
+    }, [open]);
+
     return (
         <>
             <style>{`
+                /* TinyMCE elements z-index and pointer events */
                 .tox-tinymce-aux,
                 .tox-menu,
                 .tox-dialog,
@@ -62,11 +105,27 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
                 .tox-dialog-wrap,
                 .tox-collection__item,
                 .tox-swatch {
-                    z-index: 999999 !important;
+                    z-index: 160000 !important;
                     pointer-events: auto !important;
                 }
-                .tox-tinymce-aux * {
+                
+                /* Ensure all interactive TinyMCE elements are clickable and focusable */
+                .tox-tinymce-aux *,
+                .tox-dialog *,
+                .tox-dialog input,
+                .tox-dialog textarea,
+                .tox-dialog select,
+                .tox-dialog button,
+                .tox-dialog-wrap *,
+                .tox-dialog-wrap input,
+                .tox-dialog-wrap textarea,
+                .tox-dialog-wrap button {
                     pointer-events: auto !important;
+                }
+                
+                /* Dialog overlay with proper z-index */
+                [data-radix-dialog-overlay] {
+                    z-index: 150200 !important;
                 }
             `}</style>
             <Dialog
@@ -77,39 +136,31 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
                 <DialogContent
                     className="max-w-[500px] z-[150200]"
                     style={{ overflow: 'visible' }}
+                    onEscapeKeyDown={(e) => {
+                        // Prevent dialog from closing when TinyMCE dialogs are open
+                        const tinyMCEDialog = document.querySelector('.tox-dialog');
+                        if (tinyMCEDialog) {
+                            e.preventDefault();
+                        }
+                    }}
                     onPointerDownOutside={(e) => {
                         // Allow interaction with WordPress media modal and TinyMCE menus
                         const target = e.target as HTMLElement;
-                        // Check if clicking on any TinyMCE UI element
-                        const isTinyMCEElement = target.className &&
-                            typeof target.className === 'string' &&
-                            target.className.includes('tox-');
-
-                        if (
-                            target.closest('.media-modal') ||
-                            target.closest('.media-modal-backdrop') ||
-                            target.closest('.tox-tinymce-aux') ||
-                            target.closest('.tox') ||
-                            isTinyMCEElement
-                        ) {
+                        if (isInteractableElement(target)) {
                             e.preventDefault();
                         }
                     }}
                     onInteractOutside={(e) => {
                         // Allow interaction with WordPress media modal and TinyMCE menus
                         const target = e.target as HTMLElement;
-                        // Check if clicking on any TinyMCE UI element
-                        const isTinyMCEElement = target.className &&
-                            typeof target.className === 'string' &&
-                            target.className.includes('tox-');
-
-                        if (
-                            target.closest('.media-modal') ||
-                            target.closest('.media-modal-backdrop') ||
-                            target.closest('.tox-tinymce-aux') ||
-                            target.closest('.tox') ||
-                            isTinyMCEElement
-                        ) {
+                        if (isInteractableElement(target)) {
+                            e.preventDefault();
+                        }
+                    }}
+                    onFocusOutside={(e) => {
+                        // Allow focus to move to TinyMCE dialogs
+                        const target = e.target as HTMLElement;
+                        if (isInteractableElement(target)) {
                             e.preventDefault();
                         }
                     }}

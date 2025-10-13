@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Abstract Campaign Controller
  * Base class for all campaign REST controllers
@@ -9,6 +10,7 @@
 
 namespace QuillCRM\Abstracts;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -26,7 +28,7 @@ use QuillCRM\Constants\Tracking_Status;
 abstract class Abstract_Campaign_Controller extends REST_Controller {
 
 	/**
-	 * Campaign type (email, sms)
+	 * Campaign channel (email, sms, whatsapp)
 	 *
 	 * @var string
 	 */
@@ -599,11 +601,11 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 		return $campaign_data;
 	}
 
-		/**
-		 * Get collection parameters
-		 *
-		 * @return array
-		 */
+	/**
+	 * Get collection parameters
+	 *
+	 * @return array
+	 */
 	public function get_collection_params() {
 		return array(
 			'keyword'  => array(
@@ -623,11 +625,11 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 		);
 	}
 
-		/**
-		 * Get analytics parameters
-		 *
-		 * @return array
-		 */
+	/**
+	 * Get analytics parameters
+	 *
+	 * @return array
+	 */
 	public function get_analytics_params() {
 		return array(
 			'interval'   => array(
@@ -662,24 +664,6 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Permission checks - all return the same for campaigns
-	 */
-	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' ); }
-	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' ); }
-	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' ); }
-	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' ); }
-	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' ); }
-	public function delete_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' ); }
-	public function get_analytics_permissions_check( $request ) {
-		return current_user_can( 'manage_options' ); }
-
-	/**
 	 * Validate campaign status
 	 *
 	 * @param string          $status
@@ -700,5 +684,30 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Permission checks - all return the same for campaigns
+	 */
+	public function get_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+	public function get_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+	public function create_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+	public function update_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+	public function delete_item_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+	public function delete_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+	public function get_analytics_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 }

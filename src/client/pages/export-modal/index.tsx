@@ -24,7 +24,7 @@ const ExportModal: React.FC<Props> = ({ open, onClose }) => {
 					}
 				}}
 			>
-				<DialogContent className="z-[1600000] w-screen h-screen max-w-none gap-8 overflow-y-auto py-4 px-16 bg-white rounded-none shadow-none">
+				<DialogContent className="z-[150000] w-screen h-screen max-w-none gap-8 overflow-y-auto py-4 px-16 bg-white rounded-none shadow-none">
 					<ExportHeader />
 					<div className="flex h-full gap-5">
 						<div className="w-full">

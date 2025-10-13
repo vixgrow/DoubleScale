@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Campaign_Model
  * This class is responsible for handling the campaign model
@@ -24,6 +25,7 @@ use QuillCRM\Constants\Campaign_Channel;
  * Campaign_Model class
  */
 class Campaign_Model extends Model {
+
 
 
 	/**
@@ -92,6 +94,14 @@ class Campaign_Model extends Model {
 	);
 
 	/**
+	 * Appends
+	 *
+	 * @var array
+	 */
+	protected $appends = array( 'sent', 'opened', 'click' );
+
+
+	/**
 	 * Timestamps
 	 *
 	 * @var bool
@@ -146,6 +156,47 @@ class Campaign_Model extends Model {
 	}
 
 	/**
+	 * Get the campaign email sequences
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function sequences_mail() {
+		return $this->hasMany( Campaign_Model::class, 'parent_id' )->where( 'type', 'sequence_mail' );
+	}
+
+	/**
+	 * Get parent campaign
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function parent() {
+		return $this->belongsTo( Campaign_Model::class, 'parent_id' );
+	}
+
+
+	public function getSentAttribute() {
+		return $this->messages()
+			->where( 'status', 'sent' )
+			->count();
+	}
+
+	public function getOpenedAttribute() {
+		return $this->messages()
+			->where( 'opened', true )
+			->count();
+	}
+
+	public function getClickAttribute() {
+		return $this->messages()
+			->where( 'clicked', true )
+			->count();
+	}
+
+	/**
 	 * Get setting
 	 *
 	 * @param string $key key.
@@ -166,6 +217,25 @@ class Campaign_Model extends Model {
 	 */
 	public function get_type() {
 		return $this->type ?? Campaign_Channel::get_default();
+	}
+
+	/**
+	 * Get the campaign type for template processing
+	 * Sequence mails should be treated as email campaigns for template processing
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public function get_template_processing_type() {
+		$type = $this->get_type();
+
+		// Sequence mails are email-based campaigns
+		if ( $type === 'sequence_mail' ) {
+			return 'email';
+		}
+
+		return $type;
 	}
 
 	/**
@@ -218,7 +288,7 @@ class Campaign_Model extends Model {
 		}
 
 		$templates     = array();
-		$campaign_type = $this->get_type();
+		$campaign_type = $this->get_template_processing_type();
 
 		foreach ( $template_ids as $template_id ) {
 			$template = Template_Model::find( $template_id );
@@ -239,7 +309,7 @@ class Campaign_Model extends Model {
 	 * @return array Array of template IDs
 	 */
 	private function process_templates( $templates_data ) {
-		$campaign_type    = $this->get_type();
+		$campaign_type    = $this->get_template_processing_type();
 		$template_factory = Campaign_Template_Factory::instance();
 
 		return $template_factory->process_templates_data( $templates_data, $campaign_type );

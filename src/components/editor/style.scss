@@ -1,0 +1,96 @@
+.tinymce-wp-editor {
+    width: 100%;
+
+    // TinyMCE editor container styling
+    .tox-tinymce {
+        border: 1px solid #DEE1E6;
+        border-radius: 0.375rem;
+
+        &:focus-within {
+            border-color: none;
+            outline: none;
+
+        }
+    }
+
+    // Editor toolbar styling
+    .tox-toolbar,
+    .tox-toolbar__primary,
+    .tox-toolbar-overlord {
+        background: #F8F8F8 !important; // bg-gray-100
+        border-bottom: 1px solid #e5e7eb;
+        flex-wrap: nowrap !important;
+    }
+
+    .tox-toolbar__group button {
+        background-color: #F8F8F8 !important;
+    }
+
+    // Keep toolbar in single line
+    .tox-toolbar__primary {
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+    }
+
+    // Editor content area
+    .tox-edit-area {
+        background: #ffffff;
+    }
+
+    // Disabled state
+    &.disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    // Loading state
+    &.loading {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+    }
+}
+
+// WordPress media modal adjustments
+.media-modal {
+    z-index: 160000 !important;
+    pointer-events: auto !important;
+}
+
+.media-modal-backdrop {
+    z-index: 159999 !important;
+    pointer-events: auto !important;
+}
+
+// Ensure WordPress media modal content is always interactive
+.media-frame,
+.media-modal-content,
+.media-frame-content,
+.media-sidebar,
+.media-toolbar {
+    pointer-events: auto !important;
+}
+
+// Override any aria-hidden styles that might block interaction
+.media-modal[aria-hidden="true"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.tox-editor-header {
+    padding: 0 !important;
+    box-shadow: none !important;
+}

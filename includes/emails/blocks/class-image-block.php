@@ -69,7 +69,9 @@ class Image_Block extends Email_Block {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
-		// Process link for merge tags
+		// Process src, alt, and link for merge tags
+		$src  = ! empty( $props['src'] ) ? $this->process_merge_tags( $props['src'], $merge_tags ) : '';
+		$alt  = ! empty( $props['alt'] ) ? $this->process_merge_tags( $props['alt'], $merge_tags ) : '';
 		$link = ! empty( $props['link'] ) ? $this->process_merge_tags( $props['link'], $merge_tags ) : '';
 
 		// Wrapper style (matches frontend wrapperStyle)
@@ -86,8 +88,7 @@ class Image_Block extends Email_Block {
 				'background-color' => $props['backgroundColor'],
 				'padding'          => $this->format_padding( $props['padding'] ),
 				'border-radius'    => $props['borderRadius'] . 'px',
-				'display'          => 'block',
-				'max-width'        => '100%',
+				'display'          => 'inline-block',
 			)
 		);
 
@@ -98,7 +99,9 @@ class Image_Block extends Email_Block {
 				'height'        => $props['height'] === 'auto' ? 'auto' : $props['height'],
 				'max-width'     => '100%',
 				'border-radius' => $props['borderRadius'] . 'px',
-				'display'       => 'inline-block',
+				'display'       => 'block',
+				'border'        => '0',
+				'outline'       => 'none',
 			)
 		);
 
@@ -119,26 +122,27 @@ class Image_Block extends Email_Block {
 			)
 		);
 
-		// Start wrapper div
+		// Simple div structure - already wrapped in table cell by renderer
 		$output  = "<div style=\"{$wrapper_style}\">";
-		$output .= "<div style=\"{$container_style}\">";
+		$output .= "<span style=\"{$container_style}\">";
 
-		// Render image element
-		if ( ! empty( $props['src'] ) ) {
-			// Render image
-			$image_element = "<img src=\"{$props['src']}\" alt=\"{$props['alt']}\" style=\"{$image_style}\" />";
+		// Build the image or placeholder
+		if ( ! empty( $src ) ) {
+			// Render image with proper URL escaping
+			$image = '<img src="' . esc_url( $src ) . '" alt="' . esc_attr( $alt ) . '" style="' . $image_style . '" border="0" />';
+
+			// Wrap in link if provided
+			if ( $link ) {
+				$output .= '<a href="' . esc_url( $link ) . '" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:block;">' . $image . '</a>';
+			} else {
+				$output .= $image;
+			}
 		} else {
-			// Render placeholder (simplified for email - no icon, just text)
-			$image_element = "<div style=\"{$placeholder_style}\">📷</div>";
+			// Render placeholder
+			$output .= "<div style=\"{$placeholder_style}\">📷</div>";
 		}
 
-		// Wrap in link if provided
-		if ( $link ) {
-			$image_element = "<a href=\"{$link}\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"text-decoration:none;\">{$image_element}</a>";
-		}
-
-		$output .= $image_element;
-		$output .= '</div>';
+		$output .= '</span>';
 		$output .= '</div>';
 
 		return $output;

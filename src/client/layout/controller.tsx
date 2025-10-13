@@ -53,10 +53,13 @@ import {
 	SettingsIcon,
 	ToolsIcon,
 	CustomFieldsIcon,
+	EmailSequenceIcon,
 } from '@quillcrm/components';
+import EmailSequences from '../pages/email-sequences';
 
 // Import Lucide React icon for pipeline
 import { TrendingUp } from 'lucide-react';
+import SequencesMail from '../pages/email-sequences/sequences-mail';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -122,6 +125,21 @@ registerAdminPage('campaign', {
 	path: 'campaigns/:id/:tab?/:subtab?',
 	component: () => <Campaign />,
 	label: __('Campaign', 'quillcrm'),
+	hidden: true,
+});
+
+registerAdminPage('email-sequences', {
+	path: 'email-sequences',
+	component: () => <EmailSequences />,
+	label: __('Email Sequence', 'quillcrm'),
+	icon: <EmailSequenceIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
+});
+
+registerAdminPage('email-sequence', {
+	path: 'email-sequences/:id',
+	component: () => <SequencesMail />,
+	label: __('Email Sequence', 'quillcrm'),
 	hidden: true,
 });
 

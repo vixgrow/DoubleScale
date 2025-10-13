@@ -42,7 +42,7 @@ const Header: React.FC = () => {
 	// Use auto-save hook
 	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
 		{
-			interval: 2000, // Auto-save every 2 seconds
+			interval: 10000, // Auto-save every 10 seconds
 			enabled: true,
 		}
 	);
@@ -82,7 +82,6 @@ const Header: React.FC = () => {
 				body: JSON.stringify(builderData),
 				settings: JSON.stringify({
 					type: 'builder',
-					version: '1.0',
 				}),
 				hidden: 0, // Make it visible in templates list
 				category: 'custom',

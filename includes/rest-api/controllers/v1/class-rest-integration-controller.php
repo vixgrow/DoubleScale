@@ -159,9 +159,16 @@ class REST_Integration_Controller extends REST_Controller {
 			$slug        = $request->get_param( 'slug' );
 			$settings    = $request->get_param( 'settings' ) ?? array();
 			$integration = Integrations_Manager::instance()->get_integration( $slug );
-			$validator   = $integration->validate( $settings );
-			if ( ! $validator ) {
-				return new WP_Error( 'rest_invalid_request', __( 'Invalid settings.', 'quillcrm' ), array( 'status' => 400 ) );
+			
+			// Skip validation if settings are empty (disconnecting)
+			if ( ! empty( $settings ) ) {
+				$validator = $integration->validate( $settings );
+				if ( is_wp_error( $validator ) ) {
+					return $validator;
+				}
+				if ( ! $validator ) {
+					return new WP_Error( 'rest_invalid_request', __( 'Invalid settings.', 'quillcrm' ), array( 'status' => 400 ) );
+				}
 			}
 
 			$integration->update_settings( $settings );

@@ -10,6 +10,7 @@
 namespace QuillCRM\Emails;
 
 use QuillCRM\Models\Template_Model;
+use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * Renderer for email templates
@@ -58,11 +59,17 @@ class Email_Renderer {
 			return $template->body;
 		}
 
-		// Get settings - already parsed by model if $casts is working
-		$settings = is_array( $template->settings ) ? $template->settings : ( json_decode( $template->settings, true ) ?: array() );
+		// Get global settings from content (builder stores them in body.globalSettings)
+		$global_settings = isset( $content['globalSettings'] ) ? $content['globalSettings'] : array();
+
+		// Get preview_text from template and process merge tags
+		$preview_text = ! empty( $template->preview_text ) ? $template->preview_text : '';
+		if ( ! empty( $preview_text ) && ! empty( $merge_tags ) ) {
+			$preview_text = Merge_Tags_Manager::instance()->process_merge_tags( $preview_text, $merge_tags );
+		}
 
 		// Generate HTML for email body
-		$html = $this->build_email_structure( $content, $settings, $merge_tags );
+		$html = $this->build_email_structure( $content, $global_settings, $merge_tags, $preview_text );
 
 		return $html;
 	}
@@ -70,20 +77,48 @@ class Email_Renderer {
 	/**
 	 * Build email HTML structure
 	 *
-	 * @param array $content Template content
-	 * @param array $settings Template settings
-	 * @param array $merge_tags Merge tags
+	 * @param array  $content Template content
+	 * @param array  $global_settings Global email settings (canvas, background, etc.)
+	 * @param array  $merge_tags Merge tags
+	 * @param string $preview_text Preview text for email clients
 	 * @return string HTML output
 	 */
-	private function build_email_structure( $content, $settings, $merge_tags ) {
+	private function build_email_structure( $content, $global_settings, $merge_tags, $preview_text = '' ) {
 		// Extract button settings from content if available
 		if ( isset( $content['buttonSettings'] ) && is_array( $content['buttonSettings'] ) ) {
 			$this->button_settings = $content['buttonSettings'];
 		}
 
-		// Default settings
-		$bg_color     = isset( $settings['backgroundColor'] ) ? $settings['backgroundColor'] : '#f7f7f7';
-		$canvas_color = isset( $settings['canvasColor'] ) ? $settings['canvasColor'] : '#ffffff';
+		// Extract global settings (with defaults)
+		$canvas_color        = isset( $global_settings['canvasColor'] ) ? $global_settings['canvasColor'] : '#ffffff';
+		$canvas_width        = isset( $global_settings['canvasWidth'] ) ? $global_settings['canvasWidth'] : 600;
+		$background_image    = isset( $global_settings['backgroundImage']['url'] ) ? $global_settings['backgroundImage']['url'] : '';
+		$background_repeat   = isset( $global_settings['backgroundRepeat'] ) ? $global_settings['backgroundRepeat'] : 'no-repeat';
+		$background_size     = isset( $global_settings['backgroundSize'] ) ? $global_settings['backgroundSize'] : 'cover';
+		$background_position = isset( $global_settings['backgroundPosition'] ) ? $global_settings['backgroundPosition'] : 'center';
+
+		// Process background image through merge tags if present
+		if ( ! empty( $background_image ) ) {
+			error_log( 'QuillCRM Canvas - Original background image: ' . $background_image );
+			$background_image = Merge_Tags_Manager::instance()->process_merge_tags( $background_image, $merge_tags );
+			error_log( 'QuillCRM Canvas - Processed background image: ' . $background_image );
+		} else {
+			error_log( 'QuillCRM Canvas - No background image found in global settings: ' . print_r( $global_settings, true ) );
+		}
+
+		// Use a light gray for outer wrapper background (email client background)
+		$bg_color = '#f7f7f7';
+
+		// Generate preheader HTML if preview_text is provided
+		$preheader_html = '';
+		if ( ! empty( $preview_text ) ) {
+			// Add hidden preheader text - this appears in email client previews but not in the email body
+			$preheader_html = '<div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">'
+				. esc_html( $preview_text )
+				// Add invisible characters to push unwanted preview text out of view
+				. str_repeat( '&nbsp;&zwnj;', 50 )
+				. '</div>';
+		}
 
 		// Start with proper email structure using tables for compatibility
 		$html = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
@@ -107,7 +142,7 @@ class Email_Renderer {
 				
 				/* Container styles */
 				.email-wrapper { width: 100% !important; background-color: {$bg_color} !important; }
-				.email-container { max-width: 600px !important; background-color: {$canvas_color} !important; }
+				.email-container { max-width: {$canvas_width}px !important; background-color: {$canvas_color} !important; }
 				
 				/* Image styles */
 				img { max-width: 100% !important; height: auto !important; }
@@ -119,14 +154,14 @@ class Email_Renderer {
 				a { text-decoration: none; }
 				a:hover { text-decoration: underline !important; }
 				
-				/* Mobile responsiveness */
-				@media only screen and (max-width: 620px) {
-					.email-container { width: 100% !important; }
-					.mobile-padding { padding: 10px !important; }
-					.mobile-hide { display: none !important; }
-					.mobile-center { text-align: center !important; }
-					.mobile-full-width { width: 100% !important; }
-				}
+			/* Mobile responsiveness */
+			@media only screen and (max-width: " . ( $canvas_width + 40 ) . "px) {
+				.email-container { width: 100% !important; }
+				.mobile-padding { padding: 10px !important; }
+				.mobile-hide { display: none !important; }
+				.mobile-center { text-align: center !important; }
+				.mobile-full-width { width: 100% !important; }
+			}
 				
 				/* Outlook specific */
 				<!--[if mso]>
@@ -135,14 +170,35 @@ class Email_Renderer {
 			</style>
 		</head>
 		<body style=\"margin: 0; padding: 0; background-color: {$bg_color};\">
+			{$preheader_html}
 			<!-- Email Wrapper Table -->
 			<table role=\"presentation\" class=\"email-wrapper\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: {$bg_color};\">
 				<tr>
 					<td align=\"center\" style=\"padding: 20px 0;\">
-						<!-- Main Email Container -->
-						<table role=\"presentation\" class=\"email-container\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color: {$canvas_color}; max-width: 600px;\">
-							<tr>
-								<td style=\"padding: 0;\">";
+					<!-- Main Email Container -->";
+
+		// Build canvas inline styles
+		$canvas_styles = array(
+			'background-color' => $canvas_color,
+			'max-width'        => $canvas_width . 'px',
+		);
+
+		// Add background image styles if set (Gmail-compatible)
+		if ( ! empty( $background_image ) && strpos( $background_image, 'localhost' ) === false ) {
+			$canvas_styles['background-image']    = "url('{$background_image}')";
+			$canvas_styles['background-repeat']   = $background_repeat;
+			$canvas_styles['background-size']     = $background_size;
+			$canvas_styles['background-position'] = $background_position;
+		}
+
+		$canvas_style_string = $this->build_style_string( $canvas_styles );
+
+		// Debug: Log canvas styles
+		error_log( 'QuillCRM Canvas - Canvas styles: ' . $canvas_style_string );
+
+		$html .= "<table role=\"presentation\" class=\"email-container\" width=\"{$canvas_width}\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"{$canvas_style_string}\">
+					<tr>
+						<td style=\"padding: 0;\">";
 
 		// Process all sections
 		if ( isset( $content['sections'] ) && is_array( $content['sections'] ) ) {

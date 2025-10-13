@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Merge Tag Manager
  *
@@ -18,6 +19,8 @@ use QuillCRM\Models\Automation_Contact_Model;
  * Merge Tag Manager
  */
 final class Merge_Tags_Manager {
+
+
 
 	/**
 	 * Registed merge tags
@@ -135,6 +138,11 @@ final class Merge_Tags_Manager {
 				'name'      => __( 'General', 'quillcrm' ),
 				'mergeTags' => array(),
 			),
+			'fluentforms'    => array(
+				'name'      => __( 'FluentForm Fields', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'fluentforms' ),
+			),
 			'order'          => array(
 				'name'      => __( 'Order', 'quillcrm' ),
 				'mergeTags' => array(),
@@ -170,7 +178,7 @@ final class Merge_Tags_Manager {
 	public function process_merge_tags( $content, $contact ) {
 		return preg_replace_callback(
 			'/{{(.*?):(.*?)}}/',
-			function( $matches ) use ( $contact ) {
+			function ( $matches ) use ( $contact ) {
 				$group          = $matches[1];
 				$slug           = $matches[2];
 				$slug_parts     = explode( ' ', $slug );

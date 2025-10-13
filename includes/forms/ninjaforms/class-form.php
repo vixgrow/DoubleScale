@@ -22,6 +22,7 @@ class Form extends Abstracts_Form {
 
 
 
+
 	/**
 	 * Slug
 	 *
@@ -99,7 +100,7 @@ class Form extends Abstracts_Form {
 			return $fields;
 		}
 
-		$fields = $this->prepare_fields( $form_fields );
+		$fields = $this->prepare_form_fields( $form_fields );
 
 		return $fields;
 	}

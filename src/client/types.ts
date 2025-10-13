@@ -479,7 +479,7 @@ export type TrackedMessage = {
 	contact_id: string;
 	template_id: string;
 	hash_key: string;
-	email: string;
+	recipient: string; // Unified recipient field (email address or phone number)
 	opened: string;
 	clicked: string;
 	status: number; // Integer status code (1=pending, 2=sent, 3=failed, etc.)

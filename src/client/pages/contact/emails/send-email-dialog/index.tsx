@@ -71,7 +71,7 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 
 		setIsSending(true);
 		try {
-			const response = await apiFetch({
+			await apiFetch({
 				path: `/qc/v1/contacts/${contact.id}/send-message`,
 				method: 'POST',
 				data: {
@@ -93,10 +93,20 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 
 			onClose();
 		} catch (error: any) {
+			// Extract error message from various possible error formats
+			let errorMessage = __('Failed to send email', 'quillcrm');
+
+			if (error.message) {
+				errorMessage = error.message;
+			} else if (error.data?.message) {
+				errorMessage = error.data.message;
+			} else if (typeof error === 'string') {
+				errorMessage = error;
+			}
+
 			createNotice({
 				type: 'error',
-				message:
-					error.message || __('Failed to send email', 'quillcrm'),
+				message: errorMessage,
 			});
 		} finally {
 			setIsSending(false);

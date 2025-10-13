@@ -7,27 +7,18 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import type { TrackedMessage } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-table';
-import { TimeAgoCell } from '@quillcrm/components';
+import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
 import SendSMSDialog from './send-sms-dialog';
+import SMSDetails from './sms-details-dialog';
 import { MessageSquare, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { MessageStatsCard } from '../components/message-stats-card';
 import type { ColumnDef } from '@tanstack/react-table';
-
-interface SMSMessage {
-	id: number;
-	recipient: string;
-	body?: string;
-	status: string;
-	status_name: string;
-	sent_at: string;
-	clicked: string;
-	external_id?: string;
-}
 
 interface SMSProps {
 	contact_id: number;
@@ -36,6 +27,7 @@ interface SMSProps {
 const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 	const { contact } = useContactContext();
 	const [showSendSMSModal, setShowSendSMSModal] = useState<boolean>(false);
+	const [selectedSMS, setSelectedSMS] = useState<TrackedMessage | null>(null);
 
 	// Use combined hook for data + table pagination
 	const { loading, messages, analytics, serverSideTable, refetch } =
@@ -49,11 +41,19 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 		return null;
 	}
 
-	const columns: ColumnDef<SMSMessage>[] = [
+	const columns: ColumnDef<TrackedMessage>[] = [
 		{
-			accessorKey: 'recipient',
-			header: __('Recipient', 'quillcrm'),
-			cell: ({ row }) => row.original.recipient,
+			accessorKey: 'message',
+			header: __('Message', 'quillcrm'),
+			cell: ({ row }) => {
+				const body =
+					row.original.template?.body ||
+					row.original.message?.body ||
+					'';
+				const preview =
+					body.length > 50 ? body.substring(0, 50) + '...' : body;
+				return <span className="text-sm">{preview}</span>;
+			},
 		},
 		{
 			accessorKey: 'sent_at',
@@ -64,17 +64,17 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 			accessorKey: 'status',
 			header: __('Status', 'quillcrm'),
 			cell: ({ row }) => {
-				const status = row.original.status;
+				const statusSlug = row.original.status_slug || 'unknown';
 				const statusName = row.original.status_name;
 
 				let icon = <Clock className="w-4 h-4" />;
 				let colorClass =
 					'text-yellow-600 bg-yellow-50 border-yellow-600';
 
-				if (status === 'sent' || status === 'delivered') {
+				if (statusSlug === 'sent' || statusSlug === 'delivered') {
 					icon = <CheckCircle2 className="w-4 h-4" />;
 					colorClass = 'text-green-600 bg-green-50 border-green-600';
-				} else if (status === 'failed') {
+				} else if (statusSlug === 'failed') {
 					icon = <XCircle className="w-4 h-4" />;
 					colorClass = 'text-red-600 bg-red-50 border-red-600';
 				}
@@ -85,7 +85,7 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 							className={`flex items-center gap-1 border rounded-md px-2 py-1 ${colorClass}`}
 						>
 							{icon}
-							{statusName || status}
+							{statusName || statusSlug}
 						</span>
 					</div>
 				);
@@ -111,6 +111,22 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 					</div>
 				);
 			},
+		},
+		{
+			accessorKey: 'actions',
+			header: __('Actions', 'quillcrm'),
+			cell: ({ row }) => (
+				<Button
+					size="sm"
+					className="bg-transparent border-y-0 border-l-0 border-r shadow-none text-primary hover:bg-transparent hover:text-primary/80"
+					onClick={() =>
+						setSelectedSMS(row.original as TrackedMessage)
+					}
+				>
+					<ViewIcon />
+					{__('View', 'quillcrm')}
+				</Button>
+			),
 		},
 	];
 
@@ -139,14 +155,18 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 			{analytics && (
 				<div className="flex gap-5">
 					<MessageStatsCard
-						icon={<MessageSquare className="w-6 h-6 text-primary" />}
+						icon={
+							<MessageSquare className="w-6 h-6 text-primary" />
+						}
 						value={total}
 						label={__('Total SMS', 'quillcrm')}
 						iconBgClass="bg-blue-50"
 						borderColorClass="border-l-primary"
 					/>
 					<MessageStatsCard
-						icon={<CheckCircle2 className="w-6 h-6 text-green-600" />}
+						icon={
+							<CheckCircle2 className="w-6 h-6 text-green-600" />
+						}
 						value={totalSent}
 						label={__('Sent', 'quillcrm')}
 						iconBgClass="bg-green-50"
@@ -183,13 +203,18 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 							initialPageSize={10}
 							showMainActions={false}
 							config={{}}
+							setPage={() => {}}
 						/>
 						<DataTablePagination table={serverSideTable} />
 					</>
 				)}
 			</div>
 
-			{/* Send SMS Dialog */}
+			{/* Dialogs */}
+			<SMSDetails
+				smsMessage={selectedSMS}
+				onClose={() => setSelectedSMS(null)}
+			/>
 			<SendSMSDialog
 				open={showSendSMSModal}
 				onClose={() => {

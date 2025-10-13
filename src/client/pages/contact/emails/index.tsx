@@ -135,6 +135,7 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 							initialPageSize={10}
 							showMainActions={false}
 							config={{}}
+							setPage={() => {}}
 						/>
 						<DataTablePagination table={serverSideTable} />
 					</>

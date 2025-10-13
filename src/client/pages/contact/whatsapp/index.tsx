@@ -7,27 +7,18 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import type { TrackedMessage } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-table';
-import { TimeAgoCell } from '@quillcrm/components';
+import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
 import SendWhatsAppDialog from './send-whatsapp-dialog';
+import WhatsAppDetails from './whatsapp-details-dialog';
 import { MessageCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { MessageStatsCard } from '../components/message-stats-card';
 import type { ColumnDef } from '@tanstack/react-table';
-
-interface WhatsAppMessage {
-	id: number;
-	recipient: string;
-	body?: string;
-	status: string;
-	status_name: string;
-	sent_at: string;
-	clicked: string;
-	external_id?: string;
-}
 
 interface WhatsAppProps {
 	contact_id: number;
@@ -37,6 +28,8 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 	const { contact } = useContactContext();
 	const [showSendWhatsAppModal, setShowSendWhatsAppModal] =
 		useState<boolean>(false);
+	const [selectedWhatsApp, setSelectedWhatsApp] =
+		useState<TrackedMessage | null>(null);
 
 	// Use combined hook for data + table pagination
 	const { loading, messages, analytics, serverSideTable, refetch } =
@@ -50,11 +43,19 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 		return null;
 	}
 
-	const columns: ColumnDef<WhatsAppMessage>[] = [
+	const columns: ColumnDef<TrackedMessage>[] = [
 		{
-			accessorKey: 'recipient',
-			header: __('Recipient', 'quillcrm'),
-			cell: ({ row }) => row.original.recipient,
+			accessorKey: 'message',
+			header: __('Message', 'quillcrm'),
+			cell: ({ row }) => {
+				const body =
+					row.original.template?.body ||
+					row.original.message?.body ||
+					'';
+				const preview =
+					body.length > 50 ? body.substring(0, 50) + '...' : body;
+				return <span className="text-sm">{preview}</span>;
+			},
 		},
 		{
 			accessorKey: 'sent_at',
@@ -65,17 +66,17 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 			accessorKey: 'status',
 			header: __('Status', 'quillcrm'),
 			cell: ({ row }) => {
-				const status = row.original.status;
+				const statusSlug = row.original.status_slug || 'unknown';
 				const statusName = row.original.status_name;
 
 				let icon = <Clock className="w-4 h-4" />;
 				let colorClass =
 					'text-yellow-600 bg-yellow-50 border-yellow-600';
 
-				if (status === 'sent' || status === 'delivered') {
+				if (statusSlug === 'sent' || statusSlug === 'delivered') {
 					icon = <CheckCircle2 className="w-4 h-4" />;
 					colorClass = 'text-green-600 bg-green-50 border-green-600';
-				} else if (status === 'failed') {
+				} else if (statusSlug === 'failed') {
 					icon = <XCircle className="w-4 h-4" />;
 					colorClass = 'text-red-600 bg-red-50 border-red-600';
 				}
@@ -86,7 +87,7 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 							className={`flex items-center gap-1 border rounded-md px-2 py-1 ${colorClass}`}
 						>
 							{icon}
-							{statusName || status}
+							{statusName || statusSlug}
 						</span>
 					</div>
 				);
@@ -112,6 +113,22 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 					</div>
 				);
 			},
+		},
+		{
+			accessorKey: 'actions',
+			header: __('Actions', 'quillcrm'),
+			cell: ({ row }) => (
+				<Button
+					size="sm"
+					className="bg-transparent border-y-0 border-l-0 border-r shadow-none text-primary hover:bg-transparent hover:text-primary/80"
+					onClick={() =>
+						setSelectedWhatsApp(row.original as TrackedMessage)
+					}
+				>
+					<ViewIcon />
+					{__('View', 'quillcrm')}
+				</Button>
+			),
 		},
 	];
 
@@ -140,14 +157,18 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 			{analytics && (
 				<div className="flex gap-5">
 					<MessageStatsCard
-						icon={<MessageCircle className="w-6 h-6 text-green-600" />}
+						icon={
+							<MessageCircle className="w-6 h-6 text-green-600" />
+						}
 						value={total}
 						label={__('Total Messages', 'quillcrm')}
 						iconBgClass="bg-green-50"
 						borderColorClass="border-l-green-600"
 					/>
 					<MessageStatsCard
-						icon={<CheckCircle2 className="w-6 h-6 text-green-600" />}
+						icon={
+							<CheckCircle2 className="w-6 h-6 text-green-600" />
+						}
 						value={totalSent}
 						label={__('Sent', 'quillcrm')}
 						iconBgClass="bg-green-50"
@@ -184,13 +205,18 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 							initialPageSize={10}
 							showMainActions={false}
 							config={{}}
+							setPage={() => {}}
 						/>
 						<DataTablePagination table={serverSideTable} />
 					</>
 				)}
 			</div>
 
-			{/* Send WhatsApp Dialog */}
+			{/* Dialogs */}
+			<WhatsAppDetails
+				whatsappMessage={selectedWhatsApp}
+				onClose={() => setSelectedWhatsApp(null)}
+			/>
 			<SendWhatsAppDialog
 				open={showSendWhatsAppModal}
 				onClose={() => {

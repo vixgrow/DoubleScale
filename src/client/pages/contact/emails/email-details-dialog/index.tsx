@@ -67,6 +67,14 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 						<div className="flex flex-col gap-4 w-full">
 							<div className="flex justify-between items-center">
 								<span className="text-base font-medium text-gray-500">
+									{__('Recipient', 'quillcrm')}
+								</span>
+								<span className="text-xl font-semibold">
+									{campaignEmail.recipient}
+								</span>
+							</div>
+							<div className="flex justify-between items-center">
+								<span className="text-base font-medium text-gray-500">
 									{__('Subject', 'quillcrm')}
 								</span>
 								<span className="text-xl font-semibold">

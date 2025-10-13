@@ -472,7 +472,8 @@ type LineTaxData = {
 	total: string[];
 };
 
-export type CampaignEmail = {
+// Represents a tracked message (email/SMS/WhatsApp) from any source (campaign, automation, or individual)
+export type TrackedMessage = {
 	id: number;
 	campaign_id: string;
 	contact_id: string;
@@ -499,6 +500,9 @@ export type CampaignEmail = {
 	} | null; // Message content for individual messages
 	campaign?: Partial<Campaign>;
 };
+
+// Legacy alias for backward compatibility
+export type CampaignEmail = TrackedMessage;
 
 export type AutomationRules = Rules[];
 

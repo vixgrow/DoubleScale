@@ -84,6 +84,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			ref={setNodeRef}
 			style={style}
 			{...attributes}
+			data-block-id={block.id}
 			className={`
 				relative mb-4 group cursor-pointer border-2
 				hover:border-blue-300 transition-colors

@@ -96,13 +96,15 @@ export const createBlocksFromTemplate = (
 
 /**
  * Handles dropping a template onto the canvas
+ * Returns the newly created section's info for auto-selection
  */
 export const handleTemplateDropOnCanvas = (
   template: TemplateConfig,
   overId: string | number | undefined,
   overData: any,
   addSectionFn: (section: EmailSection) => void,
-  addBlockFn: (sectionId: string, columnId: string, block: any) => void
+  addBlockFn: (sectionId: string, columnId: string, block: any) => void,
+  onComplete?: (sectionId: string, columnId: string, firstBlockId: string) => void
 ): boolean => {
   if (!isValidTemplateDropTarget(overId, overData)) {
     return false;
@@ -114,6 +116,19 @@ export const handleTemplateDropOnCanvas = (
   const sectionId = newSection.id;
   const columnId = newSection.columns[0].id;
 
-  createBlocksFromTemplate(template, sectionId, columnId, addBlockFn);
+  // Track the first block ID
+  let firstBlockId: string | undefined;
+  const wrappedAddBlockFn = (sId: string, cId: string, block: any) => {
+    if (!firstBlockId) firstBlockId = block.id;
+    addBlockFn(sId, cId, block);
+  };
+
+  createBlocksFromTemplate(template, sectionId, columnId, wrappedAddBlockFn);
+
+  // Call callback with IDs for auto-selection
+  if (onComplete && firstBlockId) {
+    onComplete(sectionId, columnId, firstBlockId);
+  }
+
   return true;
 };

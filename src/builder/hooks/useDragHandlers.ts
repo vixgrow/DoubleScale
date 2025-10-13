@@ -11,6 +11,20 @@ import {
 import { generateBlockId, generateColumnId, generateSectionId } from '../utils/idGenerator';
 import { isTemplateSection } from '../utils/templateUtils';
 
+// Helper: Auto-select and scroll to a block
+const selectAndScrollToBlock = (
+  dispatch: any,
+  blockId: string,
+  sectionId: string,
+  columnId: string
+) => {
+  setTimeout(() => {
+    dispatch(STORE_KEY).selectBlock(blockId, sectionId, columnId);
+    const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+    blockElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+};
+
 export const useDragHandlers = (onDragEndCallback?: () => void) => {
   const dispatch = useDispatch();
   const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
@@ -66,21 +80,25 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
         const targetIndex = sections.findIndex((s) => s.id === targetSectionId);
 
         // Create a new section from the template
+        const newSectionId = generateSectionId();
+        const newColumnId = generateColumnId();
+        const newBlocks = template.blocks.map((blockConfig: any) => {
+          // Mark blocks as template blocks (pass template layout for grids)
+          const blockProps = markAsTemplateBlock(blockConfig, template.layout);
+          return {
+            id: generateBlockId(),
+            type: blockConfig.type,
+            props: blockProps,
+          };
+        });
+
         const newSection = {
-          id: generateSectionId(),
+          id: newSectionId,
           columns: [
             {
-              id: generateColumnId(),
+              id: newColumnId,
               width: 100,
-              blocks: template.blocks.map((blockConfig: any) => {
-                // Mark blocks as template blocks (pass template layout for grids)
-                const blockProps = markAsTemplateBlock(blockConfig, template.layout);
-                return {
-                  id: generateBlockId(),
-                  type: blockConfig.type,
-                  props: blockProps,
-                };
-              }),
+              blocks: newBlocks,
             },
           ],
           styles: {},
@@ -88,21 +106,24 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
 
         // Insert before the target section
         dispatch(STORE_KEY).addSection(newSection, targetIndex);
+
+        // Auto-select and scroll to first block
+        if (newBlocks.length > 0) {
+          selectAndScrollToBlock(dispatch, newBlocks[0].id, newSectionId, newColumnId);
+        }
         return;
       }
 
-      const handled = handleTemplateDropOnCanvas(
+      handleTemplateDropOnCanvas(
         template,
         over.id,
         overData,
         (section) => dispatch(STORE_KEY).addSection(section),
         (sectionId, columnId, block) =>
-          dispatch(STORE_KEY).addBlock(sectionId, columnId, block)
+          dispatch(STORE_KEY).addBlock(sectionId, columnId, block),
+        (sectionId, columnId, firstBlockId) =>
+          selectAndScrollToBlock(dispatch, firstBlockId, sectionId, columnId)
       );
-
-      if (handled) {
-        return;
-      }
       return;
     }
 
@@ -222,11 +243,13 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
 
         const blockDef = blocksRegistry[blockType];
         if (blockDef) {
+          const newBlockId = generateBlockId();
           dispatch(STORE_KEY).addBlock(sectionId, columnId, {
-            id: generateBlockId(),
+            id: newBlockId,
             type: blockType,
             props: { ...blockDef.defaultProps },
           });
+          selectAndScrollToBlock(dispatch, newBlockId, sectionId, columnId);
         }
         return;
       }

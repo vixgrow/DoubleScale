@@ -22,6 +22,7 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Managers\Integrations_Manager;
 use QuillCRM\Managers\Campaign_Status_Manager;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Rest_WhatsApp_Campaign_Controller class
@@ -43,7 +44,7 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Messaging_Campaign_Cont
 	 *
 	 * @var string
 	 */
-	protected $channel = 'whatsapp';
+	protected $channel = Campaign_Channel::CHANNEL_WHATSAPP;
 
 	/**
 	 * Constructor
@@ -152,7 +153,7 @@ class REST_WhatsApp_Campaign_Controller extends Abstract_Messaging_Campaign_Cont
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	protected function get_campaign_query() {
-		return Campaign_Model::query()->where( 'type', $this->campaign_type );
+		return Campaign_Model::query()->where( 'type', $this->channel );
 	}
 
 	/**

@@ -12,6 +12,7 @@ namespace QuillCRM\Tracking;
 
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Abstracts\Abstract_Tracking;
+use QuillCRM\Constants\Campaign_Channel;
 
 defined('ABSPATH') || exit;
 
@@ -25,7 +26,7 @@ class SMS extends Abstract_Tracking
 	 *
 	 * @var string
 	 */
-	protected $channel = 'sms';
+	protected $channel = Campaign_Channel::CHANNEL_SMS;
 
 	/**
 	 * Add hooks - implementation of abstract method

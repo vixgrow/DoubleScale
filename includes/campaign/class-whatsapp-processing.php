@@ -15,6 +15,7 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
 use QuillCRM\Tracking\WhatsApp;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * WhatsApp Campaign Processing class
@@ -26,7 +27,7 @@ class WhatsApp_Processing extends Abstract_Campaign_Processing {
 	 *
 	 * @var string
 	 */
-	protected $channel = 'whatsapp';
+	protected $channel = Campaign_Channel::CHANNEL_WHATSAPP;
 
 	/**
 	 * Add hooks

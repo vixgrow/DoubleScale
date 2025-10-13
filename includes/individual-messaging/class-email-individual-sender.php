@@ -17,6 +17,7 @@ use QuillCRM\Tracking\Email as Email_Tracking;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Settings;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Email_Individual_Sender class
@@ -36,7 +37,7 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return string Channel type
 	 */
 	protected function get_channel_type() {
-		return 'email';
+		return Campaign_Channel::CHANNEL_EMAIL;
 	}
 
 	/**

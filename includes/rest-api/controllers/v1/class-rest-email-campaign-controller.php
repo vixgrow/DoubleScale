@@ -21,6 +21,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Managers\Campaign_Status_Manager;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Rest_Email_Campaign_Controller class
@@ -42,7 +43,7 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 *
 	 * @var string
 	 */
-	protected $channel = 'email';
+	protected $channel = Campaign_Channel::CHANNEL_EMAIL;
 
 	/**
 	 * Constructor
@@ -182,7 +183,7 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller
 	 */
 	protected function get_campaign_query()
 	{
-		return Campaign_Model::query()->where('type', $this->campaign_type);
+		return Campaign_Model::query()->where('type', $this->channel);
 	}
 
 	/**

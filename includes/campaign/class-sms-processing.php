@@ -15,6 +15,7 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
 use QuillCRM\Tracking\SMS;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * SMS Campaign Processing class
@@ -26,7 +27,7 @@ class SMS_Processing extends Abstract_Campaign_Processing {
 	 *
 	 * @var string
 	 */
-	protected $channel = 'sms';
+	protected $channel = Campaign_Channel::CHANNEL_SMS;
 
 	/**
 	 * Add hooks

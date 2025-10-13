@@ -19,6 +19,7 @@ use QuillCRM\Emails\Emails;
 use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Tracking\Email;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Email Campaign Processing class
@@ -30,7 +31,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 *
 	 * @var string
 	 */
-	protected $channel = 'email';
+	protected $channel = Campaign_Channel::CHANNEL_EMAIL;
 
 	/**
 	 * Add hooks

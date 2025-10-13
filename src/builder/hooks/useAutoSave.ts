@@ -1,5 +1,6 @@
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { CAMPAIGN_STATUS } from '../../client/types';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 
 interface UseAutoSaveOptions {
@@ -90,24 +91,39 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
       }
 
       // Import template API functions
-      const { getTemplate, updateTemplate } = await import('../api/templates');
+      const { getTemplate, updateTemplate, createTemplate } = await import('../api/templates');
 
-      // Fetch the existing template to preserve all fields
-      const existingTemplate = await getTemplate(existingTemplateData.template_id);
+      const isDraft = campaign.status === CAMPAIGN_STATUS.DRAFT;
 
-      // Update template with builder data in email_body field
-      await updateTemplate(existingTemplateData.template_id, {
-        ...existingTemplate,
-        email_body: {
-          type: 'builder',
-          value: builderData,
-        },
-      });
+      if (isDraft) {
+        // Campaign is draft → Update existing template
+        const existingTemplate = await getTemplate(existingTemplateData.template_id);
+        await updateTemplate(existingTemplateData.template_id, {
+          ...existingTemplate,
+          email_body: {
+            type: 'builder',
+            value: builderData,
+          },
+        });
+      } else {
+        // Campaign is sent/scheduled → Create new template to preserve original
+        const existingTemplate = await getTemplate(existingTemplateData.template_id);
+        const newTemplate = await createTemplate({
+          ...existingTemplate,
+          name: `${existingTemplate.name}`,
+          email_body: {
+            type: 'builder',
+            value: builderData,
+          },
+        });
 
-      // Template ID is already in template_ids array, just mark as success
-      const saveSuccess = true;
+        // Add new template to campaign template_ids array
+        await saveCampaignStep('template', {
+          template_id: newTemplate.id,
+        });
+      }
 
-      if (saveSuccess && isMountedRef.current) {
+      if (isMountedRef.current) {
         const now = new Date();
         lastSavedStateRef.current = currentState;
         setSaveStatus({
@@ -117,8 +133,6 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
           error: null,
         });
         return true;
-      } else {
-        throw new Error('Save failed');
       }
     } catch (error: any) {
       if (isMountedRef.current) {

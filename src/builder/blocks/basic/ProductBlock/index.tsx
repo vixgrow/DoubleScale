@@ -10,6 +10,8 @@ import { ProductBlockRenderer } from './Renderer';
 import { ProductBlockEditor } from './Editor';
 
 export interface ProductBlockProps {
+	// WooCommerce product ID (for tracking and dynamic content)
+	productId?: number;
 	imageSrc: string;
 	imageAlt: string;
 	width: string;

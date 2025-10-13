@@ -44,9 +44,10 @@ export interface ProductBlockEditorProps {
 	onChange: (updates: Partial<ProductBlockProps>) => void;
 }
 
-export const ProductBlockEditor: React.FC<
-	ProductBlockEditorProps
-> = ({ props, onChange }) => {
+export const ProductBlockEditor: React.FC<ProductBlockEditorProps> = ({
+	props,
+	onChange,
+}) => {
 	return (
 		<BlockEditorErrorBoundary>
 			<BaseBlockEditor props={props} onChange={onChange}>
@@ -99,6 +100,14 @@ export const ProductBlockEditor: React.FC<
 									)}
 								</Button>
 							</ProductSelectionDialog>
+							{props.productId && (
+								<p className="text-xs text-gray-500">
+									{__('WooCommerce Product ID:', 'quillcrm')}{' '}
+									<span className="font-mono font-semibold">
+										#{props.productId}
+									</span>
+								</p>
+							)}
 						</div>
 
 						{/* Image Upload */}

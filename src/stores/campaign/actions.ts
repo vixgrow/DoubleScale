@@ -73,14 +73,18 @@ export const setError = (error: string | null) => ({
 /**
  * Fetch campaign from API
  */
-export const fetchCampaign = (id: string) => async ({ dispatch }: any) => {
+export const fetchCampaign = (id: string, campaignType?: string) => async ({ dispatch }: any) => {
 	dispatch(setLoading(true));
 	dispatch(setError(null));
 
 	try {
-		const response = await apiFetch({
-			path: `/qc/v1/campaigns/${id}`,
-		}) as ExtendedCampaign;
+		// If campaign type is provided, use channel-specific endpoint
+		// Otherwise, use cross-type endpoint (fetches any campaign)
+		const path = campaignType
+			? `${getCampaignEndpoint(campaignType)}/${id}`
+			: `/qc/v1/campaigns/${id}`;
+
+		const response = await apiFetch({ path }) as ExtendedCampaign;
 
 		dispatch(setCampaign(response));
 	} catch (error: any) {
@@ -133,7 +137,7 @@ export const saveCampaign = (data: Partial<ExtendedCampaign> = {}) => async ({ s
  */
 export const saveCampaignStep = (step: string, stepData?: any) => async ({ select, dispatch }: any) => {
 	const campaign = select.getCampaign();
-	
+
 	if (!campaign) {
 		return false;
 	}
@@ -142,9 +146,15 @@ export const saveCampaignStep = (step: string, stepData?: any) => async ({ selec
 	dispatch(setError(null));
 
 	try {
+		// Get channel-specific endpoint
+		const endpoint = getCampaignEndpoint(campaign.type);
+		if (!endpoint) {
+			throw new Error(__('Invalid campaign type', 'quillcrm'));
+		}
+
 		// Get existing step data or initialize empty object
 		const existingSteps = campaign.settings?.steps || {};
-		
+
 		// Update the specific step data
 		const updatedSteps = {
 			...existingSteps,
@@ -161,8 +171,8 @@ export const saveCampaignStep = (step: string, stepData?: any) => async ({ selec
 		};
 
 		const response = await apiFetch({
-			path: `/qc/v1/campaigns/${campaign.id}`,
-			method: 'POST',
+			path: `${endpoint}/${campaign.id}`,
+			method: 'PUT',
 			data: {
 				...campaign,
 				settings: updatedSettings,

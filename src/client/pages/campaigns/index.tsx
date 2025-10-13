@@ -151,9 +151,10 @@ const Campaigns: React.FC = () => {
 		setIsApplying(true);
 
 		try {
+			// Use unified bulk-delete endpoint (works across all campaign types)
 			await apiFetch({
-				path: '/qc/v1/campaigns',
-				method: 'DELETE',
+				path: '/qc/v1/campaigns/bulk-delete',
+				method: 'POST',
 				data: {
 					ids: selectedRowKeys,
 				},

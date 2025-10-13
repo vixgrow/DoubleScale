@@ -220,7 +220,7 @@ const Templates: React.FC = () => {
 		try {
 			const template = templates[currentTab];
 			await apiFetch({
-				path: '/qc/v1/campaigns/send-test-email',
+				path: '/qc/v1/email-campaigns/send-test-email',
 				method: 'POST',
 				data: {
 					email: emailAddress,

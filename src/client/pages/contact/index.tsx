@@ -100,7 +100,7 @@ const Contact: React.FC<ContactProps> = ({
 
         try {
             const response = await apiFetch({
-                path: `/qc/v1/contacts/${id}/email-campaigns?per_page=10&page=1`,
+                path: `/qc/v1/contacts/${id}/messages?mode=email&per_page=10&page=1`,
                 method: 'GET',
             });
 

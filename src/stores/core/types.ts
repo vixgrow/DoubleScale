@@ -18,6 +18,7 @@ import {
 	SET_MERGE_TAGS_VISIBLE,
 	SET_CURRENT_TRIGGER,
 	SET_MERGE_TAG_CALLBACK,
+	SET_FORM_CONTEXT,
 } from './constants';
 
 export type CorePureState = {
@@ -26,6 +27,13 @@ export type CorePureState = {
 	mergeTagsVisible: boolean;
 	currentTrigger: string;
 	mergeTagCallback?: ((tagValue: string) => void) | null;
+	formContext?: FormContext | null;
+};
+
+export type FormContext = {
+	formId?: string | number;
+	triggerId?: string;
+	automationId?: string | number;
 };
 
 export type InitialAccountData = {
@@ -72,6 +80,11 @@ export type setMergeTagCallback = {
 	callback: ((tagValue: string) => void) | null;
 };
 
+export type setFormContext = {
+	type: typeof SET_FORM_CONTEXT;
+	context: FormContext | null;
+};
+
 export type CoreActionTypes =
 	| setupStoreAction
 	| addNote
@@ -79,6 +92,7 @@ export type CoreActionTypes =
 	| setMergeTagsVisible
 	| setCurrentTrigger
 	| setMergeTagCallback
+	| setFormContext
 	| ReturnType<() => { type: 'NOOP' }>;
 
 /**
@@ -89,8 +103,8 @@ export type CoreActionTypes =
 
 export type SelectFromMap<S extends Record<string, unknown>> = {
 	[selector in FunctionKeys<S>]: S[selector] extends (...args: any[]) => any
-		? (...args: TailParameters<S[selector]>) => ReturnType<S[selector]>
-		: never;
+	? (...args: TailParameters<S[selector]>) => ReturnType<S[selector]>
+	: never;
 };
 
 /**

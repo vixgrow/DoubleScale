@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class GravityForms Form
  * This class is responsible for handling the integration of gravityforms
@@ -13,11 +14,14 @@ namespace QuillCRM\Forms\GravityForms;
 use GFAPI;
 use QuillCRM\Abstracts\Form as Abstracts_Form;
 use QuillCRM\Managers\Forms_Manager;
+use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
 
 /**
  * GravityForms class
  */
 class Form extends Abstracts_Form {
+
+
 
 	/**
 	 * Slug
@@ -52,6 +56,21 @@ class Form extends Abstracts_Form {
 	}
 
 	/**
+	 * Register merge tags
+	 */
+	public function register_merge_tags_for_form( $form_id ) {
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
+
+		// Get fields only from forms that are selected in active automations
+		$selected_forms_fields = $this->get_fields( $form_id );
+		if ( ! empty( $selected_forms_fields ) ) {
+			new Dynamic_Fields_Registration( $selected_forms_fields, $this->slug );
+		}
+	}
+
+	/**
 	 * Is Enabled
 	 *
 	 * @since 1.0.0
@@ -69,7 +88,7 @@ class Form extends Abstracts_Form {
 	 *
 	 * @param string $form_id
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function get_fields( $form_id ) {
 		$form = GFAPI::get_form( $form_id );
@@ -105,7 +124,7 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_fields() {
-		// Check nonce.
+		 // Check nonce.
 		check_ajax_referer( 'quillcrm-admin', 'nonce' );
 
 		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( wp_unslash( $_POST['form_id'] ) ) : null;

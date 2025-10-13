@@ -170,7 +170,7 @@ const SourceSelector: React.FC = () => {
 							onClick={() =>
 								!s.disabled && !importing && handleSourceChange(s.value)
 							}
-							className={`relative p-4 transition-all shadow-none border-2 duration-200 
+							className={`relative p-4 transition-all shadow-none border duration-200 
                 ${isSelected
 									? 'border-[#274C77] cursor-pointer'
 									: s.disabled

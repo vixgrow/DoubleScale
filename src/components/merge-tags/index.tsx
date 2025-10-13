@@ -19,11 +19,10 @@ import {
 	DialogContent,
 	DialogOverlay,
 	DialogHeader,
-	DialogTitle,
 } from '@/components/ui/dialog';
 import { MergeTagsIcon } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 /**
  * Internal dependencies
@@ -32,24 +31,52 @@ import './style.scss';
 import ConfigAPI from '@quillcrm/config';
 import type { MergeTags } from '@quillcrm/config';
 import CustomDialogHeader from '../dialog-header';
+import EnhancedMergeTagsSelector from './enhanced-selector';
 
 interface MergeTagsSelectorProps {
 	visible: boolean;
 	onClose: () => void;
 	onInsertTag?: (tagValue: string) => void;
+	// Enhanced props for dynamic loading
+	triggerId?: string;
+	formId?: string | number;
+	automationId?: string | number;
 }
 
 const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 	visible,
 	onClose,
 	onInsertTag,
+	triggerId,
+	formId,
+	automationId,
 }) => {
+	// All hooks must be called at the top level
 	const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
-	const { currentTrigger } = useSelect((select) => ({
+	const { currentTrigger, formContext } = useSelect((select) => ({
 		currentTrigger: select('quillcrm/core').getCurrentTrigger(),
+		formContext: select('quillcrm/core').getFormContext(),
 	}));
 
+	// If we have form context (from props or store), use the enhanced selector
+	if (
+		(formContext && formContext.formId && formContext.triggerId) ||
+		(triggerId && formId)
+	) {
+		return (
+			<EnhancedMergeTagsSelector
+				visible={visible}
+				onClose={onClose}
+				onInsertTag={onInsertTag}
+				triggerId={triggerId}
+				formId={formId}
+				automationId={automationId}
+			/>
+		);
+	}
+
+	// Otherwise, use the original static selector
 	const automationMergeTags = ConfigAPI.getMergeTags();
 	const automationMergeTagsWithTrigger = filter(
 		automationMergeTags,

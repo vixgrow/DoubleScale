@@ -131,13 +131,12 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 		setIsSaving(true);
 		try {
-			const response = await apiFetch({
+			await apiFetch({
 				path: '/qc/v1/tags',
 				method: 'POST',
 				data: tag,
 			});
 
-			setTags([...tags, response as ContactTag]);
 			setVisible(false);
 			setTag({
 				name: '',
@@ -150,6 +149,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 					'quillcrm'
 				)
 			);
+			fetchTags();
 		} catch (error: any) {
 			setVisible(false);
 			showNotice('error', error.message);

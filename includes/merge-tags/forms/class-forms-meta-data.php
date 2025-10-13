@@ -1,0 +1,109 @@
+<?php
+
+/**
+ * Forms Metadata Merge Tag
+ *
+ * @since 1.0.0
+ *
+ * @package QuillCRM
+ */
+
+namespace QuillCRM\Merge_Tags\Forms;
+
+use QuillCRM\Abstracts\Merge_Tag;
+use QuillCRM\Models\Automation_Contact_Model;
+
+/**
+ * Forms Metadata Merge Tag
+ */
+class Forms_Metadata extends Merge_Tag {
+
+
+
+	/**
+	 * Merge Tag Name
+	 *
+	 * @var string
+	 */
+	public $name;
+
+	/**
+	 * Merge Tag Slug
+	 *
+	 * @var string
+	 */
+	public $slug;
+
+	/**
+	 * Merge Tag Description
+	 *
+	 * @var string
+	 */
+	public $description;
+
+	/**
+	 * Merge Tag Group
+	 *
+	 * @var string
+	 */
+	public $group;
+
+	/**
+	 * Is automation merge tag
+	 *
+	 * @var bool
+	 */
+	public $is_automation = true;
+
+	/**
+	 * Field name
+	 *
+	 * @var string
+	 */
+	protected $metadata_name;
+
+	/**
+	 * Constructor
+	 *
+	 * @param string $metadata_name Field name.
+	 * @param string $metadata_label Field label.
+	 */
+	public function __construct( $metadata_name, $metadata_label, $slug ) {
+		$this->metadata_name = $metadata_name;
+		$this->name          = $metadata_label;
+		$this->slug          = "metadata:{$metadata_name}";
+		$this->group         = $slug;
+		$this->description   = sprintf( __( $slug . ' metadata: %s', 'quillcrm' ), $metadata_label );
+	}
+
+	/**
+	 * Get Merge Tag Value
+	 *
+	 * @param Automation_Contact_Model $contact Automation Contact Model.
+	 * @param string                   $merge_tag Merge Tag.
+	 *
+	 * @return string
+	 */
+	public function get_value( $contact, $merge_tag = '' ) {
+		if ( is_null( $contact ) || ! $contact->data ) {
+			return '';
+		}
+
+		// Get the field name from the merge tag
+		$field_key = str_replace( 'metadata:', '', $merge_tag );
+
+		// Check if we have form entry data
+		if ( isset( $contact->data[ $field_key ] ) ) {
+			$field_value = $contact->data[ $field_key ];
+
+			// Handle array values (for checkboxes, multi-select, etc.)
+			if ( is_array( $field_value ) ) {
+				return implode( ', ', $field_value );
+			}
+
+			return (string) $field_value;
+		}
+
+		return '';
+	}
+}

@@ -33,6 +33,12 @@ use QuillCRM\User_Roles\Permissions;
 class Rest_Automation_Controller extends REST_Controller {
 
 
+
+
+
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -436,10 +442,24 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_merge_tags( $request ) {
+		$form_id    = $request->get_param( 'form_id' );
+		$trigger_id = $request->get_param( 'trigger_id' );
+
+		$forms = Forms_Manager::instance()->get_all_forms();
+
+		// If we have a specific form_id and trigger_id, register merge tags for that form only
+		if ( ! empty( $form_id ) && ! empty( $trigger_id ) && in_array( $trigger_id, array_keys( $forms ) ) ) {
+			$form_instance = $forms[ $trigger_id ];
+			if ( $form_instance ) {
+				$form_instance->register_merge_tags_for_form( $form_id );
+			}
+		}
+
 		$merge_tags = Merge_Tags_Manager::instance()->get_groups();
 
 		return new WP_REST_Response( $merge_tags, 200 );
 	}
+
 
 	/**
 	 * Get items

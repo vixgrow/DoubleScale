@@ -13,8 +13,9 @@ import {
 	SET_MERGE_TAGS_VISIBLE,
 	SET_CURRENT_TRIGGER,
 	SET_MERGE_TAG_CALLBACK,
+	SET_FORM_CONTEXT,
 } from './constants';
-import { CoreActionTypes, Notice } from './types';
+import { CoreActionTypes, Notice, FormContext } from './types';
 
 /**
  * Setup Store Action.
@@ -73,4 +74,14 @@ export const setMergeTagCallback = (
 ): CoreActionTypes => ({
 	type: SET_MERGE_TAG_CALLBACK,
 	callback,
+});
+
+/**
+ * Set Form Context Action.
+ * @param {FormContext | null} context Form context.
+ * @returns {CoreActionTypes} Set Form Context Action.
+ */
+export const setFormContext = (context: FormContext | null): CoreActionTypes => ({
+	type: SET_FORM_CONTEXT,
+	context,
 });

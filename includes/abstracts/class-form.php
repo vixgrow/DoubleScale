@@ -25,10 +25,6 @@ use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
  */
 abstract class Form {
 
-
-
-
-
 	/**
 	 * Slug
 	 *
@@ -103,9 +99,20 @@ abstract class Form {
 	 *
 	 * @param string $form_id
 	 *
-	 * @return void
+	 * @return array
 	 */
 	abstract public function get_fields( $form_id);
+
+	/**
+	 * Register merge tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $form_id
+	 *
+	 * @return void
+	 */
+	abstract public function register_merge_tags_for_form( $form_id);
 
 	/**
 	 * Process form
@@ -185,6 +192,8 @@ abstract class Form {
 			);
 		}
 	}
+
+
 
 	/**
 	 * Get contact fields

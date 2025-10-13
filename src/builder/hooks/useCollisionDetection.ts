@@ -1,8 +1,7 @@
 import {
   closestCenter,
   CollisionDetection,
-  pointerWithin,
-  rectIntersection,
+  pointerWithin
 } from '@dnd-kit/core';
 
 export const useCollisionDetection = (): CollisionDetection => {
@@ -47,7 +46,7 @@ export const useCollisionDetection = (): CollisionDetection => {
       });
     }
 
-    // Template types (library items) - only drop on sections or canvas
+    // Template types (library items) - work same as layouts (use drop zones)
     const templateTypes = [
       'library-template',
       'header-template',
@@ -55,30 +54,21 @@ export const useCollisionDetection = (): CollisionDetection => {
       'hero-image-template',
       'image-gallery-template',
       'footer-template',
+      'preheader-template',
     ];
 
     if (
       active.data?.current?.type &&
       templateTypes.includes(active.data.current.type)
     ) {
-      // First check for section intersections
-      const sectionContainers = Array.from(
+      // Use section-drop-zones (same as layouts)
+      const dropZoneContainers = Array.from(
         droppableContainers.values()
       ).filter(
-        (container) => container.data?.current?.type === 'section'
+        (container) => container.data?.current?.type === 'section-drop-zone'
       );
 
-      const sectionCollisions = rectIntersection({
-        ...args,
-        droppableContainers: sectionContainers,
-      });
-
-      // If dragging over a section, prefer section drop
-      if (sectionCollisions && sectionCollisions.length > 0) {
-        return sectionCollisions;
-      }
-
-      // Otherwise, allow canvas drop (for empty canvas)
+      // Allow canvas drop (for empty canvas)
       const canvasContainers = Array.from(
         droppableContainers.values()
       ).filter(
@@ -87,9 +77,11 @@ export const useCollisionDetection = (): CollisionDetection => {
           container.id === 'canvas-blocks'
       );
 
-      return pointerWithin({
+      const allContainers = [...dropZoneContainers, ...canvasContainers];
+
+      return closestCenter({
         ...args,
-        droppableContainers: canvasContainers,
+        droppableContainers: allContainers,
       });
     }
 

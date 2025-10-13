@@ -74,10 +74,9 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
       const template = active.data.current.template as TemplateConfig;
       const overData = over.data?.current;
 
-      // If dropping on a section, insert before/after that section
-      if (overData?.type === 'section') {
-        const targetSectionId = overData.sectionId;
-        const targetIndex = sections.findIndex((s) => s.id === targetSectionId);
+      // If dropping on a drop zone, insert at specific position
+      if (overData?.type === 'section-drop-zone') {
+        const insertIndex = overData.index;
 
         // Create a new section from the template
         const newSectionId = generateSectionId();
@@ -104,8 +103,8 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
           styles: {},
         };
 
-        // Insert before the target section
-        dispatch(STORE_KEY).addSection(newSection, targetIndex);
+        // Insert at the drop zone position
+        dispatch(STORE_KEY).addSection(newSection, insertIndex);
 
         // Auto-select and scroll to first block
         if (newBlocks.length > 0) {
@@ -114,6 +113,7 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
         return;
       }
 
+      // Otherwise, drop on empty canvas
       handleTemplateDropOnCanvas(
         template,
         over.id,

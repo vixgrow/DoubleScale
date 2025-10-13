@@ -779,7 +779,9 @@ class REST_Contact_Controller extends REST_Controller {
 						'template' => function ( $query ) {
 							$query->select( 'id', 'subject', 'body' );
 						},
-						'message', // Include message content for individual messages
+						'message' => function ( $query ) {
+							$query->select( 'id', 'tracking_id', 'subject', 'body' );
+						}, // Include message content for individual messages
 					)
 				)
 				->orderBy( 'created_at', 'desc' );

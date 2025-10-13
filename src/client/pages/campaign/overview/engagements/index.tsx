@@ -188,25 +188,27 @@ const Engagements: React.FC = () => {
 						| 'default' = 'default';
 
 					if (
-						record.status === 'sent' ||
-						record.status === 'delivered'
+						record.status_slug === 'sent' ||
+						record.status_slug === 'delivered'
 					) {
 						badgeStatus = 'success';
-					} else if (record.status === 'failed') {
+					} else if (record.status_slug === 'failed') {
 						badgeStatus = 'error';
-					} else if (record.status === 'pending') {
+					} else if (record.status_slug === 'pending') {
 						badgeStatus = 'processing';
-					} else if (record.status === 'read') {
+					} else if (record.status_slug === 'read') {
 						badgeStatus = 'success';
 					}
 
-					return <Badge status={badgeStatus} text={record.status} />;
+					return (
+						<Badge status={badgeStatus} text={record.status_slug} />
+					);
 				},
 			},
 		];
 
 		// Add type-specific columns
-		const typeSpecificColumns = [];
+		const typeSpecificColumns: any[] = [];
 
 		if (campaignType === 'email') {
 			typeSpecificColumns.push(
@@ -254,12 +256,12 @@ const Engagements: React.FC = () => {
 					render: (_, record: CampaignEmail) => (
 						<Badge
 							status={
-								record.status === 'delivered'
+								record.status_slug === 'delivered'
 									? 'success'
 									: 'default'
 							}
 							text={
-								record.status === 'delivered'
+								record.status_slug === 'delivered'
 									? __('Yes', 'quillcrm')
 									: __('No', 'quillcrm')
 							}
@@ -293,14 +295,14 @@ const Engagements: React.FC = () => {
 					render: (_, record: CampaignEmail) => (
 						<Badge
 							status={
-								record.status === 'delivered' ||
-								record.status === 'read'
+								record.status_slug === 'delivered' ||
+								record.status_slug === 'read'
 									? 'success'
 									: 'default'
 							}
 							text={
-								record.status === 'delivered' ||
-								record.status === 'read'
+								record.status_slug === 'delivered' ||
+								record.status_slug === 'read'
 									? __('Yes', 'quillcrm')
 									: __('No', 'quillcrm')
 							}
@@ -314,10 +316,12 @@ const Engagements: React.FC = () => {
 					render: (_, record: CampaignEmail) => (
 						<Badge
 							status={
-								record.status === 'read' ? 'success' : 'default'
+								record.status_slug === 'read'
+									? 'success'
+									: 'default'
 							}
 							text={
-								record.status === 'read'
+								record.status_slug === 'read'
 									? __('Yes', 'quillcrm')
 									: __('No', 'quillcrm')
 							}
@@ -412,18 +416,20 @@ const Engagements: React.FC = () => {
 								</Typography.Text>
 								<Badge
 									status={
-										campaignEmail.status === 'sent' ||
-										campaignEmail.status === 'delivered' ||
-										campaignEmail.status === 'read'
+										campaignEmail.status_slug === 'sent' ||
+										campaignEmail.status_slug ===
+											'delivered' ||
+										campaignEmail.status_slug === 'read'
 											? 'success'
-											: campaignEmail.status === 'failed'
+											: campaignEmail.status_slug ===
+												  'failed'
 												? 'error'
 												: 'default'
 									}
-									text={campaignEmail.status}
+									text={campaignEmail.status_slug}
 								/>
 							</Flex>
-							{campaignEmail.template.settings.from_name && (
+							{campaignEmail.template?.settings.from_name && (
 								<Flex gap={10}>
 									<Typography.Text>
 										{__('From Name', 'quillcrm')}
@@ -438,7 +444,7 @@ const Engagements: React.FC = () => {
 								</Flex>
 							)}
 							{campaignType === 'email' &&
-								campaignEmail.template.settings.from_email && (
+								campaignEmail.template?.settings.from_email && (
 									<Flex gap={10}>
 										<Typography.Text>
 											{__('From Email', 'quillcrm')}
@@ -446,14 +452,14 @@ const Engagements: React.FC = () => {
 										</Typography.Text>
 										<Typography.Text strong>
 											{
-												campaignEmail.template.settings
+												campaignEmail.template?.settings
 													.from_email
 											}
 										</Typography.Text>
 									</Flex>
 								)}
 							{campaignType === 'email' &&
-								campaignEmail.template.subject && (
+								campaignEmail.template?.subject && (
 									<Flex gap={10}>
 										<Typography.Text>
 											{__('Subject', 'quillcrm')}
@@ -475,7 +481,7 @@ const Engagements: React.FC = () => {
 						>
 							<div
 								dangerouslySetInnerHTML={{
-									__html: campaignEmail.template.body || '',
+									__html: campaignEmail.template?.body || '',
 								}}
 							/>
 						</Card>

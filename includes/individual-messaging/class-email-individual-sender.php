@@ -96,8 +96,8 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 		// Process merge tags (from parent)
 		$processed = parent::process_message( $message, $contact, $tracking_entry );
 
-		// Add footer and tracking pixel (for individual emails)
-		$processed = Email_Tracking_Helper::add_footer_and_tracking( $processed, $tracking_entry, $contact );
+		// Add tracking pixel only (no footer for individual messages)
+		$processed = Email_Tracking_Helper::add_tracking_pixel( $processed, $tracking_entry );
 
 		// Add click tracking
 		$processed = Email_Tracking_Helper::add_click_tracking( $processed, $tracking_entry->hash_key, $contact );

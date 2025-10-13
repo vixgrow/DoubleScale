@@ -481,14 +481,22 @@ export type CampaignEmail = {
 	email: string;
 	opened: string;
 	clicked: string;
-	status: string;
+	status: number; // Integer status code (1=pending, 2=sent, 3=failed, etc.)
+	status_slug: string; // String slug ('pending', 'sent', 'failed', etc.)
+	status_name: string; // Human-readable name
 	sent_at: string;
 	opened_at: string;
 	clicked_at: string;
 	created_at: string;
 	updated_at: string;
 	contact: Contact;
-	template: CustomTemplate;
+	template?: CustomTemplate | null; // Optional for individual messages
+	message?: {
+		id: number;
+		tracking_id: number;
+		subject: string | null;
+		body: string;
+	} | null; // Message content for individual messages
 	campaign?: Partial<Campaign>;
 };
 

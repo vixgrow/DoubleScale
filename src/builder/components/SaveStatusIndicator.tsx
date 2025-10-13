@@ -74,9 +74,9 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
 		}
 
 		return {
-			icon: null,
-			text: __('Not saved', 'quillcrm'),
-			color: 'text-gray-600',
+			icon: <Check className="h-4 w-4" />,
+			text: __('No changes', 'quillcrm'),
+			color: 'text-green-600',
 		};
 	};
 
@@ -96,4 +96,3 @@ export const SaveStatusIndicator: React.FC<SaveStatusIndicatorProps> = ({
 		</div>
 	);
 };
-

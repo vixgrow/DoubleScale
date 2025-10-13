@@ -10,6 +10,7 @@ import { EmailSection } from '../../stores/email-builder/types';
 import ColumnRenderer from './ColumnRenderer';
 import { CopyIcon, DeleteIcon } from '@quillcrm/components';
 import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
+import { DropIndicator } from './DropIndicator';
 
 interface SectionRendererProps {
 	section: EmailSection;
@@ -19,7 +20,7 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 	const dispatch = useDispatch();
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
 
-	const { attributes, setNodeRef, transform, transition, isDragging } =
+	const { attributes, setNodeRef, transform, transition, isDragging, isOver } =
 		useSortable({
 			id: section.id,
 			data: {
@@ -92,6 +93,9 @@ const SectionRenderer: React.FC<SectionRendererProps> = ({ section }) => {
 			`}
 			onClick={handleSectionClick}
 		>
+			{/* Drop Indicator */}
+			<DropIndicator position="top" isVisible={isOver} />
+			
 			{/* Section Controls */}
 			{isSelected && (
 				<div className="absolute -top-[1.5px] h-[189.5px] -left-[43px] grid items-center gap-1 bg-white shadow-md rounded-l-xl p-2 border-2 border-blue-500">

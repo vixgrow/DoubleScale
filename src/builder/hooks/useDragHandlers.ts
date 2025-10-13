@@ -3,15 +3,15 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from 'react';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { blocksRegistry } from '../blocks/BlockRegister';
+import { TemplateConfig, TemplateType } from '../types/common';
 import {
   handleTemplateDropOnCanvas,
-  isTemplateSection,
-  TemplateConfig,
-  TemplateType,
+  markAsTemplateBlock,
 } from '../utils/dragAndDropHelpers';
 import { generateBlockId, generateColumnId, generateSectionId } from '../utils/idGenerator';
+import { isTemplateSection } from '../utils/templateUtils';
 
-export const useDragHandlers = () => {
+export const useDragHandlers = (onDragEndCallback?: () => void) => {
   const dispatch = useDispatch();
   const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
   const [activeItem, setActiveItem] = useState<any>(null);
@@ -36,6 +36,11 @@ export const useDragHandlers = () => {
     const { active, over } = event;
     setActiveItem(null);
 
+    // Call the callback to close sidebar after drop
+    if (onDragEndCallback && over) {
+      onDragEndCallback();
+    }
+
     if (!over || active.id === over.id) {
       return;
     }
@@ -45,13 +50,46 @@ export const useDragHandlers = () => {
       'header-template',
       'email-body-template',
       'footer-template',
+      'hero-image-template',
       'image-gallery-template',
+      'preheader-template',
     ];
 
     const activeType = active.data?.current?.type as TemplateType;
     if (templateTypes.includes(activeType) && active.data?.current) {
       const template = active.data.current.template as TemplateConfig;
       const overData = over.data?.current;
+
+      // If dropping on a section, insert before/after that section
+      if (overData?.type === 'section') {
+        const targetSectionId = overData.sectionId;
+        const targetIndex = sections.findIndex((s) => s.id === targetSectionId);
+
+        // Create a new section from the template
+        const newSection = {
+          id: generateSectionId(),
+          columns: [
+            {
+              id: generateColumnId(),
+              width: 100,
+              blocks: template.blocks.map((blockConfig: any) => {
+                // Mark blocks as template blocks (pass template layout for grids)
+                const blockProps = markAsTemplateBlock(blockConfig, template.layout);
+                return {
+                  id: generateBlockId(),
+                  type: blockConfig.type,
+                  props: blockProps,
+                };
+              }),
+            },
+          ],
+          styles: {},
+        };
+
+        // Insert before the target section
+        dispatch(STORE_KEY).addSection(newSection, targetIndex);
+        return;
+      }
 
       const handled = handleTemplateDropOnCanvas(
         template,
@@ -196,6 +234,7 @@ export const useDragHandlers = () => {
 
     if (active.data?.current?.type === 'layout') {
       const layoutItem = active.data.current.item;
+      const overData = over.data?.current;
 
       const newSection = {
         id: generateSectionId(),
@@ -206,7 +245,15 @@ export const useDragHandlers = () => {
         })),
         styles: {},
       };
-      dispatch(STORE_KEY).addSection(newSection);
+
+      // If dropping on a drop zone, insert at specific position
+      if (overData?.type === 'section-drop-zone') {
+        const insertIndex = overData.index;
+        dispatch(STORE_KEY).addSection(newSection, insertIndex);
+      } else {
+        // Otherwise add at end (for empty canvas)
+        dispatch(STORE_KEY).addSection(newSection);
+      }
     }
   };
 

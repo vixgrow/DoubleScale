@@ -57,9 +57,13 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
     buttonSettings,
   });
 
+  // Track if initial load is complete
+  const initialLoadCompleteRef = useRef(false);
+
   // Check if there are unsaved changes
   useEffect(() => {
-    if (lastSavedStateRef.current && currentState !== lastSavedStateRef.current) {
+    // Only check for changes after initial load is complete
+    if (initialLoadCompleteRef.current && lastSavedStateRef.current && currentState !== lastSavedStateRef.current) {
       setSaveStatus((prev) => ({ ...prev, hasUnsavedChanges: true }));
     }
   }, [currentState]);
@@ -183,12 +187,16 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
             hasUnsavedChanges: false,
           }));
         }
+
+        // Mark initial load as complete
+        initialLoadCompleteRef.current = true;
       }
-    } else if (!lastSavedStateRef.current) {
-      // No existing data, initialize with current state
+    } else if (!lastSavedStateRef.current && sections && sections.length >= 0) {
+      // No existing data, initialize with current state after data loads
       lastSavedStateRef.current = currentState;
+      initialLoadCompleteRef.current = true;
     }
-  }, [existingTemplateData]);
+  }, [existingTemplateData, sections, currentState]);
 
   return {
     ...saveStatus,

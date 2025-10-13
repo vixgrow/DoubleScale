@@ -3,12 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 /**
- * external dependencies
- */
-import { useDraggable } from '@dnd-kit/core';
-/**
  * internal dependencies
  */
+import { DraggableTemplate } from '../../components/shared/DraggableTemplate';
 
 const EmailBodyLibrary = () => {
 	// Title 1 template - creates 2 blocks: heading text and lorem text
@@ -671,6 +668,7 @@ const EmailBodyLibrary = () => {
 				<DraggableTemplate
 					template={title1Template}
 					id="email-body-title-1"
+					templateType="email-body"
 				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-3 text-[10px]">
 						<div className="text-[#141B34] text-sm">
@@ -691,6 +689,7 @@ const EmailBodyLibrary = () => {
 				<DraggableTemplate
 					template={title2Template}
 					id="email-body-title-2"
+					templateType="email-body"
 				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-3 text-[10px]">
 						<div className="text-[#9197A4]">
@@ -711,6 +710,7 @@ const EmailBodyLibrary = () => {
 				<DraggableTemplate
 					template={title3Template}
 					id="email-body-title-3"
+					templateType="email-body"
 				>
 					<div className="flex items-center justify-center border rounded-lg p-2 text-[10px]">
 						<div className="text-[#141B34] text-sm font-bold">
@@ -725,6 +725,7 @@ const EmailBodyLibrary = () => {
 				<DraggableTemplate
 					template={title4Template}
 					id="email-body-title-4"
+					templateType="email-body"
 				>
 					<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-3 text-sm text-[#141B34]">
 						<div className="font-bold">
@@ -747,6 +748,7 @@ const EmailBodyLibrary = () => {
 				<DraggableTemplate
 					template={titleButton1Template}
 					id="email-body-title-button-1"
+					templateType="email-body"
 				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 						<div className="text-[#141B34] font-bold text-sm">
@@ -772,6 +774,7 @@ const EmailBodyLibrary = () => {
 				<DraggableTemplate
 					template={titleButton2Template}
 					id="email-body-title-button-2"
+					templateType="email-body"
 				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 						<div className="text-[#9197A4]">
@@ -797,6 +800,7 @@ const EmailBodyLibrary = () => {
 				<DraggableTemplate
 					template={titleButton5Template}
 					id="email-body-title-2-buttons"
+					templateType="email-body"
 				>
 					<div className="flex flex-col gap-2 items-center justify-center border rounded-lg p-2 text-[10px]">
 						<div className="text-[#9197A4]">
@@ -828,6 +832,7 @@ const EmailBodyLibrary = () => {
 				<DraggableTemplate
 					template={titleParagraphButtonTemplate}
 					id="email-body-title-paragraph-button"
+					templateType="email-body"
 				>
 					<div className="flex flex-col gap-2 items-start border rounded-lg p-2 text-[10px]">
 						<div className="text-[#9197A4]">
@@ -848,36 +853,6 @@ const EmailBodyLibrary = () => {
 					</div>
 				</DraggableTemplate>
 			</div>
-		</div>
-	);
-};
-
-// Draggable component using dnd-kit
-const DraggableTemplate = ({ template, id, children }) => {
-	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-		id: id,
-		data: {
-			type: 'email-body-template',
-			template: template,
-		},
-	});
-
-	const style = {
-		opacity: isDragging ? 0.5 : 1,
-		cursor: 'grab',
-	};
-
-	console.log(`DraggableTemplate ${id}:`, { isDragging, template });
-
-	return (
-		<div
-			ref={setNodeRef}
-			style={style}
-			{...listeners}
-			{...attributes}
-			className="hover:border-primary transition-colors"
-		>
-			{children}
 		</div>
 	);
 };

@@ -10,25 +10,25 @@ import { DraggableTemplate } from '../../components/shared/DraggableTemplate';
 const PreheaderLibrary = () => {
 	// Text & Link template
 	const textAndLinkTemplate = {
-		type: 'preheader',
-		props: {
-			text: 'If you cannot see images, Please',
-			linkText: 'Click here',
-			linkUrl: 'https://',
-			fontSize: 12,
-			textColor: '#9197A4',
-			linkColor: '#3B82F6',
-			textAlign: 'left',
-			fontFamily: 'Arial',
-			bold: false,
-			italic: false,
-			underline: true,
-			templateLayout: {
-				justifyContent: 'flex-start',
-				alignItems: 'center',
-				width: '100%',
+		type: 'preheader-template',
+		blocks: [
+			{
+				type: 'preheader',
+				props: {
+					text: 'If you cannot see images, Please',
+					linkText: 'Click here',
+					linkUrl: 'https://',
+					fontSize: 12,
+					textColor: '#9197A4',
+					linkColor: '#3B82F6',
+					textAlign: 'left',
+					fontFamily: 'Arial',
+					bold: false,
+					italic: false,
+					underline: true,
+				},
 			},
-		},
+		],
 	};
 
 	return (

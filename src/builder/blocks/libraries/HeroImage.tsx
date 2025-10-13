@@ -577,6 +577,7 @@ const HeroImageLibrary = () => {
 				<DraggableTemplate
 					template={standardHeroTemplate}
 					id="hero-standard"
+					templateType="hero-image"
 				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 						<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
@@ -605,6 +606,7 @@ const HeroImageLibrary = () => {
 				<DraggableTemplate
 					template={extendedHeroTemplate}
 					id="hero-extended"
+					templateType="hero-image"
 				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 						<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
@@ -641,6 +643,7 @@ const HeroImageLibrary = () => {
 				<DraggableTemplate
 					template={titleImageTemplate}
 					id="hero-title-image"
+					templateType="hero-image"
 				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 						<div className="text-[#141B34] text-sm font-bold">
@@ -672,6 +675,7 @@ const HeroImageLibrary = () => {
 				<DraggableTemplate
 					template={sideBySideTemplate}
 					id="hero-side-by-side"
+					templateType="hero-image"
 				>
 					<div className="flex gap-5 items-center border rounded-lg p-2 w-full">
 						<div className="text-[#616161] bg-muted w-1/2 h-full py-20 flex items-center justify-center">

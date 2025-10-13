@@ -10,6 +10,7 @@ import { EmailBlock } from '../../stores/email-builder/types';
 import { blocksRegistry } from '../blocks/BlockRegister';
 import { DeleteIcon } from '@quillcrm/components';
 import { useDispatch } from '@wordpress/data';
+import { isTemplateBlock } from '../utils/templateUtils';
 
 interface BlockRendererProps {
 	block: EmailBlock;
@@ -23,6 +24,9 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 	columnId,
 }) => {
 	const dispatch = useDispatch();
+
+	// Check if this block is part of a template (locked from editing)
+	const isThisTemplateBlock = isTemplateBlock(block);
 
 	const {
 		attributes,
@@ -40,6 +44,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			columnId: columnId,
 			block: block,
 		},
+		disabled: isThisTemplateBlock, // Disable dragging for template blocks
 	});
 
 	const style = {
@@ -89,23 +94,29 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			{/* Block Controls */}
 			{isSelected && (
 				<div className="absolute -top-8 -left-[1.5px] flex items-center gap-2 bg-white shadow-md rounded-t-xl px-2 py-1 text-sm z-10 border-2 border-blue-500">
-					<div
-						{...listeners}
-						className="cursor-grab hover:cursor-grabbing flex items-center text-secondary-foreground"
-					>
-						<GripVertical className="w-4 h-4" />
-					</div>
+					{/* Only show drag handle for non-template blocks */}
+					{!isThisTemplateBlock && (
+						<div
+							{...listeners}
+							className="cursor-grab hover:cursor-grabbing flex items-center text-secondary-foreground"
+						>
+							<GripVertical className="w-4 h-4" />
+						</div>
+					)}
 					<span className="text-secondary-foreground">
 						{blockDefinition.name || block.type}
 					</span>
-					<Button
-						variant="ghost"
-						size="sm"
-						className="h-5 w-5 p-0 text-secondary-foreground hover:text-red-700"
-						onClick={handleDeleteBlock}
-					>
-						<DeleteIcon />
-					</Button>
+					{/* Only show delete button for non-template blocks */}
+					{!isThisTemplateBlock && (
+						<Button
+							variant="ghost"
+							size="sm"
+							className="h-5 w-5 p-0 text-secondary-foreground hover:text-red-700"
+							onClick={handleDeleteBlock}
+						>
+							<DeleteIcon />
+						</Button>
+					)}
 				</div>
 			)}
 

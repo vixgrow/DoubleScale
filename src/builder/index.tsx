@@ -1,7 +1,7 @@
 /**
  * external dependencies
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
 	DndContext,
 	useSensor,
@@ -28,6 +28,7 @@ import { useDragHandlers } from './hooks/useDragHandlers';
 
 const BuilderContent: React.FC = () => {
 	const dispatch = useDispatch();
+	const [sidebarCloseTrigger, setSidebarCloseTrigger] = useState(0);
 
 	const existingTemplateData = useSelect(
 		(select: any) => select('quillcrm/campaign').getStepData('template'),
@@ -37,7 +38,14 @@ const BuilderContent: React.FC = () => {
 	useButtonSettings();
 
 	const customCollisionDetection = useCollisionDetection();
-	const { activeItem, handleDragStart, handleDragEnd } = useDragHandlers();
+
+	const onDragEndCallback = useCallback(() => {
+		// Trigger sidebar close after drop
+		setSidebarCloseTrigger((prev) => prev + 1);
+	}, []);
+
+	const { activeItem, handleDragStart, handleDragEnd } =
+		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
 		const loadTemplateData = async () => {
@@ -53,15 +61,31 @@ const BuilderContent: React.FC = () => {
 				const emailBody = template.email_body;
 
 				if (emailBody?.type === 'builder' && emailBody.value) {
-					const { sections, globalSettings } = emailBody.value;
+					const { sections, globalSettings, buttonSettings } =
+						emailBody.value;
 
+					// Load sections
 					if (sections && sections.length > 0) {
 						dispatch(STORE_KEY).setBuilderState(sections);
 					}
 
+					// Load global settings
 					if (globalSettings) {
 						dispatch(STORE_KEY).updateGlobalSettings(
 							globalSettings
+						);
+					}
+
+					// Load button settings if they exist
+					if (buttonSettings) {
+						// Update each button type's settings
+						Object.entries(buttonSettings).forEach(
+							([buttonType, settings]) => {
+								dispatch(STORE_KEY).updateButtonSettings(
+									buttonType,
+									settings
+								);
+							}
 						);
 					}
 				}
@@ -88,6 +112,12 @@ const BuilderContent: React.FC = () => {
 		useSensor(KeyboardSensor)
 	);
 
+	// Custom drop animation to make items disappear after drop (no return animation)
+	const dropAnimation = {
+		duration: 0, // Instant disappear, no animation back to original position
+		easing: 'ease',
+	};
+
 	return (
 		<div className="flex flex-col absolute top-0 left-0 right-0 bottom-0 z-50 bg-primary-foreground">
 			<Header />
@@ -102,10 +132,10 @@ const BuilderContent: React.FC = () => {
 					onDragEnd={handleDragEnd}
 					modifiers={[snapCenterToCursor]}
 				>
-					<Sidebar />
+					<Sidebar sidebarCloseTrigger={sidebarCloseTrigger} />
 					<Canvas />
 
-					<DragOverlay>
+					<DragOverlay dropAnimation={dropAnimation}>
 						<DragOverlayRenderer activeItem={activeItem} />
 					</DragOverlay>
 				</DndContext>

@@ -72,6 +72,7 @@ export interface SectionStyles {
 // ============================================================================
 
 export type TemplateType =
+  | 'library-template'
   | 'header-template'
   | 'footer-template'
   | 'email-body-template'

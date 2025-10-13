@@ -33,10 +33,19 @@ const TEMPLATE_TITLES: Record<string, Record<string, string>> = {
 		'title-2-buttons': 'Title & 2 Buttons',
 		'title-paragraph-button': 'Title, Paragraph & Button',
 	},
+	'hero-image-template': {
+		'standard-hero': 'Standard Hero',
+		'extended-hero': 'Extended Hero',
+		'title-image': 'Title + Image',
+		'side-by-side': 'Side by Side Image + Text',
+	},
 	'footer-template': {
 		'centered-footer': 'Centered Footer',
 		'centered-footer-items': 'Centered Footer & Items',
 		'basic-footer': 'Basic Footer',
+	},
+	'preheader-template': {
+		'preheader-template': 'Text & Link',
 	},
 	'image-gallery-template': {
 		'grid-1': 'Grid 1',
@@ -52,7 +61,9 @@ const TEMPLATE_LABELS: Record<string, string> = {
 	'library-template': 'Preheader Template',
 	'header-template': 'Header Template',
 	'email-body-template': 'Email Body Template',
+	'hero-image-template': 'Hero Image Template',
 	'footer-template': 'Footer Template',
+	'preheader-template': 'Preheader Template',
 	'image-gallery-template': 'Image Gallery Template',
 };
 

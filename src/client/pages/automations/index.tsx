@@ -22,7 +22,7 @@ import type {
 	DataTableConfig,
 } from '@quillcrm/client';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
-import { PageHeader, PlusIcon, NoticeBanner } from '@quillcrm/components';
+import { PageHeader, PlusIcon } from '@quillcrm/components';
 import { isEmpty } from 'validator';
 import { NoticeMessage } from '@quillcrm/client';
 import { formatDateForAPI } from '@quillcrm/utils';
@@ -57,7 +57,7 @@ const AutomationsList: React.FC = () => {
 	const [updatingAutomationId, setUpdatingAutomationId] = useState<
 		number | null
 	>(null);
-	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const [error, setError] = useState<NoticeMessage | null>(null);
 	const navigate = useNavigate();
 
 	// Use the reusable hook
@@ -86,7 +86,7 @@ const AutomationsList: React.FC = () => {
 			setData(response.data);
 			setTotalRecords(response.total);
 		} catch (error: any) {
-			setNotice({
+			setError({
 				type: 'error',
 				message: error.message,
 			});
@@ -98,8 +98,6 @@ const AutomationsList: React.FC = () => {
 	useEffect(() => {
 		fetchAutomations();
 	}, [page, perPage, keyword, dateRange]);
-
-	console.log(data);
 
 	const createAutomation = async () => {
 		if (!validate(automation)) {
@@ -115,7 +113,8 @@ const AutomationsList: React.FC = () => {
 
 			navigate(getToLink(`automations/${response.id}`));
 		} catch (error: any) {
-			setNotice({
+			setVisible(false);
+			setError({
 				type: 'error',
 				message: error.message,
 			});
@@ -137,7 +136,7 @@ const AutomationsList: React.FC = () => {
 			setSelectedRowKeys([]);
 			setBulkAction('');
 			fetchAutomations();
-			setNotice({
+			setError({
 				type: 'success',
 				message: __(
 					'Selected automations deleted successfully',
@@ -145,7 +144,7 @@ const AutomationsList: React.FC = () => {
 				),
 			});
 		} catch (error: any) {
-			setNotice({
+			setError({
 				type: 'error',
 				message: error.message,
 			});
@@ -154,7 +153,7 @@ const AutomationsList: React.FC = () => {
 
 	const validate = (automation: Partial<Automation>) => {
 		if (isEmpty(automation.name || '', { ignore_whitespace: true })) {
-			setNotice({
+			setError({
 				type: 'error',
 				message: __('Automation name is required', 'quillcrm'),
 			});
@@ -162,7 +161,7 @@ const AutomationsList: React.FC = () => {
 		}
 
 		if (isEmpty(automation.trigger || '')) {
-			setNotice({
+			setError({
 				type: 'error',
 				message: __('Automation trigger is required', 'quillcrm'),
 			});
@@ -199,7 +198,7 @@ const AutomationsList: React.FC = () => {
 				)
 			);
 
-			setNotice({
+			setError({
 				type: 'success',
 				message: __(
 					'Automation status updated successfully',
@@ -207,7 +206,7 @@ const AutomationsList: React.FC = () => {
 				),
 			});
 		} catch (error: any) {
-			setNotice({
+			setError({
 				type: 'error',
 				message: error.message,
 			});
@@ -216,9 +215,6 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
-	const closeNotice = () => {
-		setNotice(null);
-	};
 
 	const handleBulkAction = async (action: string) => {
 		switch (action) {
@@ -277,10 +273,6 @@ const AutomationsList: React.FC = () => {
 					},
 				]}
 			/>
-			{/* Notice Banner */}
-			{notice && (
-				<NoticeBanner notice={notice} closeNotice={closeNotice} />
-			)}
 
 			{/* Data Table */}
 			<DataTable
@@ -299,8 +291,12 @@ const AutomationsList: React.FC = () => {
 				isSaving={isSaving}
 				automation={automation}
 				onOk={createAutomation}
-				onCancel={() => setVisible(false)}
+				onCancel={() => {
+					setVisible(false);
+					setError(null);
+				}}
 				onAutomationChange={setAutomation}
+				error={error}
 			/>
 		</div>
 	);

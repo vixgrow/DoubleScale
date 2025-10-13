@@ -13,6 +13,7 @@ use WP_Error;
 use QuillCRM\Abstracts\Abstract_Individual_Message_Sender;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Tracking\WhatsApp;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * WhatsApp_Individual_Sender class
@@ -32,7 +33,7 @@ class WhatsApp_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return string Channel type
 	 */
 	protected function get_channel_type() {
-		return 'whatsapp';
+		return Campaign_Channel::CHANNEL_WHATSAPP;
 	}
 
 	/**

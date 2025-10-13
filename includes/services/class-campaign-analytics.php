@@ -13,6 +13,7 @@ use QuillCRM\Utils;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Campaign_Analytics class
@@ -54,11 +55,11 @@ class Campaign_Analytics {
 	 */
 	protected function get_model_query( $type ) {
 		switch ( $type ) {
-			case 'email':
+			case Campaign_Channel::CHANNEL_EMAIL:
 				return Tracking_Model::emails();
-			case 'sms':
+			case Campaign_Channel::CHANNEL_SMS:
 				return Tracking_Model::sms();
-			case 'whatsapp':
+			case Campaign_Channel::CHANNEL_WHATSAPP:
 				return Tracking_Model::whatsapp();
 			default:
 				throw new \InvalidArgumentException( "Unsupported campaign type: {$type}" );
@@ -202,20 +203,20 @@ class Campaign_Analytics {
 		}
 
 		// Optimized: Single query per type with aggregate functions
-		if ( $type === 'email' ) {
+		if ( $type === Campaign_Channel::CHANNEL_EMAIL ) {
 			$result = $base_query->selectRaw( 'SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened, SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked' )->first();
 
 			$stats['opened']  = (int) $result->opened;
 			$stats['clicked'] = (int) $result->clicked;
 
-		} elseif ( $type === 'sms' ) {
+		} elseif ( $type === Campaign_Channel::CHANNEL_SMS ) {
 			$result = $base_query->selectRaw( 'SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = ' . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered' )->first();
 
 			$stats['clicked']   = (int) $result->clicked;
 			$stats['delivered'] = (int) $result->delivered;
 			$stats              = $this->calculate_sms_rates( $stats );
 
-		} elseif ( $type === 'whatsapp' ) {
+		} elseif ( $type === Campaign_Channel::CHANNEL_WHATSAPP ) {
 			$result = $base_query->selectRaw( 'SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = ' . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered' )->first();
 
 			$stats['clicked']   = (int) $result->clicked;
@@ -302,12 +303,12 @@ class Campaign_Analytics {
             SUM(CASE WHEN status = ' . Tracking_Status::FAILED . " THEN 1 ELSE 0 END) as failed
         ";
 
-		if ( $type === 'email' ) {
+		if ( $type === Campaign_Channel::CHANNEL_EMAIL ) {
 			$select_fields .= ',
                 SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened,
                 SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked
             ';
-		} elseif ( $type === 'sms' ) {
+		} elseif ( $type === Campaign_Channel::CHANNEL_SMS ) {
 			$select_fields .= ',
                 SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked
             ';

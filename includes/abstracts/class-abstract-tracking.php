@@ -12,6 +12,7 @@ namespace QuillCRM\Abstracts;
 use QuillCRM\Utils;
 use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Constants\Tracking_Status;
+use QuillCRM\Constants\Campaign_Channel;
 
 defined('ABSPATH') || exit;
 
@@ -235,7 +236,7 @@ abstract class Abstract_Tracking
 				break;
 			case 'read':
 				// WhatsApp-specific status (not yet defined in constants, using delivered for now)
-				if ($this->channel === 'whatsapp') {
+				if ($this->channel === Campaign_Channel::CHANNEL_WHATSAPP) {
 					$tracking_record->status = Tracking_Status::DELIVERED;
 				}
 				break;

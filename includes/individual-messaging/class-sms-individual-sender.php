@@ -13,6 +13,7 @@ use WP_Error;
 use QuillCRM\Abstracts\Abstract_Individual_Message_Sender;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Tracking\SMS;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * SMS_Individual_Sender class
@@ -32,7 +33,7 @@ class SMS_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return string Channel type
 	 */
 	protected function get_channel_type() {
-		return 'sms';
+		return Campaign_Channel::CHANNEL_SMS;
 	}
 
 	/**

@@ -15,6 +15,7 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
+use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Services\Campaign_Rate_Limiter;
@@ -524,7 +525,7 @@ abstract class Abstract_Campaign_Processing {
 					$contact->id,
 					$campaign->id,
 					$this->channel,
-					$this->channel === 'email' ? 'no email' : 'no phone number'
+					$this->channel === Campaign_Channel::CHANNEL_EMAIL ? 'no email' : 'no phone number'
 				);
 				// Increment offset for skipped contact to avoid reprocessing
 				update_option( "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
@@ -609,7 +610,7 @@ abstract class Abstract_Campaign_Processing {
 
 		// Get message provider (for SMS/WhatsApp campaigns)
 		// Email campaigns skip this check
-		if ( $this->channel !== 'email' ) {
+		if ( $this->channel !== Campaign_Channel::CHANNEL_EMAIL ) {
 			$provider = $this->get_message_provider();
 			if ( ! $provider ) {
 				$this->log_provider_connection_error( $campaign, $contact, $campaign_message );
@@ -784,7 +785,7 @@ abstract class Abstract_Campaign_Processing {
 			return $this->message_provider;
 		}
 
-		if ( $this->channel === 'email' ) {
+		if ( $this->channel === Campaign_Channel::CHANNEL_EMAIL ) {
 			return null;
 		}
 
@@ -1061,7 +1062,7 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		// Check for subject in email templates
-		if ( $campaign_type === 'email' && empty( trim( $template->subject ) ) ) {
+		if ( $campaign_type === Campaign_Channel::CHANNEL_EMAIL && empty( trim( $template->subject ) ) ) {
 			quillcrm_get_logger()->warning(
 				__( 'Email template missing subject', 'quillcrm' ),
 				array( 'template_id' => $template->id )
@@ -1069,7 +1070,7 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		// Validate HTML structure for email templates
-		if ( $campaign_type === 'email' ) {
+		if ( $campaign_type === Campaign_Channel::CHANNEL_EMAIL ) {
 			if ( ! $this->is_valid_html( $template->body ) ) {
 				quillcrm_get_logger()->warning(
 					__( 'Email template contains potentially invalid HTML', 'quillcrm' ),

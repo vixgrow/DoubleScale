@@ -18,6 +18,7 @@ use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 use QuillCRM\Managers\Campaign_Status_Manager;
 use QuillCRM\Services\Campaign_Template_Factory;
 use QuillCRM\Services\Template_Field_Mapper;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Campaign_Model class
@@ -164,7 +165,7 @@ class Campaign_Model extends Model {
 	 * @return string
 	 */
 	public function get_type() {
-		return $this->type ?? 'email';
+		return $this->type ?? Campaign_Channel::get_default();
 	}
 
 	/**
@@ -175,7 +176,7 @@ class Campaign_Model extends Model {
 	 * @return bool
 	 */
 	public function is_sms_campaign() {
-		 return $this->get_type() === 'sms';
+		 return $this->get_type() === Campaign_Channel::CHANNEL_SMS;
 	}
 
 	/**
@@ -186,7 +187,7 @@ class Campaign_Model extends Model {
 	 * @return bool
 	 */
 	public function is_email_campaign() {
-		return $this->get_type() === 'email';
+		return $this->get_type() === Campaign_Channel::CHANNEL_EMAIL;
 	}
 
 	/**
@@ -197,7 +198,7 @@ class Campaign_Model extends Model {
 	 * @return bool
 	 */
 	public function is_whatsapp_campaign() {
-		return $this->get_type() === 'whatsapp';
+		return $this->get_type() === Campaign_Channel::CHANNEL_WHATSAPP;
 	}
 
 
@@ -361,14 +362,8 @@ class Campaign_Model extends Model {
 	 */
 	private function get_template_counts_optimized($campaign)
 	{
-		// Map campaign type to tracking mode
-		$mode_map = array(
-			'email' => Tracking_Model::MODE_EMAIL,
-			'sms' => Tracking_Model::MODE_SMS,
-			'whatsapp' => Tracking_Model::MODE_WHATSAPP,
-		);
-
-		$mode = $mode_map[$campaign->type] ?? null;
+		// Convert campaign channel to tracking mode
+		$mode = Campaign_Channel::to_mode($campaign->type);
 		if ($mode === null) {
 			return array();
 		}

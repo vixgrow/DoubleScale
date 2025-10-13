@@ -10,6 +10,7 @@
 namespace QuillCRM\Services;
 
 use QuillCRM\Models\Template_Model;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Template_Field_Mapper class
@@ -28,17 +29,17 @@ class Template_Field_Mapper
     public static function get_field_config($campaign_type)
     {
         $configs = array(
-            'email' => array(
+            Campaign_Channel::CHANNEL_EMAIL => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
                 'specific_fields' => array('subject'),
                 'settings_fields' => array('from_name', 'from_email', 'reply_to', 'preview_text', 'enable_utm', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'),
             ),
-            'sms' => array(
+            Campaign_Channel::CHANNEL_SMS => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
                 'specific_fields' => array(),
                 'settings_fields' => array('add_unsubscribe'),
             ),
-            'whatsapp' => array(
+            Campaign_Channel::CHANNEL_WHATSAPP => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
                 'specific_fields' => array(),
                 'settings_fields' => array('add_unsubscribe'),
@@ -151,7 +152,7 @@ class Template_Field_Mapper
      */
     public static function get_supported_types()
     {
-        return array('email', 'sms', 'whatsapp');
+        return Campaign_Channel::get_all();
     }
 
     /**

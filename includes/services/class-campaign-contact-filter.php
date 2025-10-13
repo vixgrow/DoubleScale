@@ -11,6 +11,7 @@ namespace QuillCRM\Services;
 
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Campaign_Contact_Filter class
@@ -106,12 +107,12 @@ class Campaign_Contact_Filter {
 	 */
 	public function apply_campaign_type_filter( $query, $type ) {
 		switch ( $type ) {
-			case 'email':
+			case Campaign_Channel::CHANNEL_EMAIL:
 				$query->whereNotNull( 'email' )
 					  ->where( 'email', '!=', '' );
 				break;
-			case 'sms':
-			case 'whatsapp':
+			case Campaign_Channel::CHANNEL_SMS:
+			case Campaign_Channel::CHANNEL_WHATSAPP:
 				$query->whereNotNull( 'phone' )
 					  ->where( 'phone', '!=', '' );
 				break;

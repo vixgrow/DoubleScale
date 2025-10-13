@@ -16,6 +16,7 @@ use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Tracking_Model class
@@ -465,25 +466,6 @@ class Tracking_Model extends Model
 	}
 
 	/**
-	 * Get mode label
-	 *
-	 * @return string
-	 */
-	public function get_mode_label()
-	{
-		switch ($this->mode) {
-			case self::MODE_EMAIL:
-				return __('Email', 'quillcrm');
-			case self::MODE_SMS:
-				return __('SMS', 'quillcrm');
-			case self::MODE_WHATSAPP:
-				return __('WhatsApp', 'quillcrm');
-			default:
-				return __('Unknown', 'quillcrm');
-		}
-	}
-
-	/**
 	 * Get campaign message statistics
 	 *
 	 * @param int $campaign_id Campaign ID (maps to source_id with source_type=CAMPAIGN)
@@ -494,20 +476,18 @@ class Tracking_Model extends Model
 	public static function get_campaign_stats($campaign_id, $mode = null)
 	{
 		$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
-		$mode_map = [
-			self::MODE_EMAIL => 'email',
-			self::MODE_SMS => 'sms',
-			self::MODE_WHATSAPP => 'whatsapp'
-		];
 		
-		if ($mode && isset($mode_map[$mode])) {
-			return $analytics->get_campaign_stats($mode_map[$mode], $campaign_id);
+		if ($mode) {
+			$channel = Campaign_Channel::from_mode($mode);
+			if ($channel) {
+				return $analytics->get_campaign_stats($channel, $campaign_id);
+			}
 		}
 		
 		// Return combined stats for all modes
 		$stats = [];
-		foreach ($mode_map as $mode_num => $mode_str) {
-			$stats[$mode_str] = $analytics->get_campaign_stats($mode_str, $campaign_id);
+		foreach (Campaign_Channel::get_all() as $channel) {
+			$stats[$channel] = $analytics->get_campaign_stats($channel, $campaign_id);
 		}
 		
 		return $stats;

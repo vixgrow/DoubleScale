@@ -1,22 +1,26 @@
 <?php
 
 /**
- * FluentForms Field Merge Tag
+ * Forms Field Merge Tag
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\FluentForms;
+namespace QuillCRM\Merge_Tags\Forms;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
 
 /**
- * FluentForms Field Merge Tag
+ * Forms Field Merge Tag
  */
-class FluentForms_Field extends Merge_Tag {
+class Forms_Field extends Merge_Tag {
+
+
+
+
 
 	/**
 	 * Merge Tag Name
@@ -44,7 +48,7 @@ class FluentForms_Field extends Merge_Tag {
 	 *
 	 * @var string
 	 */
-	public $group = 'fluentforms';
+	public $group;
 
 	/**
 	 * Is automation merge tag
@@ -66,11 +70,12 @@ class FluentForms_Field extends Merge_Tag {
 	 * @param string $field_name Field name.
 	 * @param string $field_label Field label.
 	 */
-	public function __construct( $field_name, $field_label ) {
+	public function __construct( $field_name, $field_label, $slug ) {
 		$this->field_name  = $field_name;
 		$this->name        = $field_label;
 		$this->slug        = "field:{$field_name}";
-		$this->description = sprintf( __( 'FluentForms field: %s', 'quillcrm' ), $field_label );
+		$this->group       = $slug;
+		$this->description = sprintf( __( $slug . ' field: %s', 'quillcrm' ), $field_label );
 	}
 
 	/**

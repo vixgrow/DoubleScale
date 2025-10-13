@@ -13,13 +13,19 @@ namespace QuillCRM\Forms\FluentForms;
 
 use QuillCRM\Abstracts\Form as Abstracts_Form;
 use QuillCRM\Managers\Forms_Manager;
-use QuillCRM\Merge_Tags\FluentForms\Dynamic_Fields_Registration;
+use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
 use QuillCRM\Models\Automation_Model;
 
 /**
  * FluentForms class
  */
 class Form extends Abstracts_Form {
+
+
+
+
+
+
 
 
 
@@ -63,14 +69,10 @@ class Form extends Abstracts_Form {
 			return;
 		}
 
-		// Load the merge tag classes
-		require_once QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/fluentforms/class-fluentforms-field.php';
-		require_once QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/fluentforms/class-dynamic-fields-registration.php';
-
 		// Get fields only from forms that are selected in active automations
 		$selected_forms_fields = $this->get_fields( $form_id );
 		if ( ! empty( $selected_forms_fields ) ) {
-			new Dynamic_Fields_Registration( $selected_forms_fields );
+			new Dynamic_Fields_Registration( $selected_forms_fields, $this->slug );
 		}
 	}
 

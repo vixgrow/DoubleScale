@@ -134,6 +134,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
         });
         return true;
       }
+      return false;
     } catch (error: any) {
       if (isMountedRef.current) {
         setSaveStatus((prev) => ({

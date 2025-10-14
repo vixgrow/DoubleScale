@@ -309,9 +309,10 @@ class Campaign_Model extends Model {
 	 */
 	private function process_templates( $templates_data ) {
 		$campaign_type    = $this->get_template_processing_type();
+		$campaign_status  = $this->status ?? 'draft';
 		$template_factory = Campaign_Template_Factory::instance();
 
-		return $template_factory->process_templates_data( $templates_data, $campaign_type );
+		return $template_factory->process_templates_data( $templates_data, $campaign_type, $campaign_status );
 	}
 
 	/**

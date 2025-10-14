@@ -49,29 +49,42 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Get campaign query - must be implemented by child classes
+	 * Get campaign query - default implementation filters by channel if set
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	abstract protected function get_campaign_query();
+	protected function get_campaign_query() {
+		return $this->channel
+			? Campaign_Model::query()->where( 'type', $this->channel )
+			: Campaign_Model::query();
+	}
 
 	/**
-	 * Get campaign message query - must be implemented by child classes
+	 * Get campaign message query - default implementation based on channel
 	 *
 	 * @param int $campaign_id
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	abstract protected function get_campaign_message_query( $campaign_id);
+	protected function get_campaign_message_query( $campaign_id ) {
+		if ( ! $this->channel ) {
+			return \QuillCRM\Models\Tracking_Model::query()
+				->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN )
+				->where( 'source_id', $campaign_id );
+		}
 
-	/**
-	 * Send test message - must be implemented by child classes
-	 *
-	 * @param WP_REST_Request $request
-	 *
-	 * @return WP_REST_Response
-	 */
-	abstract public function send_test_message( $request);
+		$mode_map = array(
+			'email'    => \QuillCRM\Models\Tracking_Model::MODE_EMAIL,
+			'sms'      => \QuillCRM\Models\Tracking_Model::MODE_SMS,
+			'whatsapp' => \QuillCRM\Models\Tracking_Model::MODE_WHATSAPP,
+		);
+
+		$mode = $mode_map[ $this->channel ] ?? \QuillCRM\Models\Tracking_Model::MODE_EMAIL;
+
+		return \QuillCRM\Models\Tracking_Model::where( 'mode', $mode )
+			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN )
+			->where( 'source_id', $campaign_id );
+	}
 
 	/**
 	 * Register common routes

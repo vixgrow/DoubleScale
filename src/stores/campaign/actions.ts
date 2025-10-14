@@ -16,7 +16,7 @@ import {
 	SET_SAVING, 
 	SET_ERROR 
 } from './constants';
-import { getCampaignEndpoint } from '@quillcrm/utils';
+// getCampaignEndpoint no longer needed - using unified /campaigns endpoint
 
 /**
  * Set campaign data
@@ -78,13 +78,10 @@ export const fetchCampaign = (id: string, campaignType?: string) => async ({ dis
 	dispatch(setError(null));
 
 	try {
-		// If campaign type is provided, use channel-specific endpoint
-		// Otherwise, use cross-type endpoint (fetches any campaign)
-		const path = campaignType
-			? `${getCampaignEndpoint(campaignType)}/${id}`
-			: `/qc/v1/campaigns/${id}`;
-
-		const response = await apiFetch({ path }) as ExtendedCampaign;
+		// Use unified endpoint for all campaign types
+		const response = await apiFetch({
+			path: `/qc/v1/campaigns/${id}`
+		}) as ExtendedCampaign;
 
 		dispatch(setCampaign(response));
 	} catch (error: any) {
@@ -99,7 +96,7 @@ export const fetchCampaign = (id: string, campaignType?: string) => async ({ dis
  */
 export const saveCampaign = (data: Partial<ExtendedCampaign> = {}) => async ({ select, dispatch }: any) => {
 	const campaign = select.getCampaign();
-	
+
 	if (!campaign) {
 		throw new Error(__('Campaign not loaded', 'quillcrm'));
 	}
@@ -108,13 +105,9 @@ export const saveCampaign = (data: Partial<ExtendedCampaign> = {}) => async ({ s
 	dispatch(setError(null));
 
 	try {
-		const endpoint = getCampaignEndpoint(campaign.type);
-		if (!endpoint) {
-			throw new Error(__('Invalid campaign type', 'quillcrm'));
-		}
-
+		// Use unified endpoint - type is auto-detected from campaign
 		const response = await apiFetch({
-			path: `${endpoint}/${campaign.id}`,
+			path: `/qc/v1/campaigns/${campaign.id}`,
 			method: 'PUT',
 			data: {
 				...campaign,
@@ -146,12 +139,6 @@ export const saveCampaignStep = (step: string, stepData?: any) => async ({ selec
 	dispatch(setError(null));
 
 	try {
-		// Get channel-specific endpoint
-		const endpoint = getCampaignEndpoint(campaign.type);
-		if (!endpoint) {
-			throw new Error(__('Invalid campaign type', 'quillcrm'));
-		}
-
 		// Get existing step data or initialize empty object
 		const existingSteps = campaign.settings?.steps || {};
 
@@ -170,8 +157,9 @@ export const saveCampaignStep = (step: string, stepData?: any) => async ({ selec
 			steps: updatedSteps,
 		};
 
+		// Use unified endpoint - type is auto-detected from campaign
 		const response = await apiFetch({
-			path: `${endpoint}/${campaign.id}`,
+			path: `/qc/v1/campaigns/${campaign.id}`,
 			method: 'PUT',
 			data: {
 				...campaign,

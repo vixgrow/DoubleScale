@@ -1,11 +1,9 @@
 <?php
-
 /**
- * Class Rest_Campaign_Controller
- * Cross-type campaign controller for read-only operations
+ * Unified Campaign Controller
+ * Handles all campaign types (email, sms, whatsapp) through a single unified endpoint
  *
  * @since 1.0.0
- *
  * @package QuillCRM
  */
 
@@ -16,98 +14,130 @@ use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
-use QuillCRM\Abstracts\REST_Controller;
+use QuillCRM\Abstracts\Abstract_Campaign_Controller;
 use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Campaign_Status_Manager;
+use QuillCRM\Managers\Message_Provider_Registry;
+use QuillCRM\Emails\Emails;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * REST_Campaign_Controller class
  *
- * Handles cross-type campaign operations (read-only):
- * - List all campaigns regardless of type
- * - Read individual campaign metadata (to determine type before routing to channel-specific controllers)
- *
- * Channel-specific operations delegated to:
- * - REST_Email_Campaign_Controller for email campaigns (/qc/v1/email-campaigns)
- * - REST_SMS_Campaign_Controller for SMS campaigns (/qc/v1/sms-campaigns)
- * - REST_WhatsApp_Campaign_Controller for WhatsApp campaigns (/qc/v1/whatsapp-campaigns)
+ * Unified controller handling all campaign operations across email, sms, and whatsapp channels.
+ * Routes: /qc/v1/campaigns with type/channel parameter
  */
-class REST_Campaign_Controller extends REST_Controller {
+class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 
 	/**
 	 * REST Base
-	 *
-	 * @since 1.0.0
 	 *
 	 * @var string
 	 */
 	protected $rest_base = 'campaigns';
 
 	/**
-	 * Register the routes for the controller.
-	 *
-	 * @since 1.0.0
+	 * Constructor
+	 */
+	public function __construct() {
+		parent::__construct();
+	}
+
+	/**
+	 * Register the routes for the controller
 	 */
 	public function register_routes() {
-		// Get all campaigns (cross-type list)
+		// Register all standard CRUD routes from parent
+		$this->register_common_routes();
+
+		// Campaign messages route
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/messages',
 			array(
+				'args' => array(
+					'id'       => array(
+						'description' => __( 'Campaign ID', 'quillcrm' ),
+						'type'        => 'integer',
+						'required'    => true,
+					),
+					'per_page' => array(
+						'description' => __( 'Items per page', 'quillcrm' ),
+						'type'        => 'integer',
+						'default'     => 10,
+					),
+					'page'     => array(
+						'description' => __( 'Page number', 'quillcrm' ),
+						'type'        => 'integer',
+						'default'     => 1,
+					),
+				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'callback'            => array( $this, 'get_campaign_messages' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
-						'keywords' => array(
-							'description' => __( 'The keyword to search for.', 'quillcrm' ),
+						'status' => array(
+							'description' => __( 'Message status filter', 'quillcrm' ),
 							'type'        => 'string',
-						),
-						'per_page' => array(
-							'description' => __( 'The number of items to return per page.', 'quillcrm' ),
-							'type'        => 'integer',
-							'default'     => 10,
-						),
-						'page'     => array(
-							'description' => __( 'The page number.', 'quillcrm' ),
-							'type'        => 'integer',
-							'default'     => 1,
-						),
-						'from'     => array(
-							'description' => __( 'Start date for filtering campaigns.', 'quillcrm' ),
-							'type'        => 'string',
-							'format'      => 'date',
-						),
-						'to'       => array(
-							'description' => __( 'End date for filtering campaigns.', 'quillcrm' ),
-							'type'        => 'string',
-							'format'      => 'date',
-						),
-						'type'     => array(
-							'description' => __( 'Campaign type filter.', 'quillcrm' ),
-							'type'        => 'string',
-							'enum'        => array( 'email', 'sms', 'whatsapp' ),
+							'enum'        => array( 'all', 'sent', 'opened', 'clicked', 'failed', 'pending', 'delivered', 'scheduled' ),
+							'required'    => false,
 						),
 					),
 				),
 			)
 		);
 
-		// Individual campaign read (cross-type)
+		// Send test message endpoint (unified for all channels)
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			'/' . $this->rest_base . '/send-test-message',
 			array(
-				'args' => array(
-					'id' => array(
-						'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
-						'type'        => 'integer',
-					),
-				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_test_message' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array(
+						'channel' => array(
+							'description' => __( 'Channel type', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+							'enum'        => array( 'email', 'sms', 'whatsapp' ),
+						),
+						// Email parameters
+						'email'     => array(
+							'description' => __( 'Email address (for email channel)', 'quillcrm' ),
+							'type'        => 'string',
+						),
+						'subject'   => array(
+							'description' => __( 'Email subject (for email channel)', 'quillcrm' ),
+							'type'        => 'string',
+						),
+						'from_name' => array(
+							'description' => __( 'From name (for email channel)', 'quillcrm' ),
+							'type'        => 'string',
+						),
+						'from_email' => array(
+							'description' => __( 'From email (for email channel)', 'quillcrm' ),
+							'type'        => 'string',
+						),
+						'reply_to'  => array(
+							'description' => __( 'Reply-to email (for email channel)', 'quillcrm' ),
+							'type'        => 'string',
+						),
+						// SMS/WhatsApp parameters
+						'phone'     => array(
+							'description' => __( 'Phone number (for SMS/WhatsApp channels)', 'quillcrm' ),
+							'type'        => 'string',
+						),
+						// Common parameter
+						'message'   => array(
+							'description' => __( 'Message content (body for email, message for SMS/WhatsApp)', 'quillcrm' ),
+							'type'        => 'string',
+							'required'    => true,
+						),
+					),
 				),
 			)
 		);
@@ -123,7 +153,7 @@ class REST_Campaign_Controller extends REST_Controller {
 					'permission_callback' => array( $this, 'bulk_delete_permissions_check' ),
 					'args'                => array(
 						'ids' => array(
-							'description' => __( 'Array of campaign IDs to delete.', 'quillcrm' ),
+							'description' => __( 'Array of campaign IDs to delete', 'quillcrm' ),
 							'type'        => 'array',
 							'items'       => array( 'type' => 'integer' ),
 							'required'    => true,
@@ -135,136 +165,205 @@ class REST_Campaign_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Schema for the campaign
+	 * Create campaign - override to set channel from request
 	 *
-	 * @since 1.0.0
-	 *
-	 * @return array $schema The campaign schema
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_item_schema() {
-		 $status_manager = Campaign_Status_Manager::instance();
+	public function create_item( $request ) {
+		// Set channel from type parameter
+		$type = $request->get_param( 'type' );
 
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'campaign',
-			'type'       => 'object',
-			'properties' => array(
-				'id'          => array(
-					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
-					'type'        => 'integer',
-					'readonly'    => true,
-				),
-				'name'        => array(
-					'description' => __( 'The name of the campaign.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'description' => array(
-					'description' => __( 'The description of the campaign.', 'quillcrm' ),
-					'type'        => 'string',
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'status'      => array(
-					'description'       => __( 'The status of the campaign.', 'quillcrm' ),
-					'type'              => 'string',
-					'enum'              => $status_manager->get_all_statuses(),
-					'default'           => Campaign_Status_Manager::DRAFT,
-					'validate_callback' => array( $this, 'validate_campaign_status' ),
-				),
-				'type'        => array(
-					'description' => __( 'The type/channel of the campaign.', 'quillcrm' ),
-					'type'        => 'string',
-					'enum'        => array( 'email', 'sms', 'whatsapp' ),
-					'readonly'    => true,
-				),
-				'settings'    => array(
-					'description' => __( 'The settings of the campaign.', 'quillcrm' ),
-					'type'        => 'object',
-				),
-				'parent_id'   => array(
-					'description' => __( 'The parent id of the campaign.', 'quillcrm' ),
-					'type'        => 'integer',
-				),
-				'count'       => array(
-					'description' => __( 'The count of the campaign.', 'quillcrm' ),
-					'type'        => 'integer',
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
-				),
-				'execute_at'  => array(
-					'description' => __( 'The execute at of the campaign.', 'quillcrm' ),
-					'type'        => 'string',
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'created_at'  => array(
-					'description' => __( 'The created at of the campaign.', 'quillcrm' ),
-					'type'        => 'string',
-					'readonly'    => true,
-				),
-				'updated_at'  => array(
-					'description' => __( 'The updated at of the campaign.', 'quillcrm' ),
-					'type'        => 'string',
-					'readonly'    => true,
-				),
-			),
-		);
+		if ( empty( $type ) ) {
+			return new WP_Error(
+				'missing_type',
+				__( 'Campaign type is required. Must be email, sms, or whatsapp.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! in_array( $type, array( 'email', 'sms', 'whatsapp' ), true ) ) {
+			return new WP_Error(
+				'invalid_type',
+				__( 'Invalid campaign type. Must be email, sms, or whatsapp.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$this->channel = $type;
+
+		return parent::create_item( $request );
 	}
 
 	/**
-	 * Get all campaigns (cross-type)
+	 * Update campaign - override to set channel from existing campaign
 	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 *
-	 * @return WP_REST_Response $response The response object
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_items( $request ) {
+	public function update_item( $request ) {
+		$campaign_id = $request->get_param( 'id' );
+		$campaign    = Campaign_Model::find( $campaign_id );
+
+		if ( $campaign ) {
+			$this->channel = $campaign->type;
+		}
+
+		return parent::update_item( $request );
+	}
+
+	/**
+	 * Get single campaign - override to set channel
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_item( $request ) {
+		$campaign_id = $request->get_param( 'id' );
+		$campaign    = Campaign_Model::find( $campaign_id );
+
+		if ( $campaign ) {
+			$this->channel = $campaign->type;
+		}
+
+		return parent::get_item( $request );
+	}
+
+	/**
+	 * Delete campaign - override to set channel
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$campaign_id = $request->get_param( 'id' );
+		$campaign    = Campaign_Model::find( $campaign_id );
+
+		if ( $campaign ) {
+			$this->channel = $campaign->type;
+		}
+
+		return parent::delete_item( $request );
+	}
+
+	/**
+	 * Duplicate campaign - override to set channel
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function duplicate_item( $request ) {
+		$campaign_id = $request->get_param( 'id' );
+		$campaign    = Campaign_Model::find( $campaign_id );
+
+		if ( $campaign ) {
+			$this->channel = $campaign->type;
+		}
+
+		return parent::duplicate_item( $request );
+	}
+
+	/**
+	 * Get campaign messages - override to set channel
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_campaign_messages( $request ) {
+		$campaign_id = $request->get_param( 'id' );
+		$campaign    = Campaign_Model::find( $campaign_id );
+
+		if ( $campaign ) {
+			$this->channel = $campaign->type;
+		}
+
+		return parent::get_campaign_messages( $request );
+	}
+
+	/**
+	 * Send test message - unified implementation for all channels
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_test_message( $request ) {
+		$channel = $request->get_param( 'channel' );
+
+		if ( empty( $channel ) ) {
+			return new WP_Error(
+				'missing_channel',
+				__( 'Channel parameter is required', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$this->channel = $channel;
+
+		if ( $channel === 'email' ) {
+			return $this->send_test_email( $request );
+		} else {
+			return $this->send_test_provider_message( $request, $channel );
+		}
+	}
+
+	/**
+	 * Send test email (inlined from REST_Email_Campaign_Controller)
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	private function send_test_email( $request ) {
 		try {
-			$keywords = $request->get_param( 'keywords' ) ?? null;
-			$per_page = $request->get_param( 'per_page' ) ?? 10;
-			$page     = $request->get_param( 'page' ) ?? 1;
-			$from     = $request->get_param( 'from' ) ?? null;
-			$to       = $request->get_param( 'to' ) ?? null;
-			$type     = $request->get_param( 'type' ) ?? null;
-			$query    = Campaign_Model::query();
+			$email      = $request->get_param( 'email' );
+			$subject    = $request->get_param( 'subject' );
+			$body       = $request->get_param( 'message' );
+			$from_name  = $request->get_param( 'from_name' ) ?: get_option( 'blogname' );
+			$from_email = $request->get_param( 'from_email' ) ?: get_option( 'admin_email' );
+			$reply_to   = $request->get_param( 'reply_to' );
 
-			// Get total count before applying filters
-			$total_count = $query->count();
-
-			// Apply type filter if specified
-			if ( $type ) {
-				if ( ! in_array( $type, array( 'email', 'sms', 'whatsapp' ) ) ) {
-					return new WP_Error( 'invalid_type', __( 'Invalid campaign type. Must be email, sms, or whatsapp.', 'quillcrm' ), array( 'status' => 400 ) );
-				}
-				$query->where( 'type', $type );
+			if ( empty( $email ) ) {
+				return new WP_Error(
+					'missing_email',
+					__( 'Email address is required for email channel', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
 			}
 
-			// Apply keywords filter
-			if ( $keywords ) {
-				$query->where( 'name', 'like', '%' . $keywords . '%' );
+			if ( empty( $subject ) ) {
+				return new WP_Error(
+					'missing_subject',
+					__( 'Subject is required for email channel', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
 			}
 
-			// Apply date range filter
-			if ( $from ) {
-				$query->where( 'created_at', '>=', $from );
+			$emails                = new Emails();
+			$emails->from_address = $from_email;
+			$emails->from_name    = $from_name;
+
+			if ( ! empty( $reply_to ) ) {
+				$emails->reply_to = $reply_to;
 			}
-			if ( $to ) {
-				$query->where( 'created_at', '<=', $to );
+
+			$for_testing_body = ! empty( $body ) ? $body : $this->get_default_test_email_content();
+
+			$contact = Contact_Model::get_by_email( $email ) ?? null;
+			$result  = $emails->send(
+				$email,
+				$subject,
+				$this->process_merge_tags( $for_testing_body, $contact )
+			);
+
+			if ( ! $result ) {
+				return new WP_Error(
+					'send_failed',
+					__( 'Failed to send test email', 'quillcrm' ),
+					array( 'status' => 500 )
+				);
 			}
-			$campaigns = $query->orderBy( 'created_at', 'desc' )
-				->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response(
-				$campaigns->toArray() + array( 'total_count' => $total_count ),
+				array( 'message' => __( 'Test email sent successfully', 'quillcrm' ) ),
 				200
 			);
 		} catch ( \Exception $e ) {
@@ -273,37 +372,104 @@ class REST_Campaign_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Get individual campaign (cross-type)
+	 * Send test provider message for SMS/WhatsApp (inlined from Abstract_Messaging_Campaign_Controller)
 	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 *
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @param WP_REST_Request $request
+	 * @param string          $channel
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_item( $request ) {
+	private function send_test_provider_message( $request, $channel ) {
 		try {
-			$campaign_id = $request->get_param( 'id' );
-			$campaign    = Campaign_Model::find( $campaign_id );
+			$phone   = $request->get_param( 'phone' );
+			$message = $request->get_param( 'message' );
 
-			if ( ! $campaign ) {
-				return new WP_Error( 'error', __( 'Campaign not found', 'quillcrm' ), array( 'status' => 404 ) );
+			if ( empty( $phone ) ) {
+				return new WP_Error(
+					'missing_phone',
+					sprintf( __( 'Phone number is required for %s channel', 'quillcrm' ), $channel ),
+					array( 'status' => 400 )
+				);
 			}
 
-			return new WP_REST_Response( $campaign, 200 );
+			// Get provider for this channel
+			$provider = Message_Provider_Registry::instance()->get_provider( $channel );
+
+			if ( ! $provider ) {
+				return new WP_Error(
+					'provider_not_available',
+					sprintf( __( 'No provider configured for %s channel', 'quillcrm' ), $channel ),
+					array( 'status' => 500 )
+				);
+			}
+
+			// Find contact for merge tag processing
+			$contact = Contact_Model::where( 'phone', $phone )->first() ?? null;
+
+			// Process merge tags
+			$processed_message = $this->process_merge_tags( $message, $contact );
+
+			// Prepare message data
+			$message_data = array(
+				'To'   => $phone,
+				'Body' => $processed_message,
+			);
+
+			// Add webhook URL for tracking
+			$webhook_url = $provider->get_webhook_url( $channel );
+			if ( $webhook_url && ! isset( $message_data['StatusCallback'] ) ) {
+				$message_data['StatusCallback'] = $webhook_url;
+			}
+
+			// Send message using provider
+			$result = $provider->send_message( $channel, $message_data, $contact ?? new Contact_Model() );
+
+			// Handle result
+			if ( ! isset( $result['success'] ) || ! $result['success'] ) {
+				$error_message = $result['error'] ?? 'Failed to send test message';
+
+				// Check for provider error details
+				if ( isset( $result['metadata']['error_details'] ) ) {
+					$error_details = $result['metadata']['error_details'];
+
+					if ( is_string( $error_details ) ) {
+						$error_message = $error_details;
+					} elseif ( is_array( $error_details ) && isset( $error_details['message'] ) ) {
+						$error_message = $error_details['message'];
+					}
+				}
+
+				return new WP_Error( 'send_failed', __( $error_message, 'quillcrm' ), array( 'status' => 400 ) );
+			}
+
+			$channel_upper = strtoupper( $channel );
+
+			return new WP_REST_Response(
+				array( 'message' => sprintf( __( 'Test %s sent successfully', 'quillcrm' ), $channel_upper ) ),
+				200
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 	}
 
 	/**
+	 * Get default test email content
+	 *
+	 * @return string
+	 */
+	private function get_default_test_email_content() {
+		$default_content = sprintf(
+			__( '<div><p>Hi {{contact:first_name}} {{contact:last_name}},</p><p>Thank you for subscribing to our updates.</p><p>Don\'t want to stay in the loop? We\'ll be sad to see you go, but you can click here to <a href="{{contact:unsubscribe_link}}" target="_blank">unsubscribe</a>.</p></div>', 'quillcrm' )
+		);
+
+		return apply_filters( 'quillcrm_default_test_email_content', $default_content );
+	}
+
+	/**
 	 * Bulk delete campaigns (cross-type)
 	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 *
-	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function bulk_delete( $request ) {
 		try {
@@ -344,65 +510,10 @@ class REST_Campaign_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Validate campaign status
+	 * Permission check for bulk delete
 	 *
-	 * @param string          $status The status to validate
-	 * @param WP_REST_Request $request The request object
-	 * @param string          $param The parameter name
-	 * @return bool|WP_Error
-	 */
-	public function validate_campaign_status( $status, $request, $param ) {
-		$status_manager = Campaign_Status_Manager::instance();
-
-		if ( ! $status_manager->is_valid_status( $status ) ) {
-			return new WP_Error(
-				'invalid_campaign_status',
-				sprintf( __( 'Invalid campaign status: %s', 'quillcrm' ), $status ),
-				array( 'status' => 400 )
-			);
-		}
-
-		return true;
-	}
-
-	// ===================================================================
-	// PERMISSION CHECKS
-	// ===================================================================
-
-	/**
-	 * Check if a given request has access to get items
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 *
-	 * @return bool $permission The permission
-	 */
-	public function get_items_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
-	}
-
-	/**
-	 * Check if a given request has access to get a specific item
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 *
-	 * @return bool $permission The permission
-	 */
-	public function get_item_permissions_check( $request ) {
-		return Permissions::has_crm_manager_access();
-	}
-
-	/**
-	 * Check if a given request has access to bulk delete campaigns
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 *
-	 * @return bool $permission The permission
+	 * @param WP_REST_Request $request
+	 * @return bool
 	 */
 	public function bulk_delete_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();

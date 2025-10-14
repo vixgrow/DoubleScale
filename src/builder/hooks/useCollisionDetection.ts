@@ -10,18 +10,29 @@ export const useCollisionDetection = (): CollisionDetection => {
 
     // Layout items - detect drop zones between sections
     if (active.data?.current?.type === 'layout') {
-      const dropZoneContainers = Array.from(
-        droppableContainers.values()
-      ).filter(
-        (container) => container.data?.current?.type === 'section-drop-zone'
-      );
-
       const canvasContainers = Array.from(
         droppableContainers.values()
       ).filter(
         (container) =>
           container.id === 'canvas' ||
           container.id === 'canvas-blocks'
+      );
+
+      // Check if we're over the canvas first
+      const canvasCollision = pointerWithin({
+        ...args,
+        droppableContainers: canvasContainers,
+      });
+
+      // Only detect drop zones if we're over the canvas
+      if (canvasCollision.length === 0) {
+        return [];
+      }
+
+      const dropZoneContainers = Array.from(
+        droppableContainers.values()
+      ).filter(
+        (container) => container.data?.current?.type === 'section-drop-zone'
       );
 
       const allContainers = [...dropZoneContainers, ...canvasContainers];
@@ -61,13 +72,6 @@ export const useCollisionDetection = (): CollisionDetection => {
       active.data?.current?.type &&
       templateTypes.includes(active.data.current.type)
     ) {
-      // Use section-drop-zones (same as layouts)
-      const dropZoneContainers = Array.from(
-        droppableContainers.values()
-      ).filter(
-        (container) => container.data?.current?.type === 'section-drop-zone'
-      );
-
       // Allow canvas drop (for empty canvas)
       const canvasContainers = Array.from(
         droppableContainers.values()
@@ -75,6 +79,24 @@ export const useCollisionDetection = (): CollisionDetection => {
         (container) =>
           container.id === 'canvas' ||
           container.id === 'canvas-blocks'
+      );
+
+      // Check if we're over the canvas first
+      const canvasCollision = pointerWithin({
+        ...args,
+        droppableContainers: canvasContainers,
+      });
+
+      // Only detect drop zones if we're over the canvas
+      if (canvasCollision.length === 0) {
+        return [];
+      }
+
+      // Use section-drop-zones (same as layouts)
+      const dropZoneContainers = Array.from(
+        droppableContainers.values()
+      ).filter(
+        (container) => container.data?.current?.type === 'section-drop-zone'
       );
 
       const allContainers = [...dropZoneContainers, ...canvasContainers];
@@ -86,6 +108,23 @@ export const useCollisionDetection = (): CollisionDetection => {
     }
 
     if (active.data?.current?.type === 'block') {
+      // First check if we're over the canvas
+      const canvasContainers = Array.from(
+        droppableContainers.values()
+      ).filter((container) =>
+        container.id === 'canvas' || container.id === 'canvas-blocks'
+      );
+
+      const canvasCollision = pointerWithin({
+        ...args,
+        droppableContainers: canvasContainers,
+      });
+
+      // Only detect collisions if we're over the canvas
+      if (canvasCollision.length === 0) {
+        return [];
+      }
+
       const columnContainers = Array.from(
         droppableContainers.values()
       ).filter((container) =>
@@ -106,6 +145,23 @@ export const useCollisionDetection = (): CollisionDetection => {
     }
 
     if (active.data?.current?.type === 'element') {
+      // First check if we're over the canvas
+      const canvasContainers = Array.from(
+        droppableContainers.values()
+      ).filter((container) =>
+        container.id === 'canvas' || container.id === 'canvas-blocks'
+      );
+
+      const canvasCollision = pointerWithin({
+        ...args,
+        droppableContainers: canvasContainers,
+      });
+
+      // Only detect column collisions if we're over the canvas
+      if (canvasCollision.length === 0) {
+        return [];
+      }
+
       const columnContainers = Array.from(
         droppableContainers.values()
       ).filter((container) =>

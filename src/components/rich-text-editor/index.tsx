@@ -298,6 +298,84 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		}
 	};
 
+	const handlePaste = (e: React.ClipboardEvent) => {
+		e.preventDefault();
+
+		const html = e.clipboardData.getData('text/html');
+		const text = e.clipboardData.getData('text/plain');
+
+		if (!html && !text) return;
+
+		if (!html) {
+			// @ts-ignore - deprecated API but no modern alternative exists
+			document.execCommand('insertText', false, text);
+			if (editorRef.current) onChange(editorRef.current.innerHTML);
+			return;
+		}
+
+		// Tag mapping for supported formatting
+		const tagMap: Record<
+			string,
+			(el: HTMLElement, content: string) => string
+		> = {
+			b: (_, content) => `<strong>${content}</strong>`,
+			strong: (_, content) => `<strong>${content}</strong>`,
+			i: (_, content) => `<em>${content}</em>`,
+			em: (_, content) => `<em>${content}</em>`,
+			u: (_, content) => `<u>${content}</u>`,
+			s: (_, content) => `<s>${content}</s>`,
+			strike: (_, content) => `<s>${content}</s>`,
+			del: (_, content) => `<s>${content}</s>`,
+			a: (el, content) =>
+				`<a href="${el.getAttribute('href') || ''}">${content}</a>`,
+			ul: (_, content) => `<ul>${content}</ul>`,
+			ol: (_, content) => `<ol>${content}</ol>`,
+			li: (_, content) => `<li>${content}</li>`,
+			br: () => '<br>',
+			span: (el, content) =>
+				el.style.color
+					? `<span style="color: ${el.style.color}">${content}</span>`
+					: content,
+			div: (el, content) =>
+				el.style.textAlign
+					? `<div style="text-align: ${el.style.textAlign}">${content}</div>`
+					: `<div>${content}</div>`,
+			p: (el, content) =>
+				el.style.textAlign
+					? `<div style="text-align: ${el.style.textAlign}">${content}</div>`
+					: `<div>${content}</div>`,
+		};
+
+		const cleanHTML = (element: HTMLElement): string => {
+			let result = '';
+			element.childNodes.forEach((node) => {
+				if (node.nodeType === Node.TEXT_NODE) {
+					result += node.textContent;
+				} else if (node.nodeType === Node.ELEMENT_NODE) {
+					const el = node as HTMLElement;
+					const tagName = el.tagName.toLowerCase();
+					const content = cleanHTML(el);
+					result += tagMap[tagName]
+						? tagMap[tagName](el, content)
+						: content;
+				}
+			});
+			return result;
+		};
+
+		const temp = document.createElement('div');
+		temp.innerHTML = html;
+		const cleanedHTML = cleanHTML(temp);
+
+		// @ts-ignore - deprecated API but no modern alternative exists
+		document.execCommand('insertHTML', false, cleanedHTML);
+
+		if (editorRef.current) {
+			processLinks();
+			onChange(editorRef.current.innerHTML);
+		}
+	};
+
 	const handleInput = () => {
 		if (editorRef.current) {
 			processLinks(); // Process links after any input
@@ -678,6 +756,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					} as React.CSSProperties
 				}
 				onInput={handleInput}
+				onPaste={handlePaste}
 				onKeyDown={handleKeyDown}
 			/>
 		</div>

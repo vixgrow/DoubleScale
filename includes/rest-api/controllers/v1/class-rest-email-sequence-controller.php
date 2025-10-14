@@ -15,6 +15,7 @@ use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Campaign_Model as Email_Sequence_Model;
 use QuillCRM\User_Roles\Permissions;
+use QuillCRM\Constants\Campaign_Channel;
 
 class REST_Email_Sequence_Controller extends REST_Controller {
 
@@ -36,7 +37,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 	 * @var string
 	 */
 	protected $campaign_type       = 'email_sequence';
-	protected $campaign_type_child = 'sequence_mail';
+	protected $campaign_type_child = Campaign_Channel::CHANNEL_SEQUENCE_MAIL;
 
 
 

@@ -17,23 +17,31 @@ use QuillCRM\Models\Tracking_Model;
  *
  * Provides constants and utility methods for campaign channels (email, SMS, WhatsApp).
  * Supports extensibility for third-party plugins to register custom channels.
+ *
+ * Campaign types are stored as integers for performance and type safety.
  */
 class Campaign_Channel {
 
 	/**
-	 * Email channel constant
+	 * Email channel type (integer)
 	 */
-	const CHANNEL_EMAIL = 'email';
+	const CHANNEL_EMAIL = 1;
 
 	/**
-	 * SMS channel constant
+	 * SMS channel type (integer)
 	 */
-	const CHANNEL_SMS = 'sms';
+	const CHANNEL_SMS = 2;
 
 	/**
-	 * WhatsApp channel constant
+	 * WhatsApp channel type (integer)
 	 */
-	const CHANNEL_WHATSAPP = 'whatsapp';
+	const CHANNEL_WHATSAPP = 3;
+
+	/**
+	 * Email sequence type (integer)
+	 * Special type for email sequences (child campaigns of email)
+	 */
+	const CHANNEL_SEQUENCE_MAIL = 4;
 
 	/**
 	 * Registered custom channels (for third-party extensions)
@@ -112,7 +120,7 @@ class Campaign_Channel {
 	/**
 	 * Get channel label (human-readable name)
 	 *
-	 * @param string $channel Channel slug.
+	 * @param int $channel Channel type integer.
 	 * @return string Channel label
 	 */
 	public static function get_label( $channel ) {
@@ -125,50 +133,38 @@ class Campaign_Channel {
 		// Allow custom channels to define labels via filter
 		$labels = apply_filters( 'quillcrm_campaign_channel_labels', $labels );
 
-		return $labels[ $channel ] ?? ucfirst( $channel );
+		return $labels[ $channel ] ?? __( 'Unknown', 'quillcrm' );
 	}
 
 	/**
-	 * Convert channel to Tracking_Model mode constant
+	 * Convert channel type to Tracking_Model mode constant
 	 *
-	 * Maps campaign channel slugs to tracking mode integers.
-	 * Used when creating tracking records for campaign messages.
+	 * Since both use the same integer values, this is now a direct mapping.
+	 * Kept for backward compatibility with existing code.
 	 *
-	 * @param string $channel Channel slug.
+	 * @param int $channel Channel type integer.
 	 * @return int|null Tracking mode constant or null if not found
 	 */
 	public static function to_mode( $channel ) {
-		$mode_map = array(
-			self::CHANNEL_EMAIL    => Tracking_Model::MODE_EMAIL,
-			self::CHANNEL_SMS      => Tracking_Model::MODE_SMS,
-			self::CHANNEL_WHATSAPP => Tracking_Model::MODE_WHATSAPP,
-		);
-
-		// Allow custom channels to define their mode mappings
-		$mode_map = apply_filters( 'quillcrm_campaign_channel_to_mode', $mode_map );
-
-		return $mode_map[ $channel ] ?? null;
+		// Channel types and tracking modes use identical integers
+		// CHANNEL_EMAIL (1) = MODE_EMAIL (1)
+		// CHANNEL_SMS (2) = MODE_SMS (2)
+		// CHANNEL_WHATSAPP (3) = MODE_WHATSAPP (3)
+		return $channel;
 	}
 
 	/**
-	 * Convert Tracking_Model mode constant to channel slug
+	 * Convert Tracking_Model mode constant to channel type
 	 *
-	 * Reverse mapping of to_mode(). Used for analytics and filtering.
+	 * Since both use the same integer values, this is now a direct mapping.
+	 * Kept for backward compatibility with existing code.
 	 *
 	 * @param int $mode Tracking mode constant.
-	 * @return string|null Channel slug or null if not found
+	 * @return int|null Channel type or null if not found
 	 */
 	public static function from_mode( $mode ) {
-		$channel_map = array(
-			Tracking_Model::MODE_EMAIL    => self::CHANNEL_EMAIL,
-			Tracking_Model::MODE_SMS      => self::CHANNEL_SMS,
-			Tracking_Model::MODE_WHATSAPP => self::CHANNEL_WHATSAPP,
-		);
-
-		// Allow custom channels to define their mode mappings
-		$channel_map = apply_filters( 'quillcrm_campaign_mode_to_channel', $channel_map );
-
-		return $channel_map[ $mode ] ?? null;
+		// Channel types and tracking modes use identical integers
+		return $mode;
 	}
 
 	/**
@@ -187,7 +183,7 @@ class Campaign_Channel {
 	/**
 	 * Check if channel requires phone number
 	 *
-	 * @param string $channel Channel slug.
+	 * @param int $channel Channel type integer.
 	 * @return bool True if channel needs phone number
 	 */
 	public static function requires_phone( $channel ) {
@@ -207,7 +203,7 @@ class Campaign_Channel {
 	 *
 	 * Returns the contact field name needed for this channel type.
 	 *
-	 * @param string $channel Channel slug.
+	 * @param int $channel Channel type integer.
 	 * @return string Field name ('email' or 'phone')
 	 */
 	public static function get_recipient_field( $channel ) {

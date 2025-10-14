@@ -73,6 +73,7 @@ class Campaign_Model extends Model {
 	 */
 	protected $casts = array(
 		'settings' => 'array',
+		'type'     => 'integer',
 	);
 
 	/**
@@ -163,7 +164,7 @@ class Campaign_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function sequences_mail() {
-		return $this->hasMany( Campaign_Model::class, 'parent_id' )->where( 'type', 'sequence_mail' );
+		return $this->hasMany( Campaign_Model::class, 'parent_id' )->where( 'type', Campaign_Channel::CHANNEL_SEQUENCE_MAIL );
 	}
 
 	/**
@@ -209,11 +210,11 @@ class Campaign_Model extends Model {
 	}
 
 	/**
-	 * Get campaign type (email, sms, or whatsapp)
+	 * Get campaign type (integer: 1=email, 2=sms, 3=whatsapp, 4=sequence_mail)
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return string
+	 * @return int Campaign type integer
 	 */
 	public function get_type() {
 		return $this->type ?? Campaign_Channel::get_default();
@@ -225,14 +226,14 @@ class Campaign_Model extends Model {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return string
+	 * @return int Campaign type integer for processing
 	 */
 	public function get_template_processing_type() {
 		$type = $this->get_type();
 
 		// Sequence mails are email-based campaigns
-		if ( $type === 'sequence_mail' ) {
-			return 'email';
+		if ( $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL ) {
+			return Campaign_Channel::CHANNEL_EMAIL;
 		}
 
 		return $type;

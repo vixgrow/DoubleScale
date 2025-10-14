@@ -219,7 +219,7 @@ final class Email_Sequences_Manager {
 	private function get_ready_sequences() {
 		// 1. Fetch sequences that are due to execute
 		$sequences = Campaign_Model::query()
-			->where( 'type', 'sequence_mail' )
+			->where( 'type', \QuillCRM\Constants\Campaign_Channel::CHANNEL_SEQUENCE_MAIL )
 			->where( 'status', Campaign_Status_Manager::ACTIVE )
 			->where( 'execute_at', '<=', current_time( 'mysql' ) )
 			->get();

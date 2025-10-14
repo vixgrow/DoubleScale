@@ -65,22 +65,22 @@ class Campaign_Template_Factory
         $template_ids = array();
 
         foreach ($templates_data as $index => $template_data) {
-            // quillcrm_get_logger()->info('Processing template', [
-            //     'index' => $index,
-            //     'template_data' => $template_data,
-            //     'campaign_type' => $campaign_type,
-            //     'code' => 'template_processing_start'
-            // ]);
+            quillcrm_get_logger()->info('Processing template', [
+                'index' => $index,
+                'template_data' => $template_data,
+                'campaign_type' => $campaign_type,
+                'code' => 'template_processing_start'
+            ]);
             
             $template_processor = $this->get_template_processor($campaign_type);
             $template = $template_processor->process($template_data);
 
             if ($template) {
                 $template_ids[] = $template->id;
-                // quillcrm_get_logger()->info('Template processed successfully', [
-                //     'template_id' => $template->id,
-                //     'code' => 'template_processing_success'
-                // ]);
+                quillcrm_get_logger()->info('Template processed successfully', [
+                    'template_id' => $template->id,
+                    'code' => 'template_processing_success'
+                ]);
             } else {
                 quillcrm_get_logger()->error('Template processing failed', [
                     'template_data' => $template_data,

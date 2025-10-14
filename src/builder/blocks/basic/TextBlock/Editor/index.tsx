@@ -17,7 +17,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { TextBlockProps } from '..';
-import TinyMCEWPEditor from '@/components/editor';
+import { RichTextEditor } from '@/components/rich-text-editor';
 import {
 	BaseBlockEditor,
 	BlockEditorErrorBoundary,
@@ -42,29 +42,13 @@ export const TextEditor: React.FC<TextEditorProps> = ({ props, onChange }) => {
 							<div className="text-[#333333] text-sm mb-1">
 								{__('Text Content', 'quillcrm')}
 							</div>
-							<TinyMCEWPEditor
-								value={props.content}
+							<RichTextEditor
+								content={props.content}
 								onChange={(content) => onChange({ content })}
-								height={250}
-								toolbar="bold italic underline | alignleft aligncenter alignright | bullist numlist | link | removeformat"
-								plugins="lists link"
-								showMergeTags={false}
+								fontSize={props.fontSize}
+								fontFamily={props.fontFamily}
 							/>
 						</div>
-
-						{/* Layout Controls */}
-						<LayoutControls.AlignmentControl
-							value={
-								props.textAlign as
-									| 'left'
-									| 'center'
-									| 'right'
-									| 'full'
-							}
-							onChange={(value) => onChange({ textAlign: value })}
-							label={__('Text Alignment', 'quillcrm')}
-							includeFull={true}
-						/>
 
 						{/* Typography Controls */}
 						<TypographyControls.TextStyleControl

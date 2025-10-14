@@ -254,7 +254,7 @@ export type Campaign = {
 	name: string;
 	description: string;
 	status: string;
-	type: 'email' | 'sms' | 'whatsapp';
+	type: number; // Campaign channel type (1=email, 2=sms, 3=whatsapp, 4=sequence_mail)
 	settings: CampaignSettings;
 	parent_id: string;
 	count: string;

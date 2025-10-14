@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import type { SMSTemplate } from '@quillcrm/client';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import MessageComposer from './components/message-composer';
 
 const SMSTemplateStep: React.FC = () => {
@@ -29,7 +30,7 @@ const SMSTemplateStep: React.FC = () => {
 	// Initialize default SMS template
 	const defaultTemplate: SMSTemplate = {
 		name: __('SMS Message', 'quillcrm'),
-		type: 'sms',
+		type: CAMPAIGN_CHANNEL.SMS,
 		body: '',
 		settings: {
 			add_unsubscribe: true,
@@ -42,13 +43,13 @@ const SMSTemplateStep: React.FC = () => {
 		if (
 			existingTemplate &&
 			'type' in existingTemplate &&
-			existingTemplate.type === 'sms'
+			existingTemplate.type === CAMPAIGN_CHANNEL.SMS
 		) {
 			// Convert backend format to frontend format
 			const backendTemplate = existingTemplate as any;
 			return {
 				name: backendTemplate.name || defaultTemplate.name,
-				type: 'sms',
+				type: CAMPAIGN_CHANNEL.SMS,
 				body: backendTemplate.body || '',
 				settings: {
 					add_unsubscribe:

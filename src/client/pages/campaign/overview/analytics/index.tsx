@@ -46,6 +46,7 @@ ChartJS.register(ArcElement, DoughnutController, Tooltip, Legend, Title);
 import './style.scss';
 import { useCampaignContext } from '../../state/context';
 import { Campaign as CampaignType, Template } from '@quillcrm/client';
+import { CAMPAIGN_CHANNEL, getCampaignChannelLabel } from '@/constants/campaign-channel';
 
 const Analytics: React.FC = () => {
 	const { campaign, isLoading, updateCampaign, saveCampaign } =
@@ -135,11 +136,11 @@ const Analytics: React.FC = () => {
 	// Get campaign type-specific labels
 	const getMessageTypeLabel = () => {
 		switch (campaign?.type) {
-			case 'email':
+			case CAMPAIGN_CHANNEL.EMAIL:
 				return __('Emails', 'quillcrm');
-			case 'sms':
+			case CAMPAIGN_CHANNEL.SMS:
 				return __('SMS Messages', 'quillcrm');
-			case 'whatsapp':
+			case CAMPAIGN_CHANNEL.WHATSAPP:
 				return __('WhatsApp Messages', 'quillcrm');
 			default:
 				return __('Messages', 'quillcrm');
@@ -148,11 +149,11 @@ const Analytics: React.FC = () => {
 
 	const getResendButtonText = () => {
 		switch (campaign?.type) {
-			case 'email':
+			case CAMPAIGN_CHANNEL.EMAIL:
 				return __('Resend Failed Emails', 'quillcrm');
-			case 'sms':
+			case CAMPAIGN_CHANNEL.SMS:
 				return __('Resend Failed SMS', 'quillcrm');
-			case 'whatsapp':
+			case CAMPAIGN_CHANNEL.WHATSAPP:
 				return __('Resend Failed WhatsApp', 'quillcrm');
 			default:
 				return __('Resend Failed Messages', 'quillcrm');
@@ -200,7 +201,7 @@ const Analytics: React.FC = () => {
 		}> = [];
 
 		// Email-specific metrics
-		if (campaign.type === 'email') {
+		if (campaign.type === CAMPAIGN_CHANNEL.EMAIL) {
 			typeSpecificCards.push(
 				{
 					icon: <EyeOutlined />,
@@ -216,7 +217,7 @@ const Analytics: React.FC = () => {
 		}
 
 		// SMS-specific metrics
-		if (campaign.type === 'sms') {
+		if (campaign.type === CAMPAIGN_CHANNEL.SMS) {
 			typeSpecificCards.push(
 				{
 					icon: <CheckCircleOutlined />,
@@ -232,7 +233,7 @@ const Analytics: React.FC = () => {
 		}
 
 		// WhatsApp-specific metrics
-		if (campaign.type === 'whatsapp') {
+		if (campaign.type === CAMPAIGN_CHANNEL.WHATSAPP) {
 			typeSpecificCards.push(
 				{
 					icon: <CheckCircleOutlined />,
@@ -285,7 +286,7 @@ const Analytics: React.FC = () => {
 			colors: string[];
 		};
 
-		if (campaign.type === 'email') {
+		if (campaign.type === CAMPAIGN_CHANNEL.EMAIL) {
 			chartData = {
 				labels: [
 					__('Sent', 'quillcrm'),
@@ -301,7 +302,7 @@ const Analytics: React.FC = () => {
 				],
 				colors: ['#1890ff', '#ff4d4f', '#52c41a', '#faad14'],
 			};
-		} else if (campaign.type === 'sms') {
+		} else if (campaign.type === CAMPAIGN_CHANNEL.SMS) {
 			chartData = {
 				labels: [
 					__('Sent', 'quillcrm'),
@@ -403,7 +404,7 @@ const Analytics: React.FC = () => {
 									{__('Campaign Type', 'quillcrm')} :
 								</Typography.Text>
 								<Typography.Text strong>
-									{campaign.type.toUpperCase()}
+									{getCampaignChannelLabel(campaign.type).toUpperCase()}
 								</Typography.Text>
 							</Flex>
 							<Flex vertical gap={10}>
@@ -419,7 +420,7 @@ const Analytics: React.FC = () => {
 											key: 'from_name',
 											render: (text) => text || '-',
 										},
-										...(campaign.type === 'email'
+										...(campaign.type === CAMPAIGN_CHANNEL.EMAIL
 											? [
 													{
 														title: __(
@@ -435,11 +436,11 @@ const Analytics: React.FC = () => {
 											: []),
 										{
 											title:
-												campaign.type === 'email'
+												campaign.type === CAMPAIGN_CHANNEL.EMAIL
 													? __('Subject', 'quillcrm')
 													: __('Message', 'quillcrm'),
 											dataIndex:
-												campaign.type === 'email'
+												campaign.type === CAMPAIGN_CHANNEL.EMAIL
 													? 'subject'
 													: 'message',
 											key: 'content',
@@ -552,7 +553,7 @@ const Analytics: React.FC = () => {
 									}
 								</Typography.Text>
 							</Flex>
-							{template.type === 'email' &&
+							{template.type === CAMPAIGN_CHANNEL.EMAIL &&
 							template.settings?.from_name ? (
 								<Flex gap={10}>
 									<Typography.Text>
@@ -564,7 +565,7 @@ const Analytics: React.FC = () => {
 									</Typography.Text>
 								</Flex>
 							) : null}
-							{template.type === 'email' &&
+							{template.type === CAMPAIGN_CHANNEL.EMAIL &&
 							template.settings?.from_email ? (
 								<Flex gap={10}>
 									<Typography.Text>
@@ -576,7 +577,7 @@ const Analytics: React.FC = () => {
 									</Typography.Text>
 								</Flex>
 							) : null}
-							{template.type === 'email' && template.subject && (
+							{template.type === CAMPAIGN_CHANNEL.EMAIL && template.subject && (
 								<Flex gap={10}>
 									<Typography.Text>
 										{__('Subject', 'quillcrm')}
@@ -591,7 +592,7 @@ const Analytics: React.FC = () => {
 						<Divider style={{ margin: 0 }} />
 						<Card
 							title={
-								campaign.type === 'email'
+								campaign.type === CAMPAIGN_CHANNEL.EMAIL
 									? __('Body', 'quillcrm')
 									: __('Message', 'quillcrm')
 							}

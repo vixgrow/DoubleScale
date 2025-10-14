@@ -25,6 +25,7 @@ import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable'; // Import the hook
 import { formatDateForAPI } from '@quillcrm/utils';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
 const Campaigns: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -110,20 +111,24 @@ const Campaigns: React.FC = () => {
 		setIsAdding(true);
 
 		try {
-			// Determine the correct campaign type
-			// Both 'standard' and 'ab_test' are email campaigns
-			const actualType =
-				campaignType === 'ab_test' || campaignType === 'standard'
-					? 'email'
-					: campaignType;
+			// Map UI selection to campaign channel integer constants
+			const typeMap: Record<string, number> = {
+				'email': CAMPAIGN_CHANNEL.EMAIL,
+				'standard': CAMPAIGN_CHANNEL.EMAIL, // Standard email campaign
+				'ab_test': CAMPAIGN_CHANNEL.EMAIL,  // A/B test is still email
+				'sms': CAMPAIGN_CHANNEL.SMS,
+				'whatsapp': CAMPAIGN_CHANNEL.WHATSAPP,
+			};
 
-			// Use unified endpoint with type parameter
+			const actualType = typeMap[campaignType] || CAMPAIGN_CHANNEL.EMAIL;
+
+			// Use unified endpoint with type parameter (now as integer)
 			const response = (await apiFetch({
 				path: '/qc/v1/campaigns',
 				method: 'POST',
 				data: {
 					name: name,
-					type: actualType, // Required: email, sms, or whatsapp
+					type: actualType, // Required: 1=email, 2=sms, 3=whatsapp
 					settings: {
 						ab_test: campaignType === 'ab_test',
 					},

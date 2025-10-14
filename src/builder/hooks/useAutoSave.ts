@@ -28,6 +28,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
   const autoSaveTimerRef = useRef<number | null>(null);
   const lastSavedStateRef = useRef<string>('');
   const isMountedRef = useRef(true);
+  const hasInitializedRef = useRef(false);
 
   // Get current builder state
   const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
@@ -58,13 +59,36 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
     buttonSettings,
   });
 
-  // Track if initial load is complete
-  const initialLoadCompleteRef = useRef(false);
-
-  // Check if there are unsaved changes
+  // Simple: Initialize baseline when store has data
   useEffect(() => {
-    // Only check for changes after initial load is complete
-    if (initialLoadCompleteRef.current && lastSavedStateRef.current && currentState !== lastSavedStateRef.current) {
+    // Only run once
+    if (hasInitializedRef.current) {
+      return;
+    }
+
+    // Wait for store to have data (at least sections array exists)
+    if (sections && sections.length > 0) {
+      lastSavedStateRef.current = currentState;
+      hasInitializedRef.current = true;
+
+      // Set last modified date if available
+      if (existingTemplateData?.template?.updated_at) {
+        setSaveStatus((prev) => ({
+          ...prev,
+          lastSaved: new Date(existingTemplateData.template.updated_at),
+        }));
+      }
+
+    }
+  }, [sections, currentState, existingTemplateData]);
+
+  // Simple: Detect changes after initialization
+  useEffect(() => {
+    if (!hasInitializedRef.current || !lastSavedStateRef.current) {
+      return;
+    }
+
+    if (currentState !== lastSavedStateRef.current) {
       setSaveStatus((prev) => ({ ...prev, hasUnsavedChanges: true }));
     }
   }, [currentState]);
@@ -180,38 +204,6 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
       }
     };
   }, []);
-
-  // Initialize last saved state on mount from existing template data
-  useEffect(() => {
-    if (!lastSavedStateRef.current && existingTemplateData?.template?.email_body) {
-      // If we have existing template data, mark it as the last saved state
-      const existingBuilderData = existingTemplateData.template.email_body.value;
-      if (existingBuilderData) {
-        lastSavedStateRef.current = JSON.stringify({
-          sections: existingBuilderData.sections || [],
-          globalSettings: existingBuilderData.globalSettings || {},
-          buttonSettings: existingBuilderData.buttonSettings || {},
-        });
-
-        // Set initial save status
-        const lastModified = existingTemplateData.template.lastModified;
-        if (lastModified) {
-          setSaveStatus((prev) => ({
-            ...prev,
-            lastSaved: new Date(lastModified),
-            hasUnsavedChanges: false,
-          }));
-        }
-
-        // Mark initial load as complete
-        initialLoadCompleteRef.current = true;
-      }
-    } else if (!lastSavedStateRef.current && sections && sections.length >= 0) {
-      // No existing data, initialize with current state after data loads
-      lastSavedStateRef.current = currentState;
-      initialLoadCompleteRef.current = true;
-    }
-  }, [existingTemplateData, sections, currentState]);
 
   return {
     ...saveStatus,

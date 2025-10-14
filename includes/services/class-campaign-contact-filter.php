@@ -106,17 +106,11 @@ class Campaign_Contact_Filter {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function apply_campaign_type_filter( $query, $type ) {
-		switch ( $type ) {
-			case Campaign_Channel::CHANNEL_EMAIL:
-				$query->whereNotNull( 'email' )
-					  ->where( 'email', '!=', '' );
-				break;
-			case Campaign_Channel::CHANNEL_SMS:
-			case Campaign_Channel::CHANNEL_WHATSAPP:
-				$query->whereNotNull( 'phone' )
-					  ->where( 'phone', '!=', '' );
-				break;
-		}
+		// Use Campaign_Channel to determine recipient field (DRY principle)
+		$recipient_field = Campaign_Channel::get_recipient_field( $type );
+
+		$query->whereNotNull( $recipient_field )
+			  ->where( $recipient_field, '!=', '' );
 
 		return $query;
 	}

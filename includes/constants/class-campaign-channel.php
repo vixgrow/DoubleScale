@@ -110,16 +110,6 @@ class Campaign_Channel {
 	}
 
 	/**
-	 * Check if a channel is a core channel
-	 *
-	 * @param string $channel Channel slug to check.
-	 * @return bool True if core channel
-	 */
-	public static function is_core( $channel ) {
-		return in_array( $channel, self::get_core_channels(), true );
-	}
-
-	/**
 	 * Get channel label (human-readable name)
 	 *
 	 * @param string $channel Channel slug.
@@ -195,25 +185,6 @@ class Campaign_Channel {
 	}
 
 	/**
-	 * Get channel icon class (for UI)
-	 *
-	 * @param string $channel Channel slug.
-	 * @return string Icon class name
-	 */
-	public static function get_icon_class( $channel ) {
-		$icons = array(
-			self::CHANNEL_EMAIL    => 'dashicons-email',
-			self::CHANNEL_SMS      => 'dashicons-smartphone',
-			self::CHANNEL_WHATSAPP => 'dashicons-whatsapp',
-		);
-
-		// Allow custom channels to define icons
-		$icons = apply_filters( 'quillcrm_campaign_channel_icons', $icons );
-
-		return $icons[ $channel ] ?? 'dashicons-megaphone';
-	}
-
-	/**
 	 * Check if channel requires phone number
 	 *
 	 * @param string $channel Channel slug.
@@ -229,16 +200,6 @@ class Campaign_Channel {
 		$phone_channels = apply_filters( 'quillcrm_campaign_channels_requiring_phone', $phone_channels );
 
 		return in_array( $channel, $phone_channels, true );
-	}
-
-	/**
-	 * Check if channel requires email address
-	 *
-	 * @param string $channel Channel slug.
-	 * @return bool True if channel needs email
-	 */
-	public static function requires_email( $channel ) {
-		return $channel === self::CHANNEL_EMAIL;
 	}
 
 	/**

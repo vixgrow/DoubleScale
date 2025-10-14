@@ -29,7 +29,7 @@ import { UserOutlined } from '@ant-design/icons';
 import './style.scss';
 import type { CampaignEmail, CampaignEmailsResponse } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
-import { convertDate, getCampaignEndpoint } from '@quillcrm/utils';
+import { convertDate } from '@quillcrm/utils';
 import { useParams } from '@quillcrm/navigation';
 
 const Engagements: React.FC = () => {
@@ -74,13 +74,9 @@ const Engagements: React.FC = () => {
 				);
 			}
 
-			const endpoint = getCampaignEndpoint(type);
-			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
-			}
-
+			// Use unified endpoint for all campaign types
 			const response = (await apiFetch({
-				path: addQueryArgs(`${endpoint}/${id}/messages`, {
+				path: addQueryArgs(`/qc/v1/campaigns/${id}/messages`, {
 					per_page: perPage,
 					page,
 					status,

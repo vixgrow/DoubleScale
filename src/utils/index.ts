@@ -46,6 +46,7 @@ export const getGoal = (goal: string): Goal => {
 			label: '',
 			description: '',
 			fields: {},
+			is_integration: false,
 		};
 };
 
@@ -85,7 +86,17 @@ export const getFilterBySlug = (slug: string, group: string) => {
 	return filtersGroups[group]['filters'][slug];
 };
 
-export const getRuleBySlug = (slug: string): Rule => {
+export const getRuleBySlug = (slug: string, dynamicRules?: any): Rule => {
+	// First try to find in dynamic rules if provided
+	if (dynamicRules) {
+		const dynamicRulesList = flatMap(dynamicRules, (group) => group.rules);
+		const foundDynamicRule = find(dynamicRulesList, (rule) => rule[slug]);
+		if (foundDynamicRule) {
+			return foundDynamicRule[slug];
+		}
+	}
+
+	// Fallback to static rules
 	const automationRules = ConfigAPI.getAutomationRules();
 	const rules = flatMap(automationRules, (group) => group.rules);
 	const foundRule = find(rules, (rule) => rule[slug]);

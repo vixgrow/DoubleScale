@@ -2,18 +2,21 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * External dependencies
  */
 import { Button, Card, Popover, List, Modal, Flex } from 'antd';
 import {
+	LeftOutlined,
 	PlusCircleOutlined,
 	RightOutlined,
-	LeftOutlined,
 } from '@ant-design/icons';
-import { map, isEmpty } from 'lodash';
+import { map, isEmpty, filter } from 'lodash';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -22,7 +25,7 @@ import './style.scss';
 import type { Rules as RulesType, AutomationStep } from '@quillcrm/client';
 import { getRuleBySlug } from '@quillcrm/utils';
 import ConfigAPI from '@quillcrm/config';
-import type { Rule as AutomationRule, RulesGroup } from '@quillcrm/config';
+import type { RulesGroup, AutomationRules } from '@quillcrm/config';
 import { Rule } from '@quillcrm/components';
 
 interface RulesProps {
@@ -41,6 +44,50 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	const stepRules = step.settings || ([] as RulesType[]);
 	const [rules, setRules] = useState<RulesType[]>(stepRules);
 	const [isSaving, setIsSaving] = useState(false);
+	const [dynamicRules, setDynamicRules] = useState<AutomationRules | null>(
+		null
+	);
+
+	// Get form context from store
+	const { formContext } = useSelect((select) => ({
+		formContext: select('quillcrm/core').getFormContext(),
+	}));
+
+	// Load dynamic rules when form context changes or when component mounts
+	useEffect(() => {
+		loadDynamicRules();
+	}, [formContext?.formId, formContext?.triggerId, visible]);
+
+	const loadDynamicRules = async () => {
+		// Only load dynamic rules if we have form context
+		if (!formContext?.formId || !formContext?.triggerId) {
+			setDynamicRules(null);
+			return;
+		}
+
+		try {
+			const params: any = {
+				trigger_id: formContext.triggerId,
+				form_id: formContext.formId,
+			};
+
+			if (formContext.automationId) {
+				params.automation_id = formContext.automationId;
+			}
+
+			const apiPath = addQueryArgs('/qc/v1/automations/rules', params);
+
+			const response = (await apiFetch({
+				path: apiPath,
+			})) as AutomationRules;
+
+			setDynamicRules(response);
+		} catch (error) {
+			console.error('Error loading dynamic rules:', error);
+			// Fallback to static rules on error
+			setDynamicRules(null);
+		}
+	};
 
 	const save = async (data: Partial<AutomationStep>) => {
 		setIsSaving(true);
@@ -82,6 +129,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 											onChange={(newRules) => {
 												setRules(newRules);
 											}}
+											dynamicRules={dynamicRules}
 										>
 											<Button
 												type="primary"
@@ -95,7 +143,8 @@ const ConditionsModal: React.FC<RulesProps> = ({
 									<Flex gap={10} vertical>
 										{map(groupRules, (rule, ruleIndex) => {
 											const ruleData = getRuleBySlug(
-												rule.rule
+												rule.rule,
+												dynamicRules
 											);
 
 											return (
@@ -142,6 +191,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						onChange={(newRules) => {
 							setRules(newRules);
 						}}
+						dynamicRules={dynamicRules}
 					>
 						<Button icon={<PlusCircleOutlined />}>
 							{__('OR', 'quillcrm')}
@@ -157,6 +207,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 					onChange={(newRules) => {
 						setRules(newRules);
 					}}
+					dynamicRules={dynamicRules}
 				>
 					<Button type="primary" icon={<PlusCircleOutlined />}>
 						{__('Add Rule', 'quillcrm')}
@@ -174,6 +225,7 @@ interface ConditionButtonProps {
 	parentIndex: number;
 	onChange: (rules: RulesType[]) => void;
 	children: React.ReactNode;
+	dynamicRules?: AutomationRules | null;
 }
 
 const ConditionButton: React.FC<ConditionButtonProps> = ({
@@ -182,10 +234,21 @@ const ConditionButton: React.FC<ConditionButtonProps> = ({
 	parentIndex,
 	onChange,
 	children,
+	dynamicRules,
 }) => {
 	const [selectedGroup, setSelectedGroup] = useState<string>('');
 	const [isModalVisible, setIsModalVisible] = useState(false);
-	const rulesGroups = ConfigAPI.getAutomationRules();
+	const rulesGroups = dynamicRules || ConfigAPI.getAutomationRules();
+
+	// Get current trigger from store
+	const { currentTrigger } = useSelect((select) => ({
+		currentTrigger: select('quillcrm/core').getCurrentTrigger(),
+	}));
+
+	// Filter rules groups by current trigger (same logic as merge tags)
+	const filteredRulesGroups = filter(rulesGroups, (group) => {
+		return !group.triggers || group.triggers.includes(currentTrigger);
+	});
 
 	const PopoverContent = () => {
 		return (
@@ -208,7 +271,7 @@ const ConditionButton: React.FC<ConditionButtonProps> = ({
 							className="qcrm-rule-groups"
 							itemLayout="horizontal"
 							dataSource={map(
-								rulesGroups[selectedGroup].rules,
+								rulesGroups[selectedGroup]?.rules || {},
 								(rule, key) => {
 									return {
 										key,
@@ -216,10 +279,7 @@ const ConditionButton: React.FC<ConditionButtonProps> = ({
 									};
 								}
 							)}
-							renderItem={(item: {
-								key: string;
-								rule: AutomationRule;
-							}) => (
+							renderItem={(item: { key: string; rule: any }) => (
 								<List.Item
 									style={{
 										cursor: 'pointer',
@@ -247,6 +307,7 @@ const ConditionButton: React.FC<ConditionButtonProps> = ({
 											}
 
 											onChange(newRules);
+											setSelectedGroup('');
 											setIsModalVisible(false);
 										}}
 									>
@@ -258,8 +319,8 @@ const ConditionButton: React.FC<ConditionButtonProps> = ({
 					</>
 				) : (
 					<List
-						dataSource={map(rulesGroups, (group, key) => ({
-							key,
+						dataSource={map(filteredRulesGroups, (group, key) => ({
+							key: String(key),
 							group,
 						}))}
 						renderItem={(item: {
@@ -276,7 +337,9 @@ const ConditionButton: React.FC<ConditionButtonProps> = ({
 									<div
 										className="qcrm-rule-item"
 										onClick={() =>
-											setSelectedGroup(item.key)
+											setSelectedGroup(
+												item.group.key || item.key
+											)
 										}
 									>
 										{item.group.name}
@@ -299,6 +362,9 @@ const ConditionButton: React.FC<ConditionButtonProps> = ({
 			open={isModalVisible}
 			onOpenChange={(visible) => {
 				setIsModalVisible(visible);
+				if (!visible) {
+					setSelectedGroup('');
+				}
 			}}
 		>
 			{children}

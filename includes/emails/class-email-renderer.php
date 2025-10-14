@@ -59,6 +59,11 @@ class Email_Renderer {
 			return $template->body;
 		}
 
+		// Check if this is a builder template with type='builder' structure
+		if ( isset( $content['type'] ) && $content['type'] === 'builder' && isset( $content['value'] ) ) {
+			$content = $content['value'];
+		}
+
 		// Get global settings from content (builder stores them in body.globalSettings)
 		$global_settings = isset( $content['globalSettings'] ) ? $content['globalSettings'] : array();
 

@@ -77,6 +77,15 @@ class Product_Block extends Email_Block {
 	 * @return string HTML output
 	 */
 	public function render( array $props, array $merge_tags = array() ): string {
+		// Check if productId is set and fetch live WooCommerce data
+		if ( ! empty( $props['productId'] ) ) {
+			$live_product_data = \QuillCRM\Emails\Product_Data_Fetcher::get_product_data( $props['productId'] );
+			if ( $live_product_data ) {
+				// Override props with live product data
+				$props = array_merge( $props, $live_product_data );
+			}
+		}
+
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 

@@ -59,6 +59,8 @@ export const MenuBlockRenderer: React.FC<MenuBlockRendererProps> = ({
 				<a
 					key={item.id}
 					href={item.link}
+					target="_blank"
+					rel="noopener noreferrer"
 					style={{
 						...getMenuItemStyle(item),
 						whiteSpace: 'nowrap',

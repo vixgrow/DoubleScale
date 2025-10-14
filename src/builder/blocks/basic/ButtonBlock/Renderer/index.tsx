@@ -86,7 +86,12 @@ export const ButtonRenderer = ({ props }: ButtonRendererProps) => {
 
 	return (
 		<div style={containerStyle}>
-			<a href={props.url} style={buttonStyle}>
+			<a
+				href={props.url}
+				target="_blank"
+				rel="noopener noreferrer"
+				style={buttonStyle}
+			>
 				{props.text}
 			</a>
 		</div>

@@ -135,3 +135,8 @@ export { default as CartDisabledIcon } from './cart-disabled';
 export { default as AlertIcon } from './alert';
 export { default as ReportsIcon } from './reports';
 export { default as TaskDoneIcon } from './task-done';
+export { default as ConditionsIcon } from './conditions';
+export { default as GoalIcon } from './goal';
+export { default as EndLinkIcon } from './end-link';
+export { default as ActionIcon } from './action';
+export { default as GradientArrowIcon } from './gradient-arrow';

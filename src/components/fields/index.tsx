@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { map } from 'lodash';
+import { Tabs } from 'antd';
 
 /**
  * Internal dependencies
@@ -17,9 +18,7 @@ type FieldType = {
 	};
 	multiple?: boolean;
 	fields?: {
-		[key: string]: {
-			label: string;
-		};
+		[key: string]: FieldType;
 	};
 	endpoint?: string;
 	settings?: {
@@ -75,6 +74,57 @@ const Fields: React.FC<FieldsProps> = ({
 		return helperText.replace(/STEP_ID/g, stepId.toString());
 	};
 
+	// Check if any field is a tab type
+	const hasTabs = Object.values(fields).some((field) => field.type === 'tab');
+
+	if (hasTabs) {
+		// Create tab items
+		const tabItems = Object.entries(fields)
+			.filter(([, field]) => field.type === 'tab')
+			.map(([key, field]) => ({
+				key,
+				label: field.label,
+				children: (
+					<div
+						className="qcrm-tab-content"
+						style={{ padding: '20px 0' }}
+					>
+						{field.fields &&
+							map(field.fields, (tabField, tabFieldKey) => {
+								return (
+									<Field
+										key={tabFieldKey}
+										label={tabField.label}
+										type={tabField.type}
+										options={optionsArray(tabField)}
+										value={values?.[tabFieldKey]}
+										onChange={(value) =>
+											handleChange(tabFieldKey, value)
+										}
+										fields={tabField.fields}
+										endpoint={tabField.endpoint}
+										multiple={tabField.multiple}
+										settings={tabField.settings}
+										allValues={values}
+										defaultValue={tabField['default-value']}
+										helperText={processHelperText(
+											tabField.helperText
+										)}
+									/>
+								);
+							})}
+					</div>
+				),
+			}));
+
+		return (
+			<div className="qcrm-fields" style={{ marginBottom: '20px' }}>
+				<Tabs items={tabItems} type="card" style={{ width: '100%' }} />
+			</div>
+		);
+	}
+
+	// Fallback to regular field rendering if no tabs
 	return (
 		<div className="qcrm-fields" style={{ marginBottom: '20px' }}>
 			{map(fields, (field, key) => {

@@ -26,8 +26,6 @@ class Create_Coupon extends Action {
 
 
 
-
-
 	/**
 	 * Action Name
 	 *
@@ -76,11 +74,14 @@ class Create_Coupon extends Action {
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		try {
-			$coupon_expiry_date = $step->get_setting( 'coupon_expiry_date' );
-			$discount_type      = $step->get_setting( 'discount_type' );
-			$coupon_prefix      = $step->get_setting( 'coupon_prefix' ) ?? '';
-			$is_free_shipping   = $step->get_setting( 'is_free_shipping' ) ?? false;
-			$title              = $step->get_setting( 'title' ) ?? '';
+			$coupon_expiry_date     = $step->get_setting( 'coupon_expiry_date' );
+			$discount_type          = $step->get_setting( 'discount_type' );
+			$coupon_prefix          = $step->get_setting( 'coupon_prefix' ) ?? '';
+			$is_free_shipping       = $step->get_setting( 'is_free_shipping' ) ?? false;
+			$title                  = $step->get_setting( 'title' ) ?? '';
+			$usage_limit_per_coupon = $step->get_setting( 'usage_limit_per_coupon' ) ?? 0;
+			$limit_usage_to_x_items = $step->get_setting( 'limit_usage_to_x_items' ) ?? 0;
+			$usage_limit_per_user   = $step->get_setting( 'usage_limit_per_user' ) ?? 0;
 
 			$coupon_code              = $this->generate_dynamic_coupon_code( $coupon_prefix );
 			$discount_type_and_amount = $this->get_discount_type_and_amount( $discount_type['type'], $discount_type['amount'] );
@@ -91,7 +92,11 @@ class Create_Coupon extends Action {
 			$coupon->set_amount( $discount_type_and_amount['amount'] );
 			$coupon->set_discount_type( $discount_type_and_amount['type'] );
 			$coupon->set_date_expires( $expiry_date );
+			$coupon->set_description( $title );
 			$coupon->set_free_shipping( $is_free_shipping );
+			$coupon->set_usage_limit( $usage_limit_per_coupon );
+			$coupon->set_limit_usage_to_x_items( $limit_usage_to_x_items );
+			$coupon->set_usage_limit_per_user( $usage_limit_per_user );
 			$coupon->save();
 
 			$settings                = $step->settings;
@@ -220,32 +225,56 @@ class Create_Coupon extends Action {
 	 */
 	public function get_fields() {
 		return array(
-			'title'              => array(
-				'type'        => 'text',
-				'label'       => __( 'Coupon Title', 'quillcrm' ),
-				'helperText'  => __( 'This dynamic coupon can be used in emails or other actions using merge tag: {{coupon:dynamic_id_STEP_ID}}', 'quillcrm' ),
-				'description' => __( 'After creating this action step, you can use the generated merge tag to reference this coupon in emails and other actions.', 'quillcrm' ),
-			),
-			'discount_type'      => array(
-				'type'    => 'discount_type_with_amount',
-				'label'   => __( 'Discount Type', 'quillcrm' ),
-				'options' => array(
-					'fixed_cart'    => __( 'Fixed cart discount', 'quillcrm' ),
-					'fixed_product' => __( 'Fixed product discount', 'quillcrm' ),
-					'percent'       => __( 'Percentage discount', 'quillcrm' ),
+			'general' => array(
+				'type'   => 'tab',
+				'label'  => __( 'General', 'quillcrm' ),
+				'fields' => array(
+					'title'              => array(
+						'type'        => 'text',
+						'label'       => __( 'Coupon Title', 'quillcrm' ),
+						'helperText'  => __( 'This dynamic coupon can be used in emails or other actions using merge tag: {{coupon:dynamic_id_STEP_ID}}', 'quillcrm' ),
+						'description' => __( 'After creating this action step, you can use the generated merge tag to reference this coupon in emails and other actions.', 'quillcrm' ),
+					),
+					'coupon_prefix'      => array(
+						'type'  => 'text',
+						'label' => __( 'Coupon Prefix', 'quillcrm' ),
+					),
+					'discount_type'      => array(
+						'type'    => 'discount_type_with_amount',
+						'label'   => __( 'Discount Type', 'quillcrm' ),
+						'options' => array(
+							'fixed_cart'    => __( 'Fixed cart discount', 'quillcrm' ),
+							'fixed_product' => __( 'Fixed product discount', 'quillcrm' ),
+							'percent'       => __( 'Percentage discount', 'quillcrm' ),
+						),
+					),
+					'coupon_expiry_date' => array(
+						'type'  => 'coupon_expiry_date',
+						'label' => __( 'Coupon Expiry Date', 'quillcrm' ),
+					),
+					'is_free_shipping'   => array(
+						'type'  => 'checkbox',
+						'label' => __( 'Is Free Shipping', 'quillcrm' ),
+					),
 				),
 			),
-			'coupon_prefix'      => array(
-				'type'  => 'text',
-				'label' => __( 'Coupon Prefix', 'quillcrm' ),
-			),
-			'coupon_expiry_date' => array(
-				'type'  => 'coupon_expiry_date',
-				'label' => __( 'Coupon Expiry Date', 'quillcrm' ),
-			),
-			'is_free_shipping'   => array(
-				'type'  => 'checkbox',
-				'label' => __( 'Is Free Shipping', 'quillcrm' ),
+			'limit'   => array(
+				'type'   => 'tab',
+				'label'  => __( 'Limit', 'quillcrm' ),
+				'fields' => array(
+					'usage_limit_per_coupon' => array(
+						'type'  => 'number',
+						'label' => __( 'Usage Limit Per Coupon', 'quillcrm' ),
+					),
+					'limit_usage_to_x_items' => array(
+						'type'  => 'number',
+						'label' => __( 'Limit usage to X items', 'quillcrm' ),
+					),
+					'usage_limit_per_user'   => array(
+						'type'  => 'number',
+						'label' => __( 'Usage Limit Per User', 'quillcrm' ),
+					),
+				),
 			),
 		);
 	}
@@ -261,11 +290,11 @@ class Create_Coupon extends Action {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'title'              => array(
+				'title'                  => array(
 					'type'     => 'string',
 					'required' => true,
 				),
-				'discount_type'      => array(
+				'discount_type'          => array(
 					'type'       => 'object',
 					'properties' => array(
 						'type'   => array(
@@ -278,11 +307,11 @@ class Create_Coupon extends Action {
 						),
 					),
 				),
-				'coupon_prefix'      => array(
+				'coupon_prefix'          => array(
 					'type'     => 'string',
 					'required' => true,
 				),
-				'coupon_expiry_date' => array(
+				'coupon_expiry_date'     => array(
 					'type'       => 'object',
 					'properties' => array(
 						'value' => array(
@@ -296,8 +325,17 @@ class Create_Coupon extends Action {
 					),
 					'required'   => true,
 				),
-				'is_free_shipping'   => array(
+				'is_free_shipping'       => array(
 					'type' => 'boolean',
+				),
+				'usage_limit_per_coupon' => array(
+					'type' => 'string',
+				),
+				'limit_usage_to_x_items' => array(
+					'type' => 'string',
+				),
+				'usage_limit_per_user'   => array(
+					'type' => 'string',
 				),
 			),
 		);

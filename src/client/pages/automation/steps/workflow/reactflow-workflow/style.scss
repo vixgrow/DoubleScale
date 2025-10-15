@@ -299,6 +299,24 @@
 		}
 	}
 
+	&--delay {
+		.qcrm-reactflow-node__icon svg {
+			width: 28px;
+			height: 28px;
+		}
+
+		// Delay configuration status
+		.qcrm-reactflow-delay__configured {
+			color: #52c41a;
+			font-weight: 500;
+		}
+
+		.qcrm-reactflow-delay__not-configured {
+			color: #ff4d4f;
+			font-weight: 500;
+		}
+	}
+
 	&--condition {
 		border: 2px solid #d9d9d9;
 		background: #ffffff;
@@ -787,3 +805,4 @@
 		}
 	}
 }
+

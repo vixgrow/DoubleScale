@@ -22,6 +22,7 @@ use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
 class Form extends Abstracts_Form {
 
 
+
 	/**
 	 * Slug
 	 *
@@ -63,21 +64,6 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_source_select_options", array( $this, 'ajax_get_source_select_options' ) );
 	}
 
-
-	/**
-	 * Register merge tags
-	 */
-	public function register_merge_tags_for_form( $form_id ) {
-		if ( ! $this->is_enabled() ) {
-			return;
-		}
-
-		// Get fields only from forms that are selected in active automations
-		$selected_forms_fields = $this->get_fields( $form_id );
-		if ( ! empty( $selected_forms_fields ) ) {
-			new Dynamic_Fields_Registration( $selected_forms_fields, $this->slug );
-		}
-	}
 
 	/**
 	 * Is Enabled

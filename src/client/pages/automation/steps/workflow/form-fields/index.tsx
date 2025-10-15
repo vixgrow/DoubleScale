@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -27,6 +27,10 @@ interface FormFieldsProps {
 }
 
 const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
+	const { currentTrigger } = useSelect((select) => ({
+		currentTrigger: select('quillcrm/core').getCurrentTrigger(),
+	}));
+
 	const [formFields, setFormFields] = useState<
 		Form['fields_settings']['fields'] | null
 	>(null);
@@ -46,6 +50,22 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 	const { getAjaxUrl, getNonce } = ConfigAPI;
 	const formOptions = form_type ? forms[form_type]?.options : {};
 	const { createNotice, setFormContext } = useDispatch('quillcrm/core');
+
+	// Auto-select form type based on current trigger and update values if needed
+	useEffect(() => {
+		if (
+			currentTrigger &&
+			forms[currentTrigger] &&
+			forms[currentTrigger].is_enabled &&
+			!form_type
+		) {
+			// Automatically select the form type that matches the current trigger
+			onChange({
+				...values,
+				form_type: currentTrigger,
+			});
+		}
+	}, [currentTrigger, form_type]);
 
 	const checkConditions = (conditions) => {
 		if (!conditions) {
@@ -154,13 +174,43 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 				>
 					<div className="qcrm-field-label">
 						<Typography.Text>
-							{__('Select Form Type', 'quillcrm')}
+							{currentTrigger &&
+							forms[currentTrigger] &&
+							forms[currentTrigger].is_enabled
+								? __(
+										'Form Type (Auto-selected from trigger)',
+										'quillcrm'
+									)
+								: __('Select Form Type', 'quillcrm')}
 						</Typography.Text>
+						{currentTrigger &&
+							forms[currentTrigger] &&
+							forms[currentTrigger].is_enabled && (
+								<Typography.Text
+									type="secondary"
+									style={{
+										fontSize: '12px',
+										display: 'block',
+									}}
+								>
+									{__(
+										'Based on your trigger selection',
+										'quillcrm'
+									)}
+								</Typography.Text>
+							)}
 					</div>
 					<div className="qcrm-field-input">
 						<Select
 							style={{ width: 200 }}
-							value={form_type}
+							value={form_type || currentTrigger}
+							disabled={
+								!!(
+									currentTrigger &&
+									forms[currentTrigger] &&
+									forms[currentTrigger].is_enabled
+								)
+							}
 							onChange={(value) => {
 								onChange({
 									...values,

@@ -9,22 +9,34 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Flex, Popover, Spin } from 'antd';
-import {
-	TrophyOutlined,
-	BranchesOutlined,
-	DisconnectOutlined,
-	ThunderboltOutlined,
-	PlusCircleOutlined,
-} from '@ant-design/icons';
 import { map } from 'lodash';
 
 /**
  * Internal dependencies
  */
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogOverlay,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+import { Card } from '@/components/ui/card';
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+import {
+	ActionIcon,
+	ConditionsIcon,
+	EndLinkIcon,
+	GoalIcon,
+	GradientArrowIcon,
+	PlusIcon,
+} from '@quillcrm/components';
 
 const updateStepOrderRecursive = (
 	steps: AutomationStep[],
@@ -99,6 +111,7 @@ const AddStep: React.FC<AddStepProps> = ({
 	const { automation, steps, setSteps, setUpdatedSteps } =
 		useAutomationContext();
 	const [loading, setLoading] = useState(false);
+	const [popoverVisible, setPopoverVisible] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	if (!automation) {
@@ -177,60 +190,112 @@ const AddStep: React.FC<AddStepProps> = ({
 	const typesOptions = {
 		action: {
 			label: __('Action', 'quillcrm'),
-			icon: <ThunderboltOutlined />,
+			description: __(
+				'Select one of the Actions to continue your workflow.',
+				'quillcrm'
+			),
+			icon: <ActionIcon />,
 		},
 		condition: {
 			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
+			description: __(
+				'Select one of the Conditions to continue your workflow.',
+				'quillcrm'
+			),
+			icon: <ConditionsIcon />,
+		},
+		delay: {
+			label: __('Delay', 'quillcrm'),
+			description: __(
+				'A pause or waiting period introduced into a sequence of automated actions.',
+				'quillcrm'
+			),
+			icon: <ConditionsIcon />,
 		},
 		goal: {
 			label: __('Goal', 'quillcrm'),
-			icon: <TrophyOutlined />,
+			description: __(
+				'Select one of the Goals to continue your workflow.',
+				'quillcrm'
+			),
+			icon: <GoalIcon />,
 		},
 		end_automation: {
 			label: __('End Automation', 'quillcrm'),
-			icon: <DisconnectOutlined />,
+			description: __('End your Automation workflow.', 'quillcrm'),
+			icon: <EndLinkIcon />,
 		},
 	};
 
 	return (
-		<Popover
-			placement="top"
-			trigger="click"
-			content={
-				<>
-					{loading && <Spin />}
-					{!loading && (
-						<Flex gap={10} wrap>
-							{map(typesOptions, (type, key) => (
-								<Button
-									key={key}
-									icon={type.icon}
-									onClick={() => storeStep(key)}
-								>
-									{type.label}
-								</Button>
-							))}
-						</Flex>
-					)}
-				</>
-			}
-		>
-			<Flex
-				justify="center"
-				align="center"
-				className="qcrm-automation-workflow__add-step"
-			>
-				<Button
-					type="primary"
-					icon={<PlusCircleOutlined />}
-					style={{
-						borderRadius: '50%',
+		<Dialog open={popoverVisible} onOpenChange={setPopoverVisible}>
+			<DialogTrigger asChild>
+				<div
+					className="qcrm-automation-workflow__add-step flex items-center justify-center pointer-events-auto"
+					onClick={(e) => {
+						e.stopPropagation();
+						setPopoverVisible(!popoverVisible);
 					}}
-					className="add-step-button"
-				/>
-			</Flex>
-		</Popover>
+				>
+					<Button
+						variant="secondary"
+						size="icon"
+						className="h-8 w-8 rounded-full bg-white hover:bg-primary"
+					>
+						<PlusIcon />
+					</Button>
+				</div>
+			</DialogTrigger>
+			<DialogOverlay className="z-[150200]" />
+			<DialogContent className="sm:max-w-[425px] p-6 z-[150200]">
+				{loading ? (
+					<div className="flex justify-center">
+						<Spinner className="h-6 w-6" />
+					</div>
+				) : (
+					<>
+						<DialogHeader>
+							<DialogTitle>
+								{__('Add Step', 'quillcrm')}
+							</DialogTitle>
+							<DialogDescription className="mt-1">
+								{__('Select one of the Steps', 'quillcrm')}
+							</DialogDescription>
+						</DialogHeader>
+						<div className="flex flex-col gap-5">
+							{map(typesOptions, (type, key) => (
+								<Card
+									key={key}
+									className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+									onClick={(e) => {
+										e.stopPropagation();
+										storeStep(key);
+										setPopoverVisible(false);
+									}}
+								>
+									<div className="flex items-center justify-between">
+										<div className="flex items-center gap-4">
+											<div className="flex-shrink-0 text-white p-2 bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg">
+												{type.icon}
+											</div>
+											<div className="">
+												<h3 className="font-semibold text-xl text-[#3F4254]">
+													{type.label}
+												</h3>
+												<p className="text-sm text-[#333333] mt-1">
+													{type.description}
+												</p>
+											</div>
+										</div>
+										<GradientArrowIcon />
+									</div>
+								</Card>
+							))}
+						</div>
+					</>
+				)}
+			</DialogContent>
+		</Dialog>
 	);
 };
 

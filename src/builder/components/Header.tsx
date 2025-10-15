@@ -26,8 +26,7 @@ const Header: React.FC = () => {
 
 	const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
 
-	const { saveAsTemplate, isSaving: isSavingTemplate } =
-		useTemplateActions();
+	const { saveAsTemplate, isSaving: isSavingTemplate } = useTemplateActions();
 
 	// Use auto-save hook
 	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
@@ -58,7 +57,7 @@ const Header: React.FC = () => {
 		setIsTemplateDialogOpen(false);
 	};
 	return (
-		<div className="flex items-center justify-between p-4 bg-primary-foreground border-b border-input">
+		<div className="flex items-center justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
 			<div className="flex items-center align-center gap-2">
 				<X className="h-5 w-5 text-primary" />
 				<BreadcrumbComponent

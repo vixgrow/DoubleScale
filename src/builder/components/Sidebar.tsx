@@ -18,7 +18,9 @@ interface BlockSidebarProps {
 }
 
 const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
-	const [activeSidebar, setActiveSidebar] = useState<SidebarItem | null>(null);
+	const [activeSidebar, setActiveSidebar] = useState<SidebarItem | null>(
+		null
+	);
 	const tabStyles =
 		'data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#1E3A8A] data-[state=active]:to-[#3B82F6] data-[state=active]:text-primary-foreground px-7 py-3.5 rounded-xl';
 
@@ -30,9 +32,12 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 	}, [sidebarCloseTrigger]);
 
 	return (
-		<div className="bg-white w-full max-w-[300px] align-center py-4 h-full relative">
-			<Tabs defaultValue="elements" className="w-full">
-				<div className="border-b border-border w-full flex flex-col items-center pb-4">
+		<div className="bg-white w-full max-w-[300px] align-center h-full relative flex flex-col overflow-hidden">
+			<Tabs
+				defaultValue="elements"
+				className="w-full h-full flex flex-col"
+			>
+				<div className="border-b border-border w-full flex flex-col items-center py-4 flex-shrink-0">
 					<TabsList className="px-4 h-16">
 						<TabsTrigger value="elements" className={tabStyles}>
 							{__('Elements', 'quillcrm')}
@@ -42,7 +47,7 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 						</TabsTrigger>
 					</TabsList>
 				</div>
-				<div className="py-6 px-9">
+				<div className="py-6 px-9 flex-1 overflow-auto">
 					<TabsContent value="elements">
 						<ContainerBlock
 							activeSidebar={activeSidebar}
@@ -72,12 +77,13 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 								<X className="h-4 w-4" />
 							</Button>
 						</div>
-						<div className='border-b-2 border-gray-200 w-full'></div>
+						<div className="border-b-2 border-gray-200 w-full"></div>
 					</div>
 					<div className="overflow-y-auto p-4 flex-1">
-						<activeSidebar.component onSidebarClose={() => setActiveSidebar(null)} />
+						<activeSidebar.component
+							onSidebarClose={() => setActiveSidebar(null)}
+						/>
 					</div>
-
 				</div>
 			)}
 		</div>

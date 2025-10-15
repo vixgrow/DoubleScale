@@ -62,9 +62,9 @@ const Canvas = ({}: CanvasProps) => {
 	};
 
 	return (
-		<div className="flex-1 p-4 pt-20 overflow-scroll">
+		<div className="flex-1 overflow-auto h-full">
 			<div
-				className="mx-auto relative"
+				className="mx-auto relative py-4"
 				style={{ width: `${globalSettings.canvasWidth}px` }}
 			>
 				{sections.length > 0 && (

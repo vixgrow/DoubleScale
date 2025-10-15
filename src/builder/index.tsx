@@ -119,10 +119,17 @@ const BuilderContent: React.FC = () => {
 	};
 
 	return (
-		<div className="flex flex-col absolute top-0 left-0 right-0 bottom-0 z-50 bg-primary-foreground">
+		<div
+			className="flex flex-col fixed inset-0 bg-primary-foreground overflow-hidden"
+			style={{
+				zIndex: 99999,
+				width: '100vw',
+				height: '100vh',
+			}}
+		>
 			<Header />
 			<div
-				className="flex flex-1 pt-1"
+				className="flex flex-1 overflow-hidden"
 				style={{ backgroundColor: '#e6eff7' }}
 			>
 				<DndContext

@@ -20,21 +20,48 @@ class Product_Data_Fetcher {
 	 * @return array|null Product data array or null if not found
 	 */
 	public static function get_product_data( $product_id ) {
-		if ( ! $product_id || ! function_exists( 'wc_get_product' ) ) {
+		// Validate product ID
+		if ( ! $product_id || ! is_numeric( $product_id ) ) {
 			return null;
 		}
 
+		// Check if WooCommerce is active
+		if ( ! function_exists( 'wc_get_product' ) ) {
+			return null;
+		}
+
+		// Get product
 		$product = wc_get_product( $product_id );
-		if ( ! $product || $product->get_status() !== 'publish' ) {
+
+		// Check if product exists and is published
+		if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
 			return null;
 		}
 
-		$image = wp_get_attachment_image_src( $product->get_image_id(), 'full' );
+		// Only show published products
+		if ( $product->get_status() !== 'publish' ) {
+			return null;
+		}
+
+		// Get product image
+		$image_id = $product->get_image_id();
+		$image    = $image_id ? wp_get_attachment_image_src( $image_id, 'full' ) : false;
+
+		// Get description (short description first, fallback to full description)
+		$description = $product->get_short_description();
+		if ( empty( $description ) ) {
+			$description = $product->get_description();
+		}
+		// Strip HTML tags and limit length
+		$description = wp_strip_all_tags( $description );
+		if ( strlen( $description ) > 200 ) {
+			$description = substr( $description, 0, 200 ) . '...';
+		}
 
 		return array(
 			'id'          => $product->get_id(),
 			'title'       => $product->get_name(),
-			'description' => $product->get_short_description() ?: $product->get_description(),
+			'description' => $description,
 			'price'       => $product->get_price_html(),
 			'imageSrc'    => $image ? $image[0] : '',
 			'imageAlt'    => $product->get_name(),

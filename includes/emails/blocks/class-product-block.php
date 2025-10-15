@@ -80,9 +80,13 @@ class Product_Block extends Email_Block {
 		// Check if productId is set and fetch live WooCommerce data
 		if ( ! empty( $props['productId'] ) ) {
 			$live_product_data = \QuillCRM\Emails\Product_Data_Fetcher::get_product_data( $props['productId'] );
+
 			if ( $live_product_data ) {
 				// Override props with live product data
 				$props = array_merge( $props, $live_product_data );
+			} else {
+				// Product not found or not published - hide the block
+				return '';
 			}
 		}
 

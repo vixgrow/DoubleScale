@@ -10,21 +10,32 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import {
-	CheckOutlined,
-	CloseOutlined,
-	PlusOutlined,
-	TrophyOutlined,
-	BranchesOutlined,
-	DisconnectOutlined,
-	ThunderboltOutlined,
-} from '@ant-design/icons';
-import { Button, Popover, Flex, Spin } from 'antd';
 import { map } from 'lodash';
-
+import { CheckCircle, XCircle } from 'lucide-react';
 /**
  * Internal dependencies
  */
+import {
+	ActionIcon,
+	ConditionsIcon,
+	EndLinkIcon,
+	GoalIcon,
+	GradientArrowIcon,
+	PlusIcon,
+} from '@quillcrm/components';
+import { Button } from '@/components/ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogOverlay,
+	DialogPortal,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
+import { Card } from '@/components/ui/card';
+import { Spinner } from '@/components/ui/spinner';
 import type { AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../../state/context';
 
@@ -67,19 +78,40 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 	const typesOptions = {
 		action: {
 			label: __('Action', 'quillcrm'),
-			icon: <ThunderboltOutlined />,
+			description: __(
+				'Select one of the Actions to continue your workflow.',
+				'quillcrm'
+			),
+			icon: <ActionIcon />,
 		},
 		condition: {
 			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
+			description: __(
+				'Select one of the Conditions to continue your workflow.',
+				'quillcrm'
+			),
+			icon: <ConditionsIcon />,
+		},
+		delay: {
+			label: __('Delay', 'quillcrm'),
+			description: __(
+				'A pause or waiting period introduced into a sequence of automated actions.',
+				'quillcrm'
+			),
+			icon: <ConditionsIcon />,
 		},
 		goal: {
 			label: __('Goal', 'quillcrm'),
-			icon: <TrophyOutlined />,
+			description: __(
+				'Select one of the Goals to continue your workflow.',
+				'quillcrm'
+			),
+			icon: <GoalIcon />,
 		},
 		end_automation: {
 			label: __('End Automation', 'quillcrm'),
-			icon: <DisconnectOutlined />,
+			description: __('End your Automation workflow.', 'quillcrm'),
+			icon: <EndLinkIcon />,
 		},
 	};
 
@@ -355,63 +387,86 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 
 			{/* Make merge node function as add-step node */}
 			{isMerge ? (
-				<Popover
-					placement="right"
-					trigger="click"
-					open={popoverVisible}
-					onOpenChange={(visible) => {
-						setPopoverVisible(visible);
-					}}
-					content={
-						<>
-							{loading && <Spin />}
-							{!loading && (
-								<Flex gap={10} wrap vertical>
-									{map(typesOptions, (type, key) => (
-										<Button
-											key={key}
-											icon={type.icon}
-											onClick={(e) => {
-												e.stopPropagation();
-												handleStepSelection(key);
-											}}
-											style={{
-												justifyContent: 'flex-start',
-											}}
-										>
-											{type.label}
-										</Button>
-									))}
-								</Flex>
-							)}
-						</>
-					}
-					overlayStyle={{ zIndex: 9999 }}
-					destroyTooltipOnHide
-				>
-					<div
-						style={{
-							pointerEvents: 'all',
-						}}
-						className="qcrm-edge-add-button"
-					>
-						<Button
-							type="primary"
-							shape="circle"
-							size="small"
-							icon={<PlusOutlined />}
-							title={__('Add step here', 'quillcrm')}
-							style={{
-								boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-								border: 'none',
+				<Dialog open={popoverVisible} onOpenChange={setPopoverVisible}>
+					<DialogTrigger asChild>
+						<div
+							className="qcrm-automation-workflow__add-step flex items-center justify-center pointer-events-auto"
+							onClick={(e) => {
+								e.stopPropagation();
+								setPopoverVisible(!popoverVisible);
 							}}
-						/>
-					</div>
-				</Popover>
+						>
+							<Button
+								variant="secondary"
+								size="icon"
+								className="h-8 w-8 rounded-full bg-white"
+								title={__('Add step here', 'quillcrm')}
+							>
+								<PlusIcon />
+							</Button>
+						</div>
+					</DialogTrigger>
+					<DialogPortal>
+						<DialogOverlay className="z-[150200]" />
+						<DialogContent className="sm:max-w-[800px] p-6 z-[150200]">
+							{loading ? (
+								<div className="flex justify-center">
+									<Spinner className="h-6 w-6" />
+								</div>
+							) : (
+								<>
+									<DialogHeader>
+										<DialogTitle>
+											{__('Add Step', 'quillcrm')}
+										</DialogTitle>
+										<DialogDescription className="mt-1">
+											{__(
+												'Select one of the Steps',
+												'quillcrm'
+											)}
+										</DialogDescription>
+									</DialogHeader>
+									<div className="flex flex-col gap-5">
+										{map(typesOptions, (type, key) => (
+											<Card
+												key={key}
+												className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+												onClick={(e) => {
+													e.stopPropagation();
+													handleStepSelection(key);
+													setPopoverVisible(false);
+												}}
+											>
+												<div className="flex items-center justify-between">
+													<div className="flex items-center gap-4">
+														<div className="flex-shrink-0 p-2 text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg">
+															{type.icon}
+														</div>
+														<div className="">
+															<h3 className="font-semibold text-xl text-[#3F4254]">
+																{type.label}
+															</h3>
+															<p className="text-sm text-[#333333] mt-1">
+																{
+																	type.description
+																}
+															</p>
+														</div>
+													</div>
+													<GradientArrowIcon />
+												</div>
+											</Card>
+										))}
+									</div>
+								</>
+							)}
+						</DialogContent>
+					</DialogPortal>
+				</Dialog>
 			) : (
 				<div className="qcrm-reactflow-merge__content">
 					<div className="qcrm-reactflow-merge__icon">
-						{isYes ? <CheckOutlined /> : <CloseOutlined />}
+						{isYes ? <CheckCircle /> : <XCircle />}
 					</div>
 					<div className="qcrm-reactflow-merge__label">
 						{isYes ? __('Yes', 'quillcrm') : __('No', 'quillcrm')}

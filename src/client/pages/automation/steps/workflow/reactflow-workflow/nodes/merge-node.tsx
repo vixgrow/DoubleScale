@@ -22,6 +22,7 @@ import {
 	GoalIcon,
 	GradientArrowIcon,
 	PlusIcon,
+	TimerBlockIcon,
 } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import {
@@ -98,7 +99,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 				'A pause or waiting period introduced into a sequence of automated actions.',
 				'quillcrm'
 			),
-			icon: <ConditionsIcon />,
+			icon: <TimerBlockIcon />,
 		},
 		goal: {
 			label: __('Goal', 'quillcrm'),

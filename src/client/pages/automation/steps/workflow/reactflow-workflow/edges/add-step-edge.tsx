@@ -41,6 +41,7 @@ import {
 	GoalIcon,
 	GradientArrowIcon,
 	PlusIcon,
+	TimerBlockIcon,
 } from '@quillcrm/components';
 import type { AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../../state/context';
@@ -192,7 +193,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 				'A pause or waiting period introduced into a sequence of automated actions.',
 				'quillcrm'
 			),
-			icon: <ConditionsIcon />,
+			icon: <TimerBlockIcon />,
 		},
 		goal: {
 			label: __('Goal', 'quillcrm'),

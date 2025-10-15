@@ -36,6 +36,7 @@ import {
 	GoalIcon,
 	GradientArrowIcon,
 	PlusIcon,
+	TimerBlockIcon,
 } from '@quillcrm/components';
 
 const updateStepOrderRecursive = (
@@ -210,7 +211,7 @@ const AddStep: React.FC<AddStepProps> = ({
 				'A pause or waiting period introduced into a sequence of automated actions.',
 				'quillcrm'
 			),
-			icon: <ConditionsIcon />,
+			icon: <TimerBlockIcon />,
 		},
 		goal: {
 			label: __('Goal', 'quillcrm'),

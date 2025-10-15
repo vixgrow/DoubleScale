@@ -7,13 +7,8 @@ import { useState } from '@wordpress/element';
 /**
  * External dependencies
  */
-import { Button, Card, Popover, List, Modal, Flex } from 'antd';
-import {
-	PlusCircleOutlined,
-	RightOutlined,
-	LeftOutlined,
-} from '@ant-design/icons';
 import { map, isEmpty } from 'lodash';
+import { PlusCircle, ChevronRight, ChevronLeft } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -23,7 +18,24 @@ import type { Rules as RulesType, AutomationStep } from '@quillcrm/client';
 import { getRuleBySlug } from '@quillcrm/utils';
 import ConfigAPI from '@quillcrm/config';
 import type { Rule as AutomationRule, RulesGroup } from '@quillcrm/config';
-import { Rule } from '@quillcrm/components';
+import { ConditionsIcon, CustomDialogHeader, Rule } from '@quillcrm/components';
+
+// ShadcnUI components
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+	DialogOverlay,
+} from '@/components/ui/dialog';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 interface RulesProps {
 	step: AutomationStep;
@@ -54,116 +66,163 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	};
 
 	return (
-		<Modal
-			className="qcrm-rules"
-			open={visible}
-			onCancel={() => onClose()}
-			title={__('Conditions', 'quillcrm')}
-			style={{ minWidth: '800px' }}
-			onOk={() => {
-				save({ settings: rules });
-			}}
-			confirmLoading={isSaving}
-		>
-			{!isEmpty(rules) && (
-				<Flex vertical gap={20}>
-					{map(rules, (ruleGroup, index) => {
-						const groupRules = ruleGroup || [];
-						return (
-							<>
-								<Card
-									key={index}
-									title={__('Rules', 'quillcrm')}
-									extra={
-										<ConditionButton
-											rules={rules}
-											type="and"
-											parentIndex={index}
-											onChange={(newRules) => {
-												setRules(newRules);
-											}}
-										>
-											<Button
-												type="primary"
-												icon={<PlusCircleOutlined />}
-											>
-												{__('AND', 'quillcrm')}
-											</Button>
-										</ConditionButton>
-									}
-								>
-									<Flex gap={10} vertical>
-										{map(groupRules, (rule, ruleIndex) => {
-											const ruleData = getRuleBySlug(
-												rule.rule
-											);
+		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
+			<DialogOverlay className="z-[150300]" />
+			<DialogContent className="min-w-[1000px] z-[150300]">
+				<DialogHeader>
+					<CustomDialogHeader
+						title={__('Create a condition', 'quillcrm')}
+						subtitle={__(
+							'Add up to 5 conditions. Define whether any or all of them must be applicable, for the condition to be met.',
+							'quillcrm'
+						)}
+						icon={<ConditionsIcon />}
+					/>
+				</DialogHeader>
+				<div className="text-base text-[#333333] font-bold">
+					{__('condition rules', 'quillcrm')}
+				</div>
+				<div className="py-4">
+					{!isEmpty(rules) && (
+						<div className="flex flex-col gap-5">
+							{map(rules, (ruleGroup, index) => {
+								const groupRules = ruleGroup || [];
+								return (
+									<Card key={index}>
+										<CardHeader>
+											<div className="flex justify-between items-center">
+												<CardTitle>
+													{__('Rules', 'quillcrm')}
+												</CardTitle>
+												<ConditionButton
+													rules={rules}
+													type="and"
+													parentIndex={index}
+													onChange={(newRules) => {
+														setRules(newRules);
+													}}
+												>
+													<Button variant="default">
+														<PlusCircle className="mr-2 h-4 w-4" />
+														{__('AND', 'quillcrm')}
+													</Button>
+												</ConditionButton>
+											</div>
+										</CardHeader>
+										<CardContent>
+											<div className="flex flex-col gap-3">
+												{map(
+													groupRules,
+													(rule, ruleIndex) => {
+														const ruleData =
+															getRuleBySlug(
+																rule.rule
+															);
 
-											return (
-												<Rule
-													key={ruleIndex}
-													ruleSettings={ruleData}
-													rule={rule}
-													onChange={(key, value) => {
-														const newRules = [
-															...rules,
-														];
-														newRules[index][
-															ruleIndex
-														] = {
-															...newRules[index][
-																ruleIndex
-															],
-															[key]: value,
-														};
-														setRules(newRules);
-													}}
-													onRemove={() => {
-														const newRules = [
-															...rules,
-														];
-														newRules[index].splice(
-															ruleIndex,
-															1
+														return (
+															<Rule
+																key={ruleIndex}
+																ruleSettings={
+																	ruleData
+																}
+																rule={rule}
+																onChange={(
+																	key,
+																	value
+																) => {
+																	const newRules =
+																		[
+																			...rules,
+																		];
+																	newRules[
+																		index
+																	][
+																		ruleIndex
+																	] = {
+																		...newRules[
+																			index
+																		][
+																			ruleIndex
+																		],
+																		[key]: value,
+																	};
+																	setRules(
+																		newRules
+																	);
+																}}
+																onRemove={() => {
+																	const newRules =
+																		[
+																			...rules,
+																		];
+																	newRules[
+																		index
+																	].splice(
+																		ruleIndex,
+																		1
+																	);
+																	setRules(
+																		newRules
+																	);
+																}}
+															/>
 														);
-														setRules(newRules);
-													}}
-												/>
-											);
-										})}
-									</Flex>
-								</Card>
-							</>
-						);
-					})}
-					<ConditionButton
-						rules={rules}
-						type="or"
-						parentIndex={0}
-						onChange={(newRules) => {
-							setRules(newRules);
-						}}
+													}
+												)}
+											</div>
+										</CardContent>
+									</Card>
+								);
+							})}
+							<ConditionButton
+								rules={rules}
+								type="or"
+								parentIndex={0}
+								onChange={(newRules) => {
+									setRules(newRules);
+								}}
+							>
+								<Button variant="outline">
+									<PlusCircle className="mr-2 h-4 w-4" />
+									{__('OR', 'quillcrm')}
+								</Button>
+							</ConditionButton>
+						</div>
+					)}
+					{isEmpty(rules) && (
+						<ConditionButton
+							rules={rules}
+							type="or"
+							parentIndex={0}
+							onChange={(newRules) => {
+								setRules(newRules);
+							}}
+						>
+							<Button>
+								<PlusCircle className="mr-2 h-4 w-4" />
+								{__('Add Rule', 'quillcrm')}
+							</Button>
+						</ConditionButton>
+					)}
+				</div>
+
+				<DialogFooter>
+					<Button
+						variant="outline"
+						onClick={onClose}
+						disabled={isSaving}
 					>
-						<Button icon={<PlusCircleOutlined />}>
-							{__('OR', 'quillcrm')}
-						</Button>
-					</ConditionButton>
-				</Flex>
-			)}
-			{isEmpty(rules) && (
-				<ConditionButton
-					rules={rules}
-					type="or"
-					parentIndex={0}
-					onChange={(newRules) => {
-						setRules(newRules);
-					}}
-				>
-					<Button type="primary" icon={<PlusCircleOutlined />}>
-						{__('Add Rule', 'quillcrm')}
+						{__('Cancel', 'quillcrm')}
 					</Button>
-				</ConditionButton>
-			)}
-		</Modal>
+					<Button
+						onClick={() => save({ settings: rules })}
+						disabled={isSaving}
+					>
+						{__('Save', 'quillcrm')}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 };
 
@@ -184,124 +243,80 @@ const ConditionButton: React.FC<ConditionButtonProps> = ({
 	children,
 }) => {
 	const [selectedGroup, setSelectedGroup] = useState<string>('');
-	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
 	const rulesGroups = ConfigAPI.getAutomationRules();
 
-	const PopoverContent = () => {
+	const RulesContent = () => {
 		return (
-			<>
+			<div className="w-[250px] p-2">
 				{selectedGroup ? (
 					<>
-						<div
-							className="qcrm-rule-back"
+						<button
+							className="flex items-center gap-2 w-full p-2 hover:bg-gray-100 rounded-md mb-2 border-b"
 							onClick={() => setSelectedGroup('')}
-							style={{
-								cursor: 'pointer',
-								padding: '5px 0',
-								borderBottom: '1px solid #f0f0f0',
-							}}
 						>
-							<LeftOutlined size={10} />
+							<ChevronLeft className="h-4 w-4" />
 							{__('Back', 'quillcrm')}
-						</div>
-						<List
-							className="qcrm-rule-groups"
-							itemLayout="horizontal"
-							dataSource={map(
+						</button>
+						<div className="space-y-1">
+							{map(
 								rulesGroups[selectedGroup].rules,
-								(rule, key) => {
-									return {
-										key,
-										rule,
-									};
-								}
-							)}
-							renderItem={(item: {
-								key: string;
-								rule: AutomationRule;
-							}) => (
-								<List.Item
-									style={{
-										cursor: 'pointer',
-										padding: '5px 0',
-									}}
-								>
-									<div
-										className="qcrm-rule-item"
+								(rule, key) => (
+									<button
+										key={key}
+										className="w-full text-left p-2 hover:bg-gray-100 rounded-md"
 										onClick={() => {
 											const newRules = [...rules];
 											if (type === 'or') {
 												newRules.push([
 													{
-														rule: item.key,
+														rule: key,
 														operator: 'is',
 														value: '',
 													},
 												]);
 											} else {
 												newRules[parentIndex].push({
-													rule: item.key,
+													rule: key,
 													operator: 'is',
 													value: '',
 												});
 											}
 
 											onChange(newRules);
-											setIsModalVisible(false);
+											setIsOpen(false);
 										}}
 									>
-										{item.rule.name}
-									</div>
-								</List.Item>
+										{rule.name}
+									</button>
+								)
 							)}
-						/>
+						</div>
 					</>
 				) : (
-					<List
-						dataSource={map(rulesGroups, (group, key) => ({
-							key,
-							group,
-						}))}
-						renderItem={(item: {
-							key: string;
-							group: RulesGroup;
-						}) => (
-							<>
-								<List.Item
-									style={{
-										cursor: 'pointer',
-										padding: '5px 0',
-									}}
-								>
-									<div
-										className="qcrm-rule-item"
-										onClick={() =>
-											setSelectedGroup(item.key)
-										}
-									>
-										{item.group.name}
-										<RightOutlined />
-									</div>
-								</List.Item>
-							</>
-						)}
-					/>
+					<div className="space-y-1">
+						{map(rulesGroups, (group, key) => (
+							<button
+								key={key}
+								className="flex justify-between items-center w-full p-2 hover:bg-gray-100 rounded-md"
+								onClick={() => setSelectedGroup(key)}
+							>
+								<span>{group.name}</span>
+								<ChevronRight className="h-4 w-4" />
+							</button>
+						))}
+					</div>
 				)}
-			</>
+			</div>
 		);
 	};
 
 	return (
-		<Popover
-			content={PopoverContent()}
-			title={__('Select Group', 'quillcrm')}
-			trigger="click"
-			open={isModalVisible}
-			onOpenChange={(visible) => {
-				setIsModalVisible(visible);
-			}}
-		>
-			{children}
+		<Popover open={isOpen} onOpenChange={setIsOpen}>
+			<PopoverTrigger asChild>{children}</PopoverTrigger>
+			<PopoverContent className="z-[150300] pointer-events-auto">
+				<RulesContent />
+			</PopoverContent>
 		</Popover>
 	);
 };

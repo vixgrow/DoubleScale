@@ -6,8 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Button } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { Trash2 } from 'lucide-react';
 import { map } from 'lodash';
 
 /**
@@ -17,6 +16,7 @@ import './style.scss';
 import type { Rule as RuleSettings } from '@quillcrm/config';
 import { Rule as RuleType } from '@quillcrm/client';
 import Field from '../field';
+import { Button } from '@/components/ui/button';
 
 interface RuleProps {
 	ruleSettings: RuleSettings;
@@ -57,10 +57,12 @@ const Rule: React.FC<RuleProps> = ({
 				/>
 				<div className="qcrm-rule-row-item">
 					<Button
-						danger
+						variant="destructive"
+						size="icon"
 						onClick={() => onRemove()}
-						icon={<DeleteOutlined />}
-					/>
+					>
+						<Trash2 className="h-4 w-4" />
+					</Button>
 				</div>
 			</div>
 		</div>

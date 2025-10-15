@@ -2,12 +2,14 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
 import { isObject } from 'lodash';
 import Select from 'react-select';
+import { Copy } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -36,6 +38,8 @@ import PipelineStageChange from '../pipeline-stage-change';
 import DealValueChange from '../deal-value-change';
 import DealOwnerChange from '../deal-owner-change';
 import DealCustomFieldChange from '../deal-custom-field-change';
+import DiscountTypeWithAmount from '../discount-type-with-amount';
+import CouponExpiryDate from '../coupon-expiry-date';
 
 interface FieldProps {
 	label?: string;
@@ -85,6 +89,52 @@ const Field: React.FC<FieldProps> = ({
 	min,
 	max,
 }) => {
+	const { createNotice } = useDispatch('quillcrm/core');
+
+	const handleCopyToClipboard = (text: string) => {
+		navigator.clipboard.writeText(text);
+		createNotice({
+			message: __('Copied to clipboard', 'quillcrm'),
+			type: 'success',
+		});
+	};
+
+	const renderHelperText = (helperText: string) => {
+		// Check if helper text contains a merge tag pattern
+		const mergeTagRegex = /\{\{[^}]+\}\}/g;
+		const matches = helperText.match(mergeTagRegex);
+
+		if (!matches) {
+			return <div className="text-ghost">{helperText}</div>;
+		}
+
+		// Split the text and render with copy icons for merge tags
+		const parts = helperText.split(mergeTagRegex);
+		const result = [];
+
+		for (let i = 0; i < parts.length; i++) {
+			if (parts[i]) {
+				result.push(<span key={`text-${i}`}>{parts[i]}</span>);
+			}
+
+			if (matches[i]) {
+				result.push(
+					<span
+						key={`tag-${i}`}
+						className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm font-mono cursor-pointer hover:bg-blue-100"
+						onClick={() => handleCopyToClipboard(matches[i])}
+						title={__('Click to copy', 'quillcrm')}
+					>
+						{matches[i]}
+						<Copy className="h-3 w-3" />
+					</span>
+				);
+			}
+		}
+
+		return <div className="text-ghost">{result}</div>;
+	};
+
 	let fieldContent;
 
 	if (type === 'boolean') {
@@ -164,7 +214,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					style={{
 						borderRadius: '8px',
@@ -178,9 +228,10 @@ const Field: React.FC<FieldProps> = ({
 				<Textarea
 					value={value || ''}
 					onChange={(e) => onChange(e.target.value)}
-					className={cn('bg-white',
+					className={cn(
+						'bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 					style={{
@@ -198,8 +249,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-								(option) => option.value === value
-							)
+									(option) => option.value === value
+								)
 							: null
 					}
 					onChange={(value) => {
@@ -252,6 +303,23 @@ const Field: React.FC<FieldProps> = ({
 				/>
 			);
 			break;
+		case 'discount_type_with_amount':
+			fieldContent = (
+				<DiscountTypeWithAmount
+					options={options}
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'coupon_expiry_date':
+			fieldContent = (
+				<CouponExpiryDate
+					value={value}
+					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
 		case 'checkbox':
 			fieldContent = (
 				<Checkbox
@@ -275,7 +343,9 @@ const Field: React.FC<FieldProps> = ({
 						min={min || 0}
 						max={max || 100}
 						value={[Number(value) || min || 0]}
-						onValueChange={(newValue) => onChange(String(newValue[0]))}
+						onValueChange={(newValue) =>
+							onChange(String(newValue[0]))
+						}
 					/>
 				</div>
 			);
@@ -364,7 +434,7 @@ const Field: React.FC<FieldProps> = ({
 				</div>
 			)}
 			<div className="qcrm-field-input">{fieldContent}</div>
-			{helperText && <div className="text-ghost">{helperText}</div>}
+			{helperText && renderHelperText(helperText)}
 		</div>
 	);
 };

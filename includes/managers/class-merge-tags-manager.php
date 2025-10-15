@@ -26,6 +26,11 @@ final class Merge_Tags_Manager {
 
 
 
+
+
+
+
+
 	/**
 	 * Registed merge tags
 	 *
@@ -151,6 +156,16 @@ final class Merge_Tags_Manager {
 				'name'      => __( 'Abandoned Cart', 'quillcrm' ),
 				'mergeTags' => array(),
 				'triggers'  => array( 'wc_abandoned_cart_created' ),
+			),
+			'edd_customer'   => array(
+				'name'      => __( 'Easy Digital Downloads Customer', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'edd_new_order_success' ),
+			),
+			'edd_order'      => array(
+				'name'      => __( 'Easy Digital Downloads Order', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'edd_new_order_success' ),
 			),
 		);
 		// get forms slug to set in groups

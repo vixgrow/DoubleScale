@@ -164,6 +164,7 @@ export type Action = {
 				[key: string]: string;
 			};
 			multiple?: boolean;
+			helperText?: string;
 		};
 	};
 };

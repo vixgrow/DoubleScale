@@ -26,6 +26,7 @@ class Create_Coupon extends Action {
 
 
 
+
 	/**
 	 * Action Name
 	 *
@@ -226,7 +227,7 @@ class Create_Coupon extends Action {
 	public function get_fields() {
 		return array(
 			'general' => array(
-				'type'   => 'tab',
+				'type'   => 'group',
 				'label'  => __( 'General', 'quillcrm' ),
 				'fields' => array(
 					'title'              => array(
@@ -259,7 +260,7 @@ class Create_Coupon extends Action {
 				),
 			),
 			'limit'   => array(
-				'type'   => 'tab',
+				'type'   => 'group',
 				'label'  => __( 'Limit', 'quillcrm' ),
 				'fields' => array(
 					'usage_limit_per_coupon' => array(

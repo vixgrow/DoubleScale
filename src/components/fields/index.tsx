@@ -75,12 +75,14 @@ const Fields: React.FC<FieldsProps> = ({
 	};
 
 	// Check if any field is a tab type
-	const hasTabs = Object.values(fields).some((field) => field.type === 'tab');
+	const hasTabs = Object.values(fields).some(
+		(field) => field.type === 'group'
+	);
 
 	if (hasTabs) {
 		// Create tab items
 		const tabItems = Object.entries(fields)
-			.filter(([, field]) => field.type === 'tab')
+			.filter(([, field]) => field.type === 'group')
 			.map(([key, field]) => ({
 				key,
 				label: field.label,

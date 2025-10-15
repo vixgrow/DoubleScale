@@ -25,6 +25,7 @@ final class Actions_Manager {
 
 
 
+
 	/**
 	 * Registed actions
 	 *
@@ -153,8 +154,12 @@ final class Actions_Manager {
 				 'label'       => __( 'WooCommerce', 'quillcrm' ),
 				 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 				 'groups'      => array(
-					 'order' => array(
+					 'order'  => array(
 						 'label'   => __( 'Order', 'quillcrm' ),
+						 'actions' => array(),
+					 ),
+					 'coupon' => array(
+						 'label'   => __( 'Coupon', 'quillcrm' ),
 						 'actions' => array(),
 					 ),
 				 ),

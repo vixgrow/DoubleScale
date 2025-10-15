@@ -48,6 +48,15 @@ class Email_Builder {
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/abstracts/class-email-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/class-block-registry.php';
 
+		// Include layout handlers
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/layouts/class-layout-handler-interface.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/layouts/class-abstract-layout-handler.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/layouts/class-abstract-grid-layout-handler.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/layouts/class-side-by-side-layout-handler.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/layouts/class-grid-layout-handler.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/layouts/class-generic-inline-layout-handler.php';
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/layouts/class-layout-handler-registry.php';
+
 		// Include block implementations
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-text-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-button-block.php';

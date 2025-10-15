@@ -152,25 +152,19 @@ class Text_Block extends Email_Block {
 	}
 
 	/**
-	 * Get adjusted font size based on heading style (matches frontend getFontSize)
+	 * Get adjusted font size based on heading style
+	 * NOTE: Frontend handles font size multiplication in the editor UI,
+	 * but the actual fontSize value saved is already the final size.
+	 * Backend should use the fontSize value directly without multiplication.
 	 *
-	 * @param int    $font_size Base font size
+	 * @param int    $font_size Base font size (already adjusted in frontend)
 	 * @param string $heading_style Heading style
-	 * @return int Adjusted font size
+	 * @return int Font size to use
 	 */
 	private function get_adjusted_font_size( int $font_size, string $heading_style ): int {
-		switch ( $heading_style ) {
-			case 'h1':
-				return max( $font_size * 2.5, 24 );
-			case 'h2':
-				return max( $font_size * 2, 20 );
-			case 'h3':
-				return max( $font_size * 1.5, 18 );
-			case 'small':
-				return max( $font_size * 0.8, 12 );
-			default:
-				return $font_size;
-		}
+		// The fontSize prop already contains the correct size from the frontend
+		// No need to multiply again - just use it directly
+		return $font_size;
 	}
 
 	/**

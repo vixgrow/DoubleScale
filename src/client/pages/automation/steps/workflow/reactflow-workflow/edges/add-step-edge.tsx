@@ -9,13 +9,6 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Popover, Flex, Spin } from 'antd';
-import {
-	PlusOutlined,
-	TrophyOutlined,
-	BranchesOutlined,
-	ThunderboltOutlined,
-} from '@ant-design/icons';
 import { map } from 'lodash';
 import {
 	EdgeProps,
@@ -28,8 +21,30 @@ import {
 /**
  * Internal dependencies
  */
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogOverlay,
+	DialogPortal,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+import { Card } from '@/components/ui/card';
+import {
+	ActionIcon,
+	ConditionsIcon,
+	EndLinkIcon,
+	GoalIcon,
+	GradientArrowIcon,
+	PlusIcon,
+} from '@quillcrm/components';
 import type { AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../../state/context';
+import './style.scss';
 
 interface AddStepEdgeData {
 	sourceStep?: AutomationStep;
@@ -157,19 +172,40 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 	const typesOptions = {
 		action: {
 			label: __('Action', 'quillcrm'),
-			icon: <ThunderboltOutlined />,
+			description: __(
+				'Select one of the Actions to continue your workflow.',
+				'quillcrm'
+			),
+			icon: <ActionIcon />,
 		},
 		condition: {
 			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
+			description: __(
+				'Select one of the Conditions to continue your workflow.',
+				'quillcrm'
+			),
+			icon: <ConditionsIcon />,
+		},
+		delay: {
+			label: __('Delay', 'quillcrm'),
+			description: __(
+				'A pause or waiting period introduced into a sequence of automated actions.',
+				'quillcrm'
+			),
+			icon: <ConditionsIcon />,
 		},
 		goal: {
 			label: __('Goal', 'quillcrm'),
-			icon: <TrophyOutlined />,
+			description: __(
+				'Select one of the Goals to continue your workflow.',
+				'quillcrm'
+			),
+			icon: <GoalIcon />,
 		},
 		end_automation: {
 			label: __('End Automation', 'quillcrm'),
-			icon: <BranchesOutlined />,
+			description: __('End your Automation workflow.', 'quillcrm'),
+			icon: <EndLinkIcon />,
 		},
 	};
 
@@ -355,16 +391,11 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		targetPosition: getCorrectTargetPosition(),
 	});
 
-	const handleAddStep = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		setPopoverVisible(!popoverVisible);
-	};
-
-	// Create custom styling for edges based on condition
+	// Use CSS class for edge styling and ensure proper z-index
 	const edgeStyle = {
 		...style,
-		stroke: '#D7D7DA', // Unified color for all edges
-		strokeWidth: 2,
+		className: 'qcrm-edge',
+		zIndex: 1,
 	};
 
 	return (
@@ -373,55 +404,93 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			<EdgeLabelRenderer>
 				<div
 					style={{
-						position: 'absolute',
-						transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-						pointerEvents: 'all',
+						transform: `translate(${labelX}px,${labelY}px) translate(-50%, -50%)`,
 					}}
 					className="qcrm-edge-add-button"
 				>
-					<Popover
-						placement="top"
-						trigger="click"
+					<Dialog
 						open={popoverVisible}
 						onOpenChange={setPopoverVisible}
-						content={
-							<>
-								{loading && <Spin />}
-								{!loading && (
-									<Flex gap={10} wrap vertical>
-										{map(typesOptions, (type, key) => (
-											<Button
-												key={key}
-												icon={type.icon}
-												onClick={() =>
-													handleStepSelection(key)
-												}
-												style={{
-													justifyContent:
-														'flex-start',
-												}}
-											>
-												{type.label}
-											</Button>
-										))}
-									</Flex>
-								)}
-							</>
-						}
 					>
-						<Button
-							type="primary"
-							shape="circle"
-							size="small"
-							icon={<PlusOutlined />}
-							onClick={handleAddStep}
-							title={__('Add step here', 'quillcrm')}
-							style={{
-								boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-								border: 'none',
-							}}
-						/>
-					</Popover>
+						<DialogTrigger asChild>
+							<div
+								className="qcrm-automation-workflow__add-step flex items-center justify-center pointer-events-auto"
+								onClick={(e) => {
+									e.stopPropagation();
+									setPopoverVisible(!popoverVisible);
+								}}
+							>
+								<Button
+									variant="secondary"
+									size="icon"
+									className="h-8 w-8 rounded-full bg-white"
+									title={__('Add step here', 'quillcrm')}
+								>
+									<PlusIcon />
+								</Button>
+							</div>
+						</DialogTrigger>
+						<DialogPortal>
+							<DialogOverlay className="z-[150200]" />
+							<DialogContent className="sm:max-w-[800px] p-6 z-[150200]">
+								{loading ? (
+									<div className="flex justify-center">
+										<Spinner className="h-6 w-6" />
+									</div>
+								) : (
+									<>
+										<DialogHeader>
+											<DialogTitle>
+												{__('Add Step', 'quillcrm')}
+											</DialogTitle>
+											<DialogDescription className="mt-1">
+												{__(
+													'Select one of the Steps',
+													'quillcrm'
+												)}
+											</DialogDescription>
+										</DialogHeader>
+										<div className="flex flex-col gap-5">
+											{map(typesOptions, (type, key) => (
+												<Card
+													key={key}
+													className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+													onClick={(e) => {
+														e.stopPropagation();
+														handleStepSelection(
+															key
+														);
+														setPopoverVisible(
+															false
+														);
+													}}
+												>
+													<div className="flex items-center justify-between">
+														<div className="flex items-center gap-4">
+															<div className="flex-shrink-0 p-2 text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg">
+																{type.icon}
+															</div>
+															<div className="">
+																<h3 className="font-semibold text-xl text-[#3F4254]">
+																	{type.label}
+																</h3>
+																<p className="text-sm text-[#333333] mt-1">
+																	{
+																		type.description
+																	}
+																</p>
+															</div>
+														</div>
+														<GradientArrowIcon />
+													</div>
+												</Card>
+											))}
+										</div>
+									</>
+								)}
+							</DialogContent>
+						</DialogPortal>
+					</Dialog>
 				</div>
 			</EdgeLabelRenderer>
 		</>

@@ -27,6 +27,7 @@ type FieldType = {
 		button_text?: string;
 	};
 	'default-value'?: string;
+	helperText?: string;
 };
 
 type FieldsType = {
@@ -37,9 +38,15 @@ interface FieldsProps {
 	fields: FieldsType;
 	values: { [key: string]: any };
 	onChange: (value: any) => void;
+	stepId?: number;
 }
 
-const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
+const Fields: React.FC<FieldsProps> = ({
+	fields,
+	values,
+	onChange,
+	stepId,
+}) => {
 	const handleChange = (key: string, value: any) => {
 		const newValues = {
 			...values,
@@ -55,6 +62,17 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 		});
 
 		return options;
+	};
+
+	const processHelperText = (
+		helperText: string | undefined
+	): string | undefined => {
+		if (!helperText || !stepId) {
+			return helperText;
+		}
+
+		// Replace STEP_ID placeholder with actual step ID
+		return helperText.replace(/STEP_ID/g, stepId.toString());
 	};
 
 	return (
@@ -74,6 +92,7 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 						settings={field.settings}
 						allValues={values}
 						defaultValue={field['default-value']}
+						helperText={processHelperText(field.helperText)}
 					/>
 				);
 			})}

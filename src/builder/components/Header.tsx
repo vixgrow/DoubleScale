@@ -29,17 +29,18 @@ const Header: React.FC = () => {
 	const { saveAsTemplate, isSaving: isSavingTemplate } = useTemplateActions();
 
 	// Use auto-save hook
-	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
-		{
+	const { isSaving, lastSaved, hasUnsavedChanges, error, save, templateId } =
+		useAutoSave({
 			interval: 10000, // Auto-save every 10 seconds
 			enabled: true,
-		}
-	);
+		});
 
 	// Use unsaved changes warning
 	useUnsavedChanges({
 		hasUnsavedChanges,
 	});
+
+	const { saveCampaignStep } = useDispatch('quillcrm/campaign');
 
 	const handleSaveAndContinue = async () => {
 		if (!campaign) {
@@ -47,7 +48,11 @@ const Header: React.FC = () => {
 		}
 
 		const saveSuccess = await save();
-		if (saveSuccess) {
+		if (saveSuccess && templateId) {
+			// Save template ID to campaign before continuing
+			await saveCampaignStep('template', {
+				template_id: templateId,
+			});
 			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 		}
 	};

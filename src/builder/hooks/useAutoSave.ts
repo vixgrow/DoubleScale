@@ -1,4 +1,4 @@
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { CAMPAIGN_STATUS } from '../../client/types';
 import { STORE_KEY } from '../../stores/email-builder/constants';
@@ -50,7 +50,9 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
     (select: any) => select('quillcrm/campaign').getStepData('template'),
     []
   );
-  const { saveCampaignStep } = useDispatch('quillcrm/campaign');
+
+  // Track template ID in a ref to avoid triggering reloads
+  const templateIdRef = useRef<number | null>(existingTemplateData?.template_id || null);
 
   // Create a serialized version of current state for comparison
   const currentState = JSON.stringify({
@@ -109,20 +111,18 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
         buttonSettings: JSON.parse(currentState).buttonSettings,
       };
 
-      // Get template_id from existing template data
-      if (!existingTemplateData?.template_id) {
-        throw new Error('No template ID found. Please save template first.');
-      }
-
       // Import template API functions
       const { getTemplate, updateTemplate, createTemplate } = await import('../api/templates');
 
       const isDraft = campaign.status === CAMPAIGN_STATUS.DRAFT;
+      const templateId = templateIdRef.current;
+      const shouldUpdateExisting = isDraft && templateId;
 
-      if (isDraft) {
-        // Campaign is draft → Update existing template
-        const existingTemplate = await getTemplate(existingTemplateData.template_id);
-        await updateTemplate(existingTemplateData.template_id, {
+      // Determine action: update existing template or create new one
+      if (shouldUpdateExisting) {
+        // Update existing template (draft campaigns with template ID)
+        const existingTemplate = await getTemplate(templateId);
+        await updateTemplate(templateId, {
           ...existingTemplate,
           email_body: {
             type: 'builder',
@@ -130,21 +130,25 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
           },
         });
       } else {
-        // Campaign is sent/scheduled → Create new template to preserve original
-        const existingTemplate = await getTemplate(existingTemplateData.template_id);
+        // Create new template (draft without template OR non-draft campaigns)
+        const existingTemplate = templateId ? await getTemplate(templateId) : null;
+
         const newTemplate = await createTemplate({
-          ...existingTemplate,
-          name: `${existingTemplate.name}`,
+          name: existingTemplate
+            ? `${existingTemplate.name}${isDraft ? '' : ' (Copy)'}`
+            : `Campaign ${campaign.id} - Email Template`,
+          type: 'email',
+          subject: existingTemplate?.subject || '',
           email_body: {
             type: 'builder',
             value: builderData,
           },
         });
 
-        // Add new template to campaign template_ids array
-        await saveCampaignStep('template', {
-          template_id: newTemplate.id,
-        });
+        // Store new template ID in ref (NOT in campaign - avoid reload)
+        if (newTemplate?.id) {
+          templateIdRef.current = newTemplate.id;
+        }
       }
 
       if (isMountedRef.current) {
@@ -170,7 +174,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
       console.error('Save error:', error);
       return false;
     }
-  }, [campaign, currentState, existingTemplateData, saveCampaignStep]);
+  }, [campaign, currentState]);
 
   // Auto-save effect
   useEffect(() => {
@@ -208,6 +212,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
   return {
     ...saveStatus,
     save,
+    templateId: templateIdRef.current,
     markAsSaved: () => {
       lastSavedStateRef.current = currentState;
       setSaveStatus((prev) => ({ ...prev, hasUnsavedChanges: false }));

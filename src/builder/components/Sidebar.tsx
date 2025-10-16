@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,8 +21,25 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 	const [activeSidebar, setActiveSidebar] = useState<SidebarItem | null>(
 		null
 	);
+	const sidebarRef = useRef<HTMLDivElement>(null);
+	const [sidebarPosition, setSidebarPosition] = useState({
+		top: 0,
+		left: 300,
+	});
+
 	const tabStyles =
 		'data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#1E3A8A] data-[state=active]:to-[#3B82F6] data-[state=active]:text-primary-foreground px-7 py-3.5 rounded-xl';
+
+	// Calculate sidebar position
+	useEffect(() => {
+		if (sidebarRef.current && activeSidebar) {
+			const rect = sidebarRef.current.getBoundingClientRect();
+			setSidebarPosition({
+				top: rect.top,
+				left: rect.right,
+			});
+		}
+	}, [activeSidebar]);
 
 	// Close sidebar when drag starts
 	useEffect(() => {
@@ -32,7 +49,10 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 	}, [sidebarCloseTrigger]);
 
 	return (
-		<div className="bg-white w-full max-w-[300px] align-center h-full relative flex flex-col overflow-hidden">
+		<div
+			ref={sidebarRef}
+			className="bg-white w-full max-w-[300px] align-center h-full relative flex flex-col overflow-hidden"
+		>
 			<Tabs
 				defaultValue="elements"
 				className="w-full h-full flex flex-col"
@@ -60,9 +80,18 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 				</div>
 			</Tabs>
 
-			{/* Active Sidebar */}
+			{/* Active Sidebar - Using fixed positioning to escape overflow container */}
 			{activeSidebar && (
-				<div className="absolute top-0 left-[102%] w-72 h-full overflow-y-auto z-20 bg-white shadow-lg">
+				<div
+					className="fixed w-72 overflow-y-auto bg-white shadow-lg"
+					style={{
+						zIndex: 100010,
+						left: `${sidebarPosition.left}px`,
+						top: `${sidebarPosition.top}px`,
+						bottom: 0,
+						height: `calc(100vh - ${sidebarPosition.top}px)`,
+					}}
+				>
 					<div className="flex flex-col px-8 pt-7">
 						<div className="flex items-center justify-between w-full pb-4">
 							<h2 className="text-base font-bold text-primary text-center flex-1">

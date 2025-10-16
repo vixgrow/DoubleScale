@@ -40,24 +40,12 @@ const templateSchema = z
 		subject: z.string().min(1, __('Subject is required', 'quillcrm')),
 		body: z.string().min(1, __('Body is required', 'quillcrm')),
 		from_name: z.string().min(1, __('From name is required', 'quillcrm')),
-		from_email: z
-			.string()
-			.min(1, __('From email is required', 'quillcrm'))
-			.email(
-				__(
-					'Please enter a valid email address for From Email',
-					'quillcrm'
-				)
-			),
-		reply_to: z
-			.string()
-			.min(1, __('Reply to email is required', 'quillcrm'))
-			.email(
-				__(
-					'Please enter a valid email address for Reply To',
-					'quillcrm'
-				)
-			),
+		from_email: z.email(
+			__('Please enter a valid email address for From Email', 'quillcrm')
+		),
+		reply_to: z.email(
+			__('Please enter a valid email address for Reply To', 'quillcrm')
+		),
 		preview_text: z
 			.string()
 			.min(1, __('Preview text is required', 'quillcrm')),
@@ -143,7 +131,6 @@ const Templates: React.FC = () => {
 					);
 					setTemplates([template]);
 				} catch (error: any) {
-					console.error('Failed to load template:', error);
 					createNotice({
 						type: 'error',
 						message: __('Failed to load template', 'quillcrm'),
@@ -329,7 +316,6 @@ const Templates: React.FC = () => {
 				});
 			}
 		} catch (error) {
-			console.error('Error saving template step:', error);
 			createNotice({
 				type: 'error',
 				message: __(
@@ -340,7 +326,6 @@ const Templates: React.FC = () => {
 		}
 	};
 
-	console.log(campaign);
 	return (
 		<div>
 			<PanelLayout
@@ -361,15 +346,15 @@ const Templates: React.FC = () => {
 						{__('Watch Tutorial', 'quillcrm')}
 					</Button>,
 				]}
-				totalSteps={tabLength}
-				currentStep={currentTab}
-				onNext={saveTemplateStepAndNavigate}
-				onBack={() => {
-					if (currentTab - 1 >= 0) {
-						setCurrentTab(currentTab - 1);
-						navigate(getToLink(`campaigns`));
-					}
-				}}
+				// totalSteps={tabLength}
+				// currentStep={currentTab}
+				// onNext={saveTemplateStepAndNavigate}
+				// onBack={() => {
+				// 	if (currentTab - 1 >= 0) {
+				// 		setCurrentTab(currentTab - 1);
+				// 		navigate(getToLink(`campaigns`));
+				// 	}
+				// }}
 			>
 				<div className="flex gap-6">
 					<PanelSettings

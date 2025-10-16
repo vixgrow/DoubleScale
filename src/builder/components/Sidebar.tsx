@@ -32,7 +32,7 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 	}, [sidebarCloseTrigger]);
 
 	return (
-		<div className="bg-white w-full max-w-[300px] align-center h-full relative flex flex-col overflow-hidden">
+		<div className="bg-white w-full max-w-[300px] align-center h-full relative flex flex-col">
 			<Tabs
 				defaultValue="elements"
 				className="w-full h-full flex flex-col"
@@ -79,7 +79,10 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 						</div>
 						<div className="border-b-2 border-gray-200 w-full"></div>
 					</div>
-					<div className="overflow-y-auto p-4 flex-1">
+					<div
+						className="overflow-y-auto p-4 flex-1"
+						style={{ zIndex: 100000 }}
+					>
 						<activeSidebar.component
 							onSidebarClose={() => setActiveSidebar(null)}
 						/>

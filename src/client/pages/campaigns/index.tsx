@@ -15,6 +15,7 @@ import {
 	Campaign,
 	CampaignModalStep,
 	CampaignsResponse,
+	CampaignType,
 } from '@quillcrm/client';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
 import { DataTable } from '@/components/ui/data-table';
@@ -28,7 +29,7 @@ import { formatDateForAPI, getCampaignEndpoint } from '@quillcrm/utils';
 
 const Campaigns: React.FC = () => {
 	const [loading, setLoading] = useState(true);
-	const [campaignType, setCampaignType] = useState<string>('');
+	const [campaignType, setCampaignType] = useState<CampaignType>('standard');
 	const [keywords, setKeywords] = useState<string>('');
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(10);
@@ -36,9 +37,7 @@ const Campaigns: React.FC = () => {
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-	const [isAdding, setIsAdding] = useState<boolean>(false);
 	const [bulkAction, setBulkAction] = useState<string>('');
-	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
@@ -107,8 +106,6 @@ const Campaigns: React.FC = () => {
 			return;
 		}
 
-		setIsAdding(true);
-
 		try {
 			// Determine the correct endpoint based on campaign type
 			// Both 'standard' and 'ab_test' are email campaigns
@@ -148,8 +145,6 @@ const Campaigns: React.FC = () => {
 	};
 
 	const deleteSelected = async () => {
-		setIsApplying(true);
-
 		try {
 			await apiFetch({
 				path: '/qc/v1/campaigns/bulk',
@@ -167,8 +162,6 @@ const Campaigns: React.FC = () => {
 				type: 'error',
 				message: error.message,
 			});
-		} finally {
-			setIsApplying(false);
 		}
 	};
 

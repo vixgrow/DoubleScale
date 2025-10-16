@@ -1,8 +1,4 @@
 /**
- * wordpress dependencies
- */
-
-/**
  * external dependencies
  */
 import React from 'react';
@@ -38,6 +34,7 @@ export const DividerRenderer: React.FC<DividerRendererProps> = ({ props }) => {
 				...paddingStyle,
 				backgroundColor: props.backgroundColor,
 				borderRadius: `${props.borderRadius}px`,
+				opacity: props.opacity,
 			}}
 		>
 			<hr

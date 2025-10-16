@@ -47,11 +47,11 @@ const Header: React.FC = () => {
 			return;
 		}
 
-		const saveSuccess = await save();
-		if (saveSuccess && templateId) {
+		const { success, templateId: savedTemplateId } = await save();
+		if (success && savedTemplateId) {
 			// Save template ID to campaign before continuing
 			await saveCampaignStep('template', {
-				template_id: templateId,
+				template_id: savedTemplateId,
 			});
 			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 		}

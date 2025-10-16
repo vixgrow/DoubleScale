@@ -50,13 +50,11 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 
 	return (
 		<Modal
-			title={(
+			title={
 				<Flex justify="space-between">
-					{
-						step.type === 'action'
-							? __('Action', 'quillcrm')
-							: __('Goal', 'quillcrm')
-					}
+					{step.type === 'action'
+						? __('Action', 'quillcrm')
+						: __('Goal', 'quillcrm')}
 					<Button
 						onClick={() => {
 							setMergeTagsVisible(true);
@@ -65,7 +63,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						{__('Merge Tags', 'quillcrm')}
 					</Button>
 				</Flex>
-			)}
+			}
 			open={true}
 			onOk={handleSave}
 			onCancel={() => setStep(null)}
@@ -79,6 +77,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				onChange={(value) => {
 					setSettings(value);
 				}}
+				stepId={step.id}
 			/>
 		</Modal>
 	);

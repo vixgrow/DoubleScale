@@ -83,7 +83,17 @@ export const getBorderStyle = (
   style: string,
   color: string
 ): string => {
-  const borderWidth = typeof width === 'number' ? `${width}px` : width;
+  // Ensure width always has 'px' unit
+  let borderWidth: string;
+  if (typeof width === 'number') {
+    borderWidth = `${width}px`;
+  } else if (width.includes('px') || width.includes('em') || width.includes('rem') || width.includes('%')) {
+    // Already has a unit
+    borderWidth = width;
+  } else {
+    // String number without unit, add 'px'
+    borderWidth = `${width}px`;
+  }
   return `${borderWidth} ${style} ${color}`;
 };
 

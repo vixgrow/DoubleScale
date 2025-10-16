@@ -5,6 +5,7 @@
 /**
  * external dependencies
  */
+import React from 'react';
 
 /**
  * internal dependencies
@@ -19,7 +20,7 @@ export interface DividerRendererProps {
 	props: DividerBlockProps;
 }
 
-export const DividerRenderer = ({ props }: DividerRendererProps) => {
+export const DividerRenderer: React.FC<DividerRendererProps> = ({ props }) => {
 	const alignmentStyle = getAlignmentStyle(props.align);
 
 	const paddingStyle = {
@@ -37,7 +38,6 @@ export const DividerRenderer = ({ props }: DividerRendererProps) => {
 				...paddingStyle,
 				backgroundColor: props.backgroundColor,
 				borderRadius: `${props.borderRadius}px`,
-				opacity: props.opacity,
 			}}
 		>
 			<hr

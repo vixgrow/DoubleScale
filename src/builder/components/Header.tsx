@@ -29,11 +29,12 @@ const Header: React.FC = () => {
 	const { saveAsTemplate, isSaving: isSavingTemplate } = useTemplateActions();
 
 	// Use auto-save hook
-	const { isSaving, lastSaved, hasUnsavedChanges, error, save, templateId } =
-		useAutoSave({
+	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
+		{
 			interval: 10000, // Auto-save every 10 seconds
 			enabled: true,
-		});
+		}
+	);
 
 	// Use unsaved changes warning
 	useUnsavedChanges({

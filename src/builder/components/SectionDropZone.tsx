@@ -34,7 +34,7 @@ export const SectionDropZone: React.FC<SectionDropZoneProps> = ({
 	return (
 		<div
 			ref={setNodeRef}
-			className={`relative transition-all ${isOver ? 'h-16' : 'h-2'}`}
+			className={`relative transition-all ${isOver ? 'h-16' : 'h-0'}`}
 		>
 			{isOver && (
 				<div className="absolute inset-0 flex items-center justify-center">

@@ -15,7 +15,6 @@ import { ColumnsLayout } from '@quillcrm/components';
 import { LayoutTemplate } from '../types';
 import { useDroppable } from '@dnd-kit/core';
 import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
-import { DropIndicator } from './DropIndicator';
 import { SectionDropZone } from './SectionDropZone';
 
 interface CanvasProps {

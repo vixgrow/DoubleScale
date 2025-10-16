@@ -49,6 +49,9 @@ const BuilderContent: React.FC = () => {
 
 	useEffect(() => {
 		const loadTemplateData = async () => {
+			// Reset builder state first to ensure clean slate
+			dispatch(STORE_KEY).resetBuilder();
+
 			if (!existingTemplateData?.template_id) {
 				return;
 			}
@@ -95,7 +98,29 @@ const BuilderContent: React.FC = () => {
 		};
 
 		loadTemplateData();
+
+		// Cleanup function: reset builder when component unmounts
+		return () => {
+			dispatch(STORE_KEY).resetBuilder();
+		};
 	}, [existingTemplateData?.template_id, dispatch]);
+
+	// Disable scrolling on the background page when builder is mounted
+	useEffect(() => {
+		// Save original overflow values
+		const originalOverflow = document.body.style.overflow;
+		const originalHTMLOverflow = document.documentElement.style.overflow;
+
+		// Disable scrolling
+		document.body.style.overflow = 'hidden';
+		document.documentElement.style.overflow = 'hidden';
+
+		// Re-enable scrolling on cleanup
+		return () => {
+			document.body.style.overflow = originalOverflow;
+			document.documentElement.style.overflow = originalHTMLOverflow;
+		};
+	}, []);
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -119,36 +144,59 @@ const BuilderContent: React.FC = () => {
 	};
 
 	return (
-		<div
-			className="flex flex-col fixed inset-0 bg-primary-foreground overflow-hidden"
-			style={{
-				zIndex: 99999,
-				width: '100vw',
-				height: '100vh',
-			}}
-		>
-			<Header />
-			<div
-				className="flex flex-1 overflow-hidden"
-				style={{ backgroundColor: '#e6eff7' }}
-			>
-				<DndContext
-					sensors={sensors}
-					collisionDetection={customCollisionDetection}
-					onDragStart={handleDragStart}
-					onDragEnd={handleDragEnd}
-					modifiers={[snapCenterToCursor]}
-				>
-					<Sidebar sidebarCloseTrigger={sidebarCloseTrigger} />
-					<Canvas />
+		<>
+			{/* Builder-specific styles */}
+			<style>{`
+				/* Hide background scrollbars when builder is active */
+				body:has(#quillcrm-email-builder),
+				html:has(#quillcrm-email-builder) {
+					overflow: hidden !important;
+				}
 
-					<DragOverlay dropAnimation={dropAnimation}>
-						<DragOverlayRenderer activeItem={activeItem} />
-					</DragOverlay>
-				</DndContext>
-				<BlockEditor />
+				/* Increase z-index for all Radix UI portals when used in builder */
+				body:has(#quillcrm-email-builder) [data-radix-portal] {
+					z-index: 100020 !important;
+				}
+				
+				/* Specific overrides for dialog/popover content */
+				body:has(#quillcrm-email-builder) [role="dialog"],
+				body:has(#quillcrm-email-builder) [role="alertdialog"],
+				body:has(#quillcrm-email-builder) [data-radix-popper-content-wrapper] {
+					z-index: 100021 !important;
+				}
+			`}</style>
+			<div
+				id="quillcrm-email-builder"
+				className="flex flex-col fixed inset-0 bg-primary-foreground overflow-hidden"
+				style={{
+					zIndex: 100000,
+					width: '100vw',
+					height: '100vh',
+				}}
+			>
+				<Header />
+				<div
+					className="flex flex-1 overflow-hidden"
+					style={{ backgroundColor: '#e6eff7' }}
+				>
+					<DndContext
+						sensors={sensors}
+						collisionDetection={customCollisionDetection}
+						onDragStart={handleDragStart}
+						onDragEnd={handleDragEnd}
+						modifiers={[snapCenterToCursor]}
+					>
+						<Sidebar sidebarCloseTrigger={sidebarCloseTrigger} />
+						<Canvas />
+
+						<DragOverlay dropAnimation={dropAnimation}>
+							<DragOverlayRenderer activeItem={activeItem} />
+						</DragOverlay>
+					</DndContext>
+					<BlockEditor />
+				</div>
 			</div>
-		</div>
+		</>
 	);
 };
 

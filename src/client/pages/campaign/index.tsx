@@ -20,21 +20,28 @@ import WhatsAppTemplateStep from './steps/templates/whatsapp-template';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import BuilderStep from '../../../builder';
-import { Campaign as CampaignType } from '@quillcrm/client';
 import Overview from './overview';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
 	const navigate = useNavigate();
-	
+
 	// Use WordPress data store instead of local state
-	const campaign = useSelect((select: any) => select('quillcrm/campaign').getCampaign(), []);
-	const loading = useSelect((select: any) => select('quillcrm/campaign').isLoading(), []);
-	const saving = useSelect((select: any) => select('quillcrm/campaign').isSaving(), []);
-	const currentStep = useSelect((select: any) => select('quillcrm/campaign').getCurrentStep(), []);
-	
-	const { fetchCampaign, saveCampaignStep } = useDispatch('quillcrm/campaign');
-	const { createNotice } = useDispatch('quillcrm/core');
+	const campaign = useSelect(
+		(select: any) => select('quillcrm/campaign').getCampaign(),
+		[]
+	);
+	const loading = useSelect(
+		(select: any) => select('quillcrm/campaign').isLoading(),
+		[]
+	);
+	const currentStep = useSelect(
+		(select: any) => select('quillcrm/campaign').getCurrentStep(),
+		[]
+	);
+
+	const { fetchCampaign, saveCampaignStep } =
+		useDispatch('quillcrm/campaign');
 
 	useEffect(() => {
 		if (id) {
@@ -59,15 +66,10 @@ const Campaign: React.FC = () => {
 		}
 	}, [tab, campaign, currentStep, saveCampaignStep]);
 
-	// Use store selector for canGoNext logic
-	const canGoNext = useSelect((select: any) => {
-		return (nextTab: string) => select('quillcrm/campaign').canGoToStep(nextTab);
-	}, []);
-
 	// Get the correct template component based on campaign type
 	const getTemplateComponent = () => {
 		if (!campaign) return null;
-		
+
 		switch (campaign.type) {
 			case 'sms':
 				return <SMSTemplateStep />;
@@ -80,10 +82,9 @@ const Campaign: React.FC = () => {
 	};
 
 	const isOverview =
-		campaign && (
-			(campaign.status === 'schedule' && tab === 'overview') ||
-			(['processing', 'completed', 'resending'].includes(campaign.status))
-		);
+		campaign &&
+		((campaign.status === 'schedule' && tab === 'overview') ||
+			['processing', 'completed', 'resending'].includes(campaign.status));
 
 	// Show loading state
 	if (loading) {

@@ -26,10 +26,17 @@ export const isSaving = (state: State): boolean => {
 };
 
 /**
- * Get error state
+ * Get error for a specific operation
  */
-export const getError = (state: State): string | null => {
-  return state.error;
+export const getError = (state: State, errorKey: string = 'general'): string => {
+  return state.errors[errorKey] || '';
+};
+
+/**
+ * Get all errors
+ */
+export const getErrors = (state: State): Record<string, string> => {
+  return state.errors;
 };
 
 /**

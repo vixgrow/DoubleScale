@@ -10,7 +10,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import './style.scss';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { useCampaignStep } from '../shared';
 import {
 	CategoryIcon,
 	FeedBuilder,
@@ -81,12 +81,7 @@ const Templates: React.FC = () => {
 	const [validationErrors, setValidationErrors] = useState<{
 		[key: string]: string;
 	}>({});
-	const campaign = useSelect(
-		(select: any) => select('quillcrm/campaign').getCampaign(),
-		[]
-	);
-	const { saveCampaignStep } = useDispatch('quillcrm/campaign');
-	const navigate = useNavigate();
+	const { campaign, saveCampaignStep, goToStep } = useCampaignStep();
 
 	// Get existing step data
 	const existingTemplateData = useSelect(
@@ -305,7 +300,7 @@ const Templates: React.FC = () => {
 			});
 
 			if (saveSuccess) {
-				navigate(getToLink(`campaigns/${campaign?.id}/builder`));
+				goToStep('builder');
 			} else {
 				createNotice({
 					type: 'error',
@@ -346,6 +341,7 @@ const Templates: React.FC = () => {
 						{__('Watch Tutorial', 'quillcrm')}
 					</Button>,
 				]}
+				type="campaign"
 				// totalSteps={tabLength}
 				// currentStep={currentTab}
 				// onNext={saveTemplateStepAndNavigate}
@@ -367,114 +363,129 @@ const Templates: React.FC = () => {
 						className="w-1/2"
 					>
 						<div>
-							<FormField
-								label={__('From Name', 'quillcrm')}
-								required={true}
-							>
-								<Input
-									placeholder={__('Name here', 'quillcrm')}
-									value={templates[currentTab]?.from_name}
-									onChange={(e) => {
-										clearError('from_name');
-										updateTemplate(currentTab, {
-											from_name: e.target.value,
-										});
-									}}
-									className={cn(
-										validationErrors.from_name &&
-											'!border-red-500 focus-visible:!ring-red-500'
+							<div className="flex gap-4">
+								<FormField
+									label={__('From Name', 'quillcrm')}
+									required={true}
+									className="flex-1"
+								>
+									<Input
+										placeholder={__(
+											'Name here',
+											'quillcrm'
+										)}
+										value={templates[currentTab]?.from_name}
+										onChange={(e) => {
+											clearError('from_name');
+											updateTemplate(currentTab, {
+												from_name: e.target.value,
+											});
+										}}
+										className={cn(
+											validationErrors.from_name &&
+												'!border-red-500 focus-visible:!ring-red-500'
+										)}
+									/>
+									{validationErrors.from_name && (
+										<p className="text-red-500 text-sm mt-1">
+											{validationErrors.from_name}
+										</p>
 									)}
-								/>
-								{validationErrors.from_name && (
-									<p className="text-red-500 text-sm mt-1">
-										{validationErrors.from_name}
-									</p>
-								)}
-							</FormField>
+								</FormField>
 
-							<FormField
-								label={__('From Email', 'quillcrm')}
-								required={true}
-							>
-								<Input
-									type="email"
-									placeholder={__(
-										'name@gmail.com',
-										'quillcrm'
+								<FormField
+									label={__('From Email', 'quillcrm')}
+									required={true}
+									className="flex-1"
+								>
+									<Input
+										type="email"
+										placeholder={__(
+											'name@gmail.com',
+											'quillcrm'
+										)}
+										value={
+											templates[currentTab]?.from_email
+										}
+										onChange={(e) => {
+											clearError('from_email');
+											updateTemplate(currentTab, {
+												from_email: e.target.value,
+											});
+										}}
+										className={cn(
+											validationErrors.from_email &&
+												'!border-red-500 focus-visible:!ring-red-500'
+										)}
+									/>
+									{validationErrors.from_email && (
+										<p className="text-red-500 text-sm mt-1">
+											{validationErrors.from_email}
+										</p>
 									)}
-									value={templates[currentTab]?.from_email}
-									onChange={(e) => {
-										clearError('from_email');
-										updateTemplate(currentTab, {
-											from_email: e.target.value,
-										});
-									}}
-									className={cn(
-										validationErrors.from_email &&
-											'!border-red-500 focus-visible:!ring-red-500'
-									)}
-								/>
-								{validationErrors.from_email && (
-									<p className="text-red-500 text-sm mt-1">
-										{validationErrors.from_email}
-									</p>
-								)}
-							</FormField>
+								</FormField>
+							</div>
 
-							<FormField
-								label={__('Reply To', 'quillcrm')}
-								required={true}
-							>
-								<Input
-									type="email"
-									placeholder={__(
-										'name@gmail.com',
-										'quillcrm'
+							<div className="flex gap-4">
+								<FormField
+									label={__('Reply To', 'quillcrm')}
+									required={true}
+									className="flex-1"
+								>
+									<Input
+										type="email"
+										placeholder={__(
+											'name@gmail.com',
+											'quillcrm'
+										)}
+										value={templates[currentTab]?.reply_to}
+										onChange={(e) => {
+											clearError('reply_to');
+											updateTemplate(currentTab, {
+												reply_to: e.target.value,
+											});
+										}}
+										className={cn(
+											validationErrors.reply_to &&
+												'!border-red-500 focus-visible:!ring-red-500'
+										)}
+									/>
+									{validationErrors.reply_to && (
+										<p className="text-red-500 text-sm mt-1">
+											{validationErrors.reply_to}
+										</p>
 									)}
-									value={templates[currentTab]?.reply_to}
-									onChange={(e) => {
-										clearError('reply_to');
-										updateTemplate(currentTab, {
-											reply_to: e.target.value,
-										});
-									}}
-									className={cn(
-										validationErrors.reply_to &&
-											'!border-red-500 focus-visible:!ring-red-500'
-									)}
-								/>
-								{validationErrors.reply_to && (
-									<p className="text-red-500 text-sm mt-1">
-										{validationErrors.reply_to}
-									</p>
-								)}
-							</FormField>
+								</FormField>
 
-							<FormField
-								label={__('Subject', 'quillcrm')}
-								required={true}
-							>
-								<Input
-									placeholder={__('Subject here', 'quillcrm')}
-									value={templates[currentTab]?.subject}
-									onChange={(e) => {
-										clearError('subject');
-										updateTemplate(currentTab, {
-											subject: e.target.value,
-										});
-									}}
-									className={cn(
-										validationErrors.subject &&
-											'!border-red-500 focus-visible:!ring-red-500'
+								<FormField
+									label={__('Subject', 'quillcrm')}
+									required={true}
+									className="flex-1"
+								>
+									<Input
+										placeholder={__(
+											'Subject here',
+											'quillcrm'
+										)}
+										value={templates[currentTab]?.subject}
+										onChange={(e) => {
+											clearError('subject');
+											updateTemplate(currentTab, {
+												subject: e.target.value,
+											});
+										}}
+										className={cn(
+											validationErrors.subject &&
+												'!border-red-500 focus-visible:!ring-red-500'
+										)}
+									/>
+									{validationErrors.subject && (
+										<p className="text-red-500 text-sm mt-1">
+											{validationErrors.subject}
+										</p>
 									)}
-								/>
-								{validationErrors.subject && (
-									<p className="text-red-500 text-sm mt-1">
-										{validationErrors.subject}
-									</p>
-								)}
-							</FormField>
-
+								</FormField>
+							</div>
 							<FormField
 								label={__('Preview Text', 'quillcrm')}
 								required={true}

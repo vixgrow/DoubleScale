@@ -1,12 +1,11 @@
-import { register, createReduxStore } from '@wordpress/data';
-import reducer from './reducer';
+import { createReduxStore, register } from '@wordpress/data';
+import type { DispatchFromMap, SelectFromMap } from '../types';
 import * as actions from './actions';
-import * as selectors from './selectors';
-import * as resolvers from './resolvers';
 import { STORE_KEY } from './constants';
 import type { State } from './reducer';
-
-import type { DispatchFromMap, SelectFromMap } from './types';
+import reducer from './reducer';
+import * as resolvers from './resolvers';
+import * as selectors from './selectors';
 
 const store: ReturnType<typeof createReduxStore> = createReduxStore<
 	State,

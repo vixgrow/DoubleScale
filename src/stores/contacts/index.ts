@@ -1,10 +1,10 @@
 import { createReduxStore, register } from '@wordpress/data';
+import type { DispatchFromMap, SelectFromMap } from '../types';
 import * as actions from './actions';
 import { STORE_KEY } from './constants';
 import type { State } from './reducer';
 import reducer from './reducer';
 import * as selectors from './selectors';
-import type { DispatchFromMap, SelectFromMap } from './types';
 
 
 const store: ReturnType<typeof createReduxStore> = createReduxStore<

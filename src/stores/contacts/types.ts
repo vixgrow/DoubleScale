@@ -1,9 +1,4 @@
 /**
- * External Dependencies.
- */
-import type { FunctionKeys } from 'utility-types';
-
-/**
  * Internal Dependencies.
  */
 import type { Contact, Filter as FilterType } from '@quillcrm/client';
@@ -219,34 +214,3 @@ export type ContactsActionTypes =
   | ClearSelectedIdsAction
   | InvalidateQueryAction
   | SetQueryCacheAction;
-
-// Helper types for store
-export type DispatchFromMap<A extends Record<string, (...args: any[]) => any>> = {
-  [actionCreator in keyof A]: (
-    ...args: Parameters<A[actionCreator]>
-  ) => A[actionCreator] extends (...args: any[]) => Generator
-    ? Promise<GeneratorReturnType<A[actionCreator]>>
-    : void;
-};
-
-export type SelectFromMap<S extends Record<string, unknown>> = {
-  [selector in FunctionKeys<S>]: S[selector] extends (...args: any[]) => any
-  ? (...args: TailParameters<S[selector]>) => ReturnType<S[selector]>
-  : never;
-};
-
-/**
- * Parameters type of a function, excluding the first parameter.
- */
-export type TailParameters<F extends Function> = F extends (
-  head: any,
-  ...tail: infer T
-) => any
-  ? T
-  : never;
-
-/**
- * Obtain the type finally returned by the generator when it's done iterating.
- */
-export type GeneratorReturnType<T extends (...args: any[]) => Generator> =
-  T extends (...args: any) => Generator<any, infer R, any> ? R : never;

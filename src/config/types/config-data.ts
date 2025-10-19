@@ -54,7 +54,7 @@ export type Importer = {
 	slug: string;
 	credentials: {
 		[key: string]: ImporterField;
-	},
+	};
 	is_integration: boolean;
 	is_active: boolean;
 	fields: {
@@ -177,7 +177,9 @@ export type ActionsGroup = {
 export type AutomationActions = {
 	[key: string]: {
 		label: string;
-		groups: ActionsGroup[];
+		groups: {
+			[key: string]: ActionsGroup;
+		};
 	};
 };
 

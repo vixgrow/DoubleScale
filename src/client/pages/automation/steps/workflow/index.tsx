@@ -9,15 +9,9 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
+import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import {
 	AlertDialog,
@@ -37,11 +31,8 @@ import {
 	RocketOutlined,
 	ThunderboltOutlined,
 	DeleteOutlined,
-	UndoOutlined,
-	RedoOutlined,
 } from '@ant-design/icons';
 import { isEmpty } from 'lodash';
-import { ChartLineIcon, ChevronRight } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -54,37 +45,21 @@ import type {
 	OrganizedStep,
 	Automation,
 } from '@quillcrm/client';
-import {
-	Field,
-	Fields,
-	RedoIcon,
-	ReportsIcon,
-	UndoIcon,
-} from '@quillcrm/components';
-import StepModal from './step-modal';
 import AddStep from './add-step';
 import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
-import WebhookFields from './webhook-fields';
-import FormFields from './form-fields';
 import ReactFlowWorkflow from './reactflow-workflow';
-import { getToLink, NavLink, useNavigate } from '@quillcrm/navigation';
+import WorkflowSidebar from './workflow-sidebar';
 
 const Workflow: React.FC = () => {
 	const {
 		automation,
 		steps,
 		isLoading,
-		updateAutomation,
-		saveAutomation,
-		isSaving: isSavingAutomation,
 		setSteps,
-		updateSettings,
 	} = useAutomationContext();
 	const [currentStep, setCurrentStep] = useState<OrganizedStep | null>(null);
 	const [visible, setVisible] = useState<boolean>(false);
-	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const useReactFlow = true;
-	const navigate = useNavigate();
 	const { createNotice, setCurrentTrigger } = useDispatch('quillcrm/core');
 
 	useEffect(() => {
@@ -121,34 +96,6 @@ const Workflow: React.FC = () => {
 		return { yesChildren, noChildren };
 	};
 
-	const save = async (data = {}) => {
-		if (!automation) {
-			return;
-		}
-
-		setIsSaving(true);
-
-		try {
-			const response = (await apiFetch({
-				path: `/qc/v1/automations/${automation.id}`,
-				method: 'POST',
-				data: {
-					...automation,
-					...data,
-				},
-			})) as Automation;
-
-			updateAutomation(response);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to save automation', 'quillcrm'),
-			});
-		} finally {
-			setIsSaving(false);
-			setVisible(false);
-		}
-	};
 
 	const trigger = automation ? getTrigger(automation.trigger) : null;
 	const typesOptions = {
@@ -396,7 +343,7 @@ const Workflow: React.FC = () => {
 
 	return (
 		<>
-			<div>
+			<div className="relative">
 				{isLoading ? (
 					<div>
 						<div className="animate-pulse space-y-4">
@@ -406,14 +353,23 @@ const Workflow: React.FC = () => {
 					</div>
 				) : (
 					automation && (
-						<div>
+						<div className={cn(
+							"qcrm-automation-workflow",
+							(currentStep || visible) ? "has-sidebar" : ""
+						)}>
 							{useReactFlow ? (
 								<ReactFlowWorkflow
-									onStepClick={(step) => setCurrentStep(step)}
-									onTriggerClick={() => setVisible(true)}
+									onStepClick={(step) => {
+										setVisible(false); // Close trigger sidebar if open
+										setCurrentStep(step);
+									}}
+									onTriggerClick={() => {
+										setCurrentStep(null); // Close step sidebar if open
+										setVisible(true);
+									}}
 								/>
 							) : (
-								<div className="flex flex-col items-center justify-center gap-5 w-full">
+								<div className="flex flex-col items-center justify-center gap-5 w-full mx-5 mt-5">
 									<div className="qcrm-automation-workflow flex flex-col gap-5 w-full">
 										<div className="qcrm-automation-workflow__item">
 											<Card
@@ -440,93 +396,12 @@ const Workflow: React.FC = () => {
 						</div>
 					)
 				)}
-				{currentStep && (
-					<StepModal step={currentStep} setStep={setCurrentStep} />
-				)}
-				{automation && trigger && (
-					<Dialog
-						open={visible}
-						onOpenChange={(open) => setVisible(open)}
-					>
-						<DialogContent className="sm:max-w-[800px] min-h-[500px]">
-							<DialogHeader>
-								<DialogTitle>
-									{__('Trigger', 'quillcrm')}
-								</DialogTitle>
-							</DialogHeader>
-							{trigger.fields && (
-								<>
-									{automation.trigger ===
-										'webhook_received' ? (
-										<WebhookFields
-											values={automation?.settings || {}}
-											onChange={(value) => {
-												updateAutomation({
-													...automation,
-													settings: value,
-												});
-											}}
-										/>
-									) : !trigger?.is_form ? (
-										<Fields
-											fields={trigger.fields}
-											values={automation.settings || {}}
-											onChange={(value) => {
-												updateAutomation({
-													...automation,
-													settings: value,
-												});
-											}}
-										/>
-									) : (
-										<FormFields
-											values={automation?.settings || {}}
-											onChange={(value) => {
-												updateAutomation({
-													...automation,
-													settings: value,
-												});
-											}}
-										/>
-									)}
-								</>
-							)}
-							<div className="mt-5">
-								<Field
-									type="switch"
-									label={__(
-										'Run Multiple Times (If you want to restart the automation for the same contact)',
-										'quillcrm'
-									)}
-									value={automation?.settings?.multiple_runs}
-									onChange={(value) => {
-										updateSettings('multiple_runs', value);
-									}}
-								/>
-							</div>
-							<div className="flex justify-end gap-2 mt-5">
-								<Button
-									variant="outline"
-									onClick={() => setVisible(false)}
-								>
-									{__('Cancel', 'quillcrm')}
-								</Button>
-								<Button
-									variant="default"
-									disabled={isSaving}
-									onClick={() => save()}
-								>
-									{isSaving && (
-										<span className="animate-spin mr-2">
-											⏳
-										</span>
-									)}
-									{__('Save', 'quillcrm')}
-								</Button>
-							</div>
-						</DialogContent>
-					</Dialog>
-				)}
+				<WorkflowSidebar
+					currentStep={currentStep}
+					setCurrentStep={setCurrentStep}
+					isTriggerVisible={visible}
+					setTriggerVisible={setVisible}
+				/>
 			</div>
 		</>
 	);

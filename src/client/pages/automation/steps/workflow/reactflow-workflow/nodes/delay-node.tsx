@@ -63,7 +63,7 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 
     return (
         <NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-            <div className="qcrm-reactflow-node qcrm-reactflow-node--delay">
+            <div className="qcrm-reactflow-node qcrm-reactflow-node--delay" onClick={handleEdit}>
                 <Handle
                     type="target"
                     position={Position.Top}

@@ -1,5 +1,13 @@
-// ReactFlow Workflow Styles
+.qcrm-reactflow-container {
+	width: 100%;
+	background-color: #fff;
+	border-radius: 8px;
+	border: 1px solid var(--qcrm-border-color);
+	overflow: hidden;
+	position: relative;
+}
 
+// ReactFlow Workflow Styles
 .qcrm-reactflow-workflow {
 	height: 90vh;
 	min-height: 400px;
@@ -469,11 +477,9 @@
 			inset: -2px;
 			border-radius: 50%;
 			padding: 2px;
-			background: linear-gradient(
-				135deg,
-				rgba(255, 255, 255, 0.8),
-				rgba(255, 255, 255, 0.2)
-			);
+			background: linear-gradient(135deg,
+					rgba(255, 255, 255, 0.8),
+					rgba(255, 255, 255, 0.2));
 			mask:
 				linear-gradient(#fff 0 0) content-box,
 				linear-gradient(#fff 0 0);
@@ -485,11 +491,9 @@
 			position: absolute;
 			inset: -8px;
 			border-radius: 50%;
-			background: radial-gradient(
-				circle,
-				transparent 70%,
-				rgba(24, 144, 255, 0.1) 100%
-			);
+			background: radial-gradient(circle,
+					transparent 70%,
+					rgba(24, 144, 255, 0.1) 100%);
 			opacity: 0;
 			transition: opacity 0.3s ease;
 			pointer-events: none;
@@ -805,4 +809,3 @@
 		}
 	}
 }
-

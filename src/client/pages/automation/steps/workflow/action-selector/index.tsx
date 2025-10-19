@@ -53,6 +53,22 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 	const [selectedCategory, setSelectedCategory] = useState('crm');
 	const automationActions = ConfigAPI.getAutomationActions();
 
+	// Filter out delay action from CRM contact group
+	const filteredActions = { ...automationActions };
+	if (filteredActions.crm?.groups?.contact?.actions) {
+		const { delay, ...restActions } = filteredActions.crm.groups.contact.actions;
+		filteredActions.crm = {
+			...filteredActions.crm,
+			groups: {
+				...filteredActions.crm.groups,
+				contact: {
+					...filteredActions.crm.groups.contact,
+					actions: restActions
+				}
+			}
+		};
+	}
+
 	const saveStep = async () => {
 		setIsSaving(true);
 
@@ -93,7 +109,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 		}
 	};
 
-	const currentCategoryData = automationActions[selectedCategory];
+	const currentCategoryData = filteredActions[selectedCategory];
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
@@ -108,7 +124,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 						<div className="flex h-full gap-5">
 							<div className="w-1/2">
 								<ActionSelectorCard
-									automationActions={automationActions}
+									automationActions={filteredActions}
 									selectedCategory={selectedCategory}
 									setSelectedCategory={setSelectedCategory}
 									categoryData={categoryData}
@@ -116,7 +132,7 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 							</div>
 							<div className="w-1/2">
 								<ActionsGroupRender
-									groups={currentCategoryData?.groups || []}
+									groups={currentCategoryData?.groups || {}}
 									onChange={(value) => onChange(value)}
 									value={value}
 								/>

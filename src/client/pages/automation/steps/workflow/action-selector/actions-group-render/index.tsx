@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/tooltip";
 
 interface ActionsGroupRenderProps {
-    groups: ActionsGroup[];
+    groups: { [key: string]: ActionsGroup };
     onChange: (value: string) => void;
     value: string;
 }
@@ -63,7 +63,7 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({ groups, onChang
         );
     };
 
-    const toggleGroup = (key: number) => {
+    const toggleGroup = (key: string) => {
         setCollapsedGroups(prev => ({
             ...prev,
             [key]: !prev[key]

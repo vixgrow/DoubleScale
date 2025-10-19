@@ -8,7 +8,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Flex, Modal } from 'antd';
+import { Button } from '@/components/ui/button';
 
 /**
  * Internal dependencies
@@ -45,42 +45,53 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setIsSaving(false);
 	};
 
+	// For delay steps, the action should be 'delay'
+	const actionKey = step.type === 'delay' ? 'delay' : step.action;
+
 	const action =
-		step.type === 'action' ? getAction(step.action) : getGoal(step.action);
+		step.type === 'action' || step.type === 'delay'
+			? getAction(actionKey)
+			: getGoal(step.action);
 
 	return (
-		<Modal
-			title={(
-				<Flex justify="space-between">
-					{
-						step.type === 'action'
-							? __('Action', 'quillcrm')
-							: __('Goal', 'quillcrm')
-					}
-					<Button
-						onClick={() => {
-							setMergeTagsVisible(true);
-						}}
-					>
-						{__('Merge Tags', 'quillcrm')}
-					</Button>
-				</Flex>
-			)}
-			open={true}
-			onOk={handleSave}
-			onCancel={() => setStep(null)}
-			confirmLoading={isSaving}
-			style={{ minWidth: '800px', minHeight: '500px' }}
-			closable={false}
-		>
-			<Fields
-				fields={action.fields}
-				values={settings}
-				onChange={(value) => {
-					setSettings(value);
-				}}
-			/>
-		</Modal>
+		<div className="qcrm-step-fields-content flex flex-col">
+			<div className="mb-4">
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={() => {
+						setMergeTagsVisible(true);
+					}}
+					className="w-full"
+				>
+					{__('Merge Tags', 'quillcrm')}
+				</Button>
+			</div>
+
+			<div className="mb-4">
+				<Fields
+					fields={action.fields}
+					values={settings}
+					onChange={(value) => {
+						setSettings(value);
+					}}
+				/>
+			</div>
+
+			<div className="">
+				<Button
+					onClick={handleSave}
+					disabled={isSaving}
+					variant="gradient"
+					className="w-full"
+					size="xl"
+				>
+					{isSaving
+						? __('Saving...', 'quillcrm')
+						: __('Save Changes', 'quillcrm')}
+				</Button>
+			</div>
+		</div>
 	);
 };
 

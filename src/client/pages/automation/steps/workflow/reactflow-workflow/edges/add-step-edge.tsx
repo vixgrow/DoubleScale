@@ -318,6 +318,8 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			stepData.action = 'condition';
 		} else if (type === 'end_automation') {
 			stepData.action = 'end_automation';
+		} else if (type === 'delay') {
+			stepData.action = 'delay';
 		}
 		// For 'action' and 'goal' types, leave action empty - will be set when user selects specific action/goal
 

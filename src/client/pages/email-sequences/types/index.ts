@@ -5,10 +5,10 @@
 import { EmailTemplate } from '../../../types';
 
 /**
- * Settings for sequence mail
+ * Settings for sequence mail (stored in database)
+ * Note: subject and email_body are handled by templates, not stored in settings
  */
 export interface SequenceMailSettings {
-    subject: string;
     pre_header: string;
     delay: {
         value: number;
@@ -36,7 +36,42 @@ export interface SequenceMailSettings {
         campaign_term: string;
         campaign_content: string;
     };
+    templates: EmailTemplate[];
+}
+
+/**
+ * Form data for sequence mail modal (includes subject and email_body for UI)
+ */
+export interface SequenceMailFormData {
+    subject: string;
     email_body: string;
+    pre_header: string;
+    delay: {
+        value: number;
+        unit: string;
+    };
+    sending_time_range: {
+        from: string;
+        to: string;
+    };
+    enable_specific_days: boolean;
+    days: {
+        monday: boolean;
+        tuesday: boolean;
+        wednesday: boolean;
+        thursday: boolean;
+        friday: boolean;
+        saturday: boolean;
+        sunday: boolean;
+    };
+    add_utm_parameters: boolean;
+    utm_parameters: {
+        campaign_source: string;
+        campaign_medium: string;
+        campaign_name: string;
+        campaign_term: string;
+        campaign_content: string;
+    };
     templates: EmailTemplate[];
 }
 
@@ -79,6 +114,8 @@ export interface SequenceMail {
     name: string;
     description: string;
     status: string;
+    subject: string;
+    email_body: string;
     settings: SequenceMailSettings;
     parent_id: string;
     count: string;
@@ -100,6 +137,8 @@ export interface EmailSequence {
     name: string;
     description: string;
     status: string;
+    subject: string;
+    email_body: string;
     settings: any;
     parent_id: string;
     count: string;
@@ -140,8 +179,8 @@ export interface SequenceMailModalProps {
     isOpen: boolean;
     onClose: () => void;
     title: string;
-    initialData?: SequenceMailSettings;
-    onSave: (data: SequenceMailSettings) => void;
+    initialData?: SequenceMailFormData;
+    onSave: (data: SequenceMailFormData) => void;
 }
 
 /**
@@ -172,6 +211,8 @@ export interface SequenceMailRequest {
     type: string;
     parent_id: string | number;
     name: string;
+    subject: string;
+    email_body: string;
     description?: string;
     status?: string;
     settings: SequenceMailSettings;

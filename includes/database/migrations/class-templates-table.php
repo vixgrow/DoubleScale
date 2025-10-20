@@ -47,6 +47,8 @@ class Templates_Table extends Migration {
 		 * category VARCHAR(100) DEFAULT 'general',
 		 * is_pro TINYINT(1) NOT NULL DEFAULT 0,
 		 * created_by BIGINT(20),
+		 * content_hash VARCHAR(64) NULL COMMENT 'SHA-256 hash for auto-template deduplication',
+		 * is_auto_generated TINYINT(1) DEFAULT 0 COMMENT 'Flag for auto-generated templates',
 		 * created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		 * updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 		 */
@@ -62,10 +64,13 @@ class Templates_Table extends Migration {
             category VARCHAR(100) DEFAULT "general",
             is_pro TINYINT(1) NOT NULL DEFAULT 0,
             created_by BIGINT(20),
+            content_hash VARCHAR(64) NULL COMMENT "SHA-256 hash for auto-template deduplication",
+            is_auto_generated TINYINT(1) DEFAULT 0 COMMENT "Flag for auto-generated templates",
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
-            INDEX idx_type (type)';
+            INDEX idx_type (type),
+            UNIQUE INDEX idx_content_hash_auto (content_hash, is_auto_generated)';
 
 		return $query;
 	}

@@ -55,6 +55,8 @@ class Template_Model extends Model {
 		'category',
 		'is_pro',
 		'created_by',
+		'content_hash',
+		'is_auto_generated',
 		'created_at',
 		'updated_at',
 	);
@@ -139,6 +141,17 @@ class Template_Model extends Model {
 		}
 
 		return $rules;
+	}
+
+	/**
+	 * Get tracking records that use this template
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function tracking_records() {
+		return $this->hasMany( Tracking_Model::class, 'template_id' );
 	}
 
 	/**

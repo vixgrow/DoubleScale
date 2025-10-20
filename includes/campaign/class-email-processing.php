@@ -109,6 +109,16 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			if ( $template && $template->get_setting( 'reply_to' ) ) {
 				$emails->reply_to = $template->get_setting( 'reply_to' );
 			}
+
+			// Set unsubscribe URL for List-Unsubscribe header (RFC 8058 compliance)
+			$emails->unsubscribe_url = add_query_arg(
+				array(
+					'quillcrm' => 'email_unsubscribe',
+					'hash_key' => $campaign_message->hash_key,
+				),
+				home_url()
+			);
+
 			$result = $emails->send(
 				$contact->email,
 				$message_data['subject'],

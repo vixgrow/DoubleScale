@@ -453,7 +453,9 @@ class Campaign_Model extends Model {
 
 		// Get analytics stats from centralized service
 		$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
-		$stats = $analytics->get_campaign_stats($campaign->type, $campaign->id);
+		// Convert string type to integer for analytics service (bypass accessor)
+		$type_int = \QuillCRM\Constants\Campaign_Channel::to_integer($campaign->type);
+		$stats = $analytics->get_campaign_stats($type_int, $campaign->id);
 
 		// Get optimized template counts (single query instead of N queries)
 		$campaign->templates_count = $this->get_template_counts_optimized($campaign);

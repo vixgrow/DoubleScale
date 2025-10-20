@@ -64,6 +64,7 @@ class Template_Model extends Model {
 	 * @var array
 	 */
 	protected $casts = array(
+		'type'     => 'integer',
 		'settings' => 'array',
 	);
 

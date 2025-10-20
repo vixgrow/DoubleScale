@@ -118,6 +118,22 @@ class Campaign_Channel {
 	}
 
 	/**
+	 * Convert channel integer to string slug
+	 *
+	 * @param int $channel Channel type integer.
+	 * @return string|null Channel slug ('email', 'sms', 'whatsapp') or null if invalid
+	 */
+	public static function to_string( $channel ) {
+		$mapping = array(
+			self::CHANNEL_EMAIL    => 'email',
+			self::CHANNEL_SMS      => 'sms',
+			self::CHANNEL_WHATSAPP => 'whatsapp',
+		);
+
+		return $mapping[ $channel ] ?? null;
+	}
+
+	/**
 	 * Get channel label (human-readable name)
 	 *
 	 * @param int $channel Channel type integer.

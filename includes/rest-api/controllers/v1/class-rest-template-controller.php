@@ -233,10 +233,10 @@ class REST_Template_Controller extends REST_Controller {
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'type'     => array(
-				'description' => __( 'Filter by template type.', 'quillcrm' ),
-				'type'        => 'string',
-				'default'     => 'email',
-				'enum'        => array( 'email', 'sms', 'whatsapp' ),
+				'description' => __( 'Filter by template type: 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ),
+				'type'        => 'integer',
+				'default'     => 1,
+				'enum'        => array( 1, 2, 3 ),
 			),
 			'category' => array(
 				'description'       => __( 'Filter by template category.', 'quillcrm' ),
@@ -290,14 +290,16 @@ class REST_Template_Controller extends REST_Controller {
 	public function get_items( $request ) {
 		try {
 			// Get parameters with defaults
-			$type     = $request->get_param( 'type' ) ?: 'email';
-			$per_page = (int) ( $request->get_param( 'per_page' ) ?: 20 );
-			$page     = (int) ( $request->get_param( 'page' ) ?: 1 );
-			$orderby  = $request->get_param( 'orderby' ) ?: 'id';
-			$order    = $request->get_param( 'order' ) ?: 'DESC';
-			$search   = $request->get_param( 'search' );
-			$keyword  = $request->get_param( 'keyword' ); // Backward compatibility
-			$category = $request->get_param( 'category' );
+			$type_param = $request->get_param( 'type' ) ?: \QuillCRM\Constants\Campaign_Channel::CHANNEL_EMAIL;
+			// Convert integer to string (templates.type is stored as string in DB)
+			$type       = \QuillCRM\Constants\Campaign_Channel::to_string( (int) $type_param ) ?: 'email';
+			$per_page   = (int) ( $request->get_param( 'per_page' ) ?: 20 );
+			$page       = (int) ( $request->get_param( 'page' ) ?: 1 );
+			$orderby    = $request->get_param( 'orderby' ) ?: 'id';
+			$order      = $request->get_param( 'order' ) ?: 'DESC';
+			$search     = $request->get_param( 'search' );
+			$keyword    = $request->get_param( 'keyword' ); // Backward compatibility
+			$category   = $request->get_param( 'category' );
 
 			// Build query
 			$query = Template_Model::where( 'type', $type );
@@ -481,9 +483,13 @@ class REST_Template_Controller extends REST_Controller {
 	 * @return array $template_data The template data
 	 */
 	public function prepare_template( $request ) {
+		$type_param    = $request->get_param( 'type' ) ?? \QuillCRM\Constants\Campaign_Channel::CHANNEL_EMAIL;
+		// Convert integer to string (templates.type is stored as string in DB)
+		$type          = \QuillCRM\Constants\Campaign_Channel::to_string( (int) $type_param ) ?: 'email';
+		
 		$template_data = array(
 			'name'         => $request->get_param( 'name' ) ?? __( 'New Template', 'quillcrm' ),
-			'type'         => $request->get_param( 'type' ) ?? 'email',
+			'type'         => $type,
 			'subject'      => $request->get_param( 'subject' ),
 			'body'         => $request->get_param( 'body' ),
 			'settings'     => $request->get_param( 'settings' ),

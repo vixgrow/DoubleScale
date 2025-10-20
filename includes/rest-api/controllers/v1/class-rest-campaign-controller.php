@@ -21,6 +21,7 @@ use QuillCRM\Managers\Campaign_Status_Manager;
 use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
+use QuillCRM\Models\Tracking_Model;
 
 /**
  * REST_Campaign_Controller class
@@ -171,26 +172,31 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( $request ) {
-		// Set channel from type parameter
+		// Set channel from type parameter (integer)
 		$type = $request->get_param( 'type' );
 
-		if ( empty( $type ) ) {
+		if ( ! is_int( $type ) && ! ctype_digit( (string) $type ) ) {
 			return new WP_Error(
-				'missing_type',
-				__( 'Campaign type is required. Must be email, sms, or whatsapp.', 'quillcrm' ),
+				'invalid_type_format',
+				__( 'Campaign type must be an integer: 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ),
 				array( 'status' => 400 )
 			);
 		}
 
-		if ( ! in_array( $type, array( 'email', 'sms', 'whatsapp' ), true ) ) {
+		$type = (int) $type;
+
+		// Convert integer to channel string slug using helper
+		$channel_string = Campaign_Channel::to_string( $type );
+
+		if ( ! $channel_string ) {
 			return new WP_Error(
 				'invalid_type',
-				__( 'Invalid campaign type. Must be email, sms, or whatsapp.', 'quillcrm' ),
+				__( 'Invalid campaign type. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ),
 				array( 'status' => 400 )
 			);
 		}
 
-		$this->channel = $type;
+		$this->channel = $channel_string;
 
 		return parent::create_item( $request );
 	}

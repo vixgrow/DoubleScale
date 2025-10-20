@@ -87,9 +87,9 @@ class REST_Contact_Controller extends REST_Controller {
 							'type'        => 'boolean',
 						),
 						'campaign_type' => array(
-							'description' => __( 'Campaign type for filtering contacts (email, sms, whatsapp).', 'quillcrm' ),
-							'type'        => 'string',
-							'enum'        => array( 'email', 'sms', 'whatsapp' ),
+							'description' => __( 'Campaign type for filtering contacts: 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ),
+							'type'        => 'integer',
+							'enum'        => array( 1, 2, 3 ),
 						),
 					),
 				),

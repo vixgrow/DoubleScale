@@ -28,6 +28,11 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import EmailBuilderSelection from './email-builder-selection';
+import {
+	createTemplate as createTemplateAPI,
+	updateTemplate as updateTemplateAPI,
+	getTemplate,
+} from '../../../../../builder/api/templates';
 
 // Zod validation schema for flat template structure
 const templateSchema = z
@@ -35,24 +40,12 @@ const templateSchema = z
 		subject: z.string().min(1, __('Subject is required', 'quillcrm')),
 		body: z.string().min(1, __('Body is required', 'quillcrm')),
 		from_name: z.string().min(1, __('From name is required', 'quillcrm')),
-		from_email: z
-			.string()
-			.min(1, __('From email is required', 'quillcrm'))
-			.email(
-				__(
-					'Please enter a valid email address for From Email',
-					'quillcrm'
-				)
-			),
-		reply_to: z
-			.string()
-			.min(1, __('Reply to email is required', 'quillcrm'))
-			.email(
-				__(
-					'Please enter a valid email address for Reply To',
-					'quillcrm'
-				)
-			),
+		from_email: z.email(
+			__('Please enter a valid email address for From Email', 'quillcrm')
+		),
+		reply_to: z.email(
+			__('Please enter a valid email address for Reply To', 'quillcrm')
+		),
 		preview_text: z
 			.string()
 			.min(1, __('Preview text is required', 'quillcrm')),
@@ -129,13 +122,29 @@ const Templates: React.FC = () => {
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	useEffect(() => {
-		// Load existing template data if available
-		if (existingTemplateData?.template) {
-			setTemplates([existingTemplateData.template]);
-		} else if (templates.length === 0) {
-			setTemplates([defaultTemplate]);
-		}
-	}, [existingTemplateData]);
+		// Load template from template table if we have a template_id
+		const loadTemplate = async () => {
+			if (existingTemplateData?.template_id) {
+				try {
+					const template = await getTemplate(
+						existingTemplateData.template_id
+					);
+					setTemplates([template]);
+				} catch (error: any) {
+					createNotice({
+						type: 'error',
+						message: __('Failed to load template', 'quillcrm'),
+					});
+					// Fallback to default template
+					setTemplates([defaultTemplate]);
+				}
+			} else if (templates.length === 0) {
+				setTemplates([defaultTemplate]);
+			}
+		};
+
+		loadTemplate();
+	}, [existingTemplateData?.template_id]);
 
 	const updateTemplate = (index: number, data: Partial<EmailTemplate>) => {
 		if (!campaign) {
@@ -275,19 +284,26 @@ const Templates: React.FC = () => {
 		}
 
 		try {
-			// Save template step data - only template-specific data
-			const templateStepData = {
-				template: {
-					...templates[currentTab],
-					lastModified: new Date().toISOString(),
-				},
-			};
+			// Create or update template in templates table
+			let savedTemplate: EmailTemplate;
+			const templateData = templates[currentTab];
 
-			// Save the step with template data and navigate only if successful
-			const saveSuccess = await saveCampaignStep(
-				'template',
-				templateStepData
-			);
+			if (templateData.id) {
+				// Update existing template
+				savedTemplate = await updateTemplateAPI(
+					templateData.id,
+					templateData
+				);
+			} else {
+				// Create new template
+				savedTemplate = await createTemplateAPI(templateData);
+			}
+
+			// Save template_id to campaign settings template_ids array
+			const saveSuccess = await saveCampaignStep('template', {
+				template_id: savedTemplate.id!,
+			});
+
 			if (saveSuccess) {
 				navigate(getToLink(`campaigns/${campaign?.id}/builder`));
 			} else {
@@ -300,7 +316,6 @@ const Templates: React.FC = () => {
 				});
 			}
 		} catch (error) {
-			console.error('Error saving template step:', error);
 			createNotice({
 				type: 'error',
 				message: __(
@@ -311,7 +326,6 @@ const Templates: React.FC = () => {
 		}
 	};
 
-	console.log(campaign);
 	return (
 		<div>
 			<PanelLayout
@@ -332,15 +346,15 @@ const Templates: React.FC = () => {
 						{__('Watch Tutorial', 'quillcrm')}
 					</Button>,
 				]}
-				totalSteps={tabLength}
-				currentStep={currentTab}
-				onNext={saveTemplateStepAndNavigate}
-				onBack={() => {
-					if (currentTab - 1 >= 0) {
-						setCurrentTab(currentTab - 1);
-						navigate(getToLink(`campaigns`));
-					}
-				}}
+				// totalSteps={tabLength}
+				// currentStep={currentTab}
+				// onNext={saveTemplateStepAndNavigate}
+				// onBack={() => {
+				// 	if (currentTab - 1 >= 0) {
+				// 		setCurrentTab(currentTab - 1);
+				// 		navigate(getToLink(`campaigns`));
+				// 	}
+				// }}
 			>
 				<div className="flex gap-6">
 					<PanelSettings

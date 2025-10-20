@@ -1,20 +1,35 @@
 /**
- * wordpress dependencies
+ * Menu Block Editor - REFACTORED
+ *
+ * Improvements:
+ * - Uses BaseBlockEditor wrapper
+ * - Uses grouped control imports
+ * - Better organization and type safety
+ */
+
+/**
+ * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+
 /**
- * external dependencies
+ * External dependencies
  */
 import React, { useState } from 'react';
+
 /**
- * internal dependencies
+ * Internal dependencies
  */
 import { Checkbox } from '@/components/ui/checkbox';
-import { AlignmentControl, PaddingControl } from '../../shared';
 import { MenuBlockProps, MenuItem } from '..';
 import { MenuList } from './MenuList';
 import { SingleItemEditor } from './SingleItemEditor';
 import { BulkEditor } from './BulkEditor';
+import {
+	BaseBlockEditor,
+	BlockEditorErrorBoundary,
+} from '../../shared/BaseBlockEditor';
+import * as LayoutControls from '../../shared/control-groups/layout';
 
 export interface MenuBlockEditorProps {
 	props: MenuBlockProps;
@@ -84,62 +99,77 @@ export const MenuBlockEditor: React.FC<MenuBlockEditorProps> = ({
 		props.menuItems[0];
 
 	return (
-		<div className="grid gap-5">
-			{/* Menu Items List */}
-			<MenuList
-				menuItems={props.menuItems}
-				selectedMenuItem={selectedMenuItem}
-				onAddMenuItem={addMenuItem}
-				onRemoveMenuItem={removeMenuItem}
-				onSelectMenuItem={setSelectedMenuItem}
-			/>
+		<BlockEditorErrorBoundary>
+			<BaseBlockEditor props={props} onChange={onChange}>
+				{(props, onChange) => (
+					<>
+						{/* Menu Items List */}
+						<MenuList
+							menuItems={props.menuItems}
+							selectedMenuItem={selectedMenuItem}
+							onAddMenuItem={addMenuItem}
+							onRemoveMenuItem={removeMenuItem}
+							onSelectMenuItem={setSelectedMenuItem}
+						/>
 
-			{/* Edit Mode Toggle */}
-			<div className="flex items-center space-x-2">
-				<Checkbox
-					id="edit-all-items"
-					checked={editAllItems}
-					onCheckedChange={(checked) =>
-						setEditAllItems(checked as boolean)
-					}
-				/>
-				<label
-					htmlFor="edit-all-items"
-					className="text-sm font-medium text-[#333333] leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-				>
-					{__('Edit all items at once', 'quillcrm')}
-				</label>
-			</div>
+						{/* Edit Mode Toggle */}
+						<div className="flex items-center space-x-2">
+							<Checkbox
+								id="edit-all-items"
+								checked={editAllItems}
+								onCheckedChange={(checked) =>
+									setEditAllItems(checked as boolean)
+								}
+							/>
+							<label
+								htmlFor="edit-all-items"
+								className="text-sm font-medium text-[#333333] leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+							>
+								{__('Edit all items at once', 'quillcrm')}
+							</label>
+						</div>
 
-			{/* Single Item Editor */}
-			{selectedItem && !editAllItems && (
-				<SingleItemEditor
-					item={selectedItem}
-					onUpdate={(updates) =>
-						updateMenuItem(selectedItem.id, updates)
-					}
-				/>
-			)}
+						{/* Single Item Editor */}
+						{selectedItem && !editAllItems && (
+							<SingleItemEditor
+								item={selectedItem}
+								onUpdate={(updates) =>
+									updateMenuItem(selectedItem.id, updates)
+								}
+							/>
+						)}
 
-			{/* Bulk Editor */}
-			{editAllItems && (
-				<BulkEditor item={selectedItem} onUpdate={updateAllMenuItems} />
-			)}
+						{/* Bulk Editor */}
+						{editAllItems && (
+							<BulkEditor
+								item={selectedItem}
+								onUpdate={updateAllMenuItems}
+							/>
+						)}
 
-			{/* Line Separator */}
-			<div className="border-t border-gray-200"></div>
+						{/* Line Separator */}
+						<div className="border-t border-gray-200"></div>
 
-			{/* Alignment */}
-			<AlignmentControl
-				value={props.align as 'left' | 'center' | 'right' | 'full'}
-				onChange={(value) => onChange({ align: value })}
-			/>
+						{/* Alignment */}
+						<LayoutControls.AlignmentControl
+							value={
+								props.align as
+									| 'left'
+									| 'center'
+									| 'right'
+									| 'full'
+							}
+							onChange={(value) => onChange({ align: value })}
+						/>
 
-			{/* Padding Controls - For whole menu section */}
-			<PaddingControl
-				value={props.padding}
-				onChange={(value) => onChange({ padding: value })}
-			/>
-		</div>
+						{/* Padding Controls - For whole menu section */}
+						<LayoutControls.PaddingControl
+							value={props.padding}
+							onChange={(value) => onChange({ padding: value })}
+						/>
+					</>
+				)}
+			</BaseBlockEditor>
+		</BlockEditorErrorBoundary>
 	);
 };

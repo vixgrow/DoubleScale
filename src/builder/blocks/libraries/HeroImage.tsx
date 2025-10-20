@@ -3,13 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 /**
- * external dependencies
- */
-import { useDraggable } from '@dnd-kit/core';
-/**
  * internal dependencies
  */
 import { ImageBlockIcon } from '@quillcrm/components';
+import { DraggableTemplate } from '../../components/shared/DraggableTemplate';
 
 const HeroImageLibrary = () => {
 	// Standard Hero template - creates 4 blocks: image, heading text, lorem text, button
@@ -580,6 +577,7 @@ const HeroImageLibrary = () => {
 				<DraggableTemplate
 					template={standardHeroTemplate}
 					id="hero-standard"
+					templateType="hero-image"
 				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 						<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
@@ -608,6 +606,7 @@ const HeroImageLibrary = () => {
 				<DraggableTemplate
 					template={extendedHeroTemplate}
 					id="hero-extended"
+					templateType="hero-image"
 				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 						<div className="text-[#616161] bg-muted w-full py-6 flex items-center justify-center">
@@ -644,6 +643,7 @@ const HeroImageLibrary = () => {
 				<DraggableTemplate
 					template={titleImageTemplate}
 					id="hero-title-image"
+					templateType="hero-image"
 				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg p-2">
 						<div className="text-[#141B34] text-sm font-bold">
@@ -675,6 +675,7 @@ const HeroImageLibrary = () => {
 				<DraggableTemplate
 					template={sideBySideTemplate}
 					id="hero-side-by-side"
+					templateType="hero-image"
 				>
 					<div className="flex gap-5 items-center border rounded-lg p-2 w-full">
 						<div className="text-[#616161] bg-muted w-1/2 h-full py-20 flex items-center justify-center">
@@ -700,36 +701,6 @@ const HeroImageLibrary = () => {
 					</div>
 				</DraggableTemplate>
 			</div>
-		</div>
-	);
-};
-
-// Draggable component using dnd-kit
-const DraggableTemplate = ({ template, id, children }) => {
-	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-		id: id,
-		data: {
-			type: 'library-template',
-			template: template,
-		},
-	});
-
-	const style = {
-		opacity: isDragging ? 0.5 : 1,
-		cursor: 'grab',
-	};
-
-	console.log(`DraggableTemplate ${id}:`, { isDragging, template });
-
-	return (
-		<div
-			ref={setNodeRef}
-			style={style}
-			{...listeners}
-			{...attributes}
-			className="hover:border-primary transition-colors"
-		>
-			{children}
 		</div>
 	);
 };

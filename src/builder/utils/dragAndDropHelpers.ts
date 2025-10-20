@@ -1,28 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EmailSection } from '../../stores/email-builder/types';
-
-/**
- * Template type for drag and drop operations
- */
-export type TemplateType =
-  | 'library-template'
-  | 'header-template'
-  | 'email-body-template'
-  | 'footer-template'
-  | 'image-gallery-template';
-
-/**
- * Template configuration interface
- */
-export interface TemplateConfig {
-  type: string;
-  layout?: string;
-  blocks: Array<{
-    type: string;
-    props: Record<string, any>;
-  }>;
-  props?: Record<string, any>;
-}
+import { TemplateConfig } from '../types/common';
 
 /**
  * Creates a new section with default styles
@@ -43,17 +21,29 @@ export const createNewSection = (): EmailSection => ({
 });
 
 /**
- * Adds template layout information to block props
+ * Mark block as template block (simplified)
  */
-export const addTemplateLayoutToBlockProps = (
+export const markAsTemplateBlock = (
   blockConfig: { type: string; props: Record<string, any> },
-  template: TemplateConfig
+  templateLayout?: any
 ): Record<string, any> => {
+  // Extract the correct templateLayout for blocks with containerId
+  let finalTemplateLayout;
+  if (templateLayout && blockConfig.props?.inlineLayout) {
+    const containerId = blockConfig.props?.containerId;
+    // If templateLayout has a containerId key, extract the nested layout
+    if (containerId && templateLayout[containerId]) {
+      finalTemplateLayout = templateLayout[containerId];
+    } else {
+      // Otherwise use templateLayout directly (for grid templates)
+      finalTemplateLayout = templateLayout;
+    }
+  }
+
   return {
     ...blockConfig.props,
-    templateLayout:
-      template.layout?.[blockConfig.props.containerId] || null,
-    templateType: template.type || 'library-template',
+    isTemplateBlock: true,
+    ...(finalTemplateLayout ? { templateLayout: finalTemplateLayout } : {}),
   };
 };
 
@@ -80,44 +70,10 @@ export const createBlocksFromTemplate = (
   columnId: string,
   addBlockFn: (sectionId: string, columnId: string, block: any) => void
 ): void => {
-  // Handle logo-button layout with flex justify-between
-  if (template.type === 'logo-button' && template.layout && template.blocks.length >= 2) {
-    const containerBlockId = `container-${Date.now()}`;
-
-    // Add logo block with inline properties
-    addBlockFn(sectionId, columnId, {
-      id: uuidv4(),
-      type: template.blocks[0].type,
-      props: {
-        ...template.blocks[0].props,
-        width: 'auto',
-        align: 'left',
-        inlineLayout: true,
-        containerId: containerBlockId,
-        templateLayout: template.layout,
-      },
-    });
-
-    // Add button block with inline properties
-    addBlockFn(sectionId, columnId, {
-      id: uuidv4(),
-      type: template.blocks[1].type,
-      props: {
-        ...template.blocks[1].props,
-        width: '50%',
-        align: 'right',
-        inlineLayout: true,
-        containerId: containerBlockId,
-        templateLayout: template.layout,
-      },
-    });
-    return;
-  }
-
   // Handle templates with multiple blocks
   if (template.blocks && Array.isArray(template.blocks)) {
     template.blocks.forEach((blockConfig) => {
-      const blockProps = addTemplateLayoutToBlockProps(blockConfig, template);
+      const blockProps = markAsTemplateBlock(blockConfig, template.layout);
       addBlockFn(sectionId, columnId, {
         id: uuidv4(),
         type: blockConfig.type,
@@ -127,37 +83,28 @@ export const createBlocksFromTemplate = (
     return;
   }
 
-  // Fallback: Add template as a single block
+  // Fallback: Add template as a single block (rarely used, all templates should have blocks array)
   addBlockFn(sectionId, columnId, {
     id: uuidv4(),
     type: template.type,
-    props: template.props || {},
+    props: {
+      isTemplateBlock: true,
+    },
   });
 };
 
-/**
- * Checks if a section is a template section (locked for editing)
- * A section is considered a template if any of its blocks have templateType or templateLayout
- */
-export const isTemplateSection = (section: EmailSection): boolean => {
-  return section.columns.some((column) =>
-    column.blocks.some(
-      (block) =>
-        block.props?.templateType !== undefined ||
-        block.props?.templateLayout !== undefined
-    )
-  );
-};
 
 /**
  * Handles dropping a template onto the canvas
+ * Returns the newly created section's info for auto-selection
  */
 export const handleTemplateDropOnCanvas = (
   template: TemplateConfig,
   overId: string | number | undefined,
   overData: any,
   addSectionFn: (section: EmailSection) => void,
-  addBlockFn: (sectionId: string, columnId: string, block: any) => void
+  addBlockFn: (sectionId: string, columnId: string, block: any) => void,
+  onComplete?: (sectionId: string, columnId: string, firstBlockId: string) => void
 ): boolean => {
   if (!isValidTemplateDropTarget(overId, overData)) {
     return false;
@@ -169,6 +116,19 @@ export const handleTemplateDropOnCanvas = (
   const sectionId = newSection.id;
   const columnId = newSection.columns[0].id;
 
-  createBlocksFromTemplate(template, sectionId, columnId, addBlockFn);
+  // Track the first block ID
+  let firstBlockId: string | undefined;
+  const wrappedAddBlockFn = (sId: string, cId: string, block: any) => {
+    if (!firstBlockId) firstBlockId = block.id;
+    addBlockFn(sId, cId, block);
+  };
+
+  createBlocksFromTemplate(template, sectionId, columnId, wrappedAddBlockFn);
+
+  // Call callback with IDs for auto-selection
+  if (onComplete && firstBlockId) {
+    onComplete(sectionId, columnId, firstBlockId);
+  }
+
   return true;
 };

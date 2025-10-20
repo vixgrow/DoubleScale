@@ -103,6 +103,8 @@ export type AutomationRules = {
 export type RulesGroup = {
 	name: string;
 	rules: Rules;
+	key: string;
+	triggers?: string[];
 };
 
 export type Rules = {
@@ -162,6 +164,7 @@ export type Action = {
 				[key: string]: string;
 			};
 			multiple?: boolean;
+			helperText?: string;
 		};
 	};
 };

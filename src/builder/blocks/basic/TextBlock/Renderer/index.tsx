@@ -10,43 +10,20 @@ import React from 'react';
  * internal dependencies
  */
 import { TextBlockProps } from '..';
+import { generateRandomString } from '@/builder/utils/idGenerator';
+import {
+	getHeadingConfig,
+	calculateFontSize,
+} from '@/builder/utils/styleHelpers';
 
 export interface TextRendererProps {
 	props: TextBlockProps;
 }
 
 export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
-	// Determine the HTML element based on heading style
-	const getElementType = () => {
-		switch (props.headingStyle) {
-			case 'h1':
-			case 'h2':
-			case 'h3':
-				return props.headingStyle;
-			case 'small':
-				return 'small';
-			default:
-				return 'p';
-		}
-	};
-
-	// Get font size based on heading style
-	const getFontSize = () => {
-		switch (props.headingStyle) {
-			case 'h1':
-				return Math.max(props.fontSize * 2.5, 24);
-			case 'h2':
-				return Math.max(props.fontSize * 2, 20);
-			case 'h3':
-				return Math.max(props.fontSize * 1.5, 18);
-			case 'small':
-				return Math.max(props.fontSize * 0.8, 12);
-			default:
-				return props.fontSize;
-		}
-	};
-
-	const ElementType = getElementType() as keyof JSX.IntrinsicElements;
+	const headingConfig = getHeadingConfig(props.headingStyle);
+	const ElementType = headingConfig.element as keyof JSX.IntrinsicElements;
+	const fontSize = calculateFontSize(props.headingStyle, props.fontSize);
 
 	// Check if content is HTML
 	const isHtmlContent =
@@ -100,7 +77,8 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 	// Check if HTML content has formatting that should override props
 	const hasHtmlFormatting = () => {
 		if (!isHtmlContent) return false;
-		return props.content.includes('<b>') ||
+		return (
+			props.content.includes('<b>') ||
 			props.content.includes('<strong>') ||
 			props.content.includes('<i>') ||
 			props.content.includes('<em>') ||
@@ -109,89 +87,106 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 			props.content.includes('<strike>') ||
 			props.content.includes('font-weight') ||
 			props.content.includes('font-style') ||
-			props.content.includes('text-decoration');
+			props.content.includes('text-decoration')
+		);
 	};
 
 	// Generate unique class name for this renderer instance
-	const rendererId = `text-block-renderer-${Math.random().toString(36).substr(2, 9)}`;
+	const rendererId = `text-block-renderer-${generateRandomString()}`;
 
 	const content = (
 		<>
 			<style>{`
 				.${rendererId} {
-					font-size: ${getFontSize()}px !important;
+					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
 				.${rendererId} * {
-					font-size: ${getFontSize()}px !important;
+					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
 				.${rendererId} p,
 				.${rendererId} div,
 				.${rendererId} span {
-					font-size: ${getFontSize()}px !important;
+					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
 				/* Only apply font size/family to formatting tags if no HTML formatting exists */
-				${!hasHtmlFormatting() ? `
+				${
+					!hasHtmlFormatting()
+						? `
 				.${rendererId} strong,
 				.${rendererId} em,
 				.${rendererId} u,
 				.${rendererId} strike {
-					font-size: ${getFontSize()}px !important;
+					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
-				` : ''}
+				`
+						: ''
+				}
 				.${rendererId} ul {
 					list-style-type: disc !important;
 					padding-left: 20px !important;
 					margin: 10px 0 !important;
-					font-size: ${getFontSize()}px !important;
+					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
 				.${rendererId} ol {
 					list-style-type: decimal !important;
 					padding-left: 20px !important;
 					margin: 10px 0 !important;
-					font-size: ${getFontSize()}px !important;
+					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
 				.${rendererId} li {
 					display: list-item !important;
 					margin: 5px 0 !important;
-					font-size: ${getFontSize()}px !important;
+					font-size: ${fontSize}px !important;
 					font-family: ${props.fontFamily} !important;
 				}
 				/* Only override font-size and font-family inline styles if no HTML formatting exists */
-				${!hasHtmlFormatting() ? `
+				${
+					!hasHtmlFormatting()
+						? `
 				.${rendererId} [style*="font-size"] {
-					font-size: ${getFontSize()}px !important;
+					font-size: ${fontSize}px !important;
 				}
 				.${rendererId} [style*="font-family"] {
 					font-family: ${props.fontFamily} !important;
 				}
-				` : ''}
+				`
+						: ''
+				}
 			`}</style>
 			<div
 				style={
 					{
-						fontSize: getFontSize(),
+						fontSize: fontSize,
 						color: props.color,
 						textAlign:
 							props.textAlign as React.CSSProperties['textAlign'],
 						fontFamily: props.fontFamily,
 						// Only apply formatting styles if no HTML formatting exists
-						...(hasHtmlFormatting() ? {} : {
-							fontWeight: props.bold ? 'bold' : 'normal',
-							fontStyle: props.italic ? 'italic' : 'normal',
-							textDecoration: (() => {
-								if (props.underline && props['line-through'])
-									return 'underline line-through';
-								if (props.underline) return 'underline';
-								if (props['line-through']) return 'line-through';
-								return 'none';
-							})(),
-						}),
+						...(hasHtmlFormatting()
+							? {}
+							: {
+									fontWeight: props.bold ? 'bold' : 'normal',
+									fontStyle: props.italic
+										? 'italic'
+										: 'normal',
+									textDecoration: (() => {
+										if (
+											props.underline &&
+											props['line-through']
+										)
+											return 'underline line-through';
+										if (props.underline) return 'underline';
+										if (props['line-through'])
+											return 'line-through';
+										return 'none';
+									})(),
+								}),
 						lineHeight: props.lineHeight,
 						letterSpacing: props.letterSpacing,
 						borderRadius: props.borderRadius,
@@ -208,7 +203,7 @@ export const TextRenderer: React.FC<TextRendererProps> = ({ props }) => {
 						boxSizing: 'border-box',
 						overflow: 'hidden',
 						// CSS custom properties for inheritance
-						'--text-font-size': `${getFontSize()}px`,
+						'--text-font-size': `${fontSize}px`,
 						'--text-font-family': props.fontFamily,
 					} as React.CSSProperties
 				}

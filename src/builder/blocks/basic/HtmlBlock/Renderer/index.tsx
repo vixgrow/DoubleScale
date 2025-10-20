@@ -4,12 +4,9 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * external dependencies
- */
-
-/**
  * internal dependencies
  */
+import { generateRandomString } from '@/builder/utils/idGenerator';
 
 export interface HtmlBlockRendererProps {
 	props: {
@@ -43,7 +40,7 @@ export const HtmlBlockRenderer: React.FC<HtmlBlockRendererProps> = ({
 		props.content.trim() === '<p>Insert your HTML here</p>';
 
 	// Generate unique ID for this HTML block
-	const uniqueId = `html-block-${Math.random().toString(36).substr(2, 9)}`;
+	const uniqueId = `html-block-${generateRandomString()}`;
 
 	// Use CSS string directly
 	const cssString = props.customCss || '';

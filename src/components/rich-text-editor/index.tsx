@@ -16,6 +16,10 @@ import {
 	Palette,
 	List,
 	ListOrdered,
+	AlignLeft,
+	AlignCenter,
+	AlignRight,
+	AlignJustify,
 } from 'lucide-react';
 
 /**
@@ -57,20 +61,45 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		strikeThrough: false,
 		insertUnorderedList: false,
 		insertOrderedList: false,
+		justifyLeft: false,
+		justifyCenter: false,
+		justifyRight: false,
+		justifyFull: false,
 	});
+
+	// Wrapper for deprecated queryCommandState (no modern alternative for contentEditable)
+	const queryCommandState = (command: string): boolean => {
+		// @ts-ignore - deprecated API but no modern alternative exists
+		return document.queryCommandState(command);
+	};
 
 	// Update active formats based on current selection
 	const updateActiveFormats = () => {
 		setActiveFormats({
-			bold: document.queryCommandState('bold'),
-			italic: document.queryCommandState('italic'),
-			underline: document.queryCommandState('underline'),
-			strikeThrough: document.queryCommandState('strikeThrough'),
-			insertUnorderedList: document.queryCommandState(
-				'insertUnorderedList'
-			),
-			insertOrderedList: document.queryCommandState('insertOrderedList'),
+			bold: queryCommandState('bold'),
+			italic: queryCommandState('italic'),
+			underline: queryCommandState('underline'),
+			strikeThrough: queryCommandState('strikeThrough'),
+			insertUnorderedList: queryCommandState('insertUnorderedList'),
+			insertOrderedList: queryCommandState('insertOrderedList'),
+			justifyLeft: queryCommandState('justifyLeft'),
+			justifyCenter: queryCommandState('justifyCenter'),
+			justifyRight: queryCommandState('justifyRight'),
+			justifyFull: queryCommandState('justifyFull'),
 		});
+	};
+
+	// Process all links to open in new tab
+	const processLinks = () => {
+		if (editorRef.current) {
+			const links = editorRef.current.querySelectorAll('a');
+			links.forEach((link) => {
+				if (!link.hasAttribute('target')) {
+					link.setAttribute('target', '_blank');
+					link.setAttribute('rel', 'noopener noreferrer');
+				}
+			});
+		}
 	};
 
 	// Apply font changes when props change
@@ -146,6 +175,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 			editorRef.current.innerHTML = getInitialContent();
 
+			// Process all links to open in new tab
+			processLinks();
+
 			// Restore cursor position if it existed
 			if (currentRange && currentSelection) {
 				try {
@@ -171,7 +203,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	const executeCommand = (command: string, value?: string) => {
 		// Set default font styles before executing commands
 		if (editorRef.current) {
+			// @ts-ignore - deprecated API but no modern alternative exists
 			document.execCommand('defaultParagraphSeparator', false, 'div');
+			// @ts-ignore - deprecated API but no modern alternative exists
 			document.execCommand('styleWithCSS', false, 'true');
 		}
 
@@ -191,9 +225,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				// If we're already in a list, toggle it off
 				const existingListItem = parentElement?.closest('li');
 				if (existingListItem) {
+					// @ts-ignore - deprecated API but no modern alternative exists
 					document.execCommand(command, false, value);
 				} else {
 					// Create a new list
+					// @ts-ignore - deprecated API but no modern alternative exists
 					document.execCommand(command, false, value);
 
 					// Ensure the new list item has proper content
@@ -229,6 +265,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				}
 			}
 		} else {
+			// @ts-ignore - deprecated API but no modern alternative exists
 			document.execCommand(command, false, value);
 		}
 
@@ -253,14 +290,95 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						htmlElement.style.fontFamily = fontFamily;
 					}
 				});
+				// Process links to open in new tab
+				processLinks();
 				// Update active formats after command execution
 				updateActiveFormats();
 			}, 50);
 		}
 	};
 
+	const handlePaste = (e: React.ClipboardEvent) => {
+		e.preventDefault();
+
+		const html = e.clipboardData.getData('text/html');
+		const text = e.clipboardData.getData('text/plain');
+
+		if (!html && !text) return;
+
+		if (!html) {
+			// @ts-ignore - deprecated API but no modern alternative exists
+			document.execCommand('insertText', false, text);
+			if (editorRef.current) onChange(editorRef.current.innerHTML);
+			return;
+		}
+
+		// Tag mapping for supported formatting
+		const tagMap: Record<
+			string,
+			(el: HTMLElement, content: string) => string
+		> = {
+			b: (_, content) => `<strong>${content}</strong>`,
+			strong: (_, content) => `<strong>${content}</strong>`,
+			i: (_, content) => `<em>${content}</em>`,
+			em: (_, content) => `<em>${content}</em>`,
+			u: (_, content) => `<u>${content}</u>`,
+			s: (_, content) => `<s>${content}</s>`,
+			strike: (_, content) => `<s>${content}</s>`,
+			del: (_, content) => `<s>${content}</s>`,
+			a: (el, content) =>
+				`<a href="${el.getAttribute('href') || ''}">${content}</a>`,
+			ul: (_, content) => `<ul>${content}</ul>`,
+			ol: (_, content) => `<ol>${content}</ol>`,
+			li: (_, content) => `<li>${content}</li>`,
+			br: () => '<br>',
+			span: (el, content) =>
+				el.style.color
+					? `<span style="color: ${el.style.color}">${content}</span>`
+					: content,
+			div: (el, content) =>
+				el.style.textAlign
+					? `<div style="text-align: ${el.style.textAlign}">${content}</div>`
+					: `<div>${content}</div>`,
+			p: (el, content) =>
+				el.style.textAlign
+					? `<div style="text-align: ${el.style.textAlign}">${content}</div>`
+					: `<div>${content}</div>`,
+		};
+
+		const cleanHTML = (element: HTMLElement): string => {
+			let result = '';
+			element.childNodes.forEach((node) => {
+				if (node.nodeType === Node.TEXT_NODE) {
+					result += node.textContent;
+				} else if (node.nodeType === Node.ELEMENT_NODE) {
+					const el = node as HTMLElement;
+					const tagName = el.tagName.toLowerCase();
+					const content = cleanHTML(el);
+					result += tagMap[tagName]
+						? tagMap[tagName](el, content)
+						: content;
+				}
+			});
+			return result;
+		};
+
+		const temp = document.createElement('div');
+		temp.innerHTML = html;
+		const cleanedHTML = cleanHTML(temp);
+
+		// @ts-ignore - deprecated API but no modern alternative exists
+		document.execCommand('insertHTML', false, cleanedHTML);
+
+		if (editorRef.current) {
+			processLinks();
+			onChange(editorRef.current.innerHTML);
+		}
+	};
+
 	const handleInput = () => {
 		if (editorRef.current) {
+			processLinks(); // Process links after any input
 			onChange(editorRef.current.innerHTML);
 			// Update active formats when content changes
 			updateActiveFormats();
@@ -287,6 +405,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
 				if (e.shiftKey) {
 					// Shift+Enter in list = line break within list item
+					// @ts-ignore - deprecated API but no modern alternative exists
 					document.execCommand('insertHTML', false, '<br>');
 				} else {
 					// Enter in list = new list item
@@ -344,6 +463,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				if (e.shiftKey) {
 					// Shift+Enter = single line break
 					e.preventDefault();
+					// @ts-ignore - deprecated API but no modern alternative exists
 					document.execCommand('insertHTML', false, '<br>');
 				}
 				// Let normal Enter behavior work for paragraphs
@@ -419,7 +539,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 			`}</style>
 
 			{/* Toolbar - Always visible */}
-			<div className="rich-text-toolbar border rounded-lg p-2 mb-2 bg-white shadow-sm flex flex-wrap gap-1 items-center">
+			<div className="rich-text-toolbar border rounded-lg p-2 mb-2 bg-white shadow-sm flex flex-wrap gap-1 items-center [&_button]:text-foreground [&_button_svg]:stroke-[2.5]">
 				{/* Text Formatting */}
 				<Button
 					variant="ghost"
@@ -471,6 +591,61 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					onMouseDown={(e) => e.preventDefault()}
 				>
 					<Strikethrough className="h-4 w-4" />
+				</Button>
+
+				<div className="w-px h-6 bg-border mx-1" />
+
+				{/* Text Alignment */}
+				<Button
+					variant="ghost"
+					size="sm"
+					className={cn(
+						'p-2 h-8 w-8',
+						activeFormats.justifyLeft && 'bg-accent'
+					)}
+					onClick={() => executeCommand('justifyLeft')}
+					onMouseDown={(e) => e.preventDefault()}
+				>
+					<AlignLeft className="h-4 w-4" />
+				</Button>
+
+				<Button
+					variant="ghost"
+					size="sm"
+					className={cn(
+						'p-2 h-8 w-8',
+						activeFormats.justifyCenter && 'bg-accent'
+					)}
+					onClick={() => executeCommand('justifyCenter')}
+					onMouseDown={(e) => e.preventDefault()}
+				>
+					<AlignCenter className="h-4 w-4" />
+				</Button>
+
+				<Button
+					variant="ghost"
+					size="sm"
+					className={cn(
+						'p-2 h-8 w-8',
+						activeFormats.justifyRight && 'bg-accent'
+					)}
+					onClick={() => executeCommand('justifyRight')}
+					onMouseDown={(e) => e.preventDefault()}
+				>
+					<AlignRight className="h-4 w-4" />
+				</Button>
+
+				<Button
+					variant="ghost"
+					size="sm"
+					className={cn(
+						'p-2 h-8 w-8',
+						activeFormats.justifyFull && 'bg-accent'
+					)}
+					onClick={() => executeCommand('justifyFull')}
+					onMouseDown={(e) => e.preventDefault()}
+				>
+					<AlignJustify className="h-4 w-4" />
 				</Button>
 
 				<div className="w-px h-6 bg-border mx-1" />
@@ -564,7 +739,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				className={cn(
 					editorId,
 					'min-h-[100px] p-3 border rounded-lg focus:outline-none focus:ring-1 focus:ring-ring',
-					'prose prose-sm max-w-none',
+					'prose prose-sm max-w-none text-foreground',
 					className
 				)}
 				style={
@@ -574,12 +749,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						fontFamily: fontFamily,
 						lineHeight: '1.5',
 						maxWidth: '287.2px',
+						color: 'hsl(var(--foreground))',
 						// Force font inheritance for all child elements
 						'--font-size': `${fontSize}px`,
 						'--font-family': fontFamily,
 					} as React.CSSProperties
 				}
 				onInput={handleInput}
+				onPaste={handlePaste}
 				onKeyDown={handleKeyDown}
 			/>
 		</div>

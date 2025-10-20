@@ -22,6 +22,15 @@ final class Merge_Tags_Manager {
 
 
 
+
+
+
+
+
+
+
+
+
 	/**
 	 * Registed merge tags
 	 *
@@ -138,11 +147,6 @@ final class Merge_Tags_Manager {
 				'name'      => __( 'General', 'quillcrm' ),
 				'mergeTags' => array(),
 			),
-			'fluentforms'    => array(
-				'name'      => __( 'FluentForm Fields', 'quillcrm' ),
-				'mergeTags' => array(),
-				'triggers'  => array( 'fluentforms' ),
-			),
 			'order'          => array(
 				'name'      => __( 'Order', 'quillcrm' ),
 				'mergeTags' => array(),
@@ -153,7 +157,26 @@ final class Merge_Tags_Manager {
 				'mergeTags' => array(),
 				'triggers'  => array( 'wc_abandoned_cart_created' ),
 			),
+			'edd_customer'   => array(
+				'name'      => __( 'Easy Digital Downloads Customer', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'edd_new_order_success' ),
+			),
+			'edd_order'      => array(
+				'name'      => __( 'Easy Digital Downloads Order', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'edd_new_order_success' ),
+			),
 		);
+		// get forms slug to set in groups
+		$forms = Forms_Manager::instance()->get_all_forms();
+		foreach ( $forms as $form ) {
+			$this->groups[ $form->slug ] = array(
+				'name'      => $form->name,
+				'mergeTags' => array(),
+				'triggers'  => array( $form->slug ),
+			);
+		}
 	}
 
 	/**

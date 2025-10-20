@@ -11,6 +11,7 @@ namespace QuillCRM\Emails;
 
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Emails\Layouts\Layout_Handler_Registry;
 
 /**
  * Renderer for email templates
@@ -57,6 +58,11 @@ class Email_Renderer {
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
 			// Handle legacy templates or error cases
 			return $template->body;
+		}
+
+		// Check if this is a builder template with type='builder' structure
+		if ( isset( $content['type'] ) && $content['type'] === 'builder' && isset( $content['value'] ) ) {
+			$content = $content['value'];
 		}
 
 		// Get global settings from content (builder stores them in body.globalSettings)
@@ -114,10 +120,10 @@ class Email_Renderer {
 		if ( ! empty( $preview_text ) ) {
 			// Add hidden preheader text - this appears in email client previews but not in the email body
 			$preheader_html = '<div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">'
-				. esc_html( $preview_text )
-				// Add invisible characters to push unwanted preview text out of view
-				. str_repeat( '&nbsp;&zwnj;', 50 )
-				. '</div>';
+			. esc_html( $preview_text )
+			// Add invisible characters to push unwanted preview text out of view
+			. str_repeat( '&nbsp;&zwnj;', 50 )
+			. '</div>';
 		}
 
 		// Start with proper email structure using tables for compatibility
@@ -288,8 +294,6 @@ class Email_Renderer {
 				$total_ratio += $column_width;
 			}
 
-			$column_count = count( $section['columns'] );
-
 			foreach ( $section['columns'] as $column_index => $column ) {
 				$column_width = isset( $column['width'] ) ? $column['width'] : 1;
 
@@ -327,13 +331,9 @@ class Email_Renderer {
 				// Inner table for blocks (ensures proper stacking)
 				$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';
 
-				// Render blocks in this column
+				// Render blocks in this column using the same logic as frontend
 				if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
-					foreach ( $column['blocks'] as $block_index => $block ) {
-						$html .= '<tr><td style="padding: 10px 0;">';
-						$html .= $this->render_block( $block, $merge_tags );
-						$html .= '</td></tr>';
-					}
+					$html .= $this->render_column_blocks( $column['blocks'], $merge_tags );
 				}
 
 				$html .= '</table>'; // Close inner blocks table
@@ -346,6 +346,46 @@ class Email_Renderer {
 
 		$html .= '</table>'; // Close section table
 		$html .= '<!--[if mso | IE]></td></tr></table><![endif]-->'; // Close Outlook wrapper
+
+		return $html;
+	}
+
+	/**
+	 * Render blocks in a column with template-aware layout handling
+	 * Uses the Layout Handler Registry pattern
+	 *
+	 * @param array $blocks Array of blocks
+	 * @param array $merge_tags Merge tags
+	 * @return string HTML output
+	 */
+	private function render_column_blocks( $blocks, $merge_tags ) {
+		$html     = '';
+		$i        = 0;
+		$registry = Layout_Handler_Registry::instance();
+
+		while ( $i < count( $blocks ) ) {
+			$block = $blocks[ $i ];
+
+			// Try to find a layout handler for this block
+			$handler = $registry->find_handler( $block );
+
+			if ( $handler ) {
+				// Use handler to render layout
+				$html .= $handler->render(
+					$blocks,
+					$i,
+					function ( $block ) use ( $merge_tags ) {
+						return $this->render_block( $block, $merge_tags );
+					}
+				);
+			} else {
+				// Regular block - render in single row
+				$html .= '<tr><td style="padding: 10px 0;">';
+				$html .= $this->render_block( $block, $merge_tags );
+				$html .= '</td></tr>';
+				$i++;
+			}
+		}
 
 		return $html;
 	}

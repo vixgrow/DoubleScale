@@ -3,13 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 /**
- * external dependencies
- */
-import { useDraggable } from '@dnd-kit/core';
-/**
  * internal dependencies
  */
 import { CursorIcon } from '@quillcrm/components';
+import { DraggableTemplate } from '../../components/shared/DraggableTemplate';
 //@ts-ignore
 import logo from '../../../../assets/images/header-logo.png';
 
@@ -199,7 +196,11 @@ const HeaderLibrary = () => {
 		<div className="grid gap-4">
 			<div className="flex flex-col gap-1 text-[#333333]">
 				<label className="text-sm">{__('Logo', 'quillcrm')}</label>
-				<DraggableTemplate template={logoTemplate} id="header-logo">
+				<DraggableTemplate
+					template={logoTemplate}
+					id="header-logo"
+					templateType="header"
+				>
 					<div className="flex gap-2 justify-center items-center border rounded-lg py-3 px-4">
 						<CursorIcon />
 						<div className="text-primary text-sm text-center">
@@ -216,6 +217,7 @@ const HeaderLibrary = () => {
 				<DraggableTemplate
 					template={logoNavigationTemplate}
 					id="header-navigation"
+					templateType="header"
 				>
 					<div className="flex flex-col gap-2 justify-center items-center border rounded-lg py-3 px-4">
 						<div className="flex gap-2 justify-center items-center">
@@ -241,6 +243,7 @@ const HeaderLibrary = () => {
 				<DraggableTemplate
 					template={logoButtonTemplate}
 					id="header-button"
+					templateType="header"
 				>
 					<div className="flex gap-2 items-center justify-between border rounded-lg py-3 px-4 w-full">
 						<div className="flex gap-2 justify-center items-center w-1/2">
@@ -257,36 +260,6 @@ const HeaderLibrary = () => {
 					</div>
 				</DraggableTemplate>
 			</div>
-		</div>
-	);
-};
-
-// Draggable component using dnd-kit
-const DraggableTemplate = ({ template, id, children }) => {
-	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-		id: id,
-		data: {
-			type: 'header-template',
-			template: template,
-		},
-	});
-
-	const style = {
-		opacity: isDragging ? 0.5 : 1,
-		cursor: 'grab',
-	};
-
-	console.log(`DraggableTemplate ${id}:`, { isDragging, template });
-
-	return (
-		<div
-			ref={setNodeRef}
-			style={style}
-			{...listeners}
-			{...attributes}
-			className="hover:border-primary transition-colors"
-		>
-			{children}
 		</div>
 	);
 };

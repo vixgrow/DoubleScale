@@ -1,22 +1,24 @@
 <?php
 
 /**
- * FluentForms Field Merge Tag
+ * Forms Metadata Merge Tag
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\FluentForms;
+namespace QuillCRM\Merge_Tags\Forms;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
 
 /**
- * FluentForms Field Merge Tag
+ * Forms Metadata Merge Tag
  */
-class FluentForms_Field extends Merge_Tag {
+class Forms_Metadata extends Merge_Tag {
+
+
 
 	/**
 	 * Merge Tag Name
@@ -44,7 +46,7 @@ class FluentForms_Field extends Merge_Tag {
 	 *
 	 * @var string
 	 */
-	public $group = 'fluentforms';
+	public $group;
 
 	/**
 	 * Is automation merge tag
@@ -58,19 +60,20 @@ class FluentForms_Field extends Merge_Tag {
 	 *
 	 * @var string
 	 */
-	protected $field_name;
+	protected $metadata_name;
 
 	/**
 	 * Constructor
 	 *
-	 * @param string $field_name Field name.
-	 * @param string $field_label Field label.
+	 * @param string $metadata_name Field name.
+	 * @param string $metadata_label Field label.
 	 */
-	public function __construct( $field_name, $field_label ) {
-		$this->field_name  = $field_name;
-		$this->name        = $field_label;
-		$this->slug        = "field:{$field_name}";
-		$this->description = sprintf( __( 'FluentForms field: %s', 'quillcrm' ), $field_label );
+	public function __construct( $metadata_name, $metadata_label, $slug ) {
+		$this->metadata_name = $metadata_name;
+		$this->name          = $metadata_label;
+		$this->slug          = "metadata:{$metadata_name}";
+		$this->group         = $slug;
+		$this->description   = sprintf( __( $slug . ' metadata: %s', 'quillcrm' ), $metadata_label );
 	}
 
 	/**
@@ -87,11 +90,11 @@ class FluentForms_Field extends Merge_Tag {
 		}
 
 		// Get the field name from the merge tag
-		$field_key = str_replace( 'field:', '', $merge_tag );
+		$field_key = str_replace( 'metadata:', '', $merge_tag );
 
 		// Check if we have form entry data
-		if ( isset( $contact->data['entry']['fields'][ $field_key ] ) ) {
-			$field_value = $contact->data['entry']['fields'][ $field_key ];
+		if ( isset( $contact->data[ $field_key ] ) ) {
+			$field_value = $contact->data[ $field_key ];
 
 			// Handle array values (for checkboxes, multi-select, etc.)
 			if ( is_array( $field_value ) ) {

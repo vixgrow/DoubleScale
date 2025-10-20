@@ -25,7 +25,9 @@ interface TimeLeft {
 	seconds: number;
 }
 
-export const TimerBlockRenderer: React.FC<TimerBlockRendererProps> = ({ props }) => {
+export const TimerBlockRenderer: React.FC<TimerBlockRendererProps> = ({
+	props,
+}) => {
 	const [timeLeft, setTimeLeft] = useState<TimeLeft>({
 		days: 0,
 		hours: 0,
@@ -46,20 +48,31 @@ export const TimerBlockRenderer: React.FC<TimerBlockRendererProps> = ({ props })
 			targetDateTime.setHours(props.targetHour, props.targetMinute, 0, 0);
 
 			// Convert to target timezone
-			const targetInTimezone = new Date(targetDateTime.toLocaleString('en-US', { timeZone: props.timezone }));
+			const targetInTimezone = new Date(
+				targetDateTime.toLocaleString('en-US', {
+					timeZone: props.timezone,
+				})
+			);
 
 			// Get current time in target timezone
 			const now = new Date();
-			const nowInTimezone = new Date(now.toLocaleString('en-US', { timeZone: props.timezone }));
+			const nowInTimezone = new Date(
+				now.toLocaleString('en-US', { timeZone: props.timezone })
+			);
 
-			const difference = targetInTimezone.getTime() - nowInTimezone.getTime();
+			const difference =
+				targetInTimezone.getTime() - nowInTimezone.getTime();
 
 			if (difference > 0) {
 				// Reset expired state if we now have a future time
 				setIsExpired(false);
 				const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-				const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-				const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+				const hours = Math.floor(
+					(difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+				);
+				const minutes = Math.floor(
+					(difference % (1000 * 60 * 60)) / (1000 * 60)
+				);
 				const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
 				return { days, hours, minutes, seconds };
@@ -78,7 +91,12 @@ export const TimerBlockRenderer: React.FC<TimerBlockRendererProps> = ({ props })
 		}, 1000);
 
 		return () => clearInterval(timer);
-	}, [props.targetDate, props.targetHour, props.targetMinute, props.timezone]);
+	}, [
+		props.targetDate,
+		props.targetHour,
+		props.targetMinute,
+		props.timezone,
+	]);
 
 	// Format numbers with leading zeros
 	const formatNumber = (num: number): string => {
@@ -92,7 +110,8 @@ export const TimerBlockRenderer: React.FC<TimerBlockRendererProps> = ({ props })
 	};
 
 	// Determine if we should use primary color (when no custom colors are set)
-	const usePrimaryColor = props.digitsColor === '#333333' && props.separatorColor === '#333333';
+	const usePrimaryColor =
+		props.digitsColor === '#333333' && props.separatorColor === '#333333';
 
 	// Helper function to format width value
 	const formatWidth = (width: string): string => {
@@ -171,7 +190,12 @@ export const TimerBlockRenderer: React.FC<TimerBlockRendererProps> = ({ props })
 		if (isExpired) {
 			return (
 				<div style={timerStyle}>
-					<div style={{ ...digitStyle, fontSize: `${props.digitsFontSize * 0.8}px` }}>
+					<div
+						style={{
+							...digitStyle,
+							fontSize: `${props.digitsFontSize * 0.8}px`,
+						}}
+					>
 						{__('Time Expired', 'quillcrm')}
 					</div>
 				</div>
@@ -182,19 +206,27 @@ export const TimerBlockRenderer: React.FC<TimerBlockRendererProps> = ({ props })
 			<div style={timerStyle}>
 				<div>
 					<div style={timeUnitStyle}>
-						<div style={digitStyle}>{formatNumber(timeLeft.days)}</div>
+						<div style={digitStyle}>
+							{formatNumber(timeLeft.days)}
+						</div>
 					</div>
 					<span style={separatorStyle}>:</span>
 					<div style={timeUnitStyle}>
-						<div style={digitStyle}>{formatNumber(timeLeft.hours)}</div>
+						<div style={digitStyle}>
+							{formatNumber(timeLeft.hours)}
+						</div>
 					</div>
 					<span style={separatorStyle}>:</span>
 					<div style={timeUnitStyle}>
-						<div style={digitStyle}>{formatNumber(timeLeft.minutes)}</div>
+						<div style={digitStyle}>
+							{formatNumber(timeLeft.minutes)}
+						</div>
 					</div>
 					<span style={separatorStyle}>:</span>
 					<div style={timeUnitStyle}>
-						<div style={digitStyle}>{formatNumber(timeLeft.seconds)}</div>
+						<div style={digitStyle}>
+							{formatNumber(timeLeft.seconds)}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -209,9 +241,7 @@ export const TimerBlockRenderer: React.FC<TimerBlockRendererProps> = ({ props })
 					<div style={placeholderIconStyle}>
 						<TimerBlockIcon width={48} height={48} />
 					</div>
-					<div style={placeholderTextStyle}>
-						00 : 00 : 00 : 00
-					</div>
+					<div style={placeholderTextStyle}>00 : 00 : 00 : 00</div>
 				</div>
 			</div>
 		);
@@ -221,6 +251,8 @@ export const TimerBlockRenderer: React.FC<TimerBlockRendererProps> = ({ props })
 			return (
 				<a
 					href={props.link}
+					target="_blank"
+					rel="noopener noreferrer"
 					style={{ textDecoration: 'none', display: 'block' }}
 					title={props.altText || __('Countdown Timer', 'quillcrm')}
 				>
@@ -237,6 +269,8 @@ export const TimerBlockRenderer: React.FC<TimerBlockRendererProps> = ({ props })
 		return (
 			<a
 				href={props.link}
+				target="_blank"
+				rel="noopener noreferrer"
 				style={{ textDecoration: 'none', display: 'block' }}
 				title={props.altText || __('Countdown Timer', 'quillcrm')}
 			>

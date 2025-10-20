@@ -86,11 +86,11 @@ class REST_Contact_Controller extends REST_Controller {
 							'description' => __( 'Subscribed contacts.', 'quillcrm' ),
 							'type'        => 'boolean',
 						),
-						'campaign_type' => array(
-							'description' => __( 'Campaign type for filtering contacts: 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ),
-							'type'        => 'integer',
-							'enum'        => array( 1, 2, 3 ),
-						),
+					'campaign_type' => array(
+						'description' => __( 'Campaign type for filtering contacts.', 'quillcrm' ),
+						'type'        => 'string',
+						'enum'        => array( 'email', 'sms', 'whatsapp' ),
+					),
 					),
 				),
 				array(
@@ -752,7 +752,7 @@ class REST_Contact_Controller extends REST_Controller {
 	public function get_messages( $request ) {
 		try {
 			$contact_id = $request->get_param( 'id' );
-			$mode       = $request->get_param( 'mode' ) ?: 'email';
+			$mode       = $request->get_param( 'mode' ) ?: Tracking_Model::MODE_EMAIL; // Default to email (1)
 			$per_page   = $request->get_param( 'per_page' ) ?: 25;
 			$page       = $request->get_param( 'page' ) ?: 1;
 
@@ -811,11 +811,28 @@ class REST_Contact_Controller extends REST_Controller {
 	/**
 	 * Helper: Map channel mode to tracking mode constant
 	 *
-	 * @param string $mode Channel mode (email|sms|whatsapp).
+	 * @param int|string $mode Channel mode as integer (1, 2, 3) or string (email|sms|whatsapp).
 	 *
 	 * @return int|WP_Error Tracking mode constant or WP_Error.
 	 */
 	private function map_mode_to_tracking_mode( $mode ) {
+		// If it's already an integer, validate it directly
+		if ( is_int( $mode ) || ctype_digit( (string) $mode ) ) {
+			$mode_int = (int) $mode;
+			$valid_modes = array( Tracking_Model::MODE_EMAIL, Tracking_Model::MODE_SMS, Tracking_Model::MODE_WHATSAPP );
+			
+			if ( in_array( $mode_int, $valid_modes, true ) ) {
+				return $mode_int;
+			}
+			
+			return new WP_Error(
+				'invalid_mode',
+				sprintf( __( 'Invalid mode: %d. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ), $mode_int ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Backward compatibility: Accept strings
 		$mode_map = array(
 			'email'    => Tracking_Model::MODE_EMAIL,
 			'sms'      => Tracking_Model::MODE_SMS,
@@ -825,7 +842,7 @@ class REST_Contact_Controller extends REST_Controller {
 		if ( ! isset( $mode_map[ $mode ] ) ) {
 			return new WP_Error(
 				'invalid_mode',
-				sprintf( __( 'Invalid mode: %s. Must be email, sms, or whatsapp.', 'quillcrm' ), $mode ),
+				sprintf( __( 'Invalid mode: %s. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ), $mode ),
 				array( 'status' => 400 )
 			);
 		}

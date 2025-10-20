@@ -22,6 +22,7 @@ use QuillCRM\Services\Campaign_Analytics;
 use QuillCRM\Managers\Campaign_Status_Manager;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Abstract_Campaign_Controller class
@@ -55,9 +56,12 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	protected function get_campaign_query() {
-		return $this->channel
-			? Campaign_Model::query()->where( 'type', $this->channel )
-			: Campaign_Model::query();
+		if ( $this->channel ) {
+			// Convert string to integer for database query (accessors don't work in WHERE)
+			$type_int = Campaign_Channel::to_integer( $this->channel );
+			return Campaign_Model::query()->whereRaw( 'type = ?', [ $type_int ] );
+		}
+		return Campaign_Model::query();
 	}
 
 	/**
@@ -295,6 +299,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	public function create_item( $request ) {
 		try {
 			$campaign_data         = $this->prepare_campaign( $request );
+			// Pass string directly - model's setTypeAttribute will convert to integer
 			$campaign_data['type'] = $this->channel;
 			$campaign              = Campaign_Model::create( $campaign_data );
 

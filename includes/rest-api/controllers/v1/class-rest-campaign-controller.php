@@ -172,31 +172,20 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( $request ) {
-		// Set channel from type parameter (integer)
+		// Set channel from type parameter (string: 'email', 'sms', 'whatsapp')
 		$type = $request->get_param( 'type' );
 
-		if ( ! is_int( $type ) && ! ctype_digit( (string) $type ) ) {
-			return new WP_Error(
-				'invalid_type_format',
-				__( 'Campaign type must be an integer: 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$type = (int) $type;
-
-		// Convert integer to channel string slug using helper
-		$channel_string = Campaign_Channel::to_string( $type );
-
-		if ( ! $channel_string ) {
+		// Validate it's a valid channel string
+		$valid_channels = array( 'email', 'sms', 'whatsapp' );
+		if ( ! in_array( $type, $valid_channels, true ) ) {
 			return new WP_Error(
 				'invalid_type',
-				__( 'Invalid campaign type. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ),
+				__( 'Invalid campaign type. Must be "email", "sms", or "whatsapp".', 'quillcrm' ),
 				array( 'status' => 400 )
 			);
 		}
 
-		$this->channel = $channel_string;
+		$this->channel = $type;
 
 		return parent::create_item( $request );
 	}

@@ -83,7 +83,7 @@ class Campaign_Model extends Model {
 	 */
 	protected $casts = array(
 		'settings' => 'array',
-		'type'     => 'integer',
+		// Note: 'type' conversion handled by getTypeAttribute/setTypeAttribute accessors
 	);
 
 	/**
@@ -244,14 +244,46 @@ class Campaign_Model extends Model {
 	}
 
 	/**
-	 * Get campaign type (integer: 1=email, 2=sms, 3=whatsapp, 4=sequence_mail)
+	 * Get campaign type as string for API/frontend
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string Campaign type string ('email', 'sms', 'whatsapp')
+	 */
+	public function getTypeAttribute( $value ) {
+		// Convert integer from database to string for API
+		return Campaign_Channel::to_string( $value ) ?? 'email';
+	}
+
+	/**
+	 * Set campaign type from string to integer for database
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|int $value Campaign type as string or integer
+	 */
+	public function setTypeAttribute( $value ) {
+		// If it's already an integer, store it directly
+		if ( is_int( $value ) ) {
+			$this->attributes['type'] = $value;
+			return;
+		}
+
+		// Convert string to integer for database storage
+		$integer_value = Campaign_Channel::to_integer( $value );
+		$this->attributes['type'] = $integer_value ?? Campaign_Channel::CHANNEL_EMAIL;
+	}
+
+	/**
+	 * Get campaign type as integer (for internal processing)
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return int Campaign type integer
 	 */
 	public function get_type() {
-		return $this->type ?? Campaign_Channel::get_default();
+		// Access the raw integer value from database
+		return $this->attributes['type'] ?? Campaign_Channel::get_default();
 	}
 
 	/**

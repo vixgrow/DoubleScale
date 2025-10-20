@@ -11,6 +11,7 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Template_Model class
@@ -64,9 +65,37 @@ class Template_Model extends Model {
 	 * @var array
 	 */
 	protected $casts = array(
-		'type'     => 'integer',
 		'settings' => 'array',
+		// Note: 'type' conversion handled by getTypeAttribute/setTypeAttribute accessors
 	);
+
+	/**
+	 * Get template type as string for API/frontend
+	 *
+	 * @param int $value Raw integer value from database
+	 * @return string Template type string ('email', 'sms', 'whatsapp')
+	 */
+	public function getTypeAttribute( $value ) {
+		// Convert integer from database to string for API
+		return Campaign_Channel::to_string( $value ) ?? 'email';
+	}
+
+	/**
+	 * Set template type from string to integer for database
+	 *
+	 * @param string|int $value Template type as string or integer
+	 */
+	public function setTypeAttribute( $value ) {
+		// If it's already an integer, store it directly
+		if ( is_int( $value ) ) {
+			$this->attributes['type'] = $value;
+			return;
+		}
+
+		// Convert string to integer for database storage
+		$integer_value = Campaign_Channel::to_integer( $value );
+		$this->attributes['type'] = $integer_value ?? Campaign_Channel::CHANNEL_EMAIL;
+	}
 
 	/**
 	 * Rules

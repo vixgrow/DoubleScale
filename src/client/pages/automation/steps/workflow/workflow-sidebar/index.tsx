@@ -70,8 +70,8 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		setTempAction(value);
 	};
 
-	const handleGoalSave = async () => {
-		if (!currentStep || !tempAction) {
+	const handleGoalSave = async (goalKey: string) => {
+		if (!currentStep || !goalKey) {
 			createNotice({
 				type: 'error',
 				message: __('Please select a goal', 'quillcrm'),
@@ -85,7 +85,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 				method: 'POST',
 				data: {
 					...currentStep,
-					action: tempAction,
+					action: goalKey,
 					status: 'active',
 				},
 			})) as AutomationStep;

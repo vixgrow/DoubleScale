@@ -70,91 +70,16 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		setTempAction(value);
 	};
 
-	const handleGoalSave = async (goalKey: string) => {
-		if (!currentStep || !goalKey) {
-			createNotice({
-				type: 'error',
-				message: __('Please select a goal', 'quillcrm'),
-			});
-			return;
-		}
+	// Generic save handler to reduce code duplication
+	const handleSave = async (
+		updates: Partial<AutomationStep>,
+		successMessage: string,
+		options: { clearTempAction?: boolean; stepId?: number } = {}
+	) => {
+		const { clearTempAction = false, stepId } = options;
+		const id = stepId || currentStep?.id;
 
-		try {
-			const response = (await apiFetch({
-				path: `/qc/v1/automation-steps/${currentStep.id}`,
-				method: 'POST',
-				data: {
-					...currentStep,
-					action: goalKey,
-					status: 'active',
-				},
-			})) as AutomationStep;
-
-			const organizedStep = {
-				...response,
-				children: currentStep.children,
-			} as OrganizedStep;
-
-			updateStep(response.id, response);
-			setCurrentStep(organizedStep);
-			setTempAction('');
-
-			createNotice({
-				type: 'success',
-				message: __('Goal saved', 'quillcrm'),
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message || __('Failed to save goal', 'quillcrm'),
-			});
-		}
-	};
-
-	const handleActionSave = async () => {
-		if (!currentStep || !tempAction) {
-			createNotice({
-				type: 'error',
-				message: __('Please select an action', 'quillcrm'),
-			});
-			return;
-		}
-
-		try {
-			const response = (await apiFetch({
-				path: `/qc/v1/automation-steps/${currentStep.id}`,
-				method: 'POST',
-				data: {
-					...currentStep,
-					action: tempAction,
-					status: 'active',
-				},
-			})) as AutomationStep;
-
-			const organizedStep = {
-				...response,
-				children: currentStep.children,
-			} as OrganizedStep;
-
-			updateStep(response.id, response);
-			setCurrentStep(organizedStep);
-			setTempAction('');
-
-			createNotice({
-				type: 'success',
-				message: __('Action saved', 'quillcrm'),
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message:
-					error.message || __('Failed to save action', 'quillcrm'),
-			});
-		}
-	};
-
-	const handleStepSave = async (stepData: Partial<OrganizedStep>) => {
-		if (!stepData.id) {
+		if (!id) {
 			createNotice({
 				type: 'error',
 				message: __('Invalid step data', 'quillcrm'),
@@ -164,10 +89,11 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 		try {
 			const response = (await apiFetch({
-				path: `/qc/v1/automation-steps/${stepData.id}`,
+				path: `/qc/v1/automation-steps/${id}`,
 				method: 'POST',
 				data: {
-					...stepData,
+					...currentStep,
+					...updates,
 					status: 'active',
 				},
 			})) as AutomationStep;
@@ -180,16 +106,77 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			updateStep(response.id, response);
 			setCurrentStep(organizedStep);
 
+			if (clearTempAction) {
+				setTempAction('');
+			}
+
 			createNotice({
 				type: 'success',
-				message: __('Step saved', 'quillcrm'),
+				message: successMessage,
 			});
 		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: error.message || __('Failed to save step', 'quillcrm'),
+				message: error.message || __('Failed to save', 'quillcrm'),
 			});
 		}
+	};
+
+	const handleGoalSave = async (goalKey: string) => {
+		if (!currentStep || !goalKey) {
+			createNotice({
+				type: 'error',
+				message: __('Please select a goal', 'quillcrm'),
+			});
+			return;
+		}
+
+		await handleSave(
+			{ action: goalKey },
+			__('Goal saved', 'quillcrm'),
+			{ clearTempAction: true }
+		);
+	};
+
+	const handleActionSave = async () => {
+		if (!currentStep || !tempAction) {
+			createNotice({
+				type: 'error',
+				message: __('Please select an action', 'quillcrm'),
+			});
+			return;
+		}
+
+		await handleSave(
+			{ action: tempAction },
+			__('Action saved', 'quillcrm'),
+			{ clearTempAction: true }
+		);
+	};
+
+	const handleStepSave = async (stepData: Partial<OrganizedStep>) => {
+		if (!stepData.id) {
+			createNotice({
+				type: 'error',
+				message: __('Invalid step data', 'quillcrm'),
+			});
+			return;
+		}
+
+		await handleSave(
+			stepData,
+			__('Step saved', 'quillcrm'),
+			{ stepId: stepData.id }
+		);
+	};
+
+	const handleConditionSave = async (data: Partial<AutomationStep>) => {
+		if (!currentStep) return;
+
+		await handleSave(
+			{ settings: data.settings },
+			__('Conditions saved', 'quillcrm')
+		);
 	};
 
 	const renderContent = () => {
@@ -237,7 +224,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 				condition: () => (
 					<ConditionsModal
 						step={currentStep!}
-						onSave={() => { }}
+						onSave={handleConditionSave}
 						visible={true}
 						onClose={() => setCurrentStep(null)}
 					/>

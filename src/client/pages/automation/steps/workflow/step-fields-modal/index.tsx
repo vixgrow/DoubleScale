@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -34,8 +34,18 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [isSaving, setIsSaving] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
+	const [currentStepId, setCurrentStepId] = useState(step.id);
 	const { setMergeTagsVisible, createNotice } = useDispatch('quillcrm/core');
 	const { steps, setSteps } = useAutomationContext();
+
+	// Only sync settings when the step ID changes (switching to a different step)
+	// This prevents resetting user's changes when the same step is updated after save
+	useEffect(() => {
+		if (step.id !== currentStepId) {
+			setSettings(step.settings);
+			setCurrentStepId(step.id);
+		}
+	}, [step.id, step.settings, currentStepId]);
 
 	const handleSave = async () => {
 		setIsSaving(true);

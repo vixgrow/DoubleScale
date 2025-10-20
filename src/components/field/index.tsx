@@ -168,31 +168,20 @@ const Field: React.FC<FieldProps> = ({
 			break;
 		case 'text':
 			fieldContent = (
-				<div className="relative">
-					<Input
-						value={value || ''}
-						onChange={(e) => onChange(e.target.value)}
-						type={type}
-						className={cn(
-							'h-12 bg-white',
-							enableMergeTags && 'pr-10',
-							status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500'
-						)}
-						style={{
-							borderRadius: '8px',
-						}}
-						placeholder={placeholder}
-					/>
-					{enableMergeTags && (
-						<div
-							className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer hover:opacity-80"
-							onClick={handleMergeTagClick}
-						>
-							<MergeTagsIcon />
-						</div>
+				<Input
+					value={value || ''}
+					onChange={(e) => onChange(e.target.value)}
+					type={type}
+					className={cn(
+						'h-12 bg-white',
+						status === 'error' &&
+						'border-red-500 focus-visible:ring-red-500'
 					)}
-				</div>
+					style={{
+						borderRadius: '8px',
+					}}
+					placeholder={placeholder}
+				/>
 			);
 			break;
 		case 'number':
@@ -400,9 +389,19 @@ const Field: React.FC<FieldProps> = ({
 	return (
 		<div className="qcrm-field" style={style || {}}>
 			{label && (
-				<div className="qcrm-field-label text-[#09090B] font-normal text-base">
-					{label}{' '}
-					{required && <span className="text-red-600">*</span>}
+				<div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between">
+					<span>
+						{label}{' '}
+						{required && <span className="text-red-600">*</span>}
+					</span>
+					{enableMergeTags && type === 'text' && (
+						<div
+							className="cursor-pointer hover:opacity-80 inline-flex"
+							onClick={handleMergeTagClick}
+						>
+							<MergeTagsIcon />
+						</div>
+					)}
 				</div>
 			)}
 			<div className="qcrm-field-input">{fieldContent}</div>

@@ -73,12 +73,6 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 							{triggerName}
 						</span>
 					</div>
-					<div className="qcrm-reactflow-node__subtitle">
-						{__(
-							'Select the event that starts your Workflow',
-							'quillcrm'
-						)}
-					</div>
 				</div>
 
 				{/* Three dots dropdown menu */}

@@ -102,6 +102,7 @@ class Send_WhatsApp extends Action {
 				return false;
 			}
 
+			// Validate phone number
 			if ( empty( $contact->phone ) ) {
 				quillcrm_get_logger()->warning(
 					'Send WhatsApp action: Contact has no phone number',
@@ -114,6 +115,23 @@ class Send_WhatsApp extends Action {
 				return array(
 					'status'  => 'skipped',
 					'message' => 'Contact has no phone number',
+				);
+			}
+
+			// Validate phone number format (minimum 10 digits, E.164 format)
+			if ( strlen( $contact->phone ) < 10 || ! preg_match( '/^\+?[0-9]+$/', $contact->phone ) ) {
+				quillcrm_get_logger()->warning(
+					'Send WhatsApp action: Invalid phone number format',
+					array(
+						'automation_id' => $automation->id,
+						'contact_id'    => $contact->id,
+						'phone'         => $contact->phone,
+						'code'          => 'send_whatsapp_invalid_phone',
+					)
+				);
+				return array(
+					'status'  => 'skipped',
+					'message' => 'Invalid phone number format. Use E.164 format: +1234567890',
 				);
 			}
 

@@ -429,7 +429,7 @@ final class Email_Sequences_Manager {
 	private function send_sequence_email( Campaign_Model $sequence, Contact_Model $contact ) {
 		try {
 			// Get template for sequence
-			$template_id = $this->email_processor->get_template_for_contact( $sequence, $contact ) ?? 0;
+			$template_id = $this->email_processor->get_template_for_contact( $sequence, $contact ) ?? null;
 			if ( ! $template_id ) {
 				return;
 			}

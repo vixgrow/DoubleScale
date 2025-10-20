@@ -45,6 +45,7 @@ class Auto_Template_Manager {
 				array(
 					'content_hash'      => $content_hash,
 					'is_auto_generated' => 1,
+					'type'              => $type,
 				),
 				// Attributes to set if creating new record
 				array(
@@ -68,6 +69,7 @@ class Auto_Template_Manager {
 			// If UNIQUE constraint fails, retry with simple find
 			$template = Template_Model::where( 'content_hash', $content_hash )
 				->where( 'is_auto_generated', 1 )
+				->where( 'type', $type )
 				->first();
 			
 			if ( ! $template ) {

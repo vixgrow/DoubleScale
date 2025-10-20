@@ -155,11 +155,11 @@ abstract class Abstract_Individual_Message_Sender {
 		return Tracking_Model::create(
 			array(
 				'contact_id'  => $contact->id,
-				'template_id' => 0, // No template for individual messages
-				'hash_key'    => wp_generate_password( 32, false ),
+				'template_id' => null, // No template for individual messages
+				'hash_key'    => \QuillCRM\Utils::generate_hash_key(),
 				'mode'        => $this->get_tracking_mode(),
 				'source_type' => Message_Source_Types::INDIVIDUAL,
-				'source_id'   => 0, // No campaign/automation
+				'source_id'   => null, // No campaign/automation
 				'author_id'   => get_current_user_id(), // Track who sent it
 				'recipient'   => $recipient,
 				'status'      => Tracking_Status::PENDING,

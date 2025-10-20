@@ -15,7 +15,7 @@ import { map } from 'lodash';
 import './style.scss';
 import type { AutomationStep } from '@quillcrm/client';
 import ConfigAPI from '@quillcrm/config';
-import { ConditionsIcon, CustomDialogHeader, PlusIcon } from '@quillcrm/components';
+import { CustomDialogHeader, GradientConditionIcon, PlusIcon } from '@quillcrm/components';
 import {
 	Dialog,
 	DialogContent,
@@ -61,6 +61,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 		setIsSaving(true);
 		try {
 			await onSave(data);
+			onClose();
 		} catch (error) {
 			console.error(error);
 		} finally {
@@ -71,7 +72,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
 			<DialogOverlay className="z-[150300]" />
-			<DialogContent className="max-w-[800px] max-h-[90vh] z-[150300] overflow-y-auto">
+			<DialogContent className="max-w-[1000px] max-h-[90vh] z-[150300] overflow-y-auto">
 				<DialogHeader>
 					<CustomDialogHeader
 						title={__('Create a condition', 'quillcrm')}
@@ -79,20 +80,31 @@ const ConditionsModal: React.FC<RulesProps> = ({
 							'Add up to 5 conditions. Define whether any or all of them must be applicable, for the condition to be met.',
 							'quillcrm'
 						)}
-						icon={<ConditionsIcon />}
+						icon={<GradientConditionIcon />}
 					/>
 				</DialogHeader>
 				<div className="py-4">
-					<div className="flex flex-col gap-6">
+					<div className="flex flex-col gap-4">
 						{map(rules, (ruleGroup, groupIndex) => (
-							<RuleGroupCard
-								key={groupIndex}
-								ruleGroup={ruleGroup}
-								groupIndex={groupIndex}
-								rulesGroups={rulesGroups}
-								rules={rules}
-								onRulesChange={setRules}
-							/>
+							<>
+								<RuleGroupCard
+									key={groupIndex}
+									ruleGroup={ruleGroup}
+									groupIndex={groupIndex}
+									rulesGroups={rulesGroups}
+									rules={rules}
+									onRulesChange={setRules}
+								/>
+								{groupIndex < rules.length - 1 && (
+									<div className="flex justify-center items-center gap-4">
+										<div className="flex-1 h-[2px] bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6]"></div>
+										<span className="text-base font-bold text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] px-3 py-1 rounded-full">
+											{__('OR', 'quillcrm')}
+										</span>
+										<div className="flex-1 h-[2px] bg-gradient-to-l from-[#1E3A8A] to-[#3B82F6]"></div>
+									</div>
+								)}
+							</>
 						))}
 						<div className="flex justify-start items-start">
 							<Button

@@ -139,3 +139,4 @@ export { default as EmailOutlinedIcon } from './email-outlined';
 export { default as EmailSequenceOutlinedIcon } from './email-sequence-outlined';
 export { default as PremiumIcon } from './premium';
 export { default as TwoArrowsIcon } from './two-arrows';
+export { default as MyTemplatesIcon } from './my-templates';

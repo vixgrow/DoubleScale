@@ -17,6 +17,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogFooter,
+	DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -64,7 +65,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 		}
 	};
 
-	const handleKeyPress = (e: React.KeyboardEvent) => {
+	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === 'Enter' && !isSaving) {
 			handleSave();
 		}
@@ -72,60 +73,49 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="top-[22%]">
 				<DialogHeader>
 					<DialogTitle className="text-2xl font-bold">
 						{__('Save as Template', 'quillcrm')}
 					</DialogTitle>
-				</DialogHeader>
-
-				<div className="grid gap-4 py-4">
-					<div className="grid gap-2">
-						<Label htmlFor="template-name">
-							{__('Template Name', 'quillcrm')}
-						</Label>
-						<Input
-							id="template-name"
-							value={templateName}
-							onChange={(e) => {
-								setTemplateName(e.target.value);
-								setError('');
-							}}
-							onKeyPress={handleKeyPress}
-							placeholder={__('Enter template name', 'quillcrm')}
-							disabled={isSaving}
-							className="h-10"
-							style={{
-								borderColor: error ? '#ef4444' : '#e5e5e5',
-								borderRadius: '0.5rem',
-							}}
-							autoFocus
-						/>
-						{error && (
-							<p className="text-sm text-red-500">{error}</p>
-						)}
-					</div>
-
-					<p className="text-sm text-gray-500">
+					<DialogDescription>
 						{__(
-							'This will save your current email design as a reusable template.',
+							'Save this email design as a template so you could re-use it for your future emails.',
 							'quillcrm'
 						)}
-					</p>
+					</DialogDescription>
+				</DialogHeader>
+
+				<div className="flex flex-col gap-2">
+					<Label htmlFor="template-name">
+						{__('Template Name', 'quillcrm')}
+					</Label>
+					<Input
+						id="template-name"
+						value={templateName}
+						onChange={(e) => {
+							setTemplateName(e.target.value);
+							setError('');
+						}}
+						onKeyDown={handleKeyDown}
+						placeholder={__('Enter template name', 'quillcrm')}
+						disabled={isSaving}
+						className="h-10"
+						style={{
+							borderColor: error ? '#ef4444' : '#e5e5e5',
+							borderRadius: '0.5rem',
+						}}
+						autoFocus
+					/>
+					{error && <p className="text-sm text-red-500">{error}</p>}
 				</div>
 
 				<DialogFooter>
 					<Button
-						variant="outline"
-						onClick={handleClose}
-						disabled={isSaving}
-					>
-						{__('Cancel', 'quillcrm')}
-					</Button>
-					<Button
 						variant="gradient"
 						onClick={handleSave}
 						disabled={isSaving || !templateName.trim()}
+						className="w-full"
 					>
 						{isSaving
 							? __('Saving...', 'quillcrm')

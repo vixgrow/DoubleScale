@@ -140,3 +140,4 @@ export { default as GoalIcon } from './goal';
 export { default as EndLinkIcon } from './end-link';
 export { default as ActionIcon } from './action';
 export { default as GradientArrowIcon } from './gradient-arrow';
+export { default as GradientConditionIcon } from './gradient-condition';

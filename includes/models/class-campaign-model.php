@@ -20,6 +20,7 @@ use QuillCRM\Managers\Campaign_Status_Manager;
 use QuillCRM\Services\Campaign_Template_Factory;
 use QuillCRM\Services\Template_Field_Mapper;
 use QuillCRM\Constants\Campaign_Channel;
+use QuillCRM\Constants\Tracking_Status;
 
 /**
  * Campaign_Model class
@@ -190,7 +191,7 @@ class Campaign_Model extends Model {
 
 	public function getSentAttribute() {
 		return $this->messages()
-			->where( 'status', 'sent' )
+			->where( 'status', Tracking_Status::SENT )
 			->count();
 	}
 

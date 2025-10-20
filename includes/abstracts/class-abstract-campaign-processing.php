@@ -603,10 +603,57 @@ abstract class Abstract_Campaign_Processing {
 	public function process_campaign_message( Campaign_Model $campaign, Contact_Model $contact, Tracking_Model $campaign_message ) {
 		// Check if memory limit is reached
 		if ( Utils::is_memory_limit_reached() ) {
-			// If memory limit is reached, we will requeue the task
+			// Track retry attempts using transients to prevent infinite requeue loop
+			$retry_key   = "quillcrm_retry_{$this->channel}_{$campaign_message->id}";
+			$retry_count = (int) get_transient( $retry_key );
+			
+			// Maximum 3 retries for memory issues
+			if ( $retry_count >= 3 ) {
+				// Give up after 3 retries - mark as failed
+				$campaign_message->status = Tracking_Status::FAILED;
+				$campaign_message->save();
+				
+				// Clean up retry transient
+				delete_transient( $retry_key );
+				
+				quillcrm_get_logger()->error(
+					sprintf( __( '%s message failed after memory limit retries', 'quillcrm' ), ucfirst( $this->channel ) ),
+					array(
+						'code'             => "{$this->channel}_memory_retry_exceeded",
+						'tracking_id'      => $campaign_message->id,
+						'contact_id'       => $contact->id,
+						'campaign_id'      => $campaign->id,
+						'retry_count'      => $retry_count,
+						'memory_usage'     => memory_get_usage( true ),
+						'memory_limit'     => Utils::get_memory_limit(),
+					)
+				);
+				return;
+			}
+			
+			// Increment retry counter (expires after 1 hour to handle stuck tasks)
+			set_transient( $retry_key, $retry_count + 1, HOUR_IN_SECONDS );
+			
+			// Log retry attempt
+			quillcrm_get_logger()->warning(
+				sprintf( __( '%s message requeued due to memory limit (attempt %d/3)', 'quillcrm' ), ucfirst( $this->channel ), $retry_count + 1 ),
+				array(
+					'code'         => "{$this->channel}_memory_requeue",
+					'tracking_id'  => $campaign_message->id,
+					'retry_count'  => $retry_count + 1,
+					'memory_usage' => memory_get_usage( true ),
+					'memory_limit' => Utils::get_memory_limit(),
+				)
+			);
+			
+			// Requeue the task for later processing
 			QuillCRM::instance()->campaigns_tasks->enqueue_async( "process_campaign_{$this->channel}", $campaign, $contact, $campaign_message );
 			return;
 		}
+		
+		// Clear retry counter on successful processing attempt (memory OK)
+		$retry_key = "quillcrm_retry_{$this->channel}_{$campaign_message->id}";
+		delete_transient( $retry_key );
 
 		// Get message provider (for SMS/WhatsApp campaigns)
 		// Email campaigns skip this check
@@ -639,10 +686,18 @@ abstract class Abstract_Campaign_Processing {
 
 			// Log processing result
 			$this->log_campaign_processing_result( $campaign, $contact, $campaign_message );
+			
+			// Clean up retry counter on successful processing
+			$retry_key = "quillcrm_retry_{$this->channel}_{$campaign_message->id}";
+			delete_transient( $retry_key );
 
 		} catch ( \Exception $e ) {
 			// Log processing error
 			$this->log_campaign_processing_error( $campaign, $contact, $campaign_message, $e );
+			
+			// Clean up retry counter on error (will be handled by error status)
+			$retry_key = "quillcrm_retry_{$this->channel}_{$campaign_message->id}";
+			delete_transient( $retry_key );
 		}
 	}
 

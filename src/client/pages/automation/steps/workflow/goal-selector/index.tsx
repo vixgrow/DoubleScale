@@ -8,12 +8,12 @@ import { useState } from '@wordpress/element';
  * External dependencies
  */
 import { map } from 'lodash';
-import { Button } from '@/components/ui/button';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 /**
  * Internal dependencies
  */
+import { Button } from '@/components/ui/button';
 import './style.scss';
 import ConfigAPI from '@quillcrm/config';
 import {

@@ -20,12 +20,12 @@ import {
 } from '@quillcrm/components';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
 import { useCampaignStep, campaignSteps } from '../shared';
-import { Button } from '@/components/ui/button';
 
 const Contacts: React.FC = () => {
-	const { campaign, saveCampaignStep, updateSettings, goToStep } =
+	const { campaign, saveCampaignStep, updateSettings, goToStep, saving } =
 		useCampaignStep();
 
 	// Get existing step data
@@ -117,7 +117,7 @@ const Contacts: React.FC = () => {
 			<Stepper steps={campaignSteps} canProceed="true" currentStep={3} />
 
 			<div className="flex gap-6 items-start">
-				<div ref={panelRef} className="w-[55%]">
+				<div ref={panelRef} className="w-2/3">
 					<PanelSettings
 						title={__('Recipients', 'quillcrm')}
 						description={__(
@@ -126,10 +126,14 @@ const Contacts: React.FC = () => {
 						)}
 						icon={<TeamIcon />}
 						className="flex flex-col"
+						showButtons={true}
+						onNext={save}
+						nextLabel={__('Save & Continue', 'quillcrm')}
+						isLoading={saving}
 					>
 						<div className="space-y-6">
 							<div>
-								<p className="text-base font-bold mb-2">
+								<p className="text-base font-bold mb-2 text-black">
 									{__('Filter By', 'quillcrm')}
 								</p>
 								<RadioGroup
@@ -139,9 +143,9 @@ const Contacts: React.FC = () => {
 								>
 									<Label
 										htmlFor="list-tags"
-										className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
+										className={`flex items-center space-x-4 w-1/2 border rounded-lg p-4 cursor-pointer ${
 											filterBy === 'list-tags'
-												? 'border-blue-500 bg-blue-50'
+												? 'border-blue-500 bg-blue-50 text-blue-500'
 												: 'border-gray-300'
 										}`}
 									>
@@ -172,17 +176,6 @@ const Contacts: React.FC = () => {
 								</RadioGroup>
 							</div>
 
-							{/* Contact Count Display */}
-							<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-								<div className="text-sm font-medium text-gray-700">
-									{__(
-										'Total Contacts based on filters',
-										'quillcrm'
-									)}
-									: {total.toLocaleString()}
-								</div>
-							</div>
-
 							{filterBy === 'list-tags' && (
 								<ListTagFilter
 									filters={filters}
@@ -201,12 +194,6 @@ const Contacts: React.FC = () => {
 									onApplyingChange={setIsApplying}
 								/>
 							)}
-						</div>
-
-						<div className="mt-6 flex justify-end">
-							<Button onClick={save} className="px-6">
-								{__('Save & Continue', 'quillcrm')}
-							</Button>
 						</div>
 					</PanelSettings>
 				</div>

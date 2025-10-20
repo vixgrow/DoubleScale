@@ -132,14 +132,14 @@ export default function AdvancedFilter({
 					{__('Add Filter', 'quillcrm')}
 				</Button>
 				<Button
-					variant="outline"
+					variant="secondaryDeepBlue"
 					onClick={handleApplyFilters}
 					disabled={loading}
 				>
 					{__('Apply Filters', 'quillcrm')}
 				</Button>
 				<Button
-					variant="secondaryDeepBlue"
+					variant="destructive"
 					onClick={handleClearFilters}
 					disabled={loading}
 				>

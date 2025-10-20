@@ -21,6 +21,7 @@ use QuillCRM\Models\Template_Model;
 use QuillCRM\Emails\Email_Renderer;
 use QuillCRM\Emails\Block_Registry;
 use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * REST_Template_Controller class
@@ -179,7 +180,7 @@ class REST_Template_Controller extends REST_Controller {
 				 'type'       => array(
 					 'description' => __( 'Type of the template.', 'quillcrm' ),
 					 'type'        => 'string',
-					 'enum'        => array( 'email', 'sms', 'whatsapp' ),
+					 'enum'        => Campaign_Channel::get_core_channel_strings(),
 				 ),
 				 'subject'    => array(
 					 'description' => __( 'Subject of the template.', 'quillcrm' ),
@@ -235,8 +236,8 @@ class REST_Template_Controller extends REST_Controller {
 		'type'     => array(
 			'description' => __( 'Filter by template type.', 'quillcrm' ),
 			'type'        => 'string',
-			'default'     => 'email',
-			'enum'        => array( 'email', 'sms', 'whatsapp' ),
+			'default'     => Campaign_Channel::STR_EMAIL,
+			'enum'        => Campaign_Channel::get_core_channel_strings(),
 		),
 			'category' => array(
 				'description'       => __( 'Filter by template category.', 'quillcrm' ),
@@ -290,7 +291,7 @@ class REST_Template_Controller extends REST_Controller {
 	public function get_items( $request ) {
 		try {
 			// Get parameters with defaults
-		$type     = $request->get_param( 'type' ) ?: 'email';
+		$type     = $request->get_param( 'type' ) ?: Campaign_Channel::STR_EMAIL;
 		$per_page = (int) ( $request->get_param( 'per_page' ) ?: 20 );
 		$page     = (int) ( $request->get_param( 'page' ) ?: 1 );
 			$orderby    = $request->get_param( 'orderby' ) ?: 'id';
@@ -481,7 +482,7 @@ class REST_Template_Controller extends REST_Controller {
 	 * @return array $template_data The template data
 	 */
 	public function prepare_template( $request ) {
-		$type = $request->get_param( 'type' ) ?? 'email';
+		$type = $request->get_param( 'type' ) ?? Campaign_Channel::STR_EMAIL;
 		
 		$template_data = array(
 			'name'         => $request->get_param( 'name' ) ?? __( 'New Template', 'quillcrm' ),

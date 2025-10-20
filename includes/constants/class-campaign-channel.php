@@ -44,6 +44,14 @@ class Campaign_Channel {
 	const CHANNEL_SEQUENCE_MAIL = 4;
 
 	/**
+	 * String constants for channel types (for comparisons in code)
+	 */
+	const STR_EMAIL = 'email';
+	const STR_SMS = 'sms';
+	const STR_WHATSAPP = 'whatsapp';
+	const STR_SEQUENCE_MAIL = 'sequence_mail';
+
+	/**
 	 * Registered custom channels (for third-party extensions)
 	 *
 	 * @var array
@@ -61,6 +69,15 @@ class Campaign_Channel {
 			self::CHANNEL_SMS,
 			self::CHANNEL_WHATSAPP,
 		);
+	}
+
+	/**
+	 * Get all core channel strings (for API validation)
+	 *
+	 * @return array Core channel string slugs
+	 */
+	public static function get_core_channel_strings() {
+		return array( self::STR_EMAIL, self::STR_SMS, self::STR_WHATSAPP );
 	}
 
 	/**
@@ -125,10 +142,10 @@ class Campaign_Channel {
 	 */
 	public static function to_string( $channel ) {
 		$mapping = array(
-			self::CHANNEL_EMAIL         => 'email',
-			self::CHANNEL_SMS           => 'sms',
-			self::CHANNEL_WHATSAPP      => 'whatsapp',
-			self::CHANNEL_SEQUENCE_MAIL => 'sequence_mail',
+			self::CHANNEL_EMAIL         => self::STR_EMAIL,
+			self::CHANNEL_SMS           => self::STR_SMS,
+			self::CHANNEL_WHATSAPP      => self::STR_WHATSAPP,
+			self::CHANNEL_SEQUENCE_MAIL => self::STR_SEQUENCE_MAIL,
 		);
 
 		return $mapping[ $channel ] ?? null;
@@ -142,10 +159,10 @@ class Campaign_Channel {
 	 */
 	public static function to_integer( $channel_string ) {
 		$mapping = array(
-			'email'         => self::CHANNEL_EMAIL,
-			'sms'           => self::CHANNEL_SMS,
-			'whatsapp'      => self::CHANNEL_WHATSAPP,
-			'sequence_mail' => self::CHANNEL_SEQUENCE_MAIL,
+			self::STR_EMAIL         => self::CHANNEL_EMAIL,
+			self::STR_SMS           => self::CHANNEL_SMS,
+			self::STR_WHATSAPP      => self::CHANNEL_WHATSAPP,
+			self::STR_SEQUENCE_MAIL => self::CHANNEL_SEQUENCE_MAIL,
 		);
 
 		return $mapping[ $channel_string ] ?? null;

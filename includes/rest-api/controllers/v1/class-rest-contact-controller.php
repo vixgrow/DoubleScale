@@ -28,6 +28,7 @@ use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 use QuillCRM\Settings;
 use QuillCRM\Emails\Emails;
+use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
@@ -89,7 +90,7 @@ class REST_Contact_Controller extends REST_Controller {
 					'campaign_type' => array(
 						'description' => __( 'Campaign type for filtering contacts.', 'quillcrm' ),
 						'type'        => 'string',
-						'enum'        => array( 'email', 'sms', 'whatsapp' ),
+						'enum'        => Campaign_Channel::get_core_channel_strings(),
 					),
 					),
 				),
@@ -202,7 +203,7 @@ class REST_Contact_Controller extends REST_Controller {
 							'description' => __( 'Communication channel: email, sms, or whatsapp.', 'quillcrm' ),
 							'type'        => 'string',
 							'required'    => true,
-							'enum'        => array( 'email', 'sms', 'whatsapp' ),
+							'enum'        => Campaign_Channel::get_core_channel_strings(),
 						),
 						'to'      => array(
 							'description' => __( 'Recipient (email address or phone number in E.164 format).', 'quillcrm' ),
@@ -409,7 +410,7 @@ class REST_Contact_Controller extends REST_Controller {
 							'description' => __( 'Message channel: email, sms, or whatsapp.', 'quillcrm' ),
 							'type'        => 'string',
 							'required'    => false,
-							'enum'        => array( 'email', 'sms', 'whatsapp' ),
+							'enum'        => Campaign_Channel::get_core_channel_strings(),
 							'default'     => 'email',
 						),
 						'per_page' => array(
@@ -832,11 +833,11 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 		}
 
-		// Backward compatibility: Accept strings
+		// Map string modes to tracking mode constants
 		$mode_map = array(
-			'email'    => Tracking_Model::MODE_EMAIL,
-			'sms'      => Tracking_Model::MODE_SMS,
-			'whatsapp' => Tracking_Model::MODE_WHATSAPP,
+			Campaign_Channel::STR_EMAIL    => Tracking_Model::MODE_EMAIL,
+			Campaign_Channel::STR_SMS      => Tracking_Model::MODE_SMS,
+			Campaign_Channel::STR_WHATSAPP => Tracking_Model::MODE_WHATSAPP,
 		);
 
 		if ( ! isset( $mode_map[ $mode ] ) ) {
@@ -866,7 +867,7 @@ class REST_Contact_Controller extends REST_Controller {
 		$table = $wpdb->prefix . 'quillcrm_tracking';
 
 		// Build query based on mode
-		if ( $mode === 'email' ) {
+		if ( $mode === Campaign_Channel::STR_EMAIL ) {
 			$query = $wpdb->prepare(
 				"SELECT 
 					COUNT(CASE WHEN status = %d THEN 1 END) as total_sent,
@@ -1548,7 +1549,7 @@ class REST_Contact_Controller extends REST_Controller {
 		$channel = $request->get_param( 'channel' );
 
 		// Validate channel parameter
-		if ( ! in_array( $channel, array( 'email', 'sms', 'whatsapp' ), true ) ) {
+		if ( ! in_array( $channel, Campaign_Channel::get_core_channel_strings(), true ) ) {
 			return new WP_Error(
 				'invalid_channel',
 				__( 'Invalid channel. Must be email, sms, or whatsapp.', 'quillcrm' ),
@@ -1557,7 +1558,7 @@ class REST_Contact_Controller extends REST_Controller {
 		}
 
 		// Validate email requires subject
-		if ( $channel === 'email' && empty( $request->get_param( 'subject' ) ) ) {
+		if ( $channel === Campaign_Channel::STR_EMAIL && empty( $request->get_param( 'subject' ) ) ) {
 			return new WP_Error(
 				'missing_subject',
 				__( 'Subject is required for email messages.', 'quillcrm' ),
@@ -1567,15 +1568,15 @@ class REST_Contact_Controller extends REST_Controller {
 
 		// Route to appropriate sender based on channel
 		switch ( $channel ) {
-			case 'email':
+			case Campaign_Channel::STR_EMAIL:
 				$sender = new \QuillCRM\Individual_Messaging\Email_Individual_Sender();
 				break;
 
-			case 'sms':
+			case Campaign_Channel::STR_SMS:
 				$sender = new \QuillCRM\Individual_Messaging\SMS_Individual_Sender();
 				break;
 
-			case 'whatsapp':
+			case Campaign_Channel::STR_WHATSAPP:
 				$sender = new \QuillCRM\Individual_Messaging\WhatsApp_Individual_Sender();
 				break;
 

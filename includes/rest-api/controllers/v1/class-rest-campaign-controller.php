@@ -104,7 +104,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 							'description' => __( 'Channel type', 'quillcrm' ),
 							'type'        => 'string',
 							'required'    => true,
-							'enum'        => array( 'email', 'sms', 'whatsapp' ),
+							'enum'        => Campaign_Channel::get_core_channel_strings(),
 						),
 						// Email parameters
 						'email'     => array(
@@ -176,7 +176,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 		$type = $request->get_param( 'type' );
 
 		// Validate it's a valid channel string
-		$valid_channels = array( 'email', 'sms', 'whatsapp' );
+		$valid_channels = Campaign_Channel::get_core_channel_strings();
 		if ( ! in_array( $type, $valid_channels, true ) ) {
 			return new WP_Error(
 				'invalid_type',
@@ -294,7 +294,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 
 		$this->channel = $channel;
 
-		if ( $channel === 'email' ) {
+		if ( $channel === Campaign_Channel::STR_EMAIL ) {
 			return $this->send_test_email( $request );
 		} else {
 			return $this->send_test_provider_message( $request, $channel );

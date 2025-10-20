@@ -19,6 +19,7 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Campaign\Email_Processing;
 use QuillCRM\Services\Campaign_Rate_Limiter;
 use QuillCRM\Settings;
@@ -441,7 +442,7 @@ final class Email_Sequences_Manager {
 				'source_type' => Message_Source_Types::CAMPAIGN,
 				'source_id'   => $sequence->id,
 				'recipient'   => $contact->email,
-				'status'      => 'pending',
+				'status'      => Tracking_Status::PENDING,
 				'hash_key'    => Utils::generate_hash_key(),
 			);
 

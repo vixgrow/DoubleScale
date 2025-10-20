@@ -148,23 +148,43 @@ export const saveCampaignStep =
 		dispatch(setError(null));
 
 		try {
-			// Get existing step data or initialize empty object
-			const existingSteps = campaign.settings?.steps || {};
+			let updatedSettings = { ...campaign.settings, current_step: step };
 
-			// Update the specific step data
-			const updatedSteps = {
-				...existingSteps,
-				[step]: {
-					...existingSteps[step], // Preserve existing step data
-					...stepData, // Merge new step data
-				},
-			};
+			// Handle template step - add template_id to template_ids array
+			if (step === 'template' && stepData?.template_id) {
+				const templateIds = campaign.settings.template_ids || [];
+				// Replace the first template ID or add new one
+				const newTemplateIds =
+					templateIds.length > 0
+						? [stepData.template_id, ...templateIds.slice(1)]
+						: [stepData.template_id];
 
-			const updatedSettings = {
-				...campaign.settings,
-				current_step: step,
-				steps: updatedSteps,
-			};
+				updatedSettings.template_ids = newTemplateIds;
+			} else {
+				// Handle other steps - save to their respective data fields
+				const stepDataMap: Record<string, string> = {
+					contacts: 'contacts_data',
+					review: 'review_data',
+				};
+
+				const dataKey = stepDataMap[step];
+
+				if (!dataKey) {
+					throw new Error(__(`Invalid step: ${step}`, 'quillcrm'));
+				}
+
+				// Get existing step data for this specific step
+				const existingStepData =
+					(campaign.settings as any)[dataKey] || {};
+
+				// Merge existing step data with new step data
+				const updatedStepData = {
+					...existingStepData,
+					...stepData,
+				};
+
+				(updatedSettings as any)[dataKey] = updatedStepData;
+			}
 
 			// Use unified endpoint - type is auto-detected from campaign
 			const response = (await apiFetch({

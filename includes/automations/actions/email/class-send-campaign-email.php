@@ -127,6 +127,18 @@ class Send_Campaign_Email extends Action {
 			$email_processor->process_campaign_message( $campaign, $contact, $campaign_message );
 			return true;
 		} catch ( \Exception $e ) {
+			quillcrm_get_logger()->error(
+				'Send Campaign Email action failed',
+				array(
+					'code'          => 'send_campaign_email_action_failed',
+					'error'         => $e->getMessage(),
+					'campaign_id'   => $campaign_id ?? null,
+					'contact_id'    => $contact->id ?? null,
+					'automation_id' => $automation->id ?? null,
+					'step_id'       => $step->id ?? null,
+					'trace'         => $e->getTraceAsString(),
+				)
+			);
 			return false;
 		}
 	}

@@ -130,10 +130,7 @@ export const useContactMessages = ({
 		} catch (err: any) {
 			const errorMsg =
 				err.message ||
-				__(
-					`Failed to fetch ${mode} messages`,
-					'quillcrm'
-				);
+				__(`Failed to fetch ${mode} messages`, 'quillcrm');
 
 			setError(errorMsg);
 

@@ -9,6 +9,7 @@ import { useState } from '@wordpress/element';
  */
 import type { TrackedMessage } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
@@ -33,7 +34,7 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 	const { loading, messages, analytics, serverSideTable, refetch } =
 		useContactMessagesTable({
 			contactId: contact_id,
-			mode: 'sms',
+			mode: CAMPAIGN_CHANNEL.SMS,
 			initialPerPage: 10,
 		});
 

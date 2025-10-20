@@ -197,7 +197,7 @@ export type EmailTemplateSettings = {
 export type EmailTemplate = {
 	id?: number;
 	name: string;
-	type: 'email';
+	type: 'email'; // Campaign channel type
 	subject: string;
 	body?: string; // Rich-text content (for simple editor)
 	preview_text: string;
@@ -293,7 +293,7 @@ export type Campaign = {
 	name: string;
 	description: string;
 	status: string;
-	type: number; // Campaign channel type (1=email, 2=sms, 3=whatsapp, 4=sequence_mail)
+	type: 'email' | 'sms' | 'whatsapp' | 'sequence_mail'; // Campaign channel type
 	settings: CampaignSettings;
 	parent_id: string;
 	count: string;

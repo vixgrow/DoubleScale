@@ -11,6 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import './style.scss';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import {
 	CategoryIcon,
 	FeedBuilder,
@@ -97,7 +98,7 @@ const Templates: React.FC = () => {
 	// Using old flat template structure
 	const defaultTemplate: EmailTemplate = {
 		name: campaign?.name || __('New Email', 'quillcrm'),
-		type: 'email' as const,
+		type: CAMPAIGN_CHANNEL.EMAIL,
 		subject: __('New Email', 'quillcrm'),
 		body: 'Email body', // Default rich-text content
 		email_body: {

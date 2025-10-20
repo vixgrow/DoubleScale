@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
  * Internal dependencies
  */
 import type { Contact } from '@quillcrm/client';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import {
 	Dialog,
 	DialogContent,
@@ -83,7 +84,7 @@ const SendSMSDialog: React.FC<SendSMSDialogProps> = ({
 				path: `/qc/v1/contacts/${contact.id}/send-message`,
 				method: 'POST',
 				data: {
-					channel: 'sms',
+					channel: CAMPAIGN_CHANNEL.SMS,
 					to: toPhone,
 					body: message,
 				},

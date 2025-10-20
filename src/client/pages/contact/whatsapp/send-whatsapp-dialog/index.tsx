@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
  * Internal dependencies
  */
 import type { Contact } from '@quillcrm/client';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import {
 	Dialog,
 	DialogContent,
@@ -83,7 +84,7 @@ const SendWhatsAppDialog: React.FC<SendWhatsAppDialogProps> = ({
 				path: `/qc/v1/contacts/${contact.id}/send-message`,
 				method: 'POST',
 				data: {
-					channel: 'whatsapp',
+					channel: CAMPAIGN_CHANNEL.WHATSAPP,
 					to: toPhone,
 					body: message,
 				},

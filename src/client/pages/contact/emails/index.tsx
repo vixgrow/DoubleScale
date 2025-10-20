@@ -10,6 +10,7 @@ import { useState } from '@wordpress/element';
 import './style.scss';
 import type { CampaignEmail } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { Button } from '@/components/ui/button';
 import {
 	ClickRateIcon,
@@ -42,7 +43,7 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 	const { loading, messages, analytics, serverSideTable, refetch } =
 		useContactMessagesTable({
 			contactId: contact_id,
-			mode: 'email',
+			mode: CAMPAIGN_CHANNEL.EMAIL,
 			initialPerPage: 10,
 		});
 

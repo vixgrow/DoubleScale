@@ -16,6 +16,7 @@ import {
 import { EnvelopeIcon, RepeatIcon, SMSIcon, WhatsAppIcon } from '@/components';
 import ArrowRightIcon from '@/components/icons/arrow-right';
 import { CampaignModalStep } from '@quillcrm/client';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
 interface CampaignTypesProps {
 	step: CampaignModalStep;
@@ -53,7 +54,7 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 				'Send SMS text messages to your contacts via Twilio.',
 				'quillcrm'
 			),
-			type: 'sms',
+			type: CAMPAIGN_CHANNEL.SMS,
 			icon: <SMSIcon />,
 		},
 		{
@@ -62,7 +63,7 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 				'Send WhatsApp messages to your contacts via Twilio.',
 				'quillcrm'
 			),
-			type: 'whatsapp',
+			type: CAMPAIGN_CHANNEL.WHATSAPP,
 			icon: <WhatsAppIcon />,
 		},
 	];

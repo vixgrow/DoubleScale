@@ -111,8 +111,8 @@ const Campaigns: React.FC = () => {
 		setIsAdding(true);
 
 		try {
-			// Map UI selection to campaign channel integer constants
-			const typeMap: Record<string, number> = {
+			// Map UI selection to campaign channel constants
+			const typeMap: Record<string, string> = {
 				email: CAMPAIGN_CHANNEL.EMAIL,
 				standard: CAMPAIGN_CHANNEL.EMAIL, // Standard email campaign
 				ab_test: CAMPAIGN_CHANNEL.EMAIL, // A/B test is still email
@@ -122,13 +122,13 @@ const Campaigns: React.FC = () => {
 
 			const actualType = typeMap[campaignType] || CAMPAIGN_CHANNEL.EMAIL;
 
-			// Use unified endpoint with type parameter (as integer)
+			// Use unified endpoint with type parameter (as string)
 			const response = (await apiFetch({
 				path: '/qc/v1/campaigns',
 				method: 'POST',
 				data: {
 					name: name,
-					type: actualType, // Required: 1=email, 2=sms, 3=whatsapp
+					type: actualType, // 'email', 'sms', or 'whatsapp'
 					settings: {
 						ab_test: campaignType === 'ab_test',
 					},

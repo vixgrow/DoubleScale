@@ -23,7 +23,6 @@ import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep } from '../utils/step-utils';
-import { getAction } from '@quillcrm/utils';
 import { TimerBlockIcon } from '@quillcrm/components';
 
 interface DelayNodeData {
@@ -40,12 +39,18 @@ const DelayNode: React.FC<NodeProps> = (props) => {
     const { steps, setSteps } = useAutomationContext();
     const { createNotice } = useDispatch('quillcrm/core');
 
-    // Check if action is configured - an action is configured if it has an action slug
-    const isConfigured = !!step.action;
+    // Check if delay is configured - it has both delay value and unit
+    const isConfigured = !!step.settings?.delay && !!step.settings?.unit;
 
-    // Get action details for display
-    const actionData = isConfigured ? getAction(step.action) : null;
-    const actionName = actionData?.label || step.action;
+    // Format delay display text
+    const getDelayText = () => {
+        if (!isConfigured) return null;
+        const delay = step.settings.delay;
+        const unit = step.settings.unit;
+        return `${delay} ${unit}`;
+    };
+
+    const delayText = getDelayText();
 
 
     const handleEdit = () => {
@@ -82,7 +87,9 @@ const DelayNode: React.FC<NodeProps> = (props) => {
                     </div>
                     <div className="qcrm-reactflow-node__subtitle">
                         {isConfigured ? (
-                            <span className="qcrm-reactflow-delay__configured">{actionName}</span>
+                            <span className="qcrm-reactflow-delay__configured">
+                                {__('Sets to delay', 'quillcrm')} {delayText}
+                            </span>
                         ) : (
                             <span className="qcrm-reactflow-delay__not-configured">
                                 <span className='text-[#333333B2] mr-1'>{__('Need to', 'quillcrm')}</span>

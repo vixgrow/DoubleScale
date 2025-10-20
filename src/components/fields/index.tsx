@@ -37,9 +37,10 @@ interface FieldsProps {
 	fields: FieldsType;
 	values: { [key: string]: any };
 	onChange: (value: any) => void;
+	enableMergeTags?: boolean;
 }
 
-const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
+const Fields: React.FC<FieldsProps> = ({ fields, values, onChange, enableMergeTags = false }) => {
 	const handleChange = (key: string, value: any) => {
 		const newValues = {
 			...values,
@@ -74,6 +75,7 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 						settings={field.settings}
 						allValues={values}
 						defaultValue={field['default-value']}
+						enableMergeTags={enableMergeTags}
 					/>
 				);
 			})}

@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -19,6 +20,7 @@ import {
 	LinkTriggerField,
 	DynamicKeyValueInput,
 	TestButton,
+	MergeTagsIcon,
 } from '@quillcrm/components';
 import type { ReactSelectOptions } from '@quillcrm/client';
 import ContactMappedFields from '../contact-mapped-fields';
@@ -63,6 +65,7 @@ interface FieldProps {
 	defaultValue?: string;
 	min?: number;
 	max?: number;
+	enableMergeTags?: boolean;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -84,7 +87,18 @@ const Field: React.FC<FieldProps> = ({
 	defaultValue,
 	min,
 	max,
+	enableMergeTags = false,
 }) => {
+	const { setMergeTagsVisible, setMergeTagCallback } =
+		useDispatch('quillcrm/core');
+
+	const handleMergeTagClick = () => {
+		setMergeTagCallback((tagValue: string) => {
+			onChange((value || '') + tagValue);
+		});
+		setMergeTagsVisible(true);
+	};
+
 	let fieldContent;
 
 	if (type === 'boolean') {
@@ -153,6 +167,34 @@ const Field: React.FC<FieldProps> = ({
 			);
 			break;
 		case 'text':
+			fieldContent = (
+				<div className="relative">
+					<Input
+						value={value || ''}
+						onChange={(e) => onChange(e.target.value)}
+						type={type}
+						className={cn(
+							'h-12 bg-white',
+							enableMergeTags && 'pr-10',
+							status === 'error' &&
+							'border-red-500 focus-visible:ring-red-500'
+						)}
+						style={{
+							borderRadius: '8px',
+						}}
+						placeholder={placeholder}
+					/>
+					{enableMergeTags && (
+						<div
+							className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer hover:opacity-80"
+							onClick={handleMergeTagClick}
+						>
+							<MergeTagsIcon />
+						</div>
+					)}
+				</div>
+			);
+			break;
 		case 'number':
 		case 'email':
 		case 'url':

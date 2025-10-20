@@ -104,7 +104,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 					style={{ flex: 1, marginRight: '60px' }}
 				>
 					<div className="qcrm-reactflow-node__title">
-						{__('Start Workflow (Action)', 'quillcrm')}
+						{__('Action', 'quillcrm')}
 					</div>
 					<div className="qcrm-reactflow-node__subtitle">
 						{subtitle}

@@ -68,7 +68,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 			<div
 				className={`flex-1 bg-white px-12 ${type === 'campaign' ? 'pt-4' : ''}`}
 			>
-				<div className="pb-8">{children}</div>
+				<div className="pb-8 h-full">{children}</div>
 			</div>
 
 			{/* Footer Section - Fixed */}

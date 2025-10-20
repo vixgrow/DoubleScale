@@ -125,7 +125,7 @@ const Header: React.FC = () => {
 				>
 					{isSaving
 						? __('Saving...', 'quillcrm')
-						: __('Save & Continue', 'quillcrm')}
+						: __('Save & choose recipients', 'quillcrm')}
 				</Button>
 			</div>
 

@@ -35,4 +35,5 @@ export { default as DynamicKeyValueInput } from './dynamic-keyvalue-input';
 export { default as TestButton } from './test-button';
 export { default as AdvancedFilter } from './advanced-filter';
 export { default as ContactList } from './contacts-list';
+export { default as Stepper } from './stepper';
 export { TinyMCEWPEditor } from './editor';

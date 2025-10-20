@@ -9,11 +9,19 @@ import { useState } from '@wordpress/element';
  * Internal dependencies
  */
 import './style.scss';
-import { useCampaignStep, StepLayout } from '../shared';
-import { PanelSettings, CategoryIcon, FormField } from '@quillcrm/components';
+import { useCampaignStep, campaignSteps } from '../shared';
+import {
+	PanelSettings,
+	CategoryIcon,
+	FormField,
+	PanelLayout,
+	PlayIcon,
+	Stepper,
+} from '@quillcrm/components';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { isEmpty } from 'lodash';
 
 const Review: React.FC = () => {
@@ -88,29 +96,28 @@ const Review: React.FC = () => {
 	};
 
 	return (
-		<StepLayout
-			breadcrumbItems={[
+		<PanelLayout
+			items={[
 				{
 					label: __('Create Campaign', 'quillcrm'),
 					href: 'campaigns',
 				},
 				{
-					label: __('Review & Schedule', 'quillcrm'),
+					label: campaign?.settings.ab_test
+						? __('A/B Test Campaign', 'quillcrm')
+						: __('Standard Campaign', 'quillcrm'),
 				},
 			]}
-			totalSteps={1}
-			currentStep={0}
-			onNext={save}
-			onBack={async () => {
-				// Save current review data before going back
-				const reviewStepData = {
-					run_type: runType,
-					execute_at: runType === 'schedule' ? executeAt : null,
-				};
-				await saveCampaignStep('review', reviewStepData);
-				goToStep('contacts');
-			}}
+			panelbtns={[
+				<Button variant="secondaryDeepBlue">
+					<PlayIcon />
+					{__('Watch Tutorial', 'quillcrm')}
+				</Button>,
+			]}
+			type="campaign"
 		>
+			<Stepper steps={campaignSteps} canProceed="true" currentStep={4} />
+
 			<div className="w-full max-w-2xl">
 				<PanelSettings
 					title={__('Review & Schedule', 'quillcrm')}
@@ -209,10 +216,18 @@ const Review: React.FC = () => {
 										)}
 							</p>
 						</div>
+
+						<div className="mt-6 flex justify-end">
+							<Button onClick={save} className="px-6">
+								{runType === 'processing'
+									? __('Send Campaign Now', 'quillcrm')
+									: __('Schedule Campaign', 'quillcrm')}
+							</Button>
+						</div>
 					</div>
 				</PanelSettings>
 			</div>
-		</StepLayout>
+		</PanelLayout>
 	);
 };
 

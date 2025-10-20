@@ -135,6 +135,8 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
       // Determine action: update existing template or create new one
       if (shouldUpdateExisting) {
         // Update existing template (draft campaigns with template ID)
+        // This happens when template was created in templates step with metadata
+        console.log('Updating existing template with builder content:', templateId);
         const existingTemplate = await getTemplate(templateId);
         await updateTemplate(templateId, {
           ...existingTemplate,
@@ -143,8 +145,11 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
             value: builderData,
           },
         });
+        console.log('Template updated successfully with builder content');
       } else {
         // Create new template (draft without template OR non-draft campaigns)
+        // This shouldn't happen in normal flow since templates step creates it first
+        console.log('Creating new template (fallback case)');
         const existingTemplate = templateId ? await getTemplate(templateId) : null;
 
         const newTemplate = await createTemplate({
@@ -172,6 +177,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
             hasUpdatedCampaignRef.current = true;
           }
         }
+        console.log('New template created:', newTemplate?.id);
       }
 
       if (isMountedRef.current) {

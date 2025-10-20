@@ -10,11 +10,19 @@ import { useSelect } from '@wordpress/data';
  */
 import './style.scss';
 import type { Filter as FilterType } from '@quillcrm/client';
-import { ContactList, PanelSettings, TeamIcon } from '@quillcrm/components';
+import {
+	ContactList,
+	PanelSettings,
+	TeamIcon,
+	PanelLayout,
+	PlayIcon,
+	Stepper,
+} from '@quillcrm/components';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
-import { useCampaignStep, StepLayout } from '../shared';
+import { useCampaignStep, campaignSteps } from '../shared';
+import { Button } from '@/components/ui/button';
 
 const Contacts: React.FC = () => {
 	const { campaign, saveCampaignStep, updateSettings, goToStep } =
@@ -86,32 +94,28 @@ const Contacts: React.FC = () => {
 	};
 
 	return (
-		<StepLayout
-			breadcrumbItems={[
+		<PanelLayout
+			items={[
 				{
 					label: __('Create Campaign', 'quillcrm'),
 					href: 'campaigns',
 				},
 				{
-					label: __('Recipients', 'quillcrm'),
+					label: campaign?.settings.ab_test
+						? __('A/B Test Campaign', 'quillcrm')
+						: __('Standard Campaign', 'quillcrm'),
 				},
 			]}
-			totalSteps={1}
-			currentStep={0}
-			onNext={save}
-			onBack={async () => {
-				// Save current contacts data before going back
-				const contactsStepData = {
-					contacts: {
-						filters: filters,
-						contacts_count: total,
-						lastModified: new Date().toISOString(),
-					},
-				};
-				await saveCampaignStep('contacts', contactsStepData);
-				goToStep('builder');
-			}}
+			panelbtns={[
+				<Button variant="secondaryDeepBlue">
+					<PlayIcon />
+					{__('Watch Tutorial', 'quillcrm')}
+				</Button>,
+			]}
+			type="campaign"
 		>
+			<Stepper steps={campaignSteps} canProceed="true" currentStep={3} />
+
 			<div className="flex gap-6 items-start">
 				<div ref={panelRef} className="w-[55%]">
 					<PanelSettings
@@ -198,6 +202,12 @@ const Contacts: React.FC = () => {
 								/>
 							)}
 						</div>
+
+						<div className="mt-6 flex justify-end">
+							<Button onClick={save} className="px-6">
+								{__('Save & Continue', 'quillcrm')}
+							</Button>
+						</div>
 					</PanelSettings>
 				</div>
 
@@ -212,7 +222,7 @@ const Contacts: React.FC = () => {
 					onLoadingChange={setIsLoading}
 				/>
 			</div>
-		</StepLayout>
+		</PanelLayout>
 	);
 };
 

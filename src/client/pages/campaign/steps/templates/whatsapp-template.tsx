@@ -10,8 +10,14 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import './style.scss';
-import { useCampaignStep, StepLayout } from '../shared';
-import { PanelSettings, CategoryIcon } from '@quillcrm/components';
+import { useCampaignStep, campaignSteps } from '../shared';
+import {
+	PanelSettings,
+	CategoryIcon,
+	PanelLayout,
+	PlayIcon,
+	Stepper,
+} from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
@@ -202,21 +208,32 @@ const WhatsAppTemplateStep: React.FC = () => {
 	};
 
 	return (
-		<StepLayout
-			breadcrumbItems={[
+		<PanelLayout
+			items={[
 				{
 					label: __('Create Campaign', 'quillcrm'),
 					href: 'campaigns',
 				},
 				{
-					label: __('WhatsApp Campaign', 'quillcrm'),
+					label: campaign?.settings.ab_test
+						? __('A/B Test Campaign', 'quillcrm')
+						: __('Standard Campaign', 'quillcrm'),
 				},
 			]}
-			totalSteps={1}
-			currentStep={0}
-			onNext={save}
-			onBack={() => goToStep('campaigns')}
+			panelbtns={[
+				<Button variant="secondaryDeepBlue">
+					<PlayIcon />
+					{__('Watch Tutorial', 'quillcrm')}
+				</Button>,
+			]}
+			type="campaign"
 		>
+			<Stepper
+				steps={campaignSteps.filter((step) => step.slug !== 'builder')}
+				canProceed="true"
+				currentStep={1}
+			/>
+
 			<div className="w-full max-w-2xl">
 				<PanelSettings
 					title={__('WhatsApp Message', 'quillcrm')}
@@ -284,9 +301,9 @@ const WhatsAppTemplateStep: React.FC = () => {
 							</p>
 						</div>
 
-						<div className="mt-4">
+						<div className="mt-4 flex gap-4">
 							<Button
-								variant="default"
+								variant="outline"
 								onClick={sendTestWhatsApp}
 								disabled={isSendingTest || saving}
 							>
@@ -294,11 +311,21 @@ const WhatsAppTemplateStep: React.FC = () => {
 									? __('Sending...', 'quillcrm')
 									: __('Send Test WhatsApp', 'quillcrm')}
 							</Button>
+							<Button
+								variant="default"
+								onClick={save}
+								disabled={saving}
+								className="px-6"
+							>
+								{saving
+									? __('Saving...', 'quillcrm')
+									: __('Save & Continue', 'quillcrm')}
+							</Button>
 						</div>
 					</div>
 				</PanelSettings>
 			</div>
-		</StepLayout>
+		</PanelLayout>
 	);
 };
 

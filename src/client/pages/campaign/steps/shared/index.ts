@@ -2,6 +2,6 @@
  * Shared step utilities
  */
 
-export { default as StepLayout } from './StepLayout';
+export { campaignSteps } from './stepsConfig';
 export { useCampaignStep } from './useCampaignStep';
 

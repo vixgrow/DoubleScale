@@ -9,8 +9,6 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -19,18 +17,13 @@ import { cn } from '@/lib/utils';
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
 import type { OrganizedStep, AutomationStep } from '@quillcrm/client';
+import { getTitle } from './titles';
+import SidebarHeader from './sidebar-header';
+import TriggerContent from './trigger-content';
+import ConditionsModal from '../conditions-modal';
 import StepFieldsModal from '../step-fields-modal';
 import ActionSelector from '../action-selector';
-import ConditionsModal from '../conditions-modal';
-import ConfigAPI from '@quillcrm/config';
-import type { GoalsGroup } from '@quillcrm/config';
-import { map } from 'lodash';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import WebhookFields from '../webhook-fields';
-import FormFields from '../form-fields';
-import Fields from '@/components/fields';
-import { Field } from '@quillcrm/components';
-import { getTrigger } from '@quillcrm/utils';
+import GoalSelector from '../goal-selector';
 
 interface WorkflowSidebarProps {
 	currentStep: OrganizedStep | null;
@@ -47,8 +40,6 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 }) => {
 	const { automation, updateAutomation, updateSettings, updateStep } =
 		useAutomationContext();
-	const trigger = automation ? getTrigger(automation.trigger) : null;
-	console.log(automation);
 	const [tempAction, setTempAction] = useState<string>('');
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -61,55 +52,6 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			(currentStep.action ||
 				currentStep.type === 'goal' ||
 				currentStep.type === 'delay'));
-
-	const findActionLabel = (actionKey: string): string | null => {
-		const automationActions = ConfigAPI.getAutomationActions();
-		for (const category of Object.values(automationActions)) {
-			for (const group of Object.values(category.groups)) {
-				if (group.actions?.[actionKey]) {
-					return group.actions[actionKey].label;
-				}
-			}
-		}
-		return null;
-	};
-
-	const findGoalLabel = (goalKey: string): string | null => {
-		const automationGoals = ConfigAPI.getAutomationGoals();
-		for (const category of Object.values(automationGoals)) {
-			if (category.groups) {
-				for (const group of Object.values(category.groups)) {
-					if (group.goals?.[goalKey]) {
-						return group.goals[goalKey].label;
-					}
-				}
-			}
-		}
-		return null;
-	};
-
-	const titleMap: Record<string, () => string> = {
-		action: () =>
-			currentStep?.action
-				? findActionLabel(currentStep.action) ||
-					__('Action Settings', 'quillcrm')
-				: __('Action Settings', 'quillcrm'),
-		goal: () =>
-			currentStep?.action
-				? findGoalLabel(currentStep.action) ||
-					__('Goal Settings', 'quillcrm')
-				: __('Goal Settings', 'quillcrm'),
-		condition: () => __('Condition Settings', 'quillcrm'),
-		delay: () => __('Delay', 'quillcrm'),
-	};
-
-	const getTitle = () => {
-		if (isTriggerVisible) return __('Trigger Settings', 'quillcrm');
-		if (!currentStep) return '';
-
-		const getTitleFn = titleMap[currentStep.type];
-		return getTitleFn ? getTitleFn() : '';
-	};
 
 	const handleClose = () => {
 		if (isTriggerVisible) {
@@ -167,75 +109,6 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 				message: error.message || __('Failed to save goal', 'quillcrm'),
 			});
 		}
-	};
-
-	const renderGoalSelector = () => {
-		const automationGoals = ConfigAPI.getAutomationGoals();
-
-		console.log(automationGoals);
-
-		const GoalsGroupRender: React.FC<{
-			groups: GoalsGroup[];
-		}> = ({ groups }) => {
-			return (
-				<div className="flex flex-col gap-5">
-					{map(groups, (group, key) => (
-						<div key={key} className="qcrm-automation-goals-group">
-							<p className="qcrm-automation-goals-group__label font-semibold mb-3">
-								{group.label}
-							</p>
-							<div className="qcrm-automation-goals-group__goals flex flex-wrap gap-2.5">
-								{map(group.goals, (action, actionKey) => {
-									return (
-										<Button
-											key={actionKey}
-											onClick={() =>
-												handleGoalChange(actionKey)
-											}
-											variant={
-												tempAction === actionKey
-													? 'default'
-													: 'outline'
-											}
-										>
-											{action.label}
-										</Button>
-									);
-								})}
-							</div>
-						</div>
-					))}
-				</div>
-			);
-		};
-
-		return (
-			<div className="py-4">
-				<Tabs defaultValue="0" orientation="vertical">
-					{map(automationGoals, (goal, index) => (
-						<div key={index}>
-							<TabsList>
-								<TabsTrigger value={index.toString()}>
-									{goal.label}
-								</TabsTrigger>
-							</TabsList>
-							<TabsContent value={index.toString()}>
-								<GoalsGroupRender groups={goal.groups} />
-							</TabsContent>
-						</div>
-					))}
-				</Tabs>
-				<div className="mt-4">
-					<Button
-						onClick={handleGoalSave}
-						disabled={!tempAction}
-						className="w-full"
-					>
-						{__('Save Goal', 'quillcrm')}
-					</Button>
-				</div>
-			</div>
-		);
 	};
 
 	const handleActionSave = async () => {
@@ -319,162 +192,89 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		}
 	};
 
-	const getTriggerFieldsComponent = () => {
-		const triggerFieldTypeMap: Record<string, JSX.Element> = {
-			webhook_received: (
-				<WebhookFields
-					values={automation?.settings || {}}
-					onChange={(value) => {
-						updateAutomation({
-							...automation!,
-							settings: value,
-						});
-					}}
-				/>
-			),
-		};
-
-		if (automation?.trigger && triggerFieldTypeMap[automation.trigger]) {
-			return triggerFieldTypeMap[automation.trigger];
-		}
-
-		return trigger?.is_form ? (
-			<FormFields
-				values={automation?.settings || {}}
-				onChange={(value) => {
-					updateAutomation({
-						...automation!,
-						settings: value,
-					});
-				}}
-			/>
-		) : (
-			<Fields
-				fields={trigger!.fields!}
-				values={automation?.settings || {}}
-				onChange={(value) => {
-					updateAutomation({
-						...automation!,
-						settings: value,
-					});
-				}}
-			/>
-		);
-	};
-
-	const renderTriggerContent = () => {
-		if (!automation || !trigger) return null;
-
-		return (
-			<div className="flex flex-col h-full">
-				<div className="qcrm-workflow-sidebar__fields-container max-h-[55vh] overflow-y-auto">
-					{trigger.fields && getTriggerFieldsComponent()}
-				</div>
-				<div className="mt-5 pt-5 border-t bg-white">
-					<Field
-						type="switch"
-						label={__(
-							'Run Multiple Times (If you want to restart the automation for the same contact)',
-							'quillcrm'
-						)}
-						value={automation?.settings?.multiple_runs}
-						onChange={(value) => {
-							updateSettings('multiple_runs', value);
-						}}
-					/>
-				</div>
-			</div>
-		);
-	};
-
-	const renderActionSelector = () => (
-		<ActionSelector
-			value={tempAction}
-			visible={true}
-			onClose={() => {
-				setCurrentStep(null);
-				setTempAction('');
-			}}
-			onChange={handleActionChange}
-			onSave={handleActionSave}
-		/>
-	);
-
-	const renderStepFieldsModal = () => (
-		<StepFieldsModal
-			step={currentStep!}
-			setStep={setCurrentStep}
-			saveStep={handleStepSave}
-		/>
-	);
-
-	const renderConditionModal = () => (
-		<ConditionsModal
-			step={currentStep!}
-			onSave={() => {}}
-			visible={true}
-			onClose={() => setCurrentStep(null)}
-		/>
-	);
-
-	// Component map for unconfigured steps (no action selected)
-	const unconfiguredStepRenderers: Record<string, () => JSX.Element | null> =
-		{
-			action: renderActionSelector,
-			goal: renderGoalSelector,
-		};
-
-	// Component map for configured steps (action already selected)
-	const configuredStepRenderers: Record<string, () => JSX.Element | null> = {
-		action: renderStepFieldsModal,
-		goal: renderStepFieldsModal,
-		delay: renderStepFieldsModal,
-		condition: renderConditionModal,
-	};
-
 	const renderContent = () => {
 		// Close any other open sidebars first
-		if (isTriggerVisible && currentStep) {
-			setCurrentStep(null);
-		} else if (!isTriggerVisible && currentStep?.type === 'trigger') {
-			setTriggerVisible(false);
-		}
+		isTriggerVisible && currentStep && setCurrentStep(null);
+		!isTriggerVisible && currentStep?.type === 'trigger' && setTriggerVisible(false);
+
+		// Content renderers configuration map
+		const contentRenderers = {
+			// Trigger content
+			trigger: () => automation && (
+				<TriggerContent
+					automation={automation}
+					onSettingsChange={(value) => updateAutomation({ ...automation, settings: value })}
+					onMultipleRunsChange={(value) => updateSettings('multiple_runs', value)}
+				/>
+			),
+
+			// Unconfigured steps (no action selected)
+			unconfigured: {
+				action: () => (
+					<ActionSelector
+						value={tempAction}
+						visible={true}
+						onClose={() => {
+							setCurrentStep(null);
+							setTempAction('');
+						}}
+						onChange={handleActionChange}
+						onSave={handleActionSave}
+					/>
+				),
+				goal: () => (
+					<GoalSelector
+						value={tempAction}
+						onChange={handleGoalChange}
+						onSave={handleGoalSave}
+					/>
+				),
+				default: () => null,
+			},
+
+			// Configured steps (action already selected)
+			configured: {
+				condition: () => (
+					<ConditionsModal
+						step={currentStep!}
+						onSave={() => { }}
+						visible={true}
+						onClose={() => setCurrentStep(null)}
+					/>
+				),
+				default: () => (
+					<StepFieldsModal
+						step={currentStep!}
+						setStep={setCurrentStep}
+						saveStep={handleStepSave}
+					/>
+				),
+			},
+		};
 
 		// Render trigger content
-		if (isTriggerVisible) {
-			return renderTriggerContent();
-		}
+		if (isTriggerVisible) return contentRenderers.trigger();
 
 		// Early returns for edge cases
-		if (!currentStep) return null;
-		if (currentStep.type === 'end_automation') return null;
+		if (!currentStep || currentStep.type === 'end_automation') return null;
 
-		// Render based on whether step has action configured
+		// Determine renderer based on step configuration
 		const hasAction = currentStep.action || currentStep.type === 'delay';
-		const rendererMap = hasAction
-			? configuredStepRenderers
-			: unconfiguredStepRenderers;
-		const renderer = rendererMap[currentStep.type];
+		const category = hasAction ? 'configured' : 'unconfigured';
+		const renderer = contentRenderers[category][currentStep.type] ||
+			contentRenderers[category].default;
 
-		return renderer ? renderer() : null;
+		return renderer?.() || null;
 	};
 
-	// Determine rendering mode: modal, action-selector, or sidebar
-	const shouldRenderAsModal = currentStep?.type === 'condition';
-	const shouldRenderAsActionSelector =
-		currentStep && !currentStep.action && currentStep.type === 'action';
+	// Render standalone modals/selectors without sidebar wrapper
+	const isStandalone =
+		currentStep?.type === 'condition' ||
+		(currentStep && !currentStep.action && currentStep.type === 'action');
 
-	// Render condition as standalone modal (no sidebar)
-	if (shouldRenderAsModal) {
-		return renderConditionModal();
-	}
+	if (isStandalone) return renderContent();
 
-	// Render unconfigured action as standalone action selector (no sidebar)
-	if (shouldRenderAsActionSelector) {
-		return renderActionSelector();
-	}
-
-	// Render sidebar for trigger and configured steps
+	// Render content within sidebar wrapper
 	return (
 		<div
 			className={cn(
@@ -482,14 +282,10 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 				isVisible ? 'is-visible' : ''
 			)}
 		>
-			<div className="flex items-center justify-between border-b-2 px-4 pt-5 pb-4">
-				<h3 className="text-base font-semibold text-[#333333]">
-					{getTitle()}
-				</h3>
-				<Button variant="ghost" size="sm" onClick={handleClose}>
-					<X className="h-4 w-4" />
-				</Button>
-			</div>
+			<SidebarHeader
+				title={getTitle(isTriggerVisible, currentStep)}
+				onClose={handleClose}
+			/>
 
 			<div className="space-y-4 p-4 h-[calc(100vh-4rem)] overflow-y-auto">
 				{renderContent()}

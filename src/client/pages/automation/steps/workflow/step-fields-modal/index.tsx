@@ -38,7 +38,10 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 
 		const newStep = {
 			...step,
-			settings,
+			settings: {
+				...step.settings, // Preserve existing settings (template_ids, etc.)
+				...settings, // Merge with updated form values
+			},
 		};
 		await saveStep(newStep);
 

@@ -10,35 +10,13 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { map } from 'lodash';
 import { CheckCircle, XCircle } from 'lucide-react';
 /**
  * Internal dependencies
  */
-import {
-	ActionIcon,
-	ConditionsIcon,
-	EndLinkIcon,
-	GoalIcon,
-	GradientArrowIcon,
-	PlusIcon,
-	TimerBlockIcon,
-} from '@quillcrm/components';
-import { Button } from '@/components/ui/button';
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogOverlay,
-	DialogPortal,
-	DialogTitle,
-	DialogTrigger,
-} from '@/components/ui/dialog';
-import { Card } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
 import type { AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../../state/context';
+import { AddStepDialog } from '../../add-step-dialog';
 
 interface MergeNodeData {
 	condition: 'yes' | 'no' | 'merge';
@@ -48,6 +26,7 @@ interface MergeNodeData {
 	noChildCount?: number;
 	level?: number;
 	onMergeClick?: () => void;
+	onStepClick?: (step: any) => void;
 }
 
 const MergeNode: React.FC<NodeProps> = ({ data }) => {
@@ -58,13 +37,14 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 		noChildCount,
 		level,
 		onMergeClick,
+		onStepClick,
 	} = data as unknown as MergeNodeData;
 	const isYes = condition === 'yes';
 	const isMerge = condition === 'merge';
 	const mergeLevel = level || 0;
 
 	const [loading, setLoading] = useState(false);
-	const [popoverVisible, setPopoverVisible] = useState(false);
+	const [visible, setVisible] = useState(false);
 	const { automation, steps, setSteps, setUpdatedSteps } =
 		useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -73,47 +53,6 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 		if (onMergeClick) {
 			onMergeClick();
 		}
-	};
-
-	// Step types available for creation after merge
-	const typesOptions = {
-		action: {
-			label: __('Action', 'quillcrm'),
-			description: __(
-				'Select one of the Actions to continue your workflow.',
-				'quillcrm'
-			),
-			icon: <ActionIcon />,
-		},
-		condition: {
-			label: __('Condition', 'quillcrm'),
-			description: __(
-				'Select one of the Conditions to continue your workflow.',
-				'quillcrm'
-			),
-			icon: <ConditionsIcon />,
-		},
-		delay: {
-			label: __('Delay', 'quillcrm'),
-			description: __(
-				'A pause or waiting period introduced into a sequence of automated actions.',
-				'quillcrm'
-			),
-			icon: <TimerBlockIcon />,
-		},
-		goal: {
-			label: __('Goal', 'quillcrm'),
-			description: __(
-				'Select one of the Goals to continue your workflow.',
-				'quillcrm'
-			),
-			icon: <GoalIcon />,
-		},
-		end_automation: {
-			label: __('End Automation', 'quillcrm'),
-			description: __('End your Automation workflow.', 'quillcrm'),
-			icon: <EndLinkIcon />,
-		},
 	};
 
 	const updateStepOrderRecursive = (
@@ -246,8 +185,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			stepData.action = 'condition';
 		} else if (type === 'end_automation') {
 			stepData.action = 'end_automation';
-		}
-		else if (type === 'delay') {
+		} else if (type === 'delay') {
 			stepData.action = 'delay';
 		}
 
@@ -280,7 +218,26 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 				message: __('Step added after merge', 'quillcrm'),
 			});
 
-			setPopoverVisible(false);
+			// Close dialog first
+			setVisible(false);
+
+			// Then open modal/selector for action, condition, goal, and delay steps
+			// Use setTimeout to ensure dialog closes before modal opens
+			if (
+				(type === 'action' ||
+					type === 'condition' ||
+					type === 'goal' ||
+					type === 'delay') &&
+				onStepClick
+			) {
+				setTimeout(() => {
+					const organizedStep = {
+						...response,
+						children: [],
+					};
+					onStepClick(organizedStep);
+				}, 100);
+			}
 		} catch (error: any) {
 			console.error('Error creating step', error);
 			createNotice({
@@ -391,82 +348,12 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 
 			{/* Make merge node function as add-step node */}
 			{isMerge ? (
-				<Dialog open={popoverVisible} onOpenChange={setPopoverVisible}>
-					<DialogTrigger asChild>
-						<div
-							className="qcrm-automation-workflow__add-step flex items-center justify-center pointer-events-auto"
-							onClick={(e) => {
-								e.stopPropagation();
-								setPopoverVisible(!popoverVisible);
-							}}
-						>
-							<Button
-								variant="secondary"
-								size="icon"
-								className="h-8 w-8 rounded-full bg-white"
-								title={__('Add step here', 'quillcrm')}
-							>
-								<PlusIcon />
-							</Button>
-						</div>
-					</DialogTrigger>
-					<DialogPortal>
-						<DialogOverlay className="z-[150200]" />
-						<DialogContent className="sm:max-w-[800px] p-6 z-[150200]">
-							{loading ? (
-								<div className="flex justify-center">
-									<Spinner className="h-6 w-6" />
-								</div>
-							) : (
-								<>
-									<DialogHeader>
-										<DialogTitle>
-											{__('Add Step', 'quillcrm')}
-										</DialogTitle>
-										<DialogDescription className="mt-1">
-											{__(
-												'Select one of the Steps',
-												'quillcrm'
-											)}
-										</DialogDescription>
-									</DialogHeader>
-									<div className="flex flex-col gap-5">
-										{map(typesOptions, (type, key) => (
-											<Card
-												key={key}
-												className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-												onClick={(e) => {
-													e.stopPropagation();
-													handleStepSelection(key);
-													setPopoverVisible(false);
-												}}
-											>
-												<div className="flex items-center justify-between">
-													<div className="flex items-center gap-4">
-														<div className="flex-shrink-0 p-2 text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg">
-															{type.icon}
-														</div>
-														<div className="">
-															<h3 className="font-semibold text-xl text-[#3F4254]">
-																{type.label}
-															</h3>
-															<p className="text-sm text-[#333333] mt-1">
-																{
-																	type.description
-																}
-															</p>
-														</div>
-													</div>
-													<GradientArrowIcon />
-												</div>
-											</Card>
-										))}
-									</div>
-								</>
-							)}
-						</DialogContent>
-					</DialogPortal>
-				</Dialog>
+				<AddStepDialog
+					visible={visible}
+					onVisibleChange={setVisible}
+					loading={loading}
+					onStepSelection={handleStepSelection}
+				/>
 			) : (
 				<div className="qcrm-reactflow-merge__content">
 					<div className="qcrm-reactflow-merge__icon">

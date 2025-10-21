@@ -9,7 +9,6 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { map } from 'lodash';
 import {
 	EdgeProps,
 	getBezierPath,
@@ -21,29 +20,9 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogOverlay,
-	DialogPortal,
-	DialogTitle,
-	DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import {
-	ActionIcon,
-	ConditionsIcon,
-	EndLinkIcon,
-	GoalIcon,
-	GradientArrowIcon,
-	PlusIcon,
-	TimerBlockIcon,
-} from '@quillcrm/components';
 import type { AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../../state/context';
+import { AddStepDialog } from '../../add-step-dialog';
 import './style.scss';
 
 interface AddStepEdgeData {
@@ -140,8 +119,8 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 	const shouldShowAddStepEdge = Boolean(
 		// Don't show on edges going TO add-step nodes
 		!(target && target.startsWith('add-step')) &&
-			// Must have either a source step or be a condition branch
-			(sourceStep || condition)
+		// Must have either a source step or be a condition branch
+		(sourceStep || condition)
 	);
 
 	if (!shouldShowAddStepEdge) {
@@ -169,46 +148,6 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			/>
 		);
 	}
-
-	const typesOptions = {
-		action: {
-			label: __('Action', 'quillcrm'),
-			description: __(
-				'Select one of the Actions to continue your workflow.',
-				'quillcrm'
-			),
-			icon: <ActionIcon />,
-		},
-		condition: {
-			label: __('Condition', 'quillcrm'),
-			description: __(
-				'Select one of the Conditions to continue your workflow.',
-				'quillcrm'
-			),
-			icon: <ConditionsIcon />,
-		},
-		delay: {
-			label: __('Delay', 'quillcrm'),
-			description: __(
-				'A pause or waiting period introduced into a sequence of automated actions.',
-				'quillcrm'
-			),
-			icon: <TimerBlockIcon />,
-		},
-		goal: {
-			label: __('Goal', 'quillcrm'),
-			description: __(
-				'Select one of the Goals to continue your workflow.',
-				'quillcrm'
-			),
-			icon: <GoalIcon />,
-		},
-		end_automation: {
-			label: __('End Automation', 'quillcrm'),
-			description: __('End your Automation workflow.', 'quillcrm'),
-			icon: <EndLinkIcon />,
-		},
-	};
 
 	const handleStepSelection = async (type: string) => {
 		setLoading(true);
@@ -430,71 +369,12 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 					}}
 					className="qcrm-edge-add-button"
 				>
-					<Dialog open={visible} onOpenChange={setVisible}>
-						<DialogTrigger asChild>
-							<div
-								className="qcrm-automation-workflow__add-step flex items-center justify-center pointer-events-auto"
-								onClick={(e) => {
-									e.stopPropagation();
-									setVisible(!visible);
-								}}
-							>
-								<Button
-									variant="secondary"
-									size="icon"
-									className="h-8 w-8 rounded-full bg-white"
-									title={__('Add step here', 'quillcrm')}
-								>
-									<PlusIcon />
-								</Button>
-							</div>
-						</DialogTrigger>
-						<DialogPortal>
-							<DialogOverlay className="z-[150200]" />
-							<DialogContent className="sm:max-w-[800px] p-6 z-[150200]">
-								<DialogHeader>
-									<DialogTitle>
-										{__('Add Step', 'quillcrm')}
-									</DialogTitle>
-									<DialogDescription className="mt-1">
-										{__(
-											'Select one of the Steps',
-											'quillcrm'
-										)}
-									</DialogDescription>
-								</DialogHeader>
-								<div className="flex flex-col gap-5">
-									{map(typesOptions, (type, key) => (
-										<Card
-											key={key}
-											className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${loading ? 'pointer-events-none opacity-50' : ''}`}
-											onClick={(e) => {
-												e.stopPropagation();
-												handleStepSelection(key);
-											}}
-										>
-											<div className="flex items-center justify-between">
-												<div className="flex items-center gap-4">
-													<div className="flex-shrink-0 p-2 text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg">
-														{type.icon}
-													</div>
-													<div className="">
-														<h3 className="font-semibold text-xl text-[#3F4254]">
-															{type.label}
-														</h3>
-														<p className="text-sm text-[#333333] mt-1">
-															{type.description}
-														</p>
-													</div>
-												</div>
-												<GradientArrowIcon />
-											</div>
-										</Card>
-									))}
-								</div>
-							</DialogContent>
-						</DialogPortal>
-					</Dialog>
+					<AddStepDialog
+						visible={visible}
+						onVisibleChange={setVisible}
+						loading={loading}
+						onStepSelection={handleStepSelection}
+					/>
 				</div>
 			</EdgeLabelRenderer>
 		</>

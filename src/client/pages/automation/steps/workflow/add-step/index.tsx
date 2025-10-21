@@ -155,7 +155,7 @@ const AddStep: React.FC<AddStepProps> = ({
 			) {
 				setTimeout(() => {
 					setStep(organizedStep);
-				}, 100);
+				}, 250);
 			}
 		} catch (error: any) {
 			createNotice({

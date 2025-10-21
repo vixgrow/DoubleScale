@@ -134,7 +134,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 				targetOrder =
 					allSiblingsAtLevel.length > 0
 						? Math.max(...allSiblingsAtLevel.map((s) => s.order)) +
-							1
+						1
 						: conditionStep.order + 1;
 			}
 		} else {
@@ -236,7 +236,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 						children: [],
 					};
 					onStepClick(organizedStep);
-				}, 100);
+				}, 250);
 			}
 		} catch (error: any) {
 			console.error('Error creating step', error);

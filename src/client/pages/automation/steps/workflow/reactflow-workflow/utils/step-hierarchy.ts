@@ -411,6 +411,7 @@ const processStepHierarchy = (
 						parentId: step.id,
 						condition: 'yes',
 						prevStep: null,
+						onStepClick,
 					},
 				});
 
@@ -536,6 +537,7 @@ const processStepHierarchy = (
 						parentId: step.id,
 						condition: 'no',
 						prevStep: null,
+						onStepClick,
 					},
 				});
 

@@ -188,7 +188,7 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 						children: [],
 					};
 					onStepClick(organizedStep);
-				}, 100);
+				}, 250);
 			}
 		} catch (error: any) {
 			console.error('Failed to create step:', error);

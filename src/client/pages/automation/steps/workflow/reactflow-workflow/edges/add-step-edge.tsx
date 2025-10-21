@@ -304,7 +304,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 						children: [],
 					};
 					onStepClick(organizedStep);
-				}, 100);
+				}, 250);
 			}
 		} catch (error: any) {
 			console.error('Failed to create step:', error);

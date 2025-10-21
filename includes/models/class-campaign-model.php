@@ -690,14 +690,12 @@ class Campaign_Model extends Model {
 		static::retrieved(
 			function ( $campaign ) {
 				$campaign->attach_counts( $campaign );
-				$campaign->attach_templates( $campaign );
 			}
 		);
 
 		static::saved(
 			function ( $campaign ) {
 				$campaign->attach_counts( $campaign );
-				$campaign->attach_templates( $campaign );
 			}
 		);
 	}

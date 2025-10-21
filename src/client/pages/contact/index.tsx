@@ -9,7 +9,7 @@ import { useEffect, useState } from '@wordpress/element';
  * External dependencies
  */
 import { useReducer, useRef } from 'react';
-import { useParams } from '@quillcrm/navigation';
+import { useParams, useNavigate, getToLink } from '@quillcrm/navigation';
 
 /**
  * Internal dependencies
@@ -47,10 +47,12 @@ const Contact: React.FC<ContactProps> = ({
     onContactUpdate,
 }) => {
     const { id: urlId } = useParams<{ id: string; tab: string }>();
+    const navigate = useNavigate();
     const id = contactId || urlId;
     const [loading, setLoading] = useState(true);
     const [isUpdating, setIsUpdating] = useState(false);
-    const [showFullPageDialog, setShowFullPageDialog] = useState(isDialog);
+    // When used as a route (isDialog=false), the dialog should be open by default
+    const [showFullPageDialog, setShowFullPageDialog] = useState(true);
     const [notice, setNotice] = useState<NoticeMessage | null>(null);
     const [state, dispatch] = useReducer(reducer, {
         contact: null,
@@ -174,16 +176,21 @@ const Contact: React.FC<ContactProps> = ({
         setNotice(null);
     };
 
+    const handleClose = () => {
+        if (isDialog && onClose) {
+            onClose();
+        } else {
+            // Navigate back to contacts list
+            navigate(getToLink('contacts'));
+        }
+    };
+
     return (
         <Dialog
             open={isDialog ? isOpen : showFullPageDialog}
             onOpenChange={(value) => {
                 if (!value) {
-                    if (isDialog && onClose) {
-                        onClose();
-                    } else {
-                        setShowFullPageDialog(false);
-                    }
+                    handleClose();
                 }
             }}
         >

@@ -293,7 +293,7 @@ export type Campaign = {
 	name: string;
 	description: string;
 	status: string;
-	type: 'email' | 'sms' | 'whatsapp' | 'sequence_mail'; // Campaign channel type
+	type: 'email' | 'sms' | 'whatsapp' | 'sequence_mail' | 'email_sequence'; // Campaign channel type
 	settings: CampaignSettings;
 	parent_id: string;
 	count: string;

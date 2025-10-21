@@ -24,6 +24,7 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Utils;
 use QuillCRM\Campaign\Email_Processing;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Campaign_Channel;
 
 
 class Send_Email_Sequence extends Action {
@@ -105,7 +106,7 @@ class Send_Email_Sequence extends Action {
 
 		// Validate email sequence exists
 		$email_sequence = Email_Sequence_Model::find( $email_sequence_id );
-		if ( ! $email_sequence || $email_sequence->type !== 'email_sequence' ) {
+		if ( ! $email_sequence || $email_sequence->get_type() !== Campaign_Channel::CHANNEL_EMAIL_SEQUENCE ) {
 			quillcrm_get_logger()->error(
 				'Email sequence not found or invalid type',
 				array(
@@ -205,7 +206,7 @@ class Send_Email_Sequence extends Action {
 	 * @return array
 	 */
 	private function get_email_sequence_options() {
-		 $email_sequences = Email_Sequence_Model::where( 'type', 'email_sequence' )->get();
+		 $email_sequences = Email_Sequence_Model::where( 'type', Campaign_Channel::CHANNEL_EMAIL_SEQUENCE )->get();
 		return wp_list_pluck( $email_sequences->toArray(), 'name', 'id' );
 	}
 }

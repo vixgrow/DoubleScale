@@ -17,6 +17,7 @@ export const CAMPAIGN_CHANNEL = {
 	SMS: 'sms',
 	WHATSAPP: 'whatsapp',
 	SEQUENCE_MAIL: 'sequence_mail',
+	EMAIL_SEQUENCE: 'email_sequence',
 } as const;
 
 /**
@@ -34,6 +35,7 @@ export function getCampaignChannelLabel(channel: CampaignChannelType): string {
 		[CAMPAIGN_CHANNEL.SMS]: 'SMS',
 		[CAMPAIGN_CHANNEL.WHATSAPP]: 'WhatsApp',
 		[CAMPAIGN_CHANNEL.SEQUENCE_MAIL]: 'Sequence Mail',
+		[CAMPAIGN_CHANNEL.EMAIL_SEQUENCE]: 'Email Sequence',
 	};
 
 	return labels[channel] || 'Unknown';
@@ -55,7 +57,8 @@ export function channelRequiresPhone(channel: CampaignChannelType): boolean {
 export function isEmailChannel(channel: CampaignChannelType): boolean {
 	return (
 		channel === CAMPAIGN_CHANNEL.EMAIL ||
-		channel === CAMPAIGN_CHANNEL.SEQUENCE_MAIL
+		channel === CAMPAIGN_CHANNEL.SEQUENCE_MAIL ||
+		channel === CAMPAIGN_CHANNEL.EMAIL_SEQUENCE
 	);
 }
 

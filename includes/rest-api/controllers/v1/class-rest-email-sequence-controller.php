@@ -53,9 +53,9 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 	/**
 	 * Campaign type
 	 *
-	 * @var string
+	 * @var int|string
 	 */
-	protected $campaign_type       = 'email_sequence';
+	protected $campaign_type       = Campaign_Channel::CHANNEL_EMAIL_SEQUENCE;
 	protected $campaign_type_child = Campaign_Channel::CHANNEL_SEQUENCE_MAIL;
 
 

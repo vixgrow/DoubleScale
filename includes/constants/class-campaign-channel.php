@@ -44,12 +44,19 @@ class Campaign_Channel {
 	const CHANNEL_SEQUENCE_MAIL = 4;
 
 	/**
+	 * Email sequence parent type (integer)
+	 * Parent email sequence campaign that contains sequence_mail children
+	 */
+	const CHANNEL_EMAIL_SEQUENCE = 5;
+
+	/**
 	 * String constants for channel types (for comparisons in code)
 	 */
 	const STR_EMAIL = 'email';
 	const STR_SMS = 'sms';
 	const STR_WHATSAPP = 'whatsapp';
 	const STR_SEQUENCE_MAIL = 'sequence_mail';
+	const STR_EMAIL_SEQUENCE = 'email_sequence';
 
 	/**
 	 * Registered custom channels (for third-party extensions)
@@ -138,14 +145,15 @@ class Campaign_Channel {
 	 * Convert channel integer to string slug
 	 *
 	 * @param int $channel Channel type integer.
-	 * @return string|null Channel slug ('email', 'sms', 'whatsapp') or null if invalid
+	 * @return string|null Channel slug ('email', 'sms', 'whatsapp', 'email_sequence', 'sequence_mail') or null if invalid
 	 */
 	public static function to_string( $channel ) {
 		$mapping = array(
-			self::CHANNEL_EMAIL         => self::STR_EMAIL,
-			self::CHANNEL_SMS           => self::STR_SMS,
-			self::CHANNEL_WHATSAPP      => self::STR_WHATSAPP,
-			self::CHANNEL_SEQUENCE_MAIL => self::STR_SEQUENCE_MAIL,
+			self::CHANNEL_EMAIL          => self::STR_EMAIL,
+			self::CHANNEL_SMS            => self::STR_SMS,
+			self::CHANNEL_WHATSAPP       => self::STR_WHATSAPP,
+			self::CHANNEL_SEQUENCE_MAIL  => self::STR_SEQUENCE_MAIL,
+			self::CHANNEL_EMAIL_SEQUENCE => self::STR_EMAIL_SEQUENCE,
 		);
 
 		return $mapping[ $channel ] ?? null;
@@ -154,15 +162,16 @@ class Campaign_Channel {
 	/**
 	 * Convert channel string slug to integer
 	 *
-	 * @param string $channel_string Channel slug ('email', 'sms', 'whatsapp').
+	 * @param string $channel_string Channel slug ('email', 'sms', 'whatsapp', 'email_sequence', 'sequence_mail').
 	 * @return int|null Channel type integer or null if invalid
 	 */
 	public static function to_integer( $channel_string ) {
 		$mapping = array(
-			self::STR_EMAIL         => self::CHANNEL_EMAIL,
-			self::STR_SMS           => self::CHANNEL_SMS,
-			self::STR_WHATSAPP      => self::CHANNEL_WHATSAPP,
-			self::STR_SEQUENCE_MAIL => self::CHANNEL_SEQUENCE_MAIL,
+			self::STR_EMAIL          => self::CHANNEL_EMAIL,
+			self::STR_SMS            => self::CHANNEL_SMS,
+			self::STR_WHATSAPP       => self::CHANNEL_WHATSAPP,
+			self::STR_SEQUENCE_MAIL  => self::CHANNEL_SEQUENCE_MAIL,
+			self::STR_EMAIL_SEQUENCE => self::CHANNEL_EMAIL_SEQUENCE,
 		);
 
 		return $mapping[ $channel_string ] ?? null;
@@ -176,10 +185,11 @@ class Campaign_Channel {
 	 */
 	public static function get_label( $channel ) {
 		$labels = array(
-			self::CHANNEL_EMAIL         => __( 'Email', 'quillcrm' ),
-			self::CHANNEL_SMS           => __( 'SMS', 'quillcrm' ),
-			self::CHANNEL_WHATSAPP      => __( 'WhatsApp', 'quillcrm' ),
-			self::CHANNEL_SEQUENCE_MAIL => __( 'Email Sequence', 'quillcrm' ),
+			self::CHANNEL_EMAIL          => __( 'Email', 'quillcrm' ),
+			self::CHANNEL_SMS            => __( 'SMS', 'quillcrm' ),
+			self::CHANNEL_WHATSAPP       => __( 'WhatsApp', 'quillcrm' ),
+			self::CHANNEL_SEQUENCE_MAIL  => __( 'Sequence Mail', 'quillcrm' ),
+			self::CHANNEL_EMAIL_SEQUENCE => __( 'Email Sequence', 'quillcrm' ),
 		);
 
 		// Allow custom channels to define labels via filter

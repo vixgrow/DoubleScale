@@ -288,7 +288,7 @@ class Campaign_Model extends Model {
 
 	/**
 	 * Get the campaign type for template processing
-	 * Sequence mails should be treated as email campaigns for template processing
+	 * Sequence mails and email sequences should be treated as email campaigns for template processing
 	 *
 	 * @since 1.0.0
 	 *
@@ -297,8 +297,8 @@ class Campaign_Model extends Model {
 	public function get_template_processing_type() {
 		$type = $this->get_type();
 
-		// Sequence mails are email-based campaigns
-		if ( $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL ) {
+		// Sequence mails and email sequences are email-based campaigns
+		if ( $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL || $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE ) {
 			return Campaign_Channel::CHANNEL_EMAIL;
 		}
 
@@ -336,6 +336,28 @@ class Campaign_Model extends Model {
 	 */
 	public function is_whatsapp_campaign() {
 		return $this->get_type() === Campaign_Channel::CHANNEL_WHATSAPP;
+	}
+
+	/**
+	 * Check if campaign is email sequence parent type
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_email_sequence() {
+		return $this->get_type() === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE;
+	}
+
+	/**
+	 * Check if campaign is sequence mail (child of email sequence)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_sequence_mail() {
+		return $this->get_type() === Campaign_Channel::CHANNEL_SEQUENCE_MAIL;
 	}
 
 

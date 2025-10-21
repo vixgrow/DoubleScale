@@ -110,17 +110,18 @@ class Send_Campaign_Email extends Action {
 				return true; // Already sent, skip
 			}
 
-			// Create campaign message tracking record
-			$campaign_message_data = array(
-				'contact_id'  => $contact->id,
-				'template_id' => $template_id,
-				'mode'        => Tracking_Model::MODE_EMAIL,
-				'source_type' => Message_Source_Types::AUTOMATION,
-				'source_id'   => $automation->id,
-				'recipient'   => $contact->email,
-				'status'      => Tracking_Status::PENDING,
-				'hash_key'    => Utils::generate_hash_key(),
-			);
+		// Create campaign message tracking record
+		$campaign_message_data = array(
+			'contact_id'  => $contact->id,
+			'template_id' => $template_id,
+			'mode'        => Tracking_Model::MODE_EMAIL,
+			'source_type' => Message_Source_Types::AUTOMATION,
+			'source_id'   => $automation->id,
+			'step_id'     => $step->id,
+			'recipient'   => $contact->email,
+			'status'      => Tracking_Status::PENDING,
+			'hash_key'    => Utils::generate_hash_key(),
+		);
 
 			$campaign_message = Tracking_Model::create( $campaign_message_data );
 

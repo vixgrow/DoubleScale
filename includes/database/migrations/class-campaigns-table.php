@@ -51,6 +51,8 @@ class Campaigns_Table extends Migration {
 		 * 1 = Email (Campaign_Channel::CHANNEL_EMAIL)
 		 * 2 = SMS (Campaign_Channel::CHANNEL_SMS)
 		 * 3 = WhatsApp (Campaign_Channel::CHANNEL_WHATSAPP)
+		 * 4 = Sequence Mail - Child email in sequence (Campaign_Channel::CHANNEL_SEQUENCE_MAIL)
+		 * 5 = Email Sequence - Parent sequence (Campaign_Channel::CHANNEL_EMAIL_SEQUENCE)
 		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL,

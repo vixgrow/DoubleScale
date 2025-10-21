@@ -33,6 +33,8 @@ import wpusers from '../../../../../../../assets/images/wordpress/wordpress-icon
 import lms from '../../../../../../../assets/images/lms/lms.png';
 //@ts-ignore
 import data from '../../../../../../../assets/images/send-data/data.png';
+import { useAutomationContext } from '../../../state/context';
+import { getTrigger } from '@quillcrm/utils';
 
 interface ActionSelectorProps {
 	value: string;

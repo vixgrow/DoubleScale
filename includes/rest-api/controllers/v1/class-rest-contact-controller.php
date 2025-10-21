@@ -39,6 +39,10 @@ class REST_Contact_Controller extends REST_Controller {
 
 
 
+
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -759,36 +763,44 @@ class REST_Contact_Controller extends REST_Controller {
 			$to         = $request->get_param( 'to' ) ?? null;
 			$query      = Contact_Model::query();
 
-			$total_count = $query->count();
-			if ( '' !== $keywords ) {
-				$contacts = $query->with( 'lists', 'tags', 'custom_fields', 'notes' )
-					->where( 'first_name', 'like', '%' . $keywords . '%' )
-					->orWhere( 'last_name', 'like', '%' . $keywords . '%' )
-					->orWhere( 'email', 'like', '%' . $keywords . '%' )
-					->orWhere( 'phone', 'like', '%' . $keywords . '%' );
-			} else {
-				$contacts = $query->with( 'lists', 'tags', 'custom_fields', 'notes' );
-			}
+			// Start with base query and load relationships
+			$contacts = $query->with( 'lists', 'tags', 'custom_fields', 'notes' );
 
+			// Apply date range filters
 			if ( $from ) {
-				$query->where( 'created_at', '>=', $from );
+				$contacts->where( 'created_at', '>=', $from );
 			}
 			if ( $to ) {
-				$query->where( 'created_at', '<=', $to );
+				$contacts->where( 'created_at', '<=', $to );
 			}
 
+			// Apply filters FIRST to narrow down the results
 			if ( $filters ) {
 				$filters_process = new Contact_Filters_Process( $contacts, $filters );
 				$contacts        = $filters_process->filter();
 			}
 
+			// Apply subscription filter
 			if ( $subscribed ) {
 				$contacts = $contacts->where( 'status', 'subscribed' );
 			}
 
+			// Apply keyword search AFTER filters (search within filtered results)
+			if ( '' !== $keywords ) {
+				$contacts = $contacts->where(
+					function ( $query ) use ( $keywords ) {
+						$query->where( 'first_name', 'like', '%' . $keywords . '%' )
+						->orWhere( 'last_name', 'like', '%' . $keywords . '%' )
+						->orWhere( 'email', 'like', '%' . $keywords . '%' )
+						->orWhere( 'phone', 'like', '%' . $keywords . '%' );
+					}
+				);
+			}
+
+			// Paginate and get results (pagination automatically handles total count)
 			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
-			return new WP_REST_Response( $contacts->toArray() + array( 'total_count' => $total_count ), 200 );
+			return new WP_REST_Response( $contacts->toArray(), 200 );
 		} catch ( Exception $e ) {
 			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
@@ -1076,7 +1088,7 @@ class REST_Contact_Controller extends REST_Controller {
 			$lists = $request->get_param( 'lists' );
 			if ( is_array( $lists ) ) {
 				if ( empty( $lists ) ) {
-					$contact->lists()->detach();
+					$contact->sync_lists( array() );
 					return;
 				}
 				$lists_arr = array();
@@ -1117,7 +1129,7 @@ class REST_Contact_Controller extends REST_Controller {
 			$tags = $request->get_param( 'tags' );
 			if ( is_array( $tags ) ) {
 				if ( empty( $tags ) ) {
-					$contact->tags()->detach();
+					$contact->sync_tags( array() );
 					return;
 				}
 

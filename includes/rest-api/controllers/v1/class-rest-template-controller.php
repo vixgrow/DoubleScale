@@ -19,6 +19,7 @@ use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Emails\Email_Renderer;
+use QuillCRM\Emails\Block_Registry;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
@@ -115,6 +116,39 @@ class REST_Template_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		// Register endpoint for rendering templates (merged from email-builder controller)
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/render',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'render_template' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'merge_tags' => array(
+							'description' => __( 'Merge tags to use in the template', 'quillcrm' ),
+							'type'        => 'object',
+							'default'     => array(),
+						),
+					),
+				),
+			)
+		);
+
+		// Register endpoint for getting email blocks (merged from email-builder controller)
+		register_rest_route(
+			$this->namespace,
+			'/email-blocks',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_blocks' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -180,6 +214,7 @@ class REST_Template_Controller extends REST_Controller {
 
 	/**
 	 * Get collection params
+	 * Enhanced with filtering options
 	 *
 	 * @since 1.0.0
 	 *
@@ -187,26 +222,64 @@ class REST_Template_Controller extends REST_Controller {
 	 */
 	public function get_collection_params() {
 		return array(
-			'keywork'  => array(
+			'keyword'  => array(
 				'description'       => __( 'Limit results to those matching a string.', 'quillcrm' ),
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
+			'search'   => array(
+				'description'       => __( 'Search templates by name.', 'quillcrm' ),
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'type'     => array(
+				'description' => __( 'Filter by template type.', 'quillcrm' ),
+				'type'        => 'string',
+				'default'     => 'email',
+				'enum'        => array( 'email', 'sms', 'whatsapp' ),
+			),
+			'category' => array(
+				'description'       => __( 'Filter by template category.', 'quillcrm' ),
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'hidden'   => array(
+				'description' => __( 'Filter by hidden status.', 'quillcrm' ),
+				'type'        => 'integer',
+				'enum'        => array( 0, 1 ),
+			),
+			'is_pro'   => array(
+				'description' => __( 'Filter by pro status.', 'quillcrm' ),
+				'type'        => 'integer',
+				'enum'        => array( 0, 1 ),
+			),
 			'per_page' => array(
 				'description' => __( 'Number of items to return in one page.', 'quillcrm' ),
 				'type'        => 'integer',
-				'default'     => 10,
+				'default'     => 20,
 			),
 			'page'     => array(
 				'description' => __( 'Current page of the collection.', 'quillcrm' ),
 				'type'        => 'integer',
 				'default'     => 1,
 			),
+			'orderby'  => array(
+				'description' => __( 'Order by field.', 'quillcrm' ),
+				'type'        => 'string',
+				'default'     => 'id',
+			),
+			'order'    => array(
+				'description' => __( 'Order direction.', 'quillcrm' ),
+				'type'        => 'string',
+				'default'     => 'DESC',
+				'enum'        => array( 'ASC', 'DESC' ),
+			),
 		);
 	}
 
 	/**
 	 * Get items
+	 * Enhanced with better filtering support
 	 *
 	 * @since 1.0.0
 	 *
@@ -216,18 +289,60 @@ class REST_Template_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$keyword  = $request->get_param( 'keyword' ) ? $request->get_param( 'keyword' ) : '';
-			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			// Get parameters with defaults
+			$type     = $request->get_param( 'type' ) ?: 'email';
+			$per_page = (int) ( $request->get_param( 'per_page' ) ?: 20 );
+			$page     = (int) ( $request->get_param( 'page' ) ?: 1 );
+			$orderby  = $request->get_param( 'orderby' ) ?: 'id';
+			$order    = $request->get_param( 'order' ) ?: 'DESC';
+			$search   = $request->get_param( 'search' );
+			$keyword  = $request->get_param( 'keyword' ); // Backward compatibility
+			$category = $request->get_param( 'category' );
 
-			if ( $keyword ) {
-				$templates = Template_Model::where( 'name', 'LIKE', '%' . $keyword . '%' )->where( 'hidden', 0 )
-					->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			// Build query
+			$query = Template_Model::where( 'type', $type );
+
+			// Add conditional filters
+			if ( $request->has_param( 'hidden' ) ) {
+				$query->where( 'hidden', (int) $request->get_param( 'hidden' ) );
 			} else {
-				$templates = Template_Model::where( 'hidden', 0 )->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+				// Default: show only non-hidden templates
+				$query->where( 'hidden', 0 );
 			}
 
-			return new WP_REST_Response( $templates, 200 );
+			if ( $request->has_param( 'is_pro' ) ) {
+				$query->where( 'is_pro', (int) $request->get_param( 'is_pro' ) );
+			}
+
+			if ( $category ) {
+				$query->where( 'category', $category );
+			}
+
+			// Search by name (support both 'search' and 'keyword' for backward compatibility)
+			$search_term = $search ?: $keyword;
+			if ( $search_term ) {
+				$query->where( 'name', 'LIKE', '%' . $search_term . '%' );
+			}
+
+			// Get total count for pagination
+			$total = $query->count();
+
+			// Get paginated results with ordering
+			$templates = $query->orderBy( $orderby, $order )
+				->offset( ( $page - 1 ) * $per_page )
+				->limit( $per_page )
+				->get();
+
+			return new WP_REST_Response(
+				array(
+					'templates' => $templates,
+					'total'     => (int) $total,
+					'pages'     => ceil( $total / $per_page ),
+					'page'      => $page,
+					'per_page'  => $per_page,
+				),
+				200
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -367,17 +482,20 @@ class REST_Template_Controller extends REST_Controller {
 	 */
 	public function prepare_template( $request ) {
 		$template_data = array(
-			'name'       => $request->get_param( 'name' ) ?? __( 'New Template', 'quillcrm' ),
-			'type'       => $request->get_param( 'type' ) ?? 'email',
-			'subject'    => $request->get_param( 'subject' ),
-			'body'       => $request->get_param( 'body' ),
-			'settings'   => $request->get_param( 'settings' ),
-			'created_at' => current_time( 'mysql' ),
-			'updated_at' => current_time( 'mysql' ),
+			'name'         => $request->get_param( 'name' ) ?? __( 'New Template', 'quillcrm' ),
+			'type'         => $request->get_param( 'type' ) ?? 'email',
+			'subject'      => $request->get_param( 'subject' ),
+			'body'         => $request->get_param( 'body' ),
+			'settings'     => $request->get_param( 'settings' ),
+			'preview_text' => $request->get_param( 'preview_text' ),
+			'created_at'   => current_time( 'mysql' ),
+			'updated_at'   => current_time( 'mysql' ),
 		);
 
+		// Note: email_body data is now sent directly in the body field as JSON
+
 		foreach ( $template_data as $key => $value ) {
-			if ( empty( $value ) ) {
+			if ( empty( $value ) && $value !== '0' && $value !== 0 ) {
 				unset( $template_data[ $key ] );
 			}
 		}
@@ -565,5 +683,63 @@ class REST_Template_Controller extends REST_Controller {
 	 */
 	public function delete_item_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Render a template
+	 * Merged from REST_Email_Builder_Controller
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return WP_REST_Response|WP_Error The response object
+	 */
+	public function render_template( $request ) {
+		$template_id = (int) $request->get_param( 'id' );
+		$merge_tags  = $request->get_param( 'merge_tags' ) ?: array();
+
+		$renderer = new Email_Renderer();
+		$html     = $renderer->render_template( $template_id, $merge_tags );
+
+		if ( empty( $html ) ) {
+			return new WP_Error(
+				'rendering_failed',
+				__( 'Failed to render template', 'quillcrm' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return rest_ensure_response(
+			array(
+				'html' => $html,
+			)
+		);
+	}
+
+	/**
+	 * Get available email blocks
+	 * Merged from REST_Email_Builder_Controller
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return WP_REST_Response The response object
+	 */
+	public function get_blocks( $request ) {
+		$registry = Block_Registry::instance();
+		$blocks   = $registry->get_blocks();
+
+		$response = array();
+		foreach ( $blocks as $block ) {
+			$response[] = array(
+				'type'         => $block->get_type(),
+				'name'         => $block->get_name(),
+				'defaultProps' => $block->get_default_props(),
+			);
+		}
+
+		return rest_ensure_response( $response );
 	}
 }

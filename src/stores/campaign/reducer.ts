@@ -1,28 +1,28 @@
 /**
  * External dependencies
  */
-import type { Reducer } from 'redux';
 import { isObject } from 'lodash';
+import type { Reducer } from 'redux';
 
 /**
  * Internal dependencies
  */
-import { 
-	SET_CAMPAIGN, 
-	UPDATE_CAMPAIGN, 
-	UPDATE_SETTINGS, 
-	SET_LOADING, 
-	SET_SAVING, 
-	SET_ERROR 
+import {
+	SET_CAMPAIGN,
+	SET_ERROR,
+	SET_LOADING,
+	SET_SAVING,
+	UPDATE_CAMPAIGN,
+	UPDATE_SETTINGS
 } from './constants';
-import type { CampaignState, CampaignAction, ExtendedCampaignSettings } from './types';
+import type { CampaignAction, CampaignState, ExtendedCampaignSettings } from './types';
 
 // Initial State
 const initialState: CampaignState = {
 	campaign: null,
 	loading: false,
 	saving: false,
-	error: null,
+	errors: {},
 };
 
 /**
@@ -37,7 +37,7 @@ const reducer: Reducer<CampaignState, CampaignAction> = (
 			return {
 				...state,
 				campaign: action.campaign,
-				error: null,
+				errors: {},
 			};
 
 		case UPDATE_CAMPAIGN:
@@ -53,7 +53,7 @@ const reducer: Reducer<CampaignState, CampaignAction> = (
 			if (!state.campaign) {
 				return state;
 			}
-			
+
 			const newSettings: ExtendedCampaignSettings = isObject(state.campaign.settings)
 				? { ...state.campaign.settings }
 				: {
@@ -89,7 +89,9 @@ const reducer: Reducer<CampaignState, CampaignAction> = (
 		case SET_ERROR:
 			return {
 				...state,
-				error: action.error,
+				errors: action.error
+					? { ...state.errors, general: action.error }
+					: {},
 			};
 
 		default:

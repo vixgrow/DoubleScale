@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Merge Tag Manager
  *
@@ -18,6 +19,17 @@ use QuillCRM\Models\Automation_Contact_Model;
  * Merge Tag Manager
  */
 final class Merge_Tags_Manager {
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * Registed merge tags
@@ -145,7 +157,26 @@ final class Merge_Tags_Manager {
 				'mergeTags' => array(),
 				'triggers'  => array( 'wc_abandoned_cart_created' ),
 			),
+			'edd_customer'   => array(
+				'name'      => __( 'Easy Digital Downloads Customer', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'edd_new_order_success' ),
+			),
+			'edd_order'      => array(
+				'name'      => __( 'Easy Digital Downloads Order', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'edd_new_order_success' ),
+			),
 		);
+		// get forms slug to set in groups
+		$forms = Forms_Manager::instance()->get_all_forms();
+		foreach ( $forms as $form ) {
+			$this->groups[ $form->slug ] = array(
+				'name'      => $form->name,
+				'mergeTags' => array(),
+				'triggers'  => array( $form->slug ),
+			);
+		}
 	}
 
 	/**
@@ -170,7 +201,7 @@ final class Merge_Tags_Manager {
 	public function process_merge_tags( $content, $contact ) {
 		return preg_replace_callback(
 			'/{{(.*?):(.*?)}}/',
-			function( $matches ) use ( $contact ) {
+			function ( $matches ) use ( $contact ) {
 				$group          = $matches[1];
 				$slug           = $matches[2];
 				$slug_parts     = explode( ' ', $slug );

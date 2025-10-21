@@ -26,10 +26,17 @@ export const isSaving = (state: State): boolean => {
 };
 
 /**
- * Get error state
+ * Get error for a specific operation
  */
-export const getError = (state: State): string | null => {
-  return state.error;
+export const getError = (state: State, errorKey: string = 'general'): string => {
+  return state.errors[errorKey] || '';
+};
+
+/**
+ * Get all errors
+ */
+export const getErrors = (state: State): Record<string, string> => {
+  return state.errors;
 };
 
 /**
@@ -43,20 +50,57 @@ export const getCurrentStep = (state: State): string => {
  * Get step data for a specific step
  */
 export const getStepData = (state: State, step: string): any => {
-  return state.campaign?.settings?.steps?.[step] || {};
+  const settings = state.campaign?.settings;
+  if (!settings) return {};
+
+  // For template step, return the first template_id from the array
+  if (step === 'template') {
+    const templateIds = settings.template_ids || [];
+    return {
+      template_id: templateIds.length > 0 ? templateIds[0] : undefined,
+    };
+  }
+
+  // Map other step names to their corresponding data fields
+  const stepDataMap: Record<string, string> = {
+    'contacts': 'contacts_data',
+    'review': 'review_data',
+  };
+
+  const dataKey = stepDataMap[step];
+  return dataKey ? (settings as any)[dataKey] || {} : {};
 };
 
 /**
- * Get all step data
+ * Get all step data in a single object
  */
 export const getAllStepData = (state: State): any => {
-  return state.campaign?.settings?.steps || {};
+  const settings = state.campaign?.settings;
+  if (!settings) return {};
+
+  const templateIds = settings.template_ids || [];
+
+  return {
+    template: {
+      template_id: templateIds.length > 0 ? templateIds[0] : undefined,
+    },
+    contacts: settings.contacts_data || {},
+    review: settings.review_data || {},
+  };
 };
 
 /**
  * Check if a step has data
  */
 export const hasStepData = (state: State, step: string): boolean => {
+  const settings = state.campaign?.settings;
+  if (!settings) return false;
+
+  // For template step, check if template_ids array has entries
+  if (step === 'template') {
+    return (settings.template_ids || []).length > 0;
+  }
+
   const stepData = getStepData(state, step);
   return Object.keys(stepData).length > 0;
 };

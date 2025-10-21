@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rules_Manager
  *
@@ -67,7 +68,7 @@ final class Rules_Manager {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		$this->set_groups();
+		 $this->set_groups();
 	}
 
 	/**
@@ -81,26 +82,46 @@ final class Rules_Manager {
 		$this->groups = array(
 			'contact'        => array(
 				'name'  => __( 'Contact', 'quillcrm' ),
+				'key'   => 'contact',
 				'rules' => array(),
 			),
 			'contact_fields' => array(
 				'name'  => __( 'Contact Fields', 'quillcrm' ),
+				'key'   => 'contact_fields',
 				'rules' => array(),
 			),
 			'segments'       => array(
 				'name'  => __( 'Segments', 'quillcrm' ),
+				'key'   => 'segments',
 				'rules' => array(),
 			),
 			'user'           => array(
 				'name'  => __( 'User', 'quillcrm' ),
+				'key'   => 'user',
 				'rules' => array(),
 			),
 			'activity'       => array(
 				'name'  => __( 'Activity', 'quillcrm' ),
+				'key'   => 'activity',
 				'rules' => array(),
 			),
 		);
+
+		// get forms slug to set in groups
+		$forms = Forms_Manager::instance()->get_all_forms();
+		foreach ( $forms as $form ) {
+			$this->groups[ $form->slug ] = array(
+				'name'     => $form->name,
+				'rules'    => array(),
+				'key'      => $form->slug,
+				'triggers' => array( $form->slug ),
+			);
+		}
 	}
+
+
+
+
 
 	/**
 	 * Register rule
@@ -148,7 +169,7 @@ final class Rules_Manager {
 	 *
 	 * @param string $slug
 	 *
-	 * @return Rule
+	 * @return Rule|null
 	 */
 	public function get_rule( $slug ) {
 		if ( isset( $this->rules[ $slug ] ) ) {

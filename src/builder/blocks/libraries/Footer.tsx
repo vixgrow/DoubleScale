@@ -3,13 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 /**
- * external dependencies
- */
-import { useDraggable } from '@dnd-kit/core';
-/**
  * internal dependencies
  */
 import { CursorIcon } from '@quillcrm/components';
+import { DraggableTemplate } from '../../components/shared/DraggableTemplate';
 //@ts-ignore
 import logo from '../../../../assets/images/header-logo.png';
 
@@ -229,6 +226,7 @@ const FooterLibrary = () => {
 				<DraggableTemplate
 					template={centeredFooterTemplate}
 					id="centered-footer"
+					templateType="footer"
 				>
 					<div className="flex flex-col items-center justify-center text-center border rounded-lg p-3 text-[10px] text-[#333333]">
 						<div className="flex gap-2 justify-center items-center mb-2">
@@ -270,6 +268,7 @@ const FooterLibrary = () => {
 				<DraggableTemplate
 					template={centeredFooterWithItemsTemplate}
 					id="centered-footer-items"
+					templateType="footer"
 				>
 					<div className="flex flex-col items-center justify-center text-center border rounded-lg p-3 text-[10px] text-[#333333]">
 						<div className="flex gap-2 justify-center items-center mb-2">
@@ -318,6 +317,7 @@ const FooterLibrary = () => {
 				<DraggableTemplate
 					template={basicFooterTemplate}
 					id="basic-footer"
+					templateType="footer"
 				>
 					<div className="flex flex-col items-start justify-start border rounded-lg p-3 text-[10px] text-[#333333]">
 						<div className="flex gap-2 justify-start items-center mb-2">
@@ -351,36 +351,6 @@ const FooterLibrary = () => {
 					</div>
 				</DraggableTemplate>
 			</div>
-		</div>
-	);
-};
-
-// Draggable component using dnd-kit
-const DraggableTemplate = ({ template, id, children }) => {
-	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-		id: id,
-		data: {
-			type: 'footer-template',
-			template: template,
-		},
-	});
-
-	const style = {
-		opacity: isDragging ? 0.5 : 1,
-		cursor: 'grab',
-	};
-
-	console.log(`DraggableTemplate ${id}:`, { isDragging, template });
-
-	return (
-		<div
-			ref={setNodeRef}
-			style={style}
-			{...listeners}
-			{...attributes}
-			className="hover:border-primary transition-colors"
-		>
-			{children}
 		</div>
 	);
 };

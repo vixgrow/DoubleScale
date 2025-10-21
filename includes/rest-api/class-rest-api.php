@@ -21,7 +21,6 @@ use QuillCRM\REST_API\Controllers\V1\REST_Email_Campaign_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_SMS_Campaign_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_WhatsApp_Campaign_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Template_Controller;
-use QuillCRM\REST_API\Controllers\V1\REST_Email_Builder_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Step_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Contact_Controller;
@@ -113,7 +112,7 @@ class REST_API {
 			REST_SMS_Campaign_Controller::class,
 			REST_WhatsApp_Campaign_Controller::class,
 			REST_Template_Controller::class,
-			REST_Email_Builder_Controller::class,
+			// REST_Email_Builder_Controller removed - merged into REST_Template_Controller
 			Rest_Automation_Controller::class,
 			Rest_Automation_Step_Controller::class,
 			Rest_Automation_Contact_Controller::class,

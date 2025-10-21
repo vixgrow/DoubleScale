@@ -4,35 +4,34 @@
 import type { Campaign } from '@quillcrm/client';
 import { SET_CAMPAIGN, SET_ERROR, SET_LOADING, SET_SAVING, UPDATE_CAMPAIGN, UPDATE_SETTINGS } from './constants';
 
-export interface CampaignStepData {
-  template?: {
-    // Template data is now stored directly in the template object
-    // with email_body containing builder or rich-text content
-    [key: string]: any;
-    lastModified: string;
-  };
-  contacts?: {
-    filters: any[];
-    contacts_count: number;
-    selected_contacts?: number[];
-    lastModified: string;
-  };
-  review?: {
-    send_time?: string;
-    test_emails?: string[];
-    final_review_completed?: boolean;
-    lastModified: string;
-  };
+// Contacts step data
+export interface ContactsStepData {
+  filters: any[];
+  contacts_count: number;
+  selected_contacts?: number[];
+  lastModified: string;
 }
 
-// Extended Campaign Settings to support step-based data
+// Review step data
+export interface ReviewStepData {
+  send_time?: string;
+  test_emails?: string[];
+  final_review_completed?: boolean;
+  lastModified: string;
+}
+
+// Extended Campaign Settings
 export interface ExtendedCampaignSettings {
   templates: Campaign['settings']['templates'];
   contacts: Campaign['settings']['contacts'];
   filters: Campaign['settings']['filters'];
   ab_test: Campaign['settings']['ab_test'];
   current_step?: Campaign['settings']['current_step'];
-  steps?: CampaignStepData;
+  // Template IDs stored in array (for A/B testing support)
+  template_ids?: number[];
+  // Step-specific data
+  contacts_data?: ContactsStepData;
+  review_data?: ReviewStepData;
 }
 
 // Extended Campaign type with step-based settings
@@ -44,7 +43,7 @@ export interface CampaignState {
   campaign: ExtendedCampaign | null;
   loading: boolean;
   saving: boolean;
-  error: string | null;
+  errors: Record<string, string>;
 }
 
 // Action types

@@ -89,24 +89,32 @@ export const ProductSelectionDialog: React.FC<ProductSelectionDialogProps> = ({
 			console.log('📦 Raw API response:', data);
 
 			if (Array.isArray(data)) {
-				const transformedProducts: WooCommerceProduct[] = data.map((product: any) => ({
-					id: product.id,
-					name: product.name,
-					price: stripHtmlTags(product.price_html) || `${product.price} ${product.currency || 'EGP'}`,
-					regular_price: product.regular_price,
-					sale_price: product.sale_price,
-					images: product.images || [],
-					short_description: product.short_description
-						? product.short_description.replace(/<[^>]*>/g, '').substring(0, 100)
-						: '',
-					permalink: product.permalink,
-				}));
+				const transformedProducts: WooCommerceProduct[] = data.map(
+					(product: any) => ({
+						id: product.id,
+						name: product.name,
+						price:
+							stripHtmlTags(product.price_html) ||
+							`${product.price} ${product.currency || 'EGP'}`,
+						regular_price: product.regular_price,
+						sale_price: product.sale_price,
+						images: product.images || [],
+						short_description: product.short_description
+							? product.short_description
+									.replace(/<[^>]*>/g, '')
+									.substring(0, 100)
+							: '',
+						permalink: product.permalink,
+					})
+				);
 
 				console.log('📦 Transformed products:', transformedProducts);
 				setProducts(transformedProducts);
 
 				if (transformedProducts.length === 0) {
-					setError('No products found. Make sure WooCommerce is installed and you have published products.');
+					setError(
+						'No products found. Make sure WooCommerce is installed and you have published products.'
+					);
 				}
 			} else {
 				setError('Invalid response format from WooCommerce API.');
@@ -158,6 +166,7 @@ export const ProductSelectionDialog: React.FC<ProductSelectionDialogProps> = ({
 		const priceWithCurrency = cleanPrice ? `${cleanPrice} EGP` : '';
 
 		onChange({
+			productId: product.id, // Save WooCommerce product ID
 			imageSrc: primaryImage?.src || '',
 			imageAlt: primaryImage?.alt || product.name,
 			title: product.name,
@@ -196,6 +205,12 @@ export const ProductSelectionDialog: React.FC<ProductSelectionDialogProps> = ({
 							<div className="flex items-center justify-center py-8">
 								<div className="text-sm text-gray-500">
 									{__('Loading products...', 'quillcrm')}
+								</div>
+							</div>
+						) : error ? (
+							<div className="flex flex-col items-center justify-center py-8 space-y-2">
+								<div className="text-sm text-red-600">
+									{error}
 								</div>
 							</div>
 						) : products.length === 0 ? (
@@ -259,7 +274,7 @@ export const ProductSelectionDialog: React.FC<ProductSelectionDialogProps> = ({
 												<span className="text-sm font-semibold text-green-600">
 													{stripHtmlTags(
 														product.sale_price ||
-														product.price
+															product.price
 													)}
 												</span>
 												{product.sale_price &&

@@ -1,15 +1,26 @@
 /**
- * wordpress dependencies
+ * Social Media Block Editor - REFACTORED
+ *
+ * Improvements:
+ * - Uses BaseBlockEditor wrapper
+ * - Uses grouped control imports
+ * - Better organization and type safety
+ * - Maintained all platform configurations and features
+ */
+
+/**
+ * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 
 /**
- * external dependencies
+ * External dependencies
  */
+import React from 'react';
 import { cn } from '@/lib/utils';
 
 /**
- * internal dependencies
+ * Internal dependencies
  */
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -32,10 +43,11 @@ import {
 	LinkedinIcon,
 } from '@quillcrm/components';
 import {
-	AlignmentControl,
-	PaddingControl,
-	ColorPickerControl,
-} from '../../shared';
+	BaseBlockEditor,
+	BlockEditorErrorBoundary,
+} from '../../shared/BaseBlockEditor';
+import * as LayoutControls from '../../shared/control-groups/layout';
+import * as StyleControls from '../../shared/control-groups/style';
 
 export interface SocialMediaBlockEditorProps {
 	props: {
@@ -91,10 +103,9 @@ const socialMediaPlatforms = [
 	{ key: 'linkedin', label: 'LinkedIn', icon: LinkedinIcon },
 ];
 
-export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
-	props,
-	onChange,
-}) => {
+export const SocialMediaBlockEditor: React.FC<
+	SocialMediaBlockEditorProps
+> = ({ props, onChange }) => {
 	const handlePlatformToggle = (platformKey: string, enabled: boolean) => {
 		onChange({
 			platforms: {
@@ -123,197 +134,204 @@ export const SocialMediaBlockEditor: React.FC<SocialMediaBlockEditorProps> = ({
 		});
 	};
 
-	return (
-		<div className="grid gap-5">
-			{/* Social Media Platforms */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div className="text-sm font-medium">
-					{__('Social Media Platforms', 'quillcrm')}
-				</div>
-				<div className="grid grid-cols-2 gap-3">
-					{socialMediaPlatforms.map((platform) => {
-						const IconComponent = platform.icon;
-						const platformData =
-							props.platforms[
-								platform.key as keyof typeof props.platforms
-							];
+	const handleIconSizeChange = (size: 'small' | 'medium' | 'large') => {
+		onChange({ iconSize: size });
+	};
 
-						return (
-							<div key={platform.key} className="space-y-2">
-								<div className="flex items-center space-x-2">
-									<Checkbox
-										id={platform.key}
-										checked={platformData.enabled}
-										onCheckedChange={(checked) =>
-											handlePlatformToggle(
-												platform.key,
-												!!checked
+	const handleShapeChange = (shape: 'circle' | 'square' | 'rounded') => {
+		onChange({ shape });
+	};
+
+	const handleColorModeChange = (mode: 'original' | 'colored') => {
+		onChange({ colorMode: mode });
+	};
+
+	return (
+		<BlockEditorErrorBoundary>
+			<BaseBlockEditor props={props} onChange={onChange}>
+				{(props, onChange) => (
+					<>
+						{/* Icon Size Selection */}
+						<div className="flex flex-col gap-2 text-[#333333]">
+							<label className="text-sm">
+								{__('Icon Size', 'quillcrm')}
+							</label>
+							<div className="flex gap-2">
+								{['small', 'medium', 'large'].map((size) => (
+									<button
+										key={size}
+										onClick={() =>
+											handleIconSizeChange(
+												size as
+													| 'small'
+													| 'medium'
+													| 'large'
 											)
 										}
-									/>
-									<label
-										htmlFor={platform.key}
-										className="flex items-center space-x-2 text-sm"
+										className={cn(
+											'px-4 py-2 border rounded-lg text-sm transition-colors',
+											props.iconSize === size
+												? 'bg-blue-500 text-white border-blue-500'
+												: 'bg-white text-gray-700 border-gray-300 hover:border-blue-500'
+										)}
 									>
-										<IconComponent width={16} height={16} />
-										<span>{platform.label}</span>
-									</label>
-								</div>
-								{platformData.enabled && (
-									<Input
-										type="url"
-										placeholder={`${platform.label} URL`}
-										value={platformData.link}
-										onChange={(e) =>
-											handlePlatformLinkChange(
-												platform.key,
-												e.target.value
-											)
-										}
-										className="text-sm"
-									/>
+										{size.charAt(0).toUpperCase() +
+											size.slice(1)}
+									</button>
+								))}
+							</div>
+						</div>
+
+						{/* Shape Selection */}
+						<div className="flex flex-col gap-2 text-[#333333]">
+							<label className="text-sm">
+								{__('Icon Shape', 'quillcrm')}
+							</label>
+							<div className="flex gap-2">
+								{['circle', 'square', 'rounded'].map(
+									(shape) => (
+										<button
+											key={shape}
+											onClick={() =>
+												handleShapeChange(
+													shape as
+														| 'circle'
+														| 'square'
+														| 'rounded'
+												)
+											}
+											className={cn(
+												'px-4 py-2 border rounded-lg text-sm transition-colors',
+												props.shape === shape
+													? 'bg-blue-500 text-white border-blue-500'
+													: 'bg-white text-gray-700 border-gray-300 hover:border-blue-500'
+											)}
+										>
+											{shape.charAt(0).toUpperCase() +
+												shape.slice(1)}
+										</button>
+									)
 								)}
 							</div>
-						);
-					})}
-				</div>
-			</div>
+						</div>
 
-			{/* Icon Size */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div className="text-sm font-medium">
-					{__('Icon Size', 'quillcrm')}
-				</div>
-				<div className="flex items-center justify-between border rounded-lg">
-					<div
-						className={cn(
-							'py-2 px-4 w-full text-center cursor-pointer text-sm',
-							props.iconSize === 'small' &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
-						)}
-						onClick={() => onChange({ iconSize: 'small' })}
-					>
-						{__('Small', 'quillcrm')}
-					</div>
-					<div
-						className={cn(
-							'py-2 px-4 w-full text-center cursor-pointer text-sm',
-							props.iconSize === 'medium' &&
-								'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ iconSize: 'medium' })}
-					>
-						{__('Medium', 'quillcrm')}
-					</div>
-					<div
-						className={cn(
-							'py-2 px-4 w-full text-center cursor-pointer text-sm',
-							props.iconSize === 'large' &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
-						)}
-						onClick={() => onChange({ iconSize: 'large' })}
-					>
-						{__('Large', 'quillcrm')}
-					</div>
-				</div>
-			</div>
+						{/* Color Mode Selection */}
+						<div className="flex flex-col gap-2 text-[#333333]">
+							<label className="text-sm">
+								{__('Color Mode', 'quillcrm')}
+							</label>
+							<div className="flex gap-2">
+								{['original', 'colored'].map((mode) => (
+									<button
+										key={mode}
+										onClick={() =>
+											handleColorModeChange(
+												mode as 'original' | 'colored'
+											)
+										}
+										className={cn(
+											'px-4 py-2 border rounded-lg text-sm transition-colors',
+											props.colorMode === mode
+												? 'bg-blue-500 text-white border-blue-500'
+												: 'bg-white text-gray-700 border-gray-300 hover:border-blue-500'
+										)}
+									>
+										{mode.charAt(0).toUpperCase() +
+											mode.slice(1)}
+									</button>
+								))}
+							</div>
+						</div>
 
-			{/* Alignment */}
-			<AlignmentControl
-				value={props.align}
-				onChange={(align) => {
-					if (align !== 'full') {
-						onChange({ align });
-					}
-				}}
-			/>
+						{/* Icon Color (only shown in colored mode) */}
+						{props.colorMode === 'colored' && (
+							<StyleControls.ColorPickerControl
+								value={props.color}
+								onChange={(color) => onChange({ color })}
+								label={__('Icon Color', 'quillcrm')}
+								id="icon-color"
+							/>
+						)}
 
-			{/* Shape */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div className="text-sm font-medium">
-					{__('Shape', 'quillcrm')}
-				</div>
-				<div className="flex items-center justify-between border rounded-lg">
-					<div
-						className={cn(
-							'py-2 px-4 w-full text-center cursor-pointer text-sm',
-							props.shape === 'circle' &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
-						)}
-						onClick={() => onChange({ shape: 'circle' })}
-					>
-						{__('Circle', 'quillcrm')}
-					</div>
-					<div
-						className={cn(
-							'py-2 px-4 w-full text-center cursor-pointer text-sm',
-							props.shape === 'rounded' &&
-								'bg-[#C6DFF366] border border-primary'
-						)}
-						onClick={() => onChange({ shape: 'rounded' })}
-					>
-						{__('Rounded', 'quillcrm')}
-					</div>
-					<div
-						className={cn(
-							'py-2 px-4 w-full text-center cursor-pointer text-sm',
-							props.shape === 'square' &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
-						)}
-						onClick={() => onChange({ shape: 'square' })}
-					>
-						{__('Square', 'quillcrm')}
-					</div>
-				</div>
-			</div>
+						{/* Platform Configuration */}
+						<div className="flex flex-col gap-3 text-[#333333]">
+							<label className="text-sm font-medium">
+								{__('Social Media Platforms', 'quillcrm')}
+							</label>
+							<div className="grid gap-3">
+								{socialMediaPlatforms.map(
+									({ key, label, icon: Icon }) => {
+										const platform =
+											props.platforms[
+												key as keyof typeof props.platforms
+											];
+										return (
+											<div
+												key={key}
+												className="flex flex-col gap-2 p-3 border rounded-lg"
+											>
+												<div className="flex items-center gap-2">
+													<Checkbox
+														id={`platform-${key}`}
+														checked={
+															platform.enabled
+														}
+														onCheckedChange={(
+															checked
+														) =>
+															handlePlatformToggle(
+																key,
+																checked as boolean
+															)
+														}
+													/>
+													<Icon className="size-5" />
+													<label
+														htmlFor={`platform-${key}`}
+														className="text-sm font-medium flex-1 cursor-pointer"
+													>
+														{label}
+													</label>
+												</div>
+												{platform.enabled && (
+													<Input
+														type="url"
+														value={platform.link}
+														onChange={(e) =>
+															handlePlatformLinkChange(
+																key,
+																e.target.value
+															)
+														}
+														placeholder={`https://${key}.com/username`}
+														className="h-9"
+													/>
+												)}
+											</div>
+										);
+									}
+								)}
+							</div>
+						</div>
 
-			{/* Icon Color */}
-			<div className="flex flex-col gap-2 text-[#333333]">
-				<div className="text-sm font-medium">
-					{__('Icon Color', 'quillcrm')}
-				</div>
-				<div className="flex items-center justify-between border rounded-lg">
-					<div
-						className={cn(
-							'py-2 px-4 w-full text-center cursor-pointer text-sm',
-							props.colorMode === 'original' &&
-								'bg-[#C6DFF366] border border-primary rounded-l-lg'
-						)}
-						onClick={() =>
-							onChange({ colorMode: 'original', color: '' })
-						}
-					>
-						{__('Original', 'quillcrm')}
-					</div>
-					<div
-						className={cn(
-							'py-2 px-4 w-full text-center cursor-pointer text-sm',
-							props.colorMode === 'colored' &&
-								'bg-[#C6DFF366] border border-primary rounded-r-lg'
-						)}
-						onClick={() => onChange({ colorMode: 'colored' })}
-					>
-						{__('Colored', 'quillcrm')}
-					</div>
-				</div>
-				{props.colorMode === 'colored' && (
-					<ColorPickerControl
-						value={props.color}
-						onChange={(color) => onChange({ color })}
-						label=""
-						id="icon-color"
-						placeholder="#000000"
-					/>
+						{/* Alignment */}
+						<LayoutControls.AlignmentControl
+							value={props.align as 'left' | 'center' | 'right'}
+							onChange={(align) =>
+								onChange({
+									align: align as 'left' | 'center' | 'right',
+								})
+							}
+						/>
+
+						{/* Padding */}
+						<LayoutControls.PaddingControl
+							value={props.padding}
+							onChange={(padding) => onChange({ padding })}
+						/>
+					</>
 				)}
-			</div>
-
-			{/* Padding */}
-			<PaddingControl
-				value={
-					props.padding || { top: 0, right: 0, bottom: 0, left: 0 }
-				}
-				onChange={(padding) => onChange({ padding })}
-			/>
-		</div>
+			</BaseBlockEditor>
+		</BlockEditorErrorBoundary>
 	);
 };

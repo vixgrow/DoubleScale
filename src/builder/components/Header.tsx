@@ -9,9 +9,9 @@ import { STORE_KEY } from '../../stores/email-builder/constants';
 import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
+import { useTemplateActions } from '../hooks/useTemplateActions';
 import { SaveStatusIndicator } from './SaveStatusIndicator';
 import { SaveAsTemplateDialog } from './SaveAsTemplateDialog';
-import { saveEmailAsTemplate } from '../api/templates';
 
 const Header: React.FC = () => {
 	const dispatch = useDispatch();
@@ -24,20 +24,9 @@ const Header: React.FC = () => {
 	const canUndo = useSelect((select) => select(STORE_KEY).canUndo(), []);
 	const canRedo = useSelect((select) => select(STORE_KEY).canRedo(), []);
 
-	// Get builder data for template saving
-	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
-	const globalSettings = useSelect(
-		(select) => select(STORE_KEY).getGlobalSettings(),
-		[]
-	);
-	const buttonSettings = useSelect(
-		(select) => select(STORE_KEY).getAllButtonSettings(),
-		[]
-	);
-
-	// State for template dialog
 	const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
-	const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+
+	const { saveAsTemplate, isSaving: isSavingTemplate } = useTemplateActions();
 
 	// Use auto-save hook
 	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
@@ -52,61 +41,30 @@ const Header: React.FC = () => {
 		hasUnsavedChanges,
 	});
 
+	const { saveCampaignStep } = useDispatch('quillcrm/campaign');
+
 	const handleSaveAndContinue = async () => {
 		if (!campaign) {
 			return;
 		}
 
-		const saveSuccess = await save();
-		if (saveSuccess) {
+		const { success, templateId: savedTemplateId } = await save();
+		if (success && savedTemplateId) {
+			// Save template ID to campaign before continuing
+			await saveCampaignStep('template', {
+				template_id: savedTemplateId,
+			});
 			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 		}
 	};
 
 	const handleSaveAsTemplate = async (templateName: string) => {
-		setIsSavingTemplate(true);
-
-		try {
-			// Prepare builder data
-			const builderData = {
-				sections: sections,
-				globalSettings: globalSettings,
-				buttonSettings: buttonSettings,
-			};
-
-			// Prepare template data
-			const templateData = {
-				name: templateName,
-				type: 'email',
-				subject: '',
-				body: JSON.stringify(builderData),
-				settings: JSON.stringify({
-					type: 'builder',
-				}),
-				hidden: 0, // Make it visible in templates list
-				category: 'custom',
-				is_pro: 0,
-			};
-
-			// Save template
-			await saveEmailAsTemplate(templateData);
-
-			// Show success message (you can use a toast notification here)
-			console.log('Template saved successfully!');
-
-			// Close dialog
-			setIsTemplateDialogOpen(false);
-		} catch (error: any) {
-			console.error('Error saving template:', error);
-			throw error; // Re-throw to let dialog handle the error
-		} finally {
-			setIsSavingTemplate(false);
-		}
+		await saveAsTemplate(templateName);
+		setIsTemplateDialogOpen(false);
 	};
 	return (
-		<div className="flex items-center justify-between p-4 bg-primary-foreground border-b border-input">
+		<div className="flex items-center justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
 			<div className="flex items-center align-center gap-2">
-				<X className="h-5 w-5 text-primary" />
 				<BreadcrumbComponent
 					items={[
 						{ label: __('Create Campaign', 'quillcrm') },
@@ -150,7 +108,7 @@ const Header: React.FC = () => {
 					{__('Preview & test', 'quillcrm')}
 				</Button>
 				<Button
-					variant="outline"
+					variant="secondary"
 					className="px-3"
 					onClick={() => setIsTemplateDialogOpen(true)}
 					disabled={isSavingTemplate}
@@ -166,7 +124,7 @@ const Header: React.FC = () => {
 				>
 					{isSaving
 						? __('Saving...', 'quillcrm')
-						: __('Save & Continue', 'quillcrm')}
+						: __('Save & choose recipients', 'quillcrm')}
 				</Button>
 			</div>
 

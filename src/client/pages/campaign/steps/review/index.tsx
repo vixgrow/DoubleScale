@@ -6,25 +6,27 @@ import { useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 
 /**
- * External dependencies
- */
-import { Button, DatePicker, Card, Radio, Typography } from 'antd';
-import en from 'antd/es/date-picker/locale/en_US';
-import dayjs from 'dayjs';
-import type { RadioChangeEvent } from 'antd';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
-import { useCampaignContext } from '../../state/context';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { isEmpty, isString } from 'lodash';
+import { useCampaignStep, campaignSteps } from '../shared';
+import {
+	PanelSettings,
+	CategoryIcon,
+	FormField,
+	PanelLayout,
+	PlayIcon,
+	Stepper,
+} from '@quillcrm/components';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { isEmpty } from 'lodash';
 
 const Review: React.FC = () => {
-	const { campaign, isLoading, saveCampaign, saveCampaignStep, isSaving } =
-		useCampaignContext();
-	const navigate = useNavigate();
+	const { campaign, saveCampaignStep, saveCampaignSettings, goToStep } =
+		useCampaignStep();
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [runType, setRunType] = useState<string>(
 		campaign && campaign.status !== 'draft' ? campaign.status : 'processing'
@@ -54,14 +56,6 @@ const Review: React.FC = () => {
 			return;
 		}
 
-		const data = {
-			status: runType,
-		};
-
-		if (runType === 'schedule') {
-			data['execute_at'] = executeAt;
-		}
-
 		try {
 			// Save review step data
 			const reviewStepData = {
@@ -69,14 +63,25 @@ const Review: React.FC = () => {
 				execute_at: runType === 'schedule' ? executeAt : null,
 			};
 
-			// Save the final step data and campaign status
+			// Save the final step data
 			const saveSuccess = await saveCampaignStep(
-				'completed',
+				'review',
 				reviewStepData
 			);
+
 			if (saveSuccess) {
-				await saveCampaign(data);
-				navigate(getToLink(`campaigns/${campaign.id}/overview`));
+				// Update campaign status using shared helper
+				const data: any = {
+					status: runType,
+				};
+
+				if (runType === 'schedule') {
+					data.execute_at = executeAt;
+				}
+
+				await saveCampaignSettings(data);
+
+				goToStep('overview');
 			}
 		} catch (error) {
 			console.error(error);
@@ -91,102 +96,138 @@ const Review: React.FC = () => {
 	};
 
 	return (
-		<Card loading={isLoading}>
-			{campaign && (
-				<>
-					<div className="qcrm-review-campaign qcrm-fields">
-						<div className="qcrm-review-select-run-type qcrm-field">
-							<div className="qcrm-field-label">
-								<Typography.Text>
-									{__('Select Run Type', 'quillcrm')}
-								</Typography.Text>
-							</div>
-							<div className="qcrm-field-input">
-								<Radio.Group
-									value={runType}
-									onChange={(e: RadioChangeEvent) => {
-										setRunType(e.target.value);
-									}}
-									optionType="button"
-									buttonStyle="solid"
+		<PanelLayout
+			items={[
+				{
+					label: __('Create Campaign', 'quillcrm'),
+					href: 'campaigns',
+				},
+				{
+					label: campaign?.settings.ab_test
+						? __('A/B Test Campaign', 'quillcrm')
+						: __('Standard Campaign', 'quillcrm'),
+				},
+			]}
+			panelbtns={[
+				<Button variant="secondaryDeepBlue">
+					<PlayIcon />
+					{__('Watch Tutorial', 'quillcrm')}
+				</Button>,
+			]}
+			type="campaign"
+		>
+			<Stepper steps={campaignSteps} canProceed="true" currentStep={4} />
+
+			<div className="w-full max-w-2xl">
+				<PanelSettings
+					title={__('Review & Schedule', 'quillcrm')}
+					description={__(
+						'Review your campaign settings and choose when to send it.',
+						'quillcrm'
+					)}
+					icon={<CategoryIcon />}
+				>
+					<div className="space-y-6">
+						<FormField
+							label={__('Select Run Type', 'quillcrm')}
+							required={true}
+						>
+							<RadioGroup
+								value={runType}
+								onValueChange={setRunType}
+								className="flex gap-4"
+							>
+								<Label
+									htmlFor="now"
+									className={`flex items-center space-x-4 w-1/2 border rounded-lg py-3 px-4 cursor-pointer ${
+										runType === 'processing'
+											? 'border-blue-500 bg-blue-50'
+											: 'border-gray-300'
+									}`}
 								>
-									<Radio value="processing">
-										{__('Now', 'quillcrm')}
-									</Radio>
-									<Radio value="schedule">
-										{__('Schedule', 'quillcrm')}
-									</Radio>
-								</Radio.Group>
-							</div>
-						</div>
-						{runType === 'schedule' && (
-							<div className="qcrm-review-schedule-date qcrm-field">
-								<div className="qcrm-field-label">
-									<Typography.Text>
-										{__('Schedule Date', 'quillcrm')}
-									</Typography.Text>
-								</div>
-								<div className="qcrm-field-input">
-									<DatePicker
-										locale={en}
-										format="YYYY-MM-DD HH:mm:ss"
-										showTime
-										showSecond={false}
-										value={dayjs(executeAt)}
-										// @ts-ignore
-										onChange={(date, dateString) => {
-											if (!isString(dateString)) {
-												return;
-											}
-											setExecuteAt(dateString);
-										}}
+									<RadioGroupItem
+										value="processing"
+										id="now"
 									/>
-								</div>
-							</div>
-						)}
-					</div>
-					<div className="qcrm-review-actions">
-						<Button
-							type="default"
-							onClick={async () => {
-								// Save current review data before going back
-								const reviewStepData = {
-									run_type: runType,
-									execute_at:
+									<span>{__('Send Now', 'quillcrm')}</span>
+								</Label>
+								<Label
+									htmlFor="schedule"
+									className={`flex items-center space-x-4 w-1/2 border rounded-lg py-3 px-4 cursor-pointer ${
 										runType === 'schedule'
-											? executeAt
-											: null,
-								};
-								const saveSuccess = await saveCampaignStep(
-									'contacts',
-									reviewStepData
-								);
-								if (saveSuccess) {
-									navigate(
-										getToLink(
-											`campaigns/${campaign.id}/contacts`
+											? 'border-blue-500 bg-blue-50'
+											: 'border-gray-300'
+									}`}
+								>
+									<RadioGroupItem
+										value="schedule"
+										id="schedule"
+									/>
+									<span>{__('Schedule', 'quillcrm')}</span>
+								</Label>
+							</RadioGroup>
+						</FormField>
+
+						{runType === 'schedule' && (
+							<FormField
+								label={__('Schedule Date & Time', 'quillcrm')}
+								required={true}
+							>
+								<Input
+									type="datetime-local"
+									value={
+										executeAt
+											? new Date(executeAt)
+													.toISOString()
+													.slice(0, 16)
+											: ''
+									}
+									onChange={(e) => {
+										if (e.target.value) {
+											setExecuteAt(
+												new Date(
+													e.target.value
+												).toISOString()
+											);
+										}
+									}}
+									className="w-full"
+								/>
+								<p className="text-sm text-muted-foreground mt-2">
+									{__(
+										'Select the date and time when you want to send this campaign.',
+										'quillcrm'
+									)}
+								</p>
+							</FormField>
+						)}
+
+						<div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+							<p className="text-sm text-blue-800">
+								<strong>{__('Note:', 'quillcrm')}</strong>{' '}
+								{runType === 'processing'
+									? __(
+											'The campaign will be sent immediately after you click Save.',
+											'quillcrm'
 										)
-									);
-								}
-							}}
-						>
-							{__('Back', 'quillcrm')}
-						</Button>
-						<Button
-							type="primary"
-							loading={isSaving}
-							onClick={save}
-							disabled={
-								!runType ||
-								(runType === 'schedule' && isEmpty(executeAt))
-							}
-						>
-							{__('Save', 'quillcrm')}
-						</Button>
+									: __(
+											'The campaign will be sent at the scheduled time.',
+											'quillcrm'
+										)}
+							</p>
+						</div>
+
+						<div className="mt-6 flex justify-end">
+							<Button onClick={save} className="px-6">
+								{runType === 'processing'
+									? __('Send Campaign Now', 'quillcrm')
+									: __('Schedule Campaign', 'quillcrm')}
+							</Button>
+						</div>
 					</div>
-				</>
-			)}
-		</Card>
+				</PanelSettings>
+			</div>
+		</PanelLayout>
 	);
 };
 

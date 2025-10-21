@@ -59,6 +59,9 @@ final class QuillCRM {
 
 
 
+
+
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -382,6 +385,12 @@ final class QuillCRM {
 			if ( basename( $file ) !== 'class-base-deal-action.php' ) {
 				require $file;
 			}
+		}
+
+		// Load all froms
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/forms/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
+			require $file;
 		}
 
 		// Load all contact merge tags files

@@ -8,7 +8,7 @@ import { END_POINT, SEQUENCE_MAIL_TYPE } from '../../constants';
 // Import types
 import {
 	AddSequenceMailProps,
-	SequenceMailSettings,
+	SequenceMailFormData,
 	SequenceMailRequest,
 } from '../../types';
 
@@ -24,7 +24,7 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 		setIsAdding(false);
 	};
 
-	const handleSave = async (data: SequenceMailSettings) => {
+	const handleSave = async (data: SequenceMailFormData) => {
 		// Start processing
 		try {
 			// Prepare the data for API
@@ -32,8 +32,9 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 				type: SEQUENCE_MAIL_TYPE,
 				parent_id: sequenceId,
 				name: data.subject, // Use subject as name for consistency
+				subject: data.subject,
+				email_body: data.email_body,
 				settings: {
-					subject: data.subject,
 					pre_header: data.pre_header,
 					delay: {
 						value: data.delay.value,
@@ -47,7 +48,6 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 					days: data.days,
 					add_utm_parameters: data.add_utm_parameters,
 					utm_parameters: data.utm_parameters,
-					email_body: data.email_body,
 					templates: data.templates || [],
 				},
 				description: __('New sequence email', 'quillcrm'),
@@ -89,6 +89,7 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 			onSave={handleSave}
 			initialData={{
 				subject: '',
+				email_body: '',
 				pre_header: '',
 				delay: {
 					value: 0,
@@ -116,7 +117,6 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 					campaign_term: '',
 					campaign_content: '',
 				},
-				email_body: '',
 				templates: [],
 			}}
 		/>

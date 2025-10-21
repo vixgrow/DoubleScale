@@ -27,6 +27,15 @@ class Campaign_Model extends Model {
 
 
 
+
+
+
+
+
+
+
+
+
 	/**
 	 * Table name
 	 *
@@ -97,7 +106,7 @@ class Campaign_Model extends Model {
 	 *
 	 * @var array
 	 */
-	protected $appends = array( 'sent', 'opened', 'click' );
+	protected $appends = array( 'sent', 'opened', 'click', 'subject', 'email_body' );
 
 
 	/**
@@ -193,6 +202,30 @@ class Campaign_Model extends Model {
 		return $this->messages()
 			->where( 'clicked', true )
 			->count();
+	}
+
+	public function getSubjectAttribute() {
+		 $template_ids = $this->get_template_ids();
+		$template      = reset( $template_ids );
+		if ( $template ) {
+			$template = Template_Model::find( $template );
+			if ( $template ) {
+				return $template->subject;
+			}
+		}
+		return '';
+	}
+
+	public function getEmailBodyAttribute() {
+		$template_ids = $this->get_template_ids();
+		$template     = reset( $template_ids );
+		if ( $template ) {
+			$template = Template_Model::find( $template );
+			if ( $template ) {
+				return $template->body;
+			}
+		}
+		return '';
 	}
 
 	/**
@@ -309,9 +342,10 @@ class Campaign_Model extends Model {
 	 */
 	private function process_templates( $templates_data ) {
 		$campaign_type    = $this->get_template_processing_type();
+		$campaign_status  = $this->status ?? 'draft';
 		$template_factory = Campaign_Template_Factory::instance();
 
-		return $template_factory->process_templates_data( $templates_data, $campaign_type );
+		return $template_factory->process_templates_data( $templates_data, $campaign_type, $campaign_status );
 	}
 
 	/**

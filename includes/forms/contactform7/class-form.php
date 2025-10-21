@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Contact Form 7 Forms Form
  * This class is used to handle Contact Form 7 form integration
@@ -13,11 +14,15 @@ namespace QuillCRM\Forms\ContactForm7;
 use WPCF7_ContactForm;
 use QuillCRM\Abstracts\Form as Abstracts_Form;
 use QuillCRM\Managers\Forms_Manager;
+use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
 
 /**
  * ContactForm7 class
  */
 class Form extends Abstracts_Form {
+
+
+
 
 	/**
 	 * Slug
@@ -51,6 +56,7 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
 	}
 
+
 	/**
 	 * Set is_enabled
 	 *
@@ -67,7 +73,7 @@ class Form extends Abstracts_Form {
 	 *
 	 * @param string $form_id
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function get_fields( $form_id ) {
 		$form   = WPCF7_ContactForm::get_instance( $form_id );
@@ -93,7 +99,7 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_fields() {
-		// Check nonce.
+		 // Check nonce.
 		check_ajax_referer( 'quillcrm-admin', 'nonce' );
 
 		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( $_POST['form_id'] ) : '';

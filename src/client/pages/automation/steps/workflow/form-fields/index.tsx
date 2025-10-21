@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -32,6 +32,8 @@ import { Switch } from '@quillcrm/components/ui/switch';
 import { Spinner } from '@quillcrm/components/ui/spinner';
 
 interface FormFieldsProps {
+	values: { [key: string]: any };
+	onChange: (value: any) => void;
 	values: { [key: string]: any };
 	onChange: (value: any) => void;
 }

@@ -177,7 +177,12 @@ export const ProductBlockRenderer: React.FC<ProductBlockRendererProps> = ({
 			<h3 style={titleStyle}>{props.title}</h3>
 			<p style={descriptionStyle}>{props.description}</p>
 			<div style={priceStyle}>{props.price || '0.00 EGP'}</div>
-			<a href={props.buttonLink} style={buttonStyle}>
+			<a
+				href={props.buttonLink}
+				target="_blank"
+				rel="noopener noreferrer"
+				style={buttonStyle}
+			>
 				{props.buttonText}
 			</a>
 		</div>

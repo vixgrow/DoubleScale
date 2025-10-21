@@ -9,7 +9,7 @@ import { END_POINT, SEQUENCE_MAIL_TYPE } from '../../constants';
 import {
 	EditSequenceMailProps,
 	SequenceMail,
-	SequenceMailSettings,
+	SequenceMailFormData,
 	SequenceMailRequest,
 } from '../../types';
 
@@ -41,11 +41,8 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 			// Handle case where settings might be empty or null
 			const settings = response.settings || {};
 
-			// Use the response directly since it already matches our SequenceMail type
-			// Just ensure settings are properly initialized
 			if (!response.settings) {
 				response.settings = {
-					subject: response.name || '',
 					pre_header: '',
 					delay: {
 						value: 0,
@@ -73,13 +70,10 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 						campaign_term: '',
 						campaign_content: '',
 					},
-					email_body: '',
 					templates: [],
 				};
 			} else {
 				// Ensure all required fields exist
-				response.settings.subject =
-					settings.subject || response.name || '';
 				response.settings.pre_header = settings.pre_header || '';
 
 				if (!response.settings.delay) {
@@ -134,7 +128,7 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 		setEmailData(null);
 	};
 
-	const handleSave = async (data: SequenceMailSettings) => {
+	const handleSave = async (data: SequenceMailFormData) => {
 		setLoading(true);
 		try {
 			// Prepare the data for API
@@ -142,8 +136,9 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 				type: SEQUENCE_MAIL_TYPE,
 				parent_id: sequenceId, // Include parent_id to maintain relationship
 				name: data.subject, // Use subject as name for consistency
+				subject: data.subject,
+				email_body: data.email_body,
 				settings: {
-					subject: data.subject,
 					pre_header: data.pre_header,
 					delay: {
 						value: data.delay.value,
@@ -157,7 +152,6 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 					days: data.days,
 					add_utm_parameters: data.add_utm_parameters,
 					utm_parameters: data.utm_parameters,
-					email_body: data.email_body,
 					templates: data.templates || [],
 				},
 			};
@@ -205,7 +199,8 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 			title={__('Edit Sequence Email', 'quillcrm')}
 			onSave={handleSave}
 			initialData={{
-				subject: emailData.settings.subject,
+				subject: emailData.subject,
+				email_body: emailData.email_body,
 				pre_header: emailData.settings.pre_header,
 				delay: {
 					value: emailData.settings.delay.value,
@@ -219,7 +214,6 @@ const EditSequenceMail: React.FC<EditSequenceMailProps> = ({
 				days: emailData.settings.days,
 				add_utm_parameters: emailData.settings.add_utm_parameters,
 				utm_parameters: emailData.settings.utm_parameters,
-				email_body: emailData.settings.email_body,
 				templates: emailData.settings.templates || [],
 			}}
 		/>

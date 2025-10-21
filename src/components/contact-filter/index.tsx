@@ -92,8 +92,8 @@ export const ContactFilterSection = forwardRef<
 	ContactFilterSectionProps
 >(({ title, description, onReset, onChange, initialRows }, ref) => {
 	const [rows, setRows] = useState<FilterRow[]>(
-		initialRows && initialRows.length > 0 
-			? initialRows 
+		initialRows && initialRows.length > 0
+			? initialRows
 			: [{ id: 1, list: 'all', tag: 'all' }]
 	);
 	const [lists, setLists] = useState<List[]>([]);
@@ -257,7 +257,7 @@ export const ContactFilterSection = forwardRef<
 	return (
 		<div className="space-y-1">
 			<div>
-				<p className="text-base font-bold">{title}</p>
+				<p className="text-base font-bold text-black">{title}</p>
 				<p className="text-sm text-muted-foreground">{description}</p>
 			</div>
 			{error && (

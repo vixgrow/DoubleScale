@@ -60,11 +60,24 @@ const Workflow: React.FC = () => {
 	const [currentStep, setCurrentStep] = useState<OrganizedStep | null>(null);
 	const [visible, setVisible] = useState<boolean>(false);
 	const useReactFlow = true;
-	const { createNotice, setCurrentTrigger } = useDispatch('quillcrm/core');
+	const { createNotice, setCurrentTrigger, setFormContext } =
+		useDispatch('quillcrm/core');
 
 	useEffect(() => {
 		if (automation) {
 			setCurrentTrigger(automation.trigger);
+
+			// Set form context if automation has form data
+			if (
+				automation.settings?.form_id &&
+				automation.settings?.form_type
+			) {
+				setFormContext({
+					formId: automation.settings.form_id,
+					triggerId: automation.settings.form_type,
+					automationId: automation.id,
+				});
+			}
 		}
 	}, [automation]);
 

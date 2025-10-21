@@ -12,6 +12,7 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
  * Internal dependencies
  */
 import type { Automation } from '@quillcrm/client';
+import { getTrigger } from '@quillcrm/utils';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeActionsDropdown from '../components/node-actions-dropdown';
 
@@ -22,13 +23,20 @@ interface TriggerNodeData {
 }
 
 const TriggerNode: React.FC<NodeProps> = ({ data }) => {
-	const { onTriggerClick } = data as unknown as TriggerNodeData;
+	const { automation, onTriggerClick } = data as unknown as TriggerNodeData;
 
 	const handleEdit = () => {
 		if (onTriggerClick) {
 			onTriggerClick();
 		}
 	};
+
+	// Get trigger label from the automation trigger
+	const triggerData = getTrigger(automation?.trigger || '');
+	const triggerName =
+		triggerData?.label ||
+		automation?.trigger ||
+		__('No trigger selected', 'quillcrm');
 
 	const TriggerIcon = () => (
 		<svg
@@ -60,11 +68,10 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 					<div className="qcrm-reactflow-node__title">
 						{__('Start Workflow (Trigger)', 'quillcrm')}
 					</div>
-					<div className="qcrm-reactflow-node__subtitle">
-						{__(
-							'Select the event that starts your Workflow',
-							'quillcrm'
-						)}
+					<div className="qcrm-reactflow-node__trigger-name">
+						<span style={{ fontWeight: 'bold', color: 'green' }}>
+							{triggerName}
+						</span>
 					</div>
 				</div>
 

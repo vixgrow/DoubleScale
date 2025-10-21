@@ -20,12 +20,14 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\User_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\WC_Order_Model;
+use QuillCRM\Models\Automation_Contact_Processes_Model;
 use QuillCRM\Utils;
 
 /**
  * Contact_Model class
  */
 class Contact_Model extends Model {
+
 
 
 
@@ -163,7 +165,7 @@ class Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
 	 */
 	public function campaign_emails() {
-		return $this->hasMany( Tracking_Model::class, 'contact_id', 'id' )->emails();
+		 return $this->hasMany( Tracking_Model::class, 'contact_id', 'id' )->emails();
 	}
 
 	/**
@@ -236,7 +238,7 @@ class Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function processes() {
-		return $this->hasMany( Automation_Contact_Process_Model::class, 'contact_id', 'id' );
+		return $this->hasMany( Automation_Contact_Processes_Model::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -327,6 +329,47 @@ class Contact_Model extends Model {
 	}
 
 	/**
+	 * Override save method to ensure events are registered
+	 *
+	 * @param array $options
+	 * @return bool
+	 */
+	public function save( array $options = array() ) {
+		// Ensure events are registered if this is a new contact
+		if ( ! $this->exists ) {
+			$dispatcher = static::getEventDispatcher();
+			$model_name = static::class;
+			$event_name = "eloquent.creating: {$model_name}";
+			$listeners  = $dispatcher->getListeners( $event_name );
+
+			// If no listeners, re-register events on current dispatcher
+			if ( count( $listeners ) === 0 ) {
+				$this->registerEventsOnDispatcher( $dispatcher, $model_name );
+			}
+		}
+
+		return parent::save( $options );
+	}
+
+	/**
+	 * Override create method to ensure events are properly registered
+	 *
+	 * @param array $attributes
+	 * @return static
+	 */
+	public static function create( array $attributes = array() ) {
+		// Ensure boot is called by creating a temporary instance
+		new static();
+
+		// Create the actual instance using standard Eloquent approach
+		$instance = new static();
+		$instance->fill( $attributes );
+		$instance->save();
+
+		return $instance;
+	}
+
+	/**
 	 * Create or update contact
 	 *
 	 * @param array $data Contact data
@@ -337,13 +380,79 @@ class Contact_Model extends Model {
 		$contact = self::where( 'email', $data['email'] ?? '' )->first();
 
 		if ( ! $contact ) {
-			$contact = new self();
+			// Use create() to ensure events fire
+			return self::create( $data );
 		}
 
+		// For updates, use fill + save to trigger saved event
 		$contact->fill( $data );
 		$contact->save();
 
 		return $contact;
+	}
+
+	/**
+	 * Register events on a specific dispatcher
+	 *
+	 * @param object $dispatcher Event dispatcher instance
+	 * @param string $model_name Model class name
+	 * @return void
+	 */
+	private function registerEventsOnDispatcher( $dispatcher, $model_name ) {
+		// Creating event
+		$dispatcher->listen(
+			"eloquent.creating: {$model_name}",
+			function ( $contact ) {
+				$contact->hash_id = Utils::generate_hash_key();
+			}
+		);
+
+		// Saving event
+		$dispatcher->listen(
+			"eloquent.saving: {$model_name}",
+			function ( $contact ) {
+				unset( $contact->revenue );
+			}
+		);
+
+		// Saved event
+		$dispatcher->listen(
+			"eloquent.saved: {$model_name}",
+			function ( $contact ) {
+				if ( $contact->status == 'unsubscribed' ) {
+					do_action( 'quillcrm_contact_unsubscribed', $contact );
+				} else {
+					do_action( 'quillcrm_contact_subscribed', $contact );
+				}
+			}
+		);
+
+		// Deleting event
+		$dispatcher->listen(
+			"eloquent.deleting: {$model_name}",
+			function ( $contact ) {
+				$contact->notes()->delete();
+				$contact->automation_contacts()->delete();
+			}
+		);
+
+		// Retrieved event (if WooCommerce is active)
+		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			$dispatcher->listen(
+				"eloquent.retrieved: {$model_name}",
+				function ( $contact ) {
+					$orders  = $contact->orders;
+					$revenue = 0;
+
+					foreach ( $orders as $order ) {
+						$revenue += $order->total_amount;
+					}
+
+					$currency         = \get_woocommerce_currency();
+					$contact->revenue = $revenue . ' ' . $currency;
+				}
+			);
+		}
 	}
 
 	/**
@@ -354,57 +463,25 @@ class Contact_Model extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		 parent::boot();
+		 // Use global flag to prevent multiple event registrations
+		global $quillcrm_contact_events_registered;
 
-		static::deleting(
-			function ( $contact ) {
-				$contact->notes()->delete();
+		parent::boot();
 
-				// Delete the contact from the automation contacts
-				$contact->automation_contacts()->delete();
-			}
-		);
+		if ( $quillcrm_contact_events_registered ) {
+			return;
+		}
+		$quillcrm_contact_events_registered = true;
 
-		parent::saved(
-			function ( $contact ) {
-				if ( $contact->status == 'unsubscribed' ) {
-					do_action( 'quillcrm_contact_unsubscribed', $contact );
-				} else {
-					do_action( 'quillcrm_contact_subscribed', $contact );
-				}
-			}
-		);
-
-		// Attach revenue to the contact if woo commerce is active in retreving contact.
-		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-			parent::retrieved(
-				function ( $contact ) {
-					$orders  = $contact->orders;
-					$revenue = 0;
-
-					foreach ( $orders as $order ) {
-						$revenue += $order->total_amount;
-					}
-
-					// WooCommerce Currency
-					$currency = \get_woocommerce_currency();
-
-					$contact->revenue = $revenue . ' ' . $currency;
-				}
-			);
+		// Get the event dispatcher
+		$dispatcher = static::getEventDispatcher();
+		if ( ! $dispatcher ) {
+			return;
 		}
 
-		// Save templates when saving the campaign
-		static::saving(
-			function ( $contact ) {
-				unset( $contact->revenue );
-			}
-		);
-
-		static::creating(
-			function ( $contact ) {
-				$contact->hash_id = Utils::generate_hash_key();
-			}
-		);
+		// Register events directly with the dispatcher
+		$model_name = static::class;
+		$instance   = new static();
+		$instance->registerEventsOnDispatcher( $dispatcher, $model_name );
 	}
 }

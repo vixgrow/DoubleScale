@@ -505,7 +505,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			// update the template settings
 			if ( isset( $email_sequence->settings['template_ids'] ) ) {
 				$template_id = reset( $email_sequence->get_template_ids() );
-				if ( $this->is_template_used_in_tracking( $template_id ) ) {
+				if ( Template_Model::is_used_in_tracking( $template_id ) ) {
 					// Template in use - create new one
 					unset( $email_sequence_data['settings']['template_ids'] );
 					$template_data = Template_Data_Preparer::prepare_for_campaign( $email_sequence_data, 'email' );
@@ -700,18 +700,6 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 		return $sanitized;
 	}
 
-
-	/**
-	 * Check that this template id is used in Tracking_Model
-	 *
-	 * @param int $template_id The template id.
-	 *
-	 * @return bool $is_used Whether the template id is used in Tracking_Model
-	 */
-	private function is_template_used_in_tracking( $template_id ) {
-		$tracking = Tracking_Model::where( 'template_id', $template_id )->get();
-		return $tracking->isNotEmpty();
-	}
 
 	/**
 	 * Prepare the email sequence data

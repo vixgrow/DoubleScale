@@ -130,8 +130,29 @@ class Template_Data_Preparer {
 	 * @return array|null Template data array or null if not applicable
 	 */
 	public static function prepare_for_campaign( $data, $channel_type ) {
-		// If this is a sequence email (has parent_id), prepare template
+		// If this is a sequence email (has parent_id), prepare template with parent settings
 		if ( isset( $data['parent_id'] ) && $data['parent_id'] ) {
+			// Need to get parent sequence settings for email metadata
+			if ( $channel_type === 'email' ) {
+				// Load parent to get from_name, from_email, reply_to
+				$parent_campaign = \QuillCRM\Models\Campaign_Model::find( $data['parent_id'] );
+				if ( $parent_campaign && isset( $parent_campaign->settings ) ) {
+					// Merge parent settings with sequence data
+					$merged_settings = array_merge(
+						array(
+							'from_name'       => $parent_campaign->settings['from_name'] ?? get_bloginfo( 'name' ),
+							'from_email'      => $parent_campaign->settings['from_email'] ?? get_option( 'admin_email' ),
+							'reply_to'        => $parent_campaign->settings['reply_to_email'] ?? get_option( 'admin_email' ),
+							'add_unsubscribe' => true,
+							'enable_utm'      => false,
+						),
+						$data
+					);
+					return self::prepare_from_settings( $merged_settings, $channel_type );
+				}
+			}
+
+			// Fallback for non-email or if parent not found
 			return self::prepare_from_settings( $data, $channel_type );
 		}
 

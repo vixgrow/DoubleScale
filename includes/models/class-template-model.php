@@ -167,6 +167,17 @@ class Template_Model extends Model {
 	}
 
 	/**
+	 * Check if template is used in any tracking record
+	 * Shared helper to determine if template can be safely updated or needs new version
+	 *
+	 * @param int $template_id Template ID
+	 * @return bool True if template has been used in any sent message
+	 */
+	public static function is_used_in_tracking( $template_id ) {
+		return Tracking_Model::where( 'template_id', $template_id )->exists();
+	}
+
+	/**
 	 * Create or update template
 	 *
 	 * @since 1.0.0

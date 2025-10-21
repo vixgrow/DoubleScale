@@ -30,7 +30,7 @@ const TemplateCard = ({
 	};
 
 	const baseClasses =
-		'w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-2 transition-colors';
+		'w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-2 transition-colors text-center';
 	const interactiveClasses = isDragOverlay
 		? 'cursor-grabbing border-blue-300 shadow-xl'
 		: 'cursor-grab hover:cursor-grabbing hover:border-blue-300';
@@ -44,16 +44,16 @@ const TemplateCard = ({
 			className={`${baseClasses} ${interactiveClasses}`}
 			key={item.value || blockType}
 		>
-		<DragDropIcon />
-		<div className="flex flex-row gap-2 items-center justify-center w-full">
-			{type === 'layout' &&
-				item.width?.map((width, index) => (
-					<div
-						key={index}
-						className="w-full h-full bg-border rounded-sm py-4"
-						style={{ width: `${width}%` }}
-					></div>
-				))}
+			<DragDropIcon />
+			<div className="flex flex-row gap-2 items-center justify-center w-full">
+				{type === 'layout' &&
+					item.width?.map((width, index) => (
+						<div
+							key={index}
+							className="w-full h-full bg-border rounded-sm py-4"
+							style={{ width: `${width}%` }}
+						></div>
+					))}
 
 				{type === 'element' && item.icon && (
 					<div>

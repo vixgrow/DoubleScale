@@ -334,42 +334,27 @@ const Templates: React.FC = () => {
 				type: 'email' as const,
 			};
 
-			if (templateData.id) {
-				// Update existing template with latest metadata
-				console.log('Updating existing template:', templateData.id);
-				savedTemplate = await updateTemplateAPI(
-					templateData.id,
-					templateData
-				);
-			} else {
+			// If campaign is NOT draft, create new template to preserve original
+			// Only update existing template if campaign is draft
+			const shouldCreateNew = campaign.status !== 'draft';
+
+			if (shouldCreateNew || !templateData.id) {
 				// Create new template with metadata
-				// The builder will later fill in the email_body
 				console.log(
 					'Creating new template with metadata:',
 					templateData
 				);
 				savedTemplate = await createTemplateAPI(templateData);
+			} else {
+				// Update existing template with latest metadata (draft mode)
+				console.log('Updating existing template:', templateData.id);
+				savedTemplate = await updateTemplateAPI(
+					templateData.id,
+					templateData
+				);
 			}
 
 			console.log('Saved template:', savedTemplate);
-
-			// Prepare template data for campaign settings
-			const campaignTemplateData = {
-				template_id: savedTemplate.id,
-				name: savedTemplate.name,
-				type: savedTemplate.type,
-				subject: savedTemplate.subject,
-				preview_text: savedTemplate.preview_text,
-				from_name: savedTemplate.from_name,
-				from_email: savedTemplate.from_email,
-				reply_to: savedTemplate.reply_to,
-				enable_utm: savedTemplate.enable_utm,
-				utm_source: savedTemplate.utm_source,
-				utm_medium: savedTemplate.utm_medium,
-				utm_name: savedTemplate.utm_name,
-				utm_term: savedTemplate.utm_term,
-				utm_content: savedTemplate.utm_content,
-			};
 
 			// Save template_id to campaign step data
 			const saveSuccess = await saveCampaignStep('template', {
@@ -380,11 +365,12 @@ const Templates: React.FC = () => {
 				throw new Error('Failed to save template step data');
 			}
 
-			// Update campaign settings with template data
+			// Update campaign settings with only template_ids
+			// The backend will fetch full template data using attach_templates()
 			await saveCampaignSettings({
 				settings: {
 					...campaign.settings,
-					templates: [campaignTemplateData],
+					template_ids: [savedTemplate.id!],
 				},
 			});
 

@@ -88,7 +88,7 @@ const ContactInformation: React.FC = () => {
 					</div>
 					<div className="w-full">
 						<div className="flex justify-between items-center gap-2">
-							<CardTitle className="text-xl font-semibold">
+							<CardTitle className="text-xl font-semibold truncate max-w-[168px]">
 								{fullName}
 							</CardTitle>
 							<Select

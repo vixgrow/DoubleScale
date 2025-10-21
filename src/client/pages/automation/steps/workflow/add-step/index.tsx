@@ -24,7 +24,6 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import { Card } from '@/components/ui/card';
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
@@ -112,7 +111,7 @@ const AddStep: React.FC<AddStepProps> = ({
 	const { automation, steps, setSteps, setUpdatedSteps } =
 		useAutomationContext();
 	const [loading, setLoading] = useState(false);
-	const [popoverVisible, setPopoverVisible] = useState(false);
+	const [Visible, setVisible] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	if (!automation) {
@@ -161,11 +160,22 @@ const AddStep: React.FC<AddStepProps> = ({
 			} as OrganizedStep;
 			setUpdatedSteps({});
 			setSteps([...newSteps, response]);
-			setStep(organizedStep);
+
 			createNotice({
 				type: 'success',
 				message: __('Step added', 'quillcrm'),
 			});
+
+			// Close dialog first
+			setVisible(false);
+
+			// Then open modal/selector for action, condition, goal, and delay steps
+			// Use setTimeout to ensure dialog closes before modal opens
+			if (type === 'action' || type === 'condition' || type === 'goal' || type === 'delay') {
+				setTimeout(() => {
+					setStep(organizedStep);
+				}, 100);
+			}
 		} catch (error: any) {
 			createNotice({
 				type: 'error',
@@ -229,13 +239,13 @@ const AddStep: React.FC<AddStepProps> = ({
 	};
 
 	return (
-		<Dialog open={popoverVisible} onOpenChange={setPopoverVisible}>
+		<Dialog open={Visible} onOpenChange={setVisible}>
 			<DialogTrigger asChild>
 				<div
 					className="qcrm-automation-workflow__add-step flex items-center justify-center pointer-events-auto"
 					onClick={(e) => {
 						e.stopPropagation();
-						setPopoverVisible(!popoverVisible);
+						setVisible(!Visible);
 					}}
 				>
 					<Button
@@ -249,52 +259,43 @@ const AddStep: React.FC<AddStepProps> = ({
 			</DialogTrigger>
 			<DialogOverlay className="z-[150200]" />
 			<DialogContent className="sm:max-w-[425px] p-6 z-[150200]">
-				{loading ? (
-					<div className="flex justify-center">
-						<Spinner className="h-6 w-6" />
-					</div>
-				) : (
-					<>
-						<DialogHeader>
-							<DialogTitle>
-								{__('Add Step', 'quillcrm')}
-							</DialogTitle>
-							<DialogDescription className="mt-1">
-								{__('Select one of the Steps', 'quillcrm')}
-							</DialogDescription>
-						</DialogHeader>
-						<div className="flex flex-col gap-5">
-							{map(typesOptions, (type, key) => (
-								<Card
-									key={key}
-									className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-									onClick={(e) => {
-										e.stopPropagation();
-										storeStep(key);
-										setPopoverVisible(false);
-									}}
-								>
-									<div className="flex items-center justify-between">
-										<div className="flex items-center gap-4">
-											<div className="flex-shrink-0 text-white p-2 bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg">
-												{type.icon}
-											</div>
-											<div className="">
-												<h3 className="font-semibold text-xl text-[#3F4254]">
-													{type.label}
-												</h3>
-												<p className="text-sm text-[#333333] mt-1">
-													{type.description}
-												</p>
-											</div>
-										</div>
-										<GradientArrowIcon />
+				<DialogHeader>
+					<DialogTitle>
+						{__('Add Step', 'quillcrm')}
+					</DialogTitle>
+					<DialogDescription className="mt-1">
+						{__('Select one of the Steps', 'quillcrm')}
+					</DialogDescription>
+				</DialogHeader>
+				<div className="flex flex-col gap-5">
+					{map(typesOptions, (type, key) => (
+						<Card
+							key={key}
+							className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${loading ? 'pointer-events-none opacity-50' : ''}`}
+							onClick={(e) => {
+								e.stopPropagation();
+								storeStep(key);
+							}}
+						>
+							<div className="flex items-center justify-between">
+								<div className="flex items-center gap-4">
+									<div className="flex-shrink-0 text-white p-2 bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg">
+										{type.icon}
 									</div>
-								</Card>
-							))}
-						</div>
-					</>
-				)}
+									<div className="">
+										<h3 className="font-semibold text-xl text-[#3F4254]">
+											{type.label}
+										</h3>
+										<p className="text-sm text-[#333333] mt-1">
+											{type.description}
+										</p>
+									</div>
+								</div>
+								<GradientArrowIcon />
+							</div>
+						</Card>
+					))}
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

@@ -13,6 +13,7 @@ namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
 use QuillCRM\Services\Campaign_Template_Factory;
+use QuillCRM\Services\Template_Data_Preparer;
 use QuillCRM\Constants\Campaign_Channel;
 
 /**
@@ -213,8 +214,8 @@ class Automation_Step_Model extends Model {
 					return;
 				}
 
-				// Prepare template data from settings fields
-				$template_data = self::prepare_template_data_from_settings( $settings, $channel_type );
+				// Prepare template data from settings fields using shared service
+				$template_data = Template_Data_Preparer::prepare_from_settings( $settings, $channel_type, 'Automation: ' );
 
 				if ( ! empty( $template_data ) ) {
 					// Use Campaign_Template_Factory to process template data
@@ -348,50 +349,4 @@ class Automation_Step_Model extends Model {
 		return Tracking_Model::where( 'template_id', $template_id )->exists();
 	}
 
-	/**
-	 * Prepare template data from settings fields
-	 * Converts step settings into template data format expected by Campaign_Template_Factory
-	 *
-	 * @param array  $settings Step settings
-	 * @param string $channel_type Channel type ('email', 'sms', 'whatsapp')
-	 * @return array|null Template data array or null if required fields missing
-	 */
-	private static function prepare_template_data_from_settings( $settings, $channel_type ) {
-		// Email requires subject and body
-		if ( $channel_type === 'email' ) {
-			if ( empty( $settings['subject'] ) || empty( $settings['body'] ) ) {
-				return null;
-			}
-
-			return array(
-				'name'     => 'Automation: ' . $settings['subject'],
-				'subject'  => $settings['subject'],
-				'body'     => $settings['body'],
-				'settings' => array(
-					'from_name'       => $settings['from_name'] ?? get_bloginfo( 'name' ),
-					'from_email'      => $settings['from_email'] ?? get_option( 'admin_email' ),
-					'reply_to'        => $settings['reply_to'] ?? '',
-					'add_unsubscribe' => true,
-					'enable_utm'      => false,
-				),
-			);
-		}
-
-		// SMS and WhatsApp only require body
-		if ( $channel_type === 'sms' || $channel_type === 'whatsapp' ) {
-			if ( empty( $settings['body'] ) ) {
-				return null;
-			}
-
-			$channel_label = ucfirst( $channel_type );
-			return array(
-				'name'     => "Automation: {$channel_label} - " . mb_substr( $settings['body'], 0, 30 ),
-				'subject'  => '', // SMS/WhatsApp don't have subject
-				'body'     => $settings['body'],
-				'settings' => array(),
-			);
-		}
-
-		return null;
-	}
 }

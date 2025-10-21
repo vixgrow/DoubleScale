@@ -111,7 +111,7 @@ const AddStep: React.FC<AddStepProps> = ({
 	const { automation, steps, setSteps, setUpdatedSteps } =
 		useAutomationContext();
 	const [loading, setLoading] = useState(false);
-	const [Visible, setVisible] = useState(false);
+	const [visible, setVisible] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	if (!automation) {
@@ -239,13 +239,13 @@ const AddStep: React.FC<AddStepProps> = ({
 	};
 
 	return (
-		<Dialog open={Visible} onOpenChange={setVisible}>
+		<Dialog open={visible} onOpenChange={setVisible}>
 			<DialogTrigger asChild>
 				<div
 					className="qcrm-automation-workflow__add-step flex items-center justify-center pointer-events-auto"
 					onClick={(e) => {
 						e.stopPropagation();
-						setVisible(!Visible);
+						setVisible(!visible);
 					}}
 				>
 					<Button

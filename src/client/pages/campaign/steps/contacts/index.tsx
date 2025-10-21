@@ -48,6 +48,13 @@ const Contacts: React.FC = () => {
 	const [panelHeight, setPanelHeight] = useState<number>(0);
 	const panelRef = useRef<HTMLDivElement>(null);
 
+	// Handle filter mode change - clear filters immediately
+	const handleFilterModeChange = (newMode: string) => {
+		setFilters([]); // Clear filters first
+		setFilterBy(newMode); // Then change mode
+		setShouldFetchContacts(true); // Trigger refetch
+	};
+
 	// Measure and sync panel height
 	useEffect(() => {
 		const measureHeight = () => {
@@ -137,7 +144,7 @@ const Contacts: React.FC = () => {
 								</p>
 								<RadioGroup
 									value={filterBy}
-									onValueChange={setFilterBy}
+									onValueChange={handleFilterModeChange}
 									className="flex gap-4"
 								>
 									<Label
@@ -177,6 +184,7 @@ const Contacts: React.FC = () => {
 
 							{filterBy === 'list-tags' && (
 								<ListTagFilter
+									key="list-tags-filter"
 									filters={filters}
 									setFilters={setFilters}
 									fetchContacts={handleApplyFilters}
@@ -186,6 +194,7 @@ const Contacts: React.FC = () => {
 							)}
 							{filterBy === 'advanced' && (
 								<AdvancedFilter
+									key="advanced-filter"
 									filters={filters}
 									setFilters={setFilters}
 									fetchContacts={handleApplyFilters}

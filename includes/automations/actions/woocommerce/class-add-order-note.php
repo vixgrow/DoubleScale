@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Add Order Note Action
  *
@@ -21,6 +22,9 @@ use QuillCRM\Managers\Actions_Manager;
  * Add Order Note Action
  */
 class Add_Order_Note extends Action {
+
+
+
 
 	/**
 	 * Action Name
@@ -56,6 +60,13 @@ class Add_Order_Note extends Action {
 	 * @var string
 	 */
 	public $group = 'order';
+
+	/**
+	 * Required triggers for this action to be enabled
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array( 'wc_order_created', 'wc_order_completed', 'wc_order_status_changed', 'wc_order_refunded' );
 
 	/**
 	 * Process Action

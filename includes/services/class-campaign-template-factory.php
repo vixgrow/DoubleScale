@@ -115,6 +115,8 @@ class Campaign_Template_Factory {
 	private function get_template_processor( $campaign_type ) {
 		switch ( $campaign_type ) {
 			case 'email':
+			case 'email_sequence':
+			case 'sequence_mail':
 				return new Email_Template_Processor();
 			case 'sms':
 				return new SMS_Template_Processor();

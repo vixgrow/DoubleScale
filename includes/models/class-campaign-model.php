@@ -398,11 +398,13 @@ class Campaign_Model extends Model {
 	 * @return array Array of template IDs
 	 */
 	private function process_templates( $templates_data ) {
-		$campaign_type    = $this->get_template_processing_type();
-		$campaign_status  = $this->status ?? 'draft';
-		$template_factory = Campaign_Template_Factory::instance();
+		$campaign_type_int = $this->get_template_processing_type();
+		// Convert integer to string for template factory
+		$campaign_type_str = Campaign_Channel::to_string( $campaign_type_int ) ?? 'email';
+		$campaign_status   = $this->status ?? 'draft';
+		$template_factory  = Campaign_Template_Factory::instance();
 
-		return $template_factory->process_templates_data( $templates_data, $campaign_type, $campaign_status );
+		return $template_factory->process_templates_data( $templates_data, $campaign_type_str, $campaign_status );
 	}
 
 	/**

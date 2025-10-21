@@ -38,6 +38,10 @@ class Send_Email_Sequence extends Action {
 
 
 
+
+
+
+
 	/**
 	 * Action Name
 	 *
@@ -106,7 +110,8 @@ class Send_Email_Sequence extends Action {
 
 		// Validate email sequence exists
 		$email_sequence = Email_Sequence_Model::find( $email_sequence_id );
-		if ( ! $email_sequence || $email_sequence->get_type() !== Campaign_Channel::CHANNEL_EMAIL_SEQUENCE ) {
+		$type           = $email_sequence->get_type();
+		if ( ! $email_sequence || $type != Campaign_Channel::CHANNEL_EMAIL_SEQUENCE ) {
 			quillcrm_get_logger()->error(
 				'Email sequence not found or invalid type',
 				array(

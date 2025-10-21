@@ -367,7 +367,7 @@ const InfoCard: React.FC = () => {
                         style={{ borderRadius: '0.5rem' }}
                     />
                 ) : (
-                    <div className="text-lg font-semibold">
+                    <div className="text-lg font-semibold truncate max-w-[400px]">
                         {value || __('—', 'quillcrm')}
                     </div>
                 )}

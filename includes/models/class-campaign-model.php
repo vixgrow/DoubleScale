@@ -499,7 +499,7 @@ class Campaign_Model extends Model {
 		$query = Contact_Model::where('status', 'subscribed');
 
 		// Apply type-specific filtering
-		if ($campaign->is_email_campaign()) {
+		if ($campaign->is_email_campaign() || $campaign->is_email_sequence() || $campaign->is_sequence_mail()) {
 			$query->whereNotNull('email')->where('email', '!=', '');
 		} elseif ($campaign->is_sms_campaign() || $campaign->is_whatsapp_campaign()) {
 			$query->whereNotNull('phone')->where('phone', '!=', '');

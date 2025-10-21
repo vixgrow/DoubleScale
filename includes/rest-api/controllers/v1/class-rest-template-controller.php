@@ -300,8 +300,11 @@ class REST_Template_Controller extends REST_Controller {
 			$keyword    = $request->get_param( 'keyword' ); // Backward compatibility
 			$category   = $request->get_param( 'category' );
 
+			// Convert string type to integer for database query
+			$type_int = Campaign_Channel::to_integer( $type ) ?? Campaign_Channel::CHANNEL_EMAIL;
+
 			// Build query
-			$query = Template_Model::where( 'type', $type );
+			$query = Template_Model::where( 'type', $type_int );
 
 			// Add conditional filters
 			if ( $request->has_param( 'hidden' ) ) {

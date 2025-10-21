@@ -39,6 +39,16 @@ class Template_Field_Mapper
                 'specific_fields' => array('subject'),
                 'settings_fields' => array('from_name', 'from_email', 'reply_to', 'preview_text', 'enable_utm', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'),
             ),
+            Campaign_Channel::CHANNEL_EMAIL_SEQUENCE => array(
+                'common_fields' => array('template_id', 'name', 'body', 'type'),
+                'specific_fields' => array('subject'),
+                'settings_fields' => array('from_name', 'from_email', 'reply_to', 'preview_text', 'enable_utm', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'),
+            ),
+            Campaign_Channel::CHANNEL_SEQUENCE_MAIL => array(
+                'common_fields' => array('template_id', 'name', 'body', 'type'),
+                'specific_fields' => array('subject'),
+                'settings_fields' => array('from_name', 'from_email', 'reply_to', 'preview_text', 'enable_utm', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'),
+            ),
             Campaign_Channel::CHANNEL_SMS => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
                 'specific_fields' => array(),

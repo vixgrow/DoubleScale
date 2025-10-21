@@ -56,6 +56,8 @@ class Campaign_Analytics {
 	protected function get_model_query( $type ) {
 		switch ( $type ) {
 			case Campaign_Channel::CHANNEL_EMAIL:
+			case Campaign_Channel::CHANNEL_EMAIL_SEQUENCE:
+			case Campaign_Channel::CHANNEL_SEQUENCE_MAIL:
 				return Tracking_Model::emails();
 			case Campaign_Channel::CHANNEL_SMS:
 				return Tracking_Model::sms();
@@ -203,7 +205,7 @@ class Campaign_Analytics {
 		}
 
 		// Optimized: Single query per type with aggregate functions
-		if ( $type === Campaign_Channel::CHANNEL_EMAIL ) {
+		if ( $type === Campaign_Channel::CHANNEL_EMAIL || $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE || $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL ) {
 			$result = $base_query->selectRaw( 'SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened, SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked' )->first();
 
 			$stats['opened']  = (int) $result->opened;

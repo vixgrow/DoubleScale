@@ -27,6 +27,15 @@ class Campaign_Model extends Model {
 
 
 
+
+
+
+
+
+
+
+
+
 	/**
 	 * Table name
 	 *
@@ -97,7 +106,7 @@ class Campaign_Model extends Model {
 	 *
 	 * @var array
 	 */
-	protected $appends = array( 'sent', 'opened', 'click' );
+	protected $appends = array( 'sent', 'opened', 'click', 'subject', 'email_body' );
 
 
 	/**
@@ -193,6 +202,30 @@ class Campaign_Model extends Model {
 		return $this->messages()
 			->where( 'clicked', true )
 			->count();
+	}
+
+	public function getSubjectAttribute() {
+		 $template_ids = $this->get_template_ids();
+		$template      = reset( $template_ids );
+		if ( $template ) {
+			$template = Template_Model::find( $template );
+			if ( $template ) {
+				return $template->subject;
+			}
+		}
+		return '';
+	}
+
+	public function getEmailBodyAttribute() {
+		$template_ids = $this->get_template_ids();
+		$template     = reset( $template_ids );
+		if ( $template ) {
+			$template = Template_Model::find( $template );
+			if ( $template ) {
+				return $template->body;
+			}
+		}
+		return '';
 	}
 
 	/**

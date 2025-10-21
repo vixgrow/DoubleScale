@@ -21,6 +21,24 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -234,6 +252,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 				$email_sequence_data['settings']['templates'] = array(
 					$this->get_settings_template( $email_sequence_data ),
 				);
+				unset( $email_sequence_data['subject'], $email_sequence_data['email_body'] );
 			}
 
 			$email_sequence = Email_Sequence_Model::create( $email_sequence_data );
@@ -477,26 +496,30 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 
 			$email_sequence_data = $this->prepare_email_sequence( $request );
 
-			if ( isset( $email_sequence_data['settings']['delay'] ) ) {
-				$execute_at                        = Email_Sequences_Manager::instance()->calculate_execution_time( $email_sequence_data['settings']['delay'] );
-				$email_sequence_data['execute_at'] = $execute_at;
-			}
-			$email_sequence_data['execute_at'] = $execute_at;
-
 			// add parent_id to data
 			$email_sequence_data['parent_id'] = $email_sequence->parent_id;
 
 			// update the template settings
 			if ( isset( $email_sequence->settings['template_ids'] ) ) {
-				$template_ids = $email_sequence->get_template_ids();
-				foreach ( $template_ids as $template_id ) {
-					$template = Template_Model::find( $template_id );
-					$settings = $this->get_settings_template( $email_sequence_data );
-					$template->update( $settings );
+				$template_id = reset( $email_sequence->get_template_ids() );
+				if ( $this->is_template_used_in_tracking( $template_id ) ) {
+					unset( $email_sequence_data['settings']['template_ids'] );
+					$email_sequence_data['settings']['templates'] = array(
+						$this->get_settings_template( $email_sequence_data ),
+					);
+				} else {
+					if ( $template_id ) {
+						$template = Template_Model::find( $template_id );
+						if ( $template ) {
+							$settings = $this->get_settings_template( $email_sequence_data );
+							$template->update( $settings );
+						}
+					}
 				}
 			}
 
 			$email_sequence_data['settings']['template_ids'] = $email_sequence->get_template_ids();
+			unset( $email_sequence_data['subject'], $email_sequence_data['email_body'] );
 
 			$email_sequence->update( $email_sequence_data );
 
@@ -576,6 +599,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 					$sequence_mail_data['settings']['templates'] = array(
 						$this->get_settings_template( $sequence_mail_data ),
 					);
+					unset( $sequence_mail_data['subject'], $sequence_mail_data['email_body'] );
 					Email_Sequence_Model::create( $sequence_mail_data );
 				}
 			} elseif ( $type === $this->campaign_type_child ) {
@@ -586,7 +610,8 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 				$email_sequence_data['settings']['templates'] = array(
 					$this->get_settings_template( $email_sequence ),
 				);
-				$new_email_sequence                           = Email_Sequence_Model::create( $email_sequence_data );
+				unset( $email_sequence_data['subject'], $email_sequence_data['email_body'] );
+				$new_email_sequence = Email_Sequence_Model::create( $email_sequence_data );
 			}
 
 			return new WP_REST_Response( $new_email_sequence, 201 );
@@ -676,9 +701,9 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 		if ( $email_sequence['parent_id'] ) {
 			$parent_email_sequence = Email_Sequence_Model::find( $email_sequence['parent_id'] );
 			$settings_template     = array(
-				'name'     => $email_sequence['settings']['subject'],
-				'subject'  => $email_sequence['settings']['subject'],
-				'body'     => $email_sequence['settings']['email_body'],
+				'name'     => $email_sequence['subject'],
+				'subject'  => $email_sequence['subject'],
+				'body'     => $email_sequence['email_body'],
 				'settings' => array(
 					'from_name'  => $parent_email_sequence['settings']['from_name'] ?? get_bloginfo( 'name' ),
 					'from_email' => $parent_email_sequence['settings']['from_email'] ?? get_option( 'admin_email' ),
@@ -688,6 +713,18 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			return $settings_template;
 		}
 		return array();
+	}
+
+	/**
+	 * Check that this template id is used in Tracking_Model
+	 *
+	 * @param int $template_id The template id.
+	 *
+	 * @return bool $is_used Whether the template id is used in Tracking_Model
+	 */
+	private function is_template_used_in_tracking( $template_id ) {
+		$tracking = Tracking_Model::where( 'template_id', $template_id )->get();
+		return $tracking->isNotEmpty();
 	}
 
 	/**

@@ -56,6 +56,8 @@ const SequencesMail: React.FC = () => {
 
 			// Set the sequence emails
 			setSequenceEmails(sequenceResponse.sequences_mail || []);
+
+			console.log('sequenceEmails', sequenceResponse.sequences_mail);
 		} catch (error: any) {
 			createNotice({
 				type: 'error',

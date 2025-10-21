@@ -24,10 +24,11 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 
 // Import types
-import { SequenceMailModalProps, SequenceMailSettings } from '../../types';
+import { SequenceMailModalProps, SequenceMailFormData } from '../../types';
 
-const defaultData: SequenceMailSettings = {
+const defaultData: SequenceMailFormData = {
 	subject: '',
+	email_body: '',
 	pre_header: '',
 	delay: {
 		value: 0,
@@ -55,7 +56,6 @@ const defaultData: SequenceMailSettings = {
 		campaign_term: '',
 		campaign_content: '',
 	},
-	email_body: '',
 	templates: [],
 };
 
@@ -78,7 +78,7 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 	};
 
 	const [formData, setFormData] =
-		useState<SequenceMailSettings>(mergedInitialData);
+		useState<SequenceMailFormData>(mergedInitialData);
 	const subjectInputRef = useRef<HTMLInputElement>(null);
 	const preHeaderTextareaRef = useRef<HTMLTextAreaElement>(null);
 	const emailBodyTextareaRef = useRef<HTMLTextAreaElement>(null);

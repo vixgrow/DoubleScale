@@ -72,12 +72,21 @@ class Template_Data_Preparer {
 			$subject = $settings['subject'] ?? null;
 			$body    = $settings['body'] ?? $settings['email_body'] ?? null;
 
-			if ( empty( $subject ) || empty( $body ) ) {
+			// If this is an existing template being reprocessed (has template_id), allow empty subject/body
+			// This happens when attach_templates() adds templates and they get reprocessed during save
+			$has_template_id = isset( $settings['template_id'] ) && ! empty( $settings['template_id'] );
+			
+			if ( ! $has_template_id && ( empty( $subject ) || empty( $body ) ) ) {
 				return null;
 			}
 
 			$template_data         = self::prepare_email_template_data( $subject, $body, $settings );
-			$template_data['name'] = $name_prefix . $subject;
+			$template_data['name'] = $name_prefix . ($subject ?: 'Untitled');
+			
+			// Preserve template_id if it exists (for updates)
+			if ( $has_template_id ) {
+				$template_data['template_id'] = $settings['template_id'];
+			}
 
 			return $template_data;
 		}

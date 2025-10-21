@@ -10,23 +10,16 @@
 
 namespace QuillCRM\Automations\Actions;
 
-use QuillCRM\Abstracts\Action;
-use QuillCRM\Managers\Actions_Manager;
-use QuillCRM\Models\Automation_Model;
+use QuillCRM\Abstracts\Abstract_Send_Message;
 use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Services\Auto_Template_Manager;
 use QuillCRM\Campaign\SMS_Processing;
-use QuillCRM\Constants\Message_Source_Types;
-use QuillCRM\Constants\Tracking_Status;
-use QuillCRM\Utils;
 
 /**
  * Send SMS Action
  */
-class Send_SMS extends Action {
+class Send_SMS extends Abstract_Send_Message {
 
 	/**
 	 * Action Name
@@ -41,13 +34,6 @@ class Send_SMS extends Action {
 	 * @var string
 	 */
 	public $slug = 'send_sms';
-
-	/**
-	 * Source
-	 *
-	 * @var string
-	 */
-	public $source = 'message';
 
 	/**
 	 * Trigger Group
@@ -71,169 +57,109 @@ class Send_SMS extends Action {
 	public $attributes = array();
 
 	/**
-	 * Process Action
-	 * auto-create template, create tracking, reuse campaign infrastructure
+	 * Get channel type
 	 *
-	 * @since 1.0.0
-	 *
-	 * @param Automation_Model         $automation Automation Model.
-	 * @param Automation_Step_Model    $step Automation Step Model.
-	 * @param Automation_Contact_Model $automation_contact Automation Contact Model.
-	 *
-	 * @return bool|array True on success, false or array with status on failure
+	 * @return string
 	 */
-	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
-		try {
-			// 1. Get SMS content from step settings (user composes directly in UI)
-			$body = $step->get_setting( 'body' );
+	protected function get_channel_type() {
+		return \QuillCRM\Constants\Campaign_Channel::CHANNEL_SMS;
+	}
 
-			$contact = $automation_contact->contact;
+	/**
+	 * Get tracking mode
+	 *
+	 * @return int
+	 */
+	protected function get_tracking_mode() {
+		return Tracking_Model::MODE_SMS;
+	}
 
-			// Validate required fields
-			if ( empty( $body ) ) {
-				quillcrm_get_logger()->error(
-					'Send SMS action: Body is required',
-					array(
-						'automation_id' => $automation->id,
-						'contact_id'    => $contact->id,
-						'code'          => 'send_sms_no_body',
-					)
-				);
-				return false;
-			}
+	/**
+	 * Get recipient from contact
+	 *
+	 * @param Contact_Model $contact Contact Model.
+	 * @return string|null
+	 */
+	protected function get_recipient( Contact_Model $contact ) {
+		return $contact->phone;
+	}
 
-			// Validate phone number
-			if ( empty( $contact->phone ) ) {
-				quillcrm_get_logger()->warning(
-					'Send SMS action: Contact has no phone number',
-					array(
-						'automation_id' => $automation->id,
-						'contact_id'    => $contact->id,
-						'code'          => 'send_sms_no_phone',
-					)
-				);
-				return array(
-					'status'  => 'skipped',
-					'message' => 'Contact has no phone number',
-				);
-			}
-
-			// Validate phone number format (minimum 10 digits, E.164 format)
-			if ( strlen( $contact->phone ) < 10 || ! preg_match( '/^\+?[0-9]+$/', $contact->phone ) ) {
-				quillcrm_get_logger()->warning(
-					'Send SMS action: Invalid phone number format',
-					array(
-						'automation_id' => $automation->id,
-						'contact_id'    => $contact->id,
-						'phone'         => $contact->phone,
-						'code'          => 'send_sms_invalid_phone',
-					)
-				);
-				return array(
-					'status'  => 'skipped',
-					'message' => 'Invalid phone number format. Use E.164 format: +1234567890',
-				);
-			}
-
-			// Check if contact is unsubscribed
-			if ( $contact->status === 'unsubscribed' ) {
-				quillcrm_get_logger()->info(
-					'Send SMS action: Contact is unsubscribed',
-					array(
-						'automation_id' => $automation->id,
-						'contact_id'    => $contact->id,
-						'code'          => 'send_sms_unsubscribed',
-					)
-				);
-				return array(
-					'status'  => 'skipped',
-					'message' => 'Contact is unsubscribed',
-				);
-			}
-
-			// 2. Auto-create or find template (with deduplication)
-			// SMS templates don't have subject, just body
-			$template = Auto_Template_Manager::find_or_create(
-				'', // No subject for SMS
-				$body,
-				array(),
-				\QuillCRM\Constants\Campaign_Channel::CHANNEL_SMS
+	/**
+	 * Validate recipient
+	 *
+	 * @param Contact_Model $contact Contact Model.
+	 * @return array|null
+	 */
+	protected function validate_recipient( Contact_Model $contact ) {
+		if ( empty( $contact->phone ) ) {
+			return array(
+				'status'  => 'skipped',
+				'message' => 'Contact has no phone number',
 			);
-
-			// 3. Create tracking record BEFORE sending (critical for analytics)
-			$tracking = Tracking_Model::create(
-				array(
-					'contact_id'  => $contact->id,
-					'template_id' => $template->id,
-					'mode'        => Tracking_Model::MODE_SMS,
-					'source_type' => Message_Source_Types::AUTOMATION,
-					'source_id'   => $automation->id,
-					'recipient'   => $contact->phone,
-					'status'      => Tracking_Status::PENDING,
-					'hash_key'    => Utils::generate_hash_key(),
-				)
-			);
-
-			// 4. Create dummy campaign for process_campaign_message() to work
-			// This allows us to reuse 100% of existing campaign infrastructure
-			$dummy_campaign = new Campaign_Model(
-				array(
-					'id'       => $automation->id,
-					'name'     => 'Automation: ' . $automation->name,
-					'type'     => 'sms',
-					'settings' => array(),
-				)
-			);
-			$dummy_campaign->exists = true; // Mark as existing to prevent save attempts
-
-			// 5. ✅ REUSE EXISTING CAMPAIGN INFRASTRUCTURE
-			// This gives us: merge tags, provider integration, click tracking, etc.
-			SMS_Processing::instance()->process_campaign_message(
-				$dummy_campaign,
-				$contact,
-				$tracking
-			);
-
-			// 6. Check result and return
-			$tracking->refresh();
-
-			if ( $tracking->status === Tracking_Status::SENT ) {
-				quillcrm_get_logger()->info(
-					'Send SMS action: SMS sent successfully',
-					array(
-						'automation_id' => $automation->id,
-						'contact_id'    => $contact->id,
-						'tracking_id'   => $tracking->id,
-						'template_id'   => $template->id,
-						'code'          => 'send_sms_success',
-					)
-				);
-				return true;
-			} else {
-				quillcrm_get_logger()->error(
-					'Send SMS action: SMS sending failed',
-					array(
-						'automation_id' => $automation->id,
-						'contact_id'    => $contact->id,
-						'tracking_id'   => $tracking->id,
-						'status'        => $tracking->status,
-						'code'          => 'send_sms_failed',
-					)
-				);
-				return false;
-			}
-		} catch ( \Exception $e ) {
-			quillcrm_get_logger()->error(
-				'Send SMS action: Exception occurred',
-				array(
-					'automation_id' => $automation->id ?? 0,
-					'contact_id'    => $automation_contact->contact->id ?? 0,
-					'error'         => $e->getMessage(),
-					'code'          => 'send_sms_exception',
-				)
-			);
-			return false;
 		}
+
+		// Validate phone number format (minimum 10 digits, E.164 format)
+		if ( strlen( $contact->phone ) < 10 || ! preg_match( '/^\+?[0-9]+$/', $contact->phone ) ) {
+			return array(
+				'status'  => 'skipped',
+				'message' => 'Invalid phone number format. Use E.164 format: +1234567890',
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get content fields from step settings
+	 *
+	 * @param Automation_Step_Model $step Automation Step Model.
+	 * @return array
+	 */
+	protected function get_content_fields( Automation_Step_Model $step ) {
+		return array(
+			'body' => $step->get_setting( 'body' ),
+		);
+	}
+
+	/**
+	 * Validate content fields
+	 *
+	 * @param array $content_fields Content fields.
+	 * @return string|null
+	 */
+	protected function validate_content_fields( array $content_fields ) {
+		if ( empty( $content_fields['body'] ) ) {
+			return 'Body is required';
+		}
+		return null;
+	}
+
+	/**
+	 * Get template settings
+	 *
+	 * @param array $content_fields Content fields.
+	 * @return array
+	 */
+	protected function get_template_settings( array $content_fields ) {
+		return array(); // SMS templates don't have additional settings
+	}
+
+	/**
+	 * Get processing instance
+	 *
+	 * @return SMS_Processing
+	 */
+	protected function get_processing_instance() {
+		return SMS_Processing::instance();
+	}
+
+	/**
+	 * Get channel name for logging
+	 *
+	 * @return string
+	 */
+	protected function get_channel_name() {
+		return 'SMS';
 	}
 
 	/**

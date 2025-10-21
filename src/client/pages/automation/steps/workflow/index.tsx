@@ -10,6 +10,12 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { cn } from '@/lib/utils';
+import { Power, Rocket } from 'lucide-react';
+import { isEmpty } from 'lodash';
+
+/**
+ * Internal dependencies
+ */
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,19 +30,6 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import {
-	TrophyOutlined,
-	BranchesOutlined,
-	DisconnectOutlined,
-	RocketOutlined,
-	ThunderboltOutlined,
-	DeleteOutlined,
-} from '@ant-design/icons';
-import { isEmpty } from 'lodash';
-
-/**
- * Internal dependencies
- */
 import './style.scss';
 import { useAutomationContext } from '../../state/context';
 import type {
@@ -49,6 +42,7 @@ import AddStep from './add-step';
 import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
 import ReactFlowWorkflow from './reactflow-workflow';
 import WorkflowSidebar from './workflow-sidebar';
+import { ActionIcon, ConditionsIcon, DeleteIcon, GoalIcon, TimerBlockIcon } from '@quillcrm/components';
 
 const Workflow: React.FC = () => {
 	const {
@@ -114,19 +108,23 @@ const Workflow: React.FC = () => {
 	const typesOptions = {
 		action: {
 			label: __('Action', 'quillcrm'),
-			icon: <ThunderboltOutlined />,
+			icon: <ActionIcon width={23} height={23} />,
 		},
 		condition: {
 			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
+			icon: <ConditionsIcon width={23} height={23} />,
+		},
+		delay: {
+			label: __('Delay', 'quillcrm'),
+			icon: <TimerBlockIcon width={23} height={23} />,
 		},
 		goal: {
 			label: __('Goal', 'quillcrm'),
-			icon: <TrophyOutlined />,
+			icon: <GoalIcon width={23} height={23} />,
 		},
 		end_automation: {
 			label: __('End Automation', 'quillcrm'),
-			icon: <DisconnectOutlined />,
+			icon: <Power className='w-6 h-6' />,
 		},
 	};
 
@@ -270,7 +268,7 @@ const Workflow: React.FC = () => {
 										size="icon"
 										className="text-destructive hover:text-destructive"
 									>
-										<DeleteOutlined className="h-4 w-4" />
+										<DeleteIcon />
 									</Button>
 								</AlertDialogTrigger>
 								<AlertDialogContent>
@@ -392,7 +390,7 @@ const Workflow: React.FC = () => {
 												<CardContent className="p-4">
 													<div className="flex gap-2 items-center">
 														<div className="qcrm-automation-workflow__card-icon">
-															<RocketOutlined className="h-4 w-4" />
+															<Rocket className="h-4 w-4" />
 														</div>
 														<div className="qcrm-automation-workflow__card-title">
 															{trigger?.label}

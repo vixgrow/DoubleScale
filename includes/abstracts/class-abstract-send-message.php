@@ -73,23 +73,6 @@ abstract class Abstract_Send_Message extends Action {
 	abstract protected function validate_recipient( Contact_Model $contact );
 
 	/**
-	 * Get the content fields from step settings
-	 * Returns array with keys: subject (optional), body, and any other channel-specific fields
-	 *
-	 * @param Automation_Step_Model $step Automation Step Model.
-	 * @return array
-	 */
-	abstract protected function get_content_fields( Automation_Step_Model $step );
-
-	/**
-	 * Validate required content fields
-	 *
-	 * @param array $content_fields Content fields from get_content_fields().
-	 * @return string|null Returns error message if invalid, null if valid
-	 */
-	abstract protected function validate_content_fields( array $content_fields );
-
-	/**
 	 * Get the processing instance for this channel
 	 * Returns Email_Processing, SMS_Processing, or WhatsApp_Processing instance
 	 *
@@ -122,24 +105,7 @@ abstract class Abstract_Send_Message extends Action {
 			$channel_name = $this->get_channel_name();
 			$channel_type = $this->get_channel_type();
 
-			// 1. Get content fields from step settings
-			$content_fields = $this->get_content_fields( $step );
-
-			// 2. Validate required content fields
-			$content_error = $this->validate_content_fields( $content_fields );
-			if ( $content_error ) {
-				quillcrm_get_logger()->error(
-					"Send {$channel_name} action: {$content_error}",
-					array(
-						'automation_id' => $automation->id,
-						'contact_id'    => $contact->id,
-						'code'          => "send_{$channel_type}_validation_error",
-					)
-				);
-				return false;
-			}
-
-			// 3. Validate recipient
+			// 1. Validate recipient
 			$recipient_error = $this->validate_recipient( $contact );
 			if ( $recipient_error ) {
 				quillcrm_get_logger()->warning(
@@ -153,7 +119,7 @@ abstract class Abstract_Send_Message extends Action {
 				return $recipient_error;
 			}
 
-			// 4. Check if contact is unsubscribed
+			// 2. Check if contact is unsubscribed
 			if ( $contact->status === 'unsubscribed' ) {
 				quillcrm_get_logger()->info(
 					"Send {$channel_name} action: Contact is unsubscribed",
@@ -169,7 +135,7 @@ abstract class Abstract_Send_Message extends Action {
 				);
 			}
 
-			// 5. Get template from step settings (already created by model event)
+			// 3. Get template from step settings (already created and validated by model event)
 			$template_ids = $step->get_setting( 'template_ids', array() );
 			if ( empty( $template_ids ) ) {
 				quillcrm_get_logger()->error(
@@ -201,7 +167,7 @@ abstract class Abstract_Send_Message extends Action {
 				throw new \Exception( "Template {$template_id} not found" );
 			}
 
-			// 6. Create tracking record BEFORE sending (critical for analytics)
+			// 4. Create tracking record BEFORE sending (critical for analytics)
 			$tracking = Tracking_Model::create(
 				array(
 					'contact_id'  => $contact->id,
@@ -215,7 +181,7 @@ abstract class Abstract_Send_Message extends Action {
 				)
 			);
 
-			// 7. Create dummy campaign for process_campaign_message() to work
+			// 5. Create dummy campaign for process_campaign_message() to work
 			// This allows us to reuse 100% of existing campaign infrastructure
 			$dummy_campaign         = new Campaign_Model(
 				array(
@@ -227,7 +193,7 @@ abstract class Abstract_Send_Message extends Action {
 			);
 			$dummy_campaign->exists = true; // Mark as existing to prevent save attempts
 
-			// 8. REUSE EXISTING CAMPAIGN INFRASTRUCTURE
+			// 6. REUSE EXISTING CAMPAIGN INFRASTRUCTURE
 			// This gives us: merge tags, provider integration, tracking, etc.
 			$this->get_processing_instance()->process_campaign_message(
 				$dummy_campaign,
@@ -235,7 +201,7 @@ abstract class Abstract_Send_Message extends Action {
 				$tracking
 			);
 
-			// 9. Check result and return
+			// 7. Check result and return
 			$tracking->refresh();
 
 			if ( $tracking->status === Tracking_Status::SENT ) {

@@ -101,38 +101,6 @@ class Send_Email extends Abstract_Send_Message {
 	}
 
 	/**
-	 * Get content fields from step settings
-	 *
-	 * @param Automation_Step_Model $step Automation Step Model.
-	 * @return array
-	 */
-	protected function get_content_fields( Automation_Step_Model $step ) {
-		return array(
-			'subject'    => $step->get_setting( 'subject' ),
-			'body'       => $step->get_setting( 'body' ),
-			'from_name'  => $step->get_setting( 'from_name' ) ?: get_bloginfo( 'name' ),
-			'from_email' => $step->get_setting( 'from_email' ) ?: get_option( 'admin_email' ),
-			'reply_to'   => $step->get_setting( 'reply_to' ) ?: '',
-		);
-	}
-
-	/**
-	 * Validate content fields
-	 *
-	 * @param array $content_fields Content fields.
-	 * @return string|null
-	 */
-	protected function validate_content_fields( array $content_fields ) {
-		if ( empty( $content_fields['subject'] ) ) {
-			return 'Subject is required';
-		}
-		if ( empty( $content_fields['body'] ) ) {
-			return 'Body is required';
-		}
-		return null;
-	}
-
-	/**
 	 * Get processing instance
 	 *
 	 * @return Email_Processing

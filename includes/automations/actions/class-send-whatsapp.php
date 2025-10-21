@@ -110,31 +110,6 @@ class Send_WhatsApp extends Abstract_Send_Message {
 	}
 
 	/**
-	 * Get content fields from step settings
-	 *
-	 * @param Automation_Step_Model $step Automation Step Model.
-	 * @return array
-	 */
-	protected function get_content_fields( Automation_Step_Model $step ) {
-		return array(
-			'body' => $step->get_setting( 'body' ),
-		);
-	}
-
-	/**
-	 * Validate content fields
-	 *
-	 * @param array $content_fields Content fields.
-	 * @return string|null
-	 */
-	protected function validate_content_fields( array $content_fields ) {
-		if ( empty( $content_fields['body'] ) ) {
-			return 'Body is required';
-		}
-		return null;
-	}
-
-	/**
 	 * Get processing instance
 	 *
 	 * @return WhatsApp_Processing

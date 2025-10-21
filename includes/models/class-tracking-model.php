@@ -63,6 +63,7 @@ class Tracking_Model extends Model
 		'mode',           // Email/SMS/WhatsApp
 		'source_type',    // Campaign/Automation/Manual
 		'source_id',      // ID of the source (campaign_id, automation_id, etc.)
+		'step_id',        // Automation step ID (NULL for campaigns/individual)
 		'author_id',      // User who sent the message (for individual sends)
 		'recipient',      // Email address or phone number
 		'external_id',    // Twilio MessageSid, email provider ID, etc.
@@ -87,6 +88,7 @@ class Tracking_Model extends Model
 		'mode' => 'integer',
 		'source_type' => 'integer',
 		'source_id' => 'integer',
+		'step_id' => 'integer',
 		'status' => 'integer',
 	);
 
@@ -255,6 +257,20 @@ class Tracking_Model extends Model
 	}
 
 	/**
+	 * Scope: Messages by automation step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query
+	 * @param int $step_id
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeByStep($query, $step_id)
+	{
+		return $query->where('step_id', $step_id);
+	}
+
+	/**
 	 * Check if message is email
 	 *
 	 * @return bool
@@ -344,6 +360,18 @@ class Tracking_Model extends Model
 		return $this->belongsTo(Automation_Model::class, 'source_id');
 	}
 
+	/**
+	 * Get automation step relationship (only when source_type = AUTOMATION)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function step()
+	{
+		return $this->belongsTo(Automation_Step_Model::class, 'step_id');
+	}
+
 
 	/**
 	 * Get campaign safely (only when source_type = CAMPAIGN)
@@ -367,6 +395,21 @@ class Tracking_Model extends Model
 	{
 		if ($this->source_type === Message_Source_Types::AUTOMATION) {
 			return Automation_Model::find($this->source_id);
+		}
+		return null;
+	}
+
+	/**
+	 * Get automation step safely (only when source_type = AUTOMATION)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Automation_Step_Model|null
+	 */
+	public function get_step()
+	{
+		if ($this->source_type === Message_Source_Types::AUTOMATION && $this->step_id) {
+			return Automation_Step_Model::find($this->step_id);
 		}
 		return null;
 	}

@@ -167,19 +167,20 @@ abstract class Abstract_Send_Message extends Action {
 				throw new \Exception( "Template {$template_id} not found" );
 			}
 
-			// 4. Create tracking record BEFORE sending (critical for analytics)
-			$tracking = Tracking_Model::create(
-				array(
-					'contact_id'  => $contact->id,
-					'template_id' => $template->id,
-					'mode'        => $this->get_tracking_mode(),
-					'source_type' => Message_Source_Types::AUTOMATION,
-					'source_id'   => $automation->id,
-					'recipient'   => $this->get_recipient( $contact ),
-					'status'      => Tracking_Status::PENDING,
-					'hash_key'    => Utils::generate_hash_key(),
-				)
-			);
+		// 4. Create tracking record BEFORE sending (critical for analytics)
+		$tracking = Tracking_Model::create(
+			array(
+				'contact_id'  => $contact->id,
+				'template_id' => $template->id,
+				'mode'        => $this->get_tracking_mode(),
+				'source_type' => Message_Source_Types::AUTOMATION,
+				'source_id'   => $automation->id,
+				'step_id'     => $step->id,
+				'recipient'   => $this->get_recipient( $contact ),
+				'status'      => Tracking_Status::PENDING,
+				'hash_key'    => Utils::generate_hash_key(),
+			)
+		);
 
 			// 5. Create dummy campaign for process_campaign_message() to work
 			// This allows us to reuse 100% of existing campaign infrastructure

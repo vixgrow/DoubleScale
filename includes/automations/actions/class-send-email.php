@@ -134,7 +134,7 @@ class Send_Email extends Abstract_Send_Message {
 			),
 			'body'       => array(
 				'label'    => __( 'Body', 'quillcrm' ),
-				'type'     => 'wysiwyg',
+				'type'     => 'textarea',
 				'required' => true,
 			),
 			'from_name'  => array(

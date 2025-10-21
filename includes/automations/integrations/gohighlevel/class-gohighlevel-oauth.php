@@ -1,6 +1,12 @@
 <?php
+/**
+ * GoHighLevel OAuth Handler
+ *
+ * @since 1.0.0
+ * @package QuillCRM
+ */
 
-namespace QuillCRM\OAuth;
+namespace QuillCRM\Automations\Integrations\GoHighLevel;
 
 use QuillCRM\Settings;
 

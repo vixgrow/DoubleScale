@@ -15,6 +15,8 @@ use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Tracking_Status;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Tracking_Model class
@@ -61,6 +63,8 @@ class Tracking_Model extends Model
 		'mode',           // Email/SMS/WhatsApp
 		'source_type',    // Campaign/Automation/Manual
 		'source_id',      // ID of the source (campaign_id, automation_id, etc.)
+		'step_id',        // Automation step ID (NULL for campaigns/individual)
+		'author_id',      // User who sent the message (for individual sends)
 		'recipient',      // Email address or phone number
 		'external_id',    // Twilio MessageSid, email provider ID, etc.
 		'opened',         // Open tracking (emails only)
@@ -84,6 +88,20 @@ class Tracking_Model extends Model
 		'mode' => 'integer',
 		'source_type' => 'integer',
 		'source_id' => 'integer',
+		'step_id' => 'integer',
+		'status' => 'integer',
+	);
+
+	/**
+	 * Appends (virtual attributes for API responses)
+	 *
+	 * @var array
+	 */
+	protected $appends = array(
+		'status_name',
+		'status_slug',
+		'status_class',
+		'status_badge_color',
 	);
 
 	/**
@@ -129,6 +147,18 @@ class Tracking_Model extends Model
 	public function template()
 	{
 		return $this->belongsTo(Template_Model::class, 'template_id');
+	}
+
+	/**
+	 * Message relationship (for individual messages)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasOne
+	 */
+	public function message()
+	{
+		return $this->hasOne(Message_Model::class, 'tracking_id');
 	}
 
 	/**
@@ -227,6 +257,20 @@ class Tracking_Model extends Model
 	}
 
 	/**
+	 * Scope: Messages by automation step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param \Illuminate\Database\Eloquent\Builder $query
+	 * @param int $step_id
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public function scopeByStep($query, $step_id)
+	{
+		return $query->where('step_id', $step_id);
+	}
+
+	/**
 	 * Check if message is email
 	 *
 	 * @return bool
@@ -316,6 +360,18 @@ class Tracking_Model extends Model
 		return $this->belongsTo(Automation_Model::class, 'source_id');
 	}
 
+	/**
+	 * Get automation step relationship (only when source_type = AUTOMATION)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function step()
+	{
+		return $this->belongsTo(Automation_Step_Model::class, 'step_id');
+	}
+
 
 	/**
 	 * Get campaign safely (only when source_type = CAMPAIGN)
@@ -344,6 +400,21 @@ class Tracking_Model extends Model
 	}
 
 	/**
+	 * Get automation step safely (only when source_type = AUTOMATION)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Automation_Step_Model|null
+	 */
+	public function get_step()
+	{
+		if ($this->source_type === Message_Source_Types::AUTOMATION && $this->step_id) {
+			return Automation_Step_Model::find($this->step_id);
+		}
+		return null;
+	}
+
+	/**
 	 * Set source information
 	 *
 	 * @param int $source_type Source type constant
@@ -363,7 +434,7 @@ class Tracking_Model extends Model
 	 */
 	public function is_failed()
 	{
-		return $this->status === 'failed';
+		return $this->status === Tracking_Status::FAILED;
 	}
 
 	/**
@@ -373,26 +444,68 @@ class Tracking_Model extends Model
 	 */
 	public function is_sent()
 	{
-		return $this->status === 'sent';
+		return $this->status === Tracking_Status::SENT;
 	}
 
 	/**
-	 * Get mode label
+	 * Check if message is pending
+	 *
+	 * @return bool
+	 */
+	public function is_pending()
+	{
+		return $this->status === Tracking_Status::PENDING;
+	}
+
+	/**
+	 * Check if message is delivered
+	 *
+	 * @return bool
+	 */
+	public function is_delivered()
+	{
+		return $this->status === Tracking_Status::DELIVERED;
+	}
+
+
+	/**
+	 * Get status name (accessor for API)
 	 *
 	 * @return string
 	 */
-	public function get_mode_label()
+	public function getStatusNameAttribute()
 	{
-		switch ($this->mode) {
-			case self::MODE_EMAIL:
-				return __('Email', 'quillcrm');
-			case self::MODE_SMS:
-				return __('SMS', 'quillcrm');
-			case self::MODE_WHATSAPP:
-				return __('WhatsApp', 'quillcrm');
-			default:
-				return __('Unknown', 'quillcrm');
-		}
+		return Tracking_Status::get_name($this->status);
+	}
+
+	/**
+	 * Get status slug (accessor for API)
+	 *
+	 * @return string
+	 */
+	public function getStatusSlugAttribute()
+	{
+		return Tracking_Status::get_slug($this->status);
+	}
+
+	/**
+	 * Get status CSS class (accessor for UI)
+	 *
+	 * @return string
+	 */
+	public function getStatusClassAttribute()
+	{
+		return Tracking_Status::get_status_class($this->status);
+	}
+
+	/**
+	 * Get status badge color (accessor for Ant Design)
+	 *
+	 * @return string
+	 */
+	public function getStatusBadgeColorAttribute()
+	{
+		return Tracking_Status::get_badge_color($this->status);
 	}
 
 	/**
@@ -406,20 +519,18 @@ class Tracking_Model extends Model
 	public static function get_campaign_stats($campaign_id, $mode = null)
 	{
 		$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
-		$mode_map = [
-			self::MODE_EMAIL => 'email',
-			self::MODE_SMS => 'sms',
-			self::MODE_WHATSAPP => 'whatsapp'
-		];
 		
-		if ($mode && isset($mode_map[$mode])) {
-			return $analytics->get_campaign_stats($mode_map[$mode], $campaign_id);
+		if ($mode) {
+			$channel = Campaign_Channel::from_mode($mode);
+			if ($channel) {
+				return $analytics->get_campaign_stats($channel, $campaign_id);
+			}
 		}
 		
 		// Return combined stats for all modes
 		$stats = [];
-		foreach ($mode_map as $mode_num => $mode_str) {
-			$stats[$mode_str] = $analytics->get_campaign_stats($mode_str, $campaign_id);
+		foreach (Campaign_Channel::get_all() as $channel) {
+			$stats[$channel] = $analytics->get_campaign_stats($channel, $campaign_id);
 		}
 		
 		return $stats;

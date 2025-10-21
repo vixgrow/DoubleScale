@@ -22,6 +22,7 @@ import {
 } from '@/components';
 import ArrowRightIcon from '@/components/icons/arrow-right';
 import { CampaignModalStep, CampaignType } from '@quillcrm/client';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';

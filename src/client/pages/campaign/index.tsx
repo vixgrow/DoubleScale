@@ -20,6 +20,8 @@ import WhatsAppTemplateStep from './steps/templates/whatsapp-template';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import BuilderStep from '../../../builder';
+import { Campaign as CampaignType } from '@quillcrm/client';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import Overview from './overview';
 
 const Campaign: React.FC = () => {
@@ -71,11 +73,11 @@ const Campaign: React.FC = () => {
 		if (!campaign) return null;
 
 		switch (campaign.type) {
-			case 'sms':
+			case CAMPAIGN_CHANNEL.SMS:
 				return <SMSTemplateStep />;
-			case 'whatsapp':
+			case CAMPAIGN_CHANNEL.WHATSAPP:
 				return <WhatsAppTemplateStep />;
-			case 'email':
+			case CAMPAIGN_CHANNEL.EMAIL:
 			default:
 				return <TemplatesStep />;
 		}

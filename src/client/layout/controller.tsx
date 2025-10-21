@@ -92,7 +92,7 @@ registerAdminPage('contacts', {
 });
 
 registerAdminPage('contact', {
-	path: 'contacts/:id',
+	path: 'contacts/:id/:tab?',
 	component: () => <Contact />,
 	label: __('Contact', 'quillcrm'),
 	hidden: true,

@@ -22,6 +22,7 @@ interface ContactListProps {
 	onFetchComplete?: () => void;
 	onTotalChange?: (total: number) => void;
 	onLoadingChange?: (loading: boolean) => void;
+	campaignType?: string;
 }
 
 // Helper function to generate contact initials
@@ -60,6 +61,7 @@ const ContactList: React.FC<ContactListProps> = ({
 	onFetchComplete,
 	onTotalChange,
 	onLoadingChange,
+	campaignType,
 }) => {
 	// Simple local state
 	const [searchTerm, setSearchTerm] = useState('');
@@ -86,6 +88,7 @@ const ContactList: React.FC<ContactListProps> = ({
 					filters,
 					subscribed: true,
 					keywords: searchTerm,
+					campaign_type: campaignType,
 				}),
 				method: 'GET',
 			});

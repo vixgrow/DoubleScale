@@ -22,6 +22,7 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Utils;
 use QuillCRM\Campaign\Email_Processing;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Tracking_Status;
 
 
 class Send_Campaign_Email extends Action {
@@ -109,23 +110,36 @@ class Send_Campaign_Email extends Action {
 				return true; // Already sent, skip
 			}
 
-			// Create campaign message tracking record
-			$campaign_message_data = array(
-				'contact_id'  => $contact->id,
-				'template_id' => $template_id,
-				'mode'        => Tracking_Model::MODE_EMAIL,
-				'source_type' => Message_Source_Types::AUTOMATION,
-				'source_id'   => $automation->id,
-				'recipient'   => $contact->email,
-				'status'      => 'pending',
-				'hash_key'    => Utils::generate_hash_key(),
-			);
+		// Create campaign message tracking record
+		$campaign_message_data = array(
+			'contact_id'  => $contact->id,
+			'template_id' => $template_id,
+			'mode'        => Tracking_Model::MODE_EMAIL,
+			'source_type' => Message_Source_Types::AUTOMATION,
+			'source_id'   => $automation->id,
+			'step_id'     => $step->id,
+			'recipient'   => $contact->email,
+			'status'      => Tracking_Status::PENDING,
+			'hash_key'    => Utils::generate_hash_key(),
+		);
 
 			$campaign_message = Tracking_Model::create( $campaign_message_data );
 
 			$email_processor->process_campaign_message( $campaign, $contact, $campaign_message );
 			return true;
 		} catch ( \Exception $e ) {
+			quillcrm_get_logger()->error(
+				'Send Campaign Email action failed',
+				array(
+					'code'          => 'send_campaign_email_action_failed',
+					'error'         => $e->getMessage(),
+					'campaign_id'   => $campaign_id ?? null,
+					'contact_id'    => $contact->id ?? null,
+					'automation_id' => $automation->id ?? null,
+					'step_id'       => $step->id ?? null,
+					'trace'         => $e->getTraceAsString(),
+				)
+			);
 			return false;
 		}
 	}

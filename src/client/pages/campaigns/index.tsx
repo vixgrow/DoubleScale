@@ -25,7 +25,8 @@ import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable'; // Import the hook
-import { formatDateForAPI, getCampaignEndpoint } from '@quillcrm/utils';
+import { formatDateForAPI } from '@quillcrm/utils';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
 const Campaigns: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -107,22 +108,24 @@ const Campaigns: React.FC = () => {
 		}
 
 		try {
-			// Determine the correct endpoint based on campaign type
-			// Both 'standard' and 'ab_test' are email campaigns
-			const actualType =
-				campaignType === 'ab_test' || campaignType === 'standard'
-					? 'email'
-					: campaignType;
-			const endpoint = getCampaignEndpoint(actualType);
-			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
-			}
+			// Map UI selection to campaign channel constants
+			const typeMap: Record<string, string> = {
+				email: CAMPAIGN_CHANNEL.EMAIL,
+				standard: CAMPAIGN_CHANNEL.EMAIL, // Standard email campaign
+				ab_test: CAMPAIGN_CHANNEL.EMAIL, // A/B test is still email
+				sms: CAMPAIGN_CHANNEL.SMS,
+				whatsapp: CAMPAIGN_CHANNEL.WHATSAPP,
+			};
 
+			const actualType = typeMap[campaignType] || CAMPAIGN_CHANNEL.EMAIL;
+
+			// Use unified endpoint with type parameter (as string)
 			const response = (await apiFetch({
-				path: endpoint,
+				path: '/qc/v1/campaigns',
 				method: 'POST',
 				data: {
 					name: name,
+					type: actualType, // 'email', 'sms', or 'whatsapp'
 					settings: {
 						ab_test: campaignType === 'ab_test',
 					},
@@ -146,12 +149,12 @@ const Campaigns: React.FC = () => {
 
 	const deleteSelected = async () => {
 		try {
+			// Use unified bulk-delete endpoint (works across all campaign types)
 			await apiFetch({
-				path: '/qc/v1/campaigns/bulk',
+				path: '/qc/v1/campaigns/bulk-delete',
 				method: 'POST',
 				data: {
-					operation: 'delete',
-					campaign_ids: selectedRowKeys,
+					ids: selectedRowKeys,
 				},
 			});
 
@@ -167,19 +170,9 @@ const Campaigns: React.FC = () => {
 
 	const deleteCampaign = async (id: number) => {
 		try {
-			// Find the campaign to get its type
-			const campaign = campaigns.find((c) => c.id === id);
-			if (!campaign) {
-				throw new Error(__('Campaign not found', 'quillcrm'));
-			}
-
-			const endpoint = getCampaignEndpoint(campaign.type);
-			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
-			}
-
+			// Use unified endpoint - type is auto-detected
 			await apiFetch({
-				path: `${endpoint}/${id}`,
+				path: `/qc/v1/campaigns/${id}`,
 				method: 'DELETE',
 			});
 
@@ -199,19 +192,9 @@ const Campaigns: React.FC = () => {
 		});
 
 		try {
-			// Find the campaign to get its type
-			const campaign = campaigns.find((c) => c.id === id);
-			if (!campaign) {
-				throw new Error(__('Campaign not found', 'quillcrm'));
-			}
-
-			const endpoint = getCampaignEndpoint(campaign.type);
-			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
-			}
-
+			// Use unified endpoint - type is auto-detected
 			const response = (await apiFetch({
-				path: `${endpoint}/${id}/duplicate`,
+				path: `/qc/v1/campaigns/${id}/duplicate`,
 				method: 'POST',
 			})) as Campaign;
 

@@ -9,6 +9,8 @@ import { useSelect, useDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import './style.scss';
+import { useNavigate, getToLink } from '@quillcrm/navigation';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { useCampaignStep } from '../shared';
 import {
 	CategoryIcon,
@@ -94,7 +96,7 @@ const Templates: React.FC = () => {
 	// Using old flat template structure
 	const defaultTemplate: EmailTemplate = {
 		name: campaign?.name || __('New Email', 'quillcrm'),
-		type: 'email' as const,
+		type: CAMPAIGN_CHANNEL.EMAIL,
 		subject: __('New Email', 'quillcrm'),
 		body: 'Email body', // Default rich-text content
 		email_body: {
@@ -265,6 +267,7 @@ const Templates: React.FC = () => {
 	// 				reply_to: template.reply_to,
 	// 			},
 	// 		});
+	// 	}
 
 	// 		createNotice({
 	// 			type: 'success',

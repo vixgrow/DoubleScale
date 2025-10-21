@@ -189,18 +189,3 @@ export const formatDateForAPI = (date: Date | null): string | undefined => {
 
 	return `${year}-${month}-${day}`;
 };
-
-/**
- * Get the correct REST API endpoint for a campaign type
- *
- * @param campaignType - Campaign type ('email', 'sms', 'whatsapp')
- * @returns The REST API endpoint path or undefined if invalid type
- */
-export const getCampaignEndpoint = (campaignType: string): string | undefined => {
-	const endpoints = {
-		email: '/qc/v1/email-campaigns',
-		sms: '/qc/v1/sms-campaigns',
-		whatsapp: '/qc/v1/whatsapp-campaigns',
-	} as const;
-	return endpoints[campaignType as keyof typeof endpoints];
-};

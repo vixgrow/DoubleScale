@@ -29,8 +29,9 @@ import { UserOutlined } from '@ant-design/icons';
 import './style.scss';
 import type { CampaignEmail, CampaignEmailsResponse } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
-import { convertDate, getCampaignEndpoint } from '@quillcrm/utils';
+import { convertDate } from '@quillcrm/utils';
 import { useParams } from '@quillcrm/navigation';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
 const Engagements: React.FC = () => {
 	const { id } = useParams<{ id: string; subtab: string }>();
@@ -74,13 +75,9 @@ const Engagements: React.FC = () => {
 				);
 			}
 
-			const endpoint = getCampaignEndpoint(type);
-			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
-			}
-
+			// Use unified endpoint for all campaign types
 			const response = (await apiFetch({
-				path: addQueryArgs(`${endpoint}/${id}/messages`, {
+				path: addQueryArgs(`/qc/v1/campaigns/${id}/messages`, {
 					per_page: perPage,
 					page,
 					status,
@@ -112,20 +109,20 @@ const Engagements: React.FC = () => {
 			{ value: 'failed', label: __('Failed', 'quillcrm') },
 		];
 
-		if (campaignType === 'email') {
+		if (campaignType === CAMPAIGN_CHANNEL.EMAIL) {
 			return [
 				...baseOptions,
 				{ value: 'opened', label: __('Opened', 'quillcrm') },
 				{ value: 'clicked', label: __('Clicked', 'quillcrm') },
 			];
-		} else if (campaignType === 'sms') {
+		} else if (campaignType === CAMPAIGN_CHANNEL.SMS) {
 			return [
 				...baseOptions,
 				{ value: 'pending', label: __('Pending', 'quillcrm') },
 				{ value: 'delivered', label: __('Delivered', 'quillcrm') },
 				{ value: 'clicked', label: __('Clicked', 'quillcrm') },
 			];
-		} else if (campaignType === 'whatsapp') {
+		} else if (campaignType === CAMPAIGN_CHANNEL.WHATSAPP) {
 			return [
 				...baseOptions,
 				{ value: 'pending', label: __('Pending', 'quillcrm') },
@@ -165,13 +162,13 @@ const Engagements: React.FC = () => {
 			},
 			{
 				title:
-					campaignType === 'email'
+					campaignType === CAMPAIGN_CHANNEL.EMAIL
 						? __('Email', 'quillcrm')
 						: __('Phone', 'quillcrm'),
 				dataIndex: 'recipient',
 				key: 'recipient',
 				render: (_, record: CampaignEmail) =>
-					campaignType === 'email'
+					campaignType === CAMPAIGN_CHANNEL.EMAIL
 						? record.contact.email
 						: record.contact.phone || '-',
 			},
@@ -188,27 +185,29 @@ const Engagements: React.FC = () => {
 						| 'default' = 'default';
 
 					if (
-						record.status === 'sent' ||
-						record.status === 'delivered'
+						record.status_slug === 'sent' ||
+						record.status_slug === 'delivered'
 					) {
 						badgeStatus = 'success';
-					} else if (record.status === 'failed') {
+					} else if (record.status_slug === 'failed') {
 						badgeStatus = 'error';
-					} else if (record.status === 'pending') {
+					} else if (record.status_slug === 'pending') {
 						badgeStatus = 'processing';
-					} else if (record.status === 'read') {
+					} else if (record.status_slug === 'read') {
 						badgeStatus = 'success';
 					}
 
-					return <Badge status={badgeStatus} text={record.status} />;
+					return (
+						<Badge status={badgeStatus} text={record.status_slug} />
+					);
 				},
 			},
 		];
 
 		// Add type-specific columns
-		const typeSpecificColumns = [];
+		const typeSpecificColumns: any[] = [];
 
-		if (campaignType === 'email') {
+		if (campaignType === CAMPAIGN_CHANNEL.EMAIL) {
 			typeSpecificColumns.push(
 				{
 					title: __('Opened', 'quillcrm'),
@@ -245,7 +244,7 @@ const Engagements: React.FC = () => {
 					),
 				}
 			);
-		} else if (campaignType === 'sms') {
+		} else if (campaignType === CAMPAIGN_CHANNEL.SMS) {
 			typeSpecificColumns.push(
 				{
 					title: __('Delivered', 'quillcrm'),
@@ -254,12 +253,12 @@ const Engagements: React.FC = () => {
 					render: (_, record: CampaignEmail) => (
 						<Badge
 							status={
-								record.status === 'delivered'
+								record.status_slug === 'delivered'
 									? 'success'
 									: 'default'
 							}
 							text={
-								record.status === 'delivered'
+								record.status_slug === 'delivered'
 									? __('Yes', 'quillcrm')
 									: __('No', 'quillcrm')
 							}
@@ -284,7 +283,7 @@ const Engagements: React.FC = () => {
 					),
 				}
 			);
-		} else if (campaignType === 'whatsapp') {
+		} else if (campaignType === CAMPAIGN_CHANNEL.WHATSAPP) {
 			typeSpecificColumns.push(
 				{
 					title: __('Delivered', 'quillcrm'),
@@ -293,14 +292,14 @@ const Engagements: React.FC = () => {
 					render: (_, record: CampaignEmail) => (
 						<Badge
 							status={
-								record.status === 'delivered' ||
-								record.status === 'read'
+								record.status_slug === 'delivered' ||
+								record.status_slug === 'read'
 									? 'success'
 									: 'default'
 							}
 							text={
-								record.status === 'delivered' ||
-								record.status === 'read'
+								record.status_slug === 'delivered' ||
+								record.status_slug === 'read'
 									? __('Yes', 'quillcrm')
 									: __('No', 'quillcrm')
 							}
@@ -314,10 +313,12 @@ const Engagements: React.FC = () => {
 					render: (_, record: CampaignEmail) => (
 						<Badge
 							status={
-								record.status === 'read' ? 'success' : 'default'
+								record.status_slug === 'read'
+									? 'success'
+									: 'default'
 							}
 							text={
-								record.status === 'read'
+								record.status_slug === 'read'
 									? __('Yes', 'quillcrm')
 									: __('No', 'quillcrm')
 							}
@@ -412,18 +413,20 @@ const Engagements: React.FC = () => {
 								</Typography.Text>
 								<Badge
 									status={
-										campaignEmail.status === 'sent' ||
-										campaignEmail.status === 'delivered' ||
-										campaignEmail.status === 'read'
+										campaignEmail.status_slug === 'sent' ||
+										campaignEmail.status_slug ===
+											'delivered' ||
+										campaignEmail.status_slug === 'read'
 											? 'success'
-											: campaignEmail.status === 'failed'
+											: campaignEmail.status_slug ===
+												  'failed'
 												? 'error'
 												: 'default'
 									}
-									text={campaignEmail.status}
+									text={campaignEmail.status_slug}
 								/>
 							</Flex>
-							{campaignEmail.template.settings.from_name && (
+							{campaignEmail.template?.settings.from_name && (
 								<Flex gap={10}>
 									<Typography.Text>
 										{__('From Name', 'quillcrm')}
@@ -437,8 +440,8 @@ const Engagements: React.FC = () => {
 									</Typography.Text>
 								</Flex>
 							)}
-							{campaignType === 'email' &&
-								campaignEmail.template.settings.from_email && (
+							{campaignType === CAMPAIGN_CHANNEL.EMAIL &&
+								campaignEmail.template?.settings.from_email && (
 									<Flex gap={10}>
 										<Typography.Text>
 											{__('From Email', 'quillcrm')}
@@ -446,14 +449,14 @@ const Engagements: React.FC = () => {
 										</Typography.Text>
 										<Typography.Text strong>
 											{
-												campaignEmail.template.settings
+												campaignEmail.template?.settings
 													.from_email
 											}
 										</Typography.Text>
 									</Flex>
 								)}
-							{campaignType === 'email' &&
-								campaignEmail.template.subject && (
+							{campaignType === CAMPAIGN_CHANNEL.EMAIL &&
+								campaignEmail.template?.subject && (
 									<Flex gap={10}>
 										<Typography.Text>
 											{__('Subject', 'quillcrm')}
@@ -468,14 +471,14 @@ const Engagements: React.FC = () => {
 						<Divider style={{ margin: 0 }} />
 						<Card
 							title={
-								campaignType === 'email'
+								campaignType === CAMPAIGN_CHANNEL.EMAIL
 									? __('Body', 'quillcrm')
 									: __('Message', 'quillcrm')
 							}
 						>
 							<div
 								dangerouslySetInnerHTML={{
-									__html: campaignEmail.template.body || '',
+									__html: campaignEmail.template?.body || '',
 								}}
 							/>
 						</Card>

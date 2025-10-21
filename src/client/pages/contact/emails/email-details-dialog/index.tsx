@@ -28,7 +28,6 @@ import {
 } from '@quillcrm/components';
 import { Button } from '@quillcrm/components/ui/button';
 
-
 interface EmailDetailsProps {
 	campaignEmail: CampaignEmail | null;
 	onClose: () => void;
@@ -49,20 +48,26 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 			open={!!campaignEmail}
 			onOpenChange={(open) => !open && onClose()}
 		>
-			<DialogOverlay className="z-[150200]"/>	
+			<DialogOverlay className="z-[150200]" />
 			<DialogContent
 				className="max-w-[500px] z-[150200]"
 				onPointerDownOutside={(e) => {
 					// Allow interaction with WordPress media modal
 					const target = e.target as HTMLElement;
-					if (target.closest('.media-modal') || target.closest('.media-modal-backdrop')) {
+					if (
+						target.closest('.media-modal') ||
+						target.closest('.media-modal-backdrop')
+					) {
 						e.preventDefault();
 					}
 				}}
 				onInteractOutside={(e) => {
 					// Allow interaction with WordPress media modal
 					const target = e.target as HTMLElement;
-					if (target.closest('.media-modal') || target.closest('.media-modal-backdrop')) {
+					if (
+						target.closest('.media-modal') ||
+						target.closest('.media-modal-backdrop')
+					) {
 						e.preventDefault();
 					}
 				}}
@@ -87,7 +92,9 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 									{__('Subject', 'quillcrm')}
 								</span>
 								<span className="text-xl font-semibold">
-									{campaignEmail.template.subject}
+									{campaignEmail.template?.subject ||
+										campaignEmail.message?.subject ||
+										__('No Subject', 'quillcrm')}
 								</span>
 							</div>
 							<div className="flex justify-between items-center">
@@ -153,10 +160,11 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 								</span>
 								<div className="flex items-center gap-2">
 									<span
-										className={`border rounded-md px-2 py-1 ${campaignEmail.status === 'sent'
-											? 'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]'
-											: 'text-destructive bg-[#EF444429] border-destructive'
-											}`}
+										className={`border rounded-md px-2 py-1 ${
+											campaignEmail.status === 'sent'
+												? 'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]'
+												: 'text-destructive bg-[#EF444429] border-destructive'
+										}`}
 									>
 										{campaignEmail.status === 'sent'
 											? __('Sent', 'quillcrm')
@@ -181,7 +189,10 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 							</div>
 							<div
 								dangerouslySetInnerHTML={{
-									__html: campaignEmail.template.body,
+									__html:
+										campaignEmail.template?.body ||
+										campaignEmail.message?.body ||
+										__('No content available', 'quillcrm'),
 								}}
 							/>
 						</div>

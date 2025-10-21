@@ -39,19 +39,26 @@ class Campaigns_Table extends Migration {
 		 * name VARCHAR(255) NOT NULL,
 		 * description TEXT,
 		 * status VARCHAR(255) NOT NULL DEFAULT "inactive",
-		 * type VARCHAR(50) NOT NULL DEFAULT "email",
+		 * type TINYINT UNSIGNED NOT NULL DEFAULT 1,
 		 * settings TEXT,
 		 * parent_id BIGINT(20) NOT NULL DEFAULT 0,
 		 * count INT(11) NOT NULL DEFAULT 0,
 		 * execute_at TIMESTAMP,
 		 * created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		 * updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		 *
+		 * Campaign types (integers):
+		 * 1 = Email (Campaign_Channel::CHANNEL_EMAIL)
+		 * 2 = SMS (Campaign_Channel::CHANNEL_SMS)
+		 * 3 = WhatsApp (Campaign_Channel::CHANNEL_WHATSAPP)
+		 * 4 = Sequence Mail - Child email in sequence (Campaign_Channel::CHANNEL_SEQUENCE_MAIL)
+		 * 5 = Email Sequence - Parent sequence (Campaign_Channel::CHANNEL_EMAIL_SEQUENCE)
 		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL,
             description TEXT,
             status VARCHAR(255) NOT NULL DEFAULT "inactive",
-            type VARCHAR(50) NOT NULL DEFAULT "email",
+            type TINYINT UNSIGNED NOT NULL DEFAULT 1,
             settings TEXT,
             parent_id BIGINT(20) NOT NULL DEFAULT 0,
             count INT(11) NOT NULL DEFAULT 0,

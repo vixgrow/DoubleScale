@@ -38,7 +38,10 @@ class Logs_Table extends Migration {
             message longtext NOT NULL,
             context longtext NULL,
             PRIMARY KEY (id),
-            KEY level (level)';
+            KEY level (level),
+            KEY idx_timestamp (timestamp),
+            KEY idx_source (source(50)),
+            KEY idx_timestamp_level (timestamp, level)';
 
 		return $query;
 	}

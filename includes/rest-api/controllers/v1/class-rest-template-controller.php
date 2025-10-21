@@ -21,6 +21,7 @@ use QuillCRM\Models\Template_Model;
 use QuillCRM\Emails\Email_Renderer;
 use QuillCRM\Emails\Block_Registry;
 use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * REST_Template_Controller class
@@ -179,7 +180,7 @@ class REST_Template_Controller extends REST_Controller {
 				 'type'       => array(
 					 'description' => __( 'Type of the template.', 'quillcrm' ),
 					 'type'        => 'string',
-					 'enum'        => array( 'email', 'sms' ),
+					 'enum'        => Campaign_Channel::get_core_channel_strings(),
 				 ),
 				 'subject'    => array(
 					 'description' => __( 'Subject of the template.', 'quillcrm' ),
@@ -232,12 +233,12 @@ class REST_Template_Controller extends REST_Controller {
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'type'     => array(
-				'description' => __( 'Filter by template type.', 'quillcrm' ),
-				'type'        => 'string',
-				'default'     => 'email',
-				'enum'        => array( 'email', 'sms', 'whatsapp' ),
-			),
+		'type'     => array(
+			'description' => __( 'Filter by template type.', 'quillcrm' ),
+			'type'        => 'string',
+			'default'     => Campaign_Channel::STR_EMAIL,
+			'enum'        => Campaign_Channel::get_core_channel_strings(),
+		),
 			'category' => array(
 				'description'       => __( 'Filter by template category.', 'quillcrm' ),
 				'type'              => 'string',
@@ -290,17 +291,20 @@ class REST_Template_Controller extends REST_Controller {
 	public function get_items( $request ) {
 		try {
 			// Get parameters with defaults
-			$type     = $request->get_param( 'type' ) ?: 'email';
-			$per_page = (int) ( $request->get_param( 'per_page' ) ?: 20 );
-			$page     = (int) ( $request->get_param( 'page' ) ?: 1 );
-			$orderby  = $request->get_param( 'orderby' ) ?: 'id';
-			$order    = $request->get_param( 'order' ) ?: 'DESC';
-			$search   = $request->get_param( 'search' );
-			$keyword  = $request->get_param( 'keyword' ); // Backward compatibility
-			$category = $request->get_param( 'category' );
+		$type     = $request->get_param( 'type' ) ?: Campaign_Channel::STR_EMAIL;
+		$per_page = (int) ( $request->get_param( 'per_page' ) ?: 20 );
+		$page     = (int) ( $request->get_param( 'page' ) ?: 1 );
+			$orderby    = $request->get_param( 'orderby' ) ?: 'id';
+			$order      = $request->get_param( 'order' ) ?: 'DESC';
+			$search     = $request->get_param( 'search' );
+			$keyword    = $request->get_param( 'keyword' ); // Backward compatibility
+			$category   = $request->get_param( 'category' );
+
+			// Convert string type to integer for database query
+			$type_int = Campaign_Channel::to_integer( $type ) ?? Campaign_Channel::CHANNEL_EMAIL;
 
 			// Build query
-			$query = Template_Model::where( 'type', $type );
+			$query = Template_Model::where( 'type', $type_int );
 
 			// Add conditional filters
 			if ( $request->has_param( 'hidden' ) ) {
@@ -481,9 +485,11 @@ class REST_Template_Controller extends REST_Controller {
 	 * @return array $template_data The template data
 	 */
 	public function prepare_template( $request ) {
+		$type = $request->get_param( 'type' ) ?? Campaign_Channel::STR_EMAIL;
+		
 		$template_data = array(
 			'name'         => $request->get_param( 'name' ) ?? __( 'New Template', 'quillcrm' ),
-			'type'         => $request->get_param( 'type' ) ?? 'email',
+			'type'         => $type,
 			'subject'      => $request->get_param( 'subject' ),
 			'body'         => $request->get_param( 'body' ),
 			'settings'     => $request->get_param( 'settings' ),
@@ -494,7 +500,23 @@ class REST_Template_Controller extends REST_Controller {
 
 		// Note: email_body data is now sent directly in the body field as JSON
 
+		// Keep subject field for email templates even if empty (it's required for validation)
+		// For non-email templates, subject should be removed if empty
+		$is_email_template = in_array(
+			$type,
+			array(
+				Campaign_Channel::STR_EMAIL,
+				Campaign_Channel::STR_EMAIL_SEQUENCE,
+				Campaign_Channel::STR_SEQUENCE_MAIL,
+			)
+		);
+
 		foreach ( $template_data as $key => $value ) {
+			// Don't remove subject for email templates - it's a required field
+			if ( $key === 'subject' && $is_email_template ) {
+				continue;
+			}
+			
 			if ( empty( $value ) && $value !== '0' && $value !== 0 ) {
 				unset( $template_data[ $key ] );
 			}

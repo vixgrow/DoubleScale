@@ -94,6 +94,15 @@ class Emails {
 	public $template;
 
 	/**
+	 * Unsubscribe URL for List-Unsubscribe header (RFC 8058 compliance)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var string|false
+	 */
+	public $unsubscribe_url = false;
+
+	/**
 	 * Get things going.
 	 *
 	 * @since 1.0.0
@@ -212,6 +221,7 @@ class Emails {
 
 	/**
 	 * Get the email headers.
+	 * Includes List-Unsubscribe header for RFC 8058 compliance (Gmail/Yahoo 2024 requirement)
 	 *
 	 * @since 1.0.0
 	 *
@@ -227,6 +237,14 @@ class Emails {
 			if ( $this->get_cc() ) {
 				$this->headers .= "Cc: {$this->get_cc()}\r\n";
 			}
+
+			// Add List-Unsubscribe headers for RFC 8058 compliance
+			// Required by Gmail/Yahoo for bulk senders as of 2024
+			if ( ! empty( $this->unsubscribe_url ) ) {
+				$this->headers .= "List-Unsubscribe: <{$this->unsubscribe_url}>\r\n";
+				$this->headers .= "List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n";
+			}
+
 			$this->headers .= "Content-Type: {$this->get_content_type()}; charset=utf-8\r\n";
 		}
 

@@ -25,6 +25,11 @@ class Message_Source_Types
     const AUTOMATION = 2;
 
     /**
+     * Individual source - Individual/manual messages sent from contact page
+     */
+    const INDIVIDUAL = 3;
+
+    /**
      * Get all source types
      *
      * @return array
@@ -34,6 +39,7 @@ class Message_Source_Types
         return [
             self::CAMPAIGN => __('Campaign', 'quillcrm'),
             self::AUTOMATION => __('Automation', 'quillcrm'),
+            self::INDIVIDUAL => __('Individual', 'quillcrm'),
         ];
     }
 
@@ -68,7 +74,7 @@ class Message_Source_Types
      */
     public static function supports_analytics($type)
     {
-        return in_array($type, [self::CAMPAIGN, self::AUTOMATION]);
+        return in_array($type, [self::CAMPAIGN, self::AUTOMATION, self::INDIVIDUAL]);
     }
 
     /**

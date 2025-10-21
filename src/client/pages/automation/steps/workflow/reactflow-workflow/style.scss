@@ -290,11 +290,6 @@
 	}
 
 	&--action {
-		.qcrm-reactflow-node__icon svg {
-			width: 15.75px;
-			height: 22.75px;
-		}
-
 		// Action configuration status
 		.qcrm-reactflow-action__configured {
 			color: #52c41a;
@@ -394,11 +389,6 @@
 	}
 
 	&--goal {
-		.qcrm-reactflow-node__icon svg {
-			width: 28px;
-			height: 29px;
-		}
-
 		// Goal configuration status
 		.qcrm-reactflow-goal__configured {
 			color: #52c41a;
@@ -408,13 +398,6 @@
 		.qcrm-reactflow-goal__not-configured {
 			color: #ff4d4f;
 			font-weight: 500;
-		}
-	}
-
-	&--end {
-		.qcrm-reactflow-node__icon svg {
-			width: 28px;
-			height: 29px;
 		}
 	}
 

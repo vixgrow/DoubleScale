@@ -282,13 +282,6 @@
 	}
 
 	// Node Type Specific Styles
-	&--trigger {
-		.qcrm-reactflow-node__icon svg {
-			width: 15.75px;
-			height: 22.75px;
-		}
-	}
-
 	&--action {
 		// Action configuration status
 		.qcrm-reactflow-action__configured {

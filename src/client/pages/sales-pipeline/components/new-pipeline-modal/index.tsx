@@ -8,29 +8,40 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import {
-	Modal,
-	Form,
-	Input,
-	Button,
-	Switch,
-	Card,
-	Space,
-	Row,
-	Col,
-	Divider,
-	ColorPicker,
-	InputNumber,
-	Tooltip,
-} from 'antd';
-import { Plus, Trash2, Info, Palette } from 'lucide-react';
+import { ColorPicker } from 'antd';
+import { Plus } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { z } from 'zod';
+import tinycolor from 'tinycolor2';
 
 /**
  * Internal dependencies
  */
 import { usePipelineOperations } from '../../hooks/use-pipeline-operations';
+import { Input } from '@/components/ui/input';
 import ConfigAPI from '@quillcrm/config';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
 import './style.scss';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+} from '@quillcrm/components/ui/dialog';
+import { CustomDialogHeader, DragDropIcon } from '@quillcrm/components';
+import CreatePipelineIcon from '@quillcrm/components/icons/create-pipeline';
+import { DialogTitle } from '@radix-ui/react-dialog';
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
+import TrashIcon from '@quillcrm/components/icons/trash';
+import { ColorPickerControl } from '@/builder/blocks/basic/shared';
 
 interface Stage {
 	name: string;
@@ -47,14 +58,26 @@ interface NewPipelineModalProps {
 // Get default stages from config
 const DEFAULT_STAGES: Stage[] = ConfigAPI.getDefaultStages();
 
+// validation
+const formSchema = z.object({
+	name: z
+		.string()
+		.min(2, {
+			message: 'Username must be at least 2 characters.',
+		})
+		.max(255, {
+			message: "'Pipeline name must not exceed 255 characters",
+		}),
+});
+type FormValues = z.infer<typeof formSchema>;
+
 export const NewPipelineModal: React.FC<NewPipelineModalProps> = ({
 	visible,
 	onClose,
 	onSuccess,
 }) => {
-	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
-	const [useCustomStages, setUseCustomStages] = useState(false);
+	const [useCustomStages, setUseCustomStages] = useState(true);
 	const [customStages, setCustomStages] = useState<Stage[]>([
 		...DEFAULT_STAGES,
 	]);
@@ -83,7 +106,6 @@ export const NewPipelineModal: React.FC<NewPipelineModalProps> = ({
 				});
 			}
 
-			form.resetFields();
 			setUseCustomStages(false);
 			setCustomStages([...DEFAULT_STAGES]);
 			onSuccess();
@@ -102,9 +124,13 @@ export const NewPipelineModal: React.FC<NewPipelineModalProps> = ({
 			setLoading(false);
 		}
 	};
+	const form = useForm<FormValues>({
+		resolver: zodResolver(formSchema),
+		defaultValues: { name: '' },
+	});
 
 	const handleCancel = () => {
-		form.resetFields();
+		// form.resetFields();
 		setUseCustomStages(false);
 		setCustomStages([...DEFAULT_STAGES]);
 		onClose();
@@ -138,292 +164,434 @@ export const NewPipelineModal: React.FC<NewPipelineModalProps> = ({
 	const resetToDefaults = () => {
 		setCustomStages([...DEFAULT_STAGES]);
 	};
+	const handleDragEnd = (result) => {
+		if (!result.destination) return;
+		if (result.source.index === 0 || result.destination.index === 0) return;
+		const reordered = Array.from(customStages);
+		const [removed] = reordered.splice(result.source.index, 1);
+		reordered.splice(result.destination.index, 0, removed);
+		setCustomStages(reordered);
+	};
 
 	return (
-		<Modal
-			title={
-				<div className="modal-title">
-					<Plus size={20} />
-					<span>{__('Create New Pipeline', 'quillcrm')}</span>
-				</div>
-			}
+		<Dialog
 			open={visible}
-			onCancel={handleCancel}
-			width={800}
-			footer={
-				<div className="modal-footer">
-					<Button onClick={handleCancel}>
-						{__('Cancel', 'quillcrm')}
-					</Button>
-					<Button
-						type="primary"
-						onClick={() => form.submit()}
-						loading={loading}
-					>
-						{__('Create Pipeline', 'quillcrm')}
-					</Button>
-				</div>
-			}
-			className="new-pipeline-modal"
+			onOpenChange={(open) => {
+				if (!open) {
+					handleCancel();
+				}
+			}}
 		>
-			<Form
-				form={form}
-				layout="vertical"
-				onFinish={handleSubmit}
-				className="new-pipeline-form"
-			>
-				{/* Basic Information */}
-				<Card
-					title={__('Basic Information', 'quillcrm')}
-					className="form-section"
-				>
-					<Row gutter={16}>
-						<Col span={24}>
-							<Form.Item
-								name="name"
-								label={__('Pipeline Name', 'quillcrm')}
-								rules={[
-									{
-										required: true,
-										message: __(
-											'Please enter a pipeline name',
-											'quillcrm'
-										),
-									},
-									{
-										max: 255,
-										message: __(
-											'Pipeline name must not exceed 255 characters',
-											'quillcrm'
-										),
-									},
-								]}
-							>
-								<Input
-									placeholder={__(
-										'e.g., Sales Pipeline, Lead Nurturing',
-										'quillcrm'
-									)}
-									maxLength={255}
-								/>
-							</Form.Item>
-						</Col>
-						<Col span={24}>
-							<Form.Item
-								name="description"
-								label={__('Description', 'quillcrm')}
-							>
-								<Input.TextArea
-									placeholder={__(
-										'Optional description for this pipeline',
-										'quillcrm'
-									)}
-									rows={3}
-									maxLength={500}
-								/>
-							</Form.Item>
-						</Col>
-					</Row>
-				</Card>
+			<DialogContent className="w-full max-w-7xl max-h-[80vh] overflow-y-auto my-4 sm:mx-auto z-[10000] p-6 rounded-[16px] pipline-content">
+				<DialogHeader>
+					<DialogTitle>
+						<CustomDialogHeader
+							title={__('Create New Pipeline', 'quillcrm')}
+							subtitle={__(
+								'Add basic information below to create new pipeline',
+								'quillcrm'
+							)}
+							icon={<CreatePipelineIcon />}
+						/>
+					</DialogTitle>
+				</DialogHeader>
 
-				{/* Stage Configuration */}
-				<Card
-					title={
-						<div className="card-title-with-info">
-							<span>{__('Stage Configuration', 'quillcrm')}</span>
-							<Tooltip
-								title={__(
-									'You can use the default 5-stage sales pipeline or create custom stages',
-									'quillcrm'
-								)}
-							>
-								<Info size={16} className="info-icon" />
-							</Tooltip>
-						</div>
-					}
-					className="form-section"
-				>
-					<div className="stage-config-header">
-						<div className="stage-switch">
-							<Switch
-								checked={useCustomStages}
-								onChange={setUseCustomStages}
-								size="small"
-							/>
-							<span className="switch-label">
-								{__('Customize stages', 'quillcrm')}
-							</span>
-						</div>
+				<div className=" grid grid-cols-1 md:grid-cols-2 gap-6 ">
+					<div className="new-pipeline flex p-5 flex-col w-full ">
+						<Form {...form}>
+							{/* Basic Information */}
+							<form onSubmit={form.handleSubmit(handleSubmit)}>
+								<FormField
+									control={form.control}
+									name="name"
+									render={({ field }) => (
+										<FormItem className="mb-6">
+											<FormLabel className=" text-[#09090B] text-base font-normal landing-[150%] ">
+												{__(
+													'Pipeline Name',
+													'quillcrm'
+												)}{' '}
+												<span className=" text-[#E13B3B]">
+													*
+												</span>
+											</FormLabel>
+											<FormControl>
+												<Input
+													placeholder={__(
+														'e.g., Sales Pipeline, Lead Nurturing',
+														'quillcrm'
+													)}
+													{...field}
+													className="py-[5px] h-12 px-4 flex items-center rounded-[8px] gap-20 border border-[#DEE1E6] bg-[#FFF]"
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								></FormField>
+							</form>
+							{/* Stage Configuration */}
+							<DragDropContext onDragEnd={handleDragEnd}>
+								<Droppable droppableId="stages-droppable">
+									{(provided) => (
+										<div
+											className="stages-list w-full mt-4 "
+											ref={provided.innerRef}
+											{...provided.droppableProps}
+										>
+											{customStages.map(
+												(stage, index) => (
+													<Draggable
+														key={index.toString()}
+														draggableId={index.toString()}
+														index={index}
+														isDragDisabled={
+															index === 0
+														}
+													>
+														{(
+															provided,
+															snapshot
+														) => (
+															<div
+																ref={
+																	provided.innerRef
+																}
+																{...provided.draggableProps}
+																{...(index !== 0
+																	? provided.dragHandleProps
+																	: {})}
+																className={`grid md:grid-cols-[28px_minmax(200px,1fr)_minmax(120px,1fr)_minmax(120px,1fr)_28px] gap-2 pr-2 items-center mb-4 w-full rounded-[6px] ${snapshot.isDragging ? 'bg-[#f5f5ff] shadow-md' : 'bg-white'}`}
+															>
+																{/* Drag icon */}
+																<div>
+																	{index !==
+																		0 && (
+																		<div
+																			className="mr-2 p-0 cursor-grab hover:bg-transparent "
+																			{...provided.dragHandleProps}
+																		>
+																			<DragDropIcon />
+																		</div>
+																	)}
+																</div>
 
-						{!useCustomStages && (
-							<div className="default-stages-info">
-								<p className="info-text">
-									{__(
-										`Using default ${DEFAULT_STAGES.length}-stage sales pipeline:`,
-										'quillcrm'
-									)}{' '}
-									{DEFAULT_STAGES.map(
-										(stage) => stage.name
-									).join(' → ')}
-								</p>
+																{/* Stage name */}
+																<div className="flex flex-col">
+																	{index ===
+																		0 && (
+																		<label className="block mb-2 text-[16px] leading-6 font-normal text-[#09090B]">
+																			{__(
+																				'Stage Name',
+																				'quillcrm'
+																			)}
+																		</label>
+																	)}
+																	<div className="relative w-full flex justify-center">
+																		<input
+																			type="text"
+																			value={
+																				stage.name
+																			}
+																			onChange={(
+																				e
+																			) =>
+																				updateStage(
+																					index,
+																					'name',
+																					e
+																						.target
+																						.value
+																				)
+																			}
+																			maxLength={
+																				255
+																			}
+																			placeholder="Enter stage name"
+																			className="input-stage"
+																		/>
+																		{index ===
+																			0 && (
+																			<span className="absolute right-4 p-1 gap-2 rounded-[8px] bg-[#F0F0F0] border border-[#DEE1E6] top-1/2 -translate-y-1/2 text-[#777] text-[14px] font-normal">
+																				Default
+																			</span>
+																		)}
+																	</div>
+																</div>
+
+																{/* Color Picker */}
+																<div className="flex flex-col">
+																	{index ===
+																		0 && (
+																		<label className="block mb-2 text-[16px] leading-6 font-normal text-[#09090B]">
+																			{__(
+																				'Color',
+																				'quillcrm'
+																			)}
+																		</label>
+																	)}
+																	<div className="flex items-center justify-center">
+																		<ColorPicker
+																			value={
+																				stage.color
+																			}
+																			onChange={(
+																				color
+																			) =>
+																				updateStage(
+																					index,
+																					'color',
+																					color.toHexString()
+																				)
+																			}
+																			size="small"
+																			showText
+																			format="hex"
+																			className="w-full input-stage"
+																		/>
+																	</div>
+																</div>
+
+																{/* Probability */}
+																<div className="flex flex-col w-full">
+																	{index ===
+																		0 && (
+																		<label className="block mb-2 text-[16px] leading-6 font-normal text-[#09090B]">
+																			Probability
+																			(%)
+																		</label>
+																	)}
+																	<div className="relative w-full">
+																		<input
+																			type="number"
+																			value={
+																				stage.win_probability
+																			}
+																			onChange={(
+																				e
+																			) =>
+																				updateStage(
+																					index,
+																					'win_probability',
+																					Number(
+																						e
+																							.target
+																							.value
+																					) ||
+																						0
+																				)
+																			}
+																			min={
+																				0
+																			}
+																			max={
+																				100
+																			}
+																			placeholder="0–100"
+																			className="w-full input-stage"
+																		/>
+																		<span className="absolute top-0 right-0 w-12 h-full flex items-center justify-center border border-[#DEE1E6] bg-[#F0F0F0] text-[#777] text-sm font-normal p-1 rounded-tr-lg rounded-br-lg pointer-events-none">
+																			(%)
+																		</span>
+																	</div>
+																</div>
+
+																{/* Delete */}
+																<div className="flex items-center justify-center w-full ">
+																	{index !==
+																		0 && (
+																		<button
+																			className="ml-4 w-6 hover:bg-transparent "
+																			onClick={() =>
+																				removeStage(
+																					index
+																				)
+																			}
+																		>
+																			<TrashIcon />
+																		</button>
+																	)}
+																</div>
+															</div>
+														)}
+													</Draggable>
+												)
+											)}
+											{provided.placeholder}
+										</div>
+									)}
+								</Droppable>
+							</DragDropContext>
+						</Form>
+						<div className="flex  items-center gap-4 pb-5">
+							<button
+								onClick={addStage}
+								className="border-none flex add-stage-button p-0 text-[16px] bg-[#fff] shadow-none text-[#1E3A8A] font-normal font-[inter] landing-[150%] tracking-[-0.32px] "
+							>
+								<Plus size={24} className="mr-2" />{' '}
+								{__('Add Stage', 'quillcrm')}
+							</button>
+
+							<div className="w-[2px] h-6  bg-[#DEE1E6]"></div>
+							<Button
+								variant="ghost"
+								onClick={resetToDefaults}
+								className=" text-[#E13B3B] hover:bg-transparent hover:text-[#E13B3B] p-0 text-[16px] font-normal font-[inter] landing-[150%] tracking-[-0.32px]"
+							>
+								{__('Reset to Defaults', 'quillcrm')}
+							</Button>
+						</div>
+					</div>
+
+					{/* pipline table */}
+					<div className="new-pipeline flex flex-col p-5 ">
+						{useCustomStages && (
+							<div className="pipeline-board w-full overflow-x-auto  ">
+								<div
+									className="grid gap-4  min-h-[400px]"
+									style={{
+										gridTemplateColumns: `repeat(${customStages.length}, minmax(120px, 1fr))`,
+									}}
+								>
+									{customStages.map((stage, index) => {
+										const baseColor = tinycolor(
+											stage.color
+										);
+
+										// const isDark = baseColor.isDark();
+										const backgroundColor = baseColor
+											.lighten(30)
+											.toString();
+										const isFirst = index === 0;
+										const isLast =
+											index === customStages.length - 1;
+
+										//   ? baseColor.lighten(20).toString()
+										//   : baseColor.darken(5).toString();
+										return (
+											<div className=" flex flex-col  p-0 m-0 relative">
+												<div
+													className=" h-14 flex items-center justify-center relative  rounded-t-[8px]"
+													style={{
+														background:
+															backgroundColor,
+													}}
+												>
+													<div
+														className="font-bold absolute text-base leading-[26px] tracking-[-.5px] font-[inter]"
+														style={{
+															color: stage.color,
+														}}
+													>
+														{stage.name ||
+															`Stage ${index + 1}`}
+													</div>
+													{isFirst && (
+														<div
+															className="absolute top-[1px] right-[-11px] w-0 h-0"
+															style={{
+																borderTop:
+																	'28px solid transparent',
+																borderBottom:
+																	'28px solid transparent',
+																borderLeft: `14px solid ${backgroundColor}`,
+															}}
+														></div>
+													)}
+
+													{isLast && (
+														<div
+															className="absolute top-0 left-[-3px] w-0 h-0"
+															style={{
+																borderTop:
+																	'28px solid transparent',
+																borderBottom:
+																	'28px solid transparent',
+																borderLeft: `14px solid white`,
+															}}
+														></div>
+													)}
+													{!isFirst && !isLast && (
+														<>
+															<div
+																className="absolute top-0 left-[-3px] w-0 h-0"
+																style={{
+																	borderTop:
+																		'28px solid transparent',
+																	borderBottom:
+																		'28px solid transparent',
+																	borderLeft: `14px solid white`,
+																}}
+															></div>
+															<div
+																className="absolute top-[1px] right-[-11px] w-0 h-0"
+																style={{
+																	borderTop:
+																		'28px solid transparent',
+																	borderBottom:
+																		'28px solid transparent',
+																	borderLeft: `14px solid ${backgroundColor}`,
+																}}
+															></div>
+														</>
+													)}
+												</div>
+
+												<div
+													key={index}
+													className="relative flex flex-col items-center p-4 rounded-[8px] rounded-t-none shadow-sm h-full overflow-hidden "
+													style={{
+														background:
+															backgroundColor,
+													}}
+												>
+													{/* <div
+														className={`relative mt-4 w-full p-0 z-[100] font-bold leading-[26px] tracking-[-.5px] font-[inter] text-base flex justify-start`}
+														style={{
+															color: `${stage.color}`,
+														}}
+													>
+														{stage.name ||
+															`Stage ${index + 1}`}
+													</div> */}
+
+													<div className="flex flex-col gap-3 w-full items-center mt-6">
+														{Array.from({
+															length: 10,
+														}).map((_, i) => (
+															<div
+																key={`cell-${index}-${i}`}
+																className=" w-full px-4 py-1 bg-[#FFFFFFCC] border border-[#DEE1E6] rounded-[8px] h-9 flex items-center justify-center shadow-sm hover:shadow-md transition"
+															></div>
+														))}
+													</div>
+												</div>
+											</div>
+										);
+									})}
+								</div>
 							</div>
 						)}
 					</div>
+				</div>
 
-					{useCustomStages && (
-						<div className="custom-stages-config">
-							<div className="stages-header">
-								<Space>
-									<Button
-										type="dashed"
-										icon={<Plus size={16} />}
-										onClick={addStage}
-										size="small"
-									>
-										{__('Add Stage', 'quillcrm')}
-									</Button>
-									<Button
-										type="link"
-										onClick={resetToDefaults}
-										size="small"
-									>
-										{__('Reset to Defaults', 'quillcrm')}
-									</Button>
-								</Space>
-							</div>
-
-							<Divider style={{ margin: '12px 0' }} />
-
-							<div className="stages-list">
-								{customStages.map((stage, index) => (
-									<Card
-										key={index}
-										size="small"
-										className="stage-card"
-										title={
-											<div className="stage-card-title">
-												<span>
-													{__('Stage', 'quillcrm')}{' '}
-													{index + 1}
-												</span>
-												{customStages.length > 1 && (
-													<Button
-														type="text"
-														icon={
-															<Trash2 size={14} />
-														}
-														onClick={() =>
-															removeStage(index)
-														}
-														className="remove-stage-btn"
-														size="small"
-													/>
-												)}
-											</div>
-										}
-									>
-										<Row gutter={12}>
-											<Col span={10}>
-												<div className="form-item-compact">
-													<label className="form-label">
-														{__(
-															'Stage Name',
-															'quillcrm'
-														)}
-													</label>
-													<Input
-														value={stage.name}
-														onChange={(e) =>
-															updateStage(
-																index,
-																'name',
-																e.target.value
-															)
-														}
-														placeholder={__(
-															'Enter stage name',
-															'quillcrm'
-														)}
-														maxLength={255}
-														size="small"
-													/>
-												</div>
-											</Col>
-											<Col span={6}>
-												<div className="form-item-compact">
-													<label className="form-label">
-														<Palette
-															size={14}
-															style={{
-																marginRight: 4,
-															}}
-														/>
-														{__(
-															'Color',
-															'quillcrm'
-														)}
-													</label>
-													<ColorPicker
-														value={stage.color}
-														onChange={(color) =>
-															updateStage(
-																index,
-																'color',
-																color.toHexString()
-															)
-														}
-														size="small"
-														showText
-														format="hex"
-													/>
-												</div>
-											</Col>
-											<Col span={8}>
-												<div className="form-item-compact">
-													<label className="form-label">
-														{__(
-															'Win Probability (%)',
-															'quillcrm'
-														)}
-													</label>
-													<InputNumber
-														value={
-															stage.win_probability
-														}
-														onChange={(value) =>
-															updateStage(
-																index,
-																'win_probability',
-																value || 0
-															)
-														}
-														min={0}
-														max={100}
-														style={{
-															width: '100%',
-														}}
-														size="small"
-														placeholder="0-100"
-													/>
-												</div>
-											</Col>
-										</Row>
-									</Card>
-								))}
-							</div>
-
-							<div className="stages-footer">
-								<p className="help-text">
-									{__(
-										'Tip: Arrange stages in order from initial contact to deal closure. Win probability helps with pipeline forecasting.',
-										'quillcrm'
-									)}
-								</p>
-							</div>
-						</div>
-					)}
-				</Card>
-			</Form>
-		</Modal>
+				{/* botton footer */}
+				<div className="dialog-footer ">
+					<Button
+						onClick={handleCancel}
+						className="cancel-button shared-button"
+					>
+						{__('Cancel', 'quillcrm')}
+					</Button>
+					<Button
+						variant="default"
+						onClick={form.handleSubmit(handleSubmit)}
+						className="create-pipeline-button shared-button"
+					>
+						{loading ? loading : __('Create Pipeline', 'quillcrm')}
+					</Button>
+				</div>
+			</DialogContent>
+		</Dialog>
 	);
 };

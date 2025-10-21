@@ -7,6 +7,7 @@
 		"@dnd-kit/modifiers": "^9.0.0",
 		"@dnd-kit/sortable": "^10.0.0",
 		"@dnd-kit/utilities": "^3.2.2",
+		"@hookform/resolvers": "^5.2.2",
 		"@nanostores/react": "github:ai/react",
 		"@quillforms/types": "^3.0.19",
 		"@radix-ui/react-alert-dialog": "^1.1.14",
@@ -90,8 +91,10 @@
 		"react": "^18.3.1",
 		"react-beautiful-dnd": "^13.1.1",
 		"react-chartjs-2": "^5.2.0",
+		"react-colorful": "^5.6.1",
 		"react-day-picker": "^9.7.0",
 		"react-dom": "^18.3.1",
+		"react-hook-form": "^7.65.0",
 		"react-loader-spinner": "^6.1.6",
 		"react-router": "^6.25.1",
 		"react-router-dom": "^6.25.1",
@@ -100,12 +103,13 @@
 		"rtlcss-webpack-plugin": "^4.0.7",
 		"tailwind-merge": "^2.6.0",
 		"tailwindcss-animate": "^1.0.7",
+		"tinycolor2": "^1.6.0",
 		"tinymce": "^8.1.2",
 		"ts-loader": "^9.5.1",
 		"utility-types": "^3.11.0",
 		"uuid": "^11.1.0",
 		"validator": "^13.12.0",
-		"zod": "^4.1.11"
+		"zod": "^4.1.12"
 	},
 	"scripts": {
 		"dev": "npm run dev-client && npm run dev-config",

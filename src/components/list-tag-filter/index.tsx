@@ -226,14 +226,14 @@ export default function ListTagFilter({
 
 			<div className="flex gap-2">
 				<Button
-					variant="outline"
+					variant="secondaryDeepBlue"
 					onClick={handleApplyFilters}
-					disabled={loading || isApplying}
+					disabled={loading}
 				>
 					{__('Apply Filters', 'quillcrm')}
 				</Button>
 				<Button
-					variant="secondaryDeepBlue"
+					variant="destructive"
 					onClick={handleClearFilters}
 					disabled={loading || isApplying}
 				>

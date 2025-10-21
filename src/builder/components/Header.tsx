@@ -65,7 +65,6 @@ const Header: React.FC = () => {
 	return (
 		<div className="flex items-center justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
 			<div className="flex items-center align-center gap-2">
-				<X className="h-5 w-5 text-primary" />
 				<BreadcrumbComponent
 					items={[
 						{ label: __('Create Campaign', 'quillcrm') },
@@ -109,7 +108,7 @@ const Header: React.FC = () => {
 					{__('Preview & test', 'quillcrm')}
 				</Button>
 				<Button
-					variant="outline"
+					variant="secondary"
 					className="px-3"
 					onClick={() => setIsTemplateDialogOpen(true)}
 					disabled={isSavingTemplate}
@@ -125,7 +124,7 @@ const Header: React.FC = () => {
 				>
 					{isSaving
 						? __('Saving...', 'quillcrm')
-						: __('Save & Continue', 'quillcrm')}
+						: __('Save & choose recipients', 'quillcrm')}
 				</Button>
 			</div>
 

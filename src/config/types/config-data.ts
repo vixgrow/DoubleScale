@@ -167,6 +167,7 @@ export type Action = {
 			helperText?: string;
 		};
 	};
+	required_triggers?: string[];
 };
 
 export type ActionsGroup = {

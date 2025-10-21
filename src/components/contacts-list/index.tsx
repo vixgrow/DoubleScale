@@ -2,16 +2,16 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect, useCallback } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import { Input } from '@/components/ui/input';
-import type { Filter as FilterType } from '@quillcrm/client';
+import type { Filter as FilterType, Contact } from '@quillcrm/client';
 import { SearchIcon } from 'lucide-react';
-import { STORE_KEY } from '@/stores/contacts';
 
 interface ContactListProps {
 	filters?: FilterType[];
@@ -63,124 +63,108 @@ const ContactList: React.FC<ContactListProps> = ({
 	onLoadingChange,
 	campaignType,
 }) => {
+	// Simple local state
 	const [searchTerm, setSearchTerm] = useState('');
+	const [contacts, setContacts] = useState<Contact[]>([]);
+	const [total, setTotal] = useState(0);
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [page, setPage] = useState(1);
+	const [hasMore, setHasMore] = useState(true);
 
-	// Get data from store
-	const {
-		contacts,
-		total,
-		isLoadingContacts,
-		contactsError,
-		hasMoreContacts,
-	} = useSelect((select: any) => {
-		const store = select(STORE_KEY);
-		return {
-			contacts: store.getContacts(),
-			total: store.getContactsTotal(),
-			isLoadingContacts: store.isLoadingContacts(),
-			contactsError: store.getContactsError(),
-			hasMoreContacts: store.hasMoreContacts(),
-		};
-	}, []);
+	// Simple fetch function
+	const fetchContacts = async (
+		pageNum: number = 1,
+		append: boolean = false
+	) => {
+		setIsLoading(true);
+		setError(null);
 
-	// Store actions
-	const { fetchContacts, setFilters, setSearchKeywords, loadMoreContacts } =
-		useDispatch(STORE_KEY) as any;
-
-	// Fetch contacts using store action
-	const handleFetchContacts = async (search = '') => {
 		try {
-			await fetchContacts({
-				filters,
-				keywords: search,
-				page: 1,
-				perPage: 50,
-				subscribed: true,
-				campaignType,
+			const response: any = await apiFetch({
+				path: addQueryArgs('/qc/v1/contacts', {
+					per_page: 50,
+					page: pageNum,
+					filters,
+					subscribed: true,
+					keywords: searchTerm,
+					campaign_type: campaignType,
+				}),
+				method: 'GET',
 			});
-		} catch (error) {
-			console.error('Failed to fetch contacts:', error);
+
+			const newContacts = response.data || [];
+
+			if (append) {
+				setContacts((prev) => [...prev, ...newContacts]);
+			} else {
+				setContacts(newContacts);
+			}
+
+			setTotal(response.total);
+			setPage(pageNum);
+			setHasMore(newContacts.length === 50);
+		} catch (err: any) {
+			setError(err.message || 'Failed to fetch contacts');
+			console.error('Failed to fetch contacts:', err);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
-	// Notify parent components of state changes
+	// Notify parent components
 	useEffect(() => {
-		if (onTotalChange) {
-			onTotalChange(total);
-		}
-	}, [total, onTotalChange]);
+		onTotalChange?.(total);
+	}, [total]);
 
 	useEffect(() => {
-		if (onLoadingChange) {
-			onLoadingChange(isLoadingContacts);
-		}
-	}, [isLoadingContacts, onLoadingChange]);
+		onLoadingChange?.(isLoading);
+	}, [isLoading]);
 
-	// Initial fetch on component mount
+	const isInitialMount = useRef(true);
+
+	// Initial fetch
 	useEffect(() => {
-		handleFetchContacts(searchTerm);
+		fetchContacts(1);
+		isInitialMount.current = false;
 	}, []);
 
-	// Refetch when shouldFetch is true (when apply filters is clicked)
+	// Refetch when filters change (from apply button)
 	useEffect(() => {
 		if (shouldFetch) {
-			// Update store filters
-			setFilters(filters);
-			handleFetchContacts(searchTerm);
-			if (onFetchComplete) {
-				onFetchComplete();
-			}
+			fetchContacts(1);
+			onFetchComplete?.();
 		}
-	}, [shouldFetch, filters]);
+	}, [shouldFetch]);
 
-	// Debounce search
+	// Debounced search (skip on initial mount)
 	useEffect(() => {
-		if (searchTerm !== '') {
-			const timeoutId = setTimeout(() => {
-				setSearchKeywords(searchTerm);
-				handleFetchContacts(searchTerm);
-			}, 300);
-
-			return () => clearTimeout(timeoutId);
-		} else if (searchTerm === '') {
-			// If search is cleared, fetch without search term
-			setSearchKeywords('');
-			handleFetchContacts('');
+		if (isInitialMount.current) {
+			return;
 		}
-		// Return undefined for other cases
-		return undefined;
+
+		const timeoutId = setTimeout(() => {
+			fetchContacts(1);
+		}, 300);
+
+		return () => clearTimeout(timeoutId);
 	}, [searchTerm]);
 
 	// Handle infinite scroll
 	const handleScroll = useCallback(
-		async (e: React.UIEvent<HTMLDivElement>) => {
+		(e: React.UIEvent<HTMLDivElement>) => {
 			const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
 
-			// Check if we're near the bottom (within 100px) and can load more
+			// Load more when near bottom
 			if (
 				scrollHeight - scrollTop - clientHeight < 100 &&
-				hasMoreContacts &&
-				!isLoadingContacts
+				hasMore &&
+				!isLoading
 			) {
-				try {
-					await loadMoreContacts({
-						filters,
-						keywords: searchTerm,
-						subscribed: true,
-						campaignType,
-					});
-				} catch (error) {
-					console.error('Failed to load more contacts:', error);
-				}
+				fetchContacts(page + 1, true);
 			}
 		},
-		[
-			hasMoreContacts,
-			isLoadingContacts,
-			loadMoreContacts,
-			filters,
-			searchTerm,
-		]
+		[hasMore, isLoading, page]
 	);
 
 	return (
@@ -228,20 +212,20 @@ const ContactList: React.FC<ContactListProps> = ({
 				</div>
 			</div>
 
-			{/* Contacts List - make it fill remaining space but scroll content */}
+			{/* Contacts List */}
 			<div
 				className="space-y-3 overflow-y-auto flex-1 min-h-0 mt-3"
 				onScroll={handleScroll}
 			>
-				{(isLoadingContacts || loading) && contacts.length === 0 ? (
+				{(isLoading || loading) && contacts.length === 0 ? (
 					<div className="flex items-center justify-center py-8">
 						<div className="text-gray-500">
 							{__('Loading contacts...', 'quillcrm')}
 						</div>
 					</div>
-				) : contactsError ? (
+				) : error ? (
 					<div className="flex items-center justify-center py-8">
-						<div className="text-red-500">{contactsError}</div>
+						<div className="text-red-500">{error}</div>
 					</div>
 				) : contacts.length === 0 ? (
 					<div className="flex items-center justify-center py-8">
@@ -289,8 +273,8 @@ const ContactList: React.FC<ContactListProps> = ({
 							);
 						})}
 
-						{/* Loading indicator for infinite scroll */}
-						{isLoadingContacts && contacts.length > 0 && (
+						{/* Loading more indicator */}
+						{isLoading && contacts.length > 0 && (
 							<div className="flex items-center justify-center py-4">
 								<div className="text-gray-500 text-sm">
 									{__('Loading more contacts...', 'quillcrm')}
@@ -298,8 +282,8 @@ const ContactList: React.FC<ContactListProps> = ({
 							</div>
 						)}
 
-						{/* End of list indicator */}
-						{!hasMoreContacts && contacts.length > 0 && (
+						{/* End of list */}
+						{!hasMore && contacts.length > 0 && (
 							<div className="flex items-center justify-center py-4">
 								<div className="text-gray-400 text-sm">
 									{__('No more contacts to load', 'quillcrm')}

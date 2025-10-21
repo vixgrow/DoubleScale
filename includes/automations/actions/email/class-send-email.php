@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Send Email Action
  * Auto-generates templates and creates tracking records
@@ -21,6 +22,7 @@ use QuillCRM\Campaign\Email_Processing;
  */
 class Send_Email extends Abstract_Send_Message {
 
+
 	/**
 	 * Action Name
 	 *
@@ -34,6 +36,13 @@ class Send_Email extends Abstract_Send_Message {
 	 * @var string
 	 */
 	public $slug = 'send_email';
+
+	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'email';
 
 	/**
 	 * Trigger Group

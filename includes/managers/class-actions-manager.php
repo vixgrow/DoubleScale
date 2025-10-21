@@ -20,12 +20,6 @@ use QuillCRM\Managers\Integrations_Manager;
  */
 final class Actions_Manager {
 
-
-
-
-
-
-
 	/**
 	 * Registed actions
 	 *
@@ -96,10 +90,11 @@ final class Actions_Manager {
 
 		$this->actions[ $action->slug ] = $action;
 		$this->sources[ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = array(
-			'label'          => $action->name,
-			'description'    => $action->description,
-			'fields'         => $action->get_fields(),
-			'is_integration' => $action->is_integration,
+			'label'             => $action->name,
+			'description'       => $action->description,
+			'fields'            => $action->get_fields(),
+			'is_integration'    => $action->is_integration,
+			'required_triggers' => $action->required_triggers,
 		);
 	}
 

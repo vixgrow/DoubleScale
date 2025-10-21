@@ -21,6 +21,7 @@ interface PanelLayoutProps {
 	showSaveDraft?: boolean;
 	isLoading?: boolean;
 	children: React.ReactNode;
+	type?: string;
 }
 
 const PanelLayout: React.FC<PanelLayoutProps> = ({
@@ -36,6 +37,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 	showSaveDraft = false,
 	isLoading = false,
 	children,
+	type,
 }) => {
 	const progressValue =
 		totalSteps && currentStep ? ((currentStep + 1) / totalSteps) * 100 : 0;
@@ -43,7 +45,14 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 	return (
 		<div className="fixed inset-0 w-full h-full bg-white z-[1700000] flex flex-col overflow-y-auto">
 			{/* Header Section - Fixed */}
-			<div className="flex-none p-6 bg-white px-12">
+			<div
+				className={`flex-none p-4 bg-white px-12 ${type === 'campaign' ? 'z-10' : ''}`}
+				style={
+					type === 'campaign'
+						? { boxShadow: '0 4px 20px 0 rgba(59, 130, 246, 0.14)' }
+						: undefined
+				}
+			>
 				<div className="flex justify-between items-center">
 					<Breadcrumb items={items} />
 
@@ -56,8 +65,10 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 			</div>
 
 			{/* Scrollable Content Section */}
-			<div className="flex-1  bg-white px-12">
-				<div className="pb-8">{children}</div>
+			<div
+				className={`flex-1 bg-white px-12 ${type === 'campaign' ? 'pt-4' : ''}`}
+			>
+				<div className="pb-8 h-full">{children}</div>
 			</div>
 
 			{/* Footer Section - Fixed */}

@@ -676,6 +676,8 @@ export type AutomationsResponse = Response & {
 	data: Automation[];
 };
 
+export type CampaignType = 'standard' | 'ab_test' | 'email_sequence';
+
 export type CampaignsResponse = Response & {
 	data: Campaign[];
 	total_count: number;

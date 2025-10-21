@@ -44,13 +44,24 @@ ChartJS.register(ArcElement, DoughnutController, Tooltip, Legend, Title);
  * Internal dependencies
  */
 import './style.scss';
-import { useCampaignContext } from '../../state/context';
 import { Campaign as CampaignType, Template } from '@quillcrm/client';
 import { CAMPAIGN_CHANNEL, getCampaignChannelLabel } from '@/constants/campaign-channel';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { getCampaignEndpoint } from '@quillcrm/utils';
 
 const Analytics: React.FC = () => {
-	const { campaign, isLoading, updateCampaign, saveCampaign } =
-		useCampaignContext();
+	const campaign = useSelect(
+		(select: any) => select('quillcrm/campaign').getCampaign(),
+		[]
+	) as CampaignType | null;
+
+	const isLoading = useSelect(
+		(select: any) => select('quillcrm/campaign').isLoading(),
+		[]
+	);
+
+	const { updateCampaign: updateCampaignAction } =
+		useDispatch('quillcrm/campaign');
 	const totalMessages = campaign
 		? campaign.sent_count + campaign.failed_count
 		: 0;
@@ -82,7 +93,7 @@ const Analytics: React.FC = () => {
 				setStarted(true);
 			}
 
-			updateCampaign(response);
+			updateCampaignAction(response);
 
 			if (response.status === 'completed') {
 				setStarted(false);
@@ -92,7 +103,7 @@ const Analytics: React.FC = () => {
 		} finally {
 			setIsFetching(false);
 		}
-	}, [campaign, isFetching, started, updateCampaign]);
+	}, [campaign, isFetching, started, updateCampaignAction]);
 
 	// @ts-ignore
 	useEffect(() => {
@@ -117,7 +128,21 @@ const Analytics: React.FC = () => {
 
 		setResending(true);
 		try {
-			await saveCampaign({ status: 'resending' });
+			const endpoint = getCampaignEndpoint(campaign.type);
+			if (!endpoint) {
+				throw new Error('Invalid campaign type');
+			}
+
+			const response = (await apiFetch({
+				path: `${endpoint}/${campaign.id}`,
+				method: 'PUT',
+				data: {
+					...campaign,
+					status: 'resending',
+				},
+			})) as CampaignType;
+
+			updateCampaignAction(response);
 		} catch (error) {
 			console.error(error);
 		} finally {

@@ -43,7 +43,7 @@ export interface CampaignState {
   campaign: ExtendedCampaign | null;
   loading: boolean;
   saving: boolean;
-  error: string | null;
+  errors: Record<string, string>;
 }
 
 // Action types

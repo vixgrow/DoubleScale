@@ -133,22 +133,6 @@ class Send_Email extends Abstract_Send_Message {
 	}
 
 	/**
-	 * Get template settings
-	 *
-	 * @param array $content_fields Content fields.
-	 * @return array
-	 */
-	protected function get_template_settings( array $content_fields ) {
-		return array(
-			'from_name'       => $content_fields['from_name'],
-			'from_email'      => $content_fields['from_email'],
-			'reply_to'        => $content_fields['reply_to'],
-			'add_unsubscribe' => true,
-			'enable_utm'      => false,
-		);
-	}
-
-	/**
 	 * Get processing instance
 	 *
 	 * @return Email_Processing

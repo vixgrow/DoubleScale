@@ -135,16 +135,6 @@ class Send_WhatsApp extends Abstract_Send_Message {
 	}
 
 	/**
-	 * Get template settings
-	 *
-	 * @param array $content_fields Content fields.
-	 * @return array
-	 */
-	protected function get_template_settings( array $content_fields ) {
-		return array(); // WhatsApp templates don't have additional settings
-	}
-
-	/**
 	 * Get processing instance
 	 *
 	 * @return WhatsApp_Processing

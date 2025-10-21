@@ -12,6 +12,8 @@
 namespace QuillCRM\Models;
 
 use WPEloquent\Eloquent\Model;
+use QuillCRM\Services\Campaign_Template_Factory;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Automation_Step_Model class
@@ -197,5 +199,149 @@ class Automation_Step_Model extends Model {
 				}
 			}
 		);
+
+		// Process template data when saving step (similar to email sequences)
+		static::saving(
+			function ( $step ) {
+				$settings = $step->settings;
+
+				// If step contains template data array, process it
+				if ( isset( $settings['templates'] ) && is_array( $settings['templates'] ) && ! empty( $settings['templates'] ) ) {
+					// Determine channel type from step action
+					$channel_type = self::get_channel_type_from_action( $step->action );
+
+					if ( $channel_type ) {
+						// Use Campaign_Template_Factory to process template data
+						$template_factory = Campaign_Template_Factory::instance();
+						$template_ids     = $template_factory->process_templates_data(
+							$settings['templates'],
+							$channel_type,
+							'draft'
+						);
+
+						if ( ! empty( $template_ids ) ) {
+							// Store template IDs and remove template data
+							$settings['template_ids'] = $template_ids;
+							unset( $settings['templates'] );
+
+							$step->settings = $settings;
+
+							quillcrm_get_logger()->info(
+								'Automation step: Templates processed and saved',
+								array(
+									'step_id'      => $step->id ?? 'new',
+									'action'       => $step->action,
+									'template_ids' => $template_ids,
+									'code'         => 'automation_step_templates_processed',
+								)
+							);
+						}
+					}
+				}
+			}
+		);
+
+		// Handle template updates when updating step
+		static::updating(
+			function ( $step ) {
+				$settings = $step->settings;
+
+				// If template content changed, check if we need to create a new template
+				if ( isset( $settings['template_ids'] ) && ! empty( $settings['template_ids'] ) ) {
+					$template_id = reset( $settings['template_ids'] );
+
+					// Check if this template has been used in tracking
+					if ( self::is_template_used_in_tracking( $template_id ) ) {
+						// Template has been used - create new template instead of updating
+						// Remove template_ids so the saving event will create a new one
+						unset( $settings['template_ids'] );
+
+						quillcrm_get_logger()->info(
+							'Automation step: Template in use, creating new template',
+							array(
+								'step_id'            => $step->id,
+								'old_template_id'    => $template_id,
+								'code'               => 'automation_step_template_in_use',
+							)
+						);
+					} else {
+						// Template not used yet - safe to update in-place
+						if ( isset( $settings['subject'] ) || isset( $settings['body'] ) ) {
+							$template = Template_Model::find( $template_id );
+							if ( $template ) {
+								$update_data = array();
+
+								if ( isset( $settings['subject'] ) ) {
+									$update_data['subject'] = $settings['subject'];
+									$update_data['name']    = 'Automation: ' . $settings['subject'];
+								}
+
+								if ( isset( $settings['body'] ) ) {
+									$update_data['body'] = $settings['body'];
+								}
+
+								// Update template settings if applicable
+								if ( isset( $settings['from_name'] ) || isset( $settings['from_email'] ) || isset( $settings['reply_to'] ) ) {
+									$template_settings = $template->settings ?? array();
+
+									if ( isset( $settings['from_name'] ) ) {
+										$template_settings['from_name'] = $settings['from_name'];
+									}
+									if ( isset( $settings['from_email'] ) ) {
+										$template_settings['from_email'] = $settings['from_email'];
+									}
+									if ( isset( $settings['reply_to'] ) ) {
+										$template_settings['reply_to'] = $settings['reply_to'];
+									}
+
+									$update_data['settings'] = $template_settings;
+								}
+
+								if ( ! empty( $update_data ) ) {
+									$template->update( $update_data );
+
+									quillcrm_get_logger()->info(
+										'Automation step: Template updated in-place',
+										array(
+											'step_id'     => $step->id,
+											'template_id' => $template_id,
+											'code'        => 'automation_step_template_updated',
+										)
+									);
+								}
+							}
+						}
+					}
+
+					$step->settings = $settings;
+				}
+			}
+		);
+	}
+
+	/**
+	 * Get channel type from action slug
+	 *
+	 * @param string $action Action slug (e.g., 'send_email', 'send_sms')
+	 * @return string|null Channel type ('email', 'sms', 'whatsapp') or null
+	 */
+	private static function get_channel_type_from_action( $action ) {
+		$action_channel_map = array(
+			'send_email'    => 'email',
+			'send_sms'      => 'sms',
+			'send_whatsapp' => 'whatsapp',
+		);
+
+		return $action_channel_map[ $action ] ?? null;
+	}
+
+	/**
+	 * Check if template is used in tracking records
+	 *
+	 * @param int $template_id Template ID
+	 * @return bool True if template is used in any tracking record
+	 */
+	private static function is_template_used_in_tracking( $template_id ) {
+		return Tracking_Model::where( 'template_id', $template_id )->exists();
 	}
 }

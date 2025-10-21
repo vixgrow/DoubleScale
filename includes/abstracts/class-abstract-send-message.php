@@ -4,7 +4,7 @@
  * Base class for all message sending actions (Email, SMS, WhatsApp)
  *
  * This class consolidates the common logic for sending messages across all channels:
- * - Template auto-creation/deduplication
+ * - Template retrieval from step settings (templates created by model events)
  * - Tracking record creation
  * - Campaign infrastructure reuse
  * - Error handling and logging
@@ -24,7 +24,7 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Services\Auto_Template_Manager;
+use QuillCRM\Models\Template_Model;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Utils;
@@ -88,14 +88,6 @@ abstract class Abstract_Send_Message extends Action {
 	 * @return string|null Returns error message if invalid, null if valid
 	 */
 	abstract protected function validate_content_fields( array $content_fields );
-
-	/**
-	 * Get template settings for Auto_Template_Manager::find_or_create()
-	 *
-	 * @param array $content_fields Content fields from get_content_fields().
-	 * @return array
-	 */
-	abstract protected function get_template_settings( array $content_fields );
 
 	/**
 	 * Get the processing instance for this channel
@@ -177,14 +169,37 @@ abstract class Abstract_Send_Message extends Action {
 				);
 			}
 
-			// 5. Auto-create or find template (with deduplication)
-			$template_settings = $this->get_template_settings( $content_fields );
-			$template          = Auto_Template_Manager::find_or_create(
-				$content_fields['subject'] ?? '',
-				$content_fields['body'],
-				$template_settings,
-				$channel_type
-			);
+			// 5. Get template from step settings (already created by model event)
+			$template_ids = $step->get_setting( 'template_ids', array() );
+			if ( empty( $template_ids ) ) {
+				quillcrm_get_logger()->error(
+					"Send {$channel_name} action: No template found in step settings",
+					array(
+						'automation_id' => $automation->id,
+						'step_id'       => $step->id,
+						'contact_id'    => $contact->id,
+						'code'          => "send_{$channel_type}_no_template",
+					)
+				);
+				throw new \Exception( "No template found for automation step {$step->id}" );
+			}
+
+			$template_id = reset( $template_ids );
+			$template    = Template_Model::find( $template_id );
+
+			if ( ! $template ) {
+				quillcrm_get_logger()->error(
+					"Send {$channel_name} action: Template not found in database",
+					array(
+						'automation_id' => $automation->id,
+						'step_id'       => $step->id,
+						'template_id'   => $template_id,
+						'contact_id'    => $contact->id,
+						'code'          => "send_{$channel_type}_template_not_found",
+					)
+				);
+				throw new \Exception( "Template {$template_id} not found" );
+			}
 
 			// 6. Create tracking record BEFORE sending (critical for analytics)
 			$tracking = Tracking_Model::create(

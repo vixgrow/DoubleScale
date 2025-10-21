@@ -135,16 +135,6 @@ class Send_SMS extends Abstract_Send_Message {
 	}
 
 	/**
-	 * Get template settings
-	 *
-	 * @param array $content_fields Content fields.
-	 * @return array
-	 */
-	protected function get_template_settings( array $content_fields ) {
-		return array(); // SMS templates don't have additional settings
-	}
-
-	/**
 	 * Get processing instance
 	 *
 	 * @return SMS_Processing

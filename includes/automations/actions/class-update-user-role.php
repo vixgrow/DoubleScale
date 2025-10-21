@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Update User Role Action
  * This action will update the user role.
@@ -21,6 +22,7 @@ use WP_User;
  * Update User Role Action
  */
 class Update_User_Role extends Action {
+
 
 	/**
 	 * Action Name
@@ -102,7 +104,7 @@ class Update_User_Role extends Action {
 	 * @return array
 	 */
 	public function get_options() {
-		// Get all WordPress roles
+		 // Get all WordPress roles
 		global $wp_roles;
 
 		if ( ! isset( $wp_roles ) ) {

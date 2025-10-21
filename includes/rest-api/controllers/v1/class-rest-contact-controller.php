@@ -39,6 +39,10 @@ class REST_Contact_Controller extends REST_Controller {
 
 
 
+
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -1084,7 +1088,7 @@ class REST_Contact_Controller extends REST_Controller {
 			$lists = $request->get_param( 'lists' );
 			if ( is_array( $lists ) ) {
 				if ( empty( $lists ) ) {
-					$contact->lists()->detach();
+					$contact->sync_lists( array() );
 					return;
 				}
 				$lists_arr = array();
@@ -1125,7 +1129,7 @@ class REST_Contact_Controller extends REST_Controller {
 			$tags = $request->get_param( 'tags' );
 			if ( is_array( $tags ) ) {
 				if ( empty( $tags ) ) {
-					$contact->tags()->detach();
+					$contact->sync_tags( array() );
 					return;
 				}
 

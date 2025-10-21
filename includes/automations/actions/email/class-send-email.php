@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Send Email Action
  *
@@ -22,6 +23,7 @@ use QuillCRM\Models\Template_Model;
  */
 class Send_Email extends Action {
 
+
 	/**
 	 * Action Name
 	 *
@@ -41,7 +43,7 @@ class Send_Email extends Action {
 	 *
 	 * @var string
 	 */
-	public $source = 'message';
+	public $source = 'email';
 
 	/**
 	 * Tigger Group

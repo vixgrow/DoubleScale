@@ -61,17 +61,30 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const firstRowRef = useRef<HTMLDivElement | null>(null);
 	const lastRowRef = useRef<HTMLDivElement | null>(null);
-	const [bracketStyle, setBracketStyle] = useState<{ top: number; height: number }>({ top: 0, height: 0 });
+	const [bracketStyle, setBracketStyle] = useState<{
+		top: number;
+		height: number;
+	}>({ top: 0, height: 0 });
 
 	useLayoutEffect(() => {
 		const update = () => {
-			if (!wrapperRef.current || !firstRowRef.current || !lastRowRef.current) return;
+			if (
+				!wrapperRef.current ||
+				!firstRowRef.current ||
+				!lastRowRef.current
+			)
+				return;
 			const containerRect = wrapperRef.current.getBoundingClientRect();
 			const firstRect = firstRowRef.current.getBoundingClientRect();
 			const lastRect = lastRowRef.current.getBoundingClientRect();
-			const firstMid = firstRect.top - containerRect.top + firstRect.height / 2;
-			const lastMid = lastRect.top - containerRect.top + lastRect.height / 2;
-			setBracketStyle({ top: firstMid, height: Math.max(0, lastMid - firstMid) });
+			const firstMid =
+				firstRect.top - containerRect.top + firstRect.height / 2;
+			const lastMid =
+				lastRect.top - containerRect.top + lastRect.height / 2;
+			setBracketStyle({
+				top: firstMid,
+				height: Math.max(0, lastMid - firstMid),
+			});
 		};
 		update();
 		window.addEventListener('resize', update);
@@ -85,7 +98,11 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 					{ruleGroup.length > 1 && (
 						<div
 							className="absolute"
-							style={{ left: -72, top: bracketStyle.top, height: bracketStyle.height }}
+							style={{
+								left: 8,
+								top: bracketStyle.top,
+								height: bracketStyle.height,
+							}}
 						>
 							<div className="h-full w-12 border-2 border-[#3B82F6] border-r-0 rounded-l-2xl"></div>
 							<span className="absolute -left-7 top-1/2 -translate-y-1/2 text-base font-bold text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] px-3 py-1 rounded-full">
@@ -93,7 +110,10 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 							</span>
 						</div>
 					)}
-					<div ref={containerRef} className="flex flex-col gap-6 pl-10">
+					<div
+						ref={containerRef}
+						className="flex flex-col gap-6 pl-14"
+					>
 						{map(ruleGroup, (rule, ruleIndex) => (
 							<div
 								key={ruleIndex}
@@ -144,7 +164,9 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 										onValueChange={(value) => {
 											const newRules = [...rules];
 											newRules[groupIndex][ruleIndex] = {
-												...newRules[groupIndex][ruleIndex],
+												...newRules[groupIndex][
+													ruleIndex
+												],
 												rule: value,
 											};
 											onRulesChange(newRules);
@@ -164,8 +186,9 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 													.rules
 											).length > 0 ? (
 												map(
-													rulesGroups[rule.selectedGroup]
-														.rules,
+													rulesGroups[
+														rule.selectedGroup
+													].rules,
 													(ruleOption, key) => (
 														<SelectItem
 															key={key}
@@ -193,40 +216,46 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 										onChange={(key, value) => {
 											const newRules = [...rules];
 											newRules[groupIndex][ruleIndex] = {
-												...newRules[groupIndex][ruleIndex],
+												...newRules[groupIndex][
+													ruleIndex
+												],
 												[key]: value,
 											};
 											onRulesChange(newRules);
 										}}
 										onRemove={
 											rules.length === 1 &&
-												ruleGroup.length === 1
+											ruleGroup.length === 1
 												? undefined
 												: () => {
-													const newRules = [...rules];
-													const removeRule = {
-														singleRuleInGroup: () =>
-															newRules.splice(
-																groupIndex,
-																1
-															),
-														multipleRulesInGroup:
-															() =>
-																newRules[
-																	groupIndex
-																].splice(
-																	ruleIndex,
-																	1
-																),
-													};
+														const newRules = [
+															...rules,
+														];
+														const removeRule = {
+															singleRuleInGroup:
+																() =>
+																	newRules.splice(
+																		groupIndex,
+																		1
+																	),
+															multipleRulesInGroup:
+																() =>
+																	newRules[
+																		groupIndex
+																	].splice(
+																		ruleIndex,
+																		1
+																	),
+														};
 
-													removeRule[
-														ruleGroup.length === 1
-															? 'singleRuleInGroup'
-															: 'multipleRulesInGroup'
-													]();
-													onRulesChange(newRules);
-												}
+														removeRule[
+															ruleGroup.length ===
+															1
+																? 'singleRuleInGroup'
+																: 'multipleRulesInGroup'
+														]();
+														onRulesChange(newRules);
+													}
 										}
 									/>
 								)}
@@ -240,9 +269,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 							const newRules = [...rules];
 							const firstGroup = Object.keys(rulesGroups)[0];
 							const firstRule = firstGroup
-								? Object.keys(
-									rulesGroups[firstGroup].rules
-								)[0]
+								? Object.keys(rulesGroups[firstGroup].rules)[0]
 								: '';
 							newRules[groupIndex].push({
 								rule: firstRule,
@@ -258,9 +285,8 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 						{__('Add another condition (And)', 'quillcrm')}
 					</Button>
 				</div>
-
 			</CardContent>
-		</Card >
+		</Card>
 	);
 };
 

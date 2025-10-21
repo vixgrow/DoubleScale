@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useLayoutEffect, useRef } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -15,7 +15,11 @@ import { map } from 'lodash';
 import './style.scss';
 import type { AutomationStep } from '@quillcrm/client';
 import ConfigAPI from '@quillcrm/config';
-import { CustomDialogHeader, GradientConditionIcon, PlusIcon } from '@quillcrm/components';
+import {
+	CustomDialogHeader,
+	GradientConditionIcon,
+	PlusIcon,
+} from '@quillcrm/components';
 import {
 	Dialog,
 	DialogContent,
@@ -41,21 +45,62 @@ const ConditionsModal: React.FC<RulesProps> = ({
 }) => {
 	const rulesGroups = ConfigAPI.getAutomationRules();
 	const firstGroup = Object.keys(rulesGroups)[0];
-	const firstRule = firstGroup ? Object.keys(rulesGroups[firstGroup].rules)[0] : '';
+	const firstRule = firstGroup
+		? Object.keys(rulesGroups[firstGroup].rules)[0]
+		: '';
 	const getInitialRule = () => ({
 		rule: firstRule,
 		operator: 'is',
 		value: '',
-		selectedGroup: firstGroup
+		selectedGroup: firstGroup,
 	});
 	const stepRules = step.settings || [[getInitialRule()]];
-	const [rules, setRules] = useState<Array<Array<{
-		rule: string;
-		operator: string;
-		value: string;
-		selectedGroup: string;
-	}>>>(stepRules);
+	const [rules, setRules] = useState<
+		Array<
+			Array<{
+				rule: string;
+				operator: string;
+				value: string;
+				selectedGroup: string;
+			}>
+		>
+	>(stepRules);
 	const [isSaving, setIsSaving] = useState(false);
+	const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+	const [orBracketStyle, setOrBracketStyle] = useState<{
+		top: number;
+		height: number;
+	}>({ top: 0, height: 0 });
+	const containerRef = useRef<HTMLDivElement | null>(null);
+
+	useLayoutEffect(() => {
+		const updateBracket = () => {
+			if (
+				rules.length <= 1 ||
+				!containerRef.current ||
+				!cardRefs.current[0] ||
+				!cardRefs.current[rules.length - 1]
+			) {
+				return;
+			}
+			const containerRect = containerRef.current.getBoundingClientRect();
+			const firstCard = cardRefs.current[0];
+			const lastCard = cardRefs.current[rules.length - 1];
+			if (firstCard && lastCard) {
+				const firstRect = firstCard.getBoundingClientRect();
+				const lastRect = lastCard.getBoundingClientRect();
+				const firstMid =
+					firstRect.top - containerRect.top + firstRect.height / 2;
+				const lastMid =
+					lastRect.top - containerRect.top + lastRect.height / 2;
+				const height = lastMid - firstMid;
+				setOrBracketStyle({ top: firstMid, height });
+			}
+		};
+		updateBracket();
+		window.addEventListener('resize', updateBracket);
+		return () => window.removeEventListener('resize', updateBracket);
+	}, [rules]);
 
 	const save = async (data: Partial<AutomationStep>) => {
 		setIsSaving(true);
@@ -84,27 +129,39 @@ const ConditionsModal: React.FC<RulesProps> = ({
 					/>
 				</DialogHeader>
 				<div className="py-4">
-					<div className="flex flex-col gap-4">
+					<div
+						ref={containerRef}
+						className="flex flex-col gap-4 relative"
+					>
+						{rules.length > 1 && orBracketStyle.height > 0 && (
+							<div
+								className="absolute left-4"
+								style={{
+									top: `${orBracketStyle.top}px`,
+									height: `${orBracketStyle.height}px`,
+								}}
+							>
+								<div className="h-full w-12 border-2 border-[#3B82F6] border-r-0 rounded-l-2xl"></div>
+								<span className="absolute -left-6 top-1/2 -translate-y-1/2 text-base font-bold text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] px-3 py-1 rounded-full">
+									{__('OR', 'quillcrm')}
+								</span>
+							</div>
+						)}
 						{map(rules, (ruleGroup, groupIndex) => (
-							<>
+							<div
+								key={groupIndex}
+								ref={(el) =>
+									(cardRefs.current[groupIndex] = el)
+								}
+							>
 								<RuleGroupCard
-									key={groupIndex}
 									ruleGroup={ruleGroup}
 									groupIndex={groupIndex}
 									rulesGroups={rulesGroups}
 									rules={rules}
 									onRulesChange={setRules}
 								/>
-								{groupIndex < rules.length - 1 && (
-									<div className="flex justify-center items-center gap-4">
-										<div className="flex-1 h-[2px] bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6]"></div>
-										<span className="text-base font-bold text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] px-3 py-1 rounded-full">
-											{__('OR', 'quillcrm')}
-										</span>
-										<div className="flex-1 h-[2px] bg-gradient-to-l from-[#1E3A8A] to-[#3B82F6]"></div>
-									</div>
-								)}
-							</>
+							</div>
 						))}
 						<div className="flex justify-start items-start">
 							<Button
@@ -129,7 +186,9 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						className="w-full"
 						variant="gradient"
 					>
-						{isSaving ? __('Adding...', 'quillcrm') : __('Add condition', 'quillcrm')}
+						{isSaving
+							? __('Adding...', 'quillcrm')
+							: __('Add condition', 'quillcrm')}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

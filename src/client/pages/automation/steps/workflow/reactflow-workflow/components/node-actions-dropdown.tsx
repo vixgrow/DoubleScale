@@ -7,6 +7,10 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { MoreVertical } from 'lucide-react';
+import { useState } from 'react';
+/**
+ * Internal dependencies
+ */
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -52,9 +56,26 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 	showDelete = true,
 	disabled = false,
 }) => {
+	const [isDeleting, setIsDeleting] = useState(false);
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+
 	if (disabled || (!showEdit && !showDelete)) {
 		return null;
 	}
+
+	const handleDelete = async () => {
+		if (!onDelete) return;
+
+		setIsDeleting(true);
+		try {
+			await onDelete();
+			setIsDialogOpen(false);
+		} catch (error) {
+			console.error('Delete failed:', error);
+		} finally {
+			setIsDeleting(false);
+		}
+	};
 
 	return (
 		<div
@@ -98,7 +119,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 						</DropdownMenuItem>
 					)}
 					{showDelete && onDelete && (
-						<AlertDialog>
+						<AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 							<AlertDialogTrigger asChild>
 								<DropdownMenuItem
 									className="text-destructive focus:text-destructive cursor-pointer hover:bg-gray-100"
@@ -120,11 +141,17 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 										</AlertDialogDescription>
 									</AlertDialogHeader>
 									<AlertDialogFooter>
-										<AlertDialogCancel>
+										<AlertDialogCancel disabled={isDeleting}>
 											{__('Cancel', 'quillcrm')}
 										</AlertDialogCancel>
-										<AlertDialogAction onClick={onDelete}>
-											{__('Delete', 'quillcrm')}
+										<AlertDialogAction
+											onClick={(e) => {
+												e.preventDefault();
+												handleDelete();
+											}}
+											disabled={isDeleting}
+										>
+											{isDeleting ? __('Deleting...', 'quillcrm') : __('Delete', 'quillcrm')}
 										</AlertDialogAction>
 									</AlertDialogFooter>
 								</AlertDialogContent>

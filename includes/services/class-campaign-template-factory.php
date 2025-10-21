@@ -153,10 +153,11 @@ interface Template_Processor_Interface {
 	/**
 	 * Validate template data
 	 *
-	 * @param array $template_data Template data
+	 * @param array  $template_data Template data
+	 * @param string $campaign_status Campaign status (draft, scheduled, etc.)
 	 * @return bool
 	 */
-	public function validate( array $template_data);
+	public function validate( array $template_data, $campaign_status = 'draft' );
 }
 
 /**
@@ -188,7 +189,7 @@ abstract class Abstract_Template_Processor implements Template_Processor_Interfa
 	 * @return Template_Model|null
 	 */
 	public function process( array $template_data, $campaign_status = 'draft' ) {
-		if ( ! $this->validate( $template_data ) ) {
+		if ( ! $this->validate( $template_data, $campaign_status ) ) {
 			return null;
 		}
 
@@ -245,10 +246,11 @@ abstract class Abstract_Template_Processor implements Template_Processor_Interfa
 	/**
 	 * Basic validation - can be overridden by child classes
 	 *
-	 * @param array $template_data Template data
+	 * @param array  $template_data Template data
+	 * @param string $campaign_status Campaign status (draft, scheduled, etc.)
 	 * @return bool
 	 */
-	public function validate( array $template_data ) {
+	public function validate( array $template_data, $campaign_status = 'draft' ) {
 		if ( empty( $template_data ) ) {
 			quillcrm_get_logger()->error(
 				'Template validation failed: Empty template data',
@@ -328,12 +330,13 @@ class Email_Template_Processor extends Abstract_Template_Processor {
 	/**
 	 * Validate email template data
 	 *
-	 * @param array $template_data Template data
+	 * @param array  $template_data Template data
+	 * @param string $campaign_status Campaign status (draft, scheduled, etc.)
 	 * @return bool
 	 */
-	public function validate( array $template_data ) {
+	public function validate( array $template_data, $campaign_status = 'draft' ) {
 		// Call parent validation first
-		if ( ! parent::validate( $template_data ) ) {
+		if ( ! parent::validate( $template_data, $campaign_status ) ) {
 			quillcrm_get_logger()->error(
 				'Email template validation failed: Parent validation failed',
 				array(
@@ -345,15 +348,26 @@ class Email_Template_Processor extends Abstract_Template_Processor {
 		}
 
 		// Email templates require both subject and body
+		// For draft campaigns, allow empty subject but log a warning
 		if ( empty( $template_data['subject'] ) ) {
-			quillcrm_get_logger()->error(
-				'Email template validation failed: Empty subject',
-				array(
-					'template_data' => $template_data,
-					'code'          => 'email_template_validation_empty_subject',
-				)
-			);
-			return false;
+			if ( $campaign_status === 'draft' ) {
+				quillcrm_get_logger()->info(
+					'Email template has empty subject (draft mode)',
+					array(
+						'template_data' => $template_data,
+						'code'          => 'email_template_draft_empty_subject',
+					)
+				);
+			} else {
+				quillcrm_get_logger()->error(
+					'Email template validation failed: Empty subject',
+					array(
+						'template_data' => $template_data,
+						'code'          => 'email_template_validation_empty_subject',
+					)
+				);
+				return false;
+			}
 		}
 
 		if ( empty( $template_data['body'] ) ) {

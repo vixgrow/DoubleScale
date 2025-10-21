@@ -35,7 +35,6 @@ import {
 	DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import { Card } from '@/components/ui/card';
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep } from '@quillcrm/client';
@@ -44,6 +43,7 @@ interface AddStepNodeData {
 	parentId?: number | null;
 	condition?: string | null;
 	prevStep?: AutomationStep | null;
+	onStepClick?: (step: any) => void;
 }
 
 const updateStepOrderRecursive = (
@@ -83,10 +83,10 @@ const updateStepOrderRecursive = (
 };
 
 const AddStepNode: React.FC<NodeProps> = ({ data }) => {
-	const { parentId, condition, prevStep } =
+	const { parentId, condition, prevStep, onStepClick } =
 		data as unknown as AddStepNodeData;
 	const [loading, setLoading] = useState(false);
-	const [popoverVisible, setPopoverVisible] = useState(false);
+	const [visible, setVisible] = useState(false);
 	const { automation, steps, setSteps, setUpdatedSteps } =
 		useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -230,6 +230,27 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 				type: 'success',
 				message: __('Step added', 'quillcrm'),
 			});
+
+			// Close dialog first
+			setVisible(false);
+
+			// Then open modal/selector for action, condition, goal, and delay steps
+			// Use setTimeout to ensure dialog closes before modal opens
+			if (
+				(type === 'action' ||
+					type === 'condition' ||
+					type === 'goal' ||
+					type === 'delay') &&
+				onStepClick
+			) {
+				setTimeout(() => {
+					const organizedStep = {
+						...response,
+						children: [],
+					};
+					onStepClick(organizedStep);
+				}, 100);
+			}
 		} catch (error: any) {
 			console.error('Failed to create step:', error);
 			console.error('Request data was:', requestData);
@@ -251,13 +272,13 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 				className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 			/>
 
-			<Dialog open={popoverVisible} onOpenChange={setPopoverVisible}>
+			<Dialog open={visible} onOpenChange={setVisible}>
 				<DialogTrigger asChild>
 					<div
 						className="qcrm-automation-workflow__add-step flex items-center justify-center pointer-events-auto"
 						onClick={(e) => {
 							e.stopPropagation();
-							setPopoverVisible(!popoverVisible);
+							setVisible(!visible);
 						}}
 					>
 						<Button
@@ -273,55 +294,43 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 				<DialogPortal>
 					<DialogOverlay className="z-[150200]" />
 					<DialogContent className="sm:max-w-[800px] p-6 z-[150200]">
-						{loading ? (
-							<div className="flex justify-center">
-								<Spinner className="h-6 w-6" />
-							</div>
-						) : (
-							<>
-								<DialogHeader>
-									<DialogTitle>
-										{__('Add Step', 'quillcrm')}
-									</DialogTitle>
-									<DialogDescription className="mt-1">
-										{__(
-											'Select one of the Steps',
-											'quillcrm'
-										)}
-									</DialogDescription>
-								</DialogHeader>
-								<div className="flex flex-col gap-5">
-									{map(typesOptions, (type, key) => (
-										<Card
-											key={key}
-											className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-											onClick={(e) => {
-												e.stopPropagation();
-												handleStepSelection(key);
-												setPopoverVisible(false);
-											}}
-										>
-											<div className="flex items-center justify-between">
-												<div className="flex items-center gap-4">
-													<div className="flex-shrink-0 p-2 text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg">
-														{type.icon}
-													</div>
-													<div className="">
-														<h3 className="font-semibold text-xl text-[#3F4254]">
-															{type.label}
-														</h3>
-														<p className="text-sm text-[#333333] mt-1">
-															{type.description}
-														</p>
-													</div>
-												</div>
-												<GradientArrowIcon />
+						<DialogHeader>
+							<DialogTitle>
+								{__('Add Step', 'quillcrm')}
+							</DialogTitle>
+							<DialogDescription className="mt-1">
+								{__('Select one of the Steps', 'quillcrm')}
+							</DialogDescription>
+						</DialogHeader>
+						<div className="flex flex-col gap-5">
+							{map(typesOptions, (type, key) => (
+								<Card
+									key={key}
+									className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${loading ? 'pointer-events-none opacity-50' : ''}`}
+									onClick={(e) => {
+										e.stopPropagation();
+										handleStepSelection(key);
+									}}
+								>
+									<div className="flex items-center justify-between">
+										<div className="flex items-center gap-4">
+											<div className="flex-shrink-0 p-2 text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg">
+												{type.icon}
 											</div>
-										</Card>
-									))}
-								</div>
-							</>
-						)}
+											<div className="">
+												<h3 className="font-semibold text-xl text-[#3F4254]">
+													{type.label}
+												</h3>
+												<p className="text-sm text-[#333333] mt-1">
+													{type.description}
+												</p>
+											</div>
+										</div>
+										<GradientArrowIcon />
+									</div>
+								</Card>
+							))}
+						</div>
 					</DialogContent>
 				</DialogPortal>
 			</Dialog>

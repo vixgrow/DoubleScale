@@ -39,7 +39,6 @@ const Contacts: React.FC = () => {
 		updateSettings('filters', newFilters);
 	};
 
-	const [total, setTotal] = useState(0);
 	const [filterBy, setFilterBy] = useState(
 		existingContactsData?.filter_type || 'list-tags'
 	);
@@ -128,7 +127,7 @@ const Contacts: React.FC = () => {
 						className="flex flex-col"
 						showButtons={true}
 						onNext={save}
-						nextLabel={__('Save & Continue', 'quillcrm')}
+						onBack={() => goToStep('builder')}
 						isLoading={saving}
 					>
 						<div className="space-y-6">
@@ -205,7 +204,6 @@ const Contacts: React.FC = () => {
 					maxHeight={panelHeight}
 					shouldFetch={shouldFetchContacts}
 					onFetchComplete={() => setShouldFetchContacts(false)}
-					onTotalChange={setTotal}
 					onLoadingChange={setIsLoading}
 				/>
 			</div>

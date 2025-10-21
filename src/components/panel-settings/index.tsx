@@ -51,7 +51,7 @@ const PanelSettings: React.FC<PanelSettingsProps> = ({
 					<div className="mt-6 flex justify-between items-center border-t border-gray-200 pt-6">
 						{onBack ? (
 							<Button
-								variant="outline"
+								variant="secondary"
 								onClick={onBack}
 								disabled={isLoading}
 								className="rounded-lg"

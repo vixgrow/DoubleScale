@@ -500,7 +500,23 @@ class REST_Template_Controller extends REST_Controller {
 
 		// Note: email_body data is now sent directly in the body field as JSON
 
+		// Keep subject field for email templates even if empty (it's required for validation)
+		// For non-email templates, subject should be removed if empty
+		$is_email_template = in_array(
+			$type,
+			array(
+				Campaign_Channel::STR_EMAIL,
+				Campaign_Channel::STR_EMAIL_SEQUENCE,
+				Campaign_Channel::STR_SEQUENCE_MAIL,
+			)
+		);
+
 		foreach ( $template_data as $key => $value ) {
+			// Don't remove subject for email templates - it's a required field
+			if ( $key === 'subject' && $is_email_template ) {
+				continue;
+			}
+			
 			if ( empty( $value ) && $value !== '0' && $value !== 0 ) {
 				unset( $template_data[ $key ] );
 			}

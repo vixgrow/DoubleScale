@@ -200,42 +200,45 @@ class Automation_Step_Model extends Model {
 			}
 		);
 
-		// Process template data when saving step (similar to email sequences)
+		// Process template data when saving step
 		static::saving(
 			function ( $step ) {
 				$settings = $step->settings;
 
-				// If step contains template data array, process it
-				if ( isset( $settings['templates'] ) && is_array( $settings['templates'] ) && ! empty( $settings['templates'] ) ) {
-					// Determine channel type from step action
-					$channel_type = self::get_channel_type_from_action( $step->action );
+				// Determine channel type from step action
+				$channel_type = self::get_channel_type_from_action( $step->action );
 
-					if ( $channel_type ) {
-						// Use Campaign_Template_Factory to process template data
-						$template_factory = Campaign_Template_Factory::instance();
-						$template_ids     = $template_factory->process_templates_data(
-							$settings['templates'],
-							$channel_type,
-							'draft'
+				// Skip if not a message action or template_ids already exist
+				if ( ! $channel_type || isset( $settings['template_ids'] ) ) {
+					return;
+				}
+
+				// Prepare template data from settings fields
+				$template_data = self::prepare_template_data_from_settings( $settings, $channel_type );
+
+				if ( ! empty( $template_data ) ) {
+					// Use Campaign_Template_Factory to process template data
+					$template_factory = Campaign_Template_Factory::instance();
+					$template_ids     = $template_factory->process_templates_data(
+						array( $template_data ),
+						$channel_type,
+						'draft'
+					);
+
+					if ( ! empty( $template_ids ) ) {
+						// Store template IDs
+						$settings['template_ids'] = $template_ids;
+						$step->settings           = $settings;
+
+						quillcrm_get_logger()->info(
+							'Automation step: Template processed and saved',
+							array(
+								'step_id'      => $step->id ?? 'new',
+								'action'       => $step->action,
+								'template_ids' => $template_ids,
+								'code'         => 'automation_step_template_processed',
+							)
 						);
-
-						if ( ! empty( $template_ids ) ) {
-							// Store template IDs and remove template data
-							$settings['template_ids'] = $template_ids;
-							unset( $settings['templates'] );
-
-							$step->settings = $settings;
-
-							quillcrm_get_logger()->info(
-								'Automation step: Templates processed and saved',
-								array(
-									'step_id'      => $step->id ?? 'new',
-									'action'       => $step->action,
-									'template_ids' => $template_ids,
-									'code'         => 'automation_step_templates_processed',
-								)
-							);
-						}
 					}
 				}
 			}
@@ -259,9 +262,9 @@ class Automation_Step_Model extends Model {
 						quillcrm_get_logger()->info(
 							'Automation step: Template in use, creating new template',
 							array(
-								'step_id'            => $step->id,
-								'old_template_id'    => $template_id,
-								'code'               => 'automation_step_template_in_use',
+								'step_id'         => $step->id,
+								'old_template_id' => $template_id,
+								'code'            => 'automation_step_template_in_use',
 							)
 						);
 					} else {
@@ -343,5 +346,52 @@ class Automation_Step_Model extends Model {
 	 */
 	private static function is_template_used_in_tracking( $template_id ) {
 		return Tracking_Model::where( 'template_id', $template_id )->exists();
+	}
+
+	/**
+	 * Prepare template data from settings fields
+	 * Converts step settings into template data format expected by Campaign_Template_Factory
+	 *
+	 * @param array  $settings Step settings
+	 * @param string $channel_type Channel type ('email', 'sms', 'whatsapp')
+	 * @return array|null Template data array or null if required fields missing
+	 */
+	private static function prepare_template_data_from_settings( $settings, $channel_type ) {
+		// Email requires subject and body
+		if ( $channel_type === 'email' ) {
+			if ( empty( $settings['subject'] ) || empty( $settings['body'] ) ) {
+				return null;
+			}
+
+			return array(
+				'name'     => 'Automation: ' . $settings['subject'],
+				'subject'  => $settings['subject'],
+				'body'     => $settings['body'],
+				'settings' => array(
+					'from_name'       => $settings['from_name'] ?? get_bloginfo( 'name' ),
+					'from_email'      => $settings['from_email'] ?? get_option( 'admin_email' ),
+					'reply_to'        => $settings['reply_to'] ?? '',
+					'add_unsubscribe' => true,
+					'enable_utm'      => false,
+				),
+			);
+		}
+
+		// SMS and WhatsApp only require body
+		if ( $channel_type === 'sms' || $channel_type === 'whatsapp' ) {
+			if ( empty( $settings['body'] ) ) {
+				return null;
+			}
+
+			$channel_label = ucfirst( $channel_type );
+			return array(
+				'name'     => "Automation: {$channel_label} - " . mb_substr( $settings['body'], 0, 30 ),
+				'subject'  => '', // SMS/WhatsApp don't have subject
+				'body'     => $settings['body'],
+				'settings' => array(),
+			);
+		}
+
+		return null;
 	}
 }

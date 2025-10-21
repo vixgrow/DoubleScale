@@ -55,8 +55,6 @@ class Template_Model extends Model {
 		'category',
 		'is_pro',
 		'created_by',
-		'content_hash',
-		'is_auto_generated',
 		'created_at',
 		'updated_at',
 	);
@@ -95,7 +93,7 @@ class Template_Model extends Model {
 		}
 
 		// Convert string to integer for database storage
-		$integer_value = Campaign_Channel::to_integer( $value );
+		$integer_value            = Campaign_Channel::to_integer( $value );
 		$this->attributes['type'] = $integer_value ?? Campaign_Channel::CHANNEL_EMAIL;
 	}
 

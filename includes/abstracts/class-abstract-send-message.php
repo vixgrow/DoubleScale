@@ -217,7 +217,7 @@ abstract class Abstract_Send_Message extends Action {
 
 			// 7. Create dummy campaign for process_campaign_message() to work
 			// This allows us to reuse 100% of existing campaign infrastructure
-			$dummy_campaign = new Campaign_Model(
+			$dummy_campaign         = new Campaign_Model(
 				array(
 					'id'       => $automation->id,
 					'name'     => 'Automation: ' . $automation->name,

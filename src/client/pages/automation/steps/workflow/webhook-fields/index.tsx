@@ -58,7 +58,7 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 			<Flex gap={10} vertical>
 				<Typography.Text>{__('Webhook URL')}</Typography.Text>
 				<Input
-					value={`${adminUrl}/wp-json/qc/v1/automation/webhook/?quillcrm_key=${webhook_key}&quillcrm_id=${automation?.id}`}
+					value={`${adminUrl}/wp-json/qc/v1/automations/webhook?quillcrm_key=${webhook_key}&quillcrm_id=${automation?.id}`}
 					readOnly
 				/>
 				<Typography.Text type="secondary">

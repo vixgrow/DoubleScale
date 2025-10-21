@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WooCommerce Order Status Changed Trigger
  * This trigger will be fired when an order status is changed.
@@ -19,6 +20,11 @@ use WC_Order;
  * Order Status Changed Trigger
  */
 class Order_Status_Changed extends Trigger {
+
+
+
+
+
 
 	/**
 	 * Trigger Name
@@ -118,8 +124,8 @@ class Order_Status_Changed extends Trigger {
 	 * @return bool
 	 */
 	public function is_processable( Automation_Model $automation, $args ) {
-		$automation_from_status = $automation->get_attribute( 'from_status' ) ?? 'any';
-		$automation_to_status   = $automation->get_attribute( 'to_status' ) ?? 'any';
+		$automation_from_status = $automation->get_setting( 'from_status', 'any' );
+		$automation_to_status   = $automation->get_setting( 'to_status', 'any' );
 		$status                 = $args['data']['from_status'] ?? '';
 		$new_status             = $args['data']['to_status'] ?? '';
 

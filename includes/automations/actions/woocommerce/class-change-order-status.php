@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Change Order Status Action
  *
@@ -21,6 +22,8 @@ use QuillCRM\Managers\Actions_Manager;
  * Change Order Status Action
  */
 class Change_Order_Status extends Action {
+
+
 
 	/**
 	 * Action Name
@@ -56,6 +59,14 @@ class Change_Order_Status extends Action {
 	 * @var string
 	 */
 	public $group = 'order';
+
+	/**
+	 * Required triggers for this action to be enabled
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array( 'wc_order_created', 'wc_order_completed', 'wc_order_status_changed', 'wc_order_refunded' );
+
 
 	/**
 	 * Process Action

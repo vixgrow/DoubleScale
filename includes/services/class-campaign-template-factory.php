@@ -11,6 +11,7 @@ namespace QuillCRM\Services;
 
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Services\Template_Field_Mapper;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Campaign_Template_Factory class
@@ -114,13 +115,13 @@ class Campaign_Template_Factory {
 	 */
 	private function get_template_processor( $campaign_type ) {
 		switch ( $campaign_type ) {
-			case 'email':
-			case 'email_sequence':
-			case 'sequence_mail':
+			case Campaign_Channel::STR_EMAIL:
+			case Campaign_Channel::STR_EMAIL_SEQUENCE:
+			case Campaign_Channel::STR_SEQUENCE_MAIL:
 				return new Email_Template_Processor();
-			case 'sms':
+			case Campaign_Channel::STR_SMS:
 				return new SMS_Template_Processor();
-			case 'whatsapp':
+			case Campaign_Channel::STR_WHATSAPP:
 				return new WhatsApp_Template_Processor();
 			default:
 				throw new \InvalidArgumentException( "Unsupported campaign type: {$campaign_type}" );
@@ -260,7 +261,7 @@ abstract class Abstract_Template_Processor implements Template_Processor_Interfa
 		}
 
 		// For SMS and WhatsApp, validate body content and length
-		if ( in_array( $this->campaign_type, array( 'sms', 'whatsapp' ) ) ) {
+		if ( in_array( $this->campaign_type, array( Campaign_Channel::STR_SMS, Campaign_Channel::STR_WHATSAPP ) ) ) {
 			$body = $template_data['body'] ?? '';
 
 			// Body is required
@@ -303,7 +304,7 @@ class Email_Template_Processor extends Abstract_Template_Processor {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct( 'email' );
+		parent::__construct( Campaign_Channel::STR_EMAIL );
 	}
 
 	/**
@@ -403,7 +404,7 @@ class SMS_Template_Processor extends Abstract_Template_Processor {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct( 'sms' );
+		parent::__construct( Campaign_Channel::STR_SMS );
 	}
 
 	/**
@@ -434,7 +435,7 @@ class WhatsApp_Template_Processor extends Abstract_Template_Processor {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct( 'whatsapp' );
+		parent::__construct( Campaign_Channel::STR_WHATSAPP );
 	}
 
 	/**

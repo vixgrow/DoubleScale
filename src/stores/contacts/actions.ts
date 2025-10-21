@@ -22,14 +22,12 @@ import {
   FETCH_CONTACT_ERROR,
   FETCH_CONTACT_START,
   FETCH_CONTACT_SUCCESS,
-  INVALIDATE_QUERY,
   SET_FILTERS,
-  SET_PAGINATION,
   SET_SEARCH_KEYWORDS,
   SET_SELECTED_IDS,
   UPDATE_CONTACT_ERROR,
   UPDATE_CONTACT_START,
-  UPDATE_CONTACT_SUCCESS,
+  UPDATE_CONTACT_SUCCESS
 } from './constants';
 import type { PaginationState } from './types';
 import { generateQueryKey } from './utils';
@@ -43,26 +41,16 @@ export const fetchContacts = (options: {
   page?: number;
   perPage?: number;
   subscribed?: boolean;
-  forceRefresh?: boolean;
-} = {}) => async ({ select, dispatch }: any) => {
+} = {}) => async ({ dispatch }: any) => {
   const {
     filters = [],
     keywords = '',
     page = 1,
     perPage = 50,
     subscribed = true,
-    forceRefresh = false,
   } = options;
 
   const queryKey = generateQueryKey(filters, keywords, page, perPage);
-
-  // Check cache first (unless force refresh)
-  if (!forceRefresh) {
-    const cachedQuery = select.getQueryCache(queryKey);
-    if (cachedQuery && Date.now() - cachedQuery.lastFetch < 60000) { // 1 minute cache
-      return cachedQuery;
-    }
-  }
 
   dispatch({
     type: FETCH_CONTACTS_START,
@@ -248,14 +236,6 @@ export const setFilters = (filters: FilterType[]) => ({
 });
 
 /**
- * Set pagination
- */
-export const setPagination = (pagination: Partial<PaginationState>) => ({
-  type: SET_PAGINATION,
-  pagination,
-});
-
-/**
  * Set search keywords
  */
 export const setSearchKeywords = (keywords: string) => ({
@@ -276,21 +256,6 @@ export const setSelectedIds = (ids: number[]) => ({
  */
 export const clearSelectedIds = () => ({
   type: CLEAR_SELECTED_IDS,
-});
-
-/**
- * Invalidate query cache
- */
-export const invalidateQuery = (queryKey?: string) => ({
-  type: INVALIDATE_QUERY,
-  queryKey,
-});
-
-/**
- * Invalidate all queries (useful after mutations)
- */
-export const invalidateAllQueries = () => ({
-  type: INVALIDATE_QUERY,
 });
 
 /**
@@ -316,6 +281,5 @@ export const loadMoreContacts = (options: {
     ...options,
     page: nextPage,
     perPage: pagination.perPage,
-    forceRefresh: true, // Don't use cache for pagination
   });
 };

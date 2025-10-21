@@ -18,7 +18,6 @@ import {
   FETCH_CONTACT_SUCCESS,
   INVALIDATE_QUERY,
   SET_FILTERS,
-  SET_PAGINATION,
   SET_QUERY_CACHE,
   SET_SEARCH_KEYWORDS,
   SET_SELECTED_IDS,
@@ -161,11 +160,6 @@ export interface SetFiltersAction {
   filters: FilterType[];
 }
 
-export interface SetPaginationAction {
-  type: typeof SET_PAGINATION;
-  pagination: Partial<PaginationState>;
-}
-
 export interface SetSearchKeywordsAction {
   type: typeof SET_SEARCH_KEYWORDS;
   keywords: string;
@@ -208,7 +202,6 @@ export type ContactsActionTypes =
   | DeleteContactsSuccessAction
   | DeleteContactsErrorAction
   | SetFiltersAction
-  | SetPaginationAction
   | SetSearchKeywordsAction
   | SetSelectedIdsAction
   | ClearSelectedIdsAction

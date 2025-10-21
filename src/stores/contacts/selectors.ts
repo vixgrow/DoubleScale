@@ -38,28 +38,6 @@ export const getContacts = (state: ContactsPureState): Contact[] => {
 };
 
 /**
- * Get contacts for a specific query
- */
-export const getContactsByQuery = (
-  state: ContactsPureState,
-  filters: FilterType[],
-  keywords: string,
-  page: number,
-  perPage: number
-): Contact[] => {
-  const queryKey = generateQueryKey(filters, keywords, page, perPage);
-  const query = state.queries[queryKey];
-
-  if (!query) {
-    return [];
-  }
-
-  return query.contacts
-    .map(id => state.contacts[id])
-    .filter(Boolean);
-};
-
-/**
  * Get current filters
  */
 export const getFilters = (state: ContactsPureState): FilterType[] => {
@@ -147,79 +125,14 @@ export const getContactsError = (state: ContactsPureState): string => {
 };
 
 /**
- * Check if a query is cached and fresh
- */
-export const isQueryCached = (
-  state: ContactsPureState,
-  filters: FilterType[],
-  keywords: string,
-  page: number,
-  perPage: number,
-  maxAge: number = 60000 // 1 minute default
-): boolean => {
-  const queryKey = generateQueryKey(filters, keywords, page, perPage);
-  const query = state.queries[queryKey];
-
-  if (!query) {
-    return false;
-  }
-
-  return Date.now() - query.lastFetch < maxAge;
-};
-
-/**
- * Get query cache
+ * Get query cache (used by actions for cache checking)
  */
 export const getQueryCache = (state: ContactsPureState, queryKey: string): QueryResult | undefined => {
   return state.queries[queryKey];
 };
 
 /**
- * Check if there are more pages available
- */
-export const hasMorePages = (state: ContactsPureState): boolean => {
-  const { pagination } = state;
-  return pagination.page < pagination.totalPages;
-};
-
-/**
- * Check if we're on the first page
- */
-export const isFirstPage = (state: ContactsPureState): boolean => {
-  return state.pagination.page === 1;
-};
-
-/**
- * Check if we're on the last page
- */
-export const isLastPage = (state: ContactsPureState): boolean => {
-  const { pagination } = state;
-  return pagination.page >= pagination.totalPages;
-};
-
-/**
- * Get contacts count per page
- */
-export const getContactsPerPage = (state: ContactsPureState): number => {
-  return state.pagination.perPage;
-};
-
-/**
- * Get current page number
- */
-export const getCurrentPage = (state: ContactsPureState): number => {
-  return state.pagination.page;
-};
-
-/**
- * Get total pages count
- */
-export const getTotalPages = (state: ContactsPureState): number => {
-  return state.pagination.totalPages;
-};
-
-/**
- * Get full contacts state (for actions that need access to state)
+ * Get full contacts state (used by actions)
  */
 export const getContactsState = (state: ContactsPureState): ContactsPureState => {
   return state;

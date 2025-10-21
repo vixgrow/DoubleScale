@@ -23,7 +23,6 @@ import {
   FETCH_CONTACT_SUCCESS,
   INVALIDATE_QUERY,
   SET_FILTERS,
-  SET_PAGINATION,
   SET_QUERY_CACHE,
   SET_SEARCH_KEYWORDS,
   SET_SELECTED_IDS,
@@ -333,16 +332,6 @@ const reducer: Reducer<ContactsPureState, ContactsActionTypes> = (
         pagination: {
           ...state.pagination,
           page: 1, // Reset to first page when filters change
-        },
-      };
-    }
-
-    case SET_PAGINATION: {
-      return {
-        ...state,
-        pagination: {
-          ...state.pagination,
-          ...action.pagination,
         },
       };
     }

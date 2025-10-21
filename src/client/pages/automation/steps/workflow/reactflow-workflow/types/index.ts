@@ -1,4 +1,10 @@
+/**
+ * External dependencies
+ */
 import { EdgeTypes } from '@xyflow/react';
+/**
+ * Internal dependencies
+ */
 import {
 	Automation,
 	AutomationStep,

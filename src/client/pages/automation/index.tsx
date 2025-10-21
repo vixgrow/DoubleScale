@@ -10,10 +10,10 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { useReducer, useRef } from 'react';
-import { useParams, useNavigate, getToLink } from '@quillcrm/navigation';
 /**
  * Internal dependencies
  */
+import { useParams, useNavigate, getToLink } from '@quillcrm/navigation';
 import './style.scss';
 import { Provider } from './state/context';
 import reducer, { State } from './state/reducer';

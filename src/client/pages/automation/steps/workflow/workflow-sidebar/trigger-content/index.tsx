@@ -57,11 +57,11 @@ const TriggerContent: React.FC<TriggerContentProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full gap-5">
             <div className="qcrm-workflow-sidebar__fields-container max-h-[55vh] overflow-y-auto">
                 {trigger.fields && getTriggerFieldsComponent()}
             </div>
-            <div className="mt-5 pt-5 border-t bg-white">
+            <div className="bg-white">
                 <Field
                     type="switch"
                     label={__(

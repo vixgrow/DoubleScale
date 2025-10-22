@@ -84,8 +84,8 @@ class Update_User_Role extends Action {
 			return false;
 		}
 
-		$role    = $step->get_attribute( 'role' );
-		$replace = $step->get_attribute( 'replace' );
+		$role    = $step->get_setting( 'role' );
+		$replace = $step->get_setting( 'replace' );
 
 		if ( $replace ) {
 			$user->set_role( $role );

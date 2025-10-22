@@ -18,11 +18,12 @@ import ConfigAPI from '@quillcrm/config';
 import type { Form } from '@quillcrm/config';
 import AjaxSelect from './ajax-select';
 import type { MappedFields } from '@quillcrm/client';
-import { ListField, TagField, ContactMappedFields } from '@quillcrm/components';
+import { ListField, TagField } from '@quillcrm/components';
 import { Card, CardContent } from '@quillcrm/components/ui/card';
 import { Label } from '@quillcrm/components/ui/label';
 import { Switch } from '@quillcrm/components/ui/switch';
 import { Spinner } from '@quillcrm/components/ui/spinner';
+import ContactMappedFields from './contact-mapped-fields';
 
 interface FormFieldsProps {
 	values: { [key: string]: any };

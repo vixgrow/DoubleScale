@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -25,6 +25,7 @@ import Overview from './overview';
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
 	const navigate = useNavigate();
+	const isMountedRef = useRef(true);
 
 	// Use WordPress data store instead of local state
 	const campaign = useSelect(
@@ -44,9 +45,15 @@ const Campaign: React.FC = () => {
 		useDispatch('quillcrm/campaign');
 
 	useEffect(() => {
+		isMountedRef.current = true;
+
 		if (id) {
 			fetchCampaign(id);
 		}
+
+		return () => {
+			isMountedRef.current = false;
+		};
 	}, [id, fetchCampaign]);
 
 	// Redirect to saved current step when campaign is loaded

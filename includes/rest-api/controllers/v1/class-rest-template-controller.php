@@ -91,32 +91,6 @@ class REST_Template_Controller extends REST_Controller {
 			)
 		);
 
-		// Register endpoint for sending test emails
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)/send-test',
-			array(
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'send_test_email' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
-					'args'                => array(
-						'to'         => array(
-							'description'       => __( 'Recipient email address for the test email', 'quillcrm' ),
-							'type'              => 'string',
-							'required'          => true,
-							'sanitize_callback' => 'sanitize_email',
-							'validate_callback' => 'is_email',
-						),
-						'merge_tags' => array(
-							'description' => __( 'Merge tags to use in the email', 'quillcrm' ),
-							'type'        => 'object',
-						),
-					),
-				),
-			)
-		);
-
 		// Register endpoint for rendering templates (merged from email-builder controller)
 		register_rest_route(
 			$this->namespace,
@@ -488,123 +462,19 @@ class REST_Template_Controller extends REST_Controller {
 			'body'         => $request->get_param( 'body' ),
 			'settings'     => $request->get_param( 'settings' ),
 			'preview_text' => $request->get_param( 'preview_text' ),
-			'created_at'   => current_time( 'mysql' ),
 			'updated_at'   => current_time( 'mysql' ),
 		);
 
 		// Note: email_body data is now sent directly in the body field as JSON
 
+		// Only remove null values (not provided), but keep empty strings (user might want to clear fields)
 		foreach ( $template_data as $key => $value ) {
-			if ( empty( $value ) && $value !== '0' && $value !== 0 ) {
+			if ( $value === null ) {
 				unset( $template_data[ $key ] );
 			}
 		}
 
 		return $template_data;
-	}
-
-
-
-	/**
-	 * Send a test email using the template
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object
-	 *
-	 * @return WP_REST_Response|WP_Error Response object
-	 */
-	public function send_test_email( $request ) {
-		try {
-			$template_id = $request->get_param( 'id' );
-			$to          = $request->get_param( 'to' );
-			$merge_tags  = $request->get_param( 'merge_tags' ) ?: array();
-
-			// Default merge tags for testing
-			$default_merge_tags = array(
-				'first_name' => 'John',
-				'last_name'  => 'Doe',
-				'email'      => $to,
-				'site_name'  => get_bloginfo( 'name' ),
-				'site_url'   => site_url(),
-				'date'       => current_time( 'mysql' ),
-			);
-
-			// Merge the default tags with any provided tags, with provided tags taking precedence
-			$merge_tags = wp_parse_args( $merge_tags, $default_merge_tags );
-
-			// Find the template
-			$template = Template_Model::find( $template_id );
-
-			if ( ! $template ) {
-				return new WP_Error( 'template_not_found', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
-			}
-
-			// Render the email content
-			$renderer = new Email_Renderer();
-			$content  = $renderer->render_template( $template_id, $merge_tags );
-
-			if ( empty( $content ) ) {
-				return new WP_Error( 'rendering_failed', __( 'Failed to render email template', 'quillcrm' ), array( 'status' => 500 ) );
-			}
-
-			// Set up email headers
-			$headers    = array();
-			$from_name  = get_bloginfo( 'name' );
-			$from_email = get_option( 'admin_email' );
-			$reply_to   = '';
-
-			// Use template settings if available
-			if ( ! empty( $template->settings ) ) {
-				$settings = is_array( $template->settings ) ? $template->settings : json_decode( $template->settings, true );
-
-				// Set from name if provided
-				if ( ! empty( $settings['from_name'] ) ) {
-					$from_name = $settings['from_name'];
-				}
-
-				// Set from email if provided and valid
-				if ( ! empty( $settings['from_email'] ) && is_email( $settings['from_email'] ) ) {
-					$from_email = $settings['from_email'];
-				}
-
-				// Set reply-to if provided and valid
-				if ( ! empty( $settings['reply_to'] ) && is_email( $settings['reply_to'] ) ) {
-					$reply_to = $settings['reply_to'];
-				}
-			}
-
-			// Format headers
-			$headers[] = 'Content-Type: text/html; charset=UTF-8';
-			$headers[] = 'From: ' . $from_name . ' <' . $from_email . '>';
-			if ( ! empty( $reply_to ) ) {
-				$headers[] = 'Reply-To: ' . $reply_to;
-			}
-
-			// Use template subject and process merge tags using Merge_Tags_Manager
-			$subject = ! empty( $template->subject ) ? $template->subject : 'Test Email';
-
-			// Create a mock contact for merge tag processing
-			$mock_contact = (object) $merge_tags;
-			$subject      = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $mock_contact );
-
-			// Send the email using wp_mail directly
-			$result = wp_mail( $to, $subject, $content, $headers );
-
-			if ( ! $result ) {
-				return new WP_Error( 'send_failed', __( 'Failed to send test email', 'quillcrm' ), array( 'status' => 500 ) );
-			}
-
-			return new WP_REST_Response(
-				array(
-					'success' => true,
-					'message' => __( 'Test email sent successfully', 'quillcrm' ),
-				),
-				200
-			);
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
-		}
 	}
 
 	/**

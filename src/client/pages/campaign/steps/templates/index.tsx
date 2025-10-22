@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
@@ -76,14 +76,21 @@ const templateSchema = z
 	);
 
 const Templates: React.FC = () => {
+	const isMountedRef = useRef(true);
 	const [emailBuilderSelectionVisible, setEmailBuilderSelectionVisible] =
 		useState(false);
-	const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
 	const [validationErrors, setValidationErrors] = useState<{
 		[key: string]: string;
 	}>({});
 	const { campaign, saveCampaignStep, saveCampaignSettings, goToStep } =
 		useCampaignStep();
+
+	// Cleanup on unmount
+	useEffect(() => {
+		return () => {
+			isMountedRef.current = false;
+		};
+	}, []);
 
 	// Get existing step data
 	const existingTemplateData = useSelect(
@@ -121,12 +128,11 @@ const Templates: React.FC = () => {
 	useEffect(() => {
 		// Load template from template table if we have a template_id
 		const loadTemplate = async () => {
-			setIsLoadingTemplate(true);
-			console.log('Loading template...', {
-				existingTemplateData,
-				campaignTemplates: campaign?.settings?.templates,
-				currentTemplatesLength: templates.length,
-			});
+			// Don't reload if we already have templates loaded
+			if (templates.length > 0 && templates[0].id) {
+				console.log('Template already loaded, skipping reload');
+				return;
+			}
 
 			try {
 				if (existingTemplateData?.template_id) {
@@ -165,13 +171,11 @@ const Templates: React.FC = () => {
 				});
 				// Fallback to default template
 				setTemplates([defaultTemplate]);
-			} finally {
-				setIsLoadingTemplate(false);
 			}
 		};
 
 		loadTemplate();
-	}, [existingTemplateData?.template_id, campaign?.settings?.templates]);
+	}, [existingTemplateData?.template_id]);
 
 	const updateTemplate = (index: number, data: Partial<EmailTemplate>) => {
 		if (!campaign) {
@@ -219,69 +223,6 @@ const Templates: React.FC = () => {
 		setValidationErrors({});
 		return true;
 	};
-
-	// const sendTestEmail = async () => {
-	// 	if (!templates[currentTab]) {
-	// 		return;
-	// 	}
-
-	// 	// Validate the current template before sending
-	// 	if (!validate(templates[currentTab])) {
-	// 		return;
-	// 	}
-
-	// 	// Ask for test email address if not provided
-	// 	const emailAddress =
-	// 		testEmailAddress ||
-	// 		prompt(__('Enter test email address:', 'quillcrm'));
-	// 	if (!emailAddress) {
-	// 		return;
-	// 	}
-
-	// 	// Validate email using Zod
-	// 	const emailValidation = z.string().email().safeParse(emailAddress);
-	// 	if (!emailValidation.success) {
-	// 		createNotice({
-	// 			type: 'error',
-	// 			message: __('Please enter a valid email address', 'quillcrm'),
-	// 		});
-	// 		return;
-	// 	}
-
-	// 	setTestEmailAddress(emailAddress);
-	// 	setIsSendingTestEmail(true);
-
-	// 	try {
-	// 		const template = templates[currentTab];
-	// 		await apiFetch({
-	// 			path: '/qc/v1/campaigns/send-test-email',
-	// 			method: 'POST',
-	// 			data: {
-	// 				email: emailAddress,
-	// 				subject: template.subject,
-	// 				body: template.body || 'Email body',
-	// 				from_name: template.from_name,
-	// 				from_email: template.from_email,
-	// 				reply_to: template.reply_to,
-	// 			},
-	// 		});
-
-	// 		createNotice({
-	// 			type: 'success',
-	// 			message: __('Test email sent successfully', 'quillcrm'),
-	// 		});
-	// 	} catch (error: any) {
-	// 		console.error('Test email error:', error);
-	// 		createNotice({
-	// 			type: 'error',
-	// 			message:
-	// 				error.message ||
-	// 				__('Failed to send test email', 'quillcrm'),
-	// 		});
-	// 	} finally {
-	// 		setIsSendingTestEmail(false);
-	// 	}
-	// };
 
 	const handleOpenEmailBuilder = () => {
 		if (!templates[currentTab]) {
@@ -331,25 +272,25 @@ const Templates: React.FC = () => {
 				type: 'email' as const,
 			};
 
-			// If campaign is NOT draft, create new template to preserve original
-			// Only update existing template if campaign is draft
-			const shouldCreateNew = campaign.status !== 'draft';
-
-			if (shouldCreateNew || !templateData.id) {
-				// Create new template with metadata
-				console.log(
-					'Creating new template with metadata:',
-					templateData
-				);
-				savedTemplate = await createTemplateAPI(templateData);
-			} else {
-				// Update existing template with latest metadata (draft mode)
+			// Update existing template if it has an ID, otherwise create new one
+			if (templateData.id) {
+				// Update existing template
 				console.log('Updating existing template:', templateData.id);
 				savedTemplate = await updateTemplateAPI(
 					templateData.id,
 					templateData
 				);
+			} else {
+				// Create new template
+				console.log(
+					'Creating new template with metadata:',
+					templateData
+				);
+				savedTemplate = await createTemplateAPI(templateData);
 			}
+
+			// Check if component is still mounted before continuing
+			if (!isMountedRef.current) return;
 
 			console.log('Saved template:', savedTemplate);
 
@@ -357,6 +298,8 @@ const Templates: React.FC = () => {
 			const saveSuccess = await saveCampaignStep('template', {
 				template_id: savedTemplate.id!,
 			});
+
+			if (!isMountedRef.current) return;
 
 			if (!saveSuccess) {
 				throw new Error('Failed to save template step data');
@@ -371,6 +314,8 @@ const Templates: React.FC = () => {
 				},
 			});
 
+			if (!isMountedRef.current) return;
+
 			createNotice({
 				type: 'success',
 				message: __('Template metadata saved successfully', 'quillcrm'),
@@ -378,6 +323,8 @@ const Templates: React.FC = () => {
 
 			goToStep('builder');
 		} catch (error: any) {
+			if (!isMountedRef.current) return;
+
 			console.error('Save template error:', error);
 			createNotice({
 				type: 'error',
@@ -412,15 +359,6 @@ const Templates: React.FC = () => {
 					</Button>,
 				]}
 				type="campaign"
-				// totalSteps={tabLength}
-				// currentStep={currentTab}
-				// onNext={saveTemplateStepAndNavigate}
-				// onBack={() => {
-				// 	if (currentTab - 1 >= 0) {
-				// 		setCurrentTab(currentTab - 1);
-				// 		navigate(getToLink(`campaigns`));
-				// 	}
-				// }}
 			>
 				<Stepper
 					steps={campaignSteps}
@@ -438,15 +376,6 @@ const Templates: React.FC = () => {
 						icon={<CategoryIcon />}
 						className="w-2/3 h-full"
 					>
-						{/* Loading State */}
-						{isLoadingTemplate && (
-							<div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-								<p className="text-blue-800">
-									{__('Loading template data...', 'quillcrm')}
-								</p>
-							</div>
-						)}
-
 						<div>
 							<div className="flex gap-4">
 								<FormField

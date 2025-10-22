@@ -6,6 +6,7 @@ interface CardLayoutProps {
 	buttonIcon: React.ReactNode;
 	buttonText: string;
 	children: React.ReactNode;
+	onButtonClick?: () => void;
 }
 const CardLayout: React.FC<CardLayoutProps> = ({
 	icon,
@@ -13,6 +14,7 @@ const CardLayout: React.FC<CardLayoutProps> = ({
 	buttonIcon,
 	buttonText,
 	children,
+	onButtonClick,
 }) => {
 	return (
 		<div className="bg-white rounded-lg border border-gray-200">
@@ -22,7 +24,7 @@ const CardLayout: React.FC<CardLayoutProps> = ({
 					{header}
 				</div>
 
-				<Button variant="secondary">
+				<Button variant="secondary" onClick={onButtonClick}>
 					{buttonIcon}
 					{buttonText}
 				</Button>

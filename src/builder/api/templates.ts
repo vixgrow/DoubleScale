@@ -16,19 +16,19 @@ import type { EmailTemplate, EmailTemplateSettings } from '@quillcrm/client';
 export const prepareTemplateForAPI = (template: Partial<EmailTemplate>) => {
   // Fields that go into settings JSON column
   const settings: Partial<EmailTemplateSettings> = {
-    from_name: template.from_name || '',
-    from_email: template.from_email || '',
-    reply_to: template.reply_to || '',
-    enable_utm: template.enable_utm || false,
-    utm_source: template.utm_source || '',
-    utm_medium: template.utm_medium || '',
-    utm_name: template.utm_name || '',
-    utm_term: template.utm_term || '',
-    utm_content: template.utm_content || '',
+    from_name: template.from_name ?? '',
+    from_email: template.from_email ?? '',
+    reply_to: template.reply_to ?? '',
+    enable_utm: template.enable_utm ?? false,
+    utm_source: template.utm_source ?? '',
+    utm_medium: template.utm_medium ?? '',
+    utm_name: template.utm_name ?? '',
+    utm_term: template.utm_term ?? '',
+    utm_content: template.utm_content ?? '',
   };
 
   // Prepare body field - if email_body is provided, store it as JSON in body
-  let bodyContent = template.body || '';
+  let bodyContent = template.body ?? '';
   if (template.email_body) {
     bodyContent = JSON.stringify(template.email_body);
   }
@@ -36,10 +36,10 @@ export const prepareTemplateForAPI = (template: Partial<EmailTemplate>) => {
   // Fields that go into direct columns
   return {
     name: template.name,
-    type: template.type || 'email',
-    subject: template.subject || '',
+    type: template.type ?? 'email',
+    subject: template.subject ?? '',
     body: bodyContent, // Store builder data or rich-text content
-    preview_text: template.preview_text || '',
+    preview_text: template.preview_text ?? '',
     settings,
   };
 };

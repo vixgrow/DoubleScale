@@ -151,20 +151,6 @@ class Automation_Step_Model extends Model {
 	}
 
 	/**
-	 * Get attribute
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $key Key.
-	 * @param mixed  $default Default.
-	 *
-	 * @return mixed
-	 */
-	public function get_attribute( $key, $default = null ) {
-		return $this->settings[ $key ] ?? $default;
-	}
-
-	/**
 	 * Boot
 	 *
 	 * @since 1.0.0

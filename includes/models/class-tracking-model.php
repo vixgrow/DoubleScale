@@ -101,7 +101,6 @@ class Tracking_Model extends Model
 		'status_name',
 		'status_slug',
 		'status_class',
-		'status_badge_color',
 	);
 
 	/**
@@ -498,15 +497,6 @@ class Tracking_Model extends Model
 		return Tracking_Status::get_status_class($this->status);
 	}
 
-	/**
-	 * Get status badge color (accessor for Ant Design)
-	 *
-	 * @return string
-	 */
-	public function getStatusBadgeColorAttribute()
-	{
-		return Tracking_Status::get_badge_color($this->status);
-	}
 
 	/**
 	 * Get campaign message statistics

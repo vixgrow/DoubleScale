@@ -156,21 +156,5 @@ class Tracking_Status {
 		return $classes[ $status ] ?? 'status-unknown';
 	}
 
-	/**
-	 * Get badge color
-	 *
-	 * @param int $status Status constant.
-	 * @return string Badge color (success, processing, error, default, warning)
-	 */
-	public static function get_badge_color( $status ) {
-		$colors = array(
-			self::PENDING   => 'processing',
-			self::SENT      => 'success',
-			self::FAILED    => 'error',
-			self::DELIVERED => 'success',
-			self::SCHEDULED => 'default',
-		);
-		return $colors[ $status ] ?? 'default';
-	}
 }
 

@@ -138,8 +138,8 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		);
 	};
 
-	const handleActionSave = async () => {
-		if (!currentStep || !tempAction) {
+	const handleActionSave = async (actionKey: string) => {
+		if (!currentStep || !actionKey) {
 			createNotice({
 				type: 'error',
 				message: __('Please select an action', 'quillcrm'),
@@ -148,7 +148,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		}
 
 		await handleSave(
-			{ action: tempAction },
+			{ action: actionKey },
 			__('Action saved', 'quillcrm'),
 			{ clearTempAction: true }
 		);

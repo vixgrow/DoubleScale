@@ -158,7 +158,7 @@ const Field: React.FC<FieldProps> = ({
 		case 'lists':
 			fieldContent = (
 				<ListField
-					value={value || []}
+					value={Array.isArray(value) ? value : []}
 					onChange={(value) => onChange(value)}
 				/>
 			);
@@ -202,7 +202,7 @@ const Field: React.FC<FieldProps> = ({
 		case 'tags':
 			fieldContent = (
 				<TagField
-					value={value || []}
+					value={Array.isArray(value) ? value : []}
 					onChange={(value) => onChange(value)}
 				/>
 			);
@@ -210,7 +210,7 @@ const Field: React.FC<FieldProps> = ({
 		case 'link-triggers':
 			fieldContent = (
 				<LinkTriggerField
-					value={value || []}
+					value={Array.isArray(value) ? value : []}
 					onChange={(value) => onChange(value)}
 				/>
 			);
@@ -244,12 +244,14 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500'
+						'border-red-500 focus-visible:ring-red-500'
 					)}
 					style={{
 						borderRadius: '8px',
 					}}
 					placeholder={placeholder}
+					min={type === 'number' ? 0 : undefined}
+					max={type === 'number' && max ? max : undefined}
 				/>
 			);
 			break;
@@ -261,7 +263,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500'
+						'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 					style={{
@@ -279,8 +281,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-									(option) => option.value === value
-								)
+								(option) => option.value === value
+							)
 							: null
 					}
 					onChange={(value) => {

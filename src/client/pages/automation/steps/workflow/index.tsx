@@ -27,6 +27,8 @@ import {
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
+	AlertDialogPortal,
+	AlertDialogOverlay,
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
@@ -271,7 +273,9 @@ const Workflow: React.FC = () => {
 										<DeleteIcon />
 									</Button>
 								</AlertDialogTrigger>
-								<AlertDialogContent>
+								<AlertDialogPortal>
+								<AlertDialogOverlay className="z-[150000]" />
+								<AlertDialogContent className="z-[150000]">
 									<AlertDialogHeader>
 										<AlertDialogTitle>
 											{__('Are you sure?', 'quillcrm')}
@@ -294,6 +298,7 @@ const Workflow: React.FC = () => {
 										</AlertDialogAction>
 									</AlertDialogFooter>
 								</AlertDialogContent>
+								</AlertDialogPortal>
 							</AlertDialog>
 						</div>
 					</CardContent>

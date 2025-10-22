@@ -60,7 +60,7 @@ const TriggerContent: React.FC<TriggerContentProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full gap-5 overflow-y-auto max-h-[75vh]">
+        <div className="flex flex-col h-full max-h-[90vh] overflow-y-auto gap-5">
             <div className="qcrm-workflow-sidebar__fields-container">
                 {trigger.fields && getTriggerFieldsComponent()}
             </div>

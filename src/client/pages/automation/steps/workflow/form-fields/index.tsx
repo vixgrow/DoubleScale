@@ -3,12 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { map, keys, mapValues } from 'lodash';
+import { map, mapValues } from 'lodash';
 
 /**
  * Internal dependencies
@@ -21,19 +21,10 @@ import type { MappedFields } from '@quillcrm/client';
 import { ListField, TagField, ContactMappedFields } from '@quillcrm/components';
 import { Card, CardContent } from '@quillcrm/components/ui/card';
 import { Label } from '@quillcrm/components/ui/label';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@quillcrm/components/ui/select';
 import { Switch } from '@quillcrm/components/ui/switch';
 import { Spinner } from '@quillcrm/components/ui/spinner';
 
 interface FormFieldsProps {
-	values: { [key: string]: any };
-	onChange: (value: any) => void;
 	values: { [key: string]: any };
 	onChange: (value: any) => void;
 }
@@ -146,44 +137,6 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 	return (
 		<div className="flex flex-col gap-5">
 			<div className="qcrm-fields">
-				<div className="qcrm-field mb-2 w-full">
-					<div className="qcrm-field-label">
-						<Label>{__('Select Form Type', 'quillcrm')}</Label>
-					</div>
-					<div className="qcrm-field-input">
-						<Select
-							value={form_type}
-							onValueChange={(value) => {
-								onChange({
-									...values,
-									form_type: value,
-									form_id: null,
-									mapped_fields: {},
-								});
-							}}
-						>
-							<SelectTrigger className="w-full">
-								<SelectValue
-									placeholder={__(
-										'Select form type',
-										'quillcrm'
-									)}
-								/>
-							</SelectTrigger>
-							<SelectContent>
-								{map(keys(forms), (key) => (
-									<SelectItem
-										key={key}
-										value={key}
-										disabled={!forms[key].is_enabled}
-									>
-										{forms[key].label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-				</div>
 				{form_type &&
 					map(formOptions, (options, key) => {
 						const {

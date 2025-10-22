@@ -55,9 +55,9 @@ const Rule: React.FC<RuleProps> = ({
 					type={ruleSettings.type}
 					value={rule.value}
 					onChange={(value) => onChange('value', value)}
-					options={map(ruleSettings.options || [], (option) => ({
+					options={map(ruleSettings.options || [], (option, key) => ({
 						label: option,
-						value: option,
+						value: key,
 					}))}
 				/>
 				{onRemove && (

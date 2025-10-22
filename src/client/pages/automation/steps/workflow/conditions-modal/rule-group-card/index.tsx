@@ -150,7 +150,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											)}
 										/>
 									</SelectTrigger>
-									<SelectContent>
+									<SelectContent className="max-h-[200px] overflow-y-auto">
 										{map(rulesGroups, (group, key) => (
 											<SelectItem key={key} value={key}>
 												{group.name}

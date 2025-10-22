@@ -15,6 +15,7 @@ class Order_Payment_Gateway extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -73,7 +74,7 @@ class Order_Payment_Gateway extends Rule {
 	 */
 	public function get_options() {
 		$options  = array();
-		$gateways = WC()->payment_gateways->payment_gateways();
+		$gateways = \WC()->payment_gateways->payment_gateways();
 
 		if ( ! empty( $gateways ) ) {
 			foreach ( $gateways as $gateway_id => $gateway ) {
@@ -95,7 +96,7 @@ class Order_Payment_Gateway extends Rule {
 	 */
 	public function get_value( $automation_contact ) {
 		$order_id = $automation_contact->get_data( 'order_id' );
-		$order    = wc_get_order( $order_id );
+		$order    = \wc_get_order( $order_id );
 
 		if ( ! $order instanceof \WC_Order ) {
 			return '';

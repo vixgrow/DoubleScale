@@ -22,12 +22,6 @@ use QuillCRM\Constants\Order_Status as Order_Status_Constant;
  */
 class Order_Status extends Rule {
 
-
-
-
-
-
-
 	/**
 	 * Name
 	 *

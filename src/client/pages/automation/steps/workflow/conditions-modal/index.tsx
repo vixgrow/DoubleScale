@@ -2,7 +2,15 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useLayoutEffect, useRef } from '@wordpress/element';
+import {
+	useState,
+	useLayoutEffect,
+	useRef,
+	useEffect,
+} from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
+import { useSelect } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -43,10 +51,42 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	visible,
 	onClose,
 }) => {
-	const rulesGroups = ConfigAPI.getAutomationRules();
-	const firstGroup = Object.keys(rulesGroups)[0];
+	// Get form context and current trigger from store
+	const formContext = useSelect((select: any) => {
+		return select('quillcrm/core').getFormContext();
+	}, []);
+
+	const currentTrigger = useSelect((select: any) => {
+		return select('quillcrm/core').getCurrentTrigger();
+	}, []);
+
+	const [rulesGroups, setRulesGroups] = useState(
+		ConfigAPI.getAutomationRules()
+	);
+
+	// Filter rules groups by current trigger
+	const filterRulesByTrigger = (groups: any) => {
+		if (!currentTrigger) return groups;
+
+		const filteredGroups: any = {};
+		Object.keys(groups).forEach((groupKey) => {
+			const group = groups[groupKey];
+			// Include group if it has no triggers property (available for all)
+			// or if the triggers array includes the current trigger
+			if (!group.triggers || group.triggers.includes(currentTrigger)) {
+				filteredGroups[groupKey] = group;
+			}
+		});
+
+		return filteredGroups;
+	};
+
+	// Get filtered rules groups based on current trigger
+	const filteredRulesGroups = filterRulesByTrigger(rulesGroups);
+
+	const firstGroup = Object.keys(filteredRulesGroups)[0];
 	const firstRule = firstGroup
-		? Object.keys(rulesGroups[firstGroup].rules)[0]
+		? Object.keys(filteredRulesGroups[firstGroup].rules)[0]
 		: '';
 	const getInitialRule = () => ({
 		rule: firstRule,
@@ -72,6 +112,34 @@ const ConditionsModal: React.FC<RulesProps> = ({
 		height: number;
 	}>({ top: 0, height: 0 });
 	const containerRef = useRef<HTMLDivElement | null>(null);
+
+	// Fetch dynamic rules when form_context is available
+	useEffect(() => {
+		const fetchDynamicRules = async () => {
+			if (formContext && formContext.formId && formContext.triggerId) {
+				try {
+					const response = (await apiFetch({
+						path: addQueryArgs('/qc/v1/automations/rules', {
+							form_id: formContext.formId,
+							trigger_id: formContext.triggerId,
+						}),
+						method: 'GET',
+					})) as any;
+
+					if (response) {
+						setRulesGroups(response);
+						ConfigAPI.setAutomationRules(response);
+					}
+				} catch (error) {
+					console.error('Failed to fetch dynamic rules:', error);
+				}
+			}
+		};
+
+		if (visible) {
+			fetchDynamicRules();
+		}
+	}, [formContext, visible]);
 
 	useLayoutEffect(() => {
 		const updateBracket = () => {
@@ -157,7 +225,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 								<RuleGroupCard
 									ruleGroup={ruleGroup}
 									groupIndex={groupIndex}
-									rulesGroups={rulesGroups}
+									rulesGroups={filteredRulesGroups}
 									rules={rules}
 									onRulesChange={setRules}
 								/>

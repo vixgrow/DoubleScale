@@ -44,7 +44,10 @@ const TriggerContent: React.FC<TriggerContentProps> = ({
 
         return trigger.is_form ? (
             <FormFields
-                values={automation.settings || {}}
+                values={{
+                    form_type: automation.trigger,
+                    ...(automation.settings || {}),
+                }}
                 onChange={onSettingsChange}
             />
         ) : (
@@ -57,8 +60,8 @@ const TriggerContent: React.FC<TriggerContentProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full gap-5">
-            <div className="qcrm-workflow-sidebar__fields-container max-h-[55vh] overflow-y-auto">
+        <div className="flex flex-col h-full gap-5 overflow-y-auto max-h-[75vh]">
+            <div className="qcrm-workflow-sidebar__fields-container">
                 {trigger.fields && getTriggerFieldsComponent()}
             </div>
             <div className="bg-white">

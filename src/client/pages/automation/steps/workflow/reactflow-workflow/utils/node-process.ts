@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 
-
 const initializeTrigger = (
 	automation,
 	steps,
@@ -17,6 +16,7 @@ const initializeTrigger = (
 	nodeWidth,
 	addStepWidth,
 	onTriggerClick,
+	onStepClick,
 	savedPositions = {}
 ) => {
 	// Always add trigger node at the top
@@ -45,6 +45,7 @@ const initializeTrigger = (
 				parentId: null,
 				condition: null,
 				prevStep: null,
+				onStepClick,
 			},
 		});
 
@@ -56,6 +57,7 @@ const initializeTrigger = (
 			data: {
 				sourceStep: undefined,
 				targetStep: undefined,
+				onStepClick,
 			},
 		});
 
@@ -64,9 +66,6 @@ const initializeTrigger = (
 		return;
 	}
 };
-
-
-
 
 function addFinalAddStep(
 	steps,
@@ -77,6 +76,7 @@ function addFinalAddStep(
 	incrementY,
 	nodeWidth,
 	addStepWidth,
+	onStepClick,
 	savedPositions = {},
 	getNodePositionLocal,
 	result
@@ -131,6 +131,7 @@ function addFinalAddStep(
 					parentId: null,
 					condition: null,
 					prevStep: lastRootStep,
+					onStepClick,
 				},
 			});
 
@@ -158,6 +159,7 @@ function addFinalAddStep(
 							sourceStep: { id: mergeId, type: 'merge' },
 							targetStep: undefined, // adding at end
 							fromMerge: true,
+							onStepClick,
 						},
 					});
 				} else {
@@ -170,6 +172,7 @@ function addFinalAddStep(
 						data: {
 							sourceStep: lastRootStep,
 							targetStep: undefined, // adding at end
+							onStepClick,
 						},
 					});
 				}
@@ -184,6 +187,7 @@ function addFinalAddStep(
 					data: {
 						sourceStep: lastRootStep,
 						targetStep: undefined, // adding at end
+						onStepClick,
 					},
 				});
 			}

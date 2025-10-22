@@ -2,21 +2,24 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { Button, Flex, Modal } from 'antd';
+
 
 /**
  * Internal dependencies
  */
+import { Button } from '@/components/ui/button';
 import './style.scss';
 import type { OrganizedStep } from '@quillcrm/client';
 import { Fields } from '@quillcrm/components';
 import { getAction, getGoal } from '@quillcrm/utils';
+import { useAutomationContext } from '../../../state/context';
+import { deleteStep } from '../reactflow-workflow/utils/step-utils';
 
 interface StepFieldsModalProps {
 	step: OrganizedStep;
@@ -30,8 +33,20 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	saveStep,
 }) => {
 	const [isSaving, setIsSaving] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
-	const { setMergeTagsVisible } = useDispatch('quillcrm/core');
+	const [currentStepId, setCurrentStepId] = useState(step.id);
+	const { setMergeTagsVisible, createNotice } = useDispatch('quillcrm/core');
+	const { steps, setSteps } = useAutomationContext();
+
+	// Only sync settings when the step ID changes (switching to a different step)
+	// This prevents resetting user's changes when the same step is updated after save
+	useEffect(() => {
+		if (step.id !== currentStepId) {
+			setSettings(step.settings);
+			setCurrentStepId(step.id);
+		}
+	}, [step.id, step.settings, currentStepId]);
 
 	const handleSave = async () => {
 		setIsSaving(true);
@@ -48,41 +63,60 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setIsSaving(false);
 	};
 
+	const handleDelete = async () => {
+		setIsDeleting(true);
+		await deleteStep(step.id.toString(), steps, setSteps, createNotice);
+		setIsDeleting(false);
+		setStep(null); // Close the modal after deletion
+	};
+
+	// For delay steps, the action should be 'delay'
+	const actionKey = step.type === 'delay' ? 'delay' : step.action;
+
 	const action =
-		step.type === 'action' ? getAction(step.action) : getGoal(step.action);
+		step.type === 'action' || step.type === 'delay'
+			? getAction(actionKey)
+			: getGoal(step.action);
 
 	return (
-		<Modal
-			title={
-				<Flex justify="space-between">
-					{step.type === 'action'
-						? __('Action', 'quillcrm')
-						: __('Goal', 'quillcrm')}
-					<Button
-						onClick={() => {
-							setMergeTagsVisible(true);
-						}}
-					>
-						{__('Merge Tags', 'quillcrm')}
-					</Button>
-				</Flex>
-			}
-			open={true}
-			onOk={handleSave}
-			onCancel={() => setStep(null)}
-			confirmLoading={isSaving}
-			style={{ minWidth: '800px', minHeight: '500px' }}
-			closable={false}
-		>
-			<Fields
-				fields={action.fields}
-				values={settings}
-				onChange={(value) => {
-					setSettings(value);
-				}}
-				stepId={step.id}
-			/>
-		</Modal>
+		<div className="qcrm-step-fields-content flex flex-col">
+			<div className="mb-4">
+				<Fields
+					fields={action.fields}
+					values={settings}
+					onChange={(value) => {
+						setSettings(value);
+					}}
+					enableMergeTags={true}
+				/>
+			</div>
+
+			<div className="space-y-4">
+				<Button
+					onClick={handleSave}
+					disabled={isSaving || isDeleting}
+					variant="gradient"
+					className="w-full"
+					size="lg"
+				>
+					{isSaving
+						? __('Saving...', 'quillcrm')
+						: __('Save Changes', 'quillcrm')}
+				</Button>
+
+				<Button
+					onClick={handleDelete}
+					disabled={isSaving || isDeleting}
+					variant="outline"
+					className="w-full text-destructive border-destructive hover:text-destructive"
+					size="lg"
+				>
+					{isDeleting
+						? __('Deleting...', 'quillcrm')
+						: __('Delete', 'quillcrm')}
+				</Button>
+			</div>
+		</div>
 	);
 };
 

@@ -1,12 +1,18 @@
-// ReactFlow Workflow Styles
+.qcrm-reactflow-container {
+	width: 100%;
+	background-color: #fff;
+	border-radius: 8px;
+	border: 1px solid var(--qcrm-border-color);
+	overflow: hidden;
+	position: relative;
+}
 
+// ReactFlow Workflow Styles
 .qcrm-reactflow-workflow {
-	height: 600px;
+	height: 90vh;
 	min-height: 400px;
 	width: 100%;
 	background: #f9f9f9;
-	border: 1px solid #e8e8e8;
-	border-radius: 8px;
 	overflow: hidden;
 	position: relative;
 
@@ -276,19 +282,7 @@
 	}
 
 	// Node Type Specific Styles
-	&--trigger {
-		.qcrm-reactflow-node__icon svg {
-			width: 15.75px;
-			height: 22.75px;
-		}
-	}
-
 	&--action {
-		.qcrm-reactflow-node__icon svg {
-			width: 15.75px;
-			height: 22.75px;
-		}
-
 		// Action configuration status
 		.qcrm-reactflow-action__configured {
 			color: #52c41a;
@@ -296,6 +290,24 @@
 		}
 
 		.qcrm-reactflow-action__not-configured {
+			color: #ff4d4f;
+			font-weight: 500;
+		}
+	}
+
+	&--delay {
+		.qcrm-reactflow-node__icon svg {
+			width: 28px;
+			height: 28px;
+		}
+
+		// Delay configuration status
+		.qcrm-reactflow-delay__configured {
+			color: #52c41a;
+			font-weight: 500;
+		}
+
+		.qcrm-reactflow-delay__not-configured {
 			color: #ff4d4f;
 			font-weight: 500;
 		}
@@ -370,11 +382,6 @@
 	}
 
 	&--goal {
-		.qcrm-reactflow-node__icon svg {
-			width: 28px;
-			height: 29px;
-		}
-
 		// Goal configuration status
 		.qcrm-reactflow-goal__configured {
 			color: #52c41a;
@@ -384,13 +391,6 @@
 		.qcrm-reactflow-goal__not-configured {
 			color: #ff4d4f;
 			font-weight: 500;
-		}
-	}
-
-	&--end {
-		.qcrm-reactflow-node__icon svg {
-			width: 28px;
-			height: 29px;
 		}
 	}
 
@@ -453,11 +453,9 @@
 			inset: -2px;
 			border-radius: 50%;
 			padding: 2px;
-			background: linear-gradient(
-				135deg,
-				rgba(255, 255, 255, 0.8),
-				rgba(255, 255, 255, 0.2)
-			);
+			background: linear-gradient(135deg,
+					rgba(255, 255, 255, 0.8),
+					rgba(255, 255, 255, 0.2));
 			mask:
 				linear-gradient(#fff 0 0) content-box,
 				linear-gradient(#fff 0 0);
@@ -469,11 +467,9 @@
 			position: absolute;
 			inset: -8px;
 			border-radius: 50%;
-			background: radial-gradient(
-				circle,
-				transparent 70%,
-				rgba(24, 144, 255, 0.1) 100%
-			);
+			background: radial-gradient(circle,
+					transparent 70%,
+					rgba(24, 144, 255, 0.1) 100%);
 			opacity: 0;
 			transition: opacity 0.3s ease;
 			pointer-events: none;

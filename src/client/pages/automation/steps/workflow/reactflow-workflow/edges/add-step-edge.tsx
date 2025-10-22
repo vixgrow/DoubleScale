@@ -9,14 +9,6 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Popover, Flex, Spin } from 'antd';
-import {
-	PlusOutlined,
-	TrophyOutlined,
-	BranchesOutlined,
-	ThunderboltOutlined,
-} from '@ant-design/icons';
-import { map } from 'lodash';
 import {
 	EdgeProps,
 	getBezierPath,
@@ -30,11 +22,14 @@ import {
  */
 import type { AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../../state/context';
+import { AddStepDialog } from '../../add-step-dialog';
+import './style.scss';
 
 interface AddStepEdgeData {
 	sourceStep?: AutomationStep;
 	targetStep?: AutomationStep;
 	condition?: 'yes' | 'no' | string;
+	onStepClick?: (step: any) => void;
 }
 
 const updateStepOrderRecursive = (
@@ -106,10 +101,10 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 	data,
 	target,
 }) => {
-	const { sourceStep, targetStep, condition } =
+	const { sourceStep, targetStep, condition, onStepClick } =
 		(data as AddStepEdgeData) || {};
 	const [loading, setLoading] = useState(false);
-	const [popoverVisible, setPopoverVisible] = useState(false);
+	const [visible, setVisible] = useState(false);
 	const { automation, steps, setSteps, setUpdatedSteps } =
 		useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -124,8 +119,8 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 	const shouldShowAddStepEdge = Boolean(
 		// Don't show on edges going TO add-step nodes
 		!(target && target.startsWith('add-step')) &&
-			// Must have either a source step or be a condition branch
-			(sourceStep || condition)
+		// Must have either a source step or be a condition branch
+		(sourceStep || condition)
 	);
 
 	if (!shouldShowAddStepEdge) {
@@ -153,25 +148,6 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			/>
 		);
 	}
-
-	const typesOptions = {
-		action: {
-			label: __('Action', 'quillcrm'),
-			icon: <ThunderboltOutlined />,
-		},
-		condition: {
-			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
-		},
-		goal: {
-			label: __('Goal', 'quillcrm'),
-			icon: <TrophyOutlined />,
-		},
-		end_automation: {
-			label: __('End Automation', 'quillcrm'),
-			icon: <BranchesOutlined />,
-		},
-	};
 
 	const handleStepSelection = async (type: string) => {
 		setLoading(true);
@@ -281,6 +257,8 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			stepData.action = 'condition';
 		} else if (type === 'end_automation') {
 			stepData.action = 'end_automation';
+		} else if (type === 'delay') {
+			stepData.action = 'delay';
 		}
 		// For 'action' and 'goal' types, leave action empty - will be set when user selects specific action/goal
 
@@ -308,7 +286,26 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 				message: __('Step added', 'quillcrm'),
 			});
 
-			setPopoverVisible(false);
+			// Close dialog first
+			setVisible(false);
+
+			// Then open modal/selector for action, condition, goal, and delay steps
+			// Use setTimeout to ensure dialog closes before modal opens
+			if (
+				(type === 'action' ||
+					type === 'condition' ||
+					type === 'goal' ||
+					type === 'delay') &&
+				onStepClick
+			) {
+				setTimeout(() => {
+					const organizedStep = {
+						...response,
+						children: [],
+					};
+					onStepClick(organizedStep);
+				}, 250);
+			}
 		} catch (error: any) {
 			console.error('Failed to create step:', error);
 			console.error('Request data was:', requestData);
@@ -355,16 +352,11 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		targetPosition: getCorrectTargetPosition(),
 	});
 
-	const handleAddStep = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		setPopoverVisible(!popoverVisible);
-	};
-
-	// Create custom styling for edges based on condition
+	// Use CSS class for edge styling and ensure proper z-index
 	const edgeStyle = {
 		...style,
-		stroke: '#D7D7DA', // Unified color for all edges
-		strokeWidth: 2,
+		className: 'qcrm-edge',
+		zIndex: 1,
 	};
 
 	return (
@@ -373,55 +365,16 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			<EdgeLabelRenderer>
 				<div
 					style={{
-						position: 'absolute',
-						transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-						pointerEvents: 'all',
+						transform: `translate(${labelX}px,${labelY}px) translate(-50%, -50%)`,
 					}}
 					className="qcrm-edge-add-button"
 				>
-					<Popover
-						placement="top"
-						trigger="click"
-						open={popoverVisible}
-						onOpenChange={setPopoverVisible}
-						content={
-							<>
-								{loading && <Spin />}
-								{!loading && (
-									<Flex gap={10} wrap vertical>
-										{map(typesOptions, (type, key) => (
-											<Button
-												key={key}
-												icon={type.icon}
-												onClick={() =>
-													handleStepSelection(key)
-												}
-												style={{
-													justifyContent:
-														'flex-start',
-												}}
-											>
-												{type.label}
-											</Button>
-										))}
-									</Flex>
-								)}
-							</>
-						}
-					>
-						<Button
-							type="primary"
-							shape="circle"
-							size="small"
-							icon={<PlusOutlined />}
-							onClick={handleAddStep}
-							title={__('Add step here', 'quillcrm')}
-							style={{
-								boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-								border: 'none',
-							}}
-						/>
-					</Popover>
+					<AddStepDialog
+						visible={visible}
+						onVisibleChange={setVisible}
+						loading={loading}
+						onStepSelection={handleStepSelection}
+					/>
 				</div>
 			</EdgeLabelRenderer>
 		</>

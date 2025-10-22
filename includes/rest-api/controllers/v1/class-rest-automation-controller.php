@@ -257,6 +257,16 @@ class Rest_Automation_Controller extends REST_Controller {
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
+			'from'     => array(
+				'description' => __( 'Start date for filtering automations.', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+			'to'       => array(
+				'description' => __( 'End date for filtering automations.', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
 		);
 	}
 
@@ -471,16 +481,24 @@ class Rest_Automation_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$per_page = $request->get_param( 'per_page' ) ?? 10;
-			$page     = $request->get_param( 'page' ) ?? 1;
-			$keyword  = $request->get_param( 'keyword' ) ?? '';
+			$keyword  = $request->get_param( 'keyword' ) ? $request->get_param( 'keyword' ) : '';
+			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$from     = $request->get_param( 'from' ) ?? null;
+			$to       = $request->get_param( 'to' ) ?? null;
+
+			$query = Automation_Model::query();
 
 			if ( $keyword ) {
-				$automations = Automation_Model::where( 'name', 'like', '%' . $keyword . '%' )
-					->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
-			} else {
-				$automations = Automation_Model::orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+				$query->where( 'name', 'LIKE', '%' . $keyword . '%' );
 			}
+			if ( $from ) {
+				$query->where( 'created_at', '>=', $from );
+			}
+			if ( $to ) {
+				$query->where( 'created_at', '<=', $to );
+			}
+			$automations = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $automations, 200 );
 		} catch ( \Exception $e ) {

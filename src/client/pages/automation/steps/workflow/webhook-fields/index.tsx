@@ -9,7 +9,31 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Input, Typography, Table, Flex, Button, Select } from 'antd';
+import { Loader2 } from 'lucide-react';
+import { isEmpty, map } from 'lodash';
+
+/**
+ * Internal dependencies - UI Components
+ */
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@/components/ui/table';
 
 /**
  * Internal dependencies
@@ -18,7 +42,6 @@ import './style.scss';
 import { useAutomationContext } from '../../../state/context';
 import { Automation } from '@quillcrm/client';
 import ConfigAPI from '@quillcrm/config';
-import { isEmpty, map } from 'lodash';
 import { convertDate } from '@quillcrm/utils';
 
 interface WebhookFieldsProps {
@@ -54,60 +77,63 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 	};
 
 	return (
-		<Flex gap={20} vertical>
-			<Flex gap={10} vertical>
-				<Typography.Text>{__('Webhook URL')}</Typography.Text>
+		<div className="flex flex-col gap-5">
+			<div className="flex flex-col gap-2.5">
+				<p className="text-sm font-medium">{__('Webhook URL')}</p>
 				<Input
 					value={`${adminUrl}/wp-json/qc/v1/automations/webhook?quillcrm_key=${webhook_key}&quillcrm_id=${automation?.id}`}
 					readOnly
 				/>
-				<Typography.Text type="secondary">
+				<p className="text-sm text-muted-foreground">
 					{__('Use this URL to send data to QuillCRM.')}
-				</Typography.Text>
-			</Flex>
-			<Flex gap={10} vertical>
+				</p>
+			</div>
+			<div className="flex flex-col gap-2.5">
 				{isEmpty(payload) && (
-					<Button onClick={fetchAutomation} loading={loading}>
+					<Button onClick={fetchAutomation} disabled={loading}>
+						{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 						{__('Receive Data')}
 					</Button>
 				)}
 				{!isEmpty(payload) && (
-					<Flex gap={10} vertical>
-						<Table
-							dataSource={Object.entries(payload)}
-							pagination={false}
-						>
-							<Table.Column
-								title={__('Field')}
-								dataIndex={0}
-								key={0}
-							/>
-							<Table.Column
-								title={__('Value')}
-								dataIndex={1}
-								key={1}
-							/>
+					<div className="flex flex-col gap-2.5">
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>{__('Field')}</TableHead>
+									<TableHead>{__('Value')}</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{Object.entries(payload).map(([key, value]) => (
+									<TableRow key={key}>
+										<TableCell>{key}</TableCell>
+										<TableCell>{value as string}</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
 						</Table>
-						<Typography.Text>
+						<p className="text-sm">
 							{__('Received At')}: {convertDate(received_at)}
-						</Typography.Text>
-						<Button onClick={fetchAutomation} loading={loading}>
+						</p>
+						<Button onClick={fetchAutomation} disabled={loading}>
+							{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 							{__('Refresh Data')}
 						</Button>
-						<Flex gap={10} vertical>
-							<Typography.Text>
+						<div className="flex flex-col gap-2.5">
+							<p className="text-sm font-medium">
 								{__('Map Fields')}
-							</Typography.Text>
+							</p>
 							{map(payload, (_, key) => {
 								return (
-									<Flex key={key} gap={20}>
+									<div key={key} className="flex gap-5">
 										<Input
 											readOnly
 											value={key}
-											style={{ flex: 1 }}
+											className="flex-1"
 										/>
 										<Select
-											onChange={(value) => {
+											onValueChange={(value) => {
 												onChange({
 													...values,
 													mapped_fields: {
@@ -117,30 +143,40 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 												});
 											}}
 											value={mapped_fields?.[key] || ''}
-											options={map(
-												contactFieldsGroups,
-												(group, groupKey) => ({
-													label: group.label,
-													value: groupKey,
-													options: map(
-														group.fields,
-														(field, fieldKey) => ({
-															label: field.label,
-															value: fieldKey,
-														})
-													),
-												})
-											)}
-											style={{ flex: 1 }}
-										/>
-									</Flex>
+										>
+											<SelectTrigger className="flex-1">
+												<SelectValue placeholder={__('Select field', 'quillcrm')} />
+											</SelectTrigger>
+											<SelectContent>
+												{map(
+													contactFieldsGroups,
+													(group, groupKey) => (
+														<SelectGroup key={groupKey}>
+															<SelectLabel>{group.label}</SelectLabel>
+															{map(
+																group.fields,
+																(field, fieldKey) => (
+																	<SelectItem
+																		key={fieldKey}
+																		value={fieldKey}
+																	>
+																		{field.label}
+																	</SelectItem>
+																)
+															)}
+														</SelectGroup>
+													)
+												)}
+											</SelectContent>
+										</Select>
+									</div>
 								);
 							})}
-						</Flex>
-					</Flex>
+						</div>
+					</div>
 				)}
-			</Flex>
-		</Flex>
+			</div>
+		</div>
 	);
 };
 

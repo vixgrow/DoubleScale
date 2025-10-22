@@ -6,9 +6,29 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Dropdown, Modal } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
+import { useState } from 'react';
+
+/**
+ * Internal dependencies
+ */
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { DeleteIcon, EditIcon } from '@quillcrm/components';
 
 interface NodeContextMenuProps {
 	onEdit?: () => void;
@@ -25,65 +45,90 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 	disabled = false,
 	showDelete = true,
 }) => {
-	const handleDelete = () => {
-		Modal.confirm({
-			title: __('Are you sure?', 'quillcrm'),
-			content: __('This action cannot be undone.', 'quillcrm'),
-			okText: __('Yes', 'quillcrm'),
-			cancelText: __('No', 'quillcrm'),
-			okType: 'danger',
-			onOk() {
-				if (onDelete) {
-					onDelete();
-				}
-			},
-		});
+	const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+
+	const handleEdit = (e: Event) => {
+		e.stopPropagation();
+		if (onEdit) {
+			onEdit();
+		}
 	};
 
-	const menuItems: MenuProps['items'] = [
-		{
-			key: 'edit',
-			icon: <EditOutlined />,
-			label: __('Edit', 'quillcrm'),
-			onClick: ({ domEvent }) => {
-				domEvent.stopPropagation();
-				if (onEdit) {
-					onEdit();
-				}
-			},
-		},
-		...(showDelete
-			? [
-					{
-						type: 'divider' as const,
-					},
-					{
-						key: 'delete',
-						icon: <DeleteOutlined />,
-						label: __('Delete', 'quillcrm'),
-						danger: true,
-						onClick: ({ domEvent }) => {
-							domEvent.stopPropagation();
-							handleDelete();
-						},
-					},
-				]
-			: []),
-	];
+	const handleDeleteClick = (e: Event) => {
+		e.stopPropagation();
+		setShowDeleteAlert(true);
+	};
+
+	const handleDeleteConfirm = () => {
+		if (onDelete) {
+			onDelete();
+		}
+		setShowDeleteAlert(false);
+	};
 
 	if (disabled) {
 		return <>{children}</>;
 	}
 
 	return (
-		<Dropdown
-			menu={{ items: menuItems }}
-			trigger={['contextMenu']}
-			placement="bottomLeft"
-			overlayClassName="qcrm-reactflow-context-menu"
-		>
-			<div onContextMenu={(e) => e.stopPropagation()}>{children}</div>
-		</Dropdown>
+		<>
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<div onContextMenu={(e) => e.preventDefault()}>
+						{children}
+					</div>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent
+					className="qcrm-reactflow-context-menu"
+					side="bottom"
+					align="start"
+					onContextMenu={(e) => e.preventDefault()}
+				>
+					{onEdit && (
+						<DropdownMenuItem onSelect={handleEdit}>
+							<EditIcon />
+							{__('Edit', 'quillcrm')}
+						</DropdownMenuItem>
+					)}
+					{showDelete && (
+						<>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem
+								onSelect={handleDeleteClick}
+								className="text-destructive focus:text-destructive"
+							>
+								<DeleteIcon/>
+								{__('Delete', 'quillcrm')}
+							</DropdownMenuItem>
+						</>
+					)}
+				</DropdownMenuContent>
+			</DropdownMenu>
+
+			<AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>
+							{__('Are you sure?', 'quillcrm')}
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							{__('This action cannot be undone.', 'quillcrm')}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>
+							{__('No', 'quillcrm')}
+						</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={handleDeleteConfirm}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
+							{__('Yes', 'quillcrm')}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+		</>
 	);
 };
 

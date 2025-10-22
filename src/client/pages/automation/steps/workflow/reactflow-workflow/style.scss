@@ -3,17 +3,19 @@
 	background-color: #fff;
 	border-radius: 8px;
 	border: 1px solid var(--qcrm-border-color);
-	overflow: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
 	position: relative;
 }
 
 // ReactFlow Workflow Styles
 .qcrm-reactflow-workflow {
-	height: 90vh;
+	height: 100vh;
 	min-height: 400px;
 	width: 100%;
 	background: #f9f9f9;
-	overflow: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
 	position: relative;
 
 	&__layout {

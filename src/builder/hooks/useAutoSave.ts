@@ -109,14 +109,16 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			const template = await getTemplate(templateId);
 
 			// Save template with updated builder body + campaign_id
-			const savedTemplate = await saveTemplate({
+			const templateWithCampaignId: typeof template & { campaign_id: number } = {
 				...template,
 				body: JSON.stringify({
 					type: 'builder',
 					value: builderData,
 				}),
 				campaign_id: campaign.id,
-			} as any);
+			};
+
+			const savedTemplate = await saveTemplate(templateWithCampaignId);
 
 			if (isMountedRef.current) {
 				const now = new Date();

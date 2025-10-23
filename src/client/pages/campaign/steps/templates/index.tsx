@@ -10,6 +10,7 @@ import { useDispatch } from '@wordpress/data';
  */
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { useCampaignStep } from '../shared';
+import type { ExtendedCampaignSettings } from '@/stores/campaign/types';
 import {
 	CategoryIcon,
 	FeedBuilder,
@@ -93,6 +94,7 @@ const Templates: React.FC = () => {
 	const [isSaving, setIsSaving] = useState(false);
 	const { campaign, goToStep } = useCampaignStep();
 	const { createNotice } = useDispatch('quillcrm/core');
+	const { updateCampaign } = useDispatch('quillcrm/campaign');
 
 	// Single template object - matches backend structure
 	const [template, setTemplate] = useState<Partial<EmailTemplate>>({
@@ -206,7 +208,9 @@ const Templates: React.FC = () => {
 
 		try {
 			// Prepare template with empty body shell (builder will fill it)
-			const templateData = {
+			const templateData: Partial<EmailTemplate> & {
+				campaign_id?: number;
+			} = {
 				...template,
 				body: template.body || '{"type":"rich-text","value":""}',
 				campaign_id: campaign?.id, // Backend will update campaign's template_ids
@@ -214,7 +218,18 @@ const Templates: React.FC = () => {
 
 			// saveTemplate decides create vs update based on ID presence
 			// Backend handles updating campaign.settings.template_ids
-			await saveTemplate(templateData as any);
+			const savedTemplate = await saveTemplate(templateData);
+
+			// Update campaign state with new template ID
+			if (savedTemplate.id && campaign?.settings) {
+				updateCampaign({
+					id: campaign.id,
+					settings: {
+						...campaign.settings,
+						template_ids: [savedTemplate.id],
+					} as ExtendedCampaignSettings,
+				});
+			}
 
 			createNotice({
 				type: 'success',

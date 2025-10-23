@@ -13,6 +13,8 @@ class Order_Country extends Rule {
 
 
 
+
+
 	/**
 	 * Name
 	 *
@@ -47,7 +49,7 @@ class Order_Country extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $type = 'select';
+	public $type = 'multiselect';
 
 	/**
 	 * Get operators

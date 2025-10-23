@@ -223,6 +223,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			configured: {
 				condition: () => (
 					<ConditionsModal
+						key={currentStep!.id}
 						step={currentStep!}
 						onSave={handleConditionSave}
 						visible={true}
@@ -231,6 +232,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 				),
 				default: () => (
 					<StepFieldsModal
+						key={currentStep!.id}
 						step={currentStep!}
 						setStep={setCurrentStep}
 						saveStep={handleStepSave}

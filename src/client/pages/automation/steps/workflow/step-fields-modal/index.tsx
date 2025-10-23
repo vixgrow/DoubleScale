@@ -15,7 +15,7 @@ import { useDispatch } from '@wordpress/data';
 import { Button } from '@/components/ui/button';
 import './style.scss';
 import type { OrganizedStep } from '@quillcrm/client';
-import { Fields, MergeTagsIcon } from '@quillcrm/components';
+import { Fields } from '@quillcrm/components';
 import { getAction, getGoal } from '@quillcrm/utils';
 import { useAutomationContext } from '../../../state/context';
 import { deleteStep } from '../reactflow-workflow/utils/step-utils';
@@ -34,19 +34,15 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [isSaving, setIsSaving] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
-	const [currentStepId, setCurrentStepId] = useState(step.id);
 	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
 		useDispatch('quillcrm/core');
 	const { steps, setSteps } = useAutomationContext();
 
-	// Only sync settings when the step ID changes (switching to a different step)
-	// This prevents resetting user's changes when the same step is updated after save
+	// Sync settings when step.settings changes
+	// This ensures we load the latest settings from the parent
 	useEffect(() => {
-		if (step.id !== currentStepId) {
-			setSettings(step.settings);
-			setCurrentStepId(step.id);
-		}
-	}, [step.id, step.settings, currentStepId]);
+		setSettings(step.settings || {});
+	}, [step.settings]);
 
 	const handleSave = async () => {
 		setIsSaving(true);

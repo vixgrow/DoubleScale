@@ -9,7 +9,6 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import { useCampaignStep, campaignSteps } from '../shared';
 import {
 	PanelSettings,

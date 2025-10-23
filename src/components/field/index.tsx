@@ -21,7 +21,6 @@ import {
 	LinkTriggerField,
 	DynamicKeyValueInput,
 	TestButton,
-	MergeTagsIcon,
 } from '@quillcrm/components';
 import type { ReactSelectOptions } from '@quillcrm/client';
 import ContactMappedFields from '../contact-mapped-fields';
@@ -68,7 +67,6 @@ interface FieldProps {
 	defaultValue?: string;
 	min?: number;
 	max?: number;
-	enableMergeTags?: boolean;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -90,18 +88,7 @@ const Field: React.FC<FieldProps> = ({
 	defaultValue,
 	min,
 	max,
-	enableMergeTags = false,
 }) => {
-	const { setMergeTagsVisible, setMergeTagCallback } =
-		useDispatch('quillcrm/core');
-
-	const handleMergeTagClick = () => {
-		setMergeTagCallback((tagValue: string) => {
-			onChange((value || '') + tagValue);
-		});
-		setMergeTagsVisible(true);
-	};
-
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const handleCopyToClipboard = (text: string) => {
@@ -216,23 +203,6 @@ const Field: React.FC<FieldProps> = ({
 			);
 			break;
 		case 'text':
-			fieldContent = (
-				<Input
-					value={value || ''}
-					onChange={(e) => onChange(e.target.value)}
-					type={type}
-					className={cn(
-						'h-12 bg-white',
-						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
-					)}
-					style={{
-						borderRadius: '8px',
-					}}
-					placeholder={placeholder}
-				/>
-			);
-			break;
 		case 'number':
 		case 'email':
 		case 'url':
@@ -244,7 +214,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					style={{
 						borderRadius: '8px',
@@ -263,7 +233,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 					style={{
@@ -281,8 +251,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-								(option) => option.value === value
-							)
+									(option) => option.value === value
+								)
 							: null
 					}
 					onChange={(value) => {
@@ -465,14 +435,6 @@ const Field: React.FC<FieldProps> = ({
 						{label}{' '}
 						{required && <span className="text-red-600">*</span>}
 					</span>
-					{enableMergeTags && type === 'text' && (
-						<div
-							className="cursor-pointer hover:opacity-80 inline-flex"
-							onClick={handleMergeTagClick}
-						>
-							<MergeTagsIcon />
-						</div>
-					)}
 				</div>
 			)}
 			<div className="qcrm-field-input">{fieldContent}</div>

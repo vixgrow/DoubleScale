@@ -189,3 +189,19 @@ export const formatDateForAPI = (date: Date | null): string | undefined => {
 
 	return `${year}-${month}-${day}`;
 };
+
+/**
+ * Get the REST API endpoint for a campaign type
+ * All campaign types now use the unified campaigns endpoint
+ * @param campaignType - The type of campaign ('email', 'sms', 'whatsapp')
+ * @returns The API endpoint path or null if invalid type
+ */
+export const getCampaignEndpoint = (campaignType: string): string | null => {
+	const validTypes = ['email', 'sms', 'whatsapp'];
+
+	if (validTypes.includes(campaignType)) {
+		return '/qc/v1/campaigns';
+	}
+
+	return null;
+};

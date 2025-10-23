@@ -2,10 +2,16 @@ import { useSelect } from '@wordpress/data';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { getTemplate, saveTemplate } from '../api/templates';
+import { ButtonSettings, ButtonType, EmailSection, GlobalSettings } from '../types/common';
 
 interface UseAutoSaveOptions {
 	interval?: number; // Auto-save interval in milliseconds (default: 30000 = 30 seconds)
 	enabled?: boolean; // Enable/disable auto-save
+	customSaveCallback?: (data: {
+		sections: EmailSection[];
+		globalSettings: GlobalSettings;
+		buttonSettings: Record<ButtonType, ButtonSettings>;
+	}) => Promise<void>;
 }
 
 interface SaveStatus {
@@ -16,7 +22,7 @@ interface SaveStatus {
 }
 
 export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
-	const { interval = 30000, enabled = true } = options;
+	const { interval = 10000, enabled = true, customSaveCallback } = options;
 
 	const [saveStatus, setSaveStatus] = useState<SaveStatus>({
 		isSaving: false,
@@ -84,7 +90,53 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 		success: boolean;
 		templateId: number | null;
 	}> => {
-		if (!campaign || !isMountedRef.current) {
+		if (!isMountedRef.current) {
+			return { success: false, templateId: null };
+		}
+
+		// If customSaveCallback is provided, use it instead of default save logic
+		if (customSaveCallback) {
+			try {
+				setSaveStatus((prev) => ({ ...prev, isSaving: true, error: null }));
+
+				// Create the builder data
+				const builderData = {
+					sections: JSON.parse(currentState).sections,
+					globalSettings: JSON.parse(currentState).globalSettings,
+					buttonSettings: JSON.parse(currentState).buttonSettings,
+				};
+
+				// Call custom save callback
+				await customSaveCallback(builderData);
+
+				if (isMountedRef.current) {
+					const now = new Date();
+					lastSavedStateRef.current = currentState;
+					setSaveStatus({
+						isSaving: false,
+						lastSaved: now,
+						hasUnsavedChanges: false,
+						error: null,
+					});
+					return { success: true, templateId: null };
+				}
+				return { success: false, templateId: null };
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Failed to save';
+				if (isMountedRef.current) {
+					setSaveStatus((prev) => ({
+						...prev,
+						isSaving: false,
+						error: errorMessage,
+					}));
+				}
+				console.error('Save error:', error);
+				return { success: false, templateId: null };
+			}
+		}
+
+		// Default save logic (for campaign flow)
+		if (!campaign) {
 			return { success: false, templateId: null };
 		}
 
@@ -144,7 +196,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			console.error('Save error:', error);
 			return { success: false, templateId: null };
 		}
-	}, [campaign, currentState]);
+	}, [campaign, currentState, customSaveCallback]);
 
 	// Auto-save effect
 	useEffect(() => {

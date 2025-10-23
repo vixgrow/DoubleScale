@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PreviewIcon, RedoIcon, UndoIcon } from '@/components/icons';
 import BreadcrumbComponent from '@/components/breadcrumb';
@@ -12,8 +11,38 @@ import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { useTemplateActions } from '../hooks/useTemplateActions';
 import { SaveStatusIndicator } from './SaveStatusIndicator';
 import { SaveAsTemplateDialog } from './SaveAsTemplateDialog';
+import {
+	EmailSection,
+	GlobalSettings,
+	ButtonType,
+	ButtonSettings,
+} from '../types/common';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+	/**
+	 * Custom save callback
+	 * If not provided, will use default campaign save flow
+	 */
+	onSave?: (data: {
+		sections: EmailSection[];
+		globalSettings: GlobalSettings;
+		buttonSettings: Record<ButtonType, ButtonSettings>;
+	}) => Promise<void>;
+	/**
+	 * Enable/disable auto-save functionality
+	 */
+	autoSaveEnabled?: boolean;
+	/**
+	 * Auto-save interval in milliseconds
+	 */
+	autoSaveInterval?: number;
+}
+
+const Header: React.FC<HeaderProps> = ({
+	onSave,
+	autoSaveEnabled = true,
+	autoSaveInterval = 10000,
+}) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const campaign = useSelect(
@@ -28,11 +57,12 @@ const Header: React.FC = () => {
 
 	const { saveAsTemplate, isSaving: isSavingTemplate } = useTemplateActions();
 
-	// Use auto-save hook
+	// Use auto-save hook with custom save callback if provided
 	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
 		{
-			interval: 10000, // Auto-save every 10 seconds
-			enabled: true,
+			interval: autoSaveInterval,
+			enabled: autoSaveEnabled,
+			customSaveCallback: onSave,
 		}
 	);
 
@@ -42,12 +72,8 @@ const Header: React.FC = () => {
 	});
 
 	const handleSaveAndContinue = async () => {
-		if (!campaign) {
-			return;
-		}
-
 		const { success } = await save();
-		if (success) {
+		if (success && campaign) {
 			// Template is already linked via campaign.settings.template_ids
 			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 		}

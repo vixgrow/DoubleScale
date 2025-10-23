@@ -274,30 +274,30 @@ const Workflow: React.FC = () => {
 									</Button>
 								</AlertDialogTrigger>
 								<AlertDialogPortal>
-								<AlertDialogOverlay className="z-[150000]" />
-								<AlertDialogContent className="z-[150000]">
-									<AlertDialogHeader>
-										<AlertDialogTitle>
-											{__('Are you sure?', 'quillcrm')}
-										</AlertDialogTitle>
-										<AlertDialogDescription>
-											{__(
-												'This action cannot be undone.',
-												'quillcrm'
-											)}
-										</AlertDialogDescription>
-									</AlertDialogHeader>
-									<AlertDialogFooter>
-										<AlertDialogCancel>
-											{__('No', 'quillcrm')}
-										</AlertDialogCancel>
-										<AlertDialogAction
-											onClick={() => deleteStep(step)}
-										>
-											{__('Yes', 'quillcrm')}
-										</AlertDialogAction>
-									</AlertDialogFooter>
-								</AlertDialogContent>
+									<AlertDialogOverlay className="z-[150000]" />
+									<AlertDialogContent className="z-[150000]">
+										<AlertDialogHeader>
+											<AlertDialogTitle>
+												{__('Are you sure?', 'quillcrm')}
+											</AlertDialogTitle>
+											<AlertDialogDescription>
+												{__(
+													'This action cannot be undone.',
+													'quillcrm'
+												)}
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogFooter>
+											<AlertDialogCancel>
+												{__('No', 'quillcrm')}
+											</AlertDialogCancel>
+											<AlertDialogAction
+												onClick={() => deleteStep(step)}
+											>
+												{__('Yes', 'quillcrm')}
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogContent>
 								</AlertDialogPortal>
 							</AlertDialog>
 						</div>
@@ -375,6 +375,8 @@ const Workflow: React.FC = () => {
 						)}>
 							{useReactFlow ? (
 								<ReactFlowWorkflow
+									currentStep={currentStep}
+									isTriggerVisible={visible}
 									onStepClick={(step) => {
 										setVisible(false); // Close trigger sidebar if open
 										setCurrentStep(step);

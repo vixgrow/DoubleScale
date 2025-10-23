@@ -42,7 +42,8 @@ const processStepHierarchy = (
 	parentId: number | null = null,
 	condition: string | null = null,
 	level: number = 0,
-	startIndex: number = 0
+	startIndex: number = 0,
+	selectedStepId?: string | null
 ): { lastIndex: number; lastStepId?: string } => {
 	// Get steps for current level
 	const currentLevelSteps = stepList
@@ -81,6 +82,7 @@ const processStepHierarchy = (
 			data: {
 				step,
 				automation,
+				selectedStepId,
 				onStepClick: (stepData: OrganizedStep) => {
 					if (onStepClick) {
 						onStepClick(stepData);
@@ -331,7 +333,8 @@ const processStepHierarchy = (
 				step.id,
 				'yes',
 				level + 1,
-				0
+				0,
+				selectedStepId
 			);
 
 			processStepHierarchy(
@@ -351,7 +354,8 @@ const processStepHierarchy = (
 				step.id,
 				'no',
 				level + 1,
-				0
+				0,
+				selectedStepId
 			);
 
 			// Connect condition to Yes branch node with explicit handle

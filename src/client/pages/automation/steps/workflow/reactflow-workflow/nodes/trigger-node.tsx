@@ -19,12 +19,13 @@ import { ActionIcon } from '@quillcrm/components';
 
 interface TriggerNodeData {
 	automation: Automation;
+	isTriggerVisible?: boolean;
 	onTriggerClick?: () => void;
 	onDeleteTrigger?: (triggerId: string) => void;
 }
 
 const TriggerNode: React.FC<NodeProps> = ({ data }) => {
-	const { automation, onTriggerClick } = data as unknown as TriggerNodeData;
+	const { automation, onTriggerClick, isTriggerVisible } = data as unknown as TriggerNodeData;
 
 	const handleEdit = () => {
 		if (onTriggerClick) {
@@ -41,7 +42,7 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 
 	return (
 		<NodeContextMenu onEdit={handleEdit} showDelete={false}>
-			<div className="qcrm-reactflow-node qcrm-reactflow-node--trigger">
+			<div className={`qcrm-reactflow-node qcrm-reactflow-node--trigger ${isTriggerVisible ? 'qcrm-reactflow-node--selected' : ''}`}>
 				<div className="qcrm-reactflow-node__icon">
 					<ActionIcon width={23} height={23} />
 				</div>

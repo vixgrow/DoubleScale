@@ -19,11 +19,15 @@ import type { OrganizedStep } from '@quillcrm/client';
 import WorkflowVisualization from './workflow-visualization';
 
 interface ReactFlowWorkflowProps {
+	currentStep?: OrganizedStep | null;
+	isTriggerVisible?: boolean;
 	onStepClick?: (step: OrganizedStep) => void;
 	onTriggerClick?: () => void;
 }
 
 const ReactFlowWorkflow: React.FC<ReactFlowWorkflowProps> = ({
+	currentStep,
+	isTriggerVisible,
 	onStepClick,
 	onTriggerClick,
 }) => {
@@ -53,6 +57,8 @@ const ReactFlowWorkflow: React.FC<ReactFlowWorkflowProps> = ({
 					automation={automation || undefined}
 					steps={steps}
 					isLoading={isLoading}
+					currentStep={currentStep}
+					isTriggerVisible={isTriggerVisible}
 					onStepClick={handleStepClick}
 					onTriggerClick={handleTriggerClick}
 				/>

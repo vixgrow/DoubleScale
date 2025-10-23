@@ -131,6 +131,13 @@
 		box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 	}
 
+	// Selected state when editing in sidebar
+	&--selected {
+		border-color: #1890ff !important;
+		background-color: #e6f7ff !important;
+		box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+	}
+
 	// Node Header
 	&__header {
 		display: flex;
@@ -285,6 +292,7 @@
 
 	// Node Type Specific Styles
 	&--action {
+
 		// Action configuration status
 		.qcrm-reactflow-action__configured {
 			color: #52c41a;
@@ -384,6 +392,7 @@
 	}
 
 	&--goal {
+
 		// Goal configuration status
 		.qcrm-reactflow-goal__configured {
 			color: #52c41a;

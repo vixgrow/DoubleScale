@@ -17,7 +17,8 @@ const initializeTrigger = (
 	addStepWidth,
 	onTriggerClick,
 	onStepClick,
-	savedPositions = {}
+	savedPositions = {},
+	isTriggerVisible = false
 ) => {
 	// Always add trigger node at the top
 	const triggerPosition = savedPositions['trigger'] || {
@@ -28,7 +29,7 @@ const initializeTrigger = (
 		id: 'trigger',
 		type: 'trigger',
 		position: triggerPosition,
-		data: { automation, onTriggerClick },
+		data: { automation, onTriggerClick, isTriggerVisible },
 	});
 
 	if (!steps || steps.length === 0) {

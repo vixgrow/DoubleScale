@@ -23,10 +23,11 @@ import { Power } from 'lucide-react';
 
 interface EndNodeData {
 	step: AutomationStep;
+	selectedStepId?: string | null;
 }
 
 const EndNode: React.FC<NodeProps> = ({ data }) => {
-	const { step } = data as unknown as EndNodeData;
+	const { step, selectedStepId } = data as unknown as EndNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const [isDeleting, setIsDeleting] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -96,9 +97,12 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
+	// Check if this node is selected
+	const isSelected = selectedStepId === step.id.toString();
+
 	return (
 		<NodeContextMenu onDelete={handleDelete} disabled={false}>
-			<div className="qcrm-reactflow-node qcrm-reactflow-node--end">
+			<div className={`qcrm-reactflow-node qcrm-reactflow-node--end ${isSelected ? 'qcrm-reactflow-node--selected' : ''}`}>
 				<Handle
 					type="target"
 					position={Position.Top}

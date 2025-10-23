@@ -23,11 +23,12 @@ import { GoalIcon } from '@quillcrm/components';
 
 interface GoalNodeData {
 	step: AutomationStep;
+	selectedStepId?: string | null;
 	onStepClick?: (step: OrganizedStep) => void;
 }
 
 const GoalNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, onStepClick } = data as unknown as GoalNodeData;
+	const { step, onStepClick, selectedStepId } = data as unknown as GoalNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -104,9 +105,12 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
+	// Check if this node is selected
+	const isSelected = selectedStepId === step.id.toString();
+
 	return (
 		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-			<div className="qcrm-reactflow-node qcrm-reactflow-node--goal">
+			<div className={`qcrm-reactflow-node qcrm-reactflow-node--goal ${isSelected ? 'qcrm-reactflow-node--selected' : ''}`}>
 				<Handle
 					type="target"
 					position={Position.Top}

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -18,6 +18,7 @@ import {
 	Background,
 	Controls,
 	MiniMap,
+	useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -61,11 +62,23 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	automation,
 	steps = [],
 	isLoading = false,
+	currentStep,
+	isTriggerVisible,
 	onStepClick,
 	onTriggerClick,
 }) => {
 	// ========== CONTEXT AND STATE ==========
 	const { updateAutomation } = useAutomationContext();
+	const reactFlowInstance = useReactFlow();
+
+	// Track the last focused step ID to maintain focus when sidebar closes
+	const lastFocusedStepIdRef = useRef<string | null>(null);
+	// Track previous step state to detect when modal closes
+	const prevStepStateRef = useRef<{ id: number | null; action: string | null; type: string | null }>({
+		id: null,
+		action: null,
+		type: null
+	});
 
 	// ReactFlow state management
 	const [nodesState, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -148,7 +161,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			addStepWidth,
 			onTriggerClick,
 			onStepClick,
-			savedPositions
+			savedPositions,
+			isTriggerVisible
 		);
 
 		// Position calculator that considers nested structure
@@ -188,6 +202,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		);
 
 		// Process the entire step hierarchy starting from root
+		const selectedStepId = currentStep?.id?.toString() || null;
 		const result = processStepHierarchy(
 			steps,
 			initialNodes,
@@ -211,7 +226,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			null,
 			null,
 			0,
-			0
+			0,
+			selectedStepId
 		);
 
 		// Post-process to ensure all child condition merge nodes connect to their parent merge nodes
@@ -254,7 +270,117 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		setEdges(initialEdges);
 
 		// saveNodePositions(initialNodes);
-	}, [automation?.id, steps, onStepClick, onDeleteStep]);
+	}, [automation?.id, steps, onStepClick, onDeleteStep, currentStep?.id, isTriggerVisible]);
+
+	// Focus on selected node when currentStep changes or trigger is selected
+	useEffect(() => {
+		if (!reactFlowInstance) return;
+
+		if (isTriggerVisible) {
+			// Focus on trigger node
+			lastFocusedStepIdRef.current = 'trigger';
+			const timer = setTimeout(() => {
+				const node = reactFlowInstance.getNode('trigger');
+
+				if (node) {
+					// Center the view on the trigger node with animation
+					reactFlowInstance.fitView({
+						nodes: [{ id: 'trigger' }],
+						duration: 400,
+						padding: 0.5,
+						minZoom: 0.8,
+						maxZoom: 1.2,
+					});
+				}
+			}, 100); // Small delay to ensure nodes are updated
+
+			return () => clearTimeout(timer);
+		} else if (currentStep?.id) {
+			const prevState = prevStepStateRef.current;
+			const nodeId = currentStep.id.toString();
+
+			// Detect different scenarios
+			const isNewStep = prevState.id !== currentStep.id;
+			const modalJustClosed =
+				prevState.id === currentStep.id &&
+				(currentStep.type === 'action' || currentStep.type === 'goal') &&
+				prevState.action === null &&
+				currentStep.action !== null;
+			const isStepWithoutModal =
+				currentStep.type === 'condition' ||
+				currentStep.type === 'delay' ||
+				currentStep.type === 'end_automation';
+
+			// Update tracking refs
+			lastFocusedStepIdRef.current = nodeId;
+			prevStepStateRef.current = {
+				id: currentStep.id,
+				action: currentStep.action || null,
+				type: currentStep.type || null
+			};
+
+			// Only focus if modal just closed, or it's a step type without modal, or switching to configured step
+			const shouldFocus =
+				modalJustClosed || // Action/Goal modal just closed with selection
+				isStepWithoutModal || // Steps that don't have modals
+				(isNewStep && currentStep.action); // Switching to different step that's already configured
+
+			if (shouldFocus) {
+				// Delay to ensure nodes are rendered
+				const timer = setTimeout(() => {
+					const node = reactFlowInstance.getNode(nodeId);
+
+					if (node) {
+						// Center the view on the selected node with animation
+						reactFlowInstance.fitView({
+							nodes: [{ id: nodeId }],
+							duration: 400,
+							padding: 0.5,
+							minZoom: 0.8,
+							maxZoom: 1.2,
+						});
+					}
+				}, 3000); // Small delay to ensure nodes are updated
+
+				return () => clearTimeout(timer);
+			}
+
+			return undefined;
+		} else {
+			// Sidebar closed - maintain focus on last step if it wasn't the trigger
+			if (lastFocusedStepIdRef.current && lastFocusedStepIdRef.current !== 'trigger') {
+				// Keep focus on the last step (whether configured or not)
+				// This prevents losing track of newly added steps
+				const timer = setTimeout(() => {
+					const node = reactFlowInstance.getNode(lastFocusedStepIdRef.current!);
+
+					if (node) {
+						reactFlowInstance.fitView({
+							nodes: [{ id: lastFocusedStepIdRef.current! }],
+							duration: 400,
+							padding: 0.5,
+							minZoom: 0.8,
+							maxZoom: 1.2,
+						});
+					}
+				}, 100);
+
+				// Reset state
+				prevStepStateRef.current = { id: null, action: null, type: null };
+
+				return () => clearTimeout(timer);
+			}
+
+			// Only reset view when trigger sidebar closed or no previous step
+			lastFocusedStepIdRef.current = null;
+			prevStepStateRef.current = { id: null, action: null, type: null };
+			reactFlowInstance.fitView({
+				duration: 400,
+				padding: 0.2,
+			});
+			return undefined;
+		}
+	}, [currentStep?.id, currentStep?.action, currentStep?.type, isTriggerVisible, reactFlowInstance, nodesState]);
 
 	// ========== POSITION MANAGEMENT ==========
 
@@ -282,9 +408,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			return (
 				!current ||
 				Math.abs(current.x - new_.x) >
-					LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
+				LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
 				Math.abs(current.y - new_.y) >
-					LAYOUT_CONSTANTS.POSITION_THRESHOLD
+				LAYOUT_CONSTANTS.POSITION_THRESHOLD
 			);
 		});
 

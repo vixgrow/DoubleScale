@@ -26,11 +26,13 @@ import TriggerNode from '../nodes/trigger-node';
  * Types and Interfaces
  */
 interface WorkflowVisualizationProps {
-    automation?: Automation;
-    steps?: AutomationStep[];
-    isLoading?: boolean;
-    onStepClick?: (step: OrganizedStep) => void;
-    onTriggerClick?: () => void;
+	automation?: Automation;
+	steps?: AutomationStep[];
+	isLoading?: boolean;
+	currentStep?: OrganizedStep | null;
+	isTriggerVisible?: boolean;
+	onStepClick?: (step: OrganizedStep) => void;
+	onTriggerClick?: () => void;
 }
 
 interface PositionCalculationParams {
@@ -58,8 +60,8 @@ const NODE_TYPES = {
 };
 
 const EDGE_TYPES: EdgeTypes = {
-    addStepEdge: AddStepEdge,
-    conditionEdge: ConditionEdge,
+	addStepEdge: AddStepEdge,
+	conditionEdge: ConditionEdge,
 };
 
 export type { WorkflowVisualizationProps, PositionCalculationParams };

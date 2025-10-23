@@ -23,12 +23,13 @@ import { ConditionsIcon } from '@quillcrm/components';
 
 interface ConditionNodeData {
 	step: AutomationStep;
+	selectedStepId?: string | null;
 	onStepClick?: (step: OrganizedStep) => void;
 }
 
 const ConditionNode: React.FC<NodeProps> = (props) => {
 	const { data } = props;
-	const { step, onStepClick } = data as unknown as ConditionNodeData;
+	const { step, onStepClick, selectedStepId } = data as unknown as ConditionNodeData;
 
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -62,9 +63,12 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 		await deleteStep(step.id.toString(), steps, setSteps, createNotice);
 	};
 
+	// Check if this node is selected
+	const isSelected = selectedStepId === step.id.toString();
+
 	return (
 		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-			<div className="qcrm-reactflow-node qcrm-reactflow-node--condition">
+			<div className={`qcrm-reactflow-node qcrm-reactflow-node--condition ${isSelected ? 'qcrm-reactflow-node--selected' : ''}`}>
 				<Handle
 					type="target"
 					position={Position.Top}

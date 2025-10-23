@@ -28,13 +28,14 @@ import { TimerBlockIcon } from '@quillcrm/components';
 interface DelayNodeData {
     step: AutomationStep;
     automation: Automation;
+    selectedStepId?: string | null;
     onStepClick?: (step: OrganizedStep) => void;
     onDeleteStep?: (stepId: string) => void;
 }
 
 const DelayNode: React.FC<NodeProps> = (props) => {
     const { data } = props;
-    const { step, onStepClick } = data as unknown as DelayNodeData;
+    const { step, onStepClick, selectedStepId } = data as unknown as DelayNodeData;
 
     const { steps, setSteps } = useAutomationContext();
     const { createNotice } = useDispatch('quillcrm/core');
@@ -66,9 +67,12 @@ const DelayNode: React.FC<NodeProps> = (props) => {
         await deleteStep(step.id.toString(), steps, setSteps, createNotice);
     };
 
+    // Check if this node is selected
+    const isSelected = selectedStepId === step.id.toString();
+
     return (
         <NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-            <div className="qcrm-reactflow-node qcrm-reactflow-node--delay" onClick={handleEdit}>
+            <div className={`qcrm-reactflow-node qcrm-reactflow-node--delay ${isSelected ? 'qcrm-reactflow-node--selected' : ''}`} onClick={handleEdit}>
                 <Handle
                     type="target"
                     position={Position.Top}

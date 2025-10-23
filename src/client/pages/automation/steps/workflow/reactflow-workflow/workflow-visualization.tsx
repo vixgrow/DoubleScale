@@ -74,10 +74,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	// Track the last focused step ID to maintain focus when sidebar closes
 	const lastFocusedStepIdRef = useRef<string | null>(null);
 	// Track previous step state to detect when modal closes
-	const prevStepStateRef = useRef<{ id: number | null; action: string | null; type: string | null }>({
+	const prevStepStateRef = useRef<{
+		id: number | null;
+		action: string | null;
+		type: string | null;
+	}>({
 		id: null,
 		action: null,
-		type: null
+		type: null,
 	});
 
 	// ReactFlow state management
@@ -270,7 +274,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		setEdges(initialEdges);
 
 		// saveNodePositions(initialNodes);
-	}, [automation?.id, steps, onStepClick, onDeleteStep, currentStep?.id, isTriggerVisible]);
+	}, [
+		automation?.id,
+		steps,
+		onStepClick,
+		onDeleteStep,
+		currentStep?.id,
+		isTriggerVisible,
+	]);
 
 	// Focus on selected node when currentStep changes or trigger is selected
 	useEffect(() => {
@@ -303,7 +314,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			const isNewStep = prevState.id !== currentStep.id;
 			const modalJustClosed =
 				prevState.id === currentStep.id &&
-				(currentStep.type === 'action' || currentStep.type === 'goal') &&
+				(currentStep.type === 'action' ||
+					currentStep.type === 'goal') &&
 				prevState.action === null &&
 				currentStep.action !== null;
 
@@ -320,7 +332,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			prevStepStateRef.current = {
 				id: currentStep.id,
 				action: currentStep.action || null,
-				type: currentStep.type || null
+				type: currentStep.type || null,
 			};
 
 			// Focus when:
@@ -355,11 +367,16 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			return undefined;
 		} else {
 			// Sidebar closed - maintain focus on last step if it wasn't the trigger
-			if (lastFocusedStepIdRef.current && lastFocusedStepIdRef.current !== 'trigger') {
+			if (
+				lastFocusedStepIdRef.current &&
+				lastFocusedStepIdRef.current !== 'trigger'
+			) {
 				// Keep focus on the last step (whether configured or not)
 				// This prevents losing track of newly added steps
 				const timer = setTimeout(() => {
-					const node = reactFlowInstance.getNode(lastFocusedStepIdRef.current!);
+					const node = reactFlowInstance.getNode(
+						lastFocusedStepIdRef.current!
+					);
 
 					if (node) {
 						reactFlowInstance.fitView({
@@ -373,7 +390,11 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				}, 100);
 
 				// Reset state
-				prevStepStateRef.current = { id: null, action: null, type: null };
+				prevStepStateRef.current = {
+					id: null,
+					action: null,
+					type: null,
+				};
 
 				return () => clearTimeout(timer);
 			}
@@ -387,7 +408,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			});
 			return undefined;
 		}
-	}, [currentStep?.id, currentStep?.action, currentStep?.type, isTriggerVisible, reactFlowInstance, nodesState]);
+	}, [
+		currentStep?.id,
+		currentStep?.action,
+		currentStep?.type,
+		isTriggerVisible,
+		reactFlowInstance,
+		nodesState,
+	]);
 
 	// ========== POSITION MANAGEMENT ==========
 
@@ -415,9 +443,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			return (
 				!current ||
 				Math.abs(current.x - new_.x) >
-				LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
+					LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
 				Math.abs(current.y - new_.y) >
-				LAYOUT_CONSTANTS.POSITION_THRESHOLD
+					LAYOUT_CONSTANTS.POSITION_THRESHOLD
 			);
 		});
 

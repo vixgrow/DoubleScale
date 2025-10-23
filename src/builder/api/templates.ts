@@ -39,15 +39,16 @@ export const createTemplate = async (
 	try {
 		const preparedData = prepareTemplateForAPI(templateData);
 
-		const response = (await apiFetch({
+		const response = await apiFetch({
 			path: '/qc/v1/templates',
 			method: 'POST',
 			data: preparedData,
-		})) as any;
-		return response;
-	} catch (error: any) {
+		});
+		return response as EmailTemplate;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			error.message || __('Failed to create template', 'quillcrm')
+			errorMessage || __('Failed to create template', 'quillcrm')
 		);
 	}
 };
@@ -58,21 +59,49 @@ export const createTemplate = async (
 export const updateTemplate = async (
 	templateId: number,
 	templateData: Partial<EmailTemplate>
-): Promise<any> => {
+): Promise<EmailTemplate> => {
 	try {
 		const preparedData = prepareTemplateForAPI(templateData);
 
-		const response = (await apiFetch({
+		const response = await apiFetch({
 			path: `/qc/v1/templates/${templateId}`,
 			method: 'PUT',
 			data: preparedData,
-		})) as any;
+		});
 
-		// Return response as-is (already in backend structure)
-		return response;
-	} catch (error: any) {
+		return response as EmailTemplate;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			error.message || __('Failed to update template', 'quillcrm')
+			errorMessage || __('Failed to update template', 'quillcrm')
+		);
+	}
+};
+
+/**
+ * Save template - smart endpoint that decides create vs update
+ * Backend logic:
+ * - No ID: Create new
+ * - ID + template in use: Create new (preserve original)
+ * - ID + NOT in use: Update existing
+ */
+export const saveTemplate = async (
+	templateData: Partial<EmailTemplate>
+): Promise<EmailTemplate> => {
+	try {
+		const preparedData = prepareTemplateForAPI(templateData);
+
+		const response = await apiFetch({
+			path: '/qc/v1/templates/save',
+			method: 'POST',
+			data: preparedData,
+		});
+
+		return response as EmailTemplate;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to save template', 'quillcrm')
 		);
 	}
 };
@@ -84,14 +113,15 @@ export const getTemplate = async (
 	templateId: number
 ): Promise<EmailTemplate> => {
 	try {
-		const response = (await apiFetch({
+		const response = await apiFetch({
 			path: `/qc/v1/templates/${templateId}`,
-		})) as any;
+		});
 
-		return response;
-	} catch (error: any) {
+		return response as EmailTemplate;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			error.message || __('Failed to fetch template', 'quillcrm')
+			errorMessage || __('Failed to fetch template', 'quillcrm')
 		);
 	}
 };
@@ -105,12 +135,19 @@ export const deleteTemplate = async (templateId: number): Promise<void> => {
 			path: `/qc/v1/templates/${templateId}`,
 			method: 'DELETE',
 		});
-	} catch (error: any) {
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
 		throw new Error(
-			error.message || __('Failed to delete template', 'quillcrm')
+			errorMessage || __('Failed to delete template', 'quillcrm')
 		);
 	}
 };
+
+interface BuilderData {
+	sections: unknown[];
+	globalSettings: Record<string, unknown>;
+	buttonSettings: Record<string, unknown>;
+}
 
 /**
  * Save email as template (for builder "Save as Template" feature)
@@ -118,7 +155,7 @@ export const deleteTemplate = async (templateId: number): Promise<void> => {
  */
 export const saveEmailAsTemplate = async (
 	templateName: string,
-	builderData: { sections: any; globalSettings: any; buttonSettings: any }
+	builderData: BuilderData
 ): Promise<EmailTemplate> => {
 	// Store builder data directly in body field as JSON
 	const bodyData = {

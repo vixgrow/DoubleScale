@@ -28,17 +28,14 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import EmailBuilderSelection from './email-builder-selection';
-import {
-	createTemplate as createTemplateAPI,
-	updateTemplate as updateTemplateAPI,
-} from '@/builder/api/templates';
+import { saveTemplate } from '@/builder/api/templates';
 import { campaignSteps } from '../shared/stepsConfig';
 import { ArrowRight } from 'lucide-react';
 
 const templateSchema = z
 	.object({
 		subject: z.string().min(1, __('Subject is required', 'quillcrm')),
-		body: z.string().min(1, __('Body is required', 'quillcrm')),
+		body: z.string().optional(), // Body will be filled by builder
 		preview_text: z
 			.string()
 			.min(1, __('Preview text is required', 'quillcrm')),
@@ -98,7 +95,7 @@ const Templates: React.FC = () => {
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	// Single template object - matches backend structure
-	const [template, setTemplate] = useState<any>({
+	const [template, setTemplate] = useState<Partial<EmailTemplate>>({
 		name: campaign?.name || __('Email Template', 'quillcrm'),
 		type: CAMPAIGN_CHANNEL.EMAIL,
 		subject: '',
@@ -120,22 +117,24 @@ const Templates: React.FC = () => {
 	// Load template from campaign.settings.templates (attached by backend)
 	useEffect(() => {
 		if (campaign?.settings?.templates?.[0]) {
-			setTemplate(campaign.settings.templates[0]);
+			setTemplate(campaign.settings.templates[0] as EmailTemplate);
 		}
 	}, [campaign?.settings?.templates]);
 
-	const updateTemplate = (data: any) => {
-		setTemplate((prev: any) => ({ ...prev, ...data }));
+	const updateTemplate = (data: Partial<EmailTemplate>) => {
+		setTemplate((prev) => ({ ...prev, ...data }));
 	};
 
 	// Helper to update settings fields
-	const updateSettings = (settingsData: any) => {
-		setTemplate((prev: any) => ({
+	const updateSettings = (
+		settingsData: Partial<EmailTemplate['settings']>
+	) => {
+		setTemplate((prev) => ({
 			...prev,
 			settings: {
 				...prev.settings,
 				...settingsData,
-			},
+			} as EmailTemplate['settings'],
 		}));
 	};
 
@@ -206,16 +205,23 @@ const Templates: React.FC = () => {
 		setIsSaving(true);
 
 		try {
-			const savedTemplate = template.id
-				? await updateTemplateAPI(template.id, template)
-				: await createTemplateAPI(template);
+			// Prepare template with empty body shell (builder will fill it)
+			const templateData = {
+				...template,
+				body: template.body || '{"type":"rich-text","value":""}',
+			};
 
-			const { templates, ...cleanSettings } = campaign.settings || {};
+			// saveTemplate decides create vs update based on ID presence
+			const savedTemplate = await saveTemplate(templateData);
+
+			const { templates: _templates, ...cleanSettings } =
+				campaign.settings || {};
 			await saveCampaignSettings({
 				settings: {
 					...cleanSettings,
 					template_ids: [savedTemplate.id!],
-				} as any,
+					templates: [], // Will be attached by backend
+				},
 			});
 
 			createNotice({
@@ -224,11 +230,13 @@ const Templates: React.FC = () => {
 			});
 
 			goToStep('builder');
-		} catch (error: any) {
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
 			createNotice({
 				type: 'error',
 				message:
-					error.message ||
+					errorMessage ||
 					__(
 						'An error occurred while saving. Please try again.',
 						'quillcrm'

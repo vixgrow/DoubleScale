@@ -92,6 +92,20 @@ class REST_Template_Controller extends REST_Controller {
 			)
 		);
 
+		// Smart save endpoint - creates or updates based on usage
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/save',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'save_template' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				),
+			)
+		);
+
 		// Register endpoint for rendering templates (merged from email-builder controller)
 		register_rest_route(
 			$this->namespace,
@@ -398,6 +412,54 @@ class REST_Template_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Smart save - creates or updates based on template usage
+	 * 
+	 * Logic:
+	 * - No ID: Create new template
+	 * - ID exists + template in use (tracked): Create new template (preserve original)
+	 * - ID exists + template NOT in use: Update existing template
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return WP_REST_Response $response The response object
+	 */
+	public function save_template( $request ) {
+		try {
+			$template_id = $request->get_param( 'id' );
+			$template_data = $this->prepare_template( $request );
+
+			// Case 1: No ID - create new template
+			if ( ! $template_id ) {
+				$template = Template_Model::create( $template_data );
+				return new WP_REST_Response( $template, 201 );
+			}
+
+			// Case 2 & 3: ID exists - check if template is in use
+			$template = Template_Model::find( $template_id );
+
+			if ( ! $template ) {
+				return new WP_Error( 'error', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Check if template has been used in any sent messages
+			if ( Template_Model::is_used_in_tracking( $template_id ) ) {
+				// Template is in use - create new copy to preserve original
+				unset( $template_data['id'] );
+				$new_template = Template_Model::create( $template_data );
+				return new WP_REST_Response( $new_template, 201 );
+			} else {
+				// Template is NOT in use - safe to update
+				$template->update( $template_data );
+				return new WP_REST_Response( $template, 200 );
+			}
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
 	 * Delete items
 	 *
 	 * @since 1.0.0
@@ -462,6 +524,7 @@ class REST_Template_Controller extends REST_Controller {
 		$type = $request->get_param( 'type' ) ?? Campaign_Channel::STR_EMAIL;
 
 		$template_data = array(
+			'id'           => $request->get_param( 'id' ),
 			'name'         => $request->get_param( 'name' ) ?? 'New Template',
 			'type'         => $type,
 			'subject'      => $request->get_param( 'subject' ),
@@ -489,6 +552,7 @@ class REST_Template_Controller extends REST_Controller {
 				continue;
 			}
 
+			// For ID: keep if it has a value, remove if null/empty
 			if ( empty( $value ) && $value !== '0' && $value !== 0 ) {
 				unset( $template_data[ $key ] );
 			}

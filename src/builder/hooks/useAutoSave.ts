@@ -1,7 +1,5 @@
-import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
-import { CAMPAIGN_STATUS } from '../../client/types';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 
 interface UseAutoSaveOptions {
@@ -45,11 +43,11 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 
 	// Get campaign data
 	const campaign = useSelect(
-		(select: any) => select('quillcrm/campaign').getCampaign(),
+		(select) => select('quillcrm/campaign').getCampaign(),
 		[]
 	);
 	const existingTemplateData = useSelect(
-		(select: any) => select('quillcrm/campaign').getStepData('template'),
+		(select) => select('quillcrm/campaign').getStepData('template'),
 		[]
 	);
 
@@ -134,65 +132,29 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			};
 
 			// Import template API functions
-			const { getTemplate, updateTemplate, createTemplate } =
-				await import('../api/templates');
+			const { getTemplate, saveTemplate } = await import('../api/templates');
 
-			const isDraft = campaign.status === CAMPAIGN_STATUS.DRAFT;
 			const templateId = templateIdRef.current;
-			const shouldUpdateExisting = isDraft && templateId;
 
-			let finalTemplateId = templateId;
+			// Get existing template data if available
+			const existingTemplate = templateId
+				? await getTemplate(templateId)
+				: null;
 
-			// Determine action: update existing template or create new one
-			if (shouldUpdateExisting) {
-				// Update existing template (draft campaigns with template ID)
-				// This happens when template was created in templates step with metadata
-				console.log('Updating existing template with builder content:', templateId);
-				const existingTemplate = await getTemplate(templateId);
-				await updateTemplate(templateId, {
-					...existingTemplate,
-					body: JSON.stringify({
-						type: 'builder',
-						value: builderData,
-					}),
-				});
-				console.log('Template updated successfully with builder content');
-			} else {
-				// Create new template (draft without template OR non-draft campaigns)
-				// This shouldn't happen in normal flow since templates step creates it first
-				console.log('Creating new template (fallback case)');
-				const existingTemplate = templateId ? await getTemplate(templateId) : null;
+			// Save template with builder body (saveTemplate decides create vs update)
+			const savedTemplate = await saveTemplate({
+				...(existingTemplate || {}),
+				id: templateId || undefined,
+				body: JSON.stringify({
+					type: 'builder',
+					value: builderData,
+				}),
+			});
 
-				const newTemplate = await createTemplate({
-					name: existingTemplate
-						? `${existingTemplate.name}${isDraft ? '' : ' (Copy)'}`
-						: `Campaign ${campaign.id} - Email Template`,
-					type: CAMPAIGN_CHANNEL.EMAIL,
-					subject: existingTemplate?.subject || '',
-					body: JSON.stringify({
-						type: 'builder',
-						value: builderData,
-					}),
-				});
-
-				// Store new template ID in ref and save to campaign
-				if (newTemplate?.id) {
-					templateIdRef.current = newTemplate.id;
-					finalTemplateId = newTemplate.id;
-
-					// Save template ID to campaign (only first time to avoid unnecessary updates)
-					if (
-						!hasUpdatedCampaignRef.current &&
-						isDraft &&
-						campaign?.id
-					) {
-						await saveCampaignStep('template', {
-							template_id: newTemplate.id,
-						});
-						hasUpdatedCampaignRef.current = true;
-					}
-				}
-				console.log('New template created:', newTemplate?.id);
+			// Update ref with template ID
+			const finalTemplateId = savedTemplate.id ?? null;
+			if (finalTemplateId) {
+				templateIdRef.current = finalTemplateId;
 			}
 
 			if (isMountedRef.current) {
@@ -207,12 +169,13 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 				return { success: true, templateId: finalTemplateId };
 			}
 			return { success: false, templateId: null };
-		} catch (error: any) {
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Failed to save';
 			if (isMountedRef.current) {
 				setSaveStatus((prev) => ({
 					...prev,
 					isSaving: false,
-					error: error.message || 'Failed to save',
+					error: errorMessage,
 				}));
 			}
 			console.error('Save error:', error);

@@ -11,6 +11,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\Models\Campaign_Model;
 use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
@@ -427,12 +428,19 @@ class REST_Template_Controller extends REST_Controller {
 	 */
 	public function save_template( $request ) {
 		try {
-			$template_id = $request->get_param( 'id' );
+			$template_id  = $request->get_param( 'id' );
+			$campaign_id  = $request->get_param( 'campaign_id' );
 			$template_data = $this->prepare_template( $request );
 
 			// Case 1: No ID - create new template
 			if ( ! $template_id ) {
 				$template = Template_Model::create( $template_data );
+
+				// Update campaign to use new template ID
+				if ( $campaign_id ) {
+					$this->add_template_to_campaign( $campaign_id, $template->id );
+				}
+
 				return new WP_REST_Response( $template, 201 );
 			}
 
@@ -448,6 +456,12 @@ class REST_Template_Controller extends REST_Controller {
 				// Template is in use - create new copy to preserve original
 				unset( $template_data['id'] );
 				$new_template = Template_Model::create( $template_data );
+
+				// Update campaign to use new template ID
+				if ( $campaign_id ) {
+					$this->update_campaign_template_id( $campaign_id, $template_id, $new_template->id );
+				}
+
 				return new WP_REST_Response( $new_template, 201 );
 			} else {
 				// Template is NOT in use - safe to update
@@ -457,6 +471,63 @@ class REST_Template_Controller extends REST_Controller {
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Add template ID to campaign's template_ids (for first-time creation)
+	 *
+	 * @param int $campaign_id Campaign ID
+	 * @param int $template_id Template ID to add
+	 */
+	private function add_template_to_campaign( $campaign_id, $template_id ) {
+		$campaign = Campaign_Model::find( $campaign_id );
+
+		if ( ! $campaign ) {
+			return;
+		}
+
+		$settings = is_array( $campaign->settings ) ? $campaign->settings : json_decode( $campaign->settings, true );
+
+		// Initialize template_ids array if it doesn't exist
+		if ( ! isset( $settings['template_ids'] ) ) {
+			$settings['template_ids'] = array();
+		}
+
+		// Add template ID if not already in array
+		if ( ! in_array( $template_id, $settings['template_ids'] ) ) {
+			$settings['template_ids'][] = $template_id;
+		}
+
+		// Save campaign
+		$campaign->update( array( 'settings' => $settings ) );
+	}
+
+	/**
+	 * Update campaign's template_ids when a new template is created (replaces old ID)
+	 *
+	 * @param int $campaign_id Campaign ID
+	 * @param int $old_template_id Old template ID
+	 * @param int $new_template_id New template ID
+	 */
+	private function update_campaign_template_id( $campaign_id, $old_template_id, $new_template_id ) {
+		$campaign = Campaign_Model::find( $campaign_id );
+
+		if ( ! $campaign ) {
+			return;
+		}
+
+		$settings = is_array( $campaign->settings ) ? $campaign->settings : json_decode( $campaign->settings, true );
+
+		// Update template_ids array
+		if ( isset( $settings['template_ids'] ) && is_array( $settings['template_ids'] ) ) {
+			$key = array_search( $old_template_id, $settings['template_ids'] );
+			if ( $key !== false ) {
+				$settings['template_ids'][ $key ] = $new_template_id;
+			}
+		}
+
+		// Save campaign
+		$campaign->update( array( 'settings' => $settings ) );
 	}
 
 	/**

@@ -41,19 +41,14 @@ const Header: React.FC = () => {
 		hasUnsavedChanges,
 	});
 
-	const { saveCampaignStep } = useDispatch('quillcrm/campaign');
-
 	const handleSaveAndContinue = async () => {
 		if (!campaign) {
 			return;
 		}
 
-		const { success, templateId: savedTemplateId } = await save();
-		if (success && savedTemplateId) {
-			// Save template ID to campaign before continuing
-			await saveCampaignStep('template', {
-				template_id: savedTemplateId,
-			});
+		const { success } = await save();
+		if (success) {
+			// Template is already linked via campaign.settings.template_ids
 			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 		}
 	};

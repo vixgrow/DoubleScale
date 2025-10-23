@@ -91,7 +91,7 @@ const Templates: React.FC = () => {
 		[key: string]: string;
 	}>({});
 	const [isSaving, setIsSaving] = useState(false);
-	const { campaign, saveCampaignSettings, goToStep } = useCampaignStep();
+	const { campaign, goToStep } = useCampaignStep();
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	// Single template object - matches backend structure
@@ -209,20 +209,12 @@ const Templates: React.FC = () => {
 			const templateData = {
 				...template,
 				body: template.body || '{"type":"rich-text","value":""}',
+				campaign_id: campaign?.id, // Backend will update campaign's template_ids
 			};
 
 			// saveTemplate decides create vs update based on ID presence
-			const savedTemplate = await saveTemplate(templateData);
-
-			const { templates: _templates, ...cleanSettings } =
-				campaign.settings || {};
-			await saveCampaignSettings({
-				settings: {
-					...cleanSettings,
-					template_ids: [savedTemplate.id!],
-					templates: [], // Will be attached by backend
-				},
-			});
+			// Backend handles updating campaign.settings.template_ids
+			await saveTemplate(templateData as any);
 
 			createNotice({
 				type: 'success',

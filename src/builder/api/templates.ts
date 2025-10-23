@@ -11,38 +11,16 @@ import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { EmailTemplate } from '@quillcrm/client';
 
 /**
- * Prepare template data for API
- */
-export const prepareTemplateForAPI = (template: Partial<EmailTemplate>) => {
-
-	let bodyContent = template.body || '';
-	if (template.body && typeof template.body === 'object') {
-		bodyContent = JSON.stringify(template.body);
-	}
-
-	return {
-		name: template.name,
-		type: template.type || CAMPAIGN_CHANNEL.EMAIL,
-		subject: template.subject || '',
-		body: bodyContent,
-		preview_text: template.preview_text || '',
-		settings: template.settings || {},
-	};
-};
-
-/**
  * Create a new template
  */
 export const createTemplate = async (
 	templateData: Partial<EmailTemplate>
 ): Promise<EmailTemplate> => {
 	try {
-		const preparedData = prepareTemplateForAPI(templateData);
-
 		const response = await apiFetch({
 			path: '/qc/v1/templates',
 			method: 'POST',
-			data: preparedData,
+			data: templateData,
 		});
 		return response as EmailTemplate;
 	} catch (error) {
@@ -61,12 +39,10 @@ export const updateTemplate = async (
 	templateData: Partial<EmailTemplate>
 ): Promise<EmailTemplate> => {
 	try {
-		const preparedData = prepareTemplateForAPI(templateData);
-
 		const response = await apiFetch({
 			path: `/qc/v1/templates/${templateId}`,
 			method: 'PUT',
-			data: preparedData,
+			data: templateData,
 		});
 
 		return response as EmailTemplate;
@@ -89,12 +65,10 @@ export const saveTemplate = async (
 	templateData: Partial<EmailTemplate>
 ): Promise<EmailTemplate> => {
 	try {
-		const preparedData = prepareTemplateForAPI(templateData);
-
 		const response = await apiFetch({
 			path: '/qc/v1/templates/save',
 			method: 'POST',
-			data: preparedData,
+			data: templateData,
 		});
 
 		return response as EmailTemplate;

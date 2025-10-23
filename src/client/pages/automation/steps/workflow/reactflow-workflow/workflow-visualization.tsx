@@ -306,10 +306,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				(currentStep.type === 'action' || currentStep.type === 'goal') &&
 				prevState.action === null &&
 				currentStep.action !== null;
-			const isStepWithoutModal =
+
+			// Steps that open sidebar directly (not a standalone modal)
+			const opensSidebarDirectly =
 				currentStep.type === 'condition' ||
 				currentStep.type === 'delay' ||
-				currentStep.type === 'end_automation';
+				currentStep.type === 'end_automation' ||
+				(currentStep.type === 'action' && currentStep.action) || // Configured actions
+				(currentStep.type === 'goal' && currentStep.action); // Configured goals
 
 			// Update tracking refs
 			lastFocusedStepIdRef.current = nodeId;
@@ -319,11 +323,14 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 				type: currentStep.type || null
 			};
 
-			// Only focus if modal just closed, or it's a step type without modal, or switching to configured step
+			// Focus when:
+			// 1. Modal just closed with action selection
+			// 2. It's a step that opens sidebar directly
+			// 3. Clicking on a different step
 			const shouldFocus =
 				modalJustClosed || // Action/Goal modal just closed with selection
-				isStepWithoutModal || // Steps that don't have modals
-				(isNewStep && currentStep.action); // Switching to different step that's already configured
+				opensSidebarDirectly || // Steps that show sidebar directly
+				isNewStep; // Any time a different step is clicked
 
 			if (shouldFocus) {
 				// Delay to ensure nodes are rendered
@@ -340,7 +347,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							maxZoom: 1.2,
 						});
 					}
-				}, 3000); // Small delay to ensure nodes are updated
+				}, 100); // Small delay to ensure nodes are updated
 
 				return () => clearTimeout(timer);
 			}

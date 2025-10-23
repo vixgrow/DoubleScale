@@ -190,7 +190,6 @@ export type EmailTemplateSettings = {
 	utm_name: string;
 	utm_term: string;
 	utm_content: string;
-	email_body?: EmailBodyContent;
 };
 
 // Email Template Type (matches database structure)
@@ -199,7 +198,7 @@ export type EmailTemplate = {
 	name: string;
 	type: 'email'; // Campaign channel type
 	subject: string;
-	body?: string; // Rich-text content (for simple editor)
+	body?: string | EmailBodyContent; // Can be string (rich-text) or EmailBodyContent (builder)
 	preview_text: string;
 	settings?: EmailTemplateSettings;
 	created_at?: string;
@@ -215,7 +214,6 @@ export type EmailTemplate = {
 	utm_name?: string;
 	utm_term?: string;
 	utm_content?: string;
-	email_body?: EmailBodyContent;
 };
 
 // SMS Template Type (for frontend use)

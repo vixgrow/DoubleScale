@@ -72,7 +72,7 @@ export const useTemplateActions = (): UseTemplateActionsReturn => {
         const builderData = prepareBuilderData();
 
         const templateData = {
-          email_body: {
+          body: {
             type: 'builder' as const,
             value: builderData,
           },

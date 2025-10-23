@@ -197,7 +197,7 @@ export type EmailTemplateSettings = {
 export type EmailTemplate = {
 	id?: number;
 	name: string;
-	type: 'email';
+	type: 'email'; // Campaign channel type
 	subject: string;
 	body?: string; // Rich-text content (for simple editor)
 	preview_text: string;
@@ -293,7 +293,7 @@ export type Campaign = {
 	name: string;
 	description: string;
 	status: string;
-	type: 'email' | 'sms' | 'whatsapp';
+	type: 'email' | 'sms' | 'whatsapp' | 'sequence_mail' | 'email_sequence'; // Campaign channel type
 	settings: CampaignSettings;
 	parent_id: string;
 	count: string;
@@ -511,25 +511,37 @@ type LineTaxData = {
 	total: string[];
 };
 
-export type CampaignEmail = {
+// Represents a tracked message (email/SMS/WhatsApp) from any source (campaign, automation, or individual)
+export type TrackedMessage = {
 	id: number;
 	campaign_id: string;
 	contact_id: string;
 	template_id: string;
 	hash_key: string;
-	email: string;
+	recipient: string; // Unified recipient field (email address or phone number)
 	opened: string;
 	clicked: string;
-	status: string;
+	status: number; // Integer status code (1=pending, 2=sent, 3=failed, etc.)
+	status_slug: string; // String slug ('pending', 'sent', 'failed', etc.)
+	status_name: string; // Human-readable name
 	sent_at: string;
 	opened_at: string;
 	clicked_at: string;
 	created_at: string;
 	updated_at: string;
 	contact: Contact;
-	template: CustomTemplate;
+	template?: CustomTemplate | null; // Optional for individual messages
+	message?: {
+		id: number;
+		tracking_id: number;
+		subject: string | null;
+		body: string;
+	} | null; // Message content for individual messages
 	campaign?: Partial<Campaign>;
 };
+
+// Legacy alias for backward compatibility
+export type CampaignEmail = TrackedMessage;
 
 export type AutomationRules = Rules[];
 

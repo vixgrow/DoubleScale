@@ -19,6 +19,7 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Campaign\Email_Processing;
 use QuillCRM\Services\Campaign_Rate_Limiter;
 use QuillCRM\Settings;
@@ -219,7 +220,7 @@ final class Email_Sequences_Manager {
 	private function get_ready_sequences() {
 		// 1. Fetch sequences that are due to execute
 		$sequences = Campaign_Model::query()
-			->where( 'type', 'sequence_mail' )
+			->where( 'type', \QuillCRM\Constants\Campaign_Channel::CHANNEL_SEQUENCE_MAIL )
 			->where( 'status', Campaign_Status_Manager::ACTIVE )
 			->where( 'execute_at', '<=', current_time( 'mysql' ) )
 			->get();
@@ -428,7 +429,7 @@ final class Email_Sequences_Manager {
 	private function send_sequence_email( Campaign_Model $sequence, Contact_Model $contact ) {
 		try {
 			// Get template for sequence
-			$template_id = $this->email_processor->get_template_for_contact( $sequence, $contact ) ?? 0;
+			$template_id = $this->email_processor->get_template_for_contact( $sequence, $contact ) ?? null;
 			if ( ! $template_id ) {
 				return;
 			}
@@ -441,7 +442,7 @@ final class Email_Sequences_Manager {
 				'source_type' => Message_Source_Types::CAMPAIGN,
 				'source_id'   => $sequence->id,
 				'recipient'   => $contact->email,
-				'status'      => 'pending',
+				'status'      => Tracking_Status::PENDING,
 				'hash_key'    => Utils::generate_hash_key(),
 			);
 

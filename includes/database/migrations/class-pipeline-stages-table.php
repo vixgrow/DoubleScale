@@ -42,8 +42,7 @@ class Pipeline_Stages_Table extends Migration {
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),
 			INDEX idx_pipeline_id (pipeline_id),
-			INDEX idx_sort_order (sort_order),
-			CONSTRAINT fk_pipeline_stages_pipeline_id FOREIGN KEY (pipeline_id) REFERENCES ' . $GLOBALS['wpdb']->prefix . 'quillcrm_pipelines(id) ON DELETE CASCADE';
+			INDEX idx_sort_order (sort_order)';
 
 		return $query;
 	}

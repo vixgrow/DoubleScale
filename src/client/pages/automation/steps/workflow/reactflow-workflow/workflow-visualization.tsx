@@ -147,6 +147,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			nodeWidth,
 			addStepWidth,
 			onTriggerClick,
+			onStepClick,
 			savedPositions
 		);
 
@@ -243,6 +244,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			incrementY,
 			nodeWidth,
 			addStepWidth,
+			onStepClick,
 			savedPositions,
 			getNodePositionLocal,
 			result

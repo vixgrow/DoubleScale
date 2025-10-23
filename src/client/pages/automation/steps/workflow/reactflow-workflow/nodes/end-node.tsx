@@ -10,7 +10,6 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { PoweroffOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
@@ -20,6 +19,7 @@ import type { AutomationStep } from '@quillcrm/client';
 import NodeContextMenu from '../components/node-context-menu';
 import StepReorderControls from '../components/step-reorder-controls';
 import NodeActionsDropdown from '../components/node-actions-dropdown';
+import { Power } from 'lucide-react';
 
 interface EndNodeData {
 	step: AutomationStep;
@@ -30,10 +30,6 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 	const { steps, setSteps } = useAutomationContext();
 	const [isDeleting, setIsDeleting] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
-
-	const endIcon = () => {
-		return <PoweroffOutlined />;
-	};
 
 	const getNewSteps = () => {
 		const updatedOrdersSteps = {};
@@ -112,7 +108,7 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 				{/* Step Reorder Controls */}
 				<StepReorderControls step={step} />
 
-				<div className="qcrm-reactflow-node__icon">{endIcon()}</div>
+				<div className="qcrm-reactflow-node__icon"><Power className='w-6 h-6' /></div>
 
 				{/* Three dots dropdown menu */}
 				<NodeActionsDropdown

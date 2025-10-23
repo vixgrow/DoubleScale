@@ -22,6 +22,7 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\Abandoned_Cart_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Constants\Tracking_Status;
 
 /**
  * REST_General_Controller is REST api controller class for log
@@ -70,7 +71,7 @@ class REST_General_Controller extends REST_Controller {
 	 */
 	public function get_dashboard( WP_REST_Request $request ) {
 		$total_contacts               = Contact_Model::count();
-		$total_sent_emails            = Tracking_Model::emails()->where( 'status', 'sent' )->count();
+		$total_sent_emails            = Tracking_Model::emails()->where( 'status', Tracking_Status::SENT )->count();
 		$recent_contacts              = Contact_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$recent_unsubscribed_contacts = Contact_Model::where( 'status', 'unsubscribed' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_campaigns                = Campaign_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();

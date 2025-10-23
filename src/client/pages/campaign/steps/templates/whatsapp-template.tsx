@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import type { WhatsAppTemplate } from '@quillcrm/client';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import MessageComposer from './components/message-composer';
 import { getCampaignEndpoint } from '@quillcrm/utils';
 
@@ -34,7 +35,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 	// Initialize default WhatsApp template
 	const defaultTemplate: WhatsAppTemplate = {
 		name: __('WhatsApp Message', 'quillcrm'),
-		type: 'whatsapp',
+		type: CAMPAIGN_CHANNEL.WHATSAPP,
 		body: '',
 		settings: {
 			add_unsubscribe: true,
@@ -47,13 +48,13 @@ const WhatsAppTemplateStep: React.FC = () => {
 		if (
 			existingTemplate &&
 			'type' in existingTemplate &&
-			existingTemplate.type === 'whatsapp'
+			existingTemplate.type === CAMPAIGN_CHANNEL.WHATSAPP
 		) {
 			// Convert backend format to frontend format
 			const backendTemplate = existingTemplate as any;
 			return {
 				name: backendTemplate.name || defaultTemplate.name,
-				type: 'whatsapp',
+				type: CAMPAIGN_CHANNEL.WHATSAPP,
 				body: backendTemplate.body || '',
 				settings: {
 					add_unsubscribe:

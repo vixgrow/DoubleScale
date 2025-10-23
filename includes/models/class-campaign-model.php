@@ -19,6 +19,8 @@ use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 use QuillCRM\Managers\Campaign_Status_Manager;
 use QuillCRM\Services\Campaign_Template_Factory;
 use QuillCRM\Services\Template_Field_Mapper;
+use QuillCRM\Constants\Campaign_Channel;
+use QuillCRM\Constants\Tracking_Status;
 
 /**
  * Campaign_Model class
@@ -81,6 +83,7 @@ class Campaign_Model extends Model {
 	 */
 	protected $casts = array(
 		'settings' => 'array',
+		// Note: 'type' conversion handled by getTypeAttribute/setTypeAttribute accessors
 	);
 
 	/**
@@ -171,7 +174,7 @@ class Campaign_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function sequences_mail() {
-		return $this->hasMany( Campaign_Model::class, 'parent_id' )->where( 'type', 'sequence_mail' );
+		return $this->hasMany( Campaign_Model::class, 'parent_id' )->where( 'type', Campaign_Channel::CHANNEL_SEQUENCE_MAIL );
 	}
 
 	/**
@@ -188,7 +191,7 @@ class Campaign_Model extends Model {
 
 	public function getSentAttribute() {
 		return $this->messages()
-			->where( 'status', 'sent' )
+			->where( 'status', Tracking_Status::SENT )
 			->count();
 	}
 
@@ -241,30 +244,62 @@ class Campaign_Model extends Model {
 	}
 
 	/**
-	 * Get campaign type (email, sms, or whatsapp)
+	 * Get campaign type as string for API/frontend
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return string
+	 * @return string Campaign type string ('email', 'sms', 'whatsapp')
+	 */
+	public function getTypeAttribute( $value ) {
+		// Convert integer from database to string for API
+		return Campaign_Channel::to_string( $value ) ?? 'email';
+	}
+
+	/**
+	 * Set campaign type from string to integer for database
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|int $value Campaign type as string or integer
+	 */
+	public function setTypeAttribute( $value ) {
+		// If it's already an integer, store it directly
+		if ( is_int( $value ) ) {
+			$this->attributes['type'] = $value;
+			return;
+		}
+
+		// Convert string to integer for database storage
+		$integer_value = Campaign_Channel::to_integer( $value );
+		$this->attributes['type'] = $integer_value ?? Campaign_Channel::CHANNEL_EMAIL;
+	}
+
+	/**
+	 * Get campaign type as integer (for internal processing)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int Campaign type integer
 	 */
 	public function get_type() {
-		return $this->type ?? 'email';
+		// Access the raw integer value from database
+		return $this->attributes['type'] ?? Campaign_Channel::get_default();
 	}
 
 	/**
 	 * Get the campaign type for template processing
-	 * Sequence mails should be treated as email campaigns for template processing
+	 * Sequence mails and email sequences should be treated as email campaigns for template processing
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return string
+	 * @return int Campaign type integer for processing
 	 */
 	public function get_template_processing_type() {
 		$type = $this->get_type();
 
-		// Sequence mails are email-based campaigns
-		if ( $type === 'sequence_mail' ) {
-			return 'email';
+		// Sequence mails and email sequences are email-based campaigns
+		if ( $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL || $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE ) {
+			return Campaign_Channel::CHANNEL_EMAIL;
 		}
 
 		return $type;
@@ -278,7 +313,7 @@ class Campaign_Model extends Model {
 	 * @return bool
 	 */
 	public function is_sms_campaign() {
-		 return $this->get_type() === 'sms';
+		 return $this->get_type() === Campaign_Channel::CHANNEL_SMS;
 	}
 
 	/**
@@ -289,7 +324,7 @@ class Campaign_Model extends Model {
 	 * @return bool
 	 */
 	public function is_email_campaign() {
-		return $this->get_type() === 'email';
+		return $this->get_type() === Campaign_Channel::CHANNEL_EMAIL;
 	}
 
 	/**
@@ -300,7 +335,29 @@ class Campaign_Model extends Model {
 	 * @return bool
 	 */
 	public function is_whatsapp_campaign() {
-		return $this->get_type() === 'whatsapp';
+		return $this->get_type() === Campaign_Channel::CHANNEL_WHATSAPP;
+	}
+
+	/**
+	 * Check if campaign is email sequence parent type
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_email_sequence() {
+		return $this->get_type() === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE;
+	}
+
+	/**
+	 * Check if campaign is sequence mail (child of email sequence)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_sequence_mail() {
+		return $this->get_type() === Campaign_Channel::CHANNEL_SEQUENCE_MAIL;
 	}
 
 
@@ -341,11 +398,13 @@ class Campaign_Model extends Model {
 	 * @return array Array of template IDs
 	 */
 	private function process_templates( $templates_data ) {
-		$campaign_type    = $this->get_template_processing_type();
-		$campaign_status  = $this->status ?? 'draft';
-		$template_factory = Campaign_Template_Factory::instance();
+		$campaign_type_int = $this->get_template_processing_type();
+		// Convert integer to string for template factory
+		$campaign_type_str = Campaign_Channel::to_string( $campaign_type_int ) ?? 'email';
+		$campaign_status   = $this->status ?? 'draft';
+		$template_factory  = Campaign_Template_Factory::instance();
 
-		return $template_factory->process_templates_data( $templates_data, $campaign_type, $campaign_status );
+		return $template_factory->process_templates_data( $templates_data, $campaign_type_str, $campaign_status );
 	}
 
 	/**
@@ -406,78 +465,124 @@ class Campaign_Model extends Model {
 	 *
 	 * @return void
 	 */
-	public function attach_counts( $campaign ) {
-		$filters             = $campaign->get_setting( 'filters', array() );
-		$campaign_recipients = Contact_Model::where( 'status', 'subscribed' );
-
-		// For SMS and WhatsApp campaigns, only include contacts with phone numbers
-		if ( $campaign->is_sms_campaign() || $campaign->is_whatsapp_campaign() ) {
-			$campaign_recipients = $campaign_recipients->whereNotNull( 'phone' )->where( 'phone', '!=', '' );
+	public function attach_counts($campaign)
+	{
+		// Skip if campaign type is not set (e.g., when only selecting specific fields)
+		if (empty($campaign->type)) {
+			return;
 		}
 
-		if ( ! empty( $filters ) ) {
-			$contact_filters     = new Contact_Filters_Process( $campaign_recipients, $filters );
-			$campaign_recipients = $contact_filters->filter();
+		// Calculate contacts count with type-specific filtering
+		$campaign->contacts_count = $this->get_contacts_count($campaign);
+
+		// Get analytics stats from centralized service
+		$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
+		// Convert string type to integer for analytics service (bypass accessor)
+		$type_int = \QuillCRM\Constants\Campaign_Channel::to_integer($campaign->type);
+		$stats = $analytics->get_campaign_stats($type_int, $campaign->id);
+
+		// Get optimized template counts (single query instead of N queries)
+		$campaign->templates_count = $this->get_template_counts_optimized($campaign);
+
+		// Assign stats based on campaign type
+		$this->assign_campaign_stats($campaign, $stats);
+	}
+
+	/**
+	 * Get contacts count for campaign with type-specific filtering
+	 *
+	 * @param Campaign_Model $campaign campaign model.
+	 *
+	 * @return int Contact count
+	 */
+	private function get_contacts_count($campaign)
+	{
+		$filters = $campaign->get_setting('filters', array());
+		$query = Contact_Model::where('status', 'subscribed');
+
+		// Apply type-specific filtering
+		if ($campaign->is_email_campaign() || $campaign->is_email_sequence() || $campaign->is_sequence_mail()) {
+			$query->whereNotNull('email')->where('email', '!=', '');
+		} elseif ($campaign->is_sms_campaign() || $campaign->is_whatsapp_campaign()) {
+			$query->whereNotNull('phone')->where('phone', '!=', '');
 		}
 
-		$campaign->contacts_count = $campaign_recipients->count();
+		// Apply custom filters if provided
+		if (!empty($filters)) {
+			$contact_filters = new Contact_Filters_Process($query, $filters);
+			$query = $contact_filters->filter();
+		}
 
-		if ( $campaign->is_email_campaign() ) {
-			// Email campaign counts using centralized analytics
-			$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
-			$stats     = $analytics->get_campaign_stats( 'email', $campaign->id );
+		return $query->count();
+	}
 
-			// Template counts (email-specific)
-			$templates_count = array();
-			foreach ( $campaign->get_template_ids() as $template_id ) {
-				$templates_count[ $template_id ] = $campaign->messages()->emails()->where( 'template_id', $template_id )->count();
-			}
+	/**
+	 * Get template counts using optimized single query with GROUP BY
+	 * Fixes N+1 query problem - previously ran one COUNT query per template
+	 *
+	 * @param Campaign_Model $campaign campaign model.
+	 *
+	 * @return array Template counts indexed by template_id
+	 */
+	private function get_template_counts_optimized($campaign)
+	{
+		// Convert campaign channel to tracking mode
+		$mode = Campaign_Channel::to_mode($campaign->type);
+		if ($mode === null) {
+			return array();
+		}
 
-			$campaign->templates_count = $templates_count;
-			$campaign->sent_count      = $stats['sent'];
-			$campaign->failed_count    = $stats['failed'];
-			$campaign->opened_count    = $stats['opened'];
-			$campaign->clicked_count   = $stats['clicked'];
-		} elseif ( $campaign->is_sms_campaign() ) {
-			// SMS campaign counts using centralized analytics
-			$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
-			$stats     = $analytics->get_campaign_stats( 'sms', $campaign->id );
+		// Single query with GROUP BY instead of N separate queries
+		$counts = $campaign->messages()
+			->where('mode', $mode)
+			->selectRaw('template_id, COUNT(*) as count')
+			->groupBy('template_id')
+			->get()
+			->pluck('count', 'template_id')
+			->toArray();
 
-			// Template counts (SMS-specific - now supports A/B testing)
-			$templates_count = array();
-			foreach ( $campaign->get_template_ids() as $template_id ) {
-				$templates_count[ $template_id ] = $campaign->messages()->sms()->where( 'template_id', $template_id )->count();
-			}
+		// Ensure all template IDs have a count (even if 0)
+		$template_counts = array();
+		foreach ($campaign->get_template_ids() as $template_id) {
+			$template_counts[$template_id] = isset($counts[$template_id]) ? (int) $counts[$template_id] : 0;
+		}
 
-			$campaign->templates_count = $templates_count;
-			$campaign->sent_count      = $stats['sent'];
-			$campaign->failed_count    = $stats['failed'];
-			$campaign->pending_count   = $stats['pending'];
-			$campaign->delivered_count = $stats['delivered']; // Now properly provided by analytics
-			$campaign->clicked_count   = $stats['clicked'];
-			$campaign->delivery_rate   = $stats['delivery_rate']; // Now properly calculated by analytics
-			$campaign->click_rate      = $stats['click_rate'];
-		} elseif ( $campaign->is_whatsapp_campaign() ) {
-			// WhatsApp campaign counts using centralized analytics
-			$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
-			$stats     = $analytics->get_campaign_stats( 'whatsapp', $campaign->id );
+		return $template_counts;
+	}
 
-			// Template counts (WhatsApp-specific - now supports A/B testing)
-			$templates_count = array();
-			foreach ( $campaign->get_template_ids() as $template_id ) {
-				$templates_count[ $template_id ] = $campaign->messages()->whatsapp()->where( 'template_id', $template_id )->count();
-			}
+	/**
+	 * Assign campaign statistics based on type
+	 * Eliminates duplicate code across email/sms/whatsapp branches
+	 *
+	 * @param Campaign_Model $campaign campaign model.
+	 * @param array          $stats Statistics from analytics service.
+	 *
+	 * @return void
+	 */
+	private function assign_campaign_stats($campaign, $stats)
+	{
+		// Common stats for all campaign types
+		$campaign->sent_count = $stats['sent'] ?? 0;
+		$campaign->failed_count = $stats['failed'] ?? 0;
+		$campaign->clicked_count = $stats['clicked'] ?? 0;
 
-			$campaign->templates_count = $templates_count;
-			$campaign->sent_count      = $stats['sent'];
-			$campaign->failed_count    = $stats['failed'];
-			$campaign->pending_count   = $stats['pending'];
-			$campaign->delivered_count = $stats['delivered']; // Now properly provided by analytics
-			$campaign->read_count      = $stats['read']; // Now properly provided by analytics
-			$campaign->clicked_count   = $stats['clicked'];
-			$campaign->delivery_rate   = $stats['delivery_rate']; // Now properly calculated by analytics
-			$campaign->read_rate       = $stats['read_rate']; // Now properly calculated by analytics
-			$campaign->click_rate      = $stats['click_rate'];
+		// Type-specific stats
+		if ($campaign->is_email_campaign()) {
+			$campaign->opened_count = $stats['opened'] ?? 0;
+			$campaign->open_rate = $stats['open_rate'] ?? 0;
+			$campaign->click_rate = $stats['click_rate'] ?? 0;
+		} elseif ($campaign->is_sms_campaign()) {
+			$campaign->pending_count = $stats['pending'] ?? 0;
+			$campaign->delivered_count = $stats['delivered'] ?? 0;
+			$campaign->delivery_rate = $stats['delivery_rate'] ?? 0;
+			$campaign->click_rate = $stats['click_rate'] ?? 0;
+		} elseif ($campaign->is_whatsapp_campaign()) {
+			$campaign->pending_count = $stats['pending'] ?? 0;
+			$campaign->delivered_count = $stats['delivered'] ?? 0;
+			$campaign->read_count = $stats['read'] ?? 0;
+			$campaign->delivery_rate = $stats['delivery_rate'] ?? 0;
+			$campaign->read_rate = $stats['read_rate'] ?? 0;
+			$campaign->click_rate = $stats['click_rate'] ?? 0;
 		}
 	}
 
@@ -552,11 +657,14 @@ class Campaign_Model extends Model {
 				unset( $campaign->opened_count );
 				unset( $campaign->clicked_count );
 
+				// Remove email-specific calculated properties
+				unset( $campaign->open_rate );
+				unset( $campaign->click_rate );
+
 				// Remove SMS-specific calculated properties
 				unset( $campaign->pending_count );
 				unset( $campaign->delivered_count );
 				unset( $campaign->delivery_rate );
-				unset( $campaign->click_rate );
 
 				// Remove WhatsApp-specific calculated properties
 				unset( $campaign->read_count );
@@ -582,14 +690,12 @@ class Campaign_Model extends Model {
 		static::retrieved(
 			function ( $campaign ) {
 				$campaign->attach_counts( $campaign );
-				$campaign->attach_templates( $campaign );
 			}
 		);
 
 		static::saved(
 			function ( $campaign ) {
 				$campaign->attach_counts( $campaign );
-				$campaign->attach_templates( $campaign );
 			}
 		);
 	}

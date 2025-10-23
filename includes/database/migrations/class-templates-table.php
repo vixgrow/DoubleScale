@@ -37,7 +37,7 @@ class Templates_Table extends Migration {
 		 *
 		 * id BIGINT(20) NOT NULL AUTO_INCREMENT,
 		 * name VARCHAR(255) NOT NULL,
-		 * type VARCHAR(255) NOT NULL DEFAULT "email",
+		 * type TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '1=Email, 2=SMS, 3=WhatsApp',
 		 * subject VARCHAR(255) NOT NULL,
 		 * body TEXT,
 		 * settings TEXT,
@@ -52,7 +52,7 @@ class Templates_Table extends Migration {
 		 */
 		$query = 'id BIGINT(20) NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL,
-            type VARCHAR(255) NOT NULL DEFAULT "email",
+            type TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT "1=Email, 2=SMS, 3=WhatsApp",
             subject VARCHAR(255) NOT NULL,
             body LONGTEXT,
             settings LONGTEXT,
@@ -64,7 +64,8 @@ class Templates_Table extends Migration {
             created_by BIGINT(20),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            PRIMARY KEY (id)';
+            PRIMARY KEY (id),
+            INDEX idx_type (type)';
 
 		return $query;
 	}

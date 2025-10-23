@@ -27,6 +27,7 @@ use QuillCRM\Database\Migrations\Campaigns_Table;
 use QuillCRM\Database\Migrations\Templates_Table;
 use QuillCRM\Database\Migrations\Task_Meta_Table;
 use QuillCRM\Database\Migrations\Tracking_Table;
+use QuillCRM\Database\Migrations\Messages_Table;
 use QuillCRM\Database\Migrations\Forms_Table;
 use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
 use QuillCRM\Database\Migrations\Link_Triggers_Table;
@@ -77,6 +78,7 @@ class Install {
 				'automation_contacts'          => Automation_Contacts_Table::class,
 				'task_meta'                    => Task_Meta_Table::class,
 				'tracking'                     => Tracking_Table::class,
+				'messages'                     => Messages_Table::class,
 				'forms'                        => Forms_Table::class,
 				'automation_contact_processes' => Automation_Contact_Processes_Table::class,
 				'link_triggers'                => Link_Triggers_Table::class,

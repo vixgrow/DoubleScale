@@ -45,6 +45,8 @@ import NotesTab from './notes';
 import ProfileTab from './profile';
 import Automation from './automation';
 import Emails from './emails';
+import SMS from './sms';
+import WhatsApp from './whatsapp';
 import PurchaseHistory from './purchase-history';
 import Courses from './courses';
 import { Provider } from './state/context';
@@ -376,6 +378,16 @@ const Contact: React.FC = () => {
 			key: 'emails',
 			label: __('Emails', 'quillcrm'),
 			children: contact && <Emails contact_id={contact.id} />,
+		},
+		{
+			key: 'sms',
+			label: __('SMS', 'quillcrm'),
+			children: contact && <SMS contact_id={contact.id} />,
+		},
+		{
+			key: 'whatsapp',
+			label: __('WhatsApp', 'quillcrm'),
+			children: contact && <WhatsApp contact_id={contact.id} />,
 		},
 		{
 			key: 'notes',

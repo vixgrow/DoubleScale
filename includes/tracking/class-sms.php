@@ -11,21 +11,22 @@
 namespace QuillCRM\Tracking;
 
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Abstracts\Abstract_Twilio_Tracking;
+use QuillCRM\Abstracts\Abstract_Tracking;
+use QuillCRM\Constants\Campaign_Channel;
 
 defined('ABSPATH') || exit;
 
 /**
  * SMS Tracking Class
  */
-class SMS extends Abstract_Twilio_Tracking
+class SMS extends Abstract_Tracking
 {
 	/**
-	 * Campaign type
+	 * Communication channel
 	 *
 	 * @var string
 	 */
-	protected $campaign_type = 'sms';
+	protected $channel = Campaign_Channel::CHANNEL_SMS;
 
 	/**
 	 * Add hooks - implementation of abstract method
@@ -55,7 +56,7 @@ class SMS extends Abstract_Twilio_Tracking
 	 */
 	public function handle_webhook()
 	{
-		$this->process_twilio_webhook();
+		$this->process_provider_webhook();
 	}
 
 	/**
@@ -114,12 +115,12 @@ class SMS extends Abstract_Twilio_Tracking
 	}
 
 	/**
-	 * Get campaign type - implementation of abstract method
+	 * Get channel type - implementation of abstract method
 	 *
 	 * @since 1.0.0
 	 * @return string
 	 */
-	protected static function get_campaign_type()
+	protected static function get_channel_type()
 	{
 		return 'sms';
 	}

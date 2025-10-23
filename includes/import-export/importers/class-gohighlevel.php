@@ -315,7 +315,7 @@ class GoHighLevel extends Importer
 	public function get_credentials()
 	{
 		// Check if user has active OAuth session
-		$stored_tokens = \QuillCRM\OAuth\GoHighLevel_OAuth::get_stored_tokens();
+		$stored_tokens = \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_stored_tokens();
 		if ($stored_tokens) {
 			return array(
 				'oauth_status' => array(
@@ -347,7 +347,7 @@ class GoHighLevel extends Importer
 						'description' => __('Your GoHighLevel app Client Secret (keep this confidential)', 'quillcrm'),
 					),
 				),
-				'redirect_url' => \QuillCRM\OAuth\GoHighLevel_OAuth::get_redirect_uri(),
+				'redirect_url' => \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_redirect_uri(),
 				'setup_instructions' => array(
 					'title' => __('Setup Instructions', 'quillcrm'),
 					'steps' => array(
@@ -362,7 +362,7 @@ class GoHighLevel extends Importer
 							'title' => __('Configure Permissions', 'quillcrm'),
 							'details' => array(
 								__('Set scopes: contacts.readonly', 'quillcrm'),
-								__('Add redirect URL: ', 'quillcrm') . \QuillCRM\OAuth\GoHighLevel_OAuth::get_redirect_uri(),
+								__('Add redirect URL: ', 'quillcrm') . \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_redirect_uri(),
 								__('Note: The app will access contacts from all authorized locations', 'quillcrm'),
 							),
 						),
@@ -391,7 +391,7 @@ class GoHighLevel extends Importer
 	public function get_api()
 	{
 		// Get OAuth tokens from session storage
-		$stored_tokens = \QuillCRM\OAuth\GoHighLevel_OAuth::get_stored_tokens();
+		$stored_tokens = \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_stored_tokens();
 		if (!$stored_tokens) {
 			throw new \Exception(__('Please connect to your GoHighLevel account using OAuth first', 'quillcrm'));
 		}
@@ -399,7 +399,7 @@ class GoHighLevel extends Importer
 		// Check if tokens are expired
 		if ($stored_tokens['expires_at'] <= time()) {
 			// Clear expired tokens
-			\QuillCRM\OAuth\GoHighLevel_OAuth::clear_stored_tokens();
+			\QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::clear_stored_tokens();
 			throw new \Exception(__('Your GoHighLevel OAuth connection has expired. Please reconnect.', 'quillcrm'));
 		}
 
@@ -414,7 +414,7 @@ class GoHighLevel extends Importer
 	public function get_fields()
 	{
 		// Check if OAuth tokens exist before trying to validate
-		$stored_tokens = \QuillCRM\OAuth\GoHighLevel_OAuth::get_stored_tokens();
+		$stored_tokens = \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_stored_tokens();
 		if (!$stored_tokens) {
 			// No OAuth connection yet, return empty fields array
 			// The frontend will show the OAuth setup form instead
@@ -430,7 +430,7 @@ class GoHighLevel extends Importer
 			if (empty($test_response['success']) || $test_response['success'] !== true) {
 				$error_message = __('GoHighLevel OAuth connection has expired or is invalid. Please reconnect your account.', 'quillcrm');
 				if (isset($test_response['code']) && $test_response['code'] === 401) {
-					\QuillCRM\OAuth\GoHighLevel_OAuth::clear_stored_tokens();
+					\QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::clear_stored_tokens();
 				}
 				throw new \Exception($error_message);
 			}

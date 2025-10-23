@@ -214,6 +214,7 @@ const Contacts: React.FC = () => {
 					shouldFetch={shouldFetchContacts}
 					onFetchComplete={() => setShouldFetchContacts(false)}
 					onLoadingChange={setIsLoading}
+					campaignType={campaign?.type}
 				/>
 			</div>
 		</PanelLayout>

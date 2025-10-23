@@ -21,6 +21,7 @@ use QuillCRM\Managers\Rules_Manager;
  */
 class Order_Shipping_Method extends Rule {
 
+
 	/**
 	 * Name
 	 *
@@ -28,7 +29,7 @@ class Order_Shipping_Method extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $name = 'Order Shipping Method';
+	public $name = 'Shipping Method';
 
 	/**
 	 * Slug
@@ -78,8 +79,8 @@ class Order_Shipping_Method extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		$methods = \WC()->shipping()->get_shipping_methods();
-		$options = array();
+		 $methods = \WC()->shipping()->get_shipping_methods();
+		$options  = array();
 		foreach ( $methods as $method ) {
 			$options[ $method->id ] = $method->method_title;
 		}

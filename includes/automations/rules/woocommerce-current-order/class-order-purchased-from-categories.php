@@ -11,6 +11,7 @@ use QuillCRM\Managers\Rules_Manager;
  */
 class Order_Purchased_From_Categories extends Rule {
 
+
 	/**
 	 * Name
 	 *
@@ -18,7 +19,7 @@ class Order_Purchased_From_Categories extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $name = 'Order Purchased From Categories';
+	public $name = 'Purchased From Categories';
 
 	/**
 	 * Slug
@@ -55,7 +56,7 @@ class Order_Purchased_From_Categories extends Rule {
 	 * @return bool
 	 */
 	public function has_options() {
-		return true;
+		 return true;
 	}
 
 	/**

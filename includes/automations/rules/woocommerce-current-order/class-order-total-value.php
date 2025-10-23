@@ -22,6 +22,7 @@ use QuillCRM\Managers\Rules_Manager;
 class Order_Total_Value extends Rule {
 
 
+
 	/**
 	 * Name
 	 *
@@ -29,7 +30,7 @@ class Order_Total_Value extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $name = 'Order Total Value';
+	public $name = 'Total Order Value';
 
 	/**
 	 * Slug

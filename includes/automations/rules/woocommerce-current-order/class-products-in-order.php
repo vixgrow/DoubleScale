@@ -7,9 +7,10 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Rules_Manager;
 
 /**
- * Order Purchase From Product class
+ * Products In Order class
  */
-class Order_Purchase_From_Product extends Rule {
+class Products_In_Order extends Rule {
+
 
 
 
@@ -23,7 +24,7 @@ class Order_Purchase_From_Product extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $name = 'Order Purchase From Product';
+	public $name = 'Products in Order';
 
 	/**
 	 * Slug
@@ -32,7 +33,7 @@ class Order_Purchase_From_Product extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $slug = 'order_purchase_from_product';
+	public $slug = 'products_in_order';
 
 	/**
 	 * Group
@@ -60,7 +61,7 @@ class Order_Purchase_From_Product extends Rule {
 	 * @return bool
 	 */
 	public function has_options() {
-		return true;
+		 return true;
 	}
 
 	/**
@@ -87,7 +88,7 @@ class Order_Purchase_From_Product extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		// Check if WooCommerce is available
+		 // Check if WooCommerce is available
 		if ( ! function_exists( 'wc_get_products' ) ) {
 			return array();
 		}
@@ -210,12 +211,12 @@ add_action(
 	'init',
 	function () {
 		if ( class_exists( 'WooCommerce' ) ) {
-			Rules_Manager::instance()->register( new Order_Purchase_From_Product() );
+			Rules_Manager::instance()->register( new Products_In_Order() );
 		} else {
 			add_action(
 				'woocommerce_loaded',
 				function () {
-					Rules_Manager::instance()->register( new Order_Purchase_From_Product() );
+					Rules_Manager::instance()->register( new Products_In_Order() );
 				}
 			);
 		}

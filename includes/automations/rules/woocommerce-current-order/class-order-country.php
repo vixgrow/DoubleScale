@@ -11,6 +11,7 @@ use QuillCRM\Managers\Rules_Manager;
  */
 class Order_Country extends Rule {
 
+
 	/**
 	 * Name
 	 *
@@ -18,7 +19,7 @@ class Order_Country extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $name = 'Order Country';
+	public $name = 'Country';
 
 	/**
 	 * Slug
@@ -71,7 +72,7 @@ class Order_Country extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		$countries = new \WC_Countries();
+		 $countries = new \WC_Countries();
 		return $countries->get_countries();
 	}
 

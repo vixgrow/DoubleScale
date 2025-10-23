@@ -16,6 +16,7 @@ class Order_Payment_Gateway extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -23,7 +24,7 @@ class Order_Payment_Gateway extends Rule {
 	 *
 	 * @since 1.0.0
 	 */
-	public $name = 'Order Payment Gateway';
+	public $name = 'Payment Gateway';
 
 	/**
 	 * Slug
@@ -73,7 +74,7 @@ class Order_Payment_Gateway extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		$options  = array();
+		 $options = array();
 		$gateways = \WC()->payment_gateways->payment_gateways();
 
 		if ( ! empty( $gateways ) ) {

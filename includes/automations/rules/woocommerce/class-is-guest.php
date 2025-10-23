@@ -14,6 +14,7 @@ class Is_Guest extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -117,10 +118,8 @@ class Is_Guest extends Rule {
 		switch ( $operator ) {
 			case 'equal':
 				if ( $rule_value === 'yes' ) {
-					// Rule passes if customer IS a guest
 					return $is_guest === true;
 				} elseif ( $rule_value === 'no' ) {
-					// Rule passes if customer IS NOT a guest (is registered)
 					return $is_guest === false;
 				}
 				return false;

@@ -376,15 +376,12 @@ class Campaign_Model extends Model {
 			return array();
 		}
 
-		$templates     = array();
-		$campaign_type = $this->get_template_processing_type();
+		$templates = array();
 
 		foreach ( $template_ids as $template_id ) {
 			$template = Template_Model::find( $template_id );
 			if ( $template ) {
-				// Use centralized field mapper for consistent formatting
-				$template_data = Template_Field_Mapper::template_to_array( $template, $campaign_type );
-				$templates[]   = $template_data;
+				$templates[] = $template;
 			}
 		}
 

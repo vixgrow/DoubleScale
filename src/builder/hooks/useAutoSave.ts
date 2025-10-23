@@ -1,8 +1,8 @@
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { CAMPAIGN_STATUS } from '../../client/types';
 import { STORE_KEY } from '../../stores/email-builder/constants';
-import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
 interface UseAutoSaveOptions {
 	interval?: number; // Auto-save interval in milliseconds (default: 30000 = 30 seconds)
@@ -151,10 +151,10 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 				const existingTemplate = await getTemplate(templateId);
 				await updateTemplate(templateId, {
 					...existingTemplate,
-					email_body: {
+					body: JSON.stringify({
 						type: 'builder',
 						value: builderData,
-					},
+					}),
 				});
 				console.log('Template updated successfully with builder content');
 			} else {
@@ -169,10 +169,10 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 						: `Campaign ${campaign.id} - Email Template`,
 					type: CAMPAIGN_CHANNEL.EMAIL,
 					subject: existingTemplate?.subject || '',
-					email_body: {
+					body: JSON.stringify({
 						type: 'builder',
 						value: builderData,
-					},
+					}),
 				});
 
 				// Store new template ID in ref and save to campaign

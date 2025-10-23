@@ -462,13 +462,12 @@ class REST_Template_Controller extends REST_Controller {
 		$type = $request->get_param( 'type' ) ?? Campaign_Channel::STR_EMAIL;
 
 		$template_data = array(
-			'name'         => $request->get_param( 'name' ) ?? __( 'New Template', 'quillcrm' ),
+			'name'         => $request->get_param( 'name' ) ?? 'New Template',
 			'type'         => $type,
 			'subject'      => $request->get_param( 'subject' ),
 			'body'         => $request->get_param( 'body' ),
 			'settings'     => $request->get_param( 'settings' ),
 			'preview_text' => $request->get_param( 'preview_text' ),
-			'updated_at'   => current_time( 'mysql' ),
 		);
 
 		// Note: email_body data is now sent directly in the body field as JSON

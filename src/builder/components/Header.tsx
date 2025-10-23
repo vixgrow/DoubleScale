@@ -11,30 +11,11 @@ import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { useTemplateActions } from '../hooks/useTemplateActions';
 import { SaveStatusIndicator } from './SaveStatusIndicator';
 import { SaveAsTemplateDialog } from './SaveAsTemplateDialog';
-import {
-	EmailSection,
-	GlobalSettings,
-	ButtonType,
-	ButtonSettings,
-} from '../types/common';
+import { BuilderData } from '../index';
 
 interface HeaderProps {
-	/**
-	 * Custom save callback
-	 * If not provided, will use default campaign save flow
-	 */
-	onSave?: (data: {
-		sections: EmailSection[];
-		globalSettings: GlobalSettings;
-		buttonSettings: Record<ButtonType, ButtonSettings>;
-	}) => Promise<void>;
-	/**
-	 * Enable/disable auto-save functionality
-	 */
+	onSave?: (data: BuilderData) => Promise<void>;
 	autoSaveEnabled?: boolean;
-	/**
-	 * Auto-save interval in milliseconds
-	 */
 	autoSaveInterval?: number;
 }
 

@@ -2,16 +2,12 @@ import { useSelect } from '@wordpress/data';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { getTemplate, saveTemplate } from '../api/templates';
-import { ButtonSettings, ButtonType, EmailSection, GlobalSettings } from '../types/common';
+import { BuilderData } from '../index';
 
 interface UseAutoSaveOptions {
-	interval?: number; // Auto-save interval in milliseconds (default: 30000 = 30 seconds)
-	enabled?: boolean; // Enable/disable auto-save
-	customSaveCallback?: (data: {
-		sections: EmailSection[];
-		globalSettings: GlobalSettings;
-		buttonSettings: Record<ButtonType, ButtonSettings>;
-	}) => Promise<void>;
+	interval?: number;
+	enabled?: boolean;
+	customSaveCallback?: (data: BuilderData) => Promise<void>;
 }
 
 interface SaveStatus {
@@ -99,14 +95,9 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			try {
 				setSaveStatus((prev) => ({ ...prev, isSaving: true, error: null }));
 
-				// Create the builder data
-				const builderData = {
-					sections: JSON.parse(currentState).sections,
-					globalSettings: JSON.parse(currentState).globalSettings,
-					buttonSettings: JSON.parse(currentState).buttonSettings,
-				};
+				const builderData = JSON.parse(currentState);
 
-				// Call custom save callback
+				// Call custom save callback with complete builder data
 				await customSaveCallback(builderData);
 
 				if (isMountedRef.current) {

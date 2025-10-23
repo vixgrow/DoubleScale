@@ -28,20 +28,19 @@ import { useDragHandlers } from './hooks/useDragHandlers';
 import {
 	EmailSection,
 	GlobalSettings,
-	ButtonType,
 	ButtonSettings,
+	ButtonType,
 } from './types/common';
 
-/**
- * Builder props interface
- */
+export interface BuilderData {
+	sections: EmailSection[];
+	globalSettings: GlobalSettings;
+	buttonSettings: Record<ButtonType, ButtonSettings>;
+}
+
 export interface BuilderProps {
-	initialData?: EmailSection[];
-	onSave?: (data: {
-		sections: EmailSection[];
-		globalSettings: GlobalSettings;
-		buttonSettings: Record<ButtonType, ButtonSettings>;
-	}) => Promise<void>;
+	initialData?: BuilderData;
+	onSave?: (data: BuilderData) => Promise<void>;
 	autoSave?:
 		| boolean
 		| {
@@ -85,9 +84,21 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
-		// Load from initialData prop (sections only)
-		if (initialData?.length) {
-			dispatch(STORE_KEY).setBuilderState(initialData);
+		// Load from initialData prop
+		if (initialData) {
+			const { sections, globalSettings, buttonSettings } = initialData;
+
+			if (sections?.length) {
+				dispatch(STORE_KEY).setBuilderState(sections);
+			}
+			if (globalSettings) {
+				dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
+			}
+			if (buttonSettings) {
+				Object.entries(buttonSettings).forEach(([type, settings]) => {
+					dispatch(STORE_KEY).updateButtonSettings(type, settings);
+				});
+			}
 			return;
 		}
 

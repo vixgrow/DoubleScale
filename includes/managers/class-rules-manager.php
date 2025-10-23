@@ -21,6 +21,8 @@ use QuillCRM\Abstracts\Rule;
 final class Rules_Manager {
 
 
+
+
 	/**
 	 * Registed rules
 	 *
@@ -111,6 +113,11 @@ final class Rules_Manager {
 				'key'      => 'woocommerce_current_order',
 				'rules'    => array(),
 				'triggers' => array( 'wc_order_created', 'wc_order_completed', 'wc_order_refunded', 'wc_order_status_changed' ),
+			),
+			'woocommerce'               => array(
+				'name'  => __( 'WooCommerce', 'quillcrm' ),
+				'key'   => 'woocommerce',
+				'rules' => array(),
 			),
 		);
 

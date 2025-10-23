@@ -10,7 +10,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Rules\WooCommerce\Current_Order;
+namespace QuillCRM\Automations\Rules\WooCommerce_Current_Order;
 
 use QuillCRM\Abstracts\Rule;
 use QuillCRM\Models\Automation_Contact_Model;
@@ -21,6 +21,7 @@ use QuillCRM\Constants\Order_Status as Order_Status_Constant;
  * Order Status class
  */
 class Order_Status extends Rule {
+
 
 	/**
 	 * Name

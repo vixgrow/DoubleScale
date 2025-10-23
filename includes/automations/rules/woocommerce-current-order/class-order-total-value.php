@@ -10,7 +10,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Rules\WooCommerce\Current_Order;
+namespace QuillCRM\Automations\Rules\WooCommerce_Current_Order;
 
 use QuillCRM\Abstracts\Rule;
 use QuillCRM\Models\Automation_Contact_Model;
@@ -20,6 +20,7 @@ use QuillCRM\Managers\Rules_Manager;
  * Order Total Value class
  */
 class Order_Total_Value extends Rule {
+
 
 
 

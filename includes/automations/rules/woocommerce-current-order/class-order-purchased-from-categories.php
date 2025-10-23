@@ -1,6 +1,6 @@
 <?php
 
-namespace QuillCRM\Automations\Rules\WooCommerce\Current_Order;
+namespace QuillCRM\Automations\Rules\WooCommerce_Current_Order;
 
 use QuillCRM\Abstracts\Rule;
 use QuillCRM\Models\Automation_Contact_Model;
@@ -10,6 +10,7 @@ use QuillCRM\Managers\Rules_Manager;
  * Order Purchased From Categories class
  */
 class Order_Purchased_From_Categories extends Rule {
+
 
 
 	/**

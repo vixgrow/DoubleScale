@@ -9,14 +9,13 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 
-
 /**
  * Internal dependencies
  */
 import { Button } from '@/components/ui/button';
 import './style.scss';
 import type { OrganizedStep } from '@quillcrm/client';
-import { Fields } from '@quillcrm/components';
+import { Fields, MergeTagsIcon } from '@quillcrm/components';
 import { getAction, getGoal } from '@quillcrm/utils';
 import { useAutomationContext } from '../../../state/context';
 import { deleteStep } from '../reactflow-workflow/utils/step-utils';
@@ -36,7 +35,8 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
 	const [currentStepId, setCurrentStepId] = useState(step.id);
-	const { setMergeTagsVisible, createNotice } = useDispatch('quillcrm/core');
+	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
+		useDispatch('quillcrm/core');
 	const { steps, setSteps } = useAutomationContext();
 
 	// Only sync settings when the step ID changes (switching to a different step)
@@ -70,6 +70,20 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setStep(null); // Close the modal after deletion
 	};
 
+	const handleMergeTagsClick = () => {
+		setMergeTagCallback((tagValue: string) => {
+			navigator.clipboard.writeText(tagValue);
+			createNotice({
+				type: 'success',
+				message: __(
+					'Merge tag copied to clipboard. You can now paste it in any field.',
+					'quillcrm'
+				),
+			});
+		});
+		setMergeTagsVisible(true);
+	};
+
 	// For delay steps, the action should be 'delay'
 	const actionKey = step.type === 'delay' ? 'delay' : step.action;
 
@@ -80,6 +94,15 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 
 	return (
 		<div className="qcrm-step-fields-content flex flex-col">
+			<Button
+				onClick={handleMergeTagsClick}
+				disabled={isSaving || isDeleting}
+				variant="secondaryDeepBlue"
+				className="w-full mb-4"
+				size="lg"
+			>
+				{__('Merge Tags', 'quillcrm')}
+			</Button>
 			<div className="mb-4">
 				<Fields
 					fields={action.fields}
@@ -87,7 +110,6 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					onChange={(value) => {
 						setSettings(value);
 					}}
-					enableMergeTags={true}
 				/>
 			</div>
 

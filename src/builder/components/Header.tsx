@@ -67,13 +67,15 @@ const Header: React.FC<HeaderProps> = ({
 	return (
 		<div className="flex items-center justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
 			<div className="flex items-center align-center gap-2">
-				<BreadcrumbComponent
-					items={[
-						{ label: __('Create Campaign', 'quillcrm') },
-						{ label: __('Standard Campaign', 'quillcrm') },
-						{ label: __('Email Template', 'quillcrm') },
-					]}
-				/>
+				{campaign && (
+					<BreadcrumbComponent
+						items={[
+							{ label: __('Create Campaign', 'quillcrm') },
+							{ label: __('Standard Campaign', 'quillcrm') },
+							{ label: __('Email Template', 'quillcrm') },
+						]}
+					/>
+				)}
 			</div>
 			<div className="flex items-center gap-3">
 				<SaveStatusIndicator
@@ -102,32 +104,50 @@ const Header: React.FC<HeaderProps> = ({
 					<RedoIcon />
 				</Button>
 				<div className="h-6 w-px bg-border" />
-				<Button
-					variant="outline"
-					className="px-3 text-muted-foreground"
-				>
-					<PreviewIcon />
-					{__('Preview & test', 'quillcrm')}
-				</Button>
-				<Button
-					variant="secondary"
-					className="px-3"
-					onClick={() => setIsTemplateDialogOpen(true)}
-					disabled={isSavingTemplate}
-					title={__('Save as template', 'quillcrm')}
-				>
-					{__('Save as Template', 'quillcrm')}
-				</Button>
-				<Button
-					variant="default"
-					className="px-3"
-					onClick={handleSaveAndContinue}
-					disabled={isSaving}
-				>
-					{isSaving
-						? __('Saving...', 'quillcrm')
-						: __('Save & choose recipients', 'quillcrm')}
-				</Button>
+				{campaign && (
+					<>
+						<Button
+							variant="outline"
+							className="px-3 text-muted-foreground"
+						>
+							<PreviewIcon />
+							{__('Preview & test', 'quillcrm')}
+						</Button>
+						<Button
+							variant="secondary"
+							className="px-3"
+							onClick={() => setIsTemplateDialogOpen(true)}
+							disabled={isSavingTemplate}
+							title={__('Save as template', 'quillcrm')}
+						>
+							{__('Save as Template', 'quillcrm')}
+						</Button>
+
+						<Button
+							variant="default"
+							className="px-3"
+							onClick={handleSaveAndContinue}
+							disabled={isSaving}
+						>
+							{isSaving
+								? __('Saving...', 'quillcrm')
+								: __('Save & choose recipients', 'quillcrm')}
+						</Button>
+					</>
+				)}
+
+				{onSave && (
+					<Button
+						variant="default"
+						className="px-3"
+						onClick={() => save()}
+						disabled={isSaving}
+					>
+						{isSaving
+							? __('Saving...', 'quillcrm')
+							: __('Save', 'quillcrm')}
+					</Button>
+				)}
 			</div>
 
 			{/* Save as Template Dialog */}

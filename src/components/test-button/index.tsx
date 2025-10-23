@@ -103,11 +103,6 @@ const TestButton: React.FC<TestButtonProps> = ({
 		<Button
 			onClick={handleButtonClick}
 			variant="secondaryDeepBlue"
-			style={{
-				backgroundColor: '#6d78d8',
-				border: 'none',
-				color: '#fff',
-			}}
 			disabled={isLoading}
 		>
 			{isLoading

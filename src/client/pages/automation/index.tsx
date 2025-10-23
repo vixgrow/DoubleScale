@@ -141,7 +141,7 @@ const Automation: React.FC = () => {
 				}}
 			>
 				<DialogContent
-					className="z-[150000] w-screen h-screen max-w-none gap-0 overflow-y-auto overflow-x-hidden bg-white rounded-none shadow-none"
+					className="z-[150000] w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none"
 					style={{
 						paddingTop: '10px',
 						paddingLeft: '0px',
@@ -268,7 +268,7 @@ const Automation: React.FC = () => {
 									</div>
 								</DialogTitle>
 							</DialogHeader>
-							<div className="h-screen">{renderContent()}</div>
+							<div className="overflow-y-auto overflow-x-hidden">{renderContent()}</div>
 						</>
 					)}
 				</DialogContent>

@@ -38,6 +38,9 @@ class Campaign_Model extends Model {
 
 
 
+
+
+
 	/**
 	 * Table name
 	 *
@@ -134,6 +137,26 @@ class Campaign_Model extends Model {
 	}
 
 	/**
+	 * Get campaign messages with existing contacts only
+	 * Filters out messages where the contact has been deleted
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function messages_with_contacts() {
+		return $this->hasMany( Tracking_Model::class, 'source_id', 'id' )
+			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN )
+			->whereExists(
+				function ( $query ) {
+					$query->selectRaw( '1' )
+						->from( 'wp_quillcrm_contacts' )
+						->whereColumn( 'wp_quillcrm_contacts.id', 'wp_quillcrm_tracking.contact_id' );
+				}
+			);
+	}
+
+	/**
 	 * Get the campaign emails
 	 *
 	 * @since 1.0.0
@@ -190,19 +213,19 @@ class Campaign_Model extends Model {
 
 
 	public function getSentAttribute() {
-		return $this->messages()
+		return $this->messages_with_contacts()
 			->where( 'status', Tracking_Status::SENT )
 			->count();
 	}
 
 	public function getOpenedAttribute() {
-		return $this->messages()
+		return $this->messages_with_contacts()
 			->where( 'opened', true )
 			->count();
 	}
 
 	public function getClickAttribute() {
-		return $this->messages()
+		return $this->messages_with_contacts()
 			->where( 'clicked', true )
 			->count();
 	}
@@ -270,7 +293,7 @@ class Campaign_Model extends Model {
 		}
 
 		// Convert string to integer for database storage
-		$integer_value = Campaign_Channel::to_integer( $value );
+		$integer_value            = Campaign_Channel::to_integer( $value );
 		$this->attributes['type'] = $integer_value ?? Campaign_Channel::CHANNEL_EMAIL;
 	}
 
@@ -462,27 +485,26 @@ class Campaign_Model extends Model {
 	 *
 	 * @return void
 	 */
-	public function attach_counts($campaign)
-	{
+	public function attach_counts( $campaign ) {
 		// Skip if campaign type is not set (e.g., when only selecting specific fields)
-		if (empty($campaign->type)) {
+		if ( empty( $campaign->type ) ) {
 			return;
 		}
 
 		// Calculate contacts count with type-specific filtering
-		$campaign->contacts_count = $this->get_contacts_count($campaign);
+		$campaign->contacts_count = $this->get_contacts_count( $campaign );
 
 		// Get analytics stats from centralized service
 		$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
 		// Convert string type to integer for analytics service (bypass accessor)
-		$type_int = \QuillCRM\Constants\Campaign_Channel::to_integer($campaign->type);
-		$stats = $analytics->get_campaign_stats($type_int, $campaign->id);
+		$type_int = \QuillCRM\Constants\Campaign_Channel::to_integer( $campaign->type );
+		$stats    = $analytics->get_campaign_stats( $type_int, $campaign->id );
 
 		// Get optimized template counts (single query instead of N queries)
-		$campaign->templates_count = $this->get_template_counts_optimized($campaign);
+		$campaign->templates_count = $this->get_template_counts_optimized( $campaign );
 
 		// Assign stats based on campaign type
-		$this->assign_campaign_stats($campaign, $stats);
+		$this->assign_campaign_stats( $campaign, $stats );
 	}
 
 	/**
@@ -492,22 +514,21 @@ class Campaign_Model extends Model {
 	 *
 	 * @return int Contact count
 	 */
-	private function get_contacts_count($campaign)
-	{
-		$filters = $campaign->get_setting('filters', array());
-		$query = Contact_Model::where('status', 'subscribed');
+	private function get_contacts_count( $campaign ) {
+		$filters = $campaign->get_setting( 'filters', array() );
+		$query   = Contact_Model::where( 'status', 'subscribed' );
 
 		// Apply type-specific filtering
-		if ($campaign->is_email_campaign() || $campaign->is_email_sequence() || $campaign->is_sequence_mail()) {
-			$query->whereNotNull('email')->where('email', '!=', '');
-		} elseif ($campaign->is_sms_campaign() || $campaign->is_whatsapp_campaign()) {
-			$query->whereNotNull('phone')->where('phone', '!=', '');
+		if ( $campaign->is_email_campaign() || $campaign->is_email_sequence() || $campaign->is_sequence_mail() ) {
+			$query->whereNotNull( 'email' )->where( 'email', '!=', '' );
+		} elseif ( $campaign->is_sms_campaign() || $campaign->is_whatsapp_campaign() ) {
+			$query->whereNotNull( 'phone' )->where( 'phone', '!=', '' );
 		}
 
 		// Apply custom filters if provided
-		if (!empty($filters)) {
-			$contact_filters = new Contact_Filters_Process($query, $filters);
-			$query = $contact_filters->filter();
+		if ( ! empty( $filters ) ) {
+			$contact_filters = new Contact_Filters_Process( $query, $filters );
+			$query           = $contact_filters->filter();
 		}
 
 		return $query->count();
@@ -521,27 +542,26 @@ class Campaign_Model extends Model {
 	 *
 	 * @return array Template counts indexed by template_id
 	 */
-	private function get_template_counts_optimized($campaign)
-	{
+	private function get_template_counts_optimized( $campaign ) {
 		// Convert campaign channel to tracking mode
-		$mode = Campaign_Channel::to_mode($campaign->type);
-		if ($mode === null) {
+		$mode = Campaign_Channel::to_mode( $campaign->type );
+		if ( $mode === null ) {
 			return array();
 		}
 
 		// Single query with GROUP BY instead of N separate queries
 		$counts = $campaign->messages()
-			->where('mode', $mode)
-			->selectRaw('template_id, COUNT(*) as count')
-			->groupBy('template_id')
+			->where( 'mode', $mode )
+			->selectRaw( 'template_id, COUNT(*) as count' )
+			->groupBy( 'template_id' )
 			->get()
-			->pluck('count', 'template_id')
+			->pluck( 'count', 'template_id' )
 			->toArray();
 
 		// Ensure all template IDs have a count (even if 0)
 		$template_counts = array();
-		foreach ($campaign->get_template_ids() as $template_id) {
-			$template_counts[$template_id] = isset($counts[$template_id]) ? (int) $counts[$template_id] : 0;
+		foreach ( $campaign->get_template_ids() as $template_id ) {
+			$template_counts[ $template_id ] = isset( $counts[ $template_id ] ) ? (int) $counts[ $template_id ] : 0;
 		}
 
 		return $template_counts;
@@ -556,30 +576,29 @@ class Campaign_Model extends Model {
 	 *
 	 * @return void
 	 */
-	private function assign_campaign_stats($campaign, $stats)
-	{
+	private function assign_campaign_stats( $campaign, $stats ) {
 		// Common stats for all campaign types
-		$campaign->sent_count = $stats['sent'] ?? 0;
-		$campaign->failed_count = $stats['failed'] ?? 0;
+		$campaign->sent_count    = $stats['sent'] ?? 0;
+		$campaign->failed_count  = $stats['failed'] ?? 0;
 		$campaign->clicked_count = $stats['clicked'] ?? 0;
 
 		// Type-specific stats
-		if ($campaign->is_email_campaign()) {
+		if ( $campaign->is_email_campaign() ) {
 			$campaign->opened_count = $stats['opened'] ?? 0;
-			$campaign->open_rate = $stats['open_rate'] ?? 0;
-			$campaign->click_rate = $stats['click_rate'] ?? 0;
-		} elseif ($campaign->is_sms_campaign()) {
-			$campaign->pending_count = $stats['pending'] ?? 0;
+			$campaign->open_rate    = $stats['open_rate'] ?? 0;
+			$campaign->click_rate   = $stats['click_rate'] ?? 0;
+		} elseif ( $campaign->is_sms_campaign() ) {
+			$campaign->pending_count   = $stats['pending'] ?? 0;
 			$campaign->delivered_count = $stats['delivered'] ?? 0;
-			$campaign->delivery_rate = $stats['delivery_rate'] ?? 0;
-			$campaign->click_rate = $stats['click_rate'] ?? 0;
-		} elseif ($campaign->is_whatsapp_campaign()) {
-			$campaign->pending_count = $stats['pending'] ?? 0;
+			$campaign->delivery_rate   = $stats['delivery_rate'] ?? 0;
+			$campaign->click_rate      = $stats['click_rate'] ?? 0;
+		} elseif ( $campaign->is_whatsapp_campaign() ) {
+			$campaign->pending_count   = $stats['pending'] ?? 0;
 			$campaign->delivered_count = $stats['delivered'] ?? 0;
-			$campaign->read_count = $stats['read'] ?? 0;
-			$campaign->delivery_rate = $stats['delivery_rate'] ?? 0;
-			$campaign->read_rate = $stats['read_rate'] ?? 0;
-			$campaign->click_rate = $stats['click_rate'] ?? 0;
+			$campaign->read_count      = $stats['read'] ?? 0;
+			$campaign->delivery_rate   = $stats['delivery_rate'] ?? 0;
+			$campaign->read_rate       = $stats['read_rate'] ?? 0;
+			$campaign->click_rate      = $stats['click_rate'] ?? 0;
 		}
 	}
 

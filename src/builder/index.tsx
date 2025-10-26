@@ -25,10 +25,46 @@ import { STORE_KEY } from '../stores/email-builder/constants';
 import { useButtonSettings } from './hooks/useButtonSettings';
 import { useCollisionDetection } from './hooks/useCollisionDetection';
 import { useDragHandlers } from './hooks/useDragHandlers';
+import {
+	EmailSection,
+	GlobalSettings,
+	ButtonSettings,
+	ButtonType,
+} from './types/common';
 
-const BuilderContent: React.FC = () => {
+export interface BuilderData {
+	sections: EmailSection[];
+	globalSettings: GlobalSettings;
+	buttonSettings: Record<ButtonType, ButtonSettings>;
+}
+
+export interface BuilderProps {
+	initialData?: BuilderData;
+	onSave?: (data: BuilderData) => Promise<void>;
+	autoSave?:
+		| boolean
+		| {
+				enabled: boolean;
+				interval?: number;
+		  };
+}
+
+const BuilderContent: React.FC<BuilderProps> = ({
+	initialData,
+	onSave,
+	autoSave = true,
+}) => {
 	const dispatch = useDispatch();
 	const [sidebarCloseTrigger, setSidebarCloseTrigger] = useState(0);
+
+	// Parse autoSave prop into enabled/interval
+	const autoSaveConfig =
+		typeof autoSave === 'boolean'
+			? { enabled: autoSave, interval: 10000 }
+			: {
+					enabled: autoSave.enabled,
+					interval: autoSave.interval ?? 10000,
+				};
 
 	const existingTemplateData = useSelect(
 		(select: any) => select('quillcrm/campaign').getStepData('template'),
@@ -48,44 +84,58 @@ const BuilderContent: React.FC = () => {
 		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
-		const loadTemplateData = async () => {
-			// Reset builder state first to ensure clean slate
-			dispatch(STORE_KEY).resetBuilder();
+		// Load from initialData prop
+		if (initialData) {
+			const { sections, globalSettings, buttonSettings } = initialData;
 
-			if (!existingTemplateData?.template_id) {
-				return;
+			if (sections?.length) {
+				dispatch(STORE_KEY).setBuilderState(sections);
 			}
+			if (globalSettings) {
+				dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
+			}
+			if (buttonSettings) {
+				Object.entries(buttonSettings).forEach(([type, settings]) => {
+					dispatch(STORE_KEY).updateButtonSettings(type, settings);
+				});
+			}
+			return;
+		}
 
+		// Load from campaign template
+		if (!existingTemplateData?.template_id) {
+			return;
+		}
+
+		const loadTemplate = async () => {
 			try {
 				const { getTemplate } = await import('./api/templates');
 				const template = await getTemplate(
 					existingTemplateData.template_id
 				);
-				const emailBody = template.email_body;
 
-				if (emailBody?.type === 'builder' && emailBody.value) {
+				const body =
+					typeof template.body === 'string'
+						? JSON.parse(template.body)
+						: template.body;
+
+				if (body?.type === 'builder' && body.value) {
 					const { sections, globalSettings, buttonSettings } =
-						emailBody.value;
+						body.value;
 
-					// Load sections
-					if (sections && sections.length > 0) {
+					if (sections?.length) {
 						dispatch(STORE_KEY).setBuilderState(sections);
 					}
-
-					// Load global settings
 					if (globalSettings) {
 						dispatch(STORE_KEY).updateGlobalSettings(
 							globalSettings
 						);
 					}
-
-					// Load button settings if they exist
 					if (buttonSettings) {
-						// Update each button type's settings
 						Object.entries(buttonSettings).forEach(
-							([buttonType, settings]) => {
+							([type, settings]) => {
 								dispatch(STORE_KEY).updateButtonSettings(
-									buttonType,
+									type,
 									settings
 								);
 							}
@@ -97,13 +147,8 @@ const BuilderContent: React.FC = () => {
 			}
 		};
 
-		loadTemplateData();
-
-		// Cleanup function: reset builder when component unmounts
-		return () => {
-			dispatch(STORE_KEY).resetBuilder();
-		};
-	}, [existingTemplateData?.template_id, dispatch]);
+		loadTemplate();
+	}, [initialData, existingTemplateData?.template_id, dispatch]);
 
 	// Disable scrolling on the background page when builder is mounted
 	useEffect(() => {
@@ -174,7 +219,11 @@ const BuilderContent: React.FC = () => {
 					height: '100vh',
 				}}
 			>
-				<Header />
+				<Header
+					onSave={onSave}
+					autoSaveEnabled={autoSaveConfig.enabled}
+					autoSaveInterval={autoSaveConfig.interval}
+				/>
 				<div
 					className="flex flex-1 overflow-hidden"
 					style={{ backgroundColor: '#e6eff7' }}
@@ -200,8 +249,8 @@ const BuilderContent: React.FC = () => {
 	);
 };
 
-const Builder: React.FC = () => {
-	return <BuilderContent />;
+const Builder: React.FC<BuilderProps> = (props) => {
+	return <BuilderContent {...props} />;
 };
 
 export default Builder;

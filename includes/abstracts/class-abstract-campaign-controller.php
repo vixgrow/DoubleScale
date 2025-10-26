@@ -283,6 +283,9 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
+			// Attach full template data for frontend use
+			$campaign->attach_templates( $campaign );
+
 			return new WP_REST_Response( $campaign, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
@@ -325,18 +328,21 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
-			$campaign_data = $this->prepare_campaign( $request );
+		$campaign_data = $this->prepare_campaign( $request );
 
-			// Recalculate count if filters were updated
-			if ( isset( $campaign_data['settings']['filters'] ) ) {
-				$filters                = $campaign_data['settings']['filters'] ?? array();
-				$contact_filter         = \QuillCRM\Services\Campaign_Contact_Filter::instance();
-				$campaign_data['count'] = $contact_filter->get_contact_count( $this->channel, $filters );
-			}
+		// Recalculate count if filters were updated
+		if ( isset( $campaign_data['settings']['filters'] ) ) {
+			$filters                = $campaign_data['settings']['filters'] ?? array();
+			$contact_filter         = \QuillCRM\Services\Campaign_Contact_Filter::instance();
+			$campaign_data['count'] = $contact_filter->get_contact_count( $this->channel, $filters );
+		}
 
-			$campaign->update( $campaign_data );
+		$campaign->update( $campaign_data );
 
-			return new WP_REST_Response( $campaign, 200 );
+		// Attach full template data for frontend use
+		$campaign->attach_templates( $campaign );
+
+		return new WP_REST_Response( $campaign, 200 );
 		} catch ( \Exception $e ) {
 			$logger = quillcrm_get_logger();
 			$logger->error(

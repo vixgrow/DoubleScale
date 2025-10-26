@@ -150,3 +150,4 @@ export { default as MyTemplatesIcon } from './my-templates';
 export { default as AutomationAnalyticsIcon } from './automation-analytics';
 export { default as AutomationContactsIcon } from './automation-contacts';
 export { default as WorkflowIcon } from './workflow';
+export { default as GradientAutomationsIcon } from './gradient-automations';

@@ -23,6 +23,9 @@ use QuillCRM\Campaign\Email_Processing;
 class Send_Email extends Abstract_Send_Message {
 
 
+
+
+
 	/**
 	 * Action Name
 	 *
@@ -71,7 +74,7 @@ class Send_Email extends Abstract_Send_Message {
 	 * @return string
 	 */
 	protected function get_channel_type() {
-		return 'email';
+		 return 'email';
 	}
 
 	/**
@@ -124,7 +127,7 @@ class Send_Email extends Abstract_Send_Message {
 	 * @return string
 	 */
 	protected function get_channel_name() {
-		return 'Email';
+		 return 'Email';
 	}
 
 	/**
@@ -143,7 +146,7 @@ class Send_Email extends Abstract_Send_Message {
 			),
 			'body'       => array(
 				'label'    => __( 'Body', 'quillcrm' ),
-				'type'     => 'textarea',
+				'type'     => 'open_builder',
 				'required' => true,
 			),
 			'from_name'  => array(

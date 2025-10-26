@@ -203,21 +203,21 @@ const BuilderContent: React.FC<BuilderProps> = ({
 
 				/* Increase z-index for all Radix UI portals when used in builder */
 				body:has(#quillcrm-email-builder) [data-radix-portal] {
-					z-index: 100020 !important;
+					z-index: 160020 !important;
 				}
 				
 				/* Specific overrides for dialog/popover content */
 				body:has(#quillcrm-email-builder) [role="dialog"],
 				body:has(#quillcrm-email-builder) [role="alertdialog"],
 				body:has(#quillcrm-email-builder) [data-radix-popper-content-wrapper] {
-					z-index: 100021 !important;
+					z-index: 160021 !important;
 				}
 			`}</style>
 			<div
 				id="quillcrm-email-builder"
 				className="flex flex-col fixed inset-0 bg-primary-foreground overflow-hidden"
 				style={{
-					zIndex: 100000,
+					zIndex: 160000,
 					width: '100vw',
 					height: '100vh',
 				}}

@@ -41,6 +41,7 @@ export interface BuilderData {
 export interface BuilderProps {
 	initialData?: BuilderData;
 	onSave?: (data: BuilderData) => Promise<void>;
+	onClose?: () => void;
 	autoSave?:
 		| boolean
 		| {
@@ -52,6 +53,7 @@ export interface BuilderProps {
 const BuilderContent: React.FC<BuilderProps> = ({
 	initialData,
 	onSave,
+	onClose,
 	autoSave = true,
 }) => {
 	const dispatch = useDispatch();
@@ -84,6 +86,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
+		console.log('initialData', initialData);
 		// Load from initialData prop
 		if (initialData) {
 			const { sections, globalSettings, buttonSettings } = initialData;
@@ -221,6 +224,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 			>
 				<Header
 					onSave={onSave}
+					onClose={onClose}
 					autoSaveEnabled={autoSaveConfig.enabled}
 					autoSaveInterval={autoSaveConfig.interval}
 				/>

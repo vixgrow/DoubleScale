@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Check, X } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -35,7 +36,7 @@ const BranchNode: React.FC<NodeProps> = ({ data }) => {
 				<div
 					className={`qcrm-reactflow-branch__label qcrm-reactflow-branch__label--${condition}`}
 				>
-					{isYes ? __('Yes', 'quillcrm') : __('No', 'quillcrm')}
+					{isYes ? <Check className="text-green-600 size-7" /> : <X className="text-destructive size-7" />}
 				</div>
 			</div>
 

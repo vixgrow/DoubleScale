@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WooCommerce Order Created Trigger
  * This trigger will be fired when an order is created.
@@ -14,11 +15,16 @@ use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Models\Automation_Model;
 use WC_Order;
+use QuillCRM\Constants\Order_Status;
 
 /**
  * Order Created Trigger
  */
 class Order_Created extends Trigger {
+
+
+
+
 
 	/**
 	 * Trigger Name
@@ -179,16 +185,7 @@ class Order_Created extends Trigger {
 			'statuses' => array(
 				'type'    => 'multiselect',
 				'label'   => __( 'Order Statuses', 'quillcrm' ),
-				'options' => array(
-					'wc-pending'        => __( 'Pending Payment', 'quillcrm' ),
-					'wc-processing'     => __( 'Processing', 'quillcrm' ),
-					'wc-on-hold'        => __( 'On Hold', 'quillcrm' ),
-					'wc-completed'      => __( 'Completed', 'quillcrm' ),
-					'wc-cancelled'      => __( 'Cancelled', 'quillcrm' ),
-					'wc-refunded'       => __( 'Refunded', 'quillcrm' ),
-					'wc-failed'         => __( 'Failed', 'quillcrm' ),
-					'wc-checkout-draft' => __( 'Checkout Draft', 'quillcrm' ),
-				),
+				'options' => Order_Status::get_all(),
 			),
 		);
 	}

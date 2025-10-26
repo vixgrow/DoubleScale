@@ -240,8 +240,7 @@ const Automation: React.FC = () => {
 									</div>
 								</DialogTitle>
 							</DialogHeader>
-							<div className="">
-							<div className="flex">
+							<div className="flex flex-1 overflow-hidden">
 								{/* Left Sidebar */}
 								<div className="w-28 border-r border-[#E4E7EC] flex flex-col gap-5 pt-4 px-2">
 									{tabs.map((tab) => {
@@ -267,7 +266,6 @@ const Automation: React.FC = () => {
 								{/* Main Content */}
 								<div className="flex-1 overflow-y-auto overflow-x-hidden">
 									{renderContent()}
-								</div>
 								</div>
 							</div>
 						</>

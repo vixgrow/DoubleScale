@@ -21,6 +21,7 @@ import WorkflowVisualization from './workflow-visualization';
 interface ReactFlowWorkflowProps {
 	currentStep?: OrganizedStep | null;
 	isTriggerVisible?: boolean;
+	isSidebarOpen?: boolean;
 	onStepClick?: (step: OrganizedStep) => void;
 	onTriggerClick?: () => void;
 }
@@ -28,6 +29,7 @@ interface ReactFlowWorkflowProps {
 const ReactFlowWorkflow: React.FC<ReactFlowWorkflowProps> = ({
 	currentStep,
 	isTriggerVisible,
+	isSidebarOpen,
 	onStepClick,
 	onTriggerClick,
 }) => {
@@ -59,6 +61,7 @@ const ReactFlowWorkflow: React.FC<ReactFlowWorkflowProps> = ({
 					isLoading={isLoading}
 					currentStep={currentStep}
 					isTriggerVisible={isTriggerVisible}
+					isSidebarOpen={isSidebarOpen}
 					onStepClick={handleStepClick}
 					onTriggerClick={handleTriggerClick}
 				/>

@@ -377,6 +377,15 @@ const Workflow: React.FC = () => {
 								<ReactFlowWorkflow
 									currentStep={currentStep}
 									isTriggerVisible={visible}
+									isSidebarOpen={
+										visible ||
+										(currentStep !== null &&
+											currentStep.type !== 'end_automation' &&
+											currentStep.type !== 'condition' &&
+											(!!currentStep.action ||
+												currentStep.type === 'goal' ||
+												currentStep.type === 'delay'))
+									}
 									onStepClick={(step) => {
 										setVisible(false); // Close trigger sidebar if open
 										setCurrentStep(step);

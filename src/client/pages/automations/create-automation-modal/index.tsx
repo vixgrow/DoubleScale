@@ -14,10 +14,10 @@ import React, { useState, useMemo } from 'react';
 import ConfigAPI from '@quillcrm/config';
 import type { NoticeMessage } from '@quillcrm/client';
 import {
-    AutomationsIcon,
     CustomDialogHeader,
     Field,
     NoticeBanner,
+    GradientAutomationsIcon,
 } from '@quillcrm/components';
 import {
     Dialog,
@@ -51,6 +51,7 @@ interface CreateAutomationModalProps {
     onOk: () => void;
     onCancel: () => void;
     onAutomationChange: (automation: { name: string; trigger: string }) => void;
+    onClearError: () => void;
     error?: NoticeMessage | null;
 }
 
@@ -61,6 +62,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
     onOk,
     onCancel,
     onAutomationChange,
+    onClearError,
     error,
 }) => {
     const automationTriggers = ConfigAPI.getAutomationTriggers();
@@ -109,7 +111,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
                     <CustomDialogHeader
                         title={__('Create Automation', 'quillcrm')}
                         subtitle={__('Add New Automation', 'quillcrm')}
-                        icon={<AutomationsIcon />}
+                        icon={<GradientAutomationsIcon width={32} height={32} />}
                     />
                 </DialogHeader>
 
@@ -117,7 +119,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
                     <div className="mb-4">
                         <NoticeBanner
                             notice={error}
-                            closeNotice={() => onAutomationChange(automation)}
+                            closeNotice={onClearError}
                         />
                     </div>
                 )}

@@ -90,7 +90,7 @@ const ContactsList: React.FC = () => {
 	};
 
 	return (
-		<div className="qcrm-contacts-list px-5 overflow-y-auto">
+		<div className="qcrm-contacts-list px-5 overflow-y-auto h-screen">
 			<div className="qcrm-contacts-list__table">
 				<DataTable
 					columns={columns}

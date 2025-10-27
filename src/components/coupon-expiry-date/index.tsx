@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import './style.scss';
 import { Input } from '@/components/ui/input';
 import { DatePicker } from '@/components/ui/date-picker';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 
 interface CouponExpiryDateProps {
@@ -43,61 +44,47 @@ const CouponExpiryDate: React.FC<CouponExpiryDateProps> = ({
 	};
 
 	return (
-		<div className="coupon-expiry-date">
+		<div className="coupon-expiry-date mb-4">
 			<div className="space-y-4">
-				{/* Expiry after Specific Days */}
-				<div className="flex items-center space-x-3">
-					<input
-						type="radio"
-						id="expiry-days"
-						name="coupon-expiry"
-						checked={type === 'days'}
-						onChange={() => handleTypeChange('days')}
-						className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-					/>
-					<label
-						htmlFor="expiry-days"
-						className="text-sm font-medium text-gray-900 cursor-pointer"
-					>
-						{__('Expiry after Specific Days', 'quillcrm')}
-					</label>
-				</div>
+				<RadioGroup
+					value={type}
+					onValueChange={(value) =>
+						handleTypeChange(value as 'days' | 'date' | 'never')
+					}
+				>
+					{/* Expiry after Specific Days */}
+					<div className="flex items-center space-x-3">
+						<RadioGroupItem value="days" id="expiry-days" />
+						<label
+							htmlFor="expiry-days"
+							className="text-sm font-medium text-gray-900 cursor-pointer"
+						>
+							{__('Expiry after Specific Days', 'quillcrm')}
+						</label>
+					</div>
 
-				{/* Expiry on Specific Date */}
-				<div className="flex items-center space-x-3">
-					<input
-						type="radio"
-						id="expiry-date"
-						name="coupon-expiry"
-						checked={type === 'date'}
-						onChange={() => handleTypeChange('date')}
-						className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-					/>
-					<label
-						htmlFor="expiry-date"
-						className="text-sm font-medium text-gray-900 cursor-pointer"
-					>
-						{__('Expiry on Specific Date', 'quillcrm')}
-					</label>
-				</div>
+					{/* Expiry on Specific Date */}
+					<div className="flex items-center space-x-3">
+						<RadioGroupItem value="date" id="expiry-date" />
+						<label
+							htmlFor="expiry-date"
+							className="text-sm font-medium text-gray-900 cursor-pointer"
+						>
+							{__('Expiry on Specific Date', 'quillcrm')}
+						</label>
+					</div>
 
-				{/* Never Expire */}
-				<div className="flex items-center space-x-3">
-					<input
-						type="radio"
-						id="never-expire"
-						name="coupon-expiry"
-						checked={type === 'never'}
-						onChange={() => handleTypeChange('never')}
-						className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-					/>
-					<label
-						htmlFor="never-expire"
-						className="text-sm font-medium text-gray-900 cursor-pointer"
-					>
-						{__('Never Expire', 'quillcrm')}
-					</label>
-				</div>
+					{/* Never Expire */}
+					<div className="flex items-center space-x-3">
+						<RadioGroupItem value="never" id="never-expire" />
+						<label
+							htmlFor="never-expire"
+							className="text-sm font-medium text-gray-900 cursor-pointer"
+						>
+							{__('Never Expire', 'quillcrm')}
+						</label>
+					</div>
+				</RadioGroup>
 
 				{/* Days Input Field */}
 				{type === 'days' && (
@@ -116,7 +103,7 @@ const CouponExpiryDate: React.FC<CouponExpiryDateProps> = ({
 								}}
 								placeholder="0"
 							/>
-							<span className="text-sm text-gray-600 bg-gray-100 px-3 py-3 rounded-lg">
+							<span className="text-sm text-gray-600 bg-gray-100 px-3 py-3.5 rounded-lg">
 								{__('Days', 'quillcrm')}
 							</span>
 						</div>
@@ -133,6 +120,7 @@ const CouponExpiryDate: React.FC<CouponExpiryDateProps> = ({
 							}
 							placeholder={__('Select expiry date', 'quillcrm')}
 							outputFormat="iso"
+							buttonClassName='bg-white border shadow-none text-[#333333] w-full'
 						/>
 					</div>
 				)}

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
@@ -38,10 +38,22 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	isTriggerVisible,
 	setTriggerVisible,
 }) => {
-	const { automation, updateAutomation, updateSettings, updateStep } =
+	const { automation, updateAutomation, updateSettings, updateStep, steps } =
 		useAutomationContext();
 	const [tempAction, setTempAction] = useState<string>('');
 	const { createNotice } = useDispatch('quillcrm/core');
+
+	// Close sidebar if the current step has been deleted
+	useEffect(() => {
+		if (currentStep && currentStep.id) {
+			// Check if the current step still exists in the steps array
+			const stepExists = steps.some(step => step.id === currentStep.id);
+			if (!stepExists) {
+				// Step was deleted, close the sidebar
+				setCurrentStep(null);
+			}
+		}
+	}, [steps, currentStep, setCurrentStep]);
 
 	// Only show sidebar for trigger, configured steps, unconfigured goals, or delay steps
 	// Exclude conditions and end_automation (they don't need configuration)

@@ -15,12 +15,14 @@ import { BuilderData } from '../index';
 
 interface HeaderProps {
 	onSave?: (data: BuilderData) => Promise<void>;
+	onClose?: () => void;
 	autoSaveEnabled?: boolean;
 	autoSaveInterval?: number;
 }
 
 const Header: React.FC<HeaderProps> = ({
 	onSave,
+	onClose,
 	autoSaveEnabled = true,
 	autoSaveInterval = 10000,
 }) => {
@@ -137,16 +139,28 @@ const Header: React.FC<HeaderProps> = ({
 				)}
 
 				{onSave && (
-					<Button
-						variant="default"
-						className="px-3"
-						onClick={() => save()}
-						disabled={isSaving}
-					>
-						{isSaving
-							? __('Saving...', 'quillcrm')
-							: __('Save', 'quillcrm')}
-					</Button>
+					<>
+						{onClose && (
+							<Button
+								variant="outline"
+								className="px-3"
+								onClick={onClose}
+								disabled={isSaving}
+							>
+								{__('Cancel', 'quillcrm')}
+							</Button>
+						)}
+						<Button
+							variant="default"
+							className="px-3"
+							onClick={() => save()}
+							disabled={isSaving}
+						>
+							{isSaving
+								? __('Saving...', 'quillcrm')
+								: __('Save', 'quillcrm')}
+						</Button>
+					</>
 				)}
 			</div>
 

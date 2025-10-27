@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Email Renderer
  *
@@ -17,6 +18,7 @@ use QuillCRM\Emails\Layouts\Layout_Handler_Registry;
  * Renderer for email templates
  */
 class Email_Renderer {
+
 	/**
 	 * Block registry instance
 	 *
@@ -35,7 +37,7 @@ class Email_Renderer {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->block_registry = Block_Registry::instance();
+		 $this->block_registry = Block_Registry::instance();
 	}
 
 	/**
@@ -81,6 +83,34 @@ class Email_Renderer {
 	}
 
 	/**
+	 * Render builder content directly from builder data (without template ID)
+	 * Useful for email sequences and campaigns where content is stored in email_body field
+	 *
+	 * @param array  $builder_data Builder content data (sections, globalSettings, buttonSettings)
+	 * @param array  $merge_tags Merge tags for processing
+	 * @param string $preview_text Optional preview text
+	 * @return string HTML output
+	 */
+	public function render_from_builder_data( $builder_data, $merge_tags = array(), $preview_text = '' ) {
+		if ( ! is_array( $builder_data ) ) {
+			return '';
+		}
+
+		// Get global settings from builder data
+		$global_settings = isset( $builder_data['globalSettings'] ) ? $builder_data['globalSettings'] : array();
+
+		// Process preview text if provided
+		if ( ! empty( $preview_text ) && ! empty( $merge_tags ) ) {
+			$preview_text = Merge_Tags_Manager::instance()->process_merge_tags( $preview_text, $merge_tags );
+		}
+
+		// Generate HTML for email body
+		$html = $this->build_email_structure( $builder_data, $global_settings, $merge_tags, $preview_text );
+
+		return $html;
+	}
+
+	/**
 	 * Build email HTML structure
 	 *
 	 * @param array  $content Template content
@@ -120,10 +150,10 @@ class Email_Renderer {
 		if ( ! empty( $preview_text ) ) {
 			// Add hidden preheader text - this appears in email client previews but not in the email body
 			$preheader_html = '<div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">'
-			. esc_html( $preview_text )
-			// Add invisible characters to push unwanted preview text out of view
-			. str_repeat( '&nbsp;&zwnj;', 50 )
-			. '</div>';
+				. esc_html( $preview_text )
+				// Add invisible characters to push unwanted preview text out of view
+				. str_repeat( '&nbsp;&zwnj;', 50 )
+				. '</div>';
 		}
 
 		// Start with proper email structure using tables for compatibility
@@ -455,5 +485,3 @@ class Email_Renderer {
 		return array();
 	}
 }
-
-

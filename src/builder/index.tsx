@@ -41,6 +41,7 @@ export interface BuilderData {
 export interface BuilderProps {
 	initialData?: BuilderData;
 	onSave?: (data: BuilderData) => Promise<void>;
+	onClose?: () => void;
 	autoSave?:
 		| boolean
 		| {
@@ -52,6 +53,7 @@ export interface BuilderProps {
 const BuilderContent: React.FC<BuilderProps> = ({
 	initialData,
 	onSave,
+	onClose,
 	autoSave = true,
 }) => {
 	const dispatch = useDispatch();
@@ -84,6 +86,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
+		console.log('initialData', initialData);
 		// Load from initialData prop
 		if (initialData) {
 			const { sections, globalSettings, buttonSettings } = initialData;
@@ -200,27 +203,28 @@ const BuilderContent: React.FC<BuilderProps> = ({
 
 				/* Increase z-index for all Radix UI portals when used in builder */
 				body:has(#quillcrm-email-builder) [data-radix-portal] {
-					z-index: 100020 !important;
+					z-index: 160020 !important;
 				}
 				
 				/* Specific overrides for dialog/popover content */
 				body:has(#quillcrm-email-builder) [role="dialog"],
 				body:has(#quillcrm-email-builder) [role="alertdialog"],
 				body:has(#quillcrm-email-builder) [data-radix-popper-content-wrapper] {
-					z-index: 100021 !important;
+					z-index: 160021 !important;
 				}
 			`}</style>
 			<div
 				id="quillcrm-email-builder"
 				className="flex flex-col fixed inset-0 bg-primary-foreground overflow-hidden"
 				style={{
-					zIndex: 100000,
+					zIndex: 160000,
 					width: '100vw',
 					height: '100vh',
 				}}
 			>
 				<Header
 					onSave={onSave}
+					onClose={onClose}
 					autoSaveEnabled={autoSaveConfig.enabled}
 					autoSaveInterval={autoSaveConfig.interval}
 				/>

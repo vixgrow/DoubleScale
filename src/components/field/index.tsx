@@ -41,6 +41,7 @@ import DealOwnerChange from '../deal-owner-change';
 import DealCustomFieldChange from '../deal-custom-field-change';
 import DiscountTypeWithAmount from '../discount-type-with-amount';
 import CouponExpiryDate from '../coupon-expiry-date';
+import OpenBuilder from '../open-builder';
 
 interface FieldProps {
 	label?: string;
@@ -224,7 +225,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					style={{
 						borderRadius: '8px',
@@ -448,6 +449,14 @@ const Field: React.FC<FieldProps> = ({
 					settings={settings}
 					allValues={allValues}
 					onResult={(result) => onChange(result || value)}
+				/>
+			);
+			break;
+		case 'open_builder':
+			fieldContent = (
+				<OpenBuilder
+					initialEmailBody={value}
+					onSave={(emailBodyJson) => onChange(emailBodyJson)}
 				/>
 			);
 			break;

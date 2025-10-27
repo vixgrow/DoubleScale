@@ -29,6 +29,7 @@ use QuillCRM\Settings;
  */
 abstract class Abstract_Campaign_Processing {
 
+
 	/**
 	 * Communication channel (email, sms, whatsapp)
 	 *
@@ -91,7 +92,7 @@ abstract class Abstract_Campaign_Processing {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->settings           = Settings::get( $this->channel, array() );
+		 $this->settings          = Settings::get( $this->channel, array() );
 		$this->max_execution_time = Utils::get_max_execution_time();
 		$this->rate_limiter       = Campaign_Rate_Limiter::instance();
 		$this->contact_filter     = Campaign_Contact_Filter::instance();
@@ -106,7 +107,7 @@ abstract class Abstract_Campaign_Processing {
 	 * @return static
 	 */
 	public static function instance() {
-		$class = get_called_class();
+		 $class = get_called_class();
 		if ( ! isset( self::$instances[ $class ] ) ) {
 			self::$instances[ $class ] = new static();
 		}
@@ -412,12 +413,12 @@ abstract class Abstract_Campaign_Processing {
 		return Campaign_Model::where(
 			function ( $query ) {
 				$query->where( 'status', 'processing' )
-				->orWhere(
-					function ( $subQuery ) {
-						$subQuery->where( 'status', 'schedule' )
-						->whereDate( 'execute_at', '<=', date( 'Y-m-d H:i:s' ) );
-					}
-				);
+					->orWhere(
+						function ( $subQuery ) {
+							$subQuery->where( 'status', 'schedule' )
+								->whereDate( 'execute_at', '<=', date( 'Y-m-d H:i:s' ) );
+						}
+					);
 			}
 		)
 			->where( 'type', $this->channel )
@@ -606,37 +607,37 @@ abstract class Abstract_Campaign_Processing {
 			// Track retry attempts using transients to prevent infinite requeue loop
 			$retry_key   = "quillcrm_retry_{$this->channel}_{$campaign_message->id}";
 			$retry_count = (int) get_transient( $retry_key );
-			
+
 			// Maximum 3 retries for memory issues
 			if ( $retry_count >= 3 ) {
 				// Give up after 3 retries - mark as failed
 				$campaign_message->status = Tracking_Status::FAILED;
 				$campaign_message->save();
-				
+
 				// Clean up retry transient
 				delete_transient( $retry_key );
-				
+
 				quillcrm_get_logger()->error(
 					sprintf( __( '%s message failed after memory limit retries', 'quillcrm' ), ucfirst( $this->channel ) ),
 					array(
-						'code'             => "{$this->channel}_memory_retry_exceeded",
-						'tracking_id'      => $campaign_message->id,
-						'contact_id'       => $contact->id,
-						'campaign_id'      => $campaign->id,
-						'retry_count'      => $retry_count,
-						'memory_usage'     => memory_get_usage( true ),
-						'memory_limit'     => Utils::get_memory_limit(),
+						'code'         => "{$this->channel}_memory_retry_exceeded",
+						'tracking_id'  => $campaign_message->id,
+						'contact_id'   => $contact->id,
+						'campaign_id'  => $campaign->id,
+						'retry_count'  => $retry_count,
+						'memory_usage' => memory_get_usage( true ),
+						'memory_limit' => Utils::get_memory_limit(),
 					)
 				);
 				return;
 			}
-			
+
 			// Increment retry counter (expires after 1 hour to handle stuck tasks)
 			set_transient( $retry_key, $retry_count + 1, HOUR_IN_SECONDS );
-			
+
 			// Log retry attempt
 			quillcrm_get_logger()->warning(
-				sprintf( __( '%s message requeued due to memory limit (attempt %d/3)', 'quillcrm' ), ucfirst( $this->channel ), $retry_count + 1 ),
+				sprintf( __( '%1$s message requeued due to memory limit (attempt %2$d/3)', 'quillcrm' ), ucfirst( $this->channel ), $retry_count + 1 ),
 				array(
 					'code'         => "{$this->channel}_memory_requeue",
 					'tracking_id'  => $campaign_message->id,
@@ -645,12 +646,12 @@ abstract class Abstract_Campaign_Processing {
 					'memory_limit' => Utils::get_memory_limit(),
 				)
 			);
-			
+
 			// Requeue the task for later processing
 			QuillCRM::instance()->campaigns_tasks->enqueue_async( "process_campaign_{$this->channel}", $campaign, $contact, $campaign_message );
 			return;
 		}
-		
+
 		// Clear retry counter on successful processing attempt (memory OK)
 		$retry_key = "quillcrm_retry_{$this->channel}_{$campaign_message->id}";
 		delete_transient( $retry_key );
@@ -686,15 +687,14 @@ abstract class Abstract_Campaign_Processing {
 
 			// Log processing result
 			$this->log_campaign_processing_result( $campaign, $contact, $campaign_message );
-			
+
 			// Clean up retry counter on successful processing
 			$retry_key = "quillcrm_retry_{$this->channel}_{$campaign_message->id}";
 			delete_transient( $retry_key );
-
 		} catch ( \Exception $e ) {
 			// Log processing error
 			$this->log_campaign_processing_error( $campaign, $contact, $campaign_message, $e );
-			
+
 			// Clean up retry counter on error (will be handled by error status)
 			$retry_key = "quillcrm_retry_{$this->channel}_{$campaign_message->id}";
 			delete_transient( $retry_key );
@@ -713,6 +713,9 @@ abstract class Abstract_Campaign_Processing {
 		$subject         = $template->subject ?? '';
 		$message         = $template->body ?? $this->get_default_campaign_content();
 		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
+
+		// Check if the message is in builder JSON format and render it to HTML
+		$message = $this->render_builder_content( $message, $contact );
 
 		// Process merge tags
 		$processed_message = Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
@@ -738,6 +741,44 @@ abstract class Abstract_Campaign_Processing {
 			'hash_key'  => $campaign_message->hash_key,
 		);
 	}
+
+	/**
+	 * Render builder content to HTML if it's in builder JSON format
+	 *
+	 * @param string        $content The content to render (could be HTML or JSON)
+	 * @param Contact_Model $contact Contact model for merge tags
+	 * @return string Rendered HTML content
+	 */
+	protected function render_builder_content( $content, Contact_Model $contact ) {
+		// Try to decode the content to see if it's JSON
+		$decoded = json_decode( $content, true );
+
+		// If it's not valid JSON, return as-is (it's already HTML)
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return $content;
+		}
+
+		// Check if this is a builder format with type='builder' structure
+		if ( isset( $decoded['type'] ) && $decoded['type'] === 'builder' && isset( $decoded['value'] ) ) {
+			// Use Email_Renderer to convert builder JSON to HTML
+			if ( class_exists( '\QuillCRM\Emails\Email_Renderer' ) ) {
+				$renderer     = new \QuillCRM\Emails\Email_Renderer();
+				$builder_data = $decoded['value'];
+
+				// Prepare merge tags array from contact
+				$merge_tags = array( 'contact' => $contact );
+
+				// Extract preview text if available
+				$preview_text = '';
+
+				return $renderer->render_from_builder_data( $builder_data, $merge_tags, $preview_text );
+			}
+		}
+
+		// If it's JSON but not builder format, return as-is (might be legacy format)
+		return $content;
+	}
+
 
 	/**
 	 * Complete campaign
@@ -952,7 +993,7 @@ abstract class Abstract_Campaign_Processing {
 	 * @return bool True if resending was handled
 	 */
 	protected function handle_resending() {
-		$resending_campaign = Campaign_Model::where( 'status', 'resending' )
+		 $resending_campaign = Campaign_Model::where( 'status', 'resending' )
 			->where( 'type', $this->channel )
 			->orderBy( 'updated_at', 'asc' )
 			->first();
@@ -999,9 +1040,9 @@ abstract class Abstract_Campaign_Processing {
 					break;
 				}
 
-			foreach ( $failed_messages as $message ) {
-				$message->status = Tracking_Status::SCHEDULED;
-				$message->save();
+				foreach ( $failed_messages as $message ) {
+					$message->status = Tracking_Status::SCHEDULED;
+					$message->save();
 					QuillCRM::instance()->campaigns_tasks->enqueue_sync(
 						"process_campaign_{$this->channel}",
 						$campaign,
@@ -1137,13 +1178,13 @@ abstract class Abstract_Campaign_Processing {
 		// Check for required unsubscribe link in email templates
 		// Note: Validation disabled - footer automatically adds unsubscribe link via default_email_footer()
 		// if ( $campaign_type === 'email' && strpos( $template->body, '{{contact:unsubscribe_link}}' ) === false ) {
-		// 	quillcrm_get_logger()->warning(
-		// 		__( 'Email template missing unsubscribe link', 'quillcrm' ),
-		// 		array(
-		// 			'template_id'   => $template->id,
-		// 			'template_name' => $template->name ?? 'Unknown',
-		// 		)
-		// 	);
+		// quillcrm_get_logger()->warning(
+		// __( 'Email template missing unsubscribe link', 'quillcrm' ),
+		// array(
+		// 'template_id'   => $template->id,
+		// 'template_name' => $template->name ?? 'Unknown',
+		// )
+		// );
 		// }
 
 		// Validate content length for SMS/WhatsApp

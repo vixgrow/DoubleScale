@@ -56,7 +56,10 @@ const SequenceReportsModal: React.FC<SequenceReportsModalProps> = ({
 		}
 	};
 
+	// (1 = Pending), (2 = Sent), (3 = Failed), (4 = Delivered), (5 = Scheduled);
+
 	const getStatusBadge = (recipient: SequenceMailReport['recipients'][0]) => {
+		console.log('recipient', recipient);
 		if (recipient.clicked_at) {
 			return (
 				<Badge
@@ -79,7 +82,7 @@ const SequenceReportsModal: React.FC<SequenceReportsModalProps> = ({
 				</Badge>
 			);
 		}
-		if (recipient.status === 'sent') {
+		if (recipient.status == '2') {
 			return (
 				<Badge
 					variant="default"
@@ -90,7 +93,7 @@ const SequenceReportsModal: React.FC<SequenceReportsModalProps> = ({
 				</Badge>
 			);
 		}
-		if (recipient.status === 'pending') {
+		if (recipient.status == '1') {
 			return (
 				<Badge
 					variant="default"
@@ -101,7 +104,7 @@ const SequenceReportsModal: React.FC<SequenceReportsModalProps> = ({
 				</Badge>
 			);
 		}
-		if (recipient.status === 'failed') {
+		if (recipient.status == '3') {
 			return (
 				<Badge
 					variant="default"
@@ -109,6 +112,28 @@ const SequenceReportsModal: React.FC<SequenceReportsModalProps> = ({
 				>
 					<Mail size={12} />
 					{__('Failed', 'quillcrm')}
+				</Badge>
+			);
+		}
+		if (recipient.status == '4') {
+			return (
+				<Badge
+					variant="default"
+					className="flex items-center gap-1 bg-green-500 text-white"
+				>
+					<Mail size={12} />
+					{__('Delivered', 'quillcrm')}
+				</Badge>
+			);
+		}
+		if (recipient.status == '5') {
+			return (
+				<Badge
+					variant="default"
+					className="flex items-center gap-1 bg-gray-500 text-white"
+				>
+					<Mail size={12} />
+					{__('Scheduled', 'quillcrm')}
 				</Badge>
 			);
 		}

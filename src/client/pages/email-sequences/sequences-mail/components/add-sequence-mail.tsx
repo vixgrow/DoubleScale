@@ -28,10 +28,24 @@ const AddSequenceMail: React.FC<AddSequenceMailProps> = ({
 		// Start processing
 		try {
 			// Prepare the data for API
+			if (!data.subject || data.subject.trim() === '') {
+				createNotice({
+					type: 'error',
+					message: __('Subject is required', 'quillcrm'),
+				});
+				return;
+			}
+			if (!data.email_body || data.email_body.trim() === '') {
+				createNotice({
+					type: 'error',
+					message: __('Email body is required', 'quillcrm'),
+				});
+				return;
+			}
 			const sequenceMailData: SequenceMailRequest = {
 				type: SEQUENCE_MAIL_TYPE,
 				parent_id: sequenceId,
-				name: data.subject, // Use subject as name for consistency
+				name: data.subject,
 				subject: data.subject,
 				email_body: data.email_body,
 				settings: {

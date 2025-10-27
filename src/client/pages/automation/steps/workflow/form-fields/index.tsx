@@ -18,12 +18,9 @@ import ConfigAPI from '@quillcrm/config';
 import type { Form } from '@quillcrm/config';
 import AjaxSelect from './ajax-select';
 import type { MappedFields } from '@quillcrm/client';
-import { ListField, TagField } from '@quillcrm/components';
 import { Card, CardContent } from '@quillcrm/components/ui/card';
-import { Label } from '@quillcrm/components/ui/label';
-import { Switch } from '@quillcrm/components/ui/switch';
 import { Spinner } from '@quillcrm/components/ui/spinner';
-import ContactMappedFields from './contact-mapped-fields';
+import MappingDialog from './mapping-dialog';
 
 interface FormFieldsProps {
 	values: { [key: string]: any };
@@ -39,11 +36,6 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 		form_type,
 		form_id,
 		mapped_fields = {},
-		lists = [],
-		tags = [],
-		update_existing_contact = false,
-		update_blank_fields = false,
-		mark_as_subscribed = false,
 	} = values;
 	const forms = ConfigAPI.getForms();
 	const fieldsSettings = form_type ? forms[form_type]?.fields_settings : null;
@@ -179,159 +171,35 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 						}
 					})}
 				{form_type && form_id && (
-					<Card>
-						<CardContent className="pt-6">
-							{isFetching ? (
-								<div className="flex justify-center items-center py-8">
-									<Spinner className="size-8" />
-								</div>
-							) : (
-								<div className="qcrm-fields">
-									<div className="qcrm-field">
-										<div className="qcrm-field-label">
-											<Label>
-												{__('Map fields', 'quillcrm')}
-											</Label>
-										</div>
-										{formFields && (
-											<ContactMappedFields
-												values={mapped_fields}
-												onChange={(
-													value: MappedFields
-												) => {
-													onChange({
-														...values,
-														mapped_fields: value,
-													});
-												}}
-												fields={mapValues(
-													formFields,
-													(name) => ({ label: name })
-												)}
-											/>
-										)}
+					<>
+						{isFetching ? (
+							<Card>
+								<CardContent className="pt-6">
+									<div className="flex justify-center items-center py-8">
+										<Spinner className="size-8" />
 									</div>
-									<div className="qcrm-field">
-										<div className="qcrm-field-label">
-											<Label>
-												{__('Contact', 'quillcrm')}
-											</Label>
-										</div>
-										<div className="qcrm-field-input">
-											<div className="flex flex-col gap-2.5">
-												<div className="flex flex-col gap-2.5">
-													<div className="flex flex-col gap-2.5 flex-1">
-														<Label>
-															{__(
-																'Lists',
-																'quillcrm'
-															)}
-														</Label>
-														<ListField
-															value={lists}
-															onChange={(
-																value
-															) => {
-																onChange({
-																	...values,
-																	lists: value,
-																});
-															}}
-														/>
-													</div>
-													<div className="flex flex-col gap-2.5 flex-1">
-														<Label>
-															{__(
-																'Tags',
-																'quillcrm'
-															)}
-														</Label>
-														<TagField
-															value={tags}
-															onChange={(
-																value
-															) => {
-																onChange({
-																	...values,
-																	tags: value,
-																});
-															}}
-														/>
-													</div>
-												</div>
-												<div className="flex gap-2.5 justify-between items-center">
-													<Label>
-														{__(
-															'Update existing contact',
-															'quillcrm'
-														)}
-													</Label>
-													<Switch
-														checked={
-															update_existing_contact
-														}
-														onCheckedChange={(
-															value
-														) => {
-															onChange({
-																...values,
-																update_existing_contact:
-																	value,
-															});
-														}}
-													/>
-												</div>
-												<div className="flex gap-2.5 justify-between items-center">
-													<Label>
-														{__(
-															'Update blank fields',
-															'quillcrm'
-														)}
-													</Label>
-													<Switch
-														checked={
-															update_blank_fields
-														}
-														onCheckedChange={(
-															value
-														) => {
-															onChange({
-																...values,
-																update_blank_fields:
-																	value,
-															});
-														}}
-													/>
-												</div>
-												<div className="flex gap-2.5 justify-between items-center">
-													<Label>
-														{__(
-															'Mark as Subscribed',
-															'quillcrm'
-														)}
-													</Label>
-													<Switch
-														checked={
-															mark_as_subscribed
-														}
-														onCheckedChange={(
-															value
-														) => {
-															onChange({
-																...values,
-																mark_as_subscribed:
-																	value,
-															});
-														}}
-													/>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							)}
-						</CardContent>
-					</Card>
+								</CardContent>
+							</Card>
+						) : (
+							formFields && (
+								<MappingDialog
+									values={mapped_fields}
+									onChange={(value: MappedFields) => {
+										onChange({
+											...values,
+											mapped_fields: value,
+										});
+									}}
+									onChangeAll={onChange}
+									allValues={values}
+									fields={mapValues(
+										formFields,
+										(name) => ({ label: name })
+									)}
+								/>
+							)
+						)}
+					</>
 				)}
 			</div>
 		</div>

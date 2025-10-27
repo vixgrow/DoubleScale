@@ -21,12 +21,12 @@ export interface OpenBuilderProps {
 	 * Button variant (optional)
 	 */
 	buttonVariant?:
-	| 'default'
-	| 'destructive'
-	| 'outline'
-	| 'secondary'
-	| 'ghost'
-	| 'link';
+		| 'default'
+		| 'destructive'
+		| 'outline'
+		| 'secondary'
+		| 'ghost'
+		| 'link';
 	/**
 	 * Button className (optional)
 	 */
@@ -48,9 +48,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 	const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 
 	const handleOpenBuilder = () => {
-		console.log('OpenBuilder: Button clicked, opening builder...');
 		setIsBuilderOpen(true);
-		console.log('OpenBuilder: isBuilderOpen set to true');
 	};
 
 	const handleBuilderSave = (builderData: any) => {
@@ -180,10 +178,6 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 			{/* Builder Modal - Rendered in portal to ensure full screen */}
 			{isBuilderOpen && (
 				<>
-					{console.log(
-						'OpenBuilder: Rendering builder with isBuilderOpen =',
-						isBuilderOpen
-					)}
 					{createPortal(
 						// eslint-disable-next-line react/forbid-dom-props
 						<div

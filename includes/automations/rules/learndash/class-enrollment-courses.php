@@ -11,6 +11,7 @@ use QuillCRM\Managers\Rules_Manager;
  */
 class Enrollment_Courses extends Rule {
 
+
 	/**
 	 * Name
 	 *
@@ -118,7 +119,6 @@ class Enrollment_Courses extends Rule {
 	 * @return array Array of enrolled course IDs
 	 */
 	public function get_value( $automation_contact ) {
-		xdebug_break();
 		$contact = $automation_contact->contact;
 
 		if ( ! $contact || empty( $contact->email ) ) {

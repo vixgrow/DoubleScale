@@ -214,7 +214,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500'
+						'border-red-500 focus-visible:ring-red-500'
 					)}
 					style={{
 						borderRadius: '8px',
@@ -233,7 +233,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'bg-white',
 						status === 'error' &&
-							'border-red-500 focus-visible:ring-red-500'
+						'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 					style={{
@@ -251,8 +251,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-									(option) => option.value === value
-								)
+								(option) => option.value === value
+							)
 							: null
 					}
 					onChange={(value) => {
@@ -427,6 +427,47 @@ const Field: React.FC<FieldProps> = ({
 			fieldContent = null;
 	}
 
+	// Special layout for switch - label before the switch with justify-between
+	if (type === 'switch') {
+		return (
+			<div className="qcrm-field" style={style || {}}>
+				<div className="flex items-center justify-between">
+					{label && (
+						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
+							<span>
+								{label}{' '}
+								{required && <span className="text-red-600">*</span>}
+							</span>
+						</div>
+					)}
+					<div className="qcrm-field-input">{fieldContent}</div>
+				</div>
+				{helperText && renderHelperText(helperText)}
+			</div>
+		);
+	}
+
+	// Special layout for checkbox - checkbox before label
+	if (type === 'checkbox') {
+		return (
+			<div className="qcrm-field" style={style || {}}>
+				<div className="flex items-center gap-3">
+					<div className="qcrm-field-input">{fieldContent}</div>
+					{label && (
+						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
+							<span>
+								{label}{' '}
+								{required && <span className="text-red-600">*</span>}
+							</span>
+						</div>
+					)}
+				</div>
+				{helperText && renderHelperText(helperText)}
+			</div>
+		);
+	}
+
+	// Default layout - label above the field
 	return (
 		<div className="qcrm-field" style={style || {}}>
 			{label && (

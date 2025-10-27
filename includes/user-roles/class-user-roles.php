@@ -23,6 +23,9 @@ namespace QuillCRM\User_Roles;
 final class User_Roles {
 
 
+
+
+
 	public const PREFIX        = 'quillcrm_';
 	public const CRM_MANAGER   = self::PREFIX . 'crm_manager';
 	public const DEAL_OWNER    = self::PREFIX . 'deal_owner';
@@ -61,9 +64,7 @@ final class User_Roles {
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct() {
-		 add_action( 'quillcrm_installed', array( $this, 'add_roles_and_capabilities' ) );
-	}
+	public function __construct() {}
 
 
 
@@ -74,7 +75,7 @@ final class User_Roles {
 	 *
 	 * @since 1.0.0
 	 */
-	public function add_roles_and_capabilities() {
+	public static function add_roles_and_capabilities() {
 		$roles = self::get_roles();
 
 		foreach ( $roles as $role => $label ) {

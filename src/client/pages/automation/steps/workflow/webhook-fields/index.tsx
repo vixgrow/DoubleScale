@@ -79,7 +79,7 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 	return (
 		<div className="flex flex-col gap-5">
 			<div className="flex flex-col gap-2.5">
-				<p className="text-sm font-medium">{__('Webhook URL')}</p>
+				<p className="text-base font-normal text-[#09090B]">{__('Webhook URL')}</p>
 				<Input
 					value={`${adminUrl}/wp-json/qc/v1/automations/webhook?quillcrm_key=${webhook_key}&quillcrm_id=${automation?.id}`}
 					readOnly
@@ -90,7 +90,7 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 			</div>
 			<div className="flex flex-col gap-2.5">
 				{isEmpty(payload) && (
-					<Button onClick={fetchAutomation} disabled={loading}>
+					<Button onClick={fetchAutomation} disabled={loading} variant="secondaryDeepBlue">
 						{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 						{__('Receive Data')}
 					</Button>
@@ -106,7 +106,7 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 							</TableHeader>
 							<TableBody>
 								{Object.entries(payload).map(([key, value]) => (
-									<TableRow key={key}>
+									<TableRow key={key} className="text-[#333333]">
 										<TableCell>{key}</TableCell>
 										<TableCell>{value as string}</TableCell>
 									</TableRow>
@@ -116,17 +116,17 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 						<p className="text-sm">
 							{__('Received At')}: {convertDate(received_at)}
 						</p>
-						<Button onClick={fetchAutomation} disabled={loading}>
+						<Button onClick={fetchAutomation} disabled={loading} variant="secondaryDeepBlue">
 							{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 							{__('Refresh Data')}
 						</Button>
 						<div className="flex flex-col gap-2.5">
-							<p className="text-sm font-medium">
+							<p className="text-base font-normal text-[#09090B]">
 								{__('Map Fields')}
 							</p>
 							{map(payload, (_, key) => {
 								return (
-									<div key={key} className="flex gap-5">
+									<div key={key} className="flex gap-3">
 										<Input
 											readOnly
 											value={key}
@@ -147,7 +147,7 @@ const WebhookFields: React.FC<WebhookFieldsProps> = ({ values, onChange }) => {
 											<SelectTrigger className="flex-1">
 												<SelectValue placeholder={__('Select field', 'quillcrm')} />
 											</SelectTrigger>
-											<SelectContent>
+											<SelectContent className="max-h-[250px] overflow-y-auto">
 												{map(
 													contactFieldsGroups,
 													(group, groupKey) => (

@@ -40,6 +40,8 @@ import woocommerce from '../../../../../assets/images/woocoomerce/woo-icon.png';
 import wpusers from '../../../../../assets/images/wordpress/wordpress-icon.png';
 //@ts-ignore
 import forms from '../../../../../assets/images/forms/forms.png';
+//@ts-ignore
+import booking from '../../../../../assets/images/booking/booking.png';
 
 interface CreateAutomationModalProps {
     visible: boolean;
@@ -70,7 +72,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 
     const categoryData = {
         'booking': {
-            image: forms,
+            image: booking,
             description: __('Trigger automations based on booking events', 'quillcrm')
         },
         'crm': {

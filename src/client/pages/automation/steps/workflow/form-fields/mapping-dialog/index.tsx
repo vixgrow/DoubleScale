@@ -11,7 +11,6 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import { Settings } from 'lucide-react';
 import {
 	Dialog,
 	DialogContent,

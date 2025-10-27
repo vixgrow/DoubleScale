@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@/components/ui/button';
@@ -21,12 +21,12 @@ export interface OpenBuilderProps {
 	 * Button variant (optional)
 	 */
 	buttonVariant?:
-		| 'default'
-		| 'destructive'
-		| 'outline'
-		| 'secondary'
-		| 'ghost'
-		| 'link';
+	| 'default'
+	| 'destructive'
+	| 'outline'
+	| 'secondary'
+	| 'ghost'
+	| 'link';
 	/**
 	 * Button className (optional)
 	 */
@@ -67,6 +67,61 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 	const handleBuilderClose = () => {
 		setIsBuilderOpen(false);
 	};
+
+	// Handle inert attribute for background dialogs to prevent focus issues
+	useEffect(() => {
+		if (!isBuilderOpen) {
+			return;
+		}
+
+		const inertElements: HTMLElement[] = [];
+
+		// Use setTimeout to ensure DOM is ready after portal renders
+		const timeoutId = setTimeout(() => {
+			// Find all dialog content elements that might be in the background
+			const dialogContents = document.querySelectorAll('[role="dialog"]');
+
+			dialogContents.forEach((dialog) => {
+				const dialogElement = dialog as HTMLElement;
+				// Don't make the builder itself inert
+				if (
+					!dialogElement.querySelector('#quillcrm-email-builder') &&
+					!dialogElement.closest('#quillcrm-email-builder')
+				) {
+					// Store original inert state
+					const wasInert = dialogElement.hasAttribute('inert');
+					if (!wasInert) {
+						dialogElement.setAttribute('inert', '');
+						inertElements.push(dialogElement);
+					}
+				}
+			});
+
+			// Also set the workflow sidebar to inert if it exists
+			const sidebar = document.querySelector('.qcrm-workflow-sidebar');
+			if (sidebar && !sidebar.closest('#quillcrm-email-builder')) {
+				const sidebarElement = sidebar as HTMLElement;
+				sidebarElement.setAttribute('inert', '');
+				inertElements.push(sidebarElement);
+			}
+
+			// Focus the builder wrapper to ensure focus is moved away from background
+			const builderWrapper = document.getElementById(
+				'builder-portal-wrapper'
+			);
+			if (builderWrapper) {
+				builderWrapper.focus();
+			}
+		}, 50);
+
+		// Cleanup: remove inert when builder closes
+		return () => {
+			clearTimeout(timeoutId);
+			inertElements.forEach((element) => {
+				element.removeAttribute('inert');
+			});
+		};
+	}, [isBuilderOpen]);
 
 	const getBuilderInitialData = () => {
 		if (!initialEmailBody) {
@@ -130,15 +185,22 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 						isBuilderOpen
 					)}
 					{createPortal(
+						// eslint-disable-next-line react/forbid-dom-props
 						<div
-							onPointerDown={(e) => e.stopPropagation()}
-							onClick={(e) => e.stopPropagation()}
-							onMouseDown={(e) => e.stopPropagation()}
-							onKeyDown={(e) => {
-								// Prevent escape key from closing parent dialogs
-								if (e.key === 'Escape') {
-									e.stopPropagation();
-								}
+							id="builder-portal-wrapper"
+							tabIndex={-1}
+							// Add data attribute to help Radix UI dialogs ignore this element
+							data-state="open"
+							data-builder-portal="true"
+							role="dialog"
+							aria-modal="true"
+							aria-label="Email Template Builder"
+							// Inline styles required for portal z-index layering
+							style={{
+								position: 'fixed',
+								inset: 0,
+								zIndex: 160000,
+								pointerEvents: 'auto',
 							}}
 						>
 							<Builder

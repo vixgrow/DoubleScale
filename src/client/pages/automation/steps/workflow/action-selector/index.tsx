@@ -22,7 +22,7 @@ import ConfigAPI from '@quillcrm/config';
 //@ts-ignore
 import crm from '../../../../../../../assets/images/crm/crm.png';
 //@ts-ignore
-import forms from '../../../../../../../assets/images/forms/forms.png';
+import email from '../../../../../../../assets/images/emails/emails.png';
 //@ts-ignore
 import woocommerce from '../../../../../../../assets/images/woocoomerce/woo-icon.png';
 //@ts-ignore
@@ -31,6 +31,8 @@ import wpusers from '../../../../../../../assets/images/wordpress/wordpress-icon
 import lms from '../../../../../../../assets/images/lms/lms.png';
 //@ts-ignore
 import data from '../../../../../../../assets/images/send-data/data.png';
+//@ts-ignore
+import messages from '../../../../../../../assets/images/messages/messages.png';
 
 interface ActionSelectorProps {
 	value: string;
@@ -101,8 +103,12 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 			description: __('Send data to external services', 'quillcrm')
 		},
 		'email': {
-			image: forms,
+			image: email,
 			description: __('Send email to users', 'quillcrm')
+		},
+		'message': {
+			image: messages,
+			description: __('Send message to users', 'quillcrm')
 		}
 	};
 

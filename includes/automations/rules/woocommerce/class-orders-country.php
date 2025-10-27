@@ -15,6 +15,7 @@ class Orders_Country extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -75,7 +76,7 @@ class Orders_Country extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		$countries = new \WC_Countries();
+		 $countries = new \WC_Countries();
 		return $countries->get_countries();
 	}
 
@@ -176,4 +177,19 @@ class Orders_Country extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new Orders_Country() );
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Orders_Country() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Orders_Country() );
+				}
+			);
+		}
+	},
+	99
+);

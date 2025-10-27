@@ -11,6 +11,7 @@ use QuillCRM\Managers\Rules_Manager;
  */
 class Orders_Used_Coupon extends Rule {
 
+
 	/**
 	 * Name
 	 *
@@ -181,4 +182,19 @@ class Orders_Used_Coupon extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new Orders_Used_Coupon() );
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Orders_Used_Coupon() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Orders_Used_Coupon() );
+				}
+			);
+		}
+	},
+	99
+);

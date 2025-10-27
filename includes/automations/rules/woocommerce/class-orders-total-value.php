@@ -23,6 +23,7 @@ class Orders_Total_Value extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -141,4 +142,19 @@ class Orders_Total_Value extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new Orders_Total_Value() );
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Orders_Total_Value() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Orders_Total_Value() );
+				}
+			);
+		}
+	},
+	99
+);

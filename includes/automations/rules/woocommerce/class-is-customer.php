@@ -11,6 +11,7 @@ use QuillCRM\Managers\Rules_Manager;
  */
 class Is_Customer extends Rule {
 
+
 	/**
 	 * Name
 	 *
@@ -69,10 +70,10 @@ class Is_Customer extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		return array(
-			'yes' => __( 'Yes', 'quillcrm' ),
-			'no'  => __( 'No', 'quillcrm' ),
-		);
+		 return array(
+			 'yes' => __( 'Yes', 'quillcrm' ),
+			 'no'  => __( 'No', 'quillcrm' ),
+		 );
 	}
 
 	/**
@@ -125,4 +126,19 @@ class Is_Customer extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new Is_Customer() );
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Is_Customer() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Is_Customer() );
+				}
+			);
+		}
+	},
+	99
+);

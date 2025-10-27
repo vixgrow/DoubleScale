@@ -15,6 +15,7 @@ class Is_Guest extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -129,5 +130,19 @@ class Is_Guest extends Rule {
 		}
 	}
 }
-
-Rules_Manager::instance()->register( new Is_Guest() );
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Is_Guest() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Is_Guest() );
+				}
+			);
+		}
+	},
+	99
+);

@@ -12,6 +12,7 @@ use QuillCRM\Managers\Rules_Manager;
 class Last_Order extends Rule {
 
 
+
 	/**
 	 * Name
 	 *
@@ -168,4 +169,19 @@ class Last_Order extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new Last_Order() );
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Last_Order() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Last_Order() );
+				}
+			);
+		}
+	},
+	99
+);

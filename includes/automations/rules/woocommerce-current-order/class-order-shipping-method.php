@@ -23,6 +23,7 @@ class Order_Shipping_Method extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -142,4 +143,19 @@ class Order_Shipping_Method extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new Order_Shipping_Method() );
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Order_Shipping_Method() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Order_Shipping_Method() );
+				}
+			);
+		}
+	},
+	99
+);

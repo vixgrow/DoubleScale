@@ -18,6 +18,7 @@ class Order_Payment_Gateway extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -131,4 +132,20 @@ class Order_Payment_Gateway extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new Order_Payment_Gateway() );
+
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Order_Payment_Gateway() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Order_Payment_Gateway() );
+				}
+			);
+		}
+	},
+	99
+);

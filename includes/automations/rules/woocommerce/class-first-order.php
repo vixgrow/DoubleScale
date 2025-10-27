@@ -11,6 +11,7 @@ use QuillCRM\Managers\Rules_Manager;
  */
 class First_Order extends Rule {
 
+
 	/**
 	 * Name
 	 *
@@ -166,4 +167,20 @@ class First_Order extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new First_Order() );
+
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new First_Order() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new First_Order() );
+				}
+			);
+		}
+	},
+	99
+);

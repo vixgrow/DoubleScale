@@ -15,6 +15,7 @@ class Order_Country extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -151,4 +152,19 @@ class Order_Country extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new Order_Country() );
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Order_Country() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Order_Country() );
+				}
+			);
+		}
+	},
+	99
+);

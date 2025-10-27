@@ -26,6 +26,7 @@ class Orders_Total_Count extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -145,4 +146,19 @@ class Orders_Total_Count extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new Orders_Total_Count() );
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Orders_Total_Count() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Orders_Total_Count() );
+				}
+			);
+		}
+	},
+	99
+);

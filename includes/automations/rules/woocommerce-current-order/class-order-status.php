@@ -23,6 +23,7 @@ use QuillCRM\Constants\Order_Status as Order_Status_Constant;
 class Order_Status extends Rule {
 
 
+
 	/**
 	 * Name
 	 *
@@ -132,4 +133,20 @@ class Order_Status extends Rule {
 	}
 }
 
-Rules_Manager::instance()->register( new Order_Status() );
+
+add_action(
+	'init',
+	function () {
+		if ( class_exists( 'WooCommerce' ) ) {
+			Rules_Manager::instance()->register( new Order_Status() );
+		} else {
+			add_action(
+				'woocommerce_loaded',
+				function () {
+					Rules_Manager::instance()->register( new Order_Status() );
+				}
+			);
+		}
+	},
+	99
+);

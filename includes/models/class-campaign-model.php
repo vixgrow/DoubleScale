@@ -305,8 +305,9 @@ class Campaign_Model extends Model {
 	 * @return int Campaign type integer
 	 */
 	public function get_type() {
-		// Access the raw integer value from database
-		return $this->attributes['type'] ?? Campaign_Channel::get_default();
+		// Access the raw value from database and cast to integer
+		// Eloquent may return this as a string, so we ensure it's an integer
+		return (int) ( $this->attributes['type'] ?? Campaign_Channel::get_default() );
 	}
 
 	/**

@@ -123,17 +123,13 @@ abstract class Abstract_Campaign_Processing {
 	 * @return void
 	 */
 	protected function register_campaign_processing_hooks() {
-		$type               = $this->channel;
+		// Convert channel integer to string for hook names (e.g., 1 -> 'email')
+		$type_string        = Campaign_Channel::to_string( $this->channel );
 		$daily_callback_key = $this->get_daily_callback_key();
 
-		add_action(
-			'init',
-			function () use ( $type, $daily_callback_key ) {
-				QuillCRM::instance()->daily_tasks->register_callback( $daily_callback_key, array( $this, 'reset_daily_count' ) );
-				QuillCRM::instance()->campaigns_tasks->register_callback( "quillcrm_{$type}_campaigns", array( $this, 'process_campaigns' ) );
-				QuillCRM::instance()->campaigns_tasks->register_callback( "process_campaign_{$type}", array( $this, 'process_campaign_message' ) );
-			}
-		);
+		QuillCRM::instance()->daily_tasks->register_callback( $daily_callback_key, array( $this, 'reset_daily_count' ) );
+		QuillCRM::instance()->campaigns_tasks->register_callback( "quillcrm_{$type_string}_campaigns", array( $this, 'process_campaigns' ) );
+		QuillCRM::instance()->campaigns_tasks->register_callback( "process_campaign_{$type_string}", array( $this, 'process_campaign_message' ) );
 	}
 
 	/**
@@ -563,8 +559,9 @@ abstract class Abstract_Campaign_Processing {
 			// Update last contact offset
 			update_option( "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
 
-			// Enqueue processing task
-			QuillCRM::instance()->campaigns_tasks->enqueue_sync( "process_campaign_{$this->channel}", $campaign, $contact, $campaign_message );
+			// Enqueue processing task (convert channel integer to string for hook name)
+			$channel_string = Campaign_Channel::to_string( $this->channel );
+			QuillCRM::instance()->campaigns_tasks->enqueue_sync( "process_campaign_{$channel_string}", $campaign, $contact, $campaign_message );
 
 			quillcrm_get_logger()->info(
 				sprintf( __( 'Campaign %s enqueued.', 'quillcrm' ), $this->channel ),
@@ -647,8 +644,9 @@ abstract class Abstract_Campaign_Processing {
 				)
 			);
 
-			// Requeue the task for later processing
-			QuillCRM::instance()->campaigns_tasks->enqueue_async( "process_campaign_{$this->channel}", $campaign, $contact, $campaign_message );
+			// Requeue the task for later processing (convert channel integer to string for hook name)
+			$channel_string = Campaign_Channel::to_string( $this->channel );
+			QuillCRM::instance()->campaigns_tasks->enqueue_async( "process_campaign_{$channel_string}", $campaign, $contact, $campaign_message );
 			return;
 		}
 

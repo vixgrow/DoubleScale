@@ -81,7 +81,7 @@ export function getColumns({ onView }: ColumnsProps) {
                 <div className="flex items-center gap-2">
                     <Button
                         size="sm"
-                        className="bg-transparent border-y-0 border-l-0 border-r shadow-none text-primary hover:bg-transparent hover:text-primary/80"
+                        className="text-primary p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
                         onClick={() => onView(row.original)}
                     >
                         <ViewIcon />

@@ -6,6 +6,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
+import { useNavigate, getToLink } from '@quillcrm/navigation';
 
 /**
  * Internal dependencies
@@ -30,6 +31,7 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 	const [page, setPage] = useState<number>(1);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const { createNotice } = useDispatch('quillcrm/core');
+	const navigate = useNavigate();
 
 	const serverSideTable = useServerSideTable({
 		page,
@@ -71,8 +73,7 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 
 	const columns = getColumns({
 		onView: (automationContact) => {
-			// TODO: Implement view automation details dialog
-			console.log('View automation:', automationContact);
+			navigate(getToLink(`automations/${automationContact.automation_id}`));
 		},
 	});
 

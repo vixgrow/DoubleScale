@@ -31,6 +31,7 @@ final class Merge_Tags_Manager {
 
 
 
+
 	/**
 	 * Registed merge tags
 	 *
@@ -166,6 +167,10 @@ final class Merge_Tags_Manager {
 				'name'      => __( 'Easy Digital Downloads Order', 'quillcrm' ),
 				'mergeTags' => array(),
 				'triggers'  => array( 'edd_new_order_success' ),
+			),
+			'learndash'      => array(
+				'name'      => __( 'LearnDash', 'quillcrm' ),
+				'mergeTags' => array(),
 			),
 		);
 		// get forms slug to set in groups

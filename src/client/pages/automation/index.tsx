@@ -21,6 +21,7 @@ import actions from './state/actions';
 import { Automation as AutomationType } from '@quillcrm/client';
 import Workflow from './steps/workflow';
 import Contacts from './steps/contacts';
+import AutomationFunnel from '../automation-reports/automation-funnels';
 import {
 	Dialog,
 	DialogContent,
@@ -99,19 +100,6 @@ const Automation: React.FC = () => {
 	);
 	const [open, setOpen] = useState(true);
 
-	useEffect(() => {
-		if (activeTab === 'reports') {
-			setOpen(false);
-			setTimeout(() => {
-				navigate(
-					getToLink(
-						`automations/${automation?.id}/reports`
-					)
-				);
-			}, 100);
-		}
-	}, [activeTab, automation?.id, navigate]);
-
 	const renderContent = () => {
 		switch (activeTab) {
 			case 'workflow':
@@ -119,7 +107,7 @@ const Automation: React.FC = () => {
 			case 'contacts':
 				return <Contacts />;
 			case 'reports':
-				return null;
+				return <AutomationFunnel automation={automation} />;
 			default:
 				return <Workflow />;
 		}

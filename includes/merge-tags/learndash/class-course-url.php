@@ -21,6 +21,7 @@ use QuillCRM\Managers\Merge_Tags_Manager;
  */
 class Course_URL extends Merge_Tag {
 
+
 	/**
 	 * Merge Tag Name
 	 *
@@ -47,7 +48,8 @@ class Course_URL extends Merge_Tag {
 	 *
 	 * @var array
 	 */
-	public $required_triggers = array( 'learndash_user_enrolled_course' );
+	public $required_triggers = array( 'learndash_course_completed', 'learndash_lesson_completed', 'learndash_topic_completed', 'learndash_user_added_group', 'learndash_user_enrolled_course', 'learndash_user_left_course' );
+
 
 	/**
 	 * Merge Tag Group

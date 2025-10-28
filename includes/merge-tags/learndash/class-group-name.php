@@ -1,46 +1,53 @@
 <?php
+
 /**
- * Class Course URL Merge Tag
+ * Class Group Name Merge Tag
  *
- * This class is responsible for handling the course URL merge tag
+ * This class is responsible for handling the group name merge tag
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\LMS\LearnDash;
+namespace QuillCRM\Merge_Tags\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Course URL Merge Tag
+ * Group Name Merge Tag
  */
-class Course_URL extends Merge_Tag {
+class Group_Name extends Merge_Tag {
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Course URL';
+	public $name = 'Group Name';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'course_url';
+	public $slug = 'group_name';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Course URL';
+	public $description = 'Group Name';
+
+	/**
+	 * Required Triggers
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array( 'learndash_user_added_group' );
 
 	/**
 	 * Merge Tag Group
@@ -58,11 +65,15 @@ class Course_URL extends Merge_Tag {
 	 * @return string
 	 */
 	public function get_value( $contact, $merge_tag = '' ) {
-		$course_id  = $contact->get_data( 'course_id' );
-		$course_url = get_permalink( $course_id );
+		$group_id = $contact->get_data( 'group_id' );
 
-		return $course_url ? $course_url : '';
+		$group = get_post( $group_id );
+		if ( ! empty( $group ) ) {
+			return $group->post_title;
+		}
+
+		return '';
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Course_URL() );
+Merge_Tags_Manager::instance()->register( new Group_Name() );

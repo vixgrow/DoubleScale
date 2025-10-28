@@ -1,46 +1,56 @@
 <?php
+
 /**
- * Class User Enrolled Courses Merge Tag
+ * Class Candidate Name Merge Tag
  *
- * This class is responsible for handling the user enrolled courses merge tag
+ * This class is responsible for handling the candidate name merge tag
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\LMS\LearnDash;
+namespace QuillCRM\Merge_Tags\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * User Enrolled Courses Merge Tag
+ * Candidate Name Merge Tag
  */
-class User_Enrolled_Courses extends Merge_Tag {
+class Candidate_Name extends Merge_Tag {
+
+
+
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'User Enrolled Courses';
+	public $name = 'Candidate Name';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'enrolled_courses';
+	public $slug = 'candidate_name';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'User Enrolled Courses';
+	public $description = 'Candidate Name';
+
+	/**
+	 * Required Triggers
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array( 'learndash_course_completed', 'learndash_lesson_completed', 'learndash_topic_completed', 'learndash_user_added_group', 'learndash_user_enrolled_course', 'learndash_user_left_course' );
 
 	/**
 	 * Merge Tag Group
@@ -64,14 +74,8 @@ class User_Enrolled_Courses extends Merge_Tag {
 			return '';
 		}
 
-		$enrolled_courses = ld_get_mycourses( $user_id );
-		$course_names     = array();
-		foreach ( $enrolled_courses as $course ) {
-			$course_names[] = get_the_title( $course->ID );
-		}
-
-		return implode( ', ', $course_names );
+		return $user->display_name ?? '';
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new User_Enrolled_Courses() );
+Merge_Tags_Manager::instance()->register( new Candidate_Name() );

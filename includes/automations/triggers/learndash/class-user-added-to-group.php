@@ -1,4 +1,5 @@
 <?php
+
 /**
  * LearnDash Trigger for User Added to Group
  * This trigger will be fired when a user is added to a group.
@@ -18,6 +19,9 @@ use WP_User;
  * User Added to Group Trigger
  */
 class User_Added_To_Group extends Trigger {
+
+
+
 
 	/**
 	 * Trigger Name
@@ -81,7 +85,7 @@ class User_Added_To_Group extends Trigger {
 	 * @param int $user_id User ID.
 	 * @return void
 	 */
-	public function user_added_to_group( $group_id, $user_id ) {
+	public function user_added_to_group( $user_id, $group_id ) {
 		$user = get_user_by( 'ID', $user_id );
 		if ( ! $user instanceof WP_User ) {
 			return;

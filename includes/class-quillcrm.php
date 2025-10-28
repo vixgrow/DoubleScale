@@ -62,6 +62,10 @@ final class QuillCRM {
 
 
 
+
+
+
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -398,6 +402,18 @@ final class QuillCRM {
 
 		// Load all froms
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/forms/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
+			require $file;
+		}
+
+		// Load all learndash merge tags files
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/learndash/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
+			require $file;
+		}
+
+		// Load all learndash merge tags files
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/lms/learndash/class-*.php' );
 		foreach ( $merge_tags_files as $file ) {
 			require $file;
 		}

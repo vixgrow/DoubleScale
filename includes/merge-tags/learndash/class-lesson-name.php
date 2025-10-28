@@ -1,46 +1,54 @@
 <?php
+
 /**
- * Class Group Name Merge Tag
+ * Class for Lesson Name Merge Tag
  *
- * This class is responsible for handling the group name merge tag
+ * This class is responsible for handling the lesson name merge tag
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\LMS\LearnDash;
+namespace QuillCRM\Merge_Tags\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Group Name Merge Tag
+ * Lesson Name Merge Tag
  */
-class Group_Name extends Merge_Tag {
+class Lesson_Name extends Merge_Tag {
+
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Group Name';
+	public $name = 'Lesson Name';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'group_name';
+	public $slug = 'lesson_name';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Group Name';
+	public $description = 'Lesson Name';
+
+	/**
+	 * Required Triggers
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array( 'learndash_lesson_completed' );
 
 	/**
 	 * Merge Tag Group
@@ -58,15 +66,15 @@ class Group_Name extends Merge_Tag {
 	 * @return string
 	 */
 	public function get_value( $contact, $merge_tag = '' ) {
-		$group_id = $contact->get_data( 'group_id' );
+		$lesson_id = $contact->get_data( 'lesson_id' );
+		$lesson    = get_post( $lesson_id );
 
-		$group = get_post( $group_id );
-		if ( ! empty( $group ) ) {
-			return $group->post_title;
+		if ( ! $lesson ) {
+			return '';
 		}
 
-		return '';
+		return $lesson->post_title;
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Group_Name() );
+Merge_Tags_Manager::instance()->register( new Lesson_Name() );

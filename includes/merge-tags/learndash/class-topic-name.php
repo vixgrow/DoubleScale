@@ -1,46 +1,54 @@
 <?php
+
 /**
- * Class Course Name Merge Tag
+ * Class Topic_Name Merge Tag
  *
- * This class is responsible for handling the course name merge tag
+ * This class is responsible for handling the topic name merge tag
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\LMS\LearnDash;
+namespace QuillCRM\Merge_Tags\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Course Name Merge Tag
+ * Topic Name Merge Tag
  */
-class Course_Name extends Merge_Tag {
+class Topic_Name extends Merge_Tag {
+
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Course Name';
+	public $name = 'Topic Name';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'course_name';
+	public $slug = 'topic_name';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Course Name';
+	public $description = 'Topic Name';
+
+	/**
+	 * Required Triggers
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array( 'learndash_topic_completed' );
 
 	/**
 	 * Merge Tag Group
@@ -58,15 +66,16 @@ class Course_Name extends Merge_Tag {
 	 * @return string
 	 */
 	public function get_value( $contact, $merge_tag = '' ) {
-		$course_id = $contact->get_data( 'course_id' );
-		$course    = get_post( $course_id );
+		$topic_id = $contact->get_data( 'topic_id' );
 
-		if ( ! $course ) {
-			return '';
+		$topic = get_post( $topic_id );
+
+		if ( ! empty( $topic ) ) {
+			return $topic->post_title;
 		}
 
-		return $course->post_title;
+		return '';
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Course_Name() );
+Merge_Tags_Manager::instance()->register( new Topic_Name() );

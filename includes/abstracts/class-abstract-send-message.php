@@ -119,19 +119,20 @@ abstract class Abstract_Send_Message extends Action {
 				return $recipient_error;
 			}
 
-			// 2. Check if contact is unsubscribed
-			if ( $contact->status === 'unsubscribed' ) {
+			// 2. Check if contact is subscribed (only send to subscribed contacts)
+			if ( $contact->status !== 'subscribed' ) {
 				quillcrm_get_logger()->info(
-					"Send {$channel_name} action: Contact is unsubscribed",
+					"Send {$channel_name} action: Contact is not subscribed (status: {$contact->status})",
 					array(
-						'automation_id' => $automation->id,
-						'contact_id'    => $contact->id,
-						'code'          => "send_{$channel_type}_unsubscribed",
+						'automation_id'  => $automation->id,
+						'contact_id'     => $contact->id,
+						'contact_status' => $contact->status,
+						'code'           => "send_{$channel_type}_not_subscribed",
 					)
 				);
 				return array(
 					'status'  => 'skipped',
-					'message' => 'Contact is unsubscribed',
+					'message' => "Contact is not subscribed (status: {$contact->status})",
 				);
 			}
 

@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EmailSequenceData } from '../types';
+import { FromEmailSelector } from '@/components/from-email-selector';
 
 interface EmailSequenceModalProps {
 	open: boolean;
@@ -136,27 +137,16 @@ const EmailSequenceModal: React.FC<EmailSequenceModalProps> = ({
 										<Label htmlFor="fromEmail">
 											{__('From Email', 'quillcrm')}
 										</Label>
-										<Input
-											id="fromEmail"
-											type="email"
-											placeholder={__(
-												'From Email',
-												'quillcrm'
-											)}
+										<FromEmailSelector
 											value={formData.fromEmail}
-											onChange={(e) =>
-												updateFormData(
-													'fromEmail',
-													e.target.value
-												)
-											}
+											onChange={(email, name) => {
+												updateFormData('fromEmail', email);
+												// Auto-fill from name if provided and current fromName is empty
+												if (name && !formData.fromName) {
+													updateFormData('fromName', name);
+												}
+											}}
 										/>
-										<p className="text-xs text-gray-500">
-											{__(
-												'Please make sure this email is supported by your SMTP/SES',
-												'quillcrm'
-											)}
-										</p>
 									</div>
 								</div>
 

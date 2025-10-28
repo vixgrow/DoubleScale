@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 import type { Settings } from '@quillcrm/client';
 import { Field, TinyMCEWPEditor } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
-import { Label } from '@quillcrm/components/ui/label';
+import { FromEmailSelector } from '@/components/from-email-selector';
 
 interface EmailSettingsProps {
     settings: Settings;
@@ -42,25 +42,40 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
             <div className="text-[#09090B] font-semibold text-2xl">
                 {__('Email', 'quillcrm')}
             </div>
-            <div className="flex gap-5 items-center mb-3">
-                <Field
-                    label={__('From Name', 'quillcrm')}
-                    value={from_name || ConfigAPI.getBlogName()}
-                    onChange={(value) => handleFieldChange('from_name', value)}
-                    type="text"
-                />
-                <Field
-                    label={__('From Email', 'quillcrm')}
-                    value={from_email || ConfigAPI.getBlogName()}
-                    onChange={(value) => handleFieldChange('from_email', value)}
-                    type="email"
-                />
-                <Field
-                    label={__('Reply To', 'quillcrm')}
-                    value={reply_to || ConfigAPI.getBlogName()}
-                    onChange={(value) => handleFieldChange('reply_to', value)}
-                    type="email"
-                />
+            <div className="flex gap-5 items-start mb-3">
+                <div className="flex-1">
+                    <Field
+                        label={__('From Name', 'quillcrm')}
+                        value={from_name || ConfigAPI.getBlogName()}
+                        onChange={(value) => handleFieldChange('from_name', value)}
+                        type="text"
+                    />
+                </div>
+                <div className="flex-1">
+                    <div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-2">
+                        {__('From Email', 'quillcrm')}
+                    </div>
+                    <div className="qcrm-field-input">
+                        <FromEmailSelector
+                            value={from_email || ConfigAPI.getAdminEmail()}
+                            onChange={(email, name) => {
+                                handleFieldChange('from_email', email);
+                                // Auto-fill from name if provided and current from_name is empty
+                                if (name && !from_name) {
+                                    handleFieldChange('from_name', name);
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
+                <div className="flex-1">
+                    <Field
+                        label={__('Reply To', 'quillcrm')}
+                        value={reply_to || ConfigAPI.getBlogName()}
+                        onChange={(value) => handleFieldChange('reply_to', value)}
+                        type="email"
+                    />
+                </div>
             </div>
             <div className="flex gap-5 items-start w-full">
                 <div className="w-full flex flex-col gap-5">
@@ -86,10 +101,10 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                     />
                 </div>
                 <div className="w-full">
-                    <Label className="text-[#09090B] font-normal text-base">
+                    <div className="text-[#09090B] font-normal text-base mb-2">
                         {__('Email Footer', 'quillcrm')}
-                    </Label>
-                    <div className="mt-2">
+                    </div>
+                    <div>
                         <TinyMCEWPEditor
                             value={email_footer}
                             onChange={(content) =>

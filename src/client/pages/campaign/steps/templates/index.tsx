@@ -32,6 +32,7 @@ import EmailBuilderSelection from './email-builder-selection';
 import { saveTemplate } from '@/builder/api/templates';
 import { campaignSteps } from '../shared/stepsConfig';
 import { ArrowRight } from 'lucide-react';
+import { FromEmailSelector } from '@/components/from-email-selector';
 
 const templateSchema = z
 	.object({
@@ -330,25 +331,21 @@ const Templates: React.FC = () => {
 									required={true}
 									className="flex-1"
 								>
-									<Input
-										type="email"
-										placeholder={__(
-											'name@gmail.com',
-											'quillcrm'
-										)}
+									<FromEmailSelector
 										value={
 											template.settings?.from_email || ''
 										}
-										onChange={(e) => {
+										onChange={(email, name) => {
 											clearError('from_email');
 											updateSettings({
-												from_email: e.target.value,
+												from_email: email,
+												// Auto-fill from name if provided and current from_name is empty
+												...(name && !template.settings?.from_name
+													? { from_name: name }
+													: {}),
 											});
 										}}
-										className={cn(
-											validationErrors.from_email &&
-												'!border-red-500 focus-visible:!ring-red-500'
-										)}
+										error={validationErrors.from_email}
 									/>
 									{validationErrors.from_email && (
 										<p className="text-red-500 text-sm mt-1">

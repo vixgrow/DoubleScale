@@ -27,6 +27,7 @@ export type ConfigData = Record<string, unknown> & {
 	userCapabilities: UserCapabilities;
 	defaultStages: DefaultStage[];
 	dealPriorities: DealPriority[];
+	quillsmtpInfo: QuillSMTPInfo;
 };
 
 export type UserCapabilities = {
@@ -43,6 +44,19 @@ export type DefaultStage = {
 export type DealPriority = {
 	label: string;
 	color: string;
+};
+
+export type VerifiedSender = {
+	email: string;
+	name: string;
+	connection_id: string;
+};
+
+export type QuillSMTPInfo = {
+	configured: boolean;
+	verified_senders?: VerifiedSender[];
+	config_url?: string;
+	plugin_url?: string;
 };
 
 export type Importers = {

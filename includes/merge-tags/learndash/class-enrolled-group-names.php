@@ -10,7 +10,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\LMS\LearnDash;
+namespace QuillCRM\Merge_Tags\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
@@ -21,6 +21,7 @@ use QuillCRM\Managers\Merge_Tags_Manager;
  * Enrolled Group Names Merge Tag
  */
 class Enrolled_Group_Names extends Merge_Tag {
+
 
 	/**
 	 * Merge Tag Name
@@ -59,7 +60,7 @@ class Enrolled_Group_Names extends Merge_Tag {
 	 * @return string
 	 */
 	public function get_value( $contact, $merge_tag = '' ) {
-		$contact_id = $contact->id;
+		$contact_id = $contact->contact_id;
 		$contact    = Contact_Model::find( $contact_id );
 
 		if ( ! $contact ) {

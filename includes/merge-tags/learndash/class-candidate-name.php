@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Candidate Name Merge Tag
  *
@@ -9,17 +10,18 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\LMS\LearnDash;
+namespace QuillCRM\Merge_Tags\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * Candidate Name Merge Tag
  */
 class Candidate_Name extends Merge_Tag {
+
+
 
 	/**
 	 * Merge Tag Name
@@ -43,6 +45,13 @@ class Candidate_Name extends Merge_Tag {
 	public $description = 'Candidate Name';
 
 	/**
+	 * Required Triggers
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array( 'learndash_user_added_group', 'learndash_user_enrolled_course', 'learndash_user_left_course' );
+
+	/**
 	 * Merge Tag Group
 	 *
 	 * @var string
@@ -64,11 +73,7 @@ class Candidate_Name extends Merge_Tag {
 			return '';
 		}
 
-		$first_name = $user->first_name;
-		$last_name  = $user->last_name;
-		$full_name  = $first_name . ' ' . $last_name;
-
-		return $full_name;
+		return $user->display_name ?? '';
 	}
 }
 

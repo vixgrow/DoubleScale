@@ -13,6 +13,7 @@ class Last_Order extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -76,7 +77,6 @@ class Last_Order extends Rule {
 	 * @return string|null
 	 */
 	public function get_value( $automation_contact ) {
-		xdebug_break();
 		$contact = $automation_contact->contact;
 
 		if ( ! $contact || empty( $contact->email ) ) {

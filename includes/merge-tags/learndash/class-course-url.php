@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Course URL Merge Tag
  *
@@ -9,11 +10,10 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\LMS\LearnDash;
+namespace QuillCRM\Merge_Tags\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
@@ -43,6 +43,13 @@ class Course_URL extends Merge_Tag {
 	public $description = 'Course URL';
 
 	/**
+	 * Required Triggers
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array( 'learndash_user_enrolled_course' );
+
+	/**
 	 * Merge Tag Group
 	 *
 	 * @var string
@@ -61,7 +68,7 @@ class Course_URL extends Merge_Tag {
 		$course_id  = $contact->get_data( 'course_id' );
 		$course_url = get_permalink( $course_id );
 
-		return $course_url ? $course_url : '';
+		return $course_url ?? '';
 	}
 }
 

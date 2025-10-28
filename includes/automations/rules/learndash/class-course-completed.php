@@ -16,6 +16,7 @@ class Course_Completed extends Rule {
 
 
 
+
 	/**
 	 * Name
 	 *
@@ -74,7 +75,7 @@ class Course_Completed extends Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		$options = array();
+		 $options = array();
 
 		if ( function_exists( 'learndash_get_courses' ) ) {
 			$courses = learndash_get_courses();
@@ -126,7 +127,6 @@ class Course_Completed extends Rule {
 	 * @return array Array of completed course IDs
 	 */
 	public function get_value( $automation_contact ) {
-		xdebug_break();
 		$contact = $automation_contact->contact;
 
 		if ( ! $contact || empty( $contact->email ) ) {

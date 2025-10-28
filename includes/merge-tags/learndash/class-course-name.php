@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Course Name Merge Tag
  *
@@ -9,17 +10,19 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Merge_Tags\LMS\LearnDash;
+namespace QuillCRM\Merge_Tags\LearnDash;
 
 use QuillCRM\Abstracts\Merge_Tag;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * Course Name Merge Tag
  */
 class Course_Name extends Merge_Tag {
+
+
+
 
 	/**
 	 * Merge Tag Name
@@ -41,6 +44,13 @@ class Course_Name extends Merge_Tag {
 	 * @var string
 	 */
 	public $description = 'Course Name';
+
+	/**
+	 * Required Triggers
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array( 'learndash_user_enrolled_course' );
 
 	/**
 	 * Merge Tag Group
@@ -65,7 +75,7 @@ class Course_Name extends Merge_Tag {
 			return '';
 		}
 
-		return $course->post_title;
+		return $course->post_title ?? '';
 	}
 }
 

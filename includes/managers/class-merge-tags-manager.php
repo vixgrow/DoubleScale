@@ -21,17 +21,6 @@ use QuillCRM\Models\Automation_Contact_Model;
 final class Merge_Tags_Manager {
 
 
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Registed merge tags
 	 *
@@ -100,9 +89,10 @@ final class Merge_Tags_Manager {
 		// Merge tag will be like {{group:slug}}
 		$this->merge_tags[ $merge_tag->group ][ $merge_tag->slug ]          = $merge_tag;
 		$this->groups[ $merge_tag->group ]['mergeTags'][ $merge_tag->slug ] = array(
-			'name'  => $merge_tag->name,
+			'name'              => $merge_tag->name,
 			// 'description' => $merge_tag->description,
-			'value' => "{{{$merge_tag->group}:{$merge_tag->slug}}}",
+			'value'             => "{{{$merge_tag->group}:{$merge_tag->slug}}}",
+			'required_triggers' => $merge_tag->required_triggers,
 		);
 	}
 

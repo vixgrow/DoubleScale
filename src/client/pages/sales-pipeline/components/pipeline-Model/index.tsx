@@ -193,29 +193,6 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 
         
 	};
-    // to clean anything
-    useEffect(() => {
-        if (!visible) {
-            const timer = setTimeout(() => {
-                const body = document.body;
-                body.style.pointerEvents = "auto";
-                body.classList.remove("overflow-hidden");
-    
-                const overlays = document.querySelectorAll(
-                    '.fixed.inset-0.bg-black\\/50, [data-state="open"][data-radix-dialog-overlay]'
-                );
-                overlays.forEach((el) => {
-                    if (el instanceof HTMLElement) {
-                        el.style.display = "none";
-                        el.removeAttribute("data-state");
-                    }
-                });
-            }, 400); 
-            return () => clearTimeout(timer);
-        }
-    }, [visible]);
-    
-
 	const addStage = () => {
 		setCustomStages((prev) => [
 			...prev,

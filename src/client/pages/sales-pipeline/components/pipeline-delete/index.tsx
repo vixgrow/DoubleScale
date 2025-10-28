@@ -1,106 +1,180 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
-import { useEffect, useState } from 'react';
-import { usePipelineOperations } from '../../hooks/use-pipeline-operations';
+import {
+	Select,
+	SelectTrigger,
+	SelectContent,
+	SelectItem,
+	SelectValue,
+} from '@/components/ui/select';
+import { useState } from 'react';
 import TrashIcon from '@quillcrm/components/icons/trash';
-import { Alert, AlertDescription, AlertTitle } from '@quillcrm/components/ui/alert';
-import { AlertIcon } from '@quillcrm/components';
+import {
+	Alert,
+	AlertDescription,
+} from '@quillcrm/components/ui/alert';
+import { useDispatch } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
+import { usePipelineOperations } from '../../hooks/use-pipeline-operations';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import AlertDeleteIcon from '@quillcrm/components/icons/alert-delete';
 
-export const DeletePipelineDialog = ({ open, onClose, pipeline, pipelines, onConfirm }) => {
-  const [action, setAction] = useState<'move' | 'archive' | null>(null);
-  const [targetPipeline, setTargetPipeline] = useState<string | null>(null);
+export const DeletePipelineDialog = ({
+  visible,
+	onClose,
+	pipeline,
+	pipelines,
+	onConfirm,
+}) => {
+	const [loading, setLoading] = useState(false);
+	const [action, setAction] = useState<'move' | 'archive' | 'delete'>('move');
+	const [targetPipeline, setTargetPipeline] = useState<string | undefined>();
+	const { deletePipeline } = usePipelineOperations();
+  const dispatch = useDispatch('quillcrm/core');
+	const createNotice = dispatch?.createNotice;
 
+	const handleConfirm = async () => {
+		if (!pipeline?.id) return;
 
-  const { deletePipeline } = usePipelineOperations();
-
-//   const handleConfirm = async () => {
-// //     if (action === 'move' && targetPipeline) {
-// //     //   await moveDealsToPipeline(pipeline.id, targetPipeline);
-// //     } else if (action === 'archive') {
-// //     //   await archiveDeals(pipeline.id);
-// //     }
-// //     await deletePipeline(pipeline.id);
-// //     onConfirm?.();
-// //     onClose();
-// //   };
-const handleCancel = () => {
+		setLoading(true);
+		try {
+			if (action === 'delete') {
+				await deletePipeline(pipeline.id);
+				createNotice?.({
+					type: 'success',
+					message: __(
+						`Pipeline "${pipeline.name}" deleted successfully!`,
+						'quillcrm'
+					),
+				});
+				onConfirm?.();
+			} else {
+				
+				createNotice?.({
+					type: 'info',
+					message: __(
+						`"${action}" option selected — no real action executed.`,
+						'quillcrm'
+					),
+				});
+			}
+			onClose();
+		} catch (error) {
+			createNotice?.({
+				type: 'error',
+				message: __(`Failed to delete pipeline`, 'quillcrm'),
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
   
-  onClose();
 
-      
-};
+	return (
+		<Dialog
+			open={visible}
+			onOpenChange={(open) => {
+				if (!open) onClose();
+			}}
+		>
+			<DialogContent className="w-full max-w-xl max-h-[80vh] flex flex-col justify-center items-center gap-3 overflow-y-auto my-4 sm:mx-auto z-[10000] p-8 rounded-[16px] ">
+				{/* Header */}
+				<DialogHeader className="flex flex-col items-center justify-center w-full gap-4 text-center">
+					<div className="flex justify-center items-center w-[88px] h-[88px] bg-[#FCDADA] rounded-[26px]">
+						<TrashIcon width={40} height={40} />
+					</div>
 
+					<Alert
+						variant="default"
+						className="bg-[#F8F8F8] text-sm border text-[#E13B3B] border-[#DEE1E6] l rounded-[8px] w-full py-4 flex gap-3  items-center"
+					>
+            <AlertDescription className="text-sm">
+              <AlertDeleteIcon/>
+						</AlertDescription>
+						<AlertDescription className="text-sm">
+            {__('Before deleting this pipeline, please choose one of the following options:', 'quillcrm')}
+						</AlertDescription>
+					</Alert>
+				</DialogHeader>
 
-  return (
-    <Dialog open={open} onOpenChange={(open) => {
-      if (!open) handleCancel();
-    }}>
-      <DialogContent className="w-full min-w-max max-h-[80vh] flex flex-col justify-center items-center gap-5 overflow-y-auto my-4 sm:mx-auto z-[10000] p-8 rounded-[16px] pipline-content ">
-      <DialogHeader className="flex flex-col items-center justify-center w-full gap-4 text-center">
-  {/* Icon */}
-  <div className="flex justify-center items-center w-[88px] h-[88px] bg-[#FCDADA] rounded-[26px]">
-    <TrashIcon width={40} height={40} />
-  </div>
-
-  {/* Alert */}
-  <Alert
-    variant="default"
-    className="bg-[#F8F8F8] text-base border text-[#E13B3B] border-[#DEE1E6] font-normal rounded-[8px] w-full p-4 gap-[10px] flex justify-center items-center"
-  >
-    <div>
-      <AlertIcon color="#E13B3B" />
-    </div>
-    <div className="flex items-center gap-1">
-      <AlertTitle className="font-medium mt-0.5">Note:</AlertTitle>
-      <AlertDescription className="text-base">
-        Before deleting this pipeline, please specify the following:
-      </AlertDescription>
-    </div>
-  </Alert>
-</DialogHeader>
-
-        {pipeline?.dealsCount > 0 ? (
-          <div className="space-y-4">
-            <p>This pipeline has {pipeline?.dealsCount} deals. What do you want to do with them?</p>
-
-            <div className="flex flex-col gap-3">
-              <Button variant={action === 'move' ? 'default' : 'outline'} onClick={() => setAction('move')}>
-                Move Deals
-              </Button>
-              {action === 'move' && (
-                <Select onValueChange={setTargetPipeline}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select target pipeline" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {pipelines
-                      .filter(p => p.id !== pipeline.id)
-                      .map(p => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              )}
-
-              <Button variant={action === 'archive' ? 'default' : 'outline'} onClick={() => setAction('archive')}>
-                Archive Deals
-              </Button>
-            </div>
+				{/* Options */}
+				<RadioGroup
+					value={action}
+					onValueChange={(val) => setAction(val as 'move' | 'archive' | 'delete')}
+					className="flex flex-col gap-6 w-full"
+				>
+          <div className=' flex justify-center items-center'>
+            <p className=' text-[#09090B] font-semibold text-lg'> {__(`What would you like to do with the ${pipeline?.stats?.deal_count} deals in this pipeline?`, 'quillcrm')}</p>
           </div>
-        ) : (
-          <p>Are you sure you want to delete this empty pipeline?</p>
-        )}
+					{/* Move Option (static) */}
+					<div className="flex flex-col gap-2">
+						<div className="flex items-center space-x-3">
+							<RadioGroupItem value="move" id="move" />
+							<label htmlFor="move" className="font-medium text-[#09090B]">
+                {__(`Move deals to another pipeline`, 'quillcrm')}
+							</label>
+						</div>
 
-        <div className="flex justify-end gap-3 mt-6">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          {/* <Button disabled={action === 'move' && !targetPipeline} onClick={handleConfirm}>
-            {pipeline.dealsCount > 0 ? 'Confirm' : 'Delete'}
-          </Button> */}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+						{/* Select always visible (static) */}
+						<div className="">
+							<Select value={targetPipeline} onValueChange={setTargetPipeline}>
+								<SelectTrigger className="w-full !shadow-none py-[5px] px-4 h-10 gap-20 !text-[#09090B] text-sm border !border-[#DEE1E6] rounded-[8px]">
+									<SelectValue placeholder="Select pipeline" />
+								</SelectTrigger >
+								<SelectContent>
+									{pipelines
+										.filter((p) => p.id !== pipeline?.id)
+										.map((p) => (
+											<SelectItem key={p.id} value={String(p.id)}>
+												{p.name}
+
+											</SelectItem>
+										))}
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
+
+					{/* Archive Option (static) */}
+					<div className="flex items-center space-x-3">
+						<RadioGroupItem value="archive" id="archive" />
+						<label htmlFor="archive" className="font-medium text-[#09090B]">
+              {__(`Archive The Whole Pipeline`, 'quillcrm')}
+						</label>
+					</div>
+
+					{/* Delete Option */}
+					<div className="flex items-center space-x-3">
+						<RadioGroupItem value="delete" id="delete" />
+						<label htmlFor="delete" className="font-medium text-[#09090B]">
+              {__(`Delete pipeline permanently`, 'quillcrm')}
+						</label>
+					</div>
+				</RadioGroup>
+
+				{/* Footer */}
+				<div className="flex flex-col sm:flex-row gap-3 mt-6 w-full">
+  <Button 
+    variant="outline" 
+    onClick={onClose} 
+    className="w-full !p-[10px] h-12 text-[#374151] text-base rounded-[8px] border !border-[#374151]"
+  >
+    {__('Cancel', 'quillcrm')}
+  </Button>
+  <Button 
+    onClick={handleConfirm} 
+    disabled={loading} 
+    className="w-full !p-[10px] h-12 text-[#FFF] hover:!bg-[#E13B3B] bg-[#E13B3B] text-base rounded-[8px] border !border-[#E13B3B]"
+  >
+    {__(`Yes,Delete`, 'quillcrm')}
+  </Button>
+</div>
+			</DialogContent>
+		</Dialog>
+	);
 };

@@ -7,30 +7,49 @@ import { useMemo } from '@wordpress/element';
 /**
  * React dependencies
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 
 /**
  * External dependencies
  */
 import { useDraggable } from '@dnd-kit/core';
+
+import { Button } from '@/components/ui/button';
 import {
-	Calendar,
-	DollarSign,
-	User,
-	Clock,
-	AlertTriangle,
-	Eye,
-	Edit3,
-	MoreVertical,
-	Target,
-	Percent,
-} from 'lucide-react';
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 /**
  * Internal dependencies
  */
 import { Deal } from '../../types';
 import './style.scss';
+import DealContactIcon from '@quillcrm/components/icons/deal-contact';
+import DealCalenderIcon from '@quillcrm/components/icons/deal-calender';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@quillcrm/components/ui/dropdown-menu';
+import MoreHorizantail from '@quillcrm/components/icons/moreHorizantal-header';
+import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
+import TrashIcon from '@quillcrm/components/icons/trash';
+import DealValueIcon from '@quillcrm/components/icons/deal-value';
+import WeightedIcon from '@quillcrm/components/icons/weighted-icon';
+import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
+import NoteAddIcon from '@quillcrm/components/icons/note-add';
+import CallLogIcon from '@quillcrm/components/icons/call-log';
+import EmailLogIcon from '@quillcrm/components/icons/email-log';
+import MeetingDealIcon from '@quillcrm/components/icons/meeting-deal';
+import ViewIcon from '@quillcrm/components/icons/view-header';
 
 interface DealCardProps {
 	deal: Deal;
@@ -80,6 +99,10 @@ export const DealCard: React.FC<DealCardProps> = ({
 			__('Unknown contact', 'quillcrm')
 		);
 	}, [deal.contact]);
+
+	useEffect(()=>{
+      console.log(deal)
+	},[deal])
 
 	// Format expected close date
 	const formattedDate = useMemo(() => {
@@ -133,132 +156,157 @@ export const DealCard: React.FC<DealCardProps> = ({
 			style={style}
 			{...attributes}
 			{...listeners}
-			className={`deal-card ${isDragging || isDraggging ? 'dragging' : ''} ${deal.is_overdue ? 'overdue' : ''}`}
+			className={`deal-card m-4 ${isDragging || isDraggging ? 'dragging' : ''} ${deal.is_overdue ? 'overdue' : ''}`}
 			onClick={handleCardClick}
 		>
-			{/* Card Header */}
-			<div className="card-header">
-				<div className="deal-title-section">
-					<h4 className="deal-title" title={deal.title}>
-						{deal.title}
-					</h4>
-					<div className="deal-value">
-						<DollarSign size={14} />
-						<span>{formattedValue}</span>
-					</div>
-					{/* Probability Information */}
-					<div className="deal-probability">
-						<div className="probability-row">
-							<Percent size={12} />
-							<span className="probability-value">
-								{effectiveProbability.toFixed(0)}%
-							</span>
-						</div>
-					</div>
-					{/* Weighted Value */}
-					<div className="deal-weighted-value">
-						<Target size={12} />
-						<span className="weighted-label">
-							{__('Weighted:', 'quillcrm')}{' '}
-							{formattedWeightedValue}
-						</span>
-					</div>
-				</div>
+			<Card className="w-full flex flex-col gap-1.5 rounded-[16px] border border-[#DEE1E6] ">
+				<CardHeader className="flex flex-col gap-1  text-[#09090B]">
+					<div className="flex items-center justify-between">
+						<CardTitle
+							title={deal.title}
+							className="text-lg font-bold leading-[28px] tracking-[-.5px]"
+						>
+							{deal.title}
+						</CardTitle>
 
-				<div className="card-actions">
-					{/* Visual drag indicator */}
-					<div
-						className="drag-indicator"
-						aria-label={__('Drag to move deal', 'quillcrm')}
-					>
-						<MoreVertical size={16} />
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button
+									variant="outline"
+									size="icon"
+									className="text-base !active:border-0  !focus:border-0 !shadow-none !border-0 font-medium !text-[#374151] flex items-center justify-center gap-3 h-10 py-2 px-4"
+								>
+									<MoreHorizantail
+										color="#1E3A8A"
+										width={26}
+										height={26}
+									/>
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent
+								align="end"
+								style={{
+									boxShadow:
+										'3px 3px 4px 0 rgba(0, 0, 0, 0.25)',
+								}}
+								className="p-4 flex flex-col gap-[10px] rounded-[10px] border border-[#F5F5F5]"
+							>
+								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
+									<NoteAddIcon />
+									{__('Add Note', 'quillcrm')}
+								</DropdownMenuItem>
+								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
+									<CallLogIcon />
+									{__('Log Call', 'quillcrm')}
+								</DropdownMenuItem>
+								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
+									<EmailLogIcon />
+									{__('LogEmail', 'quillcrm')}
+								</DropdownMenuItem>
+								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
+									<MeetingDealIcon />
+									{__('Meeting', 'quillcrm')}
+								</DropdownMenuItem>
+								<div className='h-[1px] bg-[#DEE1E6] m-1'>
+
+								</div>
+								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
+									<ViewIcon/>
+									{__('View Pipeline', 'quillcrm')}
+								</DropdownMenuItem>
+								<DropdownMenuItem className="flex items-center gap-2 text-[#374151] font-medium text-sm leading-[16px]">
+									<EditHeaderIcon />
+									{__('Edit Pipeline', 'quillcrm')}
+								</DropdownMenuItem>
+								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
+									<TrashIcon />
+									{__('Delete Pipeline', 'quillcrm')}
+								</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</div>
-				</div>
-			</div>
 
-			{/* Card Body */}
-			<div className="card-body">
-				{/* Contact Info */}
-				<div className="contact-info">
-					<User size={14} />
-					<span className="contact-name">{contactName}</span>
-				</div>
+					<div className="flex flex-wrap items-center gap-1 text-[#777] text-base font-medium font-[Inter] leading-[26px]">
+						<span className="flex items-center gap-1">
+							<DealContactIcon />
+							{__(
+								`Contact: ${deal.contact?.first_name || __('N/A', 'quillcrm')}`
+							)}
+						</span>
 
-				{/* Owner Info */}
-				{deal.owner && (
-					<div className="owner-info">
-						<span className="owner-label">
-							{__('Owner:', 'quillcrm')}
-						</span>
-						<span className="owner-name">
-							{deal.owner.display_name}
-						</span>
-					</div>
-				)}
-
-				{/* Expected Close Date */}
-				{formattedDate && (
-					<div
-						className={`close-date ${deal.is_overdue ? 'overdue' : ''}`}
-					>
-						<Calendar size={14} />
-						<span className="date-text">
-							{formattedDate.formatted}
-						</span>
-						{deal.days_until_close !== null && (
-							<span className="days-until">
-								{deal.is_overdue
-									? `${Math.abs(deal.days_until_close)} ${__('days overdue', 'quillcrm')}`
-									: deal.days_until_close === 0
-										? __('Due today', 'quillcrm')
-										: `${deal.days_until_close} ${__('days left', 'quillcrm')}`}
-							</span>
+						{formattedDate && (
+							<>
+								<div className="h-5 w-[1px] bg-[#DEE1E6]" />
+								<span className="flex items-center gap-1">
+									<DealCalenderIcon />
+									{formattedDate.formatted}
+								</span>
+							</>
 						)}
 					</div>
+				</CardHeader>
+				<CardContent className=" flex  justify-between mb-0">
+					<div className="flex flex-col">
+						<span className=" text-[#660FF1] text-base font-medium landing-[26px] flex items-center gap-1">
+							<DealValueIcon color="#660FF1" />
+							{__('Deal Value', 'quillcrm')}
+						</span>
+						<p className=" text-[#09090B] text-lg font-bold landing-[28px] text-center ">
+							{formattedValue}
+						</p>
+					</div>
+					<div className=" flex flex-col">
+						<span className=" text-[#458DC7] text-base font-medium landing-[26px] flex items-center gap-1">
+							<WeightedIcon color="#458DC7" />
+							{__('Weighted', 'quillcrm')}
+						</span>
+						<p className=" text-[#09090B] text-lg font-bold landing-[28px] text-center">
+							{formattedWeightedValue}
+						</p>
+					</div>
+					
+				</CardContent>
+				<div className=" h-0.5 bg-[#DEE1E6] mx-6 "></div>
+				<CardFooter className='flex  justify-between items-center'>
+				{deal.owner&&(
+					<div className="flex items-center gap-1">
+					<div className="flex items-center gap-1">
+					  <span className="w-8 h-8 rounded-full border border-[#DEE1E6] flex items-center justify-center">
+						<DealOwnerIcon />
+					  </span>
+					  <span className="text-base font-normal text-[#777] leading-[26px]">
+						{__('Owner:', 'quillcrm')}
+					  </span>
+					</div>
+				  
+					<p className="text-[#09090B] text-base font-medium leading-[26px]">
+					  {deal?.owner.display_name}
+					</p>
+				  </div>
+				  
 				)}
-			</div>
-
-			{/* Card Footer */}
-			<div className="card-footer">
-				<div className="quick-actions">
-					<button
-						className="action-btn view-btn"
-						onClick={(e) => handleActionClick(e, 'view')}
-						title={__('View details', 'quillcrm')}
-					>
-						<Eye size={14} />
-					</button>
-					<button
-						className="action-btn edit-btn"
-						onClick={(e) => handleActionClick(e, 'edit')}
-						title={__('Edit deal', 'quillcrm')}
-					>
-						<Edit3 size={14} />
-					</button>
-				</div>
-
-				{/* Status Indicators */}
-				<div className="status-indicators">
-					{deal.is_overdue && (
-						<div
-							className="overdue-indicator"
-							title={__('Deal is overdue', 'quillcrm')}
-						>
-							<AlertTriangle size={14} />
-							<span>{__('Overdue', 'quillcrm')}</span>
-						</div>
-					)}
-					{deal.days_until_close === 0 && !deal.is_overdue && (
-						<div
-							className="due-today-indicator"
-							title={__('Due today', 'quillcrm')}
-						>
-							<Clock size={14} />
-							<span>{__('Due today', 'quillcrm')}</span>
-						</div>
-					)}
-				</div>
-			</div>
+				  <div className="flex mt-1 gap-3">
+  {deal.priority && (
+    <span
+      className={`
+        text-base font-normal tracking-[-.32px] flex justify-center items-center py-1 px-2 rounded-[8px] border
+        ${
+          deal.priority === 'low'
+            ? 'text-[#16A34A] border-[#16A34A] bg-[#EFFFF5]'
+            : deal.priority === 'medium'
+            ? 'text-[#A67D0A] border-[#E4B123] bg-[#FFF2CE]'
+            : deal.priority === 'high'
+            ? 'text-[#E13B3B] border-[#E13B3B] bg-[#FBE8E8]'
+            : 'text-gray-700 border-gray-300 bg-gray-50'
+        }
+      `}
+    >
+      {deal.priority.charAt(0).toUpperCase() + deal.priority.slice(1)}
+    </span>
+  )}
+</div>
+				</CardFooter>
+			</Card>
 		</div>
 	);
 };

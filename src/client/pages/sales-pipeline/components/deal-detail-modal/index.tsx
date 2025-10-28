@@ -46,8 +46,9 @@ import { useDealOperations } from '../../hooks/use-deal-operations';
 import { DealActivities } from '../deal-activities';
 import { Deal } from '../../types';
 import './style.scss';
-import { DealCustomFields } from '../deal-custom-fields';
+// import { DealCustomFields } from '../deal-custom-fields';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+import DealCustomFields from '../deal-custom-fields/index copy';
 
 const { Title, Text, Paragraph } = Typography;
 

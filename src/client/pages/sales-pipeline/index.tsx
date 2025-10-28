@@ -237,7 +237,7 @@ const SalesPipeline: React.FC = () => {
 			</div>
 		);
 	}
-
+	
 	return (
 		<div className="sales-pipeline">
 			<div className=" flex justify-between items-center ">
@@ -539,11 +539,11 @@ const SalesPipeline: React.FC = () => {
   pipeline={selectedPipeline}
 />
 <DeletePipelineDialog
-  open={deleteDialogOpen}
+  visible={deleteDialogOpen}
   onClose={() => setDeleteDialogOpen(false)}
   pipeline={selectedPipeline}
   pipelines={pipelines}
-  onConfirm={refreshData}
+  onConfirm={refreshData} 
 />
 
 		</div>

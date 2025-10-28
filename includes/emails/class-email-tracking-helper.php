@@ -51,6 +51,12 @@ class Email_Tracking_Helper {
 		// Add tracking pixel
 		$body_with_tracking = self::add_tracking_pixel( $body, $tracking_entry );
 
+		// Check if unsubscribe link already exists in body
+		if ( self::has_unsubscribe_link( $body_with_tracking ) ) {
+			// Unsubscribe link already present, no need to add footer
+			return $body_with_tracking;
+		}
+
 		// Get email footer
 		if ( ! empty( $settings['email_footer'] ) ) {
 			$email_footer = $settings['email_footer'];
@@ -141,6 +147,37 @@ class Email_Tracking_Helper {
 	 */
 	public static function get_default_footer() {
 		return "<p>Don't want to stay in the loop? We'll be sad to see you go, but you can click here to <a href='{{contact:unsubscribe_link}}'>unsubscribe</a>.</p>";
+	}
+
+	/**
+	 * Check if unsubscribe link already exists in email body
+	 *
+	 * Detects both:
+	 * 1. Unsubscribe merge tag: {{contact:unsubscribe_link}}
+	 * 2. Actual unsubscribe URLs: quillcrm=email_unsubscribe or quillcrm-unsubscribe
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $body Email body to check.
+	 * @return bool True if unsubscribe link exists, false otherwise
+	 */
+	public static function has_unsubscribe_link( $body ) {
+		// Check for unsubscribe merge tag
+		if ( false !== strpos( $body, '{{contact:unsubscribe_link}}' ) ) {
+			return true;
+		}
+
+		// Check for actual unsubscribe URLs (after merge tags have been processed)
+		if ( false !== strpos( $body, 'quillcrm=email_unsubscribe' ) ) {
+			return true;
+		}
+
+		// Check for alternative unsubscribe URL format
+		if ( false !== strpos( $body, 'quillcrm-unsubscribe' ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

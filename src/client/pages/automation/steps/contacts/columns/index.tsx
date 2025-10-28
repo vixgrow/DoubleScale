@@ -119,13 +119,13 @@ export function getColumns({ onViewJourney }) {
             cell: ({ row }) => {
                 const status = row.getValue('status') as string;
                 const bgColor = status === 'completed'
-                    ? 'bg-[#EFFFF5] text-[#16A34A]'
+                    ? 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]'
                     : status === 'failed'
-                        ? 'bg-[#EF44444A] text-destructive'
+                        ? 'bg-[#EF444429] text-destructive border-destructive'
                         : 'bg-gray-100 text-gray-700';
 
                 return (
-                    <span className={`capitalize rounded-xl py-1 px-3 text-xs w-fit ${bgColor}`}>
+                    <span className={`capitalize border rounded py-1 px-3 text-sm w-fit ${bgColor}`}>
                         {status}
                     </span>
                 );

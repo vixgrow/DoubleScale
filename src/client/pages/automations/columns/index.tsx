@@ -123,9 +123,9 @@ export const getAutomationColumns = ({
             ),
             cell: ({ row }) => (
                 <span
-                    className={`px-3 py-1 rounded text-xs font-semibold ${row.original.status === 'active'
-                        ? 'bg-[#E2FFEF] text-[#50CD89]'
-                        : 'bg-[#EBEBEB] text-[#2E2C2F]'
+                    className={`px-3 py-1 border rounded text-sm font-normal ${row.original.status === 'active'
+                        ? 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]'
+                        : 'bg-[#F8F8F8] text-gray-500 border-gray-500'
                         }`}
                 >
                     {row.original.status === 'active' ? 'Published' : 'Draft'}

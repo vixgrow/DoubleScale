@@ -137,9 +137,8 @@ export function getColumns({ onViewJourney }) {
             cell: ({ row }) => {
                 return (
                     <Button
-                        size="sm"
                         onClick={() => onViewJourney(row.original)}
-                        className="flex items-center h-auto p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
+                        className="text-primary p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
                     >
                         <ViewIcon />
                         {__('View Journey', 'quillcrm')}

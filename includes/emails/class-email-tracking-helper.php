@@ -152,27 +152,25 @@ class Email_Tracking_Helper {
 	/**
 	 * Check if unsubscribe link already exists in email body
 	 *
-	 * Detects both:
-	 * 1. Unsubscribe merge tag: {{contact:unsubscribe_link}}
-	 * 2. Actual unsubscribe URLs: quillcrm=email_unsubscribe or quillcrm-unsubscribe
+	 * NOTE: This method is called AFTER merge tags have been processed in prepare_message_content().
+	 * Therefore, we check for actual unsubscribe URLs, not the {{contact:unsubscribe_link}} merge tag.
+	 *
+	 * Detects unsubscribe URLs in two formats:
+	 * 1. quillcrm=email_unsubscribe (used in List-Unsubscribe headers and direct URLs)
+	 * 2. quillcrm-unsubscribe (used by {{contact:unsubscribe_link}} merge tag processor)
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $body Email body to check.
+	 * @param string $body Email body to check (with merge tags already processed).
 	 * @return bool True if unsubscribe link exists, false otherwise
 	 */
 	public static function has_unsubscribe_link( $body ) {
-		// Check for unsubscribe merge tag
-		if ( false !== strpos( $body, '{{contact:unsubscribe_link}}' ) ) {
-			return true;
-		}
-
-		// Check for actual unsubscribe URLs (after merge tags have been processed)
+		// Check for List-Unsubscribe header URL format
 		if ( false !== strpos( $body, 'quillcrm=email_unsubscribe' ) ) {
 			return true;
 		}
 
-		// Check for alternative unsubscribe URL format
+		// Check for merge tag processed URL format ({{contact:unsubscribe_link}} becomes this)
 		if ( false !== strpos( $body, 'quillcrm-unsubscribe' ) ) {
 			return true;
 		}

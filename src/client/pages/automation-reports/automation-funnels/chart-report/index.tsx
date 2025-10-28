@@ -196,6 +196,9 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 	if (loading) {
 		return (
 			<div className="chart-report-container">
+				<div className="report-header">
+					<h2 className="report-title">{__('Automation Funnel Chart', 'quillcrm')}</h2>
+				</div>
 				<div className="loading-spinner">
 					{__('Loading funnel data...', 'quillcrm')}
 				</div>
@@ -206,6 +209,9 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 	if (error) {
 		return (
 			<div className="chart-report-container">
+				<div className="report-header">
+					<h2 className="report-title">{__('Automation Funnel Chart', 'quillcrm')}</h2>
+				</div>
 				<div className="error-message">{error}</div>
 			</div>
 		);
@@ -214,6 +220,9 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 	if (funnelData.length === 0) {
 		return (
 			<div className="chart-report-container">
+				<div className="report-header">
+					<h2 className="report-title">{__('Automation Funnel Chart', 'quillcrm')}</h2>
+				</div>
 				<div className="empty-state">
 					{__('No funnel data available', 'quillcrm')}
 				</div>
@@ -223,22 +232,25 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 
 	return (
 		<div className="chart-report-container">
+			<div className="report-header">
+				<h2 className="report-title">{__('Automation Funnel Chart', 'quillcrm')}</h2>
+				<div className="stats-container">
+					<div className="stat-box bg-[#E3EEFF99] text-secondary border border-secondary">
+						<span className="stat-label">
+							{__('Total Contacts:', 'quillcrm')}
+						</span>
+						<span className="stat-value">{totalContacts}</span>
+					</div>
+					<div className="stat-box bg-[#E4FAEC] text-[#16A34A] border border-[#16A34A]">
+						<span className="stat-label">
+							{__('Completion Rate:', 'quillcrm')}
+						</span>
+						<span className="stat-value">{completionRate}%</span>
+					</div>
+				</div>
+			</div>
 			<Card>
 				<CardContent className="p-6">
-					<div className="chart-summary">
-						<div className="chart-summary-item">
-							<span className="label">
-								{__('Total Contacts:', 'quillcrm')}
-							</span>
-							<span className="value">{totalContacts}</span>
-						</div>
-						<div className="chart-summary-item">
-							<span className="label">
-								{__('Completion Rate:', 'quillcrm')}
-							</span>
-							<span className="value">{completionRate}%</span>
-						</div>
-					</div>
 					<div
 						className="chart-wrapper"
 						style={{ height: '400px', width: '100%' }}

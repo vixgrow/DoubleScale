@@ -131,6 +131,9 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 	if (loading) {
 		return (
 			<div className="step-report-container">
+				<div className="report-header">
+					<h2 className="report-title">{__('Step Report', 'quillcrm')}</h2>
+				</div>
 				<div className="loading-state">Loading step data...</div>
 			</div>
 		);
@@ -139,6 +142,9 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 	if (error) {
 		return (
 			<div className="step-report-container">
+				<div className="report-header">
+					<h2 className="report-title">{__('Step Report', 'quillcrm')}</h2>
+				</div>
 				<div className="error-state">Error: {error}</div>
 			</div>
 		);
@@ -147,6 +153,9 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 	if (stepData.length === 0) {
 		return (
 			<div className="step-report-container">
+				<div className="report-header">
+					<h2 className="report-title">{__('Step Report', 'quillcrm')}</h2>
+				</div>
 				<div className="empty-state">No step data available</div>
 			</div>
 		);
@@ -154,6 +163,9 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 
 	return (
 		<div className="step-report-container">
+			<div className="report-header">
+				<h2 className="report-title">{__('Step Report', 'quillcrm')}</h2>
+			</div>
 			<div className="step-grid">
 				{stepData.map((step, index) => (
 					<div key={index} className="step-card">

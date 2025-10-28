@@ -3,6 +3,7 @@ import apiFetch from '@wordpress/api-fetch';
 import './style.scss';
 import { __ } from '@wordpress/i18n';
 import { Automation } from '@quillcrm/client';
+import CircularProgress from './circular-progress';
 
 interface StepReportProps {
 	automation: Automation | null;
@@ -26,66 +27,8 @@ interface StepsReportResponse {
 	};
 }
 
-interface CircularProgressProps {
-	percentage: number;
-	size?: number;
-	strokeWidth?: number;
-	color?: string;
-	showCheckmark?: boolean;
-}
-
-const CircularProgress: React.FC<CircularProgressProps> = ({
-	percentage,
-	size = 120,
-	strokeWidth = 8,
-	color = '#4F8EF7',
-	showCheckmark = false,
-}) => {
-	const radius = (size - strokeWidth) / 2;
-	const circumference = radius * 2 * Math.PI;
-	const strokeDasharray = circumference;
-	const strokeDashoffset = circumference - (percentage / 100) * circumference;
-
-	return (
-		<div
-			className="circular-progress"
-			style={{ width: size, height: size }}
-		>
-			<svg width={size} height={size} className="circular-progress-svg">
-				<circle
-					className="circular-progress-background"
-					cx={size / 2}
-					cy={size / 2}
-					r={radius}
-					strokeWidth={strokeWidth}
-				/>
-				<circle
-					className="circular-progress-foreground"
-					cx={size / 2}
-					cy={size / 2}
-					r={radius}
-					strokeWidth={strokeWidth}
-					style={{
-						strokeDasharray,
-						strokeDashoffset,
-						stroke: color,
-					}}
-				/>
-			</svg>
-			<div className="circular-progress-text">
-				{showCheckmark ? (
-					<span className="checkmark">✓</span>
-				) : (
-					<span className="percentage">{percentage}%</span>
-				)}
-			</div>
-		</div>
-	);
-};
-
 const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 	const [stepData, setStepData] = useState<StepData[]>([]);
-	const [overallConversion, setOverallConversion] = useState<number>(0);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -104,7 +47,6 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 
 			if (response.steps && Array.isArray(response.steps)) {
 				setStepData(response.steps);
-				setOverallConversion(response.overall_conversion || 0);
 			} else {
 				setError('Invalid response format');
 			}
@@ -166,56 +108,39 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 			<div className="report-header">
 				<h2 className="report-title">{__('Step Report', 'quillcrm')}</h2>
 			</div>
-			<div className="step-grid">
+			<div className="step-flex">
 				{stepData.map((step, index) => (
-					<div key={index} className="step-card">
-						<div className="step-progress">
-							<CircularProgress
-								percentage={step.completionRate}
-								color={getProgressColor(step.completionRate)}
-								size={120}
-								strokeWidth={8}
-							/>
-						</div>
-						<div className="step-info">
-							<h3 className="step-title">{step.stepName}</h3>
-							<div className="step-stats">
-								<div className="stat-row">
-									<span className="stat-icon">👥</span>
-									<span className="stat-value">
-										{step.contactsEntered}
-									</span>
-									<span className="stat-label">
-										{step.completionRate}%
-									</span>
-									{step.dropOffRate > 0 && (
-										<span className="drop-indicator">
-											↓ {step.dropOffRate}%
+					<React.Fragment key={index}>
+						<div className="step-item">
+							<div className="step-progress">
+								<CircularProgress
+									percentage={step.completionRate}
+									color={getProgressColor(step.completionRate)}
+									size={100}
+									strokeWidth={12}
+								/>
+							</div>
+							<div className="step-info">
+								<h3 className="step-title">
+									{index === 0 ? __('Entrance', 'quillcrm') : `${__('Step', 'quillcrm')} ${index}`}
+								</h3>
+								<div className="step-stats">
+									<div className="stat-row">
+										<span className="stat-label">
+											{step.completionRate}%
 										</span>
-									)}
+										{step.dropOffRate > 0 && (
+											<span className="drop-indicator">
+												↓ {step.dropOffRate}%
+											</span>
+										)}
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
+						{index < stepData.length - 1 && <div className="step-connector"></div>}
+					</React.Fragment>
 				))}
-				{/* overall conversion */}
-				<div className="step-card">
-					<div className="step-progress">
-						<CircularProgress
-							percentage={100}
-							color={getProgressColor(100)}
-							size={120}
-							strokeWidth={8}
-							showCheckmark={true}
-						/>
-					</div>
-					<div className="step-info">
-						<h3 className="step-title">
-							{__('Overall Conversion Rate', 'quillcrm')}:{' '}
-							{overallConversion}%
-						</h3>
-					</div>
-				</div>
 			</div>
 		</div>
 	);

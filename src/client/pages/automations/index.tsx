@@ -216,6 +216,26 @@ const AutomationsList: React.FC = () => {
 		}
 	};
 
+	const deleteAutomation = async (id: number) => {
+		try {
+			await apiFetch({
+				path: `/qc/v1/automations/${id}`,
+				method: 'DELETE',
+			});
+
+			fetchAutomations();
+			setListError({
+				type: 'success',
+				message: __('Automation deleted successfully', 'quillcrm'),
+			});
+		} catch (error: any) {
+			setListError({
+				type: 'error',
+				message: error.message,
+			});
+		}
+	};
+
 
 	const handleBulkAction = async (action: string) => {
 		switch (action) {
@@ -233,6 +253,7 @@ const AutomationsList: React.FC = () => {
 		onStatusChange: handleStatusChange,
 		updatingAutomationId,
 		navigate,
+		onDelete: deleteAutomation,
 	});
 
 	const tableConfig: DataTableConfig<Automation> = {

@@ -10,7 +10,7 @@ import { ColumnDef } from '@tanstack/react-table';
  * internal dependencies
  */
 import type { Automation } from '@quillcrm/client';
-import { SortIcon, TimeAgoCell, SettingsOutlinedIcon, ThreeDotsIcon, ReportsIcon } from '@quillcrm/components';
+import { SortIcon, TimeAgoCell, SettingsOutlinedIcon, ThreeDotsIcon, ReportsIcon, DeleteIcon } from '@quillcrm/components';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@quillcrm/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -27,6 +27,7 @@ interface AutomationColumnsProps {
     onStatusChange: (automation: Automation, newStatus: string) => void;
     updatingAutomationId: number | null;
     navigate: (to: string) => void;
+    onDelete: (id: number) => void;
 }
 
 export const getAutomationColumns = ({
@@ -34,6 +35,7 @@ export const getAutomationColumns = ({
     onStatusChange,
     updatingAutomationId,
     navigate,
+    onDelete,
 }: AutomationColumnsProps): ColumnDef<Automation>[] => {
     const selectionColumn: ColumnDef<Automation> = {
         id: 'select',
@@ -177,6 +179,13 @@ export const getAutomationColumns = ({
                                 >
                                     <ReportsIcon />
                                     {__('Report', 'quillcrm')}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={() => onDelete(automation.id)}
+                                    className="text-red-500 hover:text-red-500 focus:text-red-500"
+                                >
+                                    <DeleteIcon />
+                                    {__('Delete', 'quillcrm')}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>

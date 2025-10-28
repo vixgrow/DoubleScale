@@ -64,7 +64,7 @@ export function getColumns({ onViewJourney }) {
                 </div>
             ),
             cell: ({ row }) => (
-                <NavLink to={getToLink(`contacts/${row.original.contact.id}`)}>
+                <NavLink to={`contacts/${row.original.contact.id}`}>
                     {row.original.contact.email}
                 </NavLink>
             ),

@@ -152,3 +152,4 @@ export { default as AutomationContactsIcon } from './automation-contacts';
 export { default as WorkflowIcon } from './workflow';
 export { default as GradientAutomationsIcon } from './gradient-automations';
 export { default as GradientViewIcon } from './gradient-view';
+export { default as ClockIcon } from './clock';

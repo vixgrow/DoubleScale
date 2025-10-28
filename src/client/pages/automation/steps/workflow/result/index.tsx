@@ -11,10 +11,7 @@ import React from 'react';
  * Internal dependencies
  */
 import type { AutomationContact } from '@quillcrm/client';
-import {
-	CustomDialogHeader,
-	GradientViewIcon,
-} from '@quillcrm/components';
+import { CustomDialogHeader, GradientViewIcon } from '@quillcrm/components';
 import {
 	Dialog,
 	DialogContent,

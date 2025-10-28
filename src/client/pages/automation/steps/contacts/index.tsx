@@ -22,7 +22,6 @@ import { DataTable } from '@/components/ui/data-table';
 import { getColumns } from './columns';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
-import { Dialog, DialogContent, DialogOverlay } from '@quillcrm/components/ui/dialog';
 
 const ContactsList: React.FC = () => {
 	const { id } = useParams<{ id: string; tab: string }>();
@@ -61,7 +60,8 @@ const ContactsList: React.FC = () => {
 		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: error.message || __('Failed to fetch contacts', 'quillcrm'),
+				message:
+					error.message || __('Failed to fetch contacts', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);
@@ -104,12 +104,11 @@ const ContactsList: React.FC = () => {
 				<DataTablePagination table={serverSideTable} />
 			</div>
 
-			<Dialog open={contact !== null} onOpenChange={() => setContact(null)}>
-				<DialogOverlay className="z-[150200]"/>	
-				<DialogContent className="max-w-4xl z-[150200]">
-					<Result contact={contact} />
-				</DialogContent>
-			</Dialog>
+			<Result
+				contact={contact}
+				open={contact !== null}
+				onOpenChange={(open) => !open && setContact(null)}
+			/>
 		</div>
 	);
 };

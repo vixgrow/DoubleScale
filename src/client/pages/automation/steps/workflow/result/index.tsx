@@ -26,13 +26,23 @@ import {
 	ConditionsIcon,
 	GoalIcon,
 	TimerBlockIcon,
+	CustomDialogHeader,
+	GradientViewIcon,
 } from '@quillcrm/components';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogOverlay,
+} from '@quillcrm/components/ui/dialog';
 
 interface ResultProps {
 	contact: AutomationContact | null;
+	open?: boolean;
+	onOpenChange?: (open: boolean) => void;
 }
 
-const Result: React.FC<ResultProps> = ({ contact }) => {
+const Result: React.FC<ResultProps> = ({ contact, open, onOpenChange }) => {
 	const { automation } = useAutomationContext();
 
 	if (!contact || !automation) {
@@ -202,7 +212,7 @@ const Result: React.FC<ResultProps> = ({ contact }) => {
 		);
 	};
 
-	return (
+	const content = (
 		<Card>
 			<CardContent className="pt-6">
 				<div className="w-auto flex flex-col gap-5 justify-center items-center">
@@ -227,6 +237,31 @@ const Result: React.FC<ResultProps> = ({ contact }) => {
 			</CardContent>
 		</Card>
 	);
+
+	// If dialog props are provided, wrap in dialog
+	if (open !== undefined && onOpenChange) {
+		return (
+			<Dialog open={open} onOpenChange={onOpenChange}>
+				<DialogOverlay className="z-[150200]" />
+				<DialogContent className="max-w-4xl z-[150200]">
+					<DialogHeader>
+						<CustomDialogHeader
+							title={__('View Journey', 'quillcrm')}
+							subtitle={__(
+								`View journey of contact ${contact?.contact.email}`,
+								'quillcrm'
+							)}
+							icon={<GradientViewIcon />}
+						/>
+					</DialogHeader>
+					<div>{content}</div>
+				</DialogContent>
+			</Dialog>
+		);
+	}
+
+	// Return content without dialog wrapper
+	return content;
 };
 
 export default Result;

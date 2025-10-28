@@ -45,6 +45,7 @@ interface UpdatePipelineData {
 	name?: string;
 	description?: string;
 	sort_order?: number;
+	stages?: any[];
 }
 
 interface PipelineOperationsReturn {

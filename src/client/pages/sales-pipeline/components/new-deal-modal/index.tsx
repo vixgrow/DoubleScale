@@ -8,22 +8,23 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
-import {
-	Modal,
-	Form,
-	Input,
-	Select,
-	InputNumber,
-	DatePicker,
-	message,
-} from 'antd';
-import {
-	UserOutlined,
-	DollarOutlined,
-	CalendarOutlined,
-} from '@ant-design/icons';
-import { debounce } from 'lodash';
+import { message } from 'antd';
 
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@quillcrm/components/ui/dialog';
+import {
+	Select,
+	SelectTrigger,
+	SelectValue,
+	SelectContent,
+	SelectItem,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@quillcrm/components/ui/input';
 /**
  * Internal dependencies
  */
@@ -33,8 +34,12 @@ import { UserService } from '../../../../../services/user-service';
 import { SOURCE_OPTIONS } from '../../../../../config/types/config-data';
 import './style.scss';
 import ConfigAPI from '@quillcrm/config';
-
-const { Option } = Select;
+import { CustomDialogHeader } from '@quillcrm/components';
+import AddDealIcon from '@quillcrm/components/icons/add-deal';
+import DealValueIcon from '@quillcrm/components/icons/deal-value';
+import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
+// import { useCustomFields } from '@/client/pages/custom-fields/use-customFields'; // hook custom fields
+import { useCustomFields } from '@/client/pages/custom-fields/use-customFields';
 
 export interface NewDealModalProps {
 	visible: boolean;
@@ -49,9 +54,10 @@ interface DealFormData {
 	stage_id: number;
 	value?: number;
 	expected_close_date?: string;
-	// probability?: number;
+	priority?: string;
 	source?: string;
 	owner_id?: number;
+	label?: string;
 }
 
 interface Contact {
@@ -61,16 +67,131 @@ interface Contact {
 	email: string;
 }
 
+// stages
+import { StageColorBody } from '@quillcrm/components/stagebody-color/stagebodyColor';
+import { CustomFieldsSection } from '../deal-custom-fields';
+
+interface PipelineStageBoxProps {
+	stage: {
+		color: string;
+	};
+	index: number;
+	totalStages: number;
+	children?: React.ReactNode;
+	triangleWidth?: number;
+	triangleHeight?: number;
+	boxHeight?: number;
+	isSelected?: boolean;
+	isPrevious?: boolean;
+}
+
+const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
+	stage,
+	index,
+	totalStages,
+	children,
+	isSelected,
+	isPrevious,
+}) => {
+	const backgroundColor =
+		isSelected || isPrevious
+			? StageColorBody(stage.color, index, totalStages).backgroundColor
+			: '#DEE1E6';
+
+	const isFirst = index === 0;
+	const isLast = index === totalStages - 1;
+
+	return (
+		<div className="flex flex-col p-0 m-0 relative">
+			<div
+				className="h-10 flex items-center justify-center relative rounded-[8px] px-7 md:px-5"
+				style={{ background: backgroundColor }}
+			>
+				{children}
+				{/* Triangles */}
+				{isFirst && (
+					<span
+						className="absolute top-0 right-[-11px] w-0 h-0 z-[11]  rounded-sm"
+						style={{
+							borderTop: '20px solid transparent',
+							borderBottom: '20px solid transparent',
+							borderLeft: `15px solid ${backgroundColor}`,
+						}}
+					/>
+				)}
+				{isLast && (
+					<span
+						className="absolute top-0 left-0 z-[3] w-0 h-0 "
+						style={{
+							borderTop: '20px solid transparent',
+							borderBottom: '20px solid transparent',
+							borderLeft: '15px solid white',
+						}}
+					/>
+				)}
+				{!isFirst && !isLast && (
+					<>
+						<span
+							className="absolute top-0 right-[-11px] w-0 h-0 z-[11]   rounded-sm"
+							style={{
+								borderTop: '20px solid transparent',
+								borderBottom: '20px solid transparent',
+								borderLeft: `15px solid ${backgroundColor}`,
+							}}
+						/>
+
+						<span
+							className="absolute top-0 left-0 z-[3] w-0 h-0 "
+							style={{
+								borderTop: '20px solid transparent',
+								borderBottom: '20px solid transparent',
+								borderLeft: '15px solid white',
+							}}
+						/>
+					</>
+				)}
+			</div>
+		</div>
+	);
+};
 export const NewDealModal: React.FC<NewDealModalProps> = ({
 	visible,
 	onClose,
 	onSuccess,
 	pipeline,
 }) => {
-	const [form] = Form.useForm();
+	// const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactsLoading, setContactsLoading] = useState(false);
+	const [customFields, setCustomFields] = useState<Record<string, any>>({});
+
+	const [formData, setFormData] = useState<{
+		title: string;
+		contact_id: string | number;
+		stage_id: string | number;
+		value: string | number;
+		source: string;
+		owner_id: string | number;
+		expected_close_date: {
+			from: string;
+			to: string;
+		};
+		priority?: string;
+		label?: string;
+		custom_fields: Record<string, any>;
+	}>({
+		title: '',
+		contact_id: '',
+		stage_id: '',
+		value: '',
+		source: '',
+		owner_id: '',
+		expected_close_date: { from: '', to: '' },
+		priority: '',
+		label: '',
+		custom_fields: {},
+	});
 	const priorities = useMemo(() => {
 		return ConfigAPI.getDealPriorities();
 	}, []);
@@ -113,7 +234,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 
 			message.success(__('Deal created successfully!', 'quillcrm'));
 
-			form.resetFields();
+			// form.reset()
 			onClose();
 			onSuccess();
 		} catch (error: any) {
@@ -126,11 +247,26 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		}
 	};
 
-	const handleCancel = () => {
-		form.resetFields();
-		onClose();
+	const handleChange = (field: keyof DealFormData, value: any) => {
+		setFormData((prev) => ({
+			...prev,
+			[field]: value,
+		}));
 	};
 
+	const handleCancel = () => {
+		setFormData({
+			title: '',
+			contact_id: '',
+			stage_id: '',
+			value: '',
+			source: '',
+			owner_id: '',
+			expected_close_date: { from: '', to: '' },
+			custom_fields: {},
+		});
+		onClose();
+	};
 	// Get the first stage as default if available (sorted by sort_order)
 	const defaultStageId = useMemo(() => {
 		if (!pipeline?.stages?.length) return undefined;
@@ -175,21 +311,15 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		return currentUserId;
 	}, [currentUserId]);
 
-	// Update form values when pipeline changes or current user is loaded
 	useEffect(() => {
 		if (defaultStageId && visible) {
-			const values: any = {
+			setFormData((prev) => ({
+				...prev,
 				stage_id: defaultStageId,
-			};
-
-			// Only set owner_id if we have a valid current user
-			if (defaultOwnerId) {
-				values.owner_id = defaultOwnerId;
-			}
-
-			form.setFieldsValue(values);
+				owner_id: defaultOwnerId || prev.owner_id,
+			}));
 		}
-	}, [defaultStageId, defaultOwnerId, visible, form]);
+	}, [defaultStageId, defaultOwnerId, visible]);
 
 	// Load initial contacts
 	const loadContacts = useCallback(async (searchTerm = '') => {
@@ -219,12 +349,6 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 			setContactsLoading(false);
 		}
 	}, []);
-
-	// Debounced search function
-	const debouncedLoadContacts = useMemo(
-		() => debounce(loadContacts, 300),
-		[loadContacts]
-	);
 
 	// Load contacts and owners when modal opens
 	useEffect(() => {
@@ -265,287 +389,379 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	}, [currentUserId, owners, ensureUserIncluded]);
 
 	return (
-		<Modal
-			title={
-				<div className="new-deal-modal-title">
-					<DollarOutlined />
-					<span>{__('Create New Deal', 'quillcrm')}</span>
-				</div>
-			}
+		<Dialog
 			open={visible}
-			onCancel={handleCancel}
-			onOk={() => form.submit()}
-			okText={__('Create Deal', 'quillcrm')}
-			cancelText={__('Cancel', 'quillcrm')}
-			confirmLoading={loading}
-			width={600}
-			className="new-deal-modal"
-			destroyOnClose
+			onOpenChange={(open) => {
+				if (!open) {
+					handleCancel();
+				}
+			}}
 		>
-			<Form
-				form={form}
-				layout="vertical"
-				onFinish={handleSubmit}
-				key={visible ? 'deal-form' : 'hidden'}
-				initialValues={{
-					stage_id: defaultStageId,
-					owner_id: defaultOwnerId,
-				}}
-			>
-				<Form.Item
-					name="title"
-					label={__('Deal Title', 'quillcrm')}
-					rules={[
-						{
-							required: true,
-							message: __(
-								'Please enter a deal title',
-								'quillcrm'
-							),
-						},
-						{
-							min: 3,
-							message: __(
-								'Deal title must be at least 3 characters',
-								'quillcrm'
-							),
-						},
-					]}
-				>
-					<Input
-						placeholder={__('Enter deal title', 'quillcrm')}
-						prefix={<UserOutlined />}
-					/>
-				</Form.Item>
-
-				<Form.Item
-					name="contact_id"
-					label={__('Contact', 'quillcrm')}
-					rules={[
-						{
-							required: true,
-							message: __('Please select a contact', 'quillcrm'),
-						},
-					]}
-				>
-					<Select
-						placeholder={__(
-							'Search and select a contact',
-							'quillcrm'
-						)}
-						showSearch
-						filterOption={false}
-						loading={contactsLoading}
-						notFoundContent={
-							contactsLoading
-								? __('Searching...', 'quillcrm')
-								: __('No contacts found', 'quillcrm')
-						}
-						onSearch={debouncedLoadContacts}
-						optionLabelProp="label"
-					>
-						{contacts.map((contact) => (
-							<Option
-								key={contact.id}
-								value={contact.id}
-								label={`${contact.first_name} ${contact.last_name}`.trim()}
-							>
-								<div className="contact-option">
-									<span className="contact-name">
-										{contact.first_name} {contact.last_name}
-									</span>
-									<span className="contact-email">
-										{contact.email}
-									</span>
-								</div>
-							</Option>
-						))}
-					</Select>
-				</Form.Item>
-
-				<Form.Item
-					name="owner_id"
-					label={__('Deal Owner', 'quillcrm')}
-					rules={[
-						{
-							required: true,
-							message: __(
-								'Please select a deal owner',
-								'quillcrm'
-							),
-						},
-					]}
-				>
-					<Select
-						placeholder={__(
-							'Search and select a deal owner',
-							'quillcrm'
-						)}
-						showSearch
-						filterOption={false}
-						notFoundContent={__('No users found', 'quillcrm')}
-						onSearch={searchOwners}
-						loading={ownersLoading}
-						allowClear
-					>
-						{owners.map((owner) => (
-							<Option key={owner.id} value={Number(owner.id)}>
-								{owner.display_name} ({owner.email})
-							</Option>
-						))}
-					</Select>
-				</Form.Item>
-
-				<div className="form-row">
-					<Form.Item
-						name="value"
-						label={__('Deal Value', 'quillcrm')}
-						className="form-item-half"
-					>
-						<InputNumber
-							style={{ width: '100%' }}
-							placeholder={__('Enter amount', 'quillcrm')}
-							prefix={<DollarOutlined />}
-							min={0}
-							step={0.01}
-							formatter={(value) =>
-								`${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-							}
-							parser={(value) => {
-								const parsed = value
-									? value.replace(/\$\s?|(,*)/g, '')
-									: '';
-								return parsed as any;
-							}}
+			<DialogContent className="w-full max-w-2xl max-h-[80vh] my-2 sm:mx-auto overflow-y-auto  p-8 rounded-[16px] ">
+				<DialogHeader>
+					<DialogTitle className="!mb-0">
+						<CustomDialogHeader
+							title={__('Add New Deal', 'quillcrm')}
+							subtitle="Add basic information below to add new deal"
+							icon={<AddDealIcon />}
 						/>
-					</Form.Item>
-				</div>
-
-				{/* <Form.Item
-					name="probability"
-					label={__('Win Probability (%)', 'quillcrm')}
-					help={__(
-						'Override the default stage probability. Leave empty to use stage default.',
-						'quillcrm'
-					)}
-				>
-					<InputNumber
-						style={{ width: '100%' }}
-						placeholder={__(
-							'Enter win probability (0-100)',
-							'quillcrm'
-						)}
-						min={0}
-						max={100}
-						step={5}
-						formatter={(value) => `${value}%`}
-						parser={(value) => {
-							const parsed = value ? value.replace('%', '') : '';
-							const result = parseFloat(parsed) || 0;
-							return Math.min(Math.max(result, 0), 100) as any;
-						}}
-					/>
-				</Form.Item> */}
-
-				{pipeline?.stages && pipeline.stages.length > 0 && (
-					<Form.Item
-						name="stage_id"
-						label={__('Pipeline Stage', 'quillcrm')}
-						rules={[
-							{
-								required: true,
-								message: __(
-									'Please select a stage',
-									'quillcrm'
-								),
-							},
-						]}
-					>
-						<Select placeholder={__('Select stage', 'quillcrm')}>
-							{[...pipeline.stages]
-								.sort((a, b) => a.sort_order - b.sort_order)
-								.map((stage: any) => (
-									<Option key={stage.id} value={stage.id}>
-										<div className="stage-option">
-											<span
-												className="stage-color"
-												style={{
-													backgroundColor:
-														stage.color,
-												}}
-											/>
-											<span>{stage.name}</span>
-											<span className="stage-probability">
-												({stage.win_probability}%{' '}
-												{__('win rate', 'quillcrm')})
-											</span>
-										</div>
-									</Option>
-								))}
+					</DialogTitle>
+				</DialogHeader>
+				<div className="  w-full grid grid-cols-1 md:grid-cols-2 gap-6 my-3">
+					{/* related contact */}
+					<div className="flex flex-col gap-2">
+						<label className=" font-normal text-[#09090B] text-base">
+							{__('Related Contact', 'quillcrm')}
+						</label>
+						<Select
+							value={
+								formData.contact_id
+									? String(formData.contact_id)
+									: ''
+							}
+							onValueChange={(v) =>
+								handleChange('contact_id', Number(v))
+							}
+						>
+							<SelectTrigger className=" h-12 !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] !text-[#09090B] font-sm text-sm landing-[150%] tracking-[-.5px]">
+								<SelectValue
+									placeholder={
+										contactsLoading
+											? __(
+													'Loading contacts...',
+													'quillcrm'
+												)
+											: __('Select contact', 'quillcrm')
+									}
+								/>
+							</SelectTrigger>
+							<SelectContent>
+								{contactsLoading ? (
+									<div className=" px-3 py-2 text-sm">
+										{__('Loading contacts...', 'quillcrm')}
+									</div>
+								) : contacts.length === 0 ? (
+									<div className=" px-3 py-2 text-sm">
+										{__('No contacts found', 'quillcrm')}
+									</div>
+								) : (
+									contacts.map((c) => (
+										<SelectItem
+											key={c.id}
+											value={String(c.id)}
+										>
+											{c.first_name} {c.last_name}
+										</SelectItem>
+									))
+								)}
+							</SelectContent>
 						</Select>
-					</Form.Item>
-				)}
+					</div>
+					{/*deal value  */}
+					<div className="flex flex-col gap-2">
+						<label className=" font-normal text-[#09090B] text-base">
+							{__('Deal Value', 'quillcrm')}
+						</label>
+						<div className=" flex justify-between gap-3">
+							<Input
+								type="number"
+								value={formData.value}
+								onChange={(e) =>
+									handleChange('value', e.target.value)
+								}
+								placeholder={__('Deal Value', 'quillcrm')}
+								className=" h-12 !shadow-none py-[5px] px-4 !rounded-[8px] outline-none border !border-[#DEE1E6] !text-[#09090B] font-sm text-sm landing-[150%] tracking-[-.5px]"
+							/>
+							<div className=" h-12 rounded-[8px] flex justify-center items-center gap-1 border border-[#DEE1E6] bg-[#F0F0F0] py-[5px] px-[12px]">
+								<DealValueIcon />
+								<span>USP</span>
+							</div>
+						</div>
+					</div>
+					{/* deal name */}
+					<div className="flex flex-col gap-2">
+						<label className="font-normal text-[#09090B] text-base">
+							{__('Deal Title', 'quillcrm')}
+						</label>
+						<Input
+							type="text"
+							value={formData.title}
+							onChange={(e) =>
+								handleChange('title', e.target.value)
+							}
+							placeholder={__('Deal Name', 'quillcrm')}
+							className="h-12 !shadow-none py-[5px] px-4 !rounded-[8px] outline-none border !border-[#DEE1E6] !text-[#09090B] font-sm text-sm landing-[150%] tracking-[-.5px]"
+						/>
+					</div>
+					{/* deal owner */}
+					<div className="flex flex-col gap-2">
+						<label className="font-normal text-[#09090B] text-base">
+							{__('Deal Owner', 'quillcrm')}
+						</label>
 
-				{/* priority */}
-				<Form.Item name="priority" label={__('Priority', 'quillcrm')}>
-					<Select placeholder={__('Select priority', 'quillcrm')}>
-						{Object.keys(priorities).map((key) => (
-							<Option key={key} value={key}>
-								<div className="stage-option">
-									<span
-										className="stage-color"
-										style={{
-											backgroundColor:
-												priorities[key].color,
-										}}
+						<Select
+							value={
+								formData.owner_id
+									? String(formData.owner_id)
+									: ''
+							}
+							onValueChange={(v) =>
+								handleChange('owner_id', Number(v))
+							}
+						>
+							<SelectTrigger className="h-12 !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] !text-[#09090B] font-sm text-sm leading-[150%] tracking-[-.5px]">
+								<SelectValue
+									placeholder={
+										ownersLoading
+											? __(
+													'Loading owners...',
+													'quillcrm'
+												)
+											: __('Select Owner', 'quillcrm')
+									}
+								/>
+							</SelectTrigger>
+
+							<SelectContent>
+								{ownersLoading ? (
+									<div className="px-3 py-2 text-sm">
+										{__('Loading owners...', 'quillcrm')}
+									</div>
+								) : owners.length === 0 ? (
+									<div className="px-3 py-2 text-sm">
+										{__('No users found', 'quillcrm')}
+									</div>
+								) : (
+									owners.map((owner) => (
+										<SelectItem
+											key={owner.id}
+											value={String(owner.id)}
+										>
+											{owner.display_name} ({owner.email})
+										</SelectItem>
+									))
+								)}
+							</SelectContent>
+						</Select>
+					</div>
+					{/* source option */}
+					<div className="flex flex-col gap-2">
+						<label className="font-normal text-[#09090B] text-base">
+							{__('Deal Source', 'quillcrm')}
+						</label>
+
+						<Select
+							value={
+								formData.source ? String(formData.source) : ''
+							}
+							onValueChange={(v) => handleChange('source', v)}
+						>
+							<SelectTrigger className="h-12 !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] !text-[#09090B] font-sm text-sm leading-[150%] tracking-[-.5px]">
+								<SelectValue
+									placeholder={__(
+										'Select Deal source',
+										'quillcrm'
+									)}
+								/>
+							</SelectTrigger>
+
+							<SelectContent>
+								{SOURCE_OPTIONS.map((source) => (
+									<SelectItem
+										key={source.value}
+										value={source.value}
+									>
+										{source.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+					{/* Expected Close Date */}
+					<div className="flex flex-col gap-2">
+						<label className="block mb-1 font-normal text-[#09090B] text-base">
+							{__('Expected Close Date', 'quillcrm')}
+						</label>
+
+						<DateRangePicker
+							value={{
+								from: formData.expected_close_date?.from
+									? new Date(
+											formData.expected_close_date.from
+										)
+									: null,
+								to: formData.expected_close_date?.to
+									? new Date(formData.expected_close_date.to)
+									: null,
+							}}
+							onChange={(range) =>
+								handleChange('expected_close_date', {
+									from: range?.from
+										? range.from.toISOString()
+										: '',
+									to: range?.to ? range.to.toISOString() : '',
+								})
+							}
+							placeholder={__('From-To', 'quillcrm')}
+							className="w-full h-12 !shadow-none rounded-[8px] border border-[#DEE1E6] !text-[#09090B] bg-white !font-normal !text-base tracking-[-.5px]"
+						/>
+					</div>
+					{pipeline?.stages && pipeline.stages.length > 0 && (
+						<div className="flex flex-col gap-2">
+							<label className="block mb-1 font-normal text-[#09090B] text-base">
+								{__('Pipeline', 'quillcrm')}
+							</label>
+
+							<Select
+								value={pipeline?.id ? String(pipeline.id) : ''}
+								onValueChange={() => {}}
+							>
+								<SelectTrigger className="w-full h-12 rounded-[8px] border border-[#DEE1E6] text-[#09090B] bg-white font-normal text-base tracking-[-.5px]">
+									<SelectValue
+										// placeholder={__(
+										// 	'Select stage',
+										// 	'quillcrm'
+										// )}
+										placeholder={
+											pipeline?.name ||
+											__('Select pipeline', 'quillcrm')
+										}
 									/>
-									<span>{priorities[key].label}</span>
-								</div>
-							</Option>
-						))}
-					</Select>
-				</Form.Item>
+								</SelectTrigger>
 
-				<Form.Item
-					name="expected_close_date"
-					label={__('Expected Close Date', 'quillcrm')}
-				>
-					<DatePicker
-						style={{ width: '100%' }}
-						placeholder={__(
-							'Select expected close date',
-							'quillcrm'
-						)}
-						suffixIcon={<CalendarOutlined />}
-						format="YYYY-MM-DD"
-					/>
-				</Form.Item>
+								<SelectContent>
+									<SelectItem
+										value={
+											pipeline?.id
+												? String(pipeline.id)
+												: '0'
+										}
+									>
+										{pipeline?.name}
+									</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+					)}
+					{pipeline?.stages && pipeline.stages.length > 0 && (
+						<div className="flex flex-col  gap-2 mt-2">
+							<label className="block mb-1 font-normal text-[#09090B] text-base">
+								{__('Deal stage', 'quillcrm')}
+							</label>
+							<div className=" flex  flex-wrap gap-2 ">
+								{[...pipeline.stages]
+									.sort((a, b) => a.sort_order - b.sort_order)
+									.map((stage: any, index: number) => {
+										const selectedIndex =
+											pipeline.stages.findIndex(
+												(s: any) =>
+													s.id === formData.stage_id
+											);
+										const isSelected =
+											index === selectedIndex;
+										const isPrevious =
+											index < selectedIndex;
 
-				<Form.Item name="source" label={__('Deal Source', 'quillcrm')}>
-					<Select
-						placeholder={__(
-							'Select deal source (optional)',
-							'quillcrm'
-						)}
-						allowClear
-					>
-						{SOURCE_OPTIONS.map((source) => (
-							<Option key={source.value} value={source.value}>
-								{source.label}
-							</Option>
-						))}
-					</Select>
-				</Form.Item>
-			</Form>
-
-			{pipeline && (
-				<div className="pipeline-info">
-					<span className="pipeline-label">
-						{__('Pipeline:', 'quillcrm')}
-					</span>
-					<span className="pipeline-name">{pipeline.name}</span>
+										return (
+											<div
+												key={stage.id}
+												onClick={() =>
+													handleChange(
+														'stage_id',
+														stage.id
+													)
+												}
+												className="cursor-pointer transition-all duration-200"
+												title={stage.name}
+											>
+												<PipelineStageHeaderBox
+													stage={stage}
+													index={index}
+													totalStages={
+														pipeline.stages.length
+													}
+													isSelected={isSelected}
+													isPrevious={isPrevious}
+												/>
+											</div>
+										);
+									})}
+							</div>
+						</div>
+					)}
 				</div>
-			)}
-		</Modal>
+				<div className="w-full grid grid-cols-1 gap-6">
+					{/* priority */}
+					<div className="flex flex-col gap-2">
+						<label className="font-normal text-[#09090B] text-base">
+							{__('Priority', 'quillcrm')}
+						</label>
+
+						<div className="flex gap-3">
+							{Object.keys(priorities).map((key) => {
+								const isSelected = formData.priority === key;
+								return (
+									<button
+										key={key}
+										type="button"
+										onClick={() =>
+											handleChange('priority', key)
+										}
+										className={`flex items-center gap-3 px-4 py-2 rounded-[8px] border transition-all duration-200 ${
+											isSelected
+												? 'border-[#1E3A8A] bg-[#E4EEFD]'
+												: 'border-[#DEE1E6] bg-white hover:bg-[#F9FAFB]'
+										}`}
+									>
+										<span
+											className="inline-block w-6 h-6 rounded-[8px]"
+											style={{
+												backgroundColor:
+													priorities[key].color,
+											}}
+										/>
+										<span className="text-[#09090B] text-sm font-normal tracking-[-.32px]">
+											{priorities[key].label}
+										</span>
+									</button>
+								);
+							})}
+						</div>
+					</div>
+
+					<div className="h-[1px] bg-[#DEE1E6] w-full"></div>
+
+					{/* custom Filed */}
+					<CustomFieldsSection
+						onChange={(fields) => setCustomFields(fields)}
+					/>
+				</div>
+				{/* Apply Button */}
+				<div className="mt-4">
+					<Button
+						className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 p-[10px] gap-1 rounded-md font-manrope text-base font-normal tracking-tight"
+						onClick={() =>
+							handleSubmit({
+								...formData,
+								contact_id: Number(formData.contact_id),
+								stage_id: Number(formData.stage_id),
+								owner_id: Number(formData.owner_id),
+								value: formData.value
+									? Number(formData.value)
+									: undefined,
+								expected_close_date:
+									formData.expected_close_date?.to || '',
+							})
+						}
+						disabled={loading}
+						title={__('Add Deal', 'quillcrm')}
+					>
+						{loading
+							? __('Creating deal...', 'quillcrm')
+							: __('Add Deal', 'quillcrm')}
+					</Button>
+				</div>
+			</DialogContent>
+		</Dialog>
 	);
 };

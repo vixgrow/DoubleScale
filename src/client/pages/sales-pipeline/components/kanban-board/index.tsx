@@ -20,6 +20,11 @@ import {
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
+// charts
+import { Doughnut } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
+ChartJS.register(ArcElement, Tooltip);
+
 /**
  * Internal dependencies
  */
@@ -28,6 +33,7 @@ import { DealCard } from '../deal-card';
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { Deal } from '../../types';
 import './style.scss';
+import AllDealIcon from '@quillcrm/components/icons/all-deals';
 
 interface KanbanBoardProps {
 	pipeline: {
@@ -242,32 +248,144 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	return (
 		<div className="kanban-board">
 			{/* Pipeline Statistics */}
-			<div className="pipeline-stats mb-6 p-4 bg-white rounded-lg border border-gray-200">
-				<div className="flex justify-between items-center">
-					<div className="flex gap-8">
-						<div className="stat-item">
-							<span className="stat-label text-sm text-gray-600">
-								{__('Total Deals', 'quillcrm')}
-							</span>
-							<span className="stat-value text-2xl font-bold text-gray-900">
-								{totalDeals}
-							</span>
+			<div className=" mb-6 w-full overflow-visible ">
+				<div className="flex justify-between items-center gap-8">
+					<div className="flex w-full gap-4">
+						<div className="stat-item flex justify-between items-center border-l-[3px] border-[#3B82F6] rounded-[8px] bg-[#F8F8F8] p-4 w-[25%]">
+							<div className=" flex flex-col">
+								<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter] ">
+									{totalDeals}
+								</span>
+								<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777] ">
+									{__('Total Deals', 'quillcrm')}
+								</span>
+							</div>
+							<div className=" bg-[#E4EEFD] flex justify-center items-center w-10 h-10 p-2  rounded-full ">
+								<AllDealIcon />
+							</div>
 						</div>
-						<div className="stat-item">
-							<span className="stat-label text-sm text-gray-600">
-								{__('Total Value', 'quillcrm')}
-							</span>
-							<span className="stat-value text-2xl font-bold text-green-600">
-								${totalValue.toLocaleString()}
-							</span>
+						<div className="stat-item flex justify-between items-center border-l-[3px] border-[#660FF1] rounded-[8px] bg-[#F8F8F8] p-4 w-[25%]">
+							<div className="flex flex-col">
+								<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter]">
+									{totalValue.toLocaleString()}%
+								</span>
+								<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777]">
+									{__('Avg Win Rate', 'quillcrm')}
+								</span>
+							</div>
+							<div className="w-[52px] h-[51px]">
+								<Doughnut
+									data={{
+										datasets: [
+											{
+												data: [
+													totalValue,
+													100 - totalValue,
+												],
+												backgroundColor: [
+													'#660FF1',
+													'#E5E7EB',
+												],
+												borderWidth: 0,
+											},
+										],
+									}}
+									options={{
+										cutout: '75%',
+										plugins: {
+											tooltip: { enabled: false },
+										},
+										animation: {
+											duration: 1000,
+											easing: 'easeOutQuart',
+										},
+									}}
+								/>
+							</div>
 						</div>
-						<div className="stat-item">
-							<span className="stat-label text-sm text-gray-600">
-								{__('Weighted Value', 'quillcrm')}
-							</span>
-							<span className="stat-value text-2xl font-bold text-blue-600">
-								${weightedValue.toLocaleString()}
-							</span>
+						<div className="stat-item flex justify-between border-l-[3px] border-[#16A34A] rounded-[8px] bg-[#F8F8F8] p-4 w-[45%]">
+							<div className=" flex justify-between items-center w-[45%]">
+								<div className='flex flex-col'>
+									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter]">
+										 ${totalValue.toLocaleString()}
+									</span>
+									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777]">
+									  {__('Total Value', 'quillcrm')}
+									</span>
+								</div>
+								<div className="w-[52px] h-[51px]">
+								<Doughnut
+									data={{
+										datasets: [
+											{
+												data: [
+													100,
+													0
+												],
+												backgroundColor: [
+													'#16A34A',
+													'#E5E7EB',
+												],
+												borderWidth: 0,
+											},
+										],
+									}}
+									options={{
+										cutout: '80%',
+										plugins: {
+											tooltip: { enabled: false },
+										},
+										animation: {
+											duration: 1000,
+											easing: 'easeOutQuart',
+										},
+									}}
+								/>
+							</div>
+
+							</div>
+							<div className="w-[1px] h-full bg-[#DEE1E6]"></div>
+							<div className='flex justify-between items-center w-[45%]'>
+							<div className='flex flex-col'>
+									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter]">
+										 ${weightedValue.toLocaleString()}
+									</span>
+									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777]">
+									  {__('weighted Value', 'quillcrm')}
+									</span>
+							</div>
+							<div className="w-[52px] h-[51px]">
+								<Doughnut
+									data={{
+										datasets: [
+											{
+												data: [
+													weightedValue,
+													100 - weightedValue
+												],
+												backgroundColor: [
+													'#E4B123',
+													'#E5E7EB',
+												],
+												borderWidth: 0,
+											},
+										],
+									}}
+									options={{
+										cutout: '80%',
+										plugins: {
+											tooltip: { enabled: false },
+										},
+										animation: {
+											duration: 1000,
+											easing: 'easeOutQuart',
+										},
+									}}
+								/>
+							</div>
+
+
+							</div>
 						</div>
 					</div>
 				</div>
@@ -280,13 +398,15 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 				onDragStart={handleDragStart}
 				onDragEnd={handleDragEnd}
 			>
-				<div className="kanban-columns">
+				<div className="kanban-columns overflow-x-auto">
 					{pipeline.stages
 						.sort((a, b) => a.sort_order - b.sort_order)
-						.map((stage) => (
+						.map((stage, index) => (
 							<PipelineColumn
 								key={stage.id}
 								stage={stage}
+								index={index}
+								totalStages={pipeline.stages.length}
 								deals={dealsByStage[stage.id] || []}
 								isOver={false} // Will be enhanced with collision detection
 								activeDealId={activeId}

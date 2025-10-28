@@ -33,7 +33,9 @@ div#wpcontent {
 		width: 100%;
 		padding: 20px 40px;
 		padding-top: 40px;
-		overflow-x: scroll;
+		// overflow-x: scroll;
+		overflow-x: hidden; 
+		scroll-padding-inline: 40px;
 	}
 }
 
@@ -65,6 +67,7 @@ img {
 body {
 	font-family: "Inter", sans-serif;
 	color: #9b9ca7;
+	overflow-x: hidden;
 }
 
 @layer base {

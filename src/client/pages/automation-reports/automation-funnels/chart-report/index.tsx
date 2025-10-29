@@ -4,7 +4,8 @@ import apiFetch from '@wordpress/api-fetch';
 import { Card, CardContent } from '@/components/ui/card';
 import './style.scss';
 import { Automation } from '@quillcrm/client';
-import Chart from 'chart.js/auto';
+// @ts-ignore
+import D3Funnel from 'd3-funnel';
 
 interface ChartReportProps {
 	automation: Automation | null;
@@ -34,8 +35,8 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 	const [completionRate, setCompletionRate] = useState<number>(0);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const chartRef = useRef<HTMLCanvasElement>(null);
-	const chartInstance = useRef<Chart | null>(null);
+	const chartRef = useRef<HTMLDivElement>(null);
+	const chartInstance = useRef<any>(null);
 
 	const fetchFunnelData = useCallback(async () => {
 		if (!automation?.id) {
@@ -78,120 +79,193 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 
 	useEffect(() => {
 		if (chartRef.current && funnelData.length > 0) {
-			// Destroy existing chart if it exists
-			if (chartInstance.current) {
-				chartInstance.current.destroy();
-			}
+			// Clear the container
+			chartRef.current.innerHTML = '';
 
-			const labels = funnelData.map((item) => item.label);
-			const contactValues = funnelData.map((item) => item.value);
-			const percentageValues = funnelData.map((item) => item.percentage);
+			// Create a wrapper div for both D3 funnel and custom overlay
+			const wrapper = document.createElement('div');
+			wrapper.style.position = 'relative';
+			wrapper.style.width = '100%';
+			wrapper.style.minHeight = '400px';
 
-			const ctx = chartRef.current.getContext('2d');
+			// Create container for D3 funnel
+			const funnelContainer = document.createElement('div');
+			funnelContainer.style.position = 'absolute';
+			funnelContainer.style.width = '250px';
+			funnelContainer.style.height = '1000px';
+			funnelContainer.style.left = '50%';
+			funnelContainer.style.top = '52%';
+			funnelContainer.style.transform = 'translate(-50%, -50%) rotate(-90deg)';
+			funnelContainer.style.transformOrigin = 'center center';
+			funnelContainer.style.display = 'flex';
+			funnelContainer.style.justifyContent = 'center';
+			funnelContainer.style.alignItems = 'center';
 
-			if (ctx) {
-				chartInstance.current = new Chart(ctx, {
-					type: 'bar',
-					data: {
-						labels: labels,
-						datasets: [
-							{
-								label: __('Contacts', 'quillcrm'),
-								data: contactValues,
-								backgroundColor: 'rgba(54, 162, 235, 0.5)',
-								borderColor: 'rgba(54, 162, 235, 1)',
-								borderWidth: 1,
-								yAxisID: 'y',
-							},
-							{
-								label: __('Conversion Rate (%)', 'quillcrm'),
-								data: percentageValues,
-								type: 'line',
-								backgroundColor: 'rgba(255, 99, 132, 0.2)',
-								borderColor: 'rgba(255, 99, 132, 1)',
-								borderWidth: 2,
-								pointBackgroundColor: 'rgba(255, 99, 132, 1)',
-								pointBorderColor: '#fff',
-								pointHoverBackgroundColor: '#fff',
-								pointHoverBorderColor: 'rgba(255, 99, 132, 1)',
-								pointRadius: 5,
-								pointHoverRadius: 7,
-								yAxisID: 'y1',
-							},
-						],
+			// Create SVG overlay for custom labels and separators
+			const svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+			svgOverlay.setAttribute('width', '100%');
+			svgOverlay.setAttribute('height', '400');
+			svgOverlay.setAttribute('viewBox', '0 0 1000 400');
+			svgOverlay.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+			svgOverlay.style.position = 'absolute';
+			svgOverlay.style.top = '0';
+			svgOverlay.style.left = '0';
+			svgOverlay.style.width = '100%';
+			svgOverlay.style.maxWidth = '100%';
+
+			const svgWidth = 1000;
+			const svgHeight = 400;
+			const segmentWidth = svgWidth / funnelData.length;
+
+			// Add vertical segments with labels at top
+			funnelData.forEach((item, index) => {
+				const x = index * segmentWidth;
+				const leftX = x + 15; // Position text 15px from the left edge of each segment
+
+				// Vertical solid separator line (except for first segment)
+				if (index > 0) {
+					const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+					line.setAttribute('x1', String(x));
+					line.setAttribute('y1', '50');
+					line.setAttribute('x2', String(x));
+					line.setAttribute('y2', String(svgHeight - 20));
+					line.setAttribute('stroke', '#e5e7eb');
+					line.setAttribute('stroke-width', '2');
+					svgOverlay.appendChild(line);
+				}
+
+				// Step label at top
+				const stepLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+				stepLabel.setAttribute('x', String(leftX));
+				stepLabel.setAttribute('y', '30');
+				stepLabel.setAttribute('text-anchor', 'start');
+				stepLabel.setAttribute('fill', '#09090B');
+				stepLabel.setAttribute('font-size', '18');
+				stepLabel.setAttribute('font-weight', '600');
+				stepLabel.textContent = item.label;
+				svgOverlay.appendChild(stepLabel);
+
+				// Contacts info
+				const contactsText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+				contactsText.setAttribute('x', String(leftX));
+				contactsText.setAttribute('y', '55');
+				contactsText.setAttribute('text-anchor', 'start');
+				contactsText.setAttribute('fill', '#09090B');
+				contactsText.setAttribute('font-size', '14');
+
+				const contactsLabel = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+				contactsLabel.textContent = 'Contacts: ';
+				contactsLabel.setAttribute('fill', '#09090B');
+
+				const contactsValue = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+				contactsValue.textContent = String(item.value);
+				contactsValue.setAttribute('fill', '#3b82f6');
+				contactsValue.setAttribute('font-weight', 'bold');
+
+				contactsText.appendChild(contactsLabel);
+				contactsText.appendChild(contactsValue);
+				svgOverlay.appendChild(contactsText);
+
+				// Conversion Rate info
+				const conversionText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+				conversionText.setAttribute('x', String(leftX));
+				conversionText.setAttribute('y', '72');
+				conversionText.setAttribute('text-anchor', 'start');
+				conversionText.setAttribute('fill', '#09090B');
+				conversionText.setAttribute('font-size', '14');
+
+				const conversionLabel = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+				conversionLabel.textContent = 'Conversion Rate: ';
+				conversionLabel.setAttribute('fill', '#09090B');
+
+				const conversionValue = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+				conversionValue.textContent = `${item.percentage}%`;
+				conversionValue.setAttribute('fill', '#3b82f6');
+				conversionValue.setAttribute('font-weight', 'bold');
+
+				conversionText.appendChild(conversionLabel);
+				conversionText.appendChild(conversionValue);
+				svgOverlay.appendChild(conversionText);
+			});
+
+			// Add horizontal line at the bottom connecting all vertical lines
+			const horizontalLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+			horizontalLine.setAttribute('x1', '0');
+			horizontalLine.setAttribute('y1', String(svgHeight - 20));
+			horizontalLine.setAttribute('x2', String(svgWidth));
+			horizontalLine.setAttribute('y2', String(svgHeight - 20));
+			horizontalLine.setAttribute('stroke', '#e5e7eb');
+			horizontalLine.setAttribute('stroke-width', '2');
+			svgOverlay.appendChild(horizontalLine);
+
+			// Initialize D3 Funnel for the funnel shape
+			const data = funnelData.map((item) => ({
+				label: '',
+				value: item.value,
+			}));
+
+			const chart = new D3Funnel(funnelContainer);
+			chart.draw(data, {
+				chart: {
+					width: 250,
+					height: 1000,
+					horizontal: false,
+					bottomWidth: 1 / 3,
+					bottomPinch: 0,
+					curve: {
+						enabled: true,
+						height: 15,
 					},
-					options: {
-						responsive: true,
-						maintainAspectRatio: false,
-						scales: {
-							y: {
-								type: 'linear',
-								display: true,
-								position: 'left',
-								title: {
-									display: true,
-									text: __('Number of Contacts', 'quillcrm'),
-								},
-							},
-							y1: {
-								type: 'linear',
-								display: true,
-								position: 'right',
-								title: {
-									display: true,
-									text: __('Conversion Rate (%)', 'quillcrm'),
-								},
-								min: 0,
-								max: 100,
-								grid: {
-									drawOnChartArea: false,
-								},
-							},
-						},
-						plugins: {
-							title: {
-								display: true,
-								text: __('Automation Funnel Chart', 'quillcrm'),
-								font: {
-									size: 16,
-								},
-							},
-							subtitle: {
-								display: true,
-								text: __(
-									`Total Contacts: ${totalContacts} | Overall Completion Rate: ${completionRate}%`,
-									'quillcrm'
-								),
-								padding: {
-									bottom: 10,
-								},
-							},
-							tooltip: {
-								callbacks: {
-									label: function (context) {
-										const label =
-											context.dataset.label || '';
-										const value = context.parsed.y;
-										if (label.includes('Conversion')) {
-											return `${label}: ${value}%`;
-										}
-										return `${label}: ${value}`;
-									},
-								},
-							},
-						},
+				},
+				block: {
+					dynamicHeight: false,
+					dynamicSlope: true,
+					fill: {
+						type: 'solid',
+						scale: ['#E3EEFF99'],
 					},
-				});
-			}
+					minHeight: 30,
+					highlight: false,
+				},
+				label: {
+					enabled: false,
+				},
+			});
+
+			// Style the funnel SVG and add labels inside blocks
+			setTimeout(() => {
+				const svg = funnelContainer.querySelector('svg');
+				if (svg) {
+					svg.style.width = '100%';
+					svg.style.height = '100%';
+					svg.style.display = 'block';
+
+					// Make funnel blocks visible with correct color
+					const paths = svg.querySelectorAll('path');
+					paths.forEach((path) => {
+						path.setAttribute('fill', '#E3EEFF99');
+						path.setAttribute('stroke', 'none');
+					});
+
+					console.log('D3 Funnel rendered:', svg);
+				} else {
+					console.error('SVG not found in funnel container');
+				}
+			}, 100);
+
+			wrapper.appendChild(funnelContainer);
+			wrapper.appendChild(svgOverlay);
+			chartRef.current.appendChild(wrapper);
+
+			chartInstance.current = chart;
 		}
 
-		// Cleanup function
 		return () => {
-			if (chartInstance.current) {
-				chartInstance.current.destroy();
+			if (chartRef.current) {
+				chartRef.current.innerHTML = '';
 			}
 		};
-	}, [funnelData, totalContacts, completionRate]);
+	}, [funnelData]);
 
 	if (loading) {
 		return (
@@ -249,16 +323,11 @@ const ChartReport: React.FC<ChartReportProps> = ({ automation }) => {
 					</div>
 				</div>
 			</div>
-			<Card>
-				<CardContent className="p-6">
-					<div
-						className="chart-wrapper"
-						style={{ height: '400px', width: '100%' }}
-					>
-						<canvas ref={chartRef}></canvas>
+				<div className="p-6">
+					<div className="chart-wrapper">
+						<div ref={chartRef}></div>
 					</div>
-				</CardContent>
-			</Card>
+				</div>
 		</div>
 	);
 };

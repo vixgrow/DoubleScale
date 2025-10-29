@@ -22,6 +22,7 @@ use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Traits\Message_Provider_Validation;
 
 /**
  * REST_Campaign_Controller class
@@ -30,6 +31,8 @@ use QuillCRM\Models\Tracking_Model;
  * Routes: /qc/v1/campaigns with type/channel parameter
  */
 class REST_Campaign_Controller extends Abstract_Campaign_Controller {
+
+	use Message_Provider_Validation;
 
 	/**
 	 * REST Base
@@ -522,80 +525,4 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 		return Permissions::has_crm_manager_access();
 	}
 
-	/**
-	 * Validate provider connection for SMS/WhatsApp campaigns
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $channel Channel type ('sms', 'whatsapp')
-	 * @return true|WP_Error True if provider is connected, WP_Error otherwise
-	 */
-	private function validate_provider_connection( $channel ) {
-		// Get provider for this channel
-		$provider = Message_Provider_Registry::instance()->get_provider( $channel );
-
-		// Check if provider is available
-		if ( ! $provider ) {
-			$provider_name = $this->get_default_provider_name( $channel );
-
-			return new WP_Error(
-				'provider_not_configured',
-				sprintf(
-					/* translators: 1: Channel name (SMS/WhatsApp), 2: Provider name (Twilio) */
-					__( '%1$s provider (%2$s) is not configured. Please configure the integration in Settings > Integrations before creating %1$s campaigns.', 'quillcrm' ),
-					ucfirst( $channel ),
-					$provider_name
-				),
-				array(
-					'status'        => 400,
-					'channel'       => $channel,
-					'provider_name' => $provider_name,
-					'help_link'     => admin_url( 'admin.php?page=quillcrm#/settings/integrations' ),
-				)
-			);
-		}
-
-		// Check if provider is configured and connected
-		if ( ! $provider->is_configured() ) {
-			return new WP_Error(
-				'provider_not_connected',
-				sprintf(
-					/* translators: 1: Channel name (SMS/WhatsApp), 2: Provider name */
-					__( '%1$s provider (%2$s) is not connected. Please connect the integration in Settings > Integrations before creating %1$s campaigns.', 'quillcrm' ),
-					ucfirst( $channel ),
-					$provider->get_provider_name()
-				),
-				array(
-					'status'        => 400,
-					'channel'       => $channel,
-					'provider_name' => $provider->get_provider_name(),
-					'provider_slug' => $provider->get_provider_slug(),
-					'help_link'     => admin_url( 'admin.php?page=quillcrm#/settings/integrations' ),
-				)
-			);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Get default provider name for channel
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $channel Channel type
-	 * @return string Provider name
-	 */
-	private function get_default_provider_name( $channel ) {
-		$default_slug = Message_Provider_Registry::instance()->get_default_provider_slug( $channel );
-
-		// Map common provider slugs to friendly names
-		$provider_names = array(
-			'twilio'      => 'Twilio',
-			'vonage'      => 'Vonage',
-			'messagebird' => 'MessageBird',
-		);
-
-		return $provider_names[ $default_slug ] ?? ucfirst( $default_slug );
-	}
 }

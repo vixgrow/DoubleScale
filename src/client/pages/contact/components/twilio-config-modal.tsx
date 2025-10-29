@@ -100,6 +100,11 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 		}
 	};
 
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		handleSave();
+	};
+
 	return (
 		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
 			<DialogOverlay className="z-[1700000]" />
@@ -111,83 +116,85 @@ const TwilioConfigModal: React.FC<TwilioConfigModalProps> = ({
 					</DialogTitle>
 				</DialogHeader>
 
-				<div className="space-y-4 py-4">
-					<div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
-						<p className="text-sm text-blue-800">
-							{__(
-								'To send SMS and WhatsApp messages, you need to configure your Twilio account credentials. You can find these in your Twilio Console.',
+				<form onSubmit={handleSubmit}>
+					<div className="space-y-4 py-4">
+						<div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+							<p className="text-sm text-blue-800">
+								{__(
+									'To send SMS and WhatsApp messages, you need to configure your Twilio account credentials. You can find these in your Twilio Console.',
+									'quillcrm'
+								)}
+							</p>
+							<a
+								href="https://console.twilio.com/"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-sm text-blue-600 hover:text-blue-800 underline mt-2 inline-block"
+							>
+								{__('Open Twilio Console →', 'quillcrm')}
+							</a>
+						</div>
+
+						<Field
+							label={__('Account SID', 'quillcrm')}
+							type="text"
+							value={accountSid}
+							onChange={(value) => setAccountSid(value)}
+							placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+							required
+							helperText={__(
+								'Your Twilio Account SID (starts with AC)',
 								'quillcrm'
 							)}
-						</p>
-						<a
-							href="https://console.twilio.com/"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-sm text-blue-600 hover:text-blue-800 underline mt-2 inline-block"
-						>
-							{__('Open Twilio Console →', 'quillcrm')}
-						</a>
+						/>
+
+						<Field
+							label={__('Auth Token', 'quillcrm')}
+							type="password"
+							value={authToken}
+							onChange={(value) => setAuthToken(value)}
+							placeholder="********************************"
+							required
+							helperText={__(
+								'Your Twilio Auth Token (keep this secret)',
+								'quillcrm'
+							)}
+						/>
+
+						<Field
+							label={__('Phone Number', 'quillcrm')}
+							type="text"
+							value={phoneNumber}
+							onChange={(value) => setPhoneNumber(value)}
+							placeholder="+1234567890"
+							required
+							helperText={__(
+								'Your Twilio phone number in E.164 format (e.g., +1234567890)',
+								'quillcrm'
+							)}
+						/>
 					</div>
 
-				<Field
-					label={__('Account SID', 'quillcrm')}
-					type="text"
-					value={accountSid}
-					onChange={(value) => setAccountSid(value)}
-					placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-					required
-					helperText={__(
-						'Your Twilio Account SID (starts with AC)',
-						'quillcrm'
-					)}
-				/>
-
-				<Field
-					label={__('Auth Token', 'quillcrm')}
-					type="password"
-					value={authToken}
-					onChange={(value) => setAuthToken(value)}
-					placeholder="********************************"
-					required
-					helperText={__(
-						'Your Twilio Auth Token (keep this secret)',
-						'quillcrm'
-					)}
-				/>
-
-				<Field
-					label={__('Phone Number', 'quillcrm')}
-					type="text"
-					value={phoneNumber}
-					onChange={(value) => setPhoneNumber(value)}
-					placeholder="+1234567890"
-					required
-					helperText={__(
-						'Your Twilio phone number in E.164 format (e.g., +1234567890)',
-						'quillcrm'
-					)}
-				/>
-
-				</div>
-
-				<DialogFooter>
-					<Button
-						variant="outline"
-						onClick={onClose}
-						disabled={isSaving}
-					>
-						{__('Cancel', 'quillcrm')}
-					</Button>
-					<Button
-						onClick={handleSave}
-						disabled={isSaving}
-						className="bg-primary"
-					>
-						{isSaving
-							? __('Saving...', 'quillcrm')
-							: __('Save Configuration', 'quillcrm')}
-					</Button>
-				</DialogFooter>
+					<DialogFooter>
+						<Button
+							type="button"
+							variant="outline"
+							onClick={onClose}
+							disabled={isSaving}
+						>
+							{__('Cancel', 'quillcrm')}
+						</Button>
+						<Button
+							type="submit"
+							disabled={isSaving}
+							className="bg-primary"
+						>
+							{isSaving
+								? __('Saving...', 'quillcrm')
+								: __('Save Configuration', 'quillcrm')}
+						</Button>
+					</DialogFooter>
+				</form>
 			</DialogContent>
 		</Dialog>
 	);

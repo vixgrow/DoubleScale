@@ -169,6 +169,17 @@ abstract class Abstract_Campaign_Processing {
 				throw new \Exception( sprintf( 'No message provider available for %s', $this->channel ) );
 			}
 
+			// Validate provider is configured before attempting to send
+			if ( ! $provider->is_configured() ) {
+				throw new \Exception(
+					sprintf(
+						'%s provider (%s) is not configured. Please configure it in Settings > Integrations before sending messages.',
+						ucfirst( $this->channel ),
+						$provider->get_provider_name()
+					)
+				);
+			}
+
 			// Prepare message data for provider API
 			$api_data = array(
 				'Body' => $message_data['body'],

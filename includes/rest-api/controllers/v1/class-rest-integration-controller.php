@@ -43,25 +43,6 @@ class REST_Integration_Controller extends REST_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			"/{$this->rest_base}/(?P<slug>[\w-]+)",
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get' ),
-					'permission_callback' => array( $this, 'get_permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'update' ),
-					'permission_callback' => array( $this, 'update_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
-				),
-			)
-		);
-
 		// Provider status check endpoint.
 		register_rest_route(
 			$this->namespace,
@@ -79,6 +60,26 @@ class REST_Integration_Controller extends REST_Controller {
 							'required'    => false,
 						),
 					),
+				),
+			)
+		);
+
+		// Dynamic integration slug route (catches /integrations/{slug})
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/(?P<slug>[\w-]+)",
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get' ),
+					'permission_callback' => array( $this, 'get_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'update' ),
+					'permission_callback' => array( $this, 'update_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
 			)
 		);

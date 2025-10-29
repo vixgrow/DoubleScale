@@ -19,7 +19,8 @@ import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
 import SendSMSDialog from './send-sms-dialog';
 import SMSDetails from './sms-details-dialog';
 import TwilioConfigModal from '../components/twilio-config-modal';
-import { MessageSquare, CheckCircle2, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { ProviderNotConnectedWarning } from '../components/provider-not-connected-warning';
+import { MessageSquare, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { MessageStatsCard } from '../components/message-stats-card';
 import type { ColumnDef } from '@tanstack/react-table';
 
@@ -190,26 +191,16 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 							: __('Send SMS', 'quillcrm')}
 					</Button>
 					
-					{/* Inline warning when provider not configured */}
-					{!isConnected && !providerLoading && (
-						<div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex items-start gap-2 max-w-sm">
-							<AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-							<div className="text-sm">
-							<p className="text-yellow-800 font-medium">
-								{__('Twilio not configured', 'quillcrm')}
-							</p>
-							<button
-								onClick={() => {
-									console.log('[QuillCRM] Configure link clicked, opening modal');
-									setShowTwilioConfig(true);
-								}}
-								className="text-yellow-700 hover:text-yellow-900 underline mt-1 text-left"
-							>
-								{__('Configure Twilio to send SMS', 'quillcrm')}
-							</button>
-							</div>
-						</div>
-					)}
+				{/* Inline warning when provider not configured */}
+				{!isConnected && !providerLoading && (
+					<ProviderNotConnectedWarning
+						channel="sms"
+						onConfigureClick={() => {
+							console.log('[QuillCRM] Configure link clicked, opening modal');
+							setShowTwilioConfig(true);
+						}}
+					/>
+				)}
 				</div>
 			</div>
 

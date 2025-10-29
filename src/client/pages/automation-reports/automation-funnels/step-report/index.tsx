@@ -62,14 +62,6 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 		fetchStepData();
 	}, [fetchStepData]);
 
-	const getProgressColor = (rate: number): string => {
-		if (rate >= 90) return '#4F8EF7'; // Blue for excellent
-		if (rate >= 70) return '#4F8EF7'; // Blue for good
-		if (rate >= 50) return '#52C41A'; // Green for average
-		if (rate >= 30) return '#FAAD14'; // Orange for below average
-		return '#FF4D4F'; // Red for poor
-	};
-
 	if (loading) {
 		return (
 			<div className="step-report-container">
@@ -115,7 +107,7 @@ const StepReport: React.FC<StepReportProps> = ({ automation }) => {
 							<div className="step-progress">
 								<CircularProgress
 									percentage={step.completionRate}
-									color={getProgressColor(step.completionRate)}
+									color={'#4F8EF7'}
 									size={100}
 									strokeWidth={12}
 								/>

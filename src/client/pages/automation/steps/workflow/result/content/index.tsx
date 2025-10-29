@@ -99,6 +99,9 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
         });
     });
 
+    // Check if contact has started the automation (has at least one process)
+    const hasStartedAutomation = contact.processes.length > 0;
+
     // Use all automation steps, not just processed ones
     const allSteps = automation.steps || [];
     const steps = allSteps.map((step) => {
@@ -107,8 +110,14 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
             step['process_status'] = processed.status;
             step['process_date'] = processed.date;
         } else {
-            // Mark as pending if not processed yet
-            step['process_status'] = 'pending';
+            // If the contact has already started the automation but this step has no process record,
+            // it means this step was added after the contact started, so mark it as skipped
+            if (hasStartedAutomation) {
+                step['process_status'] = 'skipped';
+            } else {
+                // Mark as pending if not processed yet
+                step['process_status'] = 'pending';
+            }
             step['process_date'] = null;
         }
         return step;
@@ -118,6 +127,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
         completed: __('Completed', 'quillcrm'),
         failed: __('Failed', 'quillcrm'),
         pending: __('Pending', 'quillcrm'),
+        skipped: __('Skipped', 'quillcrm'),
     };
 
     const organizedSteps = processSteps(0, steps) as OrganizedStep[];
@@ -170,15 +180,6 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
             date?: string;
             step?: OrganizedStep;
             conditionResult?: 'yes' | 'no';
-            branchSteps?: Array<{
-                id: number | string;
-                type: string;
-                label: string;
-                icon: React.ReactNode;
-                status?: string;
-                date?: string;
-                step?: OrganizedStep;
-            }>;
         }> = [];
 
         // Add trigger as first item
@@ -267,67 +268,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                 const childrenToProcess =
                     pathTaken === 'yes' ? yesChildren : noChildren;
 
-                // Collect branch steps
-                const branchSteps: Array<{
-                    id: number | string;
-                    type: string;
-                    label: string;
-                    icon: React.ReactNode;
-                    status?: string;
-                    date?: string;
-                    step?: OrganizedStep;
-                }> = [];
-
-                // Process children and collect them as branch steps
-                const processBranchStep = (branchStep: OrganizedStep) => {
-                    const branchStepData = getStep(branchStep);
-                    let branchLabel = typesOptions[branchStep.type].label;
-
-                    // Format label based on branch step type
-                    if (branchStep.type === 'delay') {
-                        const delayText = getDelayText(branchStep);
-                        if (delayText) {
-                            branchLabel = `${typesOptions[branchStep.type].label} (${delayText})`;
-                        }
-                    } else if (branchStep.type === 'goal' && branchStepData.label) {
-                        branchLabel = `${typesOptions[branchStep.type].label} (${branchStepData.label})`;
-                    } else if (branchStep.type === 'action' && branchStepData.label) {
-                        branchLabel = `${typesOptions[branchStep.type].label} (${branchStepData.label})`;
-                    } else if (
-                        branchStep.type !== 'condition' &&
-                        branchStep.type !== 'end_automation' &&
-                        branchStep.type !== 'delay' &&
-                        branchStep.action &&
-                        branchStepData.label
-                    ) {
-                        branchLabel = branchStepData.label;
-                    }
-
-                    const branchStatus =
-                        branchStep['process_status'] || 'pending';
-                    const branchDate = branchStep['process_date'];
-
-                    // Action labels are already formatted above, use branchLabel directly
-                    const stepLabel = branchLabel;
-
-                    branchSteps.push({
-                        id: branchStep.id,
-                        type: branchStep.type,
-                        label: stepLabel,
-                        icon: typesOptions[branchStep.type].icon,
-                        status: branchStatus,
-                        date: branchDate,
-                        step: branchStep,
-                    });
-
-                    // Process nested children recursively
-                    if (branchStep.children && branchStep.children.length > 0) {
-                        branchStep.children.forEach(processBranchStep);
-                    }
-                };
-
-                childrenToProcess.forEach(processBranchStep);
-
+                // Add the condition card itself
                 timelineItems.push({
                     id: `condition-${step.id}`,
                     type: 'condition',
@@ -337,8 +278,10 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                     date,
                     step,
                     conditionResult: pathTaken!,
-                    branchSteps,
                 });
+
+                // Process children and add them as separate timeline items
+                childrenToProcess.forEach(processStepForTimeline);
             } else {
                 // Regular step (action, delay, goal, etc.)
                 // Labels are already formatted above
@@ -375,7 +318,6 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                     {timelineItems.map((item, index) => {
                         const isLeft = index % 2 === 1;
                         const isCondition = item.type === 'condition';
-                        const branchSteps = item.branchSteps || [];
 
                         return (
                             <div
@@ -391,7 +333,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                                     </div>
                                 </div>
                                 <div className="qcrm-timeline-content">
-                                    {item.date && item.status !== 'pending' && (
+                                    {item.date && item.status !== 'pending' && item.type !== 'end_automation' && (
                                         <div className="qcrm-timeline-timestamp">
                                             <ClockIcon />
                                             <span>
@@ -411,14 +353,14 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                                                     conditionResult={
                                                         item.conditionResult!
                                                     }
-                                                    branchSteps={branchSteps}
+                                                    status={item.status}
                                                     statuses={statuses}
                                                 />
                                             ) : (
                                                 <RegularStep
                                                     icon={item.icon}
                                                     label={item.label}
-                                                    status={item.status}
+                                                    status={item.type === 'end_automation' ? undefined : item.status}
                                                     statuses={statuses}
                                                 />
                                             )}

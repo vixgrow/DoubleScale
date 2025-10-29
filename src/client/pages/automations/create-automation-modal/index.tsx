@@ -42,7 +42,8 @@ import wpusers from '../../../../../assets/images/wordpress/wordpress-icon.png';
 import forms from '../../../../../assets/images/forms/forms.png';
 //@ts-ignore
 import booking from '../../../../../assets/images/booking/booking.png';
-
+//@ts-ignore
+import edd from '../../../../../assets/images/downloads/digital-downloads.png';
 interface CreateAutomationModalProps {
     visible: boolean;
     isSaving: boolean;
@@ -98,6 +99,10 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
         'wp': {
             image: wpusers,
             description: __('WordPress user and content automation', 'quillcrm')
+        },
+        'edd': {
+            image: edd,
+            description: __('Easy Digital Downloads order automation', 'quillcrm')
         }
     };
 

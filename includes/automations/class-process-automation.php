@@ -23,6 +23,9 @@ use QuillCRM\Automations\Conditions\Process as Process_Conditions;
  */
 class Process_Automation {
 
+
+
+
 	/**
 	 * Automation
 	 *
@@ -135,6 +138,7 @@ class Process_Automation {
 	 * @return void
 	 */
 	public function process_step( $step, $automation_contact_id ) {
+		xdebug_break();
 		// If this step has a parent_id > 0, it's a child of a condition step
 		// We need to verify that the parent condition has been processed first
 		if ( $step->parent_id > 0 ) {
@@ -155,6 +159,7 @@ class Process_Automation {
 
 		switch ( $step->type ) {
 			case 'action':
+			case 'delay':
 				$this->process_action( $step, $automation_contact_id );
 				break;
 			case 'condition':

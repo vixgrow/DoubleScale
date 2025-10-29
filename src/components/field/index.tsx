@@ -237,6 +237,7 @@ const Field: React.FC<FieldProps> = ({
 		case 'number':
 		case 'email':
 		case 'url':
+		case 'password':
 			fieldContent = (
 				<Input
 					value={value || ''}

@@ -2,21 +2,15 @@
  * WordPress dependencies
  */
 import { useState, useEffect, useCallback } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import { checkProviderStatus, type ProviderStatusResponse } from '@/utils/provider-status';
 
-interface ProviderStatus {
-	connected: boolean;
-	provider_name: string;
-	provider_slug: string;
-	error: string | null;
-	help_link: string;
-}
+type ProviderStatus = ProviderStatusResponse;
 
 interface UseProviderStatusReturn {
 	isConnected: boolean;
@@ -42,15 +36,13 @@ export function useProviderStatus(
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	/**
-	 * Fetch provider status from API
+	 * Fetch provider status from API using shared utility
 	 */
 	const fetchStatus = useCallback(async () => {
 		setIsLoading(true);
 		console.log(`[QuillCRM] Fetching provider status for ${channel}`);
 		try {
-			const response = await apiFetch<ProviderStatus>({
-				path: `/qc/v1/integrations/provider-status?channel=${channel}`,
-			});
+			const response = await checkProviderStatus(channel);
 			console.log(`[QuillCRM] Provider status response for ${channel}:`, response);
 			setStatus(response);
 			return response.connected;

@@ -190,10 +190,6 @@ final class Actions_Manager {
 		 'message'     => array(
 			 'label'  => __( 'Messaging', 'quillcrm' ),
 			 'groups' => array(
-				 'email'    => array(
-					 'label'   => __( 'Email', 'quillcrm' ),
-					 'actions' => array(),
-				 ),
 				 'sms'      => array(
 					 'label'   => __( 'SMS', 'quillcrm' ),
 					 'actions' => array(),

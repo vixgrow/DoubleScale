@@ -28,9 +28,8 @@ const ContactsList: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(10);
-	const [totalRecords, setTotalRecords] = useState(0);
+	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [contacts, setContacts] = useState<AutomationContact[]>([]);
-	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [contact, setContact] = useState<AutomationContact | null>(null);
 	const [keyword, setKeyword] = useState('');
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -55,8 +54,8 @@ const ContactsList: React.FC = () => {
 				method: 'GET',
 			})) as AutomationContactsResponse;
 
-			response.total && setTotalRecords(response.total);
-			response.data && setContacts(response.data);
+			setTotalRecords(response.total);
+			setContacts(response.data);
 		} catch (error: any) {
 			createNotice({
 				type: 'error',
@@ -81,11 +80,6 @@ const ContactsList: React.FC = () => {
 			placeholder: __('Search Contacts', 'quillcrm'),
 			onChange: (value) => setKeyword(value),
 			value: keyword,
-		},
-		selection: {
-			enabled: true,
-			selectedKeys: selectedRowKeys,
-			onSelectionChange: setSelectedRowKeys,
 		},
 	};
 

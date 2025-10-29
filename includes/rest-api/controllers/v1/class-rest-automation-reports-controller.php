@@ -39,6 +39,10 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 
 
 
+
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -123,33 +127,11 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 				->where( 'status', '!=', 'deleted' )
 				->get();
 
-			if ( $steps->isEmpty() ) {
-				return new WP_REST_Response(
-					array(
-						'funnel_data'     => array(),
-						'total_contacts'  => 0,
-						'completion_rate' => 0,
-					),
-					200
-				);
-			}
-
 			// Base query for automation contacts
 			$contacts_query = Automation_Contact_Model::where( 'automation_id', $automation_id );
 
 			// Get total contacts who entered the automation
 			$total_contacts = $contacts_query->count();
-
-			if ( $total_contacts === 0 ) {
-				return new WP_REST_Response(
-					array(
-						'funnel_data'     => array(),
-						'total_contacts'  => 0,
-						'completion_rate' => 0,
-					),
-					200
-				);
-			}
 
 			// Calculate funnel data for each step
 			$funnel_data = array();
@@ -162,6 +144,28 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 				'step_id'    => null,
 				'step_type'  => 'entrance',
 			);
+
+			if ( $steps->isEmpty() ) {
+				return new WP_REST_Response(
+					array(
+						'funnel_data'     => $funnel_data,
+						'total_contacts'  => 0,
+						'completion_rate' => 0,
+					),
+					200
+				);
+			}
+
+			if ( $total_contacts === 0 ) {
+				return new WP_REST_Response(
+					array(
+						'funnel_data'     => $funnel_data,
+						'total_contacts'  => 0,
+						'completion_rate' => 0,
+					),
+					200
+				);
+			}
 
 			// Process each automation step
 			foreach ( $steps as $step ) {

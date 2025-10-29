@@ -14,42 +14,23 @@ import { ColumnDef } from '@tanstack/react-table';
 import type { AutomationContact } from '@quillcrm/client';
 import {
     SortIcon,
-    ViewOutlinedIcon,
     TimeAgoCell,
     FormattedDateCell,
     ViewIcon,
 } from '@quillcrm/components';
-import { getToLink } from '@quillcrm/navigation';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@quillcrm/components/ui/button';
-import { Badge } from '@quillcrm/components/ui/badge';
 import { NavLink } from '@quillcrm/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export const selectionColumn: ColumnDef<AutomationContact> = {
-    id: 'select',
-    header: ({ table }) => (
-        <Checkbox
-            checked={table.getIsAllPageRowsSelected()}
-            onCheckedChange={(value) =>
-                table.toggleAllPageRowsSelected(!!value)
-            }
-            aria-label="Select all"
-        />
-    ),
-    cell: ({ row }) => (
-        <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-        />
-    ),
-    enableSorting: false,
-    enableHiding: false,
+// Helper function to generate contact initials
+const getContactInitials = (firstName: string, lastName: string): string => {
+    const first = firstName?.charAt(0)?.toUpperCase() || '';
+    const last = lastName?.charAt(0)?.toUpperCase() || '';
+    return first + last || '?';
 };
 
 export function getColumns({ onViewJourney }) {
     const columns: ColumnDef<AutomationContact>[] = [
-        selectionColumn,
         {
             accessorKey: 'contact',
             header: ({ column }) => (
@@ -63,11 +44,40 @@ export function getColumns({ onViewJourney }) {
                     <SortIcon />
                 </div>
             ),
-            cell: ({ row }) => (
-                <NavLink to={`contacts/${row.original.contact.id}`}>
-                    {row.original.contact.email}
-                </NavLink>
-            ),
+            cell: ({ row }) => {
+                const contact = row.original.contact;
+                const fullName = `${contact.first_name} ${contact.last_name}`.trim();
+                const initials = getContactInitials(contact.first_name, contact.last_name);
+                const hasImage = (contact as any).img;
+
+                return (
+                    <NavLink to={`contacts/${contact.id}`}>
+                        <div className="flex items-center gap-3">
+                            {hasImage ? (
+                                <Avatar className="w-12 h-12 rounded-lg">
+                                    <AvatarImage src={(contact as any).img} alt={fullName || contact.email} className="rounded-lg" />
+                                </Avatar>
+                            ) : (
+                                <Avatar className="w-12 h-12 rounded-lg">
+                                    <AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
+                                        {initials}
+                                    </AvatarFallback>
+                                </Avatar>
+                            )}
+                            <div className="flex flex-col">
+                                {fullName && (
+                                    <div className="font-semibold capitalize text-base text-[#09090B]">
+                                        {fullName}
+                                    </div>
+                                )}
+                                <div className="text-base text-gray-500">
+                                    {contact.email}
+                                </div>
+                            </div>
+                        </div>
+                    </NavLink>
+                );
+            },
         },
         {
             accessorKey: 'created_at',

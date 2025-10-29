@@ -1,0 +1,337 @@
+<?php
+
+/**
+ * WooCommerce Cart Recovered Trigger
+ * This trigger will be fired when an abandoned cart is recovered (customer completes purchase).
+ *
+ * @since 1.0.0
+ *
+ * @package QuillCRM
+ */
+
+namespace QuillCRM\Automations\Triggers\WooCommerce;
+
+use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Managers\Triggers_Manager;
+use QuillCRM\Models\Automation_Model;
+use QuillCRM\Models\Abandoned_Cart_Model;
+use WC_Order;
+
+/**
+ * Cart Recovered Trigger
+ */
+class Cart_Recovered extends Trigger {
+
+
+
+	/**
+	 * Trigger Name
+	 *
+	 * @var string
+	 */
+	public $name = 'WooCommerce Cart Recovered';
+
+	/**
+	 * Trigger Slug
+	 *
+	 * @var string
+	 */
+	public $slug = 'wc_cart_recovered';
+
+	/**
+	 * Trigger Description
+	 *
+	 * @var string
+	 */
+	public $description = 'This trigger will be fired when an abandoned cart is recovered (customer completes purchase).';
+
+	/**
+	 * Trigger Attributes
+	 *
+	 * @var array
+	 */
+	public $attributes = array();
+
+	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'woocommerce';
+
+	/**
+	 * Group
+	 *
+	 * @var string
+	 */
+	public $group = 'cart';
+
+	/**
+	 * Load Hooks
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public function load_hooks() {
+		add_action( 'woocommerce_order_status_completed', array( $this, 'check_cart_recovery' ), 10, 1 );
+		add_action( 'woocommerce_order_status_processing', array( $this, 'check_cart_recovery' ), 10, 1 );
+		add_action( 'woocommerce_payment_complete', array( $this, 'check_cart_recovery' ), 10, 1 );
+	}
+
+	/**
+	 * Check Cart Recovery
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $order_id Order ID.
+	 *
+	 * @return void
+	 */
+	public function check_cart_recovery( $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+
+		// Get customer email
+		$customer_email = $order->get_billing_email();
+		if ( empty( $customer_email ) ) {
+			return;
+		}
+
+		// Check if there was an abandoned cart for this email
+		$abandoned_cart = $this->get_abandoned_cart_by_email( $customer_email );
+		if ( ! $abandoned_cart ) {
+			return;
+		}
+
+		// Check if the order contains similar products to the abandoned cart
+		if ( ! $this->is_cart_recovery( $order, $abandoned_cart ) ) {
+			return;
+		}
+
+		// Mark the abandoned cart as recovered
+		$this->mark_cart_as_recovered( $abandoned_cart->id, $order_id );
+
+		$data = array(
+			'first_name' => $order->get_billing_first_name(),
+			'last_name'  => $order->get_billing_last_name(),
+			'email'      => $customer_email,
+			'data'       => array(
+				'order_id'          => $order->get_id(),
+				'abandoned_cart_id' => $abandoned_cart->id,
+				'recovery_time'     => current_time( 'mysql' ),
+				'cart_total'        => $abandoned_cart->total ?? 0,
+				'order_total'       => $order->get_total(),
+			),
+		);
+
+		$this->process( $data );
+	}
+
+	/**
+	 * Get Abandoned Cart by Email
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $email Customer email.
+	 *
+	 * @return Abandoned_Cart_Model|null
+	 */
+	private function get_abandoned_cart_by_email( $email ) {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'quillcrm_abandoned_carts';
+
+		// Check if table exists
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
+			return null;
+		}
+
+		$cart_data = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$table_name} 
+				WHERE email = %s 
+				AND status = 'abandoned' 
+				AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+				ORDER BY created_at DESC 
+				LIMIT 1",
+				$email
+			)
+		);
+
+		if ( ! $cart_data ) {
+			return null;
+		}
+
+		return new Abandoned_Cart_Model( $cart_data );
+	}
+
+	/**
+	 * Check if Order is Cart Recovery
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WC_Order             $order Order object.
+	 * @param Abandoned_Cart_Model $abandoned_cart Abandoned cart model.
+	 *
+	 * @return bool
+	 */
+	private function is_cart_recovery( $order, $abandoned_cart ) {
+		// Get order items
+		$order_items = $order->get_items();
+		if ( empty( $order_items ) ) {
+			return false;
+		}
+
+		// Get abandoned cart items
+		$cart_items = isset( $abandoned_cart->cart_items ) ? json_decode( $abandoned_cart->cart_items, true ) : array();
+		if ( empty( $cart_items ) ) {
+			return false;
+		}
+
+		// Extract product IDs from order
+		$order_product_ids = array();
+		foreach ( $order_items as $item ) {
+			$product = $item->get_product();
+			if ( $product ) {
+				$order_product_ids[] = $product->get_id();
+			}
+		}
+
+		// Extract product IDs from abandoned cart
+		$cart_product_ids = array();
+		foreach ( $cart_items as $cart_item ) {
+			if ( isset( $cart_item['product_id'] ) ) {
+				$cart_product_ids[] = (int) $cart_item['product_id'];
+			}
+		}
+
+		// Check if there's at least 50% overlap in products
+		$common_products    = array_intersect( $order_product_ids, $cart_product_ids );
+		$overlap_percentage = count( $common_products ) / max( count( $cart_product_ids ), 1 ) * 100;
+
+		return $overlap_percentage >= 50;
+	}
+
+	/**
+	 * Mark Cart as Recovered
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $cart_id Abandoned cart ID.
+	 * @param int $order_id Order ID.
+	 *
+	 * @return void
+	 */
+	private function mark_cart_as_recovered( $cart_id, $order_id ) {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'quillcrm_abandoned_carts';
+
+		$wpdb->update(
+			$table_name,
+			array(
+				'status'             => 'recovered',
+				'recovered_at'       => current_time( 'mysql' ),
+				'recovered_order_id' => $order_id,
+			),
+			array( 'id' => $cart_id ),
+			array( '%s', '%s', '%d' ),
+			array( '%d' )
+		);
+
+		// Fire action for other plugins/code to hook into
+		do_action( 'quillcrm_cart_recovered', $cart_id, $order_id );
+	}
+
+	/**
+	 * Is Processable
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Automation_Model $automation
+	 * @param array            $args
+	 *
+	 * @return bool
+	 */
+	public function is_processable( Automation_Model $automation, $args ) {
+		// Check minimum cart value if specified
+		$min_cart_value = $automation->get_setting( 'min_cart_value', 0 );
+		if ( $min_cart_value > 0 ) {
+			$cart_total = $args['data']['cart_total'] ?? 0;
+			if ( $cart_total < $min_cart_value ) {
+				return false;
+			}
+		}
+
+		// Check recovery time frame if specified
+		$max_recovery_days = $automation->get_setting( 'max_recovery_days', 0 );
+		if ( $max_recovery_days > 0 ) {
+			$abandoned_cart_id = $args['data']['abandoned_cart_id'] ?? 0;
+			if ( $abandoned_cart_id ) {
+				$abandoned_cart = new Abandoned_Cart_Model( $abandoned_cart_id );
+				if ( $abandoned_cart->created_at ) {
+					$days_since_abandonment = ( time() - strtotime( $abandoned_cart->created_at ) ) / DAY_IN_SECONDS;
+					if ( $days_since_abandonment > $max_recovery_days ) {
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'min_cart_value'    => array(
+				'type'        => 'number',
+				'label'       => __( 'Minimum Cart Value', 'quillcrm' ),
+				'description' => __( 'Only trigger for recovered carts above this value (optional).', 'quillcrm' ),
+				'placeholder' => __( '0.00', 'quillcrm' ),
+				'step'        => '0.01',
+				'min'         => '0',
+			),
+			'max_recovery_days' => array(
+				'type'        => 'number',
+				'label'       => __( 'Maximum Recovery Days', 'quillcrm' ),
+				'description' => __( 'Only trigger for carts recovered within this many days (optional, 0 = no limit).', 'quillcrm' ),
+				'placeholder' => __( '30', 'quillcrm' ),
+				'min'         => '0',
+				'step'        => '1',
+			),
+		);
+	}
+
+	/**
+	 * Get attributes schema
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_attributes_schema() {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'min_cart_value'    => array(
+					'type' => 'number',
+				),
+				'max_recovery_days' => array(
+					'type' => 'integer',
+				),
+			),
+		);
+	}
+}
+
+Triggers_Manager::instance()->register( new Cart_Recovered() );

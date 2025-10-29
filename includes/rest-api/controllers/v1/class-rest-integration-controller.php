@@ -19,6 +19,8 @@ use WP_REST_Server;
 use Exception;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Managers\Integrations_Manager;
+use QuillCRM\Managers\Message_Provider_Registry;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Rest Integration Controller
@@ -56,6 +58,27 @@ class REST_Integration_Controller extends REST_Controller {
 					'callback'            => array( $this, 'update' ),
 					'permission_callback' => array( $this, 'update_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				),
+			)
+		);
+
+		// Provider status check endpoint.
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/provider-status",
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_provider_status' ),
+					'permission_callback' => array( $this, 'get_permissions_check' ),
+					'args'                => array(
+						'channel' => array(
+							'description' => __( 'Channel type to check', 'quillcrm' ),
+							'type'        => 'string',
+							'enum'        => array( 'sms', 'whatsapp' ),
+							'required'    => false,
+						),
+					),
 				),
 			)
 		);
@@ -208,5 +231,97 @@ class REST_Integration_Controller extends REST_Controller {
 	 */
 	public function update_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Get provider status for SMS/WhatsApp channels
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_provider_status( $request ) {
+		$channel = $request->get_param( 'channel' );
+
+		// If no channel specified, return status for all messaging channels
+		if ( empty( $channel ) ) {
+			return new WP_REST_Response(
+				array(
+					'sms'      => $this->get_channel_provider_status( Campaign_Channel::STR_SMS ),
+					'whatsapp' => $this->get_channel_provider_status( Campaign_Channel::STR_WHATSAPP ),
+				),
+				200
+			);
+		}
+
+		// Return status for specific channel
+		return new WP_REST_Response(
+			$this->get_channel_provider_status( $channel ),
+			200
+		);
+	}
+
+	/**
+	 * Get provider status for a specific channel
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $channel Channel type.
+	 *
+	 * @return array Provider status information
+	 */
+	private function get_channel_provider_status( $channel ) {
+		$provider = Message_Provider_Registry::instance()->get_provider( $channel );
+
+		if ( ! $provider ) {
+			$default_provider_slug = Message_Provider_Registry::instance()->get_default_provider_slug( $channel );
+			return array(
+				'connected'     => false,
+				'provider_name' => $this->get_default_provider_name( $channel ),
+				'provider_slug' => $default_provider_slug,
+				'error'         => sprintf(
+					/* translators: %s: Provider name */
+					__( '%s provider is not configured', 'quillcrm' ),
+					$this->get_default_provider_name( $channel )
+				),
+				'help_link'     => admin_url( 'admin.php?page=quillcrm#/settings/integrations' ),
+			);
+		}
+
+		$is_configured = $provider->is_configured();
+
+		return array(
+			'connected'     => $is_configured,
+			'provider_name' => $provider->get_provider_name(),
+			'provider_slug' => $provider->get_provider_slug(),
+			'error'         => $is_configured ? null : sprintf(
+				/* translators: %s: Provider name */
+				__( '%s provider is not connected', 'quillcrm' ),
+				$provider->get_provider_name()
+			),
+			'help_link'     => admin_url( 'admin.php?page=quillcrm#/settings/integrations' ),
+		);
+	}
+
+	/**
+	 * Get default provider name for channel
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $channel Channel type.
+	 *
+	 * @return string Provider name
+	 */
+	private function get_default_provider_name( $channel ) {
+		$default_slug = Message_Provider_Registry::instance()->get_default_provider_slug( $channel );
+
+		// Map common provider slugs to friendly names
+		$provider_names = array(
+			'twilio'      => 'Twilio'
+		);
+
+		return $provider_names[ $default_slug ] ?? ucfirst( $default_slug );
 	}
 }

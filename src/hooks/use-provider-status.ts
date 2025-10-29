@@ -9,7 +9,6 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import type { CampaignChannelType } from '@/constants/campaign-channel';
 
 interface ProviderStatus {
 	connected: boolean;
@@ -50,7 +49,7 @@ export function useProviderStatus(
 		console.log(`[QuillCRM] Fetching provider status for ${channel}`);
 		try {
 			const response = await apiFetch<ProviderStatus>({
-				path: `/qc/v1/campaigns/provider-status?channel=${channel}`,
+				path: `/qc/v1/integrations/provider-status?channel=${channel}`,
 			});
 			console.log(`[QuillCRM] Provider status response for ${channel}:`, response);
 			setStatus(response);

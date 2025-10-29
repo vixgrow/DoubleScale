@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Update User Meta Action
  *
@@ -21,6 +22,7 @@ use QuillCRM\Models\Automation_Contact_Model;
  */
 class Update_User_Meta extends Action {
 
+
 	/**
 	 * Action Name
 	 *
@@ -41,6 +43,21 @@ class Update_User_Meta extends Action {
 	 * @var string
 	 */
 	public $description = 'This action will update the user meta.';
+
+
+	/**
+	 * Source
+	 *
+	 * @var string
+	 */
+	public $source = 'wp';
+
+	/**
+	 * Tigger Group
+	 *
+	 * @var string
+	 */
+	public $group = 'user';
 
 	/**
 	 * Process Action

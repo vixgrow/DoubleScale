@@ -1560,7 +1560,7 @@ class REST_Contact_Controller extends REST_Controller {
 	public function send_message( $request ) {
 		$channel = $request->get_param( 'channel' );
 
-		// Validate channel parameter
+		// Validate channel parameter.
 		if ( ! in_array( $channel, Campaign_Channel::get_core_channel_strings(), true ) ) {
 			return new WP_Error(
 				'invalid_channel',
@@ -1569,7 +1569,7 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 		}
 
-		// Validate email requires subject
+		// Validate email requires subject.
 		if ( $channel === Campaign_Channel::STR_EMAIL && empty( $request->get_param( 'subject' ) ) ) {
 			return new WP_Error(
 				'missing_subject',
@@ -1578,7 +1578,15 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 		}
 
-		// Route to appropriate sender based on channel
+		// Validate provider connection for SMS/WhatsApp before processing.
+		if ( $channel === Campaign_Channel::STR_SMS || $channel === Campaign_Channel::STR_WHATSAPP ) {
+			$provider_check = $this->validate_provider_connection( $channel );
+			if ( is_wp_error( $provider_check ) ) {
+				return $provider_check;
+			}
+		}
+
+		// Route to appropriate sender based on channel.
 		switch ( $channel ) {
 			case Campaign_Channel::STR_EMAIL:
 				$sender = new \QuillCRM\Individual_Messaging\Email_Individual_Sender();
@@ -1939,5 +1947,88 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	public function get_purchase_history_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Validate provider connection for SMS/WhatsApp messages
+	 *
+	 * Checks if the message provider is configured and connected before
+	 * allowing individual message sending. This prevents users from
+	 * composing messages only to discover the provider isn't set up.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $channel Channel type ('sms', 'whatsapp').
+	 * @return true|WP_Error True if provider is connected, WP_Error otherwise.
+	 */
+	private function validate_provider_connection( $channel ) {
+		// Get provider for this channel.
+		$provider = \QuillCRM\Managers\Message_Provider_Registry::instance()->get_provider( $channel );
+
+		// Check if provider is available.
+		if ( ! $provider ) {
+			$provider_name = $this->get_default_provider_name( $channel );
+
+			return new WP_Error(
+				'provider_not_configured',
+				sprintf(
+					/* translators: 1: Channel name (SMS/WhatsApp), 2: Provider name (Twilio) */
+					__( '%1$s provider (%2$s) is not configured. Please configure the integration in Settings > Integrations before sending %1$s messages.', 'quillcrm' ),
+					ucfirst( $channel ),
+					$provider_name
+				),
+				array(
+					'status'        => 400,
+					'channel'       => $channel,
+					'provider_name' => $provider_name,
+					'help_link'     => admin_url( 'admin.php?page=quillcrm#/settings/integrations' ),
+				)
+			);
+		}
+
+		// Check if provider is configured and connected.
+		if ( ! $provider->is_configured() ) {
+			return new WP_Error(
+				'provider_not_connected',
+				sprintf(
+					/* translators: 1: Channel name (SMS/WhatsApp), 2: Provider name */
+					__( '%1$s provider (%2$s) is not connected. Please connect the integration in Settings > Integrations before sending %1$s messages.', 'quillcrm' ),
+					ucfirst( $channel ),
+					$provider->get_provider_name()
+				),
+				array(
+					'status'        => 400,
+					'channel'       => $channel,
+					'provider_name' => $provider->get_provider_name(),
+					'provider_slug' => $provider->get_provider_slug(),
+					'help_link'     => admin_url( 'admin.php?page=quillcrm#/settings/integrations' ),
+				)
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get default provider name for channel
+	 *
+	 * Maps provider slugs to user-friendly display names.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $channel Channel type.
+	 * @return string Provider name.
+	 */
+	private function get_default_provider_name( $channel ) {
+		$default_slug = \QuillCRM\Managers\Message_Provider_Registry::instance()->get_default_provider_slug( $channel );
+
+		// Map common provider slugs to friendly names.
+		$provider_names = array(
+			'twilio'      => 'Twilio',
+			'vonage'      => 'Vonage',
+			'messagebird' => 'MessageBird',
+		);
+
+		return $provider_names[ $default_slug ] ?? ucfirst( $default_slug );
 	}
 }

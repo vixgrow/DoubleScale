@@ -14,10 +14,12 @@ import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-table';
+import { useProviderStatus } from '@/hooks/use-provider-status';
 import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
 import SendWhatsAppDialog from './send-whatsapp-dialog';
 import WhatsAppDetails from './whatsapp-details-dialog';
-import { MessageCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import TwilioConfigModal from '../components/twilio-config-modal';
+import { MessageCircle, CheckCircle2, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { MessageStatsCard } from '../components/message-stats-card';
 import type { ColumnDef } from '@tanstack/react-table';
 
@@ -31,6 +33,11 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 		useState<boolean>(false);
 	const [selectedWhatsApp, setSelectedWhatsApp] =
 		useState<TrackedMessage | null>(null);
+	const [showTwilioConfig, setShowTwilioConfig] = useState<boolean>(false);
+
+	// Check WhatsApp provider status
+	const { isConnected, isLoading: providerLoading, checkStatus } =
+		useProviderStatus('whatsapp');
 
 	// Use combined hook for data + table pagination
 	const { loading, messages, analytics, serverSideTable, refetch } =
@@ -43,6 +50,34 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 	if (!contact) {
 		return null;
 	}
+
+	/**
+	 * Handle send WhatsApp button click
+	 * Check provider connection before opening dialog
+	 */
+	const handleSendWhatsApp = () => {
+		console.log('[QuillCRM WhatsApp] Button clicked', {
+			isConnected,
+			providerLoading,
+		});
+
+		if (!isConnected) {
+			console.log('[QuillCRM WhatsApp] Provider not connected - inline warning visible');
+			// Inline warning is already visible, user can click the configure link
+			return;
+		}
+
+		console.log('[QuillCRM WhatsApp] Opening WhatsApp dialog');
+		setShowSendWhatsAppModal(true);
+	};
+
+	/**
+	 * Handle successful Twilio configuration
+	 * Refresh provider status
+	 */
+	const handleTwilioConfigSuccess = async () => {
+		await checkStatus();
+	};
 
 	const columns: ColumnDef<TrackedMessage>[] = [
 		{
@@ -143,15 +178,38 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 				<h2 className="text-2xl font-semibold">
 					{__('WhatsApp Messages', 'quillcrm')}
 				</h2>
-				<Button
-					variant="secondary"
-					size="sm"
-					className="bg-white"
-					onClick={() => setShowSendWhatsAppModal(true)}
-				>
-					<MessageCircle className="w-4 h-4 mr-2" />
-					{__('Send WhatsApp', 'quillcrm')}
-				</Button>
+				<div className="flex flex-col items-end gap-2">
+					<Button
+						variant="secondary"
+						size="sm"
+						className="bg-white"
+						onClick={handleSendWhatsApp}
+						disabled={providerLoading || !isConnected}
+					>
+						<MessageCircle className="w-4 h-4 mr-2" />
+						{providerLoading
+							? __('Checking...', 'quillcrm')
+							: __('Send WhatsApp', 'quillcrm')}
+					</Button>
+					
+					{/* Inline warning when provider not configured */}
+					{!isConnected && !providerLoading && (
+						<div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex items-start gap-2 max-w-sm">
+							<AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+							<div className="text-sm">
+								<p className="text-yellow-800 font-medium">
+									{__('Twilio not configured', 'quillcrm')}
+								</p>
+								<button
+									onClick={() => setShowTwilioConfig(true)}
+									className="text-yellow-700 hover:text-yellow-900 underline mt-1 text-left"
+								>
+									{__('Configure Twilio to send WhatsApp', 'quillcrm')}
+								</button>
+							</div>
+						</div>
+					)}
+				</div>
 			</div>
 
 			{/* Statistics Cards */}
@@ -225,6 +283,11 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 					refetch(); // Refresh the list after sending
 				}}
 				contact={contact}
+			/>
+			<TwilioConfigModal
+				open={showTwilioConfig}
+				onClose={() => setShowTwilioConfig(false)}
+				onSuccess={handleTwilioConfigSuccess}
 			/>
 		</div>
 	);

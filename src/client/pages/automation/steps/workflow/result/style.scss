@@ -99,35 +99,6 @@
 					font-weight: 500;
 					color: #09090b;
 				}
-
-				// Condition card with branch steps
-				.qcrm-condition-card {
-					.qcrm-branch-steps {
-						margin-top: 16px;
-
-						.qcrm-branch-step-card {
-							background-color: white;
-							border: 1px solid #dee1e6;
-							border-radius: 8px;
-							transition: all 0.2s ease;
-
-							.qcrm-timeline-card-icon {
-								width: 28px;
-								height: 28px;
-
-								svg {
-									width: 16px;
-									height: 16px;
-								}
-							}
-
-							.qcrm-timeline-card-title {
-								font-size: 14px;
-								font-weight: 500;
-							}
-						}
-					}
-				}
 			}
 		}
 

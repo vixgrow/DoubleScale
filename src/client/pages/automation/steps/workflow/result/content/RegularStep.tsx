@@ -11,6 +11,7 @@ interface RegularStepProps {
         completed: string;
         failed: string;
         pending: string;
+        skipped: string;
     };
 }
 
@@ -36,7 +37,9 @@ const RegularStep: React.FC<RegularStepProps> = ({
                                     ? 'bg-[#EF444429] text-destructive border-destructive'
                                     : status == 'pending'
                                         ? 'bg-gray-100 text-gray-500 border-gray-300'
-                                        : 'bg-gray-100 text-gray-700';
+                                        : status == 'skipped'
+                                            ? 'bg-orange-50 text-orange-600 border-orange-400'
+                                            : 'bg-gray-100 text-gray-700';
                         return (
                             <span
                                 className={`capitalize border rounded py-1 px-3 text-sm w-fit ${bgColor}`}

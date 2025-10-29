@@ -7,7 +7,7 @@ import { useMemo } from '@wordpress/element';
 /**
  * React dependencies
  */
-import React from 'react';
+import React, { useState } from 'react';
 
 /**
  * External dependencies
@@ -64,6 +64,8 @@ export const DealCard: React.FC<DealCardProps> = ({
 			currentStageId: deal.stage?.id,
 		},
 	});
+	const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+	const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
 
 	const style = {
 		'--stage-color': stageColor || '#6d78d8',
@@ -124,7 +126,10 @@ export const DealCard: React.FC<DealCardProps> = ({
 			onCardClick(deal);
 		} else if (action === 'edit') {
 			onDealEdit?.(deal);
-		}
+		} else if (action === 'delete') {
+			setSelectedDeal(deal); 
+			setDeleteDialogVisible(true);
+		  }
 	};
 
 	return (

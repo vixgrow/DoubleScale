@@ -52,6 +52,8 @@ interface KanbanBoardProps {
 	updateDealOptimistically: (dealId: number, updates: any) => void;
 	onDealView?: (dealId: number) => void;
 	onDealEdit?: (deal: Deal) => void;
+	onDealDelete?: (deal: Deal) => void;
+	onDealAddNote?: (deal: Deal) => void;
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -60,6 +62,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	updateDealOptimistically,
 	onDealView,
 	onDealEdit,
+	onDealDelete,
+	onDealAddNote
 }) => {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const { moveDealToStage } = useDealOperations();
@@ -412,6 +416,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								activeDealId={activeId}
 								onDealView={onDealView}
 								onDealEdit={onDealEdit}
+								onDealDelete={onDealDelete}
+								onDealAddNote={onDealAddNote}
+								
 							/>
 						))}
 				</div>
@@ -424,6 +431,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								deal={activeDeal}
 								isDragging={true}
 								onCardClick={() => {}} // No-op during drag
+								onAddNote={onDealAddNote} 
 								stageColor={
 									pipeline.stages.find(
 										(s) => s.id === activeDeal.stage?.id

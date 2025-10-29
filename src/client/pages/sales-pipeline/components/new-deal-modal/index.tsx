@@ -4,11 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { message } from 'antd';
+// import { message } from 'antd';
 
 import {
 	Dialog,
@@ -38,8 +39,7 @@ import { CustomDialogHeader } from '@quillcrm/components';
 import AddDealIcon from '@quillcrm/components/icons/add-deal';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
-// import { useCustomFields } from '@/client/pages/custom-fields/use-customFields'; // hook custom fields
-import { useCustomFields } from '@/client/pages/custom-fields/use-customFields';
+
 
 export interface NewDealModalProps {
 	visible: boolean;
@@ -85,6 +85,75 @@ interface PipelineStageBoxProps {
 	isPrevious?: boolean;
 }
 
+// const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
+// 	stage,
+// 	index,
+// 	totalStages,
+// 	children,
+// 	isSelected,
+// 	isPrevious,
+// }) => {
+// 	const backgroundColor =
+// 		isSelected || isPrevious
+// 			? StageColorBody(stage.color, index, totalStages).backgroundColor
+// 			: '#DEE1E6';
+
+// 	const isFirst = index === 0;
+// 	const isLast = index === totalStages - 1;
+
+// 	return (
+// 		<div className="flex flex-col p-0 m-0 relative">
+// 			<div
+// 				className="h-10 flex items-center justify-center relative rounded-[8px] px-7 md:px-5"
+// 				style={{ background: backgroundColor }}
+// 			>
+// 				{children}
+// 				{/* Triangles */}
+// 				{isFirst && (
+// 					<span
+// 						className="absolute top-0 right-[-11px] w-0 h-0 z-[11]  rounded-sm"
+// 						style={{
+// 							borderTop: '20px solid transparent',
+// 							borderBottom: '20px solid transparent',
+// 							borderLeft: `15px solid ${backgroundColor}`,
+// 						}}
+// 					/>
+// 				)}
+// 				{isLast && (
+// 					<span
+// 						className="absolute top-0 left-0 z-[3] w-0 h-0 "
+// 						style={{
+// 							borderTop: '20px solid transparent',
+// 							borderBottom: '20px solid transparent',
+// 							borderLeft: '15px solid white',
+// 						}}
+// 					/>
+// 				)}
+// 				{!isFirst && !isLast && (
+// 					<>
+// 						<span
+// 							className="absolute top-0 right-[-11px] w-0 h-0 z-[11]   rounded-sm"
+// 							style={{
+// 								borderTop: '20px solid transparent',
+// 								borderBottom: '20px solid transparent',
+// 								borderLeft: `15px solid ${backgroundColor}`,
+// 							}}
+// 						/>
+
+// 						<span
+// 							className="absolute top-0 left-0 z-[3] w-0 h-0 "
+// 							style={{
+// 								borderTop: '20px solid transparent',
+// 								borderBottom: '20px solid transparent',
+// 								borderLeft: '15px solid white',
+// 							}}
+// 						/>
+// 					</>
+// 				)}
+// 			</div>
+// 		</div>
+// 	);
+// };
 const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 	stage,
 	index,
@@ -102,58 +171,59 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 	const isLast = index === totalStages - 1;
 
 	return (
-		<div className="flex flex-col p-0 m-0 relative">
+		<div
+			className="relative flex items-center"
+			style={{
+				zIndex: 100 - index,
+				marginLeft: isFirst ? 0 : -5, 
+			}}
+		>
 			<div
-				className="h-10 flex items-center justify-center relative rounded-[8px] px-7 md:px-5"
-				style={{ background: backgroundColor }}
+				className={`relative flex items-center justify-center h-8 px-3 ${
+					isFirst ? 'rounded-l-[6px]' : ''
+				} ${isLast ? 'rounded-r-[6px]' : ''}`}
+				style={{
+					backgroundColor,
+					minWidth: 40, 
+					zIndex: 100 - index,
+					boxShadow: isSelected ? '0 0 6px rgba(0,0,0,0.1)' : 'none',
+				}}
 			>
-				{children}
-				{/* Triangles */}
-				{isFirst && (
+				<span className="text-[11px] font-medium text-[#09090B] whitespace-nowrap">
+					{children}
+				</span>
+				{!isLast && (
 					<span
-						className="absolute top-0 right-[-11px] w-0 h-0 z-[11]  rounded-sm"
+						className="absolute top-0 right-[-8px] w-0 h-0"
 						style={{
-							borderTop: '20px solid transparent',
-							borderBottom: '20px solid transparent',
-							borderLeft: `15px solid ${backgroundColor}`,
+							borderTop: '16px solid transparent',
+							borderBottom: '16px solid transparent',
+							borderLeft: `9px solid ${backgroundColor}`,
+							zIndex: 100 - index,
 						}}
 					/>
 				)}
-				{isLast && (
-					<span
-						className="absolute top-0 left-0 z-[3] w-0 h-0 "
-						style={{
-							borderTop: '20px solid transparent',
-							borderBottom: '20px solid transparent',
-							borderLeft: '15px solid white',
-						}}
-					/>
-				)}
-				{!isFirst && !isLast && (
-					<>
-						<span
-							className="absolute top-0 right-[-11px] w-0 h-0 z-[11]   rounded-sm"
-							style={{
-								borderTop: '20px solid transparent',
-								borderBottom: '20px solid transparent',
-								borderLeft: `15px solid ${backgroundColor}`,
-							}}
-						/>
 
-						<span
-							className="absolute top-0 left-0 z-[3] w-0 h-0 "
-							style={{
-								borderTop: '20px solid transparent',
-								borderBottom: '20px solid transparent',
-								borderLeft: '15px solid white',
-							}}
-						/>
-					</>
+				{/* السهم الشمال */}
+				{!isFirst && (
+					<span
+						className="absolute top-0 left-0 w-0 h-0"
+						style={{
+							borderTop: '16px solid transparent',
+							borderBottom: '16px solid transparent',
+							borderLeft: '9px solid white',
+							zIndex: 99 - index,
+						}}
+					/>
 				)}
 			</div>
 		</div>
 	);
 };
+
+
+
+
 export const NewDealModal: React.FC<NewDealModalProps> = ({
 	visible,
 	onClose,
@@ -165,6 +235,10 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactsLoading, setContactsLoading] = useState(false);
 	const [customFields, setCustomFields] = useState<Record<string, any>>({});
+		// Get current user as default owner
+		const [currentUserId, setCurrentUserId] = useState<number | undefined>(
+			undefined
+		);
 
 	const [formData, setFormData] = useState<{
 		title: string;
@@ -192,6 +266,8 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		label: '',
 		custom_fields: {},
 	});
+	const dispatch = useDispatch('quillcrm/core');
+	const createNotice = dispatch?.createNotice;
 	const priorities = useMemo(() => {
 		return ConfigAPI.getDealPriorities();
 	}, []);
@@ -208,10 +284,15 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 
 	const handleSubmit = async (values: DealFormData) => {
 		if (!pipeline) {
-			message.error(__('Please select a pipeline first.', 'quillcrm'));
+			createNotice?.({
+				type: 'error',
+				message: __(
+					`Please select a pipeline first`,
+					'quillcrm'
+				),
+			});
 			return;
 		}
-
 		// Ensure owner_id is set as fallback
 		if (!values.owner_id && defaultOwnerId) {
 			values.owner_id = defaultOwnerId;
@@ -231,17 +312,23 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 			};
 
 			await createDeal(dealData);
-
-			message.success(__('Deal created successfully!', 'quillcrm'));
-
-			// form.reset()
+			createNotice?.({
+				type: 'success',
+				message: __(
+					`Deal created successfully!`,
+					'quillcrm'
+				),
+			});
 			onClose();
 			onSuccess();
 		} catch (error: any) {
-			message.error(
-				error?.message ||
-					__('Failed to create deal. Please try again.', 'quillcrm')
-			);
+			createNotice?.({
+				type: 'error',
+				message: error.message || __(
+					`Deal created successfully!`,
+					'quillcrm'
+				),
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -276,10 +363,6 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		return sortedStages[0].id;
 	}, [pipeline?.stages]);
 
-	// Get current user as default owner
-	const [currentUserId, setCurrentUserId] = useState<number | undefined>(
-		undefined
-	);
 
 	// Get current user ID from WordPress using centralized service
 	useEffect(() => {
@@ -394,6 +477,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 			onOpenChange={(open) => {
 				if (!open) {
 					handleCancel();
+					
 				}
 			}}
 		>
@@ -474,7 +558,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 							/>
 							<div className=" h-12 rounded-[8px] flex justify-center items-center gap-1 border border-[#DEE1E6] bg-[#F0F0F0] py-[5px] px-[12px]">
 								<DealValueIcon />
-								<span>USP</span>
+								<span>USD</span>
 							</div>
 						</div>
 					</div>
@@ -765,3 +849,4 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		</Dialog>
 	);
 };
+

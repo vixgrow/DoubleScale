@@ -45,7 +45,6 @@ import { PipelineFilters } from './components/pipeline-filters';
 import { PipelineSettingsModal } from './components/pipeline-settings-modal';
 import { NewDealModal } from './components/new-deal-modal';
 import { DealDetailModal } from './components/deal-detail-modal';
-import { EditDealModal } from './components/edit-deal-modal';
 import { NewPipelineModal } from './components/new-pipeline-modal';
 import { DuplicatePipelineModal } from './components/duplicate-pipeline-modal';
 import { usePipelineData } from './hooks/use-pipeline-data';
@@ -63,6 +62,10 @@ import AddPipIcon from '@quillcrm/components/icons/addpip-header';
 import DuplicatePipelineHeader from '@quillcrm/components/icons/duplicate-pipeline-header';
 import { EditPipelineModal } from './components/pipeline-edit';
 import { DeletePipelineDialog } from './components/pipeline-delete';
+import { EditDealModal } from './components/edit-deal-modal';
+import { DeleteDeal } from './components/deal-delete';
+import { Deal } from './types';
+import { AddNoteModal } from './components/add-note-modal';
 
 // Import types for proper typing
 type Filters = {
@@ -92,6 +95,10 @@ const SalesPipeline: React.FC = () => {
 	const [editingDeal, setEditingDeal] = useState<any | null>(null);
 	const [showDuplicateError, setShowDuplicateError] = useState(false);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const [deleteDealModalVisible, setDeleteDealModalVisible] = useState(false);
+    const [dealToDelete, setDealToDelete] = useState<any | null>(null);
+	const [addNoteVisible, setAddNoteVisible] = useState(false);
+    const [selectedDealForNote, setSelectedDealForNote] = useState<any | null>(null);
 	const [filters, setFilters] = useState<Filters>({
 		search: '',
 		ownerId: null,
@@ -123,82 +130,14 @@ const SalesPipeline: React.FC = () => {
 			setSelectedPipelineId(pipelines[0].id);
 		}
 	}, [pipelines, selectedPipelineId]);
+	// handle note
 
-	// const headerActions = [
-	// 	{
-	// 		label: __('New Pipeline', 'quillcrm'),
-	// 		variant: 'gradient',
-	// 		size: 'default',
-	// 		icon: <Plus size={16} />,
-	// 		className: 'sales-pipeline-btn btn-primary',
-	// 		title: __(
-	// 			'Create a new sales pipeline with custom stages',
-	// 			'quillcrm'
-	// 		),
-	// 		onClick: () => {
-	// 			setNewPipelineModalVisible(true);
-	// 		},
-	// 		hidden: isDealOwner(),
-	// 	},
-	// 	{
-	// 		label: __('New Deal', 'quillcrm'),
-	// 		variant: 'default',
-	// 		size: 'default',
-	// 		icon: <Zap size={16} />,
-	// 		className: 'sales-pipeline-btn btn-secondary',
-	// 		title: selectedPipeline
-	// 			? __('Add a new deal to this pipeline', 'quillcrm')
-	// 			: __('Select a pipeline first to add deals', 'quillcrm'),
-	// 		onClick: () => {
-	// 			setNewDealModalVisible(true);
-	// 		},
-	// 		disabled: !selectedPipeline,
-	// 		hidden: isDealOwner(),
-	// 	},
-	// 	{
-	// 		label: __('Duplicate Pipeline', 'quillcrm'),
-	// 		variant: 'secondary',
-	// 		size: 'default',
-	// 		icon: <Copy size={16} />,
-	// 		className: 'sales-pipeline-btn btn-tertiary',
-	// 		title: selectedPipeline
-	// 			? __(
-	// 					'Create a copy of this pipeline with all stages',
-	// 					'quillcrm'
-	// 				)
-	// 			: __('Select a pipeline first to duplicate it', 'quillcrm'),
-	// 		// onClick: () => {
-	// 		// 	setDuplicatePipelineModalVisible(true);
-	// 		// },
-	// 		onClick: () => {
-	// 			if (selectedPipeline) {
-	// 			  setDuplicatePipelineModalVisible(true);
-	// 			} else {
-	// 			  setShowDuplicateError(true);
-	// 			  setTimeout(() => setShowDuplicateError(false), 3000);
-	// 			}
-	// 		},
-	// 		disabled: !selectedPipeline,
-	// 		hidden: isDealOwner(),
-	// 	},
-	// 	{
-	// 		label: __('Settings', 'quillcrm'),
-	// 		variant: 'outline',
-	// 		size: 'default',
-	// 		icon: <Settings size={16} />,
-	// 		className: 'sales-pipeline-btn btn-utility',
-	// 		title: selectedPipeline
-	// 			? __('Configure pipeline stages and settings', 'quillcrm')
-	// 			: __('Select a pipeline first to access settings', 'quillcrm'),
-	// 		onClick: () => {
-	// 			setSettingsModalVisible(true);
-	// 		},
-	// 		disabled: !selectedPipeline,
-	// 		hidden: isDealOwner(),
-	// 	},
+	const handleAddNote = (deal: Deal) => {
+		setSelectedDealForNote(deal);
+		setAddNoteVisible(true);
+	};
 
-	// ];
-
+	
 	if (loading) {
 		return (
 			<div className="sales-pipeline-loading">
@@ -438,6 +377,11 @@ const SalesPipeline: React.FC = () => {
 							setEditingDeal(deal);
 							setEditDealModalVisible(true);
 						}}
+						onDealDelete={(deal) => {
+							setDealToDelete(deal);
+							setDeleteDealModalVisible(true);
+						}}
+						onDealAddNote={(deal) => handleAddNote(deal)} 
 					/>
 				</div>
 			)}
@@ -524,19 +468,36 @@ const SalesPipeline: React.FC = () => {
 				}}
 			/>
 			<EditPipelineModal
-  visible={editPipelineModalVisible}
-  onClose={() => setEditPipelineModalVisible(false)}
-  onSuccess={async (updatedPipeline) => {
-    await refreshData();
-
-    
-    if (updatedPipeline?.id) {
-      setSelectedPipelineId(updatedPipeline.id);
-    }
-
-    setEditPipelineModalVisible(false);
-  }}
+              visible={editPipelineModalVisible}
+              onClose={() => setEditPipelineModalVisible(false)}
+              onSuccess={async (updatedPipeline) => {
+              await refreshData();
+              if (updatedPipeline?.id) {
+                 setSelectedPipelineId(updatedPipeline.id);
+              }
+             setEditPipelineModalVisible(false);
+            }}
   pipeline={selectedPipeline}
+/>
+<DeleteDeal
+  visible={deleteDealModalVisible}
+  onClose={() => setDeleteDealModalVisible(false)}
+  deal={dealToDelete}
+  pipeline={selectedPipeline}
+  pipelines={pipelines}
+  onConfirm={() => {
+    refreshData();
+    setDeleteDealModalVisible(false);
+  }}
+/>
+<AddNoteModal
+	visible={addNoteVisible}
+	onClose={() => setAddNoteVisible(false)}
+	dealId={selectedDealForNote?.id}
+	onSuccess={() => {
+		setAddNoteVisible(false);
+		refreshData(); 
+	}}
 />
 <DeletePipelineDialog
   visible={deleteDialogOpen}

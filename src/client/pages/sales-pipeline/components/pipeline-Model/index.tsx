@@ -21,6 +21,7 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
+	DialogOverlay,
 	DialogTitle,
 } from '@quillcrm/components/ui/dialog';
 import {
@@ -193,6 +194,8 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 
         
 	};
+    
+
 	const addStage = () => {
 		setCustomStages((prev) => [
 			...prev,
@@ -209,7 +212,7 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 			open={visible}
 			onOpenChange={(open) => {
 				if (!open) handleCancel();
-			}}
+			}}	
 		>
 			<DialogContent className="w-full max-w-7xl max-h-[80vh] overflow-y-auto my-4 sm:mx-auto z-[10000] p-6 rounded-[16px] pipline-content">
 				<DialogHeader>

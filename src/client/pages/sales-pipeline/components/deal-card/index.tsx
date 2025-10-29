@@ -23,8 +23,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 /**
  * Internal dependencies
@@ -33,29 +31,20 @@ import { Deal } from '../../types';
 import './style.scss';
 import DealContactIcon from '@quillcrm/components/icons/deal-contact';
 import DealCalenderIcon from '@quillcrm/components/icons/deal-calender';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@quillcrm/components/ui/dropdown-menu';
-import MoreHorizantail from '@quillcrm/components/icons/moreHorizantal-header';
-import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
-import TrashIcon from '@quillcrm/components/icons/trash';
+
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import WeightedIcon from '@quillcrm/components/icons/weighted-icon';
 import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
-import NoteAddIcon from '@quillcrm/components/icons/note-add';
-import CallLogIcon from '@quillcrm/components/icons/call-log';
-import EmailLogIcon from '@quillcrm/components/icons/email-log';
-import MeetingDealIcon from '@quillcrm/components/icons/meeting-deal';
-import ViewIcon from '@quillcrm/components/icons/view-header';
+
+import { DealCardMenu } from './DealCardMenu';
 
 interface DealCardProps {
 	deal: Deal;
 	isDragging: boolean;
 	onCardClick: (deal: Deal) => void;
 	onDealEdit?: (deal: Deal) => void;
+	onDealDelete?: (deal:Deal) =>void;
+	onAddNote?: (deal: Deal) => void;
 	stageColor?: string;
 	stageProbability?: number;
 	style?: React.CSSProperties;
@@ -66,6 +55,8 @@ export const DealCard: React.FC<DealCardProps> = ({
 	isDragging,
 	onCardClick,
 	onDealEdit,
+	onDealDelete,
+	onAddNote,
 	stageColor,
 	stageProbability,
 	style: customStyle = {},
@@ -140,13 +131,24 @@ export const DealCard: React.FC<DealCardProps> = ({
 		onCardClick(deal);
 	};
 
-	const handleActionClick = (e: React.MouseEvent, action: string) => {
-		e.stopPropagation();
+	// const handleActionClick = (e: React.MouseEvent, action: string) => {
+	// 	e.stopPropagation();
 
+	// 	if (action === 'view') {
+	// 		onCardClick(deal);
+	// 	} else if (action === 'edit') {
+	// 		onDealEdit?.(deal);
+	// 	}
+	// };
+	const handleActionClick = (action: string) => {
 		if (action === 'view') {
 			onCardClick(deal);
 		} else if (action === 'edit') {
 			onDealEdit?.(deal);
+		} else if (action === 'delete'){
+			onDealDelete?.(deal)
+		}else if (action === 'add_note') {
+			onAddNote?.(deal); 
 		}
 	};
 
@@ -169,7 +171,7 @@ export const DealCard: React.FC<DealCardProps> = ({
 							{deal.title}
 						</CardTitle>
 
-						<DropdownMenu>
+						{/* <DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button
 									variant="outline"
@@ -223,7 +225,8 @@ export const DealCard: React.FC<DealCardProps> = ({
 									{__('Delete Pipeline', 'quillcrm')}
 								</DropdownMenuItem>
 							</DropdownMenuContent>
-						</DropdownMenu>
+						</DropdownMenu> */}
+						<DealCardMenu onActionClick={handleActionClick} />
 					</div>
 
 					<div className="flex flex-wrap items-center gap-1 text-[#777] text-base font-medium font-[Inter] leading-[26px]">

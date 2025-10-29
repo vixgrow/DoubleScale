@@ -200,29 +200,6 @@
     // }
     // }
     // }
-    
-    // Responsive adjustments
-    // @media (max-width: 768px) {
-    //     .new-pipeline-modal {
-    //         .new-pipeline-form {
-    //             .custom-stages-config {
-    //                 .stages-list {
-    //                     .stage-card {
-    //                         .ant-row {
-    //                             flex-direction: column;
-    
-    //                             .ant-col {
-    //                                 width: 100% !important;
-    //                                 margin-bottom: 8px;
-    
-    //                                 &:last-child {
-    //                                     margin-bottom: 0;
-    //                                 }
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+body[style*="pointer-events: none"] {
+    pointer-events: auto !important;
+ }

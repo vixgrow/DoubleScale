@@ -1,6 +1,6 @@
 // CustomFieldsSection.tsx
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 // import { Input } from 'antd';
 import {
 	Accordion,
@@ -33,11 +33,13 @@ interface CustomField {
 interface CustomFieldsSectionProps {
 	dealId?: number;
 	onChange?: (fields: Record<string, any>) => void;
+	initialValues?: Record<string, any>;
 }
 
 // ==================== Component ====================
-export const CustomFieldsSection = ({ dealId, onChange }: CustomFieldsSectionProps) => {
-	const [values, setValues] = useState<Record<string, any>>({});
+export const CustomFieldsSection = ({ dealId, onChange ,initialValues }: CustomFieldsSectionProps) => {
+	// const [values, setValues] = useState<Record<string, any>>({});
+	const [values, setValues] = useState<Record<string, any>>(initialValues || {});
 	const { groups: customFieldsGroups, isLoading, error } = useCustomFields() as unknown as {
 		groups: { id: number; name: string; slug: string; custom_fields: CustomField[] }[];
 		isLoading?: boolean;
@@ -51,6 +53,9 @@ export const CustomFieldsSection = ({ dealId, onChange }: CustomFieldsSectionPro
 			return updated;
 		});
 	};
+	useEffect(() => {
+		if (initialValues) setValues(initialValues);
+	}, [initialValues]);
 
 	if (isLoading)
 		return <p className="text-sm text-gray-500">{__('Loading custom fields...', 'quillcrm')}</p>;

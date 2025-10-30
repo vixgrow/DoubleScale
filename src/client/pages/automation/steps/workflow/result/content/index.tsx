@@ -169,6 +169,86 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
         }
     };
 
+    // Helper: Format step label based on type
+    const formatStepLabel = (step: OrganizedStep): string => {
+        const baseLabel = typesOptions[step.type].label;
+        const stepData = getStep(step);
+
+        // Label formatters for each type
+        const labelFormatters: Record<string, () => string | null> = {
+            delay: () => {
+                const delayText = getDelayText(step);
+                return delayText ? `${baseLabel} (${delayText})` : null;
+            },
+            goal: () => stepData.label ? `${baseLabel} (${stepData.label})` : null,
+            action: () => stepData.label ? `${baseLabel} (${stepData.label})` : null,
+        };
+
+        // Try specific formatter first
+        const formatter = labelFormatters[step.type];
+        if (formatter) {
+            const formattedLabel = formatter();
+            if (formattedLabel) return formattedLabel;
+        }
+
+        // Fallback for other types with action and label
+        const shouldUseFallback =
+            step.type !== 'condition' &&
+            step.type !== 'end_automation' &&
+            step.type !== 'delay' &&
+            step.action &&
+            stepData.label;
+
+        return shouldUseFallback ? stepData.label : baseLabel;
+    };
+
+    // Helper: Determine which condition path was taken
+    const determineConditionPath = (
+        step: OrganizedStep,
+        yesChildren: OrganizedStep[],
+        noChildren: OrganizedStep[]
+    ): 'yes' | 'no' => {
+        const hasChildrenWithStatus = (children: OrganizedStep[]) =>
+            children.some(child => child['process_status']);
+
+        const hasProcessedChildren = (children: OrganizedStep[]) =>
+            children.some(child =>
+                child['process_status'] && child['process_status'] !== 'pending'
+            );
+
+        // If condition hasn't been processed, default to branch with children or 'yes'
+        const isConditionProcessed = step['process_status'] && step['process_status'] !== 'pending';
+        if (!isConditionProcessed) {
+            return yesChildren.length > 0 ? 'yes' : 'no';
+        }
+
+        // Check which branch has processed children
+        if (hasProcessedChildren(yesChildren)) return 'yes';
+        if (hasProcessedChildren(noChildren)) return 'no';
+
+        // Check which branch has any status (even pending)
+        if (hasChildrenWithStatus(yesChildren)) return 'yes';
+        if (hasChildrenWithStatus(noChildren)) return 'no';
+
+        // Default to branch with steps or 'yes'
+        return yesChildren.length > 0 ? 'yes' : 'no';
+    };
+
+    // Helper: Determine branch label for steps in condition branches
+    const getBranchLabel = (
+        isInBranch: boolean,
+        isFirstInBranch: boolean,
+        isLastInBranch: boolean
+    ): 'started' | 'ended' | 'both' | undefined => {
+        if (!isInBranch) return undefined;
+
+        if (isFirstInBranch && isLastInBranch) return 'both';
+        if (isFirstInBranch) return 'started';
+        if (isLastInBranch) return 'ended';
+
+        return undefined;
+    };
+
     // Flatten steps into a sequential timeline array
     const flattenStepsForTimeline = () => {
         const timelineItems: Array<{
@@ -193,81 +273,23 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
         });
 
         // Process organized steps
-        const processStepForTimeline = (step: OrganizedStep, isInBranch = false, isFirstInBranch = false, isLastInBranch = false) => {
+        const processStepForTimeline = (
+            step: OrganizedStep,
+            isInBranch = false,
+            isFirstInBranch = false,
+            isLastInBranch = false
+        ) => {
             const { yesChildren, noChildren } = organizeChildrenByCondition(
                 step.children || []
             );
 
-            let label = typesOptions[step.type].label;
-            const stepData = getStep(step);
-
-            // Format label based on step type
-            if (step.type === 'delay') {
-                const delayText = getDelayText(step);
-                if (delayText) {
-                    label = `${typesOptions[step.type].label} (${delayText})`;
-                }
-            } else if (step.type === 'goal' && stepData.label) {
-                label = `${typesOptions[step.type].label} (${stepData.label})`;
-            } else if (step.type === 'action' && stepData.label) {
-                label = `${typesOptions[step.type].label} (${stepData.label})`;
-            } else if (
-                step.type !== 'condition' &&
-                step.type !== 'end_automation' &&
-                step.type !== 'delay' &&
-                step.action &&
-                stepData.label
-            ) {
-                label = stepData.label;
-            }
-
             const status = step['process_status'] || 'pending';
             const date = step['process_date'];
 
-            // Add the step itself
+            // Handle condition steps
             if (step.type === 'condition') {
-                // For conditions, check which path was taken based on which children have process_status
-                const yesChildrenProcessed = yesChildren.filter(
-                    (child) => child['process_status'] && child['process_status'] !== 'pending'
-                );
-                const noChildrenProcessed = noChildren.filter(
-                    (child) => child['process_status'] && child['process_status'] !== 'pending'
-                );
-
-                // Determine path taken: check if condition itself has been processed
-                let pathTaken: 'yes' | 'no' | null = null;
-                if (step['process_status'] && step['process_status'] !== 'pending') {
-                    // Condition has been processed, determine path based on which children were processed
-                    if (yesChildrenProcessed.length > 0) {
-                        pathTaken = 'yes';
-                    } else if (noChildrenProcessed.length > 0) {
-                        pathTaken = 'no';
-                    } else {
-                        // Condition is processed but no children processed yet
-                        // Check if there are any children with process_status (even pending)
-                        const yesChildrenWithStatus = yesChildren.filter(
-                            (child) => child['process_status']
-                        );
-                        const noChildrenWithStatus = noChildren.filter(
-                            (child) => child['process_status']
-                        );
-
-                        if (yesChildrenWithStatus.length > 0) {
-                            pathTaken = 'yes';
-                        } else if (noChildrenWithStatus.length > 0) {
-                            pathTaken = 'no';
-                        } else {
-                            // No status info, show the branch with steps or default to yes
-                            pathTaken = yesChildren.length > 0 ? 'yes' : 'no';
-                        }
-                    }
-                } else {
-                    // Condition not processed yet, show both branches or default
-                    pathTaken = yesChildren.length > 0 ? 'yes' : 'no';
-                }
-
-                const childrenToProcess =
-                    pathTaken === 'yes' ? yesChildren : noChildren;
+                const pathTaken = determineConditionPath(step, yesChildren, noChildren);
+                const childrenToProcess = pathTaken === 'yes' ? yesChildren : noChildren;
 
                 // Add the condition card itself
                 timelineItems.push({
@@ -278,47 +300,33 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                     status,
                     date,
                     step,
-                    conditionResult: pathTaken!,
+                    conditionResult: pathTaken,
                 });
 
-                // Process children and add them as separate timeline items
+                // Process children
                 childrenToProcess.forEach((child, idx) => {
                     const isFirst = idx === 0;
                     const isLast = idx === childrenToProcess.length - 1;
                     processStepForTimeline(child, true, isFirst, isLast);
                 });
-            } else {
-                // Regular step (action, delay, goal, etc.)
-                // Labels are already formatted above
-                const stepLabel = label;
+                return;
+            }
 
-                // Determine branch label if in branch
-                let branchLabel: 'started' | 'ended' | 'both' | undefined = undefined;
-                if (isInBranch) {
-                    if (isFirstInBranch && isLastInBranch) {
-                        branchLabel = 'both';
-                    } else if (isFirstInBranch) {
-                        branchLabel = 'started';
-                    } else if (isLastInBranch) {
-                        branchLabel = 'ended';
-                    }
-                }
+            // Handle regular steps (action, delay, goal, etc.)
+            timelineItems.push({
+                id: step.id,
+                type: step.type,
+                label: formatStepLabel(step),
+                icon: typesOptions[step.type].icon,
+                status,
+                date,
+                step,
+                branchLabel: getBranchLabel(isInBranch, isFirstInBranch, isLastInBranch),
+            });
 
-                timelineItems.push({
-                    id: step.id,
-                    type: step.type,
-                    label: stepLabel,
-                    icon: typesOptions[step.type].icon,
-                    status,
-                    date,
-                    step,
-                    branchLabel,
-                });
-
-                // Process children if any
-                if (step.children && step.children.length > 0) {
-                    step.children.forEach((child) => processStepForTimeline(child));
-                }
+            // Process children if any
+            if (step.children && step.children.length > 0) {
+                step.children.forEach((child) => processStepForTimeline(child));
             }
         };
 
@@ -328,6 +336,28 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
     };
 
     const timelineItems = flattenStepsForTimeline();
+
+    // Helper: Get translated branch label text
+    const getBranchLabelText = (branchLabel?: 'started' | 'ended' | 'both'): string | undefined => {
+        if (!branchLabel) return undefined;
+
+        const branchLabelMap = {
+            started: __('Condition Started', 'quillcrm'),
+            ended: __('Condition Ended', 'quillcrm'),
+            both: `${__('Condition Started', 'quillcrm')} & ${__('Ended', 'quillcrm')}`,
+        };
+
+        return branchLabelMap[branchLabel];
+    };
+
+    // Helper: Check if timestamp should be shown
+    const shouldShowTimestamp = (item: typeof timelineItems[0]): boolean => {
+        return Boolean(
+            item.date &&
+            item.status !== 'pending' &&
+            item.type !== 'end_automation'
+        );
+    };
 
     return (
         <Card className="shadow-none">
@@ -340,9 +370,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                         return (
                             <div
                                 key={item.id}
-                                className={`qcrm-timeline-item ${isLeft
-                                    ? 'qcrm-timeline-item--left'
-                                    : 'qcrm-timeline-item--right'
+                                className={`qcrm-timeline-item ${isLeft ? 'qcrm-timeline-item--left' : 'qcrm-timeline-item--right'
                                     }`}
                             >
                                 <div className="qcrm-timeline-marker">
@@ -351,14 +379,14 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                                     </div>
                                 </div>
                                 <div className="qcrm-timeline-content">
-                                    {item.date && item.status !== 'pending' && item.type !== 'end_automation' && (
+                                    {shouldShowTimestamp(item) && (
                                         <div className="qcrm-timeline-timestamp">
                                             <ClockIcon />
                                             <span>
                                                 {__('Started on', 'quillcrm')}:
                                             </span>
                                             <span className="font-semibold">
-                                                {convertDate(item.date, true)}
+                                                {convertDate(item.date!, true)}
                                             </span>
                                         </div>
                                     )}
@@ -368,9 +396,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                                                 <ConditionStep
                                                     icon={item.icon}
                                                     label={item.label}
-                                                    conditionResult={
-                                                        item.conditionResult!
-                                                    }
+                                                    conditionResult={item.conditionResult!}
                                                     status={item.status}
                                                     statuses={statuses}
                                                 />
@@ -380,15 +406,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                                                     label={item.label}
                                                     status={item.type === 'end_automation' ? undefined : item.status}
                                                     statuses={statuses}
-                                                    branchLabel={
-                                                        item.branchLabel
-                                                            ? item.branchLabel === 'started'
-                                                                ? __('Condition Started', 'quillcrm')
-                                                                : item.branchLabel === 'ended'
-                                                                    ? __('Condition Ended', 'quillcrm')
-                                                                    : `${__('Condition Started', 'quillcrm')} & ${__('Ended', 'quillcrm')}`
-                                                            : undefined
-                                                    }
+                                                    branchLabel={getBranchLabelText(item.branchLabel)}
                                                 />
                                             )}
                                         </CardContent>

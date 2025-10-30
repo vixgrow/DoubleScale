@@ -8,11 +8,19 @@ import { createContext, useContext } from 'react';
  */
 import { Automation, AutomationStep } from '@quillcrm/client';
 
+export interface StepAnalytics {
+	step_id: number | null;
+	contacts: number;
+	conversion_rate: number;
+}
+
 export const AutomationContext = createContext<{
 	automation: Automation | null;
 	steps: AutomationStep[];
 	isLoading: boolean;
 	isSaving: boolean;
+	viewMode?: boolean;
+	analyticsData?: StepAnalytics[];
 	updatedSteps: {
 		[stepId: number]: Partial<AutomationStep>;
 	};
@@ -37,6 +45,8 @@ export const AutomationContext = createContext<{
 	steps: [],
 	isLoading: false,
 	isSaving: false,
+	viewMode: false,
+	analyticsData: [],
 	updatedSteps: {},
 	setAutomation: (_automation: Automation) => {
 		throw new Error('setAutomation() not implemented');

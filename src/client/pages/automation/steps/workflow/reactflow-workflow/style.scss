@@ -416,7 +416,6 @@
 		border: 2px solid #d9d9d9;
 		background: #ffffff;
 		overflow: visible;
-		padding-right: 60px;
 
 		.qcrm-reactflow-node__content {
 			margin-right: 20px;
@@ -662,6 +661,22 @@
 		line-height: 1;
 		margin-top: 1px;
 	}
+}
+
+// Merge node placeholder for view mode
+.qcrm-reactflow-merge__placeholder {
+	width: 32px;
+	height: 32px;
+}
+
+// Merge node dialog disabled in view mode
+.qcrm-reactflow-merge__dialog--disabled {
+	pointer-events: none;
+}
+
+// Disabled nodes in view mode
+.qcrm-reactflow-node--disabled {
+	pointer-events: none;
 }
 
 // Branch node content styles

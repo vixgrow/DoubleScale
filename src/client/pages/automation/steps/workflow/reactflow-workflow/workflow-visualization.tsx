@@ -65,6 +65,8 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	currentStep,
 	isTriggerVisible,
 	isSidebarOpen = false,
+	viewMode = false,
+	analyticsData = [],
 	onStepClick,
 	onTriggerClick,
 }) => {
@@ -169,7 +171,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			onTriggerClick,
 			onStepClick,
 			savedPositions,
-			isTriggerVisible
+			isTriggerVisible,
+			viewMode,
+			analyticsData
 		);
 
 		// Position calculator that considers nested structure
@@ -234,7 +238,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			null,
 			0,
 			0,
-			selectedStepId
+			selectedStepId,
+			viewMode,
+			analyticsData
 		);
 
 		// Post-process to ensure all child condition merge nodes connect to their parent merge nodes
@@ -522,13 +528,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						edges={edgesState}
 						onNodesChange={handleNodesChange}
 						onEdgesChange={onEdgesChange}
-						onNodeClick={onNodeClick}
+						onNodeClick={viewMode ? undefined : onNodeClick}
 						nodeTypes={NODE_TYPES}
 						edgeTypes={EDGE_TYPES}
 						fitView
 						fitViewOptions={{ padding: 0.2 }}
 						nodesConnectable={false}
-						elementsSelectable={true}
+						elementsSelectable={!viewMode}
 						nodesDraggable={false}
 						selectNodesOnDrag={false}
 						panOnDrag={true}
@@ -540,7 +546,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							type: 'default',
 							style: EDGE_STYLES.DEFAULT,
 						}}
-						elevateEdgesOnSelect={true}
+						elevateEdgesOnSelect={!viewMode}
 						elevateNodesOnSelect={false}
 						snapToGrid={false}
 						snapGrid={[15, 15]}

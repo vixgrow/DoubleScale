@@ -47,6 +47,8 @@ const Automation: React.FC = () => {
 	const { automation, steps, updatedSteps } = state;
 	const [loading, setLoading] = useState<boolean>(true);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
+	const [analyticsData, setAnalyticsData] = useState<any[]>([]);
+	const [analyticsLoading, setAnalyticsLoading] = useState<boolean>(false);
 	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -64,6 +66,9 @@ const Automation: React.FC = () => {
 
 			setAutomation(response);
 			setSteps(response.steps);
+
+			// Fetch analytics data once when automation loads
+			fetchAnalyticsData(response.id);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -71,6 +76,36 @@ const Automation: React.FC = () => {
 			});
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const fetchAnalyticsData = async (automationId: number) => {
+		if (!automationId) {
+			setAnalyticsData([]);
+			return;
+		}
+
+		try {
+			setAnalyticsLoading(true);
+			const response = (await apiFetch({
+				path: `/qc/v1/automation-reports/${automationId}/get-chart-report`,
+			})) as any;
+
+			if (response.funnel_data) {
+				// Transform funnel data to analytics format
+				const analytics = response.funnel_data.map((item: any) => ({
+					step_id: item.step_id,
+					contacts: item.value || 0,
+					conversion_rate: item.percentage || 0,
+					step_type: item.step_type,
+				}));
+				setAnalyticsData(analytics);
+			}
+		} catch (error: any) {
+			console.error('Failed to fetch analytics data:', error);
+			setAnalyticsData([]);
+		} finally {
+			setAnalyticsLoading(false);
 		}
 	};
 
@@ -107,7 +142,7 @@ const Automation: React.FC = () => {
 			case 'contacts':
 				return <Contacts />;
 			case 'reports':
-				return <AutomationFunnel automation={automation} />;
+				return <AutomationFunnel automation={automation} analyticsData={analyticsData} loading={analyticsLoading} />;
 			default:
 				return <Workflow />;
 		}

@@ -20,6 +20,9 @@ import { Fields } from '@quillcrm/components';
 import { getAction, getGoal } from '@quillcrm/utils';
 import { useAutomationContext } from '../../../state/context';
 import { deleteStep } from '../reactflow-workflow/utils/step-utils';
+import { useProviderStatus } from '@/hooks/use-provider-status';
+import { ProviderNotConnectedWarning } from '@/client/pages/contact/components/provider-not-connected-warning';
+import TwilioConfigModal from '@/client/pages/contact/components/twilio-config-modal';
 
 interface StepFieldsModalProps {
 	step: OrganizedStep;
@@ -36,8 +39,21 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
 	const [currentStepId, setCurrentStepId] = useState(step.id);
+	const [showTwilioConfig, setShowTwilioConfig] = useState(false);
 	const { setMergeTagsVisible, createNotice } = useDispatch('quillcrm/core');
 	const { steps, setSteps } = useAutomationContext();
+
+	// Determine if this is a messaging action that requires provider
+	const actionKey = step.type === 'delay' ? 'delay' : step.action;
+	const isSmsAction = actionKey === 'send_sms';
+	const isWhatsAppAction = actionKey === 'send_whatsapp';
+	const requiresProvider = isSmsAction || isWhatsAppAction;
+	const channel = isSmsAction ? 'sms' : isWhatsAppAction ? 'whatsapp' : null;
+
+	// Check provider status for SMS/WhatsApp actions (non-blocking)
+	const { isConnected, isLoading: providerLoading, checkStatus } = useProviderStatus(
+		channel || 'sms' // Default to 'sms' if not a messaging action (hook always needs a value)
+	);
 
 	// Only sync settings when the step ID changes (switching to a different step)
 	// This prevents resetting user's changes when the same step is updated after save
@@ -70,9 +86,6 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setStep(null); // Close the modal after deletion
 	};
 
-	// For delay steps, the action should be 'delay'
-	const actionKey = step.type === 'delay' ? 'delay' : step.action;
-
 	const action =
 		step.type === 'action' || step.type === 'delay'
 			? getAction(actionKey)
@@ -80,6 +93,16 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 
 	return (
 		<div className="qcrm-step-fields-content flex flex-col">
+			{/* Provider not configured warning for SMS/WhatsApp actions (non-blocking) */}
+			{requiresProvider && !isConnected && !providerLoading && channel && (
+				<div className="mb-4">
+					<ProviderNotConnectedWarning
+						channel={channel}
+						onConfigureClick={() => setShowTwilioConfig(true)}
+					/>
+				</div>
+			)}
+
 			<div className="mb-4">
 				<Fields
 					fields={action.fields}
@@ -116,6 +139,18 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						: __('Delete', 'quillcrm')}
 				</Button>
 			</div>
+
+			{/* Twilio Configuration Modal */}
+			{requiresProvider && channel && (
+				<TwilioConfigModal
+					open={showTwilioConfig}
+					onClose={() => setShowTwilioConfig(false)}
+					onSuccess={() => {
+						setShowTwilioConfig(false);
+						checkStatus(); // Refresh provider status after configuration
+					}}
+				/>
+			)}
 		</div>
 	);
 };

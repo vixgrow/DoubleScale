@@ -179,29 +179,27 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 				<h2 className="text-2xl font-semibold">
 					{__('WhatsApp Messages', 'quillcrm')}
 				</h2>
-				<div className="flex flex-col items-end gap-2">
-					<Button
-						variant="secondary"
-						size="sm"
-						className="bg-white"
-						onClick={handleSendWhatsApp}
-						disabled={providerLoading || !isConnected}
-					>
-						<MessageCircle className="w-4 h-4 mr-2" />
-						{providerLoading
-							? __('Checking...', 'quillcrm')
-							: __('Send WhatsApp', 'quillcrm')}
-					</Button>
-					
-				{/* Inline warning when provider not configured */}
-				{!isConnected && !providerLoading && (
-					<ProviderNotConnectedWarning
-						channel="whatsapp"
-						onConfigureClick={() => setShowTwilioConfig(true)}
-					/>
-				)}
-				</div>
+				<Button
+					variant="secondary"
+					size="sm"
+					className="bg-white"
+					onClick={handleSendWhatsApp}
+					disabled={providerLoading || !isConnected}
+				>
+					<MessageCircle className="w-4 h-4 mr-2" />
+					{providerLoading
+						? __('Checking...', 'quillcrm')
+						: __('Send WhatsApp', 'quillcrm')}
+				</Button>
 			</div>
+
+			{/* Inline warning when provider not configured */}
+			{!isConnected && !providerLoading && (
+				<ProviderNotConnectedWarning
+					channel="whatsapp"
+					onConfigureClick={() => setShowTwilioConfig(true)}
+				/>
+			)}
 
 			{/* Statistics Cards */}
 			{analytics && (

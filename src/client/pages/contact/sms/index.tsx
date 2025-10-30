@@ -177,32 +177,30 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 				<h2 className="text-2xl font-semibold">
 					{__('SMS Messages', 'quillcrm')}
 				</h2>
-				<div className="flex flex-col items-end gap-2">
-					<Button
-						variant="secondary"
-						size="sm"
-						className="bg-white"
-						onClick={handleSendSMS}
-						disabled={providerLoading || !isConnected}
-					>
-						<MessageSquare className="w-4 h-4 mr-2" />
-						{providerLoading
-							? __('Checking...', 'quillcrm')
-							: __('Send SMS', 'quillcrm')}
-					</Button>
-					
-				{/* Inline warning when provider not configured */}
-				{!isConnected && !providerLoading && (
-					<ProviderNotConnectedWarning
-						channel="sms"
-						onConfigureClick={() => {
-							console.log('[QuillCRM] Configure link clicked, opening modal');
-							setShowTwilioConfig(true);
-						}}
-					/>
-				)}
-				</div>
+				<Button
+					variant="secondary"
+					size="sm"
+					className="bg-white"
+					onClick={handleSendSMS}
+					disabled={providerLoading || !isConnected}
+				>
+					<MessageSquare className="w-4 h-4 mr-2" />
+					{providerLoading
+						? __('Checking...', 'quillcrm')
+						: __('Send SMS', 'quillcrm')}
+				</Button>
 			</div>
+
+			{/* Inline warning when provider not configured */}
+			{!isConnected && !providerLoading && (
+				<ProviderNotConnectedWarning
+					channel="sms"
+					onConfigureClick={() => {
+						console.log('[QuillCRM] Configure link clicked, opening modal');
+						setShowTwilioConfig(true);
+					}}
+				/>
+			)}
 
 			{/* Statistics Cards */}
 			{analytics && (

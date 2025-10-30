@@ -33,6 +33,8 @@ import wpusers from '../../../../../../../assets/images/wordpress/wordpress-icon
 import lms from '../../../../../../../assets/images/lms/lms.png';
 //@ts-ignore
 import data from '../../../../../../../assets/images/send-data/data.png';
+//@ts-ignore
+import messaging from '../../../../../../../assets/images/twilio/twilio.png';
 import { useAutomationContext } from '../../../state/context';
 import { getTrigger } from '@quillcrm/utils';
 
@@ -108,6 +110,10 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 		'email': {
 			image: forms,
 			description: __('Send email to users', 'quillcrm')
+		},
+		'message': {
+			image: messaging,
+			description: __('Send SMS and WhatsApp messages', 'quillcrm')
 		}
 	};
 

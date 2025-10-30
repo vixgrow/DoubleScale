@@ -15,18 +15,27 @@ import type {
 } from '../types/analytics';
 import { formatAnalyticsForPopup } from '../types/analytics';
 
+interface CachedAnalytics {
+	data: FormattedAnalytics;
+	timestamp: number;
+}
+
 interface UseStepAnalyticsReturn {
 	analyticsData: FormattedAnalytics | null;
 	isLoading: boolean;
 	isVisible: boolean;
 	error: string | null;
-	fetchAnalytics: (stepId: number) => Promise<void>;
+	fetchAnalytics: (stepId: number, forceRefresh?: boolean) => Promise<void>;
 	showAnalytics: () => void;
 	hideAnalytics: () => void;
+	clearCache: () => void;
 }
 
+// Cache TTL: 5 minutes
+const CACHE_TTL = 5 * 60 * 1000;
+
 /**
- * Custom hook for fetching and managing step analytics
+ * Custom hook for fetching and managing step analytics with caching
  *
  * @returns Analytics state and control functions
  */
@@ -36,10 +45,24 @@ export const useStepAnalytics = (): UseStepAnalyticsReturn => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [cache, setCache] = useState<Record<number, CachedAnalytics>>({});
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const fetchAnalytics = useCallback(
-		async (stepId: number) => {
+		async (stepId: number, forceRefresh = false) => {
+			// Check cache first (unless force refresh)
+			if (!forceRefresh && cache[stepId]) {
+				const cached = cache[stepId];
+				const age = Date.now() - cached.timestamp;
+
+				if (age < CACHE_TTL) {
+					// Use cached data
+					setAnalyticsData(cached.data);
+					setIsVisible(true);
+					return;
+				}
+			}
+
 			setIsLoading(true);
 			setError(null);
 
@@ -50,6 +73,16 @@ export const useStepAnalytics = (): UseStepAnalyticsReturn => {
 				})) as StepAnalyticsResponse;
 
 				const formatted = formatAnalyticsForPopup(response);
+
+				// Update cache
+				setCache((prev) => ({
+					...prev,
+					[stepId]: {
+						data: formatted,
+						timestamp: Date.now(),
+					},
+				}));
+
 				setAnalyticsData(formatted);
 				setIsVisible(true);
 			} catch (err) {
@@ -69,7 +102,7 @@ export const useStepAnalytics = (): UseStepAnalyticsReturn => {
 				setIsLoading(false);
 			}
 		},
-		[createNotice]
+		[cache, createNotice]
 	);
 
 	const showAnalytics = useCallback(() => {
@@ -80,6 +113,10 @@ export const useStepAnalytics = (): UseStepAnalyticsReturn => {
 		setIsVisible(false);
 	}, []);
 
+	const clearCache = useCallback(() => {
+		setCache({});
+	}, []);
+
 	return {
 		analyticsData,
 		isLoading,
@@ -88,5 +125,6 @@ export const useStepAnalytics = (): UseStepAnalyticsReturn => {
 		fetchAnalytics,
 		showAnalytics,
 		hideAnalytics,
+		clearCache,
 	};
 };

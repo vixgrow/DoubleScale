@@ -483,11 +483,31 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
 			}
 
-			// Get all tracking records for this step.
-			$tracking_query = Tracking_Model::byStep( $step_id );
+			// Validate step supports analytics.
+			$analytics_actions = array( 'send_email', 'send_sms', 'send_whatsapp' );
+			if ( ! in_array( $automation_step->action, $analytics_actions, true ) ) {
+				return new WP_Error( 'rest_automation_step_invalid_action', __( 'This step does not support analytics', 'quillcrm' ), array( 'status' => 400 ) );
+			}
 
-			// Calculate basic metrics.
-			$total_sent = $tracking_query->count();
+			// Get all analytics in a single optimized query.
+			$analytics_raw = Tracking_Model::byStep( $step_id )
+				->selectRaw( '
+					COUNT(*) as total_sent,
+					SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened_count,
+					SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked_count,
+					SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as delivered_count,
+					SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as read_count,
+					SUM(CASE WHEN unsubscribed = 1 THEN 1 ELSE 0 END) as unsubscribed_count
+				', array( Tracking_Model::STATUS_DELIVERED, Tracking_Model::STATUS_READ ) )
+				->first();
+
+			// Extract metrics.
+			$total_sent   = (int) $analytics_raw->total_sent;
+			$opened       = (int) $analytics_raw->opened_count;
+			$clicked      = (int) $analytics_raw->clicked_count;
+			$delivered    = (int) $analytics_raw->delivered_count;
+			$read         = (int) $analytics_raw->read_count;
+			$unsubscribed = (int) $analytics_raw->unsubscribed_count;
 
 			// If no messages sent, return zero analytics.
 			if ( 0 === $total_sent ) {
@@ -508,13 +528,6 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 					200
 				);
 			}
-
-			// Calculate detailed metrics.
-			$opened       = Tracking_Model::byStep( $step_id )->where( 'opened', true )->count();
-			$clicked      = Tracking_Model::byStep( $step_id )->where( 'clicked', true )->count();
-			$delivered    = Tracking_Model::byStep( $step_id )->where( 'status', Tracking_Model::STATUS_DELIVERED )->count();
-			$read         = Tracking_Model::byStep( $step_id )->where( 'status', Tracking_Model::STATUS_READ )->count();
-			$unsubscribed = Tracking_Model::byStep( $step_id )->where( 'unsubscribed', true )->count();
 
 			// Calculate rates as percentages.
 			$open_rate         = $total_sent > 0 ? round( ( $opened / $total_sent ) * 100, 2 ) : 0;

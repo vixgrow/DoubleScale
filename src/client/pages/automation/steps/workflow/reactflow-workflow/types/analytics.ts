@@ -25,7 +25,7 @@ export interface StepAnalyticsResponse {
 export interface FormattedAnalytics {
 	sent: number;
 	clickRate: number;
-	unsubscribed: number;
+	unsubscribedRate: number;  // Renamed for clarity - it's a percentage
 	openRate: number;
 	clickToOpenRate: number;
 }
@@ -39,11 +39,12 @@ export const formatAnalyticsForPopup = (
 	return {
 		sent: data.sent,
 		clickRate: data.clickRate,
-		unsubscribed: data.unsubscribedRate,
+		unsubscribedRate: data.unsubscribedRate,
 		openRate: data.openRate,
+		// Calculate click-to-open rate using raw counts for accuracy
 		clickToOpenRate:
-			data.openRate > 0
-				? (data.clickRate / data.openRate) * 100
+			data.opened > 0
+				? (data.clicked / data.opened) * 100
 				: 0,
 	};
 };

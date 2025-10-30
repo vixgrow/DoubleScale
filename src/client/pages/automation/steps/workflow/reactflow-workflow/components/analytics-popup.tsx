@@ -16,7 +16,7 @@ interface AnalyticsPopupProps {
 	analytics?: {
 		sent?: number;
 		clickRate?: number;
-		unsubscribed?: number;
+		unsubscribedRate?: number;  // Renamed to match FormattedAnalytics
 		openRate?: number;
 		clickToOpenRate?: number;
 	};
@@ -33,7 +33,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 	const {
 		sent = 0,
 		clickRate = 0,
-		unsubscribed = 0,
+		unsubscribedRate = 0,  // Updated to match interface
 		openRate = 0,
 		clickToOpenRate = 0,
 	} = analytics;
@@ -168,7 +168,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 				</div>
 				<div>
 					<div className="qcrm-analytics-popup__metric-value">
-						{unsubscribed.toFixed(2)}%
+						{unsubscribedRate.toFixed(2)}%
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
 						{__('Unsubscribed', 'quillcrm')}
@@ -375,7 +375,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 				</div>
 				<div>
 					<div className="qcrm-analytics-popup__metric-value">
-						{unsubscribed.toFixed(2)}%
+						{unsubscribedRate.toFixed(2)}%
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
 						{__('Unsubscribed', 'quillcrm')}

@@ -24,10 +24,11 @@ import { Power } from 'lucide-react';
 interface EndNodeData {
 	step: AutomationStep;
 	selectedStepId?: string | null;
+	viewMode?: boolean;
 }
 
 const EndNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, selectedStepId } = data as unknown as EndNodeData;
+	const { step, selectedStepId, viewMode = false } = data as unknown as EndNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const [isDeleting, setIsDeleting] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -67,6 +68,8 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	const handleDelete = async () => {
+		if (viewMode) return;
+		
 		setIsDeleting(true);
 
 		const { newSteps, updatedOrdersSteps } = getNewSteps();
@@ -101,7 +104,7 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 	const isSelected = selectedStepId === step.id.toString();
 
 	return (
-		<NodeContextMenu onDelete={handleDelete} disabled={false}>
+		<NodeContextMenu onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
 			<div className={`qcrm-reactflow-node qcrm-reactflow-node--end ${isSelected ? 'qcrm-reactflow-node--selected' : ''}`}>
 				<Handle
 					type="target"
@@ -109,8 +112,8 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 
-				{/* Step Reorder Controls */}
-				<StepReorderControls step={step} />
+				{/* Step Reorder Controls - hide in view mode */}
+				{!viewMode && <StepReorderControls step={step} />}
 
 				<div className="qcrm-reactflow-node__icon"><Power className='w-6 h-6' /></div>
 

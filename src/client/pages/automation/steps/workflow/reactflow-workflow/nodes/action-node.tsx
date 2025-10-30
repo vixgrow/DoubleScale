@@ -31,13 +31,15 @@ interface ActionNodeData {
 	step: AutomationStep;
 	automation: Automation;
 	selectedStepId?: string | null;
+	viewMode?: boolean;
+	analytics?: { contacts: number; conversion_rate: number };
 	onStepClick?: (step: OrganizedStep) => void;
 	onDeleteStep?: (stepId: string) => void;
 }
 
 const ActionNode: React.FC<NodeProps> = (props) => {
 	const { data } = props;
-	const { step, onStepClick, selectedStepId } = data as unknown as ActionNodeData;
+	const { step, onStepClick, selectedStepId, viewMode = false, analytics } = data as unknown as ActionNodeData;
 
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -93,7 +95,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	);
 
 	const handleEdit = () => {
-		if (onStepClick) {
+		if (!viewMode && onStepClick) {
 			onStepClick({
 				...step,
 				children: [], // Will be populated if needed by the consuming component
@@ -102,7 +104,9 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	};
 
 	const handleDelete = async () => {
-		await deleteStep(step.id.toString(), steps, setSteps, createNotice);
+		if (!viewMode) {
+			await deleteStep(step.id.toString(), steps, setSteps, createNotice);
+		}
 	};
 
 	// Check if this node is selected
@@ -115,18 +119,18 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 
 	return (
 		<>
-			<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-				<div className={`qcrm-reactflow-node qcrm-reactflow-node--action ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${supportsAnalytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
+			<NodeContextMenu onEdit={viewMode ? undefined : handleEdit} onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
+				<div className={`qcrm-reactflow-node qcrm-reactflow-node--action ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${(supportsAnalytics && isConfigured) || (viewMode && analytics) ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
 					<Handle
 						type="target"
 						position={Position.Top}
 						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 					/>
 
-					{/* Step Reorder Controls */}
-					<StepReorderControls step={step} />
+					{/* Step Reorder Controls - hide in view mode */}
+					{!viewMode && <StepReorderControls step={step} />}
 
-					{supportsAnalytics && isConfigured ? (
+					{(supportsAnalytics && isConfigured) || (viewMode && analytics) ? (
 						<>
 							{/* First Row: Icon, Content, Dropdown */}
 							<div className="qcrm-reactflow-node__header-row">
@@ -156,20 +160,33 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 								/>
 							</div>
 
-							{/* Second Row: Recipient and View Analytics */}
-							<div className="qcrm-reactflow-node__footer-row">
-								<div className="qcrm-reactflow-node__recipient text-[#660FF1]">
-									{getRecipientInfo()}
+							{/* Second Row: Different content for view mode vs edit mode */}
+							{viewMode && analytics ? (
+								<div className="qcrm-reactflow-node__footer-row">
+									<div className="text-sm">
+										<span className="text-[#667085]">{__('Contact:', 'quillcrm')} </span>
+										<span className="font-semibold text-[#344054]">{analytics.contacts || 0}</span>
+									</div>
+									<div className="text-sm">
+										<span className="text-[#667085]">{__('Conversion Rate:', 'quillcrm')} </span>
+										<span className="font-semibold text-[#344054]">{analytics.conversion_rate || 0}%</span>
+									</div>
 								</div>
-								<button
-									className="qcrm-reactflow-node__analytics-link text-primary"
-									onClick={handleViewAnalytics}
-									title={__('View Analytics', 'quillcrm')}
-								>
-									<ViewIcon width={16} height={16} />
-									<span>{__('View Analytics', 'quillcrm')}</span>
-								</button>
-							</div>
+							) : (
+								<div className="qcrm-reactflow-node__footer-row">
+									<div className="qcrm-reactflow-node__recipient text-[#660FF1]">
+										{getRecipientInfo()}
+									</div>
+									<button
+										className="qcrm-reactflow-node__analytics-link text-primary"
+										onClick={handleViewAnalytics}
+										title={__('View Analytics', 'quillcrm')}
+									>
+										<ViewIcon width={16} height={16} />
+										<span>{__('View Analytics', 'quillcrm')}</span>
+									</button>
+								</div>
+							)}
 						</>
 					) : (
 						<>

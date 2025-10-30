@@ -1,58 +1,102 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Automation } from '@quillcrm/client';
-import ChartReport from './chart-report';
-import StepReport from './step-report';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-import EmailAnalytics from './email-analytics';
+import apiFetch from '@wordpress/api-fetch';
 import './style.scss';
 import { __ } from '@wordpress/i18n';
+import ReactFlowWorkflow from '../../automation/steps/workflow/reactflow-workflow';
+import { Provider, useAutomationContext } from '../../automation/state/context';
 
 interface AutomationFunnelProps {
 	automation: Automation | null;
 }
 
+interface FunnelDataItem {
+	label: string;
+	value: number;
+	percentage: number;
+	step_id: number | null;
+	step_type: string;
+}
+
+interface FunnelResponse {
+	funnel_data: FunnelDataItem[];
+	total_contacts: number;
+	completion_rate: number;
+	automation: {
+		id: number;
+		name: string;
+	};
+}
+
 const AutomationFunnel: React.FC<AutomationFunnelProps> = ({ automation }) => {
-	const renderChartReport = () => {
-		return <ChartReport automation={automation} />;
-	};
+	const [analyticsData, setAnalyticsData] = useState<any[]>([]);
+	const [loading, setLoading] = useState(true);
+	const context = useAutomationContext();
 
-	const renderStepReport = () => {
-		return <StepReport automation={automation} />;
-	};
+	const fetchAnalyticsData = useCallback(async () => {
+		if (!automation?.id) {
+			setAnalyticsData([]);
+			setLoading(false);
+			return;
+		}
 
-	// const renderEmailAnalytics = () => {
-	// 	return <EmailAnalytics automation={automation} />;
-	// };
+		try {
+			setLoading(true);
+			const response = (await apiFetch({
+				path: `/qc/v1/automation-reports/${automation.id}/get-chart-report`,
+			})) as FunnelResponse;
+
+			if (response.funnel_data) {
+				// Transform funnel data to analytics format
+				const analytics = response.funnel_data.map((item) => ({
+					step_id: item.step_id,
+					contacts: item.value || 0,
+					conversion_rate: item.percentage || 0,
+					step_type: item.step_type,
+				}));
+				setAnalyticsData(analytics);
+			}
+			setLoading(false);
+		} catch (error: any) {
+			console.error('Failed to fetch analytics data:', error);
+			setAnalyticsData([]);
+			setLoading(false);
+		}
+	}, [automation?.id]);
+
+	useEffect(() => {
+		fetchAnalyticsData();
+	}, [fetchAnalyticsData]);
+
+	// Create a new context value that includes viewMode and analyticsData
+	const contextValue = useMemo(() => ({
+		...context,
+		viewMode: true,
+		analyticsData,
+	}), [context, analyticsData]);
+
+	if (loading) {
+		return (
+			<div className="flex items-center justify-center h-screen">
+				<div className="text-lg">{__('Loading analytics...', 'quillcrm')}</div>
+			</div>
+		);
+	}
 
 	return (
-		<div className="qcrm-automation-reports__automation-funnels px-8 py-5 h-screen">
-			<div className="qcrm-automation-reports__automation-funnels__header mb-4">
-				<h1 className="text-3xl font-semibold text-[#09090B]">{__('Analytics', 'quillcrm')}</h1>
+		<Provider value={contextValue}>
+			<div className="h-screen overflow-auto">
+				<ReactFlowWorkflow
+					currentStep={null}
+					isTriggerVisible={false}
+					isSidebarOpen={false}
+					onStepClick={() => { }}
+					onTriggerClick={() => { }}
+					viewMode={true}
+					analyticsData={analyticsData}
+				/>
 			</div>
-
-			<div className="reports-container">
-				<div className="report-card">
-					<div className="report-card__content">
-						{renderChartReport()}
-					</div>
-				</div>
-
-				<div className="report-card">
-					<div className="report-card__content">
-						{renderStepReport()}
-					</div>
-				</div>
-
-				{/* <div className="report-card">
-					<div className="report-card__header">
-						<h2 className="report-card__title">{__('Emails Analytics', 'quillcrm')}</h2>
-					</div>
-					<div className="report-card__content">
-						{renderEmailAnalytics()}
-					</div>
-				</div> */}
-			</div>
-		</div>
+		</Provider>
 	);
 };
 

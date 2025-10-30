@@ -32,6 +32,8 @@ interface WorkflowVisualizationProps {
 	currentStep?: OrganizedStep | null;
 	isTriggerVisible?: boolean;
 	isSidebarOpen?: boolean;
+	viewMode?: boolean;
+	analyticsData?: any[];
 	onStepClick?: (step: OrganizedStep) => void;
 	onTriggerClick?: () => void;
 }

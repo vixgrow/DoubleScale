@@ -105,7 +105,7 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		(data as AddStepEdgeData) || {};
 	const [loading, setLoading] = useState(false);
 	const [visible, setVisible] = useState(false);
-	const { automation, steps, setSteps, setUpdatedSteps } =
+	const { automation, steps, setSteps, setUpdatedSteps, viewMode = false } =
 		useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -367,13 +367,14 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 					style={{
 						transform: `translate(${labelX}px,${labelY}px) translate(-50%, -50%)`,
 					}}
-					className="qcrm-edge-add-button"
+					className={`qcrm-edge-add-button ${viewMode ? 'qcrm-edge-add-button--disabled' : ''}`}
 				>
 					<AddStepDialog
 						visible={visible}
 						onVisibleChange={setVisible}
 						loading={loading}
 						onStepSelection={handleStepSelection}
+						disabled={viewMode}
 					/>
 				</div>
 			</EdgeLabelRenderer>

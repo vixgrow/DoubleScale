@@ -20,15 +20,17 @@ import { ActionIcon } from '@quillcrm/components';
 interface TriggerNodeData {
 	automation: Automation;
 	isTriggerVisible?: boolean;
+	viewMode?: boolean;
+	analytics?: { contacts: number; conversion_rate: number };
 	onTriggerClick?: () => void;
 	onDeleteTrigger?: (triggerId: string) => void;
 }
 
 const TriggerNode: React.FC<NodeProps> = ({ data }) => {
-	const { automation, onTriggerClick, isTriggerVisible } = data as unknown as TriggerNodeData;
+	const { automation, onTriggerClick, isTriggerVisible, viewMode = false, analytics } = data as unknown as TriggerNodeData;
 
 	const handleEdit = () => {
-		if (onTriggerClick) {
+		if (!viewMode && onTriggerClick) {
 			onTriggerClick();
 		}
 	};
@@ -41,31 +43,70 @@ const TriggerNode: React.FC<NodeProps> = ({ data }) => {
 		__('No trigger selected', 'quillcrm');
 
 	return (
-		<NodeContextMenu onEdit={handleEdit} showDelete={false}>
-			<div className={`qcrm-reactflow-node qcrm-reactflow-node--trigger ${isTriggerVisible ? 'qcrm-reactflow-node--selected' : ''}`}>
-				<div className="qcrm-reactflow-node__icon">
-					<ActionIcon width={23} height={23} />
-				</div>
-				<div
-					className="qcrm-reactflow-node__content"
-					style={{ flex: 1, marginRight: '60px' }}
-				>
-					<div className="qcrm-reactflow-node__title">
-						{__('Start Workflow (Trigger)', 'quillcrm')}
-					</div>
-					<div className="qcrm-reactflow-node__trigger-name">
-						<span style={{ fontWeight: 'bold', color: 'green' }}>
-							{triggerName}
-						</span>
-					</div>
-				</div>
+		<NodeContextMenu onEdit={viewMode ? undefined : handleEdit} showDelete={false} disabled={viewMode}>
+			<div className={`qcrm-reactflow-node qcrm-reactflow-node--trigger ${isTriggerVisible ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
+				{viewMode && analytics ? (
+					<>
+						{/* Header Row: Icon, Content, Dropdown */}
+						<div className="qcrm-reactflow-node__header-row">
+							<div className="qcrm-reactflow-node__header-left">
+								<div className="qcrm-reactflow-node__icon">
+									<ActionIcon width={23} height={23} />
+								</div>
+								<div className="qcrm-reactflow-node__content">
+									<div className="qcrm-reactflow-node__title">
+										{__('Start Workflow (Trigger)', 'quillcrm')}
+									</div>
+									<div className="qcrm-reactflow-node__trigger-name">
+										<span style={{ fontWeight: 'bold', color: 'green' }}>
+											{triggerName}
+										</span>
+									</div>
+								</div>
+							</div>
+							<NodeActionsDropdown
+								onEdit={handleEdit}
+								editLabel={__('Edit Trigger', 'quillcrm')}
+								showDelete={false}
+							/>
+						</div>
 
-				{/* Three dots dropdown menu */}
-				<NodeActionsDropdown
-					onEdit={handleEdit}
-					editLabel={__('Edit Trigger', 'quillcrm')}
-					showDelete={false}
-				/>
+						{/* Footer Row: Analytics */}
+						<div className="qcrm-reactflow-node__footer-row">
+							<div className="text-sm">
+								<span className="text-[#667085]">{__('Contact:', 'quillcrm')} </span>
+								<span className="font-semibold text-[#344054]">{analytics.contacts || 0}</span>
+							</div>
+							<div className="text-sm">
+								<span className="text-[#667085]">{__('Conversion Rate:', 'quillcrm')} </span>
+								<span className="font-semibold text-[#344054]">{analytics.conversion_rate || 0}%</span>
+							</div>
+						</div>
+					</>
+				) : (
+					<>
+						<div className="qcrm-reactflow-node__icon">
+							<ActionIcon width={23} height={23} />
+						</div>
+						<div className="qcrm-reactflow-node__content">
+							<div className="qcrm-reactflow-node__title">
+								{__('Start Workflow (Trigger)', 'quillcrm')}
+							</div>
+							<div className="qcrm-reactflow-node__trigger-name">
+								<span style={{ fontWeight: 'bold', color: 'green' }}>
+									{triggerName}
+								</span>
+							</div>
+						</div>
+
+						{/* Three dots dropdown menu */}
+						<NodeActionsDropdown
+							onEdit={handleEdit}
+							editLabel={__('Edit Trigger', 'quillcrm')}
+							showDelete={false}
+						/>
+					</>
+				)}
 
 				<Handle
 					type="source"

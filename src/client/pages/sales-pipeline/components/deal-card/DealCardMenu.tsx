@@ -52,7 +52,7 @@ export const DealCardMenu: React.FC<DealCardMenuProps> = ({ onActionClick }) => 
 				<DropdownMenuItem
 					onClick={(e) =>{ 
                         e.stopPropagation();
-                        onActionClick('log-call')}}
+                        onActionClick('log_call')}}
 					className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]"
 				>
 					<CallLogIcon />
@@ -62,7 +62,7 @@ export const DealCardMenu: React.FC<DealCardMenuProps> = ({ onActionClick }) => 
 				<DropdownMenuItem
 					onClick={(e) => {
                         e.stopPropagation();
-                        onActionClick('log-email')}}
+                        onActionClick('log_email')}}
 					className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]"
 				>
 					<EmailLogIcon />
@@ -72,7 +72,7 @@ export const DealCardMenu: React.FC<DealCardMenuProps> = ({ onActionClick }) => 
 				<DropdownMenuItem
 					onClick={(e) => {
                         e.stopPropagation();
-                        onActionClick('meeting')}}
+                        onActionClick('schedule_meeting')}}
 					className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]"
 				>
 					<MeetingDealIcon />

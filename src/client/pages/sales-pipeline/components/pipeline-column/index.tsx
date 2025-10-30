@@ -37,6 +37,9 @@ interface PipelineColumnProps {
 	onDealEdit?: (deal: Deal) => void;
 	onDealDelete?: (deal: Deal) => void;
 	onDealAddNote?: (deal: Deal) => void;
+	onDealLogCall?: (deal: Deal) => void;
+	onDealScheduleMeeting?: (deal: Deal) => void;
+	onDealLogEmail?: (deal: Deal) => void;
 	index: number;
 	totalStages: number;
 }
@@ -51,7 +54,10 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	onDealView,
 	onDealEdit,
 	onDealDelete,
-	onDealAddNote
+	onDealAddNote,
+	onDealLogCall,
+	onDealScheduleMeeting,
+	onDealLogEmail,
 }) => {
 	const { setNodeRef: setDroppableRef, isOver: isDropOver } = useDroppable({
 		id: `stage-${stage.id}`,
@@ -235,6 +241,9 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 									onDealEdit={onDealEdit}
 									onDealDelete={onDealDelete}
 									onAddNote={(deal) => onDealAddNote?.(deal)}
+									onDealLogCall={(deal) => onDealLogCall?.(deal)}
+									onDealScheduleMeeting={(deal) => onDealScheduleMeeting?.(deal)}
+									onDealLogEmail={(deal) => onDealLogEmail?.(deal)}
 									stageColor={stage.color}
 									stageProbability={stage.win_probability}
 									style={

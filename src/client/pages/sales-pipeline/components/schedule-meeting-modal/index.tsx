@@ -7,18 +7,37 @@ import { useState } from '@wordpress/element';
 /**
  * External dependencies
  */
-import { Modal, Form, Input, Button, DatePicker, Select, message } from 'antd';
-import { Calendar } from 'lucide-react';
 import dayjs from 'dayjs';
 
 /**
  * Internal dependencies
  */
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form';
 import { useActivityOperations } from '../../hooks/use-activity-operations';
+import { useForm } from 'react-hook-form';
+import { CustomDialogHeader } from '@quillcrm/components';
+import { Input } from '@quillcrm/components/ui/input';
+import { Textarea } from '@quillcrm/components/ui/textarea';
+import { Button } from '@quillcrm/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@quillcrm/components/ui/select';
+import { DateTimePicker } from '@quillcrm/components/date-time-picker';
+import { useDispatch } from '@wordpress/data';
 import './style.scss';
-
-const { TextArea } = Input;
-const { Option } = Select;
+import MeetingDealIcon from '@quillcrm/components/icons/meeting-deal';
 
 interface ScheduleMeetingModalProps {
 	visible: boolean;
@@ -34,6 +53,7 @@ interface MeetingFormData {
 	duration: number;
 	location: string;
 	description: string;
+	dealTitle:string
 }
 
 export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
@@ -43,183 +63,220 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 	dealId,
 	dealTitle,
 }) => {
-	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
 	const { scheduleMeeting } = useActivityOperations();
+	const dispatch = useDispatch('quillcrm/core');
+	const createNotice = dispatch?.createNotice;
 
-	const handleSubmit = async (values: any) => {
+	const form = useForm<MeetingFormData>({
+		defaultValues: {
+			title: '',
+			scheduled_at: dayjs().add(1, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+			duration: 60,
+			location: '',
+			description: '',
+		},
+	});
+
+	const handleSubmit = async (values: MeetingFormData) => {
 		setLoading(true);
 		try {
 			const meetingData: MeetingFormData = {
-				title: values.title,
-				scheduled_at: dayjs(values.scheduled_at).format(
-					'YYYY-MM-DD HH:mm:ss'
-				),
-				duration: values.duration || 60,
-				location: values.location || '',
-				description: values.description || '',
+				...values,
+				scheduled_at: dayjs(values.scheduled_at).format('YYYY-MM-DD HH:mm:ss'),
 			};
 
 			await scheduleMeeting(dealId, meetingData);
 
-			message.success(__('Meeting scheduled successfully!', 'quillcrm'));
+			createNotice?.({
+				type: 'success',
+				message: __('Meeting scheduled successfully!', 'quillcrm'),
+			});
 
-			form.resetFields();
+			form.reset();
 			onSuccess();
 			onClose();
 		} catch (error) {
-			message.error(
-				error instanceof Error
-					? error.message
-					: __('Failed to schedule meeting', 'quillcrm')
-			);
+			const err = error as Error;
+			createNotice?.({
+				type: 'error',
+				message: err.message || __('Failed to schedule meeting', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
 	};
 
 	const handleCancel = () => {
-		form.resetFields();
+		form.reset();
 		onClose();
 	};
 
 	return (
-		<Modal
-			title={
-				<div className="schedule-meeting-modal-title">
-					<Calendar size={20} />
-					<span>{__('Schedule Meeting', 'quillcrm')}</span>
-				</div>
-			}
-			open={visible}
-			onCancel={handleCancel}
-			footer={[
-				<Button key="cancel" onClick={handleCancel}>
-					{__('Cancel', 'quillcrm')}
-				</Button>,
-				<Button
-					key="submit"
-					type="primary"
-					loading={loading}
-					onClick={() => form.submit()}
-				>
-					{__('Schedule Meeting', 'quillcrm')}
-				</Button>,
-			]}
-			width={600}
-			className="schedule-meeting-modal"
-		>
-			{dealTitle && (
-				<div className="deal-context">
-					<span className="deal-label">
-						{__('Deal:', 'quillcrm')}
-					</span>
-					<span className="deal-title">{dealTitle}</span>
-				</div>
-			)}
-
-			<Form
-				form={form}
-				layout="vertical"
-				onFinish={handleSubmit}
-				autoComplete="off"
-				initialValues={{
-					duration: 60,
-					scheduled_at: dayjs().add(1, 'hour'),
-				}}
-			>
-				<Form.Item
-					name="title"
-					label={__('Meeting Title', 'quillcrm')}
-					rules={[
-						{
-							required: true,
-							message: __(
-								'Please enter meeting title',
-								'quillcrm'
-							),
-						},
-					]}
-				>
-					<Input
-						placeholder={__('Enter meeting title...', 'quillcrm')}
-					/>
-				</Form.Item>
-
-				<div className="form-row">
-					<Form.Item
-						name="scheduled_at"
-						label={__('Date & Time', 'quillcrm')}
-						rules={[
-							{
-								required: true,
-								message: __(
-									'Please select date and time',
-									'quillcrm'
-								),
-							},
-						]}
-						className="form-item-half"
-					>
-						<DatePicker
-							showTime
-							format="YYYY-MM-DD HH:mm"
-							style={{ width: '100%' }}
+		<Dialog open={visible} onOpenChange={(open) => !open && handleCancel()}>
+			<DialogContent className="w-full max-w-2xl max-h-[80vh] my-2 mx-5 sm:mx-auto overflow-y-auto p-8 rounded-[16px]">
+				<DialogHeader>
+					<DialogTitle>
+						<CustomDialogHeader
+							title={__('Schedule Meeting', 'quillcrm')}
+							subtitle=''
+							icon={<MeetingDealIcon color='#1E3A8A' />}
 						/>
-					</Form.Item>
+					</DialogTitle>
+				</DialogHeader>
 
-					<Form.Item
-						name="duration"
-						label={__('Duration (minutes)', 'quillcrm')}
-						className="form-item-half"
-					>
-						<Select placeholder={__('Select duration', 'quillcrm')}>
-							<Option value={15}>
-								15 {__('minutes', 'quillcrm')}
-							</Option>
-							<Option value={30}>
-								30 {__('minutes', 'quillcrm')}
-							</Option>
-							<Option value={45}>
-								45 {__('minutes', 'quillcrm')}
-							</Option>
-							<Option value={60}>
-								1 {__('hour', 'quillcrm')}
-							</Option>
-							<Option value={90}>
-								1.5 {__('hours', 'quillcrm')}
-							</Option>
-							<Option value={120}>
-								2 {__('hours', 'quillcrm')}
-							</Option>
-						</Select>
-					</Form.Item>
-				</div>
+				<Form {...form}>
+					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-6">
+						{/* title */}
+						<FormField
+							control={form.control}
+							name="dealTitle"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className="font-normal text-[#09090B] text-base">
+										{__('Deal Name', 'quillcrm')}
+									</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="Deal Name"
+											{...field}
+											readOnly
+											value={dealTitle}
+											className=" h-12 py-[5px] !shadow-none px-4  bg-[#F0F0F0] focus:bg-[#F0F0F0] border !border-[#DEE1E6] rounded-[8px]"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						></FormField>
+						{/* Meeting Title */}
+						<FormField
+							control={form.control}
+							name="title"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className="font-normal text-[#09090B] text-base">
+										{__('Meeting Title', 'quillcrm')}
+									</FormLabel>
+									<FormControl>
+										<Input
+											placeholder={__('Enter meeting title...', 'quillcrm')}
+											{...field}
+											className="h-12 py-[5px] px-4 bg-white border !border-[#DEE1E6] rounded-[8px] !shadow-none"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-				<Form.Item name="location" label={__('Location', 'quillcrm')}>
-					<Input
-						placeholder={__(
-							'Meeting room, video call link, address...',
-							'quillcrm'
-						)}
-					/>
-				</Form.Item>
+						{/* Duration */}
+						<FormField
+							control={form.control}
+							name="duration"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className="font-normal text-[#09090B] text-base">
+										{__('Duration (minutes)', 'quillcrm')}
+									</FormLabel>
+									<FormControl>
+										<Select
+											onValueChange={(val) => field.onChange(Number(val))}
+											defaultValue={String(field.value)}
+										>
+											<SelectTrigger className="h-12 w-full bg-white border !border-[#DEE1E6] rounded-[8px] px-4 text-[#09090B]">
+												<SelectValue placeholder={__('Select duration', 'quillcrm')} />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="15">15 {__('minutes', 'quillcrm')}</SelectItem>
+												<SelectItem value="30">30 {__('minutes', 'quillcrm')}</SelectItem>
+												<SelectItem value="45">45 {__('minutes', 'quillcrm')}</SelectItem>
+												<SelectItem value="60">1 {__('hour', 'quillcrm')}</SelectItem>
+												<SelectItem value="90">1.5 {__('hours', 'quillcrm')}</SelectItem>
+												<SelectItem value="120">2 {__('hours', 'quillcrm')}</SelectItem>
+											</SelectContent>
+										</Select>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						{/* Date & Time */}
+						<FormField
+							control={form.control}
+							name="scheduled_at"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className="font-normal text-[#09090B] text-base">
+										{__('Date & Time', 'quillcrm')}
+									</FormLabel>
+									<FormControl>
+									<DateTimePicker
+            {...field}
+            placeholder="Start date"
+           
+          />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						{/* Location */}
+						<FormField
+							control={form.control}
+							name="location"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className="font-normal text-[#09090B] text-base">
+										{__('Location', 'quillcrm')}
+									</FormLabel>
+									<FormControl>
+										<Input
+											placeholder={__('Meeting room, video link, address...', 'quillcrm')}
+											{...field}
+											className="h-12 py-[5px] px-4 bg-white border !border-[#DEE1E6] rounded-[8px] !shadow-none"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						{/* Description */}
+						<FormField
+							control={form.control}
+							name="description"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className="font-normal text-[#09090B] text-base">
+										{__('Meeting Description', 'quillcrm')}
+									</FormLabel>
+									<FormControl>
+										<Textarea
+											placeholder={__('Meeting agenda, topics to discuss...', 'quillcrm')}
+											{...field}
+											rows={4}
+											className="w-full py-3 px-4 !shadow-none bg-white placeholder:text-[#777] border !border-[#DEE1E6] rounded-[8px]"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-				<Form.Item
-					name="description"
-					label={__('Meeting Description', 'quillcrm')}
-				>
-					<TextArea
-						rows={3}
-						placeholder={__(
-							'Meeting agenda, topics to discuss...',
-							'quillcrm'
-						)}
-						maxLength={500}
-						showCount
-					/>
-				</Form.Item>
-			</Form>
-		</Modal>
+						<DialogFooter className="!mt-3">
+							<Button
+								type="submit"
+								disabled={loading}
+								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-[8px] font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
+							>
+								{loading
+									? __('Scheduling...', 'quillcrm')
+									: __('Schedule Meeting', 'quillcrm')}
+							</Button>
+						</DialogFooter>
+					</form>
+				</Form>
+			</DialogContent>
+		</Dialog>
 	);
 };

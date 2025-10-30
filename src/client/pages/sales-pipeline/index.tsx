@@ -66,6 +66,9 @@ import { EditDealModal } from './components/edit-deal-modal';
 import { DeleteDeal } from './components/deal-delete';
 import { Deal } from './types';
 import { AddNoteModal } from './components/add-note-modal';
+import { LogCallModal } from './components/log-call-modal';
+import { ScheduleMeetingModal } from './components/schedule-meeting-modal';
+import { LogEmailModal } from './components/log-email-modal';
 
 // Import types for proper typing
 type Filters = {
@@ -84,8 +87,10 @@ const SalesPipeline: React.FC = () => {
 		null
 	);
 	const [settingsModalVisible, setSettingsModalVisible] = useState(false);
-	const [newPipelineModalVisible, setNewPipelineModalVisible] =useState(false);
-	const [editPipelineModalVisible, setEditPipelineModalVisible] =useState(false);
+	const [newPipelineModalVisible, setNewPipelineModalVisible] =
+		useState(false);
+	const [editPipelineModalVisible, setEditPipelineModalVisible] =
+		useState(false);
 	const [duplicatePipelineModalVisible, setDuplicatePipelineModalVisible] =
 		useState(false);
 	const [newDealModalVisible, setNewDealModalVisible] = useState(false);
@@ -96,9 +101,19 @@ const SalesPipeline: React.FC = () => {
 	const [showDuplicateError, setShowDuplicateError] = useState(false);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [deleteDealModalVisible, setDeleteDealModalVisible] = useState(false);
-    const [dealToDelete, setDealToDelete] = useState<any | null>(null);
+	const [dealToDelete, setDealToDelete] = useState<any | null>(null);
 	const [addNoteVisible, setAddNoteVisible] = useState(false);
-    const [selectedDealForNote, setSelectedDealForNote] = useState<any | null>(null);
+	const [selectedDealForNote, setSelectedDealForNote] = useState<any | null>(
+		null
+	);
+	const [logCallVisible, setLogCallVisible] = useState(false);
+	const [selectedDealForCall, setSelectedDealForCall] = useState<Deal | null>(
+		null
+	);
+	const [ScheduleMeetingVisible, setScheduleMeetingVisible] = useState(false);
+	const [LogEmailVisible, setLogEmailVisible] = useState(false);
+	
+
 	const [filters, setFilters] = useState<Filters>({
 		search: '',
 		ownerId: null,
@@ -136,8 +151,19 @@ const SalesPipeline: React.FC = () => {
 		setSelectedDealForNote(deal);
 		setAddNoteVisible(true);
 	};
+	const handleLogCall = (deal: Deal) => {
+		setSelectedDealForCall(deal);
+		setLogCallVisible(true);
+	};
+	const handleScheduleMeetingVisible = (deal: Deal) => {
+		setSelectedDealForCall(deal);
+		setScheduleMeetingVisible(true);
+	};
+	const handleLogEmailVisible = (deal: Deal) => {
+		setSelectedDealForCall(deal);
+		setLogEmailVisible(true);
+	};
 
-	
 	if (loading) {
 		return (
 			<div className="sales-pipeline-loading">
@@ -176,7 +202,7 @@ const SalesPipeline: React.FC = () => {
 			</div>
 		);
 	}
-	
+
 	return (
 		<div className="sales-pipeline">
 			<div className=" flex justify-between items-center ">
@@ -264,19 +290,23 @@ const SalesPipeline: React.FC = () => {
 									<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
 										<ViewIcon />
 										{__('View Pipeline', 'quillcrm')}
-										
 									</DropdownMenuItem>
-									<DropdownMenuItem onClick={() =>
-										setEditPipelineModalVisible(true)
-									}
-									disabled={!selectedPipeline} 
-									className="flex items-center gap-2 text-[#374151] font-medium text-sm leading-[16px]">
+									<DropdownMenuItem
+										onClick={() =>
+											setEditPipelineModalVisible(true)
+										}
+										disabled={!selectedPipeline}
+										className="flex items-center gap-2 text-[#374151] font-medium text-sm leading-[16px]"
+									>
 										<EditHeaderIcon />
 										{__('Edit Pipeline', 'quillcrm')}
 									</DropdownMenuItem>
-									<DropdownMenuItem onClick={() =>
-										setDeleteDialogOpen(true)
-									} className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
+									<DropdownMenuItem
+										onClick={() =>
+											setDeleteDialogOpen(true)
+										}
+										className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]"
+									>
 										<TrashIcon />
 										{__('Delete Pipeline', 'quillcrm')}
 									</DropdownMenuItem>
@@ -326,24 +356,20 @@ const SalesPipeline: React.FC = () => {
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</div>
-					<div className='flex items-center gap-1'>
-					<Button
-									onClick={() =>
-										setNewDealModalVisible(true)
-									}
-									className={`text-base font-medium !text-[#FFF] leading-[26px] tracking-[-.5px] flex items-center justify-center gap-[6px] h-10 bg-[#1E3A8A] py-2 px-4 rounded-[8px] `}
-								>
-									<span className='mt-1'>
-									<PlusIcon width={32} height={32} color='#FFF'/>
-									</span>
-									Add New Deal
-									
-								</Button>
+					<div className="flex items-center gap-1">
+						<Button
+							onClick={() => setNewDealModalVisible(true)}
+							className={`text-base font-medium !text-[#FFF] leading-[26px] tracking-[-.5px] flex items-center justify-center gap-[6px] h-10 bg-[#1E3A8A] py-2 px-4 rounded-[8px] `}
+						>
+							<span className="mt-1">
+								<PlusIcon width={32} height={32} color="#FFF" />
+							</span>
+							Add New Deal
+						</Button>
 					</div>
-
 				</div>
 			</div>
-			
+
 			{showDuplicateError && (
 				<NoticeBanner
 					notice={{
@@ -381,7 +407,10 @@ const SalesPipeline: React.FC = () => {
 							setDealToDelete(deal);
 							setDeleteDealModalVisible(true);
 						}}
-						onDealAddNote={(deal) => handleAddNote(deal)} 
+						onDealAddNote={(deal) => handleAddNote(deal)}
+						onDealLogCall={(deal) => handleLogCall(deal)}
+						onDealScheduleMeeting={(deal) => handleScheduleMeetingVisible(deal)}
+						onDealLogEmail={(deal) => handleLogEmailVisible(deal)}
 					/>
 				</div>
 			)}
@@ -468,45 +497,66 @@ const SalesPipeline: React.FC = () => {
 				}}
 			/>
 			<EditPipelineModal
-              visible={editPipelineModalVisible}
-              onClose={() => setEditPipelineModalVisible(false)}
-              onSuccess={async (updatedPipeline) => {
-              await refreshData();
-              if (updatedPipeline?.id) {
-                 setSelectedPipelineId(updatedPipeline.id);
-              }
-             setEditPipelineModalVisible(false);
-            }}
-  pipeline={selectedPipeline}
-/>
-<DeleteDeal
-  visible={deleteDealModalVisible}
-  onClose={() => setDeleteDealModalVisible(false)}
-  deal={dealToDelete}
-  pipeline={selectedPipeline}
-  pipelines={pipelines}
-  onConfirm={() => {
-    refreshData();
-    setDeleteDealModalVisible(false);
-  }}
-/>
-<AddNoteModal
-	visible={addNoteVisible}
-	onClose={() => setAddNoteVisible(false)}
-	dealId={selectedDealForNote?.id}
-	onSuccess={() => {
-		setAddNoteVisible(false);
-		refreshData(); 
-	}}
-/>
-<DeletePipelineDialog
-  visible={deleteDialogOpen}
-  onClose={() => setDeleteDialogOpen(false)}
-  pipeline={selectedPipeline}
-  pipelines={pipelines}
-  onConfirm={refreshData} 
-/>
-
+				visible={editPipelineModalVisible}
+				onClose={() => setEditPipelineModalVisible(false)}
+				onSuccess={async (updatedPipeline) => {
+					await refreshData();
+					if (updatedPipeline?.id) {
+						setSelectedPipelineId(updatedPipeline.id);
+					}
+					setEditPipelineModalVisible(false);
+				}}
+				pipeline={selectedPipeline}
+			/>
+			<DeleteDeal
+				visible={deleteDealModalVisible}
+				onClose={() => setDeleteDealModalVisible(false)}
+				deal={dealToDelete}
+				pipeline={selectedPipeline}
+				pipelines={pipelines}
+				onConfirm={() => {
+					refreshData();
+					setDeleteDealModalVisible(false);
+				}}
+			/>
+			<AddNoteModal
+				visible={addNoteVisible}
+				onClose={() => setAddNoteVisible(false)}
+				dealId={selectedDealForNote?.id}
+				onSuccess={() => {
+					setAddNoteVisible(false);
+					refreshData();
+				}}
+			/>
+			<LogCallModal
+				visible={logCallVisible}
+				onClose={() => setLogCallVisible(false)}
+				onSuccess={refreshData}
+				dealId={selectedDealForCall?.id || 0}
+				dealTitle={selectedDealForCall?.title}
+				dealContact={selectedDealForCall?.contact}
+			/>
+			<ScheduleMeetingModal
+				visible={ScheduleMeetingVisible}
+				onClose={() => setScheduleMeetingVisible(false)}
+				onSuccess={refreshData}
+				dealId={selectedDealForCall?.id || 0}
+				dealTitle={selectedDealForCall?.title}
+			/>
+			<LogEmailModal
+				visible={LogEmailVisible}
+				onClose={() => setLogEmailVisible(false)}
+				onSuccess={refreshData}
+				dealId={selectedDealForCall?.id || 0}
+				dealTitle={selectedDealForCall?.title}
+			/>
+			<DeletePipelineDialog
+				visible={deleteDialogOpen}
+				onClose={() => setDeleteDialogOpen(false)}
+				pipeline={selectedPipeline}
+				pipelines={pipelines}
+				onConfirm={refreshData}
+			/>
 		</div>
 	);
 };

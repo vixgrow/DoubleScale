@@ -54,6 +54,9 @@ interface KanbanBoardProps {
 	onDealEdit?: (deal: Deal) => void;
 	onDealDelete?: (deal: Deal) => void;
 	onDealAddNote?: (deal: Deal) => void;
+	onDealLogCall?: (deal: Deal) => void;
+	onDealScheduleMeeting?: (deal: Deal) => void;
+	onDealLogEmail?: (deal: Deal) => void;
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -63,7 +66,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	onDealView,
 	onDealEdit,
 	onDealDelete,
-	onDealAddNote
+	onDealAddNote,
+	onDealLogCall,
+	onDealScheduleMeeting,
+	onDealLogEmail,
 }) => {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const { moveDealToStage } = useDealOperations();
@@ -418,6 +424,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								onDealEdit={onDealEdit}
 								onDealDelete={onDealDelete}
 								onDealAddNote={onDealAddNote}
+								onDealLogCall={onDealLogCall}
+								onDealScheduleMeeting={onDealScheduleMeeting}
+								onDealLogEmail={onDealLogEmail}
 								
 							/>
 						))}
@@ -432,6 +441,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								isDragging={true}
 								onCardClick={() => {}} // No-op during drag
 								onAddNote={onDealAddNote} 
+								onDealLogCall={onDealLogCall} 
+								onDealScheduleMeeting={onDealScheduleMeeting} 
+								onDealLogEmail={onDealLogEmail} 
 								stageColor={
 									pipeline.stages.find(
 										(s) => s.id === activeDeal.stage?.id

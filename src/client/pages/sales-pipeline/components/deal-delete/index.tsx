@@ -95,12 +95,7 @@ export const DeleteDeal = ({
   <p className='text-lg font-medium leading-[28px] text-[#09090B]'>
     {__('Are you sure you want to delete this deal?', 'quillcrm')}
   </p>
-  <p className='text-base font-normal leading-[26px] text-[#09090B]'>
-    {__(
-      `You can restore deleted deals from the Restore data page within 30 days.`,
-      'quillcrm'
-    )}
-  </p>
+  
 </div>
 
 				

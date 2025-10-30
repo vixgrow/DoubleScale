@@ -45,6 +45,9 @@ interface DealCardProps {
 	onDealEdit?: (deal: Deal) => void;
 	onDealDelete?: (deal:Deal) =>void;
 	onAddNote?: (deal: Deal) => void;
+	onDealLogCall?: (deal: Deal) => void;
+	onDealScheduleMeeting?: (deal: Deal) => void;
+	onDealLogEmail?: (deal: Deal) => void;
 	stageColor?: string;
 	stageProbability?: number;
 	style?: React.CSSProperties;
@@ -57,6 +60,9 @@ export const DealCard: React.FC<DealCardProps> = ({
 	onDealEdit,
 	onDealDelete,
 	onAddNote,
+	onDealLogCall,
+	onDealScheduleMeeting,
+	onDealLogEmail,
 	stageColor,
 	stageProbability,
 	style: customStyle = {},
@@ -149,6 +155,12 @@ export const DealCard: React.FC<DealCardProps> = ({
 			onDealDelete?.(deal)
 		}else if (action === 'add_note') {
 			onAddNote?.(deal); 
+		}else if (action === 'log_call') {
+			onDealLogCall?.(deal); 
+		}else if (action === 'schedule_meeting') {
+			onDealScheduleMeeting?.(deal); 
+		}else if (action === 'log_email') {
+			onDealLogEmail?.(deal); 
 		}
 	};
 

@@ -16,6 +16,14 @@ import { Button } from '@/components/ui/button';
 import { SortIcon, TimeAgoCell, ViewIcon } from '@quillcrm/components';
 import { useContactOrderDetails } from '../useContactsAPI';
 import { useContactsContext } from '../contexts';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+// Helper function to generate contact initials
+const getContactInitials = (firstName: string, lastName: string): string => {
+	const first = firstName?.charAt(0)?.toUpperCase() || '';
+	const last = lastName?.charAt(0)?.toUpperCase() || '';
+	return first + last || '?';
+};
 
 export const selectionColumn: ColumnDef<Contact> = {
 	id: 'select',
@@ -46,7 +54,7 @@ export const useContactsColumns = () => {
 
 	const baseColumns: ColumnDef<Contact>[] = [
 		{
-			accessorKey: 'full_name',
+			accessorKey: 'contact',
 			header: ({ column }) => (
 				<div
 					className="flex items-center gap-1"
@@ -54,23 +62,51 @@ export const useContactsColumns = () => {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Full Name', 'quillcrm')}
+					{__('Contact', 'quillcrm')}
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => (
-				<Button
-					variant="ghost"
-					onClick={() => openContactDialog(row.original.id.toString())}
-					className="h-auto p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
-				>
-					{row.original.first_name || '-'}{' '}
-					{row.original.last_name || '-'}
-				</Button>
-			),
+			cell: ({ row }) => {
+				const contact = row.original;
+				const fullName = `${contact.first_name} ${contact.last_name}`.trim();
+				const initials = getContactInitials(contact.first_name, contact.last_name);
+				const hasImage = (contact as any).img;
+
+				return (
+					<Button
+						variant="ghost"
+						onClick={() => openContactDialog(row.original.id.toString())}
+						className="h-auto p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
+					>
+						<div className="flex items-center gap-3">
+							{hasImage ? (
+								<Avatar className="w-12 h-12 rounded-lg">
+									<AvatarImage src={(contact as any).img} alt={fullName || contact.email} className="rounded-lg" />
+								</Avatar>
+							) : (
+								<Avatar className="w-12 h-12 rounded-lg">
+									<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
+										{initials}
+									</AvatarFallback>
+								</Avatar>
+							)}
+							<div className="flex flex-col">
+								{fullName && (
+									<div className="font-semibold capitalize text-base text-[#09090B]">
+										{fullName}
+									</div>
+								)}
+								<div className="text-base text-gray-500">
+									{contact.email}
+								</div>
+							</div>
+						</div>
+					</Button>
+				);
+			},
 		},
 		{
-			accessorKey: 'email',
+			accessorKey: 'phone',
 			header: ({ column }) => (
 				<div
 					className="flex items-center gap-1"
@@ -78,35 +114,31 @@ export const useContactsColumns = () => {
 						column.toggleSorting(column.getIsSorted() === 'asc')
 					}
 				>
-					{__('Email', 'quillcrm')}
+					{__('Phone', 'quillcrm')}
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => (
-				<Button
-					variant="ghost"
-					onClick={() => openContactDialog(row.original.id.toString())}
-					className="h-auto p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
+			cell: ({ row }) => row.original.phone || '-',
+		},
+		{
+			accessorKey: 'country',
+			header: ({ column }) => (
+				<div
+					className="flex items-center gap-1"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === 'asc')
+					}
 				>
-					{row.original.email}
-				</Button>
+					{__('Country', 'quillcrm')}
+					<SortIcon />
+				</div>
 			),
+			cell: ({ row }) => row.original.country || '-',
 		},
 		{
-			accessorKey: 'tags',
-			header: 'Tag',
-			cell: ({ row }) =>
-				row.original.tags?.map((tag) => (
-					<div key={tag.id}>{tag.name}</div>
-				)),
-		},
-		{
-			accessorKey: 'lists',
-			header: 'List',
-			cell: ({ row }) =>
-				row.original.lists?.map((list) => (
-					<div key={list.id}>{list.name}</div>
-				)),
+			accessorKey: 'city',
+			header: __('City', 'quillcrm'),
+			cell: ({ row }) => row.original.city || '-',
 		},
 		{
 			accessorKey: 'status',
@@ -152,39 +184,20 @@ export const useContactsColumns = () => {
 			},
 		},
 		{
-			accessorKey: 'phone',
-			header: ({ column }) => (
-				<div
-					className="flex items-center gap-1"
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Phone', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => row.original.phone || '-',
+			accessorKey: 'tags',
+			header: 'Tag',
+			cell: ({ row }) =>
+				row.original.tags?.map((tag) => (
+					<div key={tag.id}>{tag.name}</div>
+				)),
 		},
 		{
-			accessorKey: 'country',
-			header: ({ column }) => (
-				<div
-					className="flex items-center gap-1"
-					onClick={() =>
-						column.toggleSorting(column.getIsSorted() === 'asc')
-					}
-				>
-					{__('Country', 'quillcrm')}
-					<SortIcon />
-				</div>
-			),
-			cell: ({ row }) => row.original.country || '-',
-		},
-		{
-			accessorKey: 'city',
-			header: __('City', 'quillcrm'),
-			cell: ({ row }) => row.original.city || '-',
+			accessorKey: 'lists',
+			header: 'List',
+			cell: ({ row }) =>
+				row.original.lists?.map((list) => (
+					<div key={list.id}>{list.name}</div>
+				)),
 		},
 		{
 			accessorKey: 'address_1',

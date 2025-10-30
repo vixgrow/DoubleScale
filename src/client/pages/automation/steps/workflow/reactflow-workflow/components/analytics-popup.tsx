@@ -16,7 +16,7 @@ interface AnalyticsPopupProps {
 	analytics?: {
 		sent?: number;
 		clickRate?: number;
-		unsubscribed?: number;
+		unsubscribedRate?: number;  // Renamed to match FormattedAnalytics
 		openRate?: number;
 		clickToOpenRate?: number;
 	};
@@ -31,11 +31,11 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 	if (!visible) return null;
 
 	const {
-		sent = 1836,
-		clickRate = 9.8,
-		unsubscribed = 0.8,
-		openRate = 72,
-		clickToOpenRate = 9.3,
+		sent = 0,
+		clickRate = 0,
+		unsubscribedRate = 0,  // Updated to match interface
+		openRate = 0,
+		clickToOpenRate = 0,
 	} = analytics;
 
 	// Get proper label based on action type
@@ -53,6 +53,20 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 	};
 
 	const actionLabel = getActionLabel();
+
+	// Get "Sent" label based on action type
+	const getSentLabel = () => {
+		switch (actionType) {
+			case 'email':
+				return __('Sent Emails', 'quillcrm');
+			case 'sms':
+				return __('Sent SMS', 'quillcrm');
+			case 'whatsapp':
+				return __('Sent WhatsApp', 'quillcrm');
+			default:
+				return __('Sent Messages', 'quillcrm');
+		}
+	};
 
 	// Render email-specific metrics
 	const renderEmailMetrics = () => (
@@ -87,7 +101,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 						{sent.toLocaleString()}
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
-						{__('Sent Emails', 'quillcrm')}
+						{getSentLabel()}
 					</div>
 				</div>
 			</div>
@@ -154,7 +168,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 				</div>
 				<div>
 					<div className="qcrm-analytics-popup__metric-value">
-						{unsubscribed.toFixed(2)}%
+						{unsubscribedRate.toFixed(2)}%
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
 						{__('Unsubscribed', 'quillcrm')}
@@ -274,7 +288,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 						{sent.toLocaleString()}
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
-						{__('Sent Emails', 'quillcrm')}
+						{getSentLabel()}
 					</div>
 				</div>
 			</div>
@@ -361,7 +375,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 				</div>
 				<div>
 					<div className="qcrm-analytics-popup__metric-value">
-						{unsubscribed.toFixed(2)}%
+						{unsubscribedRate.toFixed(2)}%
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
 						{__('Unsubscribed', 'quillcrm')}

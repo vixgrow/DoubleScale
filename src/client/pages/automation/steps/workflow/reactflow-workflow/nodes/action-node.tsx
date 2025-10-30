@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import React, { useState } from 'react';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -26,6 +26,11 @@ import { useDispatch } from '@wordpress/data';
 import { deleteStep } from '../utils/step-utils';
 import { getAction } from '@quillcrm/utils';
 import { ActionIcon, ViewIcon } from '@quillcrm/components';
+import { useStepAnalytics } from '../hooks/use-step-analytics';
+import {
+	supportsAnalytics,
+	getChannelType,
+} from '../constants/action-types';
 
 interface ActionNodeData {
 	step: AutomationStep;
@@ -43,7 +48,14 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
-	const [showAnalytics, setShowAnalytics] = useState(false);
+
+	// Use custom analytics hook
+	const {
+		analyticsData,
+		isVisible: showAnalytics,
+		fetchAnalytics,
+		hideAnalytics,
+	} = useStepAnalytics();
 
 	// Check if action is configured - an action is configured if it has an action slug
 	const isConfigured = !!step.action;
@@ -52,27 +64,12 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	const actionData = isConfigured ? getAction(step.action) : null;
 	const actionName = actionData?.label || step.action;
 
-	// Check if this action supports analytics (send_email, send_sms, send_whatsapp)
-	const supportsAnalytics = ['send_email', 'send_sms', 'send_whatsapp'].includes(step.action || '');
-
-	// Get action type for analytics
-	const getActionType = () => {
-		if (step.action === 'send_email') return 'email';
-		if (step.action === 'send_sms') return 'sms';
-		if (step.action === 'send_whatsapp') return 'whatsapp';
-		return 'email';
-	};
-
-	// Mock analytics data - in real implementation, this would come from API
-	const analyticsData = {
-		sent: 1836,
-		clickRate: 9.8,
-		unsubscribed: 0.80,
-	};
+	// Check if this action supports analytics
+	const hasAnalytics = supportsAnalytics(step.action || '');
 
 	// Get recipient info for display
 	const getRecipientInfo = () => {
-		if (!isConfigured || !supportsAnalytics) return null;
+		if (!isConfigured || !hasAnalytics) return null;
 
 		// This would come from step configuration in real implementation
 		// For now, showing placeholder
@@ -82,7 +79,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	const subtitle = isConfigured ? (
 		<>
 			<span className="qcrm-reactflow-action__configured">{actionName}</span>
-			{supportsAnalytics && (
+			{hasAnalytics && (
 				<div className="qcrm-reactflow-action__recipient">
 					{getRecipientInfo()}
 				</div>
@@ -112,13 +109,13 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	// Check if this node is selected
 	const isSelected = selectedStepId === step.id.toString();
 
-	const handleViewAnalytics = (e: React.MouseEvent) => {
+	const handleViewAnalytics = async (e: React.MouseEvent) => {
 		e.stopPropagation();
-		setShowAnalytics(true);
+		await fetchAnalytics(step.id);
 	};
 
 	// Custom footer for analytics
-	const customFooter = !viewMode && supportsAnalytics && isConfigured ? (
+	const customFooter = !viewMode && hasAnalytics && isConfigured ? (
 		<div className="qcrm-reactflow-node__footer-row">
 			<div className="qcrm-reactflow-node__recipient text-[#660FF1]">
 				{getRecipientInfo()}
@@ -137,7 +134,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	return (
 		<>
 			<NodeContextMenu onEdit={viewMode ? undefined : handleEdit} onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
-				<div className={`qcrm-reactflow-node qcrm-reactflow-node--action ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${(supportsAnalytics && isConfigured) || (viewMode && analytics) ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
+				<div className={`qcrm-reactflow-node qcrm-reactflow-node--action ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${(hasAnalytics && isConfigured) || (viewMode && analytics) ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
 					<Handle
 						type="target"
 						position={Position.Top}
@@ -174,11 +171,11 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 			</NodeContextMenu>
 
 			{/* Analytics Popup */}
-			{isConfigured && supportsAnalytics && (
+			{isConfigured && hasAnalytics && analyticsData && (
 				<AnalyticsPopup
 					visible={showAnalytics}
-					onClose={() => setShowAnalytics(false)}
-					actionType={getActionType()}
+					onClose={hideAnalytics}
+					actionType={getChannelType(step.action || '')}
 					analytics={analyticsData}
 				/>
 			)}

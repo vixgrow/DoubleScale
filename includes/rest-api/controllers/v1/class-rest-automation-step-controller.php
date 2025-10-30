@@ -18,6 +18,8 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Automation_Step_Model;
+use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Managers\Actions_Manager;
 
 /**
@@ -98,6 +100,18 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 							'required'    => true,
 						),
 					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/analytics',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_step_analytics' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 			)
 		);
@@ -448,6 +462,97 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 		}
 
 		return $step_data;
+	}
+
+	/**
+	 * Get analytics for an Automation Step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_step_analytics( $request ) {
+		try {
+			$step_id = $request->get_param( 'id' );
+
+			// Verify step exists.
+			$automation_step = Automation_Step_Model::find( $step_id );
+
+			if ( ! $automation_step ) {
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Validate step supports analytics.
+			$analytics_actions = array( 'send_email', 'send_sms', 'send_whatsapp' );
+			if ( ! in_array( $automation_step->action, $analytics_actions, true ) ) {
+				return new WP_Error( 'rest_automation_step_invalid_action', __( 'This step does not support analytics', 'quillcrm' ), array( 'status' => 400 ) );
+			}
+
+			// Get all analytics in a single optimized query.
+			$analytics_raw = Tracking_Model::byStep( $step_id )
+				->selectRaw( '
+					COUNT(*) as total_sent,
+					SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened_count,
+					SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked_count,
+					SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as delivered_count
+				', array( Tracking_Status::DELIVERED ) )
+				->first();
+
+			// Extract metrics.
+			$total_sent   = (int) $analytics_raw->total_sent;
+			$opened       = (int) $analytics_raw->opened_count;
+			$clicked      = (int) $analytics_raw->clicked_count;
+			$delivered    = (int) $analytics_raw->delivered_count;
+			$read         = 0;
+			$unsubscribed = 0; 
+
+			// If no messages sent, return zero analytics.
+			if ( 0 === $total_sent ) {
+				return new WP_REST_Response(
+					array(
+						'sent'             => 0,
+						'opened'           => 0,
+						'clicked'          => 0,
+						'delivered'        => 0,
+						'read'             => 0,
+						'unsubscribed'     => 0,
+						'openRate'         => 0,
+						'clickRate'        => 0,
+						'deliveryRate'     => 0,
+						'readRate'         => 0,
+						'unsubscribedRate' => 0,
+					),
+					200
+				);
+			}
+
+			// Calculate rates as percentages.
+			$open_rate         = $total_sent > 0 ? round( ( $opened / $total_sent ) * 100, 2 ) : 0;
+			$click_rate        = $total_sent > 0 ? round( ( $clicked / $total_sent ) * 100, 2 ) : 0;
+			$delivery_rate     = $total_sent > 0 ? round( ( $delivered / $total_sent ) * 100, 2 ) : 0;
+			$read_rate         = $total_sent > 0 ? round( ( $read / $total_sent ) * 100, 2 ) : 0;
+			$unsubscribed_rate = $total_sent > 0 ? round( ( $unsubscribed / $total_sent ) * 100, 2 ) : 0;
+
+			$analytics = array(
+				'sent'             => $total_sent,
+				'opened'           => $opened,
+				'clicked'          => $clicked,
+				'delivered'        => $delivered,
+				'read'             => $read,
+				'unsubscribed'     => $unsubscribed,
+				'openRate'         => $open_rate,
+				'clickRate'        => $click_rate,
+				'deliveryRate'     => $delivery_rate,
+				'readRate'         => $read_rate,
+				'unsubscribedRate' => $unsubscribed_rate,
+			);
+
+			return new WP_REST_Response( $analytics, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'rest_automation_step_analytics_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
 	}
 
 	/**

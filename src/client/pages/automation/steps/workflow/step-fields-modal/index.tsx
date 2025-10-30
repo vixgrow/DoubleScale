@@ -8,6 +8,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
+import { BarChart3 } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -19,6 +20,12 @@ import { Fields } from '@quillcrm/components';
 import { getAction, getGoal } from '@quillcrm/utils';
 import { useAutomationContext } from '../../../state/context';
 import { deleteStep } from '../reactflow-workflow/utils/step-utils';
+import AnalyticsPopup from '../reactflow-workflow/components/analytics-popup';
+import { useStepAnalytics } from '../reactflow-workflow/hooks/use-step-analytics';
+import {
+	supportsAnalytics,
+	getChannelType,
+} from '../reactflow-workflow/constants/action-types';
 
 interface StepFieldsModalProps {
 	step: OrganizedStep;
@@ -37,6 +44,15 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
 		useDispatch('quillcrm/core');
 	const { steps, setSteps } = useAutomationContext();
+
+	// Use custom analytics hook
+	const {
+		analyticsData,
+		isLoading: isLoadingAnalytics,
+		isVisible: analyticsVisible,
+		fetchAnalytics,
+		hideAnalytics,
+	} = useStepAnalytics();
 
 	// Sync settings when step.settings changes
 	// This ensures we load the latest settings from the parent
@@ -80,6 +96,13 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setMergeTagsVisible(true);
 	};
 
+	const handleViewAnalytics = async () => {
+		await fetchAnalytics(step.id);
+	};
+
+	// Check if this step supports analytics
+	const hasAnalytics = supportsAnalytics(step.action);
+
 	// For delay steps, the action should be 'delay'
 	const actionKey = step.type === 'delay' ? 'delay' : step.action;
 
@@ -99,6 +122,22 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 			>
 				{__('Merge Tags', 'quillcrm')}
 			</Button>
+
+			{hasAnalytics && step.id && (
+				<Button
+					onClick={handleViewAnalytics}
+					disabled={isSaving || isDeleting || isLoadingAnalytics}
+					variant="outline"
+					className="w-full mb-4"
+					size="lg"
+				>
+					<BarChart3 className="w-4 h-4 mr-2" />
+					{isLoadingAnalytics
+						? __('Loading...', 'quillcrm')
+						: __('View Analytics', 'quillcrm')}
+				</Button>
+			)}
+
 			<div className="mb-4">
 				<Fields
 					fields={action.fields}
@@ -134,6 +173,15 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						: __('Delete', 'quillcrm')}
 				</Button>
 			</div>
+
+			{hasAnalytics && analyticsData && (
+				<AnalyticsPopup
+					visible={analyticsVisible}
+					onClose={hideAnalytics}
+					actionType={getChannelType(step.action)}
+					analytics={analyticsData}
+				/>
+			)}
 		</div>
 	);
 };

@@ -19,6 +19,7 @@ use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Managers\Actions_Manager;
 
 /**
@@ -495,10 +496,8 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 					COUNT(*) as total_sent,
 					SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened_count,
 					SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked_count,
-					SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as delivered_count,
-					SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as read_count,
-					SUM(CASE WHEN unsubscribed = 1 THEN 1 ELSE 0 END) as unsubscribed_count
-				', array( Tracking_Model::STATUS_DELIVERED, Tracking_Model::STATUS_READ ) )
+					SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as delivered_count
+				', array( Tracking_Status::DELIVERED ) )
 				->first();
 
 			// Extract metrics.
@@ -506,8 +505,8 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			$opened       = (int) $analytics_raw->opened_count;
 			$clicked      = (int) $analytics_raw->clicked_count;
 			$delivered    = (int) $analytics_raw->delivered_count;
-			$read         = (int) $analytics_raw->read_count;
-			$unsubscribed = (int) $analytics_raw->unsubscribed_count;
+			$read         = 0;
+			$unsubscribed = 0; 
 
 			// If no messages sent, return zero analytics.
 			if ( 0 === $total_sent ) {

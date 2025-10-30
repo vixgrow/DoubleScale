@@ -17,7 +17,7 @@ import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
 import { getGoal } from '@quillcrm/utils';
 import NodeContextMenu from '../components/node-context-menu';
-import NodeActionsDropdown from '../components/node-actions-dropdown';
+import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
 import { GoalIcon } from '@quillcrm/components';
 
@@ -36,6 +36,16 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 
 	const goal = step.action ? getGoal(step.action) : null;
 	const hasGoal = !!step.action;
+
+	const subtitle = hasGoal ? (
+		<span className="qcrm-reactflow-goal__configured">
+			{goal?.label}
+		</span>
+	) : (
+		<span className="qcrm-reactflow-goal__not-configured">
+			{__('Goal not set', 'quillcrm')}
+		</span>
+	);
 
 	const handleEdit = () => {
 		if (!viewMode && onStepClick) {
@@ -82,7 +92,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 
 	const handleDelete = async () => {
 		if (viewMode) return;
-		
+
 		const { newSteps, updatedOrdersSteps } = getNewSteps();
 
 		try {
@@ -124,92 +134,22 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 				{/* Step Reorder Controls - hide in view mode */}
 				{!viewMode && <StepReorderControls step={step} />}
 
-				{viewMode && analytics ? (
-					<>
-						{/* Header Row: Icon, Content, Dropdown */}
-						<div className="qcrm-reactflow-node__header-row">
-							<div className="qcrm-reactflow-node__header-left">
-								<div className="qcrm-reactflow-node__icon">
-									<GoalIcon width={23} height={23} />
-								</div>
-								<div className="qcrm-reactflow-node__content">
-									<div className="qcrm-reactflow-node__title">
-										{__('Goal', 'quillcrm')}
-									</div>
-									<div className="qcrm-reactflow-node__subtitle">
-										{hasGoal ? (
-											<span className="qcrm-reactflow-goal__configured">
-												{goal?.label}
-											</span>
-										) : (
-											<span className="qcrm-reactflow-goal__not-configured">
-												{__('Goal not set', 'quillcrm')}
-											</span>
-										)}
-									</div>
-								</div>
-							</div>
-							<NodeActionsDropdown
-								onEdit={handleEdit}
-								onDelete={handleDelete}
-								editLabel={__('Edit Goal', 'quillcrm')}
-								deleteLabel={__('Delete Goal', 'quillcrm')}
-								deleteTitle={__('Delete this goal?', 'quillcrm')}
-								deleteDescription={__(
-									'This will remove the goal from your workflow.',
-									'quillcrm'
-								)}
-							/>
-						</div>
-
-						{/* Footer Row: Analytics */}
-						<div className="qcrm-reactflow-node__footer-row">
-							<div className="text-sm">
-								<span className="text-[#667085]">{__('Contact:', 'quillcrm')} </span>
-								<span className="font-semibold text-[#344054]">{analytics.contacts || 0}</span>
-							</div>
-							<div className="text-sm">
-								<span className="text-[#667085]">{__('Conversion Rate:', 'quillcrm')} </span>
-								<span className="font-semibold text-[#344054]">{analytics.conversion_rate || 0}%</span>
-							</div>
-						</div>
-					</>
-				) : (
-					<>
-						<div className="qcrm-reactflow-node__icon">
-							<GoalIcon width={23} height={23} />
-						</div>
-						<div className="qcrm-reactflow-node__content">
-							<div className="qcrm-reactflow-node__title">
-								{__('Goal', 'quillcrm')}
-							</div>
-							<div className="qcrm-reactflow-node__subtitle">
-								{hasGoal ? (
-									<span className="qcrm-reactflow-goal__configured">
-										{goal?.label}
-									</span>
-								) : (
-									<span className="qcrm-reactflow-goal__not-configured">
-										{__('Goal not set', 'quillcrm')}
-									</span>
-								)}
-							</div>
-						</div>
-
-						{/* Three dots dropdown menu */}
-						<NodeActionsDropdown
-							onEdit={handleEdit}
-							onDelete={handleDelete}
-							editLabel={__('Edit Goal', 'quillcrm')}
-							deleteLabel={__('Delete Goal', 'quillcrm')}
-							deleteTitle={__('Delete this goal?', 'quillcrm')}
-							deleteDescription={__(
-								'This will remove the goal from your workflow.',
-								'quillcrm'
-							)}
-						/>
-					</>
-				)}
+				<NodeLayout
+					icon={<GoalIcon width={23} height={23} />}
+					title={__('Goal', 'quillcrm')}
+					subtitle={subtitle}
+					onEdit={handleEdit}
+					onDelete={handleDelete}
+					editLabel={__('Edit Goal', 'quillcrm')}
+					deleteLabel={__('Delete Goal', 'quillcrm')}
+					deleteTitle={__('Delete this goal?', 'quillcrm')}
+					deleteDescription={__(
+						'This will remove the goal from your workflow.',
+						'quillcrm'
+					)}
+					viewMode={viewMode}
+					analytics={analytics}
+				/>
 
 				<Handle
 					type="source"

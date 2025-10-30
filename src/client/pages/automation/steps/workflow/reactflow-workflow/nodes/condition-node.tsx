@@ -14,7 +14,7 @@ import React from 'react';
  */
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
 import NodeContextMenu from '../components/node-context-menu';
-import NodeActionsDropdown from '../components/node-actions-dropdown';
+import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
@@ -82,76 +82,22 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 				{/* Step Reorder Controls - hide in view mode */}
 				{!viewMode && <StepReorderControls step={step} />}
 
-				{viewMode && analytics ? (
-					<>
-						{/* Header Row: Icon, Content, Dropdown */}
-						<div className="qcrm-reactflow-node__header-row">
-							<div className="qcrm-reactflow-node__header-left">
-								<div className="qcrm-reactflow-node__icon">
-									<ConditionsIcon width={23} height={23} />
-								</div>
-								<div className="qcrm-reactflow-node__content">
-									<div className="qcrm-reactflow-node__title">
-										{__('Condition', 'quillcrm')}
-									</div>
-									<div className="qcrm-reactflow-node__subtitle">
-										{subtitle}
-									</div>
-								</div>
-							</div>
-							<NodeActionsDropdown
-								onEdit={handleEdit}
-								onDelete={handleDelete}
-								editLabel={__('Edit Condition', 'quillcrm')}
-								deleteLabel={__('Delete Condition', 'quillcrm')}
-								deleteTitle={__('Delete this condition?', 'quillcrm')}
-								deleteDescription={__(
-									'This will also remove all connected steps in both branches.',
-									'quillcrm'
-								)}
-							/>
-						</div>
-
-						{/* Footer Row: Analytics */}
-						<div className="qcrm-reactflow-node__footer-row">
-							<div className="text-sm">
-								<span className="text-[#667085]">{__('Contact:', 'quillcrm')} </span>
-								<span className="font-semibold text-[#344054]">{analytics.contacts || 0}</span>
-							</div>
-							<div className="text-sm">
-								<span className="text-[#667085]">{__('Conversion Rate:', 'quillcrm')} </span>
-								<span className="font-semibold text-[#344054]">{analytics.conversion_rate || 0}%</span>
-							</div>
-						</div>
-					</>
-				) : (
-					<>
-						<div className="qcrm-reactflow-node__icon">
-							<ConditionsIcon width={23} height={23} />
-						</div>
-						<div className="qcrm-reactflow-node__content">
-							<div className="qcrm-reactflow-node__title">
-								{__('Condition', 'quillcrm')}
-							</div>
-							<div className="qcrm-reactflow-node__subtitle">
-								{subtitle}
-							</div>
-						</div>
-
-						{/* Three dots dropdown menu */}
-						<NodeActionsDropdown
-							onEdit={handleEdit}
-							onDelete={handleDelete}
-							editLabel={__('Edit Condition', 'quillcrm')}
-							deleteLabel={__('Delete Condition', 'quillcrm')}
-							deleteTitle={__('Delete this condition?', 'quillcrm')}
-							deleteDescription={__(
-								'This will also remove all connected steps in both branches.',
-								'quillcrm'
-							)}
-						/>
-					</>
-				)}
+				<NodeLayout
+					icon={<ConditionsIcon width={23} height={23} />}
+					title={__('Condition', 'quillcrm')}
+					subtitle={subtitle}
+					onEdit={handleEdit}
+					onDelete={handleDelete}
+					editLabel={__('Edit Condition', 'quillcrm')}
+					deleteLabel={__('Delete Condition', 'quillcrm')}
+					deleteTitle={__('Delete this condition?', 'quillcrm')}
+					deleteDescription={__(
+						'This will also remove all connected steps in both branches.',
+						'quillcrm'
+					)}
+					viewMode={viewMode}
+					analytics={analytics}
+				/>
 
 				{/* Separate source handles for yes and no branches */}
 				<Handle

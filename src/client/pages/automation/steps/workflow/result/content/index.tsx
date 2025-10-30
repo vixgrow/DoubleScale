@@ -180,6 +180,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
             date?: string;
             step?: OrganizedStep;
             conditionResult?: 'yes' | 'no';
+            branchLabel?: 'started' | 'ended' | 'both';
         }> = [];
 
         // Add trigger as first item
@@ -192,7 +193,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
         });
 
         // Process organized steps
-        const processStepForTimeline = (step: OrganizedStep) => {
+        const processStepForTimeline = (step: OrganizedStep, isInBranch = false, isFirstInBranch = false, isLastInBranch = false) => {
             const { yesChildren, noChildren } = organizeChildrenByCondition(
                 step.children || []
             );
@@ -281,11 +282,27 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                 });
 
                 // Process children and add them as separate timeline items
-                childrenToProcess.forEach(processStepForTimeline);
+                childrenToProcess.forEach((child, idx) => {
+                    const isFirst = idx === 0;
+                    const isLast = idx === childrenToProcess.length - 1;
+                    processStepForTimeline(child, true, isFirst, isLast);
+                });
             } else {
                 // Regular step (action, delay, goal, etc.)
                 // Labels are already formatted above
                 const stepLabel = label;
+
+                // Determine branch label if in branch
+                let branchLabel: 'started' | 'ended' | 'both' | undefined = undefined;
+                if (isInBranch) {
+                    if (isFirstInBranch && isLastInBranch) {
+                        branchLabel = 'both';
+                    } else if (isFirstInBranch) {
+                        branchLabel = 'started';
+                    } else if (isLastInBranch) {
+                        branchLabel = 'ended';
+                    }
+                }
 
                 timelineItems.push({
                     id: step.id,
@@ -295,16 +312,17 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                     status,
                     date,
                     step,
+                    branchLabel,
                 });
 
                 // Process children if any
                 if (step.children && step.children.length > 0) {
-                    step.children.forEach(processStepForTimeline);
+                    step.children.forEach((child) => processStepForTimeline(child));
                 }
             }
         };
 
-        organizedSteps.forEach(processStepForTimeline);
+        organizedSteps.forEach((step) => processStepForTimeline(step));
 
         return timelineItems;
     };
@@ -362,6 +380,15 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
                                                     label={item.label}
                                                     status={item.type === 'end_automation' ? undefined : item.status}
                                                     statuses={statuses}
+                                                    branchLabel={
+                                                        item.branchLabel
+                                                            ? item.branchLabel === 'started'
+                                                                ? __('Condition Started', 'quillcrm')
+                                                                : item.branchLabel === 'ended'
+                                                                    ? __('Condition Ended', 'quillcrm')
+                                                                    : `${__('Condition Started', 'quillcrm')} & ${__('Ended', 'quillcrm')}`
+                                                            : undefined
+                                                    }
                                                 />
                                             )}
                                         </CardContent>

@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
@@ -22,6 +21,11 @@ import { getAction, getGoal } from '@quillcrm/utils';
 import { useAutomationContext } from '../../../state/context';
 import { deleteStep } from '../reactflow-workflow/utils/step-utils';
 import AnalyticsPopup from '../reactflow-workflow/components/analytics-popup';
+import { useStepAnalytics } from '../reactflow-workflow/hooks/use-step-analytics';
+import {
+	supportsAnalytics,
+	getChannelType,
+} from '../reactflow-workflow/constants/action-types';
 
 interface StepFieldsModalProps {
 	step: OrganizedStep;
@@ -37,12 +41,18 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [isSaving, setIsSaving] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
-	const [analyticsVisible, setAnalyticsVisible] = useState(false);
-	const [analyticsData, setAnalyticsData] = useState<any>(null);
-	const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
 	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
 		useDispatch('quillcrm/core');
 	const { steps, setSteps } = useAutomationContext();
+
+	// Use custom analytics hook
+	const {
+		analyticsData,
+		isLoading: isLoadingAnalytics,
+		isVisible: analyticsVisible,
+		fetchAnalytics,
+		hideAnalytics,
+	} = useStepAnalytics();
 
 	// Sync settings when step.settings changes
 	// This ensures we load the latest settings from the parent
@@ -87,41 +97,11 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	};
 
 	const handleViewAnalytics = async () => {
-		setIsLoadingAnalytics(true);
-		try {
-			const response = await apiFetch({
-				path: `/qc/v1/automation-steps/${step.id}/analytics`,
-				method: 'GET',
-			});
-
-			setAnalyticsData(response);
-			setAnalyticsVisible(true);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __(
-					'Failed to load analytics. Please try again.',
-					'quillcrm'
-				),
-			});
-			console.error('Analytics fetch error:', error);
-		} finally {
-			setIsLoadingAnalytics(false);
-		}
+		await fetchAnalytics(step.id);
 	};
 
-	// Determine if this step supports analytics
-	const supportsAnalytics = ['send_email', 'send_sms', 'send_whatsapp'].includes(
-		step.action
-	);
-
-	// Determine action type for analytics popup
-	const getActionType = (): 'email' | 'sms' | 'whatsapp' => {
-		if (step.action === 'send_email') return 'email';
-		if (step.action === 'send_sms') return 'sms';
-		if (step.action === 'send_whatsapp') return 'whatsapp';
-		return 'email'; // fallback
-	};
+	// Check if this step supports analytics
+	const hasAnalytics = supportsAnalytics(step.action);
 
 	// For delay steps, the action should be 'delay'
 	const actionKey = step.type === 'delay' ? 'delay' : step.action;
@@ -143,7 +123,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				{__('Merge Tags', 'quillcrm')}
 			</Button>
 
-			{supportsAnalytics && step.id && (
+			{hasAnalytics && step.id && (
 				<Button
 					onClick={handleViewAnalytics}
 					disabled={isSaving || isDeleting || isLoadingAnalytics}
@@ -194,23 +174,12 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				</Button>
 			</div>
 
-			{supportsAnalytics && analyticsData && (
+			{hasAnalytics && analyticsData && (
 				<AnalyticsPopup
 					visible={analyticsVisible}
-					onClose={() => setAnalyticsVisible(false)}
-					actionType={getActionType()}
-					analytics={{
-						sent: analyticsData.sent,
-						clickRate: analyticsData.clickRate,
-						unsubscribed: analyticsData.unsubscribedRate,
-						openRate: analyticsData.openRate,
-						clickToOpenRate:
-							analyticsData.openRate > 0
-								? (analyticsData.clickRate /
-										analyticsData.openRate) *
-								  100
-								: 0,
-					}}
+					onClose={hideAnalytics}
+					actionType={getChannelType(step.action)}
+					analytics={analyticsData}
 				/>
 			)}
 		</div>

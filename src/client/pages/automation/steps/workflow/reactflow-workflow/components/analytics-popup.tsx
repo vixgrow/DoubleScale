@@ -54,6 +54,20 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 
 	const actionLabel = getActionLabel();
 
+	// Get "Sent" label based on action type
+	const getSentLabel = () => {
+		switch (actionType) {
+			case 'email':
+				return __('Sent Emails', 'quillcrm');
+			case 'sms':
+				return __('Sent SMS', 'quillcrm');
+			case 'whatsapp':
+				return __('Sent WhatsApp', 'quillcrm');
+			default:
+				return __('Sent Messages', 'quillcrm');
+		}
+	};
+
 	// Render email-specific metrics
 	const renderEmailMetrics = () => (
 		<>
@@ -87,7 +101,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 						{sent.toLocaleString()}
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
-						{__('Sent Emails', 'quillcrm')}
+						{getSentLabel()}
 					</div>
 				</div>
 			</div>
@@ -274,7 +288,7 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 						{sent.toLocaleString()}
 					</div>
 					<div className="qcrm-analytics-popup__metric-label">
-						{__('Sent Emails', 'quillcrm')}
+						{getSentLabel()}
 					</div>
 				</div>
 			</div>

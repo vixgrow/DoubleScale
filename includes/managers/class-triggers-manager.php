@@ -181,6 +181,11 @@ final class Triggers_Manager {
 						 'label'    => __( 'Review', 'quillcrm' ),
 						 'triggers' => array(),
 					 ),
+					 'subscription' => array(
+						 'label'       => __( 'Subscription', 'quillcrm' ),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
+						 'triggers'    => array(),
+					 ),
 				 ),
 			 ),
 			 'wp'          => array(

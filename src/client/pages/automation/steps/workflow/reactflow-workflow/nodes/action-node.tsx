@@ -27,10 +27,7 @@ import { deleteStep } from '../utils/step-utils';
 import { getAction } from '@quillcrm/utils';
 import { ActionIcon, ViewIcon } from '@quillcrm/components';
 import { useStepAnalytics } from '../hooks/use-step-analytics';
-import {
-	supportsAnalytics,
-	getChannelType,
-} from '../constants/action-types';
+import { supportsAnalytics, getChannelType } from '../constants/action-types';
 
 interface ActionNodeData {
 	step: AutomationStep;
@@ -44,7 +41,13 @@ interface ActionNodeData {
 
 const ActionNode: React.FC<NodeProps> = (props) => {
 	const { data } = props;
-	const { step, onStepClick, selectedStepId, viewMode = false, analytics } = data as unknown as ActionNodeData;
+	const {
+		step,
+		onStepClick,
+		selectedStepId,
+		viewMode = false,
+		analytics,
+	} = data as unknown as ActionNodeData;
 
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -77,14 +80,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	};
 
 	const subtitle = isConfigured ? (
-		<>
-			<span className="qcrm-reactflow-action__configured">{actionName}</span>
-			{hasAnalytics && (
-				<div className="qcrm-reactflow-action__recipient">
-					{getRecipientInfo()}
-				</div>
-			)}
-		</>
+		<span className="qcrm-reactflow-action__configured">{actionName}</span>
 	) : (
 		<span className="qcrm-reactflow-action__not-configured">
 			{__('Not Configured', 'quillcrm')}
@@ -115,26 +111,33 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	};
 
 	// Custom footer for analytics
-	const customFooter = !viewMode && hasAnalytics && isConfigured ? (
-		<div className="qcrm-reactflow-node__footer-row">
-			<div className="qcrm-reactflow-node__recipient text-[#660FF1]">
-				{getRecipientInfo()}
+	const customFooter =
+		!viewMode && hasAnalytics && isConfigured ? (
+			<div className="qcrm-reactflow-node__footer-row">
+				<div className="qcrm-reactflow-node__recipient text-[#660FF1]">
+					{getRecipientInfo()}
+				</div>
+				<button
+					className="qcrm-reactflow-node__analytics-link text-primary"
+					onClick={handleViewAnalytics}
+					title={__('View Analytics', 'quillcrm')}
+				>
+					<ViewIcon width={16} height={16} />
+					<span>{__('View Analytics', 'quillcrm')}</span>
+				</button>
 			</div>
-			<button
-				className="qcrm-reactflow-node__analytics-link text-primary"
-				onClick={handleViewAnalytics}
-				title={__('View Analytics', 'quillcrm')}
-			>
-				<ViewIcon width={16} height={16} />
-				<span>{__('View Analytics', 'quillcrm')}</span>
-			</button>
-		</div>
-	) : undefined;
+		) : undefined;
 
 	return (
 		<>
-			<NodeContextMenu onEdit={viewMode ? undefined : handleEdit} onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
-				<div className={`qcrm-reactflow-node qcrm-reactflow-node--action ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${(hasAnalytics && isConfigured) || (viewMode && analytics) ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
+			<NodeContextMenu
+				onEdit={viewMode ? undefined : handleEdit}
+				onDelete={viewMode ? undefined : handleDelete}
+				disabled={viewMode}
+			>
+				<div
+					className={`qcrm-reactflow-node qcrm-reactflow-node--action ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${(hasAnalytics && isConfigured) || (viewMode && analytics) ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}
+				>
 					<Handle
 						type="target"
 						position={Position.Top}

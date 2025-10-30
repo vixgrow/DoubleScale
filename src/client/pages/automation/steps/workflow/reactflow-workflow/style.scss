@@ -301,7 +301,6 @@
 
 	// Node Type Specific Styles
 	&--action {
-
 		// Action configuration status
 		.qcrm-reactflow-action__configured {
 			color: #52c41a;
@@ -480,7 +479,6 @@
 	}
 
 	&--goal {
-
 		// Goal configuration status
 		.qcrm-reactflow-goal__configured {
 			color: #52c41a;
@@ -552,9 +550,11 @@
 			inset: -2px;
 			border-radius: 50%;
 			padding: 2px;
-			background: linear-gradient(135deg,
-					rgba(255, 255, 255, 0.8),
-					rgba(255, 255, 255, 0.2));
+			background: linear-gradient(
+				135deg,
+				rgba(255, 255, 255, 0.8),
+				rgba(255, 255, 255, 0.2)
+			);
 			mask:
 				linear-gradient(#fff 0 0) content-box,
 				linear-gradient(#fff 0 0);
@@ -566,9 +566,11 @@
 			position: absolute;
 			inset: -8px;
 			border-radius: 50%;
-			background: radial-gradient(circle,
-					transparent 70%,
-					rgba(24, 144, 255, 0.1) 100%);
+			background: radial-gradient(
+				circle,
+				transparent 70%,
+				rgba(24, 144, 255, 0.1) 100%
+			);
 			opacity: 0;
 			transition: opacity 0.3s ease;
 			pointer-events: none;
@@ -607,8 +609,8 @@
 
 	&--branch {
 		border-radius: 50%;
-		width: 80px;
-		height: 80px;
+		width: 60px;
+		height: 60px;
 		padding: 0;
 		display: flex;
 		align-items: center;

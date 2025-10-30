@@ -31,11 +31,11 @@ const AnalyticsPopup: React.FC<AnalyticsPopupProps> = ({
 	if (!visible) return null;
 
 	const {
-		sent = 1836,
-		clickRate = 9.8,
-		unsubscribed = 0.8,
-		openRate = 72,
-		clickToOpenRate = 9.3,
+		sent = 0,
+		clickRate = 0,
+		unsubscribed = 0,
+		openRate = 0,
+		clickToOpenRate = 0,
 	} = analytics;
 
 	// Get proper label based on action type

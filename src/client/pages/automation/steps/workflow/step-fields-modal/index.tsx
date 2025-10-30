@@ -4,10 +4,12 @@
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
  */
+import { BarChart3 } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -19,6 +21,7 @@ import { Fields } from '@quillcrm/components';
 import { getAction, getGoal } from '@quillcrm/utils';
 import { useAutomationContext } from '../../../state/context';
 import { deleteStep } from '../reactflow-workflow/utils/step-utils';
+import AnalyticsPopup from '../reactflow-workflow/components/analytics-popup';
 
 interface StepFieldsModalProps {
 	step: OrganizedStep;
@@ -34,6 +37,9 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [isSaving, setIsSaving] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
+	const [analyticsVisible, setAnalyticsVisible] = useState(false);
+	const [analyticsData, setAnalyticsData] = useState<any>(null);
+	const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
 	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
 		useDispatch('quillcrm/core');
 	const { steps, setSteps } = useAutomationContext();
@@ -80,6 +86,43 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setMergeTagsVisible(true);
 	};
 
+	const handleViewAnalytics = async () => {
+		setIsLoadingAnalytics(true);
+		try {
+			const response = await apiFetch({
+				path: `/qc/v1/automation-steps/${step.id}/analytics`,
+				method: 'GET',
+			});
+
+			setAnalyticsData(response);
+			setAnalyticsVisible(true);
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message: __(
+					'Failed to load analytics. Please try again.',
+					'quillcrm'
+				),
+			});
+			console.error('Analytics fetch error:', error);
+		} finally {
+			setIsLoadingAnalytics(false);
+		}
+	};
+
+	// Determine if this step supports analytics
+	const supportsAnalytics = ['send_email', 'send_sms', 'send_whatsapp'].includes(
+		step.action
+	);
+
+	// Determine action type for analytics popup
+	const getActionType = (): 'email' | 'sms' | 'whatsapp' => {
+		if (step.action === 'send_email') return 'email';
+		if (step.action === 'send_sms') return 'sms';
+		if (step.action === 'send_whatsapp') return 'whatsapp';
+		return 'email'; // fallback
+	};
+
 	// For delay steps, the action should be 'delay'
 	const actionKey = step.type === 'delay' ? 'delay' : step.action;
 
@@ -99,6 +142,22 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 			>
 				{__('Merge Tags', 'quillcrm')}
 			</Button>
+
+			{supportsAnalytics && step.id && (
+				<Button
+					onClick={handleViewAnalytics}
+					disabled={isSaving || isDeleting || isLoadingAnalytics}
+					variant="outline"
+					className="w-full mb-4"
+					size="lg"
+				>
+					<BarChart3 className="w-4 h-4 mr-2" />
+					{isLoadingAnalytics
+						? __('Loading...', 'quillcrm')
+						: __('View Analytics', 'quillcrm')}
+				</Button>
+			)}
+
 			<div className="mb-4">
 				<Fields
 					fields={action.fields}
@@ -134,6 +193,26 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						: __('Delete', 'quillcrm')}
 				</Button>
 			</div>
+
+			{supportsAnalytics && analyticsData && (
+				<AnalyticsPopup
+					visible={analyticsVisible}
+					onClose={() => setAnalyticsVisible(false)}
+					actionType={getActionType()}
+					analytics={{
+						sent: analyticsData.sent,
+						clickRate: analyticsData.clickRate,
+						unsubscribed: analyticsData.unsubscribedRate,
+						openRate: analyticsData.openRate,
+						clickToOpenRate:
+							analyticsData.openRate > 0
+								? (analyticsData.clickRate /
+										analyticsData.openRate) *
+								  100
+								: 0,
+					}}
+				/>
+			)}
 		</div>
 	);
 };

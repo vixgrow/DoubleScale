@@ -18,6 +18,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Automation_Step_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Managers\Actions_Manager;
 
 /**
@@ -98,6 +99,18 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 							'required'    => true,
 						),
 					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/analytics',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_step_analytics' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 			)
 		);
@@ -448,6 +461,86 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 		}
 
 		return $step_data;
+	}
+
+	/**
+	 * Get analytics for an Automation Step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_step_analytics( $request ) {
+		try {
+			$step_id = $request->get_param( 'id' );
+
+			// Verify step exists.
+			$automation_step = Automation_Step_Model::find( $step_id );
+
+			if ( ! $automation_step ) {
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Get all tracking records for this step.
+			$tracking_query = Tracking_Model::byStep( $step_id );
+
+			// Calculate basic metrics.
+			$total_sent = $tracking_query->count();
+
+			// If no messages sent, return zero analytics.
+			if ( 0 === $total_sent ) {
+				return new WP_REST_Response(
+					array(
+						'sent'             => 0,
+						'opened'           => 0,
+						'clicked'          => 0,
+						'delivered'        => 0,
+						'read'             => 0,
+						'unsubscribed'     => 0,
+						'openRate'         => 0,
+						'clickRate'        => 0,
+						'deliveryRate'     => 0,
+						'readRate'         => 0,
+						'unsubscribedRate' => 0,
+					),
+					200
+				);
+			}
+
+			// Calculate detailed metrics.
+			$opened       = Tracking_Model::byStep( $step_id )->where( 'opened', true )->count();
+			$clicked      = Tracking_Model::byStep( $step_id )->where( 'clicked', true )->count();
+			$delivered    = Tracking_Model::byStep( $step_id )->where( 'status', Tracking_Model::STATUS_DELIVERED )->count();
+			$read         = Tracking_Model::byStep( $step_id )->where( 'status', Tracking_Model::STATUS_READ )->count();
+			$unsubscribed = Tracking_Model::byStep( $step_id )->where( 'unsubscribed', true )->count();
+
+			// Calculate rates as percentages.
+			$open_rate         = $total_sent > 0 ? round( ( $opened / $total_sent ) * 100, 2 ) : 0;
+			$click_rate        = $total_sent > 0 ? round( ( $clicked / $total_sent ) * 100, 2 ) : 0;
+			$delivery_rate     = $total_sent > 0 ? round( ( $delivered / $total_sent ) * 100, 2 ) : 0;
+			$read_rate         = $total_sent > 0 ? round( ( $read / $total_sent ) * 100, 2 ) : 0;
+			$unsubscribed_rate = $total_sent > 0 ? round( ( $unsubscribed / $total_sent ) * 100, 2 ) : 0;
+
+			$analytics = array(
+				'sent'             => $total_sent,
+				'opened'           => $opened,
+				'clicked'          => $clicked,
+				'delivered'        => $delivered,
+				'read'             => $read,
+				'unsubscribed'     => $unsubscribed,
+				'openRate'         => $open_rate,
+				'clickRate'        => $click_rate,
+				'deliveryRate'     => $delivery_rate,
+				'readRate'         => $read_rate,
+				'unsubscribedRate' => $unsubscribed_rate,
+			);
+
+			return new WP_REST_Response( $analytics, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'rest_automation_step_analytics_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
 	}
 
 	/**

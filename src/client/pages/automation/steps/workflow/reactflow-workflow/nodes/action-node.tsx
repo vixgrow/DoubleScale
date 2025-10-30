@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
@@ -42,6 +43,8 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [showAnalytics, setShowAnalytics] = useState(false);
+	const [analyticsData, setAnalyticsData] = useState<any>(null);
+	const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
 
 	// Check if action is configured - an action is configured if it has an action slug
 	const isConfigured = !!step.action;
@@ -54,18 +57,11 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	const supportsAnalytics = ['send_email', 'send_sms', 'send_whatsapp'].includes(step.action || '');
 
 	// Get action type for analytics
-	const getActionType = () => {
+	const getActionType = (): 'email' | 'sms' | 'whatsapp' => {
 		if (step.action === 'send_email') return 'email';
 		if (step.action === 'send_sms') return 'sms';
 		if (step.action === 'send_whatsapp') return 'whatsapp';
 		return 'email';
-	};
-
-	// Mock analytics data - in real implementation, this would come from API
-	const analyticsData = {
-		sent: 1836,
-		clickRate: 9.8,
-		unsubscribed: 0.80,
 	};
 
 	// Get recipient info for display
@@ -108,9 +104,30 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	// Check if this node is selected
 	const isSelected = selectedStepId === step.id.toString();
 
-	const handleViewAnalytics = (e: React.MouseEvent) => {
+	const handleViewAnalytics = async (e: React.MouseEvent) => {
 		e.stopPropagation();
-		setShowAnalytics(true);
+
+		setIsLoadingAnalytics(true);
+		try {
+			const response = await apiFetch({
+				path: `/qc/v1/automation-steps/${step.id}/analytics`,
+				method: 'GET',
+			});
+
+			setAnalyticsData(response);
+			setShowAnalytics(true);
+		} catch (error) {
+			createNotice({
+				type: 'error',
+				message: __(
+					'Failed to load analytics. Please try again.',
+					'quillcrm'
+				),
+			});
+			console.error('Analytics fetch error:', error);
+		} finally {
+			setIsLoadingAnalytics(false);
+		}
 	};
 
 	return (
@@ -209,12 +226,23 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 			</NodeContextMenu>
 
 			{/* Analytics Popup */}
-			{isConfigured && supportsAnalytics && (
+			{isConfigured && supportsAnalytics && analyticsData && (
 				<AnalyticsPopup
 					visible={showAnalytics}
 					onClose={() => setShowAnalytics(false)}
 					actionType={getActionType()}
-					analytics={analyticsData}
+					analytics={{
+						sent: analyticsData.sent,
+						clickRate: analyticsData.clickRate,
+						unsubscribed: analyticsData.unsubscribedRate,
+						openRate: analyticsData.openRate,
+						clickToOpenRate:
+							analyticsData.openRate > 0
+								? (analyticsData.clickRate /
+										analyticsData.openRate) *
+								  100
+								: 0,
+					}}
 				/>
 			)}
 		</>

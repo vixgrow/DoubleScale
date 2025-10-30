@@ -20,13 +20,12 @@ use WC_Order;
  */
 class Order_Status_Pending extends Trigger {
 
-
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Status Pending';
+	public $name = 'Order Status Pending';
 
 	/**
 	 * Trigger Slug

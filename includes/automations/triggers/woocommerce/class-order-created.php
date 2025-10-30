@@ -22,16 +22,12 @@ use QuillCRM\Constants\Order_Status;
  */
 class Order_Created extends Trigger {
 
-
-
-
-
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Created';
+	public $name = 'Order Created';
 
 	/**
 	 * Trigger Slug

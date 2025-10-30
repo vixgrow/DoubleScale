@@ -22,14 +22,12 @@ use WC_Order;
  */
 class Cart_Recovered extends Trigger {
 
-
-
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Cart Recovered';
+	public $name = 'Cart Recovered';
 
 	/**
 	 * Trigger Slug

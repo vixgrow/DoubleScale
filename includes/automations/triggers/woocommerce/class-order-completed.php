@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WooCommerce Order Completed Trigger
  * This trigger will be fired when an order is completed.
@@ -24,7 +25,7 @@ class Order_Completed extends Trigger {
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Completed';
+	public $name = 'Order Completed';
 
 	/**
 	 * Trigger Slug

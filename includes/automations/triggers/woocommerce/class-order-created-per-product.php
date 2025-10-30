@@ -27,7 +27,7 @@ class Order_Created_Per_Product extends Trigger {
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Created - Per Product';
+	public $name = 'Order Created - Per Product';
 
 	/**
 	 * Trigger Slug

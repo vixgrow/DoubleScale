@@ -23,6 +23,7 @@ final class Triggers_Manager {
 
 
 
+
 	/**
 	 * Registed triggers
 	 *
@@ -172,7 +173,7 @@ final class Triggers_Manager {
 						 'triggers' => array(),
 					 ),
 					 'cart'  => array(
-						 'label'    => __( 'Abandoned Cart', 'quillcrm' ),
+						 'label'    => __( 'Cart', 'quillcrm' ),
 						 'triggers' => array(),
 					 ),
 				 ),

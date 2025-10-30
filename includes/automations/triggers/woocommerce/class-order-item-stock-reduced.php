@@ -22,18 +22,12 @@ use WC_Order_Item_Product;
  */
 class Order_Item_Stock_Reduced extends Trigger {
 
-
-
-
-
-
-
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Item Stock Reduced';
+	public $name = 'Order Item Stock Reduced';
 
 	/**
 	 * Trigger Slug

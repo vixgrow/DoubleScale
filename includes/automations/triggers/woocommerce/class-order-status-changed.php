@@ -22,13 +22,12 @@ use WC_Order;
  */
 class Order_Status_Changed extends Trigger {
 
-
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Status Changed';
+	public $name = 'Order Status Changed';
 
 	/**
 	 * Trigger Slug

@@ -20,12 +20,13 @@ use WC_Order;
  * Order Note Added Trigger
  */
 class Order_Note_Added extends Trigger {
+
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Note Added';
+	public $name = 'Order Note Added';
 
 	/**
 	 * Trigger Slug

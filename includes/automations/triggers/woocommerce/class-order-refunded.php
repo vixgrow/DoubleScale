@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WooCommerce Order Refunded Trigger
  * This trigger will be fired when an order is refunded.
@@ -19,12 +20,13 @@ use WC_Order;
  */
 class Order_Refunded extends Trigger {
 
+
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Refunded';
+	public $name = 'Order Refunded';
 
 	/**
 	 * Trigger Slug

@@ -120,14 +120,14 @@ const Automation: React.FC = () => {
 			icon: WorkflowIcon,
 		},
 		{
-			id: 'contacts',
-			label: __('Contacts', 'quillcrm'),
-			icon: AutomationContactsIcon,
-		},
-		{
 			id: 'reports',
 			label: __('Reports', 'quillcrm'),
 			icon: AutomationAnalyticsIcon,
+		},
+		{
+			id: 'contacts',
+			label: __('Contacts', 'quillcrm'),
+			icon: AutomationContactsIcon,
 		},
 	];
 
@@ -171,7 +171,7 @@ const Automation: React.FC = () => {
 							<DialogHeader className="border-b border-[#E4E7EC] pr-14 pl-5 pb-4">
 								<DialogTitle>
 									<div className="flex items-center justify-between">
-										{/* Left section - Undo/Redo buttons */}
+										{/* Left section - Undo/Redo buttons
 										<div className="flex gap-2">
 											{activeTab === 'workflow' && (
 												<>
@@ -189,9 +189,9 @@ const Automation: React.FC = () => {
 													</Button>
 												</>
 											)}
-										</div>
+										</div> */}
 
-										{/* Middle section - Title */}
+										{/* Left section - Title */}
 										<div className="flex items-center gap-2">
 											<span className="text-base text-normal text-[#667085]">
 												{__(

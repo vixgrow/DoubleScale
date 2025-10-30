@@ -9,7 +9,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Triggers\WooCommerce;
+namespace QuillCRM\Automations\Triggers\WooCommerce\Order;
 
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
@@ -21,6 +21,7 @@ use WC_Order;
  * Order Status Changed Trigger
  */
 class Order_Status_Changed extends Trigger {
+
 
 	/**
 	 * Trigger Name

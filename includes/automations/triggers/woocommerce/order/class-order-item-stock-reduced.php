@@ -9,7 +9,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Triggers\WooCommerce;
+namespace QuillCRM\Automations\Triggers\WooCommerce\Order;
 
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
@@ -21,6 +21,7 @@ use WC_Order_Item_Product;
  * Order Item Stock Reduced Trigger
  */
 class Order_Item_Stock_Reduced extends Trigger {
+
 
 	/**
 	 * Trigger Name

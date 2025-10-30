@@ -9,7 +9,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Triggers\WooCommerce;
+namespace QuillCRM\Automations\Triggers\WooCommerce\Order;
 
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
@@ -20,6 +20,7 @@ use WC_Order;
  * Order Note Added Trigger
  */
 class Order_Note_Added extends Trigger {
+
 
 	/**
 	 * Trigger Name

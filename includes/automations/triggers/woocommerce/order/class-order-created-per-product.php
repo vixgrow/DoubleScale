@@ -9,7 +9,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Triggers\WooCommerce;
+namespace QuillCRM\Automations\Triggers\WooCommerce\Order;
 
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
@@ -21,6 +21,7 @@ use WC_Order;
  * Order Created Per Product Trigger
  */
 class Order_Created_Per_Product extends Trigger {
+
 
 	/**
 	 * Trigger Name

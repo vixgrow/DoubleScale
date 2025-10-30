@@ -9,7 +9,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Triggers\WooCommerce;
+namespace QuillCRM\Automations\Triggers\WooCommerce\Cart;
 
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
@@ -21,6 +21,7 @@ use WC_Order;
  * Cart Recovered Trigger
  */
 class Cart_Recovered extends Trigger {
+
 
 	/**
 	 * Trigger Name

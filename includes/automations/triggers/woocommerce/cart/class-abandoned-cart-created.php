@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WooCommerce Abandoned Cart Created Trigger
  * This trigger will be fired when an abandoned cart is created.
@@ -8,7 +9,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Triggers\WooCommerce;
+namespace QuillCRM\Automations\Triggers\WooCommerce\Cart;
 
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
@@ -20,6 +21,7 @@ use QuillCRM\QuillCRM;
  * Abandoned Cart Created Trigger
  */
 class Abandoned_Cart_Created extends Trigger {
+
 
 	/**
 	 * Trigger Name

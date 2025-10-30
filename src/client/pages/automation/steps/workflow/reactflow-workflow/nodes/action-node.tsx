@@ -143,7 +143,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 											{__('Action', 'quillcrm')}
 										</div>
 										<div className="qcrm-reactflow-node__subtitle">
-											<span className="qcrm-reactflow-action__configured">{actionName}</span>
+											<span className="qcrm-reactflow-action__configured">{subtitle}</span>
 										</div>
 									</div>
 								</div>

@@ -150,3 +150,4 @@ export { default as MyTemplatesIcon } from './my-templates';
 export { default as DealsIcon } from './deals';
 export { default as NotesIcon } from './notes';
 export { default as PurchaseHistoryIcon } from './purchase-history';
+export { default as GradientAutomationsIcon } from './gradient-automations';

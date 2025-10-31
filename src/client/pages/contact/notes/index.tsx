@@ -14,10 +14,11 @@ import type { Note, NotesResponse, NoticeMessage } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
 import { Button } from '@/components/ui/button';
 import {
-	NoNotesIcon,
 	PlusIcon,
 	NoticeBanner,
 	DeleteModal,
+	GradientNotesIcon,
+	NoData,
 } from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
@@ -150,14 +151,13 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 			)}
 			<div>
 				{!loading && (!notes || notes.length === 0) ? (
-					<div className="flex flex-col items-center justify-center py-20 gap-4">
-						<div className="text-gray-400">
-							<NoNotesIcon width={120} height={120} />
-						</div>
-						<span className="text-lg text-gray-500 font-medium">
-							{__('No notes found', 'quillcrm')}
-						</span>
-					</div>
+					<NoData
+						icon={<GradientNotesIcon />}
+						title={__('No notes yet', 'quillcrm')}
+						subtitle={__('Track subscriber growth, open rates, and conversion trends in real time.', 'quillcrm')}
+						onClick={handleAddNote}
+						buttonLabel={__('Add Note', 'quillcrm')}
+					/>
 				) : (
 					<>
 						<DataTable

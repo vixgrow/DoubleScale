@@ -16,6 +16,7 @@ import {
     DialogHeader,
     DialogOverlay,
     DialogTitle,
+    DialogPortal,
 } from '@/components/ui/dialog';
 import {
     CustomDialogHeader,
@@ -131,7 +132,8 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogOverlay className="z-[150200]" />
+            <DialogPortal>
+            <DialogOverlay className="z-[150200] h-screen" />
             <DialogContent className="max-w-[500px] z-[150200]">
                 <DialogHeader>
                     <DialogTitle>
@@ -210,6 +212,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                     </Button>
                 </DialogFooter>
             </DialogContent>
+            </DialogPortal>
         </Dialog>
     );
 };

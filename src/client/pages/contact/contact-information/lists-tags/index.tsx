@@ -19,6 +19,8 @@ import {
 	OutlinedListIcon,
 	AddRemoveListsModal,
 	AddRemoveTagsModal,
+	ListsIcon,
+	TagsIcon,
 } from '@quillcrm/components';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -147,7 +149,7 @@ const ListsTagsCards: React.FC = () => {
 					<CardHeader className="px-4 py-2 border-b">
 						<CardTitle className="flex items-center justify-between font-medium text-lg">
 							<div className="flex items-center gap-2">
-								<OutlinedListIcon />
+								<ListsIcon width={26} height={26} />
 								{__('Lists', 'quillcrm')}
 							</div>
 							<Button
@@ -219,7 +221,7 @@ const ListsTagsCards: React.FC = () => {
 					<CardHeader className="px-4 py-2 border-b">
 						<CardTitle className="flex items-center justify-between font-medium text-lg">
 							<div className="flex items-center gap-2">
-								<AddTagIcon width={20} height={20} />
+								<TagsIcon width={26} height={26} />
 								{__('Tags', 'quillcrm')}
 							</div>
 							<Button

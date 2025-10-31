@@ -1258,10 +1258,10 @@ class REST_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
-			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-			$contacts = $contact->automation_contacts()->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
-			$contacts->load( 'automation' );
+		$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+		$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+		$contacts = $contact->automation_contacts()->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+		$contacts->load( 'automation.steps', 'contact', 'processes.step', 'current_step', 'next_step' );
 
 			return new WP_REST_Response( $contacts, 200 );
 		} catch ( Exception $e ) {

@@ -1,373 +1,164 @@
 /**
- * WordPress dependencies
+ *  External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { useEffect, useState, useRef } from 'react';
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
+import { ContentEditable } from '@lexical/react/LexicalContentEditable';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
+import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
+import { ListPlugin } from '@lexical/react/LexicalListPlugin';
+import { HeadingNode, QuoteNode } from '@lexical/rich-text';
+import { ListItemNode, ListNode } from '@lexical/list';
+import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
+import { LinkNode, AutoLinkNode } from '@lexical/link';
+import { TextNode } from 'lexical';
 
 /**
- * External dependencies
+ *  Internal dependencies
  */
-import React, { useRef, useState } from 'react';
-import { Editor as TinyMCEEditor } from '@tinymce/tinymce-react';
-
-/**
- * Internal dependencies
- */
-import MergeTagsSelector from '../merge-tags';
-
-/**
- * Styles
- */
+import { ToolbarPlugin } from './plugins/ToolbarPlugin';
+import { MentionNode } from './nodes/mention-node';
+import { ImageNode } from './nodes/img-node';
+import AutoLinkMatchers from './plugins/autolink-plugin';
+import HtmlSerializer from './html-serializer';
+import InitialContentPlugin from './plugins/initial-content-plugin';
+import WordCountPlugin from './word-count';
 import './style.scss';
 
-/**
- * TinyMCE Editor Type
- */
-export type TinyMCEEditorType = any;
-
-/**
- * WordPress media library types
- */
-declare global {
-    interface Window {
-        wp: {
-            media: (options: any) => any;
-        };
-    }
-}
-
-/**
- * TinyMCE Editor Props
- */
-export interface TinyMCEWPEditorProps {
-    /**
-     * The initial or controlled value of the editor
-     */
-    value?: string;
-
-    /**
-     * Callback fired when the editor content changes
-     */
-    onChange?: (content: string, editor: TinyMCEEditorType) => void;
-
-    /**
-     * Height of the editor in pixels
-     * @default 500
-     */
-    height?: number;
-
-    /**
-     * Whether the editor should be inline
-     * @default false
-     */
-    inline?: boolean;
-
-    /**
-     * Custom toolbar configuration
-     */
-    toolbar?: string | string[];
-
-    /**
-     * Custom plugins to enable
-     */
-    plugins?: string | string[];
-
-    /**
-     * Additional TinyMCE configuration
-     */
-    init?: Record<string, any>;
-
-    /**
-     * Placeholder text
-     */
-    placeholder?: string;
-
-    /**
-     * Whether the editor is disabled
-     * @default false
-     */
-    disabled?: boolean;
-
-    /**
-     * Callback fired when the editor is initialized
-     */
-    onInit?: (evt: any, editor: TinyMCEEditorType) => void;
-
-    /**
-     * CSS class name for the editor container
-     */
-    className?: string;
-
-    /**
-     * ID for the editor
-     */
-    id?: string;
-
-    /**
-     * Whether to show merge tags button
-     * @default false
-     */
-    showMergeTags?: boolean;
-}
-
-
-export const TinyMCEWPEditor: React.FC<TinyMCEWPEditorProps> = ({
-    value = '',
-    onChange,
-    height = 500,
-    inline = false,
-    toolbar,
-    plugins,
-    init = {},
-    placeholder,
-    disabled = false,
-    onInit,
-    className = '',
-    id,
-    showMergeTags = false,
-}) => {
-    const editorRef = useRef<TinyMCEEditorType | null>(null);
-    const [mergeTagsVisible, setMergeTagsVisible] = useState(false);
-
-    /**
-     * Opens WordPress media library for image selection
-     */
-    const openWordPressMediaLibrary = (callback: (url: string, attachment: any) => void) => {
-        // Check if wp.media is available
-        if (typeof window.wp !== 'undefined' && window.wp.media) {
-            // Create the media frame (library only, no upload)
-            const frame = window.wp.media({
-                title: __('Select Media', 'quillcrm'),
-                button: {
-                    text: __('Insert into content', 'quillcrm'),
-                },
-                multiple: false,
-                library: {
-                    type: 'image'
-                },
-                frame: 'select'
-            });
-
-            // When an image is selected, run the callback
-            frame.on('select', function () {
-                const attachment = frame
-                    .state()
-                    .get('selection')
-                    .first()
-                    .toJSON();
-
-                callback(attachment.url, attachment);
-            });
-
-            // Open the modal
-            frame.open();
-        } else {
-            console.error('WordPress media library is not available');
-            // You could implement a fallback upload mechanism here
-            alert(__('WordPress media library is not available', 'quillcrm'));
-        }
-    };
-
-    /**
-     * Default toolbar configuration
-     */
-    const defaultToolbar = toolbar || [
-        'undo redo | formatselect | bold italic underline strikethrough | forecolor backcolor',
-        'alignleft aligncenter alignright alignjustify | bullist numlist outdent indent',
-        'link image media | removeformat | code fullscreen',
-    ];
-
-    /**
-     * Default plugins configuration
-     */
-    const defaultPlugins = plugins || [
-        'advlist',
-        'autolink',
-        'lists',
-        'link',
-        'image',
-        'charmap',
-        'preview',
-        'anchor',
-        'searchreplace',
-        'visualblocks',
-        'code',
-        'fullscreen',
-        'insertdatetime',
-        'media',
-        'table',
-        'help',
-        'wordcount',
-    ];
-
-    /**
-     * TinyMCE initialization configuration
-     */
-    const editorInit = {
-        height,
-        menubar: false,
-        plugins: defaultPlugins,
-        toolbar: Array.isArray(defaultToolbar) ? defaultToolbar.join(' | ') : defaultToolbar,
-        content_style: `
-            body { 
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; 
-                font-size: 14px; 
-                line-height: 0.5;
-                color: #333;
-                padding: 0px;
-            }
-            ${placeholder ? `body:empty::before { content: '${placeholder}'; color: #999; font-style: italic; }` : ''}
-        `,
-        skin: 'oxide',
-        content_css: 'default',
-        branding: false,
-        promotion: false,
-        statusbar: false,
-        resize: true,
-
-        // Completely disable default image upload dialog
-        automatic_uploads: false,
-        images_reuse_filename: false,
-        paste_data_images: false,
-
-        // Image upload configuration
-        images_upload_handler: (blobInfo: any): Promise<string> => new Promise((resolve, reject) => {
-            // You can implement custom upload logic here
-            // For now, we'll use the WordPress media library
-            const reader = new FileReader();
-            reader.onload = () => {
-                const result = reader.result;
-                if (typeof result === 'string') {
-                    resolve(result);
-                } else {
-                    reject('File read error: result is not a string');
-                }
-            };
-            reader.onerror = () => {
-                reject('File read error');
-            };
-            reader.readAsDataURL(blobInfo.blob());
-        }),
-
-
-        // Override the default image button behavior
-        setup: (editor: TinyMCEEditorType) => {
-            // Store editor reference
-            editorRef.current = editor;
-
-            // Override default image button to use WordPress media library
-            editor.ui.registry.addButton('image', {
-                icon: 'image',
-                tooltip: __('Insert/edit image', 'quillcrm'),
-                onAction: () => {
-                    openWordPressMediaLibrary((url, attachment) => {
-                        editor.insertContent(
-                            `<img src="${url}" alt="${attachment.alt || attachment.title || ''}" 
-                                width="${attachment.width || ''}" 
-                                height="${attachment.height || ''}" />`
-                        );
-                    });
-                },
-            });
-
-            // Custom media button
-            editor.ui.registry.addButton('wpmedia', {
-                icon: 'embed',
-                tooltip: __('Insert/edit media', 'quillcrm'),
-                onAction: () => {
-                    openWordPressMediaLibrary((url, attachment) => {
-                        if (attachment.type === 'video') {
-                            editor.insertContent(
-                                `<video controls width="${attachment.width || 640}">
-                                    <source src="${url}" type="${attachment.mime || 'video/mp4'}">
-                                </video>`
-                            );
-                        } else if (attachment.type === 'audio') {
-                            editor.insertContent(
-                                `<audio controls>
-                                    <source src="${url}" type="${attachment.mime || 'audio/mpeg'}">
-                                </audio>`
-                            );
-                        } else {
-                            editor.insertContent(`<a href="${url}">${attachment.title || attachment.filename}</a>`);
-                        }
-                    });
-                },
-            });
-
-            // Custom merge tags button
-            if (showMergeTags) {
-                editor.ui.registry.addButton('mergetags', {
-                    icon: 'code-sample',
-                    tooltip: __('Insert merge tag', 'quillcrm'),
-                    onAction: () => {
-                        setMergeTagsVisible(true);
-                    },
-                });
-            }
-        },
-
-        // Merge with custom init config
-        ...init,
-    };
-
-    /**
-     * Handle editor initialization
-     */
-    const handleInit = (evt: any, editor: TinyMCEEditorType) => {
-        editorRef.current = editor;
-
-        if (onInit) {
-            onInit(evt, editor);
-        }
-    };
-
-    /**
-     * Handle editor content changes
-     */
-    const handleEditorChange = (content: string, editor: TinyMCEEditorType) => {
-        if (onChange) {
-            onChange(content, editor);
-        }
-    };
-
-    /**
-     * Handle merge tag insertion
-     */
-    const handleInsertMergeTag = (tagValue: string) => {
-        if (editorRef.current) {
-            editorRef.current.insertContent(tagValue);
-        }
-        setMergeTagsVisible(false);
-    };
-
-    return (
-        <>
-            <div className={`tinymce-wp-editor ${className}`}>
-                <TinyMCEEditor
-                    apiKey="psa9an4lpfjn0zszaj8yeoz9aekqvug1b841ka7wp49g4wkm"
-                    id={id}
-                    value={value}
-                    disabled={disabled}
-                    inline={inline}
-                    init={editorInit}
-                    onInit={handleInit}
-                    onEditorChange={handleEditorChange}
-                />
-            </div>
-
-            {showMergeTags && (
-                <MergeTagsSelector
-                    visible={mergeTagsVisible}
-                    onClose={() => setMergeTagsVisible(false)}
-                    onInsertTag={handleInsertMergeTag}
-                />
-            )}
-        </>
-    );
+const theme = {
+	paragraph: 'editor-paragraph',
+	text: {
+		bold: 'editor-text-bold',
+		italic: 'editor-text-italic',
+		underline: 'editor-text-underline',
+		strikethrough: 'editor-text-linethrough',
+	},
+	list: {
+		ul: 'editor-list-ul',
+		ol: 'editor-list-ol',
+	},
 };
 
-/**
- * Default export
- */
-export default TinyMCEWPEditor;
+interface EditorProps {
+	message: string;
+	onChange: (html: string) => void;
+}
 
+function Editor({ message, onChange }: EditorProps) {
+	const [editorActive, setEditorActive] = useState(false);
+	const [wordCount, setWordCount] = useState(0);
+	// Keep track of the initial load to prevent resetting content during editing
+	const initialLoadRef = useRef(true);
+	// Store initial message to compare if it changes from parent
+	const initialMessageRef = useRef(message);
+
+	const initialConfig = {
+		namespace: 'EmailBodyEditor',
+		theme,
+		onError: (error: Error) => console.error(error),
+		nodes: [
+			HeadingNode,
+			ListNode,
+			AutoLinkNode,
+			ListItemNode,
+			TextNode,
+			QuoteNode,
+			TableNode,
+			TableCellNode,
+			TableRowNode,
+			LinkNode,
+			MentionNode,
+			ImageNode,
+		],
+	};
+
+	const handleHtmlChange = (html: string) => {
+		if (onChange) onChange(html);
+	};
+
+	const handleWordCountChange = (count: number) => {
+		setWordCount(count);
+	};
+
+	// Set initial word count from initial message
+	useEffect(() => {
+		if (initialLoadRef.current) {
+			const tempDiv = document.createElement('div');
+			tempDiv.innerHTML = message || '';
+			const text = tempDiv.textContent || tempDiv.innerText || '';
+			const words = text.split(/\s+/).filter((word) => word.length > 0);
+			setWordCount(words.length);
+		}
+	}, [message]);
+
+	// Check if message was changed externally (not from this editor's onChange)
+	useEffect(() => {
+		// Skip the first render and during active editing
+		if (initialLoadRef.current) {
+			initialLoadRef.current = false;
+			return;
+		}
+
+		// Only update the editor if the message prop changes from an external source
+		// and the editor is not currently focused/active
+		if (!editorActive && message !== initialMessageRef.current) {
+			initialMessageRef.current = message;
+
+			// Update word count for the new external message
+			const tempDiv = document.createElement('div');
+			tempDiv.innerHTML = message || '';
+			const text = tempDiv.textContent || tempDiv.innerText || '';
+			const words = text.split(/\s+/).filter((word) => word.length > 0);
+			setWordCount(words.length);
+		}
+	}, [message, editorActive]);
+
+	return (
+		<div className="email-body-editor">
+			<LexicalComposer initialConfig={initialConfig}>
+				<div className="editor-container">
+					<ToolbarPlugin />
+					<div className="editor-inner">
+						<RichTextPlugin
+							contentEditable={
+								<ContentEditable
+									className="editor-input"
+									onFocus={() => setEditorActive(true)}
+									onBlur={() => setEditorActive(false)}
+								/>
+							}
+							placeholder={
+								<div className="editor-placeholder">
+									Enter content here...
+								</div>
+							}
+							ErrorBoundary={() => (
+								<div className="editor-error"></div>
+							)}
+						/>
+						<HtmlSerializer
+							onChange={handleHtmlChange}
+							onWordCountChange={handleWordCountChange}
+						/>
+						<HistoryPlugin />
+						<ListPlugin />
+						<LinkPlugin />
+						<AutoLinkMatchers />
+						{/* Only load initial content once when the component mounts */}
+						{initialLoadRef.current && (
+							<InitialContentPlugin
+								initialContent={initialMessageRef.current}
+							/>
+						)}
+					</div>
+					<div className="flex justify-between items-center bg-[#FCFCFC] border-t py-2 px-5 text-[#1A1A1AB2]">
+						<WordCountPlugin wordCount={wordCount} />
+					</div>
+				</div>
+			</LexicalComposer>
+		</div>
+	);
+}
+
+export default Editor;

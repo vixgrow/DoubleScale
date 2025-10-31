@@ -36,5 +36,5 @@ export { default as TestButton } from './test-button';
 export { default as AdvancedFilter } from './advanced-filter';
 export { default as ContactList } from './contacts-list';
 export { default as Stepper } from './stepper';
-export { TinyMCEWPEditor } from './editor';
+export { default as Editor } from './editor';
 export { NoData } from './no-data';

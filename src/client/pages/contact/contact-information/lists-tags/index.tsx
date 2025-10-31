@@ -15,8 +15,6 @@ import { X, Plus, ChevronUp, ChevronDown } from 'lucide-react';
  */
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-	AddTagIcon,
-	OutlinedListIcon,
 	AddRemoveListsModal,
 	AddRemoveTagsModal,
 	ListsIcon,

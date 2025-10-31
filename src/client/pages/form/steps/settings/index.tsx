@@ -25,15 +25,12 @@ import { Label } from '@/components/ui/label';
 import SettingsShimmer from './settings-shimmer';
 
 const Settings: React.FC = () => {
-	const { form, updateSettings } = useFormContext();
+	const { form, updateSettings, formFields, setFormFields } = useFormContext();
 	const { getForms } = ConfigAPI;
 	const forms = getForms();
 	const fieldsSettings = form
 		? forms[form?.form_type]?.fields_settings
 		: null;
-	const [formFields, setFormFields] = useState<
-		Form['fields_settings']['fields'] | null
-	>(null);
 	const [isFetching, setIsFetching] = useState(true);
 	const { getAjaxUrl, getNonce } = ConfigAPI;
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -63,7 +60,8 @@ const Settings: React.FC = () => {
 				throw new Error(data.data);
 			}
 
-			setFormFields(data.data as Form['fields_settings']['fields']);
+			const fields = data.data as Form['fields_settings']['fields'];
+			setFormFields(fields);
 		} catch (error) {
 			createNotice({
 				type: 'error',
@@ -110,7 +108,7 @@ const Settings: React.FC = () => {
 								<div className="flex justify-between gap-[10px]">
 									<div className="flex flex-col gap-[10px] flex-1">
 										<div className="flex text-[#09090B] font-normal text-base">
-											{__('Lists','quillcrm')}
+											{__('Lists', 'quillcrm')}
 										</div>
 										<ListField
 											value={settings?.lists || []}
@@ -121,7 +119,7 @@ const Settings: React.FC = () => {
 									</div>
 									<div className="flex flex-col flex-1 gap-[10px]">
 										<div className="flex text-[#09090B] font-normal text-base">
-											{__('Tags','quillcrm')}
+											{__('Tags', 'quillcrm')}
 										</div>
 										<TagField
 											value={settings?.tags || []}

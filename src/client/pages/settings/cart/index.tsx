@@ -4,15 +4,10 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * External dependencies
- */
-import { Typography } from 'antd';
-
-/**
  * Internal dependencies
  */
 import type { Settings } from '@quillcrm/client';
-import { Field, CartDisabledIcon, AlertIcon } from '@quillcrm/components';
+import { Field, AlertIcon, CartIcon } from '@quillcrm/components';
 import { Switch } from '@quillcrm/components/ui/switch';
 import { Label } from '@quillcrm/components/ui/label';
 
@@ -64,7 +59,7 @@ const CartSettings: React.FC<CartSettingsProps> = ({ settings, onChange }) => {
 			</div>
 			{!enable_cart_tracking && (
 				<div className="flex flex-col items-center justify-center py-16 gap-4 text-gray-500">
-					<CartDisabledIcon />
+					<CartIcon width={100} height={100} />
 					<div className="text-base text-center flex items-center gap-1">
 						{__('To fill your cart details, please', 'quillcrm')}
 						<span className="text-black font-semibold">

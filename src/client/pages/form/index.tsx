@@ -272,6 +272,11 @@ const Form: React.FC<FormProps> = ({
 		}
 	};
 
+	const stepTitles = [
+		__('Form Information', 'quillcrm'),
+		__('Mappping Fields', 'quillcrm'),
+	];
+
 	const breadcrumbItems = isNewForm
 		? [
 			{
@@ -282,7 +287,7 @@ const Form: React.FC<FormProps> = ({
 				label: __('Form Information', 'quillcrm'),
 			},
 			{
-				label: __('Form Settings', 'quillcrm'),
+				label: stepTitles[currentStep],
 			},
 		]
 		: [
@@ -294,14 +299,9 @@ const Form: React.FC<FormProps> = ({
 				label: __('Form Information', 'quillcrm'),
 			},
 			{
-				label: __('Form Settings', 'quillcrm'),
+				label: stepTitles[currentStep],
 			},
 		];
-
-	const stepTitles = [
-		__('Form Information', 'quillcrm'),
-		__('Mappping Fields', 'quillcrm'),
-	];
 
 	return (
 		<Provider

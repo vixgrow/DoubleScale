@@ -10,6 +10,7 @@ import { addQueryArgs } from '@wordpress/url';
  * External dependencies
  */
 import { ChevronRight } from 'lucide-react';
+import { useRef, useEffect } from 'react';
 
 /**
  * Internal dependencies
@@ -62,10 +63,18 @@ const Integration: React.FC<IntegrationProps> = ({
 		useState<Record<string, any>>(initialValues);
 	const [isSaving, setIsSaving] = useState(false);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const closeNotice = () => {
 		setNotice(null);
 	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	const save = async () => {
 		setIsSaving(true);
@@ -138,7 +147,7 @@ const Integration: React.FC<IntegrationProps> = ({
 
 				{notice && (
 					<div className="px-12">
-						<NoticeBanner notice={notice} closeNotice={closeNotice} />
+						<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 					</div>
 				)}
 

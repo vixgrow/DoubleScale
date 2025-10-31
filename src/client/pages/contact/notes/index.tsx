@@ -13,6 +13,7 @@ import './style.scss';
 import type { Note, NotesResponse, NoticeMessage } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
 import { Button } from '@/components/ui/button';
+import { useRef } from 'react';
 import {
 	PlusIcon,
 	NoticeBanner,
@@ -46,6 +47,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 	const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 	const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const serverSideTable = useServerSideTable({
 		page,
@@ -64,6 +66,13 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 	const closeNotice = () => {
 		setNotice(null);
 	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	const fetchNotes = async () => {
 		setLoading(true);
@@ -147,7 +156,7 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 				</Button>
 			</div>
 			{notice && (
-				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 			<div>
 				{!loading && (!notes || notes.length === 0) ? (

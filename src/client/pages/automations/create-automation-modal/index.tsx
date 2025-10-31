@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 
 /**
  * Internal dependencies
@@ -65,6 +65,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 }) => {
     const automationTriggers = ConfigAPI.getAutomationTriggers();
     const [selectedCategory, setSelectedCategory] = useState('crm');
+    const noticeBannerRef = useRef<HTMLDivElement>(null);
 
     const categoryData = {
         'booking': {
@@ -102,6 +103,13 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
         return automationTriggers[selectedCategory];
     }, [automationTriggers, selectedCategory]);
 
+    // Scroll to notice banner when error appears
+    useEffect(() => {
+        if (error && noticeBannerRef.current) {
+            noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }, [error]);
+
     return (
         <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
             <DialogContent className="max-w-[1100px] overflow-y-auto max-h-[90vh]">
@@ -116,6 +124,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
                 {error && (
                     <div className="mb-4">
                         <NoticeBanner
+                            ref={noticeBannerRef}
                             notice={error}
                             closeNotice={() => onAutomationChange(automation)}
                         />

@@ -8,7 +8,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * external dependencies
  */
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 /**
  * Internal dependencies
  */
@@ -54,6 +54,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
@@ -70,6 +71,13 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const closeNotice = () => {
 		setNotice(null);
 	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	const validate = (list: Partial<ContactList>) => {
 		if (isEmpty(list.name || '', { ignore_whitespace: true })) {
@@ -276,7 +284,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		<div className="qcrm-contacts-lists-list">
 			{/* Notice Banner */}
 			{notice && (
-				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 
 			{/* Data Table */}

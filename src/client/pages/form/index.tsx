@@ -59,6 +59,7 @@ const Form: React.FC<FormProps> = ({
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	// Helper function to show notice
 	const showNotice = (type: 'success' | 'error', message: string) => {
@@ -69,6 +70,13 @@ const Form: React.FC<FormProps> = ({
 	const closeNotice = () => {
 		setNotice(null);
 	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	useEffect(() => {
 		if (isNewForm) {
@@ -346,7 +354,7 @@ const Form: React.FC<FormProps> = ({
 				isLoading={isSaving}
 			>
 				{notice && (
-					<NoticeBanner notice={notice} closeNotice={closeNotice} />
+					<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 				)}
 				<div className="flex gap-6">
 					<PanelSettings

@@ -10,6 +10,7 @@ import React, {
 	useImperativeHandle,
 	useState,
 	useEffect,
+	useRef,
 } from 'react';
 import {
 	DndContext,
@@ -96,6 +97,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		} = useCustomFields(scope);
 
 		const [visible, setVisible] = useState(false);
+		const noticeBannerRef = useRef<HTMLDivElement>(null);
 		const [addGroupVisible, setAddGroupVisible] = useState(false);
 		const [deleteGroupVisible, setDeleteGroupVisible] = useState(false);
 		const [selectedField, setSelectedField] = useState<CustomField | null>(
@@ -197,6 +199,13 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			setAddGroupVisible(false);
 			setEditingGroup(null);
 		};
+
+		// Scroll to notice banner when notice appears
+		useEffect(() => {
+			if (notice && noticeBannerRef.current) {
+				noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			}
+		}, [notice]);
 
 		// Effect to reset UI state when scope changes
 		useEffect(() => {
@@ -313,7 +322,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 				/>
 				{/* Notice Banner */}
 				{notice && (
-					<NoticeBanner notice={notice} closeNotice={closeNotice} />
+					<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 				)}
 
 				{/* Global Actions */}

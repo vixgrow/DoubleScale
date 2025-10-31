@@ -12,13 +12,15 @@ import { useNavigate, getToLink } from '@quillcrm/navigation';
  * Internal dependencies
  */
 import './style.scss';
-import type { AutomationContactsResponse } from '@quillcrm/client';
+import type { AutomationContactsResponse, AutomationContact } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
 import { NoAutomationIcon } from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import { getColumns } from './columns';
+import Result from '../../automation/steps/workflow/result';
+import { Provider as AutomationProvider } from '../../automation/state/context';
 
 interface AutomationProps {
 	contact_id: number;
@@ -30,6 +32,8 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
+	const [selectedContact, setSelectedContact] = useState<AutomationContact | null>(null);
+	const [isResultDialogOpen, setIsResultDialogOpen] = useState<boolean>(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
 
@@ -72,7 +76,11 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 	}, [page, perPage]);
 
 	const columns = getColumns({
-		onView: (automationContact) => {
+		onViewJourney: (automationContact) => {
+			setSelectedContact(automationContact);
+			setIsResultDialogOpen(true);
+		},
+		onViewAutomation: (automationContact) => {
 			navigate(getToLink(`automations/${automationContact.automation_id}`));
 		},
 	});
@@ -108,6 +116,36 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 					</>
 				)}
 			</div>
+			{selectedContact && (
+				<AutomationProvider
+					value={{
+						automation: (selectedContact as any).automation || null,
+						steps: (selectedContact as any).automation?.steps || [],
+						isLoading: false,
+						isSaving: false,
+						viewMode: true,
+						analyticsData: [],
+						updatedSteps: {},
+						setAutomation: () => { },
+						setIsLoading: () => { },
+						setIsSaving: () => { },
+						updateAutomation: () => { },
+						saveAutomation: () => { },
+						updateSettings: () => { },
+						setSteps: () => { },
+						addStep: () => { },
+						removeStep: () => { },
+						updateStep: () => { },
+						setUpdatedSteps: () => { },
+					}}
+				>
+					<Result
+						contact={selectedContact}
+						open={isResultDialogOpen}
+						onOpenChange={setIsResultDialogOpen}
+					/>
+				</AutomationProvider>
+			)}
 		</div>
 	);
 };

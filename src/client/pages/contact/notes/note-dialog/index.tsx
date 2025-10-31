@@ -98,7 +98,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                     data: {
                         title,
                         note,
-                        type,
+                        type : 'note',
                         contact_id,
                     },
                 })) as Note;
@@ -113,7 +113,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                     data: {
                         title,
                         note,
-                        type,
+                        type : 'note',
                         contact_id,
                     },
                 })) as Note;
@@ -170,7 +170,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                         status={errors.title ? 'error' : undefined}
                         helperText={errors.title}
                     />
-                    <Field
+                    {/* <Field
                         label={__('Type', 'quillcrm')}
                         placeholder={__('Select type', 'quillcrm')}
                         value={type}
@@ -180,7 +180,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                             { label: __('Note', 'quillcrm'), value: 'note' },
                             { label: __('Reminder', 'quillcrm'), value: 'reminder' },
                         ]}
-                    />
+                    /> */}
                     <Field
                         label={__('Note', 'quillcrm')}
                         placeholder={__('Enter note', 'quillcrm')}

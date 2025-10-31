@@ -149,7 +149,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                                         'quillcrm'
                                     )
                             }
-                            icon={<GradientNotesIcon />}
+                            icon={<GradientNotesIcon width={24} height={24} />}
                         />
                     </DialogTitle>
                 </DialogHeader>

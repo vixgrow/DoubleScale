@@ -31,7 +31,7 @@ export const NoData: React.FC<NoDataProps> = ({
 					<h3 className="text-xl font-semibold text-[#09090B]">
 						{title}
 					</h3>
-					<p className="text-base text-gray-500 font-medium max-w-md">
+					<p className="text-base text-gray-500 font-medium">
 						{subtitle}
 					</p>
 				</div>

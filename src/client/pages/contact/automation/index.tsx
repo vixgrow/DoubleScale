@@ -13,7 +13,7 @@ import { useDispatch } from '@wordpress/data';
 import './style.scss';
 import type { AutomationContactsResponse } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
-import { NoAutomationIcon } from '@quillcrm/components';
+import { GradientAutomationsIcon, NoData } from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
@@ -83,14 +83,11 @@ const Automation: React.FC<AutomationProps> = ({ contact_id }) => {
 			</h3>
 			<div>
 				{!loading && (!automationContacts || automationContacts.length === 0) ? (
-					<div className="flex flex-col items-center justify-center py-20 gap-4">
-						<div className="text-gray-400">
-							<NoAutomationIcon width={120} height={120} />
-						</div>
-						<span className="text-lg text-gray-500 font-medium">
-							{__('No automations found', 'quillcrm')}
-						</span>
-					</div>
+					<NoData
+						icon={<GradientAutomationsIcon />}
+						title={__('No automations yet', 'quillcrm')}
+						subtitle={__('Automations help you engage smarter—send emails, assign deals, or trigger actions based on behavior.', 'quillcrm')}
+					/>
 				) : (
 					<>
 						<DataTable

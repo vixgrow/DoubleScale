@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { Settings } from '@quillcrm/client';
-import { Field, TinyMCEWPEditor } from '@quillcrm/components';
+import { Field, Editor } from '@quillcrm/components';
 import { RadioGroup, RadioGroupItem } from '@quillcrm/components/ui/radio-group';
 import { Label } from '@quillcrm/components/ui/label';
 
@@ -59,23 +59,11 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
                         {__('Email Content', 'quillcrm')}
                     </Label>
                     <div className="mt-2">
-                        <TinyMCEWPEditor
-                            value={email_content}
+                        <Editor
+                            message={email_content}
                             onChange={(content) =>
                                 handleFieldChange('email_content', content)
                             }
-                            height={132}
-                            toolbar="bold italic underline strikethrough align bullist numlist link image mergetags"
-                            plugins={[
-                                'advlist',
-                                'lists',
-                                'link',
-                            ]}
-                            init={{
-                                toolbar_mode: 'scrolling',
-                            }}
-                            placeholder={__('Enter email content...', 'quillcrm')}
-                            showMergeTags={true}
                         />
                     </div>
                 </div>
@@ -92,7 +80,7 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
                                 handleFieldChange('after_confirmation', value)
                             }
                         >
-                            <div className="flex gap-7">
+                            <div className="flex gap-5">
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="message" id="radio-message" />
                                     <Label htmlFor="radio-message" className="font-normal cursor-pointer">
@@ -116,23 +104,11 @@ const DoubleOptInSettings: React.FC<DoubleOptInSettingsProps> = ({
                                 {__('Confirmation Message', 'quillcrm')}
                             </Label>
                             <div className="mt-2">
-                                <TinyMCEWPEditor
-                                    value={confirmation_message}
+                                <Editor
+                                    message={confirmation_message}
                                     onChange={(content) =>
                                         handleFieldChange('confirmation_message', content)
                                     }
-                                    height={132}
-                                    toolbar="bold italic underline strikethrough align bullist numlist link image mergetags"
-                                    plugins={[
-                                        'advlist',
-                                        'lists',
-                                        'link',
-                                    ]}
-                                    init={{
-                                        toolbar_mode: 'scrolling',
-                                    }}
-                                    placeholder={__('Enter confirmation message...', 'quillcrm')}
-                                    showMergeTags={true}
                                 />
                             </div>
                         </>

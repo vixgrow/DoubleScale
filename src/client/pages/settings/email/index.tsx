@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { Settings } from '@quillcrm/client';
-import { Field, TinyMCEWPEditor } from '@quillcrm/components';
+import { Field, Editor } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
 import { FromEmailSelector } from '@/components/from-email-selector';
 
@@ -105,23 +105,11 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                         {__('Email Footer', 'quillcrm')}
                     </div>
                     <div>
-                        <TinyMCEWPEditor
-                            value={email_footer}
+                        <Editor
+                            message={email_footer}
                             onChange={(content) =>
                                 handleFieldChange('email_footer', content)
                             }
-                            height={132}
-                            toolbar="bold italic underline strikethrough align bullist numlist link image mergetags"
-                            plugins={[
-                                'advlist',
-                                'lists',
-                                'link',
-                            ]}
-                            init={{
-                                toolbar_mode: 'scrolling',
-                            }}
-                            placeholder={__('Enter email footer content...', 'quillcrm')}
-                            showMergeTags={true}
                         />
                     </div>
                 </div>

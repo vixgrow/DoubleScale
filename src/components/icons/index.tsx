@@ -147,3 +147,6 @@ export { default as EmailSequenceOutlinedIcon } from './email-sequence-outlined'
 export { default as PremiumIcon } from './premium';
 export { default as TwoArrowsIcon } from './two-arrows';
 export { default as MyTemplatesIcon } from './my-templates';
+export { default as DealsIcon } from './deals';
+export { default as NotesIcon } from './notes';
+export { default as PurchaseHistoryIcon } from './purchase-history';

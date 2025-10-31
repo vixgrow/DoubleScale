@@ -17,8 +17,8 @@ import ConfigAPI from '@quillcrm/config';
 import {
 	TotalOrdersIcon,
 	TotalRevenueIcon,
-	AverageOrderValueIcon,
 	NoPurchaseHistoryIcon,
+	AnalyticsReportsIcon,
 } from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
@@ -124,7 +124,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 								iconColor="text-[#16A34A]"
 							/>
 							<MessageStatsCard
-								icon={<AverageOrderValueIcon />}
+								icon={<AnalyticsReportsIcon width={40} height={40} />}
 								value={`${purchaseHistory.wc.average || '0'} ${purchaseHistory.wc.currency}`}
 								label={__('Average Order Value', 'quillcrm')}
 								iconBgClass="bg-[#EEE4FF]"
@@ -191,7 +191,7 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 								iconColor="text-[#16A34A]"
 							/>
 							<MessageStatsCard
-								icon={<AverageOrderValueIcon />}
+								icon={<AnalyticsReportsIcon width={40} height={40} />}
 								value={`${purchaseHistory.edd.average || '0'} ${purchaseHistory.edd.currency}`}
 								label={__('Average Order Value', 'quillcrm')}
 								iconBgClass="bg-[#EEE4FF]"

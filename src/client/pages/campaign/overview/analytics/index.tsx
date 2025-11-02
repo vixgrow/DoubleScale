@@ -9,15 +9,13 @@ import apiFetch from '@wordpress/api-fetch';
  * External dependencies
  */
 import {
-	Card,
-	Flex,
-	Typography,
 	Spin,
 	Progress,
-	Table,
-	Divider,
 	Button,
 	Modal,
+	Flex,
+	Typography,
+	Divider,
 } from 'antd';
 import {
 	SendOutlined,
@@ -28,17 +26,6 @@ import {
 	CheckCircleOutlined,
 	ReadOutlined,
 } from '@ant-design/icons';
-import { Chart } from 'react-chartjs-2';
-import {
-	Chart as ChartJS,
-	ArcElement,
-	DoughnutController,
-	Tooltip,
-	Legend,
-	Title,
-} from 'chart.js';
-
-ChartJS.register(ArcElement, DoughnutController, Tooltip, Legend, Title);
 
 /**
  * Internal dependencies
@@ -48,17 +35,13 @@ import { Campaign as CampaignType, Template } from '@quillcrm/client';
 import { CAMPAIGN_CHANNEL, getCampaignChannelLabel } from '@/constants/campaign-channel';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { getCampaignEndpoint } from '@quillcrm/utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Analytics: React.FC = () => {
 	const campaign = useSelect(
 		(select: any) => select('quillcrm/campaign').getCampaign(),
 		[]
 	) as CampaignType | null;
-
-	const isLoading = useSelect(
-		(select: any) => select('quillcrm/campaign').isLoading(),
-		[]
-	);
 
 	const { updateCampaign: updateCampaignAction } =
 		useDispatch('quillcrm/campaign');
@@ -93,7 +76,7 @@ const Analytics: React.FC = () => {
 				setStarted(true);
 			}
 
-			updateCampaignAction(response);
+			updateCampaignAction(response as any);
 
 			if (response.status === 'completed') {
 				setStarted(false);
@@ -142,7 +125,7 @@ const Analytics: React.FC = () => {
 				},
 			})) as CampaignType;
 
-			updateCampaignAction(response);
+			updateCampaignAction(response as any);
 		} catch (error) {
 			console.error(error);
 		} finally {
@@ -158,18 +141,141 @@ const Analytics: React.FC = () => {
 		return ((value / total) * 100).toFixed(2);
 	};
 
-	// Get campaign type-specific labels
-	const getMessageTypeLabel = () => {
-		switch (campaign?.type) {
-			case CAMPAIGN_CHANNEL.EMAIL:
-				return __('Emails', 'quillcrm');
-			case CAMPAIGN_CHANNEL.SMS:
-				return __('SMS Messages', 'quillcrm');
-			case CAMPAIGN_CHANNEL.WHATSAPP:
-				return __('WhatsApp Messages', 'quillcrm');
+	// Get status colors
+	const getStatusClasses = (status: string) => {
+		switch (status?.toLowerCase()) {
+			case 'completed':
+				return 'border-[#16A34A] text-[#16A34A] bg-[#EFFFF5]';
+			case 'processing':
+			case 'resending':
+				return 'border-[#5570F1] text-[#5570F1] bg-[#5570F129]';
+			case 'draft':
+				return 'border-[#1C1D22] text-[#1C1D22] bg-[#FFF2E2]';
+			case 'scheduled':
+				return 'border-[#faad14] text-[#faad14] bg-[#faad1429]';
 			default:
-				return __('Messages', 'quillcrm');
+				return 'border-gray-600 text-gray-600 bg-gray-100';
 		}
+	};
+
+	// Render analytics metrics based on campaign type
+	const renderMetrics = () => {
+		if (!campaign) return null;
+
+		const baseMetrics = [
+			{
+				icon: <UserOutlined className="text-[#458DC7]" />,
+				label: __('Contacts', 'quillcrm'),
+				value: campaign.contacts_count,
+				bgColor: 'bg-[#E4EEFD]',
+			},
+			{
+				icon: <SendOutlined className="text-[#16A34A]" />,
+				label: __('Sent', 'quillcrm'),
+				value: campaign.sent_count,
+				bgColor: 'bg-[#D1F6DF]',
+			},
+			{
+				icon: <WarningOutlined className="text-[#CC5F5F]" />,
+				label: __('Failed', 'quillcrm'),
+				value: campaign.failed_count,
+				bgColor: 'bg-[#F57E7729]',
+			},
+		];
+
+		const typeSpecificMetrics: Array<{
+			icon: JSX.Element;
+			label: string;
+			value: string | number;
+			bgColor: string;
+		}> = [];
+
+		// Email-specific metrics
+		if (campaign.type === CAMPAIGN_CHANNEL.EMAIL) {
+			typeSpecificMetrics.push(
+				{
+					icon: <EyeOutlined className="text-[#660FF1]" />,
+					label: __('Open Rate', 'quillcrm'),
+					value: `${calculatePercentage(totalMessages, campaign.opened_count || 0)}%`,
+					bgColor: 'bg-[#EEE4FF]',
+				},
+				{
+					icon: <LinkOutlined className="text-[#faad14]" />,
+					label: __('Click Rate', 'quillcrm'),
+					value: `${calculatePercentage(totalMessages, campaign.clicked_count)}%`,
+					bgColor: 'bg-[#faad1429]',
+				}
+			);
+		}
+
+		// SMS-specific metrics
+		if (campaign.type === CAMPAIGN_CHANNEL.SMS) {
+			typeSpecificMetrics.push(
+				{
+					icon: <CheckCircleOutlined className="text-[#16A34A]" />,
+					label: __('Delivery Rate', 'quillcrm'),
+					value: `${campaign.delivery_rate || 0}%`,
+					bgColor: 'bg-[#D1F6DF]',
+				},
+				{
+					icon: <LinkOutlined className="text-[#faad14]" />,
+					label: __('Click Rate', 'quillcrm'),
+					value: `${campaign.click_rate || 0}%`,
+					bgColor: 'bg-[#faad1429]',
+				}
+			);
+		}
+
+		// WhatsApp-specific metrics
+		if (campaign.type === CAMPAIGN_CHANNEL.WHATSAPP) {
+			typeSpecificMetrics.push(
+				{
+					icon: <CheckCircleOutlined className="text-[#16A34A]" />,
+					label: __('Delivery Rate', 'quillcrm'),
+					value: `${campaign.delivery_rate || 0}%`,
+					bgColor: 'bg-[#D1F6DF]',
+				},
+				{
+					icon: <ReadOutlined className="text-[#660FF1]" />,
+					label: __('Read Rate', 'quillcrm'),
+					value: `${campaign.read_rate || 0}%`,
+					bgColor: 'bg-[#EEE4FF]',
+				},
+				{
+					icon: <LinkOutlined className="text-[#faad14]" />,
+					label: __('Click Rate', 'quillcrm'),
+					value: `${campaign.click_rate || 0}%`,
+					bgColor: 'bg-[#faad1429]',
+				}
+			);
+		}
+
+		const allMetrics = [...baseMetrics, ...typeSpecificMetrics];
+
+		return (
+			<div className="flex flex-col gap-3">
+				{allMetrics.map((metric, index) => (
+					<div key={index} className="flex items-center justify-between">
+						<div className="flex items-center gap-2">
+							<div className={`${metric.bgColor} p-1.5 rounded-full`}>
+								{metric.icon}
+							</div>
+							<span className="text-sm text-gray-600">{metric.label}</span>
+						</div>
+						<span className="text-base font-semibold text-primary">
+							{metric.value}
+						</span>
+					</div>
+				))}
+			</div>
+		);
+	};
+
+	const getCompletedMessage = () => {
+		return sprintf(
+			__('Campaign completed. %s messages failed to send.', 'quillcrm'),
+			campaign?.failed_count
+		);
 	};
 
 	const getResendButtonText = () => {
@@ -185,379 +291,143 @@ const Analytics: React.FC = () => {
 		}
 	};
 
-	const getCompletedMessage = () => {
-		const messageType = getMessageTypeLabel().toLowerCase();
-		return sprintf(
-			__(
-				'Campaign has been completed. %s %s failed to send.',
-				'quillcrm'
-			),
-			campaign?.failed_count,
-			messageType
-		);
-	};
-
-	// Render analytics cards based on campaign type
-	const renderAnalyticsCards = () => {
-		if (!campaign) return null;
-
-		const baseCards = [
-			{
-				icon: <UserOutlined />,
-				title: __('Contacts', 'quillcrm'),
-				value: campaign.contacts_count,
-			},
-			{
-				icon: <SendOutlined />,
-				title: __('Sent', 'quillcrm'),
-				value: campaign.sent_count,
-			},
-			{
-				icon: <WarningOutlined />,
-				title: __('Failed', 'quillcrm'),
-				value: campaign.failed_count,
-			},
-		];
-
-		const typeSpecificCards: Array<{
-			icon: JSX.Element;
-			title: string;
-			value: string | number;
-		}> = [];
-
-		// Email-specific metrics
-		if (campaign.type === CAMPAIGN_CHANNEL.EMAIL) {
-			typeSpecificCards.push(
-				{
-					icon: <EyeOutlined />,
-					title: __('Open Rate', 'quillcrm'),
-					value: `${calculatePercentage(totalMessages, campaign.opened_count || 0)}%`,
-				},
-				{
-					icon: <LinkOutlined />,
-					title: __('Click Rate', 'quillcrm'),
-					value: `${calculatePercentage(totalMessages, campaign.clicked_count)}%`,
-				}
-			);
-		}
-
-		// SMS-specific metrics
-		if (campaign.type === CAMPAIGN_CHANNEL.SMS) {
-			typeSpecificCards.push(
-				{
-					icon: <CheckCircleOutlined />,
-					title: __('Delivery Rate', 'quillcrm'),
-					value: `${campaign.delivery_rate || 0}%`,
-				},
-				{
-					icon: <LinkOutlined />,
-					title: __('Click Rate', 'quillcrm'),
-					value: `${campaign.click_rate || 0}%`,
-				}
-			);
-		}
-
-		// WhatsApp-specific metrics
-		if (campaign.type === CAMPAIGN_CHANNEL.WHATSAPP) {
-			typeSpecificCards.push(
-				{
-					icon: <CheckCircleOutlined />,
-					title: __('Delivery Rate', 'quillcrm'),
-					value: `${campaign.delivery_rate || 0}%`,
-				},
-				{
-					icon: <ReadOutlined />,
-					title: __('Read Rate', 'quillcrm'),
-					value: `${campaign.read_rate || 0}%`,
-				},
-				{
-					icon: <LinkOutlined />,
-					title: __('Click Rate', 'quillcrm'),
-					value: `${campaign.click_rate || 0}%`,
-				}
-			);
-		}
-
-		const allCards = [...baseCards, ...typeSpecificCards];
-
-		return (
-			<Flex gap={20} wrap="wrap">
-				{allCards.map((card, index) => (
-					<Card key={index} style={{ flex: 1, minWidth: 200 }}>
-						<Flex vertical={true} gap={10}>
-							<Flex gap={10}>
-								{card.icon}
-								<Typography.Text strong>
-									{card.title}
-								</Typography.Text>
-							</Flex>
-							<Typography.Text className="qcrm-analytics-count">
-								{card.value}
-							</Typography.Text>
-						</Flex>
-					</Card>
-				))}
-			</Flex>
-		);
-	};
-
-	// Render chart data based on campaign type
-	const renderChart = () => {
-		if (!campaign) return null;
-
-		let chartData: {
-			labels: string[];
-			data: number[];
-			colors: string[];
-		};
-
-		if (campaign.type === CAMPAIGN_CHANNEL.EMAIL) {
-			chartData = {
-				labels: [
-					__('Sent', 'quillcrm'),
-					__('Failed', 'quillcrm'),
-					__('Opened', 'quillcrm'),
-					__('Clicked', 'quillcrm'),
-				],
-				data: [
-					campaign.sent_count,
-					campaign.failed_count,
-					campaign.opened_count || 0,
-					campaign.clicked_count,
-				],
-				colors: ['#1890ff', '#ff4d4f', '#52c41a', '#faad14'],
-			};
-		} else if (campaign.type === CAMPAIGN_CHANNEL.SMS) {
-			chartData = {
-				labels: [
-					__('Sent', 'quillcrm'),
-					__('Failed', 'quillcrm'),
-					__('Delivered', 'quillcrm'),
-					__('Clicked', 'quillcrm'),
-				],
-				data: [
-					campaign.sent_count,
-					campaign.failed_count,
-					campaign.delivered_count || 0,
-					campaign.clicked_count,
-				],
-				colors: ['#1890ff', '#ff4d4f', '#52c41a', '#faad14'],
-			};
-		} else {
-			// WhatsApp
-			chartData = {
-				labels: [
-					__('Sent', 'quillcrm'),
-					__('Failed', 'quillcrm'),
-					__('Delivered', 'quillcrm'),
-					__('Read', 'quillcrm'),
-					__('Clicked', 'quillcrm'),
-				],
-				data: [
-					campaign.sent_count,
-					campaign.failed_count,
-					campaign.delivered_count || 0,
-					campaign.read_count || 0,
-					campaign.clicked_count,
-				],
-				colors: ['#1890ff', '#ff4d4f', '#52c41a', '#722ed1', '#faad14'],
-			};
-		}
-
-		return (
-			<Card>
-				<Flex justify="center">
-					<div style={{ maxWidth: 400 }}>
-						<Chart
-							type="doughnut"
-							data={{
-								labels: chartData.labels,
-								datasets: [
-									{
-										data: chartData.data,
-										backgroundColor: chartData.colors,
-									},
-								],
-							}}
-							options={{
-								responsive: true,
-								plugins: {
-									legend: {
-										display: true,
-										position: 'bottom',
-									},
-								},
-							}}
-						/>
-					</div>
-				</Flex>
-			</Card>
-		);
-	};
+	if (!campaign) {
+		return null;
+	}
 
 	return (
-		<Card
-			loading={isLoading}
-			title={
-				<Flex justify="space-between">
-					<Typography.Title level={4} style={{ margin: 0 }}>
-						{__('Analytics')}
-					</Typography.Title>
-					<Flex gap={10}>
-						<Typography.Text>{campaign?.status}</Typography.Text>
-						{campaign &&
-							(campaign.status === 'processing' ||
-								campaign.status === 'resending') && <Spin />}
-					</Flex>
-				</Flex>
-			}
-		>
-			{campaign && (
-				<Flex gap={20} vertical>
-					<Card title={__('Campaign Details')}>
-						<Flex vertical gap={10}>
-							<Flex gap={10}>
-								<Typography.Text>
-									{__('Campaign Name', 'quillcrm')} :
-								</Typography.Text>
-								<Typography.Text strong>
-									{campaign.name}
-								</Typography.Text>
-							</Flex>
-							<Flex gap={10}>
-								<Typography.Text>
-									{__('Campaign Type', 'quillcrm')} :
-								</Typography.Text>
-								<Typography.Text strong>
-									{getCampaignChannelLabel(campaign.type).toUpperCase()}
-								</Typography.Text>
-							</Flex>
-							<Flex vertical gap={10}>
-								<Typography.Title level={5}>
-									{__('Template', 'quillcrm')}
-								</Typography.Title>
-								<Table
-									dataSource={campaign.settings.templates}
-									columns={[
-										{
-											title: __('From Name', 'quillcrm'),
-											dataIndex: 'from_name',
-											key: 'from_name',
-											render: (text) => text || '-',
-										},
-										...(campaign.type === CAMPAIGN_CHANNEL.EMAIL
-											? [
-													{
-														title: __(
-															'From Email',
-															'quillcrm'
-														),
-														dataIndex: 'from_email',
-														key: 'from_email',
-														render: (text) =>
-															text || '-',
-													},
-												]
-											: []),
-										{
-											title:
-												campaign.type === CAMPAIGN_CHANNEL.EMAIL
-													? __('Subject', 'quillcrm')
-													: __('Message', 'quillcrm'),
-											dataIndex:
-												campaign.type === CAMPAIGN_CHANNEL.EMAIL
-													? 'subject'
-													: 'message',
-											key: 'content',
-											render: (text) =>
-												text && text.length > 50
-													? text.substring(0, 50) +
-														'...'
-													: text || '-',
-										},
-										{
-											title: __(
-												'Total Recipients',
-												'quillcrm'
-											),
-											key: 'total_recipients',
-											render: (_, record: Template) =>
-												campaign.templates_count[
-													record['template_id']
-												] || 0,
-										},
-										{
-											title: __('View', 'quillcrm'),
-											key: 'view',
-											render: (_, record: Template) => (
-												<Button
-													onClick={() =>
-														setTemplate(record)
-													}
-												>
-													{__('View', 'quillcrm')}
-												</Button>
-											),
-										},
-									]}
-									pagination={false}
-								/>
-							</Flex>
-						</Flex>
-					</Card>
-					{renderAnalyticsCards()}
+		<>
+			<Card className="bg-[#F8F8F8] shadow-none w-1/3">
+				<CardHeader className="border-b pb-4">
+					<div className="flex flex-col gap-3">
+						<CardTitle className="text-xl font-semibold truncate">
+							{campaign.name}
+						</CardTitle>
+						<div className="flex items-center justify-between">
+							<span className="text-sm text-gray-600">
+								{__('Type:', 'quillcrm')} {getCampaignChannelLabel(campaign.type)}
+							</span>
+							<span
+								className={`px-3 py-1 rounded text-xs font-medium border ${getStatusClasses(campaign.status)}`}
+							>
+								{campaign.status}
+								{(campaign.status === 'processing' ||
+									campaign.status === 'resending') && (
+										<Spin size="small" className="ml-2" />
+									)}
+							</span>
+						</div>
+						{/* Subject Line - for email campaigns */}
+						{campaign.type === CAMPAIGN_CHANNEL.EMAIL && campaign.settings?.templates?.[0]?.subject && (
+							<div className="flex flex-col gap-1">
+								<span className="text-xs text-gray-500">
+									{__('Subject:', 'quillcrm')}
+								</span>
+								<span className="text-sm text-gray-700 font-medium">
+									{campaign.settings.templates[0].subject}
+								</span>
+							</div>
+						)}
+						{/* Scheduled Date */}
+						{campaign.execute_at && (
+							<div className="flex flex-col gap-1">
+								<span className="text-xs text-gray-500">
+									{__('Scheduled On:', 'quillcrm')}
+								</span>
+								<span className="text-sm text-gray-700 font-medium">
+									{new Date(campaign.execute_at).toLocaleString()}
+								</span>
+							</div>
+						)}
+					</div>
+				</CardHeader>
+				<CardContent className="flex flex-col gap-5 pt-5">
+					{/* Progress indicator */}
 					{started && (
-						<Flex>
+						<div className="flex flex-col gap-2">
+							<span className="text-sm text-gray-600">
+								{__('Progress', 'quillcrm')}
+							</span>
 							<Progress
 								percent={
 									totalMessages > 0
 										? Math.round(
-												(totalMessages /
-													campaign.contacts_count) *
-													100
-											)
+											(totalMessages / campaign.contacts_count) * 100
+										)
 										: 0
 								}
 								format={(percent) => `${percent}%`}
 							/>
-						</Flex>
+						</div>
 					)}
+
+					{/* Processing message */}
 					{(campaign.status === 'processing' ||
 						campaign.status === 'resending') &&
 						!started && (
-							<Flex gap={20}>
-								<Typography.Text>
-									{__('Campaign is being processed.')}
-								</Typography.Text>
+							<div className="flex items-center gap-3 p-3 bg-blue-50 rounded">
 								<Spin />
-							</Flex>
+								<span className="text-sm">
+									{__('Campaign is being processed...', 'quillcrm')}
+								</span>
+							</div>
 						)}
+
+					{/* Metrics */}
+					<div className="flex flex-col gap-2">
+						<h3 className="text-sm font-semibold text-gray-700">
+							{__('Analytics', 'quillcrm')}
+						</h3>
+						{renderMetrics()}
+					</div>
+
+					{/* Resend failed messages button */}
 					{campaign.status === 'completed' &&
 						!started &&
 						campaign.failed_count > 0 && (
-							<Card>
-								<Flex vertical gap={20} align="center">
-									<Typography.Title level={5}>
-										{getCompletedMessage()}
-									</Typography.Title>
-									<Flex justify="center">
-										<Button
-											onClick={resendFailed}
-											loading={resending}
-											disabled={resending}
-										>
-											{getResendButtonText()}
-										</Button>
-									</Flex>
-								</Flex>
-							</Card>
+							<div className="flex flex-col gap-3 p-3 bg-yellow-50 rounded">
+								<span className="text-sm text-gray-700">
+									{getCompletedMessage()}
+								</span>
+								<Button
+									onClick={resendFailed}
+									loading={resending}
+									disabled={resending}
+									size="small"
+								>
+									{getResendButtonText()}
+								</Button>
+							</div>
 						)}
-					{renderChart()}
-				</Flex>
-			)}
+
+					{/* View templates button */}
+					{campaign.settings?.templates &&
+						campaign.settings.templates.length > 0 && (
+							<div className="flex flex-col gap-2">
+								<h3 className="text-sm font-semibold text-gray-700">
+									{__('Templates', 'quillcrm')}
+								</h3>
+								<div className="flex flex-col gap-2">
+									{campaign.settings.templates.map((tmpl, index) => (
+										<Button
+											key={index}
+											onClick={() => setTemplate(tmpl)}
+											size="small"
+											block
+										>
+											{__('View Template', 'quillcrm')} #{index + 1}
+										</Button>
+									))}
+								</div>
+							</div>
+						)}
+				</CardContent>
+			</Card>
+
+			{/* Template Details Modal */}
 			<Modal
 				open={!!template}
-				title={__('Template Details')}
+				title={__('Template Details', 'quillcrm')}
 				onCancel={() => setTemplate(null)}
 				footer={null}
 				style={{ minWidth: '800px' }}
@@ -573,13 +443,13 @@ const Analytics: React.FC = () => {
 								<Typography.Text strong>
 									{
 										campaign.templates_count[
-											template['template_id']
+										template['template_id']
 										]
 									}
 								</Typography.Text>
 							</Flex>
 							{template.type === CAMPAIGN_CHANNEL.EMAIL &&
-							template.settings?.from_name ? (
+								template.settings?.from_name ? (
 								<Flex gap={10}>
 									<Typography.Text>
 										{__('From Name', 'quillcrm')}
@@ -591,7 +461,7 @@ const Analytics: React.FC = () => {
 								</Flex>
 							) : null}
 							{template.type === CAMPAIGN_CHANNEL.EMAIL &&
-							template.settings?.from_email ? (
+								template.settings?.from_email ? (
 								<Flex gap={10}>
 									<Typography.Text>
 										{__('From Email', 'quillcrm')}
@@ -615,23 +485,23 @@ const Analytics: React.FC = () => {
 							)}
 						</Flex>
 						<Divider style={{ margin: 0 }} />
-						<Card
-							title={
-								campaign.type === CAMPAIGN_CHANNEL.EMAIL
+						<div>
+							<Typography.Title level={5}>
+								{campaign.type === CAMPAIGN_CHANNEL.EMAIL
 									? __('Body', 'quillcrm')
-									: __('Message', 'quillcrm')
-							}
-						>
+									: __('Message', 'quillcrm')}
+							</Typography.Title>
 							<div
+								className="template-body-preview"
 								dangerouslySetInnerHTML={{
 									__html: template.body || '',
 								}}
 							/>
-						</Card>
+						</div>
 					</Flex>
 				)}
 			</Modal>
-		</Card>
+		</>
 	);
 };
 

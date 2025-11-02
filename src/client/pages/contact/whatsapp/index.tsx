@@ -22,6 +22,7 @@ import TwilioConfigModal from '../components/twilio-config-modal';
 import { ProviderNotConnectedWarning } from '../components/provider-not-connected-warning';
 import { MessageCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { MessageStatsCard } from '../components/message-stats-card';
+import { NoData } from '@/components/no-data';
 import type { ColumnDef } from '@tanstack/react-table';
 
 interface WhatsAppProps {
@@ -235,14 +236,11 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 			{/* Messages Table */}
 			<div>
 				{!loading && messages.length === 0 ? (
-					<div className="flex flex-col items-center justify-center py-20 gap-4">
-						<div className="text-gray-400">
-							<MessageCircle className="w-24 h-24" />
-						</div>
-						<span className="text-lg text-gray-500 font-medium">
-							{__('No WhatsApp messages found', 'quillcrm')}
-						</span>
-					</div>
+					<NoData
+						icon={<MessageCircle className="w-24 h-24 text-gray-400" />}
+						title={__('No WhatsApp messages', 'quillcrm')}
+						subtitle={__('No WhatsApp messages found for this contact.', 'quillcrm')}
+					/>
 				) : (
 					<>
 						<DataTable
@@ -253,7 +251,7 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 							initialPageSize={10}
 							showMainActions={false}
 							config={{}}
-							setPage={() => {}}
+							setPage={() => { }}
 						/>
 						<DataTablePagination table={serverSideTable} />
 					</>

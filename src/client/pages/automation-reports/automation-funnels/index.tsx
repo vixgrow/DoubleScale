@@ -14,21 +14,26 @@ interface AutomationFunnelProps {
 const AutomationFunnel: React.FC<AutomationFunnelProps> = ({
 	automation,
 	analyticsData = [],
-	loading = false
+	loading = false,
 }) => {
 	const context = useAutomationContext();
 
 	// Create a new context value that includes viewMode and analyticsData
-	const contextValue = useMemo(() => ({
-		...context,
-		viewMode: true,
-		analyticsData,
-	}), [context, analyticsData]);
+	const contextValue = useMemo(
+		() => ({
+			...context,
+			viewMode: true,
+			analyticsData,
+		}),
+		[context, analyticsData]
+	);
 
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center h-screen">
-				<div className="text-lg">{__('Loading analytics...', 'quillcrm')}</div>
+				<div className="text-lg">
+					{__('Loading analytics...', 'quillcrm')}
+				</div>
 			</div>
 		);
 	}
@@ -40,8 +45,8 @@ const AutomationFunnel: React.FC<AutomationFunnelProps> = ({
 					currentStep={null}
 					isTriggerVisible={false}
 					isSidebarOpen={false}
-					onStepClick={() => { }}
-					onTriggerClick={() => { }}
+					onStepClick={() => {}}
+					onTriggerClick={() => {}}
 					viewMode={true}
 					analyticsData={analyticsData}
 				/>

@@ -26,6 +26,9 @@ class Process_Automation {
 
 
 
+
+
+
 	/**
 	 * Automation
 	 *
@@ -138,6 +141,7 @@ class Process_Automation {
 	 * @return void
 	 */
 	public function process_step( $step, $automation_contact_id ) {
+
 		// If this step has a parent_id > 0, it's a child of a condition step
 		// We need to verify that the parent condition has been processed first
 		if ( $step->parent_id > 0 ) {
@@ -434,12 +438,15 @@ class Process_Automation {
 			$skip               = $step->get_setting( 'skip', false );
 			$next_step          = $this->get_next_step( $step );
 			if ( $skip ) {
-				$this->add_automation_contact_process( $step, $automation_contact->id, 'pending' );
+				$this->add_automation_contact_process( $step, $automation_contact->id, 'skipped' );
 				if ( $next_step ) {
 					$this->enqueue_step( $next_step->id, $automation_contact->id );
 				}
 				return;
 			}
+
+			// Create a process record for the goal step with pending status
+			$this->add_automation_contact_process( $step, $automation_contact->id, 'pending' );
 			$this->update_automation_contact_status( $automation_contact, 'pending', $step->id, $next_step ? $next_step->id : 0 );
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(

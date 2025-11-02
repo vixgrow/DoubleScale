@@ -22,6 +22,7 @@ use QuillCRM\Automations\Process_Automation;
  */
 final class Loader {
 
+
 	/**
 	 * Class Instance.
 	 *
@@ -177,6 +178,14 @@ final class Loader {
 			if ( ! $skip ) {
 				$automation_contacts = $step->automation->contacts()->where( 'contact_id', $contact_id )->where( 'current_step', $step->id )->where( 'status', 'pending' )->get();
 				foreach ( $automation_contacts as $automation_contact ) {
+					// Update the goal process record to completed
+					$goal_process = $automation_contact->processes()->where( 'step_id', $step->id )->where( 'status', 'pending' )->first();
+					if ( $goal_process ) {
+						$goal_process->status = 'completed';
+						$goal_process->save();
+					}
+
+					// Move to next step if available
 					if ( 0 !== $automation_contact->next_step ) {
 						$automation_process = new Process_Automation( $step->automation );
 						$automation_process->enqueue_step( $automation_contact->next_step, $automation_contact->id );

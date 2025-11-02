@@ -29,6 +29,7 @@ class Process_Automation {
 
 
 
+
 	/**
 	 * Automation
 	 *
@@ -230,8 +231,9 @@ class Process_Automation {
 				throw new Exception( \__( 'Action failed', 'quillcrm' ) );
 			}
 
+			$status = $action->auto_enqueue ? 'completed' : 'pending';
 			// Add to the automation_contact_processes table
-			$this->add_automation_contact_process( $step, $automation_contact->id, 'completed' );
+			$this->add_automation_contact_process( $step, $automation_contact->id, $status );
 
 			if ( $action->auto_enqueue ) {
 				if ( $next_step ) {

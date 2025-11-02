@@ -43,6 +43,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -140,7 +141,7 @@ class REST_Automation_Reports_Controller extends REST_Controller {
 			$funnel_data[] = array(
 				'label'      => __( 'Entrance', 'quillcrm' ),
 				'value'      => $total_contacts,
-				'percentage' => 100,
+				'percentage' => $total_contacts > 0 ? 100 : 0,
 				'step_id'    => null,
 				'step_type'  => 'entrance',
 			);

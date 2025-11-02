@@ -23,6 +23,7 @@ use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
+use QuillCRM\Managers\Bounce_Handler_Manager;
 use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Tracking\Link_Triggers;
@@ -258,6 +259,7 @@ final class QuillCRM {
 		Activity_Manager::instance();
 		Email_Sequences_Manager::instance();
 		User_Roles::instance();
+		Bounce_Handler_Manager::instance();
 	}
 
 	/**
@@ -271,6 +273,36 @@ final class QuillCRM {
 
 		// Register message providers
 		add_action( 'quillcrm_loaded', array( $this, 'register_message_providers' ) );
+
+		// Register contact meta table
+		add_action( 'init', array( $this, 'register_contact_meta_table' ) );
+	}
+
+	/**
+	 * Register contact meta table
+	 *
+	 * @since 1.0.0
+	 */
+	public function register_contact_meta_table() {
+		global $wpdb;
+		$wpdb->quillcrm_contactmeta = $wpdb->prefix . 'quillcrm_contact_meta';
+
+		// Register meta type with WordPress so add_metadata/get_metadata work correctly
+		// This is CRITICAL for the metadata functions to work
+		if ( function_exists( 'register_meta_table' ) ) {
+			// WordPress 5.3+ has dedicated function
+			register_meta_table( 'quillcrm_contact', $wpdb->quillcrm_contactmeta, 'contact_id' );
+		} else {
+			// Fallback: Add filter to tell WordPress this is a valid meta type
+			add_filter(
+				'sanitize_quillcrm_contact_meta_quillcrm_contact',
+				function ( $meta_value, $meta_key, $meta_type ) {
+					return $meta_value;
+				},
+				10,
+				3
+			);
+		}
 	}
 
 	/**

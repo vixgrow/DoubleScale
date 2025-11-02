@@ -18,6 +18,7 @@ import type {
 } from '@quillcrm/client';
 import { createMergeNodeData } from './merge-utils';
 import { calculateBranchWidth } from './helper';
+import { LAYOUT_CONSTANTS_VIEW_MODE } from '../config';
 
 const processStepHierarchy = (
 	stepList: AutomationStep[],
@@ -78,7 +79,7 @@ const processStepHierarchy = (
 
 		// Get step analytics
 		const stepAnalytics = analyticsData.find((a) => a.step_id === step.id);
-		
+
 		// Add step node
 		initialNodes.push({
 			id: step.id.toString(),
@@ -195,14 +196,19 @@ const processStepHierarchy = (
 			const yesNodeId = `branch-yes-${step.id}`;
 			const noNodeId = `branch-no-${step.id}`;
 
+			// Calculate spacing based on view mode
+			const branchSpacing = viewMode
+				? LAYOUT_CONSTANTS_VIEW_MODE.CONDITION_TO_BRANCH_SPACING
+				: 150;
+
 			// Use the already calculated branch positions for proper alignment
 			const yesPosition = savedPositions[yesNodeId] || {
 				x: yesX,
-				y: conditionPos.y + 150,
+				y: conditionPos.y + branchSpacing,
 			};
 			const noPosition = savedPositions[noNodeId] || {
 				x: noX,
-				y: conditionPos.y + 150,
+				y: conditionPos.y + branchSpacing,
 			};
 
 			// Create Yes branch node
@@ -415,7 +421,7 @@ const processStepHierarchy = (
 				const yesAddStepId = `add-step-yes-${step.id}`;
 				const yesAddStepPosition = savedPositions[yesAddStepId] || {
 					x: yesPosition.x + nodeYesNoWidth / 2 - addStepWidth / 2,
-					y: yesPosition.y + 150,
+					y: yesPosition.y + branchSpacing,
 				};
 
 				initialNodes.push({
@@ -541,7 +547,7 @@ const processStepHierarchy = (
 				const noAddStepId = `add-step-no-${step.id}`;
 				const noAddStepPosition = savedPositions[noAddStepId] || {
 					x: noPosition.x + nodeYesNoWidth / 2 - addStepWidth / 2,
-					y: noPosition.y + 150,
+					y: noPosition.y + branchSpacing,
 				};
 
 				initialNodes.push({

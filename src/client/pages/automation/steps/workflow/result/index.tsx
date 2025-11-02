@@ -17,6 +17,7 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogOverlay,
+	DialogPortal,
 } from '@quillcrm/components/ui/dialog';
 import ResultContent from './content';
 
@@ -33,22 +34,24 @@ const Result: React.FC<ResultProps> = ({ contact, open, onOpenChange }) => {
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogOverlay className="z-[150200]" />
-			<DialogContent className="max-w-[1000px] max-h-[90vh] overflow-y-auto z-[150200]">
-				<DialogHeader>
-					<CustomDialogHeader
-						title={__('View Journey', 'quillcrm')}
-						subtitle={__(
-							`View journey of contact ${contact?.contact.email}`,
-							'quillcrm'
-						)}
-						icon={<GradientViewIcon />}
-					/>
-				</DialogHeader>
-				<div>
-					<ResultContent contact={contact} />
-				</div>
-			</DialogContent>
+			<DialogPortal>
+				<DialogOverlay className="z-[150200]" />
+				<DialogContent className="max-w-[1000px] max-h-[90vh] overflow-y-auto z-[150200]">
+					<DialogHeader>
+						<CustomDialogHeader
+							title={__('View Journey', 'quillcrm')}
+							subtitle={__(
+								`View journey of contact ${contact?.contact.email}`,
+								'quillcrm'
+							)}
+							icon={<GradientViewIcon />}
+						/>
+					</DialogHeader>
+					<div>
+						<ResultContent contact={contact} />
+					</div>
+				</DialogContent>
+			</DialogPortal>
 		</Dialog>
 	);
 };

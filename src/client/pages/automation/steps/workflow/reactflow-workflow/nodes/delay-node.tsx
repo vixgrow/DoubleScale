@@ -18,7 +18,7 @@ import type {
     OrganizedStep,
 } from '@quillcrm/client';
 import NodeContextMenu from '../components/node-context-menu';
-import NodeActionsDropdown from '../components/node-actions-dropdown';
+import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
@@ -55,6 +55,16 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 
     const delayText = getDelayText();
 
+    const subtitle = isConfigured ? (
+        <span className="qcrm-reactflow-delay__configured">
+            {__('Sets to delay', 'quillcrm')} {delayText}
+        </span>
+    ) : (
+        <span className="qcrm-reactflow-delay__not-configured">
+            <span className='text-[#333333B2] mr-1'>{__('Need to', 'quillcrm')}</span>
+            {__('Set Delay Time', 'quillcrm')}
+        </span>
+    );
 
     const handleEdit = () => {
         if (!viewMode && onStepClick) {
@@ -86,94 +96,22 @@ const DelayNode: React.FC<NodeProps> = (props) => {
                 {/* Step Reorder Controls - hide in view mode */}
                 {!viewMode && <StepReorderControls step={step} />}
 
-                {viewMode && analytics ? (
-                    <>
-                        {/* Header Row: Icon, Content, Dropdown */}
-                        <div className="qcrm-reactflow-node__header-row">
-                            <div className="qcrm-reactflow-node__header-left">
-                                <div className="qcrm-reactflow-node__icon">
-                                    <TimerBlockIcon />
-                                </div>
-                                <div className="qcrm-reactflow-node__content">
-                                    <div className="qcrm-reactflow-node__title">
-                                        {__('Delay', 'quillcrm')}
-                                    </div>
-                                    <div className="qcrm-reactflow-node__subtitle">
-                                        {isConfigured ? (
-                                            <span className="qcrm-reactflow-delay__configured">
-                                                {__('Sets to delay', 'quillcrm')} {delayText}
-                                            </span>
-                                        ) : (
-                                            <span className="qcrm-reactflow-delay__not-configured">
-                                                <span className='text-[#333333B2] mr-1'>{__('Need to', 'quillcrm')}</span>
-                                                {__('Set Delay Time', 'quillcrm')}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                            <NodeActionsDropdown
-                                onEdit={handleEdit}
-                                onDelete={handleDelete}
-                                editLabel={__('Edit Delay', 'quillcrm')}
-                                deleteLabel={__('Delete Delay', 'quillcrm')}
-                                deleteTitle={__('Delete this Delay?', 'quillcrm')}
-                                deleteDescription={__(
-                                    'This will remove the Delay from your workflow.',
-                                    'quillcrm'
-                                )}
-                            />
-                        </div>
-
-                        {/* Footer Row: Analytics */}
-                        <div className="qcrm-reactflow-node__footer-row">
-                            <div className="text-sm">
-                                <span className="text-[#667085]">{__('Contact:', 'quillcrm')} </span>
-                                <span className="font-semibold text-[#344054]">{analytics.contacts || 0}</span>
-                            </div>
-                            <div className="text-sm">
-                                <span className="text-[#667085]">{__('Conversion Rate:', 'quillcrm')} </span>
-                                <span className="font-semibold text-[#344054]">{analytics.conversion_rate || 0}%</span>
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className="qcrm-reactflow-node__icon">
-                            <TimerBlockIcon />
-                        </div>
-                        <div className="qcrm-reactflow-node__content">
-                            <div className="qcrm-reactflow-node__title">
-                                {__('Delay', 'quillcrm')}
-                            </div>
-                            <div className="qcrm-reactflow-node__subtitle">
-                                {isConfigured ? (
-                                    <span className="qcrm-reactflow-delay__configured">
-                                        {__('Sets to delay', 'quillcrm')} {delayText}
-                                    </span>
-                                ) : (
-                                    <span className="qcrm-reactflow-delay__not-configured">
-                                        <span className='text-[#333333B2] mr-1'>{__('Need to', 'quillcrm')}</span>
-                                        {__('Set Delay Time', 'quillcrm')}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Three dots dropdown menu */}
-                        <NodeActionsDropdown
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            editLabel={__('Edit Delay', 'quillcrm')}
-                            deleteLabel={__('Delete Delay', 'quillcrm')}
-                            deleteTitle={__('Delete this Delay?', 'quillcrm')}
-                            deleteDescription={__(
-                                'This will remove the Delay from your workflow.',
-                                'quillcrm'
-                            )}
-                        />
-                    </>
-                )}
+                <NodeLayout
+                    icon={<TimerBlockIcon />}
+                    title={__('Delay', 'quillcrm')}
+                    subtitle={subtitle}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    editLabel={__('Edit Delay', 'quillcrm')}
+                    deleteLabel={__('Delete Delay', 'quillcrm')}
+                    deleteTitle={__('Delete this Delay?', 'quillcrm')}
+                    deleteDescription={__(
+                        'This will remove the Delay from your workflow.',
+                        'quillcrm'
+                    )}
+                    viewMode={viewMode}
+                    analytics={analytics}
+                />
 
                 <Handle
                     type="source"

@@ -123,21 +123,6 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				{__('Merge Tags', 'quillcrm')}
 			</Button>
 
-			{hasAnalytics && step.id && (
-				<Button
-					onClick={handleViewAnalytics}
-					disabled={isSaving || isDeleting || isLoadingAnalytics}
-					variant="outline"
-					className="w-full mb-4"
-					size="lg"
-				>
-					<BarChart3 className="w-4 h-4 mr-2" />
-					{isLoadingAnalytics
-						? __('Loading...', 'quillcrm')
-						: __('View Analytics', 'quillcrm')}
-				</Button>
-			)}
-
 			<div className="mb-4">
 				<Fields
 					fields={action.fields}

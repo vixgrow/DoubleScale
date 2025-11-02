@@ -30,7 +30,11 @@ import type { Automation, AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../state/context';
 
 // Configuration constants
-import { LAYOUT_CONSTANTS, EDGE_STYLES } from './config';
+import {
+	LAYOUT_CONSTANTS,
+	EDGE_STYLES,
+	LAYOUT_CONSTANTS_VIEW_MODE,
+} from './config';
 
 // Types and Interfaces
 import { WorkflowVisualizationProps, NODE_TYPES, EDGE_TYPES } from './types';
@@ -140,7 +144,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		const initialNodes: Node[] = [];
 		const initialEdges: Edge[] = [];
 		// the width of node
-		const nodeWidth = LAYOUT_CONSTANTS.NODE_WIDTH;
+		const nodeWidth = viewMode
+			? LAYOUT_CONSTANTS_VIEW_MODE.NODE_WIDTH
+			: LAYOUT_CONSTANTS.NODE_WIDTH;
 		// the width of the add step node
 		const addStepWidth = LAYOUT_CONSTANTS.ADD_STEP_WIDTH;
 		// the width of the yes and no nodes
@@ -303,7 +309,11 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			// Sidebar closed - reset view (focus out)
 			const timer = setTimeout(() => {
 				lastFocusedStepIdRef.current = null;
-				prevStepStateRef.current = { id: null, action: null, type: null };
+				prevStepStateRef.current = {
+					id: null,
+					action: null,
+					type: null,
+				};
 				reactFlowInstance.fitView({
 					duration: 400,
 					padding: 0.2,
@@ -439,9 +449,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			return (
 				!current ||
 				Math.abs(current.x - new_.x) >
-				LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
+					LAYOUT_CONSTANTS.POSITION_THRESHOLD ||
 				Math.abs(current.y - new_.y) >
-				LAYOUT_CONSTANTS.POSITION_THRESHOLD
+					LAYOUT_CONSTANTS.POSITION_THRESHOLD
 			);
 		});
 

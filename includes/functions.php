@@ -266,3 +266,65 @@ function quillcrm_cleanup_logs() {
 	}
 }
 add_action( 'quillcrm_cleanup_logs', 'quillcrm_cleanup_logs' );
+
+/**
+ * Add contact meta
+ *
+ * @since 1.0.0
+ *
+ * @param int    $contact_id Contact ID.
+ * @param string $meta_key Meta key.
+ * @param mixed  $meta_value Meta value.
+ * @param bool   $unique Optional. Whether the same key should not be added. Default false.
+ *
+ * @return int|false Meta ID on success, false on failure.
+ */
+function quillcrm_add_contact_meta( $contact_id, $meta_key, $meta_value, $unique = false ) {
+	return add_metadata( 'quillcrm_contact', $contact_id, $meta_key, $meta_value, $unique );
+}
+
+/**
+ * Update contact meta
+ *
+ * @since 1.0.0
+ *
+ * @param int    $contact_id Contact ID.
+ * @param string $meta_key Meta key.
+ * @param mixed  $meta_value Meta value.
+ * @param mixed  $prev_value Optional. Previous value to check before updating. Default empty.
+ *
+ * @return int|bool Meta ID if the key didn't exist, true on successful update, false on failure.
+ */
+function quillcrm_update_contact_meta( $contact_id, $meta_key, $meta_value, $prev_value = '' ) {
+	return update_metadata( 'quillcrm_contact', $contact_id, $meta_key, $meta_value, $prev_value );
+}
+
+/**
+ * Get contact meta
+ *
+ * @since 1.0.0
+ *
+ * @param int    $contact_id Contact ID.
+ * @param string $meta_key Optional. Meta key. If not specified, retrieve all metadata for the contact.
+ * @param bool   $single Optional. If true, return only the first value of the specified meta_key. Default false.
+ *
+ * @return mixed Single metadata value, or array of values.
+ */
+function quillcrm_get_contact_meta( $contact_id, $meta_key = '', $single = false ) {
+	return get_metadata( 'quillcrm_contact', $contact_id, $meta_key, $single );
+}
+
+/**
+ * Delete contact meta
+ *
+ * @since 1.0.0
+ *
+ * @param int    $contact_id Contact ID.
+ * @param string $meta_key Meta key.
+ * @param mixed  $meta_value Optional. Meta value. If provided, rows will only be removed that match the value. Default empty.
+ *
+ * @return bool True on success, false on failure.
+ */
+function quillcrm_delete_contact_meta( $contact_id, $meta_key, $meta_value = '' ) {
+	return delete_metadata( 'quillcrm_contact', $contact_id, $meta_key, $meta_value );
+}

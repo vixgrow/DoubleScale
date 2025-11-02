@@ -70,6 +70,7 @@ class Campaign_Analytics {
 
 	/**
 	 * Get analytics data for campaign type
+	 * Optimized to use single GROUP BY query instead of N+1 queries
 	 *
 	 * @param string $type Campaign type ('email', 'sms')
 	 * @param string $interval Analytics interval
@@ -88,31 +89,41 @@ class Campaign_Analytics {
 
 		$dates     = Utils::get_dates_between_dates( $start_date, $end_date );
 		$date_type = $dates['type'] ?? 'hour';
-		$data      = array();
 
+		// Determine the MySQL date format based on interval type
+		$date_formats = array(
+			'hour'  => '%Y-%m-%d %H:00:00',
+			'day'   => '%Y-%m-%d',
+			'month' => '%Y-%m',
+			'year'  => '%Y',
+		);
+
+		$format = $date_formats[ $date_type ] ?? $date_formats['day'];
+
+		// Optimized: Single GROUP BY query instead of N queries
+		$results = $query
+			->selectRaw( "DATE_FORMAT(created_at, '{$format}') as period, COUNT(*) as count" )
+			->whereBetween( 'created_at', array( $start_date . ' 00:00:00', $end_date . ' 23:59:59' ) )
+			->groupBy( 'period' )
+			->orderBy( 'period', 'ASC' )
+			->get();
+
+		// Convert results to associative array with date as key
+		$data = array();
+		foreach ( $results as $result ) {
+			$data[ $result->period ] = (int) $result->count;
+		}
+
+		// Fill in missing dates with zero counts
 		foreach ( $dates['dates'] as $date ) {
-			switch ( $date_type ) {
-				case 'hour':
-					$end_hour      = date( 'Y-m-d H:i:s', strtotime( $date . ' +1 hour' ) );
-					$data[ $date ] = $query->whereBetween( 'created_at', array( $date, $end_hour ) )->count();
-					break;
-				case 'day':
-					$start_of_day  = $date . ' 00:00:00';
-					$end_of_day    = $date . ' 23:59:59';
-					$data[ $date ] = $query->whereBetween( 'created_at', array( $start_of_day, $end_of_day ) )->count();
-					break;
-				case 'month':
-					$start_of_month = date( 'Y-m-01 00:00:00', strtotime( $date ) );
-					$end_of_month   = date( 'Y-m-t 23:59:59', strtotime( $date ) );
-					$data[ $date ]  = $query->whereBetween( 'created_at', array( $start_of_month, $end_of_month ) )->count();
-					break;
-				case 'year':
-					$start_of_year = date( 'Y-01-01 00:00:00', strtotime( $date ) );
-					$end_of_year   = date( 'Y-12-31 23:59:59', strtotime( $date ) );
-					$data[ $date ] = $query->whereBetween( 'created_at', array( $start_of_year, $end_of_year ) )->count();
-					break;
+			$period_key = $this->format_date_for_period( $date, $date_type );
+			if ( ! isset( $data[ $period_key ] ) ) {
+				$data[ $period_key ] = 0;
 			}
 		}
+
+		// Sort by date to ensure proper order
+		ksort( $data );
 
 		$totals = $this->get_total_stats( $type, $start_date, $end_date );
 
@@ -120,6 +131,31 @@ class Campaign_Analytics {
 			$type  => $data,
 			'data' => $dates,
 		) + $totals;
+	}
+
+	/**
+	 * Format date string to match the period format used in GROUP BY query
+	 *
+	 * @param string $date Date string
+	 * @param string $period_type Period type ('hour', 'day', 'month', 'year')
+	 *
+	 * @return string Formatted date string
+	 */
+	protected function format_date_for_period( $date, $period_type ) {
+		$timestamp = strtotime( $date );
+
+		switch ( $period_type ) {
+			case 'hour':
+				return date( 'Y-m-d H:00:00', $timestamp );
+			case 'day':
+				return date( 'Y-m-d', $timestamp );
+			case 'month':
+				return date( 'Y-m', $timestamp );
+			case 'year':
+				return date( 'Y', $timestamp );
+			default:
+				return date( 'Y-m-d', $timestamp );
+		}
 	}
 
 	/**
@@ -303,8 +339,8 @@ class Campaign_Analytics {
             DATE_FORMAT(sent_at, '{$format}') as period,
             COUNT(*) as total_sent,
             SUM(CASE WHEN status = " . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as sent,
-            SUM(CASE WHEN status = ' . Tracking_Status::FAILED . " THEN 1 ELSE 0 END) as failed
-        ";
+            SUM(CASE WHEN status = ' . Tracking_Status::FAILED . ' THEN 1 ELSE 0 END) as failed
+        ';
 
 		if ( $type === Campaign_Channel::CHANNEL_EMAIL ) {
 			$select_fields .= ',

@@ -4,6 +4,8 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MyTemplatesIcon } from '@/components/icons';
 import { getUserTemplates } from '../api/templates';
+import { useDispatch } from '@wordpress/data';
+import { STORE_KEY } from '../../stores/email-builder/constants';
 import type { EmailTemplate } from '@quillcrm/client';
 
 interface MyTemplatesPanelProps {
@@ -11,10 +13,70 @@ interface MyTemplatesPanelProps {
 	onClose: () => void;
 }
 
+interface TemplateCardProps {
+	template: EmailTemplate;
+	onUseTemplate: (template: EmailTemplate) => void;
+	onPreview: (template: EmailTemplate) => void;
+}
+
+const TemplateCard = ({
+	template,
+	onUseTemplate,
+	onPreview,
+}: TemplateCardProps) => {
+	return (
+		<div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+			{/* Template Preview */}
+			<div className="relative group">
+				{template.thumbnail ? (
+					<img
+						src={template.thumbnail}
+						alt={template.name}
+						className="w-full h-64 object-cover"
+					/>
+				) : (
+					<div className="w-full h-64 bg-gray-100 flex items-center justify-center">
+						<div className="text-gray-400">
+							<MyTemplatesIcon width={48} height={48} />
+						</div>
+					</div>
+				)}
+
+				{/* Overlay buttons */}
+				<div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+					<div className="flex flex-col gap-3">
+						<Button
+							onClick={() => onUseTemplate(template)}
+							className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-2 rounded-full font-medium text-sm shadow-lg"
+						>
+							{__('Use template', 'quillcrm')}
+						</Button>
+						<Button
+							onClick={() => onPreview(template)}
+							variant="outline"
+							className="bg-white text-gray-900 px-8 py-2 rounded-full font-medium text-sm border-2 border-white hover:bg-gray-50"
+						>
+							{__('Preview', 'quillcrm')}
+						</Button>
+					</div>
+				</div>
+			</div>
+
+			{/* Template Info */}
+			<div className="p-3 text-center">
+				<h3 className="font-medium text-gray-900 text-sm">
+					{template.name}
+				</h3>
+			</div>
+		</div>
+	);
+};
+
 const MyTemplatesContent = () => {
 	const [templates, setTemplates] = useState<EmailTemplate[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		const fetchTemplates = async () => {
@@ -47,6 +109,67 @@ const MyTemplatesContent = () => {
 
 		fetchTemplates();
 	}, []);
+
+	const handleUseTemplate = (template: EmailTemplate) => {
+		try {
+			console.log('Loading template:', template);
+
+			// Parse the template body to get builder data
+			if (template.body && typeof template.body === 'string') {
+				const bodyData = JSON.parse(template.body);
+				console.log('Parsed body data:', bodyData);
+
+				if (bodyData.type === 'builder' && bodyData.value) {
+					// Load the template data into the builder
+					const { sections, globalSettings, buttonSettings } =
+						bodyData.value;
+
+					console.log('Template data:', {
+						sections,
+						globalSettings,
+						buttonSettings,
+					});
+
+					// Clear existing content first
+					dispatch(STORE_KEY).resetBuilder();
+
+					// Update the builder state
+					if (sections && sections.length > 0) {
+						dispatch(STORE_KEY).setBuilderState(sections);
+					}
+
+					if (globalSettings) {
+						dispatch(STORE_KEY).updateGlobalSettings(
+							globalSettings
+						);
+					}
+
+					if (buttonSettings) {
+						dispatch(STORE_KEY).setButtonSettings(buttonSettings);
+					}
+
+					// Mark as having unsaved changes
+					dispatch(STORE_KEY).setHasUnsavedChanges(true);
+
+					console.log('Template loaded successfully:', template.name);
+				} else {
+					console.warn('Invalid template body structure:', bodyData);
+				}
+			} else {
+				console.warn(
+					'Template body is not a string or is empty:',
+					template.body
+				);
+			}
+		} catch (error) {
+			console.error('Error loading template:', error);
+		}
+	};
+
+	const handlePreview = (template: EmailTemplate) => {
+		// TODO: Implement preview functionality
+		console.log('Preview template:', template.name);
+	};
 
 	if (loading) {
 		return (
@@ -83,32 +206,14 @@ const MyTemplatesContent = () => {
 	}
 
 	return (
-		<div className="grid grid-cols-1 gap-4 p-4">
+		<div className="grid grid-cols-1 gap-4 p-4 max-w-md mx-auto">
 			{templates.map((template) => (
-				<div
+				<TemplateCard
 					key={template.id}
-					className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer"
-				>
-					{template.thumbnail ? (
-						<img
-							src={template.thumbnail}
-							alt={template.name}
-							className="w-full h-32 object-cover rounded-md mb-3"
-						/>
-					) : (
-						<div className="w-full h-32 bg-gray-100 rounded-md mb-3 flex items-center justify-center">
-							<MyTemplatesIcon width={32} height={32} />
-						</div>
-					)}
-					<h3 className="font-medium text-sm text-gray-900 truncate">
-						{template.name}
-					</h3>
-					<p className="text-xs text-gray-500 mt-1">
-						{template.created_at
-							? new Date(template.created_at).toLocaleDateString()
-							: ''}
-					</p>
-				</div>
+					template={template}
+					onUseTemplate={handleUseTemplate}
+					onPreview={handlePreview}
+				/>
 			))}
 		</div>
 	);
@@ -122,7 +227,7 @@ const MyTemplatesPanel = ({ isOpen, onClose }: MyTemplatesPanelProps) => {
 			<div className="flex flex-col h-full">
 				<div className="flex items-center justify-between p-6 border-b border-gray-200 mx-2">
 					<h2 className="text-lg font-semibold text-gray-900">
-						{__('Pre-built Templates', 'quillcrm')}
+						{__('My Templates', 'quillcrm')}
 					</h2>
 					<Button
 						variant="ghost"

@@ -112,10 +112,6 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setMergeTagsVisible(true);
 	};
 
-	const handleViewAnalytics = async () => {
-		await fetchAnalytics(step.id);
-	};
-
 	// Check if this step supports analytics
 	const hasAnalytics = supportsAnalytics(step.action);
 	const action =

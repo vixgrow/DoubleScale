@@ -13,7 +13,7 @@ import type { Contact } from '@quillcrm/client';
 import { convertDate } from '@quillcrm/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { SortIcon, TimeAgoCell, ViewIcon } from '@quillcrm/components';
+import { SortIcon, TimeAgoCell } from '@quillcrm/components';
 import { useContactOrderDetails } from '../useContactsAPI';
 import { useContactsContext } from '../contexts';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -176,7 +176,7 @@ export const useContactsColumns = () => {
 
 				return (
 					<div
-						className={`text-xs capitalize rounded-lg py-1 px-3 ${statusClasses}`}
+						className={`text-xs capitalize w-fit rounded-lg py-1 px-3 ${statusClasses}`}
 					>
 						{status}
 					</div>
@@ -233,22 +233,6 @@ export const useContactsColumns = () => {
 				</div>
 			),
 			cell: ({ row }) => <TimeAgoCell value={row.getValue('created_at')} />,
-		},
-		{
-			accessorKey: 'view',
-			header: __('Actions', 'quillcrm'),
-			cell: ({ row }) => (
-				<Button
-					variant="ghost"
-					onClick={() => openContactDialog(row.original.id.toString())}
-					className="h-auto p-0 flex items-center gap-1 text-[#3F3F46] hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
-				>
-					<div className="text-[#A1A1AA]">
-						<ViewIcon />
-					</div>
-					View
-				</Button>
-			),
 		},
 	];
 

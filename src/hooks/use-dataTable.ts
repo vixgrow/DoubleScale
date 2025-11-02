@@ -27,7 +27,7 @@ export function useDataTable<TData>(
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-		{}
+		config.initialColumnVisibility || {}
 	);
 	const [globalFilter, setGlobalFilter] = useState('');
 

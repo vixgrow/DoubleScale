@@ -120,6 +120,23 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 			},
 			placeholder: __('Date Range', 'quillcrm'),
 		},
+		initialColumnVisibility: {
+			contact: true,
+			created_at: true,
+			lists: true,
+			tags: true,
+			status: true,
+			phone: false,
+			country: false,
+			city: false,
+			address_1: false,
+			address_2: false,
+			state: false,
+			zip: false,
+			total_orders: true,
+			total_revenue: true,
+			last_order_date: true,
+		},
 	};
 
 	useEffect(() => {

@@ -790,6 +790,7 @@ export interface DataTableConfig<TData> {
 		onDateChange: (range: { from: Date | null; to: Date | null }) => void;
 		placeholder?: string;
 	};
+	initialColumnVisibility?: Record<string, boolean>;
 }
 
 export type NoticeMessage = {

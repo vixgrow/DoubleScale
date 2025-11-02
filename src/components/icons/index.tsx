@@ -151,3 +151,5 @@ export { default as PurchaseHistoryIcon } from './purchase-history';
 export { default as GradientAutomationsIcon } from './gradient-automations';
 export { default as DealsClosedWonIcon } from './deals-closed-won';
 export { default as DealsWonValueIcon } from './deals-won-value';
+export { default as ContactSMSIcon } from './contact-sms';
+export { default as ContactWhatsAppIcon } from './contact-whatsapp';

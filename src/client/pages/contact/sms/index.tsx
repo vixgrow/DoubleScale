@@ -22,6 +22,7 @@ import TwilioConfigModal from '../components/twilio-config-modal';
 import { ProviderNotConnectedWarning } from '../components/provider-not-connected-warning';
 import { MessageSquare, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { MessageStatsCard } from '../components/message-stats-card';
+import { NoData } from '@/components/no-data';
 import type { ColumnDef } from '@tanstack/react-table';
 
 interface SMSProps {
@@ -236,14 +237,11 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 			{/* Messages Table */}
 			<div>
 				{!loading && messages.length === 0 ? (
-					<div className="flex flex-col items-center justify-center py-20 gap-4">
-						<div className="text-gray-400">
-							<MessageSquare className="w-24 h-24" />
-						</div>
-						<span className="text-lg text-gray-500 font-medium">
-							{__('No SMS messages found', 'quillcrm')}
-						</span>
-					</div>
+					<NoData
+						icon={<MessageSquare className="w-24 h-24 text-gray-400" />}
+						title={__('No SMS messages', 'quillcrm')}
+						subtitle={__('No SMS messages found for this contact.', 'quillcrm')}
+					/>
 				) : (
 					<>
 						<DataTable
@@ -254,7 +252,7 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 							initialPageSize={10}
 							showMainActions={false}
 							config={{}}
-							setPage={() => {}}
+							setPage={() => { }}
 						/>
 						<DataTablePagination table={serverSideTable} />
 					</>
@@ -274,16 +272,16 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 				}}
 				contact={contact}
 			/>
-		{/* Twilio Config Modal - Debug */}
-		{console.log('[QuillCRM] Rendering TwilioConfigModal, open:', showTwilioConfig)}
-		<TwilioConfigModal
-			open={showTwilioConfig}
-			onClose={() => {
-				console.log('[QuillCRM] Modal close requested');
-				setShowTwilioConfig(false);
-			}}
-			onSuccess={handleTwilioConfigSuccess}
-		/>
+			{/* Twilio Config Modal - Debug */}
+			{console.log('[QuillCRM] Rendering TwilioConfigModal, open:', showTwilioConfig)}
+			<TwilioConfigModal
+				open={showTwilioConfig}
+				onClose={() => {
+					console.log('[QuillCRM] Modal close requested');
+					setShowTwilioConfig(false);
+				}}
+				onSuccess={handleTwilioConfigSuccess}
+			/>
 		</div>
 	);
 };

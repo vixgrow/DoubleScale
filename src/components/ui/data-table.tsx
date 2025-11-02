@@ -113,7 +113,7 @@ export function DataTable<TData>({
 					</TableHeader>
 					<TableBody>
 						{loading ? (
-							<TableSkeleton columns={columns.length} />
+							<TableSkeleton columns={table.getVisibleLeafColumns().length} />
 						) : table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
 								<TableRow

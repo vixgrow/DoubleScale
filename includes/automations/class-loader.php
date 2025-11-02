@@ -23,6 +23,7 @@ use QuillCRM\Automations\Process_Automation;
 final class Loader {
 
 
+
 	/**
 	 * Class Instance.
 	 *
@@ -125,7 +126,7 @@ final class Loader {
 			if ( is_numeric( $automation ) && $step_id == null && $contact_id == null ) {
 				$args = $this->get_meta_args( $automation );
 				if ( $args && count( $args ) >= 3 ) {
-					list($automation, $step_id, $contact_id) = $args;
+					list($automation, $parent_step_id, $step_id, $contact_id) = $args;
 				} else {
 					throw new Exception( 'Failed to retrieve arguments from meta_id: ' . $automation );
 				}
@@ -139,6 +140,19 @@ final class Loader {
 				}
 			}
 
+			if ( $parent_step_id && is_numeric( $parent_step_id ) && $parent_step_id > 0 ) {
+				// Find and update the process record for the delay step, not the step itself
+				$delay_process = $automation->processes()
+					->where( 'automation_contact_id', $contact_id )
+					->where( 'step_id', $parent_step_id )
+					->where( 'status', 'pending' )
+					->first();
+
+				if ( $delay_process ) {
+					$delay_process->status = 'completed';
+					$delay_process->save();
+				}
+			}
 			$step               = Automation_Step_Model::findOrFail( $step_id );
 			$automation_process = new Process_Automation( $automation );
 			$automation_process->process_step( $step, $contact_id );

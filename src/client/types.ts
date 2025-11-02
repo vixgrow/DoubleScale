@@ -200,6 +200,8 @@ export type EmailTemplate = {
 	subject: string;
 	body?: string | EmailBodyContent; // Can be string (rich-text) or EmailBodyContent (builder)
 	preview_text: string;
+	thumbnail?: string;
+	hidden?: boolean;
 	settings?: EmailTemplateSettings;
 	created_at?: string;
 	updated_at?: string;

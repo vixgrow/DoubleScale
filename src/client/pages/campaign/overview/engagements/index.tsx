@@ -26,14 +26,14 @@ import { UserOutlined } from '@ant-design/icons';
 /**
  * Internal dependencies
  */
-import './style.scss';
+import '../engagements/style.scss';
 import type { CampaignEmail, CampaignEmailsResponse } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
 import { useParams } from '@quillcrm/navigation';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
-const Engagements: React.FC = () => {
+const EngagementsTab: React.FC = () => {
 	const { id } = useParams<{ id: string; subtab: string }>();
 	const [isLoading, setIsLoading] = useState(true);
 	const [page, setPage] = useState(1);
@@ -142,7 +142,7 @@ const Engagements: React.FC = () => {
 				title: __('Contact', 'quillcrm'),
 				dataIndex: 'contact',
 				key: 'contact',
-				render: (_, record: CampaignEmail) => (
+				render: (_: any, record: CampaignEmail) => (
 					<NavLink to={`contacts/${record.contact.id}`}>
 						<Flex vertical gap={5}>
 							<Flex gap={10} align="center">
@@ -167,7 +167,7 @@ const Engagements: React.FC = () => {
 						: __('Phone', 'quillcrm'),
 				dataIndex: 'recipient',
 				key: 'recipient',
-				render: (_, record: CampaignEmail) =>
+				render: (_: any, record: CampaignEmail) =>
 					campaignType === CAMPAIGN_CHANNEL.EMAIL
 						? record.contact.email
 						: record.contact.phone || '-',
@@ -176,7 +176,7 @@ const Engagements: React.FC = () => {
 				title: __('Status', 'quillcrm'),
 				dataIndex: 'status',
 				key: 'status',
-				render: (_, record: CampaignEmail) => {
+				render: (_: any, record: CampaignEmail) => {
 					let badgeStatus:
 						| 'success'
 						| 'error'
@@ -213,7 +213,7 @@ const Engagements: React.FC = () => {
 					title: __('Opened', 'quillcrm'),
 					dataIndex: 'opened',
 					key: 'opened',
-					render: (_, record: CampaignEmail) => (
+					render: (_: any, record: CampaignEmail) => (
 						<Badge
 							status={
 								record.opened != '0' ? 'success' : 'default'
@@ -230,7 +230,7 @@ const Engagements: React.FC = () => {
 					title: __('Clicked', 'quillcrm'),
 					dataIndex: 'clicked',
 					key: 'clicked',
-					render: (_, record: CampaignEmail) => (
+					render: (_: any, record: CampaignEmail) => (
 						<Badge
 							status={
 								record.clicked != '0' ? 'success' : 'default'
@@ -250,7 +250,7 @@ const Engagements: React.FC = () => {
 					title: __('Delivered', 'quillcrm'),
 					dataIndex: 'status',
 					key: 'delivered',
-					render: (_, record: CampaignEmail) => (
+					render: (_: any, record: CampaignEmail) => (
 						<Badge
 							status={
 								record.status_slug === 'delivered'
@@ -269,7 +269,7 @@ const Engagements: React.FC = () => {
 					title: __('Clicked', 'quillcrm'),
 					dataIndex: 'clicked',
 					key: 'clicked',
-					render: (_, record: CampaignEmail) => (
+					render: (_: any, record: CampaignEmail) => (
 						<Badge
 							status={
 								record.clicked != '0' ? 'success' : 'default'
@@ -289,17 +289,17 @@ const Engagements: React.FC = () => {
 					title: __('Delivered', 'quillcrm'),
 					dataIndex: 'status',
 					key: 'delivered',
-					render: (_, record: CampaignEmail) => (
+					render: (_: any, record: CampaignEmail) => (
 						<Badge
 							status={
 								record.status_slug === 'delivered' ||
-								record.status_slug === 'read'
+									record.status_slug === 'read'
 									? 'success'
 									: 'default'
 							}
 							text={
 								record.status_slug === 'delivered' ||
-								record.status_slug === 'read'
+									record.status_slug === 'read'
 									? __('Yes', 'quillcrm')
 									: __('No', 'quillcrm')
 							}
@@ -310,7 +310,7 @@ const Engagements: React.FC = () => {
 					title: __('Read', 'quillcrm'),
 					dataIndex: 'status',
 					key: 'read',
-					render: (_, record: CampaignEmail) => (
+					render: (_: any, record: CampaignEmail) => (
 						<Badge
 							status={
 								record.status_slug === 'read'
@@ -329,7 +329,7 @@ const Engagements: React.FC = () => {
 					title: __('Clicked', 'quillcrm'),
 					dataIndex: 'clicked',
 					key: 'clicked',
-					render: (_, record: CampaignEmail) => (
+					render: (_: any, record: CampaignEmail) => (
 						<Badge
 							status={
 								record.clicked != '0' ? 'success' : 'default'
@@ -351,7 +351,7 @@ const Engagements: React.FC = () => {
 			{
 				title: __('Template', 'quillcrm'),
 				key: 'template',
-				render: (_, record: CampaignEmail) => (
+				render: (_: any, record: CampaignEmail) => (
 					<Button onClick={() => setCampaignEmail(record)}>
 						{__('View', 'quillcrm')}
 					</Button>
@@ -361,18 +361,10 @@ const Engagements: React.FC = () => {
 	};
 
 	return (
-		<Card
-			title={
-				<Flex justify="space-between">
-					<Typography.Title level={4} style={{ margin: 0 }}>
-						{__('Engagements')}
-					</Typography.Title>
-				</Flex>
-			}
-		>
-			<Flex vertical gap={20}>
+		<>
+			<div className="space-y-4">
 				<Flex gap={20} align="center">
-					<Typography.Text>{__('Filter by status')}</Typography.Text>
+					<Typography.Text>{__('Filter by status', 'quillcrm')}</Typography.Text>
 					<Radio.Group
 						options={getStatusOptions()}
 						onChange={(e) => setStatus(e.target.value)}
@@ -395,7 +387,9 @@ const Engagements: React.FC = () => {
 						},
 					}}
 				/>
-			</Flex>
+			</div>
+
+			{/* Modal for viewing individual email details */}
 			<Modal
 				open={!!campaignEmail}
 				title={__('Details')}
@@ -414,12 +408,12 @@ const Engagements: React.FC = () => {
 								<Badge
 									status={
 										campaignEmail.status_slug === 'sent' ||
-										campaignEmail.status_slug ===
+											campaignEmail.status_slug ===
 											'delivered' ||
-										campaignEmail.status_slug === 'read'
+											campaignEmail.status_slug === 'read'
 											? 'success'
 											: campaignEmail.status_slug ===
-												  'failed'
+												'failed'
 												? 'error'
 												: 'default'
 									}
@@ -485,8 +479,9 @@ const Engagements: React.FC = () => {
 					</Flex>
 				)}
 			</Modal>
-		</Card>
+		</>
 	);
 };
 
-export default Engagements;
+export default EngagementsTab;
+

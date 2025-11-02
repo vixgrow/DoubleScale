@@ -239,7 +239,7 @@ class Campaign_Analytics {
 
 		if ( $campaign_id ) {
 			$base_query->where( $tracking_table . '.source_id', $campaign_id )
-				->where( $tracking_table . '.source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN );
+				->where( $tracking_table . '.source_type', Message_Source_Types::CAMPAIGN );
 		}
 
 		if ( $start_date && $end_date ) {
@@ -392,7 +392,7 @@ class Campaign_Analytics {
 
 		$results = $query->selectRaw( $select_fields )
 			->where( 'source_id', $campaign_id )
-			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN )
+			->where( 'source_type', Message_Source_Types::CAMPAIGN )
 			->whereNotNull( 'sent_at' )
 			->groupBy( 'period' )
 			->orderBy( 'period', 'DESC' )

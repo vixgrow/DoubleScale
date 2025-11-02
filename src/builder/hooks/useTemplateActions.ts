@@ -76,6 +76,7 @@ export const useTemplateActions = (): UseTemplateActionsReturn => {
             type: 'builder' as const,
             value: builderData,
           },
+          hidden: true, // Regular save should be hidden from user templates
         };
 
         let savedTemplate: EmailTemplate;

@@ -20,7 +20,15 @@ import Automation from '../automation';
 import Notes from '../notes';
 import { useContactContext } from '../state/context';
 import Deals from '../deals';
-import { AutomationsIcon, ContactTotalEmailsIcon, DealsIcon, NotesIcon, PurchaseHistoryIcon } from '@quillcrm/components';
+import {
+	AutomationsIcon,
+	ContactSMSIcon,
+	ContactTotalEmailsIcon,
+	ContactWhatsAppIcon,
+	DealsIcon,
+	NotesIcon,
+	PurchaseHistoryIcon,
+} from '@quillcrm/components';
 
 const DataCard: React.FC = () => {
 	const { contact } = useContactContext();
@@ -30,13 +38,25 @@ const DataCard: React.FC = () => {
 	}
 
 	const tabsList = [
-		{ value: 'emails', label: 'Emails', icon: <ContactTotalEmailsIcon width={24} height={24} /> },
-		{ value: 'sms', label: 'SMS' },
-		{ value: 'whatsapp', label: 'WhatsApp' },
-		{ value: 'deals', label: 'Deals', icon: <DealsIcon/> },
-		{ value: 'notes', label: 'Notes', icon: <NotesIcon/> },
-		{ value: 'automation', label: 'Automation', icon: <AutomationsIcon width={24} height={24} /> },
-		{ value: 'purchase-history', label: 'Purchase History', icon: <PurchaseHistoryIcon/> },
+		{
+			value: 'emails',
+			label: 'Emails',
+			icon: <ContactTotalEmailsIcon width={24} height={24} />,
+		},
+		{ value: 'sms', label: 'SMS', icon: <ContactSMSIcon /> },
+		{ value: 'whatsapp', label: 'WhatsApp', icon: <ContactWhatsAppIcon /> },
+		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
+		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
+		{
+			value: 'automation',
+			label: 'Automation',
+			icon: <AutomationsIcon width={24} height={24} />,
+		},
+		{
+			value: 'purchase-history',
+			label: 'Purchase History',
+			icon: <PurchaseHistoryIcon />,
+		},
 	];
 
 	const tabsContent = [

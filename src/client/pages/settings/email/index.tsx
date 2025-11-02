@@ -52,7 +52,7 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                     />
                 </div>
                 <div className="flex-1">
-                    <div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-2">
+                    <div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-[10px]">
                         {__('From Email', 'quillcrm')}
                     </div>
                     <div className="qcrm-field-input">
@@ -85,9 +85,8 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                         onChange={(value) =>
                             handleFieldChange('max_in_second', value)
                         }
-                        type="slider"
-                        min={0}
-                        max={1500}
+                        type="number"
+                        min={1}
                     />
                     <Field
                         label={__('Max Emails in Day', 'quillcrm')}
@@ -95,9 +94,8 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                         onChange={(value) =>
                             handleFieldChange('max_in_day', value)
                         }
-                        type="slider"
-                        min={0}
-                        max={1000}
+                        type="number"
+                        min={1}
                     />
                 </div>
                 <div className="w-full">

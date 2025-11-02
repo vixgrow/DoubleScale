@@ -21,6 +21,9 @@ use WC_Subscription;
  */
 class Subscription_Renewal_Payment_Complete extends Trigger {
 
+
+
+
 	/**
 	 * Trigger Name
 	 *
@@ -80,27 +83,26 @@ class Subscription_Renewal_Payment_Complete extends Trigger {
 	 * @since 1.0.0
 	 *
 	 * @param WC_Subscription $subscription Subscription object.
+	 * @param WC_Order        $last_order Last order object.
 	 * @return void
 	 */
-	public function subscription_renewal_payment_complete( $subscription ) {
+	public function subscription_renewal_payment_complete( $subscription, $last_order ) {
 		if ( ! $subscription instanceof WC_Subscription ) {
 			return;
 		}
 
-		$last_order = $subscription->get_last_order( 'all', 'renewal' );
-
 		$data = array(
-			'subscription_id'   => $subscription->get_id(),
-			'subscription'      => $subscription,
-			'customer_id'       => $subscription->get_customer_id(),
-			'customer_email'    => $subscription->get_billing_email(),
-			'status'            => $subscription->get_status(),
-			'total'             => $subscription->get_total(),
-			'currency'          => $subscription->get_currency(),
-			'next_payment'      => $subscription->get_date( 'next_payment' ),
-			'payment_amount'    => $last_order ? $last_order->get_total() : $subscription->get_total(),
-			'payment_method'    => $subscription->get_payment_method_title(),
-			'renewal_order_id'  => $last_order ? $last_order->get_id() : null,
+			'subscription_id'  => $subscription->get_id(),
+			'subscription'     => $subscription,
+			'customer_id'      => $subscription->get_customer_id(),
+			'customer_email'   => $subscription->get_billing_email(),
+			'status'           => $subscription->get_status(),
+			'total'            => $subscription->get_total(),
+			'currency'         => $subscription->get_currency(),
+			'next_payment'     => $subscription->get_date( 'next_payment' ),
+			'payment_amount'   => $last_order ? $last_order->get_total() : $subscription->get_total(),
+			'payment_method'   => $subscription->get_payment_method_title(),
+			'renewal_order_id' => $last_order ? $last_order->get_id() : null,
 		);
 
 		$this->process( $data );
@@ -114,44 +116,7 @@ class Subscription_Renewal_Payment_Complete extends Trigger {
 	 * @return array
 	 */
 	public function get_attributes_schema() {
-		return array(
-			'subscription_id' => array(
-				'label' => __( 'Subscription ID', 'quillcrm' ),
-				'type'  => 'number',
-			),
-			'customer_id' => array(
-				'label' => __( 'Customer ID', 'quillcrm' ),
-				'type'  => 'number',
-			),
-			'customer_email' => array(
-				'label' => __( 'Customer Email', 'quillcrm' ),
-				'type'  => 'email',
-			),
-			'status' => array(
-				'label' => __( 'Subscription Status', 'quillcrm' ),
-				'type'  => 'text',
-			),
-			'total' => array(
-				'label' => __( 'Subscription Total', 'quillcrm' ),
-				'type'  => 'number',
-			),
-			'currency' => array(
-				'label' => __( 'Currency', 'quillcrm' ),
-				'type'  => 'text',
-			),
-			'payment_amount' => array(
-				'label' => __( 'Payment Amount', 'quillcrm' ),
-				'type'  => 'number',
-			),
-			'payment_method' => array(
-				'label' => __( 'Payment Method', 'quillcrm' ),
-				'type'  => 'text',
-			),
-			'renewal_order_id' => array(
-				'label' => __( 'Renewal Order ID', 'quillcrm' ),
-				'type'  => 'number',
-			),
-		);
+		return array();
 	}
 }
 

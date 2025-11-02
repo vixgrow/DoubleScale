@@ -147,11 +147,6 @@ const MyTemplatesContent = () => {
 					if (buttonSettings) {
 						dispatch(STORE_KEY).setButtonSettings(buttonSettings);
 					}
-
-					// Mark as having unsaved changes
-					dispatch(STORE_KEY).setHasUnsavedChanges(true);
-
-					console.log('Template loaded successfully:', template.name);
 				} else {
 					console.warn('Invalid template body structure:', bodyData);
 				}

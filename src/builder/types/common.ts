@@ -249,6 +249,7 @@ export interface EmailTemplate {
 		};
 	};
 	preview_text: string;
+	thumbnail?: string;
 	created_at: string;
 	updated_at: string;
 	// Settings fields (flattened from JSON column)

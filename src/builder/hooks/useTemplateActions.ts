@@ -18,7 +18,7 @@ import {
 
 interface UseTemplateActionsReturn {
   saveTemplate: (templateId?: number) => Promise<EmailTemplate>;
-  saveAsTemplate: (templateName: string) => Promise<EmailTemplate>;
+  saveAsTemplate: (templateName: string, thumbnailUrl?: string) => Promise<EmailTemplate>;
   isSaving: boolean;
   error: string | null;
   clearError: () => void;
@@ -112,7 +112,7 @@ export const useTemplateActions = (): UseTemplateActionsReturn => {
    * Saves current email as a new template in the library
    */
   const saveAsTemplate = useCallback(
-    async (templateName: string): Promise<EmailTemplate> => {
+    async (templateName: string, thumbnailUrl?: string): Promise<EmailTemplate> => {
       setIsSaving(true);
       setError(null);
 
@@ -125,7 +125,8 @@ export const useTemplateActions = (): UseTemplateActionsReturn => {
 
         const savedTemplate = await saveEmailAsTemplate(
           templateName.trim(),
-          builderData
+          builderData,
+          thumbnailUrl
         );
 
         return savedTemplate;

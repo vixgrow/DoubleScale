@@ -198,6 +198,14 @@ class REST_Template_Controller extends REST_Controller {
 					 'type'        => 'string',
 					 'readonly'    => false,
 				 ),
+				 'thumbnail'  => array(
+					 'description' => __( 'Thumbnail URL of the template.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => false,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'esc_url_raw',
+					 ),
+				 ),
 			 ),
 		 );
 	}
@@ -414,7 +422,7 @@ class REST_Template_Controller extends REST_Controller {
 
 	/**
 	 * Smart save - creates or updates based on template usage
-	 * 
+	 *
 	 * Logic:
 	 * - No ID: Create new template
 	 * - ID exists + template in use (tracked): Create new template (preserve original)
@@ -428,8 +436,8 @@ class REST_Template_Controller extends REST_Controller {
 	 */
 	public function save_template( $request ) {
 		try {
-			$template_id  = $request->get_param( 'id' );
-			$campaign_id  = $request->get_param( 'campaign_id' );
+			$template_id   = $request->get_param( 'id' );
+			$campaign_id   = $request->get_param( 'campaign_id' );
 			$template_data = $this->prepare_template( $request );
 
 			// Case 1: No ID - create new template
@@ -602,6 +610,7 @@ class REST_Template_Controller extends REST_Controller {
 			'body'         => $request->get_param( 'body' ),
 			'settings'     => $request->get_param( 'settings' ),
 			'preview_text' => $request->get_param( 'preview_text' ),
+			'thumbnail'    => $request->get_param( 'thumbnail' ),
 		);
 
 		// Note: email_body data is now sent directly in the body field as JSON
@@ -620,6 +629,11 @@ class REST_Template_Controller extends REST_Controller {
 		foreach ( $template_data as $key => $value ) {
 			// Don't remove subject for email templates - it's a required field
 			if ( $key === 'subject' && $is_email_template ) {
+				continue;
+			}
+
+			// Don't remove thumbnail field - allow empty strings to be saved
+			if ( $key === 'thumbnail' ) {
 				continue;
 			}
 

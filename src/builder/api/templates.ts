@@ -101,6 +101,23 @@ export const getTemplate = async (
 };
 
 /**
+ * Get all templates
+ */
+export const getTemplates = async (): Promise<EmailTemplate[]> => {
+	try {
+		const response = await apiFetch({
+			path: '/qc/v1/templates',
+		});
+		return response as EmailTemplate[];
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to fetch templates', 'quillcrm')
+		);
+	}
+};
+
+/**
  * Delete a template
  */
 export const deleteTemplate = async (templateId: number): Promise<void> => {
@@ -129,7 +146,8 @@ interface BuilderData {
  */
 export const saveEmailAsTemplate = async (
 	templateName: string,
-	builderData: BuilderData
+	builderData: BuilderData,
+	thumbnailUrl?: string
 ): Promise<EmailTemplate> => {
 	// Store builder data directly in body field as JSON
 	const bodyData = {
@@ -144,5 +162,6 @@ export const saveEmailAsTemplate = async (
 		subject: '',
 		body: JSON.stringify(bodyData), // Store builder data in body field
 		preview_text: '',
+		thumbnail: thumbnailUrl || '', // Always include thumbnail field, even if empty
 	});
 };

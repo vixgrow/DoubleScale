@@ -127,6 +127,32 @@ class REST_Template_Controller extends REST_Controller {
 			)
 		);
 
+		// Register endpoint for getting user templates (non-hidden)
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/user-templates',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_user_templates' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'type'   => array(
+							'description' => __( 'Filter by template type.', 'quillcrm' ),
+							'type'        => 'string',
+							'default'     => Campaign_Channel::STR_EMAIL,
+							'enum'        => Campaign_Channel::get_core_channel_strings(),
+						),
+						'search' => array(
+							'description'       => __( 'Search templates by name.', 'quillcrm' ),
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+			)
+		);
+
 		// Register endpoint for getting email blocks (merged from email-builder controller)
 		register_rest_route(
 			$this->namespace,
@@ -205,6 +231,12 @@ class REST_Template_Controller extends REST_Controller {
 					 'arg_options' => array(
 						 'sanitize_callback' => 'esc_url_raw',
 					 ),
+				 ),
+				 'hidden'     => array(
+					 'description' => __( 'Whether the template is hidden from users.', 'quillcrm' ),
+					 'type'        => 'boolean',
+					 'required'    => false,
+					 'default'     => false,
 				 ),
 			 ),
 		 );
@@ -344,6 +376,44 @@ class REST_Template_Controller extends REST_Controller {
 				),
 				200
 			);
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Get user templates (non-hidden only)
+	 * Dedicated endpoint for user-created templates
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return WP_REST_Response $response The response object
+	 */
+	public function get_user_templates( $request ) {
+		try {
+			// Get parameters with defaults
+			$type   = $request->get_param( 'type' ) ?: Campaign_Channel::STR_EMAIL;
+			$search = $request->get_param( 'search' );
+
+			// Convert string type to integer for database query
+			$type_int = Campaign_Channel::to_integer( $type ) ?? Campaign_Channel::CHANNEL_EMAIL;
+
+			// Build query - only non-hidden templates
+			$query = Template_Model::where( 'type', $type_int )
+				->where( 'hidden', 0 ); // Only user-created templates
+
+			// Search by name if provided
+			if ( $search ) {
+				$query->where( 'name', 'LIKE', '%' . $search . '%' );
+			}
+
+			// Get results ordered by most recent first
+			$templates = $query->orderBy( 'created_at', 'DESC' )
+				->get();
+
+			return new WP_REST_Response( $templates, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -611,6 +681,7 @@ class REST_Template_Controller extends REST_Controller {
 			'settings'     => $request->get_param( 'settings' ),
 			'preview_text' => $request->get_param( 'preview_text' ),
 			'thumbnail'    => $request->get_param( 'thumbnail' ),
+			'hidden'       => $request->get_param( 'hidden' ) ?? false,
 		);
 
 		// Note: email_body data is now sent directly in the body field as JSON
@@ -634,6 +705,11 @@ class REST_Template_Controller extends REST_Controller {
 
 			// Don't remove thumbnail field - allow empty strings to be saved
 			if ( $key === 'thumbnail' ) {
+				continue;
+			}
+
+			// Don't remove hidden field - allow false values to be saved
+			if ( $key === 'hidden' ) {
 				continue;
 			}
 

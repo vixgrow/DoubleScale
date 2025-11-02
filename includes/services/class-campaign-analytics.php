@@ -219,10 +219,11 @@ class Campaign_Analytics {
 			$stats              = $this->calculate_sms_rates( $stats );
 
 		} elseif ( $type === Campaign_Channel::CHANNEL_WHATSAPP ) {
-			$result = $base_query->selectRaw( 'SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = ' . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered' )->first();
+			$result = $base_query->selectRaw( 'SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = ' . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered, SUM(CASE WHEN status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as read' )->first();
 
 			$stats['clicked']   = (int) $result->clicked;
 			$stats['delivered'] = (int) $result->delivered;
+			$stats['read']      = (int) $result->read;
 			$stats              = $this->calculate_whatsapp_rates( $stats );
 		}
 

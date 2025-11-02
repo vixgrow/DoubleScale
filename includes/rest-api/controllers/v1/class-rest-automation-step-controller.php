@@ -490,14 +490,21 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				return new WP_Error( 'rest_automation_step_invalid_action', __( 'This step does not support analytics', 'quillcrm' ), array( 'status' => 400 ) );
 			}
 
-			// Get all analytics in a single optimized query.
+			// Get all analytics in a single optimized query with JOIN to contacts table.
+			global $wpdb;
+			$contacts_table   = $wpdb->prefix . 'quillcrm_contacts';
+			$tracking_table   = $wpdb->prefix . 'quillcrm_tracking';
+
 			$analytics_raw = Tracking_Model::byStep( $step_id )
-				->selectRaw( '
+				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
+				->selectRaw( "
 					COUNT(*) as total_sent,
-					SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened_count,
-					SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked_count,
-					SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as delivered_count
-				', array( Tracking_Status::DELIVERED ) )
+					SUM(CASE WHEN {$tracking_table}.opened = 1 THEN 1 ELSE 0 END) as opened_count,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked_count,
+					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as delivered_count,
+					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as read_count,
+					SUM(CASE WHEN contacts.status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed_count
+				", array( Tracking_Status::DELIVERED, Tracking_Status::READ ) )
 				->first();
 
 			// Extract metrics.
@@ -505,8 +512,8 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			$opened       = (int) $analytics_raw->opened_count;
 			$clicked      = (int) $analytics_raw->clicked_count;
 			$delivered    = (int) $analytics_raw->delivered_count;
-			$read         = 0;
-			$unsubscribed = 0; 
+			$read         = (int) $analytics_raw->read_count;
+			$unsubscribed = (int) $analytics_raw->unsubscribed_count; 
 
 			// If no messages sent, return zero analytics.
 			if ( 0 === $total_sent ) {

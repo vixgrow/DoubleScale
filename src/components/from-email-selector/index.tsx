@@ -82,8 +82,11 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 					placeholder={__('name@gmail.com', 'quillcrm')}
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
-					className={cn(error && '!border-red-500 focus-visible:!ring-red-500')}
+					className={cn('h-12 bg-white', error && '!border-red-500 focus-visible:!ring-red-500')}
 					required={required}
+					style={{
+						borderRadius: '8px',
+					}}
 				/>
 				{!quillsmtpInfo?.configured && quillsmtpInfo?.plugin_url && (
 					<p className="text-sm text-gray-500 mt-1">

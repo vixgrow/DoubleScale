@@ -124,13 +124,11 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 					step['process_status'] = 'completed';
 					step['process_date'] = contact.updated_at;
 				} else {
-					step['process_status'] = 'skipped';
+					step['process_status'] = 'pending';
 					step['process_date'] = null;
 				}
 			} else if (hasStartedAutomation) {
-				// If the contact has already started the automation but this step has no process record,
-				// it means this step was added after the contact started, so mark it as skipped
-				step['process_status'] = 'skipped';
+				step['process_status'] = 'pending';
 				step['process_date'] = null;
 			} else {
 				// Mark as pending if not processed yet

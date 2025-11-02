@@ -8,7 +8,7 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-
+import { BarChart3 } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -23,6 +23,12 @@ import { deleteStep } from '../reactflow-workflow/utils/step-utils';
 import { useProviderStatus } from '@/hooks/use-provider-status';
 import { ProviderNotConnectedWarning } from '@/client/pages/contact/components/provider-not-connected-warning';
 import TwilioConfigModal from '@/client/pages/contact/components/twilio-config-modal';
+import AnalyticsPopup from '../reactflow-workflow/components/analytics-popup';
+import { useStepAnalytics } from '../reactflow-workflow/hooks/use-step-analytics';
+import {
+	supportsAnalytics,
+	getChannelType,
+} from '../reactflow-workflow/constants/action-types';
 
 interface StepFieldsModalProps {
 	step: OrganizedStep;
@@ -38,9 +44,9 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const [isSaving, setIsSaving] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [settings, setSettings] = useState(step.settings);
-	const [currentStepId, setCurrentStepId] = useState(step.id);
 	const [showTwilioConfig, setShowTwilioConfig] = useState(false);
-	const { setMergeTagsVisible, createNotice } = useDispatch('quillcrm/core');
+	const { setMergeTagsVisible, setMergeTagCallback, createNotice } =
+		useDispatch('quillcrm/core');
 	const { steps, setSteps } = useAutomationContext();
 
 	// Determine if this is a messaging action that requires provider
@@ -55,14 +61,20 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		channel || 'sms' // Default to 'sms' if not a messaging action (hook always needs a value)
 	);
 
-	// Only sync settings when the step ID changes (switching to a different step)
-	// This prevents resetting user's changes when the same step is updated after save
+	// Use custom analytics hook
+	const {
+		analyticsData,
+		isLoading: isLoadingAnalytics,
+		isVisible: analyticsVisible,
+		fetchAnalytics,
+		hideAnalytics,
+	} = useStepAnalytics();
+
+	// Sync settings when step.settings changes
+	// This ensures we load the latest settings from the parent
 	useEffect(() => {
-		if (step.id !== currentStepId) {
-			setSettings(step.settings);
-			setCurrentStepId(step.id);
-		}
-	}, [step.id, step.settings, currentStepId]);
+		setSettings(step.settings || {});
+	}, [step.settings]);
 
 	const handleSave = async () => {
 		setIsSaving(true);
@@ -86,6 +98,26 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 		setStep(null); // Close the modal after deletion
 	};
 
+	const handleMergeTagsClick = () => {
+		setMergeTagCallback((tagValue: string) => {
+			navigator.clipboard.writeText(tagValue);
+			createNotice({
+				type: 'success',
+				message: __(
+					'Merge tag copied to clipboard. You can now paste it in any field.',
+					'quillcrm'
+				),
+			});
+		});
+		setMergeTagsVisible(true);
+	};
+
+	const handleViewAnalytics = async () => {
+		await fetchAnalytics(step.id);
+	};
+
+	// Check if this step supports analytics
+	const hasAnalytics = supportsAnalytics(step.action);
 	const action =
 		step.type === 'action' || step.type === 'delay'
 			? getAction(actionKey)
@@ -103,6 +135,16 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				</div>
 			)}
 
+			<Button
+				onClick={handleMergeTagsClick}
+				disabled={isSaving || isDeleting}
+				variant="secondaryDeepBlue"
+				className="w-full mb-4"
+				size="lg"
+			>
+				{__('Merge Tags', 'quillcrm')}
+			</Button>
+
 			<div className="mb-4">
 				<Fields
 					fields={action.fields}
@@ -110,7 +152,6 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					onChange={(value) => {
 						setSettings(value);
 					}}
-					enableMergeTags={true}
 				/>
 			</div>
 
@@ -149,6 +190,15 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 						setShowTwilioConfig(false);
 						checkStatus(); // Refresh provider status after configuration
 					}}
+				/>
+			)}
+
+			{hasAnalytics && analyticsData && (
+				<AnalyticsPopup
+					visible={analyticsVisible}
+					onClose={hideAnalytics}
+					actionType={getChannelType(step.action)}
+					analytics={analyticsData}
 				/>
 			)}
 		</div>

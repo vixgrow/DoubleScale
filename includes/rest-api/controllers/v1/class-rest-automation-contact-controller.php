@@ -25,6 +25,8 @@ use QuillCRM\Models\Automation_Contact_Model;
 class Rest_Automation_Contact_Controller extends REST_Controller {
 
 
+
+
 	/**
 	 * REST Base
 	 *

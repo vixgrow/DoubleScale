@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
@@ -38,10 +38,22 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	isTriggerVisible,
 	setTriggerVisible,
 }) => {
-	const { automation, updateAutomation, updateSettings, updateStep } =
+	const { automation, updateAutomation, updateSettings, updateStep, steps } =
 		useAutomationContext();
 	const [tempAction, setTempAction] = useState<string>('');
 	const { createNotice } = useDispatch('quillcrm/core');
+
+	// Close sidebar if the current step has been deleted
+	useEffect(() => {
+		if (currentStep && currentStep.id) {
+			// Check if the current step still exists in the steps array
+			const stepExists = steps.some(step => step.id === currentStep.id);
+			if (!stepExists) {
+				// Step was deleted, close the sidebar
+				setCurrentStep(null);
+			}
+		}
+	}, [steps, currentStep, setCurrentStep]);
 
 	// Only show sidebar for trigger, configured steps, unconfigured goals, or delay steps
 	// Exclude conditions and end_automation (they don't need configuration)
@@ -138,8 +150,8 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		);
 	};
 
-	const handleActionSave = async () => {
-		if (!currentStep || !tempAction) {
+	const handleActionSave = async (actionKey: string) => {
+		if (!currentStep || !actionKey) {
 			createNotice({
 				type: 'error',
 				message: __('Please select an action', 'quillcrm'),
@@ -148,7 +160,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		}
 
 		await handleSave(
-			{ action: tempAction },
+			{ action: actionKey },
 			__('Action saved', 'quillcrm'),
 			{ clearTempAction: true }
 		);
@@ -223,6 +235,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			configured: {
 				condition: () => (
 					<ConditionsModal
+						key={currentStep!.id}
 						step={currentStep!}
 						onSave={handleConditionSave}
 						visible={true}
@@ -231,6 +244,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 				),
 				default: () => (
 					<StepFieldsModal
+						key={currentStep!.id}
 						step={currentStep!}
 						setStep={setCurrentStep}
 						saveStep={handleStepSave}
@@ -265,7 +279,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	return (
 		<div
 			className={cn(
-				'qcrm-workflow-sidebar absolute top-1 right-0 h-screen w-80 rounded-l-lg z-[150400] overflow-y-auto',
+				'qcrm-workflow-sidebar absolute top-1 right-0 h-screen min-w-[21rem] max-w-96 rounded-l-lg z-[150400] overflow-y-auto',
 				isVisible ? 'is-visible' : ''
 			)}
 		>
@@ -274,7 +288,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 				onClose={handleClose}
 			/>
 
-			<div className="space-y-4 p-4 h-[calc(100vh-4rem)] overflow-y-auto">
+			<div className="space-y-4 p-4">
 				{renderContent()}
 			</div>
 		</div>

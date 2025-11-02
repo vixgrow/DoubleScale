@@ -23,6 +23,7 @@ final class Triggers_Manager {
 
 
 
+
 	/**
 	 * Registed triggers
 	 *
@@ -183,6 +184,16 @@ final class Triggers_Manager {
 					 'user' => array(
 						 'label'    => __( 'User', 'quillcrm' ),
 						 'triggers' => array(),
+					 ),
+				 ),
+			 ),
+			 'edd'         => array(
+				 'label'  => __( 'Easy Digital Downloads', 'quillcrm' ),
+				 'groups' => array(
+					 'order' => array(
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ),
+						 'label'       => __( 'Order', 'quillcrm' ),
+						 'triggers'    => array(),
 					 ),
 				 ),
 			 ),

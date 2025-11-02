@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useEffect } from '@wordpress/element';
+import { useCallback, useEffect, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -18,6 +18,7 @@ import {
 	Background,
 	Controls,
 	MiniMap,
+	useReactFlow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -29,7 +30,11 @@ import type { Automation, AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../state/context';
 
 // Configuration constants
-import { LAYOUT_CONSTANTS, EDGE_STYLES } from './config';
+import {
+	LAYOUT_CONSTANTS,
+	EDGE_STYLES,
+	LAYOUT_CONSTANTS_VIEW_MODE,
+} from './config';
 
 // Types and Interfaces
 import { WorkflowVisualizationProps, NODE_TYPES, EDGE_TYPES } from './types';
@@ -61,11 +66,32 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 	automation,
 	steps = [],
 	isLoading = false,
+	currentStep,
+	isTriggerVisible,
+	isSidebarOpen = false,
+	viewMode = false,
+	analyticsData = [],
 	onStepClick,
 	onTriggerClick,
 }) => {
 	// ========== CONTEXT AND STATE ==========
 	const { updateAutomation } = useAutomationContext();
+	const reactFlowInstance = useReactFlow();
+
+	// Track the last focused step ID to maintain focus when sidebar closes
+	const lastFocusedStepIdRef = useRef<string | null>(null);
+	// Track previous step state to detect when modal closes
+	const prevStepStateRef = useRef<{
+		id: number | null;
+		action: string | null;
+		type: string | null;
+	}>({
+		id: null,
+		action: null,
+		type: null,
+	});
+	// Track previous sidebar state to detect when it closes
+	const prevSidebarOpenRef = useRef<boolean>(false);
 
 	// ReactFlow state management
 	const [nodesState, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -118,7 +144,9 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		const initialNodes: Node[] = [];
 		const initialEdges: Edge[] = [];
 		// the width of node
-		const nodeWidth = LAYOUT_CONSTANTS.NODE_WIDTH;
+		const nodeWidth = viewMode
+			? LAYOUT_CONSTANTS_VIEW_MODE.NODE_WIDTH
+			: LAYOUT_CONSTANTS.NODE_WIDTH;
 		// the width of the add step node
 		const addStepWidth = LAYOUT_CONSTANTS.ADD_STEP_WIDTH;
 		// the width of the yes and no nodes
@@ -148,7 +176,10 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			addStepWidth,
 			onTriggerClick,
 			onStepClick,
-			savedPositions
+			savedPositions,
+			isTriggerVisible,
+			viewMode,
+			analyticsData
 		);
 
 		// Position calculator that considers nested structure
@@ -188,6 +219,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		);
 
 		// Process the entire step hierarchy starting from root
+		const selectedStepId = currentStep?.id?.toString() || null;
 		const result = processStepHierarchy(
 			steps,
 			initialNodes,
@@ -211,7 +243,10 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 			null,
 			null,
 			0,
-			0
+			0,
+			selectedStepId,
+			viewMode,
+			analyticsData
 		);
 
 		// Post-process to ensure all child condition merge nodes connect to their parent merge nodes
@@ -254,7 +289,139 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 		setEdges(initialEdges);
 
 		// saveNodePositions(initialNodes);
-	}, [automation?.id, steps, onStepClick, onDeleteStep]);
+	}, [
+		automation?.id,
+		steps,
+		onStepClick,
+		onDeleteStep,
+		currentStep?.id,
+		isTriggerVisible,
+	]);
+
+	// Track sidebar state and handle focus out when it closes
+	useEffect(() => {
+		if (!reactFlowInstance) return undefined;
+
+		// Check if sidebar just closed
+		const sidebarJustClosed = prevSidebarOpenRef.current && !isSidebarOpen;
+
+		if (sidebarJustClosed) {
+			// Sidebar closed - reset view (focus out)
+			const timer = setTimeout(() => {
+				lastFocusedStepIdRef.current = null;
+				prevStepStateRef.current = {
+					id: null,
+					action: null,
+					type: null,
+				};
+				reactFlowInstance.fitView({
+					duration: 400,
+					padding: 0.2,
+				});
+			}, 100);
+
+			prevSidebarOpenRef.current = isSidebarOpen;
+			return () => clearTimeout(timer);
+		}
+
+		// Update previous sidebar state
+		prevSidebarOpenRef.current = isSidebarOpen;
+		return undefined;
+	}, [isSidebarOpen, reactFlowInstance]);
+
+	// Focus on selected node when currentStep changes or trigger is selected
+	useEffect(() => {
+		if (!reactFlowInstance) return;
+
+		if (isTriggerVisible) {
+			// Focus on trigger node
+			lastFocusedStepIdRef.current = 'trigger';
+			const timer = setTimeout(() => {
+				const node = reactFlowInstance.getNode('trigger');
+
+				if (node) {
+					// Center the view on the trigger node with animation
+					reactFlowInstance.fitView({
+						nodes: [{ id: 'trigger' }],
+						duration: 400,
+						padding: 0.5,
+						minZoom: 0.8,
+						maxZoom: 1.2,
+					});
+				}
+			}, 100); // Small delay to ensure nodes are updated
+
+			return () => clearTimeout(timer);
+		} else if (currentStep?.id) {
+			const prevState = prevStepStateRef.current;
+			const nodeId = currentStep.id.toString();
+
+			// Detect different scenarios
+			const isNewStep = prevState.id !== currentStep.id;
+			const modalJustClosed =
+				prevState.id === currentStep.id &&
+				(currentStep.type === 'action' ||
+					currentStep.type === 'goal') &&
+				prevState.action === null &&
+				currentStep.action !== null;
+
+			// Steps that open sidebar directly (not a standalone modal)
+			const opensSidebarDirectly =
+				currentStep.type === 'condition' ||
+				currentStep.type === 'delay' ||
+				currentStep.type === 'end_automation' ||
+				(currentStep.type === 'action' && currentStep.action) || // Configured actions
+				(currentStep.type === 'goal' && currentStep.action); // Configured goals
+
+			// Update tracking refs
+			lastFocusedStepIdRef.current = nodeId;
+			prevStepStateRef.current = {
+				id: currentStep.id,
+				action: currentStep.action || null,
+				type: currentStep.type || null,
+			};
+
+			// Focus when:
+			// 1. Modal just closed with action selection
+			// 2. It's a step that opens sidebar directly
+			// 3. Clicking on a different step
+			const shouldFocus =
+				modalJustClosed || // Action/Goal modal just closed with selection
+				opensSidebarDirectly || // Steps that show sidebar directly
+				isNewStep; // Any time a different step is clicked
+
+			if (shouldFocus) {
+				// Delay to ensure nodes are rendered
+				const timer = setTimeout(() => {
+					const node = reactFlowInstance.getNode(nodeId);
+
+					if (node) {
+						// Center the view on the selected node with animation
+						reactFlowInstance.fitView({
+							nodes: [{ id: nodeId }],
+							duration: 400,
+							padding: 0.5,
+							minZoom: 0.8,
+							maxZoom: 1.2,
+						});
+					}
+				}, 100); // Small delay to ensure nodes are updated
+
+				return () => clearTimeout(timer);
+			}
+
+			return undefined;
+		}
+
+		return undefined;
+	}, [
+		currentStep?.id,
+		currentStep?.action,
+		currentStep?.type,
+		isTriggerVisible,
+		reactFlowInstance,
+		nodesState,
+	]);
 
 	// ========== POSITION MANAGEMENT ==========
 
@@ -371,13 +538,13 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 						edges={edgesState}
 						onNodesChange={handleNodesChange}
 						onEdgesChange={onEdgesChange}
-						onNodeClick={onNodeClick}
+						onNodeClick={viewMode ? undefined : onNodeClick}
 						nodeTypes={NODE_TYPES}
 						edgeTypes={EDGE_TYPES}
 						fitView
 						fitViewOptions={{ padding: 0.2 }}
 						nodesConnectable={false}
-						elementsSelectable={true}
+						elementsSelectable={!viewMode}
 						nodesDraggable={false}
 						selectNodesOnDrag={false}
 						panOnDrag={true}
@@ -389,7 +556,7 @@ const WorkflowVisualization: React.FC<WorkflowVisualizationProps> = ({
 							type: 'default',
 							style: EDGE_STYLES.DEFAULT,
 						}}
-						elevateEdgesOnSelect={true}
+						elevateEdgesOnSelect={!viewMode}
 						elevateNodesOnSelect={false}
 						snapToGrid={false}
 						snapGrid={[15, 15]}

@@ -113,6 +113,16 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	}>({ top: 0, height: 0 });
 	const containerRef = useRef<HTMLDivElement | null>(null);
 
+	// Sync rules state with step.settings when modal opens
+	useEffect(() => {
+		if (visible) {
+			const stepRules = step.settings || [[getInitialRule()]];
+			setRules(stepRules);
+			// Reset refs for fresh calculation
+			cardRefs.current = [];
+		}
+	}, [visible, step.settings]);
+
 	// Fetch dynamic rules when form_context is available
 	useEffect(() => {
 		const fetchDynamicRules = async () => {
@@ -142,6 +152,8 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	}, [formContext, visible]);
 
 	useLayoutEffect(() => {
+		if (!visible) return;
+
 		const updateBracket = () => {
 			if (
 				rules.length <= 1 ||
@@ -165,10 +177,17 @@ const ConditionsModal: React.FC<RulesProps> = ({
 				setOrBracketStyle({ top: firstMid, height });
 			}
 		};
-		updateBracket();
+
+		// Use multiple attempts to ensure refs are populated
+		const timeoutId1 = setTimeout(updateBracket, 0);
+		const timeoutId2 = setTimeout(updateBracket, 50);
 		window.addEventListener('resize', updateBracket);
-		return () => window.removeEventListener('resize', updateBracket);
-	}, [rules]);
+		return () => {
+			clearTimeout(timeoutId1);
+			clearTimeout(timeoutId2);
+			window.removeEventListener('resize', updateBracket);
+		};
+	}, [rules, visible]);
 
 	const save = async (data: Partial<AutomationStep>) => {
 		setIsSaving(true);

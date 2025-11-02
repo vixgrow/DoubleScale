@@ -70,6 +70,7 @@ class Campaign_Analytics {
 
 	/**
 	 * Get analytics data for campaign type
+	 * Optimized to use single GROUP BY query instead of N+1 queries
 	 *
 	 * @param string $type Campaign type ('email', 'sms')
 	 * @param string $interval Analytics interval
@@ -88,31 +89,41 @@ class Campaign_Analytics {
 
 		$dates     = Utils::get_dates_between_dates( $start_date, $end_date );
 		$date_type = $dates['type'] ?? 'hour';
-		$data      = array();
 
+		// Determine the MySQL date format based on interval type
+		$date_formats = array(
+			'hour'  => '%Y-%m-%d %H:00:00',
+			'day'   => '%Y-%m-%d',
+			'month' => '%Y-%m',
+			'year'  => '%Y',
+		);
+
+		$format = $date_formats[ $date_type ] ?? $date_formats['day'];
+
+		// Optimized: Single GROUP BY query instead of N queries
+		$results = $query
+			->selectRaw( "DATE_FORMAT(created_at, '{$format}') as period, COUNT(*) as count" )
+			->whereBetween( 'created_at', array( $start_date . ' 00:00:00', $end_date . ' 23:59:59' ) )
+			->groupBy( 'period' )
+			->orderBy( 'period', 'ASC' )
+			->get();
+
+		// Convert results to associative array with date as key
+		$data = array();
+		foreach ( $results as $result ) {
+			$data[ $result->period ] = (int) $result->count;
+		}
+
+		// Fill in missing dates with zero counts
 		foreach ( $dates['dates'] as $date ) {
-			switch ( $date_type ) {
-				case 'hour':
-					$end_hour      = date( 'Y-m-d H:i:s', strtotime( $date . ' +1 hour' ) );
-					$data[ $date ] = $query->whereBetween( 'created_at', array( $date, $end_hour ) )->count();
-					break;
-				case 'day':
-					$start_of_day  = $date . ' 00:00:00';
-					$end_of_day    = $date . ' 23:59:59';
-					$data[ $date ] = $query->whereBetween( 'created_at', array( $start_of_day, $end_of_day ) )->count();
-					break;
-				case 'month':
-					$start_of_month = date( 'Y-m-01 00:00:00', strtotime( $date ) );
-					$end_of_month   = date( 'Y-m-t 23:59:59', strtotime( $date ) );
-					$data[ $date ]  = $query->whereBetween( 'created_at', array( $start_of_month, $end_of_month ) )->count();
-					break;
-				case 'year':
-					$start_of_year = date( 'Y-01-01 00:00:00', strtotime( $date ) );
-					$end_of_year   = date( 'Y-12-31 23:59:59', strtotime( $date ) );
-					$data[ $date ] = $query->whereBetween( 'created_at', array( $start_of_year, $end_of_year ) )->count();
-					break;
+			$period_key = $this->format_date_for_period( $date, $date_type );
+			if ( ! isset( $data[ $period_key ] ) ) {
+				$data[ $period_key ] = 0;
 			}
 		}
+
+		// Sort by date to ensure proper order
+		ksort( $data );
 
 		$totals = $this->get_total_stats( $type, $start_date, $end_date );
 
@@ -120,6 +131,31 @@ class Campaign_Analytics {
 			$type  => $data,
 			'data' => $dates,
 		) + $totals;
+	}
+
+	/**
+	 * Format date string to match the period format used in GROUP BY query
+	 *
+	 * @param string $date Date string
+	 * @param string $period_type Period type ('hour', 'day', 'month', 'year')
+	 *
+	 * @return string Formatted date string
+	 */
+	protected function format_date_for_period( $date, $period_type ) {
+		$timestamp = strtotime( $date );
+
+		switch ( $period_type ) {
+			case 'hour':
+				return date( 'Y-m-d H:00:00', $timestamp );
+			case 'day':
+				return date( 'Y-m-d', $timestamp );
+			case 'month':
+				return date( 'Y-m', $timestamp );
+			case 'year':
+				return date( 'Y', $timestamp );
+			default:
+				return date( 'Y-m-d', $timestamp );
+		}
 	}
 
 	/**
@@ -192,38 +228,76 @@ class Campaign_Analytics {
 	 * @return array Enhanced statistics with type-specific data
 	 */
 	protected function add_type_specific_stats( $stats, $type, $campaign_id = null, $start_date = null, $end_date = null ) {
+		global $wpdb;
+
+		// Get table names for JOIN
+		$contacts_table = $wpdb->prefix . 'quillcrm_contacts';
+		$tracking_table = $wpdb->prefix . 'quillcrm_tracking';
+
 		// Build base query with all common filters
 		$base_query = $this->get_model_query( $type );
 
 		if ( $campaign_id ) {
-			$base_query->where( 'source_id', $campaign_id )
-				->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN );
+			$base_query->where( $tracking_table . '.source_id', $campaign_id )
+				->where( $tracking_table . '.source_type', Message_Source_Types::CAMPAIGN );
 		}
 
 		if ( $start_date && $end_date ) {
-			$base_query->whereBetween( 'created_at', array( $start_date . ' 00:00:00', $end_date . ' 23:59:59' ) );
+			$base_query->whereBetween( $tracking_table . '.created_at', array( $start_date . ' 00:00:00', $end_date . ' 23:59:59' ) );
 		}
 
-		// Optimized: Single query per type with aggregate functions
+		// Optimized: Single query per type with aggregate functions, including unsubscribe tracking
 		if ( $type === Campaign_Channel::CHANNEL_EMAIL || $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE || $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL ) {
-			$result = $base_query->selectRaw( 'SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened, SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked' )->first();
+			$result = $base_query
+				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
+				->selectRaw(
+					"
+					SUM(CASE WHEN {$tracking_table}.opened = 1 THEN 1 ELSE 0 END) as opened,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN contacts.status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
+				"
+				)
+				->first();
 
-			$stats['opened']  = (int) $result->opened;
-			$stats['clicked'] = (int) $result->clicked;
+			$stats['opened']       = (int) $result->opened;
+			$stats['clicked']      = (int) $result->clicked;
+			$stats['unsubscribed'] = (int) $result->unsubscribed;
 
 		} elseif ( $type === Campaign_Channel::CHANNEL_SMS ) {
-			$result = $base_query->selectRaw( 'SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = ' . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered' )->first();
+			$result = $base_query
+				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
+				->selectRaw(
+					"
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
+					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
+				'
+				)
+				->first();
 
-			$stats['clicked']   = (int) $result->clicked;
-			$stats['delivered'] = (int) $result->delivered;
-			$stats              = $this->calculate_sms_rates( $stats );
+			$stats['clicked']      = (int) $result->clicked;
+			$stats['delivered']    = (int) $result->delivered;
+			$stats['unsubscribed'] = (int) $result->unsubscribed;
+			$stats                 = $this->calculate_sms_rates( $stats );
 
 		} elseif ( $type === Campaign_Channel::CHANNEL_WHATSAPP ) {
-			$result = $base_query->selectRaw( 'SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = ' . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered' )->first();
+			$result = $base_query
+				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
+				->selectRaw(
+					"
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
+					SUM(CASE WHEN ' . $tracking_table . '.status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as read,
+					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
+				'
+				)
+				->first();
 
-			$stats['clicked']   = (int) $result->clicked;
-			$stats['delivered'] = (int) $result->delivered;
-			$stats              = $this->calculate_whatsapp_rates( $stats );
+			$stats['clicked']      = (int) $result->clicked;
+			$stats['delivered']    = (int) $result->delivered;
+			$stats['read']         = (int) $result->read;
+			$stats['unsubscribed'] = (int) $result->unsubscribed;
+			$stats                 = $this->calculate_whatsapp_rates( $stats );
 		}
 
 		return $stats;
@@ -302,8 +376,8 @@ class Campaign_Analytics {
             DATE_FORMAT(sent_at, '{$format}') as period,
             COUNT(*) as total_sent,
             SUM(CASE WHEN status = " . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as sent,
-            SUM(CASE WHEN status = ' . Tracking_Status::FAILED . " THEN 1 ELSE 0 END) as failed
-        ";
+            SUM(CASE WHEN status = ' . Tracking_Status::FAILED . ' THEN 1 ELSE 0 END) as failed
+        ';
 
 		if ( $type === Campaign_Channel::CHANNEL_EMAIL ) {
 			$select_fields .= ',
@@ -318,7 +392,7 @@ class Campaign_Analytics {
 
 		$results = $query->selectRaw( $select_fields )
 			->where( 'source_id', $campaign_id )
-			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN )
+			->where( 'source_type', Message_Source_Types::CAMPAIGN )
 			->whereNotNull( 'sent_at' )
 			->groupBy( 'period' )
 			->orderBy( 'period', 'DESC' )

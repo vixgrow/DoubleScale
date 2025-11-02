@@ -212,7 +212,7 @@ export function DataTableActions<TData>({
 							</DialogTitle>
 						</DialogHeader>
 
-						<div className="mt-4 grid grid-cols-3 justify-between gap-x-5 gap-y-4">
+						<div className="mt-4 grid grid-cols-2 justify-between gap-x-5 gap-y-4">
 							{table
 								.getAllColumns()
 								.filter((column) => column.getCanHide())

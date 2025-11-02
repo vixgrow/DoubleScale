@@ -228,39 +228,76 @@ class Campaign_Analytics {
 	 * @return array Enhanced statistics with type-specific data
 	 */
 	protected function add_type_specific_stats( $stats, $type, $campaign_id = null, $start_date = null, $end_date = null ) {
+		global $wpdb;
+
+		// Get table names for JOIN
+		$contacts_table = $wpdb->prefix . 'quillcrm_contacts';
+		$tracking_table = $wpdb->prefix . 'quillcrm_tracking';
+
 		// Build base query with all common filters
 		$base_query = $this->get_model_query( $type );
 
 		if ( $campaign_id ) {
-			$base_query->where( 'source_id', $campaign_id )
-				->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN );
+			$base_query->where( $tracking_table . '.source_id', $campaign_id )
+				->where( $tracking_table . '.source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN );
 		}
 
 		if ( $start_date && $end_date ) {
-			$base_query->whereBetween( 'created_at', array( $start_date . ' 00:00:00', $end_date . ' 23:59:59' ) );
+			$base_query->whereBetween( $tracking_table . '.created_at', array( $start_date . ' 00:00:00', $end_date . ' 23:59:59' ) );
 		}
 
-		// Optimized: Single query per type with aggregate functions
+		// Optimized: Single query per type with aggregate functions, including unsubscribe tracking
 		if ( $type === Campaign_Channel::CHANNEL_EMAIL || $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE || $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL ) {
-			$result = $base_query->selectRaw( 'SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened, SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked' )->first();
+			$result = $base_query
+				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
+				->selectRaw(
+					"
+					SUM(CASE WHEN {$tracking_table}.opened = 1 THEN 1 ELSE 0 END) as opened,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN contacts.status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
+				"
+				)
+				->first();
 
-			$stats['opened']  = (int) $result->opened;
-			$stats['clicked'] = (int) $result->clicked;
+			$stats['opened']       = (int) $result->opened;
+			$stats['clicked']      = (int) $result->clicked;
+			$stats['unsubscribed'] = (int) $result->unsubscribed;
 
 		} elseif ( $type === Campaign_Channel::CHANNEL_SMS ) {
-			$result = $base_query->selectRaw( 'SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = ' . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered' )->first();
+			$result = $base_query
+				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
+				->selectRaw(
+					"
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
+					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
+				'
+				)
+				->first();
 
-			$stats['clicked']   = (int) $result->clicked;
-			$stats['delivered'] = (int) $result->delivered;
-			$stats              = $this->calculate_sms_rates( $stats );
+			$stats['clicked']      = (int) $result->clicked;
+			$stats['delivered']    = (int) $result->delivered;
+			$stats['unsubscribed'] = (int) $result->unsubscribed;
+			$stats                 = $this->calculate_sms_rates( $stats );
 
 		} elseif ( $type === Campaign_Channel::CHANNEL_WHATSAPP ) {
-			$result = $base_query->selectRaw( 'SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked, SUM(CASE WHEN status = ' . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered, SUM(CASE WHEN status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as read' )->first();
+			$result = $base_query
+				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
+				->selectRaw(
+					"
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
+					SUM(CASE WHEN ' . $tracking_table . '.status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as read,
+					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
+				'
+				)
+				->first();
 
-			$stats['clicked']   = (int) $result->clicked;
-			$stats['delivered'] = (int) $result->delivered;
-			$stats['read']      = (int) $result->read;
-			$stats              = $this->calculate_whatsapp_rates( $stats );
+			$stats['clicked']      = (int) $result->clicked;
+			$stats['delivered']    = (int) $result->delivered;
+			$stats['read']         = (int) $result->read;
+			$stats['unsubscribed'] = (int) $result->unsubscribed;
+			$stats                 = $this->calculate_whatsapp_rates( $stats );
 		}
 
 		return $stats;

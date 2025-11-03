@@ -55,7 +55,6 @@ const Analytics: React.FC = () => {
 	const [started, setStarted] = useState(
 		campaign?.status === 'processing' && totalMessages > 0
 	);
-	const [resending, setResending] = useState(false);
 
 	const fetchCampaign = useCallback(async () => {
 		if (!campaign || isFetching) {
@@ -105,35 +104,6 @@ const Analytics: React.FC = () => {
 			clearTimeout(timeout);
 		};
 	}, [campaign, fetchCampaign]);
-
-	const resendFailed = async () => {
-		if (!campaign) {
-			return;
-		}
-
-		setResending(true);
-		try {
-			const endpoint = getCampaignEndpoint(campaign.type);
-			if (!endpoint) {
-				throw new Error('Invalid campaign type');
-			}
-
-			const response = (await apiFetch({
-				path: `${endpoint}/${campaign.id}`,
-				method: 'PUT',
-				data: {
-					...campaign,
-					status: 'resending',
-				},
-			})) as CampaignType;
-
-			updateCampaignAction(response as any);
-		} catch (error) {
-			console.error(error);
-		} finally {
-			setResending(false);
-		}
-	};
 
 	const calculatePercentage = (total: number, value: number) => {
 		if (total === 0) {

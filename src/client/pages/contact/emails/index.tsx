@@ -18,15 +18,15 @@ import {
 	OpenRateIcon,
 	SendEmailsIcon,
 	NoEmailsIcon,
+	MessageStatsCard,
+	NoData,
 } from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
-import { NoData } from '@/components/no-data';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-table';
 import { getColumns } from './columns';
 import EmailDetails from './email-details-dialog';
 import SendEmailDialog from './send-email-dialog';
-import { MessageStatsCard } from '../components/message-stats-card';
 
 interface EmailsProps {
 	contact_id: number;

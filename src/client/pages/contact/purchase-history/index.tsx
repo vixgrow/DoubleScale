@@ -19,13 +19,13 @@ import {
 	TotalRevenueIcon,
 	NoPurchaseHistoryIcon,
 	AnalyticsReportsIcon,
+	MessageStatsCard,
+	NoData,
 } from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import { getWooColumns, getEddColumns } from './columns';
-import { MessageStatsCard } from '../components/message-stats-card';
-import { NoData } from '@quillcrm/components/no-data';
 
 interface PurchaseHistoryProps {
 	contact_id: number;

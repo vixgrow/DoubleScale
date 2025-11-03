@@ -22,16 +22,14 @@ import { DataTable } from '@/components/ui/data-table';
 import { getColumns } from './columns';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@quillcrm/components/ui/data-table-pagination';
-import { Dialog, DialogContent, DialogOverlay } from '@quillcrm/components/ui/dialog';
 
 const ContactsList: React.FC = () => {
 	const { id } = useParams<{ id: string; tab: string }>();
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(10);
-	const [totalRecords, setTotalRecords] = useState(0);
+	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [contacts, setContacts] = useState<AutomationContact[]>([]);
-	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [contact, setContact] = useState<AutomationContact | null>(null);
 	const [keyword, setKeyword] = useState('');
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -56,12 +54,13 @@ const ContactsList: React.FC = () => {
 				method: 'GET',
 			})) as AutomationContactsResponse;
 
-			response.total && setTotalRecords(response.total);
-			response.data && setContacts(response.data);
+			setTotalRecords(response.total);
+			setContacts(response.data);
 		} catch (error: any) {
 			createNotice({
 				type: 'error',
-				message: error.message || __('Failed to fetch contacts', 'quillcrm'),
+				message:
+					error.message || __('Failed to fetch contacts', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);
@@ -82,15 +81,13 @@ const ContactsList: React.FC = () => {
 			onChange: (value) => setKeyword(value),
 			value: keyword,
 		},
-		selection: {
-			enabled: true,
-			selectedKeys: selectedRowKeys,
-			onSelectionChange: setSelectedRowKeys,
-		},
 	};
 
 	return (
-		<div className="qcrm-contacts-list px-5 overflow-y-auto">
+		<div className="qcrm-contacts-list px-8 py-5 h-screen">
+			<div className="mb-4">
+				<h1 className="text-3xl font-semibold text-[#09090B]">{__('Contacts', 'quillcrm')}</h1>
+			</div>
 			<div className="qcrm-contacts-list__table">
 				<DataTable
 					columns={columns}
@@ -104,12 +101,11 @@ const ContactsList: React.FC = () => {
 				<DataTablePagination table={serverSideTable} />
 			</div>
 
-			<Dialog open={contact !== null} onOpenChange={() => setContact(null)}>
-				<DialogOverlay className="z-[150200]"/>	
-				<DialogContent className="max-w-4xl z-[150200]">
-					<Result contact={contact} />
-				</DialogContent>
-			</Dialog>
+			<Result
+				contact={contact}
+				open={contact !== null}
+				onOpenChange={(open) => !open && setContact(null)}
+			/>
 		</div>
 	);
 };

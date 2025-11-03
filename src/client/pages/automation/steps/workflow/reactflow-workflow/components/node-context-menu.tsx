@@ -26,6 +26,7 @@ import {
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
+	AlertDialogOverlay,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { DeleteIcon, EditIcon } from '@quillcrm/components';
@@ -85,7 +86,7 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 					onContextMenu={(e) => e.preventDefault()}
 				>
 					{onEdit && (
-						<DropdownMenuItem onSelect={handleEdit}>
+						<DropdownMenuItem onSelect={handleEdit} className="pointer-events-auto cursor-pointer hover:bg-gray-100">
 							<EditIcon />
 							{__('Edit', 'quillcrm')}
 						</DropdownMenuItem>
@@ -95,9 +96,9 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
 								onSelect={handleDeleteClick}
-								className="text-destructive focus:text-destructive"
+								className="text-destructive focus:text-destructive pointer-events-auto cursor-pointer hover:bg-gray-100"
 							>
-								<DeleteIcon/>
+								<DeleteIcon />
 								{__('Delete', 'quillcrm')}
 							</DropdownMenuItem>
 						</>
@@ -106,7 +107,8 @@ const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
 			</DropdownMenu>
 
 			<AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
-				<AlertDialogContent>
+				<AlertDialogOverlay className="z-[150000]" />
+				<AlertDialogContent className="z-[150000]">
 					<AlertDialogHeader>
 						<AlertDialogTitle>
 							{__('Are you sure?', 'quillcrm')}

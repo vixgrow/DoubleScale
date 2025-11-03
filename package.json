@@ -82,6 +82,7 @@
 		"classnames": "^2.5.1",
 		"clsx": "^2.1.1",
 		"cmdk": "^1.0.0",
+		"d3-funnel": "^2.1.3",
 		"date-fns": "^4.1.0",
 		"emotion": "^11.0.0",
 		"eslint-plugin-prettier": "^5.2.1",

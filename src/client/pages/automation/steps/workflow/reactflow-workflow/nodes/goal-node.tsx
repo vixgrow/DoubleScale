@@ -17,25 +17,38 @@ import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
 import { getGoal } from '@quillcrm/utils';
 import NodeContextMenu from '../components/node-context-menu';
-import NodeActionsDropdown from '../components/node-actions-dropdown';
+import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
 import { GoalIcon } from '@quillcrm/components';
 
 interface GoalNodeData {
 	step: AutomationStep;
+	selectedStepId?: string | null;
+	viewMode?: boolean;
+	analytics?: { contacts: number; conversion_rate: number };
 	onStepClick?: (step: OrganizedStep) => void;
 }
 
 const GoalNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, onStepClick } = data as unknown as GoalNodeData;
+	const { step, onStepClick, selectedStepId, viewMode = false, analytics } = data as unknown as GoalNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const goal = step.action ? getGoal(step.action) : null;
 	const hasGoal = !!step.action;
 
+	const subtitle = hasGoal ? (
+		<span className="qcrm-reactflow-goal__configured">
+			{goal?.label}
+		</span>
+	) : (
+		<span className="qcrm-reactflow-goal__not-configured">
+			{__('Goal not set', 'quillcrm')}
+		</span>
+	);
+
 	const handleEdit = () => {
-		if (onStepClick) {
+		if (!viewMode && onStepClick) {
 			onStepClick({
 				...step,
 				children: [], // Will be populated if needed by the consuming component
@@ -78,6 +91,8 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	const handleDelete = async () => {
+		if (viewMode) return;
+
 		const { newSteps, updatedOrdersSteps } = getNewSteps();
 
 		try {
@@ -104,43 +119,25 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
+	// Check if this node is selected
+	const isSelected = selectedStepId === step.id.toString();
+
 	return (
-		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-			<div className="qcrm-reactflow-node qcrm-reactflow-node--goal">
+		<NodeContextMenu onEdit={viewMode ? undefined : handleEdit} onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
+			<div className={`qcrm-reactflow-node qcrm-reactflow-node--goal ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
 				<Handle
 					type="target"
 					position={Position.Top}
 					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 
-				{/* Step Reorder Controls */}
-				<StepReorderControls step={step} />
+				{/* Step Reorder Controls - hide in view mode */}
+				{!viewMode && <StepReorderControls step={step} />}
 
-				<div className="qcrm-reactflow-node__icon">
-					<GoalIcon width={23} height={23} />
-				</div>
-				<div
-					className="qcrm-reactflow-node__content"
-					style={{ flex: 1, marginRight: '60px' }}
-				>
-					<div className="qcrm-reactflow-node__title">
-						{__('Goal', 'quillcrm')}
-					</div>
-					<div className="qcrm-reactflow-node__subtitle">
-						{hasGoal ? (
-							<span className="qcrm-reactflow-goal__configured">
-								{goal?.label}
-							</span>
-						) : (
-							<span className="qcrm-reactflow-goal__not-configured">
-								{__('Goal not set', 'quillcrm')}
-							</span>
-						)}
-					</div>
-				</div>
-
-				{/* Three dots dropdown menu */}
-				<NodeActionsDropdown
+				<NodeLayout
+					icon={<GoalIcon width={23} height={23} />}
+					title={__('Goal', 'quillcrm')}
+					subtitle={subtitle}
 					onEdit={handleEdit}
 					onDelete={handleDelete}
 					editLabel={__('Edit Goal', 'quillcrm')}
@@ -150,6 +147,8 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 						'This will remove the goal from your workflow.',
 						'quillcrm'
 					)}
+					viewMode={viewMode}
+					analytics={analytics}
 				/>
 
 				<Handle

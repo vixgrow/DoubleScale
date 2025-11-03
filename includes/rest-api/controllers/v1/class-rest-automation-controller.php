@@ -137,6 +137,11 @@ class Rest_Automation_Controller extends REST_Controller {
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 						),
+						'keyword'  => array(
+							'description'       => __( 'Search keyword.', 'quillcrm' ),
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 				),
 			)
@@ -543,10 +548,26 @@ class Rest_Automation_Controller extends REST_Controller {
 	 */
 	public function get_contacts( $request ) {
 		try {
-			$id                  = $request->get_param( 'id' );
-			$per_page            = $request->get_param( 'per_page' ) ?? 10;
-			$page                = $request->get_param( 'page' ) ?? 1;
-			$automation_contacts = Automation_Contact_Model::where( 'automation_id', $id )->with( 'contact', 'processes.step', 'current_step', 'next_step' )->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			$id       = $request->get_param( 'id' );
+			$per_page = $request->get_param( 'per_page' ) ?? 10;
+			$page     = $request->get_param( 'page' ) ?? 1;
+			$keyword  = $request->get_param( 'keyword' ) ?? '';
+
+			$query = Automation_Contact_Model::where( 'automation_id', $id );
+
+			// Apply keyword search if provided
+			if ( ! empty( $keyword ) ) {
+				$query->whereHas(
+					'contact',
+					function ( $q ) use ( $keyword ) {
+						$q->where( 'email', 'LIKE', '%' . $keyword . '%' );
+					}
+				);
+			}
+
+			$automation_contacts = $query->with( 'contact', 'processes.step', 'current_step', 'next_step' )
+				->orderBy( 'created_at', 'desc' )
+				->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $automation_contacts, 200 );
 		} catch ( \Exception $e ) {

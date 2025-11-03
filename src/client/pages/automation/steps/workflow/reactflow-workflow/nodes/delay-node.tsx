@@ -18,7 +18,7 @@ import type {
     OrganizedStep,
 } from '@quillcrm/client';
 import NodeContextMenu from '../components/node-context-menu';
-import NodeActionsDropdown from '../components/node-actions-dropdown';
+import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
@@ -28,13 +28,16 @@ import { TimerBlockIcon } from '@quillcrm/components';
 interface DelayNodeData {
     step: AutomationStep;
     automation: Automation;
+    selectedStepId?: string | null;
+    viewMode?: boolean;
+    analytics?: { contacts: number; conversion_rate: number };
     onStepClick?: (step: OrganizedStep) => void;
     onDeleteStep?: (stepId: string) => void;
 }
 
 const DelayNode: React.FC<NodeProps> = (props) => {
     const { data } = props;
-    const { step, onStepClick } = data as unknown as DelayNodeData;
+    const { step, onStepClick, selectedStepId, viewMode = false, analytics } = data as unknown as DelayNodeData;
 
     const { steps, setSteps } = useAutomationContext();
     const { createNotice } = useDispatch('quillcrm/core');
@@ -52,9 +55,19 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 
     const delayText = getDelayText();
 
+    const subtitle = isConfigured ? (
+        <span className="qcrm-reactflow-delay__configured">
+            {__('Sets to delay', 'quillcrm')} {delayText}
+        </span>
+    ) : (
+        <span className="qcrm-reactflow-delay__not-configured">
+            <span className='text-[#333333B2] mr-1'>{__('Need to', 'quillcrm')}</span>
+            {__('Set Delay Time', 'quillcrm')}
+        </span>
+    );
 
     const handleEdit = () => {
-        if (onStepClick) {
+        if (!viewMode && onStepClick) {
             onStepClick({
                 ...step,
                 children: [], // Will be populated if needed by the consuming component
@@ -63,44 +76,30 @@ const DelayNode: React.FC<NodeProps> = (props) => {
     };
 
     const handleDelete = async () => {
-        await deleteStep(step.id.toString(), steps, setSteps, createNotice);
+        if (!viewMode) {
+            await deleteStep(step.id.toString(), steps, setSteps, createNotice);
+        }
     };
 
+    // Check if this node is selected
+    const isSelected = selectedStepId === step.id.toString();
+
     return (
-        <NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-            <div className="qcrm-reactflow-node qcrm-reactflow-node--delay" onClick={handleEdit}>
+        <NodeContextMenu onEdit={viewMode ? undefined : handleEdit} onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
+            <div className={`qcrm-reactflow-node qcrm-reactflow-node--delay ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`} onClick={viewMode ? undefined : handleEdit}>
                 <Handle
                     type="target"
                     position={Position.Top}
                     className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
                 />
 
-                {/* Step Reorder Controls */}
-                <StepReorderControls step={step} />
+                {/* Step Reorder Controls - hide in view mode */}
+                {!viewMode && <StepReorderControls step={step} />}
 
-                <div className="qcrm-reactflow-node__icon">
-                    <TimerBlockIcon />
-                </div>
-                <div className="qcrm-reactflow-node__content">
-                    <div className="qcrm-reactflow-node__title">
-                        {__('Delay', 'quillcrm')}
-                    </div>
-                    <div className="qcrm-reactflow-node__subtitle">
-                        {isConfigured ? (
-                            <span className="qcrm-reactflow-delay__configured">
-                                {__('Sets to delay', 'quillcrm')} {delayText}
-                            </span>
-                        ) : (
-                            <span className="qcrm-reactflow-delay__not-configured">
-                                <span className='text-[#333333B2] mr-1'>{__('Need to', 'quillcrm')}</span>
-                                {__('Set Delay Time', 'quillcrm')}
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Three dots dropdown menu */}
-                <NodeActionsDropdown
+                <NodeLayout
+                    icon={<TimerBlockIcon />}
+                    title={__('Delay', 'quillcrm')}
+                    subtitle={subtitle}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     editLabel={__('Edit Delay', 'quillcrm')}
@@ -110,6 +109,8 @@ const DelayNode: React.FC<NodeProps> = (props) => {
                         'This will remove the Delay from your workflow.',
                         'quillcrm'
                     )}
+                    viewMode={viewMode}
+                    analytics={analytics}
                 />
 
                 <Handle

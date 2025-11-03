@@ -66,7 +66,7 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 		data as unknown as AddStepNodeData;
 	const [loading, setLoading] = useState(false);
 	const [visible, setVisible] = useState(false);
-	const { automation, steps, setSteps, setUpdatedSteps } =
+	const { automation, steps, setSteps, setUpdatedSteps, viewMode = false } =
 		useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -204,25 +204,28 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	return (
-		<div className="qcrm-reactflow-node qcrm-reactflow-node--add-step w-auto h-auto min-w-0 p-0 bg-transparent border-0 shadow-none">
-			<Handle
-				type="target"
-				position={Position.Top}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
-			/>
+		<div 
+			className={`qcrm-reactflow-node qcrm-reactflow-node--add-step w-auto h-auto min-w-0 p-0 bg-transparent border-0 shadow-none ${viewMode ? 'qcrm-reactflow-node--disabled' : ''}`}
+		>
+		<Handle
+			type="target"
+			position={Position.Top}
+			className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+		/>
 
-			<AddStepDialog
-				visible={visible}
-				onVisibleChange={setVisible}
-				loading={loading}
-				onStepSelection={handleStepSelection}
-			/>
+		<AddStepDialog
+			visible={visible}
+			onVisibleChange={setVisible}
+			loading={loading}
+			onStepSelection={handleStepSelection}
+			disabled={viewMode}
+		/>
 
-			<Handle
-				type="source"
-				position={Position.Bottom}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
-			/>
+		<Handle
+			type="source"
+			position={Position.Bottom}
+			className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+		/>
 		</div>
 	);
 };

@@ -38,3 +38,4 @@ export { default as ContactList } from './contacts-list';
 export { default as Stepper } from './stepper';
 export { default as Editor } from './editor';
 export { NoData } from './no-data';
+export { MessageStatsCard } from './message-stats-card';

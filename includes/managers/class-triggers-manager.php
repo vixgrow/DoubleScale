@@ -25,6 +25,7 @@ final class Triggers_Manager {
 
 
 
+
 	/**
 	 * Registed triggers
 	 *
@@ -169,15 +170,15 @@ final class Triggers_Manager {
 				 'label'       => __( 'WooCommerce', 'quillcrm' ),
 				 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 				 'groups'      => array(
-					 'order'  => array(
+					 'order'        => array(
 						 'label'    => __( 'Order', 'quillcrm' ),
 						 'triggers' => array(),
 					 ),
-					 'cart'   => array(
+					 'cart'         => array(
 						 'label'    => __( 'Cart', 'quillcrm' ),
 						 'triggers' => array(),
 					 ),
-					 'review' => array(
+					 'review'       => array(
 						 'label'    => __( 'Review', 'quillcrm' ),
 						 'triggers' => array(),
 					 ),
@@ -185,6 +186,10 @@ final class Triggers_Manager {
 						 'label'       => __( 'Subscription', 'quillcrm' ),
 						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
 						 'triggers'    => array(),
+					 ),
+					 'wishlist'     => array(
+						 'label'    => __( 'Wishlist', 'quillcrm' ),
+						 'triggers' => array(),
 					 ),
 				 ),
 			 ),

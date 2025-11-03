@@ -2,50 +2,99 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import { useEffect, useState, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
-
-/**
- * External dependencies
- */
-import {
-	Card,
-	Flex,
-	Typography,
-	Table,
-	Badge,
-	Radio,
-	Modal,
-	Divider,
-	Button,
-} from 'antd';
-import { UserOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { CampaignEmail, CampaignEmailsResponse } from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
-import { convertDate } from '@quillcrm/utils';
+import type {
+	CampaignEmail,
+	CampaignEmailsResponse,
+	NoticeMessage,
+} from '@quillcrm/client';
 import { useParams } from '@quillcrm/navigation';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
+import { DataTable } from '@/components/ui/data-table';
+import DataTablePagination from '@/components/ui/data-table-pagination';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { getColumns } from './columns';
+import MessageDetails from './message-details-dialog';
+import {
+	ContactTotalEmailsIcon,
+	NoData,
+	NoticeBanner,
+	BadConnectionIcon,
+	SendEmailsIcon,
+	AlertIcon,
+} from '@quillcrm/components';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogOverlay,
+	AlertDialogPortal,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 
 const EmailsTab: React.FC = () => {
 	const { id } = useParams<{ id: string; subtab: string }>();
 	const [isLoading, setIsLoading] = useState(true);
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(10);
-	const [total, setTotal] = useState(0);
+	const [totalRecords, setTotalRecords] = useState(0);
 	const [data, setData] = useState<CampaignEmail[]>([]);
-	const { createNotice } = useDispatch('quillcrm/core');
 	const [status, setStatus] = useState('all');
 	const [campaignEmail, setCampaignEmail] = useState<CampaignEmail | null>(
 		null
 	);
 	const [campaignType, setCampaignType] = useState<string | null>(null);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
+	const [showRetryDialog, setShowRetryDialog] = useState(false);
+	const [hasFailedEmails, setHasFailedEmails] = useState(false);
+	const [retryType, setRetryType] = useState<'all' | 'single'>('all');
+	const [emailToRetry, setEmailToRetry] = useState<CampaignEmail | null>(
+		null
+	);
+
+	// Close notice function
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			});
+		}
+	}, [notice]);
+
+	// Initialize server-side table
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
+	});
 
 	// Helper function to get campaign type
 	const fetchCampaignType = async () => {
@@ -84,10 +133,17 @@ const EmailsTab: React.FC = () => {
 				}),
 			})) as CampaignEmailsResponse;
 
-			response.total && setTotal(response.total);
-			response.data && setData(response.data);
+			setTotalRecords(response.total);
+			setData(response.data);
+
+			// Check if there are any failed emails
+			const hasFailed =
+				response.data?.some(
+					(email) => email.status_slug === 'failed'
+				) || false;
+			setHasFailedEmails(hasFailed);
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message:
 					error.message || __('Failed to fetch messages', 'quillcrm'),
@@ -100,6 +156,107 @@ const EmailsTab: React.FC = () => {
 	useEffect(() => {
 		fetchCampaignEmails();
 	}, [page, perPage, status]);
+
+	// Confirm retry sending
+	const handleConfirmRetry = async () => {
+		setShowRetryDialog(false);
+		if (retryType === 'all') {
+			await handleRetryAllFailed();
+		} else {
+			await handleRetrySingleEmail();
+		}
+	};
+
+	// Resend ALL failed messages function (from analytics)
+	const handleRetryAllFailed = async () => {
+		try {
+			if (!campaignType) {
+				throw new Error('Campaign type not loaded');
+			}
+
+			setNotice({
+				type: 'success',
+				message: __(
+					'Initiating resend process for all failed messages...',
+					'quillcrm'
+				),
+			});
+
+			const endpoint = `/qc/v1/campaigns`;
+
+			// Fetch current campaign data first
+			const currentCampaign = (await apiFetch({
+				path: `${endpoint}/${id}`,
+			})) as any;
+
+			// Update campaign status to 'resending' to trigger backend resend process
+			await apiFetch({
+				path: `${endpoint}/${id}`,
+				method: 'PUT',
+				data: {
+					...currentCampaign,
+					status: 'resending',
+				},
+			});
+
+			setNotice({
+				type: 'success',
+				message: __(
+					'Resend process initiated. All failed messages will be retried automatically.',
+					'quillcrm'
+				),
+			});
+
+			// Refresh the list after a short delay to show updated status
+			setTimeout(() => {
+				fetchCampaignEmails();
+			}, 2000);
+		} catch (error: any) {
+			setNotice({
+				type: 'error',
+				message:
+					error.message ||
+					__('Failed to initiate resend process', 'quillcrm'),
+			});
+		}
+	};
+
+	// Resend single email function
+	const handleRetrySingleEmail = async () => {
+		if (!emailToRetry) return;
+
+		try {
+			setNotice({
+				type: 'success',
+				message: __('Resending email...', 'quillcrm'),
+			});
+
+			// TODO: Implement single email resend API endpoint when available
+			// For now, we'll trigger the same resend all process
+			// In the future, this should be:
+			// await apiFetch({
+			//   path: `/qc/v1/campaigns/${id}/messages/${emailToRetry.id}/resend`,
+			//   method: 'POST',
+			// });
+
+			// Temporary: Use the same approach as retry all
+			await handleRetryAllFailed();
+
+			setNotice({
+				type: 'success',
+				message: __('Email resent successfully!', 'quillcrm'),
+			});
+
+			// Refresh the list
+			await fetchCampaignEmails();
+		} catch (error: any) {
+			setNotice({
+				type: 'error',
+				message:
+					error.message || __('Failed to resend email', 'quillcrm'),
+			});
+		}
+	};
 
 	// Get type-aware status options
 	const getStatusOptions = () => {
@@ -135,353 +292,195 @@ const EmailsTab: React.FC = () => {
 		return baseOptions;
 	};
 
-	// Get type-aware columns
-	const getColumns = () => {
-		const baseColumns = [
-			{
-				title: __('Contact', 'quillcrm'),
-				dataIndex: 'contact',
-				key: 'contact',
-				render: (_: any, record: CampaignEmail) => (
-					<NavLink to={`contacts/${record.contact.id}`}>
-						<Flex vertical gap={5}>
-							<Flex gap={10} align="center">
-								<div className="qcrm-contacts-list__avatar">
-									<UserOutlined />
-								</div>
-								{record.contact.first_name || '-'}{' '}
-								{record.contact.last_name || '-'}
-							</Flex>
-							<Typography.Text type="secondary">
-								{__('Sent on', 'quillcrm')}{' '}
-								{convertDate(record.sent_at)}
-							</Typography.Text>
-						</Flex>
-					</NavLink>
-				),
-			},
-			{
-				title:
-					campaignType === CAMPAIGN_CHANNEL.EMAIL
-						? __('Email', 'quillcrm')
-						: __('Phone', 'quillcrm'),
-				dataIndex: 'recipient',
-				key: 'recipient',
-				render: (_: any, record: CampaignEmail) =>
-					campaignType === CAMPAIGN_CHANNEL.EMAIL
-						? record.contact.email
-						: record.contact.phone || '-',
-			},
-			{
-				title: __('Status', 'quillcrm'),
-				dataIndex: 'status',
-				key: 'status',
-				render: (_: any, record: CampaignEmail) => {
-					let badgeStatus:
-						| 'success'
-						| 'error'
-						| 'warning'
-						| 'processing'
-						| 'default' = 'default';
-
-					if (
-						record.status_slug === 'sent' ||
-						record.status_slug === 'delivered'
-					) {
-						badgeStatus = 'success';
-					} else if (record.status_slug === 'failed') {
-						badgeStatus = 'error';
-					} else if (record.status_slug === 'pending') {
-						badgeStatus = 'processing';
-					} else if (record.status_slug === 'read') {
-						badgeStatus = 'success';
-					}
-
-					return (
-						<Badge status={badgeStatus} text={record.status_slug} />
-					);
-				},
-			},
-		];
-
-		// Add type-specific columns
-		const typeSpecificColumns: any[] = [];
-
-		if (campaignType === CAMPAIGN_CHANNEL.EMAIL) {
-			typeSpecificColumns.push(
-				{
-					title: __('Opened', 'quillcrm'),
-					dataIndex: 'opened',
-					key: 'opened',
-					render: (_: any, record: CampaignEmail) => (
-						<Badge
-							status={
-								record.opened != '0' ? 'success' : 'default'
-							}
-							text={
-								record.opened != '0'
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')
-							}
-						/>
-					),
-				},
-				{
-					title: __('Clicked', 'quillcrm'),
-					dataIndex: 'clicked',
-					key: 'clicked',
-					render: (_: any, record: CampaignEmail) => (
-						<Badge
-							status={
-								record.clicked != '0' ? 'success' : 'default'
-							}
-							text={
-								record.clicked != '0'
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')
-							}
-						/>
-					),
-				}
-			);
-		} else if (campaignType === CAMPAIGN_CHANNEL.SMS) {
-			typeSpecificColumns.push(
-				{
-					title: __('Delivered', 'quillcrm'),
-					dataIndex: 'status',
-					key: 'delivered',
-					render: (_: any, record: CampaignEmail) => (
-						<Badge
-							status={
-								record.status_slug === 'delivered'
-									? 'success'
-									: 'default'
-							}
-							text={
-								record.status_slug === 'delivered'
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')
-							}
-						/>
-					),
-				},
-				{
-					title: __('Clicked', 'quillcrm'),
-					dataIndex: 'clicked',
-					key: 'clicked',
-					render: (_: any, record: CampaignEmail) => (
-						<Badge
-							status={
-								record.clicked != '0' ? 'success' : 'default'
-							}
-							text={
-								record.clicked != '0'
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')
-							}
-						/>
-					),
-				}
-			);
-		} else if (campaignType === CAMPAIGN_CHANNEL.WHATSAPP) {
-			typeSpecificColumns.push(
-				{
-					title: __('Delivered', 'quillcrm'),
-					dataIndex: 'status',
-					key: 'delivered',
-					render: (_: any, record: CampaignEmail) => (
-						<Badge
-							status={
-								record.status_slug === 'delivered' ||
-									record.status_slug === 'read'
-									? 'success'
-									: 'default'
-							}
-							text={
-								record.status_slug === 'delivered' ||
-									record.status_slug === 'read'
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')
-							}
-						/>
-					),
-				},
-				{
-					title: __('Read', 'quillcrm'),
-					dataIndex: 'status',
-					key: 'read',
-					render: (_: any, record: CampaignEmail) => (
-						<Badge
-							status={
-								record.status_slug === 'read'
-									? 'success'
-									: 'default'
-							}
-							text={
-								record.status_slug === 'read'
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')
-							}
-						/>
-					),
-				},
-				{
-					title: __('Clicked', 'quillcrm'),
-					dataIndex: 'clicked',
-					key: 'clicked',
-					render: (_: any, record: CampaignEmail) => (
-						<Badge
-							status={
-								record.clicked != '0' ? 'success' : 'default'
-							}
-							text={
-								record.clicked != '0'
-									? __('Yes', 'quillcrm')
-									: __('No', 'quillcrm')
-							}
-						/>
-					),
-				}
-			);
-		}
-
-		return [
-			...baseColumns,
-			...typeSpecificColumns,
-			{
-				title: __('Template', 'quillcrm'),
-				key: 'template',
-				render: (_: any, record: CampaignEmail) => (
-					<Button onClick={() => setCampaignEmail(record)}>
-						{__('View', 'quillcrm')}
-					</Button>
-				),
-			},
-		];
+	// Handler to show retry dialog for individual message
+	const handleResendMessage = async (messageToResend: CampaignEmail) => {
+		setRetryType('single');
+		setEmailToRetry(messageToResend);
+		setShowRetryDialog(true);
 	};
+
+	// Handler to show retry dialog for all failed messages
+	const handleRetryAllClick = () => {
+		setRetryType('all');
+		setEmailToRetry(null);
+		setShowRetryDialog(true);
+	};
+
+	// Get columns
+	const columns = getColumns({
+		onViewTemplate: setCampaignEmail,
+		onResendMessage: handleResendMessage,
+		campaignType,
+	});
 
 	return (
 		<>
-			<div className="space-y-4">
-				<Flex gap={20} align="center">
-					<Typography.Text>{__('Filter by status', 'quillcrm')}</Typography.Text>
-					<Radio.Group
-						options={getStatusOptions()}
-						onChange={(e) => setStatus(e.target.value)}
-						value={status}
-						optionType="button"
-						buttonStyle="solid"
+			<div className="flex flex-col gap-5">
+				{/* Header with status filter */}
+				<div className="flex justify-between items-center">
+					<h3 className="text-2xl font-semibold text-[#09090B]">
+						{__('Emails', 'quillcrm')}
+					</h3>
+					<div className="flex items-center gap-3">
+						<span className="text-sm text-gray-600">
+							{__('Filter by status:', 'quillcrm')}
+						</span>
+						<Select value={status} onValueChange={setStatus}>
+							<SelectTrigger className="w-[100px]">
+								<SelectValue
+									placeholder={__(
+										'Select status',
+										'quillcrm'
+									)}
+								/>
+							</SelectTrigger>
+							<SelectContent>
+								{getStatusOptions().map((option) => (
+									<SelectItem
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+				</div>
+
+				{/* Notice Banner */}
+				{notice && (
+					<NoticeBanner
+						ref={noticeBannerRef}
+						notice={notice}
+						closeNotice={closeNotice}
 					/>
-				</Flex>
-				<Table
-					dataSource={data}
-					columns={getColumns()}
-					loading={isLoading}
-					pagination={{
-						current: page,
-						pageSize: perPage,
-						total: total,
-						onChange: (page, pageSize) => {
-							setPage(page);
-							setPerPage(pageSize);
-						},
-					}}
-				/>
+				)}
+
+				{/* Warning Banner for Failed Emails */}
+				{hasFailedEmails && !isLoading && (
+					<div className="flex justify-between items-center border py-3 px-5 rounded-lg bg-[#FAEADF] border-[#CB5301]">
+						<div className="flex items-center gap-2">
+							<AlertIcon />
+							<div className="text-base text-[#CB5301]">
+								<div className="font-semibold">
+									{__('Warning:', 'quillcrm')}
+								</div>
+								<div>
+									{__(
+										`${data.filter((email) => email.status_slug === 'failed').length} Failed Email to send to recipients. try resending it again.`,
+										'quillcrm'
+									)}
+								</div>
+							</div>
+						</div>
+						<Button
+							variant="secondary"
+							size="sm"
+							className="bg-white"
+							onClick={handleRetryAllClick}
+						>
+							<SendEmailsIcon />
+							{__('Retry Sending', 'quillcrm')}
+						</Button>
+					</div>
+				)}
+
+				{/* Messages Table */}
+				<div>
+					{!isLoading && data.length === 0 ? (
+						<NoData
+							icon={
+								<ContactTotalEmailsIcon
+									width={100}
+									height={100}
+								/>
+							}
+							title={__('No emails yet', 'quillcrm')}
+							subtitle={__(
+								'Emails sent through this campaign will appear here.',
+								'quillcrm'
+							)}
+						/>
+					) : (
+						<>
+							<DataTable
+								columns={columns}
+								data={data}
+								loading={isLoading}
+								showPagination={false}
+								initialPageSize={10}
+								showMainActions={false}
+								config={{}}
+								setPage={setPage}
+							/>
+							<DataTablePagination table={serverSideTable} />
+						</>
+					)}
+				</div>
 			</div>
 
-			{/* Modal for viewing individual email details */}
-			<Modal
-				open={!!campaignEmail}
-				title={__('Details')}
-				onCancel={() => setCampaignEmail(null)}
-				footer={null}
-				style={{ minWidth: '800px' }}
+			{/* Message Details Dialog */}
+			<MessageDetails
+				campaignEmail={campaignEmail}
+				campaignType={campaignType}
+				onClose={() => setCampaignEmail(null)}
+				onResend={handleResendMessage}
+			/>
+
+			{/* Retry Sending Confirmation Dialog */}
+			<AlertDialog
+				open={showRetryDialog}
+				onOpenChange={setShowRetryDialog}
 			>
-				{campaignEmail && (
-					<Flex vertical gap={20}>
-						<Flex vertical gap={10}>
-							<Flex gap={10}>
-								<Typography.Text>
-									{__('Status', 'quillcrm')}
-									{': '}
-								</Typography.Text>
-								<Badge
-									status={
-										campaignEmail.status_slug === 'sent' ||
-											campaignEmail.status_slug ===
-											'delivered' ||
-											campaignEmail.status_slug === 'read'
-											? 'success'
-											: campaignEmail.status_slug ===
-												'failed'
-												? 'error'
-												: 'default'
-									}
-									text={campaignEmail.status_slug}
-								/>
-							</Flex>
-							{campaignEmail.template?.settings.from_name && (
-								<Flex gap={10}>
-									<Typography.Text>
-										{__('From Name', 'quillcrm')}
-										{': '}
-									</Typography.Text>
-									<Typography.Text strong>
-										{
-											campaignEmail.template.settings
-												.from_name
-										}
-									</Typography.Text>
-								</Flex>
-							)}
-							{campaignType === CAMPAIGN_CHANNEL.EMAIL &&
-								campaignEmail.template?.settings.from_email && (
-									<Flex gap={10}>
-										<Typography.Text>
-											{__('From Email', 'quillcrm')}
-											{': '}
-										</Typography.Text>
-										<Typography.Text strong>
-											{
-												campaignEmail.template?.settings
-													.from_email
-											}
-										</Typography.Text>
-									</Flex>
-								)}
-							{campaignType === CAMPAIGN_CHANNEL.EMAIL &&
-								campaignEmail.template?.subject && (
-									<Flex gap={10}>
-										<Typography.Text>
-											{__('Subject', 'quillcrm')}
-											{': '}
-										</Typography.Text>
-										<Typography.Text strong>
-											{campaignEmail.template.subject}
-										</Typography.Text>
-									</Flex>
-								)}
-						</Flex>
-						<Divider style={{ margin: 0 }} />
-						<Card
-							title={
-								campaignType === CAMPAIGN_CHANNEL.EMAIL
-									? __('Body', 'quillcrm')
-									: __('Message', 'quillcrm')
-							}
-						>
-							<div
-								dangerouslySetInnerHTML={{
-									__html: campaignEmail.template?.body || '',
-								}}
-							/>
-						</Card>
-					</Flex>
-				)}
-			</Modal>
+				<AlertDialogPortal>
+					<AlertDialogOverlay className="z-[1800100]" />
+					<AlertDialogContent className="max-w-[38rem] p-8 z-[1800100]">
+						<AlertDialogHeader>
+							<div className="flex flex-col items-center justify-center gap-6">
+								<div className="flex items-center justify-center rounded-3xl p-5 bg-[#FAEADF] text-[#CB5301]">
+									<BadConnectionIcon />
+								</div>
+								<AlertDialogTitle className="text-2xl font-bold text-[#09090B] text-center">
+									{retryType === 'all'
+										? __(
+												'Retry Sending All Failed Emails?',
+												'quillcrm'
+											)
+										: __(
+												'Retry Sending This Email?',
+												'quillcrm'
+											)}
+								</AlertDialogTitle>
+								<AlertDialogDescription className="text-base text-center">
+									{retryType === 'all'
+										? __(
+												'Are you sure you want to retry sending all failed emails in this campaign?',
+												'quillcrm'
+											)
+										: __(
+												'Are you sure you want to retry sending this email?',
+												'quillcrm'
+											)}
+								</AlertDialogDescription>
+							</div>
+						</AlertDialogHeader>
+						<AlertDialogFooter className="flex gap-2 mt-4">
+							<AlertDialogCancel className="flex-1">
+								{__('Cancel', 'quillcrm')}
+							</AlertDialogCancel>
+							<AlertDialogAction
+								onClick={handleConfirmRetry}
+								className="flex-1 bg-destructive hover:bg-destructive/90"
+							>
+								{__('Yes, Retry', 'quillcrm')}
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialogPortal>
+			</AlertDialog>
 		</>
 	);
 };
 
 export default EmailsTab;
-

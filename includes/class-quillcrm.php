@@ -285,24 +285,22 @@ final class QuillCRM {
 	 */
 	public function register_contact_meta_table() {
 		global $wpdb;
-		$wpdb->quillcrm_contactmeta = $wpdb->prefix . 'quillcrm_contact_meta';
+		$wpdb->contactmeta = $wpdb->prefix . 'quillcrm_contact_meta';
 
-		// Register meta type with WordPress so add_metadata/get_metadata work correctly
-		// This is CRITICAL for the metadata functions to work
-		if ( function_exists( 'register_meta_table' ) ) {
-			// WordPress 5.3+ has dedicated function
-			register_meta_table( 'quillcrm_contact', $wpdb->quillcrm_contactmeta, 'contact_id' );
-		} else {
-			// Fallback: Add filter to tell WordPress this is a valid meta type
-			add_filter(
-				'sanitize_quillcrm_contact_meta_quillcrm_contact',
-				function ( $meta_value, $meta_key, $meta_type ) {
-					return $meta_value;
-				},
-				10,
-				3
-			);
-		}
+		// Register meta type with WordPress so add_metadata/get_metadata work correctly.
+		// This is the modern way to register a custom meta table with WordPress.
+		add_filter(
+			'get_meta_table',
+			function( $table, $meta_type ) {
+				global $wpdb;
+				if ( 'contact' === $meta_type ) {
+					return $wpdb->contactmeta;
+				}
+				return $table;
+			},
+			10,
+			2
+		);
 	}
 
 	/**

@@ -280,7 +280,7 @@ add_action( 'quillcrm_cleanup_logs', 'quillcrm_cleanup_logs' );
  * @return int|false Meta ID on success, false on failure.
  */
 function quillcrm_add_contact_meta( $contact_id, $meta_key, $meta_value, $unique = false ) {
-	return add_metadata( 'quillcrm_contact', $contact_id, $meta_key, $meta_value, $unique );
+	return add_metadata( 'contact', $contact_id, $meta_key, $meta_value, $unique );
 }
 
 /**
@@ -296,7 +296,7 @@ function quillcrm_add_contact_meta( $contact_id, $meta_key, $meta_value, $unique
  * @return int|bool Meta ID if the key didn't exist, true on successful update, false on failure.
  */
 function quillcrm_update_contact_meta( $contact_id, $meta_key, $meta_value, $prev_value = '' ) {
-	return update_metadata( 'quillcrm_contact', $contact_id, $meta_key, $meta_value, $prev_value );
+	return update_metadata( 'contact', $contact_id, $meta_key, $meta_value, $prev_value );
 }
 
 /**
@@ -311,7 +311,7 @@ function quillcrm_update_contact_meta( $contact_id, $meta_key, $meta_value, $pre
  * @return mixed Single metadata value, or array of values.
  */
 function quillcrm_get_contact_meta( $contact_id, $meta_key = '', $single = false ) {
-	return get_metadata( 'quillcrm_contact', $contact_id, $meta_key, $single );
+	return get_metadata( 'contact', $contact_id, $meta_key, $single );
 }
 
 /**
@@ -326,5 +326,5 @@ function quillcrm_get_contact_meta( $contact_id, $meta_key = '', $single = false
  * @return bool True on success, false on failure.
  */
 function quillcrm_delete_contact_meta( $contact_id, $meta_key, $meta_value = '' ) {
-	return delete_metadata( 'quillcrm_contact', $contact_id, $meta_key, $meta_value );
+	return delete_metadata( 'contact', $contact_id, $meta_key, $meta_value );
 }

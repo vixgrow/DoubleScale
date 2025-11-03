@@ -3,10 +3,16 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MyTemplatesIcon } from '@/components/icons';
-import { getUserTemplates } from '../api/templates';
+import { getUserTemplates, renderTemplate } from '../api/templates';
 import { useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import type { EmailTemplate } from '@quillcrm/client';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
 
 interface MyTemplatesPanelProps {
 	isOpen: boolean;
@@ -77,6 +83,10 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 	const [templates, setTemplates] = useState<EmailTemplate[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [previewTemplate, setPreviewTemplate] =
+		useState<EmailTemplate | null>(null);
+	const [previewHtml, setPreviewHtml] = useState<string>('');
+	const [loadingPreview, setLoadingPreview] = useState(false);
 	const dispatch = useDispatch();
 
 	const fetchTemplates = async () => {
@@ -160,9 +170,27 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 		}
 	};
 
-	const handlePreview = (template: EmailTemplate) => {
-		// TODO: Implement preview functionality
-		console.log('Preview template:', template.name);
+	const handlePreview = async (template: EmailTemplate) => {
+		if (!template.id) {
+			console.error('Template ID is missing');
+			return;
+		}
+
+		setPreviewTemplate(template);
+		setLoadingPreview(true);
+		setPreviewHtml('');
+
+		try {
+			const html = await renderTemplate(template.id);
+			setPreviewHtml(html);
+		} catch (error) {
+			console.error('Error rendering template:', error);
+			setPreviewHtml(
+				'<p style="color: red; padding: 20px; text-align: center;">Failed to load preview</p>'
+			);
+		} finally {
+			setLoadingPreview(false);
+		}
 	};
 
 	if (loading) {
@@ -200,16 +228,59 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 	}
 
 	return (
-		<div className="grid grid-cols-1 gap-4 p-4 max-w-md mx-auto">
-			{templates.map((template) => (
-				<TemplateCard
-					key={template.id}
-					template={template}
-					onUseTemplate={handleUseTemplate}
-					onPreview={handlePreview}
-				/>
-			))}
-		</div>
+		<>
+			<div className="grid grid-cols-1 gap-4 p-4 max-w-md mx-auto">
+				{templates.map((template) => (
+					<TemplateCard
+						key={template.id}
+						template={template}
+						onUseTemplate={handleUseTemplate}
+						onPreview={handlePreview}
+					/>
+				))}
+			</div>
+
+			{/* Preview Dialog */}
+			<Dialog
+				open={!!previewTemplate}
+				onOpenChange={() => setPreviewTemplate(null)}
+			>
+				<DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+					<DialogHeader>
+						<DialogTitle className="text-center">
+							{__('Preview template', 'quillcrm')}
+						</DialogTitle>
+					</DialogHeader>
+					<div className="flex-1 overflow-auto mt-4">
+						{loadingPreview ? (
+							<div className="flex flex-col items-center justify-center h-full min-h-[400px]">
+								<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+								<p className="text-gray-500 text-center mt-4">
+									{__('Loading preview...', 'quillcrm')}
+								</p>
+							</div>
+						) : previewHtml ? (
+							<iframe
+								srcDoc={previewHtml}
+								className="w-full min-h-[600px] border-0"
+								title={__('Template Preview', 'quillcrm')}
+								sandbox="allow-same-origin"
+								style={{ backgroundColor: '#fff' }}
+							/>
+						) : (
+							<div className="flex flex-col items-center justify-center p-12 bg-gray-50 rounded-lg min-h-[400px]">
+								<div className="text-gray-300 mb-4">
+									<MyTemplatesIcon width={64} height={64} />
+								</div>
+								<p className="text-gray-500 text-center">
+									{__('No preview available', 'quillcrm')}
+								</p>
+							</div>
+						)}
+					</div>
+				</DialogContent>
+			</Dialog>
+		</>
 	);
 };
 

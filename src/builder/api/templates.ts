@@ -11,6 +11,29 @@ import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { EmailTemplate } from '@quillcrm/client';
 
 /**
+ * Render a template to HTML
+ */
+export const renderTemplate = async (
+	templateId: number
+): Promise<string> => {
+	try {
+		const response = await apiFetch({
+			path: `/qc/v1/templates/${templateId}/render`,
+			method: 'POST',
+			data: {
+				merge_tags: {},
+			},
+		});
+		return (response as { html: string }).html;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to render template', 'quillcrm')
+		);
+	}
+};
+
+/**
  * Create a new template
  */
 export const createTemplate = async (

@@ -66,7 +66,7 @@ const TabsSelection: React.FC = () => {
 				tabsList={tabsList}
 				tabsContent={tabsContent}
 				className="w-full"
-				tabsListWrapperClassName="border-b pb-4 pt-5 px-6"
+				tabsListWrapperClassName="border-b pb-4 pt-5"
 				tabsListClassName="bg-transparent text-foreground gap-2 justify-start w-full"
 			/>
 		</Card>

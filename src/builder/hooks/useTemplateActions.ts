@@ -110,25 +110,40 @@ export const useTemplateActions = (): UseTemplateActionsReturn => {
   );
 
   /**
-   * Saves current email as a new template in the library
+   * Saves current email as a new template in the library or updates existing one
    */
   const saveAsTemplate = useCallback(
-    async (templateName: string, thumbnailUrl?: string): Promise<EmailTemplate> => {
+    async (templateName: string, thumbnailUrl?: string, templateId?: number): Promise<EmailTemplate> => {
       setIsSaving(true);
       setError(null);
 
       try {
-        if (!templateName || templateName.trim() === '') {
-          throw new Error(__('Template name is required', 'quillcrm'));
-        }
-
         const builderData = prepareBuilderData();
 
-        const savedTemplate = await saveEmailAsTemplate(
-          templateName.trim(),
-          builderData,
-          thumbnailUrl
-        );
+        let savedTemplate: EmailTemplate;
+
+        if (templateId) {
+          // Update existing template - only update the body, keep name and thumbnail unchanged
+          const bodyData = {
+            type: 'builder',
+            value: builderData,
+          };
+
+          savedTemplate = await updateTemplate(templateId, {
+            body: JSON.stringify(bodyData),
+          });
+        } else {
+          // Create new template
+          if (!templateName || templateName.trim() === '') {
+            throw new Error(__('Template name is required', 'quillcrm'));
+          }
+
+          savedTemplate = await saveEmailAsTemplate(
+            templateName.trim(),
+            builderData,
+            thumbnailUrl
+          );
+        }
 
         return savedTemplate;
       } catch (err) {

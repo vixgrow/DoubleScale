@@ -671,10 +671,10 @@ class REST_Template_Controller extends REST_Controller {
 	 */
 	public function prepare_template( $request ) {
 		$type = $request->get_param( 'type' ) ?? Campaign_Channel::STR_EMAIL;
+		$name = $request->get_param( 'name' );
 
 		$template_data = array(
 			'id'           => $request->get_param( 'id' ),
-			'name'         => $request->get_param( 'name' ) ?? 'New Template',
 			'type'         => $type,
 			'subject'      => $request->get_param( 'subject' ),
 			'body'         => $request->get_param( 'body' ),
@@ -683,6 +683,11 @@ class REST_Template_Controller extends REST_Controller {
 			'thumbnail'    => $request->get_param( 'thumbnail' ),
 			'hidden'       => $request->get_param( 'hidden' ) ?? false,
 		);
+
+		// Only set name if provided, otherwise leave it out (for updates that don't change name)
+		if ( $name !== null ) {
+			$template_data['name'] = $name ?: 'New Template';
+		}
 
 		// Note: email_body data is now sent directly in the body field as JSON
 

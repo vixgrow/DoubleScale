@@ -18,6 +18,7 @@ interface HeaderProps {
 	onClose?: () => void;
 	autoSaveEnabled?: boolean;
 	autoSaveInterval?: number;
+	onTemplatesSaved?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -25,6 +26,7 @@ const Header: React.FC<HeaderProps> = ({
 	onClose,
 	autoSaveEnabled = true,
 	autoSaveInterval = 10000,
+	onTemplatesSaved,
 }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -64,10 +66,16 @@ const Header: React.FC<HeaderProps> = ({
 
 	const handleSaveAsTemplate = async (
 		templateName: string,
-		thumbnailUrl?: string
+		thumbnailUrl?: string,
+		templateId?: number
 	) => {
-		await saveAsTemplate(templateName, thumbnailUrl);
+		await saveAsTemplate(templateName, thumbnailUrl, templateId);
 		setIsTemplateDialogOpen(false);
+
+		// Trigger templates refresh in sidebar
+		if (onTemplatesSaved) {
+			onTemplatesSaved();
+		}
 	};
 	return (
 		<div className="flex items-center justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">

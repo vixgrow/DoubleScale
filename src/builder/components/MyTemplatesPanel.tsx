@@ -11,6 +11,7 @@ import type { EmailTemplate } from '@quillcrm/client';
 interface MyTemplatesPanelProps {
 	isOpen: boolean;
 	onClose: () => void;
+	refreshKey?: number;
 }
 
 interface TemplateCardProps {
@@ -72,43 +73,41 @@ const TemplateCard = ({
 	);
 };
 
-const MyTemplatesContent = () => {
+const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 	const [templates, setTemplates] = useState<EmailTemplate[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const dispatch = useDispatch();
 
-	useEffect(() => {
-		const fetchTemplates = async () => {
-			try {
-				setLoading(true);
-				// Fetch only user-created templates using dedicated endpoint
-				const fetchedTemplates = await getUserTemplates();
-				// Ensure we have an array
-				if (Array.isArray(fetchedTemplates)) {
-					setTemplates(fetchedTemplates);
-				} else {
-					console.warn(
-						'Templates response is not an array:',
-						fetchedTemplates
-					);
-					setTemplates([]);
-				}
-			} catch (err) {
-				console.error('Error fetching templates:', err);
-				setError(
-					err instanceof Error
-						? err.message
-						: 'Failed to load templates'
+	const fetchTemplates = async () => {
+		try {
+			setLoading(true);
+			// Fetch only user-created templates using dedicated endpoint
+			const fetchedTemplates = await getUserTemplates();
+			// Ensure we have an array
+			if (Array.isArray(fetchedTemplates)) {
+				setTemplates(fetchedTemplates);
+			} else {
+				console.warn(
+					'Templates response is not an array:',
+					fetchedTemplates
 				);
-				setTemplates([]); // Set empty array on error
-			} finally {
-				setLoading(false);
+				setTemplates([]);
 			}
-		};
+		} catch (err) {
+			console.error('Error fetching templates:', err);
+			setError(
+				err instanceof Error ? err.message : 'Failed to load templates'
+			);
+			setTemplates([]); // Set empty array on error
+		} finally {
+			setLoading(false);
+		}
+	};
 
+	useEffect(() => {
 		fetchTemplates();
-	}, []);
+	}, [refreshKey]);
 
 	const handleUseTemplate = (template: EmailTemplate) => {
 		try {
@@ -214,7 +213,11 @@ const MyTemplatesContent = () => {
 	);
 };
 
-const MyTemplatesPanel = ({ isOpen, onClose }: MyTemplatesPanelProps) => {
+const MyTemplatesPanel = ({
+	isOpen,
+	onClose,
+	refreshKey,
+}: MyTemplatesPanelProps) => {
 	if (!isOpen) return null;
 
 	return (
@@ -234,7 +237,7 @@ const MyTemplatesPanel = ({ isOpen, onClose }: MyTemplatesPanelProps) => {
 					</Button>
 				</div>
 				<div className="flex-1 overflow-y-auto">
-					<MyTemplatesContent />
+					<MyTemplatesContent refreshKey={refreshKey} />
 				</div>
 			</div>
 		</div>

@@ -58,6 +58,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 }) => {
 	const dispatch = useDispatch();
 	const [sidebarCloseTrigger, setSidebarCloseTrigger] = useState(0);
+	const [templatesRefreshTrigger, setTemplatesRefreshTrigger] = useState(0);
 
 	// Parse autoSave prop into enabled/interval
 	const autoSaveConfig =
@@ -243,6 +244,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 					onClose={onClose}
 					autoSaveEnabled={autoSaveConfig.enabled}
 					autoSaveInterval={autoSaveConfig.interval}
+					onTemplatesSaved={() =>
+						setTemplatesRefreshTrigger((prev) => prev + 1)
+					}
 				/>
 				<div
 					className="flex flex-1 overflow-hidden"
@@ -255,7 +259,10 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						onDragEnd={handleDragEnd}
 						modifiers={[snapCenterToCursor]}
 					>
-						<Sidebar sidebarCloseTrigger={sidebarCloseTrigger} />
+						<Sidebar
+							sidebarCloseTrigger={sidebarCloseTrigger}
+							templatesRefreshKey={templatesRefreshTrigger}
+						/>
 						<Canvas />
 
 						<DragOverlay dropAnimation={dropAnimation}>

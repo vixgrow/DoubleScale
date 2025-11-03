@@ -17,9 +17,13 @@ interface SidebarItem {
 
 interface BlockSidebarProps {
 	sidebarCloseTrigger?: number;
+	templatesRefreshKey?: number;
 }
 
-const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
+const BlockSidebar = ({
+	sidebarCloseTrigger,
+	templatesRefreshKey,
+}: BlockSidebarProps = {}) => {
 	const [activeSidebar, setActiveSidebar] = useState<SidebarItem | null>(
 		null
 	);
@@ -116,6 +120,7 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 				<MyTemplatesPanel
 					isOpen={showMyTemplates}
 					onClose={() => setShowMyTemplates(false)}
+					refreshKey={templatesRefreshKey}
 				/>
 			</div>
 		</div>

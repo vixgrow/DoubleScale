@@ -460,6 +460,9 @@ const Field: React.FC<FieldProps> = ({
 				/>
 			);
 			break;
+		case 'label':
+			fieldContent = <div className="text-ghost">{value}</div>;
+			break;
 		default:
 			fieldContent = null;
 	}

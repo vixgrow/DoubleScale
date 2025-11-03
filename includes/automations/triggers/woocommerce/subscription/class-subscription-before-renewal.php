@@ -14,12 +14,21 @@ namespace QuillCRM\Automations\Triggers\WooCommerce\Subscription;
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Models\Automation_Model;
+use QuillCRM\QuillCRM;
 use WC_Subscription;
 
 /**
  * Subscription Before Renewal Trigger
  */
 class Subscription_Before_Renewal extends Trigger {
+
+
+	/**
+	 * Tasks instance for scheduling cron jobs
+	 *
+	 * @var \QuillCRM\Tasks
+	 */
+	private $tasks;
 
 	/**
 	 * Trigger Name
@@ -64,6 +73,16 @@ class Subscription_Before_Renewal extends Trigger {
 	public $group = 'subscription';
 
 	/**
+	 * Constructor
+	 *
+	 * @since 1.0.0
+	 */
+	public function __construct() {
+		 parent::__construct();
+		$this->tasks = new \QuillCRM\Tasks( 'quillcrm_subscription_renewal' );
+	}
+
+	/**
 	 * Load Hooks
 	 *
 	 * @since 1.0.0
@@ -71,21 +90,148 @@ class Subscription_Before_Renewal extends Trigger {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'woocommerce_scheduled_subscription_payment', array( $this, 'subscription_before_renewal' ) );
+		// Register the cron job callback
+		$this->tasks->register_callback( 'check_subscription_renewals', array( $this, 'check_subscription_renewals' ) );
+		$this->tasks->register_callback( 'process_subscription_before_renewal', array( $this, 'process_subscription_before_renewal' ) );
+
+		// Schedule the recurring cron job to check subscriptions every hour
+		\add_action( 'init', array( $this, 'schedule_renewal_checker' ) );
+
+		// Hook into subscription status changes to reschedule jobs
+		\add_action( 'woocommerce_subscription_status_updated', array( $this, 'reschedule_on_status_change' ), 10, 3 );
 	}
 
 	/**
-	 * Subscription Before Renewal
+	 * Schedule the recurring cron job to check subscription renewals
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $subscription_id Subscription ID.
 	 * @return void
 	 */
-	public function subscription_before_renewal( $subscription_id ) {
-		$subscription = wcs_get_subscription( $subscription_id );
-		
+	public function schedule_renewal_checker() {
+		// Check if the recurring job is already scheduled
+		if ( $this->tasks->get_next_timestamp( 'check_subscription_renewals' ) === false ) {
+			// Schedule to run every 5 minutes (300 seconds)
+			$this->tasks->schedule_recurring( time(), 300, 'check_subscription_renewals' );
+		}
+	}
+
+	/**
+	 * Check subscription renewals and schedule individual triggers
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public function check_subscription_renewals() {
+		 // Get all active automations for this trigger
+		$automations = Automation_Model::get_automations_by_trigger( $this->slug );
+
+		if ( empty( $automations ) ) {
+			return;
+		}
+
+		// Get all active subscriptions
+		$subscriptions = $this->get_active_subscriptions();
+
+		foreach ( $subscriptions as $subscription ) {
+			$next_payment_time = $subscription->get_time( 'next_payment' );
+
+			if ( ! $next_payment_time || $next_payment_time <= time() ) {
+				continue;
+			}
+
+			// Schedule triggers for each automation
+			foreach ( $automations as $automation ) {
+				$this->schedule_trigger_for_subscription( $subscription, $automation );
+			}
+		}
+	}
+
+	/**
+	 * Get active subscriptions with upcoming renewals
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return WC_Subscription[]
+	 */
+	private function get_active_subscriptions() {
+		if ( ! \function_exists( 'wcs_get_subscriptions' ) ) {
+			return array();
+		}
+
+		// Get active subscriptions with next payment dates
+		return \wcs_get_subscriptions(
+			array(
+				'subscription_status'    => array( 'active' ),
+				'subscriptions_per_page' => -1,
+				'meta_query'             => array(
+					array(
+						'key'     => '_schedule_next_payment',
+						'value'   => '',
+						'compare' => '!=',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Schedule trigger for a specific subscription and automation
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WC_Subscription  $subscription Subscription object
+	 * @param Automation_Model $automation Automation model
+	 *
+	 * @return void
+	 */
+	private function schedule_trigger_for_subscription( $subscription, $automation ) {
+		$days    = (int) $automation->get_setting( 'days', 1 );
+		$hours   = (int) $automation->get_setting( 'hours', 0 );
+		$minutes = (int) $automation->get_setting( 'minutes', 0 );
+
+		$next_payment_time = $subscription->get_time( 'next_payment' );
+
+		// Calculate trigger time: days/hours/minutes before renewal
+		$trigger_time = $next_payment_time - ( $days * \DAY_IN_SECONDS ) - ( $hours * \HOUR_IN_SECONDS ) - ( $minutes * \MINUTE_IN_SECONDS );
+
+		// Only schedule if trigger time is in the future
+		if ( $trigger_time <= time() ) {
+			return;
+		}
+
+		// Create unique hook name for this subscription and automation
+		$hook_suffix = $subscription->get_id() . '_' . $automation->id;
+
+		// Check if already scheduled
+		if ( $this->tasks->get_next_timestamp( 'process_subscription_before_renewal', array( $hook_suffix ) ) !== false ) {
+			return;
+		}
+
+		// Schedule the individual trigger
+		$this->tasks->schedule_single( $trigger_time, 'process_subscription_before_renewal', $subscription->get_id(), $automation->id );
+	}
+
+	/**
+	 * Process individual subscription before renewal trigger
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $subscription_id Subscription ID
+	 * @param int $automation_id Automation ID
+	 *
+	 * @return void
+	 */
+	public function process_subscription_before_renewal( $subscription_id, $automation_id ) {
+		$subscription = \wcs_get_subscription( $subscription_id );
+
 		if ( ! $subscription instanceof WC_Subscription ) {
+			return;
+		}
+
+		// Check if subscription is still active and has next payment
+		if ( ! $subscription->has_status( 'active' ) || ! $subscription->get_time( 'next_payment' ) ) {
 			return;
 		}
 
@@ -99,9 +245,92 @@ class Subscription_Before_Renewal extends Trigger {
 			'currency'        => $subscription->get_currency(),
 			'next_payment'    => $subscription->get_date( 'next_payment' ),
 			'renewal_amount'  => $subscription->get_total(),
+			'automation_id'   => $automation_id,
 		);
 
 		$this->process( $data );
+	}
+
+	/**
+	 * Reschedule jobs when subscription status changes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WC_Subscription $subscription Subscription object
+	 * @param string          $new_status New status
+	 * @param string          $old_status Old status
+	 *
+	 * @return void
+	 */
+	public function reschedule_on_status_change( $subscription, $new_status, $old_status ) {
+		// If subscription becomes active, schedule new jobs
+		if ( 'active' === $new_status && 'active' !== $old_status ) {
+			$automations = Automation_Model::get_automations_by_trigger( $this->slug );
+			foreach ( $automations as $automation ) {
+				$this->schedule_trigger_for_subscription( $subscription, $automation );
+			}
+		}
+	}
+
+	/**
+	 * Check if trigger should be processed for specific automation
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Automation_Model $automation Automation Model
+	 * @param array            $args Arguments
+	 *
+	 * @return bool
+	 */
+	public function is_processable( Automation_Model $automation, $args ) {
+		// If automation_id is provided, only process for that specific automation
+		if ( isset( $args['automation_id'] ) && $automation->id !== $args['automation_id'] ) {
+			return false;
+		}
+
+		return parent::is_processable( $automation, $args );
+	}
+
+	/**
+	 * Get fields
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_fields() {
+		return array(
+			'days'    => array(
+				'type'     => 'number',
+				'label'    => \__( 'Days before subscription renewal', 'quillcrm' ),
+				'required' => true,
+				'default'  => 1,
+				'min'      => 0,
+				'max'      => 365,
+			),
+			'label'   => array(
+				'type'  => 'label',
+				'label' => \__( 'Run at following (Store) Time of a Day: ', 'quillcrm' ),
+			),
+			'hours'   => array(
+				'type'        => 'number',
+				'label'       => \__( 'Hours', 'quillcrm' ),
+				'placeholder' => 'HH',
+				'required'    => true,
+				'default'     => 0,
+				'min'         => 0,
+				'max'         => 23,
+			),
+			'minutes' => array(
+				'type'        => 'number',
+				'label'       => \__( 'Minutes', 'quillcrm' ),
+				'placeholder' => 'MM',
+				'required'    => true,
+				'default'     => 0,
+				'min'         => 0,
+				'max'         => 59,
+			),
+		);
 	}
 
 	/**
@@ -113,33 +342,23 @@ class Subscription_Before_Renewal extends Trigger {
 	 */
 	public function get_attributes_schema() {
 		return array(
-			'subscription_id' => array(
-				'label' => __( 'Subscription ID', 'quillcrm' ),
-				'type'  => 'number',
+			'days'    => array(
+				'label'    => \__( 'Days', 'quillcrm' ),
+				'type'     => 'number',
+				'required' => true,
+				'default'  => 1,
 			),
-			'customer_id' => array(
-				'label' => __( 'Customer ID', 'quillcrm' ),
-				'type'  => 'number',
+			'hours'   => array(
+				'label'    => \__( 'Hours', 'quillcrm' ),
+				'type'     => 'number',
+				'required' => true,
+				'default'  => 0,
 			),
-			'customer_email' => array(
-				'label' => __( 'Customer Email', 'quillcrm' ),
-				'type'  => 'email',
-			),
-			'status' => array(
-				'label' => __( 'Subscription Status', 'quillcrm' ),
-				'type'  => 'text',
-			),
-			'total' => array(
-				'label' => __( 'Subscription Total', 'quillcrm' ),
-				'type'  => 'number',
-			),
-			'currency' => array(
-				'label' => __( 'Currency', 'quillcrm' ),
-				'type'  => 'text',
-			),
-			'renewal_amount' => array(
-				'label' => __( 'Renewal Amount', 'quillcrm' ),
-				'type'  => 'number',
+			'minutes' => array(
+				'label'    => \__( 'Minutes', 'quillcrm' ),
+				'type'     => 'number',
+				'required' => true,
+				'default'  => 0,
 			),
 		);
 	}

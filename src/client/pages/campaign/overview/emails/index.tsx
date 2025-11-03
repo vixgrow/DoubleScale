@@ -26,14 +26,14 @@ import { UserOutlined } from '@ant-design/icons';
 /**
  * Internal dependencies
  */
-import '../engagements/style.scss';
+import './style.scss';
 import type { CampaignEmail, CampaignEmailsResponse } from '@quillcrm/client';
 import { NavLink } from '@quillcrm/navigation';
 import { convertDate } from '@quillcrm/utils';
 import { useParams } from '@quillcrm/navigation';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
-const EngagementsTab: React.FC = () => {
+const EmailsTab: React.FC = () => {
 	const { id } = useParams<{ id: string; subtab: string }>();
 	const [isLoading, setIsLoading] = useState(true);
 	const [page, setPage] = useState(1);
@@ -483,5 +483,5 @@ const EngagementsTab: React.FC = () => {
 	);
 };
 
-export default EngagementsTab;
+export default EmailsTab;
 

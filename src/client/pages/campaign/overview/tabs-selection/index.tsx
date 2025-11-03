@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { Card, CardContent } from '@/components/ui/card';
 import PageTabs from '@/components/page-tabs';
 import CampaignDetails from '../campaign-details';
-import EngagementsTab from '../engagements';
+import EmailsTab from '../emails';
 import UnsubscribesTab from '../unsubscribes';
 import { CampaignsIcon, ContactTotalEmailsIcon, UnsubscribesIcon } from '@quillcrm/components';
 
@@ -45,7 +45,7 @@ const TabsSelection: React.FC = () => {
 			value: 'emails',
 			children: (
 				<CardContent className="pt-6">
-					<EngagementsTab />
+					<EmailsTab />
 				</CardContent>
 			),
 		},

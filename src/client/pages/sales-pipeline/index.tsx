@@ -112,7 +112,6 @@ const SalesPipeline: React.FC = () => {
 	);
 	const [ScheduleMeetingVisible, setScheduleMeetingVisible] = useState(false);
 	const [LogEmailVisible, setLogEmailVisible] = useState(false);
-	
 
 	const [filters, setFilters] = useState<Filters>({
 		search: '',
@@ -138,6 +137,7 @@ const SalesPipeline: React.FC = () => {
 		removeStageOptimistically,
 		reorderStagesOptimistically,
 	} = usePipelineData(selectedPipelineId, filters);
+	console.log("Loading value:", loading);
 
 	// Set default pipeline on load
 	useEffect(() => {
@@ -409,8 +409,11 @@ const SalesPipeline: React.FC = () => {
 						}}
 						onDealAddNote={(deal) => handleAddNote(deal)}
 						onDealLogCall={(deal) => handleLogCall(deal)}
-						onDealScheduleMeeting={(deal) => handleScheduleMeetingVisible(deal)}
+						onDealScheduleMeeting={(deal) =>
+							handleScheduleMeetingVisible(deal)
+						}
 						onDealLogEmail={(deal) => handleLogEmailVisible(deal)}
+						loading={loading}
 					/>
 				</div>
 			)}
@@ -447,6 +450,7 @@ const SalesPipeline: React.FC = () => {
 					setEditDealModalVisible(true);
 					setDealDetailModalVisible(false);
 				}}
+				pipeline={selectedPipeline} 
 			/>
 
 			<EditDealModal
@@ -512,8 +516,8 @@ const SalesPipeline: React.FC = () => {
 				visible={deleteDealModalVisible}
 				onClose={() => setDeleteDealModalVisible(false)}
 				deal={dealToDelete}
-				pipeline={selectedPipeline}
-				pipelines={pipelines}
+				// pipeline={selectedPipeline}
+				// pipelines={pipelines}
 				onConfirm={() => {
 					refreshData();
 					setDeleteDealModalVisible(false);

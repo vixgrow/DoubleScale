@@ -138,7 +138,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && handleCancel()}>
-			<DialogContent className="w-full max-w-2xl max-h-[80vh] my-2 mx-5 sm:mx-auto overflow-y-auto p-8 rounded-[16px]">
+			<DialogContent className="w-full max-w-2xl max-h-[80vh] my-2 mx-5 sm:mx-auto overflow-y-auto p-8 rounded-[16px]  z-[100000]">
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader

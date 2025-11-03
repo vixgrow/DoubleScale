@@ -217,6 +217,10 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	const priorities = useMemo(() => {
 		return ConfigAPI.getDealPriorities();
 	}, []);
+	// useEffect(() => {
+    //     console.log(pipelines)
+	// 	// console.log('Current form values:', form.watch());
+	//   }, [form.watch()]);
 
 	// Check if current user is restricted (deal owner)
 	const isRestrictedUser = isDealOwner();
@@ -815,8 +819,17 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 						)}
 						<div className="h-[1px] bg-[#DEE1E6] w-full"></div>
 						{/* custom filed */}
-						<CustomFieldsSection
+						{/* <CustomFieldsSection
 	initialValues={deal?.custom_fields || {}}
+	onChange={(fields) => {
+		Object.entries(fields).forEach(([key, value]) => {
+			form.setValue(key as any, value);
+		});
+	}}
+/> */}
+<CustomFieldsSection
+	deal={deal} 
+	// initialValues={deal?.custom_fields || {}}
 	onChange={(fields) => {
 		Object.entries(fields).forEach(([key, value]) => {
 			form.setValue(key as any, value);

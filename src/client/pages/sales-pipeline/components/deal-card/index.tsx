@@ -7,7 +7,7 @@ import { useMemo } from '@wordpress/element';
 /**
  * React dependencies
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 /**
  * External dependencies
@@ -37,6 +37,7 @@ import WeightedIcon from '@quillcrm/components/icons/weighted-icon';
 import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
 
 import { DealCardMenu } from './DealCardMenu';
+import { DealCardShimmer } from './DealCardShimmer';
 
 interface DealCardProps {
 	deal: Deal;
@@ -80,6 +81,15 @@ export const DealCard: React.FC<DealCardProps> = ({
 			currentStageId: deal.stage?.id,
 		},
 	});
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+
+		  if(deal){
+			setLoading(false);
+		  }
+ 
+	  }, [deal]);
 
 	const style = {
 		'--stage-color': stageColor || '#6d78d8',
@@ -163,6 +173,22 @@ export const DealCard: React.FC<DealCardProps> = ({
 			onDealLogEmail?.(deal); 
 		}
 	};
+	if (loading) {
+		
+		return (
+		  <div
+			className="m-4"
+			style={{
+			  height: '100%',
+			  minHeight: '180px',
+			}}
+		  >
+			<DealCardShimmer />
+		  </div>
+		);
+	  }
+	  
+
 
 	return (
 		<div
@@ -182,62 +208,6 @@ export const DealCard: React.FC<DealCardProps> = ({
 						>
 							{deal.title}
 						</CardTitle>
-
-						{/* <DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button
-									variant="outline"
-									size="icon"
-									className="text-base !active:border-0  !focus:border-0 !shadow-none !border-0 font-medium !text-[#374151] flex items-center justify-center gap-3 h-10 py-2 px-4"
-								>
-									<MoreHorizantail
-										color="#1E3A8A"
-										width={26}
-										height={26}
-									/>
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent
-								align="end"
-								style={{
-									boxShadow:
-										'3px 3px 4px 0 rgba(0, 0, 0, 0.25)',
-								}}
-								className="p-4 flex flex-col gap-[10px] rounded-[10px] border border-[#F5F5F5]"
-							>
-								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
-									<NoteAddIcon />
-									{__('Add Note', 'quillcrm')}
-								</DropdownMenuItem>
-								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
-									<CallLogIcon />
-									{__('Log Call', 'quillcrm')}
-								</DropdownMenuItem>
-								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
-									<EmailLogIcon />
-									{__('LogEmail', 'quillcrm')}
-								</DropdownMenuItem>
-								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
-									<MeetingDealIcon />
-									{__('Meeting', 'quillcrm')}
-								</DropdownMenuItem>
-								<div className='h-[1px] bg-[#DEE1E6] m-1'>
-
-								</div>
-								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
-									<ViewIcon/>
-									{__('View Pipeline', 'quillcrm')}
-								</DropdownMenuItem>
-								<DropdownMenuItem className="flex items-center gap-2 text-[#374151] font-medium text-sm leading-[16px]">
-									<EditHeaderIcon />
-									{__('Edit Pipeline', 'quillcrm')}
-								</DropdownMenuItem>
-								<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
-									<TrashIcon />
-									{__('Delete Pipeline', 'quillcrm')}
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu> */}
 						<DealCardMenu onActionClick={handleActionClick} />
 					</div>
 

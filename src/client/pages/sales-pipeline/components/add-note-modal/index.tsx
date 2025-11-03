@@ -115,7 +115,7 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 				if (!open) handleCancel();
 			}}
 		>
-			<DialogContent className="w-full max-w-2xl max-h-[80vh] my-2 mx-5 sm:mx-auto overflow-y-auto  p-8 rounded-[16px]">
+			<DialogContent className="w-full max-w-2xl   z-[100000] max-h-[80vh] my-2 mx-5 sm:mx-auto overflow-y-auto  p-8 rounded-[16px]">
 				<DialogHeader>
 					<DialogTitle className="!mb-0">
 						<CustomDialogHeader

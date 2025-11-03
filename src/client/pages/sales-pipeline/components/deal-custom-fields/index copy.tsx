@@ -25,6 +25,7 @@ export const DealCustomFields: React.FC<DealCustomFieldsProps> = ({ deal }) => {
 			setUpdatedCustomFields(deal.custom_fields);
 		}
 	}, [deal]);
+	
 
 	// Helper function to get custom field value from deal
 	const getCustomFieldValue = (fieldId: number, fieldType?: string) => {

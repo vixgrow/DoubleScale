@@ -71,6 +71,7 @@ interface Contact {
 import { StageColorBody } from '@quillcrm/components/stagebody-color/stagebodyColor';
 import { CustomFieldsSection } from '../deal-custom-fields';
 
+
 interface PipelineStageBoxProps {
 	stage: {
 		color: string;
@@ -204,7 +205,6 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 					/>
 				)}
 
-				{/* السهم الشمال */}
 				{!isFirst && (
 					<span
 						className="absolute top-0 left-0 w-0 h-0"
@@ -550,9 +550,10 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 							<Input
 								type="number"
 								value={formData.value}
-								onChange={(e) =>
-									handleChange('value', e.target.value)
-								}
+								// onChange={(e) =>
+								// 	handleChange('value', e.target.value)
+								// }
+								onChange={(e) => handleChange('value', Number(e.target.value))}
 								placeholder={__('Deal Value', 'quillcrm')}
 								className=" h-12 !shadow-none py-[5px] px-4 !rounded-[8px] outline-none border !border-[#DEE1E6] !text-[#09090B] font-sm text-sm landing-[150%] tracking-[-.5px]"
 							/>
@@ -815,10 +816,26 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 
 					<div className="h-[1px] bg-[#DEE1E6] w-full"></div>
 
-					{/* custom Filed */}
-					<CustomFieldsSection
+					{/* custom Filed  */}
+					{/* <CustomFieldsSection
+					deal={formData || { custom_fields: [] }} 
 						onChange={(fields) => setCustomFields(fields)}
-					/>
+					/> */}
+					<CustomFieldsSection
+  deal={formData}
+  onChange={(fields) =>
+    setFormData((prev) => ({
+      ...prev,
+      custom_fields: fields,
+    }))
+  }
+/>
+					
+					
+				
+					
+					
+
 				</div>
 				{/* Apply Button */}
 				<div className="mt-4">

@@ -88,7 +88,7 @@ export const DealCardMenu: React.FC<DealCardMenuProps> = ({ onActionClick }) => 
 					className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]"
 				>
 					<ViewIcon />
-					{__('View Pipeline', 'quillcrm')}
+					{__('View Deal', 'quillcrm')}
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
@@ -98,7 +98,7 @@ export const DealCardMenu: React.FC<DealCardMenuProps> = ({ onActionClick }) => 
 					className="flex items-center gap-2 text-[#374151] font-medium text-sm leading-[16px]"
 				>
 					<EditHeaderIcon />
-					{__('Edit Pipeline', 'quillcrm')}
+					{__('Edit Deal', 'quillcrm')}
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
@@ -108,7 +108,7 @@ export const DealCardMenu: React.FC<DealCardMenuProps> = ({ onActionClick }) => 
 					className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]"
 				>
 					<TrashIcon />
-					{__('Delete Pipeline', 'quillcrm')}
+					{__('Delete Deal', 'quillcrm')}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

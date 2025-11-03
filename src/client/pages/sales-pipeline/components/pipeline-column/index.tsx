@@ -21,6 +21,8 @@ import WinTagIcon from '@quillcrm/components/icons/win-tag';
 import { PlusIcon } from 'lucide-react';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import WeightedIcon from '@quillcrm/components/icons/weighted-icon';
+import { DealCardShimmer } from '../deal-card/DealCardShimmer';
+import React from 'react';
 
 interface PipelineColumnProps {
 	stage: {
@@ -42,6 +44,7 @@ interface PipelineColumnProps {
 	onDealLogEmail?: (deal: Deal) => void;
 	index: number;
 	totalStages: number;
+	loading?: boolean;
 }
 
 export const PipelineColumn: React.FC<PipelineColumnProps> = ({
@@ -58,6 +61,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	onDealLogCall,
 	onDealScheduleMeeting,
 	onDealLogEmail,
+	loading = false,
 }) => {
 	const { setNodeRef: setDroppableRef, isOver: isDropOver } = useDroppable({
 		id: `stage-${stage.id}`,
@@ -210,7 +214,23 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 				style={{ backgroundColor: backgroundColor }}
 				data-stage-id={stage.id}
 			>
-				{deals.length === 0 ? (
+				{loading ? (
+					// Show shimmer cards while loading
+					<div className="">
+						{Array.from({ length: 3 }).map((_, shimmerIndex) => (
+							<DealCardShimmer
+								key={`shimmer-${shimmerIndex}`}
+								style={
+									{
+										'--stage-color': stage.color,
+										marginBottom:
+											shimmerIndex < 2 ? '12px' : '0',
+									} as React.CSSProperties
+								}
+							/>
+						))}
+					</div>
+				) : deals.length === 0 ? (
 					<div className=" flex justify-center items-center flex-col text-center h-full ">
 						{/* <div className=" flex flex-col justify-center items-center  "> */}
 						<span className=" block my-2">
@@ -235,15 +255,21 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 									key={deal.id}
 									deal={deal}
 									isDragging={isDragging}
-									onCardClick={(dealData) => {
-										onDealView?.(dealData.id);
-									}}
+									onCardClick={(dealData) =>
+										onDealView?.(dealData.id)
+									}
 									onDealEdit={onDealEdit}
 									onDealDelete={onDealDelete}
 									onAddNote={(deal) => onDealAddNote?.(deal)}
-									onDealLogCall={(deal) => onDealLogCall?.(deal)}
-									onDealScheduleMeeting={(deal) => onDealScheduleMeeting?.(deal)}
-									onDealLogEmail={(deal) => onDealLogEmail?.(deal)}
+									onDealLogCall={(deal) =>
+										onDealLogCall?.(deal)
+									}
+									onDealScheduleMeeting={(deal) =>
+										onDealScheduleMeeting?.(deal)
+									}
+									onDealLogEmail={(deal) =>
+										onDealLogEmail?.(deal)
+									}
 									stageColor={stage.color}
 									stageProbability={stage.win_probability}
 									style={

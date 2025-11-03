@@ -143,7 +143,7 @@ export const usePipelineData = (
 				ERROR_MESSAGES.LOAD_DEALS
 			);
 			setError(errorMessage);
-		}
+		} 
 	}, [selectedPipelineId, filters]);
 
 	// Debounced search to avoid too many API calls
@@ -162,6 +162,7 @@ export const usePipelineData = (
 
 		loadInitialData();
 	}, [fetchPipelines]);
+	
 
 	// Fetch deals when pipeline or filters change
 	useEffect(() => {

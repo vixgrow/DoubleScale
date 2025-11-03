@@ -2,6 +2,10 @@
  * Shared types for the sales pipeline module
  */
 import { CustomField } from '../../../types';
+
+// Re-export CustomField for use in components
+export type { CustomField };
+
 export interface Deal {
 	id: number;
 	title: string;

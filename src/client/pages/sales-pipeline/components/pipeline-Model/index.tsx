@@ -214,7 +214,7 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 				if (!open) handleCancel();
 			}}	
 		>
-			<DialogContent className="w-full max-w-7xl max-h-[80vh] overflow-y-auto my-4 sm:mx-auto z-[10000] p-6 rounded-[16px] pipline-content">
+			<DialogContent className="w-full max-w-7xl max-h-[80vh] overflow-y-auto my-4 sm:mx-auto z-[100000] p-6 rounded-[16px] pipline-content">
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader

@@ -57,6 +57,7 @@ interface KanbanBoardProps {
 	onDealLogCall?: (deal: Deal) => void;
 	onDealScheduleMeeting?: (deal: Deal) => void;
 	onDealLogEmail?: (deal: Deal) => void;
+	loading?: boolean;
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -70,6 +71,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	onDealLogCall,
 	onDealScheduleMeeting,
 	onDealLogEmail,
+	loading = false,
 }) => {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const { moveDealToStage } = useDealOperations();
@@ -315,86 +317,80 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 						</div>
 						<div className="stat-item flex justify-between border-l-[3px] border-[#16A34A] rounded-[8px] bg-[#F8F8F8] p-4 w-[45%]">
 							<div className=" flex justify-between items-center w-[45%]">
-								<div className='flex flex-col'>
+								<div className="flex flex-col">
 									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter]">
-										 ${totalValue.toLocaleString()}
+										${totalValue.toLocaleString()}
 									</span>
 									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777]">
-									  {__('Total Value', 'quillcrm')}
+										{__('Total Value', 'quillcrm')}
 									</span>
 								</div>
 								<div className="w-[52px] h-[51px]">
-								<Doughnut
-									data={{
-										datasets: [
-											{
-												data: [
-													100,
-													0
-												],
-												backgroundColor: [
-													'#16A34A',
-													'#E5E7EB',
-												],
-												borderWidth: 0,
+									<Doughnut
+										data={{
+											datasets: [
+												{
+													data: [100, 0],
+													backgroundColor: [
+														'#16A34A',
+														'#E5E7EB',
+													],
+													borderWidth: 0,
+												},
+											],
+										}}
+										options={{
+											cutout: '80%',
+											plugins: {
+												tooltip: { enabled: false },
 											},
-										],
-									}}
-									options={{
-										cutout: '80%',
-										plugins: {
-											tooltip: { enabled: false },
-										},
-										animation: {
-											duration: 1000,
-											easing: 'easeOutQuart',
-										},
-									}}
-								/>
-							</div>
-
+											animation: {
+												duration: 1000,
+												easing: 'easeOutQuart',
+											},
+										}}
+									/>
+								</div>
 							</div>
 							<div className="w-[1px] h-full bg-[#DEE1E6]"></div>
-							<div className='flex justify-between items-center w-[45%]'>
-							<div className='flex flex-col'>
+							<div className="flex justify-between items-center w-[45%]">
+								<div className="flex flex-col">
 									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter]">
-										 ${weightedValue.toLocaleString()}
+										${weightedValue.toLocaleString()}
 									</span>
 									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777]">
-									  {__('weighted Value', 'quillcrm')}
+										{__('weighted Value', 'quillcrm')}
 									</span>
-							</div>
-							<div className="w-[52px] h-[51px]">
-								<Doughnut
-									data={{
-										datasets: [
-											{
-												data: [
-													weightedValue,
-													100 - weightedValue
-												],
-												backgroundColor: [
-													'#E4B123',
-													'#E5E7EB',
-												],
-												borderWidth: 0,
+								</div>
+								<div className="w-[52px] h-[51px]">
+									<Doughnut
+										data={{
+											datasets: [
+												{
+													data: [
+														weightedValue,
+														100 - weightedValue,
+													],
+													backgroundColor: [
+														'#E4B123',
+														'#E5E7EB',
+													],
+													borderWidth: 0,
+												},
+											],
+										}}
+										options={{
+											cutout: '80%',
+											plugins: {
+												tooltip: { enabled: false },
 											},
-										],
-									}}
-									options={{
-										cutout: '80%',
-										plugins: {
-											tooltip: { enabled: false },
-										},
-										animation: {
-											duration: 1000,
-											easing: 'easeOutQuart',
-										},
-									}}
-								/>
-							</div>
-
-
+											animation: {
+												duration: 1000,
+												easing: 'easeOutQuart',
+											},
+										}}
+									/>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -427,7 +423,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								onDealLogCall={onDealLogCall}
 								onDealScheduleMeeting={onDealScheduleMeeting}
 								onDealLogEmail={onDealLogEmail}
-								
+								loading={loading}
 							/>
 						))}
 				</div>
@@ -440,10 +436,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								deal={activeDeal}
 								isDragging={true}
 								onCardClick={() => {}} // No-op during drag
-								onAddNote={onDealAddNote} 
-								onDealLogCall={onDealLogCall} 
-								onDealScheduleMeeting={onDealScheduleMeeting} 
-								onDealLogEmail={onDealLogEmail} 
+								onAddNote={onDealAddNote}
+								onDealLogCall={onDealLogCall}
+								onDealScheduleMeeting={onDealScheduleMeeting}
+								onDealLogEmail={onDealLogEmail}
 								stageColor={
 									pipeline.stages.find(
 										(s) => s.id === activeDeal.stage?.id

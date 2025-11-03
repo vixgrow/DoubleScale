@@ -27,8 +27,7 @@ import { useDealOperations } from '../../hooks/use-deal-operations';
 export const DeleteDeal = ({
   visible,
 	onClose,
-	pipeline,
-	pipelines,
+
     deal,
 	onConfirm,
 }) => {

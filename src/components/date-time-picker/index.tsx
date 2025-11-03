@@ -117,7 +117,7 @@ export function DateTimePicker({
 				<PopoverTrigger asChild>
 					<Button
 						variant="outline"
-						className="px-3 h-12 bg-white hover:bg-white text-[#09090B] border border-[#DEE1E6] flex flex-row-reverse justify-between items-center"
+						className="px-3 h-12 !shadow-none bg-white hover:bg-white text-[#09090B] border border-[#DEE1E6] flex flex-row-reverse justify-between items-center"
 					>
 						<OutlinedCalendarIcon />
 						<span>{date ? formatDateTime(date) : placeholder}</span>

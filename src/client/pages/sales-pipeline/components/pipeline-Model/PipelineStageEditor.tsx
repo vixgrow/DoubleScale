@@ -110,21 +110,7 @@ export const PipelineStageEditor = ({
 													</label>
 												)}
 												<div className="flex items-center justify-center relative z-50">
-													{/* <ColorPicker
-														value={stage.color}
-														onChange={(color) =>
-															updateStage(
-																index,
-																'color',
-																color.toHexString()
-															)
-														}
-														size="small"
-														showText
-														format="hex"
-														className="w-full input-stage z-50 "
-														
-													/> */}
+													
 													<input value={stage.color} className="w-full input-stage z-50 "/>
 												</div>
 											</div>

@@ -64,7 +64,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 					open={open}
 					onOpenChange={onOpenChange}
 				>
-					<DialogContent className="w-full max-w-2xl min-h-[80vh] my-2 sm:mx-auto overflow-y-auto  p-6 rounded-[16px] pipline-content">
+					<DialogContent className="w-full max-w-2xl max-h-[80vh] my-2 sm:mx-auto overflow-y-auto  p-6 rounded-[16px] pipline-content">
 						<DialogHeader>
 							<DialogTitle>
 								<CustomDialogHeader

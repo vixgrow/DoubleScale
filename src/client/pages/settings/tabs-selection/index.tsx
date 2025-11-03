@@ -15,7 +15,7 @@ import {
     CartIcon,
     CurrencyIcon,
     DoubleOptInIcon,
-    NoEmailsIcon,
+    ContactTotalEmailsIcon,
 } from '@quillcrm/components';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -51,7 +51,7 @@ const TabsSelection: React.FC<TabsSelectionProps> = ({ activeTab, onTabChange })
                             value="email"
                             className="w-full justify-start gap-2 text-base text-[#2E2C2F] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-medium py-2"
                         >
-                            <NoEmailsIcon width={20} height={17} />
+                            <ContactTotalEmailsIcon width={24} height={24} />
                             {__('Email', 'quillcrm')}
                         </TabsTrigger>
                         <TabsTrigger

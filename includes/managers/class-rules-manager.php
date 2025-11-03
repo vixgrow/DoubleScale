@@ -20,6 +20,11 @@ use QuillCRM\Abstracts\Rule;
  */
 final class Rules_Manager {
 
+
+
+
+
+
 	/**
 	 * Registed rules
 	 *
@@ -80,29 +85,45 @@ final class Rules_Manager {
 	 */
 	public function set_groups() {
 		$this->groups = array(
-			'contact'        => array(
+			'contact'                   => array(
 				'name'  => __( 'Contact', 'quillcrm' ),
 				'key'   => 'contact',
 				'rules' => array(),
 			),
-			'contact_fields' => array(
+			'contact_fields'            => array(
 				'name'  => __( 'Contact Fields', 'quillcrm' ),
 				'key'   => 'contact_fields',
 				'rules' => array(),
 			),
-			'segments'       => array(
+			'segments'                  => array(
 				'name'  => __( 'Segments', 'quillcrm' ),
 				'key'   => 'segments',
 				'rules' => array(),
 			),
-			'user'           => array(
+			'user'                      => array(
 				'name'  => __( 'User', 'quillcrm' ),
 				'key'   => 'user',
 				'rules' => array(),
 			),
-			'activity'       => array(
+			'activity'                  => array(
 				'name'  => __( 'Activity', 'quillcrm' ),
 				'key'   => 'activity',
+				'rules' => array(),
+			),
+			'woocommerce_current_order' => array(
+				'name'     => __( 'WooCommerce Current Order', 'quillcrm' ),
+				'key'      => 'woocommerce_current_order',
+				'rules'    => array(),
+				'triggers' => array( 'wc_order_created', 'wc_order_completed', 'wc_order_refunded', 'wc_order_status_changed' ),
+			),
+			'woocommerce'               => array(
+				'name'  => __( 'WooCommerce', 'quillcrm' ),
+				'key'   => 'woocommerce',
+				'rules' => array(),
+			),
+			'learndash'                 => array(
+				'name'  => __( 'LearnDash', 'quillcrm' ),
+				'key'   => 'learn_dash',
 				'rules' => array(),
 			),
 		);

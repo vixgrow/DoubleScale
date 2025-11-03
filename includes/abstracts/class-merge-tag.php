@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Merge Tag
  *
@@ -18,6 +19,7 @@ use QuillCRM\Models\Contact_Model;
  * Merge Tag class
  */
 abstract class Merge_Tag {
+
 
 	/**
 	 * Merge Tag Name
@@ -41,6 +43,13 @@ abstract class Merge_Tag {
 	public $description;
 
 	/**
+	 * Required Triggers
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array();
+
+	/**
 	 * Merge Tag Group
 	 *
 	 * @var string
@@ -62,7 +71,7 @@ abstract class Merge_Tag {
 	 *
 	 * @return string
 	 */
-	abstract public function get_value( $contact, $merge_tag = '' );
+	abstract public function get_value( $contact, $merge_tag = '');
 
 	/**
 	 * Is Automation Contact

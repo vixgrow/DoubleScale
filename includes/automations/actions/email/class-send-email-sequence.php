@@ -124,6 +124,26 @@ class Send_Email_Sequence extends Action {
 			return false;
 		}
 
+		// Only send to subscribed contacts
+		$contact = $automation_contact->contact;
+		if ( $contact->status !== 'subscribed' ) {
+			quillcrm_get_logger()->info(
+				'Send Email Sequence action: Contact is not subscribed',
+				array(
+					'automation_id'     => $automation->id,
+					'step_id'           => $step->id,
+					'contact_id'        => $contact->id,
+					'contact_status'    => $contact->status,
+					'email_sequence_id' => $email_sequence_id,
+					'code'              => 'send_email_sequence_not_subscribed',
+				)
+			);
+			return array(
+				'status'  => 'skipped',
+				'message' => "Contact is not subscribed (status: {$contact->status})",
+			);
+		}
+
 		// Start the email sequence for this contact
 		$email_sequences_manager = Email_Sequences_Manager::instance();
 		$result                  = $email_sequences_manager->start_sequence_for_contact( $email_sequence_id, $automation_contact->contact_id );

@@ -7,9 +7,9 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { Settings } from '@quillcrm/client';
-import { Field, TinyMCEWPEditor } from '@quillcrm/components';
+import { Field, Editor } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
-import { Label } from '@quillcrm/components/ui/label';
+import { FromEmailSelector } from '@/components/from-email-selector';
 
 interface EmailSettingsProps {
     settings: Settings;
@@ -42,25 +42,40 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
             <div className="text-[#09090B] font-semibold text-2xl">
                 {__('Email', 'quillcrm')}
             </div>
-            <div className="flex gap-5 items-center mb-3">
-                <Field
-                    label={__('From Name', 'quillcrm')}
-                    value={from_name || ConfigAPI.getBlogName()}
-                    onChange={(value) => handleFieldChange('from_name', value)}
-                    type="text"
-                />
-                <Field
-                    label={__('From Email', 'quillcrm')}
-                    value={from_email || ConfigAPI.getBlogName()}
-                    onChange={(value) => handleFieldChange('from_email', value)}
-                    type="email"
-                />
-                <Field
-                    label={__('Reply To', 'quillcrm')}
-                    value={reply_to || ConfigAPI.getBlogName()}
-                    onChange={(value) => handleFieldChange('reply_to', value)}
-                    type="email"
-                />
+            <div className="flex gap-5 items-start mb-3">
+                <div className="flex-1">
+                    <Field
+                        label={__('From Name', 'quillcrm')}
+                        value={from_name || ConfigAPI.getBlogName()}
+                        onChange={(value) => handleFieldChange('from_name', value)}
+                        type="text"
+                    />
+                </div>
+                <div className="flex-1">
+                    <div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between mb-[10px]">
+                        {__('From Email', 'quillcrm')}
+                    </div>
+                    <div className="qcrm-field-input">
+                        <FromEmailSelector
+                            value={from_email || ConfigAPI.getAdminEmail()}
+                            onChange={(email, name) => {
+                                handleFieldChange('from_email', email);
+                                // Auto-fill from name if provided and current from_name is empty
+                                if (name && !from_name) {
+                                    handleFieldChange('from_name', name);
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
+                <div className="flex-1">
+                    <Field
+                        label={__('Reply To', 'quillcrm')}
+                        value={reply_to || ConfigAPI.getBlogName()}
+                        onChange={(value) => handleFieldChange('reply_to', value)}
+                        type="email"
+                    />
+                </div>
             </div>
             <div className="flex gap-5 items-start w-full">
                 <div className="w-full flex flex-col gap-5">
@@ -70,9 +85,8 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                         onChange={(value) =>
                             handleFieldChange('max_in_second', value)
                         }
-                        type="slider"
-                        min={0}
-                        max={1500}
+                        type="number"
+                        min={1}
                     />
                     <Field
                         label={__('Max Emails in Day', 'quillcrm')}
@@ -80,33 +94,20 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                         onChange={(value) =>
                             handleFieldChange('max_in_day', value)
                         }
-                        type="slider"
-                        min={0}
-                        max={1000}
+                        type="number"
+                        min={1}
                     />
                 </div>
                 <div className="w-full">
-                    <Label className="text-[#09090B] font-normal text-base">
+                    <div className="text-[#09090B] font-normal text-base mb-2">
                         {__('Email Footer', 'quillcrm')}
-                    </Label>
-                    <div className="mt-2">
-                        <TinyMCEWPEditor
-                            value={email_footer}
+                    </div>
+                    <div>
+                        <Editor
+                            message={email_footer}
                             onChange={(content) =>
                                 handleFieldChange('email_footer', content)
                             }
-                            height={132}
-                            toolbar="bold italic underline strikethrough align bullist numlist link image mergetags"
-                            plugins={[
-                                'advlist',
-                                'lists',
-                                'link',
-                            ]}
-                            init={{
-                                toolbar_mode: 'scrolling',
-                            }}
-                            placeholder={__('Enter email footer content...', 'quillcrm')}
-                            showMergeTags={true}
                         />
                     </div>
                 </div>

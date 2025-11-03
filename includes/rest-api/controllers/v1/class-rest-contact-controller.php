@@ -31,6 +31,7 @@ use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Traits\Message_Provider_Validation;
 
 /**
  * REST_Contact_Controller is REST api controller class for log
@@ -38,6 +39,8 @@ use QuillCRM\Managers\Merge_Tags_Manager;
  * @since 1.0.0
  */
 class REST_Contact_Controller extends REST_Controller {
+
+	use Message_Provider_Validation;
 
 
 
@@ -1560,7 +1563,7 @@ class REST_Contact_Controller extends REST_Controller {
 	public function send_message( $request ) {
 		$channel = $request->get_param( 'channel' );
 
-		// Validate channel parameter
+		// Validate channel parameter.
 		if ( ! in_array( $channel, Campaign_Channel::get_core_channel_strings(), true ) ) {
 			return new WP_Error(
 				'invalid_channel',
@@ -1569,7 +1572,7 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 		}
 
-		// Validate email requires subject
+		// Validate email requires subject.
 		if ( $channel === Campaign_Channel::STR_EMAIL && empty( $request->get_param( 'subject' ) ) ) {
 			return new WP_Error(
 				'missing_subject',
@@ -1578,7 +1581,15 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 		}
 
-		// Route to appropriate sender based on channel
+		// Validate provider connection for SMS/WhatsApp before processing.
+		if ( $channel === Campaign_Channel::STR_SMS || $channel === Campaign_Channel::STR_WHATSAPP ) {
+			$provider_check = $this->validate_provider_connection( $channel );
+			if ( is_wp_error( $provider_check ) ) {
+				return $provider_check;
+			}
+		}
+
+		// Route to appropriate sender based on channel.
 		switch ( $channel ) {
 			case Campaign_Channel::STR_EMAIL:
 				$sender = new \QuillCRM\Individual_Messaging\Email_Individual_Sender();
@@ -1940,4 +1951,5 @@ class REST_Contact_Controller extends REST_Controller {
 	public function get_purchase_history_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
+
 }

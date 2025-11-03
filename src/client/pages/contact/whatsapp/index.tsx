@@ -14,11 +14,15 @@ import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-table';
+import { useProviderStatus } from '@/hooks/use-provider-status';
 import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
 import SendWhatsAppDialog from './send-whatsapp-dialog';
 import WhatsAppDetails from './whatsapp-details-dialog';
+import TwilioConfigModal from '../components/twilio-config-modal';
+import { ProviderNotConnectedWarning } from '../components/provider-not-connected-warning';
 import { MessageCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { MessageStatsCard } from '../components/message-stats-card';
+import { NoData } from '@/components/no-data';
 import type { ColumnDef } from '@tanstack/react-table';
 
 interface WhatsAppProps {
@@ -31,6 +35,11 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 		useState<boolean>(false);
 	const [selectedWhatsApp, setSelectedWhatsApp] =
 		useState<TrackedMessage | null>(null);
+	const [showTwilioConfig, setShowTwilioConfig] = useState<boolean>(false);
+
+	// Check WhatsApp provider status
+	const { isConnected, isLoading: providerLoading, checkStatus } =
+		useProviderStatus('whatsapp');
 
 	// Use combined hook for data + table pagination
 	const { loading, messages, analytics, serverSideTable, refetch } =
@@ -43,6 +52,34 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 	if (!contact) {
 		return null;
 	}
+
+	/**
+	 * Handle send WhatsApp button click
+	 * Check provider connection before opening dialog
+	 */
+	const handleSendWhatsApp = () => {
+		console.log('[QuillCRM WhatsApp] Button clicked', {
+			isConnected,
+			providerLoading,
+		});
+
+		if (!isConnected) {
+			console.log('[QuillCRM WhatsApp] Provider not connected - inline warning visible');
+			// Inline warning is already visible, user can click the configure link
+			return;
+		}
+
+		console.log('[QuillCRM WhatsApp] Opening WhatsApp dialog');
+		setShowSendWhatsAppModal(true);
+	};
+
+	/**
+	 * Handle successful Twilio configuration
+	 * Refresh provider status
+	 */
+	const handleTwilioConfigSuccess = async () => {
+		await checkStatus();
+	};
 
 	const columns: ColumnDef<TrackedMessage>[] = [
 		{
@@ -147,12 +184,23 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 					variant="secondary"
 					size="sm"
 					className="bg-white"
-					onClick={() => setShowSendWhatsAppModal(true)}
+					onClick={handleSendWhatsApp}
+					disabled={providerLoading || !isConnected}
 				>
 					<MessageCircle className="w-4 h-4 mr-2" />
-					{__('Send WhatsApp', 'quillcrm')}
+					{providerLoading
+						? __('Checking...', 'quillcrm')
+						: __('Send WhatsApp', 'quillcrm')}
 				</Button>
 			</div>
+
+			{/* Inline warning when provider not configured */}
+			{!isConnected && !providerLoading && (
+				<ProviderNotConnectedWarning
+					channel="whatsapp"
+					onConfigureClick={() => setShowTwilioConfig(true)}
+				/>
+			)}
 
 			{/* Statistics Cards */}
 			{analytics && (
@@ -188,14 +236,11 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 			{/* Messages Table */}
 			<div>
 				{!loading && messages.length === 0 ? (
-					<div className="flex flex-col items-center justify-center py-20 gap-4">
-						<div className="text-gray-400">
-							<MessageCircle className="w-24 h-24" />
-						</div>
-						<span className="text-lg text-gray-500 font-medium">
-							{__('No WhatsApp messages found', 'quillcrm')}
-						</span>
-					</div>
+					<NoData
+						icon={<MessageCircle className="w-24 h-24 text-gray-400" />}
+						title={__('No WhatsApp messages', 'quillcrm')}
+						subtitle={__('No WhatsApp messages found for this contact.', 'quillcrm')}
+					/>
 				) : (
 					<>
 						<DataTable
@@ -206,7 +251,7 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 							initialPageSize={10}
 							showMainActions={false}
 							config={{}}
-							setPage={() => {}}
+							setPage={() => { }}
 						/>
 						<DataTablePagination table={serverSideTable} />
 					</>
@@ -225,6 +270,11 @@ const WhatsApp: React.FC<WhatsAppProps> = ({ contact_id }) => {
 					refetch(); // Refresh the list after sending
 				}}
 				contact={contact}
+			/>
+			<TwilioConfigModal
+				open={showTwilioConfig}
+				onClose={() => setShowTwilioConfig(false)}
+				onSuccess={handleTwilioConfigSuccess}
 			/>
 		</div>
 	);

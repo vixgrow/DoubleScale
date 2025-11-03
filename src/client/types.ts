@@ -190,7 +190,6 @@ export type EmailTemplateSettings = {
 	utm_name: string;
 	utm_term: string;
 	utm_content: string;
-	email_body?: EmailBodyContent;
 };
 
 // Email Template Type (matches database structure)
@@ -199,8 +198,10 @@ export type EmailTemplate = {
 	name: string;
 	type: 'email'; // Campaign channel type
 	subject: string;
-	body?: string; // Rich-text content (for simple editor)
+	body?: string | EmailBodyContent; // Can be string (rich-text) or EmailBodyContent (builder)
 	preview_text: string;
+	thumbnail?: string;
+	hidden?: boolean;
 	settings?: EmailTemplateSettings;
 	created_at?: string;
 	updated_at?: string;
@@ -215,7 +216,6 @@ export type EmailTemplate = {
 	utm_name?: string;
 	utm_term?: string;
 	utm_content?: string;
-	email_body?: EmailBodyContent;
 };
 
 // SMS Template Type (for frontend use)
@@ -790,6 +790,7 @@ export interface DataTableConfig<TData> {
 		onDateChange: (range: { from: Date | null; to: Date | null }) => void;
 		placeholder?: string;
 	};
+	initialColumnVisibility?: Record<string, boolean>;
 }
 
 export type NoticeMessage = {

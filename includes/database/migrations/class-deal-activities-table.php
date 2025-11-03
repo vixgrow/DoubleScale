@@ -42,8 +42,7 @@ class Deal_Activities_Table extends Migration {
 			INDEX idx_deal_id (deal_id),
 			INDEX idx_activity_type (activity_type),
 			INDEX idx_user_id (user_id),
-			INDEX idx_created_at (created_at),
-			CONSTRAINT fk_deal_activities_deal_id FOREIGN KEY (deal_id) REFERENCES ' . $GLOBALS['wpdb']->prefix . 'quillcrm_deals(id) ON DELETE CASCADE';
+			INDEX idx_created_at (created_at)';
 
 		return $query;
 	}

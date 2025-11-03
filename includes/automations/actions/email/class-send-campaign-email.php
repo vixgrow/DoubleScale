@@ -96,6 +96,23 @@ class Send_Campaign_Email extends Action {
 				return false;
 			}
 
+			// Only send to subscribed contacts
+			if ( $contact->status !== 'subscribed' ) {
+				quillcrm_get_logger()->info(
+					'Send Campaign Email action: Contact is not subscribed',
+					array(
+						'automation_id'  => $automation->id,
+						'contact_id'     => $contact->id,
+						'contact_status' => $contact->status,
+						'code'           => 'send_campaign_email_not_subscribed',
+					)
+				);
+				return array(
+					'status'  => 'skipped',
+					'message' => "Contact is not subscribed (status: {$contact->status})",
+				);
+			}
+
 			// Use process_campaign_message for the actual sending
 			$email_processor = Email_Processing::instance();
 			// Get template for campaign (with A/B testing support)

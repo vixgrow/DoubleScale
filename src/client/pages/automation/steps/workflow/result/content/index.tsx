@@ -72,6 +72,7 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 	): AutomationStep[] => {
 		const newSteps = steps
 			.filter((step) => step.parent_id == parentId)
+			.filter((step) => step['process_status'] !== 'skipped') // Filter out skipped steps
 			.map((step) => ({
 				...step,
 				children: processSteps(step.id, steps),
@@ -124,11 +125,12 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 					step['process_status'] = 'completed';
 					step['process_date'] = contact.updated_at;
 				} else {
-					step['process_status'] = 'pending';
+					step['process_status'] = 'skipped';
 					step['process_date'] = null;
 				}
 			} else if (hasStartedAutomation) {
-				step['process_status'] = 'pending';
+				// Mark as skipped but will be filtered out from display
+				step['process_status'] = 'skipped';
 				step['process_date'] = null;
 			} else {
 				// Mark as pending if not processed yet

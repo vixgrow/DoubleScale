@@ -29,7 +29,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	/**
 	 * Communication channel
 	 *
-	 * @var string
+	 * @var int
 	 */
 	protected $channel = Campaign_Channel::CHANNEL_EMAIL;
 

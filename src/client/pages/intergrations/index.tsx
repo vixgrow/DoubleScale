@@ -3,6 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
+import { useRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 
@@ -52,6 +53,7 @@ const Integrations: React.FC = () => {
 	const allIntegrations = ConfigAPI.getIntegrations();
 	const navigate = useNavigate();
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const [loadingIntegrations, setLoadingIntegrations] = useState<Record<string, boolean>>({});
 	const [integrations, setIntegrations] = useState(() => filterIntegrations(allIntegrations));
 
@@ -90,6 +92,13 @@ const Integrations: React.FC = () => {
 	const showNotice = (type: 'success' | 'error', message: string) => {
 		setNotice({ type, message });
 	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	const handleSuccess = async (integrationLabel: string, integrationKey?: string) => {
 		if (!integrationKey) return;
@@ -160,7 +169,7 @@ const Integrations: React.FC = () => {
 				actions={[]}
 			/>
 
-			{notice && <NoticeBanner notice={notice} closeNotice={closeNotice} />}
+			{notice && <NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />}
 
 			<Card className="shadow-none bg-[#F8F8F8]">
 				<CardContent className="flex gap-4 items-center flex-wrap p-6">

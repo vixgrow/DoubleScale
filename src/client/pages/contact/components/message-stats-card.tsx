@@ -28,6 +28,8 @@ interface MessageStatsCardProps {
 	borderColorClass?: string;
 	/** Additional CSS classes for the card */
 	className?: string;
+	/** Icon color class for icon */
+	iconColor?: string;
 }
 
 /**
@@ -71,6 +73,7 @@ export const MessageStatsCard: React.FC<MessageStatsCardProps> = ({
 	iconBgClass = 'bg-blue-50',
 	borderColorClass = 'border-l-primary',
 	className = '',
+	iconColor = 'text-secondary',
 }) => {
 	return (
 		<Card
@@ -88,7 +91,7 @@ export const MessageStatsCard: React.FC<MessageStatsCardProps> = ({
 						</span>
 					)}
 				</div>
-				<div className={`${iconBgClass} px-2 py-4 rounded-full`}>
+				<div className={`${iconBgClass} p-1.5 rounded-full ${iconColor}`}>
 					{icon}
 				</div>
 			</div>

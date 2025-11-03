@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PageTabs from '@/components/page-tabs';
 import Emails from '../emails';
 import SMS from '../sms';
 import WhatsApp from '../whatsapp';
@@ -20,6 +20,15 @@ import Automation from '../automation';
 import Notes from '../notes';
 import { useContactContext } from '../state/context';
 import Deals from '../deals';
+import {
+	AutomationsIcon,
+	ContactSMSIcon,
+	ContactTotalEmailsIcon,
+	ContactWhatsAppIcon,
+	DealsIcon,
+	NotesIcon,
+	PurchaseHistoryIcon,
+} from '@quillcrm/components';
 
 const DataCard: React.FC = () => {
 	const { contact } = useContactContext();
@@ -28,96 +37,97 @@ const DataCard: React.FC = () => {
 		return null;
 	}
 
+	const tabsList = [
+		{
+			value: 'emails',
+			label: 'Emails',
+			icon: <ContactTotalEmailsIcon width={24} height={24} />,
+		},
+		{ value: 'sms', label: 'SMS', icon: <ContactSMSIcon /> },
+		{ value: 'whatsapp', label: 'WhatsApp', icon: <ContactWhatsAppIcon /> },
+		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
+		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
+		{
+			value: 'automation',
+			label: 'Automation',
+			icon: <AutomationsIcon width={24} height={24} />,
+		},
+		{
+			value: 'purchase-history',
+			label: 'Purchase History',
+			icon: <PurchaseHistoryIcon />,
+		},
+	];
+
+	const tabsContent = [
+		{
+			value: 'emails',
+			children: (
+				<CardContent className="pt-6">
+					<Emails contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'sms',
+			children: (
+				<CardContent className="pt-6">
+					<SMS contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'whatsapp',
+			children: (
+				<CardContent className="pt-6">
+					<WhatsApp contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'deals',
+			children: (
+				<CardContent className="pt-6">
+					<Deals contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'notes',
+			children: (
+				<CardContent className="pt-6">
+					<Notes contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'automation',
+			children: (
+				<CardContent className="pt-6">
+					<Automation contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'purchase-history',
+			children: (
+				<CardContent className="pt-6">
+					<PurchaseHistory contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+	];
+
 	return (
 		<Card className="w-2/3 bg-[#F8F8F8] shadow-none p-5">
-			<Tabs defaultValue="emails" className="w-full">
-				<TabsList className="bg-transparent text-foreground gap-5 border-b pb-9 justify-start w-full pt-5">
-					<TabsTrigger
-						value="emails"
-						className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-					>
-						{__('Emails', 'quillcrm')}
-					</TabsTrigger>
-					<TabsTrigger
-						value="sms"
-						className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-					>
-						{__('SMS', 'quillcrm')}
-					</TabsTrigger>
-					<TabsTrigger
-						value="whatsapp"
-						className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-					>
-						{__('WhatsApp', 'quillcrm')}
-					</TabsTrigger>
-					<TabsTrigger
-						value="deals"
-						className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-					>
-						{__('Deals', 'quillcrm')}
-					</TabsTrigger>
-					<TabsTrigger
-						value="notes"
-						className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-					>
-						{__('Notes', 'quillcrm')}
-					</TabsTrigger>
-					<TabsTrigger
-						value="automation"
-						className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-					>
-						{__('Automation', 'quillcrm')}
-					</TabsTrigger>
-					<TabsTrigger
-						value="purchase-history"
-						className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-					>
-						{__('Purchase History', 'quillcrm')}
-					</TabsTrigger>
-				</TabsList>
-
-				<TabsContent value="emails">
-					<CardContent className="pt-6">
-						<Emails contact_id={contact.id} />
-					</CardContent>
-				</TabsContent>
-
-				<TabsContent value="sms">
-					<CardContent className="pt-6">
-						<SMS contact_id={contact.id} />
-					</CardContent>
-				</TabsContent>
-
-				<TabsContent value="whatsapp">
-					<CardContent className="pt-6">
-						<WhatsApp contact_id={contact.id} />
-					</CardContent>
-				</TabsContent>
-
-				<TabsContent value="deals">
-					<CardContent className="pt-6">
-						<Deals contact_id={contact.id} />
-					</CardContent>
-				</TabsContent>
-
-				<TabsContent value="notes">
-					<CardContent className="pt-6">
-						<Notes contact_id={contact.id} />
-					</CardContent>
-				</TabsContent>
-
-				<TabsContent value="automation">
-					<CardContent className="pt-6">
-						<Automation contact_id={contact.id} />
-					</CardContent>
-				</TabsContent>
-
-				<TabsContent value="purchase-history">
-					<CardContent className="pt-6">
-						<PurchaseHistory contact_id={contact.id} />
-					</CardContent>
-				</TabsContent>
-			</Tabs>
+			<PageTabs
+				defaultValue="emails"
+				tabsList={tabsList}
+				tabsContent={tabsContent}
+				className="w-full"
+				tabsListWrapperClassName="border-b pb-7 pt-5"
+				tabsListClassName="bg-transparent text-foreground gap-2 justify-start w-full"
+			/>
 		</Card>
 	);
 };

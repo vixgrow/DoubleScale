@@ -41,8 +41,7 @@ class Activity_Comments_Table extends Migration {
 			PRIMARY KEY (id),
 			INDEX idx_activity_id (activity_id),
 			INDEX idx_user_id (user_id),
-			INDEX idx_created_at (created_at),
-			CONSTRAINT fk_activity_comments_activity_id FOREIGN KEY (activity_id) REFERENCES ' . $GLOBALS['wpdb']->prefix . 'quillcrm_deal_activities(id) ON DELETE CASCADE';
+			INDEX idx_created_at (created_at)';
 
 		return $query;
 	}

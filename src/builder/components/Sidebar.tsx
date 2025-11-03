@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import ColumnBlock from '../blocks/layout/ColumnBlock';
 import ContainerBlock from '../blocks/layout/ContainerBlock';
 import { MyTemplatesIcon } from '@/components/icons';
+import MyTemplatesPanel from './MyTemplatesPanel';
 
 interface SidebarItem {
 	id: string;
@@ -22,6 +23,7 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 	const [activeSidebar, setActiveSidebar] = useState<SidebarItem | null>(
 		null
 	);
+	const [showMyTemplates, setShowMyTemplates] = useState(false);
 	const tabStyles =
 		'data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#1E3A8A] data-[state=active]:to-[#3B82F6] data-[state=active]:text-primary-foreground px-7 py-3.5 rounded-xl';
 
@@ -29,18 +31,27 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 	useEffect(() => {
 		if (sidebarCloseTrigger && sidebarCloseTrigger > 0) {
 			setActiveSidebar(null);
+			setShowMyTemplates(false);
 		}
 	}, [sidebarCloseTrigger]);
+
+	const HandleMyTemplates = () => {
+		// Toggle MyTemplates sidebar
+		setShowMyTemplates(!showMyTemplates);
+		// Close regular sidebar when opening MyTemplates
+		if (!showMyTemplates) {
+			setActiveSidebar(null);
+		}
+	};
 
 	return (
 		<div className="flex">
 			<div className="bg-white p-4">
-				<div className="border rounded p-4 flex flex-col items-center cursor-pointer">
-					<span className="text-[#374151]">
-						<MyTemplatesIcon />
-					</span>
-					<p>{__('My', 'quillcrm')}</p>
-					<p>{__('Templates', 'quillcrm')}</p>
+				<div
+					className={`flex flex-col items-center cursor-pointer ${showMyTemplates ? 'text-[#1E3A8A]' : ''}`}
+					onClick={HandleMyTemplates}
+				>
+					<MyTemplatesIcon />
 				</div>
 			</div>
 			<div className="bg-white w-full max-w-[320px] align-center h-full relative flex flex-col border-l">
@@ -100,6 +111,12 @@ const BlockSidebar = ({ sidebarCloseTrigger }: BlockSidebarProps = {}) => {
 						</div>
 					</div>
 				)}
+
+				{/* MyTemplates Panel */}
+				<MyTemplatesPanel
+					isOpen={showMyTemplates}
+					onClose={() => setShowMyTemplates(false)}
+				/>
 			</div>
 		</div>
 	);

@@ -39,11 +39,13 @@ use QuillCRM\Database\Migrations\Pipeline_Stages_Table;
 use QuillCRM\Database\Migrations\Deals_Table;
 use QuillCRM\Database\Migrations\Deal_Activities_Table;
 use QuillCRM\Database\Migrations\Activity_Comments_Table;
+use QuillCRM\User_Roles\User_Roles;
 
 /**
  * Install class
  */
 class Install {
+
 
 
 
@@ -107,6 +109,6 @@ class Install {
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient( 'quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		delete_transient( 'quillcrm_installing' );
-		do_action( 'quillcrm_installed' );
+		User_Roles::add_roles_and_capabilities();
 	}
 }

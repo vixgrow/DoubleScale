@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PreviewIcon, RedoIcon, UndoIcon } from '@/components/icons';
 import BreadcrumbComponent from '@/components/breadcrumb';
@@ -12,8 +11,21 @@ import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { useTemplateActions } from '../hooks/useTemplateActions';
 import { SaveStatusIndicator } from './SaveStatusIndicator';
 import { SaveAsTemplateDialog } from './SaveAsTemplateDialog';
+import { BuilderData } from '../index';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+	onSave?: (data: BuilderData) => Promise<void>;
+	onClose?: () => void;
+	autoSaveEnabled?: boolean;
+	autoSaveInterval?: number;
+}
+
+const Header: React.FC<HeaderProps> = ({
+	onSave,
+	onClose,
+	autoSaveEnabled = true,
+	autoSaveInterval = 10000,
+}) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const campaign = useSelect(
@@ -28,11 +40,12 @@ const Header: React.FC = () => {
 
 	const { saveAsTemplate, isSaving: isSavingTemplate } = useTemplateActions();
 
-	// Use auto-save hook
+	// Use auto-save hook with custom save callback if provided
 	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
 		{
-			interval: 10000, // Auto-save every 10 seconds
-			enabled: true,
+			interval: autoSaveInterval,
+			enabled: autoSaveEnabled,
+			customSaveCallback: onSave,
 		}
 	);
 
@@ -41,37 +54,33 @@ const Header: React.FC = () => {
 		hasUnsavedChanges,
 	});
 
-	const { saveCampaignStep } = useDispatch('quillcrm/campaign');
-
 	const handleSaveAndContinue = async () => {
-		if (!campaign) {
-			return;
-		}
-
-		const { success, templateId: savedTemplateId } = await save();
-		if (success && savedTemplateId) {
-			// Save template ID to campaign before continuing
-			await saveCampaignStep('template', {
-				template_id: savedTemplateId,
-			});
+		const { success } = await save();
+		if (success && campaign) {
+			// Template is already linked via campaign.settings.template_ids
 			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 		}
 	};
 
-	const handleSaveAsTemplate = async (templateName: string) => {
-		await saveAsTemplate(templateName);
+	const handleSaveAsTemplate = async (
+		templateName: string,
+		thumbnailUrl?: string
+	) => {
+		await saveAsTemplate(templateName, thumbnailUrl);
 		setIsTemplateDialogOpen(false);
 	};
 	return (
 		<div className="flex items-center justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
 			<div className="flex items-center align-center gap-2">
-				<BreadcrumbComponent
-					items={[
-						{ label: __('Create Campaign', 'quillcrm') },
-						{ label: __('Standard Campaign', 'quillcrm') },
-						{ label: __('Email Template', 'quillcrm') },
-					]}
-				/>
+				{campaign && (
+					<BreadcrumbComponent
+						items={[
+							{ label: __('Create Campaign', 'quillcrm') },
+							{ label: __('Standard Campaign', 'quillcrm') },
+							{ label: __('Email Template', 'quillcrm') },
+						]}
+					/>
+				)}
 			</div>
 			<div className="flex items-center gap-3">
 				<SaveStatusIndicator
@@ -100,32 +109,62 @@ const Header: React.FC = () => {
 					<RedoIcon />
 				</Button>
 				<div className="h-6 w-px bg-border" />
-				<Button
-					variant="outline"
-					className="px-3 text-muted-foreground"
-				>
-					<PreviewIcon />
-					{__('Preview & test', 'quillcrm')}
-				</Button>
-				<Button
-					variant="secondary"
-					className="px-3"
-					onClick={() => setIsTemplateDialogOpen(true)}
-					disabled={isSavingTemplate}
-					title={__('Save as template', 'quillcrm')}
-				>
-					{__('Save as Template', 'quillcrm')}
-				</Button>
-				<Button
-					variant="default"
-					className="px-3"
-					onClick={handleSaveAndContinue}
-					disabled={isSaving}
-				>
-					{isSaving
-						? __('Saving...', 'quillcrm')
-						: __('Save & choose recipients', 'quillcrm')}
-				</Button>
+				{campaign && (
+					<>
+						<Button
+							variant="outline"
+							className="px-3 text-muted-foreground"
+						>
+							<PreviewIcon />
+							{__('Preview & test', 'quillcrm')}
+						</Button>
+						<Button
+							variant="secondary"
+							className="px-3"
+							onClick={() => setIsTemplateDialogOpen(true)}
+							disabled={isSavingTemplate}
+							title={__('Save as template', 'quillcrm')}
+						>
+							{__('Save as Template', 'quillcrm')}
+						</Button>
+
+						<Button
+							variant="default"
+							className="px-3"
+							onClick={handleSaveAndContinue}
+							disabled={isSaving}
+						>
+							{isSaving
+								? __('Saving...', 'quillcrm')
+								: __('Save & choose recipients', 'quillcrm')}
+						</Button>
+					</>
+				)}
+
+				{onSave && (
+					<>
+						{onClose && (
+							<Button
+								variant="outline"
+								className="px-3"
+								onClick={onClose}
+								disabled={isSaving}
+							>
+								{__('Cancel', 'quillcrm')}
+							</Button>
+						)}
+						<Button
+							variant="default"
+							className="px-3"
+							onClick={() => save()}
+							disabled={isSaving}
+						>
+							{isSaving
+								? __('Saving...', 'quillcrm')
+								: __('Save', 'quillcrm')}
+						</Button>
+					</>
+				)}
 			</div>
 
 			{/* Save as Template Dialog */}

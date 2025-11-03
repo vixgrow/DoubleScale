@@ -3,15 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import './style.scss';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { useCampaignStep } from '../shared';
+import type { ExtendedCampaignSettings } from '@/stores/campaign/types';
 import {
 	CategoryIcon,
 	FeedBuilder,
@@ -30,41 +29,51 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import EmailBuilderSelection from './email-builder-selection';
-import {
-	createTemplate as createTemplateAPI,
-	updateTemplate as updateTemplateAPI,
-	getTemplate,
-} from '@/builder/api/templates';
+import { saveTemplate } from '@/builder/api/templates';
 import { campaignSteps } from '../shared/stepsConfig';
 import { ArrowRight } from 'lucide-react';
+import { FromEmailSelector } from '@/components/from-email-selector';
 
-// Zod validation schema for flat template structure
 const templateSchema = z
 	.object({
 		subject: z.string().min(1, __('Subject is required', 'quillcrm')),
-		body: z.string().min(1, __('Body is required', 'quillcrm')),
-		from_name: z.string().min(1, __('From name is required', 'quillcrm')),
-		from_email: z.email(
-			__('Please enter a valid email address for From Email', 'quillcrm')
-		),
-		reply_to: z.email(
-			__('Please enter a valid email address for Reply To', 'quillcrm')
-		),
+		body: z.string().optional(), // Body will be filled by builder
 		preview_text: z
 			.string()
 			.min(1, __('Preview text is required', 'quillcrm')),
-		enable_utm: z.boolean().optional(),
-		utm_source: z.string().optional(),
-		utm_medium: z.string().optional(),
-		utm_name: z.string().optional(),
-		utm_term: z.string().optional(),
-		utm_content: z.string().optional(),
+		settings: z.object({
+			from_name: z
+				.string()
+				.min(1, __('From name is required', 'quillcrm')),
+			from_email: z.email(
+				__(
+					'Please enter a valid email address for From Email',
+					'quillcrm'
+				)
+			),
+			reply_to: z.email(
+				__(
+					'Please enter a valid email address for Reply To',
+					'quillcrm'
+				)
+			),
+			enable_utm: z.boolean().optional(),
+			utm_source: z.string().optional(),
+			utm_medium: z.string().optional(),
+			utm_name: z.string().optional(),
+			utm_term: z.string().optional(),
+			utm_content: z.string().optional(),
+		}),
 	})
 	.refine(
 		(data) => {
 			// If UTM is enabled, require UTM fields
-			if (data.enable_utm) {
-				return !!(data.utm_source && data.utm_medium && data.utm_name);
+			if (data.settings.enable_utm) {
+				return !!(
+					data.settings.utm_source &&
+					data.settings.utm_medium &&
+					data.settings.utm_name
+				);
 			}
 			return true;
 		},
@@ -73,125 +82,63 @@ const templateSchema = z
 				'All UTM fields are required when UTM is enabled',
 				'quillcrm'
 			),
-			path: ['utm_source'],
+			path: ['settings', 'utm_source'],
 		}
 	);
 
 const Templates: React.FC = () => {
 	const [emailBuilderSelectionVisible, setEmailBuilderSelectionVisible] =
 		useState(false);
-	const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
 	const [validationErrors, setValidationErrors] = useState<{
 		[key: string]: string;
 	}>({});
-	const { campaign, saveCampaignStep, saveCampaignSettings, goToStep } =
-		useCampaignStep();
-
-	// Get existing step data
-	const existingTemplateData = useSelect(
-		(select: any) => select('quillcrm/campaign').getStepData('template'),
-		[]
-	);
-
-	// Using old flat template structure
-	const defaultTemplate: EmailTemplate = {
-		name: campaign?.name || __('New Email', 'quillcrm'),
-		type: CAMPAIGN_CHANNEL.EMAIL,
-		subject: __('New Email', 'quillcrm'),
-		body: 'Email body', // Default rich-text content
-		email_body: {
-			type: 'rich-text',
-			value: 'Email body',
-		},
-		from_name: '',
-		from_email: '',
-		reply_to: '',
-		preview_text: '',
-		enable_utm: false,
-		utm_source: '',
-		utm_medium: '',
-		utm_name: '',
-		utm_term: '',
-		utm_content: '',
-	};
-	const [templates, setTemplates] = useState<EmailTemplate[]>(
-		(campaign?.settings?.templates as EmailTemplate[]) || []
-	);
-	const [currentTab] = useState(0);
+	const [isSaving, setIsSaving] = useState(false);
+	const { campaign, goToStep } = useCampaignStep();
 	const { createNotice } = useDispatch('quillcrm/core');
+	const { updateCampaign } = useDispatch('quillcrm/campaign');
 
+	// Single template object - matches backend structure
+	const [template, setTemplate] = useState<Partial<EmailTemplate>>({
+		name: campaign?.name || __('Email Template', 'quillcrm'),
+		type: CAMPAIGN_CHANNEL.EMAIL,
+		subject: '',
+		body: '',
+		preview_text: '',
+		settings: {
+			from_name: '',
+			from_email: '',
+			reply_to: '',
+			enable_utm: false,
+			utm_source: '',
+			utm_medium: '',
+			utm_name: '',
+			utm_term: '',
+			utm_content: '',
+		},
+	});
+
+	// Load template from campaign.settings.templates (attached by backend)
 	useEffect(() => {
-		// Load template from template table if we have a template_id
-		const loadTemplate = async () => {
-			setIsLoadingTemplate(true);
-			console.log('Loading template...', {
-				existingTemplateData,
-				campaignTemplates: campaign?.settings?.templates,
-				currentTemplatesLength: templates.length,
-			});
-
-			try {
-				if (existingTemplateData?.template_id) {
-					console.log(
-						'Loading template by ID:',
-						existingTemplateData.template_id
-					);
-					const template = await getTemplate(
-						existingTemplateData.template_id
-					);
-					setTemplates([template]);
-					console.log('Loaded template from API:', template);
-				} else if (
-					campaign?.settings?.templates &&
-					campaign.settings.templates.length > 0
-				) {
-					// Load from campaign settings if available
-					const campaignTemplates = campaign.settings
-						.templates as EmailTemplate[];
-					setTemplates(campaignTemplates);
-					console.log(
-						'Loaded templates from campaign settings:',
-						campaignTemplates
-					);
-				} else if (templates.length === 0) {
-					setTemplates([defaultTemplate]);
-					console.log('Using default template:', defaultTemplate);
-				}
-			} catch (error: any) {
-				console.error('Failed to load template:', error);
-				createNotice({
-					type: 'error',
-					message:
-						error.message ||
-						__('Failed to load template', 'quillcrm'),
-				});
-				// Fallback to default template
-				setTemplates([defaultTemplate]);
-			} finally {
-				setIsLoadingTemplate(false);
-			}
-		};
-
-		loadTemplate();
-	}, [existingTemplateData?.template_id, campaign?.settings?.templates]);
-
-	const updateTemplate = (index: number, data: Partial<EmailTemplate>) => {
-		if (!campaign) {
-			return;
+		if (campaign?.settings?.templates?.[0]) {
+			setTemplate(campaign.settings.templates[0] as EmailTemplate);
 		}
+	}, [campaign?.settings?.templates]);
 
-		const newTemplates = templates ? [...templates] : [];
-		newTemplates[index] = newTemplates[index]
-			? {
-					...newTemplates[index],
-					...data,
-				}
-			: {
-					...defaultTemplate,
-					...data,
-				};
+	const updateTemplate = (data: Partial<EmailTemplate>) => {
+		setTemplate((prev) => ({ ...prev, ...data }));
+	};
 
-		setTemplates(newTemplates);
+	// Helper to update settings fields
+	const updateSettings = (
+		settingsData: Partial<EmailTemplate['settings']>
+	) => {
+		setTemplate((prev) => ({
+			...prev,
+			settings: {
+				...prev.settings,
+				...settingsData,
+			} as EmailTemplate['settings'],
+		}));
 	};
 
 	const clearError = (fieldName: string) => {
@@ -202,14 +149,13 @@ const Templates: React.FC = () => {
 		});
 	};
 
-	const validate = (template: Partial<EmailTemplate>) => {
-		const result = templateSchema.safeParse(template);
+	const validate = (templateToValidate: Partial<EmailTemplate>) => {
+		const result = templateSchema.safeParse(templateToValidate);
 
 		if (!result.success) {
 			const errors: { [key: string]: string } = {};
 
 			result.error.issues.forEach((issue) => {
-				// Convert nested paths like "settings.from_name" to just "from_name"
 				const fieldName = String(issue.path[issue.path.length - 1]);
 				errors[fieldName] = issue.message;
 			});
@@ -222,77 +168,13 @@ const Templates: React.FC = () => {
 		return true;
 	};
 
-	// const sendTestEmail = async () => {
-	// 	if (!templates[currentTab]) {
-	// 		return;
-	// 	}
-
-	// 	// Validate the current template before sending
-	// 	if (!validate(templates[currentTab])) {
-	// 		return;
-	// 	}
-
-	// 	// Ask for test email address if not provided
-	// 	const emailAddress =
-	// 		testEmailAddress ||
-	// 		prompt(__('Enter test email address:', 'quillcrm'));
-	// 	if (!emailAddress) {
-	// 		return;
-	// 	}
-
-	// 	// Validate email using Zod
-	// 	const emailValidation = z.string().email().safeParse(emailAddress);
-	// 	if (!emailValidation.success) {
-	// 		createNotice({
-	// 			type: 'error',
-	// 			message: __('Please enter a valid email address', 'quillcrm'),
-	// 		});
-	// 		return;
-	// 	}
-
-	// 	setTestEmailAddress(emailAddress);
-	// 	setIsSendingTestEmail(true);
-
-	// 	try {
-	// 		const template = templates[currentTab];
-	// 		await apiFetch({
-	// 			path: '/qc/v1/campaigns/send-test-email',
-	// 			method: 'POST',
-	// 			data: {
-	// 				email: emailAddress,
-	// 				subject: template.subject,
-	// 				body: template.body || 'Email body',
-	// 				from_name: template.from_name,
-	// 				from_email: template.from_email,
-	// 				reply_to: template.reply_to,
-	// 			},
-	// 		});
-	// 	}
-
-	// 		createNotice({
-	// 			type: 'success',
-	// 			message: __('Test email sent successfully', 'quillcrm'),
-	// 		});
-	// 	} catch (error: any) {
-	// 		console.error('Test email error:', error);
-	// 		createNotice({
-	// 			type: 'error',
-	// 			message:
-	// 				error.message ||
-	// 				__('Failed to send test email', 'quillcrm'),
-	// 		});
-	// 	} finally {
-	// 		setIsSendingTestEmail(false);
-	// 	}
-	// };
-
 	const handleOpenEmailBuilder = () => {
-		if (!templates[currentTab]) {
+		if (!template) {
 			return;
 		}
 
 		// Validate the current template before opening the modal
-		if (!validate(templates[currentTab])) {
+		if (!validate(template)) {
 			return;
 		}
 
@@ -300,9 +182,7 @@ const Templates: React.FC = () => {
 	};
 
 	const saveTemplateStepAndNavigate = async () => {
-		const currentTemplate = templates[currentTab];
-
-		if (!currentTemplate || !campaign) {
+		if (!template || !campaign) {
 			createNotice({
 				type: 'error',
 				message: __(
@@ -314,7 +194,7 @@ const Templates: React.FC = () => {
 		}
 
 		// Validate current template
-		if (!validate(currentTemplate)) {
+		if (!validate(template)) {
 			createNotice({
 				type: 'error',
 				message: __(
@@ -325,72 +205,53 @@ const Templates: React.FC = () => {
 			return;
 		}
 
+		setIsSaving(true);
+
 		try {
-			// Create or update template in templates table
-			let savedTemplate: EmailTemplate;
-			const templateData = {
-				...templates[currentTab],
-				name: `Campaign ${campaign?.id} - Email Template`,
-				type: 'email' as const,
+			// Prepare template with empty body shell (builder will fill it)
+			const templateData: Partial<EmailTemplate> & {
+				campaign_id?: number;
+			} = {
+				...template,
+				body: template.body || '{"type":"rich-text","value":""}',
+				campaign_id: campaign?.id, // Backend will update campaign's template_ids
 			};
 
-			// If campaign is NOT draft, create new template to preserve original
-			// Only update existing template if campaign is draft
-			const shouldCreateNew = campaign.status !== 'draft';
+			// saveTemplate decides create vs update based on ID presence
+			// Backend handles updating campaign.settings.template_ids
+			const savedTemplate = await saveTemplate(templateData);
 
-			if (shouldCreateNew || !templateData.id) {
-				// Create new template with metadata
-				console.log(
-					'Creating new template with metadata:',
-					templateData
-				);
-				savedTemplate = await createTemplateAPI(templateData);
-			} else {
-				// Update existing template with latest metadata (draft mode)
-				console.log('Updating existing template:', templateData.id);
-				savedTemplate = await updateTemplateAPI(
-					templateData.id,
-					templateData
-				);
+			// Update campaign state with new template ID
+			if (savedTemplate.id && campaign?.settings) {
+				updateCampaign({
+					id: campaign.id,
+					settings: {
+						...campaign.settings,
+						template_ids: [savedTemplate.id],
+					} as ExtendedCampaignSettings,
+				});
 			}
-
-			console.log('Saved template:', savedTemplate);
-
-			// Save template_id to campaign step data
-			const saveSuccess = await saveCampaignStep('template', {
-				template_id: savedTemplate.id!,
-			});
-
-			if (!saveSuccess) {
-				throw new Error('Failed to save template step data');
-			}
-
-			// Update campaign settings with only template_ids
-			// The backend will fetch full template data using attach_templates()
-			await saveCampaignSettings({
-				settings: {
-					...campaign.settings,
-					template_ids: [savedTemplate.id!],
-				},
-			});
 
 			createNotice({
 				type: 'success',
-				message: __('Template metadata saved successfully', 'quillcrm'),
+				message: __('Template saved successfully', 'quillcrm'),
 			});
 
 			goToStep('builder');
-		} catch (error: any) {
-			console.error('Save template error:', error);
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
 			createNotice({
 				type: 'error',
 				message:
-					error.message ||
+					errorMessage ||
 					__(
 						'An error occurred while saving. Please try again.',
 						'quillcrm'
 					),
 			});
+		} finally {
+			setIsSaving(false);
 		}
 	};
 
@@ -415,15 +276,6 @@ const Templates: React.FC = () => {
 					</Button>,
 				]}
 				type="campaign"
-				// totalSteps={tabLength}
-				// currentStep={currentTab}
-				// onNext={saveTemplateStepAndNavigate}
-				// onBack={() => {
-				// 	if (currentTab - 1 >= 0) {
-				// 		setCurrentTab(currentTab - 1);
-				// 		navigate(getToLink(`campaigns`));
-				// 	}
-				// }}
 			>
 				<Stepper
 					steps={campaignSteps}
@@ -435,21 +287,12 @@ const Templates: React.FC = () => {
 					<PanelSettings
 						title={__('Campaign Template', 'quillcrm')}
 						description={__(
-							'Name your campaign to help you remember what its about. only you will see this.',
+							'Define your sender identity, subject line, and preview text before building your campaign.',
 							'quillcrm'
 						)}
 						icon={<CategoryIcon />}
 						className="w-2/3 h-full"
 					>
-						{/* Loading State */}
-						{isLoadingTemplate && (
-							<div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-								<p className="text-blue-800">
-									{__('Loading template data...', 'quillcrm')}
-								</p>
-							</div>
-						)}
-
 						<div>
 							<div className="flex gap-4">
 								<FormField
@@ -463,12 +306,11 @@ const Templates: React.FC = () => {
 											'quillcrm'
 										)}
 										value={
-											templates[currentTab]?.from_name ||
-											''
+											template.settings?.from_name || ''
 										}
 										onChange={(e) => {
 											clearError('from_name');
-											updateTemplate(currentTab, {
+											updateSettings({
 												from_name: e.target.value,
 											});
 										}}
@@ -489,26 +331,21 @@ const Templates: React.FC = () => {
 									required={true}
 									className="flex-1"
 								>
-									<Input
-										type="email"
-										placeholder={__(
-											'name@gmail.com',
-											'quillcrm'
-										)}
+									<FromEmailSelector
 										value={
-											templates[currentTab]?.from_email ||
-											''
+											template.settings?.from_email || ''
 										}
-										onChange={(e) => {
+										onChange={(email, name) => {
 											clearError('from_email');
-											updateTemplate(currentTab, {
-												from_email: e.target.value,
+											updateSettings({
+												from_email: email,
+												// Auto-fill from name if provided and current from_name is empty
+												...(name && !template.settings?.from_name
+													? { from_name: name }
+													: {}),
 											});
 										}}
-										className={cn(
-											validationErrors.from_email &&
-												'!border-red-500 focus-visible:!ring-red-500'
-										)}
+										error={validationErrors.from_email}
 									/>
 									{validationErrors.from_email && (
 										<p className="text-red-500 text-sm mt-1">
@@ -531,12 +368,11 @@ const Templates: React.FC = () => {
 											'quillcrm'
 										)}
 										value={
-											templates[currentTab]?.reply_to ||
-											''
+											template.settings?.reply_to || ''
 										}
 										onChange={(e) => {
 											clearError('reply_to');
-											updateTemplate(currentTab, {
+											updateSettings({
 												reply_to: e.target.value,
 											});
 										}}
@@ -562,12 +398,10 @@ const Templates: React.FC = () => {
 											'Subject here',
 											'quillcrm'
 										)}
-										value={
-											templates[currentTab]?.subject || ''
-										}
+										value={template.subject || ''}
 										onChange={(e) => {
 											clearError('subject');
-											updateTemplate(currentTab, {
+											updateTemplate({
 												subject: e.target.value,
 											});
 										}}
@@ -583,6 +417,7 @@ const Templates: React.FC = () => {
 									)}
 								</FormField>
 							</div>
+
 							<FormField
 								label={__('Preview Text', 'quillcrm')}
 								required={true}
@@ -592,13 +427,10 @@ const Templates: React.FC = () => {
 										'Preview text here',
 										'quillcrm'
 									)}
-									value={
-										templates[currentTab]?.preview_text ||
-										''
-									}
+									value={template.preview_text || ''}
 									onChange={(e) => {
 										clearError('preview_text');
-										updateTemplate(currentTab, {
+										updateTemplate({
 											preview_text: e.target.value,
 										});
 									}}
@@ -631,18 +463,18 @@ const Templates: React.FC = () => {
 									</div>
 									<Switch
 										checked={
-											templates[currentTab]?.enable_utm ||
+											template.settings?.enable_utm ||
 											false
 										}
 										onCheckedChange={(checked) =>
-											updateTemplate(currentTab, {
+											updateSettings({
 												enable_utm: checked,
 											})
 										}
 									/>
 								</div>
 
-								{templates[currentTab]?.enable_utm && (
+								{template.settings?.enable_utm && (
 									<div className="space-y-4">
 										<div className="grid grid-cols-2 gap-4">
 											<FormField
@@ -658,21 +490,17 @@ const Templates: React.FC = () => {
 														'quillcrm'
 													)}
 													value={
-														templates[currentTab]
+														template.settings
 															?.utm_source || ''
 													}
 													onChange={(e) => {
 														clearError(
 															'utm_source'
 														);
-														updateTemplate(
-															currentTab,
-															{
-																utm_source:
-																	e.target
-																		.value,
-															}
-														);
+														updateSettings({
+															utm_source:
+																e.target.value,
+														});
 													}}
 													className={cn(
 														validationErrors.utm_source &&
@@ -687,6 +515,7 @@ const Templates: React.FC = () => {
 													</p>
 												)}
 											</FormField>
+
 											<FormField
 												label={__(
 													'UTM Medium',
@@ -700,21 +529,17 @@ const Templates: React.FC = () => {
 														'quillcrm'
 													)}
 													value={
-														templates[currentTab]
+														template.settings
 															?.utm_medium || ''
 													}
 													onChange={(e) => {
 														clearError(
 															'utm_medium'
 														);
-														updateTemplate(
-															currentTab,
-															{
-																utm_medium:
-																	e.target
-																		.value,
-															}
-														);
+														updateSettings({
+															utm_medium:
+																e.target.value,
+														});
 													}}
 													className={cn(
 														validationErrors.utm_medium &&
@@ -730,6 +555,7 @@ const Templates: React.FC = () => {
 												)}
 											</FormField>
 										</div>
+
 										<div className="grid grid-cols-2 gap-4">
 											<FormField
 												label={__(
@@ -744,19 +570,15 @@ const Templates: React.FC = () => {
 														'quillcrm'
 													)}
 													value={
-														templates[currentTab]
+														template.settings
 															?.utm_name || ''
 													}
 													onChange={(e) => {
 														clearError('utm_name');
-														updateTemplate(
-															currentTab,
-															{
-																utm_name:
-																	e.target
-																		.value,
-															}
-														);
+														updateSettings({
+															utm_name:
+																e.target.value,
+														});
 													}}
 													className={cn(
 														validationErrors.utm_name &&
@@ -771,6 +593,7 @@ const Templates: React.FC = () => {
 													</p>
 												)}
 											</FormField>
+
 											<FormField
 												label={__(
 													'UTM Term',
@@ -783,22 +606,19 @@ const Templates: React.FC = () => {
 														'quillcrm'
 													)}
 													value={
-														templates[currentTab]
+														template.settings
 															?.utm_term || ''
 													}
 													onChange={(e) =>
-														updateTemplate(
-															currentTab,
-															{
-																utm_term:
-																	e.target
-																		.value,
-															}
-														)
+														updateSettings({
+															utm_term:
+																e.target.value,
+														})
 													}
 												/>
 											</FormField>
 										</div>
+
 										<FormField
 											label={__(
 												'UTM Content',
@@ -811,11 +631,11 @@ const Templates: React.FC = () => {
 													'quillcrm'
 												)}
 												value={
-													templates[currentTab]
+													template.settings
 														?.utm_content || ''
 												}
 												onChange={(e) =>
-													updateTemplate(currentTab, {
+													updateSettings({
 														utm_content:
 															e.target.value,
 													})
@@ -829,21 +649,15 @@ const Templates: React.FC = () => {
 							<Separator />
 
 							<div className="flex justify-end py-4">
-								{/* <Button
-									variant="outline"
-									onClick={sendTestEmail}
-									disabled={isSendingTestEmail}
-								>
-									{isSendingTestEmail
-										? __('Sending...', 'quillcrm')
-										: __('Send Test Email', 'quillcrm')}
-								</Button> */}
-
 								<Button
 									variant="gradient"
 									onClick={saveTemplateStepAndNavigate}
+									disabled={isSaving}
 								>
-									{__('Next', 'quillcrm')} <ArrowRight />
+									{isSaving
+										? __('Saving...', 'quillcrm')
+										: __('Next', 'quillcrm')}{' '}
+									<ArrowRight />
 								</Button>
 							</div>
 						</div>

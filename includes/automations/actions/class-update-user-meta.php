@@ -77,7 +77,7 @@ class Update_User_Meta extends Action {
 			return false;
 		}
 
-		$meta = $step->get_attribute( 'meta', array() );
+		$meta = $step->get_setting( 'meta', array() );
 		foreach ( $meta as $item ) {
 			update_user_meta( $user->ID, $item['key'], $item['value'] );
 		}

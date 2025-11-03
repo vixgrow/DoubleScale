@@ -240,9 +240,7 @@ export interface EmailTemplate {
 	name: string;
 	type: 'email' | 'sms' | 'whatsapp';
 	subject: string;
-	body: string;
-	preview_text: string;
-	email_body?: {
+	body: string | {
 		type: 'builder';
 		value: {
 			sections: EmailSection[];
@@ -250,6 +248,9 @@ export interface EmailTemplate {
 			buttonSettings: Record<ButtonType, ButtonSettings>;
 		};
 	};
+	preview_text: string;
+	thumbnail?: string;
+	hidden?: boolean;
 	created_at: string;
 	updated_at: string;
 	// Settings fields (flattened from JSON column)
@@ -290,7 +291,7 @@ export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
 > &
 	{
 		[K in Keys]-?: Required<Pick<T, K>> &
-			Partial<Pick<T, Exclude<Keys, K>>>;
+		Partial<Pick<T, Exclude<Keys, K>>>;
 	}[Keys];
 
 // ============================================================================

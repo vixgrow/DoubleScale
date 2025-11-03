@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Template Data Preparer Service
  * Shared logic for preparing template data from various sources
@@ -14,6 +15,7 @@ namespace QuillCRM\Services;
  * Template_Data_Preparer class
  */
 class Template_Data_Preparer {
+
 
 	/**
 	 * Prepare template data from individual fields (email)
@@ -74,18 +76,18 @@ class Template_Data_Preparer {
 
 			// If this is an existing template being reprocessed (has template_id), allow empty subject/body
 			// This happens when attach_templates() adds templates and they get reprocessed during save
-			$has_template_id = isset( $settings['template_id'] ) && ! empty( $settings['template_id'] );
-			
+			$has_template_id = isset( $settings['template_ids'] ) && ! empty( $settings['template_ids'] );
+
 			if ( ! $has_template_id && ( empty( $subject ) || empty( $body ) ) ) {
 				return null;
 			}
 
 			$template_data         = self::prepare_email_template_data( $subject, $body, $settings );
-			$template_data['name'] = $name_prefix . ($subject ?: 'Untitled');
-			
+			$template_data['name'] = $name_prefix . ( $subject ?: 'Untitled' );
+
 			// Preserve template_id if it exists (for updates)
 			if ( $has_template_id ) {
-				$template_data['template_id'] = $settings['template_id'];
+				$template_data['template_ids'] = $settings['template_ids'];
 			}
 
 			return $template_data;
@@ -120,7 +122,7 @@ class Template_Data_Preparer {
 		if ( $channel_type === 'email' ) {
 			// Check for subject and body (or email_body for sequences)
 			return isset( $settings['subject'] ) &&
-				   ( isset( $settings['body'] ) || isset( $settings['email_body'] ) );
+				( isset( $settings['body'] ) || isset( $settings['email_body'] ) );
 		}
 
 		if ( $channel_type === 'sms' || $channel_type === 'whatsapp' ) {

@@ -54,7 +54,7 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 
 	return (
 		<>
-			<DialogHeader>
+			<DialogHeader className='px-16 pb-4'>
 				<DialogTitle>
 					<div className="flex items-center justify-between">
 						<h1 className="text-3xl font-normal text-[#09090B]">
@@ -72,8 +72,8 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 					</div>
 				</DialogTitle>
 			</DialogHeader>
-			<div>
-				<div className="flex h-full gap-5">
+			<div className="overflow-y-auto px-16 pb-8">
+				<div className="flex gap-5 ">
 					<div className="w-2/5">
 						<SourceSelector />
 					</div>
@@ -103,7 +103,14 @@ const ImportModal: React.FC<Props> = ({ open, onClose, onCompleted }) => {
 					}
 				}}
 			>
-				<DialogContent className="z-[150000] w-screen h-screen max-w-none gap-8 overflow-y-auto py-4 px-16 bg-white rounded-none shadow-none">
+				<DialogContent className="z-[150000] w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none"
+				style={{
+					paddingTop: '12px',
+					paddingLeft: '0px',
+					paddingRight: '0px',
+					paddingBottom: '0px',
+				}}
+				>
 					<ImportModalContent
 						onClose={onClose}
 						onCompleted={onCompleted}

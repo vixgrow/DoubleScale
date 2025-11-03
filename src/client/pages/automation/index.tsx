@@ -198,6 +198,30 @@ const Automation: React.FC = () => {
 						paddingRight: '0px',
 						paddingBottom: '0px',
 					}}
+					onInteractOutside={(e) => {
+						// Check if the interaction is with the builder
+						const target = e.target as HTMLElement;
+
+						// Check for builder-portal-wrapper or any builder element
+						const isBuilderClick =
+							target.closest('#builder-portal-wrapper') !== null ||
+							target.closest('[data-builder-portal="true"]') !== null ||
+							target.id === 'builder-portal-wrapper' ||
+							target.getAttribute('data-builder-portal') === 'true' ||
+							document.getElementById('builder-portal-wrapper') !== null;
+
+						// Prevent closing if builder is open at all
+						if (isBuilderClick) {
+							e.preventDefault();
+						}
+					}}
+					onEscapeKeyDown={(e) => {
+						// Prevent closing on Escape if builder is open
+						const builderPortalWrapper = document.getElementById('builder-portal-wrapper');
+						if (builderPortalWrapper) {
+							e.preventDefault();
+						}
+					}}
 				>
 					{loading ? (
 						<AutomationShimmer />

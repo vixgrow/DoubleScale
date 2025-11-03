@@ -22,6 +22,7 @@ use QuillCRM\Managers\Message_Provider_Registry;
 use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Traits\Message_Provider_Validation;
 
 /**
  * REST_Campaign_Controller class
@@ -30,6 +31,8 @@ use QuillCRM\Models\Tracking_Model;
  * Routes: /qc/v1/campaigns with type/channel parameter
  */
 class REST_Campaign_Controller extends Abstract_Campaign_Controller {
+
+	use Message_Provider_Validation;
 
 	/**
 	 * REST Base
@@ -49,10 +52,10 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 	 * Register the routes for the controller
 	 */
 	public function register_routes() {
-		// Register all standard CRUD routes from parent
+		// Register all standard CRUD routes from parent.
 		$this->register_common_routes();
 
-		// Campaign messages route
+		// Campaign messages route.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)/messages',
@@ -90,7 +93,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			)
 		);
 
-		// Send test message endpoint (unified for all channels)
+		// Send test message endpoint (unified for all channels).
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/send-test-message',
@@ -100,22 +103,22 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 					'callback'            => array( $this, 'send_test_message' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array(
-						'channel' => array(
+						'channel'    => array(
 							'description' => __( 'Channel type', 'quillcrm' ),
 							'type'        => 'string',
 							'required'    => true,
 							'enum'        => Campaign_Channel::get_core_channel_strings(),
 						),
-						// Email parameters
-						'email'     => array(
+						// Email parameters.
+						'email'      => array(
 							'description' => __( 'Email address (for email channel)', 'quillcrm' ),
 							'type'        => 'string',
 						),
-						'subject'   => array(
+						'subject'    => array(
 							'description' => __( 'Email subject (for email channel)', 'quillcrm' ),
 							'type'        => 'string',
 						),
-						'from_name' => array(
+						'from_name'  => array(
 							'description' => __( 'From name (for email channel)', 'quillcrm' ),
 							'type'        => 'string',
 						),
@@ -123,17 +126,17 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 							'description' => __( 'From email (for email channel)', 'quillcrm' ),
 							'type'        => 'string',
 						),
-						'reply_to'  => array(
+						'reply_to'   => array(
 							'description' => __( 'Reply-to email (for email channel)', 'quillcrm' ),
 							'type'        => 'string',
 						),
-						// SMS/WhatsApp parameters
-						'phone'     => array(
+						// SMS/WhatsApp parameters.
+						'phone'      => array(
 							'description' => __( 'Phone number (for SMS/WhatsApp channels)', 'quillcrm' ),
 							'type'        => 'string',
 						),
-						// Common parameter
-						'message'   => array(
+						// Common parameter.
+						'message'    => array(
 							'description' => __( 'Message content (body for email, message for SMS/WhatsApp)', 'quillcrm' ),
 							'type'        => 'string',
 							'required'    => true,
@@ -143,7 +146,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			)
 		);
 
-		// Bulk delete endpoint (cross-type)
+		// Bulk delete endpoint (cross-type).
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/bulk-delete',
@@ -172,10 +175,10 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( $request ) {
-		// Set channel from type parameter (string: 'email', 'sms', 'whatsapp')
+		// Set channel from type parameter (string: 'email', 'sms', 'whatsapp').
 		$type = $request->get_param( 'type' );
 
-		// Validate it's a valid channel string
+		// Validate it's a valid channel string.
 		$valid_channels = Campaign_Channel::get_core_channel_strings();
 		if ( ! in_array( $type, $valid_channels, true ) ) {
 			return new WP_Error(
@@ -186,6 +189,14 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 		}
 
 		$this->channel = $type;
+
+		// Validate provider connection for SMS/WhatsApp campaigns.
+		if ( $type === Campaign_Channel::STR_SMS || $type === Campaign_Channel::STR_WHATSAPP ) {
+			$provider_check = $this->validate_provider_connection( $type );
+			if ( is_wp_error( $provider_check ) ) {
+				return $provider_check;
+			}
+		}
 
 		return parent::create_item( $request );
 	}
@@ -332,7 +343,7 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 				);
 			}
 
-			$emails                = new Emails();
+			$emails               = new Emails();
 			$emails->from_address = $from_email;
 			$emails->from_name    = $from_name;
 
@@ -513,4 +524,5 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 	public function bulk_delete_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
+
 }

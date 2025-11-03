@@ -21,26 +21,6 @@ use QuillCRM\Services\Template_Data_Preparer;
 class REST_Email_Sequence_Controller extends REST_Controller {
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * REST Base
 	 *
@@ -298,7 +278,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 		foreach ( $email_sequences as $email_sequence ) {
 			$email_count                      = $email_sequence->sequences_mail()->count();
 			$email_sequence->email_count      = $email_count;
-			$email_sequence->subscriber_count = count( $email_sequence->settings['contact_ids'] ?? array() ) . ' ' . __( 'Subscribers', 'quillcrm' );
+			$email_sequence->subscriber_count = Contact_Model::whereIn( 'id', $email_sequence->settings['contact_ids'] ?? array() )->where( 'status', 'subscribed' )->count() . __( ' Subscribers', 'quillcrm' );
 		}
 		return new WP_REST_Response( $email_sequences->toArray() + array( 'total_count' => $total_count ), 200 );
 	}
@@ -389,7 +369,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 				return new WP_Error( 'error', sprintf( __( '%s Email sequence not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
 			}
 			$parent_email_sequence        = Email_Sequence_Model::find( $email_sequence->parent_id );
-			$total_contacts               = count( $parent_email_sequence->settings['contact_ids'] ?? array() );
+			$total_contacts               = Contact_Model::whereIn( 'id', $parent_email_sequence->settings['contact_ids'] ?? array() )->count();
 			$email_sequence['sent_rate']  = round( ( $email_sequence->sent / ( $total_contacts > 0 ? $total_contacts : 1 ) * 100 ), 2 );
 			$email_sequence['open_rate']  = round( ( $email_sequence->opened / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100 ), 2 );
 			$email_sequence['click_rate'] = round( ( $email_sequence->click / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100 ), 2 );
@@ -398,17 +378,25 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 				->get();
 			$email_sequence['recipients'] = $contacts->map(
 				function ( $contact ) {
+					$found_contact = Contact_Model::find( $contact->contact_id );
+					if ( ! $found_contact ) {
+						return null;
+					}
 					return array(
-						'id'         => $contact->contact->id,
-						'name'       => $contact->contact->first_name . ' ' . $contact->contact->last_name,
-						'email'      => $contact->contact->email,
+						'id'         => $found_contact->id,
+						'name'       => $found_contact->first_name . ' ' . $found_contact->last_name,
+						'email'      => $found_contact->email,
 						'status'     => $contact->status,
 						'sent_at'    => $contact->sent_at,
 						'opened_at'  => $contact->opened_at,
 						'clicked_at' => $contact->clicked_at,
 					);
 				}
-			);
+			)->filter(
+				function ( $contact ) {
+					return $contact !== null;
+				}
+			)->values()->toArray();
 			return new WP_REST_Response( $email_sequence, 200 );
 		} catch ( \Exception $e ) {
 			$logger = quillcrm_get_logger();

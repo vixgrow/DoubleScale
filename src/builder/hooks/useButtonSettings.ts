@@ -32,10 +32,13 @@ export const useButtonSettings = () => {
       try {
         const { getTemplate } = await import('../api/templates');
         const template = await getTemplate(existingTemplateData.template_id);
-        const emailBody = template.email_body;
 
-        if (emailBody?.type === 'builder' && emailBody.value?.buttonSettings) {
-          dispatch(STORE_KEY).setButtonSettings(emailBody.value.buttonSettings);
+        const body = typeof template.body === 'string'
+          ? JSON.parse(template.body)
+          : template.body;
+
+        if (body?.type === 'builder' && body.value?.buttonSettings) {
+          dispatch(STORE_KEY).setButtonSettings(body.value.buttonSettings);
         }
       } catch (error) {
         console.error('Failed to load button settings:', error);

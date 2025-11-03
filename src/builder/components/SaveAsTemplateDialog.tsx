@@ -22,11 +22,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ImageUploadControl } from '../blocks/basic/shared/ImageUploadControl';
 
 interface SaveAsTemplateDialogProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSave: (templateName: string) => Promise<void>;
+	onSave: (templateName: string, thumbnailUrl?: string) => Promise<void>;
 	isSaving?: boolean;
 }
 
@@ -38,6 +39,8 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 }) => {
 	const [templateName, setTemplateName] = useState('');
 	const [error, setError] = useState('');
+	const [thumbnailUrl, setThumbnailUrl] = useState('');
+	const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
 
 	const handleSave = async () => {
 		// Validate template name
@@ -47,10 +50,11 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 		}
 
 		try {
-			await onSave(templateName.trim());
+			await onSave(templateName.trim(), thumbnailUrl);
 			// Reset state on success
 			setTemplateName('');
 			setError('');
+			setThumbnailUrl('');
 			onClose();
 		} catch (err: any) {
 			setError(err.message || __('Failed to save template', 'quillcrm'));
@@ -58,9 +62,11 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 	};
 
 	const handleClose = () => {
-		if (!isSaving) {
+		// Don't close if media modal is open or if saving
+		if (!isSaving && !isMediaModalOpen) {
 			setTemplateName('');
 			setError('');
+			setThumbnailUrl('');
 			onClose();
 		}
 	};
@@ -72,8 +78,15 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 	};
 
 	return (
-		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogContent className="top-[22%]">
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				if (!open) {
+					handleClose();
+				}
+			}}
+		>
+			<DialogContent className="top-[35%]">
 				<DialogHeader>
 					<DialogTitle className="text-2xl font-bold">
 						{__('Save as Template', 'quillcrm')}
@@ -86,27 +99,44 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="flex flex-col gap-2">
-					<Label htmlFor="template-name">
-						{__('Template Name', 'quillcrm')}
-					</Label>
-					<Input
-						id="template-name"
-						value={templateName}
-						onChange={(e) => {
-							setTemplateName(e.target.value);
-							setError('');
-						}}
-						onKeyDown={handleKeyDown}
-						placeholder={__('Enter template name', 'quillcrm')}
+				<div className="flex flex-col gap-4">
+					<div className="flex flex-col gap-2">
+						<Label htmlFor="template-name">
+							{__('Template Name', 'quillcrm')}
+						</Label>
+						<Input
+							id="template-name"
+							value={templateName}
+							onChange={(e) => {
+								setTemplateName(e.target.value);
+								setError('');
+							}}
+							onKeyDown={handleKeyDown}
+							placeholder={__('Enter template name', 'quillcrm')}
+							disabled={isSaving}
+							className="h-10"
+							style={{
+								borderColor: error ? '#ef4444' : '#e5e5e5',
+								borderRadius: '0.5rem',
+							}}
+							autoFocus
+						/>
+					</div>
+
+					<ImageUploadControl
+						label={__('Template Thumbnail', 'quillcrm')}
+						description={__(
+							'Upload a thumbnail image to represent your template. This will help you identify it later.',
+							'quillcrm'
+						)}
+						value={thumbnailUrl}
+						onChange={({ src }) => setThumbnailUrl(src)}
+						uploadId="template-thumbnail"
 						disabled={isSaving}
-						className="h-10"
-						style={{
-							borderColor: error ? '#ef4444' : '#e5e5e5',
-							borderRadius: '0.5rem',
-						}}
-						autoFocus
+						onModalStateChange={setIsMediaModalOpen}
+						simpleMode={true}
 					/>
+
 					{error && <p className="text-sm text-red-500">{error}</p>}
 				</div>
 
@@ -114,7 +144,9 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 					<Button
 						variant="gradient"
 						onClick={handleSave}
-						disabled={isSaving || !templateName.trim()}
+						disabled={
+							isSaving || !templateName.trim() || !thumbnailUrl
+						}
 						className="w-full"
 					>
 						{isSaving

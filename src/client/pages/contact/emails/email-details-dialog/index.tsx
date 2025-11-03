@@ -16,14 +16,16 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogOverlay,
+	DialogPortal,
 	DialogTitle,
 } from '@/components/ui/dialog';
 import {
 	ClickRateIcon,
 	CustomDialogHeader,
-	GradientEmailIcon,
+	NoEmailsIcon,
 	NotOpenedIcon,
 	OpenedIcon,
+	OpenRateIcon,
 	TimeAgoCell,
 } from '@quillcrm/components';
 import { Button } from '@quillcrm/components/ui/button';
@@ -48,30 +50,10 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 			open={!!campaignEmail}
 			onOpenChange={(open) => !open && onClose()}
 		>
+			<DialogPortal>
 			<DialogOverlay className="z-[150200]" />
 			<DialogContent
-				className="max-w-[500px] z-[150200]"
-				onPointerDownOutside={(e) => {
-					// Allow interaction with WordPress media modal
-					const target = e.target as HTMLElement;
-					if (
-						target.closest('.media-modal') ||
-						target.closest('.media-modal-backdrop')
-					) {
-						e.preventDefault();
-					}
-				}}
-				onInteractOutside={(e) => {
-					// Allow interaction with WordPress media modal
-					const target = e.target as HTMLElement;
-					if (
-						target.closest('.media-modal') ||
-						target.closest('.media-modal-backdrop')
-					) {
-						e.preventDefault();
-					}
-				}}
-			>
+				className="max-w-[500px] z-[150200] max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader
@@ -80,7 +62,7 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 								'View the details of the email',
 								'quillcrm'
 							)}
-							icon={<GradientEmailIcon />}
+							icon={<NoEmailsIcon />}
 						/>
 					</DialogTitle>
 				</DialogHeader>
@@ -109,7 +91,7 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 							</div>
 							<div className="flex justify-between items-center">
 								<span className="text-base font-medium text-gray-500 flex items-center gap-2">
-									<div className="bg-[#EEE4FF] p-1.5 rounded-full">
+									<div className="bg-[#EEE4FF] p-1.5 rounded-full text-[#660FF1]">
 										<ClickRateIcon width={16} height={19} />
 									</div>
 									{__('Clicked', 'quillcrm')}
@@ -133,7 +115,10 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 								</div>
 							</div>
 							<div className="flex justify-between items-center">
-								<span className="text-base font-medium text-gray-500">
+								<span className="text-base font-medium text-gray-500 flex items-center gap-2">
+									<div className="bg-[#D1F6DF] p-1.5 rounded-full text-[#16A34A]">
+										<OpenRateIcon width={16} height={16} />
+									</div>
 									{__('Opened', 'quillcrm')}
 								</span>
 								<div>
@@ -210,8 +195,9 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 							? __('Resending...', 'quillcrm')
 							: __('Resend Email again', 'quillcrm')}
 					</Button>
-				</DialogFooter>
-			</DialogContent>
+					</DialogFooter>
+				</DialogContent>
+			</DialogPortal>
 		</Dialog>
 	);
 };

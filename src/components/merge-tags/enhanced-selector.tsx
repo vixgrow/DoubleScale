@@ -215,6 +215,7 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 									onInsertTag={onInsertTag}
 									isDynamic={!!dynamicMergeTags}
 									formId={activeFormId}
+									activeTrigger={activeTrigger}
 								/>
 							)}
 						</CardContent>
@@ -230,8 +231,23 @@ const MergeTagsGroupRender: React.FC<{
 	onInsertTag?: (tagValue: string) => void;
 	isDynamic?: boolean;
 	formId?: string | number;
-}> = ({ mergeTags, onInsertTag, isDynamic, formId }) => {
+	activeTrigger?: string;
+}> = ({ mergeTags, onInsertTag, isDynamic, formId, activeTrigger }) => {
 	const { createNotice, setMergeTagsVisible } = useDispatch('quillcrm/core');
+
+	// Filter merge tags based on required_triggers
+	const filteredMergeTags = filter(mergeTags, (tag) => {
+		// If tag has no required_triggers, show it
+		if (!tag.required_triggers || tag.required_triggers.length === 0) {
+			return true;
+		}
+		// If no active trigger, hide tags with required_triggers
+		if (!activeTrigger) {
+			return false;
+		}
+		// Show tag only if current trigger is in required_triggers
+		return tag.required_triggers.includes(activeTrigger);
+	});
 
 	const handleTagClick = (tagValue: string) => {
 		if (onInsertTag) {
@@ -252,7 +268,7 @@ const MergeTagsGroupRender: React.FC<{
 
 	return (
 		<div className="space-y-3 max-h-96 overflow-y-auto">
-			{Object.keys(mergeTags).length === 0 ? (
+			{Object.keys(filteredMergeTags).length === 0 ? (
 				<div className="text-center text-gray-500 py-8">
 					{isDynamic ? (
 						<>
@@ -279,7 +295,7 @@ const MergeTagsGroupRender: React.FC<{
 					)}
 				</div>
 			) : (
-				map(mergeTags, (tag, key) => (
+				map(filteredMergeTags, (tag, key) => (
 					<Card
 						key={key}
 						className="cursor-pointer shadow-none transition-all duration-200 hover:shadow-md hover:bg-gray-50"

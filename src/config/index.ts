@@ -14,6 +14,7 @@ import type {
 	Forms,
 	Importers,
 	Integrations,
+	QuillSMTPInfo,
 	UserCapabilities,
 } from './types/config-data';
 import { InitialPayload } from './types/initial-payload';
@@ -72,6 +73,9 @@ const configData: ConfigData = {
 	},
 	defaultStages: [],
 	dealPriorities: [],
+	quillsmtpInfo: {
+		configured: false,
+	},
 };
 
 /**
@@ -598,12 +602,33 @@ export const getDealPriorities = (data: ConfigData): DealPriority[] => {
 
 /**
  * Set deal priorities
- * 
+ *
  * @param data the json environment configuration to use for getting config values
  * @param value the value to set
  */
 export const setDealPriorities = (data: ConfigData) => (value: DealPriority[]) => {
 	data.dealPriorities = value;
+};
+
+/**
+ * Get QuillSMTP connection info
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns QuillSMTPInfo
+ */
+export const getQuillSMTPInfo = (data: ConfigData): QuillSMTPInfo => {
+	return data.quillsmtpInfo;
+};
+
+/**
+ * Set QuillSMTP connection info
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setQuillSMTPInfo = (data: ConfigData) => (value: QuillSMTPInfo) => {
+	data.quillsmtpInfo = value;
 };
 
 export interface ConfigApi {
@@ -658,6 +683,8 @@ export interface ConfigApi {
 	setDefaultStages: (value: DefaultStage[]) => void;
 	getDealPriorities: () => DealPriority[];
 	setDealPriorities: (value: DealPriority[]) => void;
+	getQuillSMTPInfo: () => QuillSMTPInfo;
+	setQuillSMTPInfo: (value: QuillSMTPInfo) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -712,6 +739,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setDefaultStages = setDefaultStages(data);
 	configApi.getDealPriorities = () => getDealPriorities(data);
 	configApi.setDealPriorities = setDealPriorities(data);
+	configApi.getQuillSMTPInfo = () => getQuillSMTPInfo(data);
+	configApi.setQuillSMTPInfo = setQuillSMTPInfo(data);
 	return configApi;
 };
 

@@ -88,7 +88,7 @@ final class Bounce_Handler_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $class_name Handler class name
+	 * @param string $class_name Handler class name.
 	 *
 	 * @return bool
 	 */
@@ -105,7 +105,14 @@ final class Bounce_Handler_Manager {
 
 			return true;
 		} catch ( Exception $e ) {
-			error_log( 'QuillCRM Bounce Handler Registration Error: ' . $e->getMessage() );
+			quillcrm_get_logger()->error(
+				'Bounce handler registration error: ' . $e->getMessage(),
+				array(
+					'source'     => 'bounce-handler-manager',
+					'class_name' => $class_name,
+					'exception'  => $e->getMessage(),
+				)
+			);
 			return false;
 		}
 	}
@@ -115,12 +122,12 @@ final class Bounce_Handler_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $class_name Class name
+	 * @param string $class_name Class name.
 	 *
 	 * @return string
 	 */
 	private function get_slug_from_class( $class_name ) {
-		// QuillCRM\Bounce_Handlers\Sendgrid_Bounce_Handler -> sendgrid
+		// QuillCRM\Bounce_Handlers\Sendgrid_Bounce_Handler -> sendgrid.
 		$parts = explode( '\\', $class_name );
 		$class = end( $parts );
 		$slug  = str_replace( array( '_bounce_handler', '-' ), '', strtolower( $class ) );
@@ -159,7 +166,7 @@ final class Bounce_Handler_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param \WP_REST_Request $request Request object
+	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -167,7 +174,7 @@ final class Bounce_Handler_Manager {
 		$security_key = get_option( 'quillcrm_bounce_security_key' );
 
 		if ( ! $security_key ) {
-			// Generate longer key (32 chars instead of 16) for better security
+			// Generate longer key (32 chars instead of 16) for better security.
 			$security_key = 'qcrm_' . wp_generate_password( 32, false );
 			update_option( 'quillcrm_bounce_security_key', $security_key );
 			update_option( 'quillcrm_bounce_security_key_generated_at', time() );
@@ -175,10 +182,8 @@ final class Bounce_Handler_Manager {
 
 		$provided_key = $request->get_param( 'key' );
 
-		// Use hash_equals() to prevent timing attacks
-		// CRITICAL: Never use === or !== for security comparisons
 		if ( ! hash_equals( $security_key, (string) $provided_key ) ) {
-			// Log failed attempts for security monitoring
+			// Log failed attempts for security monitoring.
 			do_action(
 				'quillcrm_bounce_webhook_failed_auth',
 				array(
@@ -199,7 +204,7 @@ final class Bounce_Handler_Manager {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param \WP_REST_Request $request Request object
+	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @return \WP_REST_Response
 	 */
@@ -218,13 +223,13 @@ final class Bounce_Handler_Manager {
 
 		$handler = $this->handlers[ $provider ];
 
-		// Get data from request
+		// Get data from request.
 		$data = $request->get_json_params();
 		if ( empty( $data ) ) {
 			$data = $request->get_params();
 		}
 
-		// Special handling for raw input (e.g., Amazon SNS)
+		// Special handling for raw input (e.g., Amazon SNS).
 		if ( empty( $data ) || $provider === 'amazonses' ) {
 			$raw_data = file_get_contents( 'php://input' );
 			if ( $raw_data ) {
@@ -235,14 +240,34 @@ final class Bounce_Handler_Manager {
 			}
 		}
 
-		// Log if debugging enabled
-		if ( defined( 'QUILLCRM_BOUNCE_DEBUG' ) && QUILLCRM_BOUNCE_DEBUG ) {
-			error_log( 'QuillCRM Bounce Webhook - Provider: ' . $provider );
-			error_log( 'QuillCRM Bounce Webhook - Data: ' . print_r( $data, true ) );
-		}
+		// Log incoming webhook.
+		quillcrm_get_logger()->debug(
+			sprintf( 'Bounce webhook received from provider: %s', $provider ),
+			array(
+				'source'   => 'bounce-webhook',
+				'provider' => $provider,
+				'data'     => $data,
+			)
+		);
 
 		$handler->set_data( $data );
 		$result = $handler->handle();
+
+		// Log successful webhook processing.
+		quillcrm_get_logger()->info(
+			sprintf(
+				'Bounce webhook processed successfully for provider: %s',
+				$provider
+			),
+			array(
+				'source'   => 'bounce-webhook',
+				'provider' => $provider,
+				'result'   => $result,
+			)
+		);
+
+		// Fire action for external logging/monitoring systems.
+		do_action( 'quillcrm_bounce_webhook_processed', $provider, $result, $data );
 
 		return new \WP_REST_Response(
 			array(

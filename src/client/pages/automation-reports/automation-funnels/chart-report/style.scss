@@ -1,4 +1,46 @@
 .chart-report-container {
+	background: transparent;
+	padding: 0;
+
+	.report-header {
+		padding: 20px 30px;
+		margin-bottom: 0;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 24px;
+
+		.report-title {
+			margin: 0;
+			font-size: 24px;
+			font-weight: 500;
+			color: #09090B;
+		}
+
+		.stats-container {
+			display: flex;
+			gap: 16px;
+
+			.stat-box {
+				display: flex;
+				gap: 4px;
+				border-radius: 8px;
+				padding: 4px 12px;
+				min-width: 150px;
+
+				.stat-label {
+					font-size: 16px;
+					font-weight: 400;
+				}
+
+				.stat-value {
+					font-size: 16px;
+					font-weight: 600;
+				}
+			}
+		}
+	}
+
 	// Loading and error states
 	.loading-spinner,
 	.error-message,
@@ -10,6 +52,7 @@
 		padding: 2rem;
 		text-align: center;
 		color: hsl(var(--muted-foreground));
+		margin: 24px;
 	}
 
 	.error-message {
@@ -21,30 +64,6 @@
 		font-style: italic;
 	}
 
-	.chart-summary {
-		display: flex;
-		justify-content: space-between;
-		margin-bottom: 20px;
-		padding: 10px;
-		background-color: hsl(var(--muted) / 0.3);
-		border-radius: 4px;
-
-		.chart-summary-item {
-			display: flex;
-			align-items: center;
-
-			.label {
-				font-weight: 500;
-				margin-right: 8px;
-			}
-
-			.value {
-				font-weight: 600;
-				font-size: 18px;
-				color: hsl(var(--primary));
-			}
-		}
-	}
 
 	.chart-wrapper {
 		position: relative;
@@ -54,9 +73,21 @@
 
 	// Responsive Design
 	@media (max-width: 768px) {
-		.chart-summary {
+		.report-header {
 			flex-direction: column;
-			gap: 10px;
+			align-items: flex-start;
+			gap: 16px;
+
+			.stats-container {
+				width: 100%;
+				flex-direction: column;
+				gap: 12px;
+
+				.stat-box {
+					width: 100%;
+					min-width: auto;
+				}
+			}
 		}
 	}
 }

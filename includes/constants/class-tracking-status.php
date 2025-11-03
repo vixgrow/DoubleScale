@@ -40,6 +40,11 @@ class Tracking_Status {
 	const SCHEDULED = 5;
 
 	/**
+	 * Read - Message read by recipient (WhatsApp)
+	 */
+	const READ = 6;
+
+	/**
 	 * Get all statuses
 	 *
 	 * @return array Associative array of status constants to labels
@@ -51,6 +56,7 @@ class Tracking_Status {
 			self::FAILED    => __( 'Failed', 'quillcrm' ),
 			self::DELIVERED => __( 'Delivered', 'quillcrm' ),
 			self::SCHEDULED => __( 'Scheduled', 'quillcrm' ),
+			self::READ      => __( 'Read', 'quillcrm' ),
 		);
 	}
 
@@ -78,6 +84,7 @@ class Tracking_Status {
 			self::FAILED    => 'failed',
 			self::DELIVERED => 'delivered',
 			self::SCHEDULED => 'scheduled',
+			self::READ      => 'read',
 		);
 		return $map[ $status ] ?? 'unknown';
 	}
@@ -95,6 +102,7 @@ class Tracking_Status {
 			'failed'    => self::FAILED,
 			'delivered' => self::DELIVERED,
 			'scheduled' => self::SCHEDULED,
+			'read'      => self::READ,
 		);
 		return $map[ strtolower( $slug ) ] ?? null;
 	}
@@ -134,6 +142,7 @@ class Tracking_Status {
 			self::PENDING   => self::get_name( self::PENDING ),
 			self::SENT      => self::get_name( self::SENT ),
 			self::DELIVERED => self::get_name( self::DELIVERED ),
+			self::READ      => self::get_name( self::READ ),
 			self::FAILED    => self::get_name( self::FAILED ),
 			self::SCHEDULED => self::get_name( self::SCHEDULED ),
 		);
@@ -152,9 +161,27 @@ class Tracking_Status {
 			self::FAILED    => 'status-failed',
 			self::DELIVERED => 'status-delivered',
 			self::SCHEDULED => 'status-scheduled',
+			self::READ      => 'status-read',
 		);
 		return $classes[ $status ] ?? 'status-unknown';
 	}
 
+	/**
+	 * Get badge color
+	 *
+	 * @param int $status Status constant.
+	 * @return string Badge color (success, processing, error, default, warning)
+	 */
+	public static function get_badge_color( $status ) {
+		$colors = array(
+			self::PENDING   => 'processing',
+			self::SENT      => 'success',
+			self::FAILED    => 'error',
+			self::DELIVERED => 'success',
+			self::SCHEDULED => 'default',
+			self::READ      => 'success',
+		);
+		return $colors[ $status ] ?? 'default';
+	}
 }
 

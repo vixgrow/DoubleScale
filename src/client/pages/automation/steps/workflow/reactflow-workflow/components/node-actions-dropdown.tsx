@@ -112,7 +112,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 					{showEdit && onEdit && (
 						<DropdownMenuItem
 							onClick={onEdit}
-							className="hover:bg-gray-100 cursor-pointer"
+							className="hover:bg-gray-100 cursor-pointer pointer-events-auto"
 						>
 							<EditIcon />
 							<span>{editLabel}</span>
@@ -122,7 +122,7 @@ const NodeActionsDropdown: React.FC<NodeActionsDropdownProps> = ({
 						<AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 							<AlertDialogTrigger asChild>
 								<DropdownMenuItem
-									className="text-destructive focus:text-destructive cursor-pointer hover:bg-gray-100"
+									className="text-destructive focus:text-destructive pointer-events-auto cursor-pointer hover:bg-gray-100"
 									onSelect={(e) => e.preventDefault()}
 								>
 									<DeleteIcon />

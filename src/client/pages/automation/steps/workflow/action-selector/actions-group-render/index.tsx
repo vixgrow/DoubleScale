@@ -32,9 +32,10 @@ interface ActionsGroupRenderProps {
     groups: { [key: string]: ActionsGroup };
     onChange: (value: string) => void;
     value: string;
+    isSaving?: boolean;
 }
 
-const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({ groups, onChange, value }) => {
+const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({ groups, onChange, value, isSaving = false }) => {
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
     // Helper function to get tooltip message for disabled actions
@@ -119,10 +120,12 @@ const ActionsGroupRender: React.FC<ActionsGroupRenderProps> = ({ groups, onChang
                                             <span className="text-sm">{action.label}</span>
                                             <Button
                                                 onClick={() => onChange(actionKey)}
-                                                disabled={group.is_disabled}
+                                                disabled={group.is_disabled || isSaving}
                                                 className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${value === actionKey ? 'border-2 border-primary' : 'border'}`}
                                             >
-                                                {__('Select', 'quillcrm')}
+                                                {isSaving && value === actionKey
+                                                    ? __('Selecting...', 'quillcrm')
+                                                    : __('Select', 'quillcrm')}
                                             </Button>
                                         </div>
                                     );

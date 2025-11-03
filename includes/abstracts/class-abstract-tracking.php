@@ -235,9 +235,9 @@ abstract class Abstract_Tracking
 				$tracking_record->status = Tracking_Status::DELIVERED;
 				break;
 			case 'read':
-				// WhatsApp-specific status (not yet defined in constants, using delivered for now)
+				// WhatsApp read receipt
 				if ($this->channel === Campaign_Channel::CHANNEL_WHATSAPP) {
-					$tracking_record->status = Tracking_Status::DELIVERED;
+					$tracking_record->status = Tracking_Status::READ;
 				}
 				break;
 			case 'failed':
@@ -249,17 +249,17 @@ abstract class Abstract_Tracking
 		$tracking_record->save();
 
 		// Log status update
-		// quillcrm_get_logger()->info(ucfirst($this->campaign_type) . ' delivery status updated', [
-		// 	'tracking_record_id' => $tracking_record->id,
-		// 	'previous_status' => $previous_status,
-		// 	'new_status' => $status,
-		// 	'contact_id' => $tracking_record->contact_id,
-		// 	'source_id' => $tracking_record->source_id,
-		// 	'source_type' => $tracking_record->source_type,
-		// 	'error_code' => $error_code,
-		// 	'error_message' => $error_message,
-		// 	'code' => "{$this->campaign_type}_delivery_status_updated"
-		// ]);
+		quillcrm_get_logger()->info(ucfirst($this->channel) . ' delivery status updated', [
+			'tracking_record_id' => $tracking_record->id,
+			'previous_status' => $previous_status,
+			'new_status' => $status,
+			'contact_id' => $tracking_record->contact_id,
+			'source_id' => $tracking_record->source_id,
+			'source_type' => $tracking_record->source_type,
+			'error_code' => $error_code,
+			'error_message' => $error_message,
+			'code' => "{$this->channel}_delivery_status_updated"
+		]);
 
 		// Trigger delivery status hooks
 		do_action("quillcrm_{$this->channel}_delivery_status_updated", $tracking_record, $status, $previous_status);
@@ -374,13 +374,13 @@ abstract class Abstract_Tracking
 				$campaign_record->clicked_at = current_time('mysql');
 				$campaign_record->save();
 
-				// quillcrm_get_logger()->info("{$this->channel} click tracked", [
-				// 	'campaign_record_id' => $campaign_record->id,
-				// 	'contact_id' => $campaign_record->contact_id,
-				// 	'source_id' => $campaign_record->source_id,
-				// 	'source_type' => $campaign_record->source_type,
-				// 	'code' => "{$this->channel}_click_tracked"
-				// ]);
+				quillcrm_get_logger()->info("{$this->channel} click tracked", [
+					'campaign_record_id' => $campaign_record->id,
+					'contact_id' => $campaign_record->contact_id,
+					'source_id' => $campaign_record->source_id,
+					'source_type' => $campaign_record->source_type,
+					'code' => "{$this->channel}_click_tracked"
+				]);
 
 			// Trigger click automation if enabled
 			do_action("quillcrm_{$this->channel}_clicked", $campaign_record);

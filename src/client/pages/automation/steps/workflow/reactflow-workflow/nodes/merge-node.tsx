@@ -45,7 +45,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 
 	const [loading, setLoading] = useState(false);
 	const [visible, setVisible] = useState(false);
-	const { automation, steps, setSteps, setUpdatedSteps } =
+	const { automation, steps, setSteps, setUpdatedSteps, viewMode = false } =
 		useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -92,8 +92,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	const handleStepSelection = async (type: string) => {
-		if (!automation) {
-			console.error('No automation context available');
+		if (!automation || viewMode) {
 			return;
 		}
 
@@ -348,12 +347,15 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 
 			{/* Make merge node function as add-step node */}
 			{isMerge ? (
-				<AddStepDialog
-					visible={visible}
-					onVisibleChange={setVisible}
-					loading={loading}
-					onStepSelection={handleStepSelection}
-				/>
+				<div className={viewMode ? 'qcrm-reactflow-merge__dialog--disabled' : ''}>
+					<AddStepDialog
+						visible={visible}
+						onVisibleChange={setVisible}
+						loading={loading}
+						onStepSelection={handleStepSelection}
+						disabled={viewMode}
+					/>
+				</div>
 			) : (
 				<div className="qcrm-reactflow-merge__content">
 					<div className="qcrm-reactflow-merge__icon">

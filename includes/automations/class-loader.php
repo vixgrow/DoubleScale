@@ -22,6 +22,8 @@ use QuillCRM\Automations\Process_Automation;
  */
 final class Loader {
 
+
+
 	/**
 	 * Class Instance.
 	 *
@@ -124,7 +126,7 @@ final class Loader {
 			if ( is_numeric( $automation ) && $step_id == null && $contact_id == null ) {
 				$args = $this->get_meta_args( $automation );
 				if ( $args && count( $args ) >= 3 ) {
-					list($automation, $step_id, $contact_id) = $args;
+					list($automation, $parent_step_id, $step_id, $contact_id) = $args;
 				} else {
 					throw new Exception( 'Failed to retrieve arguments from meta_id: ' . $automation );
 				}
@@ -138,6 +140,19 @@ final class Loader {
 				}
 			}
 
+			if ( $parent_step_id && is_numeric( $parent_step_id ) && $parent_step_id > 0 ) {
+				// Find and update the process record for the delay step, not the step itself
+				$delay_process = $automation->processes()
+					->where( 'automation_contact_id', $contact_id )
+					->where( 'step_id', $parent_step_id )
+					->where( 'status', 'pending' )
+					->first();
+
+				if ( $delay_process ) {
+					$delay_process->status = 'completed';
+					$delay_process->save();
+				}
+			}
 			$step               = Automation_Step_Model::findOrFail( $step_id );
 			$automation_process = new Process_Automation( $automation );
 			$automation_process->process_step( $step, $contact_id );
@@ -177,6 +192,14 @@ final class Loader {
 			if ( ! $skip ) {
 				$automation_contacts = $step->automation->contacts()->where( 'contact_id', $contact_id )->where( 'current_step', $step->id )->where( 'status', 'pending' )->get();
 				foreach ( $automation_contacts as $automation_contact ) {
+					// Update the goal process record to completed
+					$goal_process = $automation_contact->processes()->where( 'step_id', $step->id )->where( 'status', 'pending' )->first();
+					if ( $goal_process ) {
+						$goal_process->status = 'completed';
+						$goal_process->save();
+					}
+
+					// Move to next step if available
 					if ( 0 !== $automation_contact->next_step ) {
 						$automation_process = new Process_Automation( $step->automation );
 						$automation_process->enqueue_step( $automation_contact->next_step, $automation_contact->id );

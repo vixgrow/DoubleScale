@@ -62,8 +62,11 @@ const Header: React.FC<HeaderProps> = ({
 		}
 	};
 
-	const handleSaveAsTemplate = async (templateName: string) => {
-		await saveAsTemplate(templateName);
+	const handleSaveAsTemplate = async (
+		templateName: string,
+		thumbnailUrl?: string
+	) => {
+		await saveAsTemplate(templateName, thumbnailUrl);
 		setIsTemplateDialogOpen(false);
 	};
 	return (

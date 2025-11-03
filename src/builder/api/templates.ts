@@ -101,6 +101,59 @@ export const getTemplate = async (
 };
 
 /**
+ * Get all templates
+ */
+export const getTemplates = async (): Promise<EmailTemplate[]> => {
+	try {
+		const response = await apiFetch({
+			path: '/qc/v1/templates',
+		});
+		return response as EmailTemplate[];
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to fetch templates', 'quillcrm')
+		);
+	}
+};
+
+/**
+ * Get user templates (non-hidden only)
+ * Dedicated function for user-created templates in MyTemplates panel
+ */
+export const getUserTemplates = async (params?: {
+	type?: string;
+	search?: string;
+}): Promise<EmailTemplate[]> => {
+	try {
+		// Build query parameters
+		const queryParams = new URLSearchParams();
+
+		if (params?.type) {
+			queryParams.append('type', params.type);
+		}
+
+		if (params?.search) {
+			queryParams.append('search', params.search);
+		}
+
+		const path = queryParams.toString()
+			? `/qc/v1/templates/user-templates?${queryParams.toString()}`
+			: '/qc/v1/templates/user-templates';
+
+		const response = await apiFetch({
+			path,
+		});
+		return response as EmailTemplate[];
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to fetch user templates', 'quillcrm')
+		);
+	}
+};
+
+/**
  * Delete a template
  */
 export const deleteTemplate = async (templateId: number): Promise<void> => {
@@ -129,7 +182,8 @@ interface BuilderData {
  */
 export const saveEmailAsTemplate = async (
 	templateName: string,
-	builderData: BuilderData
+	builderData: BuilderData,
+	thumbnailUrl?: string
 ): Promise<EmailTemplate> => {
 	// Store builder data directly in body field as JSON
 	const bodyData = {
@@ -144,5 +198,7 @@ export const saveEmailAsTemplate = async (
 		subject: '',
 		body: JSON.stringify(bodyData), // Store builder data in body field
 		preview_text: '',
+		thumbnail: thumbnailUrl || '', // Always include thumbnail field, even if empty
+		hidden: false, // User-created templates should be visible
 	});
 };

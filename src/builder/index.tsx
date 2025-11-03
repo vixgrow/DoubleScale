@@ -86,9 +86,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
-		console.log('initialData', initialData);
-		// Load from initialData prop
 		if (initialData) {
+			dispatch(STORE_KEY).resetBuilder();
+
 			const { sections, globalSettings, buttonSettings } = initialData;
 
 			if (sections?.length) {
@@ -105,8 +105,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 			return;
 		}
 
-		// Load from campaign template
+		// Load from campaign template if available
 		if (!existingTemplateData?.template_id) {
+			dispatch(STORE_KEY).resetBuilder();
 			return;
 		}
 
@@ -123,6 +124,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						: template.body;
 
 				if (body?.type === 'builder' && body.value) {
+					// Reset before loading template data
+					dispatch(STORE_KEY).resetBuilder();
+
 					const { sections, globalSettings, buttonSettings } =
 						body.value;
 
@@ -144,14 +148,26 @@ const BuilderContent: React.FC<BuilderProps> = ({
 							}
 						);
 					}
+				} else {
+					dispatch(STORE_KEY).resetBuilder();
 				}
 			} catch (error) {
 				console.error('Failed to load template:', error);
+				// If template loading fails, start fresh
+				dispatch(STORE_KEY).resetBuilder();
 			}
 		};
 
 		loadTemplate();
 	}, [initialData, existingTemplateData?.template_id, dispatch]);
+
+	// Cleanup: Reset builder state when component unmounts
+	useEffect(() => {
+		return () => {
+			// Clean up the store when component unmounts
+			dispatch(STORE_KEY).resetBuilder();
+		};
+	}, [dispatch]);
 
 	// Disable scrolling on the background page when builder is mounted
 	useEffect(() => {

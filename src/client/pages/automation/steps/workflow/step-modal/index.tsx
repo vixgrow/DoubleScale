@@ -117,7 +117,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 							setStep(null);
 						}}
 						onChange={(value) => setValue(value)}
-						onSave={() => saveActionStep()}
+						onSave={(actionKey) => saveActionStep(actionKey)}
 					/>
 				);
 			case 'goal':
@@ -125,7 +125,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 					<GoalSelector
 						value={value}
 						onChange={(value) => setValue(value)}
-						onSave={() => saveActionStep()}
+						onSave={(goalKey) => saveActionStep(goalKey)}
 					/>
 				);
 

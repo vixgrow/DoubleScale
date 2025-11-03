@@ -17,18 +17,31 @@ const initializeTrigger = (
 	addStepWidth,
 	onTriggerClick,
 	onStepClick,
-	savedPositions = {}
+	savedPositions = {},
+	isTriggerVisible = false,
+	viewMode = false,
+	analyticsData = []
 ) => {
 	// Always add trigger node at the top
 	const triggerPosition = savedPositions['trigger'] || {
 		x: startX,
 		y: startY,
 	};
+	
+	// Get trigger analytics
+	const triggerAnalytics = analyticsData.find((a) => a.step_id === null || a.step_type === 'trigger');
+	
 	initialNodes.push({
 		id: 'trigger',
 		type: 'trigger',
 		position: triggerPosition,
-		data: { automation, onTriggerClick },
+		data: { 
+			automation, 
+			onTriggerClick, 
+			isTriggerVisible, 
+			viewMode,
+			analytics: triggerAnalytics 
+		},
 	});
 
 	if (!steps || steps.length === 0) {

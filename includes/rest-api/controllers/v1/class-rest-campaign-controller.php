@@ -169,6 +169,27 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 	}
 
 	/**
+	 * Get all campaigns - override to set channel from request
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_items( $request ) {
+		// Set channel from query parameter for filtering
+		$channel = $request->get_param( 'channel' );
+		
+		if ( ! empty( $channel ) ) {
+			// Validate it's a valid channel string
+			$valid_channels = Campaign_Channel::get_core_channel_strings();
+			if ( in_array( $channel, $valid_channels, true ) ) {
+				$this->channel = $channel;
+			}
+		}
+
+		return parent::get_items( $request );
+	}
+
+	/**
 	 * Create campaign - override to set channel from request
 	 *
 	 * @param WP_REST_Request $request

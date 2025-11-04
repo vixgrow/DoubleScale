@@ -19,6 +19,7 @@ import {
 	PanelSettings,
 	PlayIcon,
 	Stepper,
+	SetUpInfoIcon,
 } from '@quillcrm/components';
 import type { EmailTemplate } from '@quillcrm/client';
 import { z } from 'zod';
@@ -285,15 +286,14 @@ const Templates: React.FC = () => {
 
 				<div className="flex gap-6">
 					<PanelSettings
-						title={__('Campaign Template', 'quillcrm')}
+						title={__('Set-up info', 'quillcrm')}
 						description={__(
-							'Define your sender identity, subject line, and preview text before building your campaign.',
+							'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
 							'quillcrm'
 						)}
-						icon={<CategoryIcon />}
+						icon={<SetUpInfoIcon />}
 						className="w-2/3 h-full"
 					>
-						<div>
 							<div className="flex gap-4">
 								<FormField
 									label={__('From Name', 'quillcrm')}
@@ -314,7 +314,11 @@ const Templates: React.FC = () => {
 												from_name: e.target.value,
 											});
 										}}
+										style={{
+											borderRadius: '8px',
+										}}
 										className={cn(
+											'h-12 bg-white',
 											validationErrors.from_name &&
 												'!border-red-500 focus-visible:!ring-red-500'
 										)}
@@ -340,7 +344,8 @@ const Templates: React.FC = () => {
 											updateSettings({
 												from_email: email,
 												// Auto-fill from name if provided and current from_name is empty
-												...(name && !template.settings?.from_name
+												...(name &&
+												!template.settings?.from_name
 													? { from_name: name }
 													: {}),
 											});
@@ -376,7 +381,11 @@ const Templates: React.FC = () => {
 												reply_to: e.target.value,
 											});
 										}}
+										style={{
+											borderRadius: '8px',
+										}}
 										className={cn(
+											'h-12 bg-white',
 											validationErrors.reply_to &&
 												'!border-red-500 focus-visible:!ring-red-500'
 										)}
@@ -405,7 +414,11 @@ const Templates: React.FC = () => {
 												subject: e.target.value,
 											});
 										}}
+										style={{
+											borderRadius: '8px',
+										}}
 										className={cn(
+											'h-12 bg-white',
 											validationErrors.subject &&
 												'!border-red-500 focus-visible:!ring-red-500'
 										)}
@@ -434,7 +447,11 @@ const Templates: React.FC = () => {
 											preview_text: e.target.value,
 										});
 									}}
+									style={{
+										borderRadius: '8px',
+									}}
 									className={cn(
+										'bg-white',
 										validationErrors.preview_text &&
 											'!border-red-500 focus-visible:!ring-red-500'
 									)}
@@ -502,7 +519,11 @@ const Templates: React.FC = () => {
 																e.target.value,
 														});
 													}}
+													style={{
+														borderRadius: '8px',
+													}}
 													className={cn(
+														'h-12 bg-white',
 														validationErrors.utm_source &&
 															'!border-red-500 focus-visible:!ring-red-500'
 													)}
@@ -541,7 +562,11 @@ const Templates: React.FC = () => {
 																e.target.value,
 														});
 													}}
+													style={{
+														borderRadius: '8px',
+													}}
 													className={cn(
+														'h-12 bg-white',
 														validationErrors.utm_medium &&
 															'!border-red-500 focus-visible:!ring-red-500'
 													)}
@@ -580,7 +605,11 @@ const Templates: React.FC = () => {
 																e.target.value,
 														});
 													}}
+													style={{
+														borderRadius: '8px',
+													}}
 													className={cn(
+														'h-12 bg-white',
 														validationErrors.utm_name &&
 															'!border-red-500 focus-visible:!ring-red-500'
 													)}
@@ -609,6 +638,14 @@ const Templates: React.FC = () => {
 														template.settings
 															?.utm_term || ''
 													}
+													style={{
+														borderRadius: '8px',
+													}}
+													className={cn(
+														'h-12 bg-white',
+														validationErrors.utm_term &&
+															'!border-red-500 focus-visible:!ring-red-500'
+													)}
 													onChange={(e) =>
 														updateSettings({
 															utm_term:
@@ -634,6 +671,14 @@ const Templates: React.FC = () => {
 													template.settings
 														?.utm_content || ''
 												}
+												style={{
+													borderRadius: '8px',
+												}}
+												className={cn(
+													'h-12 bg-white',
+													validationErrors.utm_content &&
+														'!border-red-500 focus-visible:!ring-red-500'
+												)}
 												onChange={(e) =>
 													updateSettings({
 														utm_content:
@@ -660,7 +705,6 @@ const Templates: React.FC = () => {
 									<ArrowRight />
 								</Button>
 							</div>
-						</div>
 					</PanelSettings>
 
 					<FeedBuilder setVisibile={handleOpenEmailBuilder} />

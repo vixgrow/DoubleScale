@@ -15,14 +15,12 @@ import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-table';
 import { useProviderStatus } from '@/hooks/use-provider-status';
-import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
+import { TimeAgoCell, ViewIcon, MessageStatsCard, NoData } from '@quillcrm/components';
 import SendWhatsAppDialog from './send-whatsapp-dialog';
 import WhatsAppDetails from './whatsapp-details-dialog';
 import TwilioConfigModal from '../components/twilio-config-modal';
 import { ProviderNotConnectedWarning } from '../components/provider-not-connected-warning';
 import { MessageCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
-import { MessageStatsCard } from '../components/message-stats-card';
-import { NoData } from '@/components/no-data';
 import type { ColumnDef } from '@tanstack/react-table';
 
 interface WhatsAppProps {

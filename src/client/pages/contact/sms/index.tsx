@@ -15,14 +15,12 @@ import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-table';
 import { useProviderStatus } from '@/hooks/use-provider-status';
-import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
+import { TimeAgoCell, ViewIcon, MessageStatsCard, NoData } from '@quillcrm/components';
 import SendSMSDialog from './send-sms-dialog';
 import SMSDetails from './sms-details-dialog';
 import TwilioConfigModal from '../components/twilio-config-modal';
 import { ProviderNotConnectedWarning } from '../components/provider-not-connected-warning';
 import { MessageSquare, CheckCircle2, XCircle, Clock } from 'lucide-react';
-import { MessageStatsCard } from '../components/message-stats-card';
-import { NoData } from '@/components/no-data';
 import type { ColumnDef } from '@tanstack/react-table';
 
 interface SMSProps {

@@ -26,6 +26,7 @@ import {
 	ABSplitIcon,
 	CopyIcon,
 	DeleteIcon,
+	EditIcon,
 	FallbackCell,
 	FormattedDateCell,
 	ProcessingEmailsIcon,
@@ -134,6 +135,8 @@ const getCommonColumns = ({
 		),
 		cell: ({ row }) => {
 			const campaign = row.original;
+			const canEdit = campaign.status === 'draft' || campaign.status === 'schedule';
+
 			return (
 				<div className="text-center">
 					<DropdownMenu>
@@ -149,7 +152,7 @@ const getCommonColumns = ({
 							<DropdownMenuItem
 								onClick={() => {
 									navigate(
-										getToLink(`campaigns/${campaign.id}`)
+										getToLink(`campaigns/${campaign.id}/overview`)
 									);
 								}}
 							>
@@ -162,6 +165,18 @@ const getCommonColumns = ({
 								<CopyIcon />
 								{__('Duplicate', 'quillcrm')}
 							</DropdownMenuItem>
+							{canEdit && (
+								<DropdownMenuItem
+									onClick={() => {
+										navigate(
+											getToLink(`campaigns/${campaign.id}/template`)
+										);
+									}}
+								>
+									<EditIcon />
+									{__('Edit', 'quillcrm')}
+								</DropdownMenuItem>
+							)}
 							<DropdownMenuItem
 								onClick={() => onDelete(campaign.id)}
 								className="text-red-500 hover:text-red-500 focus:text-red-500"

@@ -94,11 +94,11 @@ class REST_Contact_Controller extends REST_Controller {
 							'description' => __( 'Subscribed contacts.', 'quillcrm' ),
 							'type'        => 'boolean',
 						),
-					'campaign_type' => array(
-						'description' => __( 'Campaign type for filtering contacts.', 'quillcrm' ),
-						'type'        => 'string',
-						'enum'        => Campaign_Channel::get_core_channel_strings(),
-					),
+						'campaign_type' => array(
+							'description' => __( 'Campaign type for filtering contacts.', 'quillcrm' ),
+							'type'        => 'string',
+							'enum'        => Campaign_Channel::get_core_channel_strings(),
+						),
 					),
 				),
 				array(
@@ -787,7 +787,7 @@ class REST_Contact_Controller extends REST_Controller {
 						'template' => function ( $query ) {
 							$query->select( 'id', 'subject', 'body' );
 						},
-						'message' => function ( $query ) {
+						'message'  => function ( $query ) {
 							$query->select( 'id', 'tracking_id', 'subject', 'body' );
 						}, // Include message content for individual messages
 					)
@@ -826,13 +826,13 @@ class REST_Contact_Controller extends REST_Controller {
 	private function map_mode_to_tracking_mode( $mode ) {
 		// If it's already an integer, validate it directly
 		if ( is_int( $mode ) || ctype_digit( (string) $mode ) ) {
-			$mode_int = (int) $mode;
+			$mode_int    = (int) $mode;
 			$valid_modes = array( Tracking_Model::MODE_EMAIL, Tracking_Model::MODE_SMS, Tracking_Model::MODE_WHATSAPP );
-			
+
 			if ( in_array( $mode_int, $valid_modes, true ) ) {
 				return $mode_int;
 			}
-			
+
 			return new WP_Error(
 				'invalid_mode',
 				sprintf( __( 'Invalid mode: %d. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ), $mode_int ),
@@ -988,6 +988,7 @@ class REST_Contact_Controller extends REST_Controller {
 			$from          = $request->get_param( 'from' ) ?? null;
 			$to            = $request->get_param( 'to' ) ?? null;
 			$query         = Contact_Model::query();
+			$total_count   = $query->count();
 
 			// Start with base query and load relationships
 			$contacts = $query->with( 'lists', 'tags', 'custom_fields', 'notes' );
@@ -1032,7 +1033,7 @@ class REST_Contact_Controller extends REST_Controller {
 			// Paginate and get results (pagination automatically handles total count)
 			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
-			return new WP_REST_Response( $contacts->toArray(), 200 );
+			return new WP_REST_Response( $contacts->toArray() + array( 'total_count' => $total_count ), 200 );
 		} catch ( Exception $e ) {
 			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
@@ -1261,10 +1262,10 @@ class REST_Contact_Controller extends REST_Controller {
 				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
 			}
 
-		$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
-		$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
-		$contacts = $contact->automation_contacts()->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
-		$contacts->load( 'automation.steps', 'contact', 'processes.step', 'current_step', 'next_step' );
+			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$contacts = $contact->automation_contacts()->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			$contacts->load( 'automation.steps', 'contact', 'processes.step', 'current_step', 'next_step' );
 
 			return new WP_REST_Response( $contacts, 200 );
 		} catch ( Exception $e ) {

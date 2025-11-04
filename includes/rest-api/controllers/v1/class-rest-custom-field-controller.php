@@ -203,9 +203,28 @@ class REST_Custom_Field_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$custom_fields = Custom_Field_Model::all();
+			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$keyword  = $request->get_param( 'keyword' ) ?? '';
+			$from     = $request->get_param( 'from' ) ?? null;
+			$to       = $request->get_param( 'to' ) ?? null;
 
-			return new WP_REST_Response( $custom_fields, 200 );
+			$query       = Custom_Field_Model::query();
+			$total_count = $query->count();
+
+			if ( $keyword ) {
+				$query->where( 'name', 'LIKE', '%' . $keyword . '%' );
+			}
+			if ( $from ) {
+				$query->where( 'created_at', '>=', $from );
+			}
+			if ( $to ) {
+				$query->where( 'created_at', '<=', $to );
+			}
+
+			$custom_fields = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+
+			return new WP_REST_Response( $custom_fields->toArray() + array( 'total_count' => $total_count ), 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'rest_custom_field_get_items', $e->getMessage(), array( 'status' => 500 ) );
 		}

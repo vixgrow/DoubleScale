@@ -294,417 +294,382 @@ const Templates: React.FC = () => {
 						icon={<SetUpInfoIcon />}
 						className="w-2/3 h-full"
 					>
-							<div className="flex gap-4">
-								<FormField
-									label={__('From Name', 'quillcrm')}
-									required={true}
-									className="flex-1"
-								>
-									<Input
-										placeholder={__(
-											'Name here',
-											'quillcrm'
-										)}
-										value={
-											template.settings?.from_name || ''
-										}
-										onChange={(e) => {
-											clearError('from_name');
-											updateSettings({
-												from_name: e.target.value,
-											});
-										}}
-										style={{
-											borderRadius: '8px',
-										}}
-										className={cn(
-											'h-12 bg-white',
-											validationErrors.from_name &&
-												'!border-red-500 focus-visible:!ring-red-500'
-										)}
-									/>
-									{validationErrors.from_name && (
-										<p className="text-red-500 text-sm mt-1">
-											{validationErrors.from_name}
-										</p>
-									)}
-								</FormField>
-
-								<FormField
-									label={__('From Email', 'quillcrm')}
-									required={true}
-									className="flex-1"
-								>
-									<FromEmailSelector
-										value={
-											template.settings?.from_email || ''
-										}
-										onChange={(email, name) => {
-											clearError('from_email');
-											updateSettings({
-												from_email: email,
-												// Auto-fill from name if provided and current from_name is empty
-												...(name &&
-												!template.settings?.from_name
-													? { from_name: name }
-													: {}),
-											});
-										}}
-										error={validationErrors.from_email}
-									/>
-									{validationErrors.from_email && (
-										<p className="text-red-500 text-sm mt-1">
-											{validationErrors.from_email}
-										</p>
-									)}
-								</FormField>
-							</div>
-
-							<div className="flex gap-4">
-								<FormField
-									label={__('Reply To', 'quillcrm')}
-									required={true}
-									className="flex-1"
-								>
-									<Input
-										type="email"
-										placeholder={__(
-											'name@gmail.com',
-											'quillcrm'
-										)}
-										value={
-											template.settings?.reply_to || ''
-										}
-										onChange={(e) => {
-											clearError('reply_to');
-											updateSettings({
-												reply_to: e.target.value,
-											});
-										}}
-										style={{
-											borderRadius: '8px',
-										}}
-										className={cn(
-											'h-12 bg-white',
-											validationErrors.reply_to &&
-												'!border-red-500 focus-visible:!ring-red-500'
-										)}
-									/>
-									{validationErrors.reply_to && (
-										<p className="text-red-500 text-sm mt-1">
-											{validationErrors.reply_to}
-										</p>
-									)}
-								</FormField>
-
-								<FormField
-									label={__('Subject', 'quillcrm')}
-									required={true}
-									className="flex-1"
-								>
-									<Input
-										placeholder={__(
-											'Subject here',
-											'quillcrm'
-										)}
-										value={template.subject || ''}
-										onChange={(e) => {
-											clearError('subject');
-											updateTemplate({
-												subject: e.target.value,
-											});
-										}}
-										style={{
-											borderRadius: '8px',
-										}}
-										className={cn(
-											'h-12 bg-white',
-											validationErrors.subject &&
-												'!border-red-500 focus-visible:!ring-red-500'
-										)}
-									/>
-									{validationErrors.subject && (
-										<p className="text-red-500 text-sm mt-1">
-											{validationErrors.subject}
-										</p>
-									)}
-								</FormField>
-							</div>
-
+						<div className="flex gap-4">
 							<FormField
-								label={__('Preview Text', 'quillcrm')}
+								label={__('From Name', 'quillcrm')}
 								required={true}
+								className="flex-1"
 							>
-								<Textarea
-									placeholder={__(
-										'Preview text here',
-										'quillcrm'
-									)}
-									value={template.preview_text || ''}
+								<Input
+									placeholder={__('Name here', 'quillcrm')}
+									value={template.settings?.from_name || ''}
 									onChange={(e) => {
-										clearError('preview_text');
-										updateTemplate({
-											preview_text: e.target.value,
+										clearError('from_name');
+										updateSettings({
+											from_name: e.target.value,
 										});
 									}}
 									style={{
 										borderRadius: '8px',
 									}}
 									className={cn(
-										'bg-white',
-										validationErrors.preview_text &&
+										'h-12 bg-white',
+										validationErrors.from_name &&
 											'!border-red-500 focus-visible:!ring-red-500'
 									)}
 								/>
-								{validationErrors.preview_text && (
+								{validationErrors.from_name && (
 									<p className="text-red-500 text-sm mt-1">
-										{validationErrors.preview_text}
+										{validationErrors.from_name}
 									</p>
 								)}
 							</FormField>
 
-							<Separator />
+							<FormField
+								label={__('From Email', 'quillcrm')}
+								required={true}
+								className="flex-1"
+							>
+								<FromEmailSelector
+									value={template.settings?.from_email || ''}
+									onChange={(email, name) => {
+										clearError('from_email');
+										updateSettings({
+											from_email: email,
+											// Auto-fill from name if provided and current from_name is empty
+											...(name &&
+											!template.settings?.from_name
+												? { from_name: name }
+												: {}),
+										});
+									}}
+									error={validationErrors.from_email}
+								/>
+								{validationErrors.from_email && (
+									<p className="text-red-500 text-sm mt-1">
+										{validationErrors.from_email}
+									</p>
+								)}
+							</FormField>
+						</div>
 
-							<div className="py-4">
-								<div className="flex items-center justify-between mb-4">
-									<div>
-										<p className="text-lg font-semibold text-foreground">
-											{__('Enable UTM', 'quillcrm')}
-										</p>
-										<p>
-											{__(
-												'A UTM (Urchin Tracking Module) code is a snippet of text added to the end of a URL to track the metrics and performance of a specific digital marketing campaign',
-												'quillcrm'
-											)}
-										</p>
-									</div>
-									<Switch
-										checked={
-											template.settings?.enable_utm ||
-											false
-										}
-										onCheckedChange={(checked) =>
-											updateSettings({
-												enable_utm: checked,
-											})
-										}
-									/>
+						<div className="flex gap-4">
+							<FormField
+								label={__('Reply To', 'quillcrm')}
+								required={true}
+								className="flex-1"
+							>
+								<Input
+									type="email"
+									placeholder={__(
+										'name@gmail.com',
+										'quillcrm'
+									)}
+									value={template.settings?.reply_to || ''}
+									onChange={(e) => {
+										clearError('reply_to');
+										updateSettings({
+											reply_to: e.target.value,
+										});
+									}}
+									style={{
+										borderRadius: '8px',
+									}}
+									className={cn(
+										'h-12 bg-white',
+										validationErrors.reply_to &&
+											'!border-red-500 focus-visible:!ring-red-500'
+									)}
+								/>
+								{validationErrors.reply_to && (
+									<p className="text-red-500 text-sm mt-1">
+										{validationErrors.reply_to}
+									</p>
+								)}
+							</FormField>
+
+							<FormField
+								label={__('Subject', 'quillcrm')}
+								required={true}
+								className="flex-1"
+							>
+								<Input
+									placeholder={__('Subject here', 'quillcrm')}
+									value={template.subject || ''}
+									onChange={(e) => {
+										clearError('subject');
+										updateTemplate({
+											subject: e.target.value,
+										});
+									}}
+									style={{
+										borderRadius: '8px',
+									}}
+									className={cn(
+										'h-12 bg-white',
+										validationErrors.subject &&
+											'!border-red-500 focus-visible:!ring-red-500'
+									)}
+								/>
+								{validationErrors.subject && (
+									<p className="text-red-500 text-sm mt-1">
+										{validationErrors.subject}
+									</p>
+								)}
+							</FormField>
+						</div>
+
+						<FormField
+							label={__('Preview Text', 'quillcrm')}
+							required={true}
+						>
+							<Textarea
+								placeholder={__(
+									'Preview text here',
+									'quillcrm'
+								)}
+								value={template.preview_text || ''}
+								onChange={(e) => {
+									clearError('preview_text');
+									updateTemplate({
+										preview_text: e.target.value,
+									});
+								}}
+								style={{
+									borderRadius: '8px',
+								}}
+								className={cn(
+									'bg-white',
+									validationErrors.preview_text &&
+										'!border-red-500 focus-visible:!ring-red-500'
+								)}
+							/>
+							{validationErrors.preview_text && (
+								<p className="text-red-500 text-sm mt-1">
+									{validationErrors.preview_text}
+								</p>
+							)}
+						</FormField>
+
+						<Separator />
+
+						<div className="py-4">
+							<div className="flex items-center justify-between mb-4">
+								<div>
+									<p className="text-lg font-semibold text-foreground">
+										{__('Enable UTM', 'quillcrm')}
+									</p>
+									<p>
+										{__(
+											'A UTM (Urchin Tracking Module) code is a snippet of text added to the end of a URL to track the metrics and performance of a specific digital marketing campaign',
+											'quillcrm'
+										)}
+									</p>
 								</div>
+								<Switch
+									checked={
+										template.settings?.enable_utm || false
+									}
+									onCheckedChange={(checked) =>
+										updateSettings({
+											enable_utm: checked,
+										})
+									}
+								/>
+							</div>
 
-								{template.settings?.enable_utm && (
-									<div className="space-y-4">
-										<div className="grid grid-cols-2 gap-4">
-											<FormField
-												label={__(
-													'UTM Source',
-													'quillcrm'
-												)}
-												required={true}
-											>
-												<Input
-													placeholder={__(
-														'Source',
-														'quillcrm'
-													)}
-													value={
-														template.settings
-															?.utm_source || ''
-													}
-													onChange={(e) => {
-														clearError(
-															'utm_source'
-														);
-														updateSettings({
-															utm_source:
-																e.target.value,
-														});
-													}}
-													style={{
-														borderRadius: '8px',
-													}}
-													className={cn(
-														'h-12 bg-white',
-														validationErrors.utm_source &&
-															'!border-red-500 focus-visible:!ring-red-500'
-													)}
-												/>
-												{validationErrors.utm_source && (
-													<p className="text-red-500 text-sm mt-1">
-														{
-															validationErrors.utm_source
-														}
-													</p>
-												)}
-											</FormField>
-
-											<FormField
-												label={__(
-													'UTM Medium',
-													'quillcrm'
-												)}
-												required={true}
-											>
-												<Input
-													placeholder={__(
-														'Medium',
-														'quillcrm'
-													)}
-													value={
-														template.settings
-															?.utm_medium || ''
-													}
-													onChange={(e) => {
-														clearError(
-															'utm_medium'
-														);
-														updateSettings({
-															utm_medium:
-																e.target.value,
-														});
-													}}
-													style={{
-														borderRadius: '8px',
-													}}
-													className={cn(
-														'h-12 bg-white',
-														validationErrors.utm_medium &&
-															'!border-red-500 focus-visible:!ring-red-500'
-													)}
-												/>
-												{validationErrors.utm_medium && (
-													<p className="text-red-500 text-sm mt-1">
-														{
-															validationErrors.utm_medium
-														}
-													</p>
-												)}
-											</FormField>
-										</div>
-
-										<div className="grid grid-cols-2 gap-4">
-											<FormField
-												label={__(
-													'UTM Name',
-													'quillcrm'
-												)}
-												required={true}
-											>
-												<Input
-													placeholder={__(
-														'Name',
-														'quillcrm'
-													)}
-													value={
-														template.settings
-															?.utm_name || ''
-													}
-													onChange={(e) => {
-														clearError('utm_name');
-														updateSettings({
-															utm_name:
-																e.target.value,
-														});
-													}}
-													style={{
-														borderRadius: '8px',
-													}}
-													className={cn(
-														'h-12 bg-white',
-														validationErrors.utm_name &&
-															'!border-red-500 focus-visible:!ring-red-500'
-													)}
-												/>
-												{validationErrors.utm_name && (
-													<p className="text-red-500 text-sm mt-1">
-														{
-															validationErrors.utm_name
-														}
-													</p>
-												)}
-											</FormField>
-
-											<FormField
-												label={__(
-													'UTM Term',
-													'quillcrm'
-												)}
-											>
-												<Input
-													placeholder={__(
-														'Term',
-														'quillcrm'
-													)}
-													value={
-														template.settings
-															?.utm_term || ''
-													}
-													style={{
-														borderRadius: '8px',
-													}}
-													className={cn(
-														'h-12 bg-white',
-														validationErrors.utm_term &&
-															'!border-red-500 focus-visible:!ring-red-500'
-													)}
-													onChange={(e) =>
-														updateSettings({
-															utm_term:
-																e.target.value,
-														})
-													}
-												/>
-											</FormField>
-										</div>
-
+							{template.settings?.enable_utm && (
+								<div className="space-y-4">
+									<div className="grid grid-cols-2 gap-4">
 										<FormField
-											label={__(
-												'UTM Content',
-												'quillcrm'
-											)}
+											label={__('UTM Source', 'quillcrm')}
+											required={true}
 										>
 											<Input
 												placeholder={__(
-													'Content',
+													'Source',
 													'quillcrm'
 												)}
 												value={
 													template.settings
-														?.utm_content || ''
+														?.utm_source || ''
+												}
+												onChange={(e) => {
+													clearError('utm_source');
+													updateSettings({
+														utm_source:
+															e.target.value,
+													});
+												}}
+												style={{
+													borderRadius: '8px',
+												}}
+												className={cn(
+													'h-12 bg-white',
+													validationErrors.utm_source &&
+														'!border-red-500 focus-visible:!ring-red-500'
+												)}
+											/>
+											{validationErrors.utm_source && (
+												<p className="text-red-500 text-sm mt-1">
+													{
+														validationErrors.utm_source
+													}
+												</p>
+											)}
+										</FormField>
+
+										<FormField
+											label={__('UTM Medium', 'quillcrm')}
+											required={true}
+										>
+											<Input
+												placeholder={__(
+													'Medium',
+													'quillcrm'
+												)}
+												value={
+													template.settings
+														?.utm_medium || ''
+												}
+												onChange={(e) => {
+													clearError('utm_medium');
+													updateSettings({
+														utm_medium:
+															e.target.value,
+													});
+												}}
+												style={{
+													borderRadius: '8px',
+												}}
+												className={cn(
+													'h-12 bg-white',
+													validationErrors.utm_medium &&
+														'!border-red-500 focus-visible:!ring-red-500'
+												)}
+											/>
+											{validationErrors.utm_medium && (
+												<p className="text-red-500 text-sm mt-1">
+													{
+														validationErrors.utm_medium
+													}
+												</p>
+											)}
+										</FormField>
+									</div>
+
+									<div className="grid grid-cols-2 gap-4">
+										<FormField
+											label={__('UTM Name', 'quillcrm')}
+											required={true}
+										>
+											<Input
+												placeholder={__(
+													'Name',
+													'quillcrm'
+												)}
+												value={
+													template.settings
+														?.utm_name || ''
+												}
+												onChange={(e) => {
+													clearError('utm_name');
+													updateSettings({
+														utm_name:
+															e.target.value,
+													});
+												}}
+												style={{
+													borderRadius: '8px',
+												}}
+												className={cn(
+													'h-12 bg-white',
+													validationErrors.utm_name &&
+														'!border-red-500 focus-visible:!ring-red-500'
+												)}
+											/>
+											{validationErrors.utm_name && (
+												<p className="text-red-500 text-sm mt-1">
+													{validationErrors.utm_name}
+												</p>
+											)}
+										</FormField>
+
+										<FormField
+											label={__('UTM Term', 'quillcrm')}
+										>
+											<Input
+												placeholder={__(
+													'Term',
+													'quillcrm'
+												)}
+												value={
+													template.settings
+														?.utm_term || ''
 												}
 												style={{
 													borderRadius: '8px',
 												}}
 												className={cn(
 													'h-12 bg-white',
-													validationErrors.utm_content &&
+													validationErrors.utm_term &&
 														'!border-red-500 focus-visible:!ring-red-500'
 												)}
 												onChange={(e) =>
 													updateSettings({
-														utm_content:
+														utm_term:
 															e.target.value,
 													})
 												}
 											/>
 										</FormField>
 									</div>
-								)}
-							</div>
 
-							<Separator />
+									<FormField
+										label={__('UTM Content', 'quillcrm')}
+									>
+										<Input
+											placeholder={__(
+												'Content',
+												'quillcrm'
+											)}
+											value={
+												template.settings
+													?.utm_content || ''
+											}
+											style={{
+												borderRadius: '8px',
+											}}
+											className={cn(
+												'h-12 bg-white',
+												validationErrors.utm_content &&
+													'!border-red-500 focus-visible:!ring-red-500'
+											)}
+											onChange={(e) =>
+												updateSettings({
+													utm_content: e.target.value,
+												})
+											}
+										/>
+									</FormField>
+								</div>
+							)}
+						</div>
 
-							<div className="flex justify-end py-4">
-								<Button
-									variant="gradient"
-									onClick={saveTemplateStepAndNavigate}
-									disabled={isSaving}
-								>
-									{isSaving
-										? __('Saving...', 'quillcrm')
-										: __('Next', 'quillcrm')}{' '}
-									<ArrowRight />
-								</Button>
-							</div>
+						<Separator />
+
+						<div className="flex justify-end py-4">
+							<Button
+								variant="gradient"
+								onClick={saveTemplateStepAndNavigate}
+								disabled={isSaving}
+							>
+								{isSaving
+									? __('Saving...', 'quillcrm')
+									: __('Next', 'quillcrm')}{' '}
+								<ArrowRight />
+							</Button>
+						</div>
 					</PanelSettings>
 
 					<FeedBuilder setVisibile={handleOpenEmailBuilder} />

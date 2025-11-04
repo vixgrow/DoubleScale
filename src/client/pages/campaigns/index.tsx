@@ -28,7 +28,6 @@ import {
 	PlusIcon,
 	ContactTotalEmailsIcon,
 	ContactSMSIcon,
-	ContactWhatsAppIcon,
 } from '@/components';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
@@ -90,7 +89,6 @@ const Campaigns: React.FC = () => {
 			const channelMap: Record<string, string> = {
 				email: 'email',
 				sms: 'sms',
-				whatsapp: 'whatsapp',
 			};
 
 			const response = (await apiFetch({
@@ -125,25 +123,25 @@ const Campaigns: React.FC = () => {
 			return;
 		}
 
-		if (!campaignType) {
-			createNotice({
-				type: 'error',
-				message: __('Campaign type is required', 'quillcrm'),
-			});
-			return;
-		}
-
 		try {
-			// Map UI selection to campaign channel - using actual database values
-			const typeMap: Record<string, string> = {
-				email: 'email',
-				standard: 'email', // Standard email campaign
-				ab_test: 'email', // A/B test is still email
-				sms: 'sms',
-				whatsapp: 'whats app',
-			};
+			let channelType = '';
+			let isAbTest = false;
 
-			const actualType = typeMap[campaignType] || 'email';
+			// Determine channel type based on active tab
+			if (activeTab === 'email') {
+				// For email, campaignType determines if it's standard or ab_test
+				if (!campaignType) {
+					createNotice({
+						type: 'error',
+						message: __('Campaign type is required', 'quillcrm'),
+					});
+					return;
+				}
+				channelType = 'email';
+				isAbTest = campaignType === 'ab_test';
+			} else if (activeTab === 'sms') {
+				channelType = 'sms';
+			}
 
 			// Use unified endpoint with type parameter (as string)
 			const response = (await apiFetch({
@@ -151,9 +149,9 @@ const Campaigns: React.FC = () => {
 				method: 'POST',
 				data: {
 					name: name,
-					type: actualType, // 'email', 'sms', or 'whatsapp'
+					type: channelType,
 					settings: {
-						ab_test: campaignType === 'ab_test',
+						ab_test: isAbTest,
 					},
 					description: __('New campaign', 'quillcrm'),
 					status: 'draft',
@@ -263,11 +261,6 @@ const Campaigns: React.FC = () => {
 			label: 'SMS Campaigns',
 			icon: <ContactSMSIcon width={24} height={24} />,
 		},
-		{
-			value: 'whatsapp',
-			label: 'WhatsApp Campaigns',
-			icon: <ContactWhatsAppIcon width={24} height={24} />,
-		},
 	];
 
 	// Campaign content component
@@ -325,10 +318,6 @@ const Campaigns: React.FC = () => {
 			value: 'sms',
 			children: <CampaignContent />,
 		},
-		{
-			value: 'whatsapp',
-			children: <CampaignContent />,
-		},
 	];
 
 	return (
@@ -360,6 +349,7 @@ const Campaigns: React.FC = () => {
 				setStep={setStep}
 				step={step}
 				addCampaign={addCampaign}
+				activeTab={activeTab}
 			/>
 		</div>
 	);

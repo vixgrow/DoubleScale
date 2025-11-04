@@ -15,7 +15,8 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trash2, Plus, Info, Loader2 } from 'lucide-react';
+import { Plus, Info, Loader2 } from 'lucide-react';
+import { AlertIcon, DeleteIcon } from '@quillcrm/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -255,9 +256,9 @@ export const ContactFilterSection = forwardRef<
 	}));
 
 	return (
-		<div className="space-y-1">
+		<div className="space-y-3">
 			<div>
-				<p className="text-base font-bold text-black">{title}</p>
+				<p className="text-base font-bold text-black mb-1">{title}</p>
 				<p className="text-sm text-muted-foreground">{description}</p>
 			</div>
 			{error && (
@@ -294,7 +295,7 @@ export const ContactFilterSection = forwardRef<
 												updateRow(row.id, 'list', value)
 											}
 										>
-											<SelectTrigger className="w-full">
+											<SelectTrigger className="w-full h-12">
 												<SelectValue placeholder="Select List" />
 											</SelectTrigger>
 											<SelectContent
@@ -347,7 +348,7 @@ export const ContactFilterSection = forwardRef<
 												updateRow(row.id, 'tag', value)
 											}
 										>
-											<SelectTrigger className="w-full">
+											<SelectTrigger className="w-full h-12">
 												<SelectValue placeholder="Select Tag" />
 											</SelectTrigger>
 											<SelectContent
@@ -398,13 +399,14 @@ export const ContactFilterSection = forwardRef<
 										variant="ghost"
 										size="icon"
 										onClick={() => removeRow(row.id)}
+										className="text-destructive"
 									>
-										<Trash2 className="h-4 w-4 text-red-500" />
+										<DeleteIcon />
 									</Button>
 								</div>
 								{index === 0 && (
-									<div className="flex items-center text-xs font-bold text-blue-600 mt-1">
-										<Info className="h-3 w-3 mr-1" />
+									<div className="flex items-center gap-2 text-sm font-semibold text-secondary mt-3">
+										<AlertIcon width={20} height={20} />
 										{__(
 											'This Question Is Required By Default',
 											'quillcrm'

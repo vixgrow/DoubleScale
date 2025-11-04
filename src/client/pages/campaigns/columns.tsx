@@ -14,7 +14,6 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Campaign, CampaignStatus } from '../../types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CAMPAIGN_STATUS_COLORS } from './constants';
-import { Badge } from '@/components/ui/badge';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -36,7 +35,6 @@ import {
 	ViewOutlinedIcon,
 } from '@quillcrm/components';
 import { getToLink } from '@quillcrm/navigation';
-import { DivideCircleIcon } from 'lucide-react';
 
 // Add interface for column props
 interface ColumnProps {

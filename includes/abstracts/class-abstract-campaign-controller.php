@@ -527,7 +527,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 
 			// Generate cache key
 			$cache_key = sprintf(
-				'qcrm_analytics_%s_%s_%s_%s',
+				'quillcrm_analytics_%s_%s_%s_%s',
 				$this->channel,
 				$interval,
 				$start_date,
@@ -574,7 +574,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 
 			// Generate cache key
 			$cache_key = sprintf(
-				'qcrm_timeseries_%s_%d_%s_%d',
+				'quillcrm_timeseries_%s_%d_%s_%d',
 				$this->channel,
 				$campaign_id,
 				$period,

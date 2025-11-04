@@ -166,11 +166,9 @@ abstract class Bounce_Handler {
 	 *
 	 * @return bool
 	 */
-	protected function handle_soft_bounce( $contact, $metadata ) {
-		$soft_bounce_count = (int) quillcrm_get_contact_meta( $contact->id, self::META_SOFT_BOUNCE_COUNT, true );
-		$soft_bounce_limit = apply_filters( 'quillcrm_soft_bounce_limit', 1 );
-
-		if ( $soft_bounce_count < $soft_bounce_limit ) {
+	        protected function handle_soft_bounce( $contact, $metadata ) {
+	    		$soft_bounce_count = (int) quillcrm_get_contact_meta( $contact->id, self::META_SOFT_BOUNCE_COUNT, true );
+	    		$soft_bounce_limit = apply_filters( 'quillcrm_soft_bounce_limit', 1 );		if ( $soft_bounce_count < $soft_bounce_limit ) {
 			// Increment soft bounce counter.
 			quillcrm_update_contact_meta( $contact->id, self::META_SOFT_BOUNCE_COUNT, $soft_bounce_count + 1 );
 			quillcrm_update_contact_meta( $contact->id, self::META_LAST_BOUNCE_REASON, $metadata['reason'] ?? 'Soft bounce' );

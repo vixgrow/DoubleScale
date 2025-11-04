@@ -36,6 +36,7 @@ import {
 	ViewOutlinedIcon,
 } from '@quillcrm/components';
 import { getToLink } from '@quillcrm/navigation';
+import { DivideCircleIcon } from 'lucide-react';
 
 // Add interface for column props
 interface ColumnProps {
@@ -95,12 +96,11 @@ const getCommonColumns = ({
 				'bg-muted text-muted-foreground';
 
 			return (
-				<Badge
-					className={`${colorClasses} rounded-[88px] w-full max-w-24 text-center px-0 justify-center py-1.5`}
-					variant="borderTransparent"
+				<div
+					className={`${colorClasses} rounded-xl w-fit text-center px-2 py-1 border text-base`}
 				>
 					{status.charAt(0).toUpperCase() + status.slice(1)}
-				</Badge>
+				</div>
 			);
 		},
 	};

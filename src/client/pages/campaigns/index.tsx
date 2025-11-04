@@ -19,14 +19,23 @@ import {
 } from '@quillcrm/client';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
 import { DataTable } from '@/components/ui/data-table';
-import { campaignColumns } from './columns';
-import { PageHeader, PlusIcon } from '@/components';
+import {
+	emailCampaignColumns,
+	smsCampaignColumns,
+} from './columns';
+import {
+	PageHeader,
+	PlusIcon,
+	ContactTotalEmailsIcon,
+	ContactSMSIcon,
+	ContactWhatsAppIcon,
+} from '@/components';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable'; // Import the hook
 import { formatDateForAPI } from '@quillcrm/utils';
-import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
+import PageTabs from '@/components/page-tabs';
 
 const Campaigns: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -47,6 +56,7 @@ const Campaigns: React.FC = () => {
 		to: null,
 	});
 	const [step, setStep] = useState<CampaignModalStep>(null);
+	const [activeTab, setActiveTab] = useState<string>('email');
 
 	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
@@ -62,12 +72,27 @@ const Campaigns: React.FC = () => {
 
 	useEffect(() => {
 		fetchCampaigns();
-	}, [page, perPage, dateRange, keywords]);
+	}, [page, perPage, dateRange, keywords, activeTab]);
+
+	console.log(campaigns);
+
+	// Reset page when changing tabs
+	useEffect(() => {
+		setPage(1);
+		setSelectedRowKeys([]);
+	}, [activeTab]);
 
 	const fetchCampaigns = async () => {
 		setLoading(true);
 
 		try {
+			// Map active tab to campaign channel - using actual database values
+			const channelMap: Record<string, string> = {
+				email: 'email',
+				sms: 'sms',
+				whatsapp: 'whatsapp',
+			};
+
 			const response = (await apiFetch({
 				path: addQueryArgs('/qc/v1/campaigns', {
 					page,
@@ -75,6 +100,7 @@ const Campaigns: React.FC = () => {
 					from: formatDateForAPI(dateRange.from),
 					to: formatDateForAPI(dateRange.to),
 					keywords,
+					channel: channelMap[activeTab],
 				}),
 			})) as CampaignsResponse;
 			setCampaigns(response.data);
@@ -108,16 +134,16 @@ const Campaigns: React.FC = () => {
 		}
 
 		try {
-			// Map UI selection to campaign channel constants
+			// Map UI selection to campaign channel - using actual database values
 			const typeMap: Record<string, string> = {
-				email: CAMPAIGN_CHANNEL.EMAIL,
-				standard: CAMPAIGN_CHANNEL.EMAIL, // Standard email campaign
-				ab_test: CAMPAIGN_CHANNEL.EMAIL, // A/B test is still email
-				sms: CAMPAIGN_CHANNEL.SMS,
-				whatsapp: CAMPAIGN_CHANNEL.WHATSAPP,
+				email: 'email',
+				standard: 'email', // Standard email campaign
+				ab_test: 'email', // A/B test is still email
+				sms: 'sms',
+				whatsapp: 'whats app',
 			};
 
-			const actualType = typeMap[campaignType] || CAMPAIGN_CHANNEL.EMAIL;
+			const actualType = typeMap[campaignType] || 'email';
 
 			// Use unified endpoint with type parameter (as string)
 			const response = (await apiFetch({
@@ -207,26 +233,46 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
-	const columns = campaignColumns({
-		onDelete: deleteCampaign,
-		duplicate: duplicateCampaign,
-		navigate: navigate,
-	});
+	// Get columns based on active tab
+	const getColumns = () => {
+		const columnProps = {
+			onDelete: deleteCampaign,
+			duplicate: duplicateCampaign,
+			navigate: navigate,
+		};
 
-	return (
-		<div className="qcrm-campaigns">
-			<PageHeader
-				title={__('Campaigns List', 'quillcrm')}
-				subtitle={__('Campaigns', 'quillcrm')}
-				actions={[
-					{
-						label: __('Create Campaign', 'quillcrm'),
-						icon: <PlusIcon />,
-						onClick: () => setStep('campaign-types'),
-					},
-				]}
-			/>
+		if (activeTab === 'email') {
+			return emailCampaignColumns(columnProps);
+		} else {
+			// Both SMS and WhatsApp use the same columns
+			return smsCampaignColumns(columnProps);
+		}
+	};
 
+	const columns = getColumns();
+
+	// Define tabs list with icons
+	const tabsList = [
+		{
+			value: 'email',
+			label: 'Email Campaigns',
+			icon: <ContactTotalEmailsIcon width={24} height={24} />,
+		},
+		{
+			value: 'sms',
+			label: 'SMS Campaigns',
+			icon: <ContactSMSIcon width={24} height={24} />,
+		},
+		{
+			value: 'whatsapp',
+			label: 'WhatsApp Campaigns',
+			icon: <ContactWhatsAppIcon width={24} height={24} />,
+		},
+	];
+
+	// Campaign content component
+	const CampaignContent = () => (
+		<>
 			{loading || hasRecords ? (
 				<>
 					<DataTable
@@ -266,6 +312,47 @@ const Campaigns: React.FC = () => {
 			) : (
 				<EmptyCampaignList setStep={setStep} />
 			)}
+		</>
+	);
+
+	// Define tabs content
+	const tabsContent = [
+		{
+			value: 'email',
+			children: <CampaignContent />,
+		},
+		{
+			value: 'sms',
+			children: <CampaignContent />,
+		},
+		{
+			value: 'whatsapp',
+			children: <CampaignContent />,
+		},
+	];
+
+	return (
+		<div className="qcrm-campaigns">
+			<PageHeader
+				title={__('Campaigns List', 'quillcrm')}
+				subtitle={__('Campaigns', 'quillcrm')}
+				actions={[
+					{
+						label: __('Create Campaign', 'quillcrm'),
+						icon: <PlusIcon />,
+						onClick: () => setStep('campaign-types'),
+					},
+				]}
+			/>
+
+			<PageTabs
+				defaultValue="email"
+				tabsList={tabsList}
+				tabsContent={tabsContent}
+				onValueChange={(value) => setActiveTab(value)}
+				tabsListWrapperClassName="border px-5 py-3 rounded-lg mb-4"
+				tabsListClassName="bg-transparent text-foreground gap-3"
+			/>
 
 			<AddCampaign
 				setCampaignType={setCampaignType}

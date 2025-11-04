@@ -488,7 +488,7 @@ const Field: React.FC<FieldProps> = ({
 					</span>
 				</div>
 			)}
-			<div className="qcrm-field-input">{fieldContent}</div>
+			<div className="qcrm-field-input mt-2">{fieldContent}</div>
 			{helperText && renderHelperText(helperText)}
 		</div>
 	);

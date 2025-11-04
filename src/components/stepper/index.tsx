@@ -25,12 +25,12 @@ const StepperComponent: React.FC<Stepper> = ({
 						className="flex items-center justify-center gap-2"
 					>
 						<div
-							className={`rounded-full border border-gray w-[30px] h-[30px] flex justify-center items-center ${currentStep == index + 1 && 'border-[#3B82F6] bg-[#3B82F6] text-white font-semibold'} ${currentStep > index + 1 && 'bg-[#16A34A] font-semibold text-white'}`}
+							className={`rounded-full border border-gray w-[30px] h-[30px] flex justify-center items-center ${currentStep == index + 1 && 'border-[#458DC7] bg-[#458DC7] text-white font-semibold'} ${currentStep > index + 1 && 'bg-[#16A34A] font-semibold text-white'}`}
 						>
 							{index > 9 ? index + 1 : `0${index + 1}`}
 						</div>
 						<div
-							className={`${currentStep == index + 1 && 'text-[#3B82F6] font-semibold'} ${currentStep > index + 1 && 'text-[#16A34A] font-semibold'}`}
+							className={`${currentStep == index + 1 && 'text-[#458DC7] font-semibold'} ${currentStep > index + 1 && 'text-[#16A34A] font-semibold'}`}
 						>
 							{step.label}
 						</div>

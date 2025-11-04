@@ -251,7 +251,7 @@ final class Bounce_Handler_Manager {
 
 		if ( ! $security_key ) {
 			// Generate longer key (32 chars instead of 16) for better security.
-			$security_key = 'qcrm_' . wp_generate_password( 32, false );
+			$security_key = 'quillcrm_' . wp_generate_password( 32, false );
 			update_option( 'quillcrm_bounce_security_key', $security_key );
 			update_option( 'quillcrm_bounce_security_key_generated_at', time() );
 		}

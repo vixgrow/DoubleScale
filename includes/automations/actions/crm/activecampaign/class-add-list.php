@@ -144,7 +144,7 @@ class Add_List extends Action {
 
 		$contact_id = $result['data']['contacts'][0]['id'] ?? null;
 		if ( ! $contact_id ) {
-			qcrm_logger()->error(
+			quillcrm_get_logger()->error(
 				__( 'Failed to add list to ActiveCampaign. Contact not found.', 'quillcrm' ),
 				array(
 					'code'     => 'activecampaign_add_list',
@@ -174,7 +174,7 @@ class Add_List extends Action {
 
 		$result = $api->sync_contact_list( $data );
 		if ( $result['success'] ) {
-			qcrm_logger()->info(
+			quillcrm_get_logger()->info(
 				__( 'List added to contact in ActiveCampaign.', 'quillcrm' ),
 				array(
 					'code' => 'activecampaign_add_list',
@@ -194,7 +194,7 @@ class Add_List extends Action {
 			return true;
 		}
 
-		qcrm_logger()->error(
+		quillcrm_get_logger()->error(
 			__( 'Failed to add list to contact in ActiveCampaign.', 'quillcrm' ),
 			array(
 				'code'     => 'activecampaign_add_list',

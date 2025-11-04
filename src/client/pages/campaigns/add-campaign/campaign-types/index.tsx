@@ -62,15 +62,15 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 			icon: <ABTestIcon />,
 			isPremium: true,
 		},
-		{
-			label: __('Email Sequence', 'quillcrm'),
-			description: __(
-				'Slow, personalized follow-up series; stops automatically on reply',
-				'quillcrm'
-			),
-			type: 'sequence',
-			icon: <EmailSequenceOutlinedIcon />,
-		},
+		// {
+		// 	label: __('Email Sequence', 'quillcrm'),
+		// 	description: __(
+		// 		'Slow, personalized follow-up series; stops automatically on reply',
+		// 		'quillcrm'
+		// 	),
+		// 	type: 'sequence',
+		// 	icon: <EmailSequenceOutlinedIcon />,
+		// },
 	];
 
 	const handleSubmit = () => {

@@ -33,6 +33,8 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover-dialog';
+import { MergeTagsIcon } from '@quillcrm/components';
+import MergeTagsSelector from '@/components/merge-tags';
 
 interface RichTextEditorProps {
 	content: string;
@@ -51,6 +53,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [selectedColor, setSelectedColor] = useState('#000000');
+	const [isMergeTagsModalOpen, setIsMergeTagsModalOpen] = useState(false);
 	const [editorId] = useState(
 		() => `rich-text-editor-${Math.random().toString(36).substr(2, 9)}`
 	);
@@ -239,9 +242,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 							const newRange = newSelection.getRangeAt(0);
 							const newParent =
 								newRange.commonAncestorContainer.nodeType ===
-								Node.TEXT_NODE
+									Node.TEXT_NODE
 									? newRange.commonAncestorContainer
-											.parentElement
+										.parentElement
 									: (newRange.commonAncestorContainer as Element);
 
 							const newListItem = newParent?.closest('li');
@@ -478,6 +481,23 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 	const handleColorChange = (color: string) => {
 		setSelectedColor(color);
 		executeCommand('foreColor', color);
+	};
+
+	const handleInsertMergeTag = (tagValue: string) => {
+		if (editorRef.current) {
+			// Focus the editor first
+			editorRef.current.focus();
+
+			// Insert the merge tag at cursor position
+			// @ts-ignore - deprecated API but no modern alternative exists
+			document.execCommand('insertHTML', false, tagValue);
+
+			// Update the content
+			onChange(editorRef.current.innerHTML);
+		}
+
+		// Close the modal
+		setIsMergeTagsModalOpen(false);
 	};
 
 	// Convert HTML to text for initial display if needed
@@ -729,6 +749,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				>
 					<Link className="h-4 w-4" />
 				</Button>
+
+				<div className="w-px h-6 bg-border mx-1" />
+
+				{/* Merge Tags */}
+				<Button
+					variant="ghost"
+					size="sm"
+					className="p-2 h-8 w-8"
+					onClick={() => setIsMergeTagsModalOpen(true)}
+					onMouseDown={(e) => e.preventDefault()}
+					title={__('Insert Merge Tags', 'quillcrm')}
+				>
+					<MergeTagsIcon width={16} height={16} />
+				</Button>
 			</div>
 
 			{/* Editor */}
@@ -758,6 +792,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				onInput={handleInput}
 				onPaste={handlePaste}
 				onKeyDown={handleKeyDown}
+			/>
+
+			{/* Merge Tags Modal */}
+			<MergeTagsSelector
+				visible={isMergeTagsModalOpen}
+				onClose={() => setIsMergeTagsModalOpen(false)}
+				onInsertTag={handleInsertMergeTag}
 			/>
 		</div>
 	);

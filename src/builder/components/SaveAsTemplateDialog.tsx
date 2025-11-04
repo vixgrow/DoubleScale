@@ -18,6 +18,7 @@ import {
 	DialogTitle,
 	DialogFooter,
 	DialogDescription,
+	DialogOverlay,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -139,7 +140,8 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 				}
 			}}
 		>
-			<DialogContent className="top-[35%]">
+			<DialogOverlay />
+			<DialogContent className="top-[39%]">
 				<DialogHeader>
 					<DialogTitle className="text-2xl font-bold">
 						{__('Save as Template', 'quillcrm')}
@@ -209,7 +211,7 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 										'quillcrm'
 									)}
 									disabled={isSaving}
-									className="h-10"
+									className="h-12"
 									style={{
 										borderColor: error
 											? '#ef4444'

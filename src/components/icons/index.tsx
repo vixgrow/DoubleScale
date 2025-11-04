@@ -165,4 +165,6 @@ export { default as ScheduledEmailsIcon } from './scheduled-emails';
 export { default as ProcessingEmailsIcon } from './processing-emails';
 export { default as ClickToOpenRateIcon } from './click-to-open-rate';
 export { default as DeliveryRateIcon } from './delivery-rate';
-export { default as ReadRateIcon } from './read-rate';export { default as ABSplitIcon } from './ab-split';
+export { default as ReadRateIcon } from './read-rate';
+export { default as ABSplitIcon } from './ab-split';
+export { default as SetUpInfoIcon } from './set-up-info';

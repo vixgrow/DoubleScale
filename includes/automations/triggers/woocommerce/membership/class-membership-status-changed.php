@@ -20,6 +20,7 @@ use WP_User;
  */
 class Membership_Status_Changed extends Trigger {
 
+
 	/**
 	 * Trigger Name
 	 *

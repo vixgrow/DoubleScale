@@ -127,7 +127,7 @@ const Contacts: React.FC = () => {
 					<PanelSettings
 						title={__('Recipients', 'quillcrm')}
 						description={__(
-							'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
+							'Select who will receive this campaign and how your audience will be split for testing',
 							'quillcrm'
 						)}
 						icon={<TeamIcon />}

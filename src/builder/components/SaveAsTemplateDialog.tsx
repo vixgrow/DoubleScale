@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
+import { CustomDialogHeader, SaveAsTemplateIcon } from '@quillcrm/components';
 
 interface SaveAsTemplateDialogProps {
 	isOpen: boolean;
@@ -142,17 +143,14 @@ export const SaveAsTemplateDialog: React.FC<SaveAsTemplateDialogProps> = ({
 		>
 			<DialogOverlay />
 			<DialogContent className="top-[39%]">
-				<DialogHeader>
-					<DialogTitle className="text-2xl font-bold">
-						{__('Save as Template', 'quillcrm')}
-					</DialogTitle>
-					<DialogDescription>
-						{__(
-							'Save this email design as a template so you could re-use it for your future emails.',
-							'quillcrm'
-						)}
-					</DialogDescription>
-				</DialogHeader>
+				<CustomDialogHeader
+					title={__('Save as Template', 'quillcrm')}
+					subtitle={__(
+						'Save this email design as a template so you could re-use it.',
+						'quillcrm'
+					)}
+					icon={<SaveAsTemplateIcon />}
+				/>
 
 				<div className="flex flex-col gap-4">
 					{/* Mode Selector with Radio Buttons */}

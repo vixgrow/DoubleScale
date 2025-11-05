@@ -17,7 +17,6 @@ import './style.scss';
 import Analytics from './analytics';
 import TabsSelection from './tabs-selection';
 import CampaignDetails from './campaign-details';
-import OverviewShimmer from './overview-shimmer';
 import {
 	Dialog,
 	DialogContent,
@@ -74,11 +73,7 @@ const Overview: React.FC = () => {
 						</h1>
 					</DialogTitle>
 				</DialogHeader>
-				{isLoading ? (
-					<div className="px-12 py-8">
-						<OverviewShimmer />
-					</div>
-				) : campaign ? (
+				{campaign ? (
 					<div className="px-12 overflow-y-auto py-8">
 						{campaign.status === 'draft' ? (
 							// Draft campaigns: Show only campaign details, full width

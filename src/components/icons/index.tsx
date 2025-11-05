@@ -172,3 +172,7 @@ export { default as SaveAsTemplateIcon } from './save-as-template';
 export { default as ReviewIcon } from './review';
 export { default as ScheduleIcon } from './schedule';
 export { default as SendTestEmailIcon } from './send-test-email';
+export { default as UnsubscribeSMSIcon } from './unsubscribe-sms';
+export { default as ProcessingSMSIcon } from './processing-sms';
+export { default as TotalSMSIcon } from './total-sms';
+export { default as FailedSMSIcon } from './failed-sms';

@@ -271,7 +271,15 @@ const Review: React.FC = () => {
 			]}
 			type="campaign"
 		>
-			<Stepper steps={campaignSteps} canProceed="true" currentStep={4} />
+			<Stepper
+				steps={
+					campaign?.type === 'email'
+						? campaignSteps
+						: campaignSteps.filter((step) => step.slug !== 'builder')
+				}
+				canProceed="true"
+				currentStep={campaign?.type === 'email' ? 4 : 3}
+			/>
 
 			<div className="qcrm-review-step flex gap-6 items-start">
 				<div className="w-2/3">

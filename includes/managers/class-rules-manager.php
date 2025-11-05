@@ -26,6 +26,8 @@ final class Rules_Manager {
 
 
 
+
+
 	/**
 	 * Registed rules
 	 *
@@ -123,9 +125,16 @@ final class Rules_Manager {
 				'rules' => array(),
 			),
 			'woocommerce_membership'    => array(
-				'name'  => __( 'WooCommerce Membership', 'quillcrm' ),
-				'key'   => 'woocommerce_membership',
-				'rules' => array(),
+				'name'     => __( 'WooCommerce Membership', 'quillcrm' ),
+				'key'      => 'woocommerce_membership',
+				'rules'    => array(),
+				'triggers' => array( 'wc_membership_created', 'wc_membership_status_changed' ),
+			),
+			'woocommerce_whishlist'     => array(
+				'name'     => __( 'WooCommerce Whishlist', 'quillcrm' ),
+				'key'      => 'woocommerce_whishlist',
+				'rules'    => array(),
+				'triggers' => array( 'wc_user_adds_product_to_wishlist', 'wc_wishlist_item_on_sale', 'wc_wishlist_reminder' ),
 			),
 			'learndash'                 => array(
 				'name'  => __( 'LearnDash', 'quillcrm' ),

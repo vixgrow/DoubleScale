@@ -23,6 +23,7 @@ import {
 	CalendarOutlined,
 } from '@ant-design/icons';
 import { debounce } from 'lodash';
+import dayjs from 'dayjs';
 
 /**
  * Internal dependencies
@@ -103,9 +104,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 				pipeline_id: pipeline.id,
 				currency: 'USD',
 				expected_close_date: values.expected_close_date
-					? new Date(values.expected_close_date)
-							.toISOString()
-							.split('T')[0]
+					? dayjs(values.expected_close_date).format('YYYY-MM-DD')
 					: null,
 			};
 

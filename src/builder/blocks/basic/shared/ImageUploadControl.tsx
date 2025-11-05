@@ -287,13 +287,13 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 
 	return (
 		<div>
-			<label className="text-[#333333] mb-2 text-sm">{label}</label>
+			<label className="text-[#333333] mb-2 text-base">{label}</label>
 			{description && (
 				<p className="text-xs text-[#616161] mb-4">{description}</p>
 			)}
 
 			{imageData || (value && value.trim() !== '') ? (
-				<div className="border rounded-lg p-4 flex items-center justify-between">
+				<div className="border rounded-lg p-4 bg-white flex items-center justify-between mt-2">
 					<div className="flex items-center gap-3">
 						<img
 							src={value}
@@ -345,7 +345,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 				</div>
 			) : (
 				<div
-					className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+					className={`border-2 border-dashed mt-2 bg-white rounded-lg p-4 text-center transition-colors ${
 						disabled
 							? 'cursor-not-allowed opacity-50'
 							: 'cursor-pointer hover:border-gray-400'

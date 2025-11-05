@@ -56,6 +56,12 @@ const Campaigns: React.FC = () => {
 	});
 	const [step, setStep] = useState<CampaignModalStep>(null);
 	const [activeTab, setActiveTab] = useState<string>('email');
+	const [campaignFilters, setCampaignFilters] = useState({
+		status: 'all',
+		type: 'all',
+		createDate: { from: null, to: null },
+		updatedAt: { from: null, to: null },
+	});
 
 	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
@@ -71,7 +77,7 @@ const Campaigns: React.FC = () => {
 
 	useEffect(() => {
 		fetchCampaigns();
-	}, [page, perPage, dateRange, keywords, activeTab]);
+	}, [page, perPage, dateRange, keywords, activeTab, campaignFilters]);
 
 	console.log(campaigns);
 
@@ -91,15 +97,44 @@ const Campaigns: React.FC = () => {
 				sms: 'sms',
 			};
 
+			// Build query parameters
+			const queryParams: Record<string, any> = {
+				page,
+				per_page: perPage,
+				from: formatDateForAPI(dateRange.from),
+				to: formatDateForAPI(dateRange.to),
+				keywords,
+				channel: channelMap[activeTab],
+			};
+
+			// Add campaign filter parameters
+			if (campaignFilters.status && campaignFilters.status !== 'all') {
+				queryParams.status = campaignFilters.status;
+			}
+
+			if (campaignFilters.type && campaignFilters.type !== 'all') {
+				// Map type to ab_test setting
+				queryParams.campaign_type = campaignFilters.type;
+			}
+
+			if (campaignFilters.createDate.from) {
+				queryParams.created_from = formatDateForAPI(campaignFilters.createDate.from);
+			}
+
+			if (campaignFilters.createDate.to) {
+				queryParams.created_to = formatDateForAPI(campaignFilters.createDate.to);
+			}
+
+			if (campaignFilters.updatedAt.from) {
+				queryParams.updated_from = formatDateForAPI(campaignFilters.updatedAt.from);
+			}
+
+			if (campaignFilters.updatedAt.to) {
+				queryParams.updated_to = formatDateForAPI(campaignFilters.updatedAt.to);
+			}
+
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/campaigns', {
-					page,
-					per_page: perPage,
-					from: formatDateForAPI(dateRange.from),
-					to: formatDateForAPI(dateRange.to),
-					keywords,
-					channel: channelMap[activeTab],
-				}),
+				path: addQueryArgs('/qc/v1/campaigns', queryParams),
 			})) as CampaignsResponse;
 			setCampaigns(response.data);
 			setTotalRecords(response.total || 0);
@@ -275,6 +310,7 @@ const Campaigns: React.FC = () => {
 						initialPageSize={perPage}
 						setPage={setPage}
 						loading={loading}
+						activeTab={activeTab}
 						config={{
 							search: {
 								placeholder: __('Search', 'quillcrm'),
@@ -297,6 +333,19 @@ const Campaigns: React.FC = () => {
 								enabled: true,
 								value: dateRange,
 								onDateChange: setDateRange,
+							},
+							campaignFilters: {
+								filters: campaignFilters,
+								onFiltersChange: setCampaignFilters,
+								onClear: () => {
+									setCampaignFilters({
+										status: 'all',
+										type: 'all',
+										createDate: { from: null, to: null },
+										updatedAt: { from: null, to: null },
+									});
+									setPage(1);
+								},
 							},
 						}}
 					/>

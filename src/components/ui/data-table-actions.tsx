@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useState } from 'react';
+import { CampaignFilters } from '@/components/campaign-filters';
 
 interface DataTableActionsProps<TData> {
 	table: Table<TData>;
@@ -52,6 +53,8 @@ export function DataTableActions<TData>({
 		Record<string, boolean>
 	>({});
 	const [isColumnsDialogOpen, setIsColumnsDialogOpen] = useState(false);
+	const [isCampaignFiltersOpen, setIsCampaignFiltersOpen] = useState(false);
+	const [tempCampaignFilters, setTempCampaignFilters] = useState<any>(null);
 
 	// Initialize column visibility state when dialog opens
 	const handleDialogOpen = () => {
@@ -90,6 +93,35 @@ export function DataTableActions<TData>({
 		setIsColumnsDialogOpen(false);
 	};
 
+	// Initialize temp filters when dialog opens
+	const handleCampaignFiltersDialogOpen = () => {
+		if (config.campaignFilters) {
+			setTempCampaignFilters({ ...config.campaignFilters.filters });
+		}
+		setIsCampaignFiltersOpen(true);
+	};
+
+	// Handle campaign filters - apply and close dialog
+	const handleApplyCampaignFilters = () => {
+		if (config.campaignFilters && tempCampaignFilters) {
+			config.campaignFilters.onFiltersChange(tempCampaignFilters);
+		}
+		setIsCampaignFiltersOpen(false);
+		if (setPage) {
+			setPage(1);
+		}
+	};
+
+	// Handle clear temp filters
+	const handleClearTempFilters = () => {
+		setTempCampaignFilters({
+			status: 'all',
+			type: 'all',
+			createDate: { from: null, to: null },
+			updatedAt: { from: null, to: null },
+		});
+	};
+
 	return (
 		<div className="flex gap-[10px] items-center">
 			{config.dateRange?.enabled && (
@@ -118,15 +150,71 @@ export function DataTableActions<TData>({
 					doBulkAction={config.bulkActions?.onExecuteAction}
 					setSelectedLists={
 						config.bulkActions.lists?.onSelectionChange ||
-						(() => {})
+						(() => { })
 					}
 					setSelectedTags={
-						config.bulkActions.tags?.onSelectionChange || (() => {})
+						config.bulkActions.tags?.onSelectionChange || (() => { })
 					}
 					selectedLists={config.bulkActions.lists?.selected || []}
 					selectedTags={config.bulkActions.tags?.selected || []}
 					activeTab={activeTab}
 				/>
+			)}
+
+			{/* Campaign Filters Button */}
+			{activeTab === 'email' && config.campaignFilters && (
+				<Dialog
+					open={isCampaignFiltersOpen}
+					onOpenChange={(open) => {
+						if (open) {
+							handleCampaignFiltersDialogOpen();
+						} else {
+							setIsCampaignFiltersOpen(false);
+						}
+					}}
+				>
+					<DialogTrigger asChild>
+						<Button
+							variant="tertiary"
+							className="font-semibold px-4 text-[#3B82F6]"
+							onClick={handleCampaignFiltersDialogOpen}
+						>
+							<FiltersIcon />
+							{__('Filters', 'quillcrm')}
+						</Button>
+					</DialogTrigger>
+					<DialogContent className="sm:max-w-[800px]">
+						<DialogHeader>
+							<DialogTitle>
+								<CustomDialogHeader
+									title={__('Filter', 'quillcrm')}
+									subtitle={__(
+										'Select Groups of filters about data you want to view.',
+										'quillcrm'
+									)}
+									icon={<GradientFilterIcon />}
+								/>
+							</DialogTitle>
+						</DialogHeader>
+						{tempCampaignFilters && (
+							<CampaignFilters
+								filters={tempCampaignFilters}
+								onChange={setTempCampaignFilters}
+								onClear={handleClearTempFilters}
+							/>
+						)}
+						<DialogFooter>
+							<Button
+								onClick={handleApplyCampaignFilters}
+								className="w-full"
+								variant="gradient"
+								size="xl"
+							>
+								{__('Apply Filters', 'quillcrm')}
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
 			)}
 
 			{/* Advanced Filters Button */}

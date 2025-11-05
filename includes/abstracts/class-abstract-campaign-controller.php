@@ -235,11 +235,19 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$keywords = $request->get_param( 'keywords' ) ?? null;
-			$per_page = $request->get_param( 'per_page' ) ?? 10;
-			$page     = $request->get_param( 'page' ) ?? 1;
-			$from     = $request->get_param( 'from' ) ?? null;
-			$to       = $request->get_param( 'to' ) ?? null;
+			$keywords      = $request->get_param( 'keywords' ) ?? null;
+			$per_page      = $request->get_param( 'per_page' ) ?? 10;
+			$page          = $request->get_param( 'page' ) ?? 1;
+			$from          = $request->get_param( 'from' ) ?? null;
+			$to            = $request->get_param( 'to' ) ?? null;
+			
+			// New filter parameters
+			$status        = $request->get_param( 'status' ) ?? null;
+			$campaign_type = $request->get_param( 'campaign_type' ) ?? null;
+			$created_from  = $request->get_param( 'created_from' ) ?? null;
+			$created_to    = $request->get_param( 'created_to' ) ?? null;
+			$updated_from  = $request->get_param( 'updated_from' ) ?? null;
+			$updated_to    = $request->get_param( 'updated_to' ) ?? null;
 
 			$query       = $this->get_campaign_query();
 			$total_count = $query->count();
@@ -248,11 +256,48 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			if ( $keywords ) {
 				$query->where( 'name', 'like', '%' . $keywords . '%' );
 			}
+			
+			// Status filter
+			if ( $status ) {
+				$query->where( 'status', $status );
+			}
+			
+			// Campaign type filter (standard or ab_test)
+			if ( $campaign_type ) {
+				if ( $campaign_type === 'standard' ) {
+					// Standard campaigns have ab_test = false or null in settings
+					$query->where(function ($q) {
+						$q->whereRaw("JSON_EXTRACT(settings, '$.ab_test') = false")
+						  ->orWhereRaw("JSON_EXTRACT(settings, '$.ab_test') IS NULL");
+					});
+				} elseif ( $campaign_type === 'ab_test' ) {
+					// A/B test campaigns have ab_test = true in settings
+					$query->whereRaw("JSON_EXTRACT(settings, '$.ab_test') = true");
+				}
+			}
+			
+			// Backward compatibility: use from/to for created_at if provided
 			if ( $from ) {
 				$query->where( 'created_at', '>=', $from );
 			}
 			if ( $to ) {
 				$query->where( 'created_at', '<=', $to );
+			}
+			
+			// New created_at date range filters
+			if ( $created_from ) {
+				$query->where( 'created_at', '>=', $created_from );
+			}
+			if ( $created_to ) {
+				$query->where( 'created_at', '<=', $created_to );
+			}
+			
+			// Updated_at date range filters
+			if ( $updated_from ) {
+				$query->where( 'updated_at', '>=', $updated_from );
+			}
+			if ( $updated_to ) {
+				$query->where( 'updated_at', '<=', $updated_to );
 			}
 
 			$campaigns = $query->orderBy( 'created_at', 'desc' )

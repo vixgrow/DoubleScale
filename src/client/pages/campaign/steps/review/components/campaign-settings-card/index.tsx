@@ -7,8 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import CardLayout from '../card-layout';
-import { CampaignsIcon } from '@quillcrm/components';
-import { EditIcon } from 'lucide-react';
+import { CampaignsIcon, EditIcon } from '@quillcrm/components';
 
 interface CampaignSettingsCardProps {
 	fromName: string;
@@ -38,18 +37,18 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 			<div className="space-y-4">
 				<div className="grid grid-cols-2 gap-2">
 					<div>
-						<p className="text-xs text-gray-500 mb-1">
+						<p className="text-base text-gray-500 mb-1">
 							{__('From Name', 'quillcrm')}
 						</p>
-						<p className="text-sm font-medium text-gray-900">
+						<p className="text-base font-semibold text-gray-900">
 							{fromName}
 						</p>
 					</div>
 					<div>
-						<p className="text-xs text-gray-500 mb-1">
+						<p className="text-base text-gray-500 mb-1">
 							{__('From Email', 'quillcrm')}
 						</p>
-						<p className="text-sm font-medium text-gray-900">
+						<p className="text-base font-semibold text-gray-900">
 							{fromEmail}
 						</p>
 					</div>
@@ -57,29 +56,29 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 
 				<div className="grid grid-cols-2 gap-2">
 					<div>
-						<p className="text-xs text-gray-500 mb-1">
+						<p className="text-base text-gray-500 mb-1">
 							{__('Reply to', 'quillcrm')}
 						</p>
-						<p className="text-sm font-medium text-gray-900">
+						<p className="text-base font-semibold text-gray-900">
 							{replyTo}
 						</p>
 					</div>
 
 					<div>
-						<p className="text-xs text-gray-500 mb-1">
+						<p className="text-base text-gray-500 mb-1">
 							{__('Subject', 'quillcrm')}
 						</p>
-						<p className="text-sm font-medium text-gray-900">
+						<p className="text-base font-semibold text-gray-900">
 							{emailSubject}
 						</p>
 					</div>
 				</div>
 
 				<div>
-					<p className="text-xs text-gray-500 mb-1">
+					<p className="text-base text-gray-500 mb-1">
 						{__('Preview Text', 'quillcrm')}
 					</p>
-					<p className="text-sm text-gray-900">{previewText}</p>
+					<p className="text-base font-semibold text-gray-900">{previewText}</p>
 				</div>
 			</div>
 		</CardLayout>

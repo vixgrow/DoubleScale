@@ -16,6 +16,7 @@ import {
 	PanelLayout,
 	PlayIcon,
 	Stepper,
+	ReviewIcon,
 } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import { isEmpty } from 'lodash';
@@ -262,7 +263,7 @@ const Review: React.FC = () => {
 							'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
 							'quillcrm'
 						)}
-						icon={<CategoryIcon />}
+						icon={<ReviewIcon />}
 						showButtons={true}
 						onNext={save}
 						onBack={() => goToStep('contacts')}

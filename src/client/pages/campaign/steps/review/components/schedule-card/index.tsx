@@ -9,7 +9,8 @@ import { __ } from '@wordpress/i18n';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CalendarIcon, ClockIcon } from 'lucide-react';
+import { ClockIcon } from 'lucide-react';
+import { OutlinedCalendarIcon, ScheduleIcon } from '@quillcrm/components';
 
 interface ScheduleCardProps {
 	sendNow: boolean;
@@ -33,11 +34,11 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 	setTimezoneMode,
 }) => {
 	return (
-		<div className="border border-gray-200 rounded-lg p-6">
+		<div className="border border-gray-200 bg-white rounded-lg p-6">
 			{/* Title with icon */}
-			<div className="flex items-center gap-2 mb-6">
-				<ClockIcon className="h-5 w-5 text-purple-600" />
-				<h3 className="text-base font-semibold text-purple-600">
+			<div className="flex items-center gap-2 mb-6 text-[#660FF1]">
+				<ScheduleIcon />
+				<h3 className="text-lg font-semibold text-[#660FF1]">
 					{__(
 						'When would you like to send the campaign?',
 						'quillcrm'
@@ -56,12 +57,12 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 						htmlFor="send-now"
 						className={`flex items-center space-x-3 flex-1 border rounded-lg p-3 cursor-pointer ${
 							sendNow
-								? 'border-purple-500 bg-purple-50'
-								: 'border-gray-300'
+								? 'border-secondary bg-[#E3EEFF99] text-secondary'
+								: 'border-[#DEE1E6] text-[#09090B]'
 						}`}
 					>
 						<RadioGroupItem value="now" id="send-now" />
-						<span className="text-sm font-medium">
+						<span className="text-base font-semibold">
 							{__('Send now', 'quillcrm')}
 						</span>
 					</Label>
@@ -70,12 +71,12 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 						htmlFor="schedule-later"
 						className={`flex items-center space-x-3 flex-1 border rounded-lg p-3 cursor-pointer ${
 							!sendNow
-								? 'border-blue-500 bg-blue-50'
-								: 'border-gray-300'
+								? 'border-secondary bg-[#E3EEFF99] text-secondary'
+								: 'border-[#DEE1E6] text-[#09090B]'
 						}`}
 					>
 						<RadioGroupItem value="later" id="schedule-later" />
-						<span className="text-sm font-medium">
+						<span className="text-base font-semibold">
 							{__('Schedule for later', 'quillcrm')}
 						</span>
 					</Label>
@@ -84,9 +85,10 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 				{/* Date and Time Fields */}
 				{!sendNow && (
 					<>
+						{/* TODO: date range picker with time picker */}
 						<div className="grid grid-cols-2 gap-4">
 							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">
+								<label className="block text-base text-[#09090B] mb-2">
 									{__('Date', 'quillcrm')}
 								</label>
 								<div className="relative">
@@ -99,12 +101,14 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 										placeholder="From - To"
 										className="w-full pr-10"
 									/>
-									<CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+									<div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+										<OutlinedCalendarIcon />
+									</div>
 								</div>
 							</div>
 
 							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-2">
+								<label className="block text-base text-[#09090B] mb-2">
 									{__('Time', 'quillcrm')}
 								</label>
 								<div className="relative">
@@ -124,36 +128,19 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 
 						{/* Based on section */}
 						<div>
-							<h4 className="text-sm font-medium text-gray-900 mb-3">
+							<h4 className="text-base text-[#09090B] mb-3">
 								{__('Based on', 'quillcrm')}
 							</h4>
 							<RadioGroup
 								value={timezoneMode}
 								onValueChange={setTimezoneMode}
-								className="space-y-3"
+								className="flex gap-4 w-full"
 							>
 								<Label
-									htmlFor="user-timezone"
-									className={`flex items-center space-x-3 border rounded-lg p-4 cursor-pointer ${
-										timezoneMode === 'user'
-											? 'border-gray-400 bg-gray-50'
-											: 'border-gray-300'
-									}`}
-								>
-									<RadioGroupItem
-										value="user"
-										id="user-timezone"
-									/>
-									<span className="text-sm">
-										{__('Your time zone GMT+3', 'quillcrm')}
-									</span>
-								</Label>
-
-								<Label
 									htmlFor="subscriber-timezone"
-									className={`flex items-center space-x-3 border rounded-lg p-4 cursor-pointer ${
+									className={`flex items-center space-x-3 flex-1 border rounded-lg p-4 cursor-pointer ${
 										timezoneMode === 'subscriber'
-											? 'border-blue-500 bg-blue-50'
+											? 'border-secondary bg-[#E3EEFF99] text-secondary'
 											: 'border-gray-300'
 									}`}
 								>
@@ -161,17 +148,32 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({
 										value="subscriber"
 										id="subscriber-timezone"
 									/>
-									<span className="text-sm text-blue-600">
+									<span className="text-base font-semibold">
 										{__(
 											'Based on the Subscribers time zone',
 											'quillcrm'
 										)}
 									</span>
 								</Label>
+								<Label
+									htmlFor="user-timezone"
+									className={`flex items-center space-x-3 flex-1 border rounded-lg p-4 cursor-pointer ${
+										timezoneMode === 'user'
+											? 'border-secondary bg-[#E3EEFF99] text-secondary'
+											: 'border-gray-300'
+									}`}
+								>
+									<RadioGroupItem
+										value="user"
+										id="user-timezone"
+									/>
+									<span className="text-base font-semibold">
+										{__('Your time zone GMT+3', 'quillcrm')}
+									</span>
+								</Label>
 							</RadioGroup>
-
 							{timezoneMode === 'subscriber' && (
-								<p className="text-xs text-red-500 mt-2 ml-7">
+								<p className="text-base text-destructive mt-2">
 									{__(
 										'(Applies only to subscribers with location data)',
 										'quillcrm'

@@ -11,6 +11,9 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import type { Campaign as CampaignType } from '@quillcrm/client';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
+import { Button } from '@/components/ui/button';
+import { getToLink, useNavigate } from '@quillcrm/navigation';
+import { NoData, ContactTotalEmailsIcon, EditIcon } from '@quillcrm/components';
 
 const CampaignDetails: React.FC = () => {
 	const campaign = useSelect(
@@ -18,6 +21,7 @@ const CampaignDetails: React.FC = () => {
 		[]
 	) as CampaignType | null;
 
+	const navigate = useNavigate();
 	const [renderedTemplates, setRenderedTemplates] = useState<Record<number, string>>({});
 
 	// Render template bodies from JSON to HTML
@@ -70,6 +74,9 @@ const CampaignDetails: React.FC = () => {
 		);
 	}
 
+	// Check if there are no templates
+	const hasTemplates = campaign.settings?.templates && campaign.settings.templates.length > 0;
+
 	return (
 		<div className="space-y-6">
 			{/* Campaign Info */}
@@ -117,43 +124,83 @@ const CampaignDetails: React.FC = () => {
 			</div>
 
 			{/* Email Template */}
-			{campaign.settings?.templates &&
-				campaign.settings.templates.length > 0 && (
-					<div className="space-y-3 border-t pt-4">
-						<h3 className="text-2xl font-medium">
+			<div className="space-y-3 border-t pt-4">
+				<div className="flex items-center justify-between">
+					<h3 className="text-2xl font-medium">
+						{campaign.type === CAMPAIGN_CHANNEL.EMAIL
+							? __('Email Template', 'quillcrm')
+							: __('Message Template', 'quillcrm')}
+					</h3>
+					{campaign.status === 'draft' && hasTemplates && (
+						<Button
+							variant="default"
+							onClick={() => {
+								navigate(
+									getToLink(`campaigns/${campaign.id}/template`)
+								);
+							}}
+						>
 							{campaign.type === CAMPAIGN_CHANNEL.EMAIL
-								? __('Email Template', 'quillcrm')
-								: __('Message Template', 'quillcrm')}
-						</h3>
+								? __('Edit Email Template', 'quillcrm')
+								: __('Edit Template', 'quillcrm')}
+						</Button>
+					)}
+				</div>
 
-						{campaign.settings.templates.map((template, index) => {
-							const renderedHtml = template.id
-								? renderedTemplates[template.id]
-								: (typeof template.body === 'string' ? template.body : JSON.stringify(template.body));
+				{hasTemplates ? (
+					campaign.settings.templates.map((template, index) => {
+						const renderedHtml = template.id
+							? renderedTemplates[template.id]
+							: (typeof template.body === 'string' ? template.body : JSON.stringify(template.body));
 
-							return (
-								<div
-									key={index}
-									className="space-y-4 bg-[#E3EEFF99] p-4 rounded-lg border"
-								>
-									{/* Template Body */}
-									{renderedHtml ? (
-										<div
-											className="template-body-preview rounded border"
-											dangerouslySetInnerHTML={{
-												__html: renderedHtml || '',
-											}}
-										/>
-									) : (
-										<div className="flex items-center justify-center py-8 text-gray-500">
-											{__('Loading template...', 'quillcrm')}
-										</div>
-									)}
-								</div>
+						return (
+							<div
+								key={index}
+								className="space-y-4 bg-[#E3EEFF99] p-4 rounded-lg border"
+							>
+								{/* Template Body */}
+								{renderedHtml ? (
+									<div
+										className="template-body-preview rounded border"
+										dangerouslySetInnerHTML={{
+											__html: renderedHtml || '',
+										}}
+									/>
+								) : (
+									<div className="flex items-center justify-center py-8 text-gray-500">
+										{__('Loading template...', 'quillcrm')}
+									</div>
+								)}
+							</div>
+						);
+					})
+				) : (
+					<NoData
+						icon={<ContactTotalEmailsIcon width={120} height={120} />}
+						title={
+							campaign.type === CAMPAIGN_CHANNEL.EMAIL
+								? __('No Email Template', 'quillcrm')
+								: __('No Template', 'quillcrm')
+						}
+						subtitle={
+							campaign.type === CAMPAIGN_CHANNEL.EMAIL
+								? __('Create an email template to get started with your campaign.', 'quillcrm')
+								: __('Create a template to get started with your campaign.', 'quillcrm')
+						}
+						onClick={() => {
+							navigate(
+								getToLink(`campaigns/${campaign.id}/template`)
 							);
-						})}
-					</div>
+						}}
+						buttonLabel={
+							campaign.type === CAMPAIGN_CHANNEL.EMAIL
+								? __('Edit Email Template', 'quillcrm')
+								: __('Edit Template', 'quillcrm')
+						}
+						buttonIcon={<EditIcon />}
+					/>
 				)}
+			</div>
 		</div>
 	);
 };

@@ -26,6 +26,8 @@ import {
 	SendTestEmailCard,
 } from './components';
 import { NoticeMessage } from '@quillcrm/client';
+//@ts-ignore
+import device from '../../../../../../assets/images/message-device.png';
 
 const Review: React.FC = () => {
 	const {
@@ -72,9 +74,11 @@ const Review: React.FC = () => {
 
 	// Extract template data based on Template_Field_Mapper structure
 	// For email: subject is top-level, from_name/from_email/reply_to/preview_text are in settings
+	// For SMS: from_name and from_phone are in settings
 	const emailSubject = template?.subject || '-';
 	const fromName = template?.settings?.from_name || '-';
 	const fromEmail = template?.settings?.from_email || '-';
+	const fromPhone = template?.settings?.from_phone || '-';
 	const replyTo = template?.settings?.reply_to || '-';
 	const previewText = template?.settings?.preview_text || '-';
 
@@ -86,6 +90,7 @@ const Review: React.FC = () => {
 				subject: emailSubject,
 				fromName,
 				fromEmail,
+				fromPhone,
 				replyTo,
 				previewText,
 			});
@@ -312,8 +317,10 @@ const Review: React.FC = () => {
 
 							{/* Campaign Settings */}
 							<CampaignSettingsCard
+								campaignType={campaign?.type}
 								fromName={fromName}
 								fromEmail={fromEmail}
+								fromPhone={fromPhone}
 								replyTo={replyTo}
 								emailSubject={emailSubject}
 								previewText={previewText}
@@ -344,9 +351,15 @@ const Review: React.FC = () => {
 					</PanelSettings>
 				</div>
 
-				{/* Send Test Email */}
+				{/* Send Test Email or Device Preview */}
 				<div className="w-1/3">
-					<SendTestEmailCard campaignId={campaign?.id} />
+					{campaign?.type === 'sms' ? (
+						<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] h-full">
+							<img src={device} alt="device" className="w-[350px]" />
+						</div>
+					) : (
+						<SendTestEmailCard campaignId={campaign?.id} />
+					)}
 				</div>
 			</div>
 		</PanelLayout>

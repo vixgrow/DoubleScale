@@ -11,17 +11,17 @@ import {
 	Dialog,
 	DialogContent,
 } from '@/components/ui/dialog';
-import { CampaignsIcon, CustomDialogHeader, Field } from '@/components';
+import { CampaignsIcon, CustomDialogHeader, Field, NoticeBanner } from '@/components';
 import { Button } from '@/components/ui/button';
 import CampaignTypes from './campaign-types';
-import { CampaignModalStep, CampaignType } from '@quillcrm/client';
+import { CampaignModalStep, CampaignType, NoticeMessage } from '@quillcrm/client';
 
 interface AddCampaignProps {
 	setCampaignType: (campaignType: CampaignType) => void;
 	campaignType: CampaignType;
 	step: CampaignModalStep;
 	setStep: (step: CampaignModalStep) => void;
-	addCampaign: (campaignName: string) => void;
+	addCampaign: (campaignName: string) => Promise<{ success: boolean; error?: string }>;
 	activeTab: string;
 }
 
@@ -34,23 +34,45 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 }) => {
 	const [campaignName, setCampaignName] = useState('');
 	const [selectedType, setSelectedType] = useState<CampaignType>('standard');
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		if (!campaignName.trim()) {
+			setNotice({
+				type: 'error',
+				message: __('Campaign name is required', 'quillcrm'),
+			});
 			return;
 		}
+		
 		// Set campaign type for email campaigns
 		if (activeTab === 'email') {
 			setCampaignType(selectedType);
 		}
+		
+		const result = await addCampaign(campaignName);
+		if (!result.success && result.error) {
+			setNotice({
+				type: 'error',
+				message: result.error,
+			});
+		} else {
+			setStep(null);
+			setCampaignName('');
+			setNotice(null);
+		}
+	};
+
+	const handleOpenChange = () => {
 		setStep(null);
-		addCampaign(campaignName);
+		setCampaignName('');
+		setNotice(null);
 	};
 
 	return (
 		<Dialog
 			open={step === 'campaign-types'}
-			onOpenChange={() => setStep(null)}
+			onOpenChange={handleOpenChange}
 		>
 			<DialogContent className="max-w-[740px] w-full mx-auto">
 				<CustomDialogHeader
@@ -61,6 +83,14 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 					)}
 					icon={<CampaignsIcon />}
 				/>
+
+				{/* Notice Banner */}
+				{notice && (
+					<NoticeBanner
+						notice={notice}
+						closeNotice={() => setNotice(null)}
+					/>
+				)}
 
 				{/* Campaign Name Input */}
 				<div>

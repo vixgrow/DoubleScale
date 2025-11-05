@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -16,6 +15,7 @@ import {
 	CampaignModalStep,
 	CampaignsResponse,
 	CampaignType,
+	NoticeMessage,
 } from '@quillcrm/client';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
 import { DataTable } from '@/components/ui/data-table';
@@ -28,6 +28,7 @@ import {
 	PlusIcon,
 	ContactTotalEmailsIcon,
 	ContactSMSIcon,
+	NoticeBanner,
 } from '@/components';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
@@ -62,8 +63,8 @@ const Campaigns: React.FC = () => {
 		createDate: { from: null, to: null },
 		updatedAt: { from: null, to: null },
 	});
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
-	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
 
 	// Use the reusable hook
@@ -140,7 +141,7 @@ const Campaigns: React.FC = () => {
 			setTotalRecords(response.total || 0);
 			setHasRecords(response.total_count > 0);
 		} catch (error) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: __('Failed to fetch campaigns', 'quillcrm'),
 			});
@@ -149,13 +150,12 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
-	const addCampaign = async (name: string) => {
+	const addCampaign = async (name: string): Promise<{ success: boolean; error?: string }> => {
 		if (!name) {
-			createNotice({
-				type: 'error',
-				message: __('Campaign name is required', 'quillcrm'),
-			});
-			return;
+			return {
+				success: false,
+				error: __('Campaign name is required', 'quillcrm'),
+			};
 		}
 
 		try {
@@ -166,11 +166,10 @@ const Campaigns: React.FC = () => {
 			if (activeTab === 'email') {
 				// For email, campaignType determines if it's standard or ab_test
 				if (!campaignType) {
-					createNotice({
-						type: 'error',
-						message: __('Campaign type is required', 'quillcrm'),
-					});
-					return;
+					return {
+						success: false,
+						error: __('Campaign type is required', 'quillcrm'),
+					};
 				}
 				channelType = 'email';
 				isAbTest = campaignType === 'ab_test';
@@ -196,13 +195,12 @@ const Campaigns: React.FC = () => {
 			setCampaigns([...campaigns, response]);
 			setStep(null);
 			navigate(getToLink(`campaigns/${response.id}/template`));
+			return { success: true };
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setStep(null);
+			return {
+				success: false,
+				error: error.message,
+			};
 		}
 	};
 
@@ -220,7 +218,7 @@ const Campaigns: React.FC = () => {
 			setSelectedRowKeys([]);
 			fetchCampaigns();
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: error.message,
 			});
@@ -237,7 +235,7 @@ const Campaigns: React.FC = () => {
 
 			fetchCampaigns();
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: error.message,
 			});
@@ -245,8 +243,8 @@ const Campaigns: React.FC = () => {
 	};
 
 	const duplicateCampaign = async (id: number) => {
-		createNotice({
-			type: 'info',
+		setNotice({
+			type: 'success',
 			message: __('Duplicating campaign...', 'quillcrm'),
 		});
 
@@ -259,7 +257,7 @@ const Campaigns: React.FC = () => {
 
 			navigate(getToLink(`campaigns/${response.id}`));
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: error.message,
 			});
@@ -382,6 +380,14 @@ const Campaigns: React.FC = () => {
 					},
 				]}
 			/>
+
+			{/* Notice Banner */}
+			{notice && (
+				<NoticeBanner
+					notice={notice}
+					closeNotice={() => setNotice(null)}
+				/>
+			)}
 
 			<PageTabs
 				defaultValue="email"

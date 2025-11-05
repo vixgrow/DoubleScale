@@ -20,6 +20,9 @@ use WP_User;
  */
 class Membership_Created extends Trigger {
 
+
+
+
 	/**
 	 * Admin membership ID for tracking admin-created memberships
 	 *
@@ -127,13 +130,16 @@ class Membership_Created extends Trigger {
 				'last_name'  => $user->last_name,
 				'email'      => $user->user_email,
 				'data'       => array(
-					'membership_id' => $args['user_membership_id'],
-					'user_id'       => $user_id,
-					'plan_id'       => $plan_id,
-					'plan_name'     => $plan_name,
-					'status'        => $user_membership && method_exists( $user_membership, 'get_status' ) ? $user_membership->get_status() : '',
-					'start_date'    => $user_membership && method_exists( $user_membership, 'get_start_date' ) ? $user_membership->get_start_date( 'Y-m-d H:i:s' ) : '',
-					'is_update'     => isset( $args['is_update'] ) ? $args['is_update'] : false,
+					'member_name'            => $user->first_name . ' ' . $user->last_name,
+					'user_membership_id'     => $args['user_membership_id'],
+					'user_id'                => $user_id,
+					'plan_id'                => $plan_id,
+					'plan_name'              => $plan_name,
+					'status'                 => $user_membership && method_exists( $user_membership, 'get_status' ) ? $user_membership->get_status() : '',
+					'membership_renewal_url' => method_exists( $user_membership, 'get_renew_membership_url' ) ? $user_membership->get_renew_membership_url() : '',
+					'start_date'             => $user_membership && method_exists( $user_membership, 'get_start_date' ) ? $user_membership->get_start_date( 'Y-m-d H:i:s' ) : '',
+					'end_date'               => $user_membership && method_exists( $user_membership, 'get_end_date' ) ? $user_membership->get_end_date( 'Y-m-d H:i:s' ) : '',
+					'is_update'              => isset( $args['is_update'] ) ? $args['is_update'] : false,
 				),
 			);
 

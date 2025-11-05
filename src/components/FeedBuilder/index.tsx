@@ -3,7 +3,7 @@ import WandIcon from '../icons/wand';
 import { BuilderArrowIcon, WandOutlinedIcon } from '../icons';
 import { Button } from '../ui/button';
 //@ts-ignore
-import device from '../../../assets/images/device.png';
+import device from '../../../assets/images/email-device.png';
 
 const FeedBuilder: React.FC<{
 	setVisibile: (visible: boolean) => void;

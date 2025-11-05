@@ -25,6 +25,7 @@ final class Rules_Manager {
 
 
 
+
 	/**
 	 * Registed rules
 	 *
@@ -119,6 +120,11 @@ final class Rules_Manager {
 			'woocommerce'               => array(
 				'name'  => __( 'WooCommerce', 'quillcrm' ),
 				'key'   => 'woocommerce',
+				'rules' => array(),
+			),
+			'woocommerce_membership'    => array(
+				'name'  => __( 'WooCommerce Membership', 'quillcrm' ),
+				'key'   => 'woocommerce_membership',
 				'rules' => array(),
 			),
 			'learndash'                 => array(

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@/components/ui/button';
-import { PreviewIcon, RedoIcon, UndoIcon } from '@/components/icons';
+import { RedoIcon, UndoIcon } from '@/components/icons';
 import BreadcrumbComponent from '@/components/breadcrumb';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
@@ -119,13 +119,6 @@ const Header: React.FC<HeaderProps> = ({
 				<div className="h-6 w-px bg-border" />
 				{campaign && (
 					<>
-						<Button
-							variant="outline"
-							className="px-3 text-muted-foreground"
-						>
-							<PreviewIcon />
-							{__('Preview & test', 'quillcrm')}
-						</Button>
 						<Button
 							variant="secondary"
 							className="px-3"

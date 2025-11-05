@@ -2,8 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -12,11 +11,11 @@ import apiFetch from '@wordpress/api-fetch';
 import { useCampaignStep, campaignSteps } from '../shared';
 import {
 	PanelSettings,
-	CategoryIcon,
 	PanelLayout,
 	PlayIcon,
 	Stepper,
 	ReviewIcon,
+	NoticeBanner,
 } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import { isEmpty } from 'lodash';
@@ -26,6 +25,7 @@ import {
 	ScheduleCard,
 	SendTestEmailCard,
 } from './components';
+import { NoticeMessage } from '@quillcrm/client';
 
 const Review: React.FC = () => {
 	const {
@@ -35,12 +35,30 @@ const Review: React.FC = () => {
 		goToStep,
 		saving,
 	} = useCampaignStep();
-	const { createNotice } = useDispatch('quillcrm/core');
 
 	const [sendNow, setSendNow] = useState(false);
 	const [scheduleDate, setScheduleDate] = useState('');
 	const [scheduleTime, setScheduleTime] = useState('');
 	const [timezoneMode, setTimezoneMode] = useState('user'); // 'user' or 'subscriber'
+
+	// Notice state
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
+
+	const showNotice = (noticeData: NoticeMessage) => {
+		setNotice(noticeData);
+	};
+
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	// State for lists and tags
 	const [includedLists, setIncludedLists] = useState<string[]>([]);
@@ -175,7 +193,7 @@ const Review: React.FC = () => {
 
 		// Validate schedule if not sending now
 		if (!sendNow && (isEmpty(scheduleDate) || isEmpty(scheduleTime))) {
-			createNotice({
+			showNotice({
 				type: 'error',
 				message: __('Please set a schedule date and time', 'quillcrm'),
 			});
@@ -222,7 +240,7 @@ const Review: React.FC = () => {
 			}
 		} catch (error) {
 			console.error(error);
-			createNotice({
+			showNotice({
 				type: 'error',
 				message: __(
 					'Failed to save campaign. Please try again.',
@@ -275,6 +293,15 @@ const Review: React.FC = () => {
 						isLoading={saving}
 					>
 						<div className="space-y-6">
+							{/* Notice Banner */}
+							{notice && (
+								<NoticeBanner
+									ref={noticeBannerRef}
+									notice={notice}
+									closeNotice={closeNotice}
+								/>
+							)}
+
 							{/* Campaign Settings */}
 							<CampaignSettingsCard
 								fromName={fromName}

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -19,8 +19,9 @@ import {
 	PlayIcon,
 	Stepper,
 	SetUpInfoIcon,
+	NoticeBanner,
 } from '@quillcrm/components';
-import type { EmailTemplate } from '@quillcrm/client';
+import type { EmailTemplate, NoticeMessage } from '@quillcrm/client';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -93,8 +94,26 @@ const Templates: React.FC = () => {
 	}>({});
 	const [isSaving, setIsSaving] = useState(false);
 	const { campaign, goToStep } = useCampaignStep();
-	const { createNotice } = useDispatch('quillcrm/core');
 	const { updateCampaign } = useDispatch('quillcrm/campaign');
+
+	// Notice state
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
+
+	const showNotice = (noticeData: NoticeMessage) => {
+		setNotice(noticeData);
+	};
+
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	// Single template object - matches backend structure
 	const [template, setTemplate] = useState<Partial<EmailTemplate>>({
@@ -182,7 +201,7 @@ const Templates: React.FC = () => {
 
 	const saveTemplateStepAndNavigate = async () => {
 		if (!template || !campaign) {
-			createNotice({
+			showNotice({
 				type: 'error',
 				message: __(
 					'No template data found. Please refresh the page and try again.',
@@ -194,7 +213,7 @@ const Templates: React.FC = () => {
 
 		// Validate current template
 		if (!validate(template)) {
-			createNotice({
+			showNotice({
 				type: 'error',
 				message: __(
 					'Please fix the validation errors before proceeding',
@@ -231,7 +250,7 @@ const Templates: React.FC = () => {
 				});
 			}
 
-			createNotice({
+			showNotice({
 				type: 'success',
 				message: __('Template saved successfully', 'quillcrm'),
 			});
@@ -240,7 +259,7 @@ const Templates: React.FC = () => {
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : String(error);
-			createNotice({
+			showNotice({
 				type: 'error',
 				message:
 					errorMessage ||
@@ -300,6 +319,15 @@ const Templates: React.FC = () => {
 						}
 						isLoading={isSaving}
 					>
+						{/* Notice Banner */}
+						{notice && (
+							<NoticeBanner
+								ref={noticeBannerRef}
+								notice={notice}
+								closeNotice={closeNotice}
+							/>
+						)}
+
 						<div className="flex gap-4">
 							<FormField
 								label={__('From Name', 'quillcrm')}

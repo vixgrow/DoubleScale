@@ -49,7 +49,7 @@ const BlockSidebar = ({
 	};
 
 	return (
-		<div className="flex">
+		<div className="flex flex-1 max-w-[350px]">
 			<div className="bg-white p-4">
 				<div
 					className={`flex flex-col items-center cursor-pointer ${showMyTemplates ? 'text-[#1E3A8A]' : ''}`}
@@ -58,7 +58,7 @@ const BlockSidebar = ({
 					<MyTemplatesIcon />
 				</div>
 			</div>
-			<div className="bg-white w-full max-w-[320px] align-center h-full relative flex flex-col border-l">
+			<div className="bg-white w-full align-center h-full relative flex flex-col border-l">
 				<Tabs
 					defaultValue="elements"
 					className="w-full h-full flex flex-col"
@@ -73,7 +73,7 @@ const BlockSidebar = ({
 							</TabsTrigger>
 						</TabsList>
 					</div>
-					<div className="py-6 px-9 flex-1 overflow-auto">
+					<div className="py-6 px-6 flex-1 overflow-auto">
 						<TabsContent value="elements">
 							<ContainerBlock
 								activeSidebar={activeSidebar}

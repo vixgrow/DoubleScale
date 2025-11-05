@@ -5,7 +5,6 @@ const TemplateCard = ({
 	item,
 	type,
 	blockType,
-	onCreateBlock,
 	isDragOverlay = false,
 }: {
 	item: any;

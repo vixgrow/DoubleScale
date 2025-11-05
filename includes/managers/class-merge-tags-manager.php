@@ -21,6 +21,9 @@ use QuillCRM\Models\Automation_Contact_Model;
 final class Merge_Tags_Manager {
 
 
+
+
+
 	/**
 	 * Registed merge tags
 	 *
@@ -161,6 +164,11 @@ final class Merge_Tags_Manager {
 			'learndash'      => array(
 				'name'      => __( 'LearnDash', 'quillcrm' ),
 				'mergeTags' => array(),
+			),
+			'membership'     => array(
+				'name'      => __( 'Membership', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'wc_membership_created', 'wc_membership_status_changed' ),
 			),
 		);
 		// get forms slug to set in groups

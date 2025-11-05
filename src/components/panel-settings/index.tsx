@@ -50,7 +50,7 @@ const PanelSettings: React.FC<PanelSettingsProps> = ({
 
 				{/* Navigation Buttons */}
 				{showButtons && (onNext || onBack) && (
-					<div className="flex justify-between items-center border-t border-gray-200 bg-white px-8 py-4">
+					<div className="flex justify-between items-center border-t border-gray-200 bg-white rounded-b-2xl px-8 py-4">
 						{onBack ? (
 							<Button
 								variant="secondary"

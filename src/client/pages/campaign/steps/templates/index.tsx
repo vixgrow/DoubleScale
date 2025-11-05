@@ -12,7 +12,6 @@ import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { useCampaignStep } from '../shared';
 import type { ExtendedCampaignSettings } from '@/stores/campaign/types';
 import {
-	CategoryIcon,
 	FeedBuilder,
 	FormField,
 	PanelLayout,
@@ -32,8 +31,7 @@ import { cn } from '@/lib/utils';
 import EmailBuilderSelection from './email-builder-selection';
 import { saveTemplate } from '@/builder/api/templates';
 import { campaignSteps } from '../shared/stepsConfig';
-import { ArrowRight } from 'lucide-react';
-import { FromEmailSelector } from '@/components/from-email-selector';
+import { FromEmailSelector } from '@quillcrm/components/from-email-selector';
 
 const templateSchema = z
 	.object({
@@ -293,6 +291,14 @@ const Templates: React.FC = () => {
 						)}
 						icon={<SetUpInfoIcon />}
 						className="w-2/3 h-full"
+						showButtons={true}
+						onNext={saveTemplateStepAndNavigate}
+						nextLabel={
+							isSaving
+								? __('Saving...', 'quillcrm')
+								: __('Next', 'quillcrm')
+						}
+						isLoading={isSaving}
 					>
 						<div className="flex gap-4">
 							<FormField
@@ -315,7 +321,7 @@ const Templates: React.FC = () => {
 									className={cn(
 										'h-12 bg-white',
 										validationErrors.from_name &&
-											'!border-red-500 focus-visible:!ring-red-500'
+										'!border-red-500 focus-visible:!ring-red-500'
 									)}
 								/>
 								{validationErrors.from_name && (
@@ -338,7 +344,7 @@ const Templates: React.FC = () => {
 											from_email: email,
 											// Auto-fill from name if provided and current from_name is empty
 											...(name &&
-											!template.settings?.from_name
+												!template.settings?.from_name
 												? { from_name: name }
 												: {}),
 										});
@@ -378,7 +384,7 @@ const Templates: React.FC = () => {
 									className={cn(
 										'h-12 bg-white',
 										validationErrors.reply_to &&
-											'!border-red-500 focus-visible:!ring-red-500'
+										'!border-red-500 focus-visible:!ring-red-500'
 									)}
 								/>
 								{validationErrors.reply_to && (
@@ -408,7 +414,7 @@ const Templates: React.FC = () => {
 									className={cn(
 										'h-12 bg-white',
 										validationErrors.subject &&
-											'!border-red-500 focus-visible:!ring-red-500'
+										'!border-red-500 focus-visible:!ring-red-500'
 									)}
 								/>
 								{validationErrors.subject && (
@@ -441,7 +447,7 @@ const Templates: React.FC = () => {
 								className={cn(
 									'bg-white',
 									validationErrors.preview_text &&
-										'!border-red-500 focus-visible:!ring-red-500'
+									'!border-red-500 focus-visible:!ring-red-500'
 								)}
 							/>
 							{validationErrors.preview_text && (
@@ -507,7 +513,7 @@ const Templates: React.FC = () => {
 												className={cn(
 													'h-12 bg-white',
 													validationErrors.utm_source &&
-														'!border-red-500 focus-visible:!ring-red-500'
+													'!border-red-500 focus-visible:!ring-red-500'
 												)}
 											/>
 											{validationErrors.utm_source && (
@@ -545,7 +551,7 @@ const Templates: React.FC = () => {
 												className={cn(
 													'h-12 bg-white',
 													validationErrors.utm_medium &&
-														'!border-red-500 focus-visible:!ring-red-500'
+													'!border-red-500 focus-visible:!ring-red-500'
 												)}
 											/>
 											{validationErrors.utm_medium && (
@@ -585,7 +591,7 @@ const Templates: React.FC = () => {
 												className={cn(
 													'h-12 bg-white',
 													validationErrors.utm_name &&
-														'!border-red-500 focus-visible:!ring-red-500'
+													'!border-red-500 focus-visible:!ring-red-500'
 												)}
 											/>
 											{validationErrors.utm_name && (
@@ -613,7 +619,7 @@ const Templates: React.FC = () => {
 												className={cn(
 													'h-12 bg-white',
 													validationErrors.utm_term &&
-														'!border-red-500 focus-visible:!ring-red-500'
+													'!border-red-500 focus-visible:!ring-red-500'
 												)}
 												onChange={(e) =>
 													updateSettings({
@@ -643,7 +649,7 @@ const Templates: React.FC = () => {
 											className={cn(
 												'h-12 bg-white',
 												validationErrors.utm_content &&
-													'!border-red-500 focus-visible:!ring-red-500'
+												'!border-red-500 focus-visible:!ring-red-500'
 											)}
 											onChange={(e) =>
 												updateSettings({
@@ -654,21 +660,6 @@ const Templates: React.FC = () => {
 									</FormField>
 								</div>
 							)}
-						</div>
-
-						<Separator />
-
-						<div className="flex justify-end py-4">
-							<Button
-								variant="gradient"
-								onClick={saveTemplateStepAndNavigate}
-								disabled={isSaving}
-							>
-								{isSaving
-									? __('Saving...', 'quillcrm')
-									: __('Next', 'quillcrm')}{' '}
-								<ArrowRight />
-							</Button>
 						</div>
 					</PanelSettings>
 

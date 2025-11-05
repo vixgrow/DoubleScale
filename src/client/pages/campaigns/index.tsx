@@ -113,7 +113,8 @@ const Campaigns: React.FC = () => {
 				queryParams.status = campaignFilters.status;
 			}
 
-			if (campaignFilters.type && campaignFilters.type !== 'all') {
+			// Only apply type filter for email campaigns
+			if (activeTab === 'email' && campaignFilters.type && campaignFilters.type !== 'all') {
 				// Map type to ab_test setting
 				queryParams.campaign_type = campaignFilters.type;
 			}

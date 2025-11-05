@@ -33,12 +33,14 @@ interface CampaignFiltersProps {
 	filters: CampaignFiltersState;
 	onChange: (filters: CampaignFiltersState) => void;
 	onClear: () => void;
+	activeTab?: string;
 }
 
 export function CampaignFilters({
 	filters,
 	onChange,
 	onClear,
+	activeTab = 'email',
 }: CampaignFiltersProps) {
 	const handleFilterChange = (
 		key: keyof CampaignFiltersState,
@@ -95,35 +97,37 @@ export function CampaignFilters({
 					</Select>
 				</div>
 
-				{/* Type Filter */}
-				<div className="space-y-2">
-					<Label className="text-[#3F4254] font-semibold text-base">
-						{__('Type', 'quillcrm')}
-					</Label>
-					<Select
-						value={filters.type}
-						onValueChange={(value) =>
-							handleFilterChange('type', value)
-						}
-					>
-						<SelectTrigger className="w-full h-11 bg-white border-gray-200 rounded-lg">
-							<SelectValue
-								placeholder={__('Select Type', 'quillcrm')}
-							/>
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">
-								{__('All Types', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="standard">
-								{__('Standard Campaign', 'quillcrm')}
-							</SelectItem>
-							<SelectItem value="ab_test">
-								{__('A/B Split Campaign', 'quillcrm')}
-							</SelectItem>
-						</SelectContent>
-					</Select>
-				</div>
+				{/* Type Filter - Only show for email campaigns */}
+				{activeTab === 'email' && (
+					<div className="space-y-2">
+						<Label className="text-[#3F4254] font-semibold text-base">
+							{__('Type', 'quillcrm')}
+						</Label>
+						<Select
+							value={filters.type}
+							onValueChange={(value) =>
+								handleFilterChange('type', value)
+							}
+						>
+							<SelectTrigger className="w-full h-11 bg-white border-gray-200 rounded-lg">
+								<SelectValue
+									placeholder={__('Select Type', 'quillcrm')}
+								/>
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">
+									{__('All Types', 'quillcrm')}
+								</SelectItem>
+								<SelectItem value="standard">
+									{__('Standard Campaign', 'quillcrm')}
+								</SelectItem>
+								<SelectItem value="ab_test">
+									{__('A/B Split Campaign', 'quillcrm')}
+								</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+				)}
 
 				{/* Create Date Filter */}
 				<div className="flex flex-col gap-1">

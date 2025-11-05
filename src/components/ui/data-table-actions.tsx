@@ -162,7 +162,7 @@ export function DataTableActions<TData>({
 			)}
 
 			{/* Campaign Filters Button */}
-			{activeTab === 'email' && config.campaignFilters && (
+			{(activeTab === 'email' || activeTab === 'sms') && config.campaignFilters && (
 				<Dialog
 					open={isCampaignFiltersOpen}
 					onOpenChange={(open) => {
@@ -201,6 +201,7 @@ export function DataTableActions<TData>({
 								filters={tempCampaignFilters}
 								onChange={setTempCampaignFilters}
 								onClear={handleClearTempFilters}
+								activeTab={activeTab}
 							/>
 						)}
 						<DialogFooter>

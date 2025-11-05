@@ -269,10 +269,10 @@ export const ContactFilterSection = forwardRef<
 			<Card className="shadow-none overflow-hidden">
 				<CardContent className="space-y-4 p-0">
 					<div className="bg-gray-100 px-3 flex justify-between items-center">
-						<p className="font-bold">
+						<p className="font-semibold">
 							{__('Select List', 'quillcrm')}
 						</p>
-						<p className="font-bold">
+						<p className="font-semibold">
 							{__('Select Tag', 'quillcrm')}
 						</p>
 						{/* Add Row */}

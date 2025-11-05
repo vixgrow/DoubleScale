@@ -150,7 +150,7 @@ const ContactList: React.FC<ContactListProps> = ({
 
 	return (
 		<div
-			className="w-[45%] bg-white rounded-lg border border-gray-200 p-6 flex flex-col"
+			className="w-[45%] bg-[#F8F8F8] rounded-lg border border-gray-200 p-6 flex flex-col"
 			style={{
 				height: maxHeight > 0 ? `${maxHeight}px` : 'auto',
 				maxHeight: maxHeight > 0 ? `${maxHeight}px` : 'none',

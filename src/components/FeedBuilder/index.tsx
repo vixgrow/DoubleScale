@@ -9,7 +9,7 @@ const FeedBuilder: React.FC<{
 	setVisibile: (visible: boolean) => void;
 }> = ({ setVisibile }) => {
 	return (
-		<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#EBF4FB] w-1/3">
+		<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] w-1/3">
 			<img src={device} alt="device" className="w-[300px]" />
 			{/* <div className="bg-sidebar-accent w-fit rounded-lg p-2 mb-4">
 				<WandIcon />

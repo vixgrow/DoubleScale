@@ -169,3 +169,6 @@ export { default as ReadRateIcon } from './read-rate';
 export { default as ABSplitIcon } from './ab-split';
 export { default as SetUpInfoIcon } from './set-up-info';
 export { default as SaveAsTemplateIcon } from './save-as-template';
+export { default as ReviewIcon } from './review';
+export { default as ScheduleIcon } from './schedule';
+export { default as SendTestEmailIcon } from './send-test-email';

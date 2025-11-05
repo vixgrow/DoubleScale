@@ -71,6 +71,7 @@ export const HtmlBlockRenderer: React.FC<HtmlBlockRendererProps> = ({
 						id={uniqueId}
 						dangerouslySetInnerHTML={{ __html: props.content }}
 						style={{
+							fontFamily: 'monospace',
 							width: '100%',
 						}}
 					/>

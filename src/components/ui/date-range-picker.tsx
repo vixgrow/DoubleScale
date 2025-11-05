@@ -99,7 +99,12 @@ export function DateRangePicker({
 					<OutlinedCalendarIcon />
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-auto p-0" align="start">
+			<PopoverContent
+				className="w-auto p-0 max-h-[300px] overflow-y-auto z-[9999]"
+				align="start"
+				side="bottom"
+				sideOffset={5}
+			>
 				<div className="p-3">
 					<Calendar
 						mode="range"

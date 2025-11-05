@@ -13,15 +13,16 @@ import type { Filter as FilterType } from '@quillcrm/client';
 import {
 	ContactList,
 	PanelSettings,
-	TeamIcon,
+	ContactsIcon,
 	PanelLayout,
 	PlayIcon,
 	Stepper,
+	ListTagFilter,
+	AdvancedFilter,
 } from '@quillcrm/components';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
 import { useCampaignStep, campaignSteps } from '../shared';
 
 const Contacts: React.FC = () => {
@@ -130,7 +131,7 @@ const Contacts: React.FC = () => {
 							'Select who will receive this campaign and how your audience will be split for testing',
 							'quillcrm'
 						)}
-						icon={<TeamIcon />}
+						icon={<ContactsIcon />}
 						className="flex flex-col"
 						showButtons={true}
 						onNext={save}
@@ -152,7 +153,7 @@ const Contacts: React.FC = () => {
 										className={`flex items-center space-x-4 w-1/2 border rounded-lg p-4 cursor-pointer ${
 											filterBy === 'list-tags'
 												? 'border-blue-500 bg-blue-50 text-blue-500'
-												: 'border-gray-300'
+												: 'border-gray-300 bg-white'
 										}`}
 									>
 										<RadioGroupItem
@@ -168,7 +169,7 @@ const Contacts: React.FC = () => {
 										className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
 											filterBy === 'advanced'
 												? 'border-blue-500 bg-blue-50'
-												: 'border-gray-300'
+												: 'border-gray-300 bg-white'
 										}`}
 									>
 										<RadioGroupItem

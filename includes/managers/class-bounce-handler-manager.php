@@ -204,7 +204,7 @@ final class Bounce_Handler_Manager {
 	public function register_routes() {
 		register_rest_route(
 			'quillcrm/v1',
-			'/webhooks/bounce/(?P<provider>[a-z0-9-]+)',
+			'/webhooks/bounce/(?P<provider>[a-z0-9_-]+)',
 			array(
 				'methods'             => array( 'GET', 'POST' ),
 				'callback'            => array( $this, 'handle_webhook' ),

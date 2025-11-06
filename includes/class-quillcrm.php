@@ -23,6 +23,7 @@ use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
+use QuillCRM\Managers\Bounce_Handler_Manager;
 use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Tracking\Link_Triggers;
@@ -262,6 +263,7 @@ final class QuillCRM {
 		Activity_Manager::instance();
 		Email_Sequences_Manager::instance();
 		User_Roles::instance();
+		Bounce_Handler_Manager::instance();
 	}
 
 	/**
@@ -275,6 +277,34 @@ final class QuillCRM {
 
 		// Register message providers
 		add_action( 'quillcrm_loaded', array( $this, 'register_message_providers' ) );
+
+		// Register contact meta table
+		add_action( 'init', array( $this, 'register_contact_meta_table' ) );
+	}
+
+	/**
+	 * Register contact meta table
+	 *
+	 * @since 1.0.0
+	 */
+	public function register_contact_meta_table() {
+		global $wpdb;
+		$wpdb->contactmeta = $wpdb->prefix . 'quillcrm_contact_meta';
+
+		// Register meta type with WordPress so add_metadata/get_metadata work correctly.
+		// This is the modern way to register a custom meta table with WordPress.
+		add_filter(
+			'get_meta_table',
+			function( $table, $meta_type ) {
+				global $wpdb;
+				if ( 'contact' === $meta_type ) {
+					return $wpdb->contactmeta;
+				}
+				return $table;
+			},
+			10,
+			2
+		);
 	}
 
 	/**

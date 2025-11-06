@@ -159,24 +159,24 @@ export const useContactsColumns = () => {
 
 				switch (status.toLowerCase()) {
 					case 'subscribed':
-						statusClasses = 'text-[#16A34A] bg-[#EFFFF5]';
+						statusClasses = 'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]';
 						break;
 					case 'unsubscribed':
-						statusClasses = 'text-[#1C1D22] bg-[#FFF2E2]';
+						statusClasses = 'text-[#1C1D22] bg-[#FFF2E2] border-[#1C1D22]';
 						break;
 					case 'bounced':
-						statusClasses = 'text-[#5570F1] bg-[#5570F129]';
+						statusClasses = 'text-[#5570F1] bg-[#5570F129] border-[#5570F1]';
 						break;
 					case 'unverified':
-						statusClasses = 'text-[#CC5F5F] bg-[#F57E7729]';
+						statusClasses = 'text-[#CC5F5F] bg-[#F57E7729] border-[#CC5F5F]';
 						break;
 					default:
-						statusClasses = 'text-gray-600 bg-gray-100';
+						statusClasses = 'text-gray-600 bg-gray-100 border-gray-600';
 				}
 
 				return (
 					<div
-						className={`text-xs capitalize w-fit rounded-lg py-1 px-3 ${statusClasses}`}
+						className={`text-base capitalize w-fit rounded-lg border py-1 px-3 ${statusClasses}`}
 					>
 						{status}
 					</div>

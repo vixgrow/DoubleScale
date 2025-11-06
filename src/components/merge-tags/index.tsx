@@ -20,7 +20,7 @@ import {
 	DialogOverlay,
 	DialogHeader,
 } from '@/components/ui/dialog';
-import { MergeTagsIcon } from '@quillcrm/components';
+import { GradientMergeTagsIcon } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -98,7 +98,7 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 							'Choose your Merge tags type and Select one of them related to your input.',
 							'quillcrm'
 						)}
-						icon={<MergeTagsIcon />}
+						icon={<GradientMergeTagsIcon />}
 					/>
 				</DialogHeader>
 

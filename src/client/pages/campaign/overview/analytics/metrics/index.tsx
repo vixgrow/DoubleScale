@@ -22,6 +22,10 @@ import {
 	ContactWhatsAppIcon,
 	DeliveryRateIcon,
 	ReadRateIcon,
+	ScheduleIcon,
+	ProcessingSMSIcon,
+	FailedSMSIcon,
+	UnsubscribeSMSIcon,
 } from '@quillcrm/components';
 
 interface MetricsProps {
@@ -181,7 +185,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						{/* Processing: Scheduled SMS */}
 						<MessageStatsCard
 							icon={
-								<ScheduledEmailsIcon
+								<ScheduleIcon
 									width={40}
 									height={40}
 								/>
@@ -196,7 +200,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						{/* Processing: Processing SMS */}
 						<MessageStatsCard
 							icon={
-								<ProcessingEmailsIcon
+								<ProcessingSMSIcon
 									width={40}
 									height={40}
 								/>
@@ -213,7 +217,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						{/* Not Processing: Failed SMS */}
 						<MessageStatsCard
 							icon={
-								<FailedEmailsIcon width={40} height={40} />
+								<FailedSMSIcon width={40} height={40} />
 							}
 							value={campaign.failed_count}
 							label={__('Failed SMS', 'quillcrm')}
@@ -243,108 +247,122 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 							borderColorClass="border-l-[#660FF1]"
 							iconColor="text-[#660FF1]"
 						/>
-					</>
-				)}
-			</div>
-		);
-	}
 
-	// WhatsApp Campaign Metrics
-	if (campaign.type === CAMPAIGN_CHANNEL.WHATSAPP) {
-		return (
-			<div className="flex flex-col gap-5">
-				{/* First card: Total WhatsApp (always shown) */}
-				<MessageStatsCard
-					icon={<ContactWhatsAppIcon width={40} height={40} />}
-					value={totalMessages}
-					label={__('Total WhatsApp', 'quillcrm')}
-					iconBgClass="bg-[#E4EEFD]"
-					borderColorClass="border-l-[#458DC7]"
-					iconColor="text-[#458DC7]"
-				/>
-
-				{isProcessing ? (
-					<>
-						{/* Processing: Scheduled WhatsApp */}
+						{/* Not Processing: Unsubscribed */}
 						<MessageStatsCard
 							icon={
-								<ScheduledEmailsIcon
-									width={40}
-									height={40}
-								/>
+								<UnsubscribeSMSIcon width={40} height={40} />
 							}
-							value={campaign.contacts_count - totalMessages}
-							label={__('Scheduled Messages', 'quillcrm')}
-							iconBgClass="bg-[#FAF3DF]"
-							borderColorClass="border-l-[#A67D0A]"
-							iconColor="text-[#A67D0A]"
-						/>
-
-						{/* Processing: Processing WhatsApp */}
-						<MessageStatsCard
-							icon={
-								<ProcessingEmailsIcon
-									width={40}
-									height={40}
-								/>
+							value={
+								(campaign as any).unsubscribed_count || 0
 							}
-							value={campaign.sent_count}
-							label={__('Processing Messages', 'quillcrm')}
-							iconBgClass="bg-[#FAEADF]"
-							borderColorClass="border-l-[#CB5301]"
-							iconColor="text-[#CB5301]"
-						/>
-					</>
-				) : (
-					<>
-						{/* Not Processing: Failed WhatsApp */}
-						<MessageStatsCard
-							icon={
-								<FailedEmailsIcon width={40} height={40} />
-							}
-							value={campaign.failed_count}
-							label={__('Failed Messages', 'quillcrm')}
+							label={__('Unsubscribed', 'quillcrm')}
 							iconBgClass="bg-[#FBE8E8]"
-							borderColorClass="border-l-destructive"
-							iconColor="text-destructive"
-						/>
-
-						{/* Not Processing: Delivery Rate */}
-						<MessageStatsCard
-							icon={
-								<DeliveryRateIcon width={40} height={40} />
-							}
-							value={`${campaign.delivery_rate || 0}%`}
-							label={__('Delivery Rate', 'quillcrm')}
-							iconBgClass="bg-[#E4FAEC]"
-							borderColorClass="border-l-[#16A34A]"
-							iconColor="text-[#16A34A]"
-						/>
-
-						{/* Not Processing: Read Rate */}
-						<MessageStatsCard
-							icon={<ReadRateIcon width={40} height={40} />}
-							value={`${campaign.read_rate || 0}%`}
-							label={__('Read Rate', 'quillcrm')}
-							iconBgClass="bg-[#FAEADF]"
-							borderColorClass="border-l-[#CB5301]"
-							iconColor="text-[#CB5301]"
-						/>
-
-						{/* Not Processing: Click rate */}
-						<MessageStatsCard
-							icon={<ClickRateIcon width={40} height={40} />}
-							value={`${campaign.click_rate || 0}%`}
-							label={__('Click Rate', 'quillcrm')}
-							iconBgClass="bg-[#EEE4FF]"
-							borderColorClass="border-l-[#660FF1]"
-							iconColor="text-[#660FF1]"
+							borderColorClass="border-l-[#A61919]"
+							iconColor="text-[#A61919]"
 						/>
 					</>
 				)}
 			</div>
 		);
 	}
+
+	// // WhatsApp Campaign Metrics
+	// if (campaign.type === CAMPAIGN_CHANNEL.WHATSAPP) {
+	// 	return (
+	// 		<div className="flex flex-col gap-5">
+	// 			{/* First card: Total WhatsApp (always shown) */}
+	// 			<MessageStatsCard
+	// 				icon={<ContactWhatsAppIcon width={40} height={40} />}
+	// 				value={totalMessages}
+	// 				label={__('Total WhatsApp', 'quillcrm')}
+	// 				iconBgClass="bg-[#E4EEFD]"
+	// 				borderColorClass="border-l-[#458DC7]"
+	// 				iconColor="text-[#458DC7]"
+	// 			/>
+
+	// 			{isProcessing ? (
+	// 				<>
+	// 					{/* Processing: Scheduled WhatsApp */}
+	// 					<MessageStatsCard
+	// 						icon={
+	// 							<ScheduledEmailsIcon
+	// 								width={40}
+	// 								height={40}
+	// 							/>
+	// 						}
+	// 						value={campaign.contacts_count - totalMessages}
+	// 						label={__('Scheduled Messages', 'quillcrm')}
+	// 						iconBgClass="bg-[#FAF3DF]"
+	// 						borderColorClass="border-l-[#A67D0A]"
+	// 						iconColor="text-[#A67D0A]"
+	// 					/>
+
+	// 					{/* Processing: Processing WhatsApp */}
+	// 					<MessageStatsCard
+	// 						icon={
+	// 							<ProcessingEmailsIcon
+	// 								width={40}
+	// 								height={40}
+	// 							/>
+	// 						}
+	// 						value={campaign.sent_count}
+	// 						label={__('Processing Messages', 'quillcrm')}
+	// 						iconBgClass="bg-[#FAEADF]"
+	// 						borderColorClass="border-l-[#CB5301]"
+	// 						iconColor="text-[#CB5301]"
+	// 					/>
+	// 				</>
+	// 			) : (
+	// 				<>
+	// 					{/* Not Processing: Failed WhatsApp */}
+	// 					<MessageStatsCard
+	// 						icon={
+	// 							<FailedEmailsIcon width={40} height={40} />
+	// 						}
+	// 						value={campaign.failed_count}
+	// 						label={__('Failed Messages', 'quillcrm')}
+	// 						iconBgClass="bg-[#FBE8E8]"
+	// 						borderColorClass="border-l-destructive"
+	// 						iconColor="text-destructive"
+	// 					/>
+
+	// 					{/* Not Processing: Delivery Rate */}
+	// 					<MessageStatsCard
+	// 						icon={
+	// 							<DeliveryRateIcon width={40} height={40} />
+	// 						}
+	// 						value={`${campaign.delivery_rate || 0}%`}
+	// 						label={__('Delivery Rate', 'quillcrm')}
+	// 						iconBgClass="bg-[#E4FAEC]"
+	// 						borderColorClass="border-l-[#16A34A]"
+	// 						iconColor="text-[#16A34A]"
+	// 					/>
+
+	// 					{/* Not Processing: Read Rate */}
+	// 					<MessageStatsCard
+	// 						icon={<ReadRateIcon width={40} height={40} />}
+	// 						value={`${campaign.read_rate || 0}%`}
+	// 						label={__('Read Rate', 'quillcrm')}
+	// 						iconBgClass="bg-[#FAEADF]"
+	// 						borderColorClass="border-l-[#CB5301]"
+	// 						iconColor="text-[#CB5301]"
+	// 					/>
+
+	// 					{/* Not Processing: Click rate */}
+	// 					<MessageStatsCard
+	// 						icon={<ClickRateIcon width={40} height={40} />}
+	// 						value={`${campaign.click_rate || 0}%`}
+	// 						label={__('Click Rate', 'quillcrm')}
+	// 						iconBgClass="bg-[#EEE4FF]"
+	// 						borderColorClass="border-l-[#660FF1]"
+	// 						iconColor="text-[#660FF1]"
+	// 					/>
+	// 				</>
+	// 			)}
+	// 		</div>
+	// 	);
+	// }
 
 	return null;
 };

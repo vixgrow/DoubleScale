@@ -46,7 +46,9 @@ const Dashboard: React.FC = () => {
 				actions={[]}
 			/>
 
-			<PageTabs
+			<UserDashboard dashboardData={data} />
+
+			{/* <PageTabs
 				defaultValue="user"
 				onValueChange={(value) => setActiveTab(value)}
 				tabsList={[
@@ -85,7 +87,7 @@ const Dashboard: React.FC = () => {
 						children: <CartAnalytics dashboardData={data} />,
 					},
 				]}
-			/>
+			/> */}
 		</div>
 	);
 };

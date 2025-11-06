@@ -700,10 +700,12 @@ export type CustomFieldsGroupsResponse = Response & {
 
 export type FormsResponse = Response & {
 	data: Form[];
+	total_count: number;
 };
 
 export type LinkTriggersResponse = Response & {
 	data: LinkTrigger[];
+	total_count: number;
 };
 
 export type TemplatesResponse = Response & {

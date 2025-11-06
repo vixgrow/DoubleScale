@@ -27,6 +27,8 @@ import { ListDialog } from './lists-dialog';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@quillcrm/utils';
+import { NoData } from '@quillcrm/components';
+import ListsIcon from '@/components/icons/lists';
 
 export interface ListsRef {
 	openCreateListModal: () => void;
@@ -42,6 +44,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
+	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [keyword, setKeyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedList, setSelectedList] = useState<ContactList | null>(null);
@@ -113,6 +116,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 
 			setLists(response.data);
 			setTotalRecords(response.total || 0);
+			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -287,18 +291,33 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 
-			{/* Data Table */}
-			<DataTable
-				columns={columns}
-				data={lists}
-				activeTab={activeTab}
-				config={tableConfig}
-				showPagination={false}
-				initialPageSize={perPage}
-				setPage={setPage}
-				loading={loading}
-			/>
-			<DataTablePagination table={serverSideTable} />
+			{loading || hasRecords ? (
+				<>
+					{/* Data Table */}
+					<DataTable
+						columns={columns}
+						data={lists}
+						activeTab={activeTab}
+						config={tableConfig}
+						showPagination={false}
+						initialPageSize={perPage}
+						setPage={setPage}
+						loading={loading}
+					/>
+					<DataTablePagination table={serverSideTable} />
+				</>
+			) : (
+				<NoData
+					icon={<ListsIcon width={120} height={120} />}
+					title={__('No lists yet', 'quillcrm')}
+					subtitle={__(
+						'Get started by creating your first list to organize your contacts',
+						'quillcrm'
+					)}
+					buttonLabel={__('Create List', 'quillcrm')}
+					onClick={handleOpenCreateModal}
+				/>
+			)}
 
 			{/* Dialog */}
 			<ListDialog

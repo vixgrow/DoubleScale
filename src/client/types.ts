@@ -666,10 +666,12 @@ export type ContactsResponse = Response & {
 
 export type ListsResponse = Response & {
 	data: List[];
+	total_count: number;
 };
 
 export type TagsResponse = Response & {
 	data: Tag[];
+	total_count: number;
 };
 
 export type AutomationsResponse = Response & {

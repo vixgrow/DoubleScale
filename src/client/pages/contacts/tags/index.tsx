@@ -29,6 +29,8 @@ import { useTagsColumns } from './columns';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@quillcrm/utils';
+import { NoData } from '@quillcrm/components';
+import TagsIcon from '@/components/icons/tags';
 
 export interface TagsRef {
 	openCreateTagModal: () => void;
@@ -45,6 +47,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [page, setPage] = useState<number>(1);
 	const [keyword, setKeyword] = useState<string>('');
 	const [totalRecords, setTotalRecords] = useState<number>(0);
+	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedTag, setSelectedTag] = useState<ContactTag | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -121,6 +124,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 			setTags(response.data);
 			setTotalRecords(response.total);
+			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -288,17 +292,39 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 
-			<DataTable
-				columns={columns}
-				data={tags}
-				activeTab={activeTab}
-				config={tableConfig}
-				showPagination={false}
-				initialPageSize={perPage}
-				setPage={setPage}
-				loading={loading}
-			/>
-			<DataTablePagination table={serverSideTable} />
+			{loading || hasRecords ? (
+				<>
+					<DataTable
+						columns={columns}
+						data={tags}
+						activeTab={activeTab}
+						config={tableConfig}
+						showPagination={false}
+						initialPageSize={perPage}
+						setPage={setPage}
+						loading={loading}
+					/>
+					<DataTablePagination table={serverSideTable} />
+				</>
+			) : (
+				<NoData
+					icon={<TagsIcon width={120} height={120} />}
+					title={__('No tags yet', 'quillcrm')}
+					subtitle={__(
+						'Get started by creating your first tag to organize your contacts',
+						'quillcrm'
+					)}
+					buttonLabel={__('Create Tag', 'quillcrm')}
+					onClick={() => {
+						setSelectedTag(null);
+						setTag({
+							name: '',
+							description: '',
+						});
+						setVisible(true);
+					}}
+				/>
+			)}
 
 			<TagsDialog
 				visible={visible}

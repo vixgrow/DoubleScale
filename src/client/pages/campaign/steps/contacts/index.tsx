@@ -21,7 +21,9 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
+import { ListTagFilter } from '@quillcrm/components';
+import RulesBuilder from '@/components/rules-builder';
+import ConfigAPI from '@quillcrm/config';
 import { useCampaignStep, campaignSteps } from '../shared';
 
 const Contacts: React.FC = () => {
@@ -47,6 +49,65 @@ const Contacts: React.FC = () => {
 	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
 	const [panelHeight, setPanelHeight] = useState<number>(0);
 	const panelRef = useRef<HTMLDivElement>(null);
+
+	// Rules builder state (shared with ConditionsModal component)
+	const [rulesGroups] = useState(ConfigAPI.getAutomationRules());
+	const firstGroup = Object.keys(rulesGroups)[0];
+	const firstRule = firstGroup
+		? Object.keys(rulesGroups[firstGroup].rules)[0]
+		: '';
+	const getInitialRule = () => ({
+		rule: firstRule,
+		operator: 'is',
+		value: '',
+		selectedGroup: firstGroup,
+	});
+	const [rules, setRules] = useState([[getInitialRule()]]);
+
+	// Map RulesBuilder rules -> backend filters schema
+	const mapRulesToFilters = (inputRules: typeof rules): any[] => {
+		const flat = (inputRules || []).reduce(
+			(acc, group) => acc.concat(group || []),
+			[] as any[]
+		);
+		return flat
+			.filter((r) => r && r.rule)
+			.map((r) => ({
+				filter: r.rule, // backend expects filter slug
+				operator: r.operator || 'is',
+				value: r.value ?? '',
+			}));
+	};
+
+	// Helper: map backend filters -> RulesBuilder rules (single group)
+	const mapFiltersToRules = (inputFilters: FilterType[]) => {
+		const safe = Array.isArray(inputFilters) ? inputFilters : [];
+		if (!safe.length) return [[getInitialRule()]];
+		const group = safe.map((f: any) => ({
+			rule: f.filter || firstRule,
+			operator: f.operator || 'is',
+			value: f.value ?? '',
+			selectedGroup: firstGroup,
+		}));
+		return [group];
+	};
+
+	// Keep applying spinner in sync with fetch lifecycle
+	useEffect(() => {
+		if (!shouldFetchContacts) {
+			setIsApplying(false);
+		}
+	}, [shouldFetchContacts]);
+
+	// Initialize RulesBuilder from existing saved filters (DB) when advanced mode
+	useEffect(() => {
+		if (filterBy === 'advanced') {
+			setRules(mapFiltersToRules(filters));
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [filterBy]);
+
+	// (legacy duplicate) removed
 
 	// Handle filter mode change - clear filters immediately
 	const handleFilterModeChange = (newMode: string) => {
@@ -193,14 +254,41 @@ const Contacts: React.FC = () => {
 								/>
 							)}
 							{filterBy === 'advanced' && (
-								<AdvancedFilter
-									key="advanced-filter"
-									filters={filters}
-									setFilters={setFilters}
-									fetchContacts={handleApplyFilters}
-									loading={isLoading}
-									onApplyingChange={setIsApplying}
-								/>
+								<>
+									<RulesBuilder
+										rules={rules}
+										onChange={setRules}
+										rulesGroups={rulesGroups}
+									/>
+									<div className="flex gap-3 mt-4">
+										<Button
+											variant="secondaryDeepBlue"
+											onClick={() => {
+												// Sync filters then reuse existing handler
+												setFilters(
+													mapRulesToFilters(rules)
+												);
+												setIsApplying(true);
+												handleApplyFilters();
+											}}
+											disabled={isLoading}
+										>
+											{__('Apply Filters', 'quillcrm')}
+										</Button>
+										<Button
+											variant="destructive"
+											onClick={() => {
+												setRules([[getInitialRule()]]);
+												setFilters([]);
+												setIsApplying(true);
+												handleApplyFilters();
+											}}
+											disabled={isLoading}
+										>
+											{__('Clear Filters', 'quillcrm')}
+										</Button>
+									</div>
+								</>
 							)}
 						</div>
 					</PanelSettings>

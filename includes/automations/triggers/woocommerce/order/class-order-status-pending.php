@@ -1,44 +1,46 @@
 <?php
+
 /**
- * WooCommerce Order Completed Trigger
- * This trigger will be fired when an order is completed.
+ * WooCommerce Order Status Pending Trigger
+ * This trigger will be fired when an order status changes to pending.
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Triggers\WooCommerce;
+namespace QuillCRM\Automations\Triggers\WooCommerce\Order;
 
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
 use WC_Order;
 
 /**
- * Order Completed Trigger
+ * Order Status Pending Trigger
  */
-class Order_Completed extends Trigger {
+class Order_Status_Pending extends Trigger {
+
 
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Completed';
+	public $name = 'Order Status Pending';
 
 	/**
 	 * Trigger Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'wc_order_completed';
+	public $slug = 'wc_order_status_pending';
 
 	/**
 	 * Trigger Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This trigger will be fired when an order is completed.';
+	public $description = 'This trigger will be fired when an order status changes to pending payment.';
 
 	/**
 	 * Trigger Attributes
@@ -69,11 +71,11 @@ class Order_Completed extends Trigger {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'woocommerce_order_status_completed', array( $this, 'order_completed' ) );
+		add_action( 'woocommerce_order_status_pending', array( $this, 'order_status_pending' ) );
 	}
 
 	/**
-	 * Order Completed
+	 * Order Status Pending
 	 *
 	 * @since 1.0.0
 	 *
@@ -81,7 +83,7 @@ class Order_Completed extends Trigger {
 	 *
 	 * @return void
 	 */
-	public function order_completed( $order_id ) {
+	public function order_status_pending( $order_id ) {
 		$order = \wc_get_order( $order_id );
 		if ( ! $order instanceof WC_Order ) {
 			return;
@@ -92,7 +94,9 @@ class Order_Completed extends Trigger {
 			'last_name'  => $order->get_billing_last_name(),
 			'email'      => $order->get_billing_email(),
 			'data'       => array(
-				'order_id' => $order->get_id(),
+				'order_id'     => $order->get_id(),
+				'order_total'  => $order->get_total(),
+				'order_status' => 'wc-pending',
 			),
 		);
 
@@ -100,4 +104,4 @@ class Order_Completed extends Trigger {
 	}
 }
 
-Triggers_Manager::instance()->register( new Order_Completed() );
+Triggers_Manager::instance()->register( new Order_Status_Pending() );

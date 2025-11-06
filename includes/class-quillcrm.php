@@ -70,6 +70,7 @@ final class QuillCRM {
 
 
 
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -344,7 +345,7 @@ final class QuillCRM {
 
 		// Load all automations woocommerce triggers files
 		if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/woocommerce/class-*.php' );
+			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/woocommerce/**/class-*.php' );
 			foreach ( $triggers_files as $file ) {
 				require $file;
 			}

@@ -1,44 +1,46 @@
 <?php
+
 /**
- * WooCommerce Order Refunded Trigger
- * This trigger will be fired when an order is refunded.
+ * WooCommerce Order Completed Trigger
+ * This trigger will be fired when an order is completed.
  *
  * @since 1.0.0
  *
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Triggers\WooCommerce;
+namespace QuillCRM\Automations\Triggers\WooCommerce\Order;
 
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
 use WC_Order;
 
 /**
- * Order Refunded Trigger
+ * Order Completed Trigger
  */
-class Order_Refunded extends Trigger {
+class Order_Completed extends Trigger {
+
 
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Refunded';
+	public $name = 'Order Completed';
 
 	/**
 	 * Trigger Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'wc_order_refunded';
+	public $slug = 'wc_order_completed';
 
 	/**
 	 * Trigger Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This trigger will be fired when an order is refunded.';
+	public $description = 'This trigger will be fired when an order is completed.';
 
 	/**
 	 * Trigger Attributes
@@ -69,19 +71,19 @@ class Order_Refunded extends Trigger {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'woocommerce_order_refunded', array( $this, 'order_refunded' ), 10, 2 );
+		add_action( 'woocommerce_order_status_completed', array( $this, 'order_completed' ) );
 	}
 
 	/**
-	 * Order Refunded
+	 * Order Completed
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param int $order_id Order ID.
-	 * @param int $refund_id Refund ID.
+	 *
 	 * @return void
 	 */
-	public function order_refunded( $order_id, $refund_id ) {
+	public function order_completed( $order_id ) {
 		$order = \wc_get_order( $order_id );
 		if ( ! $order instanceof WC_Order ) {
 			return;
@@ -92,8 +94,7 @@ class Order_Refunded extends Trigger {
 			'last_name'  => $order->get_billing_last_name(),
 			'email'      => $order->get_billing_email(),
 			'data'       => array(
-				'order_id'  => $order->get_id(),
-				'refund_id' => $refund_id,
+				'order_id' => $order->get_id(),
 			),
 		);
 
@@ -101,4 +102,4 @@ class Order_Refunded extends Trigger {
 	}
 }
 
-Triggers_Manager::instance()->register( new Order_Refunded() );
+Triggers_Manager::instance()->register( new Order_Completed() );

@@ -28,6 +28,7 @@ final class Rules_Manager {
 
 
 
+
 	/**
 	 * Registed rules
 	 *
@@ -135,6 +136,22 @@ final class Rules_Manager {
 				'key'      => 'woocommerce_whishlist',
 				'rules'    => array(),
 				'triggers' => array( 'wc_user_adds_product_to_wishlist', 'wc_wishlist_item_on_sale', 'wc_wishlist_reminder' ),
+			),
+			'woocommerce_subscription'  => array(
+				'name'     => __( 'WooCommerce Subscription', 'quillcrm' ),
+				'key'      => 'woocommerce_subscription',
+				'rules'    => array(),
+				'triggers' => array(
+					'wc_subscription_created',
+					'wc_subscription_status_changed',
+					'wc_customer_before_card_expiry',
+					'wc_subscription_renewal_payment_failed',
+					'wc_subscription_renewal_payment_complete',
+					'wc_subscription_trial_end',
+					'wc_subscription_note_added',
+					'wc_subscription_before_renewal',
+					'wc_subscription_before_end',
+				),
 			),
 			'learndash'                 => array(
 				'name'  => __( 'LearnDash', 'quillcrm' ),

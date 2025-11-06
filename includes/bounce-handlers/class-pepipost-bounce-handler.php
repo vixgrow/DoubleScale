@@ -10,7 +10,6 @@
 namespace QuillCRM\Bounce_Handlers;
 
 use QuillCRM\Abstracts\Bounce_Handler;
-use QuillCRM\Managers\Bounce_Handler_Manager;
 
 /**
  * Pepipost_Bounce_Handler class
@@ -23,20 +22,6 @@ class Pepipost_Bounce_Handler extends Bounce_Handler {
 	 * @var string
 	 */
 	protected $name = 'Pepipost';
-
-	/**
-	 * Constructor
-	 *
-	 * @since 1.0.0
-	 */
-	public function __construct() {
-		add_action(
-			'quillcrm_bounce_handlers_loaded',
-			function () {
-				Bounce_Handler_Manager::instance()->register( self::class );
-			}
-		);
-	}
 
 	/**
 	 * Handle Pepipost bounce webhook
@@ -158,5 +143,3 @@ class Pepipost_Bounce_Handler extends Bounce_Handler {
 		return 'soft';
 	}
 }
-
-new Pepipost_Bounce_Handler();

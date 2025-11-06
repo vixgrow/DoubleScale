@@ -10,7 +10,6 @@
 namespace QuillCRM\Bounce_Handlers;
 
 use QuillCRM\Abstracts\Bounce_Handler;
-use QuillCRM\Managers\Bounce_Handler_Manager;
 
 /**
  * SMTP2GO_Bounce_Handler class
@@ -23,21 +22,6 @@ class SMTP2GO_Bounce_Handler extends Bounce_Handler {
 	 * @var string
 	 */
 	protected $name = 'SMTP2GO';
-
-	/**
-	 * Constructor
-	 *
-	 * @since 1.0.0
-	 */
-	public function __construct() {
-		// Auto-register with manager
-		add_action(
-			'quillcrm_bounce_handlers_loaded',
-			function () {
-				Bounce_Handler_Manager::instance()->register( self::class );
-			}
-		);
-	}
 
 	/**
 	 * Handle SMTP2GO webhook
@@ -382,5 +366,4 @@ class SMTP2GO_Bounce_Handler extends Bounce_Handler {
 }
 
 // Initialize handler
-new SMTP2GO_Bounce_Handler();
 

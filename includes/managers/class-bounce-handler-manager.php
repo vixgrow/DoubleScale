@@ -18,7 +18,16 @@ use Exception;
 final class Bounce_Handler_Manager {
 
 	/**
-	 * Registered bounce handlers
+	 * Registered bounce handler class names (lazy loaded)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var array
+	 */
+	protected $handler_classes = array();
+
+	/**
+	 * Instantiated bounce handlers (lazy loaded)
 	 *
 	 * @since 1.0.0
 	 *
@@ -65,6 +74,9 @@ final class Bounce_Handler_Manager {
 	/**
 	 * Load bounce handlers
 	 *
+	 * Discovers and registers handler classes without instantiating them.
+	 * Handlers are instantiated lazily when first needed.
+	 *
 	 * @since 1.0.0
 	 *
 	 * @return void
@@ -76,15 +88,31 @@ final class Bounce_Handler_Manager {
 			return;
 		}
 
+		// Load all handler files
 		foreach ( glob( $handlers_dir . 'class-*-bounce-handler.php' ) as $file ) {
 			require_once $file;
+
+			// Extract class name from file
+			$class_name = $this->get_class_name_from_file( $file );
+
+			if ( $class_name && class_exists( $class_name ) ) {
+				$this->register( $class_name );
+			}
 		}
 
+		/**
+		 * Fires after all bounce handlers have been loaded and registered.
+		 *
+		 * @since 1.0.0
+		 */
 		do_action( 'quillcrm_bounce_handlers_loaded' );
 	}
 
 	/**
-	 * Register a bounce handler
+	 * Register a bounce handler class
+	 *
+	 * Stores the class name for lazy instantiation. The handler is not
+	 * instantiated until it's actually needed (when a webhook is received).
 	 *
 	 * @since 1.0.0
 	 *
@@ -118,62 +146,47 @@ final class Bounce_Handler_Manager {
 			return false;
 		}
 
-		try {
-			$handler = new $class_name();
-
-			// Validate that handler extends the abstract class
-			if ( ! $handler instanceof \QuillCRM\Abstracts\Bounce_Handler ) {
-				quillcrm_get_logger()->error(
-					'Bounce handler must extend QuillCRM\Abstracts\Bounce_Handler: ' . $class_name,
-					array(
-						'source'     => 'bounce-handler-manager',
-						'class_name' => $class_name,
-						'parent'     => get_parent_class( $handler ),
-					)
-				);
-				return false;
-			}
-
-			$slug = $this->get_slug_from_class( $class_name );
-
-			// Check for duplicate registrations
-			if ( isset( $this->handlers[ $slug ] ) ) {
-				quillcrm_get_logger()->warning(
-					'Bounce handler already registered, overwriting: ' . $slug,
-					array(
-						'source'        => 'bounce-handler-manager',
-						'class_name'    => $class_name,
-						'slug'          => $slug,
-						'existing_name' => $this->handlers[ $slug ]->get_name(),
-					)
-				);
-			}
-
-			$this->handlers[ $slug ] = $handler;
-
-			quillcrm_get_logger()->info(
-				'Bounce handler registered successfully: ' . $handler->get_name(),
-				array(
-					'source'     => 'bounce-handler-manager',
-					'class_name' => $class_name,
-					'slug'       => $slug,
-					'name'       => $handler->get_name(),
-				)
-			);
-
-			return true;
-		} catch ( \Exception $e ) {
+		// Validate that class extends the abstract class (without instantiating)
+		if ( ! is_subclass_of( $class_name, '\QuillCRM\Abstracts\Bounce_Handler' ) ) {
 			quillcrm_get_logger()->error(
-				'Bounce handler registration error: ' . $e->getMessage(),
+				'Bounce handler must extend QuillCRM\Abstracts\Bounce_Handler: ' . $class_name,
 				array(
 					'source'     => 'bounce-handler-manager',
 					'class_name' => $class_name,
-					'exception'  => $e->getMessage(),
-					'trace'      => $e->getTraceAsString(),
+					'parent'     => get_parent_class( $class_name ),
 				)
 			);
 			return false;
 		}
+
+		$slug = $this->get_slug_from_class( $class_name );
+
+		// Check for duplicate registrations
+		if ( isset( $this->handler_classes[ $slug ] ) ) {
+			quillcrm_get_logger()->warning(
+				'Bounce handler already registered, overwriting: ' . $slug,
+				array(
+					'source'           => 'bounce-handler-manager',
+					'class_name'       => $class_name,
+					'slug'             => $slug,
+					'existing_class'   => $this->handler_classes[ $slug ],
+				)
+			);
+		}
+
+		// Store class name for lazy loading
+		$this->handler_classes[ $slug ] = $class_name;
+
+		quillcrm_get_logger()->debug(
+			'Bounce handler class registered: ' . $class_name,
+			array(
+				'source'     => 'bounce-handler-manager',
+				'class_name' => $class_name,
+				'slug'       => $slug,
+			)
+		);
+
+		return true;
 	}
 
 	/**
@@ -192,6 +205,94 @@ final class Bounce_Handler_Manager {
 		$slug  = str_replace( array( '_bounce_handler', '-' ), '', strtolower( $class ) );
 
 		return $slug;
+	}
+
+	/**
+	 * Get class name from file path
+	 *
+	 * Extracts the fully qualified class name from a bounce handler file path.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $file_path Full path to the bounce handler file.
+	 *
+	 * @return string|null Fully qualified class name or null if not found.
+	 */
+	private function get_class_name_from_file( $file_path ) {
+		// Extract filename: class-sendgrid-bounce-handler.php
+		$filename = basename( $file_path );
+
+		// Remove 'class-' prefix and '.php' suffix
+		$class_part = str_replace( array( 'class-', '.php' ), '', $filename );
+
+		// Convert kebab-case to PascalCase: sendgrid-bounce-handler -> Sendgrid_Bounce_Handler
+		$class_parts = explode( '-', $class_part );
+		$class_parts = array_map( 'ucfirst', $class_parts );
+		$class_name  = implode( '_', $class_parts );
+
+		// Build fully qualified class name
+		$full_class_name = '\\QuillCRM\\Bounce_Handlers\\' . $class_name;
+
+		return $full_class_name;
+	}
+
+	/**
+	 * Get handler instance (lazy loaded)
+	 *
+	 * Returns the handler instance for a given slug. If the handler hasn't been
+	 * instantiated yet, it will be created on first access.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $slug Handler slug.
+	 *
+	 * @return \QuillCRM\Abstracts\Bounce_Handler|null Handler instance or null if not found.
+	 */
+	private function get_handler( $slug ) {
+		// Check if handler is already instantiated
+		if ( isset( $this->handlers[ $slug ] ) ) {
+			return $this->handlers[ $slug ];
+		}
+
+		// Check if handler class is registered
+		if ( ! isset( $this->handler_classes[ $slug ] ) ) {
+			return null;
+		}
+
+		// Lazy instantiate the handler
+		$class_name = $this->handler_classes[ $slug ];
+
+		try {
+			$handler = new $class_name();
+
+			// Cache the instance
+			$this->handlers[ $slug ] = $handler;
+
+			quillcrm_get_logger()->debug(
+				'Bounce handler instantiated: ' . $handler->get_name(),
+				array(
+					'source'     => 'bounce-handler-manager',
+					'slug'       => $slug,
+					'class_name' => $class_name,
+				)
+			);
+
+			return $handler;
+
+		} catch ( \Exception $e ) {
+			quillcrm_get_logger()->error(
+				'Failed to instantiate bounce handler: ' . $e->getMessage(),
+				array(
+					'source'     => 'bounce-handler-manager',
+					'slug'       => $slug,
+					'class_name' => $class_name,
+					'exception'  => $e->getMessage(),
+					'trace'      => $e->getTraceAsString(),
+				)
+			);
+
+			return null;
+		}
 	}
 
 	/**
@@ -337,15 +438,17 @@ final class Bounce_Handler_Manager {
 			);
 		}
 
-		// Check if handler exists
-		if ( ! isset( $this->handlers[ $provider ] ) ) {
+		// Get handler (lazy loaded)
+		$handler = $this->get_handler( $provider );
+
+		if ( ! $handler ) {
 			quillcrm_get_logger()->warning(
 				'Unknown provider in bounce webhook: ' . $provider,
 				array(
 					'source'             => 'bounce-webhook',
 					'provider'           => $provider,
 					'request_id'         => $request_id,
-					'available_handlers' => array_keys( $this->handlers ),
+					'available_handlers' => array_keys( $this->handler_classes ),
 					'ip'                 => $this->get_client_ip(),
 				)
 			);
@@ -359,8 +462,6 @@ final class Bounce_Handler_Manager {
 				404
 			);
 		}
-
-		$handler = $this->handlers[ $provider ];
 
 		try {
 			// Get and validate data from request
@@ -465,6 +566,9 @@ final class Bounce_Handler_Manager {
 	/**
 	 * Get webhook URLs
 	 *
+	 * Returns webhook URLs for all registered handlers. Handlers are instantiated
+	 * only to get their display names.
+	 *
 	 * @since 1.0.0
 	 *
 	 * @return array
@@ -474,22 +578,43 @@ final class Bounce_Handler_Manager {
 		$base_url     = rest_url( 'quillcrm/v1/webhooks/bounce/' );
 
 		$urls = array();
-		foreach ( $this->handlers as $slug => $handler ) {
-			$urls[ $slug ] = array(
-				'name' => $handler->get_name(),
-				'url'  => add_query_arg( 'key', $security_key, $base_url . $slug ),
-			);
+		foreach ( $this->handler_classes as $slug => $class_name ) {
+			// Get handler instance (will be lazy loaded)
+			$handler = $this->get_handler( $slug );
+
+			if ( $handler ) {
+				$urls[ $slug ] = array(
+					'name' => $handler->get_name(),
+					'url'  => add_query_arg( 'key', $security_key, $base_url . $slug ),
+				);
+			}
 		}
 
 		return $urls;
 	}
 
 	/**
-	 * Get registered handlers
+	 * Get registered handler classes
+	 *
+	 * Returns the registered handler class names without instantiating them.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return array
+	 * @return array Array of slug => class_name pairs.
+	 */
+	public function get_handler_classes() {
+		return $this->handler_classes;
+	}
+
+	/**
+	 * Get instantiated handlers
+	 *
+	 * Returns only the handlers that have been instantiated so far.
+	 * Use get_handler_classes() to get all registered handlers.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array Array of instantiated handler instances.
 	 */
 	public function get_handlers() {
 		return $this->handlers;

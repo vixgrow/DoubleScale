@@ -10,7 +10,6 @@
 namespace QuillCRM\Bounce_Handlers;
 
 use QuillCRM\Abstracts\Bounce_Handler;
-use QuillCRM\Managers\Bounce_Handler_Manager;
 
 /**
  * Postal_Bounce_Handler class
@@ -23,21 +22,6 @@ class Postal_Bounce_Handler extends Bounce_Handler {
 	 * @var string
 	 */
 	protected $name = 'Postal';
-
-	/**
-	 * Constructor
-	 *
-	 * @since 1.0.0
-	 */
-	public function __construct() {
-		// Auto-register with manager
-		add_action(
-			'quillcrm_bounce_handlers_loaded',
-			function () {
-				Bounce_Handler_Manager::instance()->register( self::class );
-			}
-		);
-	}
 
 	/**
 	 * Handle Postal webhook
@@ -551,5 +535,4 @@ class Postal_Bounce_Handler extends Bounce_Handler {
 }
 
 // Initialize handler
-new Postal_Bounce_Handler();
 

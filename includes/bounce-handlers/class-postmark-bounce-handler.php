@@ -10,7 +10,6 @@
 namespace QuillCRM\Bounce_Handlers;
 
 use QuillCRM\Abstracts\Bounce_Handler;
-use QuillCRM\Managers\Bounce_Handler_Manager;
 
 /**
  * Postmark_Bounce_Handler class
@@ -30,20 +29,6 @@ class Postmark_Bounce_Handler extends Bounce_Handler {
 	 * @var array
 	 */
 	private $hard_bounce_codes = array( 1, 16, 512, 100000, 100001, 100002, 100003, 100006, 100009 );
-
-	/**
-	 * Constructor
-	 *
-	 * @since 1.0.0
-	 */
-	public function __construct() {
-		add_action(
-			'quillcrm_bounce_handlers_loaded',
-			function () {
-				Bounce_Handler_Manager::instance()->register( self::class );
-			}
-		);
-	}
 
 	/**
 	 * Handle Postmark bounce webhook
@@ -149,5 +134,3 @@ class Postmark_Bounce_Handler extends Bounce_Handler {
 		return 'soft';
 	}
 }
-
-new Postmark_Bounce_Handler();

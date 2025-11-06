@@ -10,7 +10,6 @@
 namespace QuillCRM\Bounce_Handlers;
 
 use QuillCRM\Abstracts\Bounce_Handler;
-use QuillCRM\Managers\Bounce_Handler_Manager;
 
 /**
  * Mailgun_Bounce_Handler class
@@ -23,21 +22,6 @@ class Mailgun_Bounce_Handler extends Bounce_Handler {
 	 * @var string
 	 */
 	protected $name = 'Mailgun';
-
-	/**
-	 * Constructor
-	 *
-	 * @since 1.0.0
-	 */
-	public function __construct() {
-		// Auto-register with manager
-		add_action(
-			'quillcrm_bounce_handlers_loaded',
-			function () {
-				Bounce_Handler_Manager::instance()->register( self::class );
-			}
-		);
-	}
 
 	/**
 	 * Handle Mailgun webhook
@@ -117,6 +101,3 @@ class Mailgun_Bounce_Handler extends Bounce_Handler {
 		return $this->mark_contact_bounced( $email, $metadata );
 	}
 }
-
-// Initialize handler
-new Mailgun_Bounce_Handler();

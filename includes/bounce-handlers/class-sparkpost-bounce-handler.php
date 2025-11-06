@@ -10,7 +10,6 @@
 namespace QuillCRM\Bounce_Handlers;
 
 use QuillCRM\Abstracts\Bounce_Handler;
-use QuillCRM\Managers\Bounce_Handler_Manager;
 
 /**
  * Sparkpost_Bounce_Handler class
@@ -30,20 +29,6 @@ class Sparkpost_Bounce_Handler extends Bounce_Handler {
 	 * @var array
 	 */
 	private $hard_bounce_classes = array( '10', '25', '30', '80', '90' );
-
-	/**
-	 * Constructor
-	 *
-	 * @since 1.0.0
-	 */
-	public function __construct() {
-		add_action(
-			'quillcrm_bounce_handlers_loaded',
-			function () {
-				Bounce_Handler_Manager::instance()->register( self::class );
-			}
-		);
-	}
 
 	/**
 	 * Handle SparkPost bounce webhook
@@ -164,4 +149,3 @@ class Sparkpost_Bounce_Handler extends Bounce_Handler {
 	}
 }
 
-new Sparkpost_Bounce_Handler();

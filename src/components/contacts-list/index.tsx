@@ -243,7 +243,6 @@ const ContactList: React.FC<ContactListProps> = ({
 									contact.last_name
 								);
 								const hasImage = (contact as any).img;
-								
 
 								return (
 									<div
@@ -255,7 +254,10 @@ const ContactList: React.FC<ContactListProps> = ({
 											<Avatar className="w-12 h-12 rounded-full">
 												<AvatarImage
 													src={(contact as any).img}
-													alt={fullName || contact.email}
+													alt={
+														fullName ||
+														contact.email
+													}
 													className="rounded-full"
 												/>
 											</Avatar>
@@ -280,8 +282,8 @@ const ContactList: React.FC<ContactListProps> = ({
 										</div>
 									</div>
 								);
-							})}
-						</div>
+							}
+						)}
 
 						{/* Loading more indicator */}
 						{isLoading && contacts.length > 0 && (

@@ -13,7 +13,7 @@ import type { Campaign as CampaignType } from '@quillcrm/client';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { Button } from '@/components/ui/button';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
-import { NoData, ContactTotalEmailsIcon, EditIcon } from '@quillcrm/components';
+import { NoData, ContactTotalEmailsIcon, EditIcon, FormattedDateCell, ContactSMSIcon } from '@quillcrm/components';
 
 const CampaignDetails: React.FC = () => {
 	const campaign = useSelect(
@@ -128,7 +128,7 @@ const CampaignDetails: React.FC = () => {
 							{__('Scheduled On', 'quillcrm')}
 						</span>
 						<p className="text-base font-semibold text-[#09090B]">
-							{new Date(campaign.execute_at).toLocaleString()}
+							<FormattedDateCell value={campaign.execute_at} />
 						</p>
 					</div>
 				)}
@@ -162,9 +162,10 @@ const CampaignDetails: React.FC = () => {
 								);
 							}}
 						>
+							<EditIcon />
 							{campaign.type === CAMPAIGN_CHANNEL.EMAIL
 								? __('Edit Email Template', 'quillcrm')
-								: __('Edit Template', 'quillcrm')}
+								: __('Edit SMS Template', 'quillcrm')}
 						</Button>
 					)}
 				</div>
@@ -201,12 +202,14 @@ const CampaignDetails: React.FC = () => {
 				) : (
 					<NoData
 						icon={
-							<ContactTotalEmailsIcon width={120} height={120} />
+							campaign.type === CAMPAIGN_CHANNEL.EMAIL
+								? <ContactTotalEmailsIcon width={120} height={120} />
+								: <ContactSMSIcon width={120} height={120} />
 						}
 						title={
 							campaign.type === CAMPAIGN_CHANNEL.EMAIL
 								? __('No Email Template', 'quillcrm')
-								: __('No Template', 'quillcrm')
+								: __('No SMS Template', 'quillcrm')
 						}
 						subtitle={
 							campaign.type === CAMPAIGN_CHANNEL.EMAIL
@@ -227,7 +230,7 @@ const CampaignDetails: React.FC = () => {
 						buttonLabel={
 							campaign.type === CAMPAIGN_CHANNEL.EMAIL
 								? __('Edit Email Template', 'quillcrm')
-								: __('Edit Template', 'quillcrm')
+								: __('Edit SMS Template', 'quillcrm')
 						}
 						buttonIcon={<EditIcon />}
 					/>

@@ -24,6 +24,27 @@ class Sparkpost_Bounce_Handler extends Bounce_Handler {
 	protected $name = 'SparkPost';
 
 	/**
+	 * Provider description
+	 *
+	 * @var string
+	 */
+	protected $description = 'Set up SparkPost webhooks for bounce handling';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = 'https://developers.sparkpost.com/api/webhooks/';
+
+	/**
+	 * Setup instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = 'In SparkPost Dashboard → Webhooks → Create Webhook, select \"Bounce\" and \"Out of Band\" events.';
+
+	/**
 	 * Hard bounce classification codes
 	 *
 	 * @var array

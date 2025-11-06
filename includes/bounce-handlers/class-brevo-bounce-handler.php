@@ -24,6 +24,27 @@ class Brevo_Bounce_Handler extends Bounce_Handler {
 	protected $name = 'Brevo';
 
 	/**
+	 * Provider description
+	 *
+	 * @var string
+	 */
+	protected $description = 'Set up Brevo (formerly Sendinblue) bounce handling';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = 'https://developers.brevo.com/docs/webhooks';
+
+	/**
+	 * Setup instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = 'In Brevo Dashboard → Transactional → Settings → Webhooks, add this URL for bounce events.';
+
+	/**
 	 * Handle Brevo webhook
 	 *
 	 * @since 1.0.0

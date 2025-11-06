@@ -24,6 +24,27 @@ class Postal_Bounce_Handler extends Bounce_Handler {
 	protected $name = 'Postal';
 
 	/**
+	 * Provider description
+	 *
+	 * @var string
+	 */
+	protected $description = 'Configure Postal server bounce webhook';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = 'https://github.com/postalserver/postal/wiki/Webhooks';
+
+	/**
+	 * Setup instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = 'Add this webhook URL in your Postal server webhook settings.';
+
+	/**
 	 * Handle Postal webhook
 	 *
 	 * @since 1.0.0

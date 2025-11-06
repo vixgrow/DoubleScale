@@ -24,6 +24,27 @@ class SMTP2GO_Bounce_Handler extends Bounce_Handler {
 	protected $name = 'SMTP2GO';
 
 	/**
+	 * Provider description
+	 *
+	 * @var string
+	 */
+	protected $description = 'Configure SMTP2GO webhook for bounce events';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = 'https://support.smtp2go.com/hc/en-gb/articles/223076368-Webhook-Reference';
+
+	/**
+	 * Setup instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = 'Add webhook URL in SMTP2GO Dashboard → Settings → Webhooks.';
+
+	/**
 	 * Handle SMTP2GO webhook
 	 *
 	 * @since 1.0.0

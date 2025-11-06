@@ -24,6 +24,27 @@ class Sendgrid_Bounce_Handler extends Bounce_Handler {
 	protected $name = 'SendGrid';
 
 	/**
+	 * Provider description
+	 *
+	 * @var string
+	 */
+	protected $description = 'Configure SendGrid Event Webhook for bounce notifications';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = 'https://docs.sendgrid.com/for-developers/tracking-events/getting-started-event-webhook';
+
+	/**
+	 * Setup instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = 'Go to SendGrid Dashboard → Settings → Mail Settings → Event Webhook. Enable "Bounced" and "Dropped" events, then paste the webhook URL.';
+
+	/**
 	 * Handle SendGrid webhook
 	 *
 	 * @since 1.0.0

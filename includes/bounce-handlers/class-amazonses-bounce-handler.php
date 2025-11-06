@@ -24,6 +24,27 @@ class Amazonses_Bounce_Handler extends Bounce_Handler {
 	protected $name = 'Amazon SES';
 
 	/**
+	 * Provider description
+	 *
+	 * @var string
+	 */
+	protected $description = 'Configure Amazon SES bounce notifications via SNS';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = 'https://docs.aws.amazon.com/ses/latest/dg/configure-sns-notifications.html';
+
+	/**
+	 * Setup instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = 'Set up an SNS topic for bounces in AWS SES Console → Email Addresses → Notifications, then subscribe this webhook URL to that topic.';
+
+	/**
 	 * Handle Amazon SES bounce webhook (via SNS)
 	 *
 	 * @since 1.0.0

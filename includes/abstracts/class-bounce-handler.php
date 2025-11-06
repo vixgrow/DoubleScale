@@ -34,6 +34,27 @@ abstract class Bounce_Handler {
 	protected $name = '';
 
 	/**
+	 * Provider Description
+	 *
+	 * @var string
+	 */
+	protected $description = '';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = '';
+
+	/**
+	 * Setup Instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = '';
+
+	/**
 	 * Webhook data
 	 *
 	 * @var array
@@ -49,6 +70,57 @@ abstract class Bounce_Handler {
 	 */
 	public function get_name() {
 		return $this->name;
+	}
+
+	/**
+	 * Get provider description
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public function get_description() {
+		return $this->description;
+	}
+
+	/**
+	 * Get documentation URL
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public function get_doc_url() {
+		return $this->doc_url;
+	}
+
+	/**
+	 * Get setup instructions
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public function get_setup_instructions() {
+		return $this->setup_instructions;
+	}
+
+	/**
+	 * Get provider metadata
+	 *
+	 * Returns all provider metadata in a single array.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public function get_metadata() {
+		return array(
+			'name'              => $this->get_name(),
+			'description'       => $this->get_description(),
+			'doc_url'           => $this->get_doc_url(),
+			'setup_instructions' => $this->get_setup_instructions(),
+		);
 	}
 
 	/**

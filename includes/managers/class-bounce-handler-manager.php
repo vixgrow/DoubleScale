@@ -566,14 +566,16 @@ final class Bounce_Handler_Manager {
 	/**
 	 * Get webhook URLs
 	 *
-	 * Returns webhook URLs for all registered handlers. Handlers are instantiated
-	 * only to get their display names.
+	 * Returns webhook URLs and metadata for all registered handlers.
+	 * Handlers are instantiated only to get their metadata.
 	 *
 	 * @since 1.0.0
 	 *
+	 * @param bool $include_metadata Whether to include full metadata (description, doc_url, etc.).
+	 *
 	 * @return array
 	 */
-	public function get_webhook_urls() {
+	public function get_webhook_urls( $include_metadata = true ) {
 		$security_key = get_option( 'quillcrm_bounce_security_key' );
 		$base_url     = rest_url( 'quillcrm/v1/webhooks/bounce/' );
 
@@ -583,10 +585,20 @@ final class Bounce_Handler_Manager {
 			$handler = $this->get_handler( $slug );
 
 			if ( $handler ) {
-				$urls[ $slug ] = array(
+				$webhook_data = array(
+					'slug' => $slug,
 					'name' => $handler->get_name(),
 					'url'  => add_query_arg( 'key', $security_key, $base_url . $slug ),
 				);
+
+				// Include additional metadata if requested
+				if ( $include_metadata ) {
+					$webhook_data['description']        = $handler->get_description();
+					$webhook_data['doc_url']            = $handler->get_doc_url();
+					$webhook_data['setup_instructions'] = $handler->get_setup_instructions();
+				}
+
+				$urls[ $slug ] = $webhook_data;
 			}
 		}
 

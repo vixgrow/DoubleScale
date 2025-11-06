@@ -24,6 +24,27 @@ class Pepipost_Bounce_Handler extends Bounce_Handler {
 	protected $name = 'Pepipost';
 
 	/**
+	 * Provider description
+	 *
+	 * @var string
+	 */
+	protected $description = 'Configure Pepipost webhook for bounce tracking';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = 'https://docs.pepipost.com/docs/webhooks';
+
+	/**
+	 * Setup instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = 'Add this webhook URL in Pepipost Dashboard → Settings → Webhooks.';
+
+	/**
 	 * Handle Pepipost bounce webhook
 	 *
 	 * @since 1.0.0

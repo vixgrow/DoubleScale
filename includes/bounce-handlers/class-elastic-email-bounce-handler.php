@@ -24,6 +24,27 @@ class Elastic_Email_Bounce_Handler extends Bounce_Handler {
 	protected $name = 'Elastic Email';
 
 	/**
+	 * Provider description
+	 *
+	 * @var string
+	 */
+	protected $description = 'Set up Elastic Email bounce notifications';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = 'https://elasticemail.com/developers/webhooks';
+
+	/**
+	 * Setup instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = 'Configure webhook in Elastic Email Dashboard → Settings → Notification → Webhooks.';
+
+	/**
 	 * Handle Elastic Email webhook
 	 *
 	 * @since 1.0.0

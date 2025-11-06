@@ -24,6 +24,27 @@ class Mailgun_Bounce_Handler extends Bounce_Handler {
 	protected $name = 'Mailgun';
 
 	/**
+	 * Provider description
+	 *
+	 * @var string
+	 */
+	protected $description = 'Set up Mailgun webhooks for bounce and failure events';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = 'https://documentation.mailgun.com/en/latest/user_manual.html#webhooks';
+
+	/**
+	 * Setup instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = 'In Mailgun Dashboard → Webhooks, enable \"Permanent Failure\" and \"Temporary Failure\" events with this URL.';
+
+	/**
 	 * Handle Mailgun webhook
 	 *
 	 * @since 1.0.0

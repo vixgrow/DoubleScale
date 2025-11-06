@@ -24,6 +24,27 @@ class Postmark_Bounce_Handler extends Bounce_Handler {
 	protected $name = 'Postmark';
 
 	/**
+	 * Provider description
+	 *
+	 * @var string
+	 */
+	protected $description = 'Configure Postmark bounce webhook';
+
+	/**
+	 * Documentation URL
+	 *
+	 * @var string
+	 */
+	protected $doc_url = 'https://postmarkapp.com/developer/webhooks/bounce-webhook';
+
+	/**
+	 * Setup instructions
+	 *
+	 * @var string
+	 */
+	protected $setup_instructions = 'Navigate to Postmark Dashboard → Servers → [Your Server] → Webhooks → Bounce, and paste this URL.';
+
+	/**
 	 * Hard bounce TypeCodes
 	 *
 	 * @var array

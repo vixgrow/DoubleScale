@@ -34,93 +34,17 @@ interface EmailSettingsProps {
 }
 
 interface BounceWebhook {
+	slug: string;
 	name: string;
 	url: string;
+	description?: string;
+	doc_url?: string;
+	setup_instructions?: string;
 }
 
 interface BounceWebhooks {
 	[provider: string]: BounceWebhook;
 }
-
-interface ProviderInfo {
-	description: string;
-	docUrl?: string;
-	setupInstructions?: string;
-}
-
-const PROVIDER_INFO: Record<string, ProviderInfo> = {
-	sendgrid: {
-		description: __('Configure SendGrid Event Webhook for bounce notifications', 'quillcrm'),
-		docUrl: 'https://docs.sendgrid.com/for-developers/tracking-events/getting-started-event-webhook',
-		setupInstructions: __(
-			'Go to SendGrid Dashboard → Settings → Mail Settings → Event Webhook. Enable "Bounced" and "Dropped" events, then paste the webhook URL.',
-			'quillcrm'
-		),
-	},
-	mailgun: {
-		description: __('Set up Mailgun webhooks for bounce and failure events', 'quillcrm'),
-		docUrl: 'https://documentation.mailgun.com/en/latest/user_manual.html#webhooks',
-		setupInstructions: __(
-			'In Mailgun Dashboard → Webhooks, enable "Permanent Failure" and "Temporary Failure" events with this URL.',
-			'quillcrm'
-		),
-	},
-	postmark: {
-		description: __('Configure Postmark bounce webhook', 'quillcrm'),
-		docUrl: 'https://postmarkapp.com/developer/webhooks/bounce-webhook',
-		setupInstructions: __(
-			'Navigate to Postmark Dashboard → Servers → [Your Server] → Webhooks → Bounce, and paste this URL.',
-			'quillcrm'
-		),
-	},
-	sparkpost: {
-		description: __('Set up SparkPost webhooks for bounce handling', 'quillcrm'),
-		docUrl: 'https://developers.sparkpost.com/api/webhooks/',
-		setupInstructions: __(
-			'In SparkPost Dashboard → Webhooks → Create Webhook, select "Bounce" and "Out of Band" events.',
-			'quillcrm'
-		),
-	},
-	amazonses: {
-		description: __('Configure Amazon SES bounce notifications via SNS', 'quillcrm'),
-		docUrl: 'https://docs.aws.amazon.com/ses/latest/dg/configure-sns-notifications.html',
-		setupInstructions: __(
-			'Set up an SNS topic for bounces in AWS SES Console → Email Addresses → Notifications, then subscribe this webhook URL to that topic.',
-			'quillcrm'
-		),
-	},
-	pepipost: {
-		description: __('Configure Pepipost webhook for bounce tracking', 'quillcrm'),
-		docUrl: 'https://docs.pepipost.com/docs/webhooks',
-		setupInstructions: __('Add this webhook URL in Pepipost Dashboard → Settings → Webhooks.', 'quillcrm'),
-	},
-	brevo: {
-		description: __('Set up Brevo (formerly Sendinblue) bounce handling', 'quillcrm'),
-		docUrl: 'https://developers.brevo.com/docs/webhooks',
-		setupInstructions: __(
-			'In Brevo Dashboard → Transactional → Settings → Webhooks, add this URL for bounce events.',
-			'quillcrm'
-		),
-	},
-	smtp2go: {
-		description: __('Configure SMTP2GO webhook for bounce events', 'quillcrm'),
-		docUrl: 'https://support.smtp2go.com/hc/en-gb/articles/223076368-Webhook-Reference',
-		setupInstructions: __('Add webhook URL in SMTP2GO Dashboard → Settings → Webhooks.', 'quillcrm'),
-	},
-	elasticemail: {
-		description: __('Set up Elastic Email bounce notifications', 'quillcrm'),
-		docUrl: 'https://elasticemail.com/developers/webhooks',
-		setupInstructions: __(
-			'Configure webhook in Elastic Email Dashboard → Settings → Notification → Webhooks.',
-			'quillcrm'
-		),
-	},
-	postal: {
-		description: __('Configure Postal server bounce webhook', 'quillcrm'),
-		docUrl: 'https://github.com/postalserver/postal/wiki/Webhooks',
-		setupInstructions: __('Add this webhook URL in your Postal server webhook settings.', 'quillcrm'),
-	},
-};
 
 const EmailSettings: React.FC<EmailSettingsProps> = ({
     settings,
@@ -140,11 +64,10 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
 	const [isLoadingWebhooks, setIsLoadingWebhooks] = useState(false);
 	const [copied, setCopied] = useState(false);
 
+	// Fetch webhooks on component mount
 	useEffect(() => {
-		if (selectedProvider && !webhooks) {
-			fetchWebhooks();
-		}
-	}, [selectedProvider]);
+		fetchWebhooks();
+	}, []);
 
 	const fetchWebhooks = async () => {
 		try {
@@ -183,7 +106,11 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
     };
 
 	const selectedWebhook = selectedProvider && webhooks ? webhooks[selectedProvider] : null;
-	const providerInfo = selectedProvider ? PROVIDER_INFO[selectedProvider] : null;
+
+	// Get sorted provider list for dropdown
+	const providersList = webhooks
+		? Object.values(webhooks).sort((a, b) => a.name.localeCompare(b.name))
+		: [];
 
     return (
         <div className="email-settings qcrm-fields">
@@ -278,113 +205,107 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
 						<label className="text-[#09090B] font-normal text-base mb-2 block">
 							{__('Select Email Service Provider', 'quillcrm')}
 						</label>
-						<Select value={selectedProvider} onValueChange={setSelectedProvider}>
+						<Select
+							value={selectedProvider}
+							onValueChange={setSelectedProvider}
+							disabled={isLoadingWebhooks || !webhooks}
+						>
 							<SelectTrigger className="w-full">
-								<SelectValue placeholder={__('Choose your email provider...', 'quillcrm')} />
+								<SelectValue
+									placeholder={
+										isLoadingWebhooks
+											? __('Loading providers...', 'quillcrm')
+											: __('Choose your email provider...', 'quillcrm')
+									}
+								/>
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="sendgrid">SendGrid</SelectItem>
-								<SelectItem value="mailgun">Mailgun</SelectItem>
-								<SelectItem value="postmark">Postmark</SelectItem>
-								<SelectItem value="sparkpost">SparkPost</SelectItem>
-								<SelectItem value="amazonses">Amazon SES</SelectItem>
-								<SelectItem value="pepipost">Pepipost</SelectItem>
-								<SelectItem value="brevo">Brevo (Sendinblue)</SelectItem>
-								<SelectItem value="smtp2go">SMTP2GO</SelectItem>
-								<SelectItem value="elasticemail">Elastic Email</SelectItem>
-								<SelectItem value="postal">Postal</SelectItem>
+								{providersList.map((provider) => (
+									<SelectItem key={provider.slug} value={provider.slug}>
+										{provider.name}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 					</div>
 
-					{selectedProvider && (
+					{selectedProvider && selectedWebhook && (
 						<Card className="mt-6">
 							<CardHeader>
-								<CardTitle className="text-lg">
-									{selectedWebhook?.name || selectedProvider}
-								</CardTitle>
-								{providerInfo && (
-									<CardDescription>{providerInfo.description}</CardDescription>
+								<CardTitle className="text-lg">{selectedWebhook.name}</CardTitle>
+								{selectedWebhook.description && (
+									<CardDescription>{selectedWebhook.description}</CardDescription>
 								)}
 							</CardHeader>
 							<CardContent className="space-y-4">
-								{isLoadingWebhooks ? (
-									<div className="animate-pulse space-y-3">
-										<div className="h-10 bg-gray-200 rounded"></div>
-										<div className="h-20 bg-gray-200 rounded"></div>
+								{/* Webhook URL */}
+								<div className="space-y-2">
+									<label className="text-sm font-medium text-gray-700">
+										{__('Webhook URL', 'quillcrm')}
+									</label>
+									<div className="flex gap-2">
+										<input
+											type="text"
+											value={selectedWebhook.url}
+											readOnly
+											className="flex-1 px-3 py-2 text-sm border rounded-md bg-gray-50 font-mono text-gray-600"
+										/>
+										<Button
+											onClick={handleCopyWebhook}
+											variant="outline"
+											size="sm"
+											className="shrink-0"
+										>
+											{copied ? (
+												<>
+													<Check className="h-4 w-4 mr-1 text-green-600" />
+													{__('Copied!', 'quillcrm')}
+												</>
+											) : (
+												<>
+													<Copy className="h-4 w-4 mr-1" />
+													{__('Copy', 'quillcrm')}
+												</>
+											)}
+										</Button>
 									</div>
-								) : selectedWebhook ? (
-									<>
-										{/* Webhook URL */}
-										<div className="space-y-2">
-											<label className="text-sm font-medium text-gray-700">
-												{__('Webhook URL', 'quillcrm')}
-											</label>
-											<div className="flex gap-2">
-												<input
-													type="text"
-													value={selectedWebhook.url}
-													readOnly
-													className="flex-1 px-3 py-2 text-sm border rounded-md bg-gray-50 font-mono text-gray-600"
-												/>
-												<Button
-													onClick={handleCopyWebhook}
-													variant="outline"
-													size="sm"
-													className="shrink-0"
-												>
-													{copied ? (
-														<>
-															<Check className="h-4 w-4 mr-1 text-green-600" />
-															{__('Copied!', 'quillcrm')}
-														</>
-													) : (
-														<>
-															<Copy className="h-4 w-4 mr-1" />
-															{__('Copy', 'quillcrm')}
-														</>
-													)}
-												</Button>
-											</div>
-										</div>
+								</div>
 
-										{/* Setup Instructions */}
-										{providerInfo?.setupInstructions && (
-											<Alert>
-												<AlertDescription className="text-sm">
-													<strong>{__('Setup Instructions:', 'quillcrm')}</strong>{' '}
-													{providerInfo.setupInstructions}
-												</AlertDescription>
-											</Alert>
+								{/* Setup Instructions */}
+								{selectedWebhook.setup_instructions && (
+									<Alert>
+										<AlertDescription className="text-sm">
+											<strong>{__('Setup Instructions:', 'quillcrm')}</strong>{' '}
+											{selectedWebhook.setup_instructions}
+										</AlertDescription>
+									</Alert>
+								)}
+
+								{/* Documentation Link */}
+								{selectedWebhook.doc_url && (
+									<div>
+										<a
+											href={selectedWebhook.doc_url}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+										>
+											<ExternalLink className="h-4 w-4" />
+											{__('View Provider Documentation', 'quillcrm')}
+										</a>
+									</div>
+								)}
+
+								{/* How It Works Info */}
+								<Alert className="bg-blue-50 border-blue-200 mt-4">
+									<AlertDescription className="text-sm text-blue-900">
+										<strong>{__('How it works:', 'quillcrm')}</strong>{' '}
+										{__(
+											'When an email bounces, your provider sends a notification to this webhook. QuillCRM automatically marks contacts as bounced (hard bounce) or tracks soft bounces. After 3 soft bounces, contacts are converted to hard bounce status.',
+											'quillcrm'
 										)}
-
-										{/* Documentation Link */}
-										{providerInfo?.docUrl && (
-											<div>
-												<a
-													href={providerInfo.docUrl}
-													target="_blank"
-													rel="noopener noreferrer"
-													className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-												>
-													<ExternalLink className="h-4 w-4" />
-													{__('View Provider Documentation', 'quillcrm')}
-												</a>
-											</div>
-										)}
-
-										{/* How It Works Info */}
-										<Alert className="bg-blue-50 border-blue-200 mt-4">
-											<AlertDescription className="text-sm text-blue-900">
-												<strong>{__('How it works:', 'quillcrm')}</strong>{' '}
-												{__(
-													'When an email bounces, your provider sends a notification to this webhook. QuillCRM automatically marks contacts as bounced (hard bounce) or tracks soft bounces. After 3 soft bounces, contacts are converted to hard bounce status.',
-													'quillcrm'
-												)}
-											</AlertDescription>
-										</Alert>
-									</>
-								) : null}
+									</AlertDescription>
+								</Alert>
 							</CardContent>
 						</Card>
 					)}

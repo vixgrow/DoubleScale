@@ -30,6 +30,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const { createNotice } = useDispatch('quillcrm/core');
 	const campaign = useSelect(
 		(select: any) => select('quillcrm/campaign').getCampaign(),
 		[]
@@ -37,8 +38,36 @@ const Header: React.FC<HeaderProps> = ({
 
 	const canUndo = useSelect((select) => select(STORE_KEY).canUndo(), []);
 	const canRedo = useSelect((select) => select(STORE_KEY).canRedo(), []);
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
 
 	const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+
+	// Check if builder is empty
+	const isBuilderEmpty =
+		!sections?.length ||
+		sections.every(
+			(section) =>
+				!section.columns?.length ||
+				section.columns.every((column) => !column.blocks?.length)
+		);
+
+	// Centralized notice and guard
+	const showEmptyBuilderNotice = () =>
+		createNotice({
+			type: 'error',
+			message: __(
+				'The builder cannot be empty. Please add at least one block before saving.',
+				'quillcrm'
+			),
+		});
+
+	const ensureNotEmptyOrNotify = (): boolean => {
+		if (isBuilderEmpty) {
+			showEmptyBuilderNotice();
+			return false;
+		}
+		return true;
+	};
 
 	const { saveAsTemplate, isSaving: isSavingTemplate } = useTemplateActions();
 
@@ -57,9 +86,10 @@ const Header: React.FC<HeaderProps> = ({
 	});
 
 	const handleSaveAndContinue = async () => {
+		if (!ensureNotEmptyOrNotify()) return;
+
 		const { success } = await save();
 		if (success && campaign) {
-			// Template is already linked via campaign.settings.template_ids
 			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 		}
 	};
@@ -123,7 +153,7 @@ const Header: React.FC<HeaderProps> = ({
 							variant="secondary"
 							className="px-3"
 							onClick={() => setIsTemplateDialogOpen(true)}
-							disabled={isSavingTemplate}
+							disabled={isSavingTemplate || isBuilderEmpty}
 							title={__('Save as template', 'quillcrm')}
 						>
 							{__('Save as Template', 'quillcrm')}
@@ -133,7 +163,7 @@ const Header: React.FC<HeaderProps> = ({
 							variant="default"
 							className="px-3"
 							onClick={handleSaveAndContinue}
-							disabled={isSaving}
+							disabled={isSaving || isBuilderEmpty}
 						>
 							{isSaving
 								? __('Saving...', 'quillcrm')
@@ -157,8 +187,11 @@ const Header: React.FC<HeaderProps> = ({
 						<Button
 							variant="default"
 							className="px-3"
-							onClick={() => save()}
-							disabled={isSaving}
+							onClick={() => {
+								if (!ensureNotEmptyOrNotify()) return;
+								save();
+							}}
+							disabled={isSaving || isBuilderEmpty}
 						>
 							{isSaving
 								? __('Saving...', 'quillcrm')

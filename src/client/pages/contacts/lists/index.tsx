@@ -8,7 +8,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * external dependencies
  */
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 /**
  * Internal dependencies
  */
@@ -19,7 +19,7 @@ import type {
 	DataTableConfig,
 	NoticeMessage,
 } from '@quillcrm/client';
-import { NoticeBanner } from '@quillcrm/components';
+import { GradientListIcon, NoticeBanner, NoData } from '@quillcrm/components';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
 import { getListColumns } from './columns';
@@ -42,6 +42,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
+	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [keyword, setKeyword] = useState<string>('');
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedList, setSelectedList] = useState<ContactList | null>(null);
@@ -54,6 +55,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 	const [bulkAction, setBulkAction] = useState<string>('');
 	const [isApplying, setIsApplying] = useState<boolean>(false);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
@@ -71,8 +73,16 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		setNotice(null);
 	};
 
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
+
 	const validate = (list: Partial<ContactList>) => {
 		if (isEmpty(list.name || '', { ignore_whitespace: true })) {
+			setVisible(false);
 			showNotice('error', __('List name is required', 'quillcrm'));
 			return false;
 		}
@@ -104,6 +114,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 
 			setLists(response.data);
 			setTotalRecords(response.total || 0);
+			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -118,13 +129,12 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 
 		setIsSaving(true);
 		try {
-			const response = await apiFetch({
+			await apiFetch({
 				path: '/qc/v1/lists',
 				method: 'POST',
 				data: list,
 			});
 
-			setLists([...lists, response as ContactList]);
 			setVisible(false);
 			setList({ name: '', description: '' });
 			showNotice(
@@ -134,6 +144,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 					'quillcrm'
 				)
 			);
+			fetchLists();
 		} catch (error: any) {
 			setVisible(false);
 			showNotice('error', error.message);
@@ -232,17 +243,9 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		}
 	};
 
-	// Effects
 	useEffect(() => {
 		fetchLists();
 	}, [page, perPage, keyword, dateRange]);
-
-	// useEffect(() => {
-	// 	if (dateRange.from || dateRange.to) {
-	// 		setPage(1);
-	// 		fetchLists();
-	// 	}
-	// }, [dateRange]);
 
 	// Imperative handle
 	useImperativeHandle(ref, () => ({
@@ -283,19 +286,36 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 		<div className="qcrm-contacts-lists-list">
 			{/* Notice Banner */}
 			{notice && (
-				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 
-			{/* Data Table */}
-			<DataTable
-				columns={columns}
-				data={lists}
-				config={tableConfig}
-				showPagination={false}
-				initialPageSize={perPage}
-				setPage={setPage}
-			/>
-			<DataTablePagination table={serverSideTable} />
+			{loading || hasRecords ? (
+				<>
+					{/* Data Table */}
+					<DataTable
+						columns={columns}
+						data={lists}
+						activeTab={activeTab}
+						config={tableConfig}
+						showPagination={false}
+						initialPageSize={perPage}
+						setPage={setPage}
+						loading={loading}
+					/>
+					<DataTablePagination table={serverSideTable} />
+				</>
+			) : (
+				<NoData
+					icon={<GradientListIcon width={120} height={120} />}
+					title={__('No lists yet', 'quillcrm')}
+					subtitle={__(
+						'Get started by creating your first list to organize your contacts',
+						'quillcrm'
+					)}
+					buttonLabel={__('Create List', 'quillcrm')}
+					onClick={handleOpenCreateModal}
+				/>
+			)}
 
 			{/* Dialog */}
 			<ListDialog

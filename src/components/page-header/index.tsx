@@ -30,11 +30,13 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 		<div className="flex flex-col gap-2 mb-4">
 			<p>{subtitle}</p>
 
-			<div className="flex justify-between items-center">
+			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
 				<h1 className="font-semibold text-3xl">{title}</h1>
 
 				{actions.length > 0 && (
-					<div className={`flex items-center gap-2 ${className}`}>
+					<div
+						className={`sales-pipeline-header-actions flex flex-col sm:flex-row items-stretch sm:items-center gap-3 ${className}`}
+					>
 						{actions.map((action, index) => {
 							const {
 								label,
@@ -42,19 +44,26 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 								onClick,
 								className,
 								disabled,
+								hidden,
 								...rest
 							} = action;
 							return (
-								<Button
-									key={index}
-									onClick={onClick}
-									className={`${className || ''}`}
-									disabled={disabled}
-									{...rest}
-								>
-									{icon && icon}
-									{__(label, '@quillcrm')}
-								</Button>
+								!hidden && (
+									<Button
+										key={index}
+										onClick={onClick}
+										className={`${className || ''} w-full sm:w-auto min-w-[120px] transition-all duration-200 hover:scale-105 hover:shadow-md`}
+										disabled={disabled}
+										{...rest}
+									>
+										{icon && (
+											<span className="mr-2 btn-icon">
+												{icon}
+											</span>
+										)}
+										{__(label, '@quillcrm')}
+									</Button>
+								)
 							);
 						})}
 					</div>

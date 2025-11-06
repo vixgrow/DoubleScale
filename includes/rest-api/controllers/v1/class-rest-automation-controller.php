@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rest_Automation_Controller
  * This class is responsible for handling the Automation REST API
@@ -24,6 +25,7 @@ use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Managers\Goals_Manager;
 use QuillCRM\Managers\Forms_Manager;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * Rest_Automation_Controller class
@@ -135,6 +137,11 @@ class Rest_Automation_Controller extends REST_Controller {
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 						),
+						'keyword'  => array(
+							'description'       => __( 'Search keyword.', 'quillcrm' ),
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 				),
 			)
@@ -188,13 +195,6 @@ class Rest_Automation_Controller extends REST_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_rules' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => array(
-						'trigger' => array(
-							'description' => __( 'The trigger of the rule.', 'quillcrm' ),
-							'type'        => 'string',
-							'required'    => false,
-						),
-					),
 				),
 			)
 		);
@@ -262,6 +262,16 @@ class Rest_Automation_Controller extends REST_Controller {
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
+			'from'     => array(
+				'description' => __( 'Start date for filtering automations.', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
+			'to'       => array(
+				'description' => __( 'End date for filtering automations.', 'quillcrm' ),
+				'type'        => 'string',
+				'format'      => 'date',
+			),
 		);
 	}
 
@@ -273,56 +283,56 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'automation',
-			'type'       => 'object',
-			'properties' => array(
-				'id'         => array(
-					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
-					'type'        => 'integer',
-					'readonly'    => true,
-				),
-				'name'       => array(
-					'description' => __( 'The name of the automation.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'trigger'    => array(
-					'description' => __( 'The trigger of the automation.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'status'     => array(
-					'description' => __( 'The status of the automation.', 'quillcrm' ),
-					'type'        => 'string',
-					'enum'        => array( 'active', 'inactive' ),
-					'default'     => 'active',
-				),
-				'settings'   => array(
-					'description' => __( 'The settings of the automation.', 'quillcrm' ),
-					'type'        => 'object',
-				),
-				'created_at' => array(
-					'description' => __( 'The date the automation was created.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'readonly'    => true,
-				),
-				'updated_at' => array(
-					'description' => __( 'The date the automation was last updated.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'readonly'    => true,
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'automation',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'id'         => array(
+					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'readonly'    => true,
+				 ),
+				 'name'       => array(
+					 'description' => __( 'The name of the automation.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'trigger'    => array(
+					 'description' => __( 'The trigger of the automation.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'status'     => array(
+					 'description' => __( 'The status of the automation.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'enum'        => array( 'active', 'inactive' ),
+					 'default'     => 'active',
+				 ),
+				 'settings'   => array(
+					 'description' => __( 'The settings of the automation.', 'quillcrm' ),
+					 'type'        => 'object',
+				 ),
+				 'created_at' => array(
+					 'description' => __( 'The date the automation was created.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'readonly'    => true,
+				 ),
+				 'updated_at' => array(
+					 'description' => __( 'The date the automation was last updated.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'readonly'    => true,
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -350,8 +360,21 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_rules( $request ) {
-		$trigger = $request->get_param( 'trigger' );
-		$rules   = Rules_Manager::instance()->get_groups();
+		$trigger    = $request->get_param( 'trigger' );
+		$form_id    = $request->get_param( 'form_id' );
+		$trigger_id = $request->get_param( 'trigger_id' );
+
+		$forms = Forms_Manager::instance()->get_all_forms();
+
+		// If we have a specific form_id and trigger_id, register field rules for that form only
+		if ( ! empty( $form_id ) && ! empty( $trigger_id ) && in_array( $trigger_id, array_keys( $forms ) ) ) {
+			$form_instance = $forms[ $trigger_id ];
+			if ( $form_instance && method_exists( $form_instance, 'register_field_rules_for_form' ) ) {
+				$form_instance->register_field_rules_for_form( $form_id );
+			}
+		}
+
+		$rules = Rules_Manager::instance()->get_groups();
 
 		return new WP_REST_Response( $rules, 200 );
 	}
@@ -433,10 +456,24 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_merge_tags( $request ) {
+		$form_id    = $request->get_param( 'form_id' );
+		$trigger_id = $request->get_param( 'trigger_id' );
+
+		$forms = Forms_Manager::instance()->get_all_forms();
+
+		// If we have a specific form_id and trigger_id, register merge tags for that form only
+		if ( ! empty( $form_id ) && ! empty( $trigger_id ) && in_array( $trigger_id, array_keys( $forms ) ) ) {
+			$form_instance = $forms[ $trigger_id ];
+			if ( $form_instance ) {
+				$form_instance->register_merge_tags_for_form( $form_id );
+			}
+		}
+
 		$merge_tags = Merge_Tags_Manager::instance()->get_groups();
 
 		return new WP_REST_Response( $merge_tags, 200 );
 	}
+
 
 	/**
 	 * Get items
@@ -449,18 +486,27 @@ class Rest_Automation_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$per_page = $request->get_param( 'per_page' ) ?? 10;
-			$page     = $request->get_param( 'page' ) ?? 1;
-			$keyword  = $request->get_param( 'keyword' ) ?? '';
+			$keyword  = $request->get_param( 'keyword' ) ? $request->get_param( 'keyword' ) : '';
+			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
+			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
+			$from     = $request->get_param( 'from' ) ?? null;
+			$to       = $request->get_param( 'to' ) ?? null;
+
+			$query       = Automation_Model::query();
+			$total_count = $query->count();
 
 			if ( $keyword ) {
-				$automations = Automation_Model::where( 'name', 'like', '%' . $keyword . '%' )
-				->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
-			} else {
-				$automations = Automation_Model::orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+				$query->where( 'name', 'LIKE', '%' . $keyword . '%' );
 			}
+			if ( $from ) {
+				$query->where( 'created_at', '>=', $from );
+			}
+			if ( $to ) {
+				$query->where( 'created_at', '<=', $to );
+			}
+			$automations = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
-			return new WP_REST_Response( $automations, 200 );
+			return new WP_REST_Response( $automations->toArray() + array( 'total_count' => $total_count ), 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -503,10 +549,26 @@ class Rest_Automation_Controller extends REST_Controller {
 	 */
 	public function get_contacts( $request ) {
 		try {
-			$id                  = $request->get_param( 'id' );
-			$per_page            = $request->get_param( 'per_page' ) ?? 10;
-			$page                = $request->get_param( 'page' ) ?? 1;
-			$automation_contacts = Automation_Contact_Model::where( 'automation_id', $id )->with( 'contact', 'processes.step', 'current_step', 'next_step' )->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
+			$id       = $request->get_param( 'id' );
+			$per_page = $request->get_param( 'per_page' ) ?? 10;
+			$page     = $request->get_param( 'page' ) ?? 1;
+			$keyword  = $request->get_param( 'keyword' ) ?? '';
+
+			$query = Automation_Contact_Model::where( 'automation_id', $id );
+
+			// Apply keyword search if provided
+			if ( ! empty( $keyword ) ) {
+				$query->whereHas(
+					'contact',
+					function ( $q ) use ( $keyword ) {
+						$q->where( 'email', 'LIKE', '%' . $keyword . '%' );
+					}
+				);
+			}
+
+			$automation_contacts = $query->with( 'contact', 'processes.step', 'current_step', 'next_step' )
+				->orderBy( 'created_at', 'desc' )
+				->paginate( $per_page, array( '*' ), 'page', $page );
 
 			return new WP_REST_Response( $automation_contacts, 200 );
 		} catch ( \Exception $e ) {
@@ -713,7 +775,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -726,7 +788,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -739,7 +801,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -752,7 +814,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -765,7 +827,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_items_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -778,6 +840,6 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

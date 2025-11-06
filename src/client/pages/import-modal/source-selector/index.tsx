@@ -35,10 +35,16 @@ import fluentcrmIcon from '../../../../../assets/images/fluent-crm/fluent-icon.p
 import mailerliteIcon from '../../../../../assets/images/mailer-lite/mailer-icon.png';
 //@ts-ignore
 import activecampaignIcon from '../../../../../assets/images/active-campaign/active-icon.png';
+//@ts-ignore
+import hubspotIcon from '../../../../../assets/images/hubspot/hubspot-icon.png';
+//@ts-ignore
+import pipedriveIcon from '../../../../../assets/images/pipedrive/pipedrive-icon.png';
+//@ts-ignore
+import gohighlevelIcon from '../../../../../assets/images/gohighlevel/gohighlevel-icon.png';
 
 const SourceSelector: React.FC = () => {
 	const { state, dispatch } = useImportContext();
-	const { source } = state;
+	const { source, importing } = state;
 	const importers = ConfigAPI.getImporters();
 
 	const getSourceIcon = (sourceKey: string) => {
@@ -82,6 +88,23 @@ const SourceSelector: React.FC = () => {
 					className="w-10 h-10"
 				/>
 			),
+			hubspot: (
+				<img src={hubspotIcon} alt="HubSpot" className="w-10 h-10" />
+			),
+			pipedrive: (
+				<img
+					src={pipedriveIcon}
+					alt="Pipedrive"
+					className="w-10 h-10"
+				/>
+			),
+			gohighlevel: (
+				<img
+					src={gohighlevelIcon}
+					alt="GoHighLevel"
+					className="w-10 h-10"
+				/>
+			),
 		};
 		return (
 			iconMap[sourceKey] || (
@@ -95,10 +118,21 @@ const SourceSelector: React.FC = () => {
 		value: slug,
 		disabled: !importer.is_active,
 		icon: getSourceIcon(slug),
-		requiresCredentials: ['mailerlite', 'activecampaign'].includes(slug),
+		requiresCredentials: [
+			'mailerlite',
+			'activecampaign',
+			'hubspot',
+			'pipedrive',
+			'gohighlevel',
+		].includes(slug),
 	}));
 
 	const handleSourceChange = (newSource: string) => {
+		// Prevent source change when importing is in progress
+		if (importing) {
+			return;
+		}
+
 		dispatch({ type: 'SET_SOURCE', payload: newSource });
 		dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 
@@ -128,21 +162,23 @@ const SourceSelector: React.FC = () => {
 			<CardContent className="p-0 space-y-3">
 				{sources.map((s) => {
 					const isSelected = source === s.value;
+					const isLocked = importing && !isSelected;
 
 					return (
 						<Card
 							key={s.value}
 							onClick={() =>
-								!s.disabled && handleSourceChange(s.value)
+								!s.disabled && !importing && handleSourceChange(s.value)
 							}
-							className={`relative p-4 cursor-pointer transition-all shadow-none border-2 duration-200 
-                ${
-					isSelected
-						? 'border-[#274C77]'
-						: s.disabled
-							? 'border-[#E2EAF380] bg-gray-50 cursor-not-allowed opacity-50'
-							: 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-				}`}
+							className={`relative p-4 transition-all shadow-none border duration-200 
+                ${isSelected
+									? 'border-[#274C77] cursor-pointer'
+									: s.disabled
+										? 'border-[#E2EAF380] bg-gray-50 cursor-not-allowed opacity-50'
+										: isLocked
+											? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+											: 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 cursor-pointer'
+								}`}
 						>
 							<div className="flex items-center space-x-4">
 								<div>{s.icon}</div>
@@ -160,7 +196,7 @@ const SourceSelector: React.FC = () => {
 										</p>
 									</div>
 
-									{s.disabled && (
+									{s.disabled && !['wpfunnelkit', 'fluentcrm'].includes(s.value) && (
 										<Button className="bg-[#3B82F6] rounded-full text-xs px-2 py-1">
 											<InstallIcon />
 											{__('INSTALL NOW', 'quillcrm')}

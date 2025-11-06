@@ -10,9 +10,17 @@ import {
 	SET_AUTOMATION_CONTACTS,
 	SET_EMAIL_ANALYTICS,
 	SET_PURCHASES_HISTORY,
-	SET_COURSES
+	SET_COURSES,
 } from './constants';
-import type { Contact, Note, AutomationContact, CampaignEmailsResponse, Order, EddOrder, LMSCourse } from '@quillcrm/client';
+import type {
+	Contact,
+	Note,
+	AutomationContact,
+	CampaignEmailsResponse,
+	Order,
+	EddOrder,
+	LMSCourse,
+} from '@quillcrm/client';
 
 export type setContact = {
 	type: typeof SET_CONTACT;
@@ -45,10 +53,11 @@ export type setAutomationContacts = {
 };
 
 export type EmailAnalytics = {
-	emails: CampaignEmailsResponse;
+	messages: CampaignEmailsResponse; // Unified endpoint returns 'messages'
 	total_sent: number;
 	total_opened: number;
 	total_clicked: number;
+	mode?: string;
 } | null;
 
 export type setEmailAnalytics = {
@@ -64,7 +73,7 @@ export type PurchaseHistory = {
 		average: number;
 		last_order: string;
 		currency: string;
-	},
+	};
 	wc: {
 		orders: Order[];
 		total: number;
@@ -72,7 +81,7 @@ export type PurchaseHistory = {
 		average: number;
 		last_order: string;
 		currency: string;
-	}
+	};
 } | null;
 
 export type setPurchaseHistory = {

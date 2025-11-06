@@ -9,20 +9,12 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Popover, Flex, Spin } from 'antd';
-import {
-	PlusOutlined,
-	TrophyOutlined,
-	BranchesOutlined,
-	DisconnectOutlined,
-	ThunderboltOutlined,
-} from '@ant-design/icons';
-import { map } from 'lodash';
 import {
 	EdgeProps,
 	getBezierPath,
 	EdgeLabelRenderer,
 	BaseEdge,
+	Position,
 } from '@xyflow/react';
 
 /**
@@ -30,11 +22,14 @@ import {
  */
 import type { AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../../state/context';
+import { AddStepDialog } from '../../add-step-dialog';
+import './style.scss';
 
 interface AddStepEdgeData {
 	sourceStep?: AutomationStep;
 	targetStep?: AutomationStep;
-	condition?: string;
+	condition?: 'yes' | 'no' | string;
+	onStepClick?: (step: any) => void;
 }
 
 const updateStepOrderRecursive = (
@@ -47,29 +42,49 @@ const updateStepOrderRecursive = (
 	const newSteps = [...steps];
 	let currentStepOrder = order;
 
-	// Filter steps to update based on parent_id and condition
-	const stepsToUpdate = newSteps
-		.filter((step) => {
-			if (parentId > 0) {
-				// Child steps - same parent and condition
-				return (
-					step.parent_id === parentId && step.condition === condition
-				);
-			} else {
-				// Root level steps
-				return !step.parent_id;
-			}
-		})
-		.sort((a, b) => a.order - b.order);
-
-	// Update orders for steps that come at or after the insertion point
-	stepsToUpdate.forEach((step) => {
-		if (step.order >= order) {
-			const newOrder = step.order + 1;
-			step.order = newOrder;
-			updatedSteps[step.id] = { order: newOrder };
+	// Find steps that need to be reordered
+	const stepsToUpdate = newSteps.filter((step) => {
+		if (parentId === 0) {
+			return !step.parent_id && step.order >= order;
+		} else {
+			return (
+				step.parent_id === parentId &&
+				step.condition === condition &&
+				step.order >= order
+			);
 		}
 	});
+
+	// Sort steps by order to ensure proper sequential updating
+	stepsToUpdate.sort((a, b) => a.order - b.order);
+
+	// Update their orders - shift all steps forward by 1
+	stepsToUpdate.forEach((step) => {
+		const newOrder = step.order + 1;
+		updatedSteps[step.id] = { order: newOrder };
+		step.order = newOrder;
+	});
+
+	// Also update any root-level steps that come after this parent condition
+	// to maintain proper flow ordering
+	if (parentId > 0) {
+		const parentStep = steps.find((step) => step.id === parentId);
+		if (
+			parentStep &&
+			'order' in parentStep &&
+			typeof parentStep.order === 'number'
+		) {
+			const rootStepsAfterParent = newSteps.filter(
+				(step) => !step.parent_id && step.order > parentStep.order
+			);
+			rootStepsAfterParent.forEach((step) => {
+				if (!updatedSteps[step.id]) {
+					updatedSteps[step.id] = { order: step.order + 1 };
+					step.order = step.order + 1;
+				}
+			});
+		}
+	}
 
 	return { newSteps, updatedSteps, currentStepOrder };
 };
@@ -84,14 +99,13 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 	targetPosition,
 	style = {},
 	data,
-	markerEnd,
 	target,
 }) => {
-	const { sourceStep, targetStep, condition } =
+	const { sourceStep, targetStep, condition, onStepClick } =
 		(data as AddStepEdgeData) || {};
 	const [loading, setLoading] = useState(false);
-	const [popoverVisible, setPopoverVisible] = useState(false);
-	const { automation, steps, setSteps, setUpdatedSteps } =
+	const [visible, setVisible] = useState(false);
+	const { automation, steps, setSteps, setUpdatedSteps, viewMode = false } =
 		useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -99,11 +113,24 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		return null;
 	}
 
-	// Don't show plus button if target is an AddStepNode (these have their own + button)
-	const shouldShowPlusButton = !target?.startsWith('add-step');
+	// Show add-step button on most edges except:
+	// 1. Edges TO add-step nodes (would be redundant)
+	// 2. Structural edges without proper step data
+	const shouldShowAddStepEdge = Boolean(
+		// Don't show on edges going TO add-step nodes
+		!(target && target.startsWith('add-step')) &&
+		// Must have either a source step or be a condition branch
+		(sourceStep || condition)
+	);
 
-	if (!shouldShowPlusButton) {
-		// Just render a regular edge without the plus button
+	if (!shouldShowAddStepEdge) {
+		// For other cases where we don't show the plus button
+		const edgeStyle = {
+			...style,
+			stroke: '#D7D7DA', // Unified color for all edges
+			strokeWidth: 2,
+		};
+
 		return (
 			<BaseEdge
 				id={id}
@@ -111,70 +138,16 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 					getBezierPath({
 						sourceX,
 						sourceY,
-						sourcePosition,
+						sourcePosition: sourcePosition || Position.Bottom,
 						targetX,
 						targetY,
-						targetPosition,
+						targetPosition: targetPosition || Position.Top,
 					})[0]
 				}
-				style={style}
-				markerEnd={markerEnd}
+				style={edgeStyle}
 			/>
 		);
 	}
-
-	const typesOptions = {
-		action: {
-			label: __('Action', 'quillcrm'),
-			icon: <ThunderboltOutlined />,
-		},
-		condition: {
-			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
-		},
-		goal: {
-			label: __('Goal', 'quillcrm'),
-			icon: <TrophyOutlined />,
-		},
-		end_automation: {
-			label: __('End Automation', 'quillcrm'),
-			icon: <DisconnectOutlined />,
-		},
-	};
-
-	const getNewStepOrder = () => {
-		if (!sourceStep) {
-			// Adding after trigger, so first step
-			return 1;
-		}
-
-		if (targetStep) {
-			// Adding between two steps, use target step's order
-			// This will push the target step and all subsequent steps down by 1
-			return targetStep.order;
-		}
-
-		// Adding at the end, so next order after source step
-		// Need to find the highest order in the same branch
-		const parentId = sourceStep.parent_id || 0;
-		const branchCondition = sourceStep.condition || null;
-
-		const sameBranchSteps = steps.filter((step) => {
-			if (parentId === 0) {
-				// Root level steps
-				return !step.parent_id;
-			} else {
-				// Child steps - same parent and condition
-				return (
-					step.parent_id === parentId &&
-					step.condition === branchCondition
-				);
-			}
-		});
-
-		const maxOrder = Math.max(...sameBranchSteps.map((s) => s.order), 0);
-		return maxOrder + 1;
-	};
 
 	const handleStepSelection = async (type: string) => {
 		setLoading(true);
@@ -183,36 +156,86 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 		let parentId = 0;
 		let stepCondition: string | undefined = undefined;
 
-		if (sourceStep && condition) {
+		if (sourceStep && sourceStep.type === 'condition' && condition) {
+			// Adding step to a condition branch (direct child of condition)
 			parentId = sourceStep.id;
 			stepCondition = condition;
+		} else if (sourceStep && condition && sourceStep.parent_id) {
+			// Adding step within an existing condition branch (sibling of sourceStep)
+			parentId = sourceStep.parent_id;
+			stepCondition = condition;
 		} else if (sourceStep && sourceStep.parent_id) {
-			// If sourceStep has a parent, the new step should also have the same parent and condition
+			// If sourceStep has a parent, the new step should be a sibling with same parent and condition
 			parentId = sourceStep.parent_id;
 			stepCondition = sourceStep.condition || undefined;
-		} else if (targetStep && targetStep.parent_id) {
-			// If targetStep has a parent, the new step should also have the same parent and condition
+		} else if (
+			targetStep &&
+			'parent_id' in targetStep &&
+			targetStep.parent_id &&
+			'type' in targetStep &&
+			targetStep.type !== 'merge'
+		) {
+			// If targetStep has a parent, the new step should be a sibling with same parent and condition
 			parentId = targetStep.parent_id;
 			stepCondition = targetStep.condition || undefined;
+		} else if (condition) {
+			// Edge case: we have a condition but no clear parent context
+			// This might happen in some edge scenarios - keep as root level but preserve condition
+			stepCondition = condition;
 		}
 
 		// Calculate order: if we have targetStep, insert before it, otherwise add at end
 		let order: number;
-		if (targetStep) {
+
+		// Find steps in the same branch to determine proper order
+		const sameBranchSteps = steps.filter((step) => {
+			if (parentId === 0) {
+				return !step.parent_id;
+			} else {
+				return (
+					step.parent_id === parentId &&
+					step.condition === stepCondition
+				);
+			}
+		});
+
+		if (
+			targetStep &&
+			targetStep.type !== 'merge' &&
+			'order' in targetStep &&
+			typeof targetStep.order === 'number'
+		) {
+			// Insert before the target step (only if it's a real automation step with order)
 			order = targetStep.order;
+		} else if (
+			sourceStep &&
+			'order' in sourceStep &&
+			typeof sourceStep.order === 'number'
+		) {
+			// Insert after the source step
+			const stepsAfterSource = sameBranchSteps.filter(
+				(step) => step.order > sourceStep.order
+			);
+			if (stepsAfterSource.length > 0) {
+				// Insert before the first step after source
+				order = Math.min(...stepsAfterSource.map((s) => s.order));
+			} else {
+				// No steps after source, add at the end
+				order = sourceStep.order + 1;
+			}
 		} else {
-			// Find the highest order in the same branch
-			const sameBranchSteps = steps.filter((step) => {
-				if (parentId === 0) {
-					return !step.parent_id;
-				} else {
-					return (
-						step.parent_id === parentId &&
-						step.condition === stepCondition
-					);
-				}
-			});
-			order = Math.max(...sameBranchSteps.map((s) => s.order), 0) + 1;
+			// Add at the end of the current branch
+			if (sameBranchSteps.length === 0) {
+				order = 1; // First step in this branch
+			} else {
+				order = Math.max(...sameBranchSteps.map((s) => s.order)) + 1;
+			}
+		}
+
+		// Ensure order is always a valid number
+		if (typeof order !== 'number' || isNaN(order) || order < 1) {
+			console.warn('Invalid order calculated, defaulting to 1:', order);
+			order = 1;
 		}
 
 		const stepData = {
@@ -229,9 +252,15 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 			stepData.condition = stepCondition;
 		}
 
+		// Set appropriate action based on step type
 		if (type === 'condition') {
 			stepData.action = 'condition';
+		} else if (type === 'end_automation') {
+			stepData.action = 'end_automation';
+		} else if (type === 'delay') {
+			stepData.action = 'delay';
 		}
+		// For 'action' and 'goal' types, leave action empty - will be set when user selects specific action/goal
 
 		const { newSteps, updatedSteps, currentStepOrder } =
 			updateStepOrderRecursive(steps, parentId, order, stepCondition);
@@ -257,91 +286,96 @@ const AddStepEdge: React.FC<EdgeProps> = ({
 				message: __('Step added', 'quillcrm'),
 			});
 
-			setPopoverVisible(false);
+			// Close dialog first
+			setVisible(false);
+
+			// Then open modal/selector for action, condition, goal, and delay steps
+			// Use setTimeout to ensure dialog closes before modal opens
+			if (
+				(type === 'action' ||
+					type === 'condition' ||
+					type === 'goal' ||
+					type === 'delay') &&
+				onStepClick
+			) {
+				setTimeout(() => {
+					const organizedStep = {
+						...response,
+						children: [],
+					};
+					onStepClick(organizedStep);
+				}, 250);
+			}
 		} catch (error: any) {
+			console.error('Failed to create step:', error);
+			console.error('Request data was:', requestData);
+
 			createNotice({
 				type: 'error',
-				message: error.message,
+				message: error.message || __('Failed to add step', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);
 		}
 	};
 
+	// Determine the correct source and target positions based on edge data
+	const getCorrectSourcePosition = (): Position => {
+		const edgeData = data as AddStepEdgeData;
+		if (
+			edgeData &&
+			edgeData.sourceStep &&
+			edgeData.sourceStep.type === 'condition'
+		) {
+			// For condition nodes, use the specific handle based on condition
+			if (edgeData.condition === 'yes') {
+				return Position.Left; // Yes branch from left handle
+			} else if (edgeData.condition === 'no') {
+				return Position.Right; // No branch from right handle
+			}
+		}
+		// For all other cases, use bottom handle
+		return sourcePosition || Position.Bottom;
+	};
+
+	const getCorrectTargetPosition = (): Position => {
+		// For target nodes, usually top unless specified otherwise
+		return targetPosition || Position.Top;
+	};
+
 	const [edgePath, labelX, labelY] = getBezierPath({
 		sourceX,
 		sourceY,
-		sourcePosition,
+		sourcePosition: getCorrectSourcePosition(),
 		targetX,
 		targetY,
-		targetPosition,
+		targetPosition: getCorrectTargetPosition(),
 	});
 
-	const handleAddStep = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		setPopoverVisible(!popoverVisible);
+	// Use CSS class for edge styling and ensure proper z-index
+	const edgeStyle = {
+		...style,
+		className: 'qcrm-edge',
+		zIndex: 1,
 	};
 
 	return (
 		<>
-			<BaseEdge
-				id={id}
-				path={edgePath}
-				style={style}
-				markerEnd={markerEnd}
-			/>
+			<BaseEdge id={id} path={edgePath} style={edgeStyle} />
 			<EdgeLabelRenderer>
 				<div
 					style={{
-						position: 'absolute',
-						transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-						pointerEvents: 'all',
+						transform: `translate(${labelX}px,${labelY}px) translate(-50%, -50%)`,
 					}}
-					className="qcrm-edge-add-button"
+					className={`qcrm-edge-add-button ${viewMode ? 'qcrm-edge-add-button--disabled' : ''}`}
 				>
-					<Popover
-						placement="top"
-						trigger="click"
-						open={popoverVisible}
-						onOpenChange={setPopoverVisible}
-						content={
-							<>
-								{loading && <Spin />}
-								{!loading && (
-									<Flex gap={10} wrap vertical>
-										{map(typesOptions, (type, key) => (
-											<Button
-												key={key}
-												icon={type.icon}
-												onClick={() =>
-													handleStepSelection(key)
-												}
-												style={{
-													justifyContent:
-														'flex-start',
-												}}
-											>
-												{type.label}
-											</Button>
-										))}
-									</Flex>
-								)}
-							</>
-						}
-					>
-						<Button
-							type="primary"
-							shape="circle"
-							size="small"
-							icon={<PlusOutlined />}
-							onClick={handleAddStep}
-							title={__('Add step here', 'quillcrm')}
-							style={{
-								boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-								border: 'none',
-							}}
-						/>
-					</Popover>
+					<AddStepDialog
+						visible={visible}
+						onVisibleChange={setVisible}
+						loading={loading}
+						onStepSelection={handleStepSelection}
+						disabled={viewMode}
+					/>
 				</div>
 			</EdgeLabelRenderer>
 		</>

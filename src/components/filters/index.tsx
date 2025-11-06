@@ -8,28 +8,27 @@ import { useState, useMemo, useCallback } from '@wordpress/element';
  * External dependencies
  */
 import { map } from 'lodash';
-import Select from 'react-select';
 
 /**
  * Internal dependencies
  */
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import type { Filter as FilterType } from '@quillcrm/client';
 import { getFilterBySlug } from '@quillcrm/utils';
 import ConfigAPI from '@quillcrm/config';
-import type { FiltersGroup } from '@quillcrm/config';
 import FilterItem from '../filter';
-import { PlusIcon } from '@quillcrm/components';
-import './style.scss';
+import { PlusIcon, InfoIcon } from '@quillcrm/components';
 
 interface FiltersProps {
 	filters: FilterType[];
 	onChange: (filters: FilterType[]) => void;
-}
-
-interface SelectOption {
-	value: string;
-	label: string;
 }
 
 const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
@@ -39,7 +38,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 	const filtersGroups = ConfigAPI.getFiltersGroups();
 
 	// Memoized options to prevent unnecessary re-renders
-	const groupOptions = useMemo<SelectOption[]>(
+	const groupOptions = useMemo(
 		() =>
 			map(filtersGroups, (group, key) => ({
 				value: key,
@@ -48,7 +47,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 		[filtersGroups]
 	);
 
-	const filterOptions = useMemo<SelectOption[]>(
+	const filterOptions = useMemo(
 		() =>
 			selectedGroup
 				? map(filtersGroups[selectedGroup].filters, (filter, key) => ({
@@ -57,38 +56,6 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 					}))
 				: [],
 		[filtersGroups, selectedGroup]
-	);
-
-	// Memoized select styles to prevent recreation on every render
-	const selectStyles = useMemo(
-		() => ({
-			control: (base: any) => ({
-				...base,
-				width: '250px',
-				height: '48px',
-				minHeight: '48px',
-				borderColor: '#D3D4D6',
-				borderRadius: '6px',
-			}),
-			indicatorsContainer: (base: any) => ({
-				...base,
-				height: '48px',
-			}),
-			valueContainer: (base: any) => ({
-				...base,
-				height: '48px',
-				padding: '0 8px',
-			}),
-			singleValue: (base: any) => ({
-				...base,
-				lineHeight: '48px',
-			}),
-			menu: (base: any) => ({
-				...base,
-				color: 'black',
-			}),
-		}),
-		[]
 	);
 
 	// Event handlers
@@ -128,103 +95,125 @@ const Filters: React.FC<FiltersProps> = ({ filters, onChange }) => {
 		[filters, onChange]
 	);
 
-	const handleGroupChange = useCallback(
-		(selectedOption: SelectOption | null) => {
-			const value = selectedOption?.value || '';
-			setSelectedGroup(value);
-			setSelectedFilter('');
-		},
-		[]
-	);
+	const handleGroupChange = useCallback((value: string) => {
+		setSelectedGroup(value);
+		setSelectedFilter('');
+	}, []);
 
-	const handleFilterSelectChange = useCallback(
-		(selectedOption: SelectOption | null) => {
-			const value = selectedOption?.value || '';
-			setSelectedFilter(value);
-		},
-		[]
-	);
-
-	// Helper functions
-	const getSelectedGroupOption = () =>
-		groupOptions.find((option) => option.value === selectedGroup) || null;
-
-	const getSelectedFilterOption = () =>
-		filterOptions.find((option) => option.value === selectedFilter) || null;
+	const handleFilterSelectChange = useCallback((value: string) => {
+		setSelectedFilter(value);
+	}, []);
 
 	return (
-		<div className="filters-container">
-			{/* Header with Add Filter */}
-			<div className="filters-header">
-				<h3 className="filters-title">
-					{__('Select Group', 'quillcrm')}
-				</h3>
+		<Card>
+			<CardContent className="p-5">
+				{/* Header with Add Filter */}
+				<div className="flex items-center justify-between gap-3 pb-3">
+					<h3 className="font-bold text-lg w-[15%]">
+						{__('And', 'quillcrm')}
+					</h3>
 
-				<Select
-					value={getSelectedGroupOption()}
-					onChange={handleGroupChange}
-					options={groupOptions}
-					placeholder={__('Select group', 'quillcrm')}
-					isClearable
-					styles={selectStyles}
-					className="group-select"
-					classNamePrefix="react-select"
-				/>
-
-				<Select
-					value={getSelectedFilterOption()}
-					onChange={handleFilterSelectChange}
-					options={filterOptions}
-					placeholder={__('Select filter', 'quillcrm')}
-					isDisabled={!selectedGroup}
-					isClearable
-					styles={selectStyles}
-					className="filter-select"
-					classNamePrefix="react-select"
-				/>
-
-				<Button
-					size="icon"
-					onClick={handleAddFilter}
-					disabled={!selectedFilter}
-					className="add-filter-btn"
-				>
-					<PlusIcon />
-				</Button>
-			</div>
-
-			{/* Divider */}
-			<div className="filters-divider" />
-
-			{/* Active Filters */}
-			<div className="active-filters">
-				{filters.length > 0 ? (
-					<div className="filters-list">
-						{filters.map((filter, index) => {
-							const filterSettings = getFilterBySlug(
-								filter.filter,
-								filter.group
-							);
-							return (
-								<FilterItem
-									key={`${filter.group}-${filter.filter}-${index}`}
-									filterSettings={filterSettings}
-									filter={filter}
-									onChange={(key, value) =>
-										handleFilterChange(index, key, value)
-									}
-									onRemove={() => handleRemoveFilter(index)}
+					<div className="w-[85%] flex items-center gap-3">
+						<Select
+							value={selectedGroup}
+							onValueChange={handleGroupChange}
+						>
+							<SelectTrigger className="border-gray-300 focus:border-[#3B82F6] focus:ring-[#3B82F6]">
+								<SelectValue
+									placeholder={__('Select group', 'quillcrm')}
 								/>
-							);
-						})}
+							</SelectTrigger>
+							<SelectContent>
+								{groupOptions.map((option) => (
+									<SelectItem
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+
+						<Select
+							value={selectedFilter}
+							onValueChange={handleFilterSelectChange}
+							disabled={!selectedGroup}
+						>
+							<SelectTrigger className="border-gray-300 focus:border-[#3B82F6] focus:ring-[#3B82F6] disabled:opacity-50">
+								<SelectValue
+									placeholder={__(
+										'Select filter',
+										'quillcrm'
+									)}
+								/>
+							</SelectTrigger>
+							<SelectContent>
+								{filterOptions.map((option) => (
+									<SelectItem
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</div>
-				) : (
-					<p className="no-filters-message">
-						{__('No filters applied', 'quillcrm')}
-					</p>
-				)}
-			</div>
-		</div>
+
+					<div
+						onClick={handleAddFilter}
+						className={`cursor-pointer ${!selectedFilter ? 'opacity-50 cursor-not-allowed' : ''} text-secondary`}
+					>
+						<PlusIcon width={20} height={20} />
+					</div>
+				</div>
+
+				{/* Divider */}
+				<div className="text-secondary flex items-center gap-2 font-bold">
+					<InfoIcon />
+					{__(
+						'This add new filter to narrow down your contact based on different prosperities. is required by default',
+						'quillcrm'
+					)}
+				</div>
+
+				{/* Active Filters */}
+				<div className="space-y-2 py-6">
+					{filters.length > 0 ? (
+						<div className="space-y-2">
+							{filters.map((filter, index) => {
+								const filterSettings = getFilterBySlug(
+									filter.filter,
+									filter.group
+								);
+								return (
+									<FilterItem
+										key={`${filter.group}-${filter.filter}-${index}`}
+										filterSettings={filterSettings}
+										filter={filter}
+										onChange={(key, value) =>
+											handleFilterChange(
+												index,
+												key,
+												value
+											)
+										}
+										onRemove={() =>
+											handleRemoveFilter(index)
+										}
+									/>
+								);
+							})}
+						</div>
+					) : (
+						<p className="text-sm text-center text-muted-foreground">
+							{__('No filters applied', 'quillcrm')}
+						</p>
+					)}
+				</div>
+			</CardContent>
+		</Card>
 	);
 };
 

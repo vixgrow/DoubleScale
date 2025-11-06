@@ -1,0 +1,173 @@
+.email-body-editor {
+	font-family: Arial, sans-serif;
+
+	.editor-container {
+		border: 1px solid #ddd;
+		border-radius: 6px;
+		overflow: hidden;
+		background-color: #fff;
+
+		h1 {
+			font-size: 2rem;
+			font-weight: bold;
+			margin-top: 1rem;
+		}
+
+		h2 {
+			font-size: 1.5rem;
+			font-weight: bold;
+			margin-top: 0.75rem;
+		}
+
+		h3 {
+			font-size: 1.25rem;
+			font-weight: bold;
+			margin-top: 0.5rem;
+		}
+
+		blockquote {
+			border-left: 4px solid #ccc;
+			margin-left: 0;
+			padding-left: 16px;
+			font-style: italic;
+		}
+
+		a {
+			color: #0066ff;
+			text-decoration: underline;
+		}
+	}
+
+	.editor-inner {
+		position: relative;
+		padding: 10px;
+		min-height: 150px;
+	}
+
+	.editor-input {
+		width: 100%;
+		height: 100%;
+		min-height: 150px;
+		resize: none;
+		font-size: 16px;
+		padding: 17px 0px;
+		outline: none;
+		position: relative;
+		tab-size: 1;
+		line-height: 1.5;
+	}
+
+	.editor-placeholder {
+		color: #999;
+		overflow: hidden;
+		position: absolute;
+		text-overflow: ellipsis;
+		top: 25px;
+		font-size: 16px;
+		pointer-events: none;
+	}
+}
+
+/* Rich Text Format Styles */
+.editor-paragraph {
+	margin: 0;
+	margin-bottom: 8px;
+	position: relative;
+}
+
+.editor-text-bold {
+	font-weight: bold;
+}
+
+.editor-text-italic {
+	font-style: italic;
+}
+
+.editor-text-underline {
+	text-decoration: underline;
+}
+
+.editor-text-linethrough {
+	text-decoration: line-through;
+}
+
+.editor-list-ol {
+	padding: 0;
+	margin: 0;
+	margin-left: 16px;
+	list-style-type: decimal;
+}
+
+.editor-list-ul {
+	padding: 0;
+	margin: 0;
+	margin-left: 16px;
+	list-style-type: disc;
+}
+
+/* Preview Styles */
+.rendered-html-preview {
+	min-height: 150px;
+}
+
+.custom-ant-select .ant-select-selector {
+	background-color: #f4f4f5 !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+
+
+/* WordPress Media Library Modal Styles */
+.media-modal {
+	z-index: 160000 !important;
+	pointer-events: auto !important;
+	position: fixed !important;
+}
+
+.media-modal-backdrop {
+	background: rgba(0, 0, 0, 0.7) !important;
+	z-index: 159999 !important;
+	pointer-events: none !important;
+}
+
+.media-modal * {
+	pointer-events: auto !important;
+}
+
+.media-modal-content,
+.media-frame,
+.media-frame-content,
+.media-toolbar,
+.attachments-browser,
+.media-sidebar,
+.attachment,
+.thumbnail {
+	pointer-events: auto !important;
+}
+
+/* Ensure media modal buttons and inputs are clickable */
+.media-modal button,
+.media-modal input,
+.media-modal select,
+.media-modal textarea,
+.media-modal a,
+.media-modal .attachment,
+.media-modal .thumbnail,
+.media-modal .check {
+	pointer-events: auto !important;
+	cursor: pointer !important;
+}
+
+/* Ensure attachments are clickable */
+.media-modal .attachments-browser .attachments,
+.media-modal .attachments-browser .attachment {
+	pointer-events: auto !important;
+}
+
+/* Make sure the close button and all controls work */
+.media-modal-close,
+.media-button,
+.media-button-select {
+	pointer-events: auto !important;
+	cursor: pointer !important;
+}

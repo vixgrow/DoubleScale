@@ -3,6 +3,10 @@
  */
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 /**
+ * QuillCRM dependencies
+ */
+import { useNavigate, getToLink } from '@quillcrm/navigation';
+/**
  * internal dependencies
  */
 import type {
@@ -20,6 +24,7 @@ export interface ContactsState {
 	perPage: number;
 	keywords: string;
 	totalRecords: number;
+	hasRecords: boolean;
 
 	// Filter state
 	showFilters: boolean;
@@ -61,6 +66,7 @@ export interface ContactsActions {
 	setPerPage: (perPage: number) => void;
 	setKeywords: (keywords: string) => void;
 	setTotalRecords: (totalRecords: number) => void;
+	setHasRecords: (hasRecords: boolean) => void;
 
 	// Filter actions
 	setShowFilters: (show: boolean) => void;
@@ -82,6 +88,9 @@ export interface ContactsActions {
 	setIsSaving: (saving: boolean) => void;
 	setContact: (contact: ContactsState['contact']) => void;
 
+	// Contact navigation actions
+	openContactDialog: (id: string) => void;
+
 	// Notice actions
 	setNotice: (notice: NoticeMessage | null) => void;
 	showNotice: (type: 'success' | 'error', message: string) => void;
@@ -96,6 +105,7 @@ const initialState: ContactsState = {
 	perPage: 10,
 	keywords: '',
 	totalRecords: 0,
+	hasRecords: false,
 	showFilters: false,
 	filters: [],
 	isFiltering: false,
@@ -121,6 +131,7 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 	children,
 }) => {
 	const [state, setState] = useState<ContactsState>(initialState);
+	const navigate = useNavigate();
 
 	const updateState = (updates: Partial<ContactsState>) => {
 		setState((prev) => ({ ...prev, ...updates }));
@@ -134,6 +145,7 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 		setPerPage: (perPage) => updateState({ perPage }),
 		setKeywords: (keywords) => updateState({ keywords }),
 		setTotalRecords: (totalRecords) => updateState({ totalRecords }),
+		setHasRecords: (hasRecords) => updateState({ hasRecords }),
 		setShowFilters: (showFilters) => updateState({ showFilters }),
 		setFilters: (filters) => updateState({ filters }),
 		setIsFiltering: (isFiltering) => updateState({ isFiltering }),
@@ -152,6 +164,10 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 			updateState({ exportModalVisible }),
 		setIsSaving: (isSaving) => updateState({ isSaving }),
 		setContact: (contact) => updateState({ contact }),
+		openContactDialog: (id) => {
+			// Navigate to the contact page with the ID in the URL
+			navigate(getToLink(`contacts/${id}`));
+		},
 		setNotice: (notice) => updateState({ notice }),
 		showNotice: (type, message) =>
 			updateState({ notice: { type, message } }),

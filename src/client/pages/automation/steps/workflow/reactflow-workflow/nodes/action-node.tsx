@@ -2,50 +2,93 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import {
-	ThunderboltOutlined,
-	EditOutlined,
-	DeleteOutlined,
-} from '@ant-design/icons';
-import { Button, Popconfirm, Tag } from 'antd';
+import React from 'react';
 
 /**
  * Internal dependencies
  */
-import { useAutomationContext } from '../../../../state/context';
 import type {
 	AutomationStep,
 	Automation,
 	OrganizedStep,
 } from '@quillcrm/client';
-import { getAction } from '@quillcrm/utils';
 import NodeContextMenu from '../components/node-context-menu';
+import NodeLayout from '../components/node-layout';
+import StepReorderControls from '../components/step-reorder-controls';
+import AnalyticsPopup from '../components/analytics-popup';
+import { useAutomationContext } from '../../../../state/context';
+import { useDispatch } from '@wordpress/data';
+import { deleteStep } from '../utils/step-utils';
+import { getAction } from '@quillcrm/utils';
+import { ActionIcon, ViewIcon } from '@quillcrm/components';
+import { useStepAnalytics } from '../hooks/use-step-analytics';
+import { supportsAnalytics, getChannelType } from '../constants/action-types';
 
 interface ActionNodeData {
 	step: AutomationStep;
 	automation: Automation;
+	selectedStepId?: string | null;
+	viewMode?: boolean;
+	analytics?: { contacts: number; conversion_rate: number };
 	onStepClick?: (step: OrganizedStep) => void;
+	onDeleteStep?: (stepId: string) => void;
 }
 
-const ActionNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, automation, onStepClick } = data as unknown as ActionNodeData;
+const ActionNode: React.FC<NodeProps> = (props) => {
+	const { data } = props;
+	const {
+		step,
+		onStepClick,
+		selectedStepId,
+		viewMode = false,
+		analytics,
+	} = data as unknown as ActionNodeData;
+
 	const { steps, setSteps } = useAutomationContext();
-	const [isDeleting, setIsDeleting] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
-	const action = step.action ? getAction(step.action) : null;
-	const hasAction = !!step.action;
+	// Use custom analytics hook
+	const {
+		analyticsData,
+		isVisible: showAnalytics,
+		fetchAnalytics,
+		hideAnalytics,
+	} = useStepAnalytics();
+
+	// Check if action is configured - an action is configured if it has an action slug
+	const isConfigured = !!step.action;
+
+	// Get action details for display
+	const actionData = isConfigured ? getAction(step.action) : null;
+	const actionName = actionData?.label || step.action;
+
+	// Check if this action supports analytics
+	const hasAnalytics = supportsAnalytics(step.action || '');
+
+	// Get recipient info for display
+	const getRecipientInfo = () => {
+		if (!isConfigured || !hasAnalytics) return null;
+
+		// This would come from step configuration in real implementation
+		// For now, showing placeholder
+		return __('To: (100 contacts)', 'quillcrm');
+	};
+
+	const subtitle = isConfigured ? (
+		<span className="qcrm-reactflow-action__configured">{actionName}</span>
+	) : (
+		<span className="qcrm-reactflow-action__not-configured">
+			{__('Not Configured', 'quillcrm')}
+		</span>
+	);
 
 	const handleEdit = () => {
-		if (onStepClick) {
+		if (!viewMode && onStepClick) {
 			onStepClick({
 				...step,
 				children: [], // Will be populated if needed by the consuming component
@@ -53,146 +96,93 @@ const ActionNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	const handleDeleteWithStopPropagation = (e?: React.MouseEvent) => {
-		if (e) {
-			e.stopPropagation();
-		}
-		handleDelete();
-	};
-
-	const getNewSteps = () => {
-		const updatedOrdersSteps = {};
-		const newSteps = [...steps];
-
-		if (step.parent_id) {
-			newSteps
-				.filter(
-					(child) =>
-						child.parent_id === step.parent_id &&
-						child.condition === step.condition
-				)
-				.filter((s) => s.id !== step.id)
-				.sort((a, b) => a.order - b.order)
-				.forEach((child, index) => {
-					const newOrder = index + 1;
-					if (newOrder !== child.order) {
-						updatedOrdersSteps[child.id] = { order: newOrder };
-					}
-				});
-		} else {
-			newSteps
-				.sort((a, b) => a.order - b.order)
-				.filter((s) => s.id !== step.id)
-				.forEach((stepItem, index) => {
-					const newOrder = index + 1;
-					if (newOrder !== stepItem.order) {
-						updatedOrdersSteps[stepItem.id] = { order: newOrder };
-					}
-				});
-		}
-
-		return { updatedOrdersSteps, newSteps };
-	};
-
 	const handleDelete = async () => {
-		setIsDeleting(true);
-
-		const { newSteps, updatedOrdersSteps } = getNewSteps();
-
-		try {
-			await apiFetch({
-				path: `/qc/v1/automation-steps/${step.id}`,
-				method: 'DELETE',
-				data: {
-					updated_steps: updatedOrdersSteps,
-				},
-			});
-
-			const updatedSteps = newSteps.filter((s) => s.id !== step.id);
-			setSteps(updatedSteps);
-
-			createNotice({
-				type: 'success',
-				message: __('Step deleted', 'quillcrm'),
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsDeleting(false);
+		if (!viewMode) {
+			await deleteStep(step.id.toString(), steps, setSteps, createNotice);
 		}
 	};
+
+	// Check if this node is selected
+	const isSelected = selectedStepId === step.id.toString();
+
+	const handleViewAnalytics = async (e: React.MouseEvent) => {
+		e.stopPropagation();
+		await fetchAnalytics(step.id);
+	};
+
+	// Custom footer for analytics
+	const customFooter =
+		!viewMode && hasAnalytics && isConfigured ? (
+			<div className="qcrm-reactflow-node__footer-row">
+				<div className="qcrm-reactflow-node__recipient text-[#660FF1]">
+					{getRecipientInfo()}
+				</div>
+				<button
+					className="qcrm-reactflow-node__analytics-link text-primary"
+					onClick={handleViewAnalytics}
+					title={__('View Analytics', 'quillcrm')}
+				>
+					<ViewIcon width={16} height={16} />
+					<span>{__('View Analytics', 'quillcrm')}</span>
+				</button>
+			</div>
+		) : undefined;
 
 	return (
-		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-			<div className="qcrm-reactflow-node qcrm-reactflow-node--action">
-				<Handle
-					type="target"
-					position={Position.Top}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
-				/>
+		<>
+			<NodeContextMenu
+				onEdit={viewMode ? undefined : handleEdit}
+				onDelete={viewMode ? undefined : handleDelete}
+				disabled={viewMode}
+			>
+				<div
+					className={`qcrm-reactflow-node qcrm-reactflow-node--action ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${(hasAnalytics && isConfigured) || (viewMode && analytics) ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}
+				>
+					<Handle
+						type="target"
+						position={Position.Top}
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+					/>
 
-				<div className="qcrm-reactflow-node__header">
-					<div className="qcrm-reactflow-node__icon">
-						<ThunderboltOutlined />
-					</div>
-					<div className="qcrm-reactflow-node__actions">
-						<Button
-							type="text"
-							size="small"
-							icon={<EditOutlined />}
-							onClick={(e) => {
-								e.stopPropagation();
-								handleEdit();
-							}}
-						/>
-						<Popconfirm
-							title={__('Are you sure?', 'quillcrm')}
-							onConfirm={handleDeleteWithStopPropagation}
-							okText={__('Yes', 'quillcrm')}
-							cancelText={__('No', 'quillcrm')}
-							onCancel={(e) => e?.stopPropagation()}
-							onOpenChange={(open, e) => {
-								if (e) {
-									e.stopPropagation();
-								}
-							}}
-						>
-							<Button
-								type="text"
-								size="small"
-								icon={<DeleteOutlined />}
-								danger
-								loading={isDeleting}
-								onClick={(e) => e.stopPropagation()}
-							/>
-						</Popconfirm>
-					</div>
+					{/* Step Reorder Controls - hide in view mode */}
+					{!viewMode && <StepReorderControls step={step} />}
+
+					<NodeLayout
+						icon={<ActionIcon width={23} height={23} />}
+						title={__('Action', 'quillcrm')}
+						subtitle={subtitle}
+						onEdit={handleEdit}
+						onDelete={handleDelete}
+						editLabel={__('Edit Action', 'quillcrm')}
+						deleteLabel={__('Delete Action', 'quillcrm')}
+						deleteTitle={__('Delete this action?', 'quillcrm')}
+						deleteDescription={__(
+							'This will remove the action from your workflow.',
+							'quillcrm'
+						)}
+						viewMode={viewMode}
+						analytics={analytics}
+						customFooter={customFooter}
+					/>
+
+					<Handle
+						type="source"
+						position={Position.Bottom}
+						className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+					/>
 				</div>
+			</NodeContextMenu>
 
-				<div className="qcrm-reactflow-node__content">
-					<div className="qcrm-reactflow-node__title">
-						{hasAction ? action?.label : __('Action', 'quillcrm')}
-					</div>
-					{!hasAction && (
-						<Tag
-							color="warning"
-							className="qcrm-reactflow-node__warning"
-						>
-							{__('Action not set', 'quillcrm')}
-						</Tag>
-					)}
-				</div>
-
-				<Handle
-					type="source"
-					position={Position.Bottom}
-					className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+			{/* Analytics Popup */}
+			{isConfigured && hasAnalytics && analyticsData && (
+				<AnalyticsPopup
+					visible={showAnalytics}
+					onClose={hideAnalytics}
+					actionType={getChannelType(step.action || '')}
+					analytics={analyticsData}
 				/>
-			</div>
-		</NodeContextMenu>
+			)}
+		</>
 	);
 };
 

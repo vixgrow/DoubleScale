@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Change Order Status Action
  *
@@ -15,12 +16,16 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Managers\Actions_Manager;
+use QuillCRM\Constants\Order_Status;
 
 /**
  * Change Order Status Action
  */
 class Change_Order_Status extends Action {
+
+
+
+
 
 	/**
 	 * Action Name
@@ -56,6 +61,14 @@ class Change_Order_Status extends Action {
 	 * @var string
 	 */
 	public $group = 'order';
+
+	/**
+	 * Required triggers for this action to be enabled
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array( 'wc_order_created', 'wc_order_completed', 'wc_order_status_changed', 'wc_order_refunded' );
+
 
 	/**
 	 * Process Action
@@ -101,16 +114,7 @@ class Change_Order_Status extends Action {
 			'status' => array(
 				'type'    => 'select',
 				'label'   => __( 'Order Status', 'quillcrm' ),
-				'options' => array(
-					'wc-pending'        => __( 'Pending Payment', 'quillcrm' ),
-					'wc-processing'     => __( 'Processing', 'quillcrm' ),
-					'wc-on-hold'        => __( 'On Hold', 'quillcrm' ),
-					'wc-completed'      => __( 'Completed', 'quillcrm' ),
-					'wc-cancelled'      => __( 'Cancelled', 'quillcrm' ),
-					'wc-refunded'       => __( 'Refunded', 'quillcrm' ),
-					'wc-failed'         => __( 'Failed', 'quillcrm' ),
-					'wc-checkout-draft' => __( 'Checkout Draft', 'quillcrm' ),
-				),
+				'options' => Order_Status::get_all(),
 			),
 		);
 	}

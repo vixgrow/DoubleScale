@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { map } from 'lodash';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -17,11 +19,15 @@ type FieldType = {
 	};
 	multiple?: boolean;
 	fields?: {
-		[key: string]: {
-			label: string;
-		};
+		[key: string]: FieldType;
 	};
 	endpoint?: string;
+	settings?: {
+		ajax_action?: string;
+		button_text?: string;
+	};
+	'default-value'?: string;
+	helperText?: string;
 };
 
 type FieldsType = {
@@ -32,9 +38,15 @@ interface FieldsProps {
 	fields: FieldsType;
 	values: { [key: string]: any };
 	onChange: (value: any) => void;
+	stepId?: number;
 }
 
-const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
+const Fields: React.FC<FieldsProps> = ({
+	fields,
+	values,
+	onChange,
+	stepId,
+}) => {
 	const handleChange = (key: string, value: any) => {
 		const newValues = {
 			...values,
@@ -52,6 +64,87 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 		return options;
 	};
 
+	const processHelperText = (
+		helperText: string | undefined
+	): string | undefined => {
+		if (!helperText || !stepId) {
+			return helperText;
+		}
+
+		// Replace STEP_ID placeholder with actual step ID
+		return helperText.replace(/STEP_ID/g, stepId.toString());
+	};
+
+	// Check if any field is a tab type
+	const hasTabs = Object.values(fields).some(
+		(field) => field.type === 'group'
+	);
+
+	if (hasTabs) {
+		// Get tab fields
+		const tabFields = Object.entries(fields).filter(
+			([, field]) => field.type === 'group'
+		);
+
+		// Get first tab key as default
+		const defaultTab = tabFields[0]?.[0] || '';
+
+		return (
+			<div className="qcrm-fields" style={{ marginBottom: '20px' }}>
+				<Tabs defaultValue={defaultTab}>
+					<div className="border px-5 py-3 rounded-lg">
+						<TabsList className="bg-transparent text-foreground gap-3">
+							{tabFields.map(([key, field]) => (
+								<TabsTrigger
+									key={key}
+									value={key}
+									className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+								>
+									{__(field.label, '@quillcrm')}
+								</TabsTrigger>
+							))}
+						</TabsList>
+					</div>
+
+					{tabFields.map(([key, field]) => (
+						<TabsContent key={key} value={key}>
+							<div
+								className="qcrm-tab-content"
+								style={{ padding: '20px 0' }}
+							>
+								{field.fields &&
+									map(field.fields, (tabField, tabFieldKey) => {
+										return (
+											<Field
+												key={tabFieldKey}
+												label={tabField.label}
+												type={tabField.type}
+												options={optionsArray(tabField)}
+												value={values?.[tabFieldKey]}
+												onChange={(value) =>
+													handleChange(tabFieldKey, value)
+												}
+												fields={tabField.fields}
+												endpoint={tabField.endpoint}
+												multiple={tabField.multiple}
+												settings={tabField.settings}
+												allValues={values}
+												defaultValue={tabField['default-value']}
+												helperText={processHelperText(
+													tabField.helperText
+												)}
+											/>
+										);
+									})}
+							</div>
+						</TabsContent>
+					))}
+				</Tabs>
+			</div>
+		);
+	}
+
+	// Fallback to regular field rendering if no tabs
 	return (
 		<div className="qcrm-fields" style={{ marginBottom: '20px' }}>
 			{map(fields, (field, key) => {
@@ -66,6 +159,10 @@ const Fields: React.FC<FieldsProps> = ({ fields, values, onChange }) => {
 						fields={field.fields}
 						endpoint={field.endpoint}
 						multiple={field.multiple}
+						settings={field.settings}
+						allValues={values}
+						defaultValue={field['default-value']}
+						helperText={processHelperText(field.helperText)}
 					/>
 				);
 			})}

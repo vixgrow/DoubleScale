@@ -2,13 +2,16 @@ import { __ } from '@wordpress/i18n';
 import WandIcon from '../icons/wand';
 import { BuilderArrowIcon, WandOutlinedIcon } from '../icons';
 import { Button } from '../ui/button';
+//@ts-ignore
+import device from '../../../assets/images/email-device.png';
 
 const FeedBuilder: React.FC<{
 	setVisibile: (visible: boolean) => void;
 }> = ({ setVisibile }) => {
 	return (
-		<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#EBF4FB] w-1/2">
-			<div className="bg-sidebar-accent w-fit rounded-lg p-2 mb-4">
+		<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] w-1/3">
+			<img src={device} alt="device" className="w-[300px]" />
+			{/* <div className="bg-sidebar-accent w-fit rounded-lg p-2 mb-4">
 				<WandIcon />
 			</div>
 			<div className="text-black text-center">
@@ -28,7 +31,7 @@ const FeedBuilder: React.FC<{
 			<Button variant="gradient" onClick={() => setVisibile(true)}>
 				<WandOutlinedIcon />
 				{__('Create with Email Builder', 'quillcrm')}
-			</Button>
+			</Button> */}
 		</div>
 	);
 };

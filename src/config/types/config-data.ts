@@ -1,3 +1,4 @@
+import { __ } from '@wordpress/i18n';
 import type { InitialPayload } from './initial-payload';
 
 export type ConfigData = Record<string, unknown> & {
@@ -23,6 +24,39 @@ export type ConfigData = Record<string, unknown> & {
 	isLmsActive: boolean;
 	mergeTags: AutomationMergeTags;
 	importers: Importers;
+	userCapabilities: UserCapabilities;
+	defaultStages: DefaultStage[];
+	dealPriorities: DealPriority[];
+	quillsmtpInfo: QuillSMTPInfo;
+};
+
+export type UserCapabilities = {
+	quillcrm_crm_manager: boolean;
+	quillcrm_deal_owner: boolean;
+};
+
+export type DefaultStage = {
+	name: string;
+	color: string;
+	win_probability: number;
+};
+
+export type DealPriority = {
+	label: string;
+	color: string;
+};
+
+export type VerifiedSender = {
+	email: string;
+	name: string;
+	connection_id: string;
+};
+
+export type QuillSMTPInfo = {
+	configured: boolean;
+	verified_senders?: VerifiedSender[];
+	config_url?: string;
+	plugin_url?: string;
 };
 
 export type Importers = {
@@ -34,7 +68,7 @@ export type Importer = {
 	slug: string;
 	credentials: {
 		[key: string]: ImporterField;
-	},
+	};
 	is_integration: boolean;
 	is_active: boolean;
 	fields: {
@@ -83,6 +117,8 @@ export type AutomationRules = {
 export type RulesGroup = {
 	name: string;
 	rules: Rules;
+	key: string;
+	triggers?: string[];
 };
 
 export type Rules = {
@@ -142,8 +178,10 @@ export type Action = {
 				[key: string]: string;
 			};
 			multiple?: boolean;
+			helperText?: string;
 		};
 	};
+	required_triggers?: string[];
 };
 
 export type ActionsGroup = {
@@ -157,7 +195,9 @@ export type ActionsGroup = {
 export type AutomationActions = {
 	[key: string]: {
 		label: string;
-		groups: ActionsGroup[];
+		groups: {
+			[key: string]: ActionsGroup;
+		};
 	};
 };
 
@@ -326,3 +366,14 @@ export type FiltersGroup = {
 export type FiltersGroups = {
 	contact: FiltersGroup;
 };
+
+export const SOURCE_OPTIONS = [
+	{ value: 'website', label: __('Website', 'quillcrm') },
+	{ value: 'referral', label: __('Referral', 'quillcrm') },
+	{ value: 'social_media', label: __('Social Media', 'quillcrm') },
+	{ value: 'email_campaign', label: __('Email Campaign', 'quillcrm') },
+	{ value: 'cold_call', label: __('Cold Call', 'quillcrm') },
+	{ value: 'trade_show', label: __('Trade Show', 'quillcrm') },
+	{ value: 'partner', label: __('Partner', 'quillcrm') },
+	{ value: 'other', label: __('Other', 'quillcrm') },
+] as const;

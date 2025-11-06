@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST_Settings_Controller class.
  *
@@ -10,6 +11,8 @@
 namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Settings;
+use QuillCRM\User_Roles\Permissions;
+use QuillCRM\Managers\Bounce_Handler_Manager;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -22,6 +25,7 @@ use QuillCRM\Abstracts\REST_Controller;
  * @since 1.0.0
  */
 class REST_Settings_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -57,6 +61,28 @@ class REST_Settings_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/bounce-webhooks",
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_bounce_webhooks' ),
+				'permission_callback' => array( $this, 'get_permissions_check' ),
+				'args'                => array(
+					'provider' => array(
+						'description'       => __( 'Optional email provider slug to filter results (e.g., sendgrid, mailgun, postmark). If not provided, returns all providers.', 'quillcrm' ),
+						'type'              => 'string',
+						'required'          => false,
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => function ( $param ) {
+							// Allow only lowercase alphanumeric and hyphens.
+							return preg_match( '/^[a-z0-9-]+$/', $param );
+						},
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -73,7 +99,7 @@ class REST_Settings_Controller extends REST_Controller {
 			'type'                 => 'object',
 			'additionalProperties' => false,
 			'properties'           => array(
-				'business'     => array(
+				'business'        => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -87,7 +113,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'email'        => array(
+				'email'           => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -117,7 +143,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'double_optin' => array(
+				'double_optin'    => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
@@ -143,13 +169,13 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
-				'cart'         => array(
+				'cart'            => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
 						'enable_cart_tracking' => array(
 							'type'    => 'boolean',
-							'default' => true,
+							'default' => false,
 						),
 						'wait_period'          => array(
 							'type'    => 'integer',
@@ -201,6 +227,11 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
+				'button_settings' => array(
+					'type'                 => 'object',
+					'additionalProperties' => true,
+					'default'              => array(),
+				),
 			),
 		);
 		return $schema;
@@ -214,31 +245,26 @@ class REST_Settings_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
-	public function get( $request ) { // phpcs:ignore
+	public function get( $request ) 	{ // phpcs:ignore
 		$settings = Settings::get_all();
 
 		$result = array();
 		foreach ( $this->get_schema()['properties'] as $group_key => $group_schema ) {
-			$result[ $group_key ] = array();
-			foreach ( $group_schema['properties'] as $setting_key => $setting_schema ) {
-				$result[ $group_key ][ $setting_key ] = $settings[ $group_key ][ $setting_key ] ?? $setting_schema['default'];
+			if ( $group_key === 'button_settings' ) {
+				// Handle button_settings specially since it's not a structured schema
+				$result[ $group_key ] = $settings[ $group_key ] ?? $group_schema['default'];
+			} else {
+				$result[ $group_key ] = array();
+				foreach ( $group_schema['properties'] as $setting_key => $setting_schema ) {
+					$result[ $group_key ][ $setting_key ] = $settings[ $group_key ][ $setting_key ] ?? $setting_schema['default'];
+				}
 			}
 		}
 
 		return new WP_REST_Response( $result, 200 );
 	}
 
-	/**
-	 * Checks if a given request has access to get settings.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
-	 */
-	public function get_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
-	}
+
 
 	/**
 	 * Updates settings.
@@ -263,7 +289,68 @@ class REST_Settings_Controller extends REST_Controller {
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
 	public function update_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
+	/**
+	 * Checks if a given request has access to get settings.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
+	 */
+	public function get_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Get bounce webhook URLs.
+	 *
+	 * Retrieves bounce webhook URLs for email providers. If a provider parameter
+	 * is specified, returns only that provider's webhook URL. Otherwise, returns
+	 * all available provider webhook URLs.
+	 *
+	 * These URLs can be used to configure webhooks in email service providers
+	 * (SendGrid, Mailgun, Postmark, etc.) to automatically handle email bounces.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object with bounce webhook URLs or error.
+	 */
+	public function get_bounce_webhooks( $request ) {
+		$manager  = Bounce_Handler_Manager::instance();
+		$urls     = $manager->get_webhook_urls();
+		$provider = $request->get_param( 'provider' );
+
+		// If no provider specified, return all webhooks.
+		if ( empty( $provider ) ) {
+			return new WP_REST_Response( $urls, 200 );
+		}
+
+		// Provider specified - validate and return single webhook.
+		if ( ! isset( $urls[ $provider ] ) ) {
+			return new WP_Error(
+				'invalid_provider',
+				sprintf(
+					/* translators: 1: provider slug, 2: available providers */
+					__( 'Provider "%1$s" not found. Available providers: %2$s', 'quillcrm' ),
+					$provider,
+					implode( ', ', array_keys( $urls ) )
+				),
+				array( 'status' => 404 )
+			);
+		}
+
+		// Return single provider webhook.
+		return new WP_REST_Response(
+			array(
+				'provider' => $provider,
+				'name'     => $urls[ $provider ]['name'],
+				'url'      => $urls[ $provider ]['url'],
+			),
+			200
+		);
+	}
 }

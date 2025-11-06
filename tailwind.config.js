@@ -5,6 +5,7 @@ module.exports = {
 		'./src/api/email-editor-blocks/built-in-blocks/text/**/*.tsx',
 		'./src/client/pages/**/*.tsx',
 		'./src/components/**/*.tsx',
+		'./src/builder/**/*.tsx',
 	],
 	theme: {
 		container: {

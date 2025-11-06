@@ -17,9 +17,10 @@ import ConfigAPI from '@quillcrm/config';
 import AjaxSelect from '../ajax-select';
 import { Field } from '@quillcrm/components';
 import FormTypeSelector from '../form-types-cards';
+import InitialShimmer from './initial-shimmer';
 
 const Initial: React.FC = () => {
-	const { form, updateForm } = useFormContext();
+	const { form, updateForm, isLoading } = useFormContext();
 	const { getForms } = ConfigAPI;
 	const forms = getForms();
 	const formOptions = form ? forms[form?.form_type]?.options : {};
@@ -71,12 +72,16 @@ const Initial: React.FC = () => {
 	const handleFormTypeSelect = (value: string) => {
 		updateForm({
 			form_type: value,
+			form_id: '', // Clear form_id when type changes
+			post_id: undefined, // Clear post_id when type changes
 		});
 	};
 
 	return (
 		<div>
-			{form && (
+			{isLoading ? (
+				<InitialShimmer />
+			) : form ? (
 				<div className="qcrm-fields">
 					<div className="text-[#09090B] font-bold text-2xl">
 						{__('Basic Information', 'quillcrm')}
@@ -118,7 +123,7 @@ const Initial: React.FC = () => {
 											<AjaxSelect
 												label={label}
 												ajax_action={ajax_action}
-												key={key}
+												key={`${form.form_type}-${key}`}
 												parent={parent}
 												slug={key}
 											/>
@@ -137,7 +142,7 @@ const Initial: React.FC = () => {
 						/>
 					</div>
 				</div>
-			)}
+			) : null}
 		</div>
 	);
 };

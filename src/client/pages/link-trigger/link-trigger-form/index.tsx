@@ -60,7 +60,7 @@ const LinkTriggerForm: React.FC<LinkTriggerFormProps> = ({
 							onUpdateSettings({ add_lists: value })
 						}
 						type="lists"
-						required={true}
+						required={false}
 					/>
 					<Field
 						label={__('Add Tags', 'quillcrm')}
@@ -69,7 +69,7 @@ const LinkTriggerForm: React.FC<LinkTriggerFormProps> = ({
 							onUpdateSettings({ add_tags: value })
 						}
 						type="tags"
-						required={true}
+						required={false}
 					/>
 				</div>
 				<div className="flex gap-5">
@@ -82,7 +82,7 @@ const LinkTriggerForm: React.FC<LinkTriggerFormProps> = ({
 							})
 						}
 						type="lists"
-						required={true}
+						required={false}
 					/>
 					<Field
 						label={__('Remove Tags', 'quillcrm')}
@@ -93,7 +93,7 @@ const LinkTriggerForm: React.FC<LinkTriggerFormProps> = ({
 							})
 						}
 						type="tags"
-						required={true}
+						required={false}
 					/>
 				</div>
 			</div>

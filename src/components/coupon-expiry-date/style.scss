@@ -1,0 +1,37 @@
+.coupon-expiry-date {
+	.space-y-4 > * + * {
+		margin-top: 1rem;
+	}
+
+	.flex {
+		display: flex;
+	}
+
+	.items-center {
+		align-items: center;
+	}
+
+	.space-x-2 > * + * {
+		margin-left: 0.5rem;
+	}
+
+	.space-x-3 > * + * {
+		margin-left: 0.75rem;
+	}
+
+	.w-32 {
+		width: 8rem;
+	}
+
+	.mt-4 {
+		margin-top: 1rem;
+	}
+
+	input[type="radio"] {
+		accent-color: #3b82f6;
+	}
+
+	label {
+		user-select: none;
+	}
+}

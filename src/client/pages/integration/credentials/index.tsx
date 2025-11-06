@@ -1,16 +1,6 @@
 /**
- * WordPress dependencies
- */
-import { useState } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
-import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
-
-/**
  * External dependencies
  */
-import { Typography, Input, Modal } from 'antd';
 import { map } from 'lodash';
 
 /**
@@ -18,49 +8,24 @@ import { map } from 'lodash';
  */
 import './style.scss';
 import type { Integration as IntegrationType } from '@quillcrm/config';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import SelectField from '../select-field';
 
-interface IntegrationProps {
-	open: boolean;
-	onClose: () => void;
+interface CredentialsProps {
 	integration: IntegrationType;
 	slug: string;
+	fieldsValue: Record<string, any>;
+	setFieldsValue: (value: Record<string, any>) => void;
 }
 
-const Credentials: React.FC<IntegrationProps> = ({
-	open,
-	onClose,
+const Credentials: React.FC<CredentialsProps> = ({
 	integration,
 	slug,
+	fieldsValue,
+	setFieldsValue,
 }) => {
-	const { fields, settings } = integration;
-	const [fieldsValue, setFieldsValue] = useState(settings);
-	const [isSaving, setIsSaving] = useState(false);
-	const { createNotice } = useDispatch('quillcrm/core');
-
-	const save = async () => {
-		setIsSaving(true);
-
-		try {
-			// @ts-ignore
-			const response = await apiFetch({
-				path: addQueryArgs(`/qc/v1/integrations/${slug}`),
-				method: 'POST',
-				data: {
-					settings: fieldsValue,
-				},
-			});
-
-			onClose();
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to save settings', 'quillcrm'),
-			});
-		} finally {
-			setIsSaving(false);
-		}
-	};
+	const { fields } = integration;
 
 	const checkConditions = (conditions, fieldsValue) => {
 		let result = true;
@@ -96,62 +61,48 @@ const Credentials: React.FC<IntegrationProps> = ({
 	};
 
 	return (
-		<Modal
-			className="qcrm-integrations"
-			open={open}
-			onCancel={onClose}
-			onOk={() => save()}
-			loading={isSaving}
-		>
-			<div className="qcrm-fields" style={{ marginBottom: 20 }}>
-				{map(fields, (field, key) => {
-					if (
-						field.conditions &&
-						!checkConditions(field.conditions, fieldsValue)
-					) {
-						return null;
-					}
+		<div className="space-y-4">
+			{map(fields, (field, key) => {
+				if (
+					field.conditions &&
+					!checkConditions(field.conditions, fieldsValue)
+				) {
+					return null;
+				}
 
-					return (
-						<div className="qcrm-field">
-							<div className="qcrm-field">
-								<div className="qcrm-field-label">
-									<Typography.Text>
-										{field.label}
-									</Typography.Text>
-								</div>
-								<div className="qcrm-field-input">
-									{!field.has_options && (
-										<Input
-											value={fieldsValue[key]}
-											onChange={(e) => {
-												setFieldsValue({
-													...fieldsValue,
-													[key]: e.target.value,
-												});
-											}}
-										/>
-									)}
-									{field.has_options && (
-										<SelectField
-											integration={slug}
-											slug={field.endpoint || ''}
-											onChange={(value) => {
-												setFieldsValue({
-													...fieldsValue,
-													[key]: value,
-												});
-											}}
-											value={fieldsValue[key] || ''}
-										/>
-									)}
-								</div>
-							</div>
-						</div>
-					);
-				})}
-			</div>
-		</Modal>
+				return (
+					<div key={key} className="space-y-2">
+						<Label htmlFor={key}>{field.label}</Label>
+						{!field.has_options && (
+							<Input
+								id={key}
+								value={fieldsValue[key] || ''}
+								onChange={(e) => {
+									setFieldsValue({
+										...fieldsValue,
+										[key]: e.target.value,
+									});
+								}}
+								className="h-12 bg-white"
+							/>
+						)}
+						{field.has_options && (
+							<SelectField
+								integration={slug}
+								slug={field.endpoint || ''}
+								onChange={(value) => {
+									setFieldsValue({
+										...fieldsValue,
+										[key]: value,
+									});
+								}}
+								value={fieldsValue[key] || ''}
+							/>
+						)}
+					</div>
+				);
+			})}
+		</div>
 	);
 };
 

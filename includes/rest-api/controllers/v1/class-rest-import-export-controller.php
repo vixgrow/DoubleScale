@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API: Import_Export Controller
  *
@@ -9,13 +10,13 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use Exception;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
-use QuillCRM\Import_Export\Import;
 use QuillCRM\Import_Export\Export;
 use QuillCRM\Import_Export\Security;
 use QuillCRM\Import_Export\Importers\Manager;
@@ -24,6 +25,7 @@ use QuillCRM\Import_Export\Importers\Manager;
  * Import_Export Controller
  */
 class Rest_Import_Export_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -180,6 +182,7 @@ class Rest_Import_Export_Controller extends REST_Controller {
 		);
 
 		$this->register_importer_routes();
+		$this->register_oauth_routes();
 	}
 
 	/**
@@ -198,7 +201,7 @@ class Rest_Import_Export_Controller extends REST_Controller {
 				array(
 					array(
 						'methods'             => WP_REST_Server::READABLE,
-						'callback'            => function( $request ) use ( $importer ) {
+						'callback'            => function ( $request ) use ( $importer ) {
 							try {
 								$credentials = $request->get_param( 'credentials' ) ?? array();
 								$importer->set_credentials( $credentials );
@@ -221,6 +224,196 @@ class Rest_Import_Export_Controller extends REST_Controller {
 			);
 		}
 	}
+
+	/**
+	 * Register OAuth routes
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public function register_oauth_routes() {
+		// Get OAuth authorization URL
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/oauth/authorize",
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'get_oauth_authorization_url' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+					'args'                => array(
+						'provider'  => array(
+							'required' => true,
+							'type'     => 'string',
+							'enum'     => array( 'gohighlevel' ),
+						),
+						'client_id' => array(
+							'required' => true,
+							'type'     => 'string',
+						),
+					),
+				),
+			)
+		);
+
+		// Get OAuth connection status
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/oauth/status",
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_oauth_status' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+					'args'                => array(
+						'provider' => array(
+							'required' => true,
+							'type'     => 'string',
+							'enum'     => array( 'gohighlevel' ),
+						),
+					),
+				),
+			)
+		);
+
+		// Clear OAuth connection
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/oauth/disconnect",
+			array(
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'disconnect_oauth' ),
+					'permission_callback' => array( $this, 'import_export_permissions_check' ),
+					'args'                => array(
+						'provider' => array(
+							'required' => true,
+							'type'     => 'string',
+							'enum'     => array( 'gohighlevel' ),
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Get OAuth authorization URL
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_oauth_authorization_url( $request ) {
+		$provider = $request->get_param( 'provider' );
+
+		$client_id     = $request->get_param( 'client_id' );
+		$client_secret = $request->get_param( 'client_secret' );
+
+		switch ( $provider ) {
+			case 'gohighlevel':
+				$auth_url = admin_url( 'admin.php?quillcrm-ghl=authorize&client_id=' . urlencode( $client_id ) . '&client_secret=' . urlencode( $client_secret ) );
+
+				return new WP_REST_Response(
+					array(
+						'authorization_url' => $auth_url,
+					),
+					200
+				);
+
+			default:
+				return new WP_Error(
+					'invalid_provider',
+					__( 'Invalid OAuth provider', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+		}
+	}
+
+	/**
+	 * Get OAuth connection status
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_oauth_status( $request ) {
+		$provider = $request->get_param( 'provider' );
+
+		switch ( $provider ) {
+			case 'gohighlevel':
+				$tokens = \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::get_stored_tokens();
+				if ( $tokens ) {
+					return new WP_REST_Response(
+						array(
+							'connected'    => true,
+							'connected_at' => $tokens['created_at'],
+							'expires_at'   => $tokens['expires_at'],
+							'expires_in'   => max( 0, $tokens['expires_at'] - time() ),
+						),
+						200
+					);
+				} else {
+					return new WP_REST_Response(
+						array(
+							'connected' => false,
+						),
+						200
+					);
+				}
+
+			default:
+				return new WP_REST_Response(
+					array(
+						'connected' => false,
+						'error'     => 'Invalid provider',
+					),
+					400
+				);
+		}
+	}
+
+	/**
+	 * Disconnect OAuth connection
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function disconnect_oauth( $request ) {
+		$provider = $request->get_param( 'provider' );
+
+		switch ( $provider ) {
+			case 'gohighlevel':
+				$result = \QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::clear_stored_tokens();
+				return new WP_REST_Response(
+					array(
+						'success' => $result,
+						'message' => $result
+							? __( 'GoHighLevel connection cleared', 'quillcrm' )
+							: __( 'No connection to clear', 'quillcrm' ),
+					),
+					200
+				);
+
+			default:
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'message' => 'Invalid provider',
+					),
+					400
+				);
+		}
+	}
+
 
 	/**
 	 * Download
@@ -368,6 +561,7 @@ class Rest_Import_Export_Controller extends REST_Controller {
 	public function import( $request ) {
 		$source          = $request->get_param( 'source' ) ?? 'csv';
 		$offset          = $request->get_param( 'offset' ) ?? 0;
+		$cursor          = $request->get_param( 'cursor' ) ?? null;
 		$file_name       = $request->get_param( 'file_name' ) ?? '';
 		$mapping         = $request->get_param( 'mapping' ) ?? array();
 		$lists_mapping   = $request->get_param( 'lists_mapping' ) ?? array();
@@ -381,6 +575,7 @@ class Rest_Import_Export_Controller extends REST_Controller {
 
 		$args = array(
 			'offset'          => $offset,
+			'cursor'          => $cursor,
 			'status'          => $status,
 			'update_existing' => $update_existing,
 			'lists_mapping'   => $lists_mapping,
@@ -414,6 +609,6 @@ class Rest_Import_Export_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function import_export_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

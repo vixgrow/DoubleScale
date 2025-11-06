@@ -24,6 +24,7 @@ import { useDataTable } from '@quillcrm/hooks/use-dataTable';
 import { DataTableSearch } from './data-table-search';
 import { DataTableActions } from './data-table-actions';
 import { DataTableConfig } from '@quillcrm/client';
+import { TableSkeleton } from './table-skeleton';
 
 interface DataTableProps<TData> {
 	columns: ColumnDef<TData, any>[];
@@ -34,6 +35,7 @@ interface DataTableProps<TData> {
 	showPagination?: boolean;
 	initialPageSize?: number | undefined;
 	setPage: (page: number) => void;
+	loading?: boolean;
 }
 
 export function DataTable<TData>({
@@ -45,6 +47,7 @@ export function DataTable<TData>({
 	showPagination = true,
 	initialPageSize,
 	setPage,
+	loading = false,
 }: DataTableProps<TData>) {
 	const { table, globalFilter, setGlobalFilter } = useDataTable(
 		data,
@@ -99,17 +102,19 @@ export function DataTable<TData>({
 										{header.isPlaceholder
 											? null
 											: flexRender(
-													header.column.columnDef
-														.header,
-													header.getContext()
-												)}
+												header.column.columnDef
+													.header,
+												header.getContext()
+											)}
 									</TableHead>
 								))}
 							</TableRow>
 						))}
 					</TableHeader>
 					<TableBody>
-						{table.getRowModel().rows?.length ? (
+						{loading ? (
+							<TableSkeleton columns={table.getVisibleLeafColumns().length} />
+						) : table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}

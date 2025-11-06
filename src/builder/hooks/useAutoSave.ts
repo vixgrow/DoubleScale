@@ -1,0 +1,234 @@
+import { useSelect } from '@wordpress/data';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { STORE_KEY } from '../../stores/email-builder/constants';
+import { getTemplate, saveTemplate } from '../api/templates';
+import { BuilderData } from '../index';
+
+interface UseAutoSaveOptions {
+	interval?: number;
+	enabled?: boolean;
+	customSaveCallback?: (data: BuilderData) => Promise<void>;
+}
+
+interface SaveStatus {
+	isSaving: boolean;
+	lastSaved: Date | null;
+	hasUnsavedChanges: boolean;
+	error: string | null;
+}
+
+export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
+	const { interval = 10000, enabled = true, customSaveCallback } = options;
+
+	const [saveStatus, setSaveStatus] = useState<SaveStatus>({
+		isSaving: false,
+		lastSaved: null,
+		hasUnsavedChanges: false,
+		error: null,
+	});
+
+	const autoSaveTimerRef = useRef<number | null>(null);
+	const lastSavedStateRef = useRef<string>('');
+	const isMountedRef = useRef(true);
+	const hasInitializedRef = useRef(false);
+
+	// Get current builder state
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
+	const globalSettings = useSelect(
+		(select) => select(STORE_KEY).getGlobalSettings(),
+		[]
+	);
+	const buttonSettings = useSelect(
+		(select) => select(STORE_KEY).getAllButtonSettings(),
+		[]
+	);
+
+	// Get campaign data
+	const campaign = useSelect(
+		(select) => select('quillcrm/campaign').getCampaign(),
+		[]
+	);
+
+	// Create a serialized version of current state for comparison
+	const currentState = JSON.stringify({
+		sections,
+		globalSettings,
+		buttonSettings,
+	});
+
+	// Initialize baseline when store has data
+	useEffect(() => {
+		// Only run once
+		if (hasInitializedRef.current) {
+			return;
+		}
+
+		// Wait for store to have data (at least sections array exists)
+		if (sections && sections.length > 0) {
+			lastSavedStateRef.current = currentState;
+			hasInitializedRef.current = true;
+		}
+	}, [sections, currentState]);
+
+	// Simple: Detect changes after initialization
+	useEffect(() => {
+		if (!hasInitializedRef.current || !lastSavedStateRef.current) {
+			return;
+		}
+
+		if (currentState !== lastSavedStateRef.current) {
+			setSaveStatus((prev) => ({ ...prev, hasUnsavedChanges: true }));
+		}
+	}, [currentState]);
+
+	// Save function
+	const save = useCallback(async (): Promise<{
+		success: boolean;
+		templateId: number | null;
+	}> => {
+		if (!isMountedRef.current) {
+			return { success: false, templateId: null };
+		}
+
+		// If customSaveCallback is provided, use it instead of default save logic
+		if (customSaveCallback) {
+			try {
+				setSaveStatus((prev) => ({ ...prev, isSaving: true, error: null }));
+
+				const builderData = JSON.parse(currentState);
+
+				// Call custom save callback with complete builder data
+				await customSaveCallback(builderData);
+
+				if (isMountedRef.current) {
+					const now = new Date();
+					lastSavedStateRef.current = currentState;
+					setSaveStatus({
+						isSaving: false,
+						lastSaved: now,
+						hasUnsavedChanges: false,
+						error: null,
+					});
+					return { success: true, templateId: null };
+				}
+				return { success: false, templateId: null };
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Failed to save';
+				if (isMountedRef.current) {
+					setSaveStatus((prev) => ({
+						...prev,
+						isSaving: false,
+						error: errorMessage,
+					}));
+				}
+				console.error('Save error:', error);
+				return { success: false, templateId: null };
+			}
+		}
+
+		// Default save logic (for campaign flow)
+		if (!campaign) {
+			return { success: false, templateId: null };
+		}
+
+		try {
+			setSaveStatus((prev) => ({ ...prev, isSaving: true, error: null }));
+
+			// Create the builder data
+			const builderData = {
+				sections: JSON.parse(currentState).sections,
+				globalSettings: JSON.parse(currentState).globalSettings,
+				buttonSettings: JSON.parse(currentState).buttonSettings,
+			};
+
+			// Get template ID from campaign settings
+			const templateId = campaign.settings?.template_ids?.[0];
+
+			if (!templateId) {
+				throw new Error('No template ID found. Please complete the template step first.');
+			}
+
+			// Fetch current template
+			const template = await getTemplate(templateId);
+
+			// Save template with updated builder body + campaign_id
+			const templateWithCampaignId: typeof template & { campaign_id: number } = {
+				...template,
+				body: JSON.stringify({
+					type: 'builder',
+					value: builderData,
+				}),
+				campaign_id: campaign.id,
+				hidden: true, // Auto-save should be hidden from user templates
+			};
+
+			const savedTemplate = await saveTemplate(templateWithCampaignId);
+
+			if (isMountedRef.current) {
+				const now = new Date();
+				lastSavedStateRef.current = currentState;
+				setSaveStatus({
+					isSaving: false,
+					lastSaved: now,
+					hasUnsavedChanges: false,
+					error: null,
+				});
+				return { success: true, templateId: savedTemplate.id ?? null };
+			}
+			return { success: false, templateId: null };
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Failed to save';
+			if (isMountedRef.current) {
+				setSaveStatus((prev) => ({
+					...prev,
+					isSaving: false,
+					error: errorMessage,
+				}));
+			}
+			console.error('Save error:', error);
+			return { success: false, templateId: null };
+		}
+	}, [campaign, currentState, customSaveCallback]);
+
+	// Auto-save effect
+	useEffect(() => {
+		if (!enabled || !saveStatus.hasUnsavedChanges) {
+			return;
+		}
+
+		// Clear existing timer
+		if (autoSaveTimerRef.current) {
+			clearTimeout(autoSaveTimerRef.current);
+		}
+
+		// Set new timer
+		autoSaveTimerRef.current = window.setTimeout(() => {
+			save();
+		}, interval);
+
+		return () => {
+			if (autoSaveTimerRef.current) {
+				clearTimeout(autoSaveTimerRef.current);
+			}
+		};
+	}, [enabled, saveStatus.hasUnsavedChanges, interval, save]);
+
+	// Cleanup on unmount
+	useEffect(() => {
+		return () => {
+			isMountedRef.current = false;
+			if (autoSaveTimerRef.current) {
+				clearTimeout(autoSaveTimerRef.current);
+			}
+		};
+	}, []);
+
+	return {
+		...saveStatus,
+		save,
+		markAsSaved: () => {
+			lastSavedStateRef.current = currentState;
+			setSaveStatus((prev) => ({ ...prev, hasUnsavedChanges: false }));
+		},
+	};
+};

@@ -8,288 +8,241 @@ import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
 
 /**
- * External dependencies
- */
-import { Card, Typography, Table, Flex, Divider } from 'antd';
-import {
-    TransactionOutlined,
-    ShopOutlined,
-} from '@ant-design/icons';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
-import type {
-    PurchaseHistory as PurchaseHistoryType,
-} from '../state/types';
-import { convertDate } from '@quillcrm/utils';
+import type { PurchaseHistory as PurchaseHistoryType } from '../state/types';
 import { useContactContext } from '../state/context';
 import ConfigAPI from '@quillcrm/config';
-import { Order, EddOrder } from '@quillcrm/client';
+import {
+	TotalOrdersIcon,
+	TotalRevenueIcon,
+	NoPurchaseHistoryIcon,
+	AnalyticsReportsIcon,
+	MessageStatsCard,
+	NoData,
+} from '@quillcrm/components';
+import { DataTable } from '@/components/ui/data-table';
+import DataTablePagination from '@/components/ui/data-table-pagination';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { getWooColumns, getEddColumns } from './columns';
 
 interface PurchaseHistoryProps {
-    contact_id: number;
+	contact_id: number;
 }
 
 const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
-    const { purchaseHistory, setPurchaseHistory } = useContactContext();
-    const [loading, setLoading] = useState<boolean>(false);
-    const isEddActive = ConfigAPI.isEddActive();
-    const isWooActive = ConfigAPI.isWoocommerceActive();
-    const { createNotice } = useDispatch('quillcrm/core');
+	const { purchaseHistory, setPurchaseHistory } = useContactContext();
+	const [loading, setLoading] = useState<boolean>(false);
+	const [wooPerPage, setWooPerPage] = useState<number>(10);
+	const [wooPage, setWooPage] = useState<number>(1);
+	const [wooTotalRecords, setWooTotalRecords] = useState<number>(0);
+	const [eddPerPage, setEddPerPage] = useState<number>(10);
+	const [eddPage, setEddPage] = useState<number>(1);
+	const [eddTotalRecords, setEddTotalRecords] = useState<number>(0);
+	const isEddActive = ConfigAPI.isEddActive();
+	const isWooActive = ConfigAPI.isWoocommerceActive();
+	const { createNotice } = useDispatch('quillcrm/core');
 
-    const fetchPurchaseHistory = async () => {
-        setLoading(true);
-        try {
-            const response = await apiFetch({
-                path: `/qc/v1/contacts/${contact_id}/purchase-history`,
-            }) as PurchaseHistoryType;
+	const wooServerSideTable = useServerSideTable({
+		page: wooPage,
+		perPage: wooPerPage,
+		totalRecords: wooTotalRecords,
+		setPage: setWooPage,
+		setPerPage: setWooPerPage,
+	});
 
-            setPurchaseHistory(response);
-        } catch (error: any) {
-            createNotice({
-                type: 'error',
-                message: error.message,
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+	const eddServerSideTable = useServerSideTable({
+		page: eddPage,
+		perPage: eddPerPage,
+		totalRecords: eddTotalRecords,
+		setPage: setEddPage,
+		setPerPage: setEddPerPage,
+	});
 
-    useEffect(() => {
-        fetchPurchaseHistory();
-    }, []);
+	const fetchPurchaseHistory = async () => {
+		setLoading(true);
+		try {
+			const response = (await apiFetch({
+				path: addQueryArgs(
+					`/qc/v1/contacts/${contact_id}/purchase-history`,
+					{
+						woo_page: wooPage,
+						woo_per_page: wooPerPage,
+						edd_page: eddPage,
+						edd_per_page: eddPerPage,
+					}
+				),
+			})) as PurchaseHistoryType;
 
-    const wooTableColumns = [
-        {
-            title: __('Order ID', 'quillcrm'),
-            dataIndex: 'id',
-            key: 'id',
-            render: (_, record: Order) => (
-                <Typography.Text>
-                    {record.id}
-                </Typography.Text>
-            ),
-        },
-        {
-            title: __('Date', 'quillcrm'),
-            dataIndex: 'date',
-            key: 'date',
-            render: (_, record: Order) => (
-                <Typography.Text>
-                    {convertDate(record.date_created_gmt)}
-                </Typography.Text>
-            ),
-        },
-        {
-            title: __('Status', 'quillcrm'),
-            dataIndex: 'status',
-            key: 'status',
-            render: (status: string) => (
-                <Typography.Text>
-                    {status}
-                </Typography.Text>
-            ),
-        },
-        {
-            title: __('Total', 'quillcrm'),
-            dataIndex: 'total',
-            key: 'total',
-            render: (_, record: Order) => (
-                <Typography.Text>
-                    {record.total_amount}{' '}{record.currency}
-                </Typography.Text>
-            ),
-        },
-        {
-            title: __('Actions', 'quillcrm'),
-            dataIndex: 'actions',
-            key: 'actions',
-            render: (_, record: Order) => (
-                <Typography.Link href={record.url} target="_blank">
-                    {__('View', 'quillcrm')}
-                </Typography.Link>
-            ),
-        }
-    ];
+			if (response) {
+				setPurchaseHistory(response);
+				setWooTotalRecords(response.wc?.total || 0);
+				setEddTotalRecords(response.edd?.total || 0);
+			}
+		} catch (error: any) {
+			createNotice({
+				type: 'error',
+				message: error.message,
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
 
-    const eddTableColumns = [
-        {
-            title: __('Order ID', 'quillcrm'),
-            dataIndex: 'id',
-            key: 'id',
-            render: (_, record: EddOrder) => (
-                <Typography.Text>
-                    {record.id}
-                </Typography.Text>
-            ),
-        },
-        {
-            title: __('Date', 'quillcrm'),
-            dataIndex: 'date',
-            key: 'date',
-            render: (_, record: EddOrder) => (
-                <Typography.Text>
-                    {convertDate(record.date_completed)}
-                </Typography.Text>
-            ),
-        },
-        {
-            title: __('Status', 'quillcrm'),
-            dataIndex: 'status',
-            key: 'status',
-            render: (status: string) => (
-                <Typography.Text>
-                    {status}
-                </Typography.Text>
-            ),
-        },
-        {
-            title: __('Total', 'quillcrm'),
-            dataIndex: 'total',
-            key: 'total',
-            render: (_, record: EddOrder) => (
-                <Typography.Text>
-                    {record.total}{' '}{record.currency}
-                </Typography.Text>
-            ),
-        },
-        {
-            title: __('Actions', 'quillcrm'),
-            dataIndex: 'actions',
-            key: 'actions',
-            render: (_, record: EddOrder) => (
-                <Typography.Link href={record.url} target="_blank">
-                    {__('View', 'quillcrm')}
-                </Typography.Link>
-            ),
-        }
-    ];
+	useEffect(() => {
+		fetchPurchaseHistory();
+	}, [wooPage, wooPerPage, eddPage, eddPerPage]);
 
-    return (
-        <Flex vertical gap={20}>
-            <Card loading={loading}>
-                {isWooActive && purchaseHistory && (
-                    <>
-                        <Typography.Title level={4}>
-                            {__('Woocommerce Purchase History', 'quillcrm')}
-                        </Typography.Title>
-                        <Flex vertical gap={20}>
-                            <Flex gap={20}>
-                                <Card style={{ flex: 1 }}>
-                                    <Flex vertical={true} gap={10}>
-                                        <Flex gap={10}>
-                                            <ShopOutlined />
-                                            <Typography.Text strong>
-                                                {__('Total Orders', 'quillcrm')}
-                                            </Typography.Text>
-                                        </Flex>
-                                        <Typography.Text className="qcrm-analytics-count">
-                                            {purchaseHistory.wc.total}
-                                        </Typography.Text>
-                                    </Flex>
-                                </Card>
-                                <Card style={{ flex: 1 }}>
-                                    <Flex vertical={true} gap={10}>
-                                        <Flex gap={10}>
-                                            <TransactionOutlined />
-                                            <Typography.Text strong>
-                                                {__('Total Revenue', 'quillcrm')}
-                                            </Typography.Text>
-                                        </Flex>
-                                        <Typography.Text className="qcrm-analytics-count">
-                                            {purchaseHistory.wc.revenue}{' '}{purchaseHistory.wc.currency}
-                                        </Typography.Text>
-                                    </Flex>
-                                </Card>
-                                <Card style={{ flex: 1 }}>
-                                    <Flex vertical={true} gap={10}>
-                                        <Flex gap={10}>
-                                            <ShopOutlined />
-                                            <Typography.Text strong>
-                                                {__('Average Order Value', 'quillcrm')}
-                                            </Typography.Text>
-                                        </Flex>
-                                        <Typography.Text className="qcrm-analytics-count">
-                                            {purchaseHistory.wc.average}{' '}{purchaseHistory.wc.currency}
-                                        </Typography.Text>
-                                    </Flex>
-                                </Card>
-                            </Flex>
-                            <Divider />
-                            <Table
-                                columns={wooTableColumns}
-                                dataSource={purchaseHistory.wc.orders}
-                                rowKey="id"
-                                pagination={false}
-                            />
-                        </Flex>
-                    </>
-                )}
-            </Card>
-            <Card loading={loading}>
-                {isEddActive && purchaseHistory && (
-                    <>
-                        <Typography.Title level={4}>
-                            {__('Easy Digital Downloads Purchase History', 'quillcrm')}
-                        </Typography.Title>
-                        <Flex vertical gap={20}>
-                            <Flex gap={20}>
-                                <Card style={{ flex: 1 }}>
-                                    <Flex vertical={true} gap={10}>
-                                        <Flex gap={10}>
-                                            <ShopOutlined />
-                                            <Typography.Text strong>
-                                                {__('Total Orders', 'quillcrm')}
-                                            </Typography.Text>
-                                        </Flex>
-                                        <Typography.Text className="qcrm-analytics-count">
-                                            {purchaseHistory.edd.total}
-                                        </Typography.Text>
-                                    </Flex>
-                                </Card>
-                                <Card style={{ flex: 1 }}>
-                                    <Flex vertical={true} gap={10}>
-                                        <Flex gap={10}>
-                                            <TransactionOutlined />
-                                            <Typography.Text strong>
-                                                {__('Total Revenue', 'quillcrm')}
-                                            </Typography.Text>
-                                        </Flex>
-                                        <Typography.Text className="qcrm-analytics-count">
-                                            {purchaseHistory.edd.revenue}{' '}{purchaseHistory.edd.currency}
-                                        </Typography.Text>
-                                    </Flex>
-                                </Card>
-                                <Card style={{ flex: 1 }}>
-                                    <Flex vertical={true} gap={10}>
-                                        <Flex gap={10}>
-                                            <ShopOutlined />
-                                            <Typography.Text strong>
-                                                {__('Average Order Value', 'quillcrm')}
-                                            </Typography.Text>
-                                        </Flex>
-                                        <Typography.Text className="qcrm-analytics-count">
-                                            {purchaseHistory.edd.average}{' '}{purchaseHistory.edd.currency}
-                                        </Typography.Text>
-                                    </Flex>
-                                </Card>
-                            </Flex>
-                            <Divider />
-                            <Table
-                                columns={eddTableColumns}
-                                dataSource={purchaseHistory.edd.orders}
-                                rowKey="id"
-                                pagination={false}
-                            />
-                        </Flex>
-                    </>
-                )}
-            </Card>
-        </Flex>
-    );
-}
+	const wooColumns = getWooColumns();
+	const eddColumns = getEddColumns();
+
+	return (
+		<div className="qcrm-purchase-history flex flex-col gap-5">
+			{/* WooCommerce Section */}
+			{isWooActive && (
+				<div className="flex flex-col gap-5">
+					<h3 className="text-2xl font-semibold">
+						{__('WooCommerce Purchase History', 'quillcrm')}
+					</h3>
+					{purchaseHistory && (
+						<div className="flex gap-5">
+							<MessageStatsCard
+								icon={<TotalOrdersIcon />}
+								value={purchaseHistory.wc.total}
+								label={__('Total Orders', 'quillcrm')}
+								iconBgClass="bg-[#E4EEFD]"
+								borderColorClass="border-l-secondary"
+								iconColor="text-[#458DC7]"
+							/>
+							<MessageStatsCard
+								icon={<TotalRevenueIcon />}
+								value={`${purchaseHistory.wc.revenue} ${purchaseHistory.wc.currency}`}
+								label={__('Total Revenue', 'quillcrm')}
+								iconBgClass="bg-[#D1F6DF]"
+								borderColorClass="border-l-[#16A34A]"
+								iconColor="text-[#16A34A]"
+							/>
+							<MessageStatsCard
+								icon={<AnalyticsReportsIcon width={40} height={40} />}
+								value={`${purchaseHistory.wc.average || '0'} ${purchaseHistory.wc.currency}`}
+								label={__('Average Order Value', 'quillcrm')}
+								iconBgClass="bg-[#EEE4FF]"
+								borderColorClass="border-l-[#660FF1]"
+								iconColor="text-[#660FF1]"
+							/>
+						</div>
+					)}
+					<div>
+						{!loading &&
+							purchaseHistory &&
+							purchaseHistory.wc.orders.length === 0 ? (
+							<NoData
+								icon={<NoPurchaseHistoryIcon width={120} height={120} />}
+								title={__('No purchase history', 'quillcrm')}
+								subtitle={__('No WooCommerce purchase history found for this contact.', 'quillcrm')}
+							/>
+						) : (
+							purchaseHistory &&
+							purchaseHistory.wc.orders.length > 0 && (
+								<>
+									<DataTable
+										columns={wooColumns}
+										data={purchaseHistory.wc.orders}
+										loading={loading}
+										showPagination={false}
+										showMainActions={false}
+										initialPageSize={wooPerPage}
+										setPage={setWooPage}
+										config={{}}
+									/>
+									<DataTablePagination
+										table={wooServerSideTable}
+									/>
+								</>
+							)
+						)}
+					</div>
+				</div>
+			)}
+
+			{/* EDD Section */}
+			{isEddActive && (
+				<div className="flex flex-col gap-5 border-t border-gray-200 pt-5">
+					<h3 className="text-2xl font-semibold">
+						{__('Easy Digital Downloads', 'quillcrm')}
+					</h3>
+					{purchaseHistory && (
+						<div className="flex gap-5">
+							<MessageStatsCard
+								icon={<TotalOrdersIcon />}
+								value={purchaseHistory.edd.total}
+								label={__('Total Orders', 'quillcrm')}
+								iconBgClass="bg-[#E4EEFD]"
+								borderColorClass="border-l-secondary"
+								iconColor="text-[#458DC7]"
+							/>
+							<MessageStatsCard
+								icon={<TotalRevenueIcon />}
+								value={`${purchaseHistory.edd.revenue} ${purchaseHistory.edd.currency}`}
+								label={__('Total Revenue', 'quillcrm')}
+								iconBgClass="bg-[#D1F6DF]"
+								borderColorClass="border-l-[#16A34A]"
+								iconColor="text-[#16A34A]"
+							/>
+							<MessageStatsCard
+								icon={<AnalyticsReportsIcon width={40} height={40} />}
+								value={`${purchaseHistory.edd.average || '0'} ${purchaseHistory.edd.currency}`}
+								label={__('Average Order Value', 'quillcrm')}
+								iconBgClass="bg-[#EEE4FF]"
+								borderColorClass="border-l-[#660FF1]"
+								iconColor="text-[#660FF1]"
+							/>
+						</div>
+					)}
+					<div>
+						{!loading &&
+							purchaseHistory &&
+							purchaseHistory.edd.orders.length === 0 ? (
+							<NoData
+								icon={<NoPurchaseHistoryIcon width={120} height={120} />}
+								title={__('No purchase history', 'quillcrm')}
+								subtitle={__('No Easy Digital Downloads purchase history found for this contact.', 'quillcrm')}
+							/>
+						) : (
+							purchaseHistory &&
+							purchaseHistory.edd.orders.length > 0 && (
+								<>
+									<DataTable
+										columns={eddColumns}
+										data={purchaseHistory.edd.orders}
+										loading={loading}
+										showPagination={false}
+										showMainActions={false}
+										initialPageSize={eddPerPage}
+										setPage={setEddPage}
+										config={{}}
+									/>
+									<DataTablePagination
+										table={eddServerSideTable}
+									/>
+								</>
+							)
+						)}
+					</div>
+				</div>
+			)}
+
+			{/* No Data State - when both are inactive or loading */}
+			{!loading && !isWooActive && !isEddActive && (
+				<NoData
+					icon={<NoPurchaseHistoryIcon width={120} height={120} />}
+					title={__('No eCommerce platform active', 'quillcrm')}
+					subtitle={__('Activate WooCommerce or Easy Digital Downloads to track purchase history.', 'quillcrm')}
+				/>
+			)}
+		</div>
+	);
+};
 
 export default PurchaseHistory;
-

@@ -5,32 +5,27 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
-
-/**
- * External dependencies
- */
-import {
-	Button,
-	Input,
-	Card,
-	Typography,
-	List,
-	Modal,
-	Select,
-	Popconfirm,
-	Flex,
-	Tag
-} from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { isEmpty } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Note, NotesResponse } from '@quillcrm/client';
+import type { Note, NotesResponse, NoticeMessage } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
+import { Button } from '@/components/ui/button';
+import { useRef } from 'react';
+import {
+	PlusIcon,
+	NoticeBanner,
+	DeleteModal,
+	GradientNotesIcon,
+	NoData,
+} from '@quillcrm/components';
+import { DataTable } from '@/components/ui/data-table';
+import DataTablePagination from '@/components/ui/data-table-pagination';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { getColumns } from './columns';
+import NoteDialog from './note-dialog';
 
 interface NotesProps {
 	contact_id: number;
@@ -47,16 +42,37 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
-	const [total, setTotal] = useState<number>(0);
+	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [noteModalVisible, setNoteModalVisible] = useState(false);
 	const [selectedNote, setSelectedNote] = useState<Note | null>(null);
-	const [isSavingNote, setIsSavingNote] = useState(false);
-	const [note, setNote] = useState<Partial<Note>>({
-		title: '',
-		note: '',
-		type: 'note',
+	const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
+
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
 	});
-	const { createNotice } = useDispatch('quillcrm/core');
+
+	// Helper function to show notice
+	const showNotice = (type: 'success' | 'error', message: string) => {
+		setNotice({ type, message });
+	};
+
+	// Helper function to close notice
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	const fetchNotes = async () => {
 		setLoading(true);
@@ -70,12 +86,12 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 			})) as NotesResponse;
 
 			setNotes(response.data);
-			setTotal(response.total);
+			setTotalRecords(response.total);
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
+			showNotice(
+				'error',
+				error.message || __('Failed to fetch notes', 'quillcrm')
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -85,322 +101,114 @@ const Notes: React.FC<NotesProps> = ({ contact_id }) => {
 		fetchNotes();
 	}, [page, perPage]);
 
-	const saveNote = async () => {
-		if (!note) {
-			return;
-		}
-
-		if (!validate(note)) {
-			setIsSavingNote(false);
-			return;
-		}
-
-		setIsSavingNote(true);
-		try {
-			const response = (await apiFetch({
-				path: `/qc/v1/contact-notes`,
-				method: 'POST',
-				data: {
-					title: note.title,
-					note: note.note,
-					type: note.type,
-					contact_id: contact_id,
-				},
-			})) as Note;
-
-			setNote({
-				title: '',
-				note: '',
-				type: 'note',
-			});
-			addNote({
-				...response,
-			});
-			setNoteModalVisible(false);
-			createNotice({
-				type: 'success',
-				message: __('Note saved successfully', 'quillcrm'),
-			});
-		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setIsSavingNote(false);
-		}
+	const handleEdit = (note: Note) => {
+		setSelectedNote(note);
+		setNoteModalVisible(true);
 	};
 
-	const editNote = async () => {
-		if (!selectedNote) {
-			return;
-		}
-
-		if (!validate(selectedNote)) {
-			setIsSavingNote(false);
-			return;
-		}
-
-		setIsSavingNote(true);
-
-		try {
-			const response = (await apiFetch({
-				path: `/qc/v1/contact-notes/${selectedNote.id}`,
-				method: 'PUT',
-				data: {
-					title: selectedNote.title,
-					note: selectedNote.note,
-					type: selectedNote.type,
-					contact_id: contact_id,
-				},
-			})) as Note;
-
-			setSelectedNote(null);
-			updateNote({
-				...response,
-			});
-			createNotice({
-				type: 'success',
-				message: __('Note updated successfully', 'quillcrm'),
-			});
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to update note', 'quillcrm'),
-			});
-		} finally {
-			setIsSavingNote(false);
-			setNoteModalVisible(false);
-		}
+	const handleDelete = (note: Note) => {
+		setNoteToDelete(note);
 	};
 
-	const deleteNote = async (note: Note) => {
+	const confirmDelete = async () => {
+		if (!noteToDelete) return;
+
 		try {
 			await apiFetch({
-				path: `/qc/v1/contact-notes/${note.id}`,
+				path: `/qc/v1/contact-notes/${noteToDelete.id}`,
 				method: 'DELETE',
 			});
 
-			removeNote({
-				...note,
-			});
+			removeNote(noteToDelete);
+			fetchNotes();
+			showNotice('success', __('Note deleted successfully', 'quillcrm'));
 		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to delete note', 'quillcrm'),
-			});
+			showNotice('error', __('Failed to delete note', 'quillcrm'));
+		} finally {
+			setNoteToDelete(null);
 		}
 	};
 
-	const validate = (note: Partial<Note>) => {
-		if (!note.title) {
-			createNotice({
-				type: 'error',
-				message: __('Title is required', 'quillcrm'),
-			});
-			return false;
-		}
-
-		if (!note.note) {
-			createNotice({
-				type: 'error',
-				message: __('Note is required', 'quillcrm'),
-			});
-			return false;
-		}
-
-		return true;
+	const handleAddNote = () => {
+		setSelectedNote(null);
+		setNoteModalVisible(true);
 	};
+
+	const columns = getColumns({
+		onEdit: handleEdit,
+		onDelete: handleDelete,
+	});
 
 	return (
-		<>
-			<Card className="qcrm-contact-notes" loading={loading}>
-				<Flex
-					justify="space-between"
-					align="center"
-					style={{ marginBottom: 20 }}
+		<div className="qcrm-notes flex flex-col gap-5">
+			<div className="flex justify-between items-center">
+				<h2 className="text-2xl font-semibold">
+					{__('Notes', 'quillcrm')}
+				</h2>
+				<Button
+					variant="secondary"
+					size="sm"
+					className="bg-white"
+					onClick={handleAddNote}
 				>
-					<Typography.Title level={4} style={{ margin: 0 }}>
-						{__('Notes', 'quillcrm')}
-					</Typography.Title>
-					<Button
-						onClick={() => {
-							setSelectedNote(null);
-							setNoteModalVisible(true);
-						}}
-						type="primary"
-					>
-						{__('Add Note', 'quillcrm')}
-					</Button>
-				</Flex>
-				{isEmpty(notes) ? (
-					<p>{__('No notes found.', 'quillcrm')}</p>
-				) : (
-					<List
-						itemLayout="horizontal"
-						dataSource={notes}
-						pagination={{
-							current: page,
-							pageSize: perPage,
-							total,
-							onChange: (page, perPage) => {
-								setPage(page);
-								setPerPage(perPage);
-							},
-							position: 'bottom',
-							align: 'center',
-						}}
-						renderItem={(item: Note) => (
-							<List.Item
-								actions={[
-									<Button
-										onClick={() => {
-											setSelectedNote(item);
-											setNoteModalVisible(true);
-										}}
-										type="link"
-									>
-										<EditOutlined />
-									</Button>,
-									<Popconfirm
-										title={__(
-											'Are you sure you want to delete this note?',
-											'quillcrm'
-										)}
-										onConfirm={() => deleteNote(item)}
-										okText={__('Yes', 'quillcrm')}
-										cancelText={__('No', 'quillcrm')}
-									>
-										<Button type="link" danger>
-											<DeleteOutlined />
-										</Button>
-									</Popconfirm>,
-								]}
-							>
-								<Flex vertical gap={10} style={{ width: '100%' }}>
-									<Flex align="center">
-										<Tag color={item.type === 'system' ? 'blue' : item.type === 'reminder' ? 'orange' : 'green'}>
-											{item.type}
-										</Tag>
-									</Flex>
-									<List.Item.Meta
-										title={item.title}
-										description={item.note}
-									/>
-								</Flex>
-							</List.Item>
-						)}
+					<PlusIcon />
+					{__('Add Note', 'quillcrm')}
+				</Button>
+			</div>
+			{notice && (
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+			)}
+			<div>
+				{!loading && (!notes || notes.length === 0) ? (
+					<NoData
+						icon={<GradientNotesIcon />}
+						title={__('No notes yet', 'quillcrm')}
+						subtitle={__('Track subscriber growth, open rates, and conversion trends in real time.', 'quillcrm')}
+						onClick={handleAddNote}
+						buttonLabel={__('Add Note', 'quillcrm')}
 					/>
+				) : (
+					<>
+						<DataTable
+							columns={columns}
+							data={notes || []}
+							loading={loading}
+							showPagination={false}
+							initialPageSize={perPage}
+							showMainActions={false}
+							setPage={setPage}
+							config={{}}
+						/>
+						<DataTablePagination table={serverSideTable} />
+					</>
 				)}
-			</Card>
-			<Modal
-				title={
-					selectedNote
-						? __('Edit Note', 'quillcrm')
-						: __('Add Note', 'quillcrm')
-				}
+			</div>
+			<NoteDialog
 				open={noteModalVisible}
-				onOk={() => (selectedNote ? editNote() : saveNote())}
-				onCancel={() => setNoteModalVisible(false)}
-				okText={__('Save', 'quillcrm')}
-				cancelText={__('Cancel', 'quillcrm')}
-				confirmLoading={isSavingNote}
-			>
-				<div className="qcrm-fields">
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Title', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input
-								value={
-									selectedNote
-										? selectedNote.title
-										: note.title
-								}
-								onChange={(e) => {
-									if (selectedNote) {
-										setSelectedNote({
-											...selectedNote,
-											title: e.target.value,
-										});
-									} else {
-										setNote({
-											...note,
-											title: e.target.value,
-										});
-									}
-								}}
-							/>
-						</div>
-					</div>
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Note', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Input.TextArea
-								value={
-									selectedNote ? selectedNote.note : note.note
-								}
-								onChange={(e) => {
-									if (selectedNote) {
-										setSelectedNote({
-											...selectedNote,
-											note: e.target.value,
-										});
-									} else {
-										setNote({
-											...note,
-											note: e.target.value,
-										});
-									}
-								}}
-							/>
-						</div>
-					</div>
-					<div className="qcrm-field">
-						<div className="qcrm-field-label">
-							<Typography.Text>
-								{__('Type', 'quillcrm')}
-							</Typography.Text>
-						</div>
-						<div className="qcrm-field-input">
-							<Select
-								value={
-									selectedNote ? selectedNote.type : note.type
-								}
-								onChange={(value) => {
-									if (selectedNote) {
-										setSelectedNote({
-											...selectedNote,
-											type: value,
-										});
-									} else {
-										setNote({
-											...note,
-											type: value,
-										});
-									}
-								}}
-								style={{ width: '100%' }}
-							>
-								<Select.Option value="note">
-									{__('Note', 'quillcrm')}
-								</Select.Option>
-								<Select.Option value="reminder">
-									{__('Reminder', 'quillcrm')}
-								</Select.Option>
-							</Select>
-						</div>
-					</div>
-				</div>
-			</Modal>
-		</>
+				onClose={() => {
+					setNoteModalVisible(false);
+					setSelectedNote(null);
+				}}
+				contact_id={contact_id}
+				selectedNote={selectedNote}
+				onSave={(note) => {
+					addNote(note);
+					fetchNotes();
+				}}
+				onUpdate={(note) => {
+					updateNote(note);
+					fetchNotes();
+				}}
+				showNotice={showNotice}
+			/>
+			<DeleteModal
+				isOpen={!!noteToDelete}
+				onClose={() => setNoteToDelete(null)}
+				onConfirm={confirmDelete}
+				selectedCount={1}
+				activeTab="notes"
+			/>
+		</div>
 	);
 };
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST API: General Controller
  *
@@ -9,6 +10,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use Exception;
 use WP_REST_Request;
@@ -16,10 +18,11 @@ use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Campaign_Email_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\Abandoned_Cart_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Constants\Tracking_Status;
 
 /**
  * REST_General_Controller is REST api controller class for log
@@ -27,6 +30,7 @@ use QuillCRM\Models\Campaign_Model;
  * @since 1.0.0
  */
 class REST_General_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -43,7 +47,6 @@ class REST_General_Controller extends REST_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
-
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/dashboard',
@@ -68,12 +71,12 @@ class REST_General_Controller extends REST_Controller {
 	 */
 	public function get_dashboard( WP_REST_Request $request ) {
 		$total_contacts               = Contact_Model::count();
-		$total_sent_emails            = Campaign_Email_Model::where( 'status', 'sent' )->count();
+		$total_sent_emails            = Tracking_Model::emails()->where( 'status', Tracking_Status::SENT )->count();
 		$recent_contacts              = Contact_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$recent_unsubscribed_contacts = Contact_Model::where( 'status', 'unsubscribed' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_campaigns                = Campaign_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_automations              = Automation_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
-		$recent_emails                = Campaign_Email_Model::with( 'template' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
+		$recent_emails                = Tracking_Model::emails()->with( 'template' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 
 		$response = array(
 			'total_contacts'               => $total_contacts,
@@ -110,6 +113,6 @@ class REST_General_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_dashboard_permissions_check( WP_REST_Request $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

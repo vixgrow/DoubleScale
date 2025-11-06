@@ -46,6 +46,7 @@ export const getGoal = (goal: string): Goal => {
 			label: '',
 			description: '',
 			fields: {},
+			is_integration: false,
 		};
 };
 
@@ -85,7 +86,17 @@ export const getFilterBySlug = (slug: string, group: string) => {
 	return filtersGroups[group]['filters'][slug];
 };
 
-export const getRuleBySlug = (slug: string): Rule => {
+export const getRuleBySlug = (slug: string, dynamicRules?: any): Rule => {
+	// First try to find in dynamic rules if provided
+	if (dynamicRules) {
+		const dynamicRulesList = flatMap(dynamicRules, (group) => group.rules);
+		const foundDynamicRule = find(dynamicRulesList, (rule) => rule[slug]);
+		if (foundDynamicRule) {
+			return foundDynamicRule[slug];
+		}
+	}
+
+	// Fallback to static rules
 	const automationRules = ConfigAPI.getAutomationRules();
 	const rules = flatMap(automationRules, (group) => group.rules);
 	const foundRule = find(rules, (rule) => rule[slug]);
@@ -177,4 +188,20 @@ export const formatDateForAPI = (date: Date | null): string | undefined => {
 	const day = String(date.getDate()).padStart(2, '0');
 
 	return `${year}-${month}-${day}`;
+};
+
+/**
+ * Get the REST API endpoint for a campaign type
+ * All campaign types now use the unified campaigns endpoint
+ * @param campaignType - The type of campaign ('email', 'sms', 'whatsapp')
+ * @returns The API endpoint path or null if invalid type
+ */
+export const getCampaignEndpoint = (campaignType: string): string | null => {
+	const validTypes = ['email', 'sms', 'whatsapp'];
+
+	if (validTypes.includes(campaignType)) {
+		return '/qc/v1/campaigns';
+	}
+
+	return null;
 };

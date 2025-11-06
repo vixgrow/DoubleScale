@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
+import { useRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
@@ -16,8 +17,13 @@ import type {
 	LinkTriggersResponse,
 	NoticeMessage,
 } from '@quillcrm/client';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { Field, NoticeBanner, PageHeader, PlusIcon } from '@quillcrm/components';
+import {
+	CreateFormsIcon,
+	NoData,
+	NoticeBanner,
+	PageHeader,
+	PlusIcon,
+} from '@quillcrm/components';
 import { formatDateForAPI } from '@quillcrm/utils';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import { DataTable } from '@/components/ui/data-table';
@@ -34,13 +40,14 @@ const LinkTriggerList: React.FC = () => {
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [showCreateForm, setShowCreateForm] = useState(false);
 	const [keyword, setKeyword] = useState('');
-	const navigate = useNavigate();
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [bulkAction, setBulkAction] = useState('');
 	const [isApplying, setIsApplying] = useState(false);
+	const [hasRecords, setHasRecords] = useState(false);
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
@@ -68,6 +75,16 @@ const LinkTriggerList: React.FC = () => {
 		setNotice(null);
 	};
 
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			});
+		}
+	}, [notice]);
+
 	// Handle link trigger creation success
 	const handleLinkTriggerCreated = (message: string) => {
 		setShowCreateForm(false);
@@ -90,6 +107,7 @@ const LinkTriggerList: React.FC = () => {
 			})) as LinkTriggersResponse;
 			setData(response.data);
 			setTotalRecords(response.total || 0);
+			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -180,19 +198,39 @@ const LinkTriggerList: React.FC = () => {
 				]}
 			/>
 			{notice && (
-				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				<NoticeBanner
+					ref={noticeBannerRef}
+					notice={notice}
+					closeNotice={closeNotice}
+				/>
 			)}
 
 			<div className="qcrm-link-triggers-list__actions">
-				<DataTable
-					columns={getColumns()}
-					data={data}
-					config={tableConfig}
-					showPagination={false}
-					initialPageSize={perPage}
-					setPage={setPage}
-				/>
-				<DataTablePagination table={serverSideTable} />
+				{hasRecords ? (
+					<>
+						<DataTable
+							columns={getColumns()}
+							data={data}
+							config={tableConfig}
+							showPagination={false}
+							initialPageSize={perPage}
+							setPage={setPage}
+							loading={loading}
+						/>
+						<DataTablePagination table={serverSideTable} />
+					</>
+				) : (
+					<NoData
+						icon={<CreateFormsIcon width={120} height={120} />}
+						title={__('No link triggers yet', 'quillcrm')}
+						subtitle={__(
+							'Get started by creating your first link trigger to track your links',
+							'quillcrm'
+						)}
+						buttonLabel={__('Create Link Trigger', 'quillcrm')}
+						onClick={() => setShowCreateForm(true)}
+					/>
+				)}
 			</div>
 		</div>
 	);

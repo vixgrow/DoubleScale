@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Form
  * This class is responsible for handling the integration of forms
@@ -17,6 +18,9 @@ use QuillCRM\Models\Form_Model;
 use QuillCRM\Fields\Contact_Fields;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\QuillCRM;
+use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
+use QuillCRM\Automations\Rules\Forms\Form_Field_Rule;
+use QuillCRM\Managers\Rules_Manager;
 
 /**
  * Form class
@@ -97,9 +101,63 @@ abstract class Form {
 	 *
 	 * @param string $form_id
 	 *
+	 * @return array
+	 */
+	abstract public function get_fields( $form_id);
+
+	/**
+	 * Register merge tags
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $form_id
+	 *
 	 * @return void
 	 */
-	abstract public function get_fields( $form_id );
+	public function register_merge_tags_for_form( $form_id, array $new_fields = array() ) {
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
+
+		$fields = ! empty( $new_fields ) ? $new_fields : $this->get_fields( $form_id );
+
+		if ( empty( $fields ) ) {
+			return;
+		}
+
+		new Dynamic_Fields_Registration( $fields, $this->slug );
+	}
+
+	/**
+	 * Register field rules for form
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $form_id
+	 *
+	 * @return void
+	 */
+	public function register_field_rules_for_form( $form_id, array $new_fields = array() ): void {
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
+
+		// Prefer provided fields; fallback to existing fields
+		$fields = ! empty( $new_fields ) ? $new_fields : $this->get_fields( $form_id );
+
+		// Exit early if no fields
+		if ( empty( $fields ) ) {
+			return;
+		}
+
+		$rules_manager = Rules_Manager::instance();
+
+		foreach ( $fields as $field_id => $field_name ) {
+			$rule = new Form_Field_Rule( $this, $form_id, $field_id, $field_name );
+			$rules_manager->register( $rule );
+		}
+	}
+
 
 	/**
 	 * Process form
@@ -179,6 +237,8 @@ abstract class Form {
 			);
 		}
 	}
+
+
 
 	/**
 	 * Get contact fields
@@ -305,7 +365,13 @@ abstract class Form {
 	public function process_automations( $args ) {
 		try {
 			$this->submission = $args;
-			$automations      = Automation_Model::get_automations_by_trigger( $this->slug );
+
+			// Register dynamic merge tags for form fields before processing automations
+			$this->register_merge_tags_for_form( $args['form_id'], $args['fields'] );
+			// Register field rules for form
+			$this->register_field_rules_for_form( $args['form_id'], $args['fields'] );
+
+			$automations = Automation_Model::get_automations_by_trigger( $this->slug );
 
 			foreach ( $automations as $automation ) {
 				if ( ! $this->is_processable( $automation, $args ) ) {
@@ -432,7 +498,7 @@ abstract class Form {
 		$form_id            = $this->get_form_id( $args['form_id'] );
 		$automation_form_id = $automation->get_setting( 'form_id' );
 
-		return $form_id === $automation_form_id;
+		return $form_id == $automation_form_id;
 	}
 
 	/**

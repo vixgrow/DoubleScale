@@ -1,3 +1,6 @@
-import "./core";
-import "./email-editor";
-import "./email-editor-blocks";
+// Import and register all stores
+import './campaign';
+import './core';
+import './email-builder';
+import './email-editor-blocks';
+

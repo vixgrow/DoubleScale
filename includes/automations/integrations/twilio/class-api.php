@@ -80,6 +80,26 @@ class API extends Integration_API {
 	}
 
 	/**
+	 * Send WhatsApp message
+	 *
+	 * @param array $data
+	 *
+	 * @return array|WP_Error
+	 */
+	public function send_whatsapp( $data ) {
+		// WhatsApp messages require "whatsapp:" prefix
+		$data['From'] = 'whatsapp:' . $this->phone_number;
+		
+		// Ensure To number has whatsapp: prefix if not already present
+		if ( strpos( $data['To'], 'whatsapp:' ) !== 0 ) {
+			$data['To'] = 'whatsapp:' . $data['To'];
+		}
+		
+		return $this->post( 'Accounts/' . $this->account_sid . '/Messages.json', $data );
+	}
+
+
+	/**
 	 * Send POST request to the api.
 	 *
 	 * @param string     $path Path.

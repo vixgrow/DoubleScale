@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
@@ -10,12 +9,6 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import {
-	TrophyOutlined,
-	EditOutlined,
-	DeleteOutlined,
-} from '@ant-design/icons';
-import { Button, Popconfirm, Tag } from 'antd';
 
 /**
  * Internal dependencies
@@ -24,35 +17,43 @@ import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
 import { getGoal } from '@quillcrm/utils';
 import NodeContextMenu from '../components/node-context-menu';
+import NodeLayout from '../components/node-layout';
+import StepReorderControls from '../components/step-reorder-controls';
+import { GoalIcon } from '@quillcrm/components';
 
 interface GoalNodeData {
 	step: AutomationStep;
+	selectedStepId?: string | null;
+	viewMode?: boolean;
+	analytics?: { contacts: number; conversion_rate: number };
 	onStepClick?: (step: OrganizedStep) => void;
 }
 
 const GoalNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, onStepClick } = data as unknown as GoalNodeData;
+	const { step, onStepClick, selectedStepId, viewMode = false, analytics } = data as unknown as GoalNodeData;
 	const { steps, setSteps } = useAutomationContext();
-	const [isDeleting, setIsDeleting] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	const goal = step.action ? getGoal(step.action) : null;
 	const hasGoal = !!step.action;
 
+	const subtitle = hasGoal ? (
+		<span className="qcrm-reactflow-goal__configured">
+			{goal?.label}
+		</span>
+	) : (
+		<span className="qcrm-reactflow-goal__not-configured">
+			{__('Goal not set', 'quillcrm')}
+		</span>
+	);
+
 	const handleEdit = () => {
-		if (onStepClick) {
+		if (!viewMode && onStepClick) {
 			onStepClick({
 				...step,
 				children: [], // Will be populated if needed by the consuming component
 			});
 		}
-	};
-
-	const handleDeleteWithStopPropagation = (e?: React.MouseEvent) => {
-		if (e) {
-			e.stopPropagation();
-		}
-		handleDelete();
 	};
 
 	const getNewSteps = () => {
@@ -90,7 +91,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	const handleDelete = async () => {
-		setIsDeleting(true);
+		if (viewMode) return;
 
 		const { newSteps, updatedOrdersSteps } = getNewSteps();
 
@@ -115,71 +116,40 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 				type: 'error',
 				message: error.message,
 			});
-		} finally {
-			setIsDeleting(false);
 		}
 	};
 
+	// Check if this node is selected
+	const isSelected = selectedStepId === step.id.toString();
+
 	return (
-		<NodeContextMenu onEdit={handleEdit} onDelete={handleDelete}>
-			<div className="qcrm-reactflow-node qcrm-reactflow-node--goal">
+		<NodeContextMenu onEdit={viewMode ? undefined : handleEdit} onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
+			<div className={`qcrm-reactflow-node qcrm-reactflow-node--goal ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
 				<Handle
 					type="target"
 					position={Position.Top}
 					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 
-				<div className="qcrm-reactflow-node__header">
-					<div className="qcrm-reactflow-node__icon">
-						<TrophyOutlined />
-					</div>
-					<div className="qcrm-reactflow-node__actions">
-						<Button
-							type="text"
-							size="small"
-							icon={<EditOutlined />}
-							onClick={(e) => {
-								e.stopPropagation();
-								handleEdit();
-							}}
-						/>
-						<Popconfirm
-							title={__('Are you sure?', 'quillcrm')}
-							onConfirm={handleDeleteWithStopPropagation}
-							okText={__('Yes', 'quillcrm')}
-							cancelText={__('No', 'quillcrm')}
-							onCancel={(e) => e?.stopPropagation()}
-							onOpenChange={(open, e) => {
-								if (e) {
-									e.stopPropagation();
-								}
-							}}
-						>
-							<Button
-								type="text"
-								size="small"
-								icon={<DeleteOutlined />}
-								danger
-								loading={isDeleting}
-								onClick={(e) => e.stopPropagation()}
-							/>
-						</Popconfirm>
-					</div>
-				</div>
+				{/* Step Reorder Controls - hide in view mode */}
+				{!viewMode && <StepReorderControls step={step} />}
 
-				<div className="qcrm-reactflow-node__content">
-					<div className="qcrm-reactflow-node__title">
-						{hasGoal ? goal?.label : __('Goal', 'quillcrm')}
-					</div>
-					{!hasGoal && (
-						<Tag
-							color="warning"
-							className="qcrm-reactflow-node__warning"
-						>
-							{__('Goal not set', 'quillcrm')}
-						</Tag>
+				<NodeLayout
+					icon={<GoalIcon width={23} height={23} />}
+					title={__('Goal', 'quillcrm')}
+					subtitle={subtitle}
+					onEdit={handleEdit}
+					onDelete={handleDelete}
+					editLabel={__('Edit Goal', 'quillcrm')}
+					deleteLabel={__('Delete Goal', 'quillcrm')}
+					deleteTitle={__('Delete this goal?', 'quillcrm')}
+					deleteDescription={__(
+						'This will remove the goal from your workflow.',
+						'quillcrm'
 					)}
-				</div>
+					viewMode={viewMode}
+					analytics={analytics}
+				/>
 
 				<Handle
 					type="source"

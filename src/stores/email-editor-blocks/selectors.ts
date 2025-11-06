@@ -1,17 +1,17 @@
 /**
  * External dependencies
  */
-import { get, sortBy, keys, reduce } from 'lodash';
+import { get, keys, reduce, sortBy } from 'lodash';
 
 /**
  * Internal Dependencies
  */
 import type {
-	BlockTypeSettings,
 	BlocksState,
 	BlockSupportedFeatures,
 	BlockTypeInterface,
-} from './src/types';
+	BlockTypeSettings,
+} from './types';
 /**
  * Given a block name or block type object, returns the corresponding
  * normalized block type object.

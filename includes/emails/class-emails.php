@@ -94,6 +94,15 @@ class Emails {
 	public $template;
 
 	/**
+	 * Unsubscribe URL for List-Unsubscribe header (RFC 8058 compliance)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @var string|false
+	 */
+	public $unsubscribe_url = false;
+
+	/**
 	 * Get things going.
 	 *
 	 * @since 1.0.0
@@ -212,6 +221,7 @@ class Emails {
 
 	/**
 	 * Get the email headers.
+	 * Includes List-Unsubscribe header for RFC 8058 compliance (Gmail/Yahoo 2024 requirement)
 	 *
 	 * @since 1.0.0
 	 *
@@ -227,6 +237,14 @@ class Emails {
 			if ( $this->get_cc() ) {
 				$this->headers .= "Cc: {$this->get_cc()}\r\n";
 			}
+
+			// Add List-Unsubscribe headers for RFC 8058 compliance
+			// Required by Gmail/Yahoo for bulk senders as of 2024
+			if ( ! empty( $this->unsubscribe_url ) ) {
+				$this->headers .= "List-Unsubscribe: <{$this->unsubscribe_url}>\r\n";
+				$this->headers .= "List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n";
+			}
+
 			$this->headers .= "Content-Type: {$this->get_content_type()}; charset=utf-8\r\n";
 		}
 
@@ -249,9 +267,19 @@ class Emails {
 		}
 
 		/*
-		 * Generate an HTML email.
-		 */
+		* Generate an HTML email.
+		*/
 
+		// Check if message is already a complete HTML document (from Email_Renderer)
+		$is_complete_html = strpos( $message, '<!DOCTYPE html' ) !== false ||
+					   strpos( $message, '<html' ) !== false;
+
+		if ( $is_complete_html ) {
+			// Message is already a complete HTML document, return as-is
+			return apply_filters( 'quillcrm_email_message', $message, $this );
+		}
+
+		// Process as template-based email
 		ob_start();
 
 		$this->get_template_part( 'header', $this->get_template(), true );
@@ -266,9 +294,7 @@ class Emails {
 
 		$this->get_template_part( 'footer', $this->get_template(), true );
 
-		// Hooks into the email footer.
-		do_action( 'quillcrm_email_footer', $this );
-
+		// Only apply nl2br and make_clickable for template-based emails
 		$message = nl2br( $message );
 
 		$body = ob_get_clean();

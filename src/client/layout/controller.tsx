@@ -21,7 +21,7 @@ import Contacts from '../pages/contacts';
 import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
-import CustomFields from '../pages/contacts/custom-fields';
+import CustomFields from '../pages/custom-fields';
 import Campaigns from '../pages/campaigns';
 import Campaign from '../pages/campaign';
 import Forms from '../pages/forms';
@@ -33,6 +33,7 @@ import Templates from '../pages/templates';
 import Template from '../pages/template';
 import Automations from '../pages/automations';
 import Automation from '../pages/automation';
+import AutomationReports from '../pages/automation-reports';
 import AbandonedCartsList from '../pages/abandond-carts';
 import Setting from '../pages/settings';
 import Dashboard from '../pages/home';
@@ -41,7 +42,7 @@ import ContactAnalytics from '../pages/home/contacts-analytics';
 import EmailAnalytics from '../pages/home/emails-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
-import Tools from '../pages/tools';
+import SalesPipeline from '../pages/sales-pipeline';
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -52,7 +53,14 @@ import {
 	IntegrationsIcon,
 	SettingsIcon,
 	ToolsIcon,
+	CustomFieldsIcon,
+	EmailSequenceIcon,
 } from '@quillcrm/components';
+import EmailSequences from '../pages/email-sequences';
+
+// Import Lucide React icon for pipeline
+import { TrendingUp } from 'lucide-react';
+import SequencesMail from '../pages/email-sequences/sequences-mail';
 
 export const Controller = ({ page }) => {
 	useEffect(() => {
@@ -72,6 +80,7 @@ registerAdminPage('dashboard', {
 	component: () => <Dashboard />,
 	label: __('Dashboard', 'quillcrm'),
 	icon: <DashboardIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('contacts', {
@@ -79,6 +88,7 @@ registerAdminPage('contacts', {
 	component: () => <Contacts />,
 	label: __('Contacts', 'quillcrm'),
 	icon: <ContactsIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('contact', {
@@ -86,6 +96,7 @@ registerAdminPage('contact', {
 	component: () => <Contact />,
 	label: __('Contact', 'quillcrm'),
 	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('lists', {
@@ -93,6 +104,7 @@ registerAdminPage('lists', {
 	component: () => <Lists />,
 	label: __('Lists', 'quillcrm'),
 	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('tags', {
@@ -106,7 +118,8 @@ registerAdminPage('custom-fields', {
 	path: 'custom-fields',
 	component: () => <CustomFields />,
 	label: __('Custom Fields', 'quillcrm'),
-	hidden: true,
+	icon: <CustomFieldsIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('campaigns', {
@@ -114,6 +127,7 @@ registerAdminPage('campaigns', {
 	component: () => <Campaigns />,
 	label: __('Campaigns', 'quillcrm'),
 	icon: <CampaignsIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('campaign', {
@@ -123,11 +137,35 @@ registerAdminPage('campaign', {
 	hidden: true,
 });
 
+registerAdminPage('email-sequences', {
+	path: 'email-sequences',
+	component: () => <EmailSequences />,
+	label: __('Email Sequence', 'quillcrm'),
+	icon: <EmailSequenceIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
+});
+
+registerAdminPage('email-sequence', {
+	path: 'email-sequences/:id',
+	component: () => <SequencesMail />,
+	label: __('Email Sequence', 'quillcrm'),
+	hidden: true,
+});
+
+registerAdminPage('sales-pipeline', {
+	path: 'sales-pipeline',
+	component: () => <SalesPipeline />,
+	label: __('Pipelines', 'quillcrm'),
+	icon: <TrendingUp size={20} />,
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],
+});
+
 registerAdminPage('automations', {
 	path: 'automations',
 	component: () => <Automations />,
 	label: __('Automations', 'quillcrm'),
 	icon: <AutomationsIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('automation', {
@@ -137,11 +175,19 @@ registerAdminPage('automation', {
 	hidden: true,
 });
 
+registerAdminPage('automation-reports', {
+	path: 'automations/:id/reports',
+	component: () => <AutomationReports />,
+	label: __('Automation Reports', 'quillcrm'),
+	hidden: true,
+});
+
 registerAdminPage('forms', {
 	path: 'forms',
 	component: () => <Forms />,
 	label: __('Forms', 'quillcrm'),
 	icon: <FormsIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('form', {
@@ -156,6 +202,7 @@ registerAdminPage('link-triggers', {
 	component: () => <LinkTriggers />,
 	label: __('Link Triggers', 'quillcrm'),
 	icon: <ToolsIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('link-trigger', {
@@ -170,6 +217,7 @@ registerAdminPage('integrations', {
 	component: () => <Integrations />,
 	label: __('Integrations', 'quillcrm'),
 	icon: <IntegrationsIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('templates', {
@@ -198,6 +246,7 @@ registerAdminPage('analytics-and-reports', {
 	component: () => <AnalyticsAndReports />,
 	label: __('Analytics and Reports', 'quillcrm'),
 	icon: <AnalyticsReportsIcon />,
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],
 });
 
 registerAdminPage('cart-analytics', {
@@ -233,6 +282,7 @@ registerAdminPage('settings', {
 	component: () => <Setting />,
 	label: __('Settings', 'quillcrm'),
 	icon: <SettingsIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('debug', {

@@ -1,0 +1,159 @@
+.new-pipeline-modal {
+	.modal-title {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-weight: 600;
+	}
+
+	.modal-footer {
+		display: flex;
+		justify-content: flex-end;
+		gap: 8px;
+	}
+
+	.new-pipeline-form {
+		.form-section {
+			margin-bottom: 24px;
+
+			&:last-child {
+				margin-bottom: 0;
+			}
+
+			.ant-card-head {
+				background-color: #fafafa;
+			}
+		}
+
+		.card-title-with-info {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+
+			.info-icon {
+				color: #666;
+				cursor: help;
+			}
+		}
+
+		.stage-config-header {
+			margin-bottom: 16px;
+
+			.stage-switch {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-bottom: 12px;
+
+				.switch-label {
+					font-weight: 500;
+				}
+			}
+
+			.default-stages-info {
+				padding: 12px;
+				background-color: #f0f9ff;
+				border: 1px solid #bae6fd;
+				border-radius: 6px;
+
+				.info-text {
+					margin: 0;
+					color: #0369a1;
+					font-size: 14px;
+				}
+			}
+		}
+
+		.custom-stages-config {
+			.stages-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			.stages-list {
+				.stage-card {
+					margin-bottom: 12px;
+					border: 1px solid #e5e7eb;
+
+					&:last-child {
+						margin-bottom: 0;
+					}
+
+					.stage-card-title {
+						display: flex;
+						justify-content: space-between;
+						align-items: center;
+						font-size: 14px;
+						font-weight: 500;
+
+						.remove-stage-btn {
+							color: #dc2626;
+
+							&:hover {
+								color: #b91c1c;
+								background-color: #fee2e2;
+							}
+						}
+					}
+
+					.ant-card-body {
+						padding: 12px;
+					}
+
+					.form-item-compact {
+						margin-bottom: 0;
+
+						.form-label {
+							display: flex;
+							align-items: center;
+							font-size: 12px;
+							font-weight: 500;
+							color: #374151;
+							margin-bottom: 4px;
+						}
+					}
+				}
+			}
+
+			.stages-footer {
+				margin-top: 16px;
+				padding-top: 16px;
+				border-top: 1px solid #e5e7eb;
+
+				.help-text {
+					margin: 0;
+					font-size: 13px;
+					color: #6b7280;
+					font-style: italic;
+				}
+			}
+		}
+	}
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+	.new-pipeline-modal {
+		.new-pipeline-form {
+			.custom-stages-config {
+				.stages-list {
+					.stage-card {
+						.ant-row {
+							flex-direction: column;
+
+							.ant-col {
+								width: 100% !important;
+								margin-bottom: 8px;
+
+								&:last-child {
+									margin-bottom: 0;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

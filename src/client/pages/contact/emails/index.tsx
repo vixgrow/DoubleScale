@@ -2,299 +2,168 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState } from '@wordpress/element';
-import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
-
-/**
- * External dependencies
- */
-import { Card, Typography, Table, Badge, Flex, Button, Modal, Divider } from 'antd';
-import {
-    EyeOutlined,
-    LinkOutlined,
-    UserOutlined,
-    MailOutlined,
-} from '@ant-design/icons';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type {
-    CampaignEmail,
-} from '@quillcrm/client';
-import { NavLink } from '@quillcrm/navigation';
-import { convertDate } from '@quillcrm/utils';
-import type { EmailAnalytics } from '../state/types';
+import type { CampaignEmail } from '@quillcrm/client';
 import { useContactContext } from '../state/context';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
+import { Button } from '@/components/ui/button';
+import {
+	ClickRateIcon,
+	ContactTotalEmailsIcon,
+	OpenRateIcon,
+	SendEmailsIcon,
+	NoEmailsIcon,
+	MessageStatsCard,
+	NoData,
+} from '@quillcrm/components';
+import { DataTable } from '@/components/ui/data-table';
+import DataTablePagination from '@/components/ui/data-table-pagination';
+import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-table';
+import { getColumns } from './columns';
+import EmailDetails from './email-details-dialog';
+import SendEmailDialog from './send-email-dialog';
 
 interface EmailsProps {
-    contact_id: number;
+	contact_id: number;
 }
 
 const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
-    const { emailAnalytics, setEmailAnalytics, contact } = useContactContext();
-    const [loading, setLoading] = useState<boolean>(true);
-    const [perPage, setPerPage] = useState<number>(10);
-    const [page, setPage] = useState<number>(1);
-    const [total, setTotal] = useState<number>(0);
-    const [campaignEmail, setCampaignEmail] = useState<CampaignEmail | null>(null);
-    const { createNotice } = useDispatch('quillcrm/core');
+	const { contact, setEmailAnalytics } = useContactContext();
+	const [campaignEmail, setCampaignEmail] = useState<CampaignEmail | null>(
+		null
+	);
+	const [showSendEmailModal, setShowSendEmailModal] =
+		useState<boolean>(false);
 
-    const fetchEmails = async () => {
-        setLoading(true);
+	// Use combined hook for data + table pagination
+	const { loading, messages, analytics, serverSideTable, refetch } =
+		useContactMessagesTable({
+			contactId: contact_id,
+			mode: CAMPAIGN_CHANNEL.EMAIL,
+			initialPerPage: 10,
+		});
 
-        try {
-            const response = (await apiFetch({
-                path: addQueryArgs(
-                    `/qc/v1/contacts/${contact_id}/email-campaigns`,
-                    {
-                        per_page: perPage,
-                        page,
-                    }
-                ),
-            })) as EmailAnalytics;
+	// Update context when analytics change
+	if (analytics && setEmailAnalytics) {
+		setEmailAnalytics(analytics);
+	}
 
-            if (!response || !response.emails) {
-                createNotice({
-                    type: 'error',
-                    message: __('Failed to fetch emails', 'quillcrm'),
-                });
-                return;
-            }
+	if (!contact) {
+		return null;
+	}
 
-            setEmailAnalytics(response);
-            setTotal(response.emails.total);
-        } catch (error) {
-            createNotice({
-                type: 'error',
-                message: __('Failed to fetch emails', 'quillcrm'),
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+	const columns = getColumns({
+		onViewTemplate: setCampaignEmail,
+	});
 
-    useEffect(() => {
-        fetchEmails();
-    }, [page, perPage]);
+	const calculatePercentage = (total: number, value: number) => {
+		if (total === 0) {
+			return 0;
+		}
+		return ((value / total) * 100).toFixed(2);
+	};
 
-    if (!contact) {
-        return null;
-    }
+	const total = analytics?.messages?.total || 0;
+	const totalOpened = analytics?.total_opened || 0;
+	const totalClicked = analytics?.total_clicked || 0;
 
-    const columns = [
-        {
-            title: __('Contact', 'quillcrm'),
-            dataIndex: 'contact',
-            key: 'contact',
-            render: (_, record: CampaignEmail) => (
-                <NavLink to={`contacts/${contact.id}`}>
-                    <Flex vertical gap={5}>
-                        <Flex gap={10} align="center">
-                            <div className="qcrm-contacts-list__avatar">
-                                <UserOutlined />
-                            </div>
-                            {contact.first_name || '-'}{' '}
-                            {contact.last_name || '-'}
-                        </Flex>
-                        <Typography.Text type="secondary">
-                            {__('Sent on', 'quillcrm')}{' '}
-                            {convertDate(record.sent_at)}
-                        </Typography.Text>
-                    </Flex>
-                </NavLink>
-            ),
-        },
-        {
-            title: __('Email', 'quillcrm'),
-            dataIndex: 'email',
-            key: 'email',
-            render: (_, _record: CampaignEmail) => contact.email,
-        },
-        {
-            title: __('Sent Status', 'quillcrm'),
-            dataIndex: 'status',
-            key: 'status',
-            render: (_, record: CampaignEmail) => (
-                <Badge
-                    status={record.status === 'sent' ? 'success' : 'error'}
-                    text={record.status === 'sent' ? __('Sent', 'quillcrm') : __('Failed', 'quillcrm')}
-                />
-            ),
-        },
-        {
-            title: __('Opened', 'quillcrm'),
-            dataIndex: 'opened',
-            key: 'opened',
-            render: (_, record: CampaignEmail) => (
-                <Badge
-                    status={record.opened != '0' ? 'success' : 'default'}
-                    text={
-                        record.opened != '0'
-                            ? __('Yes', 'quillcrm')
-                            : __('No', 'quillcrm')
-                    }
-                />
-            ),
-        },
-        {
-            title: __('Clicked', 'quillcrm'),
-            dataIndex: 'clicked',
-            key: 'clicked',
-            render: (_, record: CampaignEmail) => (
-                <Badge
-                    status={record.clicked != '0' ? 'success' : 'default'}
-                    text={
-                        record.clicked != '0'
-                            ? __('Yes', 'quillcrm')
-                            : __('No', 'quillcrm')
-                    }
-                />
-            ),
-        },
-        {
-            title: __('Template', 'quillcrm'),
-            key: 'template',
-            render: (_, record: CampaignEmail) => (
-                <Button onClick={() => setCampaignEmail(record)}>
-                    {__('View', 'quillcrm')}
-                </Button>
-            ),
-        }
-    ];
+	return (
+		<div className="qcrm-emails flex flex-col gap-5">
+			<div className="flex justify-between items-center">
+				<h2 className="text-2xl font-semibold">
+					{__('Emails', 'quillcrm')}
+				</h2>
+				<Button
+					variant="secondary"
+					size="sm"
+					className="bg-white"
+					onClick={() => setShowSendEmailModal(true)}
+				>
+					<SendEmailsIcon />
+					{__('Send Email', 'quillcrm')}
+				</Button>
+			</div>
 
-    const calculatePercentage = (total: number, value: number) => {
-        if (total === 0) {
-            return 0;
-        }
+			{/* Statistics Cards */}
+			{analytics && (
+				<div className="flex gap-5">
+					<MessageStatsCard
+						icon={<ContactTotalEmailsIcon width={40} height={40} />}
+						value={total}
+						label={__('Total Emails', 'quillcrm')}
+						iconBgClass="bg-[#E4EEFD]"
+						borderColorClass="border-l-secondary"
+						iconColor="text-[#458DC7]"
+					/>
+					<MessageStatsCard
+						icon={<OpenRateIcon width={40} height={40} />}
+						value={`${calculatePercentage(total, totalOpened)}%`}
+						label={__('Open Rate', 'quillcrm')}
+						iconBgClass="bg-[#D1F6DF]"
+						borderColorClass="border-l-[#16A34A]"
+						iconColor="text-[#16A34A]"
+					/>
+					<MessageStatsCard
+						icon={<ClickRateIcon width={40} height={40} />}
+						value={`${calculatePercentage(total, totalClicked)}%`}
+						label={__('Click Rate', 'quillcrm')}
+						iconBgClass="bg-[#EEE4FF]"
+						borderColorClass="border-l-[#660FF1]"
+						iconColor="text-[#660FF1]"
+					/>
+				</div>
+			)}
 
-        return ((value / total) * 100).toFixed(2);
-    };
+			{/* Messages Table */}
+			<div>
+				{!loading && messages.length === 0 ? (
+					<NoData
+						icon={<NoEmailsIcon />}
+						title={__('No emails yet', 'quillcrm')}
+						subtitle={__(
+							'Track subscriber growth, open rates, and conversion trends in real time.',
+							'quillcrm'
+						)}
+						onClick={() => setShowSendEmailModal(true)}
+						buttonLabel={__('Send Email', 'quillcrm')}
+					/>
+				) : (
+					<>
+						<DataTable
+							columns={columns}
+							data={messages}
+							loading={loading}
+							showPagination={false}
+							initialPageSize={10}
+							showMainActions={false}
+							config={{}}
+							setPage={() => { }}
+						/>
+						<DataTablePagination table={serverSideTable} />
+					</>
+				)}
+			</div>
 
-    return (
-        <>
-            <Card>
-                <Typography.Title level={4}>
-                    {__('Emails', 'quillcrm')}
-                </Typography.Title>
-                <Flex vertical gap={20}>
-                    <Card loading={loading}>
-                        {emailAnalytics && (
-                            <Flex gap={20}>
-                                <Card style={{ flex: 1 }}>
-                                    <Flex vertical={true} gap={10}>
-                                        <Flex gap={10}>
-                                            <MailOutlined />
-                                            <Typography.Text strong>
-                                                {__('Total Emails', 'quillcrm')}
-                                            </Typography.Text>
-                                        </Flex>
-                                        <Typography.Text className="qcrm-analytics-count">
-                                            {total}
-                                        </Typography.Text>
-                                    </Flex>
-                                </Card>
-                                <Card style={{ flex: 1 }}>
-                                    <Flex vertical={true} gap={10}>
-                                        <Flex gap={10}>
-                                            <EyeOutlined />
-                                            <Typography.Text strong>
-                                                {__('Open Rate', 'quillcrm')}
-                                            </Typography.Text>
-                                        </Flex>
-                                        <Typography.Text className="qcrm-analytics-count">
-                                            {calculatePercentage(
-                                                total,
-                                                emailAnalytics.total_opened
-                                            )}
-                                            %
-                                        </Typography.Text>
-                                    </Flex>
-                                </Card>
-                                <Card style={{ flex: 1 }}>
-                                    <Flex vertical={true} gap={10}>
-                                        <Flex gap={10}>
-                                            <LinkOutlined />
-                                            <Typography.Text strong>
-                                                {__('Click Rate', 'quillcrm')}
-                                            </Typography.Text>
-                                        </Flex>
-                                        <Typography.Text className="qcrm-analytics-count">
-                                            {calculatePercentage(
-                                                total,
-                                                emailAnalytics.total_clicked
-                                            )}
-                                            %
-                                        </Typography.Text>
-                                    </Flex>
-                                </Card>
-                            </Flex>
-                        )}
-                    </Card>
-                    <Table
-                        dataSource={emailAnalytics?.emails.data}
-                        columns={columns}
-                        loading={loading}
-                        pagination={{
-                            current: page,
-                            pageSize: perPage,
-                            total: total,
-                            onChange: (page, pageSize) => {
-                                setPage(page);
-                                setPerPage(pageSize);
-                            },
-                        }}
-                    />
-                </Flex>
-                <Modal
-                    open={!!campaignEmail}
-                    title={__('Details')}
-                    onCancel={() => setCampaignEmail(null)}
-                    footer={null}
-                    style={{ minWidth: '800px' }}
-                >
-                    {campaignEmail && (
-                        <Flex vertical gap={20}>
-                            <Flex vertical gap={10}>
-                                <Flex gap={10}>
-                                    <Typography.Text>{__('Status', 'quillcrm')}{': '}</Typography.Text>
-                                    <Badge
-                                        status={campaignEmail.status === 'sent' ? 'success' : 'error'}
-                                        text={campaignEmail.status}
-                                    />
-                                </Flex>
-                                {campaignEmail.campaign && (
-                                    <Flex gap={10}>
-                                        <Typography.Text>{__('Campaign', 'quillcrm')}{': '}</Typography.Text>
-                                        <Typography.Text strong>{campaignEmail.campaign.name}</Typography.Text>
-                                    </Flex>
-                                )}
-                                <Flex gap={10}>
-                                    <Typography.Text>{__('From Name', 'quillcrm')}{': '}</Typography.Text>
-                                    <Typography.Text strong>{campaignEmail.template.settings.from_name}</Typography.Text>
-                                </Flex>
-                                <Flex gap={10}>
-                                    <Typography.Text>{__('From Email', 'quillcrm')}{': '}</Typography.Text>
-                                    <Typography.Text strong>{campaignEmail.template.settings.from_email}</Typography.Text>
-                                </Flex>
-                                <Flex gap={10}>
-                                    <Typography.Text>{__('Subject', 'quillcrm')}{': '}</Typography.Text>
-                                    <Typography.Text strong>{campaignEmail.template.subject}</Typography.Text>
-                                </Flex>
-                            </Flex>
-                            <Divider style={{ margin: 0 }} />
-                            <Card title={__('Body', 'quillcrm')}>
-                                <div dangerouslySetInnerHTML={{ __html: campaignEmail.template.body }} />
-                            </Card>
-                        </Flex>
-                    )}
-                </Modal>
-            </Card>
-        </>
-    );
+			{/* Dialogs */}
+			<EmailDetails
+				campaignEmail={campaignEmail}
+				onClose={() => setCampaignEmail(null)}
+			/>
+			<SendEmailDialog
+				open={showSendEmailModal}
+				onClose={() => {
+					setShowSendEmailModal(false);
+					refetch(); // Refresh the list after sending
+				}}
+				contact={contact}
+			/>
+		</div>
+	);
 };
 
 export default Emails;

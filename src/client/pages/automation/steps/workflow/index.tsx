@@ -2,36 +2,36 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
+import { useState, useMemo, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import {
-	Card,
-	Flex,
-	Modal,
-	Switch,
-	Tag,
-	Typography,
-	Popconfirm,
-	Button,
-} from 'antd';
-import {
-	TrophyOutlined,
-	BranchesOutlined,
-	DisconnectOutlined,
-	RocketOutlined,
-	ThunderboltOutlined,
-	DeleteOutlined,
-} from '@ant-design/icons';
+import { cn } from '@/lib/utils';
+import { Power, Rocket } from 'lucide-react';
 import { isEmpty } from 'lodash';
 
 /**
  * Internal dependencies
  */
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogPortal,
+	AlertDialogOverlay,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import './style.scss';
 import { useAutomationContext } from '../../state/context';
 import type {
@@ -40,34 +40,40 @@ import type {
 	OrganizedStep,
 	Automation,
 } from '@quillcrm/client';
-import { Field, Fields } from '@quillcrm/components';
-import StepModal from './step-modal';
 import AddStep from './add-step';
 import { getAction, getGoal, getTrigger } from '@quillcrm/utils';
-import WebhookFields from './webhook-fields';
-import FormFields from './form-fields';
 import ReactFlowWorkflow from './reactflow-workflow';
+import WorkflowSidebar from './workflow-sidebar';
+import { ActionIcon, ConditionsIcon, DeleteIcon, GoalIcon, TimerBlockIcon } from '@quillcrm/components';
 
 const Workflow: React.FC = () => {
 	const {
 		automation,
 		steps,
 		isLoading,
-		updateAutomation,
-		saveAutomation,
-		isSaving: isSavingAutomation,
 		setSteps,
-		updateSettings,
 	} = useAutomationContext();
 	const [currentStep, setCurrentStep] = useState<OrganizedStep | null>(null);
 	const [visible, setVisible] = useState<boolean>(false);
-	const [isSaving, setIsSaving] = useState<boolean>(false);
-	const [useReactFlow, setUseReactFlow] = useState<boolean>(true);
-	const { createNotice, setCurrentTrigger } = useDispatch('quillcrm/core');
+	const useReactFlow = true;
+	const { createNotice, setCurrentTrigger, setFormContext } =
+		useDispatch('quillcrm/core');
 
 	useEffect(() => {
 		if (automation) {
 			setCurrentTrigger(automation.trigger);
+
+			// Set form context if automation has form data
+			if (
+				automation.settings?.form_id &&
+				automation.settings?.form_type
+			) {
+				setFormContext({
+					formId: automation.settings.form_id,
+					triggerId: automation.settings.form_type,
+					automationId: automation.id,
+				});
+			}
 		}
 	}, [automation]);
 
@@ -99,52 +105,28 @@ const Workflow: React.FC = () => {
 		return { yesChildren, noChildren };
 	};
 
-	const save = async (data = {}) => {
-		if (!automation) {
-			return;
-		}
-
-		setIsSaving(true);
-
-		try {
-			const response = (await apiFetch({
-				path: `/qc/v1/automations/${automation.id}`,
-				method: 'POST',
-				data: {
-					...automation,
-					...data,
-				},
-			})) as Automation;
-
-			updateAutomation(response);
-		} catch (error) {
-			createNotice({
-				type: 'error',
-				message: __('Failed to save automation', 'quillcrm'),
-			});
-		} finally {
-			setIsSaving(false);
-			setVisible(false);
-		}
-	};
 
 	const trigger = automation ? getTrigger(automation.trigger) : null;
 	const typesOptions = {
 		action: {
 			label: __('Action', 'quillcrm'),
-			icon: <ThunderboltOutlined />,
+			icon: <ActionIcon width={23} height={23} />,
 		},
 		condition: {
 			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
+			icon: <ConditionsIcon width={23} height={23} />,
+		},
+		delay: {
+			label: __('Delay', 'quillcrm'),
+			icon: <TimerBlockIcon width={23} height={23} />,
 		},
 		goal: {
 			label: __('Goal', 'quillcrm'),
-			icon: <TrophyOutlined />,
+			icon: <GoalIcon width={23} height={23} />,
 		},
 		end_automation: {
 			label: __('End Automation', 'quillcrm'),
-			icon: <DisconnectOutlined />,
+			icon: <Power className='w-6 h-6' />,
 		},
 	};
 
@@ -254,45 +236,72 @@ const Workflow: React.FC = () => {
 
 		return (
 			<div key={step.id} className="qcrm-automation-workflow__item">
-				<Card
-					className="qcrm-automation-workflow__card"
-					hoverable
-					actions={[
-						<Popconfirm
-							title={__('Are you sure?', 'quillcrm')}
-							onConfirm={() => deleteStep(step)}
-							okText={__('Yes', 'quillcrm')}
-							cancelText={__('No', 'quillcrm')}
-						>
-							<Button
-								type="text"
-								icon={<DeleteOutlined />}
-								danger
-							/>
-						</Popconfirm>,
-					]}
-				>
-					<Flex gap={10} onClick={() => setStepHandler(step)}>
-						<div className="qcrm-automation-workflow__card-icon">
-							{typesOptions[step.type].icon}
-						</div>
-						<div className="qcrm-automation-workflow__card-title">
-							{label}
-							{!step.action &&
-								step.type !== 'end_automation' &&
-								step.type !== 'condition' && (
-									<Tag
-										color="warning"
-										style={{
-											display: 'block',
-											marginTop: '5px',
-										}}
+				<Card className="qcrm-automation-workflow__card hover:bg-accent cursor-pointer transition-colors">
+					<CardContent className="p-4">
+						<div className="flex justify-between items-center">
+							<div
+								className="flex gap-2 items-center"
+								onClick={() => setStepHandler(step)}
+							>
+								<div className="qcrm-automation-workflow__card-icon">
+									{typesOptions[step.type].icon}
+								</div>
+								<div className="qcrm-automation-workflow__card-title">
+									{label}
+									{!step.action &&
+										step.type !== 'end_automation' &&
+										step.type !== 'condition' && (
+											<Badge
+												variant="destructive"
+												className="mt-1 block"
+											>
+												{__(
+													'Action not set',
+													'quillcrm'
+												)}
+											</Badge>
+										)}
+								</div>
+							</div>
+							<AlertDialog>
+								<AlertDialogTrigger asChild>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="text-destructive hover:text-destructive"
 									>
-										{__('Action not set', 'quillcrm')}
-									</Tag>
-								)}
+										<DeleteIcon />
+									</Button>
+								</AlertDialogTrigger>
+								<AlertDialogPortal>
+									<AlertDialogOverlay className="z-[150000]" />
+									<AlertDialogContent className="z-[150000]">
+										<AlertDialogHeader>
+											<AlertDialogTitle>
+												{__('Are you sure?', 'quillcrm')}
+											</AlertDialogTitle>
+											<AlertDialogDescription>
+												{__(
+													'This action cannot be undone.',
+													'quillcrm'
+												)}
+											</AlertDialogDescription>
+										</AlertDialogHeader>
+										<AlertDialogFooter>
+											<AlertDialogCancel>
+												{__('No', 'quillcrm')}
+											</AlertDialogCancel>
+											<AlertDialogAction
+												onClick={() => deleteStep(step)}
+											>
+												{__('Yes', 'quillcrm')}
+											</AlertDialogAction>
+										</AlertDialogFooter>
+									</AlertDialogContent>
+								</AlertDialogPortal>
+							</AlertDialog>
 						</div>
-					</Flex>
+					</CardContent>
 				</Card>
 				{step.type !== 'condition' &&
 					step.type !== 'end_automation' && (
@@ -304,40 +313,42 @@ const Workflow: React.FC = () => {
 						/>
 					)}
 				{step.type === 'condition' && (
-					<Flex gap={20} style={{ marginTop: 10 }}>
-						<Card
-							className="qcrm-automation-workflow__condition-yes"
-							style={{ flex: 1 }}
-						>
-							<Flex vertical gap={10}>
-								<h4>{__('Yes', 'quillcrm')}</h4>
-								<AddStep
-									setStep={setCurrentStep}
-									prevStep={null}
-									parentId={step.id}
-									condition="yes"
-								/>
-								{yesChildren.length > 0 &&
-									yesChildren.map(renderStep)}
-							</Flex>
+					<div className="flex gap-5 mt-2.5">
+						<Card className="qcrm-automation-workflow__condition-yes flex-1">
+							<CardContent className="p-4">
+								<div className="flex flex-col gap-2.5">
+									<h4 className="font-semibold">
+										{__('Yes', 'quillcrm')}
+									</h4>
+									<AddStep
+										setStep={setCurrentStep}
+										prevStep={null}
+										parentId={step.id}
+										condition="yes"
+									/>
+									{yesChildren.length > 0 &&
+										yesChildren.map(renderStep)}
+								</div>
+							</CardContent>
 						</Card>
-						<Card
-							className="qcrm-automation-workflow__condition-no"
-							style={{ flex: 1 }}
-						>
-							<Flex vertical gap={10}>
-								<h4>{__('No', 'quillcrm')}</h4>
-								<AddStep
-									setStep={setCurrentStep}
-									prevStep={null}
-									parentId={step.id}
-									condition="no"
-								/>
-								{noChildren.length > 0 &&
-									noChildren.map(renderStep)}
-							</Flex>
+						<Card className="qcrm-automation-workflow__condition-no flex-1">
+							<CardContent className="p-4">
+								<div className="flex flex-col gap-2.5">
+									<h4 className="font-semibold">
+										{__('No', 'quillcrm')}
+									</h4>
+									<AddStep
+										setStep={setCurrentStep}
+										prevStep={null}
+										parentId={step.id}
+										condition="no"
+									/>
+									{noChildren.length > 0 &&
+										noChildren.map(renderStep)}
+								</div>
+							</CardContent>
 						</Card>
-					</Flex>
+					</div>
 				)}
 				{step.type === 'condition' && (
 					<AddStep setStep={setCurrentStep} prevStep={step ?? null} />
@@ -348,150 +359,77 @@ const Workflow: React.FC = () => {
 
 	return (
 		<>
-			<Card style={{ marginBottom: 20 }} loading={isLoading}>
-				<Flex justify="space-between">
-					<Typography.Title level={4} style={{ margin: 0 }}>
-						{automation?.name || __('New Automation', 'quillcrm')}
-					</Typography.Title>
-					<Flex gap={20} align="center">
-						<Flex gap={10} align="center">
-							<Typography.Text>
-								{__('Workflow View:', 'quillcrm')}
-							</Typography.Text>
-							<Switch
-								checked={useReactFlow}
-								onChange={setUseReactFlow}
-								checkedChildren={__('Flow', 'quillcrm')}
-								unCheckedChildren={__('List', 'quillcrm')}
-							/>
-						</Flex>
-						<Flex gap={10} align="center">
-							<Typography.Text>
-								{__('Status:', 'quillcrm')}
-							</Typography.Text>
-							<Switch
-								checked={automation?.status === 'active'}
-								onChange={(value) =>
-									saveAutomation({
-										status: value ? 'active' : 'inactive',
-									})
-								}
-								loading={isSavingAutomation}
-							/>
-						</Flex>
-					</Flex>
-				</Flex>
-			</Card>
-			<Card loading={isLoading}>
-				{automation && (
-					<>
-						{useReactFlow ? (
-							<ReactFlowWorkflow
-								onStepClick={(step) => setCurrentStep(step)}
-								onTriggerClick={() => setVisible(true)}
-							/>
-						) : (
-							<Flex
-								style={{ width: 'auto' }}
-								gap={20}
-								justify="center"
-								align="center"
-								vertical={true}
-							>
-								<Flex
-									className="qcrm-automation-workflow"
-									vertical={true}
-									gap={20}
-									style={{ width: '100%' }}
-								>
-									<div className="qcrm-automation-workflow__item">
-										<Card
-											className="qcrm-automation-workflow__card"
-											hoverable
-											onClick={() => setVisible(true)}
-										>
-											<Flex gap={10}>
-												<div className="qcrm-automation-workflow__card-icon">
-													<RocketOutlined />
-												</div>
-												<div className="qcrm-automation-workflow__card-title">
-													{trigger?.label}
-												</div>
-											</Flex>
-										</Card>
-									</div>
-									<AddStep setStep={setCurrentStep} />
-									{organizedSteps.map(renderStep)}
-								</Flex>
-							</Flex>
-						)}
-					</>
-				)}
-				{currentStep && (
-					<StepModal step={currentStep} setStep={setCurrentStep} />
-				)}
-				{automation && trigger && (
-					<Modal
-						title={__('Trigger', 'quillcrm')}
-						open={visible}
-						onOk={() => save()}
-						onCancel={() => setVisible(false)}
-						confirmLoading={isSaving}
-						style={{ minWidth: '800px', minHeight: '500px' }}
-						closable={false}
-					>
-						{trigger.fields && (
-							<>
-								{automation.trigger === 'webhook_received' ? (
-									<WebhookFields
-										values={automation?.settings || {}}
-										onChange={(value) => {
-											updateAutomation({
-												...automation,
-												settings: value,
-											});
-										}}
-									/>
-								) : !trigger?.is_form ? (
-									<Fields
-										fields={trigger.fields}
-										values={automation.settings || {}}
-										onChange={(value) => {
-											updateAutomation({
-												...automation,
-												settings: value,
-											});
-										}}
-									/>
-								) : (
-									<FormFields
-										values={automation?.settings || {}}
-										onChange={(value) => {
-											updateAutomation({
-												...automation,
-												settings: value,
-											});
-										}}
-									/>
-								)}
-							</>
-						)}
-						<div style={{ marginTop: 20 }}>
-							<Field
-								type="switch"
-								label={__(
-									'Run Multiple Times (If you want to restart the automation for the same contact)',
-									'quillcrm'
-								)}
-								value={automation?.settings?.multiple_runs}
-								onChange={(value) => {
-									updateSettings('multiple_runs', value);
-								}}
-							/>
+			<div className="relative">
+				{isLoading ? (
+					<div>
+						<div className="animate-pulse space-y-4">
+							<div className="h-10 w-full bg-muted rounded"></div>
+							<div className="h-32 w-full bg-muted rounded"></div>
 						</div>
-					</Modal>
+					</div>
+				) : (
+					automation && (
+						<div className={cn(
+							"qcrm-automation-workflow",
+							(currentStep || visible) ? "has-sidebar" : ""
+						)}>
+							{useReactFlow ? (
+								<ReactFlowWorkflow
+									currentStep={currentStep}
+									isTriggerVisible={visible}
+									isSidebarOpen={
+										visible ||
+										(currentStep !== null &&
+											currentStep.type !== 'end_automation' &&
+											currentStep.type !== 'condition' &&
+											(!!currentStep.action ||
+												currentStep.type === 'goal' ||
+												currentStep.type === 'delay'))
+									}
+									onStepClick={(step) => {
+										setVisible(false); // Close trigger sidebar if open
+										setCurrentStep(step);
+									}}
+									onTriggerClick={() => {
+										setCurrentStep(null); // Close step sidebar if open
+										setVisible(true);
+									}}
+								/>
+							) : (
+								<div className="flex flex-col items-center justify-center gap-5 w-full mx-5 mt-5">
+									<div className="qcrm-automation-workflow flex flex-col gap-5 w-full">
+										<div className="qcrm-automation-workflow__item">
+											<Card
+												className="qcrm-automation-workflow__card hover:bg-accent cursor-pointer transition-colors"
+												onClick={() => setVisible(true)}
+											>
+												<CardContent className="p-4">
+													<div className="flex gap-2 items-center">
+														<div className="qcrm-automation-workflow__card-icon">
+															<Rocket className="h-4 w-4" />
+														</div>
+														<div className="qcrm-automation-workflow__card-title">
+															{trigger?.label}
+														</div>
+													</div>
+												</CardContent>
+											</Card>
+										</div>
+										<AddStep setStep={setCurrentStep} />
+										{organizedSteps.map(renderStep)}
+									</div>
+								</div>
+							)}
+						</div>
+					)
 				)}
-			</Card>
+				<WorkflowSidebar
+					currentStep={currentStep}
+					setCurrentStep={setCurrentStep}
+					isTriggerVisible={visible}
+					setTriggerVisible={setVisible}
+				/>
+			</div>
 		</>
 	);
 };

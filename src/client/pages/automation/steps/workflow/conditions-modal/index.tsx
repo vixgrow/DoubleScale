@@ -2,28 +2,34 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useLayoutEffect, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
+import { useSelect } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { Button, Card, Popover, List, Modal, Flex } from 'antd';
-import {
-	PlusCircleOutlined,
-	RightOutlined,
-	LeftOutlined,
-} from '@ant-design/icons';
-import { map, isEmpty } from 'lodash';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import type { Rules as RulesType, AutomationStep } from '@quillcrm/client';
-import { getRuleBySlug } from '@quillcrm/utils';
+import type { AutomationStep } from '@quillcrm/client';
 import ConfigAPI from '@quillcrm/config';
-import type { Rule as AutomationRule, RulesGroup } from '@quillcrm/config';
-import { Rule } from '@quillcrm/components';
+import {
+	CustomDialogHeader,
+	GradientConditionIcon,
+} from '@quillcrm/components';
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogFooter,
+	DialogOverlay,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import RulesBuilder from '@/components/rules-builder';
 
 interface RulesProps {
 	step: AutomationStep;
@@ -38,14 +44,108 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	visible,
 	onClose,
 }) => {
-	const stepRules = step.settings || ([] as RulesType[]);
-	const [rules, setRules] = useState<RulesType[]>(stepRules);
+	// Get form context and current trigger from store
+	const formContext = useSelect((select: any) => {
+		return select('quillcrm/core').getFormContext();
+	}, []);
+
+	const currentTrigger = useSelect((select: any) => {
+		return select('quillcrm/core').getCurrentTrigger();
+	}, []);
+
+	const [rulesGroups, setRulesGroups] = useState(
+		ConfigAPI.getAutomationRules()
+	);
+
+	// Filter rules groups by current trigger
+	const filterRulesByTrigger = (groups: any) => {
+		if (!currentTrigger) return groups;
+
+		const filteredGroups: any = {};
+		Object.keys(groups).forEach((groupKey) => {
+			const group = groups[groupKey];
+			// Include group if it has no triggers property (available for all)
+			// or if the triggers array includes the current trigger
+			if (!group.triggers || group.triggers.includes(currentTrigger)) {
+				filteredGroups[groupKey] = group;
+			}
+		});
+
+		return filteredGroups;
+	};
+
+	// Get filtered rules groups based on current trigger
+	const filteredRulesGroups = filterRulesByTrigger(rulesGroups);
+
+	const firstGroup = Object.keys(filteredRulesGroups)[0];
+	const firstRule = firstGroup
+		? Object.keys(filteredRulesGroups[firstGroup].rules)[0]
+		: '';
+	const getInitialRule = () => ({
+		rule: firstRule,
+		operator: 'is',
+		value: '',
+		selectedGroup: firstGroup,
+	});
+	const stepRules = step.settings || [[getInitialRule()]];
+	const [rules, setRules] = useState<
+		Array<
+			Array<{
+				rule: string;
+				operator: string;
+				value: string;
+				selectedGroup: string;
+			}>
+		>
+	>(stepRules);
 	const [isSaving, setIsSaving] = useState(false);
+
+	// Sync rules state with step.settings when modal opens
+	useEffect(() => {
+		if (visible) {
+			const stepRules = step.settings || [[getInitialRule()]];
+			setRules(stepRules);
+			// Reset handled in RulesBuilder
+		}
+	}, [visible, step.settings]);
+
+	// Fetch dynamic rules when form_context is available
+	useEffect(() => {
+		const fetchDynamicRules = async () => {
+			if (formContext && formContext.formId && formContext.triggerId) {
+				try {
+					const response = (await apiFetch({
+						path: addQueryArgs('/qc/v1/automations/rules', {
+							form_id: formContext.formId,
+							trigger_id: formContext.triggerId,
+						}),
+						method: 'GET',
+					})) as any;
+
+					if (response) {
+						setRulesGroups(response);
+						ConfigAPI.setAutomationRules(response);
+					}
+				} catch (error) {
+					console.error('Failed to fetch dynamic rules:', error);
+				}
+			}
+		};
+
+		if (visible) {
+			fetchDynamicRules();
+		}
+	}, [formContext, visible]);
+
+	useLayoutEffect(() => {
+		// placeholder
+	}, [rules, visible]);
 
 	const save = async (data: Partial<AutomationStep>) => {
 		setIsSaving(true);
 		try {
 			await onSave(data);
+			onClose();
 		} catch (error) {
 			console.error(error);
 		} finally {
@@ -54,255 +154,41 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	};
 
 	return (
-		<Modal
-			className="qcrm-rules"
-			open={visible}
-			onCancel={() => onClose()}
-			title={__('Conditions', 'quillcrm')}
-			style={{ minWidth: '800px' }}
-			onOk={() => {
-				save({ settings: rules });
-			}}
-			confirmLoading={isSaving}
-		>
-			{!isEmpty(rules) && (
-				<Flex vertical gap={20}>
-					{map(rules, (ruleGroup, index) => {
-						const groupRules = ruleGroup || [];
-						return (
-							<>
-								<Card
-									key={index}
-									title={__('Rules', 'quillcrm')}
-									extra={
-										<ConditionButton
-											rules={rules}
-											type="and"
-											parentIndex={index}
-											onChange={(newRules) => {
-												setRules(newRules);
-											}}
-										>
-											<Button
-												type="primary"
-												icon={<PlusCircleOutlined />}
-											>
-												{__('AND', 'quillcrm')}
-											</Button>
-										</ConditionButton>
-									}
-								>
-									<Flex gap={10} vertical>
-										{map(groupRules, (rule, ruleIndex) => {
-											const ruleData = getRuleBySlug(
-												rule.rule
-											);
-
-											return (
-												<Rule
-													key={ruleIndex}
-													ruleSettings={ruleData}
-													rule={rule}
-													onChange={(key, value) => {
-														const newRules = [
-															...rules,
-														];
-														newRules[index][
-															ruleIndex
-														] = {
-															...newRules[index][
-																ruleIndex
-															],
-															[key]: value,
-														};
-														setRules(newRules);
-													}}
-													onRemove={() => {
-														const newRules = [
-															...rules,
-														];
-														newRules[index].splice(
-															ruleIndex,
-															1
-														);
-														setRules(newRules);
-													}}
-												/>
-											);
-										})}
-									</Flex>
-								</Card>
-							</>
-						);
-					})}
-					<ConditionButton
-						rules={rules}
-						type="or"
-						parentIndex={0}
-						onChange={(newRules) => {
-							setRules(newRules);
-						}}
-					>
-						<Button icon={<PlusCircleOutlined />}>
-							{__('OR', 'quillcrm')}
-						</Button>
-					</ConditionButton>
-				</Flex>
-			)}
-			{isEmpty(rules) && (
-				<ConditionButton
-					rules={rules}
-					type="or"
-					parentIndex={0}
-					onChange={(newRules) => {
-						setRules(newRules);
-					}}
-				>
-					<Button type="primary" icon={<PlusCircleOutlined />}>
-						{__('Add Rule', 'quillcrm')}
-					</Button>
-				</ConditionButton>
-			)}
-		</Modal>
-	);
-};
-
-// Separate or and and buttons into separate popovers
-interface ConditionButtonProps {
-	rules: RulesType[];
-	type: 'or' | 'and';
-	parentIndex: number;
-	onChange: (rules: RulesType[]) => void;
-	children: React.ReactNode;
-}
-
-const ConditionButton: React.FC<ConditionButtonProps> = ({
-	rules,
-	type,
-	parentIndex,
-	onChange,
-	children,
-}) => {
-	const [selectedGroup, setSelectedGroup] = useState<string>('');
-	const [isModalVisible, setIsModalVisible] = useState(false);
-	const rulesGroups = ConfigAPI.getAutomationRules();
-
-	const PopoverContent = () => {
-		return (
-			<>
-				{selectedGroup ? (
-					<>
-						<div
-							className="qcrm-rule-back"
-							onClick={() => setSelectedGroup('')}
-							style={{
-								cursor: 'pointer',
-								padding: '5px 0',
-								borderBottom: '1px solid #f0f0f0',
-							}}
-						>
-							<LeftOutlined size={10} />
-							{__('Back', 'quillcrm')}
-						</div>
-						<List
-							className="qcrm-rule-groups"
-							itemLayout="horizontal"
-							dataSource={map(
-								rulesGroups[selectedGroup].rules,
-								(rule, key) => {
-									return {
-										key,
-										rule,
-									};
-								}
-							)}
-							renderItem={(item: {
-								key: string;
-								rule: AutomationRule;
-							}) => (
-								<List.Item
-									style={{
-										cursor: 'pointer',
-										padding: '5px 0',
-									}}
-								>
-									<div
-										className="qcrm-rule-item"
-										onClick={() => {
-											const newRules = [...rules];
-											if (type === 'or') {
-												newRules.push([
-													{
-														rule: item.key,
-														operator: 'is',
-														value: '',
-													},
-												]);
-											} else {
-												newRules[parentIndex].push({
-													rule: item.key,
-													operator: 'is',
-													value: '',
-												});
-											}
-
-											onChange(newRules);
-											setIsModalVisible(false);
-										}}
-									>
-										{item.rule.name}
-									</div>
-								</List.Item>
-							)}
-						/>
-					</>
-				) : (
-					<List
-						dataSource={map(rulesGroups, (group, key) => ({
-							key,
-							group,
-						}))}
-						renderItem={(item: {
-							key: string;
-							group: RulesGroup;
-						}) => (
-							<>
-								<List.Item
-									style={{
-										cursor: 'pointer',
-										padding: '5px 0',
-									}}
-								>
-									<div
-										className="qcrm-rule-item"
-										onClick={() =>
-											setSelectedGroup(item.key)
-										}
-									>
-										{item.group.name}
-										<RightOutlined />
-									</div>
-								</List.Item>
-							</>
+		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
+			<DialogOverlay className="z-[150300]" />
+			<DialogContent className="max-w-[1000px] max-h-[90vh] z-[150300] overflow-y-auto">
+				<DialogHeader>
+					<CustomDialogHeader
+						title={__('Create a condition', 'quillcrm')}
+						subtitle={__(
+							'Add up to 5 conditions. Define whether any or all of them must be applicable, for the condition to be met.',
+							'quillcrm'
 						)}
+						icon={<GradientConditionIcon />}
 					/>
-				)}
-			</>
-		);
-	};
-
-	return (
-		<Popover
-			content={PopoverContent()}
-			title={__('Select Group', 'quillcrm')}
-			trigger="click"
-			open={isModalVisible}
-			onOpenChange={(visible) => {
-				setIsModalVisible(visible);
-			}}
-		>
-			{children}
-		</Popover>
+				</DialogHeader>
+				<div className="py-4">
+					<RulesBuilder
+						rules={rules}
+						onChange={setRules}
+						rulesGroups={filteredRulesGroups}
+					/>
+				</div>
+				<DialogFooter>
+					<Button
+						onClick={() => save({ settings: rules })}
+						disabled={isSaving}
+						size="xl"
+						className="w-full"
+						variant="gradient"
+					>
+						{isSaving
+							? __('Adding...', 'quillcrm')
+							: __('Add condition', 'quillcrm')}
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

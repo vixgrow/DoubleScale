@@ -10,7 +10,7 @@
 
 namespace QuillCRM\Tracking;
 
-use QuillCRM\Models\Campaign_Email_Model;
+use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\Contact_Model;
 
 /**
@@ -61,6 +61,7 @@ class Email {
 
 	/**
 	 * Email Opened Tracking
+	 * Handles tracking for all email types: Campaign, Automation, and Individual
 	 */
 	public function email_opened_tracking() {
 		try {
@@ -68,15 +69,17 @@ class Email {
 				return;
 			}
 
-			$hash_key       = isset( $_GET['hash_key'] ) ? sanitize_text_field( $_GET['hash_key'] ) : '';
-			$campaign_email = Campaign_Email_Model::get_by_hash_key( $hash_key );
+			$hash_key = isset( $_GET['hash_key'] ) ? sanitize_text_field( $_GET['hash_key'] ) : '';
+			$tracking_entry = Tracking_Model::where( 'hash_key', $hash_key )
+				->where( 'mode', Tracking_Model::MODE_EMAIL )
+				->first();
 
-			if ( ! $campaign_email ) {
+			if ( ! $tracking_entry ) {
 				return;
 			}
 
-			// Update the email status
-			$campaign_email->update(
+			// Update the email tracking status
+			$tracking_entry->update(
 				array(
 					'opened'    => 1,
 					'opened_at' => current_time( 'mysql' ),
@@ -109,6 +112,7 @@ class Email {
 
 	/**
 	 * Email Clicked Tracking
+	 * Handles tracking for all email types: Campaign, Automation, and Individual
 	 */
 	public function email_clicked_tracking() {
 		try {
@@ -116,23 +120,30 @@ class Email {
 				return;
 			}
 
-			$hash_key       = isset( $_GET['hash_key'] ) ? sanitize_text_field( $_GET['hash_key'] ) : '';
-			$campaign_email = Campaign_Email_Model::get_by_hash_key( $hash_key );
-
-			if ( ! $campaign_email ) {
+			if ( ! isset( $_GET['hash_key'] ) || ! isset( $_GET['original'] ) ) {
 				return;
 			}
 
-			// Update the email status
-			$campaign_email->update(
+			$hash_key = sanitize_text_field( $_GET['hash_key'] );
+			$tracking_entry = Tracking_Model::where( 'hash_key', $hash_key )
+				->where( 'mode', Tracking_Model::MODE_EMAIL )
+				->first();
+
+			if ( ! $tracking_entry ) {
+				return;
+			}
+
+			// Update the email tracking status
+			$tracking_entry->update(
 				array(
 					'clicked'    => 1,
 					'clicked_at' => current_time( 'mysql' ),
 				)
 			);
 
-			if ( ! $campaign_email->opened ) {
-				$campaign_email->update(
+			// If email was clicked but not opened, mark as opened too
+			if ( ! $tracking_entry->opened ) {
+				$tracking_entry->update(
 					array(
 						'opened'    => 1,
 						'opened_at' => current_time( 'mysql' ),
@@ -140,8 +151,8 @@ class Email {
 				);
 			}
 
-			$orginal_url = urldecode( $_GET['orginal'] );
-			wp_redirect( $orginal_url );
+		$original_url = urldecode( $_GET['original'] );
+		wp_redirect( $original_url );
 			exit;
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(

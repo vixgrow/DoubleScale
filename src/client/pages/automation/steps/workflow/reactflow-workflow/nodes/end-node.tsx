@@ -10,8 +10,6 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { DisconnectOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Button, Popconfirm } from 'antd';
 
 /**
  * Internal dependencies
@@ -19,13 +17,18 @@ import { Button, Popconfirm } from 'antd';
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep } from '@quillcrm/client';
 import NodeContextMenu from '../components/node-context-menu';
+import StepReorderControls from '../components/step-reorder-controls';
+import NodeActionsDropdown from '../components/node-actions-dropdown';
+import { Power } from 'lucide-react';
 
 interface EndNodeData {
 	step: AutomationStep;
+	selectedStepId?: string | null;
+	viewMode?: boolean;
 }
 
 const EndNode: React.FC<NodeProps> = ({ data }) => {
-	const { step } = data as unknown as EndNodeData;
+	const { step, selectedStepId, viewMode = false } = data as unknown as EndNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const [isDeleting, setIsDeleting] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -65,6 +68,8 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	const handleDelete = async () => {
+		if (viewMode) return;
+		
 		setIsDeleting(true);
 
 		const { newSteps, updatedOrdersSteps } = getNewSteps();
@@ -95,50 +100,34 @@ const EndNode: React.FC<NodeProps> = ({ data }) => {
 		}
 	};
 
-	const handleDeleteWithStopPropagation = (e?: React.MouseEvent) => {
-		if (e) {
-			e.stopPropagation();
-		}
-		handleDelete();
-	};
+	// Check if this node is selected
+	const isSelected = selectedStepId === step.id.toString();
 
 	return (
-		<NodeContextMenu onDelete={handleDelete} disabled={false}>
-			<div className="qcrm-reactflow-node qcrm-reactflow-node--end">
+		<NodeContextMenu onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
+			<div className={`qcrm-reactflow-node qcrm-reactflow-node--end ${isSelected ? 'qcrm-reactflow-node--selected' : ''}`}>
 				<Handle
 					type="target"
 					position={Position.Top}
 					className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
 				/>
 
-				<div className="qcrm-reactflow-node__header">
-					<div className="qcrm-reactflow-node__icon">
-						<DisconnectOutlined />
-					</div>
-					<div className="qcrm-reactflow-node__actions">
-						<Popconfirm
-							title={__('Are you sure?', 'quillcrm')}
-							onConfirm={handleDeleteWithStopPropagation}
-							okText={__('Yes', 'quillcrm')}
-							cancelText={__('No', 'quillcrm')}
-							onCancel={(e) => e?.stopPropagation()}
-							onOpenChange={(open, e) => {
-								if (e) {
-									e.stopPropagation();
-								}
-							}}
-						>
-							<Button
-								type="text"
-								size="small"
-								icon={<DeleteOutlined />}
-								danger
-								loading={isDeleting}
-								onClick={(e) => e.stopPropagation()}
-							/>
-						</Popconfirm>
-					</div>
-				</div>
+				{/* Step Reorder Controls - hide in view mode */}
+				{!viewMode && <StepReorderControls step={step} />}
+
+				<div className="qcrm-reactflow-node__icon"><Power className='w-6 h-6' /></div>
+
+				{/* Three dots dropdown menu */}
+				<NodeActionsDropdown
+					onDelete={handleDelete}
+					showEdit={false}
+					deleteLabel={__('Delete End Node', 'quillcrm')}
+					deleteTitle={__('Delete this end node?', 'quillcrm')}
+					deleteDescription={__(
+						'This action cannot be undone.',
+						'quillcrm'
+					)}
+				/>
 
 				<div className="qcrm-reactflow-node__content">
 					<div className="qcrm-reactflow-node__title">

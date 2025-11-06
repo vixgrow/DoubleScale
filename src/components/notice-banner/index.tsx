@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import React, { forwardRef } from 'react';
 import { X, CircleX } from 'lucide-react';
 /**
  * Internal dependencies
@@ -13,11 +14,12 @@ interface NoticeBannerProps {
 	closeNotice: () => void;
 }
 
-const NoticeBanner: React.FC<NoticeBannerProps> = ({ closeNotice, notice }) => {
+const NoticeBanner = forwardRef<HTMLDivElement, NoticeBannerProps>(({ closeNotice, notice }, ref) => {
 	const isSuccess = notice.type === 'success';
 
 	return (
 		<div
+			ref={ref}
 			className={`flex justify-between items-start border py-3 px-5 mb-4 rounded-lg ${
 				isSuccess
 					? 'bg-[#D1E6DD] border-[#C0D7CD]'
@@ -47,6 +49,8 @@ const NoticeBanner: React.FC<NoticeBannerProps> = ({ closeNotice, notice }) => {
 			/>
 		</div>
 	);
-};
+});
+
+NoticeBanner.displayName = 'NoticeBanner';
 
 export default NoticeBanner;

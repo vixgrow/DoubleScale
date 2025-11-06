@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WooCommerce Order Status Changed Trigger
  * This trigger will be fired when an order status is changed.
@@ -13,12 +14,14 @@ namespace QuillCRM\Automations\Triggers\WooCommerce;
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Models\Automation_Model;
+use QuillCRM\Constants\Order_Status;
 use WC_Order;
 
 /**
  * Order Status Changed Trigger
  */
 class Order_Status_Changed extends Trigger {
+
 
 	/**
 	 * Trigger Name
@@ -118,8 +121,8 @@ class Order_Status_Changed extends Trigger {
 	 * @return bool
 	 */
 	public function is_processable( Automation_Model $automation, $args ) {
-		$automation_from_status = $automation->get_attribute( 'from_status' ) ?? 'any';
-		$automation_to_status   = $automation->get_attribute( 'to_status' ) ?? 'any';
+		$automation_from_status = $automation->get_setting( 'from_status', 'any' );
+		$automation_to_status   = $automation->get_setting( 'to_status', 'any' );
 		$status                 = $args['data']['from_status'] ?? '';
 		$new_status             = $args['data']['to_status'] ?? '';
 
@@ -146,30 +149,12 @@ class Order_Status_Changed extends Trigger {
 			'from_status' => array(
 				'type'    => 'select',
 				'label'   => __( 'From Status', 'quillcrm' ),
-				'options' => array(
-					'wc-pending'        => __( 'Pending Payment', 'quillcrm' ),
-					'wc-processing'     => __( 'Processing', 'quillcrm' ),
-					'wc-on-hold'        => __( 'On Hold', 'quillcrm' ),
-					'wc-completed'      => __( 'Completed', 'quillcrm' ),
-					'wc-cancelled'      => __( 'Cancelled', 'quillcrm' ),
-					'wc-refunded'       => __( 'Refunded', 'quillcrm' ),
-					'wc-failed'         => __( 'Failed', 'quillcrm' ),
-					'wc-checkout-draft' => __( 'Checkout Draft', 'quillcrm' ),
-				),
+				'options' => Order_Status::get_all(),
 			),
 			'to_status'   => array(
 				'type'    => 'select',
 				'label'   => __( 'To Status', 'quillcrm' ),
-				'options' => array(
-					'wc-pending'        => __( 'Pending Payment', 'quillcrm' ),
-					'wc-processing'     => __( 'Processing', 'quillcrm' ),
-					'wc-on-hold'        => __( 'On Hold', 'quillcrm' ),
-					'wc-completed'      => __( 'Completed', 'quillcrm' ),
-					'wc-cancelled'      => __( 'Cancelled', 'quillcrm' ),
-					'wc-refunded'       => __( 'Refunded', 'quillcrm' ),
-					'wc-failed'         => __( 'Failed', 'quillcrm' ),
-					'wc-checkout-draft' => __( 'Checkout Draft', 'quillcrm' ),
-				),
+				'options' => Order_Status::get_all(),
 			),
 		);
 	}

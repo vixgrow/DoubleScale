@@ -1,0 +1,221 @@
+.qcrm-automation-workflow-timeline {
+	position: relative;
+	padding: 20px 0;
+	width: 100%;
+	max-width: 1200px;
+	margin: 0 auto;
+
+	// Central vertical line
+	&::before {
+		content: "";
+		position: absolute;
+		left: 50%;
+		top: 0;
+		bottom: 0;
+		width: 4px;
+		border-radius: 8px;
+		background-color: #e4eefd;
+		transform: translateX(-50%);
+		z-index: 0;
+	}
+
+	.qcrm-timeline-item {
+		position: relative;
+		margin-bottom: 40px;
+		width: 100%;
+		min-height: 100px;
+		z-index: 1;
+
+		&:last-child {
+			margin-bottom: 0;
+
+			.qcrm-timeline-marker::after {
+				display: none;
+			}
+		}
+
+		// Marker (numbered circle)
+		.qcrm-timeline-marker {
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+			z-index: 2;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 34px;
+			height: 34px;
+			background-color: #458dc7;
+			border-radius: 4px;
+
+			.qcrm-timeline-number {
+				color: white;
+				font-weight: 600;
+				font-size: 16px;
+				line-height: 1;
+			}
+		}
+
+		// Content wrapper
+		.qcrm-timeline-content {
+			width: calc(50% - 60px);
+			position: relative;
+
+			.qcrm-timeline-timestamp {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				font-size: 16px;
+				color: #777777;
+				margin-bottom: 8px;
+			}
+
+			.qcrm-timeline-card {
+				background-color: #f8f8f8;
+				border: 1px solid #dee1e6;
+				border-radius: 8px;
+				min-height: 64px;
+
+				.qcrm-timeline-card-icon {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					width: 36px;
+					height: 36px;
+					flex-shrink: 0;
+					color: #777777;
+					border-radius: 4px;
+					border: 1px solid #dee1e6;
+					background-color: white;
+
+					svg {
+						width: 20px;
+						height: 20px;
+					}
+				}
+
+				.qcrm-timeline-card-title {
+					font-size: 18px;
+					font-weight: 500;
+					color: #09090b;
+				}
+			}
+		}
+
+		// Left side items (odd indices) - positioned on left side of timeline
+		&--left {
+			display: flex;
+			justify-content: flex-start;
+
+			.qcrm-timeline-content {
+				margin-left: 0;
+				text-align: left;
+
+				.qcrm-timeline-timestamp {
+					text-align: left;
+				}
+			}
+		}
+
+		// Right side items (even indices) - positioned on right side of timeline
+		&--right {
+			display: flex;
+			justify-content: flex-end;
+
+			.qcrm-timeline-content {
+				margin-right: 0;
+
+				.qcrm-timeline-timestamp {
+					text-align: left;
+				}
+			}
+		}
+
+		// Condition result items - inline with condition
+		&--condition-result {
+			margin-bottom: 20px;
+
+			.qcrm-timeline-marker {
+				width: 30px;
+				height: 30px;
+				background-color: #10b981;
+
+				.qcrm-timeline-number {
+					font-size: 12px;
+				}
+			}
+
+			.qcrm-timeline-content {
+				width: calc(50% - 50px);
+
+				.qcrm-timeline-card {
+					min-height: 60px;
+					background-color: #f3f4f6;
+				}
+			}
+
+			&.qcrm-timeline-item--left {
+				display: flex;
+				justify-content: flex-start;
+
+				.qcrm-timeline-content {
+					margin-left: 0;
+					text-align: right;
+					padding-right: 20px;
+				}
+			}
+
+			&.qcrm-timeline-item--right {
+				display: flex;
+				justify-content: flex-end;
+
+				.qcrm-timeline-content {
+					margin-right: 0;
+					padding-left: 20px;
+				}
+			}
+		}
+	}
+
+	// Responsive adjustments
+	@media (max-width: 768px) {
+		padding: 10px 0;
+
+		&::before {
+			left: 30px;
+		}
+
+		.qcrm-timeline-item {
+			flex-direction: row !important;
+
+			.qcrm-timeline-marker {
+				left: 30px;
+				width: 32px;
+				height: 32px;
+
+				.qcrm-timeline-number {
+					font-size: 12px;
+				}
+			}
+
+			.qcrm-timeline-content {
+				width: calc(100% - 80px);
+				margin-left: 60px !important;
+				padding-left: 20px !important;
+				padding-right: 0 !important;
+
+				.qcrm-timeline-timestamp {
+					text-align: left !important;
+				}
+			}
+
+			&--left,
+			&--right {
+				.qcrm-timeline-content {
+					margin-left: 60px !important;
+					text-align: left !important;
+				}
+			}
+		}
+	}
+}

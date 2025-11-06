@@ -17,14 +17,12 @@ import {
 	AllContactsIcon,
 	ListsIcon,
 	TagsIcon,
-	CustomFieldsIcon,
+	ContactsIcon,
 } from '@quillcrm/components';
 import Lists from './lists';
 import { ListsRef } from './lists';
 import Tags, { TagsRef } from './tags';
-import CustomFields from './custom-fields';
 import AllContacts, { AllContactsRef } from './all-contacts';
-import { CustomFieldsRef } from '@quillcrm/client';
 
 const ContactsList: React.FC = () => {
 	const [activeTab, setActiveTab] = useState('all');
@@ -32,13 +30,11 @@ const ContactsList: React.FC = () => {
 	const listsRef = useRef<ListsRef>(null);
 	const tagsRef = useRef<TagsRef>(null);
 	const allContactsRef = useRef<AllContactsRef>(null);
-	const customFieldsRef = useRef<CustomFieldsRef>(null);
 
 	const tabTitles = {
 		all: __('Contacts List', 'quillcrm'),
 		lists: __('Lists', 'quillcrm'),
 		tags: __('Tags', 'quillcrm'),
-		'custom-fields': __('Custom Fields', 'quillcrm'),
 	};
 
 	const headerActions =
@@ -85,25 +81,7 @@ const ContactsList: React.FC = () => {
 								icon: <PlusIcon />,
 							},
 						]
-					: activeTab === 'custom-fields'
-						? [
-								{
-									label: __('Add Field', 'quillcrm'),
-									variant: 'tertiary',
-									onClick: () => {
-										customFieldsRef.current?.openCreateFieldModal();
-									},
-									icon: <PlusIcon />,
-								},
-								{
-									label: __('Add Group', 'quillcrm'),
-									onClick: () => {
-										customFieldsRef.current?.openCreateGroupModal();
-									},
-									icon: <PlusIcon />,
-								},
-							]
-						: [];
+					: [];
 
 	return (
 		<div className="qcrm-contacts-list w-full">
@@ -120,22 +98,17 @@ const ContactsList: React.FC = () => {
 					{
 						label: __('All Contacts', 'quillcrm'),
 						value: 'all',
-						icon: <AllContactsIcon />,
+						icon: <ContactsIcon width={20} height={20} />,
 					},
 					{
 						label: __('Lists', 'quillcrm'),
 						value: 'lists',
-						icon: <ListsIcon />,
+						icon: <ListsIcon width={20} height={20} />,
 					},
 					{
 						label: __('Tags', 'quillcrm'),
 						value: 'tags',
-						icon: <TagsIcon />,
-					},
-					{
-						label: __('Custom Fields', 'quillcrm'),
-						value: 'custom-fields',
-						icon: <CustomFieldsIcon />,
+						icon: <TagsIcon width={20} height={20} />,
 					},
 				]}
 				tabsContent={[
@@ -152,10 +125,6 @@ const ContactsList: React.FC = () => {
 					{
 						value: 'tags',
 						children: <Tags ref={tagsRef} activeTab="tags" />,
-					},
-					{
-						value: 'custom-fields',
-						children: <CustomFields ref={customFieldsRef} activeTab="custom-fields"/>,
 					},
 				]}
 			/>

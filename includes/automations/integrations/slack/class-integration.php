@@ -44,7 +44,7 @@ class Integration extends Integration_Abstract {
 	 *
 	 * @since 1.0.0
 	 */
-	public $description = 'Slack Integration';
+	public $description = 'Slack is a digital headquarters that brings all your work communication and tools together in one place, like a shared workspace for your team.';
 
 	/**
 	 * App

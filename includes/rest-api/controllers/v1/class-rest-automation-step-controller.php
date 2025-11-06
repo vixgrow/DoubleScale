@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rest_Automation_Step_Controller
  * This class is responsible for handling the Automation Step REST API
@@ -10,18 +11,22 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Automation_Step_Model;
+use QuillCRM\Models\Tracking_Model;
+use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Managers\Actions_Manager;
 
 /**
  * Rest_Automation_Step_Controller class
  */
 class Rest_Automation_Step_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -73,6 +78,43 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/reorder',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'reorder_step' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'direction'     => array(
+							'description' => __( 'Direction to move the step (up or down)', 'quillcrm' ),
+							'type'        => 'string',
+							'enum'        => array( 'up', 'down' ),
+							'required'    => true,
+						),
+						'updated_steps' => array(
+							'description' => __( 'Array of steps with updated orders', 'quillcrm' ),
+							'type'        => 'object',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/analytics',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_step_analytics' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -83,89 +125,89 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'automation-step',
-			'type'       => 'object',
-			'properties' => array(
-				'id'            => array(
-					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
-					'type'        => 'integer',
-					'readonly'    => true,
-				),
-				'automation_id' => array(
-					'description' => __( 'The ID of the automation this step belongs to.', 'quillcrm' ),
-					'type'        => 'integer',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
-				),
-				'parent_id'     => array(
-					'description' => __( 'The ID of the parent step.', 'quillcrm' ),
-					'type'        => 'integer',
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
-				),
-				'action'        => array(
-					'description' => __( 'The action of the step.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => false,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'type'          => array(
-					'description' => __( 'The type of the step.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'condition'     => array(
-					'description' => __( 'The condition of the step.', 'quillcrm' ),
-					'type'        => 'string',
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'status'        => array(
-					'description' => __( 'The status of the step.', 'quillcrm' ),
-					'type'        => 'string',
-					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_text_field',
-					),
-				),
-				'settings'      => array(
-					'description' => __( 'The settings of the step.', 'quillcrm' ),
-					'type'        => 'object',
-					'arg_options' => array(
-						'validate_callback' => array( $this, 'validate_item_settings' ),
-					),
-				),
-				'order'         => array(
-					'description' => __( 'Order of the list.', 'quillcrm' ),
-					'type'        => 'integer',
-					'arg_options' => array(
-						'sanitize_callback' => 'absint',
-					),
-				),
-				'created_at'    => array(
-					'description' => __( 'The date the object was created.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'readonly'    => true,
-				),
-				'updated_at'    => array(
-					'description' => __( 'The date the object was last modified.', 'quillcrm' ),
-					'type'        => 'string',
-					'format'      => 'date-time',
-					'readonly'    => true,
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'automation-step',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'id'            => array(
+					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'readonly'    => true,
+				 ),
+				 'automation_id' => array(
+					 'description' => __( 'The ID of the automation this step belongs to.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'absint',
+					 ),
+				 ),
+				 'parent_id'     => array(
+					 'description' => __( 'The ID of the parent step.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'absint',
+					 ),
+				 ),
+				 'action'        => array(
+					 'description' => __( 'The action of the step.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => false,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'type'          => array(
+					 'description' => __( 'The type of the step.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'condition'     => array(
+					 'description' => __( 'The condition of the step.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'status'        => array(
+					 'description' => __( 'The status of the step.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'sanitize_text_field',
+					 ),
+				 ),
+				 'settings'      => array(
+					 'description' => __( 'The settings of the step.', 'quillcrm' ),
+					 'type'        => 'object',
+					 'arg_options' => array(
+						 'validate_callback' => array( $this, 'validate_item_settings' ),
+					 ),
+				 ),
+				 'order'         => array(
+					 'description' => __( 'Order of the list.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'arg_options' => array(
+						 'sanitize_callback' => 'absint',
+					 ),
+				 ),
+				 'created_at'    => array(
+					 'description' => __( 'The date the object was created.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'readonly'    => true,
+				 ),
+				 'updated_at'    => array(
+					 'description' => __( 'The date the object was last modified.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'format'      => 'date-time',
+					 'readonly'    => true,
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -212,13 +254,21 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function create_item( $request ) {
+		error_log( 'Step data: ' . print_r( $request->get_json_params(), true ) );
 		try {
-			$step_data       = $this->prepare_step( $request );
-			$updated_steps   = $request->get_param( 'updated_steps' ) ?? array();
+			$step_data     = $this->prepare_step( $request );
+			$updated_steps = $request->get_param( 'updated_steps' ) ?? array();
+
+			error_log( 'Prepared step data: ' . print_r( $step_data, true ) );
+			error_log( 'Updated steps: ' . print_r( $updated_steps, true ) );
+
 			$automation_step = Automation_Step_Model::create( $step_data );
 
 			if ( ! empty( $updated_steps ) ) {
+				error_log( 'Updating orders for ' . count( $updated_steps ) . ' steps' );
 				$this->update_orders( $updated_steps );
+			} else {
+				error_log( 'No steps to update orders for' );
 			}
 
 			$automation_step = Automation_Step_Model::find( $automation_step->id );
@@ -316,6 +366,46 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Reorder an Automation Step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function reorder_step( $request ) {
+		try {
+			$step_id       = $request->get_param( 'id' );
+			$direction     = $request->get_param( 'direction' );
+			$updated_steps = $request->get_param( 'updated_steps' ) ?? array();
+
+			$automation_step = Automation_Step_Model::find( $step_id );
+
+			if ( ! $automation_step ) {
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Validate direction
+			if ( ! in_array( $direction, array( 'up', 'down' ), true ) ) {
+				return new WP_Error( 'rest_automation_step_invalid_direction', __( 'Invalid direction. Must be "up" or "down"', 'quillcrm' ), array( 'status' => 400 ) );
+			}
+
+			// Update the orders based on the frontend calculations
+			if ( ! empty( $updated_steps ) ) {
+				$this->update_orders( $updated_steps );
+			}
+
+			// Return the updated step
+			$automation_step = Automation_Step_Model::find( $step_id );
+
+			return new WP_REST_Response( $automation_step, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'rest_automation_step_reorder_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
 	 * Update orders of the steps
 	 *
 	 * @since 1.0.0
@@ -357,13 +447,119 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			'order'         => $request->get_param( 'order' ),
 		);
 
+		// Remove empty values but preserve 0 values for numeric fields
 		foreach ( $step_data as $key => $value ) {
-			if ( empty( $value ) ) {
+			if ( is_null( $value ) || ( '' === $value ) ) {
 				unset( $step_data[ $key ] );
 			}
 		}
 
+		// Ensure order is always a valid positive integer
+		if ( isset( $step_data['order'] ) ) {
+			$step_data['order'] = max( 1, intval( $step_data['order'] ) );
+		} else {
+			$step_data['order'] = 1; // Default order if not provided
+		}
+
 		return $step_data;
+	}
+
+	/**
+	 * Get analytics for an Automation Step
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_step_analytics( $request ) {
+		try {
+			$step_id = $request->get_param( 'id' );
+
+			// Verify step exists.
+			$automation_step = Automation_Step_Model::find( $step_id );
+
+			if ( ! $automation_step ) {
+				return new WP_Error( 'rest_automation_step_not_found', __( 'Automation Step not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Validate step supports analytics.
+			$analytics_actions = array( 'send_email', 'send_sms', 'send_whatsapp' );
+			if ( ! in_array( $automation_step->action, $analytics_actions, true ) ) {
+				return new WP_Error( 'rest_automation_step_invalid_action', __( 'This step does not support analytics', 'quillcrm' ), array( 'status' => 400 ) );
+			}
+
+			// Get all analytics in a single optimized query with JOIN to contacts table.
+			global $wpdb;
+			$contacts_table   = $wpdb->prefix . 'quillcrm_contacts';
+			$tracking_table   = $wpdb->prefix . 'quillcrm_tracking';
+
+			$analytics_raw = Tracking_Model::byStep( $step_id )
+				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
+				->selectRaw( "
+					COUNT(*) as total_sent,
+					SUM(CASE WHEN {$tracking_table}.opened = 1 THEN 1 ELSE 0 END) as opened_count,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked_count,
+					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as delivered_count,
+					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as read_count,
+					SUM(CASE WHEN contacts.status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed_count
+				", array( Tracking_Status::DELIVERED, Tracking_Status::READ ) )
+				->first();
+
+			// Extract metrics.
+			$total_sent   = (int) $analytics_raw->total_sent;
+			$opened       = (int) $analytics_raw->opened_count;
+			$clicked      = (int) $analytics_raw->clicked_count;
+			$delivered    = (int) $analytics_raw->delivered_count;
+			$read         = (int) $analytics_raw->read_count;
+			$unsubscribed = (int) $analytics_raw->unsubscribed_count; 
+
+			// If no messages sent, return zero analytics.
+			if ( 0 === $total_sent ) {
+				return new WP_REST_Response(
+					array(
+						'sent'             => 0,
+						'opened'           => 0,
+						'clicked'          => 0,
+						'delivered'        => 0,
+						'read'             => 0,
+						'unsubscribed'     => 0,
+						'openRate'         => 0,
+						'clickRate'        => 0,
+						'deliveryRate'     => 0,
+						'readRate'         => 0,
+						'unsubscribedRate' => 0,
+					),
+					200
+				);
+			}
+
+			// Calculate rates as percentages.
+			$open_rate         = $total_sent > 0 ? round( ( $opened / $total_sent ) * 100, 2 ) : 0;
+			$click_rate        = $total_sent > 0 ? round( ( $clicked / $total_sent ) * 100, 2 ) : 0;
+			$delivery_rate     = $total_sent > 0 ? round( ( $delivered / $total_sent ) * 100, 2 ) : 0;
+			$read_rate         = $total_sent > 0 ? round( ( $read / $total_sent ) * 100, 2 ) : 0;
+			$unsubscribed_rate = $total_sent > 0 ? round( ( $unsubscribed / $total_sent ) * 100, 2 ) : 0;
+
+			$analytics = array(
+				'sent'             => $total_sent,
+				'opened'           => $opened,
+				'clicked'          => $clicked,
+				'delivered'        => $delivered,
+				'read'             => $read,
+				'unsubscribed'     => $unsubscribed,
+				'openRate'         => $open_rate,
+				'clickRate'        => $click_rate,
+				'deliveryRate'     => $delivery_rate,
+				'readRate'         => $read_rate,
+				'unsubscribedRate' => $unsubscribed_rate,
+			);
+
+			return new WP_REST_Response( $analytics, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'rest_automation_step_analytics_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
 	}
 
 	/**
@@ -376,7 +572,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -389,7 +585,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -402,7 +598,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -415,6 +611,6 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

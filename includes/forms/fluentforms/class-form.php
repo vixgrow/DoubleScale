@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Fluent Forms Form class
  * This class is responsible for fluent forms integration
@@ -12,11 +13,22 @@ namespace QuillCRM\Forms\FluentForms;
 
 use QuillCRM\Abstracts\Form as Abstracts_Form;
 use QuillCRM\Managers\Forms_Manager;
+use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
+use QuillCRM\Models\Automation_Model;
 
 /**
  * FluentForms class
  */
 class Form extends Abstracts_Form {
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * Slug
@@ -50,6 +62,7 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
 	}
 
+
 	/**
 	 * Is Enabled
 	 *
@@ -67,15 +80,16 @@ class Form extends Abstracts_Form {
 	 * @since 1.0.0
 	 *
 	 * @param string $form_id
+	 * @param bool   $register_merge_tags Whether to register merge tags
 	 *
 	 * @return array
 	 */
-	public function get_fields( $form_id ) {
+	public function get_fields( $form_id, $register_merge_tags = true ) {
 		$form   = wpFluent()->table( 'fluentform_forms' )->find( $form_id );
 		$fields = array();
 
 		if ( empty( $form ) ) {
-			return;
+			return array();
 		}
 
 		$form_fields = json_decode( $form->form_fields );
@@ -148,7 +162,7 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_fields() {
-		// Check nonce.
+		 // Check nonce.
 		check_ajax_referer( 'quillcrm-admin', 'nonce' );
 
 		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( $_POST['form_id'] ) : '';

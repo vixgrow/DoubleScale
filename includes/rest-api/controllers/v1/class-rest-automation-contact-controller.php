@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rest_Automation_Contact_Controller
  * This class is responsible for handling the Automation Contact REST API
@@ -10,6 +11,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -21,6 +23,9 @@ use QuillCRM\Models\Automation_Contact_Model;
  * Rest_Automation_Contact_Controller class
  */
 class Rest_Automation_Contact_Controller extends REST_Controller {
+
+
+
 
 	/**
 	 * REST Base
@@ -82,58 +87,58 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'automation_contact',
-			'type'       => 'object',
-			'properties' => array(
-				'id'             => array(
-					'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
-					'type'        => 'integer',
-					'readonly'    => true,
-				),
-				'contact_id'     => array(
-					'description' => __( 'The ID of the contact.', 'quillcrm' ),
-					'type'        => 'integer',
-					'required'    => true,
-				),
-				'automation_id'  => array(
-					'description' => __( 'The ID of the automation.', 'quillcrm' ),
-					'type'        => 'integer',
-					'required'    => true,
-				),
-				'execution_time' => array(
-					'description' => __( 'The time the automation should be executed.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-				),
-				'event'          => array(
-					'description' => __( 'The event that triggered the automation.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-				),
-				'status'         => array(
-					'description' => __( 'The status of the automation.', 'quillcrm' ),
-					'type'        => 'string',
-					'required'    => true,
-				),
-				'step_id'        => array(
-					'description' => __( 'The ID of the step.', 'quillcrm' ),
-					'type'        => 'integer',
-					'required'    => true,
-				),
-				'created_at'     => array(
-					'description' => __( 'The date the contact was created.', 'quillcrm' ),
-					'type'        => 'string',
-					'readonly'    => true,
-				),
-				'updated_at'     => array(
-					'description' => __( 'The date the contact was last updated.', 'quillcrm' ),
-					'type'        => 'string',
-					'readonly'    => true,
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'automation_contact',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'id'             => array(
+					 'description' => __( 'Unique identifier for the object.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'readonly'    => true,
+				 ),
+				 'contact_id'     => array(
+					 'description' => __( 'The ID of the contact.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'required'    => true,
+				 ),
+				 'automation_id'  => array(
+					 'description' => __( 'The ID of the automation.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'required'    => true,
+				 ),
+				 'execution_time' => array(
+					 'description' => __( 'The time the automation should be executed.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => true,
+				 ),
+				 'event'          => array(
+					 'description' => __( 'The event that triggered the automation.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => true,
+				 ),
+				 'status'         => array(
+					 'description' => __( 'The status of the automation.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => true,
+				 ),
+				 'step_id'        => array(
+					 'description' => __( 'The ID of the step.', 'quillcrm' ),
+					 'type'        => 'integer',
+					 'required'    => true,
+				 ),
+				 'created_at'     => array(
+					 'description' => __( 'The date the contact was created.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'readonly'    => true,
+				 ),
+				 'updated_at'     => array(
+					 'description' => __( 'The date the contact was last updated.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'readonly'    => true,
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -273,7 +278,7 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 */
 	public function create_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -284,7 +289,7 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 */
 	public function get_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -295,7 +300,7 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 */
 	public function update_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 
 	/**
@@ -306,6 +311,6 @@ class Rest_Automation_Contact_Controller extends REST_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_deal_owner_access();
 	}
 }

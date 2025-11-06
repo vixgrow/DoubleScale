@@ -28,6 +28,7 @@ import { notification } from 'antd';
  */
 import { NavBar } from '@quillcrm/components';
 import { Controller } from './controller';
+import ProtectedRoute from './protected-route';
 import './style.scss';
 import { MergeTagsModal } from '@quillcrm/components';
 import {
@@ -62,11 +63,21 @@ const Notices: React.FC = () => {
 };
 
 export const Layout = (props) => {
-	const { mergeTagsVisible } = useSelect((select) => ({
-		mergeTagsVisible: select('quillcrm/core').getMergeTagsVisible(),
-	}));
-	const { setMergeTagsVisible } = useDispatch('quillcrm/core');
-	console.log(mergeTagsVisible, 'mergeTagsVisible');
+	const { mergeTagsVisible, mergeTagCallback, formContext } = useSelect(
+		(select) => ({
+			mergeTagsVisible: select('quillcrm/core').getMergeTagsVisible(),
+			mergeTagCallback: select('quillcrm/core').getMergeTagCallback(),
+			formContext: select('quillcrm/core').getFormContext(),
+		})
+	);
+	const { setMergeTagsVisible, setMergeTagCallback } =
+		useDispatch('quillcrm/core');
+
+	const handleCloseMergeTags = () => {
+		setMergeTagsVisible(false);
+		// Clear the callback when closing
+		setMergeTagCallback(null);
+	};
 
 	return (
 		<SlotFillProvider>
@@ -74,12 +85,18 @@ export const Layout = (props) => {
 				<Notices />
 				<MergeTagsModal
 					visible={mergeTagsVisible}
-					onClose={() => setMergeTagsVisible(false)}
+					onClose={handleCloseMergeTags}
+					onInsertTag={mergeTagCallback || undefined}
+					triggerId={formContext?.triggerId}
+					formId={formContext?.formId}
+					automationId={formContext?.automationId}
 				/>
 				<div className="qcrm-layout__main">
 					<NavBar />
 					<SidebarTrigger />
-					<Controller {...props} />
+					<ProtectedRoute page={props.page}>
+						<Controller {...props} />
+					</ProtectedRoute>
 				</div>
 			</SidebarProvider>
 		</SlotFillProvider>

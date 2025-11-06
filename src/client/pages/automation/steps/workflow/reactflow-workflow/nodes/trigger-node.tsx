@@ -7,44 +7,65 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { RocketOutlined } from '@ant-design/icons';
 
 /**
  * Internal dependencies
  */
-import { getTrigger } from '@quillcrm/utils';
 import type { Automation } from '@quillcrm/client';
+import { getTrigger } from '@quillcrm/utils';
 import NodeContextMenu from '../components/node-context-menu';
+import NodeLayout from '../components/node-layout';
+import { ActionIcon } from '@quillcrm/components';
 
 interface TriggerNodeData {
 	automation: Automation;
+	isTriggerVisible?: boolean;
+	viewMode?: boolean;
+	analytics?: { contacts: number; conversion_rate: number };
 	onTriggerClick?: () => void;
+	onDeleteTrigger?: (triggerId: string) => void;
 }
 
 const TriggerNode: React.FC<NodeProps> = ({ data }) => {
-	const { automation, onTriggerClick } = data as unknown as TriggerNodeData;
-	const trigger = automation ? getTrigger(automation.trigger) : null;
+	const { automation, onTriggerClick, isTriggerVisible, viewMode = false, analytics } = data as unknown as TriggerNodeData;
 
 	const handleEdit = () => {
-		if (onTriggerClick) {
+		if (!viewMode && onTriggerClick) {
 			onTriggerClick();
 		}
 	};
 
+	// Get trigger label from the automation trigger
+	const triggerData = getTrigger(automation?.trigger || '');
+	const triggerName =
+		triggerData?.label ||
+		automation?.trigger ||
+		__('No trigger selected', 'quillcrm');
+
+	const subtitle = (
+		<span style={{ fontWeight: 'bold', color: 'green' }}>
+			{triggerName}
+		</span>
+	);
+
 	return (
-		<NodeContextMenu onEdit={handleEdit} showDelete={false}>
-			<div className="qcrm-reactflow-node qcrm-reactflow-node--trigger">
-				<div className="qcrm-reactflow-node__icon">
-					<RocketOutlined />
-				</div>
-				<div className="qcrm-reactflow-node__content">
-					<div className="qcrm-reactflow-node__title">
-						{trigger?.label || __('Trigger', 'quillcrm')}
-					</div>
-					<div className="qcrm-reactflow-node__subtitle">
-						{__('Start', 'quillcrm')}
-					</div>
-				</div>
+		<NodeContextMenu onEdit={viewMode ? undefined : handleEdit} showDelete={false} disabled={viewMode}>
+			<div className={`qcrm-reactflow-node qcrm-reactflow-node--trigger ${isTriggerVisible ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
+				<NodeLayout
+					icon={<ActionIcon width={23} height={23} />}
+					title={__('Start Workflow (Trigger)', 'quillcrm')}
+					subtitle={subtitle}
+					onEdit={handleEdit}
+					onDelete={() => { }}
+					editLabel={__('Edit Trigger', 'quillcrm')}
+					deleteLabel=""
+					deleteTitle=""
+					deleteDescription=""
+					showDelete={false}
+					viewMode={viewMode}
+					analytics={analytics}
+				/>
+
 				<Handle
 					type="source"
 					position={Position.Bottom}

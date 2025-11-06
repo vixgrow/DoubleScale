@@ -24,9 +24,16 @@ const ExportModal: React.FC<Props> = ({ open, onClose }) => {
 					}
 				}}
 			>
-				<DialogContent className="z-[1600000] w-screen h-screen max-w-none gap-8 overflow-y-auto py-4 px-16 bg-white rounded-none shadow-none">
+				<DialogContent className="z-[150000] w-screen h-screen max-w-none gap-0 overflow-y-auto bg-white rounded-none shadow-none"
+				style={{
+					paddingTop: '12px',
+					paddingLeft: '0px',
+					paddingRight: '0px',
+					paddingBottom: '0px',
+				}}
+				>
 					<ExportHeader />
-					<div className="flex h-full gap-5">
+					<div className="flex overflow-y-auto gap-5 px-16 pb-8">
 						<div className="w-full">
 							<Card className="shadow-none rounded-2xl border-none bg-[#FAFAFA]">
 								<CardContent className="py-4 px-24">

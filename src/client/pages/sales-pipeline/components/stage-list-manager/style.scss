@@ -1,0 +1,184 @@
+.stage-list-manager {
+	.stage-list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	
+	.stage-item {
+		display: flex;
+		align-items: center;
+		padding: 16px;
+		background: #ffffff;
+		border: 1px solid #e8e8e8;
+		border-radius: 8px;
+		transition: all 0.2s ease;
+		
+		&:hover {
+			border-color: #6d78d8;
+			box-shadow: 0 2px 8px rgba(109, 120, 216, 0.1);
+		}
+		
+		&.editing {
+			border-color: #6d78d8;
+			box-shadow: 0 0 0 2px rgba(109, 120, 216, 0.1);
+			
+			.stage-drag-handle {
+				opacity: 0.3;
+				pointer-events: none;
+			}
+		}
+		
+		.stage-drag-handle {
+			display: flex;
+			align-items: center;
+			padding: 4px;
+			margin-right: 12px;
+			color: #8c8c8c;
+			cursor: grab;
+			border-radius: 4px;
+			transition: all 0.2s ease;
+			
+			&:hover {
+				color: #6d78d8;
+				background: rgba(109, 120, 216, 0.1);
+			}
+			
+			&:active {
+				cursor: grabbing;
+			}
+		}
+		
+		.stage-info {
+			flex: 1;
+			min-width: 0;
+			
+			.stage-header {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin-bottom: 4px;
+				
+				.stage-color {
+					width: 16px;
+					height: 16px;
+					border-radius: 3px;
+					border: 1px solid rgba(0, 0, 0, 0.1);
+					flex-shrink: 0;
+				}
+				
+				.stage-name {
+					font-weight: 500;
+					color: #262626;
+					flex: 1;
+					min-width: 0;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+				}
+			}
+			
+			.stage-stats {
+				display: flex;
+				gap: 16px;
+				font-size: 12px;
+				color: #8c8c8c;
+				
+				.stat {
+					display: flex;
+					align-items: center;
+					gap: 4px;
+				}
+			}
+		}
+		
+		.stage-actions {
+			margin-left: 12px;
+		}
+		
+		// Edit form styling
+		.edit-form {
+			flex: 1;
+			
+			.edit-content {
+				.edit-basic-info {
+					display: flex;
+					align-items: flex-start;
+					gap: 12px;
+					margin-bottom: 12px;
+					
+					.color-picker-section {
+						display: flex;
+						align-items: center;
+						gap: 8px;
+						
+						.color-value {
+							font-family: monospace;
+							font-size: 12px;
+							color: #8c8c8c;
+						}
+					}
+				}
+				
+				.ant-form-item {
+					margin-bottom: 0;
+					
+					.ant-form-item-label {
+						padding-bottom: 4px;
+						
+						> label {
+							font-size: 12px;
+							font-weight: 500;
+						}
+					}
+				}
+				
+				.edit-actions {
+					display: flex;
+					justify-content: flex-end;
+					margin-top: 8px;
+				}
+			}
+		}
+	}
+	
+	.stage-list-empty {
+		text-align: center;
+		padding: 40px 20px;
+		color: #8c8c8c;
+		
+		p {
+			margin: 0;
+			font-size: 14px;
+		}
+	}
+}
+
+// Drag and drop indicators
+.stage-item[aria-pressed="true"] {
+	z-index: 999;
+	transform: rotate(2deg);
+	box-shadow: 0 8px 24px rgba(109, 120, 216, 0.3) !important;
+}
+
+// Button hover effects
+.ant-btn-text {
+	&:hover {
+		color: #6d78d8 !important;
+		background: rgba(109, 120, 216, 0.1) !important;
+	}
+	
+	&.ant-btn-dangerous:hover {
+		color: #ff4d4f !important;
+		background: rgba(255, 77, 79, 0.1) !important;
+	}
+}
+
+// Tag styling
+.ant-tag {
+	border-radius: 4px;
+	font-size: 11px;
+	line-height: 1.2;
+	padding: 2px 6px;
+	margin: 0;
+}

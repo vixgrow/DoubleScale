@@ -13,12 +13,10 @@ import { isEmail } from 'validator';
  */
 import type { Contact, ContactsResponse } from '@quillcrm/client';
 import ConfigAPI from '@quillcrm/config';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
 import { formatDateForAPI } from '@quillcrm/utils';
 import { useContactsContext } from './contexts';
 
 export const useContactsAPI = () => {
-	const navigate = useNavigate();
 	const {
 		page,
 		perPage,
@@ -27,11 +25,9 @@ export const useContactsAPI = () => {
 		contact,
 		selectedRowKeys,
 		keywords,
-		totalRecords,
 		setTotalRecords,
 		setLoading,
 		setData,
-		setTotal,
 		setIsFiltering,
 		setIsSaving,
 		showNotice,
@@ -39,6 +35,8 @@ export const useContactsAPI = () => {
 		setCreateContactVisible,
 		setBulkAction,
 		setIsApplying,
+		openContactDialog,
+		setHasRecords,
 	} = useContactsContext();
 
 	const fetchContacts = async () => {
@@ -57,6 +55,7 @@ export const useContactsAPI = () => {
 			})) as ContactsResponse;
 
 			setTotalRecords(response.total || 0);
+			setHasRecords((response.total_count || 0) > 0);
 			response.data && setData(response.data);
 		} catch (error) {
 			showNotice('error', __('Failed to fetch contacts', 'quillcrm'));
@@ -68,6 +67,7 @@ export const useContactsAPI = () => {
 
 	const createContact = async () => {
 		if (!isEmail(contact.email)) {
+			setCreateContactVisible(false);
 			showNotice('error', __('Invalid email', 'quillcrm'));
 			return;
 		}
@@ -81,7 +81,20 @@ export const useContactsAPI = () => {
 				data: contact,
 			})) as Contact;
 
-			navigate(getToLink(`contacts/${response.id}`));
+			// Close the create contact modal
+			setCreateContactVisible(false);
+
+			// Show success message
+			showNotice(
+				'success',
+				__('Contact created successfully', 'quillcrm')
+			);
+
+			// Open the contact dialog with the newly created contact
+			openContactDialog(response.id.toString());
+
+			// Refresh contacts list
+			fetchContacts();
 		} catch (error: any) {
 			setCreateContactVisible(false);
 			showNotice(
@@ -269,8 +282,6 @@ export const useContactsAPI = () => {
 		doBulkAction,
 	};
 };
-
-
 
 export const useContactOrderDetails = () => {
 	const isWooCommerceActive = ConfigAPI.isWoocommerceActive();

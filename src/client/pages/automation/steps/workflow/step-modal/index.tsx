@@ -74,8 +74,9 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 		}
 	};
 
-	const saveActionStep = async () => {
-		if (!value) {
+	const saveActionStep = async (actionValue?: string) => {
+		const valueToSave = actionValue || value;
+		if (!valueToSave) {
 			createNotice({
 				type: 'error',
 				message: __('Please select an action', 'quillcrm'),
@@ -84,7 +85,7 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 		}
 		const data = {
 			...step,
-			action: value,
+			action: valueToSave,
 		};
 
 		await saveStep(data);
@@ -116,20 +117,15 @@ const StepModal: React.FC<StepModalProps> = ({ step, setStep }) => {
 							setStep(null);
 						}}
 						onChange={(value) => setValue(value)}
-						onSave={() => saveActionStep()}
+						onSave={(actionKey) => saveActionStep(actionKey)}
 					/>
 				);
 			case 'goal':
 				return (
 					<GoalSelector
 						value={value}
-						visible={actionModalVisible}
-						onClose={() => {
-							setActionModalVisible(false);
-							setStep(null);
-						}}
 						onChange={(value) => setValue(value)}
-						onSave={() => saveActionStep()}
+						onSave={(goalKey) => saveActionStep(goalKey)}
 					/>
 				);
 

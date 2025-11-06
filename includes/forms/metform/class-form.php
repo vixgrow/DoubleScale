@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MetForm Form Class
  * This class is responsible for handling the integration of MetForm forms
@@ -12,11 +13,16 @@ namespace QuillCRM\Forms\MetForm;
 
 use QuillCRM\Abstracts\Form as Abstracts_Form;
 use QuillCRM\Managers\Forms_Manager;
+use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
 
 /**
  * MetForm class
  */
 class Form extends Abstracts_Form {
+
+
+
+
 
 	/**
 	 * Slug
@@ -50,6 +56,9 @@ class Form extends Abstracts_Form {
 		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
 	}
 
+
+
+
 	/**
 	 * Is Enabled
 	 *
@@ -68,14 +77,14 @@ class Form extends Abstracts_Form {
 	 *
 	 * @param string $form_id
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function get_fields( $form_id ) {
 		$form_fields = \MetForm\Core\Entries\Action::instance()->get_fields( $form_id );
 		$fields      = array();
 
 		if ( empty( $form_fields ) ) {
-			return;
+			return $fields;
 		}
 
 		foreach ( $form_fields as $field_id => $field ) {
@@ -96,7 +105,7 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function ajax_get_fields() {
-		// Check nonce.
+		 // Check nonce.
 		check_ajax_referer( 'quillcrm-admin', 'nonce' );
 
 		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( $_POST['form_id'] ) : '';

@@ -150,6 +150,12 @@ export type CustomField = {
 	type: string;
 	attributes: any | null; // Adjust the type if the structure of attributes is known
 	group_id: number;
+	scope: string;
+	pivot: {
+		entity_id: string;
+		custom_field_id: string;
+		value: string;
+	};
 	created_at: string;
 	updated_at: string;
 };
@@ -158,6 +164,7 @@ export type CustomFieldsGroup = {
 	id: number;
 	name: string;
 	slug: string;
+	scope: string;
 	created_at: string;
 	updated_at: string;
 	custom_fields: CustomField[];
@@ -166,13 +173,17 @@ export type CustomFieldsGroup = {
 // The array type
 export type CustomFieldsGroups = CustomFieldsGroup[];
 
-export type Template = {
+// Email Template Type
+export type EmailBodyContent = {
+	type: 'rich-text' | 'builder';
+	value: any; // For rich-text: string, for builder: sections/globalSettings/buttonSettings
+};
+
+// Email template settings (stored in settings JSON column)
+export type EmailTemplateSettings = {
 	from_name: string;
 	from_email: string;
 	reply_to: string;
-	subject: string;
-	preview_text: string;
-	body: string;
 	enable_utm: boolean;
 	utm_source: string;
 	utm_medium: string;
@@ -181,11 +192,93 @@ export type Template = {
 	utm_content: string;
 };
 
+// Email Template Type (matches database structure)
+export type EmailTemplate = {
+	id?: number;
+	name: string;
+	type: 'email'; // Campaign channel type
+	subject: string;
+	body?: string | EmailBodyContent; // Can be string (rich-text) or EmailBodyContent (builder)
+	preview_text: string;
+	thumbnail?: string;
+	hidden?: boolean;
+	settings?: EmailTemplateSettings;
+	created_at?: string;
+	updated_at?: string;
+
+	// Flattened fields for UI convenience (derived from settings)
+	from_name?: string;
+	from_email?: string;
+	reply_to?: string;
+	enable_utm?: boolean;
+	utm_source?: string;
+	utm_medium?: string;
+	utm_name?: string;
+	utm_term?: string;
+	utm_content?: string;
+};
+
+// SMS Template Type (for frontend use)
+export type SMSTemplate = {
+	id?: number;
+	name: string;
+	type: 'sms';
+	body: string;
+	subject?: never; // SMS doesn't have subject
+	settings?: {
+		// For UI state management only
+		add_unsubscribe?: boolean;
+	};
+	created_at?: string;
+	updated_at?: string;
+};
+
+// WhatsApp Template Type (for frontend use)
+export type WhatsAppTemplate = {
+	id?: number;
+	name: string;
+	type: 'whatsapp';
+	body: string;
+	subject?: never; // WhatsApp doesn't have subject
+	settings?: {
+		// For UI state management only
+		add_unsubscribe?: boolean;
+	};
+	created_at?: string;
+	updated_at?: string;
+};
+
+// Discriminated Union for all template types
+export type Template = EmailTemplate | SMSTemplate | WhatsAppTemplate;
+
+// Contacts step data
+export type ContactsStepData = {
+	filters?: any[];
+	contacts_count?: number;
+	selected_contacts?: number[];
+	filter_type?: string;
+	lastModified?: string;
+};
+
+// Review step data
+export type ReviewStepData = {
+	send_time?: string;
+	test_emails?: string[];
+	final_review_completed?: boolean;
+	lastModified?: string;
+};
+
 type CampaignSettings = {
 	templates: Template[];
 	contacts: number[];
 	filters: Filter[];
 	ab_test: boolean;
+	current_step?: string;
+	// Template IDs stored in array (for A/B testing support)
+	template_ids?: number[];
+	// Step-specific data
+	contacts_data?: ContactsStepData;
+	review_data?: ReviewStepData;
 };
 
 export type Filter = {
@@ -200,6 +293,7 @@ export type Campaign = {
 	name: string;
 	description: string;
 	status: string;
+	type: 'email' | 'sms' | 'whatsapp' | 'sequence_mail' | 'email_sequence'; // Campaign channel type
 	settings: CampaignSettings;
 	parent_id: string;
 	count: string;
@@ -208,12 +302,22 @@ export type Campaign = {
 	updated_at: string;
 	contacts_count: number;
 	sent_count: number;
-	opened_count: number;
-	clicked_count: number;
 	failed_count: number;
 	templates_count: {
 		[key: string]: number;
 	};
+	// Email-specific analytics
+	opened_count?: number;
+	// Shared analytics (email, SMS, WhatsApp)
+	clicked_count: number;
+	// SMS & WhatsApp analytics
+	pending_count?: number;
+	delivered_count?: number;
+	delivery_rate?: number;
+	click_rate?: number;
+	// WhatsApp-specific analytics
+	read_count?: number;
+	read_rate?: number;
 };
 
 export type Campaigns = Campaign[];
@@ -260,6 +364,16 @@ export type FiltersGroups = {
 
 export type MappedFields = {
 	[key: string]: string;
+};
+
+export type KeyValuePair = {
+	id: string;
+	key: string;
+	value: string;
+};
+
+export type DynamicKeyValueData = {
+	[key: string]: any;
 };
 
 type FormData = {
@@ -309,16 +423,15 @@ export type CustomTemplate = {
 	body: string;
 	subject: string;
 	settings: {
-		preview_text: string;
-		from_name: string;
-		from_email: string;
-		reply_to: string;
-		enable_utm: boolean;
-		utm_source: string;
-		utm_medium: string;
-		utm_name: string;
-		utm_term: string;
-		utm_content: string;
+		// Common settings
+		preview_text?: string;
+		from_name?: string;
+		// Email-specific settings
+		from_email?: string;
+		reply_to?: string;
+		// SMS/WhatsApp campaign settings
+		message?: string;
+		add_unsubscribe?: boolean;
 	};
 	created_at: string;
 	updated_at: string;
@@ -398,25 +511,37 @@ type LineTaxData = {
 	total: string[];
 };
 
-export type CampaignEmail = {
+// Represents a tracked message (email/SMS/WhatsApp) from any source (campaign, automation, or individual)
+export type TrackedMessage = {
 	id: number;
 	campaign_id: string;
 	contact_id: string;
 	template_id: string;
 	hash_key: string;
-	email: string;
+	recipient: string; // Unified recipient field (email address or phone number)
 	opened: string;
 	clicked: string;
-	status: string;
+	status: number; // Integer status code (1=pending, 2=sent, 3=failed, etc.)
+	status_slug: string; // String slug ('pending', 'sent', 'failed', etc.)
+	status_name: string; // Human-readable name
 	sent_at: string;
 	opened_at: string;
 	clicked_at: string;
 	created_at: string;
 	updated_at: string;
 	contact: Contact;
-	template: CustomTemplate;
+	template?: CustomTemplate | null; // Optional for individual messages
+	message?: {
+		id: number;
+		tracking_id: number;
+		subject: string | null;
+		body: string;
+	} | null; // Message content for individual messages
 	campaign?: Partial<Campaign>;
 };
+
+// Legacy alias for backward compatibility
+export type CampaignEmail = TrackedMessage;
 
 export type AutomationRules = Rules[];
 
@@ -541,15 +666,20 @@ export type ContactsResponse = Response & {
 
 export type ListsResponse = Response & {
 	data: List[];
+	total_count: number;
 };
 
 export type TagsResponse = Response & {
 	data: Tag[];
+	total_count: number;
 };
 
 export type AutomationsResponse = Response & {
 	data: Automation[];
+	total_count: number;
 };
+
+export type CampaignType = 'standard' | 'ab_test' | 'email_sequence';
 
 export type CampaignsResponse = Response & {
 	data: Campaign[];
@@ -570,10 +700,12 @@ export type CustomFieldsGroupsResponse = Response & {
 
 export type FormsResponse = Response & {
 	data: Form[];
+	total_count: number;
 };
 
 export type LinkTriggersResponse = Response & {
 	data: LinkTrigger[];
+	total_count: number;
 };
 
 export type TemplatesResponse = Response & {
@@ -663,6 +795,17 @@ export interface DataTableConfig<TData> {
 		onDateChange: (range: { from: Date | null; to: Date | null }) => void;
 		placeholder?: string;
 	};
+	campaignFilters?: {
+		filters: {
+			status: string;
+			type: string;
+			createDate: { from: Date | null; to: Date | null };
+			updatedAt: { from: Date | null; to: Date | null };
+		};
+		onFiltersChange: (filters: any) => void;
+		onClear: () => void;
+	};
+	initialColumnVisibility?: Record<string, boolean>;
 }
 
 export type NoticeMessage = {
@@ -677,6 +820,7 @@ export interface CustomFieldsRef {
 
 export interface CustomFieldsProps {
 	activeTab?: string;
+	scope?: string; // Add scope parameter with default 'contact'
 }
 
 export interface FieldDialogProps {
@@ -691,7 +835,7 @@ export interface FieldDialogProps {
 export interface GroupDialogProps {
 	visible: boolean;
 	onClose: () => void;
-	onSave: (name: string) => Promise<boolean>;
+	onSave: (name: string, scope: string) => Promise<boolean>;
 }
 
 export interface DeleteGroupDialogProps {
@@ -701,7 +845,6 @@ export interface DeleteGroupDialogProps {
 	groups: CustomFieldsGroup[];
 	onDelete: (groupId: number, newGroupId?: number) => Promise<boolean>;
 }
-
 
 export const CAMPAIGN_STATUS = {
 	DRAFT: 'draft',
@@ -715,6 +858,7 @@ export const CAMPAIGN_STATUS = {
 	CANCELLED: 'cancelled',
 } as const;
 
-export type CampaignStatus = typeof CAMPAIGN_STATUS[keyof typeof CAMPAIGN_STATUS];
+export type CampaignStatus =
+	(typeof CAMPAIGN_STATUS)[keyof typeof CAMPAIGN_STATUS];
 
 export type CampaignModalStep = 'campaign-types' | 'campaign-name' | null;

@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
+import { useRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
@@ -23,7 +24,7 @@ import type {
 } from '@quillcrm/client';
 import { useNavigate } from '@quillcrm/navigation';
 import ConfigAPI from '@quillcrm/config';
-import { PageHeader, PlusIcon, NoticeBanner } from '@quillcrm/components';
+import { PageHeader, PlusIcon, NoticeBanner, NoData, CreateFormsIcon } from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
 import { getColumns } from './columns';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
@@ -42,12 +43,13 @@ const FormsList: React.FC = () => {
 	const [showCreateForm, setShowCreateForm] = useState(false);
 	const formTypes = ConfigAPI.getForms();
 	const [bulkAction, setBulkAction] = useState('');
-	const [deactivating, setDeactivating] = useState(false);
 	const [isApplying, setIsApplying] = useState(false);
 	const navigate = useNavigate();
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
+	const [hasRecords, setHasRecords] = useState(false);
 
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
@@ -75,6 +77,13 @@ const FormsList: React.FC = () => {
 		setNotice(null);
 	};
 
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
+
 	// Handle form creation success
 	const handleFormCreated = (message: string) => {
 		setShowCreateForm(false);
@@ -97,6 +106,7 @@ const FormsList: React.FC = () => {
 			})) as FormsResponse;
 			setForms(response.data);
 			setTotalRecords(response.total || 0);
+			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -142,6 +152,7 @@ const FormsList: React.FC = () => {
 			});
 
 			fetchForms();
+			showNotice('success', __('Form deleted', 'quillcrm'));
 		} catch (error: any) {
 			showNotice('error', error.message);
 		}
@@ -220,20 +231,34 @@ const FormsList: React.FC = () => {
 				]}
 			/>
 			{notice && (
-				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 
-			<div className="qcrm-contacts-forms-list__actions">
-				<DataTable
-					columns={columns}
-					data={forms}
-					config={tableConfig}
-					showPagination={false}
-					initialPageSize={perPage}
-					setPage={setPage}
+			{loading || hasRecords ? (
+				<div className="qcrm-contacts-forms-list__actions">
+					<DataTable
+						columns={columns}
+						data={forms}
+						config={tableConfig}
+						showPagination={false}
+						initialPageSize={perPage}
+						setPage={setPage}
+						loading={loading}
+					/>
+					<DataTablePagination table={serverSideTable} />
+				</div>
+			) : (
+				<NoData
+					icon={<CreateFormsIcon width={120} height={120} />}
+					title={__('No forms yet', 'quillcrm')}
+					subtitle={__(
+						'Get started by creating your first form to capture leads and grow your contact list',
+						'quillcrm'
+					)}
+					buttonLabel={__('Create Form', 'quillcrm')}
+					onClick={() => setShowCreateForm(true)}
 				/>
-				<DataTablePagination table={serverSideTable} />
-			</div>
+			)}
 
 			{showCreateForm && (
 				<Form

@@ -19,4 +19,8 @@ yarn.lock
 .cache
 *.tsbuildinfo
 .docker/mysql/*
-
+package-lock.json
+.vscode/launch.json
+*.txt
+CLAUDE.md
+*.md

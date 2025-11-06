@@ -234,7 +234,15 @@ const BulkActionSelect: React.FC<BulkActionSelectProps> = ({
 					</SelectTrigger>
 					<SelectContent>
 						{availableActions.map((action) => (
-							<SelectItem key={action.value} value={action.value}>
+							<SelectItem
+								key={action.value}
+								value={action.value}
+								className={
+									action.value === 'delete'
+										? 'text-destructive focus:text-destructive hover:text-destructive'
+										: ''
+								}
+							>
 								<div className="flex items-center gap-2">
 									{action.icon} {action.label}
 								</div>

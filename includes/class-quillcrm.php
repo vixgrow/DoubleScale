@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Main class: class QuillCRM
  *
@@ -13,11 +14,16 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
 use QuillCRM\Tasks;
-use QuillCRM\Campaign\Processing as Campaign_Processing;
+use QuillCRM\Campaign\Email_Processing;
+use QuillCRM\Campaign\SMS_Processing;
+use QuillCRM\Campaign\WhatsApp_Processing;
 use QuillCRM\Tracking\Email as Email_Tracking;
+use QuillCRM\Tracking\SMS as SMS_Tracking;
+use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
+use QuillCRM\Managers\Bounce_Handler_Manager;
 use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Tracking\Link_Triggers;
@@ -29,11 +35,18 @@ use QuillCRM\Abandoned_Cart\Abandoned_Cart;
 use QuillCRM\Managers\Custom_Fields_Manager;
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
+use QuillCRM\Managers\Pipeline_Manager;
+use QuillCRM\Managers\Deal_Manager;
+use QuillCRM\Managers\Activity_Manager;
+use QuillCRM\Managers\Email_Sequences_Manager;
 use Illuminate\Translation\Translator;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Validation\Factory as ValidatorFactory;
 use QuillCRM\Custom_Metabox;
 use QuillCRM\Log_Handlers\Log_Handler_DB;
+use QuillCRM\Emails\Email_Builder;
+use QuillCRM\User_Roles\User_Roles;
+
 
 /**
  * QuillCRM Main Class.
@@ -42,6 +55,17 @@ use QuillCRM\Log_Handlers\Log_Handler_DB;
  * @since 1.0.0
  */
 final class QuillCRM {
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * Campaigns tasks
@@ -123,12 +147,28 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	public function register_tasks() {
-		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_campaigns' ) === false ) {
-			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_campaigns' );
+		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_email_campaigns' ) === false ) {
+			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_email_campaigns' );
+		}
+
+		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_sms_campaigns' ) === false ) {
+			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_sms_campaigns' );
+		}
+
+		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_whatsapp_campaigns' ) === false ) {
+			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_whatsapp_campaigns' );
+		}
+
+		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_email_sequences' ) === false ) {
+			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_email_sequences' );
 		}
 
 		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily3' ) === false ) {
 			$this->daily_tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'quillcrm_daily3' );
+		}
+
+		if ( $this->daily_tasks->get_next_timestamp( 'quillcrm_daily4' ) === false ) {
+			$this->daily_tasks->schedule_recurring( time(), DAY_IN_SECONDS, 'quillcrm_daily4' );
 		}
 	}
 
@@ -198,8 +238,12 @@ final class QuillCRM {
 		Admin::instance();
 		Admin_Loader::instance();
 		REST_API::instance();
-		Campaign_Processing::instance();
+		Email_Processing::instance();
+		SMS_Processing::instance();
+		WhatsApp_Processing::instance();
 		Email_Tracking::instance();
+		SMS_Tracking::instance();
+		WhatsApp_Tracking::instance();
 		Link_Triggers::instance();
 		Subscription_Manage::instance();
 		Forms_Manager::instance();
@@ -212,6 +256,14 @@ final class QuillCRM {
 		Filters_Manager::instance();
 		Importers_Manager::instance();
 		Custom_Metabox::get_instance();
+		Email_Builder::instance();
+		\QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::init();
+		Pipeline_Manager::instance();
+		Deal_Manager::instance();
+		Activity_Manager::instance();
+		Email_Sequences_Manager::instance();
+		User_Roles::instance();
+		Bounce_Handler_Manager::instance();
 	}
 
 	/**
@@ -220,8 +272,39 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	private function init_hooks() {
-		// Register log handlers.
+		 // Register log handlers.
 		add_filter( 'quillcrm_register_log_handlers', array( $this, 'register_log_handlers' ) );
+
+		// Register message providers
+		add_action( 'quillcrm_loaded', array( $this, 'register_message_providers' ) );
+
+		// Register contact meta table
+		add_action( 'init', array( $this, 'register_contact_meta_table' ) );
+	}
+
+	/**
+	 * Register contact meta table
+	 *
+	 * @since 1.0.0
+	 */
+	public function register_contact_meta_table() {
+		global $wpdb;
+		$wpdb->contactmeta = $wpdb->prefix . 'quillcrm_contact_meta';
+
+		// Register meta type with WordPress so add_metadata/get_metadata work correctly.
+		// This is the modern way to register a custom meta table with WordPress.
+		add_filter(
+			'get_meta_table',
+			function( $table, $meta_type ) {
+				global $wpdb;
+				if ( 'contact' === $meta_type ) {
+					return $wpdb->contactmeta;
+				}
+				return $table;
+			},
+			10,
+			2
+		);
 	}
 
 	/**
@@ -231,6 +314,12 @@ final class QuillCRM {
 	 */
 	private function load_dependencies() {
 		require QUILLCRM_PLUGIN_DIR . 'includes/functions.php';
+
+		// Load message provider system
+		require QUILLCRM_PLUGIN_DIR . 'includes/interfaces/interface-message-provider.php';
+		require QUILLCRM_PLUGIN_DIR . 'includes/abstracts/class-abstract-message-provider.php';
+		require QUILLCRM_PLUGIN_DIR . 'includes/managers/class-message-provider-registry.php';
+		require QUILLCRM_PLUGIN_DIR . 'includes/message-providers/class-twilio-message-provider.php';
 
 		// Load all integrations files
 		$integrations_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/integrations/**/class-integration.php' );
@@ -260,7 +349,7 @@ final class QuillCRM {
 
 		// Load all automations learndash triggers files
 		// if ( quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) ) {
-			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/learndash/class-*.php' );
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/learndash/class-*.php' );
 		foreach ( $triggers_files as $file ) {
 			require $file;
 		}
@@ -268,7 +357,7 @@ final class QuillCRM {
 
 		// Load all automations memberpress triggers files
 		// if ( quillcrm_is_plugin_active( 'memberpress/memberpress.php' ) ) {
-			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/memberpress/class-*.php' );
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/memberpress/class-*.php' );
 		foreach ( $triggers_files as $file ) {
 			require $file;
 		}
@@ -276,11 +365,23 @@ final class QuillCRM {
 
 		// Load all automations edd triggers files
 		// if ( quillcrm_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ) ) {
-			$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/edd/class-*.php' );
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/edd/class-*.php' );
 		foreach ( $triggers_files as $file ) {
 			require $file;
 		}
 		// }
+
+		// Load all automations booking triggers files
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/booking/quillbooking/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations deal triggers files
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
 
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
@@ -290,7 +391,7 @@ final class QuillCRM {
 
 		// Load all automations woocommerce actions files
 		// if ( quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-			$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/woocommerce/class-*.php' );
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/woocommerce/class-*.php' );
 		foreach ( $actions_files as $file ) {
 			require $file;
 		}
@@ -304,11 +405,48 @@ final class QuillCRM {
 
 		// Load all automations learndash actions files
 		// if ( quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) ) {
-			$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/learndash/class-*.php' );
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/learndash/class-*.php' );
 		foreach ( $actions_files as $file ) {
 			require $file;
 		}
 		// }
+
+		// Load all automations email actions files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/email/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations deal actions files
+		// First load the base class
+		require_once QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-base-deal-action.php';
+
+		// Then load all other deal action files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			// Skip the base class as we've already loaded it
+			if ( basename( $file ) !== 'class-base-deal-action.php' ) {
+				require $file;
+			}
+		}
+
+		// Load all froms
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/forms/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
+			require $file;
+		}
+
+		// Load all learndash merge tags files
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/learndash/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
+			require $file;
+		}
+
+		// Load all learndash merge tags files
+		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/lms/learndash/class-*.php' );
+		foreach ( $merge_tags_files as $file ) {
+			require $file;
+		}
 
 		// Load all contact merge tags files
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/contact/class-*.php' );
@@ -365,7 +503,6 @@ final class QuillCRM {
 	 * @since 2.13.3
 	 */
 	public function flush_rewrite_rules() {
-
 		if ( ! $option = get_option( 'quillcrm-flush-rewrite-rules' ) ) {
 			return false;
 		}
@@ -374,11 +511,9 @@ final class QuillCRM {
 
 			flush_rewrite_rules();
 			update_option( 'quillcrm-flush-rewrite-rules', 0 );
-
 		}
 
 		return true;
-
 	}
 
 	/**
@@ -390,5 +525,25 @@ final class QuillCRM {
 	public function register_log_handlers( $handlers ) {
 		$handlers[] = new Log_Handler_DB();
 		return $handlers;
+	}
+
+	/**
+	 * Register message providers
+	 *
+	 * Registers default message providers (Twilio for MVP).
+	 * Third-party plugins can add additional providers via the
+	 * 'quillcrm_register_message_providers' action hook.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public function register_message_providers() {
+		// Register Twilio as the default provider for SMS and WhatsApp
+		\QuillCRM\Managers\Message_Provider_Registry::instance()->register(
+			new \QuillCRM\Message_Providers\Twilio_Message_Provider()
+		);
+
+		do_action( 'quillcrm_register_message_providers' );
 	}
 }

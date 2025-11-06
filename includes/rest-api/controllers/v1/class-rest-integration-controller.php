@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rest_Integration_Controller
  * This class is responsible for handling the Integration REST API
@@ -10,6 +11,7 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -17,11 +19,14 @@ use WP_REST_Server;
 use Exception;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Managers\Integrations_Manager;
+use QuillCRM\Managers\Message_Provider_Registry;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Rest Integration Controller
  */
 class REST_Integration_Controller extends REST_Controller {
+
 
 	/**
 	 * REST Base
@@ -38,6 +43,28 @@ class REST_Integration_Controller extends REST_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
+		// Provider status check endpoint.
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/provider-status",
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_provider_status' ),
+					'permission_callback' => array( $this, 'get_permissions_check' ),
+					'args'                => array(
+						'channel' => array(
+							'description' => __( 'Channel type to check', 'quillcrm' ),
+							'type'        => 'string',
+							'enum'        => array( 'sms', 'whatsapp' ),
+							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		// Dynamic integration slug route (catches /integrations/{slug})
 		register_rest_route(
 			$this->namespace,
 			"/{$this->rest_base}/(?P<slug>[\w-]+)",
@@ -66,26 +93,26 @@ class REST_Integration_Controller extends REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'integration',
-			'type'       => 'object',
-			'properties' => array(
-				'slug'     => array(
-					'description' => __( 'Integration Slug', 'quillcrm' ),
-					'type'        => 'string',
-					'readonly'    => true,
-				),
-				'settings' => array(
-					'description' => __( 'Integration Settings', 'quillcrm' ),
-					'type'        => 'object',
-					'required'    => true,
-					'arg_options' => array(
-						'validate_callback' => array( $this, 'validate_item_settings' ),
-					),
-				),
-			),
-		);
+		 return array(
+			 '$schema'    => 'http://json-schema.org/draft-04/schema#',
+			 'title'      => 'integration',
+			 'type'       => 'object',
+			 'properties' => array(
+				 'slug'     => array(
+					 'description' => __( 'Integration Slug', 'quillcrm' ),
+					 'type'        => 'string',
+					 'readonly'    => true,
+				 ),
+				 'settings' => array(
+					 'description' => __( 'Integration Settings', 'quillcrm' ),
+					 'type'        => 'object',
+					 'required'    => true,
+					 'arg_options' => array(
+						 'validate_callback' => array( $this, 'validate_item_settings' ),
+					 ),
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -156,9 +183,16 @@ class REST_Integration_Controller extends REST_Controller {
 			$slug        = $request->get_param( 'slug' );
 			$settings    = $request->get_param( 'settings' ) ?? array();
 			$integration = Integrations_Manager::instance()->get_integration( $slug );
-			$validator   = $integration->validate( $settings );
-			if ( ! $validator ) {
-				return new WP_Error( 'rest_invalid_request', __( 'Invalid settings.', 'quillcrm' ), array( 'status' => 400 ) );
+			
+			// Skip validation if settings are empty (disconnecting)
+			if ( ! empty( $settings ) ) {
+				$validator = $integration->validate( $settings );
+				if ( is_wp_error( $validator ) ) {
+					return $validator;
+				}
+				if ( ! $validator ) {
+					return new WP_Error( 'rest_invalid_request', __( 'Invalid settings.', 'quillcrm' ), array( 'status' => 400 ) );
+				}
 			}
 
 			$integration->update_settings( $settings );
@@ -184,7 +218,7 @@ class REST_Integration_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**
@@ -197,6 +231,98 @@ class REST_Integration_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function update_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Get provider status for SMS/WhatsApp channels
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_provider_status( $request ) {
+		$channel = $request->get_param( 'channel' );
+
+		// If no channel specified, return status for all messaging channels
+		if ( empty( $channel ) ) {
+			return new WP_REST_Response(
+				array(
+					'sms'      => $this->get_channel_provider_status( Campaign_Channel::STR_SMS ),
+					'whatsapp' => $this->get_channel_provider_status( Campaign_Channel::STR_WHATSAPP ),
+				),
+				200
+			);
+		}
+
+		// Return status for specific channel
+		return new WP_REST_Response(
+			$this->get_channel_provider_status( $channel ),
+			200
+		);
+	}
+
+	/**
+	 * Get provider status for a specific channel
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $channel Channel type.
+	 *
+	 * @return array Provider status information
+	 */
+	private function get_channel_provider_status( $channel ) {
+		$provider = Message_Provider_Registry::instance()->get_provider( $channel );
+
+		if ( ! $provider ) {
+			$default_provider_slug = Message_Provider_Registry::instance()->get_default_provider_slug( $channel );
+			return array(
+				'connected'     => false,
+				'provider_name' => $this->get_default_provider_name( $channel ),
+				'provider_slug' => $default_provider_slug,
+				'error'         => sprintf(
+					/* translators: %s: Provider name */
+					__( '%s provider is not configured', 'quillcrm' ),
+					$this->get_default_provider_name( $channel )
+				),
+				'help_link'     => admin_url( 'admin.php?page=quillcrm#/settings/integrations' ),
+			);
+		}
+
+		$is_configured = $provider->is_configured();
+
+		return array(
+			'connected'     => $is_configured,
+			'provider_name' => $provider->get_provider_name(),
+			'provider_slug' => $provider->get_provider_slug(),
+			'error'         => $is_configured ? null : sprintf(
+				/* translators: %s: Provider name */
+				__( '%s provider is not connected', 'quillcrm' ),
+				$provider->get_provider_name()
+			),
+			'help_link'     => admin_url( 'admin.php?page=quillcrm#/settings/integrations' ),
+		);
+	}
+
+	/**
+	 * Get default provider name for channel
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $channel Channel type.
+	 *
+	 * @return string Provider name
+	 */
+	private function get_default_provider_name( $channel ) {
+		$default_slug = Message_Provider_Registry::instance()->get_default_provider_slug( $channel );
+
+		// Map common provider slugs to friendly names
+		$provider_names = array(
+			'twilio'      => 'Twilio'
+		);
+
+		return $provider_names[ $default_slug ] ?? ucfirst( $default_slug );
 	}
 }

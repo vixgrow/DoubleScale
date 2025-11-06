@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Automations Loader
  * This class is responsible for loading the Automations
@@ -20,6 +21,8 @@ use QuillCRM\Automations\Process_Automation;
  * Automations Loader class
  */
 final class Loader {
+
+
 
 	/**
 	 * Class Instance.
@@ -52,6 +55,30 @@ final class Loader {
 	 */
 	private function __construct() {
 		add_action( 'quillcrm_loaded', array( $this, 'load_hooks' ) );
+	}
+
+	/**
+	 * Get meta arguments from database
+	 *
+	 * @param int $meta_id Meta ID
+	 * @return array|false
+	 */
+	private function get_meta_args( $meta_id ) {
+		global $wpdb;
+
+		$meta = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}quillcrm_task_meta WHERE ID = %d",
+				$meta_id
+			),
+			ARRAY_A
+		);
+
+		if ( ! $meta || empty( $meta['value'] ) ) {
+			return false;
+		}
+
+		return maybe_unserialize( $meta['value'] );
 	}
 
 	/**
@@ -88,13 +115,44 @@ final class Loader {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Automation_Model $automation The automation model.
-	 * @param int              $step_id      The step.
-	 * @param int              $contact_id      The contact.
+	 * @param Automation_Model|int $automation The automation model or meta_id integer.
+	 * @param int                  $step_id      The step.
+	 * @param int                  $contact_id      The contact.
 	 * @return void
 	 */
-	public function process_automation_step( $automation, $step_id, $contact_id ) {
+	public function process_automation_step( $automation, $step_id = null, $contact_id = null ) {
 		try {
+			// if this below condition is true this meaning i get args from meta_id from database and automation is integer from that meta_id
+			if ( is_numeric( $automation ) && $step_id == null && $contact_id == null ) {
+				$args = $this->get_meta_args( $automation );
+				if ( $args && count( $args ) >= 3 ) {
+					list($automation, $parent_step_id, $step_id, $contact_id) = $args;
+				} else {
+					throw new Exception( 'Failed to retrieve arguments from meta_id: ' . $automation );
+				}
+			}
+
+			// after this i will check that i can get Automation_Model from $automation
+			if ( ! $automation instanceof Automation_Model ) {
+				$automation = Automation_Model::findOrFail( $automation );
+				if ( ! $automation ) {
+					throw new Exception( 'Automation not found' );
+				}
+			}
+
+			if ( $parent_step_id && is_numeric( $parent_step_id ) && $parent_step_id > 0 ) {
+				// Find and update the process record for the delay step, not the step itself
+				$delay_process = $automation->processes()
+					->where( 'automation_contact_id', $contact_id )
+					->where( 'step_id', $parent_step_id )
+					->where( 'status', 'pending' )
+					->first();
+
+				if ( $delay_process ) {
+					$delay_process->status = 'completed';
+					$delay_process->save();
+				}
+			}
 			$step               = Automation_Step_Model::findOrFail( $step_id );
 			$automation_process = new Process_Automation( $automation );
 			$automation_process->process_step( $step, $contact_id );
@@ -134,6 +192,14 @@ final class Loader {
 			if ( ! $skip ) {
 				$automation_contacts = $step->automation->contacts()->where( 'contact_id', $contact_id )->where( 'current_step', $step->id )->where( 'status', 'pending' )->get();
 				foreach ( $automation_contacts as $automation_contact ) {
+					// Update the goal process record to completed
+					$goal_process = $automation_contact->processes()->where( 'step_id', $step->id )->where( 'status', 'pending' )->first();
+					if ( $goal_process ) {
+						$goal_process->status = 'completed';
+						$goal_process->save();
+					}
+
+					// Move to next step if available
 					if ( 0 !== $automation_contact->next_step ) {
 						$automation_process = new Process_Automation( $step->automation );
 						$automation_process->enqueue_step( $automation_contact->next_step, $automation_contact->id );

@@ -180,3 +180,4 @@ export { default as FailedSMSIcon } from './failed-sms';
 export { default as SentSMSIcon } from './sent-sms';
 export { default as GradientSendSMSIcon } from './gradient-send-sms';
 export { default as GradientMergeTagsIcon } from './gradient-merge-tags';
+export { default as GradientContactsIcon } from './gradient-contacts';

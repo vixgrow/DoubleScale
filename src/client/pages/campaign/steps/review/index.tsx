@@ -43,7 +43,7 @@ const Review: React.FC = () => {
 		saving,
 	} = useCampaignStep();
 
-	const [sendNow, setSendNow] = useState(false);
+	const [sendNow, setSendNow] = useState(true);
 	const [scheduleDate, setScheduleDate] = useState('');
 	const [scheduleTime, setScheduleTime] = useState('');
 	const [timezoneMode, setTimezoneMode] = useState('user'); // 'user' or 'subscriber'

@@ -21,6 +21,7 @@ use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\List_Model;
+use QuillCRM\Models\Log_Model;
 use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\Custom_Field_Model;
@@ -1545,6 +1546,41 @@ class REST_Contact_Controller extends REST_Controller {
 				$subject,
 				$body,
 			);
+
+			// Log the result for troubleshooting and audit trail.
+			if ( ! $result ) {
+				Log_Model::create(
+					array(
+						'timestamp' => gmdate( 'Y-m-d H:i:s' ),
+						'level'     => 400, // Error level.
+						'message'   => 'Failed to send double opt-in confirmation email',
+						'source'    => 'QuillCRM\REST_API\Controllers\V1\REST_Contact_Controller',
+						'context'   => array(
+							'contact_id'    => $contact->id,
+							'email'         => $contact->email,
+							'subject'       => $subject,
+							'reason'        => 'wp_mail() returned false',
+							'endpoint'      => '/contacts/' . $contact->id . '/send-opt-in-email',
+							'user_id'       => get_current_user_id(),
+						),
+					)
+				);
+			} else {
+				Log_Model::create(
+					array(
+						'timestamp' => gmdate( 'Y-m-d H:i:s' ),
+						'level'     => 600, // Info level.
+						'message'   => 'Double opt-in confirmation email sent successfully',
+						'source'    => 'QuillCRM\REST_API\Controllers\V1\REST_Contact_Controller',
+						'context'   => array(
+							'contact_id' => $contact->id,
+							'email'      => $contact->email,
+							'subject'    => $subject,
+							'user_id'    => get_current_user_id(),
+						),
+					)
+				);
+			}
 
 			return new WP_REST_Response( array( 'success' => $result ), 200 );
 		} catch ( \Exception $e ) {

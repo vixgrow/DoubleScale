@@ -25,6 +25,7 @@ export const ContactsTable: React.FC<ContactsTableProps> = ({ activeTab }) => {
 	const {
 		data,
 		loading,
+		hasRecords,
 		selectedRowKeys,
 		setSelectedRowKeys,
 		selectedLists,

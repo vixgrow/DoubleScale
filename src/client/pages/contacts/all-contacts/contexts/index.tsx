@@ -24,6 +24,7 @@ export interface ContactsState {
 	perPage: number;
 	keywords: string;
 	totalRecords: number;
+	hasRecords: boolean;
 
 	// Filter state
 	showFilters: boolean;
@@ -65,6 +66,7 @@ export interface ContactsActions {
 	setPerPage: (perPage: number) => void;
 	setKeywords: (keywords: string) => void;
 	setTotalRecords: (totalRecords: number) => void;
+	setHasRecords: (hasRecords: boolean) => void;
 
 	// Filter actions
 	setShowFilters: (show: boolean) => void;
@@ -103,6 +105,7 @@ const initialState: ContactsState = {
 	perPage: 10,
 	keywords: '',
 	totalRecords: 0,
+	hasRecords: false,
 	showFilters: false,
 	filters: [],
 	isFiltering: false,
@@ -142,6 +145,7 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 		setPerPage: (perPage) => updateState({ perPage }),
 		setKeywords: (keywords) => updateState({ keywords }),
 		setTotalRecords: (totalRecords) => updateState({ totalRecords }),
+		setHasRecords: (hasRecords) => updateState({ hasRecords }),
 		setShowFilters: (showFilters) => updateState({ showFilters }),
 		setFilters: (filters) => updateState({ filters }),
 		setIsFiltering: (isFiltering) => updateState({ isFiltering }),

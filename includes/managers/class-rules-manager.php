@@ -30,6 +30,7 @@ final class Rules_Manager {
 
 
 
+
 	/**
 	 * Registed rules
 	 *
@@ -159,6 +160,12 @@ final class Rules_Manager {
 				'key'      => 'woocommerce_review',
 				'rules'    => array(),
 				'triggers' => array( 'wc_review_received' ),
+			),
+			'cart'                      => array(
+				'name'     => __( 'Cart', 'quillcrm' ),
+				'key'      => 'cart',
+				'rules'    => array(),
+				'triggers' => array( 'wc_abandoned_cart_created' ),
 			),
 			'learndash'                 => array(
 				'name'  => __( 'LearnDash', 'quillcrm' ),

@@ -31,6 +31,7 @@ final class Merge_Tags_Manager {
 
 
 
+
 	/**
 	 * Registed merge tags
 	 *
@@ -151,7 +152,7 @@ final class Merge_Tags_Manager {
 			'order'          => array(
 				'name'      => __( 'Order', 'quillcrm' ),
 				'mergeTags' => array(),
-				'triggers'  => array( 'wc_order_completed', 'wc_order_created', 'wc_order_refunded', 'wc_order_status_changed' ),
+				'triggers'  => array( 'wc_order_completed', 'wc_order_created', 'wc_order_refunded', 'wc_order_status_changed', 'wc_cart_recovered' ),
 			),
 			'abandoned_cart' => array(
 				'name'      => __( 'Abandoned Cart', 'quillcrm' ),

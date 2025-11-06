@@ -5,18 +5,19 @@ import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import type { CampaignEmail, CampaignEmailsResponse } from '@quillcrm/client';
+import type { CampaignEmail, CampaignEmailsResponse, Campaign } from '@quillcrm/client';
 import { useParams } from '@quillcrm/navigation';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import { getColumns } from './columns';
-import { NoData, UnsubscribesIcon } from '@quillcrm/components';
+import { NoData, UnsubscribesIcon, UnsubscribeSMSIcon } from '@quillcrm/components';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 
 const UnsubscribesTab: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
@@ -27,6 +28,11 @@ const UnsubscribesTab: React.FC = () => {
 	const [data, setData] = useState<CampaignEmail[]>([]);
 	const [keywords, setKeywords] = useState('');
 	const { createNotice } = useDispatch('quillcrm/core');
+
+	const campaign = useSelect(
+		(select: any) => select('quillcrm/campaign').getCampaign(),
+		[]
+	) as Campaign | null;
 
 	// Server-side table for pagination
 	const serverSideTable = useServerSideTable({
@@ -67,7 +73,7 @@ const UnsubscribesTab: React.FC = () => {
 		fetchUnsubscribes();
 	}, [page, perPage, keywords]);
 
-	const columns = getColumns();
+	const columns = getColumns(campaign?.type);
 
 	return (
 		<div className="flex flex-col gap-5">
@@ -81,7 +87,13 @@ const UnsubscribesTab: React.FC = () => {
 			<div>
 				{!loading && data.length === 0 ? (
 					<NoData
-						icon={<UnsubscribesIcon width={48} height={48} />}
+						icon={
+							campaign?.type === CAMPAIGN_CHANNEL.SMS ? (
+								<UnsubscribeSMSIcon width={48} height={48} />
+							) : (
+								<UnsubscribesIcon width={48} height={48} />
+							)
+						}
 						title={__('No unsubscribes yet', 'quillcrm')}
 						subtitle={__(
 							'When contacts unsubscribe from this campaign, they will appear here.',
@@ -99,15 +111,14 @@ const UnsubscribesTab: React.FC = () => {
 							showMainActions={false}
 							config={{
 								search: {
-									placeholder: __(
-										'Search by name or email...',
-										'quillcrm'
-									),
+									placeholder: campaign?.type === CAMPAIGN_CHANNEL.SMS
+										? __('Search by name or phone...', 'quillcrm')
+										: __('Search by name or email...', 'quillcrm'),
 									onChange: setKeywords,
 									value: keywords,
 								},
 							}}
-							setPage={() => {}}
+							setPage={() => { }}
 						/>
 						<DataTablePagination table={serverSideTable} />
 					</>

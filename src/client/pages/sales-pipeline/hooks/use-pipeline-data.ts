@@ -75,7 +75,7 @@ export const usePipelineData = (
 		}
 	}, []);
 
-	// Fetch all deals for the pipeline without pagination
+	// Fetch all deals for the pipeline
 	const fetchDeals = useCallback(async () => {
 		if (!selectedPipelineId) {
 			setDeals([]);
@@ -85,7 +85,6 @@ export const usePipelineData = (
 		try {
 			const params = new URLSearchParams();
 			params.append('pipeline_id', selectedPipelineId.toString());
-			params.append('per_page', '-1'); // Get all deals without pagination
 
 			const response = await apiFetch({
 				path: `/qc/v1/deals?${params.toString()}`,

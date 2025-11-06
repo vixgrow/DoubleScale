@@ -348,12 +348,10 @@ final class Deal_Manager {
 	 * @since 1.0.0
 	 *
 	 * @param array $filters Filter criteria
-	 * @param int   $per_page Results per page (-1 for all results)
-	 * @param int   $page Page number
 	 *
-	 * @return \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Database\Eloquent\Collection
+	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
-	public function get_deals_with_filters( $filters = array(), $per_page = 20, $page = 1 ) {
+	public function get_deals_with_filters( $filters = array() ) {
 		$query = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) );
 
 		// Filter by pipeline
@@ -436,12 +434,7 @@ final class Deal_Manager {
 		$sort_order = $filters['sort_order'] ?? 'desc';
 		$query->orderBy( $sort_by, $sort_order );
 
-		// If per_page is -1, return all results without pagination
-		if ( $per_page === -1 ) {
-			return $query->get();
-		}
-
-		return $query->paginate( $per_page, array( '*' ), 'page', $page );
+		return $query->get();
 	}
 
 	/**

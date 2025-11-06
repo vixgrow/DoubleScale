@@ -11,10 +11,10 @@ import { isEmpty } from 'lodash';
  */
 import {
 	DashboardContentCard,
-	ManageIcon,
+	ThreeDotsIcon,
 	TimeAgoCell,
 } from '@quillcrm/components';
-import { NavLink } from '@quillcrm/navigation';
+import { getToLink, useNavigate } from '@quillcrm/navigation';
 import {
 	Table,
 	TableBody,
@@ -25,6 +25,7 @@ import {
 } from '@quillcrm/components/ui/table';
 import type { DashboardData } from '@quillcrm/client';
 import { EmptyState } from '../../no-data';
+import { Button } from '@quillcrm/components/ui/button';
 
 interface RecentCampaignsTableProps {
 	campaigns: DashboardData['top_campaigns'];
@@ -33,17 +34,20 @@ interface RecentCampaignsTableProps {
 export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 	campaigns,
 }) => {
+	const navigate = useNavigate();
 	return (
 		<DashboardContentCard
 			title={__('Recent Campaigns', 'quillcrm')}
-			className="w-2/3"
+			cardClassName="w-full"
+			viewAllLink={true}
+			viewAllLinkUrl="campaigns"
 		>
 			{isEmpty(campaigns) ? (
 				<EmptyState />
 			) : (
 				<div>
-					<Table>
-						<TableHeader>
+					<Table className="border">
+						<TableHeader className="bg-[#DEE1E666]">
 							<TableRow>
 								<TableHead className="text-[#3F4254] font-semibold">
 									{__('ID', 'quillcrm')}
@@ -53,9 +57,6 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
 									{__('Status', 'quillcrm')}
-								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Labels', 'quillcrm')}
 								</TableHead>
 								<TableHead className="text-[#3F4254] font-semibold">
 									{__('Created At', 'quillcrm')}
@@ -68,7 +69,7 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 								</TableHead>
 							</TableRow>
 						</TableHeader>
-						<TableBody>
+						<TableBody className="bg-white">
 							{campaigns.map((campaign, index) => (
 								<TableRow key={campaign.id}>
 									<TableCell className="text-[#A1A5B7] text-sm font-semibold">
@@ -78,14 +79,17 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 										{campaign.name}
 									</TableCell>
 									<TableCell>
-										<div
-											className={`text-sm w-fit capitalize rounded-lg py-1 px-3 ${campaign.status == 'archived' ? 'text-[#50CD89] bg-[#E2FFEF]' : 'bg-[#EBEBEB] text-[#616161]'}`}
+										<span
+											className={`px-3 py-1 border rounded text-sm font-normal ${
+												campaign.status === 'completed'
+													? 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]'
+													: 'bg-[#F8F8F8] text-gray-500 border-gray-500'
+											}`}
 										>
-											{campaign.status}
-										</div>
-									</TableCell>
-									<TableCell className="text-[#A1A5B7] font-semibold text-sm">
-										Labels
+											{campaign.status === 'completed'
+												? 'Completed'
+												: 'Draft'}
+										</span>
 									</TableCell>
 									<TableCell className="text-[#A1A5B7] font-semibold text-sm">
 										<TimeAgoCell
@@ -93,17 +97,21 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 										/>
 									</TableCell>
 									<TableCell className="text-[#A1A5B7] font-semibold text-sm">
-										{campaign.sent_count}
+										{campaign.contacts_count || 0}
 									</TableCell>
-									<TableCell className="text-[#3F3F46] font-semibold text-sm flex items-center gap-2">
-										<NavLink
-											to={`campaigns/${campaign.id}`}
+									<TableCell>
+										<Button
+											className="h-6 w-6 bg-accent text-[#1E2125] rounded-lg p-0 hover:bg-accent focus-visible:border-none focus-visible:outline-none focus-visible:box-shadow-none focus-visible:ring-0"
+											onClick={() =>
+												navigate(
+													getToLink(
+														`campaigns/${campaign.id}/overview`
+													)
+												)
+											}
 										>
-											<div className="flex items-center gap-2">
-												<ManageIcon />
-												{__('Manage', 'quillcrm')}
-											</div>
-										</NavLink>
+											<ThreeDotsIcon />
+										</Button>
 									</TableCell>
 								</TableRow>
 							))}

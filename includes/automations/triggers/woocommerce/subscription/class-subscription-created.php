@@ -23,6 +23,9 @@ class Subscription_Created extends Trigger {
 
 
 
+
+
+
 	/**
 	 * Trigger Name
 	 *
@@ -73,7 +76,10 @@ class Subscription_Created extends Trigger {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'woocommerce_subscription_status_active', array( $this, 'subscription_created' ) );
+		add_action( 'woocommerce_checkout_subscription_created', array( $this, 'subscription_created' ), 20, 2 );
+		add_action( 'wcs_api_subscription_created', array( $this, 'subscription_created' ), 20, 1 );
+		add_action( 'woocommerce_admin_created_subscription', array( $this, 'subscription_created' ), 20, 1 );
+		add_action( 'woocommerce_new_subscription', array( $this, 'subscription_created' ), 20, 1 );
 	}
 
 	/**
@@ -113,32 +119,7 @@ class Subscription_Created extends Trigger {
 	 * @return array
 	 */
 	public function get_attributes_schema() {
-		return array(
-			'subscription_id' => array(
-				'label' => __( 'Subscription ID', 'quillcrm' ),
-				'type'  => 'number',
-			),
-			'customer_id'     => array(
-				'label' => __( 'Customer ID', 'quillcrm' ),
-				'type'  => 'number',
-			),
-			'customer_email'  => array(
-				'label' => __( 'Customer Email', 'quillcrm' ),
-				'type'  => 'email',
-			),
-			'status'          => array(
-				'label' => __( 'Subscription Status', 'quillcrm' ),
-				'type'  => 'text',
-			),
-			'total'           => array(
-				'label' => __( 'Subscription Total', 'quillcrm' ),
-				'type'  => 'number',
-			),
-			'currency'        => array(
-				'label' => __( 'Currency', 'quillcrm' ),
-				'type'  => 'text',
-			),
-		);
+		return array();
 	}
 }
 

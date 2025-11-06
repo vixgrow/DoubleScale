@@ -74,7 +74,8 @@ class Campaign_Channel {
 		return array(
 			self::CHANNEL_EMAIL,
 			self::CHANNEL_SMS,
-			self::CHANNEL_WHATSAPP,
+			// Disabled: WhatsApp feature is currently disabled
+			// self::CHANNEL_WHATSAPP,
 		);
 	}
 
@@ -84,7 +85,12 @@ class Campaign_Channel {
 	 * @return array Core channel string slugs
 	 */
 	public static function get_core_channel_strings() {
-		return array( self::STR_EMAIL, self::STR_SMS, self::STR_WHATSAPP );
+		return array(
+			self::STR_EMAIL,
+			self::STR_SMS,
+			// Disabled: WhatsApp feature is currently disabled
+			// self::STR_WHATSAPP,
+		);
 	}
 
 	/**
@@ -251,7 +257,8 @@ class Campaign_Channel {
 	public static function requires_phone( $channel ) {
 		$phone_channels = array(
 			self::CHANNEL_SMS,
-			self::CHANNEL_WHATSAPP,
+			// Disabled: WhatsApp feature is currently disabled
+			// self::CHANNEL_WHATSAPP,
 		);
 
 		// Allow custom channels to specify if they need phone

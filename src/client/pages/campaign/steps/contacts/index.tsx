@@ -216,7 +216,16 @@ const Contacts: React.FC = () => {
 			]}
 			type="campaign"
 		>
-			<Stepper steps={campaignSteps} canProceed="true" currentStep={3} />
+			{!(
+				campaign?.status === 'processed' ||
+				campaign?.status === 'archived'
+			) && (
+				<Stepper
+					steps={campaignSteps}
+					canProceed="true"
+					currentStep={3}
+				/>
+			)}
 
 			<div className="flex gap-6 items-start">
 				<div ref={panelRef} className="w-2/3">
@@ -228,9 +237,19 @@ const Contacts: React.FC = () => {
 						)}
 						icon={<TeamIcon />}
 						className="flex flex-col"
-						showButtons={true}
+						showButtons={
+							!(
+								campaign?.status === 'processed' ||
+								campaign?.status === 'archived'
+							)
+						}
 						onNext={handleNext}
-						onBack={() => goToStep('builder')}
+						onBack={
+							campaign?.status === 'processed' ||
+							campaign?.status === 'archived'
+								? undefined
+								: () => goToStep('builder')
+						}
 						isLoading={saving || isApplying}
 					>
 						<div className="space-y-6">

@@ -81,19 +81,23 @@ const ContactList: React.FC<ContactListProps> = ({
 		setError(null);
 
 		try {
-			const response: any = await apiFetch({
-				path: addQueryArgs('/qc/v1/contacts', {
-					per_page: 50,
-					page: pageNum,
-					filters,
-					subscribed: true,
-					keywords: searchTerm,
-					campaign_type: campaignType,
-				}),
-				method: 'GET',
-			});
+			const response = await apiFetch<{ data: Contact[]; total: number }>(
+				{
+					path: addQueryArgs('/qc/v1/contacts', {
+						per_page: 50,
+						page: pageNum,
+						filters,
+						subscribed: true,
+						keywords: searchTerm,
+						campaign_type: campaignType,
+					}),
+					method: 'GET',
+				}
+			);
 
-			const newContacts = response.data || [];
+			const newContacts = Array.isArray(response.data)
+				? response.data
+				: ([] as Contact[]);
 
 			if (append) {
 				setContacts((prev) => [...prev, ...newContacts]);
@@ -104,8 +108,10 @@ const ContactList: React.FC<ContactListProps> = ({
 			setTotal(response.total);
 			setPage(pageNum);
 			setHasMore(newContacts.length === 50);
-		} catch (err: any) {
-			setError(err.message || 'Failed to fetch contacts');
+		} catch (err: unknown) {
+			const message =
+				err instanceof Error ? err.message : 'Failed to fetch contacts';
+			setError(message);
 			console.error('Failed to fetch contacts:', err);
 		} finally {
 			setIsLoading(false);
@@ -141,12 +147,12 @@ const ContactList: React.FC<ContactListProps> = ({
 	const normalizedSearch = searchTerm.trim().toLowerCase();
 	const displayedContacts = normalizedSearch
 		? contacts.filter((c) => {
-				const first = String(
-					(c as any)?.first_name || ''
+				const first = String(c.first_name ?? '').toLowerCase();
+				const last = String(c.last_name ?? '').toLowerCase();
+				const email = String(c.email ?? '').toLowerCase();
+				const phone = String(
+					(c as unknown as { phone?: string })?.phone ?? ''
 				).toLowerCase();
-				const last = String((c as any)?.last_name || '').toLowerCase();
-				const email = String((c as any)?.email || '').toLowerCase();
-				const phone = String((c as any)?.phone || '').toLowerCase();
 				const full = `${first} ${last}`.trim();
 				return (
 					first.includes(normalizedSearch) ||

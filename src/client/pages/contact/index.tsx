@@ -3,12 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useState } from '@wordpress/element';
+import {  useState } from '@wordpress/element';
 
 /**
  * External dependencies
  */
-import { useReducer, useRef } from 'react';
+import { useReducer, useRef, useEffect } from 'react';
 import { useParams, useNavigate, getToLink } from '@quillcrm/navigation';
 
 /**
@@ -54,6 +54,7 @@ const Contact: React.FC<ContactProps> = ({
 	// When used as a route (isDialog=false), the dialog should be open by default
 	const [showFullPageDialog, setShowFullPageDialog] = useState(true);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	const [state, dispatch] = useReducer(reducer, {
 		contact: null,
 		notes: [],
@@ -176,6 +177,13 @@ const Contact: React.FC<ContactProps> = ({
 		setNotice(null);
 	};
 
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
+
 	const handleClose = () => {
 		if (isDialog && onClose) {
 			onClose();
@@ -195,11 +203,12 @@ const Contact: React.FC<ContactProps> = ({
 			}}
 		>
 			<DialogContent
-				className="z-[140000] w-screen h-screen max-w-none gap-8 overflow-y-auto bg-white rounded-none shadow-none"
+				className="z-[140000] w-screen h-screen max-w-none gap-0 bg-white rounded-none shadow-none"
 				style={{
 					paddingTop: '10px',
 					paddingLeft: '0px',
 					paddingRight: '0px',
+					paddingBottom: '0px',
 				}}
 			>
 				<DialogHeader className="pb-0 border-b border-[#E4E7EC]">
@@ -212,7 +221,7 @@ const Contact: React.FC<ContactProps> = ({
 					</DialogTitle>
 				</DialogHeader>
 				{loading ? (
-					<div className="px-12">
+					<div className="px-12 py-8">
 						<ContactShimmer />
 					</div>
 				) : contact ? (
@@ -225,14 +234,15 @@ const Contact: React.FC<ContactProps> = ({
 							updateContact,
 						}}
 					>
-						<div className="px-12">
+						<div className="px-12 overflow-y-auto py-8">
 							{notice && (
 								<NoticeBanner
+									ref={noticeBannerRef}
 									notice={notice}
 									closeNotice={closeNotice}
 								/>
 							)}
-							<div className="flex h-full gap-5">
+							<div className="flex gap-5">
 								<ContactInformation />
 								<DataCard />
 							</div>

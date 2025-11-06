@@ -121,7 +121,7 @@ const BlockEditor: React.FC = () => {
 								// Show block-specific editor
 								selectedBlock && blockDefinition?.Editor ? (
 									<blockDefinition.Editor
-										props={selectedBlock.props}
+										props={selectedBlock.props as any}
 										onChange={handlePropsChange}
 									/>
 								) : (

@@ -15,16 +15,14 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogFooter,
 	DialogOverlay,
 	DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import ConfigAPI from '@quillcrm/config';
 //@ts-ignore
 import crm from '../../../../../../../assets/images/crm/crm.png';
 //@ts-ignore
-import forms from '../../../../../../../assets/images/forms/forms.png';
+import email from '../../../../../../../assets/images/emails/emails.png';
 //@ts-ignore
 import woocommerce from '../../../../../../../assets/images/woocoomerce/woo-icon.png';
 //@ts-ignore
@@ -33,15 +31,15 @@ import wpusers from '../../../../../../../assets/images/wordpress/wordpress-icon
 import lms from '../../../../../../../assets/images/lms/lms.png';
 //@ts-ignore
 import data from '../../../../../../../assets/images/send-data/data.png';
-import { useAutomationContext } from '../../../state/context';
-import { getTrigger } from '@quillcrm/utils';
+//@ts-ignore
+import messages from '../../../../../../../assets/images/messages/messages.png';
 
 interface ActionSelectorProps {
 	value: string;
 	visible: boolean;
 	onClose: () => void;
 	onChange: (value: string) => void;
-	onSave: () => void;
+	onSave: (actionKey: string) => void;
 }
 
 const ActionSelector: React.FC<ActionSelectorProps> = ({
@@ -71,12 +69,11 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 		};
 	}
 
-	const saveStep = async () => {
+	const handleActionSelect = async (actionKey: string) => {
+		onChange(actionKey);
 		setIsSaving(true);
-
 		try {
-			// Save the step
-			await onSave();
+			await onSave(actionKey);
 		} catch (error) {
 			console.error(error);
 		} finally {
@@ -106,8 +103,12 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 			description: __('Send data to external services', 'quillcrm')
 		},
 		'email': {
-			image: forms,
+			image: email,
 			description: __('Send email to users', 'quillcrm')
+		},
+		'message': {
+			image: messages,
+			description: __('Send message to users', 'quillcrm')
 		}
 	};
 
@@ -135,20 +136,14 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 							<div className="w-1/2">
 								<ActionsGroupRender
 									groups={currentCategoryData?.groups || {}}
-									onChange={(value) => onChange(value)}
+									onChange={(value) => handleActionSelect(value)}
 									value={value}
+									isSaving={isSaving}
 								/>
 							</div>
 						</div>
 					</div>
 				</div>
-				<DialogFooter>
-					<Button onClick={saveStep} disabled={isSaving} size="xl" variant="gradient" className="w-full mt-4">
-						{isSaving
-							? __('Saving...', 'quillcrm')
-							: __('Save', 'quillcrm')}
-					</Button>
-				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);

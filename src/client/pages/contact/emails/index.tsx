@@ -18,6 +18,8 @@ import {
 	OpenRateIcon,
 	SendEmailsIcon,
 	NoEmailsIcon,
+	MessageStatsCard,
+	NoData,
 } from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
@@ -25,7 +27,6 @@ import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-ta
 import { getColumns } from './columns';
 import EmailDetails from './email-details-dialog';
 import SendEmailDialog from './send-email-dialog';
-import { MessageStatsCard } from '../components/message-stats-card';
 
 interface EmailsProps {
 	contact_id: number;
@@ -92,25 +93,28 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 			{analytics && (
 				<div className="flex gap-5">
 					<MessageStatsCard
-						icon={<ContactTotalEmailsIcon width={38} height={22} />}
+						icon={<ContactTotalEmailsIcon width={40} height={40} />}
 						value={total}
 						label={__('Total Emails', 'quillcrm')}
 						iconBgClass="bg-[#E4EEFD]"
 						borderColorClass="border-l-secondary"
+						iconColor="text-[#458DC7]"
 					/>
 					<MessageStatsCard
-						icon={<OpenRateIcon width={37} height={39} />}
+						icon={<OpenRateIcon width={40} height={40} />}
 						value={`${calculatePercentage(total, totalOpened)}%`}
 						label={__('Open Rate', 'quillcrm')}
 						iconBgClass="bg-[#D1F6DF]"
 						borderColorClass="border-l-[#16A34A]"
+						iconColor="text-[#16A34A]"
 					/>
 					<MessageStatsCard
-						icon={<ClickRateIcon width={38} height={38} />}
+						icon={<ClickRateIcon width={40} height={40} />}
 						value={`${calculatePercentage(total, totalClicked)}%`}
 						label={__('Click Rate', 'quillcrm')}
 						iconBgClass="bg-[#EEE4FF]"
 						borderColorClass="border-l-[#660FF1]"
+						iconColor="text-[#660FF1]"
 					/>
 				</div>
 			)}
@@ -118,14 +122,16 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 			{/* Messages Table */}
 			<div>
 				{!loading && messages.length === 0 ? (
-					<div className="flex flex-col items-center justify-center py-20 gap-4">
-						<div className="text-gray-400">
-							<NoEmailsIcon width={120} height={120} />
-						</div>
-						<span className="text-lg text-gray-500 font-medium">
-							{__('No emails found', 'quillcrm')}
-						</span>
-					</div>
+					<NoData
+						icon={<NoEmailsIcon />}
+						title={__('No emails yet', 'quillcrm')}
+						subtitle={__(
+							'Track subscriber growth, open rates, and conversion trends in real time.',
+							'quillcrm'
+						)}
+						onClick={() => setShowSendEmailModal(true)}
+						buttonLabel={__('Send Email', 'quillcrm')}
+					/>
 				) : (
 					<>
 						<DataTable
@@ -136,7 +142,7 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 							initialPageSize={10}
 							showMainActions={false}
 							config={{}}
-							setPage={() => {}}
+							setPage={() => { }}
 						/>
 						<DataTablePagination table={serverSideTable} />
 					</>

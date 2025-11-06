@@ -4,6 +4,7 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
+	DialogOverlay,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { __ } from '@wordpress/i18n';
@@ -28,6 +29,7 @@ const AddNewSectionModal: React.FC<AddNewSectionModalProps> = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
+			<DialogOverlay />
 			<DialogContent className="max-w-2xl">
 				<DialogHeader>
 					<DialogTitle>

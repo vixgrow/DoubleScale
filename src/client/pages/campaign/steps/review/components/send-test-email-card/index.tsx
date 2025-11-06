@@ -12,6 +12,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { SendIcon, AlertCircle } from 'lucide-react';
+import { AlertIcon, SendTestEmailIcon } from '@quillcrm/components/icons';
 
 interface SendTestEmailCardProps {
 	campaignId?: number;
@@ -132,12 +133,12 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 	};
 
 	return (
-		<div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-4">
+		<div className="bg-[#F8F8F8] rounded-lg border border-gray-200 p-6 sticky top-4">
 			{/* Header */}
-			<div className="bg-gray-50 rounded-lg p-4 mb-6">
-				<div className="flex items-center gap-2 justify-center">
-					<SendIcon className="h-5 w-5 text-purple-600" />
-					<h3 className="text-base font-semibold text-purple-600">
+			<div className="pb-4 border-b mb-6">
+				<div className="flex items-center gap-2 justify-center text-[#660FF1]">
+					<SendTestEmailIcon  />
+					<h3 className="text-lg text-[#660FF1]">
 						{__('Send test email', 'quillcrm')}
 					</h3>
 				</div>
@@ -145,22 +146,22 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 
 			{/* Content */}
 			<div className="space-y-4">
-				<h4 className="text-base font-medium text-gray-900">
+				<h4 className="text-base text-[#09090B]">
 					{__('Who do you want to test your email with?', 'quillcrm')}
 				</h4>
 
 				<div>
-					<label className="block text-sm font-medium text-gray-700 mb-2">
+					<label className="block text-base text-[#09090B] mb-2">
 						{__('Send a test email to', 'quillcrm')}
 					</label>
 					<Textarea
 						value={testEmails}
 						onChange={(e) => setTestEmails(e.target.value)}
 						placeholder="name@email.com,name@email.com"
-						className="w-full resize-none"
+						className="w-full resize-none bg-white"
 						rows={2}
 					/>
-					<p className="text-xs text-blue-600 mt-2">
+					<p className="text-base font-medium text-secondary mt-2">
 						{__(
 							'If you enter multiple emails, separate them with a comma',
 							'quillcrm'
@@ -169,10 +170,12 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 				</div>
 
 				{/* Warning */}
-				<div className="bg-red-50 border border-red-200 rounded-lg p-4">
+				<div className="bg-white border border-[#DEE1E6] rounded-lg p-4">
 					<div className="flex gap-3">
-						<AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-						<p className="text-sm text-red-600">
+						<div className="text-destructive">
+						<AlertIcon width={24} height={24} />	
+						</div>
+						<p className="text-base text-destructive">
 							{__(
 								"Your test email could land in a spam folder. But don't worry, once you send the actual campaign, the emails will successfully reach your recipients.",
 								'quillcrm'
@@ -186,12 +189,9 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 					<Button
 						onClick={sendTestEmail}
 						disabled={isSendingTest || !testEmails.trim()}
-						variant="outline"
-						className="border-blue-500 text-blue-600 hover:bg-blue-50"
+						variant="secondary"
 					>
-						{isSendingTest
-							? __('Sending...', 'quillcrm')
-							: __('Send Test', 'quillcrm')}
+						{isSendingTest ? __('Sending...', 'quillcrm') : __('Send Test', 'quillcrm')}
 					</Button>
 				</div>
 			</div>

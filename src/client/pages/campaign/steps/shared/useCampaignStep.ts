@@ -43,8 +43,17 @@ export const useCampaignStep = () => {
   /**
    * Navigate to a specific campaign step
    */
+  type CampaignStatus = 'processed' | 'archived' | string;
+  type CampaignWithStatus = Campaign & Partial<{ status: CampaignStatus }>;
+
   const goToStep = (step: string) => {
     if (!campaign) return;
+    const status = (campaign as CampaignWithStatus)?.status;
+    if (status === 'processed' || status === 'archived') {
+      // Lock steps: show overview details only
+      navigate(getToLink(`campaigns/${campaign.id}/overview`));
+      return;
+    }
     navigate(getToLink(`campaigns/${campaign.id}/${step}`));
   };
 

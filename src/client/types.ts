@@ -200,6 +200,8 @@ export type EmailTemplate = {
 	subject: string;
 	body?: string | EmailBodyContent; // Can be string (rich-text) or EmailBodyContent (builder)
 	preview_text: string;
+	thumbnail?: string;
+	hidden?: boolean;
 	settings?: EmailTemplateSettings;
 	created_at?: string;
 	updated_at?: string;
@@ -664,14 +666,17 @@ export type ContactsResponse = Response & {
 
 export type ListsResponse = Response & {
 	data: List[];
+	total_count: number;
 };
 
 export type TagsResponse = Response & {
 	data: Tag[];
+	total_count: number;
 };
 
 export type AutomationsResponse = Response & {
 	data: Automation[];
+	total_count: number;
 };
 
 export type CampaignType = 'standard' | 'ab_test' | 'email_sequence';
@@ -695,10 +700,12 @@ export type CustomFieldsGroupsResponse = Response & {
 
 export type FormsResponse = Response & {
 	data: Form[];
+	total_count: number;
 };
 
 export type LinkTriggersResponse = Response & {
 	data: LinkTrigger[];
+	total_count: number;
 };
 
 export type TemplatesResponse = Response & {
@@ -788,6 +795,17 @@ export interface DataTableConfig<TData> {
 		onDateChange: (range: { from: Date | null; to: Date | null }) => void;
 		placeholder?: string;
 	};
+	campaignFilters?: {
+		filters: {
+			status: string;
+			type: string;
+			createDate: { from: Date | null; to: Date | null };
+			updatedAt: { from: Date | null; to: Date | null };
+		};
+		onFiltersChange: (filters: any) => void;
+		onClear: () => void;
+	};
+	initialColumnVisibility?: Record<string, boolean>;
 }
 
 export type NoticeMessage = {

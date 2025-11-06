@@ -384,11 +384,12 @@ const Contact: React.FC = () => {
 			label: __('SMS', 'quillcrm'),
 			children: contact && <SMS contact_id={contact.id} />,
 		},
-		{
-			key: 'whatsapp',
-			label: __('WhatsApp', 'quillcrm'),
-			children: contact && <WhatsApp contact_id={contact.id} />,
-		},
+		// Disabled: WhatsApp feature is currently disabled
+		// {
+		// 	key: 'whatsapp',
+		// 	label: __('WhatsApp', 'quillcrm'),
+		// 	children: contact && <WhatsApp contact_id={contact.id} />,
+		// },
 		{
 			key: 'notes',
 			label: __('Notes', 'quillcrm'),

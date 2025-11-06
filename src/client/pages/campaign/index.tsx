@@ -16,13 +16,14 @@ import { useNavigate, useParams, getToLink } from '@quillcrm/navigation';
 import './style.scss';
 import TemplatesStep from './steps/templates';
 import SMSTemplateStep from './steps/templates/sms-template';
-import WhatsAppTemplateStep from './steps/templates/whatsapp-template';
+// import WhatsAppTemplateStep from './steps/templates/whatsapp-template';
 import ContactsStep from './steps/contacts';
 import ReviewStep from './steps/review';
 import BuilderStep from '../../../builder';
-import { Campaign as CampaignType } from '@quillcrm/client';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import Overview from './overview';
+import StepsShimmer from './steps-shimmer';
+import OverviewDialogShimmer from './overview-dialog-shimmer';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
@@ -79,25 +80,28 @@ const Campaign: React.FC = () => {
 	const getTemplateComponent = () => {
 		if (!campaign) return null;
 
-		switch (campaign.type) {
-			case CAMPAIGN_CHANNEL.SMS:
-				return <SMSTemplateStep />;
-			case CAMPAIGN_CHANNEL.WHATSAPP:
-				return <WhatsAppTemplateStep />;
-			case CAMPAIGN_CHANNEL.EMAIL:
-			default:
-				return <TemplatesStep />;
-		}
+					switch (campaign.type) {
+					case CAMPAIGN_CHANNEL.SMS:
+						return <SMSTemplateStep />;
+					// case CAMPAIGN_CHANNEL.WHATSAPP:
+					// 	return <WhatsAppTemplateStep />;
+					case CAMPAIGN_CHANNEL.EMAIL:
+					default:
+						return <TemplatesStep />;
+					}
 	};
 
 	const isOverview =
 		campaign &&
 		((campaign.status === 'schedule' && tab === 'overview') ||
+			(campaign.status === 'draft' && tab === 'overview') ||
 			['processing', 'completed', 'resending'].includes(campaign.status));
 
-	// Show loading state
+	// Show loading state with appropriate shimmer
 	if (loading) {
-		return <div>Loading...</div>; // TODO: Replace with proper loading component
+		// Check if we're loading overview or steps based on tab
+		const isOverviewTab = tab === 'overview';
+		return isOverviewTab ? <OverviewDialogShimmer /> : <StepsShimmer />;
 	}
 
 	// Show error state or redirect if no campaign

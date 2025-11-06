@@ -159,6 +159,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 					value: builderData,
 				}),
 				campaign_id: campaign.id,
+				hidden: true, // Auto-save should be hidden from user templates
 			};
 
 			const savedTemplate = await saveTemplate(templateWithCampaignId);

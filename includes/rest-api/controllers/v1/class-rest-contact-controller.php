@@ -21,6 +21,7 @@ use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\List_Model;
+use QuillCRM\Models\Log_Model;
 use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\Custom_Field_Model;
@@ -31,6 +32,7 @@ use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Traits\Message_Provider_Validation;
 
 /**
  * REST_Contact_Controller is REST api controller class for log
@@ -38,6 +40,8 @@ use QuillCRM\Managers\Merge_Tags_Manager;
  * @since 1.0.0
  */
 class REST_Contact_Controller extends REST_Controller {
+
+	use Message_Provider_Validation;
 
 
 
@@ -91,11 +95,11 @@ class REST_Contact_Controller extends REST_Controller {
 							'description' => __( 'Subscribed contacts.', 'quillcrm' ),
 							'type'        => 'boolean',
 						),
-					'campaign_type' => array(
-						'description' => __( 'Campaign type for filtering contacts.', 'quillcrm' ),
-						'type'        => 'string',
-						'enum'        => Campaign_Channel::get_core_channel_strings(),
-					),
+						'campaign_type' => array(
+							'description' => __( 'Campaign type for filtering contacts.', 'quillcrm' ),
+							'type'        => 'string',
+							'enum'        => Campaign_Channel::get_core_channel_strings(),
+						),
 					),
 				),
 				array(
@@ -784,7 +788,7 @@ class REST_Contact_Controller extends REST_Controller {
 						'template' => function ( $query ) {
 							$query->select( 'id', 'subject', 'body' );
 						},
-						'message' => function ( $query ) {
+						'message'  => function ( $query ) {
 							$query->select( 'id', 'tracking_id', 'subject', 'body' );
 						}, // Include message content for individual messages
 					)
@@ -823,13 +827,13 @@ class REST_Contact_Controller extends REST_Controller {
 	private function map_mode_to_tracking_mode( $mode ) {
 		// If it's already an integer, validate it directly
 		if ( is_int( $mode ) || ctype_digit( (string) $mode ) ) {
-			$mode_int = (int) $mode;
+			$mode_int    = (int) $mode;
 			$valid_modes = array( Tracking_Model::MODE_EMAIL, Tracking_Model::MODE_SMS, Tracking_Model::MODE_WHATSAPP );
-			
+
 			if ( in_array( $mode_int, $valid_modes, true ) ) {
 				return $mode_int;
 			}
-			
+
 			return new WP_Error(
 				'invalid_mode',
 				sprintf( __( 'Invalid mode: %d. Must be 1 (email), 2 (sms), or 3 (whatsapp).', 'quillcrm' ), $mode_int ),
@@ -985,6 +989,7 @@ class REST_Contact_Controller extends REST_Controller {
 			$from          = $request->get_param( 'from' ) ?? null;
 			$to            = $request->get_param( 'to' ) ?? null;
 			$query         = Contact_Model::query();
+			$total_count   = $query->count();
 
 			// Start with base query and load relationships
 			$contacts = $query->with( 'lists', 'tags', 'custom_fields', 'notes' );
@@ -1029,7 +1034,7 @@ class REST_Contact_Controller extends REST_Controller {
 			// Paginate and get results (pagination automatically handles total count)
 			$contacts = $contacts->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
-			return new WP_REST_Response( $contacts->toArray(), 200 );
+			return new WP_REST_Response( $contacts->toArray() + array( 'total_count' => $total_count ), 200 );
 		} catch ( Exception $e ) {
 			error_log( $e->getMessage() );
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
@@ -1261,7 +1266,7 @@ class REST_Contact_Controller extends REST_Controller {
 			$per_page = $request->get_param( 'per_page' ) ? $request->get_param( 'per_page' ) : 10;
 			$page     = $request->get_param( 'page' ) ? $request->get_param( 'page' ) : 1;
 			$contacts = $contact->automation_contacts()->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
-			$contacts->load( 'automation' );
+			$contacts->load( 'automation.steps', 'contact', 'processes.step', 'current_step', 'next_step' );
 
 			return new WP_REST_Response( $contacts, 200 );
 		} catch ( Exception $e ) {
@@ -1532,7 +1537,7 @@ class REST_Contact_Controller extends REST_Controller {
 			$double_optin = Settings::get( 'double_optin', array() );
 			$subject      = $double_optin['email_subject'] ?? __( 'Confirm Subscription', 'quillcrm' );
 			$subject      = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
-			$body         = $double_optin['email_body'] ?? $this->default_opt_in_email_body();
+			$body         = $double_optin['email_content'] ?? $this->default_opt_in_email_body();
 			$body         = Merge_Tags_Manager::instance()->process_merge_tags( $body, $contact );
 
 			$emails = new Emails();
@@ -1541,6 +1546,41 @@ class REST_Contact_Controller extends REST_Controller {
 				$subject,
 				$body,
 			);
+
+			// Log the result for troubleshooting and audit trail.
+			if ( ! $result ) {
+				Log_Model::create(
+					array(
+						'timestamp' => gmdate( 'Y-m-d H:i:s' ),
+						'level'     => 400, // Error level.
+						'message'   => 'Failed to send double opt-in confirmation email',
+						'source'    => 'QuillCRM\REST_API\Controllers\V1\REST_Contact_Controller',
+						'context'   => array(
+							'contact_id'    => $contact->id,
+							'email'         => $contact->email,
+							'subject'       => $subject,
+							'reason'        => 'wp_mail() returned false',
+							'endpoint'      => '/contacts/' . $contact->id . '/send-opt-in-email',
+							'user_id'       => get_current_user_id(),
+						),
+					)
+				);
+			} else {
+				Log_Model::create(
+					array(
+						'timestamp' => gmdate( 'Y-m-d H:i:s' ),
+						'level'     => 600, // Info level.
+						'message'   => 'Double opt-in confirmation email sent successfully',
+						'source'    => 'QuillCRM\REST_API\Controllers\V1\REST_Contact_Controller',
+						'context'   => array(
+							'contact_id' => $contact->id,
+							'email'      => $contact->email,
+							'subject'    => $subject,
+							'user_id'    => get_current_user_id(),
+						),
+					)
+				);
+			}
 
 			return new WP_REST_Response( array( 'success' => $result ), 200 );
 		} catch ( \Exception $e ) {
@@ -1560,7 +1600,7 @@ class REST_Contact_Controller extends REST_Controller {
 	public function send_message( $request ) {
 		$channel = $request->get_param( 'channel' );
 
-		// Validate channel parameter
+		// Validate channel parameter.
 		if ( ! in_array( $channel, Campaign_Channel::get_core_channel_strings(), true ) ) {
 			return new WP_Error(
 				'invalid_channel',
@@ -1569,7 +1609,7 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 		}
 
-		// Validate email requires subject
+		// Validate email requires subject.
 		if ( $channel === Campaign_Channel::STR_EMAIL && empty( $request->get_param( 'subject' ) ) ) {
 			return new WP_Error(
 				'missing_subject',
@@ -1578,7 +1618,15 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 		}
 
-		// Route to appropriate sender based on channel
+		// Validate provider connection for SMS/WhatsApp before processing.
+		if ( $channel === Campaign_Channel::STR_SMS || $channel === Campaign_Channel::STR_WHATSAPP ) {
+			$provider_check = $this->validate_provider_connection( $channel );
+			if ( is_wp_error( $provider_check ) ) {
+				return $provider_check;
+			}
+		}
+
+		// Route to appropriate sender based on channel.
 		switch ( $channel ) {
 			case Campaign_Channel::STR_EMAIL:
 				$sender = new \QuillCRM\Individual_Messaging\Email_Individual_Sender();
@@ -1940,4 +1988,5 @@ class REST_Contact_Controller extends REST_Controller {
 	public function get_purchase_history_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
+
 }

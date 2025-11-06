@@ -20,6 +20,7 @@ use QuillCRM\Managers\Integrations_Manager;
  */
 final class Actions_Manager {
 
+
 	/**
 	 * Registed actions
 	 *
@@ -178,33 +179,29 @@ final class Actions_Manager {
 					 ),
 				 ),
 			 ),
-		 'email'       => array(
-			 'label'  => __( 'Email', 'quillcrm' ),
-			 'groups' => array(
-				 'email' => array(
-					 'label'   => __( 'Email', 'quillcrm' ),
-					 'actions' => array(),
+			 'email'       => array(
+				 'label'  => __( 'Email', 'quillcrm' ),
+				 'groups' => array(
+					 'email' => array(
+						 'label'   => __( 'Email', 'quillcrm' ),
+						 'actions' => array(),
+					 ),
 				 ),
 			 ),
-		 ),
-		 'message'     => array(
-			 'label'  => __( 'Messaging', 'quillcrm' ),
-			 'groups' => array(
-				 'email'    => array(
-					 'label'   => __( 'Email', 'quillcrm' ),
-					 'actions' => array(),
-				 ),
-				 'sms'      => array(
-					 'label'   => __( 'SMS', 'quillcrm' ),
-					 'actions' => array(),
-				 ),
-				 'whatsapp' => array(
-					 'label'   => __( 'WhatsApp', 'quillcrm' ),
-					 'actions' => array(),
+			 'message'     => array(
+				 'label'  => __( 'Messaging', 'quillcrm' ),
+				 'groups' => array(
+					 'sms'      => array(
+						 'label'   => __( 'SMS', 'quillcrm' ),
+						 'actions' => array(),
+					 ),
+					 'whatsapp' => array(
+						 'label'   => __( 'WhatsApp', 'quillcrm' ),
+						 'actions' => array(),
+					 ),
 				 ),
 			 ),
-		 ),
-		 'send_data'   => array(
+			 'send_data'   => array(
 				 'label'  => __( 'Send Data', 'quillcrm' ),
 				 'groups' => array(
 					 'activecampaign' => array(

@@ -1,4 +1,8 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+/**
  * external dependencies
  */
 import { forwardRef, useImperativeHandle } from 'react';
@@ -13,7 +17,7 @@ import {
 	ContactsImportModal,
 	ContactsExportModal,
 } from './contacts-modals';
-import type { Contact as ContactType } from '@quillcrm/client';
+import { NoData, ContactsIcon, GradientAddContactIcon, GradientContactsIcon } from '@quillcrm/components';
 
 export interface AllContactsRef {
 	openCreateContactModal: () => void;
@@ -33,30 +37,52 @@ const AllContactsContent = forwardRef<AllContactsRef, AllContactsProps>(
 			setImportModalVisible,
 			setExportModalVisible,
 			setContact,
+			loading,
+			hasRecords,
 		} = useContactsContext();
+
+		// Handler functions
+		const handleOpenCreateContactModal = () => {
+			setContact({
+				email: '',
+				first_name: '',
+				last_name: '',
+			});
+			setCreateContactVisible(true);
+		};
+
+		const handleOpenImportModal = () => {
+			setImportModalVisible(true);
+		};
+
+		const handleOpenExportModal = () => {
+			setExportModalVisible(true);
+		};
 
 		// Expose methods to parent component
 		useImperativeHandle(ref, () => ({
-			openCreateContactModal: () => {
-				setContact({
-					email: '',
-					first_name: '',
-					last_name: '',
-				});
-				setCreateContactVisible(true);
-			},
-			openImportModal: () => {
-				setImportModalVisible(true);
-			},
-			openExportModal: () => {
-				setExportModalVisible(true);
-			},
+			openCreateContactModal: handleOpenCreateContactModal,
+			openImportModal: handleOpenImportModal,
+			openExportModal: handleOpenExportModal,
 		}));
 
 		return (
 			<div className="qcrm-all-contacts w-full">
 				<NoticeSection />
-				<ContactsTable activeTab={activeTab} />
+				{loading || hasRecords ? (
+					<ContactsTable activeTab={activeTab} />
+				) : (
+					<NoData
+						icon={<GradientContactsIcon width={120} height={120} />}
+						title={__('No contacts yet', 'quillcrm')}
+						subtitle={__(
+							'Get started by creating your first contact or import contacts from a CSV file',
+							'quillcrm'
+						)}
+						buttonLabel={__('Create Contact', 'quillcrm')}
+						onClick={handleOpenCreateContactModal}
+					/>
+				)}
 				<CreateContactModal />
 				<ContactsImportModal />
 				<ContactsExportModal />

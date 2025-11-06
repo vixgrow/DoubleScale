@@ -9,9 +9,16 @@ import { __ } from '@wordpress/i18n';
 import WebhookFields from '../../webhook-fields';
 import FormFields from '../../form-fields';
 import Fields from '@/components/fields';
-import { Field } from '@quillcrm/components';
 import { getTrigger } from '@quillcrm/utils';
 import type { Automation } from '@quillcrm/client';
+import { Switch } from '@/components/ui/switch';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { HelpCircle } from 'lucide-react';
 
 interface TriggerContentProps {
     automation: Automation;
@@ -60,19 +67,36 @@ const TriggerContent: React.FC<TriggerContentProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-full gap-5 overflow-y-auto max-h-[75vh]">
-            <div className="qcrm-workflow-sidebar__fields-container">
-                {trigger.fields && getTriggerFieldsComponent()}
-            </div>
-            <div className="bg-white">
-                <Field
-                    type="switch"
-                    label={__(
-                        'Run Multiple Times (If you want to restart the automation for the same contact)',
-                        'quillcrm'
-                    )}
-                    value={automation.settings?.multiple_runs}
-                    onChange={onMultipleRunsChange}
+        <div className="flex flex-col gap-5 min-h-[80vh]">
+            {trigger.fields && (
+                <div className="qcrm-workflow-sidebar__fields-container">
+                    {getTriggerFieldsComponent()}
+                </div>
+            )}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-[#333333]">
+                        {__('Run Multiple Times', 'quillcrm')}
+                    </span>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent className="z-[160000] bg-gray-100 border-none w-60 text-gray-600 text-xs">
+                                <p>
+                                    {__(
+                                        'If you want to restart the automation for the same contact',
+                                        'quillcrm'
+                                    )}
+                                </p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+                <Switch
+                    checked={automation.settings?.multiple_runs}
+                    onCheckedChange={onMultipleRunsChange}
                 />
             </div>
         </div>

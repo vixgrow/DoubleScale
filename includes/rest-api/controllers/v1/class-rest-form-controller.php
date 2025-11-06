@@ -226,7 +226,8 @@ class Rest_Form_Controller extends REST_Controller {
 			$from     = $request->get_param( 'from' ) ?? null;
 			$to       = $request->get_param( 'to' ) ?? null;
 
-			$query = Form_Model::query();
+			$query       = Form_Model::query();
+			$total_count = $query->count();
 
 			if ( $keyword ) {
 				$query->where( 'name', 'LIKE', '%' . $keyword . '%' );
@@ -239,7 +240,7 @@ class Rest_Form_Controller extends REST_Controller {
 			}
 			$forms = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
-			return new WP_REST_Response( $forms, 200 );
+			return new WP_REST_Response( $forms->toArray() + array( 'total_count' => $total_count ), 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}

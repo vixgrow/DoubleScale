@@ -22,9 +22,8 @@ import {
 	DialogOverlay,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { CustomDialogHeader, Field } from '@quillcrm/components';
+import { CustomDialogHeader, Field, GradientSendSMSIcon } from '@quillcrm/components';
 import { Button } from '@quillcrm/components/ui/button';
-import { MessageSquare } from 'lucide-react';
 
 interface SendSMSDialogProps {
 	open: boolean;
@@ -137,7 +136,7 @@ const SendSMSDialog: React.FC<SendSMSDialogProps> = ({
 								'quillcrm'
 							)}
 							icon={
-								<MessageSquare className="w-6 h-6 text-primary" />
+								<GradientSendSMSIcon />
 							}
 						/>
 					</DialogTitle>

@@ -22,7 +22,7 @@ import type {
 	DataTableConfig,
 } from '@quillcrm/client';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
-import { PageHeader, PlusIcon } from '@quillcrm/components';
+import { PageHeader, PlusIcon, GradientAutomationsIcon, NoticeBanner, NoData } from '@quillcrm/components';
 import { isEmpty } from 'validator';
 import { NoticeMessage } from '@quillcrm/client';
 import { formatDateForAPI } from '@quillcrm/utils';
@@ -37,6 +37,7 @@ const AutomationsList: React.FC = () => {
 	const [page, setPage] = useState<number>(1);
 	const [perPage, setPerPage] = useState<number>(10);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
+	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [data, setData] = useState<Automations>([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [keyword, setKeyword] = useState<string>('');
@@ -57,7 +58,8 @@ const AutomationsList: React.FC = () => {
 	const [updatingAutomationId, setUpdatingAutomationId] = useState<
 		number | null
 	>(null);
-	const [error, setError] = useState<NoticeMessage | null>(null);
+	const [createError, setCreateError] = useState<NoticeMessage | null>(null);
+	const [listError, setListError] = useState<NoticeMessage | null>(null);
 	const navigate = useNavigate();
 
 	// Use the reusable hook
@@ -85,8 +87,9 @@ const AutomationsList: React.FC = () => {
 
 			setData(response.data);
 			setTotalRecords(response.total);
+			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
-			setError({
+			setListError({
 				type: 'error',
 				message: error.message,
 			});
@@ -113,8 +116,7 @@ const AutomationsList: React.FC = () => {
 
 			navigate(getToLink(`automations/${response.id}`));
 		} catch (error: any) {
-			setVisible(false);
-			setError({
+			setCreateError({
 				type: 'error',
 				message: error.message,
 			});
@@ -136,7 +138,7 @@ const AutomationsList: React.FC = () => {
 			setSelectedRowKeys([]);
 			setBulkAction('');
 			fetchAutomations();
-			setError({
+			setListError({
 				type: 'success',
 				message: __(
 					'Selected automations deleted successfully',
@@ -144,7 +146,7 @@ const AutomationsList: React.FC = () => {
 				),
 			});
 		} catch (error: any) {
-			setError({
+			setListError({
 				type: 'error',
 				message: error.message,
 			});
@@ -153,7 +155,7 @@ const AutomationsList: React.FC = () => {
 
 	const validate = (automation: Partial<Automation>) => {
 		if (isEmpty(automation.name || '', { ignore_whitespace: true })) {
-			setError({
+			setCreateError({
 				type: 'error',
 				message: __('Automation name is required', 'quillcrm'),
 			});
@@ -161,7 +163,7 @@ const AutomationsList: React.FC = () => {
 		}
 
 		if (isEmpty(automation.trigger || '')) {
-			setError({
+			setCreateError({
 				type: 'error',
 				message: __('Automation trigger is required', 'quillcrm'),
 			});
@@ -169,10 +171,6 @@ const AutomationsList: React.FC = () => {
 		}
 
 		return true;
-	};
-
-	const handleViewReports = (automation: Automation) => {
-		navigate(getToLink(`automations/${automation.id}/reports`));
 	};
 
 	const handleStatusChange = async (
@@ -198,7 +196,7 @@ const AutomationsList: React.FC = () => {
 				)
 			);
 
-			setError({
+			setListError({
 				type: 'success',
 				message: __(
 					'Automation status updated successfully',
@@ -206,12 +204,32 @@ const AutomationsList: React.FC = () => {
 				),
 			});
 		} catch (error: any) {
-			setError({
+			setListError({
 				type: 'error',
 				message: error.message,
 			});
 		} finally {
 			setUpdatingAutomationId(null);
+		}
+	};
+
+	const deleteAutomation = async (id: number) => {
+		try {
+			await apiFetch({
+				path: `/qc/v1/automations/${id}`,
+				method: 'DELETE',
+			});
+
+			fetchAutomations();
+			setListError({
+				type: 'success',
+				message: __('Automation deleted successfully', 'quillcrm'),
+			});
+		} catch (error: any) {
+			setListError({
+				type: 'error',
+				message: error.message,
+			});
 		}
 	};
 
@@ -228,10 +246,10 @@ const AutomationsList: React.FC = () => {
 
 	// Table configuration
 	const columns = getAutomationColumns({
-		onViewReports: handleViewReports,
 		onStatusChange: handleStatusChange,
 		updatingAutomationId,
 		navigate,
+		onDelete: deleteAutomation,
 	});
 
 	const tableConfig: DataTableConfig<Automation> = {
@@ -268,23 +286,53 @@ const AutomationsList: React.FC = () => {
 				actions={[
 					{
 						label: __('Create Automation', 'quillcrm'),
-						onClick: () => setVisible(true),
+						onClick: () => {
+							setVisible(true);
+							setCreateError(null);
+						},
 						icon: <PlusIcon />,
 					},
 				]}
 			/>
 
-			{/* Data Table */}
-			<DataTable
-				columns={columns}
-				data={data}
-				config={tableConfig}
-				showPagination={false}
-				initialPageSize={perPage}
-				setPage={setPage}
-				loading={loading}
+		{listError && (
+			<div className="mb-4">
+				<NoticeBanner
+					notice={listError}
+					closeNotice={() => setListError(null)}
+				/>
+			</div>
+		)}
+
+		{loading || hasRecords ? (
+			<>
+				{/* Data Table */}
+				<DataTable
+					columns={columns}
+					data={data}
+					config={tableConfig}
+					showPagination={false}
+					initialPageSize={perPage}
+					setPage={setPage}
+					loading={loading}
+				/>
+				<DataTablePagination table={serverSideTable} />
+			</>
+		) : (
+			<NoData
+				icon={<GradientAutomationsIcon />}
+				title={__('No automations yet', 'quillcrm')}
+				subtitle={__(
+					'Create Automation to build your first workflow and start streamlining your process',
+					'quillcrm'
+				)}
+				buttonLabel={__('Create Automation', 'quillcrm')}
+				onClick={() => {
+					setVisible(true);
+					setCreateError(null);
+				}}
 			/>
-			<DataTablePagination table={serverSideTable} />
+		)}
 
 			<CreateAutomationModal
 				visible={visible}
@@ -293,10 +341,11 @@ const AutomationsList: React.FC = () => {
 				onOk={createAutomation}
 				onCancel={() => {
 					setVisible(false);
-					setError(null);
+					setCreateError(null);
 				}}
 				onAutomationChange={setAutomation}
-				error={error}
+				onClearError={() => setCreateError(null)}
+				error={createError}
 			/>
 		</div>
 	);

@@ -44,6 +44,8 @@ interface AddStepDialogProps {
 	loading: boolean;
 	/** Callback when a step type is selected */
 	onStepSelection: (type: string) => void;
+	/** Whether the dialog is disabled */
+	disabled?: boolean;
 }
 
 const defaultTypesOptions: Record<string, StepTypeOption> = {
@@ -91,13 +93,15 @@ export const AddStepDialog: React.FC<AddStepDialogProps> = ({
 	onVisibleChange,
 	loading,
 	onStepSelection,
+	disabled = false,
 }) => {
 	return (
 		<Dialog open={visible} onOpenChange={onVisibleChange}>
 			<DialogTrigger asChild>
 				<div
-					className="qcrm-automation-workflow__add-step flex items-center justify-center pointer-events-auto"
+					className={`qcrm-automation-workflow__add-step flex items-center justify-center ${!disabled ? 'pointer-events-auto' : ''}`}
 					onClick={(e) => {
+						if (disabled) return;
 						e.stopPropagation();
 						onVisibleChange(!visible);
 					}}

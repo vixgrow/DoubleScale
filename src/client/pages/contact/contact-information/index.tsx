@@ -14,6 +14,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 /**
  * Internal dependencies
@@ -49,7 +50,7 @@ const ContactInformation: React.FC = () => {
 		contact.email;
 
 	// Calculate email analytics
-	const totalEmails = emailAnalytics?.emails?.total || 0;
+	const totalEmails = emailAnalytics?.total_sent || 0;
 	const totalOpened = emailAnalytics?.total_opened || 0;
 	const totalClicked = emailAnalytics?.total_clicked || 0;
 
@@ -83,9 +84,11 @@ const ContactInformation: React.FC = () => {
 		<Card className="w-1/3 bg-[#F8F8F8] shadow-none">
 			<CardHeader>
 				<div className="flex items-center gap-4 border-b pb-4">
-					<div className="w-40 h-28 border flex items-center justify-center font-semibold rounded-full">
-						<UserRound className="w-12 h-12" />
-					</div>
+					<Avatar className="w-28 h-28 border">
+						<AvatarFallback className="bg-transparent">
+							<UserRound className="w-12 h-12" />
+						</AvatarFallback>
+					</Avatar>
 					<div className="w-full">
 						<div className="flex justify-between items-center gap-2">
 							<CardTitle className="text-xl font-semibold truncate max-w-[168px]">
@@ -136,7 +139,7 @@ const ContactInformation: React.FC = () => {
 						</div>
 						<div className="mt-2 flex items-center gap-3">
 							<div className="flex gap-1 items-center border-r pr-3">
-								<div className="bg-[#E4EEFD] px-2 py-3 rounded-full">
+								<div className="bg-[#E4EEFD] text-[#458DC7] p-1.5 rounded-full">
 									<ContactTotalEmailsIcon />
 								</div>
 								<span className="text-primary text-base font-semibold">
@@ -144,7 +147,7 @@ const ContactInformation: React.FC = () => {
 								</span>
 							</div>
 							<div className="flex gap-1 items-center border-r pr-3">
-								<div className="bg-[#D1F6DF] p-2 rounded-full">
+								<div className="bg-[#D1F6DF] text-[#16A34A] p-1.5 rounded-full">
 									<OpenRateIcon />
 								</div>
 								<span className="text-primary text-base font-semibold">
@@ -152,7 +155,7 @@ const ContactInformation: React.FC = () => {
 								</span>
 							</div>
 							<div className="flex gap-1 items-center">
-								<div className="bg-[#EEE4FF] p-1.5 rounded-full">
+								<div className="bg-[#EEE4FF] text-[#660FF1] p-1.5 rounded-full">
 									<ClickRateIcon />
 								</div>
 								<span className="text-primary text-base font-semibold">

@@ -10,7 +10,7 @@ import { ColumnDef } from '@tanstack/react-table';
  * internal dependencies
  */
 import type { Automation } from '@quillcrm/client';
-import { SortIcon, TimeAgoCell, SettingsOutlinedIcon, ThreeDotsIcon, ReportsIcon } from '@quillcrm/components';
+import { SortIcon, TimeAgoCell, SettingsOutlinedIcon, ThreeDotsIcon, DeleteIcon } from '@quillcrm/components';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@quillcrm/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -23,17 +23,17 @@ import {
 } from '@quillcrm/components/ui/dropdown-menu';
 
 interface AutomationColumnsProps {
-    onViewReports: (automation: Automation) => void;
     onStatusChange: (automation: Automation, newStatus: string) => void;
     updatingAutomationId: number | null;
     navigate: (to: string) => void;
+    onDelete: (id: number) => void;
 }
 
 export const getAutomationColumns = ({
-    onViewReports,
     onStatusChange,
     updatingAutomationId,
     navigate,
+    onDelete,
 }: AutomationColumnsProps): ColumnDef<Automation>[] => {
     const selectionColumn: ColumnDef<Automation> = {
         id: 'select',
@@ -123,9 +123,9 @@ export const getAutomationColumns = ({
             ),
             cell: ({ row }) => (
                 <span
-                    className={`px-3 py-1 rounded text-xs font-semibold ${row.original.status === 'active'
-                        ? 'bg-[#E2FFEF] text-[#50CD89]'
-                        : 'bg-[#EBEBEB] text-[#2E2C2F]'
+                    className={`px-3 py-1 border rounded text-sm font-normal ${row.original.status === 'active'
+                        ? 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]'
+                        : 'bg-[#F8F8F8] text-gray-500 border-gray-500'
                         }`}
                 >
                     {row.original.status === 'active' ? 'Published' : 'Draft'}
@@ -173,10 +173,11 @@ export const getAutomationColumns = ({
                                     {__('Setup', 'quillcrm')}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                    onClick={() => onViewReports(automation)}
+                                    onClick={() => onDelete(automation.id)}
+                                    className="text-red-500 hover:text-red-500 focus:text-red-500"
                                 >
-                                    <ReportsIcon />
-                                    {__('Report', 'quillcrm')}
+                                    <DeleteIcon />
+                                    {__('Delete', 'quillcrm')}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>

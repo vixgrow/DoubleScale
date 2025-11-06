@@ -10,9 +10,15 @@ import { useDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import type { DealsResponse } from '@quillcrm/client';
-import { useContactContext } from '../state/context';
-import { NoDealsIcon } from '@quillcrm/components';
+import type { Deal } from '@/client/pages/sales-pipeline/types';
+import {
+	GradientDealsIcon,
+	DealsIcon,
+	DealsClosedWonIcon,
+	DealsWonValueIcon,
+	MessageStatsCard,
+	NoData,
+} from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
@@ -22,8 +28,13 @@ interface DealsProps {
 	contact_id: number;
 }
 
+interface DealsResponse {
+	data: Deal[];
+	total: number;
+}
+
 const Deals: React.FC<DealsProps> = ({ contact_id }) => {
-	const { deals, setDeals } = useContactContext();
+	const [deals, setDeals] = useState<Deal[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [perPage, setPerPage] = useState<number>(10);
 	const [page, setPage] = useState<number>(1);
@@ -75,21 +86,68 @@ const Deals: React.FC<DealsProps> = ({ contact_id }) => {
 		},
 	});
 
+	// Calculate statistics
+	const totalDeals = totalRecords;
+	const closedWonDeals = deals?.filter((deal) => deal.status === 'won').length || 0;
+	const wonValue = deals?.reduce((sum, deal) => {
+		if (deal.status === 'won') {
+			return sum + (deal.value || 0);
+		}
+		return sum;
+	}, 0) || 0;
+
+	// Format currency value
+	const formatCurrency = (value: number) => {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: deals?.[0]?.currency || 'USD',
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0,
+		}).format(value);
+	};
+
 	return (
 		<div className="qcrm-automation flex flex-col gap-5">
 			<h3 className="text-2xl font-semibold">
 				{__('Deals', 'quillcrm')}
 			</h3>
+
+			{/* Statistics Cards */}
+			{!loading && (
+				<div className="flex gap-5">
+					<MessageStatsCard
+						icon={<DealsIcon width={40} height={40} />}
+						value={totalDeals}
+						label={__('Total Deals', 'quillcrm')}
+						iconBgClass="bg-[#E4EEFD]"
+						borderColorClass="border-l-secondary"
+						iconColor="text-[#458DC7]"
+					/>
+					<MessageStatsCard
+						icon={<DealsClosedWonIcon width={40} height={40} />}
+						value={closedWonDeals}
+						label={__('Deals Closed Won', 'quillcrm')}
+						iconBgClass="bg-[#D1F6DF]"
+						borderColorClass="border-l-[#16A34A]"
+						iconColor="text-[#16A34A]"
+					/>
+					<MessageStatsCard
+						icon={<DealsWonValueIcon width={40} height={40} />}
+						value={formatCurrency(wonValue)}
+						label={__('Deals Won Value', 'quillcrm')}
+						iconBgClass="bg-[#EEE4FF]"
+						borderColorClass="border-l-[#660FF1]"
+						iconColor="text-[#660FF1]"
+					/>
+				</div>
+			)}
 			<div>
 				{!loading && (!deals || deals.length === 0) ? (
-					<div className="flex flex-col items-center justify-center py-20 gap-4">
-						<div className="text-gray-400">
-						 <NoDealsIcon width={120} height={120} />
-						</div>
-						<span className="text-lg text-gray-500 font-medium">
-							{__('No deals found', 'quillcrm')}
-						</span>
-					</div>
+					<NoData
+						icon={<GradientDealsIcon />}
+						title={__('No Deals', 'quillcrm')}
+						subtitle={__('No deals found', 'quillcrm')}
+					/>
 				) : (
 					<>
 						<DataTable

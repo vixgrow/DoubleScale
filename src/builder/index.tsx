@@ -58,6 +58,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 }) => {
 	const dispatch = useDispatch();
 	const [sidebarCloseTrigger, setSidebarCloseTrigger] = useState(0);
+	const [templatesRefreshTrigger, setTemplatesRefreshTrigger] = useState(0);
 
 	// Parse autoSave prop into enabled/interval
 	const autoSaveConfig =
@@ -86,9 +87,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
-		console.log('initialData', initialData);
-		// Load from initialData prop
 		if (initialData) {
+			dispatch(STORE_KEY).resetBuilder();
+
 			const { sections, globalSettings, buttonSettings } = initialData;
 
 			if (sections?.length) {
@@ -105,8 +106,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 			return;
 		}
 
-		// Load from campaign template
+		// Load from campaign template if available
 		if (!existingTemplateData?.template_id) {
+			dispatch(STORE_KEY).resetBuilder();
 			return;
 		}
 
@@ -123,6 +125,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						: template.body;
 
 				if (body?.type === 'builder' && body.value) {
+					// Reset before loading template data
+					dispatch(STORE_KEY).resetBuilder();
+
 					const { sections, globalSettings, buttonSettings } =
 						body.value;
 
@@ -144,14 +149,26 @@ const BuilderContent: React.FC<BuilderProps> = ({
 							}
 						);
 					}
+				} else {
+					dispatch(STORE_KEY).resetBuilder();
 				}
 			} catch (error) {
 				console.error('Failed to load template:', error);
+				// If template loading fails, start fresh
+				dispatch(STORE_KEY).resetBuilder();
 			}
 		};
 
 		loadTemplate();
 	}, [initialData, existingTemplateData?.template_id, dispatch]);
+
+	// Cleanup: Reset builder state when component unmounts
+	useEffect(() => {
+		return () => {
+			// Clean up the store when component unmounts
+			dispatch(STORE_KEY).resetBuilder();
+		};
+	}, [dispatch]);
 
 	// Disable scrolling on the background page when builder is mounted
 	useEffect(() => {
@@ -227,6 +244,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 					onClose={onClose}
 					autoSaveEnabled={autoSaveConfig.enabled}
 					autoSaveInterval={autoSaveConfig.interval}
+					onTemplatesSaved={() =>
+						setTemplatesRefreshTrigger((prev) => prev + 1)
+					}
 				/>
 				<div
 					className="flex flex-1 overflow-hidden"
@@ -239,7 +259,10 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						onDragEnd={handleDragEnd}
 						modifiers={[snapCenterToCursor]}
 					>
-						<Sidebar sidebarCloseTrigger={sidebarCloseTrigger} />
+						<Sidebar
+							sidebarCloseTrigger={sidebarCloseTrigger}
+							templatesRefreshKey={templatesRefreshTrigger}
+						/>
 						<Canvas />
 
 						<DragOverlay dropAnimation={dropAnimation}>

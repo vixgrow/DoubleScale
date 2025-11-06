@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { MessageSquare } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -17,7 +16,7 @@ import {
 	DialogOverlay,
 	DialogTitle,
 } from '@/components/ui/dialog';
-import { CustomDialogHeader, TimeAgoCell } from '@quillcrm/components';
+import { CustomDialogHeader, TimeAgoCell, GradientSendSMSIcon } from '@quillcrm/components';
 import { Button } from '@quillcrm/components/ui/button';
 
 interface SMSDetailsProps {
@@ -46,7 +45,7 @@ const SMSDetails: React.FC<SMSDetailsProps> = ({ smsMessage, onClose }) => {
 								'quillcrm'
 							)}
 							icon={
-								<MessageSquare className="w-6 h-6 text-primary" />
+								<GradientSendSMSIcon />
 							}
 						/>
 					</DialogTitle>

@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 
 /**
  * Internal dependencies
@@ -14,10 +14,10 @@ import React, { useState, useMemo } from 'react';
 import ConfigAPI from '@quillcrm/config';
 import type { NoticeMessage } from '@quillcrm/client';
 import {
-    AutomationsIcon,
     CustomDialogHeader,
     Field,
     NoticeBanner,
+    GradientAutomationsIcon,
 } from '@quillcrm/components';
 import {
     Dialog,
@@ -40,7 +40,10 @@ import woocommerce from '../../../../../assets/images/woocoomerce/woo-icon.png';
 import wpusers from '../../../../../assets/images/wordpress/wordpress-icon.png';
 //@ts-ignore
 import forms from '../../../../../assets/images/forms/forms.png';
-
+//@ts-ignore
+import booking from '../../../../../assets/images/booking/booking.png';
+//@ts-ignore
+import edd from '../../../../../assets/images/downloads/digital-downloads.png';
 interface CreateAutomationModalProps {
     visible: boolean;
     isSaving: boolean;
@@ -51,6 +54,7 @@ interface CreateAutomationModalProps {
     onOk: () => void;
     onCancel: () => void;
     onAutomationChange: (automation: { name: string; trigger: string }) => void;
+    onClearError: () => void;
     error?: NoticeMessage | null;
 }
 
@@ -61,14 +65,16 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
     onOk,
     onCancel,
     onAutomationChange,
+    onClearError,
     error,
 }) => {
     const automationTriggers = ConfigAPI.getAutomationTriggers();
     const [selectedCategory, setSelectedCategory] = useState('crm');
+    const noticeBannerRef = useRef<HTMLDivElement>(null);
 
     const categoryData = {
         'booking': {
-            image: forms,
+            image: booking,
             description: __('Trigger automations based on booking events', 'quillcrm')
         },
         'crm': {
@@ -94,6 +100,10 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
         'wp': {
             image: wpusers,
             description: __('WordPress user and content automation', 'quillcrm')
+        },
+        'edd': {
+            image: edd,
+            description: __('Easy Digital Downloads order automation', 'quillcrm')
         }
     };
 
@@ -102,6 +112,13 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
         return automationTriggers[selectedCategory];
     }, [automationTriggers, selectedCategory]);
 
+    // Scroll to notice banner when error appears
+    useEffect(() => {
+        if (error && noticeBannerRef.current) {
+            noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }, [error]);
+
     return (
         <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
             <DialogContent className="max-w-[1100px] overflow-y-auto max-h-[90vh]">
@@ -109,15 +126,16 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
                     <CustomDialogHeader
                         title={__('Create Automation', 'quillcrm')}
                         subtitle={__('Add New Automation', 'quillcrm')}
-                        icon={<AutomationsIcon />}
+                        icon={<GradientAutomationsIcon width={32} height={32} />}
                     />
                 </DialogHeader>
 
                 {error && (
                     <div className="mb-4">
                         <NoticeBanner
+                            ref={noticeBannerRef}
                             notice={error}
-                            closeNotice={() => onAutomationChange(automation)}
+                            closeNotice={onClearError}
                         />
                     </div>
                 )}

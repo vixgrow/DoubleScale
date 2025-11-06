@@ -1,7 +1,8 @@
 /**
  * WordPress dependencies
  */
-import { useState, useEffect, useRef, useMemo } from '@wordpress/element';
+import { useState, useEffect, useRef as useWordPressRef, useMemo } from '@wordpress/element';
+import { useRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 
@@ -29,7 +30,8 @@ const SettingsPage: React.FC = () => {
 	const [settings, setSettings] = useState<Settings | null>(null);
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const [saveCounter, setSaveCounter] = useState<number>(0);
-	const originalSettingsRef = useRef<Settings | null>(null);
+	const originalSettingsRef = useWordPressRef<Settings | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const fetchSettings = async () => {
 		try {
@@ -80,6 +82,13 @@ const SettingsPage: React.FC = () => {
 	const closeNotice = () => {
 		setNotice(null);
 	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	// Check if settings have changed
 	const hasChanges = useMemo(() => {
@@ -141,7 +150,7 @@ const SettingsPage: React.FC = () => {
 			/>
 
 			{notice && (
-				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 
 			<div className="grid grid-cols-12 gap-4">

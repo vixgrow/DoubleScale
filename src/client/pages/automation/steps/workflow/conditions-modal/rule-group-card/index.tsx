@@ -92,7 +92,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 	}, [ruleGroup.length]);
 
 	return (
-		<Card className="shadow-none max-w-[800px] ml-16">
+		<Card className={`shadow-none ${rules.length > 1 ? 'ml-16 max-w-[800px]' : 'w-fit'}`}>
 			<CardContent className="pt-6">
 				<div ref={wrapperRef} className="relative">
 					{ruleGroup.length > 1 && (
@@ -112,7 +112,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 					)}
 					<div
 						ref={containerRef}
-						className="flex flex-col gap-6 pl-14"
+						className={`flex flex-col gap-6 ${ruleGroup.length > 1 ? 'pl-14' : ''}`}
 					>
 						{map(ruleGroup, (rule, ruleIndex) => (
 							<div
@@ -150,7 +150,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											)}
 										/>
 									</SelectTrigger>
-									<SelectContent>
+									<SelectContent className="max-h-[200px] overflow-y-auto">
 										{map(rulesGroups, (group, key) => (
 											<SelectItem key={key} value={key}>
 												{group.name}
@@ -165,7 +165,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											const newRules = [...rules];
 											newRules[groupIndex][ruleIndex] = {
 												...newRules[groupIndex][
-													ruleIndex
+												ruleIndex
 												],
 												rule: value,
 											};
@@ -217,7 +217,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											const newRules = [...rules];
 											newRules[groupIndex][ruleIndex] = {
 												...newRules[groupIndex][
-													ruleIndex
+												ruleIndex
 												],
 												[key]: value,
 											};
@@ -225,37 +225,37 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 										}}
 										onRemove={
 											rules.length === 1 &&
-											ruleGroup.length === 1
+												ruleGroup.length === 1
 												? undefined
 												: () => {
-														const newRules = [
-															...rules,
-														];
-														const removeRule = {
-															singleRuleInGroup:
-																() =>
-																	newRules.splice(
-																		groupIndex,
-																		1
-																	),
-															multipleRulesInGroup:
-																() =>
-																	newRules[
-																		groupIndex
-																	].splice(
-																		ruleIndex,
-																		1
-																	),
-														};
+													const newRules = [
+														...rules,
+													];
+													const removeRule = {
+														singleRuleInGroup:
+															() =>
+																newRules.splice(
+																	groupIndex,
+																	1
+																),
+														multipleRulesInGroup:
+															() =>
+																newRules[
+																	groupIndex
+																].splice(
+																	ruleIndex,
+																	1
+																),
+													};
 
-														removeRule[
-															ruleGroup.length ===
+													removeRule[
+														ruleGroup.length ===
 															1
-																? 'singleRuleInGroup'
-																: 'multipleRulesInGroup'
-														]();
-														onRulesChange(newRules);
-													}
+															? 'singleRuleInGroup'
+															: 'multipleRulesInGroup'
+													]();
+													onRulesChange(newRules);
+												}
 										}
 									/>
 								)}

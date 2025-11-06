@@ -17,6 +17,7 @@ import {
 	AllContactsIcon,
 	ListsIcon,
 	TagsIcon,
+	ContactsIcon,
 } from '@quillcrm/components';
 import Lists from './lists';
 import { ListsRef } from './lists';
@@ -97,17 +98,17 @@ const ContactsList: React.FC = () => {
 					{
 						label: __('All Contacts', 'quillcrm'),
 						value: 'all',
-						icon: <AllContactsIcon />,
+						icon: <ContactsIcon width={20} height={20} />,
 					},
 					{
 						label: __('Lists', 'quillcrm'),
 						value: 'lists',
-						icon: <ListsIcon />,
+						icon: <ListsIcon width={20} height={20} />,
 					},
 					{
 						label: __('Tags', 'quillcrm'),
 						value: 'tags',
-						icon: <TagsIcon />,
+						icon: <TagsIcon width={20} height={20} />,
 					},
 				]}
 				tabsContent={[

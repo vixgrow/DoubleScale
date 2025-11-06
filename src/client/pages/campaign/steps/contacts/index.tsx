@@ -13,15 +13,17 @@ import type { Filter as FilterType } from '@quillcrm/client';
 import {
 	ContactList,
 	PanelSettings,
-	TeamIcon,
+	ContactsIcon,
 	PanelLayout,
 	PlayIcon,
 	Stepper,
+	ListTagFilter,
 } from '@quillcrm/components';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { ListTagFilter, AdvancedFilter } from '@quillcrm/components';
+import RulesBuilder from '@/components/rules-builder';
+import ConfigAPI from '@quillcrm/config';
 import { useCampaignStep, campaignSteps } from '../shared';
 
 const Contacts: React.FC = () => {
@@ -47,6 +49,82 @@ const Contacts: React.FC = () => {
 	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
 	const [panelHeight, setPanelHeight] = useState<number>(0);
 	const panelRef = useRef<HTMLDivElement>(null);
+	const [totalRecipients, setTotalRecipients] = useState(0);
+	const [applyRequested, setApplyRequested] = useState(false);
+	const [inlineError, setInlineError] = useState<string | null>(null);
+
+	// Rules builder state (shared with ConditionsModal component)
+	const [rulesGroups] = useState(ConfigAPI.getAutomationRules());
+	const firstGroup = Object.keys(rulesGroups)[0];
+	const firstRule = firstGroup
+		? Object.keys(rulesGroups[firstGroup].rules)[0]
+		: '';
+	const getInitialRule = () => ({
+		rule: firstRule,
+		operator: 'is',
+		value: '',
+		selectedGroup: firstGroup,
+	});
+	const [rules, setRules] = useState([[getInitialRule()]]);
+
+	// Map RulesBuilder rules -> backend filters schema
+	const mapRulesToFilters = (inputRules: typeof rules): any[] => {
+		const flat = (inputRules || []).reduce(
+			(acc, group) => acc.concat(group || []),
+			[] as any[]
+		);
+		return flat
+			.filter((r) => r && r.rule)
+			.map((r) => ({
+				filter: r.rule, // backend expects filter slug
+				operator: r.operator || 'is',
+				value: r.value ?? '',
+			}));
+	};
+
+	// Helper: map backend filters -> RulesBuilder rules (single group)
+	const mapFiltersToRules = (inputFilters: FilterType[]) => {
+		const safe = Array.isArray(inputFilters) ? inputFilters : [];
+		if (!safe.length) return [[getInitialRule()]];
+		const group = safe.map((f: any) => ({
+			rule: f.filter || firstRule,
+			operator: f.operator || 'is',
+			value: f.value ?? '',
+			selectedGroup: firstGroup,
+		}));
+		return [group];
+	};
+
+	// Keep applying spinner in sync with fetch lifecycle
+	useEffect(() => {
+		if (!shouldFetchContacts) {
+			setIsApplying(false);
+		}
+	}, [shouldFetchContacts]);
+
+	// After fetch completes, if this was an apply request and total is 0, show notice
+	useEffect(() => {
+		if (applyRequested && totalRecipients === 0) {
+			setInlineError(
+				__('No recipients match the current filters.', 'quillcrm')
+			);
+			setApplyRequested(false);
+		}
+		if (applyRequested && totalRecipients > 0) {
+			setInlineError(null);
+			setApplyRequested(false);
+		}
+	}, [applyRequested, totalRecipients]);
+
+	// Initialize RulesBuilder from existing saved filters (DB) when advanced mode
+	useEffect(() => {
+		if (filterBy === 'advanced') {
+			setRules(mapFiltersToRules(filters));
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [filterBy]);
+
+	// (legacy duplicate) removed
 
 	// Handle filter mode change - clear filters immediately
 	const handleFilterModeChange = (newMode: string) => {
@@ -99,6 +177,24 @@ const Contacts: React.FC = () => {
 		goToStep('review');
 	};
 
+	const handleNext = async () => {
+		// Block while applying
+		if (isApplying) {
+			return;
+		}
+
+		// Block when zero recipients
+		if (totalRecipients === 0) {
+			setInlineError(
+				__('No recipients match the current filters.', 'quillcrm')
+			);
+			return;
+		}
+
+		setInlineError(null);
+		await save();
+	};
+
 	return (
 		<PanelLayout
 			items={[
@@ -120,24 +216,61 @@ const Contacts: React.FC = () => {
 			]}
 			type="campaign"
 		>
-			<Stepper steps={campaignSteps} canProceed="true" currentStep={3} />
+			{!(
+				campaign?.status === 'processed' ||
+				campaign?.status === 'archived'
+			) && (
+				<Stepper
+					steps={
+						campaign?.type === 'email'
+							? campaignSteps
+							: campaignSteps.filter(
+									(step) => step.slug !== 'builder'
+								)
+					}
+					canProceed="true"
+					currentStep={campaign?.type === 'email' ? 3 : 2}
+				/>
+			)}
 
 			<div className="flex gap-6 items-start">
 				<div ref={panelRef} className="w-2/3">
 					<PanelSettings
 						title={__('Recipients', 'quillcrm')}
 						description={__(
-							'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
+							'Select who will receive this campaign and how your audience will be split for testing',
 							'quillcrm'
 						)}
-						icon={<TeamIcon />}
+						icon={<ContactsIcon />}
 						className="flex flex-col"
-						showButtons={true}
-						onNext={save}
-						onBack={() => goToStep('builder')}
-						isLoading={saving}
+						showButtons={
+							!(
+								campaign?.status === 'processed' ||
+								campaign?.status === 'archived'
+							)
+						}
+						onNext={handleNext}
+						onBack={() => {
+							// Navigate based on campaign type
+							if (campaign?.type === 'sms') {
+								goToStep('template');
+							} else if (campaign?.type === 'whatsapp') {
+								goToStep('whatsapp-template');
+							} else {
+								campaign?.status === 'processed' ||
+								campaign?.status === 'archived'
+									? undefined
+									: () => goToStep('builder');
+							}
+						}}
+						isLoading={saving || isApplying}
 					>
 						<div className="space-y-6">
+							{inlineError && (
+								<div className="border border-red-300 bg-red-50 text-red-700 rounded-lg px-4 py-2">
+									{inlineError}
+								</div>
+							)}
 							<div>
 								<p className="text-base font-bold mb-2 text-black">
 									{__('Filter By', 'quillcrm')}
@@ -152,7 +285,7 @@ const Contacts: React.FC = () => {
 										className={`flex items-center space-x-4 w-1/2 border rounded-lg p-4 cursor-pointer ${
 											filterBy === 'list-tags'
 												? 'border-blue-500 bg-blue-50 text-blue-500'
-												: 'border-gray-300'
+												: 'border-gray-300 bg-white'
 										}`}
 									>
 										<RadioGroupItem
@@ -168,7 +301,7 @@ const Contacts: React.FC = () => {
 										className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
 											filterBy === 'advanced'
 												? 'border-blue-500 bg-blue-50'
-												: 'border-gray-300'
+												: 'border-gray-300 bg-white'
 										}`}
 									>
 										<RadioGroupItem
@@ -193,14 +326,43 @@ const Contacts: React.FC = () => {
 								/>
 							)}
 							{filterBy === 'advanced' && (
-								<AdvancedFilter
-									key="advanced-filter"
-									filters={filters}
-									setFilters={setFilters}
-									fetchContacts={handleApplyFilters}
-									loading={isLoading}
-									onApplyingChange={setIsApplying}
-								/>
+								<>
+									<RulesBuilder
+										rules={rules}
+										onChange={setRules}
+										rulesGroups={rulesGroups}
+									/>
+									<div className="flex gap-3 mt-4">
+										<Button
+											variant="secondaryDeepBlue"
+											onClick={() => {
+												// Sync filters then reuse existing handler
+												setFilters(
+													mapRulesToFilters(rules)
+												);
+												setApplyRequested(true);
+												setIsApplying(true);
+												handleApplyFilters();
+											}}
+											disabled={isLoading || isApplying}
+										>
+											{__('Apply Filters', 'quillcrm')}
+										</Button>
+										<Button
+											variant="destructive"
+											onClick={() => {
+												setRules([[getInitialRule()]]);
+												setFilters([]);
+												setApplyRequested(true);
+												setIsApplying(true);
+												handleApplyFilters();
+											}}
+											disabled={isLoading || isApplying}
+										>
+											{__('Clear Filters', 'quillcrm')}
+										</Button>
+									</div>
+								</>
 							)}
 						</div>
 					</PanelSettings>
@@ -213,6 +375,7 @@ const Contacts: React.FC = () => {
 					maxHeight={panelHeight}
 					shouldFetch={shouldFetchContacts}
 					onFetchComplete={() => setShouldFetchContacts(false)}
+					onTotalChange={setTotalRecipients}
 					onLoadingChange={setIsLoading}
 					campaignType={campaign?.type}
 				/>

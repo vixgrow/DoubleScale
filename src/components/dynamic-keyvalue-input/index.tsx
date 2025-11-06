@@ -8,7 +8,21 @@ import { useCallback } from '@wordpress/element';
  * Internal dependencies
  */
 import './style.scss';
-import { PlusIcon, Trash2Icon } from 'lucide-react';
+import { PlusIcon, ChevronDown } from 'lucide-react';
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
+	Card,
+	CardHeader,
+	CardTitle,
+	CardContent,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { DeleteIcon } from '@quillcrm/components';
 
 export interface KeyValuePair {
 	key: string;
@@ -68,58 +82,94 @@ const DynamicKeyValueInput: React.FC<DynamicKeyValueInputProps> = ({
 			data-field-type="dynamic_keyvalue"
 			data-field-value={JSON.stringify(value)}
 		>
-			<div className="dynamic-keyvalue-input__pairs">
-				{value.map((pair) => (
-					<div key={pair.id} className="dynamic-keyvalue-input__pair">
-						<div className="dynamic-keyvalue-input__inputs">
-							<input
-								type="text"
-								value={pair.key}
-								onChange={(e) =>
-									updatePair(pair.id, 'key', e.target.value)
-								}
-								placeholder={keyPlaceholder}
-								className="dynamic-keyvalue-input__input dynamic-keyvalue-input__input--key"
-							/>
-							<input
-								type="text"
-								value={pair.value}
-								onChange={(e) =>
-									updatePair(pair.id, 'value', e.target.value)
-								}
-								placeholder={valuePlaceholder}
-								className="dynamic-keyvalue-input__input dynamic-keyvalue-input__input--value"
-							/>
-						</div>
-						<button
-							type="button"
-							onClick={() => removePair(pair.id)}
-							className="dynamic-keyvalue-input__remove-btn"
-							title={__('Remove pair', 'quillcrm')}
-						>
-							<Trash2Icon width={16} height={16} />
-						</button>
-					</div>
+			<div className="dynamic-keyvalue-input__pairs space-y-3">
+				{value.map((pair, index) => (
+					<Collapsible key={pair.id} defaultOpen className="group/collapsible">
+						<Card>
+							<CardHeader className="p-4">
+								<div className="flex items-center justify-between">
+									<CardTitle className="text-sm font-medium">
+										{__('Key-Value Pair', 'quillcrm')} {index + 1}
+									</CardTitle>
+									<div className="flex items-center gap-1">
+										<CollapsibleTrigger asChild>
+											<Button
+												type="button"
+												variant="ghost"
+												size="icon"
+												className="h-8 w-8"
+											>
+												<ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+											</Button>
+										</CollapsibleTrigger>
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon"
+											onClick={() => removePair(pair.id)}
+											className="h-8 w-8 text-destructive hover:text-destructive"
+											title={__('Remove pair', 'quillcrm')}
+										>
+											<DeleteIcon />
+										</Button>
+									</div>
+								</div>
+							</CardHeader>
+							<CollapsibleContent>
+								<CardContent className="p-4 pt-0">
+									<div className="flex flex-col gap-3">
+										<div className="flex flex-col gap-2">
+											<label className="text-sm font-medium">
+												{__('Key', 'quillcrm')}
+											</label>
+											<Input
+												type="text"
+												value={pair.key}
+												onChange={(e) =>
+													updatePair(pair.id, 'key', e.target.value)
+												}
+												placeholder={keyPlaceholder}
+											/>
+										</div>
+										<div className="flex flex-col gap-2">
+											<label className="text-sm font-medium">
+												{__('Value', 'quillcrm')}
+											</label>
+											<Input
+												type="text"
+												value={pair.value}
+												onChange={(e) =>
+													updatePair(pair.id, 'value', e.target.value)
+												}
+												placeholder={valuePlaceholder}
+											/>
+										</div>
+									</div>
+								</CardContent>
+							</CollapsibleContent>
+						</Card>
+					</Collapsible>
 				))}
 
 				{value.length === 0 && (
-					<div className="dynamic-keyvalue-input__empty">
-						<p className="dynamic-keyvalue-input__empty-text">
+					<div className="dynamic-keyvalue-input__empty text-center py-6 text-muted-foreground">
+						<p className="text-sm">
 							{__('No key-value pairs added yet.', 'quillcrm')}
 						</p>
 					</div>
 				)}
 			</div>
 
-			<div className="dynamic-keyvalue-input__actions">
-				<button
+			<div className="dynamic-keyvalue-input__actions mt-4">
+				<Button
 					type="button"
+					variant="secondaryDeepBlue"
 					onClick={addPair}
-					className="dynamic-keyvalue-input__add-btn"
+					className="w-full"
 				>
-					<PlusIcon width={16} height={16} />
+					<PlusIcon className="h-5 w-5" />
 					{__('Add New', 'quillcrm')}
-				</button>
+				</Button>
 			</div>
 		</div>
 	);

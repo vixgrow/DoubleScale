@@ -18,7 +18,7 @@ import {
 
 interface UseTemplateActionsReturn {
   saveTemplate: (templateId?: number) => Promise<EmailTemplate>;
-  saveAsTemplate: (templateName: string, thumbnailUrl?: string) => Promise<EmailTemplate>;
+  saveAsTemplate: (templateName: string, thumbnailUrl?: string, templateId?: number) => Promise<EmailTemplate>;
   isSaving: boolean;
   error: string | null;
   clearError: () => void;

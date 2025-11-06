@@ -2,12 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useState,
-	useLayoutEffect,
-	useRef,
-	useEffect,
-} from '@wordpress/element';
+import { useState, useLayoutEffect, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
@@ -15,7 +10,6 @@ import { useSelect } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { map } from 'lodash';
 
 /**
  * Internal dependencies
@@ -26,7 +20,6 @@ import ConfigAPI from '@quillcrm/config';
 import {
 	CustomDialogHeader,
 	GradientConditionIcon,
-	PlusIcon,
 } from '@quillcrm/components';
 import {
 	Dialog,
@@ -36,7 +29,7 @@ import {
 	DialogOverlay,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import RuleGroupCard from './rule-group-card';
+import RulesBuilder from '@/components/rules-builder';
 
 interface RulesProps {
 	step: AutomationStep;
@@ -106,20 +99,13 @@ const ConditionsModal: React.FC<RulesProps> = ({
 		>
 	>(stepRules);
 	const [isSaving, setIsSaving] = useState(false);
-	const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-	const [orBracketStyle, setOrBracketStyle] = useState<{
-		top: number;
-		height: number;
-	}>({ top: 0, height: 0 });
-	const containerRef = useRef<HTMLDivElement | null>(null);
 
 	// Sync rules state with step.settings when modal opens
 	useEffect(() => {
 		if (visible) {
 			const stepRules = step.settings || [[getInitialRule()]];
 			setRules(stepRules);
-			// Reset refs for fresh calculation
-			cardRefs.current = [];
+			// Reset handled in RulesBuilder
 		}
 	}, [visible, step.settings]);
 
@@ -152,41 +138,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	}, [formContext, visible]);
 
 	useLayoutEffect(() => {
-		if (!visible) return;
-
-		const updateBracket = () => {
-			if (
-				rules.length <= 1 ||
-				!containerRef.current ||
-				!cardRefs.current[0] ||
-				!cardRefs.current[rules.length - 1]
-			) {
-				return;
-			}
-			const containerRect = containerRef.current.getBoundingClientRect();
-			const firstCard = cardRefs.current[0];
-			const lastCard = cardRefs.current[rules.length - 1];
-			if (firstCard && lastCard) {
-				const firstRect = firstCard.getBoundingClientRect();
-				const lastRect = lastCard.getBoundingClientRect();
-				const firstMid =
-					firstRect.top - containerRect.top + firstRect.height / 2;
-				const lastMid =
-					lastRect.top - containerRect.top + lastRect.height / 2;
-				const height = lastMid - firstMid;
-				setOrBracketStyle({ top: firstMid, height });
-			}
-		};
-
-		// Use multiple attempts to ensure refs are populated
-		const timeoutId1 = setTimeout(updateBracket, 0);
-		const timeoutId2 = setTimeout(updateBracket, 50);
-		window.addEventListener('resize', updateBracket);
-		return () => {
-			clearTimeout(timeoutId1);
-			clearTimeout(timeoutId2);
-			window.removeEventListener('resize', updateBracket);
-		};
+		// placeholder
 	}, [rules, visible]);
 
 	const save = async (data: Partial<AutomationStep>) => {
@@ -216,54 +168,11 @@ const ConditionsModal: React.FC<RulesProps> = ({
 					/>
 				</DialogHeader>
 				<div className="py-4">
-					<div
-						ref={containerRef}
-						className="flex flex-col gap-4 relative"
-					>
-						{rules.length > 1 && orBracketStyle.height > 0 && (
-							<div
-								className="absolute left-4"
-								style={{
-									top: `${orBracketStyle.top}px`,
-									height: `${orBracketStyle.height}px`,
-								}}
-							>
-								<div className="h-full w-12 border-2 border-[#3B82F6] border-r-0 rounded-l-2xl"></div>
-								<span className="absolute -left-6 top-1/2 -translate-y-1/2 text-base font-bold text-white bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] px-3 py-1 rounded-full">
-									{__('OR', 'quillcrm')}
-								</span>
-							</div>
-						)}
-						{map(rules, (ruleGroup, groupIndex) => (
-							<div
-								key={groupIndex}
-								ref={(el) =>
-									(cardRefs.current[groupIndex] = el)
-								}
-							>
-								<RuleGroupCard
-									ruleGroup={ruleGroup}
-									groupIndex={groupIndex}
-									rulesGroups={filteredRulesGroups}
-									rules={rules}
-									onRulesChange={setRules}
-								/>
-							</div>
-						))}
-						<div className="flex justify-start items-start">
-							<Button
-								onClick={() => {
-									const newRules = [...rules];
-									newRules.push([getInitialRule()]);
-									setRules(newRules);
-								}}
-								className="text-[#414141] bg-[#CECECE] border border-[#D3D3D3] rounded-md p-0 px-2 shadow-none hover:bg-transparent font-semibold"
-							>
-								<PlusIcon />
-								{__('Add another condition (Or)', 'quillcrm')}
-							</Button>
-						</div>
-					</div>
+					<RulesBuilder
+						rules={rules}
+						onChange={setRules}
+						rulesGroups={filteredRulesGroups}
+					/>
 				</div>
 				<DialogFooter>
 					<Button

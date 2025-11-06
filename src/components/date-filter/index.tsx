@@ -7,8 +7,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import './style.scss';
-import { RefreshIcon } from '@quillcrm/components';
-import { Button } from '@/components/ui/button';
 import {
 	Select,
 	SelectContent,
@@ -25,7 +23,6 @@ interface DateFilterProps {
 	onIntervalChange: (interval: string) => void;
 	onChangeFromDate: (date: Date) => void;
 	onChangeToDate: (date: Date) => void;
-	onSubmit: () => void;
 }
 
 const DateFilter: React.FC<DateFilterProps> = ({
@@ -35,7 +32,6 @@ const DateFilter: React.FC<DateFilterProps> = ({
 	onIntervalChange,
 	onChangeFromDate,
 	onChangeToDate,
-	onSubmit,
 }) => {
 	const intervalOptions = [
 		{
@@ -118,13 +114,6 @@ const DateFilter: React.FC<DateFilterProps> = ({
 					className="bg-[#FFFFFF80] text-[#2E2C2F] px-2 py-0 rounded-md"
 				/>
 			)}
-			<Button
-				onClick={onSubmit}
-				className="text-[#2E2C2F] bg-[#FFFFFF80] shadow-none py-0 px-2 rounded-md hover:bg-white"
-			>
-				<RefreshIcon />
-				{__('Refresh', 'quillcrm')}
-			</Button>
 		</div>
 	);
 };

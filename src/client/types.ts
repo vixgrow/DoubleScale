@@ -793,6 +793,16 @@ export interface DataTableConfig<TData> {
 		onDateChange: (range: { from: Date | null; to: Date | null }) => void;
 		placeholder?: string;
 	};
+	campaignFilters?: {
+		filters: {
+			status: string;
+			type: string;
+			createDate: { from: Date | null; to: Date | null };
+			updatedAt: { from: Date | null; to: Date | null };
+		};
+		onFiltersChange: (filters: any) => void;
+		onClear: () => void;
+	};
 	initialColumnVisibility?: Record<string, boolean>;
 }
 

@@ -43,12 +43,14 @@ const PanelSettings: React.FC<PanelSettingsProps> = ({
 				icon={icon}
 				iconVariant={iconVariant}
 			/>
-			<div className="rounded-b-2xl px-8 border border-t-0 border-gray-200 py-4">
-				{children}
+			<div className="rounded-b-2xl border border-t-0 border-gray-200">
+				<div className="bg-[#F8F8F8] px-8 py-4">
+					{children}
+				</div>
 
 				{/* Navigation Buttons */}
 				{showButtons && (onNext || onBack) && (
-					<div className="mt-6 flex justify-between items-center border-t border-gray-200 pt-6">
+					<div className="flex justify-between items-center border-t border-gray-200 bg-white rounded-b-2xl px-8 py-4">
 						{onBack ? (
 							<Button
 								variant="secondary"

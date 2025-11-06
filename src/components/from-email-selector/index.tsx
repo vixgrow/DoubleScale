@@ -117,9 +117,12 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
 						className={cn(
-							'w-full',
+							'w-full h-12 bg-white',
 							error && '!border-red-500 focus-visible:!ring-red-500'
 						)}
+						style={{
+							borderRadius: '8px',
+						}}
 						required={required}
 					/>
 				</div>
@@ -129,10 +132,10 @@ export const FromEmailSelector: React.FC<FromEmailSelectorProps> = ({
 							variant="outline"
 							role="combobox"
 							aria-expanded={open}
-							className="h-9 w-9 shrink-0 justify-center p-0"
+							className="h-12 w-12 shrink-0 justify-center p-0"
 							type="button"
 						>
-							<ChevronsUpDown className="h-4 w-4 opacity-50" />
+							<ChevronsUpDown className="h-6 w-6 opacity-50" />
 						</Button>
 					</PopoverTrigger>
 					<PopoverContent className="w-[400px] p-0" align="end">

@@ -2,7 +2,11 @@ import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MyTemplatesIcon } from '@/components/icons';
+import {
+	MyTemplatesIcon,
+	BadConnectionIcon,
+	AlertIcon,
+} from '@/components/icons';
 import { getUserTemplates, renderTemplate } from '../api/templates';
 import { useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
@@ -10,7 +14,9 @@ import type { EmailTemplate } from '@quillcrm/client';
 import {
 	Dialog,
 	DialogContent,
+	DialogFooter,
 	DialogHeader,
+	DialogOverlay,
 	DialogTitle,
 } from '@/components/ui/dialog';
 
@@ -87,6 +93,8 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 		useState<EmailTemplate | null>(null);
 	const [previewHtml, setPreviewHtml] = useState<string>('');
 	const [loadingPreview, setLoadingPreview] = useState(false);
+	const [confirmTemplate, setConfirmTemplate] =
+		useState<EmailTemplate | null>(null);
 	const dispatch = useDispatch();
 
 	const fetchTemplates = async () => {
@@ -119,13 +127,23 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 		fetchTemplates();
 	}, [refreshKey]);
 
-	const handleUseTemplate = (template: EmailTemplate) => {
+	const handleUseTemplateClick = (template: EmailTemplate) => {
+		// Show confirmation dialog
+		setConfirmTemplate(template);
+	};
+
+	const handleConfirmUseTemplate = () => {
+		if (!confirmTemplate) return;
+
 		try {
-			console.log('Loading template:', template);
+			console.log('Loading template:', confirmTemplate);
 
 			// Parse the template body to get builder data
-			if (template.body && typeof template.body === 'string') {
-				const bodyData = JSON.parse(template.body);
+			if (
+				confirmTemplate.body &&
+				typeof confirmTemplate.body === 'string'
+			) {
+				const bodyData = JSON.parse(confirmTemplate.body);
 				console.log('Parsed body data:', bodyData);
 
 				if (bodyData.type === 'builder' && bodyData.value) {
@@ -162,11 +180,13 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 			} else {
 				console.warn(
 					'Template body is not a string or is empty:',
-					template.body
+					confirmTemplate.body
 				);
 			}
 		} catch (error) {
 			console.error('Error loading template:', error);
+		} finally {
+			setConfirmTemplate(null);
 		}
 	};
 
@@ -234,7 +254,7 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 					<TemplateCard
 						key={template.id}
 						template={template}
-						onUseTemplate={handleUseTemplate}
+						onUseTemplate={handleUseTemplateClick}
 						onPreview={handlePreview}
 					/>
 				))}
@@ -245,6 +265,7 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 				open={!!previewTemplate}
 				onOpenChange={() => setPreviewTemplate(null)}
 			>
+				<DialogOverlay />
 				<DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
 					<DialogHeader>
 						<DialogTitle className="text-center">
@@ -278,6 +299,58 @@ const MyTemplatesContent = ({ refreshKey }: { refreshKey?: number }) => {
 							</div>
 						)}
 					</div>
+				</DialogContent>
+			</Dialog>
+
+			{/* Confirmation Dialog */}
+			<Dialog
+				open={!!confirmTemplate}
+				onOpenChange={() => setConfirmTemplate(null)}
+			>
+				<DialogOverlay />
+				<DialogContent className="max-w-[41rem] p-8">
+					<DialogHeader>
+						<div className="flex flex-col items-center justify-center gap-6">
+							<div className="flex items-center justify-center rounded-3xl p-5 bg-[#FAEADF] text-[#CB5301]">
+								<BadConnectionIcon />
+							</div>
+							{/* Alert Banner */}
+							<div className="w-full flex items-center gap-3 p-4 bg-[#F8F8F8] rounded-lg border border-[#DEE1E6]">
+								<div className="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full text-destructive">
+									<AlertIcon width={20} height={20} />
+								</div>
+								<p className="text-base text-destructive leading-relaxed">
+									{__(
+										'Selecting this template will permanently replace your current design.',
+										'quillcrm'
+									)}
+								</p>
+							</div>
+							<DialogTitle className="text-2xl font-bold text-[#09090B] text-center">
+								{__(
+									'Are you sure you want to miss this current template?',
+									'quillcrm'
+								)}
+							</DialogTitle>
+						</div>
+					</DialogHeader>
+					<DialogFooter className="flex gap-2 mt-4">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => setConfirmTemplate(null)}
+							className="flex-1"
+						>
+							{__('Back', 'quillcrm')}
+						</Button>
+						<Button
+							type="button"
+							onClick={handleConfirmUseTemplate}
+							className="flex-1 bg-destructive hover:bg-destructive/90"
+						>
+							{__('Yes', 'quillcrm')}
+						</Button>
+					</DialogFooter>
 				</DialogContent>
 			</Dialog>
 		</>

@@ -13,10 +13,12 @@ import type { Filter as FilterType } from '@quillcrm/client';
 import {
 	ContactList,
 	PanelSettings,
-	TeamIcon,
+	ContactsIcon,
 	PanelLayout,
 	PlayIcon,
 	Stepper,
+	ListTagFilter,
+	AdvancedFilter,
 } from '@quillcrm/components';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -221,10 +223,14 @@ const Contacts: React.FC = () => {
 				campaign?.status === 'archived'
 			) && (
 				<Stepper
-					steps={campaignSteps}
-					canProceed="true"
-					currentStep={3}
-				/>
+				steps={
+					campaign?.type === 'email'
+						? campaignSteps
+						: campaignSteps.filter((step) => step.slug !== 'builder')
+				}
+				canProceed="true"
+				currentStep={campaign?.type === 'email' ? 3 : 2}
+			/>
 			)}
 
 			<div className="flex gap-6 items-start">
@@ -232,10 +238,10 @@ const Contacts: React.FC = () => {
 					<PanelSettings
 						title={__('Recipients', 'quillcrm')}
 						description={__(
-							'Lorem ipsum contains the typefaces more in use, an aspect that allows you to have an overview.',
+							'Select who will receive this campaign and how your audience will be split for testing',
 							'quillcrm'
 						)}
-						icon={<TeamIcon />}
+						icon={<ContactsIcon />}
 						className="flex flex-col"
 						showButtons={
 							!(
@@ -244,12 +250,19 @@ const Contacts: React.FC = () => {
 							)
 						}
 						onNext={handleNext}
-						onBack={
-							campaign?.status === 'processed' ||
+						onBack={() => {
+							// Navigate based on campaign type
+							if (campaign?.type === 'sms') {
+								goToStep('template');
+							} else if (campaign?.type === 'whatsapp') {
+								goToStep('whatsapp-template');
+							} else {
+								campaign?.status === 'processed' ||
 							campaign?.status === 'archived'
 								? undefined
 								: () => goToStep('builder')
-						}
+							}
+						}}
 						isLoading={saving || isApplying}
 					>
 						<div className="space-y-6">
@@ -269,11 +282,10 @@ const Contacts: React.FC = () => {
 								>
 									<Label
 										htmlFor="list-tags"
-										className={`flex items-center space-x-4 w-1/2 border rounded-lg p-4 cursor-pointer ${
-											filterBy === 'list-tags'
+										className={`flex items-center space-x-4 w-1/2 border rounded-lg p-4 cursor-pointer ${filterBy === 'list-tags'
 												? 'border-blue-500 bg-blue-50 text-blue-500'
-												: 'border-gray-300'
-										}`}
+												: 'border-gray-300 bg-white'
+											}`}
 									>
 										<RadioGroupItem
 											value="list-tags"
@@ -285,11 +297,10 @@ const Contacts: React.FC = () => {
 									</Label>
 									<Label
 										htmlFor="advanced"
-										className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
-											filterBy === 'advanced'
+										className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${filterBy === 'advanced'
 												? 'border-blue-500 bg-blue-50'
-												: 'border-gray-300'
-										}`}
+												: 'border-gray-300 bg-white'
+											}`}
 									>
 										<RadioGroupItem
 											value="advanced"

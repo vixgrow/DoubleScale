@@ -15,7 +15,17 @@ import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { useContactMessagesTable } from '@quillcrm/hooks/use-contact-messages-table';
 import { useProviderStatus } from '@/hooks/use-provider-status';
-import { TimeAgoCell, ViewIcon, MessageStatsCard, NoData } from '@quillcrm/components';
+import {
+	TimeAgoCell,
+	ViewIcon,
+	MessageStatsCard,
+	NoData,
+	ContactSMSIcon,
+	FailedSMSIcon,
+	SentSMSIcon,
+	UnsubscribeSMSIcon,
+	ProcessingSMSIcon,
+} from '@quillcrm/components';
 import SendSMSDialog from './send-sms-dialog';
 import SMSDetails from './sms-details-dialog';
 import TwilioConfigModal from '../components/twilio-config-modal';
@@ -34,8 +44,11 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 	const [showTwilioConfig, setShowTwilioConfig] = useState<boolean>(false);
 
 	// Check SMS provider status
-	const { isConnected, isLoading: providerLoading, checkStatus } =
-		useProviderStatus('sms');
+	const {
+		isConnected,
+		isLoading: providerLoading,
+		checkStatus,
+	} = useProviderStatus('sms');
 
 	// Use combined hook for data + table pagination
 	const { loading, messages, analytics, serverSideTable, refetch } =
@@ -60,7 +73,9 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 		});
 
 		if (!isConnected) {
-			console.log('[QuillCRM SMS] Provider not connected - inline warning visible');
+			console.log(
+				'[QuillCRM SMS] Provider not connected - inline warning visible'
+			);
 			// Inline warning is already visible, user can click the configure link
 			return;
 		}
@@ -183,7 +198,7 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 					onClick={handleSendSMS}
 					disabled={providerLoading || !isConnected}
 				>
-					<MessageSquare className="w-4 h-4 mr-2" />
+					<ProcessingSMSIcon width={24} height={24}/>
 					{providerLoading
 						? __('Checking...', 'quillcrm')
 						: __('Send SMS', 'quillcrm')}
@@ -195,7 +210,9 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 				<ProviderNotConnectedWarning
 					channel="sms"
 					onConfigureClick={() => {
-						console.log('[QuillCRM] Configure link clicked, opening modal');
+						console.log(
+							'[QuillCRM] Configure link clicked, opening modal'
+						);
 						setShowTwilioConfig(true);
 					}}
 				/>
@@ -205,29 +222,28 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 			{analytics && (
 				<div className="flex gap-5">
 					<MessageStatsCard
-						icon={
-							<MessageSquare className="w-6 h-6 text-primary" />
-						}
+						icon={<ContactSMSIcon width={40} height={40} />}
 						value={total}
 						label={__('Total SMS', 'quillcrm')}
-						iconBgClass="bg-blue-50"
-						borderColorClass="border-l-primary"
+						iconBgClass="bg-[#E4EEFD]"
+						borderColorClass="border-l-secondary"
+						iconColor="text-[#458DC7]"
 					/>
 					<MessageStatsCard
-						icon={
-							<CheckCircle2 className="w-6 h-6 text-green-600" />
-						}
+						icon={<SentSMSIcon width={40} height={40} />}
 						value={totalSent}
 						label={__('Sent', 'quillcrm')}
-						iconBgClass="bg-green-50"
-						borderColorClass="border-l-green-600"
+						iconBgClass="bg-[#D1F6DF]"
+						borderColorClass="border-l-[#16A34A]"
+						iconColor="text-[#16A34A]"
 					/>
 					<MessageStatsCard
-						icon={<XCircle className="w-6 h-6 text-red-600" />}
+						icon={<FailedSMSIcon width={40} height={40} />}
 						value={totalFailed}
 						label={__('Failed', 'quillcrm')}
-						iconBgClass="bg-red-50"
-						borderColorClass="border-l-red-600"
+						iconBgClass="bg-[#FBE8E8]"
+						borderColorClass="border-l-destructive"
+						iconColor="text-destructive"
 					/>
 				</div>
 			)}
@@ -236,9 +252,12 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 			<div>
 				{!loading && messages.length === 0 ? (
 					<NoData
-						icon={<MessageSquare className="w-24 h-24 text-gray-400" />}
+						icon={<UnsubscribeSMSIcon width={120} height={120} />}
 						title={__('No SMS messages', 'quillcrm')}
-						subtitle={__('No SMS messages found for this contact.', 'quillcrm')}
+						subtitle={__(
+							'No SMS messages found for this contact.',
+							'quillcrm'
+						)}
 					/>
 				) : (
 					<>
@@ -250,7 +269,7 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 							initialPageSize={10}
 							showMainActions={false}
 							config={{}}
-							setPage={() => { }}
+							setPage={() => {}}
 						/>
 						<DataTablePagination table={serverSideTable} />
 					</>
@@ -271,7 +290,10 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 				contact={contact}
 			/>
 			{/* Twilio Config Modal - Debug */}
-			{console.log('[QuillCRM] Rendering TwilioConfigModal, open:', showTwilioConfig)}
+			{console.log(
+				'[QuillCRM] Rendering TwilioConfigModal, open:',
+				showTwilioConfig
+			)}
 			<TwilioConfigModal
 				open={showTwilioConfig}
 				onClose={() => {

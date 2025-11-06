@@ -23,6 +23,8 @@ import BuilderStep from '../../../builder';
 import { Campaign as CampaignType } from '@quillcrm/client';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import Overview from './overview';
+import StepsShimmer from './steps-shimmer';
+import OverviewDialogShimmer from './overview-dialog-shimmer';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
@@ -93,11 +95,14 @@ const Campaign: React.FC = () => {
 	const isOverview =
 		campaign &&
 		((campaign.status === 'schedule' && tab === 'overview') ||
+			(campaign.status === 'draft' && tab === 'overview') ||
 			['processing', 'completed', 'resending'].includes(campaign.status));
 
-	// Show loading state
+	// Show loading state with appropriate shimmer
 	if (loading) {
-		return <div>Loading...</div>; // TODO: Replace with proper loading component
+		// Check if we're loading overview or steps based on tab
+		const isOverviewTab = tab === 'overview';
+		return isOverviewTab ? <OverviewDialogShimmer /> : <StepsShimmer />;
 	}
 
 	// Show error state or redirect if no campaign

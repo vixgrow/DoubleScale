@@ -44,7 +44,7 @@ const DataCard: React.FC = () => {
 			icon: <ContactTotalEmailsIcon width={24} height={24} />,
 		},
 		{ value: 'sms', label: 'SMS', icon: <ContactSMSIcon /> },
-		{ value: 'whatsapp', label: 'WhatsApp', icon: <ContactWhatsAppIcon /> },
+		// { value: 'whatsapp', label: 'WhatsApp', icon: <ContactWhatsAppIcon /> },
 		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
 		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
 		{
@@ -76,14 +76,14 @@ const DataCard: React.FC = () => {
 				</CardContent>
 			),
 		},
-		{
-			value: 'whatsapp',
-			children: (
-				<CardContent className="pt-6">
-					<WhatsApp contact_id={contact.id} />
-				</CardContent>
-			),
-		},
+		// {
+		// 	value: 'whatsapp',
+		// 	children: (
+		// 		<CardContent className="pt-6">
+		// 			<WhatsApp contact_id={contact.id} />
+		// 		</CardContent>
+		// 	),
+		// },
 		{
 			value: 'deals',
 			children: (

@@ -17,6 +17,8 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
+	DialogOverlay,
+	DialogPortal,
 	DialogTitle,
 	DialogTrigger,
 } from '@/components/ui/dialog';
@@ -63,6 +65,7 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 							: __('Edit HTML content', 'quillcrm'))}
 				</Button>
 			</DialogTrigger>
+			<DialogOverlay />
 			<DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle className="text-3xl font-bold">
@@ -80,10 +83,10 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 						<label className="text-sm font-medium">
 							{__('HTML Content', 'quillcrm')}
 						</label>
-						<div className="relative flex w-full bg-[#C6DFF3] rounded-lg">
+						<div className="relative flex w-full bg-gray-100 rounded-lg">
 							{/* Line numbers */}
 							<pre
-								className="select-none text-gray-500 text-xs text-right pr-3 rounded-l-lg pt-2 font-mono leading-5"
+								className="select-none text-gray-500 text-xs text-right pr-3 border rounded-l-lg pt-2 font-mono leading-5"
 								style={{ minWidth: '2rem' }}
 							>
 								{tempHtml
@@ -97,9 +100,8 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 								value={tempHtml}
 								onChange={(e) => setTempHtml(e.target.value)}
 								placeholder="<p>Your HTML content here</p>"
-								className="min-h-[200px] font-mono text-sm leading-5 rounded-l-none"
+								className="min-h-[200px] bg-white font-mono text-sm leading-5 rounded-l-none"
 								style={{
-									border: 'none',
 									outline: 'none',
 								}}
 							/>
@@ -109,10 +111,10 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 						<label className="text-sm font-medium">
 							{__('Custom CSS', 'quillcrm')}
 						</label>
-						<div className="relative flex w-full bg-[#C6DFF3] rounded-lg">
+						<div className="relative flex w-full bg-gray-100 rounded-lg">
 							{/* Line numbers */}
 							<pre
-								className="select-none text-gray-500 text-xs text-right pr-3 rounded-l-lg pt-2 font-mono leading-5"
+								className="select-none text-gray-500 text-xs text-right pr-3 border rounded-l-lg pt-2 font-mono leading-5"
 								style={{ minWidth: '2rem' }}
 							>
 								{tempCss
@@ -124,9 +126,8 @@ export const HtmlDialog: React.FC<HtmlDialogProps> = ({
 								value={tempCss}
 								onChange={(e) => setTempCss(e.target.value)}
 								placeholder=".my-class { color: #333; font-size: 16px; }"
-								className="min-h-[200px] font-mono text-sm leading-5 rounded-l-none"
+								className="min-h-[200px] bg-white font-mono text-sm leading-5 rounded-l-none"
 								style={{
-									border: 'none',
 									outline: 'none',
 								}}
 							/>

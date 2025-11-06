@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -16,6 +15,7 @@ import {
 	CampaignModalStep,
 	CampaignsResponse,
 	CampaignType,
+	NoticeMessage,
 } from '@quillcrm/client';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
 import { DataTable } from '@/components/ui/data-table';
@@ -28,7 +28,7 @@ import {
 	PlusIcon,
 	ContactTotalEmailsIcon,
 	ContactSMSIcon,
-	ContactWhatsAppIcon,
+	NoticeBanner,
 } from '@/components';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
@@ -57,8 +57,14 @@ const Campaigns: React.FC = () => {
 	});
 	const [step, setStep] = useState<CampaignModalStep>(null);
 	const [activeTab, setActiveTab] = useState<string>('email');
+	const [campaignFilters, setCampaignFilters] = useState({
+		status: 'all',
+		type: 'all',
+		createDate: { from: null, to: null },
+		updatedAt: { from: null, to: null },
+	});
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
-	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
 
 	// Use the reusable hook
@@ -72,7 +78,7 @@ const Campaigns: React.FC = () => {
 
 	useEffect(() => {
 		fetchCampaigns();
-	}, [page, perPage, dateRange, keywords, activeTab]);
+	}, [page, perPage, dateRange, keywords, activeTab, campaignFilters]);
 
 	console.log(campaigns);
 
@@ -90,24 +96,53 @@ const Campaigns: React.FC = () => {
 			const channelMap: Record<string, string> = {
 				email: 'email',
 				sms: 'sms',
-				whatsapp: 'whatsapp',
 			};
 
+			// Build query parameters
+			const queryParams: Record<string, any> = {
+				page,
+				per_page: perPage,
+				from: formatDateForAPI(dateRange.from),
+				to: formatDateForAPI(dateRange.to),
+				keywords,
+				channel: channelMap[activeTab],
+			};
+
+			// Add campaign filter parameters
+			if (campaignFilters.status && campaignFilters.status !== 'all') {
+				queryParams.status = campaignFilters.status;
+			}
+
+			// Only apply type filter for email campaigns
+			if (activeTab === 'email' && campaignFilters.type && campaignFilters.type !== 'all') {
+				// Map type to ab_test setting
+				queryParams.campaign_type = campaignFilters.type;
+			}
+
+			if (campaignFilters.createDate.from) {
+				queryParams.created_from = formatDateForAPI(campaignFilters.createDate.from);
+			}
+
+			if (campaignFilters.createDate.to) {
+				queryParams.created_to = formatDateForAPI(campaignFilters.createDate.to);
+			}
+
+			if (campaignFilters.updatedAt.from) {
+				queryParams.updated_from = formatDateForAPI(campaignFilters.updatedAt.from);
+			}
+
+			if (campaignFilters.updatedAt.to) {
+				queryParams.updated_to = formatDateForAPI(campaignFilters.updatedAt.to);
+			}
+
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/campaigns', {
-					page,
-					per_page: perPage,
-					from: formatDateForAPI(dateRange.from),
-					to: formatDateForAPI(dateRange.to),
-					keywords,
-					channel: channelMap[activeTab],
-				}),
+				path: addQueryArgs('/qc/v1/campaigns', queryParams),
 			})) as CampaignsResponse;
 			setCampaigns(response.data);
 			setTotalRecords(response.total || 0);
 			setHasRecords(response.total_count > 0);
 		} catch (error) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: __('Failed to fetch campaigns', 'quillcrm'),
 			});
@@ -116,34 +151,32 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
-	const addCampaign = async (name: string) => {
+	const addCampaign = async (name: string): Promise<{ success: boolean; error?: string }> => {
 		if (!name) {
-			createNotice({
-				type: 'error',
-				message: __('Campaign name is required', 'quillcrm'),
-			});
-			return;
-		}
-
-		if (!campaignType) {
-			createNotice({
-				type: 'error',
-				message: __('Campaign type is required', 'quillcrm'),
-			});
-			return;
+			return {
+				success: false,
+				error: __('Campaign name is required', 'quillcrm'),
+			};
 		}
 
 		try {
-			// Map UI selection to campaign channel - using actual database values
-			const typeMap: Record<string, string> = {
-				email: 'email',
-				standard: 'email', // Standard email campaign
-				ab_test: 'email', // A/B test is still email
-				sms: 'sms',
-				whatsapp: 'whats app',
-			};
+			let channelType = '';
+			let isAbTest = false;
 
-			const actualType = typeMap[campaignType] || 'email';
+			// Determine channel type based on active tab
+			if (activeTab === 'email') {
+				// For email, campaignType determines if it's standard or ab_test
+				if (!campaignType) {
+					return {
+						success: false,
+						error: __('Campaign type is required', 'quillcrm'),
+					};
+				}
+				channelType = 'email';
+				isAbTest = campaignType === 'ab_test';
+			} else if (activeTab === 'sms') {
+				channelType = 'sms';
+			}
 
 			// Use unified endpoint with type parameter (as string)
 			const response = (await apiFetch({
@@ -151,9 +184,9 @@ const Campaigns: React.FC = () => {
 				method: 'POST',
 				data: {
 					name: name,
-					type: actualType, // 'email', 'sms', or 'whatsapp'
+					type: channelType,
 					settings: {
-						ab_test: campaignType === 'ab_test',
+						ab_test: isAbTest,
 					},
 					description: __('New campaign', 'quillcrm'),
 					status: 'draft',
@@ -163,13 +196,12 @@ const Campaigns: React.FC = () => {
 			setCampaigns([...campaigns, response]);
 			setStep(null);
 			navigate(getToLink(`campaigns/${response.id}/template`));
+			return { success: true };
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setStep(null);
+			return {
+				success: false,
+				error: error.message,
+			};
 		}
 	};
 
@@ -187,7 +219,7 @@ const Campaigns: React.FC = () => {
 			setSelectedRowKeys([]);
 			fetchCampaigns();
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: error.message,
 			});
@@ -204,7 +236,7 @@ const Campaigns: React.FC = () => {
 
 			fetchCampaigns();
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: error.message,
 			});
@@ -212,8 +244,8 @@ const Campaigns: React.FC = () => {
 	};
 
 	const duplicateCampaign = async (id: number) => {
-		createNotice({
-			type: 'info',
+		setNotice({
+			type: 'success',
 			message: __('Duplicating campaign...', 'quillcrm'),
 		});
 
@@ -226,7 +258,7 @@ const Campaigns: React.FC = () => {
 
 			navigate(getToLink(`campaigns/${response.id}`));
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: error.message,
 			});
@@ -263,11 +295,6 @@ const Campaigns: React.FC = () => {
 			label: 'SMS Campaigns',
 			icon: <ContactSMSIcon width={24} height={24} />,
 		},
-		{
-			value: 'whatsapp',
-			label: 'WhatsApp Campaigns',
-			icon: <ContactWhatsAppIcon width={24} height={24} />,
-		},
 	];
 
 	// Campaign content component
@@ -282,6 +309,7 @@ const Campaigns: React.FC = () => {
 						initialPageSize={perPage}
 						setPage={setPage}
 						loading={loading}
+						activeTab={activeTab}
 						config={{
 							search: {
 								placeholder: __('Search', 'quillcrm'),
@@ -305,6 +333,19 @@ const Campaigns: React.FC = () => {
 								value: dateRange,
 								onDateChange: setDateRange,
 							},
+							campaignFilters: {
+								filters: campaignFilters,
+								onFiltersChange: setCampaignFilters,
+								onClear: () => {
+									setCampaignFilters({
+										status: 'all',
+										type: 'all',
+										createDate: { from: null, to: null },
+										updatedAt: { from: null, to: null },
+									});
+									setPage(1);
+								},
+							},
 						}}
 					/>
 					<DataTablePagination table={serverSideTable} />
@@ -325,10 +366,6 @@ const Campaigns: React.FC = () => {
 			value: 'sms',
 			children: <CampaignContent />,
 		},
-		{
-			value: 'whatsapp',
-			children: <CampaignContent />,
-		},
 	];
 
 	return (
@@ -345,6 +382,14 @@ const Campaigns: React.FC = () => {
 				]}
 			/>
 
+			{/* Notice Banner */}
+			{notice && (
+				<NoticeBanner
+					notice={notice}
+					closeNotice={() => setNotice(null)}
+				/>
+			)}
+
 			<PageTabs
 				defaultValue="email"
 				tabsList={tabsList}
@@ -360,6 +405,7 @@ const Campaigns: React.FC = () => {
 				setStep={setStep}
 				step={step}
 				addCampaign={addCampaign}
+				activeTab={activeTab}
 			/>
 		</div>
 	);

@@ -43,7 +43,7 @@ const PanelLayout: React.FC<PanelLayoutProps> = ({
 		totalSteps && currentStep ? ((currentStep + 1) / totalSteps) * 100 : 0;
 
 	return (
-		<div className="fixed inset-0 w-full h-full bg-white z-[1700000] flex flex-col overflow-y-auto">
+		<div className="fixed inset-0 w-full h-full bg-white z-[150000] flex flex-col overflow-y-auto">
 			{/* Header Section - Fixed */}
 			<div
 				className={`flex-none p-4 bg-white px-12 ${type === 'campaign' ? 'z-10' : ''}`}

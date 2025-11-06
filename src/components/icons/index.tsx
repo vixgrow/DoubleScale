@@ -166,6 +166,17 @@ export { default as ProcessingEmailsIcon } from './processing-emails';
 export { default as ClickToOpenRateIcon } from './click-to-open-rate';
 export { default as DeliveryRateIcon } from './delivery-rate';
 export { default as ReadRateIcon } from './read-rate';
+
 export { default as ABSplitIcon } from './ab-split';
+export { default as SetUpInfoIcon } from './set-up-info';
+export { default as SaveAsTemplateIcon } from './save-as-template';
+export { default as ReviewIcon } from './review';
+export { default as ScheduleIcon } from './schedule';
+export { default as SendTestEmailIcon } from './send-test-email';
+export { default as UnsubscribeSMSIcon } from './unsubscribe-sms';
+export { default as ProcessingSMSIcon } from './processing-sms';
+export { default as TotalSMSIcon } from './total-sms';
+export { default as FailedSMSIcon } from './failed-sms';
+export { default as SentSMSIcon } from './sent-sms';
 export { default as GradientSendSMSIcon } from './gradient-send-sms';
 export { default as GradientMergeTagsIcon } from './gradient-merge-tags';

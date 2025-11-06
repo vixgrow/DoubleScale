@@ -137,13 +137,13 @@ const Analytics: React.FC = () => {
 					{(campaign.status === 'processing' ||
 						campaign.status === 'resending') &&
 						started && (
-							<Card className="shadow-none bg-white">
-								<CardHeader className="px-0">
+							<Card className="shadow-none bg-white p-4">
+								<CardHeader>
 									<CardTitle className="text-xl font-medium text-[#09090B]">
 										{__('Process Sending', 'quillcrm')}
 									</CardTitle>
 								</CardHeader>
-								<CardContent className="flex flex-col gap-2 px-0">
+								<CardContent className="flex flex-col gap-2">
 									<div className="flex justify-between text-lg font-semibold text-[#16A34A]">
 										<span>
 											{sprintf(

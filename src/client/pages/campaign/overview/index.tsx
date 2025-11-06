@@ -16,7 +16,7 @@ import { useParams, useNavigate, getToLink } from '@quillcrm/navigation';
 import './style.scss';
 import Analytics from './analytics';
 import TabsSelection from './tabs-selection';
-import OverviewShimmer from './overview-shimmer';
+import CampaignDetails from './campaign-details';
 import {
 	Dialog,
 	DialogContent,
@@ -24,6 +24,8 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Campaign as CampaignType } from '@quillcrm/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CampaignsIcon } from '@quillcrm/components';
 
 const Overview: React.FC = () => {
 	const { id } = useParams<{ id: string }>();
@@ -71,16 +73,28 @@ const Overview: React.FC = () => {
 						</h1>
 					</DialogTitle>
 				</DialogHeader>
-				{isLoading ? (
-					<div className="px-12 py-8">
-						<OverviewShimmer />
-					</div>
-				) : campaign ? (
+				{campaign ? (
 					<div className="px-12 overflow-y-auto py-8">
-						<div className="flex gap-5">
-							<Analytics />
-							<TabsSelection />
-						</div>
+						{campaign.status === 'draft' ? (
+							// Draft campaigns: Show only campaign details, full width
+							<Card className="bg-[#F8F8F8] shadow-none px-5 w-full">
+								<CardHeader className="border-b pb-4 px-0">
+									<CardTitle className="text-xl font-medium text-[#09090B] flex items-center gap-2">
+										<CampaignsIcon width={24} height={24} />
+										{__('Campaign Details', 'quillcrm')}
+									</CardTitle>
+								</CardHeader>
+								<CardContent className="pt-6 px-0">
+									<CampaignDetails />
+								</CardContent>
+							</Card>
+						) : (
+							// Other campaigns: Show analytics + tabs
+							<div className="flex gap-5">
+								<Analytics />
+								<TabsSelection />
+							</div>
+						)}
 					</div>
 				) : (
 					<div className="flex items-center justify-center h-64">

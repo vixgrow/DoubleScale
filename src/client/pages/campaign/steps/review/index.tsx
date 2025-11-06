@@ -2,8 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useDispatch } from '@wordpress/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -12,10 +11,11 @@ import apiFetch from '@wordpress/api-fetch';
 import { useCampaignStep, campaignSteps } from '../shared';
 import {
 	PanelSettings,
-	CategoryIcon,
 	PanelLayout,
 	PlayIcon,
 	Stepper,
+	ReviewIcon,
+	NoticeBanner,
 } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import { isEmpty } from 'lodash';
@@ -25,6 +25,9 @@ import {
 	ScheduleCard,
 	SendTestEmailCard,
 } from './components';
+import { NoticeMessage } from '@quillcrm/client';
+//@ts-ignore
+import device from '../../../../../../assets/images/message-device.png';
 
 const Review: React.FC = () => {
 	const {
@@ -34,12 +37,30 @@ const Review: React.FC = () => {
 		goToStep,
 		saving,
 	} = useCampaignStep();
-	const { createNotice } = useDispatch('quillcrm/core');
 
 	const [sendNow, setSendNow] = useState(false);
 	const [scheduleDate, setScheduleDate] = useState('');
 	const [scheduleTime, setScheduleTime] = useState('');
 	const [timezoneMode, setTimezoneMode] = useState('user'); // 'user' or 'subscriber'
+
+	// Notice state
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
+
+	const showNotice = (noticeData: NoticeMessage) => {
+		setNotice(noticeData);
+	};
+
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	// State for lists and tags
 	const [includedLists, setIncludedLists] = useState<string[]>([]);
@@ -53,9 +74,11 @@ const Review: React.FC = () => {
 
 	// Extract template data based on Template_Field_Mapper structure
 	// For email: subject is top-level, from_name/from_email/reply_to/preview_text are in settings
+	// For SMS: from_name and from_phone are in settings
 	const emailSubject = template?.subject || '-';
 	const fromName = template?.settings?.from_name || '-';
 	const fromEmail = template?.settings?.from_email || '-';
+	const fromPhone = template?.settings?.from_phone || '-';
 	const replyTo = template?.settings?.reply_to || '-';
 	const previewText = template?.settings?.preview_text || '-';
 
@@ -67,6 +90,7 @@ const Review: React.FC = () => {
 				subject: emailSubject,
 				fromName,
 				fromEmail,
+				fromPhone,
 				replyTo,
 				previewText,
 			});
@@ -174,7 +198,7 @@ const Review: React.FC = () => {
 
 		// Validate schedule if not sending now
 		if (!sendNow && (isEmpty(scheduleDate) || isEmpty(scheduleTime))) {
-			createNotice({
+			showNotice({
 				type: 'error',
 				message: __('Please set a schedule date and time', 'quillcrm'),
 			});
@@ -221,7 +245,7 @@ const Review: React.FC = () => {
 			}
 		} catch (error) {
 			console.error(error);
-			createNotice({
+			showNotice({
 				type: 'error',
 				message: __(
 					'Failed to save campaign. Please try again.',
@@ -252,7 +276,15 @@ const Review: React.FC = () => {
 			]}
 			type="campaign"
 		>
-			<Stepper steps={campaignSteps} canProceed="true" currentStep={4} />
+			<Stepper
+				steps={
+					campaign?.type === 'email'
+						? campaignSteps
+						: campaignSteps.filter((step) => step.slug !== 'builder')
+				}
+				canProceed="true"
+				currentStep={campaign?.type === 'email' ? 4 : 3}
+			/>
 
 			<div className="qcrm-review-step flex gap-6 items-start">
 				<div className="w-2/3">
@@ -262,7 +294,7 @@ const Review: React.FC = () => {
 							'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
 							'quillcrm'
 						)}
-						icon={<CategoryIcon />}
+						icon={<ReviewIcon />}
 						showButtons={true}
 						onNext={save}
 						onBack={() => goToStep('contacts')}
@@ -274,10 +306,21 @@ const Review: React.FC = () => {
 						isLoading={saving}
 					>
 						<div className="space-y-6">
+							{/* Notice Banner */}
+							{notice && (
+								<NoticeBanner
+									ref={noticeBannerRef}
+									notice={notice}
+									closeNotice={closeNotice}
+								/>
+							)}
+
 							{/* Campaign Settings */}
 							<CampaignSettingsCard
+								campaignType={campaign?.type}
 								fromName={fromName}
 								fromEmail={fromEmail}
+								fromPhone={fromPhone}
 								replyTo={replyTo}
 								emailSubject={emailSubject}
 								previewText={previewText}
@@ -308,9 +351,15 @@ const Review: React.FC = () => {
 					</PanelSettings>
 				</div>
 
-				{/* Send Test Email */}
+				{/* Send Test Email or Device Preview */}
 				<div className="w-1/3">
-					<SendTestEmailCard campaignId={campaign?.id} />
+					{campaign?.type === 'sms' ? (
+						<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] h-full">
+							<img src={device} alt="device" className="w-[350px]" />
+						</div>
+					) : (
+						<SendTestEmailCard campaignId={campaign?.id} />
+					)}
 				</div>
 			</div>
 		</PanelLayout>

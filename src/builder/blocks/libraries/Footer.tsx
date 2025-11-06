@@ -39,7 +39,7 @@ const FooterLibrary = () => {
 				type: 'text',
 				props: {
 					content:
-						'Copyright © [[account.name]]<br/>[[account.address]], [[account.city]], [[account.country]], [[account.zipCode]]<br/>Lorem ipsum dolor sit amet, consectetur elit.<br/>Click here or Click here',
+						'Copyright © {{general:business_name}}<br/>{{general:business_address}}<br/>Lorem ipsum dolor sit amet, consectetur elit.<br/><a href="{{contact:unsubscribe_link}}">Unsubscribe</a>',
 					textAlign: 'center',
 					fontSize: '12px',
 					fontWeight: 'normal',
@@ -157,7 +157,7 @@ const FooterLibrary = () => {
 				type: 'text',
 				props: {
 					content:
-						'Copyright © [[account.name]]<br/>[[account.address]], [[account.city]], [[account.country]], [[account.zipCode]]<br/>Lorem ipsum dolor sit amet, consectetur elit.<br/>Click here or Click here',
+						'Copyright © {{general:business_name}}<br/>{{general:business_address}}<br/>Lorem ipsum dolor sit amet, consectetur elit.<br/><a href="{{contact:unsubscribe_link}}">Unsubscribe</a>',
 					textAlign: 'center',
 					fontSize: '12px',
 					fontWeight: 'normal',
@@ -201,7 +201,7 @@ const FooterLibrary = () => {
 				type: 'text',
 				props: {
 					content:
-						'Copyright © [[account.name]]<br/>[[account.address]], [[account.city]], [[account.country]], [[account.zipCode]]<br/>Lorem ipsum dolor sit amet, consectetur elit.<br/>Click here or Click here',
+						'Copyright © {{general:business_name}}<br/>{{general:business_address}}<br/>Lorem ipsum dolor sit amet, consectetur elit.<br/><a href="{{contact:unsubscribe_link}}">Unsubscribe</a>',
 					align: 'left',
 					fontSize: '12px',
 					fontWeight: 'normal',
@@ -236,11 +236,11 @@ const FooterLibrary = () => {
 							</div>
 						</div>
 						<div className="mb-2 font-medium">
-							{__('Copyright © [[account.name]]', 'quillcrm')}
+							{__('Copyright © {{general:business_name}}', 'quillcrm')}
 						</div>
 						<div className="mb-2 font-medium">
 							{__(
-								'[[account.address]], [[account.city]], [[account.country]], [[account.zipCode]]',
+								'{{general:business_address}}',
 								'quillcrm'
 							)}
 						</div>
@@ -251,11 +251,7 @@ const FooterLibrary = () => {
 							)}
 						</div>
 						<div className="text-secondary flex gap-1">
-							{__('Click here', 'quillcrm')}
-							<div className="text-[#333333]">
-								{__('or', 'quillcrm')}
-							</div>
-							{__('Click here', 'quillcrm')}
+							{__('Unsubscribe', 'quillcrm')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -284,12 +280,12 @@ const FooterLibrary = () => {
 							<div className="">{__('Item 4', 'quillcrm')}</div>
 						</div>
 						<div className="mb-2 font-medium">
-							{__('Copyright © [[account.name]]', 'quillcrm')}
+							{__('Copyright © {{general:business_name}}', 'quillcrm')}
 						</div>
 
 						<div className="mb-2 font-medium">
 							{__(
-								'[[account.address]], [[account.city]], [[account.country]], [[account.zipCode]]',
+								'{{general:business_address}}',
 								'quillcrm'
 							)}
 						</div>
@@ -300,11 +296,7 @@ const FooterLibrary = () => {
 							)}
 						</div>
 						<div className="text-secondary flex gap-1">
-							{__('Click here', 'quillcrm')}
-							<div className="text-[#333333]">
-								{__('or', 'quillcrm')}
-							</div>
-							{__('Click here', 'quillcrm')}
+							{__('Unsubscribe', 'quillcrm')}
 						</div>
 					</div>
 				</DraggableTemplate>
@@ -327,11 +319,11 @@ const FooterLibrary = () => {
 							</div>
 						</div>
 						<div className="mb-2 font-medium">
-							{__('Copyright © [[account.name]]', 'quillcrm')}
+							{__('Copyright © {{general:business_name}}', 'quillcrm')}
 						</div>
 						<div className="mb-2 font-medium">
 							{__(
-								'[[account.address]], [[account.city]], [[account.country]], [[account.zipCode]]',
+								'{{general:business_address}}',
 								'quillcrm'
 							)}
 						</div>
@@ -342,11 +334,7 @@ const FooterLibrary = () => {
 							)}
 						</div>
 						<div className="text-secondary flex gap-1">
-							{__('Click here', 'quillcrm')}
-							<div className="text-[#333333]">
-								{__('or', 'quillcrm')}
-							</div>
-							{__('Click here', 'quillcrm')}
+							{__('Unsubscribe', 'quillcrm')}
 						</div>
 					</div>
 				</DraggableTemplate>

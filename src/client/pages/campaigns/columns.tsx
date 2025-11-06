@@ -14,7 +14,6 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Campaign, CampaignStatus } from '../../types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CAMPAIGN_STATUS_COLORS } from './constants';
-import { Badge } from '@/components/ui/badge';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -26,6 +25,7 @@ import {
 	ABSplitIcon,
 	CopyIcon,
 	DeleteIcon,
+	EditIcon,
 	FallbackCell,
 	FormattedDateCell,
 	ProcessingEmailsIcon,
@@ -94,12 +94,11 @@ const getCommonColumns = ({
 				'bg-muted text-muted-foreground';
 
 			return (
-				<Badge
-					className={`${colorClasses} rounded-[88px] w-full max-w-24 text-center px-0 justify-center py-1.5`}
-					variant="borderTransparent"
+				<div
+					className={`${colorClasses} rounded-xl w-fit text-center px-2 py-1 border text-base`}
 				>
 					{status.charAt(0).toUpperCase() + status.slice(1)}
-				</Badge>
+				</div>
 			);
 		},
 	};
@@ -134,6 +133,8 @@ const getCommonColumns = ({
 		),
 		cell: ({ row }) => {
 			const campaign = row.original;
+			const canEdit = campaign.status === 'draft' || campaign.status === 'schedule';
+
 			return (
 				<div className="text-center">
 					<DropdownMenu>
@@ -149,7 +150,7 @@ const getCommonColumns = ({
 							<DropdownMenuItem
 								onClick={() => {
 									navigate(
-										getToLink(`campaigns/${campaign.id}`)
+										getToLink(`campaigns/${campaign.id}/overview`)
 									);
 								}}
 							>
@@ -162,6 +163,18 @@ const getCommonColumns = ({
 								<CopyIcon />
 								{__('Duplicate', 'quillcrm')}
 							</DropdownMenuItem>
+							{canEdit && (
+								<DropdownMenuItem
+									onClick={() => {
+										navigate(
+											getToLink(`campaigns/${campaign.id}/template`)
+										);
+									}}
+								>
+									<EditIcon />
+									{__('Edit', 'quillcrm')}
+								</DropdownMenuItem>
+							)}
 							<DropdownMenuItem
 								onClick={() => onDelete(campaign.id)}
 								className="text-red-500 hover:text-red-500 focus:text-red-500"

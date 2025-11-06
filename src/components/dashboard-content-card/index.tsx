@@ -35,9 +35,9 @@ const DashboardContentCard: React.FC<DashboardContentProps> = ({
 	const navigate = useNavigate();
 	return (
 		<Card className={`shadow-none rounded-lg bg-[#F8F8F8] ${cardClassName}`}>
-			<CardHeader className={`flex flex-row justify-between items-center p-4`}>
+			<CardHeader className={`flex flex-row justify-between items-center px-5 pt-5 pb-0`}>
 				<div className="flex items-center justify-start gap-2">
-					<CardTitle className="text-[#333333] font-medium text-2xl bg-gradient-to-b from-transparent from-50% to-[#458DC7] px-1">
+					<CardTitle className="text-[#333333] font-medium text-2xl">
 						{title}
 					</CardTitle>
 					{headerContent && <div className="text-[#7E8299] text-lg font-medium">{headerContent}</div>}
@@ -52,7 +52,7 @@ const DashboardContentCard: React.FC<DashboardContentProps> = ({
 				)}
 				{dateFilter && <div className="w-1/2 flex justify-end">{dateFilterComponent}</div>}
 			</CardHeader>
-			<CardContent className="p-3">{children}</CardContent>
+			<CardContent className="p-5">{children}</CardContent>
 		</Card>
 	);
 };

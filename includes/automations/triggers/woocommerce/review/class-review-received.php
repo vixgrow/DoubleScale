@@ -74,11 +74,16 @@ class Review_Received extends Trigger {
 	 */
 	public function review_received( $comment_ID, $comment_approved, $commentdata ) {
 		if ( isset( $commentdata['comment_type'] ) && $commentdata['comment_type'] === 'review' ) {
+			// Get the rating from comment meta
+			$rating = get_comment_meta( $comment_ID, 'rating', true );
+
 			$this->process(
 				array(
-					'review_id'    => $comment_ID,
-					'product_id'   => $commentdata['comment_post_ID'] ?? null,
-					'author_email' => $commentdata['comment_author_email'] ?? '',
+					'review_id'      => $comment_ID,
+					'product_id'     => $commentdata['comment_post_ID'] ?? null,
+					'author_email'   => $commentdata['comment_author_email'] ?? '',
+					'review_content' => $commentdata['comment_content'] ?? '',
+					'review_rating'  => $rating ?? '',
 				)
 			);
 		}

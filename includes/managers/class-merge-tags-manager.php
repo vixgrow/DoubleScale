@@ -29,6 +29,8 @@ final class Merge_Tags_Manager {
 
 
 
+
+
 	/**
 	 * Registed merge tags
 	 *
@@ -194,6 +196,11 @@ final class Merge_Tags_Manager {
 					'wc_subscription_before_renewal',
 					'wc_subscription_before_end',
 				),
+			),
+			'review'         => array(
+				'name'      => __( 'Review', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'wc_review_received' ),
 			),
 		);
 		// get forms slug to set in groups

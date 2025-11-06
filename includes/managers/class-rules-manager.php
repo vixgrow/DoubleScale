@@ -29,6 +29,7 @@ final class Rules_Manager {
 
 
 
+
 	/**
 	 * Registed rules
 	 *
@@ -152,6 +153,12 @@ final class Rules_Manager {
 					'wc_subscription_before_renewal',
 					'wc_subscription_before_end',
 				),
+			),
+			'woocommerce_review'        => array(
+				'name'     => __( 'WooCommerce Review', 'quillcrm' ),
+				'key'      => 'woocommerce_review',
+				'rules'    => array(),
+				'triggers' => array( 'wc_review_received' ),
 			),
 			'learndash'                 => array(
 				'name'  => __( 'LearnDash', 'quillcrm' ),

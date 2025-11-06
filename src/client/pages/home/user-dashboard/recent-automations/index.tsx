@@ -9,12 +9,8 @@ import { isEmpty } from 'lodash';
 /**
  * internal dependencies
  */
-import {
-	DashboardContentCard,
-	ManageIcon,
-	OutlineReportsIcon,
-} from '@quillcrm/components';
-import { NavLink } from '@quillcrm/navigation';
+import { DashboardContentCard, ThreeDotsIcon } from '@quillcrm/components';
+import { getToLink, useNavigate } from '@quillcrm/navigation';
 import {
 	Table,
 	TableBody,
@@ -23,6 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '@quillcrm/components/ui/table';
+import { Button } from '@/components/ui/button';
 import type { DashboardData } from '@quillcrm/client';
 import { EmptyState } from '../../no-data';
 
@@ -33,77 +30,67 @@ interface RecentAutomationsTableProps {
 export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
 	automations,
 }) => {
+	const navigate = useNavigate();
+
 	return (
 		<DashboardContentCard
 			title={__('Recent Automations', 'quillcrm')}
-			className="w-2/3"
+			cardClassName="w-3/5"
+			viewAllLink={true}
+			viewAllLinkUrl="automations"
 		>
 			{isEmpty(automations) ? (
 				<EmptyState />
 			) : (
 				<div>
-					<Table>
-						<TableHeader>
+					<Table className="border">
+						<TableHeader className="bg-[#DEE1E666]">
 							<TableRow>
-								<TableHead className="text-[#3F4254] font-semibold">
-									{__('ID', 'quillcrm')}
-								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Title', 'quillcrm')}
-								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead>{__('ID', 'quillcrm')}</TableHead>
+								<TableHead>{__('Title', 'quillcrm')}</TableHead>
+								<TableHead>
 									{__('Trigger', 'quillcrm')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
-									{__('Labels', 'quillcrm')}
-								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead>
 									{__('Status', 'quillcrm')}
 								</TableHead>
-								<TableHead className="text-[#3F4254] font-semibold">
+								<TableHead>
 									{__('Action', 'quillcrm')}
 								</TableHead>
 							</TableRow>
 						</TableHeader>
-						<TableBody>
+						<TableBody className="bg-white">
 							{automations.map((automation, index) => (
 								<TableRow key={automation.id}>
-									<TableCell className="text-[#A1A5B7] text-sm font-semibold">
-										{index + 1}
-									</TableCell>
-									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-										{automation.name}
-									</TableCell>
-									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-										{automation.trigger}
-									</TableCell>
-									<TableCell className="text-[#A1A5B7] font-semibold text-sm">
-										Labels
+									<TableCell>{index + 1}</TableCell>
+									<TableCell>{automation.name}</TableCell>
+									<TableCell>{automation.trigger}</TableCell>
+									<TableCell>
+										<span
+											className={`px-3 py-1 border rounded text-sm font-normal ${
+												automation.status === 'active'
+													? 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]'
+													: 'bg-[#F8F8F8] text-gray-500 border-gray-500'
+											}`}
+										>
+											{automation.status === 'active'
+												? 'Published'
+												: 'Draft'}
+										</span>
 									</TableCell>
 									<TableCell>
-										<div
-											className={`text-sm w-fit capitalize rounded-lg py-1 px-3 ${automation.status == 'active' ? 'text-[#50CD89] bg-[#E2FFEF]' : 'bg-[#EF44444A] text-destructive'}`}
+										<Button
+											onClick={() =>
+												navigate(
+													getToLink(
+														`automations/${automation.id}`
+													)
+												)
+											}
+											className="h-6 w-6 bg-accent text-[#1E2125] rounded-lg p-0 hover:bg-accent focus-visible:border-none focus-visible:outline-none focus-visible:box-shadow-none focus-visible:ring-0"
 										>
-											{automation.status}
-										</div>
-									</TableCell>
-									<TableCell className="text-[#3F3F46] font-semibold text-sm flex items-center gap-2">
-										<NavLink
-											to={`automations/${automation.id}`}
-										>
-											<div className="flex items-center gap-2">
-												<ManageIcon />
-												{__('Manage', 'quillcrm')}
-											</div>
-										</NavLink>
-										<NavLink
-											to={`automations/${automation.id}`}
-										>
-											<div className="flex items-center gap-2">
-												<OutlineReportsIcon />
-												{__('Report', 'quillcrm')}
-											</div>
-										</NavLink>
+											<ThreeDotsIcon />
+										</Button>
 									</TableCell>
 								</TableRow>
 							))}

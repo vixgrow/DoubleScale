@@ -25,7 +25,12 @@ import {
 	ScheduleCard,
 	SendTestEmailCard,
 } from './components';
-import { NoticeMessage } from '@quillcrm/client';
+import type {
+	NoticeMessage,
+	EmailTemplate,
+	SMSTemplate,
+	WhatsAppTemplate,
+} from '@quillcrm/client';
 //@ts-ignore
 import device from '../../../../../../assets/images/message-device.png';
 
@@ -58,7 +63,10 @@ const Review: React.FC = () => {
 	// Scroll to notice banner when notice appears
 	useEffect(() => {
 		if (notice && noticeBannerRef.current) {
-			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			noticeBannerRef.current.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			});
 		}
 	}, [notice]);
 
@@ -70,17 +78,39 @@ const Review: React.FC = () => {
 
 	// Get template info from campaign
 	// Backend attaches templates via attach_templates() method
-	const template = campaign?.settings?.templates?.[0] as any;
+	type CampaignTemplate = EmailTemplate | SMSTemplate | WhatsAppTemplate;
+	const template: CampaignTemplate | null =
+		(campaign?.settings?.templates?.[0] as CampaignTemplate) || null;
 
 	// Extract template data based on Template_Field_Mapper structure
 	// For email: subject is top-level, from_name/from_email/reply_to/preview_text are in settings
 	// For SMS: from_name and from_phone are in settings
-	const emailSubject = template?.subject || '-';
-	const fromName = template?.settings?.from_name || '-';
-	const fromEmail = template?.settings?.from_email || '-';
-	const fromPhone = template?.settings?.from_phone || '-';
-	const replyTo = template?.settings?.reply_to || '-';
-	const previewText = template?.settings?.preview_text || '-';
+	const isEmailTemplate = template?.type === 'email';
+	const emailSubject =
+		isEmailTemplate && (template as EmailTemplate).subject
+			? (template as EmailTemplate).subject
+			: '-';
+	const fromName =
+		isEmailTemplate && (template as EmailTemplate).settings?.from_name
+			? (template as EmailTemplate).settings!.from_name
+			: '-';
+	const fromEmail =
+		isEmailTemplate && (template as EmailTemplate).settings?.from_email
+			? (template as EmailTemplate).settings!.from_email
+			: '-';
+	const fromPhone =
+		campaign?.type === 'sms'
+			? ((campaign?.settings as unknown as { from_phone?: string })
+					?.from_phone ?? '-')
+			: '-';
+	const replyTo =
+		isEmailTemplate && (template as EmailTemplate).settings?.reply_to
+			? (template as EmailTemplate).settings!.reply_to
+			: '-';
+	const previewText =
+		isEmailTemplate && (template as EmailTemplate).preview_text
+			? (template as EmailTemplate).preview_text
+			: '-';
 
 	// Debug: Log template structure to verify data
 	useEffect(() => {
@@ -108,10 +138,16 @@ const Review: React.FC = () => {
 			const excludeListIds: number[] = [];
 			const excludeTagIds: number[] = [];
 
-			filters.forEach((filter: any) => {
+			type SegmentFilter = {
+				group?: string;
+				value?: unknown[];
+				operator?: string;
+				filter?: string;
+			};
+			(filters as SegmentFilter[]).forEach((filter) => {
 				if (filter.group !== 'segments' || !filter.value?.[0]) return;
 
-				const id = filter.value[0];
+				const id = Number((filter.value as unknown[])[0]);
 				const isInclude = filter.operator === 'contains';
 
 				if (filter.filter === 'lists_segment') {
@@ -133,11 +169,12 @@ const Review: React.FC = () => {
 			try {
 				if (includeListIds.length > 0) {
 					const lists = await Promise.all(
-						includeListIds.map((id) =>
-							apiFetch({ path: `/qc/v1/lists/${id}` }).then(
-								(list: any) => list.name
-							)
-						)
+						includeListIds.map(async (listId) => {
+							const list = (await apiFetch({
+								path: `/qc/v1/lists/${listId}`,
+							})) as { name?: string };
+							return list?.name || '';
+						})
 					);
 					setIncludedLists(lists);
 				} else {
@@ -146,11 +183,12 @@ const Review: React.FC = () => {
 
 				if (excludeListIds.length > 0) {
 					const lists = await Promise.all(
-						excludeListIds.map((id) =>
-							apiFetch({ path: `/qc/v1/lists/${id}` }).then(
-								(list: any) => list.name
-							)
-						)
+						excludeListIds.map(async (listId) => {
+							const list = (await apiFetch({
+								path: `/qc/v1/lists/${listId}`,
+							})) as { name?: string };
+							return list?.name || '';
+						})
 					);
 					setExcludedLists(lists);
 				}
@@ -158,11 +196,12 @@ const Review: React.FC = () => {
 				// Fetch tag names
 				if (includeTagIds.length > 0) {
 					const tags = await Promise.all(
-						includeTagIds.map((id) =>
-							apiFetch({ path: `/qc/v1/tags/${id}` }).then(
-								(tag: any) => tag.name
-							)
-						)
+						includeTagIds.map(async (tagId) => {
+							const tag = (await apiFetch({
+								path: `/qc/v1/tags/${tagId}`,
+							})) as { name?: string };
+							return tag?.name || '';
+						})
 					);
 					setIncludedTags(tags);
 				} else {
@@ -173,11 +212,12 @@ const Review: React.FC = () => {
 
 				if (excludeTagIds.length > 0) {
 					const tags = await Promise.all(
-						excludeTagIds.map((id) =>
-							apiFetch({ path: `/qc/v1/tags/${id}` }).then(
-								(tag: any) => tag.name
-							)
-						)
+						excludeTagIds.map(async (tagId) => {
+							const tag = (await apiFetch({
+								path: `/qc/v1/tags/${tagId}`,
+							})) as { name?: string };
+							return tag?.name || '';
+						})
 					);
 					setExcludedTags(tags);
 				}
@@ -231,7 +271,7 @@ const Review: React.FC = () => {
 
 			if (saveSuccess) {
 				// Update campaign status
-				const data: any = {
+				const data: { status: string; execute_at?: string } = {
 					status: runType,
 				};
 
@@ -280,7 +320,9 @@ const Review: React.FC = () => {
 				steps={
 					campaign?.type === 'email'
 						? campaignSteps
-						: campaignSteps.filter((step) => step.slug !== 'builder')
+						: campaignSteps.filter(
+								(step) => step.slug !== 'builder'
+							)
 				}
 				canProceed="true"
 				currentStep={campaign?.type === 'email' ? 4 : 3}
@@ -355,7 +397,11 @@ const Review: React.FC = () => {
 				<div className="w-1/3">
 					{campaign?.type === 'sms' ? (
 						<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] h-full">
-							<img src={device} alt="device" className="w-[350px]" />
+							<img
+								src={device}
+								alt="device"
+								className="w-[350px]"
+							/>
 						</div>
 					) : (
 						<SendTestEmailCard campaignId={campaign?.id} />

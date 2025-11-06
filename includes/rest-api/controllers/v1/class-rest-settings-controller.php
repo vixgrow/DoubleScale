@@ -227,6 +227,16 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
+				'currency'        => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'currency' => array(
+							'type'    => 'string',
+							'default' => 'USD',
+						),
+					),
+				),
 				'button_settings' => array(
 					'type'                 => 'object',
 					'additionalProperties' => true,

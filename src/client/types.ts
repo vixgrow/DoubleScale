@@ -643,6 +643,9 @@ export type Settings = {
 		lost_tags: number[];
 		lost_lists: number[];
 	};
+	currency: {
+		currency: string;
+	};
 };
 
 export type Response = {

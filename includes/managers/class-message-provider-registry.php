@@ -49,7 +49,7 @@ class Message_Provider_Registry {
 	 */
 	private $default_providers = array(
 		'sms'      => 'twilio',
-		'whatsapp' => 'twilio',
+		// 'whatsapp' => 'twilio',
 	);
 
 	/**

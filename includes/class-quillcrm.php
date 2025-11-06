@@ -16,10 +16,10 @@ use Illuminate\Container\Container;
 use QuillCRM\Tasks;
 use QuillCRM\Campaign\Email_Processing;
 use QuillCRM\Campaign\SMS_Processing;
-use QuillCRM\Campaign\WhatsApp_Processing;
+// use QuillCRM\Campaign\WhatsApp_Processing;
 use QuillCRM\Tracking\Email as Email_Tracking;
 use QuillCRM\Tracking\SMS as SMS_Tracking;
-use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
+// use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
@@ -46,6 +46,9 @@ use QuillCRM\Custom_Metabox;
 use QuillCRM\Log_Handlers\Log_Handler_DB;
 use QuillCRM\Emails\Email_Builder;
 use QuillCRM\User_Roles\User_Roles;
+use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
+use QuillCRM\Managers\Message_Provider_Registry;
+use QuillCRM\Message_Providers\Twilio_Message_Provider;
 
 
 /**
@@ -155,9 +158,9 @@ final class QuillCRM {
 			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_sms_campaigns' );
 		}
 
-		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_whatsapp_campaigns' ) === false ) {
-			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_whatsapp_campaigns' );
-		}
+		// if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_whatsapp_campaigns' ) === false ) {
+		// 	$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_whatsapp_campaigns' );
+		// }
 
 		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_email_sequences' ) === false ) {
 			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_email_sequences' );
@@ -240,10 +243,10 @@ final class QuillCRM {
 		REST_API::instance();
 		Email_Processing::instance();
 		SMS_Processing::instance();
-		WhatsApp_Processing::instance();
+		// WhatsApp_Processing::instance();
 		Email_Tracking::instance();
 		SMS_Tracking::instance();
-		WhatsApp_Tracking::instance();
+		// WhatsApp_Tracking::instance();
 		Link_Triggers::instance();
 		Subscription_Manage::instance();
 		Forms_Manager::instance();
@@ -257,7 +260,7 @@ final class QuillCRM {
 		Importers_Manager::instance();
 		Custom_Metabox::get_instance();
 		Email_Builder::instance();
-		\QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth::init();
+		GoHighLevel_OAuth::init();
 		Pipeline_Manager::instance();
 		Deal_Manager::instance();
 		Activity_Manager::instance();
@@ -540,8 +543,8 @@ final class QuillCRM {
 	 */
 	public function register_message_providers() {
 		// Register Twilio as the default provider for SMS and WhatsApp
-		\QuillCRM\Managers\Message_Provider_Registry::instance()->register(
-			new \QuillCRM\Message_Providers\Twilio_Message_Provider()
+		Message_Provider_Registry::instance()->register(
+			new Twilio_Message_Provider()
 		);
 
 		do_action( 'quillcrm_register_message_providers' );

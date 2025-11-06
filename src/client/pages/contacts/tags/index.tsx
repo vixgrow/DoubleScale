@@ -21,7 +21,7 @@ import type {
 	DataTableConfig,
 	NoticeMessage,
 } from '@quillcrm/client';
-import { NoticeBanner } from '@quillcrm/components';
+import { NoticeBanner, NoData, GradientTagIcon } from '@quillcrm/components';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
 import { TagsDialog } from './tags-dialog';
@@ -29,8 +29,6 @@ import { useTagsColumns } from './columns';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@quillcrm/utils';
-import { NoData } from '@quillcrm/components';
-import TagsIcon from '@/components/icons/tags';
 
 export interface TagsRef {
 	openCreateTagModal: () => void;
@@ -308,7 +306,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 				</>
 			) : (
 				<NoData
-					icon={<TagsIcon width={120} height={120} />}
+					icon={<GradientTagIcon width={120} height={120} />}
 					title={__('No tags yet', 'quillcrm')}
 					subtitle={__(
 						'Get started by creating your first tag to organize your contacts',

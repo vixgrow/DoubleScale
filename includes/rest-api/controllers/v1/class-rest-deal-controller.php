@@ -242,6 +242,45 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function create_item( $request ) {
+		// Validate required fields
+		$title       = $request->get_param( 'title' );
+		$contact_id  = $request->get_param( 'contact_id' );
+		$pipeline_id = $request->get_param( 'pipeline_id' );
+		$stage_id    = $request->get_param( 'stage_id' );
+
+		// Check for required fields
+		if ( empty( $title ) ) {
+			return new WP_Error(
+				'missing_title',
+				__( 'Deal title is required.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( empty( $contact_id ) ) {
+			return new WP_Error(
+				'missing_contact',
+				__( 'Contact is required to create a deal.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( empty( $pipeline_id ) ) {
+			return new WP_Error(
+				'missing_pipeline',
+				__( 'Pipeline is required to create a deal.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( empty( $stage_id ) ) {
+			return new WP_Error(
+				'missing_stage',
+				__( 'Pipeline stage is required to create a deal.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		// Validate owner_id if provided
 		$owner_id = $request->get_param( 'owner_id' );
 		if ( $owner_id ) {
@@ -252,14 +291,13 @@ class REST_Deal_Controller extends REST_Controller {
 		}
 
 		$data = array(
-			'title'               => sanitize_text_field( $request->get_param( 'title' ) ),
-			'contact_id'          => intval( $request->get_param( 'contact_id' ) ),
-			'pipeline_id'         => intval( $request->get_param( 'pipeline_id' ) ),
-			'stage_id'            => intval( $request->get_param( 'stage_id' ) ),
+			'title'               => sanitize_text_field( $title ),
+			'contact_id'          => intval( $contact_id ),
+			'pipeline_id'         => intval( $pipeline_id ),
+			'stage_id'            => intval( $stage_id ),
 			'value'               => floatval( $request->get_param( 'value' ) ),
 			'currency'            => sanitize_text_field( $request->get_param( 'currency' ) ),
 			'expected_close_date' => sanitize_text_field( $request->get_param( 'expected_close_date' ) ),
-			// 'probability'         => $request->get_param( 'probability' ) !== null ? floatval( $request->get_param( 'probability' ) ) : null,
 			'priority'            => sanitize_text_field( $request->get_param( 'priority' ) ),
 			'owner_id'            => $owner_id ? intval( $owner_id ) : null,
 			'source'              => sanitize_text_field( $request->get_param( 'source' ) ),
@@ -276,7 +314,11 @@ class REST_Deal_Controller extends REST_Controller {
 		$deal = Deal_Manager::instance()->create_deal( $data );
 
 		if ( ! $deal ) {
-			return new WP_Error( 'creation_failed', 'Failed to create deal', array( 'status' => 500 ) );
+			return new WP_Error(
+				'creation_failed',
+				__( 'Failed to create deal. Please check if the contact, pipeline, and stage exist.', 'quillcrm' ),
+				array( 'status' => 500 )
+			);
 		}
 
 		$sync_custom_fields = $deal->sync_custom_fields( $request->get_param( 'custom_fields' ) );

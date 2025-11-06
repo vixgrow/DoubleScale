@@ -54,7 +54,7 @@ export const useDealOperations = (): DealOperationsReturn => {
 				});
 				return response;
 			} catch (error) {
-				const errorMessage = handleApiError(
+				const errorInfo = handleApiError(
 					'fetch deal details',
 					error,
 					__(
@@ -62,8 +62,7 @@ export const useDealOperations = (): DealOperationsReturn => {
 						'quillcrm'
 					)
 				);
-				// throw new Error(errorMessage);
-				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
+				throw new Error(errorInfo.message);
 			}
 		},
 		[]
@@ -104,7 +103,7 @@ export const useDealOperations = (): DealOperationsReturn => {
 				});
 				return response;
 			} catch (error) {
-				const errorMessage = handleApiError(
+				const errorInfo = handleApiError(
 					'fetch deal activities',
 					error,
 					__(
@@ -112,7 +111,7 @@ export const useDealOperations = (): DealOperationsReturn => {
 						'quillcrm'
 					)
 				);
-				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
+				throw new Error(errorInfo.message);
 			}
 		},
 		[]
@@ -143,13 +142,12 @@ export const useDealOperations = (): DealOperationsReturn => {
 					data,
 				});
 			} catch (error) {
-				const errorMessage = handleApiError(
+				const errorInfo = handleApiError(
 					'move deal to stage',
 					error,
 					ERROR_MESSAGES.MOVE_DEAL
 				);
-				// throw new Error(errorMessage);
-				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
+				throw new Error(errorInfo.message);
 			}
 		},
 		[]
@@ -172,13 +170,12 @@ export const useDealOperations = (): DealOperationsReturn => {
 					data,
 				});
 			} catch (error) {
-				const errorMessage = handleApiError(
+				const errorInfo = handleApiError(
 					'move deal to pipeline',
 					error,
 					ERROR_MESSAGES.MOVE_DEAL
 				);
-				// throw new Error(errorMessage);
-				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
+				throw new Error(errorInfo.message);
 			}
 		},
 		[]
@@ -197,12 +194,12 @@ export const useDealOperations = (): DealOperationsReturn => {
 					data,
 				});
 			} catch (error) {
-				const errorMessage = handleApiError(
+				const errorInfo = handleApiError(
 					'update deal',
 					error,
 					ERROR_MESSAGES.UPDATE_DEAL
 				);
-				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
+				throw new Error(errorInfo.message);
 			}
 		},
 		[]
@@ -218,12 +215,12 @@ export const useDealOperations = (): DealOperationsReturn => {
 				method: 'DELETE',
 			});
 		} catch (error) {
-			const errorMessage = handleApiError(
+			const errorInfo = handleApiError(
 				'delete deal',
 				error,
 				ERROR_MESSAGES.DELETE_DEAL
 			);
-			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
+			throw new Error(errorInfo.message);
 		}
 	}, []);
 
@@ -239,12 +236,13 @@ export const useDealOperations = (): DealOperationsReturn => {
 			});
 			return response;
 		} catch (error) {
-			const errorMessage = handleApiError(
+			const errorInfo = handleApiError(
 				'create deal',
 				error,
 				ERROR_MESSAGES.CREATE_DEAL
 			);
-			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
+			// Throw the actual error message for the UI to display
+			throw new Error(errorInfo.message);
 		}
 	}, []);
 
@@ -265,12 +263,12 @@ export const useDealOperations = (): DealOperationsReturn => {
 
 				return response.updated_count;
 			} catch (error) {
-				const errorMessage = handleApiError(
+				const errorInfo = handleApiError(
 					'bulk update deals',
 					error,
 					__('Failed to update deals. Please try again.', 'quillcrm')
 				);
-				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
+				throw new Error(errorInfo.message);
 			}
 		},
 		[]

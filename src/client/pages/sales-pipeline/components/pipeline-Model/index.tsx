@@ -29,7 +29,6 @@ import {
 	AlertIcon,
 	PlusIcon,
 } from '@quillcrm/components';
-import DuplicatePipelineDialog from '@quillcrm/components/icons/duplicate-pipeline-modal';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {

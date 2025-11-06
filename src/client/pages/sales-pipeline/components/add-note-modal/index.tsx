@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -13,7 +13,6 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -48,7 +47,7 @@ interface AddNoteModalProps {
 	dealTitle?: string;
 }
 const noteSchema = z.object({
-	dealTitle: z.string().optional(),
+	// dealTitle: z.string().optional(),
 	note: z
 		.string()
 		.min(3, {
@@ -76,7 +75,7 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 	const form = useForm<NoteFormValues>({
 		resolver: zodResolver(noteSchema),
 		defaultValues: {
-			dealTitle: dealTitle || '',
+			// dealTitle: dealTitle || '',
 			note: '',
 		},
 	});
@@ -131,25 +130,18 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 						className="space-y-4"
 					>
 						{/* Deal Title (read-only) */}
-						<FormField
-							control={form.control}
-							name="dealTitle"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel className="font-normal text-[#09090B] text-base">
-										{__('Deal Name', 'quillcrm')}
-									</FormLabel>
-									<FormControl className="h-12 !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] !text-[#09090B] font-sm text-sm landing-[150%] tracking-[-.5px]">
-										<Input
-											{...field}
-											value={field.value}
-											className="bg-gray-50 "
-											placeholder="Deal Name"
-										/>
-									</FormControl>
-								</FormItem>
-							)}
-						/>
+
+						<div className="flex flex-col gap-1">
+							<Label className="font-normal text-[#09090B] text-base">
+								{__('Deal Name', 'quillcrm')}
+							</Label>
+							<Input
+								readOnly
+								value={dealTitle || ''}
+								className="h-12 py-[5px] px-4 bg-[#F0F0F0] border border-[#DEE1E6] rounded-[8px]"
+								placeholder="Deal Name"
+							/>
+						</div>
 
 						{/* Note Field */}
 						<FormField

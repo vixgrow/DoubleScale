@@ -1,5 +1,5 @@
 import { PipelineStageHeaderBox } from '@quillcrm/components/pipeline-stage-headerBox/pipeline-stage-headerBox';
-import { StageColorBody } from '@quillcrm/components/stagebody-color/stagebodyColor';
+import {  StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
 import { __ } from '@wordpress/i18n';
 
 export const PipelinePreviewBoard = ({ stages }) => {
@@ -14,7 +14,7 @@ export const PipelinePreviewBoard = ({ stages }) => {
 				}}
 			>
 				{stages.map((stage, index) => {
-					const { backgroundColor } = StageColorBody(
+					const { backgroundColor } = (
 						stage.color,
 						index,
 						stages.length
@@ -32,7 +32,7 @@ export const PipelinePreviewBoard = ({ stages }) => {
 							>
 								<div
 									className="font-bold  text-base leading-[26px] tracking-[-.5px] font-[inter]"
-									style={{ color: stage.color }}
+									style={{ color: StageTextColor(stage.color) }}
 								>
 									{stage.name || `Stage ${index + 1}`}
 								</div>
@@ -40,7 +40,7 @@ export const PipelinePreviewBoard = ({ stages }) => {
 
 							<div
 								className="relative flex flex-col items-center p-4 pt-0 rounded-[8px] rounded-t-none shadow-sm h-full overflow-hidden "
-								style={{ background: backgroundColor }}
+								style={{ background: stage.color }}
 							>
 								<div className="flex flex-col gap-3 w-full items-center mt-6">
 									{Array.from({ length: 10 }).map((_, i) => (

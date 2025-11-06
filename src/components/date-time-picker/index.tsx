@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -5,19 +6,14 @@ import { OutlinedCalendarIcon } from '@quillcrm/components';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover-dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover-dialog';
 
 interface DateTimePickerProps {
-	value?: string | Date | null;
-	onChange: (value: string) => void;
+	value?: Date | null;
+	onChange: (value: Date) => void;
 	placeholder?: string;
 	disabled?: boolean;
 	className?: string;
-	outputFormat?: 'iso' | 'display';
 }
 
 function formatDateTime(date: Date | undefined) {
@@ -32,7 +28,7 @@ function formatDateTime(date: Date | undefined) {
 	});
 }
 
-function parseDate(value: string | Date | null | undefined): Date | undefined {
+function parseDate(value: Date | string | null | undefined): Date | undefined {
 	if (!value) return undefined;
 	if (value instanceof Date && !isNaN(value.getTime())) return value;
 	if (typeof value === 'string') {
@@ -48,16 +44,13 @@ export function DateTimePicker({
 	placeholder = 'Select date & time',
 	disabled = false,
 	className,
-	outputFormat = 'iso',
 }: DateTimePickerProps) {
 	const [open, setOpen] = React.useState(false);
-	const [showCalendar, setShowCalendar] = React.useState(true);
 	const initialDate = React.useMemo(() => parseDate(value), [value]);
 	const [date, setDate] = React.useState<Date | undefined>(initialDate || new Date());
-
 	const [tempDate, setTempDate] = React.useState<Date | undefined>(date);
 
-	// الوقت
+	
 	const [hours, setHours] = React.useState(() => {
 		const d = initialDate || new Date();
 		let h = d.getHours();
@@ -71,15 +64,6 @@ export function DateTimePicker({
 		const d = initialDate || new Date();
 		return d.getHours() >= 12 ? 'PM' : 'AM';
 	});
-
-	const formatValue = (d: Date) => {
-		let h = hours % 12 + (ampm === 'PM' ? 12 : 0);
-		const updated = new Date(d);
-		updated.setHours(h, minutes);
-		return outputFormat === 'iso'
-			? updated.toISOString()
-			: formatDateTime(updated);
-	};
 
 	const handleDateSelect = (selected: Date | undefined) => {
 		if (!selected) return;
@@ -99,21 +83,29 @@ export function DateTimePicker({
 		setAmPm(val);
 	};
 
-	const handleDone = () => {
+	const handleDone = (e?: React.MouseEvent) => {
+		e?.stopPropagation();
 		if (!tempDate) return;
-		setDate(tempDate);
-		onChange(formatValue(tempDate));
+		const updated = new Date(tempDate);
+		const h = hours % 12 + (ampm === 'PM' ? 12 : 0);
+		updated.setHours(h, minutes);
+		setDate(updated);
+		onChange(updated);
 		setOpen(false);
 	};
 
-	const handleCancel = () => {
+	const handleCancel = (e?: React.MouseEvent) => {
+		e?.stopPropagation();
 		setTempDate(date);
 		setOpen(false);
 	};
 
 	return (
 		<div className={cn('relative flex flex-col gap-2', className)}>
-			<Popover open={open} onOpenChange={setOpen}>
+			<Popover open={open} onOpenChange={(val) => {
+				if (!val) return; 
+				setOpen(val);
+			}}>
 				<PopoverTrigger asChild>
 					<Button
 						variant="outline"
@@ -125,6 +117,7 @@ export function DateTimePicker({
 				</PopoverTrigger>
 
 				<PopoverContent
+					onClick={(e) => e.stopPropagation()}
 					className="w-auto p-4 flex flex-col gap-3 shadow-lg border-none"
 					align="end"
 					sideOffset={10}
@@ -147,7 +140,7 @@ export function DateTimePicker({
 								min={1}
 								max={12}
 								onChange={(e) => handleTimeChange('h', e.target.value)}
-								className=" w-12 text-center text-sm text-[#09090B] font-medium !outline-none focus:!outline-none !border-0 focus:border-0"
+								className="w-12 text-center text-sm text-[#09090B] font-medium !outline-none focus:!outline-none !border-0 focus:border-0"
 							/>
 							<span className="text-sm">:</span>
 							<input
@@ -156,7 +149,7 @@ export function DateTimePicker({
 								min={0}
 								max={59}
 								onChange={(e) => handleTimeChange('m', e.target.value)}
-								className=" w-12 text-center text-sm text-[#09090B] font-medium !outline-none focus:!outline-none !border-0 focus:border-0"
+								className="w-12 text-center text-sm text-[#09090B] font-medium !outline-none focus:!outline-none !border-0 focus:border-0"
 							/>
 						</div>
 
@@ -188,7 +181,21 @@ export function DateTimePicker({
 						</div>
 					</div>
 
-					
+					<div className="flex justify-end gap-2 pt-3 border-t">
+						<Button 
+							variant="outline" 
+							onClick={handleCancel}
+							type="button"
+						>
+							Cancel
+						</Button>
+						<Button 
+							onClick={handleDone}
+							type="button"
+						>
+							Done
+						</Button>
+					</div>
 				</PopoverContent>
 			</Popover>
 		</div>

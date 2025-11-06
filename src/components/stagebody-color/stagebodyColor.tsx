@@ -1,17 +1,12 @@
 import tinycolor from 'tinycolor2';
 
-interface StageColorInfo {
-  baseColor: string;
-  backgroundColor: string;
-}
-
-export function StageColorBody(
-  stageColor: string,
-  index: number,
-  totalStages: number
-): StageColorInfo {
-  const baseColor = tinycolor(stageColor).toString();
-  const backgroundColor = tinycolor(stageColor).lighten(30).toString();
-
-  return { baseColor, backgroundColor};
+export function StageTextColor(stageColor: string): string {
+  const tc = tinycolor(stageColor).setAlpha(1); 
+  if (tc.isLight()) {
+    
+    return tc.darken(40).toHexString(); 
+  } else {
+    
+    return tc.lighten(40).toHexString();
+  }
 }

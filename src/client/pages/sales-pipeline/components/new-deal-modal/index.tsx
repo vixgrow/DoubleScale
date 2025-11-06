@@ -31,7 +31,7 @@ import { Input } from '@quillcrm/components/ui/input';
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { useUsers } from '../../hooks/use-users';
-import { UserService } from '../../../../../services/user-service';
+import { User, UserService } from '../../../../../services/user-service';
 import { SOURCE_OPTIONS } from '../../../../../config/types/config-data';
 import './style.scss';
 import ConfigAPI from '@quillcrm/config';
@@ -68,8 +68,10 @@ interface Contact {
 }
 
 // stages
-import { StageColorBody } from '@quillcrm/components/stagebody-color/stagebodyColor';
+
 import { CustomFieldsSection } from '../deal-custom-fields';
+import { DatePicker } from '@quillcrm/components/ui/date-picker';
+import { convertDate } from '@quillcrm/utils';
 
 
 interface PipelineStageBoxProps {
@@ -86,75 +88,6 @@ interface PipelineStageBoxProps {
 	isPrevious?: boolean;
 }
 
-// const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
-// 	stage,
-// 	index,
-// 	totalStages,
-// 	children,
-// 	isSelected,
-// 	isPrevious,
-// }) => {
-// 	const backgroundColor =
-// 		isSelected || isPrevious
-// 			? StageColorBody(stage.color, index, totalStages).backgroundColor
-// 			: '#DEE1E6';
-
-// 	const isFirst = index === 0;
-// 	const isLast = index === totalStages - 1;
-
-// 	return (
-// 		<div className="flex flex-col p-0 m-0 relative">
-// 			<div
-// 				className="h-10 flex items-center justify-center relative rounded-[8px] px-7 md:px-5"
-// 				style={{ background: backgroundColor }}
-// 			>
-// 				{children}
-// 				{/* Triangles */}
-// 				{isFirst && (
-// 					<span
-// 						className="absolute top-0 right-[-11px] w-0 h-0 z-[11]  rounded-sm"
-// 						style={{
-// 							borderTop: '20px solid transparent',
-// 							borderBottom: '20px solid transparent',
-// 							borderLeft: `15px solid ${backgroundColor}`,
-// 						}}
-// 					/>
-// 				)}
-// 				{isLast && (
-// 					<span
-// 						className="absolute top-0 left-0 z-[3] w-0 h-0 "
-// 						style={{
-// 							borderTop: '20px solid transparent',
-// 							borderBottom: '20px solid transparent',
-// 							borderLeft: '15px solid white',
-// 						}}
-// 					/>
-// 				)}
-// 				{!isFirst && !isLast && (
-// 					<>
-// 						<span
-// 							className="absolute top-0 right-[-11px] w-0 h-0 z-[11]   rounded-sm"
-// 							style={{
-// 								borderTop: '20px solid transparent',
-// 								borderBottom: '20px solid transparent',
-// 								borderLeft: `15px solid ${backgroundColor}`,
-// 							}}
-// 						/>
-
-// 						<span
-// 							className="absolute top-0 left-0 z-[3] w-0 h-0 "
-// 							style={{
-// 								borderTop: '20px solid transparent',
-// 								borderBottom: '20px solid transparent',
-// 								borderLeft: '15px solid white',
-// 							}}
-// 						/>
-// 					</>
-// 				)}
-// 			</div>
-// 		</div>
-// 	);
-// };
 const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 	stage,
 	index,
@@ -164,9 +97,7 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 	isPrevious,
 }) => {
 	const backgroundColor =
-		isSelected || isPrevious
-			? StageColorBody(stage.color, index, totalStages).backgroundColor
-			: '#DEE1E6';
+		isSelected || isPrevious ? stage.color : '#DEE1E6';
 
 	const isFirst = index === 0;
 	const isLast = index === totalStages - 1;
@@ -220,6 +151,9 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 		</div>
 	);
 };
+
+
+
 
 
 
@@ -305,10 +239,8 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 				pipeline_id: pipeline.id,
 				currency: 'USD',
 				expected_close_date: values.expected_close_date
-					? new Date(values.expected_close_date)
-							.toISOString()
-							.split('T')[0]
-					: null,
+                ? convertDate(values.expected_close_date)
+                : null,
 			};
 
 			await createDeal(dealData);
@@ -669,6 +601,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 						</label>
 
 						<DateRangePicker
+						   
 							value={{
 								from: formData.expected_close_date?.from
 									? new Date(
@@ -688,8 +621,22 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 								})
 							}
 							placeholder={__('From-To', 'quillcrm')}
-							className="w-full h-12 !shadow-none rounded-[8px] border border-[#DEE1E6] !text-[#09090B] bg-white !font-normal !text-base tracking-[-.5px]"
+							className="w-full h-12  !shadow-none rounded-[8px] border border-[#DEE1E6] !text-[#09090B] bg-white !font-normal !text-base tracking-[-.5px]"
 						/>
+						{/* <DatePicker
+		value={
+			typeof formData.expected_close_date === 'string' && formData.expected_close_date
+				? new Date(formData.expected_close_date)
+				: ''
+		}
+		onChange={(value: string) =>
+			handleChange('expected_close_date', value)
+		}
+		
+		placeholder={__('Select Date', 'quillcrm')}
+		className="!w-full h-12 !shadow-none rounded-[8px] border border-[#DEE1E6] !text-[#09090B] !bg-white !font-normal !text-base tracking-[-.5px]"
+	/> */}
+						
 					</div>
 					{pipeline?.stages && pipeline.stages.length > 0 && (
 						<div className="flex flex-col gap-2">
@@ -757,6 +704,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 													)
 												}
 												className="cursor-pointer transition-all duration-200"
+												
 												title={stage.name}
 											>
 												<PipelineStageHeaderBox
@@ -866,4 +814,10 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		</Dialog>
 	);
 };
+
+
+
+
+// -----------------------------------
+
 

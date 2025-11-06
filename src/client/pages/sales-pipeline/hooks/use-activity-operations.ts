@@ -47,7 +47,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				error,
 				__('Failed to add note. Please try again.', 'quillcrm')
 			);
-			throw new Error(errorMessage);
+			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 		}
 	}, []);
 
@@ -71,7 +71,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				error,
 				__('Failed to log call. Please try again.', 'quillcrm')
 			);
-			throw new Error(errorMessage);
+			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 		}
 	}, []);
 
@@ -95,7 +95,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				error,
 				__('Failed to log email. Please try again.', 'quillcrm')
 			);
-			throw new Error(errorMessage);
+			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 		}
 	}, []);
 
@@ -123,7 +123,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 						'quillcrm'
 					)
 				);
-				throw new Error(errorMessage);
+				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 			}
 		},
 		[]
@@ -149,7 +149,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 					error,
 					__('Failed to add comment. Please try again.', 'quillcrm')
 				);
-				throw new Error(errorMessage);
+				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 			}
 		},
 		[]
@@ -178,7 +178,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 						'quillcrm'
 					)
 				);
-				throw new Error(errorMessage);
+				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 			}
 		},
 		[]
@@ -199,7 +199,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				error,
 				__('Failed to delete comment. Please try again.', 'quillcrm')
 			);
-			throw new Error(errorMessage);
+			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 		}
 	}, []);
 
@@ -219,7 +219,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				error,
 				__('Failed to load comments. Please try again.', 'quillcrm')
 			);
-			throw new Error(errorMessage);
+			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 		}
 	}, []);
 
@@ -250,7 +250,7 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 				error,
 				__('Failed to load statistics. Please try again.', 'quillcrm')
 			);
-			throw new Error(errorMessage);
+			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 		}
 	}, []);
 

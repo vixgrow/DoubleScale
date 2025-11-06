@@ -1,9 +1,11 @@
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { ColorPicker } from 'antd';
 import TrashIcon from '@quillcrm/components/icons/trash';
 import { PlusIcon, DragDropIcon } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import { __ } from '@wordpress/i18n';
+import { COLORS, CustomColorPicker } from '@quillcrm/components/custom-colorPicker';
+import { useStageOperations } from '../../hooks/use-stage-operations';
+
 
 export const PipelineStageEditor = ({
 	stages,
@@ -11,23 +13,49 @@ export const PipelineStageEditor = ({
 	onReset,
 	onAddStage,
 }) => {
-	const updateStage = (index, key, value) => {
+	const { updateStage , reorderStages } = useStageOperations();
+
+	const updateStageHandler = async (index, key, value) => {
+		
 		setStages((prev) => {
 			const updated = [...prev];
 			updated[index] = { ...updated[index], [key]: value };
 			return updated;
 		});
+		
+		const stage = stages[index];
+		try {
+			await updateStage(stage.pipeline_id, stage.id, { [key]: value });
+		} catch (error) {
+			console.error('Failed to update stage:', error);
+			
+		}
 	};
 
 	const removeStage = (index) =>
 		setStages((prev) => prev.filter((_, i) => i !== index));
 
-	const handleDragEnd = (result) => {
+	// const handleDragEnd = (result) => {
+	// 	if (!result.destination) return;
+	// 	const reordered = Array.from(stages);
+	// 	const [moved] = reordered.splice(result.source.index, 1);
+	// 	reordered.splice(result.destination.index, 0, moved);
+	// 	setStages(reordered);
+	// };
+	const handleDragEnd = async (result) => {
 		if (!result.destination) return;
+	
 		const reordered = Array.from(stages);
 		const [moved] = reordered.splice(result.source.index, 1);
 		reordered.splice(result.destination.index, 0, moved);
 		setStages(reordered);
+	
+		try {
+			const stageIds =(reordered as any[]).map((s) => s.id); 
+			await reorderStages(stages[0]?.pipeline_id, stageIds);
+		} catch (error) {
+			console.error('Failed to reorder stages:', error);
+		}
 	};
 
 	return (
@@ -84,13 +112,7 @@ export const PipelineStageEditor = ({
 													<input
 														type="text"
 														value={stage.name}
-														onChange={(e) =>
-															updateStage(
-																index,
-																'name',
-																e.target.value
-															)
-														}
+														onChange={(e) => updateStageHandler(index, 'name', e.target.value)}
 														maxLength={255}
 														placeholder="Enter stage name"
 														className="input-stage"
@@ -109,9 +131,14 @@ export const PipelineStageEditor = ({
 														Color
 													</label>
 												)}
-												<div className="flex items-center justify-center relative z-50">
+												<div className="flex items-center justify-center relative ">
 													
-													<input value={stage.color} className="w-full input-stage z-50 "/>
+													{/* <input value={stage.color} className="w-full input-stage z-50 "/> */}
+													<CustomColorPicker
+    colors={COLORS}
+    selected={stage.color}
+    onSelect={(color) => updateStageHandler(index, 'color', color)}
+/>
 												</div>
 											</div>
 
@@ -127,16 +154,7 @@ export const PipelineStageEditor = ({
 														value={
 															stage.win_probability
 														}
-														onChange={(e) =>
-															updateStage(
-																index,
-																'win_probability',
-																Number(
-																	e.target
-																		.value
-																) || 0
-															)
-														}
+														onChange={(e) => updateStageHandler(index, 'win_probability', Number(e.target.value) || 0)}
 														min={0}
 														max={100}
 														placeholder="0–100"

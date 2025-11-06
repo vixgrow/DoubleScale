@@ -147,7 +147,7 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 							name="sent_at"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel className="font-normal text-[#09090B] text-base">
+									<FormLabel className="font-normal text-[#09090B] text-base ">
 										{__('Sent Date & Time', 'quillcrm')}
 									</FormLabel>
 									<FormControl>
@@ -155,6 +155,7 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 											value={field.value}
 											onChange={field.onChange}
 											placeholder="Select date & time"
+											
 										/>
 									</FormControl>
 									<FormMessage />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StageColorBody } from '@quillcrm/components/stagebody-color/stagebodyColor';
+
 
 interface PipelineStageBoxProps {
 	stage: {
@@ -19,7 +19,8 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 	totalStages,
 	children,
 }) => {
-	const { backgroundColor } = StageColorBody(stage.color, index, totalStages);
+	// const { backgroundColor } = (stage.color, index, totalStages);
+	const backgroundColor = stage.color || '#E4EEFD'
 	const isFirst = index === 0;
 	const isLast = index === totalStages - 1;
 

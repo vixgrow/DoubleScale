@@ -7,8 +7,7 @@ import { useState } from '@wordpress/element';
 /**
  * External dependencies
  */
-import {message } from 'antd';
-import { Phone } from 'lucide-react';
+
 import dayjs from 'dayjs';
 
 /**
@@ -42,14 +41,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@quillcrm/components/ui/select';
-// import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
 import { Textarea } from '@quillcrm/components/ui/textarea';
 import { Button } from '@quillcrm/components/ui/button';
 import { useDispatch } from '@wordpress/data';
 import { DateTimePicker } from '@quillcrm/components/date-time-picker';
-// import { DateTimePicker } from '@quillcrm/components/ui/date-picker';
-
-// import { DatePicker } from '@quillcrm/components/ui/date-picker';
 
 
 interface LogCallModalProps {
@@ -64,6 +59,7 @@ interface LogCallModalProps {
 		last_name: string;
 		email: string;
 	} | null;
+	dealContactName?:string
 }
 
 interface CallFormData {
@@ -74,6 +70,7 @@ interface CallFormData {
 	called_at: string 
 	dealTitle: string;
 	dealContact: string;
+	dealContactName:string
 }
 
 export const LogCallModal: React.FC<LogCallModalProps> = ({
@@ -83,6 +80,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 	dealId,
 	dealTitle,
 	dealContact,
+	dealContactName
 }) => {
 	const [loading, setLoading] = useState(false);
 	const { logCall } = useActivityOperations();
@@ -178,7 +176,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 						{/* related contact */}
 						<FormField
 							control={form.control}
-							name="dealContact"
+							name="dealContactName"
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel className="font-normal text-[#09090B] text-base">
@@ -189,7 +187,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 											placeholder="Deal Name"
 											{...field}
 											readOnly
-											value={dealContact?.first_name}
+											value={dealContactName}
 											className=" h-12 py-[5px] px-4 !shadow-none  bg-[#F0F0F0] focus:bg-[#F0F0F0] border !border-[#DEE1E6] rounded-[8px]"
 										/>
 									</FormControl>

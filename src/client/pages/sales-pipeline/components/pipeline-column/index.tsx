@@ -14,7 +14,7 @@ import { useDroppable } from '@dnd-kit/core';
  */
 import { DealCard } from '../deal-card';
 import { Deal } from '../../types';
-import { StageColorBody } from '@quillcrm/components/stagebody-color/stagebodyColor';
+import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
 import './style.scss';
 import { NoDealsIcon } from '@quillcrm/components';
 import WinTagIcon from '@quillcrm/components/icons/win-tag';
@@ -90,10 +90,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 		};
 	}, [deals, stage.win_probability]);
 
-	const { backgroundColor } = useMemo(
-		() => StageColorBody(stage.color, 0, 1), // to avoid every render
-		[stage.color]
-	);
+
 	const isFirst = index === 0;
 	const isLast = index === totalStages - 1;
 
@@ -106,7 +103,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 
 			<div
 				className="column-header h-32  relative rounded-t-[16px] "
-				style={{ backgroundColor }}
+				style={{ backgroundColor:stage.color }}
 			>
 				{isFirst && (
 					<div
@@ -114,7 +111,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 						style={{
 							borderTop: '60px solid transparent',
 							borderBottom: '60px solid transparent',
-							borderLeft: `40px solid ${backgroundColor}`,
+							borderLeft: `40px solid ${stage.color}`,
 						}}
 					></div>
 				)}
@@ -143,7 +140,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 							style={{
 								borderTop: '60px solid transparent',
 								borderBottom: '60px solid transparent',
-								borderLeft: `40px solid ${backgroundColor}`,
+								borderLeft: `40px solid ${stage.color}`,
 							}}
 						></div>
 					</>
@@ -158,7 +155,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 						<div className=" flex gap-2">
 							<h3
 								className="stage-name text-[24px] font-semibold leading-normal tracking-[-1px] "
-								style={{ color: `${stage.color}` }}
+								style={{ color: StageTextColor(stage.color) }}
 							>
 								{stage.name} {`(${deals.length})`}{' '}
 							</h3>
@@ -205,13 +202,13 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 			</div>
 
 			{deals.length > 0 && (
-				<div className=" w-full h-[2px] bg-[#DEE1E6]"></div>
+				<div className=" w-full h-[2px] bg-[#ebecef]"></div>
 			)}
 
 			{/* Deals Container */}
 			<div
 				className={`deals-container overflow-y-auto flex-1 max-h-screen relative  rounded-br-[16px]  rounded-bl-[16px]  ${isDropOver ? 'accepting-drop' : ''}`}
-				style={{ backgroundColor: backgroundColor }}
+				style={{ backgroundColor: stage.color }}
 				data-stage-id={stage.id}
 			>
 				{loading ? (
@@ -232,7 +229,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 					</div>
 				) : deals.length === 0 ? (
 					<div className=" flex justify-center items-center flex-col text-center h-full ">
-						{/* <div className=" flex flex-col justify-center items-center  "> */}
+						
 						<span className=" block my-2">
 							<NoDealsIcon />
 						</span>
@@ -243,7 +240,6 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 							{__('Drag deals here to move them to', 'quillcrm')}{' '}
 							"{stage.name}"
 						</small>
-						{/* </div> */}
 					</div>
 				) : (
 					<div className="">

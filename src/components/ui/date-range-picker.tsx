@@ -60,7 +60,13 @@ export function DateRangePicker({
 	};
 
 	const handleDateSelect = (range: any) => {
-		const newRange = range || { from: null, to: null };
+		// const newRange = range || { from: null, to: null };
+		let newRange = { from: range.from, to: range.to };
+
+	     if (newRange.from && newRange.to && newRange.from > newRange.to) {
+		newRange = { from: newRange.to, to: newRange.from };
+	}
+
 
 		// Update internal state immediately for UI feedback
 		setInternalRange(newRange);

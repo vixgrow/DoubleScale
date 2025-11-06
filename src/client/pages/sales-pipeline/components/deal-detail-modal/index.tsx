@@ -9,7 +9,6 @@ import { useState, useEffect } from '@wordpress/element';
  */
 import { Spin, message } from 'antd';
 
-
 /**
  * Internal dependencies
  */
@@ -33,12 +32,16 @@ import { DealOverViewModal } from './OverView';
 import { CustomFieldsView } from './CustomFileldView';
 import { PipelineStagesHeader } from './SatagesHeader';
 import { NewPipelineModal } from '../new-pipeline-modal';
+import Deal_Activites from '../deal-activities';
+import { DealDetailSkeleton } from './DealDetailSkeleton';
+import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
 
 interface DealDetailModalProps {
 	dealId: number | null;
 	visible: boolean;
 	onClose: () => void;
 	onUpdate?: () => void;
+	onDeleted?: () => void;
 	onEdit?: (deal: Deal) => void;
 	pipeline?: any;
 }
@@ -48,15 +51,24 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	visible,
 	onClose,
 	onUpdate,
+	onDeleted,
 	onEdit,
 	pipeline,
 }) => {
 	const [deal, setDeal] = useState<Deal | null>(null);
 	const [loading, setLoading] = useState(false);
+	const [showContent, setShowContent] = useState(false);
 	const [newPipelineModalVisible, setNewPipelineModalVisible] =
 		useState(false);
 
 	const { getDeal, deleteDeal } = useDealOperations();
+
+	useEffect(() => {
+		if (!loading && deal) {
+		  const timer = setTimeout(() => setShowContent(true), 150);
+		  return () => clearTimeout(timer);
+		}
+	}, [loading, deal]);
 
 	// Fetch deal data when modal opens
 	useEffect(() => {
@@ -80,18 +92,17 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	};
 	const previousStage = (() => {
 		if (!pipeline?.stages || !deal?.stage?.id) return null;
-	  
+
 		const currentIndex = pipeline.stages.findIndex(
-		  (stage: any) => stage.id === deal?.stage?.id
+			(stage: any) => stage.id === deal?.stage?.id
 		);
-	  
-		
+
 		if (currentIndex > 0) {
-		  return pipeline.stages[currentIndex - 1];
+			return pipeline.stages[currentIndex - 1];
 		}
-	  
+
 		return null;
-	  })();	  
+	})();
 
 	const formatCurrency = (value: number): string => {
 		let formattedValue = '';
@@ -109,17 +120,16 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 		return formattedValue;
 	};
 
-
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
-			<DialogContent className="max-h-[98vh] gap-8 w-[calc(100vw-500px)] max-w-none ml-auto mr-0 p-10  rounded-none z-[100000] overflow-y-auto">
-				{loading ? (
-					<div className="flex justify-center items-center min-h-[200px]">
-						<Spin size="large" />
-					</div>
+			<DialogContent className="max-h-[98vh] gap-8 w-full max-w-[calc(100vw-500px)]  ml-auto my-8 p-10  rounded-none overflow-y-auto">
+				{loading || !showContent  ? (
+					// <div className="flex justify-center items-center min-h-[200px]">
+						<DealDetailSkeleton />
+					// </div>
 				) : (
 					<>
-						<DialogHeader >
+						<DialogHeader>
 							<DialogTitle className=" flex justify-between ">
 								<div className=" p-0 m-0">
 									<div className=" flex gap-2 items-center">
@@ -160,6 +170,12 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 								<ActivityActions
 									dealId={deal?.id ?? 0}
 									onRefresh={fetchDealDetails}
+									dealTitle={deal?.title}
+									deal={deal}
+									dealContactName={deal?.contact?.first_name}
+									onDeleted={() => {
+										if(onDeleted) onDeleted();
+									}}
 								/>
 							</DialogTitle>
 						</DialogHeader>
@@ -188,13 +204,16 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 									<p className=" text-[#777] text-base font-medium">
 										{__('Pipeline', 'quillcrm')}
 									</p>
-									<p
-										className="text-[#09090B] font-bold text-lg "
-									>
+									<p className="text-[#09090B] font-bold text-lg ">
 										{__('New Pibeline', 'quillcrm')}
 									</p>
 								</div>
-								<span onClick={() =>setNewPipelineModalVisible(true)} className="w-7 h-7 p-1 flex items-center cursor-pointer justify-center rounded-full bg-[#E4EEFD]">
+								<span
+									onClick={() =>
+										setNewPipelineModalVisible(true)
+									}
+									className="w-7 h-7 p-1 flex items-center cursor-pointer justify-center rounded-full bg-[#E4EEFD]"
+								>
 									<EditHeaderIcon
 										color="#458DC7"
 										width={20}
@@ -208,45 +227,51 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 									<p className=" text-[#777] text-base font-medium">
 										{__('Previous Stage', 'quillcrm')}
 									</p>
-									<p
-										className="text-[#09090B] font-bold text-lg "
-									>
-										{previousStage ? previousStage.name : __('No previous stage', 'quillcrm')}
+									<p className="text-[#09090B] font-bold text-lg ">
+										{previousStage
+											? previousStage.name
+											: __(
+													'No previous stage',
+													'quillcrm'
+												)}
 									</p>
 								</div>
 							</div>
 							{/* current stage  */}
-							{deal?.stage&&(
+							{deal?.stage && (
 								<div className=" flex gap-4 items-center">
-								<div className=" flex flex-col gap-2">
-									<p className=" text-[#777] text-base font-medium">
-										{__('Current Stage', 'quillcrm')}
-									</p>
-									<p
-										className="font-bold text-lg "
-										style={{color:deal.stage.color}}
-									>
-										{deal?.stage?.name}
-									</p>
+									<div className=" flex flex-col gap-2">
+										<p className=" text-[#777] text-base font-medium">
+											{__('Current Stage', 'quillcrm')}
+										</p>
+										<p
+											className="font-bold text-lg "
+											style={{ color: StageTextColor(deal.stage.color) }}
+										>
+											{deal?.stage?.name}
+										</p>
+									</div>
 								</div>
-							</div>
 							)}
 							{/* win   */}
-							{deal?.probability &&(
+							{deal?.probability && (
 								<div className=" flex gap-4 items-center">
-								<div className=" flex flex-col gap-2">
-									<p className=" text-[#777] text-base font-medium">
-										{__('Win Probability (%)', 'quillcrm')}
-									</p>
-									<p
-										className="font-bold text-[#09090B]  text-lg "
-									>
-										{deal?.probability}
-									</p>
+									<div className=" flex flex-col gap-2">
+										<p className=" text-[#777] text-base font-medium">
+											{__(
+												'Win Probability (%)',
+												'quillcrm'
+											)}
+										</p>
+										<p className="font-bold text-[#09090B]  text-lg ">
+											{deal?.probability}
+										</p>
+									</div>
 								</div>
-							</div>
 							)}
 						</div>
+						{/* avtivites */}
+						<Deal_Activites dealId={dealId || undefined} />
 					</>
 				)}
 

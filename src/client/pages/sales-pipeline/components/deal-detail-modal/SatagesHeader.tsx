@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StageColorBody } from '@quillcrm/components/stagebody-color/stagebodyColor';
 import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
 import { __ } from '@wordpress/i18n';
+import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
 
 interface PipelineStageBoxProps {
   stage: {
@@ -29,7 +29,7 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
   totalStages,
   children,
 }) => {
-  const { backgroundColor } = StageColorBody(stage.color, index, totalStages);
+  // const { backgroundColor } = StageColorBody(stage.color, index, totalStages);
   const isFirst = index === 0;
   const isLast = index === totalStages - 1;
 
@@ -37,7 +37,7 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
     <div
       className="relative flex items-center justify-center h-14"
       style={{
-        backgroundColor,
+        backgroundColor:stage.color,
         width: `${100 / totalStages}%`,
         marginLeft: isFirst ? 0 :5,
         zIndex: 100 - index,
@@ -48,7 +48,7 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
           : undefined,
       }}
     >
-      <span className='text-base font-semibold  whitespace-nowrap' style={{ color: stage.color }} >
+      <span className='text-base font-semibold  whitespace-nowrap' style={{ color: StageTextColor(stage.color) }} >
         {children}
       </span>
 
@@ -58,7 +58,7 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
           style={{
             borderTop: "28px solid transparent",
             borderBottom: "28px solid transparent",
-            borderLeft: `15px solid ${backgroundColor}`,
+            borderLeft: `15px solid ${stage.color}`,
           }}
         />
       )}

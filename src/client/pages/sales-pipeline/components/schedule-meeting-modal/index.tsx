@@ -49,7 +49,7 @@ interface ScheduleMeetingModalProps {
 
 interface MeetingFormData {
 	title: string;
-	scheduled_at: string;
+	scheduled_at: Date;
 	duration: number;
 	location: string;
 	description: string;
@@ -71,7 +71,8 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 	const form = useForm<MeetingFormData>({
 		defaultValues: {
 			title: '',
-			scheduled_at: dayjs().add(1, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+			// scheduled_at: dayjs().add(1, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+			scheduled_at: dayjs().add(1, 'hour').toDate(),
 			duration: 60,
 			location: '',
 			description: '',
@@ -83,7 +84,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 		try {
 			const meetingData: MeetingFormData = {
 				...values,
-				scheduled_at: dayjs(values.scheduled_at).format('YYYY-MM-DD HH:mm:ss'),
+				scheduled_at: values.scheduled_at, // Preserve as Date to match MeetingFormData type
 			};
 
 			await scheduleMeeting(dealId, meetingData);
@@ -111,6 +112,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 		form.reset();
 		onClose();
 	};
+	
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && handleCancel()}>
@@ -214,7 +216,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 									<DateTimePicker
             {...field}
             placeholder="Start date"
-           
+			onChange={(val) => field.onChange(val)}
           />
 									</FormControl>
 									<FormMessage />

@@ -43,7 +43,7 @@ import {
  * Internal dependencies
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
-import { DealActivities } from '../deal-activities';
+import { DealActivities } from '../deal-activities/index copy';
 import { Deal } from '../../types';
 import './style.scss';
 // import { DealCustomFields } from '../deal-custom-fields';

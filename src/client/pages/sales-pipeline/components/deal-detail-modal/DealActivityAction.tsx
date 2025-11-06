@@ -6,7 +6,6 @@ import { LogCallModal } from '../log-call-modal';
 import { LogEmailModal } from '../log-email-modal';
 import { ScheduleMeetingModal } from '../schedule-meeting-modal';
 import { Button } from '@/components/ui/button';
-import { StickyNote, Phone, Mail, Calendar } from 'lucide-react';
 import NoteAddIcon from '@quillcrm/components/icons/note-add';
 import CallLogIcon from '@quillcrm/components/icons/call-log';
 import EmailLogIcon from '@quillcrm/components/icons/email-log';
@@ -17,26 +16,54 @@ import TrashIcon from '@quillcrm/components/icons/trash';
 import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
 import { EditDealModal } from '../edit-deal-modal';
 import { DeleteDeal } from '../deal-delete';
+import { useDealOperations } from '../../hooks/use-deal-operations';
 
 interface ActivityActionsProps {
   dealId: number;
+  dealTitle?: string;
+  dealContactName?: string;
   onRefresh?: () => void; 
+  onDeleted?: () => void; 
+  deal?: any;
 }
 
-const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh }) => {
+const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,dealTitle,dealContactName,deal,onDeleted}) => {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<any>(null);
-  const handleOpenModal = (type: string, deal?: any) => {
-    if (type === 'edit' || type === 'delete') {
-      setSelectedDeal(deal); 
+  const { getDeal } = useDealOperations();
+  // const handleOpenModal = (type: string, deal?: any) => {
+  //   if (type === 'edit' || type === 'delete') {
+  //     setSelectedDeal(deal); 
+      
+  //   }
+  //   setOpenModal(type);
+  // };
+  const handleOpenModal = async (type: string, deal?: any) => {
+    if (type === 'edit' && deal?.id) {
+      try {
+        const latestDeal = await getDeal(deal.id, true);
+        setSelectedDeal(latestDeal);
+        setOpenModal('edit');
+      } catch (error) {
+        console.error('Failed to fetch deal for edit', error);
+        // message.error(__('Failed to fetch deal data', 'quillcrm'));
+      }
+      return;
     }
+  
+    if (type === 'delete') {
+      setSelectedDeal(deal);
+    }
+  
     setOpenModal(type);
   };
+  
 
   const handleClose = () => {
     setOpenModal(null);
     setSelectedDeal(null); 
   };
+
 
   return (
     <div className="flex flex-wrap gap-3">
@@ -85,19 +112,19 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh }) 
     <Button
       variant="outline"
       size="icon"
-      className=" h-10 w-10 border border-[#374151] !shadow-none"
+      className=" h-10 border border-[#374151] rounded-[8px] px-2 py-1"
     >
-      <PlusIcon color="#374151" width={32} height={32} />
+      <PlusIcon color="#374151"  />
     </Button>
   </DropdownMenuTrigger>
 
   <DropdownMenuContent
     align="end"
     style={{ boxShadow: '3px 3px 4px 0 rgba(0, 0, 0, 0.25)' }}
-    className="p-4 flex flex-col gap-[10px] rounded-[10px] border border-[#F5F5F5]"
+    className="p-4 flex flex-col gap-[10px] rounded-[10px] border border-[#F5F5F5] z-[100000]"
   >
     <DropdownMenuItem
-      onClick={() => setOpenModal('edit')}
+      onClick={() => handleOpenModal('edit', deal)}
       className="flex items-center gap-2 text-[#374151] font-medium text-sm leading-[16px]"
     >
       <EditHeaderIcon />
@@ -120,6 +147,7 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh }) 
   visible={openModal === 'note'}
   onClose={handleClose}
   dealId={dealId}
+  dealTitle={dealTitle}
   onSuccess={onRefresh || (() => {})}
 />
 
@@ -127,13 +155,16 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh }) 
   visible={openModal === 'call'}
   onClose={handleClose}
   dealId={dealId}
+  dealTitle={dealTitle}
   onSuccess={onRefresh || (() => {})}
+  dealContactName={dealContactName}
 />
 
 <LogEmailModal
   visible={openModal === 'email'}
   onClose={handleClose}
   dealId={dealId}
+  dealTitle={dealTitle}
   onSuccess={onRefresh || (() => {})}
 />
 
@@ -141,21 +172,36 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh }) 
   visible={openModal === 'meeting'}
   onClose={handleClose}
   dealId={dealId}
+  dealTitle={dealTitle}
   onSuccess={onRefresh || (() => {})}
 />
-<EditDealModal
+{/* <EditDealModal
   visible={openModal === 'edit'}
   onClose={handleClose}
-  deal={selectedDeal}
+  deal={selectedDeal} 
   pipelines={[]}
   onSuccess={onRefresh || (() => {})}
+/> */}
+<EditDealModal
+    visible={openModal === 'edit' && !!selectedDeal} 
+    onClose={handleClose}
+    deal={selectedDeal} 
+    pipelines={[]}
+    onSuccess={onRefresh || (() => {})}
 />
+
 <DeleteDeal
   visible={openModal === 'delete'}
   onClose={handleClose}
-  deal={selectedDeal}
+  deal={deal} 
+  onConfirm={() => {
+    handleClose();
+    onRefresh?.();
+    onDeleted?.();
+  }}
  
-  onConfirm={onRefresh || (() => {})}
+  // onConfirm={onRefresh || (() => {})}
+  
 />
 
     </div>
@@ -163,3 +209,4 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh }) 
 };
 
 export default ActivityActions;
+

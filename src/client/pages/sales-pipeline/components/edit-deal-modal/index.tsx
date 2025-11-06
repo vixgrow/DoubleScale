@@ -43,11 +43,11 @@ import { CustomDialogHeader, NoticeBanner } from '@quillcrm/components';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import { Input } from '@quillcrm/components/ui/input';
 import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
-import { StageColorBody } from '@quillcrm/components/stagebody-color/stagebodyColor';
 import { CustomFieldsSection } from '../deal-custom-fields';
 import { Button } from '@quillcrm/components/ui/button';
 import AllDealIcon from '@quillcrm/components/icons/all-deals';
 import { useDispatch } from '@wordpress/data';
+import { convertDate } from '@quillcrm/utils';
 
 interface PipelineStageBoxProps {
 	stage: {
@@ -71,8 +71,8 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 	isPrevious,
 }) => {
 	const backgroundColor =
-		isSelected || isPrevious
-			? StageColorBody(stage.color, index, totalStages).backgroundColor
+		isSelected || isPrevious ?
+			stage.color
 			: '#DEE1E6';
 
 	const isFirst = index === 0;
@@ -112,7 +112,6 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 					/>
 				)}
 
-				{/* السهم الشمال */}
 				{!isFirst && (
 					<span
 						className="absolute top-0 left-0 w-0 h-0"
@@ -180,9 +179,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	const [loading, setLoading] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactSearchLoading, setContactSearchLoading] = useState(false);
-	const [sources, setSources] = useState<{ label: string; value: string }[]>(
-		[]
-	);
+
 
 	// Use shared users hook
 	const {
@@ -217,24 +214,10 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	const priorities = useMemo(() => {
 		return ConfigAPI.getDealPriorities();
 	}, []);
-	// useEffect(() => {
-    //     console.log(pipelines)
-	// 	// console.log('Current form values:', form.watch());
-	//   }, [form.watch()]);
+
 
 	// Check if current user is restricted (deal owner)
 	const isRestrictedUser = isDealOwner();
-
-	// Get stages for selected pipeline
-	const availableStages = useMemo(() => {
-		// For restricted users, use the deal's current pipeline
-		const pipelineId = isRestrictedUser
-			? deal?.pipeline?.id
-			: selectedPipelineId;
-		if (!pipelineId) return [];
-		const pipeline = pipelines.find((p) => p.id === pipelineId);
-		return pipeline?.stages || [];
-	}, [selectedPipelineId, pipelines, isRestrictedUser, deal?.pipeline?.id]);
 
 	const dispatch = useDispatch('quillcrm/core');
 	const createNotice = dispatch?.createNotice;
@@ -371,8 +354,9 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				value: values.value || 0,
 				currency: 'USD',
 				expected_close_date: values.expected_close_date
-					? dayjs(values.expected_close_date).format('YYYY-MM-DD')
-					: null,
+                ? convertDate(values.expected_close_date)
+                : null,
+				
 				source: values.source,
 				priority: values.priority,
 			};
@@ -429,7 +413,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				}
 			}}
 		>
-			<DialogContent className="w-full max-w-2xl max-h-[80vh] my-2 sm:mx-auto overflow-y-auto  p-8 rounded-[16px] ">
+			<DialogContent className="w-full max-w-3xl max-h-[80vh] my-2 sm:mx-auto overflow-y-auto z-[100000]  p-8 rounded-[16px] ">
 				<DialogHeader>
 					<DialogTitle className="!mb-0">
 						<CustomDialogHeader
@@ -589,7 +573,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 									}
 								}}
 							>
-								<SelectTrigger className="h-12 !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] text-[#09090B] text-sm leading-[150%] tracking-[-.5px]">
+								<SelectTrigger className="h-12  !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] text-[#09090B] text-sm leading-[150%] tracking-[-.5px]">
 									<SelectValue
 										placeholder={
 											ownersLoading
@@ -604,7 +588,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 
 								<SelectContent>
 									{ownersLoading ? (
-										<div className="px-3 py-2 text-sm text-muted-foreground">
+										<div className="px-3 py-2 text-sm text-muted-foreground ">
 											{__(
 												'Loading owners...',
 												'quillcrm'
@@ -663,7 +647,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 						</Select>
 					</div>
 					{/* expeted close date */}
-					<div className="flex flex-col gap-2">
+					<div className="flex flex-col gap-2 z-[120]">
 						<label className="block mb-1 font-normal text-[#09090B] text-base">
 							{__('Expected Close Date', 'quillcrm')}
 						</label>
@@ -671,15 +655,9 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 						<DateRangePicker
 							value={{
 								from: form.watch('expected_close_date')
-									? new Date(
-											form.watch('expected_close_date')
-										)
+									? new Date(form.watch('expected_close_date'))
 									: null,
-								to: form.watch('expected_close_date')
-									? new Date(
-											form.watch('expected_close_date')
-										)
-									: null,
+								to: null
 							}}
 							onChange={(range) => {
 								const date = range?.from
@@ -819,14 +797,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 						)}
 						<div className="h-[1px] bg-[#DEE1E6] w-full"></div>
 						{/* custom filed */}
-						{/* <CustomFieldsSection
-	initialValues={deal?.custom_fields || {}}
-	onChange={(fields) => {
-		Object.entries(fields).forEach(([key, value]) => {
-			form.setValue(key as any, value);
-		});
-	}}
-/> */}
+						
 <CustomFieldsSection
 	deal={deal} 
 	// initialValues={deal?.custom_fields || {}}

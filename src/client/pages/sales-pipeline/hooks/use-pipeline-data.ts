@@ -12,7 +12,7 @@ import { debounce } from 'lodash';
 /**
  * Internal dependencies
  */
-import { handleApiError, ERROR_MESSAGES } from '../utils/error-handler';
+import { handleApiError, ERROR_MESSAGES, ErrorInfo } from '../utils/error-handler';
 import { Deal, Pipeline, Filters } from '../types';
 
 interface UsePipelineDataReturn {
@@ -20,7 +20,7 @@ interface UsePipelineDataReturn {
 	selectedPipeline: Pipeline | null;
 	deals: Deal[];
 	loading: boolean;
-	error: string | null;
+	error: ErrorInfo | null;
 	refreshData: () => Promise<void>;
 	updateDealOptimistically: (dealId: number, updates: Partial<Deal>) => void;
 	updatePipelineOptimistically: (
@@ -39,6 +39,7 @@ interface UsePipelineDataReturn {
 	reorderStagesOptimistically: (pipelineId: number, newStages: any[]) => void;
 }
 
+
 export const usePipelineData = (
 	selectedPipelineId: number | null,
 	filters: Filters
@@ -46,12 +47,14 @@ export const usePipelineData = (
 	const [pipelines, setPipelines] = useState<Pipeline[]>([]);
 	const [deals, setDeals] = useState<Deal[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<ErrorInfo | null>(null);
 
 	// Get selected pipeline
 	const selectedPipeline = useMemo(() => {
 		return pipelines.find((p) => p.id === selectedPipelineId) || null;
 	}, [pipelines, selectedPipelineId]);
+
+	
 
 	// Fetch pipelines data
 	const fetchPipelines = useCallback(async () => {
@@ -69,12 +72,12 @@ export const usePipelineData = (
 			setPipelines(pipelinesData);
 			setError(null);
 		} catch (err) {
-			const errorMessage = handleApiError(
+			const errorInfo = handleApiError(
 				'fetch pipelines',
 				err,
 				ERROR_MESSAGES.LOAD_PIPELINES
 			);
-			setError(errorMessage);
+			setError(errorInfo);
 		}
 	}, []);
 
@@ -137,12 +140,12 @@ export const usePipelineData = (
 			setDeals(dealsData);
 			setError(null);
 		} catch (err) {
-			const errorMessage = handleApiError(
+			const errorInfo = handleApiError(
 				'fetch deals',
 				err,
 				ERROR_MESSAGES.LOAD_DEALS
 			);
-			setError(errorMessage);
+			setError(errorInfo);
 		} 
 	}, [selectedPipelineId, filters]);
 
@@ -297,7 +300,7 @@ export const usePipelineData = (
 		selectedPipeline: selectedPipeline || null,
 		deals: deals || [],
 		loading: loading || false,
-		error: error || null,
+		error: error,
 		refreshData,
 		updateDealOptimistically,
 		updatePipelineOptimistically,

@@ -70,7 +70,7 @@ export const DeleteDeal = ({
 				if (!open) onClose();
 			}}
 		>
-			<DialogContent className="w-full max-w-xl max-h-[80vh] flex flex-col justify-center items-center gap-3 overflow-y-auto my-4 sm:mx-auto z-[10000] p-8 rounded-[16px] ">
+			<DialogContent className="w-full max-w-xl max-h-[80vh] flex flex-col justify-center  items-center gap-3 overflow-y-auto my-4 sm:mx-auto z-[100000] p-8 rounded-[16px] ">
 				{/* Header */}
 				<DialogHeader className="flex flex-col items-center justify-center w-full gap-4 text-center">
 					<div className="flex justify-center items-center w-[88px] h-[88px] bg-[#FCDADA] rounded-[26px]">

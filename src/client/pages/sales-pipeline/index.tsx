@@ -7,38 +7,12 @@ import { useEffect, useState } from '@wordpress/element';
 /**
  * External dependencies
  */
-import { Skeleton } from 'antd';
-import {
-	Plus,
-	Settings,
-	Copy,
-	Zap,
-	RefreshCw,
-	MoreHorizontal,
-	Pencil,
-	Trash2,
-	ChevronDown,
-	Eye,
-} from 'lucide-react';
-// import { Button } from "@/components/ui/button"
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreVertical } from 'lucide-react';
 
 /**
  * Internal dependencies
  */
 import {
-	EditIcon,
 	NoticeBanner,
-	PageHeader,
-	PlusIcon,
 } from '@quillcrm/components';
 import { KanbanBoard } from './components/kanban-board';
 import { PipelineFilters } from './components/pipeline-filters';
@@ -49,17 +23,6 @@ import { NewPipelineModal } from './components/new-pipeline-modal';
 import { DuplicatePipelineModal } from './components/duplicate-pipeline-modal';
 import { usePipelineData } from './hooks/use-pipeline-data';
 import './styles/enhanced-buttons.scss';
-import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
-import { Popover } from '@quillcrm/components/ui/popover-dialog';
-import { Button } from '@quillcrm/components/ui/button';
-import ArrowIcon from '@quillcrm/components/icons/dropdown-header';
-import MoreHorizantail from '@quillcrm/components/icons/moreHorizantal-header';
-import ViewIcon from '@quillcrm/components/icons/view-header';
-import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
-import TrashIcon from '@quillcrm/components/icons/trash';
-import ArrowColoredIcon from '@quillcrm/components/icons/dropdown-headerColored';
-import AddPipIcon from '@quillcrm/components/icons/addpip-header';
-import DuplicatePipelineHeader from '@quillcrm/components/icons/duplicate-pipeline-header';
 import { EditPipelineModal } from './components/pipeline-edit';
 import { DeletePipelineDialog } from './components/pipeline-delete';
 import { EditDealModal } from './components/edit-deal-modal';
@@ -69,6 +32,10 @@ import { AddNoteModal } from './components/add-note-modal';
 import { LogCallModal } from './components/log-call-modal';
 import { ScheduleMeetingModal } from './components/schedule-meeting-modal';
 import { LogEmailModal } from './components/log-email-modal';
+import { ErrorState } from '@quillcrm/components/pipeline-errorState/ErrorState';
+import { handleApiError } from './utils/error-handler';
+import { SalesPipelineSkeleton } from './SalesPipelineSkeleton';
+import { PipelineHeader } from './components/salePipeline-header/SalePipelineHeader';
 
 // Import types for proper typing
 type Filters = {
@@ -121,7 +88,6 @@ const SalesPipeline: React.FC = () => {
 		priority: null,
 	});
 
-	const { isDealOwner } = useCapabilities();
 
 	const {
 		pipelines,
@@ -137,7 +103,7 @@ const SalesPipeline: React.FC = () => {
 		removeStageOptimistically,
 		reorderStagesOptimistically,
 	} = usePipelineData(selectedPipelineId, filters);
-	console.log("Loading value:", loading);
+	console.log('Loading value:', loading);
 
 	// Set default pipeline on load
 	useEffect(() => {
@@ -164,211 +130,50 @@ const SalesPipeline: React.FC = () => {
 		setLogEmailVisible(true);
 	};
 
-	if (loading) {
-		return (
-			<div className="sales-pipeline-loading">
-				<PageHeader
-					title={__('Loading...', 'quillcrm')}
-					subtitle={__('Pipelines', 'quillcrm')}
-					actions={[]}
-				/>
-				<div className="mt-6">
-					<Skeleton active paragraph={{ rows: 8 }} />
-				</div>
-			</div>
-		);
-	}
 
 	if (error) {
-		return (
-			<div className="sales-pipeline-error">
-				<PageHeader
-					title={__('Error loading pipeline data', 'quillcrm')}
-					subtitle={__('Pipelines', 'quillcrm')}
-					actions={[
-						{
-							label: __('Retry', 'quillcrm'),
-							variant: 'default',
-							size: 'default',
-							icon: <RefreshCw size={16} />,
-							className: 'sales-pipeline-btn btn-secondary',
-							onClick: refreshData,
-						},
-					]}
-				/>
-				<div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-					<p className="text-red-700">{error}</p>
-				</div>
-			</div>
+		// return (
+		// 	<div className="sales-pipeline-error">
+		// 		<PageHeader
+		// 			title={__('Error loading pipeline data', 'quillcrm')}
+		// 			subtitle={__('Pipelines', 'quillcrm')}
+		// 			actions={[
+		// 				{
+		// 					label: __('Retry', 'quillcrm'),
+		// 					variant: 'default',
+		// 					size: 'default',
+		// 					icon: <RefreshCw size={16} />,
+		// 					className: 'sales-pipeline-btn btn-secondary',
+		// 					onClick: refreshData,
+		// 				},
+		// 			]}
+		// 		/>
+		// 		<div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+		// 			<p className="text-red-700">{error}</p>
+		// 		</div>
+		const errorInfo = handleApiError(
+			'load pipeline',
+			error,
+			'Error loading pipeline data'
 		);
+		return <ErrorState type={errorInfo.type} onRetry={refreshData} />;
 	}
 
 	return (
 		<div className="sales-pipeline">
-			<div className=" flex justify-between items-center ">
-				<PageHeader
-					title={
-						selectedPipeline
-							? selectedPipeline.name
-							: __('Select a pipeline', 'quillcrm')
-					}
-					subtitle={__('Pipelines', 'quillcrm')}
-					// actions={headerActions}
-					actions={[]}
-				/>
-				<div className=" flex gap-4">
-					<div className="flex items-center gap-1">
-						<div className="flex items-center">
-							{/* Dropdown for selecting pipeline */}
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button
-										variant="outline"
-										disabled={pipelines.length <= 0}
-										className={`text-base font-medium !text-[#374151] leading-[26px] tracking-[-.5px] flex items-center justify-center gap-3 h-10 border !border-[#374151] py-2 px-4 rounded-l-[8px] rounded-r-none ${
-											pipelines.length <= 1
-												? 'cursor-default'
-												: ''
-										}`}
-									>
-										{selectedPipeline
-											? selectedPipeline.name
-											: 'Select Pipeline'}
-										<ArrowIcon />
-									</Button>
-								</DropdownMenuTrigger>
-
-								{pipelines.length > 1 && (
-									<DropdownMenuContent
-										style={{
-											boxShadow:
-												'3px 3px 4px 0 rgba(0, 0, 0, 0.25);',
-										}}
-										className="p-4 flex flex-col gap-[10px] rounded-[10px] border  border-[#F5F5F5]"
-									>
-										{pipelines.map((pipeline: any) => (
-											<DropdownMenuItem
-												key={pipeline.id}
-												onClick={() =>
-													setSelectedPipelineId(
-														pipeline.id
-													)
-												}
-												className={`${
-													selectedPipelineId ===
-													pipeline.id
-														? 'bg-gray-100'
-														: ''
-												}`}
-											>
-												{pipeline.name}
-											</DropdownMenuItem>
-										))}
-									</DropdownMenuContent>
-								)}
-							</DropdownMenu>
-
-							{/* 3-dots dropdown for actions */}
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button
-										variant="outline"
-										size="icon"
-										className="rounded-l-none rounded-r-[8px] text-base font-medium !text-[#374151] leading-[26px] tracking-[-.5px] flex items-center justify-center gap-3 h-10 border !border-[#374151] py-2 px-4"
-									>
-										<MoreHorizantail />
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent
-									align="end"
-									style={{
-										boxShadow:
-											'3px 3px 4px 0 rgba(0, 0, 0, 0.25);',
-									}}
-									className="p-4 flex flex-col gap-[10px] rounded-[10px] border  border-[#F5F5F5]"
-								>
-									<DropdownMenuItem className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]">
-										<ViewIcon />
-										{__('View Pipeline', 'quillcrm')}
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() =>
-											setEditPipelineModalVisible(true)
-										}
-										disabled={!selectedPipeline}
-										className="flex items-center gap-2 text-[#374151] font-medium text-sm leading-[16px]"
-									>
-										<EditHeaderIcon />
-										{__('Edit Pipeline', 'quillcrm')}
-									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() =>
-											setDeleteDialogOpen(true)
-										}
-										className="flex items-center gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]"
-									>
-										<TrashIcon />
-										{__('Delete Pipeline', 'quillcrm')}
-									</DropdownMenuItem>
-								</DropdownMenuContent>
-							</DropdownMenu>
-						</div>
-					</div>
-					<div className="flex items-center gap-1">
-						{/* Dropdown for selecting pipeline */}
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button
-									variant="outline"
-									// disabled={pipelines.length <= 0}
-									className={`text-base font-medium !text-[#3B82F6] leading-[26px] tracking-[-.5px] flex items-center justify-center gap-3 h-10 border !border-[#3B82F6] py-2 px-4 rounded-[8px] `}
-								>
-									New Pipeline
-									<ArrowColoredIcon />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent
-								style={{
-									boxShadow:
-										'3px 3px 4px 0 rgba(0, 0, 0, 0.25);',
-								}}
-								className="p-4 flex flex-col gap-[10px] rounded-[10px] border  border-[#F5F5F5]"
-							>
-								<DropdownMenuItem
-									onClick={() =>
-										setNewPipelineModalVisible(true)
-									}
-									className="flex items-center cursor-pointer gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]"
-								>
-									<AddPipIcon />
-									New Pipeline
-								</DropdownMenuItem>
-								<DropdownMenuItem
-									onClick={() =>
-										setDuplicatePipelineModalVisible(true)
-									}
-									disabled={!selectedPipeline}
-									className="flex items-center cursor-pointer gap-2 text-[#2E2C2F] font-medium text-sm leading-[16px]"
-								>
-									<DuplicatePipelineHeader />
-									Duplicate Pipeline
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</div>
-					<div className="flex items-center gap-1">
-						<Button
-							onClick={() => setNewDealModalVisible(true)}
-							className={`text-base font-medium !text-[#FFF] leading-[26px] tracking-[-.5px] flex items-center justify-center gap-[6px] h-10 bg-[#1E3A8A] py-2 px-4 rounded-[8px] `}
-						>
-							<span className="mt-1">
-								<PlusIcon width={32} height={32} color="#FFF" />
-							</span>
-							Add New Deal
-						</Button>
-					</div>
-				</div>
-			</div>
+			<PipelineHeader
+				pipelines={pipelines}
+				selectedPipeline={selectedPipeline}
+				selectedPipelineId={selectedPipelineId}
+				setSelectedPipelineId={setSelectedPipelineId}
+				setNewPipelineModalVisible={setNewPipelineModalVisible}
+				setDuplicatePipelineModalVisible={
+					setDuplicatePipelineModalVisible
+				}
+				setEditPipelineModalVisible={setEditPipelineModalVisible}
+				setDeleteDialogOpen={setDeleteDialogOpen}
+				setNewDealModalVisible={setNewDealModalVisible}
+			/>
 
 			{showDuplicateError && (
 				<NoticeBanner
@@ -388,36 +193,42 @@ const SalesPipeline: React.FC = () => {
 				onFiltersChange={setFilters}
 			/>
 
-			{selectedPipeline && (
-				<div className="mt-6">
-					<KanbanBoard
-						pipeline={selectedPipeline}
-						deals={(deals as any) || []}
-						onRefresh={refreshData}
-						updateDealOptimistically={updateDealOptimistically}
-						onDealView={(dealId: number) => {
-							setSelectedDealId(dealId);
-							setDealDetailModalVisible(true);
-						}}
-						onDealEdit={(deal) => {
-							setEditingDeal(deal);
-							setEditDealModalVisible(true);
-						}}
-						onDealDelete={(deal) => {
-							setDealToDelete(deal);
-							setDeleteDealModalVisible(true);
-						}}
-						onDealAddNote={(deal) => handleAddNote(deal)}
-						onDealLogCall={(deal) => handleLogCall(deal)}
-						onDealScheduleMeeting={(deal) =>
-							handleScheduleMeetingVisible(deal)
-						}
-						onDealLogEmail={(deal) => handleLogEmailVisible(deal)}
-						loading={loading}
-					/>
-				</div>
-			)}
+			<div className='mt-6'>
+				{loading ?(
+					<SalesPipelineSkeleton/>
 
+				): selectedPipeline && (
+					<div className="mt-6">
+						<KanbanBoard
+							pipeline={selectedPipeline}
+							deals={(deals as any) || []}
+							onRefresh={refreshData}
+							updateDealOptimistically={updateDealOptimistically}
+							onDealView={(dealId: number) => {
+								setSelectedDealId(dealId);
+								setDealDetailModalVisible(true);
+							}}
+							onDealEdit={(deal) => {
+								setEditingDeal(deal);
+								setEditDealModalVisible(true);
+							}}
+							onDealDelete={(deal) => {
+								setDealToDelete(deal);
+								setDeleteDealModalVisible(true);
+							}}
+							onDealAddNote={(deal) => handleAddNote(deal)}
+							onDealLogCall={(deal) => handleLogCall(deal)}
+							onDealScheduleMeeting={(deal) =>
+								handleScheduleMeetingVisible(deal)
+							}
+							onDealLogEmail={(deal) => handleLogEmailVisible(deal)}
+							loading={loading}
+						/>
+					</div>
+				)}
+
+			</div>
+			
 			<PipelineSettingsModal
 				pipeline={selectedPipeline as any}
 				visible={settingsModalVisible}
@@ -450,7 +261,12 @@ const SalesPipeline: React.FC = () => {
 					setEditDealModalVisible(true);
 					setDealDetailModalVisible(false);
 				}}
-				pipeline={selectedPipeline} 
+				onDeleted={() => {   
+					setDealDetailModalVisible(false);
+					setSelectedDealId(null);
+					refreshData();
+				}}
+				pipeline={selectedPipeline}
 			/>
 
 			<EditDealModal
@@ -467,15 +283,6 @@ const SalesPipeline: React.FC = () => {
 				deal={editingDeal}
 				pipelines={pipelines || []}
 			/>
-
-			{/* <DuplicatePipelineModal
-				visible={duplicatePipelineModalVisible}
-				onClose={() => setDuplicatePipelineModalVisible(false)}
-				onSuccess={() => {
-					refreshData();
-				}}
-				pipeline={selectedPipeline}
-			/> */}
 
 			{selectedPipeline && (
 				<DuplicatePipelineModal
@@ -531,6 +338,7 @@ const SalesPipeline: React.FC = () => {
 					setAddNoteVisible(false);
 					refreshData();
 				}}
+				dealTitle={selectedDealForNote?.title}
 			/>
 			<LogCallModal
 				visible={logCallVisible}
@@ -539,6 +347,7 @@ const SalesPipeline: React.FC = () => {
 				dealId={selectedDealForCall?.id || 0}
 				dealTitle={selectedDealForCall?.title}
 				dealContact={selectedDealForCall?.contact}
+				dealContactName={selectedDealForCall?.contact?.first_name}
 			/>
 			<ScheduleMeetingModal
 				visible={ScheduleMeetingVisible}

@@ -11,7 +11,7 @@ import {
 	Dialog,
 	DialogContent,
 } from '@/components/ui/dialog';
-import { CampaignsIcon, CustomDialogHeader, Field, NoticeBanner } from '@/components';
+import { CampaignsIcon, CustomDialogHeader, Field, GradientCampaignsIcon, NoticeBanner } from '@/components';
 import { Button } from '@/components/ui/button';
 import CampaignTypes from './campaign-types';
 import { CampaignModalStep, CampaignType, NoticeMessage } from '@quillcrm/client';
@@ -81,7 +81,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 						"Name your campaign to help you remember what it's about. only you will see this.",
 						'quillcrm'
 					)}
-					icon={<CampaignsIcon />}
+					icon={<GradientCampaignsIcon />}
 				/>
 
 				{/* Notice Banner */}

@@ -1536,7 +1536,7 @@ class REST_Contact_Controller extends REST_Controller {
 			$double_optin = Settings::get( 'double_optin', array() );
 			$subject      = $double_optin['email_subject'] ?? __( 'Confirm Subscription', 'quillcrm' );
 			$subject      = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
-			$body         = $double_optin['email_body'] ?? $this->default_opt_in_email_body();
+			$body         = $double_optin['email_content'] ?? $this->default_opt_in_email_body();
 			$body         = Merge_Tags_Manager::instance()->process_merge_tags( $body, $contact );
 
 			$emails = new Emails();

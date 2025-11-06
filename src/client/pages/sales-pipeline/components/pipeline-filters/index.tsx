@@ -91,7 +91,7 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 		filters.ownerId ||
 		filters.dateRange.from ||
 		filters.dateRange.to ||
-		filters.status !== 'open' ||
+		filters.status !== 'all' ||
 		filters.priority !== null;
 
 	return (

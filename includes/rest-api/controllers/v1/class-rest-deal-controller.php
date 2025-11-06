@@ -181,8 +181,14 @@ class REST_Deal_Controller extends REST_Controller {
 			'priority'            => $request->get_param( 'priority' ),
 		);
 
-		$per_page = $request->get_param( 'per_page' ) ?: 20;
-		$page     = $request->get_param( 'page' ) ?: 1;
+		$per_page = $request->get_param( 'per_page' );
+		// Allow -1 for all results, default to 20 if not provided
+		if ( $per_page === null || $per_page === '' ) {
+			$per_page = 20;
+		} else {
+			$per_page = intval( $per_page );
+		}
+		$page = $request->get_param( 'page' ) ?: 1;
 
 		// Remove null values
 		$filters = array_filter(
@@ -195,16 +201,27 @@ class REST_Deal_Controller extends REST_Controller {
 		$deals = Deal_Manager::instance()->get_deals_with_filters( $filters, $per_page, $page );
 
 		$data = array();
-		foreach ( $deals->items() as $deal ) {
-			$data[] = $this->prepare_item_for_response( $deal, $request );
+
+		// Handle both Collection and Paginator results
+		if ( $per_page === -1 ) {
+			// All results returned as Collection
+			foreach ( $deals as $deal ) {
+				$data[] = $this->prepare_item_for_response( $deal, $request );
+			}
+			$response = new WP_REST_Response( $data, 200 );
+			// Add total count header for consistency
+			$response->header( 'X-Total-Count', count( $data ) );
+		} else {
+			// Paginated results
+			foreach ( $deals->items() as $deal ) {
+				$data[] = $this->prepare_item_for_response( $deal, $request );
+			}
+			$response = new WP_REST_Response( $data, 200 );
+			// Add pagination headers
+			$response->header( 'X-Total-Count', $deals->total() );
+			$response->header( 'X-Total-Pages', $deals->lastPage() );
+			$response->header( 'X-Current-Page', $deals->currentPage() );
 		}
-
-		$response = new WP_REST_Response( $data, 200 );
-
-		// Add pagination headers
-		$response->header( 'X-Total-Count', $deals->total() );
-		$response->header( 'X-Total-Pages', $deals->lastPage() );
-		$response->header( 'X-Current-Page', $deals->currentPage() );
 
 		return $response;
 	}

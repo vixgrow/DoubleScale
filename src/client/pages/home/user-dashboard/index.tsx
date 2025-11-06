@@ -113,7 +113,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 
 			<div className="flex gap-5">
 				<RecentCampaignsTable campaigns={dashboardData.top_campaigns} />
-				<CartsChart
+				{/* <CartsChart
 					data={cartsData}
 					interval={cartsInterval}
 					startDate={cartsStartDate}
@@ -122,7 +122,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 					onChangeFromDate={setCartsStartDate}
 					onChangeToDate={setCartsEndDate}
 					onSubmit={refetchCarts}
-				/>
+				/> */}
 			</div>
 		</div>
 	);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Subscription End Date Merge Tag
  *
@@ -19,6 +20,7 @@ use QuillCRM\Managers\Merge_Tags_Manager;
  * Subscription End Date Merge Tag
  */
 class Subscription_End_Date extends Merge_Tag {
+
 
 	/**
 	 * Merge Tag Name
@@ -59,6 +61,10 @@ class Subscription_End_Date extends Merge_Tag {
 	public function get_value( $contact, $merge_tag = '' ) {
 		$subscription_id = $contact->get_data( 'subscription_id' );
 		if ( ! $subscription_id ) {
+			return '';
+		}
+
+		if ( ! function_exists( 'wcs_get_subscription' ) ) {
 			return '';
 		}
 

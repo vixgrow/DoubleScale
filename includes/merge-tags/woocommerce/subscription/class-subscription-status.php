@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Subscription Billing Address Merge Tag
+ * Subscription Status Merge Tag
  *
- * This class is responsible for handling the subscription billing address merge tag
+ * This class is responsible for handling the subscription status merge tag
  *
  * @since 1.0.0
  *
@@ -17,33 +17,30 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Subscription Billing Address Merge Tag
+ * Subscription Status Merge Tag
  */
-class Subscription_Billing_Address extends Merge_Tag {
-
-
-
+class Subscription_Status extends Merge_Tag {
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Subscription Billing Address';
+	public $name = 'Subscription Status';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'subscription_billing_address';
+	public $slug = 'subscription_status';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Subscription Billing Address';
+	public $description = 'Subscription Status';
 
 	/**
 	 * Merge Tag Group
@@ -65,6 +62,7 @@ class Subscription_Billing_Address extends Merge_Tag {
 		if ( ! $subscription_id ) {
 			return '';
 		}
+
 		if ( ! function_exists( 'wcs_get_subscription' ) ) {
 			return '';
 		}
@@ -74,9 +72,12 @@ class Subscription_Billing_Address extends Merge_Tag {
 			return '';
 		}
 
-		$address = $subscription->get_formatted_billing_address();
-		return $address;
+		$subscription_status_slug = 'wc-' . $subscription->get_status();
+		$subscription_statuses    = wcs_get_subscription_statuses();
+		$subscription_status      = $subscription_statuses[ $subscription_status_slug ];
+
+		return $subscription_status ? $subscription_status : '';
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Subscription_Billing_Address() );
+Merge_Tags_Manager::instance()->register( new Subscription_Status() );

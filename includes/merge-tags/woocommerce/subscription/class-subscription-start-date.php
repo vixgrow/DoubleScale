@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Subscription Billing Address Merge Tag
+ * Subscription Start Date Merge Tag
  *
- * This class is responsible for handling the subscription billing address merge tag
+ * This class is responsible for handling the subscription start date merge tag
  *
  * @since 1.0.0
  *
@@ -17,33 +17,30 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
- * Subscription Billing Address Merge Tag
+ * Subscription Start Date Merge Tag
  */
-class Subscription_Billing_Address extends Merge_Tag {
-
-
-
+class Subscription_Start_Date extends Merge_Tag {
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Subscription Billing Address';
+	public $name = 'Subscription Start Date';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'subscription_billing_address';
+	public $slug = 'subscription_start_date';
 
 	/**
 	 * Merge Tag Description
 	 *
 	 * @var string
 	 */
-	public $description = 'Subscription Billing Address';
+	public $description = 'Subscription Start Date';
 
 	/**
 	 * Merge Tag Group
@@ -65,6 +62,7 @@ class Subscription_Billing_Address extends Merge_Tag {
 		if ( ! $subscription_id ) {
 			return '';
 		}
+
 		if ( ! function_exists( 'wcs_get_subscription' ) ) {
 			return '';
 		}
@@ -74,9 +72,13 @@ class Subscription_Billing_Address extends Merge_Tag {
 			return '';
 		}
 
-		$address = $subscription->get_formatted_billing_address();
-		return $address;
+		$start_date = $subscription->get_date_created();
+		if ( ! $start_date ) {
+			return '';
+		}
+
+		return date_i18n( get_option( 'date_format' ), strtotime( $start_date ) );
 	}
 }
 
-Merge_Tags_Manager::instance()->register( new Subscription_Billing_Address() );
+Merge_Tags_Manager::instance()->register( new Subscription_Start_Date() );

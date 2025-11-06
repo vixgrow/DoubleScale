@@ -26,6 +26,9 @@ final class Merge_Tags_Manager {
 
 
 
+
+
+
 	/**
 	 * Registed merge tags
 	 *
@@ -176,6 +179,21 @@ final class Merge_Tags_Manager {
 				'name'      => __( 'Wishlist', 'quillcrm' ),
 				'mergeTags' => array(),
 				'triggers'  => array( 'wc_user_adds_product_to_wishlist', 'wc_wishlist_item_on_sale', 'wc_wishlist_reminder' ),
+			),
+			'subscription'   => array(
+				'name'      => __( 'Subscription', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array(
+					'wc_subscription_created',
+					'wc_subscription_status_changed',
+					'wc_customer_before_card_expiry',
+					'wc_subscription_renewal_payment_failed',
+					'wc_subscription_renewal_payment_complete',
+					'wc_subscription_trial_end',
+					'wc_subscription_note_added',
+					'wc_subscription_before_renewal',
+					'wc_subscription_before_end',
+				),
 			),
 		);
 		// get forms slug to set in groups

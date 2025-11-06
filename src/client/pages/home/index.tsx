@@ -21,7 +21,7 @@ const Dashboard: React.FC = () => {
 	const { data, loading } = useDashboardData();
 
 	const tabTitles = {
-		user: __('User Dashboard', 'quillcrm'),
+		user: __('Dashboard', 'quillcrm'),
 		contacts: __('Contacts Analytics', 'quillcrm'),
 		emails: __('Emails Analytics', 'quillcrm'),
 		cart: __('Cart Analytics', 'quillcrm'),

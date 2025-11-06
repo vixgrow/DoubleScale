@@ -676,6 +676,7 @@ export type TagsResponse = Response & {
 
 export type AutomationsResponse = Response & {
 	data: Automation[];
+	total_count: number;
 };
 
 export type CampaignType = 'standard' | 'ab_test' | 'email_sequence';

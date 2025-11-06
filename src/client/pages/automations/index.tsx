@@ -22,7 +22,7 @@ import type {
 	DataTableConfig,
 } from '@quillcrm/client';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
-import { PageHeader, PlusIcon, GradientAutomationsIcon, NoticeBanner } from '@quillcrm/components';
+import { PageHeader, PlusIcon, GradientAutomationsIcon, NoticeBanner, NoData } from '@quillcrm/components';
 import { isEmpty } from 'validator';
 import { NoticeMessage } from '@quillcrm/client';
 import { formatDateForAPI } from '@quillcrm/utils';
@@ -31,13 +31,13 @@ import { DataTable } from '@/components/ui/data-table';
 import { getAutomationColumns } from './columns';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
-import { Button } from '@/components/ui/button';
 
 const AutomationsList: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [page, setPage] = useState<number>(1);
 	const [perPage, setPerPage] = useState<number>(10);
 	const [totalRecords, setTotalRecords] = useState<number>(0);
+	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [data, setData] = useState<Automations>([]);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [keyword, setKeyword] = useState<string>('');
@@ -87,6 +87,7 @@ const AutomationsList: React.FC = () => {
 
 			setData(response.data);
 			setTotalRecords(response.total);
+			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
 			setListError({
 				type: 'error',
@@ -172,10 +173,6 @@ const AutomationsList: React.FC = () => {
 		return true;
 	};
 
-	const handleViewReports = (automation: Automation) => {
-		navigate(getToLink(`automations/${automation.id}/reports`));
-	};
-
 	const handleStatusChange = async (
 		automation: Automation,
 		newStatus: string
@@ -249,7 +246,6 @@ const AutomationsList: React.FC = () => {
 
 	// Table configuration
 	const columns = getAutomationColumns({
-		onViewReports: handleViewReports,
 		onStatusChange: handleStatusChange,
 		updatingAutomationId,
 		navigate,
@@ -299,77 +295,44 @@ const AutomationsList: React.FC = () => {
 				]}
 			/>
 
-			{listError && (
-				<div className="mb-4">
-					<NoticeBanner
-						notice={listError}
-						closeNotice={() => setListError(null)}
-					/>
-				</div>
-			)}
+		{listError && (
+			<div className="mb-4">
+				<NoticeBanner
+					notice={listError}
+					closeNotice={() => setListError(null)}
+				/>
+			</div>
+		)}
 
-			{loading && (
-				<>
-					{/* Data Table */}
-					<DataTable
-						columns={columns}
-						data={data}
-						config={tableConfig}
-						showPagination={false}
-						initialPageSize={perPage}
-						setPage={setPage}
-						loading={loading}
-					/>
-					<DataTablePagination table={serverSideTable} />
-				</>
-			)}
-
-			{!loading && (!data || data.length === 0) && (
-				<div className="flex flex-col items-center justify-center py-16 px-4 border rounded-xl">
-					<div className="flex flex-col items-center space-y-4">
-						<div className="text-primary">
-							<GradientAutomationsIcon />
-						</div>
-						<div className="text-center space-y-2">
-							<h3 className="text-2xl font-semibold text-gray-900">
-								{__('No automations yet', 'quillcrm')}
-							</h3>
-							<p className="text-base text-gray-500 font-medium">
-								{__(
-									'Create Automation to build your first workflow and start streamlining your process',
-									'quillcrm'
-								)}
-							</p>
-						</div>
-						<Button
-							onClick={() => {
-								setVisible(true);
-								setCreateError(null);
-							}}
-							className="mt-4"
-						>
-							<PlusIcon />
-							{__('Create Automation', 'quillcrm')}
-						</Button>
-					</div>
-				</div>
-			)}
-
-			{!loading && data && data.length > 0 && (
-				<>
-					{/* Data Table */}
-					<DataTable
-						columns={columns}
-						data={data}
-						config={tableConfig}
-						showPagination={false}
-						initialPageSize={perPage}
-						setPage={setPage}
-						loading={loading}
-					/>
-					<DataTablePagination table={serverSideTable} />
-				</>
-			)}
+		{loading || hasRecords ? (
+			<>
+				{/* Data Table */}
+				<DataTable
+					columns={columns}
+					data={data}
+					config={tableConfig}
+					showPagination={false}
+					initialPageSize={perPage}
+					setPage={setPage}
+					loading={loading}
+				/>
+				<DataTablePagination table={serverSideTable} />
+			</>
+		) : (
+			<NoData
+				icon={<GradientAutomationsIcon />}
+				title={__('No automations yet', 'quillcrm')}
+				subtitle={__(
+					'Create Automation to build your first workflow and start streamlining your process',
+					'quillcrm'
+				)}
+				buttonLabel={__('Create Automation', 'quillcrm')}
+				onClick={() => {
+					setVisible(true);
+					setCreateError(null);
+				}}
+			/>
+		)}
 
 			<CreateAutomationModal
 				visible={visible}

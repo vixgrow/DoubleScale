@@ -49,6 +49,9 @@ const Contacts: React.FC = () => {
 	const [shouldFetchContacts, setShouldFetchContacts] = useState(false);
 	const [panelHeight, setPanelHeight] = useState<number>(0);
 	const panelRef = useRef<HTMLDivElement>(null);
+	const [totalRecipients, setTotalRecipients] = useState(0);
+	const [applyRequested, setApplyRequested] = useState(false);
+	const [inlineError, setInlineError] = useState<string | null>(null);
 
 	// Rules builder state (shared with ConditionsModal component)
 	const [rulesGroups] = useState(ConfigAPI.getAutomationRules());
@@ -98,6 +101,20 @@ const Contacts: React.FC = () => {
 			setIsApplying(false);
 		}
 	}, [shouldFetchContacts]);
+
+	// After fetch completes, if this was an apply request and total is 0, show notice
+	useEffect(() => {
+		if (applyRequested && totalRecipients === 0) {
+			setInlineError(
+				__('No recipients match the current filters.', 'quillcrm')
+			);
+			setApplyRequested(false);
+		}
+		if (applyRequested && totalRecipients > 0) {
+			setInlineError(null);
+			setApplyRequested(false);
+		}
+	}, [applyRequested, totalRecipients]);
 
 	// Initialize RulesBuilder from existing saved filters (DB) when advanced mode
 	useEffect(() => {
@@ -160,6 +177,24 @@ const Contacts: React.FC = () => {
 		goToStep('review');
 	};
 
+	const handleNext = async () => {
+		// Block while applying
+		if (isApplying) {
+			return;
+		}
+
+		// Block when zero recipients
+		if (totalRecipients === 0) {
+			setInlineError(
+				__('No recipients match the current filters.', 'quillcrm')
+			);
+			return;
+		}
+
+		setInlineError(null);
+		await save();
+	};
+
 	return (
 		<PanelLayout
 			items={[
@@ -194,11 +229,16 @@ const Contacts: React.FC = () => {
 						icon={<TeamIcon />}
 						className="flex flex-col"
 						showButtons={true}
-						onNext={save}
+						onNext={handleNext}
 						onBack={() => goToStep('builder')}
-						isLoading={saving}
+						isLoading={saving || isApplying}
 					>
 						<div className="space-y-6">
+							{inlineError && (
+								<div className="border border-red-300 bg-red-50 text-red-700 rounded-lg px-4 py-2">
+									{inlineError}
+								</div>
+							)}
 							<div>
 								<p className="text-base font-bold mb-2 text-black">
 									{__('Filter By', 'quillcrm')}
@@ -268,10 +308,11 @@ const Contacts: React.FC = () => {
 												setFilters(
 													mapRulesToFilters(rules)
 												);
+												setApplyRequested(true);
 												setIsApplying(true);
 												handleApplyFilters();
 											}}
-											disabled={isLoading}
+											disabled={isLoading || isApplying}
 										>
 											{__('Apply Filters', 'quillcrm')}
 										</Button>
@@ -280,10 +321,11 @@ const Contacts: React.FC = () => {
 											onClick={() => {
 												setRules([[getInitialRule()]]);
 												setFilters([]);
+												setApplyRequested(true);
 												setIsApplying(true);
 												handleApplyFilters();
 											}}
-											disabled={isLoading}
+											disabled={isLoading || isApplying}
 										>
 											{__('Clear Filters', 'quillcrm')}
 										</Button>
@@ -301,6 +343,7 @@ const Contacts: React.FC = () => {
 					maxHeight={panelHeight}
 					shouldFetch={shouldFetchContacts}
 					onFetchComplete={() => setShouldFetchContacts(false)}
+					onTotalChange={setTotalRecipients}
 					onLoadingChange={setIsLoading}
 					campaignType={campaign?.type}
 				/>

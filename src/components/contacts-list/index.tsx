@@ -125,7 +125,7 @@ const ContactList: React.FC<ContactListProps> = ({
 
 	// Initial fetch
 	useEffect(() => {
-	fetchContacts(1);
+		fetchContacts(1);
 		isInitialMount.current = false;
 	}, []);
 

@@ -43,7 +43,7 @@ import { RecentAutomationsTable } from './recent-automations';
 import { QuickLinks } from './quick-links';
 import { RecentCampaignsTable } from './RecentCampaignsTable';
 import { CartsChart } from '../cart-chart';
-import { Skeleton } from '@/components/ui/skeleton';
+import { UserDashboardShimmer } from './UserDashboardShimmer';
 import { useContactAnalytics, useCartAnalytics } from '../use-analytics';
 
 interface UserDashboardProps {
@@ -78,15 +78,8 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 		refetch: refetchCarts,
 	} = useCartAnalytics();
 
-	if (!contactsData || !cartsData || contactsLoading || cartsLoading) {
-		return (
-			<div className="space-y-4 p-4">
-				<Skeleton className="h-6 w-1/3" />
-				<Skeleton className="h-4 w-full" />
-				<Skeleton className="h-4 w-5/6" />
-				<Skeleton className="h-4 w-4/6" />
-			</div>
-		);
+	if (!contactsData || !cartsData) {
+		return <UserDashboardShimmer />;
 	}
 
 	return (
@@ -96,13 +89,13 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ dashboardData }) => {
 				<RecentContactsList contacts={dashboardData.recent_contacts} />
 				<ContactAnalyticsChart
 					data={contactsData}
+					loading={contactsLoading}
 					interval={contactsInterval}
 					startDate={contactsStartDate}
 					endDate={contactsEndDate}
 					onIntervalChange={setContactsInterval}
 					onChangeFromDate={setContactsStartDate}
 					onChangeToDate={setContactsEndDate}
-					onSubmit={refetchContacts}
 				/>
 			</div>
 

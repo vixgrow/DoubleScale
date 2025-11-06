@@ -13,7 +13,7 @@ import UserDashboard from './user-dashboard';
 import ContactsAnalytics from './contacts-analytics';
 import EmailAnalytics from './emails-analytics';
 import CartAnalytics from './cart-analytics';
-import { Skeleton } from '@/components/ui/skeleton';
+import { UserDashboardShimmer } from './user-dashboard/UserDashboardShimmer';
 import { useDashboardData } from './use-analytics';
 
 const Dashboard: React.FC = () => {
@@ -29,11 +29,13 @@ const Dashboard: React.FC = () => {
 
 	if (!data || loading) {
 		return (
-			<div className="space-y-4 p-4">
-				<Skeleton className="h-6 w-1/3" />
-				<Skeleton className="h-4 w-full" />
-				<Skeleton className="h-4 w-5/6" />
-				<Skeleton className="h-4 w-4/6" />
+			<div className="qcrm-dashboard">
+				<PageHeader
+					title={__('Dashboard', 'quillcrm')}
+					subtitle={tabTitles[activeTab]}
+					actions={[]}
+				/>
+				<UserDashboardShimmer />
 			</div>
 		);
 	}

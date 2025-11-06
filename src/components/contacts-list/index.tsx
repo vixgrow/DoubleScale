@@ -125,7 +125,7 @@ const ContactList: React.FC<ContactListProps> = ({
 
 	// Initial fetch
 	useEffect(() => {
-		fetchContacts(1);
+	fetchContacts(1);
 		isInitialMount.current = false;
 	}, []);
 
@@ -137,18 +137,26 @@ const ContactList: React.FC<ContactListProps> = ({
 		}
 	}, [shouldFetch]);
 
-	// Debounced search (skip on initial mount)
-	useEffect(() => {
-		if (isInitialMount.current) {
-			return;
-		}
-
-		const timeoutId = setTimeout(() => {
-			fetchContacts(1);
-		}, 300);
-
-		return () => clearTimeout(timeoutId);
-	}, [searchTerm]);
+	// Local search only - compute filtered list client-side (no refetch)
+	const normalizedSearch = searchTerm.trim().toLowerCase();
+	const displayedContacts = normalizedSearch
+		? contacts.filter((c) => {
+				const first = String(
+					(c as any)?.first_name || ''
+				).toLowerCase();
+				const last = String((c as any)?.last_name || '').toLowerCase();
+				const email = String((c as any)?.email || '').toLowerCase();
+				const phone = String((c as any)?.phone || '').toLowerCase();
+				const full = `${first} ${last}`.trim();
+				return (
+					first.includes(normalizedSearch) ||
+					last.includes(normalizedSearch) ||
+					full.includes(normalizedSearch) ||
+					email.includes(normalizedSearch) ||
+					phone.includes(normalizedSearch)
+				);
+			})
+		: contacts;
 
 	// Handle infinite scroll
 	const handleScroll = useCallback(
@@ -227,7 +235,11 @@ const ContactList: React.FC<ContactListProps> = ({
 					<div className="flex items-center justify-center py-8">
 						<div className="text-red-500">{error}</div>
 					</div>
-				) : contacts.length === 0 ? (
+				) : (
+						normalizedSearch
+							? displayedContacts.length === 0
+							: contacts.length === 0
+				  ) ? (
 					<div className="flex items-center justify-center py-8">
 						<div className="text-gray-500">
 							{__('No contacts found', 'quillcrm')}
@@ -235,43 +247,45 @@ const ContactList: React.FC<ContactListProps> = ({
 					</div>
 				) : (
 					<>
-						{contacts.map((contact) => {
-							const fullName =
-								`${contact.first_name} ${contact.last_name}`.trim();
-							const initials = getContactInitials(
-								contact.first_name,
-								contact.last_name
-							);
-							const avatarColor = getAvatarColor(
-								fullName || contact.email
-							);
+						{(normalizedSearch ? displayedContacts : contacts).map(
+							(contact) => {
+								const fullName =
+									`${contact.first_name} ${contact.last_name}`.trim();
+								const initials = getContactInitials(
+									contact.first_name,
+									contact.last_name
+								);
+								const avatarColor = getAvatarColor(
+									fullName || contact.email
+								);
 
-							return (
-								<div
-									key={contact.id}
-									className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
-								>
-									{/* Avatar */}
+								return (
 									<div
-										className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium text-sm ${avatarColor}`}
+										key={contact.id}
+										className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
 									>
-										{initials}
-									</div>
+										{/* Avatar */}
+										<div
+											className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium text-sm ${avatarColor}`}
+										>
+											{initials}
+										</div>
 
-									{/* Contact Info */}
-									<div className="flex-1 min-w-0">
-										<div className="font-medium text-gray-900 truncate">
-											{fullName ||
-												__('No Name', 'quillcrm')}
-										</div>
-										<div className="text-sm text-gray-500 truncate">
-											{__('Email:', 'quillcrm')}{' '}
-											{contact.email}
+										{/* Contact Info */}
+										<div className="flex-1 min-w-0">
+											<div className="font-medium text-gray-900 truncate">
+												{fullName ||
+													__('No Name', 'quillcrm')}
+											</div>
+											<div className="text-sm text-gray-500 truncate">
+												{__('Email:', 'quillcrm')}{' '}
+												{contact.email}
+											</div>
 										</div>
 									</div>
-								</div>
-							);
-						})}
+								);
+							}
+						)}
 
 						{/* Loading more indicator */}
 						{isLoading && contacts.length > 0 && (

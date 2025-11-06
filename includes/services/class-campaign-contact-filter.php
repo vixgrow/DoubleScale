@@ -53,7 +53,11 @@ class Campaign_Contact_Filter {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public function get_filtered_contacts( $type, $filters = array() ) {
-		$query = Contact_Model::where( 'status', 'subscribed' );
+		// Get excluded statuses (bounced contacts should never receive campaigns)
+		$excluded_statuses = apply_filters( 'quillcrm_campaign_excluded_statuses', array( 'bounced', 'unsubscribed' ) );
+
+		$query = Contact_Model::where( 'status', 'subscribed' )
+							  ->whereNotIn( 'status', $excluded_statuses );
 
 		// Apply type-specific filtering (email/phone availability)
 		$query = $this->apply_campaign_type_filter( $query, $type );

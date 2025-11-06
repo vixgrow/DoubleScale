@@ -176,3 +176,4 @@ export { default as UnsubscribeSMSIcon } from './unsubscribe-sms';
 export { default as ProcessingSMSIcon } from './processing-sms';
 export { default as TotalSMSIcon } from './total-sms';
 export { default as FailedSMSIcon } from './failed-sms';
+export { default as SentSMSIcon } from './sent-sms';

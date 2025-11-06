@@ -25,6 +25,7 @@ import {
 	SentSMSIcon,
 	UnsubscribeSMSIcon,
 	ProcessingSMSIcon,
+	GradientSendSMSIcon,
 } from '@quillcrm/components';
 import SendSMSDialog from './send-sms-dialog';
 import SMSDetails from './sms-details-dialog';
@@ -252,7 +253,7 @@ const SMS: React.FC<SMSProps> = ({ contact_id }) => {
 			<div>
 				{!loading && messages.length === 0 ? (
 					<NoData
-						icon={<UnsubscribeSMSIcon width={120} height={120} />}
+						icon={<GradientSendSMSIcon width={120} height={120} />}
 						title={__('No SMS messages', 'quillcrm')}
 						subtitle={__(
 							'No SMS messages found for this contact.',

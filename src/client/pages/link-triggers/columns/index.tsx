@@ -73,11 +73,11 @@ export function getColumns() {
 			),
 			cell: ({ row }) => (
 				<div
-					className={`capitalize rounded-xl py-1 px-3 text-xs w-fit
+					className={`capitalize rounded-lg py-1 px-3 border text-base w-fit
 						${
 							row.original.status === 'active'
-								? 'bg-[#EFFFF5] text-[#16A34A]'
-								: 'bg-[#EF44444A] text-destructive'
+								? 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]'
+								: 'bg-[#EF44444A] text-destructive border-destructive'
 						}
 					`}
 				>

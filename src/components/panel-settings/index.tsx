@@ -44,7 +44,7 @@ const PanelSettings: React.FC<PanelSettingsProps> = ({
 				iconVariant={iconVariant}
 			/>
 			<div className="rounded-b-2xl border border-t-0 border-gray-200">
-				<div className="bg-[#F8F8F8] px-8 py-4">
+				<div className={cn("bg-[#F8F8F8] px-8 py-4", !showButtons || (!onNext && !onBack) ? "rounded-b-2xl" : "")}>
 					{children}
 				</div>
 

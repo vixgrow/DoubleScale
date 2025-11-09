@@ -14,8 +14,10 @@ import {
 	DollarOutlined,
 } from '@ant-design/icons';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
-import ReportFilters from '../../../../components/reports/ReportFilters';
+
 import { cn } from '../../../../lib/utils';
+import ReportFilters from '@quillcrm/components/reports/ReportFilters';
+
 
 interface ContactsDealsReportsProps {
 	contacts_created: number;

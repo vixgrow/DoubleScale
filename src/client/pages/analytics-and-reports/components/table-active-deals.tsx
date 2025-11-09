@@ -1,5 +1,4 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
 	Table,
 	TableHeader,
@@ -8,10 +7,24 @@ import {
 	TableCell,
 	TableHead,
 } from '@/components/ui/table';
+import {
+	Pagination,
+	PaginationContent,
+	PaginationItem,
+	PaginationPrevious,
+	PaginationNext,
+	PaginationLink,
+	PaginationEllipsis,
+} from '@/components/ui/pagination';
+
 import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import apiFetch from '@wordpress/api-fetch';
 import { Skeleton } from 'antd';
+import { convertDate } from '@quillcrm/utils';
+import { __ } from '@wordpress/i18n';
+import StageBadge from './StageBadge';
+import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
 
 interface Deal {
 	id: string;
@@ -98,16 +111,17 @@ const TableActiveDeals = ({
 	return (
 		<Card>
 			<CardHeader>
-				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-					<CardTitle>
-						Active Deals
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+					<CardTitle className="text-xl font-medium text-[#09090B]">
+						{__('Active Deals', 'quillcrm')}
 						{pagination.total > 0 && (
-							<span className="text-sm font-normal text-gray-500 ml-2">
-								({pagination.total} total)
+							<span className="text-xl font-medium text-[#09090B] ml-2">
+								({deals.length}
+								{__(` active deals`, 'quillcrm')})
 							</span>
 						)}
 					</CardTitle>
-					<div className="flex items-center gap-4">
+					{/* <div className="flex items-center gap-4">
 						<div className="relative">
 							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
 							<input
@@ -118,86 +132,203 @@ const TableActiveDeals = ({
 								onChange={(e) => setSearchTerm(e.target.value)}
 							/>
 						</div>
-						<select
-							value={pagination.per_page}
-							onChange={(e) =>
-								handlePerPageChange(Number(e.target.value))
-							}
-							className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-						>
-							<option value={5}>5 per page</option>
-							<option value={10}>10 per page</option>
-							<option value={25}>25 per page</option>
-							<option value={50}>50 per page</option>
-						</select>
-					</div>
+						
+					</div> */}
 				</div>
 			</CardHeader>
 			<CardContent>
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Deal Name</TableHead>
-							<TableHead>Value</TableHead>
-							<TableHead>Stage</TableHead>
-							<TableHead>Close Date</TableHead>
-							<TableHead>Time in Stage</TableHead>
-							<TableHead>Last Activity</TableHead>
-						</TableRow>
-					</TableHeader>
-					{isLoading ? (
-						<TableBody>
-							<Skeleton active paragraph={{ rows: 6 }} />
-						</TableBody>
-					) : (
-						<TableBody>
-							{deals.length === 0 ? (
-								<TableRow>
-									<TableCell
-										colSpan={6}
-										className="text-center py-8 text-gray-500"
-									>
-										{searchTerm
-											? 'No deals found matching your search.'
-											: 'No active deals found.'}
-									</TableCell>
-								</TableRow>
-							) : (
-								deals.map((deal) => (
-									<TableRow key={deal.id}>
-										<TableCell className="font-semibold">
-											{deal.name}
-										</TableCell>
-										<TableCell className="font-semibold">
-											{deal.value}
-										</TableCell>
-										<TableCell>
-											<Badge
-												style={{
-													backgroundColor:
-														deal.stage_color,
-													border: 'none',
-												}}
+				<div className="border border-[#DEE1E6] rounded-[8px] overflow-hidden">
+					<Table>
+						<TableHeader>
+							<TableRow className="  bg-[#F8F8F8]  rounded-r-[8px] py-4 px-6">
+								<TableHead>Deal Name</TableHead>
+								<TableHead>Value</TableHead>
+								<TableHead>Stage</TableHead>
+								<TableHead>Close Date</TableHead>
+								<TableHead>Time in Stage</TableHead>
+								<TableHead>Last Activity</TableHead>
+							</TableRow>
+						</TableHeader>
+						{isLoading ? (
+							<TableBody>
+								<Skeleton active paragraph={{ rows: 6 }} />
+							</TableBody>
+						) : (
+							<>
+								<TableBody>
+									{deals.length === 0 ? (
+										<TableRow>
+											<TableCell
+												colSpan={6}
+												className="text-center py-8 text-gray-500"
 											>
-												{deal.stage}
-											</Badge>
-										</TableCell>
-										<TableCell>{deal.closeDate}</TableCell>
-										<TableCell>
-											{deal.timeInStage || 'N/A'}
-										</TableCell>
-										<TableCell>
-											{deal.lastActivity}
-										</TableCell>
-									</TableRow>
-								))
-							)}
-						</TableBody>
-					)}
-				</Table>
+												{searchTerm
+													? 'No deals found matching your search.'
+													: 'No active deals found.'}
+											</TableCell>
+										</TableRow>
+									) : (
+										deals.map((deal) => (
+											<TableRow
+												className="p-6"
+												key={deal.id}
+											>
+												<TableCell className="font-normal text-[#09090B] text-sm">
+													{deal.name}
+												</TableCell>
+												<TableCell className="font-normal text-[#09090B] text-sm">
+													{deal.value}
+												</TableCell>
+												{/* <TableCell>
+													<Badge
+														style={{
+															backgroundColor:
+																deal.stage_color,
+															border: 'none',
+														}}
+													>
+														{deal.stage}
+													</Badge>
+												</TableCell> */}
+												<TableCell>
+	<StageBadge
+		stage={deal.stage} 
+		stageColor={deal.stage_color} 
+	/>
+</TableCell>
+												<TableCell>
+													{deal.closeDate
+														? convertDate(
+																deal.closeDate,
+																true
+															)
+														: '__'}
+												</TableCell>
+												<TableCell>
+													{deal.timeInStage || 'N/A'}
+												</TableCell>
+												<TableCell>
+													{convertDate(
+														deal.lastActivity,
+														true
+													)}
+												</TableCell>
+											</TableRow>
+										))
+									)}
+								</TableBody>
+							</>
+						)}
+					</Table>
 
-				{/* Pagination Controls */}
-				{pagination.total_pages > 1 && (
+					<div className="w-full border-t border-t-[#DEE1E6] bg-transparent flex items-center justify-between gap-2 p-2">
+						{/* LEFT SIDE */}
+						<div className="flex gap-2 items-center">
+							<p className="text-[#3F3F46] text-sm">
+								{__(
+									`Showing 1 to ${pagination?.total} of ${pagination?.total} results`,
+									'quillcrm'
+								)}
+							</p>
+
+							<div className="flex items-center rounded-[8px] border border-[#E4E4E7] py-2 px-3 w-fit">
+								<span className="text-[#71717A] text-sm">
+									{__('Per page', 'quillcrm')}
+								</span>
+
+								<div className="mx-2 w-[1px] h-7 bg-[#E4E4E7]"></div>
+
+								<select
+									value={pagination.per_page}
+									onChange={(e) =>
+										handlePerPageChange(
+											Number(e.target.value)
+										)
+									}
+									className="border-0 text-sm focus:outline-none"
+								>
+									<option value={5}>5</option>
+									<option value={10}>10</option>
+									<option value={25}>25</option>
+									<option value={50}>50</option>
+								</select>
+							</div>
+						</div>
+
+						{/* RIGHT SIDE */}
+						<div>
+							<Pagination>
+								<PaginationContent>
+									<PaginationItem>
+										<PaginationPrevious
+											onClick={() =>
+												handlePageChange(
+													pagination.current_page - 1
+												)
+											}
+											className={
+												!pagination.has_prev
+													? 'pointer-events-none opacity-40'
+													: ''
+											}
+										/>
+									</PaginationItem>
+
+									{Array.from(
+										{ length: pagination.total_pages },
+										(_, i) => i + 1
+									)
+										.filter((page) => {
+											const current =
+												pagination.current_page;
+											return (
+												page === 1 ||
+												page ===
+													pagination.total_pages ||
+												(page >= current - 1 &&
+													page <= current + 1)
+											);
+										})
+										.map((page, index, array) => (
+											<PaginationItem key={page}>
+												{index > 0 &&
+													array[index - 1] !==
+														page - 1 && (
+														<PaginationEllipsis />
+													)}
+												<PaginationLink
+													onClick={() =>
+														handlePageChange(page)
+													}
+													isActive={
+														pagination.current_page ===
+														page
+													}
+												>
+													{page}
+												</PaginationLink>
+											</PaginationItem>
+										))}
+
+									<PaginationItem>
+										<PaginationNext
+											onClick={() =>
+												handlePageChange(
+													pagination.current_page + 1
+												)
+											}
+											className={
+												!pagination.has_next
+													? 'pointer-events-none opacity-40'
+													: ''
+											}
+										/>
+									</PaginationItem>
+								</PaginationContent>
+							</Pagination>
+						</div>
+
+						{/* {pagination.total_pages > 1 && (
 					<div className="flex items-center justify-between mt-4 pt-4 border-t">
 						<div className="text-sm text-gray-500">
 							Showing{' '}
@@ -283,7 +414,12 @@ const TableActiveDeals = ({
 							</button>
 						</div>
 					</div>
-				)}
+				)} */}
+					</div>
+				</div>
+
+				{/* Pagination Controls */}
+				
 			</CardContent>
 		</Card>
 	);

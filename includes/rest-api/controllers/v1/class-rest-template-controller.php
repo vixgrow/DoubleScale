@@ -819,8 +819,20 @@ class REST_Template_Controller extends REST_Controller {
 		$template_id = (int) $request->get_param( 'id' );
 		$merge_tags  = $request->get_param( 'merge_tags' ) ?: array();
 
+		// Extract contact from merge_tags if provided (for backward compatibility)
+		// Most commonly used for preview, so contact may be null
+		$contact = null;
+		if ( ! empty( $merge_tags ) ) {
+			// Check if contact is in 'contact' key
+			if ( isset( $merge_tags['contact'] ) && ( $merge_tags['contact'] instanceof \QuillCRM\Models\Contact_Model || $merge_tags['contact'] instanceof \QuillCRM\Models\Automation_Contact_Model ) ) {
+				$contact = $merge_tags['contact'];
+			} elseif ( ! empty( $merge_tags[0] ) && ( $merge_tags[0] instanceof \QuillCRM\Models\Contact_Model || $merge_tags[0] instanceof \QuillCRM\Models\Automation_Contact_Model ) ) {
+				$contact = $merge_tags[0];
+			}
+		}
+
 		$renderer = new Email_Renderer();
-		$html     = $renderer->render_template( $template_id, $merge_tags );
+		$html     = $renderer->render_template( $template_id, $contact );
 
 		if ( empty( $html ) ) {
 			return new WP_Error(

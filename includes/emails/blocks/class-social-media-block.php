@@ -124,10 +124,10 @@ class Social_Media_Block extends Email_Block {
 	 * Render block
 	 *
 	 * @param array $props Block properties
-	 * @param array $merge_tags Merge tags
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	public function render( array $props, array $merge_tags = array() ): string {
+	public function render( array $props, $contact = null ): string {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
@@ -185,7 +185,7 @@ class Social_Media_Block extends Email_Block {
 
 		// Add each platform icon (matching frontend)
 		foreach ( $enabled_platforms as $platform => $data ) {
-			$link = $this->process_merge_tags( $data['link'], $merge_tags );
+			$link = $this->process_merge_tags( $data['link'], $contact );
 
 			// Get the icon URL
 			$icon_url = $this->get_social_icon_url( $platform, $props['colorMode'] === 'original', $props['color'] );

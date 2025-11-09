@@ -774,13 +774,10 @@ abstract class Abstract_Campaign_Processing {
 				$renderer     = new \QuillCRM\Emails\Email_Renderer();
 				$builder_data = $decoded['value'];
 
-				// Prepare merge tags array from contact
-				$merge_tags = array( 'contact' => $contact );
-
 				// Extract preview text if available
 				$preview_text = '';
 
-				return $renderer->render_from_builder_data( $builder_data, $merge_tags, $preview_text );
+				return $renderer->render_from_builder_data( $builder_data, $contact, $preview_text );
 			}
 		}
 

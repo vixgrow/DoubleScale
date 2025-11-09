@@ -691,7 +691,11 @@ const Templates: React.FC = () => {
 						</div>
 					</PanelSettings>
 
-					<FeedBuilder setVisibile={handleOpenEmailBuilder} />
+					<FeedBuilder
+						fromName={template.settings?.from_name}
+						subject={template.subject}
+						previewText={template.preview_text}
+					/>
 				</div>
 			</PanelLayout>
 			<EmailBuilderSelection

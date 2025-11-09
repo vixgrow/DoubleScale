@@ -1047,14 +1047,7 @@ abstract class Abstract_Campaign_Processing {
 				}
 
 				foreach ( $failed_messages as $message ) {
-					$message->status = Tracking_Status::SCHEDULED;
-					$message->save();
-					QuillCRM::instance()->campaigns_tasks->enqueue_sync(
-						"process_campaign_{$this->channel}",
-						$campaign,
-						$message->contact,
-						$message
-					);
+					$this->resend_single_message( $campaign, $message->contact, $message );
 					$last_offset++;
 					update_option( $offset_key, $last_offset );
 				}
@@ -1072,6 +1065,29 @@ abstract class Abstract_Campaign_Processing {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Resend a single message
+	 * Helper method to resend a single tracking message
+	 *
+	 * @param Campaign_Model $campaign
+	 * @param Contact_Model $contact
+	 * @param Tracking_Model $message
+	 * @return void
+	 */
+	public function resend_single_message( $campaign, $contact, $message ) {
+		$message->status = Tracking_Status::SCHEDULED;
+		$message->save();
+		
+		// Convert channel integer to string for task name
+		$channel_string = Campaign_Channel::to_string( $this->channel ) ?? 'email';
+		QuillCRM::instance()->campaigns_tasks->enqueue_sync(
+			"process_campaign_{$channel_string}",
+			$campaign,
+			$contact,
+			$message
+		);
 	}
 
 	/**

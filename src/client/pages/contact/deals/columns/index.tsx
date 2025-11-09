@@ -9,42 +9,21 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import type { DealsResponse } from '@quillcrm/client';
+import type { Deal } from '@/client/pages/sales-pipeline/types';
 import { Button } from '@quillcrm/components/ui/button';
 import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
 
 interface ColumnsProps {
-	onView: (deal: DealsResponse) => void;
+	onView: (deal: Deal) => void;
 }
 
-type DealStage =
-	| 'qualified'
-	| 'proposal'
-	| 'negotiation'
-	| 'lead'
-	| 'lost'
-	| 'won';
-
-const getStageStyles = (stage: DealStage) => {
-	const styles = {
-		qualified: 'text-[#660FF1] bg-[#F5EFFF] border-[#660FF1]',
-		proposal: 'text-[#A67D0A] bg-[#FAF3DF] border-[#A67D0A]',
-		negotiation: 'text-[#CB5301] bg-[#FAEADF] border-[#CB5301]',
-		lead: 'text-secondary bg-[#E3EEFF99] border-secondary',
-		lost: 'text-destructive bg-[#FBE8E8] border-destructive',
-		won: 'text-[#16A34A] bg-[#E4FAEC] border-[#16A34A]',
-	};
-	return styles[stage] || 'text-gray-600 bg-gray-100 border-gray-600';
-};
-
 export function getColumns({ onView }: ColumnsProps) {
-	const columns: ColumnDef<DealsResponse>[] = [
+	const columns: ColumnDef<Deal>[] = [
 		{
-			accessorKey: 'deal_name',
+			accessorKey: 'title',
 			header: __('Deal Name', 'quillcrm'),
 			cell: ({ row }) => {
-				const dealName = (row.original as any).deal_name;
-				return dealName || __('N/A', 'quillcrm');
+				return row.original.title || __('N/A', 'quillcrm');
 			},
 		},
 		{
@@ -55,17 +34,18 @@ export function getColumns({ onView }: ColumnsProps) {
 			),
 		},
 		{
-			accessorKey: 'deal_value',
+			accessorKey: 'value',
 			header: __('Deal Value', 'quillcrm'),
 			cell: ({ row }) => {
-				const value = (row.original as any).deal_value;
+				const value = row.original.value;
+				const currency = row.original.currency || 'USD';
 				if (!value) {
 					return __('N/A', 'quillcrm');
 				}
 				// Format as currency
 				return new Intl.NumberFormat('en-US', {
 					style: 'currency',
-					currency: 'USD',
+					currency: currency,
 				}).format(value);
 			},
 		},
@@ -73,15 +53,24 @@ export function getColumns({ onView }: ColumnsProps) {
 			accessorKey: 'stage',
 			header: __('Current Stage', 'quillcrm'),
 			cell: ({ row }) => {
-				const stage = (row.original as any).stage as DealStage;
-				const stageStyles = getStageStyles(stage);
+				const stageName = row.original.stage?.name;
+				const stageColor = row.original.stage?.color || '#6d78d8';
+				
+				if (!stageName) {
+					return __('N/A', 'quillcrm');
+				}
 
 				return (
 					<div className="flex items-center gap-2">
 						<span
-							className={`border rounded-md px-2 py-1 capitalize ${stageStyles}`}
+							className="border rounded-md px-2 py-1 capitalize"
+							style={{
+								borderColor: stageColor,
+								color: stageColor,
+								backgroundColor: `${stageColor}20`,
+							}}
 						>
-							{stage || __('N/A', 'quillcrm')}
+							{stageName}
 						</span>
 					</div>
 				);

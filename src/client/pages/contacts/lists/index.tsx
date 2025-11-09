@@ -19,7 +19,7 @@ import type {
 	DataTableConfig,
 	NoticeMessage,
 } from '@quillcrm/client';
-import { NoticeBanner } from '@quillcrm/components';
+import { GradientListIcon, NoticeBanner, NoData } from '@quillcrm/components';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
 import { getListColumns } from './columns';
@@ -27,8 +27,6 @@ import { ListDialog } from './lists-dialog';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import { formatDateForAPI } from '@quillcrm/utils';
-import { NoData } from '@quillcrm/components';
-import ListsIcon from '@/components/icons/lists';
 
 export interface ListsRef {
 	openCreateListModal: () => void;
@@ -308,7 +306,7 @@ const Lists = forwardRef<ListsRef, ListsProps>(({ activeTab }, ref) => {
 				</>
 			) : (
 				<NoData
-					icon={<ListsIcon width={120} height={120} />}
+					icon={<GradientListIcon width={120} height={120} />}
 					title={__('No lists yet', 'quillcrm')}
 					subtitle={__(
 						'Get started by creating your first list to organize your contacts',

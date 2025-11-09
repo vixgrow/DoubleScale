@@ -9,7 +9,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Automations\Triggers\WooCommerce;
+namespace QuillCRM\Automations\Triggers\WooCommerce\Order;
 
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
@@ -23,15 +23,12 @@ use QuillCRM\Constants\Order_Status;
 class Order_Created extends Trigger {
 
 
-
-
-
 	/**
 	 * Trigger Name
 	 *
 	 * @var string
 	 */
-	public $name = 'WooCommerce Order Created';
+	public $name = 'Order Created';
 
 	/**
 	 * Trigger Slug

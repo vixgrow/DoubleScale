@@ -163,5 +163,6 @@ class Send_WhatsApp extends Abstract_Send_Message {
 	}
 }
 
-Send_WhatsApp::instance();
+// Disabled: WhatsApp feature is currently disabled
+// Send_WhatsApp::instance();
 

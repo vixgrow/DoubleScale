@@ -87,7 +87,7 @@ const CampaignDetails: React.FC = () => {
 		campaign.settings?.templates && campaign.settings.templates.length > 0;
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 h-screen">
 			{/* Campaign Info */}
 			<div className="grid grid-cols-2 gap-4">
 				<div className="space-y-1">

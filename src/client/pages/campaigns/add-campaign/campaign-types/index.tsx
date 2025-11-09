@@ -7,10 +7,10 @@ import { __ } from '@wordpress/i18n';
  * internal dependencies
  */
 import {
-	ABTestIcon,
-	EmailOutlinedIcon,
+	ABSplitIcon,
+	AllContactsIcon,
 	PremiumIcon,
-} from '@/components';
+} from '@quillcrm/components';
 import { CampaignType } from '@quillcrm/client';
 import { Label } from '@/components/ui/label';
 
@@ -32,7 +32,7 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 				'quillcrm'
 			),
 			type: 'standard',
-			icon: <EmailOutlinedIcon />,
+			icon: <AllContactsIcon width={24} height={24} />,
 		},
 		{
 			label: __('A/B Split Campaign', 'quillcrm'),
@@ -41,7 +41,7 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 				'quillcrm'
 			),
 			type: 'ab_test',
-			icon: <ABTestIcon />,
+			icon: <ABSplitIcon width={24} height={24} />,
 			isPremium: true,
 		},
 		// {

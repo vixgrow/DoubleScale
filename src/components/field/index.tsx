@@ -433,6 +433,9 @@ const Field: React.FC<FieldProps> = ({
 				/>
 			);
 			break;
+		case 'label':
+			fieldContent = <div className="text-ghost">{value}</div>;
+			break;
 		default:
 			fieldContent = null;
 	}
@@ -488,7 +491,7 @@ const Field: React.FC<FieldProps> = ({
 					</span>
 				</div>
 			)}
-			<div className="qcrm-field-input mt-2">{fieldContent}</div>
+			<div className="qcrm-field-input">{fieldContent}</div>
 			{helperText && renderHelperText(helperText)}
 		</div>
 	);

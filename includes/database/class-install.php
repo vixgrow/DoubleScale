@@ -18,6 +18,7 @@ use QuillCRM\Database\Migrations\Custom_Field_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_List_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_Tag_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_Notes_Table;
+use QuillCRM\Database\Migrations\Contact_Meta_Table;
 use QuillCRM\Database\Migrations\Contacts_Table;
 use QuillCRM\Database\Migrations\Custom_Fields_Groups_Table;
 use QuillCRM\Database\Migrations\Custom_Fields_Table;
@@ -65,6 +66,7 @@ class Install {
 			'quillcrm_database_tables',
 			array(
 				'contacts'                     => Contacts_Table::class,
+				'contact_meta'                 => Contact_Meta_Table::class,
 				'custom_field_relationship'    => Custom_Field_Relationship_Table::class,
 				'contact_list_relationship'    => Contact_List_Relationship_Table::class,
 				'contact_tag_relationship'     => Contact_Tag_Relationship_Table::class,

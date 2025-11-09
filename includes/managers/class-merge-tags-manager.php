@@ -21,6 +21,17 @@ use QuillCRM\Models\Automation_Contact_Model;
 final class Merge_Tags_Manager {
 
 
+
+
+
+
+
+
+
+
+
+
+
 	/**
 	 * Registed merge tags
 	 *
@@ -141,7 +152,7 @@ final class Merge_Tags_Manager {
 			'order'          => array(
 				'name'      => __( 'Order', 'quillcrm' ),
 				'mergeTags' => array(),
-				'triggers'  => array( 'wc_order_completed', 'wc_order_created', 'wc_order_refunded', 'wc_order_status_changed' ),
+				'triggers'  => array( 'wc_order_completed', 'wc_order_created', 'wc_order_refunded', 'wc_order_status_changed', 'wc_cart_recovered' ),
 			),
 			'abandoned_cart' => array(
 				'name'      => __( 'Abandoned Cart', 'quillcrm' ),
@@ -161,6 +172,36 @@ final class Merge_Tags_Manager {
 			'learndash'      => array(
 				'name'      => __( 'LearnDash', 'quillcrm' ),
 				'mergeTags' => array(),
+			),
+			'membership'     => array(
+				'name'      => __( 'Membership', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'wc_membership_created', 'wc_membership_status_changed' ),
+			),
+			'wishlist'       => array(
+				'name'      => __( 'Wishlist', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'wc_user_adds_product_to_wishlist', 'wc_wishlist_item_on_sale', 'wc_wishlist_reminder' ),
+			),
+			'subscription'   => array(
+				'name'      => __( 'Subscription', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array(
+					'wc_subscription_created',
+					'wc_subscription_status_changed',
+					'wc_customer_before_card_expiry',
+					'wc_subscription_renewal_payment_failed',
+					'wc_subscription_renewal_payment_complete',
+					'wc_subscription_trial_end',
+					'wc_subscription_note_added',
+					'wc_subscription_before_renewal',
+					'wc_subscription_before_end',
+				),
+			),
+			'review'         => array(
+				'name'      => __( 'Review', 'quillcrm' ),
+				'mergeTags' => array(),
+				'triggers'  => array( 'wc_review_received' ),
 			),
 		);
 		// get forms slug to set in groups

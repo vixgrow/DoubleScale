@@ -21,6 +21,7 @@ use QuillCRM\Services\Campaign_Template_Factory;
 use QuillCRM\Services\Template_Field_Mapper;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Constants\Tracking_Status;
+use QuillCRM\Constants\Message_Source_Types;
 
 /**
  * Campaign_Model class
@@ -145,13 +146,17 @@ class Campaign_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
 	 */
 	public function messages_with_contacts() {
+		global $wpdb;
+		$contacts_table = $wpdb->prefix . 'quillcrm_contacts';
+		$tracking_table = $wpdb->prefix . 'quillcrm_tracking';
+
 		return $this->hasMany( Tracking_Model::class, 'source_id', 'id' )
-			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN )
+			->where( 'source_type', Message_Source_Types::CAMPAIGN )
 			->whereExists(
-				function ( $query ) {
+				function ( $query ) use ( $contacts_table, $tracking_table ) {
 					$query->selectRaw( '1' )
-						->from( 'wp_quillcrm_contacts' )
-						->whereColumn( 'wp_quillcrm_contacts.id', 'wp_quillcrm_tracking.contact_id' );
+						->from( $contacts_table )
+						->whereColumn( "{$contacts_table}.id", "{$tracking_table}.contact_id" );
 				}
 			);
 	}

@@ -12,6 +12,7 @@
 namespace QuillCRM\REST_API\Controllers\V1;
 
 use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
@@ -121,6 +122,11 @@ class REST_Template_Controller extends REST_Controller {
 							'description' => __( 'Merge tags to use in the template', 'quillcrm' ),
 							'type'        => 'object',
 							'default'     => array(),
+						),
+						'contact_id' => array(
+							'description' => __( 'Contact ID to use for merge tags', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => null,
 						),
 					),
 				),
@@ -818,15 +824,18 @@ class REST_Template_Controller extends REST_Controller {
 	public function render_template( $request ) {
 		$template_id = (int) $request->get_param( 'id' );
 		$merge_tags  = $request->get_param( 'merge_tags' ) ?: array();
+		$contact_id  = $request->get_param( 'contact_id' );
 
-		// Extract contact from merge_tags if provided (for backward compatibility)
-		// Most commonly used for preview, so contact may be null
+		// Get contact - prioritize contact_id parameter, then extract from merge_tags
 		$contact = null;
-		if ( ! empty( $merge_tags ) ) {
+		if ( ! empty( $contact_id ) ) {
+			$contact = Contact_Model::find( (int) $contact_id );
+		} elseif ( ! empty( $merge_tags ) ) {
+			// Extract contact from merge_tags if provided (for backward compatibility)
 			// Check if contact is in 'contact' key
-			if ( isset( $merge_tags['contact'] ) && ( $merge_tags['contact'] instanceof \QuillCRM\Models\Contact_Model || $merge_tags['contact'] instanceof \QuillCRM\Models\Automation_Contact_Model ) ) {
+			if ( isset( $merge_tags['contact'] ) && ( $merge_tags['contact'] instanceof Contact_Model || $merge_tags['contact'] instanceof Automation_Contact_Model ) ) {
 				$contact = $merge_tags['contact'];
-			} elseif ( ! empty( $merge_tags[0] ) && ( $merge_tags[0] instanceof \QuillCRM\Models\Contact_Model || $merge_tags[0] instanceof \QuillCRM\Models\Automation_Contact_Model ) ) {
+			} elseif ( ! empty( $merge_tags[0] ) && ( $merge_tags[0] instanceof Contact_Model || $merge_tags[0] instanceof Automation_Contact_Model ) ) {
 				$contact = $merge_tags[0];
 			}
 		}

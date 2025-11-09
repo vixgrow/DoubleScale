@@ -289,15 +289,15 @@ export const smsCampaignColumns = ({
 		actionsColumn,
 	} = getCommonColumns({ onDelete, duplicate, navigate });
 
-	const deliveredRateColumn: ColumnDef<Campaign> = {
-		accessorKey: 'delivered_rate',
+	const deliveryRateColumn: ColumnDef<Campaign> = {
+		accessorKey: 'delivery_rate',
 		header: ({ column }) =>
 			SortedHeaderCell({
 				column,
-				header: __('Delivered Rate', 'quillcrm'),
+				header: __('Delivery Rate', 'quillcrm'),
 			}),
 		cell: ({ row }) => (
-			<FallbackCell value={row.getValue('delivered_rate')} />
+			<FallbackCell value={row.getValue('delivery_rate')} />
 		),
 	};
 
@@ -306,7 +306,7 @@ export const smsCampaignColumns = ({
 		nameColumn,
 		statusColumn,
 		broadcastColumn,
-		deliveredRateColumn,
+		deliveryRateColumn,
 		createdAtColumn,
 		updatedAtColumn,
 		actionsColumn,

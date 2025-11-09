@@ -93,7 +93,7 @@ export const ContactFilterSection = forwardRef<
 	ContactFilterSectionProps
 >(({ title, description, onReset, onChange, initialRows }, ref) => {
 	const [rows, setRows] = useState<FilterRow[]>(
-		initialRows && initialRows.length > 0
+		initialRows !== undefined
 			? initialRows
 			: [{ id: 1, list: 'all', tag: 'all' }]
 	);
@@ -284,137 +284,157 @@ export const ContactFilterSection = forwardRef<
 						</div>
 					</div>
 					<div className="p-3 space-y-4">
-						{rows.map((row, index) => (
-							<div key={row.id}>
-								<div className="flex items-center gap-4">
-									{/* Select List */}
-									<div className="flex-1">
-										<Select
-											value={row.list}
-											onValueChange={(value) =>
-												updateRow(row.id, 'list', value)
-											}
-										>
-											<SelectTrigger className="w-full h-12">
-												<SelectValue placeholder="Select List" />
-											</SelectTrigger>
-											<SelectContent
-												position="popper"
-												sideOffset={4}
-												className="max-h-[300px]"
-												onCloseAutoFocus={(e) =>
-													e.preventDefault()
-												}
-											>
-												<SelectItem value="all">
-													All Lists
-												</SelectItem>
-												{lists.map((list, index) => (
-													<SelectItem
-														key={list.id}
-														value={String(list.id)}
-														ref={
-															index ===
-																lists.length -
-																	1 &&
-															listsHasMore
-																? lastListItemRef
-																: undefined
-														}
-													>
-														{list.name}
-													</SelectItem>
-												))}
-												{loadingLists && (
-													<div className="flex items-center justify-center py-2">
-														<Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
-														<span>
-															{__(
-																'Loading more...',
-																'quillcrm'
-															)}
-														</span>
-													</div>
-												)}
-											</SelectContent>
-										</Select>
-									</div>
-
-									{/* Select Tag */}
-									<div className="flex-1">
-										<Select
-											value={row.tag}
-											onValueChange={(value) =>
-												updateRow(row.id, 'tag', value)
-											}
-										>
-											<SelectTrigger className="w-full h-12">
-												<SelectValue placeholder="Select Tag" />
-											</SelectTrigger>
-											<SelectContent
-												position="popper"
-												sideOffset={4}
-												className="max-h-[300px]"
-												onCloseAutoFocus={(e) =>
-													e.preventDefault()
-												}
-											>
-												<SelectItem value="all">
-													All Contact on Selected list
-													Segment
-												</SelectItem>
-												{tags.map((tag, index) => (
-													<SelectItem
-														key={tag.id}
-														value={String(tag.id)}
-														ref={
-															index ===
-																tags.length -
-																	1 &&
-															tagsHasMore
-																? lastTagItemRef
-																: undefined
-														}
-													>
-														{tag.name}
-													</SelectItem>
-												))}
-												{loadingTags && (
-													<div className="flex items-center justify-center py-2">
-														<Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
-														<span>
-															{__(
-																'Loading more...',
-																'quillcrm'
-															)}
-														</span>
-													</div>
-												)}
-											</SelectContent>
-										</Select>
-									</div>
-
-									{/* Remove button */}
-									<Button
-										variant="ghost"
-										size="icon"
-										onClick={() => removeRow(row.id)}
-										className="text-destructive"
-									>
-										<DeleteIcon />
-									</Button>
-								</div>
-								{index === 0 && (
-									<div className="flex items-center gap-2 text-sm font-semibold text-secondary mt-3">
-										<AlertIcon width={20} height={20} />
-										{__(
-											'This Question Is Required By Default',
-											'quillcrm'
-										)}
-									</div>
-								)}
+						{rows.length === 0 ? (
+							<div className="py-4 text-center text-sm text-gray-500">
+								{__('No filters added yet.', 'quillcrm')}
 							</div>
-						))}
+						) : (
+							rows.map((row, index) => (
+								<div key={row.id}>
+									<div className="flex items-center gap-4">
+										{/* Select List */}
+										<div className="flex-1">
+											<Select
+												value={row.list}
+												onValueChange={(value) =>
+													updateRow(
+														row.id,
+														'list',
+														value
+													)
+												}
+											>
+												<SelectTrigger className="w-full h-12">
+													<SelectValue placeholder="Select List" />
+												</SelectTrigger>
+												<SelectContent
+													position="popper"
+													sideOffset={4}
+													className="max-h-[300px]"
+													onCloseAutoFocus={(e) =>
+														e.preventDefault()
+													}
+												>
+													<SelectItem value="all">
+														All Lists
+													</SelectItem>
+													{lists.map(
+														(list, index) => (
+															<SelectItem
+																key={list.id}
+																value={String(
+																	list.id
+																)}
+																ref={
+																	index ===
+																		lists.length -
+																			1 &&
+																	listsHasMore
+																		? lastListItemRef
+																		: undefined
+																}
+															>
+																{list.name}
+															</SelectItem>
+														)
+													)}
+													{loadingLists && (
+														<div className="flex items-center justify-center py-2">
+															<Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
+															<span>
+																{__(
+																	'Loading more...',
+																	'quillcrm'
+																)}
+															</span>
+														</div>
+													)}
+												</SelectContent>
+											</Select>
+										</div>
+
+										{/* Select Tag */}
+										<div className="flex-1">
+											<Select
+												value={row.tag}
+												onValueChange={(value) =>
+													updateRow(
+														row.id,
+														'tag',
+														value
+													)
+												}
+											>
+												<SelectTrigger className="w-full h-12">
+													<SelectValue placeholder="Select Tag" />
+												</SelectTrigger>
+												<SelectContent
+													position="popper"
+													sideOffset={4}
+													className="max-h-[300px]"
+													onCloseAutoFocus={(e) =>
+														e.preventDefault()
+													}
+												>
+													<SelectItem value="all">
+														All Contact on Selected
+														list Segment
+													</SelectItem>
+													{tags.map((tag, index) => (
+														<SelectItem
+															key={tag.id}
+															value={String(
+																tag.id
+															)}
+															ref={
+																index ===
+																	tags.length -
+																		1 &&
+																tagsHasMore
+																	? lastTagItemRef
+																	: undefined
+															}
+														>
+															{tag.name}
+														</SelectItem>
+													))}
+													{loadingTags && (
+														<div className="flex items-center justify-center py-2">
+															<Loader2 className="h-4 w-4 animate-spin text-primary mr-2" />
+															<span>
+																{__(
+																	'Loading more...',
+																	'quillcrm'
+																)}
+															</span>
+														</div>
+													)}
+												</SelectContent>
+											</Select>
+										</div>
+
+										{/* Remove button */}
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={() => removeRow(row.id)}
+											className="text-destructive"
+										>
+											<DeleteIcon />
+										</Button>
+									</div>
+									{index === 0 && (
+										<div className="flex items-center gap-2 text-sm font-semibold text-secondary mt-3">
+											<AlertIcon width={20} height={20} />
+											{__(
+												'This Question Is Required By Default',
+												'quillcrm'
+											)}
+										</div>
+									)}
+								</div>
+							))
+						)}
 					</div>
 				</CardContent>
 			</Card>

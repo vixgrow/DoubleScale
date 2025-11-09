@@ -211,7 +211,7 @@ export default function ListTagFilter({
 				description="Select List and Tags that you want to send emails for this campaign. You can create multiple row to send to all of them."
 				ref={includeFilterRef}
 				onChange={setIncludeData}
-				initialRows={includeData}
+				initialRows={includeData.length ? includeData : undefined}
 			/>
 			<div className="border-t border-gray-200"></div>
 			<ContactFilterSection

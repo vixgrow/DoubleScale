@@ -35,7 +35,7 @@ import { ImageUploadControl } from '@/builder/blocks/basic/shared/ImageUploadCon
 import { getCampaignEndpoint } from '@quillcrm/utils';
 //@ts-ignore
 import device from '../../../../../../assets/images/message-device.png';
-
+import SMSDevice from './sms-device';
 
 const SMSTemplateStep: React.FC = () => {
 	const { campaign, saving, goToStep } = useCampaignStep();
@@ -49,7 +49,10 @@ const SMSTemplateStep: React.FC = () => {
 	// Scroll to notice banner when it appears
 	useEffect(() => {
 		if (notice && noticeBannerRef.current) {
-			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			noticeBannerRef.current.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			});
 		}
 	}, [notice]);
 
@@ -115,7 +118,10 @@ const SMSTemplateStep: React.FC = () => {
 		if (template.body.length > 1600) {
 			setNotice({
 				type: 'error',
-				message: __('Message is too long. Maximum 1600 characters.', 'quillcrm'),
+				message: __(
+					'Message is too long. Maximum 1600 characters.',
+					'quillcrm'
+				),
 			});
 			return false;
 		}
@@ -164,7 +170,10 @@ const SMSTemplateStep: React.FC = () => {
 				type: 'error',
 				message:
 					error.message ||
-					__('Failed to save template. Please try again.', 'quillcrm'),
+					__(
+						'Failed to save template. Please try again.',
+						'quillcrm'
+					),
 			});
 		}
 	};
@@ -233,7 +242,11 @@ const SMSTemplateStep: React.FC = () => {
 						)}
 						icon={<SetUpInfoIcon />}
 						onNext={save}
-						nextLabel={saving ? __('Saving...', 'quillcrm') : __('Next', 'quillcrm')}
+						nextLabel={
+							saving
+								? __('Saving...', 'quillcrm')
+								: __('Next', 'quillcrm')
+						}
 						showButtons={true}
 						isLoading={saving}
 					>
@@ -303,9 +316,7 @@ const SMSTemplateStep: React.FC = () => {
 									</div>
 									<Button
 										variant="ghost"
-										onClick={() =>
-											setShowWarning(false)
-										}
+										onClick={() => setShowWarning(false)}
 										className="flex-shrink-0 text-[#333333] shadow-none border-none p-0 hover:text-black"
 									>
 										<X className="w-4 h-4" />
@@ -320,14 +331,19 @@ const SMSTemplateStep: React.FC = () => {
 									<div className="flex items-center justify-between">
 										<label className="text-base font-medium text-[#333333]">
 											{__('Message', 'quillcrm')}
-											<span className="text-red-500">*</span>
+											<span className="text-red-500">
+												*
+											</span>
 										</label>
 										<Button
 											variant="ghost"
 											onClick={handleMergeTagClick}
 											className="text-[#333333] shadow-none border-none p-0 hover:text-black"
 										>
-											<MergeTagsIcon width={24} height={24} />
+											<MergeTagsIcon
+												width={24}
+												height={24}
+											/>
 										</Button>
 									</div>
 									<Textarea
@@ -400,9 +416,7 @@ const SMSTemplateStep: React.FC = () => {
 						</div>
 					</PanelSettings>
 				</div>
-				<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] w-1/3">
-					<img src={device} alt="device" className="w-[350px]" />
-				</div>
+				<SMSDevice fromName={fromName} body={template.body} />
 			</div>
 		</PanelLayout>
 	);

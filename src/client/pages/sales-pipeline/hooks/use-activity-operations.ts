@@ -19,6 +19,8 @@ interface ActivityOperationsReturn {
 	logCall: (dealId: number, callData: any) => Promise<any>;
 	logEmail: (dealId: number, emailData: any) => Promise<any>;
 	scheduleMeeting: (dealId: number, meetingData: any) => Promise<any>;
+	updateActivity: (activityId: number, activityType: string, data: any) => Promise<any>;
+	deleteActivity: (activityId: number) => Promise<void>;
 	addComment: (activityId: number, content: string) => Promise<any>;
 	updateComment: (commentId: number, content: string) => Promise<any>;
 	deleteComment: (commentId: number) => Promise<void>;
@@ -128,6 +130,75 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 		},
 		[]
 	);
+
+	/**
+	 * Update activity (only for user-created activities)
+	 */
+	const updateActivity = useCallback(
+		async (activityId: number, activityType: string, data: any) => {
+			try {
+				// Prepare request data based on activity type
+				const requestData: any = {};
+				
+				switch (activityType) {
+					case 'note_added':
+						requestData.note = data.note;
+						break;
+					case 'email_sent':
+						requestData.email_data = data;
+						break;
+					case 'call_logged':
+						requestData.call_data = data;
+						break;
+					case 'meeting_scheduled':
+						requestData.meeting_data = data;
+						break;
+					default:
+						throw new Error('Invalid activity type for update');
+				}
+
+				const response = await apiFetch({
+					path: `/qc/v1/activities/${activityId}`,
+					method: 'PATCH',
+					data: requestData,
+				});
+				return response;
+			} catch (error) {
+				const errorMessage = handleApiError(
+					'update activity',
+					error,
+					__(
+						'Failed to update activity. Please try again.',
+						'quillcrm'
+					)
+				);
+				throw new Error(errorMessage);
+			}
+		},
+		[]
+	);
+
+	/**
+	 * Delete activity (only for user-created activities)
+	 */
+	const deleteActivity = useCallback(async (activityId: number) => {
+		try {
+			await apiFetch({
+				path: `/qc/v1/activities/${activityId}`,
+				method: 'DELETE',
+			});
+		} catch (error) {
+			const errorMessage = handleApiError(
+				'delete activity',
+				error,
+				__(
+					'Failed to delete activity. Please try again.',
+					'quillcrm'
+				)
+			);
+			throw new Error(errorMessage);
+		}
+	}, []);
 
 	/**
 	 * Add comment to activity
@@ -259,6 +330,8 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 		logCall,
 		logEmail,
 		scheduleMeeting,
+		updateActivity,
+		deleteActivity,
 		addComment,
 		updateComment,
 		deleteComment,

@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { dateI18n } from '@wordpress/date';
 /**
  * External dependencies
  */
@@ -11,7 +12,20 @@ import { ColumnDef } from '@tanstack/react-table';
  */
 import type { Order, EddOrder } from '@quillcrm/client';
 import { Button } from '@quillcrm/components/ui/button';
-import { TimeAgoCell, ViewIcon } from '@quillcrm/components';
+import { ViewIcon } from '@quillcrm/components';
+
+/**
+ * Format date to "Month Day, Year" format
+ */
+const formatDate = (dateString: string | null | undefined): string => {
+	if (!dateString) return '';
+
+	try {
+		return dateI18n('F j, Y', dateString);
+	} catch (error) {
+		return '';
+	}
+};
 
 export function getWooColumns() {
 	const columns: ColumnDef<Order>[] = [
@@ -23,9 +37,7 @@ export function getWooColumns() {
 		{
 			accessorKey: 'date',
 			header: __('Date', 'quillcrm'),
-			cell: ({ row }) => (
-				<TimeAgoCell value={row.original.date_created_gmt} />
-			),
+			cell: ({ row }) => formatDate((row.original as any).date),
 		},
 		{
 			accessorKey: 'total',
@@ -83,9 +95,10 @@ export function getEddColumns() {
 		{
 			accessorKey: 'date',
 			header: __('Date', 'quillcrm'),
-			cell: ({ row }) => (
-				<TimeAgoCell value={row.original.date_completed} />
-			),
+			cell: ({ row }) =>
+				formatDate(
+					row.original.date_completed || row.original.date_created
+				),
 		},
 		{
 			accessorKey: 'status',

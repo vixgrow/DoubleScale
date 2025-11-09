@@ -71,6 +71,9 @@ final class QuillCRM {
 
 
 
+
+
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -160,7 +163,7 @@ final class QuillCRM {
 		}
 
 		// if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_whatsapp_campaigns' ) === false ) {
-		// 	$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_whatsapp_campaigns' );
+		// $this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_whatsapp_campaigns' );
 		// }
 
 		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_email_sequences' ) === false ) {
@@ -292,14 +295,14 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	public function register_contact_meta_table() {
-		global $wpdb;
+		 global $wpdb;
 		$wpdb->contactmeta = $wpdb->prefix . 'quillcrm_contact_meta';
 
 		// Register meta type with WordPress so add_metadata/get_metadata work correctly.
 		// This is the modern way to register a custom meta table with WordPress.
 		add_filter(
 			'get_meta_table',
-			function( $table, $meta_type ) {
+			function ( $table, $meta_type ) {
 				global $wpdb;
 				if ( 'contact' === $meta_type ) {
 					return $wpdb->contactmeta;
@@ -402,7 +405,13 @@ final class QuillCRM {
 		// }
 
 		// Load all automations crm actions files
-		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/crm/**/class-*.php' );
+		// $actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/crm/**/class-*.php' );
+		// foreach ( $actions_files as $file ) {
+		// require $file;
+		// }
+
+		// Load Slack actions files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/crm/slack/class-*.php' );
 		foreach ( $actions_files as $file ) {
 			require $file;
 		}

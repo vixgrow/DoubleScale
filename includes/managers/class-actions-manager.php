@@ -21,6 +21,9 @@ use QuillCRM\Managers\Integrations_Manager;
 final class Actions_Manager {
 
 
+
+
+
 	/**
 	 * Registed actions
 	 *
@@ -204,56 +207,60 @@ final class Actions_Manager {
 			 'send_data'   => array(
 				 'label'  => __( 'Send Data', 'quillcrm' ),
 				 'groups' => array(
-					 'activecampaign' => array(
-						 'label'   => __( 'ActiveCampaign', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'convertkit'     => array(
-						 'label'   => __( 'ConvertKit', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'drip'           => array(
-						 'label'   => __( 'Drip', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'getresponse'    => array(
-						 'label'   => __( 'GetResponse', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'hubspot'        => array(
-						 'label'   => __( 'HubSpot', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'keap'           => array(
-						 'label'   => __( 'Keap', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'klaviyo'        => array(
-						 'label'   => __( 'Klaviyo', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'mailchimp'      => array(
-						 'label'   => __( 'Mailchimp', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'mailerlite'     => array(
-						 'label'   => __( 'MailerLite', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'mautic'         => array(
-						 'label'   => __( 'Mautic', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'slack'          => array(
+					 // 'activecampaign' => array(
+					 // 'label'   => __( 'ActiveCampaign', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'convertkit'     => array(
+					 // 'label'   => __( 'ConvertKit', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'drip'           => array(
+					 // 'label'   => __( 'Drip', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'getresponse'    => array(
+					 // 'label'   => __( 'GetResponse', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'hubspot'        => array(
+					 // 'label'   => __( 'HubSpot', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'keap'           => array(
+					 // 'label'   => __( 'Keap', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'klaviyo'        => array(
+					 // 'label'   => __( 'Klaviyo', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'mailchimp'      => array(
+					 // 'label'   => __( 'Mailchimp', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'mailerlite'     => array(
+					 // 'label'   => __( 'MailerLite', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'mautic'         => array(
+					 // 'label'   => __( 'Mautic', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 'slack'        => array(
 						 'label'   => __( 'Slack', 'quillcrm' ),
 						 'actions' => array(),
 					 ),
-					 'twilio'         => array(
-						 'label'   => __( 'Twilio', 'quillcrm' ),
+					 // 'twilio'         => array(
+					 // 'label'   => __( 'Twilio', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 'zapier'       => array(
+						 'label'   => __( 'Zapier', 'quillcrm' ),
 						 'actions' => array(),
 					 ),
-					 'zapier'         => array(
-						 'label'   => __( 'Zapier', 'quillcrm' ),
+					 'http_request' => array(
+						 'label'   => __( 'HTTP Request', 'quillcrm' ),
 						 'actions' => array(),
 					 ),
 				 ),
@@ -262,7 +269,7 @@ final class Actions_Manager {
 
 		 foreach ( $this->sources['send_data']['groups'] as $group => $data ) {
 			 // Zapier doesn't require integration setup, so it's always enabled
-			 if ( $group === 'zapier' ) {
+			 if ( $group === 'zapier' || $group === 'http_request' ) {
 				 $this->sources['send_data']['groups'][ $group ]['is_disabled'] = false;
 			 } else {
 				 $this->sources['send_data']['groups'][ $group ]['is_disabled'] = ! Integrations_Manager::instance()->is_active( $group );

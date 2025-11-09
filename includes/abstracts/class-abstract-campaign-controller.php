@@ -59,7 +59,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 		if ( $this->channel ) {
 			// Convert string to integer for database query (accessors don't work in WHERE)
 			$type_int = Campaign_Channel::to_integer( $this->channel );
-			return Campaign_Model::query()->whereRaw( 'type = ?', [ $type_int ] );
+			return Campaign_Model::query()->whereRaw( 'type = ?', array( $type_int ) );
 		}
 		return Campaign_Model::query();
 	}
@@ -235,12 +235,12 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	 */
 	public function get_items( $request ) {
 		try {
-			$keywords      = $request->get_param( 'keywords' ) ?? null;
-			$per_page      = $request->get_param( 'per_page' ) ?? 10;
-			$page          = $request->get_param( 'page' ) ?? 1;
-			$from          = $request->get_param( 'from' ) ?? null;
-			$to            = $request->get_param( 'to' ) ?? null;
-			
+			$keywords = $request->get_param( 'keywords' ) ?? null;
+			$per_page = $request->get_param( 'per_page' ) ?? 10;
+			$page     = $request->get_param( 'page' ) ?? 1;
+			$from     = $request->get_param( 'from' ) ?? null;
+			$to       = $request->get_param( 'to' ) ?? null;
+
 			// New filter parameters
 			$status        = $request->get_param( 'status' ) ?? null;
 			$campaign_type = $request->get_param( 'campaign_type' ) ?? null;
@@ -256,26 +256,28 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			if ( $keywords ) {
 				$query->where( 'name', 'like', '%' . $keywords . '%' );
 			}
-			
+
 			// Status filter
 			if ( $status ) {
 				$query->where( 'status', $status );
 			}
-			
+
 			// Campaign type filter (standard or ab_test)
 			if ( $campaign_type ) {
 				if ( $campaign_type === 'standard' ) {
 					// Standard campaigns have ab_test = false or null in settings
-					$query->where(function ($q) {
-						$q->whereRaw("JSON_EXTRACT(settings, '$.ab_test') = false")
-						  ->orWhereRaw("JSON_EXTRACT(settings, '$.ab_test') IS NULL");
-					});
+					$query->where(
+						function ( $q ) {
+							$q->whereRaw( "JSON_EXTRACT(settings, '$.ab_test') = false" )
+							->orWhereRaw( "JSON_EXTRACT(settings, '$.ab_test') IS NULL" );
+						}
+					);
 				} elseif ( $campaign_type === 'ab_test' ) {
 					// A/B test campaigns have ab_test = true in settings
-					$query->whereRaw("JSON_EXTRACT(settings, '$.ab_test') = true");
+					$query->whereRaw( "JSON_EXTRACT(settings, '$.ab_test') = true" );
 				}
 			}
-			
+
 			// Backward compatibility: use from/to for created_at if provided
 			if ( $from ) {
 				$query->where( 'created_at', '>=', $from );
@@ -283,7 +285,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			if ( $to ) {
 				$query->where( 'created_at', '<=', $to );
 			}
-			
+
 			// New created_at date range filters
 			if ( $created_from ) {
 				$query->where( 'created_at', '>=', $created_from );
@@ -291,7 +293,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			if ( $created_to ) {
 				$query->where( 'created_at', '<=', $created_to );
 			}
-			
+
 			// Updated_at date range filters
 			if ( $updated_from ) {
 				$query->where( 'updated_at', '>=', $updated_from );
@@ -346,7 +348,7 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	 */
 	public function create_item( $request ) {
 		try {
-			$campaign_data         = $this->prepare_campaign( $request );
+			$campaign_data = $this->prepare_campaign( $request );
 			// Pass string directly - model's setTypeAttribute will convert to integer
 			$campaign_data['type'] = $this->channel;
 			$campaign              = Campaign_Model::create( $campaign_data );
@@ -373,21 +375,26 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				return new WP_Error( 'error', sprintf( __( '%s Campaign not found', 'quillcrm' ), ucfirst( $this->channel ) ), array( 'status' => 404 ) );
 			}
 
-		$campaign_data = $this->prepare_campaign( $request );
+			if ( $campaign['status'] !== 'draft' ) {
+				return new WP_Error( 'error', __( 'Campaign is not draft', 'quillcrm' ), array( 'status' => 400 ) );
+			}
 
-		// Recalculate count if filters were updated
-		if ( isset( $campaign_data['settings']['filters'] ) ) {
-			$filters                = $campaign_data['settings']['filters'] ?? array();
-			$contact_filter         = \QuillCRM\Services\Campaign_Contact_Filter::instance();
-			$campaign_data['count'] = $contact_filter->get_contact_count( $this->channel, $filters );
-		}
+			$campaign_data = $this->prepare_campaign( $request );
 
-		$campaign->update( $campaign_data );
+			// Recalculate count if filters were updated
+			if ( isset( $campaign_data['settings']['filters'] ) ) {
+				$filters                = $campaign_data['settings']['filters'] ?? array();
+				$contact_filter         = \QuillCRM\Services\Campaign_Contact_Filter::instance();
+				$campaign_data['count'] = $contact_filter->get_contact_count( $this->channel, $filters );
+			}
 
-		// Attach full template data for frontend use
-		$campaign->attach_templates( $campaign );
+			$campaign_data['settings']['is_attached'] = true;
+			$campaign->update( $campaign_data );
 
-		return new WP_REST_Response( $campaign, 200 );
+			// Attach full template data for frontend use
+			$campaign->attach_templates( $campaign );
+
+			return new WP_REST_Response( $campaign, 200 );
 		} catch ( \Exception $e ) {
 			$logger = quillcrm_get_logger();
 			$logger->error(
@@ -582,15 +589,15 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			// Try to get cached result
 			$analytics = get_transient( $cache_key );
 
-		if ( false === $analytics ) {
-			// Cache miss - fetch fresh data
-			// Convert string channel to integer constant for Campaign_Analytics
-			$channel_type = Campaign_Channel::to_integer( $this->channel );
-			$analytics    = $this->analytics->get_analytics( $channel_type, $interval, $start_date, $end_date );
+			if ( false === $analytics ) {
+				// Cache miss - fetch fresh data
+				// Convert string channel to integer constant for Campaign_Analytics
+				$channel_type = Campaign_Channel::to_integer( $this->channel );
+				$analytics    = $this->analytics->get_analytics( $channel_type, $interval, $start_date, $end_date );
 
-			// Cache for 5 minutes
-			set_transient( $cache_key, $analytics, 5 * MINUTE_IN_SECONDS );
-		}
+				// Cache for 5 minutes
+				set_transient( $cache_key, $analytics, 5 * MINUTE_IN_SECONDS );
+			}
 
 			return new WP_REST_Response( $analytics, 200 );
 		} catch ( \Exception $e ) {

@@ -653,9 +653,8 @@ class Campaign_Model extends Model {
 			function ( $campaign ) {
 				// Retrieve the settings attribute
 				$settings = $campaign->settings;
-
 				// If templates exist in settings, create/update Template_Model records
-				if ( isset( $settings['templates'] ) && is_array( $settings['templates'] ) ) {
+				if ( isset( $settings['templates'] ) && is_array( $settings['templates'] ) && ! isset( $settings['is_attached'] ) ) {
 					$template_ids = $campaign->process_templates( $settings['templates'] );
 
 					// Store only template IDs in settings and remove full template objects
@@ -673,6 +672,8 @@ class Campaign_Model extends Model {
 				unset( $campaign->failed_count );
 				unset( $campaign->opened_count );
 				unset( $campaign->clicked_count );
+
+				unset( $campaign->is_attached );
 
 				// Remove email-specific calculated properties
 				unset( $campaign->open_rate );

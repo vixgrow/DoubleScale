@@ -34,6 +34,7 @@ import { useDealOperations } from '../../hooks/use-deal-operations';
 import { Deal } from '../../types';
 import './style.scss';
 import AllDealIcon from '@quillcrm/components/icons/all-deals';
+import { SalesPipelineSkeleton } from '../../SalesPipelineSkeleton';
 
 interface KanbanBoardProps {
 	pipeline: {
@@ -72,6 +73,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	onDealScheduleMeeting,
 	onDealLogEmail,
 	loading = false,
+	
 }) => {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const { moveDealToStage } = useDealOperations();
@@ -256,6 +258,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		// Use the backend-calculated weighted_value if available, otherwise calculate
 		return sum + (deal.weighted_value || 0);
 	}, 0);
+	if (loading) {
+		return <SalesPipelineSkeleton />;
+	}
 
 	return (
 		<div className="kanban-board">
@@ -424,6 +429,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								onDealScheduleMeeting={onDealScheduleMeeting}
 								onDealLogEmail={onDealLogEmail}
 								loading={loading}
+								// pipeline={data}
+								pipeline={pipeline}
+								
 							/>
 						))}
 				</div>

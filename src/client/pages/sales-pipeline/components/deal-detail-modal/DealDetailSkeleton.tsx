@@ -1,4 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
+import DealOverviewSkeleton from './deal-overview-skeleton';
 export const DealDetailSkeleton = () => {
 	return (
 		<div className="space-y-8 animate-pulse">
@@ -13,7 +14,7 @@ export const DealDetailSkeleton = () => {
 
 			<div className="grid grid-cols-2 gap-12">
 				{/*  overview shimmer */}
-				<div className="border flex flex-col gap-6 border-[#DEE1E6] bg-[#F8F8F8] rounded-[20px] p-6">
+				{/* <div className="border flex flex-col gap-6 border-[#DEE1E6] bg-[#F8F8F8] rounded-[20px] p-6">
 					<Skeleton className="h-7 w-[180px] mb-4" />
 					<div className="grid grid-cols-2 gap-5">
 						{Array(6)
@@ -35,7 +36,8 @@ export const DealDetailSkeleton = () => {
 								</div>
 							))}
 					</div>
-				</div>
+				</div> */}
+				<DealOverviewSkeleton/>
 
 				{/*  custom fields shimmer */}
 				<div className="border flex flex-col gap-6 border-[#DEE1E6] bg-[#F8F8F8] rounded-[20px] p-6">

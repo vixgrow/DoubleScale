@@ -31,10 +31,11 @@ import { DealOverViewModal } from './OverView';
 
 import { CustomFieldsView } from './CustomFileldView';
 import { PipelineStagesHeader } from './SatagesHeader';
-import { NewPipelineModal } from '../new-pipeline-modal';
 import Deal_Activites from '../deal-activities';
 import { DealDetailSkeleton } from './DealDetailSkeleton';
 import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
+import DealOverviewSkeleton from './deal-overview-skeleton';
+import { Input } from '@quillcrm/components/ui/input';
 
 interface DealDetailModalProps {
 	dealId: number | null;
@@ -58,10 +59,11 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	const [deal, setDeal] = useState<Deal | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [showContent, setShowContent] = useState(false);
-	const [newPipelineModalVisible, setNewPipelineModalVisible] =
-		useState(false);
+	const [editingField, setEditingField] = useState<'title' | 'value' | null>(null);
+	const [tempTitle, setTempTitle] = useState('');
+	const [tempValue, setTempValue] = useState('');
 
-	const { getDeal, deleteDeal } = useDealOperations();
+	const { getDeal, deleteDeal,updateDeal } = useDealOperations();
 
 	useEffect(() => {
 		if (!loading && deal) {
@@ -69,6 +71,15 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 		  return () => clearTimeout(timer);
 		}
 	}, [loading, deal]);
+
+    // to update deal card also
+	const handleOverviewUpdate = async () => {
+		// Refresh the deal details locally
+		await fetchDealDetails();
+		if (onUpdate) {
+			onUpdate();
+		}
+	};
 
 	// Fetch deal data when modal opens
 	useEffect(() => {
@@ -103,6 +114,55 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 
 		return null;
 	})();
+	const handleSaveInline = async (field: 'title' | 'weighted_value' | 'value', value: any) => {
+		try {
+			if (!deal) return;
+
+			const updatedDeal = { ...deal, [field]: value };
+			setDeal(updatedDeal);
+
+			await updateDeal(deal.id, { [field]: value });
+
+			if (onUpdate) {
+				 onUpdate();
+			}
+		} catch (error) {
+			await fetchDealDetails();
+		} finally {
+			setEditingField(null);
+		}
+	};
+
+	const handleStartEdit = (field: 'title' | 'value') => {
+		if (field === 'title') {
+			setTempTitle(deal?.title || '');
+			setEditingField('title');
+		} else {
+			setTempValue(deal?.value?.toString() || '');
+			setEditingField('value');
+		}
+	};
+
+	const handleCancelEdit = () => {
+		setEditingField(null);
+	};
+
+	const handleSaveTitle = async () => {
+		if (!tempTitle.trim()) {
+			handleCancelEdit();
+			return;
+		}
+		await handleSaveInline('title', tempTitle.trim());
+	};
+
+	const handleSaveValue = async () => {
+		const numValue = parseFloat(tempValue);
+		if (isNaN(numValue)) {
+			handleCancelEdit();
+			return;
+		}
+		await handleSaveInline('value', numValue);
+	};
 
 	const formatCurrency = (value: number): string => {
 		let formattedValue = '';
@@ -132,19 +192,36 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 						<DialogHeader>
 							<DialogTitle className=" flex justify-between ">
 								<div className=" p-0 m-0">
-									<div className=" flex gap-2 items-center">
-										<p className="text-[#09090B] font-bold text-[32px]">
-											{__(`${deal?.title}`, 'quillcrm')}
-										</p>
-										<span className="w-6 h-6 p-1 flex items-center justify-center rounded-full bg-[#E4EEFD]">
-											<EditHeaderIcon
-												color="#458DC7"
-												width={20}
-												height={20}
+									<div className="flex gap-2 items-center">
+										{editingField === 'title' ? (
+											<Input
+												value={tempTitle}
+												onChange={(e) => setTempTitle(e.target.value)}
+												className="text-[#09090B] font-bold text-[32px] h-12 border-2 border-[#458DC7]"
+												placeholder={__('Deal Title', 'quillcrm')}
+												autoFocus
+												onBlur={handleSaveTitle}
+												onKeyDown={(e) => {
+													if (e.key === 'Enter') handleSaveTitle();
+													if (e.key === 'Escape') handleCancelEdit();
+												}}
 											/>
-										</span>
+										) : (
+											<>
+												<p className="text-[#09090B] font-bold text-[32px]">
+													{deal?.title}
+												</p>
+												<span
+													className="w-6 h-6 p-1 flex items-center justify-center rounded-full bg-[#E4EEFD] cursor-pointer"
+													onClick={() => handleStartEdit('title')}
+												>
+													<EditHeaderIcon color="#458DC7" width={20} height={20} />
+												</span>
+											</>
+										)}
 									</div>
-									<div className="flex items-center gap-2 text-[#09090B] font-bold text-2xl">
+									{/* value */}
+									{/* <div className="flex items-center gap-2 text-[#09090B] font-bold text-2xl">
 										<p className="mt-1 text-2xl">
 											{__(
 												`${formatCurrency(deal?.weighted_value ?? 0)}`,
@@ -165,7 +242,45 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 												height={20}
 											/>
 										</span>
+									</div> */}
+									{/* Editable Value */}
+									<div className="flex items-center gap-2 text-[#09090B] font-bold text-2xl mt-1">
+										{editingField === 'value' ? (
+											<div className="relative">
+												{/* <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xl text-[#777]">$</span> */}
+												<Input
+													type="number"
+													value={tempValue}
+													onChange={(e) => setTempValue(e.target.value)}
+													className="text-[#09090B] font-bold text-2xl h-12 pl-8 border-2 border-[#458DC7]"
+													placeholder="0"
+													autoFocus
+													onBlur={handleSaveValue}
+													onKeyDown={(e) => {
+														if (e.key === 'Enter') handleSaveValue();
+														if (e.key === 'Escape') handleCancelEdit();
+													}}
+												/>
+											</div>
+										) : (
+											<>
+												<p className="text-2xl">
+													${formatCurrency(deal?.value ?? 0)}
+												</p>
+												<span className="text-[#777] text-[20px] flex items-center gap-1">
+													<DealValueIcon width={20} height={20} />
+													USD
+												</span>
+												<span
+													className="w-6 h-6 p-1 flex items-center justify-center rounded-full bg-[#E4EEFD] cursor-pointer"
+													onClick={() => handleStartEdit('value')}
+												>
+													<EditHeaderIcon color="#458DC7" width={20} height={20} />
+												</span>
+											</>
+										)}
 									</div>
+								
 								</div>
 								<ActivityActions
 									dealId={deal?.id ?? 0}
@@ -181,20 +296,25 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 						</DialogHeader>
 						{/* contact overview+customfiled */}
 						<div className=" grid grid-cols-2 gap-12">
-							<div>
+							{loading?(
+								<DealOverviewSkeleton/>
+							):(
+								<div>
 								<DealOverViewModal
 									dealId={dealId}
 									onEdit={onEdit}
-									onUpdate={fetchDealDetails}
+									onUpdate={handleOverviewUpdate}
+
 								/>
 							</div>
+							)}
 							<div className="border flex flex-col gap-6 border-[#DEE1E6] bg-[#F8F8F8] rounded-[20px] p-6">
 								{deal && <CustomFieldsView deal={deal} />}
 							</div>
 						</div>
 
 						{pipeline?.stages && (
-							<PipelineStagesHeader stages={pipeline.stages} />
+							<PipelineStagesHeader stages={pipeline.stages} currentStageId={deal?.stage?.id}  />
 						)}
 						{/* pipeline */}
 						<div className=" flex flex-wrap md:flex-nowrap justify-between items-start md:items-center gap-6 w-full ">
@@ -205,21 +325,9 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 										{__('Pipeline', 'quillcrm')}
 									</p>
 									<p className="text-[#09090B] font-bold text-lg ">
-										{__('New Pibeline', 'quillcrm')}
+										{deal?.pipeline?.name}
 									</p>
 								</div>
-								<span
-									onClick={() =>
-										setNewPipelineModalVisible(true)
-									}
-									className="w-7 h-7 p-1 flex items-center cursor-pointer justify-center rounded-full bg-[#E4EEFD]"
-								>
-									<EditHeaderIcon
-										color="#458DC7"
-										width={20}
-										height={20}
-									/>
-								</span>
 							</div>
 							{/* previous stage pipeline */}
 							<div className=" flex gap-4 items-center">
@@ -274,16 +382,6 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 						<Deal_Activites dealId={dealId || undefined} />
 					</>
 				)}
-
-				{/* models */}
-				<NewPipelineModal
-					visible={newPipelineModalVisible}
-					onClose={() => setNewPipelineModalVisible(false)}
-					onSuccess={() => {
-						onUpdate?.();
-						setNewPipelineModalVisible(false);
-					}}
-				/>
 			</DialogContent>
 		</Dialog>
 	);

@@ -50,6 +50,7 @@ type Filters = {
 };
 
 const SalesPipeline: React.FC = () => {
+	const [isPipelineSwitching, setIsPipelineSwitching] = useState(false);
 	const [selectedPipelineId, setSelectedPipelineId] = useState<number | null>(
 		null
 	);
@@ -79,6 +80,8 @@ const SalesPipeline: React.FC = () => {
 	);
 	const [ScheduleMeetingVisible, setScheduleMeetingVisible] = useState(false);
 	const [LogEmailVisible, setLogEmailVisible] = useState(false);
+	const [lastPipelineId, setLastPipelineId] = useState<number | null>(null);
+
 
 	const [filters, setFilters] = useState<Filters>({
 		search: '',
@@ -104,13 +107,29 @@ const SalesPipeline: React.FC = () => {
 		reorderStagesOptimistically,
 	} = usePipelineData(selectedPipelineId, filters);
 	console.log('Loading value:', loading);
+	
 
-	// Set default pipeline on load
+    // Set default pipeline on load
 	useEffect(() => {
 		if (pipelines && pipelines.length > 0 && !selectedPipelineId) {
 			setSelectedPipelineId(pipelines[0].id);
 		}
+
 	}, [pipelines, selectedPipelineId]);
+
+	useEffect(() => {
+		// if (!selectedPipelineId) return;
+		// if (selectedPipelineId === lastPipelineId) return;
+	
+		setIsPipelineSwitching(true);
+		refreshData().finally(() => {
+			setIsPipelineSwitching(false);
+		});
+	
+		setLastPipelineId(selectedPipelineId); 
+	}, [selectedPipelineId]);
+
+
 	// handle note
 
 	const handleAddNote = (deal: Deal) => {
@@ -173,6 +192,7 @@ const SalesPipeline: React.FC = () => {
 				setEditPipelineModalVisible={setEditPipelineModalVisible}
 				setDeleteDialogOpen={setDeleteDialogOpen}
 				setNewDealModalVisible={setNewDealModalVisible}
+				setIsPipelineSwitching={setIsPipelineSwitching}
 			/>
 
 			{showDuplicateError && (
@@ -194,10 +214,11 @@ const SalesPipeline: React.FC = () => {
 			/>
 
 			<div className='mt-6'>
-				{loading ?(
+				{loading || isPipelineSwitching ?(
 					<SalesPipelineSkeleton/>
 
-				): selectedPipeline && (
+				):
+				selectedPipeline && (
 					<div className="mt-6">
 						<KanbanBoard
 							pipeline={selectedPipeline}
@@ -255,11 +276,13 @@ const SalesPipeline: React.FC = () => {
 					setDealDetailModalVisible(false);
 					setSelectedDealId(null);
 				}}
-				onUpdate={refreshData}
+				onUpdate={
+					refreshData}
 				onEdit={(deal) => {
 					setEditingDeal(deal);
 					setEditDealModalVisible(true);
 					setDealDetailModalVisible(false);
+					refreshData();
 				}}
 				onDeleted={() => {   
 					setDealDetailModalVisible(false);

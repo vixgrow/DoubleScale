@@ -42,6 +42,7 @@ interface ActivityProps {
 	dealId?: number;
 	activityTypeFilter?: string;
 	onActivityAdded?: any;
+	activityItem?: any;
 }
 
 interface Activity {
@@ -84,6 +85,7 @@ const activityTypeColors: Record<string, string> = {
 export default function Activity({
 	dealId,
 	activityTypeFilter,
+	
 }: ActivityProps) {
 	const { getDealActivities } = useDealOperations();
 	const [activities, setActivities] = useState<Activity[]>([]);

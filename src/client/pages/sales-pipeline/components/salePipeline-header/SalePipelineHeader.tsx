@@ -1,10 +1,9 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@quillcrm/components/ui/button';
-import { PageHeader } from '@quillcrm/components';
+import { PageHeader, PlusIcon } from '@quillcrm/components';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import ArrowIcon from '@quillcrm/components/icons/dropdown-header';
-import MoreHorizantail from '@quillcrm/components/icons/moreHorizantal-header';
 import ArrowColoredIcon from '@quillcrm/components/icons/dropdown-headerColored';
 import AddPipIcon from '@quillcrm/components/icons/addpip-header';
 import DuplicatePipelineHeader from '@quillcrm/components/icons/duplicate-pipeline-header';
@@ -22,6 +21,7 @@ interface PipelineHeaderProps {
   setEditPipelineModalVisible: (visible: boolean) => void;
   setDeleteDialogOpen: (visible: boolean) => void;
   setNewDealModalVisible: (visible: boolean) => void;
+  setIsPipelineSwitching: (state: boolean) => void;
 }
 
 export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
@@ -34,7 +34,11 @@ export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   setEditPipelineModalVisible,
   setDeleteDialogOpen,
   setNewDealModalVisible,
+  setIsPipelineSwitching
+
+
 }) => {
+
   return (
     <div className="flex justify-between items-center">
       <PageHeader
@@ -69,7 +73,11 @@ export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
                   {pipelines.map((pipeline) => (
                     <DropdownMenuItem
                       key={pipeline.id}
-                      onClick={() => setSelectedPipelineId(pipeline.id)}
+                      onClick={
+                        () => {setSelectedPipelineId(pipeline.id);
+                      }
+                    
+                    }
                       className={selectedPipelineId === pipeline.id ? 'bg-gray-100' : ''}
                     >
                       {pipeline.name}
@@ -79,15 +87,16 @@ export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
               )}
             </DropdownMenu>
 
-            {/* Actions (3 dots) */}
+            {/* Actions  */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="rounded-l-none rounded-r-[8px] text-base font-medium !text-[#374151] leading-[26px] tracking-[-.5px] flex items-center justify-center gap-3 h-10 border !border-[#374151] py-2 px-4"
+                  className="rounded-l-none rounded-r-[8px] text-base font-medium !text-[#374151] flex items-center justify-center h-10 w-10 p-0 border !border-[#374151]"
                 >
-                  <MoreHorizantail />
+                  
+                  <PlusIcon color='#374151' width={24} height={24}/>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -167,3 +176,7 @@ export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
     </div>
   );
 };
+
+
+
+

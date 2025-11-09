@@ -103,7 +103,7 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
         onClick={() => setOpenModal('meeting')}
       >
         <MeetingDealIcon height={20} width={20} />
-        {__('Schedule Meeting','quillcrm')}
+        {__(' Log Meeting','quillcrm')}
       </Button>
       {/* ------------------ */}
       

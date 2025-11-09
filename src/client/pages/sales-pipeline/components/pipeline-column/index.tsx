@@ -22,7 +22,8 @@ import { PlusIcon } from 'lucide-react';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import WeightedIcon from '@quillcrm/components/icons/weighted-icon';
 import { DealCardShimmer } from '../deal-card/DealCardShimmer';
-import React from 'react';
+import React, { useState } from 'react';
+import { NewDealModal } from '../new-deal-modal';
 
 interface PipelineColumnProps {
 	stage: {
@@ -45,6 +46,7 @@ interface PipelineColumnProps {
 	index: number;
 	totalStages: number;
 	loading?: boolean;
+	pipeline?: any;
 }
 
 export const PipelineColumn: React.FC<PipelineColumnProps> = ({
@@ -62,7 +64,10 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	onDealScheduleMeeting,
 	onDealLogEmail,
 	loading = false,
+	pipeline,
 }) => {
+	const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
+	const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
 	const { setNodeRef: setDroppableRef, isOver: isDropOver } = useDroppable({
 		id: `stage-${stage.id}`,
 		data: {
@@ -90,20 +95,19 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 		};
 	}, [deals, stage.win_probability]);
 
-
 	const isFirst = index === 0;
 	const isLast = index === totalStages - 1;
 
 	return (
 		<div
 			ref={setDroppableRef}
-			className={`pipeline-column min-w-[400px] flex flex-col flex-1 ${isDropOver ? 'drop-target' : ''} ${isOver ? 'drag-over' : ''}`}
+			className={`pipeline-column min-w-[360px] flex flex-col flex-1 ${isDropOver ? 'drop-target' : ''} ${isOver ? 'drag-over' : ''}`}
 		>
 			{/* Column Header */}
 
 			<div
 				className="column-header h-32  relative rounded-t-[16px] "
-				style={{ backgroundColor:stage.color }}
+				style={{ backgroundColor: stage.color }}
 			>
 				{isFirst && (
 					<div
@@ -147,7 +151,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 				)}
 
 				<div
-					className={`${index === 0 ? 'left-0' : 'left-7'} absolute top-0 w-full h-full p-4 z-10 flex flex-col gap-4`}
+					className={`${index === 0 ? 'left-0' : 'left-5'} absolute  w-full h-full p-3  z-10 flex flex-col `}
 				>
 					<div
 						className={`flex justify-between ${index !== 0 ? 'px-5' : ''}`}
@@ -166,15 +170,21 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 								<WinTagIcon />
 							</div>
 						</div>
-						<PlusIcon style={{ color: '#1E3A8A' }} />
+						<PlusIcon
+							style={{ color: '#1E3A8A', cursor:'pointer' }}
+							onClick={() => {
+								setSelectedStageId(stage.id);
+								setIsNewDealModalOpen(true);
+							}}
+						/>
 					</div>
 
 					<div
-						className={`absolute bottom-3 ${index !== 0 ? 'left-2' : 'left-3'} flex items-center gap-6 z-20`}
+						className={`absolute bottom-3  flex justify-between px-2 gap-6 items-center z-20`}
 					>
 						{/* Total Value */}
-						<div className="flex items-center gap-1">
-							<DealValueIcon />
+						<div className="flex  gap-1">
+							{/* <DealValueIcon /> */}
 							<span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
 								{columnStats.totalDeals === 1
 									? __('Deal value:', 'quillcrm')
@@ -187,8 +197,8 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 						</div>
 
 						{/* Weighted Value */}
-						<div className="flex items-center gap-1">
-							<WeightedIcon />
+						<div className="flex  gap-1">
+							{/* <WeightedIcon /> */}
 							<span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
 								{__('Weighted:', 'quillcrm')}
 							</span>
@@ -212,16 +222,14 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 				data-stage-id={stage.id}
 			>
 				{loading ? (
-					// Show shimmer cards while loading
+				
 					<div className="">
 						{Array.from({ length: 3 }).map((_, shimmerIndex) => (
 							<DealCardShimmer
-								key={`shimmer-${shimmerIndex}`}
+								key={`shimmer-${stage.id}-${shimmerIndex}`}
 								style={
 									{
 										'--stage-color': stage.color,
-										marginBottom:
-											shimmerIndex < 2 ? '12px' : '0',
 									} as React.CSSProperties
 								}
 							/>
@@ -229,7 +237,6 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 					</div>
 				) : deals.length === 0 ? (
 					<div className=" flex justify-center items-center flex-col text-center h-full ">
-						
 						<span className=" block my-2">
 							<NoDealsIcon />
 						</span>
@@ -285,14 +292,21 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 			</div>
 
 			{/* Drop Indicator */}
-			{isDropOver && (
+			{/* {isDropOver && (
 				<div className="drop-indicator">
 					<div className="drop-indicator-line" />
 					<span className="drop-indicator-text">
 						{__('Drop here to move to', 'quillcrm')} "{stage.name}"
 					</span>
 				</div>
-			)}
+			)} */}
+			<NewDealModal
+				visible={isNewDealModalOpen}
+				onClose={() => setIsNewDealModalOpen(false)}
+				onSuccess={() => setIsNewDealModalOpen(false)}
+				pipeline={pipeline}
+				initialStageId={selectedStageId ?? undefined}
+			/>
 		</div>
 	);
 };

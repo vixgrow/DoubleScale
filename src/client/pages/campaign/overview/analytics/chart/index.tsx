@@ -12,7 +12,7 @@ import { Chart } from 'react-chartjs-2';
  * Internal dependencies
  */
 import { Campaign as CampaignType } from '@quillcrm/client';
-import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
+import { CAMPAIGN_CHANNEL, isEmailChannel } from '@/constants/campaign-channel';
 
 interface ChartProps {
 	campaign: CampaignType | null;
@@ -27,7 +27,7 @@ export const RenderChart: React.FC<ChartProps> = ({ campaign }) => {
 		colors: string[];
 	};
 
-	if (campaign.type === CAMPAIGN_CHANNEL.EMAIL) {
+	if (isEmailChannel(campaign.type)) {
 		const sentCount = campaign.sent_count;
 		const openCount = campaign.opened_count || 0;
 		const clickCount = campaign.clicked_count;
@@ -73,9 +73,10 @@ export const RenderChart: React.FC<ChartProps> = ({ campaign }) => {
 				campaign.sent_count,
 				campaign.failed_count,
 				campaign.delivered_count || 0,
+				campaign.read_count || 0,
 				campaign.clicked_count,
 			],
-			colors: ['#458DC7', '#E13B3B', '#16A34A', '#660FF1'],
+			colors: ['#458DC7', '#E13B3B', '#16A34A', '#FFA500', '#660FF1'],
 		};
 	}
 

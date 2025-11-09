@@ -353,6 +353,9 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$campaign_data['type'] = $this->channel;
 			$campaign              = Campaign_Model::create( $campaign_data );
 
+			// Attach analytics counts for frontend use
+			$campaign->attach_counts( $campaign );
+
 			return new WP_REST_Response( $campaign, 201 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
@@ -393,6 +396,8 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 
 			// Attach full template data for frontend use
 			$campaign->attach_templates( $campaign );
+			// Attach analytics counts (sent, clicked, etc.) for frontend use
+			$campaign->attach_counts( $campaign );
 
 			return new WP_REST_Response( $campaign, 200 );
 		} catch ( \Exception $e ) {

@@ -277,6 +277,7 @@ class Campaign_Analytics {
 			$stats['opened']       = (int) $result->opened;
 			$stats['clicked']      = (int) $result->clicked;
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
+			$stats                 = $this->calculate_email_rates( $stats );
 
 		} elseif ( $type === Campaign_Channel::CHANNEL_SMS ) {
 			$result = $base_query
@@ -314,6 +315,27 @@ class Campaign_Analytics {
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
 			$stats                 = $this->calculate_whatsapp_rates( $stats );
 		}
+
+		return $stats;
+	}
+
+	/**
+	 * Calculate Email-specific rates
+	 *
+	 * @param array $stats Base statistics
+	 *
+	 * @return array Statistics with calculated rates
+	 */
+	protected function calculate_email_rates( $stats ) {
+		// Calculate open rate (opened / sent)
+		$stats['open_rate'] = $stats['sent'] > 0
+			? round( ( $stats['opened'] / $stats['sent'] ) * 100, 2 )
+			: 0;
+
+		// Calculate click rate (clicked / sent)
+		$stats['click_rate'] = $stats['sent'] > 0
+			? round( ( $stats['clicked'] / $stats['sent'] ) * 100, 2 )
+			: 0;
 
 		return $stats;
 	}

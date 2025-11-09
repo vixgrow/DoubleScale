@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Campaign as CampaignType } from '@quillcrm/client';
-import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
+import { CAMPAIGN_CHANNEL, isEmailChannel } from '@/constants/campaign-channel';
 import {
 	MessageStatsCard,
 	ContactTotalEmailsIcon,
@@ -44,8 +44,8 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 	const isProcessing =
 		campaign.status === 'processing' || campaign.status === 'resending';
 
-	// Email Campaign Metrics
-	if (campaign.type === CAMPAIGN_CHANNEL.EMAIL) {
+	// Email Campaign Metrics (includes email, email_sequence, sequence_mail)
+	if (isEmailChannel(campaign.type)) {
 		const clickToOpenRate =
 			campaign.opened_count && campaign.opened_count > 0
 				? (
@@ -267,16 +267,31 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 		);
 	}
 
-	// // WhatsApp Campaign Metrics
-	// if (campaign.type === CAMPAIGN_CHANNEL.WHATSAPP) {
-	// 	return (
-	// 		<div className="flex flex-col gap-5">
-	// 			{/* First card: Total WhatsApp (always shown) */}
-	// 			<MessageStatsCard
-	// 				icon={<ContactWhatsAppIcon width={40} height={40} />}
-	// 				value={totalMessages}
-	// 				label={__('Total WhatsApp', 'quillcrm')}
-	// 				iconBgClass="bg-[#E4EEFD]"
+	// WhatsApp Campaign Metrics - Coming Soon
+	if (campaign.type === CAMPAIGN_CHANNEL.WHATSAPP) {
+		return (
+			<div className="flex flex-col items-center justify-center p-8 text-center bg-muted rounded-lg">
+				<ContactWhatsAppIcon width={48} height={48} />
+				<p className="mt-4 text-base font-medium text-foreground">
+					{__('WhatsApp Analytics', 'quillcrm')}
+				</p>
+				<p className="mt-2 text-sm text-muted-foreground">
+					{__('WhatsApp campaign analytics coming soon', 'quillcrm')}
+				</p>
+			</div>
+		);
+	}
+
+	// // ORIGINAL WHATSAPP CODE - KEPT FOR REFERENCE
+	// // if (campaign.type === CAMPAIGN_CHANNEL.WHATSAPP) {
+	// // 	return (
+	// // 		<div className="flex flex-col gap-5">
+	// // 			{/* First card: Total WhatsApp (always shown) */}
+	// // 			<MessageStatsCard
+	// // 				icon={<ContactWhatsAppIcon width={40} height={40} />}
+	// // 				value={totalMessages}
+	// // 				label={__('Total WhatsApp', 'quillcrm')}
+	// // 				iconBgClass="bg-[#E4EEFD]"
 	// 				borderColorClass="border-l-[#458DC7]"
 	// 				iconColor="text-[#458DC7]"
 	// 			/>

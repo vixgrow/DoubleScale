@@ -308,13 +308,14 @@ export type Campaign = {
 	};
 	// Email-specific analytics
 	opened_count?: number;
+	open_rate?: number;
 	// Shared analytics (email, SMS, WhatsApp)
 	clicked_count: number;
+	click_rate?: number;
 	// SMS & WhatsApp analytics
 	pending_count?: number;
 	delivered_count?: number;
 	delivery_rate?: number;
-	click_rate?: number;
 	// WhatsApp-specific analytics
 	read_count?: number;
 	read_rate?: number;

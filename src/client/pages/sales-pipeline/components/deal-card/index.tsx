@@ -191,7 +191,7 @@ export const DealCard: React.FC<DealCardProps> = ({
 								</span>
 							</div>
 
-							<p className="text-[#09090B] text-base font-medium leading-6">
+							<p className="text-[#09090B] text-base font-medium truncate max-w-[120px] leading-6">
 								{deal?.owner.display_name}
 							</p>
 						</div>

@@ -59,6 +59,15 @@ export const PipelineStageEditor = ({
 			.filter(p => typeof p === 'number')
 	)].sort((a, b) => (a as number) - (b as number));
 	const probabilityOptions = Array.from({ length: 11 }, (_, i) => i * 10);
+	const baseOptions = probabilityOptions;
+
+const finalOptions = Array.from(
+    new Set([
+        ...baseOptions,
+        0,
+        100,  
+    ])
+).sort((a, b) => a - b);
 
 	return (
 		<>
@@ -229,7 +238,7 @@ export const PipelineStageEditor = ({
 																</SelectContent>
 															</Select>
 									
-															<span className="absolute top-0 right-0 w-12 h-full flex items-center justify-center border border-[#DEE1E6] bg-[#F0F0F0] text-[#777] text-sm font-normal p-1 rounded-tr-lg rounded-br-lg pointer-events-none">
+															<span className="absolute top-0 right-0 w-9 h-full flex items-center justify-center border border-[#DEE1E6] bg-[#F0F0F0] text-[#777] text-sm font-normal p-1 rounded-tr-lg rounded-br-lg pointer-events-none">
 																(%)
 															</span>
 														</div>

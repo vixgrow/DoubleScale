@@ -10,6 +10,17 @@ import apiFetch from '@wordpress/api-fetch';
 import { handleApiError, ERROR_MESSAGES, ErrorInfo } from '../utils/error-handler';
 import { Deal, Pipeline } from '../types';
 
+interface Filters {
+	search: string;
+	ownerId: number | null;
+	dateRange: {
+		from: Date | null;
+		to: Date | null;
+	};
+	status: 'open' | 'won' | 'lost';
+	priority: string | null;
+}
+
 interface UsePipelineDataReturn {
 	pipelines: Pipeline[];
 	selectedPipeline: Pipeline | null;
@@ -36,7 +47,8 @@ interface UsePipelineDataReturn {
 
 
 export const usePipelineData = (
-	selectedPipelineId: number | null
+	selectedPipelineId: number | null,
+	filters?: Filters
 ): UsePipelineDataReturn => {
 	const [pipelines, setPipelines] = useState<Pipeline[]>([]);
 	const [deals, setDeals] = useState<Deal[]>([]);
@@ -86,6 +98,28 @@ export const usePipelineData = (
 			const params = new URLSearchParams();
 			params.append('pipeline_id', selectedPipelineId.toString());
 
+			// Add filter parameters if provided
+			if (filters) {
+				if (filters.search) {
+					params.append('search', filters.search);
+				}
+				if (filters.ownerId) {
+					params.append('owner_id', filters.ownerId.toString());
+				}
+				if (filters.status) {
+					params.append('status', filters.status);
+				}
+				if (filters.priority) {
+					params.append('priority', filters.priority);
+				}
+				if (filters.dateRange.from) {
+					params.append('expected_close_from', filters.dateRange.from.toISOString().split('T')[0]);
+				}
+				if (filters.dateRange.to) {
+					params.append('expected_close_to', filters.dateRange.to.toISOString().split('T')[0]);
+				}
+			}
+
 			const response = await apiFetch({
 				path: `/qc/v1/deals?${params.toString()}`,
 				method: 'GET',
@@ -106,7 +140,7 @@ export const usePipelineData = (
 			);
 			setError(errorInfo);
 		}
-	}, [selectedPipelineId]);
+	}, [selectedPipelineId, filters]);
 
 	// Initial data load
 	useEffect(() => {

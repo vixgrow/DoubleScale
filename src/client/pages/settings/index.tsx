@@ -11,17 +11,39 @@ import { __ } from '@wordpress/i18n';
  */
 import './style.scss';
 import type { Settings, NoticeMessage } from '@quillcrm/client';
-import { PageHeader, NoticeBanner } from '@quillcrm/components';
+import {
+	PageHeader,
+	NoticeBanner,
+	PageTabs,
+	BusinessIcon,
+	ContactTotalEmailsIcon,
+	DoubleOptInIcon,
+	CartIcon,
+	CurrencyIcon,
+	CustomFieldsIcon,
+	ToolsIcon,
+} from '@quillcrm/components';
 import BusinessSettings from './business';
 import EmailSettings from './email';
 import DoubleOptInSettings from './double-optin';
 import CartSettings from './cart';
 import Managers from './managers';
 import SettingsShimmer from './settings-shimmer';
-import TabsSelection from './tabs-selection';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
+import CustomFields from '../custom-fields';
+import LinkTriggers from '../link-triggers';
+import { UserRound } from 'lucide-react';
+
+const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers']);
+const SETTINGS_DEPENDENT_TABS = new Set([
+	'business',
+	'email',
+	'double_optin',
+	'cart',
+	'currencies',
+]);
 
 const SettingsPage: React.FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -102,44 +124,137 @@ const SettingsPage: React.FC = () => {
 		fetchSettings();
 	}, []);
 
-	const renderTabContent = () => {
-		if (isLoading || !settings) {
-			return <SettingsShimmer />;
-		}
-
-		switch (tab) {
+	const renderTabBody = (currentTab: string) => {
+		switch (currentTab) {
 			case 'business':
 				return (
 					<BusinessSettings
-						settings={settings}
+						settings={settings!}
 						onChange={setSettings}
 					/>
 				);
 			case 'email':
 				return (
-					<EmailSettings settings={settings} onChange={setSettings} />
+					<EmailSettings settings={settings!} onChange={setSettings} />
 				);
 			case 'double_optin':
 				return (
 					<DoubleOptInSettings
-						settings={settings}
+						settings={settings!}
 						onChange={setSettings}
 					/>
 				);
 			case 'cart':
 				return (
-					<CartSettings settings={settings} onChange={setSettings} />
+					<CartSettings settings={settings!} onChange={setSettings} />
 				);
 			case 'managers':
 				return <Managers />;
 			case 'currencies':
 				return (
-					<CurrenciesSettings settings={settings} onChange={setSettings} />
+					<CurrenciesSettings
+						settings={settings!}
+						onChange={setSettings}
+					/>
 				);
+			case 'custom_fields':
+				return <CustomFields />;
+			case 'link_triggers':
+				return <LinkTriggers />;
 			default:
 				return null;
 		}
 	};
+
+	const tabsList = [
+		{
+			value: 'business',
+			label: 'Business',
+			icon: <BusinessIcon />,
+		},
+		{
+			value: 'email',
+			label: 'Email',
+			icon: <ContactTotalEmailsIcon width={24} height={24} />,
+		},
+		{
+			value: 'double_optin',
+			label: 'Double Opt-In',
+			icon: <DoubleOptInIcon />,
+		},
+		{
+			value: 'cart',
+			label: 'Cart',
+			icon: <CartIcon />,
+		},
+		{
+			value: 'currencies',
+			label: 'Currencies',
+			icon: <CurrencyIcon />,
+		},
+		{
+			value: 'managers',
+			label: 'Managers',
+			icon: <UserRound size={20} />,
+		},
+		{
+			value: 'custom_fields',
+			label: 'Custom Fields',
+			icon: <CustomFieldsIcon width={24} height={24} />,
+		},
+		{
+			value: 'link_triggers',
+			label: 'Link Triggers',
+			icon: <ToolsIcon width={24} height={24} />,
+		},
+	];
+
+	const tabsContent = tabsList.map(({ value }) => {
+		if (tab !== value) {
+			return { value, children: null };
+		}
+
+		const requiresSettings = SETTINGS_DEPENDENT_TABS.has(value);
+		const content =
+			requiresSettings && (isLoading || !settings)
+				? <SettingsShimmer />
+				: renderTabBody(value);
+
+		return {
+			value,
+			children: (
+				<Card
+					className={`flex shadow-none flex-col h-screen mt-4 ${TABS_WITHOUT_SAVE_BUTTON.has(value) ? 'bg-white' : 'bg-[#F8F8F8]'
+						}`}
+				>
+					<CardContent
+						className={`flex-1 overflow-y-auto ${value === 'custom_fields'
+							? 'px-6 py-0'
+							: TABS_WITHOUT_SAVE_BUTTON.has(value)
+								? 'px-6 py-6'
+								: 'p-6'
+							}`}
+					>
+						{content}
+					</CardContent>
+					{!TABS_WITHOUT_SAVE_BUTTON.has(value) && (
+						<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
+							<Button
+								onClick={updateSettings}
+								disabled={isUpdating || !hasChanges}
+								className="min-w-[120px] rounded-lg px-0"
+								variant="gradient"
+							>
+								{isUpdating
+									? __('Saving...', 'quillcrm')
+									: __('Save Settings', 'quillcrm')}
+							</Button>
+						</CardFooter>
+					)}
+				</Card>
+			),
+		};
+	});
 
 	return (
 		<div className="quillcrm-settings">
@@ -153,36 +268,12 @@ const SettingsPage: React.FC = () => {
 				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 
-			<div className="grid grid-cols-12 gap-4">
-				{/* Tabs Card */}
-				<div className="col-span-3">
-					<TabsSelection activeTab={tab} onTabChange={setTab} />
-				</div>
-
-				{/* Content Card */}
-				<div className="col-span-9">
-					<Card className="flex shadow-none bg-[#F8F8F8] flex-col h-[calc(100vh-200px)]">
-						{/* Scrollable Content */}
-						<CardContent className="flex-1 overflow-y-auto p-6">
-							{renderTabContent()}
-						</CardContent>
-
-						{/* Fixed Footer */}
-						<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
-							<Button
-								onClick={updateSettings}
-								disabled={isUpdating || !hasChanges}
-								className="min-w-[120px] rounded-lg px-0"
-								variant="gradient"
-							>
-								{isUpdating
-									? __('Saving...', 'quillcrm')
-									: __('Save Settings', 'quillcrm')}
-							</Button>
-						</CardFooter>
-					</Card>
-				</div>
-			</div>
+			<PageTabs
+				defaultValue="business"
+				onValueChange={setTab}
+				tabsList={tabsList}
+				tabsContent={tabsContent}
+			/>
 		</div>
 	);
 };

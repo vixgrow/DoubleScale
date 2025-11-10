@@ -19,9 +19,16 @@ import { ViewIcon } from '@quillcrm/components';
  */
 const formatDate = (dateString: string | null | undefined): string => {
 	if (!dateString) return '';
-
 	try {
-		return dateI18n('F j, Y', dateString);
+		// Parse the date string and format it
+		const date = new Date(dateString);
+
+		// Check if date is valid
+		if (isNaN(date.getTime())) {
+			return '';
+		}
+		// Format using dateI18n with the Date object
+		return dateI18n('F j, Y', date);
 	} catch (error) {
 		return '';
 	}
@@ -37,7 +44,7 @@ export function getWooColumns() {
 		{
 			accessorKey: 'date',
 			header: __('Date', 'quillcrm'),
-			cell: ({ row }) => formatDate((row.original as any).date),
+			cell: ({ row }) => formatDate(row.original.date.date),
 		},
 		{
 			accessorKey: 'total',

@@ -99,6 +99,7 @@ export type MergeTagsGroup = {
 	name: string;
 	mergeTags: MergeTags;
 	triggers?: string[];
+	is_disabled?: boolean;
 };
 
 export type MergeTags = {

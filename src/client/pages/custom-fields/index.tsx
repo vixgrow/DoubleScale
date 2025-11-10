@@ -288,7 +288,6 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			<div className="custom-fields mt-5">
 				<PageHeader
 					title={__('Custom Fields', 'quillcrm')}
-					subtitle={__('Custom Fields', 'quillcrm')}
 					actions={[
 						{
 							label: __('Add Field', 'quillcrm'),

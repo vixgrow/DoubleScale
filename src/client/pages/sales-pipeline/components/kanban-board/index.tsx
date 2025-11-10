@@ -222,7 +222,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 			return;
 		}
 
-		// Optimistically update the deal's stage object
+		const newProbability = targetStage.win_probability;
+		const newWeightedValue = deal.value * (newProbability / 100);
+
+		// Optimistically update the deal's stage object and weighted value
 		updateDealOptimistically(dealId, {
 			stage: {
 				id: targetStage.id,
@@ -230,6 +233,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 				color: targetStage.color,
 				win_probability: targetStage.win_probability,
 			},
+			probability: newProbability,
+			weighted_value: newWeightedValue,
 		});
 
 		try {
@@ -245,6 +250,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 			// Rollback the optimistic update
 			updateDealOptimistically(dealId, {
 				stage: deal.stage,
+				probability: deal.probability,
+				weighted_value: deal.weighted_value,
 			});
 
 			alert(__('Failed to move deal. Please try again.', 'quillcrm'));

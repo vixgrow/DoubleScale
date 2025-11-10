@@ -34,16 +34,16 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 			type: 'standard',
 			icon: <AllContactsIcon width={24} height={24} />,
 		},
-		{
-			label: __('A/B Split Campaign', 'quillcrm'),
-			description: __(
-				'Split audience to test one variable; send winner to the rest.',
-				'quillcrm'
-			),
-			type: 'ab_test',
-			icon: <ABSplitIcon width={24} height={24} />,
-			isPremium: true,
-		},
+		// {
+		// 	label: __('A/B Split Campaign', 'quillcrm'),
+		// 	description: __(
+		// 		'Split audience to test one variable; send winner to the rest.',
+		// 		'quillcrm'
+		// 	),
+		// 	type: 'ab_test',
+		// 	icon: <ABSplitIcon width={24} height={24} />,
+		// 	isPremium: true,
+		// },
 		// {
 		// 	label: __('Email Sequence', 'quillcrm'),
 		// 	description: __(

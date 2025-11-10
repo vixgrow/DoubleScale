@@ -13,6 +13,12 @@ import { createContext, useContext, useState, useEffect } from 'react';
  * internal dependencies
  */
 import type { Filter as FilterType, ContactsResponse } from '@quillcrm/client';
+import type { RuleItem } from '@/components/rules-builder';
+import {
+	getFilteredRulesGroups,
+	getInitialRule,
+	mapRulesToFilters,
+} from '@/utils';
 
 interface ExportContextType {
 	// State
@@ -21,12 +27,15 @@ interface ExportContextType {
 	total: number;
 	loading: boolean;
 	filters: FilterType[];
+	rules: Array<Array<RuleItem>>;
+	rulesGroups: any;
 	isFiltering: boolean;
 	totalContact: number;
 
 	// Actions
 	setSelectedFields: (fields: string[]) => void;
 	setFilters: (filters: FilterType[]) => void;
+	setRules: (rules: Array<Array<RuleItem>>) => void;
 	handleExport: () => Promise<void>;
 	handleClose: () => void;
 	toggleField: (field: string) => void;
@@ -65,6 +74,23 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [totalContact, setTotalContact] = useState(0);
 	const { createNotice } = useDispatch('quillcrm/core');
+
+	// Rules builder setup
+	const rulesGroups = getFilteredRulesGroups();
+	const [rules, setRules] = useState<Array<Array<RuleItem>>>([
+		[getInitialRule(rulesGroups)],
+	]);
+
+	// Sync rules to filters when rules change
+	// This ensures fetchContacts and handleExport always have the latest filters
+	useEffect(() => {
+		const newFilters = mapRulesToFilters(rules);
+		// Only update if filters actually changed to avoid infinite loops
+		if (JSON.stringify(newFilters) !== JSON.stringify(filters)) {
+			setFilters(newFilters);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [rules]);
 
 	const handleExport = async (currentOffset = 0, file = '') => {
 		if (selectedFields.length === 0 || loading) {
@@ -144,6 +170,7 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 		setLoading(false);
 		setSelectedFields(['first_name', 'last_name', 'email']);
 		setFilters([]);
+		setRules([[getInitialRule(rulesGroups)]]);
 		setTotalContact(0);
 		setTotal(0);
 		setIsFiltering(false);
@@ -194,10 +221,13 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 		total,
 		loading,
 		filters,
+		rules,
+		rulesGroups,
 		isFiltering,
 		totalContact,
 		setSelectedFields,
 		setFilters,
+		setRules,
 		handleExport,
 		handleClose,
 		toggleField,

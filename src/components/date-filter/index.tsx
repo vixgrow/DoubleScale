@@ -4,16 +4,17 @@
 import { __ } from '@wordpress/i18n';
 
 /**
- * External dependencies
- */
-import { Flex, Typography, DatePicker, Select, Button } from 'antd';
-import en from 'antd/es/date-picker/locale/en_US';
-import dayjs from 'dayjs';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 
 interface DateFilterProps {
 	interval: string;
@@ -22,7 +23,6 @@ interface DateFilterProps {
 	onIntervalChange: (interval: string) => void;
 	onChangeFromDate: (date: Date) => void;
 	onChangeToDate: (date: Date) => void;
-	onSubmit: () => void;
 }
 
 const DateFilter: React.FC<DateFilterProps> = ({
@@ -32,7 +32,6 @@ const DateFilter: React.FC<DateFilterProps> = ({
 	onIntervalChange,
 	onChangeFromDate,
 	onChangeToDate,
-	onSubmit,
 }) => {
 	const intervalOptions = [
 		{
@@ -73,45 +72,49 @@ const DateFilter: React.FC<DateFilterProps> = ({
 		},
 	];
 
+	const handleDateRangeChange = (range: {
+		from: Date | null;
+		to: Date | null;
+	}) => {
+		if (range.from) {
+			onChangeFromDate(range.from);
+		}
+		if (range.to) {
+			onChangeToDate(range.to);
+		}
+	};
+
 	return (
-		<Flex gap={10} align="flex-end">
-			<Flex gap={10} vertical>
-				<Typography.Text strong>
-					{__('Interval', 'quillcrm')}
-				</Typography.Text>
+		<div className="flex items-end gap-[10px]">
+			<div>
 				<Select
 					value={interval}
-					onChange={(value) => onIntervalChange(value)}
-					options={intervalOptions}
-					style={{ width: 200 }}
-				/>
-			</Flex>
+					onValueChange={(value) => onIntervalChange(value)}
+				>
+					<SelectTrigger className="w-full bg-[#FFFFFF80] py-0 px-2">
+						<SelectValue placeholder="Select interval" />
+					</SelectTrigger>
+					<SelectContent>
+						{intervalOptions.map((option) => (
+							<SelectItem key={option.value} value={option.value}>
+								{option.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
 			{interval === 'custom' && (
-				<>
-					<Flex gap={10} vertical>
-						<Typography.Text strong>
-							{__('Start Date', 'quillcrm')}
-						</Typography.Text>
-						<DatePicker
-							locale={en}
-							value={dayjs(startDate)}
-							onChange={(date) => onChangeFromDate(date.toDate())}
-						/>
-					</Flex>
-					<Flex gap={10} vertical>
-						<Typography.Text strong>
-							{__('End Date', 'quillcrm')}
-						</Typography.Text>
-						<DatePicker
-							locale={en}
-							value={dayjs(endDate)}
-							onChange={(date) => onChangeToDate(date.toDate())}
-						/>
-					</Flex>
-				</>
+				<DateRangePicker
+					value={{
+						from: startDate,
+						to: endDate,
+					}}
+					onChange={handleDateRangeChange}
+					placeholder={__('Select date range', 'quillcrm')}
+					className="bg-[#FFFFFF80] text-[#2E2C2F] px-2 py-0 rounded-md"
+				/>
 			)}
-			<Button onClick={onSubmit}>{__('Refresh', 'quillcrm')}</Button>
-		</Flex>
+		</div>
 	);
 };
 

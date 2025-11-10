@@ -15,7 +15,6 @@ import {
 	ColumnsIcon,
 	FiltersIcon,
 	BulkActionSelect,
-	Filters,
 	CustomDialogHeader,
 	GradientFilterIcon,
 	GradientColumnsIcon,
@@ -35,6 +34,14 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { useState } from 'react';
 import { CampaignFilters } from '@/components/campaign-filters';
+import RulesBuilder from '@/components/rules-builder';
+import type { RuleItem } from '@/components/rules-builder';
+import {
+	getFilteredRulesGroups,
+	getInitialRule,
+	mapRulesToFilters,
+	mapFiltersToRules,
+} from '@/utils';
 
 interface DataTableActionsProps<TData> {
 	table: Table<TData>;
@@ -55,6 +62,11 @@ export function DataTableActions<TData>({
 	const [isColumnsDialogOpen, setIsColumnsDialogOpen] = useState(false);
 	const [isCampaignFiltersOpen, setIsCampaignFiltersOpen] = useState(false);
 	const [tempCampaignFilters, setTempCampaignFilters] = useState<any>(null);
+	const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
+	const [tempRules, setTempRules] = useState<Array<Array<RuleItem>>>([]);
+
+	// Rules builder setup
+	const rulesGroups = getFilteredRulesGroups();
 
 	// Initialize column visibility state when dialog opens
 	const handleDialogOpen = () => {
@@ -122,6 +134,30 @@ export function DataTableActions<TData>({
 		});
 	};
 
+	// Initialize temp rules when advanced filters dialog opens
+	const handleAdvancedFiltersDialogOpen = () => {
+		if (config.filters) {
+			const currentFilters = config.filters.currentFilters || [];
+			setTempRules(mapFiltersToRules(currentFilters, rulesGroups));
+		} else {
+			// Initialize with default rule if no filters config
+			setTempRules([[getInitialRule(rulesGroups)]]);
+		}
+		setIsAdvancedFiltersOpen(true);
+	};
+
+	// Handle advanced filters - apply and close dialog
+	const handleApplyAdvancedFilters = () => {
+		if (config.filters) {
+			const newFilters = mapRulesToFilters(tempRules);
+			config.filters.onFiltersChange(newFilters);
+			if (setPage) {
+				setPage(1);
+			}
+		}
+		setIsAdvancedFiltersOpen(false);
+	};
+
 	return (
 		<div className="flex gap-[10px] items-center">
 			{config.dateRange?.enabled && (
@@ -150,10 +186,10 @@ export function DataTableActions<TData>({
 					doBulkAction={config.bulkActions?.onExecuteAction}
 					setSelectedLists={
 						config.bulkActions.lists?.onSelectionChange ||
-						(() => { })
+						(() => {})
 					}
 					setSelectedTags={
-						config.bulkActions.tags?.onSelectionChange || (() => { })
+						config.bulkActions.tags?.onSelectionChange || (() => {})
 					}
 					selectedLists={config.bulkActions.lists?.selected || []}
 					selectedTags={config.bulkActions.tags?.selected || []}
@@ -162,14 +198,72 @@ export function DataTableActions<TData>({
 			)}
 
 			{/* Campaign Filters Button */}
-			{(activeTab === 'email' || activeTab === 'sms') && config.campaignFilters && (
+			{(activeTab === 'email' || activeTab === 'sms') &&
+				config.campaignFilters && (
+					<Dialog
+						open={isCampaignFiltersOpen}
+						onOpenChange={(open) => {
+							if (open) {
+								handleCampaignFiltersDialogOpen();
+							} else {
+								setIsCampaignFiltersOpen(false);
+							}
+						}}
+					>
+						<DialogTrigger asChild>
+							<Button
+								variant="tertiary"
+								className="font-semibold px-4 text-[#3B82F6]"
+								onClick={handleCampaignFiltersDialogOpen}
+							>
+								<FiltersIcon />
+								{__('Filters', 'quillcrm')}
+							</Button>
+						</DialogTrigger>
+						<DialogContent className="sm:max-w-[800px]">
+							<DialogHeader>
+								<DialogTitle>
+									<CustomDialogHeader
+										title={__('Filter', 'quillcrm')}
+										subtitle={__(
+											'Select Groups of filters about data you want to view.',
+											'quillcrm'
+										)}
+										icon={<GradientFilterIcon />}
+									/>
+								</DialogTitle>
+							</DialogHeader>
+							{tempCampaignFilters && (
+								<CampaignFilters
+									filters={tempCampaignFilters}
+									onChange={setTempCampaignFilters}
+									onClear={handleClearTempFilters}
+									activeTab={activeTab}
+								/>
+							)}
+							<DialogFooter>
+								<Button
+									onClick={handleApplyCampaignFilters}
+									className="w-full"
+									variant="gradient"
+									size="xl"
+								>
+									{__('Apply Filters', 'quillcrm')}
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
+				)}
+
+			{/* Advanced Filters Button */}
+			{config.filters?.enabled && (
 				<Dialog
-					open={isCampaignFiltersOpen}
+					open={isAdvancedFiltersOpen}
 					onOpenChange={(open) => {
 						if (open) {
-							handleCampaignFiltersDialogOpen();
+							handleAdvancedFiltersDialogOpen();
 						} else {
-							setIsCampaignFiltersOpen(false);
+							setIsAdvancedFiltersOpen(false);
 						}
 					}}
 				>
@@ -177,60 +271,13 @@ export function DataTableActions<TData>({
 						<Button
 							variant="tertiary"
 							className="font-semibold px-4 text-[#3B82F6]"
-							onClick={handleCampaignFiltersDialogOpen}
-						>
-							<FiltersIcon />
-							{__('Filters', 'quillcrm')}
-						</Button>
-					</DialogTrigger>
-					<DialogContent className="sm:max-w-[800px]">
-						<DialogHeader>
-							<DialogTitle>
-								<CustomDialogHeader
-									title={__('Filter', 'quillcrm')}
-									subtitle={__(
-										'Select Groups of filters about data you want to view.',
-										'quillcrm'
-									)}
-									icon={<GradientFilterIcon />}
-								/>
-							</DialogTitle>
-						</DialogHeader>
-						{tempCampaignFilters && (
-							<CampaignFilters
-								filters={tempCampaignFilters}
-								onChange={setTempCampaignFilters}
-								onClear={handleClearTempFilters}
-								activeTab={activeTab}
-							/>
-						)}
-						<DialogFooter>
-							<Button
-								onClick={handleApplyCampaignFilters}
-								className="w-full"
-								variant="gradient"
-								size="xl"
-							>
-								{__('Apply Filters', 'quillcrm')}
-							</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
-			)}
-
-			{/* Advanced Filters Button */}
-			{config.filters?.enabled && (
-				<Dialog>
-					<DialogTrigger asChild>
-						<Button
-							variant="tertiary"
-							className="font-semibold px-4 text-[#3B82F6]"
+							onClick={handleAdvancedFiltersDialogOpen}
 						>
 							<FiltersIcon />
 							{__('Advanced Filters', 'quillcrm')}
 						</Button>
 					</DialogTrigger>
-					<DialogContent className="sm:max-w-[800px]">
+					<DialogContent className="sm:max-w-[900px]">
 						<DialogHeader>
 							<DialogTitle>
 								<CustomDialogHeader
@@ -243,29 +290,25 @@ export function DataTableActions<TData>({
 								/>
 							</DialogTitle>
 						</DialogHeader>
-						<Filters
-							filters={config.filters?.currentFilters}
-							onChange={(filters) => {
-								config.filters?.onFiltersChange(filters);
-								if (setPage) {
-									setPage(1);
-								}
-							}}
-						/>
+						{tempRules.length > 0 && (
+							<RulesBuilder
+								rules={tempRules}
+								onChange={setTempRules}
+								rulesGroups={rulesGroups}
+							/>
+						)}
 						<DialogFooter>
-							<DialogClose asChild>
-								<Button
-									onClick={config.filters?.onApplyFilters}
-									disabled={config.filters?.isApplying}
-									className="w-full"
-									variant="gradient"
-									size="xl"
-								>
-									{config.filters?.isApplying
-										? __('Applying...', 'quillcrm')
-										: __('Apply Filters', 'quillcrm')}
-								</Button>
-							</DialogClose>
+							<Button
+								onClick={handleApplyAdvancedFilters}
+								disabled={config.filters?.isApplying}
+								className="w-full"
+								variant="gradient"
+								size="xl"
+							>
+								{config.filters?.isApplying
+									? __('Applying...', 'quillcrm')
+									: __('Apply Filters', 'quillcrm')}
+							</Button>
 						</DialogFooter>
 					</DialogContent>
 				</Dialog>

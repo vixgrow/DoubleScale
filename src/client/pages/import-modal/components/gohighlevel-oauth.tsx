@@ -3,14 +3,35 @@
  * 
  * Dedicated component for GoHighLevel OAuth flow, separated from general import logic
  */
-
-import React, { useState, useEffect } from 'react';
-import { Button, Input, Form, Alert, Typography } from 'antd';
+/**
+ * wordpress dependencies
+ */
 import { __ } from '@wordpress/i18n';
-import { LinkOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { useGoHighLevelOAuth } from '../hooks/use-gohighlevel-oauth';
-
-const { Text, Title } = Typography;
+/**
+ * external dependencies
+ */
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { AlertCircle, CheckCircle2, Link2, Loader2 } from 'lucide-react';
+/**
+ * internal dependencies
+ */
+import {
+	Form,
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+	useGoHighLevelOAuth,
+	type GoHighLevelCredentials,
+} from '../hooks/use-gohighlevel-oauth';
 
 interface GoHighLevelOAuthProps {
 	credentials: {
@@ -46,13 +67,16 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 	onConnectionChange,
 	onDataFetched,
 }) => {
-	const [form] = Form.useForm();
+	type FormValues = GoHighLevelCredentials & Record<string, string>;
+	const form = useForm<FormValues>({
+		defaultValues: {},
+	});
 	const [connectionStatus, setConnectionStatus] = useState<
 		'connected' | 'disconnected' | 'setup_required'
 	>('disconnected');
 
 	const goHighLevelOAuth = useGoHighLevelOAuth({
-		onSuccess: (data) => {
+		onSuccess: () => {
 			setConnectionStatus('connected');
 			onConnectionChange?.(true);
 		},
@@ -74,9 +98,30 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 		}
 	}, [credentials]);
 
-	const handleConnect = async (values: { client_id: string; client_secret: string }) => {
+	useEffect(() => {
+		if (!credentials.oauth_setup?.fields) {
+			return;
+		}
+
+		const defaults = Object.keys(credentials.oauth_setup.fields).reduce(
+			(acc, key) => {
+				acc[key] = '';
+				return acc;
+			},
+			{} as FormValues
+		);
+
+		form.reset(defaults);
+	}, [credentials.oauth_setup, form]);
+
+	const handleConnect = async (values: FormValues) => {
+		const { client_id, client_secret } = values;
+
 		try {
-			await goHighLevelOAuth.connectWithCredentials(values);
+			await goHighLevelOAuth.connectWithCredentials({
+				client_id,
+				client_secret,
+			});
 		} catch (error) {
 			// Error handling is done in the hook
 		}
@@ -102,85 +147,119 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 		credentials.oauth_setup?.type === 'oauth_setup_required'
 	) {
 		const setup = credentials.oauth_setup;
-		
+
 		return (
 			<div className="gohighlevel-oauth-setup">
 				<div className="setup-header mb-6">
 					<div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-						<ExclamationCircleOutlined className="text-blue-600 mt-1" />
+						<AlertCircle className="mt-1 h-5 w-5 text-blue-600" />
 						<div className="flex-1">
-							<Title level={4} className="!mb-2">
+							<h4 className="mb-2 text-lg font-semibold text-gray-900">
 								{setup.label}
-							</Title>
-							<Text className="text-gray-600">
+							</h4>
+							<p className="text-sm text-gray-600">
 								{setup.description}
-							</Text>
+							</p>
 						</div>
 					</div>
 				</div>
 
-				<Form
-					form={form}
-					layout="vertical"
-					onFinish={handleConnect}
-					className="oauth-credentials-form"
-				>
-					{Object.entries(setup.fields).map(([key, field]) => (
-						<Form.Item
-							key={key}
-							name={key}
-							label={field.label}
-							rules={[
-								{
-									required: field.required,
-									message: `${field.label} is required`,
-								},
-							]}
-							extra={field.description}
-						>
-							<Input
-								type={field.type === 'password' ? 'password' : 'text'}
-								placeholder={field.label}
-								size="large"
+				<Form {...form}>
+					<form
+						onSubmit={form.handleSubmit(handleConnect)}
+						className="oauth-credentials-form space-y-6"
+					>
+						{Object.entries(setup.fields).map(([key, field]) => (
+							<FormField
+								key={key}
+								control={form.control}
+								name={key}
+								rules={
+									field.required
+										? {
+											required: `${field.label} is required`,
+										}
+										: undefined
+								}
+								render={({ field: formField }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-medium text-gray-900">
+											{field.label}
+										</FormLabel>
+										<FormControl>
+											<Input
+												type={
+													field.type === 'password'
+														? 'password'
+														: 'text'
+												}
+												placeholder={field.label}
+												className="h-12"
+												style={{
+													borderRadius: '0.5rem',
+												}}
+												{...formField}
+											/>
+										</FormControl>
+										{field.description && (
+											<FormDescription className="text-xs text-gray-500">
+												{field.description}
+											</FormDescription>
+										)}
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-						</Form.Item>
-					))}
+						))}
 
-					{goHighLevelOAuth.error && (
-						<Alert
-							type="error"
-							message={goHighLevelOAuth.error}
-							className="mb-4"
-							showIcon
-						/>
-					)}
+						{goHighLevelOAuth.error && (
+							<Alert variant="destructive" className="flex items-start gap-2">
+								<AlertCircle className="mt-[2px] h-4 w-4" />
+								<div>
+									<AlertTitle>
+										{__('Connection error', 'quillcrm')}
+									</AlertTitle>
+									<AlertDescription>
+										{goHighLevelOAuth.error}
+									</AlertDescription>
+								</div>
+							</Alert>
+						)}
 
-					<div className="form-actions mb-6">
-						<Button
-							type="primary"
-							htmlType="submit"
-							loading={goHighLevelOAuth.connecting}
-							size="large"
-							block
-							icon={<LinkOutlined />}
-						>
-							{goHighLevelOAuth.connecting
-								? __('Connecting...', 'quillcrm')
-								: __('Connect to GoHighLevel', 'quillcrm')}
-						</Button>
-					</div>
+						<div className="form-actions mb-6">
+							<Button
+								type="submit"
+								size="xl"
+								className="w-full"
+								disabled={goHighLevelOAuth.connecting}
+							>
+								{goHighLevelOAuth.connecting ? (
+									<>
+										<Loader2 className="h-4 w-4 animate-spin" />
+										{__('Connecting...', 'quillcrm')}
+									</>
+								) : (
+									<>
+										<Link2 className="h-4 w-4" />
+										{__('Connect to GoHighLevel', 'quillcrm')}
+									</>
+								)}
+							</Button>
+						</div>
+					</form>
 				</Form>
 
-				<div className="redirect-url-section">
-					<Text strong className="block mb-2">
+				<div className="redirect-url-section mt-4">
+					<span className="mb-2 block text-sm font-semibold text-gray-900">
 						{__('Redirect URL for your GoHighLevel app:', 'quillcrm')}
-					</Text>
+					</span>
 					<div className="flex items-center gap-2 p-2 bg-gray-100 border rounded">
 						<code className="flex-1 text-sm">
 							{setup.redirect_url}
 						</code>
 						<Button
-							size="small"
+							size="sm"
+							variant="outline"
 							onClick={() =>
 								navigator.clipboard.writeText(setup.redirect_url)
 							}
@@ -202,18 +281,14 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 		return (
 			<div className="gohighlevel-oauth-connected">
 				<div
-					className={`flex items-start gap-3 p-4 rounded-lg border ${
-						isExpiringSoon
-							? 'bg-yellow-50 border-yellow-200'
-							: 'bg-green-50 border-green-200'
-					}`}
-				>
-					<CheckCircleOutlined
-						className={`mt-1 ${
-							isExpiringSoon
-								? 'text-yellow-600'
-								: 'text-green-600'
+					className={`flex items-start gap-3 p-4 rounded-lg border ${isExpiringSoon
+						? 'bg-yellow-50 border-yellow-200'
+						: 'bg-green-50 border-green-200'
 						}`}
+				>
+					<CheckCircle2
+						className={`mt-1 h-5 w-5 ${isExpiringSoon ? 'text-yellow-600' : 'text-green-600'
+							}`}
 					/>
 					<div className="flex-1">
 						<h3 className="font-medium text-gray-900 mb-1">
@@ -252,7 +327,11 @@ const GoHighLevelOAuth: React.FC<GoHighLevelOAuthProps> = ({
 						)}
 					</div>
 					<div className="flex flex-col gap-2">
-						<Button size="small" onClick={handleDisconnect} danger>
+						<Button
+							variant="destructive"
+							size="sm"
+							onClick={handleDisconnect}
+						>
 							{__('Disconnect', 'quillcrm')}
 						</Button>
 					</div>

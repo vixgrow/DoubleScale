@@ -34,7 +34,7 @@ type Filters = {
 		from: Date | null;
 		to: Date | null;
 	};
-	status: 'open' | 'won' | 'lost' | 'all';
+	status: 'open' | 'won' | 'lost';
 	priority: string | null;
 };
 

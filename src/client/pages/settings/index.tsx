@@ -22,6 +22,7 @@ import {
 	CurrencyIcon,
 	CustomFieldsIcon,
 	ToolsIcon,
+	TotalSMSIcon,
 } from '@quillcrm/components';
 import BusinessSettings from './business';
 import EmailSettings from './email';
@@ -135,15 +136,15 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-		case 'email':
-			return (
-				<EmailSettings settings={settings!} onChange={setSettings} />
-			);
-		case 'sms':
-			return (
-				<SMSSettings settings={settings!} onChange={setSettings} />
-			);
-		case 'double_optin':
+			case 'email':
+				return (
+					<EmailSettings settings={settings!} onChange={setSettings} />
+				);
+			case 'sms':
+				return (
+					<SMSSettings settings={settings!} onChange={setSettings} />
+				);
+			case 'double_optin':
 				return (
 					<DoubleOptInSettings
 						settings={settings!}
@@ -186,7 +187,7 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'sms',
 			label: 'SMS',
-			icon: <MessageSquare size={20} />,
+			icon: <TotalSMSIcon width={24} height={24} />,
 		},
 		{
 			value: 'double_optin',
@@ -284,6 +285,8 @@ const SettingsPage: React.FC = () => {
 				onValueChange={setTab}
 				tabsList={tabsList}
 				tabsContent={tabsContent}
+				tabsListWrapperClassName='py-3 px-2.5 border rounded-lg'
+				tabsListClassName='gap-2 bg-transparent text-foreground justify-center'
 			/>
 		</div>
 	);

@@ -19,6 +19,8 @@ import {
 	Space,
 	Tag,
 	Pagination,
+	Popconfirm,
+	message,
 } from 'antd';
 import {
 	User,
@@ -31,6 +33,7 @@ import {
 	Plus,
 	Phone,
 	Mail,
+	Trash2,
 } from 'lucide-react';
 import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 
@@ -38,6 +41,7 @@ import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
  * Internal dependencies
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
+import { useActivityOperations } from '../../hooks/use-activity-operations';
 import { AddNoteModal } from '../add-note-modal';
 import { LogCallModal } from '../log-call-modal';
 import { LogEmailModal } from '../log-email-modal';
@@ -117,6 +121,7 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 	const [logCallVisible, setLogCallVisible] = useState(false);
 	const [logEmailVisible, setLogEmailVisible] = useState(false);
 	const [scheduleMeetingVisible, setScheduleMeetingVisible] = useState(false);
+	const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
 
 	// Filters
 	const [filters, setFilters] = useState({
@@ -129,6 +134,7 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 	});
 
 	const { getDealActivities } = useDealOperations();
+	const { deleteActivity } = useActivityOperations();
 
 	useEffect(() => {
 		if (dealId) {
@@ -213,6 +219,44 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 		} else {
 			return format(date, 'MMM d, yyyy'); // Older - show full date
 		}
+	};
+
+	const handleEditActivity = (activity: Activity) => {
+		setEditingActivity(activity);
+
+		switch (activity.activity_type) {
+			case 'note_added':
+				setAddNoteVisible(true);
+				break;
+			case 'call_logged':
+				setLogCallVisible(true);
+				break;
+			case 'email_sent':
+				setLogEmailVisible(true);
+				break;
+			case 'meeting_scheduled':
+				setScheduleMeetingVisible(true);
+				break;
+		}
+	};
+
+	const handleDeleteActivity = async (activityId: number) => {
+		try {
+			await deleteActivity(activityId);
+			fetchActivities();
+			message.success(__('Activity deleted successfully!', 'quillcrm'));
+		} catch (error) {
+			message.error(
+				error instanceof Error
+					? error.message
+					: __('Failed to delete activity', 'quillcrm')
+			);
+		}
+	};
+
+	const isEditableActivity = (activityType: string) => {
+		const editableTypes = ['note_added', 'email_sent', 'call_logged', 'meeting_scheduled'];
+		return editableTypes.includes(activityType);
 	};
 
 	const renderActivityItem = (activity: Activity) => {
@@ -462,6 +506,41 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 									</div>
 								)}
 
+							{/* Activity Actions for editable activities */}
+							{isEditableActivity(activity.activity_type) && (
+								<div className="activity-actions">
+									<Button
+										type="text"
+										size="small"
+										icon={<Edit size={14} />}
+										onClick={() => handleEditActivity(activity)}
+									>
+										{__('Edit', 'quillcrm')}
+									</Button>
+									<Popconfirm
+										title={__('Delete activity?', 'quillcrm')}
+										description={__(
+											'Are you sure you want to delete this activity? This action cannot be undone.',
+											'quillcrm'
+										)}
+										onConfirm={() =>
+											handleDeleteActivity(activity.id)
+										}
+										okText={__('Yes', 'quillcrm')}
+										cancelText={__('No', 'quillcrm')}
+									>
+										<Button
+											type="text"
+											size="small"
+											icon={<Trash2 size={14} />}
+											danger
+										>
+											{__('Delete', 'quillcrm')}
+										</Button>
+									</Popconfirm>
+								</div>
+							)}
+
 							{/* Activity Comments */}
 							<ActivityComments
 								activityId={activity.id}
@@ -637,46 +716,70 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 			{/* Activity Modals */}
 			<AddNoteModal
 				visible={addNoteVisible}
-				onClose={() => setAddNoteVisible(false)}
+				onClose={() => {
+					setAddNoteVisible(false);
+					setEditingActivity(null);
+				}}
 				onSuccess={() => {
 					fetchActivities();
 					setAddNoteVisible(false);
+					setEditingActivity(null);
 				}}
 				dealId={dealId}
 				dealTitle={dealTitle}
+				editMode={!!editingActivity}
+				activity={editingActivity}
 			/>
 
 			<LogCallModal
 				visible={logCallVisible}
-				onClose={() => setLogCallVisible(false)}
+				onClose={() => {
+					setLogCallVisible(false);
+					setEditingActivity(null);
+				}}
 				onSuccess={() => {
 					fetchActivities();
 					setLogCallVisible(false);
+					setEditingActivity(null);
 				}}
 				dealId={dealId}
 				dealTitle={dealTitle}
+				editMode={!!editingActivity}
+				activity={editingActivity}
 			/>
 
 			<LogEmailModal
 				visible={logEmailVisible}
-				onClose={() => setLogEmailVisible(false)}
+				onClose={() => {
+					setLogEmailVisible(false);
+					setEditingActivity(null);
+				}}
 				onSuccess={() => {
 					fetchActivities();
 					setLogEmailVisible(false);
+					setEditingActivity(null);
 				}}
 				dealId={dealId}
 				dealTitle={dealTitle}
+				editMode={!!editingActivity}
+				activity={editingActivity}
 			/>
 
 			<ScheduleMeetingModal
 				visible={scheduleMeetingVisible}
-				onClose={() => setScheduleMeetingVisible(false)}
+				onClose={() => {
+					setScheduleMeetingVisible(false);
+					setEditingActivity(null);
+				}}
 				onSuccess={() => {
 					fetchActivities();
 					setScheduleMeetingVisible(false);
+					setEditingActivity(null);
 				}}
 				dealId={dealId}
 				dealTitle={dealTitle}
+				editMode={!!editingActivity}
+				activity={editingActivity}
 			/>
 		</div>
 	);

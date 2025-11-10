@@ -562,6 +562,12 @@ export type Rule = {
 export type DashboardData = {
 	total_contacts: number;
 	total_sent_emails: number;
+	total_tags: number;
+	total_automations: number;
+	total_email_templates: number;
+	deals: number;
+	deals_closed_won: number;
+	deals_won_value: number;
 	total_orders: number;
 	total_revenue: string;
 	recent_contacts: Contact[];

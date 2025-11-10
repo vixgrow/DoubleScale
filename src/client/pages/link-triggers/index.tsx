@@ -187,7 +187,6 @@ const LinkTriggerList: React.FC = () => {
 		<div className="qcrm-link-trigger-list">
 			<PageHeader
 				title={__('Link Triggers List', 'quillcrm')}
-				subtitle={__('Link Triggers', 'quillcrm')}
 				actions={[
 					{
 						label: __('Create Link', 'quillcrm'),
@@ -206,7 +205,7 @@ const LinkTriggerList: React.FC = () => {
 			)}
 
 			<div className="qcrm-link-triggers-list__actions">
-				{hasRecords ? (
+				{hasRecords || loading ? (
 					<>
 						<DataTable
 							columns={getColumns()}

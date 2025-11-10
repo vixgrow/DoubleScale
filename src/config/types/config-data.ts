@@ -120,6 +120,7 @@ export type RulesGroup = {
 	rules: Rules;
 	key: string;
 	triggers?: string[];
+	is_disabled?: boolean;
 };
 
 export type Rules = {

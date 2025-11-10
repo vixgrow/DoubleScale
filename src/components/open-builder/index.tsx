@@ -202,6 +202,7 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 								initialData={getBuilderInitialData()}
 								onSave={handleBuilderSave}
 								onClose={handleBuilderClose}
+								autoSave={false}
 							/>
 						</div>,
 						document.body

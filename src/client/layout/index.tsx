@@ -74,7 +74,6 @@ export const Layout = (props) => {
 	);
 	const { setMergeTagsVisible, setMergeTagCallback } =
 		useDispatch('quillcrm/core');
-	const [currentUser, setCurrentUser] = useState<any>(null);
 
 	const handleCloseMergeTags = () => {
 		setMergeTagsVisible(false);

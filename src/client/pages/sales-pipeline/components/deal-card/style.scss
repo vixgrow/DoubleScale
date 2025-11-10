@@ -1,9 +1,9 @@
 .deal-card {
-	background: white;
-	border-radius: 8px;
-	border: 1px solid #e2e8f0;
-	border-left: 4px solid var(--stage-color, #6d78d8);
-	padding: 16px;
+	// background: white;
+	// border-radius: 8px;
+	// border: 1px solid #e2e8f0;
+	// border-left: 4px solid var(--stage-color, #6d78d8);
+	// padding: 16px;
 	cursor: grab;
 	transition: all 0.2s ease;
 	box-shadow:
@@ -33,22 +33,22 @@
 		cursor: grabbing;
 	}
 
-	&.overdue {
-		border-top: 3px solid #ef4444;
-		background: linear-gradient(
-			135deg,
-			rgba(239, 68, 68, 0.05) 0%,
-			white 20%
-		);
-		animation: overdue-pulse 2s ease-in-out infinite;
+	// &.overdue {
+	// 	border-top: 3px solid #ef4444;
+	// 	background: linear-gradient(
+	// 		135deg,
+	// 		rgba(239, 68, 68, 0.05) 0%,
+	// 		white 20%
+	// 	);
+	// 	animation: overdue-pulse 2s ease-in-out infinite;
 
-		.card-header {
-			background: rgba(239, 68, 68, 0.08);
-			margin: -16px -16px 16px -16px;
-			padding: 16px;
-			border-radius: 8px 8px 0 0;
-		}
-	}
+	// 	.card-header {
+	// 		background: rgba(239, 68, 68, 0.08);
+	// 		margin: -16px -16px 16px -16px;
+	// 		padding: 16px;
+	// 		border-radius: 8px 8px 0 0;
+	// 	}
+	// }
 
 	.card-header {
 		display: flex;

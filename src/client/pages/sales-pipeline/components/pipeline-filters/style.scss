@@ -1,15 +1,8 @@
 .pipeline-filters {
-	background: white;
-	border-radius: 8px;
-	border: 1px solid #e2e8f0;
-	margin-bottom: 24px;
+	
 
 	.filter-bar {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 16px 20px;
-		border-bottom: 1px solid #f1f5f9;
+		
 
 		.filter-main {
 			display: flex;
@@ -28,9 +21,7 @@
 		}
 
 		.filter-actions {
-			display: flex;
-			align-items: center;
-			gap: 12px;
+		
 
 			.filter-badge {
 				display: inline-flex;
@@ -58,17 +49,17 @@
 			gap: 20px;
 		}
 
-		.filter-item {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
+		// .filter-item {
+		// 	display: flex;
+		// 	flex-direction: column;
+		// 	gap: 8px;
 
-			label {
-				font-size: 13px;
-				font-weight: 500;
-				color: #374151;
-			}
-		}
+		// 	label {
+		// 		font-size: 13px;
+		// 		font-weight: 500;
+		// 		color: #374151;
+		// 	}
+		// }
 	}
 }
 

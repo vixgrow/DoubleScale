@@ -1,323 +1,391 @@
+// // CustomFieldsSection.tsx
+// import { __ } from '@wordpress/i18n';
+// import { useEffect, useState } from '@wordpress/element';
+// // import { Input } from 'antd';
+// import {
+// 	Accordion,
+// 	AccordionContent,
+// 	AccordionItem,
+// 	AccordionTrigger,
+// } from '@quillcrm/components/ui/accordion';
+// import {
+// 	Select,
+// 	SelectTrigger,
+// 	SelectValue,
+// 	SelectContent,
+// 	SelectItem,
+// } from '@quillcrm/components/ui/select';
+// import GroupIcon from '@quillcrm/components/icons/group-icon';
+// import { useCustomFields } from '@/client/pages/custom-fields/use-customFields';
+
+// // ==================== Interfaces ====================
+// interface CustomField {
+// 	id: number;
+// 	name: string;
+// 	slug: string;
+// 	type: string;
+// 	value?: string | number | boolean;
+// 	attributes?: {
+// 		options?: { label: string; value: string }[];
+// 	};
+// }
+
+// interface CustomFieldsSectionProps {
+// 	dealId?: number;
+// 	onChange?: (fields: Record<string, any>) => void;
+// 	initialValues?: Record<string, any>;
+// }
+
+// // ==================== Component ====================
+// export const CustomFieldsSection = ({ dealId, onChange ,initialValues }: CustomFieldsSectionProps) => {
+// 	// const [values, setValues] = useState<Record<string, any>>({});
+// 	const [values, setValues] = useState<Record<string, any>>(initialValues || {});
+// 	const { groups: customFieldsGroups, isLoading, error } = useCustomFields() as unknown as {
+// 		groups: { id: number; name: string; slug: string; custom_fields: CustomField[] }[];
+// 		isLoading?: boolean;
+// 		error?: string;
+// 	};
+
+// 	const handleChange = (slug: string, value: any) => {
+// 		setValues((prev) => {
+// 			const updated = { ...prev, [slug]: value };
+// 			onChange?.(updated);
+// 			return updated;
+// 		});
+// 	};
+// 	useEffect(() => {
+// 		if (initialValues) setValues(initialValues);
+// 	}, [initialValues]);
+
+// 	if (isLoading)
+// 		return <p className="text-sm text-gray-500">{__('Loading custom fields...', 'quillcrm')}</p>;
+
+// 	if (error)
+// 		return <p className="text-sm text-red-500">{__('Failed to load custom fields', 'quillcrm')}</p>;
+
+// 	if (!customFieldsGroups || customFieldsGroups.length === 0)
+// 		return <p className="text-sm text-gray-500">{__('No custom fields available.', 'quillcrm')}</p>;
+
+// 	return (
+// 		<div className="flex flex-col gap-3 mt-4">
+// 			<label className="font-normal text-[#09090B] text-base">
+// 				{__('Custom Fields', 'quillcrm')}
+// 			</label>
+
+// 			<Accordion type="multiple" className="w-full">
+// 				{customFieldsGroups.map((group) => (
+// 					<AccordionItem key={group.id} value={group.slug}>
+// 						<AccordionTrigger className="flex justify-between py-3 px-4 items-center w-full bg-[#F8F8F8] h-12 border border-[#DEE1E6] rounded-tl-[8px] rounded-tr-[8px]">
+// 							<span className="flex items-center gap-2">
+// 								<GroupIcon />
+// 								<span className="text-lg font-medium leading-7 tracking-[-.5px] text-[#09090B]">
+// 									{group.name}
+// 								</span>
+// 							</span>
+// 						</AccordionTrigger>
+
+// 						<AccordionContent className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-bl-[8px] rounded-br-[8px] border border-[#DEE1E6] p-4">
+// 							{group.custom_fields && group.custom_fields.length > 0 ? (
+// 								group.custom_fields.map((field) => (
+// 									<div key={field.id} className="flex flex-col gap-1">
+// 										<label className="font-normal text-[#09090B] text-base">
+// 											{field.name}
+// 										</label>
+
+// 										{field.type === 'text' ||
+// 										field.type === 'email' ||
+// 										field.type === 'number' ? (
+// 											<input
+// 												type={field.type}
+// 												value={values[field.slug] || ''}
+// 												onChange={(e) => handleChange(field.slug, e.target.value)}
+// 												placeholder={field.name}
+// 												className="h-12 !shadow-none py-[5px] px-4 !rounded-[8px] border !border-[#DEE1E6] !text-[#09090B] text-sm"
+// 											/>
+// 										) : field.type === 'select' && field.attributes?.options ? (
+// 											<Select
+// 												value={values[field.slug] || ''}
+// 												onValueChange={(v) => handleChange(field.slug, v)}
+// 											>
+// 												<SelectTrigger className="h-12 !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] text-[#09090B] text-sm">
+// 													<SelectValue
+// 														placeholder={__('Select option', 'quillcrm')}
+// 													/>
+// 												</SelectTrigger>
+// 												<SelectContent>
+// 													{field.attributes.options.map((opt) => (
+// 														<SelectItem key={opt.value} value={opt.value}>
+// 															{opt.label}
+// 														</SelectItem>
+// 													))}
+// 												</SelectContent>
+// 											</Select>
+// 										) : field.type === 'checkbox' ? (
+// 											<div className="flex items-center gap-2 mt-2">
+// 												<input
+// 													type="checkbox"
+// 													checked={!!values[field.slug]}
+// 													onChange={(e) => handleChange(field.slug, e.target.checked)}
+// 												/>
+// 												<span className="text-sm text-[#09090B]">
+// 													{__('Yes / No', 'quillcrm')}
+// 												</span>
+// 											</div>
+// 										) : field.type === 'date' ? (
+// 											<input
+// 												type="date"
+// 												value={values[field.slug] || ''}
+// 												onChange={(e) => handleChange(field.slug, e.target.value)}
+// 												className="h-12 !shadow-none py-[5px] px-4 !rounded-[8px] border !border-[#DEE1E6] !text-[#09090B] text-sm"
+// 											/>
+// 										) : null}
+// 									</div>
+// 								))
+// 							) : (
+// 								<p className="text-sm text-gray-500 col-span-2">
+// 									{__('No fields in this group.', 'quillcrm')}
+// 								</p>
+// 							)}
+// 						</AccordionContent>
+// 					</AccordionItem>
+// 				))}
+// 			</Accordion>
+// 		</div>
+// 	);
+// };
+// CustomFieldsSection.tsx
 import { __ } from '@wordpress/i18n';
-import { Button, Typography } from 'antd';
-import { useCustomFields } from '../../../custom-fields/use-customFields';
-import Field from '@quillcrm/components/field';
-import { useDealOperations } from '../../hooks/use-deal-operations';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@quillcrm/components/ui/accordion';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@quillcrm/components/ui/select';
+import { Button } from '@quillcrm/components/ui/button';
+import GroupIcon from '@quillcrm/components/icons/group-icon';
+import { useCustomFields } from '@/client/pages/custom-fields/use-customFields';
+import { useDealOperations } from '../../hooks/use-deal-operations';
 import { Deal } from '../../types';
 
-interface DealCustomFieldsProps {
-	deal: Deal;
+interface CustomField {
+  id: number;
+  name: string;
+  slug: string;
+  type: string;
+  attributes?: {
+    options?: { label: string; value: string }[];
+  };
 }
 
-export const DealCustomFields: React.FC<DealCustomFieldsProps> = ({ deal }) => {
-	const { groups } = useCustomFields('deal');
-	const { updateDeal } = useDealOperations();
-	const [updatedCustomFields, setUpdatedCustomFields] = useState<any[]>(
-		deal?.custom_fields || []
-	);
-	const { createNotice } = useDispatch('quillcrm/core');
+interface CustomFieldsSectionProps {
+//   deal: Deal;
+deal?: any;
+  onChange?: (fields: Record<string, any>) => void;
+}
 
-	// Update state when deal changes
-	useEffect(() => {
-		if (deal?.custom_fields) {
-			setUpdatedCustomFields(deal.custom_fields);
-		}
-	}, [deal]);
+export const CustomFieldsSection = ({ deal,onChange }: CustomFieldsSectionProps) => {
+//   const { groups, isLoading, error } = useCustomFields('deal') as any;
+const { groups, isLoading, error } = useCustomFields() as any;
 
-	// Helper function to get custom field value from deal
-	const getCustomFieldValue = (fieldId: number, fieldType?: string) => {
-		// First check in our updated state
-		const updatedField = updatedCustomFields.find(
-			(cf) => cf.id === fieldId
-		);
-		if (updatedField && updatedField.pivot) {
-			const value = updatedField.pivot.value || '';
+  const { updateDeal } = useDealOperations();
+  const { createNotice } = useDispatch('quillcrm/core');
+//   const [fields, setFields] = useState<Record<number, any>>({});
+const [fields, setFields] = useState<Record<string, any>>({});
 
-			// Convert string values to appropriate types
-			if (fieldType === 'boolean' || fieldType === 'checkbox') {
-				return value === 'true';
-			}
+  // ==================== Helpers ====================
 
-			return value;
-		}
+  const handleFieldChange = (key: string, value: any) => {
+    const updated = { ...fields, [key]: value };
+    setFields(updated);
+    onChange?.(updated);
+  };
 
-		// Fall back to original deal data if not found in updated fields
-		const customField = deal?.custom_fields?.find(
-			(cf) => cf.id === fieldId
-		);
-		const value = customField?.pivot?.value || '';
+  const getFieldValue = (fieldId: number, fieldType?: string) => {
+	const customField = deal?.custom_fields?.find?.((cf) => cf.id === fieldId);
+	let value = customField?.pivot?.value ?? fields[fieldId] ?? '';
+  
+	if (fieldType === 'checkbox' || fieldType === 'boolean') {
+	  return value === 'true' || value === true;
+	}
+  
+	return value;
+  };
 
-		// Convert string values to appropriate types
-		if (fieldType === 'boolean' || fieldType === 'checkbox') {
-			return value === 'true';
-		}
+  const getFieldOptions = (field: CustomField) => {
+    const options = field.attributes?.options ?? [];
+    return Array.isArray(options)
+      ? options
+      : Object.entries(options).map(([value, label]) => ({
+          value,
+          label: String(label),
+        }));
+  };
 
-		return value;
-	};
+  const handleChange = (id: number, value: any) => {
+    setFields((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
 
-	// Helper function to update custom field value
-	const updateCustomFieldValue = (
-		fieldId: number,
-		value: string | boolean | string[]
-	) => {
-		if (!deal) return;
+  const handleSave = async () => {
+    try {
+      const updated = deal.custom_fields.map((field) => {
+        const updatedValue = fields[field.id];
+        if (updatedValue === undefined) return field;
 
-		// Convert all values to strings for storage (API expects strings)
-		let stringValue: string;
-		if (typeof value === 'boolean') {
-			stringValue = value.toString();
-		} else if (Array.isArray(value)) {
-			// For multiselect, join array values with commas
-			stringValue = value.join(',');
-		} else {
-			stringValue = value;
-		}
+        return {
+          ...field,
+          pivot: {
+            ...field.pivot,
+            value:
+              typeof updatedValue === 'boolean'
+                ? String(updatedValue)
+                : Array.isArray(updatedValue)
+                ? updatedValue.join(',')
+                : updatedValue,
+          },
+        };
+      });
 
-		// Use the current state to update the fields
-		setUpdatedCustomFields((prevFields) => {
-			const existingFieldIndex = prevFields.findIndex(
-				(cf) => cf.id === fieldId
-			);
-			const newFields = [...prevFields];
+      await updateDeal(deal.id, { custom_fields: updated });
 
-			if (existingFieldIndex >= 0) {
-				// Update existing field
-				newFields[existingFieldIndex] = {
-					...newFields[existingFieldIndex],
-					value: stringValue,
-					pivot: {
-						...newFields[existingFieldIndex].pivot,
-						value: stringValue,
-					},
-				};
-			} else {
-				// Add new field (find field definition from groups)
-				const fieldDefinition = groups
-					.flatMap((group) => group.custom_fields)
-					.find((field) => field.id === fieldId);
+      createNotice?.({
+        type: 'success',
+        message: __(
+          `Deal "${deal.title}" custom fields updated successfully.`,
+          'quillcrm'
+        ),
+      });
+    } catch (err) {
+      createNotice?.({
+        type: 'error',
+        message: __('Failed to update custom fields.', 'quillcrm'),
+      });
+    }
+  };
 
-				if (fieldDefinition) {
-					newFields.push({
-						...fieldDefinition,
-						value: stringValue,
-						pivot: { value: stringValue },
-					});
-				}
-			}
+  // ==================== Render ====================
+  console.log('CUSTOM FIELD GROUPS:', groups);
 
-			return newFields;
-		});
-	};
+  if (isLoading)
+    return (
+      <p className="text-sm text-gray-500">
+        {__('Loading custom fields...', 'quillcrm')}
+      </p>
+    );
 
-	// Helper function to get options from custom field attributes
-	const getFieldOptions = (customField: any) => {
-		if (!customField.attributes) {
-			return [];
-		}
+  if (error)
+    return (
+      <p className="text-sm text-red-500">
+        {__('Failed to load custom fields', 'quillcrm')}
+      </p>
+    );
 
-		let options;
+  if (!groups?.length)
+    return (
+      <p className="text-sm text-gray-500">
+        {__('No custom fields available.', 'quillcrm')}
+      </p>
+    );
 
-		// Check if attributes is directly an array (like ["ee1", "ee2"])
-		if (Array.isArray(customField.attributes)) {
-			options = customField.attributes;
-		} else if (customField.attributes.options) {
-			// Check if attributes has an options property
-			options = customField.attributes.options;
-		} else {
-			return [];
-		}
+  return (
+    <div className="flex flex-col gap-4 mt-4">
+      <label className="font-medium text-[#09090B] text-base">
+        {__('Custom Fields', 'quillcrm')}
+      </label>
 
-		// If options is already in correct format [{label, value}]
-		if (
-			Array.isArray(options) &&
-			options.length > 0 &&
-			typeof options[0] === 'object' &&
-			options[0].label &&
-			options[0].value
-		) {
-			return options;
-		}
+      <Accordion type="multiple" className="w-full">
+        {groups.map((group: any) => (
+          <AccordionItem key={group.id} value={group.slug} className='mb-6'>
+            <AccordionTrigger className="flex justify-between py-3 px-4 items-center w-full bg-[#F8F8F8] h-12 border border-[#DEE1E6] rounded-tl-[8px] rounded-tr-[8px]">
+              <span className="flex items-center gap-2">
+                <GroupIcon />
+                <span className="text-lg font-medium text-[#09090B]">
+                  {group.name}
+                </span>
+              </span>
+            </AccordionTrigger>
 
-		// If options is an object {value: label}
-		if (typeof options === 'object' && !Array.isArray(options)) {
-			return Object.entries(options).map(([value, label]) => ({
-				value,
-				label: String(label),
-			}));
-		}
+            <AccordionContent className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-bl-[8px] rounded-br-[8px] border border-[#DEE1E6] p-4">
+              {group.custom_fields?.length ? (
+                group.custom_fields.map((field: CustomField) => {
+                  const value =
+                    fields[field.id] ?? getFieldValue(field.id, field.type);
 
-		// If options is an array of strings
-		if (
-			Array.isArray(options) &&
-			options.length > 0 &&
-			typeof options[0] === 'string'
-		) {
-			return options.map((option) => ({
-				value: option,
-				label: option,
-			}));
-		}
+                  return (
+                    <div key={field.id} className="flex flex-col gap-1">
+                      <label className="font-normal text-[#09090B] text-base">
+                        {field.name}
+                      </label>
 
-		return [];
-	};
+                      {['text', 'email', 'number', 'date'].includes(
+                        field.type
+                      ) ? (
+                        <input
+                          type={field.type}
+                          value={value || ''}
+                          onChange={(e) => handleChange(field.id, e.target.value)}
+						  placeholder={field.name}
+                          className="h-12 shadow-none py-[5px] px-4 !rounded-[8px] !border !border-[#DEE1E6] text-[#09090B] text-sm"
+                        />
+                      ) : field.type === 'select' ? (
+                        <Select
+                          value={value || ''}
+                          onValueChange={(v) => handleChange(field.id, v)}
+                        >
+                          <SelectTrigger className="h-12 !shadow-none py-[5px] px-4 !rounded-[8px] !border !border-[#DEE1E6] text-[#09090B] text-sm">
+                            <SelectValue
+                              placeholder={__('Select option', 'quillcrm')}
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getFieldOptions(field).map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : field.type === 'checkbox' ? (
+                        <div className="flex items-center gap-2 mt-2">
+                          <input
+                            type="checkbox"
+                            checked={!!value}
+							placeholder={field.name}
+                            onChange={(e) =>
+                              handleChange(field.id, e.target.checked)
+                            }
+							className='h-12 !shadow-none py-[5px] px-4 !rounded-[8px] !border !border-[#DEE1E6] !text-[#09090B] text-sm'
+                          />
+                          <span className="text-sm text-[#09090B]">
+                            {__('Yes / No', 'quillcrm')}
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-gray-500 col-span-2">
+                  {__('No fields in this group.', 'quillcrm')}
+                </p>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
 
-	// Helper function to get formatted value for multiselect
-	const getMultiselectValue = (fieldValue: string) => {
-		if (!fieldValue) return [];
-		return fieldValue.split(',').filter((val) => val.trim() !== '');
-	};
-
-	return (
-		<>
-			<div className="qcrm-deal-custom-fields qcrm-fields">
-				{groups && groups.length > 0 ? (
-					groups.map((group) => (
-						<>
-							{group.custom_fields &&
-								group.custom_fields.length > 0 && (
-									<div
-										key={group.id}
-										style={{
-											border: '1px solid #f0f0f0',
-											backgroundColor: '#F7FAFC',
-											borderRadius: '5px',
-											padding: '10px',
-											marginBottom: '10px',
-											marginTop: '10px',
-										}}
-									>
-										<>
-											<div
-												className="qcrm-field-group-title"
-												style={{
-													marginBottom: '5px',
-												}}
-											>
-												<Typography.Title level={5}>
-													{group.name}
-												</Typography.Title>
-											</div>
-											{group.custom_fields.map(
-												(customField) => {
-													const fieldValue =
-														getCustomFieldValue(
-															customField.id,
-															customField.type
-														);
-
-													// Get formatted value for multiselect
-													const formattedValue =
-														customField.type ===
-														'multiselect'
-															? getMultiselectValue(
-																	fieldValue as string
-																)
-															: fieldValue;
-
-													// Get options for select/multiselect fields
-													const fieldOptions = [
-														'select',
-														'multiselect',
-													].includes(customField.type)
-														? getFieldOptions(
-																customField
-															)
-														: undefined;
-
-													return (
-														<div
-															key={customField.id}
-															className="qcrm-field inline"
-														>
-															<div className="qcrm-field-label">
-																<Typography.Text>
-																	{
-																		customField.name
-																	}
-																</Typography.Text>
-																{customField.type && (
-																	<Typography.Text
-																		type="secondary"
-																		style={{
-																			fontSize:
-																				'11px',
-																			fontStyle:
-																				'italic',
-																		}}
-																	>
-																		(
-																		{
-																			customField.type
-																		}
-																		)
-																	</Typography.Text>
-																)}
-															</div>
-															<div className="qcrm-field-input">
-																<Field
-																	type={
-																		customField.type
-																	}
-																	value={
-																		formattedValue
-																	}
-																	options={
-																		fieldOptions
-																	}
-																	onChange={(
-																		value
-																	) =>
-																		updateCustomFieldValue(
-																			customField.id,
-																			value
-																		)
-																	}
-																/>
-															</div>
-														</div>
-													);
-												}
-											)}
-										</>
-									</div>
-								)}
-						</>
-					))
-				) : (
-					<div className="qcrm-field">
-						<Typography.Text type="secondary">
-							{__('No custom fields available', 'quillcrm')}
-						</Typography.Text>
-					</div>
-				)}
-			</div>
-
-			<div style={{ marginTop: '20px' }}>
-				<Button
-					type="primary"
-					onClick={async () => {
-						await updateDeal(deal.id, {
-							custom_fields: updatedCustomFields,
-						});
-
-						if (createNotice) {
-							createNotice({
-								type: 'success',
-								message: __(
-									`Deal "${deal.title}" custom fields updated`,
-									'quillcrm'
-								),
-							});
-						}
-					}}
-				>
-					{__('Update Custom Fields', 'quillcrm')}
-				</Button>
-			</div>
-		</>
-	);
+      
+    </div>
+  );
 };
-
-export default DealCustomFields;

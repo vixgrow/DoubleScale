@@ -1,18 +1,21 @@
+import dayjs from 'dayjs';
+import { convertToWordPressTimezone } from '@/utils/index';
+
 export const FormattedDateCell = ({ value }: { value: string }) => {
-	const date = new Date(value);
+	const parsedUtcDate = dayjs.utc(value);
+	const parsedDate = parsedUtcDate.isValid() ? parsedUtcDate : dayjs(value);
+
+	if (!parsedDate.isValid()) {
+		return <div>-</div>;
+	}
+
+	const localizedDate = convertToWordPressTimezone(parsedDate);
+
 	return (
 		<div>
-			{date.toLocaleDateString('en-US', {
-				year: 'numeric',
-				month: 'short',
-				day: 'numeric',
-			})}
+			{localizedDate.format('MMM D, YYYY')}
 			{' - '}
-			{date.toLocaleTimeString('en-US', {
-				hour: 'numeric',
-				minute: '2-digit',
-				hour12: true,
-			})}
+			{localizedDate.format('h:mm A')}
 		</div>
 	);
 };

@@ -2,13 +2,11 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 
 /**
  * External dependencies
  */
-import { Select, Input, DatePicker, Button, Space } from 'antd';
-import { Search, Filter, X, Plus } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -17,8 +15,21 @@ import './style.scss';
 import ConfigAPI from '@quillcrm/config';
 import { UserService } from '../../../../../services/user-service';
 
-const { Option } = Select;
-const { RangePicker } = DatePicker;
+
+import SearchIcon from '@quillcrm/components/icons/search';
+
+
+import {  FiltersIcon } from '@quillcrm/components';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+
+import { AdvancedFiltersDialog } from '@quillcrm/components/advancedFilterDialog/AdvancedFilterDialog';
+
 
 interface Pipeline {
 	id: number;
@@ -75,229 +86,110 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 			[key]: value,
 		});
 	};
-
-	const handleDateRangeChange = (dates: any) => {
-		handleFilterChange('dateRange', {
-			from: dates?.[0]?.toDate() || null,
-			to: dates?.[1]?.toDate() || null,
-		});
-	};
-
-	const clearFilters = () => {
-		onFiltersChange({
-			search: '',
-			ownerId: null,
-			dateRange: { from: null, to: null },
-			status: 'open',
-			priority: null,
-		});
-	};
-
 	const hasActiveFilters =
 		filters.search ||
 		filters.ownerId ||
 		filters.dateRange.from ||
 		filters.dateRange.to ||
-		filters.status !== 'open' ||
+		filters.status !== 'all' ||
 		filters.priority !== null;
 
 	return (
-		<div className="pipeline-filters">
+		<div className="pipeline-filters mr-2 mb-6 px-4 py-5 border border-[#DEE1E6] rounded-[8px] bg-[#fff] overflow-visible">
 			{/* Main Filter Bar */}
-			<div className="filter-bar">
-				<div className="filter-main">
-					{/* Pipeline Selector */}
-					<div className="pipeline-selector">
-						<Select
-							placeholder={__('Select a pipeline', 'quillcrm')}
-							value={selectedPipelineId}
-							onChange={onPipelineChange}
-							style={{ width: 250 }}
-							size="large"
-						>
-							{pipelines.map((pipeline) => (
-								<Option key={pipeline.id} value={pipeline.id}>
-									{pipeline.name}
-								</Option>
-							))}
-						</Select>
-					</div>
+			<div className="filter-bar w-full flex  gap-4">
+				{/* Search */}
+				<div className="search-input relative w-full flex-1">
+					<span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 flex items-center">
+						<SearchIcon className="w-5 h-5" />
+					</span>
 
-					{/* Search */}
-					<div className="search-input">
-						<Input
-							placeholder={__('Search deals...', 'quillcrm')}
-							prefix={<Search size={16} />}
-							value={filters.search}
-							onChange={(e) =>
-								handleFilterChange('search', e.target.value)
-							}
-							size="large"
-							allowClear
-						/>
-					</div>
+					<input
+						type="text"
+						placeholder={__('Search deals...', 'quillcrm')}
+						value={filters.search}
+						onChange={(e) =>
+							handleFilterChange('search', e.target.value)
+						}
+						className="w-full h-10 !pl-10  border-none !border !border-[#E1E3EA] rounded-[6px] placeholder:text-[#A1A5B7] placeholder:tex-[13.975px] focus:outline-none"
+					/>
+				</div>
 
+				<div className="filter-main flex items-end justify-end gap-3 ml-auto">
 					{/* Quick Status Filter */}
 					<div className="status-filter">
 						<Select
-							value={filters.status}
-							onChange={(value) =>
+							defaultValue={filters.status}
+							onValueChange={(value) =>
 								handleFilterChange('status', value)
 							}
-							size="large"
-							style={{ width: 120 }}
 						>
-							<Option value="all">{__('All', 'quillcrm')}</Option>
-							<Option value="open">
-								{__('Open', 'quillcrm')}
-							</Option>
-							<Option value="won">{__('Won', 'quillcrm')}</Option>
-							<Option value="lost">
-								{__('Lost', 'quillcrm')}
-							</Option>
+							<SelectTrigger className="w-[120px] h-10 text-[#09090B] font-medium leading-[26px] [&>svg]:text-[#09090B] tracking-[-.5px] font-[inter] text-base">
+								<SelectValue placeholder="All " />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">
+									{__('All', 'quillcrm')}
+								</SelectItem>
+								<SelectItem value="open">
+									{__('Open', 'quillcrm')}
+								</SelectItem>
+								<SelectItem value="won">
+									{__('Won', 'quillcrm')}
+								</SelectItem>
+								<SelectItem value="lost">
+									{__('Lost', 'quillcrm')}
+								</SelectItem>
+							</SelectContent>
 						</Select>
 					</div>
-				</div>
 
-				<div className="filter-actions">
-					{/* Toggle Advanced Filters */}
-					<Button
-						type={isFilterExpanded ? 'primary' : 'default'}
-						icon={<Filter size={16} />}
-						onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-						size="large"
-					>
-						{__('Filters', 'quillcrm')}
-						{hasActiveFilters && (
-							<span className="filter-badge">
-								{
-									[
-										filters.search && 'search',
-										filters.ownerId && 'owner',
-										(filters.dateRange.from ||
-											filters.dateRange.to) &&
-											'date',
-										filters.status !== 'open' && 'status',
-										filters.priority !== null && 'priority',
-									].filter(Boolean).length
-								}
-							</span>
-						)}
-					</Button>
-
-					{/* Clear Filters */}
-					{hasActiveFilters && (
-						<Button
-							icon={<X size={16} />}
-							onClick={clearFilters}
-							title={__('Clear all filters', 'quillcrm')}
-							size="large"
+					<div className="filter-actions flex items-center">
+						{/* Toggle Advanced Filters */}
+						<button
+							className=" rounded-[7px] flex justify-center items-center text-[#3B82F6] font-semibold leading-6 bg-[#C6DFF3] py-[10px] px-4"
+							onClick={() => {
+								setIsFilterExpanded(!isFilterExpanded);
+							}}
 						>
-							{__('Clear', 'quillcrm')}
-						</Button>
-					)}
+							<FiltersIcon />
+							{__('Filters', 'quillcrm')}
+							{hasActiveFilters && (
+								<span className="filter-badge">
+									{
+										[
+											filters.search && 'search',
+											filters.ownerId && 'owner',
+											(filters.dateRange.from ||
+												filters.dateRange.to) &&
+												'date',
+											filters.status !== 'open' &&
+												'status',
+											filters.priority !== null &&
+												'priority',
+										].filter(Boolean).length
+									}
+								</span>
+							)}
+						</button>
+					</div>
 				</div>
 			</div>
 
 			{/* Advanced Filters */}
 			{isFilterExpanded && (
-				<div className="advanced-filters">
-					<div className="filter-row">
-						<Space size="large" wrap>
-							{/* Owner Filter */}
-							<div className="filter-item">
-								<label>{__('Deal Owner', 'quillcrm')}</label>
-								<Select
-									placeholder={__('All owners', 'quillcrm')}
-									value={filters.ownerId}
-									onChange={(value) =>
-										handleFilterChange('ownerId', value)
-									}
-									style={{ width: 200 }}
-									allowClear
-									loading={ownersLoading}
-									notFoundContent={
-										ownersLoading
-											? __(
-													'Loading owners...',
-													'quillcrm'
-												)
-											: __('No owners found', 'quillcrm')
-									}
-								>
-									{Object.values(owners).map((owner) => (
-										<Option
-											key={owner.value}
-											value={owner.value}
-										>
-											{owner.label}
-										</Option>
-									))}
-								</Select>
-							</div>
-
-							{/* Priority Filter */}
-							<div className="filter-item">
-								<label>{__('Priority', 'quillcrm')}</label>
-								<Select
-									placeholder={__(
-										'All priorities',
-										'quillcrm'
-									)}
-									value={filters.priority}
-									onChange={(value) =>
-										handleFilterChange('priority', value)
-									}
-									style={{ width: 200 }}
-									allowClear
-								>
-									{Object.keys(priorities).map((key) => (
-										<Option key={key} value={key}>
-											{priorities[key].label}
-										</Option>
-									))}
-								</Select>
-							</div>
-
-							{/* Date Range Filter */}
-							<div className="filter-item">
-								<label>
-									{__('Expected Close Date', 'quillcrm')}
-								</label>
-								<RangePicker
-									value={
-										filters.dateRange.from &&
-										filters.dateRange.to
-											? [
-													filters.dateRange.from,
-													filters.dateRange.to,
-												]
-											: null
-									}
-									onChange={handleDateRangeChange}
-									style={{ width: 240 }}
-								/>
-							</div>
-
-							{/* Value Range Filter */}
-							<div className="filter-item">
-								<label>
-									{__('Deal Value Range', 'quillcrm')}
-								</label>
-								<Space.Compact style={{ width: 200 }}>
-									<Input
-										style={{ width: '50%' }}
-										placeholder={__('Min', 'quillcrm')}
-									/>
-									<Input
-										style={{ width: '50%' }}
-										placeholder={__('Max', 'quillcrm')}
-									/>
-								</Space.Compact>
-							</div>
-						</Space>
-					</div>
-				</div>
+				<AdvancedFiltersDialog
+					open={isFilterExpanded}
+					onOpenChange={setIsFilterExpanded}
+					filters={filters}
+					onFiltersChange={onFiltersChange}
+					pipelines={pipelines}
+					selectedPipelineId={selectedPipelineId}
+					onPipelineChange={onPipelineChange}
+					owners={owners}
+					ownersLoading={ownersLoading}
+					priorities={priorities}
+				/>
 			)}
 		</div>
 	);

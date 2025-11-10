@@ -64,7 +64,7 @@ export const useStageOperations = (): StageOperationsReturn => {
 			return response as Stage;
 		} catch (error) {
 			const errorMessage = handleApiError('create stage', error, ERROR_MESSAGES.CREATE_STAGE);
-			throw new Error(errorMessage);
+			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 		}
 	}, []);
 
@@ -86,7 +86,7 @@ export const useStageOperations = (): StageOperationsReturn => {
 			return response as Stage;
 		} catch (error) {
 			const errorMessage = handleApiError('update stage', error, ERROR_MESSAGES.UPDATE_STAGE);
-			throw new Error(errorMessage);
+			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 		}
 	}, []);
 
@@ -101,7 +101,7 @@ export const useStageOperations = (): StageOperationsReturn => {
 			});
 		} catch (error) {
 			const errorMessage = handleApiError('delete stage', error, ERROR_MESSAGES.DELETE_STAGE);
-			throw new Error(errorMessage);
+			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 		}
 	}, []);
 
@@ -122,7 +122,7 @@ export const useStageOperations = (): StageOperationsReturn => {
 			await Promise.all(updatePromises);
 		} catch (error) {
 			const errorMessage = handleApiError('reorder stages', error, ERROR_MESSAGES.REORDER_STAGES);
-			throw new Error(errorMessage);
+			throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 		}
 	}, []);
 

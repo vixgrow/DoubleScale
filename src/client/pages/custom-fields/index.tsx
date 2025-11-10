@@ -30,7 +30,7 @@ import {
 	CustomField,
 	CustomFieldsGroup,
 } from '@quillcrm/client';
-import { PageHeader, PlusIcon, GradientGroupIcon, NoData } from '@quillcrm/components';
+import { PageHeader, PlusIcon, GradientGroupIcon, NoData, PageTabs, ContactsIcon, DealsIcon } from '@quillcrm/components';
 import { DataTableSearch } from '@/components/ui/data-table-search';
 import { DataTableActions } from '@/components/ui/data-table-actions';
 import { DroppableGroup } from './droppable-group';
@@ -42,13 +42,6 @@ import { DragOverlayRow } from './drag-overlay-row';
 import ConfigAPI from '@quillcrm/config';
 import { Button } from '@/components/ui/button';
 import { NoticeBanner } from '@quillcrm/components';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
 
 // Custom modifier to center the drag overlay on the move icon
 const centerOnDragHandle = ({ transform }) => {
@@ -218,6 +211,11 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		const allFields =
 			groups?.flatMap((group) => group.custom_fields || []) || [];
 
+		const scopeTabs = [
+			{ value: 'contact', label: 'Contact', icon: <ContactsIcon /> },
+			{ value: 'deal', label: 'Deal', icon: <DealsIcon /> },
+		];
+
 		// Enhanced filtering with date range
 		const filteredFields = allFields.filter((field) => {
 			// Text filter
@@ -324,43 +322,25 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 					<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 				)}
 
+				<PageTabs
+					key={scope}
+					defaultValue={scope}
+					onValueChange={(value) => setScope(value)}
+					tabsList={scopeTabs}
+					tabsContent={[]}
+					className="w-full mt-4"
+					tabsListWrapperClassName="border rounded-lg px-5 py-3"
+					tabsListClassName="bg-transparent text-foreground gap-2 justify-start"
+				/>
+
 				{/* Global Actions */}
 				<div className="flex items-center justify-between p-5 border rounded-lg my-4 w-full">
-					<div className="flex items-center gap-2">
+					<div className="w-full">
 						<DataTableSearch
 							value={globalFilter}
 							onChange={setGlobalFilter}
 							placeholder={__('Search all fields...', 'quillcrm')}
 						/>
-
-						{/* Scope indicator */}
-						<div className="flex items-center gap-2">
-							<Select
-								value={scope}
-								onValueChange={(value) => {
-									// Update scope state - this will trigger the useEffect to reset UI and refetch groups
-									setScope(value);
-								}}
-							>
-								<SelectTrigger className="w-[180px]">
-									<SelectValue
-										placeholder={__(
-											'Select scope',
-											'quillcrm'
-										)}
-									/>
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="contact">
-										{__('Contact', 'quillcrm')}
-									</SelectItem>
-									<SelectItem value="deal">
-										{__('Deal', 'quillcrm')}
-									</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-
 					</div>
 
 					<DataTableActions

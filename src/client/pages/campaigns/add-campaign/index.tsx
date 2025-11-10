@@ -11,7 +11,7 @@ import {
 	Dialog,
 	DialogContent,
 } from '@/components/ui/dialog';
-import { CampaignsIcon, CustomDialogHeader, Field, GradientCampaignsIcon, NoticeBanner } from '@/components';
+import { CustomDialogHeader, Field, GradientCampaignsIcon, NoticeBanner } from '@/components';
 import { Button } from '@/components/ui/button';
 import CampaignTypes from './campaign-types';
 import { CampaignModalStep, CampaignType, NoticeMessage } from '@quillcrm/client';
@@ -35,8 +35,13 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 	const [campaignName, setCampaignName] = useState('');
 	const [selectedType, setSelectedType] = useState<CampaignType>('standard');
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const handleSubmit = async () => {
+		if (isSubmitting) {
+			return;
+		}
+
 		if (!campaignName.trim()) {
 			setNotice({
 				type: 'error',
@@ -44,22 +49,28 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 			});
 			return;
 		}
-		
+
 		// Set campaign type for email campaigns
 		if (activeTab === 'email') {
 			setCampaignType(selectedType);
 		}
-		
-		const result = await addCampaign(campaignName);
-		if (!result.success && result.error) {
-			setNotice({
-				type: 'error',
-				message: result.error,
-			});
-		} else {
-			setStep(null);
-			setCampaignName('');
-			setNotice(null);
+
+		setIsSubmitting(true);
+
+		try {
+			const result = await addCampaign(campaignName);
+			if (!result.success && result.error) {
+				setNotice({
+					type: 'error',
+					message: result.error,
+				});
+			} else {
+				setStep(null);
+				setCampaignName('');
+				setNotice(null);
+			}
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
@@ -67,6 +78,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 		setStep(null);
 		setCampaignName('');
 		setNotice(null);
+		setIsSubmitting(false);
 	};
 
 	return (
@@ -117,7 +129,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 					variant="gradient"
 					size="xl"
 					onClick={handleSubmit}
-					disabled={!campaignName.trim()}
+					disabled={!campaignName.trim() || isSubmitting}
 					className="w-full"
 				>
 					{__('Create Campaign', 'quillcrm')}

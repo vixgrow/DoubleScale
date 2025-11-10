@@ -15,7 +15,6 @@ import {
 	NoticeBanner,
 } from '@quillcrm/components';
 import { KanbanBoard } from './components/kanban-board';
-import { PipelineFilters } from './components/pipeline-filters';
 import { PipelineSettingsModal } from './components/pipeline-settings-modal';
 import { NewDealModal } from './components/new-deal-modal';
 import { DealDetailModal } from './components/deal-detail-modal';
@@ -36,18 +35,6 @@ import { ErrorState } from '@quillcrm/components/pipeline-errorState/ErrorState'
 import { handleApiError } from './utils/error-handler';
 import { SalesPipelineSkeleton } from './SalesPipelineSkeleton';
 import { PipelineHeader } from './components/salePipeline-header/SalePipelineHeader';
-
-// Import types for proper typing
-type Filters = {
-	search: string;
-	ownerId: number | null;
-	dateRange: {
-		from: Date | null;
-		to: Date | null;
-	};
-	status: 'open' | 'won' | 'lost' | 'all';
-	priority: string | null;
-};
 
 const SalesPipeline: React.FC = () => {
 	const [isPipelineSwitching, setIsPipelineSwitching] = useState(false);
@@ -83,14 +70,6 @@ const SalesPipeline: React.FC = () => {
 	const [lastPipelineId, setLastPipelineId] = useState<number | null>(null);
 
 
-	const [filters, setFilters] = useState<Filters>({
-		search: '',
-		ownerId: null,
-		dateRange: { from: null, to: null },
-		status: 'open',
-		priority: null,
-	});
-
 
 	const {
 		pipelines,
@@ -105,7 +84,7 @@ const SalesPipeline: React.FC = () => {
 		updateStageOptimistically,
 		removeStageOptimistically,
 		reorderStagesOptimistically,
-	} = usePipelineData(selectedPipelineId, filters);
+	} = usePipelineData(selectedPipelineId);
 	console.log('Loading value:', loading);
 	
 
@@ -204,14 +183,6 @@ const SalesPipeline: React.FC = () => {
 					closeNotice={() => setShowDuplicateError(false)}
 				/>
 			)}
-
-			<PipelineFilters
-				pipelines={pipelines || []}
-				selectedPipelineId={selectedPipelineId}
-				onPipelineChange={setSelectedPipelineId}
-				filters={filters}
-				onFiltersChange={setFilters}
-			/>
 
 			<div className='mt-6'>
 				{loading || isPipelineSwitching ?(

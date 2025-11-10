@@ -112,9 +112,9 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
     <Button
       variant="outline"
       size="icon"
-      className=" h-10 border border-[#374151] rounded-[8px] px-2 py-1"
+      className=" h-10 border border-[#374151] text-[#374151] rounded-[8px] px-2 py.5"
     >
-      <PlusIcon color="#374151"  />
+      <PlusIcon width={24} height={24} color="#374151"  />
     </Button>
   </DropdownMenuTrigger>
 

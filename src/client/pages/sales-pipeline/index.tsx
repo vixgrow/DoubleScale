@@ -26,7 +26,7 @@ import { EditPipelineModal } from './components/pipeline-edit';
 import { DeletePipelineDialog } from './components/pipeline-delete';
 import { EditDealModal } from './components/edit-deal-modal';
 import { DeleteDeal } from './components/deal-delete';
-import { Deal } from './types';
+import { Deal, Filters } from './types';
 import { AddNoteModal } from './components/add-note-modal';
 import { LogCallModal } from './components/log-call-modal';
 import { ScheduleMeetingModal } from './components/schedule-meeting-modal';
@@ -35,6 +35,7 @@ import { ErrorState } from '@quillcrm/components/pipeline-errorState/ErrorState'
 import { handleApiError } from './utils/error-handler';
 import { SalesPipelineSkeleton } from './SalesPipelineSkeleton';
 import { PipelineHeader } from './components/salePipeline-header/SalePipelineHeader';
+import { PipelineFilters } from './components/pipeline-filters';
 
 const SalesPipeline: React.FC = () => {
 	const [isPipelineSwitching, setIsPipelineSwitching] = useState(false);
@@ -68,6 +69,13 @@ const SalesPipeline: React.FC = () => {
 	const [ScheduleMeetingVisible, setScheduleMeetingVisible] = useState(false);
 	const [LogEmailVisible, setLogEmailVisible] = useState(false);
 	const [lastPipelineId, setLastPipelineId] = useState<number | null>(null);
+	const [filters, setFilters] = useState<Filters>({
+		search: '',
+		ownerId: null,
+		dateRange: { from: null, to: null },
+		status: 'open',
+		priority: null,
+	});
 
 
 
@@ -183,6 +191,14 @@ const SalesPipeline: React.FC = () => {
 					closeNotice={() => setShowDuplicateError(false)}
 				/>
 			)}
+
+                <PipelineFilters
+				pipelines={pipelines || []}
+				selectedPipelineId={selectedPipelineId}
+				onPipelineChange={setSelectedPipelineId}
+				filters={filters}
+				onFiltersChange={setFilters}
+			/>
 
 			<div className='mt-6'>
 				{loading || isPipelineSwitching ?(

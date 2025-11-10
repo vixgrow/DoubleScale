@@ -36,6 +36,7 @@ import { DealDetailSkeleton } from './DealDetailSkeleton';
 import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
 import DealOverviewSkeleton from './deal-overview-skeleton';
 import { Input } from '@quillcrm/components/ui/input';
+import { useDispatch } from '@wordpress/data';
 
 interface DealDetailModalProps {
 	dealId: number | null;
@@ -64,6 +65,8 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	const [tempValue, setTempValue] = useState('');
 
 	const { getDeal, deleteDeal,updateDeal } = useDealOperations();
+	const dispatch = useDispatch('quillcrm/core');
+	const createNotice = dispatch?.createNotice;
 
 	useEffect(() => {
 		if (!loading && deal) {
@@ -96,7 +99,13 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 			const dealData = await getDeal(dealId, true);
 			setDeal(dealData);
 		} catch (error) {
-			message.error(__('Failed to load deal details', 'quillcrm'));
+			createNotice?.({
+				type: 'error',
+				message:
+					error instanceof Error
+						? error.message
+						: __('Failed to load deal details', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}

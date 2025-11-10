@@ -117,7 +117,7 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 
 				<div className="filter-main flex items-end justify-end gap-3 ml-auto">
 					{/* Quick Status Filter */}
-					{/* <div className="status-filter">
+					<div className="status-filter">
 						<Select
 							defaultValue={filters.status}
 							onValueChange={(value) =>
@@ -142,7 +142,7 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 								</SelectItem>
 							</SelectContent>
 						</Select>
-					</div> */}
+					</div>
 
 					<div className="filter-actions flex items-center">
 						{/* Toggle Advanced Filters */}

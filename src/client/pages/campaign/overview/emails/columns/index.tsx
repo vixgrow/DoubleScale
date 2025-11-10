@@ -46,41 +46,52 @@ export function getColumns({
 			header: __('Contact', 'quillcrm'),
 			cell: ({ row }) => {
 				const contact = row.original.contact;
-				const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
-				const initials = getContactInitials(contact.first_name, contact.last_name);
-				const hasImage = (contact as any).img;
+				const recipient = row.original.recipient;
+				const firstName = contact?.first_name ?? '';
+				const lastName = contact?.last_name ?? '';
+				const fullName = [firstName, lastName].filter(Boolean).join(' ');
+				const fallbackLabel = contact?.email || recipient || '-';
+				const displayName = fullName || fallbackLabel;
+				const initials = getContactInitials(firstName, lastName);
+				const hasImage = Boolean((contact as any)?.img);
+				const primaryValue =
+					campaignType === CAMPAIGN_CHANNEL.EMAIL
+						? contact?.email || recipient || '-'
+						: contact?.phone || recipient || '-';
 
-				return (
-					<NavLink to={`/contacts/${contact.id}`}>
-						<div className="flex items-center gap-3">
-							{hasImage ? (
-								<Avatar className="w-12 h-12 rounded-lg">
-									<AvatarImage
-										src={(contact as any).img}
-										alt={fullName || contact.email}
-										className="rounded-lg"
-									/>
-								</Avatar>
-							) : (
-								<Avatar className="w-12 h-12 rounded-lg">
-									<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
-										{initials}
-									</AvatarFallback>
-								</Avatar>
-							)}
-							<div className="flex flex-col">
-								{fullName && (
-									<div className="font-semibold capitalize text-base text-[#09090B]">
-										{fullName}
-									</div>
-								)}
-								<div className="text-base text-gray-500">
-									{campaignType === CAMPAIGN_CHANNEL.EMAIL ? contact.email : contact.phone}
+				const content = (
+					<div className="flex items-center gap-3">
+						{hasImage ? (
+							<Avatar className="w-12 h-12 rounded-lg">
+								<AvatarImage
+									src={(contact as any)?.img}
+									alt={displayName}
+									className="rounded-lg"
+								/>
+							</Avatar>
+						) : (
+							<Avatar className="w-12 h-12 rounded-lg">
+								<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
+									{initials || '?'}
+								</AvatarFallback>
+							</Avatar>
+						)}
+						<div className="flex flex-col">
+							{displayName && (
+								<div className="font-semibold capitalize text-base text-[#09090B]">
+									{displayName}
 								</div>
-							</div>
+							)}
+							<div className="text-base text-gray-500">{primaryValue}</div>
 						</div>
-					</NavLink>
+					</div>
 				);
+
+				if (contact?.id) {
+					return <NavLink to={`/contacts/${contact.id}`}>{content}</NavLink>;
+				}
+
+				return content;
 			},
 		},
 		{

@@ -91,12 +91,12 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 										<p className="font-semibold text-secondary-foreground text-base">
 											{campaignType.label}
 										</p>
-										{campaignType.isPremium && (
+										{/* {campaignType.isPremium && (
 											<span className="bg-orange-50 text-[#CB5301] text-base px-2 py-0.5 rounded-md flex items-center gap-1 absolute right-0 top-0">
 												<PremiumIcon />
 												{__('Premium', 'quillcrm')}
 											</span>
-										)}
+										)} */}
 									</div>
 									<p className="text-muted-foreground text-sm">
 										{campaignType.description}

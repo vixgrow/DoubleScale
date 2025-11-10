@@ -40,3 +40,5 @@ export { default as Editor } from './editor';
 export { NoData } from './no-data';
 export { MessageStatsCard } from './message-stats-card';
 export { default as MessageDetailsDialog } from './message-details-dialog';
+export { default as DashboardSmallCard } from './dashboard-small-card';
+export { default as DashboardContentCard } from './dashboard-content-card';

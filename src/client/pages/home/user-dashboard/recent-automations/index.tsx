@@ -1,0 +1,103 @@
+/**
+ * wordpress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+/**
+ * external dependencies
+ */
+import { isEmpty } from 'lodash';
+/**
+ * internal dependencies
+ */
+import { DashboardContentCard, ThreeDotsIcon } from '@quillcrm/components';
+import { getToLink, useNavigate } from '@quillcrm/navigation';
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@quillcrm/components/ui/table';
+import { Button } from '@/components/ui/button';
+import type { DashboardData } from '@quillcrm/client';
+import { EmptyState } from '../../no-data';
+
+interface RecentAutomationsTableProps {
+	automations: DashboardData['top_automations'];
+}
+
+export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
+	automations,
+}) => {
+	const navigate = useNavigate();
+
+	return (
+		<DashboardContentCard
+			title={__('Recent Automations', 'quillcrm')}
+			cardClassName="w-3/5"
+			viewAllLink={true}
+			viewAllLinkUrl="automations"
+		>
+			{isEmpty(automations) ? (
+				<EmptyState />
+			) : (
+				<div>
+					<Table className="border">
+						<TableHeader className="bg-[#DEE1E666]">
+							<TableRow>
+								<TableHead>{__('ID', 'quillcrm')}</TableHead>
+								<TableHead>{__('Title', 'quillcrm')}</TableHead>
+								<TableHead>
+									{__('Trigger', 'quillcrm')}
+								</TableHead>
+								<TableHead>
+									{__('Status', 'quillcrm')}
+								</TableHead>
+								<TableHead>
+									{__('Action', 'quillcrm')}
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody className="bg-white">
+							{automations.map((automation, index) => (
+								<TableRow key={automation.id}>
+									<TableCell>{index + 1}</TableCell>
+									<TableCell>{automation.name}</TableCell>
+									<TableCell>{automation.trigger}</TableCell>
+									<TableCell>
+										<span
+											className={`px-3 py-1 border rounded text-sm font-normal ${
+												automation.status === 'active'
+													? 'bg-[#EFFFF5] text-[#16A34A] border-[#16A34A]'
+													: 'bg-[#F8F8F8] text-gray-500 border-gray-500'
+											}`}
+										>
+											{automation.status === 'active'
+												? 'Published'
+												: 'Draft'}
+										</span>
+									</TableCell>
+									<TableCell>
+										<Button
+											onClick={() =>
+												navigate(
+													getToLink(
+														`automations/${automation.id}`
+													)
+												)
+											}
+											className="h-6 w-6 bg-accent text-[#1E2125] rounded-lg p-0 hover:bg-accent focus-visible:border-none focus-visible:outline-none focus-visible:box-shadow-none focus-visible:ring-0"
+										>
+											<ThreeDotsIcon />
+										</Button>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</div>
+			)}
+		</DashboardContentCard>
+	);
+};

@@ -14,7 +14,11 @@ import { createContext, useContext, useState, useEffect } from 'react';
  */
 import type { Filter as FilterType, ContactsResponse } from '@quillcrm/client';
 import type { RuleItem } from '@/components/rules-builder';
-import ConfigAPI from '@quillcrm/config';
+import {
+	getFilteredRulesGroups,
+	getInitialRule,
+	mapRulesToFilters,
+} from '@/utils';
 
 interface ExportContextType {
 	// State
@@ -72,47 +76,10 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	// Rules builder setup
-	const allRulesGroups = ConfigAPI.getAutomationRules();
-	// Filter out disabled groups
-	const rulesGroups = Object.keys(allRulesGroups).reduce((acc, key) => {
-		if (!allRulesGroups[key].is_disabled) {
-			acc[key] = allRulesGroups[key];
-		}
-		return acc;
-	}, {} as any);
-
-	const firstGroup = Object.keys(rulesGroups)[0];
-	const firstRule = firstGroup
-		? Object.keys(rulesGroups[firstGroup].rules)[0]
-		: '';
-	const getInitialRule = (): RuleItem => ({
-		rule: firstRule,
-		operator: 'is',
-		value: '',
-		selectedGroup: firstGroup,
-	});
+	const rulesGroups = getFilteredRulesGroups();
 	const [rules, setRules] = useState<Array<Array<RuleItem>>>([
-		[getInitialRule()],
+		[getInitialRule(rulesGroups)],
 	]);
-
-	// Convert RulesBuilder rules format to backend filters format
-	// This is needed because fetchContacts and handleExport expect FilterType[]
-	const mapRulesToFilters = (
-		inputRules: Array<Array<RuleItem>>
-	): FilterType[] => {
-		const flat = (inputRules || []).reduce(
-			(acc, group) => acc.concat(group || []),
-			[] as RuleItem[]
-		);
-		return flat
-			.filter((r) => r && r.rule)
-			.map((r) => ({
-				group: r.selectedGroup || '',
-				filter: r.rule, // backend expects filter slug
-				operator: r.operator || 'is',
-				value: r.value ?? '',
-			}));
-	};
 
 	// Sync rules to filters when rules change
 	// This ensures fetchContacts and handleExport always have the latest filters
@@ -203,7 +170,7 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 		setLoading(false);
 		setSelectedFields(['first_name', 'last_name', 'email']);
 		setFilters([]);
-		setRules([[getInitialRule()]]);
+		setRules([[getInitialRule(rulesGroups)]]);
 		setTotalContact(0);
 		setTotal(0);
 		setIsFiltering(false);

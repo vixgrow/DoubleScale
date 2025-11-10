@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import type { Settings } from '@quillcrm/client';
-import { Field } from '@quillcrm/components';
+import { AlertIcon, Field } from '@quillcrm/components';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 
@@ -39,14 +39,16 @@ const SMSSettings: React.FC<SMSSettingsProps> = ({ settings, onChange }) => {
 
 	return (
 		<div className="sms-settings qcrm-fields">
-			<div className="text-[#09090B] font-semibold text-2xl mb-6">
+			<div className="text-[#09090B] font-semibold text-2xl">
 				{__('SMS', 'quillcrm')}
 			</div>
 
 			{/* Info Banner */}
-			<Alert className="mb-6 bg-blue-50 border-blue-200">
-				<Info className="h-4 w-4 text-blue-600" />
-				<AlertDescription className="text-sm text-blue-900">
+			<Alert className="border-secondary bg-secondary/10 text-secondary flex items-center gap-2">
+			<div className='text-secondary'>
+				<AlertIcon width={16} height={16} />
+				</div>
+				<AlertDescription className="text-base text-secondary">
 					{__(
 						'Configure SMS sending rate limits to control message throughput and ensure reliable delivery.',
 						'quillcrm'

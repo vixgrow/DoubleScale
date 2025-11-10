@@ -41,7 +41,7 @@ export const useImportActions = () => {
 		},
 	});
 
-	// Reset sourceData when source changes for integration importers
+	// Reset sourceData and currentStep when source changes for integration importers
 	useEffect(() => {
 		if (
 			importer?.is_integration &&
@@ -58,6 +58,7 @@ export const useImportActions = () => {
 				state.source
 			);
 			dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+			dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 		}
 	}, [state.source, importer?.is_integration]);
 
@@ -267,6 +268,7 @@ export const useImportActions = () => {
 				}
 				// Always reset sourceData for Pipedrive credential errors to go back to step 1
 				dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+				dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 			} else if (state.source === 'gohighlevel') {
 				if (
 					error.message.includes('OAuth connection has expired') ||
@@ -295,6 +297,7 @@ export const useImportActions = () => {
 				}
 				// Always reset sourceData for GoHighLevel OAuth errors to go back to step 1
 				dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+				dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 			}
 
 			createNotice({
@@ -302,8 +305,14 @@ export const useImportActions = () => {
 				message: errorMessage,
 			});
 
-			// Reset source data on error
-			dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+			// Reset source data and step on error (only if not already reset above)
+			if (state.source !== 'pipedrive' && state.source !== 'gohighlevel') {
+				dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+				// For integration importers, reset to step 1 when sourceData is cleared
+				if (importer?.is_integration) {
+					dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
+				}
+			}
 		} finally {
 			dispatch({ type: 'SET_IS_FETCHING', payload: false });
 		}
@@ -464,6 +473,7 @@ export const useImportActions = () => {
 				);
 				// Reset sourceData to force user back to credentials step
 				dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+				dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 			} else if (
 				error.message?.includes('no persons') ||
 				error.message?.includes('no contacts')
@@ -508,6 +518,7 @@ export const useImportActions = () => {
 			}
 			// For GoHighLevel, always reset sourceData on ANY import error to go back to step 1
 			dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+			dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 		}
 
 		createNotice({
@@ -548,12 +559,6 @@ export const useImportActions = () => {
 		};
 	}, []);
 
-	useEffect(() => {
-		// Only fetch source data if we have a valid source and we're not in completion state
-		if (state.source && !state.showingCompletion) {
-			getSourceData();
-		}
-	}, [state.source]);
 
 	return {
 		validateCredentials,

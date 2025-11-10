@@ -13,7 +13,13 @@ import type { Campaign as CampaignType } from '@quillcrm/client';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { Button } from '@/components/ui/button';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
-import { NoData, ContactTotalEmailsIcon, EditIcon, FormattedDateCell, ContactSMSIcon } from '@quillcrm/components';
+import {
+	NoData,
+	ContactTotalEmailsIcon,
+	EditIcon,
+	FormattedDateCell,
+	ContactSMSIcon,
+} from '@quillcrm/components';
 
 const CampaignDetails: React.FC = () => {
 	const campaign = useSelect(
@@ -38,10 +44,11 @@ const CampaignDetails: React.FC = () => {
 			for (const template of campaign.settings.templates) {
 				if (template.id) {
 					try {
-						// Try to render via API endpoint
+						// Try to render via API endpoint (no contact for preview)
 						const response: any = await apiFetch({
 							path: `/qc/v1/templates/${template.id}/render`,
 							method: 'POST',
+							data: {},
 						});
 
 						if (response?.html) {
@@ -112,15 +119,15 @@ const CampaignDetails: React.FC = () => {
 					)}
 
 				{campaign.type === CAMPAIGN_CHANNEL.SMS && (
-						<div className="space-y-1">
-							<span className="text-base text-gray-500">
-								{__('From Name', 'quillcrm')}
-							</span>
-							<p className="text-base font-semibold text-[#09090B]">
-								{campaign.settings.from_name || '-'}
-							</p>
-						</div>
-					)}
+					<div className="space-y-1">
+						<span className="text-base text-gray-500">
+							{__('From Name', 'quillcrm')}
+						</span>
+						<p className="text-base font-semibold text-[#09090B]">
+							{campaign.settings.from_name || '-'}
+						</p>
+					</div>
+				)}
 
 				{campaign.execute_at && (
 					<div className="space-y-1">
@@ -202,9 +209,14 @@ const CampaignDetails: React.FC = () => {
 				) : (
 					<NoData
 						icon={
-							campaign.type === CAMPAIGN_CHANNEL.EMAIL
-								? <ContactTotalEmailsIcon width={120} height={120} />
-								: <ContactSMSIcon width={120} height={120} />
+							campaign.type === CAMPAIGN_CHANNEL.EMAIL ? (
+								<ContactTotalEmailsIcon
+									width={120}
+									height={120}
+								/>
+							) : (
+								<ContactSMSIcon width={120} height={120} />
+							)
 						}
 						title={
 							campaign.type === CAMPAIGN_CHANNEL.EMAIL

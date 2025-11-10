@@ -19,10 +19,7 @@ import {
 } from '@quillcrm/client';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
 import { DataTable } from '@/components/ui/data-table';
-import {
-	emailCampaignColumns,
-	smsCampaignColumns,
-} from './columns';
+import { emailCampaignColumns, smsCampaignColumns } from './columns';
 import {
 	PageHeader,
 	PlusIcon,
@@ -47,7 +44,7 @@ const Campaigns: React.FC = () => {
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-	const [bulkAction, setBulkAction] = useState<string>('');
+	// const [bulkAction, setBulkAction] = useState<string>('');
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
@@ -79,8 +76,6 @@ const Campaigns: React.FC = () => {
 	useEffect(() => {
 		fetchCampaigns();
 	}, [page, perPage, dateRange, keywords, activeTab, campaignFilters]);
-
-	console.log(campaigns);
 
 	// Reset page when changing tabs
 	useEffect(() => {
@@ -114,25 +109,37 @@ const Campaigns: React.FC = () => {
 			}
 
 			// Only apply type filter for email campaigns
-			if (activeTab === 'email' && campaignFilters.type && campaignFilters.type !== 'all') {
+			if (
+				activeTab === 'email' &&
+				campaignFilters.type &&
+				campaignFilters.type !== 'all'
+			) {
 				// Map type to ab_test setting
 				queryParams.campaign_type = campaignFilters.type;
 			}
 
 			if (campaignFilters.createDate.from) {
-				queryParams.created_from = formatDateForAPI(campaignFilters.createDate.from);
+				queryParams.created_from = formatDateForAPI(
+					campaignFilters.createDate.from
+				);
 			}
 
 			if (campaignFilters.createDate.to) {
-				queryParams.created_to = formatDateForAPI(campaignFilters.createDate.to);
+				queryParams.created_to = formatDateForAPI(
+					campaignFilters.createDate.to
+				);
 			}
 
 			if (campaignFilters.updatedAt.from) {
-				queryParams.updated_from = formatDateForAPI(campaignFilters.updatedAt.from);
+				queryParams.updated_from = formatDateForAPI(
+					campaignFilters.updatedAt.from
+				);
 			}
 
 			if (campaignFilters.updatedAt.to) {
-				queryParams.updated_to = formatDateForAPI(campaignFilters.updatedAt.to);
+				queryParams.updated_to = formatDateForAPI(
+					campaignFilters.updatedAt.to
+				);
 			}
 
 			const response = (await apiFetch({
@@ -151,7 +158,9 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
-	const addCampaign = async (name: string): Promise<{ success: boolean; error?: string }> => {
+	const addCampaign = async (
+		name: string
+	): Promise<{ success: boolean; error?: string }> => {
 		if (!name) {
 			return {
 				success: false,
@@ -281,6 +290,16 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
+	const handleBulkAction = async (action: string) => {
+		switch (action) {
+			case 'delete':
+				deleteSelected();
+				break;
+			default:
+				break;
+		}
+	};
+
 	const columns = getColumns();
 
 	// Define tabs list with icons
@@ -321,12 +340,13 @@ const Campaigns: React.FC = () => {
 								selectedKeys: selectedRowKeys,
 								onSelectionChange: setSelectedRowKeys,
 							},
+							// TODO: investigate why setBulkAction is not working
 							bulkActions: {
 								enabled: true,
-								currentAction: bulkAction,
-								onActionChange: (value) => setBulkAction(value),
-								onExecuteAction: () => deleteSelected(),
-								activeTab: 'all',
+								currentAction: '',
+								onActionChange: () => {},
+								onExecuteAction: handleBulkAction,
+								activeTab: activeTab,
 							},
 							dateRange: {
 								enabled: true,

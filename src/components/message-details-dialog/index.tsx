@@ -73,10 +73,16 @@ const MessageDetailsDialog: React.FC<MessageDetailsDialogProps> = ({
 
 			if (templateId) {
 				try {
-					// Try to render via API endpoint
+					// Try to render via API endpoint with contact for merge tags
+					const contactId = campaignEmail?.contact_id || campaignEmail?.contact?.id;
 					const response: any = await apiFetch({
 						path: `/qc/v1/templates/${templateId}/render`,
 						method: 'POST',
+						data: contactId
+							? {
+									contact_id: contactId,
+								}
+							: {},
 					});
 
 					if (response?.html) {

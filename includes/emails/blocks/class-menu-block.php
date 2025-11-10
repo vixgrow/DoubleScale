@@ -85,11 +85,11 @@ class Menu_Block extends Email_Block {
 	/**
 	 * Render block
 	 *
-	 * @param array $props Block properties
-	 * @param array $merge_tags Merge tags
+	 * @param array                                    $props Block properties
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	public function render( array $props, array $merge_tags = array() ): string {
+	public function render( array $props, $contact = null ): string {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
@@ -114,7 +114,7 @@ class Menu_Block extends Email_Block {
 
 		$menu_items_html = '';
 		foreach ( $props['menuItems'] as $index => $item ) {
-			$menu_items_html .= $this->render_menu_item( $item, $index, $merge_tags );
+			$menu_items_html .= $this->render_menu_item( $item, $index, $contact );
 		}
 
 		// Use table structure for better email client compatibility
@@ -130,15 +130,15 @@ class Menu_Block extends Email_Block {
 	/**
 	 * Render individual menu item
 	 *
-	 * @param array $item Menu item properties
-	 * @param int   $index Item index
-	 * @param array $merge_tags Merge tags
+	 * @param array                                    $item Menu item properties
+	 * @param int                                      $index Item index
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	private function render_menu_item( array $item, int $index, array $merge_tags ): string {
+	private function render_menu_item( array $item, int $index, $contact ): string {
 		// Process content for merge tags
-		$name = $this->process_merge_tags( $item['name'], $merge_tags );
-		$link = $this->process_merge_tags( $item['link'], $merge_tags );
+		$name = $this->process_merge_tags( $item['name'], $contact );
+		$link = $this->process_merge_tags( $item['link'], $contact );
 
 		// Handle text decoration (matching frontend)
 		$text_decoration = array();

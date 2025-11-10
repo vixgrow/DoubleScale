@@ -9,24 +9,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import {
-	Chart as ChartJS,
-	ArcElement,
-	PolarAreaController,
-	RadialLinearScale,
-	Tooltip,
-	Legend,
-	Title,
-} from 'chart.js';
-
-ChartJS.register(
-	ArcElement,
-	PolarAreaController,
-	RadialLinearScale,
-	Tooltip,
-	Legend,
-	Title
-);
+import '../../../../lib/chart-setup';
 
 /**
  * Internal dependencies

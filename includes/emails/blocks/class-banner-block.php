@@ -64,18 +64,18 @@ class Banner_Block extends Email_Block {
 	 * Render block
 	 *
 	 * @param array $props Block properties
-	 * @param array $merge_tags Merge tags
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	public function render( array $props, array $merge_tags = array() ): string {
+	public function render( array $props, $contact = null ): string {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
 		// Process content, src, alt, and link for merge tags
-		$content = $this->process_merge_tags( $props['content'], $merge_tags );
-		$src     = ! empty( $props['src'] ) ? $this->process_merge_tags( $props['src'], $merge_tags ) : '';
-		$alt     = ! empty( $props['alt'] ) ? $this->process_merge_tags( $props['alt'], $merge_tags ) : '';
-		$link    = ! empty( $props['link'] ) ? $this->process_merge_tags( $props['link'], $merge_tags ) : '';
+		$content = $this->process_merge_tags( $props['content'], $contact );
+		$src     = ! empty( $props['src'] ) ? $this->process_merge_tags( $props['src'], $contact ) : '';
+		$alt     = ! empty( $props['alt'] ) ? $this->process_merge_tags( $props['alt'], $contact ) : '';
+		$link    = ! empty( $props['link'] ) ? $this->process_merge_tags( $props['link'], $contact ) : '';
 
 		// Wrapper style (matches frontend wrapperStyle)
 		$wrapper_style = $this->build_style_string(

@@ -18,25 +18,8 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { __ } from '@wordpress/i18n';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
 import ReportFilters from '../../../../components/reports/ReportFilters';
+import '../../../lib/chart-setup';
 import { Chart } from 'react-chartjs-2';
-import {
-	Chart as ChartJS,
-	CategoryScale,
-	LinearScale,
-	BarElement,
-	Title,
-	Tooltip as ChartTooltip,
-	Legend,
-} from 'chart.js';
-
-ChartJS.register(
-	CategoryScale,
-	LinearScale,
-	BarElement,
-	Title,
-	ChartTooltip,
-	Legend
-);
 
 interface DealData {
 	date: string;

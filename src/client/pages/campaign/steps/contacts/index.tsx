@@ -54,10 +54,18 @@ const Contacts: React.FC = () => {
 	const [inlineError, setInlineError] = useState<string | null>(null);
 
 	// Rules builder state (shared with ConditionsModal component)
-	const [rulesGroups] = useState(ConfigAPI.getAutomationRules());
-	const firstGroup = Object.keys(rulesGroups)[0];
+	const allRulesGroups = ConfigAPI.getAutomationRules();
+	// Filter out disabled groups
+	const rulesGroups = Object.keys(allRulesGroups).reduce((acc, key) => {
+		if (!allRulesGroups[key].is_disabled) {
+			acc[key] = allRulesGroups[key];
+		}
+		return acc;
+	}, {} as any);
+	const [filteredRulesGroups] = useState(rulesGroups);
+	const firstGroup = Object.keys(filteredRulesGroups)[0];
 	const firstRule = firstGroup
-		? Object.keys(rulesGroups[firstGroup].rules)[0]
+		? Object.keys(filteredRulesGroups[firstGroup].rules)[0]
 		: '';
 	const getInitialRule = () => ({
 		rule: firstRule,
@@ -330,7 +338,7 @@ const Contacts: React.FC = () => {
 									<RulesBuilder
 										rules={rules}
 										onChange={setRules}
-										rulesGroups={rulesGroups}
+										rulesGroups={filteredRulesGroups}
 									/>
 									<div className="flex gap-3 mt-4">
 										<Button

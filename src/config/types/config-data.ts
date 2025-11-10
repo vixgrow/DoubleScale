@@ -99,6 +99,7 @@ export type MergeTagsGroup = {
 	name: string;
 	mergeTags: MergeTags;
 	triggers?: string[];
+	is_disabled?: boolean;
 };
 
 export type MergeTags = {
@@ -119,6 +120,7 @@ export type RulesGroup = {
 	rules: Rules;
 	key: string;
 	triggers?: string[];
+	is_disabled?: boolean;
 };
 
 export type Rules = {

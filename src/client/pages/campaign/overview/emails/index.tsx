@@ -231,24 +231,21 @@ const EmailsTab: React.FC = () => {
 				message: __('Resending email...', 'quillcrm'),
 			});
 
-			// TODO: Implement single email resend API endpoint when available
-			// For now, we'll trigger the same resend all process
-			// In the future, this should be:
-			// await apiFetch({
-			//   path: `/qc/v1/campaigns/${id}/messages/${emailToRetry.id}/resend`,
-			//   method: 'POST',
-			// });
-
-			// Temporary: Use the same approach as retry all
-			await handleRetryAllFailed();
+			// Resend single message via API endpoint
+			await apiFetch({
+				path: `/qc/v1/campaigns/${id}/messages/${emailToRetry.id}/resend`,
+				method: 'POST',
+			});
 
 			setNotice({
 				type: 'success',
-				message: __('Email resent successfully!', 'quillcrm'),
+				message: __('Email queued for resending!', 'quillcrm'),
 			});
 
-			// Refresh the list
-			await fetchCampaignEmails();
+			// Refresh the list after a short delay
+			setTimeout(() => {
+				fetchCampaignEmails();
+			}, 2000);
 		} catch (error: any) {
 			setNotice({
 				type: 'error',

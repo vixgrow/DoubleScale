@@ -24,6 +24,7 @@ final class Actions_Manager {
 
 
 
+
 	/**
 	 * Registed actions
 	 *
@@ -150,16 +151,17 @@ final class Actions_Manager {
 				 ),
 			 ),
 			 'woocommerce' => array(
-				 'label'       => __( 'WooCommerce', 'quillcrm' ),
-				 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
-				 'groups'      => array(
+				 'label'  => __( 'WooCommerce', 'quillcrm' ),
+				 'groups' => array(
 					 'order'  => array(
-						 'label'   => __( 'Order', 'quillcrm' ),
-						 'actions' => array(),
+						 'label'       => __( 'Order', 'quillcrm' ),
+						 'actions'     => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 					 ),
 					 'coupon' => array(
-						 'label'   => __( 'Coupon', 'quillcrm' ),
-						 'actions' => array(),
+						 'label'       => __( 'Coupon', 'quillcrm' ),
+						 'actions'     => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 					 ),
 				 ),
 			 ),

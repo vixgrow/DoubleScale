@@ -3,6 +3,9 @@
 
 namespace QuillCRM\Emails\Blocks;
 
+use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
+
 /**
  * Interface for all email blocks
  */
@@ -24,11 +27,11 @@ interface Email_Block_Interface {
 	/**
 	 * Render block for email
 	 *
-	 * @param array $props Block properties
-	 * @param array $merge_tags Merge tags for content
+	 * @param array                                    $props Block properties
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	public function render( array $props, array $merge_tags = array()): string;
+	public function render( array $props, $contact = null ): string;
 
 	/**
 	 * Get default properties for the block

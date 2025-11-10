@@ -14,12 +14,14 @@ import {
 } from '@/components/ui/card';
 import { useExportContext } from '../contexts';
 import ExportProgress from '../export-progress';
-import ExportFilters from '../export-filters';
 import ExportFields from '../export-fields';
 import ExportActions from '../export-actions';
+import RulesBuilder from '@/components/rules-builder';
+import { LoadingSpinner } from '@quillcrm/components';
 
 const ExportContent: React.FC = () => {
-	const { loading, isFiltering, totalContact } = useExportContext();
+	const { loading, isFiltering, totalContact, rules, setRules, rulesGroups } =
+		useExportContext();
 
 	return (
 		<Card className="my-5 px-4 shadow-none rounded-2xl">
@@ -49,7 +51,32 @@ const ExportContent: React.FC = () => {
 						<Card className="shadow-none rounded-2xl border-2 border-dashed">
 							<CardContent className="px-20 py-4">
 								<div className="flex flex-col gap-[10px]">
-									<ExportFilters />
+									<div className="flex items-center justify-between">
+										<div className="font-bold text-[#09090B] text-3xl">
+											{__(
+												'Select Exporting Filters',
+												'quillcrm'
+											)}
+										</div>
+										<div className="qcrm-contacts-total flex gap-[10px] text-[#09090B] text-xl font-medium">
+											{__(
+												'Total Contacts based on filters',
+												'quillcrm'
+											)}
+											:{' '}
+											{!isFiltering && (
+												<div>{totalContact}</div>
+											)}
+											{isFiltering && (
+												<LoadingSpinner size={24} />
+											)}
+										</div>
+									</div>
+									<RulesBuilder
+										rules={rules}
+										onChange={setRules}
+										rulesGroups={rulesGroups}
+									/>
 									<div className="font-bold text-[#09090B] text-3xl">
 										{__(
 											'Select Exporting Fields',

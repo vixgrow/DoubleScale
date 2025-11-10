@@ -13,6 +13,8 @@ import { createContext, useContext, useState, useEffect } from 'react';
  * internal dependencies
  */
 import type { Filter as FilterType, ContactsResponse } from '@quillcrm/client';
+import type { RuleItem } from '@/components/rules-builder';
+import ConfigAPI from '@quillcrm/config';
 
 interface ExportContextType {
 	// State
@@ -21,12 +23,15 @@ interface ExportContextType {
 	total: number;
 	loading: boolean;
 	filters: FilterType[];
+	rules: Array<Array<RuleItem>>;
+	rulesGroups: any;
 	isFiltering: boolean;
 	totalContact: number;
 
 	// Actions
 	setSelectedFields: (fields: string[]) => void;
 	setFilters: (filters: FilterType[]) => void;
+	setRules: (rules: Array<Array<RuleItem>>) => void;
 	handleExport: () => Promise<void>;
 	handleClose: () => void;
 	toggleField: (field: string) => void;
@@ -65,6 +70,60 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 	const [isFiltering, setIsFiltering] = useState(false);
 	const [totalContact, setTotalContact] = useState(0);
 	const { createNotice } = useDispatch('quillcrm/core');
+
+	// Rules builder setup
+	const allRulesGroups = ConfigAPI.getAutomationRules();
+	// Filter out disabled groups
+	const rulesGroups = Object.keys(allRulesGroups).reduce((acc, key) => {
+		if (!allRulesGroups[key].is_disabled) {
+			acc[key] = allRulesGroups[key];
+		}
+		return acc;
+	}, {} as any);
+
+	const firstGroup = Object.keys(rulesGroups)[0];
+	const firstRule = firstGroup
+		? Object.keys(rulesGroups[firstGroup].rules)[0]
+		: '';
+	const getInitialRule = (): RuleItem => ({
+		rule: firstRule,
+		operator: 'is',
+		value: '',
+		selectedGroup: firstGroup,
+	});
+	const [rules, setRules] = useState<Array<Array<RuleItem>>>([
+		[getInitialRule()],
+	]);
+
+	// Convert RulesBuilder rules format to backend filters format
+	// This is needed because fetchContacts and handleExport expect FilterType[]
+	const mapRulesToFilters = (
+		inputRules: Array<Array<RuleItem>>
+	): FilterType[] => {
+		const flat = (inputRules || []).reduce(
+			(acc, group) => acc.concat(group || []),
+			[] as RuleItem[]
+		);
+		return flat
+			.filter((r) => r && r.rule)
+			.map((r) => ({
+				group: r.selectedGroup || '',
+				filter: r.rule, // backend expects filter slug
+				operator: r.operator || 'is',
+				value: r.value ?? '',
+			}));
+	};
+
+	// Sync rules to filters when rules change
+	// This ensures fetchContacts and handleExport always have the latest filters
+	useEffect(() => {
+		const newFilters = mapRulesToFilters(rules);
+		// Only update if filters actually changed to avoid infinite loops
+		if (JSON.stringify(newFilters) !== JSON.stringify(filters)) {
+			setFilters(newFilters);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [rules]);
 
 	const handleExport = async (currentOffset = 0, file = '') => {
 		if (selectedFields.length === 0 || loading) {
@@ -144,6 +203,7 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 		setLoading(false);
 		setSelectedFields(['first_name', 'last_name', 'email']);
 		setFilters([]);
+		setRules([[getInitialRule()]]);
 		setTotalContact(0);
 		setTotal(0);
 		setIsFiltering(false);
@@ -194,10 +254,13 @@ export const ExportProvider: React.FC<ExportProviderProps> = ({
 		total,
 		loading,
 		filters,
+		rules,
+		rulesGroups,
 		isFiltering,
 		totalContact,
 		setSelectedFields,
 		setFilters,
+		setRules,
 		handleExport,
 		handleClose,
 		toggleField,

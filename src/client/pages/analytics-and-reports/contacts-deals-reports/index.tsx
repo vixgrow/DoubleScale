@@ -3,16 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent } from '../../../../components/ui/card';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { __ } from '@wordpress/i18n';
-import {
-	UserOutlined,
-	CheckCircleOutlined,
-	PlusCircleOutlined,
-	TrophyOutlined,
-	ClockCircleOutlined,
-	CaretUpOutlined,
-	CaretDownOutlined,
-	DollarOutlined,
-} from '@ant-design/icons';
+
 import { useReportFilters } from '../../../../hooks/useReportFilters';
 import { cn } from '../../../../lib/utils';
 import ReportFilters from '@quillcrm/components/reports/ReportFilters';

@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/pagination';
 
 import { useEffect, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import apiFetch from '@wordpress/api-fetch';
 import { Skeleton } from 'antd';
 import { convertDate } from '@quillcrm/utils';

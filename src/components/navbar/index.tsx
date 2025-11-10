@@ -7,7 +7,7 @@ import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useMemo } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
@@ -15,10 +15,6 @@ import './style.scss';
 import {
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
-	SidebarGroup,
-	SidebarGroupContent,
-	SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
@@ -41,33 +37,21 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const [selectedKey, setSelectedKey] = useState<string>(defaultSelectedPath);
 	const { hasRequiredCapability } = useCapabilities();
 
-	// Memoize the filtered items to avoid recalculation on every render
-	const { dashboardItem, crmItems } = useMemo(() => {
+	const navigationItems = useMemo(() => {
 		const pages = getAdminPages();
-		const allItems: NavigationItem[] = [];
-
-		// Convert pages object to array and filter out hidden items, items without access, and root path
-		Object.entries(pages).forEach(([_, item]) => {
-			if (
-				!item.hidden &&
-				hasRequiredCapability(item.requiredCapability)
-			) {
-				allItems.push({
-					path: item.path,
-					label: item.label,
-					icon: item.icon,
-				});
-			}
-		});
-
-		// Separate dashboard item (first item) from CRM items
-		const [first, ...rest] = allItems;
-
-		return {
-			dashboardItem: first || null,
-			crmItems: rest,
-		};
-	}, []);
+		return Object.values(pages)
+			.filter(
+				(item) =>
+					!item.hidden &&
+					item.path &&
+					hasRequiredCapability(item.requiredCapability)
+			)
+			.map<NavigationItem>((item) => ({
+				path: item.path,
+				label: item.label,
+				icon: item.icon,
+			}));
+	}, [hasRequiredCapability]);
 
 	const handleNavigation = (path: string) => {
 		setSelectedKey(path);
@@ -78,92 +62,57 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		<SidebarMenuItem
 			key={item.path}
 			onClick={() => handleNavigation(item.path)}
-			className="group-data-[collapsible=icon]:pl-0 pl-3 menu-item"
+			className="qcrm-navbar__item"
 		>
 			<SidebarMenuButton
-				size="lg"
+				size="xl"
 				isActive={selectedKey === item.path}
-				className="group-data-[collapsible=icon]:justify-center"
+				className="qcrm-navbar__link"
 			>
-				<div className="cursor-pointer flex gap-2 items-center">
-					<span
-						className={
-							selectedKey === item.path
-								? 'text-primary-foreground'
-								: 'text-primary icon'
-						}
-					>
-						{item.icon}
-					</span>
-					<span className="group-data-[collapsible=icon]:hidden">
-						{item.label}
-					</span>
+				<div className="qcrm-navbar__link-inner">
+					<span className="qcrm-navbar__icon">{item.icon}</span>
+					<span className="qcrm-navbar__label">{item.label}</span>
 				</div>
 			</SidebarMenuButton>
 		</SidebarMenuItem>
 	);
 
+	useEffect(() => {
+		if (typeof window === 'undefined') {
+			return;
+		}
+
+		const currentHash = window.location.hash.replace(/^#\//, '');
+		if (!currentHash) {
+			return;
+		}
+
+		const matched = navigationItems.find((item) =>
+			currentHash.startsWith(item.path)
+		);
+
+		if (matched) {
+			setSelectedKey(matched.path);
+		}
+	}, [navigationItems]);
+
 	return (
-		<Sidebar collapsible="icon">
-			<SidebarHeader>
-				<SidebarMenu>
-					<SidebarMenuItem
-						key="logo"
-						className="border-b hover:bg-transparent cursor-default"
-						style={{
-							borderWidth: '1px',
-							borderStyle: 'solid',
-							borderImageSource:
-								'linear-gradient(90deg, hsl(var(--border) / 0) 0%, hsl(var(--border)) 49.52%, hsl(var(--border) / 0.15625) 99.04%)',
-							borderImageSlice: 1,
-						}}
-					>
-						<SidebarMenuButton
-							size="lg"
-							className="hover:bg-transparent cursor-default"
-						>
-							<div className="flex gap-2 items-center">
-								<LogoIcon width={30} height={40} />
-								<span className="group-data-[collapsible=icon]:hidden text-sidebar-header font-extrabold text-2xl">
-									{__('Quill CRM', 'quillcrm')}
-								</span>
-							</div>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-				</SidebarMenu>
-			</SidebarHeader>
-
-			<SidebarContent>
-				{/* User Dashboard Section */}
-				{dashboardItem && (
-					<SidebarGroup>
-						<SidebarGroupLabel>
-							{__('User Dashboard', 'quillcrm')}
-						</SidebarGroupLabel>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								{renderMenuItem(dashboardItem)}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
-				)}
-
-				{/* CRM Controls Section */}
-				{crmItems.length > 0 && (
-					<SidebarGroup>
-						<SidebarGroupLabel>
-							{__('CRM Controls', 'quillcrm')}
-						</SidebarGroupLabel>
-						<SidebarGroupContent>
-							<SidebarMenu>
-								{crmItems.map(renderMenuItem)}
-							</SidebarMenu>
-						</SidebarGroupContent>
-					</SidebarGroup>
-				)}
-			</SidebarContent>
-
-			<SidebarFooter />
+		<Sidebar collapsible="icon" className="qcrm-navbar">
+			<div className="qcrm-navbar__surface">
+				<SidebarHeader className="qcrm-navbar__header">
+					<div className="qcrm-navbar__brand">
+						<LogoIcon width={30} height={40} />
+						<span className="qcrm-navbar__brand-text">
+							{__('Quill CRM', 'quillcrm')}
+						</span>
+					</div>
+				</SidebarHeader>
+				<SidebarContent className="qcrm-navbar__content">
+					<SidebarMenu className="qcrm-navbar__menu">
+						{navigationItems.map(renderMenuItem)}
+					</SidebarMenu>
+				</SidebarContent>
+			</div>
 		</Sidebar>
 	);
 };

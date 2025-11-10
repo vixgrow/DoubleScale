@@ -2,6 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+	overflow: hidden;
+}
+body.js.is-fullscreen-mode {
+	// @include break-medium {
+	// Reset the html.wp-topbar padding.
+	// Because this uses negative margins, we have to compensate for the height.
+	margin-top: -32px;
+	height: calc(100% + 32px);
+	overflow: auto;
+	#adminmenumain,
+	#wpadminbar {
+		display: none;
+	}
+
+	.wrap {
+		margin: 0;
+	}
+
+	#wpcontent,
+	#wpfooter {
+		margin-left: 0;
+		padding-left: 0;
+	}
+
+	div#wpbody-content {
+		padding-bottom: 0;
+	}
+	#wpfooter {
+		display: none;
+	}
+}
+
 #screen-meta-links {
 	display: none !important;
 }
@@ -9,6 +42,11 @@
 .qcrm-layout {
 	font-size: 13px;
 	width: 100%;
+	min-height: 100vh;
+}
+
+#wpbody-content {
+	padding-bottom: 0 !important;
 }
 
 #wpwrap {
@@ -18,24 +56,190 @@
 div#wpcontent {
 	padding: 0;
 	overflow-x: unset !important;
-	min-height: calc(100vh - 32px);
+	//min-height: calc(100vh - 32px);
 }
 
 .qcrm-layout * {
 	box-sizing: border-box;
 	width: 100%;
 }
+
 .qcrm-layout__main {
 	display: flex;
 	box-sizing: border-box;
 	width: 100%;
+	min-height: 100vh;
+	background: linear-gradient(to right, #1E3A8A 20%, #3B82F6 80%);
+
+	.qcrm-layout__workspace {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-height: inherit;
+	}
+
+	.qcrm-layout__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 32px 40px 140px;
+		color: #ffffff;
+		position: relative;
+	}
+
+	.qcrm-layout__header-left {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+	}
+
+	.qcrm-layout__header-trigger {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 999px;
+		border: 1px solid rgba(255, 255, 255, 0.35);
+		background: rgba(255, 255, 255, 0.18);
+		color: #ffffff;
+		transition: transform 0.2s ease, background 0.2s ease;
+
+		&:hover {
+			transform: translateY(-1px);
+			background: rgba(255, 255, 255, 0.28);
+		}
+
+		svg {
+			width: 18px;
+			height: 18px;
+		}
+
+		@media (min-width: 1024px) {
+			display: none;
+		}
+	}
+
+	.qcrm-layout__back {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		padding: 10px 18px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.15);
+		color: #ffffff;
+		font-weight: 600;
+		font-size: 14px;
+		text-decoration: none;
+		border: 1px solid rgba(255, 255, 255, 0.28);
+		transition: background 0.2s ease, border 0.2s ease, transform 0.2s ease;
+
+		&:hover {
+			background: rgba(255, 255, 255, 0.25);
+			border-color: rgba(255, 255, 255, 0.4);
+			transform: translateY(-1px);
+		}
+	}
+
+	.qcrm-layout__back-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 26px;
+		height: 26px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.22);
+	}
+
+	.qcrm-layout__header-right {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.qcrm-layout__user {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 8px 14px;
+		border-radius: 16px;
+		background: rgba(8, 22, 68, 0.38);
+		border: 1px solid rgba(255, 255, 255, 0.25);
+		-webkit-backdrop-filter: blur(8px);
+		backdrop-filter: blur(8px);
+	}
+
+	.qcrm-layout__user-avatar {
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(255, 255, 255, 0.85);
+		color: #1f4fe0;
+		font-weight: 700;
+		font-size: 16px;
+		text-transform: uppercase;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	.qcrm-layout__user-info {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.qcrm-layout__user-name {
+		font-weight: 600;
+		font-size: 15px;
+		color: #ffffff;
+	}
+
+	.qcrm-layout__user-role {
+		font-size: 13px;
+		color: rgba(255, 255, 255, 0.85);
+	}
+
+	.qcrm-layout__content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 0 40px 48px;
+		margin-top: -100px;
+		position: relative;
+		z-index: 1;
+	}
+
 	.qcrm-page-component-wrapper {
 		width: 100%;
-		padding: 20px 40px;
-		padding-top: 40px;
-		// overflow-x: scroll;
-		overflow-x: hidden; 
-		scroll-padding-inline: 40px;
+		height: 100%;
+		background: #ffffff;
+		border-radius: 28px;
+		box-shadow: 0 24px 48px -24px rgba(13, 34, 92, 0.4);
+		padding: 36px 40px;
+	}
+
+	@media (max-width: 1023px) {
+		flex-direction: column;
+
+		.qcrm-layout__header {
+			padding: 24px 24px 110px;
+		}
+
+		.qcrm-layout__content {
+			padding: 0 24px 32px;
+			margin-top: -86px;
+		}
+
+		.qcrm-page-component-wrapper {
+			padding: 28px;
+		}
 	}
 }
 
@@ -108,6 +312,7 @@ body {
 		--sidebar-ring: 217.2 91.2% 59.8%;
 		--sidebar-header: 212 51% 31%;
 	}
+
 	.dark {
 		--background: 0 0% 3.9%;
 		--foreground: 0 0% 98%;
@@ -150,6 +355,7 @@ body {
 	* {
 		@apply border-border;
 	}
+
 	body {
 		@apply bg-background text-foreground;
 	}

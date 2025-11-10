@@ -13,7 +13,8 @@ import {
  * WordPress Dependencies
  */
 import { SlotFillProvider } from '@wordpress/components';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
@@ -22,6 +23,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { size, map } from 'lodash';
 
 import { notification } from 'antd';
+import { ChevronLeft } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -72,6 +74,7 @@ export const Layout = (props) => {
 	);
 	const { setMergeTagsVisible, setMergeTagCallback } =
 		useDispatch('quillcrm/core');
+	const [currentUser, setCurrentUser] = useState<any>(null);
 
 	const handleCloseMergeTags = () => {
 		setMergeTagsVisible(false);
@@ -93,10 +96,11 @@ export const Layout = (props) => {
 				/>
 				<div className="qcrm-layout__main">
 					<NavBar />
-					<SidebarTrigger />
-					<ProtectedRoute page={props.page}>
-						<Controller {...props} />
-					</ProtectedRoute>
+					<div className="qcrm-layout__workspace p-6">
+						<ProtectedRoute page={props.page}>
+							<Controller {...props} />
+						</ProtectedRoute>
+					</div>
 				</div>
 			</SidebarProvider>
 		</SlotFillProvider>

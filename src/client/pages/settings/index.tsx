@@ -25,6 +25,7 @@ import {
 } from '@quillcrm/components';
 import BusinessSettings from './business';
 import EmailSettings from './email';
+import SMSSettings from './sms';
 import DoubleOptInSettings from './double-optin';
 import CartSettings from './cart';
 import Managers from './managers';
@@ -34,12 +35,13 @@ import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
 import CustomFields from '../custom-fields';
 import LinkTriggers from '../link-triggers';
-import { UserRound } from 'lucide-react';
+import { UserRound, MessageSquare } from 'lucide-react';
 
 const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers']);
 const SETTINGS_DEPENDENT_TABS = new Set([
 	'business',
 	'email',
+	'sms',
 	'double_optin',
 	'cart',
 	'currencies',
@@ -133,11 +135,15 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-			case 'email':
-				return (
-					<EmailSettings settings={settings!} onChange={setSettings} />
-				);
-			case 'double_optin':
+		case 'email':
+			return (
+				<EmailSettings settings={settings!} onChange={setSettings} />
+			);
+		case 'sms':
+			return (
+				<SMSSettings settings={settings!} onChange={setSettings} />
+			);
+		case 'double_optin':
 				return (
 					<DoubleOptInSettings
 						settings={settings!}
@@ -176,6 +182,11 @@ const SettingsPage: React.FC = () => {
 			value: 'email',
 			label: 'Email',
 			icon: <ContactTotalEmailsIcon width={24} height={24} />,
+		},
+		{
+			value: 'sms',
+			label: 'SMS',
+			icon: <MessageSquare size={20} />,
 		},
 		{
 			value: 'double_optin',

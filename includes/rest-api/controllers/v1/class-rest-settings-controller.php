@@ -143,6 +143,20 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 					),
 				),
+				'sms'             => array(
+					'type'                 => 'object',
+					'additionalProperties' => false,
+					'properties'           => array(
+						'max_in_second' => array(
+							'type'    => 'integer',
+							'default' => 10,
+						),
+						'max_in_day'    => array(
+							'type'    => 'integer',
+							'default' => 1000,
+						),
+					),
+				),
 				'double_optin'    => array(
 					'type'                 => 'object',
 					'additionalProperties' => false,
@@ -286,8 +300,209 @@ class REST_Settings_Controller extends REST_Controller {
 	 */
 	public function update( $request ) {
 		$settings = $request->get_json_params();
+
+		// Validate and sanitize settings
+		$validation_result = $this->validate_settings( $settings );
+		if ( is_wp_error( $validation_result ) ) {
+			return $validation_result;
+		}
+
+		// Sanitize settings
+		$settings = $this->sanitize_settings( $settings );
+
 		Settings::update_many( $settings );
 		return new WP_REST_Response( array( 'success' => true ), 200 );
+	}
+
+	/**
+	 * Validate settings before saving
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $settings Settings to validate.
+	 * @return true|WP_Error True if valid, WP_Error otherwise.
+	 */
+	private function validate_settings( $settings ) {
+		// Validate email settings
+		if ( isset( $settings['email'] ) ) {
+			$email_validation = $this->validate_email_settings( $settings['email'] );
+			if ( is_wp_error( $email_validation ) ) {
+				return $email_validation;
+			}
+		}
+
+		// Validate SMS settings
+		if ( isset( $settings['sms'] ) ) {
+			$sms_validation = $this->validate_sms_settings( $settings['sms'] );
+			if ( is_wp_error( $sms_validation ) ) {
+				return $sms_validation;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate email settings
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $email Email settings.
+	 * @return true|WP_Error True if valid, WP_Error otherwise.
+	 */
+	private function validate_email_settings( $email ) {
+		// Validate from_email
+		if ( isset( $email['from_email'] ) && ! empty( $email['from_email'] ) ) {
+			if ( ! is_email( $email['from_email'] ) ) {
+				return new WP_Error(
+					'invalid_email',
+					__( 'From email is not a valid email address', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		// Validate reply_to
+		if ( isset( $email['reply_to'] ) && ! empty( $email['reply_to'] ) ) {
+			if ( ! is_email( $email['reply_to'] ) ) {
+				return new WP_Error(
+					'invalid_email',
+					__( 'Reply-to is not a valid email address', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		// Validate max_in_second
+		if ( isset( $email['max_in_second'] ) ) {
+			$max_in_second = intval( $email['max_in_second'] );
+
+			if ( $max_in_second < 1 ) {
+				return new WP_Error(
+					'invalid_rate_limit',
+					__( 'Max emails per second must be at least 1', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			if ( $max_in_second > 100 ) {
+				return new WP_Error(
+					'invalid_rate_limit',
+					__( 'Max emails per second cannot exceed 100 (server limitation)', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		// Validate max_in_day
+		if ( isset( $email['max_in_day'] ) ) {
+			$max_in_day = intval( $email['max_in_day'] );
+
+			if ( $max_in_day < 1 ) {
+				return new WP_Error(
+					'invalid_rate_limit',
+					__( 'Max emails per day must be at least 1', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			if ( $max_in_day > 1000000 ) {
+				return new WP_Error(
+					'invalid_rate_limit',
+					__( 'Max emails per day cannot exceed 1,000,000', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate SMS settings
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $sms SMS settings.
+	 * @return true|WP_Error True if valid, WP_Error otherwise.
+	 */
+	private function validate_sms_settings( $sms ) {
+		// Validate max_in_second
+		if ( isset( $sms['max_in_second'] ) ) {
+			$max_in_second = intval( $sms['max_in_second'] );
+
+			if ( $max_in_second < 1 ) {
+				return new WP_Error(
+					'invalid_rate_limit',
+					__( 'Max SMS per second must be at least 1', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			if ( $max_in_second > 10 ) {
+				return new WP_Error(
+					'invalid_rate_limit',
+					__( 'Max SMS per second cannot exceed 10 (Twilio account limit)', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		// Validate max_in_day
+		if ( isset( $sms['max_in_day'] ) ) {
+			$max_in_day = intval( $sms['max_in_day'] );
+
+			if ( $max_in_day < 1 ) {
+				return new WP_Error(
+					'invalid_rate_limit',
+					__( 'Max SMS per day must be at least 1', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			if ( $max_in_day > 100000 ) {
+				return new WP_Error(
+					'invalid_rate_limit',
+					__( 'Max SMS per day cannot exceed 100,000', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Sanitize settings recursively
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $settings Settings to sanitize.
+	 * @return array Sanitized settings.
+	 */
+	private function sanitize_settings( $settings ) {
+		$sanitized = array();
+
+		foreach ( $settings as $key => $value ) {
+			if ( is_array( $value ) ) {
+				$sanitized[ $key ] = $this->sanitize_settings( $value );
+			} elseif ( is_string( $value ) ) {
+				// Special handling for email_footer and email_content (allow HTML)
+				if ( in_array( $key, array( 'email_footer', 'email_content', 'confirmation_message', 'gdpr_message' ), true ) ) {
+					$sanitized[ $key ] = wp_kses_post( $value );
+				} else {
+					$sanitized[ $key ] = sanitize_text_field( $value );
+				}
+			} elseif ( is_numeric( $value ) ) {
+				$sanitized[ $key ] = absint( $value );
+			} elseif ( is_bool( $value ) ) {
+				$sanitized[ $key ] = (bool) $value;
+			} else {
+				$sanitized[ $key ] = $value;
+			}
+		}
+
+		return $sanitized;
 	}
 
 	/**

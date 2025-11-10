@@ -91,9 +91,10 @@ class Email_Renderer {
 	 * @param array                                                                  $builder_data Builder content data (sections, globalSettings, buttonSettings)
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @param string                                                                 $preview_text Optional preview text
+	 * @param string                                                                 $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string HTML output
 	 */
-	public function render_from_builder_data( $builder_data, $contact = null, $preview_text = '' ) {
+	public function render_from_builder_data( $builder_data, $contact = null, $preview_text = '', $footer_html = '' ) {
 		if ( ! is_array( $builder_data ) ) {
 			return '';
 		}
@@ -107,7 +108,7 @@ class Email_Renderer {
 		}
 
 		// Generate HTML for email body
-		$html = $this->build_email_structure( $builder_data, $global_settings, $contact, $preview_text );
+		$html = $this->build_email_structure( $builder_data, $global_settings, $contact, $preview_text, $footer_html );
 
 		return $html;
 	}
@@ -119,9 +120,10 @@ class Email_Renderer {
 	 * @param array                                                                   $global_settings Global email settings (canvas, background, etc.)
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @param string                                                                  $preview_text Preview text for email clients
+	 * @param string                                                                  $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string HTML output
 	 */
-	private function build_email_structure( $content, $global_settings, $contact, $preview_text = '' ) {
+	private function build_email_structure( $content, $global_settings, $contact, $preview_text = '', $footer_html = '' ) {
 		// Extract button settings from content if available
 		if ( isset( $content['buttonSettings'] ) && is_array( $content['buttonSettings'] ) ) {
 			$this->button_settings = $content['buttonSettings'];
@@ -277,7 +279,32 @@ class Email_Renderer {
 						</table>
 					</td>
 				</tr>
-			</table>
+			</table>';
+
+		// Inject footer HTML before closing </body> tag if provided
+		// Footer is injected here during rendering, but note that merge tags in the footer
+		// will be processed AFTER this method returns (in prepare_message_content)
+		if ( ! empty( $footer_html ) ) {
+			// Wrap footer in a centered table for proper email client compatibility
+			// Uses same canvas width and background as main email for consistency
+			$html .= '
+		<!-- Email Footer -->
+		<table role="presentation" class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ' . esc_attr( $bg_color ) . ';">
+			<tr>
+				<td align="center" style="padding: 20px;">
+					<table role="presentation" class="email-container" width="' . esc_attr( $canvas_width ) . '" cellpadding="0" cellspacing="0" border="0" style="max-width: ' . esc_attr( $canvas_width ) . 'px;">
+						<tr>
+							<td style="padding: 10px 20px; text-align: center; font-size: 12px; color: #666; line-height: 1.5;">
+								' . $footer_html . '
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>';
+		}
+
+		$html .= '
 		</body>
 		</html>';
 

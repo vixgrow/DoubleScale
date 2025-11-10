@@ -15,6 +15,7 @@ import {
 	Tooltip,
 	Legend,
 } from 'chart.js';
+import LeaderboardChartSkeleton from './LeaderboardChartSkeleton';
 
 ChartJS.register(
 	CategoryScale,
@@ -48,13 +49,7 @@ const DealsReportsLeaderboard: React.FC = () => {
 
 	// Use the custom hook for filters
 	const {
-		filters,
-		setFilters,
-		filterOptions,
-		showFilters,
-		setShowFilters,
 		buildQueryParams,
-		clearFilters,
 	} = useReportFilters();
 
 	const fetchDealsReportsLeaderboard = useCallback(async () => {
@@ -104,11 +99,11 @@ const DealsReportsLeaderboard: React.FC = () => {
 				{
 					label: __('Deal Value ($)', 'quillcrm'),
 					data: sortedData.map((item) => item.total_amount),
-					backgroundColor: '#16A34A', // Green color
+					backgroundColor: '#16A34A', 
 					borderColor: '#16A34A',
 					borderWidth: 0,
 					borderRadius: 4,
-					barThickness: 20, // Control bar thickness
+					barThickness: 20,
 				},
 			],
 		};
@@ -118,6 +113,7 @@ const DealsReportsLeaderboard: React.FC = () => {
 		indexAxis: 'y' as const,
 		responsive: true,
 		maintainAspectRatio: false,
+		
 		plugins: {
 			legend: {
 				display: false,
@@ -126,14 +122,14 @@ const DealsReportsLeaderboard: React.FC = () => {
 				display: true,
 				text: __('Deal leaderboard - amount closed by rep', 'quillcrm'),
 				font: {
-					size: 16,
-					weight: 600,
+					size: 24,
+					weight: 500,
 				},
 				align: 'start' as const,
 				padding: {
 					bottom: 20,
 				},
-				color: '#1f2937',
+				color: '#09090B',
 			},
 			tooltip: {
 				backgroundColor: '#1f2937',
@@ -160,25 +156,17 @@ const DealsReportsLeaderboard: React.FC = () => {
 		scales: {
 			x: {
 				beginAtZero: true,
-				title: {
-					display: true,
-					text: __('Deal Values ($)', 'quillcrm'),
-					font: {
-						size: 12,
-						weight: 500,
-					},
-					color: '#6b7280',
-				},
 				grid: {
 					display: true,
-					color: '#f3f4f6',
+					color: '#E5E6EB',
 					drawBorder: false,
+					borderDash: [4, 4]
 				},
 				ticks: {
 					font: {
-						size: 11,
+						size: 12,
 					},
-					color: '#9ca3af',
+					color: '#86909C',
 					callback: function (value: any) {
 						return new Intl.NumberFormat('en-US', {
 							style: 'currency',
@@ -193,28 +181,21 @@ const DealsReportsLeaderboard: React.FC = () => {
 				},
 			},
 			y: {
-				title: {
-					display: true,
-					text: __('Sales Rep Name', 'quillcrm'),
-					font: {
-						size: 12,
-						weight: 500,
-					},
-					color: '#6b7280',
-				},
+				
 				grid: {
 					display: false,
 					drawBorder: false,
+					borderDash: [4, 4],
 				},
 				ticks: {
 					font: {
-						size: 12,
+						size: 14,
 					},
-					color: '#374151',
+					color: '#777',
 					padding: 8,
 				},
 				border: {
-					display: false,
+					display: true,
 				},
 			},
 		},
@@ -229,12 +210,11 @@ const DealsReportsLeaderboard: React.FC = () => {
 	};
 
 	return (
-		<div>
-			{/* Chart Section */}
-			<Card style={{ marginTop: 20, border: '1px solid #e5e7eb' }}>
+			
+			<Card className='border border-[#DEE1E6] p-5' style={{ backgroundColor: '#F5F5F5' , boxShadow:'none' }}>
 				<CardContent style={{ padding: '24px' }}>
 					{loading ? (
-						<Skeleton className="h-8 w-full" />
+						<LeaderboardChartSkeleton/>
 					) : (
 						<div style={{ height: '500px', width: '100%' }}>
 							<Chart
@@ -246,7 +226,7 @@ const DealsReportsLeaderboard: React.FC = () => {
 					)}
 				</CardContent>
 			</Card>
-		</div>
+		
 	);
 };
 

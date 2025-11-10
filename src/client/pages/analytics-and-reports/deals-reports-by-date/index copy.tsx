@@ -154,22 +154,22 @@ const DealsReportsByDate: React.FC = () => {
 				{
 					label: __('Open', 'quillcrm'),
 					data: chartData.map((deal) => deal.open),
-					backgroundColor: '#458DC7', // red-300
-					borderColor: '#ef4444', // red-500
+					backgroundColor: '#458DC7', 
+					borderColor: '#ef4444', 
 					borderWidth: 1,
 				},
 				{
 					label: __('Closed Won', 'quillcrm'),
 					data: chartData.map((deal) => deal.won),
-					backgroundColor: '#16A34A', // cyan-400
-					borderColor: '#0891b2', // cyan-600
+					backgroundColor: '#16A34A', 
+					borderColor: '#0891b2', 
 					borderWidth: 1,
 				},
 				{
 					label: __('Lost', 'quillcrm'),
 					data: chartData.map((deal) => deal.lost),
-					backgroundColor: '#E13B3B', // violet-400
-					borderColor: '#7c3aed', // violet-600
+					backgroundColor: '#E13B3B', 
+					borderColor: '#7c3aed', 
 					borderWidth: 1,
 				},
 			],
@@ -243,7 +243,7 @@ const DealsReportsByDate: React.FC = () => {
 	return (
 		<div className="p-6 space-y-6">
 			{/* Filters Section */}
-			{/* <ReportFilters
+			<ReportFilters 
 				key={`filters-${JSON.stringify(filters)}`}
 				title={__('Deal Reports by Date - Filters', 'quillcrm')}
 				filters={filters}

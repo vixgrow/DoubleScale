@@ -106,6 +106,10 @@ const EnhancedMergeTagsSelector: React.FC<EnhancedMergeTagsSelectorProps> = ({
 	const mergeTags = dynamicMergeTags || ConfigAPI.getMergeTags();
 
 	const automationMergeTagsWithTrigger = filter(mergeTags, (group) => {
+		// Filter out disabled groups
+		if (group.is_disabled) {
+			return false;
+		}
 		return !group.triggers || group.triggers.includes(activeTrigger);
 	});
 

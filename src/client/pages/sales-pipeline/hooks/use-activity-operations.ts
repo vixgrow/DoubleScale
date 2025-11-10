@@ -138,11 +138,12 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 		async (activityId: number, activityType: string, data: any) => {
 			try {
 				// Prepare request data based on activity type
+				// Modals pass raw data: string for note, objects for others
 				const requestData: any = {};
-				
+
 				switch (activityType) {
 					case 'note_added':
-						requestData.note = data.note;
+						requestData.note = data;
 						break;
 					case 'email_sent':
 						requestData.email_data = data;

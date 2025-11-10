@@ -81,6 +81,10 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 	const automationMergeTagsWithTrigger = filter(
 		automationMergeTags,
 		(group) => {
+			// Filter out disabled groups
+			if (group.is_disabled) {
+				return false;
+			}
 			return !group.triggers || group.triggers.includes(currentTrigger);
 		}
 	);

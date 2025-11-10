@@ -120,6 +120,7 @@ registerAdminPage('custom-fields', {
 	label: __('Custom Fields', 'quillcrm'),
 	icon: <CustomFieldsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
+	hidden: true,
 });
 
 registerAdminPage('campaigns', {
@@ -203,6 +204,7 @@ registerAdminPage('link-triggers', {
 	label: __('Link Triggers', 'quillcrm'),
 	icon: <ToolsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
+	hidden: true,
 });
 
 registerAdminPage('link-trigger', {

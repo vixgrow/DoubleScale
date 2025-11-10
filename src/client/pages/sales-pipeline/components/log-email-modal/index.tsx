@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import * as React from 'react';
 
 /**
  * External dependencies
@@ -23,6 +24,8 @@ interface LogEmailModalProps {
 	onSuccess: () => void;
 	dealId: number;
 	dealTitle?: string;
+	editMode?: boolean;
+	activity?: any;
 }
 
 interface EmailFormData {
@@ -36,10 +39,24 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 	onSuccess,
 	dealId,
 	dealTitle,
+	editMode = false,
+	activity,
 }) => {
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
-	const { logEmail } = useActivityOperations();
+	const { logEmail, updateActivity } = useActivityOperations();
+
+	// Load existing activity data when in edit mode
+	React.useEffect(() => {
+		if (editMode && activity && visible) {
+			form.setFieldsValue({
+				subject: activity.data?.subject || '',
+				sent_at: activity.data?.sent_at ? dayjs(activity.data.sent_at) : dayjs(),
+			});
+		} else if (!visible) {
+			form.resetFields();
+		}
+	}, [editMode, activity, visible, form]);
 
 	const handleSubmit = async (values: any) => {
 		setLoading(true);
@@ -51,9 +68,13 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 					: dayjs().format('YYYY-MM-DD HH:mm:ss'),
 			};
 
-			await logEmail(dealId, emailData);
-
-			message.success(__('Email logged successfully!', 'quillcrm'));
+			if (editMode && activity) {
+				await updateActivity(activity.id, 'email_sent', emailData);
+				message.success(__('Email updated successfully!', 'quillcrm'));
+			} else {
+				await logEmail(dealId, emailData);
+				message.success(__('Email logged successfully!', 'quillcrm'));
+			}
 
 			onSuccess();
 			onClose();
@@ -62,7 +83,7 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 			message.error(
 				error instanceof Error
 					? error.message
-					: __('Failed to log email', 'quillcrm')
+					: __(editMode ? 'Failed to update email' : 'Failed to log email', 'quillcrm')
 			);
 		} finally {
 			setLoading(false);
@@ -79,7 +100,7 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 			title={
 				<div className="log-email-modal-title">
 					<Mail size={20} />
-					<span>{__('Log Email', 'quillcrm')}</span>
+					<span>{editMode ? __('Edit Email', 'quillcrm') : __('Log Email', 'quillcrm')}</span>
 				</div>
 			}
 			open={visible}
@@ -94,7 +115,7 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 					loading={loading}
 					onClick={() => form.submit()}
 				>
-					{__('Log Email', 'quillcrm')}
+					{editMode ? __('Update', 'quillcrm') : __('Log Email', 'quillcrm')}
 				</Button>,
 			]}
 			width={600}

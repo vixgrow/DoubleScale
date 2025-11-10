@@ -268,21 +268,23 @@ const Automation: React.FC = () => {
 
 										{/* Right section - Save button */}
 										<div className="flex gap-2">
-											<Button
-												variant="default"
-												className="px-4 text-base font-normal rounded-lg"
-												disabled={isSaving}
-												onClick={() =>
-													saveAutomation({
-														status: 'active',
-													})
-												}
-											>
-												{__(
-													'Save & Publish',
-													'quillcrm'
-												)}
-											</Button>
+											{activeTab === 'workflow' && (
+												<Button
+													variant="default"
+													className="px-4 text-base font-normal rounded-lg"
+													disabled={isSaving}
+													onClick={() =>
+														saveAutomation({
+															status: 'active',
+														})
+													}
+												>
+													{__(
+														'Save & Publish',
+														'quillcrm'
+													)}
+												</Button>
+											)}
 										</div>
 									</div>
 								</DialogTitle>

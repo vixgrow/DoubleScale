@@ -15,7 +15,7 @@ interface ActionConfig {
 
 interface PageHeaderProps {
 	title: string;
-	subtitle: string;
+	subtitle?: string;
 	actions: ActionConfig[];
 	className?: string;
 }
@@ -28,7 +28,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
 	return (
 		<div className="flex flex-col gap-2 mb-4">
-			<p>{subtitle}</p>
+			{subtitle && <p>{subtitle}</p>}
 
 			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
 				<h1 className="font-semibold text-3xl">{title}</h1>

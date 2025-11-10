@@ -9,11 +9,91 @@ import { find, flatMap } from 'lodash';
 import type { Action, Goal, Rule, Trigger } from '@quillcrm/config';
 import ConfigAPI from '@quillcrm/config';
 import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import {
+	__experimentalGetSettings as experimentalGetDateSettings,
+	getSettings as getDateSettings,
+} from '@wordpress/date';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+type WordPressTimezone = {
+	timezone?: string;
+	offsetMinutes?: number;
+};
+
+const parseTimezoneOffset = (
+	offset: unknown,
+	offsetFormatted: unknown
+): number | undefined => {
+	const parsedNumericOffset =
+		typeof offset === 'string' || typeof offset === 'number'
+			? Number(offset)
+			: undefined;
+
+	if (
+		parsedNumericOffset !== undefined &&
+		!Number.isNaN(parsedNumericOffset)
+	) {
+		return parsedNumericOffset * 60;
+	}
+
+	if (typeof offsetFormatted === 'string' && offsetFormatted) {
+		const match = offsetFormatted.match(/^([+-]?)(\d{1,2}):(\d{2})$/);
+		if (match) {
+			const [, sign, hours, minutes] = match;
+			const totalMinutes =
+				parseInt(hours, 10) * 60 + parseInt(minutes, 10);
+			return (sign === '-' ? -1 : 1) * totalMinutes;
+		}
+	}
+
+	return undefined;
+};
+
+export const getWordPressTimezone = (): WordPressTimezone => {
+	const resolveSettings =
+		typeof getDateSettings === 'function'
+			? getDateSettings
+			: typeof experimentalGetDateSettings === 'function'
+				? experimentalGetDateSettings
+				: undefined;
+
+	const settings = resolveSettings?.();
+
+	const timezoneString =
+		typeof settings?.timezone?.string === 'string' &&
+		settings.timezone.string.length > 0
+			? settings.timezone.string
+			: undefined;
+
+	const offsetMinutes = parseTimezoneOffset(
+		settings?.timezone?.offset,
+		settings?.timezone?.offsetFormatted
+	);
+
+	return {
+		timezone: timezoneString,
+		offsetMinutes,
+	};
+};
+
+export const convertToWordPressTimezone = (date: Dayjs): Dayjs => {
+	const { timezone: timezoneString, offsetMinutes } = getWordPressTimezone();
+
+	if (timezoneString) {
+		return date.tz(timezoneString);
+	}
+
+	if (typeof offsetMinutes === 'number' && !Number.isNaN(offsetMinutes)) {
+		return date.utc().utcOffset(offsetMinutes);
+	}
+
+	return date;
+};
 
 export const getAction = (action: string): Action => {
 	const actions = ConfigAPI.getAutomationActions();
@@ -25,10 +105,10 @@ export const getAction = (action: string): Action => {
 	return foundAction
 		? foundAction[action]
 		: {
-			label: '',
-			description: '',
-			fields: {},
-		};
+				label: '',
+				description: '',
+				fields: {},
+			};
 };
 
 export const getGoal = (goal: string): Goal => {
@@ -43,11 +123,11 @@ export const getGoal = (goal: string): Goal => {
 	return foundGoal
 		? foundGoal[goal]
 		: {
-			label: '',
-			description: '',
-			fields: {},
-			is_integration: false,
-		};
+				label: '',
+				description: '',
+				fields: {},
+				is_integration: false,
+			};
 };
 
 export const getTrigger = (trigger: string): Trigger => {
@@ -60,10 +140,10 @@ export const getTrigger = (trigger: string): Trigger => {
 	return foundTrigger
 		? foundTrigger[trigger]
 		: {
-			label: '',
-			description: '',
-			fields: {},
-		};
+				label: '',
+				description: '',
+				fields: {},
+			};
 };
 
 export const convertDate = (date: string, addTime: boolean = false) => {
@@ -75,7 +155,10 @@ export const convertDate = (date: string, addTime: boolean = false) => {
 
 	const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 	if (addTime) {
-		return dayjs.utc(date).tz(userTimeZone).format('MMMM D, YYYY [on] h:mm A');
+		return dayjs
+			.utc(date)
+			.tz(userTimeZone)
+			.format('MMMM D, YYYY [on] h:mm A');
 	}
 
 	return dayjs.utc(date).tz(userTimeZone).format('MMMM D, YYYY');
@@ -104,11 +187,11 @@ export const getRuleBySlug = (slug: string, dynamicRules?: any): Rule => {
 	return foundRule
 		? foundRule[slug]
 		: {
-			name: '',
-			type: '',
-			operators: {},
-			options: {},
-		};
+				name: '',
+				type: '',
+				operators: {},
+				options: {},
+			};
 };
 
 export const getCustomFieldById = (id: number) => {
@@ -120,10 +203,10 @@ export const getCustomFieldById = (id: number) => {
 	return foundField
 		? foundField[id]
 		: {
-			label: '',
-			type: '',
-		};
-}
+				label: '',
+				type: '',
+			};
+};
 
 export const formatDate = (date: string, type: string = 'hour') => {
 	switch (type) {
@@ -142,43 +225,51 @@ export const formatDate = (date: string, type: string = 'hour') => {
 };
 
 export function getTimeAgo(dateString: string): string {
-	const now = new Date();
-	const date = new Date(dateString);
-	const diffInMs = now.getTime() - date.getTime();
-	const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-	const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-	const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+	const parsedUtcDate = dayjs.utc(dateString);
+	const parsedDate = parsedUtcDate.isValid()
+		? parsedUtcDate
+		: dayjs(dateString);
+
+	if (!parsedDate.isValid()) {
+		return '';
+	}
+
+	const now = convertToWordPressTimezone(dayjs());
+	const targetDate = convertToWordPressTimezone(parsedDate);
+
+	const diffInMinutes = now.diff(targetDate, 'minute');
+
+	if (diffInMinutes < 1) {
+		return 'Just now';
+	}
+
+	const diffInHours = now.diff(targetDate, 'hour');
+	const diffInDays = now.diff(targetDate, 'day');
 	const diffInWeeks = Math.floor(diffInDays / 7);
-	const diffInMonths = Math.floor(diffInDays / 30);
+	const diffInMonths = now.diff(targetDate, 'month');
 
-	if (diffInMinutes < 1) return 'Just now';
-	if (diffInMinutes < 60)
+	if (diffInMinutes < 60) {
 		return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
-	if (diffInHours < 24)
+	}
+
+	if (diffInHours < 24) {
 		return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-	if (diffInDays < 7)
+	}
+
+	if (diffInDays < 7) {
 		return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-	if (diffInWeeks < 4)
+	}
+
+	if (diffInWeeks < 4) {
 		return `${diffInWeeks} week${diffInWeeks > 1 ? 's' : ''} ago`;
-	if (diffInMonths <= 2)
+	}
+
+	if (diffInMonths <= 2) {
 		return `${diffInMonths} month${diffInMonths > 1 ? 's' : ''} ago`;
+	}
 
-	// Fallback to full format
-	return (
-		date.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-		}) +
-		' ' +
-		date.toLocaleTimeString('en-US', {
-			hour: 'numeric',
-			minute: '2-digit',
-			hour12: true,
-		})
-	);
+	return targetDate.format('MMM D, YYYY h:mm A');
 }
-
 
 export const formatDateForAPI = (date: Date | null): string | undefined => {
 	if (!date) return undefined;

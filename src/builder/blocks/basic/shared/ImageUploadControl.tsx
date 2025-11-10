@@ -34,24 +34,31 @@ export interface ImageUploadControlProps {
 	label: string;
 	description?: string;
 	value: string;
-	alt: string;
+	alt?: string; // Made optional for simpleMode
 	onChange: (updates: { src: string; alt: string }) => void;
 	uploadId: string;
 	placeholder?: string;
 	showRotation?: boolean;
 	rotation?: number;
 	onRotationChange?: (rotation: number) => void;
+	// New props for enhanced functionality
+	onModalStateChange?: (isOpen: boolean) => void;
+	simpleMode?: boolean; // For URL-only mode without alt text requirement
+	disabled?: boolean;
 }
 
 export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 	label,
 	description,
 	value,
-	alt,
+	alt = '',
 	onChange,
 	uploadId,
 	showRotation = false,
 	rotation = 0,
+	onModalStateChange,
+	simpleMode = false,
+	disabled = false,
 }) => {
 	const [imageData, setImageData] = useState<ImageData | null>(null);
 	const [uniqueUploadId] = useState(
@@ -75,6 +82,8 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 	}, [uniqueUploadId]);
 
 	const openMediaLibrary = () => {
+		if (disabled) return;
+
 		// Check if wp.media is available
 		if (typeof window.wp !== 'undefined' && window.wp.media) {
 			console.log(
@@ -110,8 +119,38 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 
 				onChange({
 					src: attachment.url,
-					alt: attachment.alt || attachment.title || label,
+					alt: simpleMode
+						? ''
+						: attachment.alt || attachment.title || label,
 				});
+
+				onModalStateChange?.(false);
+			});
+
+			// Handle modal close without selection
+			frame.on('close', function () {
+				onModalStateChange?.(false);
+			});
+
+			// Handle modal open
+			frame.on('open', function () {
+				onModalStateChange?.(true);
+
+				// Set a higher z-index for the media modal to prevent conflicts
+				setTimeout(() => {
+					const mediaModal = document.querySelector('.media-modal');
+					const mediaModalBackdrop = document.querySelector(
+						'.media-modal-backdrop'
+					);
+
+					if (mediaModal) {
+						(mediaModal as HTMLElement).style.zIndex = '999999';
+					}
+					if (mediaModalBackdrop) {
+						(mediaModalBackdrop as HTMLElement).style.zIndex =
+							'999998';
+					}
+				}, 10);
 			});
 
 			// Open the modal
@@ -129,6 +168,8 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 	};
 
 	const handleReplaceImage = () => {
+		if (disabled) return;
+
 		// Same logic for replacing image
 		if (typeof window.wp !== 'undefined' && window.wp.media) {
 			const frame = window.wp.media({
@@ -158,8 +199,38 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 
 				onChange({
 					src: attachment.url,
-					alt: attachment.alt || attachment.title || label,
+					alt: simpleMode
+						? ''
+						: attachment.alt || attachment.title || label,
 				});
+
+				onModalStateChange?.(false);
+			});
+
+			// Handle modal close without selection
+			frame.on('close', function () {
+				onModalStateChange?.(false);
+			});
+
+			// Handle modal open
+			frame.on('open', function () {
+				onModalStateChange?.(true);
+
+				// Set a higher z-index for the media modal to prevent conflicts
+				setTimeout(() => {
+					const mediaModal = document.querySelector('.media-modal');
+					const mediaModalBackdrop = document.querySelector(
+						'.media-modal-backdrop'
+					);
+
+					if (mediaModal) {
+						(mediaModal as HTMLElement).style.zIndex = '999999';
+					}
+					if (mediaModalBackdrop) {
+						(mediaModalBackdrop as HTMLElement).style.zIndex =
+							'999998';
+					}
+				}, 10);
 			});
 
 			frame.open();
@@ -197,10 +268,12 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 	};
 
 	const handleDeleteImage = () => {
+		if (disabled) return;
+
 		setImageData(null);
 		onChange({
 			src: '',
-			alt: label,
+			alt: simpleMode ? '' : label,
 		});
 	};
 
@@ -214,13 +287,13 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 
 	return (
 		<div>
-			<label className="text-[#333333] mb-2 text-sm">{label}</label>
+			<label className="text-[#333333] mb-2 text-base">{label}</label>
 			{description && (
 				<p className="text-xs text-[#616161] mb-4">{description}</p>
 			)}
 
 			{imageData || (value && value.trim() !== '') ? (
-				<div className="border rounded-lg p-4 flex items-center justify-between">
+				<div className="border rounded-lg p-4 bg-white flex items-center justify-between mt-2">
 					<div className="flex items-center gap-3">
 						<img
 							src={value}
@@ -255,6 +328,7 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 							size="sm"
 							className="text-sm text-primary shadow-none"
 							onClick={handleReplaceImage}
+							disabled={disabled}
 						>
 							{__('Replace', 'quillcrm')}
 						</Button>
@@ -263,13 +337,20 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 							size="sm"
 							className="text-destructive shadow-none"
 							onClick={handleDeleteImage}
+							disabled={disabled}
 						>
 							<DeleteIcon width={16} height={16} />
 						</Button>
 					</div>
 				</div>
 			) : (
-				<div className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors">
+				<div
+					className={`border-2 border-dashed mt-2 bg-white rounded-lg p-4 text-center transition-colors ${
+						disabled
+							? 'cursor-not-allowed opacity-50'
+							: 'cursor-pointer hover:border-gray-400'
+					}`}
+				>
 					{/* Hidden fallback input */}
 					<Input
 						type="file"
@@ -277,8 +358,14 @@ export const ImageUploadControl: React.FC<ImageUploadControlProps> = ({
 						accept="image/*"
 						className="hidden"
 						id={`${uniqueUploadId}-upload`}
+						disabled={disabled}
 					/>
-					<div className="cursor-pointer" onClick={openMediaLibrary}>
+					<div
+						className={
+							disabled ? 'cursor-not-allowed' : 'cursor-pointer'
+						}
+						onClick={openMediaLibrary}
+					>
 						<div className="flex flex-col items-center justify-center">
 							<div className="text-primary bg-accent rounded-full p-2 mb-2">
 								<FileUploadIcon />

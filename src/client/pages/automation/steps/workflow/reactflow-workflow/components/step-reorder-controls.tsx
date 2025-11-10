@@ -8,8 +8,18 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Tooltip } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
+
+/**
+ * Internal dependencies - UI Components
+ */
+import { Button } from '@/components/ui/button';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 /**
  * Internal dependencies
@@ -172,39 +182,56 @@ const StepReorderControls: React.FC<StepReorderControlsProps> = ({
 	}
 
 	return (
-		<div className={`qcrm-step-reorder-controls ${className}`}>
-			<Tooltip title={getTooltipText('up', canMoveUp)} placement="top">
-				<Button
-					type="text"
-					size="small"
-					icon={<ArrowUpOutlined />}
-					disabled={!canMoveUp}
-					loading={isMoving === 'up'}
-					onClick={(e) => {
-						e.stopPropagation();
-						handleMove('up');
-					}}
-					className="qcrm-step-reorder-controls__button qcrm-step-reorder-controls__button--up"
-				/>
-			</Tooltip>
-			<Tooltip
-				title={getTooltipText('down', canMoveDown)}
-				placement="top"
-			>
-				<Button
-					type="text"
-					size="small"
-					icon={<ArrowDownOutlined />}
-					disabled={!canMoveDown}
-					loading={isMoving === 'down'}
-					onClick={(e) => {
-						e.stopPropagation();
-						handleMove('down');
-					}}
-					className="qcrm-step-reorder-controls__button qcrm-step-reorder-controls__button--down"
-				/>
-			</Tooltip>
-		</div>
+		<TooltipProvider>
+			<div className={`qcrm-step-reorder-controls ${className}`}>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							disabled={!canMoveUp}
+							onClick={(e) => {
+								e.stopPropagation();
+								handleMove('up');
+							}}
+							className="qcrm-step-reorder-controls__button qcrm-step-reorder-controls__button--up h-8 w-8"
+						>
+							{isMoving === 'up' ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								<ArrowUp className="h-4 w-4" />
+							)}
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="top">
+						<p>{getTooltipText('up', canMoveUp)}</p>
+					</TooltipContent>
+				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							disabled={!canMoveDown}
+							onClick={(e) => {
+								e.stopPropagation();
+								handleMove('down');
+							}}
+							className="qcrm-step-reorder-controls__button qcrm-step-reorder-controls__button--down h-8 w-8"
+						>
+							{isMoving === 'down' ? (
+								<Loader2 className="h-4 w-4 animate-spin" />
+							) : (
+								<ArrowDown className="h-4 w-4" />
+							)}
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="top">
+						<p>{getTooltipText('down', canMoveDown)}</p>
+					</TooltipContent>
+				</Tooltip>
+			</div>
+		</TooltipProvider>
 	);
 };
 

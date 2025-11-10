@@ -14,7 +14,6 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Campaign, CampaignStatus } from '../../types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CAMPAIGN_STATUS_COLORS } from './constants';
-import { Badge } from '@/components/ui/badge';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -23,15 +22,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import {
+	ABSplitIcon,
 	CopyIcon,
 	DeleteIcon,
+	EditIcon,
 	FallbackCell,
 	FormattedDateCell,
+	ProcessingEmailsIcon,
 	SettingsOutlinedIcon,
 	SortedHeaderCell,
 	TimeAgoCell,
 	ViewOutlinedIcon,
-} from '@/components';
+} from '@quillcrm/components';
 import { getToLink } from '@quillcrm/navigation';
 
 // Add interface for column props
@@ -41,12 +43,13 @@ interface ColumnProps {
 	navigate: (path: string) => void;
 }
 
-export const campaignColumns = ({
+// Common columns used across all campaign types
+const getCommonColumns = ({
 	onDelete,
 	duplicate,
 	navigate,
-}: ColumnProps): ColumnDef<Campaign>[] => [
-	{
+}: ColumnProps) => {
+	const selectColumn: ColumnDef<Campaign> = {
 		id: 'select',
 		header: ({ table }) => (
 			<Checkbox
@@ -67,19 +70,20 @@ export const campaignColumns = ({
 				aria-label="Select row"
 			/>
 		),
-
 		enableSorting: false,
 		enableHiding: false,
-	},
-	{
+	};
+
+	const nameColumn: ColumnDef<Campaign> = {
 		accessorKey: 'name',
 		header: ({ column }) =>
 			SortedHeaderCell({
 				column,
 				header: __('Campaign Name', 'quillcrm'),
 			}),
-	},
-	{
+	};
+
+	const statusColumn: ColumnDef<Campaign> = {
 		accessorKey: 'status',
 		header: ({ column }) =>
 			SortedHeaderCell({ column, header: __('Status', 'quillcrm') }),
@@ -90,54 +94,47 @@ export const campaignColumns = ({
 				'bg-muted text-muted-foreground';
 
 			return (
-				<Badge
-					className={`${colorClasses} rounded-[88px] w-full max-w-24 text-center px-0 justify-center py-1.5`}
-					variant="borderTransparent"
+				<div
+					className={`${colorClasses} rounded-xl w-fit text-center px-2 py-1 border text-base`}
 				>
 					{status.charAt(0).toUpperCase() + status.slice(1)}
-				</Badge>
+				</div>
 			);
 		},
-	},
-	{
-		accessorKey: 'broadcast',
+	};
+
+	const broadcastColumn: ColumnDef<Campaign> = {
+		accessorKey: 'execute_at',
 		header: ({ column }) =>
 			SortedHeaderCell({ column, header: __('Broadcast', 'quillcrm') }),
-		cell: ({ row }) => <FallbackCell value={row.getValue('broadcast')} />,
-	},
-	{
+		cell: ({ row }) => <TimeAgoCell value={row.getValue('execute_at')} />,
+	};
+
+	const createdAtColumn: ColumnDef<Campaign> = {
 		accessorKey: 'created_at',
 		header: ({ column }) =>
 			SortedHeaderCell({ column, header: __('Created At', 'quillcrm') }),
 		cell: ({ row }) => <TimeAgoCell value={row.getValue('created_at')} />,
-	},
-	{
+	};
+
+	const updatedAtColumn: ColumnDef<Campaign> = {
 		accessorKey: 'updated_at',
 		header: ({ column }) =>
 			SortedHeaderCell({ column, header: __('Updated At', 'quillcrm') }),
 		cell: ({ row }) => (
 			<FormattedDateCell value={row.getValue('updated_at')} />
 		),
-	},
-	{
-		accessorKey: 'recipients',
-		header: ({ column }) =>
-			SortedHeaderCell({ column, header: __('Recipients', 'quillcrm') }),
-		cell: ({ row }) => <FallbackCell value={row.getValue('recipients')} />,
-	},
-	{
-		accessorKey: 'open_rate',
-		header: ({ column }) =>
-			SortedHeaderCell({ column, header: __('Open Rate', 'quillcrm') }),
-		cell: ({ row }) => <FallbackCell value={row.getValue('open_rate')} />,
-	},
-	{
+	};
+
+	const actionsColumn: ColumnDef<Campaign> = {
 		accessorKey: 'actions',
 		header: () => (
 			<div className="text-center">{__('Actions', 'quillcrm')}</div>
 		),
 		cell: ({ row }) => {
 			const campaign = row.original;
+			const canEdit = campaign.status === 'draft' || campaign.status === 'schedule';
+
 			return (
 				<div className="text-center">
 					<DropdownMenu>
@@ -153,7 +150,7 @@ export const campaignColumns = ({
 							<DropdownMenuItem
 								onClick={() => {
 									navigate(
-										getToLink(`campaigns/${campaign.id}`)
+										getToLink(`campaigns/${campaign.id}/overview`)
 									);
 								}}
 							>
@@ -166,6 +163,18 @@ export const campaignColumns = ({
 								<CopyIcon />
 								{__('Duplicate', 'quillcrm')}
 							</DropdownMenuItem>
+							{canEdit && (
+								<DropdownMenuItem
+									onClick={() => {
+										navigate(
+											getToLink(`campaigns/${campaign.id}/template`)
+										);
+									}}
+								>
+									<EditIcon />
+									{__('Edit', 'quillcrm')}
+								</DropdownMenuItem>
+							)}
 							<DropdownMenuItem
 								onClick={() => onDelete(campaign.id)}
 								className="text-red-500 hover:text-red-500 focus:text-red-500"
@@ -178,5 +187,131 @@ export const campaignColumns = ({
 				</div>
 			);
 		},
-	},
-];
+	};
+
+	return {
+		selectColumn,
+		nameColumn,
+		statusColumn,
+		broadcastColumn,
+		createdAtColumn,
+		updatedAtColumn,
+		actionsColumn,
+	};
+};
+
+// Email campaign columns: name, status, broadcast, type, open rate, recipients, created_at, updated_at, actions
+export const emailCampaignColumns = ({
+	onDelete,
+	duplicate,
+	navigate,
+}: ColumnProps): ColumnDef<Campaign>[] => {
+	const {
+		selectColumn,
+		nameColumn,
+		statusColumn,
+		broadcastColumn,
+		createdAtColumn,
+		updatedAtColumn,
+		actionsColumn,
+	} = getCommonColumns({ onDelete, duplicate, navigate });
+
+	const typeColumn: ColumnDef<Campaign> = {
+		accessorKey: 'type',
+		header: ({ column }) =>
+			SortedHeaderCell({ column, header: __('Type', 'quillcrm') }),
+		cell: ({ row }) => {
+			const campaign = row.original;
+			const isAbTest = campaign.settings?.ab_test || false;
+
+			return (
+				<div className="flex items-center gap-2">
+					{isAbTest ? (
+						<div className="text-secondary">
+							<ABSplitIcon />
+						</div>
+					) : (
+						<div className="text-[#660FF1]">
+							<ProcessingEmailsIcon width={24} height={24} />
+						</div>
+					)}
+					<span>
+						{isAbTest
+							? __('A/B Split Campaign', 'quillcrm')
+							: __('Standard Campaign', 'quillcrm')}
+					</span>
+				</div>
+			);
+		},
+	};
+
+	const openRateColumn: ColumnDef<Campaign> = {
+		accessorKey: 'open_rate',
+		header: ({ column }) =>
+			SortedHeaderCell({ column, header: __('Open Rate', 'quillcrm') }),
+		cell: ({ row }) => <FallbackCell value={row.getValue('open_rate')} />,
+	};
+
+	const recipientsColumn: ColumnDef<Campaign> = {
+		accessorKey: 'contacts_count',
+		header: ({ column }) =>
+			SortedHeaderCell({ column, header: __('Recipients', 'quillcrm') }),
+		cell: ({ row }) => <FallbackCell value={row.getValue('contacts_count')} />,
+	};
+
+	return [
+		selectColumn,
+		nameColumn,
+		statusColumn,
+		broadcastColumn,
+		typeColumn,
+		openRateColumn,
+		recipientsColumn,
+		createdAtColumn,
+		updatedAtColumn,
+		actionsColumn,
+	];
+};
+
+// SMS/WhatsApp campaign columns: name, status, broadcast, delivered rate, created_at, updated_at, actions
+export const smsCampaignColumns = ({
+	onDelete,
+	duplicate,
+	navigate,
+}: ColumnProps): ColumnDef<Campaign>[] => {
+	const {
+		selectColumn,
+		nameColumn,
+		statusColumn,
+		broadcastColumn,
+		createdAtColumn,
+		updatedAtColumn,
+		actionsColumn,
+	} = getCommonColumns({ onDelete, duplicate, navigate });
+
+	const deliveryRateColumn: ColumnDef<Campaign> = {
+		accessorKey: 'delivery_rate',
+		header: ({ column }) =>
+			SortedHeaderCell({
+				column,
+				header: __('Delivery Rate', 'quillcrm'),
+			}),
+		cell: ({ row }) => (
+			<FallbackCell value={row.getValue('delivery_rate')} />
+		),
+	};
+
+	return [
+		selectColumn,
+		nameColumn,
+		statusColumn,
+		broadcastColumn,
+		deliveryRateColumn,
+		createdAtColumn,
+		updatedAtColumn,
+		actionsColumn,
+	];
+};
+
+// Legacy function for backward compatibility
+export const campaignColumns = emailCampaignColumns;

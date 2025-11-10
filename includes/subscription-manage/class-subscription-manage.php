@@ -149,7 +149,7 @@ class Subscription_Manage {
 			exit;
 		}
 
-		$redirect_url = $double_optin['redirect_url'] ?? home_url();
+		$redirect_url = $double_optin['confirmation_redirect'] ?? home_url();
 		wp_redirect( $redirect_url );
 	}
 

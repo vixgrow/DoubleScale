@@ -1,0 +1,163 @@
+/**
+ *  Wordpress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { useCallback, useEffect, useState } from '@wordpress/element';
+/**
+ *  External dependencies
+ */
+import {
+	AlignCenter,
+	AlignJustify,
+	AlignLeft,
+	AlignRight,
+} from 'lucide-react';
+import {
+	$getSelection,
+	$isRangeSelection,
+	FORMAT_ELEMENT_COMMAND,
+} from 'lexical';
+import { Button } from '@/components/ui/button';
+
+interface AlignmentStylesProps {
+	activeEditor: any;
+}
+
+export default function AlignmentStyles({
+	activeEditor,
+}: AlignmentStylesProps) {
+	const [alignment, setAlignment] = useState('left'); // Default alignment
+
+	// Define command handlers with specific alignment logic
+	const handleAlignLeft = () => {
+		activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left');
+		setAlignment('left');
+	};
+
+	const handleAlignCenter = () => {
+		activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center');
+		setAlignment('center');
+	};
+
+	const handleAlignRight = () => {
+		activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right');
+		setAlignment('right');
+	};
+
+	const handleAlignJustify = () => {
+		activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify');
+		setAlignment('justify');
+	};
+
+	// Update alignment state based on DOM instead of format bits
+	const updateAlignmentState = useCallback(() => {
+		activeEditor.getEditorState().read(() => {
+			const selection = $getSelection();
+			if ($isRangeSelection(selection)) {
+				const anchorNode = selection.anchor.getNode();
+				const element =
+					anchorNode.getKey() === 'root'
+						? anchorNode
+						: anchorNode.getTopLevelElementOrThrow();
+
+				const elementKey = element.getKey();
+				const elementDOM = activeEditor.getElementByKey(elementKey);
+
+				if (elementDOM) {
+					// Get style directly from DOM
+					const textAlign = elementDOM.style.textAlign;
+					if (textAlign === 'center') {
+						setAlignment('center');
+					} else if (textAlign === 'right') {
+						setAlignment('right');
+					} else if (textAlign === 'justify') {
+						setAlignment('justify');
+					} else {
+						setAlignment('left'); // Default or explicitly 'left'
+					}
+
+					console.log('Element style:', elementDOM.style.textAlign);
+					console.log('Setting alignment to:', textAlign || 'left');
+				}
+			}
+		});
+	}, [activeEditor]);
+
+	// Register update listener
+	useEffect(() => {
+		return activeEditor.registerUpdateListener(({ editorState }) => {
+			editorState.read(() => {
+				updateAlignmentState();
+			});
+		});
+	}, [activeEditor, updateAlignmentState]);
+
+	// Run update once on mount
+	useEffect(() => {
+		updateAlignmentState();
+	}, [updateAlignmentState]);
+
+	return (
+		<>
+			{/* Alignment */}
+			<div className="flex gap-2.5">
+				<Button
+					onClick={handleAlignLeft}
+					title="Align Left"
+					variant="ghost"
+					size="icon"
+					className="h-8 w-8 p-0"
+				>
+					<AlignLeft
+						className={`w-5 h-5 hover:text-color-primary ${alignment === 'left'
+								? 'text-color-primary'
+								: 'text-[#52525B]'
+							}`}
+					/>
+				</Button>
+				<Button
+					onClick={handleAlignCenter}
+					title="Align Center"
+					variant="ghost"
+					size="icon"
+					className="h-8 w-8 p-0"
+				>
+					<AlignCenter
+						className={`w-5 h-5 hover:text-color-primary ${alignment === 'center'
+								? 'text-color-primary'
+								: 'text-[#52525B]'
+							}`}
+					/>
+				</Button>
+				<Button
+					onClick={handleAlignRight}
+					title="Align Right"
+					variant="ghost"
+					size="icon"
+					className="h-8 w-8 p-0"
+				>
+					<AlignRight
+						className={`w-5 h-5 hover:text-color-primary ${alignment === 'right'
+								? 'text-color-primary'
+								: 'text-[#52525B]'
+							}`}
+					/>
+				</Button>
+				<Button
+					onClick={handleAlignJustify}
+					title="Align Justify"
+					variant="ghost"
+					size="icon"
+					className="h-8 w-8 p-0"
+				>
+					<AlignJustify
+						className={`w-5 h-5 hover:text-color-primary ${alignment === 'justify'
+								? 'text-color-primary'
+								: 'text-[#52525B]'
+							}`}
+					/>
+				</Button>
+			</div>
+		</>
+	);
+}

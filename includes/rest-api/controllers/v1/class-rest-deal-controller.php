@@ -303,11 +303,11 @@ class REST_Deal_Controller extends REST_Controller {
 			'source'              => sanitize_text_field( $request->get_param( 'source' ) ),
 		);
 
-		// Remove empty values
+		// Remove only empty strings, keep explicit nulls (allows clearing date fields)
 		$data = array_filter(
 			$data,
 			function ( $value ) {
-				return $value !== null && $value !== '';
+				return $value !== '';
 			}
 		);
 
@@ -365,7 +365,7 @@ class REST_Deal_Controller extends REST_Controller {
 				if ( $field === 'title' || $field === 'currency' || $field === 'source' || $field === 'priority' ) {
 					$data[ $field ] = sanitize_text_field( $value );
 				} elseif ( $field === 'expected_close_date' ) {
-					$data[ $field ] = sanitize_text_field( $value );
+					$data[ $field ] = $this->validate_and_sanitize_date( $value );
 				} elseif ( in_array( $field, array( 'contact_id', 'pipeline_id', 'stage_id', 'owner_id' ) ) ) {
 					$data[ $field ] = intval( $value );
 				} elseif ( $field === 'value' ) {
@@ -763,6 +763,70 @@ class REST_Deal_Controller extends REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Validate and sanitize date parameter
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $date_value Date value to validate (expects Y-m-d format).
+	 *
+	 * @return string|null Valid date string in Y-m-d format or null.
+	 */
+	private function validate_and_sanitize_date( $date_value ) {
+		// Handle null or empty - these are valid (field is nullable)
+		if ( $date_value === null || $date_value === '' ) {
+			return null;
+		}
+
+		// Sanitize the input
+		$clean_date = sanitize_text_field( $date_value );
+
+		// Validate format: Y-m-d (e.g., 2025-12-31)
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $clean_date ) ) {
+			return null; // Invalid format, treat as null
+		}
+
+		// Validate it's a real date (not 2025-13-45)
+		$date_parts = explode( '-', $clean_date );
+		if ( ! checkdate( (int) $date_parts[1], (int) $date_parts[2], (int) $date_parts[0] ) ) {
+			return null; // Invalid date
+		}
+
+		return $clean_date;
+	}
+
+	/**
+	 * Validate and sanitize datetime parameter
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $datetime_value Datetime value to validate (expects Y-m-d H:i:s format).
+	 *
+	 * @return string|null Valid datetime string in Y-m-d H:i:s format or null.
+	 */
+	private function validate_and_sanitize_datetime( $datetime_value ) {
+		// Handle null or empty - these are valid (field is nullable)
+		if ( $datetime_value === null || $datetime_value === '' ) {
+			return null;
+		}
+
+		// Sanitize the input
+		$clean_datetime = sanitize_text_field( $datetime_value );
+
+		// Validate format: Y-m-d H:i:s (e.g., 2025-12-31 14:30:00)
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $clean_datetime ) ) {
+			return null; // Invalid format
+		}
+
+		// Validate it's a real datetime
+		$datetime_obj = \DateTime::createFromFormat( 'Y-m-d H:i:s', $clean_datetime );
+		if ( ! $datetime_obj || $datetime_obj->format( 'Y-m-d H:i:s' ) !== $clean_datetime ) {
+			return null; // Invalid datetime
+		}
+
+		return $clean_datetime;
 	}
 
 	/**

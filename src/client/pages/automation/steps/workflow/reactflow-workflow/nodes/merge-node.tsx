@@ -10,23 +10,13 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
-import {
-	CheckOutlined,
-	CloseOutlined,
-	PlusOutlined,
-	TrophyOutlined,
-	BranchesOutlined,
-	DisconnectOutlined,
-	ThunderboltOutlined,
-} from '@ant-design/icons';
-import { Button, Popover, Flex, Spin } from 'antd';
-import { map } from 'lodash';
-
+import { CheckCircle, XCircle } from 'lucide-react';
 /**
  * Internal dependencies
  */
 import type { AutomationStep } from '@quillcrm/client';
 import { useAutomationContext } from '../../../../state/context';
+import { AddStepDialog } from '../../add-step-dialog';
 
 interface MergeNodeData {
 	condition: 'yes' | 'no' | 'merge';
@@ -36,6 +26,7 @@ interface MergeNodeData {
 	noChildCount?: number;
 	level?: number;
 	onMergeClick?: () => void;
+	onStepClick?: (step: any) => void;
 }
 
 const MergeNode: React.FC<NodeProps> = ({ data }) => {
@@ -46,14 +37,15 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 		noChildCount,
 		level,
 		onMergeClick,
+		onStepClick,
 	} = data as unknown as MergeNodeData;
 	const isYes = condition === 'yes';
 	const isMerge = condition === 'merge';
 	const mergeLevel = level || 0;
 
 	const [loading, setLoading] = useState(false);
-	const [popoverVisible, setPopoverVisible] = useState(false);
-	const { automation, steps, setSteps, setUpdatedSteps } =
+	const [visible, setVisible] = useState(false);
+	const { automation, steps, setSteps, setUpdatedSteps, viewMode = false } =
 		useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -61,26 +53,6 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 		if (onMergeClick) {
 			onMergeClick();
 		}
-	};
-
-	// Step types available for creation after merge
-	const typesOptions = {
-		action: {
-			label: __('Action', 'quillcrm'),
-			icon: <ThunderboltOutlined />,
-		},
-		condition: {
-			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
-		},
-		goal: {
-			label: __('Goal', 'quillcrm'),
-			icon: <TrophyOutlined />,
-		},
-		end_automation: {
-			label: __('End Automation', 'quillcrm'),
-			icon: <DisconnectOutlined />,
-		},
 	};
 
 	const updateStepOrderRecursive = (
@@ -120,8 +92,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	const handleStepSelection = async (type: string) => {
-		if (!automation) {
-			console.error('No automation context available');
+		if (!automation || viewMode) {
 			return;
 		}
 
@@ -162,7 +133,7 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 				targetOrder =
 					allSiblingsAtLevel.length > 0
 						? Math.max(...allSiblingsAtLevel.map((s) => s.order)) +
-							1
+						1
 						: conditionStep.order + 1;
 			}
 		} else {
@@ -213,6 +184,8 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			stepData.action = 'condition';
 		} else if (type === 'end_automation') {
 			stepData.action = 'end_automation';
+		} else if (type === 'delay') {
+			stepData.action = 'delay';
 		}
 
 		const { newSteps, updatedSteps, currentStepOrder } =
@@ -244,7 +217,26 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 				message: __('Step added after merge', 'quillcrm'),
 			});
 
-			setPopoverVisible(false);
+			// Close dialog first
+			setVisible(false);
+
+			// Then open modal/selector for action, condition, goal, and delay steps
+			// Use setTimeout to ensure dialog closes before modal opens
+			if (
+				(type === 'action' ||
+					type === 'condition' ||
+					type === 'goal' ||
+					type === 'delay') &&
+				onStepClick
+			) {
+				setTimeout(() => {
+					const organizedStep = {
+						...response,
+						children: [],
+					};
+					onStepClick(organizedStep);
+				}, 250);
+			}
 		} catch (error: any) {
 			console.error('Error creating step', error);
 			createNotice({
@@ -355,63 +347,19 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 
 			{/* Make merge node function as add-step node */}
 			{isMerge ? (
-				<Popover
-					placement="right"
-					trigger="click"
-					open={popoverVisible}
-					onOpenChange={(visible) => {
-						setPopoverVisible(visible);
-					}}
-					content={
-						<>
-							{loading && <Spin />}
-							{!loading && (
-								<Flex gap={10} wrap vertical>
-									{map(typesOptions, (type, key) => (
-										<Button
-											key={key}
-											icon={type.icon}
-											onClick={(e) => {
-												e.stopPropagation();
-												handleStepSelection(key);
-											}}
-											style={{
-												justifyContent: 'flex-start',
-											}}
-										>
-											{type.label}
-										</Button>
-									))}
-								</Flex>
-							)}
-						</>
-					}
-					overlayStyle={{ zIndex: 9999 }}
-					destroyTooltipOnHide
-				>
-					<div
-						style={{
-							pointerEvents: 'all',
-						}}
-						className="qcrm-edge-add-button"
-					>
-						<Button
-							type="primary"
-							shape="circle"
-							size="small"
-							icon={<PlusOutlined />}
-							title={__('Add step here', 'quillcrm')}
-							style={{
-								boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-								border: 'none',
-							}}
-						/>
-					</div>
-				</Popover>
+				<div className={viewMode ? 'qcrm-reactflow-merge__dialog--disabled' : ''}>
+					<AddStepDialog
+						visible={visible}
+						onVisibleChange={setVisible}
+						loading={loading}
+						onStepSelection={handleStepSelection}
+						disabled={viewMode}
+					/>
+				</div>
 			) : (
 				<div className="qcrm-reactflow-merge__content">
 					<div className="qcrm-reactflow-merge__icon">
-						{isYes ? <CheckOutlined /> : <CloseOutlined />}
+						{isYes ? <CheckCircle /> : <XCircle />}
 					</div>
 					<div className="qcrm-reactflow-merge__label">
 						{isYes ? __('Yes', 'quillcrm') : __('No', 'quillcrm')}

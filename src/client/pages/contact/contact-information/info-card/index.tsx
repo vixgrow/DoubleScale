@@ -21,6 +21,7 @@ import { EditIcon, OutlinedCustomFieldsIcon } from '@quillcrm/components';
 import { useCustomFields } from '../../../custom-fields/use-customFields';
 import Field from '@quillcrm/components/field';
 import { getToLink } from '@quillcrm/navigation';
+import { useNavigate } from '@quillcrm/navigation';
 
 type TabType = 'basic' | 'address' | 'custom';
 type EditingField =
@@ -54,7 +55,7 @@ const InfoCard: React.FC = () => {
     >('');
     const [isSavingCustomField, setIsSavingCustomField] =
         useState<boolean>(false);
-
+    const navigate = useNavigate();
     const tabs = [
         { id: 'basic' as TabType, label: __('Basic Information', 'quillcrm') },
         {
@@ -367,7 +368,7 @@ const InfoCard: React.FC = () => {
                         style={{ borderRadius: '0.5rem' }}
                     />
                 ) : (
-                    <div className="text-lg font-semibold">
+                    <div className="text-lg font-semibold truncate max-w-[400px]">
                         {value || __('—', 'quillcrm')}
                     </div>
                 )}
@@ -459,15 +460,14 @@ const InfoCard: React.FC = () => {
 
                 if (!hasCustomFields) {
                     return (
-                        <div className="flex flex-col items-center justify-center gap-4 py-8 text-muted-foreground">
+                        <div className="flex flex-col items-center justify-center gap-2 py-8 text-gray-500">
                             <OutlinedCustomFieldsIcon />
-                            <p className="text-base text-muted-foreground">
+                            <p className="text-lg font-medium">
                                 {__('No custom fields', 'quillcrm')}
                             </p>
                             <Button
                                 onClick={() => {
-                                    window.location.href =
-                                        getToLink('custom-fields');
+                                    navigate(getToLink('custom-fields'));
                                 }}
                                 className="shadow-none"
                                 variant="secondary"
@@ -496,6 +496,7 @@ const InfoCard: React.FC = () => {
                                     <CardHeader className="px-4 py-2 border-b bg-[#F8F8F8] rounded-t-xl">
                                         <CardTitle className="flex items-center justify-between font-medium text-lg">
                                             <div className="flex items-center gap-2">
+                                                <OutlinedCustomFieldsIcon width={20} height={20} />
                                                 {group.name}
                                             </div>
                                             <Button
@@ -682,14 +683,14 @@ const InfoCard: React.FC = () => {
     return (
         <Card className="shadow-none">
             <CardHeader className="px-4 pt-4 pb-0 border-b">
-                <div className="flex items-center gap-6 relative">
+                <div className="flex items-center justify-center gap-6 relative">
                     {tabs.map((tab) => (
                         <Button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`relative p-0 bg-transparent shadow-none hover:bg-transparent font-semibold pb-4 transition-colors ${activeTab === tab.id
-                                    ? 'text-secondary'
-                                    : 'text-[#1E2125]'
+                            className={`relative p-0 bg-transparent shadow-none hover:bg-transparent pb-4 transition-colors ${activeTab === tab.id
+                                    ? 'text-secondary font-semibold'
+                                    : 'text-[#1E2125] font-medium'
                                 }`}
                         >
                             {tab.label}

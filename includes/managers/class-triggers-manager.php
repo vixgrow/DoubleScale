@@ -20,9 +20,6 @@ use QuillCRM\Managers\Forms_Manager;
  */
 final class Triggers_Manager {
 
-
-
-
 	/**
 	 * Registed triggers
 	 *
@@ -164,16 +161,37 @@ final class Triggers_Manager {
 				 ),
 			 ),
 			 'woocommerce' => array(
-				 'label'       => __( 'WooCommerce', 'quillcrm' ),
-				 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
-				 'groups'      => array(
-					 'order' => array(
-						 'label'    => __( 'Order', 'quillcrm' ),
-						 'triggers' => array(),
+				 'label'  => __( 'WooCommerce', 'quillcrm' ),
+				 'groups' => array(
+					 'order'        => array(
+						 'label'       => __( 'Order', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 					 ),
-					 'cart'  => array(
-						 'label'    => __( 'Abandoned Cart', 'quillcrm' ),
-						 'triggers' => array(),
+					 'cart'         => array(
+						 'label'       => __( 'Cart', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					 ),
+					 'review'       => array(
+						 'label'       => __( 'Review', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					 ),
+					 'subscription' => array(
+						 'label'       => __( 'Subscription', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
+					 ),
+					 'wishlist'     => array(
+						 'label'       => __( 'Wishlist', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-wishlists/woocommerce-wishlists.php' ),
+					 ),
+					 'membership'   => array(
+						 'label'       => __( 'Membership', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
 					 ),
 				 ),
 			 ),
@@ -186,13 +204,23 @@ final class Triggers_Manager {
 					 ),
 				 ),
 			 ),
+			 'edd'         => array(
+				 'label'  => __( 'Easy Digital Downloads', 'quillcrm' ),
+				 'groups' => array(
+					 'order' => array(
+						 'label'       => __( 'Order', 'quillcrm' ),
+						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'easy-digital-downloads/easy-digital-downloads.php' ),
+					 ),
+				 ),
+			 ),
 			 'lms'         => array(
 				 'label'  => __( 'LMS', 'quillcrm' ),
 				 'groups' => array(
 					 'learndash' => array(
-						 'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 						 'label'       => __( 'LearnDash', 'quillcrm' ),
 						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 					 ),
 				 ),
 			 ),
@@ -200,9 +228,9 @@ final class Triggers_Manager {
 				 'label'  => __( 'MemberPress', 'quillcrm' ),
 				 'groups' => array(
 					 'memberpress' => array(
-						 'is_disabled' => ! quillcrm_is_plugin_active( 'memberpress/memberpress.php' ),
 						 'label'       => __( 'MemberPress', 'quillcrm' ),
 						 'triggers'    => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'memberpress/memberpress.php' ),
 					 ),
 				 ),
 			 ),
@@ -210,9 +238,9 @@ final class Triggers_Manager {
 				 'label'  => __( 'Booking', 'quillcrm' ),
 				 'groups' => array(
 					 'quillbooking' => array(
-						 'is_disabled' => ! $this->is_quillbooking_active(),
 						 'label'       => __( 'QuillBooking', 'quillcrm' ),
 						 'triggers'    => array(),
+						 'is_disabled' => ! $this->is_quillbooking_active(),
 					 ),
 				 ),
 			 ),

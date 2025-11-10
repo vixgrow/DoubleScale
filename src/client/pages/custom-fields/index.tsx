@@ -10,6 +10,7 @@ import React, {
 	useImperativeHandle,
 	useState,
 	useEffect,
+	useRef,
 } from 'react';
 import {
 	DndContext,
@@ -29,7 +30,7 @@ import {
 	CustomField,
 	CustomFieldsGroup,
 } from '@quillcrm/client';
-import { PageHeader, PlusIcon, GradientGroupIcon } from '@quillcrm/components';
+import { PageHeader, PlusIcon, GradientGroupIcon, NoData } from '@quillcrm/components';
 import { DataTableSearch } from '@/components/ui/data-table-search';
 import { DataTableActions } from '@/components/ui/data-table-actions';
 import { DroppableGroup } from './droppable-group';
@@ -96,6 +97,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 		} = useCustomFields(scope);
 
 		const [visible, setVisible] = useState(false);
+		const noticeBannerRef = useRef<HTMLDivElement>(null);
 		const [addGroupVisible, setAddGroupVisible] = useState(false);
 		const [deleteGroupVisible, setDeleteGroupVisible] = useState(false);
 		const [selectedField, setSelectedField] = useState<CustomField | null>(
@@ -198,9 +200,15 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			setEditingGroup(null);
 		};
 
-		// Effect to refetch groups when scope changes
+		// Scroll to notice banner when notice appears
 		useEffect(() => {
-			fetchGroups();
+			if (notice && noticeBannerRef.current) {
+				noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			}
+		}, [notice]);
+
+		// Effect to reset UI state when scope changes
+		useEffect(() => {
 			// Reset UI state when scope changes
 			setSelectedRowKeys([]);
 			setGlobalFilter('');
@@ -280,7 +288,6 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 			<div className="custom-fields mt-5">
 				<PageHeader
 					title={__('Custom Fields', 'quillcrm')}
-					subtitle={__('Custom Fields', 'quillcrm')}
 					actions={[
 						{
 							label: __('Add Field', 'quillcrm'),
@@ -314,7 +321,7 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 				/>
 				{/* Notice Banner */}
 				{notice && (
-					<NoticeBanner notice={notice} closeNotice={closeNotice} />
+					<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 				)}
 
 				{/* Global Actions */}
@@ -331,12 +338,8 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 							<Select
 								value={scope}
 								onValueChange={(value) => {
-									// Update scope state
+									// Update scope state - this will trigger the useEffect to reset UI and refetch groups
 									setScope(value);
-									// Reset selected rows when changing scope
-									setSelectedRowKeys([]);
-									// Fetch groups for the new scope
-									fetchGroups();
 								}}
 							>
 								<SelectTrigger className="w-[180px]">
@@ -394,30 +397,16 @@ export const CustomFields = forwardRef<CustomFieldsRef, CustomFieldsProps>(
 					<>
 						{/* Empty State - Show when no groups exist */}
 						{(!groups || groups.length === 0) ? (
-							<div className="flex flex-col items-center justify-center py-16 px-4">
-								{/* TODO: change it to no-data icon when we add dashboard to main */}
-								<div className="flex flex-col items-center space-y-4">
-									<GradientGroupIcon width={64} height={64} />
-									<div className="text-center space-y-2">
-										<h3 className="text-lg font-medium text-gray-900">
-											{__('No custom field groups yet', 'quillcrm')}
-										</h3>
-										<p className="text-sm text-gray-500 max-w-md">
-											{__('Create your first group to start organizing your custom fields.', 'quillcrm')}
-										</p>
-									</div>
-									<Button
-										onClick={() => {
-											setEditingGroup(null);
-											setAddGroupVisible(true);
-										}}
-										className="mt-4"
-									>
-										<PlusIcon />
-										{__('Create Group', 'quillcrm')}
-									</Button>
-								</div>
-							</div>
+							<NoData
+								icon={<GradientGroupIcon width={64} height={64} />}
+								title={__('No custom field groups yet', 'quillcrm')}
+								subtitle={__('Create your first group to start organizing your custom fields.', 'quillcrm')}
+								onClick={() => {
+									setEditingGroup(null);
+									setAddGroupVisible(true);
+								}}
+								buttonLabel={__('Create Group', 'quillcrm')}
+							/>
 						) : (
 							<div className="flex flex-col gap-[10px]">
 								<DndContext

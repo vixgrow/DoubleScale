@@ -7,178 +7,221 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type { EmailTemplate, EmailTemplateSettings } from '@quillcrm/client';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
+import { EmailTemplate } from '@quillcrm/client';
 
 /**
- * Prepare template data for API
- * Separates fields into columns vs settings
+ * Render a template to HTML
  */
-export const prepareTemplateForAPI = (template: Partial<EmailTemplate>) => {
-  // Fields that go into settings JSON column
-  const settings: Partial<EmailTemplateSettings> = {
-    from_name: template.from_name || '',
-    from_email: template.from_email || '',
-    reply_to: template.reply_to || '',
-    enable_utm: template.enable_utm || false,
-    utm_source: template.utm_source || '',
-    utm_medium: template.utm_medium || '',
-    utm_name: template.utm_name || '',
-    utm_term: template.utm_term || '',
-    utm_content: template.utm_content || '',
-  };
-
-  // Prepare body field - if email_body is provided, store it as JSON in body
-  let bodyContent = template.body || '';
-  if (template.email_body) {
-    bodyContent = JSON.stringify(template.email_body);
-  }
-
-  // Fields that go into direct columns
-  return {
-    name: template.name,
-    type: template.type || 'email',
-    subject: template.subject || '',
-    body: bodyContent, // Store builder data or rich-text content
-    preview_text: template.preview_text || '',
-    settings,
-  };
-};
-
-/**
- * Flatten template settings for UI
- * Combines settings JSON with top-level fields
- */
-export const flattenTemplateSettings = (template: any): EmailTemplate => {
-  const flattened: any = {
-    id: template.id,
-    name: template.name,
-    type: template.type,
-    subject: template.subject,
-    body: template.body,
-    preview_text: template.preview_text,
-    settings: template.settings,
-    created_at: template.created_at,
-    updated_at: template.updated_at,
-  };
-
-  // Flatten settings fields for UI convenience
-  if (template.settings) {
-    flattened.from_name = template.settings.from_name || '';
-    flattened.from_email = template.settings.from_email || '';
-    flattened.reply_to = template.settings.reply_to || '';
-    flattened.enable_utm = template.settings.enable_utm || false;
-    flattened.utm_source = template.settings.utm_source || '';
-    flattened.utm_medium = template.settings.utm_medium || '';
-    flattened.utm_name = template.settings.utm_name || '';
-    flattened.utm_term = template.settings.utm_term || '';
-    flattened.utm_content = template.settings.utm_content || '';
-  }
-
-  // Parse email_body from body field if it contains JSON
-  if (template.body) {
-    try {
-      const parsedBody = JSON.parse(template.body);
-      if (parsedBody && typeof parsedBody === 'object' && parsedBody.type === 'builder') {
-        flattened.email_body = parsedBody;
-      }
-    } catch (e) {
-      // If body is not JSON, it's probably rich-text content, leave as is
-    }
-  }
-
-  return flattened;
+export const renderTemplate = async (
+	templateId: number
+): Promise<string> => {
+	try {
+		const response = await apiFetch({
+			path: `/qc/v1/templates/${templateId}/render`,
+			method: 'POST',
+			data: {
+				merge_tags: {},
+			},
+		});
+		return (response as { html: string }).html;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to render template', 'quillcrm')
+		);
+	}
 };
 
 /**
  * Create a new template
  */
-export const createTemplate = async (templateData: Partial<EmailTemplate>): Promise<EmailTemplate> => {
-  try {
-    const preparedData = prepareTemplateForAPI(templateData);
-
-    const response = await apiFetch({
-      path: '/qc/v1/templates',
-      method: 'POST',
-      data: preparedData,
-    }) as any;
-
-    return flattenTemplateSettings(response);
-  } catch (error: any) {
-    throw new Error(error.message || __('Failed to create template', 'quillcrm'));
-  }
+export const createTemplate = async (
+	templateData: Partial<EmailTemplate>
+): Promise<EmailTemplate> => {
+	try {
+		const response = await apiFetch({
+			path: '/qc/v1/templates',
+			method: 'POST',
+			data: templateData,
+		});
+		return response as EmailTemplate;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to create template', 'quillcrm')
+		);
+	}
 };
 
 /**
  * Update an existing template
  */
 export const updateTemplate = async (
-  templateId: number,
-  templateData: Partial<EmailTemplate>
+	templateId: number,
+	templateData: Partial<EmailTemplate>
 ): Promise<EmailTemplate> => {
-  try {
-    const preparedData = prepareTemplateForAPI(templateData);
+	try {
+		const response = await apiFetch({
+			path: `/qc/v1/templates/${templateId}`,
+			method: 'PUT',
+			data: templateData,
+		});
 
-    const response = await apiFetch({
-      path: `/qc/v1/templates/${templateId}`,
-      method: 'PUT',
-      data: preparedData,
-    }) as any;
+		return response as EmailTemplate;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to update template', 'quillcrm')
+		);
+	}
+};
 
-    return flattenTemplateSettings(response);
-  } catch (error: any) {
-    throw new Error(error.message || __('Failed to update template', 'quillcrm'));
-  }
+/**
+ * Save template - smart endpoint that decides create vs update
+ * Backend logic:
+ * - No ID: Create new
+ * - ID + template in use: Create new (preserve original)
+ * - ID + NOT in use: Update existing
+ */
+export const saveTemplate = async (
+	templateData: Partial<EmailTemplate>
+): Promise<EmailTemplate> => {
+	try {
+		const response = await apiFetch({
+			path: '/qc/v1/templates/save',
+			method: 'POST',
+			data: templateData,
+		});
+
+		return response as EmailTemplate;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to save template', 'quillcrm')
+		);
+	}
 };
 
 /**
  * Get a template by ID
  */
-export const getTemplate = async (templateId: number): Promise<EmailTemplate> => {
-  try {
-    const response = await apiFetch({
-      path: `/qc/v1/templates/${templateId}`,
-    }) as any;
+export const getTemplate = async (
+	templateId: number
+): Promise<EmailTemplate> => {
+	try {
+		const response = await apiFetch({
+			path: `/qc/v1/templates/${templateId}`,
+		});
 
-    return flattenTemplateSettings(response);
-  } catch (error: any) {
-    throw new Error(error.message || __('Failed to fetch template', 'quillcrm'));
-  }
+		return response as EmailTemplate;
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to fetch template', 'quillcrm')
+		);
+	}
+};
+
+/**
+ * Get all templates
+ */
+export const getTemplates = async (): Promise<EmailTemplate[]> => {
+	try {
+		const response = await apiFetch({
+			path: '/qc/v1/templates',
+		});
+		return response as EmailTemplate[];
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to fetch templates', 'quillcrm')
+		);
+	}
+};
+
+/**
+ * Get user templates (non-hidden only)
+ * Dedicated function for user-created templates in MyTemplates panel
+ */
+export const getUserTemplates = async (params?: {
+	type?: string;
+	search?: string;
+}): Promise<EmailTemplate[]> => {
+	try {
+		// Build query parameters
+		const queryParams = new URLSearchParams();
+
+		if (params?.type) {
+			queryParams.append('type', params.type);
+		}
+
+		if (params?.search) {
+			queryParams.append('search', params.search);
+		}
+
+		const path = queryParams.toString()
+			? `/qc/v1/templates/user-templates?${queryParams.toString()}`
+			: '/qc/v1/templates/user-templates';
+
+		const response = await apiFetch({
+			path,
+		});
+		return response as EmailTemplate[];
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to fetch user templates', 'quillcrm')
+		);
+	}
 };
 
 /**
  * Delete a template
  */
 export const deleteTemplate = async (templateId: number): Promise<void> => {
-  try {
-    await apiFetch({
-      path: `/qc/v1/templates/${templateId}`,
-      method: 'DELETE',
-    });
-  } catch (error: any) {
-    throw new Error(error.message || __('Failed to delete template', 'quillcrm'));
-  }
+	try {
+		await apiFetch({
+			path: `/qc/v1/templates/${templateId}`,
+			method: 'DELETE',
+		});
+	} catch (error) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			errorMessage || __('Failed to delete template', 'quillcrm')
+		);
+	}
 };
+
+interface BuilderData {
+	sections: unknown[];
+	globalSettings: Record<string, unknown>;
+	buttonSettings: Record<string, unknown>;
+}
 
 /**
  * Save email as template (for builder "Save as Template" feature)
  * Saves builder data as a reusable template in the library
  */
 export const saveEmailAsTemplate = async (
-  templateName: string,
-  builderData: { sections: any; globalSettings: any; buttonSettings: any }
+	templateName: string,
+	builderData: BuilderData,
+	thumbnailUrl?: string
 ): Promise<EmailTemplate> => {
-  // Store builder data directly in body field as JSON
-  const bodyData = {
-    type: 'builder',
-    value: builderData,
-  };
+	// Store builder data directly in body field as JSON
+	const bodyData = {
+		type: 'builder',
+		value: builderData,
+	};
 
-  // Use createTemplate with proper structure
-  return createTemplate({
-    name: templateName,
-    type: 'email',
-    subject: '',
-    body: JSON.stringify(bodyData), // Store builder data in body field
-    preview_text: '',
-  });
+	// Use createTemplate with proper structure
+	return createTemplate({
+		name: templateName,
+		type: CAMPAIGN_CHANNEL.EMAIL,
+		subject: '',
+		body: JSON.stringify(bodyData), // Store builder data in body field
+		preview_text: '',
+		thumbnail: thumbnailUrl || '', // Always include thumbnail field, even if empty
+		hidden: false, // User-created templates should be visible
+	});
 };

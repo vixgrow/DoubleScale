@@ -3,13 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
  */
-import { Typography, Card, Flex, Select, Switch } from 'antd';
-import { map, keys, mapValues } from 'lodash';
+import { map, mapValues } from 'lodash';
 
 /**
  * Internal dependencies
@@ -19,7 +18,9 @@ import ConfigAPI from '@quillcrm/config';
 import type { Form } from '@quillcrm/config';
 import AjaxSelect from './ajax-select';
 import type { MappedFields } from '@quillcrm/client';
-import { ListField, TagField, ContactMappedFields } from '@quillcrm/components';
+import { Card, CardContent } from '@quillcrm/components/ui/card';
+import { Spinner } from '@quillcrm/components/ui/spinner';
+import MappingDialog from './mapping-dialog';
 
 interface FormFieldsProps {
 	values: { [key: string]: any };
@@ -27,10 +28,6 @@ interface FormFieldsProps {
 }
 
 const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
-	const { currentTrigger } = useSelect((select) => ({
-		currentTrigger: select('quillcrm/core').getCurrentTrigger(),
-	}));
-
 	const [formFields, setFormFields] = useState<
 		Form['fields_settings']['fields'] | null
 	>(null);
@@ -39,33 +36,12 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 		form_type,
 		form_id,
 		mapped_fields = {},
-		lists = [],
-		tags = [],
-		update_existing_contact = false,
-		update_blank_fields = false,
-		mark_as_subscribed = false,
 	} = values;
 	const forms = ConfigAPI.getForms();
 	const fieldsSettings = form_type ? forms[form_type]?.fields_settings : null;
 	const { getAjaxUrl, getNonce } = ConfigAPI;
 	const formOptions = form_type ? forms[form_type]?.options : {};
-	const { createNotice, setFormContext } = useDispatch('quillcrm/core');
-
-	// Auto-select form type based on current trigger and update values if needed
-	useEffect(() => {
-		if (
-			currentTrigger &&
-			forms[currentTrigger] &&
-			forms[currentTrigger].is_enabled &&
-			!form_type
-		) {
-			// Automatically select the form type that matches the current trigger
-			onChange({
-				...values,
-				form_type: currentTrigger,
-			});
-		}
-	}, [currentTrigger, form_type]);
+	const { createNotice } = useDispatch('quillcrm/core');
 
 	const checkConditions = (conditions) => {
 		if (!conditions) {
@@ -149,84 +125,11 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 
 	useEffect(() => {
 		getFormFields();
-
-		// Update form context when form_id or form_type changes
-		if (form_id && form_type) {
-			setFormContext({
-				formId: form_id,
-				triggerId: form_type,
-			});
-		} else {
-			setFormContext(null);
-		}
-	}, [form_id, form_type]);
+	}, [form_id]);
 
 	return (
-		<Flex gap={20} vertical>
+		<div className="flex flex-col gap-5">
 			<div className="qcrm-fields">
-				<div
-					className="qcrm-field"
-					style={{
-						flexDirection: 'row',
-						alignItems: 'center',
-						marginBottom: 20,
-					}}
-				>
-					<div className="qcrm-field-label">
-						<Typography.Text>
-							{currentTrigger &&
-							forms[currentTrigger] &&
-							forms[currentTrigger].is_enabled
-								? __(
-										'Form Type (Auto-selected from trigger)',
-										'quillcrm'
-									)
-								: __('Select Form Type', 'quillcrm')}
-						</Typography.Text>
-						{currentTrigger &&
-							forms[currentTrigger] &&
-							forms[currentTrigger].is_enabled && (
-								<Typography.Text
-									type="secondary"
-									style={{
-										fontSize: '12px',
-										display: 'block',
-									}}
-								>
-									{__(
-										'Based on your trigger selection',
-										'quillcrm'
-									)}
-								</Typography.Text>
-							)}
-					</div>
-					<div className="qcrm-field-input">
-						<Select
-							style={{ width: 200 }}
-							value={form_type || currentTrigger}
-							disabled={
-								!!(
-									currentTrigger &&
-									forms[currentTrigger] &&
-									forms[currentTrigger].is_enabled
-								)
-							}
-							onChange={(value) => {
-								onChange({
-									...values,
-									form_type: value,
-									form_id: null,
-									mapped_fields: {},
-								});
-							}}
-							options={map(keys(forms), (key) => ({
-								value: key,
-								label: forms[key].label,
-								disabled: !forms[key].is_enabled,
-							}))}
-						/>
-					</div>
-				</div>
 				{form_type &&
 					map(formOptions, (options, key) => {
 						const {
@@ -268,159 +171,38 @@ const FormFields: React.FC<FormFieldsProps> = ({ values, onChange }) => {
 						}
 					})}
 				{form_type && form_id && (
-					<Card loading={isFetching}>
-						{!isFetching && (
-							<div className="qcrm-fields">
-								<div className="qcrm-field">
-									<div className="qcrm-field-label">
-										<Typography.Text>
-											{__('Map fields', 'quillcrm')}
-										</Typography.Text>
+					<>
+						{isFetching ? (
+							<Card>
+								<CardContent className="pt-6">
+									<div className="flex justify-center items-center py-8">
+										<Spinner className="size-8" />
 									</div>
-									{formFields && (
-										<ContactMappedFields
-											values={mapped_fields}
-											onChange={(value: MappedFields) => {
-												onChange({
-													...values,
-													mapped_fields: value,
-												});
-											}}
-											fields={mapValues(
-												formFields,
-												(name) => ({ label: name })
-											)}
-										/>
+								</CardContent>
+							</Card>
+						) : (
+							formFields && (
+								<MappingDialog
+									values={mapped_fields}
+									onChange={(value: MappedFields) => {
+										onChange({
+											...values,
+											mapped_fields: value,
+										});
+									}}
+									onChangeAll={onChange}
+									allValues={values}
+									fields={mapValues(
+										formFields,
+										(name) => ({ label: name })
 									)}
-								</div>
-								<div className="qcrm-field">
-									<div className="qcrm-field-label">
-										<Typography.Text>
-											{__('Contact', 'quillcrm')}
-										</Typography.Text>
-									</div>
-									<div className="qcrm-field-input">
-										<Flex vertical={true} gap={10}>
-											<Flex
-												justify="space-between"
-												gap={10}
-											>
-												<Flex
-													vertical={true}
-													gap={10}
-													style={{ flex: 1 }}
-												>
-													<Typography.Text>
-														{__(
-															'Lists',
-															'quillcrm'
-														)}
-													</Typography.Text>
-													<ListField
-														value={lists}
-														onChange={(value) => {
-															onChange({
-																...values,
-																lists: value,
-															});
-														}}
-													/>
-												</Flex>
-												<Flex
-													vertical={true}
-													gap={10}
-													style={{ flex: 1 }}
-												>
-													<Typography.Text>
-														{__('Tags', 'quillcrm')}
-													</Typography.Text>
-													<TagField
-														value={tags}
-														onChange={(value) => {
-															onChange({
-																...values,
-																tags: value,
-															});
-														}}
-													/>
-												</Flex>
-											</Flex>
-											<Flex
-												gap={10}
-												justify="space-between"
-											>
-												<Typography.Text>
-													{__(
-														'Update existing contact',
-														'quillcrm'
-													)}
-												</Typography.Text>
-												<Switch
-													checked={
-														update_existing_contact
-													}
-													onChange={(value) => {
-														onChange({
-															...values,
-															update_existing_contact:
-																value,
-														});
-													}}
-												/>
-											</Flex>
-											<Flex
-												gap={10}
-												justify="space-between"
-											>
-												<Typography.Text>
-													{__(
-														'Update blank fields',
-														'quillcrm'
-													)}
-												</Typography.Text>
-												<Switch
-													checked={
-														update_blank_fields
-													}
-													onChange={(value) => {
-														onChange({
-															...values,
-															update_blank_fields:
-																value,
-														});
-													}}
-												/>
-											</Flex>
-											<Flex
-												gap={10}
-												justify="space-between"
-											>
-												<Typography.Text>
-													{__(
-														'Mark as Subscribed',
-														'quillcrm'
-													)}
-												</Typography.Text>
-												<Switch
-													checked={mark_as_subscribed}
-													onChange={(value) => {
-														onChange({
-															...values,
-															mark_as_subscribed:
-																value,
-														});
-													}}
-												/>
-											</Flex>
-										</Flex>
-									</div>
-								</div>
-							</div>
+								/>
+							)
 						)}
-					</Card>
+					</>
 				)}
 			</div>
-		</Flex>
+		</div>
 	);
 };
 

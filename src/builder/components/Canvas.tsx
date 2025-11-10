@@ -75,9 +75,7 @@ const Canvas = ({}: CanvasProps) => {
 				<div
 					ref={setNodeRefCanvas}
 					style={{
-						backgroundColor: isOverCanvas
-							? 'red'
-							: globalSettings.canvasColor,
+						backgroundColor: globalSettings.canvasColor,
 						backgroundImage: globalSettings.backgroundImage
 							? `url(${globalSettings.backgroundImage.url})`
 							: undefined,
@@ -86,7 +84,11 @@ const Canvas = ({}: CanvasProps) => {
 						backgroundPosition:
 							globalSettings.backgroundPosition || 'center',
 					}}
-					className="shadow-lg rounded-lg"
+					className={`shadow-lg rounded-lg ${
+						isOverCanvas
+							? 'border-2 border-dashed border-[#336cd3]'
+							: ''
+					}`}
 				>
 					<SortableContext
 						items={sections.map((s) => s.id)}

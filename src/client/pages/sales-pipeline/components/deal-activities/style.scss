@@ -206,6 +206,47 @@
 						}
 					}
 
+					// Activity action buttons for edit/delete
+					.activity-actions {
+						display: flex;
+						align-items: center;
+						gap: 8px;
+						margin-top: 12px;
+						padding-top: 12px;
+						border-top: 1px solid #f0f0f0;
+
+						.ant-btn {
+							padding: 0 8px;
+							height: 28px;
+							font-size: 13px;
+							display: flex;
+							align-items: center;
+							gap: 4px;
+
+							svg {
+								flex-shrink: 0;
+							}
+
+							&.ant-btn-text {
+								color: #595959;
+
+								&:hover {
+									color: #1890ff;
+									background-color: rgba(24, 144, 255, 0.06);
+								}
+
+								&.ant-btn-dangerous {
+									color: #ff4d4f;
+
+									&:hover {
+										color: #ff7875;
+										background-color: rgba(255, 77, 79, 0.06);
+									}
+								}
+							}
+						}
+					}
+
 					.activity-comments {
 						margin-top: 8px;
 						font-size: 12px;

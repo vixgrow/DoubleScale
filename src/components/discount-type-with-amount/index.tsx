@@ -61,8 +61,8 @@ const DiscountTypeWithAmount: React.FC<DiscountTypeWithAmountProps> = ({
 		selectOptions.find((option) => option.value === type) || null;
 
 	return (
-		<div className="discount-type-with-amount">
-			<div>
+		<div className="discount-type-with-amount flex gap-4 mb-4">
+			<div className="w-1/2">
 				<Select
 					className="react-select-container bg-white"
 					classNamePrefix="react-select"
@@ -83,7 +83,7 @@ const DiscountTypeWithAmount: React.FC<DiscountTypeWithAmountProps> = ({
 					}}
 				/>
 			</div>
-			<div className="w-full mt-2">
+			<div className="w-1/2">
 				<Input
 					value={amount}
 					onChange={handleAmountChange}

@@ -11,74 +11,159 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PageTabs from '@/components/page-tabs';
 import Emails from '../emails';
+import SMS from '../sms';
+// import WhatsApp from '../whatsapp';
 import PurchaseHistory from '../purchase-history';
 import Automation from '../automation';
 import Notes from '../notes';
 import { useContactContext } from '../state/context';
 import Deals from '../deals';
+import {
+	AutomationsIcon,
+	ContactSMSIcon,
+	ContactTotalEmailsIcon,
+	// ContactWhatsAppIcon,
+	DealsIcon,
+	NotesIcon,
+	PurchaseHistoryIcon,
+} from '@quillcrm/components';
+import ConfigAPI from '@quillcrm/config';
+import Courses from '../courses';
 
 const DataCard: React.FC = () => {
-    const { contact } = useContactContext();
+	const { contact } = useContactContext();
+	const isEddActive = ConfigAPI.isEddActive();
+	const isWooActive = ConfigAPI.isWoocommerceActive();
+	const lmsActive = ConfigAPI.isLmsActive();
 
-    if (!contact) {
-        return null;
-    }
+	if (!contact) {
+		return null;
+	}
 
-    return (
-        <Card className="w-2/3 bg-[#F8F8F8] shadow-none p-5">
-            <Tabs defaultValue="emails" className='w-full'>
-                <TabsList className="bg-transparent text-foreground gap-5 border-b pb-9 justify-start w-full pt-5">
-                    <TabsTrigger value="emails" className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        {__('Emails', 'quillcrm')}
-                    </TabsTrigger>
-                    <TabsTrigger value="deals" className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        {__('Deals', 'quillcrm')}
-                    </TabsTrigger>
-                    <TabsTrigger value="notes" className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        {__('Notes', 'quillcrm')}
-                    </TabsTrigger>
-                    <TabsTrigger value="automation" className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        {__('Automation', 'quillcrm')}
-                    </TabsTrigger>
-                    <TabsTrigger value="purchase-history" className="px-3 py-2 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        {__('Purchase History', 'quillcrm')}
-                    </TabsTrigger>
-                </TabsList>
+	const tabsList = [
+		{
+			value: 'emails',
+			label: 'Emails',
+			icon: <ContactTotalEmailsIcon width={24} height={24} />,
+		},
+		{ value: 'sms', label: 'SMS', icon: <ContactSMSIcon /> },
+		// { value: 'whatsapp', label: 'WhatsApp', icon: <ContactWhatsAppIcon /> },
+		{ value: 'deals', label: 'Deals', icon: <DealsIcon /> },
+		{ value: 'notes', label: 'Notes', icon: <NotesIcon /> },
+		{
+			value: 'automation',
+			label: 'Automation',
+			icon: <AutomationsIcon width={24} height={24} />,
+		},
+	];
 
-                <TabsContent value="emails">
-                    <CardContent className="pt-6">
-                        <Emails contact_id={contact.id} />
-                    </CardContent>
-                </TabsContent>
+	// Conditionally add Purchase History tab
+	if (isWooActive || isEddActive) {
+		tabsList.push({
+			value: 'purchase-history',
+			label: 'Purchase History',
+			icon: <PurchaseHistoryIcon />,
+		});
+	}
 
-                <TabsContent value="deals">
-                    <CardContent className="pt-6">
-                        <Deals contact_id={contact.id} />
-                    </CardContent>
-                </TabsContent>
+	// Conditionally add Courses tab
+	if (lmsActive) {
+		tabsList.push({
+			value: 'courses',
+			label: 'Courses',
+			icon: <AutomationsIcon width={24} height={24} />, // Replace with a Courses icon when available
+		});
+	}
 
-                <TabsContent value="notes">
-                    <CardContent className="pt-6">
-                        <Notes contact_id={contact.id} />
-                    </CardContent>
-                </TabsContent>
+	const tabsContent = [
+		{
+			value: 'emails',
+			children: (
+				<CardContent className="pt-6">
+					<Emails contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'sms',
+			children: (
+				<CardContent className="pt-6">
+					<SMS contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		// {
+		// 	value: 'whatsapp',
+		// 	children: (
+		// 		<CardContent className="pt-6">
+		// 			<WhatsApp contact_id={contact.id} />
+		// 		</CardContent>
+		// 	),
+		// },
+		{
+			value: 'deals',
+			children: (
+				<CardContent className="pt-6">
+					<Deals contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'notes',
+			children: (
+				<CardContent className="pt-6">
+					<Notes contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+		{
+			value: 'automation',
+			children: (
+				<CardContent className="pt-6">
+					<Automation contact_id={contact.id} />
+				</CardContent>
+			),
+		},
+	];
 
-                <TabsContent value="automation">
-                    <CardContent className="pt-6">
-                        <Automation contact_id={contact.id} />
-                    </CardContent>
-                </TabsContent>
+	// Conditionally add Purchase History content
+	if (isWooActive || isEddActive) {
+		tabsContent.push({
+			value: 'purchase-history',
+			children: (
+				<CardContent className="pt-6">
+					<PurchaseHistory contact_id={contact.id} />
+				</CardContent>
+			),
+		});
+	}
 
-                <TabsContent value="purchase-history">
-                    <CardContent className="pt-6">
-                        <PurchaseHistory contact_id={contact.id} />
-                    </CardContent>
-                </TabsContent>
-            </Tabs>
-        </Card>
-    );
+	// Conditionally add Courses content
+	if (lmsActive) {
+		tabsContent.push({
+			value: 'courses',
+			children: (
+				<CardContent className="pt-6">
+					<Courses contact_id={contact.id} />
+				</CardContent>
+			),
+		});
+	}
+
+	return (
+		<Card className="w-2/3 bg-[#F8F8F8] shadow-none p-5">
+			<PageTabs
+				defaultValue="emails"
+				tabsList={tabsList}
+				tabsContent={tabsContent}
+				className="w-full"
+				tabsListWrapperClassName="border-b pb-7 pt-5"
+				tabsListClassName="bg-transparent text-foreground gap-2 justify-start w-full"
+			/>
+		</Card>
+	);
 };
 
 export default DataCard;

@@ -73,7 +73,7 @@ class Remove_User_Role extends Action {
 			return false;
 		}
 
-		$role = $step->get_attribute( 'role' );
+		$role = $step->get_setting( 'role' );
 		if ( ! $role ) {
 			return false;
 		}

@@ -21,9 +21,14 @@ const BranchNode: React.FC<NodeProps> = ({ data }) => {
 	const { condition } = data as unknown as BranchNodeData;
 	const isYes = condition === 'yes';
 
+	// Tailwind classes for yes (green) and no (red/destructive)
+	const colorClasses = isYes
+		? 'bg-green-50 border-green-500 text-green-600 hover:bg-green-100 hover:border-green-600'
+		: 'bg-red-50 border-red-500 text-red-600 hover:bg-red-100 hover:border-red-600';
+
 	return (
 		<div
-			className={`qcrm-reactflow-node qcrm-reactflow-node--branch qcrm-reactflow-node--branch-${condition}`}
+			className={`qcrm-reactflow-node qcrm-reactflow-node--branch qcrm-reactflow-node--branch-${condition} ${colorClasses}`}
 		>
 			<Handle
 				type="target"

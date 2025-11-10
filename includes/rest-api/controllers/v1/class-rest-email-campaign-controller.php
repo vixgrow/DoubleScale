@@ -118,57 +118,17 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller {
 		// Send Test Email
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/send-test-email',
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/send-test-email',
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'send_test_message' ),
-					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
-						'email'      => array(
-							'description' => __( 'The email to send the test email to.', 'quillcrm' ),
-							'type'        => 'string',
+						'emails' => array(
+							'description' => __( 'Array of email addresses to send test emails to.', 'quillcrm' ),
+							'type'        => 'array',
 							'required'    => true,
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_email',
-							),
-						),
-						'subject'    => array(
-							'description' => __( 'The subject of the test email.', 'quillcrm' ),
-							'type'        => 'string',
-							'required'    => true,
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_text_field',
-							),
-						),
-						'body'       => array(
-							'description' => __( 'The body of the test email.', 'quillcrm' ),
-							'type'        => 'string',
-							'required'    => true,
-							'arg_options' => array(
-								'sanitize_callback' => 'wp_kses_post',
-							),
-						),
-						'from_name'  => array(
-							'description' => __( 'The from name of the test email.', 'quillcrm' ),
-							'type'        => 'string',
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_text_field',
-							),
-						),
-						'from_email' => array(
-							'description' => __( 'The from email of the test email.', 'quillcrm' ),
-							'type'        => 'string',
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_email',
-							),
-						),
-						'reply_to'   => array(
-							'description' => __( 'The reply to of the test email.', 'quillcrm' ),
-							'type'        => 'string',
-							'arg_options' => array(
-								'sanitize_callback' => 'sanitize_email',
-							),
 						),
 					),
 				),
@@ -205,77 +165,151 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller {
 	 */
 	public function send_test_message( $request ) {
 		try {
-			$email       = $request->get_param( 'email' );
-			$subject     = $request->get_param( 'subject' );
-			$body        = $request->get_param( 'body' );
-			$template_id = $request->get_param( 'template_id' );
-			$from_name   = $request->get_param( 'from_name' ) ?: get_option( 'blogname' );
-			$from_email  = $request->get_param( 'from_email' ) ?: get_option( 'admin_email' );
-			$reply_to    = $request->get_param( 'reply_to' );
+			$campaign_id = $request->get_param( 'id' );
+			$emails      = $request->get_param( 'emails' );
 
-			// If we have a template_id, get the template and use its subject and settings
-			if ( ! empty( $template_id ) ) {
-				$template = Template_Model::find( $template_id );
-				if ( $template ) {
-					// Use template subject if available
-					if ( ! empty( $template->subject ) ) {
-						$subject = $template->subject;
-					}
+			// Validate emails array
+			if ( empty( $emails ) || ! is_array( $emails ) ) {
+				return new WP_Error( 'invalid_emails', __( 'Please provide an array of email addresses', 'quillcrm' ), array( 'status' => 400 ) );
+			}
 
-					// Use template settings for from_name, from_email, reply_to
-					if ( ! empty( $template->settings ) ) {
-						$settings = is_array( $template->settings ) ? $template->settings : json_decode( $template->settings, true );
-
-						if ( ! empty( $settings['from_name'] ) ) {
-							$from_name = $settings['from_name'];
-						}
-						if ( ! empty( $settings['from_email'] ) && is_email( $settings['from_email'] ) ) {
-							$from_email = $settings['from_email'];
-						}
-						if ( ! empty( $settings['reply_to'] ) && is_email( $settings['reply_to'] ) ) {
-							$reply_to = $settings['reply_to'];
-						}
-					}
+			// Validate all email addresses
+			$invalid_emails = array();
+			foreach ( $emails as $email ) {
+				if ( ! is_email( $email ) ) {
+					$invalid_emails[] = $email;
 				}
 			}
 
-			$emails               = new Emails();
-			$emails->from_address = $from_email;
-			$emails->from_name    = $from_name;
-			if ( ! empty( $reply_to ) ) {
-				$emails->reply_to = $reply_to;
+			if ( ! empty( $invalid_emails ) ) {
+				return new WP_Error(
+					'invalid_emails',
+					sprintf(
+						/* translators: %s: comma-separated list of invalid email addresses */
+						__( 'Invalid email address(es): %s', 'quillcrm' ),
+						implode( ', ', $invalid_emails )
+					),
+					array( 'status' => 400 )
+				);
 			}
 
-			$for_testing_body = ! empty( $body ) ? $body : $this->get_default_test_email_content();
-			$contact          = Contact_Model::get_by_email( $email ) ?? null;
+			// Get campaign
+			$campaign = Campaign_Model::find( $campaign_id );
+			if ( ! $campaign ) {
+				return new WP_Error( 'campaign_not_found', __( 'Campaign not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
 
-			// If body is JSON (from builder) and we have a template_id, render it with Email_Renderer
-			$decoded_body = json_decode( $for_testing_body, true );
-			if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded_body ) && ! empty( $template_id ) ) {
-				// Create merge tags array
-				$merge_tags = $contact ? array( $contact ) : array();
+			// Get template ID from campaign
+			$campaign_settings = is_array( $campaign->settings ) ? $campaign->settings : json_decode( $campaign->settings, true );
 
-				$email_renderer   = new Email_Renderer();
-				$for_testing_body = $email_renderer->render_template( $template_id, $merge_tags );
+			// Email campaigns store template_ids, while SMS/WhatsApp store full templates
+			$template_id = $campaign_settings['template_ids'][0] ?? $campaign_settings['templates'][0]['id'] ?? null;
+
+			if ( ! $template_id ) {
+				return new WP_Error( 'template_not_found', __( 'Campaign template not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Get template
+			$template = Template_Model::find( $template_id );
+			if ( ! $template ) {
+				return new WP_Error( 'template_not_found', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Extract template settings
+			$template_settings = is_array( $template->settings ) ? $template->settings : json_decode( $template->settings, true );
+			$from_name         = $template_settings['from_name'] ?? get_option( 'blogname' );
+			$from_email        = $template_settings['from_email'] ?? get_option( 'admin_email' );
+			$reply_to          = $template_settings['reply_to'] ?? '';
+			$subject           = $template->subject ?? 'Test Email';
+
+			// Track results
+			$sent_count    = 0;
+			$failed_count  = 0;
+			$failed_emails = array();
+
+			// Send to each recipient
+			foreach ( $emails as $recipient_email ) {
+				$email_sender               = new Emails();
+				$email_sender->from_address = $from_email;
+				$email_sender->from_name    = $from_name;
+				if ( ! empty( $reply_to ) && is_email( $reply_to ) ) {
+					$email_sender->reply_to = $reply_to;
+				}
+
+				// Get contact for merge tags
+				$contact = Contact_Model::get_by_email( $recipient_email ) ?? null;
+
+				// Render template
+				$email_renderer = new Email_Renderer();
+				$merge_tags     = $contact ? array( $contact ) : array();
+				$body_content   = $email_renderer->render_template( $template_id, $merge_tags );
+
+				if ( empty( $body_content ) ) {
+					$failed_count++;
+					$failed_emails[] = $recipient_email;
+					continue;
+				}
+
+				// Process subject with merge tags
+				$processed_subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+
+				// Send email
+				$result = $email_sender->send( $recipient_email, $processed_subject, $body_content );
+
+				if ( $result ) {
+					$sent_count++;
+				} else {
+					$failed_count++;
+					$failed_emails[] = $recipient_email;
+				}
+			}
+
+			// Prepare response
+			if ( $sent_count > 0 && $failed_count === 0 ) {
+				return new WP_REST_Response(
+					array(
+						'success'    => true,
+						'message'    => sprintf(
+							/* translators: %d: number of emails sent */
+							_n(
+								'Test email sent successfully to %d recipient',
+								'Test emails sent successfully to %d recipients',
+								$sent_count,
+								'quillcrm'
+							),
+							$sent_count
+						),
+						'sent_count' => $sent_count,
+					),
+					200
+				);
+			} elseif ( $sent_count > 0 && $failed_count > 0 ) {
+				return new WP_REST_Response(
+					array(
+						'success'       => true,
+						'message'       => sprintf(
+							/* translators: 1: number of successful sends, 2: number of failures */
+							__( 'Test emails sent: %1$d succeeded, %2$d failed', 'quillcrm' ),
+							$sent_count,
+							$failed_count
+						),
+						'sent_count'    => $sent_count,
+						'failed_count'  => $failed_count,
+						'failed_emails' => $failed_emails,
+					),
+					200
+				);
 			} else {
-				// Process merge tags for non-builder emails
-				$for_testing_body = Merge_Tags_Manager::instance()->process_merge_tags( $for_testing_body, $contact );
+				return new WP_Error(
+					'send_failed',
+					sprintf(
+						/* translators: %s: comma-separated list of failed email addresses */
+						__( 'Failed to send test email to: %s', 'quillcrm' ),
+						implode( ', ', $failed_emails )
+					),
+					array( 'status' => 500 )
+				);
 			}
-
-			// Process subject with merge tags
-			$subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
-
-			$result = $emails->send(
-				$email,
-				$subject,
-				$for_testing_body
-			);
-
-			if ( ! $result ) {
-				return new WP_Error( 'error', __( 'Failed to send test email', 'quillcrm' ), array( 'status' => 500 ) );
-			}
-
-			return new WP_REST_Response( array( 'message' => 'Test email sent successfully' ), 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}

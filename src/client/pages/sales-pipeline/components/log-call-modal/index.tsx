@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -59,7 +59,9 @@ interface LogCallModalProps {
 		last_name: string;
 		email: string;
 	} | null;
-	dealContactName?:string
+	dealContactName?:string;
+	editMode?: boolean;
+	activity?: any;
 }
 
 interface CallFormData {
@@ -80,10 +82,12 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 	dealId,
 	dealTitle,
 	dealContact,
-	dealContactName
+	dealContactName,
+	editMode = false,
+	activity,
 }) => {
 	const [loading, setLoading] = useState(false);
-	const { logCall } = useActivityOperations();
+	const { logCall, updateActivity } = useActivityOperations();
 	const dispatch = useDispatch('quillcrm/core');
 	const createNotice = dispatch?.createNotice;
 
@@ -94,6 +98,33 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 			duration: 60,
 		},
 	});
+
+	// Load existing activity data when in edit mode
+	useEffect(() => {
+		if (editMode && activity && visible) {
+			form.reset({
+				phone_number: activity.data?.phone_number || '',
+				duration: activity.data?.duration || 60,
+				outcome: activity.data?.outcome || 'completed',
+				notes: activity.data?.notes || '',
+				called_at: activity.data?.called_at || dayjs().format('YYYY-MM-DD HH:mm:ss'),
+				dealTitle: dealTitle || '',
+				dealContactName: dealContactName || '',
+				dealContact: '',
+			});
+		} else if (!visible) {
+			form.reset({
+				outcome: 'completed',
+				called_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+				duration: 60,
+				phone_number: '',
+				notes: '',
+				dealTitle: dealTitle || '',
+				dealContactName: dealContactName || '',
+				dealContact: '',
+			});
+		}
+	}, [editMode, activity, visible, form, dealTitle, dealContactName]);
 
 	const handleDialogSubmit = async (values: any) => {
 		setLoading(true);
@@ -108,11 +139,19 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 					: dayjs().format('YYYY-MM-DD HH:mm:ss'),
 			};
 
-			await logCall(dealId, callData);
-			createNotice?.({
-				type: 'success',
-				message: __(`Call logged successfully!`, 'quillcrm'),
-			});
+			if (editMode && activity) {
+				await updateActivity(activity.id, 'call_logged', callData);
+				createNotice?.({
+					type: 'success',
+					message: __('Call updated successfully!', 'quillcrm'),
+				});
+			} else {
+				await logCall(dealId, callData);
+				createNotice?.({
+					type: 'success',
+					message: __('Call logged successfully!', 'quillcrm'),
+				});
+			}
 
 			form.reset();
 			onSuccess();
@@ -121,7 +160,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 			const err = error as Error;
 			createNotice?.({
 				type: 'error',
-				message: err.message || __('Failed to log call', 'quillcrm'),
+				message: err.message || __(editMode ? 'Failed to update call' : 'Failed to log call', 'quillcrm'),
 			});
 
 		} finally {
@@ -140,7 +179,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader
-							title={__('Add Log Call', 'quillcrm')}
+							title={editMode ? __('Edit Log Call', 'quillcrm') : __('Add Log Call', 'quillcrm')}
 							subtitle=""
 							icon={<CallLogIcon />}
 						/>
@@ -393,8 +432,8 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-[8px] font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
 							>
 								{loading
-									? __('Adding...', 'quillcrm')
-									: __('Add Log Call', 'quillcrm')}
+									? (editMode ? __('Updating...', 'quillcrm') : __('Adding...', 'quillcrm'))
+									: (editMode ? __('Update Log Call', 'quillcrm') : __('Add Log Call', 'quillcrm'))}
 							</Button>
 				</DialogFooter>
 					</form>

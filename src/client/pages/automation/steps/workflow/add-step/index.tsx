@@ -7,24 +7,12 @@ import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
 /**
- * External dependencies
- */
-import { Button, Flex, Popover, Spin } from 'antd';
-import {
-	TrophyOutlined,
-	BranchesOutlined,
-	DisconnectOutlined,
-	ThunderboltOutlined,
-	PlusCircleOutlined,
-} from '@ant-design/icons';
-import { map } from 'lodash';
-
-/**
  * Internal dependencies
  */
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
+import { AddStepDialog } from '../add-step-dialog';
 
 const updateStepOrderRecursive = (
 	steps: AutomationStep[],
@@ -99,6 +87,7 @@ const AddStep: React.FC<AddStepProps> = ({
 	const { automation, steps, setSteps, setUpdatedSteps } =
 		useAutomationContext();
 	const [loading, setLoading] = useState(false);
+	const [visible, setVisible] = useState(false);
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	if (!automation) {
@@ -147,11 +136,27 @@ const AddStep: React.FC<AddStepProps> = ({
 			} as OrganizedStep;
 			setUpdatedSteps({});
 			setSteps([...newSteps, response]);
-			setStep(organizedStep);
+
 			createNotice({
 				type: 'success',
 				message: __('Step added', 'quillcrm'),
 			});
+
+			// Close dialog first
+			setVisible(false);
+
+			// Then open modal/selector for action, condition, goal, and delay steps
+			// Use setTimeout to ensure dialog closes before modal opens
+			if (
+				type === 'action' ||
+				type === 'condition' ||
+				type === 'goal' ||
+				type === 'delay'
+			) {
+				setTimeout(() => {
+					setStep(organizedStep);
+				}, 250);
+			}
 		} catch (error: any) {
 			createNotice({
 				type: 'error',
@@ -174,63 +179,13 @@ const AddStep: React.FC<AddStepProps> = ({
 		return 1;
 	};
 
-	const typesOptions = {
-		action: {
-			label: __('Action', 'quillcrm'),
-			icon: <ThunderboltOutlined />,
-		},
-		condition: {
-			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
-		},
-		goal: {
-			label: __('Goal', 'quillcrm'),
-			icon: <TrophyOutlined />,
-		},
-		end_automation: {
-			label: __('End Automation', 'quillcrm'),
-			icon: <DisconnectOutlined />,
-		},
-	};
-
 	return (
-		<Popover
-			placement="top"
-			trigger="click"
-			content={
-				<>
-					{loading && <Spin />}
-					{!loading && (
-						<Flex gap={10} wrap>
-							{map(typesOptions, (type, key) => (
-								<Button
-									key={key}
-									icon={type.icon}
-									onClick={() => storeStep(key)}
-								>
-									{type.label}
-								</Button>
-							))}
-						</Flex>
-					)}
-				</>
-			}
-		>
-			<Flex
-				justify="center"
-				align="center"
-				className="qcrm-automation-workflow__add-step"
-			>
-				<Button
-					type="primary"
-					icon={<PlusCircleOutlined />}
-					style={{
-						borderRadius: '50%',
-					}}
-					className="add-step-button"
-				/>
-			</Flex>
-		</Popover>
+		<AddStepDialog
+			visible={visible}
+			onVisibleChange={setVisible}
+			loading={loading}
+			onStepSelection={storeStep}
+		/>
 	);
 };
 

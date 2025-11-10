@@ -36,6 +36,7 @@ export const useContactsAPI = () => {
 		setBulkAction,
 		setIsApplying,
 		openContactDialog,
+		setHasRecords,
 	} = useContactsContext();
 
 	const fetchContacts = async () => {
@@ -54,6 +55,7 @@ export const useContactsAPI = () => {
 			})) as ContactsResponse;
 
 			setTotalRecords(response.total || 0);
+			setHasRecords((response.total_count || 0) > 0);
 			response.data && setData(response.data);
 		} catch (error) {
 			showNotice('error', __('Failed to fetch contacts', 'quillcrm'));

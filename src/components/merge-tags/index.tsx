@@ -20,7 +20,7 @@ import {
 	DialogOverlay,
 	DialogHeader,
 } from '@/components/ui/dialog';
-import { MergeTagsIcon } from '@quillcrm/components';
+import { GradientMergeTagsIcon } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -81,6 +81,10 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 	const automationMergeTagsWithTrigger = filter(
 		automationMergeTags,
 		(group) => {
+			// Filter out disabled groups
+			if (group.is_disabled) {
+				return false;
+			}
 			return !group.triggers || group.triggers.includes(currentTrigger);
 		}
 	);
@@ -98,7 +102,7 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 							'Choose your Merge tags type and Select one of them related to your input.',
 							'quillcrm'
 						)}
-						icon={<MergeTagsIcon />}
+						icon={<GradientMergeTagsIcon />}
 					/>
 				</DialogHeader>
 
@@ -144,6 +148,7 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 								<MergeTagsGroupRender
 									mergeTags={selectedGroup.mergeTags}
 									onInsertTag={onInsertTag}
+									activeTrigger={currentTrigger}
 								/>
 							)}
 						</CardContent>
@@ -157,8 +162,23 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 const MergeTagsGroupRender: React.FC<{
 	mergeTags: MergeTags;
 	onInsertTag?: (tagValue: string) => void;
-}> = ({ mergeTags, onInsertTag }) => {
+	activeTrigger?: string;
+}> = ({ mergeTags, onInsertTag, activeTrigger }) => {
 	const { createNotice, setMergeTagsVisible } = useDispatch('quillcrm/core');
+
+	// Filter merge tags based on required_triggers
+	const filteredMergeTags = filter(mergeTags, (tag) => {
+		// If tag has no required_triggers, show it
+		if (!tag.required_triggers || tag.required_triggers.length === 0) {
+			return true;
+		}
+		// If no active trigger, hide tags with required_triggers
+		if (!activeTrigger) {
+			return false;
+		}
+		// Show tag only if current trigger is in required_triggers
+		return tag.required_triggers.includes(activeTrigger);
+	});
 
 	const handleTagClick = (tagValue: string) => {
 		if (onInsertTag) {
@@ -176,7 +196,7 @@ const MergeTagsGroupRender: React.FC<{
 
 	return (
 		<div className="space-y-3 max-h-96 overflow-y-auto">
-			{map(mergeTags, (tag, key) => (
+			{map(filteredMergeTags, (tag, key) => (
 				<Card
 					key={key}
 					className="cursor-pointer shadow-none transition-all duration-200 hover:shadow-md hover:bg-gray-50"

@@ -1,0 +1,100 @@
+import { IconProps } from '@quillcrm/config';
+
+const GradientMergeTagsIcon: React.FC<IconProps> = ({
+	width = 24,
+	height = 24,
+}) => {
+	return (
+		<svg
+			width={width}
+			height={height}
+			viewBox="0 0 24 24"
+			fill="none"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<g clip-path="url(#clip0_32478_28909)">
+				<mask
+					id="mask0_32478_28909"
+					style={{ maskType: 'luminance' }}
+					maskUnits="userSpaceOnUse"
+					x="0"
+					y="0"
+					width="24"
+					height="24"
+				>
+					<path d="M24 0H0V24H24V0Z" fill="white" />
+				</mask>
+				<g mask="url(#mask0_32478_28909)">
+					<path
+						opacity="0.4"
+						d="M22 8V16.19C22 19.83 19.83 22 16.19 22H7.81C4.17 22 2 19.83 2 16.19V8.01L22 8Z"
+						fill="url(#paint0_linear_32478_28909)"
+					/>
+					<path
+						d="M8.99996 17.7504C8.88996 17.7504 8.76996 17.7204 8.66996 17.6704C7.89996 17.2804 7.23996 16.7004 6.75996 15.9804C6.35996 15.3804 6.35996 14.6104 6.75996 14.0104C7.23996 13.2904 7.89996 12.7104 8.66996 12.3304C9.03996 12.1404 9.48996 12.3004 9.67996 12.6704C9.86996 13.0404 9.71996 13.4904 9.33996 13.6804C8.79996 13.9504 8.33996 14.3604 8.00996 14.8604C7.94996 14.9504 7.94996 15.0704 8.00996 15.1704C8.33996 15.6704 8.79996 16.0804 9.33996 16.3504C9.70996 16.5404 9.85996 16.9904 9.67996 17.3604C9.53996 17.6004 9.26996 17.7504 8.99996 17.7504Z"
+						fill="url(#paint1_linear_32478_28909)"
+					/>
+					<path
+						d="M15.2102 17.7504C14.9302 17.7504 14.6702 17.6004 14.5402 17.3404C14.3502 16.9704 14.5002 16.5204 14.8802 16.3304C15.4202 16.0604 15.8802 15.6504 16.2102 15.1504C16.2702 15.0604 16.2702 14.9404 16.2102 14.8404C15.8802 14.3404 15.4202 13.9304 14.8802 13.6604C14.5102 13.4704 14.3602 13.0204 14.5402 12.6504C14.7302 12.2804 15.1802 12.1304 15.5502 12.3104C16.3202 12.7004 16.9802 13.2804 17.4602 14.0004C17.8602 14.6004 17.8602 15.3704 17.4602 15.9704C16.9802 16.6904 16.3202 17.2704 15.5502 17.6504C15.4302 17.7204 15.3202 17.7504 15.2102 17.7504Z"
+						fill="url(#paint2_linear_32478_28909)"
+					/>
+					<path
+						d="M22 7.81V8L2 8.01V7.81C2 4.17 4.17 2 7.81 2H16.19C19.83 2 22 4.17 22 7.81Z"
+						fill="url(#paint3_linear_32478_28909)"
+					/>
+				</g>
+			</g>
+			<defs>
+				<linearGradient
+					id="paint0_linear_32478_28909"
+					x1="2"
+					y1="15"
+					x2="22"
+					y2="15"
+					gradientUnits="userSpaceOnUse"
+				>
+					<stop offset="0.610577" stop-color="#1E3A8A" />
+					<stop offset="1" stop-color="#3B82F6" />
+				</linearGradient>
+				<linearGradient
+					id="paint1_linear_32478_28909"
+					x1="6.45996"
+					y1="15.0002"
+					x2="9.76217"
+					y2="15.0002"
+					gradientUnits="userSpaceOnUse"
+				>
+					<stop offset="0.610577" stop-color="#1E3A8A" />
+					<stop offset="1" stop-color="#3B82F6" />
+				</linearGradient>
+				<linearGradient
+					id="paint2_linear_32478_28909"
+					x1="14.458"
+					y1="14.9924"
+					x2="17.7602"
+					y2="14.9924"
+					gradientUnits="userSpaceOnUse"
+				>
+					<stop offset="0.610577" stop-color="#1E3A8A" />
+					<stop offset="1" stop-color="#3B82F6" />
+				</linearGradient>
+				<linearGradient
+					id="paint3_linear_32478_28909"
+					x1="2"
+					y1="5.005"
+					x2="22"
+					y2="5.005"
+					gradientUnits="userSpaceOnUse"
+				>
+					<stop offset="0.610577" stop-color="#1E3A8A" />
+					<stop offset="1" stop-color="#3B82F6" />
+				</linearGradient>
+				<clipPath id="clip0_32478_28909">
+					<rect width="24" height="24" fill="white" />
+				</clipPath>
+			</defs>
+		</svg>
+	);
+};
+
+export default GradientMergeTagsIcon;

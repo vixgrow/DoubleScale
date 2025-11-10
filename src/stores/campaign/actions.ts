@@ -7,14 +7,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getCampaignEndpoint } from '@quillcrm/utils';
 import {
 	SET_CAMPAIGN,
 	SET_ERROR,
 	SET_LOADING,
 	SET_SAVING,
 	UPDATE_CAMPAIGN,
-	UPDATE_SETTINGS
+	UPDATE_SETTINGS,
 } from './constants';
 import type { ExtendedCampaign } from './types';
 
@@ -73,126 +72,145 @@ export const setError = (error: string | null) => ({
 /**
  * Fetch campaign from API
  */
-export const fetchCampaign = (id: string) => async ({ dispatch }: any) => {
-	dispatch(setLoading(true));
-	dispatch(setError(null));
+export const fetchCampaign =
+	(id: string, campaignType?: string) =>
+		async ({ dispatch }: any) => {
+			dispatch(setLoading(true));
+			dispatch(setError(null));
 
-	try {
-		const response = await apiFetch({
-			path: `/qc/v1/campaigns/${id}`,
-		}) as ExtendedCampaign;
+			try {
+				// Use unified endpoint for all campaign types
+				const response = (await apiFetch({
+					path: `/qc/v1/campaigns/${id}`,
+				})) as ExtendedCampaign;
 
-		dispatch(setCampaign(response));
-	} catch (error: any) {
-		dispatch(setError(error.message || __('Failed to fetch campaign', 'quillcrm')));
-	} finally {
-		dispatch(setLoading(false));
-	}
-};
+				dispatch(setCampaign(response));
+			} catch (error: any) {
+				dispatch(
+					setError(
+						error.message || __('Failed to fetch campaign', 'quillcrm')
+					)
+				);
+			} finally {
+				dispatch(setLoading(false));
+			}
+		};
 
 /**
  * Save campaign to API
  */
-export const saveCampaign = (data: Partial<ExtendedCampaign> = {}) => async ({ select, dispatch }: any) => {
-	const campaign = select.getCampaign();
+export const saveCampaign =
+	(data: Partial<ExtendedCampaign> = {}) =>
+		async ({ select, dispatch }: any) => {
+			const campaign = select.getCampaign();
 
-	if (!campaign) {
-		throw new Error(__('Campaign not loaded', 'quillcrm'));
-	}
+			if (!campaign) {
+				throw new Error(__('Campaign not loaded', 'quillcrm'));
+			}
 
-	dispatch(setSaving(true));
-	dispatch(setError(null));
+			dispatch(setSaving(true));
+			dispatch(setError(null));
 
-	try {
-		const endpoint = getCampaignEndpoint(campaign.type);
-		if (!endpoint) {
-			throw new Error(__('Invalid campaign type', 'quillcrm'));
-		}
+			try {
+				// Use unified endpoint - type is auto-detected from campaign
+				const response = (await apiFetch({
+					path: `/qc/v1/campaigns/${campaign.id}`,
+					method: 'PUT',
+					data: {
+						...campaign,
+						...data,
+					},
+				})) as ExtendedCampaign;
 
-		const response = await apiFetch({
-			path: `${endpoint}/${campaign.id}`,
-			method: 'PUT',
-			data: {
-				...campaign,
-				...data,
-			},
-		}) as ExtendedCampaign;
-
-		dispatch(setCampaign(response));
-		return response;
-	} catch (error: any) {
-		dispatch(setError(error.message));
-		throw error;
-	} finally {
-		dispatch(setSaving(false));
-	}
-};
+				dispatch(setCampaign(response));
+				return response;
+			} catch (error: any) {
+				dispatch(setError(error.message));
+				throw error;
+			} finally {
+				dispatch(setSaving(false));
+			}
+		};
 
 /**
  * Save campaign step data
  */
-export const saveCampaignStep = (step: string, stepData?: any) => async ({ select, dispatch }: any) => {
-	const campaign = select.getCampaign();
+export const saveCampaignStep =
+	(step: string, stepData?: any) =>
+		async ({ select, dispatch }: any) => {
+			const campaign = select.getCampaign();
 
-	if (!campaign) {
-		return false;
-	}
-
-	dispatch(setSaving(true));
-	dispatch(setError(null));
-
-	try {
-		let updatedSettings = { ...campaign.settings, current_step: step };
-
-		// Handle template step - add template_id to template_ids array
-		if (step === 'template' && stepData?.template_id) {
-			const templateIds = campaign.settings.template_ids || [];
-			// Replace the first template ID or add new one
-			const newTemplateIds = templateIds.length > 0
-				? [stepData.template_id, ...templateIds.slice(1)]
-				: [stepData.template_id];
-
-			updatedSettings.template_ids = newTemplateIds;
-		} else {
-			// Handle other steps - save to their respective data fields
-			const stepDataMap: Record<string, string> = {
-				'contacts': 'contacts_data',
-				'review': 'review_data',
-			};
-
-			const dataKey = stepDataMap[step];
-
-			if (!dataKey) {
-				throw new Error(__(`Invalid step: ${step}`, 'quillcrm'));
+			if (!campaign) {
+				return false;
 			}
 
-			// Get existing step data for this specific step
-			const existingStepData = (campaign.settings as any)[dataKey] || {};
+			dispatch(setSaving(true));
+			dispatch(setError(null));
 
-			// Merge existing step data with new step data
-			const updatedStepData = {
-				...existingStepData,
-				...stepData,
-			};
+			try {
+				let updatedSettings = { ...campaign.settings, current_step: step };
+				delete updatedSettings.templates;
 
-			(updatedSettings as any)[dataKey] = updatedStepData;
-		}
+				// Handle template step - add template_id to template_ids array
+				if (step === 'template' && stepData?.template_id) {
+					const templateIds = campaign.settings.template_ids || [];
+					// Replace the first template ID or add new one
+					const newTemplateIds =
+						templateIds.length > 0
+							? [stepData.template_id, ...templateIds.slice(1)]
+							: [stepData.template_id];
 
-		const response = await apiFetch({
-			path: `/qc/v1/campaigns/${campaign.id}`,
-			method: 'POST',
-			data: {
-				...campaign,
-				settings: updatedSettings,
-			},
-		}) as ExtendedCampaign;
+					updatedSettings.template_ids = newTemplateIds;
+				} else {
+					// Handle other steps - save to their respective data fields
+					const stepDataMap: Record<string, string> = {
+						contacts: 'contacts_data',
+						review: 'review_data',
+					};
 
-		dispatch(setCampaign(response));
-		return true;
-	} catch (error: any) {
-		dispatch(setError(error.message || __('Failed to save step data. Please try again.', 'quillcrm')));
-		return false;
-	} finally {
-		dispatch(setSaving(false));
-	}
-};
+					const dataKey = stepDataMap[step];
+
+					if (!dataKey) {
+						throw new Error(__(`Invalid step: ${step}`, 'quillcrm'));
+					}
+
+					// Get existing step data for this specific step
+					const existingStepData =
+						(campaign.settings as any)[dataKey] || {};
+
+					// Merge existing step data with new step data
+					const updatedStepData = {
+						...existingStepData,
+						...stepData,
+					};
+
+					(updatedSettings as any)[dataKey] = updatedStepData;
+				}
+
+				// Use unified endpoint - type is auto-detected from campaign
+				const response = (await apiFetch({
+					path: `/qc/v1/campaigns/${campaign.id}`,
+					method: 'PUT',
+					data: {
+						...campaign,
+						settings: updatedSettings,
+					},
+				})) as ExtendedCampaign;
+
+				dispatch(setCampaign(response));
+				return true;
+			} catch (error: any) {
+				dispatch(
+					setError(
+						error.message ||
+						__(
+							'Failed to save step data. Please try again.',
+							'quillcrm'
+						)
+					)
+				);
+				return false;
+			} finally {
+				dispatch(setSaving(false));
+			}
+		};

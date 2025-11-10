@@ -18,6 +18,7 @@ use QuillCRM\Database\Migrations\Custom_Field_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_List_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_Tag_Relationship_Table;
 use QuillCRM\Database\Migrations\Contact_Notes_Table;
+use QuillCRM\Database\Migrations\Contact_Meta_Table;
 use QuillCRM\Database\Migrations\Contacts_Table;
 use QuillCRM\Database\Migrations\Custom_Fields_Groups_Table;
 use QuillCRM\Database\Migrations\Custom_Fields_Table;
@@ -27,6 +28,7 @@ use QuillCRM\Database\Migrations\Campaigns_Table;
 use QuillCRM\Database\Migrations\Templates_Table;
 use QuillCRM\Database\Migrations\Task_Meta_Table;
 use QuillCRM\Database\Migrations\Tracking_Table;
+use QuillCRM\Database\Migrations\Messages_Table;
 use QuillCRM\Database\Migrations\Forms_Table;
 use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
 use QuillCRM\Database\Migrations\Link_Triggers_Table;
@@ -37,11 +39,13 @@ use QuillCRM\Database\Migrations\Pipeline_Stages_Table;
 use QuillCRM\Database\Migrations\Deals_Table;
 use QuillCRM\Database\Migrations\Deal_Activities_Table;
 use QuillCRM\Database\Migrations\Activity_Comments_Table;
+use QuillCRM\User_Roles\User_Roles;
 
 /**
  * Install class
  */
 class Install {
+
 
 
 
@@ -62,6 +66,7 @@ class Install {
 			'quillcrm_database_tables',
 			array(
 				'contacts'                     => Contacts_Table::class,
+				'contact_meta'                 => Contact_Meta_Table::class,
 				'custom_field_relationship'    => Custom_Field_Relationship_Table::class,
 				'contact_list_relationship'    => Contact_List_Relationship_Table::class,
 				'contact_tag_relationship'     => Contact_Tag_Relationship_Table::class,
@@ -77,6 +82,7 @@ class Install {
 				'automation_contacts'          => Automation_Contacts_Table::class,
 				'task_meta'                    => Task_Meta_Table::class,
 				'tracking'                     => Tracking_Table::class,
+				'messages'                     => Messages_Table::class,
 				'forms'                        => Forms_Table::class,
 				'automation_contact_processes' => Automation_Contact_Processes_Table::class,
 				'link_triggers'                => Link_Triggers_Table::class,
@@ -103,6 +109,6 @@ class Install {
 		// If we made it till here nothing is running yet, lets set the transient now.
 		set_transient( 'quillcrm_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		delete_transient( 'quillcrm_installing' );
-		do_action( 'quillcrm_installed' );
+		User_Roles::add_roles_and_capabilities();
 	}
 }

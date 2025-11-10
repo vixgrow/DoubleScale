@@ -9,15 +9,6 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { Button, Flex, Popover, Spin } from 'antd';
-import {
-	TrophyOutlined,
-	BranchesOutlined,
-	DisconnectOutlined,
-	ThunderboltOutlined,
-	PlusOutlined,
-} from '@ant-design/icons';
-import { map } from 'lodash';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 
 /**
@@ -25,11 +16,13 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
  */
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep } from '@quillcrm/client';
+import { AddStepDialog } from '../../add-step-dialog';
 
 interface AddStepNodeData {
 	parentId?: number | null;
 	condition?: string | null;
 	prevStep?: AutomationStep | null;
+	onStepClick?: (step: any) => void;
 }
 
 const updateStepOrderRecursive = (
@@ -69,35 +62,17 @@ const updateStepOrderRecursive = (
 };
 
 const AddStepNode: React.FC<NodeProps> = ({ data }) => {
-	const { parentId, condition, prevStep } =
+	const { parentId, condition, prevStep, onStepClick } =
 		data as unknown as AddStepNodeData;
 	const [loading, setLoading] = useState(false);
-	const { automation, steps, setSteps, setUpdatedSteps } =
+	const [visible, setVisible] = useState(false);
+	const { automation, steps, setSteps, setUpdatedSteps, viewMode = false } =
 		useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
 	if (!automation) {
 		return null;
 	}
-
-	const typesOptions = {
-		action: {
-			label: __('Action', 'quillcrm'),
-			icon: <ThunderboltOutlined />,
-		},
-		condition: {
-			label: __('Condition', 'quillcrm'),
-			icon: <BranchesOutlined />,
-		},
-		goal: {
-			label: __('Goal', 'quillcrm'),
-			icon: <TrophyOutlined />,
-		},
-		end_automation: {
-			label: __('End Automation', 'quillcrm'),
-			icon: <DisconnectOutlined />,
-		},
-	};
 
 	const getNewStepOrder = () => {
 		// Find steps in the same branch to determine proper order
@@ -156,6 +131,8 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 			stepData.action = 'condition';
 		} else if (type === 'end_automation') {
 			stepData.action = 'end_automation';
+		} else if (type === 'delay') {
+			stepData.action = 'delay';
 		}
 		// For 'action' and 'goal' types, leave action empty - will be set when user selects specific action/goal
 
@@ -192,6 +169,27 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 				type: 'success',
 				message: __('Step added', 'quillcrm'),
 			});
+
+			// Close dialog first
+			setVisible(false);
+
+			// Then open modal/selector for action, condition, goal, and delay steps
+			// Use setTimeout to ensure dialog closes before modal opens
+			if (
+				(type === 'action' ||
+					type === 'condition' ||
+					type === 'goal' ||
+					type === 'delay') &&
+				onStepClick
+			) {
+				setTimeout(() => {
+					const organizedStep = {
+						...response,
+						children: [],
+					};
+					onStepClick(organizedStep);
+				}, 250);
+			}
 		} catch (error: any) {
 			console.error('Failed to create step:', error);
 			console.error('Request data was:', requestData);
@@ -206,74 +204,28 @@ const AddStepNode: React.FC<NodeProps> = ({ data }) => {
 	};
 
 	return (
-		<div
-			className="qcrm-reactflow-node qcrm-reactflow-node--add-step"
-			style={{
-				width: 'auto',
-				height: 'auto',
-				minWidth: 'auto',
-				padding: '0',
-				background: 'transparent',
-				border: 'none',
-				boxShadow: 'none',
-			}}
+		<div 
+			className={`qcrm-reactflow-node qcrm-reactflow-node--add-step w-auto h-auto min-w-0 p-0 bg-transparent border-0 shadow-none ${viewMode ? 'qcrm-reactflow-node--disabled' : ''}`}
 		>
-			<Handle
-				type="target"
-				position={Position.Top}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
-			/>
+		<Handle
+			type="target"
+			position={Position.Top}
+			className="qcrm-reactflow-handle qcrm-reactflow-handle--target"
+		/>
 
-			<Popover
-				placement="right"
-				trigger="click"
-				content={
-					<>
-						{loading && <Spin />}
-						{!loading && (
-							<Flex gap={10} wrap vertical>
-								{map(typesOptions, (type, key) => (
-									<Button
-										key={key}
-										icon={type.icon}
-										onClick={() => handleStepSelection(key)}
-										style={{
-											justifyContent: 'flex-start',
-										}}
-									>
-										{type.label}
-									</Button>
-								))}
-							</Flex>
-						)}
-					</>
-				}
-			>
-				<div
-					style={{
-						pointerEvents: 'all',
-					}}
-					className="qcrm-edge-add-button"
-				>
-					<Button
-						type="primary"
-						shape="circle"
-						size="small"
-						icon={<PlusOutlined />}
-						title={__('Add step here', 'quillcrm')}
-						style={{
-							boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-							border: 'none',
-						}}
-					/>
-				</div>
-			</Popover>
+		<AddStepDialog
+			visible={visible}
+			onVisibleChange={setVisible}
+			loading={loading}
+			onStepSelection={handleStepSelection}
+			disabled={viewMode}
+		/>
 
-			<Handle
-				type="source"
-				position={Position.Bottom}
-				className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
-			/>
+		<Handle
+			type="source"
+			position={Position.Bottom}
+			className="qcrm-reactflow-handle qcrm-reactflow-handle--source"
+		/>
 		</div>
 	);
 };

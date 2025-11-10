@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 
-
 const initializeTrigger = (
 	automation,
 	steps,
@@ -17,18 +16,32 @@ const initializeTrigger = (
 	nodeWidth,
 	addStepWidth,
 	onTriggerClick,
-	savedPositions = {}
+	onStepClick,
+	savedPositions = {},
+	isTriggerVisible = false,
+	viewMode = false,
+	analyticsData = []
 ) => {
 	// Always add trigger node at the top
 	const triggerPosition = savedPositions['trigger'] || {
 		x: startX,
 		y: startY,
 	};
+	
+	// Get trigger analytics
+	const triggerAnalytics = analyticsData.find((a) => a.step_id === null || a.step_type === 'trigger');
+	
 	initialNodes.push({
 		id: 'trigger',
 		type: 'trigger',
 		position: triggerPosition,
-		data: { automation, onTriggerClick },
+		data: { 
+			automation, 
+			onTriggerClick, 
+			isTriggerVisible, 
+			viewMode,
+			analytics: triggerAnalytics 
+		},
 	});
 
 	if (!steps || steps.length === 0) {
@@ -45,6 +58,7 @@ const initializeTrigger = (
 				parentId: null,
 				condition: null,
 				prevStep: null,
+				onStepClick,
 			},
 		});
 
@@ -56,6 +70,7 @@ const initializeTrigger = (
 			data: {
 				sourceStep: undefined,
 				targetStep: undefined,
+				onStepClick,
 			},
 		});
 
@@ -64,9 +79,6 @@ const initializeTrigger = (
 		return;
 	}
 };
-
-
-
 
 function addFinalAddStep(
 	steps,
@@ -77,6 +89,7 @@ function addFinalAddStep(
 	incrementY,
 	nodeWidth,
 	addStepWidth,
+	onStepClick,
 	savedPositions = {},
 	getNodePositionLocal,
 	result
@@ -131,6 +144,7 @@ function addFinalAddStep(
 					parentId: null,
 					condition: null,
 					prevStep: lastRootStep,
+					onStepClick,
 				},
 			});
 
@@ -158,6 +172,7 @@ function addFinalAddStep(
 							sourceStep: { id: mergeId, type: 'merge' },
 							targetStep: undefined, // adding at end
 							fromMerge: true,
+							onStepClick,
 						},
 					});
 				} else {
@@ -170,6 +185,7 @@ function addFinalAddStep(
 						data: {
 							sourceStep: lastRootStep,
 							targetStep: undefined, // adding at end
+							onStepClick,
 						},
 					});
 				}
@@ -184,6 +200,7 @@ function addFinalAddStep(
 					data: {
 						sourceStep: lastRootStep,
 						targetStep: undefined, // adding at end
+						onStepClick,
 					},
 				});
 			}

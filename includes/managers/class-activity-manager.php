@@ -480,6 +480,144 @@ final class Activity_Manager {
 	}
 
 	/**
+	 * Update activity (only for user-created activities)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int      $activity_id Activity ID
+	 * @param array    $data Activity data to update
+	 * @param int|null $user_id User performing the action
+	 *
+	 * @return Deal_Activity_Model|null
+	 */
+	public function update_activity( $activity_id, $data, $user_id = null ) {
+		$activity = Deal_Activity_Model::with( 'deal' )->find( $activity_id );
+
+		if ( ! $activity ) {
+			return null;
+		}
+
+		// Check if activity is system-generated (immutable)
+		if ( $activity->is_system_activity() ) {
+			return null;
+		}
+
+		// Check permissions
+		if ( Permissions::is_deal_owner() ) {
+			if ( $activity->deal->owner_id != get_current_user_id() ) {
+				return null;
+			}
+		}
+
+		// Only allow the creator or admin to edit
+		if ( $user_id && $activity->user_id !== $user_id && ! current_user_can( 'manage_options' ) ) {
+			return null;
+		}
+
+		// Update activity data based on type
+		switch ( $activity->activity_type ) {
+			case 'note_added':
+				if ( isset( $data['note'] ) ) {
+					$activity->data = array( 'content' => wp_kses_post( $data['note'] ) );
+				}
+				break;
+
+			case 'email_sent':
+				if ( isset( $data['email_data'] ) && is_array( $data['email_data'] ) ) {
+					$sanitized_data = array(
+						'subject'       => sanitize_text_field( $data['email_data']['subject'] ?? $activity->data['subject'] ?? '' ),
+						'sent_at'       => $data['email_data']['sent_at'] ?? $activity->data['sent_at'] ?? current_time( 'mysql' ),
+						'contact_id'    => $activity->data['contact_id'] ?? null,
+						'contact_email' => $activity->data['contact_email'] ?? '',
+						'contact_name'  => $activity->data['contact_name'] ?? '',
+					);
+					$activity->data = $sanitized_data;
+				}
+				break;
+
+			case 'call_logged':
+				if ( isset( $data['call_data'] ) && is_array( $data['call_data'] ) ) {
+					$sanitized_data = array(
+						'duration'     => isset( $data['call_data']['duration'] ) ? intval( $data['call_data']['duration'] ) : ( $activity->data['duration'] ?? null ),
+						'outcome'      => sanitize_text_field( $data['call_data']['outcome'] ?? $activity->data['outcome'] ?? '' ),
+						'notes'        => wp_kses_post( $data['call_data']['notes'] ?? $activity->data['notes'] ?? '' ),
+						'called_at'    => $data['call_data']['called_at'] ?? $activity->data['called_at'] ?? current_time( 'mysql' ),
+						'phone_number' => sanitize_text_field( $data['call_data']['phone_number'] ?? $activity->data['phone_number'] ?? '' ),
+					);
+					$activity->data = $sanitized_data;
+				}
+				break;
+
+			case 'meeting_scheduled':
+				if ( isset( $data['meeting_data'] ) && is_array( $data['meeting_data'] ) ) {
+					$sanitized_data = array(
+						'title'                    => sanitize_text_field( $data['meeting_data']['title'] ?? $activity->data['title'] ?? '' ),
+						'scheduled_at'             => sanitize_text_field( $data['meeting_data']['scheduled_at'] ?? $activity->data['scheduled_at'] ?? '' ),
+						'duration'                 => isset( $data['meeting_data']['duration'] ) ? intval( $data['meeting_data']['duration'] ) : ( $activity->data['duration'] ?? 60 ),
+						'location'                 => sanitize_text_field( $data['meeting_data']['location'] ?? $activity->data['location'] ?? '' ),
+						'description'              => wp_kses_post( $data['meeting_data']['description'] ?? $activity->data['description'] ?? '' ),
+						'primary_attendee_id'      => $activity->data['primary_attendee_id'] ?? null,
+						'primary_attendee_name'    => $activity->data['primary_attendee_name'] ?? '',
+						'primary_attendee_email'   => $activity->data['primary_attendee_email'] ?? '',
+					);
+					$activity->data = $sanitized_data;
+				}
+				break;
+		}
+
+		$activity->save();
+
+		do_action( 'quillcrm_activity_updated', $activity );
+
+		return $activity;
+	}
+
+	/**
+	 * Delete activity (only for user-created activities)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int      $activity_id Activity ID
+	 * @param int|null $user_id User performing the action
+	 *
+	 * @return bool
+	 */
+	public function delete_activity( $activity_id, $user_id = null ) {
+		$activity = Deal_Activity_Model::with( 'deal' )->find( $activity_id );
+
+		if ( ! $activity ) {
+			return false;
+		}
+
+		// Check if activity is system-generated (immutable)
+		if ( $activity->is_system_activity() ) {
+			return false;
+		}
+
+		// Check permissions
+		if ( Permissions::is_deal_owner() ) {
+			if ( $activity->deal->owner_id != get_current_user_id() ) {
+				return false;
+			}
+		}
+
+		// Only allow the creator or admin to delete
+		if ( $user_id && $activity->user_id !== $user_id && ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+
+		do_action( 'quillcrm_activity_before_delete', $activity );
+
+		$deleted = $activity->delete();
+
+		if ( $deleted ) {
+			do_action( 'quillcrm_activity_deleted', $activity_id );
+		}
+
+		return $deleted;
+	}
+
+	/**
 	 * Bulk delete activities
 	 *
 	 * @since 1.0.0
@@ -497,17 +635,8 @@ final class Activity_Manager {
 		$deleted_count = 0;
 
 		foreach ( $activity_ids as $activity_id ) {
-			$activity = Deal_Activity_Model::find( $activity_id );
-
-			if ( $activity ) {
-				// Check permissions if needed
-				if ( $user_id && ! current_user_can( 'manage_options' ) ) {
-					continue;
-				}
-
-				if ( $activity->delete() ) {
-					$deleted_count++;
-				}
+			if ( $this->delete_activity( $activity_id, $user_id ) ) {
+				$deleted_count++;
 			}
 		}
 

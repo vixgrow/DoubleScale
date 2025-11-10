@@ -18,6 +18,7 @@ import { motion } from 'framer-motion';
  * Internal dependencies
  */
 import Contacts from '../pages/contacts';
+import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
 import CustomFields from '../pages/custom-fields';
@@ -90,6 +91,14 @@ registerAdminPage('contacts', {
 	requiredCapability: ['quillcrm_crm_manager'],
 });
 
+registerAdminPage('contact', {
+	path: 'contacts/:id/:tab?',
+	component: () => <Contact />,
+	label: __('Contact', 'quillcrm'),
+	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
+});
+
 registerAdminPage('lists', {
 	path: 'lists',
 	component: () => <Lists />,
@@ -111,6 +120,7 @@ registerAdminPage('custom-fields', {
 	label: __('Custom Fields', 'quillcrm'),
 	icon: <CustomFieldsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
+	hidden: true,
 });
 
 registerAdminPage('campaigns', {
@@ -194,6 +204,7 @@ registerAdminPage('link-triggers', {
 	label: __('Link Triggers', 'quillcrm'),
 	icon: <ToolsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
+	hidden: true,
 });
 
 registerAdminPage('link-trigger', {

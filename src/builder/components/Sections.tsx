@@ -1,8 +1,4 @@
 /**
- * wordpress dependencies
- */
-import { useDispatch } from '@wordpress/data';
-/**
  * external dependencies
  */
 import { v4 as uuidv4 } from 'uuid';
@@ -11,24 +7,15 @@ import { v4 as uuidv4 } from 'uuid';
  */
 import { blocksRegistry } from '../blocks/BlockRegister';
 import TemplateCard from './TemplateCard';
-import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
 
 const Sections = () => {
-	const dispatch = useDispatch();
-
 	const handleBlockDrop = (blockType: string) => {
-		// This would be called when a block is dropped on the canvas
-		// For now, we'll create a default block
 		const newBlock: EmailBlock = {
 			id: uuidv4(),
 			type: blockType as any,
 			props: blocksRegistry[blockType]?.defaultProps || {},
 		};
-
-		// Note: In a full implementation, you'd need to handle the drop target coordinates
-		// For now, we'll just add to the first available column
-		console.log('Block ready to be dropped:', newBlock);
 		return newBlock;
 	};
 
@@ -36,7 +23,8 @@ const Sections = () => {
 		<div
 			className="py-4 grid gap-4"
 			style={{
-				gridTemplateColumns: '50% 50%',
+				gridTemplateColumns: '1fr 1fr',
+				gridAutoRows: '120px', // Fixed height for all rows
 			}}
 		>
 			{Object.entries(blocksRegistry)

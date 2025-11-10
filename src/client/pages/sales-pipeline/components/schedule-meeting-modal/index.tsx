@@ -81,7 +81,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 			};
 
 			if (editMode && activity) {
-				await updateActivity(activity.id, 'meeting_scheduled', { meeting_data: meetingData });
+				await updateActivity(activity.id, 'meeting_scheduled', meetingData);
 				message.success(__('Meeting updated successfully!', 'quillcrm'));
 			} else {
 				await scheduleMeeting(dealId, meetingData);

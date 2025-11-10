@@ -138,20 +138,21 @@ export const useActivityOperations = (): ActivityOperationsReturn => {
 		async (activityId: number, activityType: string, data: any) => {
 			try {
 				// Prepare request data based on activity type
+				// Modals pass raw data: string for note, objects for others
 				const requestData: any = {};
-				
+
 				switch (activityType) {
 					case 'note_added':
-						requestData.note = data.note || data;
+						requestData.note = data;
 						break;
 					case 'email_sent':
-						requestData.email_data = data.email_data || data;
+						requestData.email_data = data;
 						break;
 					case 'call_logged':
-						requestData.call_data = data.call_data || data;
+						requestData.call_data = data;
 						break;
 					case 'meeting_scheduled':
-						requestData.meeting_data = data.meeting_data || data;
+						requestData.meeting_data = data;
 						break;
 					default:
 						throw new Error('Invalid activity type for update');

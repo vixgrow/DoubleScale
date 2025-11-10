@@ -57,7 +57,7 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 		setLoading(true);
 		try {
 			if (editMode && activity) {
-				await updateActivity(activity.id, 'note_added', { note: values.note });
+				await updateActivity(activity.id, 'note_added', values.note);
 				message.success(__('Note updated successfully!', 'quillcrm'));
 			} else {
 				await addNote(dealId, values.note);

@@ -222,26 +222,22 @@ export const DealActivities: React.FC<DealActivitiesProps> = ({
 	};
 
 	const handleEditActivity = (activity: Activity) => {
-		// Set editing activity first, then open modal in next tick
 		setEditingActivity(activity);
 
-		// Use setTimeout to ensure state update completes before opening modal
-		setTimeout(() => {
-			switch (activity.activity_type) {
-				case 'note_added':
-					setAddNoteVisible(true);
-					break;
-				case 'call_logged':
-					setLogCallVisible(true);
-					break;
-				case 'email_sent':
-					setLogEmailVisible(true);
-					break;
-				case 'meeting_scheduled':
-					setScheduleMeetingVisible(true);
-					break;
-			}
-		}, 0);
+		switch (activity.activity_type) {
+			case 'note_added':
+				setAddNoteVisible(true);
+				break;
+			case 'call_logged':
+				setLogCallVisible(true);
+				break;
+			case 'email_sent':
+				setLogEmailVisible(true);
+				break;
+			case 'meeting_scheduled':
+				setScheduleMeetingVisible(true);
+				break;
+		}
 	};
 
 	const handleDeleteActivity = async (activityId: number) => {

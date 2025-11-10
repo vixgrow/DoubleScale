@@ -90,7 +90,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 			};
 
 			if (editMode && activity) {
-				await updateActivity(activity.id, 'call_logged', { call_data: callData });
+				await updateActivity(activity.id, 'call_logged', callData);
 				message.success(__('Call updated successfully!', 'quillcrm'));
 			} else {
 				await logCall(dealId, callData);

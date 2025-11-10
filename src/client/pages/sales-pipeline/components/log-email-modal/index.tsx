@@ -69,7 +69,7 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 			};
 
 			if (editMode && activity) {
-				await updateActivity(activity.id, 'email_sent', { email_data: emailData });
+				await updateActivity(activity.id, 'email_sent', emailData);
 				message.success(__('Email updated successfully!', 'quillcrm'));
 			} else {
 				await logEmail(dealId, emailData);

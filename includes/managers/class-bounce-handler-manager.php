@@ -350,11 +350,19 @@ final class Bounce_Handler_Manager {
 
 		$security_key = get_option( 'quillcrm_bounce_security_key' );
 
+		// Security key must exist - it should be generated when webhook URLs are first requested
 		if ( ! $security_key ) {
-			// Generate longer key (32 chars instead of 16) for better security.
-			$security_key = 'quillcrm_' . wp_generate_password( 32, false );
-			update_option( 'quillcrm_bounce_security_key', $security_key );
-			update_option( 'quillcrm_bounce_security_key_generated_at', time() );
+			quillcrm_get_logger()->error(
+				'Bounce webhook security key not found in database',
+				array(
+					'source'   => 'bounce-webhook',
+					'provider' => $provider,
+					'ip'       => $client_ip,
+					'note'     => 'Key should be generated in get_webhook_urls()',
+				)
+			);
+
+			return new \WP_Error( 'missing_security_key', 'Security key not configured', array( 'status' => 500 ) );
 		}
 
 		$provided_key = $request->get_param( 'key' );
@@ -577,7 +585,24 @@ final class Bounce_Handler_Manager {
 	 */
 	public function get_webhook_urls( $include_metadata = true ) {
 		$security_key = get_option( 'quillcrm_bounce_security_key' );
-		$base_url     = rest_url( 'quillcrm/v1/webhooks/bounce/' );
+
+		// Generate security key if it doesn't exist
+		if ( ! $security_key ) {
+			$security_key = 'quillcrm_' . wp_generate_password( 32, false );
+			update_option( 'quillcrm_bounce_security_key', $security_key );
+			update_option( 'quillcrm_bounce_security_key_generated_at', time() );
+
+			quillcrm_get_logger()->info(
+				'Generated bounce webhook security key',
+				array(
+					'source'     => 'bounce-handler-manager',
+					'key_length' => strlen( $security_key ),
+					'context'    => 'get_webhook_urls',
+				)
+			);
+		}
+
+		$base_url = rest_url( 'quillcrm/v1/webhooks/bounce/' );
 
 		$urls = array();
 		foreach ( $this->handler_classes as $slug => $class_name ) {

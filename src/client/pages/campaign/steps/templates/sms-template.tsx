@@ -130,12 +130,19 @@ const SMSTemplateStep: React.FC = () => {
 		return true;
 	};
 
+	const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+
 	const save = async () => {
+		if (isSavingTemplate) {
+			return;
+		}
+
 		if (!campaign || !validate()) {
 			return;
 		}
 
 		try {
+			setIsSavingTemplate(true);
 			// Use consistent structure across all campaign types
 			const backendTemplate = {
 				name: template.name,
@@ -175,6 +182,8 @@ const SMSTemplateStep: React.FC = () => {
 						'quillcrm'
 					),
 			});
+		} finally {
+			setIsSavingTemplate(false);
 		}
 	};
 
@@ -243,12 +252,12 @@ const SMSTemplateStep: React.FC = () => {
 						icon={<SetUpInfoIcon />}
 						onNext={save}
 						nextLabel={
-							saving
+							saving || isSavingTemplate
 								? __('Saving...', 'quillcrm')
 								: __('Next', 'quillcrm')
 						}
 						showButtons={true}
-						isLoading={saving}
+						isLoading={saving || isSavingTemplate}
 					>
 						<div className="space-y-6">
 							{/* Notice Banner */}

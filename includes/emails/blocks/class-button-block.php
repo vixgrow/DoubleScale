@@ -111,16 +111,16 @@ class Button_Block extends Email_Block {
 	 * Render block
 	 *
 	 * @param array $props Block properties
-	 * @param array $merge_tags Merge tags
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	public function render( array $props, array $merge_tags = array() ): string {
+	public function render( array $props, $contact = null ): string {
 		// Merge with default props
 		$props = wp_parse_args( $props, $this->get_default_props() );
 
 		// Process text and URL for merge tags
-		$text = $this->process_merge_tags( $props['text'], $merge_tags );
-		$url  = $this->process_merge_tags( $props['url'], $merge_tags );
+		$text = $this->process_merge_tags( $props['text'], $contact );
+		$url  = $this->process_merge_tags( $props['url'], $contact );
 
 		// Get global button settings (matching frontend)
 		$global_settings = $this->get_global_button_settings( $props['buttonStyle'] );

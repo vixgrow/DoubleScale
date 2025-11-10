@@ -14,29 +14,8 @@ import { Card, Flex, Skeleton, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { UserOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import { map } from 'lodash';
-import {
-	Chart as ChartJS,
-	LineController,
-	LineElement,
-	PointElement,
-	LinearScale,
-	Title,
-	CategoryScale,
-	Tooltip,
-	BarElement,
-} from 'chart.js';
+import '../../lib/chart-setup';
 import { Line } from 'react-chartjs-2';
-
-ChartJS.register(
-	LineController,
-	LineElement,
-	PointElement,
-	LinearScale,
-	Title,
-	CategoryScale,
-	Tooltip,
-	BarElement
-);
 
 /**
  * Internal dependencies

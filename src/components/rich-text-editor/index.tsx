@@ -247,9 +247,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 							const newRange = newSelection.getRangeAt(0);
 							const newParent =
 								newRange.commonAncestorContainer.nodeType ===
-									Node.TEXT_NODE
+								Node.TEXT_NODE
 									? newRange.commonAncestorContainer
-										.parentElement
+											.parentElement
 									: (newRange.commonAncestorContainer as Element);
 
 							const newListItem = newParent?.closest('li');
@@ -882,6 +882,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						fontFamily: fontFamily,
 						lineHeight: '1.5',
 						maxWidth: '287.2px',
+						overflowX: 'scroll',
 						color: 'hsl(var(--foreground))',
 						// Force font inheritance for all child elements
 						'--font-size': `${fontSize}px`,

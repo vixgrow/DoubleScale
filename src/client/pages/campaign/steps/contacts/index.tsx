@@ -54,10 +54,18 @@ const Contacts: React.FC = () => {
 	const [inlineError, setInlineError] = useState<string | null>(null);
 
 	// Rules builder state (shared with ConditionsModal component)
-	const [rulesGroups] = useState(ConfigAPI.getAutomationRules());
-	const firstGroup = Object.keys(rulesGroups)[0];
+	const allRulesGroups = ConfigAPI.getAutomationRules();
+	// Filter out disabled groups
+	const rulesGroups = Object.keys(allRulesGroups).reduce((acc, key) => {
+		if (!allRulesGroups[key].is_disabled) {
+			acc[key] = allRulesGroups[key];
+		}
+		return acc;
+	}, {} as any);
+	const [filteredRulesGroups] = useState(rulesGroups);
+	const firstGroup = Object.keys(filteredRulesGroups)[0];
 	const firstRule = firstGroup
-		? Object.keys(rulesGroups[firstGroup].rules)[0]
+		? Object.keys(filteredRulesGroups[firstGroup].rules)[0]
 		: '';
 	const getInitialRule = () => ({
 		rule: firstRule,
@@ -220,18 +228,18 @@ const Contacts: React.FC = () => {
 				campaign?.status === 'processed' ||
 				campaign?.status === 'archived'
 			) && (
-				<Stepper
-					steps={
-						campaign?.type === 'email'
-							? campaignSteps
-							: campaignSteps.filter(
+					<Stepper
+						steps={
+							campaign?.type === 'email'
+								? campaignSteps
+								: campaignSteps.filter(
 									(step) => step.slug !== 'builder'
 								)
-					}
-					canProceed="true"
-					currentStep={campaign?.type === 'email' ? 3 : 2}
-				/>
-			)}
+						}
+						canProceed="true"
+						currentStep={campaign?.type === 'email' ? 3 : 2}
+					/>
+				)}
 
 			<div className="flex gap-6 items-start">
 				<div ref={panelRef} className="w-2/3">
@@ -252,16 +260,25 @@ const Contacts: React.FC = () => {
 						onNext={handleNext}
 						onBack={() => {
 							// Navigate based on campaign type
-							if (campaign?.type === 'sms') {
-								goToStep('template');
-							} else if (campaign?.type === 'whatsapp') {
-								goToStep('whatsapp-template');
-							} else {
+							if (
 								campaign?.status === 'processed' ||
 								campaign?.status === 'archived'
-									? undefined
-									: () => goToStep('builder');
+							) {
+								return;
 							}
+
+							if (campaign?.type === 'sms') {
+								goToStep('template');
+								return;
+							}
+
+							if (campaign?.type === 'whatsapp') {
+								goToStep('whatsapp-template');
+								return;
+							}
+
+							// Default: email campaign
+							goToStep('builder');
 						}}
 						isLoading={saving || isApplying}
 					>
@@ -282,11 +299,10 @@ const Contacts: React.FC = () => {
 								>
 									<Label
 										htmlFor="list-tags"
-										className={`flex items-center space-x-4 w-1/2 border rounded-lg p-4 cursor-pointer ${
-											filterBy === 'list-tags'
-												? 'border-blue-500 bg-blue-50 text-blue-500'
-												: 'border-gray-300 bg-white'
-										}`}
+										className={`flex items-center space-x-4 w-1/2 border rounded-lg p-4 cursor-pointer ${filterBy === 'list-tags'
+											? 'border-blue-500 bg-blue-50 text-blue-500'
+											: 'border-gray-300 bg-white'
+											}`}
 									>
 										<RadioGroupItem
 											value="list-tags"
@@ -298,11 +314,10 @@ const Contacts: React.FC = () => {
 									</Label>
 									<Label
 										htmlFor="advanced"
-										className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${
-											filterBy === 'advanced'
-												? 'border-blue-500 bg-blue-50'
-												: 'border-gray-300 bg-white'
-										}`}
+										className={`flex items-center space-x-4 w-1/2 border rounded-lg py-2 px-3 cursor-pointer ${filterBy === 'advanced'
+											? 'border-blue-500 bg-blue-50'
+											: 'border-gray-300 bg-white'
+											}`}
 									>
 										<RadioGroupItem
 											value="advanced"
@@ -330,7 +345,7 @@ const Contacts: React.FC = () => {
 									<RulesBuilder
 										rules={rules}
 										onChange={setRules}
-										rulesGroups={rulesGroups}
+										rulesGroups={filteredRulesGroups}
 									/>
 									<div className="flex gap-3 mt-4">
 										<Button

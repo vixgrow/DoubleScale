@@ -23,6 +23,12 @@ use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Traits\Message_Provider_Validation;
+use QuillCRM\Constants\Tracking_Status;
+use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Campaign\Email_Processing;
+use QuillCRM\Campaign\SMS_Processing;
+use QuillCRM\Campaign\WhatsApp_Processing;
+use QuillCRM\QuillCRM;
 
 /**
  * REST_Campaign_Controller class
@@ -87,6 +93,31 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 							'type'        => 'string',
 							'enum'        => array( 'all', 'sent', 'opened', 'clicked', 'failed', 'pending', 'delivered', 'scheduled' ),
 							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		// Resend single message endpoint
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/messages/(?P<message_id>[\d]+)/resend',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'resend_message' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'id'         => array(
+							'description' => __( 'Campaign ID', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+						'message_id' => array(
+							'description' => __( 'Message/Tracking ID', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
 						),
 					),
 				),
@@ -544,6 +575,97 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 	 */
 	public function bulk_delete_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Resend a single message
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function resend_message( $request ) {
+		try {
+			$campaign_id = (int) $request->get_param( 'id' );
+			$message_id  = (int) $request->get_param( 'message_id' );
+
+			// Get campaign
+			$campaign = Campaign_Model::find( $campaign_id );
+			if ( ! $campaign ) {
+				return new WP_Error(
+					'campaign_not_found',
+					__( 'Campaign not found', 'quillcrm' ),
+					array( 'status' => 404 )
+				);
+			}
+
+			// Get tracking entry
+			$tracking = Tracking_Model::find( $message_id );
+			if ( ! $tracking ) {
+				return new WP_Error(
+					'message_not_found',
+					__( 'Message not found', 'quillcrm' ),
+					array( 'status' => 404 )
+				);
+			}
+
+			// Verify the message belongs to this campaign
+			if ( (int) $tracking->source_id !== $campaign_id || (int) $tracking->source_type !== Message_Source_Types::CAMPAIGN ) {
+				return new WP_Error(
+					'invalid_message',
+					__( 'Message does not belong to this campaign', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			// Get contact
+			$contact = $tracking->contact;
+			if ( ! $contact ) {
+				return new WP_Error(
+					'contact_not_found',
+					__( 'Contact not found', 'quillcrm' ),
+					array( 'status' => 404 )
+				);
+			}
+
+			// Get the appropriate processor based on campaign type
+			// Use get_type() to get integer value for comparison
+			$campaign_type = $campaign->get_type();
+			$processor     = null;
+			
+			switch ( $campaign_type ) {
+				case Campaign_Channel::CHANNEL_EMAIL:
+					$processor = Email_Processing::instance();
+					break;
+				case Campaign_Channel::CHANNEL_SMS:
+					$processor = SMS_Processing::instance();
+					break;
+				case Campaign_Channel::CHANNEL_WHATSAPP:
+					$processor = WhatsApp_Processing::instance();
+					break;
+				default:
+					return new WP_Error(
+						'invalid_campaign_type',
+						__( 'Invalid campaign type', 'quillcrm' ),
+						array( 'status' => 400 )
+					);
+			}
+
+			// Use the processor's resend_single_message method
+			$processor->resend_single_message( $campaign, $contact, $tracking );
+
+			return rest_ensure_response(
+				array(
+					'success' => true,
+					'message' => __( 'Message queued for resending', 'quillcrm' ),
+				)
+			);
+		} catch ( \Exception $e ) {
+			return new WP_Error(
+				'resend_failed',
+				$e->getMessage(),
+				array( 'status' => 500 )
+			);
+		}
 	}
 
 }

@@ -237,7 +237,7 @@ const ContactList: React.FC<ContactListProps> = ({
 						{(normalizedSearch ? displayedContacts : contacts).map(
 							(contact) => {
 								const fullName =
-									`${contact.first_name} ${contact.last_name}`.trim();
+									`${contact.first_name || '-'} ${contact.last_name || '-'}`.trim();
 								const initials = getContactInitials(
 									contact.first_name,
 									contact.last_name

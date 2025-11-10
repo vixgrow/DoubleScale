@@ -241,8 +241,7 @@ class REST_Email_Campaign_Controller extends Abstract_Campaign_Controller {
 
 				// Render template
 				$email_renderer = new Email_Renderer();
-				$merge_tags     = $contact ? array( $contact ) : array();
-				$body_content   = $email_renderer->render_template( $template_id, $merge_tags );
+				$body_content   = $email_renderer->render_template( $template_id, $contact );
 
 				if ( empty( $body_content ) ) {
 					$failed_count++;

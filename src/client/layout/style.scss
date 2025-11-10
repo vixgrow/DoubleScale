@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+body.js.is-fullscreen-mode {
+	// @include break-medium {
+	// Reset the html.wp-topbar padding.
+	// Because this uses negative margins, we have to compensate for the height.
+	margin-top: -32px;
+	height: calc(100% + 32px);
+	overflow: hidden;
+
+	#adminmenumain,
+	#wpadminbar {
+		display: none;
+	}
+
+	.wrap {
+		margin: 0;
+	}
+
+	#wpcontent,
+	#wpfooter {
+		margin-left: 0;
+		padding-left: 0;
+	}
+
+	div#wpbody-content {
+		padding-bottom: 0;
+	}
+	#wpfooter {
+		display: none;
+	}
+}
+
 #screen-meta-links {
 	display: none !important;
 }

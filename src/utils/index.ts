@@ -6,16 +6,18 @@ import { find, flatMap } from 'lodash';
 /**
  * Internal dependencies
  */
+import type { RuleItem } from '@/components/rules-builder';
+import type { Filter as FilterType } from '@quillcrm/client';
 import type { Action, Goal, Rule, Trigger } from '@quillcrm/config';
 import ConfigAPI from '@quillcrm/config';
-import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
-import timezone from 'dayjs/plugin/timezone';
-import utc from 'dayjs/plugin/utc';
 import {
 	__experimentalGetSettings as experimentalGetDateSettings,
 	getSettings as getDateSettings,
 } from '@wordpress/date';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -66,7 +68,7 @@ export const getWordPressTimezone = (): WordPressTimezone => {
 
 	const timezoneString =
 		typeof settings?.timezone?.string === 'string' &&
-		settings.timezone.string.length > 0
+			settings.timezone.string.length > 0
 			? settings.timezone.string
 			: undefined;
 
@@ -105,10 +107,10 @@ export const getAction = (action: string): Action => {
 	return foundAction
 		? foundAction[action]
 		: {
-				label: '',
-				description: '',
-				fields: {},
-			};
+			label: '',
+			description: '',
+			fields: {},
+		};
 };
 
 export const getGoal = (goal: string): Goal => {
@@ -123,11 +125,11 @@ export const getGoal = (goal: string): Goal => {
 	return foundGoal
 		? foundGoal[goal]
 		: {
-				label: '',
-				description: '',
-				fields: {},
-				is_integration: false,
-			};
+			label: '',
+			description: '',
+			fields: {},
+			is_integration: false,
+		};
 };
 
 export const getTrigger = (trigger: string): Trigger => {
@@ -140,10 +142,10 @@ export const getTrigger = (trigger: string): Trigger => {
 	return foundTrigger
 		? foundTrigger[trigger]
 		: {
-				label: '',
-				description: '',
-				fields: {},
-			};
+			label: '',
+			description: '',
+			fields: {},
+		};
 };
 
 export const convertDate = (date: string, addTime: boolean = false) => {
@@ -189,11 +191,11 @@ export const getRuleBySlug = (slug: string, dynamicRules?: any): Rule => {
 	return foundRule
 		? foundRule[slug]
 		: {
-				name: '',
-				type: '',
-				operators: {},
-				options: {},
-			};
+			name: '',
+			type: '',
+			operators: {},
+			options: {},
+		};
 };
 
 export const getCustomFieldById = (id: number) => {
@@ -205,9 +207,9 @@ export const getCustomFieldById = (id: number) => {
 	return foundField
 		? foundField[id]
 		: {
-				label: '',
-				type: '',
-			};
+			label: '',
+			type: '',
+		};
 };
 
 export const formatDate = (date: string, type: string = 'hour') => {
@@ -226,7 +228,7 @@ export const formatDate = (date: string, type: string = 'hour') => {
 	}
 };
 
-  
+
 
 export function getTimeAgo(dateString: string): string {
 	const parsedUtcDate = dayjs.utc(dateString);
@@ -299,4 +301,89 @@ export const getCampaignEndpoint = (campaignType: string): string | null => {
 	}
 
 	return null;
+};
+
+/**
+ * Get filtered rules groups (excluding disabled groups)
+ * @returns Filtered rules groups object
+ */
+export const getFilteredRulesGroups = () => {
+	const allRulesGroups = ConfigAPI.getAutomationRules();
+	return Object.keys(allRulesGroups).reduce((acc, key) => {
+		if (!allRulesGroups[key].is_disabled) {
+			acc[key] = allRulesGroups[key];
+		}
+		return acc;
+	}, {} as any);
+};
+
+/**
+ * Get initial rule for RulesBuilder
+ * @param rulesGroups - Rules groups map
+ * @returns Initial RuleItem
+ */
+export const getInitialRule = (rulesGroups: any): RuleItem => {
+	const firstGroup = Object.keys(rulesGroups)[0] || '';
+	const firstRule = firstGroup
+		? Object.keys(rulesGroups[firstGroup]?.rules || {})[0] || ''
+		: '';
+	return {
+		rule: firstRule,
+		operator: 'is',
+		value: '',
+		selectedGroup: firstGroup,
+	};
+};
+
+/**
+ * Convert RulesBuilder rules format to backend filters format
+ * @param inputRules - Array of rule groups from RulesBuilder
+ * @returns Array of FilterType objects for backend API
+ */
+export const mapRulesToFilters = (
+	inputRules: Array<Array<RuleItem>>
+): FilterType[] => {
+	const flat = (inputRules || []).reduce(
+		(acc, group) => acc.concat(group || []),
+		[] as RuleItem[]
+	);
+	return flat
+		.filter((r) => r && r.rule)
+		.map((r) => ({
+			group: r.selectedGroup || '',
+			filter: r.rule, // backend expects filter slug
+			operator: r.operator || 'is',
+			value: r.value ?? '',
+		}));
+};
+
+/**
+ * Convert backend filters format to RulesBuilder rules format
+ * @param inputFilters - Array of filter objects from backend
+ * @param rulesGroups - Rules groups map for getting default values
+ * @returns Array of rule groups for RulesBuilder
+ */
+export const mapFiltersToRules = (
+	inputFilters: Array<{
+		group?: string;
+		filter?: string;
+		operator?: string;
+		value?: any;
+	}>,
+	rulesGroups: any
+): Array<Array<RuleItem>> => {
+	const safe = Array.isArray(inputFilters) ? inputFilters : [];
+
+	// Get default group and rule from rulesGroups
+	const initialRule = getInitialRule(rulesGroups);
+
+	if (!safe.length) return [[initialRule]];
+
+	const group = safe.map((f: any) => ({
+		rule: f.filter || initialRule.rule,
+		operator: f.operator || 'is',
+		value: f.value ?? '',
+		selectedGroup: f.group || initialRule.selectedGroup,
+	}));
+	return [group];
 };

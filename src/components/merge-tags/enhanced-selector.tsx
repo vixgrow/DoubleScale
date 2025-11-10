@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
@@ -300,34 +300,25 @@ const MergeTagsGroupRender: React.FC<{
 				</div>
 			) : (
 				map(filteredMergeTags, (tag, key) => (
-					<Card
+					<Button
 						key={key}
-						className="cursor-pointer shadow-none transition-all duration-200 hover:shadow-md hover:bg-gray-50"
-						onClick={() => handleTagClick(tag.value)}
+						className="w-full justify-start rounded-xl border border-border bg-card text-left text-card-foreground shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary py-8"
+						onClick={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							handleTagClick(tag.value);
+						}}
 					>
-						<CardContent className="p-4">
-							<div className="flex justify-between items-center">
-								<span className="font-semibold text-[#3F4254] text-base grid">
-									{tag.name}
-									<span className="text-xs text-[#505255] italic font-normal">
-										{tag.value}
-									</span>
+						<div className="flex w-full items-center justify-between">
+							<span className="grid font-semibold text-base text-[#3F4254]">
+								{tag.name}
+								<span className="text-xs font-normal italic text-[#505255]">
+									{tag.value}
 								</span>
-								<Button
-									variant="ghost"
-									size="sm"
-									className="h-8 w-8 p-0"
-									onClick={(e) => {
-										e.preventDefault();
-										e.stopPropagation();
-										handleTagClick(tag.value);
-									}}
-								>
-									<Copy className="h-4 w-4" />
-								</Button>
-							</div>
-						</CardContent>
-					</Card>
+							</span>
+							<Copy className="h-4 w-4" />
+						</div>
+					</Button>
 				))
 			)}
 		</div>

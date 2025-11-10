@@ -85,7 +85,7 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 					<div>
 						{isFetching && <Skeleton className="h-40 w-full" />}
 
-						{/* Integration-based importers: Show credentials first */}
+						{/* Integration-based importers: Show credentials first (step 1) */}
 						{importer &&
 							[
 								'mailerlite',
@@ -96,10 +96,10 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 							].includes(source) &&
 							importer.credentials &&
 							Object.keys(importer.credentials || {}).length >
-							0 &&
+								0 &&
 							!importing &&
 							!isFetching &&
-							!sourceData && (
+							currentStep === 1 && (
 								<div>
 									<h3 className="text-lg font-semibold mb-4">
 										{__(
@@ -108,33 +108,6 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 										)}
 									</h3>
 									<ApiCredentials importer={importer} />
-								</div>
-							)}
-
-						{/* Integration-based importers: Show field mapping after credentials validated */}
-						{importer &&
-							[
-								'mailerlite',
-								'activecampaign',
-								'hubspot',
-								'pipedrive',
-								'gohighlevel',
-							].includes(source) &&
-							importer.credentials &&
-							Object.keys(importer.credentials || {}).length >
-							0 &&
-							!importing &&
-							!isFetching &&
-							sourceData && (
-								<div className="space-y-6">
-									<h3 className="text-lg font-semibold mb-4">
-										{__(
-											'Step 2: Configure Import Settings',
-											'quillcrm'
-										)}
-									</h3>
-									<FieldMapping importer={importer} />
-									<ContactProfile />
 								</div>
 							)}
 
@@ -164,91 +137,125 @@ const MainContent: React.FC<MainContentProps> = ({ onImportComplete }) => {
 		);
 	}
 
-	// Step 2 - CSV mapping and final configuration
-	return (
-		<div className="w-full">
-			<div className="max-w-4xl mx-auto">
-				{source === 'csv' && fileData && (
-					<Card className="shadow-none rounded-2xl mb-8">
-						<div className="p-6">
-							<h3 className="text-2xl font-normal text-[#09090B] mb-2">
-								{__('Mapping the file', 'quillcrm')}
-							</h3>
-							<p className="text-lg text-[#71717A] mb-6">
-								{__(
-									'Select the column field you want to map it on the system to import.',
-									'quillcrm'
-								)}
-							</p>
+	// Step 2 - Integration importers field mapping and CSV mapping
+	if (currentStep === 2) {
+		// Integration-based importers: Show field mapping after credentials validated
+		if (
+			importer &&
+			[
+				'mailerlite',
+				'activecampaign',
+				'hubspot',
+				'pipedrive',
+				'gohighlevel',
+			].includes(source) &&
+			sourceData
+		) {
+			return (
+				<div className="space-y-6">
+					<h3 className="text-lg font-semibold mb-4">
+						{__('Step 2: Configure Import Settings', 'quillcrm')}
+					</h3>
+					<FieldMapping importer={importer} />
+					<ContactProfile />
+					<StepNavigation
+						importer={importer}
+						onImportContacts={handleImportContacts}
+					/>
+				</div>
+			);
+		}
 
-							{importer && sourceData && (
-								<div>
-									{map(
-										sourceData,
-										(field, key) =>
-											field.type ===
-											'contact_mapped_fields' && (
-												<div
-													key={key}
-													className="space-y-3"
-												>
-													<label className="text-base">
-														{field.label}
-													</label>
-													<ContactMappedFields
-														fields={
-															fileData
-																? fileData.header_columns.reduce(
-																	(
-																		acc,
-																		field
-																	) => {
-																		acc[
-																			field
-																		] =
-																		{
-																			label: field,
-																		};
-																		return acc;
-																	},
-																	{}
-																)
-																: field.options
-														}
-														values={
-															values[key] || {}
-														}
-														onChange={(value) =>
-															updateValues(
-																key,
-																value
-															)
-														}
-													/>
-												</div>
-											)
+		// CSV mapping and final configuration
+		return (
+			<div className="w-full">
+				<div className="max-w-4xl mx-auto">
+					{source === 'csv' && fileData && (
+						<Card className="shadow-none rounded-2xl mb-8">
+							<div className="p-6">
+								<h3 className="text-2xl font-normal text-[#09090B] mb-2">
+									{__('Mapping the file', 'quillcrm')}
+								</h3>
+								<p className="text-lg text-[#71717A] mb-6">
+									{__(
+										'Select the column field you want to map it on the system to import.',
+										'quillcrm'
 									)}
-								</div>
-							)}
-						</div>
-					</Card>
-				)}
+								</p>
 
-				<ContactProfile
-					showStatusField={[
-						'csv',
-						'wpusers',
-						'wc_customers_customers',
-					].includes(source)}
-				/>
+								{importer && sourceData && (
+									<div>
+										{map(
+											sourceData,
+											(field, key) =>
+												field.type ===
+													'contact_mapped_fields' && (
+													<div
+														key={key}
+														className="space-y-3"
+													>
+														<label className="text-base">
+															{field.label}
+														</label>
+														<ContactMappedFields
+															fields={
+																fileData
+																	? fileData.header_columns.reduce(
+																			(
+																				acc,
+																				field
+																			) => {
+																				acc[
+																					field
+																				] =
+																					{
+																						label: field,
+																					};
+																				return acc;
+																			},
+																			{}
+																		)
+																	: field.options
+															}
+															values={
+																values[key] ||
+																{}
+															}
+															onChange={(value) =>
+																updateValues(
+																	key,
+																	value
+																)
+															}
+														/>
+													</div>
+												)
+										)}
+									</div>
+								)}
+							</div>
+						</Card>
+					)}
 
-				<StepNavigation
-					importer={importer}
-					onImportContacts={handleImportContacts}
-				/>
+					<ContactProfile
+						showStatusField={[
+							'csv',
+							'wpusers',
+							'wc_customers_customers',
+						].includes(source)}
+					/>
+
+					<StepNavigation
+						importer={importer}
+						onImportContacts={handleImportContacts}
+					/>
+				</div>
 			</div>
-		</div>
-	);
+		);
+	}
+
+	// Fallback (should not reach here in normal flow)
+	return null;
 };
 
 export default MainContent;

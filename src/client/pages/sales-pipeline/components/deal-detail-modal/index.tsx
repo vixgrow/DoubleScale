@@ -7,56 +7,44 @@ import { useState, useEffect } from '@wordpress/element';
 /**
  * External dependencies
  */
-import {
-	Modal,
-	Tabs,
-	Spin,
-	message,
-	Button,
-	Tag,
-	Statistic,
-	Row,
-	Col,
-	Card,
-	Typography,
-	Avatar,
-	Badge,
-	Input,
-} from 'antd';
-import {
-	User,
-	Calendar,
-	DollarSign,
-	Target,
-	Clock,
-	Building,
-	Mail,
-	Phone,
-	Edit3,
-	Archive,
-	RotateCcw,
-	CheckCircle,
-	XCircle,
-} from 'lucide-react';
+import { Spin, message } from 'antd';
 
 /**
  * Internal dependencies
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
-import { DealActivities } from '../deal-activities';
+
 import { Deal } from '../../types';
 import './style.scss';
-import { DealCustomFields } from '../deal-custom-fields';
-import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 
-const { Title, Text, Paragraph } = Typography;
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@quillcrm/components/ui/dialog';
+
+import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
+import DealValueIcon from '@quillcrm/components/icons/deal-value';
+import ActivityActions from './DealActivityAction';
+import { DealOverViewModal } from './OverView';
+
+import { CustomFieldsView } from './CustomFileldView';
+import { PipelineStagesHeader } from './SatagesHeader';
+import Deal_Activites from '../deal-activities';
+import { DealDetailSkeleton } from './DealDetailSkeleton';
+import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
+import DealOverviewSkeleton from './deal-overview-skeleton';
+import { Input } from '@quillcrm/components/ui/input';
 
 interface DealDetailModalProps {
 	dealId: number | null;
 	visible: boolean;
 	onClose: () => void;
 	onUpdate?: () => void;
+	onDeleted?: () => void;
 	onEdit?: (deal: Deal) => void;
+	pipeline?: any;
 }
 
 export const DealDetailModal: React.FC<DealDetailModalProps> = ({
@@ -64,15 +52,34 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	visible,
 	onClose,
 	onUpdate,
+	onDeleted,
 	onEdit,
+	pipeline,
 }) => {
 	const [deal, setDeal] = useState<Deal | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [activeTab, setActiveTab] = useState('overview');
+	const [showContent, setShowContent] = useState(false);
+	const [editingField, setEditingField] = useState<'title' | 'value' | null>(null);
+	const [tempTitle, setTempTitle] = useState('');
+	const [tempValue, setTempValue] = useState('');
 
-	const { getDeal, deleteDeal } = useDealOperations();
+	const { getDeal, deleteDeal,updateDeal } = useDealOperations();
 
-	const { isDealOwner } = useCapabilities();
+	useEffect(() => {
+		if (!loading && deal) {
+		  const timer = setTimeout(() => setShowContent(true), 150);
+		  return () => clearTimeout(timer);
+		}
+	}, [loading, deal]);
+
+    // to update deal card also
+	const handleOverviewUpdate = async () => {
+		// Refresh the deal details locally
+		await fetchDealDetails();
+		if (onUpdate) {
+			onUpdate();
+		}
+	};
 
 	// Fetch deal data when modal opens
 	useEffect(() => {
@@ -94,340 +101,288 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 			setLoading(false);
 		}
 	};
+	const previousStage = (() => {
+		if (!pipeline?.stages || !deal?.stage?.id) return null;
 
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case 'open':
-				return 'blue';
-			case 'won':
-				return 'green';
-			case 'lost':
-				return 'red';
-			default:
-				return 'default';
-		}
-	};
-
-	const getStatusIcon = (status: string) => {
-		switch (status) {
-			case 'won':
-				return <CheckCircle size={16} />;
-			case 'lost':
-				return <XCircle size={16} />;
-			default:
-				return <Clock size={16} />;
-		}
-	};
-
-	const formatCurrency = (value: number, currency: string = 'USD') => {
-		return new Intl.NumberFormat('en-US', {
-			style: 'currency',
-			currency: currency,
-		}).format(value);
-	};
-
-	const formatDate = (dateString: string | null) => {
-		if (!dateString) return __('Not set', 'quillcrm');
-		return new Date(dateString).toLocaleDateString();
-	};
-
-	const renderOverviewTab = () => {
-		if (!deal) return null;
-
-		return (
-			<div className="deal-overview">
-				<Row gutter={[16, 16]}>
-					{/* Deal Information */}
-					<Col xs={24} lg={12}>
-						<Card
-							title={__('Deal Information', 'quillcrm')}
-							size="small"
-						>
-							<div className="deal-info-grid">
-								<div className="info-item">
-									<Text type="secondary">
-										{__('Value', 'quillcrm')}
-									</Text>
-									<Title level={4}>
-										{formatCurrency(
-											deal.value,
-											deal.currency
-										)}
-									</Title>
-								</div>
-
-								<div className="info-item">
-									<Text type="secondary">
-										{__('Weighted Value', 'quillcrm')}
-									</Text>
-									<Title level={4}>
-										{formatCurrency(
-											deal.weighted_value,
-											deal.currency
-										)}
-									</Title>
-								</div>
-
-								<div className="info-item">
-									<Text type="secondary">
-										{__('Probability', 'quillcrm')}
-									</Text>
-									<Text strong>
-										{deal.probability
-											? `${deal.probability}%`
-											: __('Not set', 'quillcrm')}
-									</Text>
-								</div>
-
-								<div className="info-item">
-									<Text type="secondary">
-										{__('Status', 'quillcrm')}
-									</Text>
-									<Tag
-										color={getStatusColor(deal.status)}
-										icon={getStatusIcon(deal.status)}
-									>
-										{deal.status.charAt(0).toUpperCase() +
-											deal.status.slice(1)}
-									</Tag>
-								</div>
-
-								<div className="info-item">
-									<Text type="secondary">
-										{__('Expected Close Date', 'quillcrm')}
-									</Text>
-									<div
-										className={
-											deal.is_overdue
-												? 'overdue-date'
-												: ''
-										}
-									>
-										<Calendar size={16} />
-										<Text
-											strong
-											className={
-												deal.is_overdue
-													? 'text-red-600'
-													: ''
-											}
-										>
-											{formatDate(
-												deal.expected_close_date || null
-											)}
-										</Text>
-										{deal.is_overdue && (
-											<Badge
-												count="OVERDUE"
-												style={{
-													backgroundColor: '#ef4444',
-												}}
-											/>
-										)}
-									</div>
-								</div>
-
-								{deal.days_until_close !== null && (
-									<div className="info-item">
-										<Text type="secondary">
-											{__('Days Until Close', 'quillcrm')}
-										</Text>
-										<Text
-											strong
-											className={
-												deal.days_until_close < 0
-													? 'text-red-600'
-													: ''
-											}
-										>
-											{deal.days_until_close}{' '}
-											{__('days', 'quillcrm')}
-										</Text>
-									</div>
-								)}
-
-								{deal.source && (
-									<div className="info-item">
-										<Text type="secondary">
-											{__('Source', 'quillcrm')}
-										</Text>
-										<Text strong>{deal.source}</Text>
-									</div>
-								)}
-							</div>
-						</Card>
-					</Col>
-
-					{/* Contact & Pipeline Information */}
-					<Col xs={24} lg={12}>
-						<Card
-							title={__('Contact & Pipeline', 'quillcrm')}
-							size="small"
-						>
-							{deal.contact && (
-								<div className="contact-section">
-									<div className="contact-header">
-										<Avatar size={40} icon={<User />} />
-										<div>
-											<Title level={5}>
-												{deal.contact.first_name}{' '}
-												{deal.contact.last_name}
-											</Title>
-											<Text type="secondary">
-												{deal.contact.email}
-											</Text>
-										</div>
-									</div>
-								</div>
-							)}
-
-							{deal.pipeline && deal.stage && (
-								<div className="pipeline-section">
-									<div className="pipeline-info">
-										<Building size={16} />
-										<div>
-											<Text strong>
-												{deal.pipeline.name}
-											</Text>
-											<br />
-											<Tag
-												color={deal.stage.color}
-												style={{ marginTop: 4 }}
-											>
-												{deal.stage.name} (
-												{deal.stage.win_probability}%)
-											</Tag>
-										</div>
-									</div>
-								</div>
-							)}
-
-							{deal.owner && (
-								<div className="owner-section">
-									<div className="owner-info">
-										<User size={16} />
-										<div>
-											<Text strong>
-												{__('Owner:', 'quillcrm')}{' '}
-												{deal.owner.display_name}
-											</Text>
-											<br />
-											<Text type="secondary">
-												{deal.owner.email}
-											</Text>
-										</div>
-									</div>
-								</div>
-							)}
-						</Card>
-					</Col>
-				</Row>
-
-				{/* Deal Actions */}
-				<div className="deal-actions">
-					<Button
-						type="primary"
-						icon={<Edit3 size={16} />}
-						onClick={() => {
-							if (deal && onEdit) {
-								onEdit(deal);
-							}
-						}}
-					>
-						{__('Edit Deal', 'quillcrm')}
-					</Button>
-
-					{!isDealOwner() && (
-						<Button
-							danger
-							type="text"
-							icon={<Archive size={16} />}
-							onClick={() => {
-								// Handle delete - should show confirmation modal
-								Modal.confirm({
-									title: __('Delete Deal?', 'quillcrm'),
-									content: __(
-										'This action cannot be undone.',
-										'quillcrm'
-									),
-									onOk: async () => {
-										try {
-											await deleteDeal(deal.id);
-											message.success(
-												__(
-													'Deal deleted successfully',
-													'quillcrm'
-												)
-											);
-											onClose();
-											onUpdate?.();
-										} catch (error) {
-											message.error(
-												__(
-													'Failed to delete deal',
-													'quillcrm'
-												)
-											);
-										}
-									},
-								});
-							}}
-						>
-							{__('Delete', 'quillcrm')}
-						</Button>
-					)}
-				</div>
-			</div>
+		const currentIndex = pipeline.stages.findIndex(
+			(stage: any) => stage.id === deal?.stage?.id
 		);
+
+		if (currentIndex > 0) {
+			return pipeline.stages[currentIndex - 1];
+		}
+
+		return null;
+	})();
+	const handleSaveInline = async (field: 'title' | 'weighted_value' | 'value', value: any) => {
+		try {
+			if (!deal) return;
+
+			const updatedDeal = { ...deal, [field]: value };
+			setDeal(updatedDeal);
+
+			await updateDeal(deal.id, { [field]: value });
+
+			if (onUpdate) {
+				 onUpdate();
+			}
+		} catch (error) {
+			await fetchDealDetails();
+		} finally {
+			setEditingField(null);
+		}
+	};
+
+	const handleStartEdit = (field: 'title' | 'value') => {
+		if (field === 'title') {
+			setTempTitle(deal?.title || '');
+			setEditingField('title');
+		} else {
+			setTempValue(deal?.value?.toString() || '');
+			setEditingField('value');
+		}
+	};
+
+	const handleCancelEdit = () => {
+		setEditingField(null);
+	};
+
+	const handleSaveTitle = async () => {
+		if (!tempTitle.trim()) {
+			handleCancelEdit();
+			return;
+		}
+		await handleSaveInline('title', tempTitle.trim());
+	};
+
+	const handleSaveValue = async () => {
+		const numValue = parseFloat(tempValue);
+		if (isNaN(numValue)) {
+			handleCancelEdit();
+			return;
+		}
+		await handleSaveInline('value', numValue);
+	};
+
+	const formatCurrency = (value: number): string => {
+		let formattedValue = '';
+
+		if (value >= 1_000_000) {
+			formattedValue =
+				(value / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+		} else if (value >= 1_000) {
+			formattedValue =
+				(value / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+		} else {
+			formattedValue = value.toString();
+		}
+
+		return formattedValue;
 	};
 
 	return (
-		<Modal
-			title={deal ? deal.title : __('Deal Details', 'quillcrm')}
-			open={visible}
-			onCancel={onClose}
-			width={900}
-			footer={null}
-			className="deal-detail-modal"
-		>
-			{loading ? (
-				<div className="loading-container">
-					<Spin size="large" />
-				</div>
-			) : deal ? (
-				<Tabs
-					activeKey={activeTab}
-					onChange={setActiveTab}
-					items={[
-						{
-							key: 'overview',
-							label: __('Overview', 'quillcrm'),
-							children: renderOverviewTab(),
-						},
-						{
-							key: 'activities',
-							label: __('Activities', 'quillcrm'),
-							children: (
-								<DealActivities
-									dealId={deal.id}
-									dealTitle={deal.title}
+		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="max-h-[98vh] gap-8 w-full max-w-[calc(100vw-500px)]  ml-auto my-8 p-10  rounded-none overflow-y-auto">
+				{loading || !showContent  ? (
+					// <div className="flex justify-center items-center min-h-[200px]">
+						<DealDetailSkeleton />
+					// </div>
+				) : (
+					<>
+						<DialogHeader>
+							<DialogTitle className=" flex justify-between ">
+								<div className=" p-0 m-0">
+									<div className="flex gap-2 items-center">
+										{editingField === 'title' ? (
+											<Input
+												value={tempTitle}
+												onChange={(e) => setTempTitle(e.target.value)}
+												className="text-[#09090B] font-bold text-[32px] h-12 border-2 border-[#458DC7]"
+												placeholder={__('Deal Title', 'quillcrm')}
+												autoFocus
+												onBlur={handleSaveTitle}
+												onKeyDown={(e) => {
+													if (e.key === 'Enter') handleSaveTitle();
+													if (e.key === 'Escape') handleCancelEdit();
+												}}
+											/>
+										) : (
+											<>
+												<p className="text-[#09090B] font-bold text-[32px]">
+													{deal?.title}
+												</p>
+												<span
+													className="w-6 h-6 p-1 flex items-center justify-center rounded-full bg-[#E4EEFD] cursor-pointer"
+													onClick={() => handleStartEdit('title')}
+												>
+													<EditHeaderIcon color="#458DC7" width={20} height={20} />
+												</span>
+											</>
+										)}
+									</div>
+									{/* value */}
+									{/* <div className="flex items-center gap-2 text-[#09090B] font-bold text-2xl">
+										<p className="mt-1 text-2xl">
+											{__(
+												`${formatCurrency(deal?.weighted_value ?? 0)}`,
+												'quillcrm'
+											)}
+										</p>
+										<span className="text-[#777] text-[20px] flex items-center gap-1">
+											<DealValueIcon
+												width={20}
+												height={20}
+											/>
+											USD
+										</span>
+										<span className="w-6 h-6 p-1 flex items-center justify-center rounded-full bg-[#E4EEFD]">
+											<EditHeaderIcon
+												color="#458DC7"
+												width={20}
+												height={20}
+											/>
+										</span>
+									</div> */}
+									{/* Editable Value */}
+									<div className="flex items-center gap-2 text-[#09090B] font-bold text-2xl mt-1">
+										{editingField === 'value' ? (
+											<div className="relative">
+												{/* <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xl text-[#777]">$</span> */}
+												<Input
+													type="number"
+													value={tempValue}
+													onChange={(e) => setTempValue(e.target.value)}
+													className="text-[#09090B] font-bold text-2xl h-12 pl-8 border-2 border-[#458DC7]"
+													placeholder="0"
+													autoFocus
+													onBlur={handleSaveValue}
+													onKeyDown={(e) => {
+														if (e.key === 'Enter') handleSaveValue();
+														if (e.key === 'Escape') handleCancelEdit();
+													}}
+												/>
+											</div>
+										) : (
+											<>
+												<p className="text-2xl">
+													${formatCurrency(deal?.value ?? 0)}
+												</p>
+												<span className="text-[#777] text-[20px] flex items-center gap-1">
+													<DealValueIcon width={20} height={20} />
+													USD
+												</span>
+												<span
+													className="w-6 h-6 p-1 flex items-center justify-center rounded-full bg-[#E4EEFD] cursor-pointer"
+													onClick={() => handleStartEdit('value')}
+												>
+													<EditHeaderIcon color="#458DC7" width={20} height={20} />
+												</span>
+											</>
+										)}
+									</div>
+								
+								</div>
+								<ActivityActions
+									dealId={deal?.id ?? 0}
+									onRefresh={fetchDealDetails}
+									dealTitle={deal?.title}
+									deal={deal}
+									dealContactName={deal?.contact?.first_name}
+									onDeleted={() => {
+										if(onDeleted) onDeleted();
+									}}
 								/>
-							),
-						},
-						{
-							key: 'custom-fields',
-							label: __('Custom Fields', 'quillcrm'),
-							children: <DealCustomFields deal={deal} />,
-						},
-					]}
-				/>
-			) : (
-				<div className="no-data">
-					<Text type="secondary">
-						{__('No deal data available', 'quillcrm')}
-					</Text>
-				</div>
-			)}
-		</Modal>
+							</DialogTitle>
+						</DialogHeader>
+						{/* contact overview+customfiled */}
+						<div className=" grid grid-cols-2 gap-12">
+							{loading?(
+								<DealOverviewSkeleton/>
+							):(
+								<div>
+								<DealOverViewModal
+									dealId={dealId}
+									onEdit={onEdit}
+									onUpdate={handleOverviewUpdate}
+
+								/>
+							</div>
+							)}
+							<div className="border flex flex-col gap-6 border-[#DEE1E6] bg-[#F8F8F8] rounded-[20px] p-6">
+								{deal && <CustomFieldsView deal={deal} />}
+							</div>
+						</div>
+
+						{pipeline?.stages && (
+							<PipelineStagesHeader stages={pipeline.stages} currentStageId={deal?.stage?.id}  />
+						)}
+						{/* pipeline */}
+						<div className=" flex flex-wrap md:flex-nowrap justify-between items-start md:items-center gap-6 w-full ">
+							{/* new pipeline */}
+							<div className=" flex gap-4 items-center">
+								<div className=" flex flex-col gap-2">
+									<p className=" text-[#777] text-base font-medium">
+										{__('Pipeline', 'quillcrm')}
+									</p>
+									<p className="text-[#09090B] font-bold text-lg ">
+										{deal?.pipeline?.name}
+									</p>
+								</div>
+							</div>
+							{/* previous stage pipeline */}
+							<div className=" flex gap-4 items-center">
+								<div className=" flex flex-col gap-2">
+									<p className=" text-[#777] text-base font-medium">
+										{__('Previous Stage', 'quillcrm')}
+									</p>
+									<p className="text-[#09090B] font-bold text-lg ">
+										{previousStage
+											? previousStage.name
+											: __(
+													'No previous stage',
+													'quillcrm'
+												)}
+									</p>
+								</div>
+							</div>
+							{/* current stage  */}
+							{deal?.stage && (
+								<div className=" flex gap-4 items-center">
+									<div className=" flex flex-col gap-2">
+										<p className=" text-[#777] text-base font-medium">
+											{__('Current Stage', 'quillcrm')}
+										</p>
+										<p
+											className="font-bold text-lg "
+											style={{ color: StageTextColor(deal.stage.color) }}
+										>
+											{deal?.stage?.name}
+										</p>
+									</div>
+								</div>
+							)}
+							{/* win   */}
+							{deal?.probability && (
+								<div className=" flex gap-4 items-center">
+									<div className=" flex flex-col gap-2">
+										<p className=" text-[#777] text-base font-medium">
+											{__(
+												'Win Probability (%)',
+												'quillcrm'
+											)}
+										</p>
+										<p className="font-bold text-[#09090B]  text-lg ">
+											{deal?.probability}
+										</p>
+									</div>
+								</div>
+							)}
+						</div>
+						{/* avtivites */}
+						<Deal_Activites dealId={dealId || undefined} />
+					</>
+				)}
+			</DialogContent>
+		</Dialog>
 	);
 };

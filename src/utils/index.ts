@@ -161,8 +161,10 @@ export const convertDate = (date: string, addTime: boolean = false) => {
 			.format('MMMM D, YYYY [on] h:mm A');
 	}
 
-	return dayjs.utc(date).tz(userTimeZone).format('MMMM D, YYYY');
+	// return dayjs.utc(date).tz(userTimeZone).format('MMMM D, YYYY');
+	return dayjs.utc(date).tz(userTimeZone).format('YYYY-MM-DD');
 };
+
 
 export const getFilterBySlug = (slug: string, group: string) => {
 	const filtersGroups = ConfigAPI.getFiltersGroups();
@@ -223,6 +225,8 @@ export const formatDate = (date: string, type: string = 'hour') => {
 			return new Date(date).toLocaleTimeString();
 	}
 };
+
+  
 
 export function getTimeAgo(dateString: string): string {
 	const parsedUtcDate = dayjs.utc(dateString);

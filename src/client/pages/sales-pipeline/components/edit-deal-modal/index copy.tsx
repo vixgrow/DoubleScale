@@ -1,0 +1,633 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+
+/**
+ * External dependencies
+ */
+import {
+	Modal,
+	Form,
+	Input,
+	Select,
+	InputNumber,
+	DatePicker,
+	message,
+} from 'antd';
+import {
+	UserOutlined,
+	DollarOutlined,
+	CalendarOutlined,
+	EditOutlined,
+} from '@ant-design/icons';
+import { debounce } from 'lodash';
+import dayjs from 'dayjs';
+
+/**
+ * Internal dependencies
+ */
+import { useDealOperations } from '../../hooks/use-deal-operations';
+import { useUsers } from '../../hooks/use-users';
+import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
+import { Deal } from '../../types';
+import './style.scss';
+import ConfigAPI from '@quillcrm/config';
+
+const { Option } = Select;
+
+export interface EditDealModalProps {
+	visible: boolean;
+	onClose: () => void;
+	onSuccess: () => void;
+	deal: Deal | null;
+	pipelines: any[];
+}
+
+interface DealFormData {
+	title: string;
+	contact_id: number;
+	pipeline_id: number;
+	stage_id: number;
+	value?: number;
+	expected_close_date?: string;
+	// probability?: number;
+	source?: string;
+	owner_id?: number;
+	priority?: string;
+}
+
+interface Contact {
+	id: number;
+	first_name: string;
+	last_name: string;
+	email: string;
+}
+
+export const EditDealModal: React.FC<EditDealModalProps> = ({
+	visible,
+	onClose,
+	onSuccess,
+	deal,
+	pipelines,
+}) => {
+	const [form] = Form.useForm();
+	const [loading, setLoading] = useState(false);
+	const [contacts, setContacts] = useState<Contact[]>([]);
+	const [contactSearchLoading, setContactSearchLoading] = useState(false);
+
+	// Use shared users hook
+	const {
+		users: owners,
+		loading: ownersLoading,
+		loadUsers: loadOwners,
+		searchUsers: searchOwners,
+		ensureUserIncluded,
+	} = useUsers();
+	const [selectedPipelineId, setSelectedPipelineId] = useState<number | null>(
+		null
+	);
+
+	const { updateDeal } = useDealOperations();
+	const { isDealOwner } = useCapabilities();
+
+	const priorities = useMemo(() => {
+		return ConfigAPI.getDealPriorities();
+	}, []);
+
+	// Check if current user is restricted (deal owner)
+	const isRestrictedUser = isDealOwner();
+
+	// Get stages for selected pipeline
+	const availableStages = useMemo(() => {
+		// For restricted users, use the deal's current pipeline
+		const pipelineId = isRestrictedUser
+			? deal?.pipeline?.id
+			: selectedPipelineId;
+		if (!pipelineId) return [];
+		const pipeline = pipelines.find((p) => p.id === pipelineId);
+		return pipeline?.stages || [];
+	}, [selectedPipelineId, pipelines, isRestrictedUser, deal?.pipeline?.id]);
+
+	// Load initial contacts when modal opens
+	useEffect(() => {
+		if (visible) {
+			fetchInitialContacts();
+		}
+	}, [visible]);
+
+	// Initialize form when deal changes - with proper timing
+	useEffect(() => {
+		if (deal && visible && pipelines.length > 0) {
+			// Set selectedPipelineId first
+			setSelectedPipelineId(deal.pipeline?.id || 0);
+
+			// Set form values with proper data types
+			const formValues: any = {
+				title: deal.title,
+				stage_id: deal.stage?.id ? Number(deal.stage.id) : undefined,
+				value: deal.value,
+				expected_close_date: deal.expected_close_date
+					? dayjs(deal.expected_close_date)
+					: null,
+				probability: deal.probability,
+				source: deal.source,
+				priority: deal.priority,
+			};
+
+			// Only set contact_id, pipeline_id and owner_id for non-restricted users
+			// For restricted users, these fields will be disabled inputs showing names
+			if (!isRestrictedUser) {
+				formValues.contact_id = deal.contact?.id;
+				formValues.pipeline_id = deal.pipeline?.id
+					? Number(deal.pipeline.id)
+					: undefined;
+				formValues.owner_id = deal.owner?.id
+					? Number(deal.owner.id)
+					: undefined;
+			}
+
+			form.setFieldsValue(formValues);
+
+			// Load initial owners list
+			fetchInitialOwners();
+		}
+	}, [deal, visible, form, pipelines, isRestrictedUser]);
+
+	// Reset state when modal closes
+	useEffect(() => {
+		if (!visible) {
+			setContacts([]);
+			setSelectedPipelineId(null);
+			// Note: form.resetFields() not needed here because destroyOnClose={true} handles form cleanup
+		}
+	}, [visible]);
+
+	// Fetch initial contacts (recent contacts + current contact)
+	const fetchInitialContacts = useCallback(async () => {
+		setContactSearchLoading(true);
+		try {
+			const response = await apiFetch({
+				path: '/qc/v1/contacts?per_page=20&sort_by=updated_at&sort_order=desc',
+			});
+
+			const contactsData = Array.isArray(response)
+				? response
+				: (response as any)?.data || (response as any)?.items || [];
+
+			// Ensure current deal's contact is included if not in recent list
+			let finalContacts = [...contactsData];
+			if (
+				deal?.contact &&
+				!finalContacts.find((c) => c.id === deal.contact?.id)
+			) {
+				finalContacts.unshift(deal.contact);
+			}
+
+			setContacts(finalContacts);
+		} catch (error) {
+			console.error('Failed to fetch initial contacts:', error);
+			// Fallback to current contact only
+			if (deal?.contact) {
+				setContacts([deal.contact]);
+			}
+		} finally {
+			setContactSearchLoading(false);
+		}
+	}, [deal?.contact]);
+
+	// Fetch contacts with search
+	const fetchContacts = useCallback(
+		debounce(async (searchTerm: string) => {
+			if (!searchTerm || searchTerm.length < 2) {
+				// Reload initial contacts when search is cleared
+				fetchInitialContacts();
+				return;
+			}
+
+			setContactSearchLoading(true);
+			try {
+				const response = await apiFetch({
+					path: `/qc/v1/contacts?search=${encodeURIComponent(searchTerm)}&per_page=20`,
+				});
+
+				const contactsData = Array.isArray(response)
+					? response
+					: (response as any)?.data || (response as any)?.items || [];
+
+				setContacts(contactsData);
+			} catch (error) {
+				console.error('Failed to fetch contacts:', error);
+				message.error(__('Failed to load contacts', 'quillcrm'));
+			} finally {
+				setContactSearchLoading(false);
+			}
+		}, 300),
+		[fetchInitialContacts]
+	);
+
+	// Fetch initial owners using our custom users endpoint
+	const fetchInitialOwners = useCallback(async () => {
+		await loadOwners();
+
+		// Ensure current deal's owner is included
+		if (deal?.owner) {
+			ensureUserIncluded(deal.owner);
+		}
+	}, [deal?.owner, loadOwners, ensureUserIncluded]);
+
+	const handleSubmit = async (values: DealFormData) => {
+		if (!deal) return;
+
+		setLoading(true);
+		try {
+			// Prepare update data
+			const updateData: any = {
+				title: values.title,
+				stage_id: values.stage_id,
+				value: values.value || 0,
+				currency: 'USD',
+				expected_close_date: values.expected_close_date
+					? dayjs(values.expected_close_date).format('YYYY-MM-DD')
+					: null,
+				// Explicitly handle probability: undefined/empty should become null to revert to stage default
+				// probability:
+				// 	values.probability !== undefined &&
+				// 	values.probability !== null
+				// 		? values.probability
+				// 		: null,
+				source: values.source,
+				priority: values.priority,
+			};
+
+			// Only include contact_id, pipeline_id and owner_id if user is not restricted
+			if (!isRestrictedUser) {
+				updateData.contact_id = values.contact_id;
+				updateData.pipeline_id = values.pipeline_id;
+				updateData.owner_id = values.owner_id;
+			}
+
+			await updateDeal(deal.id, updateData);
+
+			message.success(
+				__(`Deal "${values.title}" updated successfully!`, 'quillcrm')
+			);
+
+			onSuccess();
+			onClose();
+		} catch (error) {
+			message.error(
+				error instanceof Error
+					? error.message
+					: __('Failed to update deal', 'quillcrm')
+			);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleCancel = () => {
+		onClose();
+	};
+
+	const handlePipelineChange = (pipelineId: number) => {
+		setSelectedPipelineId(pipelineId);
+		// Clear stage selection when pipeline changes
+		form.setFieldValue('stage_id', undefined);
+	};
+
+	return (
+		<Modal
+			title={
+				<div className="modal-title">
+					<EditOutlined />
+					<span>{__('Edit Deal', 'quillcrm')}</span>
+				</div>
+			}
+			open={visible}
+			onCancel={handleCancel}
+			onOk={() => form.submit()}
+			confirmLoading={loading}
+			width={600}
+			className="edit-deal-modal"
+			okText={__('Update Deal', 'quillcrm')}
+			cancelText={__('Cancel', 'quillcrm')}
+			destroyOnClose={true}
+		>
+			<Form
+				form={form}
+				layout="vertical"
+				onFinish={handleSubmit}
+				className="edit-deal-form"
+			>
+				{/* Deal Title */}
+				<Form.Item
+					name="title"
+					label={__('Deal Title', 'quillcrm')}
+					rules={[
+						{
+							required: true,
+							message: __(
+								'Please enter a deal title',
+								'quillcrm'
+							),
+						},
+						{
+							max: 255,
+							message: __(
+								'Title must not exceed 255 characters',
+								'quillcrm'
+							),
+						},
+					]}
+				>
+					<Input
+						placeholder={__('Enter deal title', 'quillcrm')}
+						maxLength={255}
+					/>
+				</Form.Item>
+
+				{/* Contact Selection */}
+				{isRestrictedUser ? (
+					<Form.Item label={__('Contact', 'quillcrm')}>
+						<Input
+							value={
+								deal?.contact
+									? `${deal.contact.first_name} ${deal.contact.last_name} (${deal.contact.email})`
+									: __('No contact', 'quillcrm')
+							}
+							disabled
+							placeholder={__('Contact (fixed)', 'quillcrm')}
+						/>
+					</Form.Item>
+				) : (
+					<Form.Item
+						name="contact_id"
+						label={__('Contact', 'quillcrm')}
+						rules={[
+							{
+								required: true,
+								message: __(
+									'Please select a contact',
+									'quillcrm'
+								),
+							},
+						]}
+					>
+						<Select
+							showSearch
+							placeholder={__(
+								'Select or search contacts',
+								'quillcrm'
+							)}
+							notFoundContent={
+								contactSearchLoading
+									? __('Loading...', 'quillcrm')
+									: __(
+											'No contacts found - try searching',
+											'quillcrm'
+										)
+							}
+							filterOption={false}
+							onSearch={fetchContacts}
+							loading={contactSearchLoading}
+							suffixIcon={<UserOutlined />}
+							onDropdownVisibleChange={(open) => {
+								if (open && contacts.length === 0) {
+									fetchInitialContacts();
+								}
+							}}
+						>
+							{contacts.map((contact) => (
+								<Option key={contact.id} value={contact.id}>
+									{contact.first_name} {contact.last_name} (
+									{contact.email})
+								</Option>
+							))}
+						</Select>
+					</Form.Item>
+				)}
+
+				{/* Pipeline & Stage */}
+				<div className="form-row">
+					{isRestrictedUser ? (
+						<Form.Item
+							label={__('Pipeline', 'quillcrm')}
+							className="form-item-half"
+						>
+							<Input
+								value={deal?.pipeline?.name || ''}
+								disabled
+								placeholder={__('Pipeline (fixed)', 'quillcrm')}
+							/>
+						</Form.Item>
+					) : (
+						<Form.Item
+							name="pipeline_id"
+							label={__('Pipeline', 'quillcrm')}
+							rules={[
+								{
+									required: true,
+									message: __(
+										'Please select a pipeline',
+										'quillcrm'
+									),
+								},
+							]}
+							className="form-item-half"
+						>
+							<Select
+								placeholder={__('Select pipeline', 'quillcrm')}
+								onChange={handlePipelineChange}
+							>
+								{pipelines.map((pipeline) => (
+									<Option
+										key={pipeline.id}
+										value={pipeline.id}
+									>
+										{pipeline.name}
+									</Option>
+								))}
+							</Select>
+						</Form.Item>
+					)}
+
+					<Form.Item
+						name="stage_id"
+						label={__('Stage', 'quillcrm')}
+						rules={[
+							{
+								required: true,
+								message: __(
+									'Please select a stage',
+									'quillcrm'
+								),
+							},
+						]}
+						className="form-item-half"
+					>
+						<Select
+							placeholder={__('Select stage', 'quillcrm')}
+							disabled={
+								!selectedPipelineId ||
+								availableStages.length === 0
+							}
+						>
+							{availableStages.map((stage) => (
+								<Option key={stage.id} value={stage.id}>
+									<div className="stage-option">
+										<span
+											className="stage-color"
+											style={{
+												backgroundColor: stage.color,
+											}}
+										/>
+										{stage.name} ({stage.win_probability}%)
+									</div>
+								</Option>
+							))}
+						</Select>
+					</Form.Item>
+				</div>
+
+				{/* Priority */}
+				<Form.Item name="priority" label={__('Priority', 'quillcrm')}>
+					<Select placeholder={__('Select priority', 'quillcrm')}>
+						{Object.keys(priorities).map((key) => (
+							<Option key={key} value={key}>
+								<div className="stage-option">
+									<span
+										className="stage-color"
+										style={{
+											backgroundColor:
+												priorities[key].color,
+										}}
+									/>
+									<span>{priorities[key].label}</span>
+								</div>
+							</Option>
+						))}
+					</Select>
+				</Form.Item>
+
+				{/* Value & Currency */}
+				<div className="form-row">
+					<Form.Item
+						name="value"
+						label={__('Deal Value', 'quillcrm')}
+						className="form-item-half"
+					>
+						<InputNumber
+							placeholder={__('0.00', 'quillcrm')}
+							min={0}
+							step={0.01}
+							style={{ width: '100%' }}
+							prefix={<DollarOutlined />}
+						/>
+					</Form.Item>
+				</div>
+
+				{/* Expected Close Date & Probability */}
+				<div className="form-row">
+					<Form.Item
+						name="expected_close_date"
+						label={__('Expected Close Date', 'quillcrm')}
+						className="form-item-half"
+					>
+						<DatePicker
+							style={{ width: '100%' }}
+							placeholder={__('Select date', 'quillcrm')}
+							suffixIcon={<CalendarOutlined />}
+						/>
+					</Form.Item>
+
+					{/* <Form.Item
+						name="probability"
+						label={__('Win Probability (%)', 'quillcrm')}
+						className="form-item-half"
+					>
+						<InputNumber
+							min={0}
+							max={100}
+							style={{ width: '100%' }}
+							placeholder={__('Auto from stage', 'quillcrm')}
+						/>
+					</Form.Item> */}
+				</div>
+
+				{/* Source & Owner */}
+				<div className="form-row">
+					<Form.Item
+						name="source"
+						label={__('Source', 'quillcrm')}
+						className="form-item-half"
+					>
+						<Input
+							placeholder={__(
+								'e.g., Website, Referral',
+								'quillcrm'
+							)}
+						/>
+					</Form.Item>
+
+					{isRestrictedUser ? (
+						<Form.Item
+							label={__('Deal Owner', 'quillcrm')}
+							className="form-item-half"
+						>
+							<Input
+								value={
+									'(' +
+										deal?.owner?.display_name +
+										') ' +
+										deal?.owner?.email ||
+									__('Current User', 'quillcrm')
+								}
+								disabled
+								placeholder={__('Owner (fixed)', 'quillcrm')}
+							/>
+						</Form.Item>
+					) : (
+						<Form.Item
+							name="owner_id"
+							label={__('Deal Owner', 'quillcrm')}
+							className="form-item-half"
+						>
+							<Select
+								showSearch
+								placeholder={__(
+									'Select or search users',
+									'quillcrm'
+								)}
+								notFoundContent={__(
+									'No users found - try searching',
+									'quillcrm'
+								)}
+								filterOption={false}
+								onSearch={searchOwners}
+								loading={ownersLoading}
+								allowClear
+								onDropdownVisibleChange={(open) => {
+									if (open && owners.length === 0) {
+										fetchInitialOwners();
+									}
+								}}
+							>
+								{owners.map((owner) => (
+									<Option
+										key={owner.id}
+										value={Number(owner.id)}
+									>
+										{owner.display_name} ({owner.email})
+									</Option>
+								))}
+							</Select>
+						</Form.Item>
+					)}
+				</div>
+			</Form>
+		</Modal>
+	);
+};

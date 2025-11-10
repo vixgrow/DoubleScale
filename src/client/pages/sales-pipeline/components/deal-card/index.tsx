@@ -7,24 +7,22 @@ import { useMemo } from '@wordpress/element';
 /**
  * React dependencies
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 /**
  * External dependencies
  */
 import { useDraggable } from '@dnd-kit/core';
+
+import { Button } from '@/components/ui/button';
 import {
-	Calendar,
-	DollarSign,
-	User,
-	Clock,
-	AlertTriangle,
-	Eye,
-	Edit3,
-	MoreVertical,
-	Target,
-	Percent,
-} from 'lucide-react';
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from '@/components/ui/card';
 
 /**
  * Internal dependencies
@@ -32,11 +30,21 @@ import {
 import { Deal } from '../../types';
 import './style.scss';
 
+import DealValueIcon from '@quillcrm/components/icons/deal-value';
+import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
+
+import { DealCardMenu } from './DealCardMenu';
+
 interface DealCardProps {
 	deal: Deal;
 	isDragging: boolean;
 	onCardClick: (deal: Deal) => void;
 	onDealEdit?: (deal: Deal) => void;
+	onDealDelete?: (deal: Deal) => void;
+	onAddNote?: (deal: Deal) => void;
+	onDealLogCall?: (deal: Deal) => void;
+	onDealScheduleMeeting?: (deal: Deal) => void;
+	onDealLogEmail?: (deal: Deal) => void;
 	stageColor?: string;
 	stageProbability?: number;
 	style?: React.CSSProperties;
@@ -47,6 +55,11 @@ export const DealCard: React.FC<DealCardProps> = ({
 	isDragging,
 	onCardClick,
 	onDealEdit,
+	onDealDelete,
+	onAddNote,
+	onDealLogCall,
+	onDealScheduleMeeting,
+	onDealLogEmail,
 	stageColor,
 	stageProbability,
 	style: customStyle = {},
@@ -64,6 +77,13 @@ export const DealCard: React.FC<DealCardProps> = ({
 			currentStageId: deal.stage?.id,
 		},
 	});
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		if (deal) {
+			setLoading(false);
+		}
+	}, [deal]);
 
 	const style = {
 		'--stage-color': stageColor || '#6d78d8',
@@ -81,34 +101,14 @@ export const DealCard: React.FC<DealCardProps> = ({
 		);
 	}, [deal.contact]);
 
-	// Format expected close date
-	const formattedDate = useMemo(() => {
-		if (!deal.expected_close_date) return null;
-
-		try {
-			const date = new Date(deal.expected_close_date);
-			return {
-				formatted: date.toLocaleDateString(),
-			};
-		} catch {
-			return null;
-		}
-	}, [deal.expected_close_date]);
+	useEffect(() => {
+		console.log(deal);
+	}, [deal]);
 
 	// Format currency value
 	const formattedValue = useMemo(() => {
 		return `$${deal.value.toLocaleString()}`;
 	}, [deal.value]);
-
-	// Calculate effective probability
-	const effectiveProbability = useMemo(() => {
-		return stageProbability ?? 0;
-	}, [stageProbability]);
-
-	// Format weighted value
-	const formattedWeightedValue = useMemo(() => {
-		return `$${deal.weighted_value.toLocaleString()}`;
-	}, [deal.weighted_value]);
 
 	const handleCardClick = (e: React.MouseEvent) => {
 		if (isDraggging || (e.target as HTMLElement).closest('.drag-handle')) {
@@ -117,15 +117,36 @@ export const DealCard: React.FC<DealCardProps> = ({
 		onCardClick(deal);
 	};
 
-	const handleActionClick = (e: React.MouseEvent, action: string) => {
-		e.stopPropagation();
-
+	const handleActionClick = (action: string) => {
 		if (action === 'view') {
 			onCardClick(deal);
 		} else if (action === 'edit') {
 			onDealEdit?.(deal);
+		} else if (action === 'delete') {
+			onDealDelete?.(deal);
+		} else if (action === 'add_note') {
+			onAddNote?.(deal);
+		} else if (action === 'log_call') {
+			onDealLogCall?.(deal);
+		} else if (action === 'schedule_meeting') {
+			onDealScheduleMeeting?.(deal);
+		} else if (action === 'log_email') {
+			onDealLogEmail?.(deal);
 		}
 	};
+	// if (loading) {
+	// 	return (
+	// 		<div
+	// 			className="m-4"
+	// 			style={{
+	// 				height: '100%',
+	// 				minHeight: '180px',
+	// 			}}
+	// 		>
+	// 			<DealCardShimmer />
+	// 		</div>
+	// 	);
+	// }
 
 	return (
 		<div
@@ -133,132 +154,71 @@ export const DealCard: React.FC<DealCardProps> = ({
 			style={style}
 			{...attributes}
 			{...listeners}
-			className={`deal-card ${isDragging || isDraggging ? 'dragging' : ''} ${deal.is_overdue ? 'overdue' : ''}`}
+			className={`deal-card m-4 ${isDragging || isDraggging ? 'dragging' : ''} ${deal.is_overdue ? 'overdue' : ''}`}
 			onClick={handleCardClick}
 		>
-			{/* Card Header */}
-			<div className="card-header">
-				<div className="deal-title-section">
-					<h4 className="deal-title" title={deal.title}>
-						{deal.title}
-					</h4>
-					<div className="deal-value">
-						<DollarSign size={14} />
-						<span>{formattedValue}</span>
+			<Card className="w-full flex flex-col  rounded-[16px] border border-[#DEE1E6]">
+				<CardHeader className="p-2.5">
+					<div className="flex items-center justify-between text-[#09090B]">
+						<CardTitle
+							title={deal.title}
+							className="text-lg font-bold leading-6"
+						>
+							{deal.title}
+						</CardTitle>
+						<DealCardMenu onActionClick={handleActionClick} />
 					</div>
-					{/* Probability Information */}
-					<div className="deal-probability">
-						<div className="probability-row">
-							<Percent size={12} />
-							<span className="probability-value">
-								{effectiveProbability.toFixed(0)}%
-							</span>
+				</CardHeader>
+				<CardContent className=" flex  p-2.5">
+					{/* <div className="flex flex-col"> */}
+					<span className=" text-[#660FF1] text-base font-medium landing-6 flex items-center gap-1">
+						<DealValueIcon color="#660FF1" />
+						{__('Deal Value:', 'quillcrm')}
+					</span>
+					<p className=" text-[#09090B] text-lg font-bold landing-6 text-center ">
+						{formattedValue}
+					</p>
+				</CardContent>
+				<CardFooter className="flex  p-2.5 justify-between items-center">
+					{deal.owner && (
+						<div className="flex items-center gap-1">
+							<div className="flex items-center gap-1">
+								<span className="w-8 h-8 rounded-full border border-[#DEE1E6] flex items-center justify-center">
+									<DealOwnerIcon />
+								</span>
+								<span className="text-base font-normal text-[#777] leading-6">
+									{__('Owner:', 'quillcrm')}
+								</span>
+							</div>
+
+							<p className="text-[#09090B] text-base font-medium truncate max-w-[120px] leading-6">
+								{deal?.owner.display_name}
+							</p>
 						</div>
-					</div>
-					{/* Weighted Value */}
-					<div className="deal-weighted-value">
-						<Target size={12} />
-						<span className="weighted-label">
-							{__('Weighted:', 'quillcrm')}{' '}
-							{formattedWeightedValue}
-						</span>
-					</div>
-				</div>
-
-				<div className="card-actions">
-					{/* Visual drag indicator */}
-					<div
-						className="drag-indicator"
-						aria-label={__('Drag to move deal', 'quillcrm')}
-					>
-						<MoreVertical size={16} />
-					</div>
-				</div>
-			</div>
-
-			{/* Card Body */}
-			<div className="card-body">
-				{/* Contact Info */}
-				<div className="contact-info">
-					<User size={14} />
-					<span className="contact-name">{contactName}</span>
-				</div>
-
-				{/* Owner Info */}
-				{deal.owner && (
-					<div className="owner-info">
-						<span className="owner-label">
-							{__('Owner:', 'quillcrm')}
-						</span>
-						<span className="owner-name">
-							{deal.owner.display_name}
-						</span>
-					</div>
-				)}
-
-				{/* Expected Close Date */}
-				{formattedDate && (
-					<div
-						className={`close-date ${deal.is_overdue ? 'overdue' : ''}`}
-					>
-						<Calendar size={14} />
-						<span className="date-text">
-							{formattedDate.formatted}
-						</span>
-						{deal.days_until_close !== null && (
-							<span className="days-until">
-								{deal.is_overdue
-									? `${Math.abs(deal.days_until_close)} ${__('days overdue', 'quillcrm')}`
-									: deal.days_until_close === 0
-										? __('Due today', 'quillcrm')
-										: `${deal.days_until_close} ${__('days left', 'quillcrm')}`}
+					)}
+					<div className="flex mt-1 gap-3">
+						{deal.priority && (
+							<span
+								className={`
+        text-base font-normal tracking-[-.32px] flex justify-center items-center py-1 px-2 rounded-[8px] border
+        ${
+			deal.priority === 'low'
+				? 'text-[#16A34A] border-[#16A34A] bg-[#EFFFF5]'
+				: deal.priority === 'medium'
+					? 'text-[#A67D0A] border-[#E4B123] bg-[#FFF2CE]'
+					: deal.priority === 'high'
+						? 'text-[#E13B3B] border-[#E13B3B] bg-[#FBE8E8]'
+						: 'text-gray-700 border-gray-300 bg-gray-50'
+		}
+      `}
+							>
+								{deal.priority.charAt(0).toUpperCase() +
+									deal.priority.slice(1)}
 							</span>
 						)}
 					</div>
-				)}
-			</div>
-
-			{/* Card Footer */}
-			<div className="card-footer">
-				<div className="quick-actions">
-					<button
-						className="action-btn view-btn"
-						onClick={(e) => handleActionClick(e, 'view')}
-						title={__('View details', 'quillcrm')}
-					>
-						<Eye size={14} />
-					</button>
-					<button
-						className="action-btn edit-btn"
-						onClick={(e) => handleActionClick(e, 'edit')}
-						title={__('Edit deal', 'quillcrm')}
-					>
-						<Edit3 size={14} />
-					</button>
-				</div>
-
-				{/* Status Indicators */}
-				<div className="status-indicators">
-					{deal.is_overdue && (
-						<div
-							className="overdue-indicator"
-							title={__('Deal is overdue', 'quillcrm')}
-						>
-							<AlertTriangle size={14} />
-							<span>{__('Overdue', 'quillcrm')}</span>
-						</div>
-					)}
-					{deal.days_until_close === 0 && !deal.is_overdue && (
-						<div
-							className="due-today-indicator"
-							title={__('Due today', 'quillcrm')}
-						>
-							<Clock size={14} />
-							<span>{__('Due today', 'quillcrm')}</span>
-						</div>
-					)}
-				</div>
-			</div>
+				</CardFooter>
+			</Card>
 		</div>
 	);
 };

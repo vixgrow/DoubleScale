@@ -8,35 +8,125 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * External dependencies
  */
+// import {InputNumber, DatePicker, message } from 'antd';
+
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
-	Modal,
-	Form,
-	Input,
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@quillcrm/components/ui/dialog';
+import {
 	Select,
-	InputNumber,
-	DatePicker,
-	message,
-} from 'antd';
-import {
-	UserOutlined,
-	DollarOutlined,
-	CalendarOutlined,
-	EditOutlined,
-} from '@ant-design/icons';
+	SelectTrigger,
+	SelectValue,
+	SelectContent,
+	SelectItem,
+} from '@/components/ui/select';
 import { debounce } from 'lodash';
 import dayjs from 'dayjs';
 
 /**
  * Internal dependencies
  */
+
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { useUsers } from '../../hooks/use-users';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 import { Deal } from '../../types';
 import './style.scss';
-import ConfigAPI from '@quillcrm/config';
+import ConfigAPI, { SOURCE_OPTIONS } from '@quillcrm/config';
+import { CustomDialogHeader, NoticeBanner } from '@quillcrm/components';
+import DealValueIcon from '@quillcrm/components/icons/deal-value';
+import { Input } from '@quillcrm/components/ui/input';
+import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
+import { CustomFieldsSection } from '../deal-custom-fields';
+import { Button } from '@quillcrm/components/ui/button';
+import AllDealIcon from '@quillcrm/components/icons/all-deals';
+import { useDispatch } from '@wordpress/data';
+import { convertDate } from '@quillcrm/utils';
 
-const { Option } = Select;
+interface PipelineStageBoxProps {
+	stage: {
+		color: string;
+	};
+	index: number;
+	totalStages: number;
+	children?: React.ReactNode;
+	triangleWidth?: number;
+	triangleHeight?: number;
+	boxHeight?: number;
+	isSelected?: boolean;
+	isPrevious?: boolean;
+}
+const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
+	stage,
+	index,
+	totalStages,
+	children,
+	isSelected,
+	isPrevious,
+}) => {
+	const backgroundColor =
+		isSelected || isPrevious ?
+			stage.color
+			: '#DEE1E6';
+
+	const isFirst = index === 0;
+	const isLast = index === totalStages - 1;
+
+	return (
+		<div
+			className="relative flex items-center"
+			style={{
+				zIndex: 100 - index,
+				marginLeft: isFirst ? 0 : -5,
+			}}
+		>
+			<div
+				className={`relative flex items-center justify-center h-8 px-3 ${
+					isFirst ? 'rounded-l-[6px]' : ''
+				} ${isLast ? 'rounded-r-[6px]' : ''}`}
+				style={{
+					backgroundColor,
+					minWidth: 40,
+					zIndex: 100 - index,
+					boxShadow: isSelected ? '0 0 6px rgba(0,0,0,0.1)' : 'none',
+				}}
+			>
+				<span className="text-[11px] font-medium text-[#09090B] whitespace-nowrap">
+					{children}
+				</span>
+				{!isLast && (
+					<span
+						className="absolute top-0 right-[-8px] w-0 h-0"
+						style={{
+							borderTop: '16px solid transparent',
+							borderBottom: '16px solid transparent',
+							borderLeft: `9px solid ${backgroundColor}`,
+							zIndex: 100 - index,
+						}}
+					/>
+				)}
+
+				{!isFirst && (
+					<span
+						className="absolute top-0 left-0 w-0 h-0"
+						style={{
+							borderTop: '16px solid transparent',
+							borderBottom: '16px solid transparent',
+							borderLeft: '9px solid white',
+							zIndex: 99 - index,
+						}}
+					/>
+				)}
+			</div>
+		</div>
+	);
+};
 
 export interface EditDealModalProps {
 	visible: boolean;
@@ -66,6 +156,18 @@ interface Contact {
 	email: string;
 }
 
+const dealSchema = z.object({
+	title: z.string().min(1, __('Title is required', 'quillcrm')),
+	contact_id: z.number().optional(),
+	pipeline_id: z.number().optional(),
+	stage_id: z.number().optional(),
+	value: z.number().optional(),
+	expected_close_date: z.any().optional(),
+	source: z.string().optional(),
+	owner_id: z.number().optional(),
+	priority: z.string().optional(),
+});
+
 export const EditDealModal: React.FC<EditDealModalProps> = ({
 	visible,
 	onClose,
@@ -73,10 +175,11 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	deal,
 	pipelines,
 }) => {
-	const [form] = Form.useForm();
+	// const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactSearchLoading, setContactSearchLoading] = useState(false);
+
 
 	// Use shared users hook
 	const {
@@ -93,24 +196,31 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	const { updateDeal } = useDealOperations();
 	const { isDealOwner } = useCapabilities();
 
+	const form = useForm<z.infer<typeof dealSchema>>({
+		resolver: zodResolver(dealSchema),
+		defaultValues: {
+			title: '',
+			contact_id: undefined,
+			pipeline_id: undefined,
+			stage_id: undefined,
+			value: undefined,
+			expected_close_date: undefined,
+			source: '',
+			owner_id: undefined,
+			priority: '',
+		},
+	});
+
 	const priorities = useMemo(() => {
 		return ConfigAPI.getDealPriorities();
 	}, []);
 
+
 	// Check if current user is restricted (deal owner)
 	const isRestrictedUser = isDealOwner();
 
-	// Get stages for selected pipeline
-	const availableStages = useMemo(() => {
-		// For restricted users, use the deal's current pipeline
-		const pipelineId = isRestrictedUser
-			? deal?.pipeline?.id
-			: selectedPipelineId;
-		if (!pipelineId) return [];
-		const pipeline = pipelines.find((p) => p.id === pipelineId);
-		return pipeline?.stages || [];
-	}, [selectedPipelineId, pipelines, isRestrictedUser, deal?.pipeline?.id]);
-
+	const dispatch = useDispatch('quillcrm/core');
+	const createNotice = dispatch?.createNotice;
 	// Load initial contacts when modal opens
 	useEffect(() => {
 		if (visible) {
@@ -121,40 +231,34 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	// Initialize form when deal changes - with proper timing
 	useEffect(() => {
 		if (deal && visible && pipelines.length > 0) {
-			// Set selectedPipelineId first
 			setSelectedPipelineId(deal.pipeline?.id || 0);
 
-			// Set form values with proper data types
-			const formValues: any = {
+			form.reset({
 				title: deal.title,
 				stage_id: deal.stage?.id ? Number(deal.stage.id) : undefined,
 				value: deal.value,
 				expected_close_date: deal.expected_close_date
 					? dayjs(deal.expected_close_date)
-					: null,
-				probability: deal.probability,
-				source: deal.source,
-				priority: deal.priority,
-			};
+					: undefined,
+				// source: deal.source || undefined,
+				source: deal.source?.toLowerCase() ?? '',
+				priority: deal.priority || undefined,
+				...(isRestrictedUser
+					? {}
+					: {
+							contact_id: deal.contact?.id,
+							pipeline_id: deal.pipeline?.id
+								? Number(deal.pipeline.id)
+								: undefined,
+							owner_id: deal.owner?.id
+								? Number(deal.owner.id)
+								: undefined,
+						}),
+			});
 
-			// Only set contact_id, pipeline_id and owner_id for non-restricted users
-			// For restricted users, these fields will be disabled inputs showing names
-			if (!isRestrictedUser) {
-				formValues.contact_id = deal.contact?.id;
-				formValues.pipeline_id = deal.pipeline?.id
-					? Number(deal.pipeline.id)
-					: undefined;
-				formValues.owner_id = deal.owner?.id
-					? Number(deal.owner.id)
-					: undefined;
-			}
-
-			form.setFieldsValue(formValues);
-
-			// Load initial owners list
 			fetchInitialOwners();
 		}
-	}, [deal, visible, form, pipelines, isRestrictedUser]);
+	}, [deal, visible, pipelines, isRestrictedUser]);
 
 	// Reset state when modal closes
 	useEffect(() => {
@@ -220,7 +324,8 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				setContacts(contactsData);
 			} catch (error) {
 				console.error('Failed to fetch contacts:', error);
-				message.error(__('Failed to load contacts', 'quillcrm'));
+
+				// message.error(__('Failed to load contacts', 'quillcrm'));
 			} finally {
 				setContactSearchLoading(false);
 			}
@@ -238,31 +343,24 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 		}
 	}, [deal?.owner, loadOwners, ensureUserIncluded]);
 
-	const handleSubmit = async (values: DealFormData) => {
+	const handleSubmit = form.handleSubmit(async (values) => {
 		if (!deal) return;
-
 		setLoading(true);
+
 		try {
-			// Prepare update data
 			const updateData: any = {
 				title: values.title,
 				stage_id: values.stage_id,
 				value: values.value || 0,
 				currency: 'USD',
 				expected_close_date: values.expected_close_date
-					? dayjs(values.expected_close_date).format('YYYY-MM-DD')
-					: null,
-				// Explicitly handle probability: undefined/empty should become null to revert to stage default
-				// probability:
-				// 	values.probability !== undefined &&
-				// 	values.probability !== null
-				// 		? values.probability
-				// 		: null,
+                ? convertDate(values.expected_close_date)
+                : null,
+				
 				source: values.source,
 				priority: values.priority,
 			};
 
-			// Only include contact_id, pipeline_id and owner_id if user is not restricted
 			if (!isRestrictedUser) {
 				updateData.contact_id = values.contact_id;
 				updateData.pipeline_id = values.pipeline_id;
@@ -270,364 +368,458 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 			}
 
 			await updateDeal(deal.id, updateData);
-
-			message.success(
-				__(`Deal "${values.title}" updated successfully!`, 'quillcrm')
-			);
+			createNotice?.({
+				type: 'success',
+				message: __(
+					`Deal "${values.title}" updated successfully!`,
+					'quillcrm'
+				),
+			});
 
 			onSuccess();
 			onClose();
 		} catch (error) {
-			message.error(
-				error instanceof Error
-					? error.message
-					: __('Failed to update deal', 'quillcrm')
-			);
+			const err = error as Error;
+	         createNotice?.({
+		        type: 'error',
+		        message: err.message || __('Failed to update deal', 'quillcrm'),
+	});
+
 		} finally {
 			setLoading(false);
 		}
-	};
+	});
 
 	const handleCancel = () => {
 		onClose();
 	};
 
 	const handlePipelineChange = (pipelineId: number) => {
-		setSelectedPipelineId(pipelineId);
 		// Clear stage selection when pipeline changes
-		form.setFieldValue('stage_id', undefined);
+		setSelectedPipelineId(pipelineId);
+		form.setValue('stage_id', undefined);
 	};
+	// console.log(deal?.source, SOURCE_OPTIONS)
+	const currentPipeline = pipelines?.find(
+		(p: any) => String(p.id) === String(deal?.pipeline?.id)
+	);
 
 	return (
-		<Modal
-			title={
-				<div className="modal-title">
-					<EditOutlined />
-					<span>{__('Edit Deal', 'quillcrm')}</span>
-				</div>
-			}
+		<Dialog
 			open={visible}
-			onCancel={handleCancel}
-			onOk={() => form.submit()}
-			confirmLoading={loading}
-			width={600}
-			className="edit-deal-modal"
-			okText={__('Update Deal', 'quillcrm')}
-			cancelText={__('Cancel', 'quillcrm')}
-			destroyOnClose={true}
+			onOpenChange={(open) => {
+				if (!open) {
+					handleCancel();
+				}
+			}}
 		>
-			<Form
-				form={form}
-				layout="vertical"
-				onFinish={handleSubmit}
-				className="edit-deal-form"
-			>
-				{/* Deal Title */}
-				<Form.Item
-					name="title"
-					label={__('Deal Title', 'quillcrm')}
-					rules={[
-						{
-							required: true,
-							message: __(
-								'Please enter a deal title',
-								'quillcrm'
-							),
-						},
-						{
-							max: 255,
-							message: __(
-								'Title must not exceed 255 characters',
-								'quillcrm'
-							),
-						},
-					]}
-				>
-					<Input
-						placeholder={__('Enter deal title', 'quillcrm')}
-						maxLength={255}
-					/>
-				</Form.Item>
-
-				{/* Contact Selection */}
-				{isRestrictedUser ? (
-					<Form.Item label={__('Contact', 'quillcrm')}>
-						<Input
-							value={
-								deal?.contact
-									? `${deal.contact.first_name} ${deal.contact.last_name} (${deal.contact.email})`
-									: __('No contact', 'quillcrm')
-							}
-							disabled
-							placeholder={__('Contact (fixed)', 'quillcrm')}
+			<DialogContent className="w-full max-w-3xl max-h-[80vh] my-2 sm:mx-auto overflow-y-auto z-[100000]  p-8 rounded-[16px] ">
+				<DialogHeader>
+					<DialogTitle className="!mb-0">
+						<CustomDialogHeader
+							title={__('Edit Deal', 'quillcrm')}
+							subtitle=""
+							icon={<AllDealIcon />}
 						/>
-					</Form.Item>
-				) : (
-					<Form.Item
-						name="contact_id"
-						label={__('Contact', 'quillcrm')}
-						rules={[
-							{
-								required: true,
-								message: __(
-									'Please select a contact',
-									'quillcrm'
-								),
-							},
-						]}
-					>
-						<Select
-							showSearch
-							placeholder={__(
-								'Select or search contacts',
-								'quillcrm'
-							)}
-							notFoundContent={
-								contactSearchLoading
-									? __('Loading...', 'quillcrm')
-									: __(
-											'No contacts found - try searching',
-											'quillcrm'
-										)
-							}
-							filterOption={false}
-							onSearch={fetchContacts}
-							loading={contactSearchLoading}
-							suffixIcon={<UserOutlined />}
-							onDropdownVisibleChange={(open) => {
-								if (open && contacts.length === 0) {
-									fetchInitialContacts();
-								}
-							}}
-						>
-							{contacts.map((contact) => (
-								<Option key={contact.id} value={contact.id}>
-									{contact.first_name} {contact.last_name} (
-									{contact.email})
-								</Option>
-							))}
-						</Select>
-					</Form.Item>
-				)}
+					</DialogTitle>
+				</DialogHeader>
 
-				{/* Pipeline & Stage */}
-				<div className="form-row">
+				<div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 my-3">
+					{/* Related Contact */}
 					{isRestrictedUser ? (
-						<Form.Item
-							label={__('Pipeline', 'quillcrm')}
-							className="form-item-half"
-						>
-							<Input
-								value={deal?.pipeline?.name || ''}
-								disabled
-								placeholder={__('Pipeline (fixed)', 'quillcrm')}
-							/>
-						</Form.Item>
-					) : (
-						<Form.Item
-							name="pipeline_id"
-							label={__('Pipeline', 'quillcrm')}
-							rules={[
-								{
-									required: true,
-									message: __(
-										'Please select a pipeline',
-										'quillcrm'
-									),
-								},
-							]}
-							className="form-item-half"
-						>
-							<Select
-								placeholder={__('Select pipeline', 'quillcrm')}
-								onChange={handlePipelineChange}
-							>
-								{pipelines.map((pipeline) => (
-									<Option
-										key={pipeline.id}
-										value={pipeline.id}
-									>
-										{pipeline.name}
-									</Option>
-								))}
-							</Select>
-						</Form.Item>
-					)}
-
-					<Form.Item
-						name="stage_id"
-						label={__('Stage', 'quillcrm')}
-						rules={[
-							{
-								required: true,
-								message: __(
-									'Please select a stage',
-									'quillcrm'
-								),
-							},
-						]}
-						className="form-item-half"
-					>
-						<Select
-							placeholder={__('Select stage', 'quillcrm')}
-							disabled={
-								!selectedPipelineId ||
-								availableStages.length === 0
-							}
-						>
-							{availableStages.map((stage) => (
-								<Option key={stage.id} value={stage.id}>
-									<div className="stage-option">
-										<span
-											className="stage-color"
-											style={{
-												backgroundColor: stage.color,
-											}}
-										/>
-										{stage.name} ({stage.win_probability}%)
-									</div>
-								</Option>
-							))}
-						</Select>
-					</Form.Item>
-				</div>
-
-				{/* Priority */}
-				<Form.Item name="priority" label={__('Priority', 'quillcrm')}>
-					<Select placeholder={__('Select priority', 'quillcrm')}>
-						{Object.keys(priorities).map((key) => (
-							<Option key={key} value={key}>
-								<div className="stage-option">
-									<span
-										className="stage-color"
-										style={{
-											backgroundColor:
-												priorities[key].color,
-										}}
-									/>
-									<span>{priorities[key].label}</span>
-								</div>
-							</Option>
-						))}
-					</Select>
-				</Form.Item>
-
-				{/* Value & Currency */}
-				<div className="form-row">
-					<Form.Item
-						name="value"
-						label={__('Deal Value', 'quillcrm')}
-						className="form-item-half"
-					>
-						<InputNumber
-							placeholder={__('0.00', 'quillcrm')}
-							min={0}
-							step={0.01}
-							style={{ width: '100%' }}
-							prefix={<DollarOutlined />}
-						/>
-					</Form.Item>
-				</div>
-
-				{/* Expected Close Date & Probability */}
-				<div className="form-row">
-					<Form.Item
-						name="expected_close_date"
-						label={__('Expected Close Date', 'quillcrm')}
-						className="form-item-half"
-					>
-						<DatePicker
-							style={{ width: '100%' }}
-							placeholder={__('Select date', 'quillcrm')}
-							suffixIcon={<CalendarOutlined />}
-						/>
-					</Form.Item>
-
-					{/* <Form.Item
-						name="probability"
-						label={__('Win Probability (%)', 'quillcrm')}
-						className="form-item-half"
-					>
-						<InputNumber
-							min={0}
-							max={100}
-							style={{ width: '100%' }}
-							placeholder={__('Auto from stage', 'quillcrm')}
-						/>
-					</Form.Item> */}
-				</div>
-
-				{/* Source & Owner */}
-				<div className="form-row">
-					<Form.Item
-						name="source"
-						label={__('Source', 'quillcrm')}
-						className="form-item-half"
-					>
-						<Input
-							placeholder={__(
-								'e.g., Website, Referral',
-								'quillcrm'
-							)}
-						/>
-					</Form.Item>
-
-					{isRestrictedUser ? (
-						<Form.Item
-							label={__('Deal Owner', 'quillcrm')}
-							className="form-item-half"
-						>
-							<Input
+						<div className="flex flex-col gap-2">
+							<label className="font-normal text-[#09090B] text-base">
+								{__('ٌRelated Contact', 'quillcrm')}
+							</label>
+							<input
+								className="h-12 !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] !text-[#09090B] font-sm text-sm landing-[150%] tracking-[-.5px]"
 								value={
-									'(' +
-										deal?.owner?.display_name +
-										') ' +
-										deal?.owner?.email ||
-									__('Current User', 'quillcrm')
+									deal?.contact
+										? `${deal.contact.first_name} ${deal.contact.last_name} (${deal.contact.email})`
+										: __('No contact', 'quillcrm')
+								}
+								disabled
+								placeholder={__('Contact (fixed)', 'quillcrm')}
+							/>
+						</div>
+					) : (
+						<div className="flex flex-col gap-2">
+							<label className="font-normal text-[#09090B] text-base ">
+								{__('Related Contact', 'quillcrm')}
+							</label>
+
+							<Select
+								onValueChange={(value) =>
+									form.setValue('contact_id', Number(value))
+								}
+								value={form.watch('contact_id')?.toString()}
+								onOpenChange={(open) => {
+									if (open && contacts.length === 0) {
+										fetchInitialContacts();
+									}
+								}}
+							>
+								<SelectTrigger className="h-12 !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] !text-[#09090B] font-sm text-sm landing-[150%] tracking-[-.5px]">
+									<SelectValue
+										placeholder={__(
+											'Select a contact',
+											'quillcrm'
+										)}
+									/>
+								</SelectTrigger>
+
+								<SelectContent>
+									{contactSearchLoading ? (
+										<div className="px-3 py-2 text-sm text-muted-foreground">
+											{__('Loading...', 'quillcrm')}
+										</div>
+									) : contacts.length > 0 ? (
+										contacts.map((contact) => (
+											<SelectItem
+												key={contact.id}
+												value={String(contact.id)}
+											>
+												{contact.first_name}{' '}
+												{contact.last_name} (
+												{contact.email})
+											</SelectItem>
+										))
+									) : (
+										<div className="px-3 py-2 text-sm text-muted-foreground">
+											{__(
+												'No contacts found',
+												'quillcrm'
+											)}
+										</div>
+									)}
+								</SelectContent>
+							</Select>
+						</div>
+					)}
+					{/* Deal value */}
+					<div className="flex flex-col gap-2">
+						<label className=" font-normal text-[#09090B] text-base">
+							{__('Deal Value', 'quillcrm')}
+						</label>
+						<div className=" flex justify-between gap-3">
+							<Input
+								type="number"
+								value={form.watch('value')}
+								onChange={(e) =>
+									form.setValue(
+										'value',
+										Number(e.target.value)
+									)
+								}
+								placeholder={__('Deal Value', 'quillcrm')}
+								className=" h-12 !shadow-none py-[5px] px-4 !rounded-[8px] outline-none border !border-[#DEE1E6] !text-[#09090B] font-sm text-sm landing-[150%] tracking-[-.5px]"
+							/>
+							<div className=" h-12 rounded-[8px] flex justify-center items-center gap-1 border border-[#DEE1E6] bg-[#F0F0F0] py-[5px] px-[12px]">
+								<DealValueIcon />
+								<span>USD</span>
+							</div>
+						</div>
+					</div>
+					{/* deal name */}
+					<div className="flex flex-col gap-2">
+						<label className="font-normal text-[#09090B] text-base">
+							{__('Deal Title', 'quillcrm')}
+						</label>
+						<Input
+							type="text"
+							value={form.watch('title')}
+							onChange={(e) =>
+								form.setValue('title', e.target.value)
+							}
+							placeholder={__('Deal Name', 'quillcrm')}
+							className="h-12 !shadow-none py-[5px] px-4 !rounded-[8px] outline-none border !border-[#DEE1E6] !text-[#09090B] font-sm text-sm landing-[150%] tracking-[-.5px]"
+						/>
+					</div>
+					{/* Deal Owner */}
+					{isRestrictedUser ? (
+						<div className="flex flex-col gap-2">
+							<label className="font-normal text-[#09090B] text-base">
+								{__('Deal Owner', 'quillcrm')}
+							</label>
+							<input
+								className="h-12 w-full rounded-[8px] border border-input bg-muted px-4 py-[5px] text-sm"
+								value={
+									deal?.owner
+										? `${deal.owner.display_name} (${deal.owner.email})`
+										: __('Current User', 'quillcrm')
 								}
 								disabled
 								placeholder={__('Owner (fixed)', 'quillcrm')}
 							/>
-						</Form.Item>
+						</div>
 					) : (
-						<Form.Item
-							name="owner_id"
-							label={__('Deal Owner', 'quillcrm')}
-							className="form-item-half"
-						>
+						<div className="flex flex-col gap-2">
+							<label className="font-normal text-[#09090B] text-base ">
+								{__('Deal Owner', 'quillcrm')}
+							</label>
+
 							<Select
-								showSearch
-								placeholder={__(
-									'Select or search users',
-									'quillcrm'
-								)}
-								notFoundContent={__(
-									'No users found - try searching',
-									'quillcrm'
-								)}
-								filterOption={false}
-								onSearch={searchOwners}
-								loading={ownersLoading}
-								allowClear
-								onDropdownVisibleChange={(open) => {
+								value={
+									form.watch('owner_id')
+										? String(form.watch('owner_id'))
+										: ''
+								}
+								onValueChange={(v) =>
+									form.setValue('owner_id', Number(v))
+								}
+								onOpenChange={(open) => {
 									if (open && owners.length === 0) {
 										fetchInitialOwners();
 									}
 								}}
 							>
-								{owners.map((owner) => (
-									<Option
-										key={owner.id}
-										value={Number(owner.id)}
-									>
-										{owner.display_name} ({owner.email})
-									</Option>
-								))}
+								<SelectTrigger className="h-12  !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] text-[#09090B] text-sm leading-[150%] tracking-[-.5px]">
+									<SelectValue
+										placeholder={
+											ownersLoading
+												? __(
+														'Loading owners...',
+														'quillcrm'
+													)
+												: __('Select Owner', 'quillcrm')
+										}
+									/>
+								</SelectTrigger>
+
+								<SelectContent>
+									{ownersLoading ? (
+										<div className="px-3 py-2 text-sm text-muted-foreground ">
+											{__(
+												'Loading owners...',
+												'quillcrm'
+											)}
+										</div>
+									) : owners.length > 0 ? (
+										owners.map((owner) => (
+											<SelectItem
+												key={owner.id}
+												value={String(owner.id)}
+											>
+												{owner.display_name} (
+												{owner.email})
+											</SelectItem>
+										))
+									) : (
+										<div className="px-3 py-2 text-sm text-muted-foreground">
+											{__('No users found', 'quillcrm')}
+										</div>
+									)}
+								</SelectContent>
 							</Select>
-						</Form.Item>
+						</div>
 					)}
+					{/* deal source */}
+					<div className="flex flex-col gap-2">
+						<label className="font-normal text-[#09090B] text-base">
+							{__('Deal Source', 'quillcrm')}
+						</label>
+
+						<Select
+							value={form.watch('source') || ''}
+							onValueChange={(value) =>
+								form.setValue('source', value)
+							}
+						>
+							<SelectTrigger className="h-12 !shadow-none py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] !text-[#09090B] text-sm leading-[150%] tracking-[-.5px]">
+								<SelectValue
+									placeholder={__(
+										'Select deal source',
+										'quillcrm'
+									)}
+								/>
+							</SelectTrigger>
+
+							<SelectContent>
+								{SOURCE_OPTIONS.map((source) => (
+									<SelectItem
+										key={source.value}
+										value={source.value}
+									>
+										{source.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+					{/* expeted close date */}
+					<div className="flex flex-col gap-2 z-[120]">
+						<label className="block mb-1 font-normal text-[#09090B] text-base">
+							{__('Expected Close Date', 'quillcrm')}
+						</label>
+
+						<DateRangePicker
+							value={{
+								from: form.watch('expected_close_date')
+									? new Date(form.watch('expected_close_date'))
+									: null,
+								to: null
+							}}
+							onChange={(range) => {
+								const date = range?.from
+									? range.from.toISOString()
+									: '';
+								form.setValue('expected_close_date', date);
+							}}
+							placeholder={__('Select date', 'quillcrm')}
+							className="w-full h-12 !shadow-none rounded-[8px] border border-[#DEE1E6] bg-white !text-[#09090B] !font-normal !text-base tracking-[-.5px]"
+						/>
+					</div>
+					{/* pipeline */}
+					<div className="flex flex-col gap-2">
+						<label className="block mb-1 font-normal text-[#09090B] text-base">
+							{__('Pipeline', 'quillcrm')}
+						</label>
+
+						<Input
+							value={
+								deal?.pipeline?.name ||
+								__('No pipeline', 'quillcrm')
+							}
+							disabled
+							className="w-full h-12 rounded-[8px] border disabled:bg-[#F5F5F5] font-normal text-base tracking-[-.5px] disabled:text-[#09090B] disabled:border-[#DEE1E6]  cursor-not-allowed"
+						/>
+					</div>
+					{/* stages  */}
+
+					{currentPipeline?.stages &&
+						currentPipeline.stages.length > 0 && (
+							<div className="flex flex-col gap-2 mt-2">
+								<label className="block mb-1 font-normal text-[#09090B] text-base">
+									{__('Deal Stage', 'quillcrm')}
+								</label>
+
+								<div className="flex flex-wrap gap-2">
+									{[...currentPipeline.stages]
+										.sort(
+											(a, b) =>
+												a.sort_order - b.sort_order
+										)
+										.map((stage: any, index: number) => {
+											const selectedIndex =
+												currentPipeline.stages.findIndex(
+													(s: any) =>
+														s.id ===
+														form.watch('stage_id')
+												);
+
+											const isSelected =
+												index === selectedIndex;
+											const isPrevious =
+												index < selectedIndex;
+
+											return (
+												<div
+													key={stage.id}
+													onClick={() =>
+														form.setValue(
+															'stage_id',
+															stage.id
+														)
+													}
+													className={`cursor-pointer transition-all duration-200 `}
+													title={stage.name}
+												>
+													<PipelineStageHeaderBox
+														stage={stage}
+														index={index}
+														totalStages={
+															currentPipeline
+																.stages.length
+														}
+														isSelected={isSelected}
+														isPrevious={isPrevious}
+													/>
+												</div>
+											);
+										})}
+								</div>
+							</div>
+						)}
 				</div>
-			</Form>
-		</Modal>
+				{/* Priority select */}
+				<div className="w-full grid grid-cols-1 gap-6">
+						{priorities && (
+							<div className="flex flex-col gap-2 mt-2">
+								<label className="block mb-1 font-normal text-[#09090B] text-base">
+									{__('Priority', 'quillcrm')}
+								</label>
+
+								<div className="flex flex-wrap gap-2">
+									{Object.entries(priorities).map(
+										([key, value]) => {
+											const selectedPriority =
+												form.watch('priority');
+											const isSelected =
+												selectedPriority === key;
+
+											return (
+												<div
+													key={key}
+													onClick={() =>
+														form.setValue(
+															'priority',
+															key
+														)
+													}
+													className={`flex items-center gap-2 cursor-pointer px-4 py-2 rounded-md border transition-all duration-200 ${
+														isSelected
+															? 'border-[#1E3A8A] bg-[#E4EEFD] ring-2 ring-[#1E3A8A]/30'
+															: 'border-[#DEE1E6] bg-white hover:bg-[#F9FAFB]'
+													}`}
+												>
+													<span
+														className="inline-block w-5 h-5 rounded-md"
+														style={{
+															backgroundColor:
+																value.color,
+														}}
+													/>
+													<span
+														className={`text-sm font-medium ${
+															isSelected
+																? 'text-[#1E3A8A]'
+																: 'text-[#09090B]'
+														}`}
+													>
+														{value.label}
+													</span>
+												</div>
+											);
+										}
+									)}
+								</div>
+							</div>
+						)}
+						<div className="h-[1px] bg-[#DEE1E6] w-full"></div>
+						{/* custom filed */}
+						
+<CustomFieldsSection
+	deal={deal} 
+	// initialValues={deal?.custom_fields || {}}
+	onChange={(fields) => {
+		Object.entries(fields).forEach(([key, value]) => {
+			form.setValue(key as any, value);
+		});
+	}}
+/>
+{/*button */}
+<div className="mt-6">
+	<Button
+		type="button"
+		onClick={handleSubmit} 
+		disabled={loading}
+		className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-md font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
+	>
+		{loading ? __('Updating deal...', 'quillcrm') : __('Update Deal', 'quillcrm')}
+	</Button>
+</div>
+				</div>
+			</DialogContent>
+		</Dialog>
 	);
 };

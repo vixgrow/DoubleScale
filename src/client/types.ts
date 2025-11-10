@@ -67,6 +67,11 @@ export type Order = {
 	billing_email: string;
 	date_created_gmt: string;
 	date_updated_gmt: string;
+	date: {
+		date: string;
+		timezone: string;
+		timezone_type: number;
+	}
 	parent_order_id: string;
 	payment_method: string;
 	payment_method_title: string;

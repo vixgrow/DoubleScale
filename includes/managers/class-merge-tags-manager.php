@@ -35,6 +35,7 @@ final class Merge_Tags_Manager {
 
 
 
+
 	/**
 	 * Registed merge tags
 	 *
@@ -220,9 +221,10 @@ final class Merge_Tags_Manager {
 		$forms = Forms_Manager::instance()->get_all_forms();
 		foreach ( $forms as $form ) {
 			$this->groups[ $form->slug ] = array(
-				'name'      => $form->name,
-				'mergeTags' => array(),
-				'triggers'  => array( $form->slug ),
+				'name'        => $form->name,
+				'mergeTags'   => array(),
+				'triggers'    => array( $form->slug ),
+				'is_disabled' => ! $form->is_enabled(),
 			);
 		}
 	}

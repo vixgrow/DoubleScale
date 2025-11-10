@@ -285,6 +285,8 @@ const SettingsPage: React.FC = () => {
 				onValueChange={setTab}
 				tabsList={tabsList}
 				tabsContent={tabsContent}
+				tabsListWrapperClassName='py-3 px-2.5 border rounded-lg'
+				tabsListClassName='gap-2 bg-transparent text-foreground justify-center'
 			/>
 		</div>
 	);

@@ -182,3 +182,4 @@ export { default as GradientSendSMSIcon } from './gradient-send-sms';
 export { default as GradientMergeTagsIcon } from './gradient-merge-tags';
 export { default as GradientContactsIcon } from './gradient-contacts';
 export { default as GradientCampaignsIcon } from './gradient-campaigns';
+export { default as NoDealsIcon } from './no-deals';

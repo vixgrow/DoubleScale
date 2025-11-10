@@ -25,6 +25,7 @@ import {  FiltersIcon } from '@quillcrm/components';
 import { AdvancedFiltersDialog } from '@quillcrm/components/advancedFilterDialog/AdvancedFilterDialog';
 
 
+
 interface Pipeline {
 	id: number;
 	name: string;
@@ -109,6 +110,8 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 				</div>
 
 				<div className="filter-main flex items-end justify-end gap-3 ml-auto">
+					{/* Quick Status Filter */}
+					
 					<div className="filter-actions flex items-center">
 						{/* Toggle Advanced Filters */}
 						<button

@@ -205,7 +205,7 @@ const SalesPipeline: React.FC = () => {
 			)}
 
 
-			<PipelineFilters
+               <PipelineFilters
 				pipelines={pipelines || []}
 				selectedPipelineId={selectedPipelineId}
 				onPipelineChange={setSelectedPipelineId}

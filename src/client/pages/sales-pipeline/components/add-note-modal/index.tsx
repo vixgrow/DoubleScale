@@ -2,22 +2,42 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
-import * as React from 'react';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * External dependencies
  */
-import { Modal, Form, Input, Button, message } from 'antd';
-import { MessageSquare } from 'lucide-react';
+
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '@/components/ui/form';
 
 /**
  * Internal dependencies
  */
 import { useActivityOperations } from '../../hooks/use-activity-operations';
 import './style.scss';
-
-const { TextArea } = Input;
+import { CustomDialogHeader } from '@quillcrm/components';
+import NoteAddIcon from '@quillcrm/components/icons/note-add';
+import { useDispatch } from '@wordpress/data';
 
 interface AddNoteModalProps {
 	visible: boolean;
@@ -28,6 +48,19 @@ interface AddNoteModalProps {
 	editMode?: boolean;
 	activity?: any;
 }
+const noteSchema = z.object({
+	// dealTitle: z.string().optional(),
+	note: z
+		.string()
+		.min(3, {
+			message: __('Note must be at least 3 characters long', 'quillcrm'),
+		})
+		.max(5000, {
+			message: __('Note cannot exceed 5000 characters', 'quillcrm'),
+		}),
+});
+
+type NoteFormValues = z.infer<typeof noteSchema>;
 
 export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 	visible,
@@ -38,121 +71,140 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 	editMode = false,
 	activity,
 }) => {
-	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
 	const { addNote, updateActivity } = useActivityOperations();
+	const dispatch = useDispatch('quillcrm/core');
+	const createNotice = dispatch?.createNotice;
+
+	const form = useForm<NoteFormValues>({
+		resolver: zodResolver(noteSchema),
+		defaultValues: {
+			// dealTitle: dealTitle || '',
+			note: '',
+		},
+	});
 
 	// Load existing activity data when in edit mode
-	React.useEffect(() => {
+	useEffect(() => {
 		if (editMode && activity && visible) {
-			form.setFieldsValue({
+			form.reset({
 				note: activity.data?.content || '',
 			});
 		} else if (!visible) {
-			form.resetFields();
+			form.reset({ note: '' });
 		}
 	}, [editMode, activity, visible, form]);
 
-	const handleSubmit = async (values: { note: string }) => {
+	const handleSubmitForm = async (values: { note: string }) => {
 		setLoading(true);
 		try {
 			if (editMode && activity) {
 				await updateActivity(activity.id, 'note_added', values.note);
-				message.success(__('Note updated successfully!', 'quillcrm'));
+				createNotice?.({
+					type: 'success',
+					message: __('Note updated successfully!', 'quillcrm'),
+				});
 			} else {
 				await addNote(dealId, values.note);
-				message.success(__('Note added successfully!', 'quillcrm'));
+				createNotice?.({
+					type: 'success',
+					message: __('Note added successfully!', 'quillcrm'),
+				});
 			}
-
-			form.resetFields();
+			form.reset();
 			onSuccess();
 			onClose();
 		} catch (error) {
-			message.error(
-				error instanceof Error
-					? error.message
-					: __(editMode ? 'Failed to update note' : 'Failed to add note', 'quillcrm')
-			);
+			const err = error as Error;
+			createNotice?.({
+				type: 'error',
+				message: err.message || __(editMode ? 'Failed to update note' : 'Failed to add note', 'quillcrm'),
+			});
 		} finally {
 			setLoading(false);
 		}
 	};
 
 	const handleCancel = () => {
-		form.resetFields();
+		form.reset();
 		onClose();
 	};
 
 	return (
-		<Modal
-			title={
-				<div className="add-note-modal-title">
-					<MessageSquare size={20} />
-					<span>{editMode ? __('Edit Note', 'quillcrm') : __('Add Note', 'quillcrm')}</span>
-				</div>
-			}
+		<Dialog
 			open={visible}
-			onCancel={handleCancel}
-			footer={[
-				<Button key="cancel" onClick={handleCancel}>
-					{__('Cancel', 'quillcrm')}
-				</Button>,
-				<Button
-					key="submit"
-					type="primary"
-					loading={loading}
-					onClick={() => form.submit()}
-				>
-					{editMode ? __('Update', 'quillcrm') : __('Add Note', 'quillcrm')}
-				</Button>,
-			]}
-			width={500}
-			className="add-note-modal"
+			onOpenChange={(open) => {
+				if (!open) handleCancel();
+			}}
 		>
-			{dealTitle && (
-				<div className="deal-context">
-					<span className="deal-label">
-						{__('Deal:', 'quillcrm')}
-					</span>
-					<span className="deal-title">{dealTitle}</span>
-				</div>
-			)}
+			<DialogContent className="w-full max-w-2xl   z-[100000] max-h-[80vh] my-2 mx-5 sm:mx-auto overflow-y-auto  p-8 rounded-[16px]">
+				<DialogHeader>
+					<DialogTitle className="!mb-0">
+						<CustomDialogHeader
+							title={editMode ? __('Edit Note', 'quillcrm') : __('Add Note', 'quillcrm')}
+							subtitle=""
+							icon={<NoteAddIcon />}
+						/>
+					</DialogTitle>
+				</DialogHeader>
+				<Form {...form}>
+					<form
+						onSubmit={form.handleSubmit(handleSubmitForm)}
+						className="space-y-4"
+					>
+						{/* Deal Title (read-only) */}
 
-			<Form
-				form={form}
-				layout="vertical"
-				onFinish={handleSubmit}
-				autoComplete="off"
-			>
-				<Form.Item
-					name="note"
-					label={__('Note Content', 'quillcrm')}
-					rules={[
-						{
-							required: true,
-							message: __(
-								'Please enter note content',
-								'quillcrm'
-							),
-						},
-						{
-							min: 3,
-							message: __(
-								'Note must be at least 3 characters long',
-								'quillcrm'
-							),
-						},
-					]}
-				>
-					<TextArea
-						rows={4}
-						placeholder={__('Enter your note here...', 'quillcrm')}
-						maxLength={1000}
-						showCount
-					/>
-				</Form.Item>
-			</Form>
-		</Modal>
+						<div className="flex flex-col gap-1">
+							<Label className="font-normal text-[#09090B] text-base">
+								{__('Deal Name', 'quillcrm')}
+							</Label>
+							<Input
+								readOnly
+								value={dealTitle || ''}
+								className="h-12 py-[5px] px-4 bg-[#F0F0F0] border border-[#DEE1E6] rounded-[8px]"
+								placeholder="Deal Name"
+							/>
+						</div>
+
+						{/* Note Field */}
+						<FormField
+							control={form.control}
+							name="note"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className='font-normal text-[#09090B] text-base after:content-["*"] after:ml-1 after:text-red-500'>
+										{__('Note', 'quillcrm')}
+									</FormLabel>
+									<FormControl>
+										<Textarea
+											{...field}
+											rows={6}
+											placeholder={__(
+												'Enter your note here...',
+												'quillcrm'
+											)}
+											className=" py-3 px-4 mb-3 border border-[#DEE1E6] rounded-[8px] bg-[#FFF]"
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						{/* button */}
+						<div className="mt-2">
+							<Button
+								type="submit"
+								disabled={loading}
+								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-md font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
+							>
+								{loading
+									? (editMode ? __('Updating...', 'quillcrm') : __('Adding...', 'quillcrm'))
+									: (editMode ? __('Update Note', 'quillcrm') : __('Add Note', 'quillcrm'))}
+							</Button>
+						</div>
+					</form>
+				</Form>
+			</DialogContent>
+		</Dialog>
 	);
 };
-

@@ -14,6 +14,7 @@ export interface ColorPickerControlProps {
     label: string;
     placeholder?: string;
     id?: string;
+    className?: string;
 }
 
 export const ColorPickerControl: React.FC<ColorPickerControlProps> = ({
@@ -22,11 +23,12 @@ export const ColorPickerControl: React.FC<ColorPickerControlProps> = ({
     label,
     placeholder = '#000000',
     id,
+    className
 }) => {
     return (
-        <div className="flex flex-col gap-2 text-[#333333]">
+        <div className={`flex flex-col gap-2 text-[#333333]`}>
             <label className="text-sm">{label}</label>
-            <div className="flex items-center gap-2 border rounded-lg px-2">
+            <div className={`flex items-center gap-2 border rounded-lg px-2 ${className}`}>
                 <Input
                     id={id}
                     type="text"

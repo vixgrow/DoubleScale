@@ -45,6 +45,7 @@ interface UpdatePipelineData {
 	name?: string;
 	description?: string;
 	sort_order?: number;
+	stages?: any[];
 }
 
 interface PipelineOperationsReturn {
@@ -92,7 +93,7 @@ export const usePipelineOperations = (): PipelineOperationsReturn => {
 						'quillcrm'
 					)
 				);
-				throw new Error(errorMessage);
+				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 			}
 		},
 		[]
@@ -123,7 +124,7 @@ export const usePipelineOperations = (): PipelineOperationsReturn => {
 						'quillcrm'
 					)
 				);
-				throw new Error(errorMessage);
+				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 			}
 		},
 		[]
@@ -157,7 +158,7 @@ export const usePipelineOperations = (): PipelineOperationsReturn => {
 						'quillcrm'
 					)
 				);
-				throw new Error(errorMessage);
+				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 			}
 		},
 		[]
@@ -190,7 +191,7 @@ export const usePipelineOperations = (): PipelineOperationsReturn => {
 						'quillcrm'
 					)
 				);
-				throw new Error(errorMessage);
+				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 			}
 		},
 		[]
@@ -218,7 +219,7 @@ export const usePipelineOperations = (): PipelineOperationsReturn => {
 						'quillcrm'
 					)
 				);
-				throw new Error(errorMessage);
+				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 			}
 		},
 		[]
@@ -257,7 +258,7 @@ export const usePipelineOperations = (): PipelineOperationsReturn => {
 						'quillcrm'
 					)
 				);
-				throw new Error(errorMessage);
+				throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
 			}
 		},
 		[]

@@ -87,32 +87,32 @@ final class Pipeline_Manager {
 		return array(
 			array(
 				'name'            => 'Lead',
-				'color'           => '#e74c3c',
+				'color'           => '#EEF5FF',
 				'win_probability' => 10.0,
 			),
 			array(
 				'name'            => 'Qualified',
-				'color'           => '#f39c12',
+				'color'           => '#EEE4FF',
 				'win_probability' => 25.0,
 			),
 			array(
 				'name'            => 'Proposal',
-				'color'           => '#f1c40f',
+				'color'           => '#FAF3DF',
 				'win_probability' => 50.0,
 			),
 			array(
 				'name'            => 'Negotiation',
-				'color'           => '#2ecc71',
+				'color'           => '#FAEADF',
 				'win_probability' => 75.0,
 			),
 			array(
 				'name'            => 'Closed Won',
-				'color'           => '#27ae60',
+				'color'           => '#E4FAEC',
 				'win_probability' => 100.0,
 			),
 			array(
 				'name'            => 'Closed Lost',
-				'color'           => '#e74c3c',
+				'color'           => '#FBE8E8',
 				'win_probability' => 0.0,
 			),
 		);
@@ -166,7 +166,7 @@ final class Pipeline_Manager {
 					array(
 						'pipeline_id'     => $pipeline->id,
 						'name'            => $stage_data['name'],
-						'color'           => $stage_data['color'] ?? '#6d78d8',
+						'color'           => $stage_data['color'] ?? '#E4EEFD',
 						'sort_order'      => $sort_order++,
 						'win_probability' => $stage_data['win_probability'] ?? 0.0,
 					)
@@ -297,7 +297,7 @@ final class Pipeline_Manager {
 	 *
 	 * @return Pipeline_Stage|null
 	 */
-	public function add_stage( $pipeline_id, $name, $color = '#6d78d8', $win_probability = 0.0, $position = null ) {
+	public function add_stage( $pipeline_id, $name, $color = '#E4EEFD', $win_probability = 0.0, $position = null ) {
 		$pipeline = Pipeline_Model::find( $pipeline_id );
 
 		if ( ! $pipeline ) {

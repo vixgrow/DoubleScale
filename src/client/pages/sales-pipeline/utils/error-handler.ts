@@ -9,41 +9,59 @@ import { __ } from '@wordpress/i18n';
 export interface ApiError {
 	message?: string;
 	code?: string;
-	data?: any;
+	data?: {
+		status?: number;
+		[key: string]: any;
+	};
 }
 
 /**
- * Create a standardized error message from an API error
- * @param error - The error object from API call
- * @param fallbackMessage - Default message if error doesn't have one
- * @returns Localized error message
+ * Error info object for UI
+ */
+export interface ErrorInfo {
+	type: number; // e.g. 404, 403, 500, 0 (network)
+	message: string; // User-friendly error message
+}
+
+/**
+ * Extract and standardize error message
  */
 export const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
 	if (error && typeof error === 'object' && 'message' in error) {
 		return (error as ApiError).message || fallbackMessage;
 	}
-	
+
 	if (typeof error === 'string') {
 		return error;
 	}
-	
+
 	return fallbackMessage;
 };
 
 /**
- * Log error and create localized message for user display
- * @param operation - Description of the operation that failed
- * @param error - The original error
- * @param fallbackMessage - User-friendly fallback message
- * @returns Localized error message for UI display
+ * Log error and return structured error info for UI display
  */
 export const handleApiError = (
 	operation: string,
 	error: unknown,
 	fallbackMessage: string
-): string => {
-	console.error(`Failed to ${operation}:`, error);
-	return getErrorMessage(error, fallbackMessage);
+): ErrorInfo => {
+	console.error(` Failed to ${operation}:`, error);
+
+	// Extract status code if available
+	const status =
+		(error as ApiError)?.data?.status ||
+		(error as any)?.status ||
+		(error as any)?.code ||
+		0;
+
+	// Extract error message from API response
+	const message = getErrorMessage(error, fallbackMessage);
+
+	return {
+		type: Number(status) || 500,
+		message
+	};
 };
 
 /**

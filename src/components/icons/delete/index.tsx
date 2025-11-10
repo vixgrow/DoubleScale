@@ -1,7 +1,8 @@
 import { IconProps } from '@quillcrm/config';
 
-const DeleteIcon: React.FC<IconProps> = ({ width = 16, height = 16 }) => {
+const DeleteIcon: React.FC<IconProps> = ({ width = 16, height = 16}) => {
 	return (
+		
 		<svg
 			width={width}
 			height={height}

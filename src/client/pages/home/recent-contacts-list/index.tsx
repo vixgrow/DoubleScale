@@ -25,7 +25,7 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 	return (
 		<DashboardContentCard
 			title={__('Recent Contacts', 'quillcrm')}
-			cardClassName="w-1/2"
+			cardClassName="w-1/2 h-[420px] overflow-y-auto"
 			viewAllLink={true}
 			viewAllLinkUrl="contacts"
 		>

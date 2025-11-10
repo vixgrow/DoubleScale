@@ -92,7 +92,7 @@ export const ContactAnalyticsChart: React.FC<ContactAnalyticsChartProps> = ({
 					onChangeToDate={onChangeToDate}
 				/>
 			}
-			cardClassName="w-1/2"
+			cardClassName="w-1/2 h-[420px] overflow-y-auto"
 		>
 			{loading ? (
 				<div className="space-y-4 py-4">
@@ -184,7 +184,7 @@ export const ContactAnalyticsChart: React.FC<ContactAnalyticsChartProps> = ({
 							intersect: false,
 						},
 					}}
-					height={70}
+					height={316}
 				/>
 			)}
 		</DashboardContentCard>

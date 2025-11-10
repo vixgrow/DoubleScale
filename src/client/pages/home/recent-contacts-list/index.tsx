@@ -43,7 +43,7 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 						return (
 							<div
 								key={record.id}
-								className={`flex justify-between items-center hover:bg-gray-50 py-4${!isLast ? 'border-b border-dashed border-gray-200' : ''}`}
+								className={`flex justify-between items-center hover:bg-gray-50 py-4 ${!isLast ? 'border-b border-dashed border-gray-200' : ''}`}
 							>
 								<div className="flex items-center gap-4">
 									{hasImage ? (

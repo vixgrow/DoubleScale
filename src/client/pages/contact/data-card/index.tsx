@@ -14,7 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import PageTabs from '@/components/page-tabs';
 import Emails from '../emails';
 import SMS from '../sms';
-import WhatsApp from '../whatsapp';
+// import WhatsApp from '../whatsapp';
 import PurchaseHistory from '../purchase-history';
 import Automation from '../automation';
 import Notes from '../notes';
@@ -24,14 +24,19 @@ import {
 	AutomationsIcon,
 	ContactSMSIcon,
 	ContactTotalEmailsIcon,
-	ContactWhatsAppIcon,
+	// ContactWhatsAppIcon,
 	DealsIcon,
 	NotesIcon,
 	PurchaseHistoryIcon,
 } from '@quillcrm/components';
+import ConfigAPI from '@quillcrm/config';
+import Courses from '../courses';
 
 const DataCard: React.FC = () => {
 	const { contact } = useContactContext();
+	const isEddActive = ConfigAPI.isEddActive();
+	const isWooActive = ConfigAPI.isWoocommerceActive();
+	const lmsActive = ConfigAPI.isLmsActive();
 
 	if (!contact) {
 		return null;
@@ -52,12 +57,25 @@ const DataCard: React.FC = () => {
 			label: 'Automation',
 			icon: <AutomationsIcon width={24} height={24} />,
 		},
-		{
+	];
+
+	// Conditionally add Purchase History tab
+	if (isWooActive || isEddActive) {
+		tabsList.push({
 			value: 'purchase-history',
 			label: 'Purchase History',
 			icon: <PurchaseHistoryIcon />,
-		},
-	];
+		});
+	}
+
+	// Conditionally add Courses tab
+	if (lmsActive) {
+		tabsList.push({
+			value: 'courses',
+			label: 'Courses',
+			icon: <AutomationsIcon width={24} height={24} />, // Replace with a Courses icon when available
+		});
+	}
 
 	const tabsContent = [
 		{
@@ -108,15 +126,31 @@ const DataCard: React.FC = () => {
 				</CardContent>
 			),
 		},
-		{
+	];
+
+	// Conditionally add Purchase History content
+	if (isWooActive || isEddActive) {
+		tabsContent.push({
 			value: 'purchase-history',
 			children: (
 				<CardContent className="pt-6">
 					<PurchaseHistory contact_id={contact.id} />
 				</CardContent>
 			),
-		},
-	];
+		});
+	}
+
+	// Conditionally add Courses content
+	if (lmsActive) {
+		tabsContent.push({
+			value: 'courses',
+			children: (
+				<CardContent className="pt-6">
+					<Courses contact_id={contact.id} />
+				</CardContent>
+			),
+		});
+	}
 
 	return (
 		<Card className="w-2/3 bg-[#F8F8F8] shadow-none p-5">

@@ -28,11 +28,6 @@ interface DealsProps {
 	contact_id: number;
 }
 
-interface DealsResponse {
-	data: Deal[];
-	total: number;
-}
-
 const Deals: React.FC<DealsProps> = ({ contact_id }) => {
 	const [deals, setDeals] = useState<Deal[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -53,18 +48,26 @@ const Deals: React.FC<DealsProps> = ({ contact_id }) => {
 		setLoading(true);
 
 		try {
-			const response = (await apiFetch({
+			const response = await apiFetch({
 				path: addQueryArgs(
-					`/qc/v1/contacts/${contact_id}/deals`,
+					`/qc/v1/deals`,
 					{
+						contact_id: contact_id,
 						per_page: perPage,
 						page,
 					}
 				),
-			})) as DealsResponse;
+				parse: false,
+			}) as Response;
 
-			setDeals(response.data);
-			setTotalRecords(response.total);
+			// Get data from response body
+			const data = (await response.json()) as Deal[];
+			
+			// Get total from headers
+			const total = parseInt(response.headers.get('X-Total-Count') || '0', 10);
+
+			setDeals(data);
+			setTotalRecords(total);
 		} catch (error) {
 			createNotice({
 				type: 'error',

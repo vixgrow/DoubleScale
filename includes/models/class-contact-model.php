@@ -21,6 +21,7 @@ use QuillCRM\Models\User_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\WC_Order_Model;
 use QuillCRM\Models\Automation_Contact_Processes_Model;
+use QuillCRM\Models\Deal_Model;
 use QuillCRM\Utils;
 
 /**
@@ -239,6 +240,50 @@ class Contact_Model extends Model {
 	 */
 	public function processes() {
 		return $this->hasMany( Automation_Contact_Processes_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Get the deals for this contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function deals() {
+		return $this->hasMany( Deal_Model::class, 'contact_id', 'id' );
+	}
+
+	/**
+	 * Get active deals (open status) for this contact
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 */
+	public function active_deals() {
+		return $this->hasMany( Deal_Model::class, 'contact_id', 'id' )->where( 'status', 'open' );
+	}
+
+	/**
+	 * Get total deal value for won deals
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return float
+	 */
+	public function getTotalDealValueAttribute() {
+		return $this->deals()->where( 'status', 'won' )->sum( 'value' );
+	}
+
+	/**
+	 * Get active deals count
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int
+	 */
+	public function getActiveDealsCountAttribute() {
+		return $this->active_deals()->count();
 	}
 
 	/**

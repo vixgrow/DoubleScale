@@ -47,9 +47,21 @@ class REST_Activity_Controller extends REST_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				),
 			)
 		);
 
@@ -460,6 +472,125 @@ class REST_Activity_Controller extends REST_Controller {
 		$statistics = Activity_Manager::instance()->get_activity_statistics( $filters );
 
 		return new WP_REST_Response( $statistics, 200 );
+	}
+
+	/**
+	 * Update activity
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function update_item( $request ) {
+		$activity_id = intval( $request->get_param( 'id' ) );
+		$user_id     = get_current_user_id();
+
+		if ( empty( $activity_id ) ) {
+			return new WP_Error( 'missing_activity_id', 'Activity ID is required', array( 'status' => 400 ) );
+		}
+
+		// Get the activity to check its type
+		$activity = Deal_Activity_Model::find( $activity_id );
+
+		if ( ! $activity ) {
+			return new WP_Error( 'activity_not_found', 'Activity not found', array( 'status' => 404 ) );
+		}
+
+		// Check if activity is editable
+		if ( ! $activity->is_editable() ) {
+			return new WP_Error(
+				'activity_not_editable',
+				'This activity type cannot be edited. Only user-created activities (notes, calls, emails, meetings) can be modified.',
+				array( 'status' => 403 )
+			);
+		}
+
+		// Prepare data based on activity type
+		$data = array();
+		switch ( $activity->activity_type ) {
+			case 'note_added':
+				$note = $request->get_param( 'note' );
+				if ( empty( $note ) ) {
+					return new WP_Error( 'missing_note', 'Note content is required', array( 'status' => 400 ) );
+				}
+				$data['note'] = sanitize_textarea_field( $note );
+				break;
+
+			case 'email_sent':
+				$email_data = $request->get_param( 'email_data' );
+				if ( empty( $email_data ) || ! is_array( $email_data ) ) {
+					return new WP_Error( 'missing_email_data', 'Email data is required', array( 'status' => 400 ) );
+				}
+				$data['email_data'] = $email_data;
+				break;
+
+			case 'call_logged':
+				$call_data = $request->get_param( 'call_data' );
+				if ( empty( $call_data ) || ! is_array( $call_data ) ) {
+					return new WP_Error( 'missing_call_data', 'Call data is required', array( 'status' => 400 ) );
+				}
+				$data['call_data'] = $call_data;
+				break;
+
+			case 'meeting_scheduled':
+				$meeting_data = $request->get_param( 'meeting_data' );
+				if ( empty( $meeting_data ) || ! is_array( $meeting_data ) ) {
+					return new WP_Error( 'missing_meeting_data', 'Meeting data is required', array( 'status' => 400 ) );
+				}
+				$data['meeting_data'] = $meeting_data;
+				break;
+		}
+
+		$updated_activity = Activity_Manager::instance()->update_activity( $activity_id, $data, $user_id );
+
+		if ( ! $updated_activity ) {
+			return new WP_Error( 'update_failed', 'Failed to update activity or access denied', array( 'status' => 500 ) );
+		}
+
+		$updated_activity->load( array( 'user', 'deal' ) );
+		$response_data = $this->prepare_item_for_response( $updated_activity, $request );
+
+		return new WP_REST_Response( $response_data, 200 );
+	}
+
+	/**
+	 * Delete activity
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function delete_item( $request ) {
+		$activity_id = intval( $request->get_param( 'id' ) );
+		$user_id     = get_current_user_id();
+
+		if ( empty( $activity_id ) ) {
+			return new WP_Error( 'missing_activity_id', 'Activity ID is required', array( 'status' => 400 ) );
+		}
+
+		// Get the activity to check its type
+		$activity = Deal_Activity_Model::find( $activity_id );
+
+		if ( ! $activity ) {
+			return new WP_Error( 'activity_not_found', 'Activity not found', array( 'status' => 404 ) );
+		}
+
+		// Check if activity is editable
+		if ( ! $activity->is_editable() ) {
+			return new WP_Error(
+				'activity_not_deletable',
+				'This activity type cannot be deleted. Only user-created activities (notes, calls, emails, meetings) can be removed.',
+				array( 'status' => 403 )
+			);
+		}
+
+		$deleted = Activity_Manager::instance()->delete_activity( $activity_id, $user_id );
+
+		if ( ! $deleted ) {
+			return new WP_Error( 'delete_failed', 'Failed to delete activity or access denied', array( 'status' => 500 ) );
+		}
+
+		return new WP_REST_Response( array( 'deleted' => true ), 200 );
 	}
 
 	/**

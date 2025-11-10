@@ -22,6 +22,7 @@ use QuillCRM\Services\Template_Field_Mapper;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Services\Campaign_Analytics;
 
 /**
  * Campaign_Model class
@@ -134,7 +135,7 @@ class Campaign_Model extends Model {
 	 */
 	public function messages() {
 		return $this->hasMany( Tracking_Model::class, 'source_id', 'id' )
-			->where( 'source_type', \QuillCRM\Constants\Message_Source_Types::CAMPAIGN );
+			->where( 'source_type', Message_Source_Types::CAMPAIGN );
 	}
 
 	/**
@@ -346,14 +347,17 @@ class Campaign_Model extends Model {
 	}
 
 	/**
-	 * Check if campaign is email type
+	 * Check if campaign is email type (includes email sequences)
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return bool
 	 */
 	public function is_email_campaign() {
-		return $this->get_type() === Campaign_Channel::CHANNEL_EMAIL;
+		$type = $this->get_type();
+		return $type === Campaign_Channel::CHANNEL_EMAIL
+			|| $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE
+			|| $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL;
 	}
 
 	/**
@@ -501,9 +505,9 @@ class Campaign_Model extends Model {
 		$campaign->contacts_count = $this->get_contacts_count( $campaign );
 
 		// Get analytics stats from centralized service
-		$analytics = \QuillCRM\Services\Campaign_Analytics::instance();
+		$analytics = Campaign_Analytics::instance();
 		// Convert string type to integer for analytics service (bypass accessor)
-		$type_int = \QuillCRM\Constants\Campaign_Channel::to_integer( $campaign->type );
+		$type_int = Campaign_Channel::to_integer( $campaign->type );
 		$stats    = $analytics->get_campaign_stats( $type_int, $campaign->id );
 
 		// Get optimized template counts (single query instead of N queries)
@@ -716,10 +720,8 @@ class Campaign_Model extends Model {
 			}
 		);
 
-		static::saved(
-			function ( $campaign ) {
-				$campaign->attach_counts( $campaign );
-			}
-		);
+		// Note: Analytics are NOT recalculated on save to prevent wasteful DB queries.
+		// They are freshly calculated when the campaign is retrieved, which happens
+		// after every update anyway (frontend re-fetches the campaign).
 	}
 }

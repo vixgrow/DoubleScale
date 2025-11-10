@@ -72,6 +72,9 @@ class Campaign_Analytics {
 	 * Get analytics data for campaign type
 	 * Optimized to use single GROUP BY query instead of N+1 queries
 	 *
+	 * IMPORTANT: This method filters by source_type = CAMPAIGN to ensure
+	 * only campaign messages are included (not automations or individual messages).
+	 *
 	 * @param string $type Campaign type ('email', 'sms')
 	 * @param string $interval Analytics interval
 	 * @param string $start_date Start date
@@ -81,6 +84,9 @@ class Campaign_Analytics {
 	 */
 	public function get_analytics( $type, $interval = 'last_30_days', $start_date = '', $end_date = '' ) {
 		$query = $this->get_model_query( $type );
+
+		// Filter to only include campaign messages (not automations or individual)
+		$query->where( 'source_type', Message_Source_Types::CAMPAIGN );
 
 		if ( 'custom' !== $interval ) {
 			$start_date = Utils::get_start_date( $interval, $start_date );
@@ -162,6 +168,9 @@ class Campaign_Analytics {
 	 * Get total statistics for campaign type
 	 * Optimized to use single query instead of multiple clones
 	 *
+	 * IMPORTANT: This method filters by source_type = CAMPAIGN to ensure
+	 * only campaign messages are included (not automations or individual messages).
+	 *
 	 * @param string $type Campaign type ('email', 'sms')
 	 * @param string $start_date Start date for filtering (optional)
 	 * @param string $end_date End date for filtering (optional)
@@ -171,6 +180,10 @@ class Campaign_Analytics {
 	public function get_total_stats( $type, $start_date = null, $end_date = null ) {
 		// Create base query with optional date filtering
 		$base_query = $this->get_model_query( $type );
+
+		// Filter to only include campaign messages (not automations or individual)
+		$base_query->where( 'source_type', Message_Source_Types::CAMPAIGN );
+
 		if ( $start_date && $end_date ) {
 			$base_query->whereBetween( 'created_at', array( $start_date . ' 00:00:00', $end_date . ' 23:59:59' ) );
 		}
@@ -237,9 +250,11 @@ class Campaign_Analytics {
 		// Build base query with all common filters
 		$base_query = $this->get_model_query( $type );
 
+		// ALWAYS filter by source_type to exclude automation and individual messages
+		$base_query->where( $tracking_table . '.source_type', Message_Source_Types::CAMPAIGN );
+
 		if ( $campaign_id ) {
-			$base_query->where( $tracking_table . '.source_id', $campaign_id )
-				->where( $tracking_table . '.source_type', Message_Source_Types::CAMPAIGN );
+			$base_query->where( $tracking_table . '.source_id', $campaign_id );
 		}
 
 		if ( $start_date && $end_date ) {
@@ -262,6 +277,7 @@ class Campaign_Analytics {
 			$stats['opened']       = (int) $result->opened;
 			$stats['clicked']      = (int) $result->clicked;
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
+			$stats                 = $this->calculate_email_rates( $stats );
 
 		} elseif ( $type === Campaign_Channel::CHANNEL_SMS ) {
 			$result = $base_query
@@ -299,6 +315,27 @@ class Campaign_Analytics {
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
 			$stats                 = $this->calculate_whatsapp_rates( $stats );
 		}
+
+		return $stats;
+	}
+
+	/**
+	 * Calculate Email-specific rates
+	 *
+	 * @param array $stats Base statistics
+	 *
+	 * @return array Statistics with calculated rates
+	 */
+	protected function calculate_email_rates( $stats ) {
+		// Calculate open rate (opened / sent)
+		$stats['open_rate'] = $stats['sent'] > 0
+			? round( ( $stats['opened'] / $stats['sent'] ) * 100, 2 )
+			: 0;
+
+		// Calculate click rate (clicked / sent)
+		$stats['click_rate'] = $stats['sent'] > 0
+			? round( ( $stats['clicked'] / $stats['sent'] ) * 100, 2 )
+			: 0;
 
 		return $stats;
 	}

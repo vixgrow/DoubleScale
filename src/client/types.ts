@@ -67,6 +67,11 @@ export type Order = {
 	billing_email: string;
 	date_created_gmt: string;
 	date_updated_gmt: string;
+	date: {
+		date: string;
+		timezone: string;
+		timezone_type: number;
+	}
 	parent_order_id: string;
 	payment_method: string;
 	payment_method_title: string;
@@ -308,13 +313,14 @@ export type Campaign = {
 	};
 	// Email-specific analytics
 	opened_count?: number;
+	open_rate?: number;
 	// Shared analytics (email, SMS, WhatsApp)
 	clicked_count: number;
+	click_rate?: number;
 	// SMS & WhatsApp analytics
 	pending_count?: number;
 	delivered_count?: number;
 	delivery_rate?: number;
-	click_rate?: number;
 	// WhatsApp-specific analytics
 	read_count?: number;
 	read_rate?: number;

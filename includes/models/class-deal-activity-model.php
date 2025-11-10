@@ -324,6 +324,30 @@ class Deal_Activity_Model extends Model {
 	}
 
 	/**
+	 * Check if activity type is editable
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_editable() {
+		$editable_types = array( 'note_added', 'email_sent', 'call_logged', 'meeting_scheduled' );
+		return in_array( $this->activity_type, $editable_types, true );
+	}
+
+	/**
+	 * Check if activity type is system-generated (immutable)
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_system_activity() {
+		$system_types = array( 'created', 'stage_changed', 'value_changed', 'status_changed' );
+		return in_array( $this->activity_type, $system_types, true );
+	}
+
+	/**
 	 * Boot method
 	 *
 	 * @since 1.0.0

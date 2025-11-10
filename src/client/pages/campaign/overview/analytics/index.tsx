@@ -52,6 +52,7 @@ const Analytics: React.FC = () => {
 		? campaign.sent_count + campaign.failed_count
 		: 0;
 	const [isFetching, setIsFetching] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 	const [started, setStarted] = useState(
 		campaign?.status === 'processing' && totalMessages > 0
 	);
@@ -62,6 +63,7 @@ const Analytics: React.FC = () => {
 		}
 
 		setIsFetching(true);
+		setError(null);
 
 		try {
 			const response = (await apiFetch({
@@ -82,12 +84,18 @@ const Analytics: React.FC = () => {
 			if (response.status === 'completed') {
 				setStarted(false);
 			}
-		} catch (error) {
-			console.error(error);
+		} catch (err) {
+			console.error(err);
+			setError(
+				__(
+					'Failed to load campaign analytics. Retrying...',
+					'quillcrm'
+				)
+			);
 		} finally {
 			setIsFetching(false);
 		}
-	}, [campaign, isFetching, started, updateCampaignAction]);
+	}, [campaign?.id, campaign?.sent_count, campaign?.failed_count, isFetching, started, updateCampaignAction]);
 
 	// @ts-ignore
 	useEffect(() => {
@@ -126,6 +134,13 @@ const Analytics: React.FC = () => {
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-5 pt-5">
+					{/* Error message */}
+					{error && (
+						<div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+							{error}
+						</div>
+					)}
+
 					{/* Metrics */}
 					<RenderMetrics
 						campaign={campaign}

@@ -1,0 +1,3 @@
+import 'chart.js/auto';
+
+

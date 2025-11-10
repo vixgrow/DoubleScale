@@ -15,7 +15,6 @@ import {
 	NoticeBanner,
 } from '@quillcrm/components';
 import { KanbanBoard } from './components/kanban-board';
-import { PipelineFilters } from './components/pipeline-filters';
 import { PipelineSettingsModal } from './components/pipeline-settings-modal';
 import { NewDealModal } from './components/new-deal-modal';
 import { DealDetailModal } from './components/deal-detail-modal';
@@ -27,7 +26,7 @@ import { EditPipelineModal } from './components/pipeline-edit';
 import { DeletePipelineDialog } from './components/pipeline-delete';
 import { EditDealModal } from './components/edit-deal-modal';
 import { DeleteDeal } from './components/deal-delete';
-import { Deal, Filters } from './types';
+import { Deal } from './types';
 import { AddNoteModal } from './components/add-note-modal';
 import { LogCallModal } from './components/log-call-modal';
 import { ScheduleMeetingModal } from './components/schedule-meeting-modal';

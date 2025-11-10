@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import * as React from 'react';
 
 /**
  * External dependencies
@@ -26,6 +27,8 @@ interface ScheduleMeetingModalProps {
 	onSuccess: () => void;
 	dealId: number;
 	dealTitle?: string;
+	editMode?: boolean;
+	activity?: any;
 }
 
 interface MeetingFormData {
@@ -42,10 +45,27 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 	onSuccess,
 	dealId,
 	dealTitle,
+	editMode = false,
+	activity,
 }) => {
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
-	const { scheduleMeeting } = useActivityOperations();
+	const { scheduleMeeting, updateActivity } = useActivityOperations();
+
+	// Load existing activity data when in edit mode
+	React.useEffect(() => {
+		if (editMode && activity && visible) {
+			form.setFieldsValue({
+				title: activity.data?.title || '',
+				scheduled_at: activity.data?.scheduled_at ? dayjs(activity.data.scheduled_at) : dayjs().add(1, 'hour'),
+				duration: activity.data?.duration || 60,
+				location: activity.data?.location || '',
+				description: activity.data?.description || '',
+			});
+		} else if (!visible) {
+			form.resetFields();
+		}
+	}, [editMode, activity, visible, form]);
 
 	const handleSubmit = async (values: any) => {
 		setLoading(true);
@@ -60,9 +80,13 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 				description: values.description || '',
 			};
 
-			await scheduleMeeting(dealId, meetingData);
-
-			message.success(__('Meeting scheduled successfully!', 'quillcrm'));
+			if (editMode && activity) {
+				await updateActivity(activity.id, 'meeting_scheduled', { meeting_data: meetingData });
+				message.success(__('Meeting updated successfully!', 'quillcrm'));
+			} else {
+				await scheduleMeeting(dealId, meetingData);
+				message.success(__('Meeting scheduled successfully!', 'quillcrm'));
+			}
 
 			form.resetFields();
 			onSuccess();
@@ -71,7 +95,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 			message.error(
 				error instanceof Error
 					? error.message
-					: __('Failed to schedule meeting', 'quillcrm')
+					: __(editMode ? 'Failed to update meeting' : 'Failed to schedule meeting', 'quillcrm')
 			);
 		} finally {
 			setLoading(false);
@@ -88,7 +112,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 			title={
 				<div className="schedule-meeting-modal-title">
 					<Calendar size={20} />
-					<span>{__('Schedule Meeting', 'quillcrm')}</span>
+					<span>{editMode ? __('Edit Meeting', 'quillcrm') : __('Schedule Meeting', 'quillcrm')}</span>
 				</div>
 			}
 			open={visible}
@@ -103,7 +127,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 					loading={loading}
 					onClick={() => form.submit()}
 				>
-					{__('Schedule Meeting', 'quillcrm')}
+					{editMode ? __('Update', 'quillcrm') : __('Schedule Meeting', 'quillcrm')}
 				</Button>,
 			]}
 			width={600}

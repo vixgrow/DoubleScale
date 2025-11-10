@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import * as React from 'react';
 
 /**
  * External dependencies
@@ -24,6 +25,8 @@ interface AddNoteModalProps {
 	onSuccess: () => void;
 	dealId: number;
 	dealTitle?: string;
+	editMode?: boolean;
+	activity?: any;
 }
 
 export const AddNoteModal: React.FC<AddNoteModalProps> = ({
@@ -32,17 +35,34 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 	onSuccess,
 	dealId,
 	dealTitle,
+	editMode = false,
+	activity,
 }) => {
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
-	const { addNote } = useActivityOperations();
+	const { addNote, updateActivity } = useActivityOperations();
+
+	// Load existing activity data when in edit mode
+	React.useEffect(() => {
+		if (editMode && activity && visible) {
+			form.setFieldsValue({
+				note: activity.data?.content || '',
+			});
+		} else if (!visible) {
+			form.resetFields();
+		}
+	}, [editMode, activity, visible, form]);
 
 	const handleSubmit = async (values: { note: string }) => {
 		setLoading(true);
 		try {
-			await addNote(dealId, values.note);
-
-			message.success(__('Note added successfully!', 'quillcrm'));
+			if (editMode && activity) {
+				await updateActivity(activity.id, 'note_added', { note: values.note });
+				message.success(__('Note updated successfully!', 'quillcrm'));
+			} else {
+				await addNote(dealId, values.note);
+				message.success(__('Note added successfully!', 'quillcrm'));
+			}
 
 			form.resetFields();
 			onSuccess();
@@ -51,7 +71,7 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 			message.error(
 				error instanceof Error
 					? error.message
-					: __('Failed to add note', 'quillcrm')
+					: __(editMode ? 'Failed to update note' : 'Failed to add note', 'quillcrm')
 			);
 		} finally {
 			setLoading(false);
@@ -68,7 +88,7 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 			title={
 				<div className="add-note-modal-title">
 					<MessageSquare size={20} />
-					<span>{__('Add Note', 'quillcrm')}</span>
+					<span>{editMode ? __('Edit Note', 'quillcrm') : __('Add Note', 'quillcrm')}</span>
 				</div>
 			}
 			open={visible}
@@ -83,7 +103,7 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 					loading={loading}
 					onClick={() => form.submit()}
 				>
-					{__('Add Note', 'quillcrm')}
+					{editMode ? __('Update', 'quillcrm') : __('Add Note', 'quillcrm')}
 				</Button>,
 			]}
 			width={500}

@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import * as React from 'react';
 
 /**
  * External dependencies
@@ -35,6 +36,8 @@ interface LogCallModalProps {
 	onSuccess: () => void;
 	dealId: number;
 	dealTitle?: string;
+	editMode?: boolean;
+	activity?: any;
 }
 
 interface CallFormData {
@@ -51,10 +54,27 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 	onSuccess,
 	dealId,
 	dealTitle,
+	editMode = false,
+	activity,
 }) => {
 	const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
-	const { logCall } = useActivityOperations();
+	const { logCall, updateActivity } = useActivityOperations();
+
+	// Load existing activity data when in edit mode
+	React.useEffect(() => {
+		if (editMode && activity && visible) {
+			form.setFieldsValue({
+				phone_number: activity.data?.phone_number || '',
+				duration: activity.data?.duration || 0,
+				outcome: activity.data?.outcome || '',
+				notes: activity.data?.notes || '',
+				called_at: activity.data?.called_at ? dayjs(activity.data.called_at) : dayjs(),
+			});
+		} else if (!visible) {
+			form.resetFields();
+		}
+	}, [editMode, activity, visible, form]);
 
 	const handleSubmit = async (values: any) => {
 		setLoading(true);
@@ -69,9 +89,13 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 					: dayjs().format('YYYY-MM-DD HH:mm:ss'),
 			};
 
-			await logCall(dealId, callData);
-
-			message.success(__('Call logged successfully!', 'quillcrm'));
+			if (editMode && activity) {
+				await updateActivity(activity.id, 'call_logged', { call_data: callData });
+				message.success(__('Call updated successfully!', 'quillcrm'));
+			} else {
+				await logCall(dealId, callData);
+				message.success(__('Call logged successfully!', 'quillcrm'));
+			}
 
 			form.resetFields();
 			onSuccess();
@@ -80,7 +104,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 			message.error(
 				error instanceof Error
 					? error.message
-					: __('Failed to log call', 'quillcrm')
+					: __(editMode ? 'Failed to update call' : 'Failed to log call', 'quillcrm')
 			);
 		} finally {
 			setLoading(false);
@@ -97,7 +121,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 			title={
 				<div className="log-call-modal-title">
 					<Phone size={20} />
-					<span>{__('Log Call', 'quillcrm')}</span>
+					<span>{editMode ? __('Edit Call', 'quillcrm') : __('Log Call', 'quillcrm')}</span>
 				</div>
 			}
 			open={visible}
@@ -112,7 +136,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 					loading={loading}
 					onClick={() => form.submit()}
 				>
-					{__('Log Call', 'quillcrm')}
+					{editMode ? __('Update', 'quillcrm') : __('Log Call', 'quillcrm')}
 				</Button>,
 			]}
 			width={600}

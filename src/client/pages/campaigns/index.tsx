@@ -389,7 +389,7 @@ const Campaigns: React.FC = () => {
 	];
 
 	return (
-		<div className="qcrm-campaigns">
+		<div className="qcrm-campaigns h-screen">
 			<PageHeader
 				title={__('Campaigns List', 'quillcrm')}
 				subtitle={__('Campaigns', 'quillcrm')}

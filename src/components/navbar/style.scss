@@ -12,7 +12,7 @@
 
 	.qcrm-navbar__header {
 		padding: 0;
-		margin-bottom: 36px;
+		margin-bottom: 10px;
 	}
 
 	.qcrm-navbar__brand {
@@ -32,15 +32,28 @@
 	}
 
 	.qcrm-navbar__content {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 		flex: 1;
 		min-height: 0;
 		padding: 0;
-		overflow-y: auto;
-		scrollbar-width: none;
-		-ms-overflow-style: none;
+		gap: 12px;
+		overflow: hidden;
 	}
 
-	.qcrm-navbar__content::-webkit-scrollbar {
+	.qcrm-navbar__scroll-container {
+		flex: 1;
+		min-height: 0;
+		width: 100%;
+		padding: 0 0 4px;
+		overflow-y: auto;
+		-ms-overflow-style: none;
+
+	}
+
+	.qcrm-navbar__scroll-container::-webkit-scrollbar {
 		display: none;
 		width: 0;
 		height: 0;
@@ -51,6 +64,23 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+		padding: 0 12px;
+	}
+
+	.qcrm-navbar__chevron {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 38px;
+		height: 38px;
+		color: #ffffff;
+		cursor: pointer;
+		transition: background 0.2s ease, transform 0.2s ease;
+	}
+
+	.qcrm-navbar__chevron svg {
+		width: 18px;
+		height: 18px;
 	}
 
 	.qcrm-navbar__item {

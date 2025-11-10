@@ -6,7 +6,7 @@ import { registerAdminPage } from '@quillcrm/navigation';
 /**
  * WordPress dependencies
  */
-import { useEffect } from '@wordpress/element';
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -55,21 +55,160 @@ import {
 	ToolsIcon,
 	CustomFieldsIcon,
 	EmailSequenceIcon,
+	PiplelinesIcon,
 } from '@quillcrm/components';
 import EmailSequences from '../pages/email-sequences';
 
 // Import Lucide React icon for pipeline
-import { TrendingUp } from 'lucide-react';
+import { ArrowLeft, User as UserIcon } from 'lucide-react';
 import SequencesMail from '../pages/email-sequences/sequences-mail';
+import { Button } from '@quillcrm/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UserService } from '@/services/user-service';
+import type { User } from '@/services/user-service';
 
 export const Controller = ({ page }) => {
+	const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+	const handleBackToDashboard = () => {
+		const ajaxUrl = (window as Window & { ajaxurl?: string }).ajaxurl ?? '';
+
+		if (ajaxUrl.includes('admin-ajax.php')) {
+			window.location.href = ajaxUrl.replace('admin-ajax.php', 'index.php');
+			return;
+		}
+
+		window.location.href = `${window.location.origin}/wp-admin/`;
+	};
+
 	useEffect(() => {
 		window.document.documentElement.scrollTop = 0;
 	}, []);
 
+	useEffect(() => {
+		let isMounted = true;
+
+		const normalizeUser = (user: any): User | null => {
+			if (!user) {
+				return null;
+			}
+
+			const displayName =
+				user.display_name ||
+				user.name ||
+				user.username ||
+				(user.id ? `User ${user.id}` : '');
+
+			return {
+				id: Number(user.id),
+				display_name: displayName,
+				email: user.email || '',
+				name: user.name,
+				username: user.username,
+				avatar_urls: user.avatar_urls,
+			};
+		};
+
+		const fetchCurrentUser = async () => {
+			const globalUser = (
+				window as Window & {
+					qcData?: { currentUser?: any };
+				}
+			).qcData?.currentUser;
+
+			if (globalUser) {
+				const normalizedUser = normalizeUser(globalUser);
+
+				if (isMounted && normalizedUser) {
+					setCurrentUser(normalizedUser);
+				}
+
+				return;
+			}
+
+			try {
+				const user = await UserService.getCurrentUser();
+
+				if (isMounted && user) {
+					setCurrentUser(user);
+				}
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.error('Failed to load current user', error);
+			}
+		};
+
+		fetchCurrentUser();
+
+		return () => {
+			isMounted = false;
+		};
+	}, []);
+
+	const avatarUrl = useMemo(() => {
+		if (!currentUser?.avatar_urls) {
+			return undefined;
+		}
+
+		const preferredSizes = ['96', '64', '48', '24'];
+
+		for (const size of preferredSizes) {
+			if (currentUser.avatar_urls[size]) {
+				return currentUser.avatar_urls[size];
+			}
+		}
+
+		return undefined;
+	}, [currentUser]);
+
+	const displayName = currentUser?.display_name || __('Guest', 'quillcrm');
+
+	const avatarInitials = useMemo(() => {
+		if (!currentUser?.display_name) {
+			return '';
+		}
+
+		const parts = currentUser.display_name
+			.split(' ')
+			.map((part) => part.trim())
+			.filter(Boolean);
+
+		if (!parts.length) {
+			return currentUser.display_name.slice(0, 2).toUpperCase();
+		}
+
+		return parts
+			.slice(0, 2)
+			.map((part) => part[0])
+			.join('')
+			.toUpperCase();
+	}, [currentUser]);
+
 	return (
 		// Using motion div with layoutScroll to reevaluate positions when the user scrolls.
 		<motion.div layoutScroll className="qcrm-page-component-wrapper">
+			<div className="flex justify-between items-center">
+				<Button
+					className="flex items-center gap-2 text-[#667085] text-base p-0 hover:bg-transparent shadow-none bg-transparent"
+					onClick={handleBackToDashboard}
+				>
+					<ArrowLeft />
+					{__('Back to WordPress Dashboard', 'quillcrm')}
+				</Button>
+				<div className="flex items-center gap-3">
+					<Avatar className="w-10 h-10 bg-[#F5F5F5]">
+						{avatarUrl ? (
+							<AvatarImage src={avatarUrl} alt={displayName} />
+						) : null}
+						<AvatarFallback className="text-[#1D1F2C] flex items-center justify-center uppercase">
+							{avatarInitials || <UserIcon className="w-5 h-5" />}
+						</AvatarFallback>
+					</Avatar>
+					<div className="text-lg font-semibold text-[#333333]">
+						{displayName}
+					</div>
+				</div>
+			</div>
 			<page.component />
 		</motion.div>
 	);
@@ -158,7 +297,7 @@ registerAdminPage('sales-pipeline', {
 	path: 'sales-pipeline',
 	component: () => <SalesPipeline />,
 	label: __('Pipelines', 'quillcrm'),
-	icon: <TrendingUp size={20} />,
+	icon: <PiplelinesIcon />,
 	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],
 });
 

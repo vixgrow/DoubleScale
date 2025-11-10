@@ -23,7 +23,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { size, map } from 'lodash';
 
 import { notification } from 'antd';
-import { ChevronLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 /**
  * Internal dependencies

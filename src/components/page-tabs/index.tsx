@@ -18,7 +18,7 @@
 // 	className?: string;
 // 	tabsList: TabListItem[];
 // 	tabsContent: TabContent[];
-// 	onValueChange?: (value: string) => void; // 👈 Add this line
+// 	onValueChange?: (value: string) => void; 
 // }
 // const PageTabs: React.FC<PageTabsProps> = ({
 // 	defaultValue,

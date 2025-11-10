@@ -99,23 +99,21 @@ const DealsReportsLeaderboard: React.FC = () => {
 			.slice(0, 10);
 
 		return {
-			labels: sortedData.map((item) => item.owner_name),
+			labels: sortedData.map((item) => item.owner_name), // Y-axis: Owner names
 			datasets: [
 				{
 					label: __('Deal Value ($)', 'quillcrm'),
-					data: sortedData.map((item) => item.total_amount),
-					backgroundColor: '#16A34A', // Green color
-					borderColor: '#16A34A',
-					borderWidth: 0,
-					borderRadius: 4,
-					barThickness: 20, // Control bar thickness
+					data: sortedData.map((item) => item.total_amount), // X-axis: Money values
+					backgroundColor: '#1890ff',
+					borderColor: '#096dd9',
+					borderWidth: 1,
 				},
 			],
 		};
 	};
 
 	const chartOptions = {
-		indexAxis: 'y' as const,
+		indexAxis: 'y' as const, // This makes it horizontal (Y-axis = owner names, X-axis = money values)
 		responsive: true,
 		maintainAspectRatio: false,
 		plugins: {
@@ -124,32 +122,18 @@ const DealsReportsLeaderboard: React.FC = () => {
 			},
 			title: {
 				display: true,
-				text: __('Deal leaderboard - amount closed by rep', 'quillcrm'),
+				text: __('Deal Leaderboard - Amount Closed by Rep', 'quillcrm'),
 				font: {
 					size: 16,
-					weight: 600,
+					weight: 'bold' as const,
 				},
-				align: 'start' as const,
-				padding: {
-					bottom: 20,
-				},
-				color: '#1f2937',
 			},
 			tooltip: {
-				backgroundColor: '#1f2937',
-				padding: 12,
-				cornerRadius: 6,
-				titleFont: {
-					size: 13,
-					weight: 600,
-				},
-				bodyFont: {
-					size: 12,
-				},
 				callbacks: {
 					label: function (context: any) {
-						const value = context.parsed.x;
-						return `Deal Values: ${new Intl.NumberFormat('en-US', {
+						const value = context.parsed.x; // X-axis value (money amount)
+						const ownerName = context.label; // Y-axis label (owner name)
+						return `${ownerName}: ${new Intl.NumberFormat('en-US', {
 							style: 'currency',
 							currency: 'USD',
 						}).format(value)}`;
@@ -159,80 +143,81 @@ const DealsReportsLeaderboard: React.FC = () => {
 		},
 		scales: {
 			x: {
+				// X-axis: Money values
 				beginAtZero: true,
 				title: {
 					display: true,
-					text: __('Deal Values ($)', 'quillcrm'),
-					font: {
-						size: 12,
-						weight: 500,
-					},
-					color: '#6b7280',
-				},
-				grid: {
-					display: true,
-					color: '#f3f4f6',
-					drawBorder: false,
+					text: __('Deal Value ($)', 'quillcrm'),
 				},
 				ticks: {
-					font: {
-						size: 11,
-					},
-					color: '#9ca3af',
 					callback: function (value: any) {
 						return new Intl.NumberFormat('en-US', {
 							style: 'currency',
 							currency: 'USD',
 							notation: 'compact',
-							maximumFractionDigits: 1,
 						}).format(value);
 					},
 				},
-				border: {
-					display: false,
-				},
 			},
 			y: {
+				// Y-axis: Owner names
 				title: {
 					display: true,
-					text: __('Sales Rep Name', 'quillcrm'),
-					font: {
-						size: 12,
-						weight: 500,
-					},
-					color: '#6b7280',
-				},
-				grid: {
-					display: false,
-					drawBorder: false,
+					text: __('Sales Rep', 'quillcrm'),
 				},
 				ticks: {
 					font: {
 						size: 12,
 					},
-					color: '#374151',
-					padding: 8,
 				},
-				border: {
-					display: false,
-				},
-			},
-		},
-		layout: {
-			padding: {
-				left: 10,
-				right: 20,
-				top: 10,
-				bottom: 10,
 			},
 		},
 	};
 
 	return (
 		<div>
+			{/* Filters Section */}
+			{/* <ReportFilters
+				key={`filters-${JSON.stringify(filters)}`}
+				title={__(
+					'Deal leaderboard - amount closed by rep',
+					'quillcrm'
+				)}
+				filters={filters}
+				setFilters={setFilters}
+				filterOptions={filterOptions}
+				showFilters={showFilters}
+				setShowFilters={setShowFilters}
+				clearFilters={clearFilters}
+				applyFilters={applyFilters}
+				showPredefinedDateRange={false}
+				showDateRange={false}
+				showOwner={true}
+				showPipeline={true}
+				showStatus={false}
+				showContact={true}
+			/> */}
+
 			{/* Chart Section */}
-			<Card style={{ marginTop: 20, border: '1px solid #e5e7eb' }}>
-				<CardContent style={{ padding: '24px' }}>
+			<Card style={{ marginTop: 20 }}>
+				<CardContent>
+					<div style={{ marginBottom: 16 }}>
+						<p className="text-sm text-gray-600/80 font-medium">
+							{__(
+								'Showing deal values closed by each sales representative',
+								'quillcrm'
+							)}
+						</p>
+						<br />
+						<p className="text-sm text-gray-600/80 font-medium">
+							🔸{' '}
+							{__(
+								'Y-axis: Sales Rep Names | X-axis: Deal Values ($)',
+								'quillcrm'
+							)}
+						</p>
+					</div>
+
 					{loading ? (
 						<Skeleton className="h-8 w-full" />
 					) : (

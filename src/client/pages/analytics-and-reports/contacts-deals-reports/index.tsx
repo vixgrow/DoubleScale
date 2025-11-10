@@ -19,6 +19,14 @@ import ReportFilters from '@quillcrm/components/reports/ReportFilters';
 import { ContactsIcon } from '@quillcrm/components';
 import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
+import TriangleUpIcon from '@quillcrm/components/icons/triangleUp';
+import TriangleDownIcon from '@quillcrm/components/icons/triangleDown';
+import CloseWinIcon from '@quillcrm/components/icons/close-won';
+import WinValueIcon from '@quillcrm/components/icons/won-value';
+import CloseIcon from '@quillcrm/components/icons/close';
+import CloseLostIcon from '@quillcrm/components/icons/close-lost';
+import TrendingUpIcon from '@quillcrm/components/icons/trendingUp';
+import TrendingDownIcon from '@quillcrm/components/icons/trendingDown';
 
 interface ContactsDealsReportsProps {
 	contacts_created: number;
@@ -119,14 +127,14 @@ const ContactsDealsReports: React.FC = () => {
 	const contactsDealsSection = [
 		{
 			key: 'contacts_created',
-			title: __('Contacts Created', 'quillcrm'),
+			title: __('Total Contacts Created', 'quillcrm'),
 			value: data.contacts_created,
 			change: data.contacts_created_change,
 			icon: ContactsIcon,
 			iconColor: '#1E3A8A',
 			iconBg: 'bg-[#E3EEFF] ',
 			changeLogic: 'standard',
-			bo: 'standard',
+			borderLeft: 'border-[#1E3A8A]',
 		},
 		{
 			key: 'contacts_worked',
@@ -137,6 +145,7 @@ const ContactsDealsReports: React.FC = () => {
 			iconBg: 'bg-[#FAEADF]',
 			iconColor: '#CB5301',
 			changeLogic: 'standard',
+			borderLeft: 'border-[#CB5301]',
 		},
 		{
 			key: 'deals_created',
@@ -146,53 +155,58 @@ const ContactsDealsReports: React.FC = () => {
 			icon: DealValueIcon,
 			iconBg: 'bg-[#E4EEFD]',
 			iconColor: '#458DC7',
-			changeLogic: 'standard',
+			borderLeft: 'border-[#458DC7]',
 		},
 	];
 
-	const dealsClosedSection = [
+	const dealsClosedWonSection = [
 		{
 			key: 'deals_won',
 			title: __('Deals Closed Won', 'quillcrm'),
 			value: data.deals_won,
 			change: data.deals_won_change,
-			icon: TrophyOutlined,
-			iconBg: 'bg-green-100',
-			iconColor: 'text-green-600',
+			icon: CloseWinIcon,
+			iconBg: 'bg-[#E4FAEC]',
+			iconColor: '#16A34A',
 			changeLogic: 'standard',
+			borderLeft: 'border-[#16A34A]',
 		},
 		{
 			key: 'deals_lost',
 			title: __('Deals Closed Lost', 'quillcrm'),
 			value: data.deals_lost,
 			change: data.deals_lost_change,
-			icon: TrophyOutlined,
-			iconBg: 'bg-red-100',
-			iconColor: 'text-red-600',
+			icon: CloseIcon,
+			iconBg: 'bg-[#FBE8E8]',
+			iconColor: '#E13B3B',
 			changeLogic: 'inverse',
+			borderLeft: 'border-[#E13B3B]',
 		},
 	];
 
-	const dealsValueSection = [
+	const dealsClosedLostSection = [
+		
 		{
 			key: 'deals_won_value',
 			title: __('Deals Won Value', 'quillcrm'),
 			value: `${(data.deals_won_value / 1000).toFixed(1)}K USD`,
 			change: data.deals_won_value_change,
-			icon: DollarOutlined,
-			iconBg: 'bg-green-100',
-			iconColor: 'text-green-600',
+			icon: WinValueIcon,
+			iconBg: 'bg-[#E4FAEC]',
+			iconColor: '#16A34A',
 			changeLogic: 'standard',
+			borderLeft: 'border-[#16A34A]',
 		},
 		{
 			key: 'deals_lost_value',
 			title: __('Deals Lost Value', 'quillcrm'),
 			value: `${(data.deals_lost_value / 1000).toFixed(0)}K USD`,
 			change: data.deals_lost_value_change,
-			icon: DollarOutlined,
-			iconBg: 'bg-red-100',
-			iconColor: 'text-red-600',
+			icon: CloseLostIcon,
+			iconBg: 'bg-[#FBE8E8]',
+			iconColor: '#E13B3B',
 			changeLogic: 'inverse',
+			borderLeft: 'border-[#E13B3B]',
 		},
 	];
 
@@ -204,32 +218,32 @@ const ContactsDealsReports: React.FC = () => {
 		const IconComponent = item.icon;
 
 		return (
-			<div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+			<div key={item.key} className={`flex items-center justify-between  border-l-[3px] ${item.borderLeft} bg-[#FFF] rounded-[8px] p-5`}>
 				<div className="flex items-center gap-3">
 					{showIcon && (
-						<div className={`p-2 ${item.iconBg} rounded-full`}>
-							<IconComponent color={`${item.iconColor}`} />
+						<div className={` ${item.iconBg} w-10 h-10 rounded-full flex justify-center items-center  `}>
+							<IconComponent color={`${item.iconColor}`} width='30' hight='30' />
 						</div>
 					)}
 					<div className="flex flex-col">
-						<span className="text-2xl font-bold text-gray-900">
+						<span className="text-2xl font-semibold font-[Inter] leading-normal  tracking-[-1px] text-[#09090B]">
 							{typeof item.value === 'string' ? item.value : item.value.toLocaleString()}
 						</span>
-						<span className="text-xs text-gray-500 mt-0.5">
+						<span className="text-base text-[#777] font-medium font-[Inter] leading-6 tracking-[-.5px]  mt-2">
 							{item.title}
 						</span>
 					</div>
 				</div>
 				<div className="flex items-center gap-1.5">
 					{isPositiveChange ? (
-						<CaretUpOutlined className="text-green-500 text-sm" />
+						<TriangleUpIcon />
 					) : (
-						<CaretDownOutlined className="text-red-500 text-sm" />
+						<TriangleDownIcon />
 					)}
 					<span
 						className={cn(
-							'text-sm font-medium',
-							isPositiveChange ? 'text-green-500' : 'text-red-500'
+							'text-base font-[Inter] font-medium',
+							isPositiveChange ? 'text-[#16A34A]' : 'text-[#E13B3B]'
 						)}
 					>
 						{Math.abs(item.change).toFixed(2)}%
@@ -238,9 +252,68 @@ const ContactsDealsReports: React.FC = () => {
 			</div>
 		);
 	};
+	const renderStatCardRight = (item: any, showIcon: boolean = true) => {
+		const isPositiveChange =
+			item.changeLogic === 'standard'
+				? item.change >= 0
+				: item.change < 0;
+		const IconComponent = item.icon;
+
+		return (
+			<div key={item.key} className={`flex items-center justify-between border-l-[3px] ${item.borderLeft} bg-[#FFF] rounded-[8px] p-5`}>
+				<div className="flex flex-col justify-between  gap-5">
+					<div className="flex flex-col">
+						<span className="text-2xl font-semibold font-[Inter] leading-normal  tracking-[-1px] text-[#09090B]">
+							{typeof item.value === 'string' ? item.value : item.value.toLocaleString()}
+						</span>
+						<span className="text-base text-[#777] font-medium font-[Inter] leading-6 tracking-[-.5px]  mt-2">
+							{item.title}
+						</span>
+					</div>
+					<div className="flex items-center gap-1.5">
+					{isPositiveChange ? (
+						<TriangleUpIcon />
+					) : (
+						<TriangleDownIcon />
+					)}
+					<span
+						className={cn(
+							'text-base font-[Inter] font-medium',
+							isPositiveChange ? 'text-[#16A34A]' : 'text-[#E13B3B]'
+						)}
+					>
+						{Math.abs(item.change).toFixed(2)}%
+					</span>
+				</div>
+				</div>
+				<div className='flex flex-col justify-between  gap-5'>
+				{showIcon && (
+						<div className={` ${item.iconBg} w-10 h-10 rounded-full flex justify-center items-center  `}>
+							<IconComponent color={`${item.iconColor}`} width='30' hight='30' />
+						</div>
+					)}
+				<div className="flex items-center gap-1.5">
+					{isPositiveChange ? (
+						<TrendingUpIcon />
+					) : (
+						<TrendingDownIcon />
+					)}
+					{/* <span
+						className={cn(
+							'text-base font-[Inter] font-medium',
+							isPositiveChange ? 'text-[#16A34A]' : 'text-[#E13B3B]'
+						)}
+					>
+						{Math.abs(item.change).toFixed(2)}%
+					</span> */}
+				</div>
+				</div>
+			</div>
+		);
+	};
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6  ">
 			<ReportFilters
 				key={`filters-${JSON.stringify(filters)}`}
 				title={__('Contacts & Deals Reports', 'quillcrm')}
@@ -264,12 +337,12 @@ const ContactsDealsReports: React.FC = () => {
 			) : (
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 					{/* Summary Contacts & Deals */}
-					<Card className="border border-[#DEE1E6] bg-[#F8F8F8] rounded-[16px] p-5 shadow-sm lg:col-span-1">
+					<Card className="border border-[#DEE1E6] bg-[#F8F8F8] rounded-[16px] p-3 lg:col-span-1">
 						<CardContent className="p-6">
 							<h3 className="text-2xl font-medium font-[Inter] leading-normal tracking-[-1px] text-[#09090B] mb-4">
 								{__('Summary Contacts & Deals', 'quillcrm')}
 							</h3>
-							<div className="space-y-1">
+							<div className="space-y-3">
 								{contactsDealsSection.map((item) =>
 									renderStatCard(item, true)
 								)}
@@ -278,21 +351,21 @@ const ContactsDealsReports: React.FC = () => {
 					</Card>
 
 					{/* Summary Deals Closed */}
-					<Card className="border-gray-200 shadow-sm lg:col-span-2">
+					<Card className="border border-[#DEE1E6] bg-[#F8F8F8] rounded-[16px] p-3 lg:col-span-2">
 						<CardContent className="p-6">
-							<h3 className="text-base font-semibold text-gray-900 mb-4">
+							<h3 className="text-2xl font-medium font-[Inter] leading-normal tracking-[-1px] text-[#09090B] mb-4">
 								{__('Summary Deals Closed', 'quillcrm')}
 							</h3>
-							<div className="space-y-1">
+							<div className="space-y-3">
 								<div className="grid grid-cols-2 gap-6">
-									<div className="space-y-1">
-										{dealsClosedSection.map((item) =>
-											renderStatCard(item, true)
+									<div className="space-y-3">
+										{dealsClosedWonSection.map((item) =>
+											renderStatCardRight(item, true)
 										)}
 									</div>
-									<div className="space-y-1">
-										{dealsValueSection.map((item) =>
-											renderStatCard(item, false)
+									<div className="space-y-3">
+										{dealsClosedLostSection.map((item) =>
+											renderStatCardRight(item, true)
 										)}
 									</div>
 								</div>

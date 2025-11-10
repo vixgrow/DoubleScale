@@ -143,6 +143,7 @@ registerAdminPage('email-sequences', {
 	component: () => <EmailSequences />,
 	label: __('Email Sequence', 'quillcrm'),
 	icon: <EmailSequenceIcon />,
+	hidden: true,
 	requiredCapability: ['quillcrm_crm_manager'],
 });
 
@@ -246,7 +247,7 @@ registerAdminPage('abandoned-carts', {
 registerAdminPage('analytics-and-reports', {
 	path: 'analytics-and-reports',
 	component: () => <AnalyticsAndReports />,
-	label: __('Analytics and Reports', 'quillcrm'),
+	label: __('Analytics', 'quillcrm'),
 	icon: <AnalyticsReportsIcon />,
 	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],
 });

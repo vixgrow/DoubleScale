@@ -25,8 +25,8 @@ import {
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = '16rem';
-const SIDEBAR_WIDTH_MOBILE = '18rem';
+const SIDEBAR_WIDTH = '9rem';
+const SIDEBAR_WIDTH_MOBILE = '11rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
@@ -266,7 +266,7 @@ const Sidebar = React.forwardRef<
 						// Adjust the padding for floating and inset variants.
 						variant === 'floating' || variant === 'inset'
 							? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]'
-							: 'group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l',
+							: 'group-data-[collapsible=icon]:w-[--sidebar-width-icon]',
 						className
 					)}
 					{...props}
@@ -553,6 +553,7 @@ const sidebarMenuButtonVariants = cva(
 				default: 'h-8 text-sm',
 				sm: 'h-7 text-xs',
 				lg: 'h-12 text-sm group-data-[collapsible=icon]:!p-0',
+				xl: 'h-20 w-[107px] text-sm group-data-[collapsible=icon]:!p-0',
 			},
 		},
 		defaultVariants: {

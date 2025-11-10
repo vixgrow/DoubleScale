@@ -56,7 +56,6 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 		filters.ownerId ||
 		filters.dateRange.from ||
 		filters.dateRange.to ||
-		filters.status !== 'open' ||
 		filters.priority !== null;
 
 	return (

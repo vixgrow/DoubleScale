@@ -38,7 +38,6 @@ import { PipelineHeader } from './components/salePipeline-header/SalePipelineHea
 import { PipelineFilters } from './components/pipeline-filters';
 
 const SalesPipeline: React.FC = () => {
-	const [isPipelineSwitching, setIsPipelineSwitching] = useState(false);
 	const [selectedPipelineId, setSelectedPipelineId] = useState<number | null>(
 		null
 	);
@@ -105,14 +104,6 @@ const SalesPipeline: React.FC = () => {
 
 	}, [pipelines, selectedPipelineId]);
 
-	useEffect(() => {
-		setIsPipelineSwitching(true);
-		refreshData().finally(() => {
-			setIsPipelineSwitching(false);
-		});
-	}, [selectedPipelineId, refreshData]);
-
-
 	// handle note
 
 	const handleAddNote = (deal: Deal) => {
@@ -175,7 +166,6 @@ const SalesPipeline: React.FC = () => {
 				setEditPipelineModalVisible={setEditPipelineModalVisible}
 				setDeleteDialogOpen={setDeleteDialogOpen}
 				setNewDealModalVisible={setNewDealModalVisible}
-				setIsPipelineSwitching={setIsPipelineSwitching}
 			/>
 
 			{showDuplicateError && (
@@ -198,10 +188,10 @@ const SalesPipeline: React.FC = () => {
 			/>
 
 			<div className='mt-6'>
-				{loading || isPipelineSwitching ?(
+				{loading ? (
 					<SalesPipelineSkeleton/>
 
-				):
+				) :
 				selectedPipeline && (
 					<div className="mt-6">
 						<KanbanBoard

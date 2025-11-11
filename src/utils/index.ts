@@ -19,6 +19,7 @@ import {
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+import { __ } from '@wordpress/i18n';
 
 type WordPressTimezone = {
 	timezone?: string;
@@ -66,7 +67,7 @@ export const getWordPressTimezone = (): WordPressTimezone => {
 
 	const timezoneString =
 		typeof settings?.timezone?.string === 'string' &&
-		settings.timezone.string.length > 0
+			settings.timezone.string.length > 0
 			? settings.timezone.string
 			: undefined;
 
@@ -105,10 +106,10 @@ export const getAction = (action: string): Action => {
 	return foundAction
 		? foundAction[action]
 		: {
-				label: '',
-				description: '',
-				fields: {},
-			};
+			label: '',
+			description: '',
+			fields: {},
+		};
 };
 
 export const getGoal = (goal: string): Goal => {
@@ -123,11 +124,11 @@ export const getGoal = (goal: string): Goal => {
 	return foundGoal
 		? foundGoal[goal]
 		: {
-				label: '',
-				description: '',
-				fields: {},
-				is_integration: false,
-			};
+			label: '',
+			description: '',
+			fields: {},
+			is_integration: false,
+		};
 };
 
 export const getTrigger = (trigger: string): Trigger => {
@@ -140,10 +141,10 @@ export const getTrigger = (trigger: string): Trigger => {
 	return foundTrigger
 		? foundTrigger[trigger]
 		: {
-				label: '',
-				description: '',
-				fields: {},
-			};
+			label: '',
+			description: '',
+			fields: {},
+		};
 };
 
 export const convertDate = (date: string, addTime: boolean = false) => {
@@ -189,11 +190,11 @@ export const getRuleBySlug = (slug: string, dynamicRules?: any): Rule => {
 	return foundRule
 		? foundRule[slug]
 		: {
-				name: '',
-				type: '',
-				operators: {},
-				options: {},
-			};
+			name: '',
+			type: '',
+			operators: {},
+			options: {},
+		};
 };
 
 export const getCustomFieldById = (id: number) => {
@@ -205,9 +206,9 @@ export const getCustomFieldById = (id: number) => {
 	return foundField
 		? foundField[id]
 		: {
-				label: '',
-				type: '',
-			};
+			label: '',
+			type: '',
+		};
 };
 
 export const formatDate = (date: string, type: string = 'hour') => {
@@ -226,7 +227,7 @@ export const formatDate = (date: string, type: string = 'hour') => {
 	}
 };
 
-  
+
 
 export function getTimeAgo(dateString: string): string {
 	const parsedUtcDate = dayjs.utc(dateString);
@@ -299,4 +300,61 @@ export const getCampaignEndpoint = (campaignType: string): string | null => {
 	}
 
 	return null;
+};
+
+/**
+ * Get trigger label from automation (uses backend-provided label)
+ * @param automation - The automation object
+ * @returns The trigger label
+ */
+export const getTriggerLabel = (automation: any): string => {
+	// Use backend-provided label (works even when plugin is deactivated)
+	if (automation?.settings?._trigger_label) {
+		return automation.settings._trigger_label;
+	}
+
+	// Fallback to trigger slug
+	return automation?.trigger || __('No trigger selected', 'quillcrm');
+};
+
+/**
+ * Check if trigger has a plugin dependency warning
+ * @param automation - The automation object
+ * @returns True if trigger requires a missing plugin
+ */
+export const hasTriggerWarning = (automation: any): boolean => {
+	return automation?.settings?._trigger_warning === true;
+};
+
+/**
+ * Get action label from step (uses backend-provided label)
+ * @param step - The automation step object
+ * @returns The action label
+ */
+export const getActionLabel = (step: any): string => {
+	// Use backend-provided label (works even when plugin is deactivated)
+	if (step?.settings?._action_label) {
+		return step.settings._action_label;
+	}
+
+	// Fallback to action slug
+	return step?.action || __('Unknown Action', 'quillcrm');
+};
+
+/**
+ * Check if action has a plugin dependency warning
+ * @param step - The automation step object
+ * @returns True if action requires a missing plugin
+ */
+export const hasActionWarning = (step: any): boolean => {
+	return step?.settings?._action_warning === true;
+};
+
+/**
+ * Get all warnings from automation
+ * @param automation - The automation object
+ * @returns Array of warnings
+ */
+export const getAutomationWarnings = (automation: any): any[] => {
+	return automation?._warnings || [];
 };

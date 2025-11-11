@@ -141,11 +141,20 @@ export type Automation = {
 	status: string;
 	settings: {
 		multiple_runs: boolean;
+		_trigger_label?: string;
+		_trigger_warning?: boolean;
 		[key: string]: any;
 	};
 	created_at: string;
 	updated_at: string;
 	steps: AutomationStep[];
+	_warnings?: Array<{
+		type: string;
+		slug: string;
+		message: string;
+		plugin_label?: string;
+		step_id?: number;
+	}>;
 };
 
 export type CustomField = {
@@ -453,7 +462,12 @@ export type AutomationStep = {
 	type: string;
 	condition: string;
 	// This type is any because the structure of fields is different for each action
-	settings: any;
+	settings: {
+		_action_label?: string;
+		_action_warning?: boolean;
+		_condition_warning?: boolean;
+		[key: string]: any;
+	};
 	order: number;
 	status: string;
 	created_at: string;

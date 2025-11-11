@@ -38,7 +38,6 @@ import { PipelineHeader } from './components/salePipeline-header/SalePipelineHea
 import { PipelineFilters } from './components/pipeline-filters';
 
 const SalesPipeline: React.FC = () => {
-	const [isPipelineSwitching, setIsPipelineSwitching] = useState(false);
 	const [selectedPipelineId, setSelectedPipelineId] = useState<number | null>(
 		null
 	);
@@ -74,7 +73,7 @@ const SalesPipeline: React.FC = () => {
 		expectedCloseDateRange: { from: null, to: null },
 		createdDateRange: { from: null, to: null },
 		valueRange: { min: null, max: null },
-		status: 'open',
+		status: 'all',
 		priority: null,
 	});
 
@@ -104,14 +103,6 @@ const SalesPipeline: React.FC = () => {
 		}
 
 	}, [pipelines, selectedPipelineId]);
-
-	useEffect(() => {
-		setIsPipelineSwitching(true);
-		refreshData().finally(() => {
-			setIsPipelineSwitching(false);
-		});
-	}, [selectedPipelineId, refreshData]);
-
 
 	// handle note
 
@@ -175,7 +166,6 @@ const SalesPipeline: React.FC = () => {
 				setEditPipelineModalVisible={setEditPipelineModalVisible}
 				setDeleteDialogOpen={setDeleteDialogOpen}
 				setNewDealModalVisible={setNewDealModalVisible}
-				setIsPipelineSwitching={setIsPipelineSwitching}
 			/>
 
 			{showDuplicateError && (
@@ -198,10 +188,10 @@ const SalesPipeline: React.FC = () => {
 			/>
 
 			<div className='mt-6'>
-				{loading || isPipelineSwitching ?(
+				{loading ? (
 					<SalesPipelineSkeleton/>
 
-				):
+				) :
 				selectedPipeline && (
 					<div className="mt-6">
 						<KanbanBoard
@@ -375,7 +365,18 @@ const SalesPipeline: React.FC = () => {
 				onClose={() => setDeleteDialogOpen(false)}
 				pipeline={selectedPipeline}
 				pipelines={pipelines}
-				onConfirm={refreshData}
+				onConfirm={async () => {
+				await refreshData();
+				// If the deleted pipeline was selected, switch to the first available pipeline
+				if (selectedPipelineId === selectedPipeline?.id && pipelines.length > 1) {
+					const remainingPipelines = pipelines.filter(p => p.id !== selectedPipeline?.id);
+					if (remainingPipelines.length > 0) {
+						setSelectedPipelineId(remainingPipelines[0].id);
+					} else {
+						setSelectedPipelineId(null);
+					}
+				}
+			}}
 			/>
 		</div>
 	);

@@ -6,7 +6,6 @@ import { useState, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import ConfigAPI from '@quillcrm/config';
 
-
 /**
  * External dependencies
  */
@@ -22,10 +21,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@quillcrm/components/ui/dialog';
-import {
-	CustomDialogHeader,
-	AlertIcon,
-} from '@quillcrm/components';
+import { CustomDialogHeader, AlertIcon } from '@quillcrm/components';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -60,9 +56,9 @@ export interface PipelineModalProps {
 	onSuccess: (pipeline?: any) => void;
 	pipeline?: any | null;
 	mode: 'create' | 'duplicate' | 'edit';
-    title?: string;
-  subtitle?: string;
-  icon?: React.ReactNode;
+	title?: string;
+	subtitle?: string;
+	icon?: React.ReactNode;
 }
 
 export const PipelineModal: React.FC<PipelineModalProps> = ({
@@ -71,19 +67,20 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 	onSuccess,
 	pipeline,
 	mode,
-    title,
-  subtitle,
-  icon,
+	title,
+	subtitle,
+	icon,
 }) => {
 	const [loading, setLoading] = useState(false);
 	const [customStages, setCustomStages] = useState(pipeline?.stages || []);
 	const [originalPipeline, setOriginalPipeline] = useState<any | null>(null);
 
-	const { createPipeline,updatePipeline,duplicatePipeline } = usePipelineOperations();
+	const { createPipeline, updatePipeline, duplicatePipeline } =
+		usePipelineOperations();
 	const dispatch = useDispatch('quillcrm/core');
 	const createNotice = dispatch?.createNotice;
 
-    const DEFAULT_STAGES = ConfigAPI.getDefaultStages();
+	const DEFAULT_STAGES = ConfigAPI.getDefaultStages();
 
 	const form = useForm({
 		defaultValues: { name: '' },
@@ -101,18 +98,17 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 			} else if (mode === 'create') {
 				form.setValue('name', '');
 				setCustomStages([...DEFAULT_STAGES]);
-			}else if (mode === 'edit' && pipeline) {
-                console.log(' EFFECT TRIGGERED (edit)', { mode, pipeline });
-                form.setValue('name', pipeline.name);
-                // form.setValue('description', pipeline?.description || '');
-                setCustomStages(pipeline?.stages || []);
-                setOriginalPipeline({
-                    name: pipeline.name,
-                    description: pipeline?.description || '',
-                    stages: pipeline?.stages || [],
-                });
-                
-            }
+			} else if (mode === 'edit' && pipeline) {
+				console.log(' EFFECT TRIGGERED (edit)', { mode, pipeline });
+				form.setValue('name', pipeline.name);
+				// form.setValue('description', pipeline?.description || '');
+				setCustomStages(pipeline?.stages || []);
+				setOriginalPipeline({
+					name: pipeline.name,
+					description: pipeline?.description || '',
+					stages: pipeline?.stages || [],
+				});
+			}
 		}
 	}, [pipeline, visible, form, mode]);
 
@@ -129,20 +125,18 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 				});
 			}
 			return;
-
 		}
 
 		setLoading(true);
 		try {
-<<<<<<< HEAD
 			let newPipeline;
-=======
 			let updatedPipeline;
->>>>>>> 1f9f7c56331729ab6013366a6979107fd1a86d4d
 
 			if (mode === 'duplicate' && pipeline) {
-
-				updatedPipeline = await duplicatePipeline(pipeline.id, values.name.trim());
+				updatedPipeline = await duplicatePipeline(
+					pipeline.id,
+					values.name.trim()
+				);
 				createNotice?.({
 					type: 'success',
 					message: __(
@@ -151,16 +145,15 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					),
 				});
 			} else if (mode === 'create') {
-<<<<<<< HEAD
-                // await createPipeline({
-                //     name: values.name,
-                //     description: '', 
-                //     stages: customStages || [], 
-                // })
-				newPipeline = await createPipeline({ 
+				// await createPipeline({
+				//     name: values.name,
+				//     description: '',
+				//     stages: customStages || [],
+				// })
+				newPipeline = await createPipeline({
 					name: values.name,
-					description: '', 
-					stages: customStages || [], 
+					description: '',
+					stages: customStages || [],
 				});
 				createNotice?.({
 					type: 'success',
@@ -169,13 +162,11 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 						'quillcrm'
 					),
 				});
-=======
-                updatedPipeline = await createPipeline({
-                    name: values.name,
-                    description: '',
-                    stages: customStages || [],
-                })
->>>>>>> 1f9f7c56331729ab6013366a6979107fd1a86d4d
+				updatedPipeline = await createPipeline({
+					name: values.name,
+					description: '',
+					stages: customStages || [],
+				});
 				createNotice?.({
 					type: 'success',
 					message: __(
@@ -183,31 +174,26 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 						'quillcrm'
 					),
 				});
-			}else if (mode === 'edit' && pipeline) {
+			} else if (mode === 'edit' && pipeline) {
+				updatedPipeline = await updatePipeline(pipeline.id, {
+					name: values.name.trim(),
+					description: pipeline?.description || '',
+					sort_order: pipeline?.sort_order || 0,
+					stages: customStages || [],
+				});
 
-                updatedPipeline = await updatePipeline(pipeline.id, {
-                    name: values.name.trim(),
-                    description: pipeline?.description || '',
-                    sort_order: pipeline?.sort_order || 0,
-                    stages: customStages || [],
-                });
+				createNotice?.({
+					type: 'success',
+					message: __(
+						`Pipeline "${values.name}" updated successfully!`,
+						'quillcrm'
+					),
+				});
+			}
 
-                createNotice?.({
-                    type: 'success',
-                    message: __(
-                        `Pipeline "${values.name}" updated successfully!`,
-                        'quillcrm'
-                    ),
-                });
-            }
-<<<<<<< HEAD
-        
 			// onSuccess();
 			onSuccess(newPipeline);
-=======
 
-
->>>>>>> 1f9f7c56331729ab6013366a6979107fd1a86d4d
 			onClose();
 			// Pass the updated pipeline to the parent for proper refresh
 			await onSuccess(updatedPipeline);
@@ -234,10 +220,7 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 	const handleCancel = () => {
 		form.reset();
 		onClose();
-
-        
 	};
-    
 
 	const addStage = () => {
 		setCustomStages((prev) => [
@@ -255,15 +238,15 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 			open={visible}
 			onOpenChange={(open) => {
 				if (!open) handleCancel();
-			}}	
+			}}
 		>
 			<DialogContent className="w-full max-w-7xl max-h-[80vh] overflow-y-auto my-4 sm:mx-auto z-[100000] p-6 rounded-[16px] pipline-content">
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader
 							title={title || ''}
-                            subtitle={subtitle || ''}
-                            icon={icon || ''}
+							subtitle={subtitle || ''}
+							icon={icon || ''}
 						/>
 					</DialogTitle>
 				</DialogHeader>
@@ -324,7 +307,9 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 							<PipelineStageEditor
 								stages={customStages}
 								setStages={setCustomStages}
-								onReset={() => setCustomStages([...DEFAULT_STAGES])}
+								onReset={() =>
+									setCustomStages([...DEFAULT_STAGES])
+								}
 								onAddStage={addStage}
 							/>
 						</Form>
@@ -348,12 +333,12 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 						className="create-pipeline-button shared-button"
 					>
 						{loading
-	? __('Loading...', 'quillcrm')
-	: mode === 'duplicate'
-	? __('Duplicate Pipeline', 'quillcrm')
-	: mode === 'edit'
-	? __('Save Changes', 'quillcrm')
-	: __('Create Pipeline', 'quillcrm')}
+							? __('Loading...', 'quillcrm')
+							: mode === 'duplicate'
+								? __('Duplicate Pipeline', 'quillcrm')
+								: mode === 'edit'
+									? __('Save Changes', 'quillcrm')
+									: __('Create Pipeline', 'quillcrm')}
 					</Button>
 				</div>
 			</DialogContent>

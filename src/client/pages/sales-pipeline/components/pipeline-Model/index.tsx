@@ -129,7 +129,6 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 
 		setLoading(true);
 		try {
-			let newPipeline;
 			let updatedPipeline;
 
 			if (mode === 'duplicate' && pipeline) {
@@ -145,23 +144,6 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					),
 				});
 			} else if (mode === 'create') {
-				// await createPipeline({
-				//     name: values.name,
-				//     description: '',
-				//     stages: customStages || [],
-				// })
-				newPipeline = await createPipeline({
-					name: values.name,
-					description: '',
-					stages: customStages || [],
-				});
-				createNotice?.({
-					type: 'success',
-					message: __(
-						`Pipeline "${values.name}" created successfully!`,
-						'quillcrm'
-					),
-				});
 				updatedPipeline = await createPipeline({
 					name: values.name,
 					description: '',
@@ -190,10 +172,6 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					),
 				});
 			}
-
-			// onSuccess();
-			onSuccess(newPipeline);
-
 			onClose();
 			// Pass the updated pipeline to the parent for proper refresh
 			await onSuccess(updatedPipeline);

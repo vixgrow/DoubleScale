@@ -11,6 +11,7 @@ import type {
 	Note,
 	AutomationContact,
 	LMSCourse,
+	NoticeMessage,
 } from '@quillcrm/client';
 import type { EmailAnalytics, PurchaseHistory } from './types';
 
@@ -20,6 +21,7 @@ export const ContactContext = createContext<{
 	setContact: (contact: Contact) => void;
 	updateContact: (updatedData?: Partial<Contact>) => void;
 	isUpdating: boolean;
+	showNotice?: (notice: NoticeMessage) => void;
 	notes: Note[];
 	setNotes: (notes: Note[]) => void;
 	addNote: (note: Note) => void;

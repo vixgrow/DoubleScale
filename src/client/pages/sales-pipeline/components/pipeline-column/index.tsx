@@ -240,10 +240,10 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 						<span className=" block my-2">
 							<NoDealsIcon />
 						</span>
-						<p className=" my-2 font-[inter] text-lg font-bold leading-7 tracking-[-.5px] text-[#09090B]">
+						<p className=" my-2  text-lg font-bold leading-7 tracking-[-.5px] text-[#09090B]">
 							{__('No deals in this stage', 'quillcrm')}
 						</p>
-						<small className=" text-base font-normal leading-[26px] tracking-[-.5px] text-[#777]">
+						<small className=" text-base  font-normal leading-[26px] tracking-[-.5px] text-[#777]">
 							{__('Drag deals here to move them to', 'quillcrm')}{' '}
 							"{stage.name}"
 						</small>

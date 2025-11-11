@@ -77,17 +77,61 @@ class Remove_User_From_Group extends Action {
 		$contact = $automation_contact->contact;
 		$user    = get_user_by( 'email', $contact->email );
 		if ( ! $user ) {
+			quillcrm_get_logger()->warning(
+				__( 'User not found for LearnDash group removal', 'quillcrm' ),
+				array(
+					'code'          => 'learndash_user_not_found',
+					'contact_email' => $contact->email,
+					'automation_id' => $automation->id,
+					'step_id'       => $step->id,
+				)
+			);
 			return false;
 		}
 
 		$group_id = $step->get_setting( 'group_id' );
 		if ( ! $group_id ) {
+			quillcrm_get_logger()->warning(
+				__( 'Group ID not configured for LearnDash removal action', 'quillcrm' ),
+				array(
+					'code'          => 'learndash_group_id_missing',
+					'automation_id' => $automation->id,
+					'step_id'       => $step->id,
+				)
+			);
 			return false;
 		}
 
 		$group_id = absint( $group_id );
 
+		// Check if LearnDash function exists
+		if ( ! function_exists( 'ld_update_group_access' ) ) {
+			quillcrm_get_logger()->error(
+				__( 'LearnDash plugin is not active. Cannot remove user from group.', 'quillcrm' ),
+				array(
+					'code'          => 'learndash_plugin_inactive',
+					'user_id'       => $user->ID,
+					'group_id'      => $group_id,
+					'automation_id' => $automation->id,
+					'step_id'       => $step->id,
+				)
+			);
+			return false;
+		}
+
+		// Execute the action
 		ld_update_group_access( $user->ID, $group_id, true );
+
+		quillcrm_get_logger()->info(
+			__( 'User successfully removed from LearnDash group', 'quillcrm' ),
+			array(
+				'code'          => 'learndash_group_removed',
+				'user_id'       => $user->ID,
+				'group_id'      => $group_id,
+				'automation_id' => $automation->id,
+				'step_id'       => $step->id,
+			)
+		);
 
 		return true;
 	}

@@ -201,3 +201,5 @@ export { default as GradientCampaignsIcon } from './gradient-campaigns';
 export { default as AddDealsIcon } from './add-deals';
 export { default as NoDealsIcon } from './no-deals';
 export { default as PiplelinesIcon } from './piplelines';
+export { default as CoursesIcon } from './courses';
+export { default as GradientCoursesIcon } from './gradient-courses';

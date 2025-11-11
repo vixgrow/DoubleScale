@@ -108,6 +108,11 @@ export type LMSCourse = {
 	started_on: string;
 };
 
+export type LMSCoursesResponse = {
+	data: LMSCourse[];
+	total: number;
+};
+
 export type AutomationContact = {
 	id: number;
 	contact_id: number;
@@ -199,6 +204,8 @@ export type EmailTemplateSettings = {
 	from_name: string;
 	from_email: string;
 	reply_to: string;
+	subject: string;
+	preview_text: string;
 	enable_utm: boolean;
 	utm_source: string;
 	utm_medium: string;
@@ -212,25 +219,12 @@ export type EmailTemplate = {
 	id?: number;
 	name: string;
 	type: 'email'; // Campaign channel type
-	subject: string;
 	body?: string | EmailBodyContent; // Can be string (rich-text) or EmailBodyContent (builder)
-	preview_text: string;
 	thumbnail?: string;
 	hidden?: boolean;
 	settings?: EmailTemplateSettings;
 	created_at?: string;
 	updated_at?: string;
-
-	// Flattened fields for UI convenience (derived from settings)
-	from_name?: string;
-	from_email?: string;
-	reply_to?: string;
-	enable_utm?: boolean;
-	utm_source?: string;
-	utm_medium?: string;
-	utm_name?: string;
-	utm_term?: string;
-	utm_content?: string;
 };
 
 // SMS Template Type (for frontend use)
@@ -437,9 +431,9 @@ export type CustomTemplate = {
 	id: number;
 	name: string;
 	body: string;
-	subject: string;
 	settings: {
 		// Common settings
+		subject?: string;
 		preview_text?: string;
 		from_name?: string;
 		// Email-specific settings

@@ -8,6 +8,8 @@ import { useMemo } from '@wordpress/element';
  * External dependencies
  */
 import { useDroppable } from '@dnd-kit/core';
+import { Tooltip } from 'antd';
+import { AlertCircle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -24,6 +26,7 @@ import WeightedIcon from '@quillcrm/components/icons/weighted-icon';
 import { DealCardShimmer } from '../deal-card/DealCardShimmer';
 import React, { useState } from 'react';
 import { NewDealModal } from '../new-deal-modal';
+import { formatCurrency } from '../../utils/currency';
 
 interface PipelineColumnProps {
 	stage: {
@@ -76,6 +79,19 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 			stageName: stage.name,
 		},
 	});
+
+	// Get currency code from deals (use first deal's currency, or USD as fallback)
+	const { currencyCode, hasMixedCurrencies, uniqueCurrencies } = useMemo(() => {
+		if (deals.length === 0) return { currencyCode: 'USD', hasMixedCurrencies: false, uniqueCurrencies: [] };
+		// Get unique currencies in this column
+		const currencies = [...new Set(deals.map(d => d.currency))];
+		// If all deals use same currency, use that; otherwise default to first deal's currency
+		return {
+			currencyCode: currencies.length === 1 ? currencies[0] : deals[0].currency,
+			hasMixedCurrencies: currencies.length > 1,
+			uniqueCurrencies: currencies,
+		};
+	}, [deals]);
 
 	// Calculate column statistics
 	const columnStats = useMemo(() => {
@@ -183,7 +199,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 						className={`absolute bottom-3  flex justify-between px-2 gap-6 items-center z-20`}
 					>
 						{/* Total Value */}
-						<div className="flex  gap-1">
+						<div className="flex  gap-1 items-center">
 							{/* <DealValueIcon /> */}
 							<span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
 								{columnStats.totalDeals === 1
@@ -191,21 +207,49 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 									: __('Deals value:', 'quillcrm')}
 							</span>
 							<span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
-								${columnStats.totalValue}
-								{columnStats.totalValue ? 'K' : ''}
+								{formatCurrency(columnStats.totalValue, currencyCode)}
 							</span>
+							{hasMixedCurrencies && (
+								<Tooltip
+									title={__(
+										`Mixed currencies detected (${uniqueCurrencies.join(', ')}). Total is approximate and not currency-converted.`,
+										'quillcrm'
+									)}
+									placement="top"
+								>
+									<AlertCircle
+										size={16}
+										className="text-orange-500 cursor-help"
+										style={{ minWidth: '16px' }}
+									/>
+								</Tooltip>
+							)}
 						</div>
 
 						{/* Weighted Value */}
-						<div className="flex  gap-1">
+						<div className="flex  gap-1 items-center">
 							{/* <WeightedIcon /> */}
 							<span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
 								{__('Weighted:', 'quillcrm')}
 							</span>
 							<span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
-								${columnStats.weightedValue.toLocaleString()}
-								{columnStats.weightedValue ? 'K' : ''}
+								{formatCurrency(columnStats.weightedValue, currencyCode)}
 							</span>
+							{hasMixedCurrencies && (
+								<Tooltip
+									title={__(
+										`Mixed currencies detected (${uniqueCurrencies.join(', ')}). Weighted total is approximate.`,
+										'quillcrm'
+									)}
+									placement="top"
+								>
+									<AlertCircle
+										size={16}
+										className="text-orange-500 cursor-help"
+										style={{ minWidth: '16px' }}
+									/>
+								</Tooltip>
+							)}
 						</div>
 					</div>
 				</div>

@@ -32,6 +32,7 @@ import type {
 } from '@quillcrm/client';
 //@ts-ignore
 import device from '../../../../../../assets/images/message-device.png';
+import SMSDevice from '../templates/sms-device';
 
 const Review: React.FC = () => {
 	const {
@@ -81,12 +82,12 @@ const Review: React.FC = () => {
 		(campaign?.settings?.templates?.[0] as CampaignTemplate) || null;
 
 	// Extract template data based on Template_Field_Mapper structure
-	// For email: subject is top-level, from_name/from_email/reply_to/preview_text are in settings
+	// For email: subject and preview_text are in settings.subject and settings.preview_text
 	// For SMS: from_name and from_phone are in settings
 	const isEmailTemplate = template?.type === 'email';
 	const emailSubject =
-		isEmailTemplate && (template as EmailTemplate).subject
-			? (template as EmailTemplate).subject
+		isEmailTemplate && (template as EmailTemplate).settings?.subject
+			? (template as EmailTemplate).settings!.subject
 			: '-';
 	const fromName =
 		isEmailTemplate && (template as EmailTemplate).settings?.from_name
@@ -106,9 +107,12 @@ const Review: React.FC = () => {
 			? (template as EmailTemplate).settings!.reply_to
 			: '-';
 	const previewText =
-		isEmailTemplate && (template as EmailTemplate).preview_text
-			? (template as EmailTemplate).preview_text
+		isEmailTemplate && (template as EmailTemplate).settings?.preview_text
+			? (template as EmailTemplate).settings!.preview_text
 			: '-';
+
+	const smsBody =
+		template && template.type === 'sms' ? template.body : undefined;
 
 	// Debug: Log template structure to verify data
 	useEffect(() => {
@@ -388,19 +392,13 @@ const Review: React.FC = () => {
 				</div>
 
 				{/* Send Test Email or Device Preview */}
-				<div className="w-1/3">
-					{campaign?.type === 'sms' ? (
-						<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] h-full">
-							<img
-								src={device}
-								alt="device"
-								className="w-[350px]"
-							/>
-						</div>
-					) : (
+				{campaign?.type === 'sms' ? (
+					<SMSDevice fromName={fromName} body={smsBody} />
+				) : (
+					<div className="w-1/3">
 						<SendTestEmailCard campaignId={campaign?.id} />
-					)}
-				</div>
+					</div>
+				)}
 			</div>
 		</PanelLayout>
 	);

@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useMemo } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -35,6 +36,7 @@ import { Deal } from '../../types';
 import './style.scss';
 import AllDealIcon from '@quillcrm/components/icons/all-deals';
 import { SalesPipelineSkeleton } from '../../SalesPipelineSkeleton';
+import { formatCurrency } from '../../utils/currency';
 
 interface KanbanBoardProps {
 	pipeline: {
@@ -77,6 +79,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 }) => {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const { moveDealToStage } = useDealOperations();
+	const dispatch = useDispatch('quillcrm/core');
+	const createNotice = dispatch?.createNotice;
 
 	// Configure sensors for better accessibility and UX
 	const sensors = useSensors(
@@ -124,15 +128,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	};
 
 	const handleDragEnd = async ({ active, over }: DragEndEvent) => {
-		console.log('Drag ended:', {
-			activeId: active.id,
-			overId: over?.id,
-			overData: over?.data,
-		});
 		setActiveId(null);
 
 		if (!over) {
-			console.log('No drop target');
 			return;
 		}
 
@@ -162,7 +160,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 			parseInt(String(targetStageId)) ===
 				parseInt(String(draggedDeal.stage?.id))
 		) {
-			console.log('No stage change needed');
 			return;
 		}
 
@@ -178,7 +175,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		);
 
 		if (!targetStage || !currentStage) {
-			console.log('Target or current stage not found');
 			return;
 		}
 
@@ -238,9 +234,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		});
 
 		try {
-			console.log(
-				`Moving deal ${dealId} to stage ${targetStageId} with updateProbability: ${updateProbability}`
-			);
 			await moveDealToStage(dealId, targetStageId, updateProbability);
 
 			// No need to refresh - optimistic update already applied
@@ -254,9 +247,19 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 				weighted_value: deal.weighted_value,
 			});
 
-			alert(__('Failed to move deal. Please try again.', 'quillcrm'));
+			createNotice?.({
+			type: 'error',
+			message: __('Failed to move deal. Please try again.', 'quillcrm'),
+		});
 		}
 	};
+
+	// Detect currency from deals
+	const currencyCode = useMemo(() => {
+		if (deals.length === 0) return 'USD';
+		const currencies = [...new Set(deals.map(d => d.currency))];
+		return currencies.length === 1 ? currencies[0] : deals[0].currency;
+	}, [deals]);
 
 	// Calculate pipeline statistics
 	const totalDeals = deals.length;
@@ -265,9 +268,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		// Use the backend-calculated weighted_value if available, otherwise calculate
 		return sum + (deal.weighted_value || 0);
 	}, 0);
-	
+
 	// Calculate average win rate (average probability across all deals)
-	const avgWinRate = deals.length > 0 
+	const avgWinRate = deals.length > 0
 		? deals.reduce((sum, deal) => {
 			const probability = deal.probability ?? deal.stage?.win_probability ?? 0;
 			return sum + probability;
@@ -339,7 +342,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 							<div className=" flex justify-between items-center w-[45%]">
 								<div className="flex flex-col">
 									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] ">
-										${totalValue.toLocaleString()}
+										{formatCurrency(totalValue, currencyCode)}
 									</span>
 									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] text-[#777]">
 										{__('Total Value', 'quillcrm')}
@@ -376,7 +379,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 							<div className="flex justify-between items-center w-[45%]">
 								<div className="flex flex-col">
 									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] ">
-										${weightedValue.toLocaleString()}
+										{formatCurrency(weightedValue, currencyCode)}
 									</span>
 									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px]  text-[#777]">
 										{__('weighted Value', 'quillcrm')}

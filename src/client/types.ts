@@ -108,6 +108,11 @@ export type LMSCourse = {
 	started_on: string;
 };
 
+export type LMSCoursesResponse = {
+	data: LMSCourse[];
+	total: number;
+};
+
 export type AutomationContact = {
 	id: number;
 	contact_id: number;
@@ -153,6 +158,7 @@ export type Automation = {
 		slug: string;
 		message: string;
 		plugin_label?: string;
+		plugin_labels?: any[];
 		step_id?: number;
 	}>;
 };
@@ -457,6 +463,13 @@ export type AutomationStep = {
 		_condition_warning?: boolean;
 		[key: string]: any;
 	};
+
+	_action_label?: string;
+	_action_warning?: boolean;
+	_condition_warning?: boolean;
+	_unavailable_rules_count?: number;
+	_unavailable_rules?: any[];
+
 	order: number;
 	status: string;
 	created_at: string;

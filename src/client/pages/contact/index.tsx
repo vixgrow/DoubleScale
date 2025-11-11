@@ -232,6 +232,7 @@ const Contact: React.FC<ContactProps> = ({
 							isLoading: loading,
 							isUpdating: isUpdating,
 							updateContact,
+							showNotice: setNotice,
 						}}
 					>
 						<div className="px-12 overflow-y-auto py-8">

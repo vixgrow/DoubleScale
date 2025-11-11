@@ -68,6 +68,7 @@ interface FieldProps {
 	defaultValue?: string;
 	min?: number;
 	max?: number;
+	className?: string;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -89,6 +90,7 @@ const Field: React.FC<FieldProps> = ({
 	defaultValue,
 	min,
 	max,
+	className,
 }) => {
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -491,7 +493,7 @@ const Field: React.FC<FieldProps> = ({
 					</span>
 				</div>
 			)}
-			<div className="qcrm-field-input">{fieldContent}</div>
+			<div className={cn("qcrm-field-input", className)}>{fieldContent}</div>
 			{helperText && renderHelperText(helperText)}
 		</div>
 	);

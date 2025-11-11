@@ -75,6 +75,19 @@ class Create_Coupon extends Action {
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
 		try {
+			// Check if WooCommerce classes exist
+			if ( ! class_exists( 'WC_Coupon' ) ) {
+				quillcrm_get_logger()->error(
+					__( 'WooCommerce plugin is not active. Cannot create coupon.', 'quillcrm' ),
+					array(
+						'code'          => 'woocommerce_plugin_inactive',
+						'automation_id' => $automation->id,
+						'step_id'       => $step->id,
+					)
+				);
+				return false;
+			}
+
 			$coupon_expiry_date     = $step->get_setting( 'coupon_expiry_date' );
 			$discount_type          = $step->get_setting( 'discount_type' );
 			$coupon_prefix          = $step->get_setting( 'coupon_prefix' ) ?? '';
@@ -83,6 +96,18 @@ class Create_Coupon extends Action {
 			$usage_limit_per_coupon = $step->get_setting( 'usage_limit_per_coupon' ) ?? 0;
 			$limit_usage_to_x_items = $step->get_setting( 'limit_usage_to_x_items' ) ?? 0;
 			$usage_limit_per_user   = $step->get_setting( 'usage_limit_per_user' ) ?? 0;
+
+			if ( empty( $discount_type ) ) {
+				quillcrm_get_logger()->warning(
+					__( 'Discount type not configured for coupon creation', 'quillcrm' ),
+					array(
+						'code'          => 'woocommerce_discount_type_missing',
+						'automation_id' => $automation->id,
+						'step_id'       => $step->id,
+					)
+				);
+				return false;
+			}
 
 			$coupon_code              = $this->generate_dynamic_coupon_code( $coupon_prefix );
 			$discount_type_and_amount = $this->get_discount_type_and_amount( $discount_type['type'], $discount_type['amount'] );
@@ -110,14 +135,41 @@ class Create_Coupon extends Action {
 			// create merge tag
 			$merge_tag = new Coupon( $title, 'dynamic_id_' . $step->id );
 			if ( $merge_tags_manager->get_merge_tag( $merge_tag->group, $merge_tag->slug ) ) {
+				quillcrm_get_logger()->info(
+					__( 'WooCommerce coupon created successfully', 'quillcrm' ),
+					array(
+						'code'          => 'woocommerce_coupon_created',
+						'coupon_code'   => $coupon_code,
+						'automation_id' => $automation->id,
+						'step_id'       => $step->id,
+					)
+				);
 				return true;
 			}
 
 			$merge_tags_manager->register( $merge_tag );
 
+			quillcrm_get_logger()->info(
+				__( 'WooCommerce coupon created successfully', 'quillcrm' ),
+				array(
+					'code'          => 'woocommerce_coupon_created',
+					'coupon_code'   => $coupon_code,
+					'automation_id' => $automation->id,
+					'step_id'       => $step->id,
+				)
+			);
+
 			return true;
 		} catch ( \Exception $e ) {
-			error_log( $e->getMessage() );
+			quillcrm_get_logger()->error(
+				__( 'Failed to create WooCommerce coupon', 'quillcrm' ),
+				array(
+					'code'          => 'woocommerce_coupon_creation_failed',
+					'error'         => $e->getMessage(),
+					'automation_id' => $automation->id,
+					'step_id'       => $step->id,
+				)
+			);
 			return false;
 		}
 	}

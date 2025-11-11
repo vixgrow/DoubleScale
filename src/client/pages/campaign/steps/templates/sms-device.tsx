@@ -1,16 +1,18 @@
 import { __ } from '@wordpress/i18n';
 //@ts-ignore
 import device from '../../../../../../assets/images/message-device.png';
+import { cn } from '@/lib/utils';
 
 const SMSDevice: React.FC<{
     fromName?: string;
     body?: string;
-}> = ({ fromName, body }) => {
+    className?: string;
+}> = ({ fromName, body, className }) => {
     const displayFromName = fromName?.trim() || __('From Name', 'quillcrm');
     const displayBody = body?.trim() || __('Message Here...', 'quillcrm');
 
     return (
-        <div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] w-full lg:w-1/3 py-8 sm:py-10">
+        <div className={cn("flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] w-full lg:w-1/3 py-8 sm:py-10", className)}>
             <div className="relative w-full flex items-center justify-center">
                 <img
                     src={device}

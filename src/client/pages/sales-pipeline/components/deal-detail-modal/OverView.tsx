@@ -21,6 +21,7 @@ import './style.scss';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
+import { formatCurrency, getCurrencySymbol } from '../../utils/currency';
 import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
 import {
 	Select,
@@ -174,21 +175,6 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 		}
 	};
 
-	const formatCurrency = (value: number): string => {
-		let formattedValue = '';
-
-		if (value >= 1_000_000) {
-			formattedValue =
-				(value / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-		} else if (value >= 1_000) {
-			formattedValue =
-				(value / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
-		} else {
-			formattedValue = value.toString();
-		}
-
-		return formattedValue;
-	};
 
 	const formatDate = (dateString: string | null) => {
 		if (!dateString) return __('Not set', 'quillcrm');
@@ -522,10 +508,9 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 							</p>
 							<div className="flex items-center">
 								<span className="text-[#09090B] font-bold text-lg mr-1">
-									{formatCurrency(deal.weighted_value)}
+									{formatCurrency(deal.weighted_value, deal.currency || 'USD')}
 								</span>
 								<DealValueIcon width={20} height={20} />
-								<span className="text-[#777] text-[20px]">USD</span>
 							</div>
 						</div>
 					</div>

@@ -79,6 +79,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 }) => {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const { moveDealToStage } = useDealOperations();
+	const dispatch = useDispatch('quillcrm/core');
+	const createNotice = dispatch?.createNotice;
 
 	// Configure sensors for better accessibility and UX
 	const sensors = useSensors(
@@ -126,15 +128,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	};
 
 	const handleDragEnd = async ({ active, over }: DragEndEvent) => {
-		console.log('Drag ended:', {
-			activeId: active.id,
-			overId: over?.id,
-			overData: over?.data,
-		});
 		setActiveId(null);
 
 		if (!over) {
-			console.log('No drop target');
 			return;
 		}
 
@@ -164,7 +160,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 			parseInt(String(targetStageId)) ===
 				parseInt(String(draggedDeal.stage?.id))
 		) {
-			console.log('No stage change needed');
 			return;
 		}
 
@@ -180,7 +175,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		);
 
 		if (!targetStage || !currentStage) {
-			console.log('Target or current stage not found');
 			return;
 		}
 
@@ -240,9 +234,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		});
 
 		try {
-			console.log(
-				`Moving deal ${dealId} to stage ${targetStageId} with updateProbability: ${updateProbability}`
-			);
 			await moveDealToStage(dealId, targetStageId, updateProbability);
 
 			// No need to refresh - optimistic update already applied
@@ -256,7 +247,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 				weighted_value: deal.weighted_value,
 			});
 
-			alert(__('Failed to move deal. Please try again.', 'quillcrm'));
+			createNotice?.({
+			type: 'error',
+			message: __('Failed to move deal. Please try again.', 'quillcrm'),
+		});
 		}
 	};
 

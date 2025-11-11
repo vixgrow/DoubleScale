@@ -23,6 +23,7 @@ import {
 	RecipientsCard,
 	ScheduleCard,
 	SendTestEmailCard,
+	SendTestSMSCard,
 } from './components';
 import type {
 	NoticeMessage,
@@ -390,6 +391,8 @@ const Review: React.FC = () => {
 				{/* Send Test Email or Device Preview */}
 				<div className="w-1/3">
 					{campaign?.type === 'sms' ? (
+						<SendTestSMSCard campaignId={campaign?.id} />
+					) : campaign?.type === 'whatsapp' ? (
 						<div className="flex flex-col items-center justify-center border border-gray-200 rounded-2xl bg-[#F8F8F8] h-full">
 							<img
 								src={device}

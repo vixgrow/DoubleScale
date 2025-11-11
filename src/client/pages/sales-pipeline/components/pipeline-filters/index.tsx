@@ -75,7 +75,7 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 		filters.priority !== null;
 
 	return (
-		<div className="pipeline-filters mr-2 mb-6 px-4 py-5 border border-[#DEE1E6] rounded-[8px] bg-[#fff] overflow-visible">
+		<div className="pipeline-filters mr-2 mb-6 px-4 py-5 border border-[#DEE1E6] rounded-[8px] bg-[#fff] overflow-hidden">
 			{/* Main Filter Bar */}
 			<div className="filter-bar w-full flex  gap-4">
 				{/* Search */}

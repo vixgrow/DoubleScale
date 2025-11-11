@@ -55,7 +55,7 @@ class HTML_Block extends Email_Block {
 	/**
 	 * Render block
 	 *
-	 * @param array $props Block properties
+	 * @param array                                       $props Block properties
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
@@ -86,6 +86,11 @@ class HTML_Block extends Email_Block {
 		// Use CSS string directly (matching frontend)
 		$css_string = $props['customCss'] ?? '';
 
+		// If content is empty/default, do not render the block at all
+		if ( $is_default_content ) {
+			return '';
+		}
+
 		// Inner content style (matching frontend)
 		$inner_style = $this->build_style_string(
 			array(
@@ -106,12 +111,7 @@ class HTML_Block extends Email_Block {
 		}
 
 		$inner_content = '';
-		if ( $is_default_content ) {
-			$inner_content = '<span style="font-size: 32px; font-weight: 600; color: #1E3A8A;">' .
-				esc_html__( 'Add your own html here', 'quillcrm' ) . '</span>';
-		} else {
-			$inner_content = "<div id=\"{$unique_id}\" style=\"width: 100%;\">{$content}</div>";
-		}
+		$inner_content = "<div id=\"{$unique_id}\" style=\"width: 100%;\">{$content}</div>";
 
 		// Use table structure for better email client compatibility
 		return "{$style_tag}<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">

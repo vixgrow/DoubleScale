@@ -99,7 +99,7 @@ const Review: React.FC = () => {
 	const fromPhone =
 		campaign?.type === 'sms'
 			? ((campaign?.settings as unknown as { from_phone?: string })
-				?.from_phone ?? '-')
+					?.from_phone ?? '-')
 			: '-';
 	const replyTo =
 		isEmailTemplate && (template as EmailTemplate).settings?.reply_to
@@ -245,7 +245,8 @@ const Review: React.FC = () => {
 
 		try {
 			const runType = sendNow ? 'processing' : 'schedule';
-			const executeAt = !sendNow && scheduledAt ? scheduledAt.toISOString() : null;
+			const executeAt =
+				!sendNow && scheduledAt ? scheduledAt.toISOString() : null;
 
 			// Save review step data
 			const reviewStepData = {
@@ -272,7 +273,11 @@ const Review: React.FC = () => {
 
 				await saveCampaignSettings(data);
 
-				goToStep('overview');
+				if (sendNow) {
+					goToStep('overview');
+				} else {
+					goToStep('view');
+				}
 			}
 		} catch (error) {
 			console.error(error);
@@ -312,8 +317,8 @@ const Review: React.FC = () => {
 					campaign?.type === 'email'
 						? campaignSteps
 						: campaignSteps.filter(
-							(step) => step.slug !== 'builder'
-						)
+								(step) => step.slug !== 'builder'
+							)
 				}
 				canProceed="true"
 				currentStep={campaign?.type === 'email' ? 4 : 3}

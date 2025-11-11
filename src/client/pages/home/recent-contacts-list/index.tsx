@@ -58,7 +58,7 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 										</Avatar>
 									)}
 									<NavLink to={`contacts/${record.id}`}>
-										<div className="text-base font-normal text-[#09090B]">
+										<div className="text-base font-normal text-[#09090B] capitalize w-60 truncate">
 											{record.first_name || '-'}{' '}
 											{record.last_name || '-'}
 										</div>

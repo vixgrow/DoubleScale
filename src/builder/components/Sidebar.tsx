@@ -82,11 +82,27 @@ const BlockSidebar = ({
 						</TooltipProvider>
 					</div>
 
-					<div
-						className="cursor-pointer"
-						onClick={openGlobalSettings}
-					>
-						<GlobalEmailSettingsIcon />
+					<div>
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<div
+										className="cursor-pointer"
+										onClick={openGlobalSettings}
+									>
+										<GlobalEmailSettingsIcon />
+									</div>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>
+										{__(
+											'Global Email Settings',
+											'quillcrm'
+										)}
+									</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
 					</div>
 				</div>
 

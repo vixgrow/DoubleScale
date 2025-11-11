@@ -36,12 +36,11 @@ import { FromEmailSelector } from '@quillcrm/components/from-email-selector';
 
 const templateSchema = z
 	.object({
-		subject: z.string().min(1, __('Subject is required', 'quillcrm')),
-		body: z.string().optional(), // Body will be filled by builder
-		preview_text: z
-			.string()
-			.min(1, __('Preview text is required', 'quillcrm')),
 		settings: z.object({
+			subject: z.string().min(1, __('Subject is required', 'quillcrm')),
+			preview_text: z
+				.string()
+				.min(1, __('Preview text is required', 'quillcrm')),
 			from_name: z
 				.string()
 				.min(1, __('From name is required', 'quillcrm')),
@@ -64,6 +63,7 @@ const templateSchema = z
 			utm_term: z.string().optional(),
 			utm_content: z.string().optional(),
 		}),
+		body: z.string().optional(), // Body will be filled by builder
 	})
 	.refine(
 		(data) => {
@@ -119,10 +119,10 @@ const Templates: React.FC = () => {
 	const [template, setTemplate] = useState<Partial<EmailTemplate>>({
 		name: campaign?.name || __('Email Template', 'quillcrm'),
 		type: CAMPAIGN_CHANNEL.EMAIL,
-		subject: '',
 		body: '',
-		preview_text: '',
 		settings: {
+			subject: '',
+			preview_text: '',
 			from_name: '',
 			from_email: '',
 			reply_to: '',
@@ -429,10 +429,10 @@ const Templates: React.FC = () => {
 							>
 								<Input
 									placeholder={__('Subject here', 'quillcrm')}
-									value={template.subject || ''}
+									value={template.settings?.subject || ''}
 									onChange={(e) => {
 										clearError('subject');
-										updateTemplate({
+										updateSettings({
 											subject: e.target.value,
 										});
 									}}
@@ -462,10 +462,10 @@ const Templates: React.FC = () => {
 									'Preview text here',
 									'quillcrm'
 								)}
-								value={template.preview_text || ''}
+								value={template.settings?.preview_text || ''}
 								onChange={(e) => {
 									clearError('preview_text');
-									updateTemplate({
+									updateSettings({
 										preview_text: e.target.value,
 									});
 								}}
@@ -693,8 +693,8 @@ const Templates: React.FC = () => {
 
 					<FeedBuilder
 						fromName={template.settings?.from_name}
-						subject={template.subject}
-						previewText={template.preview_text}
+						subject={template.settings?.subject}
+						previewText={template.settings?.preview_text}
 					/>
 				</div>
 			</PanelLayout>

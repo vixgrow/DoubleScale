@@ -46,11 +46,9 @@ class Template_Model extends Model {
 	protected $fillable = array(
 		'name',
 		'type',
-		'subject',
 		'body',
 		'settings',
 		'hidden',
-		'preview_text',
 		'thumbnail',
 		'category',
 		'is_pro',
@@ -95,6 +93,56 @@ class Template_Model extends Model {
 		// Convert string to integer for database storage
 		$integer_value            = Campaign_Channel::to_integer( $value );
 		$this->attributes['type'] = $integer_value ?? Campaign_Channel::CHANNEL_EMAIL;
+	}
+
+	/**
+	 * Get subject from settings
+	 *
+	 * @param mixed $value Raw value (kept for compatibility, not used)
+	 * @return string Subject from settings
+	 */
+	public function getSubjectAttribute( $value ) {
+		$settings = is_array( $this->settings ) ? $this->settings : json_decode( $this->settings, true );
+		return $settings['subject'] ?? '';
+	}
+
+	/**
+	 * Set subject to settings
+	 *
+	 * @param string $value Subject value
+	 */
+	public function setSubjectAttribute( $value ) {
+		$settings = is_array( $this->settings ) ? $this->settings : json_decode( $this->settings, true );
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+		$settings['subject']          = $value;
+		$this->attributes['settings'] = $settings;
+	}
+
+	/**
+	 * Get preview_text from settings
+	 *
+	 * @param mixed $value Raw value (kept for compatibility, not used)
+	 * @return string Preview text from settings
+	 */
+	public function getPreviewTextAttribute( $value ) {
+		$settings = is_array( $this->settings ) ? $this->settings : json_decode( $this->settings, true );
+		return $settings['preview_text'] ?? '';
+	}
+
+	/**
+	 * Set preview_text to settings
+	 *
+	 * @param string $value Preview text value
+	 */
+	public function setPreviewTextAttribute( $value ) {
+		$settings = is_array( $this->settings ) ? $this->settings : json_decode( $this->settings, true );
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+		$settings['preview_text']     = $value;
+		$this->attributes['settings'] = $settings;
 	}
 
 	/**

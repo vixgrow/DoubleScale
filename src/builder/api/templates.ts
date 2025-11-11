@@ -218,10 +218,21 @@ export const saveEmailAsTemplate = async (
 	return createTemplate({
 		name: templateName,
 		type: CAMPAIGN_CHANNEL.EMAIL,
-		subject: '',
 		body: JSON.stringify(bodyData), // Store builder data in body field
-		preview_text: '',
 		thumbnail: thumbnailUrl || '', // Always include thumbnail field, even if empty
 		hidden: false, // User-created templates should be visible
+		settings: {
+			subject: '',
+			preview_text: '',
+			from_name: '',
+			from_email: '',
+			reply_to: '',
+			enable_utm: false,
+			utm_source: '',
+			utm_medium: '',
+			utm_name: '',
+			utm_term: '',
+			utm_content: '',
+		},
 	});
 };

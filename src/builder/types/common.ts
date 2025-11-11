@@ -239,7 +239,6 @@ export interface EmailTemplate {
 	id: number;
 	name: string;
 	type: 'email' | 'sms' | 'whatsapp';
-	subject: string;
 	body: string | {
 		type: 'builder';
 		value: {
@@ -248,27 +247,19 @@ export interface EmailTemplate {
 			buttonSettings: Record<ButtonType, ButtonSettings>;
 		};
 	};
-	preview_text: string;
 	thumbnail?: string;
 	hidden?: boolean;
 	created_at: string;
 	updated_at: string;
-	// Settings fields (flattened from JSON column)
-	from_name?: string;
-	from_email?: string;
-	reply_to?: string;
-	enable_utm?: boolean;
-	utm_source?: string;
-	utm_medium?: string;
-	utm_name?: string;
-	utm_term?: string;
-	utm_content?: string;
+	settings?: EmailTemplateSettings;
 }
 
 export interface EmailTemplateSettings {
 	from_name: string;
 	from_email: string;
 	reply_to: string;
+	subject: string;
+	preview_text: string;
 	enable_utm: boolean;
 	utm_source: string;
 	utm_medium: string;

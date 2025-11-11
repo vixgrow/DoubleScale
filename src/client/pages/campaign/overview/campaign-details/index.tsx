@@ -107,13 +107,17 @@ const CampaignDetails: React.FC = () => {
 				</div>
 
 				{campaign.type === CAMPAIGN_CHANNEL.EMAIL &&
-					campaign.settings?.templates?.[0]?.subject && (
+					campaign.settings?.templates?.[0] &&
+					'settings' in campaign.settings.templates[0] &&
+					campaign.settings.templates[0].settings &&
+					'subject' in campaign.settings.templates[0].settings &&
+					campaign.settings.templates[0].settings.subject && (
 						<div className="space-y-1">
 							<span className="text-base text-gray-500">
 								{__('Subject', 'quillcrm')}
 							</span>
 							<p className="text-base font-semibold text-[#09090B]">
-								{campaign.settings.templates[0].subject}
+								{(campaign.settings.templates[0].settings as { subject: string }).subject}
 							</p>
 						</div>
 					)}

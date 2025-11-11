@@ -113,6 +113,7 @@ const AddCampaign: React.FC<AddCampaignProps> = ({
 						value={campaignName}
 						onChange={(value) => setCampaignName(value)}
 						required={true}
+						className="mt-2"
 					/>
 				</div>
 

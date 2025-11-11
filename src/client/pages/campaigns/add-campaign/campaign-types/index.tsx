@@ -59,7 +59,7 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 		<>
 			{/* Campaign Type Selection */}
 			<div className="grid gap-2">
-				<Label className="text-sm font-medium">
+				<Label className="text-[#09090B] font-normal text-base">
 					{__('Select a campaign type', 'quillcrm')}
 				</Label>
 				<div className="flex flex-col gap-3">

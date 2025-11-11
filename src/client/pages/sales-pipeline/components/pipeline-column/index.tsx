@@ -24,6 +24,7 @@ import WeightedIcon from '@quillcrm/components/icons/weighted-icon';
 import { DealCardShimmer } from '../deal-card/DealCardShimmer';
 import React, { useState } from 'react';
 import { NewDealModal } from '../new-deal-modal';
+import { formatCurrency } from '../../utils/currency';
 
 interface PipelineColumnProps {
 	stage: {
@@ -77,16 +78,14 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 		},
 	});
 
-	// Format currency value with K/M suffixes
-	const formatCurrency = (value: number): string => {
-		if (value >= 1_000_000) {
-			return `$${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
-		} else if (value >= 1_000) {
-			return `$${(value / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
-		} else {
-			return `$${value.toLocaleString()}`;
-		}
-	};
+	// Get currency code from deals (use first deal's currency, or USD as fallback)
+	const currencyCode = useMemo(() => {
+		if (deals.length === 0) return 'USD';
+		// Get unique currencies in this column
+		const currencies = [...new Set(deals.map(d => d.currency))];
+		// If all deals use same currency, use that; otherwise default to first deal's currency
+		return currencies.length === 1 ? currencies[0] : deals[0].currency;
+	}, [deals]);
 
 	// Calculate column statistics
 	const columnStats = useMemo(() => {
@@ -202,7 +201,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 									: __('Deals value:', 'quillcrm')}
 							</span>
 							<span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
-								{formatCurrency(columnStats.totalValue)}
+								{formatCurrency(columnStats.totalValue, currencyCode)}
 							</span>
 						</div>
 
@@ -213,7 +212,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 								{__('Weighted:', 'quillcrm')}
 							</span>
 							<span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
-								{formatCurrency(columnStats.weightedValue)}
+								{formatCurrency(columnStats.weightedValue, currencyCode)}
 							</span>
 						</div>
 					</div>

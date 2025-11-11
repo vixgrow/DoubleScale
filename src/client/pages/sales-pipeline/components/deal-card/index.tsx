@@ -34,6 +34,7 @@ import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
 
 import { DealCardMenu } from './DealCardMenu';
+import { formatCurrencyFull } from '../../utils/currency';
 
 interface DealCardProps {
 	deal: Deal;
@@ -107,8 +108,8 @@ export const DealCard: React.FC<DealCardProps> = ({
 
 	// Format currency value
 	const formattedValue = useMemo(() => {
-		return `$${deal.value.toLocaleString()}`;
-	}, [deal.value]);
+		return formatCurrencyFull(deal.value, deal.currency || 'USD');
+	}, [deal.value, deal.currency]);
 
 	const handleCardClick = (e: React.MouseEvent) => {
 		if (isDraggging || (e.target as HTMLElement).closest('.drag-handle')) {

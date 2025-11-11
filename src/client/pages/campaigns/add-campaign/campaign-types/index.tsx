@@ -34,16 +34,16 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 			type: 'standard',
 			icon: <AllContactsIcon width={24} height={24} />,
 		},
-		{
-			label: __('A/B Split Campaign', 'quillcrm'),
-			description: __(
-				'Split audience to test one variable; send winner to the rest.',
-				'quillcrm'
-			),
-			type: 'ab_test',
-			icon: <ABSplitIcon width={24} height={24} />,
-			isPremium: true,
-		},
+		// {
+		// 	label: __('A/B Split Campaign', 'quillcrm'),
+		// 	description: __(
+		// 		'Split audience to test one variable; send winner to the rest.',
+		// 		'quillcrm'
+		// 	),
+		// 	type: 'ab_test',
+		// 	icon: <ABSplitIcon width={24} height={24} />,
+		// 	isPremium: true,
+		// },
 		// {
 		// 	label: __('Email Sequence', 'quillcrm'),
 		// 	description: __(
@@ -91,12 +91,12 @@ const CampaignTypes: React.FC<CampaignTypesProps> = ({
 										<p className="font-semibold text-secondary-foreground text-base">
 											{campaignType.label}
 										</p>
-										{campaignType.isPremium && (
+										{/* {campaignType.isPremium && (
 											<span className="bg-orange-50 text-[#CB5301] text-base px-2 py-0.5 rounded-md flex items-center gap-1 absolute right-0 top-0">
 												<PremiumIcon />
 												{__('Premium', 'quillcrm')}
 											</span>
-										)}
+										)} */}
 									</div>
 									<p className="text-muted-foreground text-sm">
 										{campaignType.description}

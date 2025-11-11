@@ -80,8 +80,24 @@ class Admin_Loader {
 		add_filter( 'admin_footer_text', '__return_empty_string' );
 		// Remove admin footer version.
 		add_filter( 'update_footer', '__return_empty_string', 11 );
+		add_filter( 'admin_body_class', array( __CLASS__, 'add_admin_body_class' ), PHP_INT_MAX );
+
 	}
 
+		/**
+	 * Add admin body class.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $classes Body classes.
+	 */
+	public static function add_admin_body_class( $classes ) {
+		if ( self::is_admin_page() ) {
+			$classes .= ' js is-fullscreen-mode';
+		}
+
+		return $classes;
+	}
 
 	/**
 	 * Runs before admin notices action and hides them.

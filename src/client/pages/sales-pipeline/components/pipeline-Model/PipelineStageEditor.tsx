@@ -2,13 +2,14 @@
 
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import TrashIcon from '@quillcrm/components/icons/trash';
-import {  DragDropIcon, PlusIcon } from '@quillcrm/components';
+import { PlusIcon } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import { __ } from '@wordpress/i18n';
 import { COLORS, CustomColorPicker } from '@quillcrm/components/custom-colorPicker';
 import { useStageOperations } from '../../hooks/use-stage-operations';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@quillcrm/components/ui/select';
 import { useState } from 'react';
+import DragDropStageIcon from '@quillcrm/components/icons/dragdrop-stage';
 
 export const PipelineStageEditor = ({
 	stages,
@@ -105,7 +106,9 @@ const finalOptions = Array.from(
 														className="mr-2 p-0 cursor-grab hover:bg-transparent "
 														{...provided.dragHandleProps}
 													>
-														<DragDropIcon />
+														
+														  <DragDropStageIcon  />
+														
 													</div>
 												)}
 											</div>
@@ -273,7 +276,7 @@ const finalOptions = Array.from(
 					onClick={onAddStage}
 					className="border-none mr-2 flex add-stage-button p-0 text-[16px] bg-[#fff] shadow-none text-[#1E3A8A] font-normal font-[inter] leading-[150%] tracking-[-0.32px]"
 				>
-					<span className='pr-1'><PlusIcon color='#1E3A8A' /></span>
+					<span className='p-1'><PlusIcon color='#1E3A8A' /></span>
 					{__('Add Stage', 'quillcrm')}
 				</button>
 

@@ -31,6 +31,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 	const lastSavedStateRef = useRef<string>('');
 	const isMountedRef = useRef(true);
 	const hasInitializedRef = useRef(false);
+	const initBaselineTimerRef = useRef<number | null>(null);
 
 	// Get current builder state
 	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
@@ -56,18 +57,33 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 		buttonSettings,
 	});
 
-	// Initialize baseline when store has data
+	// Initialize baseline after initial hydration settles to avoid false diffs
 	useEffect(() => {
-		// Only run once
 		if (hasInitializedRef.current) {
 			return;
 		}
 
-		// Wait for store to have data (at least sections array exists)
-		if (sections && sections.length > 0) {
+		// Require at least sections present to consider the builder hydrated
+		if (!sections || sections.length === 0) {
+			return;
+		}
+
+		// Debounce baseline initialization to the latest hydrated state
+		if (initBaselineTimerRef.current) {
+			clearTimeout(initBaselineTimerRef.current);
+		}
+		initBaselineTimerRef.current = window.setTimeout(() => {
 			lastSavedStateRef.current = currentState;
 			hasInitializedRef.current = true;
-		}
+			initBaselineTimerRef.current = null;
+		}, 50);
+
+		return () => {
+			if (initBaselineTimerRef.current) {
+				clearTimeout(initBaselineTimerRef.current);
+				initBaselineTimerRef.current = null;
+			}
+		};
 	}, [sections, currentState]);
 
 	// Simple: Detect changes after initialization

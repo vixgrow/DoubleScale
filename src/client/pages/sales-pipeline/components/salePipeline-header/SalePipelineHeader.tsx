@@ -21,7 +21,6 @@ interface PipelineHeaderProps {
   setEditPipelineModalVisible: (visible: boolean) => void;
   setDeleteDialogOpen: (visible: boolean) => void;
   setNewDealModalVisible: (visible: boolean) => void;
-  setIsPipelineSwitching: (state: boolean) => void;
 }
 
 export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
@@ -34,9 +33,6 @@ export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   setEditPipelineModalVisible,
   setDeleteDialogOpen,
   setNewDealModalVisible,
-  setIsPipelineSwitching
-
-
 }) => {
 
   return (

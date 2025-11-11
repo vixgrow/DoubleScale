@@ -6,16 +6,18 @@ import { find, flatMap } from 'lodash';
 /**
  * Internal dependencies
  */
+import type { RuleItem } from '@/components/rules-builder';
+import type { Filter as FilterType } from '@quillcrm/client';
 import type { Action, Goal, Rule, Trigger } from '@quillcrm/config';
 import ConfigAPI from '@quillcrm/config';
-import dayjs from 'dayjs';
-import type { Dayjs } from 'dayjs';
-import timezone from 'dayjs/plugin/timezone';
-import utc from 'dayjs/plugin/utc';
 import {
 	__experimentalGetSettings as experimentalGetDateSettings,
 	getSettings as getDateSettings,
 } from '@wordpress/date';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -301,6 +303,92 @@ export const getCampaignEndpoint = (campaignType: string): string | null => {
 
 	return null;
 };
+
+/**
+ * Get filtered rules groups (excluding disabled groups)
+ * @returns Filtered rules groups object
+ */
+export const getFilteredRulesGroups = () => {
+	const allRulesGroups = ConfigAPI.getAutomationRules();
+	return Object.keys(allRulesGroups).reduce((acc, key) => {
+		if (!allRulesGroups[key].is_disabled) {
+			acc[key] = allRulesGroups[key];
+		}
+		return acc;
+	}, {} as any);
+};
+
+/**
+ * Get initial rule for RulesBuilder
+ * @param rulesGroups - Rules groups map
+ * @returns Initial RuleItem
+ */
+export const getInitialRule = (rulesGroups: any): RuleItem => {
+	const firstGroup = Object.keys(rulesGroups)[0] || '';
+	const firstRule = firstGroup
+		? Object.keys(rulesGroups[firstGroup]?.rules || {})[0] || ''
+		: '';
+	return {
+		rule: firstRule,
+		operator: 'is',
+		value: '',
+		selectedGroup: firstGroup,
+	};
+};
+
+/**
+ * Convert RulesBuilder rules format to backend filters format
+ * @param inputRules - Array of rule groups from RulesBuilder
+ * @returns Array of FilterType objects for backend API
+ */
+export const mapRulesToFilters = (
+	inputRules: Array<Array<RuleItem>>
+): FilterType[] => {
+	const flat = (inputRules || []).reduce(
+		(acc, group) => acc.concat(group || []),
+		[] as RuleItem[]
+	);
+	return flat
+		.filter((r) => r && r.rule)
+		.map((r) => ({
+			group: r.selectedGroup || '',
+			filter: r.rule, // backend expects filter slug
+			operator: r.operator || 'is',
+			value: r.value ?? '',
+		}));
+};
+
+/**
+ * Convert backend filters format to RulesBuilder rules format
+ * @param inputFilters - Array of filter objects from backend
+ * @param rulesGroups - Rules groups map for getting default values
+ * @returns Array of rule groups for RulesBuilder
+ */
+export const mapFiltersToRules = (
+	inputFilters: Array<{
+		group?: string;
+		filter?: string;
+		operator?: string;
+		value?: any;
+	}>,
+	rulesGroups: any
+): Array<Array<RuleItem>> => {
+	const safe = Array.isArray(inputFilters) ? inputFilters : [];
+
+	// Get default group and rule from rulesGroups
+	const initialRule = getInitialRule(rulesGroups);
+
+	if (!safe.length) return [[initialRule]];
+
+	const group = safe.map((f: any) => ({
+		rule: f.filter || initialRule.rule,
+		operator: f.operator || 'is',
+		value: f.value ?? '',
+		selectedGroup: f.group || initialRule.selectedGroup,
+	}));
+	return [group];
+};
+
 
 /**
  * Get trigger label from automation (uses backend-provided label)

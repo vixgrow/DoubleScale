@@ -12,7 +12,6 @@ import ConfigAPI from '@quillcrm/config';
  */
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 
 /**
  * Internal dependencies
@@ -21,13 +20,11 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
-	DialogOverlay,
 	DialogTitle,
 } from '@quillcrm/components/ui/dialog';
 import {
 	CustomDialogHeader,
 	AlertIcon,
-	PlusIcon,
 } from '@quillcrm/components';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -88,14 +85,12 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
     const DEFAULT_STAGES = ConfigAPI.getDefaultStages();
 
 	const form = useForm({
-		resolver: zodResolver(formSchema),
 		defaultValues: { name: '' },
 	});
 
 	useEffect(() => {
 		if (visible) {
 			if (mode === 'duplicate' && pipeline) {
-                console.log(' EFFECT TRIGGERED', { mode, pipeline });
 				form.setValue('name', `Copy of ${pipeline.name}`);
 				setCustomStages(pipeline?.stages || []);
 				setOriginalPipeline({
@@ -121,11 +116,28 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 	}, [pipeline, visible, form, mode]);
 
 	const handleSubmit = async (values: { name: string }) => {
+		const result = formSchema.safeParse(values);
+
+		if (!result.success) {
+			const errors = result.error.flatten().fieldErrors;
+
+			if (errors.name) {
+				form.setError('name', {
+					type: 'manual',
+					message: errors.name[0],
+				});
+			}
+			return;
+
+		}
+
 		setLoading(true);
 		try {
+			let updatedPipeline;
+
 			if (mode === 'duplicate' && pipeline) {
 
-				await duplicatePipeline(pipeline.id, values.name.trim());
+				updatedPipeline = await duplicatePipeline(pipeline.id, values.name.trim());
 				createNotice?.({
 					type: 'success',
 					message: __(
@@ -134,10 +146,10 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					),
 				});
 			} else if (mode === 'create') {
-                await createPipeline({
+                updatedPipeline = await createPipeline({
                     name: values.name,
-                    description: '', 
-                    stages: customStages || [], 
+                    description: '',
+                    stages: customStages || [],
                 })
 				createNotice?.({
 					type: 'success',
@@ -147,14 +159,14 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					),
 				});
 			}else if (mode === 'edit' && pipeline) {
-                // 🟡 Update Existing Pipeline
-                await updatePipeline(pipeline.id, {
+
+                updatedPipeline = await updatePipeline(pipeline.id, {
                     name: values.name.trim(),
                     description: pipeline?.description || '',
                     sort_order: pipeline?.sort_order || 0,
-                    stages: customStages || [], 
+                    stages: customStages || [],
                 });
-    
+
                 createNotice?.({
                     type: 'success',
                     message: __(
@@ -163,10 +175,11 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
                     ),
                 });
             }
-        
-    
-			onSuccess();
+
+
 			onClose();
+			// Pass the updated pipeline to the parent for proper refresh
+			await onSuccess(updatedPipeline);
 			form.reset();
 		} catch (error) {
 			createNotice?.({

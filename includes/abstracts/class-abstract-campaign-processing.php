@@ -756,9 +756,10 @@ abstract class Abstract_Campaign_Processing {
 	 *
 	 * @param string        $content The content to render (could be HTML or JSON)
 	 * @param Contact_Model $contact Contact model for merge tags
+	 * @param string        $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string Rendered HTML content
 	 */
-	protected function render_builder_content( $content, Contact_Model $contact ) {
+	protected function render_builder_content( $content, Contact_Model $contact, $footer_html = '' ) {
 		// Try to decode the content to see if it's JSON
 		$decoded = json_decode( $content, true );
 
@@ -777,7 +778,7 @@ abstract class Abstract_Campaign_Processing {
 				// Extract preview text if available
 				$preview_text = '';
 
-				return $renderer->render_from_builder_data( $builder_data, $contact, $preview_text );
+				return $renderer->render_from_builder_data( $builder_data, $contact, $preview_text, $footer_html );
 			}
 		}
 

@@ -208,7 +208,12 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 
 	const getBuilderInitialData = () => {
 		if (!formData.email_body) {
-			return undefined;
+			// Provide a safe default when nothing is in the DB yet
+			return {
+				sections: [],
+				globalSettings: {},
+				buttonSettings: {},
+			} as any;
 		}
 		try {
 			const emailBodyJson = JSON.parse(formData.email_body);
@@ -217,10 +222,18 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 				return emailBodyJson.value;
 			}
 			// Otherwise return as-is (in case it's already in the correct format)
-			return emailBodyJson;
+			return emailBodyJson ?? {
+				sections: [],
+				globalSettings: {},
+				buttonSettings: {},
+			};
 		} catch (error) {
 			console.error('Failed to parse email body:', error);
-			return undefined;
+			return {
+				sections: [],
+				globalSettings: {},
+				buttonSettings: {},
+			} as any;
 		}
 	};
 

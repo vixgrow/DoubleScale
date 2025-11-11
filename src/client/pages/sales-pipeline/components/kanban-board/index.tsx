@@ -265,6 +265,14 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		// Use the backend-calculated weighted_value if available, otherwise calculate
 		return sum + (deal.weighted_value || 0);
 	}, 0);
+	
+	// Calculate average win rate (average probability across all deals)
+	const avgWinRate = deals.length > 0 
+		? deals.reduce((sum, deal) => {
+			const probability = deal.probability ?? deal.stage?.win_probability ?? 0;
+			return sum + probability;
+		}, 0) / deals.length
+		: 0;
 	if (loading) {
 		return <SalesPipelineSkeleton />;
 	}
@@ -272,7 +280,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	return (
 		<div className="kanban-board">
 			{/* Pipeline Statistics */}
-			<div className=" mb-6 w-full overflow-visible ">
+			<div className=" mb-6 w-full overflow-hidden ">
 				<div className="flex justify-between items-center gap-8">
 					<div className="flex w-full gap-4">
 						<div className="stat-item flex justify-between items-center border-l-[3px] border-[#3B82F6] rounded-[8px] bg-[#F8F8F8] p-4 w-[25%]">
@@ -288,45 +296,45 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								<AllDealIcon />
 							</div>
 						</div>
-						<div className="stat-item flex justify-between items-center border-l-[3px] border-[#660FF1] rounded-[8px] bg-[#F8F8F8] p-4 w-[25%]">
-							<div className="flex flex-col">
-								<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter]">
-									{totalValue.toLocaleString()}%
-								</span>
-								<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777]">
-									{__('Avg Win Rate', 'quillcrm')}
-								</span>
-							</div>
-							<div className="w-[52px] h-[51px]">
-								<Doughnut
-									data={{
-										datasets: [
-											{
-												data: [
-													totalValue,
-													100 - totalValue,
-												],
-												backgroundColor: [
-													'#660FF1',
-													'#E5E7EB',
-												],
-												borderWidth: 0,
-											},
-										],
-									}}
-									options={{
-										cutout: '75%',
-										plugins: {
-											tooltip: { enabled: false },
-										},
-										animation: {
-											duration: 1000,
-											easing: 'easeOutQuart',
-										},
-									}}
-								/>
-							</div>
+					<div className="stat-item flex justify-between items-center border-l-[3px] border-[#660FF1] rounded-[8px] bg-[#F8F8F8] p-4 w-[25%]">
+						<div className="flex flex-col">
+							<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter]">
+								{avgWinRate.toFixed(1)}%
+							</span>
+							<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777]">
+								{__('Avg Win Rate', 'quillcrm')}
+							</span>
 						</div>
+						<div className="w-[52px] h-[51px]">
+							<Doughnut
+								data={{
+									datasets: [
+										{
+											data: [
+												avgWinRate,
+												100 - avgWinRate,
+											],
+											backgroundColor: [
+												'#660FF1',
+												'#E5E7EB',
+											],
+											borderWidth: 0,
+										},
+									],
+								}}
+								options={{
+									cutout: '75%',
+									plugins: {
+										tooltip: { enabled: false },
+									},
+									animation: {
+										duration: 1000,
+										easing: 'easeOutQuart',
+									},
+								}}
+							/>
+						</div>
+					</div>
 						<div className="stat-item flex justify-between border-l-[3px] border-[#16A34A] rounded-[8px] bg-[#F8F8F8] p-4 w-[45%]">
 							<div className=" flex justify-between items-center w-[45%]">
 								<div className="flex flex-col">

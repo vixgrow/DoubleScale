@@ -62,6 +62,101 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	}
 
 	/**
+	 * Prepare message content - Override to inject footer during builder rendering
+	 *
+	 * This method follows the same flow as the parent but adds builder email support:
+	 * 1. Prepare footer (with merge tags) before rendering
+	 * 2. Render builder content with footer injection
+	 * 3. Process all merge tags (body + footer)
+	 * 4. Add click tracking and unsubscribe links
+	 *
+	 * @param Template_Model $template Template model
+	 * @param Contact_Model  $contact Contact model
+	 * @param Tracking_Model $campaign_message Campaign tracking record
+	 * @return array Message data array with subject, body, recipient, hash_key
+	 */
+	protected function prepare_message_content( $template, Contact_Model $contact, Tracking_Model $campaign_message ) {
+		$subject         = $template->subject ?? '';
+		$message         = $template->body ?? $this->get_default_campaign_content();
+		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
+
+		// Prepare footer HTML before rendering (for builder emails only)
+		// Footer contains merge tags that will be processed after rendering
+		$footer_html = $this->prepare_footer_html( $message, $contact, $campaign_message );
+
+		// Check if the message is in builder JSON format and render it to HTML
+		// Pass footer_html so it gets injected before </body> tag
+		$message = $this->render_builder_content( $message, $contact, $footer_html );
+
+		// Process merge tags in both body and footer (if footer was injected)
+		$processed_message = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
+		$processed_subject = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+
+		// Add click tracking to URLs in the message (if tracking class supports it)
+		$tracking_class = $this->get_tracking_class();
+		if ( method_exists( $tracking_class, 'add_click_tracking' ) ) {
+			$tracked_message = $tracking_class::add_click_tracking( $processed_message, $campaign_message->hash_key );
+		} else {
+			$tracked_message = $processed_message;
+		}
+
+		// Add unsubscribe link if enabled (if tracking class supports it)
+		if ( $add_unsubscribe && method_exists( $tracking_class, 'add_unsubscribe_link' ) ) {
+			$tracked_message = $tracking_class::add_unsubscribe_link( $tracked_message, $campaign_message->hash_key );
+		}
+
+		return array(
+			'subject'   => $processed_subject,
+			'body'      => $tracked_message,
+			'recipient' => $campaign_message->recipient,
+			'hash_key'  => $campaign_message->hash_key,
+		);
+	}
+
+	/**
+	 * Prepare footer HTML for injection into builder emails
+	 *
+	 * IMPORTANT: This method is called BEFORE merge tags are processed in the body.
+	 * We prepare the footer with merge tags here, but they will be processed later
+	 * in prepare_message_content() along with the body content.
+	 *
+	 * @param string         $message Original message content (JSON for builder, HTML for legacy)
+	 * @param Contact_Model  $contact Contact model
+	 * @param Tracking_Model $campaign_message Campaign tracking record
+	 * @return string Footer HTML with tracking pixel (or empty if not builder email)
+	 */
+	private function prepare_footer_html( $message, Contact_Model $contact, Tracking_Model $campaign_message ) {
+		// Check if message is builder format (JSON)
+		$decoded = json_decode( $message, true );
+		$is_builder_email = ( json_last_error() === JSON_ERROR_NONE && isset( $decoded['type'] ) && $decoded['type'] === 'builder' );
+
+		// Only prepare footer for builder emails
+		// Non-builder emails use the old add_footer_and_tracking() method in send_message()
+		if ( ! $is_builder_email ) {
+			return '';
+		}
+
+		// Get footer content (respecting settings hierarchy)
+		if ( ! empty( $this->settings['email_footer'] ) ) {
+			$email_footer = $this->settings['email_footer'];
+		} else {
+			$global_settings = \QuillCRM\Settings::get( 'email', array() );
+			$email_footer    = $global_settings['email_footer'] ?? Email_Tracking_Helper::get_default_footer();
+		}
+
+		// Add tracking pixel to footer
+		$tracking_pixel = sprintf(
+			'<img src="%s" width="1" height="1" style="width:1px;height:1px;" alt="" />',
+			home_url( '?quillcrm=email_open&hash_key=' . $campaign_message->hash_key )
+		);
+
+		// Return footer with tracking pixel
+		// NOTE: Merge tags in footer will be processed in prepare_message_content()
+		// after the builder content is rendered, ensuring consistent processing
+		return $email_footer . $tracking_pixel;
+	}
+
+	/**
 	 * Send message
 	 *
 	 * @param array          $message_data Prepared message data
@@ -82,13 +177,23 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			// Get template to access from_email settings early for debugging
 			$template = $campaign_message->template;
 
-			// Build complete email message with footer and tracking (using shared helper)
-			$complete_message = Email_Tracking_Helper::add_footer_and_tracking(
-				$message_data['body'],
-				$campaign_message,
-				$contact,
-				$this->settings
-			);
+			// Check if this is a builder email (complete HTML document)
+			$is_builder_email = ( strpos( $message_data['body'], '<!DOCTYPE html' ) !== false || strpos( $message_data['body'], '<html' ) !== false );
+
+			// For non-builder emails, add footer and tracking using the old method
+			// Builder emails already have footer and tracking pixel injected during render
+			if ( ! $is_builder_email ) {
+				// Build complete email message with footer and tracking (using shared helper)
+				$complete_message = Email_Tracking_Helper::add_footer_and_tracking(
+					$message_data['body'],
+					$campaign_message,
+					$contact,
+					$this->settings
+				);
+			} else {
+				// Builder email - footer and tracking already injected
+				$complete_message = $message_data['body'];
+			}
 
 			// Add click tracking to all links (using shared helper with UTM support)
 			$complete_message = Email_Tracking_Helper::add_click_tracking(

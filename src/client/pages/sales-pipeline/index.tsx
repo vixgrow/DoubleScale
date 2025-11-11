@@ -26,7 +26,7 @@ import { EditPipelineModal } from './components/pipeline-edit';
 import { DeletePipelineDialog } from './components/pipeline-delete';
 import { EditDealModal } from './components/edit-deal-modal';
 import { DeleteDeal } from './components/deal-delete';
-import { Deal } from './types';
+import { Deal, Filters, Pipeline } from './types';
 import { AddNoteModal } from './components/add-note-modal';
 import { LogCallModal } from './components/log-call-modal';
 import { ScheduleMeetingModal } from './components/schedule-meeting-modal';
@@ -35,9 +35,9 @@ import { ErrorState } from '@quillcrm/components/pipeline-errorState/ErrorState'
 import { handleApiError } from './utils/error-handler';
 import { SalesPipelineSkeleton } from './SalesPipelineSkeleton';
 import { PipelineHeader } from './components/salePipeline-header/SalePipelineHeader';
+import { PipelineFilters } from './components/pipeline-filters';
 
 const SalesPipeline: React.FC = () => {
-	const [isPipelineSwitching, setIsPipelineSwitching] = useState(false);
 	const [selectedPipelineId, setSelectedPipelineId] = useState<number | null>(
 		null
 	);
@@ -67,7 +67,15 @@ const SalesPipeline: React.FC = () => {
 	);
 	const [ScheduleMeetingVisible, setScheduleMeetingVisible] = useState(false);
 	const [LogEmailVisible, setLogEmailVisible] = useState(false);
-	const [lastPipelineId, setLastPipelineId] = useState<number | null>(null);
+	const [filters, setFilters] = useState<Filters>({
+		search: '',
+		ownerId: null,
+		expectedCloseDateRange: { from: null, to: null },
+		createdDateRange: { from: null, to: null },
+		valueRange: { min: null, max: null },
+		status: 'all',
+		priority: null,
+	});
 
 
 
@@ -84,7 +92,7 @@ const SalesPipeline: React.FC = () => {
 		updateStageOptimistically,
 		removeStageOptimistically,
 		reorderStagesOptimistically,
-	} = usePipelineData(selectedPipelineId);
+	} = usePipelineData(selectedPipelineId, filters);
 	console.log('Loading value:', loading);
 	
 
@@ -95,19 +103,6 @@ const SalesPipeline: React.FC = () => {
 		}
 
 	}, [pipelines, selectedPipelineId]);
-
-	useEffect(() => {
-		// if (!selectedPipelineId) return;
-		// if (selectedPipelineId === lastPipelineId) return;
-	
-		setIsPipelineSwitching(true);
-		refreshData().finally(() => {
-			setIsPipelineSwitching(false);
-		});
-	
-		setLastPipelineId(selectedPipelineId); 
-	}, [selectedPipelineId]);
-
 
 	// handle note
 
@@ -171,7 +166,6 @@ const SalesPipeline: React.FC = () => {
 				setEditPipelineModalVisible={setEditPipelineModalVisible}
 				setDeleteDialogOpen={setDeleteDialogOpen}
 				setNewDealModalVisible={setNewDealModalVisible}
-				setIsPipelineSwitching={setIsPipelineSwitching}
 			/>
 
 			{showDuplicateError && (
@@ -184,11 +178,20 @@ const SalesPipeline: React.FC = () => {
 				/>
 			)}
 
+
+               <PipelineFilters
+				pipelines={pipelines || []}
+				selectedPipelineId={selectedPipelineId}
+				onPipelineChange={setSelectedPipelineId}
+				filters={filters}
+				onFiltersChange={setFilters}
+			/>
+
 			<div className='mt-6'>
-				{loading || isPipelineSwitching ?(
+				{loading ? (
 					<SalesPipelineSkeleton/>
 
-				):
+				) :
 				selectedPipeline && (
 					<div className="mt-6">
 						<KanbanBoard
@@ -304,7 +307,7 @@ const SalesPipeline: React.FC = () => {
 			<EditPipelineModal
 				visible={editPipelineModalVisible}
 				onClose={() => setEditPipelineModalVisible(false)}
-				onSuccess={async (updatedPipeline) => {
+				onSuccess={async (updatedPipeline: Pipeline) => {
 					await refreshData();
 					if (updatedPipeline?.id) {
 						setSelectedPipelineId(updatedPipeline.id);
@@ -362,7 +365,18 @@ const SalesPipeline: React.FC = () => {
 				onClose={() => setDeleteDialogOpen(false)}
 				pipeline={selectedPipeline}
 				pipelines={pipelines}
-				onConfirm={refreshData}
+				onConfirm={async () => {
+				await refreshData();
+				// If the deleted pipeline was selected, switch to the first available pipeline
+				if (selectedPipelineId === selectedPipeline?.id && pipelines.length > 1) {
+					const remainingPipelines = pipelines.filter(p => p.id !== selectedPipeline?.id);
+					if (remainingPipelines.length > 0) {
+						setSelectedPipelineId(remainingPipelines[0].id);
+					} else {
+						setSelectedPipelineId(null);
+					}
+				}
+			}}
 			/>
 		</div>
 	);

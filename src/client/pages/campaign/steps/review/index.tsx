@@ -18,7 +18,6 @@ import {
 	NoticeBanner,
 } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
-import { isEmpty } from 'lodash';
 import {
 	CampaignSettingsCard,
 	RecipientsCard,
@@ -44,8 +43,7 @@ const Review: React.FC = () => {
 	} = useCampaignStep();
 
 	const [sendNow, setSendNow] = useState(true);
-	const [scheduleDate, setScheduleDate] = useState('');
-	const [scheduleTime, setScheduleTime] = useState('');
+	const [scheduledAt, setScheduledAt] = useState<Date | null>(null);
 	const [timezoneMode, setTimezoneMode] = useState('user'); // 'user' or 'subscriber'
 
 	// Notice state
@@ -237,7 +235,7 @@ const Review: React.FC = () => {
 		}
 
 		// Validate schedule if not sending now
-		if (!sendNow && (isEmpty(scheduleDate) || isEmpty(scheduleTime))) {
+		if (!sendNow && !scheduledAt) {
 			showNotice({
 				type: 'error',
 				message: __('Please set a schedule date and time', 'quillcrm'),
@@ -247,14 +245,8 @@ const Review: React.FC = () => {
 
 		try {
 			const runType = sendNow ? 'processing' : 'schedule';
-			let executeAt: string | null = null;
-
-			if (!sendNow) {
-				// Combine date and time
-				executeAt = new Date(
-					`${scheduleDate}T${scheduleTime}`
-				).toISOString();
-			}
+			const executeAt =
+				!sendNow && scheduledAt ? scheduledAt.toISOString() : null;
 
 			// Save review step data
 			const reviewStepData = {
@@ -281,7 +273,11 @@ const Review: React.FC = () => {
 
 				await saveCampaignSettings(data);
 
-				goToStep('overview');
+				if (sendNow) {
+					goToStep('overview');
+				} else {
+					goToStep('view');
+				}
 			}
 		} catch (error) {
 			console.error(error);
@@ -382,10 +378,8 @@ const Review: React.FC = () => {
 							<ScheduleCard
 								sendNow={sendNow}
 								setSendNow={setSendNow}
-								scheduleDate={scheduleDate}
-								setScheduleDate={setScheduleDate}
-								scheduleTime={scheduleTime}
-								setScheduleTime={setScheduleTime}
+								scheduledAt={scheduledAt}
+								setScheduledAt={setScheduledAt}
 								timezoneMode={timezoneMode}
 								setTimezoneMode={setTimezoneMode}
 							/>

@@ -3,6 +3,8 @@ export type InitialPayload = {
 	business: BusinessSettings;
 	// Email Settings
 	email: EmailSettings;
+	// SMS Settings
+	sms: SMSSettings;
 	// Double Opt-In Settings
 	double_optin: DoubleOptInSettings;
 	// Any other rest field
@@ -19,6 +21,11 @@ type EmailSettings = {
 	from_email: string;
 	reply_to: string;
 	email_footer: string;
+	max_in_second: number;
+	max_in_day: number;
+};
+
+type SMSSettings = {
 	max_in_second: number;
 	max_in_day: number;
 };

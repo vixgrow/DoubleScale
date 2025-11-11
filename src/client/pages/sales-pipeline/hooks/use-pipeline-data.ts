@@ -8,7 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { handleApiError, ERROR_MESSAGES, ErrorInfo } from '../utils/error-handler';
-import { Deal, Pipeline } from '../types';
+import { Deal, Pipeline, Filters } from '../types';
 
 interface UsePipelineDataReturn {
 	pipelines: Pipeline[];
@@ -36,7 +36,8 @@ interface UsePipelineDataReturn {
 
 
 export const usePipelineData = (
-	selectedPipelineId: number | null
+	selectedPipelineId: number | null,
+	filters?: Filters
 ): UsePipelineDataReturn => {
 	const [pipelines, setPipelines] = useState<Pipeline[]>([]);
 	const [deals, setDeals] = useState<Deal[]>([]);
@@ -86,6 +87,43 @@ export const usePipelineData = (
 			const params = new URLSearchParams();
 			params.append('pipeline_id', selectedPipelineId.toString());
 
+			// Add filter parameters if provided
+			if (filters) {
+				if (filters.search) {
+					params.append('search', filters.search);
+				}
+				if (filters.ownerId) {
+					params.append('owner_id', filters.ownerId.toString());
+				}
+				if (filters.status) {
+					params.append('status', filters.status);
+				}
+				if (filters.priority) {
+					params.append('priority', filters.priority);
+				}
+				// Expected close date range
+				if (filters.expectedCloseDateRange?.from) {
+					params.append('expected_close_from', filters.expectedCloseDateRange.from.toISOString().split('T')[0]);
+				}
+				if (filters.expectedCloseDateRange?.to) {
+					params.append('expected_close_to', filters.expectedCloseDateRange.to.toISOString().split('T')[0]);
+				}
+				// Created date range
+				if (filters.createdDateRange?.from) {
+					params.append('date_from', filters.createdDateRange.from.toISOString().split('T')[0]);
+				}
+				if (filters.createdDateRange?.to) {
+					params.append('date_to', filters.createdDateRange.to.toISOString().split('T')[0]);
+				}
+				// Value range
+				if (filters.valueRange?.min !== null && filters.valueRange?.min !== undefined) {
+					params.append('value_min', filters.valueRange.min.toString());
+				}
+				if (filters.valueRange?.max !== null && filters.valueRange?.max !== undefined) {
+					params.append('value_max', filters.valueRange.max.toString());
+				}
+			}
+
 			const response = await apiFetch({
 				path: `/qc/v1/deals?${params.toString()}`,
 				method: 'GET',
@@ -106,7 +144,7 @@ export const usePipelineData = (
 			);
 			setError(errorInfo);
 		}
-	}, [selectedPipelineId]);
+	}, [selectedPipelineId, filters]);
 
 	// Initial data load
 	useEffect(() => {

@@ -36,11 +36,6 @@ const Overview: React.FC = () => {
 		[]
 	) as CampaignType | null;
 
-	const isLoading = useSelect(
-		(select: any) => select('quillcrm/campaign').isLoading(),
-		[]
-	);
-
 	const handleClose = () => {
 		// Navigate back to campaigns list
 		navigate(getToLink('campaigns'));
@@ -62,9 +57,10 @@ const Overview: React.FC = () => {
 					paddingLeft: '0px',
 					paddingRight: '0px',
 					paddingBottom: '0px',
+					gap: '0px',
 				}}
 			>
-				<DialogHeader className="pb-0 border-b border-[#E4E7EC]">
+				<DialogHeader className="pb-0 border-b border-[#E4E7EC] h-12">
 					<DialogTitle className="px-12 pb-4 pt-2">
 						<h1 className="text-base font-normal text-[#667085] flex items-center gap-2">
 							{__('Campaigns List', 'quillcrm')}
@@ -74,7 +70,7 @@ const Overview: React.FC = () => {
 					</DialogTitle>
 				</DialogHeader>
 				{campaign ? (
-					<div className="px-12 overflow-y-auto py-8">
+					<div className="px-12 overflow-y-auto py-8 flex-1">
 						{campaign.status === 'draft' ? (
 							// Draft campaigns: Show only campaign details, full width
 							<Card className="bg-[#F8F8F8] shadow-none px-5 w-full">

@@ -20,6 +20,7 @@ import {
 	FormattedDateCell,
 	ContactSMSIcon,
 } from '@quillcrm/components';
+import SMSDevice from '../../steps/templates/sms-device';
 
 const CampaignDetails: React.FC = () => {
 	const campaign = useSelect(
@@ -92,9 +93,10 @@ const CampaignDetails: React.FC = () => {
 	// Check if there are no templates
 	const hasTemplates =
 		campaign.settings?.templates && campaign.settings.templates.length > 0;
+	const campaignFromName = (campaign.settings as Record<string, any>)?.from_name;
 
 	return (
-		<div className="space-y-6 h-screen">
+		<div className="space-y-6">
 			{/* Campaign Info */}
 			<div className="grid grid-cols-2 gap-4">
 				<div className="space-y-1">
@@ -124,7 +126,7 @@ const CampaignDetails: React.FC = () => {
 							{__('From Name', 'quillcrm')}
 						</span>
 						<p className="text-base font-semibold text-[#09090B]">
-							{campaign.settings.from_name || '-'}
+							{campaignFromName || '-'}
 						</p>
 					</div>
 				)}
@@ -191,7 +193,22 @@ const CampaignDetails: React.FC = () => {
 								className="space-y-4 bg-[#E3EEFF99] p-4 rounded-lg border"
 							>
 								{/* Template Body */}
-								{renderedHtml ? (
+								{template.type === CAMPAIGN_CHANNEL.SMS ? (
+									<div className="flex items-center justify-center">
+										<SMSDevice
+											fromName={
+												(template as any)?.settings?.from_name ||
+												campaignFromName
+											}
+											body={
+												typeof template.body === 'string'
+													? template.body
+													: JSON.stringify(template.body)
+											}
+											className="bg-transparent border-none py-0 sm:p-0"
+										/>
+									</div>
+								) : renderedHtml ? (
 									<div
 										className="template-body-preview"
 										dangerouslySetInnerHTML={{
@@ -226,13 +243,13 @@ const CampaignDetails: React.FC = () => {
 						subtitle={
 							campaign.type === CAMPAIGN_CHANNEL.EMAIL
 								? __(
-										'Create an email template to get started with your campaign.',
-										'quillcrm'
-									)
+									'Create an email template to get started with your campaign.',
+									'quillcrm'
+								)
 								: __(
-										'Create a template to get started with your campaign.',
-										'quillcrm'
-									)
+									'Create a template to get started with your campaign.',
+									'quillcrm'
+								)
 						}
 						onClick={() => {
 							navigate(

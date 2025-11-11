@@ -285,10 +285,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 					<div className="flex w-full gap-4">
 						<div className="stat-item flex justify-between items-center border-l-[3px] border-[#3B82F6] rounded-[8px] bg-[#F8F8F8] p-4 w-[25%]">
 							<div className=" flex flex-col">
-								<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter] ">
+								<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px]  ">
 									{totalDeals}
 								</span>
-								<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777] ">
+								<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] text-[#777] ">
 									{__('Total Deals', 'quillcrm')}
 								</span>
 							</div>
@@ -298,10 +298,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 						</div>
 					<div className="stat-item flex justify-between items-center border-l-[3px] border-[#660FF1] rounded-[8px] bg-[#F8F8F8] p-4 w-[25%]">
 						<div className="flex flex-col">
-							<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter]">
+							<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px]">
 								{avgWinRate.toFixed(1)}%
 							</span>
-							<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777]">
+							<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] text-[#777]">
 								{__('Avg Win Rate', 'quillcrm')}
 							</span>
 						</div>
@@ -338,10 +338,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 						<div className="stat-item flex justify-between border-l-[3px] border-[#16A34A] rounded-[8px] bg-[#F8F8F8] p-4 w-[45%]">
 							<div className=" flex justify-between items-center w-[45%]">
 								<div className="flex flex-col">
-									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter]">
+									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] ">
 										${totalValue.toLocaleString()}
 									</span>
-									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777]">
+									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] text-[#777]">
 										{__('Total Value', 'quillcrm')}
 									</span>
 								</div>
@@ -375,10 +375,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 							<div className="w-[1px] h-full bg-[#DEE1E6]"></div>
 							<div className="flex justify-between items-center w-[45%]">
 								<div className="flex flex-col">
-									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] font-[inter]">
+									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] ">
 										${weightedValue.toLocaleString()}
 									</span>
-									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] font-[inter] text-[#777]">
+									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px]  text-[#777]">
 										{__('weighted Value', 'quillcrm')}
 									</span>
 								</div>
@@ -458,7 +458,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 							<DealCard
 								deal={activeDeal}
 								isDragging={true}
-								onCardClick={() => {}} // No-op during drag
+								onCardClick={() => {}} 
 								onAddNote={onDealAddNote}
 								onDealLogCall={onDealLogCall}
 								onDealScheduleMeeting={onDealScheduleMeeting}

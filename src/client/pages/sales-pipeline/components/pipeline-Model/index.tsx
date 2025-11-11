@@ -56,7 +56,8 @@ const formSchema = z.object({
 export interface PipelineModalProps {
 	visible: boolean;
 	onClose: () => void;
-	onSuccess: () => void;
+	// onSuccess: () => void;
+	onSuccess: (pipeline?: any) => void;
 	pipeline?: any | null;
 	mode: 'create' | 'duplicate' | 'edit';
     title?: string;
@@ -133,6 +134,8 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 
 		setLoading(true);
 		try {
+			let newPipeline;
+
 			if (mode === 'duplicate' && pipeline) {
 
 				await duplicatePipeline(pipeline.id, values.name.trim());
@@ -144,11 +147,23 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					),
 				});
 			} else if (mode === 'create') {
-                await createPipeline({
-                    name: values.name,
-                    description: '', 
-                    stages: customStages || [], 
-                })
+                // await createPipeline({
+                //     name: values.name,
+                //     description: '', 
+                //     stages: customStages || [], 
+                // })
+				newPipeline = await createPipeline({ 
+					name: values.name,
+					description: '', 
+					stages: customStages || [], 
+				});
+				createNotice?.({
+					type: 'success',
+					message: __(
+						`Pipeline "${values.name}" created successfully!`,
+						'quillcrm'
+					),
+				});
 				createNotice?.({
 					type: 'success',
 					message: __(
@@ -174,8 +189,8 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
                 });
             }
         
-    
-			onSuccess();
+			// onSuccess();
+			onSuccess(newPipeline);
 			onClose();
 			form.reset();
 		} catch (error) {

@@ -11,7 +11,8 @@ body.js.is-fullscreen-mode {
 	// Because this uses negative margins, we have to compensate for the height.
 	margin-top: -32px;
 	height: calc(100% + 32px);
-	overflow: auto;
+	overflow-y: auto;
+	overflow-x: hidden;
 	#adminmenumain,
 	#wpadminbar {
 		display: none;
@@ -69,13 +70,15 @@ div#wpcontent {
 	box-sizing: border-box;
 	width: 100%;
 	min-height: 100vh;
-	background: linear-gradient(to right, #1E3A8A 20%, #3B82F6 80%);
+	background: linear-gradient(to right, #1e3a8a 20%, #3b82f6 80%);
 
 	.qcrm-layout__workspace {
+		width: calc(100% - 140px);
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		min-height: inherit;
+		padding: 24px 24px 24px 0;
 	}
 
 	.qcrm-layout__header {
@@ -103,7 +106,9 @@ div#wpcontent {
 		border: 1px solid rgba(255, 255, 255, 0.35);
 		background: rgba(255, 255, 255, 0.18);
 		color: #ffffff;
-		transition: transform 0.2s ease, background 0.2s ease;
+		transition:
+			transform 0.2s ease,
+			background 0.2s ease;
 
 		&:hover {
 			transform: translateY(-1px);
@@ -132,7 +137,10 @@ div#wpcontent {
 		font-size: 14px;
 		text-decoration: none;
 		border: 1px solid rgba(255, 255, 255, 0.28);
-		transition: background 0.2s ease, border 0.2s ease, transform 0.2s ease;
+		transition:
+			background 0.2s ease,
+			border 0.2s ease,
+			transform 0.2s ease;
 
 		&:hover {
 			background: rgba(255, 255, 255, 0.25);

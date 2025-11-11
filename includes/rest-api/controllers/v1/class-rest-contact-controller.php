@@ -897,14 +897,16 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 		} else {
 			// SMS/WhatsApp statistics
+			// For SMS, "total_sent" means successfully sent (SENT + DELIVERED statuses)
 			$query = $wpdb->prepare(
 				"SELECT 
-					COUNT(CASE WHEN status = %d THEN 1 END) as total_sent,
+					COUNT(CASE WHEN status IN (%d, %d) THEN 1 END) as total_sent,
 					COUNT(CASE WHEN status IN (%d, %d) THEN 1 END) as total_delivered,
 					COUNT(CASE WHEN status = %d THEN 1 END) as total_failed
 				FROM {$table}
 				WHERE contact_id = %d AND mode = %d",
 				Tracking_Status::SENT,
+				Tracking_Status::DELIVERED,
 				Tracking_Status::DELIVERED,
 				Tracking_Status::SENT,
 				Tracking_Status::FAILED,

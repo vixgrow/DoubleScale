@@ -8,18 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { handleApiError, ERROR_MESSAGES, ErrorInfo } from '../utils/error-handler';
-import { Deal, Pipeline } from '../types';
-
-interface Filters {
-	search: string;
-	ownerId: number | null;
-	dateRange: {
-		from: Date | null;
-		to: Date | null;
-	};
-	status: 'open' | 'won' | 'lost';
-	priority: string | null;
-}
+import { Deal, Pipeline, Filters } from '../types';
 
 interface UsePipelineDataReturn {
 	pipelines: Pipeline[];
@@ -112,11 +101,26 @@ export const usePipelineData = (
 				if (filters.priority) {
 					params.append('priority', filters.priority);
 				}
-				if (filters.dateRange.from) {
-					params.append('expected_close_from', filters.dateRange.from.toISOString().split('T')[0]);
+				// Expected close date range
+				if (filters.expectedCloseDateRange?.from) {
+					params.append('expected_close_from', filters.expectedCloseDateRange.from.toISOString().split('T')[0]);
 				}
-				if (filters.dateRange.to) {
-					params.append('expected_close_to', filters.dateRange.to.toISOString().split('T')[0]);
+				if (filters.expectedCloseDateRange?.to) {
+					params.append('expected_close_to', filters.expectedCloseDateRange.to.toISOString().split('T')[0]);
+				}
+				// Created date range
+				if (filters.createdDateRange?.from) {
+					params.append('date_from', filters.createdDateRange.from.toISOString().split('T')[0]);
+				}
+				if (filters.createdDateRange?.to) {
+					params.append('date_to', filters.createdDateRange.to.toISOString().split('T')[0]);
+				}
+				// Value range
+				if (filters.valueRange?.min !== null && filters.valueRange?.min !== undefined) {
+					params.append('value_min', filters.valueRange.min.toString());
+				}
+				if (filters.valueRange?.max !== null && filters.valueRange?.max !== undefined) {
+					params.append('value_max', filters.valueRange.max.toString());
 				}
 			}
 

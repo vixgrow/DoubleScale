@@ -95,7 +95,7 @@ export const Layout = (props) => {
 				/>
 				<div className="qcrm-layout__main">
 					<NavBar />
-					<div className="qcrm-layout__workspace p-6">
+					<div className="qcrm-layout__workspace">
 						<ProtectedRoute page={props.page}>
 							<Controller {...props} />
 						</ProtectedRoute>

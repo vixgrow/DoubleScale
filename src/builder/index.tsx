@@ -20,7 +20,7 @@ import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import BlockEditor from './components/BlockEditor';
 import DragOverlayRenderer from './components/DragOverlayRenderer';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../stores/email-builder/constants';
 import { useButtonSettings } from './hooks/useButtonSettings';
 import { useCollisionDetection } from './hooks/useCollisionDetection';
@@ -69,11 +69,6 @@ const BuilderContent: React.FC<BuilderProps> = ({
 					interval: autoSave.interval ?? 10000,
 				};
 
-	const existingTemplateData = useSelect(
-		(select: any) => select('quillcrm/campaign').getStepData('template'),
-		[]
-	);
-
 	useButtonSettings();
 
 	const customCollisionDetection = useCollisionDetection();
@@ -87,80 +82,26 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
-		if (initialData) {
-			dispatch(STORE_KEY).resetBuilder();
+		// Always reset on mount/prop change, then hydrate from provided initialData
+		dispatch(STORE_KEY).resetBuilder();
 
-			const { sections, globalSettings, buttonSettings } = initialData;
-
-			if (sections?.length) {
-				dispatch(STORE_KEY).setBuilderState(sections);
-			}
-			if (globalSettings) {
-				dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
-			}
-			if (buttonSettings) {
-				Object.entries(buttonSettings).forEach(([type, settings]) => {
-					dispatch(STORE_KEY).updateButtonSettings(type, settings);
-				});
-			}
+		if (!initialData) {
 			return;
 		}
 
-		// Load from campaign template if available
-		if (!existingTemplateData?.template_id) {
-			dispatch(STORE_KEY).resetBuilder();
-			return;
+		const { sections, globalSettings, buttonSettings } = initialData;
+		if (sections?.length) {
+			dispatch(STORE_KEY).setBuilderState(sections);
 		}
-
-		const loadTemplate = async () => {
-			try {
-				const { getTemplate } = await import('./api/templates');
-				const template = await getTemplate(
-					existingTemplateData.template_id
-				);
-
-				const body =
-					typeof template.body === 'string'
-						? JSON.parse(template.body)
-						: template.body;
-
-				if (body?.type === 'builder' && body.value) {
-					// Reset before loading template data
-					dispatch(STORE_KEY).resetBuilder();
-
-					const { sections, globalSettings, buttonSettings } =
-						body.value;
-
-					if (sections?.length) {
-						dispatch(STORE_KEY).setBuilderState(sections);
-					}
-					if (globalSettings) {
-						dispatch(STORE_KEY).updateGlobalSettings(
-							globalSettings
-						);
-					}
-					if (buttonSettings) {
-						Object.entries(buttonSettings).forEach(
-							([type, settings]) => {
-								dispatch(STORE_KEY).updateButtonSettings(
-									type,
-									settings
-								);
-							}
-						);
-					}
-				} else {
-					dispatch(STORE_KEY).resetBuilder();
-				}
-			} catch (error) {
-				console.error('Failed to load template:', error);
-				// If template loading fails, start fresh
-				dispatch(STORE_KEY).resetBuilder();
-			}
-		};
-
-		loadTemplate();
-	}, [initialData, existingTemplateData?.template_id, dispatch]);
+		if (globalSettings) {
+			dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
+		}
+		if (buttonSettings) {
+			Object.entries(buttonSettings).forEach(([type, settings]) => {
+				dispatch(STORE_KEY).updateButtonSettings(type, settings);
+			});
+		}
+	}, [initialData, dispatch]);
 
 	// Cleanup: Reset builder state when component unmounts
 	useEffect(() => {
@@ -262,6 +203,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						<Sidebar
 							sidebarCloseTrigger={sidebarCloseTrigger}
 							templatesRefreshKey={templatesRefreshTrigger}
+							openGlobalSettings={() =>
+								dispatch(STORE_KEY).clearSelection()
+							}
 						/>
 						<Canvas />
 

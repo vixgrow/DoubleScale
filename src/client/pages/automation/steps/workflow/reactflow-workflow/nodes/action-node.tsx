@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -24,10 +25,16 @@ import AnalyticsPopup from '../components/analytics-popup';
 import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep } from '../utils/step-utils';
-import { getAction } from '@quillcrm/utils';
+import { getActionLabel, hasActionWarning } from '@quillcrm/utils';
 import { ActionIcon, ViewIcon } from '@quillcrm/components';
 import { useStepAnalytics } from '../hooks/use-step-analytics';
 import { supportsAnalytics, getChannelType } from '../constants/action-types';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface ActionNodeData {
 	step: AutomationStep;
@@ -63,9 +70,9 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	// Check if action is configured - an action is configured if it has an action slug
 	const isConfigured = !!step.action;
 
-	// Get action details for display
-	const actionData = isConfigured ? getAction(step.action) : null;
-	const actionName = actionData?.label || step.action;
+	// Get action label and warning status from backend
+	const actionName = getActionLabel(step);
+	const hasWarning = hasActionWarning(step);
 
 	// Check if this action supports analytics
 	const hasAnalytics = supportsAnalytics(step.action || '');
@@ -80,7 +87,31 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 	};
 
 	const subtitle = isConfigured ? (
-		<span className="qcrm-reactflow-action__configured">{actionName}</span>
+		<div className="flex items-center gap-2">
+			<span className="qcrm-reactflow-action__configured" style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}>
+				{actionName}
+			</span>
+			{hasWarning && (
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<AlertTriangle className="h-4 w-4 text-orange-500" />
+						</TooltipTrigger>
+						<TooltipContent side="right" className="max-w-xs">
+							<p className="font-semibold">
+								{__('Plugin Required', 'quillcrm')}
+							</p>
+							<p className="text-xs mt-1">
+								{__(
+									'This action requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
+									'quillcrm'
+								)}
+							</p>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			)}
+		</div>
 	) : (
 		<span className="qcrm-reactflow-action__not-configured">
 			{__('Not Configured', 'quillcrm')}

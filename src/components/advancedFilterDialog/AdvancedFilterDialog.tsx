@@ -45,7 +45,9 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 		onFiltersChange({
 			search: '',
 			ownerId: null,
-			dateRange: { from: null, to: null },
+			expectedCloseDateRange: { from: null, to: null },
+			createdDateRange: { from: null, to: null },
+			valueRange: { min: null, max: null },
 			status: 'open',
 			priority: null,
 		});
@@ -54,8 +56,12 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 	const hasActiveFilters =
 		filters.search ||
 		filters.ownerId ||
-		filters.dateRange.from ||
-		filters.dateRange.to ||
+		filters.expectedCloseDateRange?.from ||
+		filters.expectedCloseDateRange?.to ||
+		filters.createdDateRange?.from ||
+		filters.createdDateRange?.to ||
+		filters.valueRange?.min !== null ||
+		filters.valueRange?.max !== null ||
 		filters.priority !== null;
 
 	return (
@@ -139,10 +145,10 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 										</SelectContent>
 									</Select>
 								</div>
-								{/* Stage (Pipeline) Filter */}
+								{/* Pipeline Filter */}
 								<div className="flex flex-col gap-2">
 									<label className="block mb-1 font-normal text-[#09090B] text-base">
-										{__(' Stage', 'quillcrm')}
+										{__('Pipeline', 'quillcrm')}
 									</label>
 
 									<Select
@@ -187,61 +193,35 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 										</SelectContent>
 									</Select>
 								</div>
-								{/* Expeted close date */}
+								{/* Expected Close Date */}
 								<div className="flex flex-col gap-2">
 									<label className="block mb-1 font-normal text-[#09090B] text-base">
 										{__('Expected Close Date', 'quillcrm')}
 									</label>
 									<DateRangePicker
-										value={filters.dateRange} // { from, to }
+										value={filters.expectedCloseDateRange || { from: null, to: null }}
 										onChange={(range) =>
-											handleFilterChange('dateRange', {
-												...filters.dateRange,
-												from: range.from,
-												to: range.to,
-											})
+											handleFilterChange('expectedCloseDateRange', range)
 										}
 										placeholder="From - To"
 										className="w-full h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-[#09090B] bg-white !font-normal !text-base tracking-[-.5px]"
 									/>
 								</div>
-								{/* Create date  static */}
+								{/* Created Date */}
 								<div className="flex flex-col gap-2">
 									<label className="block mb-1 font-normal text-[#09090B] text-base">
-										{__('Create Date', 'quillcrm')}
+										{__('Created Date', 'quillcrm')}
 									</label>
 									<DateRangePicker
-										value={filters.dateRange} // { from, to }
+										value={filters.createdDateRange || { from: null, to: null }}
 										onChange={(range) =>
-											handleFilterChange('dateRange', {
-												...filters.dateRange,
-												from: range.from,
-												to: range.to,
-											})
+											handleFilterChange('createdDateRange', range)
 										}
 										placeholder="From - To"
 										className="w-full h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-[#09090B] bg-white !font-normal !text-base tracking-[-.5px]"
 									/>
 								</div>
-								{/* Last Activity date  static */}
-								<div className="flex flex-col gap-2">
-									<label className="block mb-1 font-normal text-[#09090B] text-base">
-										{__('Last Activity Date', 'quillcrm')}
-									</label>
-									<DateRangePicker
-										value={filters.dateRange} // { from, to }
-										onChange={(range) =>
-											handleFilterChange('dateRange', {
-												...filters.dateRange,
-												from: range.from,
-												to: range.to,
-											})
-										}
-										placeholder="From - To"
-										className="w-full h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-[#09090B] bg-white !font-normal !text-base tracking-[-.5px]"
-									/>
-								</div>
-								{/* priority */}
+								{/* Priority */}
 								<div className="flex flex-col gap-2">
 									<label className="block mb-1 font-normal text-[#09090B] text-base">
 										{__('Priority', 'quillcrm')}
@@ -252,7 +232,7 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 										onValueChange={(value) =>
 											handleFilterChange(
 												'priority',
-												value
+												value || null
 											)
 										}
 									>
@@ -279,79 +259,34 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 										</SelectContent>
 									</Select>
 								</div>
-								{/* update by static */}
-								<div className="flex flex-col gap-2">
-									<label className="block mb-1  font-normal text-[#09090B] text-base">
-										{__('Updated By', 'quillcrm')}
-									</label>
-
-									<Select
-										value={
-											filters.ownerId
-												? String(filters.ownerId)
-												: ''
-										}
-										onValueChange={(value) =>
-											handleFilterChange(
-												'ownerId',
-												value ? Number(value) : null
-											)
-										}
-										disabled={ownersLoading}
-									>
-										<SelectTrigger className=" h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-[#09090B] font-sm text-base tracking-[-.5px]">
-											<SelectValue
-												placeholder={
-													
-														__(
-																'Select Sales rep',
-																'quillcrm'
-															)
-												}
-											/>
-										</SelectTrigger>
-
-										<SelectContent>
-											{!ownersLoading &&
-											Object.values(owners).length > 0 ? (
-												Object.values(owners).map(
-													(owner) => (
-														<SelectItem
-															key={owner.value}
-															value={String(
-																owner.value
-															)}
-														>
-															{owner.label}
-														</SelectItem>
-													)
-												)
-											) : (
-												<div className="px-3 py-2 text-sm">
-													{__(
-														'No owners found',
-														'quillcrm'
-													)}
-												</div>
-											)}
-										</SelectContent>
-									</Select>
-								</div>
-								{/* deal value */}
-								{/* Value Range Filter */}
+								{/* Deal Value Range */}
 								<div className="flex flex-col gap-2">
 									<label className="block mb-1 font-normal text-[#09090B] text-base">
 										{__('Deal Value Range', 'quillcrm')}
 									</label>
 									<div className=" flex gap-2">
 										<Input
-											// style={{ width: '50%' }}
-											className="flex-1 !shadow-none placeholder:text-[#09090B] text-[#09090B] font-sm text-base tracking-[-.5px]"
+											type="number"
+											value={filters.valueRange?.min !== null ? filters.valueRange?.min : ''}
+											onChange={(e) =>
+												handleFilterChange('valueRange', {
+													...filters.valueRange,
+													min: e.target.value ? Number(e.target.value) : null,
+												})
+											}
+											className="flex-1 !shadow-none placeholder:text-[#A1A5B7] text-[#09090B] font-sm text-base tracking-[-.5px]"
 											placeholder={__('Min', 'quillcrm')}
 										/>
 										<Input
-											// style={{ width: '50%' }}
-											className="flex-1 !shadow-none placeholder:text-[#09090B] text-[#09090B] font-sm text-base tracking-[-.5px]"
+											type="number"
+											value={filters.valueRange?.max !== null ? filters.valueRange?.max : ''}
+											onChange={(e) =>
+												handleFilterChange('valueRange', {
+													...filters.valueRange,
+													max: e.target.value ? Number(e.target.value) : null,
+												})
+											}
+											className="flex-1 !shadow-none placeholder:text-[#A1A5B7] text-[#09090B] font-sm text-base tracking-[-.5px]"
 											placeholder={__('Max', 'quillcrm')}
 										/>
 									</div>

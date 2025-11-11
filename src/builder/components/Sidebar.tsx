@@ -6,8 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import ColumnBlock from '../blocks/layout/ColumnBlock';
 import ContainerBlock from '../blocks/layout/ContainerBlock';
-import { MyTemplatesIcon } from '@/components/icons';
+import {
+	DashboardIcon,
+	GlobalEmailSettingsIcon,
+	MyTemplatesIcon,
+} from '@/components/icons';
 import MyTemplatesPanel from './MyTemplatesPanel';
+import {
+	Tooltip,
+	TooltipTrigger,
+	TooltipContent,
+	TooltipProvider,
+} from '@/components/ui/tooltip';
 
 interface SidebarItem {
 	id: string;
@@ -18,44 +28,89 @@ interface SidebarItem {
 interface BlockSidebarProps {
 	sidebarCloseTrigger?: number;
 	templatesRefreshKey?: number;
+	openGlobalSettings?: () => void;
 }
+
+type SidebarView =
+	| { type: 'none' }
+	| { type: 'myTemplates' }
+	| { type: 'active'; item: SidebarItem };
 
 const BlockSidebar = ({
 	sidebarCloseTrigger,
 	templatesRefreshKey,
+	openGlobalSettings = () => {},
 }: BlockSidebarProps = {}) => {
-	const [activeSidebar, setActiveSidebar] = useState<SidebarItem | null>(
-		null
-	);
-	const [showMyTemplates, setShowMyTemplates] = useState(false);
+	const [view, setView] = useState<SidebarView>({ type: 'none' });
 	const tabStyles =
 		'data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#1E3A8A] data-[state=active]:to-[#3B82F6] data-[state=active]:text-primary-foreground px-7 py-3.5 rounded-xl';
 
 	// Close sidebar when drag starts
 	useEffect(() => {
 		if (sidebarCloseTrigger && sidebarCloseTrigger > 0) {
-			setActiveSidebar(null);
-			setShowMyTemplates(false);
+			setView({ type: 'none' });
 		}
 	}, [sidebarCloseTrigger]);
 
 	const HandleMyTemplates = () => {
-		// Toggle MyTemplates sidebar
-		setShowMyTemplates(!showMyTemplates);
-		// Close regular sidebar when opening MyTemplates
-		if (!showMyTemplates) {
-			setActiveSidebar(null);
-		}
+		setView((prev) =>
+			prev.type === 'myTemplates'
+				? { type: 'none' }
+				: { type: 'myTemplates' }
+		);
 	};
 
 	return (
 		<div className="flex flex-1 max-w-[350px]">
-			<div className="bg-white p-4">
+			<div className="bg-white p-4 flex flex-col justify-between items-center">
+				<div className="flex flex-col gap-4 items-center">
+					<div>
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<div
+										className={`flex flex-col items-center cursor-pointer ${view.type === 'myTemplates' ? 'text-[#1E3A8A]' : ''}`}
+										onClick={HandleMyTemplates}
+									>
+										<MyTemplatesIcon />
+									</div>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>{__('My Templates', 'quillcrm')}</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</div>
+
+					<div>
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<div
+										className="cursor-pointer"
+										onClick={openGlobalSettings}
+									>
+										<GlobalEmailSettingsIcon />
+									</div>
+								</TooltipTrigger>
+								<TooltipContent>
+									<p>
+										{__(
+											'Global Email Settings',
+											'quillcrm'
+										)}
+									</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</div>
+				</div>
+
 				<div
-					className={`flex flex-col items-center cursor-pointer ${showMyTemplates ? 'text-[#1E3A8A]' : ''}`}
-					onClick={HandleMyTemplates}
+					className="cursor-pointer"
+					onClick={() => setView({ type: 'none' })}
 				>
-					<MyTemplatesIcon />
+					<DashboardIcon />
 				</div>
 			</div>
 			<div className="bg-white w-full align-center h-full relative flex flex-col border-l">
@@ -76,8 +131,16 @@ const BlockSidebar = ({
 					<div className="py-6 px-6 flex-1 overflow-auto">
 						<TabsContent value="elements">
 							<ContainerBlock
-								activeSidebar={activeSidebar}
-								setActiveSidebar={setActiveSidebar}
+								activeSidebar={
+									view.type === 'active' ? view.item : null
+								}
+								setActiveSidebar={(item: SidebarItem | null) =>
+									setView(
+										item
+											? { type: 'active', item }
+											: { type: 'none' }
+									)
+								}
 							/>
 						</TabsContent>
 						<TabsContent value="layouts">
@@ -87,17 +150,17 @@ const BlockSidebar = ({
 				</Tabs>
 
 				{/* Active Sidebar */}
-				{activeSidebar && (
+				{view.type === 'active' && (
 					<div className="absolute top-0 left-[102%] w-72 h-full overflow-y-auto z-20 bg-white shadow-lg">
 						<div className="flex flex-col px-8 pt-7">
 							<div className="flex items-center justify-between w-full pb-4">
 								<h2 className="text-base font-bold text-primary text-center flex-1">
-									{activeSidebar.title}
+									{view.item.title}
 								</h2>
 								<Button
 									variant="ghost"
 									size="sm"
-									onClick={() => setActiveSidebar(null)}
+									onClick={() => setView({ type: 'none' })}
 									className="h-6 w-6 p-0 hover:bg-gray-100"
 								>
 									<X className="h-4 w-4" />
@@ -109,8 +172,8 @@ const BlockSidebar = ({
 							className="overflow-y-auto p-4 flex-1"
 							style={{ zIndex: 100000 }}
 						>
-							<activeSidebar.component
-								onSidebarClose={() => setActiveSidebar(null)}
+							<view.item.component
+								onSidebarClose={() => setView({ type: 'none' })}
 							/>
 						</div>
 					</div>
@@ -118,8 +181,8 @@ const BlockSidebar = ({
 
 				{/* MyTemplates Panel */}
 				<MyTemplatesPanel
-					isOpen={showMyTemplates}
-					onClose={() => setShowMyTemplates(false)}
+					isOpen={view.type === 'myTemplates'}
+					onClose={() => setView({ type: 'none' })}
 					refreshKey={templatesRefreshKey}
 				/>
 			</div>

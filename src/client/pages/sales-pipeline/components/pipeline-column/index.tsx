@@ -77,6 +77,17 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 		},
 	});
 
+	// Format currency value with K/M suffixes
+	const formatCurrency = (value: number): string => {
+		if (value >= 1_000_000) {
+			return `$${(value / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+		} else if (value >= 1_000) {
+			return `$${(value / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
+		} else {
+			return `$${value.toLocaleString()}`;
+		}
+	};
+
 	// Calculate column statistics
 	const columnStats = useMemo(() => {
 		const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);
@@ -191,8 +202,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 									: __('Deals value:', 'quillcrm')}
 							</span>
 							<span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
-								${columnStats.totalValue}
-								{columnStats.totalValue ? 'K' : ''}
+								{formatCurrency(columnStats.totalValue)}
 							</span>
 						</div>
 
@@ -203,8 +213,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 								{__('Weighted:', 'quillcrm')}
 							</span>
 							<span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
-								${columnStats.weightedValue.toLocaleString()}
-								{columnStats.weightedValue ? 'K' : ''}
+								{formatCurrency(columnStats.weightedValue)}
 							</span>
 						</div>
 					</div>

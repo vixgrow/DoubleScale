@@ -35,7 +35,7 @@ export const RecentAutomationsTable: React.FC<RecentAutomationsTableProps> = ({
 	return (
 		<DashboardContentCard
 			title={__('Recent Automations', 'quillcrm')}
-			cardClassName="w-3/5"
+			cardClassName="w-3/5 h-[420px] overflow-y-auto"
 			viewAllLink={true}
 			viewAllLinkUrl="automations"
 		>

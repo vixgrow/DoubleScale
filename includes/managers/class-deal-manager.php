@@ -388,10 +388,10 @@ final class Deal_Manager {
 		}
 
 		// Filter by value range
-		if ( ! empty( $filters['value_min'] ) ) {
+		if ( isset( $filters['value_min'] ) && $filters['value_min'] !== '' && $filters['value_min'] !== null ) {
 			$query->where( 'value', '>=', $filters['value_min'] );
 		}
-		if ( ! empty( $filters['value_max'] ) ) {
+		if ( isset( $filters['value_max'] ) && $filters['value_max'] !== '' && $filters['value_max'] !== null ) {
 			$query->where( 'value', '<=', $filters['value_max'] );
 		}
 

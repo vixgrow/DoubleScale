@@ -20,10 +20,33 @@ import SearchIcon from '@quillcrm/components/icons/search';
 
 
 import {  FiltersIcon } from '@quillcrm/components';
-
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 
 import { AdvancedFiltersDialog } from '@quillcrm/components/advancedFilterDialog/AdvancedFilterDialog';
-import { Filters, Pipeline } from '../../types';
+
+
+interface Pipeline {
+	id: number;
+	name: string;
+	description: string;
+}
+
+interface Filters {
+	search: string;
+	ownerId: number | null;
+	dateRange: {
+		from: Date | null;
+		to: Date | null;
+	};
+	status: 'open' | 'won' | 'lost' | 'all';
+	priority: string | null;
+}
 
 interface PipelineFiltersProps {
 	pipelines: Pipeline[];
@@ -66,12 +89,9 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 	const hasActiveFilters =
 		filters.search ||
 		filters.ownerId ||
-		filters.expectedCloseDateRange?.from ||
-		filters.expectedCloseDateRange?.to ||
-		filters.createdDateRange?.from ||
-		filters.createdDateRange?.to ||
-		filters.valueRange?.min !== null ||
-		filters.valueRange?.max !== null ||
+		filters.dateRange.from ||
+		filters.dateRange.to ||
+		filters.status !== 'all' ||
 		filters.priority !== null;
 
 	return (
@@ -97,7 +117,33 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 
 				<div className="filter-main flex items-end justify-end gap-3 ml-auto">
 					{/* Quick Status Filter */}
-					
+					<div className="status-filter">
+						<Select
+							defaultValue={filters.status}
+							onValueChange={(value) =>
+								handleFilterChange('status', value)
+							}
+						>
+							<SelectTrigger className="w-[120px] h-10 text-[#09090B] font-medium leading-[26px] [&>svg]:text-[#09090B] tracking-[-.5px] font-[inter] text-base">
+								<SelectValue placeholder="All " />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">
+									{__('All', 'quillcrm')}
+								</SelectItem>
+								<SelectItem value="open">
+									{__('Open', 'quillcrm')}
+								</SelectItem>
+								<SelectItem value="won">
+									{__('Won', 'quillcrm')}
+								</SelectItem>
+								<SelectItem value="lost">
+									{__('Lost', 'quillcrm')}
+								</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+
 					<div className="filter-actions flex items-center">
 						{/* Toggle Advanced Filters */}
 						<button
@@ -114,15 +160,11 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 										[
 											filters.search && 'search',
 											filters.ownerId && 'owner',
-											(filters.expectedCloseDateRange?.from ||
-												filters.expectedCloseDateRange?.to) &&
-												'expectedClose',
-											(filters.createdDateRange?.from ||
-												filters.createdDateRange?.to) &&
-												'created',
-											(filters.valueRange?.min !== null ||
-												filters.valueRange?.max !== null) &&
-												'value',
+											(filters.dateRange.from ||
+												filters.dateRange.to) &&
+												'date',
+											filters.status !== 'open' &&
+												'status',
 											filters.priority !== null &&
 												'priority',
 										].filter(Boolean).length

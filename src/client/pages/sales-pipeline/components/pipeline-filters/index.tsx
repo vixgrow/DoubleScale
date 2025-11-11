@@ -23,25 +23,7 @@ import {  FiltersIcon } from '@quillcrm/components';
 
 
 import { AdvancedFiltersDialog } from '@quillcrm/components/advancedFilterDialog/AdvancedFilterDialog';
-
-
-
-interface Pipeline {
-	id: number;
-	name: string;
-	description: string;
-}
-
-interface Filters {
-	search: string;
-	ownerId: number | null;
-	dateRange: {
-		from: Date | null;
-		to: Date | null;
-	};
-	status: 'open' | 'won' | 'lost';
-	priority: string | null;
-}
+import { Filters, Pipeline } from '../../types';
 
 interface PipelineFiltersProps {
 	pipelines: Pipeline[];
@@ -84,8 +66,12 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 	const hasActiveFilters =
 		filters.search ||
 		filters.ownerId ||
-		filters.dateRange.from ||
-		filters.dateRange.to ||
+		filters.expectedCloseDateRange?.from ||
+		filters.expectedCloseDateRange?.to ||
+		filters.createdDateRange?.from ||
+		filters.createdDateRange?.to ||
+		filters.valueRange?.min !== null ||
+		filters.valueRange?.max !== null ||
 		filters.priority !== null;
 
 	return (
@@ -128,9 +114,15 @@ export const PipelineFilters: React.FC<PipelineFiltersProps> = ({
 										[
 											filters.search && 'search',
 											filters.ownerId && 'owner',
-											(filters.dateRange.from ||
-												filters.dateRange.to) &&
-												'date',
+											(filters.expectedCloseDateRange?.from ||
+												filters.expectedCloseDateRange?.to) &&
+												'expectedClose',
+											(filters.createdDateRange?.from ||
+												filters.createdDateRange?.to) &&
+												'created',
+											(filters.valueRange?.min !== null ||
+												filters.valueRange?.max !== null) &&
+												'value',
 											filters.priority !== null &&
 												'priority',
 										].filter(Boolean).length

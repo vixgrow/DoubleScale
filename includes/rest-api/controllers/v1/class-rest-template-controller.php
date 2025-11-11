@@ -203,21 +203,13 @@ class REST_Template_Controller extends REST_Controller {
 					 'type'        => 'string',
 					 'enum'        => Campaign_Channel::get_core_channel_strings(),
 				 ),
-				 'subject'    => array(
-					 'description' => __( 'Subject of the template.', 'quillcrm' ),
-					 'type'        => 'string',
-					 'required'    => false,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
-				 ),
 				 'body'       => array(
 					 'description' => __( 'Body of the template.', 'quillcrm' ),
 					 'type'        => 'string',
 					 'required'    => false,
 				 ),
 				 'settings'   => array(
-					 'description' => __( 'Settings of the template.', 'quillcrm' ),
+					 'description' => __( 'Settings of the template (includes subject, preview_text, from_name, from_email, etc).', 'quillcrm' ),
 					 'type'        => array( 'object', 'null' ),
 				 ),
 				 'created_at' => array(
@@ -679,15 +671,29 @@ class REST_Template_Controller extends REST_Controller {
 		$type = $request->get_param( 'type' ) ?? Campaign_Channel::STR_EMAIL;
 		$name = $request->get_param( 'name' );
 
+		// Get settings from request, or initialize as empty array
+		$settings = $request->get_param( 'settings' ) ?? array();
+
+		// If subject or preview_text are passed as separate params (for backward compatibility),
+		// merge them into settings
+		$subject      = $request->get_param( 'subject' );
+		$preview_text = $request->get_param( 'preview_text' );
+
+		if ( $subject !== null ) {
+			$settings['subject'] = $subject;
+		}
+
+		if ( $preview_text !== null ) {
+			$settings['preview_text'] = $preview_text;
+		}
+
 		$template_data = array(
-			'id'           => $request->get_param( 'id' ),
-			'type'         => $type,
-			'subject'      => $request->get_param( 'subject' ),
-			'body'         => $request->get_param( 'body' ),
-			'settings'     => $request->get_param( 'settings' ),
-			'preview_text' => $request->get_param( 'preview_text' ),
-			'thumbnail'    => $request->get_param( 'thumbnail' ),
-			'hidden'       => $request->get_param( 'hidden' ) ?? false,
+			'id'        => $request->get_param( 'id' ),
+			'type'      => $type,
+			'body'      => $request->get_param( 'body' ),
+			'settings'  => $settings,
+			'thumbnail' => $request->get_param( 'thumbnail' ),
+			'hidden'    => $request->get_param( 'hidden' ) ?? false,
 		);
 
 		// Only set name if provided, otherwise leave it out (for updates that don't change name)
@@ -697,35 +703,15 @@ class REST_Template_Controller extends REST_Controller {
 
 		// Note: email_body data is now sent directly in the body field as JSON
 
-		// Keep subject field for email templates even if empty (it's required for validation)
-		// For non-email templates, subject should be removed if empty
-		$is_email_template = in_array(
-			$type,
-			array(
-				Campaign_Channel::STR_EMAIL,
-				Campaign_Channel::STR_EMAIL_SEQUENCE,
-				Campaign_Channel::STR_SEQUENCE_MAIL,
-			)
-		);
-
+		// Don't remove thumbnail field - allow empty strings to be saved
+		// Don't remove hidden field - allow false values to be saved
 		foreach ( $template_data as $key => $value ) {
-			// Don't remove subject for email templates - it's a required field
-			if ( $key === 'subject' && $is_email_template ) {
-				continue;
-			}
-
-			// Don't remove thumbnail field - allow empty strings to be saved
-			if ( $key === 'thumbnail' ) {
-				continue;
-			}
-
-			// Don't remove hidden field - allow false values to be saved
-			if ( $key === 'hidden' ) {
+			if ( $key === 'thumbnail' || $key === 'hidden' ) {
 				continue;
 			}
 
 			// For ID: keep if it has a value, remove if null/empty
-			if ( empty( $value ) && $value !== '0' && $value !== 0 ) {
+			if ( empty( $value ) && $value !== '0' && $value !== 0 && $value !== false ) {
 				unset( $template_data[ $key ] );
 			}
 		}

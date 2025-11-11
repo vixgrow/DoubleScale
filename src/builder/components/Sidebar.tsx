@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import ColumnBlock from '../blocks/layout/ColumnBlock';
 import ContainerBlock from '../blocks/layout/ContainerBlock';
+import { STORE_KEY } from '../../stores/email-builder/constants';
+import { useSelect } from '@wordpress/data';
 import {
 	DashboardIcon,
 	GlobalEmailSettingsIcon,
@@ -42,6 +44,14 @@ const BlockSidebar = ({
 	openGlobalSettings = () => {},
 }: BlockSidebarProps = {}) => {
 	const [view, setView] = useState<SidebarView>({ type: 'none' });
+
+	const isGlobalSettingsClosed = useSelect(
+		(select) =>
+			select(STORE_KEY).getSelectedBlockId() ||
+			select(STORE_KEY).getSelectedSectionId() ||
+			select(STORE_KEY).getSelectedColumnId()
+	);
+
 	const tabStyles =
 		'data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#1E3A8A] data-[state=active]:to-[#3B82F6] data-[state=active]:text-primary-foreground px-7 py-3.5 rounded-xl';
 
@@ -64,6 +74,13 @@ const BlockSidebar = ({
 		<div className="flex flex-1 max-w-[350px]">
 			<div className="bg-white p-4 flex flex-col justify-between items-center">
 				<div className="flex flex-col gap-4 items-center">
+					<div
+						className={`cursor-pointer ${view.type === 'none' ? 'text-[#1E3A8A]' : ''}	`}
+						onClick={() => setView({ type: 'none' })}
+					>
+						<DashboardIcon width={32} height={32} />
+					</div>
+
 					<div>
 						<TooltipProvider>
 							<Tooltip>
@@ -72,7 +89,10 @@ const BlockSidebar = ({
 										className={`flex flex-col items-center cursor-pointer ${view.type === 'myTemplates' ? 'text-[#1E3A8A]' : ''}`}
 										onClick={HandleMyTemplates}
 									>
-										<MyTemplatesIcon />
+										<MyTemplatesIcon
+											width={32}
+											height={32}
+										/>
 									</div>
 								</TooltipTrigger>
 								<TooltipContent>
@@ -81,36 +101,27 @@ const BlockSidebar = ({
 							</Tooltip>
 						</TooltipProvider>
 					</div>
-
-					<div>
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<div
-										className="cursor-pointer"
-										onClick={openGlobalSettings}
-									>
-										<GlobalEmailSettingsIcon />
-									</div>
-								</TooltipTrigger>
-								<TooltipContent>
-									<p>
-										{__(
-											'Global Email Settings',
-											'quillcrm'
-										)}
-									</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</div>
 				</div>
 
-				<div
-					className="cursor-pointer"
-					onClick={() => setView({ type: 'none' })}
-				>
-					<DashboardIcon />
+				<div>
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<div
+									className={`cursor-pointer ${isGlobalSettingsClosed ? '' : 'text-[#1E3A8A]'}`}
+									onClick={openGlobalSettings}
+								>
+									<GlobalEmailSettingsIcon
+										width={32}
+										height={32}
+									/>
+								</div>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>{__('Global Email Settings', 'quillcrm')}</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
 				</div>
 			</div>
 			<div className="bg-white w-full align-center h-full relative flex flex-col border-l">

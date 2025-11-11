@@ -38,7 +38,7 @@ export const RecentCampaignsTable: React.FC<RecentCampaignsTableProps> = ({
 	return (
 		<DashboardContentCard
 			title={__('Recent Campaigns', 'quillcrm')}
-			cardClassName="w-full"
+			cardClassName="w-full max-h-[420px] overflow-y-auto"
 			viewAllLink={true}
 			viewAllLinkUrl="campaigns"
 		>

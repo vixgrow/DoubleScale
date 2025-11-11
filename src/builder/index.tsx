@@ -203,6 +203,9 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						<Sidebar
 							sidebarCloseTrigger={sidebarCloseTrigger}
 							templatesRefreshKey={templatesRefreshTrigger}
+							openGlobalSettings={() =>
+								dispatch(STORE_KEY).clearSelection()
+							}
 						/>
 						<Canvas />
 

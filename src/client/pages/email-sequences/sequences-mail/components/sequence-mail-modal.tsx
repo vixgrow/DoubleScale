@@ -222,11 +222,13 @@ const SequenceMailModal: React.FC<SequenceMailModalProps> = ({
 				return emailBodyJson.value;
 			}
 			// Otherwise return as-is (in case it's already in the correct format)
-			return emailBodyJson ?? {
-				sections: [],
-				globalSettings: {},
-				buttonSettings: {},
-			};
+			return (
+				emailBodyJson ?? {
+					sections: [],
+					globalSettings: {},
+					buttonSettings: {},
+				}
+			);
 		} catch (error) {
 			console.error('Failed to parse email body:', error);
 			return {

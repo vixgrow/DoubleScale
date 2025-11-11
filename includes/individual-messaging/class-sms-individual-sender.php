@@ -14,6 +14,7 @@ use QuillCRM\Abstracts\Abstract_Individual_Message_Sender;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Tracking\SMS;
 use QuillCRM\Constants\Campaign_Channel;
+use QuillCRM\Utils\Phone_Validator;
 
 /**
  * SMS_Individual_Sender class
@@ -67,11 +68,13 @@ class SMS_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return true|WP_Error True if valid, WP_Error if invalid
 	 */
 	protected function validate_recipient( $recipient ) {
-		// Basic phone number validation
-		if ( empty( $recipient ) || strlen( $recipient ) < 10 ) {
+		// Validate using centralized utility
+		$validation = Phone_Validator::validate( $recipient, 'individual_sms' );
+
+		if ( ! $validation['valid'] ) {
 			return new WP_Error(
 				'invalid_phone',
-				__( 'Invalid phone number. Use E.164 format: +1234567890', 'quillcrm' ),
+				$validation['error'],
 				array( 'status' => 400 )
 			);
 		}

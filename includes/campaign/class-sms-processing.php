@@ -16,6 +16,7 @@ use QuillCRM\QuillCRM;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
 use QuillCRM\Tracking\SMS;
 use QuillCRM\Constants\Campaign_Channel;
+use QuillCRM\Utils\Phone_Validator;
 
 /**
  * SMS Campaign Processing class
@@ -54,7 +55,26 @@ class SMS_Processing extends Abstract_Campaign_Processing {
 	 * @return string|null
 	 */
 	protected function get_recipient( Contact_Model $contact ) {
-		return $contact->phone;
+		$phone = $contact->phone;
+
+		if ( empty( $phone ) ) {
+			return null;
+		}
+
+		// Validate E.164 format using centralized utility
+		if ( ! Phone_Validator::is_valid( $phone ) ) {
+			quillcrm_get_logger()->warning(
+				'Invalid phone number format for SMS campaign',
+				array(
+					'code'       => 'invalid_phone_format',
+					'contact_id' => $contact->id,
+					'phone'      => $phone,
+				)
+			);
+			return null;
+		}
+
+		return $phone;
 	}
 
 	/**

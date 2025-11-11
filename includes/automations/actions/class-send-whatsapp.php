@@ -15,6 +15,7 @@ use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Campaign\WhatsApp_Processing;
+use QuillCRM\Utils\Phone_Validator;
 
 /**
  * Send WhatsApp Action
@@ -98,8 +99,8 @@ class Send_WhatsApp extends Abstract_Send_Message {
 			);
 		}
 
-		// Validate phone number format (minimum 10 digits, E.164 format)
-		if ( strlen( $contact->phone ) < 10 || ! preg_match( '/^\+?[0-9]+$/', $contact->phone ) ) {
+		// Validate phone number format using centralized utility
+		if ( ! Phone_Validator::is_valid( $contact->phone ) ) {
 			return array(
 				'status'  => 'skipped',
 				'message' => 'Invalid phone number format. Use E.164 format: +1234567890',

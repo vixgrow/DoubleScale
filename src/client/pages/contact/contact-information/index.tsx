@@ -2,10 +2,12 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
  */
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
 	Select,
@@ -15,6 +17,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 /**
  * Internal dependencies
@@ -27,11 +30,50 @@ import {
 } from '@quillcrm/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
-import { UserRound } from 'lucide-react';
+import { UserRound, Mail } from 'lucide-react';
 
 const ContactInformation: React.FC = () => {
-	const { contact, setContact, updateContact, emailAnalytics } =
+	const { contact, setContact, updateContact, emailAnalytics, showNotice } =
 		useContactContext();
+	const [isSendingOptIn, setIsSendingOptIn] = useState(false);
+	const [optInSent, setOptInSent] = useState(false);
+
+	const sendOptInEmail = async () => {
+		if (!contact) {
+			return;
+		}
+
+		setIsSendingOptIn(true);
+		try {
+			await apiFetch({
+				path: `/qc/v1/contacts/${contact.id}/send-opt-in`,
+				method: 'POST',
+			});
+
+			// Show success notification using the parent's notice system
+			if (showNotice) {
+				showNotice({
+					type: 'success',
+					message: __('Opt-in email sent successfully', 'quillcrm'),
+				});
+			}
+
+			// Mark as sent - button will stay disabled until page refresh
+			setOptInSent(true);
+		} catch (error: any) {
+			// Show error notification
+			const errorMessage = error.message || __('Failed to send opt-in email', 'quillcrm');
+			if (showNotice) {
+				showNotice({
+					type: 'error',
+					message: errorMessage,
+				});
+			}
+			console.error('Error sending opt-in email:', error);
+		} finally {
+			setIsSendingOptIn(false);
+		}
+	};
 
 	if (!contact) {
 		return (
@@ -137,6 +179,24 @@ const ContactInformation: React.FC = () => {
 								</span>
 							)}
 						</div>
+						{contact.status === 'unverified' && (
+							<div className="mt-2">
+								<Button
+									size="sm"
+									variant="outline"
+									className="h-7 text-xs gap-1"
+									disabled={isSendingOptIn || optInSent}
+									onClick={sendOptInEmail}
+								>
+									<Mail className="w-3 h-3" />
+									{isSendingOptIn
+										? __('Sending...', 'quillcrm')
+										: optInSent
+										? __('Email Sent', 'quillcrm')
+										: __('Send Opt-in Email', 'quillcrm')}
+								</Button>
+							</div>
+						)}
 						<div className="mt-2 flex items-center gap-3">
 							<div className="flex gap-1 items-center border-r pr-3">
 								<div className="bg-[#E4EEFD] text-[#458DC7] p-1.5 rounded-full">

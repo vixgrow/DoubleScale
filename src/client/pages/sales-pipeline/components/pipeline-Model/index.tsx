@@ -134,11 +134,7 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 
 		setLoading(true);
 		try {
-<<<<<<< HEAD
-			let newPipeline;
-=======
 			let updatedPipeline;
->>>>>>> 1f9f7c56331729ab6013366a6979107fd1a86d4d
 
 			if (mode === 'duplicate' && pipeline) {
 
@@ -151,16 +147,10 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					),
 				});
 			} else if (mode === 'create') {
-<<<<<<< HEAD
-                // await createPipeline({
-                //     name: values.name,
-                //     description: '', 
-                //     stages: customStages || [], 
-                // })
-				newPipeline = await createPipeline({ 
+				updatedPipeline = await createPipeline({
 					name: values.name,
-					description: '', 
-					stages: customStages || [], 
+					description: '',
+					stages: customStages || [],
 				});
 				createNotice?.({
 					type: 'success',
@@ -169,21 +159,7 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 						'quillcrm'
 					),
 				});
-=======
-                updatedPipeline = await createPipeline({
-                    name: values.name,
-                    description: '',
-                    stages: customStages || [],
-                })
->>>>>>> 1f9f7c56331729ab6013366a6979107fd1a86d4d
-				createNotice?.({
-					type: 'success',
-					message: __(
-						`Pipeline "${values.name}" created successfully!`,
-						'quillcrm'
-					),
-				});
-			}else if (mode === 'edit' && pipeline) {
+			} else if (mode === 'edit' && pipeline) {
 
                 updatedPipeline = await updatePipeline(pipeline.id, {
                     name: values.name.trim(),
@@ -200,14 +176,6 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
                     ),
                 });
             }
-<<<<<<< HEAD
-        
-			// onSuccess();
-			onSuccess(newPipeline);
-=======
-
-
->>>>>>> 1f9f7c56331729ab6013366a6979107fd1a86d4d
 			onClose();
 			// Pass the updated pipeline to the parent for proper refresh
 			await onSuccess(updatedPipeline);

@@ -1,19 +1,19 @@
 .kanban-board {
 	display: flex;
-    flex-direction: column;
-    height: 100vh;
+	flex-direction: column;
+	height: 100vh;
 
 	.kanban-columns {
-		
 		display: flex;
-    gap: 16px;
-    flex: 1;
-		
+		gap: 16px;
+		flex: 1;
 	}
 
 	.drag-overlay {
 		transform: rotate(5deg);
-		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		box-shadow:
+			0 20px 25px -5px rgba(0, 0, 0, 0.1),
+			0 10px 10px -5px rgba(0, 0, 0, 0.04);
 		cursor: grabbing;
 
 		.deal-card {

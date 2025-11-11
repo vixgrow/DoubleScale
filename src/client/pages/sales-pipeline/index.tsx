@@ -375,7 +375,18 @@ const SalesPipeline: React.FC = () => {
 				onClose={() => setDeleteDialogOpen(false)}
 				pipeline={selectedPipeline}
 				pipelines={pipelines}
-				onConfirm={refreshData}
+				onConfirm={async () => {
+				await refreshData();
+				// If the deleted pipeline was selected, switch to the first available pipeline
+				if (selectedPipelineId === selectedPipeline?.id && pipelines.length > 1) {
+					const remainingPipelines = pipelines.filter(p => p.id !== selectedPipeline?.id);
+					if (remainingPipelines.length > 0) {
+						setSelectedPipelineId(remainingPipelines[0].id);
+					} else {
+						setSelectedPipelineId(null);
+					}
+				}
+			}}
 			/>
 		</div>
 	);

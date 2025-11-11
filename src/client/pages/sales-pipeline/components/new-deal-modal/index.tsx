@@ -268,7 +268,19 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 				),
 			});
 
-			// Close modal first for better UX
+			// Reset form data before closing
+			setFormData({
+				title: '',
+				contact_id: '',
+				stage_id: '',
+				value: '',
+				source: '',
+				owner_id: '',
+				expected_close_date: { from: '', to: '' },
+				custom_fields: {},
+			});
+
+			// Close modal
 			onClose();
 
 			// Refresh data to show the new deal in the UI

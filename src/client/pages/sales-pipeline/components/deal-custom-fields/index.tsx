@@ -275,7 +275,6 @@ const [fields, setFields] = useState<Record<string, any>>({});
   };
 
   // ==================== Render ====================
-  console.log('CUSTOM FIELD GROUPS:', groups);
 
   if (isLoading)
     return (

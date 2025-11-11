@@ -133,9 +133,11 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 
 		setLoading(true);
 		try {
+			let updatedPipeline;
+
 			if (mode === 'duplicate' && pipeline) {
 
-				await duplicatePipeline(pipeline.id, values.name.trim());
+				updatedPipeline = await duplicatePipeline(pipeline.id, values.name.trim());
 				createNotice?.({
 					type: 'success',
 					message: __(
@@ -144,10 +146,10 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					),
 				});
 			} else if (mode === 'create') {
-                await createPipeline({
+                updatedPipeline = await createPipeline({
                     name: values.name,
-                    description: '', 
-                    stages: customStages || [], 
+                    description: '',
+                    stages: customStages || [],
                 })
 				createNotice?.({
 					type: 'success',
@@ -157,14 +159,14 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					),
 				});
 			}else if (mode === 'edit' && pipeline) {
-                
-                await updatePipeline(pipeline.id, {
+
+                updatedPipeline = await updatePipeline(pipeline.id, {
                     name: values.name.trim(),
                     description: pipeline?.description || '',
                     sort_order: pipeline?.sort_order || 0,
-                    stages: customStages || [], 
+                    stages: customStages || [],
                 });
-    
+
                 createNotice?.({
                     type: 'success',
                     message: __(
@@ -173,10 +175,11 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
                     ),
                 });
             }
-        
-    
-			onSuccess();
+
+
 			onClose();
+			// Pass the updated pipeline to the parent for proper refresh
+			await onSuccess(updatedPipeline);
 			form.reset();
 		} catch (error) {
 			createNotice?.({
@@ -184,7 +187,7 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 				message:
 					error instanceof Error
 						? error.message
-						: __('Failed to create pipeline', 'quillcrm'),
+						: __('Failed to process pipeline', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);

@@ -66,9 +66,17 @@ export interface Pipeline {
 export interface Filters {
 	search: string;
 	ownerId: number | null;
-	dateRange: {
+	expectedCloseDateRange: {
 		from: Date | null;
 		to: Date | null;
+	};
+	createdDateRange: {
+		from: Date | null;
+		to: Date | null;
+	};
+	valueRange: {
+		min: number | null;
+		max: number | null;
 	};
 	status: 'open' | 'won' | 'lost' | 'all';
 	priority: string | null;

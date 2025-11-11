@@ -230,6 +230,19 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 			});
 			return;
 		}
+
+		// Validate deal value
+		if (values.value !== undefined && values.value <= 0) {
+			createNotice?.({
+				type: 'error',
+				message: __(
+					`Deal value must be greater than zero`,
+					'quillcrm'
+				),
+			});
+			return;
+		}
+
 		// Ensure owner_id is set as fallback
 		if (!values.owner_id && defaultOwnerId) {
 			values.owner_id = defaultOwnerId;
@@ -254,13 +267,17 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 					'quillcrm'
 				),
 			});
+
+			// Close modal first for better UX
 			onClose();
-			onSuccess();
+
+			// Refresh data to show the new deal in the UI
+			await onSuccess();
 		} catch (error: any) {
 			createNotice?.({
 				type: 'error',
 				message: error.message || __(
-					`Deal created successfully!`,
+					`Failed to create deal. Please try again.`,
 					'quillcrm'
 				),
 			});

@@ -73,7 +73,7 @@ const SalesPipeline: React.FC = () => {
 		expectedCloseDateRange: { from: null, to: null },
 		createdDateRange: { from: null, to: null },
 		valueRange: { min: null, max: null },
-		status: 'open',
+		status: 'all',
 		priority: null,
 	});
 

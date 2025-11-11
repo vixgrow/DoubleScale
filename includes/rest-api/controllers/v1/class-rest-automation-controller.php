@@ -32,6 +32,9 @@ use QuillCRM\User_Roles\Permissions;
  */
 class Rest_Automation_Controller extends REST_Controller {
 
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -506,6 +509,11 @@ class Rest_Automation_Controller extends REST_Controller {
 			}
 			$automations = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
+			// Check dependencies for each automation
+			foreach ( $automations as $automation ) {
+				$automation = $this->check_and_mark_dependencies( $automation, 'get_items' );
+			}
+
 			return new WP_REST_Response( $automations->toArray() + array( 'total_count' => $total_count ), 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
@@ -599,6 +607,9 @@ class Rest_Automation_Controller extends REST_Controller {
 			if ( ! $automation ) {
 				return new WP_Error( 'not_found', __( 'Automation not found.', 'quillcrm' ), array( 'status' => 404 ) );
 			}
+
+			// Check plugin dependencies and add warnings
+			$automation = $this->check_and_mark_dependencies( $automation );
 
 			return new WP_REST_Response( $automation, 200 );
 		} catch ( \Exception $e ) {
@@ -737,6 +748,457 @@ class Rest_Automation_Controller extends REST_Controller {
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Check and mark plugin dependencies
+	 * Adds warnings and stores labels for unavailable triggers/actions
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param Automation_Model $automation The automation object.
+	 *
+	 * @return Automation_Model
+	 */
+	private function check_and_mark_dependencies( $automation, $context = 'get_item' ) {
+		$has_warnings = false;
+		$warnings     = array();
+
+		// Check trigger availability
+		if ( ! empty( $automation->trigger ) ) {
+			$trigger = Triggers_Manager::instance()->get_trigger( $automation->trigger );
+
+			if ( empty( $trigger ) ) {
+				// Check if it's a form trigger
+				$form = Forms_Manager::instance()->get_form( $automation->trigger );
+
+				if ( empty( $form ) || ! $form->is_enabled() ) {
+					$has_warnings = true;
+					$warnings[]   = array(
+						'type'    => 'trigger',
+						'slug'    => $automation->trigger,
+						'message' => __( 'Trigger requires a plugin that is not currently active.', 'quillcrm' ),
+					);
+
+					// Store trigger label if not already stored
+					if ( empty( $automation->settings['_trigger_label'] ) ) {
+						$settings                     = $automation->settings ?: array();
+						$settings['_trigger_label']   = $automation->trigger;
+						$settings['_trigger_warning'] = true;
+						$automation->settings         = $settings;
+					} else {
+						// Just add warning flag
+						$settings                     = $automation->settings ?: array();
+						$settings['_trigger_warning'] = true;
+						$automation->settings         = $settings;
+					}
+				} elseif ( $form ) {
+					// Form exists, store its label
+					$settings                   = $automation->settings ?: array();
+					$settings['_trigger_label'] = $form->name;
+					unset( $settings['_trigger_warning'] );
+					$automation->settings = $settings;
+				}
+			} else {
+				// Trigger exists, check if its required plugin is active
+				$trigger_plugin_check = $this->check_trigger_plugin_dependency( $trigger );
+
+				if ( ! $trigger_plugin_check['is_active'] ) {
+					$has_warnings = true;
+					$warnings[]   = array(
+						'type'         => 'trigger',
+						'slug'         => $automation->trigger,
+						'message'      => $trigger_plugin_check['message'],
+						'plugin_label' => $trigger_plugin_check['plugin_label'],
+					);
+
+					// Store trigger label and warning
+					$settings                     = $automation->settings ?: array();
+					$settings['_trigger_label']   = $trigger->name;
+					$settings['_trigger_warning'] = true;
+					$automation->settings         = $settings;
+				} else {
+					// Trigger exists and plugin is active, store its label
+					$settings                   = $automation->settings ?: array();
+					$settings['_trigger_label'] = $trigger->name;
+					unset( $settings['_trigger_warning'] );
+					$automation->settings = $settings;
+				}
+			}
+		}
+		if ( $context === 'get_items' ) {
+			$automation->_warnings = $warnings;
+			return $automation;
+		}
+		// Check each action step's availability
+		if ( ! empty( $automation->steps ) ) {
+			foreach ( $automation->steps as $step ) {
+				if ( $step->type === 'action' && ! empty( $step->action ) ) {
+					try {
+						$action = Actions_Manager::instance()->get_action( $step->action );
+
+						// Action exists, check if its required plugin is active
+						$action_plugin_check = $this->check_action_plugin_dependency( $action );
+
+						if ( ! $action_plugin_check['is_active'] ) {
+							$has_warnings = true;
+							$warnings[]   = array(
+								'type'         => 'action',
+								'step_id'      => $step->id,
+								'slug'         => $step->action,
+								'message'      => $action_plugin_check['message'],
+								'plugin_label' => $action_plugin_check['plugin_label'],
+							);
+
+							// Store action label and warning
+							$settings                    = $step->settings ?: array();
+							$settings['_action_label']   = $action->name;
+							$settings['_action_warning'] = true;
+							$step->settings              = $settings;
+						} else {
+							// Action exists and plugin is active, store its label
+							$settings                  = $step->settings ?: array();
+							$settings['_action_label'] = $action->name;
+							unset( $settings['_action_warning'] );
+							$step->settings = $settings;
+						}
+					} catch ( \Exception $e ) {
+						// Action not found - plugin missing
+						$has_warnings = true;
+						$warnings[]   = array(
+							'type'    => 'action',
+							'step_id' => $step->id,
+							'slug'    => $step->action,
+							'message' => __( 'Action requires a plugin that is not currently active.', 'quillcrm' ),
+						);
+
+						// Store action label (slug) if not already stored and add warning flag
+						$settings = $step->settings ?: array();
+						if ( empty( $settings['_action_label'] ) ) {
+							$settings['_action_label'] = $step->action;
+						}
+						$settings['_action_warning'] = true;
+						$step->settings              = $settings;
+					}
+				} elseif ( $step->type === 'condition' && ! empty( $step->settings ) ) {
+					// Check condition/rule dependencies
+					$condition_check = $this->check_condition_plugin_dependencies( $step->settings );
+
+					if ( $condition_check['has_warnings'] ) {
+						$has_warnings = true;
+						$warnings[]   = array(
+							'type'              => 'condition',
+							'step_id'           => $step->id,
+							'message'           => $condition_check['message'],
+							'plugin_labels'     => $condition_check['plugin_labels'],
+							'unavailable_count' => $condition_check['unavailable_count'],
+						);
+
+						// Store condition warning and unavailable rules info as step properties (not in settings)
+						$step->_condition_warning       = true;
+						$step->_unavailable_rules       = $condition_check['unavailable_rules'];
+						$step->_unavailable_rules_count = $condition_check['unavailable_count'];
+					} else {
+						// All rules have their plugins active - clean up warning flags
+						$step->_condition_warning       = false;
+						$step->_unavailable_rules       = array();
+						$step->_unavailable_rules_count = 0;
+					}
+				}
+			}
+		}
+
+		// Add warnings metadata to automation
+		if ( $has_warnings ) {
+			$automation->_warnings = $warnings;
+		}
+
+		return $automation;
+	}
+
+	/**
+	 * Check trigger plugin dependency
+	 * Returns whether the trigger's required plugin is active
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $trigger The trigger object.
+	 *
+	 * @return array Array with 'is_active', 'message', and 'plugin_label' keys
+	 */
+	private function check_trigger_plugin_dependency( $trigger ) {
+		// Define plugin dependencies based on trigger source and group
+		$plugin_dependencies = array(
+			'woocommerce' => array(
+				'order'        => array(
+					'plugin' => 'woocommerce/woocommerce.php',
+					'label'  => 'WooCommerce',
+				),
+				'cart'         => array(
+					'plugin' => 'woocommerce/woocommerce.php',
+					'label'  => 'WooCommerce',
+				),
+				'review'       => array(
+					'plugin' => 'woocommerce/woocommerce.php',
+					'label'  => 'WooCommerce',
+				),
+				'subscription' => array(
+					'plugin' => 'woocommerce-subscriptions/woocommerce-subscriptions.php',
+					'label'  => 'WooCommerce Subscriptions',
+				),
+				'wishlist'     => array(
+					'plugin' => 'woocommerce-wishlists/woocommerce-wishlists.php',
+					'label'  => 'WooCommerce Wishlists',
+				),
+				'membership'   => array(
+					'plugin' => 'woocommerce-memberships/woocommerce-memberships.php',
+					'label'  => 'WooCommerce Memberships',
+				),
+			),
+			'edd'         => array(
+				'order' => array(
+					'plugin' => 'easy-digital-downloads/easy-digital-downloads.php',
+					'label'  => 'Easy Digital Downloads',
+				),
+			),
+			'lms'         => array(
+				'learndash' => array(
+					'plugin' => 'sfwd-lms/sfwd_lms.php',
+					'label'  => 'LearnDash',
+				),
+			),
+			'memberpress' => array(
+				'memberpress' => array(
+					'plugin' => 'memberpress/memberpress.php',
+					'label'  => 'MemberPress',
+				),
+			),
+			'booking'     => array(
+				'quillbooking' => array(
+					'plugin' => 'QuillBooking/quillbooking.php',
+					'label'  => 'QuillBooking',
+				),
+			),
+		);
+
+		// Check if trigger has a source and group that requires a plugin
+		if ( ! empty( $trigger->source ) && ! empty( $trigger->group ) ) {
+			if ( isset( $plugin_dependencies[ $trigger->source ][ $trigger->group ] ) ) {
+				$dependency = $plugin_dependencies[ $trigger->source ][ $trigger->group ];
+				$is_active  = quillcrm_is_plugin_active( $dependency['plugin'] );
+
+				if ( ! $is_active ) {
+					return array(
+						'is_active'    => false,
+						'message'      => sprintf(
+							/* translators: %s: plugin name */
+							__( 'This trigger requires %s to be installed and activated.', 'quillcrm' ),
+							$dependency['label']
+						),
+						'plugin_label' => $dependency['label'],
+					);
+				}
+			}
+		}
+
+		// No dependency or plugin is active
+		return array(
+			'is_active'    => true,
+			'message'      => '',
+			'plugin_label' => '',
+		);
+	}
+
+	/**
+	 * Check action plugin dependency
+	 * Returns whether the action's required plugin is active
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $action The action object.
+	 *
+	 * @return array Array with 'is_active', 'message', and 'plugin_label' keys
+	 */
+	private function check_action_plugin_dependency( $action ) {
+		// Define plugin dependencies based on action source and group
+		$plugin_dependencies = array(
+			'woocommerce' => array(
+				'order'  => array(
+					'plugin' => 'woocommerce/woocommerce.php',
+					'label'  => 'WooCommerce',
+				),
+				'coupon' => array(
+					'plugin' => 'woocommerce/woocommerce.php',
+					'label'  => 'WooCommerce',
+				),
+			),
+			'lms'         => array(
+				'learndash' => array(
+					'plugin' => 'sfwd-lms/sfwd_lms.php',
+					'label'  => 'LearnDash',
+				),
+			),
+		);
+
+		// Check if action has a source and group that requires a plugin
+		if ( ! empty( $action->source ) && ! empty( $action->group ) ) {
+			if ( isset( $plugin_dependencies[ $action->source ][ $action->group ] ) ) {
+				$dependency = $plugin_dependencies[ $action->source ][ $action->group ];
+				$is_active  = quillcrm_is_plugin_active( $dependency['plugin'] );
+
+				if ( ! $is_active ) {
+					return array(
+						'is_active'    => false,
+						'message'      => sprintf(
+							/* translators: %s: plugin name */
+							__( 'This action requires %s to be installed and activated.', 'quillcrm' ),
+							$dependency['label']
+						),
+						'plugin_label' => $dependency['label'],
+					);
+				}
+			}
+		}
+
+		// No dependency or plugin is active
+		return array(
+			'is_active'    => true,
+			'message'      => '',
+			'plugin_label' => '',
+		);
+	}
+
+	/**
+	 * Check condition plugin dependencies
+	 * Returns information about unavailable rules in the condition
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $condition_settings The condition settings array containing rule groups.
+	 *
+	 * @return array Array with 'has_warnings', 'unavailable_rules', 'unavailable_count', and 'message' keys
+	 */
+	private function check_condition_plugin_dependencies( $condition_settings ) {
+		// Define plugin dependencies based on rule group
+		$plugin_dependencies = array(
+			'woocommerce'               => array(
+				'plugin'      => 'woocommerce/woocommerce.php',
+				'label'       => 'WooCommerce',
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			),
+			'woocommerce_current_order' => array(
+				'plugin'      => 'woocommerce/woocommerce.php',
+				'label'       => 'WooCommerce',
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			),
+			'woocommerce_membership'    => array(
+				'plugin'      => 'woocommerce-memberships/woocommerce-memberships.php',
+				'label'       => 'WooCommerce Memberships',
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
+			),
+			'woocommerce_whishlist'     => array(
+				'plugin'      => 'woocommerce-wishlist/woocommerce-wishlist.php',
+				'label'       => 'WooCommerce Wishlist',
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-wishlist/woocommerce-wishlist.php' ),
+			),
+			'woocommerce_subscription'  => array(
+				'plugin'      => 'woocommerce-subscriptions/woocommerce-subscriptions.php',
+				'label'       => 'WooCommerce Subscriptions',
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
+			),
+			'woocommerce_review'        => array(
+				'plugin'      => 'woocommerce/woocommerce.php',
+				'label'       => 'WooCommerce',
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			),
+			'cart'                      => array(
+				'plugin'      => 'woocommerce/woocommerce.php',
+				'label'       => 'WooCommerce',
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			),
+			'learndash'                 => array(
+				'plugin'      => 'sfwd-lms/sfwd_lms.php',
+				'label'       => 'LearnDash',
+				'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
+			),
+		);
+
+		// set forms
+		$forms = Forms_Manager::instance()->get_all_forms();
+		foreach ( $forms as $form ) {
+			$plugin_dependencies[ $form->slug ] = array(
+				'plugin'      => $form->slug,
+				'label'       => $form->name,
+				'is_disabled' => ! $form->is_enabled(),
+			);
+		}
+
+		$unavailable_rules  = array();
+		$unavailable_groups = array();
+
+		// Check each rule group in the condition settings
+		if ( is_array( $condition_settings ) ) {
+			foreach ( $condition_settings as $group_index => $rule_group ) {
+				if ( is_array( $rule_group ) ) {
+					foreach ( $rule_group as $rule_index => $rule ) {
+						$selected_group = isset( $rule['selectedGroup'] ) ? $rule['selectedGroup'] : '';
+						$rule_slug      = isset( $rule['rule'] ) ? $rule['rule'] : '';
+
+						// Check if this rule's group requires a plugin
+						if ( ! empty( $selected_group ) && isset( $plugin_dependencies[ $selected_group ] ) ) {
+							$dependency = $plugin_dependencies[ $selected_group ];
+							$is_active  = $dependency['is_disabled'] ? false : quillcrm_is_plugin_active( $dependency['plugin'] );
+
+							if ( ! $is_active ) {
+								// Store unavailable rule information
+								$unavailable_rules[] = array(
+									'group_index'  => $group_index,
+									'rule_index'   => $rule_index,
+									'rule_slug'    => $rule_slug,
+									'group_slug'   => $selected_group,
+									'plugin_label' => $dependency['label'],
+								);
+
+								// Track unique plugin groups
+								if ( ! in_array( $dependency['label'], $unavailable_groups ) ) {
+									$unavailable_groups[] = $dependency['label'];
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		$has_warnings      = count( $unavailable_rules ) > 0;
+		$unavailable_count = count( $unavailable_rules );
+		$unique_groups     = implode( ', ', array_unique( $unavailable_groups ) );
+
+		$message = '';
+		if ( $has_warnings ) {
+			if ( $unavailable_count === 1 ) {
+				$message = sprintf(
+					/* translators: %s: plugin name */
+					__( 'This condition uses 1 rule that requires %s to be installed and activated.', 'quillcrm' ),
+					$unique_groups
+				);
+			} else {
+				$message = sprintf(
+					/* translators: %1$d: number of rules, %2$s: plugin names */
+					__( 'This condition uses %1$d rules that require plugins (%2$s) to be installed and activated.', 'quillcrm' ),
+					$unavailable_count,
+					$unique_groups
+				);
+			}
+		}
+
+		return array(
+			'has_warnings'      => $has_warnings,
+			'unavailable_rules' => $unavailable_rules,
+			'unavailable_count' => $unavailable_count,
+			'message'           => $message,
+			'plugin_labels'     => $unavailable_groups,
+		);
 	}
 
 	/**

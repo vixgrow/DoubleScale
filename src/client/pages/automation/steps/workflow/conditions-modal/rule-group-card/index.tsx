@@ -8,6 +8,7 @@ import { useLayoutEffect, useRef, useState } from '@wordpress/element';
  * External dependencies
  */
 import { map } from 'lodash';
+import { AlertTriangle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -92,7 +93,9 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 	}, [ruleGroup.length]);
 
 	return (
-		<Card className={`shadow-none ${rules.length > 1 ? 'ml-16 max-w-[800px]' : 'w-fit'}`}>
+		<Card
+			className={`shadow-none ${rules.length > 1 ? 'ml-16 max-w-[800px]' : 'w-fit'}`}
+		>
 			<CardContent className="pt-6">
 				<div ref={wrapperRef} className="relative">
 					{ruleGroup.length > 1 && (
@@ -130,10 +133,14 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 									value={rule.selectedGroup}
 									onValueChange={(value) => {
 										const newRules = [...rules];
+										// Check if the selected group exists in rulesGroups
 										const firstRuleInGroup =
-											Object.keys(
-												rulesGroups[value].rules
-											)[0] || '';
+											rulesGroups[value] &&
+											rulesGroups[value].rules
+												? Object.keys(
+														rulesGroups[value].rules
+													)[0] || ''
+												: '';
 										newRules[groupIndex][ruleIndex] = {
 											...newRules[groupIndex][ruleIndex],
 											selectedGroup: value,
@@ -158,14 +165,15 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 										))}
 									</SelectContent>
 								</Select>
-								{rule.selectedGroup && (
+								{rule.selectedGroup &&
+								rulesGroups[rule.selectedGroup] ? (
 									<Select
 										value={rule.rule}
 										onValueChange={(value) => {
 											const newRules = [...rules];
 											newRules[groupIndex][ruleIndex] = {
 												...newRules[groupIndex][
-												ruleIndex
+													ruleIndex
 												],
 												rule: value,
 											};
@@ -181,7 +189,9 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											/>
 										</SelectTrigger>
 										<SelectContent className="max-h-[200px] overflow-y-auto">
-											{Object.keys(
+											{rulesGroups[rule.selectedGroup]
+												.rules &&
+											Object.keys(
 												rulesGroups[rule.selectedGroup]
 													.rules
 											).length > 0 ? (
@@ -208,7 +218,17 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											)}
 										</SelectContent>
 									</Select>
-								)}
+								) : rule.selectedGroup ? (
+									<div className="flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
+										<AlertTriangle className="h-4 w-4 text-orange-500" />
+										<span className="text-sm text-orange-700">
+											{__(
+												'This rule requires an inactive plugin',
+												'quillcrm'
+											)}
+										</span>
+									</div>
+								) : null}
 								{rule.selectedGroup && rule.rule && (
 									<Rule
 										ruleSettings={getRuleBySlug(rule.rule)}
@@ -217,7 +237,7 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 											const newRules = [...rules];
 											newRules[groupIndex][ruleIndex] = {
 												...newRules[groupIndex][
-												ruleIndex
+													ruleIndex
 												],
 												[key]: value,
 											};
@@ -225,37 +245,37 @@ const RuleGroupCard: React.FC<RuleGroupCardProps> = ({
 										}}
 										onRemove={
 											rules.length === 1 &&
-												ruleGroup.length === 1
+											ruleGroup.length === 1
 												? undefined
 												: () => {
-													const newRules = [
-														...rules,
-													];
-													const removeRule = {
-														singleRuleInGroup:
-															() =>
-																newRules.splice(
-																	groupIndex,
-																	1
-																),
-														multipleRulesInGroup:
-															() =>
-																newRules[
-																	groupIndex
-																].splice(
-																	ruleIndex,
-																	1
-																),
-													};
+														const newRules = [
+															...rules,
+														];
+														const removeRule = {
+															singleRuleInGroup:
+																() =>
+																	newRules.splice(
+																		groupIndex,
+																		1
+																	),
+															multipleRulesInGroup:
+																() =>
+																	newRules[
+																		groupIndex
+																	].splice(
+																		ruleIndex,
+																		1
+																	),
+														};
 
-													removeRule[
-														ruleGroup.length ===
+														removeRule[
+															ruleGroup.length ===
 															1
-															? 'singleRuleInGroup'
-															: 'multipleRulesInGroup'
-													]();
-													onRulesChange(newRules);
-												}
+																? 'singleRuleInGroup'
+																: 'multipleRulesInGroup'
+														]();
+														onRulesChange(newRules);
+													}
 										}
 									/>
 								)}

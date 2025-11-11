@@ -29,7 +29,10 @@ import {
 	DialogOverlay,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 import RulesBuilder from '@/components/rules-builder';
+import { useAutomationContext } from '../../../state/context';
 
 interface RulesProps {
 	step: AutomationStep;
@@ -44,6 +47,9 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	visible,
 	onClose,
 }) => {
+	// Get automation context
+	const { automation } = useAutomationContext();
+
 	// Get form context and current trigger from store
 	const formContext = useSelect((select: any) => {
 		return select('quillcrm/core').getFormContext();
@@ -52,6 +58,15 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	const currentTrigger = useSelect((select: any) => {
 		return select('quillcrm/core').getCurrentTrigger();
 	}, []);
+
+	// Check for condition warning
+	const conditionWarning = automation?._warnings?.find(
+		(warning) => warning.type === 'condition' && warning.step_id === step.id
+	);
+
+	const hasConditionWarning = step._condition_warning === true;
+	const unavailableRulesCount = step._unavailable_rules_count || 0;
+	const unavailableRules = step._unavailable_rules || [];
 
 	const [rulesGroups, setRulesGroups] = useState(
 		ConfigAPI.getAutomationRules()
@@ -91,7 +106,13 @@ const ConditionsModal: React.FC<RulesProps> = ({
 		value: '',
 		selectedGroup: firstGroup,
 	});
-	const stepRules = step.settings || [[getInitialRule()]];
+
+	const stepRules =
+		step.settings &&
+		Array.isArray(step.settings) &&
+		step.settings.length > 0
+			? step.settings
+			: [[getInitialRule()]];
 	const [rules, setRules] = useState<
 		Array<
 			Array<{
@@ -107,7 +128,12 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	// Sync rules state with step.settings when modal opens
 	useEffect(() => {
 		if (visible) {
-			const stepRules = step.settings || [[getInitialRule()]];
+			const stepRules =
+				step.settings &&
+				Array.isArray(step.settings) &&
+				step.settings.length > 0
+					? step.settings
+					: [[getInitialRule()]];
 			setRules(stepRules);
 			// Reset handled in RulesBuilder
 		}
@@ -171,6 +197,57 @@ const ConditionsModal: React.FC<RulesProps> = ({
 						icon={<GradientConditionIcon />}
 					/>
 				</DialogHeader>
+
+				{/* Show warning if condition has plugin dependency issues */}
+				{(hasConditionWarning || conditionWarning) &&
+					unavailableRulesCount > 0 && (
+						<Alert
+							variant="destructive"
+							className="border-orange-500 bg-orange-50 mx-6"
+						>
+							<AlertTriangle className="h-4 w-4 text-orange-600" />
+							<AlertDescription className="text-sm text-orange-800">
+								{conditionWarning?.message}
+								{conditionWarning?.plugin_labels &&
+									conditionWarning.plugin_labels.length >
+										0 && (
+										<span className="block mt-1 font-medium">
+											{__(
+												'Required plugins:',
+												'quillcrm'
+											)}{' '}
+											{conditionWarning.plugin_labels.join(
+												', '
+											)}
+										</span>
+									)}
+								{unavailableRules.length > 0 && (
+									<div className="mt-2">
+										<p className="font-medium mb-1">
+											{__(
+												'Unavailable rules:',
+												'quillcrm'
+											)}
+										</p>
+										<ul className="list-disc list-inside space-y-1">
+											{unavailableRules.map(
+												(rule: any, index: number) => (
+													<li
+														key={index}
+														className="text-xs"
+													>
+														{rule.rule_slug} (
+														{rule.plugin_label})
+													</li>
+												)
+											)}
+										</ul>
+									</div>
+								)}
+							</AlertDescription>
+						</Alert>
+					)}
+
 				<div className="py-4">
 					<RulesBuilder
 						rules={rules}

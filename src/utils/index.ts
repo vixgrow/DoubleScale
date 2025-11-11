@@ -21,6 +21,7 @@ import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+import { __ } from '@wordpress/i18n';
 
 type WordPressTimezone = {
 	timezone?: string;
@@ -386,4 +387,62 @@ export const mapFiltersToRules = (
 		selectedGroup: f.group || initialRule.selectedGroup,
 	}));
 	return [group];
+};
+
+
+/**
+ * Get trigger label from automation (uses backend-provided label)
+ * @param automation - The automation object
+ * @returns The trigger label
+ */
+export const getTriggerLabel = (automation: any): string => {
+	// Use backend-provided label (works even when plugin is deactivated)
+	if (automation?.settings?._trigger_label) {
+		return automation.settings._trigger_label;
+	}
+
+	// Fallback to trigger slug
+	return automation?.trigger || __('No trigger selected', 'quillcrm');
+};
+
+/**
+ * Check if trigger has a plugin dependency warning
+ * @param automation - The automation object
+ * @returns True if trigger requires a missing plugin
+ */
+export const hasTriggerWarning = (automation: any): boolean => {
+	return automation?.settings?._trigger_warning === true;
+};
+
+/**
+ * Get action label from step (uses backend-provided label)
+ * @param step - The automation step object
+ * @returns The action label
+ */
+export const getActionLabel = (step: any): string => {
+	// Use backend-provided label (works even when plugin is deactivated)
+	if (step?.settings?._action_label) {
+		return step.settings._action_label;
+	}
+
+	// Fallback to action slug
+	return step?.action || __('Unknown Action', 'quillcrm');
+};
+
+/**
+ * Check if action has a plugin dependency warning
+ * @param step - The automation step object
+ * @returns True if action requires a missing plugin
+ */
+export const hasActionWarning = (step: any): boolean => {
+	return step?.settings?._action_warning === true;
+};
+
+/**
+ * Get all warnings from automation
+ * @param automation - The automation object
+ * @returns Array of warnings
+ */
+export const getAutomationWarnings = (automation: any): any[] => {
+	return automation?._warnings || [];
 };

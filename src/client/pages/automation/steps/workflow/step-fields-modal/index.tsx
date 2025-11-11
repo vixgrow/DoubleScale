@@ -8,12 +8,13 @@ import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, AlertTriangle } from 'lucide-react';
 
 /**
  * Internal dependencies
  */
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import './style.scss';
 import type { OrganizedStep } from '@quillcrm/client';
 import { Fields } from '@quillcrm/components';
@@ -57,7 +58,11 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const channel = isSmsAction ? 'sms' : isWhatsAppAction ? 'whatsapp' : null;
 
 	// Check provider status for SMS/WhatsApp actions (non-blocking)
-	const { isConnected, isLoading: providerLoading, checkStatus } = useProviderStatus(
+	const {
+		isConnected,
+		isLoading: providerLoading,
+		checkStatus,
+	} = useProviderStatus(
 		channel || 'sms' // Default to 'sms' if not a messaging action (hook always needs a value)
 	);
 
@@ -119,17 +124,61 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 			? getAction(actionKey)
 			: getGoal(step.action);
 
+	// Check if action has plugin dependency warning
+	const hasActionWarning = step.settings?._action_warning;
+	const actionLabel = step.settings?._action_label || step.action;
+
+	// If there's an action warning, show only the warning
+	if (hasActionWarning) {
+		return (
+			<div className="qcrm-step-fields-content flex flex-col">
+				<Alert
+					variant="destructive"
+					className="border-orange-500 bg-orange-50"
+				>
+					<AlertTriangle className="h-4 w-4 text-orange-600" />
+					<AlertDescription className="text-sm text-orange-800">
+						{__(
+							'Action requires a plugin that is not currently active.',
+							'quillcrm'
+						)}
+						<span className="block mt-1 font-medium">
+							{__('Action:', 'quillcrm')} {actionLabel}
+						</span>
+					</AlertDescription>
+				</Alert>
+
+				<div className="space-y-4 mt-4">
+					<Button
+						onClick={handleDelete}
+						disabled={isDeleting}
+						variant="outline"
+						className="w-full text-destructive border-destructive hover:text-destructive"
+						size="lg"
+					>
+						{isDeleting
+							? __('Deleting...', 'quillcrm')
+							: __('Delete', 'quillcrm')}
+					</Button>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="qcrm-step-fields-content flex flex-col">
 			{/* Provider not configured warning for SMS/WhatsApp actions (non-blocking) */}
-			{requiresProvider && !isConnected && !providerLoading && channel && (
-				<div className="mb-4">
-					<ProviderNotConnectedWarning
-						channel={channel}
-						onConfigureClick={() => setShowTwilioConfig(true)}
-					/>
-				</div>
-			)}
+			{requiresProvider &&
+				!isConnected &&
+				!providerLoading &&
+				channel && (
+					<div className="mb-4">
+						<ProviderNotConnectedWarning
+							channel={channel}
+							onConfigureClick={() => setShowTwilioConfig(true)}
+						/>
+					</div>
+				)}
 
 			<Button
 				onClick={handleMergeTagsClick}

@@ -82,7 +82,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
-		// Always use initialData; reset when absent
+		// Always reset on mount/prop change, then hydrate from provided initialData
 		dispatch(STORE_KEY).resetBuilder();
 
 		if (!initialData) {
@@ -90,7 +90,6 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		}
 
 		const { sections, globalSettings, buttonSettings } = initialData;
-
 		if (sections?.length) {
 			dispatch(STORE_KEY).setBuilderState(sections);
 		}

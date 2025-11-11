@@ -39,7 +39,7 @@ const ContactInformation: React.FC = () => {
 	const [optInSent, setOptInSent] = useState(false);
 
 	const sendOptInEmail = async () => {
-		if (!contact) {
+		if (!contact || isSendingOptIn || optInSent) {
 			return;
 		}
 
@@ -50,6 +50,9 @@ const ContactInformation: React.FC = () => {
 				method: 'POST',
 			});
 
+			// Mark as sent FIRST - before showing notification
+			setOptInSent(true);
+
 			// Show success notification using the parent's notice system
 			if (showNotice) {
 				showNotice({
@@ -57,9 +60,6 @@ const ContactInformation: React.FC = () => {
 					message: __('Opt-in email sent successfully', 'quillcrm'),
 				});
 			}
-
-			// Mark as sent - button will stay disabled until page refresh
-			setOptInSent(true);
 		} catch (error: any) {
 			// Show error notification
 			const errorMessage = error.message || __('Failed to send opt-in email', 'quillcrm');
@@ -71,7 +71,10 @@ const ContactInformation: React.FC = () => {
 			}
 			console.error('Error sending opt-in email:', error);
 		} finally {
-			setIsSendingOptIn(false);
+			// Only set to false if not sent (to prevent re-enabling on success)
+			if (!optInSent) {
+				setIsSendingOptIn(false);
+			}
 		}
 	};
 

@@ -123,13 +123,29 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 
 	const getBuilderInitialData = () => {
 		if (!initialEmailBody) {
-			return undefined;
+			// Provide a safe default initialData when no body is present
+			const empty: any = {
+				sections: [],
+				globalSettings: {},
+				buttonSettings: {},
+			};
+			return empty;
 		}
 
 		try {
 			// If it's already an object, use it directly
 			if (typeof initialEmailBody === 'object') {
-				return initialEmailBody;
+				// Ensure object matches builder shape, otherwise fallback to empty
+				const value =
+					(initialEmailBody as any)?.type === 'builder' &&
+					(initialEmailBody as any)?.value
+						? (initialEmailBody as any).value
+						: initialEmailBody;
+				return (value as any) ?? {
+					sections: [],
+					globalSettings: {},
+					buttonSettings: {},
+				};
 			}
 
 			// If it's a string, parse it
@@ -141,10 +157,18 @@ const OpenBuilder: React.FC<OpenBuilderProps> = ({
 			}
 
 			// Otherwise return as-is (in case it's already in the correct format)
-			return emailBodyJson;
+			return emailBodyJson ?? {
+				sections: [],
+				globalSettings: {},
+				buttonSettings: {},
+			};
 		} catch (error) {
 			console.error('Failed to parse email body:', error);
-			return undefined;
+			return {
+				sections: [],
+				globalSettings: {},
+				buttonSettings: {},
+			};
 		}
 	};
 

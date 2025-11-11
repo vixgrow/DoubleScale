@@ -8,6 +8,12 @@ import ColumnBlock from '../blocks/layout/ColumnBlock';
 import ContainerBlock from '../blocks/layout/ContainerBlock';
 import { MyTemplatesIcon } from '@/components/icons';
 import MyTemplatesPanel from './MyTemplatesPanel';
+import {
+	Tooltip,
+	TooltipTrigger,
+	TooltipContent,
+	TooltipProvider,
+} from '@/components/ui/tooltip';
 
 interface SidebarItem {
 	id: string;
@@ -51,12 +57,21 @@ const BlockSidebar = ({
 	return (
 		<div className="flex flex-1 max-w-[350px]">
 			<div className="bg-white p-4">
-				<div
-					className={`flex flex-col items-center cursor-pointer ${showMyTemplates ? 'text-[#1E3A8A]' : ''}`}
-					onClick={HandleMyTemplates}
-				>
-					<MyTemplatesIcon />
-				</div>
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<div
+								className={`flex flex-col items-center cursor-pointer ${showMyTemplates ? 'text-[#1E3A8A]' : ''}`}
+								onClick={HandleMyTemplates}
+							>
+								<MyTemplatesIcon />
+							</div>
+						</TooltipTrigger>
+						<TooltipContent>
+							<p>{__('My Templates', 'quillcrm')}</p>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
 			</div>
 			<div className="bg-white w-full align-center h-full relative flex flex-col border-l">
 				<Tabs

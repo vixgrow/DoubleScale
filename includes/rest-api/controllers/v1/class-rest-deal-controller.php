@@ -290,14 +290,36 @@ class REST_Deal_Controller extends REST_Controller {
 			}
 		}
 
+		// Validate deal value
+		$value = $request->get_param( 'value' );
+		if ( $value !== null && $value !== '' && floatval( $value ) < 0 ) {
+			return new WP_Error(
+				'invalid_value',
+				__( 'Deal value cannot be negative.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Validate expected_close_date if provided
+		$expected_close_date = $request->get_param( 'expected_close_date' );
+		if ( $expected_close_date !== null && $expected_close_date !== '' ) {
+			$validated_date = $this->validate_and_sanitize_date( $expected_close_date );
+			if ( is_wp_error( $validated_date ) ) {
+				return $validated_date;
+			}
+			$expected_close_date = $validated_date;
+		} else {
+			$expected_close_date = null;
+		}
+
 		$data = array(
 			'title'               => sanitize_text_field( $title ),
 			'contact_id'          => intval( $contact_id ),
 			'pipeline_id'         => intval( $pipeline_id ),
 			'stage_id'            => intval( $stage_id ),
-			'value'               => floatval( $request->get_param( 'value' ) ),
+			'value'               => $value !== null && $value !== '' ? floatval( $value ) : 0,
 			'currency'            => sanitize_text_field( $request->get_param( 'currency' ) ),
-			'expected_close_date' => sanitize_text_field( $request->get_param( 'expected_close_date' ) ),
+			'expected_close_date' => $expected_close_date,
 			'priority'            => sanitize_text_field( $request->get_param( 'priority' ) ),
 			'owner_id'            => $owner_id ? intval( $owner_id ) : null,
 			'source'              => sanitize_text_field( $request->get_param( 'source' ) ),
@@ -365,7 +387,11 @@ class REST_Deal_Controller extends REST_Controller {
 				if ( $field === 'title' || $field === 'currency' || $field === 'source' || $field === 'priority' ) {
 					$data[ $field ] = sanitize_text_field( $value );
 				} elseif ( $field === 'expected_close_date' ) {
-					$data[ $field ] = $this->validate_and_sanitize_date( $value );
+					$validated_date = $this->validate_and_sanitize_date( $value );
+					if ( is_wp_error( $validated_date ) ) {
+						return $validated_date;
+					}
+					$data[ $field ] = $validated_date;
 				} elseif ( in_array( $field, array( 'contact_id', 'pipeline_id', 'stage_id', 'owner_id' ) ) ) {
 					$data[ $field ] = intval( $value );
 				} elseif ( $field === 'value' ) {
@@ -785,13 +811,29 @@ class REST_Deal_Controller extends REST_Controller {
 
 		// Validate format: Y-m-d (e.g., 2025-12-31)
 		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $clean_date ) ) {
-			return null; // Invalid format, treat as null
+			return new WP_Error(
+				'invalid_date_format',
+				sprintf(
+					/* translators: %s: the provided date value */
+					__( 'Invalid date format "%s". Expected format: YYYY-MM-DD (e.g., 2025-12-31).', 'quillcrm' ),
+					$clean_date
+				),
+				array( 'status' => 400 )
+			);
 		}
 
 		// Validate it's a real date (not 2025-13-45)
 		$date_parts = explode( '-', $clean_date );
 		if ( ! checkdate( (int) $date_parts[1], (int) $date_parts[2], (int) $date_parts[0] ) ) {
-			return null; // Invalid date
+			return new WP_Error(
+				'invalid_date',
+				sprintf(
+					/* translators: %s: the provided date value */
+					__( 'Invalid date "%s". Please provide a valid date.', 'quillcrm' ),
+					$clean_date
+				),
+				array( 'status' => 400 )
+			);
 		}
 
 		return $clean_date;

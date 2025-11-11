@@ -102,9 +102,6 @@ export const DealCard: React.FC<DealCardProps> = ({
 		);
 	}, [deal.contact]);
 
-	useEffect(() => {
-		console.log(deal);
-	}, [deal]);
 
 	// Format currency value
 	const formattedValue = useMemo(() => {

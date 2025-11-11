@@ -93,7 +93,6 @@ const SalesPipeline: React.FC = () => {
 		removeStageOptimistically,
 		reorderStagesOptimistically,
 	} = usePipelineData(selectedPipelineId, filters);
-	console.log('Loading value:', loading);
 	
 
     // Set default pipeline on load

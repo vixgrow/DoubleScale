@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useMemo } from '@wordpress/element';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -35,6 +36,7 @@ import { Deal } from '../../types';
 import './style.scss';
 import AllDealIcon from '@quillcrm/components/icons/all-deals';
 import { SalesPipelineSkeleton } from '../../SalesPipelineSkeleton';
+import { formatCurrency } from '../../utils/currency';
 
 interface KanbanBoardProps {
 	pipeline: {
@@ -258,6 +260,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		}
 	};
 
+	// Detect currency from deals
+	const currencyCode = useMemo(() => {
+		if (deals.length === 0) return 'USD';
+		const currencies = [...new Set(deals.map(d => d.currency))];
+		return currencies.length === 1 ? currencies[0] : deals[0].currency;
+	}, [deals]);
+
 	// Calculate pipeline statistics
 	const totalDeals = deals.length;
 	const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);
@@ -265,9 +274,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 		// Use the backend-calculated weighted_value if available, otherwise calculate
 		return sum + (deal.weighted_value || 0);
 	}, 0);
-	
+
 	// Calculate average win rate (average probability across all deals)
-	const avgWinRate = deals.length > 0 
+	const avgWinRate = deals.length > 0
 		? deals.reduce((sum, deal) => {
 			const probability = deal.probability ?? deal.stage?.win_probability ?? 0;
 			return sum + probability;
@@ -339,7 +348,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 							<div className=" flex justify-between items-center w-[45%]">
 								<div className="flex flex-col">
 									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] ">
-										${totalValue.toLocaleString()}
+										{formatCurrency(totalValue, currencyCode)}
 									</span>
 									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px] text-[#777]">
 										{__('Total Value', 'quillcrm')}
@@ -376,7 +385,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 							<div className="flex justify-between items-center w-[45%]">
 								<div className="flex flex-col">
 									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] ">
-										${weightedValue.toLocaleString()}
+										{formatCurrency(weightedValue, currencyCode)}
 									</span>
 									<span className="stat-value text-lg font-normal leading-[28px] tracking-[-.5px]  text-[#777]">
 										{__('weighted Value', 'quillcrm')}

@@ -28,6 +28,7 @@ import {
 	DealsIcon,
 	NotesIcon,
 	PurchaseHistoryIcon,
+	CoursesIcon,
 } from '@quillcrm/components';
 import ConfigAPI from '@quillcrm/config';
 import Courses from '../courses';
@@ -73,7 +74,7 @@ const DataCard: React.FC = () => {
 		tabsList.push({
 			value: 'courses',
 			label: 'Courses',
-			icon: <AutomationsIcon width={24} height={24} />, // Replace with a Courses icon when available
+			icon: <CoursesIcon width={24} height={24} />, // Replace with a Courses icon when available
 		});
 	}
 

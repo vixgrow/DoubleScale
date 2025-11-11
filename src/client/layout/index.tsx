@@ -13,7 +13,7 @@ import {
  * WordPress Dependencies
  */
 import { SlotFillProvider } from '@wordpress/components';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 
@@ -23,7 +23,6 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { size, map } from 'lodash';
 
 import { notification } from 'antd';
-import { ArrowLeft } from 'lucide-react';
 
 /**
  * Internal dependencies

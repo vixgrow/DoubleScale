@@ -272,7 +272,7 @@ const ContactList: React.FC<ContactListProps> = ({
 										{/* Contact Info */}
 										<div className="flex-1 min-w-0">
 											{fullName && (
-												<div className="font-semibold capitalize text-base text-[#09090B]">
+												<div className="font-semibold capitalize text-base text-[#09090B] w-72 truncate">
 													{fullName}
 												</div>
 											)}

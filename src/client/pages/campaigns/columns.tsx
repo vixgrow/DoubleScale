@@ -133,7 +133,7 @@ const getCommonColumns = ({
 		),
 		cell: ({ row }) => {
 			const campaign = row.original;
-			const canEdit = campaign.status === 'draft' || campaign.status === 'schedule';
+			const canEdit = campaign.status === 'draft';
 
 			return (
 				<div className="text-center">

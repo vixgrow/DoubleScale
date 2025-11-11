@@ -108,6 +108,11 @@ export type LMSCourse = {
 	started_on: string;
 };
 
+export type LMSCoursesResponse = {
+	data: LMSCourse[];
+	total: number;
+};
+
 export type AutomationContact = {
 	id: number;
 	contact_id: number;

@@ -24,6 +24,7 @@ import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import Overview from './overview';
 import StepsShimmer from './steps-shimmer';
 import OverviewDialogShimmer from './overview-dialog-shimmer';
+import ViewStep from './steps/view';
 
 const Campaign: React.FC = () => {
 	const { id, tab } = useParams<{ id: string; tab: string }>();
@@ -161,6 +162,7 @@ const Campaign: React.FC = () => {
 			{tab === 'contacts' && <ContactsStep />}
 			{tab === 'review' && <ReviewStep />}
 			{tab === 'builder' && <Builder initialData={builderInitialData} />}
+			{tab === 'view' && <ViewStep />}
 			{isOverview && <Overview />}
 		</>
 	);

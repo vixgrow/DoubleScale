@@ -1,13 +1,14 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -20,6 +21,12 @@ import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep } from '../utils/step-utils';
 import { ConditionsIcon } from '@quillcrm/components';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface ConditionNodeData {
 	step: AutomationStep;
@@ -31,7 +38,13 @@ interface ConditionNodeData {
 
 const ConditionNode: React.FC<NodeProps> = (props) => {
 	const { data } = props;
-	const { step, onStepClick, selectedStepId, viewMode = false, analytics } = data as unknown as ConditionNodeData;
+	const {
+		step,
+		onStepClick,
+		selectedStepId,
+		viewMode = false,
+		analytics,
+	} = data as unknown as ConditionNodeData;
 
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
@@ -42,10 +55,62 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 		Array.isArray(step.settings) &&
 		step.settings.length > 0;
 
+	// Check for warnings in condition settings
+	const hasWarning = step._condition_warning === true;
+	const unavailableRulesCount = step._unavailable_rules_count || 0;
+	const unavailableRules = step._unavailable_rules || [];
+
+	// Get unique plugin labels from unavailable rules
+	const uniquePlugins =
+		unavailableRules.length > 0
+			? [
+					...new Set(
+						unavailableRules.map((rule: any) => rule.plugin_label)
+					),
+				].join(', ')
+			: '';
+
 	const subtitle = isConfigured ? (
-		<span className="qcrm-reactflow-condition__configured">
-			{__('Configured', 'quillcrm')}
-		</span>
+		<div className="flex items-center gap-2">
+			<span
+				className="qcrm-reactflow-condition__configured"
+				style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
+			>
+				{__('Configured', 'quillcrm')}
+			</span>
+			{hasWarning && unavailableRulesCount > 0 && (
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<AlertTriangle className="h-4 w-4 text-orange-500" />
+						</TooltipTrigger>
+						<TooltipContent side="right" className="max-w-xs">
+							<p className="font-semibold">
+								{__('Plugin Required', 'quillcrm')}
+							</p>
+							<p className="text-xs mt-1">
+								{unavailableRulesCount === 1
+									? sprintf(
+											__(
+												'This condition uses 1 rule that requires %s to be installed and activated.',
+												'quillcrm'
+											),
+											uniquePlugins
+										)
+									: sprintf(
+											__(
+												'This condition uses %d rules that require plugins (%s) to be installed and activated.',
+												'quillcrm'
+											),
+											unavailableRulesCount,
+											uniquePlugins
+										)}
+							</p>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			)}
+		</div>
 	) : (
 		<span className="qcrm-reactflow-condition__not-configured">
 			{__('Not Configured', 'quillcrm')}
@@ -71,8 +136,14 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 	const isSelected = selectedStepId === step.id.toString();
 
 	return (
-		<NodeContextMenu onEdit={viewMode ? undefined : handleEdit} onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
-			<div className={`qcrm-reactflow-node qcrm-reactflow-node--condition ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
+		<NodeContextMenu
+			onEdit={viewMode ? undefined : handleEdit}
+			onDelete={viewMode ? undefined : handleDelete}
+			disabled={viewMode}
+		>
+			<div
+				className={`qcrm-reactflow-node qcrm-reactflow-node--condition ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}
+			>
 				<Handle
 					type="target"
 					position={Position.Top}

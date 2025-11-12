@@ -3,19 +3,21 @@ import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent } from '../../../../components/ui/card';
 import { Skeleton } from '../../../../components/ui/skeleton';
 import { __ } from '@wordpress/i18n';
-import {
-	UserOutlined,
-	CheckCircleOutlined,
-	PlusCircleOutlined,
-	TrophyOutlined,
-	ClockCircleOutlined,
-	CaretUpOutlined,
-	CaretDownOutlined,
-	DollarOutlined,
-} from '@ant-design/icons';
+
 import { useReportFilters } from '../../../../hooks/useReportFilters';
-import ReportFilters from '../../../../components/reports/ReportFilters';
 import { cn } from '../../../../lib/utils';
+import ReportFilters from '@quillcrm/components/reports/ReportFilters';
+import { ContactsIcon } from '@quillcrm/components';
+import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
+import DealValueIcon from '@quillcrm/components/icons/deal-value';
+import TriangleUpIcon from '@quillcrm/components/icons/triangleUp';
+import TriangleDownIcon from '@quillcrm/components/icons/triangleDown';
+import CloseWinIcon from '@quillcrm/components/icons/close-won';
+import WinValueIcon from '@quillcrm/components/icons/won-value';
+import CloseIcon from '@quillcrm/components/icons/close';
+import CloseLostIcon from '@quillcrm/components/icons/close-lost';
+import TrendingUpIcon from '@quillcrm/components/icons/trendingUp';
+import TrendingDownIcon from '@quillcrm/components/icons/trendingDown';
 
 interface ContactsDealsReportsProps {
 	contacts_created: number;
@@ -57,7 +59,6 @@ const ContactsDealsReports: React.FC = () => {
 	});
 	const [loading, setLoading] = useState(false);
 
-	// Use the custom hook for filters
 	const {
 		filters,
 		setFilters,
@@ -78,7 +79,6 @@ const ContactsDealsReports: React.FC = () => {
 				path,
 			})) as ContactsDealsReportsProps;
 
-			// Ensure all properties exist in the response
 			const processedData = {
 				contacts_created: response.contacts_created || 0,
 				contacts_created_change: response.contacts_created_change || 0,
@@ -106,7 +106,6 @@ const ContactsDealsReports: React.FC = () => {
 		}
 	}, [buildQueryParams]);
 
-	// Apply filters
 	const applyFilters = useCallback(() => {
 		fetchContactsDealsReports();
 	}, [fetchContactsDealsReports]);
@@ -115,9 +114,197 @@ const ContactsDealsReports: React.FC = () => {
 		fetchContactsDealsReports();
 	}, [fetchContactsDealsReports]);
 
+	
+	const contactsDealsSection = [
+		{
+			key: 'contacts_created',
+			title: __('Total Contacts Created', 'quillcrm'),
+			value: data.contacts_created,
+			change: data.contacts_created_change,
+			icon: ContactsIcon,
+			iconColor: '#1E3A8A',
+			iconBg: 'bg-[#E3EEFF] ',
+			changeLogic: 'standard',
+			borderLeft: 'border-[#1E3A8A]',
+		},
+		{
+			key: 'contacts_worked',
+			title: __('Total Contacts Worked', 'quillcrm'),
+			value: data.contacts_worked,
+			change: data.contacts_worked_change,
+			icon: DealOwnerIcon,
+			iconBg: 'bg-[#FAEADF]',
+			iconColor: '#CB5301',
+			changeLogic: 'standard',
+			borderLeft: 'border-[#CB5301]',
+		},
+		{
+			key: 'deals_created',
+			title: __('New Deals Created', 'quillcrm'),
+			value: data.deals_created,
+			change: data.deals_created_change,
+			icon: DealValueIcon,
+			iconBg: 'bg-[#E4EEFD]',
+			iconColor: '#458DC7',
+			borderLeft: 'border-[#458DC7]',
+		},
+	];
+
+	const dealsClosedWonSection = [
+		{
+			key: 'deals_won',
+			title: __('Deals Closed Won', 'quillcrm'),
+			value: data.deals_won,
+			change: data.deals_won_change,
+			icon: CloseWinIcon,
+			iconBg: 'bg-[#E4FAEC]',
+			iconColor: '#16A34A',
+			changeLogic: 'standard',
+			borderLeft: 'border-[#16A34A]',
+		},
+		{
+			key: 'deals_lost',
+			title: __('Deals Closed Lost', 'quillcrm'),
+			value: data.deals_lost,
+			change: data.deals_lost_change,
+			icon: CloseIcon,
+			iconBg: 'bg-[#FBE8E8]',
+			iconColor: '#E13B3B',
+			changeLogic: 'inverse',
+			borderLeft: 'border-[#E13B3B]',
+		},
+	];
+
+	const dealsClosedLostSection = [
+		
+		{
+			key: 'deals_won_value',
+			title: __('Deals Won Value', 'quillcrm'),
+			value: `${(data.deals_won_value / 1000).toFixed(1)}K USD`,
+			change: data.deals_won_value_change,
+			icon: WinValueIcon,
+			iconBg: 'bg-[#E4FAEC]',
+			iconColor: '#16A34A',
+			changeLogic: 'standard',
+			borderLeft: 'border-[#16A34A]',
+		},
+		{
+			key: 'deals_lost_value',
+			title: __('Deals Lost Value', 'quillcrm'),
+			value: `${(data.deals_lost_value / 1000).toFixed(0)}K USD`,
+			change: data.deals_lost_value_change,
+			icon: CloseLostIcon,
+			iconBg: 'bg-[#FBE8E8]',
+			iconColor: '#E13B3B',
+			changeLogic: 'inverse',
+			borderLeft: 'border-[#E13B3B]',
+		},
+	];
+
+	const renderStatCard = (item: any, showIcon: boolean = true) => {
+		const isPositiveChange =
+			item.changeLogic === 'standard'
+				? item.change >= 0
+				: item.change < 0;
+		const IconComponent = item.icon;
+
+		return (
+			<div key={item.key} className={`flex items-center justify-between  border-l-[3px] ${item.borderLeft} bg-[#FFF] rounded-[8px] p-5`}>
+				<div className="flex items-center gap-3">
+					{showIcon && (
+						<div className={` ${item.iconBg} w-10 h-10 rounded-full flex justify-center items-center  `}>
+							<IconComponent color={`${item.iconColor}`} width='30' hight='30' />
+						</div>
+					)}
+					<div className="flex flex-col">
+						<span className="text-2xl font-semibold font-[Inter] leading-normal  tracking-[-1px] text-[#09090B]">
+							{typeof item.value === 'string' ? item.value : item.value.toLocaleString()}
+						</span>
+						<span className="text-base text-[#777] font-medium font-[Inter] leading-6 tracking-[-.5px]  mt-2">
+							{item.title}
+						</span>
+					</div>
+				</div>
+				<div className="flex items-center gap-1.5">
+					{isPositiveChange ? (
+						<TriangleUpIcon />
+					) : (
+						<TriangleDownIcon />
+					)}
+					<span
+						className={cn(
+							'text-base font-[Inter] font-medium',
+							isPositiveChange ? 'text-[#16A34A]' : 'text-[#E13B3B]'
+						)}
+					>
+						{Math.abs(item.change).toFixed(2)}%
+					</span>
+				</div>
+			</div>
+		);
+	};
+	const renderStatCardRight = (item: any, showIcon: boolean = true) => {
+		const isPositiveChange =
+			item.changeLogic === 'standard'
+				? item.change >= 0
+				: item.change < 0;
+		const IconComponent = item.icon;
+
+		return (
+			<div key={item.key} className={`flex items-center justify-between border-l-[3px] ${item.borderLeft} bg-[#FFF] rounded-[8px] p-5`}>
+				<div className="flex flex-col justify-between  gap-5">
+					<div className="flex flex-col">
+						<span className="text-2xl font-semibold font-[Inter] leading-normal  tracking-[-1px] text-[#09090B]">
+							{typeof item.value === 'string' ? item.value : item.value.toLocaleString()}
+						</span>
+						<span className="text-base text-[#777] font-medium font-[Inter] leading-6 tracking-[-.5px]  mt-2">
+							{item.title}
+						</span>
+					</div>
+					<div className="flex items-center gap-1.5">
+					{isPositiveChange ? (
+						<TriangleUpIcon />
+					) : (
+						<TriangleDownIcon />
+					)}
+					<span
+						className={cn(
+							'text-base font-[Inter] font-medium',
+							isPositiveChange ? 'text-[#16A34A]' : 'text-[#E13B3B]'
+						)}
+					>
+						{Math.abs(item.change).toFixed(2)}%
+					</span>
+				</div>
+				</div>
+				<div className='flex flex-col justify-between  gap-5'>
+				{showIcon && (
+						<div className={` ${item.iconBg} w-10 h-10 rounded-full flex justify-center items-center  `}>
+							<IconComponent color={`${item.iconColor}`} width='30' hight='30' />
+						</div>
+					)}
+				<div className="flex items-center gap-1.5">
+					{isPositiveChange ? (
+						<TrendingUpIcon />
+					) : (
+						<TrendingDownIcon />
+					)}
+					{/* <span
+						className={cn(
+							'text-base font-[Inter] font-medium',
+							isPositiveChange ? 'text-[#16A34A]' : 'text-[#E13B3B]'
+						)}
+					>
+						{Math.abs(item.change).toFixed(2)}%
+					</span> */}
+				</div>
+				</div>
+			</div>
+		);
+	};
+
 	return (
-		<div className="space-y-6">
-			{/* Filters Section */}
+		<div className="space-y-6  ">
 			<ReportFilters
 				key={`filters-${JSON.stringify(filters)}`}
 				title={__('Contacts & Deals Reports', 'quillcrm')}
@@ -136,184 +323,48 @@ const ContactsDealsReports: React.FC = () => {
 				showContact={true}
 			/>
 
-			<div className="bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-200/80 rounded-xl p-6 space-y-6 shadow-sm">
-				<h3 className="text-xl font-bold text-gray-900 tracking-tight">
-					{__(
-						'Contacts created and worked totals with deals created and won totals',
-						'quillcrm'
-					)}
-				</h3>
-				<p className="text-sm text-gray-600/80 font-medium">
-					{filters.dateRange &&
-					filters.dateRange[0] &&
-					filters.dateRange[1]
-						? `${__('Date range:', 'quillcrm')} ${filters.dateRange[0].format('MMM DD, YYYY')} - ${filters.dateRange[1].format('MMM DD, YYYY')}`
-						: __(
-								'Date range: In the last 30 days',
-								'quillcrm'
-							)}{' '}
-					&nbsp;&nbsp; {__('Compared To: Year before', 'quillcrm')}
-				</p>
+			{loading ? (
+				<Skeleton className="h-64 w-full" />
+			) : (
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+					{/* Summary Contacts & Deals */}
+					<Card className="border border-[#DEE1E6] bg-[#F8F8F8] rounded-[16px] p-3 lg:col-span-1">
+						<CardContent className="p-6">
+							<h3 className="text-2xl font-medium font-[Inter] leading-normal tracking-[-1px] text-[#09090B] mb-4">
+								{__('Summary Contacts & Deals', 'quillcrm')}
+							</h3>
+							<div className="space-y-3">
+								{contactsDealsSection.map((item) =>
+									renderStatCard(item, true)
+								)}
+							</div>
+						</CardContent>
+					</Card>
 
-				{loading ? (
-					<Skeleton className="h-8 w-full" />
-				) : (
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-						{[
-							{
-								key: 'contacts_created',
-								title: __('CONTACTS CREATED', 'quillcrm'),
-								value: data.contacts_created,
-								change: data.contacts_created_change,
-								icon: UserOutlined,
-								iconBg: 'from-blue-50 to-indigo-50',
-								iconBorder: 'border-blue-100',
-								iconColor: 'text-blue-600',
-								suffix: '',
-								changeLogic: 'standard', // positive is good
-							},
-							{
-								key: 'contacts_worked',
-								title: __('CONTACTS WORKED', 'quillcrm'),
-								value: data.contacts_worked,
-								change: data.contacts_worked_change,
-								icon: CheckCircleOutlined,
-								iconBg: 'from-green-50 to-emerald-50',
-								iconBorder: 'border-green-100',
-								iconColor: 'text-green-600',
-								suffix: '',
-								changeLogic: 'standard',
-							},
-							{
-								key: 'deals_created',
-								title: __('NEW DEALS CREATED', 'quillcrm'),
-								value: data.deals_created,
-								change: data.deals_created_change,
-								icon: PlusCircleOutlined,
-								iconBg: 'from-purple-50 to-violet-50',
-								iconBorder: 'border-purple-100',
-								iconColor: 'text-purple-600',
-								suffix: '',
-								changeLogic: 'standard',
-							},
-							{
-								key: 'deals_won',
-								title: __('DEALS CLOSED WON', 'quillcrm'),
-								value: data.deals_won,
-								change: data.deals_won_change,
-								icon: TrophyOutlined,
-								iconBg: 'from-yellow-50 to-amber-50',
-								iconBorder: 'border-yellow-100',
-								iconColor: 'text-yellow-600',
-								suffix: '',
-								changeLogic: 'standard',
-							},
-							{
-								key: 'deals_won_value',
-								title: __('DEALS WON VALUE', 'quillcrm'),
-								value: data.deals_won_value,
-								change: data.deals_won_value_change,
-								icon: DollarOutlined,
-								iconBg: 'from-emerald-50 to-green-50',
-								iconBorder: 'border-emerald-100',
-								iconColor: 'text-emerald-600',
-								suffix: ` ${__('USD', 'quillcrm')}`,
-								changeLogic: 'standard',
-							},
-							{
-								key: 'deals_lost',
-								title: __('DEALS CLOSED LOST', 'quillcrm'),
-								value: data.deals_lost,
-								change: data.deals_lost_change,
-								icon: TrophyOutlined,
-								iconBg: 'from-red-50 to-rose-50',
-								iconBorder: 'border-red-100',
-								iconColor: 'text-red-600',
-								suffix: '',
-								changeLogic: 'inverse', // negative is good for lost deals
-							},
-							{
-								key: 'deals_lost_value',
-								title: __('DEALS LOST VALUE', 'quillcrm'),
-								value: data.deals_lost_value,
-								change: data.deals_lost_value_change,
-								icon: DollarOutlined,
-								iconBg: 'from-red-50 to-rose-50',
-								iconBorder: 'border-red-100',
-								iconColor: 'text-red-600',
-								suffix: ` ${__('USD', 'quillcrm')}`,
-								changeLogic: 'inverse',
-							},
-							{
-								key: 'deals_avg_time',
-								title: __('DEALS AVERAGE TIME', 'quillcrm'),
-								value: data.deals_avg_time,
-								change: data.deals_avg_time_change,
-								icon: ClockCircleOutlined,
-								iconBg: 'from-indigo-50 to-blue-50',
-								iconBorder: 'border-indigo-100',
-								iconColor: 'text-indigo-600',
-								suffix: ` ${__('days', 'quillcrm')}`,
-								changeLogic: 'inverse', // lower time is better
-							},
-						].map((card) => {
-							const isPositiveChange =
-								card.changeLogic === 'standard'
-									? card.change >= 0
-									: card.change < 0;
-							const IconComponent = card.icon;
-
-							return (
-								<Card
-									key={card.key}
-									className="w-full hover:shadow-md transition-shadow duration-200 border-gray-200/60 bg-white/80 backdrop-blur-sm"
-								>
-									<CardContent className="p-6 space-y-4">
-										<div className="flex flex-col gap-4">
-											<div className="flex items-center gap-3 pb-1">
-												<div
-													className={`qcrm-dashboard-card-icon p-2 bg-gradient-to-br ${card.iconBg} border ${card.iconBorder} rounded-lg`}
-												>
-													<IconComponent
-														className={`text-base ${card.iconColor}`}
-													/>
-												</div>
-												<span className="font-bold text-xs text-gray-700 tracking-wider uppercase">
-													{card.title}
-												</span>
-											</div>
-											<div className="qcrm-analytics-count text-2xl font-bold text-gray-900 tracking-tight">
-												{card.value.toLocaleString()}
-												{card.suffix}
-											</div>
-											<div className="flex items-center gap-2 pt-1">
-												{isPositiveChange ? (
-													<CaretUpOutlined className="text-green-500" />
-												) : (
-													<CaretDownOutlined className="text-red-500" />
-												)}
-												<span
-													className={cn(
-														'text-sm',
-														isPositiveChange
-															? 'text-green-500'
-															: 'text-red-500'
-													)}
-												>
-													{Math.abs(
-														card.change
-													).toFixed(2)}
-													%
-												</span>
-											</div>
-										</div>
-									</CardContent>
-								</Card>
-							);
-						})}
-					</div>
-				)}
-			</div>
+					{/* Summary Deals Closed */}
+					<Card className="border border-[#DEE1E6] bg-[#F8F8F8] rounded-[16px] p-3 lg:col-span-2">
+						<CardContent className="p-6">
+							<h3 className="text-2xl font-medium font-[Inter] leading-normal tracking-[-1px] text-[#09090B] mb-4">
+								{__('Summary Deals Closed', 'quillcrm')}
+							</h3>
+							<div className="space-y-3">
+								<div className="grid grid-cols-2 gap-6">
+									<div className="space-y-3">
+										{dealsClosedWonSection.map((item) =>
+											renderStatCardRight(item, true)
+										)}
+									</div>
+									<div className="space-y-3">
+										{dealsClosedLostSection.map((item) =>
+											renderStatCardRight(item, true)
+										)}
+									</div>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			)}
 		</div>
 	);
 };

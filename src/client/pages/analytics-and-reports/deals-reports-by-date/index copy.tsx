@@ -13,7 +13,6 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { __ } from '@wordpress/i18n';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
 import ReportFilters from '../../../../components/reports/ReportFilters';
-import '../../../lib/chart-setup';
 import { Chart } from 'react-chartjs-2';
 import {
 	Chart as ChartJS,
@@ -24,7 +23,6 @@ import {
 	Tooltip as ChartTooltip,
 	Legend,
 } from 'chart.js';
-import DealsReportsByDateSkeleton from './deal-report-by-date-skeleton';
 
 ChartJS.register(
 	CategoryScale,
@@ -89,17 +87,17 @@ const DealsReportsByDate: React.FC = () => {
 				setLoading(false);
 			}
 		},
-		[buildQueryParams]
+		[buildQueryParams, daysBack, frequency]
 	);
 
 	useEffect(() => {
 		fetchDealsReportsByDate(daysBack, frequency);
-	}, [daysBack, frequency, fetchDealsReportsByDate]);
+	}, [fetchDealsReportsByDate]);
 
 	// Apply filters
 	const applyFilters = useCallback(() => {
 		fetchDealsReportsByDate(daysBack, frequency);
-	}, [fetchDealsReportsByDate, daysBack, frequency]);
+	}, [fetchDealsReportsByDate]);
 
 	// Format date for display based on frequency
 	const formatDate = (dateStr: string, freq: string = frequency) => {
@@ -119,13 +117,13 @@ const DealsReportsByDate: React.FC = () => {
 				const month = parseInt(match[2]);
 				const date = new Date(year, month - 1, 1);
 				return date.toLocaleDateString('en-US', {
-					month: 'short',
+					month: 'long',
 					year: 'numeric',
 				});
 			}
 		} else {
 			// Daily format - normal date parsing
-			const date = new Date(dateStr + 'T00:00:00');
+			const date = new Date(dateStr);
 			if (!isNaN(date.getTime())) {
 				return date.toLocaleDateString('en-US', {
 					month: 'numeric',
@@ -156,26 +154,23 @@ const DealsReportsByDate: React.FC = () => {
 				{
 					label: __('Open', 'quillcrm'),
 					data: chartData.map((deal) => deal.open),
-					backgroundColor: '#5B93C7',
-					borderColor: '#5B93C7',
-					borderWidth: 0,
-					barThickness: 32,
+					backgroundColor: '#458DC7', 
+					borderColor: '#ef4444', 
+					borderWidth: 1,
 				},
 				{
 					label: __('Closed Won', 'quillcrm'),
 					data: chartData.map((deal) => deal.won),
-					backgroundColor: '#4CAF50',
-					borderColor: '#4CAF50',
-					borderWidth: 0,
-					barThickness: 32,
+					backgroundColor: '#16A34A', 
+					borderColor: '#0891b2', 
+					borderWidth: 1,
 				},
 				{
-					label: __('Closed Lost', 'quillcrm'),
+					label: __('Lost', 'quillcrm'),
 					data: chartData.map((deal) => deal.lost),
-					backgroundColor: '#E53935',
-					borderColor: '#E53935',
-					borderWidth: 0,
-					barThickness: 32,
+					backgroundColor: '#E13B3B', 
+					borderColor: '#7c3aed', 
+					borderWidth: 1,
 				},
 			],
 		};
@@ -188,28 +183,17 @@ const DealsReportsByDate: React.FC = () => {
 		scales: {
 			x: {
 				stacked: true,
-				grid: {
-					display: false,
-				},
-				ticks: {
-					font: {
-						size: 11,
-					},
-					maxRotation: 0,
-					minRotation: 0,
+				title: {
+					display: true,
+					text: __('Create Date', 'quillcrm'),
 				},
 			},
 			y: {
 				stacked: true,
 				beginAtZero: true,
-				grid: {
-					display: false,
-				},
-				ticks: {
-					font: {
-						size: 11,
-					},
-					stepSize: 0.2,
+				title: {
+					display: true,
+					text: __('Count of Deals', 'quillcrm'),
 				},
 			},
 		},
@@ -217,35 +201,35 @@ const DealsReportsByDate: React.FC = () => {
 			legend: {
 				display: true,
 				position: 'top' as const,
-				align: 'center' as const,
-				labels: {
-					usePointStyle: true,
-					pointStyle: 'circle',
-					padding: 20,
-					font: {
-						size: 12,
-						weight: 400,
-					},
-					color: '#09090B',
-				},
 			},
 			tooltip: {
 				mode: 'index' as const,
 				intersect: false,
-				backgroundColor: '#fff',
-				titleColor: '#000',
-				bodyColor: '#000',
-				borderColor: '#e5e7eb',
-				borderWidth: 1,
-				padding: 12,
-				displayColors: true,
 				callbacks: {
 					footer: function (tooltipItems: any[]) {
 						let total = 0;
 						tooltipItems.forEach(function (tooltipItem) {
 							total += tooltipItem.parsed.y;
 						});
-						return __('Total: ', 'quillcrm') + total.toFixed(1);
+						return __('Total: ', 'quillcrm') + total;
+					},
+					afterBody: function (tooltipItems: any[]) {
+						if (tooltipItems.length > 0) {
+							const total = tooltipItems.reduce(
+								(sum: number, item: any) => sum + item.parsed.y,
+								0
+							);
+							return tooltipItems.map((item: any) => {
+								const percentage =
+									total > 0
+										? Math.round(
+												(item.parsed.y / total) * 100
+											)
+										: 0;
+								return `${item.dataset.label}: ${percentage}%`;
+							});
+						}
+						return [];
 					},
 				},
 			},
@@ -257,9 +241,9 @@ const DealsReportsByDate: React.FC = () => {
 	};
 
 	return (
-		<div className="space-y-6">
+		<div className="p-6 space-y-6">
 			{/* Filters Section */}
-			{/* <ReportFilters
+			<ReportFilters 
 				key={`filters-${JSON.stringify(filters)}`}
 				title={__('Deal Reports by Date - Filters', 'quillcrm')}
 				filters={filters}
@@ -277,25 +261,31 @@ const DealsReportsByDate: React.FC = () => {
 				showContact={true}
 			/> */}
 
-			<Card className='border border-[#DEE1E6] bg-[#F8F8F8] rounded-[16px] p-5'>
+			<Card>
 				<CardContent className="p-6">
 					<div className="mb-6">
-						<div className="flex justify-between items-start mb-6">
-							<h3 className="text-2xl font-medium font-[Inter] leading-normal tracking-[-1px] text-[#09090B] mb-4">
-								{__(
-									'Deal totals by create date with status breakdown',
-									'quillcrm'
-								)}
-							</h3>
+						<div className="flex justify-between items-center mb-4">
+							<div className="flex items-center gap-2">
+								<h4 className="text-2xl font-medium truncate font-[Inter] leading-normal tracking-[-1px] text-[#09090B] m-0">
+									{__(
+										'Deal totals by create date with status breakdown',
+										'quillcrm'
+									)}
+								</h4>
+								
+							</div>
 							<div className="flex gap-4">
 								<div className="flex flex-col gap-1">
+									<span className="text-sm font-medium text-gray-700">
+										{__('Date range:', 'quillcrm')}
+									</span>
 									<Select
 										value={daysBack.toString()}
 										onValueChange={(value) =>
 											setDaysBack(parseInt(value))
 										}
 									>
-										<SelectTrigger className=" h-12 py-[5px] px-4 text-[#09090B] font-normal leading-[150%] track-[-.32px] text- font-[Manrope] border border-[#DEE1E6] bg-[#FFF] rounded-[8px]">
+										<SelectTrigger className="w-32">
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
@@ -318,11 +308,14 @@ const DealsReportsByDate: React.FC = () => {
 									</Select>
 								</div>
 								<div className="flex flex-col gap-1">
+									<span className="text-sm font-medium text-gray-700">
+										{__('Frequency:', 'quillcrm')}
+									</span>
 									<Select
 										value={frequency}
 										onValueChange={setFrequency}
 									>
-										<SelectTrigger className=" h-12 py-[5px] px-4 text-[#09090B] font-normal leading-[150%] track-[-.32px] text- font-[Manrope] border border-[#DEE1E6] bg-[#FFF] rounded-[8px]">
+										<SelectTrigger className="w-28">
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
@@ -342,10 +335,14 @@ const DealsReportsByDate: React.FC = () => {
 						</div>
 					</div>
 
-					{loading ? (						
-						  <DealsReportsByDateSkeleton/>
+					{loading ? (
+						<div className="text-center py-15">
+							<span className="text-gray-600">
+								{__('Loading...', 'quillcrm')}
+							</span>
+						</div>
 					) : (
-						<div style={{ height: '450px', width: '100%' }}>
+						<div style={{ height: '400px', width: '100%' }}>
 							<Chart
 								type="bar"
 								data={getChartData()}

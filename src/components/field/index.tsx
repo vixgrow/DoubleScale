@@ -41,6 +41,7 @@ import DealCustomFieldChange from '../deal-custom-field-change';
 import DiscountTypeWithAmount from '../discount-type-with-amount';
 import CouponExpiryDate from '../coupon-expiry-date';
 import OpenBuilder from '../open-builder';
+import { FromEmailSelector } from '../from-email-selector';
 
 interface FieldProps {
 	label?: string;
@@ -202,6 +203,17 @@ const Field: React.FC<FieldProps> = ({
 				<LinkTriggerField
 					value={Array.isArray(value) ? value : []}
 					onChange={(value) => onChange(value)}
+				/>
+			);
+			break;
+		case 'from_email':
+			fieldContent = (
+				<FromEmailSelector
+					value={value || ''}
+					onChange={(email) => onChange(email)}
+					error={status === 'error' ? 'error' : undefined}
+					required={required}
+					className={className}
 				/>
 			);
 			break;

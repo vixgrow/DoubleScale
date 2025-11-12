@@ -1,20 +1,24 @@
 import { Button } from '@/components/ui/button';
+import { EditIcon } from '@quillcrm/components/icons';
+import { __ } from '@wordpress/i18n';
 
 interface CardLayoutProps {
 	icon: React.ReactNode;
 	header: string;
-	buttonIcon: React.ReactNode;
-	buttonText: string;
+	buttonIcon?: React.ReactNode;
+	buttonText?: string;
 	children: React.ReactNode;
 	onButtonClick?: () => void;
+	button?: boolean;
 }
 const CardLayout: React.FC<CardLayoutProps> = ({
 	icon,
 	header,
-	buttonIcon,
-	buttonText,
+	buttonIcon = <EditIcon />,
+	buttonText = __('Edit', 'quillcrm'),
 	children,
 	onButtonClick,
+	button = true,
 }) => {
 	return (
 		<div className="bg-white rounded-lg border border-gray-200">
@@ -24,10 +28,12 @@ const CardLayout: React.FC<CardLayoutProps> = ({
 					{header}
 				</div>
 
-				<Button variant="secondary" onClick={onButtonClick}>
-					{buttonIcon}
-					{buttonText}
-				</Button>
+				{button && (
+					<Button variant="secondary" onClick={onButtonClick}>
+						{buttonIcon && buttonIcon}
+						{buttonText && buttonText}
+					</Button>
+				)}
 			</div>
 			<div className="p-4">{children}</div>
 		</div>

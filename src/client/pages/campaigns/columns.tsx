@@ -11,7 +11,7 @@ import { ColumnDef } from '@tanstack/react-table';
 /**
  * Internal dependencies
  */
-import { Campaign, CampaignStatus } from '../../types';
+import { CAMPAIGN_STATUS, Campaign, CampaignStatus } from '../../types';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CAMPAIGN_STATUS_COLORS } from './constants';
 import {
@@ -149,8 +149,15 @@ const getCommonColumns = ({
 						<DropdownMenuContent align="end">
 							<DropdownMenuItem
 								onClick={() => {
+									const targetTab =
+										campaign.status ===
+											CAMPAIGN_STATUS.SCHEDULED
+											? 'view'
+											: 'overview';
 									navigate(
-										getToLink(`campaigns/${campaign.id}/overview`)
+										getToLink(
+											`campaigns/${campaign.id}/${targetTab}`
+										)
 									);
 								}}
 							>

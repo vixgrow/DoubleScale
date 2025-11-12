@@ -1,0 +1,413 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
+ * External dependencies
+ */
+import { useState, useEffect, useCallback } from 'react';
+
+/**
+ * Internal dependencies
+ */
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from '../../../../components/ui/card';
+
+import { Button } from '../../../../components/ui/button';
+
+import apiFetch from '@wordpress/api-fetch';
+import CardsStatistics, {
+	CardsStatisticsProps,
+} from '../components/card-statistics';
+
+import { Skeleton } from '../../../../components/ui/skeleton';
+import ActivityCard, { ActivityItem } from '../components/card-activity';
+import CardPipelineStages from '../components/card-pipeline-stages';
+import TableActiveDeals from '../components/table-active-deals';
+import { useReportFilters } from '../../../../hooks/useReportFilters';
+// import ReportFilters from '../../../../components/reports/ReportFilters';
+import Activity from '../../sales-pipeline/components/activity';
+import { PieChart, Pie, Cell } from "recharts";
+import DealsStatisticsCard, { convertToDealsStatistics } from '../components/card-statistics-deatails';
+import UserActivityIcon from '@quillcrm/components/icons/user-activity';
+import MeetingActivityIcon from '@quillcrm/components/icons/meeting-activity';
+import ViewIcon from '@quillcrm/components/icons/view-header';
+import SaleRepHeader from '../components/sale-rep-header';
+import SaleReportFilter from '../components/sale-report-filter';
+
+
+interface SalesRepResponse {
+	sale_info: {
+		id: number;
+		name: string;
+		email: string;
+	};
+	cards_statistics: {
+		total_deals_close_won_number: CardsStatisticsProps;
+		total_deals_close_won_value: CardsStatisticsProps;
+		total_deals_close_lost_number: CardsStatisticsProps;
+		total_deals_close_lost_value: CardsStatisticsProps;
+		total_deals_close_number: CardsStatisticsProps;
+		total_deals_close_value: CardsStatisticsProps;
+		performance_rate_number: CardsStatisticsProps;
+		performance_rate_value: CardsStatisticsProps;
+	};
+	won_loss_analytics: {
+		total_deals_won: string;
+		total_deals_lost: string;
+		total_deals_open: string;
+		win_rate: string;
+	};
+	recent_activities: ActivityItem[];
+}
+
+interface SalesRepProps {
+	ownerId?: number;
+}
+
+const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
+	const [loading, setLoading] = useState(true);
+	const [saleInfo, setSaleInfo] = useState<SalesRepResponse['sale_info']>({
+		id: 0,
+		name: '',
+		email: '',
+	});
+	const [cardsStatistics, setCardsStatistics] = useState<
+		SalesRepResponse['cards_statistics']
+	>({} as SalesRepResponse['cards_statistics']);
+	const [wonLossAnalytics, setWonLossAnalytics] = useState<
+		SalesRepResponse['won_loss_analytics']
+	>({
+		total_deals_won: '0',
+		total_deals_lost: '0',
+		total_deals_open: '0',
+		win_rate: '0',
+	});
+	const [recentActivities, setRecentActivities] = useState<
+		SalesRepResponse['recent_activities']
+	>([]);
+
+	const [queryParams, setQueryParams] = useState<string>('');
+
+	const {
+		filters,
+		setFilters,
+		filterOptions,
+		showFilters,
+		setShowFilters,
+		buildQueryParams,
+		clearFilters,
+	} = useReportFilters();
+
+	const fetchSalesRep = useCallback(async () => {
+		setLoading(true);
+		try {
+			const queryParams = buildQueryParams();
+			setQueryParams(queryParams);
+			let apiPath = '';
+			if (ownerId) {
+				apiPath = `/qc/v1/reports/sales-rep?owner_id=${ownerId}${queryParams ? `&${queryParams}` : ''}`;
+			} else {
+				apiPath = `/qc/v1/reports/sales-rep${queryParams ? `?${queryParams}` : ''}`;
+			}
+
+			const response = (await apiFetch({
+				path: apiPath,
+			})) as SalesRepResponse;
+
+			setSaleInfo(response.sale_info);
+			setCardsStatistics(response.cards_statistics);
+			setWonLossAnalytics(response.won_loss_analytics);
+			setRecentActivities(response.recent_activities);
+		} catch (error) {
+			console.error('Error fetching sales rep:', error);
+		} finally {
+			setLoading(false);
+		}
+	}, [buildQueryParams, ownerId]);
+
+	useEffect(() => {
+		fetchSalesRep();
+	}, [fetchSalesRep]);
+
+	// Apply filters
+	const applyFilters = useCallback(() => {
+		fetchSalesRep();
+	}, [fetchSalesRep]);
+	const open = Number(wonLossAnalytics.total_deals_open);
+const won = Number(wonLossAnalytics.total_deals_won);
+const lost = Number(wonLossAnalytics.total_deals_lost);
+
+const total = open + won + lost;
+
+const openPercent = total ? ((open / total) * 100).toFixed(1) : 0;
+const wonPercent = total ? ((won / total) * 100).toFixed(1) : 0;
+const lostPercent = total ? ((lost / total) * 100).toFixed(1) : 0;
+
+
+	
+
+	return (
+		<div className="w-7xl max-w-[90vw] mx-auto p-6 space-y-6">
+			{/* Filters Section */}
+			{/* <ReportFilters
+				key={`filters-${JSON.stringify(filters)}`}
+				title={__('Sales Rep', 'quillcrm')}
+				filters={filters}
+				setFilters={setFilters}
+				filterOptions={filterOptions}
+				showFilters={showFilters}
+				setShowFilters={setShowFilters}
+				clearFilters={clearFilters}
+				applyFilters={applyFilters}
+				showSource={false}
+				showOwner={false}
+				showPipeline={false}
+				showStatus={false}
+				showContact={false}
+			/> */}
+			<SaleReportFilter
+				key={`filters-${JSON.stringify(filters)}`}
+				title={__('Sales Rep', 'quillcrm')}
+				filters={filters}
+				setFilters={setFilters}
+				clearFilters={clearFilters}
+				applyFilters={applyFilters}
+				filterOptions={filterOptions}
+				showFilters={showFilters}
+				setShowFilters={setShowFilters}
+			/>
+			{/* Header Section */}
+			{/* <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 border-b">
+				<div className="flex items-center gap-4">
+					<div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+						{saleInfo?.name?.charAt(0)}
+					</div>
+					<div>
+						<h1 className="text-2xl font-bold text-gray-900">
+							{saleInfo?.name}
+						</h1>
+						<p className="text-sm text-gray-500">
+							{saleInfo.email}
+						</p>
+					</div>
+				</div>
+			</div> */}
+			{/* <CardHeader className="pb-4"> */}
+				{/* <div className="flex items-start justify-between gap-3"> */}
+					{/* <div className="flex items-center gap-2 min-w-0 flex-1">
+						<div
+							// className={`w-12 h-12 rounded-full ${getAvatarColor(rep.ranking)} flex items-center justify-center text-white font-semibold flex-shrink-0`}
+							className="w-12 h-12 rounded-full flex items-center justify-center border-2 border-[#DEE1E6] font-semibold flex-shrink-0"
+						>
+							<UserActivityIcon width={22} height={32}/>
+						</div>
+						<div className="min-w-0 flex-1">
+							<h3 className="font-semibold text-[#09090B] text-base leading-[26px] truncate">
+							{__(	'Sales Representative Details','quillcrm')}{saleInfo.name}
+							</h3>
+							<div className="flex gap-1">
+							     <MeetingActivityIcon />
+								 <p className='text-base  font-medium text-[#777] '>
+								   {__(	'Last Activity:','quillcrm')}
+								   <span className='text-[#660FF1] font-semibold'>{saleInfo.lastActivity}</span>
+								 </p>
+							</div>
+						</div>
+						<Button variant={'ghost'}  className=' h-10 flex items-center gap-1 text-base border border-[#458DC7] hover:text-[#458DC7]  text-[#458DC7] hover:bg-[#FFF] bg-[#FFF] py-2 px-4 rounded-[8px]'>
+                           <ViewIcon color='#458DC7' width={24} height={24}/>
+						   {__(	'View','quillcrm')}
+						</Button>
+					</div> */}
+					<SaleRepHeader
+	                name={`${__('Sales Representative Details', 'quillcrm')} - ${saleInfo.name}`}
+	               lastActivity={recentActivities[0]?.time || __('No activity', 'quillcrm')}
+	              showViewButton={false}
+/>
+
+					{/* <Badge
+						variant="outline"
+						// className={`${getStatusColor(rep.ranking)} border-0 flex-shrink-0`}
+						className="border-0 flex-shrink-0"
+					>
+						{rep.ranking}
+					</Badge> */}
+				{/* </div> */}
+			{/* // </CardHeader> */}
+
+			{loading ? (
+				<Skeleton className="h-40 w-full" />
+			) : (
+				<>
+					{/*  Cards Statistics */}
+					{/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+						{Object.entries(cardsStatistics).map(
+							([, value], index) => (
+								<CardsStatistics
+									key={index}
+									label={value.label}
+									value={value.value}
+									change={value.change}
+									isArrow={value.isArrow}
+									isColor={value.isColor}
+								/>
+							)
+						)}
+					</div> */}
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4  border-b py-8 border-b-[#DEE1E6]">
+						{convertToDealsStatistics(cardsStatistics).map((stat, index) => (
+							<DealsStatisticsCard
+								key={index}
+								iconBgColor={stat.iconBgColor}
+								borderColor={stat.borderColor}
+								title={stat.title}
+								icon={stat.icon}
+								statistics={stat.statistics}
+							/>
+						))}
+					</div>
+
+					
+
+					{/* Main Content Grid */}
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+						{/* Pipeline Stages */}
+						<div className='lg:col-span-2 h-full'>
+						<CardPipelineStages ownerId={ownerId ?? null} />
+						</div>
+						{/* Win/Loss Analysis */}
+						<Card className='border border-[#DEE1E6] rounded-[20px] bg-[#F8F8F8] p-3  h-full  lg:col-span-1 flex flex-col'>
+							<CardHeader>
+								<div className="flex justify-between items-center">
+									<CardTitle className=' text-[#09090B] text-2xl font-[Inter] font-medium leading-normal tracking-[-1]'>
+										{__('Win/Loss Analysis', 'quillcrm')}
+									</CardTitle>
+								</div>
+							</CardHeader>
+							<CardContent>
+								<div className="flex items-center justify-between p-0 gap-1">
+									{/* Pie Chart */}
+									<div className="flex-shrink-0">
+										<PieChart width={260} height={260}>
+											<Pie
+												data={[
+													{ name: "Open Deals", value: open },
+													{ name: "Won Deals", value: won },
+													{ name: "Lost Deals", value: lost },
+												]}
+												cx="50%"
+												cy="50%"
+												outerRadius={110}
+												innerRadius={0}
+												dataKey="value"
+												startAngle={90}
+												endAngle={-270}
+											>
+												{["#458DC7", "#16A34A", "#E13B3B"].map((fill, index) => (
+													<Cell key={index} fill={fill} />
+												))}
+											</Pie>
+										</PieChart>
+									</div>
+
+									{/* Legend */}
+									<div className="flex flex-col gap-5 flex-1">
+										{/* Open Deals */}
+										<div className="flex items-center gap-3">
+											<div className="w-4 h-4 rounded-full bg-[#458DC7]"></div>
+											<div className="flex items-center justify-center gap-2">
+												<span className="text-base font-normal leading-[26px] font-[Inter] text-[#09090B]">
+													Open Deals ({openPercent}%):
+												</span>
+												<span className="text-base font-semibold leading-[26px] font-[Inter] text-[#09090B]">
+													{open}K Deal
+												</span>
+											</div>
+										</div>
+
+										{/* Closed Won */}
+										<div className="flex items-center gap-3">
+											<div className="w-4 h-4 rounded-full bg-[#16A34A]"></div>
+											<div className="flex items-center justify-center gap-2">
+												<span className="text-base font-normal leading-[26px] font-[Inter] text-[#09090B]">
+													Closed Won ({wonPercent}%):
+												</span>
+												<span className="text-base font-semibold leading-[26px] font-[Inter] text-[#09090B]">
+													{won}K Deal
+												</span>
+											</div>
+										</div>
+
+										{/* Closed Lost */}
+										<div className="flex items-center gap-3">
+											<div className="w-4 h-4 rounded-full bg-[#E13B3B]"></div>
+											<div className="flex items-center justify-center gap-2">
+												<span className="text-base font-normal leading-[26px] font-[Inter] text-[#09090B]">
+													Closed Lost ({lostPercent}%):
+												</span>
+												<span className="text-base font-semibold leading-[26px] font-[Inter] text-[#09090B]">
+													{lost}K Deal
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					</div>
+
+				
+
+					{/* Table Active Deals */}
+					<TableActiveDeals
+						ownerId={ownerId ?? null}
+						filters={filters}
+						queryParams={queryParams}
+					/>
+
+						{/* Recent Activities */}
+						<Card>
+						<CardHeader>
+							<div className="flex justify-between items-center">
+								<CardTitle>Recent Activities</CardTitle>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="text-blue-600 text-sm"
+								>
+									View all →
+								</Button>
+							</div>
+						</CardHeader>
+						<CardContent>
+							<div className="space-y-1 max-h-80 overflow-y-auto">
+								{recentActivities.length === 0 ? (
+									<div className="text-center text-gray-500">
+										{__('No recent activities', 'quillcrm')}
+									</div>
+								) : (
+									recentActivities.map((activity) => (
+										<ActivityCard
+											key={activity.id}
+											activity={activity}
+										/>
+										
+										// <Activity dealId={activity.id}
+										// 	 />
+									))
+								)}
+							</div>
+						</CardContent>
+					</Card>
+				</>
+			)}
+		</div>
+	);
+};
+
+export default SalesRep;

@@ -7,6 +7,25 @@ import apiFetch from '@wordpress/api-fetch';
 import '../../../lib/chart-setup';
 import { Chart } from 'react-chartjs-2';
 import { Card, CardContent } from '../../../../components/ui/card';
+import {
+	Chart as ChartJS,
+	CategoryScale,
+	LinearScale,
+	BarElement,
+	Title,
+	Tooltip,
+	Legend,
+} from 'chart.js';
+import LeaderboardChartSkeleton from './LeaderboardChartSkeleton';
+
+ChartJS.register(
+	CategoryScale,
+	LinearScale,
+	BarElement,
+	Title,
+	Tooltip,
+	Legend
+);
 
 interface LeaderboardItem {
 	owner_id: number;
@@ -31,13 +50,7 @@ const DealsReportsLeaderboard: React.FC = () => {
 
 	// Use the custom hook for filters
 	const {
-		filters,
-		setFilters,
-		filterOptions,
-		showFilters,
-		setShowFilters,
 		buildQueryParams,
-		clearFilters,
 	} = useReportFilters();
 
 	const fetchDealsReportsLeaderboard = useCallback(async () => {
@@ -82,41 +95,58 @@ const DealsReportsLeaderboard: React.FC = () => {
 			.slice(0, 10);
 
 		return {
-			labels: sortedData.map((item) => item.owner_name), // Y-axis: Owner names
+			labels: sortedData.map((item) => item.owner_name),
 			datasets: [
 				{
 					label: __('Deal Value ($)', 'quillcrm'),
-					data: sortedData.map((item) => item.total_amount), // X-axis: Money values
-					backgroundColor: '#1890ff',
-					borderColor: '#096dd9',
-					borderWidth: 1,
+					data: sortedData.map((item) => item.total_amount),
+					backgroundColor: '#16A34A', 
+					borderColor: '#16A34A',
+					borderWidth: 0,
+					borderRadius: 4,
+					barThickness: 20,
 				},
 			],
 		};
 	};
 
 	const chartOptions = {
-		indexAxis: 'y' as const, // This makes it horizontal (Y-axis = owner names, X-axis = money values)
+		indexAxis: 'y' as const,
 		responsive: true,
 		maintainAspectRatio: false,
+		
 		plugins: {
 			legend: {
 				display: false,
 			},
 			title: {
 				display: true,
-				text: __('Deal Leaderboard - Amount Closed by Rep', 'quillcrm'),
+				text: __('Deal leaderboard - amount closed by rep', 'quillcrm'),
 				font: {
-					size: 16,
-					weight: 'bold' as const,
+					size: 24,
+					weight: 500,
 				},
+				align: 'start' as const,
+				padding: {
+					bottom: 20,
+				},
+				color: '#09090B',
 			},
 			tooltip: {
+				backgroundColor: '#1f2937',
+				padding: 12,
+				cornerRadius: 6,
+				titleFont: {
+					size: 13,
+					weight: 600,
+				},
+				bodyFont: {
+					size: 12,
+				},
 				callbacks: {
 					label: function (context: any) {
-						const value = context.parsed.x; // X-axis value (money amount)
-						const ownerName = context.label; // Y-axis label (owner name)
-						return `${ownerName}: ${new Intl.NumberFormat('en-US', {
+						const value = context.parsed.x;
+						return `Deal Values: ${new Intl.NumberFormat('en-US', {
 							style: 'currency',
 							currency: 'USD',
 						}).format(value)}`;
@@ -126,83 +156,66 @@ const DealsReportsLeaderboard: React.FC = () => {
 		},
 		scales: {
 			x: {
-				// X-axis: Money values
 				beginAtZero: true,
-				title: {
+				grid: {
 					display: true,
-					text: __('Deal Value ($)', 'quillcrm'),
-				},
-				ticks: {
-					callback: function (value: any) {
-						return new Intl.NumberFormat('en-US', {
-							style: 'currency',
-							currency: 'USD',
-							notation: 'compact',
-						}).format(value);
-					},
-				},
-			},
-			y: {
-				// Y-axis: Owner names
-				title: {
-					display: true,
-					text: __('Sales Rep', 'quillcrm'),
+					color: '#E5E6EB',
+					drawBorder: false,
+					borderDash: [4, 4]
 				},
 				ticks: {
 					font: {
 						size: 12,
 					},
+					color: '#86909C',
+					callback: function (value: any) {
+						return new Intl.NumberFormat('en-US', {
+							style: 'currency',
+							currency: 'USD',
+							notation: 'compact',
+							maximumFractionDigits: 1,
+						}).format(value);
+					},
 				},
+				border: {
+					display: false,
+				},
+			},
+			y: {
+				
+				grid: {
+					display: false,
+					drawBorder: false,
+					borderDash: [4, 4],
+				},
+				ticks: {
+					font: {
+						size: 14,
+					},
+					color: '#777',
+					padding: 8,
+				},
+				border: {
+					display: true,
+				},
+			},
+		},
+		layout: {
+			padding: {
+				left: 10,
+				right: 20,
+				top: 10,
+				bottom: 10,
 			},
 		},
 	};
 
 	return (
-		<div>
-			{/* Filters Section */}
-			<ReportFilters
-				key={`filters-${JSON.stringify(filters)}`}
-				title={__(
-					'Deal leaderboard - amount closed by rep',
-					'quillcrm'
-				)}
-				filters={filters}
-				setFilters={setFilters}
-				filterOptions={filterOptions}
-				showFilters={showFilters}
-				setShowFilters={setShowFilters}
-				clearFilters={clearFilters}
-				applyFilters={applyFilters}
-				showPredefinedDateRange={false}
-				showDateRange={false}
-				showOwner={true}
-				showPipeline={true}
-				showStatus={false}
-				showContact={true}
-			/>
-
-			{/* Chart Section */}
-			<Card style={{ marginTop: 20 }}>
-				<CardContent>
-					<div style={{ marginBottom: 16 }}>
-						<p className="text-sm text-gray-600/80 font-medium">
-							{__(
-								'Showing deal values closed by each sales representative',
-								'quillcrm'
-							)}
-						</p>
-						<br />
-						<p className="text-sm text-gray-600/80 font-medium">
-							🔸{' '}
-							{__(
-								'Y-axis: Sales Rep Names | X-axis: Deal Values ($)',
-								'quillcrm'
-							)}
-						</p>
-					</div>
-
+			
+			<Card className='border border-[#DEE1E6] p-5' style={{ backgroundColor: '#F5F5F5' , boxShadow:'none' }}>
+				<CardContent style={{ padding: '24px' }}>
 					{loading ? (
-						<Skeleton className="h-8 w-full" />
+						<LeaderboardChartSkeleton/>
 					) : (
 						<div style={{ height: '500px', width: '100%' }}>
 							<Chart
@@ -214,7 +227,7 @@ const DealsReportsLeaderboard: React.FC = () => {
 					)}
 				</CardContent>
 			</Card>
-		</div>
+		
 	);
 };
 

@@ -1,15 +1,17 @@
 import {
 	Card,
 	CardContent,
-	CardFooter,
+
 	CardHeader,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { __ } from '@wordpress/i18n';
 
 import CardsStatistics, {
 	CardsStatisticsProps,
 } from '../components/card-statistics';
+
+import SaleRepHeader from './sale-rep-header';
 
 export interface SalesRepCardProps {
 	id: number;
@@ -74,36 +76,42 @@ const SalesRepCard = ({
 
 	return (
 		<Card
-			// className={`border-2 ${getBorderColor(rep.ranking)} shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
-			className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+			className="shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-[#DEE1E6] rounded-[20px] bg-[#F8F8F8]"
 			onClick={onClick}
 		>
 			<CardHeader className="pb-4">
-				<div className="flex items-start justify-between gap-3">
-					<div className="flex items-center gap-3 min-w-0 flex-1">
+				{/* <div className="flex items-start justify-between gap-3">
+					<div className="flex items-center gap-2 min-w-0 flex-1">
 						<div
-							// className={`w-12 h-12 rounded-full ${getAvatarColor(rep.ranking)} flex items-center justify-center text-white font-semibold flex-shrink-0`}
-							className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0"
+							className="w-12 h-12 rounded-full flex items-center justify-center border-2 border-[#DEE1E6] font-semibold flex-shrink-0"
 						>
-							{rep.name.charAt(0).toUpperCase()}
+							<UserActivityIcon width={22} height={32}/>
 						</div>
 						<div className="min-w-0 flex-1">
-							<h3 className="font-semibold text-gray-900 text-lg truncate">
+							<h3 className="font-semibold text-[#09090B] text-base leading-[26px] truncate">
 								{rep.name}
 							</h3>
-							<p className="text-gray-500 text-sm truncate">
-								{rep.email}
-							</p>
+							<div className="flex gap-1">
+							     <MeetingActivityIcon />
+								 <p className='text-base  font-medium text-[#777] '>
+								   {__(	'Last Activity:','quillcrm')}
+								   <span className='text-[#660FF1] font-semibold'>{rep.lastActivity}</span>
+								 </p>
+							</div>
 						</div>
+						<Button variant={'ghost'} onClick={onClick} className=' h-10 flex items-center gap-1 text-base border border-[#458DC7] hover:text-[#458DC7]  text-[#458DC7] hover:bg-[#FFF] bg-[#FFF] py-2 px-4 rounded-[8px]'>
+                           <ViewIcon color='#458DC7' width={24} height={24}/>
+						   {__(	'View','quillcrm')}
+						</Button>
 					</div>
-					{/* <Badge
-						variant="outline"
-						// className={`${getStatusColor(rep.ranking)} border-0 flex-shrink-0`}
-						className="border-0 flex-shrink-0"
-					>
-						{rep.ranking}
-					</Badge> */}
-				</div>
+					
+				</div> */}
+				<SaleRepHeader
+	name={rep.name}
+	lastActivity={rep.lastActivity}
+	showViewButton={true}
+	onViewClick={onClick}
+/>
 			</CardHeader>
 
 			<CardContent className="p-6 pt-0">
@@ -111,8 +119,8 @@ const SalesRepCard = ({
 				<div className="grid grid-cols-2 gap-2 mb-2">
 					<CardsStatistics
 						key={0}
-						label={rep.total_deals_close_won_number.label}
 						value={rep.total_deals_close_won_number.value}
+						label={rep.total_deals_close_won_number.label}
 						change={rep.total_deals_close_won_number.change}
 						isArrow={rep.total_deals_close_won_number.isArrow}
 						isColor={rep.total_deals_close_won_number.isColor}
@@ -122,7 +130,7 @@ const SalesRepCard = ({
 						label={rep.total_deals_close_lost_number.label}
 						value={rep.total_deals_close_lost_number.value}
 						change={rep.total_deals_close_lost_number.change}
-						isArrow={rep.total_deals_close_lost_number.isArrow}
+						// isArrow={rep.total_deals_close_lost_number.isArrow}
 						isColor={rep.total_deals_close_lost_number.isColor}
 					/>
 				</div>
@@ -146,11 +154,7 @@ const SalesRepCard = ({
 				</div>
 			</CardContent>
 
-			<CardFooter className="pt-4 border-t border-gray-100 justify-center">
-				<span className="text-sm text-gray-500">
-					{__('Last activity:', 'quillcrm')} {rep.lastActivity}
-				</span>
-			</CardFooter>
+			
 		</Card>
 	);
 };

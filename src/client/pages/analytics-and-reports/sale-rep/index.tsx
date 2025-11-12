@@ -30,7 +30,13 @@ import ActivityCard, { ActivityItem } from '../components/card-activity';
 import CardPipelineStages from '../components/card-pipeline-stages';
 import TableActiveDeals from '../components/table-active-deals';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
-import ReportFilters from '../../../../components/reports/ReportFilters';
+import { PieChart, Pie, Cell } from 'recharts';
+import DealsStatisticsCard, {
+	convertToDealsStatistics,
+} from '../components/card-statistics-deatails';
+import SaleRepHeader from '../components/sale-rep-header';
+import SaleReportFilter from '../components/sale-report-filter';
+import SalesRepSkeleton from './SalesRepSkeleton';
 
 interface SalesRepResponse {
 	sale_info: {
@@ -56,6 +62,51 @@ interface SalesRepResponse {
 	};
 	recent_activities: ActivityItem[];
 }
+
+// Utility function to convert timestamp to relative time
+const getRelativeTime = (timestamp: string): string => {
+	const now = new Date();
+	const past = new Date(timestamp);
+	const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+
+	if (diffInSeconds < 60) {
+		return __('Just now', 'quillcrm');
+	}
+
+	const diffInMinutes = Math.floor(diffInSeconds / 60);
+	if (diffInMinutes < 60) {
+		return diffInMinutes === 1
+			? __('1 minute ago', 'quillcrm')
+			: `${diffInMinutes} ${__('minutes ago', 'quillcrm')}`;
+	}
+
+	const diffInHours = Math.floor(diffInMinutes / 60);
+	if (diffInHours < 24) {
+		return diffInHours === 1
+			? __('1 hour ago', 'quillcrm')
+			: `${diffInHours} ${__('hours ago', 'quillcrm')}`;
+	}
+
+	const diffInDays = Math.floor(diffInHours / 24);
+	if (diffInDays < 30) {
+		return diffInDays === 1
+			? __('1 day ago', 'quillcrm')
+			: `${diffInDays} ${__('days ago', 'quillcrm')}`;
+	}
+
+	const diffInMonths = Math.floor(diffInDays / 30);
+	if (diffInMonths < 12) {
+		return diffInMonths === 1
+			? __('1 month ago', 'quillcrm')
+			: `${diffInMonths} ${__('months ago', 'quillcrm')}`;
+	}
+
+	const diffInYears = Math.floor(diffInMonths / 12);
+	return diffInYears === 1
+		? __('1 year ago', 'quillcrm')
+		: `${diffInYears} ${__('years ago', 'quillcrm')}`;
+};
+
 
 interface SalesRepProps {
 	ownerId?: number;
@@ -89,8 +140,6 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 		filters,
 		setFilters,
 		filterOptions,
-		showFilters,
-		setShowFilters,
 		buildQueryParams,
 		clearFilters,
 	} = useReportFilters();
@@ -130,158 +179,177 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 	const applyFilters = useCallback(() => {
 		fetchSalesRep();
 	}, [fetchSalesRep]);
+	const open = Number(wonLossAnalytics.total_deals_open);
+	const won = Number(wonLossAnalytics.total_deals_won);
+	const lost = Number(wonLossAnalytics.total_deals_lost);
+
+	const total = open + won + lost;
+
+	const openPercent = total ? ((open / total) * 100).toFixed(1) : 0;
+	const wonPercent = total ? ((won / total) * 100).toFixed(1) : 0;
+	const lostPercent = total ? ((lost / total) * 100).toFixed(1) : 0;
+
+	// time header
+	// Get relative time for last activity
+	const lastActivityTime = recentActivities[0]?.time 
+		? getRelativeTime(recentActivities[0].time)
+		: __('No activity', 'quillcrm');
 
 	return (
-		<div className="max-w-7xl mx-auto p-6 space-y-6">
-			{/* Filters Section */}
-			<ReportFilters
-				key={`filters-${JSON.stringify(filters)}`}
-				title={__('Sales Rep', 'quillcrm')}
-				filters={filters}
-				setFilters={setFilters}
-				filterOptions={filterOptions}
-				showFilters={showFilters}
-				setShowFilters={setShowFilters}
-				clearFilters={clearFilters}
-				applyFilters={applyFilters}
-				showSource={false}
-				showOwner={false}
-				showPipeline={false}
-				showStatus={false}
-				showContact={false}
-			/>
-			{/* Header Section */}
-			<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 border-b">
-				<div className="flex items-center gap-4">
-					<div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
-						{saleInfo?.name?.charAt(0)}
-					</div>
-					<div>
-						<h1 className="text-2xl font-bold text-gray-900">
-							{saleInfo?.name}
-						</h1>
-						<p className="text-sm text-gray-500">
-							{saleInfo.email}
-						</p>
-					</div>
-				</div>
+		<div className="w-7xl max-w-[90vw] mx-auto flex flex-col gap-5 ">
+			<div className=" flex justify-between items-center">
+				{/* Header Section */}
+				<SaleRepHeader
+					name={`${__('Sales Representative Details', 'quillcrm')} - ${saleInfo.name}`}
+					// lastActivity={
+					// 	recentActivities[0]?.time ||
+					lastActivity={
+						lastActivityTime
+					}
+					showViewButton={false}
+				/>
+				{/* Filters Section */}
+				<SaleReportFilter
+					key={`filters-${JSON.stringify(filters)}`}
+					// title={__('Sales Rep', 'quillcrm')}
+					filters={filters}
+					setFilters={setFilters}
+					clearFilters={clearFilters}
+					applyFilters={applyFilters}
+					filterOptions={filterOptions}
+				/>
 			</div>
 
 			{loading ? (
-				<Skeleton className="h-40 w-full" />
+				<SalesRepSkeleton/>
 			) : (
 				<>
-					{/*  Cards Statistics */}
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-						{Object.entries(cardsStatistics).map(
-							([, value], index) => (
-								<CardsStatistics
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4  border-b py-8 border-b-[#DEE1E6]">
+						{convertToDealsStatistics(cardsStatistics).map(
+							(stat, index) => (
+								<DealsStatisticsCard
 									key={index}
-									label={value.label}
-									value={value.value}
-									change={value.change}
-									isArrow={value.isArrow}
-									isColor={value.isColor}
+									iconBgColor={stat.iconBgColor}
+									borderColor={stat.borderColor}
+									title={stat.title}
+									icon={stat.icon}
+									statistics={stat.statistics}
 								/>
 							)
 						)}
 					</div>
 
 					{/* Main Content Grid */}
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start border-b py-8 border-b-[#DEE1E6]">
 						{/* Pipeline Stages */}
-						<CardPipelineStages ownerId={ownerId ?? null} />
+						<div className="lg:col-span-2 h-full">
+							<CardPipelineStages ownerId={ownerId ?? null} />
+						</div>
 						{/* Win/Loss Analysis */}
-						<Card>
+						<Card className="border border-[#DEE1E6] rounded-[20px] bg-[#F8F8F8] p-3  h-full  lg:col-span-1 flex flex-col">
 							<CardHeader>
 								<div className="flex justify-between items-center">
-									<CardTitle>
+									<CardTitle className=" text-[#09090B] text-2xl font-[Inter] font-medium leading-normal tracking-[-1]">
 										{__('Win/Loss Analysis', 'quillcrm')}
 									</CardTitle>
 								</div>
 							</CardHeader>
 							<CardContent>
-								<div className="flex items-center gap-8">
-									{/* Donut Chart */}
-									<div className="relative w-24 h-24">
-										<svg
-											className="w-24 h-24 transform -rotate-90"
-											viewBox="0 0 100 100"
-										>
-											{/* Background circle */}
-											<circle
-												cx="50"
-												cy="50"
-												r="40"
-												stroke="#e5e7eb"
-												strokeWidth="8"
-												fill="none"
-											/>
-											{/* Progress circle for win rate */}
-											<circle
-												cx="50"
-												cy="50"
-												r="40"
-												stroke="#10b981"
-												strokeWidth="8"
-												fill="none"
-												strokeDasharray={`${parseFloat(wonLossAnalytics.win_rate || '0') * 2.51} 251`}
-												strokeLinecap="round"
-											/>
-										</svg>
-										<div className="absolute inset-0 flex items-center justify-center">
-											<div className="text-center">
-												<div className="text-xl font-bold text-gray-900">
-													{wonLossAnalytics.win_rate ||
-														'0'}
-													%
-												</div>
-												<div className="text-xs text-gray-500 uppercase">
-													{__('Win Rate', 'quillcrm')}
-												</div>
-											</div>
-										</div>
+								<div className="flex items-center justify-between p-0 gap-1">
+									{/* Pie Chart */}
+									<div className="flex-shrink-0">
+										<PieChart width={260} height={260}>
+											<Pie
+												data={[
+													{
+														name: 'Open Deals',
+														value: open,
+													},
+													{
+														name: 'Won Deals',
+														value: won,
+													},
+													{
+														name: 'Lost Deals',
+														value: lost,
+													},
+												]}
+												cx="50%"
+												cy="50%"
+												outerRadius={110}
+												innerRadius={0}
+												dataKey="value"
+												startAngle={90}
+												endAngle={-270}
+											>
+												{[
+													'#458DC7',
+													'#16A34A',
+													'#E13B3B',
+												].map((fill, index) => (
+													<Cell
+														key={index}
+														fill={fill}
+													/>
+												))}
+											</Pie>
+										</PieChart>
 									</div>
 
-									{/* Statistics */}
-									<div className="space-y-3">
+									{/* Legend */}
+									<div className="flex flex-col gap-5 flex-1">
+										{/* Open Deals */}
 										<div className="flex items-center gap-3">
-											<div className="w-8 h-8 bg-green-50 rounded flex items-center justify-center">
-												<span className="text-green-600 font-semibold text-sm">
-													{wonLossAnalytics.total_deals_won ||
-														'0'}
+											<div className="w-4 h-4 rounded-full bg-[#458DC7]"></div>
+											<div className="flex items-center justify-center gap-2">
+												<span className="text-base font-normal leading-[26px] font-[Inter] text-[#09090B]">
+													Open Deals ({openPercent}%):
+												</span>
+												<span className="text-base font-semibold leading-[26px] font-[Inter] text-[#09090B]">
+													{open}K Deal
 												</span>
 											</div>
-											<span className="text-xs text-gray-500 uppercase">
-												{__('Won Deals', 'quillcrm')}
-											</span>
 										</div>
+
+										{/* Closed Won */}
 										<div className="flex items-center gap-3">
-											<div className="w-8 h-8 bg-red-50 rounded flex items-center justify-center">
-												<span className="text-red-600 font-semibold text-sm">
-													{wonLossAnalytics.total_deals_lost ||
-														'0'}
+											<div className="w-4 h-4 rounded-full bg-[#16A34A]"></div>
+											<div className="flex items-center justify-center gap-2">
+												<span className="text-base font-normal leading-[26px] font-[Inter] text-[#09090B]">
+													Closed Won ({wonPercent}%):
+												</span>
+												<span className="text-base font-semibold leading-[26px] font-[Inter] text-[#09090B]">
+													{won}K Deal
 												</span>
 											</div>
-											<span className="text-xs text-gray-500 uppercase">
-												{__('Lost Deals', 'quillcrm')}
-											</span>
 										</div>
+
+										{/* Closed Lost */}
 										<div className="flex items-center gap-3">
-											<div className="w-8 h-8 bg-gray-50 rounded flex items-center justify-center">
-												<span className="text-gray-600 font-semibold text-sm">
-													{wonLossAnalytics.total_deals_open ||
-														'0'}
+											<div className="w-4 h-4 rounded-full bg-[#E13B3B]"></div>
+											<div className="flex items-center justify-center gap-2">
+												<span className="text-base font-normal leading-[26px] font-[Inter] text-[#09090B]">
+													Closed Lost ({lostPercent}
+													%):
+												</span>
+												<span className="text-base font-semibold leading-[26px] font-[Inter] text-[#09090B]">
+													{lost}K Deal
 												</span>
 											</div>
-											<span className="text-xs text-gray-500 uppercase">
-												{__('No Decision', 'quillcrm')}
-											</span>
 										</div>
 									</div>
 								</div>
 							</CardContent>
 						</Card>
+					</div>
+
+					{/* Table Active Deals */}
+					<div className='border-b py-8 border-b-[#DEE1E6]'>
+					<TableActiveDeals
+						ownerId={ownerId ?? null}
+						filters={filters}
+						queryParams={queryParams}
+					/>
 					</div>
 
 					{/* Recent Activities */}
@@ -310,18 +378,14 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 											key={activity.id}
 											activity={activity}
 										/>
+
+										// <Activity dealId={activity.id}
+										// 	 />
 									))
 								)}
 							</div>
 						</CardContent>
 					</Card>
-
-					{/* Table Active Deals */}
-					<TableActiveDeals
-						ownerId={ownerId ?? null}
-						filters={filters}
-						queryParams={queryParams}
-					/>
 				</>
 			)}
 		</div>

@@ -92,7 +92,7 @@ export const useContactsColumns = () => {
 							)}
 							<div className="flex flex-col">
 								{fullName && (
-									<div className="font-semibold capitalize text-base text-[#09090B]">
+									<div className="font-semibold capitalize text-base text-[#09090B] w-40 truncate">
 										{fullName}
 									</div>
 								)}

@@ -11,15 +11,25 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { SendIcon, AlertCircle } from 'lucide-react';
 import { AlertIcon, SendTestEmailIcon } from '@quillcrm/components/icons';
+import { cn } from '@/lib/utils';
 
 interface SendTestEmailCardProps {
 	campaignId?: number;
+	header?: boolean;
+	description?: boolean;
+	cardClassName?: string;
+	buttonClassName?: string;
+	buttonVariant?: 'secondary' | 'gradient';
 }
 
 const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 	campaignId,
+	header = true,
+	description = true,
+	cardClassName = '',
+	buttonClassName = '',
+	buttonVariant = 'secondary',
 }) => {
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [testEmails, setTestEmails] = useState('');
@@ -133,22 +143,28 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 	};
 
 	return (
-		<div className="bg-[#F8F8F8] rounded-lg border border-gray-200 p-6 sticky top-4">
-			{/* Header */}
-			<div className="pb-4 border-b mb-6">
-				<div className="flex items-center gap-2 justify-center text-[#660FF1]">
-					<SendTestEmailIcon  />
-					<h3 className="text-lg text-[#660FF1]">
-						{__('Send test email', 'quillcrm')}
-					</h3>
+		<div className={cn('bg-[#F8F8F8] rounded-lg border border-gray-200 p-6 sticky top-4', cardClassName)}>
+			{header && (
+				<div className="pb-4 border-b mb-6">
+					<div className="flex items-center gap-2 justify-center text-[#660FF1]">
+						<SendTestEmailIcon />
+						<h3 className="text-lg text-[#660FF1]">
+							{__('Send test email', 'quillcrm')}
+						</h3>
+					</div>
 				</div>
-			</div>
+			)}
 
 			{/* Content */}
 			<div className="space-y-4">
-				<h4 className="text-base text-[#09090B]">
-					{__('Who do you want to test your email with?', 'quillcrm')}
-				</h4>
+				{description && (
+					<h4 className="text-base text-[#09090B]">
+						{__(
+							'Who do you want to test your email with?',
+							'quillcrm'
+						)}
+					</h4>
+				)}
 
 				<div>
 					<label className="block text-base text-[#09090B] mb-2">
@@ -173,7 +189,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 				<div className="bg-white border border-[#DEE1E6] rounded-lg p-4">
 					<div className="flex gap-3">
 						<div className="text-destructive">
-						<AlertIcon width={24} height={24} />	
+							<AlertIcon width={24} height={24} />
 						</div>
 						<p className="text-base text-destructive">
 							{__(
@@ -189,9 +205,12 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 					<Button
 						onClick={sendTestEmail}
 						disabled={isSendingTest || !testEmails.trim()}
-						variant="secondary"
+						variant={buttonVariant}
+						className={cn(buttonClassName)}
 					>
-						{isSendingTest ? __('Sending...', 'quillcrm') : __('Send Test', 'quillcrm')}
+						{isSendingTest
+							? __('Sending...', 'quillcrm')
+							: __('Send Test', 'quillcrm')}
 					</Button>
 				</div>
 			</div>

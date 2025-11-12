@@ -13,22 +13,22 @@ interface CampaignSettingsCardProps {
 	campaignType?: string;
 	fromName: string;
 	fromEmail?: string;
-	fromPhone?: string;
 	replyTo?: string;
 	emailSubject?: string;
 	previewText?: string;
 	onEdit?: () => void;
+	button?: boolean;
 }
 
 const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 	campaignType = 'email',
 	fromName,
 	fromEmail,
-	fromPhone,
 	replyTo,
 	emailSubject,
 	previewText,
 	onEdit,
+	button = true,
 }) => {
 	const isSMS = campaignType === 'sms';
 
@@ -39,27 +39,15 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 			buttonIcon={<EditIcon />}
 			buttonText={__('Edit', 'quillcrm')}
 			onButtonClick={onEdit}
+			button={button}
 		>
 			<div className="space-y-4">
 				{isSMS ? (
-					// SMS Layout - Only From Name and Phone
-					<div className="grid grid-cols-2 gap-2">
-						<div>
-							<p className="text-base text-gray-500 mb-1">
-								{__('From Name', 'quillcrm')}
-							</p>
-							<p className="text-base font-semibold text-gray-900">
-								{fromName}
-							</p>
-						</div>
-						<div>
-							<p className="text-base text-gray-500 mb-1">
-								{__('Phone', 'quillcrm')}
-							</p>
-							<p className="text-base font-semibold text-gray-900">
-								{fromPhone || '-'}
-							</p>
-						</div>
+					// SMS Layout - No sender fields (uses global Twilio phone number)
+					<div className="text-center py-4">
+						<p className="text-base text-gray-500">
+							{__('SMS campaigns use the phone number configured in Twilio integration settings.', 'quillcrm')}
+						</p>
 					</div>
 				) : (
 					// Email Layout - All fields

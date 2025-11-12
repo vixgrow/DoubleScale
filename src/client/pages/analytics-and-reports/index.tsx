@@ -18,6 +18,7 @@ import { BarChartOutlined, UserOutlined } from '@ant-design/icons';
  */
 import PageTabs from '../../../components/page-tabs';
 import { useCapabilities } from '../../../hooks/use-capabilities';
+import PipelineAnalysis from './pipeline-rep';
 
 const AnalyticsAndReports: React.FC = () => {
 	const { isDealOwner } = useCapabilities();
@@ -41,6 +42,11 @@ const AnalyticsAndReports: React.FC = () => {
 					value: 'sales-rep',
 					label: 'Sales Rep',
 					icon: <UserOutlined />,
+				},
+				{
+					value: 'pipeline-analysis',
+					label: 'Pipeline Analysis',
+					icon: <BarChartOutlined />, 
 				},
 			];
 
@@ -66,6 +72,11 @@ const AnalyticsAndReports: React.FC = () => {
 					value: 'sales-rep',
 					children: <SalesRep />,
 				},
+				{
+					value: 'pipeline-analysis',
+					children: <PipelineAnalysis />,
+				},
+		
 			];
 
 	return (

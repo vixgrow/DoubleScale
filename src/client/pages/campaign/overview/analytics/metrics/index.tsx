@@ -115,7 +115,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						{/* Not Processing: Open rate */}
 						<MessageStatsCard
 							icon={<OpenRateIcon width={40} height={40} />}
-							value={`${calculatePercentage(totalMessages, campaign.opened_count || 0)}%`}
+							value={`${campaign.open_rate?.toFixed(2) || '0.00'}%`}
 							label={__('Open Rate', 'quillcrm')}
 							iconBgClass="bg-[#E4FAEC]"
 							borderColorClass="border-l-[#16A34A]"
@@ -125,7 +125,7 @@ export const RenderMetrics: React.FC<MetricsProps> = ({
 						{/* Not Processing: Click rate */}
 						<MessageStatsCard
 							icon={<ClickRateIcon width={40} height={40} />}
-							value={`${calculatePercentage(totalMessages, campaign.clicked_count)}%`}
+							value={`${campaign.click_rate?.toFixed(2) || '0.00'}%`}
 							label={__('Click Rate', 'quillcrm')}
 							iconBgClass="bg-[#EEE4FF]"
 							borderColorClass="border-l-[#660FF1]"

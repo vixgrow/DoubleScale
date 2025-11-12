@@ -14,6 +14,7 @@ import {
 } from '../../../../components/ui/select';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
 
 interface PipelineStage {
 	id: number;
@@ -102,31 +103,30 @@ const CardPipelineStages: React.FC<{ ownerId: number | null }> = ({
 	};
 
 	return (
-		<Card>
+		<Card className=' border border-[#DEE1E6] rounded-[20px] bg-[#F8F8F8] p-3'>
 			<CardHeader>
-				<div className="flex justify-between items-center mb-4">
-					<CardTitle>{__('Pipeline by Stage', 'quillcrm')}</CardTitle>
-					<span className="text-sm text-gray-500">
-						{pipelineStages.reduce(
+				<div className=' flex justify-between gap-8'>
+				<div className="flex items-center justify-center gap-2 mb-4 text-[#09090B] text-2xl font-[Inter] font-medium leading-normal tracking-[-1] ">
+					<CardTitle className=' '>{__('Pipeline by Stage', 'quillcrm')}</CardTitle>
+					<span className="">
+						({pipelineStages.reduce(
 							(total, stage) => total + stage.count,
 							0
 						)}{' '}
-						{__('active deals', 'quillcrm')}
+						{__('active deals', 'quillcrm')})
 					</span>
 				</div>
+				<div>
 				{Object.keys(pipelines).length > 0 && (
-					<div className="flex items-center gap-2">
-						<label className="text-sm font-medium text-gray-700">
-							{__('Pipeline:', 'quillcrm')}
-						</label>
+					<div className="flex items-center gap-2 ">
 						<Select
 							value={selectedPipelineId?.toString() || ''}
 							onValueChange={handlePipelineChange}
 						>
-							<SelectTrigger className="w-48">
+							<SelectTrigger className=" border placeholder:px-2 border-[#DEE1E6] bg-[#FFF] rounded-[8px] py-4 px-6 text-[#09090B] font-medium ">
 								<SelectValue
 									placeholder={__(
-										'Select pipeline',
+										' Pipeline Name',
 										'quillcrm'
 									)}
 								/>
@@ -141,6 +141,8 @@ const CardPipelineStages: React.FC<{ ownerId: number | null }> = ({
 						</Select>
 					</div>
 				)}
+				</div>
+				</div>
 			</CardHeader>
 			<CardContent>
 				{pipelineLoading ? (
@@ -174,17 +176,17 @@ const CardPipelineStages: React.FC<{ ownerId: number | null }> = ({
 										<div
 											className="absolute top-[45px] left-[50%] w-full h-0.5 bg-gray-200 z-0"
 											style={{
-												width: 'calc(100% - 60px)',
-												left: '50%',
-												transform: 'translateX(30px)',
+												width: 'calc(100% - 120px)',
+												top: '60px',
+												transform: 'translateX(60px)',
 											}}
 										/>
 									)}
 
 									{/* Circular progress indicator */}
-									<div className="relative w-[90px] h-[90px] mx-auto mb-3">
+									<div className="relative w-[120px] h-[120px] mx-auto mb-3">
 										<svg
-											className="w-[90px] h-[90px] transform -rotate-90"
+											className="w-[120px] h-[120px] transform -rotate-90"
 											viewBox="0 0 80 80"
 										>
 											{/* Background circle */}
@@ -201,7 +203,7 @@ const CardPipelineStages: React.FC<{ ownerId: number | null }> = ({
 												cx="40"
 												cy="40"
 												r="35"
-												stroke={stage.color}
+												stroke={StageTextColor(stage.color)}
 												strokeWidth="6"
 												fill="none"
 												strokeDasharray={circumference}
@@ -222,12 +224,12 @@ const CardPipelineStages: React.FC<{ ownerId: number | null }> = ({
 									</div>
 
 									{/* Stage name */}
-									<div className="text-sm font-medium text-gray-700 mb-1">
+									<div className="text-base font-normal  text-[#09090B] mb-1">
 										{stage.name}
 									</div>
 
 									{/* Stage value */}
-									<div className="text-lg font-bold text-gray-900">
+									<div className="text-base font-semibold text-[#09090B]">
 										{stage.value}
 									</div>
 								</div>

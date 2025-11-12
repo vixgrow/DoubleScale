@@ -82,20 +82,37 @@ export const BulkActionsToolbar: React.FC<BulkActionsToolbarProps> = ({
 		}
 	};
 
-	const handleBulkUpdate = async (field: string, value: any) => {
+	const handleBulkUpdate = async (field: string, value: any, additionalValue?: any) => {
 		setIsPerformingBulk(true);
 		try {
 			const data: any = {};
 			data[field] = value;
 
+			// For pipeline moves, also set the stage_id
+			if (field === 'pipeline_id' && additionalValue) {
+				data['stage_id'] = additionalValue;
+			}
+
 			const updatedCount = await bulkUpdateDeals(selectedDealIds, data);
-			createNotice?.({
-				type: 'success',
-				message: __(
-					`Successfully updated ${updatedCount} deal(s)`,
-					'quillcrm'
-				),
-			});
+			
+			// Provide specific feedback for pipeline moves
+			if (field === 'pipeline_id') {
+				createNotice?.({
+					type: 'success',
+					message: __(
+						`Successfully moved ${updatedCount} deal(s) to the selected pipeline`,
+						'quillcrm'
+					),
+				});
+			} else {
+				createNotice?.({
+					type: 'success',
+					message: __(
+						`Successfully updated ${updatedCount} deal(s)`,
+						'quillcrm'
+					),
+				});
+			}
 
 			// Close modals
 			setShowStageModal(false);

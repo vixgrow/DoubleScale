@@ -46,7 +46,7 @@ export function getColumns({
 			header: __('Contact', 'quillcrm'),
 			cell: ({ row }) => {
 				const contact = row.original.contact;
-				const fullName = `${contact.first_name || '-'} ${contact.last_name || '-'}`.trim();
+				const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
 				const initials = getContactInitials(contact.first_name || '', contact.last_name || '');
 				const hasImage = (contact as any).img;
 
@@ -70,7 +70,7 @@ export function getColumns({
 							)}
 							<div className="flex flex-col">
 								{fullName && (
-									<div className="font-semibold capitalize text-base text-[#09090B]">
+									<div className="font-semibold capitalize text-base w-40 truncate text-[#09090B]">
 										{fullName}
 									</div>
 								)}

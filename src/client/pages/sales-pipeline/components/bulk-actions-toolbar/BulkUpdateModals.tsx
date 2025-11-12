@@ -69,10 +69,10 @@ export const BulkUpdateModals: React.FC<BulkUpdateModalsProps> = ({
 		}
 	}, [showOwnerModal]);
 
-	// Fetch pipelines
+	// Fetch pipelines with stages
 	useEffect(() => {
 		if (showPipelineModal) {
-			apiFetch({ path: '/qc/v1/pipelines' })
+			apiFetch({ path: '/qc/v1/pipelines?with_stages=true' })
 				.then((pipelines: any) => setPipelines(pipelines))
 				.catch(() => setPipelines([]));
 		}
@@ -233,6 +233,9 @@ export const BulkUpdateModals: React.FC<BulkUpdateModalsProps> = ({
 							))}
 						</SelectContent>
 					</Select>
+					<p className="text-sm text-gray-500 mt-2">
+						{__('Deals will be moved to the first stage of the selected pipeline', 'quillcrm')}
+					</p>
 				</div>
 				<div className="flex justify-end gap-3">
 					<Button
@@ -243,9 +246,23 @@ export const BulkUpdateModals: React.FC<BulkUpdateModalsProps> = ({
 						{__('Cancel', 'quillcrm')}
 					</Button>
 					<Button
-						onClick={() =>
-							selectedPipeline && onUpdate('pipeline_id', parseInt(selectedPipeline))
-						}
+						onClick={() => {
+							if (selectedPipeline) {
+								const targetPipeline = pipelines.find(p => p.id === parseInt(selectedPipeline));
+
+								if (targetPipeline && targetPipeline.stages && targetPipeline.stages.length > 0) {
+									// Sort stages by sort_order and get the first one
+									const sortedStages = [...targetPipeline.stages].sort((a: any, b: any) => a.sort_order - b.sort_order);
+									const firstStage = sortedStages[0];
+
+									// Send both pipeline_id and stage_id
+									onUpdate('pipeline_id', parseInt(selectedPipeline), firstStage.id);
+								} else {
+									// Fallback: send just pipeline_id (backend should handle this)
+									onUpdate('pipeline_id', parseInt(selectedPipeline));
+								}
+							}
+						}}
 						disabled={isPerforming || !selectedPipeline}
 					>
 						{isPerforming ? __('Updating...', 'quillcrm') : __('Update', 'quillcrm')}

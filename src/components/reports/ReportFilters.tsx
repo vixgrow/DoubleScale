@@ -1,3 +1,5 @@
+
+
 import React, { useMemo, useCallback } from 'react';
 import { __ } from '@wordpress/i18n';
 import dayjs from 'dayjs';
@@ -14,14 +16,15 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
 import FiltersIcon from '@/components/icons/filters';
+import { X } from 'lucide-react';
 import { FilterSelect } from './components/FilterSelect';
 import {
 	usePredefinedPeriod,
 	getPredefinedDateRange,
 } from './hooks/usePredefinedPeriod';
 import { SOURCE_OPTIONS } from '../../config/types/config-data';
+import { DateRangePopup } from '@/client/pages/analytics-and-reports/components/DateRangePopup';
 
 // Constants
 const STATUS_OPTIONS = [
@@ -52,12 +55,12 @@ const PredefinedDateRangeFilter: React.FC<PredefinedDateRangeFilterProps> = ({
 	selectedPeriod,
 	onPeriodChange,
 }) => (
-	<div>
-		<label className="block text-sm font-medium mb-1">
+	<div className="flex flex-col gap-1 w-full">
+		<label className="text-sm font-medium text-[#09090B]">
 			{__('Quick Date Range', 'quillcrm')}
 		</label>
 		<Select value={selectedPeriod} onValueChange={onPeriodChange}>
-			<SelectTrigger className="w-48">
+			<SelectTrigger className="w-full h-10">
 				<SelectValue placeholder={__('Select Period', 'quillcrm')} />
 			</SelectTrigger>
 			<SelectContent>
@@ -81,11 +84,11 @@ const CustomDateRangeFilter: React.FC<CustomDateRangeFilterProps> = ({
 	value,
 	onChange,
 }) => (
-	<div>
-		<label className="block text-sm font-medium mb-1">
-			{__('Custom Date Range', 'quillcrm')}
+	<div className="flex flex-col gap-1 w-full">
+		<label className="text-sm font-medium text-[#09090B]">
+			{__('Quick Date Range', 'quillcrm')}
 		</label>
-		<DateRangePicker value={value} onChange={onChange} className="w-60" />
+		<DateRangePopup  value={value} onChange={onChange} className="w-full" />
 	</div>
 );
 
@@ -96,12 +99,12 @@ interface StatusFilterProps {
 }
 
 const StatusFilter: React.FC<StatusFilterProps> = ({ value, onChange }) => (
-	<div>
-		<label className="block text-sm font-medium mb-1">
+	<div className="flex flex-col gap-1 w-full">
+		<label className="text-sm font-medium text-[#09090B]">
 			{__('Status', 'quillcrm')}
 		</label>
 		<Select value={value} onValueChange={onChange}>
-			<SelectTrigger className="w-30">
+			<SelectTrigger className="text-sm text-[#09090B] font-[Manrope] w-full h-12 bg-[#FFF] border border-[#DEE1E6] rounded-[8px] py-[5px] px-4">
 				<SelectValue placeholder={__('Select Status', 'quillcrm')} />
 			</SelectTrigger>
 			<SelectContent>
@@ -122,12 +125,12 @@ interface SourceFilterProps {
 }
 
 const SourceFilter: React.FC<SourceFilterProps> = ({ value, onChange }) => (
-	<div>
-		<label className="block text-sm font-medium mb-1">
+	<div className="flex flex-col gap-1 w-full">
+		<label className="text-sm font-medium text-[#09090B]">
 			{__('Deal Source', 'quillcrm')}
 		</label>
 		<Select value={value} onValueChange={onChange}>
-			<SelectTrigger className="w-40">
+			<SelectTrigger className="w-full h-12 bg-[#FFF] border border-[#DEE1E6] rounded-[8px] py-[5px] px-4">
 				<SelectValue placeholder={__('Select Source', 'quillcrm')} />
 			</SelectTrigger>
 			<SelectContent>
@@ -148,18 +151,20 @@ interface ActionButtonsProps {
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({ onClear, onApply }) => (
-	<div>
-		<label className="block text-sm font-medium mb-1">
-			{__('Actions', 'quillcrm')}
-		</label>
-		<div className="flex gap-2">
-			<Button onClick={onClear} variant="outline">
-				{__('Clear', 'quillcrm')}
-			</Button>
-			<Button onClick={onApply} variant="default">
-				{__('Apply', 'quillcrm')}
-			</Button>
-		</div>
+	<div className="flex items-end justify-end gap-2 col-span-full mt-2">
+		<Button 
+			onClick={onClear} 
+			variant="outline"
+			className="p-3 text-base font-semibold h-12 bg-transparent border border-[#E13B3B] text-[#E13B3B]  rounded-[8px]"
+		>
+			{__('Clear', 'quillcrm')}
+		</Button>
+		<Button 
+			onClick={onApply} 
+			className="p-3 text-base font-semibold h-12 bg-[#1E3A8A] text-white  rounded-[8px]"
+		>
+			{__('Apply', 'quillcrm')}
+		</Button>
 	</div>
 );
 
@@ -323,97 +328,80 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 	);
 
 	return (
-		<Card style={{ marginBottom: 20, ...style }} className={className}>
+		<Card style={{ marginBottom: 20, ...style }} className=' !shadow-none border border-[#DEE1E6] bg-[#F8F8F8] rounded-[8px] p-4'>
 			<CardContent className="p-4">
 				<div
 					className="flex justify-between items-center"
 					style={{ marginBottom: showFilters ? 16 : 0 }}
 				>
-					<h3 className="text-lg font-semibold leading-none tracking-tight m-0">
+					<h3 className="text-2xl text-[#09090B] font-medium leading-normal tracking-[-1] m-0">
 						{title}
 					</h3>
 					<Button
 						onClick={() => setShowFilters(!showFilters)}
-						variant={showFilters ? 'default' : 'outline'}
-						className="flex items-center gap-2"
+						className={`flex items-center gap-2 !border-0 rounded-[7px] py-[10px] px-4 text-base font-semibold leading-[24px] font-[Inter] h-10 ${
+							showFilters 
+								? 'bg-[#FEE2E2] hover:bg-[#FEE2E2] text-[#E13B3B]' 
+								: 'bg-[#C6DFF3] hover:bg-[#C6DFF3] text-[#458DC7]'
+						}`}
 					>
-						<FiltersIcon />
-						{__('Filters', 'quillcrm')}
+						{showFilters ? (
+							<>
+								<X className="w-4 h-4" />
+								{__('Close', 'quillcrm')}
+							</>
+						) : (
+							<>
+								<FiltersIcon />
+								{__('Filter', 'quillcrm')}
+							</>
+						)}
 					</Button>
 				</div>
 
 				{showFilters && (
-					<div className="border-t border-gray-200 pt-4">
-						<div className="flex flex-wrap gap-4">
-							{/* Predefined Date Range Filter */}
-							{showPredefinedDateRange && (
-								<PredefinedDateRangeFilter
-									selectedPeriod={selectedPeriod}
-									onPeriodChange={handlePredefinedDateChange}
-								/>
-							)}
-
+					<div className="border-t border-gray-200 pt-4 mt-4">
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 							{/* Custom Date Range Filter */}
 							{showDateRange && (
 								<CustomDateRangeFilter
 									value={dateRangeValue}
 									onChange={handleCustomDateChange}
-								/>
-							)}
-
-							{/* Owner Filter */}
-							{showOwner && (
-								<FilterSelect
-									label={__('Owner', 'quillcrm')}
-									value={filters.ownerId?.toString()}
-									defaultValue={
-										showOwnerDefault
-											? selectedOwnerId?.toString()
-											: undefined
-									}
-									placeholder={__('Select Owner', 'quillcrm')}
-									onChange={handleOwnerChange}
-									options={filterOptions.owners || []}
+									
 								/>
 							)}
 
 							{/* Pipeline Filter */}
 							{showPipeline && (
-								<FilterSelect
-									label={__('Pipeline', 'quillcrm')}
-									value={filters.pipelineId?.toString()}
-									placeholder={__(
-										'Select Pipeline',
-										'quillcrm'
-									)}
-									onChange={handlePipelineChange}
-									options={filterOptions.pipelines || []}
-								/>
+								<div className="w-full">
+									<FilterSelect
+										label={__('Pipeline', 'quillcrm')}
+										value={filters.pipelineId?.toString()}
+										placeholder={__('Select Pipeline', 'quillcrm')}
+										onChange={handlePipelineChange}
+										options={filterOptions.pipelines || []}
+										className='w-full  h-12 bg-[#FFF] border border-[#DEE1E6] rounded-[8px] py-[5px] px-4'
+									/>
+								</div>
 							)}
 
-							{/* Status Filter */}
-							{showStatus && (
-								<StatusFilter
-									value={filters.status ?? undefined}
-									onChange={handleStatusChange}
-								/>
-							)}
-
-							{/* Contact Filter */}
-							{showContact && (
-								<FilterSelect
-									label={__('Contact', 'quillcrm')}
-									value={filters.contactId?.toString()}
-									placeholder={__(
-										'Select Contact',
-										'quillcrm'
-									)}
-									onChange={handleContactChange}
-									options={filterOptions.contacts || []}
-									renderOptionText={(contact) =>
-										`${contact.first_name} ${contact.last_name}`
-									}
-								/>
+							{/* Owner Filter */}
+							{showOwner && (
+								<div className="w-full">
+									<FilterSelect
+										label={__('Owner', 'quillcrm')}
+										value={filters.ownerId?.toString()}
+										defaultValue={
+											showOwnerDefault
+												? selectedOwnerId?.toString()
+												: undefined
+										}
+										placeholder={__('Select Owner', 'quillcrm')}
+										onChange={handleOwnerChange}
+										options={filterOptions.owners || []}
+										className=' w-full h-12 bg-[#FFF] border border-[#DEE1E6] rounded-[8px] py-[5px] px-4'
+									/>
+								</div>
 							)}
 
 							{/* Source Filter */}
@@ -421,6 +409,32 @@ const ReportFilters: React.FC<ReportFiltersProps> = ({
 								<SourceFilter
 									value={filters.source ?? undefined}
 									onChange={handleSourceChange}
+								/>
+							)}
+
+							{/* Contact Filter */}
+							{showContact && (
+								<div className="w-full">
+									<FilterSelect
+										label={__('Contact', 'quillcrm')}
+										value={filters.contactId?.toString()}
+										placeholder={__('Select Contact', 'quillcrm')}
+										onChange={handleContactChange}
+										options={filterOptions.contacts || []}
+										renderOptionText={(contact) =>
+											`${contact.first_name} ${contact.last_name}`
+										
+										}
+										className='w-full h-12 bg-[#FFF] border border-[#DEE1E6] rounded-[8px] py-[5px] px-4'
+									/>
+								</div>
+							)}
+
+							{/* Status Filter */}
+							{showStatus && (
+								<StatusFilter
+									value={filters.status ?? undefined}
+									onChange={handleStatusChange}
 								/>
 							)}
 

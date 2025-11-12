@@ -22,15 +22,9 @@ const SalesRepModal = ({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden p-0">
-				<DialogHeader className="p-6 border-b border-gray-200">
-					<DialogTitle className="text-xl font-semibold text-gray-900">
-						{__('Sales Representative Details', 'quillcrm')}
-					</DialogTitle>
-				</DialogHeader>
-
+			<DialogContent className=" w-7xl max-w-[90vw] max-h-[90vh] p-6 overflow-y-auto">
 				{/* Content */}
-				<div className="overflow-y-auto max-h-[calc(90vh-80px)] p-6">
+				<div className=" max-h-[calc(90vh-80px)] p-6">
 					<SalesRepDetailView ownerId={ownerId} />
 				</div>
 			</DialogContent>

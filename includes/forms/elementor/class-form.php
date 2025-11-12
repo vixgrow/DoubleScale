@@ -21,8 +21,6 @@ use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
  */
 class Form extends Abstracts_Form {
 
-
-
 	/**
 	 * Slug
 	 *
@@ -179,22 +177,47 @@ class Form extends Abstracts_Form {
 		$data['form_title'] = $record->get_form_settings( 'form_name' );
 		$fields             = $record->get( 'fields' );
 		$data['fields']     = $this->prepare_fields( $fields );
-		$entry              = array(
-			'fields' => array(),
-		);
 
+		$entry = array( 'fields' => array() );
 		foreach ( $fields as $field_id => $field ) {
 			$entry['fields'][ $field_id ] = $field['value'] ?? '';
 		}
-
 		$data['entry'] = $entry;
 
-		if ( $this->is_form_active( $record->get_form_settings( 'id' ) ) ) {
+		$page_id = $record->get_form_settings( 'source_id' );
+
+		if ( ! $page_id ) {
+			$page_id = get_the_ID();
+		}
+
+		if ( ! $page_id && ! empty( $_POST['referrer'] ) ) {
+			$page_id = url_to_postid( sanitize_text_field( $_POST['referrer'] ) );
+		}
+
+		// page_id:form_id
+		$form_id = $page_id . ':' . $record->get_form_settings( 'id' );
+
+		if ( $this->is_form_active( $form_id ) ) {
 			$this->process_form( $data );
 		}
 
 		$this->process_automations( $data );
 	}
+
+
+	/**
+	 * Get form id
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $form_id
+	 *
+	 * @return string
+	 */
+	public function get_form_id( $form_id ) {
+		return $form_id;
+	}
+
 
 	/**
 	 * Prepare fields

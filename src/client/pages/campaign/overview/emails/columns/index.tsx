@@ -48,26 +48,23 @@ export function getColumns({
 				const contact = row.original.contact;
 				const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
 				const initials = getContactInitials(contact.first_name || '', contact.last_name || '');
-				const hasImage = (contact as any).img;
+				const avatarUrl = (contact as any).avatar_url;
 
 				return (
 					<NavLink to={`/contacts/${contact.id}`}>
 						<div className="flex items-center gap-3">
-							{hasImage ? (
-								<Avatar className="w-12 h-12 rounded-lg">
+							<Avatar className="w-12 h-12 rounded-lg">
+								{avatarUrl ? (
 									<AvatarImage
-										src={(contact as any).img}
+										src={avatarUrl}
 										alt={fullName || contact.email}
 										className="rounded-lg"
 									/>
-								</Avatar>
-							) : (
-								<Avatar className="w-12 h-12 rounded-lg">
-									<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
-										{initials}
-									</AvatarFallback>
-								</Avatar>
-							)}
+								) : null}
+								<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
+									{initials}
+								</AvatarFallback>
+							</Avatar>
 							<div className="flex flex-col">
 								{fullName && (
 									<div className="font-semibold capitalize text-base w-40 truncate text-[#09090B]">

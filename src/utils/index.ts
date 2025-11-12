@@ -354,7 +354,7 @@ export const mapRulesToFilters = (
 			group: r.selectedGroup || '',
 			filter: r.rule, // backend expects filter slug
 			operator: r.operator || 'is',
-			value: r.value ?? '',
+			value: typeof r.value === 'string' ? r.value.trim() : (r.value ?? ''),
 		}));
 };
 

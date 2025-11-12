@@ -20,7 +20,8 @@ import {
 } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import type { SMSTemplate, NoticeMessage } from '@quillcrm/client';
+import type { SMSTemplate, NoticeMessage, Campaign } from '@quillcrm/client';
+import type { ExtendedCampaign } from '@/stores/campaign/types';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { getCampaignEndpoint } from '@quillcrm/utils';
 import SMSDevice from './sms-device';
@@ -53,8 +54,10 @@ const SMSTemplateStep: React.FC = () => {
 		},
 	};
 
-	const [template, setTemplate] = useState<SMSTemplate>(() => {
-		// Safely extract template or use default
+	const [template, setTemplate] = useState<SMSTemplate>(defaultTemplate);
+
+	// Sync template state with campaign data when it changes
+	useEffect(() => {
 		const existingTemplate = campaign?.settings?.templates?.[0];
 		if (
 			existingTemplate &&
@@ -63,7 +66,7 @@ const SMSTemplateStep: React.FC = () => {
 		) {
 			// Convert backend format to frontend format
 			const backendTemplate = existingTemplate as any;
-			return {
+			setTemplate({
 				name: backendTemplate.name || defaultTemplate.name,
 				type: CAMPAIGN_CHANNEL.SMS,
 				body: backendTemplate.body || '',
@@ -71,10 +74,9 @@ const SMSTemplateStep: React.FC = () => {
 					add_unsubscribe:
 						backendTemplate.settings?.add_unsubscribe ?? true,
 				},
-			};
+			});
 		}
-		return defaultTemplate;
-	});
+	}, [campaign?.settings?.templates]);
 
 	const updateTemplate = (updates: Partial<SMSTemplate>) => {
 		setTemplate((prev) => ({
@@ -149,9 +151,10 @@ const SMSTemplateStep: React.FC = () => {
 						templates: [backendTemplate],
 					},
 				},
-			});
+			}) as Campaign;
 
-			updateCampaign(response as any);
+			// Update campaign store with response data
+			updateCampaign(response as Partial<ExtendedCampaign>);
 
 			setNotice(null);
 			goToStep('contacts');

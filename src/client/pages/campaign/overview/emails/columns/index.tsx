@@ -46,7 +46,7 @@ export function getColumns({
 			header: __('Contact', 'quillcrm'),
 			cell: ({ row }) => {
 				const contact = row.original.contact;
-				const fullName = `${contact.first_name || '-'} ${contact.last_name || '-'}`.trim();
+				const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
 				const initials = getContactInitials(contact.first_name || '', contact.last_name || '');
 				const hasImage = (contact as any).img;
 

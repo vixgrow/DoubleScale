@@ -70,7 +70,7 @@ export function getColumns({
 							)}
 							<div className="flex flex-col">
 								{fullName && (
-									<div className="font-semibold capitalize text-base text-[#09090B]">
+									<div className="font-semibold capitalize text-base w-40 truncate text-[#09090B]">
 										{fullName}
 									</div>
 								)}

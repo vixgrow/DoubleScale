@@ -113,12 +113,10 @@ const ConversionRatesChart: React.FC<ConversionRatesChartProps> = ({
         percentage: 0,
       }));
 
-      // حساب الـ Conversion Rate بالنسبة لأكبر عدد deals
-      // هنلاقي أكبر عدد deals في كل المراحل ونستخدمه كـ 100%
       const maxDealsCount = Math.max(...rawStages.map(s => s.count), 1);
 
       const stagesWithConversion = rawStages.map((stage) => {
-        // حساب النسبة المئوية بالنسبة لأكبر عدد
+       
         const conversionRate = Math.round((stage.count / maxDealsCount) * 100);
         
         return { ...stage, percentage: conversionRate };

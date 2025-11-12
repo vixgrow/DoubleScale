@@ -310,8 +310,11 @@ const View: React.FC = () => {
 							</PanelSettings>
 						</div>
 
-						<div className="w-2/5 border rounded-lg bg-[#f8f8f8]">
-							<div className="p-4 flex items-center justify-center">
+						<div className="w-2/5 border rounded-lg bg-[#f8f8f8] p-4">
+							<div className="text-[#333333] font-medium text-2xl">
+								{__('Email Preview', 'quillcrm')}
+							</div>
+							<div className="flex items-center justify-center">
 								{campaign.type === CAMPAIGN_CHANNEL.EMAIL ? (
 									isRenderingTemplate ? (
 										<div className="flex flex-col items-center gap-2 text-gray-500">
@@ -325,7 +328,7 @@ const View: React.FC = () => {
 										</div>
 									) : renderedTemplate ? (
 										<div
-											className="w-full h-full overflow-auto p-4 template-body-preview"
+											className="w-full h-full overflow-auto template-body-preview"
 											dangerouslySetInnerHTML={{
 												__html: renderedTemplate,
 											}}

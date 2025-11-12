@@ -292,7 +292,7 @@ const SMSTemplateStep: React.FC = () => {
 						</div>
 					</PanelSettings>
 				</div>
-				<SMSDevice fromName="" body={template.body} />
+				<SMSDevice body={template.body} />
 			</div>
 		</PanelLayout>
 	);

@@ -494,7 +494,7 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function move_to_pipeline( $request ) {
-		$deal_id     = $request->get_param( 'id' );
+		$deal_id     = intval( $request->get_param( 'id' ) );
 		$pipeline_id = intval( $request->get_param( 'pipeline_id' ) );
 		$stage_id    = $request->get_param( 'stage_id' ) ? intval( $request->get_param( 'stage_id' ) ) : null;
 		$user_id     = get_current_user_id();

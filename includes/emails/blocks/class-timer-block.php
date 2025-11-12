@@ -77,7 +77,7 @@ class Timer_Block extends Email_Block {
 	/**
 	 * Render block
 	 *
-	 * @param array $props Block properties
+	 * @param array                                       $props Block properties
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
@@ -92,46 +92,49 @@ class Timer_Block extends Email_Block {
 
 		// Calculate time remaining
 		$target_timestamp = $this->get_target_timestamp( $props );
-		$time_left        = $this->calculate_time_left( $target_timestamp );
+		$time_left        = $this->calculate_time_left( $target_timestamp, $props );
 
-		// Build container styles
+		// Email-friendly (table-based) layout and styles
 		$container_styles = array(
 			'width'            => $this->format_width( $props['width'] ),
 			'background-color' => $props['backgroundColor'],
 			'text-align'       => $props['align'],
 			'padding'          => $this->format_padding( $props['padding'] ),
 			'border-radius'    => '8px',
-			'display'          => 'inline-block',
 		);
 
-		// Build digit styles
 		$digit_styles = array(
 			'font-family' => $props['digitsFontFamily'],
 			'font-size'   => $props['digitsFontSize'] . 'px',
+			'line-height' => ( $props['digitsFontSize'] + 6 ) . 'px',
 			'color'       => $props['digitsColor'],
 			'font-weight' => 'bold',
-			'margin'      => '0 4px',
+			'text-align'  => 'center',
+			'padding'     => '8px 6px',
+			'min-width'   => '32px',
+			'display'     => 'inline-block',
 		);
 
-		// Build separator styles
 		$separator_styles = array(
 			'font-family' => $props['separatorFontFamily'],
 			'font-size'   => $props['separatorFontSize'] . 'px',
+			'line-height' => ( $props['separatorFontSize'] + 6 ) . 'px',
 			'color'       => $props['separatorColor'],
 			'font-weight' => 'bold',
-			'margin'      => '0 4px',
+			'text-align'  => 'center',
+			'padding'     => '8px 2px',
+			'min-width'   => '8px',
+			'display'     => 'inline-block',
 		);
 
-		$time_unit_styles = array(
-			'display'    => 'inline-block',
-			'text-align' => 'center',
-			'margin'     => '0 8px',
+		$label_styles = array(
+			'font-family' => $props['digitsFontFamily'],
+			'font-size'   => '12px',
+			'color'       => '#666666',
+			'text-align'  => 'center',
+			'padding-top' => '2px',
+			'display'     => 'block',
 		);
-
-		$container_style_string = $this->build_style_string( $container_styles );
-		$digit_style_string     = $this->build_style_string( $digit_styles );
-		$separator_style_string = $this->build_style_string( $separator_styles );
-		$time_unit_style_string = $this->build_style_string( $time_unit_styles );
 
 		// Format time values
 		$days    = str_pad( $time_left['days'], 2, '0', STR_PAD_LEFT );
@@ -139,33 +142,30 @@ class Timer_Block extends Email_Block {
 		$minutes = str_pad( $time_left['minutes'], 2, '0', STR_PAD_LEFT );
 		$seconds = str_pad( $time_left['seconds'], 2, '0', STR_PAD_LEFT );
 
-		// Build timer HTML
-		$timer_html = "
-			<div style=\"{$container_style_string}\">
-				<div>
-					<div style=\"{$time_unit_style_string}\">
-						<div style=\"{$digit_style_string}\">{$days}</div>
-					</div>
-					<span style=\"{$separator_style_string}\">:</span>
-					<div style=\"{$time_unit_style_string}\">
-						<div style=\"{$digit_style_string}\">{$hours}</div>
-					</div>
-					<span style=\"{$separator_style_string}\">:</span>
-					<div style=\"{$time_unit_style_string}\">
-						<div style=\"{$digit_style_string}\">{$minutes}</div>
-					</div>
-					<span style=\"{$separator_style_string}\">:</span>
-					<div style=\"{$time_unit_style_string}\">
-						<div style=\"{$digit_style_string}\">{$seconds}</div>
-					</div>
-				</div>
-			</div>
-		";
+		$container_style_string = $this->build_style_string( $container_styles );
+		$digit_style_string     = $this->build_style_string( $digit_styles );
+		$separator_style_string = $this->build_style_string( $separator_styles );
+		$label_style_string     = $this->build_style_string( $label_styles );
+
+		// Build timer HTML using tables for email client compatibility
+		$timer_html  = '<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="' . $container_style_string . '">';
+		$timer_html .= '<table role="presentation" cellspacing="0" cellpadding="0" border="0" align="' . esc_attr( $props['align'] ) . '" style="margin:0 auto;"><tr>';
+
+		$timer_html .= '<td align="center"><span style="' . $digit_style_string . '">' . $days . '</span><span style="' . $label_style_string . '">' . esc_html__( 'Days', 'quillcrm' ) . '</span></td>';
+		$timer_html .= '<td align="center"><span style="' . $separator_style_string . '">:</span></td>';
+		$timer_html .= '<td align="center"><span style="' . $digit_style_string . '">' . $hours . '</span><span style="' . $label_style_string . '">' . esc_html__( 'Hours', 'quillcrm' ) . '</span></td>';
+		$timer_html .= '<td align="center"><span style="' . $separator_style_string . '">:</span></td>';
+		$timer_html .= '<td align="center"><span style="' . $digit_style_string . '">' . $minutes . '</span><span style="' . $label_style_string . '">' . esc_html__( 'Minutes', 'quillcrm' ) . '</span></td>';
+		$timer_html .= '<td align="center"><span style="' . $separator_style_string . '">:</span></td>';
+		$timer_html .= '<td align="center"><span style="' . $digit_style_string . '">' . $seconds . '</span><span style="' . $label_style_string . '">' . esc_html__( 'Seconds', 'quillcrm' ) . '</span></td>';
+
+		$timer_html .= '</tr></table>';
+		$timer_html .= '</td></tr></table>';
 
 		// Wrap in link if provided
 		if ( ! empty( $props['link'] ) ) {
 			$alt_text   = ! empty( $props['altText'] ) ? $props['altText'] : __( 'Countdown Timer', 'quillcrm' );
-			$timer_html = "<a href=\"{$props['link']}\" style=\"text-decoration: none; display: block;\" title=\"{$alt_text}\">{$timer_html}</a>";
+			$timer_html = '<a href="' . esc_url( $props['link'] ) . '" style="text-decoration: none; display: block;" title="' . esc_attr( $alt_text ) . "\">{$timer_html}</a>";
 		}
 
 		return $timer_html;
@@ -184,24 +184,60 @@ class Timer_Block extends Email_Block {
 			'text-align'       => $props['align'],
 			'padding'          => $this->format_padding( $props['padding'] ),
 			'border-radius'    => '8px',
-			'display'          => 'inline-block',
 			'border'           => '2px dashed #e5e5e5',
 		);
 
-		$placeholder_text_styles = array(
+		$digit_styles = array(
 			'font-family' => $props['digitsFontFamily'],
 			'font-size'   => $props['digitsFontSize'] . 'px',
+			'line-height' => ( $props['digitsFontSize'] + 6 ) . 'px',
 			'color'       => $props['digitsColor'],
 			'font-weight' => 'bold',
 			'text-align'  => 'center',
+			'padding'     => '8px 6px',
+			'min-width'   => '32px',
+			'display'     => 'inline-block',
 		);
 
-		$placeholder_style_string      = $this->build_style_string( $placeholder_styles );
-		$placeholder_text_style_string = $this->build_style_string( $placeholder_text_styles );
+		$separator_styles = array(
+			'font-family' => $props['separatorFontFamily'],
+			'font-size'   => $props['separatorFontSize'] . 'px',
+			'line-height' => ( $props['separatorFontSize'] + 6 ) . 'px',
+			'color'       => $props['separatorColor'],
+			'font-weight' => 'bold',
+			'text-align'  => 'center',
+			'padding'     => '8px 2px',
+			'min-width'   => '8px',
+			'display'     => 'inline-block',
+		);
 
-		return "<div style=\"{$placeholder_style_string}\">
-			<div style=\"{$placeholder_text_style_string}\">00 : 00 : 00 : 00</div>
-		</div>";
+		$label_styles = array(
+			'font-family' => $props['digitsFontFamily'],
+			'font-size'   => '12px',
+			'color'       => '#666666',
+			'text-align'  => 'center',
+			'padding-top' => '2px',
+			'display'     => 'block',
+		);
+
+		$container_style_string = $this->build_style_string( $placeholder_styles );
+		$digit_style_string     = $this->build_style_string( $digit_styles );
+		$separator_style_string = $this->build_style_string( $separator_styles );
+		$label_style_string     = $this->build_style_string( $label_styles );
+
+		$html  = '<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="' . $container_style_string . '">';
+		$html .= '<table role="presentation" cellspacing="0" cellpadding="0" border="0" align="' . esc_attr( $props['align'] ) . '" style="margin:0 auto;"><tr>';
+		$html .= '<td align="center"><span style="' . $digit_style_string . '">00</span><span style="' . $label_style_string . '">' . esc_html__( 'Days', 'quillcrm' ) . '</span></td>';
+		$html .= '<td align="center"><span style="' . $separator_style_string . '">:</span></td>';
+		$html .= '<td align="center"><span style="' . $digit_style_string . '">00</span><span style="' . $label_style_string . '">' . esc_html__( 'Hours', 'quillcrm' ) . '</span></td>';
+		$html .= '<td align="center"><span style="' . $separator_style_string . '">:</span></td>';
+		$html .= '<td align="center"><span style="' . $digit_style_string . '">00</span><span style="' . $label_style_string . '">' . esc_html__( 'Minutes', 'quillcrm' ) . '</span></td>';
+		$html .= '<td align="center"><span style="' . $separator_style_string . '">:</span></td>';
+		$html .= '<td align="center"><span style="' . $digit_style_string . '">00</span><span style="' . $label_style_string . '">' . esc_html__( 'Seconds', 'quillcrm' ) . '</span></td>';
+		$html .= '</tr></table>';
+		$html .= '</td></tr></table>';
+
+		return $html;
 	}
 
 	/**
@@ -211,30 +247,54 @@ class Timer_Block extends Email_Block {
 	 * @return int Target timestamp
 	 */
 	private function get_target_timestamp( array $props ): int {
-		try {
-			$target_date = new \DateTime( $props['targetDate'] );
-			$target_date->setTime( $props['targetHour'], $props['targetMinute'], 0 );
+		$tz_string = ! empty( $props['timezone'] ) ? $props['timezone'] : wp_timezone_string();
+		if ( empty( $tz_string ) ) {
+			$tz_string = 'UTC';
+		}
 
-			// Convert to target timezone
-			if ( ! empty( $props['timezone'] ) ) {
-				$target_date->setTimezone( new \DateTimeZone( $props['timezone'] ) );
+		try {
+			$tz = new \DateTimeZone( $tz_string );
+
+			// If targetDate includes time info, use it; otherwise use targetHour/Minute
+			$includes_time = (bool) preg_match( '/\d{1,2}:\d{2}/', $props['targetDate'] ) || strpos( $props['targetDate'], 'T' ) !== false;
+
+			if ( $includes_time ) {
+				$target = new \DateTime( $props['targetDate'], $tz );
+			} else {
+				$target = new \DateTime( $props['targetDate'], $tz );
+				$hour   = is_numeric( $props['targetHour'] ) ? (int) $props['targetHour'] : 0;
+				$minute = is_numeric( $props['targetMinute'] ) ? (int) $props['targetMinute'] : 0;
+				$target->setTime( $hour, $minute, 0 );
 			}
 
-			return $target_date->getTimestamp();
+			return $target->getTimestamp();
 		} catch ( \Exception $e ) {
-			return time(); // Fallback to current time
+			return time();
 		}
 	}
 
 	/**
 	 * Calculate time left until target
 	 *
-	 * @param int $target_timestamp Target timestamp
+	 * @param int   $target_timestamp Target timestamp
+	 * @param array $props Block properties (for timezone)
 	 * @return array Time left array
 	 */
-	private function calculate_time_left( int $target_timestamp ): array {
-		$now        = time();
-		$difference = $target_timestamp - $now;
+	private function calculate_time_left( int $target_timestamp, array $props ): array {
+		$tz_string = ! empty( $props['timezone'] ) ? $props['timezone'] : wp_timezone_string();
+		if ( empty( $tz_string ) ) {
+			$tz_string = 'UTC';
+		}
+
+		try {
+			$tz     = new \DateTimeZone( $tz_string );
+			$now    = new \DateTime( 'now', $tz );
+			$now_ts = $now->getTimestamp();
+		} catch ( \Exception $e ) {
+			$now_ts = time();
+		}
+
+		$difference = $target_timestamp - $now_ts;
 
 		if ( $difference <= 0 ) {
 			return array(

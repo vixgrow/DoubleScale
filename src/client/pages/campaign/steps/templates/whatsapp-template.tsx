@@ -26,7 +26,7 @@ import MessageComposer from './components/message-composer';
 import { getCampaignEndpoint } from '@quillcrm/utils';
 
 const WhatsAppTemplateStep: React.FC = () => {
-	const { campaign, saving, goToStep } = useCampaignStep();
+	const { campaign, saving, goToStep, updateCampaign } = useCampaignStep();
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [isSendingTest, setIsSendingTest] = useState(false);
 	const [testPhone, setTestPhone] = useState('');
@@ -119,7 +119,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 				throw new Error(__('Invalid campaign type', 'quillcrm'));
 			}
 
-			await apiFetch({
+			const response = await apiFetch({
 				path: `${endpoint}/${campaign.id}`,
 				method: 'PUT',
 				data: {
@@ -130,6 +130,10 @@ const WhatsAppTemplateStep: React.FC = () => {
 					},
 				},
 			});
+
+			// Update campaign store with response data
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			updateCampaign(response as any);
 
 			goToStep('contacts');
 		} catch (error: any) {

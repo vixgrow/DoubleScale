@@ -26,7 +26,7 @@ import { getCampaignEndpoint } from '@quillcrm/utils';
 import SMSDevice from './sms-device';
 
 const SMSTemplateStep: React.FC = () => {
-	const { campaign, saving, goToStep } = useCampaignStep();
+	const { campaign, saving, goToStep, updateCampaign } = useCampaignStep();
 	const { setMergeTagsVisible, setMergeTagCallback } =
 		useDispatch('quillcrm/core');
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
@@ -139,7 +139,7 @@ const SMSTemplateStep: React.FC = () => {
 				throw new Error(__('Invalid campaign type', 'quillcrm'));
 			}
 
-			await apiFetch({
+			const response = await apiFetch({
 				path: `${endpoint}/${campaign.id}`,
 				method: 'PUT',
 				data: {
@@ -150,6 +150,8 @@ const SMSTemplateStep: React.FC = () => {
 					},
 				},
 			});
+
+			updateCampaign(response as any);
 
 			setNotice(null);
 			goToStep('contacts');

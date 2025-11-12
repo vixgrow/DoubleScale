@@ -102,16 +102,19 @@ class Deal_Model extends Model {
 	 * @return array
 	 */
 	public $rules = array(
-		'title'       => 'required|string|max:255',
-		'contact_id'  => 'required|integer',
-		'pipeline_id' => 'required|integer',
-		'stage_id'    => 'required|integer',
-		'value'       => 'nullable|numeric|min:0',
-		'currency'    => 'nullable|string|size:3',
-		'probability' => 'nullable|numeric|between:0,100',
-		'priority'    => 'nullable|in:low,medium,high',
-		'status'      => 'required|in:open,won,lost',
-		'owner_id'    => 'nullable|integer|min:1',
+		'title'               => 'required|string|max:255',
+		'contact_id'          => 'required|integer',
+		'pipeline_id'         => 'required|integer',
+		'stage_id'            => 'required|integer',
+		'value'               => 'nullable|numeric|min:0',
+		'currency'            => 'nullable|string|size:3',
+		'expected_close_date' => 'nullable|date_format:Y-m-d',
+		'probability'         => 'nullable|numeric|between:0,100',
+		'priority'            => 'nullable|in:low,medium,high',
+		'status'              => 'required|in:open,won,lost',
+		'owner_id'            => 'nullable|integer|min:1',
+		'won_time'            => 'nullable|date_format:Y-m-d H:i:s',
+		'lost_time'           => 'nullable|date_format:Y-m-d H:i:s',
 	);
 
 	/**
@@ -122,18 +125,21 @@ class Deal_Model extends Model {
 	 * @return array
 	 */
 	public $messages = array(
-		'title.required'       => 'Deal title is required.',
-		'title.max'            => 'Deal title must not exceed 255 characters.',
-		'contact_id.required'  => 'Contact is required.',
-		'pipeline_id.required' => 'Pipeline is required.',
-		'stage_id.required'    => 'Stage is required.',
-		'value.numeric'        => 'Deal value must be a number.',
-		'value.min'            => 'Deal value cannot be negative.',
-		'probability.numeric'  => 'Probability must be a number.',
-		'probability.between'  => 'Probability must be between 0 and 100.',
-		'priority.in'          => 'Priority must be low, medium, or high.',
-		'status.in'            => 'Status must be open, won, or lost.',
-		'owner_id.min'         => 'Owner ID must be a positive number.',
+		'title.required'               => 'Deal title is required.',
+		'title.max'                    => 'Deal title must not exceed 255 characters.',
+		'contact_id.required'          => 'Contact is required.',
+		'pipeline_id.required'         => 'Pipeline is required.',
+		'stage_id.required'            => 'Stage is required.',
+		'value.numeric'                => 'Deal value must be a number.',
+		'value.min'                    => 'Deal value cannot be negative.',
+		'expected_close_date.date_format' => 'Expected close date must be in Y-m-d format (e.g., 2025-12-31).',
+		'probability.numeric'          => 'Probability must be a number.',
+		'probability.between'          => 'Probability must be between 0 and 100.',
+		'priority.in'                  => 'Priority must be low, medium, or high.',
+		'status.in'                    => 'Status must be open, won, or lost.',
+		'owner_id.min'                 => 'Owner ID must be a positive number.',
+		'won_time.date_format'         => 'Won time must be in Y-m-d H:i:s format.',
+		'lost_time.date_format'        => 'Lost time must be in Y-m-d H:i:s format.',
 	);
 
 	/**

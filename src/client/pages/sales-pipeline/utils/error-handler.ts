@@ -20,6 +20,7 @@ export interface ApiError {
  */
 export interface ErrorInfo {
 	type: number; // e.g. 404, 403, 500, 0 (network)
+	message: string; // User-friendly error message
 }
 
 /**
@@ -53,8 +54,14 @@ export const handleApiError = (
 		(error as any)?.status ||
 		(error as any)?.code ||
 		0;
-		
-	return { type: Number(status) || 500 };
+
+	// Extract error message from API response
+	const message = getErrorMessage(error, fallbackMessage);
+
+	return {
+		type: Number(status) || 500,
+		message
+	};
 };
 
 /**

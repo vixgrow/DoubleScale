@@ -1,4 +1,8 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+/**
  * external dependencies
  */
 import { forwardRef, useImperativeHandle } from 'react';
@@ -13,8 +17,7 @@ import {
 	ContactsImportModal,
 	ContactsExportModal,
 } from './contacts-modals';
-import Contact from '../../contact';
-import type { Contact as ContactType } from '@quillcrm/client';
+import { NoData, ContactsIcon, GradientAddContactIcon, GradientContactsIcon } from '@quillcrm/components';
 
 export interface AllContactsRef {
 	openCreateContactModal: () => void;
@@ -34,55 +37,55 @@ const AllContactsContent = forwardRef<AllContactsRef, AllContactsProps>(
 			setImportModalVisible,
 			setExportModalVisible,
 			setContact,
-			contactDialogVisible,
-			selectedContactId,
-			setContactDialogVisible,
-			data,
-			setData,
+			loading,
+			hasRecords,
 		} = useContactsContext();
+
+		// Handler functions
+		const handleOpenCreateContactModal = () => {
+			setContact({
+				email: '',
+				first_name: '',
+				last_name: '',
+			});
+			setCreateContactVisible(true);
+		};
+
+		const handleOpenImportModal = () => {
+			setImportModalVisible(true);
+		};
+
+		const handleOpenExportModal = () => {
+			setExportModalVisible(true);
+		};
 
 		// Expose methods to parent component
 		useImperativeHandle(ref, () => ({
-			openCreateContactModal: () => {
-				setContact({
-					email: '',
-					first_name: '',
-					last_name: '',
-				});
-				setCreateContactVisible(true);
-			},
-			openImportModal: () => {
-				setImportModalVisible(true);
-			},
-			openExportModal: () => {
-				setExportModalVisible(true);
-			},
+			openCreateContactModal: handleOpenCreateContactModal,
+			openImportModal: handleOpenImportModal,
+			openExportModal: handleOpenExportModal,
 		}));
-
-		// Handle contact update callback
-		const handleContactUpdate = (updatedContact: ContactType) => {
-			// Update the contact in the list
-			setData(
-				data.map((contact) =>
-					contact.id === updatedContact.id ? updatedContact : contact
-				)
-			);
-		};
 
 		return (
 			<div className="qcrm-all-contacts w-full">
 				<NoticeSection />
-				<ContactsTable activeTab={activeTab} />
+				{loading || hasRecords ? (
+					<ContactsTable activeTab={activeTab} />
+				) : (
+					<NoData
+						icon={<GradientContactsIcon width={120} height={120} />}
+						title={__('No contacts yet', 'quillcrm')}
+						subtitle={__(
+							'Get started by creating your first contact or import contacts from a CSV file',
+							'quillcrm'
+						)}
+						buttonLabel={__('Create Contact', 'quillcrm')}
+						onClick={handleOpenCreateContactModal}
+					/>
+				)}
 				<CreateContactModal />
 				<ContactsImportModal />
 				<ContactsExportModal />
-				<Contact
-					contactId={selectedContactId || undefined}
-					isDialog={true}
-					isOpen={contactDialogVisible}
-					onClose={() => setContactDialogVisible(false)}
-					onContactUpdate={handleContactUpdate}
-				/>
 			</div>
 		);
 	}

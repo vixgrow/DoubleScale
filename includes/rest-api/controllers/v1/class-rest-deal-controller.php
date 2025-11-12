@@ -153,6 +153,16 @@ class REST_Deal_Controller extends REST_Controller {
 				'permission_callback' => array( $this, 'update_items_permissions_check' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/bulk-delete',
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'bulk_delete' ),
+				'permission_callback' => array( $this, 'delete_items_permissions_check' ),
+			)
+		);
 	}
 
 	/**
@@ -181,9 +191,6 @@ class REST_Deal_Controller extends REST_Controller {
 			'priority'            => $request->get_param( 'priority' ),
 		);
 
-		$per_page = $request->get_param( 'per_page' ) ?: 20;
-		$page     = $request->get_param( 'page' ) ?: 1;
-
 		// Remove null values
 		$filters = array_filter(
 			$filters,
@@ -192,19 +199,15 @@ class REST_Deal_Controller extends REST_Controller {
 			}
 		);
 
-		$deals = Deal_Manager::instance()->get_deals_with_filters( $filters, $per_page, $page );
+		$deals = Deal_Manager::instance()->get_deals_with_filters( $filters );
 
 		$data = array();
-		foreach ( $deals->items() as $deal ) {
+		foreach ( $deals as $deal ) {
 			$data[] = $this->prepare_item_for_response( $deal, $request );
 		}
 
 		$response = new WP_REST_Response( $data, 200 );
-
-		// Add pagination headers
-		$response->header( 'X-Total-Count', $deals->total() );
-		$response->header( 'X-Total-Pages', $deals->lastPage() );
-		$response->header( 'X-Current-Page', $deals->currentPage() );
+		$response->header( 'X-Total-Count', count( $data ) );
 
 		return $response;
 	}
@@ -249,6 +252,45 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function create_item( $request ) {
+		// Validate required fields
+		$title       = $request->get_param( 'title' );
+		$contact_id  = $request->get_param( 'contact_id' );
+		$pipeline_id = $request->get_param( 'pipeline_id' );
+		$stage_id    = $request->get_param( 'stage_id' );
+
+		// Check for required fields
+		if ( empty( $title ) ) {
+			return new WP_Error(
+				'missing_title',
+				__( 'Deal title is required.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( empty( $contact_id ) ) {
+			return new WP_Error(
+				'missing_contact',
+				__( 'Contact is required to create a deal.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( empty( $pipeline_id ) ) {
+			return new WP_Error(
+				'missing_pipeline',
+				__( 'Pipeline is required to create a deal.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( empty( $stage_id ) ) {
+			return new WP_Error(
+				'missing_stage',
+				__( 'Pipeline stage is required to create a deal.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		// Validate owner_id if provided
 		$owner_id = $request->get_param( 'owner_id' );
 		if ( $owner_id ) {
@@ -258,32 +300,57 @@ class REST_Deal_Controller extends REST_Controller {
 			}
 		}
 
+		// Validate deal value
+		$value = $request->get_param( 'value' );
+		if ( $value !== null && $value !== '' && floatval( $value ) < 0 ) {
+			return new WP_Error(
+				'invalid_value',
+				__( 'Deal value cannot be negative.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Validate expected_close_date if provided
+		$expected_close_date = $request->get_param( 'expected_close_date' );
+		if ( $expected_close_date !== null && $expected_close_date !== '' ) {
+			$validated_date = $this->validate_and_sanitize_date( $expected_close_date );
+			if ( is_wp_error( $validated_date ) ) {
+				return $validated_date;
+			}
+			$expected_close_date = $validated_date;
+		} else {
+			$expected_close_date = null;
+		}
+
 		$data = array(
-			'title'               => sanitize_text_field( $request->get_param( 'title' ) ),
-			'contact_id'          => intval( $request->get_param( 'contact_id' ) ),
-			'pipeline_id'         => intval( $request->get_param( 'pipeline_id' ) ),
-			'stage_id'            => intval( $request->get_param( 'stage_id' ) ),
-			'value'               => floatval( $request->get_param( 'value' ) ),
+			'title'               => sanitize_text_field( $title ),
+			'contact_id'          => intval( $contact_id ),
+			'pipeline_id'         => intval( $pipeline_id ),
+			'stage_id'            => intval( $stage_id ),
+			'value'               => $value !== null && $value !== '' ? floatval( $value ) : 0,
 			'currency'            => sanitize_text_field( $request->get_param( 'currency' ) ),
-			'expected_close_date' => sanitize_text_field( $request->get_param( 'expected_close_date' ) ),
-			// 'probability'         => $request->get_param( 'probability' ) !== null ? floatval( $request->get_param( 'probability' ) ) : null,
+			'expected_close_date' => $expected_close_date,
 			'priority'            => sanitize_text_field( $request->get_param( 'priority' ) ),
 			'owner_id'            => $owner_id ? intval( $owner_id ) : null,
 			'source'              => sanitize_text_field( $request->get_param( 'source' ) ),
 		);
 
-		// Remove empty values
+		// Remove only empty strings, keep explicit nulls (allows clearing date fields)
 		$data = array_filter(
 			$data,
 			function ( $value ) {
-				return $value !== null && $value !== '';
+				return $value !== '';
 			}
 		);
 
 		$deal = Deal_Manager::instance()->create_deal( $data );
 
 		if ( ! $deal ) {
-			return new WP_Error( 'creation_failed', 'Failed to create deal', array( 'status' => 500 ) );
+			return new WP_Error(
+				'creation_failed',
+				__( 'Failed to create deal. Please check if the contact, pipeline, and stage exist.', 'quillcrm' ),
+				array( 'status' => 500 )
+			);
 		}
 
 		$sync_custom_fields = $deal->sync_custom_fields( $request->get_param( 'custom_fields' ) );
@@ -330,7 +397,11 @@ class REST_Deal_Controller extends REST_Controller {
 				if ( $field === 'title' || $field === 'currency' || $field === 'source' || $field === 'priority' ) {
 					$data[ $field ] = sanitize_text_field( $value );
 				} elseif ( $field === 'expected_close_date' ) {
-					$data[ $field ] = sanitize_text_field( $value );
+					$validated_date = $this->validate_and_sanitize_date( $value );
+					if ( is_wp_error( $validated_date ) ) {
+						return $validated_date;
+					}
+					$data[ $field ] = $validated_date;
 				} elseif ( in_array( $field, array( 'contact_id', 'pipeline_id', 'stage_id', 'owner_id' ) ) ) {
 					$data[ $field ] = intval( $value );
 				} elseif ( $field === 'value' ) {
@@ -571,6 +642,25 @@ class REST_Deal_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Bulk delete deals
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function bulk_delete( $request ) {
+		$deal_ids = $request->get_param( 'deal_ids' );
+
+		if ( ! is_array( $deal_ids ) || empty( $deal_ids ) ) {
+			return new WP_Error( 'invalid_data', 'Deal IDs array is required', array( 'status' => 400 ) );
+		}
+
+		$deleted_count = Deal_Manager::instance()->bulk_delete_deals( $deal_ids );
+
+		return new WP_REST_Response( array( 'deleted_count' => $deleted_count ), 200 );
+	}
+
+	/**
 	 * Prepare the item for the REST response
 	 *
 	 * @param Deal            $deal Deal object.
@@ -731,6 +821,86 @@ class REST_Deal_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Validate and sanitize date parameter
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $date_value Date value to validate (expects Y-m-d format).
+	 *
+	 * @return string|null Valid date string in Y-m-d format or null.
+	 */
+	private function validate_and_sanitize_date( $date_value ) {
+		// Handle null or empty - these are valid (field is nullable)
+		if ( $date_value === null || $date_value === '' ) {
+			return null;
+		}
+
+		// Sanitize the input
+		$clean_date = sanitize_text_field( $date_value );
+
+		// Validate format: Y-m-d (e.g., 2025-12-31)
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $clean_date ) ) {
+			return new WP_Error(
+				'invalid_date_format',
+				sprintf(
+					/* translators: %s: the provided date value */
+					__( 'Invalid date format "%s". Expected format: YYYY-MM-DD (e.g., 2025-12-31).', 'quillcrm' ),
+					$clean_date
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Validate it's a real date (not 2025-13-45)
+		$date_parts = explode( '-', $clean_date );
+		if ( ! checkdate( (int) $date_parts[1], (int) $date_parts[2], (int) $date_parts[0] ) ) {
+			return new WP_Error(
+				'invalid_date',
+				sprintf(
+					/* translators: %s: the provided date value */
+					__( 'Invalid date "%s". Please provide a valid date.', 'quillcrm' ),
+					$clean_date
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $clean_date;
+	}
+
+	/**
+	 * Validate and sanitize datetime parameter
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $datetime_value Datetime value to validate (expects Y-m-d H:i:s format).
+	 *
+	 * @return string|null Valid datetime string in Y-m-d H:i:s format or null.
+	 */
+	private function validate_and_sanitize_datetime( $datetime_value ) {
+		// Handle null or empty - these are valid (field is nullable)
+		if ( $datetime_value === null || $datetime_value === '' ) {
+			return null;
+		}
+
+		// Sanitize the input
+		$clean_datetime = sanitize_text_field( $datetime_value );
+
+		// Validate format: Y-m-d H:i:s (e.g., 2025-12-31 14:30:00)
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $clean_datetime ) ) {
+			return null; // Invalid format
+		}
+
+		// Validate it's a real datetime
+		$datetime_obj = \DateTime::createFromFormat( 'Y-m-d H:i:s', $clean_datetime );
+		if ( ! $datetime_obj || $datetime_obj->format( 'Y-m-d H:i:s' ) !== $clean_datetime ) {
+			return null; // Invalid datetime
+		}
+
+		return $clean_datetime;
+	}
+
+	/**
 	 * Check if user can access deals
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
@@ -804,6 +974,17 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function update_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if user can delete deals
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function delete_items_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 }

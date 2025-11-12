@@ -77,15 +77,59 @@ class Remove_User_From_Course extends Action {
 		$contact = $automation_contact->contact;
 		$user    = get_user_by( 'email', $contact->email );
 		if ( ! $user ) {
+			quillcrm_get_logger()->warning(
+				__( 'User not found for LearnDash course removal', 'quillcrm' ),
+				array(
+					'code'          => 'learndash_user_not_found',
+					'contact_email' => $contact->email,
+					'automation_id' => $automation->id,
+					'step_id'       => $step->id,
+				)
+			);
 			return false;
 		}
 
 		$course_id = $step->get_setting( 'course_id' );
 		if ( ! $course_id ) {
+			quillcrm_get_logger()->warning(
+				__( 'Course ID not configured for LearnDash removal action', 'quillcrm' ),
+				array(
+					'code'          => 'learndash_course_id_missing',
+					'automation_id' => $automation->id,
+					'step_id'       => $step->id,
+				)
+			);
 			return false;
 		}
 
+		// Check if LearnDash function exists
+		if ( ! function_exists( 'ld_update_course_access' ) ) {
+			quillcrm_get_logger()->error(
+				__( 'LearnDash plugin is not active. Cannot remove user from course.', 'quillcrm' ),
+				array(
+					'code'          => 'learndash_plugin_inactive',
+					'user_id'       => $user->ID,
+					'course_id'     => $course_id,
+					'automation_id' => $automation->id,
+					'step_id'       => $step->id,
+				)
+			);
+			return false;
+		}
+
+		// Execute the action
 		ld_update_course_access( $user->ID, $course_id, true );
+
+		quillcrm_get_logger()->info(
+			__( 'User successfully removed from LearnDash course', 'quillcrm' ),
+			array(
+				'code'          => 'learndash_course_removed',
+				'user_id'       => $user->ID,
+				'course_id'     => $course_id,
+				'automation_id' => $automation->id,
+				'step_id'       => $step->id,
+			)
+		);
 
 		return true;
 	}

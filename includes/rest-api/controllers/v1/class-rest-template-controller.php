@@ -11,6 +11,8 @@
 
 namespace QuillCRM\REST_API\Controllers\V1;
 
+use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Models\Contact_Model;
 use QuillCRM\User_Roles\Permissions;
 use WP_Error;
 use WP_REST_Request;
@@ -21,6 +23,7 @@ use QuillCRM\Models\Template_Model;
 use QuillCRM\Emails\Email_Renderer;
 use QuillCRM\Emails\Block_Registry;
 use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * REST_Template_Controller class
@@ -91,28 +94,16 @@ class REST_Template_Controller extends REST_Controller {
 			)
 		);
 
-		// Register endpoint for sending test emails
+		// Smart save endpoint - creates or updates based on usage
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)/send-test',
+			'/' . $this->rest_base . '/save',
 			array(
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'send_test_email' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
-					'args'                => array(
-						'to'         => array(
-							'description'       => __( 'Recipient email address for the test email', 'quillcrm' ),
-							'type'              => 'string',
-							'required'          => true,
-							'sanitize_callback' => 'sanitize_email',
-							'validate_callback' => 'is_email',
-						),
-						'merge_tags' => array(
-							'description' => __( 'Merge tags to use in the email', 'quillcrm' ),
-							'type'        => 'object',
-						),
-					),
+					'callback'            => array( $this, 'save_template' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
 			)
 		);
@@ -131,6 +122,37 @@ class REST_Template_Controller extends REST_Controller {
 							'description' => __( 'Merge tags to use in the template', 'quillcrm' ),
 							'type'        => 'object',
 							'default'     => array(),
+						),
+						'contact_id' => array(
+							'description' => __( 'Contact ID to use for merge tags', 'quillcrm' ),
+							'type'        => 'integer',
+							'default'     => null,
+						),
+					),
+				),
+			)
+		);
+
+		// Register endpoint for getting user templates (non-hidden)
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/user-templates',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_user_templates' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'type'   => array(
+							'description' => __( 'Filter by template type.', 'quillcrm' ),
+							'type'        => 'string',
+							'default'     => Campaign_Channel::STR_EMAIL,
+							'enum'        => Campaign_Channel::get_core_channel_strings(),
+						),
+						'search' => array(
+							'description'       => __( 'Search templates by name.', 'quillcrm' ),
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
 				),
@@ -179,15 +201,7 @@ class REST_Template_Controller extends REST_Controller {
 				 'type'       => array(
 					 'description' => __( 'Type of the template.', 'quillcrm' ),
 					 'type'        => 'string',
-					 'enum'        => array( 'email', 'sms' ),
-				 ),
-				 'subject'    => array(
-					 'description' => __( 'Subject of the template.', 'quillcrm' ),
-					 'type'        => 'string',
-					 'required'    => false,
-					 'arg_options' => array(
-						 'sanitize_callback' => 'sanitize_text_field',
-					 ),
+					 'enum'        => Campaign_Channel::get_core_channel_strings(),
 				 ),
 				 'body'       => array(
 					 'description' => __( 'Body of the template.', 'quillcrm' ),
@@ -195,7 +209,7 @@ class REST_Template_Controller extends REST_Controller {
 					 'required'    => false,
 				 ),
 				 'settings'   => array(
-					 'description' => __( 'Settings of the template.', 'quillcrm' ),
+					 'description' => __( 'Settings of the template (includes subject, preview_text, from_name, from_email, etc).', 'quillcrm' ),
 					 'type'        => array( 'object', 'null' ),
 				 ),
 				 'created_at' => array(
@@ -207,6 +221,20 @@ class REST_Template_Controller extends REST_Controller {
 					 'description' => __( 'Update time of the template.', 'quillcrm' ),
 					 'type'        => 'string',
 					 'readonly'    => false,
+				 ),
+				 'thumbnail'  => array(
+					 'description' => __( 'Thumbnail URL of the template.', 'quillcrm' ),
+					 'type'        => 'string',
+					 'required'    => false,
+					 'arg_options' => array(
+						 'sanitize_callback' => 'esc_url_raw',
+					 ),
+				 ),
+				 'hidden'     => array(
+					 'description' => __( 'Whether the template is hidden from users.', 'quillcrm' ),
+					 'type'        => 'boolean',
+					 'required'    => false,
+					 'default'     => false,
 				 ),
 			 ),
 		 );
@@ -235,8 +263,8 @@ class REST_Template_Controller extends REST_Controller {
 			'type'     => array(
 				'description' => __( 'Filter by template type.', 'quillcrm' ),
 				'type'        => 'string',
-				'default'     => 'email',
-				'enum'        => array( 'email', 'sms', 'whatsapp' ),
+				'default'     => Campaign_Channel::STR_EMAIL,
+				'enum'        => Campaign_Channel::get_core_channel_strings(),
 			),
 			'category' => array(
 				'description'       => __( 'Filter by template category.', 'quillcrm' ),
@@ -290,7 +318,7 @@ class REST_Template_Controller extends REST_Controller {
 	public function get_items( $request ) {
 		try {
 			// Get parameters with defaults
-			$type     = $request->get_param( 'type' ) ?: 'email';
+			$type     = $request->get_param( 'type' ) ?: Campaign_Channel::STR_EMAIL;
 			$per_page = (int) ( $request->get_param( 'per_page' ) ?: 20 );
 			$page     = (int) ( $request->get_param( 'page' ) ?: 1 );
 			$orderby  = $request->get_param( 'orderby' ) ?: 'id';
@@ -299,8 +327,11 @@ class REST_Template_Controller extends REST_Controller {
 			$keyword  = $request->get_param( 'keyword' ); // Backward compatibility
 			$category = $request->get_param( 'category' );
 
+			// Convert string type to integer for database query
+			$type_int = Campaign_Channel::to_integer( $type ) ?? Campaign_Channel::CHANNEL_EMAIL;
+
 			// Build query
-			$query = Template_Model::where( 'type', $type );
+			$query = Template_Model::where( 'type', $type_int );
 
 			// Add conditional filters
 			if ( $request->has_param( 'hidden' ) ) {
@@ -343,6 +374,44 @@ class REST_Template_Controller extends REST_Controller {
 				),
 				200
 			);
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Get user templates (non-hidden only)
+	 * Dedicated endpoint for user-created templates
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return WP_REST_Response $response The response object
+	 */
+	public function get_user_templates( $request ) {
+		try {
+			// Get parameters with defaults
+			$type   = $request->get_param( 'type' ) ?: Campaign_Channel::STR_EMAIL;
+			$search = $request->get_param( 'search' );
+
+			// Convert string type to integer for database query
+			$type_int = Campaign_Channel::to_integer( $type ) ?? Campaign_Channel::CHANNEL_EMAIL;
+
+			// Build query - only non-hidden templates
+			$query = Template_Model::where( 'type', $type_int )
+				->where( 'hidden', 0 ); // Only user-created templates
+
+			// Search by name if provided
+			if ( $search ) {
+				$query->where( 'name', 'LIKE', '%' . $search . '%' );
+			}
+
+			// Get results ordered by most recent first
+			$templates = $query->orderBy( 'created_at', 'DESC' )
+				->get();
+
+			return new WP_REST_Response( $templates, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -420,6 +489,124 @@ class REST_Template_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Smart save - creates or updates based on template usage
+	 *
+	 * Logic:
+	 * - No ID: Create new template
+	 * - ID exists + template in use (tracked): Create new template (preserve original)
+	 * - ID exists + template NOT in use: Update existing template
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request The request object
+	 *
+	 * @return WP_REST_Response $response The response object
+	 */
+	public function save_template( $request ) {
+		try {
+			$template_id   = $request->get_param( 'id' );
+			$campaign_id   = $request->get_param( 'campaign_id' );
+			$template_data = $this->prepare_template( $request );
+
+			// Case 1: No ID - create new template
+			if ( ! $template_id ) {
+				$template = Template_Model::create( $template_data );
+
+				// Update campaign to use new template ID
+				if ( $campaign_id ) {
+					$this->add_template_to_campaign( $campaign_id, $template->id );
+				}
+
+				return new WP_REST_Response( $template, 201 );
+			}
+
+			// Case 2 & 3: ID exists - check if template is in use
+			$template = Template_Model::find( $template_id );
+
+			if ( ! $template ) {
+				return new WP_Error( 'error', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Check if template has been used in any sent messages
+			if ( Template_Model::is_used_in_tracking( $template_id ) ) {
+				// Template is in use - create new copy to preserve original
+				unset( $template_data['id'] );
+				$new_template = Template_Model::create( $template_data );
+
+				// Update campaign to use new template ID
+				if ( $campaign_id ) {
+					$this->update_campaign_template_id( $campaign_id, $template_id, $new_template->id );
+				}
+
+				return new WP_REST_Response( $new_template, 201 );
+			} else {
+				// Template is NOT in use - safe to update
+				$template->update( $template_data );
+				return new WP_REST_Response( $template, 200 );
+			}
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Add template ID to campaign's template_ids (for first-time creation)
+	 *
+	 * @param int $campaign_id Campaign ID
+	 * @param int $template_id Template ID to add
+	 */
+	private function add_template_to_campaign( $campaign_id, $template_id ) {
+		$campaign = Campaign_Model::find( $campaign_id );
+
+		if ( ! $campaign ) {
+			return;
+		}
+
+		$settings = is_array( $campaign->settings ) ? $campaign->settings : json_decode( $campaign->settings, true );
+
+		// Initialize template_ids array if it doesn't exist
+		if ( ! isset( $settings['template_ids'] ) ) {
+			$settings['template_ids'] = array();
+		}
+
+		// Add template ID if not already in array
+		if ( ! in_array( $template_id, $settings['template_ids'] ) ) {
+			$settings['template_ids'][] = $template_id;
+		}
+
+		// Save campaign
+		$campaign->update( array( 'settings' => $settings ) );
+	}
+
+	/**
+	 * Update campaign's template_ids when a new template is created (replaces old ID)
+	 *
+	 * @param int $campaign_id Campaign ID
+	 * @param int $old_template_id Old template ID
+	 * @param int $new_template_id New template ID
+	 */
+	private function update_campaign_template_id( $campaign_id, $old_template_id, $new_template_id ) {
+		$campaign = Campaign_Model::find( $campaign_id );
+
+		if ( ! $campaign ) {
+			return;
+		}
+
+		$settings = is_array( $campaign->settings ) ? $campaign->settings : json_decode( $campaign->settings, true );
+
+		// Update template_ids array
+		if ( isset( $settings['template_ids'] ) && is_array( $settings['template_ids'] ) ) {
+			$key = array_search( $old_template_id, $settings['template_ids'] );
+			if ( $key !== false ) {
+				$settings['template_ids'][ $key ] = $new_template_id;
+			}
+		}
+
+		// Save campaign
+		$campaign->update( array( 'settings' => $settings ) );
+	}
+
+	/**
 	 * Delete items
 	 *
 	 * @since 1.0.0
@@ -481,130 +668,55 @@ class REST_Template_Controller extends REST_Controller {
 	 * @return array $template_data The template data
 	 */
 	public function prepare_template( $request ) {
+		$type = $request->get_param( 'type' ) ?? Campaign_Channel::STR_EMAIL;
+		$name = $request->get_param( 'name' );
+
+		// Get settings from request, or initialize as empty array
+		$settings = $request->get_param( 'settings' ) ?? array();
+
+		// If subject or preview_text are passed as separate params (for backward compatibility),
+		// merge them into settings
+		$subject      = $request->get_param( 'subject' );
+		$preview_text = $request->get_param( 'preview_text' );
+
+		if ( $subject !== null ) {
+			$settings['subject'] = $subject;
+		}
+
+		if ( $preview_text !== null ) {
+			$settings['preview_text'] = $preview_text;
+		}
+
 		$template_data = array(
-			'name'         => $request->get_param( 'name' ) ?? __( 'New Template', 'quillcrm' ),
-			'type'         => $request->get_param( 'type' ) ?? 'email',
-			'subject'      => $request->get_param( 'subject' ),
-			'body'         => $request->get_param( 'body' ),
-			'settings'     => $request->get_param( 'settings' ),
-			'preview_text' => $request->get_param( 'preview_text' ),
-			'created_at'   => current_time( 'mysql' ),
-			'updated_at'   => current_time( 'mysql' ),
+			'id'        => $request->get_param( 'id' ),
+			'type'      => $type,
+			'body'      => $request->get_param( 'body' ),
+			'settings'  => $settings,
+			'thumbnail' => $request->get_param( 'thumbnail' ),
+			'hidden'    => $request->get_param( 'hidden' ) ?? false,
 		);
+
+		// Only set name if provided, otherwise leave it out (for updates that don't change name)
+		if ( $name !== null ) {
+			$template_data['name'] = $name ?: 'New Template';
+		}
 
 		// Note: email_body data is now sent directly in the body field as JSON
 
+		// Don't remove thumbnail field - allow empty strings to be saved
+		// Don't remove hidden field - allow false values to be saved
 		foreach ( $template_data as $key => $value ) {
-			if ( empty( $value ) && $value !== '0' && $value !== 0 ) {
+			if ( $key === 'thumbnail' || $key === 'hidden' ) {
+				continue;
+			}
+
+			// For ID: keep if it has a value, remove if null/empty
+			if ( empty( $value ) && $value !== '0' && $value !== 0 && $value !== false ) {
 				unset( $template_data[ $key ] );
 			}
 		}
 
 		return $template_data;
-	}
-
-
-
-	/**
-	 * Send a test email using the template
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request The request object
-	 *
-	 * @return WP_REST_Response|WP_Error Response object
-	 */
-	public function send_test_email( $request ) {
-		try {
-			$template_id = $request->get_param( 'id' );
-			$to          = $request->get_param( 'to' );
-			$merge_tags  = $request->get_param( 'merge_tags' ) ?: array();
-
-			// Default merge tags for testing
-			$default_merge_tags = array(
-				'first_name' => 'John',
-				'last_name'  => 'Doe',
-				'email'      => $to,
-				'site_name'  => get_bloginfo( 'name' ),
-				'site_url'   => site_url(),
-				'date'       => current_time( 'mysql' ),
-			);
-
-			// Merge the default tags with any provided tags, with provided tags taking precedence
-			$merge_tags = wp_parse_args( $merge_tags, $default_merge_tags );
-
-			// Find the template
-			$template = Template_Model::find( $template_id );
-
-			if ( ! $template ) {
-				return new WP_Error( 'template_not_found', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
-			}
-
-			// Render the email content
-			$renderer = new Email_Renderer();
-			$content  = $renderer->render_template( $template_id, $merge_tags );
-
-			if ( empty( $content ) ) {
-				return new WP_Error( 'rendering_failed', __( 'Failed to render email template', 'quillcrm' ), array( 'status' => 500 ) );
-			}
-
-			// Set up email headers
-			$headers    = array();
-			$from_name  = get_bloginfo( 'name' );
-			$from_email = get_option( 'admin_email' );
-			$reply_to   = '';
-
-			// Use template settings if available
-			if ( ! empty( $template->settings ) ) {
-				$settings = is_array( $template->settings ) ? $template->settings : json_decode( $template->settings, true );
-
-				// Set from name if provided
-				if ( ! empty( $settings['from_name'] ) ) {
-					$from_name = $settings['from_name'];
-				}
-
-				// Set from email if provided and valid
-				if ( ! empty( $settings['from_email'] ) && is_email( $settings['from_email'] ) ) {
-					$from_email = $settings['from_email'];
-				}
-
-				// Set reply-to if provided and valid
-				if ( ! empty( $settings['reply_to'] ) && is_email( $settings['reply_to'] ) ) {
-					$reply_to = $settings['reply_to'];
-				}
-			}
-
-			// Format headers
-			$headers[] = 'Content-Type: text/html; charset=UTF-8';
-			$headers[] = 'From: ' . $from_name . ' <' . $from_email . '>';
-			if ( ! empty( $reply_to ) ) {
-				$headers[] = 'Reply-To: ' . $reply_to;
-			}
-
-			// Use template subject and process merge tags using Merge_Tags_Manager
-			$subject = ! empty( $template->subject ) ? $template->subject : 'Test Email';
-
-			// Create a mock contact for merge tag processing
-			$mock_contact = (object) $merge_tags;
-			$subject      = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $mock_contact );
-
-			// Send the email using wp_mail directly
-			$result = wp_mail( $to, $subject, $content, $headers );
-
-			if ( ! $result ) {
-				return new WP_Error( 'send_failed', __( 'Failed to send test email', 'quillcrm' ), array( 'status' => 500 ) );
-			}
-
-			return new WP_REST_Response(
-				array(
-					'success' => true,
-					'message' => __( 'Test email sent successfully', 'quillcrm' ),
-				),
-				200
-			);
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
-		}
 	}
 
 	/**
@@ -698,9 +810,24 @@ class REST_Template_Controller extends REST_Controller {
 	public function render_template( $request ) {
 		$template_id = (int) $request->get_param( 'id' );
 		$merge_tags  = $request->get_param( 'merge_tags' ) ?: array();
+		$contact_id  = $request->get_param( 'contact_id' );
+
+		// Get contact - prioritize contact_id parameter, then extract from merge_tags
+		$contact = null;
+		if ( ! empty( $contact_id ) ) {
+			$contact = Contact_Model::find( (int) $contact_id );
+		} elseif ( ! empty( $merge_tags ) ) {
+			// Extract contact from merge_tags if provided (for backward compatibility)
+			// Check if contact is in 'contact' key
+			if ( isset( $merge_tags['contact'] ) && ( $merge_tags['contact'] instanceof Contact_Model || $merge_tags['contact'] instanceof Automation_Contact_Model ) ) {
+				$contact = $merge_tags['contact'];
+			} elseif ( ! empty( $merge_tags[0] ) && ( $merge_tags[0] instanceof Contact_Model || $merge_tags[0] instanceof Automation_Contact_Model ) ) {
+				$contact = $merge_tags[0];
+			}
+		}
 
 		$renderer = new Email_Renderer();
-		$html     = $renderer->render_template( $template_id, $merge_tags );
+		$html     = $renderer->render_template( $template_id, $contact );
 
 		if ( empty( $html ) ) {
 			return new WP_Error(

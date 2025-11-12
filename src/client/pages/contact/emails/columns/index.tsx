@@ -28,7 +28,10 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 		{
 			accessorKey: 'subject',
 			header: __('Subject', 'quillcrm'),
-			cell: ({ row }) => row.original.template.subject,
+			cell: ({ row }) =>
+				row.original.template?.subject ||
+				row.original.message?.subject ||
+				__('No Subject', 'quillcrm'),
 		},
 		{
 			accessorKey: 'sent_at',
@@ -87,8 +90,8 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 			accessorKey: 'status',
 			header: __('Sent Status', 'quillcrm'),
 			cell: ({ row }) => {
-				const status = row.original.status;
-				const isSent = status === 'sent';
+				const statusSlug = row.original.status_slug || 'unknown';
+				const isSent = statusSlug === 'sent';
 				return (
 					<div className="flex items-center gap-2">
 						<span

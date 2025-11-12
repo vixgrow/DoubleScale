@@ -6,14 +6,97 @@ import { find, flatMap } from 'lodash';
 /**
  * Internal dependencies
  */
+import type { RuleItem } from '@/components/rules-builder';
+import type { Filter as FilterType } from '@quillcrm/client';
 import type { Action, Goal, Rule, Trigger } from '@quillcrm/config';
 import ConfigAPI from '@quillcrm/config';
+import {
+	__experimentalGetSettings as experimentalGetDateSettings,
+	getSettings as getDateSettings,
+} from '@wordpress/date';
+import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+import { __ } from '@wordpress/i18n';
+
+type WordPressTimezone = {
+	timezone?: string;
+	offsetMinutes?: number;
+};
+
+const parseTimezoneOffset = (
+	offset: unknown,
+	offsetFormatted: unknown
+): number | undefined => {
+	const parsedNumericOffset =
+		typeof offset === 'string' || typeof offset === 'number'
+			? Number(offset)
+			: undefined;
+
+	if (
+		parsedNumericOffset !== undefined &&
+		!Number.isNaN(parsedNumericOffset)
+	) {
+		return parsedNumericOffset * 60;
+	}
+
+	if (typeof offsetFormatted === 'string' && offsetFormatted) {
+		const match = offsetFormatted.match(/^([+-]?)(\d{1,2}):(\d{2})$/);
+		if (match) {
+			const [, sign, hours, minutes] = match;
+			const totalMinutes =
+				parseInt(hours, 10) * 60 + parseInt(minutes, 10);
+			return (sign === '-' ? -1 : 1) * totalMinutes;
+		}
+	}
+
+	return undefined;
+};
+
+export const getWordPressTimezone = (): WordPressTimezone => {
+	const resolveSettings =
+		typeof getDateSettings === 'function'
+			? getDateSettings
+			: typeof experimentalGetDateSettings === 'function'
+				? experimentalGetDateSettings
+				: undefined;
+
+	const settings = resolveSettings?.();
+
+	const timezoneString =
+		typeof settings?.timezone?.string === 'string' &&
+			settings.timezone.string.length > 0
+			? settings.timezone.string
+			: undefined;
+
+	const offsetMinutes = parseTimezoneOffset(
+		settings?.timezone?.offset,
+		settings?.timezone?.offsetFormatted
+	);
+
+	return {
+		timezone: timezoneString,
+		offsetMinutes,
+	};
+};
+
+export const convertToWordPressTimezone = (date: Dayjs): Dayjs => {
+	const { timezone: timezoneString, offsetMinutes } = getWordPressTimezone();
+
+	if (timezoneString) {
+		return date.tz(timezoneString);
+	}
+
+	if (typeof offsetMinutes === 'number' && !Number.isNaN(offsetMinutes)) {
+		return date.utc().utcOffset(offsetMinutes);
+	}
+
+	return date;
+};
 
 export const getAction = (action: string): Action => {
 	const actions = ConfigAPI.getAutomationActions();
@@ -75,7 +158,10 @@ export const convertDate = (date: string, addTime: boolean = false) => {
 
 	const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 	if (addTime) {
-		return dayjs.utc(date).tz(userTimeZone).format('MMMM D, YYYY [on] h:mm A');
+		return dayjs
+			.utc(date)
+			.tz(userTimeZone)
+			.format('MMMM D, YYYY [on] h:mm A');
 	}
 
 	// return dayjs.utc(date).tz(userTimeZone).format('MMMM D, YYYY');
@@ -125,7 +211,7 @@ export const getCustomFieldById = (id: number) => {
 			label: '',
 			type: '',
 		};
-}
+};
 
 export const formatDate = (date: string, type: string = 'hour') => {
 	switch (type) {
@@ -143,47 +229,54 @@ export const formatDate = (date: string, type: string = 'hour') => {
 	}
 };
 
-  
+
 
 export function getTimeAgo(dateString: string): string {
-	const now = new Date();
-	const date = new Date(dateString);
-	const diffInMs = now.getTime() - date.getTime();
-	const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-	const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-	const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+	const parsedUtcDate = dayjs.utc(dateString);
+	const parsedDate = parsedUtcDate.isValid()
+		? parsedUtcDate
+		: dayjs(dateString);
+
+	if (!parsedDate.isValid()) {
+		return '';
+	}
+
+	const now = convertToWordPressTimezone(dayjs());
+	const targetDate = convertToWordPressTimezone(parsedDate);
+
+	const diffInMinutes = now.diff(targetDate, 'minute');
+
+	if (diffInMinutes < 1) {
+		return 'Just now';
+	}
+
+	const diffInHours = now.diff(targetDate, 'hour');
+	const diffInDays = now.diff(targetDate, 'day');
 	const diffInWeeks = Math.floor(diffInDays / 7);
-	const diffInMonths = Math.floor(diffInDays / 30);
+	const diffInMonths = now.diff(targetDate, 'month');
 
-	if (diffInMinutes < 1) return 'Just now';
-	if (diffInMinutes < 60)
+	if (diffInMinutes < 60) {
 		return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
-	if (diffInHours < 24)
+	}
+
+	if (diffInHours < 24) {
 		return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-	if (diffInDays < 7)
+	}
+
+	if (diffInDays < 7) {
 		return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-	if (diffInWeeks < 4)
+	}
+
+	if (diffInWeeks < 4) {
 		return `${diffInWeeks} week${diffInWeeks > 1 ? 's' : ''} ago`;
-	if (diffInMonths <= 2)
+	}
+
+	if (diffInMonths <= 2) {
 		return `${diffInMonths} month${diffInMonths > 1 ? 's' : ''} ago`;
+	}
 
-	// Fallback to full format
-	return (
-		date.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-		}) +
-		' ' +
-		date.toLocaleTimeString('en-US', {
-			hour: 'numeric',
-			minute: '2-digit',
-			hour12: true,
-		})
-	);
+	return targetDate.format('MMM D, YYYY h:mm A');
 }
-
-
 
 export const formatDateForAPI = (date: Date | null): string | undefined => {
 	if (!date) return undefined;
@@ -196,16 +289,160 @@ export const formatDateForAPI = (date: Date | null): string | undefined => {
 };
 
 /**
- * Get the correct REST API endpoint for a campaign type
- *
- * @param campaignType - Campaign type ('email', 'sms', 'whatsapp')
- * @returns The REST API endpoint path or undefined if invalid type
+ * Get the REST API endpoint for a campaign type
+ * All campaign types now use the unified campaigns endpoint
+ * @param campaignType - The type of campaign ('email', 'sms', 'whatsapp')
+ * @returns The API endpoint path or null if invalid type
  */
-export const getCampaignEndpoint = (campaignType: string): string | undefined => {
-	const endpoints = {
-		email: '/qc/v1/email-campaigns',
-		sms: '/qc/v1/sms-campaigns',
-		whatsapp: '/qc/v1/whatsapp-campaigns',
-	} as const;
-	return endpoints[campaignType as keyof typeof endpoints];
+export const getCampaignEndpoint = (campaignType: string): string | null => {
+	const validTypes = ['email', 'sms', 'whatsapp'];
+
+	if (validTypes.includes(campaignType)) {
+		return '/qc/v1/campaigns';
+	}
+
+	return null;
+};
+
+/**
+ * Get filtered rules groups (excluding disabled groups)
+ * @returns Filtered rules groups object
+ */
+export const getFilteredRulesGroups = () => {
+	const allRulesGroups = ConfigAPI.getAutomationRules();
+	return Object.keys(allRulesGroups).reduce((acc, key) => {
+		if (!allRulesGroups[key].is_disabled) {
+			acc[key] = allRulesGroups[key];
+		}
+		return acc;
+	}, {} as any);
+};
+
+/**
+ * Get initial rule for RulesBuilder
+ * @param rulesGroups - Rules groups map
+ * @returns Initial RuleItem
+ */
+export const getInitialRule = (rulesGroups: any): RuleItem => {
+	const firstGroup = Object.keys(rulesGroups)[0] || '';
+	const firstRule = firstGroup
+		? Object.keys(rulesGroups[firstGroup]?.rules || {})[0] || ''
+		: '';
+	return {
+		rule: firstRule,
+		operator: 'is',
+		value: '',
+		selectedGroup: firstGroup,
+	};
+};
+
+/**
+ * Convert RulesBuilder rules format to backend filters format
+ * @param inputRules - Array of rule groups from RulesBuilder
+ * @returns Array of FilterType objects for backend API
+ */
+export const mapRulesToFilters = (
+	inputRules: Array<Array<RuleItem>>
+): FilterType[] => {
+	const flat = (inputRules || []).reduce(
+		(acc, group) => acc.concat(group || []),
+		[] as RuleItem[]
+	);
+	return flat
+		.filter((r) => r && r.rule)
+		.map((r) => ({
+			group: r.selectedGroup || '',
+			filter: r.rule, // backend expects filter slug
+			operator: r.operator || 'is',
+			value: r.value ?? '',
+		}));
+};
+
+/**
+ * Convert backend filters format to RulesBuilder rules format
+ * @param inputFilters - Array of filter objects from backend
+ * @param rulesGroups - Rules groups map for getting default values
+ * @returns Array of rule groups for RulesBuilder
+ */
+export const mapFiltersToRules = (
+	inputFilters: Array<{
+		group?: string;
+		filter?: string;
+		operator?: string;
+		value?: any;
+	}>,
+	rulesGroups: any
+): Array<Array<RuleItem>> => {
+	const safe = Array.isArray(inputFilters) ? inputFilters : [];
+
+	// Get default group and rule from rulesGroups
+	const initialRule = getInitialRule(rulesGroups);
+
+	if (!safe.length) return [[initialRule]];
+
+	const group = safe.map((f: any) => ({
+		rule: f.filter || initialRule.rule,
+		operator: f.operator || 'is',
+		value: f.value ?? '',
+		selectedGroup: f.group || initialRule.selectedGroup,
+	}));
+	return [group];
+};
+
+
+/**
+ * Get trigger label from automation (uses backend-provided label)
+ * @param automation - The automation object
+ * @returns The trigger label
+ */
+export const getTriggerLabel = (automation: any): string => {
+	// Use backend-provided label (works even when plugin is deactivated)
+	if (automation?.settings?._trigger_label) {
+		return automation.settings._trigger_label;
+	}
+
+	// Fallback to trigger slug
+	return automation?.trigger || __('No trigger selected', 'quillcrm');
+};
+
+/**
+ * Check if trigger has a plugin dependency warning
+ * @param automation - The automation object
+ * @returns True if trigger requires a missing plugin
+ */
+export const hasTriggerWarning = (automation: any): boolean => {
+	return automation?.settings?._trigger_warning === true;
+};
+
+/**
+ * Get action label from step (uses backend-provided label)
+ * @param step - The automation step object
+ * @returns The action label
+ */
+export const getActionLabel = (step: any): string => {
+	// Use backend-provided label (works even when plugin is deactivated)
+	if (step?.settings?._action_label) {
+		return step.settings._action_label;
+	}
+
+	// Fallback to action slug
+	return step?.action || __('Unknown Action', 'quillcrm');
+};
+
+/**
+ * Check if action has a plugin dependency warning
+ * @param step - The automation step object
+ * @returns True if action requires a missing plugin
+ */
+export const hasActionWarning = (step: any): boolean => {
+	return step?.settings?._action_warning === true;
+};
+
+/**
+ * Get all warnings from automation
+ * @param automation - The automation object
+ * @returns Array of warnings
+ */
+export const getAutomationWarnings = (automation: any): any[] => {
+	return automation?._warnings || [];
 };

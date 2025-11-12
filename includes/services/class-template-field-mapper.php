@@ -10,6 +10,7 @@
 namespace QuillCRM\Services;
 
 use QuillCRM\Models\Template_Model;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Template_Field_Mapper class
@@ -22,30 +23,50 @@ class Template_Field_Mapper
     /**
      * Get field configuration for a campaign type
      *
-     * @param string $campaign_type Campaign type (email, sms, whatsapp)
+     * @param string|int $campaign_type Campaign type (email, sms, whatsapp) or integer constant
      * @return array Field configuration
      */
     public static function get_field_config($campaign_type)
     {
+        // Convert string to integer constant if needed
+        if (is_string($campaign_type)) {
+            $campaign_type = Campaign_Channel::to_integer($campaign_type);
+        }
+
         $configs = array(
-            'email' => array(
+            Campaign_Channel::CHANNEL_EMAIL => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
                 'specific_fields' => array('subject'),
-                'settings_fields' => array('from_name', 'from_email', 'reply_to', 'preview_text'),
+                'settings_fields' => array('from_name', 'from_email', 'reply_to', 'preview_text', 'enable_utm', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'),
             ),
-            'sms' => array(
+            Campaign_Channel::CHANNEL_EMAIL_SEQUENCE => array(
+                'common_fields' => array('template_id', 'name', 'body', 'type'),
+                'specific_fields' => array('subject'),
+                'settings_fields' => array('from_name', 'from_email', 'reply_to', 'preview_text', 'enable_utm', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'),
+            ),
+            Campaign_Channel::CHANNEL_SEQUENCE_MAIL => array(
+                'common_fields' => array('template_id', 'name', 'body', 'type'),
+                'specific_fields' => array('subject'),
+                'settings_fields' => array('from_name', 'from_email', 'reply_to', 'preview_text', 'enable_utm', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'),
+            ),
+            Campaign_Channel::CHANNEL_SMS => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
                 'specific_fields' => array(),
                 'settings_fields' => array('add_unsubscribe'),
             ),
-            'whatsapp' => array(
+            Campaign_Channel::CHANNEL_WHATSAPP => array(
                 'common_fields' => array('template_id', 'name', 'body', 'type'),
                 'specific_fields' => array(),
                 'settings_fields' => array('add_unsubscribe'),
             ),
         );
 
-        return $configs[$campaign_type] ?? array();
+        // Return default config if campaign_type not found
+        return $configs[$campaign_type] ?? array(
+            'common_fields' => array('template_id', 'name', 'body', 'type'),
+            'specific_fields' => array(),
+            'settings_fields' => array(),
+        );
     }
 
     /**
@@ -76,7 +97,15 @@ class Template_Field_Mapper
         // Add settings object with nested fields
         $settings = array();
         foreach ($config['settings_fields'] as $field) {
-            $default = ($field === 'add_unsubscribe') ? true : null;
+            // Set defaults based on field type
+            $default = null;
+            if ($field === 'add_unsubscribe') {
+                $default = true;
+            } elseif ($field === 'enable_utm') {
+                $default = false;
+            } elseif (strpos($field, 'utm_') === 0) {
+                $default = '';
+            }
             $settings[$field] = $template->get_setting($field, $default);
         }
         $template_data['settings'] = $settings;
@@ -114,9 +143,17 @@ class Template_Field_Mapper
         // Process settings - expect nested settings object
         $settings = array();
         $settings_data = $template_data['settings'] ?? array();
-        
+
         foreach ($config['settings_fields'] as $field) {
-            $default = ($field === 'add_unsubscribe') ? true : null;
+            // Set defaults based on field type
+            $default = null;
+            if ($field === 'add_unsubscribe') {
+                $default = true;
+            } elseif ($field === 'enable_utm') {
+                $default = false;
+            } elseif (strpos($field, 'utm_') === 0) {
+                $default = '';
+            }
             $settings[$field] = $settings_data[$field] ?? $default;
         }
 
@@ -135,7 +172,7 @@ class Template_Field_Mapper
      */
     public static function get_supported_types()
     {
-        return array('email', 'sms', 'whatsapp');
+        return Campaign_Channel::get_all();
     }
 
     /**

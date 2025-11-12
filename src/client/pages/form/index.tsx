@@ -53,11 +53,13 @@ const Form: React.FC<FormProps> = ({
 	const [loading, setLoading] = useState(!isNewForm);
 	const [isSaving, setIsSaving] = useState(false);
 	const [currentStep, setCurrentStep] = useState(0);
+	const [formFields, setFormFields] = useState<FormType['fields_settings']['fields'] | null>(null);
 	const navigate = useNavigate();
 	const isEditMode = !isNewForm;
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	// Helper function to show notice
 	const showNotice = (type: 'success' | 'error', message: string) => {
@@ -68,6 +70,13 @@ const Form: React.FC<FormProps> = ({
 	const closeNotice = () => {
 		setNotice(null);
 	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	useEffect(() => {
 		if (isNewForm) {
@@ -178,7 +187,7 @@ const Form: React.FC<FormProps> = ({
 			if (!form?.name || !form?.form_type || !form?.form_id) {
 				showNotice(
 					'error',
-					__('Please fill all required fields including form selection', 'quillcrm')
+					__('Please fill all required fields', 'quillcrm')
 				);
 				return;
 			}
@@ -190,6 +199,32 @@ const Form: React.FC<FormProps> = ({
 				showNotice('error', error.message);
 			}
 		} else if (currentStep === 1) {
+			// Validate that all contact fields are mapped
+			const mappedFields = (form?.data as any)?.mapped_fields || {};
+
+			// Check if form fields are available
+			if (!formFields || Object.keys(formFields).length === 0) {
+				showNotice(
+					'error',
+					__('No form fields available to map', 'quillcrm')
+				);
+				return;
+			}
+
+			// Check if all available form fields have valid mappings
+			const availableFieldKeys = Object.keys(formFields);
+			const allFieldsMapped = availableFieldKeys.every(
+				key => mappedFields[key] && mappedFields[key] !== ''
+			);
+
+			if (!allFieldsMapped) {
+				showNotice(
+					'error',
+					__('Please map all contact fields before activating', 'quillcrm')
+				);
+				return;
+			}
+
 			try {
 				await saveForm({ status: 'active' });
 
@@ -245,6 +280,11 @@ const Form: React.FC<FormProps> = ({
 		}
 	};
 
+	const stepTitles = [
+		__('Form Information', 'quillcrm'),
+		__('Mappping Fields', 'quillcrm'),
+	];
+
 	const breadcrumbItems = isNewForm
 		? [
 			{
@@ -255,7 +295,7 @@ const Form: React.FC<FormProps> = ({
 				label: __('Form Information', 'quillcrm'),
 			},
 			{
-				label: __('Form Settings', 'quillcrm'),
+				label: stepTitles[currentStep],
 			},
 		]
 		: [
@@ -267,14 +307,9 @@ const Form: React.FC<FormProps> = ({
 				label: __('Form Information', 'quillcrm'),
 			},
 			{
-				label: __('Form Settings', 'quillcrm'),
+				label: stepTitles[currentStep],
 			},
 		];
-
-	const stepTitles = [
-		__('Form Information', 'quillcrm'),
-		__('Mappping Fields', 'quillcrm'),
-	];
 
 	return (
 		<Provider
@@ -282,8 +317,10 @@ const Form: React.FC<FormProps> = ({
 				form: form as FormType,
 				isLoading: loading,
 				isSaving,
+				formFields,
 				setIsLoading: setLoading,
 				setIsSaving: setIsSaving,
+				setFormFields,
 				saveForm,
 				...$actions,
 			}}
@@ -317,7 +354,7 @@ const Form: React.FC<FormProps> = ({
 				isLoading={isSaving}
 			>
 				{notice && (
-					<NoticeBanner notice={notice} closeNotice={closeNotice} />
+					<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 				)}
 				<div className="flex gap-6">
 					<PanelSettings

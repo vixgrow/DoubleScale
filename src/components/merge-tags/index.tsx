@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -20,7 +20,7 @@ import {
 	DialogOverlay,
 	DialogHeader,
 } from '@/components/ui/dialog';
-import { MergeTagsIcon } from '@quillcrm/components';
+import { GradientMergeTagsIcon } from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -81,6 +81,10 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 	const automationMergeTagsWithTrigger = filter(
 		automationMergeTags,
 		(group) => {
+			// Filter out disabled groups
+			if (group.is_disabled) {
+				return false;
+			}
 			return !group.triggers || group.triggers.includes(currentTrigger);
 		}
 	);
@@ -98,7 +102,7 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 							'Choose your Merge tags type and Select one of them related to your input.',
 							'quillcrm'
 						)}
-						icon={<MergeTagsIcon />}
+						icon={<GradientMergeTagsIcon />}
 					/>
 				</DialogHeader>
 
@@ -144,6 +148,7 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 								<MergeTagsGroupRender
 									mergeTags={selectedGroup.mergeTags}
 									onInsertTag={onInsertTag}
+									activeTrigger={currentTrigger}
 								/>
 							)}
 						</CardContent>
@@ -157,8 +162,23 @@ const MergeTagsSelector: React.FC<MergeTagsSelectorProps> = ({
 const MergeTagsGroupRender: React.FC<{
 	mergeTags: MergeTags;
 	onInsertTag?: (tagValue: string) => void;
-}> = ({ mergeTags, onInsertTag }) => {
+	activeTrigger?: string;
+}> = ({ mergeTags, onInsertTag, activeTrigger }) => {
 	const { createNotice, setMergeTagsVisible } = useDispatch('quillcrm/core');
+
+	// Filter merge tags based on required_triggers
+	const filteredMergeTags = filter(mergeTags, (tag) => {
+		// If tag has no required_triggers, show it
+		if (!tag.required_triggers || tag.required_triggers.length === 0) {
+			return true;
+		}
+		// If no active trigger, hide tags with required_triggers
+		if (!activeTrigger) {
+			return false;
+		}
+		// Show tag only if current trigger is in required_triggers
+		return tag.required_triggers.includes(activeTrigger);
+	});
 
 	const handleTagClick = (tagValue: string) => {
 		if (onInsertTag) {
@@ -176,35 +196,27 @@ const MergeTagsGroupRender: React.FC<{
 
 	return (
 		<div className="space-y-3 max-h-96 overflow-y-auto">
-			{map(mergeTags, (tag, key) => (
-				<Card
+			{map(filteredMergeTags, (tag, key) => (
+				<Button
 					key={key}
-					className="cursor-pointer shadow-none transition-all duration-200 hover:shadow-md hover:bg-gray-50"
-					onClick={() => handleTagClick(tag.value)}
+					className="w-full py-8 justify-start rounded-xl border border-border bg-card text-left text-card-foreground shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+					onClick={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						handleTagClick(tag.value);
+					}}
 				>
-					<CardContent className="p-4">
-						<div className="flex justify-between items-center">
-							<span className="font-semibold text-[#3F4254] text-base grid">
-								{tag.name}
-								<span className="text-xs text-[#505255] italic font-normal">
-									{tag.value}
-								</span>
+					<div className="flex w-full items-center justify-between">
+						<span className="grid font-semibold text-base text-[#3F4254]">
+							{tag.name}
+							<span className="text-xs font-normal italic text-[#505255]">
+								{tag.value}
 							</span>
-							<Button
-								variant="ghost"
-								size="sm"
-								className="h-8 w-8 p-0"
-								onClick={(e) => {
-									e.preventDefault();
-									e.stopPropagation();
-									handleTagClick(tag.value);
-								}}
-							>
-								<Copy className="h-4 w-4" />
-							</Button>
-						</div>
-					</CardContent>
-				</Card>
+						</span>
+
+						<Copy className="h-4 w-4" />
+					</div>
+				</Button>
 			))}
 		</div>
 	);

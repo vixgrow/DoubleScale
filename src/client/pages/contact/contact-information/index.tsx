@@ -2,10 +2,12 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * External dependencies
  */
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
 	Select,
@@ -14,6 +16,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 /**
  * Internal dependencies
@@ -26,11 +30,53 @@ import {
 } from '@quillcrm/components';
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
-import { UserRound } from 'lucide-react';
+import { UserRound, Mail } from 'lucide-react';
 
 const ContactInformation: React.FC = () => {
-	const { contact, setContact, updateContact, emailAnalytics } =
+	const { contact, setContact, updateContact, emailAnalytics, showNotice } =
 		useContactContext();
+	const [isSendingOptIn, setIsSendingOptIn] = useState(false);
+	const [optInSent, setOptInSent] = useState(false);
+
+	const sendOptInEmail = async () => {
+		if (!contact || isSendingOptIn || optInSent) {
+			return;
+		}
+
+		setIsSendingOptIn(true);
+		try {
+			await apiFetch({
+				path: `/qc/v1/contacts/${contact.id}/send-opt-in`,
+				method: 'POST',
+			});
+
+			// Mark as sent FIRST - before showing notification
+			setOptInSent(true);
+
+			// Show success notification using the parent's notice system
+			if (showNotice) {
+				showNotice({
+					type: 'success',
+					message: __('Opt-in email sent successfully', 'quillcrm'),
+				});
+			}
+		} catch (error: any) {
+			// Show error notification
+			const errorMessage = error.message || __('Failed to send opt-in email', 'quillcrm');
+			if (showNotice) {
+				showNotice({
+					type: 'error',
+					message: errorMessage,
+				});
+			}
+			console.error('Error sending opt-in email:', error);
+		} finally {
+			// Only set to false if not sent (to prevent re-enabling on success)
+			if (!optInSent) {
+				setIsSendingOptIn(false);
+			}
+		}
+	};
 
 	if (!contact) {
 		return (
@@ -49,7 +95,7 @@ const ContactInformation: React.FC = () => {
 		contact.email;
 
 	// Calculate email analytics
-	const totalEmails = emailAnalytics?.emails?.total || 0;
+	const totalEmails = emailAnalytics?.total_sent || 0;
 	const totalOpened = emailAnalytics?.total_opened || 0;
 	const totalClicked = emailAnalytics?.total_clicked || 0;
 
@@ -83,12 +129,14 @@ const ContactInformation: React.FC = () => {
 		<Card className="w-1/3 bg-[#F8F8F8] shadow-none">
 			<CardHeader>
 				<div className="flex items-center gap-4 border-b pb-4">
-					<div className="w-40 h-28 border flex items-center justify-center font-semibold rounded-full">
-						<UserRound className="w-12 h-12" />
-					</div>
+					<Avatar className="w-28 h-28 border">
+						<AvatarFallback className="bg-transparent">
+							<UserRound className="w-12 h-12" />
+						</AvatarFallback>
+					</Avatar>
 					<div className="w-full">
 						<div className="flex justify-between items-center gap-2">
-							<CardTitle className="text-xl font-semibold">
+							<CardTitle className="text-xl font-semibold truncate max-w-[168px]">
 								{fullName}
 							</CardTitle>
 							<Select
@@ -134,9 +182,27 @@ const ContactInformation: React.FC = () => {
 								</span>
 							)}
 						</div>
+						{contact.status === 'unverified' && (
+							<div className="mt-2">
+								<Button
+									size="sm"
+									variant="outline"
+									className="h-7 text-xs gap-1"
+									disabled={isSendingOptIn || optInSent}
+									onClick={sendOptInEmail}
+								>
+									<Mail className="w-3 h-3" />
+									{isSendingOptIn
+										? __('Sending...', 'quillcrm')
+										: optInSent
+										? __('Email Sent', 'quillcrm')
+										: __('Send Opt-in Email', 'quillcrm')}
+								</Button>
+							</div>
+						)}
 						<div className="mt-2 flex items-center gap-3">
 							<div className="flex gap-1 items-center border-r pr-3">
-								<div className="bg-[#E4EEFD] px-2 py-3 rounded-full">
+								<div className="bg-[#E4EEFD] text-[#458DC7] p-1.5 rounded-full">
 									<ContactTotalEmailsIcon />
 								</div>
 								<span className="text-primary text-base font-semibold">
@@ -144,7 +210,7 @@ const ContactInformation: React.FC = () => {
 								</span>
 							</div>
 							<div className="flex gap-1 items-center border-r pr-3">
-								<div className="bg-[#D1F6DF] p-2 rounded-full">
+								<div className="bg-[#D1F6DF] text-[#16A34A] p-1.5 rounded-full">
 									<OpenRateIcon />
 								</div>
 								<span className="text-primary text-base font-semibold">
@@ -152,7 +218,7 @@ const ContactInformation: React.FC = () => {
 								</span>
 							</div>
 							<div className="flex gap-1 items-center">
-								<div className="bg-[#EEE4FF] p-1.5 rounded-full">
+								<div className="bg-[#EEE4FF] text-[#660FF1] p-1.5 rounded-full">
 									<ClickRateIcon />
 								</div>
 								<span className="text-primary text-base font-semibold">

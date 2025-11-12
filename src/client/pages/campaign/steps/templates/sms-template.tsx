@@ -2,34 +2,51 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useRef, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-
 /**
  * Internal dependencies
  */
-import './style.scss';
-import { useCampaignContext } from '../../state/context';
-import { useNavigate, getToLink } from '@quillcrm/navigation';
-import { PanelLayout, PanelSettings, CategoryIcon } from '@quillcrm/components';
+import { useCampaignStep, campaignSteps } from '../shared';
+import {
+	PanelSettings,
+	SetUpInfoIcon,
+	PanelLayout,
+	PlayIcon,
+	Stepper,
+	MergeTagsIcon,
+	NoticeBanner,
+} from '@quillcrm/components';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import type { SMSTemplate } from '@quillcrm/client';
-import MessageComposer from './components/message-composer';
+import { Textarea } from '@/components/ui/textarea';
+import type { SMSTemplate, NoticeMessage } from '@quillcrm/client';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
+import { getCampaignEndpoint } from '@quillcrm/utils';
+import SMSDevice from './sms-device';
 
 const SMSTemplateStep: React.FC = () => {
-	const { campaign, saveCampaign, isSaving } = useCampaignContext();
-	const navigate = useNavigate();
-	const { createNotice } = useDispatch('quillcrm/core');
-	const [isSendingTest, setIsSendingTest] = useState(false);
-	const [testPhone, setTestPhone] = useState('');
+	const { campaign, saving, goToStep } = useCampaignStep();
+	const { setMergeTagsVisible, setMergeTagCallback } =
+		useDispatch('quillcrm/core');
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
+	const messageTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+	// Scroll to notice banner when it appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			});
+		}
+	}, [notice]);
 
 	// Initialize default SMS template
 	const defaultTemplate: SMSTemplate = {
 		name: __('SMS Message', 'quillcrm'),
-		type: 'sms',
+		type: CAMPAIGN_CHANNEL.SMS,
 		body: '',
 		settings: {
 			add_unsubscribe: true,
@@ -42,13 +59,13 @@ const SMSTemplateStep: React.FC = () => {
 		if (
 			existingTemplate &&
 			'type' in existingTemplate &&
-			existingTemplate.type === 'sms'
+			existingTemplate.type === CAMPAIGN_CHANNEL.SMS
 		) {
 			// Convert backend format to frontend format
 			const backendTemplate = existingTemplate as any;
 			return {
 				name: backendTemplate.name || defaultTemplate.name,
-				type: 'sms',
+				type: CAMPAIGN_CHANNEL.SMS,
 				body: backendTemplate.body || '',
 				settings: {
 					add_unsubscribe:
@@ -72,7 +89,7 @@ const SMSTemplateStep: React.FC = () => {
 
 	const validate = (): boolean => {
 		if (!template.body || template.body.trim().length === 0) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: __('Message content is required', 'quillcrm'),
 			});
@@ -80,7 +97,7 @@ const SMSTemplateStep: React.FC = () => {
 		}
 
 		if (template.body.length > 1600) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: __(
 					'Message is too long. Maximum 1600 characters.',
@@ -90,181 +107,194 @@ const SMSTemplateStep: React.FC = () => {
 			return false;
 		}
 
+		setNotice(null);
 		return true;
 	};
 
+	const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+
 	const save = async () => {
+		if (isSavingTemplate) {
+			return;
+		}
+
 		if (!campaign || !validate()) {
 			return;
 		}
 
-		// Use consistent structure across all campaign types
-		const backendTemplate = {
-			name: template.name,
-			type: template.type,
-			body: template.body,
-			settings: {
-				add_unsubscribe: template.settings?.add_unsubscribe ?? true,
-			},
-		};
-
-		await saveCampaign({
-			settings: {
-				...campaign.settings,
-				templates: [backendTemplate],
-			},
-		});
-		navigate(getToLink(`campaigns/${campaign.id}/contacts`));
-	};
-
-	const sendTestSMS = async () => {
-		if (!validate()) {
-			return;
-		}
-
-		// Ask for test phone number if not provided
-		const phone =
-			testPhone ||
-			prompt(
-				__(
-					'Enter test phone number (E.164 format, e.g., +1234567890):',
-					'quillcrm'
-				)
-			);
-		if (!phone) {
-			return;
-		}
-
-		// Basic E.164 validation
-		if (!/^\+[1-9]\d{1,14}$/.test(phone)) {
-			createNotice({
-				type: 'error',
-				message: __(
-					'Please enter a valid phone number in E.164 format (e.g., +1234567890)',
-					'quillcrm'
-				),
-			});
-			return;
-		}
-
-		setTestPhone(phone);
-		setIsSendingTest(true);
-
 		try {
+			setIsSavingTemplate(true);
+			// Use consistent structure across all campaign types
+			const backendTemplate = {
+				name: template.name,
+				type: template.type,
+				body: template.body,
+				settings: {
+					add_unsubscribe: template.settings?.add_unsubscribe ?? true,
+				},
+			};
+
+			const endpoint = getCampaignEndpoint(campaign.type);
+			if (!endpoint) {
+				throw new Error(__('Invalid campaign type', 'quillcrm'));
+			}
+
 			await apiFetch({
-				path: '/qc/v1/sms-campaigns/send-test-sms',
-				method: 'POST',
+				path: `${endpoint}/${campaign.id}`,
+				method: 'PUT',
 				data: {
-					phone: phone,
-					message: template.body,
+					...campaign,
+					settings: {
+						...campaign.settings,
+						templates: [backendTemplate],
+					},
 				},
 			});
 
-			createNotice({
-				type: 'success',
-				message: __('Test SMS sent successfully', 'quillcrm'),
-			});
+			setNotice(null);
+			goToStep('contacts');
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message:
-					error.message || __('Failed to send test SMS', 'quillcrm'),
+					error.message ||
+					__(
+						'Failed to save template. Please try again.',
+						'quillcrm'
+					),
 			});
 		} finally {
-			setIsSendingTest(false);
+			setIsSavingTemplate(false);
 		}
 	};
 
+	const handleMergeTagClick = () => {
+		setMergeTagCallback((tagValue: string) => {
+			if (messageTextareaRef.current) {
+				const textarea = messageTextareaRef.current;
+				const start = textarea.selectionStart;
+				const end = textarea.selectionEnd;
+				const currentText = template.body || '';
+				const newText =
+					currentText.substring(0, start) +
+					tagValue +
+					currentText.substring(end);
+
+				updateTemplate({ body: newText });
+
+				// Set cursor position after the inserted tag
+				setTimeout(() => {
+					if (textarea) {
+						textarea.focus();
+						const newPosition = start + tagValue.length;
+						textarea.setSelectionRange(newPosition, newPosition);
+					}
+				}, 0);
+			}
+		});
+		setMergeTagsVisible(true);
+	};
+
 	return (
-		<div>
-			<PanelLayout
-				items={[
-					{
-						label: __('Create Campaign', 'quillcrm'),
-						href: 'campaigns',
-					},
-					{
-						label: __('SMS Campaign', 'quillcrm'),
-					},
-				]}
-				totalSteps={1}
-				currentStep={0}
-				onNext={save}
-				onBack={() => navigate(getToLink(`campaigns`))}
-			>
-				<div className="flex gap-6">
+		<PanelLayout
+			items={[
+				{
+					label: __('Create Campaign', 'quillcrm'),
+					href: 'campaigns',
+				},
+				{
+					label: campaign?.settings.ab_test
+						? __('A/B Test Campaign', 'quillcrm')
+						: __('Standard Campaign', 'quillcrm'),
+				},
+			]}
+			panelbtns={[
+				<Button variant="secondaryDeepBlue">
+					<PlayIcon />
+					{__('Watch Tutorial', 'quillcrm')}
+				</Button>,
+			]}
+			type="campaign"
+		>
+			<Stepper
+				steps={campaignSteps.filter((step) => step.slug !== 'builder')}
+				canProceed="true"
+				currentStep={1}
+			/>
+
+			<div className="w-full flex gap-6">
+				<div className="w-2/3">
 					<PanelSettings
-						title={__('SMS Message', 'quillcrm')}
+						title={__('Set-up Info', 'quillcrm')}
 						description={__(
-							'Compose your SMS message. You can use merge tags like {{contact:first_name}} to personalize messages.',
+							'Define your sender identity, subject line, and optional UTM tracking before building your campaign.',
 							'quillcrm'
 						)}
-						icon={<CategoryIcon />}
-						className="w-full max-w-2xl"
+						icon={<SetUpInfoIcon />}
+						onNext={save}
+						nextLabel={
+							saving || isSavingTemplate
+								? __('Saving...', 'quillcrm')
+								: __('Next', 'quillcrm')
+						}
+						showButtons={true}
+						isLoading={saving || isSavingTemplate}
 					>
-						<div className="space-y-4">
-							<MessageComposer
-								value={template.body}
-								onChange={(value) =>
-									updateTemplate({ body: value })
-								}
-								label={__('SMS Message', 'quillcrm')}
-								placeholder={__(
-									'Enter your SMS message here...',
-									'quillcrm'
-								)}
-								maxLength={1600}
-								helpText={__(
-									'Use {{contact:first_name}}, {{contact:last_name}}, etc. for personalization',
-									'quillcrm'
-								)}
-							/>
+						<div className="space-y-6">
+							{/* Notice Banner */}
+							{notice && (
+								<NoticeBanner
+									ref={noticeBannerRef}
+									notice={notice}
+									closeNotice={() => setNotice(null)}
+								/>
+							)}
 
-							<Separator />
-
-							<div className="flex items-center justify-between">
-								<div>
-									<p className="text-lg font-semibold text-foreground">
-										{__('Add Unsubscribe Link', 'quillcrm')}
-									</p>
-									<p className="text-sm text-muted-foreground">
-										{__(
-											'Automatically add an unsubscribe link to the SMS',
-											'quillcrm'
-										)}
-									</p>
+							{/* Message Field */}
+							<div className="space-y-2">
+								<div className="flex items-center justify-between">
+									<label className="text-base font-medium text-[#333333]">
+										{__('Message', 'quillcrm')}
+										<span className="text-red-500">
+											*
+										</span>
+									</label>
+									<Button
+										variant="ghost"
+										onClick={handleMergeTagClick}
+										className="text-[#333333] shadow-none border-none p-0 hover:text-black"
+									>
+										<MergeTagsIcon
+											width={24}
+											height={24}
+										/>
+									</Button>
 								</div>
-								<Switch
-									checked={template.settings?.add_unsubscribe}
-									onCheckedChange={(checked) =>
+								<Textarea
+									ref={messageTextareaRef}
+									value={template.body}
+									onChange={(e) =>
 										updateTemplate({
-											settings: {
-												...template.settings,
-												add_unsubscribe: checked,
-											},
+											body: e.target.value,
 										})
 									}
+									placeholder={__(
+										'Type your message here...',
+										'quillcrm'
+									)}
+									rows={8}
+									className="bg-white resize-none"
 								/>
-							</div>
-
-							<Separator />
-
-							<div className="mt-4">
-								<Button
-									variant="default"
-									onClick={sendTestSMS}
-									disabled={isSendingTest || isSaving}
-								>
-									{isSendingTest
-										? __('Sending...', 'quillcrm')
-										: __('Send Test SMS', 'quillcrm')}
-								</Button>
+								<p className="text-sm text-[#71717A]">
+									{__('Maximum 1600 characters', 'quillcrm')}
+								</p>
 							</div>
 						</div>
 					</PanelSettings>
 				</div>
-			</PanelLayout>
-		</div>
+				<SMSDevice fromName="" body={template.body} />
+			</div>
+		</PanelLayout>
 	);
 };
 

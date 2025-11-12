@@ -14,29 +14,8 @@ import { Card, Flex, Skeleton, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { MailOutlined, EyeOutlined, LinkOutlined } from '@ant-design/icons';
 import { map } from 'lodash';
-import {
-	Chart as ChartJS,
-	LineController,
-	LineElement,
-	PointElement,
-	LinearScale,
-	Title,
-	CategoryScale,
-	Tooltip,
-	BarElement,
-} from 'chart.js';
+import '../../lib/chart-setup';
 import { Line } from 'react-chartjs-2';
-
-ChartJS.register(
-	LineController,
-	LineElement,
-	PointElement,
-	LinearScale,
-	Title,
-	CategoryScale,
-	Tooltip,
-	BarElement
-);
 
 /**
  * Internal dependencies
@@ -59,7 +38,7 @@ const EmailAnalytics: React.FC = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/campaigns/email-analytics', {
+				path: addQueryArgs('/qc/v1/email-campaigns/analytics', {
 					interval,
 					start_date: dayjs(startDate).format('YYYY-MM-DD'),
 					end_date: dayjs(endDate).format('YYYY-MM-DD'),
@@ -114,7 +93,7 @@ const EmailAnalytics: React.FC = () => {
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
-							{data.total_opened || 0}
+							{data.opened || 0}
 						</Typography.Text>
 					</Flex>
 				</Card>
@@ -129,7 +108,7 @@ const EmailAnalytics: React.FC = () => {
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
-							{data.total_clicked || 0}
+							{data.clicked || 0}
 						</Typography.Text>
 					</Flex>
 				</Card>
@@ -162,8 +141,8 @@ const EmailAnalytics: React.FC = () => {
 								{
 									label: __('Emails', 'quillcrm'),
 									data: map(data.data.dates, (date) => {
-										return data.emails[date]
-											? data.emails[date]
+										return data.email[date]
+											? data.email[date]
 											: 0;
 									}),
 									borderColor: '#6d78d8',
@@ -190,7 +169,7 @@ const EmailAnalytics: React.FC = () => {
 											return `Date: ${convertDate(data.data.dates[context.dataIndex])}`;
 										},
 										title: function (context) {
-											return `Emails: ${data.emails[data.data.dates[context[0].dataIndex]]}`;
+											return `Emails: ${data.email[data.data.dates[context[0].dataIndex]]}`;
 										},
 									},
 								},

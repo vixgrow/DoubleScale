@@ -2,16 +2,17 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect, useCallback } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import { Input } from '@/components/ui/input';
-import type { Filter as FilterType } from '@quillcrm/client';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import type { Filter as FilterType, Contact } from '@quillcrm/client';
 import { SearchIcon } from 'lucide-react';
-import { STORE_KEY } from '@/stores/contacts';
 
 interface ContactListProps {
 	filters?: FilterType[];
@@ -22,6 +23,7 @@ interface ContactListProps {
 	onFetchComplete?: () => void;
 	onTotalChange?: (total: number) => void;
 	onLoadingChange?: (loading: boolean) => void;
+	campaignType?: string;
 }
 
 // Helper function to generate contact initials
@@ -29,26 +31,6 @@ const getContactInitials = (firstName: string, lastName: string): string => {
 	const first = firstName?.charAt(0)?.toUpperCase() || '';
 	const last = lastName?.charAt(0)?.toUpperCase() || '';
 	return first + last || '?';
-};
-
-// Helper function to generate background color based on name
-const getAvatarColor = (name: string): string => {
-	const colors = [
-		'bg-blue-500',
-		'bg-green-500',
-		'bg-purple-500',
-		'bg-pink-500',
-		'bg-indigo-500',
-		'bg-red-500',
-		'bg-yellow-500',
-		'bg-teal-500',
-	];
-
-	const hash = name.split('').reduce((acc, char) => {
-		return acc + char.charCodeAt(0);
-	}, 0);
-
-	return colors[hash % colors.length];
 };
 
 const ContactList: React.FC<ContactListProps> = ({
@@ -60,128 +42,129 @@ const ContactList: React.FC<ContactListProps> = ({
 	onFetchComplete,
 	onTotalChange,
 	onLoadingChange,
+	campaignType,
 }) => {
+	// Simple local state
 	const [searchTerm, setSearchTerm] = useState('');
+	const [contacts, setContacts] = useState<Contact[]>([]);
+	const [total, setTotal] = useState(0);
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [page, setPage] = useState(1);
+	const [hasMore, setHasMore] = useState(true);
 
-	// Get data from store
-	const {
-		contacts,
-		total,
-		isLoadingContacts,
-		contactsError,
-		hasMoreContacts,
-	} = useSelect((select: any) => {
-		const store = select(STORE_KEY);
-		return {
-			contacts: store.getContacts(),
-			total: store.getContactsTotal(),
-			isLoadingContacts: store.isLoadingContacts(),
-			contactsError: store.getContactsError(),
-			hasMoreContacts: store.hasMoreContacts(),
-		};
-	}, []);
+	// Simple fetch function
+	const fetchContacts = async (
+		pageNum: number = 1,
+		append: boolean = false
+	) => {
+		setIsLoading(true);
+		setError(null);
 
-	// Store actions
-	const { fetchContacts, setFilters, setSearchKeywords, loadMoreContacts } =
-		useDispatch(STORE_KEY) as any;
-
-	// Fetch contacts using store action
-	const handleFetchContacts = async (search = '') => {
 		try {
-			await fetchContacts({
-				filters,
-				keywords: search,
-				page: 1,
-				perPage: 50,
-				subscribed: true,
-			});
-		} catch (error) {
-			console.error('Failed to fetch contacts:', error);
+			const response = await apiFetch<{ data: Contact[]; total: number }>(
+				{
+					path: addQueryArgs('/qc/v1/contacts', {
+						per_page: 50,
+						page: pageNum,
+						filters,
+						subscribed: true,
+						keywords: searchTerm,
+						campaign_type: campaignType,
+					}),
+					method: 'GET',
+				}
+			);
+
+			const newContacts = Array.isArray(response.data)
+				? response.data
+				: ([] as Contact[]);
+
+			if (append) {
+				setContacts((prev) => [...prev, ...newContacts]);
+			} else {
+				setContacts(newContacts);
+			}
+
+			setTotal(response.total);
+			setPage(pageNum);
+			setHasMore(newContacts.length === 50);
+		} catch (err: unknown) {
+			const message =
+				err instanceof Error ? err.message : 'Failed to fetch contacts';
+			setError(message);
+			console.error('Failed to fetch contacts:', err);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
-	// Notify parent components of state changes
+	// Notify parent components
 	useEffect(() => {
-		if (onTotalChange) {
-			onTotalChange(total);
-		}
-	}, [total, onTotalChange]);
+		onTotalChange?.(total);
+	}, [total]);
 
 	useEffect(() => {
-		if (onLoadingChange) {
-			onLoadingChange(isLoadingContacts);
-		}
-	}, [isLoadingContacts, onLoadingChange]);
+		onLoadingChange?.(isLoading);
+	}, [isLoading]);
 
-	// Initial fetch on component mount
+	const isInitialMount = useRef(true);
+
+	// Initial fetch
 	useEffect(() => {
-		handleFetchContacts(searchTerm);
+		fetchContacts(1);
+		isInitialMount.current = false;
 	}, []);
 
-	// Refetch when shouldFetch is true (when apply filters is clicked)
+	// Refetch when filters change (from apply button)
 	useEffect(() => {
 		if (shouldFetch) {
-			// Update store filters
-			setFilters(filters);
-			handleFetchContacts(searchTerm);
-			if (onFetchComplete) {
-				onFetchComplete();
-			}
+			fetchContacts(1);
+			onFetchComplete?.();
 		}
-	}, [shouldFetch, filters]);
+	}, [shouldFetch]);
 
-	// Debounce search
-	useEffect(() => {
-		if (searchTerm !== '') {
-			const timeoutId = setTimeout(() => {
-				setSearchKeywords(searchTerm);
-				handleFetchContacts(searchTerm);
-			}, 300);
-
-			return () => clearTimeout(timeoutId);
-		} else if (searchTerm === '') {
-			// If search is cleared, fetch without search term
-			setSearchKeywords('');
-			handleFetchContacts('');
-		}
-		// Return undefined for other cases
-		return undefined;
-	}, [searchTerm]);
+	// Local search only - compute filtered list client-side (no refetch)
+	const normalizedSearch = searchTerm.trim().toLowerCase();
+	const displayedContacts = normalizedSearch
+		? contacts.filter((c) => {
+				const first = String(c.first_name ?? '').toLowerCase();
+				const last = String(c.last_name ?? '').toLowerCase();
+				const email = String(c.email ?? '').toLowerCase();
+				const phone = String(
+					(c as unknown as { phone?: string })?.phone ?? ''
+				).toLowerCase();
+				const full = `${first} ${last}`.trim();
+				return (
+					first.includes(normalizedSearch) ||
+					last.includes(normalizedSearch) ||
+					full.includes(normalizedSearch) ||
+					email.includes(normalizedSearch) ||
+					phone.includes(normalizedSearch)
+				);
+			})
+		: contacts;
 
 	// Handle infinite scroll
 	const handleScroll = useCallback(
-		async (e: React.UIEvent<HTMLDivElement>) => {
+		(e: React.UIEvent<HTMLDivElement>) => {
 			const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
 
-			// Check if we're near the bottom (within 100px) and can load more
+			// Load more when near bottom
 			if (
 				scrollHeight - scrollTop - clientHeight < 100 &&
-				hasMoreContacts &&
-				!isLoadingContacts
+				hasMore &&
+				!isLoading
 			) {
-				try {
-					await loadMoreContacts({
-						filters,
-						keywords: searchTerm,
-						subscribed: true,
-					});
-				} catch (error) {
-					console.error('Failed to load more contacts:', error);
-				}
+				fetchContacts(page + 1, true);
 			}
 		},
-		[
-			hasMoreContacts,
-			isLoadingContacts,
-			loadMoreContacts,
-			filters,
-			searchTerm,
-		]
+		[hasMore, isLoading, page]
 	);
 
 	return (
 		<div
-			className="w-[45%] bg-white rounded-lg border border-gray-200 p-6 flex flex-col"
+			className="w-[45%] bg-[#F8F8F8] rounded-lg border border-gray-200 p-6 flex flex-col"
 			style={{
 				height: maxHeight > 0 ? `${maxHeight}px` : 'auto',
 				maxHeight: maxHeight > 0 ? `${maxHeight}px` : 'none',
@@ -190,15 +173,15 @@ const ContactList: React.FC<ContactListProps> = ({
 			{/* Header */}
 			<div className="flex items-center justify-between gap-4 flex-shrink-0">
 				<div className="w-1/2">
-					<div className="flex items-center gap-2 mb-1">
+					<div className="flex items-center gap-2 mb-2">
 						<h3 className="text-lg font-semibold text-gray-900">
 							{__('Recipients', 'quillcrm')}
 						</h3>
-						<span className="text-lg font-semibold text-blue-600 px-5 py-1 bg-blue-50 rounded-full">
+						<span className="text-sm font-semibold text-secondary px-3 py-1 bg-[#C6DFF333] rounded-full">
 							{total.toLocaleString()}
 						</span>
 					</div>
-					<p className="text-sm text-gray-500">
+					<p className="text-sm font-semibold text-gray-500">
 						{__(
 							'Recipients Total Contacts based on filters',
 							'quillcrm'
@@ -207,7 +190,7 @@ const ContactList: React.FC<ContactListProps> = ({
 				</div>
 
 				{/* Search */}
-				<div className="w-1/2 flex items-center gap-2 bg-gray-100 p-3 rounded-lg">
+				<div className="w-1/2 flex items-center gap-2 p-3 rounded-lg">
 					<SearchIcon className="text-gray-400" />
 					<Input
 						type="text"
@@ -224,22 +207,26 @@ const ContactList: React.FC<ContactListProps> = ({
 				</div>
 			</div>
 
-			{/* Contacts List - make it fill remaining space but scroll content */}
+			{/* Contacts List */}
 			<div
-				className="space-y-3 overflow-y-auto flex-1 min-h-0 mt-3"
+				className="overflow-y-auto flex-1 min-h-0 mt-3"
 				onScroll={handleScroll}
 			>
-				{(isLoadingContacts || loading) && contacts.length === 0 ? (
+				{(isLoading || loading) && contacts.length === 0 ? (
 					<div className="flex items-center justify-center py-8">
 						<div className="text-gray-500">
 							{__('Loading contacts...', 'quillcrm')}
 						</div>
 					</div>
-				) : contactsError ? (
+				) : error ? (
 					<div className="flex items-center justify-center py-8">
-						<div className="text-red-500">{contactsError}</div>
+						<div className="text-red-500">{error}</div>
 					</div>
-				) : contacts.length === 0 ? (
+				) : (
+						normalizedSearch
+							? displayedContacts.length === 0
+							: contacts.length === 0
+				  ) ? (
 					<div className="flex items-center justify-center py-8">
 						<div className="text-gray-500">
 							{__('No contacts found', 'quillcrm')}
@@ -247,46 +234,59 @@ const ContactList: React.FC<ContactListProps> = ({
 					</div>
 				) : (
 					<>
-						{contacts.map((contact) => {
-							const fullName =
-								`${contact.first_name} ${contact.last_name}`.trim();
-							const initials = getContactInitials(
-								contact.first_name,
-								contact.last_name
-							);
-							const avatarColor = getAvatarColor(
-								fullName || contact.email
-							);
+						{(normalizedSearch ? displayedContacts : contacts).map(
+							(contact) => {
+								const fullName =
+									`${contact.first_name || '-'} ${contact.last_name || '-'}`.trim();
+								const initials = getContactInitials(
+									contact.first_name,
+									contact.last_name
+								);
+								const hasImage = (contact as any).img;
 
-							return (
-								<div
-									key={contact.id}
-									className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
-								>
-									{/* Avatar */}
+								return (
 									<div
-										className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium text-sm ${avatarColor}`}
+										key={contact.id}
+										className="flex items-center gap-3 py-3 hover:bg-gray-50 cursor-pointer"
 									>
-										{initials}
-									</div>
+										{/* Avatar */}
+										{hasImage ? (
+											<Avatar className="w-12 h-12 rounded-full">
+												<AvatarImage
+													src={(contact as any).img}
+													alt={
+														fullName ||
+														contact.email
+													}
+													className="rounded-full"
+												/>
+											</Avatar>
+										) : (
+											<Avatar className="w-12 h-12 rounded-full">
+												<AvatarFallback className="rounded-full bg-[#E3EEFF99] text-secondary font-bold text-lg">
+													{initials}
+												</AvatarFallback>
+											</Avatar>
+										)}
 
-									{/* Contact Info */}
-									<div className="flex-1 min-w-0">
-										<div className="font-medium text-gray-900 truncate">
-											{fullName ||
-												__('No Name', 'quillcrm')}
-										</div>
-										<div className="text-sm text-gray-500 truncate">
-											{__('Email:', 'quillcrm')}{' '}
-											{contact.email}
+										{/* Contact Info */}
+										<div className="flex-1 min-w-0">
+											{fullName && (
+												<div className="font-semibold capitalize text-base text-[#09090B] w-72 truncate">
+													{fullName}
+												</div>
+											)}
+											<div className="text-base text-gray-500 truncate">
+												{contact.email}
+											</div>
 										</div>
 									</div>
-								</div>
-							);
-						})}
+								);
+							}
+						)}
 
-						{/* Loading indicator for infinite scroll */}
-						{isLoadingContacts && contacts.length > 0 && (
+						{/* Loading more indicator */}
+						{isLoading && contacts.length > 0 && (
 							<div className="flex items-center justify-center py-4">
 								<div className="text-gray-500 text-sm">
 									{__('Loading more contacts...', 'quillcrm')}
@@ -294,8 +294,8 @@ const ContactList: React.FC<ContactListProps> = ({
 							</div>
 						)}
 
-						{/* End of list indicator */}
-						{!hasMoreContacts && contacts.length > 0 && (
+						{/* End of list */}
+						{!hasMore && contacts.length > 0 && (
 							<div className="flex items-center justify-center py-4">
 								<div className="text-gray-400 text-sm">
 									{__('No more contacts to load', 'quillcrm')}

@@ -24,6 +24,7 @@ class Delay extends Action {
 
 
 
+
 	/**
 	 * Action Name
 	 *
@@ -88,8 +89,8 @@ class Delay extends Action {
 		// Schedule the next step after 2 minutes
 		$next_step = $automation->get_next_step( $step );
 		$time      = null;
-		$delay     = $step->get_attribute( 'delay' );
-		$unit      = $step->get_attribute( 'unit' );
+		$delay     = $step->get_setting( 'delay' );
+		$unit      = $step->get_setting( 'unit' );
 
 		switch ( $unit ) {
 			case 'minutes':
@@ -103,7 +104,7 @@ class Delay extends Action {
 				break;
 		}
 
-		QuillCRM::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation->id, $next_step->id, $automation_contact->id );
+		QuillCRM::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation->id, $step->id, $next_step->id, $automation_contact->id );
 
 		return true;
 	}

@@ -197,8 +197,11 @@ final class Deal_Manager {
 
 		// If stage is being changed, validate it belongs to the pipeline
 		if ( isset( $data['stage_id'] ) && $data['stage_id'] != $deal->stage_id ) {
+			// Use provided pipeline_id or fall back to deal's current pipeline
+			$pipeline_id = isset( $data['pipeline_id'] ) ? $data['pipeline_id'] : $deal->pipeline_id;
+
 			$stage = Pipeline_Stage_Model::where( 'id', $data['stage_id'] )
-				->where( 'pipeline_id', $data['pipeline_id'] )
+				->where( 'pipeline_id', $pipeline_id )
 				->first();
 
 			if ( ! $stage ) {
@@ -348,12 +351,10 @@ final class Deal_Manager {
 	 * @since 1.0.0
 	 *
 	 * @param array $filters Filter criteria
-	 * @param int   $per_page Results per page
-	 * @param int   $page Page number
 	 *
-	 * @return \Illuminate\Pagination\LengthAwarePaginator
+	 * @return \Illuminate\Database\Eloquent\Collection
 	 */
-	public function get_deals_with_filters( $filters = array(), $per_page = 20, $page = 1 ) {
+	public function get_deals_with_filters( $filters = array() ) {
 		$query = Deal_Model::with( array( 'contact', 'pipeline', 'stage', 'owner' ) );
 
 		// Filter by pipeline
@@ -366,8 +367,8 @@ final class Deal_Manager {
 			$query->where( 'stage_id', $filters['stage_id'] );
 		}
 
-		// Filter by status
-		if ( ! empty( $filters['status'] ) ) {
+		// Filter by status (skip if 'all' is selected)
+		if ( ! empty( $filters['status'] ) && $filters['status'] !== 'all' ) {
 			$query->where( 'status', $filters['status'] );
 		}
 
@@ -390,10 +391,10 @@ final class Deal_Manager {
 		}
 
 		// Filter by value range
-		if ( ! empty( $filters['value_min'] ) ) {
+		if ( isset( $filters['value_min'] ) && $filters['value_min'] !== '' && $filters['value_min'] !== null ) {
 			$query->where( 'value', '>=', $filters['value_min'] );
 		}
-		if ( ! empty( $filters['value_max'] ) ) {
+		if ( isset( $filters['value_max'] ) && $filters['value_max'] !== '' && $filters['value_max'] !== null ) {
 			$query->where( 'value', '<=', $filters['value_max'] );
 		}
 
@@ -436,7 +437,7 @@ final class Deal_Manager {
 		$sort_order = $filters['sort_order'] ?? 'desc';
 		$query->orderBy( $sort_by, $sort_order );
 
-		return $query->paginate( $per_page, array( '*' ), 'page', $page );
+		return $query->get();
 	}
 
 	/**
@@ -552,6 +553,34 @@ final class Deal_Manager {
 		do_action( 'quillcrm_deals_bulk_updated', $deal_ids, $data, $updated_count );
 
 		return $updated_count;
+	}
+
+	/**
+	 * Bulk delete deals
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $deal_ids Array of deal IDs to delete
+	 *
+	 * @return int Number of deals successfully deleted
+	 */
+	public function bulk_delete_deals( $deal_ids ) {
+		if ( empty( $deal_ids ) || ! is_array( $deal_ids ) ) {
+			return 0;
+		}
+
+		$deleted_count = 0;
+
+		foreach ( $deal_ids as $deal_id ) {
+			$deleted = $this->delete_deal( $deal_id );
+			if ( $deleted ) {
+				$deleted_count++;
+			}
+		}
+
+		do_action( 'quillcrm_deals_bulk_deleted', $deal_ids, $deleted_count );
+
+		return $deleted_count;
 	}
 
 	/**

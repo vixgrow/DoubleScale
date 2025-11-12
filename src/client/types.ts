@@ -67,6 +67,11 @@ export type Order = {
 	billing_email: string;
 	date_created_gmt: string;
 	date_updated_gmt: string;
+	date: {
+		date: string;
+		timezone: string;
+		timezone_type: number;
+	}
 	parent_order_id: string;
 	payment_method: string;
 	payment_method_title: string;
@@ -103,6 +108,11 @@ export type LMSCourse = {
 	started_on: string;
 };
 
+export type LMSCoursesResponse = {
+	data: LMSCourse[];
+	total: number;
+};
+
 export type AutomationContact = {
 	id: number;
 	contact_id: number;
@@ -136,11 +146,21 @@ export type Automation = {
 	status: string;
 	settings: {
 		multiple_runs: boolean;
+		_trigger_label?: string;
+		_trigger_warning?: boolean;
 		[key: string]: any;
 	};
 	created_at: string;
 	updated_at: string;
 	steps: AutomationStep[];
+	_warnings?: Array<{
+		type: string;
+		slug: string;
+		message: string;
+		plugin_label?: string;
+		plugin_labels?: any[];
+		step_id?: number;
+	}>;
 };
 
 export type CustomField = {
@@ -184,38 +204,27 @@ export type EmailTemplateSettings = {
 	from_name: string;
 	from_email: string;
 	reply_to: string;
+	subject: string;
+	preview_text: string;
 	enable_utm: boolean;
 	utm_source: string;
 	utm_medium: string;
 	utm_name: string;
 	utm_term: string;
 	utm_content: string;
-	email_body?: EmailBodyContent;
 };
 
 // Email Template Type (matches database structure)
 export type EmailTemplate = {
 	id?: number;
 	name: string;
-	type: 'email';
-	subject: string;
-	body?: string; // Rich-text content (for simple editor)
-	preview_text: string;
+	type: 'email'; // Campaign channel type
+	body?: string | EmailBodyContent; // Can be string (rich-text) or EmailBodyContent (builder)
+	thumbnail?: string;
+	hidden?: boolean;
 	settings?: EmailTemplateSettings;
 	created_at?: string;
 	updated_at?: string;
-
-	// Flattened fields for UI convenience (derived from settings)
-	from_name?: string;
-	from_email?: string;
-	reply_to?: string;
-	enable_utm?: boolean;
-	utm_source?: string;
-	utm_medium?: string;
-	utm_name?: string;
-	utm_term?: string;
-	utm_content?: string;
-	email_body?: EmailBodyContent;
 };
 
 // SMS Template Type (for frontend use)
@@ -293,7 +302,7 @@ export type Campaign = {
 	name: string;
 	description: string;
 	status: string;
-	type: 'email' | 'sms' | 'whatsapp';
+	type: 'email' | 'sms' | 'whatsapp' | 'sequence_mail' | 'email_sequence'; // Campaign channel type
 	settings: CampaignSettings;
 	parent_id: string;
 	count: string;
@@ -308,13 +317,14 @@ export type Campaign = {
 	};
 	// Email-specific analytics
 	opened_count?: number;
+	open_rate?: number;
 	// Shared analytics (email, SMS, WhatsApp)
 	clicked_count: number;
+	click_rate?: number;
 	// SMS & WhatsApp analytics
 	pending_count?: number;
 	delivered_count?: number;
 	delivery_rate?: number;
-	click_rate?: number;
 	// WhatsApp-specific analytics
 	read_count?: number;
 	read_rate?: number;
@@ -421,9 +431,9 @@ export type CustomTemplate = {
 	id: number;
 	name: string;
 	body: string;
-	subject: string;
 	settings: {
 		// Common settings
+		subject?: string;
 		preview_text?: string;
 		from_name?: string;
 		// Email-specific settings
@@ -447,7 +457,19 @@ export type AutomationStep = {
 	type: string;
 	condition: string;
 	// This type is any because the structure of fields is different for each action
-	settings: any;
+	settings: {
+		_action_label?: string;
+		_action_warning?: boolean;
+		_condition_warning?: boolean;
+		[key: string]: any;
+	};
+
+	_action_label?: string;
+	_action_warning?: boolean;
+	_condition_warning?: boolean;
+	_unavailable_rules_count?: number;
+	_unavailable_rules?: any[];
+
 	order: number;
 	status: string;
 	created_at: string;
@@ -511,25 +533,37 @@ type LineTaxData = {
 	total: string[];
 };
 
-export type CampaignEmail = {
+// Represents a tracked message (email/SMS/WhatsApp) from any source (campaign, automation, or individual)
+export type TrackedMessage = {
 	id: number;
 	campaign_id: string;
 	contact_id: string;
 	template_id: string;
 	hash_key: string;
-	email: string;
+	recipient: string; // Unified recipient field (email address or phone number)
 	opened: string;
 	clicked: string;
-	status: string;
+	status: number; // Integer status code (1=pending, 2=sent, 3=failed, etc.)
+	status_slug: string; // String slug ('pending', 'sent', 'failed', etc.)
+	status_name: string; // Human-readable name
 	sent_at: string;
 	opened_at: string;
 	clicked_at: string;
 	created_at: string;
 	updated_at: string;
 	contact: Contact;
-	template: CustomTemplate;
+	template?: CustomTemplate | null; // Optional for individual messages
+	message?: {
+		id: number;
+		tracking_id: number;
+		subject: string | null;
+		body: string;
+	} | null; // Message content for individual messages
 	campaign?: Partial<Campaign>;
 };
+
+// Legacy alias for backward compatibility
+export type CampaignEmail = TrackedMessage;
 
 export type AutomationRules = Rules[];
 
@@ -544,6 +578,12 @@ export type Rule = {
 export type DashboardData = {
 	total_contacts: number;
 	total_sent_emails: number;
+	total_tags: number;
+	total_automations: number;
+	total_email_templates: number;
+	deals: number;
+	deals_closed_won: number;
+	deals_won_value: number;
 	total_orders: number;
 	total_revenue: string;
 	recent_contacts: Contact[];
@@ -631,6 +671,9 @@ export type Settings = {
 		lost_tags: number[];
 		lost_lists: number[];
 	};
+	currency: {
+		currency: string;
+	};
 };
 
 export type Response = {
@@ -654,15 +697,20 @@ export type ContactsResponse = Response & {
 
 export type ListsResponse = Response & {
 	data: List[];
+	total_count: number;
 };
 
 export type TagsResponse = Response & {
 	data: Tag[];
+	total_count: number;
 };
 
 export type AutomationsResponse = Response & {
 	data: Automation[];
+	total_count: number;
 };
+
+export type CampaignType = 'standard' | 'ab_test' | 'email_sequence';
 
 export type CampaignsResponse = Response & {
 	data: Campaign[];
@@ -683,10 +731,12 @@ export type CustomFieldsGroupsResponse = Response & {
 
 export type FormsResponse = Response & {
 	data: Form[];
+	total_count: number;
 };
 
 export type LinkTriggersResponse = Response & {
 	data: LinkTrigger[];
+	total_count: number;
 };
 
 export type TemplatesResponse = Response & {
@@ -776,6 +826,17 @@ export interface DataTableConfig<TData> {
 		onDateChange: (range: { from: Date | null; to: Date | null }) => void;
 		placeholder?: string;
 	};
+	campaignFilters?: {
+		filters: {
+			status: string;
+			type: string;
+			createDate: { from: Date | null; to: Date | null };
+			updatedAt: { from: Date | null; to: Date | null };
+		};
+		onFiltersChange: (filters: any) => void;
+		onClear: () => void;
+	};
+	initialColumnVisibility?: Record<string, boolean>;
 }
 
 export type NoticeMessage = {

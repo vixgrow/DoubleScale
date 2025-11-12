@@ -24,6 +24,9 @@ class Form extends Abstracts_Form {
 
 
 
+
+
+
 	/**
 	 * Slug
 	 *
@@ -184,7 +187,7 @@ class Form extends Abstracts_Form {
 				'fields' => $this->prepare_form_fields( $field_data_array ),
 			);
 
-			if ( ! $this->is_form_active( $form_id ) ) {
+			if ( $this->is_form_active( $form_id ) ) {
 				$this->process_form( $data );
 			}
 

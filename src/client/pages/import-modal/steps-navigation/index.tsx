@@ -110,6 +110,8 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
 										console.log('Back button clicked - resetting sourceData');
 										// Reset sourceData to go back to credentials step
 										dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+										// Reset currentStep to 1 to ensure UI consistency
+										dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
 										// Also reset any fetching state
 										dispatch({ type: 'SET_IS_FETCHING', payload: false });
 									}}

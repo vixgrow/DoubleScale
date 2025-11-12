@@ -23,28 +23,26 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 
 /**
  * Internal dependencies
  */
 import { Deal } from '../../types';
 import './style.scss';
-import DealContactIcon from '@quillcrm/components/icons/deal-contact';
-import DealCalenderIcon from '@quillcrm/components/icons/deal-calender';
 
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
-import WeightedIcon from '@quillcrm/components/icons/weighted-icon';
 import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
 
 import { DealCardMenu } from './DealCardMenu';
-import { DealCardShimmer } from './DealCardShimmer';
+import { formatCurrencyFull } from '../../utils/currency';
 
 interface DealCardProps {
 	deal: Deal;
 	isDragging: boolean;
 	onCardClick: (deal: Deal) => void;
 	onDealEdit?: (deal: Deal) => void;
-	onDealDelete?: (deal:Deal) =>void;
+	onDealDelete?: (deal: Deal) => void;
 	onAddNote?: (deal: Deal) => void;
 	onDealLogCall?: (deal: Deal) => void;
 	onDealScheduleMeeting?: (deal: Deal) => void;
@@ -52,6 +50,9 @@ interface DealCardProps {
 	stageColor?: string;
 	stageProbability?: number;
 	style?: React.CSSProperties;
+	selectMode?: boolean;
+	isSelected?: boolean;
+	onToggleSelect?: () => void;
 }
 
 export const DealCard: React.FC<DealCardProps> = ({
@@ -67,6 +68,9 @@ export const DealCard: React.FC<DealCardProps> = ({
 	stageColor,
 	stageProbability,
 	style: customStyle = {},
+	selectMode = false,
+	isSelected = false,
+	onToggleSelect,
 }) => {
 	const {
 		attributes,
@@ -81,15 +85,13 @@ export const DealCard: React.FC<DealCardProps> = ({
 			currentStageId: deal.stage?.id,
 		},
 	});
-    const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-
-		  if(deal){
+	useEffect(() => {
+		if (deal) {
 			setLoading(false);
-		  }
- 
-	  }, [deal]);
+		}
+	}, [deal]);
 
 	const style = {
 		'--stage-color': stageColor || '#6d78d8',
@@ -107,88 +109,54 @@ export const DealCard: React.FC<DealCardProps> = ({
 		);
 	}, [deal.contact]);
 
-	useEffect(()=>{
-      console.log(deal)
-	},[deal])
-
-	// Format expected close date
-	const formattedDate = useMemo(() => {
-		if (!deal.expected_close_date) return null;
-
-		try {
-			const date = new Date(deal.expected_close_date);
-			return {
-				formatted: date.toLocaleDateString(),
-			};
-		} catch {
-			return null;
-		}
-	}, [deal.expected_close_date]);
 
 	// Format currency value
 	const formattedValue = useMemo(() => {
-		return `$${deal.value.toLocaleString()}`;
-	}, [deal.value]);
-
-	// Calculate effective probability
-	const effectiveProbability = useMemo(() => {
-		return stageProbability ?? 0;
-	}, [stageProbability]);
-
-	// Format weighted value
-	const formattedWeightedValue = useMemo(() => {
-		return `$${deal.weighted_value.toLocaleString()}`;
-	}, [deal.weighted_value]);
+		return formatCurrencyFull(deal.value, deal.currency || 'USD');
+	}, [deal.value, deal.currency]);
 
 	const handleCardClick = (e: React.MouseEvent) => {
 		if (isDraggging || (e.target as HTMLElement).closest('.drag-handle')) {
 			return;
 		}
+		// In select mode, clicking the card toggles selection instead of opening detail
+		if (selectMode) {
+			onToggleSelect?.();
+			return;
+		}
 		onCardClick(deal);
 	};
 
-	// const handleActionClick = (e: React.MouseEvent, action: string) => {
-	// 	e.stopPropagation();
-
-	// 	if (action === 'view') {
-	// 		onCardClick(deal);
-	// 	} else if (action === 'edit') {
-	// 		onDealEdit?.(deal);
-	// 	}
-	// };
 	const handleActionClick = (action: string) => {
 		if (action === 'view') {
 			onCardClick(deal);
 		} else if (action === 'edit') {
 			onDealEdit?.(deal);
-		} else if (action === 'delete'){
-			onDealDelete?.(deal)
-		}else if (action === 'add_note') {
-			onAddNote?.(deal); 
-		}else if (action === 'log_call') {
-			onDealLogCall?.(deal); 
-		}else if (action === 'schedule_meeting') {
-			onDealScheduleMeeting?.(deal); 
-		}else if (action === 'log_email') {
-			onDealLogEmail?.(deal); 
+		} else if (action === 'delete') {
+			onDealDelete?.(deal);
+		} else if (action === 'add_note') {
+			onAddNote?.(deal);
+		} else if (action === 'log_call') {
+			onDealLogCall?.(deal);
+		} else if (action === 'schedule_meeting') {
+			onDealScheduleMeeting?.(deal);
+		} else if (action === 'log_email') {
+			onDealLogEmail?.(deal);
 		}
 	};
-	if (loading) {
-		
-		return (
-		  <div
-			className="m-4"
-			style={{
-			  height: '100%',
-			  minHeight: '180px',
-			}}
-		  >
-			<DealCardShimmer />
-		  </div>
-		);
-	  }
-	  
-
+	// if (loading) {
+	// 	return (
+	// 		<div
+	// 			className="m-4"
+	// 			style={{
+	// 				height: '100%',
+	// 				minHeight: '180px',
+	// 			}}
+	// 		>
+	// 			<DealCardShimmer />
+	// 		</div>
+	// 	);
+	// }
 
 	return (
 		<div
@@ -199,97 +167,80 @@ export const DealCard: React.FC<DealCardProps> = ({
 			className={`deal-card m-4 ${isDragging || isDraggging ? 'dragging' : ''} ${deal.is_overdue ? 'overdue' : ''}`}
 			onClick={handleCardClick}
 		>
-			<Card className="w-full flex flex-col gap-1.5 rounded-[16px] border border-[#DEE1E6] ">
-				<CardHeader className="flex flex-col gap-1  text-[#09090B]">
-					<div className="flex items-center justify-between">
+			<Card className={`w-full flex flex-col rounded-[16px] border ${isSelected ? 'border-[#3B82F6] border-2 bg-blue-50' : 'border-[#DEE1E6]'}`}>
+				<CardHeader className="p-2.5">
+					<div className="flex items-center justify-between text-[#09090B]">
+						{/* Selection Checkbox */}
+						{selectMode && (
+							<div
+								className="mr-2"
+								onClick={(e) => {
+									e.stopPropagation();
+									onToggleSelect?.();
+								}}
+							>
+								<Checkbox checked={isSelected} />
+							</div>
+						)}
+
 						<CardTitle
 							title={deal.title}
-							className="text-lg font-bold leading-[28px] tracking-[-.5px]"
+							className="text-lg font-bold leading-6 flex-1"
 						>
 							{deal.title}
 						</CardTitle>
-						<DealCardMenu onActionClick={handleActionClick} />
-					</div>
 
-					<div className="flex flex-wrap items-center gap-1 text-[#777] text-base font-medium font-[Inter] leading-[26px]">
-						<span className="flex items-center gap-1">
-							<DealContactIcon />
-							{__(
-								`Contact: ${deal.contact?.first_name || __('N/A', 'quillcrm')}`
-							)}
-						</span>
-
-						{formattedDate && (
-							<>
-								<div className="h-5 w-[1px] bg-[#DEE1E6]" />
-								<span className="flex items-center gap-1">
-									<DealCalenderIcon />
-									{formattedDate.formatted}
-								</span>
-							</>
-						)}
+						{!selectMode && <DealCardMenu onActionClick={handleActionClick} />}
 					</div>
 				</CardHeader>
-				<CardContent className=" flex  justify-between mb-0">
-					<div className="flex flex-col">
-						<span className=" text-[#660FF1] text-base font-medium landing-[26px] flex items-center gap-1">
-							<DealValueIcon color="#660FF1" />
-							{__('Deal Value', 'quillcrm')}
-						</span>
-						<p className=" text-[#09090B] text-lg font-bold landing-[28px] text-center ">
-							{formattedValue}
-						</p>
-					</div>
-					<div className=" flex flex-col">
-						<span className=" text-[#458DC7] text-base font-medium landing-[26px] flex items-center gap-1">
-							<WeightedIcon color="#458DC7" />
-							{__('Weighted', 'quillcrm')}
-						</span>
-						<p className=" text-[#09090B] text-lg font-bold landing-[28px] text-center">
-							{formattedWeightedValue}
-						</p>
-					</div>
-					
-				</CardContent>
-				<div className=" h-0.5 bg-[#DEE1E6] mx-6 "></div>
-				<CardFooter className='flex  justify-between items-center'>
-				{deal.owner&&(
-					<div className="flex items-center gap-1">
-					<div className="flex items-center gap-1">
-					  <span className="w-8 h-8 rounded-full border border-[#DEE1E6] flex items-center justify-center">
-						<DealOwnerIcon />
-					  </span>
-					  <span className="text-base font-normal text-[#777] leading-[26px]">
-						{__('Owner:', 'quillcrm')}
-					  </span>
-					</div>
-				  
-					<p className="text-[#09090B] text-base font-medium leading-[26px]">
-					  {deal?.owner.display_name}
+				<CardContent className=" flex  p-2.5">
+					{/* <div className="flex flex-col"> */}
+					<span className=" text-[#660FF1] text-base font-medium landing-6 flex items-center gap-1">
+						<DealValueIcon color="#660FF1" />
+						{__('Deal Value:', 'quillcrm')}
+					</span>
+					<p className=" text-[#09090B] text-lg font-bold landing-6 text-center ">
+						{formattedValue}
 					</p>
-				  </div>
-				  
-				)}
-				  <div className="flex mt-1 gap-3">
-  {deal.priority && (
-    <span
-      className={`
+				</CardContent>
+				<CardFooter className="flex  p-2.5 justify-between items-center">
+					{deal.owner && (
+						<div className="flex items-center gap-1">
+							<div className="flex items-center gap-1">
+								<span className="w-8 h-8 rounded-full border border-[#DEE1E6] flex items-center justify-center">
+									<DealOwnerIcon />
+								</span>
+								<span className="text-base font-normal text-[#777] leading-6">
+									{__('Owner:', 'quillcrm')}
+								</span>
+							</div>
+
+							<p className="text-[#09090B] text-base font-medium truncate max-w-[120px] leading-6">
+								{deal?.owner.display_name}
+							</p>
+						</div>
+					)}
+					<div className="flex mt-1 gap-3">
+						{deal.priority && (
+							<span
+								className={`
         text-base font-normal tracking-[-.32px] flex justify-center items-center py-1 px-2 rounded-[8px] border
         ${
-          deal.priority === 'low'
-            ? 'text-[#16A34A] border-[#16A34A] bg-[#EFFFF5]'
-            : deal.priority === 'medium'
-            ? 'text-[#A67D0A] border-[#E4B123] bg-[#FFF2CE]'
-            : deal.priority === 'high'
-            ? 'text-[#E13B3B] border-[#E13B3B] bg-[#FBE8E8]'
-            : 'text-gray-700 border-gray-300 bg-gray-50'
-        }
+			deal.priority === 'low'
+				? 'text-[#16A34A] border-[#16A34A] bg-[#EFFFF5]'
+				: deal.priority === 'medium'
+					? 'text-[#A67D0A] border-[#E4B123] bg-[#FFF2CE]'
+					: deal.priority === 'high'
+						? 'text-[#E13B3B] border-[#E13B3B] bg-[#FBE8E8]'
+						: 'text-gray-700 border-gray-300 bg-gray-50'
+		}
       `}
-    >
-      {deal.priority.charAt(0).toUpperCase() + deal.priority.slice(1)}
-    </span>
-  )}
-</div>
+							>
+								{deal.priority.charAt(0).toUpperCase() +
+									deal.priority.slice(1)}
+							</span>
+						)}
+					</div>
 				</CardFooter>
 			</Card>
 		</div>

@@ -10,6 +10,8 @@
 namespace QuillCRM\Emails;
 
 use QuillCRM\Emails\Blocks\Email_Block_Interface;
+use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 
 /**
  * Registry for email blocks
@@ -86,19 +88,19 @@ class Block_Registry {
 	/**
 	 * Render a block
 	 *
-	 * @param string $type Block type
-	 * @param array  $props Block properties
-	 * @param array  $merge_tags Merge tags
+	 * @param string                                    $type Block type
+	 * @param array                                     $props Block properties
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	public function render_block( $type, array $props, array $merge_tags = array() ) {
+	public function render_block( $type, array $props, $contact = null ) {
 		$block = $this->get_block( $type );
 
 		if ( ! $block ) {
 			return '<!-- Unsupported block type: ' . esc_html( $type ) . ' -->';
 		}
 
-		return $block->render( $props, $merge_tags );
+		return $block->render( $props, $contact );
 	}
 
 	/**

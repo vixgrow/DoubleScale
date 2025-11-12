@@ -63,7 +63,7 @@ export const HtmlBlockRenderer: React.FC<HtmlBlockRendererProps> = ({
 				title={__('Click to edit HTML content', 'quillcrm')}
 			>
 				{isDefaultContent ? (
-					<span className="text-[32px] font-semibold text-primary">
+					<span className="text-2xl font-semibold text-primary font-mono">
 						{__('Add your own html here', 'quillcrm')}
 					</span>
 				) : (
@@ -71,6 +71,7 @@ export const HtmlBlockRenderer: React.FC<HtmlBlockRendererProps> = ({
 						id={uniqueId}
 						dangerouslySetInnerHTML={{ __html: props.content }}
 						style={{
+							fontFamily: 'monospace',
 							width: '100%',
 						}}
 					/>

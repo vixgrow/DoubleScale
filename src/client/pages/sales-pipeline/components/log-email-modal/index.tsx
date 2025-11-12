@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -46,6 +46,8 @@ interface LogEmailModalProps {
 	onSuccess: () => void;
 	dealId: number;
 	dealTitle?: string;
+	editMode?: boolean;
+	activity?: any;
 }
 
 interface EmailFormData {
@@ -60,9 +62,11 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 	onSuccess,
 	dealId,
 	dealTitle,
+	editMode = false,
+	activity,
 }) => {
 	const [loading, setLoading] = useState(false);
-	const { logEmail } = useActivityOperations();
+	const { logEmail, updateActivity } = useActivityOperations();
 	const dispatch = useDispatch('quillcrm/core');
 	const createNotice = dispatch?.createNotice;
 
@@ -73,6 +77,23 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 			sent_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
 		},
 	});
+
+	// Load existing activity data when in edit mode
+	useEffect(() => {
+		if (editMode && activity && visible) {
+			form.reset({
+				subject: activity.data?.subject || '',
+				body: activity.data?.body || '',
+				sent_at: activity.data?.sent_at || dayjs().format('YYYY-MM-DD HH:mm:ss'),
+			});
+		} else if (!visible) {
+			form.reset({
+				subject: '',
+				body: '',
+				sent_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+			});
+		}
+	}, [editMode, activity, visible, form]);
 
 	const handleSubmit = async (values: EmailFormData) => {
 		setLoading(true);
@@ -85,12 +106,20 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 					: dayjs().format('YYYY-MM-DD HH:mm:ss'),
 			};
 
-			await logEmail(dealId, emailData);
+			if (editMode && activity) {
+				await updateActivity(activity.id, 'email_sent', emailData);
+				createNotice?.({
+					type: 'success',
+					message: __('Email updated successfully!', 'quillcrm'),
+				});
+			} else {
+				await logEmail(dealId, emailData);
+				createNotice?.({
+					type: 'success',
+					message: __('Email logged successfully!', 'quillcrm'),
+				});
+			}
 
-			createNotice?.({
-				type: 'success',
-				message: __(`Email logged successfully!`, 'quillcrm'),
-			});
 			onSuccess();
 			onClose();
 			form.reset();
@@ -98,7 +127,7 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 			const err = error as Error;
 			createNotice?.({
 				type: 'error',
-				message: err.message || __('Failed to log email', 'quillcrm'),
+				message: err.message || __(editMode ? 'Failed to update email' : 'Failed to log email', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);
@@ -116,7 +145,7 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader
-							title={__('Log Email', 'quillcrm')}
+							title={editMode ? __('Edit Email', 'quillcrm') : __('Log Email', 'quillcrm')}
 							subtitle=""
 							icon={<EmailLogIcon color='#1E3A8A'/>}
 						/>
@@ -216,8 +245,8 @@ export const LogEmailModal: React.FC<LogEmailModalProps> = ({
 								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-[8px] font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
 							>
 								{loading
-									? __('Logging...', 'quillcrm')
-									: __('Log Email', 'quillcrm')}
+									? (editMode ? __('Updating...', 'quillcrm') : __('Logging...', 'quillcrm'))
+									: (editMode ? __('Update Email', 'quillcrm') : __('Log Email', 'quillcrm'))}
 							</Button>
 						</DialogFooter>
 					</form>

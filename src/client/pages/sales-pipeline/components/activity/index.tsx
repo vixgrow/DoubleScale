@@ -18,10 +18,15 @@ import timezone from 'dayjs/plugin/timezone';
  */
 import ActivitiesFilters from '../deal-activities/ActivitiesFilters';
 import { useDealOperations } from '../../hooks/use-deal-operations';
+import { useActivityOperations } from '../../hooks/use-activity-operations';
 import { ActivityComments } from '../activity-comments';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AddNoteModal } from '../add-note-modal';
+import { LogCallModal } from '../log-call-modal';
+import { LogEmailModal } from '../log-email-modal';
+import { ScheduleMeetingModal } from '../schedule-meeting-modal';
 import './style.scss';
 
 import NoteAddIcon from '@quillcrm/components/icons/note-add';
@@ -42,6 +47,7 @@ interface ActivityProps {
 	dealId?: number;
 	activityTypeFilter?: string;
 	onActivityAdded?: any;
+	activityItem?: any;
 }
 
 interface Activity {
@@ -84,11 +90,20 @@ const activityTypeColors: Record<string, string> = {
 export default function Activity({
 	dealId,
 	activityTypeFilter,
+	
 }: ActivityProps) {
 	const { getDealActivities } = useDealOperations();
+	const { deleteActivity } = useActivityOperations();
 	const [activities, setActivities] = useState<Activity[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [openCommentId, setOpenCommentId] = useState<number | null>(null);
+
+	// Modal states for editing
+	const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+	const [addNoteVisible, setAddNoteVisible] = useState(false);
+	const [logCallVisible, setLogCallVisible] = useState(false);
+	const [logEmailVisible, setLogEmailVisible] = useState(false);
+	const [scheduleMeetingVisible, setScheduleMeetingVisible] = useState(false);
 
 	const [filters, setFilters] = useState({
 		activity_type: '',
@@ -160,6 +175,44 @@ export default function Activity({
 
 	const applyFilters = () => {
 		fetchActivities();
+	};
+
+	// Edit/Delete handlers
+	const handleEditActivity = (activity: Activity) => {
+		setEditingActivity(activity);
+
+		switch (activity.activity_type) {
+			case 'note_added':
+				setAddNoteVisible(true);
+				break;
+			case 'call_logged':
+				setLogCallVisible(true);
+				break;
+			case 'email_sent':
+				setLogEmailVisible(true);
+				break;
+			case 'meeting_scheduled':
+				setScheduleMeetingVisible(true);
+				break;
+		}
+	};
+
+	const handleDeleteActivity = async (activityId: number) => {
+		if (!window.confirm(__('Are you sure you want to delete this activity? This action cannot be undone.', 'quillcrm'))) {
+			return;
+		}
+
+		try {
+			await deleteActivity(activityId);
+			fetchActivities();
+		} catch (error) {
+			console.error('Failed to delete activity:', error);
+		}
+	};
+
+	const isEditableActivity = (activityType: string) => {
+		const editableTypes = ['note_added', 'email_sent', 'call_logged', 'meeting_scheduled'];
+		return editableTypes.includes(activityType);
 	};
 
 	// Fetch activities when component mounts or dealId changes
@@ -459,20 +512,12 @@ export default function Activity({
 													</span>
 												</Button>
 
-												<ActivityActionsDropdown
-													onEdit={() =>
-														console.log(
-															'Edit',
-															activity.id
-														)
-													}
-													onDelete={() =>
-														console.log(
-															'Delete',
-															activity.id
-														)
-													}
-												/>
+												{isEditableActivity(activity.activity_type) && (
+													<ActivityActionsDropdown
+														onEdit={() => handleEditActivity(activity)}
+														onDelete={() => handleDeleteActivity(activity.id)}
+													/>
+												)}
 											</div>
 										</div>
 
@@ -508,6 +553,71 @@ export default function Activity({
 					/>
 				)}
 			</div>
+
+			{/* Edit Modals */}
+			<AddNoteModal
+				visible={addNoteVisible}
+				onClose={() => {
+					setAddNoteVisible(false);
+					setEditingActivity(null);
+				}}
+				onSuccess={() => {
+					fetchActivities();
+					setAddNoteVisible(false);
+					setEditingActivity(null);
+				}}
+				dealId={dealId!}
+				editMode={!!editingActivity}
+				activity={editingActivity}
+			/>
+
+			<LogCallModal
+				visible={logCallVisible}
+				onClose={() => {
+					setLogCallVisible(false);
+					setEditingActivity(null);
+				}}
+				onSuccess={() => {
+					fetchActivities();
+					setLogCallVisible(false);
+					setEditingActivity(null);
+				}}
+				dealId={dealId!}
+				editMode={!!editingActivity}
+				activity={editingActivity}
+			/>
+
+			<LogEmailModal
+				visible={logEmailVisible}
+				onClose={() => {
+					setLogEmailVisible(false);
+					setEditingActivity(null);
+				}}
+				onSuccess={() => {
+					fetchActivities();
+					setLogEmailVisible(false);
+					setEditingActivity(null);
+				}}
+				dealId={dealId!}
+				editMode={!!editingActivity}
+				activity={editingActivity}
+			/>
+
+			<ScheduleMeetingModal
+				visible={scheduleMeetingVisible}
+				onClose={() => {
+					setScheduleMeetingVisible(false);
+					setEditingActivity(null);
+				}}
+				onSuccess={() => {
+					fetchActivities();
+					setScheduleMeetingVisible(false);
+					setEditingActivity(null);
+				}}
+				dealId={dealId!}
+				editMode={!!editingActivity}
+				activity={editingActivity}
+			/>
 		</div>
 	);
 }

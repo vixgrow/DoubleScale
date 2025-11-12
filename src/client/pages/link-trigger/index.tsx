@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
+import { useRef } from 'react';
 import { addQueryArgs } from '@wordpress/url';
 import { useDispatch } from '@wordpress/data';
 
@@ -61,6 +62,7 @@ const LinkTrigger: React.FC<LinkTriggerProps> = ({
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	// Helper function to show notice
 	const showNotice = (type: 'success' | 'error', message: string) => {
@@ -71,6 +73,13 @@ const LinkTrigger: React.FC<LinkTriggerProps> = ({
 	const closeNotice = () => {
 		setNotice(null);
 	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	const fetchLists = async (keyword = '', ids: number[] = []) => {
 		try {
@@ -333,7 +342,7 @@ const LinkTrigger: React.FC<LinkTriggerProps> = ({
 			isLoading={isSaving}
 		>
 			{notice && (
-				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 			<div className="flex gap-6">
 				<PanelSettings

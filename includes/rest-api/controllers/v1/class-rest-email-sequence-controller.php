@@ -15,28 +15,10 @@ use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
 use QuillCRM\Models\Campaign_Model as Email_Sequence_Model;
 use QuillCRM\User_Roles\Permissions;
+use QuillCRM\Constants\Campaign_Channel;
+use QuillCRM\Services\Template_Data_Preparer;
 
 class REST_Email_Sequence_Controller extends REST_Controller {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	/**
@@ -51,10 +33,10 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 	/**
 	 * Campaign type
 	 *
-	 * @var string
+	 * @var int|string
 	 */
-	protected $campaign_type       = 'email_sequence';
-	protected $campaign_type_child = 'sequence_mail';
+	protected $campaign_type       = Campaign_Channel::CHANNEL_EMAIL_SEQUENCE;
+	protected $campaign_type_child = Campaign_Channel::CHANNEL_SEQUENCE_MAIL;
 
 
 
@@ -248,11 +230,12 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 
 			$parent_id = $request->get_param( 'parent_id' );
 			if ( $parent_id ) {
-
-				$email_sequence_data['settings']['templates'] = array(
-					$this->get_settings_template( $email_sequence_data ),
-				);
-				unset( $email_sequence_data['subject'], $email_sequence_data['email_body'] );
+				// Use shared service to prepare template data
+				$template_data = Template_Data_Preparer::prepare_for_campaign( $email_sequence_data, 'email' );
+				if ( $template_data ) {
+					$email_sequence_data['settings']['templates'] = array( $template_data );
+					unset( $email_sequence_data['subject'], $email_sequence_data['email_body'] );
+				}
 			}
 
 			$email_sequence = Email_Sequence_Model::create( $email_sequence_data );
@@ -295,7 +278,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 		foreach ( $email_sequences as $email_sequence ) {
 			$email_count                      = $email_sequence->sequences_mail()->count();
 			$email_sequence->email_count      = $email_count;
-			$email_sequence->subscriber_count = count( $email_sequence->settings['contact_ids'] ?? array() ) . ' ' . __( 'Subscribers', 'quillcrm' );
+			$email_sequence->subscriber_count = Contact_Model::whereIn( 'id', $email_sequence->settings['contact_ids'] ?? array() )->where( 'status', 'subscribed' )->count() . __( ' Subscribers', 'quillcrm' );
 		}
 		return new WP_REST_Response( $email_sequences->toArray() + array( 'total_count' => $total_count ), 200 );
 	}
@@ -386,7 +369,7 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 				return new WP_Error( 'error', sprintf( __( '%s Email sequence not found', 'quillcrm' ), ucfirst( $this->campaign_type ) ), array( 'status' => 404 ) );
 			}
 			$parent_email_sequence        = Email_Sequence_Model::find( $email_sequence->parent_id );
-			$total_contacts               = count( $parent_email_sequence->settings['contact_ids'] ?? array() );
+			$total_contacts               = Contact_Model::whereIn( 'id', $parent_email_sequence->settings['contact_ids'] ?? array() )->count();
 			$email_sequence['sent_rate']  = round( ( $email_sequence->sent / ( $total_contacts > 0 ? $total_contacts : 1 ) * 100 ), 2 );
 			$email_sequence['open_rate']  = round( ( $email_sequence->opened / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100 ), 2 );
 			$email_sequence['click_rate'] = round( ( $email_sequence->click / ( $email_sequence->sent > 0 ? $email_sequence->sent : 1 ) * 100 ), 2 );
@@ -395,17 +378,25 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 				->get();
 			$email_sequence['recipients'] = $contacts->map(
 				function ( $contact ) {
+					$found_contact = Contact_Model::find( $contact->contact_id );
+					if ( ! $found_contact ) {
+						return null;
+					}
 					return array(
-						'id'         => $contact->contact->id,
-						'name'       => $contact->contact->first_name . ' ' . $contact->contact->last_name,
-						'email'      => $contact->contact->email,
+						'id'         => $found_contact->id,
+						'name'       => $found_contact->first_name . ' ' . $found_contact->last_name,
+						'email'      => $found_contact->email,
 						'status'     => $contact->status,
 						'sent_at'    => $contact->sent_at,
 						'opened_at'  => $contact->opened_at,
 						'clicked_at' => $contact->clicked_at,
 					);
 				}
-			);
+			)->filter(
+				function ( $contact ) {
+					return $contact !== null;
+				}
+			)->values()->toArray();
 			return new WP_REST_Response( $email_sequence, 200 );
 		} catch ( \Exception $e ) {
 			$logger = quillcrm_get_logger();
@@ -502,17 +493,22 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 			// update the template settings
 			if ( isset( $email_sequence->settings['template_ids'] ) ) {
 				$template_id = reset( $email_sequence->get_template_ids() );
-				if ( $this->is_template_used_in_tracking( $template_id ) ) {
+				if ( Template_Model::is_used_in_tracking( $template_id ) ) {
+					// Template in use - create new one
 					unset( $email_sequence_data['settings']['template_ids'] );
-					$email_sequence_data['settings']['templates'] = array(
-						$this->get_settings_template( $email_sequence_data ),
-					);
+					$template_data = Template_Data_Preparer::prepare_for_campaign( $email_sequence_data, 'email' );
+					if ( $template_data ) {
+						$email_sequence_data['settings']['templates'] = array( $template_data );
+					}
 				} else {
+					// Template not in use - update existing
 					if ( $template_id ) {
 						$template = Template_Model::find( $template_id );
 						if ( $template ) {
-							$settings = $this->get_settings_template( $email_sequence_data );
-							$template->update( $settings );
+							$template_data = Template_Data_Preparer::prepare_for_campaign( $email_sequence_data, 'email' );
+							if ( $template_data ) {
+								$template->update( $template_data );
+							}
 						}
 					}
 				}
@@ -592,24 +588,26 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 				foreach ( $email_sequence->sequences_mail as $sequence_mail ) {
 					$sequence_mail_data = $sequence_mail->toArray();
 					unset( $sequence_mail_data['id'], $sequence_mail_data['created_at'], $sequence_mail_data['updated_at'], $sequence_mail_data['settings']['template_ids'] );
-					$sequence_mail_data['parent_id']             = $new_email_sequence->id;
-					$sequence_mail_data['type']                  = $this->campaign_type_child;
-					$sequence_mail_data['status']                = 'draft';
-					$sequence_mail_data['name']                  = $sequence_mail_data['name'] . ' - Copy';
-					$sequence_mail_data['settings']['templates'] = array(
-						$this->get_settings_template( $sequence_mail_data ),
-					);
+					$sequence_mail_data['parent_id'] = $new_email_sequence->id;
+					$sequence_mail_data['type']      = $this->campaign_type_child;
+					$sequence_mail_data['status']    = 'draft';
+					$sequence_mail_data['name']      = $sequence_mail_data['name'] . ' - Copy';
+					$template_data                   = Template_Data_Preparer::prepare_for_campaign( $sequence_mail_data, 'email' );
+					if ( $template_data ) {
+						$sequence_mail_data['settings']['templates'] = array( $template_data );
+					}
 					unset( $sequence_mail_data['subject'], $sequence_mail_data['email_body'] );
 					Email_Sequence_Model::create( $sequence_mail_data );
 				}
 			} elseif ( $type === $this->campaign_type_child ) {
 				$email_sequence_data = $email_sequence->toArray();
 				unset( $email_sequence_data['id'], $email_sequence_data['created_at'], $email_sequence_data['updated_at'], $email_sequence_data['settings']['template_ids'] );
-				$email_sequence_data['status']                = 'draft';
-				$email_sequence_data['name']                  = $email_sequence_data['name'] . ' - Copy';
-				$email_sequence_data['settings']['templates'] = array(
-					$this->get_settings_template( $email_sequence ),
-				);
+				$email_sequence_data['status'] = 'draft';
+				$email_sequence_data['name']   = $email_sequence_data['name'] . ' - Copy';
+				$template_data                 = Template_Data_Preparer::prepare_for_campaign( $email_sequence_data, 'email' );
+				if ( $template_data ) {
+					$email_sequence_data['settings']['templates'] = array( $template_data );
+				}
 				unset( $email_sequence_data['subject'], $email_sequence_data['email_body'] );
 				$new_email_sequence = Email_Sequence_Model::create( $email_sequence_data );
 			}
@@ -690,42 +688,6 @@ class REST_Email_Sequence_Controller extends REST_Controller {
 		return $sanitized;
 	}
 
-	/**
-	 * Get the settings template
-	 *
-	 * @param array $email_sequence The email sequence data.
-	 *
-	 * @return array $settings_template The settings template.
-	 */
-	private function get_settings_template( $email_sequence ) {
-		if ( $email_sequence['parent_id'] ) {
-			$parent_email_sequence = Email_Sequence_Model::find( $email_sequence['parent_id'] );
-			$settings_template     = array(
-				'name'     => $email_sequence['subject'],
-				'subject'  => $email_sequence['subject'],
-				'body'     => $email_sequence['email_body'],
-				'settings' => array(
-					'from_name'  => $parent_email_sequence['settings']['from_name'] ?? get_bloginfo( 'name' ),
-					'from_email' => $parent_email_sequence['settings']['from_email'] ?? get_option( 'admin_email' ),
-					'reply_to'   => $parent_email_sequence['settings']['reply_to_email'] ?? get_option( 'admin_email' ),
-				),
-			);
-			return $settings_template;
-		}
-		return array();
-	}
-
-	/**
-	 * Check that this template id is used in Tracking_Model
-	 *
-	 * @param int $template_id The template id.
-	 *
-	 * @return bool $is_used Whether the template id is used in Tracking_Model
-	 */
-	private function is_template_used_in_tracking( $template_id ) {
-		$tracking = Tracking_Model::where( 'template_id', $template_id )->get();
-		return $tracking->isNotEmpty();
-	}
 
 	/**
 	 * Prepare the email sequence data

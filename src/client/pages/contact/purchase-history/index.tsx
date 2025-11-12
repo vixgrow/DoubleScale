@@ -14,12 +14,13 @@ import './style.scss';
 import type { PurchaseHistory as PurchaseHistoryType } from '../state/types';
 import { useContactContext } from '../state/context';
 import ConfigAPI from '@quillcrm/config';
-import { Card } from '@/components/ui/card';
 import {
 	TotalOrdersIcon,
 	TotalRevenueIcon,
-	AverageOrderValueIcon,
 	NoPurchaseHistoryIcon,
+	AnalyticsReportsIcon,
+	MessageStatsCard,
+	NoData,
 } from '@quillcrm/components';
 import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
@@ -106,78 +107,41 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 					</h3>
 					{purchaseHistory && (
 						<div className="flex gap-5">
-							<Card className="flex-1 p-3 shadow-none border-l-secondary border-l-[3px] border-y-0 border-r-0">
-								<div className="flex justify-between items-center">
-									<div className="flex flex-col">
-										<span className="text-2xl font-semibold">
-											{purchaseHistory.wc.total}
-										</span>
-										<span className="text-lg text-gray-500 font-medium">
-											{__('Total Orders', 'quillcrm')}
-										</span>
-									</div>
-									<div className="bg-[#E4EEFD] px-2 py-4 rounded-full">
-										<TotalOrdersIcon />
-									</div>
-								</div>
-							</Card>
-							<Card className="flex-1 p-3 shadow-none border-l-[#16A34A] border-l-[3px] border-y-0 border-r-0">
-								<div className="flex justify-between items-center">
-									<div className="flex flex-col">
-										<span className="text-2xl font-semibold">
-											{purchaseHistory.wc.revenue}{' '}
-											{purchaseHistory.wc.currency}
-										</span>
-										<span className="text-lg text-gray-500 font-medium">
-											{__('Total Revenue', 'quillcrm')}
-										</span>
-									</div>
-									<div className="bg-[#D1F6DF] p-2 rounded-full">
-										<TotalRevenueIcon />
-									</div>
-								</div>
-							</Card>
-							<Card className="flex-1 p-3 shadow-none border-l-[#660FF1] border-l-[3px] border-y-0 border-r-0">
-								<div className="flex justify-between items-center">
-									<div className="flex flex-col">
-										<span className="text-2xl font-semibold">
-											{purchaseHistory.wc.average
-												? purchaseHistory.wc.average
-												: '0'}{' '}
-											{purchaseHistory.wc.currency}
-										</span>
-										<span className="text-lg text-gray-500 font-medium">
-											{__(
-												'Average Order Value',
-												'quillcrm'
-											)}
-										</span>
-									</div>
-									<div className="bg-[#EEE4FF] p-1.5 rounded-full">
-										<AverageOrderValueIcon />
-									</div>
-								</div>
-							</Card>
+							<MessageStatsCard
+								icon={<TotalOrdersIcon />}
+								value={purchaseHistory.wc.total}
+								label={__('Total Orders', 'quillcrm')}
+								iconBgClass="bg-[#E4EEFD]"
+								borderColorClass="border-l-secondary"
+								iconColor="text-[#458DC7]"
+							/>
+							<MessageStatsCard
+								icon={<TotalRevenueIcon />}
+								value={`${purchaseHistory.wc.revenue} ${purchaseHistory.wc.currency}`}
+								label={__('Total Revenue', 'quillcrm')}
+								iconBgClass="bg-[#D1F6DF]"
+								borderColorClass="border-l-[#16A34A]"
+								iconColor="text-[#16A34A]"
+							/>
+							<MessageStatsCard
+								icon={<AnalyticsReportsIcon width={40} height={40} />}
+								value={`${purchaseHistory.wc.average || '0'} ${purchaseHistory.wc.currency}`}
+								label={__('Average Order Value', 'quillcrm')}
+								iconBgClass="bg-[#EEE4FF]"
+								borderColorClass="border-l-[#660FF1]"
+								iconColor="text-[#660FF1]"
+							/>
 						</div>
 					)}
 					<div>
 						{!loading &&
-						purchaseHistory &&
-						purchaseHistory.wc.orders.length === 0 ? (
-							<div className="flex flex-col items-center justify-center py-20 gap-4">
-								<div className="text-gray-400">
-									<NoPurchaseHistoryIcon
-										width={120}
-										height={120}
-									/>
-								</div>
-								<span className="text-lg text-gray-500 font-medium">
-									{__(
-										'No purchase history found',
-										'quillcrm'
-									)}
-								</span>
-							</div>
+							purchaseHistory &&
+							purchaseHistory.wc.orders.length === 0 ? (
+							<NoData
+								icon={<NoPurchaseHistoryIcon width={120} height={120} />}
+								title={__('No purchase history', 'quillcrm')}
+								subtitle={__('No WooCommerce purchase history found for this contact.', 'quillcrm')}
+							/>
 						) : (
 							purchaseHistory &&
 							purchaseHistory.wc.orders.length > 0 && (
@@ -210,78 +174,41 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 					</h3>
 					{purchaseHistory && (
 						<div className="flex gap-5">
-							<Card className="flex-1 p-3 shadow-none border-l-secondary border-l-[3px] border-y-0 border-r-0">
-								<div className="flex justify-between items-center">
-									<div className="flex flex-col">
-										<span className="text-2xl font-semibold">
-											{purchaseHistory.edd.total}
-										</span>
-										<span className="text-lg text-gray-500 font-medium">
-											{__('Total Orders', 'quillcrm')}
-										</span>
-									</div>
-									<div className="bg-[#E4EEFD] px-2 py-4 rounded-full">
-										<TotalOrdersIcon />
-									</div>
-								</div>
-							</Card>
-							<Card className="flex-1 p-3 shadow-none border-l-[#16A34A] border-l-[3px] border-y-0 border-r-0">
-								<div className="flex justify-between items-center">
-									<div className="flex flex-col">
-										<span className="text-2xl font-semibold">
-											{purchaseHistory.edd.revenue}{' '}
-											{purchaseHistory.edd.currency}
-										</span>
-										<span className="text-lg text-gray-500 font-medium">
-											{__('Total Revenue', 'quillcrm')}
-										</span>
-									</div>
-									<div className="bg-[#D1F6DF] p-2 rounded-full">
-										<TotalRevenueIcon />
-									</div>
-								</div>
-							</Card>
-							<Card className="flex-1 p-3 shadow-none border-l-[#660FF1] border-l-[3px] border-y-0 border-r-0">
-								<div className="flex justify-between items-center">
-									<div className="flex flex-col">
-										<span className="text-2xl font-semibold">
-											{purchaseHistory.edd.average
-												? purchaseHistory.edd.average
-												: '0'}{' '}
-											{purchaseHistory.edd.currency}
-										</span>
-										<span className="text-lg text-gray-500 font-medium">
-											{__(
-												'Average Order Value',
-												'quillcrm'
-											)}
-										</span>
-									</div>
-									<div className="bg-[#EEE4FF] p-1.5 rounded-full">
-										<AverageOrderValueIcon />
-									</div>
-								</div>
-							</Card>
+							<MessageStatsCard
+								icon={<TotalOrdersIcon />}
+								value={purchaseHistory.edd.total}
+								label={__('Total Orders', 'quillcrm')}
+								iconBgClass="bg-[#E4EEFD]"
+								borderColorClass="border-l-secondary"
+								iconColor="text-[#458DC7]"
+							/>
+							<MessageStatsCard
+								icon={<TotalRevenueIcon />}
+								value={`${purchaseHistory.edd.revenue} ${purchaseHistory.edd.currency}`}
+								label={__('Total Revenue', 'quillcrm')}
+								iconBgClass="bg-[#D1F6DF]"
+								borderColorClass="border-l-[#16A34A]"
+								iconColor="text-[#16A34A]"
+							/>
+							<MessageStatsCard
+								icon={<AnalyticsReportsIcon width={40} height={40} />}
+								value={`${purchaseHistory.edd.average || '0'} ${purchaseHistory.edd.currency}`}
+								label={__('Average Order Value', 'quillcrm')}
+								iconBgClass="bg-[#EEE4FF]"
+								borderColorClass="border-l-[#660FF1]"
+								iconColor="text-[#660FF1]"
+							/>
 						</div>
 					)}
 					<div>
 						{!loading &&
-						purchaseHistory &&
-						purchaseHistory.edd.orders.length === 0 ? (
-							<div className="flex flex-col items-center justify-center py-20 gap-4">
-								<div className="text-gray-400">
-									<NoPurchaseHistoryIcon
-										width={120}
-										height={120}
-									/>
-								</div>
-								<span className="text-lg text-gray-500 font-medium">
-									{__(
-										'No purchase history found',
-										'quillcrm'
-									)}
-								</span>
-							</div>
+							purchaseHistory &&
+							purchaseHistory.edd.orders.length === 0 ? (
+							<NoData
+								icon={<NoPurchaseHistoryIcon width={120} height={120} />}
+								title={__('No purchase history', 'quillcrm')}
+								subtitle={__('No Easy Digital Downloads purchase history found for this contact.', 'quillcrm')}
+							/>
 						) : (
 							purchaseHistory &&
 							purchaseHistory.edd.orders.length > 0 && (
@@ -308,14 +235,11 @@ const PurchaseHistory = ({ contact_id }: PurchaseHistoryProps) => {
 
 			{/* No Data State - when both are inactive or loading */}
 			{!loading && !isWooActive && !isEddActive && (
-				<div className="flex flex-col items-center justify-center py-20 gap-4">
-					<div className="text-gray-400">
-						<NoPurchaseHistoryIcon width={120} height={120} />
-					</div>
-					<span className="text-lg text-gray-500 font-medium">
-						{__('No eCommerce platform active', 'quillcrm')}
-					</span>
-				</div>
+				<NoData
+					icon={<NoPurchaseHistoryIcon width={120} height={120} />}
+					title={__('No eCommerce platform active', 'quillcrm')}
+					subtitle={__('Activate WooCommerce or Easy Digital Downloads to track purchase history.', 'quillcrm')}
+				/>
 			)}
 		</div>
 	);

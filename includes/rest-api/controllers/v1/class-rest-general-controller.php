@@ -22,6 +22,11 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\Abandoned_Cart_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Campaign_Model;
+use QuillCRM\Models\Tag_Model;
+use QuillCRM\Models\Deal_Model;
+use QuillCRM\Models\Template_Model;
+use QuillCRM\Constants\Tracking_Status;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * REST_General_Controller is REST api controller class for log
@@ -70,7 +75,13 @@ class REST_General_Controller extends REST_Controller {
 	 */
 	public function get_dashboard( WP_REST_Request $request ) {
 		$total_contacts               = Contact_Model::count();
-		$total_sent_emails            = Tracking_Model::emails()->where( 'status', 'sent' )->count();
+		$total_sent_emails            = Tracking_Model::emails()->where( 'status', Tracking_Status::SENT )->count();
+		$total_tags                   = Tag_Model::count();
+		$total_automations            = Automation_Model::where( 'status', 'active' )->count();
+		$total_email_templates        = Template_Model::where( 'type', Campaign_Channel::CHANNEL_EMAIL )->count();
+		$deals                        = Deal_Model::count();
+		$deals_closed_won             = Deal_Model::where( 'status', 'won' )->count();
+		$deals_won_value              = (float) Deal_Model::where( 'status', 'won' )->sum( 'value' );
 		$recent_contacts              = Contact_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$recent_unsubscribed_contacts = Contact_Model::where( 'status', 'unsubscribed' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_campaigns                = Campaign_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
@@ -80,6 +91,12 @@ class REST_General_Controller extends REST_Controller {
 		$response = array(
 			'total_contacts'               => $total_contacts,
 			'total_sent_emails'            => $total_sent_emails,
+			'total_tags'                   => $total_tags,
+			'total_automations'            => $total_automations,
+			'total_email_templates'        => $total_email_templates,
+			'deals'                        => $deals,
+			'deals_closed_won'             => $deals_closed_won,
+			'deals_won_value'              => $deals_won_value,
 			'recent_contacts'              => $recent_contacts,
 			'recent_unsubscribed_contacts' => $recent_unsubscribed_contacts,
 			'top_campaigns'                => $top_campaigns,

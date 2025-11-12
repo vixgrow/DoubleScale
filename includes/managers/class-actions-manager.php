@@ -25,7 +25,6 @@ final class Actions_Manager {
 
 
 
-
 	/**
 	 * Registed actions
 	 *
@@ -96,10 +95,11 @@ final class Actions_Manager {
 
 		$this->actions[ $action->slug ] = $action;
 		$this->sources[ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = array(
-			'label'          => $action->name,
-			'description'    => $action->description,
-			'fields'         => $action->get_fields(),
-			'is_integration' => $action->is_integration,
+			'label'             => $action->name,
+			'description'       => $action->description,
+			'fields'            => $action->get_fields(),
+			'is_integration'    => $action->is_integration,
+			'required_triggers' => $action->required_triggers,
 		);
 	}
 
@@ -151,16 +151,17 @@ final class Actions_Manager {
 				 ),
 			 ),
 			 'woocommerce' => array(
-				 'label'       => __( 'WooCommerce', 'quillcrm' ),
-				 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
-				 'groups'      => array(
+				 'label'  => __( 'WooCommerce', 'quillcrm' ),
+				 'groups' => array(
 					 'order'  => array(
-						 'label'   => __( 'Order', 'quillcrm' ),
-						 'actions' => array(),
+						 'label'       => __( 'Order', 'quillcrm' ),
+						 'actions'     => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 					 ),
 					 'coupon' => array(
-						 'label'   => __( 'Coupon', 'quillcrm' ),
-						 'actions' => array(),
+						 'label'       => __( 'Coupon', 'quillcrm' ),
+						 'actions'     => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 					 ),
 				 ),
 			 ),
@@ -192,59 +193,76 @@ final class Actions_Manager {
 					 ),
 				 ),
 			 ),
+			 'message'     => array(
+				 'label'  => __( 'Messaging', 'quillcrm' ),
+				 'groups' => array(
+					 'sms'      => array(
+						 'label'   => __( 'SMS', 'quillcrm' ),
+						 'actions' => array(),
+					 ),
+					 'whatsapp' => array(
+						 'label'   => __( 'WhatsApp', 'quillcrm' ),
+						 'actions' => array(),
+					 ),
+				 ),
+			 ),
 			 'send_data'   => array(
 				 'label'  => __( 'Send Data', 'quillcrm' ),
 				 'groups' => array(
-					 'activecampaign' => array(
-						 'label'   => __( 'ActiveCampaign', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'convertkit'     => array(
-						 'label'   => __( 'ConvertKit', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'drip'           => array(
-						 'label'   => __( 'Drip', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'getresponse'    => array(
-						 'label'   => __( 'GetResponse', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'hubspot'        => array(
-						 'label'   => __( 'HubSpot', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'keap'           => array(
-						 'label'   => __( 'Keap', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'klaviyo'        => array(
-						 'label'   => __( 'Klaviyo', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'mailchimp'      => array(
-						 'label'   => __( 'Mailchimp', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'mailerlite'     => array(
-						 'label'   => __( 'MailerLite', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'mautic'         => array(
-						 'label'   => __( 'Mautic', 'quillcrm' ),
-						 'actions' => array(),
-					 ),
-					 'slack'          => array(
+					 // 'activecampaign' => array(
+					 // 'label'   => __( 'ActiveCampaign', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'convertkit'     => array(
+					 // 'label'   => __( 'ConvertKit', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'drip'           => array(
+					 // 'label'   => __( 'Drip', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'getresponse'    => array(
+					 // 'label'   => __( 'GetResponse', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'hubspot'        => array(
+					 // 'label'   => __( 'HubSpot', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'keap'           => array(
+					 // 'label'   => __( 'Keap', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'klaviyo'        => array(
+					 // 'label'   => __( 'Klaviyo', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'mailchimp'      => array(
+					 // 'label'   => __( 'Mailchimp', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'mailerlite'     => array(
+					 // 'label'   => __( 'MailerLite', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 // 'mautic'         => array(
+					 // 'label'   => __( 'Mautic', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 'slack'        => array(
 						 'label'   => __( 'Slack', 'quillcrm' ),
 						 'actions' => array(),
 					 ),
-					 'twilio'         => array(
-						 'label'   => __( 'Twilio', 'quillcrm' ),
+					 // 'twilio'         => array(
+					 // 'label'   => __( 'Twilio', 'quillcrm' ),
+					 // 'actions' => array(),
+					 // ),
+					 'zapier'       => array(
+						 'label'   => __( 'Zapier', 'quillcrm' ),
 						 'actions' => array(),
 					 ),
-					 'zapier'         => array(
-						 'label'   => __( 'Zapier', 'quillcrm' ),
+					 'http_request' => array(
+						 'label'   => __( 'HTTP Request', 'quillcrm' ),
 						 'actions' => array(),
 					 ),
 				 ),
@@ -253,7 +271,7 @@ final class Actions_Manager {
 
 		 foreach ( $this->sources['send_data']['groups'] as $group => $data ) {
 			 // Zapier doesn't require integration setup, so it's always enabled
-			 if ( $group === 'zapier' ) {
+			 if ( $group === 'zapier' || $group === 'http_request' ) {
 				 $this->sources['send_data']['groups'][ $group ]['is_disabled'] = false;
 			 } else {
 				 $this->sources['send_data']['groups'][ $group ]['is_disabled'] = ! Integrations_Manager::instance()->is_active( $group );

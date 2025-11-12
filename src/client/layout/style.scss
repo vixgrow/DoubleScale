@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+	overflow: hidden;
+}
+body.js.is-fullscreen-mode {
+	// @include break-medium {
+	// Reset the html.wp-topbar padding.
+	// Because this uses negative margins, we have to compensate for the height.
+	margin-top: -32px;
+	height: calc(100% + 32px);
+	overflow-y: auto;
+	overflow-x: hidden;
+	#adminmenumain,
+	#wpadminbar {
+		display: none;
+	}
+
+	.wrap {
+		margin: 0;
+	}
+
+	#wpcontent,
+	#wpfooter {
+		margin-left: 0;
+		padding-left: 0;
+	}
+
+	div#wpbody-content {
+		padding-bottom: 0;
+	}
+	#wpfooter {
+		display: none;
+	}
+}
+
 #screen-meta-links {
 	display: none !important;
 }
@@ -9,6 +43,11 @@
 .qcrm-layout {
 	font-size: 13px;
 	width: 100%;
+	min-height: 100vh;
+}
+
+#wpbody-content {
+	padding-bottom: 0 !important;
 }
 
 #wpwrap {
@@ -18,24 +57,59 @@
 div#wpcontent {
 	padding: 0;
 	overflow-x: unset !important;
-	min-height: calc(100vh - 32px);
+	//min-height: calc(100vh - 32px);
 }
 
 .qcrm-layout * {
 	box-sizing: border-box;
 	width: 100%;
 }
+
 .qcrm-layout__main {
 	display: flex;
 	box-sizing: border-box;
 	width: 100%;
+	min-height: 100vh;
+	background: linear-gradient(to right, #1e3a8a 20%, #3b82f6 80%);
+
+	.qcrm-layout__workspace {
+		width: calc(100% - 140px);
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-height: inherit;
+		padding: 24px 24px 24px 0;
+	}
+	
 	.qcrm-page-component-wrapper {
 		width: 100%;
-		padding: 20px 40px;
-		padding-top: 40px;
-		// overflow-x: scroll;
-		overflow-x: hidden; 
-		scroll-padding-inline: 40px;
+		height: 100%;
+		flex: 1;
+		min-height: 0;
+		background: #ffffff;
+		border-radius: 28px;
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		box-shadow: 0 24px 48px -24px rgba(13, 34, 92, 0.4);
+		padding: 36px 40px;
+	}
+
+	@media (max-width: 1023px) {
+		flex-direction: column;
+
+		.qcrm-layout__header {
+			padding: 24px 24px 110px;
+		}
+
+		.qcrm-layout__content {
+			padding: 0 24px 32px;
+			margin-top: -86px;
+		}
+
+		.qcrm-page-component-wrapper {
+			padding: 28px;
+		}
 	}
 }
 
@@ -108,6 +182,7 @@ body {
 		--sidebar-ring: 217.2 91.2% 59.8%;
 		--sidebar-header: 212 51% 31%;
 	}
+
 	.dark {
 		--background: 0 0% 3.9%;
 		--foreground: 0 0% 98%;
@@ -150,6 +225,7 @@ body {
 	* {
 		@apply border-border;
 	}
+
 	body {
 		@apply bg-background text-foreground;
 	}

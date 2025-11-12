@@ -33,6 +33,9 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover-dialog';
+import { LinkDialog, LinkData } from './LinkDialog';
+import { MergeTagsIcon } from '@quillcrm/components';
+import MergeTagsSelector from '@/components/merge-tags';
 
 interface RichTextEditorProps {
 	content: string;
@@ -51,9 +54,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [selectedColor, setSelectedColor] = useState('#000000');
+	const [isMergeTagsModalOpen, setIsMergeTagsModalOpen] = useState(false);
 	const [editorId] = useState(
 		() => `rich-text-editor-${Math.random().toString(36).substr(2, 9)}`
 	);
+	const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+	const [currentLinkData, setCurrentLinkData] = useState<{
+		url: string;
+	}>({ url: '' });
 	const [activeFormats, setActiveFormats] = useState({
 		bold: false,
 		italic: false,
@@ -480,6 +488,89 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 		executeCommand('foreColor', color);
 	};
 
+	// Enhanced link handling
+	const handleLinkClick = () => {
+		const selection = window.getSelection();
+		let existingUrl = '';
+
+		// Check if selected text is already a link
+		if (selection && selection.rangeCount > 0) {
+			const range = selection.getRangeAt(0);
+			const parentElement =
+				range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+					? range.commonAncestorContainer.parentElement
+					: (range.commonAncestorContainer as Element);
+
+			const existingLink = parentElement?.closest(
+				'a'
+			) as HTMLAnchorElement;
+			if (existingLink) {
+				existingUrl = existingLink.href || '';
+			}
+		}
+
+		// Set the current link data and open dialog
+		setCurrentLinkData({ url: existingUrl });
+		setIsLinkDialogOpen(true);
+	};
+
+	const handleLinkConfirm = (linkData: LinkData) => {
+		const selection = window.getSelection();
+		if (!selection || selection.rangeCount === 0) return;
+
+		const range = selection.getRangeAt(0);
+		const parentElement =
+			range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+				? range.commonAncestorContainer.parentElement
+				: (range.commonAncestorContainer as Element);
+
+		const existingLink = parentElement?.closest('a') as HTMLAnchorElement;
+
+		if (existingLink) {
+			// Update existing link
+			existingLink.href = linkData.url;
+			existingLink.target = '_blank';
+			existingLink.rel = 'noopener noreferrer';
+		} else {
+			// Create new link
+			const linkElement = document.createElement('a');
+			linkElement.href = linkData.url;
+			linkElement.target = '_blank';
+			linkElement.rel = 'noopener noreferrer';
+
+			try {
+				range.surroundContents(linkElement);
+			} catch (e) {
+				// Fallback for complex selections
+				const selectedText = range.toString();
+				range.deleteContents();
+				linkElement.textContent = selectedText;
+				range.insertNode(linkElement);
+			}
+		}
+
+		if (editorRef.current) {
+			onChange(editorRef.current.innerHTML);
+		}
+	};
+
+	const handleInsertMergeTag = (tagValue: string) => {
+		if (editorRef.current) {
+			// Focus the editor first
+			editorRef.current.focus();
+
+			// Insert the merge tag at cursor position
+			// @ts-ignore - deprecated API but no modern alternative exists
+			document.execCommand('insertHTML', false, tagValue);
+
+			// Update the content
+			onChange(editorRef.current.innerHTML);
+		}
+
+		// Close the modal
+		setIsMergeTagsModalOpen(false);
+	};
+
 	// Convert HTML to text for initial display if needed
 	const getInitialContent = () => {
 		if (!content) return '';
@@ -535,6 +626,39 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					margin: 5px 0 !important;
 					font-family: ${fontFamily} !important;
 					font-size: ${fontSize}px !important;
+				}
+				.${editorId} a {
+					position: relative !important;
+					text-decoration: underline !important;
+					color: #333 !important;
+				}
+				.${editorId} a:hover::after {
+					content: attr(href) !important;
+					position: absolute !important;
+					bottom: 100% !important;
+					left: 50% !important;
+					transform: translateX(-50%) !important;
+					background: rgba(0, 0, 0, 0.9) !important;
+					color: white !important;
+					padding: 6px 10px !important;
+					border-radius: 6px !important;
+					font-size: 12px !important;
+					white-space: nowrap !important;
+					z-index: 1000 !important;
+					pointer-events: none !important;
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+					margin-bottom: 5px !important;
+				}
+				.${editorId} a:hover::before {
+					content: '' !important;
+					position: absolute !important;
+					top: 100% !important;
+					left: 50% !important;
+					transform: translateX(-50%) !important;
+					border: 5px solid transparent !important;
+					border-top-color: rgba(0, 0, 0, 0.9) !important;
+					z-index: 1001 !important;
+					margin-top: -5px !important;
 				}
 			`}</style>
 
@@ -719,15 +843,24 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 					variant="ghost"
 					size="sm"
 					className="p-2 h-8 w-8"
-					onClick={() => {
-						const url = prompt(__('Enter URL:', 'quillcrm'));
-						if (url) {
-							executeCommand('createLink', url);
-						}
-					}}
+					onClick={handleLinkClick}
 					onMouseDown={(e) => e.preventDefault()}
 				>
 					<Link className="h-4 w-4" />
+				</Button>
+
+				<div className="w-px h-6 bg-border mx-1" />
+
+				{/* Merge Tags */}
+				<Button
+					variant="ghost"
+					size="sm"
+					className="p-2 h-8 w-8"
+					onClick={() => setIsMergeTagsModalOpen(true)}
+					onMouseDown={(e) => e.preventDefault()}
+					title={__('Insert Merge Tags', 'quillcrm')}
+				>
+					<MergeTagsIcon width={16} height={16} />
 				</Button>
 			</div>
 
@@ -749,6 +882,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 						fontFamily: fontFamily,
 						lineHeight: '1.5',
 						maxWidth: '287.2px',
+						overflowX: 'scroll',
 						color: 'hsl(var(--foreground))',
 						// Force font inheritance for all child elements
 						'--font-size': `${fontSize}px`,
@@ -758,6 +892,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 				onInput={handleInput}
 				onPaste={handlePaste}
 				onKeyDown={handleKeyDown}
+			/>
+
+			{/* Link Dialog */}
+			<LinkDialog
+				isOpen={isLinkDialogOpen}
+				onClose={() => setIsLinkDialogOpen(false)}
+				onConfirm={handleLinkConfirm}
+				initialUrl={currentLinkData.url}
+			/>
+
+			{/* Merge Tags Modal */}
+			<MergeTagsSelector
+				visible={isMergeTagsModalOpen}
+				onClose={() => setIsMergeTagsModalOpen(false)}
+				onInsertTag={handleInsertMergeTag}
 			/>
 		</div>
 	);

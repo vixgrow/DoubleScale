@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Email Campaign Processing
  * This class is responsible for handling Email campaign processing
@@ -13,30 +12,26 @@ namespace QuillCRM\Campaign;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\QuillCRM;
 use QuillCRM\Utils;
 use QuillCRM\Abstracts\Abstract_Campaign_Processing;
 use QuillCRM\Emails\Emails;
+use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Models\Template_Model;
-use QuillCRM\Models\Link_Trigger_Model;
-use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Tracking\Email;
+use QuillCRM\Constants\Campaign_Channel;
 
 /**
  * Email Campaign Processing class
  */
 class Email_Processing extends Abstract_Campaign_Processing {
 
-
-
-
-
 	/**
-	 * Campaign type
+	 * Communication channel
 	 *
-	 * @var string
+	 * @var int
 	 */
-	protected $campaign_type = 'email';
+	protected $channel = Campaign_Channel::CHANNEL_EMAIL;
 
 	/**
 	 * Add hooks
@@ -44,14 +39,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return void
 	 */
 	public function add_hooks() {
-		add_action(
-			'init',
-			function () {
-				QuillCRM::instance()->daily_tasks->register_callback( 'quillcrm_daily3', array( $this, 'reset_daily_count' ) );
-				QuillCRM::instance()->campaigns_tasks->register_callback( 'quillcrm_email_campaigns', array( $this, 'process_campaigns' ) );
-				QuillCRM::instance()->campaigns_tasks->register_callback( 'process_campaign_email', array( $this, 'process_campaign_message' ) );
-			}
-		);
+		$this->register_campaign_processing_hooks();
 	}
 
 	/**
@@ -60,7 +48,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return int
 	 */
 	protected function get_message_mode() {
-		 return Tracking_Model::MODE_EMAIL;
+		return Tracking_Model::MODE_EMAIL;
 	}
 
 	/**
@@ -71,6 +59,101 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 */
 	protected function get_recipient( Contact_Model $contact ) {
 		return $contact->email;
+	}
+
+	/**
+	 * Prepare message content - Override to inject footer during builder rendering
+	 *
+	 * This method follows the same flow as the parent but adds builder email support:
+	 * 1. Prepare footer (with merge tags) before rendering
+	 * 2. Render builder content with footer injection
+	 * 3. Process all merge tags (body + footer)
+	 * 4. Add click tracking and unsubscribe links
+	 *
+	 * @param Template_Model $template Template model
+	 * @param Contact_Model  $contact Contact model
+	 * @param Tracking_Model $campaign_message Campaign tracking record
+	 * @return array Message data array with subject, body, recipient, hash_key
+	 */
+	protected function prepare_message_content( $template, Contact_Model $contact, Tracking_Model $campaign_message ) {
+		$subject         = $template->subject ?? '';
+		$message         = $template->body ?? $this->get_default_campaign_content();
+		$add_unsubscribe = $template->get_setting( 'add_unsubscribe', true );
+
+		// Prepare footer HTML before rendering (for builder emails only)
+		// Footer contains merge tags that will be processed after rendering
+		$footer_html = $this->prepare_footer_html( $message, $contact, $campaign_message );
+
+		// Check if the message is in builder JSON format and render it to HTML
+		// Pass footer_html so it gets injected before </body> tag
+		$message = $this->render_builder_content( $message, $contact, $footer_html );
+
+		// Process merge tags in both body and footer (if footer was injected)
+		$processed_message = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $message, $contact );
+		$processed_subject = \QuillCRM\Managers\Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+
+		// Add click tracking to URLs in the message (if tracking class supports it)
+		$tracking_class = $this->get_tracking_class();
+		if ( method_exists( $tracking_class, 'add_click_tracking' ) ) {
+			$tracked_message = $tracking_class::add_click_tracking( $processed_message, $campaign_message->hash_key );
+		} else {
+			$tracked_message = $processed_message;
+		}
+
+		// Add unsubscribe link if enabled (if tracking class supports it)
+		if ( $add_unsubscribe && method_exists( $tracking_class, 'add_unsubscribe_link' ) ) {
+			$tracked_message = $tracking_class::add_unsubscribe_link( $tracked_message, $campaign_message->hash_key );
+		}
+
+		return array(
+			'subject'   => $processed_subject,
+			'body'      => $tracked_message,
+			'recipient' => $campaign_message->recipient,
+			'hash_key'  => $campaign_message->hash_key,
+		);
+	}
+
+	/**
+	 * Prepare footer HTML for injection into builder emails
+	 *
+	 * IMPORTANT: This method is called BEFORE merge tags are processed in the body.
+	 * We prepare the footer with merge tags here, but they will be processed later
+	 * in prepare_message_content() along with the body content.
+	 *
+	 * @param string         $message Original message content (JSON for builder, HTML for legacy)
+	 * @param Contact_Model  $contact Contact model
+	 * @param Tracking_Model $campaign_message Campaign tracking record
+	 * @return string Footer HTML with tracking pixel (or empty if not builder email)
+	 */
+	private function prepare_footer_html( $message, Contact_Model $contact, Tracking_Model $campaign_message ) {
+		// Check if message is builder format (JSON)
+		$decoded = json_decode( $message, true );
+		$is_builder_email = ( json_last_error() === JSON_ERROR_NONE && isset( $decoded['type'] ) && $decoded['type'] === 'builder' );
+
+		// Only prepare footer for builder emails
+		// Non-builder emails use the old add_footer_and_tracking() method in send_message()
+		if ( ! $is_builder_email ) {
+			return '';
+		}
+
+		// Get footer content (respecting settings hierarchy)
+		if ( ! empty( $this->settings['email_footer'] ) ) {
+			$email_footer = $this->settings['email_footer'];
+		} else {
+			$global_settings = \QuillCRM\Settings::get( 'email', array() );
+			$email_footer    = $global_settings['email_footer'] ?? Email_Tracking_Helper::get_default_footer();
+		}
+
+		// Add tracking pixel to footer
+		$tracking_pixel = sprintf(
+			'<img src="%s" width="1" height="1" style="width:1px;height:1px;" alt="" />',
+			home_url( '?quillcrm=email_open&hash_key=' . $campaign_message->hash_key )
+		);
+
+		// Return footer with tracking pixel
+		// NOTE: Merge tags in footer will be processed in prepare_message_content()
+		// after the builder content is rendered, ensuring consistent processing
+		return $email_footer . $tracking_pixel;
 	}
 
 	/**
@@ -94,34 +177,53 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			// Get template to access from_email settings early for debugging
 			$template = $campaign_message->template;
 
-			// solve merge tags
-			$message_data['body']         = Merge_Tags_Manager::instance()->process_merge_tags( $message_data['body'], $contact );
-			$message_data['subject']      = Merge_Tags_Manager::instance()->process_merge_tags( $message_data['subject'], $contact );
-			$message_data['preview_text'] = Merge_Tags_Manager::instance()->process_merge_tags( $message_data['preview_text'], $contact );
-			// Build email message first
-			$email_message = $this->build_email_message( $campaign_message, $contact, $message_data['body'] );
+			// Check if this is a builder email (complete HTML document)
+			$is_builder_email = ( strpos( $message_data['body'], '<!DOCTYPE html' ) !== false || strpos( $message_data['body'], '<html' ) !== false );
 
-			// Build complete email message with footer
-			$complete_message = sprintf(
-				'%s%s',
-				$email_message,
-				$this->build_email_footer( $campaign_message, $contact )
+			// For non-builder emails, add footer and tracking using the old method
+			// Builder emails already have footer and tracking pixel injected during render
+			if ( ! $is_builder_email ) {
+				// Build complete email message with footer and tracking (using shared helper)
+				$complete_message = Email_Tracking_Helper::add_footer_and_tracking(
+					$message_data['body'],
+					$campaign_message,
+					$contact,
+					$this->settings
+				);
+			} else {
+				// Builder email - footer and tracking already injected
+				$complete_message = $message_data['body'];
+			}
+
+			// Add click tracking to all links (using shared helper with UTM support)
+			$complete_message = Email_Tracking_Helper::add_click_tracking(
+				$complete_message,
+				$campaign_message->hash_key,
+				$contact,
+				$template
 			);
 
-			// Add UTM parameters to links if enabled
-			$complete_message = $this->add_utm_parameters_to_links( $complete_message, $campaign_message );
-
-			// Add click tracking to all links (specific to email)
-			$complete_message = $this->add_email_click_tracking( $complete_message, $campaign_message->hash_key, $contact );
-
 			$emails = new Emails();
-			// Set from_email and from_name from template if available
+			// Set from_email, from_name, and reply_to from template if available
 			if ( $template && $template->get_setting( 'from_email' ) ) {
 				$emails->from_address = $template->get_setting( 'from_email' );
 			}
 			if ( $template && $template->get_setting( 'from_name' ) ) {
 				$emails->from_name = $template->get_setting( 'from_name' );
 			}
+			if ( $template && $template->get_setting( 'reply_to' ) ) {
+				$emails->reply_to = $template->get_setting( 'reply_to' );
+			}
+
+			// Set unsubscribe URL for List-Unsubscribe header (RFC 8058 compliance)
+			$emails->unsubscribe_url = add_query_arg(
+				array(
+					'quillcrm' => 'email_unsubscribe',
+					'hash_key' => $campaign_message->hash_key,
+				),
+				home_url()
+			);
+
 			$result = $emails->send(
 				$contact->email,
 				$message_data['subject'],
@@ -139,6 +241,7 @@ class Email_Processing extends Abstract_Campaign_Processing {
 				'success'    => true,
 				'message_id' => $result,
 			);
+
 		} catch ( \Exception $e ) {
 			// Enhanced error logging with debugging information
 			$debug_info = array(
@@ -180,54 +283,36 @@ class Email_Processing extends Abstract_Campaign_Processing {
 	 * @return string
 	 */
 	protected function get_tracking_class() {
-		return \QuillCRM\Tracking\Email::class;
-	}
-
-
-	/**
-	 * Build email message
-	 *
-	 * @param Tracking_Model $campaign_email
-	 * @param Contact_Model  $contact
-	 * @param string         $message
-	 * @return string
-	 */
-	protected function build_email_message( Tracking_Model $campaign_email, Contact_Model $contact, $message = '' ) {
-		// Note: Tracking pixel is added in build_email_footer() to avoid duplication
-		return $message;
+		return Email::class;
 	}
 
 	/**
-	 * Build email footer
+	 * Get default max per day
 	 *
-	 * @param Tracking_Model $campaign_email
-	 * @param Contact_Model  $contact
-	 * @return string
+	 * @return int
 	 */
-	protected function build_email_footer( Tracking_Model $campaign_email, Contact_Model $contact ) {
-		$footer = '';
-
-		// Add tracking pixel 1x1 for email open tracking
-		// Note: This is the ONLY place where the tracking pixel should be added
-		// to avoid duplicate pixels that could cause double-counting of opens
-		$footer .= sprintf(
-			'<img src="%s" width="1" height="1" style="width:1px;height:1px;" />',
-			home_url( '?quillcrm=email_open&hash_key=' . $campaign_email->hash_key )
-		);
-
-		$email_footer = $this->settings['email_footer'] ?? $this->default_email_footer();
-		$footer      .= $email_footer;
-
-		return $footer;
+	protected function get_default_max_per_day() {
+		return 10000;
 	}
 
 	/**
-	 * Default email footer
+	 * Get default max per second
+	 *
+	 * @return int
+	 */
+	protected function get_default_max_per_second() {
+		return 15;
+	}
+
+	/**
+	 * Get default campaign content
 	 *
 	 * @return string
 	 */
-	protected function default_email_footer() {
-		 return "<p>Don't want to stay in the loop? We'll be sad to see you go, but you can click here to <a href='{{contact:unsubscribe_link}}'>unsubscribe</a>.</p>";
+	protected function get_default_campaign_content() {
+		return method_exists( $this, 'get_default_email_content' )
+			? $this->get_default_email_content()
+			: sprintf( __( '<p>Hi {{contact:first_name}} {{contact:last_name}},</p><p>Thank you for subscribing to our updates.</p><p><a href="{{contact:unsubscribe_link}}">Unsubscribe</a></p>', 'quillcrm' ) );
 	}
 
 	/**
@@ -241,166 +326,5 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		);
 
 		return apply_filters( 'quillcrm_default_email_content', $default_content );
-	}
-
-	/**
-	 * Add UTM parameters to all links in the email message
-	 *
-	 * @param string         $message Email message
-	 * @param Tracking_Model $campaign_message Campaign tracking record
-	 * @return string
-	 */
-	protected function add_utm_parameters_to_links( $message, Tracking_Model $campaign_message ) {
-		// Get the campaign/sequence from the tracking record
-		$campaign = null;
-		if ( $campaign_message->source_type === Message_Source_Types::CAMPAIGN ) {
-			$campaign = Campaign_Model::find( $campaign_message->source_id );
-		}
-
-		if ( ! $campaign ) {
-			return $message;
-		}
-
-		// Check if UTM parameters are enabled
-		$settings = $campaign->settings ?? array();
-		if ( empty( $settings['add_utm_parameters'] ) || ! $settings['add_utm_parameters'] ) {
-			return $message;
-		}
-
-		// Get UTM parameters from settings
-		$utm_parameters = $settings['utm_parameters'] ?? array();
-		if ( empty( $utm_parameters ) ) {
-			return $message;
-		}
-
-		// Build UTM query parameters
-		$utm_query_params = array();
-		$utm_fields       = array(
-			'campaign_source'  => 'utm_source',
-			'campaign_medium'  => 'utm_medium',
-			'campaign_name'    => 'utm_campaign',
-			'campaign_term'    => 'utm_term',
-			'campaign_content' => 'utm_content',
-		);
-
-		foreach ( $utm_fields as $setting_key => $utm_param ) {
-			if ( ! empty( $utm_parameters[ $setting_key ] ) ) {
-				$utm_query_params[ $utm_param ] = $utm_parameters[ $setting_key ];
-			}
-		}
-
-		if ( empty( $utm_query_params ) ) {
-			return $message;
-		}
-
-		// Match all links in the message
-		preg_match_all( '/<a[^>]+href=([\'"])(?<href>.+?)\1[^>]*>/i', $message, $matches );
-
-		if ( ! isset( $matches['href'] ) ) {
-			return $message;
-		}
-
-		foreach ( $matches['href'] as $key => $href ) {
-			// Skip internal QuillCRM links and mailto/tel links
-			if (
-				strpos( $href, 'quillcrm' ) !== false ||
-				strpos( $href, 'mailto:' ) === 0 ||
-				strpos( $href, 'tel:' ) === 0 ||
-				strpos( $href, '#' ) === 0
-			) {
-				continue;
-			}
-
-			// Add UTM parameters to the URL
-			$utm_url = add_query_arg( $utm_query_params, $href );
-
-			// Replace the original link with the UTM-enhanced link
-			$to_replace = $matches[0][ $key ];
-			$message    = str_replace( $to_replace, str_replace( $href, $utm_url, $to_replace ), $message );
-		}
-
-		return $message;
-	}
-
-	/**
-	 * Add click tracking to all links (Email-specific)
-	 *
-	 * @param string        $message Email message
-	 * @param string        $hash_key Campaign email hash key
-	 * @param Contact_Model $contact Contact model
-	 * @return string
-	 */
-	protected function add_email_click_tracking( $message, $hash_key, Contact_Model $contact ) {
-		// Match all links
-		preg_match_all( '/<a[^>]+href=([\'"])(?<href>.+?)\1[^>]*>/i', $message, $matches );
-
-		if ( ! isset( $matches['href'] ) ) {
-			return $message;
-		}
-
-		foreach ( $matches['href'] as $key => $href ) {
-			// Check if link trigger quillcrm-link-trigger.
-			if ( false !== strpos( $href, 'quillcrm-link-trigger' ) ) {
-				// Get query string
-				$query_string = parse_url( $href, PHP_URL_QUERY );
-				parse_str( $query_string, $query_args );
-
-				// Get link trigger hash
-				$hash         = $query_args['quillcrm-link-trigger'] ?? '';
-				$link_trigger = Link_Trigger_Model::where( 'hash', $hash )->first();
-				if ( ! $link_trigger ) {
-					continue;
-				}
-
-				$link_trigger_url = $this->configure_link_trigger_url( $link_trigger, $contact, $hash_key );
-
-				// Replace original link with click tracking link
-				$to_replace = $matches[0][ $key ];
-				$message    = str_replace( $to_replace, str_replace( $href, $link_trigger_url, $to_replace ), $message );
-				continue;
-			}
-
-			// Add click original link to click tracking
-			$click_url = add_query_arg(
-				array(
-					'quillcrm' => 'email_click',
-					'hash_key' => $hash_key,
-					'original' => urlencode( $href ),
-				),
-				home_url()
-			);
-
-			// Replace original link with click tracking link
-			$to_replace = $matches[0][ $key ];
-			$message    = str_replace( $to_replace, str_replace( $href, $click_url, $to_replace ), $message );
-		}
-
-		return $message;
-	}
-
-	/**
-	 * Configure link trigger url
-	 *
-	 * @param Link_Trigger_Model $link_trigger
-	 * @param Contact_Model      $contact
-	 * @param string             $hash_key
-	 * @return string
-	 */
-	protected function configure_link_trigger_url( Link_Trigger_Model $link_trigger, Contact_Model $contact, $hash_key ) {
-		$auto_login    = $link_trigger->get_setting( 'auto_login', true );
-		$contact_email = $contact->email;
-		$user          = get_user_by( 'email', $contact_email );
-		$args          = array(
-			'quillcrm-link-trigger' => $link_trigger->hash,
-			'track-id'              => $hash_key,
-		);
-
-		if ( $auto_login && $user ) {
-			$args['auth-id'] = wp_hash_password( $contact_email );
-		}
-
-		$link_trigger_url = add_query_arg( $args, home_url() );
-
-		return $link_trigger_url;
 	}
 }

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -45,6 +45,8 @@ interface ScheduleMeetingModalProps {
 	onSuccess: () => void;
 	dealId: number;
 	dealTitle?: string;
+	editMode?: boolean;
+	activity?: any;
 }
 
 interface MeetingFormData {
@@ -62,9 +64,11 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 	onSuccess,
 	dealId,
 	dealTitle,
+	editMode = false,
+	activity,
 }) => {
 	const [loading, setLoading] = useState(false);
-	const { scheduleMeeting } = useActivityOperations();
+	const { scheduleMeeting, updateActivity } = useActivityOperations();
 	const dispatch = useDispatch('quillcrm/core');
 	const createNotice = dispatch?.createNotice;
 
@@ -79,6 +83,27 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 		},
 	});
 
+	// Load existing activity data when in edit mode
+	useEffect(() => {
+		if (editMode && activity && visible) {
+			form.reset({
+				title: activity.data?.title || '',
+				scheduled_at: activity.data?.scheduled_at ? dayjs(activity.data.scheduled_at).toDate() : dayjs().add(1, 'hour').toDate(),
+				duration: activity.data?.duration || 60,
+				location: activity.data?.location || '',
+				description: activity.data?.description || '',
+			});
+		} else if (!visible) {
+			form.reset({
+				title: '',
+				scheduled_at: dayjs().add(1, 'hour').toDate(),
+				duration: 60,
+				location: '',
+				description: '',
+			});
+		}
+	}, [editMode, activity, visible, form]);
+
 	const handleSubmit = async (values: MeetingFormData) => {
 		setLoading(true);
 		try {
@@ -87,12 +112,19 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 				scheduled_at: values.scheduled_at, // Preserve as Date to match MeetingFormData type
 			};
 
-			await scheduleMeeting(dealId, meetingData);
-
-			createNotice?.({
-				type: 'success',
-				message: __('Meeting scheduled successfully!', 'quillcrm'),
-			});
+			if (editMode && activity) {
+				await updateActivity(activity.id, 'meeting_scheduled', meetingData);
+				createNotice?.({
+					type: 'success',
+					message: __('Meeting updated successfully!', 'quillcrm'),
+				});
+			} else {
+				await scheduleMeeting(dealId, meetingData);
+				createNotice?.({
+					type: 'success',
+					message: __('Meeting scheduled successfully!', 'quillcrm'),
+				});
+			}
 
 			form.reset();
 			onSuccess();
@@ -101,7 +133,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 			const err = error as Error;
 			createNotice?.({
 				type: 'error',
-				message: err.message || __('Failed to schedule meeting', 'quillcrm'),
+				message: err.message || __(editMode ? 'Failed to update meeting' : 'Failed to schedule meeting', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);
@@ -120,7 +152,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 				<DialogHeader>
 					<DialogTitle>
 						<CustomDialogHeader
-							title={__('Schedule Meeting', 'quillcrm')}
+							title={editMode ? __('Edit Meeting', 'quillcrm') : __('Schedule Meeting', 'quillcrm')}
 							subtitle=''
 							icon={<MeetingDealIcon color='#1E3A8A' />}
 						/>
@@ -272,8 +304,8 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-[8px] font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
 							>
 								{loading
-									? __('Scheduling...', 'quillcrm')
-									: __('Schedule Meeting', 'quillcrm')}
+									? (editMode ? __('Updating...', 'quillcrm') : __('Scheduling...', 'quillcrm'))
+									: (editMode ? __('Update Meeting', 'quillcrm') : __('Schedule Meeting', 'quillcrm'))}
 							</Button>
 						</DialogFooter>
 					</form>

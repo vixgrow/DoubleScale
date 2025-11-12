@@ -145,5 +145,69 @@ class Admin {
 			'quillcrm&path=contacts',
 			array( Admin_Loader::class, 'page_wrapper' )
 		);
+
+		// Campaigns.
+		add_submenu_page(
+			'quillcrm',
+			__( 'Campaigns', 'quillcrm' ),
+			__( 'Campaigns', 'quillcrm' ),
+			'quillcrm_access',
+			'quillcrm&path=campaigns',
+			array( Admin_Loader::class, 'page_wrapper' )
+		);
+		// Pipelines
+		add_submenu_page(
+			'quillcrm',
+			__( 'Pipelines', 'quillcrm' ),
+			__( 'Pipelines', 'quillcrm' ),
+			'quillcrm_access',
+			'quillcrm&path=pipelines',
+			array( Admin_Loader::class, 'page_wrapper' )
+		);
+		// Automations
+		add_submenu_page(
+			'quillcrm',
+			__( 'Automations', 'quillcrm' ),
+			__( 'Automations', 'quillcrm' ),
+			'quillcrm_access',
+			'quillcrm&path=automations',
+			array( Admin_Loader::class, 'page_wrapper' )
+		);
+		// Forms
+		add_submenu_page(
+			'quillcrm',
+			__( 'Forms', 'quillcrm' ),
+			__( 'Forms', 'quillcrm' ),
+			'quillcrm_access',
+			'quillcrm&path=forms',
+			array( Admin_Loader::class, 'page_wrapper' )
+		);
+		// Integrations
+		add_submenu_page(
+			'quillcrm',
+			__( 'Integrations', 'quillcrm' ),
+			__( 'Integrations', 'quillcrm' ),
+			'quillcrm_access',
+			'quillcrm&path=integrations',
+			array( Admin_Loader::class, 'page_wrapper' )
+		);
+		// Analytics
+		add_submenu_page(
+			'quillcrm',
+			__( 'Analytics', 'quillcrm' ),
+			__( 'Analytics', 'quillcrm' ),
+			'quillcrm_access',
+			'quillcrm&path=analytics',
+			array( Admin_Loader::class, 'page_wrapper' )
+		);
+		// Settings
+		add_submenu_page(
+			'quillcrm',
+			__( 'Settings', 'quillcrm' ),
+			__( 'Settings', 'quillcrm' ),
+			'quillcrm_access',
+			'quillcrm&path=settings',
+			array( Admin_Loader::class, 'page_wrapper' )
+		);
 	}
 }

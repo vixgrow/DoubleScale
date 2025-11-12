@@ -20,20 +20,54 @@ import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import BlockEditor from './components/BlockEditor';
 import DragOverlayRenderer from './components/DragOverlayRenderer';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../stores/email-builder/constants';
 import { useButtonSettings } from './hooks/useButtonSettings';
 import { useCollisionDetection } from './hooks/useCollisionDetection';
 import { useDragHandlers } from './hooks/useDragHandlers';
+import {
+	EmailSection,
+	GlobalSettings,
+	ButtonSettings,
+	ButtonType,
+} from './types/common';
 
-const BuilderContent: React.FC = () => {
+export interface BuilderData {
+	sections: EmailSection[];
+	globalSettings: GlobalSettings;
+	buttonSettings: Record<ButtonType, ButtonSettings>;
+}
+
+export interface BuilderProps {
+	initialData?: BuilderData;
+	onSave?: (data: BuilderData) => Promise<void>;
+	onClose?: () => void;
+	autoSave?:
+		| boolean
+		| {
+				enabled: boolean;
+				interval?: number;
+		  };
+}
+
+const BuilderContent: React.FC<BuilderProps> = ({
+	initialData,
+	onSave,
+	onClose,
+	autoSave = true,
+}) => {
 	const dispatch = useDispatch();
 	const [sidebarCloseTrigger, setSidebarCloseTrigger] = useState(0);
+	const [templatesRefreshTrigger, setTemplatesRefreshTrigger] = useState(0);
 
-	const existingTemplateData = useSelect(
-		(select: any) => select('quillcrm/campaign').getStepData('template'),
-		[]
-	);
+	// Parse autoSave prop into enabled/interval
+	const autoSaveConfig =
+		typeof autoSave === 'boolean'
+			? { enabled: autoSave, interval: 10000 }
+			: {
+					enabled: autoSave.enabled,
+					interval: autoSave.interval ?? 10000,
+				};
 
 	useButtonSettings();
 
@@ -48,62 +82,34 @@ const BuilderContent: React.FC = () => {
 		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
-		const loadTemplateData = async () => {
-			// Reset builder state first to ensure clean slate
-			dispatch(STORE_KEY).resetBuilder();
+		// Always reset on mount/prop change, then hydrate from provided initialData
+		dispatch(STORE_KEY).resetBuilder();
 
-			if (!existingTemplateData?.template_id) {
-				return;
-			}
+		if (!initialData) {
+			return;
+		}
 
-			try {
-				const { getTemplate } = await import('./api/templates');
-				const template = await getTemplate(
-					existingTemplateData.template_id
-				);
-				const emailBody = template.email_body;
+		const { sections, globalSettings, buttonSettings } = initialData;
+		if (sections?.length) {
+			dispatch(STORE_KEY).setBuilderState(sections);
+		}
+		if (globalSettings) {
+			dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
+		}
+		if (buttonSettings) {
+			Object.entries(buttonSettings).forEach(([type, settings]) => {
+				dispatch(STORE_KEY).updateButtonSettings(type, settings);
+			});
+		}
+	}, [initialData, dispatch]);
 
-				if (emailBody?.type === 'builder' && emailBody.value) {
-					const { sections, globalSettings, buttonSettings } =
-						emailBody.value;
-
-					// Load sections
-					if (sections && sections.length > 0) {
-						dispatch(STORE_KEY).setBuilderState(sections);
-					}
-
-					// Load global settings
-					if (globalSettings) {
-						dispatch(STORE_KEY).updateGlobalSettings(
-							globalSettings
-						);
-					}
-
-					// Load button settings if they exist
-					if (buttonSettings) {
-						// Update each button type's settings
-						Object.entries(buttonSettings).forEach(
-							([buttonType, settings]) => {
-								dispatch(STORE_KEY).updateButtonSettings(
-									buttonType,
-									settings
-								);
-							}
-						);
-					}
-				}
-			} catch (error) {
-				console.error('Failed to load template:', error);
-			}
-		};
-
-		loadTemplateData();
-
-		// Cleanup function: reset builder when component unmounts
+	// Cleanup: Reset builder state when component unmounts
+	useEffect(() => {
 		return () => {
+			// Clean up the store when component unmounts
 			dispatch(STORE_KEY).resetBuilder();
 		};
-	}, [existingTemplateData?.template_id, dispatch]);
+	}, [dispatch]);
 
 	// Disable scrolling on the background page when builder is mounted
 	useEffect(() => {
@@ -155,26 +161,34 @@ const BuilderContent: React.FC = () => {
 
 				/* Increase z-index for all Radix UI portals when used in builder */
 				body:has(#quillcrm-email-builder) [data-radix-portal] {
-					z-index: 100020 !important;
+					z-index: 160020 !important;
 				}
 				
 				/* Specific overrides for dialog/popover content */
 				body:has(#quillcrm-email-builder) [role="dialog"],
 				body:has(#quillcrm-email-builder) [role="alertdialog"],
 				body:has(#quillcrm-email-builder) [data-radix-popper-content-wrapper] {
-					z-index: 100021 !important;
+					z-index: 160021 !important;
 				}
 			`}</style>
 			<div
 				id="quillcrm-email-builder"
 				className="flex flex-col fixed inset-0 bg-primary-foreground overflow-hidden"
 				style={{
-					zIndex: 100000,
+					zIndex: 160000,
 					width: '100vw',
 					height: '100vh',
 				}}
 			>
-				<Header />
+				<Header
+					onSave={onSave}
+					onClose={onClose}
+					autoSaveEnabled={autoSaveConfig.enabled}
+					autoSaveInterval={autoSaveConfig.interval}
+					onTemplatesSaved={() =>
+						setTemplatesRefreshTrigger((prev) => prev + 1)
+					}
+				/>
 				<div
 					className="flex flex-1 overflow-hidden"
 					style={{ backgroundColor: '#e6eff7' }}
@@ -186,7 +200,13 @@ const BuilderContent: React.FC = () => {
 						onDragEnd={handleDragEnd}
 						modifiers={[snapCenterToCursor]}
 					>
-						<Sidebar sidebarCloseTrigger={sidebarCloseTrigger} />
+						<Sidebar
+							sidebarCloseTrigger={sidebarCloseTrigger}
+							templatesRefreshKey={templatesRefreshTrigger}
+							openGlobalSettings={() =>
+								dispatch(STORE_KEY).clearSelection()
+							}
+						/>
 						<Canvas />
 
 						<DragOverlay dropAnimation={dropAnimation}>
@@ -200,8 +220,8 @@ const BuilderContent: React.FC = () => {
 	);
 };
 
-const Builder: React.FC = () => {
-	return <BuilderContent />;
+const Builder: React.FC<BuilderProps> = (props) => {
+	return <BuilderContent {...props} />;
 };
 
 export default Builder;

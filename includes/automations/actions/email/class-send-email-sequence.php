@@ -24,9 +24,14 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Utils;
 use QuillCRM\Campaign\Email_Processing;
 use QuillCRM\Constants\Message_Source_Types;
+use QuillCRM\Constants\Campaign_Channel;
 
 
 class Send_Email_Sequence extends Action {
+
+
+
+
 
 
 
@@ -105,7 +110,8 @@ class Send_Email_Sequence extends Action {
 
 		// Validate email sequence exists
 		$email_sequence = Email_Sequence_Model::find( $email_sequence_id );
-		if ( ! $email_sequence || $email_sequence->type !== 'email_sequence' ) {
+		$type           = $email_sequence->get_type();
+		if ( ! $email_sequence || $type != Campaign_Channel::CHANNEL_EMAIL_SEQUENCE ) {
 			quillcrm_get_logger()->error(
 				'Email sequence not found or invalid type',
 				array(
@@ -116,6 +122,26 @@ class Send_Email_Sequence extends Action {
 				)
 			);
 			return false;
+		}
+
+		// Only send to subscribed contacts
+		$contact = $automation_contact->contact;
+		if ( $contact->status !== 'subscribed' ) {
+			quillcrm_get_logger()->info(
+				'Send Email Sequence action: Contact is not subscribed',
+				array(
+					'automation_id'     => $automation->id,
+					'step_id'           => $step->id,
+					'contact_id'        => $contact->id,
+					'contact_status'    => $contact->status,
+					'email_sequence_id' => $email_sequence_id,
+					'code'              => 'send_email_sequence_not_subscribed',
+				)
+			);
+			return array(
+				'status'  => 'skipped',
+				'message' => "Contact is not subscribed (status: {$contact->status})",
+			);
 		}
 
 		// Start the email sequence for this contact
@@ -205,7 +231,7 @@ class Send_Email_Sequence extends Action {
 	 * @return array
 	 */
 	private function get_email_sequence_options() {
-		 $email_sequences = Email_Sequence_Model::where( 'type', 'email_sequence' )->get();
+		 $email_sequences = Email_Sequence_Model::where( 'type', Campaign_Channel::CHANNEL_EMAIL_SEQUENCE )->get();
 		return wp_list_pluck( $email_sequences->toArray(), 'name', 'id' );
 	}
 }

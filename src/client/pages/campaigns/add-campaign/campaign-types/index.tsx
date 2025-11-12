@@ -7,114 +7,119 @@ import { __ } from '@wordpress/i18n';
  * internal dependencies
  */
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog';
-import { EnvelopeIcon, RepeatIcon, SMSIcon, WhatsAppIcon } from '@/components';
-import ArrowRightIcon from '@/components/icons/arrow-right';
-import { CampaignModalStep } from '@quillcrm/client';
+	ABSplitIcon,
+	AllContactsIcon,
+	PremiumIcon,
+} from '@quillcrm/components';
+import { CampaignType } from '@quillcrm/client';
+import { Label } from '@/components/ui/label';
 
 interface CampaignTypesProps {
-	step: CampaignModalStep;
-	setStep: (step: CampaignModalStep) => void;
-	setCampaignType: (type: string) => void;
+	selectedType: CampaignType;
+	onTypeChange: (type: CampaignType) => void;
 }
 
 const CampaignTypes: React.FC<CampaignTypesProps> = ({
-	step,
-	setStep,
-	setCampaignType,
+	selectedType,
+	onTypeChange,
 }) => {
+
 	const campaignTypesRows = [
 		{
-			label: __('Email Campaign', 'quillcrm'),
+			label: __('Standard Campaign', 'quillcrm'),
 			description: __(
-				'Create and send a regular email campaign to your selected subscribers.',
+				'One-time mass email sent to a large, segmented list.',
 				'quillcrm'
 			),
 			type: 'standard',
-			icon: <EnvelopeIcon />,
+			icon: <AllContactsIcon width={24} height={24} />,
 		},
-		{
-			label: __('A/B Split Email', 'quillcrm'),
-			description: __(
-				'Send two email variations to a sample group and see which performs better.',
-				'quillcrm'
-			),
-			type: 'ab_test',
-			icon: <RepeatIcon />,
-		},
-		{
-			label: __('SMS Campaign', 'quillcrm'),
-			description: __(
-				'Send SMS text messages to your contacts via Twilio.',
-				'quillcrm'
-			),
-			type: 'sms',
-			icon: <SMSIcon />,
-		},
-		{
-			label: __('WhatsApp Campaign', 'quillcrm'),
-			description: __(
-				'Send WhatsApp messages to your contacts via Twilio.',
-				'quillcrm'
-			),
-			type: 'whatsapp',
-			icon: <WhatsAppIcon />,
-		},
+		// {
+		// 	label: __('A/B Split Campaign', 'quillcrm'),
+		// 	description: __(
+		// 		'Split audience to test one variable; send winner to the rest.',
+		// 		'quillcrm'
+		// 	),
+		// 	type: 'ab_test',
+		// 	icon: <ABSplitIcon width={24} height={24} />,
+		// 	isPremium: true,
+		// },
+		// {
+		// 	label: __('Email Sequence', 'quillcrm'),
+		// 	description: __(
+		// 		'Slow, personalized follow-up series; stops automatically on reply',
+		// 		'quillcrm'
+		// 	),
+		// 	type: 'sequence',
+		// 	icon: <EmailSequenceOutlinedIcon />,
+		// },
 	];
+
 	return (
-		<Dialog
-			open={step === 'campaign-types'}
-			onOpenChange={() => setStep(null)}
-		>
-			<DialogContent className="max-w-[840px] w-full mx-auto">
-				<DialogHeader>
-					<DialogTitle className="text-3xl font-bold mb-1">
-						{__('Create Campaign')}
-					</DialogTitle>
-					<DialogDescription className="text-foreground">
-						{__(
-							'Select one of the campaign types depending on your campaign goals',
-							'quillcrm'
-						)}
-					</DialogDescription>
-				</DialogHeader>
-				<div className="flex flex-col gap-4">
+		<>
+			{/* Campaign Type Selection */}
+			<div className="grid gap-2">
+				<Label className="text-[#09090B] font-normal text-base">
+					{__('Select a campaign type', 'quillcrm')}
+				</Label>
+				<div className="flex flex-col gap-3">
 					{campaignTypesRows.map((campaignType) => (
 						<div
-							className="flex justify-between items-center py-6 px-4 border border-gray-200 rounded-lg cursor-pointer"
 							key={campaignType.type}
-							onClick={() => {
-								setCampaignType(campaignType.type);
-								setStep('campaign-name');
-							}}
+							className={`flex items-center justify-between px-4 py-6 border rounded-xl cursor-pointer transition-colors relative overflow-hidden ${selectedType === campaignType.type
+								? 'border-primary bg-blue-50'
+								: 'border-gray-200 hover:border-gray-300'
+								}`}
+							onClick={() =>
+								onTypeChange(
+									campaignType.type as CampaignType
+								)
+							}
 						>
-							<div className="flex items-center gap-3">
-								<div className="bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] text-primary-foreground p-3 rounded-xl">
+							<div className="flex items-center gap-3 flex-1">
+								<div
+									className="text-primary-foreground p-2.5 rounded-xl"
+									style={{
+										background:
+											'var(--Linear, linear-gradient(90deg, #1E3A8A 61.06%, #3B82F6 100%))',
+									}}
+								>
 									{campaignType.icon}
 								</div>
-								<div>
-									<p className="font-semibold text-secondary-foreground text-xl mb-1">
-										{campaignType.label}
-									</p>
-									<p className="text-secondary-foreground text-sm">
+								<div className="flex-1">
+									<div className="flex items-center gap-2 mb-1">
+										<p className="font-semibold text-secondary-foreground text-base">
+											{campaignType.label}
+										</p>
+										{/* {campaignType.isPremium && (
+											<span className="bg-orange-50 text-[#CB5301] text-base px-2 py-0.5 rounded-md flex items-center gap-1 absolute right-0 top-0">
+												<PremiumIcon />
+												{__('Premium', 'quillcrm')}
+											</span>
+										)} */}
+									</div>
+									<p className="text-muted-foreground text-sm">
 										{campaignType.description}
 									</p>
 								</div>
 							</div>
-
 							<div>
-								<ArrowRightIcon />
+								<div
+									className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedType === campaignType.type
+										? 'border-primary bg-primary'
+										: 'border-gray-300'
+										}`}
+								>
+									{selectedType === campaignType.type && (
+										<div className="w-2 h-2 bg-white rounded-full" />
+									)}
+								</div>
 							</div>
 						</div>
 					))}
 				</div>
-			</DialogContent>
-		</Dialog>
+			</div>
+		</>
 	);
 };
 

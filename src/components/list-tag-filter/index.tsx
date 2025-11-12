@@ -211,7 +211,7 @@ export default function ListTagFilter({
 				description="Select List and Tags that you want to send emails for this campaign. You can create multiple row to send to all of them."
 				ref={includeFilterRef}
 				onChange={setIncludeData}
-				initialRows={includeData}
+				initialRows={includeData.length ? includeData : undefined}
 			/>
 			<div className="border-t border-gray-200"></div>
 			<ContactFilterSection
@@ -226,14 +226,14 @@ export default function ListTagFilter({
 
 			<div className="flex gap-2">
 				<Button
-					variant="outline"
+					variant="secondaryDeepBlue"
 					onClick={handleApplyFilters}
-					disabled={loading || isApplying}
+					disabled={loading}
 				>
 					{__('Apply Filters', 'quillcrm')}
 				</Button>
 				<Button
-					variant="secondaryDeepBlue"
+					variant="destructive"
 					onClick={handleClearFilters}
 					disabled={loading || isApplying}
 				>

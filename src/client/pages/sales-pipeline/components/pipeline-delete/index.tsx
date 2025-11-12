@@ -52,9 +52,13 @@ export const DeletePipelineDialog = ({
 						'quillcrm'
 					),
 				});
-				onConfirm?.();
+				onClose();
+				// Call onConfirm after closing to trigger refresh and update pipeline selection
+				if (onConfirm) {
+					await onConfirm();
+				}
 			} else {
-				
+
 				createNotice?.({
 					type: 'info',
 					message: __(
@@ -62,8 +66,8 @@ export const DeletePipelineDialog = ({
 						'quillcrm'
 					),
 				});
+				onClose();
 			}
-			onClose();
 		} catch (error) {
 			createNotice?.({
 				type: 'error',

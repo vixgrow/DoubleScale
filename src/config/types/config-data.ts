@@ -27,6 +27,7 @@ export type ConfigData = Record<string, unknown> & {
 	userCapabilities: UserCapabilities;
 	defaultStages: DefaultStage[];
 	dealPriorities: DealPriority[];
+	quillsmtpInfo: QuillSMTPInfo;
 };
 
 export type UserCapabilities = {
@@ -45,6 +46,19 @@ export type DealPriority = {
 	color: string;
 };
 
+export type VerifiedSender = {
+	email: string;
+	name: string;
+	connection_id: string;
+};
+
+export type QuillSMTPInfo = {
+	configured: boolean;
+	verified_senders?: VerifiedSender[];
+	config_url?: string;
+	plugin_url?: string;
+};
+
 export type Importers = {
 	[key: string]: Importer;
 };
@@ -54,7 +68,7 @@ export type Importer = {
 	slug: string;
 	credentials: {
 		[key: string]: ImporterField;
-	},
+	};
 	is_integration: boolean;
 	is_active: boolean;
 	fields: {
@@ -85,6 +99,7 @@ export type MergeTagsGroup = {
 	name: string;
 	mergeTags: MergeTags;
 	triggers?: string[];
+	is_disabled?: boolean;
 };
 
 export type MergeTags = {
@@ -105,6 +120,7 @@ export type RulesGroup = {
 	rules: Rules;
 	key: string;
 	triggers?: string[];
+	is_disabled?: boolean;
 };
 
 export type Rules = {
@@ -167,6 +183,7 @@ export type Action = {
 			helperText?: string;
 		};
 	};
+	required_triggers?: string[];
 };
 
 export type ActionsGroup = {
@@ -180,7 +197,9 @@ export type ActionsGroup = {
 export type AutomationActions = {
 	[key: string]: {
 		label: string;
-		groups: ActionsGroup[];
+		groups: {
+			[key: string]: ActionsGroup;
+		};
 	};
 };
 

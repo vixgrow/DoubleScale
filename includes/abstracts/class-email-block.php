@@ -10,6 +10,9 @@
 namespace QuillCRM\Abstracts;
 
 use QuillCRM\Emails\Blocks\Email_Block_Interface;
+use QuillCRM\Managers\Merge_Tags_Manager;
+use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 
 /**
  * Email Block abstract class with common methods
@@ -19,21 +22,17 @@ abstract class Email_Block implements Email_Block_Interface {
 	/**
 	 * Process merge tags in content
 	 *
-	 * @param string $content Content with merge tags
-	 * @param array  $merge_tags Merge tag values
+	 * @param string                                    $content Content with merge tags
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string Processed content
 	 */
-	protected function process_merge_tags( $content, array $merge_tags ) {
-		if ( empty( $merge_tags ) || empty( $content ) ) {
+	protected function process_merge_tags( $content, $contact = null ) {
+		if ( empty( $content ) || ! $contact ) {
 			return $content;
 		}
 
-		foreach ( $merge_tags as $tag => $value ) {
-			$content = str_replace( '{' . $tag . '}', $value, $content );
-		}
-
-		// Clean up any unused merge tags
-		return preg_replace( '/\{[^\}]+\}/', '', $content );
+		// Use Merge_Tags_Manager to process merge tags
+		return Merge_Tags_Manager::instance()->process_merge_tags( $content, $contact );
 	}
 
 	/**

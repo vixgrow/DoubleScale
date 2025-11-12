@@ -46,6 +46,7 @@ export interface NewDealModalProps {
 	onClose: () => void;
 	onSuccess: () => void;
 	pipeline: any;
+	initialStageId?: number;
 }
 
 interface DealFormData {
@@ -95,6 +96,7 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 	children,
 	isSelected,
 	isPrevious,
+
 }) => {
 	const backgroundColor =
 		isSelected || isPrevious ? stage.color : '#DEE1E6';
@@ -163,6 +165,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	onClose,
 	onSuccess,
 	pipeline,
+	initialStageId
 }) => {
 	// const [form] = Form.useForm();
 	const [loading, setLoading] = useState(false);
@@ -227,6 +230,19 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 			});
 			return;
 		}
+
+		// Validate deal value
+		if (values.value !== undefined && values.value <= 0) {
+			createNotice?.({
+				type: 'error',
+				message: __(
+					`Deal value must be greater than zero`,
+					'quillcrm'
+				),
+			});
+			return;
+		}
+
 		// Ensure owner_id is set as fallback
 		if (!values.owner_id && defaultOwnerId) {
 			values.owner_id = defaultOwnerId;
@@ -251,13 +267,29 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 					'quillcrm'
 				),
 			});
+
+			// Reset form data before closing
+			setFormData({
+				title: '',
+				contact_id: '',
+				stage_id: '',
+				value: '',
+				source: '',
+				owner_id: '',
+				expected_close_date: { from: '', to: '' },
+				custom_fields: {},
+			});
+
+			// Close modal
 			onClose();
-			onSuccess();
+
+			// Refresh data to show the new deal in the UI
+			await onSuccess();
 		} catch (error: any) {
 			createNotice?.({
 				type: 'error',
 				message: error.message || __(
-					`Deal created successfully!`,
+					`Failed to create deal. Please try again.`,
 					'quillcrm'
 				),
 			});
@@ -327,14 +359,14 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	}, [currentUserId]);
 
 	useEffect(() => {
-		if (defaultStageId && visible) {
+		if (visible) {
 			setFormData((prev) => ({
-				...prev,
-				stage_id: defaultStageId,
-				owner_id: defaultOwnerId || prev.owner_id,
+			  ...prev,
+			  stage_id: initialStageId ?? defaultStageId,  // ← أهم حاجة
+			  owner_id: defaultOwnerId || prev.owner_id,
 			}));
-		}
-	}, [defaultStageId, defaultOwnerId, visible]);
+		  }
+	}, [initialStageId,defaultStageId, defaultOwnerId, visible]);
 
 	// Load initial contacts
 	const loadContacts = useCallback(async (searchTerm = '') => {
@@ -413,7 +445,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 				}
 			}}
 		>
-			<DialogContent className="w-full max-w-2xl max-h-[80vh] my-2 sm:mx-auto overflow-y-auto  p-8 rounded-[16px] ">
+			<DialogContent className="w-full max-w-3xl max-h-[80vh] my-2 sm:mx-auto overflow-y-auto  p-8 rounded-[16px] ">
 				<DialogHeader>
 					<DialogTitle className="!mb-0">
 						<CustomDialogHeader
@@ -816,8 +848,5 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 };
 
 
-
-
-// -----------------------------------
 
 

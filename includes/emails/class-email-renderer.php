@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Email Renderer
  *
@@ -10,6 +11,8 @@
 namespace QuillCRM\Emails;
 
 use QuillCRM\Models\Template_Model;
+use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Emails\Layouts\Layout_Handler_Registry;
 
@@ -17,6 +20,7 @@ use QuillCRM\Emails\Layouts\Layout_Handler_Registry;
  * Renderer for email templates
  */
 class Email_Renderer {
+
 	/**
 	 * Block registry instance
 	 *
@@ -35,17 +39,17 @@ class Email_Renderer {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->block_registry = Block_Registry::instance();
+		 $this->block_registry = Block_Registry::instance();
 	}
 
 	/**
 	 * Render email template
 	 *
-	 * @param int   $template_id Template ID
-	 * @param array $merge_tags Merge tags
+	 * @param int                                                                    $template_id Template ID
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	public function render_template( $template_id, $merge_tags = array() ) {
+	public function render_template( $template_id, $contact = null ) {
 		// Use the Template_Model to fetch the template
 		$template = Template_Model::find( $template_id );
 
@@ -70,12 +74,41 @@ class Email_Renderer {
 
 		// Get preview_text from template and process merge tags
 		$preview_text = ! empty( $template->preview_text ) ? $template->preview_text : '';
-		if ( ! empty( $preview_text ) && ! empty( $merge_tags ) ) {
-			$preview_text = Merge_Tags_Manager::instance()->process_merge_tags( $preview_text, $merge_tags );
+		if ( ! empty( $preview_text ) && $contact ) {
+			$preview_text = Merge_Tags_Manager::instance()->process_merge_tags( $preview_text, $contact );
 		}
 
 		// Generate HTML for email body
-		$html = $this->build_email_structure( $content, $global_settings, $merge_tags, $preview_text );
+		$html = $this->build_email_structure( $content, $global_settings, $contact, $preview_text );
+
+		return $html;
+	}
+
+	/**
+	 * Render builder content directly from builder data (without template ID)
+	 * Useful for email sequences and campaigns where content is stored in email_body field
+	 *
+	 * @param array                                                                  $builder_data Builder content data (sections, globalSettings, buttonSettings)
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
+	 * @param string                                                                 $preview_text Optional preview text
+	 * @param string                                                                 $footer_html Optional footer HTML to inject before </body> tag
+	 * @return string HTML output
+	 */
+	public function render_from_builder_data( $builder_data, $contact = null, $preview_text = '', $footer_html = '' ) {
+		if ( ! is_array( $builder_data ) ) {
+			return '';
+		}
+
+		// Get global settings from builder data
+		$global_settings = isset( $builder_data['globalSettings'] ) ? $builder_data['globalSettings'] : array();
+
+		// Process preview text if provided
+		if ( ! empty( $preview_text ) && $contact ) {
+			$preview_text = Merge_Tags_Manager::instance()->process_merge_tags( $preview_text, $contact );
+		}
+
+		// Generate HTML for email body
+		$html = $this->build_email_structure( $builder_data, $global_settings, $contact, $preview_text, $footer_html );
 
 		return $html;
 	}
@@ -83,13 +116,14 @@ class Email_Renderer {
 	/**
 	 * Build email HTML structure
 	 *
-	 * @param array  $content Template content
-	 * @param array  $global_settings Global email settings (canvas, background, etc.)
-	 * @param array  $merge_tags Merge tags
-	 * @param string $preview_text Preview text for email clients
+	 * @param array                                                                  $content Template content
+	 * @param array                                                                   $global_settings Global email settings (canvas, background, etc.)
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
+	 * @param string                                                                  $preview_text Preview text for email clients
+	 * @param string                                                                  $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string HTML output
 	 */
-	private function build_email_structure( $content, $global_settings, $merge_tags, $preview_text = '' ) {
+	private function build_email_structure( $content, $global_settings, $contact, $preview_text = '', $footer_html = '' ) {
 		// Extract button settings from content if available
 		if ( isset( $content['buttonSettings'] ) && is_array( $content['buttonSettings'] ) ) {
 			$this->button_settings = $content['buttonSettings'];
@@ -104,9 +138,9 @@ class Email_Renderer {
 		$background_position = isset( $global_settings['backgroundPosition'] ) ? $global_settings['backgroundPosition'] : 'center';
 
 		// Process background image through merge tags if present
-		if ( ! empty( $background_image ) ) {
+		if ( ! empty( $background_image ) && $contact ) {
 			error_log( 'QuillCRM Canvas - Original background image: ' . $background_image );
-			$background_image = Merge_Tags_Manager::instance()->process_merge_tags( $background_image, $merge_tags );
+			$background_image = Merge_Tags_Manager::instance()->process_merge_tags( $background_image, $contact );
 			error_log( 'QuillCRM Canvas - Processed background image: ' . $background_image );
 		} else {
 			error_log( 'QuillCRM Canvas - No background image found in global settings: ' . print_r( $global_settings, true ) );
@@ -120,10 +154,10 @@ class Email_Renderer {
 		if ( ! empty( $preview_text ) ) {
 			// Add hidden preheader text - this appears in email client previews but not in the email body
 			$preheader_html = '<div style="display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">'
-			. esc_html( $preview_text )
-			// Add invisible characters to push unwanted preview text out of view
-			. str_repeat( '&nbsp;&zwnj;', 50 )
-			. '</div>';
+				. esc_html( $preview_text )
+				// Add invisible characters to push unwanted preview text out of view
+				. str_repeat( '&nbsp;&zwnj;', 50 )
+				. '</div>';
 		}
 
 		// Start with proper email structure using tables for compatibility
@@ -210,7 +244,7 @@ class Email_Renderer {
 		if ( isset( $content['sections'] ) && is_array( $content['sections'] ) ) {
 			// Structure with explicit 'sections' property
 			foreach ( $content['sections'] as $section ) {
-				$html .= $this->render_section( $section, $merge_tags );
+				$html .= $this->render_section( $section, $contact );
 			}
 		} elseif ( is_array( $content ) ) {
 			// Check if this is an array of section objects
@@ -225,14 +259,14 @@ class Email_Renderer {
 			if ( $is_section_array ) {
 				// Content is an array of section objects (each with id, columns, styles)
 				foreach ( $content as $section ) {
-					$html .= $this->render_section( $section, $merge_tags );
+					$html .= $this->render_section( $section, $contact );
 				}
 			} else {
 				// Handle flat content structure (no sections) - wrap in a default section
 				$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">';
 				foreach ( $content as $block ) {
 					if ( isset( $block['type'] ) ) {
-						$html .= '<tr><td style="padding: 10px;">' . $this->render_block( $block, $merge_tags ) . '</td></tr>';
+						$html .= '<tr><td style="padding: 10px;">' . $this->render_block( $block, $contact ) . '</td></tr>';
 					}
 				}
 				$html .= '</table>';
@@ -245,7 +279,32 @@ class Email_Renderer {
 						</table>
 					</td>
 				</tr>
-			</table>
+			</table>';
+
+		// Inject footer HTML before closing </body> tag if provided
+		// Footer is injected here during rendering, but note that merge tags in the footer
+		// will be processed AFTER this method returns (in prepare_message_content)
+		if ( ! empty( $footer_html ) ) {
+			// Wrap footer in a centered table for proper email client compatibility
+			// Uses same canvas width and background as main email for consistency
+			$html .= '
+		<!-- Email Footer -->
+		<table role="presentation" class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: ' . esc_attr( $bg_color ) . ';">
+			<tr>
+				<td align="center" style="padding: 20px;">
+					<table role="presentation" class="email-container" width="' . esc_attr( $canvas_width ) . '" cellpadding="0" cellspacing="0" border="0" style="max-width: ' . esc_attr( $canvas_width ) . 'px;">
+						<tr>
+							<td style="padding: 10px 20px; text-align: center; font-size: 12px; color: #666; line-height: 1.5;">
+								' . $footer_html . '
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>';
+		}
+
+		$html .= '
 		</body>
 		</html>';
 
@@ -255,11 +314,11 @@ class Email_Renderer {
 	/**
 	 * Render a section
 	 *
-	 * @param array $section Section data
-	 * @param array $merge_tags Merge tags
+	 * @param array                                                                   $section Section data
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	private function render_section( $section, $merge_tags ) {
+	private function render_section( $section, $contact ) {
 		// Build section styles - convert to inline styles for email compatibility
 		$section_styles = array();
 		if ( isset( $section['styles'] ) ) {
@@ -333,7 +392,7 @@ class Email_Renderer {
 
 				// Render blocks in this column using the same logic as frontend
 				if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
-					$html .= $this->render_column_blocks( $column['blocks'], $merge_tags );
+					$html .= $this->render_column_blocks( $column['blocks'], $contact );
 				}
 
 				$html .= '</table>'; // Close inner blocks table
@@ -354,11 +413,11 @@ class Email_Renderer {
 	 * Render blocks in a column with template-aware layout handling
 	 * Uses the Layout Handler Registry pattern
 	 *
-	 * @param array $blocks Array of blocks
-	 * @param array $merge_tags Merge tags
+	 * @param array                                                                   $blocks Array of blocks
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	private function render_column_blocks( $blocks, $merge_tags ) {
+	private function render_column_blocks( $blocks, $contact ) {
 		$html     = '';
 		$i        = 0;
 		$registry = Layout_Handler_Registry::instance();
@@ -374,14 +433,14 @@ class Email_Renderer {
 				$html .= $handler->render(
 					$blocks,
 					$i,
-					function ( $block ) use ( $merge_tags ) {
-						return $this->render_block( $block, $merge_tags );
+					function ( $block ) use ( $contact ) {
+						return $this->render_block( $block, $contact );
 					}
 				);
 			} else {
 				// Regular block - render in single row
 				$html .= '<tr><td style="padding: 10px 0;">';
-				$html .= $this->render_block( $block, $merge_tags );
+				$html .= $this->render_block( $block, $contact );
 				$html .= '</td></tr>';
 				$i++;
 			}
@@ -393,11 +452,11 @@ class Email_Renderer {
 	/**
 	 * Render a block
 	 *
-	 * @param array $block Block data
-	 * @param array $merge_tags Merge tags
+	 * @param array                                                                   $block Block data
+	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
-	private function render_block( $block, $merge_tags ) {
+	private function render_block( $block, $contact ) {
 		if ( ! isset( $block['type'] ) ) {
 			return '<!-- Missing block type -->';
 		}
@@ -409,7 +468,7 @@ class Email_Renderer {
 		return $this->block_registry->render_block(
 			$block['type'],
 			isset( $block['props'] ) ? $block['props'] : array(),
-			$merge_tags
+			$contact
 		);
 	}
 
@@ -454,6 +513,5 @@ class Email_Renderer {
 
 		return array();
 	}
+
 }
-
-

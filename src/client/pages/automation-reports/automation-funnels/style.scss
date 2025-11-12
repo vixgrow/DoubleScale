@@ -1,84 +1,20 @@
 .qcrm-automation-reports__automation-funnels {
-	padding: 20px;
-	background: #f8f9fa;
-	min-height: 100vh;
+	background: white;
 
-	.qcrm-automation-reports__automation-funnels__header {
+	.reports-container {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 20px;
-		background: white;
-		padding: 20px;
-		border-radius: 8px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		flex-direction: column;
+		gap: 24px;
 
-		h1 {
-			margin: 0;
-			font-size: 24px;
-			font-weight: 600;
-			color: #333;
-		}
+		.report-card {
+			background: #F8F8F8;
+			border-radius: 8px;
+			border: 1px solid #DEE1E6;
+			overflow: hidden;
 
-		.funnel-info {
-			display: flex;
-			align-items: center;
-			gap: 10px;
-			font-size: 14px;
-			color: #666;
-
-			.re-apply-btn {
-				background: #007cba;
-				color: white;
-				border: none;
-				padding: 8px 16px;
-				border-radius: 4px;
-				font-size: 14px;
-				cursor: pointer;
-				transition: background-color 0.2s;
-
-				&:hover {
-					background: #005a87;
-				}
+			&__content {
+				padding: 0;
 			}
-		}
-	}
-
-	.tabs-container {
-		background: white;
-		border-radius: 8px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		overflow: hidden;
-
-		.tabs-header {
-			display: flex;
-			border-bottom: 1px solid #e1e5e9;
-
-			.tab-button {
-				background: none;
-				border: none;
-				padding: 16px 24px;
-				font-size: 16px;
-				font-weight: 500;
-				color: #666;
-				cursor: pointer;
-				transition: all 0.2s;
-				border-bottom: 3px solid transparent;
-
-				&:hover {
-					background: #f8f9fa;
-				}
-
-				&.active {
-					color: #007cba;
-					border-bottom-color: #007cba;
-					background: #f8f9fa;
-				}
-			}
-		}
-
-		.tab-content {
-			padding: 30px;
 		}
 	}
 
@@ -283,27 +219,21 @@
 				}
 
 				&:nth-child(2) {
-					background: linear-gradient(
-						135deg,
-						#f093fb 0%,
-						#f5576c 100%
-					);
+					background: linear-gradient(135deg,
+							#f093fb 0%,
+							#f5576c 100%);
 				}
 
 				&:nth-child(3) {
-					background: linear-gradient(
-						135deg,
-						#4facfe 0%,
-						#00f2fe 100%
-					);
+					background: linear-gradient(135deg,
+							#4facfe 0%,
+							#00f2fe 100%);
 				}
 
 				&:nth-child(4) {
-					background: linear-gradient(
-						135deg,
-						#43e97b 0%,
-						#38f9d7 100%
-					);
+					background: linear-gradient(135deg,
+							#43e97b 0%,
+							#38f9d7 100%);
 				}
 			}
 		}
@@ -349,22 +279,18 @@
 			}
 		}
 
-		.tabs-header {
-			flex-direction: column;
+		.reports-container {
+			gap: 16px;
 
-			.tab-button {
-				text-align: left;
-				border-bottom: none !important;
-				border-left: 3px solid transparent;
+			.report-card {
+				&__header {
+					padding: 16px 20px;
+				}
 
-				&.active {
-					border-left-color: #007cba;
+				&__content {
+					padding: 20px;
 				}
 			}
-		}
-
-		.tab-content {
-			padding: 20px;
 		}
 
 		.chart-report-content .funnel-chart .chart-container {

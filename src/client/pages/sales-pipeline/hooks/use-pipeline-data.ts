@@ -5,11 +5,6 @@ import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
- * External dependencies
- */
-import { debounce } from 'lodash';
-
-/**
  * Internal dependencies
  */
 import { handleApiError, ERROR_MESSAGES, ErrorInfo } from '../utils/error-handler';
@@ -42,7 +37,7 @@ interface UsePipelineDataReturn {
 
 export const usePipelineData = (
 	selectedPipelineId: number | null,
-	filters: Filters
+	filters?: Filters
 ): UsePipelineDataReturn => {
 	const [pipelines, setPipelines] = useState<Pipeline[]>([]);
 	const [deals, setDeals] = useState<Deal[]>([]);
@@ -81,7 +76,7 @@ export const usePipelineData = (
 		}
 	}, []);
 
-	// Fetch deals data with filters
+	// Fetch all deals for the pipeline
 	const fetchDeals = useCallback(async () => {
 		if (!selectedPipelineId) {
 			setDeals([]);
@@ -92,47 +87,49 @@ export const usePipelineData = (
 			const params = new URLSearchParams();
 			params.append('pipeline_id', selectedPipelineId.toString());
 
-			// Apply filters
-			if (filters.status !== 'all') {
-				params.append('status', filters.status);
+			// Add filter parameters if provided
+			if (filters) {
+				if (filters.search) {
+					params.append('search', filters.search);
+				}
+				if (filters.ownerId) {
+					params.append('owner_id', filters.ownerId.toString());
+				}
+				if (filters.status) {
+					params.append('status', filters.status);
+				}
+				if (filters.priority) {
+					params.append('priority', filters.priority);
+				}
+				// Expected close date range
+				if (filters.expectedCloseDateRange?.from) {
+					params.append('expected_close_from', filters.expectedCloseDateRange.from.toISOString().split('T')[0]);
+				}
+				if (filters.expectedCloseDateRange?.to) {
+					params.append('expected_close_to', filters.expectedCloseDateRange.to.toISOString().split('T')[0]);
+				}
+				// Created date range
+				if (filters.createdDateRange?.from) {
+					params.append('date_from', filters.createdDateRange.from.toISOString().split('T')[0]);
+				}
+				if (filters.createdDateRange?.to) {
+					params.append('date_to', filters.createdDateRange.to.toISOString().split('T')[0]);
+				}
+				// Value range
+				if (filters.valueRange?.min !== null && filters.valueRange?.min !== undefined) {
+					params.append('value_min', filters.valueRange.min.toString());
+				}
+				if (filters.valueRange?.max !== null && filters.valueRange?.max !== undefined) {
+					params.append('value_max', filters.valueRange.max.toString());
+				}
 			}
-
-			if (filters.search) {
-				params.append('search', filters.search);
-			}
-
-			if (filters.ownerId) {
-				params.append('owner_id', filters.ownerId.toString());
-			}
-
-			if (filters.dateRange.from) {
-				params.append(
-					'date_from',
-					filters.dateRange.from.toISOString().split('T')[0]
-				);
-			}
-
-			if (filters.dateRange.to) {
-				params.append(
-					'date_to',
-					filters.dateRange.to.toISOString().split('T')[0]
-				);
-			}
-
-			if (filters.priority) {
-				params.append('priority', filters.priority);
-			}
-
-			// Add pagination parameters
-			params.append('per_page', '100'); // Show more deals per page for Kanban
-			params.append('page', '1');
 
 			const response = await apiFetch({
 				path: `/qc/v1/deals?${params.toString()}`,
 				method: 'GET',
 			});
 
-			// Handle both array and paginated response
+			// Handle both array and wrapped response
 			const dealsData = Array.isArray(response)
 				? response
 				: (response as any)?.data || (response as any)?.items || [];
@@ -146,14 +143,8 @@ export const usePipelineData = (
 				ERROR_MESSAGES.LOAD_DEALS
 			);
 			setError(errorInfo);
-		} 
+		}
 	}, [selectedPipelineId, filters]);
-
-	// Debounced search to avoid too many API calls
-	const debouncedFetchDeals = useMemo(
-		() => debounce(fetchDeals, 300),
-		[fetchDeals]
-	);
 
 	// Initial data load
 	useEffect(() => {
@@ -165,19 +156,13 @@ export const usePipelineData = (
 
 		loadInitialData();
 	}, [fetchPipelines]);
-	
 
-	// Fetch deals when pipeline or filters change
+	// Fetch deals when pipeline changes
 	useEffect(() => {
 		if (selectedPipelineId) {
-			debouncedFetchDeals();
+			fetchDeals();
 		}
-
-		// Cleanup debounced function
-		return () => {
-			debouncedFetchDeals.cancel();
-		};
-	}, [selectedPipelineId, debouncedFetchDeals]);
+	}, [selectedPipelineId, fetchDeals]);
 
 	// Optimistic update function for deals
 	const updateDealOptimistically = useCallback(

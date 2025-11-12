@@ -386,7 +386,7 @@ export const useCustomFields = (scope: string = 'contact') => {
 
 	useEffect(() => {
 		fetchGroups();
-	}, [isUpdated]);
+	}, [scope, isUpdated]);
 
 	return {
 		...state,

@@ -16,6 +16,7 @@ import {
     DialogHeader,
     DialogOverlay,
     DialogTitle,
+    DialogPortal,
 } from '@/components/ui/dialog';
 import {
     CustomDialogHeader,
@@ -97,7 +98,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                     data: {
                         title,
                         note,
-                        type,
+                        type : 'note',
                         contact_id,
                     },
                 })) as Note;
@@ -112,7 +113,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                     data: {
                         title,
                         note,
-                        type,
+                        type : 'note',
                         contact_id,
                     },
                 })) as Note;
@@ -131,7 +132,8 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-            <DialogOverlay className="z-[150200]" />
+            <DialogPortal>
+            <DialogOverlay className="z-[150200] h-screen" />
             <DialogContent className="max-w-[500px] z-[150200]">
                 <DialogHeader>
                     <DialogTitle>
@@ -149,7 +151,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                                         'quillcrm'
                                     )
                             }
-                            icon={<GradientNotesIcon />}
+                            icon={<GradientNotesIcon width={24} height={24} />}
                         />
                     </DialogTitle>
                 </DialogHeader>
@@ -168,7 +170,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                         status={errors.title ? 'error' : undefined}
                         helperText={errors.title}
                     />
-                    <Field
+                    {/* <Field
                         label={__('Type', 'quillcrm')}
                         placeholder={__('Select type', 'quillcrm')}
                         value={type}
@@ -178,7 +180,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                             { label: __('Note', 'quillcrm'), value: 'note' },
                             { label: __('Reminder', 'quillcrm'), value: 'reminder' },
                         ]}
-                    />
+                    /> */}
                     <Field
                         label={__('Note', 'quillcrm')}
                         placeholder={__('Enter note', 'quillcrm')}
@@ -210,6 +212,7 @@ const NoteDialog: React.FC<NoteDialogProps> = ({
                     </Button>
                 </DialogFooter>
             </DialogContent>
+            </DialogPortal>
         </Dialog>
     );
 };

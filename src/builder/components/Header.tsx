@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PreviewIcon, RedoIcon, UndoIcon } from '@/components/icons';
+import { RedoIcon, UndoIcon } from '@/components/icons';
 import BreadcrumbComponent from '@/components/breadcrumb';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_KEY } from '../../stores/email-builder/constants';
@@ -12,10 +11,26 @@ import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import { useTemplateActions } from '../hooks/useTemplateActions';
 import { SaveStatusIndicator } from './SaveStatusIndicator';
 import { SaveAsTemplateDialog } from './SaveAsTemplateDialog';
+import { BuilderData } from '../index';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+	onSave?: (data: BuilderData) => Promise<void>;
+	onClose?: () => void;
+	autoSaveEnabled?: boolean;
+	autoSaveInterval?: number;
+	onTemplatesSaved?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({
+	onSave,
+	onClose,
+	autoSaveEnabled = true,
+	autoSaveInterval = 10000,
+	onTemplatesSaved,
+}) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const { createNotice } = useDispatch('quillcrm/core');
 	const campaign = useSelect(
 		(select: any) => select('quillcrm/campaign').getCampaign(),
 		[]
@@ -23,16 +38,45 @@ const Header: React.FC = () => {
 
 	const canUndo = useSelect((select) => select(STORE_KEY).canUndo(), []);
 	const canRedo = useSelect((select) => select(STORE_KEY).canRedo(), []);
+	const sections = useSelect((select) => select(STORE_KEY).getSections(), []);
 
 	const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
 
+	// Check if builder is empty
+	const isBuilderEmpty =
+		!sections?.length ||
+		sections.every(
+			(section) =>
+				!section.columns?.length ||
+				section.columns.every((column) => !column.blocks?.length)
+		);
+
+	// Centralized notice and guard
+	const showEmptyBuilderNotice = () =>
+		createNotice({
+			type: 'error',
+			message: __(
+				'The builder cannot be empty. Please add at least one block before saving.',
+				'quillcrm'
+			),
+		});
+
+	const ensureNotEmptyOrNotify = (): boolean => {
+		if (isBuilderEmpty) {
+			showEmptyBuilderNotice();
+			return false;
+		}
+		return true;
+	};
+
 	const { saveAsTemplate, isSaving: isSavingTemplate } = useTemplateActions();
 
-	// Use auto-save hook
+	// Use auto-save hook with custom save callback if provided
 	const { isSaving, lastSaved, hasUnsavedChanges, error, save } = useAutoSave(
 		{
-			interval: 10000, // Auto-save every 10 seconds
-			enabled: true,
+			interval: autoSaveInterval,
+			enabled: autoSaveEnabled,
+			customSaveCallback: onSave,
 		}
 	);
 
@@ -41,38 +85,40 @@ const Header: React.FC = () => {
 		hasUnsavedChanges,
 	});
 
-	const { saveCampaignStep } = useDispatch('quillcrm/campaign');
-
 	const handleSaveAndContinue = async () => {
-		if (!campaign) {
-			return;
-		}
+		if (!ensureNotEmptyOrNotify()) return;
 
-		const { success, templateId: savedTemplateId } = await save();
-		if (success && savedTemplateId) {
-			// Save template ID to campaign before continuing
-			await saveCampaignStep('template', {
-				template_id: savedTemplateId,
-			});
+		const { success } = await save();
+		if (success && campaign) {
 			navigate(getToLink(`campaigns/${campaign.id}/contacts`));
 		}
 	};
 
-	const handleSaveAsTemplate = async (templateName: string) => {
-		await saveAsTemplate(templateName);
+	const handleSaveAsTemplate = async (
+		templateName: string,
+		thumbnailUrl?: string,
+		templateId?: number
+	) => {
+		await saveAsTemplate(templateName, thumbnailUrl, templateId);
 		setIsTemplateDialogOpen(false);
+
+		// Trigger templates refresh in sidebar
+		if (onTemplatesSaved) {
+			onTemplatesSaved();
+		}
 	};
 	return (
 		<div className="flex items-center justify-between px-4 py-2 bg-primary-foreground border-b border-input flex-shrink-0">
 			<div className="flex items-center align-center gap-2">
-				<X className="h-5 w-5 text-primary" />
-				<BreadcrumbComponent
-					items={[
-						{ label: __('Create Campaign', 'quillcrm') },
-						{ label: __('Standard Campaign', 'quillcrm') },
-						{ label: __('Email Template', 'quillcrm') },
-					]}
-				/>
+				{campaign && (
+					<BreadcrumbComponent
+						items={[
+							{ label: __('Create Campaign', 'quillcrm') },
+							{ label: __('Standard Campaign', 'quillcrm') },
+							{ label: __('Email Template', 'quillcrm') },
+						]}
+					/>
+				)}
 			</div>
 			<div className="flex items-center gap-3">
 				<SaveStatusIndicator
@@ -101,32 +147,58 @@ const Header: React.FC = () => {
 					<RedoIcon />
 				</Button>
 				<div className="h-6 w-px bg-border" />
-				<Button
-					variant="outline"
-					className="px-3 text-muted-foreground"
-				>
-					<PreviewIcon />
-					{__('Preview & test', 'quillcrm')}
-				</Button>
-				<Button
-					variant="outline"
-					className="px-3"
-					onClick={() => setIsTemplateDialogOpen(true)}
-					disabled={isSavingTemplate}
-					title={__('Save as template', 'quillcrm')}
-				>
-					{__('Save as Template', 'quillcrm')}
-				</Button>
-				<Button
-					variant="default"
-					className="px-3"
-					onClick={handleSaveAndContinue}
-					disabled={isSaving}
-				>
-					{isSaving
-						? __('Saving...', 'quillcrm')
-						: __('Save & Continue', 'quillcrm')}
-				</Button>
+				{campaign && (
+					<>
+						<Button
+							variant="secondary"
+							className="px-3"
+							onClick={() => setIsTemplateDialogOpen(true)}
+							disabled={isSavingTemplate || isBuilderEmpty}
+							title={__('Save as template', 'quillcrm')}
+						>
+							{__('Save as Template', 'quillcrm')}
+						</Button>
+
+						<Button
+							variant="default"
+							className="px-3"
+							onClick={handleSaveAndContinue}
+							disabled={isSaving || isBuilderEmpty}
+						>
+							{isSaving
+								? __('Saving...', 'quillcrm')
+								: __('Save & choose recipients', 'quillcrm')}
+						</Button>
+					</>
+				)}
+
+				{onSave && (
+					<>
+						{onClose && (
+							<Button
+								variant="outline"
+								className="px-3"
+								onClick={onClose}
+								disabled={isSaving}
+							>
+								{__('Cancel', 'quillcrm')}
+							</Button>
+						)}
+						<Button
+							variant="default"
+							className="px-3"
+							onClick={() => {
+								if (!ensureNotEmptyOrNotify()) return;
+								save();
+							}}
+							disabled={isSaving || isBuilderEmpty}
+						>
+							{isSaving
+								? __('Saving...', 'quillcrm')
+								: __('Save', 'quillcrm')}
+						</Button>
+					</>
+				)}
 			</div>
 
 			{/* Save as Template Dialog */}

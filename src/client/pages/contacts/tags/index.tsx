@@ -9,7 +9,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * External dependencies
  */
-import React, { forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 
 /**
  * Internal dependencies
@@ -21,7 +21,7 @@ import type {
 	DataTableConfig,
 	NoticeMessage,
 } from '@quillcrm/client';
-import { NoticeBanner } from '@quillcrm/components';
+import { NoticeBanner, NoData, GradientTagIcon } from '@quillcrm/components';
 import { isEmpty } from 'validator';
 import { DataTable } from '@/components/ui/data-table';
 import { TagsDialog } from './tags-dialog';
@@ -45,6 +45,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const [page, setPage] = useState<number>(1);
 	const [keyword, setKeyword] = useState<string>('');
 	const [totalRecords, setTotalRecords] = useState<number>(0);
+	const [hasRecords, setHasRecords] = useState<boolean>(false);
 	const [visible, setVisible] = useState<boolean>(false);
 	const [selectedTag, setSelectedTag] = useState<ContactTag | null>(null);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -58,6 +59,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 	// Notice state
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
@@ -76,6 +78,13 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 	const closeNotice = () => {
 		setNotice(null);
 	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	useImperativeHandle(ref, () => ({
 		openCreateTagModal: () => {
@@ -113,6 +122,7 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 
 			setTags(response.data);
 			setTotalRecords(response.total);
+			setHasRecords((response.total_count || 0) > 0);
 		} catch (error: any) {
 			showNotice('error', error.message);
 		} finally {
@@ -277,20 +287,42 @@ const Tags = forwardRef<TagsRef, TagsProps>(({ activeTab }, ref) => {
 		<div className="qcrm-contacts-tags-list">
 			{/* Notice Banner */}
 			{notice && (
-				<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
 			)}
 
-			<DataTable
-				columns={columns}
-				data={tags}
-				activeTab={activeTab}
-				config={tableConfig}
-				showPagination={false}
-				initialPageSize={perPage}
-				setPage={setPage}
-				loading={loading}
-			/>
-			<DataTablePagination table={serverSideTable} />
+			{loading || hasRecords ? (
+				<>
+					<DataTable
+						columns={columns}
+						data={tags}
+						activeTab={activeTab}
+						config={tableConfig}
+						showPagination={false}
+						initialPageSize={perPage}
+						setPage={setPage}
+						loading={loading}
+					/>
+					<DataTablePagination table={serverSideTable} />
+				</>
+			) : (
+				<NoData
+					icon={<GradientTagIcon width={120} height={120} />}
+					title={__('No tags yet', 'quillcrm')}
+					subtitle={__(
+						'Get started by creating your first tag to organize your contacts',
+						'quillcrm'
+					)}
+					buttonLabel={__('Create Tag', 'quillcrm')}
+					onClick={() => {
+						setSelectedTag(null);
+						setTag({
+							name: '',
+							description: '',
+						});
+						setVisible(true);
+					}}
+				/>
+			)}
 
 			<TagsDialog
 				visible={visible}

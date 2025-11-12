@@ -58,10 +58,7 @@ class Deals_Table extends Migration {
 			INDEX idx_stage_id (stage_id),
 			INDEX idx_owner_id (owner_id),
 			INDEX idx_status (status),
-			INDEX idx_expected_close_date (expected_close_date),
-			CONSTRAINT fk_deals_contact_id FOREIGN KEY (contact_id) REFERENCES ' . $GLOBALS['wpdb']->prefix . 'quillcrm_contacts(id) ON DELETE CASCADE,
-			CONSTRAINT fk_deals_pipeline_id FOREIGN KEY (pipeline_id) REFERENCES ' . $GLOBALS['wpdb']->prefix . 'quillcrm_pipelines(id) ON DELETE CASCADE,
-			CONSTRAINT fk_deals_stage_id FOREIGN KEY (stage_id) REFERENCES ' . $GLOBALS['wpdb']->prefix . 'quillcrm_pipeline_stages(id) ON DELETE CASCADE';
+			INDEX idx_expected_close_date (expected_close_date)';
 
 		return $query;
 	}

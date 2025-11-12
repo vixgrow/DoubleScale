@@ -3,7 +3,7 @@ import { useState, useEffect } from '@wordpress/element';
 import './style.scss';
 import Select from 'react-select';
 import { isObject } from 'lodash';
-import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { UserService } from '../../services/user-service';
 
 interface DealOwnerChangeProps {
@@ -66,9 +66,6 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 		fetchUsers();
 	}, []);
 
-	// random id
-	const id = Math.random().toString(36).substring(2, 15);
-
 	// Determine if current condition is "any-value" or a specific condition
 	const isAnyValue =
 		value?.condition === anyValue ||
@@ -96,9 +93,9 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 			onChange({
 				condition:
 					value?.condition &&
-					conditionOptions.some(
-						(opt) => opt.value === value?.condition
-					)
+						conditionOptions.some(
+							(opt) => opt.value === value?.condition
+						)
 						? value?.condition
 						: conditionOptions[0].value,
 				owner_id:
@@ -111,30 +108,20 @@ const DealOwnerChange = ({ value, onChange }: DealOwnerChangeProps) => {
 		<>
 			{/* Radio buttons to choose between any-value and specific-value */}
 			<div className="mb-3">
-				<div className="flex gap-4">
-					<label className="flex items-center gap-2">
-						<Input
-							type="radio"
-							name={`owner-type-${id}`}
-							value={anyValue}
-							checked={radioValue === anyValue}
-							onChange={(e) => handleRadioChange(e.target.value)}
-							className="form-radio"
-						/>
+				<RadioGroup
+					value={radioValue}
+					onValueChange={handleRadioChange}
+					className="flex gap-4"
+				>
+					<label className="flex items-center gap-2 cursor-pointer text-[#333333]">
+						<RadioGroupItem value={anyValue} />
 						<span>{labelForAnyOwner}</span>
 					</label>
-					<label className="flex items-center gap-2">
-						<Input
-							type="radio"
-							name={`owner-type-${id}`}
-							value={specificValue}
-							checked={radioValue === specificValue}
-							onChange={(e) => handleRadioChange(e.target.value)}
-							className="form-radio"
-						/>
+					<label className="flex items-center gap-2 cursor-pointer text-[#333333]">
+						<RadioGroupItem value={specificValue} />
 						<span>{labelForSpecificOwner}</span>
 					</label>
-				</div>
+				</RadioGroup>
 			</div>
 
 			{/* Show condition selector and value input only for specific-value */}

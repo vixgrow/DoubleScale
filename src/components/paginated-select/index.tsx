@@ -33,7 +33,7 @@ interface ApiResponse {
 }
 
 interface Props {
-	value: number[];
+	value?: number[];
 	onChange: (value: number[]) => void;
 	endpoint: string; // e.g., '/qc/v1/lists' or '/qc/v1/tags'
 	placeholder: string;
@@ -172,7 +172,7 @@ const PaginatedSelect = ({
 
 	// Load initial selected items
 	useEffect(() => {
-		if (value?.length) {
+		if (Array.isArray(value) && value.length > 0) {
 			fetchItems('', value).then(({ options }) => {
 				setSavedItems(
 					options.map(
@@ -219,9 +219,10 @@ const PaginatedSelect = ({
 							value={null}
 							onChange={(val: SelectOption | null) => {
 								if (!val || val.value < 0) return; // Ignore loading indicators
-								if (value.includes(val.value)) return;
+								const currentValue = Array.isArray(value) ? value : [];
+								if (currentValue.includes(val.value)) return;
 
-								const newItems = [...value, val.value];
+								const newItems = [...currentValue, val.value];
 								onChange(newItems);
 							}}
 							onInputChange={handleInputChange}
@@ -272,7 +273,7 @@ const PaginatedSelect = ({
 								),
 							}}
 						/>
-						{value && value.length > 0 && (
+						{Array.isArray(value) && value.length > 0 && (
 							<div className="flex gap-[10px] flex-wrap">
 								{value.map((item_id) => {
 									const item = savedItems.find(
@@ -285,7 +286,8 @@ const PaginatedSelect = ({
 											key={item_id}
 											label={item.name}
 											onClose={() => {
-												const newItems = value.filter(
+												const currentValue = Array.isArray(value) ? value : [];
+												const newItems = currentValue.filter(
 													(id) => id !== item_id
 												);
 												onChange(newItems);

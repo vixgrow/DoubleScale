@@ -75,6 +75,13 @@ class API extends Integration_API {
 	 * @return array|WP_Error
 	 */
 	public function send_sms( $data ) {
+		if ( empty( $this->phone_number ) ) {
+			return array(
+				'success' => false,
+				'error'   => __( 'Twilio phone number not configured. Please add your Twilio phone number in Settings > Integrations > Twilio.', 'quillcrm' ),
+			);
+		}
+
 		$data['From'] = $this->phone_number;
 		return $this->post( 'Accounts/' . $this->account_sid . '/Messages.json', $data );
 	}
@@ -87,14 +94,21 @@ class API extends Integration_API {
 	 * @return array|WP_Error
 	 */
 	public function send_whatsapp( $data ) {
+		if ( empty( $this->phone_number ) ) {
+			return array(
+				'success' => false,
+				'error'   => __( 'Twilio phone number not configured. Please add your Twilio phone number in Settings > Integrations > Twilio.', 'quillcrm' ),
+			);
+		}
+
 		// WhatsApp messages require "whatsapp:" prefix
 		$data['From'] = 'whatsapp:' . $this->phone_number;
-		
+
 		// Ensure To number has whatsapp: prefix if not already present
 		if ( strpos( $data['To'], 'whatsapp:' ) !== 0 ) {
 			$data['To'] = 'whatsapp:' . $data['To'];
 		}
-		
+
 		return $this->post( 'Accounts/' . $this->account_sid . '/Messages.json', $data );
 	}
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Abstract Action
  *
@@ -19,6 +20,7 @@ use QuillCRM\Managers\Actions_Manager;
  * Action class
  */
 abstract class Action {
+
 
 	/**
 	 * Action Name
@@ -83,29 +85,36 @@ abstract class Action {
 	 */
 	public $is_integration = false;
 
-    /**
-     * Instances
-     * 
-     * @var array
-     * 
-     * @since 1.0.0
-     */
-    private static $instances = [];
+	/**
+	 * Instances
+	 *
+	 * @var array
+	 *
+	 * @since 1.0.0
+	 */
+	private static $instances = array();
 
-    /**
-     * Get Instance
-     *
-     * @since 1.0.0
-     *
-     * @return Action
-     */
-    public static function instance() {
-        $class = get_called_class();
-        if (!isset(self::$instances[$class])) {
-            self::$instances[$class] = new static();
-        }
-        return self::$instances[$class];
-    }
+	/**
+	 * Required Triggers
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array();
+
+	/**
+	 * Get Instance
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Action
+	 */
+	public static function instance() {
+		 $class = get_called_class();
+		if ( ! isset( self::$instances[ $class ] ) ) {
+			self::$instances[ $class ] = new static();
+		}
+		return self::$instances[ $class ];
+	}
 
 
 	/**
@@ -116,7 +125,7 @@ abstract class Action {
 	private function __construct() {
 		$this->attributes         = $this->get_attributes_schema();
 		$this->merge_tags_manager = Merge_Tags_Manager::instance();
-		add_action('init', array($this, 'register'));
+		add_action( 'init', array( $this, 'register' ) );
 	}
 
 	/**
@@ -125,7 +134,6 @@ abstract class Action {
 	 * @since 1.0.0
 	 */
 	public function register() {
-
 		Actions_Manager::instance()->register( $this );
 	}
 

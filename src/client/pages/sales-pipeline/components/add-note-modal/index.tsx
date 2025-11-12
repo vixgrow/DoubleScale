@@ -45,6 +45,8 @@ interface AddNoteModalProps {
 	onSuccess: () => void;
 	dealId: number;
 	dealTitle?: string;
+	editMode?: boolean;
+	activity?: any;
 }
 const noteSchema = z.object({
 	// dealTitle: z.string().optional(),
@@ -66,9 +68,11 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 	onSuccess,
 	dealId,
 	dealTitle,
+	editMode = false,
+	activity,
 }) => {
 	const [loading, setLoading] = useState(false);
-	const { addNote } = useActivityOperations();
+	const { addNote, updateActivity } = useActivityOperations();
 	const dispatch = useDispatch('quillcrm/core');
 	const createNotice = dispatch?.createNotice;
 
@@ -80,14 +84,33 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 		},
 	});
 
+	// Load existing activity data when in edit mode
+	useEffect(() => {
+		if (editMode && activity && visible) {
+			form.reset({
+				note: activity.data?.content || '',
+			});
+		} else if (!visible) {
+			form.reset({ note: '' });
+		}
+	}, [editMode, activity, visible, form]);
+
 	const handleSubmitForm = async (values: { note: string }) => {
 		setLoading(true);
 		try {
-			await addNote(dealId, values.note);
-			createNotice?.({
-				type: 'success',
-				message: __(`Deal "Note added successfully!`, 'quillcrm'),
-			});
+			if (editMode && activity) {
+				await updateActivity(activity.id, 'note_added', values.note);
+				createNotice?.({
+					type: 'success',
+					message: __('Note updated successfully!', 'quillcrm'),
+				});
+			} else {
+				await addNote(dealId, values.note);
+				createNotice?.({
+					type: 'success',
+					message: __('Note added successfully!', 'quillcrm'),
+				});
+			}
 			form.reset();
 			onSuccess();
 			onClose();
@@ -95,7 +118,7 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 			const err = error as Error;
 			createNotice?.({
 				type: 'error',
-				message: err.message || __('Failed to add note', 'quillcrm'),
+				message: err.message || __(editMode ? 'Failed to update note' : 'Failed to add note', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);
@@ -118,7 +141,7 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 				<DialogHeader>
 					<DialogTitle className="!mb-0">
 						<CustomDialogHeader
-							title={__('Add Note', 'quillcrm')}
+							title={editMode ? __('Edit Note', 'quillcrm') : __('Add Note', 'quillcrm')}
 							subtitle=""
 							icon={<NoteAddIcon />}
 						/>
@@ -175,8 +198,8 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-md font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
 							>
 								{loading
-									? __('Adding...', 'quillcrm')
-									: __('Add Note', 'quillcrm')}
+									? (editMode ? __('Updating...', 'quillcrm') : __('Adding...', 'quillcrm'))
+									: (editMode ? __('Update Note', 'quillcrm') : __('Add Note', 'quillcrm'))}
 							</Button>
 						</div>
 					</form>

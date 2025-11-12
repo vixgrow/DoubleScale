@@ -8,6 +8,8 @@ import { useMemo } from '@wordpress/element';
  * External dependencies
  */
 import { useDroppable } from '@dnd-kit/core';
+import { Tooltip } from 'antd';
+import { AlertCircle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -22,7 +24,9 @@ import { PlusIcon } from 'lucide-react';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import WeightedIcon from '@quillcrm/components/icons/weighted-icon';
 import { DealCardShimmer } from '../deal-card/DealCardShimmer';
-import React from 'react';
+import React, { useState } from 'react';
+import { NewDealModal } from '../new-deal-modal';
+import { formatCurrency } from '../../utils/currency';
 
 interface PipelineColumnProps {
 	stage: {
@@ -45,6 +49,10 @@ interface PipelineColumnProps {
 	index: number;
 	totalStages: number;
 	loading?: boolean;
+	pipeline?: any;
+	selectMode?: boolean;
+	selectedDealIds?: number[];
+	toggleDealSelection?: (dealId: number) => void;
 }
 
 export const PipelineColumn: React.FC<PipelineColumnProps> = ({
@@ -62,7 +70,13 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	onDealScheduleMeeting,
 	onDealLogEmail,
 	loading = false,
+	pipeline,
+	selectMode = false,
+	selectedDealIds = [],
+	toggleDealSelection,
 }) => {
+	const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
+	const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
 	const { setNodeRef: setDroppableRef, isOver: isDropOver } = useDroppable({
 		id: `stage-${stage.id}`,
 		data: {
@@ -71,6 +85,19 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 			stageName: stage.name,
 		},
 	});
+
+	// Get currency code from deals (use first deal's currency, or USD as fallback)
+	const { currencyCode, hasMixedCurrencies, uniqueCurrencies } = useMemo(() => {
+		if (deals.length === 0) return { currencyCode: 'USD', hasMixedCurrencies: false, uniqueCurrencies: [] };
+		// Get unique currencies in this column
+		const currencies = [...new Set(deals.map(d => d.currency))];
+		// If all deals use same currency, use that; otherwise default to first deal's currency
+		return {
+			currencyCode: currencies.length === 1 ? currencies[0] : deals[0].currency,
+			hasMixedCurrencies: currencies.length > 1,
+			uniqueCurrencies: currencies,
+		};
+	}, [deals]);
 
 	// Calculate column statistics
 	const columnStats = useMemo(() => {
@@ -90,20 +117,19 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 		};
 	}, [deals, stage.win_probability]);
 
-
 	const isFirst = index === 0;
 	const isLast = index === totalStages - 1;
 
 	return (
 		<div
 			ref={setDroppableRef}
-			className={`pipeline-column min-w-[400px] flex flex-col flex-1 ${isDropOver ? 'drop-target' : ''} ${isOver ? 'drag-over' : ''}`}
+			className={`pipeline-column min-w-[360px] flex flex-col flex-1 ${isDropOver ? 'drop-target' : ''} ${isOver ? 'drag-over' : ''}`}
 		>
 			{/* Column Header */}
 
 			<div
 				className="column-header h-32  relative rounded-t-[16px] "
-				style={{ backgroundColor:stage.color }}
+				style={{ backgroundColor: stage.color }}
 			>
 				{isFirst && (
 					<div
@@ -147,7 +173,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 				)}
 
 				<div
-					className={`${index === 0 ? 'left-0' : 'left-7'} absolute top-0 w-full h-full p-4 z-10 flex flex-col gap-4`}
+					className={`${index === 0 ? 'left-0' : 'left-5'} absolute  w-full h-full p-3  z-10 flex flex-col `}
 				>
 					<div
 						className={`flex justify-between ${index !== 0 ? 'px-5' : ''}`}
@@ -166,36 +192,70 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 								<WinTagIcon />
 							</div>
 						</div>
-						<PlusIcon style={{ color: '#1E3A8A' }} />
+						<PlusIcon
+							style={{ color: '#1E3A8A', cursor:'pointer' }}
+							onClick={() => {
+								setSelectedStageId(stage.id);
+								setIsNewDealModalOpen(true);
+							}}
+						/>
 					</div>
 
 					<div
-						className={`absolute bottom-3 ${index !== 0 ? 'left-2' : 'left-3'} flex items-center gap-6 z-20`}
+						className={`absolute bottom-3  flex justify-between px-2 gap-6 items-center z-20`}
 					>
 						{/* Total Value */}
-						<div className="flex items-center gap-1">
-							<DealValueIcon />
+						<div className="flex  gap-1 items-center">
+							{/* <DealValueIcon /> */}
 							<span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
 								{columnStats.totalDeals === 1
 									? __('Deal value:', 'quillcrm')
 									: __('Deals value:', 'quillcrm')}
 							</span>
 							<span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
-								${columnStats.totalValue}
-								{columnStats.totalValue ? 'K' : ''}
+								{formatCurrency(columnStats.totalValue, currencyCode)}
 							</span>
+							{hasMixedCurrencies && (
+								<Tooltip
+									title={__(
+										`Mixed currencies detected (${uniqueCurrencies.join(', ')}). Total is approximate and not currency-converted.`,
+										'quillcrm'
+									)}
+									placement="top"
+								>
+									<AlertCircle
+										size={16}
+										className="text-orange-500 cursor-help"
+										style={{ minWidth: '16px' }}
+									/>
+								</Tooltip>
+							)}
 						</div>
 
 						{/* Weighted Value */}
-						<div className="flex items-center gap-1">
-							<WeightedIcon />
+						<div className="flex  gap-1 items-center">
+							{/* <WeightedIcon /> */}
 							<span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
 								{__('Weighted:', 'quillcrm')}
 							</span>
 							<span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
-								${columnStats.weightedValue.toLocaleString()}
-								{columnStats.weightedValue ? 'K' : ''}
+								{formatCurrency(columnStats.weightedValue, currencyCode)}
 							</span>
+							{hasMixedCurrencies && (
+								<Tooltip
+									title={__(
+										`Mixed currencies detected (${uniqueCurrencies.join(', ')}). Weighted total is approximate.`,
+										'quillcrm'
+									)}
+									placement="top"
+								>
+									<AlertCircle
+										size={16}
+										className="text-orange-500 cursor-help"
+										style={{ minWidth: '16px' }}
+									/>
+								</Tooltip>
+							)}
 						</div>
 					</div>
 				</div>
@@ -212,16 +272,14 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 				data-stage-id={stage.id}
 			>
 				{loading ? (
-					// Show shimmer cards while loading
+				
 					<div className="">
 						{Array.from({ length: 3 }).map((_, shimmerIndex) => (
 							<DealCardShimmer
-								key={`shimmer-${shimmerIndex}`}
+								key={`shimmer-${stage.id}-${shimmerIndex}`}
 								style={
 									{
 										'--stage-color': stage.color,
-										marginBottom:
-											shimmerIndex < 2 ? '12px' : '0',
 									} as React.CSSProperties
 								}
 							/>
@@ -229,14 +287,13 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 					</div>
 				) : deals.length === 0 ? (
 					<div className=" flex justify-center items-center flex-col text-center h-full ">
-						
 						<span className=" block my-2">
 							<NoDealsIcon />
 						</span>
-						<p className=" my-2 font-[inter] text-lg font-bold leading-7 tracking-[-.5px] text-[#09090B]">
+						<p className=" my-2  text-lg font-bold leading-7 tracking-[-.5px] text-[#09090B]">
 							{__('No deals in this stage', 'quillcrm')}
 						</p>
-						<small className=" text-base font-normal leading-[26px] tracking-[-.5px] text-[#777]">
+						<small className=" text-base  font-normal leading-[26px] tracking-[-.5px] text-[#777]">
 							{__('Drag deals here to move them to', 'quillcrm')}{' '}
 							"{stage.name}"
 						</small>
@@ -268,6 +325,9 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 									}
 									stageColor={stage.color}
 									stageProbability={stage.win_probability}
+									selectMode={selectMode}
+									isSelected={selectedDealIds.includes(deal.id)}
+									onToggleSelect={() => toggleDealSelection?.(deal.id)}
 									style={
 										{
 											'--stage-color': stage.color,
@@ -285,14 +345,21 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 			</div>
 
 			{/* Drop Indicator */}
-			{isDropOver && (
+			{/* {isDropOver && (
 				<div className="drop-indicator">
 					<div className="drop-indicator-line" />
 					<span className="drop-indicator-text">
 						{__('Drop here to move to', 'quillcrm')} "{stage.name}"
 					</span>
 				</div>
-			)}
+			)} */}
+			<NewDealModal
+				visible={isNewDealModalOpen}
+				onClose={() => setIsNewDealModalOpen(false)}
+				onSuccess={() => setIsNewDealModalOpen(false)}
+				pipeline={pipeline}
+				initialStageId={selectedStageId ?? undefined}
+			/>
 		</div>
 	);
 };

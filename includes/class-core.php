@@ -58,6 +58,9 @@ class Core {
 			'quillcrm_deal_owner'  => Permissions::is_deal_owner(),
 		);
 
+		// Get QuillSMTP connection info
+		$quillsmtp_info = self::get_quillsmtp_connection_info();
+
 		wp_add_inline_script(
 			'qcrm-config',
 			'qcrm.config.setBlogName("' . get_bloginfo( 'name' ) . '");' .
@@ -83,7 +86,55 @@ class Core {
 				'qcrm.config.setImporters( ' . wp_json_encode( Importers_Manager::instance()->get_options() ) . ');' .
 				'qcrm.config.setUserCapabilities( ' . wp_json_encode( $user_capabilities ) . ');' .
 				'qcrm.config.setDefaultStages( ' . wp_json_encode( Pipeline_Manager::instance()->get_default_stages() ) . ');' .
-				'qcrm.config.setDealPriorities( ' . wp_json_encode( Deal_Manager::instance()->get_deal_priorities() ) . ');'
+				'qcrm.config.setDealPriorities( ' . wp_json_encode( Deal_Manager::instance()->get_deal_priorities() ) . ');' .
+				'qcrm.config.setQuillSMTPInfo( ' . wp_json_encode( $quillsmtp_info ) . ');'
+		);
+	}
+
+	/**
+	 * Get QuillSMTP connection information
+	 *
+	 * @since 1.8.0
+	 *
+	 * @return array QuillSMTP connection info including verified senders
+	 */
+	private static function get_quillsmtp_connection_info() {
+		// Check if QuillSMTP is installed and active
+		if ( ! defined( 'QUILLSMTP_PLUGIN_FILE' ) ) {
+			return array(
+				'configured' => false,
+				'plugin_url' => admin_url( 'plugin-install.php?s=quillsmtp&tab=search' ),
+			);
+		}
+
+		// Get QuillSMTP settings
+		$settings    = get_option( 'quillsmtp_settings', array() );
+		$connections = isset( $settings['connections'] ) && is_array( $settings['connections'] ) ? $settings['connections'] : array();
+
+		// If no connections configured
+		if ( empty( $connections ) ) {
+			return array(
+				'configured' => false,
+				'config_url' => admin_url( 'admin.php?page=quillsmtp' ),
+			);
+		}
+
+		// Extract verified senders from connections
+		$verified_senders = array();
+		foreach ( $connections as $connection_id => $connection ) {
+			if ( ! empty( $connection['from_email'] ) && is_email( $connection['from_email'] ) ) {
+				$verified_senders[] = array(
+					'email'         => $connection['from_email'],
+					'name'          => isset( $connection['from_name'] ) ? $connection['from_name'] : '',
+					'connection_id' => $connection_id,
+				);
+			}
+		}
+
+		return array(
+			'configured'       => true,
+			'verified_senders' => $verified_senders,
+			'config_url'       => admin_url( 'admin.php?page=quillsmtp' ),
 		);
 	}
 }

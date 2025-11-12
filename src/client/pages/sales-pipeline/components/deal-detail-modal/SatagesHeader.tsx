@@ -20,6 +20,7 @@ interface PipelineStageBoxProps {
   };
   index: number;
   totalStages: number;
+  isActive?: boolean;
   children?: React.ReactNode;
 }
 
@@ -27,6 +28,7 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
   stage,
   index,
   totalStages,
+  isActive = false,
   children,
 }) => {
   // const { backgroundColor } = StageColorBody(stage.color, index, totalStages);
@@ -37,7 +39,7 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
     <div
       className="relative flex items-center justify-center h-14"
       style={{
-        backgroundColor:stage.color,
+        backgroundColor: isActive ? stage.color : '#E5E7EB', 
         width: `${100 / totalStages}%`,
         marginLeft: isFirst ? 0 :5,
         zIndex: 100 - index,
@@ -48,7 +50,7 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
           : undefined,
       }}
     >
-      <span className='text-base font-semibold  whitespace-nowrap' style={{ color: StageTextColor(stage.color) }} >
+      <span className='text-base font-semibold  whitespace-nowrap' style={{ color: isActive ? StageTextColor(stage.color) : '#9CA3AF' }} >
         {children}
       </span>
 
@@ -58,7 +60,7 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
           style={{
             borderTop: "28px solid transparent",
             borderBottom: "28px solid transparent",
-            borderLeft: `15px solid ${stage.color}`,
+            borderLeft: `15px solid ${isActive ? stage.color : '#E5E7EB'}`,
           }}
         />
       )}
@@ -83,13 +85,18 @@ interface PipelineStagesHeaderProps {
       id: number;
       name: string;
       color: string;
+      
     }[];
+    currentStageId?: number;
   }
   
   export const PipelineStagesHeader: React.FC<PipelineStagesHeaderProps> = ({
     stages,
+    currentStageId
   }) => {
     if (!Array.isArray(stages) || stages.length === 0) return null;
+
+    const currentIndex = stages.findIndex(stage => stage.id === currentStageId);
   
     return (
       <div className="w-full overflow-hidden pt-3">
@@ -100,6 +107,7 @@ interface PipelineStagesHeaderProps {
               stage={stage}
               index={index}
               totalStages={stages.length}
+              isActive={index <= currentIndex}
             >
               {stage.name}
             </PipelineStageHeaderBox>

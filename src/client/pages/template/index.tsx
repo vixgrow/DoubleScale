@@ -129,7 +129,7 @@ const Template: React.FC = () => {
 			return false;
 		}
 
-		if (!template.subject) {
+		if (!template.settings.subject) {
 			createNotice({
 				type: 'error',
 				message: __('Subject is required', 'quillcrm'),
@@ -216,16 +216,15 @@ const Template: React.FC = () => {
 									/>
 									<Field
 										label={__('Subject', 'quillcrm')}
-										value={template.subject}
+										value={template.settings.subject}
 										onChange={(value) =>
-											setTemplate({
-												...template,
+											updateSettings({
 												subject: value,
 											})
 										}
 										type="text"
 										status={
-											template.subject
+											template.settings.subject
 												? undefined
 												: 'error'
 										}

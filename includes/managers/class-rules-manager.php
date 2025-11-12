@@ -20,6 +20,8 @@ use QuillCRM\Abstracts\Rule;
  */
 final class Rules_Manager {
 
+
+
 	/**
 	 * Registed rules
 	 *
@@ -80,30 +82,94 @@ final class Rules_Manager {
 	 */
 	public function set_groups() {
 		$this->groups = array(
-			'contact'        => array(
+			'contact'                   => array(
 				'name'  => __( 'Contact', 'quillcrm' ),
 				'key'   => 'contact',
 				'rules' => array(),
 			),
-			'contact_fields' => array(
+			'contact_fields'            => array(
 				'name'  => __( 'Contact Fields', 'quillcrm' ),
 				'key'   => 'contact_fields',
 				'rules' => array(),
 			),
-			'segments'       => array(
+			'segments'                  => array(
 				'name'  => __( 'Segments', 'quillcrm' ),
 				'key'   => 'segments',
 				'rules' => array(),
 			),
-			'user'           => array(
+			'user'                      => array(
 				'name'  => __( 'User', 'quillcrm' ),
 				'key'   => 'user',
 				'rules' => array(),
 			),
-			'activity'       => array(
+			'activity'                  => array(
 				'name'  => __( 'Activity', 'quillcrm' ),
 				'key'   => 'activity',
 				'rules' => array(),
+			),
+			'woocommerce_current_order' => array(
+				'name'        => __( 'WooCommerce Current Order', 'quillcrm' ),
+				'key'         => 'woocommerce_current_order',
+				'rules'       => array(),
+				'triggers'    => array( 'wc_order_created', 'wc_order_completed', 'wc_order_refunded', 'wc_order_status_changed' ),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			),
+			'woocommerce'               => array(
+				'name'        => __( 'WooCommerce', 'quillcrm' ),
+				'key'         => 'woocommerce',
+				'rules'       => array(),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			),
+			'woocommerce_membership'    => array(
+				'name'        => __( 'WooCommerce Membership', 'quillcrm' ),
+				'key'         => 'woocommerce_membership',
+				'rules'       => array(),
+				'triggers'    => array( 'wc_membership_created', 'wc_membership_status_changed' ),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
+			),
+			'woocommerce_whishlist'     => array(
+				'name'        => __( 'WooCommerce Whishlist', 'quillcrm' ),
+				'key'         => 'woocommerce_whishlist',
+				'rules'       => array(),
+				'triggers'    => array( 'wc_user_adds_product_to_wishlist', 'wc_wishlist_item_on_sale', 'wc_wishlist_reminder' ),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-wishlist/woocommerce-wishlist.php' ),
+			),
+			'woocommerce_subscription'  => array(
+				'name'        => __( 'WooCommerce Subscription', 'quillcrm' ),
+				'key'         => 'woocommerce_subscription',
+				'rules'       => array(),
+				'triggers'    => array(
+					'wc_subscription_created',
+					'wc_subscription_status_changed',
+					'wc_customer_before_card_expiry',
+					'wc_subscription_renewal_payment_failed',
+					'wc_subscription_renewal_payment_complete',
+					'wc_subscription_trial_end',
+					'wc_subscription_note_added',
+					'wc_subscription_before_renewal',
+					'wc_subscription_before_end',
+				),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
+			),
+			'woocommerce_review'        => array(
+				'name'        => __( 'WooCommerce Review', 'quillcrm' ),
+				'key'         => 'woocommerce_review',
+				'rules'       => array(),
+				'triggers'    => array( 'wc_review_received' ),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			),
+			'cart'                      => array(
+				'name'        => __( 'Cart', 'quillcrm' ),
+				'key'         => 'cart',
+				'rules'       => array(),
+				'triggers'    => array( 'wc_abandoned_cart_created' ),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			),
+			'learndash'                 => array(
+				'name'        => __( 'LearnDash', 'quillcrm' ),
+				'key'         => 'learn_dash',
+				'rules'       => array(),
+				'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 			),
 		);
 
@@ -111,10 +177,11 @@ final class Rules_Manager {
 		$forms = Forms_Manager::instance()->get_all_forms();
 		foreach ( $forms as $form ) {
 			$this->groups[ $form->slug ] = array(
-				'name'     => $form->name,
-				'rules'    => array(),
-				'key'      => $form->slug,
-				'triggers' => array( $form->slug ),
+				'name'        => $form->name,
+				'rules'       => array(),
+				'key'         => $form->slug,
+				'triggers'    => array( $form->slug ),
+				'is_disabled' => ! $form->is_enabled(),
 			);
 		}
 	}

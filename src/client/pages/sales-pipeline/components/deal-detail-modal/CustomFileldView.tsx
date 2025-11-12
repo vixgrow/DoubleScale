@@ -26,9 +26,12 @@ export const CustomFieldsView = ({ deal }: CustomFieldsViewProps) => {
 
   if (isLoading)
     return (
-      <p className="text-sm text-gray-500">
-        {__('Loading custom fields...', 'quillcrm')}
-      </p>
+      <div className="mt-4">
+      <div className="h-6 w-40 bg-gray-200 animate-pulse mb-4 rounded"></div>
+      <div className="h-12 w-full bg-gray-200 animate-pulse rounded mb-3"></div>
+      <div className="h-12 w-full bg-gray-200 animate-pulse rounded mb-3"></div>
+      <div className="h-12 w-full bg-gray-200 animate-pulse rounded mb-3"></div>
+    </div>
     );
 
   if (error)
@@ -38,13 +41,13 @@ export const CustomFieldsView = ({ deal }: CustomFieldsViewProps) => {
       </p>
     );
 
-  if (!groups?.length)
-    return (
-      <p className="text-sm text-gray-500">
-        {__('No custom fields available.', 'quillcrm')}
-      </p>
-    );
-
+    if (!isLoading && (!groups || groups.length === 0)) {
+      return (
+        <p className="text-sm text-gray-500">
+          {__('No custom fields available.', 'quillcrm')}
+        </p>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-4 mt-4">

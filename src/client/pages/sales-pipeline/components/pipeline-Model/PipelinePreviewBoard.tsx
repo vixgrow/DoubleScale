@@ -14,11 +14,7 @@ export const PipelinePreviewBoard = ({ stages }) => {
 				}}
 			>
 				{stages.map((stage, index) => {
-					const { backgroundColor } = (
-						stage.color,
-						index,
-						stages.length
-					);
+					
 
 					return (
 						<div
@@ -31,7 +27,7 @@ export const PipelinePreviewBoard = ({ stages }) => {
 								totalStages={stages.length}
 							>
 								<div
-									className="font-bold  text-base leading-[26px] tracking-[-.5px] font-[inter]"
+									className="font-bold  text-base leading-[26px] tracking-[-.5px]"
 									style={{ color: StageTextColor(stage.color) }}
 								>
 									{stage.name || `Stage ${index + 1}`}

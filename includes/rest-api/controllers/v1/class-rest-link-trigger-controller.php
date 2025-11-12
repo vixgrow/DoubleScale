@@ -229,7 +229,8 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 			$from     = $request->get_param( 'from' ) ?? null;
 			$to       = $request->get_param( 'to' ) ?? null;
 
-			$query = Link_Trigger_Model::query();
+			$query       = Link_Trigger_Model::query();
+			$total_count = $query->count();
 
 			if ( $keyword ) {
 				$query->where( 'name', 'LIKE', '%' . $keyword . '%' );
@@ -242,7 +243,7 @@ class REST_Link_Trigger_Controller extends REST_Controller {
 			}
 			$link_triggers = $query->orderBy( 'created_at', 'desc' )->paginate( $per_page, array( '*' ), 'page', $page );
 
-			return new WP_REST_Response( $link_triggers, 200 );
+			return new WP_REST_Response( $link_triggers->toArray() + array( 'total_count' => $total_count ), 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'quillcrm_link_trigger_get_error', $e->getMessage(), array( 'status' => 500 ) );
 		}

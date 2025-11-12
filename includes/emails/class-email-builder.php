@@ -44,7 +44,6 @@ class Email_Builder {
 	 */
 	private function includes() {
 		// Include block system
-		require_once QUILLCRM_PLUGIN_DIR . 'includes/interfaces/class-templates-interface.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/abstracts/class-email-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/class-block-registry.php';
 

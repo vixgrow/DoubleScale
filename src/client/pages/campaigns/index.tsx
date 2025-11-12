@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useEffect, useState } from '@wordpress/element';
 import { addQueryArgs } from '@wordpress/url';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -15,20 +14,29 @@ import {
 	Campaign,
 	CampaignModalStep,
 	CampaignsResponse,
+	CampaignType,
+	NoticeMessage,
 } from '@quillcrm/client';
 import { getToLink, useNavigate } from '@quillcrm/navigation';
 import { DataTable } from '@/components/ui/data-table';
-import { campaignColumns } from './columns';
-import { PageHeader, PlusIcon } from '@/components';
+import { emailCampaignColumns, smsCampaignColumns } from './columns';
+import {
+	PageHeader,
+	PlusIcon,
+	ContactTotalEmailsIcon,
+	ContactSMSIcon,
+	NoticeBanner,
+} from '@/components';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
 import AddCampaign from './add-campaign';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable'; // Import the hook
-import { formatDateForAPI, getCampaignEndpoint } from '@quillcrm/utils';
+import { formatDateForAPI } from '@quillcrm/utils';
+import PageTabs from '@/components/page-tabs';
 
 const Campaigns: React.FC = () => {
 	const [loading, setLoading] = useState(true);
-	const [campaignType, setCampaignType] = useState<string>('');
+	const [campaignType, setCampaignType] = useState<CampaignType>('standard');
 	const [keywords, setKeywords] = useState<string>('');
 	const [page, setPage] = useState(1);
 	const [perPage, setPerPage] = useState(10);
@@ -36,9 +44,7 @@ const Campaigns: React.FC = () => {
 	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 	const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-	const [isAdding, setIsAdding] = useState<boolean>(false);
-	const [bulkAction, setBulkAction] = useState<string>('');
-	const [isApplying, setIsApplying] = useState<boolean>(false);
+	// const [bulkAction, setBulkAction] = useState<string>('');
 	const [dateRange, setDateRange] = useState<{
 		from: Date | null;
 		to: Date | null;
@@ -47,8 +53,15 @@ const Campaigns: React.FC = () => {
 		to: null,
 	});
 	const [step, setStep] = useState<CampaignModalStep>(null);
+	const [activeTab, setActiveTab] = useState<string>('email');
+	const [campaignFilters, setCampaignFilters] = useState({
+		status: 'all',
+		type: 'all',
+		createDate: { from: null, to: null },
+		updatedAt: { from: null, to: null },
+	});
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
-	const { createNotice } = useDispatch('quillcrm/core');
 	const navigate = useNavigate();
 
 	// Use the reusable hook
@@ -62,26 +75,81 @@ const Campaigns: React.FC = () => {
 
 	useEffect(() => {
 		fetchCampaigns();
-	}, [page, perPage, dateRange, keywords]);
+	}, [page, perPage, dateRange, keywords, activeTab, campaignFilters]);
+
+	// Reset page when changing tabs
+	useEffect(() => {
+		setPage(1);
+		setSelectedRowKeys([]);
+	}, [activeTab]);
 
 	const fetchCampaigns = async () => {
 		setLoading(true);
 
 		try {
+			// Map active tab to campaign channel - using actual database values
+			const channelMap: Record<string, string> = {
+				email: 'email',
+				sms: 'sms',
+			};
+
+			// Build query parameters
+			const queryParams: Record<string, any> = {
+				page,
+				per_page: perPage,
+				from: formatDateForAPI(dateRange.from),
+				to: formatDateForAPI(dateRange.to),
+				keywords,
+				channel: channelMap[activeTab],
+			};
+
+			// Add campaign filter parameters
+			if (campaignFilters.status && campaignFilters.status !== 'all') {
+				queryParams.status = campaignFilters.status;
+			}
+
+			// Only apply type filter for email campaigns
+			if (
+				activeTab === 'email' &&
+				campaignFilters.type &&
+				campaignFilters.type !== 'all'
+			) {
+				// Map type to ab_test setting
+				queryParams.campaign_type = campaignFilters.type;
+			}
+
+			if (campaignFilters.createDate.from) {
+				queryParams.created_from = formatDateForAPI(
+					campaignFilters.createDate.from
+				);
+			}
+
+			if (campaignFilters.createDate.to) {
+				queryParams.created_to = formatDateForAPI(
+					campaignFilters.createDate.to
+				);
+			}
+
+			if (campaignFilters.updatedAt.from) {
+				queryParams.updated_from = formatDateForAPI(
+					campaignFilters.updatedAt.from
+				);
+			}
+
+			if (campaignFilters.updatedAt.to) {
+				queryParams.updated_to = formatDateForAPI(
+					campaignFilters.updatedAt.to
+				);
+			}
+
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/campaigns', {
-					page,
-					per_page: perPage,
-					from: formatDateForAPI(dateRange.from),
-					to: formatDateForAPI(dateRange.to),
-					keywords,
-				}),
+				path: addQueryArgs('/qc/v1/campaigns', queryParams),
 			})) as CampaignsResponse;
 			setCampaigns(response.data);
 			setTotalRecords(response.total || 0);
 			setHasRecords(response.total_count > 0);
 		} catch (error) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: __('Failed to fetch campaigns', 'quillcrm'),
 			});
@@ -90,44 +158,44 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
-	const addCampaign = async (name: string) => {
+	const addCampaign = async (
+		name: string
+	): Promise<{ success: boolean; error?: string }> => {
 		if (!name) {
-			createNotice({
-				type: 'error',
-				message: __('Campaign name is required', 'quillcrm'),
-			});
-			return;
+			return {
+				success: false,
+				error: __('Campaign name is required', 'quillcrm'),
+			};
 		}
-
-		if (!campaignType) {
-			createNotice({
-				type: 'error',
-				message: __('Campaign type is required', 'quillcrm'),
-			});
-			return;
-		}
-
-		setIsAdding(true);
 
 		try {
-			// Determine the correct endpoint based on campaign type
-			// Both 'standard' and 'ab_test' are email campaigns
-			const actualType =
-				campaignType === 'ab_test' || campaignType === 'standard'
-					? 'email'
-					: campaignType;
-			const endpoint = getCampaignEndpoint(actualType);
-			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
+			let channelType = '';
+			let isAbTest = false;
+
+			// Determine channel type based on active tab
+			if (activeTab === 'email') {
+				// For email, campaignType determines if it's standard or ab_test
+				if (!campaignType) {
+					return {
+						success: false,
+						error: __('Campaign type is required', 'quillcrm'),
+					};
+				}
+				channelType = 'email';
+				isAbTest = campaignType === 'ab_test';
+			} else if (activeTab === 'sms') {
+				channelType = 'sms';
 			}
 
+			// Use unified endpoint with type parameter (as string)
 			const response = (await apiFetch({
-				path: endpoint,
+				path: '/qc/v1/campaigns',
 				method: 'POST',
 				data: {
 					name: name,
+					type: channelType,
 					settings: {
-						ab_test: campaignType === 'ab_test',
+						ab_test: isAbTest,
 					},
 					description: __('New campaign', 'quillcrm'),
 					status: 'draft',
@@ -137,62 +205,47 @@ const Campaigns: React.FC = () => {
 			setCampaigns([...campaigns, response]);
 			setStep(null);
 			navigate(getToLink(`campaigns/${response.id}/template`));
+			return { success: true };
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message,
-			});
-		} finally {
-			setStep(null);
+			return {
+				success: false,
+				error: error.message,
+			};
 		}
 	};
 
 	const deleteSelected = async () => {
-		setIsApplying(true);
-
 		try {
+			// Use unified bulk-delete endpoint (works across all campaign types)
 			await apiFetch({
-				path: '/qc/v1/campaigns/bulk',
+				path: '/qc/v1/campaigns/bulk-delete',
 				method: 'POST',
 				data: {
-					operation: 'delete',
-					campaign_ids: selectedRowKeys,
+					ids: selectedRowKeys,
 				},
 			});
 
 			setSelectedRowKeys([]);
 			fetchCampaigns();
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: error.message,
 			});
-		} finally {
-			setIsApplying(false);
 		}
 	};
 
 	const deleteCampaign = async (id: number) => {
 		try {
-			// Find the campaign to get its type
-			const campaign = campaigns.find((c) => c.id === id);
-			if (!campaign) {
-				throw new Error(__('Campaign not found', 'quillcrm'));
-			}
-
-			const endpoint = getCampaignEndpoint(campaign.type);
-			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
-			}
-
+			// Use unified endpoint - type is auto-detected
 			await apiFetch({
-				path: `${endpoint}/${id}`,
+				path: `/qc/v1/campaigns/${id}`,
 				method: 'DELETE',
 			});
 
 			fetchCampaigns();
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: error.message,
 			});
@@ -200,42 +253,140 @@ const Campaigns: React.FC = () => {
 	};
 
 	const duplicateCampaign = async (id: number) => {
-		createNotice({
-			type: 'info',
+		setNotice({
+			type: 'success',
 			message: __('Duplicating campaign...', 'quillcrm'),
 		});
 
 		try {
-			// Find the campaign to get its type
-			const campaign = campaigns.find((c) => c.id === id);
-			if (!campaign) {
-				throw new Error(__('Campaign not found', 'quillcrm'));
-			}
-
-			const endpoint = getCampaignEndpoint(campaign.type);
-			if (!endpoint) {
-				throw new Error(__('Invalid campaign type', 'quillcrm'));
-			}
-
+			// Use unified endpoint - type is auto-detected
 			const response = (await apiFetch({
-				path: `${endpoint}/${id}/duplicate`,
+				path: `/qc/v1/campaigns/${id}/duplicate`,
 				method: 'POST',
 			})) as Campaign;
 
 			navigate(getToLink(`campaigns/${response.id}`));
 		} catch (error: any) {
-			createNotice({
+			setNotice({
 				type: 'error',
 				message: error.message,
 			});
 		}
 	};
 
-	const columns = campaignColumns({
-		onDelete: deleteCampaign,
-		duplicate: duplicateCampaign,
-		navigate: navigate,
-	});
+	// Get columns based on active tab
+	const getColumns = () => {
+		const columnProps = {
+			onDelete: deleteCampaign,
+			duplicate: duplicateCampaign,
+			navigate: navigate,
+		};
+
+		if (activeTab === 'email') {
+			return emailCampaignColumns(columnProps);
+		} else {
+			// Both SMS and WhatsApp use the same columns
+			return smsCampaignColumns(columnProps);
+		}
+	};
+
+	const handleBulkAction = async (action: string) => {
+		switch (action) {
+			case 'delete':
+				deleteSelected();
+				break;
+			default:
+				break;
+		}
+	};
+
+	const columns = getColumns();
+
+	// Define tabs list with icons
+	const tabsList = [
+		{
+			value: 'email',
+			label: 'Email Campaigns',
+			icon: <ContactTotalEmailsIcon width={24} height={24} />,
+		},
+		{
+			value: 'sms',
+			label: 'SMS Campaigns',
+			icon: <ContactSMSIcon width={24} height={24} />,
+		},
+	];
+
+	// Campaign content component
+	const CampaignContent = () => (
+		<>
+			{loading || hasRecords ? (
+				<>
+					<DataTable
+						columns={columns}
+						data={campaigns}
+						showPagination={false}
+						initialPageSize={perPage}
+						setPage={setPage}
+						loading={loading}
+						activeTab={activeTab}
+						config={{
+							search: {
+								placeholder: __('Search', 'quillcrm'),
+								onChange: (value) => setKeywords(value),
+								value: keywords,
+							},
+							selection: {
+								enabled: true,
+								selectedKeys: selectedRowKeys,
+								onSelectionChange: setSelectedRowKeys,
+							},
+							// TODO: investigate why setBulkAction is not working
+							bulkActions: {
+								enabled: true,
+								currentAction: '',
+								onActionChange: () => {},
+								onExecuteAction: handleBulkAction,
+								activeTab: activeTab,
+							},
+							dateRange: {
+								enabled: true,
+								value: dateRange,
+								onDateChange: setDateRange,
+							},
+							campaignFilters: {
+								filters: campaignFilters,
+								onFiltersChange: setCampaignFilters,
+								onClear: () => {
+									setCampaignFilters({
+										status: 'all',
+										type: 'all',
+										createDate: { from: null, to: null },
+										updatedAt: { from: null, to: null },
+									});
+									setPage(1);
+								},
+							},
+						}}
+					/>
+					<DataTablePagination table={serverSideTable} />
+				</>
+			) : (
+				<EmptyCampaignList setStep={setStep} />
+			)}
+		</>
+	);
+
+	// Define tabs content
+	const tabsContent = [
+		{
+			value: 'email',
+			children: <CampaignContent />,
+		},
+		{
+			value: 'sms',
+			children: <CampaignContent />,
+		},
+	];
 
 	return (
 		<div className="qcrm-campaigns">
@@ -251,45 +402,22 @@ const Campaigns: React.FC = () => {
 				]}
 			/>
 
-			{loading || hasRecords ? (
-				<>
-					<DataTable
-						columns={columns}
-						data={campaigns}
-						showPagination={false}
-						initialPageSize={perPage}
-						setPage={setPage}
-						loading={loading}
-						config={{
-							search: {
-								placeholder: __('Search', 'quillcrm'),
-								onChange: (value) => setKeywords(value),
-								value: keywords,
-							},
-							selection: {
-								enabled: true,
-								selectedKeys: selectedRowKeys,
-								onSelectionChange: setSelectedRowKeys,
-							},
-							bulkActions: {
-								enabled: true,
-								currentAction: bulkAction,
-								onActionChange: (value) => setBulkAction(value),
-								onExecuteAction: () => deleteSelected(),
-								activeTab: 'all',
-							},
-							dateRange: {
-								enabled: true,
-								value: dateRange,
-								onDateChange: setDateRange,
-							},
-						}}
-					/>
-					<DataTablePagination table={serverSideTable} />
-				</>
-			) : (
-				<EmptyCampaignList setStep={setStep} />
+			{/* Notice Banner */}
+			{notice && (
+				<NoticeBanner
+					notice={notice}
+					closeNotice={() => setNotice(null)}
+				/>
 			)}
+
+			<PageTabs
+				defaultValue="email"
+				tabsList={tabsList}
+				tabsContent={tabsContent}
+				onValueChange={(value) => setActiveTab(value)}
+				tabsListWrapperClassName="border px-5 py-3 rounded-lg mb-4"
+				tabsListClassName="bg-transparent text-foreground gap-3"
+			/>
 
 			<AddCampaign
 				setCampaignType={setCampaignType}
@@ -297,6 +425,7 @@ const Campaigns: React.FC = () => {
 				setStep={setStep}
 				step={step}
 				addCampaign={addCampaign}
+				activeTab={activeTab}
 			/>
 		</div>
 	);

@@ -12,9 +12,11 @@ export const FormContext = createContext<{
 	form: Form | null;
 	isLoading: boolean;
 	isSaving: boolean;
+	formFields: Form['fields_settings']['fields'] | null;
 	setForm: (form: Form) => void;
 	setIsLoading: (isLoading: boolean) => void;
 	setIsSaving: (isSaving: boolean) => void;
+	setFormFields: (fields: Form['fields_settings']['fields'] | null) => void;
 	updateForm: (payload: Partial<Form>) => void;
 	saveForm: (payload?: Partial<Form>) => void;
 	updateSettings: <K extends keyof Form['data']>(
@@ -25,6 +27,7 @@ export const FormContext = createContext<{
 	form: null,
 	isLoading: false,
 	isSaving: false,
+	formFields: null,
 	setForm: (_form: Form) => {
 		throw new Error('setForm() not implemented');
 	},
@@ -33,6 +36,9 @@ export const FormContext = createContext<{
 	},
 	setIsSaving: (_isSaving: boolean) => {
 		throw new Error('setIsSaving() not implemented');
+	},
+	setFormFields: (_fields: Form['fields_settings']['fields'] | null) => {
+		throw new Error('setFormFields() not implemented');
 	},
 	updateForm: (_payload: Partial<Form>) => {
 		throw new Error('updateForm() not implemented');

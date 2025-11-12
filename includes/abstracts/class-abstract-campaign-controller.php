@@ -391,7 +391,6 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				$campaign_data['count'] = $contact_filter->get_contact_count( $this->channel, $filters );
 			}
 
-			$campaign_data['settings']['is_attached'] = true;
 			$campaign->update( $campaign_data );
 
 			// Attach full template data for frontend use

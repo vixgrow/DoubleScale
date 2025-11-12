@@ -99,15 +99,8 @@ const ContactInformation: React.FC = () => {
 	const totalOpened = emailAnalytics?.total_opened || 0;
 	const totalClicked = emailAnalytics?.total_clicked || 0;
 
-	const calculatePercentage = (total: number, value: number) => {
-		if (total === 0) {
-			return '0';
-		}
-		return ((value / total) * 100).toFixed(1);
-	};
-
-	const openRate = calculatePercentage(totalEmails, totalOpened);
-	const clickRate = calculatePercentage(totalEmails, totalClicked);
+	const openRate = emailAnalytics?.open_rate?.toFixed(1) || '0.0';
+	const clickRate = emailAnalytics?.click_rate?.toFixed(1) || '0.0';
 
 	// Get status colors
 	const getStatusClasses = (status: string) => {

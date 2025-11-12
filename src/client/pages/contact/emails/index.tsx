@@ -61,16 +61,7 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 		onViewTemplate: setCampaignEmail,
 	});
 
-	const calculatePercentage = (total: number, value: number) => {
-		if (total === 0) {
-			return 0;
-		}
-		return ((value / total) * 100).toFixed(2);
-	};
-
 	const total = analytics?.messages?.total || 0;
-	const totalOpened = analytics?.total_opened || 0;
-	const totalClicked = analytics?.total_clicked || 0;
 
 	return (
 		<div className="qcrm-emails flex flex-col gap-5">
@@ -102,7 +93,7 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 					/>
 					<MessageStatsCard
 						icon={<OpenRateIcon width={40} height={40} />}
-						value={`${calculatePercentage(total, totalOpened)}%`}
+						value={`${analytics?.open_rate?.toFixed(2) || '0.00'}%`}
 						label={__('Open Rate', 'quillcrm')}
 						iconBgClass="bg-[#D1F6DF]"
 						borderColorClass="border-l-[#16A34A]"
@@ -110,7 +101,7 @@ const Emails: React.FC<EmailsProps> = ({ contact_id }) => {
 					/>
 					<MessageStatsCard
 						icon={<ClickRateIcon width={40} height={40} />}
-						value={`${calculatePercentage(total, totalClicked)}%`}
+						value={`${analytics?.click_rate?.toFixed(2) || '0.00'}%`}
 						label={__('Click Rate', 'quillcrm')}
 						iconBgClass="bg-[#EEE4FF]"
 						borderColorClass="border-l-[#660FF1]"

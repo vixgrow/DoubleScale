@@ -391,6 +391,13 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				$campaign_data['count'] = $contact_filter->get_contact_count( $this->channel, $filters );
 			}
 
+			// Only set is_attached if templates are NOT being sent
+			// Email campaigns send template_ids only (not full templates)
+			// SMS/WhatsApp campaigns send full templates array and need them processed
+			if ( ! isset( $campaign_data['settings']['templates'] ) ) {
+				$campaign_data['settings']['is_attached'] = true;
+			}
+
 			$campaign->update( $campaign_data );
 
 			// Attach full template data for frontend use

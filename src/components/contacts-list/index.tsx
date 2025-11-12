@@ -242,7 +242,7 @@ const ContactList: React.FC<ContactListProps> = ({
 									contact.first_name,
 									contact.last_name
 								);
-								const hasImage = (contact as any).img;
+								const avatarUrl = (contact as any).avatar_url;
 
 								return (
 									<div
@@ -250,24 +250,21 @@ const ContactList: React.FC<ContactListProps> = ({
 										className="flex items-center gap-3 py-3 hover:bg-gray-50 cursor-pointer"
 									>
 										{/* Avatar */}
-										{hasImage ? (
-											<Avatar className="w-12 h-12 rounded-full">
+										<Avatar className="w-12 h-12 rounded-full">
+											{avatarUrl ? (
 												<AvatarImage
-													src={(contact as any).img}
+													src={avatarUrl}
 													alt={
 														fullName ||
 														contact.email
 													}
 													className="rounded-full"
 												/>
-											</Avatar>
-										) : (
-											<Avatar className="w-12 h-12 rounded-full">
-												<AvatarFallback className="rounded-full bg-[#E3EEFF99] text-secondary font-bold text-lg">
-													{initials}
-												</AvatarFallback>
-											</Avatar>
-										)}
+											) : null}
+											<AvatarFallback className="rounded-full bg-[#E3EEFF99] text-secondary font-bold text-lg">
+												{initials}
+											</AvatarFallback>
+										</Avatar>
 
 										{/* Contact Info */}
 										<div className="flex-1 min-w-0">

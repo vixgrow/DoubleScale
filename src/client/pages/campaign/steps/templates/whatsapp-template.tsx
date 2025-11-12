@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -20,7 +20,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import type { WhatsAppTemplate } from '@quillcrm/client';
+import type { WhatsAppTemplate, Campaign } from '@quillcrm/client';
+import type { ExtendedCampaign } from '@/stores/campaign/types';
 import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import MessageComposer from './components/message-composer';
 import { getCampaignEndpoint } from '@quillcrm/utils';
@@ -41,8 +42,10 @@ const WhatsAppTemplateStep: React.FC = () => {
 		},
 	};
 
-	const [template, setTemplate] = useState<WhatsAppTemplate>(() => {
-		// Safely extract template or use default
+	const [template, setTemplate] = useState<WhatsAppTemplate>(defaultTemplate);
+
+	// Sync template state with campaign data when it changes
+	useEffect(() => {
 		const existingTemplate = campaign?.settings?.templates?.[0];
 		if (
 			existingTemplate &&
@@ -51,7 +54,7 @@ const WhatsAppTemplateStep: React.FC = () => {
 		) {
 			// Convert backend format to frontend format
 			const backendTemplate = existingTemplate as any;
-			return {
+			setTemplate({
 				name: backendTemplate.name || defaultTemplate.name,
 				type: CAMPAIGN_CHANNEL.WHATSAPP,
 				body: backendTemplate.body || '',
@@ -59,10 +62,9 @@ const WhatsAppTemplateStep: React.FC = () => {
 					add_unsubscribe:
 						backendTemplate.settings?.add_unsubscribe ?? true,
 				},
-			};
+			});
 		}
-		return defaultTemplate;
-	});
+	}, [campaign?.settings?.templates]);
 
 	const updateTemplate = (updates: Partial<WhatsAppTemplate>) => {
 		setTemplate((prev) => ({
@@ -129,11 +131,10 @@ const WhatsAppTemplateStep: React.FC = () => {
 						templates: [backendTemplate],
 					},
 				},
-			});
+			}) as Campaign;
 
 			// Update campaign store with response data
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			updateCampaign(response as any);
+			updateCampaign(response as Partial<ExtendedCampaign>);
 
 			goToStep('contacts');
 		} catch (error: any) {

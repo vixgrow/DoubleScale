@@ -341,10 +341,8 @@ const DealsReportsByDate: React.FC = () => {
 						</div>
 					</div>
 
-					{loading ? (
-						<div style={{ height: '450px', width: '100%' }}>
+					{loading ? (						
 						  <DealsReportsByDateSkeleton/>
-						</div>
 					) : (
 						<div style={{ height: '450px', width: '100%' }}>
 							<Chart

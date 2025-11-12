@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const DealsReportsByDateSkeleton: React.FC = () => {
+const AverageDurationChartSkeleton: React.FC = () => {
   return (
     <Card className="border border-[#DEE1E6] bg-[#F8F8F8] rounded-[16px] p-5">
       <CardContent className="p-6">
@@ -55,5 +55,4 @@ const DealsReportsByDateSkeleton: React.FC = () => {
   );
 };
 
-
-export default DealsReportsByDateSkeleton;
+export default AverageDurationChartSkeleton;

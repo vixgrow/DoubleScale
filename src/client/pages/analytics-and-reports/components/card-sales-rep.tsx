@@ -1,19 +1,16 @@
 import {
 	Card,
 	CardContent,
-	CardFooter,
+
 	CardHeader,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { __ } from '@wordpress/i18n';
 
 import CardsStatistics, {
 	CardsStatisticsProps,
 } from '../components/card-statistics';
-import UserActivityIcon from '@quillcrm/components/icons/user-activity';
-import MeetingActivityIcon from '@quillcrm/components/icons/meeting-activity';
-import { Button } from '@quillcrm/components/ui/button';
-import ViewIcon from '@quillcrm/components/icons/view-header';
+
 import SaleRepHeader from './sale-rep-header';
 
 export interface SalesRepCardProps {

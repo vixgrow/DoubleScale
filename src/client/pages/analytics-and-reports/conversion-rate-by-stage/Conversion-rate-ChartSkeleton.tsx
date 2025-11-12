@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const LeaderboardChartSkeleton: React.FC = () => {
+const ConversionRatesChartSkeleton: React.FC = () => {
   return (
     <Card className="border border-[#DEE1E6] bg-[#F8F8F8] rounded-[16px] p-5">
       <CardContent className="p-6">
@@ -55,6 +55,4 @@ const LeaderboardChartSkeleton: React.FC = () => {
   );
 };
 
-
-
-export default LeaderboardChartSkeleton;
+export default ConversionRatesChartSkeleton;

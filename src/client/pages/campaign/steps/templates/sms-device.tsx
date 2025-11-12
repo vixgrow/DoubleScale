@@ -4,11 +4,9 @@ import device from '../../../../../../assets/images/message-device.png';
 import { cn } from '@/lib/utils';
 
 const SMSDevice: React.FC<{
-    fromName?: string;
     body?: string;
     className?: string;
-}> = ({ fromName, body, className }) => {
-    const displayFromName = fromName?.trim() || __('From Name', 'quillcrm');
+}> = ({ body, className }) => {
     const displayBody = body?.trim() || __('Message Here...', 'quillcrm');
 
     return (
@@ -19,12 +17,6 @@ const SMSDevice: React.FC<{
                     alt={__('Mobile preview', 'quillcrm')}
                     className="w-full max-w-[260px] sm:max-w-[300px] select-none pointer-events-none"
                 />
-
-                <div className="absolute top-[9.5%] left-1/2 -translate-x-1/2 w-[58%] sm:w-[45%] max-w-[180px]">
-                    <span className="block text-center font-semibold text-[#09090B] text-xs sm:text-sm truncate">
-                        {displayFromName}
-                    </span>
-                </div>
 
                 <div className="absolute top-[18%] left-[53%] -translate-x-1/2 w-[75%] sm:w-[65%] max-w-[220px]">
                     <p className="text-[10px] sm:text-xs leading-5 text-white whitespace-pre-wrap break-words max-h-[93px] overflow-hidden text-ellipsis line-clamp-6">

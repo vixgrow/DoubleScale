@@ -41,6 +41,7 @@ import DealCustomFieldChange from '../deal-custom-field-change';
 import DiscountTypeWithAmount from '../discount-type-with-amount';
 import CouponExpiryDate from '../coupon-expiry-date';
 import OpenBuilder from '../open-builder';
+import { DateTimePicker } from '../date-time-picker';
 
 interface FieldProps {
 	label?: string;
@@ -218,7 +219,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					style={{
 						borderRadius: '8px',
@@ -237,7 +238,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 					style={{
@@ -255,8 +256,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-								(option) => option.value === value
-							)
+									(option) => option.value === value
+								)
 							: null
 					}
 					onChange={(value) => {
@@ -438,6 +439,15 @@ const Field: React.FC<FieldProps> = ({
 		case 'label':
 			fieldContent = <div className="text-ghost">{value}</div>;
 			break;
+		case 'datetime':
+			fieldContent = (
+				<DateTimePicker
+					value={value}
+					onChange={(dateValue) => onChange(dateValue)}
+					placeholder="Select date & time"
+				/>
+			);
+			break;
 		default:
 			fieldContent = null;
 	}
@@ -451,7 +461,9 @@ const Field: React.FC<FieldProps> = ({
 						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
 							<span>
 								{label}{' '}
-								{required && <span className="text-red-600">*</span>}
+								{required && (
+									<span className="text-red-600">*</span>
+								)}
 							</span>
 						</div>
 					)}
@@ -472,7 +484,9 @@ const Field: React.FC<FieldProps> = ({
 						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
 							<span>
 								{label}{' '}
-								{required && <span className="text-red-600">*</span>}
+								{required && (
+									<span className="text-red-600">*</span>
+								)}
 							</span>
 						</div>
 					)}
@@ -493,7 +507,9 @@ const Field: React.FC<FieldProps> = ({
 					</span>
 				</div>
 			)}
-			<div className={cn("qcrm-field-input", className)}>{fieldContent}</div>
+			<div className={cn('qcrm-field-input', className)}>
+				{fieldContent}
+			</div>
 			{helperText && renderHelperText(helperText)}
 		</div>
 	);

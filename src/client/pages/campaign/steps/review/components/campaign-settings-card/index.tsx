@@ -18,6 +18,7 @@ interface CampaignSettingsCardProps {
 	emailSubject?: string;
 	previewText?: string;
 	onEdit?: () => void;
+	button?: boolean;
 }
 
 const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
@@ -29,6 +30,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 	emailSubject,
 	previewText,
 	onEdit,
+	button = true,
 }) => {
 	const isSMS = campaignType === 'sms';
 
@@ -39,6 +41,7 @@ const CampaignSettingsCard: React.FC<CampaignSettingsCardProps> = ({
 			buttonIcon={<EditIcon />}
 			buttonText={__('Edit', 'quillcrm')}
 			onButtonClick={onEdit}
+			button={button}
 		>
 			<div className="space-y-4">
 				{isSMS ? (

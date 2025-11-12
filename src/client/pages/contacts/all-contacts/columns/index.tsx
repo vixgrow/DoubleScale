@@ -68,28 +68,35 @@ export const useContactsColumns = () => {
 			),
 			cell: ({ row }) => {
 				const contact = row.original;
-				const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.trim();
-				const initials = getContactInitials(contact.first_name, contact.last_name);
-				const hasImage = (contact as any).img;
+				const fullName =
+					`${contact.first_name || ''} ${contact.last_name || ''}`.trim();
+				const initials = getContactInitials(
+					contact.first_name,
+					contact.last_name
+				);
+				const avatarUrl = (contact as any).avatar_url;
 
 				return (
 					<Button
 						variant="ghost"
-						onClick={() => openContactDialog(row.original.id.toString())}
+						onClick={() =>
+							openContactDialog(row.original.id.toString())
+						}
 						className="h-auto p-0 text-left hover:bg-transparent cursor-pointer bg-transparent shadow-none border-none"
 					>
 						<div className="flex items-center gap-3">
-							{hasImage ? (
-								<Avatar className="w-12 h-12 rounded-lg">
-									<AvatarImage src={(contact as any).img} alt={fullName || contact.email} className="rounded-lg" />
-								</Avatar>
-							) : (
-								<Avatar className="w-12 h-12 rounded-lg">
-									<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
-										{initials}
-									</AvatarFallback>
-								</Avatar>
-							)}
+							<Avatar className="w-12 h-12 rounded-lg">
+								{avatarUrl ? (
+									<AvatarImage
+										src={avatarUrl}
+										alt={fullName || contact.email}
+										className="rounded-lg"
+									/>
+								) : null}
+								<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-bold text-lg">
+									{initials}
+								</AvatarFallback>
+							</Avatar>
 							<div className="flex flex-col">
 								{fullName && (
 									<div className="font-semibold capitalize text-base text-[#09090B] w-40 truncate">
@@ -159,19 +166,24 @@ export const useContactsColumns = () => {
 
 				switch (status.toLowerCase()) {
 					case 'subscribed':
-						statusClasses = 'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]';
+						statusClasses =
+							'text-[#16A34A] bg-[#EFFFF5] border-[#16A34A]';
 						break;
 					case 'unsubscribed':
-						statusClasses = 'text-[#1C1D22] bg-[#FFF2E2] border-[#1C1D22]';
+						statusClasses =
+							'text-[#1C1D22] bg-[#FFF2E2] border-[#1C1D22]';
 						break;
 					case 'bounced':
-						statusClasses = 'text-[#5570F1] bg-[#5570F129] border-[#5570F1]';
+						statusClasses =
+							'text-[#5570F1] bg-[#5570F129] border-[#5570F1]';
 						break;
 					case 'unverified':
-						statusClasses = 'text-[#CC5F5F] bg-[#F57E7729] border-[#CC5F5F]';
+						statusClasses =
+							'text-[#CC5F5F] bg-[#F57E7729] border-[#CC5F5F]';
 						break;
 					default:
-						statusClasses = 'text-gray-600 bg-gray-100 border-gray-600';
+						statusClasses =
+							'text-gray-600 bg-gray-100 border-gray-600';
 				}
 
 				return (
@@ -232,7 +244,9 @@ export const useContactsColumns = () => {
 					<SortIcon />
 				</div>
 			),
-			cell: ({ row }) => <TimeAgoCell value={row.getValue('created_at')} />,
+			cell: ({ row }) => (
+				<TimeAgoCell value={row.getValue('created_at')} />
+			),
 		},
 	];
 

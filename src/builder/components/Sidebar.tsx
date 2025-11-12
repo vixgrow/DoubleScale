@@ -20,6 +20,7 @@ import {
 	TooltipContent,
 	TooltipProvider,
 } from '@/components/ui/tooltip';
+import './style.scss';
 
 interface SidebarItem {
 	id: string;
@@ -139,7 +140,7 @@ const BlockSidebar = ({
 							</TabsTrigger>
 						</TabsList>
 					</div>
-					<div className="py-6 px-6 flex-1 overflow-auto">
+					<div className="py-6 px-6 flex-1 overflow-auto custom-scrollbar">
 						<TabsContent value="elements">
 							<ContainerBlock
 								activeSidebar={
@@ -162,7 +163,7 @@ const BlockSidebar = ({
 
 				{/* Active Sidebar */}
 				{view.type === 'active' && (
-					<div className="absolute top-0 left-[102%] w-72 h-full overflow-y-auto z-20 bg-white shadow-lg">
+					<div className="absolute top-0 left-[102%] w-72 h-full overflow-y-auto z-20 bg-white shadow-lg active-sidebar-scrollbar">
 						<div className="flex flex-col px-8 pt-7">
 							<div className="flex items-center justify-between w-full pb-4">
 								<h2 className="text-base font-bold text-primary text-center flex-1">
@@ -180,7 +181,7 @@ const BlockSidebar = ({
 							<div className="border-b-2 border-gray-200 w-full"></div>
 						</div>
 						<div
-							className="overflow-y-auto p-4 flex-1"
+							className="overflow-y-auto p-4 flex-1 active-sidebar-scrollbar"
 							style={{ zIndex: 100000 }}
 						>
 							<view.item.component

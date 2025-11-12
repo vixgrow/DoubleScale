@@ -146,7 +146,7 @@ abstract class Abstract_Campaign_Processing {
 		// Map campaign types to daily callback keys
 		$callbacks = array(
 			'email'    => 'quillcrm_daily3',
-			'sms'      => 'quillcrm_daily3', // Shares with email
+			'sms'      => 'quillcrm_daily4',
 			'whatsapp' => 'quillcrm_daily4',
 		);
 

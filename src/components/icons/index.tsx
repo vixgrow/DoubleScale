@@ -203,3 +203,5 @@ export { default as NoDealsIcon } from './no-deals';
 export { default as PiplelinesIcon } from './piplelines';
 export { default as CoursesIcon } from './courses';
 export { default as GradientCoursesIcon } from './gradient-courses';
+export { default as OtherInfoIcon } from './other-info';
+export { default as GradientLinkIcon } from './gradient-link';

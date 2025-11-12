@@ -21,6 +21,9 @@ interface PipelineHeaderProps {
   setEditPipelineModalVisible: (visible: boolean) => void;
   setDeleteDialogOpen: (visible: boolean) => void;
   setNewDealModalVisible: (visible: boolean) => void;
+  selectMode?: boolean;
+  toggleSelectMode?: () => void;
+  selectedCount?: number;
 }
 
 export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
@@ -33,6 +36,9 @@ export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
   setEditPipelineModalVisible,
   setDeleteDialogOpen,
   setNewDealModalVisible,
+  selectMode = false,
+  toggleSelectMode,
+  selectedCount = 0,
 }) => {
 
   return (
@@ -159,11 +165,42 @@ export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
           </DropdownMenu>
         </div>
 
+        {/* Select Mode Toggle */}
+        {toggleSelectMode && (
+          <div className="flex items-center gap-1">
+            <Button
+              onClick={toggleSelectMode}
+              variant={selectMode ? "default" : "outline"}
+              className={`text-base font-medium leading-[26px] tracking-[-.5px] flex items-center justify-center gap-[6px] h-10 py-2 px-4 rounded-[8px] ${
+                selectMode
+                  ? 'bg-[#3B82F6] !text-white hover:bg-[#2563EB]'
+                  : '!text-[#374151] border !border-[#374151]'
+              }`}
+            >
+              {selectMode ? (
+                <>
+                  {__('Cancel', 'quillcrm')}
+                  {selectedCount > 0 && (
+                    <span className="ml-1 bg-white text-[#3B82F6] px-2 py-0.5 rounded-full text-sm font-semibold">
+                      {selectedCount}
+                    </span>
+                  )}
+                </>
+              ) : (
+                __('Select', 'quillcrm')
+              )}
+            </Button>
+          </div>
+        )}
+
         {/* Add New Deal */}
         <div className="flex items-center gap-1">
           <Button
             onClick={() => setNewDealModalVisible(true)}
-            className={`text-base font-medium !text-[#FFF] leading-[26px] tracking-[-.5px] flex items-center justify-center gap-[6px] h-10 bg-[#1E3A8A] py-2 px-4 rounded-[8px] `}
+            disabled={selectMode}
+            className={`text-base font-medium !text-[#FFF] leading-[26px] tracking-[-.5px] flex items-center justify-center gap-[6px] h-10 bg-[#1E3A8A] py-2 px-4 rounded-[8px] ${
+              selectMode ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             + Add New Deal
           </Button>

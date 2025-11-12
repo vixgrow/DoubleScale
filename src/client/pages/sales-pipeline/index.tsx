@@ -77,7 +77,10 @@ const SalesPipeline: React.FC = () => {
 		priority: null,
 	});
 
-
+	// Bulk operations state
+	const [selectMode, setSelectMode] = useState(false);
+	const [selectedDealIds, setSelectedDealIds] = useState<number[]>([]);
+	const [isPerformingBulk, setIsPerformingBulk] = useState(false);
 
 	const {
 		pipelines,
@@ -102,6 +105,40 @@ const SalesPipeline: React.FC = () => {
 		}
 
 	}, [pipelines, selectedPipelineId]);
+
+	// Clear selection when pipeline changes or select mode is disabled
+	useEffect(() => {
+		if (!selectMode) {
+			setSelectedDealIds([]);
+		}
+	}, [selectMode, selectedPipelineId]);
+
+	// Bulk operations handlers
+	const toggleSelectMode = () => {
+		setSelectMode(!selectMode);
+		if (selectMode) {
+			setSelectedDealIds([]);
+		}
+	};
+
+	const toggleDealSelection = (dealId: number) => {
+		setSelectedDealIds(prev => {
+			if (prev.includes(dealId)) {
+				return prev.filter(id => id !== dealId);
+			} else {
+				return [...prev, dealId];
+			}
+		});
+	};
+
+	const selectAllVisible = () => {
+		const visibleDealIds = deals.map(deal => deal.id);
+		setSelectedDealIds(visibleDealIds);
+	};
+
+	const clearSelection = () => {
+		setSelectedDealIds([]);
+	};
 
 	// handle note
 
@@ -165,6 +202,9 @@ const SalesPipeline: React.FC = () => {
 				setEditPipelineModalVisible={setEditPipelineModalVisible}
 				setDeleteDialogOpen={setDeleteDialogOpen}
 				setNewDealModalVisible={setNewDealModalVisible}
+				selectMode={selectMode}
+				toggleSelectMode={toggleSelectMode}
+				selectedCount={selectedDealIds.length}
 			/>
 
 			{showDuplicateError && (
@@ -217,6 +257,13 @@ const SalesPipeline: React.FC = () => {
 							}
 							onDealLogEmail={(deal) => handleLogEmailVisible(deal)}
 							loading={loading}
+							selectMode={selectMode}
+							selectedDealIds={selectedDealIds}
+							toggleDealSelection={toggleDealSelection}
+							selectAllVisible={selectAllVisible}
+							clearSelection={clearSelection}
+							isPerformingBulk={isPerformingBulk}
+							setIsPerformingBulk={setIsPerformingBulk}
 						/>
 					</div>
 				)}

@@ -50,6 +50,9 @@ interface PipelineColumnProps {
 	totalStages: number;
 	loading?: boolean;
 	pipeline?: any;
+	selectMode?: boolean;
+	selectedDealIds?: number[];
+	toggleDealSelection?: (dealId: number) => void;
 }
 
 export const PipelineColumn: React.FC<PipelineColumnProps> = ({
@@ -68,6 +71,9 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	onDealLogEmail,
 	loading = false,
 	pipeline,
+	selectMode = false,
+	selectedDealIds = [],
+	toggleDealSelection,
 }) => {
 	const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
 	const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
@@ -319,6 +325,9 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 									}
 									stageColor={stage.color}
 									stageProbability={stage.win_probability}
+									selectMode={selectMode}
+									isSelected={selectedDealIds.includes(deal.id)}
+									onToggleSelect={() => toggleDealSelection?.(deal.id)}
 									style={
 										{
 											'--stage-color': stage.color,

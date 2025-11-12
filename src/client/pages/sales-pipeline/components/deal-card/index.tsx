@@ -23,6 +23,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 
 /**
  * Internal dependencies
@@ -49,6 +50,9 @@ interface DealCardProps {
 	stageColor?: string;
 	stageProbability?: number;
 	style?: React.CSSProperties;
+	selectMode?: boolean;
+	isSelected?: boolean;
+	onToggleSelect?: () => void;
 }
 
 export const DealCard: React.FC<DealCardProps> = ({
@@ -64,6 +68,9 @@ export const DealCard: React.FC<DealCardProps> = ({
 	stageColor,
 	stageProbability,
 	style: customStyle = {},
+	selectMode = false,
+	isSelected = false,
+	onToggleSelect,
 }) => {
 	const {
 		attributes,
@@ -112,6 +119,11 @@ export const DealCard: React.FC<DealCardProps> = ({
 		if (isDraggging || (e.target as HTMLElement).closest('.drag-handle')) {
 			return;
 		}
+		// In select mode, clicking the card toggles selection instead of opening detail
+		if (selectMode) {
+			onToggleSelect?.();
+			return;
+		}
 		onCardClick(deal);
 	};
 
@@ -155,16 +167,30 @@ export const DealCard: React.FC<DealCardProps> = ({
 			className={`deal-card m-4 ${isDragging || isDraggging ? 'dragging' : ''} ${deal.is_overdue ? 'overdue' : ''}`}
 			onClick={handleCardClick}
 		>
-			<Card className="w-full flex flex-col  rounded-[16px] border border-[#DEE1E6]">
+			<Card className={`w-full flex flex-col rounded-[16px] border ${isSelected ? 'border-[#3B82F6] border-2 bg-blue-50' : 'border-[#DEE1E6]'}`}>
 				<CardHeader className="p-2.5">
 					<div className="flex items-center justify-between text-[#09090B]">
+						{/* Selection Checkbox */}
+						{selectMode && (
+							<div
+								className="mr-2"
+								onClick={(e) => {
+									e.stopPropagation();
+									onToggleSelect?.();
+								}}
+							>
+								<Checkbox checked={isSelected} />
+							</div>
+						)}
+
 						<CardTitle
 							title={deal.title}
-							className="text-lg font-bold leading-6"
+							className="text-lg font-bold leading-6 flex-1"
 						>
 							{deal.title}
 						</CardTitle>
-						<DealCardMenu onActionClick={handleActionClick} />
+
+						{!selectMode && <DealCardMenu onActionClick={handleActionClick} />}
 					</div>
 				</CardHeader>
 				<CardContent className=" flex  p-2.5">

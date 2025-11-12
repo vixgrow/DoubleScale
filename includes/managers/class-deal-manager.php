@@ -197,8 +197,11 @@ final class Deal_Manager {
 
 		// If stage is being changed, validate it belongs to the pipeline
 		if ( isset( $data['stage_id'] ) && $data['stage_id'] != $deal->stage_id ) {
+			// Use provided pipeline_id or fall back to deal's current pipeline
+			$pipeline_id = isset( $data['pipeline_id'] ) ? $data['pipeline_id'] : $deal->pipeline_id;
+
 			$stage = Pipeline_Stage_Model::where( 'id', $data['stage_id'] )
-				->where( 'pipeline_id', $data['pipeline_id'] )
+				->where( 'pipeline_id', $pipeline_id )
 				->first();
 
 			if ( ! $stage ) {
@@ -550,6 +553,34 @@ final class Deal_Manager {
 		do_action( 'quillcrm_deals_bulk_updated', $deal_ids, $data, $updated_count );
 
 		return $updated_count;
+	}
+
+	/**
+	 * Bulk delete deals
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $deal_ids Array of deal IDs to delete
+	 *
+	 * @return int Number of deals successfully deleted
+	 */
+	public function bulk_delete_deals( $deal_ids ) {
+		if ( empty( $deal_ids ) || ! is_array( $deal_ids ) ) {
+			return 0;
+		}
+
+		$deleted_count = 0;
+
+		foreach ( $deal_ids as $deal_id ) {
+			$deleted = $this->delete_deal( $deal_id );
+			if ( $deleted ) {
+				$deleted_count++;
+			}
+		}
+
+		do_action( 'quillcrm_deals_bulk_deleted', $deal_ids, $deleted_count );
+
+		return $deleted_count;
 	}
 
 	/**

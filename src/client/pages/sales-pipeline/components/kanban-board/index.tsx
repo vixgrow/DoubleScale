@@ -31,6 +31,7 @@ ChartJS.register(ArcElement, Tooltip);
  */
 import { PipelineColumn } from '../pipeline-column';
 import { DealCard } from '../deal-card';
+import { BulkActionsToolbar } from '../bulk-actions-toolbar';
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { Deal } from '../../types';
 import './style.scss';
@@ -61,11 +62,19 @@ interface KanbanBoardProps {
 	onDealScheduleMeeting?: (deal: Deal) => void;
 	onDealLogEmail?: (deal: Deal) => void;
 	loading?: boolean;
+	selectMode?: boolean;
+	selectedDealIds?: number[];
+	toggleDealSelection?: (dealId: number) => void;
+	selectAllVisible?: () => void;
+	clearSelection?: () => void;
+	isPerformingBulk?: boolean;
+	setIsPerformingBulk?: (performing: boolean) => void;
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	pipeline,
 	deals,
+	onRefresh,
 	updateDealOptimistically,
 	onDealView,
 	onDealEdit,
@@ -75,7 +84,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	onDealScheduleMeeting,
 	onDealLogEmail,
 	loading = false,
-	
+	selectMode = false,
+	selectedDealIds = [],
+	toggleDealSelection,
+	selectAllVisible,
+	clearSelection,
+	isPerformingBulk = false,
+	setIsPerformingBulk,
 }) => {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const { moveDealToStage } = useDealOperations();
@@ -447,9 +462,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								onDealScheduleMeeting={onDealScheduleMeeting}
 								onDealLogEmail={onDealLogEmail}
 								loading={loading}
-								// pipeline={data}
 								pipeline={pipeline}
-								
+								selectMode={selectMode}
+								selectedDealIds={selectedDealIds}
+								toggleDealSelection={toggleDealSelection}
 							/>
 						))}
 				</div>
@@ -481,6 +497,23 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 					) : null}
 				</DragOverlay>
 			</DndContext>
+
+			{/* Bulk Actions Toolbar */}
+			{selectMode && selectedDealIds.length > 0 && (
+				<BulkActionsToolbar
+					selectedCount={selectedDealIds.length}
+					selectedDealIds={selectedDealIds}
+					pipeline={pipeline}
+					clearSelection={clearSelection || (() => {})}
+					selectAllVisible={selectAllVisible || (() => {})}
+					isPerformingBulk={isPerformingBulk}
+					setIsPerformingBulk={setIsPerformingBulk || (() => {})}
+					onComplete={() => {
+						clearSelection?.();
+						onRefresh();
+					}}
+				/>
+			)}
 		</div>
 	);
 };

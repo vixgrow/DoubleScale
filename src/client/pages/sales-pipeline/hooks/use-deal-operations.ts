@@ -274,6 +274,33 @@ export const useDealOperations = (): DealOperationsReturn => {
 		[]
 	);
 
+	/**
+	 * Bulk delete deals
+	 */
+	const bulkDeleteDeals = useCallback(
+		async (dealIds: number[]) => {
+			try {
+				const response = (await apiFetch({
+					path: '/qc/v1/deals/bulk-delete',
+					method: 'DELETE',
+					data: {
+						deal_ids: dealIds,
+					},
+				})) as { deleted_count: number };
+
+				return response.deleted_count;
+			} catch (error) {
+				const errorInfo = handleApiError(
+					'bulk delete deals',
+					error,
+					__('Failed to delete deals. Please try again.', 'quillcrm')
+				);
+				throw new Error(errorInfo.message);
+			}
+		},
+		[]
+	);
+
 	return {
 		getDeal,
 		getDealActivities,
@@ -283,5 +310,6 @@ export const useDealOperations = (): DealOperationsReturn => {
 		deleteDeal,
 		createDeal,
 		bulkUpdateDeals,
+		bulkDeleteDeals,
 	};
 };

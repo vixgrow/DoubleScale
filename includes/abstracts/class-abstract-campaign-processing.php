@@ -140,14 +140,17 @@ abstract class Abstract_Campaign_Processing {
 	 * @return string Daily callback key
 	 */
 	protected function get_daily_callback_key() {
+		// Convert channel integer to string for array lookup
+		$channel_string = Campaign_Channel::to_string( $this->channel );
+
 		// Map campaign types to daily callback keys
 		$callbacks = array(
 			'email'    => 'quillcrm_daily3',
-			'sms'      => 'quillcrm_daily3', // Shares with email
+			'sms'      => 'quillcrm_daily4',
 			'whatsapp' => 'quillcrm_daily4',
 		);
 
-		return $callbacks[ $this->channel ] ?? 'quillcrm_daily_' . $this->channel;
+		return $callbacks[ $channel_string ] ?? 'quillcrm_daily_' . $channel_string;
 	}
 
 
@@ -282,16 +285,29 @@ abstract class Abstract_Campaign_Processing {
 
 	/**
 	 * Prepare StatusCallback URL for Twilio requests (common logic)
-	 * Excludes StatusCallback for localhost development environments
 	 *
+	 * IMPORTANT: StatusCallback is enabled for all environments including localhost.
+	 * For local development webhook testing, you must use a tunneling service like:
+	 * - ngrok (https://ngrok.com)
+	 * - Expose (https://expose.dev)
+	 * - LocalTunnel (https://localtunnel.github.io)
+	 *
+	 * Without a tunnel, Twilio cannot reach localhost URLs and webhooks will fail silently.
+	 * This is expected behavior and does not affect message delivery, only delivery tracking.
+	 *
+	 * To disable webhooks entirely (e.g., for testing), use this filter:
+	 * add_filter( 'quillcrm_enable_provider_webhooks', '__return_false' );
+	 *
+	 * @since 1.0.0
 	 * @param string $webhook_url The webhook URL to use
 	 * @param array  $data The message data array to modify
-	 * @return array Modified data array
+	 * @return array Modified data array with StatusCallback added
 	 */
 	protected function prepare_status_callback( $webhook_url, $data = array() ) {
-		// $site_url = home_url();
-		// if ( ! empty( $webhook_url ) && strpos( $site_url, 'localhost' ) === false && strpos( $site_url, '127.0.0.1' ) === false ) {
-		if ( ! empty( $webhook_url ) ) {
+		// Allow filtering webhook behavior
+		$webhooks_enabled = apply_filters( 'quillcrm_enable_provider_webhooks', true );
+
+		if ( ! empty( $webhook_url ) && $webhooks_enabled ) {
 			$data['StatusCallback'] = $webhook_url;
 		}
 

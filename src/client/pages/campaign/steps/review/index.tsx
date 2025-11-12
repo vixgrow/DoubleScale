@@ -23,16 +23,13 @@ import {
 	RecipientsCard,
 	ScheduleCard,
 	SendTestEmailCard,
+	SendTestSMSCard,
 } from './components';
 import type {
 	NoticeMessage,
 	EmailTemplate,
 	SMSTemplate,
-	WhatsAppTemplate,
 } from '@quillcrm/client';
-//@ts-ignore
-import device from '../../../../../../assets/images/message-device.png';
-import SMSDevice from '../templates/sms-device';
 
 const Review: React.FC = () => {
 	const {
@@ -77,7 +74,7 @@ const Review: React.FC = () => {
 
 	// Get template info from campaign
 	// Backend attaches templates via attach_templates() method
-	type CampaignTemplate = EmailTemplate | SMSTemplate | WhatsAppTemplate;
+	type CampaignTemplate = EmailTemplate | SMSTemplate;
 	const template: CampaignTemplate | null =
 		(campaign?.settings?.templates?.[0] as CampaignTemplate) || null;
 
@@ -110,9 +107,6 @@ const Review: React.FC = () => {
 		isEmailTemplate && (template as EmailTemplate).settings?.preview_text
 			? (template as EmailTemplate).settings!.preview_text
 			: '-';
-
-	const smsBody =
-		template && template.type === 'sms' ? template.body : undefined;
 
 	// Debug: Log template structure to verify data
 	useEffect(() => {
@@ -391,14 +385,14 @@ const Review: React.FC = () => {
 					</PanelSettings>
 				</div>
 
-				{/* Send Test Email or Device Preview */}
-				{campaign?.type === 'sms' ? (
-					<SMSDevice fromName={fromName} body={smsBody} />
-				) : (
-					<div className="w-1/3">
+				{/* Send Test Email or SMS Card */}
+				<div className="w-1/3">
+					{campaign?.type === 'sms' ? (
+						<SendTestSMSCard campaignId={campaign?.id} />
+					) : (
 						<SendTestEmailCard campaignId={campaign?.id} />
-					</div>
-				)}
+					)}
+				</div>
 			</div>
 		</PanelLayout>
 	);

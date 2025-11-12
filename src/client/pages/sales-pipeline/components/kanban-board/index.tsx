@@ -31,6 +31,7 @@ ChartJS.register(ArcElement, Tooltip);
  */
 import { PipelineColumn } from '../pipeline-column';
 import { DealCard } from '../deal-card';
+import { BulkActionsToolbar } from '../bulk-actions-toolbar';
 import { useDealOperations } from '../../hooks/use-deal-operations';
 import { Deal } from '../../types';
 import './style.scss';
@@ -61,11 +62,19 @@ interface KanbanBoardProps {
 	onDealScheduleMeeting?: (deal: Deal) => void;
 	onDealLogEmail?: (deal: Deal) => void;
 	loading?: boolean;
+	selectMode?: boolean;
+	selectedDealIds?: number[];
+	toggleDealSelection?: (dealId: number) => void;
+	selectAllVisible?: () => void;
+	clearSelection?: () => void;
+	isPerformingBulk?: boolean;
+	setIsPerformingBulk?: (performing: boolean) => void;
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	pipeline,
 	deals,
+	onRefresh,
 	updateDealOptimistically,
 	onDealView,
 	onDealEdit,
@@ -75,7 +84,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	onDealScheduleMeeting,
 	onDealLogEmail,
 	loading = false,
-	
+	selectMode = false,
+	selectedDealIds = [],
+	toggleDealSelection,
+	selectAllVisible,
+	clearSelection,
+	isPerformingBulk = false,
+	setIsPerformingBulk,
 }) => {
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const { moveDealToStage } = useDealOperations();
@@ -283,8 +298,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	return (
 		<div className="kanban-board">
 			{/* Pipeline Statistics */}
-			<div className=" mb-6 w-full overflow-hidden ">
-				<div className="flex justify-between items-center gap-8">
+			<div className=" mb-6 w-full ">
+				<div className="flex justify-between items-center">
 					<div className="flex w-full gap-4">
 						<div className="stat-item flex justify-between items-center border-l-[3px] border-[#3B82F6] rounded-[8px] bg-[#F8F8F8] p-4 w-[25%]">
 							<div className=" flex flex-col">
@@ -338,7 +353,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 							/>
 						</div>
 					</div>
-						<div className="stat-item flex justify-between border-l-[3px] border-[#16A34A] rounded-[8px] bg-[#F8F8F8] p-4 w-[45%]">
+						<div className="stat-item flex justify-between border-l-[3px] border-[#16A34A] rounded-[8px] bg-[#F8F8F8] p-4 w-[50%]">
 							<div className=" flex justify-between items-center w-[45%]">
 								<div className="flex flex-col">
 									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] ">
@@ -447,9 +462,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								onDealScheduleMeeting={onDealScheduleMeeting}
 								onDealLogEmail={onDealLogEmail}
 								loading={loading}
-								// pipeline={data}
 								pipeline={pipeline}
-								
+								selectMode={selectMode}
+								selectedDealIds={selectedDealIds}
+								toggleDealSelection={toggleDealSelection}
 							/>
 						))}
 				</div>
@@ -481,6 +497,23 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 					) : null}
 				</DragOverlay>
 			</DndContext>
+
+			{/* Bulk Actions Toolbar */}
+			{selectMode && selectedDealIds.length > 0 && (
+				<BulkActionsToolbar
+					selectedCount={selectedDealIds.length}
+					selectedDealIds={selectedDealIds}
+					pipeline={pipeline}
+					clearSelection={clearSelection || (() => {})}
+					selectAllVisible={selectAllVisible || (() => {})}
+					isPerformingBulk={isPerformingBulk}
+					setIsPerformingBulk={setIsPerformingBulk || (() => {})}
+					onComplete={() => {
+						clearSelection?.();
+						onRefresh();
+					}}
+				/>
+			)}
 		</div>
 	);
 };

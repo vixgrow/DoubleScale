@@ -153,6 +153,16 @@ class REST_Deal_Controller extends REST_Controller {
 				'permission_callback' => array( $this, 'update_items_permissions_check' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/bulk-delete',
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'bulk_delete' ),
+				'permission_callback' => array( $this, 'delete_items_permissions_check' ),
+			)
+		);
 	}
 
 	/**
@@ -632,6 +642,25 @@ class REST_Deal_Controller extends REST_Controller {
 	}
 
 	/**
+	 * Bulk delete deals
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function bulk_delete( $request ) {
+		$deal_ids = $request->get_param( 'deal_ids' );
+
+		if ( ! is_array( $deal_ids ) || empty( $deal_ids ) ) {
+			return new WP_Error( 'invalid_data', 'Deal IDs array is required', array( 'status' => 400 ) );
+		}
+
+		$deleted_count = Deal_Manager::instance()->bulk_delete_deals( $deal_ids );
+
+		return new WP_REST_Response( array( 'deleted_count' => $deleted_count ), 200 );
+	}
+
+	/**
 	 * Prepare the item for the REST response
 	 *
 	 * @param Deal            $deal Deal object.
@@ -945,6 +974,17 @@ class REST_Deal_Controller extends REST_Controller {
 	 * @return bool
 	 */
 	public function update_items_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
+	}
+
+	/**
+	 * Check if user can delete deals
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool
+	 */
+	public function delete_items_permissions_check( $request ) {
 		return Permissions::has_crm_manager_access();
 	}
 }

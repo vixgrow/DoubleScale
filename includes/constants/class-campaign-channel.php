@@ -281,4 +281,70 @@ class Campaign_Channel {
 		}
 		return 'email';
 	}
+
+	/**
+	 * Ensure channel is in string format
+	 *
+	 * Helper method to standardize channel representation. If already a string,
+	 * returns it unchanged. If an integer, converts to string representation.
+	 * This prevents type-mismatch bugs when comparing channels.
+	 *
+	 * @since 1.0.0
+	 * @param int|string $channel Channel as integer constant or string slug
+	 * @return string|null Channel as string slug, or null if invalid
+	 */
+	public static function ensure_string( $channel ) {
+		// Already a string
+		if ( is_string( $channel ) ) {
+			// Validate it's a known string
+			$valid_strings = array(
+				self::STR_EMAIL,
+				self::STR_SMS,
+				self::STR_WHATSAPP,
+				self::STR_SEQUENCE_MAIL,
+				self::STR_EMAIL_SEQUENCE,
+			);
+			return in_array( $channel, $valid_strings, true ) ? $channel : null;
+		}
+
+		// Convert integer to string
+		if ( is_int( $channel ) ) {
+			return self::to_string( $channel );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Ensure channel is in integer format
+	 *
+	 * Helper method to standardize channel representation. If already an integer,
+	 * returns it unchanged. If a string, converts to integer representation.
+	 * This prevents type-mismatch bugs when storing channels.
+	 *
+	 * @since 1.0.0
+	 * @param int|string $channel Channel as integer constant or string slug
+	 * @return int|null Channel as integer constant, or null if invalid
+	 */
+	public static function ensure_integer( $channel ) {
+		// Already an integer
+		if ( is_int( $channel ) ) {
+			// Validate it's a known channel
+			$valid_integers = array(
+				self::CHANNEL_EMAIL,
+				self::CHANNEL_SMS,
+				self::CHANNEL_WHATSAPP,
+				self::CHANNEL_SEQUENCE_MAIL,
+				self::CHANNEL_EMAIL_SEQUENCE,
+			);
+			return in_array( $channel, $valid_integers, true ) ? $channel : null;
+		}
+
+		// Convert string to integer
+		if ( is_string( $channel ) ) {
+			return self::to_integer( $channel );
+		}
+
+		return null;
+	}
 }

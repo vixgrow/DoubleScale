@@ -786,7 +786,7 @@ class REST_Contact_Controller extends REST_Controller {
 							$query->select( 'id', 'name', 'type' );
 						},
 						'template' => function ( $query ) {
-							$query->select( 'id', 'subject', 'body' );
+							$query->select( 'id', 'body', 'settings' );
 						},
 						'message'  => function ( $query ) {
 							$query->select( 'id', 'tracking_id', 'subject', 'body' );
@@ -1564,12 +1564,12 @@ class REST_Contact_Controller extends REST_Controller {
 						'message'   => 'Failed to send double opt-in confirmation email',
 						'source'    => 'QuillCRM\REST_API\Controllers\V1\REST_Contact_Controller',
 						'context'   => array(
-							'contact_id'    => $contact->id,
-							'email'         => $contact->email,
-							'subject'       => $subject,
-							'reason'        => 'wp_mail() returned false',
-							'endpoint'      => '/contacts/' . $contact->id . '/send-opt-in-email',
-							'user_id'       => get_current_user_id(),
+							'contact_id' => $contact->id,
+							'email'      => $contact->email,
+							'subject'    => $subject,
+							'reason'     => 'wp_mail() returned false',
+							'endpoint'   => '/contacts/' . $contact->id . '/send-opt-in-email',
+							'user_id'    => get_current_user_id(),
 						),
 					)
 				);

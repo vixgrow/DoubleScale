@@ -309,8 +309,8 @@ const Review: React.FC = () => {
 					campaign?.type === 'email'
 						? campaignSteps
 						: campaignSteps.filter(
-								(step) => step.slug !== 'builder'
-							)
+							(step) => step.slug !== 'builder'
+						)
 				}
 				canProceed="true"
 				currentStep={campaign?.type === 'email' ? 4 : 3}
@@ -354,6 +354,9 @@ const Review: React.FC = () => {
 								emailSubject={emailSubject}
 								previewText={previewText}
 								onEdit={() => goToStep('template')}
+								button={
+									campaign?.type === 'email' ? true : false
+								}
 							/>
 
 							{/* Recipients */}

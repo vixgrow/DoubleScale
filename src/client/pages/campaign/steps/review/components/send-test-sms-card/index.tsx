@@ -12,14 +12,18 @@ import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertIcon, SendTestEmailIcon } from '@quillcrm/components/icons';
+import { cn } from '@/lib/utils';
 
 interface SendTestSMSCardProps {
 	campaignId?: number;
+	header?: boolean;
+	description?: boolean;
+	cardClassName?: string;
+	buttonClassName?: string;
+	buttonVariant?: 'secondary' | 'gradient';
 }
 
-const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({
-	campaignId,
-}) => {
+const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({ campaignId, header = true, description = true, cardClassName = '', buttonClassName = '', buttonVariant = 'secondary' }) => {
 	const { createNotice } = useDispatch('quillcrm/core');
 	const [testPhone, setTestPhone] = useState('');
 	const [isSendingTest, setIsSendingTest] = useState(false);
@@ -40,10 +44,7 @@ const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({
 		if (!testPhone.trim()) {
 			createNotice({
 				type: 'error',
-				message: __(
-					'Please enter a phone number',
-					'quillcrm'
-				),
+				message: __('Please enter a phone number', 'quillcrm'),
 			});
 			return;
 		}
@@ -88,7 +89,9 @@ const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({
 			});
 
 			// Extract message from template
-			const message = campaign?.settings?.templates?.[0]?.body || __('Test SMS message', 'quillcrm');
+			const message =
+				campaign?.settings?.templates?.[0]?.body ||
+				__('Test SMS message', 'quillcrm');
 
 			// Send test SMS using unified endpoint
 			const response: any = await apiFetch({
@@ -126,8 +129,7 @@ const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({
 			createNotice({
 				type: 'error',
 				message:
-					error.message ||
-					__('Failed to send test SMS', 'quillcrm'),
+					error.message || __('Failed to send test SMS', 'quillcrm'),
 			});
 		} finally {
 			// Only update state if component is still mounted
@@ -138,23 +140,26 @@ const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({
 	};
 
 	return (
-		<div className="bg-[#F8F8F8] rounded-lg border border-gray-200 p-6 sticky top-4">
+		<div className={cn('bg-[#F8F8F8] rounded-lg border border-gray-200 p-6 sticky top-4', cardClassName)}>
 			{/* Header */}
+			{header && (
 			<div className="pb-4 border-b mb-6">
 				<div className="flex items-center gap-2 justify-center text-[#660FF1]">
-					<SendTestEmailIcon  />
+					<SendTestEmailIcon />
 					<h3 className="text-lg text-[#660FF1]">
 						{__('Send test SMS', 'quillcrm')}
 					</h3>
 				</div>
 			</div>
+			)}
 
 			{/* Content */}
 			<div className="space-y-4">
+				{description && (
 				<h4 className="text-base text-[#09090B]">
 					{__('Who do you want to test your SMS with?', 'quillcrm')}
 				</h4>
-
+				)}
 				<div>
 					<label className="block text-base text-[#09090B] mb-2">
 						{__('Send a test SMS to', 'quillcrm')}
@@ -178,11 +183,11 @@ const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({
 				<div className="bg-white border border-[#DEE1E6] rounded-lg p-4">
 					<div className="flex gap-3">
 						<div className="text-destructive">
-						<AlertIcon width={24} height={24} />
+							<AlertIcon width={24} height={24} />
 						</div>
 						<p className="text-base text-destructive">
 							{__(
-								"Your test SMS will be sent from your configured Twilio phone number. Ensure you have SMS credits available in your Twilio account.",
+								'Your test SMS will be sent from your configured Twilio phone number. Ensure you have SMS credits available in your Twilio account.',
 								'quillcrm'
 							)}
 						</p>
@@ -194,9 +199,12 @@ const SendTestSMSCard: React.FC<SendTestSMSCardProps> = ({
 					<Button
 						onClick={sendTestSMS}
 						disabled={isSendingTest || !testPhone.trim()}
-						variant="secondary"
+						variant={buttonVariant}
+						className={buttonClassName}
 					>
-						{isSendingTest ? __('Sending...', 'quillcrm') : __('Send Test', 'quillcrm')}
+						{isSendingTest
+							? __('Sending...', 'quillcrm')
+							: __('Send Test', 'quillcrm')}
 					</Button>
 				</div>
 			</div>

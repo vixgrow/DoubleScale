@@ -29,7 +29,6 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogOverlay,
-	DialogTitle,
 } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
 import { convertToWordPressTimezone } from '@/utils/index';
@@ -40,6 +39,7 @@ import {
 	CardLayout,
 	CampaignSettingsCard,
 	SendTestEmailCard,
+	SendTestSMSCard,
 } from '../review/components';
 import SMSDevice from '../templates/sms-device';
 import type {
@@ -152,11 +152,13 @@ const renderTemplateBody = async (
 
 const View: React.FC = () => {
 	const { campaign } = useCampaignStep();
+	console.log(campaign);
 	const navigate = useNavigate();
-	const [isSendTestDialogOpen, setIsSendTestDialogOpen] = useState(false);
+	const [dialogChannel, setDialogChannel] = useState<
+		typeof CAMPAIGN_CHANNEL.EMAIL | typeof CAMPAIGN_CHANNEL.SMS | null
+	>(null);
 	const [renderedTemplate, setRenderedTemplate] = useState<string>('');
 	const [isRenderingTemplate, setIsRenderingTemplate] = useState(false);
-
 	const template: CampaignTemplate | null =
 		(campaign?.settings?.templates?.[0] as CampaignTemplate) ?? null;
 
@@ -239,12 +241,6 @@ const View: React.FC = () => {
 	const previewText = isEmailTemplate
 		? ((template as EmailTemplate)?.settings?.preview_text ?? '-')
 		: '-';
-	const fromPhone =
-		campaign?.type === CAMPAIGN_CHANNEL.SMS
-			? (templateSettings?.from_phone ??
-				(campaign?.settings as Record<string, any>)?.from_phone ??
-				'-')
-			: '-';
 
 	const smsBody =
 		isSmsTemplate && template
@@ -285,15 +281,20 @@ const View: React.FC = () => {
 								showButtons={true}
 								onBack={handleClose}
 								backLabel={__('Cancel Schedule', 'quillcrm')}
-								onNext={() => setIsSendTestDialogOpen(true)}
-								nextLabel={__('Send Test Email', 'quillcrm')}
+								onNext={() =>
+									setDialogChannel(
+										campaign?.type === CAMPAIGN_CHANNEL.SMS
+											? CAMPAIGN_CHANNEL.SMS
+											: CAMPAIGN_CHANNEL.EMAIL
+									)
+								}
+								nextLabel={campaign?.type === CAMPAIGN_CHANNEL.EMAIL ? __('Send Test Email', 'quillcrm') : __('Send Test SMS', 'quillcrm')}
 							>
 								<div className="space-y-6">
 									<CampaignSettingsCard
 										campaignType={campaign?.type}
 										fromName={fromName ?? '-'}
 										fromEmail={fromEmail}
-										fromPhone={fromPhone}
 										replyTo={replyTo}
 										emailSubject={emailSubject}
 										previewText={previewText}
@@ -312,7 +313,9 @@ const View: React.FC = () => {
 
 						<div className="w-2/5 border rounded-lg bg-[#f8f8f8] p-4">
 							<div className="text-[#333333] font-medium text-2xl">
-								{__('Email Preview', 'quillcrm')}
+								{campaign.type === CAMPAIGN_CHANNEL.EMAIL
+									? __('Email Preview', 'quillcrm')
+									: __('SMS Preview', 'quillcrm')}
 							</div>
 							<div className="flex items-center justify-center">
 								{campaign.type === CAMPAIGN_CHANNEL.EMAIL ? (
@@ -343,8 +346,8 @@ const View: React.FC = () => {
 									)
 								) : (
 									<SMSDevice
-										fromName={fromName}
 										body={smsBody}
+										className="bg-transparent border-none py-0 sm:p-0 lg:w-full mt-4"
 									/>
 								)}
 							</div>
@@ -358,31 +361,47 @@ const View: React.FC = () => {
 			</PanelLayout>
 
 			<Dialog
-				open={isSendTestDialogOpen}
-				onOpenChange={setIsSendTestDialogOpen}
+				open={dialogChannel !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setDialogChannel(null);
+					}
+				}}
 			>
 				<DialogOverlay className="z-[1700000]" />
 				<DialogContent className="sm:max-w-xl z-[1700000]">
 					<DialogHeader>
-						<DialogTitle>
-							<CustomDialogHeader
-								title={__('Send Test Email', 'quillcrm')}
-								subtitle={__(
-									'Who do you want to test your email with?',
-									'quillcrm'
-								)}
-								icon={<GradientLinkIcon />}
-							/>
-						</DialogTitle>
+						<CustomDialogHeader
+							title={dialogChannel === CAMPAIGN_CHANNEL.SMS ? __('Send Test SMS', 'quillcrm') : __('Send Test Email', 'quillcrm')}
+							subtitle={dialogChannel === CAMPAIGN_CHANNEL.SMS ? __(
+								'Who do you want to test your SMS with?',
+								'quillcrm'
+							) : __(
+								'Who do you want to test your email with?',
+								'quillcrm'
+							)}
+							icon={<GradientLinkIcon />}
+						/>
 					</DialogHeader>
-					<SendTestEmailCard
-						campaignId={campaign?.id}
-						header={false}
-						description={false}
-						cardClassName="bg-white border-none shadow-none p-0"
-						buttonClassName="w-full"
-						buttonVariant="gradient"
-					/>
+					{dialogChannel === CAMPAIGN_CHANNEL.SMS ? (
+						<SendTestSMSCard
+							campaignId={campaign?.id}
+							header={false}
+							description={false}
+							cardClassName="bg-white border-none shadow-none p-0"
+							buttonClassName="w-full"
+							buttonVariant="gradient"
+						/>
+					) : (
+						<SendTestEmailCard
+							campaignId={campaign?.id}
+							header={false}
+							description={false}
+							cardClassName="bg-white border-none shadow-none p-0"
+							buttonClassName="w-full"
+							buttonVariant="gradient"
+						/>
+					)}
 				</DialogContent>
 			</Dialog>
 		</>

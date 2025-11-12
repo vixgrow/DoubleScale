@@ -890,10 +890,16 @@ class REST_Contact_Controller extends REST_Controller {
 
 			$stats = $wpdb->get_row( $query );
 
+			$total_sent    = (int) ( $stats->total_sent ?? 0 );
+			$total_opened  = (int) ( $stats->total_opened ?? 0 );
+			$total_clicked = (int) ( $stats->total_clicked ?? 0 );
+
 			return array(
-				'total_sent'    => (int) ( $stats->total_sent ?? 0 ),
-				'total_opened'  => (int) ( $stats->total_opened ?? 0 ),
-				'total_clicked' => (int) ( $stats->total_clicked ?? 0 ),
+				'total_sent'    => $total_sent,
+				'total_opened'  => $total_opened,
+				'total_clicked' => $total_clicked,
+				'open_rate'     => $total_sent > 0 ? round( ( $total_opened / $total_sent ) * 100, 2 ) : 0,
+				'click_rate'    => $total_sent > 0 ? round( ( $total_clicked / $total_sent ) * 100, 2 ) : 0,
 			);
 		} else {
 			// SMS/WhatsApp statistics

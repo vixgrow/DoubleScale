@@ -86,12 +86,22 @@
 
 	.qcrm-navbar__item {
 		list-style: none;
+		opacity: 0;
+		transform: translateY(8px);
+		transition: opacity 0.22s ease-out, transform 0.22s ease-out;
 
 		>button {
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
 			align-items: center;
+		}
+	}
+
+	&.qcrm-navbar--mounted {
+		.qcrm-navbar__item {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
 
@@ -105,7 +115,6 @@
 	.qcrm-navbar__link:hover {
 		color: #ffffff;
 		background: rgba(255, 255, 255, 0.08);
-		transform: translateX(4px);
 	}
 
 	.qcrm-navbar__link[data-active='true'] {

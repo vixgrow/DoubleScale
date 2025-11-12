@@ -61,8 +61,14 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const [selectedKey, setSelectedKey] = useState<string>(defaultSelectedPath);
 	const [isAtTop, setIsAtTop] = useState(true);
 	const [isAtBottom, setIsAtBottom] = useState(false);
+	const [isMounted, setIsMounted] = useState(false);
 	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 	const { hasRequiredCapability } = useCapabilities();
+
+	useEffect(() => {
+		const frameId = requestAnimationFrame(() => setIsMounted(true));
+		return () => cancelAnimationFrame(frameId);
+	}, []);
 
 	const navigationItems = useMemo(() => {
 		const pages = getAdminPages();
@@ -114,11 +120,14 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		});
 	};
 
-	const renderMenuItem = (item: NavigationItem) => (
+	const renderMenuItem = (item: NavigationItem, index: number) => (
 		<SidebarMenuItem
 			key={item.path}
 			onClick={() => handleNavigation(item.path)}
 			className="qcrm-navbar__item"
+			style={{
+				transitionDelay: `${Math.min(index * 100, 300)}ms`,
+			}}
 		>
 			<SidebarMenuButton
 				size="xl"
@@ -198,7 +207,11 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	}, [navigationItems, updateScrollIndicators]);
 
 	return (
-		<Sidebar collapsible="icon" className="qcrm-navbar">
+		<Sidebar
+			collapsible="icon"
+			className={`qcrm-navbar${isMounted ? ' qcrm-navbar--mounted' : ''
+				}`}
+		>
 			<div className="qcrm-navbar__surface">
 				<SidebarHeader className="qcrm-navbar__header">
 					<div className="qcrm-navbar__brand">
@@ -224,7 +237,9 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						className="qcrm-navbar__scroll-container"
 					>
 						<SidebarMenu className="qcrm-navbar__menu">
-							{navigationItems.map(renderMenuItem)}
+							{navigationItems.map((item, index) =>
+								renderMenuItem(item, index)
+							)}
 						</SidebarMenu>
 					</div>
 					{!isAtBottom && (

@@ -133,15 +133,32 @@ class Email_Processing extends Abstract_Campaign_Processing {
 		// Only prepare footer for builder emails
 		// Non-builder emails use the old add_footer_and_tracking() method in send_message()
 		if ( ! $is_builder_email ) {
+			quillcrm_get_logger()->debug(
+				'Skipping footer preparation - not a builder email',
+				array(
+					'source' => 'email-campaign-processing',
+					'is_json' => ( json_last_error() === JSON_ERROR_NONE ),
+					'has_type' => isset( $decoded['type'] ),
+				)
+			);
 			return '';
 		}
 
 		// Get footer content (respecting settings hierarchy)
 		if ( ! empty( $this->settings['email_footer'] ) ) {
-			$email_footer = $this->settings['email_footer'];
+			$email_footer  = $this->settings['email_footer'];
+			$footer_source = 'campaign_settings';
 		} else {
 			$global_settings = \QuillCRM\Settings::get( 'email', array() );
-			$email_footer    = $global_settings['email_footer'] ?? Email_Tracking_Helper::get_default_footer();
+			// Check if global setting has non-empty footer.
+			if ( ! empty( $global_settings['email_footer'] ) ) {
+				$email_footer  = $global_settings['email_footer'];
+				$footer_source = 'global_settings';
+			} else {
+				// Use default footer if campaign and global settings are both empty.
+				$email_footer  = Email_Tracking_Helper::get_default_footer();
+				$footer_source = 'default';
+			}
 		}
 
 		// Add tracking pixel to footer
@@ -150,10 +167,27 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			home_url( '?quillcrm=email_open&hash_key=' . $campaign_message->hash_key )
 		);
 
+		$footer_html = $email_footer . $tracking_pixel;
+
+		// Log footer preparation for debugging
+		quillcrm_get_logger()->debug(
+			'Prepared footer for builder email',
+			array(
+				'source'                     => 'email-campaign-processing',
+				'footer_source'              => $footer_source,
+				'footer_length'              => strlen( $footer_html ),
+				'email_footer_length'        => strlen( $email_footer ),
+				'has_unsubscribe_merge_tag'  => ( strpos( $email_footer, '{{contact:unsubscribe_link}}' ) !== false ),
+				'campaign_settings_empty'    => empty( $this->settings['email_footer'] ),
+				'global_settings_empty'      => empty( $global_settings['email_footer'] ),
+				'email_footer_preview'       => substr( $email_footer, 0, 100 ),
+			)
+		);
+
 		// Return footer with tracking pixel
 		// NOTE: Merge tags in footer will be processed in prepare_message_content()
 		// after the builder content is rendered, ensuring consistent processing
-		return $email_footer . $tracking_pixel;
+		return $footer_html;
 	}
 
 	/**
@@ -183,6 +217,15 @@ class Email_Processing extends Abstract_Campaign_Processing {
 			// For non-builder emails, add footer and tracking using the old method
 			// Builder emails already have footer and tracking pixel injected during render
 			if ( ! $is_builder_email ) {
+				quillcrm_get_logger()->debug(
+					'Using legacy footer method for non-builder email',
+					array(
+						'source'      => 'email-campaign-processing',
+						'contact_id'  => $contact->id,
+						'body_length' => strlen( $message_data['body'] ),
+					)
+				);
+
 				// Build complete email message with footer and tracking (using shared helper)
 				$complete_message = Email_Tracking_Helper::add_footer_and_tracking(
 					$message_data['body'],
@@ -191,6 +234,17 @@ class Email_Processing extends Abstract_Campaign_Processing {
 					$this->settings
 				);
 			} else {
+				quillcrm_get_logger()->debug(
+					'Builder email detected - footer should already be injected',
+					array(
+						'source'            => 'email-campaign-processing',
+						'contact_id'        => $contact->id,
+						'body_length'       => strlen( $message_data['body'] ),
+						'has_email_footer'  => ( strpos( $message_data['body'], '<!-- Email Footer -->' ) !== false ),
+						'has_tracking_pixel' => ( strpos( $message_data['body'], 'quillcrm=email_open' ) !== false ),
+					)
+				);
+
 				// Builder email - footer and tracking already injected
 				$complete_message = $message_data['body'];
 			}

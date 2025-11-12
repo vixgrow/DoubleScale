@@ -64,6 +64,7 @@ export interface EmailBuilderState {
 	draggedBlock: EmailBlock | null;
 	globalSettings: GlobalEmailSettings;
 	buttonSettings: Record<ButtonType, ButtonSettings>;
+	isLoading: boolean;
 	history: {
 		past: EmailSection[][];
 		present: EmailSection[];
@@ -194,6 +195,13 @@ export interface SetButtonSettingsAction {
 	};
 }
 
+export interface SetLoadingAction {
+	type: 'SET_LOADING';
+	payload: {
+		isLoading: boolean;
+	};
+}
+
 export type EmailBuilderActionTypes =
 	| AddBlockAction
 	| UpdateBlockAction
@@ -211,4 +219,5 @@ export type EmailBuilderActionTypes =
 	| UndoAction
 	| RedoAction
 	| UpdateButtonSettingsAction
-	| SetButtonSettingsAction;
+	| SetButtonSettingsAction
+	| SetLoadingAction;

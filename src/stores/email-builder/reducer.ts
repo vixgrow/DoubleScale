@@ -13,6 +13,7 @@ import {
 	SELECT_BLOCK,
 	SET_BUILDER_STATE,
 	SET_BUTTON_SETTINGS,
+	SET_LOADING,
 	UNDO,
 	UPDATE_BLOCK,
 	UPDATE_BUTTON_SETTINGS,
@@ -34,6 +35,7 @@ const initialState: EmailBuilderState = {
 	selectedSectionId: null,
 	selectedColumnId: null,
 	draggedBlock: null,
+	isLoading: false,
 	globalSettings: {
 		canvasColor: '#ffffff',
 		backgroundImage: null,
@@ -432,6 +434,14 @@ const reducer: Reducer<EmailBuilderState, EmailBuilderActionTypes> = (
 			return {
 				...state,
 				buttonSettings: settings,
+			};
+		}
+
+		case SET_LOADING: {
+			const { isLoading } = action.payload;
+			return {
+				...state,
+				isLoading,
 			};
 		}
 

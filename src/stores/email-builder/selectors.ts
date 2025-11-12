@@ -139,3 +139,8 @@ export const getButtonSettings = (
 ): ButtonSettings => {
 	return state.buttonSettings[buttonType];
 };
+
+// Loading selectors
+export const getIsLoading = (state: EmailBuilderState): boolean => {
+	return state.isLoading;
+};

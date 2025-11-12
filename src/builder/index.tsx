@@ -20,7 +20,7 @@ import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import BlockEditor from './components/BlockEditor';
 import DragOverlayRenderer from './components/DragOverlayRenderer';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { STORE_KEY } from '../stores/email-builder/constants';
 import { useButtonSettings } from './hooks/useButtonSettings';
 import { useCollisionDetection } from './hooks/useCollisionDetection';
@@ -69,6 +69,11 @@ const BuilderContent: React.FC<BuilderProps> = ({
 					interval: autoSave.interval ?? 10000,
 				};
 
+	const existingTemplateData = useSelect(
+		(select: any) => select('quillcrm/campaign').getStepData('template'),
+		[]
+	);
+
 	useButtonSettings();
 
 	const customCollisionDetection = useCollisionDetection();
@@ -82,26 +87,90 @@ const BuilderContent: React.FC<BuilderProps> = ({
 		useDragHandlers(onDragEndCallback);
 
 	useEffect(() => {
-		// Always reset on mount/prop change, then hydrate from provided initialData
-		dispatch(STORE_KEY).resetBuilder();
+		if (initialData) {
+			dispatch(STORE_KEY).setLoading(true);
+			dispatch(STORE_KEY).resetBuilder();
 
-		if (!initialData) {
+			const { sections, globalSettings, buttonSettings } = initialData;
+
+			if (sections?.length) {
+				dispatch(STORE_KEY).setBuilderState(sections);
+			}
+			if (globalSettings) {
+				dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
+			}
+			if (buttonSettings) {
+				Object.entries(buttonSettings).forEach(([type, settings]) => {
+					dispatch(STORE_KEY).updateButtonSettings(type, settings);
+				});
+			}
+			
+			// Set loading to false after a brief delay to ensure UI updates
+			setTimeout(() => {
+				dispatch(STORE_KEY).setLoading(false);
+			}, 100);
 			return;
 		}
 
-		const { sections, globalSettings, buttonSettings } = initialData;
-		if (sections?.length) {
-			dispatch(STORE_KEY).setBuilderState(sections);
+		// Load from campaign template if available
+		if (!existingTemplateData?.template_id) {
+			dispatch(STORE_KEY).resetBuilder();
+			return;
 		}
-		if (globalSettings) {
-			dispatch(STORE_KEY).updateGlobalSettings(globalSettings);
-		}
-		if (buttonSettings) {
-			Object.entries(buttonSettings).forEach(([type, settings]) => {
-				dispatch(STORE_KEY).updateButtonSettings(type, settings);
-			});
-		}
-	}, [initialData, dispatch]);
+
+		const loadTemplate = async () => {
+			try {
+				dispatch(STORE_KEY).setLoading(true);
+				const { getTemplate } = await import('./api/templates');
+				const template = await getTemplate(
+					existingTemplateData.template_id
+				);
+
+				const body =
+					typeof template.body === 'string'
+						? JSON.parse(template.body)
+						: template.body;
+
+				if (body?.type === 'builder' && body.value) {
+					// Reset before loading template data
+					dispatch(STORE_KEY).resetBuilder();
+
+					const { sections, globalSettings, buttonSettings } =
+						body.value;
+
+					if (sections?.length) {
+						dispatch(STORE_KEY).setBuilderState(sections);
+					}
+					if (globalSettings) {
+						dispatch(STORE_KEY).updateGlobalSettings(
+							globalSettings
+						);
+					}
+					if (buttonSettings) {
+						Object.entries(buttonSettings).forEach(
+							([type, settings]) => {
+								dispatch(STORE_KEY).updateButtonSettings(
+									type,
+									settings
+								);
+							}
+						);
+					}
+				} else {
+					dispatch(STORE_KEY).resetBuilder();
+				}
+			} catch (error) {
+				console.error('Failed to load template:', error);
+				// If template loading fails, start fresh
+				dispatch(STORE_KEY).resetBuilder();
+			} finally {
+				// Always set loading to false when done
+				dispatch(STORE_KEY).setLoading(false);
+			}
+		};
+
+		loadTemplate();
+	}, [initialData, existingTemplateData?.template_id, dispatch]);
 
 	// Cleanup: Reset builder state when component unmounts
 	useEffect(() => {
@@ -203,9 +272,6 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						<Sidebar
 							sidebarCloseTrigger={sidebarCloseTrigger}
 							templatesRefreshKey={templatesRefreshTrigger}
-							openGlobalSettings={() =>
-								dispatch(STORE_KEY).clearSelection()
-							}
 						/>
 						<Canvas />
 

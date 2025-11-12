@@ -31,3 +31,6 @@ export const REDO = 'REDO';
 // Button settings actions
 export const UPDATE_BUTTON_SETTINGS = 'UPDATE_BUTTON_SETTINGS';
 export const SET_BUTTON_SETTINGS = 'SET_BUTTON_SETTINGS';
+
+// Loading actions
+export const SET_LOADING = 'SET_LOADING';

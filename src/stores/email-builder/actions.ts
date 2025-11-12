@@ -11,6 +11,7 @@ import {
 	SELECT_BLOCK,
 	SET_BUILDER_STATE,
 	SET_BUTTON_SETTINGS,
+	SET_LOADING,
 	UNDO,
 	UPDATE_BLOCK,
 	UPDATE_BUTTON_SETTINGS,
@@ -155,4 +156,10 @@ export const setButtonSettings = (
 ): EmailBuilderActionTypes => ({
 	type: SET_BUTTON_SETTINGS,
 	payload: { settings },
+});
+
+// Loading actions
+export const setLoading = (isLoading: boolean): EmailBuilderActionTypes => ({
+	type: SET_LOADING,
+	payload: { isLoading },
 });

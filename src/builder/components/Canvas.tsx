@@ -16,12 +16,9 @@ import { LayoutTemplate } from '../types';
 import { useDroppable } from '@dnd-kit/core';
 import { EmailBuilderService } from '@/builder/services/EmailBuilderService';
 import { SectionDropZone } from './SectionDropZone';
+import CanvasShimmer from './CanvasShimmer';
 
-interface CanvasProps {
-	// No props needed since we're using the store
-}
-
-const Canvas = ({}: CanvasProps) => {
+const Canvas = () => {
 	const dispatch = useDispatch();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -45,6 +42,10 @@ const Canvas = ({}: CanvasProps) => {
 		(select) => select(STORE_KEY).getGlobalSettings(),
 		[]
 	);
+	const isLoading = useSelect(
+		(select) => select(STORE_KEY).getIsLoading(),
+		[]
+	);
 
 	const handleOpenModal = () => {
 		setIsModalOpen(true);
@@ -66,7 +67,7 @@ const Canvas = ({}: CanvasProps) => {
 				className="mx-auto relative py-4"
 				style={{ width: `${globalSettings.canvasWidth}px` }}
 			>
-				{sections.length > 0 && (
+				{(sections.length > 0 || isLoading) && (
 					<div className="p-2 bg-primary w-fit rounded-t-xl absolute -top-9 left-0 text-white">
 						{__('Email Page', 'quillcrm')}
 					</div>
@@ -94,7 +95,9 @@ const Canvas = ({}: CanvasProps) => {
 						items={sections.map((s) => s.id)}
 						strategy={verticalListSortingStrategy}
 					>
-						{sections.length === 0 ? (
+						{isLoading ? (
+							<CanvasShimmer />
+						) : sections.length === 0 ? (
 							<div
 								ref={setNodeRef}
 								className="text-center py-16 px-8 relative"

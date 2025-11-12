@@ -283,8 +283,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	return (
 		<div className="kanban-board">
 			{/* Pipeline Statistics */}
-			<div className=" mb-6 w-full overflow-hidden ">
-				<div className="flex justify-between items-center gap-8">
+			<div className=" mb-6 w-full ">
+				<div className="flex justify-between items-center">
 					<div className="flex w-full gap-4">
 						<div className="stat-item flex justify-between items-center border-l-[3px] border-[#3B82F6] rounded-[8px] bg-[#F8F8F8] p-4 w-[25%]">
 							<div className=" flex flex-col">
@@ -338,7 +338,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 							/>
 						</div>
 					</div>
-						<div className="stat-item flex justify-between border-l-[3px] border-[#16A34A] rounded-[8px] bg-[#F8F8F8] p-4 w-[45%]">
+						<div className="stat-item flex justify-between border-l-[3px] border-[#16A34A] rounded-[8px] bg-[#F8F8F8] p-4 w-[50%]">
 							<div className=" flex justify-between items-center w-[45%]">
 								<div className="flex flex-col">
 									<span className="stat-label text-2xl font-semibold pb-2 text-[#09090B] tracking-[-1px] ">

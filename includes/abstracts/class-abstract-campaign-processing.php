@@ -1197,7 +1197,7 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		// Check for subject in email templates
-		if ( $campaign_type === Campaign_Channel::CHANNEL_EMAIL && empty( trim( $template->subject ) ) ) {
+		if ( $campaign_type === Campaign_Channel::STR_EMAIL && empty( trim( $template->subject ) ) ) {
 			quillcrm_get_logger()->warning(
 				__( 'Email template missing subject', 'quillcrm' ),
 				array( 'template_id' => $template->id )
@@ -1205,7 +1205,7 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		// Validate HTML structure for email templates
-		if ( $campaign_type === Campaign_Channel::CHANNEL_EMAIL ) {
+		if ( $campaign_type === Campaign_Channel::STR_EMAIL ) {
 			if ( ! $this->is_valid_html( $template->body ) ) {
 				quillcrm_get_logger()->warning(
 					__( 'Email template contains potentially invalid HTML', 'quillcrm' ),

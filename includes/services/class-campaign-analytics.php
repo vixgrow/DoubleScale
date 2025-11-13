@@ -431,12 +431,12 @@ class Campaign_Analytics {
             SUM(CASE WHEN status = ' . Tracking_Status::FAILED . ' THEN 1 ELSE 0 END) as failed
         ';
 
-		if ( $type === Campaign_Channel::CHANNEL_EMAIL ) {
+		if ( $type === Campaign_Channel::STR_EMAIL ) {
 			$select_fields .= ',
                 SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened,
                 SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked
             ';
-		} elseif ( $type === Campaign_Channel::CHANNEL_SMS ) {
+		} elseif ( $type === Campaign_Channel::STR_SMS ) {
 			$select_fields .= ',
                 SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked
             ';

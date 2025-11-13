@@ -629,57 +629,8 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				set_transient( $cache_key, $analytics, 5 * MINUTE_IN_SECONDS );
 			}
 
-			// Normalize key names for frontend consistency
-			// Add 'total_' prefix to sent/opened/clicked/delivered/read for clarity
-			$response = array(
-				$this->channel => $analytics[ $this->channel ] ?? array(),
-				'data'         => $analytics['data'] ?? array(),
-				'total'        => $analytics['total'] ?? 0,
-			);
-
-			// Common fields across all channels
-			if ( isset( $analytics['sent'] ) ) {
-				$response['total_sent'] = $analytics['sent'];
-			}
-			if ( isset( $analytics['failed'] ) ) {
-				$response['total_failed'] = $analytics['failed'];
-			}
-			if ( isset( $analytics['pending'] ) ) {
-				$response['total_pending'] = $analytics['pending'];
-			}
-
-			// Email-specific fields
-			if ( isset( $analytics['opened'] ) ) {
-				$response['total_opened'] = $analytics['opened'];
-			}
-			if ( isset( $analytics['clicked'] ) ) {
-				$response['total_clicked'] = $analytics['clicked'];
-			}
-			if ( isset( $analytics['open_rate'] ) ) {
-				$response['open_rate'] = $analytics['open_rate'];
-			}
-			if ( isset( $analytics['click_rate'] ) ) {
-				$response['click_rate'] = $analytics['click_rate'];
-			}
-			if ( isset( $analytics['unsubscribed'] ) ) {
-				$response['total_unsubscribed'] = $analytics['unsubscribed'];
-			}
-
-			// SMS/WhatsApp specific fields
-			if ( isset( $analytics['delivered'] ) ) {
-				$response['total_delivered'] = $analytics['delivered'];
-			}
-			if ( isset( $analytics['delivery_rate'] ) ) {
-				$response['delivery_rate'] = $analytics['delivery_rate'];
-			}
-
-			// WhatsApp-specific fields
-			if ( isset( $analytics['read'] ) ) {
-				$response['total_read'] = $analytics['read'];
-			}
-			if ( isset( $analytics['read_rate'] ) ) {
-				$response['read_rate'] = $analytics['read_rate'];
-			}
+			// Normalize analytics response using centralized method
+			$response = Campaign_Analytics::normalize_response( $analytics, $this->channel );
 
 			return new WP_REST_Response( $response, 200 );
 		} catch ( \Exception $e ) {

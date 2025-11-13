@@ -446,4 +446,77 @@ class Campaign_Analytics {
 
 		return $results->toArray();
 	}
+
+	/**
+	 * Get field mapping for normalizing analytics response
+	 *
+	 * Maps source analytics keys to standardized response keys.
+	 * This ensures consistent field naming across all API responses.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array Field mapping (source_key => response_key)
+	 */
+	public static function get_field_mapping() {
+		return array(
+			// Common count fields across all channels
+			'sent'          => 'total_sent',
+			'failed'        => 'total_failed',
+			'pending'       => 'total_pending',
+
+			// Email-specific count fields
+			'opened'        => 'total_opened',
+			'clicked'       => 'total_clicked',
+			'unsubscribed'  => 'total_unsubscribed',
+
+			// Email-specific rate fields
+			'open_rate'     => 'open_rate',
+			'click_rate'    => 'click_rate',
+
+			// SMS/WhatsApp count fields
+			'delivered'     => 'total_delivered',
+
+			// SMS/WhatsApp rate fields
+			'delivery_rate' => 'delivery_rate',
+
+			// WhatsApp-specific count fields
+			'read'          => 'total_read',
+
+			// WhatsApp-specific rate fields
+			'read_rate'     => 'read_rate',
+		);
+	}
+
+	/**
+	 * Normalize analytics response using standard field mapping
+	 *
+	 * Converts analytics data to use consistent field names (e.g., 'sent' => 'total_sent').
+	 * Also includes channel-specific data and metadata.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array  $analytics Raw analytics data from service
+	 * @param string $channel   Channel identifier (email, sms, whatsapp)
+	 *
+	 * @return array Normalized response with consistent field names
+	 */
+	public static function normalize_response( $analytics, $channel ) {
+		$field_mapping = self::get_field_mapping();
+
+		// Start with base structure
+		$response = array(
+			$channel => $analytics[ $channel ] ?? array(),
+			'data'   => $analytics['data'] ?? array(),
+			'total'  => $analytics['total'] ?? 0,
+		);
+
+		// Map analytics fields to response using the mapping
+		foreach ( $field_mapping as $source_key => $response_key ) {
+			if ( isset( $analytics[ $source_key ] ) ) {
+				$response[ $response_key ] = $analytics[ $source_key ];
+			}
+		}
+
+		return $response;
+	}
 }

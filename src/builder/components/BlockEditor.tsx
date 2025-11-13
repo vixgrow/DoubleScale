@@ -14,6 +14,7 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { blocksRegistry } from '../blocks/BlockRegister';
+import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import {
 	GlobalEmailSettingsIcon,
 	LayoutSettingsIcon,
@@ -60,9 +61,23 @@ const BlockEditor: React.FC = () => {
 	// Determine what to show in the header
 	const isBlockSelected = !!selectedBlockId;
 	const isSectionSelected = !!selectedSectionId;
-	const blockDefinition = selectedBlock
-		? blocksRegistry[selectedBlock.type]
-		: null;
+
+	// Get block definition with fallback to UnknownBlock
+	const { block: blockDefinition, isUnknown, info } = selectedBlock
+		? getBlockDefinition(
+			selectedBlock.type,
+			blocksRegistry,
+			blocksRegistry.unknown
+		)
+		: { block: null, isUnknown: false, info: undefined };
+
+	// Prepare props for the editor
+	const editorProps = isUnknown && info
+		? {
+			originalType: info.originalType,
+			originalProps: selectedBlock?.props || {},
+		}
+		: selectedBlock?.props;
 
 	// Handle back navigation from settings
 	const handleBackFromSettings = () => {
@@ -121,7 +136,7 @@ const BlockEditor: React.FC = () => {
 								// Show block-specific editor
 								selectedBlock && blockDefinition?.Editor ? (
 									<blockDefinition.Editor
-										props={selectedBlock.props as any}
+										props={editorProps as any}
 										onChange={handlePropsChange}
 									/>
 								) : (
@@ -171,7 +186,7 @@ const BlockEditor: React.FC = () => {
 							)}
 						</div>
 
-						{isBlockSelected && selectedBlock && (
+						{isBlockSelected && selectedBlock && !isUnknown && (
 							<div className="mt-6 pt-4 px-4 border-t border-border">
 								<Button
 									variant="destructive"

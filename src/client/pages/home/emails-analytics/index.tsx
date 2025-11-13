@@ -38,6 +38,7 @@ import { EmailStatsCards } from './email-stats-cards';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RecentEmailsTable } from './recent-emails-list';
 import { useEmailAnalytics } from '../use-analytics';
+import { PageHeader } from '@quillcrm/components';
 
 interface EmailAnalyticsProps {
 	dashboardData: DashboardData;
@@ -68,13 +69,18 @@ const EmailAnalytics: React.FC<EmailAnalyticsProps> = ({ dashboardData }) => {
 	}
 
 	return (
-		<div className="flex flex-col gap-5 mt-5">
-			<EmailStatsCards data={data} />
+		<>
+			<PageHeader
+				title={__('Emails Analytics', 'quillcrm')}
+				subtitle={__('Emails Analytics', 'quillcrm')}
+				actions={[]}
+			/>
+			<div className="flex flex-col gap-5">
+				<EmailStatsCards data={data} />
 
-			<RecentEmailsTable emails={dashboardData.recent_emails} />
-
-			{/* You can add date filter and chart here if needed */}
-		</div>
+				<RecentEmailsTable emails={dashboardData.recent_emails} />
+			</div>
+		</>
 	);
 };
 

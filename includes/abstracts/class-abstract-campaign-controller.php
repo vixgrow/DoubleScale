@@ -588,6 +588,25 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$start_date = $request->get_param( 'start_date' ) ?: '';
 			$end_date   = $request->get_param( 'end_date' ) ?: '';
 
+			// Allow channel to be set via request parameter (for unified endpoint)
+			$channel = $request->get_param( 'channel' );
+			if ( ! empty( $channel ) ) {
+				// Validate it's a valid channel string
+				$valid_channels = Campaign_Channel::get_core_channel_strings();
+				if ( in_array( $channel, $valid_channels, true ) ) {
+					$this->channel = $channel;
+				}
+			}
+
+			// Ensure channel is set
+			if ( empty( $this->channel ) ) {
+				return new WP_Error(
+					'missing_channel',
+					__( 'Channel parameter is required', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+
 			// Generate cache key
 			$cache_key = sprintf(
 				'quillcrm_analytics_%s_%s_%s_%s',
@@ -610,7 +629,59 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				set_transient( $cache_key, $analytics, 5 * MINUTE_IN_SECONDS );
 			}
 
-			return new WP_REST_Response( $analytics, 200 );
+			// Normalize key names for frontend consistency
+			// Add 'total_' prefix to sent/opened/clicked/delivered/read for clarity
+			$response = array(
+				$this->channel => $analytics[ $this->channel ] ?? array(),
+				'data'         => $analytics['data'] ?? array(),
+				'total'        => $analytics['total'] ?? 0,
+			);
+
+			// Common fields across all channels
+			if ( isset( $analytics['sent'] ) ) {
+				$response['total_sent'] = $analytics['sent'];
+			}
+			if ( isset( $analytics['failed'] ) ) {
+				$response['total_failed'] = $analytics['failed'];
+			}
+			if ( isset( $analytics['pending'] ) ) {
+				$response['total_pending'] = $analytics['pending'];
+			}
+
+			// Email-specific fields
+			if ( isset( $analytics['opened'] ) ) {
+				$response['total_opened'] = $analytics['opened'];
+			}
+			if ( isset( $analytics['clicked'] ) ) {
+				$response['total_clicked'] = $analytics['clicked'];
+			}
+			if ( isset( $analytics['open_rate'] ) ) {
+				$response['open_rate'] = $analytics['open_rate'];
+			}
+			if ( isset( $analytics['click_rate'] ) ) {
+				$response['click_rate'] = $analytics['click_rate'];
+			}
+			if ( isset( $analytics['unsubscribed'] ) ) {
+				$response['total_unsubscribed'] = $analytics['unsubscribed'];
+			}
+
+			// SMS/WhatsApp specific fields
+			if ( isset( $analytics['delivered'] ) ) {
+				$response['total_delivered'] = $analytics['delivered'];
+			}
+			if ( isset( $analytics['delivery_rate'] ) ) {
+				$response['delivery_rate'] = $analytics['delivery_rate'];
+			}
+
+			// WhatsApp-specific fields
+			if ( isset( $analytics['read'] ) ) {
+				$response['total_read'] = $analytics['read'];
+			}
+			if ( isset( $analytics['read_rate'] ) ) {
+				$response['read_rate'] = $analytics['read_rate'];
+			}
+
+			return new WP_REST_Response( $response, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -723,6 +794,12 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	 */
 	public function get_analytics_params() {
 		return array(
+			'channel'    => array(
+				'description' => __( 'Campaign channel (email, sms, whatsapp).', 'quillcrm' ),
+				'type'        => 'string',
+				'enum'        => Campaign_Channel::get_core_channel_strings(),
+				'required'    => false,
+			),
 			'interval'   => array(
 				'description' => __( 'Interval for the analytics.', 'quillcrm' ),
 				'type'        => 'string',

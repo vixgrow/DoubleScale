@@ -162,7 +162,8 @@ export const useEmailAnalytics = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/campaigns/email-analytics', {
+				path: addQueryArgs('/qc/v1/campaigns/analytics', {
+					channel: 'email',
 					interval,
 					start_date: dayjs(startDate).format('YYYY-MM-DD'),
 					end_date: dayjs(endDate).format('YYYY-MM-DD'),

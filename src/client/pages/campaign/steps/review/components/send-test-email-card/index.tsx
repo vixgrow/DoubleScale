@@ -99,7 +99,7 @@ const SendTestEmailCard: React.FC<SendTestEmailCardProps> = ({
 
 			// Send all test emails in a single request with abort signal
 			const response: any = await apiFetch({
-				path: `/qc/v1/email-campaigns/${campaignId}/send-test-email`,
+				path: `/qc/v1/campaigns/${campaignId}/send-test-email`,
 				method: 'POST',
 				data: {
 					emails: emails,

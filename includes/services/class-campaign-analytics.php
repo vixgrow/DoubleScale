@@ -49,11 +49,19 @@ class Campaign_Analytics {
 	/**
 	 * Get model query for campaign type
 	 *
-	 * @param string $type Campaign type ('email', 'sms', 'whatsapp')
+	 * @param string $type Campaign type ('email', 'sms', 'whatsapp') or integer constant
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	protected function get_model_query( $type ) {
+		// Convert string to integer if needed (for backward compatibility)
+		if ( is_string( $type ) ) {
+			$type = Campaign_Channel::ensure_integer( $type );
+			if ( null === $type ) {
+				throw new \InvalidArgumentException( "Unsupported campaign type string" );
+			}
+		}
+
 		switch ( $type ) {
 			case Campaign_Channel::CHANNEL_EMAIL:
 			case Campaign_Channel::CHANNEL_EMAIL_SEQUENCE:

@@ -458,15 +458,18 @@ abstract class Abstract_Campaign_Processing {
 	 */
 	protected function process_campaign( Campaign_Model $campaign ) {
 		// Validate that the campaign type matches this processor
-		$campaign_type = $campaign->get_type();
-		if ( $campaign_type !== $this->channel ) {
+		// Convert both to same type for comparison (use integers at DB boundary)
+		$campaign_type_int = $campaign->get_type(); // Returns integer
+		$expected_type_int = Campaign_Channel::to_integer( $this->channel );
+
+		if ( $campaign_type_int !== $expected_type_int ) {
 			quillcrm_get_logger()->error(
 				__( 'Campaign type mismatch detected.', 'quillcrm' ),
 				array(
 					'code'          => 'campaign_type_mismatch',
 					'campaign_id'   => $campaign->id,
 					'expected_type' => $this->channel,
-					'actual_type'   => $campaign_type,
+					'actual_type'   => Campaign_Channel::to_string( $campaign_type_int ),
 					'processor'     => get_class( $this ),
 				)
 			);

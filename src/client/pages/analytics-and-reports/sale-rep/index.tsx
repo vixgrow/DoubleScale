@@ -159,6 +159,7 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 			const response = (await apiFetch({
 				path: apiPath,
 			})) as SalesRepResponse;
+			console.log(response)
 
 			setSaleInfo(response.sale_info);
 			setCardsStatistics(response.cards_statistics);

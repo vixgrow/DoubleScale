@@ -42,6 +42,7 @@ import { RecentContactsList } from '../recent-contacts-list';
 import { ContactAnalyticsChart } from '../contacts-chart';
 import { UnsubscribedContactsTable } from './unsubscribed-contacts-list';
 import { useContactAnalytics } from '../use-analytics';
+import { DashboardContentCard } from '@quillcrm/components';
 
 interface ContactAnalyticsProps {
 	dashboardData: DashboardData;
@@ -75,7 +76,25 @@ const ContactAnalytics: React.FC<ContactAnalyticsProps> = ({
 
 	return (
 		<div className="flex flex-col gap-5 mt-5">
-			<ContactStatsCards data={data} />
+
+			<div className=' grid grid-cols-1 md:grid-cols-3 gap-5'>
+				{/* <div className=' h-full col-span-1'>
+				  <ContactStatsCards data={data} />
+				</div> */}
+				<DashboardContentCard
+				title={__('Cart Analytics Overview', 'quillcrm')}
+				cardClassName='h-full col-span-1'
+			>
+								  <ContactStatsCards data={data} />
+			</DashboardContentCard>
+				<div className=' h-full col-span-2'>
+				 <UnsubscribedContactsTable
+				contacts={dashboardData.recent_unsubscribed_contacts}
+			/>
+				</div>
+
+			</div>
+			{/* <ContactStatsCards data={data} /> */}
 
 			<div className="flex gap-5">
 				<RecentContactsList contacts={dashboardData.recent_contacts} />
@@ -91,9 +110,9 @@ const ContactAnalytics: React.FC<ContactAnalyticsProps> = ({
 				/>
 			</div>
 
-			<UnsubscribedContactsTable
+			{/* <UnsubscribedContactsTable
 				contacts={dashboardData.recent_unsubscribed_contacts}
-			/>
+			/> */}
 		</div>
 	);
 };

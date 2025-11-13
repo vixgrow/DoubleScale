@@ -87,11 +87,10 @@ class Deal_Model extends Model {
 	 * @since 1.0.0
 	 */
 	protected $casts = array(
-		'value'               => 'float',
-		'probability'         => 'float',
-		'expected_close_date' => 'date',
-		'won_time'            => 'datetime',
-		'lost_time'           => 'datetime',
+		'value'       => 'float',
+		'probability' => 'float',
+		'won_time'    => 'datetime',
+		'lost_time'   => 'datetime',
 	);
 
 	/**
@@ -205,9 +204,17 @@ class Deal_Model extends Model {
 	 * @return bool
 	 */
 	public function getIsOverdueAttribute() {
-		return $this->expected_close_date &&
-			$this->expected_close_date->isPast() &&
-			$this->status === 'open';
+		if ( ! $this->expected_close_date || $this->status !== 'open' ) {
+			return false;
+		}
+
+		try {
+			$expected_date = new \DateTime( $this->expected_close_date );
+			$now           = new \DateTime();
+			return $expected_date < $now;
+		} catch ( \Exception $e ) {
+			return false;
+		}
 	}
 
 	/**
@@ -222,7 +229,14 @@ class Deal_Model extends Model {
 			return null;
 		}
 
-		return ( new \DateTime() )->diff( $this->expected_close_date )->days * ( ( $this->expected_close_date > new \DateTime() ) ? 1 : -1 );
+		try {
+			$expected_date = new \DateTime( $this->expected_close_date );
+			$now           = new \DateTime();
+			$diff          = $now->diff( $expected_date );
+			return $diff->days * ( $expected_date > $now ? 1 : -1 );
+		} catch ( \Exception $e ) {
+			return null;
+		}
 	}
 
 	/**

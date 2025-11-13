@@ -3,7 +3,7 @@
 /**
  * Plugin Name:       Quill CRM
  * Plugin URI:        https://www.quillcrm.com/
- * Description:       Conversational CRM Builder for WordPress
+ * Description:       A powerful CRM Builder for WordPress that lets you manage leads, track interactions, and automate customer relationships—all seamlessly integrated within your WordPress dashboard.
  * Version:           1.0.0
  * Author:            quillcrm.com
  * Author URI:        http://www.quillcrm.com
@@ -53,7 +53,7 @@ quillcrm_pre_init();
  */
 function quillcrm_pre_init() {
 	register_activation_hook( __FILE__, array( QuillCRM\Database\Install::class, 'install' ) );
-	
+
 	add_action(
 		'plugins_loaded',
 		function () {

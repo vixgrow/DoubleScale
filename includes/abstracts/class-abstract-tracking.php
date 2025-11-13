@@ -233,13 +233,13 @@ abstract class Abstract_Tracking
 				break;
 			case 'delivered':
 				$tracking_record->status = Tracking_Status::DELIVERED;
-				break;
-			case 'read':
-				// WhatsApp read receipt
-				if ($this->channel === Campaign_Channel::CHANNEL_WHATSAPP) {
-					$tracking_record->status = Tracking_Status::READ;
-				}
-				break;
+			break;
+		case 'read':
+			// WhatsApp read receipt
+			if ($this->channel === Campaign_Channel::STR_WHATSAPP) {
+				$tracking_record->status = Tracking_Status::READ;
+			}
+			break;
 			case 'failed':
 			case 'undelivered':
 				$tracking_record->status = Tracking_Status::FAILED;

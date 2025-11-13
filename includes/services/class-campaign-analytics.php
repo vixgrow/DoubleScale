@@ -83,14 +83,17 @@ class Campaign_Analytics {
 	 * IMPORTANT: This method filters by source_type = CAMPAIGN to ensure
 	 * only campaign messages are included (not automations or individual messages).
 	 *
-	 * @param string $type Campaign type ('email', 'sms')
+	 * @param string $type Campaign type string ('email', 'sms', 'whatsapp')
 	 * @param string $interval Analytics interval
 	 * @param string $start_date Start date
 	 * @param string $end_date End date
 	 *
-	 * @return array Analytics data
+	 * @return array Analytics data with string channel key
 	 */
 	public function get_analytics( $type, $interval = 'last_30_days', $start_date = '', $end_date = '' ) {
+		// Ensure we have a string type for the response key
+		$channel_string = is_string( $type ) ? $type : Campaign_Channel::to_string( $type );
+		
 		$query = $this->get_model_query( $type );
 
 		// Filter to only include campaign messages (not automations or individual)
@@ -141,9 +144,10 @@ class Campaign_Analytics {
 
 		$totals = $this->get_total_stats( $type, $start_date, $end_date );
 
+		// Return with string channel key for consistent API response
 		return array(
-			$type  => $data,
-			'data' => $dates,
+			$channel_string => $data,
+			'data'          => $dates,
 		) + $totals;
 	}
 
@@ -270,7 +274,10 @@ class Campaign_Analytics {
 		}
 
 		// Optimized: Single query per type with aggregate functions, including unsubscribe tracking
-		if ( $type === Campaign_Channel::CHANNEL_EMAIL || $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE || $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL ) {
+		// Convert string to integer for comparison (get_model_query already validated the type)
+		$type_int = is_string( $type ) ? Campaign_Channel::to_integer( $type ) : $type;
+		
+		if ( $type_int === Campaign_Channel::CHANNEL_EMAIL || $type_int === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE || $type_int === Campaign_Channel::CHANNEL_SEQUENCE_MAIL ) {
 			$result = $base_query
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
@@ -287,7 +294,7 @@ class Campaign_Analytics {
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
 			$stats                 = $this->calculate_email_rates( $stats );
 
-		} elseif ( $type === Campaign_Channel::CHANNEL_SMS ) {
+		} elseif ( $type_int === Campaign_Channel::CHANNEL_SMS ) {
 			$result = $base_query
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
@@ -304,14 +311,14 @@ class Campaign_Analytics {
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
 			$stats                 = $this->calculate_sms_rates( $stats );
 
-		} elseif ( $type === Campaign_Channel::CHANNEL_WHATSAPP ) {
+		} elseif ( $type_int === Campaign_Channel::CHANNEL_WHATSAPP ) {
 			$result = $base_query
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
 					"
 					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
 					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
-					SUM(CASE WHEN ' . $tracking_table . '.status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as read,
+					SUM(CASE WHEN ' . $tracking_table . '.status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as `read`,
 					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
 				'
 				)
@@ -495,7 +502,7 @@ class Campaign_Analytics {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array  $analytics Raw analytics data from service
+	 * @param array  $analytics Raw analytics data from service (already has string keys)
 	 * @param string $channel   Channel identifier (email, sms, whatsapp)
 	 *
 	 * @return array Normalized response with consistent field names
@@ -504,6 +511,7 @@ class Campaign_Analytics {
 		$field_mapping = self::get_field_mapping();
 
 		// Start with base structure
+		// Analytics service now returns data with string keys directly
 		$response = array(
 			$channel => $analytics[ $channel ] ?? array(),
 			'data'   => $analytics['data'] ?? array(),

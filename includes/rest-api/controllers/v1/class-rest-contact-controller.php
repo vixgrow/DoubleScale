@@ -786,7 +786,7 @@ class REST_Contact_Controller extends REST_Controller {
 							$query->select( 'id', 'name', 'type' );
 						},
 						'template' => function ( $query ) {
-							$query->select( 'id', 'body', 'settings' );
+							$query->select( 'id', 'subject', 'body', 'settings' );
 						},
 						'message'  => function ( $query ) {
 							$query->select( 'id', 'tracking_id', 'subject', 'body' );

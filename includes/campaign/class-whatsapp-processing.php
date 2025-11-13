@@ -26,9 +26,9 @@ class WhatsApp_Processing extends Abstract_Campaign_Processing {
 	/**
 	 * Communication channel
 	 *
-	 * @var int
+	 * @var string
 	 */
-	protected $channel = Campaign_Channel::CHANNEL_WHATSAPP;
+	protected $channel = Campaign_Channel::STR_WHATSAPP;
 
 	/**
 	 * Add hooks

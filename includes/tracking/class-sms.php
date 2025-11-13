@@ -26,7 +26,7 @@ class SMS extends Abstract_Tracking
 	 *
 	 * @var string
 	 */
-	protected $channel = Campaign_Channel::CHANNEL_SMS;
+	protected $channel = Campaign_Channel::STR_SMS;
 
 	/**
 	 * Add hooks - implementation of abstract method

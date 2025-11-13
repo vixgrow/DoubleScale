@@ -75,8 +75,8 @@ class Campaign_Rate_Limiter
     /**
      * Check if daily limit has been reached
      *
-     * @param int|string $type Campaign type (integer constant or string slug)
-     * @param int        $max_per_day Maximum allowed per day
+     * @param string $type Campaign type string ('email', 'sms', 'whatsapp'). Integer constants accepted for backward compatibility.
+     * @param int    $max_per_day Maximum allowed per day
      *
      * @return bool True if limit reached
      */
@@ -89,7 +89,7 @@ class Campaign_Rate_Limiter
     /**
      * Get current daily count for campaign type
      *
-     * @param int|string $type Campaign type (integer constant or string slug)
+     * @param string $type Campaign type string ('email', 'sms', 'whatsapp'). Integer constants accepted for backward compatibility.
      *
      * @return int Current daily count
      */
@@ -105,7 +105,7 @@ class Campaign_Rate_Limiter
      *
      * @since 1.0.0
      *
-     * @param int|string $type Campaign type (integer constant or string slug)
+     * @param string $type Campaign type string ('email', 'sms', 'whatsapp'). Integer constants accepted for backward compatibility.
      *
      * @return int New count after increment
      */
@@ -154,7 +154,7 @@ class Campaign_Rate_Limiter
     /**
      * Reset daily count for campaign type
      *
-     * @param int|string $type Campaign type (integer constant or string slug)
+     * @param string $type Campaign type string ('email', 'sms', 'whatsapp'). Integer constants accepted for backward compatibility.
      *
      * @return void
      */
@@ -175,9 +175,9 @@ class Campaign_Rate_Limiter
     /**
      * Log daily limit reached
      *
-     * @param int|string $type Campaign type (integer constant or string slug)
-     * @param int        $daily_count Current count
-     * @param int        $max_per_day Maximum allowed
+     * @param string $type Campaign type string ('email', 'sms', 'whatsapp'). Integer constants accepted for backward compatibility.
+     * @param int    $daily_count Current count
+     * @param int    $max_per_day Maximum allowed
      *
      * @return void
      */

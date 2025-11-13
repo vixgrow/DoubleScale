@@ -616,23 +616,22 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				$end_date
 			);
 
-			// Try to get cached result
-			$analytics = get_transient( $cache_key );
+		// Try to get cached result
+		$analytics = get_transient( $cache_key );
 
-			if ( false === $analytics ) {
-				// Cache miss - fetch fresh data
-				// Convert string channel to integer constant for Campaign_Analytics
-				$channel_type = Campaign_Channel::to_integer( $this->channel );
-				$analytics    = $this->analytics->get_analytics( $channel_type, $interval, $start_date, $end_date );
+		if ( false === $analytics ) {
+			// Cache miss - fetch fresh data
+			// Pass string channel directly to analytics service
+			$analytics = $this->analytics->get_analytics( $this->channel, $interval, $start_date, $end_date );
 
-				// Cache for 5 minutes
-				set_transient( $cache_key, $analytics, 5 * MINUTE_IN_SECONDS );
-			}
+			// Cache for 5 minutes
+			set_transient( $cache_key, $analytics, 5 * MINUTE_IN_SECONDS );
+		}
 
-			// Normalize analytics response using centralized method
-			$response = Campaign_Analytics::normalize_response( $analytics, $this->channel );
+		// Normalize analytics response using centralized method
+		$response = Campaign_Analytics::normalize_response( $analytics, $this->channel );
 
-			return new WP_REST_Response( $response, 200 );
+		return new WP_REST_Response( $response, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}

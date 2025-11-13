@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
  * internal dependencies
  */
 import { blocksRegistry } from '../blocks/BlockRegister';
+import { getDraggableBlocks } from '../blocks/blockRegistryUtils';
 import TemplateCard from './TemplateCard';
 import { EmailBlock } from '../../stores/email-builder/types';
 
@@ -19,6 +20,9 @@ const Sections = () => {
 		return newBlock;
 	};
 
+	// Get only user-draggable blocks (excludes system blocks like 'unknown')
+	const draggableBlocks = getDraggableBlocks(blocksRegistry);
+
 	return (
 		<div
 			className="py-4 grid gap-4"
@@ -27,17 +31,15 @@ const Sections = () => {
 				gridAutoRows: '120px', // Fixed height for all rows
 			}}
 		>
-			{Object.entries(blocksRegistry)
-				.filter(([key]) => key !== 'preheader')
-				.map(([key, block]) => (
-					<TemplateCard
-						key={key}
-						item={block}
-						type="element"
-						blockType={key}
-						onCreateBlock={() => handleBlockDrop(key)}
-					/>
-				))}
+			{Object.entries(draggableBlocks).map(([key, block]) => (
+				<TemplateCard
+					key={key}
+					item={block}
+					type="element"
+					blockType={key}
+					onCreateBlock={() => handleBlockDrop(key)}
+				/>
+			))}
 		</div>
 	);
 };

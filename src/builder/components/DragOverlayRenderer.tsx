@@ -1,5 +1,6 @@
 import React from 'react';
 import { blocksRegistry } from '../blocks/BlockRegister';
+import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import TemplateCard from './TemplateCard';
 import { EmailBlock } from '../../stores/email-builder/types';
 
@@ -86,7 +87,12 @@ const DragOverlayRenderer: React.FC<DragOverlayRendererProps> = ({
 
 	// Handle block overlay
 	if (type === 'block' && block) {
-		const blockDefinition = blocksRegistry[block.type];
+		const { block: blockDefinition } = getBlockDefinition(
+			block.type,
+			blocksRegistry,
+			blocksRegistry.unknown
+		);
+		
 		return (
 			<div className="opacity-90 transform rotate-3 shadow-lg w-48">
 				<TemplateCard

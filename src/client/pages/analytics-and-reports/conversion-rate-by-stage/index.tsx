@@ -22,6 +22,7 @@ import {
 import { Bar } from 'react-chartjs-2';
 import WinTagIcon from '@quillcrm/components/icons/win-tag';
 import ConversionRateChartSkelton from './Conversion-rate-ChartSkeleton';
+import { EmptyState } from '../../home/no-data';
 
 ChartJS.register(
   CategoryScale,
@@ -246,13 +247,7 @@ const ConversionRatesChart: React.FC<ConversionRatesChartProps> = ({
 
   if (stages.length === 0) {
     return (
-      <Card className="border border-[#DEE1E6] bg-[#F8F8F8] rounded-[16px] p-5">
-        <CardContent className="p-6">
-          <div className="p-6 flex justify-center items-center text-2xl text-[#777]">
-            {__('No data available', 'quillcrm')}
-          </div>
-        </CardContent>
-      </Card>
+      <EmptyState />
     );
   }
 

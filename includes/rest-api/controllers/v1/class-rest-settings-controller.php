@@ -131,7 +131,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 						'email_footer'  => array(
 							'type'    => 'string',
-							'default' => '',
+							'default' => Settings::get_default_email_footer(),
 						),
 						'max_in_second' => array(
 							'type'    => 'integer',
@@ -163,11 +163,11 @@ class REST_Settings_Controller extends REST_Controller {
 					'properties'           => array(
 						'email_subject'         => array(
 							'type'    => 'string',
-							'default' => '',
+							'default' => Settings::get_default_opt_in_subject(),
 						),
 						'email_content'         => array(
 							'type'    => 'string',
-							'default' => '',
+							'default' => Settings::get_default_opt_in_content(),
 						),
 						'after_confirmation'    => array(
 							'type'    => 'string',
@@ -175,7 +175,7 @@ class REST_Settings_Controller extends REST_Controller {
 						),
 						'confirmation_message'  => array(
 							'type'    => 'string',
-							'default' => '',
+							'default' => Settings::get_default_confirmation_message(),
 						),
 						'confirmation_redirect' => array(
 							'type'    => 'string',
@@ -275,12 +275,18 @@ class REST_Settings_Controller extends REST_Controller {
 		$result = array();
 		foreach ( $this->get_schema()['properties'] as $group_key => $group_schema ) {
 			if ( $group_key === 'button_settings' ) {
-				// Handle button_settings specially since it's not a structured schema
+				// Handle button_settings specially since it's not a structured schema.
 				$result[ $group_key ] = $settings[ $group_key ] ?? $group_schema['default'];
 			} else {
 				$result[ $group_key ] = array();
 				foreach ( $group_schema['properties'] as $setting_key => $setting_schema ) {
-					$result[ $group_key ][ $setting_key ] = $settings[ $group_key ][ $setting_key ] ?? $setting_schema['default'];
+					$saved_value = $settings[ $group_key ][ $setting_key ] ?? null;
+					// Use default if value is null, empty string, or empty editor content (for string types).
+					if ( null === $saved_value || ( 'string' === $setting_schema['type'] && $this->is_empty_value( $saved_value ) ) ) {
+						$result[ $group_key ][ $setting_key ] = $setting_schema['default'];
+					} else {
+						$result[ $group_key ][ $setting_key ] = $saved_value;
+					}
 				}
 			}
 		}
@@ -577,5 +583,38 @@ class REST_Settings_Controller extends REST_Controller {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Check if a value is considered empty
+	 *
+	 * This checks for empty strings and also for empty editor content like
+	 * '<p class="editor-paragraph"><br></p>' which is the default empty state
+	 * from the Lexical editor component.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $value The value to check.
+	 * @return bool True if value is empty, false otherwise.
+	 */
+	private function is_empty_value( $value ) {
+		// Check for empty string.
+		if ( '' === $value ) {
+			return true;
+		}
+
+		// Check for empty editor content (Lexical editor's empty state).
+		$trimmed = trim( $value );
+		if ( '<p class="editor-paragraph"><br></p>' === $trimmed ) {
+			return true;
+		}
+
+		// Check for other common empty HTML patterns.
+		$stripped = trim( strip_tags( $value ) );
+		if ( '' === $stripped ) {
+			return true;
+		}
+
+		return false;
 	}
 }

@@ -19,9 +19,16 @@ import { BarChartOutlined, UserOutlined } from '@ant-design/icons';
 import PageTabs from '../../../components/page-tabs';
 import { useCapabilities } from '../../../hooks/use-capabilities';
 import PipelineAnalysis from './pipeline-rep';
+import ContactAnalytics from '../home/contacts-analytics';
+import EmailAnalytics from '../home/emails-analytics';
+import { useDashboardData } from '../home/use-analytics';
+import CartAnalytics from '../home/cart-analytics';
+
 
 const AnalyticsAndReports: React.FC = () => {
 	const { isDealOwner } = useCapabilities();
+	// const { data: dashboardData} = useDashboardData();
+	const { data, loading } = useDashboardData();
 
 	// Configure tabs based on user capabilities
 	const tabsList = isDealOwner()
@@ -46,6 +53,21 @@ const AnalyticsAndReports: React.FC = () => {
 				{
 					value: 'pipeline-analysis',
 					label: 'Pipeline Analysis',
+					icon: <BarChartOutlined />, 
+				},
+				{
+					value: 'emails-analytics',
+					label: 'emails-analytics',
+					icon: <BarChartOutlined />, 
+				},
+				{
+					value: 'contacts-analytics',
+					label: 'contacts-analytics',
+					icon: <BarChartOutlined />, 
+				},
+				{
+					value: 'Cart-analytics',
+					label: 'Cart-analytics',
 					icon: <BarChartOutlined />, 
 				},
 			];
@@ -76,8 +98,71 @@ const AnalyticsAndReports: React.FC = () => {
 					value: 'pipeline-analysis',
 					children: <PipelineAnalysis />,
 				},
-		
-			];
+				{
+							value: 'contacts-analytics',
+								children: data&&( <ContactAnalytics dashboardData={data}/>),
+							
+							},
+							{
+								value: 'emails-analytics',
+								children: data &&(
+									<EmailAnalytics dashboardData={data} />
+								)
+								
+							},
+							{
+								value: 'Cart-analytics',
+								children: data &&(
+									<CartAnalytics dashboardData={data} />
+								)
+								
+							},
+			]
+	
+		// const tabsContent = [
+		// 		{
+		// 			value: 'my-reports',
+		// 			children: <SalesRepDetailView />,
+		// 		},
+		// 		{
+		// 			value: 'deals',
+		// 			children: (
+		// 				<div className="space-y-6">
+		// 					<ContactsDealsReports />
+		// 					<DealsReportsByDate />
+		// 					<DealsReportsLeaderboard />
+		// 				</div>
+		// 			),
+		// 		},
+		// 		{
+		// 			value: 'sales-rep',
+		// 			children: <SalesRep />,
+		// 		},
+		// 		{
+		// 			value: 'pipeline-analysis',
+		// 			children: <PipelineAnalysis />,
+		// 		},
+		// 		{
+		// 			value: 'contacts-analytics',
+		// 			children: data&&( <ContactAnalytics dashboardData={data}/>),
+				
+		// 		},
+		// 		{
+		// 			value: 'emails-analytics',
+		// 			children: data &&(
+		// 				<EmailAnalytics dashboardData={data} />
+		// 			)
+					
+		// 		},
+		// 		{
+		// 			value: 'Cart-analytics',
+		// 			children: data &&(
+		// 				<CartAnalytics dashboardData={data} />
+		// 			)
+					
+		// 		},
+				
+		// ]
 
 	return (
 		<div className="space-y-6">

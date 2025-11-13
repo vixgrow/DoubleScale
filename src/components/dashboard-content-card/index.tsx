@@ -36,12 +36,12 @@ const DashboardContentCard: React.FC<DashboardContentProps> = ({
 	return (
 		<Card className={`shadow-none rounded-lg bg-[#F8F8F8] ${cardClassName}`}>
 			<CardHeader className={`flex flex-row justify-between items-center px-5 pt-5 pb-0`}>
-				<div className="flex items-center justify-start gap-2">
+				{/* <div className="flex items-center justify-between gap-2"> */}
 					<CardTitle className="text-[#333333] font-medium text-2xl">
 						{title}
 					</CardTitle>
 					{headerContent && <div className="text-[#7E8299] text-lg font-medium">{headerContent}</div>}
-				</div>
+				{/* </div> */}
 				{viewAllLink && (
 					<div className="flex justify-end">
 						<Button className="text-primary shadow-none text-base bg-transparent hover:bg-transparent p-0" onClick={() => navigate(getToLink(viewAllLinkUrl ?? ''))}>

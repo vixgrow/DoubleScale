@@ -1678,12 +1678,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return string
 	 */
 	public function default_opt_in_email_body() {
-		$body = sprintf(
-			'<p>' . __( 'Please confirm your subscription by clicking the link below:', 'quillcrm' ) . '</p>
-            <p><a href="{{contact:subscribe_link}}">' . __( 'Confirm Subscription', 'quillcrm' ) . '</a></p>',
-			'{{contact:subscribe_link}}'
-		);
-		return $body;
+		return Settings::get_default_opt_in_content();
 	}
 
 

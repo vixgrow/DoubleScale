@@ -560,6 +560,7 @@ export type TrackedMessage = {
 		body: string;
 	} | null; // Message content for individual messages
 	campaign?: Partial<Campaign>;
+	unsubscribe_reason?: string; // Extracted from contact notes
 };
 
 // Legacy alias for backward compatibility

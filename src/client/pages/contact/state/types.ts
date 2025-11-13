@@ -57,6 +57,8 @@ export type EmailAnalytics = {
 	total_sent: number;
 	total_opened: number;
 	total_clicked: number;
+	open_rate: number; // Calculated as (total_opened / total_sent) * 100
+	click_rate: number; // Calculated as (total_clicked / total_sent) * 100
 	mode?: string;
 } | null;
 

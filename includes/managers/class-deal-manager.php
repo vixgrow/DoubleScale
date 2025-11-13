@@ -140,12 +140,13 @@ final class Deal_Manager {
 			}
 
 			// Set defaults
-			$deal_data = array_merge(
+			$current_user_id = get_current_user_id();
+			$deal_data       = array_merge(
 				array(
 					'value'       => 0.00,
 					'currency'    => 'USD',
 					'status'      => Deal_Model::get_status_from_probability( $stage->win_probability ),
-					'owner_id'    => get_current_user_id(),
+					'owner_id'    => $current_user_id > 0 ? $current_user_id : null,
 					'probability' => $stage->win_probability,
 				),
 				$data

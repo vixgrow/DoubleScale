@@ -99,6 +99,36 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 			)
 		);
 
+		// Campaign unsubscribes route.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/unsubscribes',
+			array(
+				'args' => array(
+					'id'       => array(
+						'description' => __( 'Campaign ID', 'quillcrm' ),
+						'type'        => 'integer',
+						'required'    => true,
+					),
+					'per_page' => array(
+						'description' => __( 'Items per page', 'quillcrm' ),
+						'type'        => 'integer',
+						'default'     => 10,
+					),
+					'page'     => array(
+						'description' => __( 'Page number', 'quillcrm' ),
+						'type'        => 'integer',
+						'default'     => 1,
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_campaign_unsubscribes' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+			)
+		);
+
 		// Resend single message endpoint
 		register_rest_route(
 			$this->namespace,
@@ -666,6 +696,84 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 				array( 'status' => 500 )
 			);
 		}
+	}
+
+	/**
+	 * Get campaign unsubscribes
+	 *
+	 * Returns contacts who unsubscribed after receiving this campaign
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_campaign_unsubscribes( $request ) {
+		try {
+			$campaign_id = $request->get_param( 'id' );
+			$per_page    = $request->get_param( 'per_page' ) ?: 10;
+			$page        = $request->get_param( 'page' ) ?: 1;
+			$keywords    = $request->get_param( 'keywords' ) ?: '';
+
+			// Get tracking records for this campaign
+			$query = Tracking_Model::where( 'source_type', Message_Source_Types::CAMPAIGN )
+				->where( 'source_id', $campaign_id )
+				->whereHas(
+					'contact',
+					function ( $q ) use ( $keywords ) {
+						// Only get contacts who are currently unsubscribed
+						$q->where( 'status', 'unsubscribed' );
+
+						// Apply keyword search if provided
+						if ( ! empty( $keywords ) ) {
+							$q->where(
+								function ( $query ) use ( $keywords ) {
+									$query->where( 'email', 'LIKE', '%' . $keywords . '%' )
+										->orWhere( 'first_name', 'LIKE', '%' . $keywords . '%' )
+										->orWhere( 'last_name', 'LIKE', '%' . $keywords . '%' )
+										->orWhere( 'phone', 'LIKE', '%' . $keywords . '%' );
+								}
+							);
+						}
+					}
+				)
+				->with( 'contact', 'contact.notes', 'template' );
+
+			$results = $query->paginate( $per_page, array( '*' ), 'page', $page );
+
+			// Extract unsubscribe reason from contact notes and add to each item
+			if ( isset( $results['data'] ) && is_array( $results['data'] ) ) {
+				foreach ( $results['data'] as $tracking ) {
+					$tracking->unsubscribe_reason = $this->extract_unsubscribe_reason( $tracking->contact );
+				}
+			}
+
+			return new WP_REST_Response( $results, 200 );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Extract unsubscribe reason from contact notes
+	 *
+	 * @param Contact_Model|null $contact
+	 * @return string
+	 */
+	private function extract_unsubscribe_reason( $contact ) {
+		if ( ! $contact || ! $contact->notes ) {
+			return '';
+		}
+
+		// Find the most recent "Unsubscribed" note
+		foreach ( $contact->notes as $note ) {
+			if ( $note->title === 'Unsubscribed' && ! empty( $note->note ) ) {
+				// Extract reason from note text: "Contact unsubscribed from the email list. Reason: {reason}"
+				if ( preg_match( '/Reason:\s*(.+)$/i', $note->note, $matches ) ) {
+					return trim( $matches[1] );
+				}
+			}
+		}
+
+		return '';
 	}
 
 }

@@ -40,6 +40,7 @@ import { RecentCartsTable } from './recent-carts-list';
 import { CartsChart } from '../cart-chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCartAnalytics } from '../use-analytics';
+import { DashboardContentCard } from '@quillcrm/components';
 
 interface CartAnalyticsProps {
 	dashboardData: DashboardData;
@@ -71,29 +72,36 @@ const CartAnalytics: React.FC<CartAnalyticsProps> = ({ dashboardData }) => {
 
 	return (
 		<div className="flex flex-col gap-5 mt-5">
-			<CartStatsCards
-				data={data}
-				total_orders={dashboardData.total_orders}
-			/>
-
+			<DashboardContentCard
+				title={__('Cart Analytics Overview', 'quillcrm')}
+			>
+				<CartStatsCards
+					data={data}
+					total_orders={dashboardData.total_orders ?? 0 }
+				/>
+			</DashboardContentCard>
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-5 ">
+				<div className=" h-full md:col-span-2">
+					<RecentCartsTable
+						carts={dashboardData.recent_abandoned_carts}
+					/>
+				</div>
+				<div className=" h-full md:col-span-1">
+					<CartsChart
+						data={data}
+						interval={interval}
+						startDate={startDate}
+						endDate={endDate}
+						onIntervalChange={setInterval}
+						onChangeFromDate={setStartDate}
+						onChangeToDate={setEndDate}
+						onSubmit={refetch}
+					/>
+				</div>
+			</div>
 			<RecoveredCartsTable
 				recovered_carts={dashboardData.recent_recoverd_carts}
 			/>
-			<div className="flex gap-5">
-				<RecentCartsTable
-					carts={dashboardData.recent_abandoned_carts}
-				/>
-				<CartsChart
-					data={data}
-					interval={interval}
-					startDate={startDate}
-					endDate={endDate}
-					onIntervalChange={setInterval}
-					onChangeFromDate={setStartDate}
-					onChangeToDate={setEndDate}
-					onSubmit={refetch}
-				/>
-			</div>
 		</div>
 	);
 };

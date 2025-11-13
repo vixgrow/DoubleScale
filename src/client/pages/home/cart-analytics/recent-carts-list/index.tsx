@@ -47,12 +47,12 @@ export const RecentCartsTable: React.FC<RecentCartsTableProps> = ({
 	return (
 		<DashboardContentCard
 			title={__('Cart Analytics', 'quillcrm')}
-			className="w-2/3"
+			cardClassName='h-full'
 		>
 			{isEmpty(carts) ? (
 				<EmptyState />
 			) : (
-				<div>
+				<div className=' h-full'>
 					<Table>
 						<TableHeader>
 							<TableRow>

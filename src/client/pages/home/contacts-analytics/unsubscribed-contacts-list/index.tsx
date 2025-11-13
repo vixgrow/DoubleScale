@@ -34,11 +34,12 @@ export const UnsubscribedContactsTable: React.FC<
 	return (
 		<DashboardContentCard
 			title={__('Recent Unsubscribed Contacts', 'quillcrm')}
+			cardClassName='h-full'
 		>
 			{isEmpty(contacts) ? (
 				<EmptyState />
 			) : (
-				<div>
+				<div className='h-full'>
 					<Table>
 						<TableHeader>
 							<TableRow>

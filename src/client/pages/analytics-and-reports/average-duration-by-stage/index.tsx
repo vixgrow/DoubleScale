@@ -16,6 +16,8 @@ import { Bar } from 'react-chartjs-2';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@quillcrm/components/ui/tooltip';
 import { Button } from '@quillcrm/components/ui/button';
 import AverageDurationChartSkeleton from './Average-duration-by-stageSkeleton';
+import { EmptyState } from '../../home/no-data';
+import { DashboardContentCard } from '@quillcrm/components';
 
 ChartJS.register(
   CategoryScale,
@@ -205,13 +207,12 @@ const AverageDurationChart: React.FC<AverageDurationChartProps> = ({
 
   if (stages.length === 0) {
     return (
-      <Card className="border border-[#DEE1E6] bg-[#FFF] rounded-[16px]">
-        <CardContent className="p-6">
-          <div className="text-center text-gray-500">
-            {__('No data available', 'quillcrm')}
-          </div>
-        </CardContent>
-      </Card>
+      <DashboardContentCard
+       title={__('Average Duration per Stage', 'quillcrm')}
+      >
+         <EmptyState />
+      </DashboardContentCard>
+     
     );
   }
 

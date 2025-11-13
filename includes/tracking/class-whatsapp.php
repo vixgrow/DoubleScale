@@ -26,7 +26,7 @@ class WhatsApp extends Abstract_Tracking
 	 *
 	 * @var string
 	 */
-	protected $channel = Campaign_Channel::CHANNEL_WHATSAPP;
+	protected $channel = Campaign_Channel::STR_WHATSAPP;
 
 	/**
 	 * Add hooks - implementation of abstract method

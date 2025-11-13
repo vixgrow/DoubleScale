@@ -26,9 +26,9 @@ class SMS_Processing extends Abstract_Campaign_Processing {
 	/**
 	 * Communication channel
 	 *
-	 * @var int
+	 * @var string
 	 */
-	protected $channel = Campaign_Channel::CHANNEL_SMS;
+	protected $channel = Campaign_Channel::STR_SMS;
 
 	/**
 	 * Add hooks

@@ -2,8 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
-import { useDispatch } from '@wordpress/data';
 /**
  * External dependencies
  */
@@ -13,7 +11,6 @@ import { useState, useEffect } from 'react';
  * Internal dependencies
  */
 import type { Contact } from '@quillcrm/client';
-import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import {
 	Dialog,
 	DialogContent,
@@ -24,6 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import { CustomDialogHeader, Field, GradientSendSMSIcon } from '@quillcrm/components';
 import { Button } from '@quillcrm/components/ui/button';
+import { useSendMessage } from '@quillcrm/hooks/use-send-message';
 
 interface SendSMSDialogProps {
 	open: boolean;
@@ -36,10 +34,19 @@ const SendSMSDialog: React.FC<SendSMSDialogProps> = ({
 	onClose,
 	contact,
 }) => {
-	const { createNotice } = useDispatch('quillcrm/core');
 	const [toPhone, setToPhone] = useState(contact?.phone || '');
 	const [message, setMessage] = useState('');
-	const [isSending, setIsSending] = useState(false);
+
+	// Use the send message hook
+	const { isSending, sendMessage } = useSendMessage({
+		contact,
+		channel: 'sms',
+		onSuccess: () => {
+			// Reset form and close dialog on success
+			setMessage('');
+			onClose();
+		},
+	});
 
 	// Update toPhone when contact changes
 	useEffect(() => {
@@ -48,75 +55,11 @@ const SendSMSDialog: React.FC<SendSMSDialogProps> = ({
 		}
 	}, [contact]);
 
-	const sendSMS = async () => {
-		if (!contact?.id) {
-			createNotice({
-				type: 'error',
-				message: __('Contact not found', 'quillcrm'),
-			});
-			return;
-		}
-
-		if (!toPhone || !message) {
-			createNotice({
-				type: 'error',
-				message: __('Please fill in all fields', 'quillcrm'),
-			});
-			return;
-		}
-
-		// Basic phone validation
-		if (toPhone.length < 10) {
-			createNotice({
-				type: 'error',
-				message: __(
-					'Please enter a valid phone number (E.164 format: +1234567890)',
-					'quillcrm'
-				),
-			});
-			return;
-		}
-
-		setIsSending(true);
-		try {
-			await apiFetch({
-				path: `/qc/v1/contacts/${contact.id}/send-message`,
-				method: 'POST',
-				data: {
-					channel: CAMPAIGN_CHANNEL.SMS,
-					to: toPhone,
-					body: message,
-				},
-			});
-
-			createNotice({
-				type: 'success',
-				message: __('SMS sent successfully!', 'quillcrm'),
-			});
-
-			// Reset form
-			setMessage('');
-
-			onClose();
-		} catch (error: any) {
-			// Extract error message from various possible error formats
-			let errorMessage = __('Failed to send SMS', 'quillcrm');
-
-			if (error.message) {
-				errorMessage = error.message;
-			} else if (error.data?.message) {
-				errorMessage = error.data.message;
-			} else if (typeof error === 'string') {
-				errorMessage = error;
-			}
-
-			createNotice({
-				type: 'error',
-				message: errorMessage,
-			});
-		} finally {
-			setIsSending(false);
-		}
+	const handleSendSMS = async () => {
+		await sendMessage({
+			to: toPhone,
+			body: message,
+		});
 	};
 
 	// Character count for SMS (standard limit is 160 for single SMS, 1600 for concatenated)
@@ -178,7 +121,7 @@ const SendSMSDialog: React.FC<SendSMSDialogProps> = ({
 				</div>
 				<DialogFooter className="mt-6">
 					<Button
-						onClick={sendSMS}
+						onClick={handleSendSMS}
 						disabled={isSending}
 						size="xl"
 						variant="gradient"

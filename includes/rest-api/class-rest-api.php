@@ -17,7 +17,6 @@ use QuillCRM\REST_API\Controllers\V1\REST_Custom_Fields_Group_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Custom_Field_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Contact_Note_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Campaign_Controller;
-use QuillCRM\REST_API\Controllers\V1\REST_Email_Campaign_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Template_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Step_Controller;
@@ -106,8 +105,7 @@ class REST_API {
 			REST_Custom_Field_Controller::class,
 			Rest_Contact_Note_Controller::class,
 			REST_Campaign_Controller::class,
-			REST_Email_Campaign_Controller::class,
-			REST_Template_Controller::class,
+				REST_Template_Controller::class,
 			Rest_Automation_Controller::class,
 			Rest_Automation_Step_Controller::class,
 			Rest_Automation_Contact_Controller::class,

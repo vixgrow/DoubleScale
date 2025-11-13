@@ -28,10 +28,19 @@ export function getColumns({ onViewTemplate }: ColumnsProps) {
 		{
 			accessorKey: 'subject',
 			header: __('Subject', 'quillcrm'),
-			cell: ({ row }) =>
-				row.original.template?.subject ||
-				row.original.message?.subject ||
-				__('No Subject', 'quillcrm'),
+			cell: ({ row }) => {
+				// Try template subject first (for campaign emails)
+				const templateSubject = row.original.template?.subject;
+				// Then try message subject (for individual emails)
+				const messageSubject = row.original.message?.subject;
+				
+				// Return the first non-empty value
+				return (
+					(templateSubject && templateSubject.trim()) ||
+					(messageSubject && messageSubject.trim()) ||
+					__('No Subject', 'quillcrm')
+				);
+			},
 		},
 		{
 			accessorKey: 'sent_at',

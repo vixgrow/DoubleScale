@@ -353,10 +353,8 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				stage_id: values.stage_id,
 				value: values.value || 0,
 				currency: 'USD',
-				expected_close_date: values.expected_close_date
-                ? convertDate(values.expected_close_date)
-                : null,
-				
+				// Date is already in YYYY-MM-DD format, no conversion needed
+				expected_close_date: values.expected_close_date || null,
 				source: values.source,
 				priority: values.priority,
 			};
@@ -660,10 +658,15 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 								to: null
 							}}
 							onChange={(range) => {
-								const date = range?.from
-									? range.from.toISOString()
-									: '';
-								form.setValue('expected_close_date', date);
+								// Format date as YYYY-MM-DD to avoid timezone issues
+								if (range?.from) {
+									const year = range.from.getFullYear();
+									const month = String(range.from.getMonth() + 1).padStart(2, '0');
+									const day = String(range.from.getDate()).padStart(2, '0');
+									form.setValue('expected_close_date', `${year}-${month}-${day}`);
+								} else {
+									form.setValue('expected_close_date', '');
+								}
 							}}
 							placeholder={__('Select date', 'quillcrm')}
 							className="w-full h-12 !shadow-none rounded-[8px] border border-[#DEE1E6] bg-white !text-[#09090B] !font-normal !text-base tracking-[-.5px]"

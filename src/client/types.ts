@@ -627,17 +627,19 @@ export type ContactAnalytics = {
 };
 
 export type EmailsAnalytics = {
-	emails: {
-		[date: string]: CampaignEmail[];
+	email: {
+		[date: string]: number;
 	};
 	data: {
 		dates: string[];
-		type: 'hour' | 'day' | 'month';
+		type: 'hour' | 'day' | 'month' | 'year';
 	};
-	total: string;
+	total: number;
 	total_sent: number;
 	total_opened: number;
 	total_clicked: number;
+	open_rate: number;
+	click_rate: number;
 };
 
 export type Settings = {

@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
 import { cn } from '../../../../lib/utils';
 import ReportFilters from '@quillcrm/components/reports/ReportFilters';
-import { ContactsIcon } from '@quillcrm/components';
+import { ContactsIcon, PageHeader } from '@quillcrm/components';
 import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import TriangleUpIcon from '@quillcrm/components/icons/triangleUp';
@@ -304,6 +304,10 @@ const ContactsDealsReports: React.FC = () => {
 	};
 
 	return (
+		<>
+		<PageHeader title={__('Deals Analytics', 'quillcrm')}
+		subtitle={__('Deals Analytics', 'quillcrm')}
+		actions={[]}/>
 		<div className="space-y-6  ">
 			<ReportFilters
 				key={`filters-${JSON.stringify(filters)}`}
@@ -366,6 +370,7 @@ const ContactsDealsReports: React.FC = () => {
 				</div>
 			)}
 		</div>
+		</>
 	);
 };
 

@@ -123,8 +123,8 @@ abstract class Abstract_Campaign_Processing {
 	 * @return void
 	 */
 	protected function register_campaign_processing_hooks() {
-		// Convert channel integer to string for hook names (e.g., 1 -> 'email')
-		$type_string        = Campaign_Channel::to_string( $this->channel );
+		// Channel is already a string ('email', 'sms', 'whatsapp')
+		$type_string        = $this->channel;
 		$daily_callback_key = $this->get_daily_callback_key();
 
 		QuillCRM::instance()->daily_tasks->register_callback( $daily_callback_key, array( $this, 'reset_daily_count' ) );
@@ -140,8 +140,8 @@ abstract class Abstract_Campaign_Processing {
 	 * @return string Daily callback key
 	 */
 	protected function get_daily_callback_key() {
-		// Convert channel integer to string for array lookup
-		$channel_string = Campaign_Channel::to_string( $this->channel );
+		// Channel is already a string
+		$channel_string = $this->channel;
 
 		// Map campaign types to daily callback keys
 		$callbacks = array(
@@ -441,13 +441,14 @@ abstract class Abstract_Campaign_Processing {
 							$subQuery->where( 'status', 'schedule' )
 								->whereDate( 'execute_at', '<=', date( 'Y-m-d H:i:s' ) );
 						}
-					);
-			}
-		)
-			->where( 'type', $this->channel )
-			->orderBy( 'updated_at', 'asc' )
-			->first();
-	}
+				);
+		}
+	)
+		// Convert string to integer for database query (DB boundary)
+		->where( 'type', Campaign_Channel::to_integer( $this->channel ) )
+		->orderBy( 'updated_at', 'asc' )
+		->first();
+}
 
 	/**
 	 * Process individual campaign
@@ -457,15 +458,15 @@ abstract class Abstract_Campaign_Processing {
 	 */
 	protected function process_campaign( Campaign_Model $campaign ) {
 		// Validate that the campaign type matches this processor
-		$campaign_type = $campaign->get_type();
-		if ( $campaign_type !== $this->channel ) {
+		// Use accessor for clean string comparison (accessor converts DB int → string)
+		if ( $campaign->type !== $this->channel ) {
 			quillcrm_get_logger()->error(
 				__( 'Campaign type mismatch detected.', 'quillcrm' ),
 				array(
 					'code'          => 'campaign_type_mismatch',
 					'campaign_id'   => $campaign->id,
 					'expected_type' => $this->channel,
-					'actual_type'   => $campaign_type,
+					'actual_type'   => $campaign->type,
 					'processor'     => get_class( $this ),
 				)
 			);
@@ -545,12 +546,12 @@ abstract class Abstract_Campaign_Processing {
 			// Get recipient field (email or phone)
 			$recipient = $this->get_recipient( $contact );
 			if ( empty( $recipient ) ) {
-				$this->contact_filter->log_skipped_contact(
-					$contact->id,
-					$campaign->id,
-					$this->channel,
-					$this->channel === Campaign_Channel::CHANNEL_EMAIL ? 'no email' : 'no phone number'
-				);
+			$this->contact_filter->log_skipped_contact(
+				$contact->id,
+				$campaign->id,
+				$this->channel,
+				$this->channel === Campaign_Channel::STR_EMAIL ? 'no email' : 'no phone number'
+			);
 				// Increment offset for skipped contact to avoid reprocessing
 				update_option( "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
 				return true; // Count as processed to avoid infinite loop
@@ -586,8 +587,8 @@ abstract class Abstract_Campaign_Processing {
 			// Update last contact offset
 			update_option( "quillcrm_{$this->channel}_campaigns_last_contact_offset_{$campaign->id}", intval( $last_contact_offset ) + 1 );
 
-			// Enqueue processing task (convert channel integer to string for hook name)
-			$channel_string = Campaign_Channel::to_string( $this->channel );
+			// Enqueue processing task
+			$channel_string = $this->channel;
 			QuillCRM::instance()->campaigns_tasks->enqueue_sync( "process_campaign_{$channel_string}", $campaign, $contact, $campaign_message );
 
 			quillcrm_get_logger()->info(
@@ -671,8 +672,8 @@ abstract class Abstract_Campaign_Processing {
 				)
 			);
 
-			// Requeue the task for later processing (convert channel integer to string for hook name)
-			$channel_string = Campaign_Channel::to_string( $this->channel );
+			// Requeue the task for later processing
+			$channel_string = $this->channel;
 			QuillCRM::instance()->campaigns_tasks->enqueue_async( "process_campaign_{$channel_string}", $campaign, $contact, $campaign_message );
 			return;
 		}
@@ -683,7 +684,7 @@ abstract class Abstract_Campaign_Processing {
 
 		// Get message provider (for SMS/WhatsApp campaigns)
 		// Email campaigns skip this check
-		if ( $this->channel !== Campaign_Channel::CHANNEL_EMAIL ) {
+		if ( $this->channel !== Campaign_Channel::STR_EMAIL ) {
 			$provider = $this->get_message_provider();
 			if ( ! $provider ) {
 				$this->log_provider_connection_error( $campaign, $contact, $campaign_message );
@@ -904,7 +905,7 @@ abstract class Abstract_Campaign_Processing {
 			return $this->message_provider;
 		}
 
-		if ( $this->channel === Campaign_Channel::CHANNEL_EMAIL ) {
+		if ( $this->channel === Campaign_Channel::STR_EMAIL ) {
 			return null;
 		}
 
@@ -1016,8 +1017,11 @@ abstract class Abstract_Campaign_Processing {
 	 * @return bool True if resending was handled
 	 */
 	protected function handle_resending() {
-		 $resending_campaign = Campaign_Model::where( 'status', 'resending' )
-			->where( 'type', $this->channel )
+		// Convert string to integer for database query (DB boundary)
+		$type_int = Campaign_Channel::to_integer( $this->channel );
+		
+		$resending_campaign = Campaign_Model::where( 'status', 'resending' )
+			->where( 'type', $type_int )
 			->orderBy( 'updated_at', 'asc' )
 			->first();
 
@@ -1097,8 +1101,8 @@ abstract class Abstract_Campaign_Processing {
 		$message->status = Tracking_Status::SCHEDULED;
 		$message->save();
 		
-		// Convert channel integer to string for task name
-		$channel_string = Campaign_Channel::to_string( $this->channel ) ?? 'email';
+		// Channel is already a string
+		$channel_string = $this->channel;
 		QuillCRM::instance()->campaigns_tasks->enqueue_sync(
 			"process_campaign_{$channel_string}",
 			$campaign,
@@ -1197,7 +1201,7 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		// Check for subject in email templates
-		if ( $campaign_type === Campaign_Channel::CHANNEL_EMAIL && empty( trim( $template->subject ) ) ) {
+		if ( $campaign_type === Campaign_Channel::STR_EMAIL && empty( trim( $template->subject ) ) ) {
 			quillcrm_get_logger()->warning(
 				__( 'Email template missing subject', 'quillcrm' ),
 				array( 'template_id' => $template->id )
@@ -1205,7 +1209,7 @@ abstract class Abstract_Campaign_Processing {
 		}
 
 		// Validate HTML structure for email templates
-		if ( $campaign_type === Campaign_Channel::CHANNEL_EMAIL ) {
+		if ( $campaign_type === Campaign_Channel::STR_EMAIL ) {
 			if ( ! $this->is_valid_html( $template->body ) ) {
 				quillcrm_get_logger()->warning(
 					__( 'Email template contains potentially invalid HTML', 'quillcrm' ),

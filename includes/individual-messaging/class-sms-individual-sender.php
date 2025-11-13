@@ -34,7 +34,7 @@ class SMS_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return string Channel type
 	 */
 	protected function get_channel_type() {
-		return Campaign_Channel::CHANNEL_SMS;
+		return Campaign_Channel::STR_SMS;
 	}
 
 	/**

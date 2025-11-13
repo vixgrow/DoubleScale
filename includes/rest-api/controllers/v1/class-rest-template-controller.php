@@ -128,6 +128,11 @@ class REST_Template_Controller extends REST_Controller {
 							'type'        => 'integer',
 							'default'     => null,
 						),
+						'preview'    => array(
+							'description' => __( 'Whether this is a preview render (strips tracking elements)', 'quillcrm' ),
+							'type'        => 'boolean',
+							'default'     => false,
+						),
 					),
 				),
 			)
@@ -811,6 +816,7 @@ class REST_Template_Controller extends REST_Controller {
 		$template_id = (int) $request->get_param( 'id' );
 		$merge_tags  = $request->get_param( 'merge_tags' ) ?: array();
 		$contact_id  = $request->get_param( 'contact_id' );
+		$is_preview  = $request->get_param( 'preview' ) ?? false;
 
 		// Get contact - prioritize contact_id parameter, then extract from merge_tags
 		$contact = null;
@@ -837,11 +843,63 @@ class REST_Template_Controller extends REST_Controller {
 			);
 		}
 
+		// Strip tracking elements if this is a preview render.
+		// This prevents admin previews from triggering open/click tracking.
+		if ( $is_preview ) {
+			$html = $this->strip_tracking_elements( $html );
+		}
+
 		return rest_ensure_response(
 			array(
 				'html' => $html,
 			)
 		);
+	}
+
+	/**
+	 * Strip tracking elements from rendered HTML.
+	 * Removes tracking pixels and restores original URLs from click tracking links.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $html The HTML to strip tracking from.
+	 *
+	 * @return string HTML with tracking elements removed.
+	 */
+	private function strip_tracking_elements( $html ) {
+		// Remove tracking pixel images (quillcrm=email_open).
+		$html = preg_replace(
+			'/<img[^>]*quillcrm=email_open[^>]*>/i',
+			'',
+			$html
+		);
+
+		// Replace click tracking links with original URLs.
+		// Pattern: href="...?quillcrm=email_click&hash_key=xxx&original=encoded_url".
+		$html = preg_replace_callback(
+			'/href=["\']([^"\']*\?[^"\']*quillcrm=email_click[^"\']*)["\']/',
+			function ( $matches ) {
+				$tracking_url = $matches[1];
+
+				// Parse the URL to extract the 'original' parameter.
+				$parsed_url = wp_parse_url( $tracking_url );
+				if ( isset( $parsed_url['query'] ) ) {
+					parse_str( $parsed_url['query'], $query_params );
+
+					// If we have an original URL, use it.
+					if ( isset( $query_params['original'] ) ) {
+						$original_url = urldecode( $query_params['original'] );
+						return 'href="' . esc_url( $original_url ) . '"';
+					}
+				}
+
+				// If we can't extract original URL, return as-is.
+				return $matches[0];
+			},
+			$html
+		);
+
+		return $html;
 	}
 
 	/**

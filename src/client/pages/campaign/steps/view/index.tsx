@@ -125,7 +125,9 @@ const renderTemplateBody = async (
 			const response: any = await apiFetch({
 				path: `/qc/v1/templates/${template.id}/render`,
 				method: 'POST',
-				data: {},
+				data: {
+					preview: true, // Strip tracking elements for admin preview
+				},
 			});
 
 			if (response?.html) {

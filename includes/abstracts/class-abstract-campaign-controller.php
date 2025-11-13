@@ -588,6 +588,25 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 			$start_date = $request->get_param( 'start_date' ) ?: '';
 			$end_date   = $request->get_param( 'end_date' ) ?: '';
 
+			// Allow channel to be set via request parameter (for unified endpoint)
+			$channel = $request->get_param( 'channel' );
+			if ( ! empty( $channel ) ) {
+				// Validate it's a valid channel string
+				$valid_channels = Campaign_Channel::get_core_channel_strings();
+				if ( in_array( $channel, $valid_channels, true ) ) {
+					$this->channel = $channel;
+				}
+			}
+
+			// Ensure channel is set
+			if ( empty( $this->channel ) ) {
+				return new WP_Error(
+					'missing_channel',
+					__( 'Channel parameter is required', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+			}
+
 			// Generate cache key
 			$cache_key = sprintf(
 				'quillcrm_analytics_%s_%s_%s_%s',
@@ -597,20 +616,22 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 				$end_date
 			);
 
-			// Try to get cached result
-			$analytics = get_transient( $cache_key );
+		// Try to get cached result
+		$analytics = get_transient( $cache_key );
 
-			if ( false === $analytics ) {
-				// Cache miss - fetch fresh data
-				// Convert string channel to integer constant for Campaign_Analytics
-				$channel_type = Campaign_Channel::to_integer( $this->channel );
-				$analytics    = $this->analytics->get_analytics( $channel_type, $interval, $start_date, $end_date );
+		if ( false === $analytics ) {
+			// Cache miss - fetch fresh data
+			// Pass string channel directly to analytics service
+			$analytics = $this->analytics->get_analytics( $this->channel, $interval, $start_date, $end_date );
 
-				// Cache for 5 minutes
-				set_transient( $cache_key, $analytics, 5 * MINUTE_IN_SECONDS );
-			}
+			// Cache for 5 minutes
+			set_transient( $cache_key, $analytics, 5 * MINUTE_IN_SECONDS );
+		}
 
-			return new WP_REST_Response( $analytics, 200 );
+		// Normalize analytics response using centralized method
+		$response = Campaign_Analytics::normalize_response( $analytics, $this->channel );
+
+		return new WP_REST_Response( $response, 200 );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -723,6 +744,12 @@ abstract class Abstract_Campaign_Controller extends REST_Controller {
 	 */
 	public function get_analytics_params() {
 		return array(
+			'channel'    => array(
+				'description' => __( 'Campaign channel (email, sms, whatsapp).', 'quillcrm' ),
+				'type'        => 'string',
+				'enum'        => Campaign_Channel::get_core_channel_strings(),
+				'required'    => false,
+			),
 			'interval'   => array(
 				'description' => __( 'Interval for the analytics.', 'quillcrm' ),
 				'type'        => 'string',

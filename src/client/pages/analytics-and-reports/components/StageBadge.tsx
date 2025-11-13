@@ -20,7 +20,7 @@ const StageBadge: React.FC<StageBadgeProps> = ({ stage, stageColor = '#7C3AED' }
 				}}
 			>
 				{/* Text */}
-				<span className="text-base font-Inter text-center px-1 leading-[26px] font-medium whitespace-nowrap relative z-10" style={{color:StageTextColor(stageColor)}}>
+				<span className="text-base text-center px-1 leading-[26px] font-medium whitespace-nowrap relative z-10" style={{color:StageTextColor(stageColor)}}>
 					{stage}
 				</span>
 

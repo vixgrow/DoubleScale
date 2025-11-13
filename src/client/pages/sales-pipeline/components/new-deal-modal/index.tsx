@@ -73,7 +73,6 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 	stage,
 	index,
 	totalStages,
-	// children,
 	isSelected,
 	isPrevious,
 
@@ -360,15 +359,14 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 
 		setLoading(true);
 		try {
-			// The DatePicker already returns the date in YYYY-MM-DD format,
-			// so we can use it directly without conversion to avoid timezone issues
+			
+
 			const dealData = {
 				...values,
 				pipeline_id: pipeline.id,
 				currency: 'USD',
 				expected_close_date: values.expected_close_date || null,
 			};
-
 			await createDeal(dealData);
 
 			createNotice?.({
@@ -637,10 +635,10 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 							<DatePicker
 								value={
 									formValues.expected_close_date
-										? new Date(
-												formValues.expected_close_date
-											)
-										: null
+										// ? new Date(
+										// 		formValues.expected_close_date
+										// 	)
+										// : null
 								}
 								onChange={(value: string) => {
 									setValue('expected_close_date', value);

@@ -21,12 +21,12 @@ import './style.scss';
 import { NoDealsIcon } from '@quillcrm/components';
 import WinTagIcon from '@quillcrm/components/icons/win-tag';
 import { PlusIcon } from 'lucide-react';
-import DealValueIcon from '@quillcrm/components/icons/deal-value';
-import WeightedIcon from '@quillcrm/components/icons/weighted-icon';
+
 import { DealCardShimmer } from '../deal-card/DealCardShimmer';
 import React, { useState } from 'react';
-import { NewDealModal } from '../new-deal-modal';
+// import { NewDealModal } from '../new-deal-modal';
 import { formatCurrency } from '../../utils/currency';
+import { NewDealModal } from '../new-deal-modal';
 
 interface PipelineColumnProps {
 	stage: {
@@ -53,6 +53,7 @@ interface PipelineColumnProps {
 	selectMode?: boolean;
 	selectedDealIds?: number[];
 	toggleDealSelection?: (dealId: number) => void;
+	onRefresh?: () => void;
 }
 
 export const PipelineColumn: React.FC<PipelineColumnProps> = ({
@@ -74,6 +75,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	selectMode = false,
 	selectedDealIds = [],
 	toggleDealSelection,
+	onRefresh
 }) => {
 	const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
 	const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
@@ -356,7 +358,10 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 			<NewDealModal
 				visible={isNewDealModalOpen}
 				onClose={() => setIsNewDealModalOpen(false)}
-				onSuccess={() => setIsNewDealModalOpen(false)}
+				onSuccess={() => {
+					setIsNewDealModalOpen(false);
+					onRefresh?.(); 
+				}}
 				pipeline={pipeline}
 				initialStageId={selectedStageId ?? undefined}
 			/>

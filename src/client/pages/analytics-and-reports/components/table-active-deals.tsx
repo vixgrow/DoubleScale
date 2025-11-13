@@ -23,7 +23,7 @@ import { Skeleton } from 'antd';
 import { convertDate } from '@quillcrm/utils';
 import { __ } from '@wordpress/i18n';
 import StageBadge from './StageBadge';
-import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
+
 
 interface Deal {
 	id: string;
@@ -120,19 +120,7 @@ const TableActiveDeals = ({
 							</span>
 						)}
 					</CardTitle>
-					{/* <div className="flex items-center gap-4">
-						<div className="relative">
-							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-							<input
-								type="text"
-								placeholder="Search deals..."
-								className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-								value={searchTerm}
-								onChange={(e) => setSearchTerm(e.target.value)}
-							/>
-						</div>
-						
-					</div> */}
+					
 				</div>
 			</CardHeader>
 			<CardContent>
@@ -178,17 +166,7 @@ const TableActiveDeals = ({
 												<TableCell className="font-normal text-[#09090B] text-sm">
 													{deal.value}
 												</TableCell>
-												{/* <TableCell>
-													<Badge
-														style={{
-															backgroundColor:
-																deal.stage_color,
-															border: 'none',
-														}}
-													>
-														{deal.stage}
-													</Badge>
-												</TableCell> */}
+												
 												<TableCell>
 	<StageBadge
 		stage={deal.stage} 

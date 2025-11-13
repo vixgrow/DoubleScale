@@ -53,25 +53,25 @@ const DealsStatisticsCard: React.FC<DealsStatisticsCardProps> = ({
         {icon}
       </div>
 
-      <h3 className="text-2xl font-[Inter] leading-normal tracking-[-1] font-semibold text-[#09090B]">
+      <h3 className="text-2xl  leading-normal tracking-[-1] font-semibold text-[#09090B]">
         {title}
       </h3>
     </div>
 
     <div className="grid grid-cols-2 gap-4 divide-x divide-[#DEE1E6]">
       <div className="text-center pr-2">
-        <div className="text-xl font-[Inter] leading-[30px] font-bold text-[#09090B] mb-1">
+        <div className="text-xl  leading-[30px] font-bold text-[#09090B] mb-1">
           {statistics.primaryValue}
         </div>
-        <div className="text-base font-[Inter] leading-[26px] font-normal text-[#777]">
+        <div className="text-base leading-[26px] font-normal text-[#777]">
           {statistics.primaryLabel}
         </div>
       </div>
       <div className="text-center pl-2">
-        <div className="text-xl font-[Inter] leading-[30px] font-bold text-[#09090B] mb-1">
+        <div className="text-xl leading-[30px] font-bold text-[#09090B] mb-1">
           {statistics.secondaryValue}
         </div>
-        <div className="text-base font-[Inter] leading-[26px] font-normal text-[#777]">
+        <div className="text-base leading-[26px] font-normal text-[#777]">
           {statistics.secondaryLabel}
         </div>
       </div>

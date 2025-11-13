@@ -466,6 +466,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								selectMode={selectMode}
 								selectedDealIds={selectedDealIds}
 								toggleDealSelection={toggleDealSelection}
+								onRefresh={onRefresh}
 							/>
 						))}
 				</div>

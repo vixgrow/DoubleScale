@@ -11,7 +11,7 @@ import React from 'react';
 /**
  * Internal dependencies
  */
-import { CardHeader } from '../../../../components/ui/card';
+
 import { Button } from '../../../../components/ui/button';
 import UserActivityIcon from '@quillcrm/components/icons/user-activity';
 import MeetingActivityIcon from '@quillcrm/components/icons/meeting-activity';

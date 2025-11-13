@@ -106,7 +106,7 @@ const CardPipelineStages: React.FC<{ ownerId: number | null }> = ({
 		<Card className=' border border-[#DEE1E6] rounded-[20px] bg-[#F8F8F8] p-3'>
 			<CardHeader>
 				<div className=' flex justify-between gap-8'>
-				<div className="flex items-center justify-center gap-2 mb-4 text-[#09090B] text-2xl font-[Inter] font-medium leading-normal tracking-[-1] ">
+				<div className="flex items-center justify-center gap-2 mb-4 text-[#09090B] text-2xl font-medium leading-normal tracking-[-1] ">
 					<CardTitle className=' '>{__('Pipeline by Stage', 'quillcrm')}</CardTitle>
 					<span className="">
 						({pipelineStages.reduce(
@@ -161,7 +161,7 @@ const CardPipelineStages: React.FC<{ ownerId: number | null }> = ({
 							);
 							const progressPercentage =
 								(stage.count / maxDeals) * 100;
-							const circumference = 2 * Math.PI * 35; // radius of 35
+							const circumference = 2 * Math.PI * 35; 
 							const strokeDashoffset =
 								circumference -
 								(progressPercentage / 100) * circumference;

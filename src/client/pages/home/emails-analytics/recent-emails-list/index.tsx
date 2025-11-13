@@ -31,12 +31,12 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 	emails,
 }) => {
 	return (
-		<DashboardContentCard title={__('Recent Emails', 'quillcrm')}>
+		<DashboardContentCard title={__('Recent Emails', 'quillcrm')} cardClassName='h-full'>
 			{isEmpty(emails) ? (
 				<EmptyState />
 			) : (
-				<div>
-					<Table>
+				<div className='h-full'>
+					<Table >
 						<TableHeader>
 							<TableRow>
 								<TableHead className="text-[#3F4254] font-semibold">
@@ -72,7 +72,7 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 										{index + 1}
 									</TableCell>
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
-										{email.email}
+										{email.message?.subject}
 									</TableCell>
 									<TableCell className="text-[#2E2C2F] font-semibold text-sm">
 										{format(
@@ -94,7 +94,11 @@ export const RecentEmailsTable: React.FC<RecentEmailsTableProps> = ({
 									</TableCell>
 									<TableCell>
 										<div
-											className={`text-sm w-fit capitalize rounded-lg py-1 px-3 ${email.status == 'sent' ? 'text-[#50CD89] bg-[#E2FFEF]' : 'bg-[#EBEBEB] text-[#616161]'}`}
+											className={`text-sm w-fit capitalize rounded-lg py-1 px-3 ${
+												String(email.status) === 'sent'
+													? 'text-[#50CD89] bg-[#E2FFEF]'
+													: 'bg-[#EBEBEB] text-[#616161]'
+											}`}
 										>
 											{email.status}
 										</div>

@@ -159,7 +159,6 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 			const response = (await apiFetch({
 				path: apiPath,
 			})) as SalesRepResponse;
-			console.log(response);
 
 			setSaleInfo(response.sale_info);
 			setCardsStatistics(response.cards_statistics);
@@ -256,7 +255,7 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 							<Card className="border border-[#DEE1E6] rounded-[20px] bg-[#F8F8F8] p-3  h-full  lg:col-span-1 flex flex-col">
 								<CardHeader>
 									<div className="flex justify-between items-center">
-										<CardTitle className=" text-[#09090B] text-2xl font-[Inter] font-medium leading-normal tracking-[-1]">
+										<CardTitle className=" text-[#09090B] text-2xl font-medium leading-normal tracking-[-1]">
 											{__(
 												'Win/Loss Analysis',
 												'quillcrm'
@@ -312,11 +311,11 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 											<div className="flex items-center gap-3">
 												<div className="w-4 h-4 rounded-full bg-[#458DC7]"></div>
 												<div className="flex items-center justify-center gap-2">
-													<span className="text-base font-normal leading-[26px] font-[Inter] text-[#09090B]">
+													<span className="text-base font-normal leading-[26px]  text-[#09090B]">
 														Open Deals (
 														{openPercent}%):
 													</span>
-													<span className="text-base font-semibold leading-[26px] font-[Inter] text-[#09090B]">
+													<span className="text-base font-semibold leading-[26px]  text-[#09090B]">
 														{open}K Deal
 													</span>
 												</div>
@@ -326,11 +325,11 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 											<div className="flex items-center gap-3">
 												<div className="w-4 h-4 rounded-full bg-[#16A34A]"></div>
 												<div className="flex items-center justify-center gap-2">
-													<span className="text-base font-normal leading-[26px] font-[Inter] text-[#09090B]">
+													<span className="text-base font-normal leading-[26px]  text-[#09090B]">
 														Closed Won ({wonPercent}
 														%):
 													</span>
-													<span className="text-base font-semibold leading-[26px] font-[Inter] text-[#09090B]">
+													<span className="text-base font-semibold leading-[26px] text-[#09090B]">
 														{won}K Deal
 													</span>
 												</div>
@@ -340,12 +339,12 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 											<div className="flex items-center gap-3">
 												<div className="w-4 h-4 rounded-full bg-[#E13B3B]"></div>
 												<div className="flex items-center justify-center gap-2">
-													<span className="text-base font-normal leading-[26px] font-[Inter] text-[#09090B]">
+													<span className="text-base font-normal leading-[26px]  text-[#09090B]">
 														Closed Lost (
 														{lostPercent}
 														%):
 													</span>
-													<span className="text-base font-semibold leading-[26px] font-[Inter] text-[#09090B]">
+													<span className="text-base font-semibold leading-[26px] text-[#09090B]">
 														{lost}K Deal
 													</span>
 												</div>

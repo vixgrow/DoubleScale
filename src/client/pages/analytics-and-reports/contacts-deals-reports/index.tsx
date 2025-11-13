@@ -217,10 +217,10 @@ const ContactsDealsReports: React.FC = () => {
 						</div>
 					)}
 					<div className="flex flex-col">
-						<span className="text-2xl font-semibold font-[Inter] leading-normal  tracking-[-1px] text-[#09090B]">
+						<span className="text-2xl font-semibold  leading-normal  tracking-[-1px] text-[#09090B]">
 							{typeof item.value === 'string' ? item.value : item.value.toLocaleString()}
 						</span>
-						<span className="text-base text-[#777] font-medium font-[Inter] leading-6 tracking-[-.5px]  mt-2">
+						<span className="text-base text-[#777] font-medium leading-6 tracking-[-.5px]  mt-2">
 							{item.title}
 						</span>
 					</div>

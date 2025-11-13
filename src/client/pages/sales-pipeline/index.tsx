@@ -16,7 +16,7 @@ import {
 } from '@quillcrm/components';
 import { KanbanBoard } from './components/kanban-board';
 import { PipelineSettingsModal } from './components/pipeline-settings-modal';
-import { NewDealModal } from './components/new-deal-modal';
+// import { NewDealModal } from './components/new-deal-modal';
 import { DealDetailModal } from './components/deal-detail-modal';
 import { NewPipelineModal } from './components/new-pipeline-modal';
 import { DuplicatePipelineModal } from './components/duplicate-pipeline-modal';
@@ -36,6 +36,7 @@ import { handleApiError } from './utils/error-handler';
 import { SalesPipelineSkeleton } from './SalesPipelineSkeleton';
 import { PipelineHeader } from './components/salePipeline-header/SalePipelineHeader';
 import { PipelineFilters } from './components/pipeline-filters';
+import { NewDealModal } from './components/new-deal-modal';
 
 const SalesPipeline: React.FC = () => {
 	const [selectedPipelineId, setSelectedPipelineId] = useState<number | null>(

@@ -36,7 +36,7 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 					{contacts?.map((record, index) => {
 						const initials =
 							`${record.first_name?.[0] || ''}${record.last_name?.[0] || ''}`.toUpperCase();
-						const hasImage = (record as any).img;
+						const avatarUrl = (record as any).avatar_url;
 						const fullName = `${record.first_name || ''} ${record.last_name || ''}`.trim();
 						const isLast = index === contacts.length - 1;
 
@@ -46,17 +46,14 @@ export const RecentContactsList: React.FC<RecentContactsListProps> = ({
 								className={`flex justify-between items-center hover:bg-gray-50 py-4 ${!isLast ? 'border-b border-dashed border-gray-200' : ''}`}
 							>
 								<div className="flex items-center gap-4">
-									{hasImage ? (
-										<Avatar className="w-12 h-12 rounded-lg">
-											<AvatarImage src={(record as any).img} alt={fullName || record.email} className="rounded-full" />
-										</Avatar>
-									) : (
-										<Avatar className="w-12 h-12 rounded-lg">
-											<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-extrabold text-lg">
-												{initials || '?'}
-											</AvatarFallback>
-										</Avatar>
-									)}
+									<Avatar className="w-12 h-12 rounded-lg">
+										{avatarUrl ? (
+											<AvatarImage src={avatarUrl} alt={fullName || record.email} className="rounded-full" />
+										) : null}
+										<AvatarFallback className="rounded-lg bg-[#E3EEFF99] text-secondary font-extrabold text-lg">
+											{initials || '?'}
+										</AvatarFallback>
+									</Avatar>
 									<NavLink to={`contacts/${record.id}`}>
 										<div className="text-base font-normal text-[#09090B] capitalize w-60 truncate">
 											{record.first_name || '-'}{' '}

@@ -162,8 +162,8 @@ export const DealCard: React.FC<DealCardProps> = ({
 		<div
 			ref={setNodeRef}
 			style={style}
-			{...attributes}
-			{...listeners}
+			{...(selectMode ? {} : attributes)}
+			{...(selectMode ? {} : listeners)}
 			className={`deal-card m-4 ${isDragging || isDraggging ? 'dragging' : ''} ${deal.is_overdue ? 'overdue' : ''}`}
 			onClick={handleCardClick}
 		>

@@ -79,8 +79,8 @@ const Review: React.FC = () => {
 		(campaign?.settings?.templates?.[0] as CampaignTemplate) || null;
 
 	// Extract template data based on Template_Field_Mapper structure
-	// For email: subject and preview_text are in settings.subject and settings.preview_text
-	// For SMS: from_name and from_phone are in settings
+	// For email: subject, preview_text, from_name, from_email, reply_to are in settings
+	// For SMS: No sender fields needed (uses global Twilio phone number)
 	const isEmailTemplate = template?.type === 'email';
 	const emailSubject =
 		isEmailTemplate && (template as EmailTemplate).settings?.subject
@@ -93,11 +93,6 @@ const Review: React.FC = () => {
 	const fromEmail =
 		isEmailTemplate && (template as EmailTemplate).settings?.from_email
 			? (template as EmailTemplate).settings!.from_email
-			: '-';
-	const fromPhone =
-		campaign?.type === 'sms'
-			? ((campaign?.settings as unknown as { from_phone?: string })
-					?.from_phone ?? '-')
 			: '-';
 	const replyTo =
 		isEmailTemplate && (template as EmailTemplate).settings?.reply_to
@@ -116,7 +111,6 @@ const Review: React.FC = () => {
 				subject: emailSubject,
 				fromName,
 				fromEmail,
-				fromPhone,
 				replyTo,
 				previewText,
 			});
@@ -315,8 +309,8 @@ const Review: React.FC = () => {
 					campaign?.type === 'email'
 						? campaignSteps
 						: campaignSteps.filter(
-								(step) => step.slug !== 'builder'
-							)
+							(step) => step.slug !== 'builder'
+						)
 				}
 				canProceed="true"
 				currentStep={campaign?.type === 'email' ? 4 : 3}
@@ -356,11 +350,13 @@ const Review: React.FC = () => {
 								campaignType={campaign?.type}
 								fromName={fromName}
 								fromEmail={fromEmail}
-								fromPhone={fromPhone}
 								replyTo={replyTo}
 								emailSubject={emailSubject}
 								previewText={previewText}
 								onEdit={() => goToStep('template')}
+								button={
+									campaign?.type === 'email' ? true : false
+								}
 							/>
 
 							{/* Recipients */}

@@ -27,6 +27,7 @@ type FieldType = {
 		button_text?: string;
 	};
 	'default-value'?: string;
+	tooltip?: string;
 	helperText?: string;
 };
 
@@ -113,29 +114,44 @@ const Fields: React.FC<FieldsProps> = ({
 								style={{ padding: '20px 0' }}
 							>
 								{field.fields &&
-									map(field.fields, (tabField, tabFieldKey) => {
-										return (
-											<Field
-												key={tabFieldKey}
-												label={tabField.label}
-												type={tabField.type}
-												options={optionsArray(tabField)}
-												value={values?.[tabFieldKey]}
-												onChange={(value) =>
-													handleChange(tabFieldKey, value)
-												}
-												fields={tabField.fields}
-												endpoint={tabField.endpoint}
-												multiple={tabField.multiple}
-												settings={tabField.settings}
-												allValues={values}
-												defaultValue={tabField['default-value']}
-												helperText={processHelperText(
-													tabField.helperText
-												)}
-											/>
-										);
-									})}
+									map(
+										field.fields,
+										(tabField, tabFieldKey) => {
+											return (
+												<Field
+													key={tabFieldKey}
+													label={tabField.label}
+													type={tabField.type}
+													options={optionsArray(
+														tabField
+													)}
+													value={
+														values?.[tabFieldKey]
+													}
+													onChange={(value) =>
+														handleChange(
+															tabFieldKey,
+															value
+														)
+													}
+													fields={tabField.fields}
+													endpoint={tabField.endpoint}
+													multiple={tabField.multiple}
+													settings={tabField.settings}
+													allValues={values}
+													tooltip={tabField.tooltip}
+													defaultValue={
+														tabField[
+															'default-value'
+														]
+													}
+													helperText={processHelperText(
+														tabField.helperText
+													)}
+												/>
+											);
+										}
+									)}
 							</div>
 						</TabsContent>
 					))}
@@ -161,6 +177,7 @@ const Fields: React.FC<FieldsProps> = ({
 						multiple={field.multiple}
 						settings={field.settings}
 						allValues={values}
+						tooltip={field.tooltip}
 						defaultValue={field['default-value']}
 						helperText={processHelperText(field.helperText)}
 					/>

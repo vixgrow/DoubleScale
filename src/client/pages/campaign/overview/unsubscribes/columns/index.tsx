@@ -99,10 +99,9 @@ export function getColumns(campaignType?: string) {
 	columns.push({
 		accessorKey: 'unsubscribe_reason',
 		header: __('Unsubscribe Reason', 'quillcrm'),
-		cell: () => {
-			// For now, we show a placeholder. In the future, this could be
-			// fetched from contact meta or a separate unsubscribe tracking table
-			return __('Not specified', 'quillcrm');
+		cell: ({ row }) => {
+			const reason = row.original.unsubscribe_reason;
+			return reason || __('Not specified', 'quillcrm');
 		},
 	});
 

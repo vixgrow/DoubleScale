@@ -77,7 +77,7 @@ export default function ListTagFilter({
 		}
 
 		// For exclude: create rows for each list/tag combination
-		const maxExclude = Math.max(excludeLists.size, excludeTags.size, 1);
+		const maxExclude = Math.max(excludeLists.size, excludeTags.size);
 		const excludeListsArray = Array.from(excludeLists);
 		const excludeTagsArray = Array.from(excludeTags);
 
@@ -219,7 +219,7 @@ export default function ListTagFilter({
 				description="Select List and Tags that you want to Exclude from this campaign. Exclude contacts will be subtracted from your included selection."
 				ref={excludeFilterRef}
 				onChange={setExcludeData}
-				initialRows={excludeData}
+				initialRows={excludeData.length > 0 ? excludeData : []}
 			/>
 
 			<div className="border-t border-gray-200"></div>

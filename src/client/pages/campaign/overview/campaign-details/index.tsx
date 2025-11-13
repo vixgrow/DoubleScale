@@ -93,7 +93,6 @@ const CampaignDetails: React.FC = () => {
 	// Check if there are no templates
 	const hasTemplates =
 		campaign.settings?.templates && campaign.settings.templates.length > 0;
-	const campaignFromName = (campaign.settings as Record<string, any>)?.from_name;
 
 	return (
 		<div className="space-y-6">
@@ -123,17 +122,6 @@ const CampaignDetails: React.FC = () => {
 							</p>
 						</div>
 					)}
-
-				{campaign.type === CAMPAIGN_CHANNEL.SMS && (
-					<div className="space-y-1">
-						<span className="text-base text-gray-500">
-							{__('From Name', 'quillcrm')}
-						</span>
-						<p className="text-base font-semibold text-[#09090B]">
-							{campaignFromName || '-'}
-						</p>
-					</div>
-				)}
 
 				{campaign.execute_at && (
 					<div className="space-y-1">
@@ -200,10 +188,6 @@ const CampaignDetails: React.FC = () => {
 								{template.type === CAMPAIGN_CHANNEL.SMS ? (
 									<div className="flex items-center justify-center">
 										<SMSDevice
-											fromName={
-												(template as any)?.settings?.from_name ||
-												campaignFromName
-											}
 											body={
 												typeof template.body === 'string'
 													? template.body

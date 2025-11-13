@@ -9,7 +9,7 @@ import { useDispatch } from '@wordpress/data';
  */
 import { isObject } from 'lodash';
 import Select from 'react-select';
-import { Copy } from 'lucide-react';
+import { Copy, HelpCircle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -41,6 +41,12 @@ import DealCustomFieldChange from '../deal-custom-field-change';
 import DiscountTypeWithAmount from '../discount-type-with-amount';
 import CouponExpiryDate from '../coupon-expiry-date';
 import OpenBuilder from '../open-builder';
+import { DateTimePicker } from '../date-time-picker';
+import { FromEmailSelector } from '../from-email-selector';
+import { TooltipProvider } from '../ui/tooltip';
+import { Tooltip } from '../ui/tooltip';
+import { TooltipTrigger } from '../ui/tooltip';
+import { TooltipContent } from '../ui/tooltip';
 
 interface FieldProps {
 	label?: string;
@@ -69,6 +75,7 @@ interface FieldProps {
 	min?: number;
 	max?: number;
 	className?: string;
+	tooltip?: string;
 }
 
 const Field: React.FC<FieldProps> = ({
@@ -91,6 +98,7 @@ const Field: React.FC<FieldProps> = ({
 	min,
 	max,
 	className,
+	tooltip,
 }) => {
 	const { createNotice } = useDispatch('quillcrm/core');
 
@@ -100,6 +108,26 @@ const Field: React.FC<FieldProps> = ({
 			message: __('Copied to clipboard', 'quillcrm'),
 			type: 'success',
 		});
+	};
+
+	const renderLabelWithTooltip = () => {
+		return (
+			<span className="flex items-center gap-2">
+				<span>{label}</span>
+				{tooltip && (
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+							</TooltipTrigger>
+							<TooltipContent className="z-[160000] bg-gray-100 border-none w-60 text-gray-600 text-xs">
+								<p>{tooltip}</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				)}
+			</span>
+		);
 	};
 
 	const renderHelperText = (helperText: string) => {
@@ -205,6 +233,17 @@ const Field: React.FC<FieldProps> = ({
 				/>
 			);
 			break;
+		case 'from_email':
+			fieldContent = (
+				<FromEmailSelector
+					value={value || ''}
+					onChange={(email) => onChange(email)}
+					error={status === 'error' ? 'error' : undefined}
+					required={required}
+					className={className}
+				/>
+			);
+			break;
 		case 'text':
 		case 'number':
 		case 'email':
@@ -218,7 +257,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'h-12 bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					style={{
 						borderRadius: '8px',
@@ -237,7 +276,7 @@ const Field: React.FC<FieldProps> = ({
 					className={cn(
 						'bg-white',
 						status === 'error' &&
-						'border-red-500 focus-visible:ring-red-500'
+							'border-red-500 focus-visible:ring-red-500'
 					)}
 					placeholder={placeholder}
 					style={{
@@ -255,8 +294,8 @@ const Field: React.FC<FieldProps> = ({
 					value={
 						value
 							? selectOptions.find(
-								(option) => option.value === value
-							)
+									(option) => option.value === value
+								)
 							: null
 					}
 					onChange={(value) => {
@@ -438,6 +477,15 @@ const Field: React.FC<FieldProps> = ({
 		case 'label':
 			fieldContent = <div className="text-ghost">{value}</div>;
 			break;
+		case 'datetime':
+			fieldContent = (
+				<DateTimePicker
+					value={value}
+					onChange={(dateValue) => onChange(dateValue)}
+					placeholder="Select date & time"
+				/>
+			);
+			break;
 		default:
 			fieldContent = null;
 	}
@@ -449,10 +497,7 @@ const Field: React.FC<FieldProps> = ({
 				<div className="flex items-center justify-between">
 					{label && (
 						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
-							<span>
-								{label}{' '}
-								{required && <span className="text-red-600">*</span>}
-							</span>
+							{renderLabelWithTooltip()}
 						</div>
 					)}
 					<div className="qcrm-field-input">{fieldContent}</div>
@@ -470,10 +515,7 @@ const Field: React.FC<FieldProps> = ({
 					<div className="qcrm-field-input">{fieldContent}</div>
 					{label && (
 						<div className="qcrm-field-label text-[#09090B] font-normal text-base">
-							<span>
-								{label}{' '}
-								{required && <span className="text-red-600">*</span>}
-							</span>
+							{renderLabelWithTooltip()}
 						</div>
 					)}
 				</div>
@@ -487,13 +529,12 @@ const Field: React.FC<FieldProps> = ({
 		<div className="qcrm-field" style={style || {}}>
 			{label && (
 				<div className="qcrm-field-label text-[#09090B] font-normal text-base flex items-center justify-between">
-					<span>
-						{label}{' '}
-						{required && <span className="text-red-600">*</span>}
-					</span>
+					{renderLabelWithTooltip()}
 				</div>
 			)}
-			<div className={cn("qcrm-field-input", className)}>{fieldContent}</div>
+			<div className={cn('qcrm-field-input', className)}>
+				{fieldContent}
+			</div>
 			{helperText && renderHelperText(helperText)}
 		</div>
 	);

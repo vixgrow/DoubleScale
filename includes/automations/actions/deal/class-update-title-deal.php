@@ -18,6 +18,7 @@ class Update_Title_Deal extends Base_Deal_Action {
 
 
 
+
 	/**
 	 * Action Name
 	 *
@@ -102,6 +103,11 @@ class Update_Title_Deal extends Base_Deal_Action {
 				'label'   => $this->t( 'Affects' ),
 				'type'    => 'select',
 				'options' => $this->get_effects_options(),
+				'tooltip' => $this->t(
+					'
+When this automation is triggered, we will use this configuration to decide which deal(s) to update for
+the given contact.'
+				),
 			),
 			'pipeline' => array(
 				'label'   => $this->t( 'Pipeline' ),

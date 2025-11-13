@@ -113,4 +113,48 @@ class Settings {
 		return delete_option( self::OPTION_NAME );
 	}
 
+	/**
+	 * Get default email footer
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public static function get_default_email_footer() {
+		return "<p>Don't want to stay in the loop? We'll be sad to see you go, but you can click here to <a href='{{contact:unsubscribe_link}}'>unsubscribe</a>.</p>";
+	}
+
+	/**
+	 * Get default opt-in email subject
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public static function get_default_opt_in_subject() {
+		return 'Please Confirm Your Subscription';
+	}
+
+	/**
+	 * Get default opt-in email content
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public static function get_default_opt_in_content() {
+		return '<p>Please confirm your subscription by clicking the link below:</p><p><a href="{{contact:subscribe_link}}">Confirm Subscription</a></p>';
+	}
+
+	/**
+	 * Get default confirmation message
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public static function get_default_confirmation_message() {
+		return 'Thank you for confirming your subscription!';
+	}
+
 }

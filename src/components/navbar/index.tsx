@@ -1,7 +1,12 @@
 /**
  * QuillCRM dependencies
  */
-import { getAdminPages, useNavigate, getToLink } from '@quillcrm/navigation';
+import {
+	getAdminPages,
+	useNavigate,
+	getToLink,
+	useLocation,
+} from '@quillcrm/navigation';
 import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 /**
  * WordPress dependencies
@@ -41,11 +46,29 @@ interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const navigate = useNavigate();
+	const location = useLocation();
+
+	// Get current path from location (handled by WordPress custom history)
+	// location.pathname will be like '/contacts' or '/contacts/123'
+	// navigation items have paths like 'contacts' (no leading slash)
+	const getCurrentPathFromLocation = useCallback(() => {
+		const pathname = location.pathname;
+		// Remove leading slash to normalize
+		const normalizedPath = pathname.replace(/^\//, '') || '';
+		return normalizedPath;
+	}, [location.pathname]);
+
 	const [selectedKey, setSelectedKey] = useState<string>(defaultSelectedPath);
 	const [isAtTop, setIsAtTop] = useState(true);
 	const [isAtBottom, setIsAtBottom] = useState(false);
+	const [isMounted, setIsMounted] = useState(false);
 	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 	const { hasRequiredCapability } = useCapabilities();
+
+	useEffect(() => {
+		const frameId = requestAnimationFrame(() => setIsMounted(true));
+		return () => cancelAnimationFrame(frameId);
+	}, []);
 
 	const navigationItems = useMemo(() => {
 		const pages = getAdminPages();
@@ -97,11 +120,14 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		});
 	};
 
-	const renderMenuItem = (item: NavigationItem) => (
+	const renderMenuItem = (item: NavigationItem, index: number) => (
 		<SidebarMenuItem
 			key={item.path}
 			onClick={() => handleNavigation(item.path)}
 			className="qcrm-navbar__item"
+			style={{
+				transitionDelay: `${Math.min(index * 100, 300)}ms`,
+			}}
 		>
 			<SidebarMenuButton
 				size="xl"
@@ -117,23 +143,45 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	);
 
 	useEffect(() => {
-		if (typeof window === 'undefined') {
-			return;
-		}
+		const currentPath = getCurrentPathFromLocation();
 
-		const currentHash = window.location.hash.replace(/^#\//, '');
-		if (!currentHash) {
-			return;
-		}
+		// Try to match the current path with navigation items
+		// navigation items can have paths like '/' (dashboard) or 'contacts' (no leading slash)
+		// currentPath will be like '' (for '/') or 'contacts', 'contacts/123', etc. (no leading slash)
+		const matched = navigationItems.find((item) => {
+			// Normalize item path for comparison (remove leading slash if present)
+			const normalizedItemPath = item.path.replace(/^\//, '');
 
-		const matched = navigationItems.find((item) =>
-			currentHash.startsWith(item.path)
-		);
+			// Handle dashboard/home case (path is '/' or empty)
+			if (item.path === '/' || item.path === '') {
+				return currentPath === '' || currentPath === '/';
+			}
+
+			// Exact match
+			if (currentPath === normalizedItemPath) {
+				return true;
+			}
+
+			// Check if current path starts with item path (for sub-routes like 'contacts/123')
+			// Make sure we match on path boundaries (e.g., 'contacts' matches 'contacts/123' but not 'contact')
+			return (
+				currentPath.startsWith(normalizedItemPath + '/') ||
+				currentPath.startsWith(normalizedItemPath + ':')
+			);
+		});
 
 		if (matched) {
 			setSelectedKey(matched.path);
+		} else if (currentPath === '') {
+			// If no path, use default
+			setSelectedKey(defaultSelectedPath);
 		}
-	}, [navigationItems]);
+	}, [
+		navigationItems,
+		location.pathname,
+		getCurrentPathFromLocation,
+		defaultSelectedPath,
+	]);
 
 	useEffect(() => {
 		const container = scrollContainerRef.current;
@@ -159,7 +207,11 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	}, [navigationItems, updateScrollIndicators]);
 
 	return (
-		<Sidebar collapsible="icon" className="qcrm-navbar">
+		<Sidebar
+			collapsible="icon"
+			className={`qcrm-navbar${isMounted ? ' qcrm-navbar--mounted' : ''
+				}`}
+		>
 			<div className="qcrm-navbar__surface">
 				<SidebarHeader className="qcrm-navbar__header">
 					<div className="qcrm-navbar__brand">
@@ -185,7 +237,9 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						className="qcrm-navbar__scroll-container"
 					>
 						<SidebarMenu className="qcrm-navbar__menu">
-							{navigationItems.map(renderMenuItem)}
+							{navigationItems.map((item, index) =>
+								renderMenuItem(item, index)
+							)}
 						</SidebarMenu>
 					</div>
 					{!isAtBottom && (

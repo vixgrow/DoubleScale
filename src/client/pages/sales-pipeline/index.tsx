@@ -108,9 +108,7 @@ const SalesPipeline: React.FC = () => {
 
 	// Clear selection when pipeline changes or select mode is disabled
 	useEffect(() => {
-		if (!selectMode) {
-			setSelectedDealIds([]);
-		}
+		setSelectedDealIds([]);
 	}, [selectMode, selectedPipelineId]);
 
 	// Bulk operations handlers

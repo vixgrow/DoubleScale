@@ -16,7 +16,7 @@ import '../../../../lib/chart-setup';
  */
 import './style.scss';
 import { Campaign as CampaignType } from '@quillcrm/client';
-import { getCampaignEndpoint } from '@quillcrm/utils';
+import { CAMPAIGN_CHANNEL } from '@/constants/campaign-channel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/spinner';
@@ -32,7 +32,7 @@ const Analytics: React.FC = () => {
 	const { updateCampaign: updateCampaignAction } =
 		useDispatch('quillcrm/campaign');
 	const totalMessages = campaign
-		? campaign.sent_count + campaign.failed_count
+		? (campaign.sent_count || 0) + (campaign.failed_count || 0)
 		: 0;
 	const [isFetching, setIsFetching] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -53,11 +53,11 @@ const Analytics: React.FC = () => {
 				path: `/qc/v1/campaigns/${campaign.id}`,
 			})) as CampaignType;
 
-			const totalMessages = response.sent_count + response.failed_count;
+			const totalMessages = (response.sent_count || 0) + (response.failed_count || 0);
 			if (
 				totalMessages > 0 &&
 				!started &&
-				totalMessages !== campaign.sent_count + campaign.failed_count
+				totalMessages !== (campaign.sent_count || 0) + (campaign.failed_count || 0)
 			) {
 				setStarted(true);
 			}
@@ -108,6 +108,19 @@ const Analytics: React.FC = () => {
 		return null;
 	}
 
+	// Get message type label based on campaign type
+	const getMessageTypeLabel = () => {
+		if (campaign.type === CAMPAIGN_CHANNEL.SMS) {
+			return 'SMS';
+		}
+		if (campaign.type === CAMPAIGN_CHANNEL.WHATSAPP) {
+			return 'WhatsApp messages';
+		}
+		return 'emails';
+	};
+
+	const messageTypeLabel = getMessageTypeLabel();
+
 	return (
 		<div className="flex flex-col gap-5 w-1/3">
 			<Card className="bg-[#F8F8F8] shadow-none w-full px-5">
@@ -146,10 +159,11 @@ const Analytics: React.FC = () => {
 										<span>
 											{sprintf(
 												__(
-													'%d emails sent',
+													'%d %s sent',
 													'quillcrm'
 												),
-												totalMessages
+												totalMessages,
+												messageTypeLabel
 											)}
 										</span>
 										<span>
@@ -176,9 +190,12 @@ const Analytics: React.FC = () => {
 										className="h-3"
 									/>
 									<div className="text-base text-gray-500">
-										{__(
-											'your email are sending right now...',
-											'quillcrm'
+										{sprintf(
+											__(
+												'your %s are being sent right now...',
+												'quillcrm'
+											),
+											messageTypeLabel
 										)}
 									</div>
 								</CardContent>

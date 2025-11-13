@@ -156,7 +156,7 @@ class Send_Email extends Abstract_Send_Message {
 			),
 			'from_email' => array(
 				'label'       => __( 'From Email', 'quillcrm' ),
-				'type'        => 'email',
+				'type'        => 'from_email',
 				'placeholder' => get_option( 'admin_email' ),
 			),
 			'reply_to'   => array(

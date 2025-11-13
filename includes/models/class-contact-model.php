@@ -86,6 +86,13 @@ class Contact_Model extends Model {
 	public $timestamps = true;
 
 	/**
+	 * The accessors to append to the model's array form.
+	 *
+	 * @var array
+	 */
+	protected $appends = array( 'avatar_url' );
+
+	/**
 	 * Rules
 	 *
 	 * @since 1.0.0
@@ -284,6 +291,28 @@ class Contact_Model extends Model {
 	 */
 	public function getActiveDealsCountAttribute() {
 		return $this->active_deals()->count();
+	}
+
+	/**
+	 * Get avatar URL using WordPress get_avatar_url()
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public function getAvatarUrlAttribute() {
+		$email = $this->email;
+		$size  = 96; // Default avatar size
+
+		// Get the user ID if this email belongs to a WordPress user
+		$user = get_user_by( 'email', $email );
+		$user_id = $user ? $user->ID : 0;
+
+		// Use get_avatar_url() with email and size
+		// If user_id is 0, it will use the email for Gravatar
+		$avatar_url = get_avatar_url( $user_id ? $user_id : $email, array( 'size' => $size ) );
+
+		return $avatar_url;
 	}
 
 	/**

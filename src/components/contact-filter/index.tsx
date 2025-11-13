@@ -93,8 +93,10 @@ export const ContactFilterSection = forwardRef<
 	ContactFilterSectionProps
 >(({ title, description, onReset, onChange, initialRows }, ref) => {
 	const [rows, setRows] = useState<FilterRow[]>(
-		initialRows !== undefined
+		initialRows !== undefined && initialRows.length > 0
 			? initialRows
+			: initialRows !== undefined && initialRows.length === 0
+			? []
 			: [{ id: 1, list: 'all', tag: 'all' }]
 	);
 	const [lists, setLists] = useState<List[]>([]);

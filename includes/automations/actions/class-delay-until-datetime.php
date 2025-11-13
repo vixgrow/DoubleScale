@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Delay Action
+ * Delay Until Datetime Action
  *
  * @since 1.0.0
  *
@@ -18,34 +18,30 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\QuillCRM;
 
 /**
- * Delay Action
+ * Delay Until Datetime Action
  */
-class Delay extends Action {
-
-
-
-
+class Delay_Until_Datetime extends Action {
 
 	/**
 	 * Action Name
 	 *
 	 * @var string
 	 */
-	public $name = 'Wait X Days/Hours/Minutes';
+	public $name = 'Delay Until Datetime';
 
 	/**
 	 * Action Slug
 	 *
 	 * @var string
 	 */
-	public $slug = 'delay';
+	public $slug = 'delay-until-datetime';
 
 	/**
 	 * Action Description
 	 *
 	 * @var string
 	 */
-	public $description = 'This action will delay the automation for a specified amount of time.';
+	public $description = 'This action will delay the automation until a specified datetime.';
 
 	/**
 	 * Action Attributes
@@ -87,29 +83,16 @@ class Delay extends Action {
 	 * @return bool
 	 */
 	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
-		// Schedule the next step after 2 minutes
 		$next_step = $automation->get_next_step( $step );
-		$time      = null;
-		$delay     = $step->get_setting( 'delay' );
-		$unit      = $step->get_setting( 'unit' );
-
-		switch ( $unit ) {
-			case 'minutes':
-				$time = strtotime( "+{$delay} minutes" );
-				break;
-			case 'hours':
-				$time = strtotime( "+{$delay} hours" );
-				break;
-			case 'days':
-				$time = strtotime( "+{$delay} days" );
-				break;
-		}
 		if ( ! $next_step ) {
 			return false;
 		}
+		// Schedule the next step after 2 minutes
+		$datetime = $step->get_setting( 'datetime' );
+		// convert datetime to timestamp
+		$timestamp = ( new \DateTime( $datetime ) )->getTimestamp();
 
-		QuillCRM::instance()->automations_tasks->schedule_single( $time, 'process_automation_step', $automation->id, $step->id, $next_step->id, $automation_contact->id );
-
+		QuillCRM::instance()->automations_tasks->schedule_single( $timestamp, 'process_automation_step', $automation->id, $step->id, $next_step->id, $automation_contact->id );
 		return true;
 	}
 
@@ -122,18 +105,9 @@ class Delay extends Action {
 	 */
 	public function get_fields() {
 		return array(
-			'delay' => array(
-				'type'  => 'number',
-				'label' => __( 'Delay', 'quillcrm' ),
-			),
-			'unit'  => array(
-				'type'    => 'select',
-				'label'   => __( 'Unit', 'quillcrm' ),
-				'options' => array(
-					'minutes' => __( 'Minutes', 'quillcrm' ),
-					'hours'   => __( 'Hours', 'quillcrm' ),
-					'days'    => __( 'Days', 'quillcrm' ),
-				),
+			'datetime' => array(
+				'type'  => 'datetime',
+				'label' => __( 'Datetime', 'quillcrm' ),
 			),
 		);
 	}
@@ -145,20 +119,14 @@ class Delay extends Action {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'delay' => array(
+				'datetime' => array(
 					'type'    => 'string',
-					'title'   => 'Delay',
-					'default' => '1',
-				),
-				'unit'  => array(
-					'type'    => 'string',
-					'title'   => 'Unit',
-					'default' => 'minutes',
-					'enum'    => array( 'minutes', 'hours', 'days' ),
+					'title'   => 'Datetime (YYYY-MM-DD HH:MM:SS)',
+					'default' => 'now',
 				),
 			),
 		);
 	}
 }
 
-Delay::instance();
+Delay_Until_Datetime::instance();

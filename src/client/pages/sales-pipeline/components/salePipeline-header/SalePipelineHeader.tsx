@@ -187,7 +187,7 @@ export const PipelineHeader: React.FC<PipelineHeaderProps> = ({
                   )}
                 </>
               ) : (
-                __('Select', 'quillcrm')
+                __('Bulk Select Deals', 'quillcrm')
               )}
             </Button>
           </div>

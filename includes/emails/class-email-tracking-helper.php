@@ -146,7 +146,7 @@ class Email_Tracking_Helper {
 	 * @return string
 	 */
 	public static function get_default_footer() {
-		return "<p>Don't want to stay in the loop? We'll be sad to see you go, but you can click here to <a href='{{contact:unsubscribe_link}}'>unsubscribe</a>.</p>";
+		return Settings::get_default_email_footer();
 	}
 
 	/**

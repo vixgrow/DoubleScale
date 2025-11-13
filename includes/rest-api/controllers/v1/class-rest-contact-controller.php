@@ -890,10 +890,16 @@ class REST_Contact_Controller extends REST_Controller {
 
 			$stats = $wpdb->get_row( $query );
 
+			$total_sent    = (int) ( $stats->total_sent ?? 0 );
+			$total_opened  = (int) ( $stats->total_opened ?? 0 );
+			$total_clicked = (int) ( $stats->total_clicked ?? 0 );
+
 			return array(
-				'total_sent'    => (int) ( $stats->total_sent ?? 0 ),
-				'total_opened'  => (int) ( $stats->total_opened ?? 0 ),
-				'total_clicked' => (int) ( $stats->total_clicked ?? 0 ),
+				'total_sent'    => $total_sent,
+				'total_opened'  => $total_opened,
+				'total_clicked' => $total_clicked,
+				'open_rate'     => $total_sent > 0 ? round( ( $total_opened / $total_sent ) * 100, 2 ) : 0,
+				'click_rate'    => $total_sent > 0 ? round( ( $total_clicked / $total_sent ) * 100, 2 ) : 0,
 			);
 		} else {
 			// SMS/WhatsApp statistics
@@ -1672,12 +1678,7 @@ class REST_Contact_Controller extends REST_Controller {
 	 * @return string
 	 */
 	public function default_opt_in_email_body() {
-		$body = sprintf(
-			'<p>' . __( 'Please confirm your subscription by clicking the link below:', 'quillcrm' ) . '</p>
-            <p><a href="{{contact:subscribe_link}}">' . __( 'Confirm Subscription', 'quillcrm' ) . '</a></p>',
-			'{{contact:subscribe_link}}'
-		);
-		return $body;
+		return Settings::get_default_opt_in_content();
 	}
 
 

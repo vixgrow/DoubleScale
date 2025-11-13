@@ -441,13 +441,14 @@ abstract class Abstract_Campaign_Processing {
 							$subQuery->where( 'status', 'schedule' )
 								->whereDate( 'execute_at', '<=', date( 'Y-m-d H:i:s' ) );
 						}
-					);
-			}
-		)
-			->where( 'type', $this->channel )
-			->orderBy( 'updated_at', 'asc' )
-			->first();
-	}
+				);
+		}
+	)
+		// Convert string to integer for database query (DB boundary)
+		->where( 'type', Campaign_Channel::to_integer( $this->channel ) )
+		->orderBy( 'updated_at', 'asc' )
+		->first();
+}
 
 	/**
 	 * Process individual campaign
@@ -1016,8 +1017,11 @@ abstract class Abstract_Campaign_Processing {
 	 * @return bool True if resending was handled
 	 */
 	protected function handle_resending() {
-		 $resending_campaign = Campaign_Model::where( 'status', 'resending' )
-			->where( 'type', $this->channel )
+		// Convert string to integer for database query (DB boundary)
+		$type_int = Campaign_Channel::to_integer( $this->channel );
+		
+		$resending_campaign = Campaign_Model::where( 'status', 'resending' )
+			->where( 'type', $type_int )
 			->orderBy( 'updated_at', 'asc' )
 			->first();
 

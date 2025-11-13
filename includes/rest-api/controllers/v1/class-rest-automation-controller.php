@@ -35,6 +35,11 @@ class Rest_Automation_Controller extends REST_Controller {
 
 
 
+
+
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -904,6 +909,54 @@ class Rest_Automation_Controller extends REST_Controller {
 						$step->_unavailable_rules       = array();
 						$step->_unavailable_rules_count = 0;
 					}
+				} elseif ( $step->type === 'goal' && ! empty( $step->action ) ) {
+
+					try {
+						$goal = Goals_Manager::instance()->get_goal( $step->action );
+
+						// Action exists, check if its required plugin is active
+						$goal_plugin_check = $this->check_goal_plugin_dependency( $goal );
+
+						if ( ! $goal_plugin_check['is_active'] ) {
+							$has_warnings = true;
+							$warnings[]   = array(
+								'type'         => 'goal',
+								'step_id'      => $step->id,
+								'slug'         => $step->action,
+								'message'      => $goal_plugin_check['message'],
+								'plugin_label' => $goal_plugin_check['plugin_label'],
+							);
+
+							// Store action label and warning
+							$settings                  = $step->settings ?: array();
+							$settings['_goal_label']   = $goal->name;
+							$settings['_goal_warning'] = true;
+							$step->settings            = $settings;
+						} else {
+							// Action exists and plugin is active, store its label
+							$settings                = $step->settings ?: array();
+							$settings['_goal_label'] = $goal->name;
+							unset( $settings['_goal_warning'] );
+							$step->settings = $settings;
+						}
+					} catch ( \Exception $e ) {
+						// Goal not found - plugin missing
+						$has_warnings = true;
+						$warnings[]   = array(
+							'type'    => 'goal',
+							'step_id' => $step->id,
+							'slug'    => $step->action,
+							'message' => __( 'Goal requires a plugin that is not currently active.', 'quillcrm' ),
+						);
+
+						// Store goal label (slug) if not already stored and add warning flag
+						$settings = $step->settings ?: array();
+						if ( empty( $settings['_goal_label'] ) ) {
+							$settings['_goal_label'] = $step->action;
+						}
+						$settings['_goal_warning'] = true;
+						$step->settings            = $settings;
+					}
 				}
 			}
 		}
@@ -1201,6 +1254,55 @@ class Rest_Automation_Controller extends REST_Controller {
 		);
 	}
 
+
+	/**
+	 * Check goal plugin dependency
+	 * Returns whether the goal's required plugin is active
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $goal The goal object.
+	 *
+	 * @return array Array with 'is_active', 'message', and 'plugin_labels' keys
+	 */
+	private function check_goal_plugin_dependency( $goal ) {
+		// Define plugin dependencies based on goal source and group
+		$plugin_dependencies = array(
+			'woocommerce' => array(
+				'coupon' => array(
+					'plugin' => 'woocommerce/woocommerce.php',
+					'label'  => 'WooCommerce',
+				),
+			),
+		);
+
+		// Check if action has a source and group that requires a plugin
+		if ( ! empty( $goal->source ) && ! empty( $goal->group ) ) {
+			if ( isset( $plugin_dependencies[ $goal->source ][ $goal->group ] ) ) {
+				$dependency = $plugin_dependencies[ $goal->source ][ $goal->group ];
+				$is_active  = quillcrm_is_plugin_active( $dependency['plugin'] );
+
+				if ( ! $is_active ) {
+					return array(
+						'is_active'    => false,
+						'message'      => sprintf(
+							/* translators: %s: plugin name */
+							__( 'This goal requires %s to be installed and activated.', 'quillcrm' ),
+							$dependency['label']
+						),
+						'plugin_label' => $dependency['label'],
+					);
+				}
+			}
+		}
+
+		// No dependency or plugin is active
+		return array(
+			'is_active'    => true,
+			'message'      => '',
+			'plugin_label' => '',
+		);
+	}
 	/**
 	 * Prepare automation
 	 *

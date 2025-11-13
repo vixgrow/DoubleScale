@@ -360,25 +360,13 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 
 		setLoading(true);
 		try {
-			// Format date properly (YYYY-MM-DD)
-			// let formattedDate = null;
-			// if (values.expected_close_date) {
-			// 	const date = new Date(values.expected_close_date);
-			// 	const year = date.getFullYear();
-			// 	const month = String(date.getMonth() + 1).padStart(2, '0');
-			// 	const day = String(date.getDate()).padStart(2, '0');
-				
-			// }
-
+			// The DatePicker already returns the date in YYYY-MM-DD format,
+			// so we can use it directly without conversion to avoid timezone issues
 			const dealData = {
 				...values,
 				pipeline_id: pipeline.id,
 				currency: 'USD',
-				expected_close_date: values.expected_close_date
-					? new Date(values.expected_close_date)
-							.toISOString()
-							.split('T')[0]
-					: null,
+				expected_close_date: values.expected_close_date || null,
 			};
 
 			await createDeal(dealData);

@@ -230,14 +230,21 @@ export const useSendMessage = ({
 
 			return true;
 		} catch (err: any) {
-			// Extract error message
+			// Extract error message from various WordPress REST API error formats
 			let errorMessage = __(`Failed to send ${channel}`, 'quillcrm');
 
-			if (err.message) {
+			// Try different error formats in order of specificity
+			if (err.message && typeof err.message === 'string') {
+				// Standard Error object or apiFetch error with message
 				errorMessage = err.message;
 			} else if (err.data?.message) {
+				// WordPress REST API error format: { data: { message: "..." } }
 				errorMessage = err.data.message;
+			} else if (err.code && err.message) {
+				// WP_Error format: { code: "error_code", message: "..." }
+				errorMessage = err.message;
 			} else if (typeof err === 'string') {
+				// Plain string error
 				errorMessage = err;
 			}
 

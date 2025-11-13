@@ -46,7 +46,7 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 	const [body, setBody] = useState('');
 
 	// Use the send message hook
-	const { isSending, sendMessage } = useSendMessage({
+	const { isSending, sendMessage, validationError } = useSendMessage({
 		contact,
 		channel: 'email',
 		onSuccess: () => {
@@ -164,6 +164,11 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 						</DialogTitle>
 					</DialogHeader>
 					<div className="flex flex-col gap-4">
+						{validationError && (
+							<div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md text-sm">
+								{validationError}
+							</div>
+						)}
 						<Field
 							label={__('To', 'quillcrm')}
 							placeholder={__('Enter To Email', 'quillcrm')}

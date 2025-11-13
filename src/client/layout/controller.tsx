@@ -40,6 +40,7 @@ import Dashboard from '../pages/home';
 import CartAnalysis from '../pages/home/cart-analytics';
 import ContactAnalytics from '../pages/home/contacts-analytics';
 import EmailAnalytics from '../pages/home/emails-analytics';
+import { useDashboardData } from '../pages/home/use-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 import SalesPipeline from '../pages/sales-pipeline';
@@ -391,25 +392,76 @@ registerAdminPage('analytics-and-reports', {
 	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],
 });
 
+registerAdminPage('deals-analytics', {
+	path: 'deals-analytics',
+	component: () => <AnalyticsAndReports defaultTab="deals" />,
+	label: __('Deals Analytics', 'quillcrm'),
+	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
+});
+
+registerAdminPage('sales-rep-analytics', {
+	path: 'sales-rep-analytics',
+	component: () => <AnalyticsAndReports defaultTab="sales-rep" />,
+	label: __('Sales Rep Analytics', 'quillcrm'),
+	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
+});
+
+registerAdminPage('pipeline-analytics', {
+	path: 'pipeline-analytics',
+	component: () => <AnalyticsAndReports defaultTab="pipeline-analysis" />,
+	label: __('Pipeline Analytics', 'quillcrm'),
+	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
+});
+
+registerAdminPage('my-reports', {
+	path: 'my-reports',
+	component: () => <AnalyticsAndReports defaultTab="my-reports" />,
+	label: __('My Reports', 'quillcrm'),
+	hidden: true,
+	requiredCapability: ['quillcrm_deal_owner'],
+});
+
+// Wrapper components for analytics pages that need dashboard data
+const CartAnalyticsWrapper = () => {
+	const { data } = useDashboardData();
+	return data ? <CartAnalysis dashboardData={data} /> : null;
+};
+
+const ContactAnalyticsWrapper = () => {
+	const { data } = useDashboardData();
+	return data ? <ContactAnalytics dashboardData={data} /> : null;
+};
+
+const EmailAnalyticsWrapper = () => {
+	const { data } = useDashboardData();
+	return data ? <EmailAnalytics dashboardData={data} /> : null;
+};
+
 registerAdminPage('cart-analytics', {
 	path: 'cart-analytics',
-	component: () => <CartAnalysis />,
+	component: () => <CartAnalyticsWrapper />,
 	label: __('Cart Analytics', 'quillcrm'),
 	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('contacts-analytics', {
 	path: 'contacts-analytics',
-	component: () => <ContactAnalytics />,
+	component: () => <ContactAnalyticsWrapper />,
 	label: __('Contacts Analytics', 'quillcrm'),
 	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 registerAdminPage('emails-analytics', {
 	path: 'emails-analytics',
-	component: () => <EmailAnalytics />,
+	component: () => <EmailAnalyticsWrapper />,
 	label: __('Emails Analytics', 'quillcrm'),
 	hidden: true,
+	requiredCapability: ['quillcrm_crm_manager'],
 });
 
 // registerAdminPage('tools', {

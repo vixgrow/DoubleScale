@@ -33,11 +33,18 @@ import {
 } from '@quillcrm/components/ui/sidebar';
 import { LogoIcon } from '../icons';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { createPortal } from 'react-dom';
+
+interface SubMenuItem {
+	path: string;
+	label: string;
+}
 
 interface NavigationItem {
 	path: string;
 	label: string;
 	icon: React.ReactNode;
+	subMenu?: SubMenuItem[];
 }
 
 interface NavBarProps {
@@ -62,12 +69,27 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	const [isAtTop, setIsAtTop] = useState(true);
 	const [isAtBottom, setIsAtBottom] = useState(false);
 	const [isMounted, setIsMounted] = useState(false);
+	const [hoveredItem, setHoveredItem] = useState<{
+		path: string;
+		subMenu: SubMenuItem[];
+		rect: DOMRect;
+	} | null>(null);
+	const hoverTimeoutRef = useRef<number | null>(null);
 	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-	const { hasRequiredCapability } = useCapabilities();
+	const { hasRequiredCapability, isDealOwner } = useCapabilities();
 
 	useEffect(() => {
 		const frameId = requestAnimationFrame(() => setIsMounted(true));
 		return () => cancelAnimationFrame(frameId);
+	}, []);
+
+	useEffect(() => {
+		// Cleanup timeout on unmount
+		return () => {
+			if (hoverTimeoutRef.current) {
+				clearTimeout(hoverTimeoutRef.current);
+			}
+		};
 	}, []);
 
 	const navigationItems = useMemo(() => {
@@ -79,12 +101,53 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 					item.path &&
 					hasRequiredCapability(item.requiredCapability)
 			)
-			.map<NavigationItem>((item) => ({
-				path: item.path,
-				label: item.label,
-				icon: item.icon,
-			}));
-	}, [hasRequiredCapability]);
+			.map<NavigationItem>((item) => {
+				const navItem: NavigationItem = {
+					path: item.path,
+					label: item.label,
+					icon: item.icon,
+				};
+
+				// Add submenu for Analytics based on capabilities
+				if (item.path === 'analytics-and-reports') {
+					navItem.subMenu = isDealOwner()
+						? [
+							{
+								path: 'my-reports',
+								label: __('My Reports', 'quillcrm'),
+							},
+						]
+						: [
+							{
+								path: 'deals-analytics',
+								label: __('Deals Analytics', 'quillcrm'),
+							},
+							{
+								path: 'sales-rep-analytics',
+								label: __('Sales Rep Analytics', 'quillcrm'),
+							},
+							{
+								path: 'pipeline-analytics',
+								label: __('Pipeline Analytics', 'quillcrm'),
+							},
+							{
+								path: 'emails-analytics',
+								label: __('Emails Analytics', 'quillcrm'),
+							},
+							{
+								path: 'contacts-analytics',
+								label: __('Contacts Analytics', 'quillcrm'),
+							},
+							{
+								path: 'cart-analytics',
+								label: __('Cart Analytics', 'quillcrm'),
+							},
+						];
+				}
+
+				return navItem;
+			});
+	}, [hasRequiredCapability, isDealOwner]);
 
 	const handleNavigation = (path: string) => {
 		setSelectedKey(path);
@@ -120,27 +183,59 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		});
 	};
 
-	const renderMenuItem = (item: NavigationItem, index: number) => (
-		<SidebarMenuItem
-			key={item.path}
-			onClick={() => handleNavigation(item.path)}
-			className="qcrm-navbar__item"
-			style={{
-				transitionDelay: `${Math.min(index * 100, 300)}ms`,
-			}}
-		>
-			<SidebarMenuButton
-				size="xl"
-				isActive={selectedKey === item.path}
-				className="qcrm-navbar__link"
+	const renderMenuItem = (item: NavigationItem, index: number) => {
+		const itemRef = useRef<HTMLLIElement>(null);
+
+		const handleMouseEnter = () => {
+			if (item.subMenu && itemRef.current) {
+				// Clear any pending timeout
+				if (hoverTimeoutRef.current) {
+					clearTimeout(hoverTimeoutRef.current);
+					hoverTimeoutRef.current = null;
+				}
+				const rect = itemRef.current.getBoundingClientRect();
+				setHoveredItem({
+					path: item.path,
+					subMenu: item.subMenu,
+					rect,
+				});
+			}
+		};
+
+		const handleMouseLeave = () => {
+			if (item.subMenu) {
+				// Delay closing to allow mouse to reach submenu
+				hoverTimeoutRef.current = window.setTimeout(() => {
+					setHoveredItem(null);
+				}, 300);
+			}
+		};
+
+		return (
+			<SidebarMenuItem
+				key={item.path}
+				ref={itemRef}
+				onClick={() => handleNavigation(item.path)}
+				onMouseEnter={handleMouseEnter}
+				onMouseLeave={handleMouseLeave}
+				className="qcrm-navbar__item"
+				style={{
+					transitionDelay: `${Math.min(index * 100, 300)}ms`,
+				}}
 			>
-				<div className="qcrm-navbar__link-inner">
-					<span className="qcrm-navbar__icon">{item.icon}</span>
-					<span className="qcrm-navbar__label">{item.label}</span>
-				</div>
-			</SidebarMenuButton>
-		</SidebarMenuItem>
-	);
+				<SidebarMenuButton
+					size="xl"
+					isActive={selectedKey === item.path}
+					className="qcrm-navbar__link"
+				>
+					<div className="qcrm-navbar__link-inner">
+						<span className="qcrm-navbar__icon">{item.icon}</span>
+						<span className="qcrm-navbar__label">{item.label}</span>
+					</div>
+				</SidebarMenuButton>
+			</SidebarMenuItem>
+		);
+	};
 
 	useEffect(() => {
 		const currentPath = getCurrentPathFromLocation();
@@ -207,54 +302,95 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	}, [navigationItems, updateScrollIndicators]);
 
 	return (
-		<Sidebar
-			collapsible="icon"
-			className={`qcrm-navbar${isMounted ? ' qcrm-navbar--mounted' : ''
-				}`}
-		>
-			<div className="qcrm-navbar__surface">
-				<SidebarHeader className="qcrm-navbar__header">
-					<div className="qcrm-navbar__brand">
-						<LogoIcon width={30} height={40} />
-						<span className="qcrm-navbar__brand-text">
-							{__('Quill CRM', 'quillcrm')}
-						</span>
-					</div>
-				</SidebarHeader>
-				<SidebarContent className="qcrm-navbar__content">
-					{!isAtTop && (
-						<button
-							type="button"
-							className="qcrm-navbar__chevron qcrm-navbar__chevron--top"
-							onClick={() => handleScrollBy('up')}
-							aria-label={__('Scroll up', 'quillcrm')}
+		<>
+			<Sidebar
+				collapsible="icon"
+				className={`qcrm-navbar${isMounted ? ' qcrm-navbar--mounted' : ''
+					}`}
+			>
+				<div className="qcrm-navbar__surface">
+					<SidebarHeader className="qcrm-navbar__header">
+						<div className="qcrm-navbar__brand">
+							<LogoIcon width={30} height={40} />
+							<span className="qcrm-navbar__brand-text">
+								{__('Quill CRM', 'quillcrm')}
+							</span>
+						</div>
+					</SidebarHeader>
+					<SidebarContent className="qcrm-navbar__content">
+						{!isAtTop && (
+							<button
+								type="button"
+								className="qcrm-navbar__chevron qcrm-navbar__chevron--top"
+								onClick={() => handleScrollBy('up')}
+								aria-label={__('Scroll up', 'quillcrm')}
+							>
+								<ChevronUp />
+							</button>
+						)}
+						<div
+							ref={scrollContainerRef}
+							className="qcrm-navbar__scroll-container"
 						>
-							<ChevronUp />
-						</button>
-					)}
+							<SidebarMenu className="qcrm-navbar__menu">
+								{navigationItems.map((item, index) =>
+									renderMenuItem(item, index)
+								)}
+							</SidebarMenu>
+						</div>
+						{!isAtBottom && (
+							<button
+								type="button"
+								className="qcrm-navbar__chevron qcrm-navbar__chevron--bottom"
+								onClick={() => handleScrollBy('down')}
+								aria-label={__('Scroll down', 'quillcrm')}
+							>
+								<ChevronDown />
+							</button>
+						)}
+					</SidebarContent>
+				</div>
+			</Sidebar>
+			{hoveredItem &&
+				createPortal(
 					<div
-						ref={scrollContainerRef}
-						className="qcrm-navbar__scroll-container"
+						className="qcrm-navbar__submenu-portal"
+						style={{
+							position: 'fixed',
+							top: `${hoveredItem.rect.top - 80}px`,
+							left: `${hoveredItem.rect.right + 20}px`,
+							zIndex: 99999,
+						}}
+						onMouseEnter={() => {
+							// Clear timeout when hovering over submenu
+							if (hoverTimeoutRef.current) {
+								clearTimeout(hoverTimeoutRef.current);
+								hoverTimeoutRef.current = null;
+							}
+						}}
+						onMouseLeave={() => {
+							// Close submenu when leaving
+							setHoveredItem(null);
+						}}
 					>
-						<SidebarMenu className="qcrm-navbar__menu">
-							{navigationItems.map((item, index) =>
-								renderMenuItem(item, index)
-							)}
-						</SidebarMenu>
-					</div>
-					{!isAtBottom && (
-						<button
-							type="button"
-							className="qcrm-navbar__chevron qcrm-navbar__chevron--bottom"
-							onClick={() => handleScrollBy('down')}
-							aria-label={__('Scroll down', 'quillcrm')}
-						>
-							<ChevronDown />
-						</button>
-					)}
-				</SidebarContent>
-			</div>
-		</Sidebar>
+						<div className="qcrm-navbar__submenu">
+							{hoveredItem.subMenu.map((subItem) => (
+								<button
+									key={subItem.path}
+									onClick={() => {
+										handleNavigation(subItem.path);
+										setHoveredItem(null);
+									}}
+									className="qcrm-navbar__submenu-item"
+								>
+									{subItem.label}
+								</button>
+							))}
+						</div>
+					</div>,
+					document.body
+				)}
+		</>
 	);
 };
 

@@ -22,6 +22,7 @@ export const renderTemplate = async (
 			method: 'POST',
 			data: {
 				merge_tags: {},
+				preview: true, // Strip tracking elements for admin preview
 			},
 		});
 		return (response as { html: string }).html;

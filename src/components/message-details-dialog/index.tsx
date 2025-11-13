@@ -74,15 +74,15 @@ const MessageDetailsDialog: React.FC<MessageDetailsDialogProps> = ({
 			if (templateId) {
 				try {
 					// Try to render via API endpoint with contact for merge tags
+					// Pass preview=true to strip tracking elements (prevents admin views from counting as opens)
 					const contactId = campaignEmail?.contact_id || campaignEmail?.contact?.id;
 					const response: any = await apiFetch({
 						path: `/qc/v1/templates/${templateId}/render`,
 						method: 'POST',
-						data: contactId
-							? {
-									contact_id: contactId,
-								}
-							: {},
+						data: {
+							...(contactId ? { contact_id: contactId } : {}),
+							preview: true,
+						},
 					});
 
 					if (response?.html) {

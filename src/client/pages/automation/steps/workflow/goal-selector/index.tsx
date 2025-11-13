@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -15,13 +16,8 @@ import { ChevronUp, ChevronDown } from 'lucide-react';
  */
 import { Button } from '@/components/ui/button';
 import './style.scss';
-import ConfigAPI from '@quillcrm/config';
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { getFilteredGoalsByTrigger } from '@quillcrm/utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface GoalSelectorProps {
 	value: string;
@@ -35,13 +31,22 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 	onSave,
 }) => {
 	const [isSaving, setIsSaving] = useState(false);
-	const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
-	const automationGoals = ConfigAPI.getAutomationGoals();
+	const [collapsedGroups, setCollapsedGroups] = useState<
+		Record<string, boolean>
+	>({});
+
+	// Get current trigger from store
+	const currentTrigger = useSelect((select: any) => {
+		return select('quillcrm/core').getCurrentTrigger();
+	}, []);
+
+	// Get filtered goals based on current trigger
+	const filteredAutomationGoals = getFilteredGoalsByTrigger(currentTrigger);
 
 	const toggleGroup = (key: string) => {
-		setCollapsedGroups(prev => ({
+		setCollapsedGroups((prev) => ({
 			...prev,
-			[key]: !prev[key]
+			[key]: !prev[key],
 		}));
 	};
 
@@ -60,10 +65,13 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 	return (
 		<div className="py-4">
 			<div className="flex flex-col gap-4">
-				{map(automationGoals, (goalCategory, categoryKey) => (
+				{map(filteredAutomationGoals, (goalCategory, categoryKey) => (
 					<div key={categoryKey} className="flex flex-col gap-4">
 						{map(goalCategory.groups, (group, groupIndex) => (
-							<Card key={`${categoryKey}-${groupIndex}`} className="shadow-none">
+							<Card
+								key={`${categoryKey}-${groupIndex}`}
+								className="shadow-none"
+							>
 								<CardHeader className="px-4 py-2 border-b-2">
 									<CardTitle className="flex items-center justify-between font-bold text-base">
 										<div className="flex items-center gap-2">
@@ -72,10 +80,16 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 										<Button
 											variant="ghost"
 											size="sm"
-											onClick={() => toggleGroup(`${categoryKey}-${groupIndex}`)}
+											onClick={() =>
+												toggleGroup(
+													`${categoryKey}-${groupIndex}`
+												)
+											}
 											className="h-8 w-8 p-0"
 										>
-											{collapsedGroups[`${categoryKey}-${groupIndex}`] ? (
+											{collapsedGroups[
+												`${categoryKey}-${groupIndex}`
+											] ? (
 												<ChevronDown className="h-6 w-6" />
 											) : (
 												<ChevronUp className="h-6 w-6" />
@@ -83,28 +97,49 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 										</Button>
 									</CardTitle>
 								</CardHeader>
-								{!collapsedGroups[`${categoryKey}-${groupIndex}`] && (
+								{!collapsedGroups[
+									`${categoryKey}-${groupIndex}`
+								] && (
 									<CardContent className="p-0">
 										<div className="flex flex-col divide-y">
-											{map(group.goals, (goal, goalKey) => {
-												return (
-													<div
-														key={goalKey}
-														className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 transition-colors"
-													>
-														<span className="text-sm">{goal.label}</span>
-														<Button
-															onClick={() => handleSelect(goalKey)}
-															disabled={isSaving}
-															className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${value === goalKey ? 'border-2 border-primary' : 'border'}`}
+											{map(
+												group.goals,
+												(goal, goalKey) => {
+													return (
+														<div
+															key={goalKey}
+															className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 transition-colors"
 														>
-															{isSaving && value === goalKey
-																? __('Saving...', 'quillcrm')
-																: __('Select', 'quillcrm')}
-														</Button>
-													</div>
-												);
-											})}
+															<span className="text-sm">
+																{goal.label}
+															</span>
+															<Button
+																onClick={() =>
+																	handleSelect(
+																		goalKey
+																	)
+																}
+																disabled={
+																	isSaving
+																}
+																className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${value === goalKey ? 'border-2 border-primary' : 'border'}`}
+															>
+																{isSaving &&
+																value ===
+																	goalKey
+																	? __(
+																			'Saving...',
+																			'quillcrm'
+																		)
+																	: __(
+																			'Select',
+																			'quillcrm'
+																		)}
+															</Button>
+														</div>
+													);
+												}
+											)}
 										</div>
 									</CardContent>
 								)}

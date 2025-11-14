@@ -492,19 +492,23 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 
 			// Get all analytics in a single optimized query with JOIN to contacts table.
 			global $wpdb;
-			$contacts_table   = $wpdb->prefix . 'quillcrm_contacts';
-			$tracking_table   = $wpdb->prefix . 'quillcrm_tracking';
+			$contacts_table = $wpdb->prefix . 'quillcrm_contacts';
+			$tracking_table = $wpdb->prefix . 'quillcrm_tracking';
 
 			$analytics_raw = Tracking_Model::byStep( $step_id )
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
-				->selectRaw( "
-					COUNT(*) as total_sent,
+				->selectRaw(
+					"
+					COUNT(*) as total,
+					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as total_sent,
 					SUM(CASE WHEN {$tracking_table}.opened = 1 THEN 1 ELSE 0 END) as opened_count,
 					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked_count,
 					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as delivered_count,
 					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as read_count,
 					SUM(CASE WHEN contacts.status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed_count
-				", array( Tracking_Status::DELIVERED, Tracking_Status::READ ) )
+				",
+					array( Tracking_Status::SENT, Tracking_Status::DELIVERED, Tracking_Status::READ )
+				)
 				->first();
 
 			// Extract metrics.
@@ -513,7 +517,7 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 			$clicked      = (int) $analytics_raw->clicked_count;
 			$delivered    = (int) $analytics_raw->delivered_count;
 			$read         = (int) $analytics_raw->read_count;
-			$unsubscribed = (int) $analytics_raw->unsubscribed_count; 
+			$unsubscribed = (int) $analytics_raw->unsubscribed_count;
 
 			// If no messages sent, return zero analytics.
 			if ( 0 === $total_sent ) {

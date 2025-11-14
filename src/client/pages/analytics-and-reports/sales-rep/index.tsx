@@ -7,6 +7,7 @@ import SalesRepCard, { SalesRepCardProps } from '../components/card-sales-rep';
 import SalesRepModal from '../components/modal-sales-rep';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@quillcrm/components';
+import SalesRepCardSkeleton from './sales-repCard-Skeleton';
 
 const SalesRep = () => {
 	const [loadingUsers, setLoadingUsers] = useState(false);
@@ -44,7 +45,7 @@ const SalesRep = () => {
 	}, []);
 
 	if (loadingUsers) {
-		return <Skeleton className="h-40 w-full" />;
+		return <SalesRepCardSkeleton count={6} />
 	}
 
 	return (

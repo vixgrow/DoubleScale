@@ -1,12 +1,11 @@
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { Skeleton } from '@/components/ui/skeleton';
 import { __ } from '@wordpress/i18n';
-import { DashboardContentCard } from '@quillcrm/components';
+
 
 const AveragePipelineChartSkeleton = () => {
 	return (
-		<DashboardContentCard title={__('Average Duration per Stage', 'quillcrm')}>
+		<>
 		<div className="flex items-center gap-2 mb-6">
           <Skeleton className="h-7 w-64" />
           <Skeleton className="h-4 w-4 rounded-full" />
@@ -50,7 +49,7 @@ const AveragePipelineChartSkeleton = () => {
             <Skeleton className="h-10 w-2" />
           </div>
         </div>
-		</DashboardContentCard>
+		</>
 	);
 };
 

@@ -117,7 +117,7 @@ export const CustomFieldsView = ({ deal }: CustomFieldsViewProps) => {
 						<span className=" block my-2">
 							<GroupIcon width={58} height={58}/>
 						</span>
-						<p className=" my-2 font-[inter] text-base font-medium leading-7 tracking-[-.5px] text-[#777]">
+						<p className=" my-2  text-base font-medium leading-7 tracking-[-.5px] text-[#777]">
 							{__('No Custom Fields', 'quillcrm')}
 						</p>
 						<button onClick={() => navigate('/custom-fields')} className=' h-10 text-[#458DC7] border border-[#458DC7] rounded-[8px] flex justify-center items-center'>

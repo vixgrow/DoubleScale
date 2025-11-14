@@ -301,7 +301,7 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 							<Button
 								type="submit"
 								disabled={loading}
-								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-[8px] font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
+								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-[8px] text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
 							>
 								{loading
 									? (editMode ? __('Updating...', 'quillcrm') : __('Scheduling...', 'quillcrm'))

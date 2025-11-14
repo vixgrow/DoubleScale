@@ -16,7 +16,7 @@ import { Skeleton } from '../../../../components/ui/skeleton';
 
 const SalesRepSkeleton: React.FC = () => {
 	return (
-		<div className="w-7xl max-w-[90vw] mx-auto flex flex-col gap-5">
+		<div className="w-full mx-auto flex flex-col gap-5">
 			{/* Header Section Skeleton */}
 			<div className="flex justify-between items-center py-6">
 				<div className="flex items-center gap-2 min-w-0 flex-1">

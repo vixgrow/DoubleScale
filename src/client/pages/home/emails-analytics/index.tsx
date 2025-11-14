@@ -39,6 +39,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { RecentEmailsTable } from './recent-emails-list';
 import { useEmailAnalytics } from '../use-analytics';
 import { DashboardContentCard, PageHeader } from '@quillcrm/components';
+import EmailAnalyticsSkeleton from './EmailAnalyticsSkeleton';
 
 interface EmailAnalyticsProps {
 	dashboardData: DashboardData;
@@ -58,14 +59,7 @@ const EmailAnalytics: React.FC<EmailAnalyticsProps> = ({ dashboardData }) => {
 	} = useEmailAnalytics();
 
 	if (!data || loading) {
-		return (
-			<div className="space-y-4 p-4">
-				<Skeleton className="h-6 w-1/3" />
-				<Skeleton className="h-4 w-full" />
-				<Skeleton className="h-4 w-5/6" />
-				<Skeleton className="h-4 w-4/6" />
-			</div>
-		);
+		return(<EmailAnalyticsSkeleton />);
 	}
 
 	return (

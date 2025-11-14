@@ -660,7 +660,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 							}}
 
 							placeholder={__('Select Date', 'quillcrm')}
-							// className="w-full h-12 justify-start text-left font-normal rounded-[8px] border border-[#DEE1E6] bg-white text-[#09090B] text-base tracking-[-.5px] px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A] focus-visible:ring-offset-2 data-[state=open]:ring-2 data-[state=open]:ring-[#1E3A8A]"
+							buttonClassName="w-full h-12 justify-start text-left font-normal rounded-[8px] border border-[#DEE1E6] bg-white text-[#09090B] text-base tracking-[-.5px] px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A] focus-visible:ring-offset-2 data-[state=open]:ring-2 data-[state=open]:ring-[#1E3A8A]"
 
 						/>
 					</div>

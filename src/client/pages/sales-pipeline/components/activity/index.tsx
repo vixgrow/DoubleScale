@@ -322,7 +322,7 @@ export default function Activity({
 								</div>
 								{activity.data.description && (
 									<div className="flex flex-col gap-2  ">
-										<h4 className="text-[#09090B] font-[Inter] text-base font-medium">
+										<h4 className="text-[#09090B]  text-base font-medium">
 											Meeting Description
 										</h4>
 										<p className=" text-base font-normal text-[#777] leading-[26px]">
@@ -339,7 +339,7 @@ export default function Activity({
 				return (
 					activity.data && (
 						<div className=" border border-[#DEE1E6] bg-[#DEE1E666] rounded-[8px] flex flex-col gap-4 py-4 px-2">
-							<h4 className="text-[#09090B] font-[Inter] text-base font-medium">
+							<h4 className="text-[#09090B]  text-base font-medium">
 								{__('Email Body', 'quillcrm')}
 							</h4>
 							<p className=" text-base font-normal text-[#777] leading-[26px]">

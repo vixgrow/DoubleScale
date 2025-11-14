@@ -17,6 +17,7 @@ import ContactAnalytics from '../home/contacts-analytics';
 import EmailAnalytics from '../home/emails-analytics';
 import { useDashboardData } from '../home/use-analytics';
 import CartAnalytics from '../home/cart-analytics';
+import DealSourceAnalytics from './deal-source';
 
 
 interface AnalyticsAndReportsProps {
@@ -42,6 +43,8 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({ defaultTab })
 				);
 			case 'sales-rep':
 				return <SalesRep />;
+			case 'dealSource-rep':
+				return <DealSourceAnalytics />;
 			case 'pipeline-analysis':
 				return <PipelineAnalysis />;
 			case 'contacts-analytics':

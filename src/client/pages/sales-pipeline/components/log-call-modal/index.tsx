@@ -387,12 +387,14 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
         {__('Call Date & Time', 'quillcrm')}
       </FormLabel>
       <FormControl>
-        {/* <div className="flex items-center gap-3"> */}
-          <DateTimePicker
-            {...field}
-            placeholder="Start date"
-           
-          />
+        <DateTimePicker
+          placeholder="Start date"
+          onChange={field.onChange}
+          
+          value={field.value ? new Date(field.value) : undefined}
+         
+        //   ref={field.ref}
+        />
 
         {/* </div> */}
       </FormControl>
@@ -429,7 +431,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 				<Button
 								type="submit"
 								// disabled={loading}
-								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-[8px] font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
+								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-[8px] text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
 							>
 								{loading
 									? (editMode ? __('Updating...', 'quillcrm') : __('Adding...', 'quillcrm'))

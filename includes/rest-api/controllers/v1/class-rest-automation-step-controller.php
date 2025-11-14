@@ -501,13 +501,13 @@ class Rest_Automation_Step_Controller extends REST_Controller {
 					"
 					COUNT(*) as total,
 					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as total_sent,
-					SUM(CASE WHEN {$tracking_table}.opened = 1 THEN 1 ELSE 0 END) as opened_count,
-					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked_count,
+					SUM(CASE WHEN {$tracking_table}.opened = 1 AND {$tracking_table}.status = ? THEN 1 ELSE 0 END) as opened_count,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = ? THEN 1 ELSE 0 END) as clicked_count,
 					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as delivered_count,
 					SUM(CASE WHEN {$tracking_table}.status = ? THEN 1 ELSE 0 END) as read_count,
 					SUM(CASE WHEN contacts.status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed_count
 				",
-					array( Tracking_Status::SENT, Tracking_Status::DELIVERED, Tracking_Status::READ )
+					array( Tracking_Status::SENT, Tracking_Status::SENT, Tracking_Status::SENT, Tracking_Status::DELIVERED, Tracking_Status::READ )
 				)
 				->first();
 

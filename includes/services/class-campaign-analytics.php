@@ -282,15 +282,15 @@ class Campaign_Analytics {
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
 					"
-					SUM(CASE WHEN {$tracking_table}.opened = 1 THEN 1 ELSE 0 END) as opened,
-					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN {$tracking_table}.opened = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_opened,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
 					SUM(CASE WHEN contacts.status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
 				"
 				)
 				->first();
 
-			$stats['opened']       = (int) $result->opened;
-			$stats['clicked']      = (int) $result->clicked;
+			$stats['opened']       = (int) $result->total_opened;
+			$stats['clicked']      = (int) $result->total_clicked;
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
 			$stats                 = $this->calculate_email_rates( $stats );
 
@@ -299,14 +299,14 @@ class Campaign_Analytics {
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
 					"
-					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
 					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
 					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
 				'
 				)
 				->first();
 
-			$stats['clicked']      = (int) $result->clicked;
+			$stats['clicked']      = (int) $result->total_clicked;
 			$stats['delivered']    = (int) $result->delivered;
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
 			$stats                 = $this->calculate_sms_rates( $stats );
@@ -316,17 +316,17 @@ class Campaign_Analytics {
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
 					"
-					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
 					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
-					SUM(CASE WHEN ' . $tracking_table . '.status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as `read`,
+					SUM(CASE WHEN ' . $tracking_table . '.status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as total_read,
 					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
 				'
 				)
 				->first();
 
-			$stats['clicked']      = (int) $result->clicked;
+			$stats['clicked']      = (int) $result->total_clicked;
 			$stats['delivered']    = (int) $result->delivered;
-			$stats['read']         = (int) $result->read;
+			$stats['read']         = (int) $result->total_read;
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
 			$stats                 = $this->calculate_whatsapp_rates( $stats );
 		}
@@ -433,12 +433,12 @@ class Campaign_Analytics {
 
 		if ( $type === Campaign_Channel::STR_EMAIL ) {
 			$select_fields .= ',
-                SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened,
-                SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked
+                SUM(CASE WHEN opened = 1 AND status = ' . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as total_opened,
+                SUM(CASE WHEN clicked = 1 AND status = ' . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as total_clicked
             ';
 		} elseif ( $type === Campaign_Channel::STR_SMS ) {
 			$select_fields .= ',
-                SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked
+                SUM(CASE WHEN clicked = 1 AND status = ' . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as total_clicked
             ';
 		}
 

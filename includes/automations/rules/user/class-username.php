@@ -14,7 +14,7 @@ namespace QuillCRM\Automations\Rules\User;
 use QuillCRM\Abstracts\Rule;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Rules_Manager;
-use WPEloquent\WP\User;
+use QuillCRM\Models\User_Model;
 
 /**
  * Username class
@@ -67,7 +67,7 @@ class Username extends Rule {
 	 * @return array
 	 */
 	public function get_options( $keyword = '' ) {
-		$users   = User::where( 'user_login', 'like', '%' . $keyword . '%' )->get();
+		$users   = User_Model::where( 'user_login', 'like', '%' . $keyword . '%' )->get();
 		$options = array();
 		foreach ( $users as $user ) {
 			$options[ $user->ID ] = $user->user_login;

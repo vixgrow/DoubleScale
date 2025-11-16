@@ -24,8 +24,43 @@ class UserMeta_Model extends Model {
 	 * @var string
 	 *
 	 * @since 1.0.0
+	 *
+	 * NOTE: WordPress usermeta table is shared across all sites in multisite.
 	 */
-	protected $table = 'usermeta';
+	protected $table;
+
+	/**
+	 * Constructor - Initialize table name
+	 *
+	 * @param array $attributes Attributes.
+	 */
+	public function __construct( array $attributes = array() ) {
+		$this->set_table_name();
+		parent::__construct( $attributes );
+	}
+
+	/**
+	 * Set the correct table name based on multisite context
+	 */
+	protected function set_table_name() {
+		global $wpdb;
+		$this->table = $wpdb->base_prefix . 'usermeta';
+	}
+
+	/**
+	 * Get the table associated with the model.
+	 *
+	 * Override to ensure table name is always correct.
+	 *
+	 * @return string
+	 */
+	public function getTable() {
+		if ( ! $this->table ) {
+			$this->set_table_name();
+		}
+		// Return as-is since we already have the full table name with prefix
+		return $this->table;
+	}
 
 	/**
 	 * Primary key

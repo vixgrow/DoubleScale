@@ -206,6 +206,8 @@ final class QuillCRM {
 	 * @since 1.0.0
 	 */
 	private function init_illuminate() {
+		global $wpdb;
+
 		$capsule = new Capsule();
 
 		$capsule->addConnection(
@@ -217,11 +219,11 @@ final class QuillCRM {
 				'password'  => DB_PASSWORD,
 				'charset'   => DB_CHARSET,
 				'collation' => DB_COLLATE,
-				'prefix'    => '',
+				'prefix'    => $wpdb->prefix,
 			)
 		);
 
-		$capsule->setEventDispatcher( new Dispatcher( new Container ) );
+		$capsule->setEventDispatcher( new Dispatcher( new Container() ) );
 
 		$capsule->setAsGlobal();
 

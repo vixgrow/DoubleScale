@@ -23,6 +23,7 @@ import {
 	CustomFieldsIcon,
 	ToolsIcon,
 	TotalSMSIcon,
+	ManagerIcon,
 } from '@quillcrm/components';
 import BusinessSettings from './business';
 import EmailSettings from './email';
@@ -207,7 +208,7 @@ const SettingsPage: React.FC = () => {
 		{
 			value: 'managers',
 			label: 'Managers',
-			icon: <UserRound size={20} />,
+			icon: <ManagerIcon width={24} height={24} />,
 		},
 		{
 			value: 'custom_fields',

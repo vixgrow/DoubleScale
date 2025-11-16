@@ -190,13 +190,13 @@ export const Controller = ({ page }) => {
 		// Using motion div with layoutScroll to reevaluate positions when the user scrolls.
 		<motion.div layoutScroll className="qcrm-page-component-wrapper">
 			<div className="flex justify-between items-center w-full">
-				<Button
-					className="text-[#CB5301] text-base p-0 hover:bg-transparent shadow-none bg-transparent"
+				<div
+					className="text-[#CB5301] flex items-center gap-2 cursor-pointer text-base p-0 hover:bg-transparent shadow-none bg-transparent"
 					onClick={handleBackToDashboard}
 				>
-					<WordPressIcon width={35} height={35} />
+					<WordPressIcon />
 					{__('Back to WordPress Dashboard', 'quillcrm')}
-				</Button>
+				</div>
 				<div className="flex items-center gap-3 justify-end w-1/2">
 					<Avatar className="w-10 h-10 bg-[#F5F5F5]">
 						{avatarUrl ? (

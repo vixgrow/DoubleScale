@@ -207,3 +207,4 @@ export { default as OtherInfoIcon } from './other-info';
 export { default as GradientLinkIcon } from './gradient-link';
 export { default as UnknownBlockIcon } from './unknown-block';
 export { default as WordPressIcon } from './wordpress';
+export { default as ManagerIcon } from './manager';

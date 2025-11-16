@@ -14,6 +14,8 @@ export interface BlockDefinition {
 	defaultProps: any;
 	Renderer: React.FC<any>;
 	Editor: React.FC<any>;
+	isProActivated?: boolean;
+	isPro: boolean;
 }
 
 export interface BlockRegistry {

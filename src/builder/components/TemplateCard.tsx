@@ -1,5 +1,5 @@
 import { useDraggable } from '@dnd-kit/core';
-import { DragDropIcon } from '@/components/icons';
+import { DragDropIcon, PremiumIcon } from '@/components/icons';
 
 const TemplateCard = ({
 	item,
@@ -20,7 +20,7 @@ const TemplateCard = ({
 			blockType: blockType || item.id,
 			item: item,
 		},
-		disabled: isDragOverlay,
+		disabled: isDragOverlay || (item.isPro && !item.isProActivated),
 	});
 
 	const style = {
@@ -29,21 +29,30 @@ const TemplateCard = ({
 	};
 
 	const baseClasses =
-		'w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-2 transition-colors text-center';
-	const interactiveClasses = isDragOverlay
-		? 'cursor-grabbing border-blue-300 shadow-xl'
-		: 'cursor-grab hover:cursor-grabbing hover:border-blue-300';
+		'relative w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-2 transition-colors text-center';
+	const interactiveClasses =
+		item.isPro && !item.isProActivated
+			? 'cursor-not-allowed opacity-70'
+			: isDragOverlay
+				? 'cursor-grabbing border-blue-300 shadow-xl'
+				: 'cursor-grab hover:cursor-grabbing hover:border-blue-300';
 
 	return (
 		<div
 			ref={setNodeRef}
 			style={style}
-			{...listeners}
-			{...attributes}
+			{...(!item.isPro || item.isProActivated ? listeners : {})}
+			{...(!item.isPro || item.isProActivated ? attributes : {})}
 			className={`${baseClasses} ${interactiveClasses}`}
 			key={item.value || blockType}
 		>
-			<DragDropIcon />
+			{item.isPro && !item.isProActivated ? (
+				<div className="absolute top-2 right-2">
+					<PremiumIcon width={16} height={16} />
+				</div>
+			) : (
+				<DragDropIcon />
+			)}
 			<div className="flex flex-row gap-2 items-center justify-center w-full">
 				{type === 'layout' &&
 					item.width?.map((width, index) => (

@@ -274,7 +274,7 @@ const finalOptions = Array.from(
 			<div className="flex items-center gap-4 pb-5 mt-2">
 				<button
 					onClick={onAddStage}
-					className="border-none mr-2 flex add-stage-button p-0 text-[16px] bg-[#fff] shadow-none text-[#1E3A8A] font-normal font-[inter] leading-[150%] tracking-[-0.32px]"
+					className="border-none mr-2 flex add-stage-button p-0 text-[16px] bg-[#fff] shadow-none text-[#1E3A8A] font-normal leading-[150%] tracking-[-0.32px]"
 				>
 					<span className='p-1'><PlusIcon color='#1E3A8A' /></span>
 					{__('Add Stage', 'quillcrm')}
@@ -285,7 +285,7 @@ const finalOptions = Array.from(
 				<Button
 					variant="ghost"
 					onClick={onReset}
-					className="text-[#E13B3B] hover:bg-transparent hover:text-[#E13B3B] p-0 text-[16px] font-normal font-[inter] leading-[150%] tracking-[-0.32px]"
+					className="text-[#E13B3B] hover:bg-transparent hover:text-[#E13B3B] p-0 text-[16px] font-normal leading-[150%] tracking-[-0.32px]"
 				>
 					{__('Reset to Defaults', 'quillcrm')}
 				</Button>

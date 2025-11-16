@@ -366,6 +366,11 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 				pipeline_id: pipeline.id,
 				currency: 'USD',
 				expected_close_date: values.expected_close_date || null,
+				// expected_close_date: values.expected_close_date
+				// ? new Date(values.expected_close_date)
+				// 		.toISOString()
+				// 		.split('T')[0]
+				// : null,
 			};
 			await createDeal(dealData);
 
@@ -646,7 +651,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 								placeholder={__('Select Date', 'quillcrm')}
 								
 								
-								// className="!w-full h-12 !shadow-none rounded-[8px] border border-[#DEE1E6] !text-[#09090B] !bg-white !font-normal !text-base tracking-[-.5px]"
+								buttonClassName="!w-full h-12 !shadow-none rounded-[8px] border border-[#DEE1E6] !text-[#09090B] !bg-white !font-normal !text-base tracking-[-.5px]"
 							/>
 						</div>
 
@@ -814,7 +819,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 						</Button>
 						<Button
 							type="submit"
-							className="flex-1 bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white h-12 rounded-md font-manrope text-base font-normal tracking-tight hover:opacity-90"
+							className="flex-1 bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white h-12 rounded-md  text-base font-normal tracking-tight hover:opacity-90"
 							disabled={loading}
 						>
 							{loading

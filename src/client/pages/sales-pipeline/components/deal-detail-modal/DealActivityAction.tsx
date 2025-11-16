@@ -69,7 +69,7 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
     <div className="flex flex-wrap gap-3">
       <Button
         variant="outline"
-        className="flex items-center justify-center gap-2 h-10 px-4 border border-[#458DC7] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] font-[Inter] text-[#458DC7] hover:text-[#458DC7]"
+        className="flex items-center justify-center gap-2 h-10 px-4 border border-[#458DC7] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px]  text-[#458DC7] hover:text-[#458DC7]"
         onClick={() => {
             setOpenModal('note')
         }
@@ -81,7 +81,7 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
 
       <Button
         variant="outline"
-         className="flex items-center justify-center gap-2 h-10 px-4 border border-[#660FF1] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] font-[Inter] text-[#660FF1] hover:text-[#660FF1]"
+         className="flex items-center justify-center gap-2 h-10 px-4 border border-[#660FF1] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px]  text-[#660FF1] hover:text-[#660FF1]"
         onClick={() => setOpenModal('call')}
       >
         <CallLogIcon  height={20} width={20} />
@@ -90,7 +90,7 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
 
       <Button
         variant="outline"
-        className="flex items-center justify-center gap-2 h-10 px-4 border border-[#16A34A] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] font-[Inter] text-[#16A34A] hover:text-[#16A34A]"
+        className="flex items-center justify-center gap-2 h-10 px-4 border border-[#16A34A] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] text-[#16A34A] hover:text-[#16A34A]"
         onClick={() => setOpenModal('email')}
       >
         <EmailLogIcon height={20} width={20}/>
@@ -99,7 +99,7 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
 
       <Button
         variant="outline"
-         className="flex items-center justify-center gap-2 h-10 px-4 border border-[#CB5301] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] font-[Inter] text-[#CB5301] hover:text-[#CB5301]"
+         className="flex items-center justify-center gap-2 h-10 px-4 border border-[#CB5301] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] text-[#CB5301] hover:text-[#CB5301]"
         onClick={() => setOpenModal('meeting')}
       >
         <MeetingDealIcon height={20} width={20} />

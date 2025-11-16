@@ -211,7 +211,7 @@ const SalesRep: React.FC<SalesRepProps> = ({ ownerId }) => {
 				actions={[]}
 			/>
 			<div className="w-7xl max-w-[90vw] mx-auto flex flex-col gap-5 ">
-				<div className=" flex justify-between items-center">
+				<div className=" flex justify-end items-end">
 					{/* Header Section */}
 
 					{/* Filters Section */}

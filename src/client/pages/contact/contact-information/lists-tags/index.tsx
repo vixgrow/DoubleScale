@@ -144,7 +144,7 @@ const ListsTagsCards: React.FC = () => {
 		<>
 			<div className="flex flex-col gap-4 border-b pb-5">
 				<Card className="shadow-none">
-					<CardHeader className="px-4 py-2 border-b">
+					<CardHeader className={`px-4 py-2 ${!isListsCollapsed ? 'border-b' : ''}`}>
 						<CardTitle className="flex items-center justify-between font-medium text-lg">
 							<div className="flex items-center gap-2">
 								<ListsIcon width={26} height={26} />
@@ -216,7 +216,7 @@ const ListsTagsCards: React.FC = () => {
 					)}
 				</Card>
 				<Card className="shadow-none">
-					<CardHeader className="px-4 py-2 border-b">
+					<CardHeader className={`px-4 py-2 ${!isTagsCollapsed ? 'border-b' : ''}`}>
 						<CardTitle className="flex items-center justify-between font-medium text-lg">
 							<div className="flex items-center gap-2">
 								<TagsIcon width={26} height={26} />

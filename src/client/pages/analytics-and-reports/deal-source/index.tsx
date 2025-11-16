@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
@@ -11,8 +12,8 @@ import { DashboardContentCard, PageHeader } from '@quillcrm/components';
 import AveragePipelineChart from '../funnelStages';
 
 import WinTagIcon from '@quillcrm/components/icons/win-tag';
-import PipelineAnalyticsSkeleton from './PipelineAnalyticsSkeleton';
-// import { PipelineAnalyticsSkeleton } from './PipelineAnalyticsSkeleton';
+
+
 
 interface PipelineAnalyticsProps {
 	pipelineId?: number;
@@ -43,7 +44,7 @@ interface Owner {
 	name: string;
 }
 
-const PipelineAnalytics: React.FC<PipelineAnalyticsProps> = ({
+const DealSourceAnalytics: React.FC<PipelineAnalyticsProps> = ({
 	pipelineId,
 	ownerId: initialOwnerId,
 }) => {
@@ -90,6 +91,9 @@ const PipelineAnalytics: React.FC<PipelineAnalyticsProps> = ({
 				path: '/qc/v1/users',
 			})) as any[];
 
+
+
+
 			const formattedOwners = response.map((user) => ({
 				id: user.id || user.ID,
 				name:
@@ -98,6 +102,7 @@ const PipelineAnalytics: React.FC<PipelineAnalyticsProps> = ({
 					`${user.first_name || ''} ${user.last_name || ''}`.trim() ||
 					'Unknown User',
 			}));
+
 
 			setAvailableOwners(formattedOwners);
 		} catch (error: any) {
@@ -156,35 +161,41 @@ const PipelineAnalytics: React.FC<PipelineAnalyticsProps> = ({
 		}
 	}, [fetchPipelineAnalytics]);
 
-	// if (error) {
+	// if (loading) {
 	// 	return (
-	// 		<div className="pipeline-analytics-container p-6">
-	// 			<div className="report-header mb-4">
-	// 				<h2 className="text-2xl font-semibold text-[#09090B]">
-	// 					{__('Pipeline Analytics', 'quillcrm')}
-	// 				</h2>
-	// 			</div>
-	// 			<div className="text-red-500 p-4 bg-red-50 rounded">
-	// 				{error}
-	// 			</div>
-	// 		</div>
+	// 		<PipelineAnalyticsSkeleton />
 	// 	);
 	// }
 
-	// if (!analyticsData || analyticsData.stages?.length === 0) {
-	// 	return (
-	// 		<div className="pipeline-analytics-container p-6">
-	// 			<div className="report-header mb-4">
-	// 				<h2 className="text-2xl font-semibold text-[#09090B]">
-	// 					{__('Pipeline Analytics', 'quillcrm')}
-	// 				</h2>
-	// 			</div>
-	// 			<div className="text-center text-gray-500 p-8">
-	// 				{__('No pipeline data available', 'quillcrm')}
-	// 			</div>
-	// 		</div>
-	// 	);
-	// }
+	if (error) {
+		return (
+			<div className="pipeline-analytics-container p-6">
+				<div className="report-header mb-4">
+					<h2 className="text-2xl font-semibold text-[#09090B]">
+						{__('Pipeline Analytics', 'quillcrm')}
+					</h2>
+				</div>
+				<div className="text-red-500 p-4 bg-red-50 rounded">
+					{error}
+				</div>
+			</div>
+		);
+	}
+
+	if (!analyticsData || analyticsData.stages?.length === 0) {
+		return (
+			<div className="pipeline-analytics-container p-6">
+				<div className="report-header mb-4">
+					<h2 className="text-2xl font-semibold text-[#09090B]">
+						{__('Pipeline Analytics', 'quillcrm')}
+					</h2>
+				</div>
+				<div className="text-center text-gray-500 p-8">
+					{__('No pipeline data available', 'quillcrm')}
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="pipeline-analytics-container w-full mx-auto">
@@ -211,45 +222,31 @@ const PipelineAnalytics: React.FC<PipelineAnalyticsProps> = ({
 			</div>
 
 			{/* Funnel Chart Card */}
+			<DashboardContentCard
+				title={__('Average Duration per Stage', 'quillcrm')}
+				headerContent={<WinTagIcon />}
+				cardClassName='!shadow-none'
+			>
+				<AveragePipelineChart
+					selectedPipelineId={selectedPipeline}
+					ownerId={selectedOwner ?? undefined}
+				/>
+			</DashboardContentCard>
+			
 
-			{loading ? (
-				<PipelineAnalyticsSkeleton />
-			) : error ? (
-				<div className="text-red-500 p-4 bg-red-50 rounded mx-6">
-					{error}
-				</div>
-			) : !analyticsData || analyticsData.stages?.length === 0 ? (
-				<div className="text-center text-gray-500 p-8">
-					{__('No pipeline data available', 'quillcrm')}
-				</div>
-			) : (
-				<>
-					<DashboardContentCard
-						title={__('Average Duration per Stage', 'quillcrm')}
-						headerContent={<WinTagIcon />}
-						cardClassName="!shadow-none"
-					>
-						<AveragePipelineChart
-							selectedPipelineId={selectedPipeline}
-							ownerId={selectedOwner ?? undefined}
-						/>
-					</DashboardContentCard>
-
-					{/* Conversion Rates and Average Duration Charts */}
-					<div className="grid grid-cols-2 gap-5 mx-5 mt-5">
-						<ConversionRatesChart
-							selectedPipelineId={selectedPipeline}
-							ownerId={selectedOwner ?? undefined}
-						/>
-						<AverageDurationChart
-							selectedPipelineId={selectedPipeline}
-							ownerId={selectedOwner ?? undefined}
-						/>
-					</div>
-				</>
-			)}
+			{/* Conversion Rates and Average Duration Charts */}
+			<div className="grid grid-cols-2 gap-5 mx-5 mt-5">
+				<ConversionRatesChart
+					selectedPipelineId={selectedPipeline}
+					ownerId={selectedOwner ?? undefined}
+				/>
+				<AverageDurationChart
+					selectedPipelineId={selectedPipeline}
+					ownerId={selectedOwner ?? undefined}
+				/>
+			</div>
 		</div>
 	);
 };
 
-export default PipelineAnalytics;
+export default DealSourceAnalytics;

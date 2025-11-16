@@ -46,8 +46,46 @@ use QuillCRM\User_Roles\User_Roles;
  */
 class Install {
 
+	/**
+	 * Multisite activation
+	 *
+	 * Activates the plugin on all sites in a multisite network
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param bool $network_wide Whether the plugin is being network activated
+	 */
+	public static function multisite_activate( $network_wide ) {
+		global $wpdb;
 
+		if ( is_multisite() && $network_wide ) {
+			// Get all blog IDs
+			$blog_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
 
+			foreach ( $blog_ids as $blog_id ) {
+				switch_to_blog( $blog_id );
+				self::install();
+				restore_current_blog();
+			}
+		} else {
+			self::install();
+		}
+	}
+
+	/**
+	 * Activate plugin on a new site in a multisite network
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $blog_id Blog ID of the new site
+	 */
+	public static function activate_new_site( $blog_id ) {
+		if ( is_plugin_active_for_network( plugin_basename( QUILLCRM_PLUGIN_FILE ) ) ) {
+			switch_to_blog( $blog_id );
+			self::install();
+			restore_current_blog();
+		}
+	}
 
 
 

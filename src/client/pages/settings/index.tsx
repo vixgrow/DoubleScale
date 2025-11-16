@@ -236,12 +236,12 @@ const SettingsPage: React.FC = () => {
 			value,
 			children: (
 				<Card
-					className={`flex shadow-none flex-col h-screen mt-4 ${TABS_WITHOUT_SAVE_BUTTON.has(value) ? 'bg-white' : 'bg-[#F8F8F8]'
+					className={`flex shadow-none flex-col mt-4 ${TABS_WITHOUT_SAVE_BUTTON.has(value) ? 'bg-white' : 'bg-[#F8F8F8]'
 						}`}
 				>
 					<CardContent
-						className={`flex-1 overflow-y-auto ${value === 'custom_fields'
-							? 'px-6 py-0'
+						className={`flex-1 ${value === 'custom_fields'
+							? 'px-6 py-0 pb-6'
 							: TABS_WITHOUT_SAVE_BUTTON.has(value)
 								? 'px-6 py-6'
 								: 'p-6'

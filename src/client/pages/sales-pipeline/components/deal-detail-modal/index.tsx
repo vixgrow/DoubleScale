@@ -5,11 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 
 /**
- * External dependencies
- */
-import { Spin, message } from 'antd';
-
-/**
  * Internal dependencies
  */
 import { useDealOperations } from '../../hooks/use-deal-operations';
@@ -34,7 +29,6 @@ import { PipelineStagesHeader } from './SatagesHeader';
 import Deal_Activites from '../deal-activities';
 import { DealDetailSkeleton } from './DealDetailSkeleton';
 import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
-import DealOverviewSkeleton from './deal-overview-skeleton';
 import { Input } from '@quillcrm/components/ui/input';
 import { useDispatch } from '@wordpress/data';
 
@@ -64,21 +58,22 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	const [tempTitle, setTempTitle] = useState('');
 	const [tempValue, setTempValue] = useState('');
 
-	const { getDeal, deleteDeal,updateDeal } = useDealOperations();
+	const { getDeal, deleteDeal, updateDeal } = useDealOperations();
 	const dispatch = useDispatch('quillcrm/core');
 	const createNotice = dispatch?.createNotice;
 
 	useEffect(() => {
 		if (!loading && deal) {
-		  const timer = setTimeout(() => setShowContent(true), 150);
-		  return () => clearTimeout(timer);
+			const timer = setTimeout(() => setShowContent(true), 150);
+			return () => clearTimeout(timer);
 		}
+		return undefined;
 	}, [loading, deal]);
 
-    // to update deal card also
+	// to update deal card also
 	const handleOverviewUpdate = async () => {
-		// Refresh the deal details locally
-		await fetchDealDetails();
+		// Refresh the deal details silently (without showing loading skeleton)
+		await refreshDealSilently();
 		if (onUpdate) {
 			onUpdate();
 		}
@@ -110,6 +105,17 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 			setLoading(false);
 		}
 	};
+
+	// Silent refresh without showing loading skeleton (used for updates)
+	const refreshDealSilently = async () => {
+		if (!dealId) return;
+		try {
+			const dealData = await getDeal(dealId, true);
+			setDeal(dealData);
+		} catch (error) {
+			// Silent error
+		}
+	};
 	const previousStage = (() => {
 		if (!pipeline?.stages || !deal?.stage?.id) return null;
 
@@ -133,10 +139,11 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 			await updateDeal(deal.id, { [field]: value });
 
 			if (onUpdate) {
-				 onUpdate();
+				onUpdate();
 			}
 		} catch (error) {
-			await fetchDealDetails();
+			// Silently refresh on error without showing loading skeleton
+			await refreshDealSilently();
 		} finally {
 			setEditingField(null);
 		}
@@ -191,10 +198,10 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
-			<DialogContent className="max-h-[98vh] gap-8 w-full max-w-[calc(100vw-500px)]  ml-auto my-8 p-10  rounded-none overflow-y-auto">
-				{loading || !showContent  ? (
+			<DialogContent className="max-h-[90vh] gap-8 w-full max-w-[calc(100vw-300px)]  ml-auto p-10  rounded-none overflow-y-auto">
+				{loading || !showContent ? (
 					// <div className="flex justify-center items-center min-h-[200px]">
-						<DealDetailSkeleton />
+					<DealDetailSkeleton />
 					// </div>
 				) : (
 					<>
@@ -289,41 +296,35 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 											</>
 										)}
 									</div>
-								
+
 								</div>
 								<ActivityActions
 									dealId={deal?.id ?? 0}
-									onRefresh={fetchDealDetails}
+									onRefresh={refreshDealSilently}
 									dealTitle={deal?.title}
 									deal={deal}
 									dealContactName={deal?.contact?.first_name}
 									onDeleted={() => {
-										if(onDeleted) onDeleted();
+										if (onDeleted) onDeleted();
 									}}
 								/>
 							</DialogTitle>
 						</DialogHeader>
 						{/* contact overview+customfiled */}
 						<div className=" grid grid-cols-2 gap-12">
-							{loading?(
-								<DealOverviewSkeleton/>
-							):(
-								<div>
-								<DealOverViewModal
-									dealId={dealId}
-									onEdit={onEdit}
-									onUpdate={handleOverviewUpdate}
-
-								/>
-							</div>
-							)}
+							<DealOverViewModal
+								dealId={dealId}
+								deal={deal}
+								onEdit={onEdit}
+								onUpdate={handleOverviewUpdate}
+							/>
 							<div className="border flex flex-col gap-6 border-[#DEE1E6] bg-[#F8F8F8] rounded-[20px] p-6">
 								{deal && <CustomFieldsView deal={deal} />}
 							</div>
 						</div>
 
 						{pipeline?.stages && (
-							<PipelineStagesHeader stages={pipeline.stages} currentStageId={deal?.stage?.id}  />
+							<PipelineStagesHeader stages={pipeline.stages} currentStageId={deal?.stage?.id} />
 						)}
 						{/* pipeline */}
 						<div className=" flex flex-wrap md:flex-nowrap justify-between items-start md:items-center gap-6 w-full ">
@@ -348,9 +349,9 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 										{previousStage
 											? previousStage.name
 											: __(
-													'No previous stage',
-													'quillcrm'
-												)}
+												'No previous stage',
+												'quillcrm'
+											)}
 									</p>
 								</div>
 							</div>

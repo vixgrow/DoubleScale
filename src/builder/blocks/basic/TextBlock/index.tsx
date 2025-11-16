@@ -35,12 +35,16 @@ export interface TextBlockProps {
 		bottom: number;
 		left: number;
 	};
+	isProActivated: boolean;
+	isPro: boolean;
 }
 
 const TextBlock = {
 	type: 'text',
 	name: __('Text', 'quillcrm'),
 	icon: TextBlockIcon,
+	isProActivated: false,
+	isPro: false,
 	defaultProps: {
 		content: '<p>Your text here</p>',
 		hyperlink: 'https://',

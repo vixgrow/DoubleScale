@@ -14,12 +14,16 @@ export interface TableBlockProps {
 	fontSize: number;
 	color: string;
 	align: string;
+	isProActivated: boolean;
+	isPro: boolean;
 }
 
 const TableBlock = {
 	type: 'table',
 	name: __('Table', 'quillcrm'),
 	icon: TableBlockIcon,
+	isProActivated: false,
+	isPro: false,
 	defaultProps: {
 		content: 'Your text here',
 		fontSize: 16,

@@ -18,6 +18,8 @@ export interface ButtonBlockProps {
 		bottom: number;
 		left: number;
 	};
+	isProActivated: boolean;
+	isPro: boolean;
 	containerBackgroundColor: string;
 	align: string;
 	buttonStyle: 'primary' | 'secondary' | 'tertiary';
@@ -27,6 +29,8 @@ const ButtonBlock = {
 	type: 'button' as const,
 	name: __('Button', 'quillcrm'),
 	icon: ButtonBlockIcon,
+	isProActivated: false,
+	isPro: false,
 	defaultProps: {
 		text: 'Click Here',
 		url: '#',

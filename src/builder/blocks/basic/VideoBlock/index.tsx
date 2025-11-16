@@ -25,12 +25,16 @@ export interface VideoBlockProps {
 	};
 	borderRadius: string;
 	shape: string;
+	isProActivated: boolean;
+	isPro: boolean;
 }
 
 const VideoBlock = {
 	type: 'video',
 	name: __('Video', 'quillcrm'),
 	icon: VideoBlockIcon,
+	isProActivated: false,
+	isPro: false,
 	defaultProps: {
 		videoUrl: '',
 		imageUrl: '',

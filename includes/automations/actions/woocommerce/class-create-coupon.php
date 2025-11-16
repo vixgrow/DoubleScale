@@ -16,13 +16,22 @@ use QuillCRM\Abstracts\Action;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Merge_Tags\WooCommerce\Coupon\Coupon;
-use QuillCRM\Managers\Merge_Tags_Manager;
 
 /**
  * Create Coupon Action
  */
 class Create_Coupon extends Action {
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -125,29 +134,14 @@ class Create_Coupon extends Action {
 			$coupon->set_usage_limit_per_user( $usage_limit_per_user );
 			$coupon->save();
 
-			$settings                = $step->settings;
-			$settings['coupon_code'] = $coupon->get_code();
-			$step->settings          = $settings;
-			$step->save();
+			// automation contact data
+			$existing_coupons   = $automation_contact->get_data( 'coupon_codes', array() );
+			$existing_coupons[] = array(
+				'code'    => $coupon_code,
+				'step_id' => $step->id,
+			);
 
-			$merge_tags_manager = Merge_Tags_Manager::instance();
-
-			// create merge tag
-			$merge_tag = new Coupon( $title, 'dynamic_id_' . $step->id );
-			if ( $merge_tags_manager->get_merge_tag( $merge_tag->group, $merge_tag->slug ) ) {
-				quillcrm_get_logger()->info(
-					__( 'WooCommerce coupon created successfully', 'quillcrm' ),
-					array(
-						'code'          => 'woocommerce_coupon_created',
-						'coupon_code'   => $coupon_code,
-						'automation_id' => $automation->id,
-						'step_id'       => $step->id,
-					)
-				);
-				return true;
-			}
-
-			$merge_tags_manager->register( $merge_tag );
+			$automation_contact->set_data( array( 'coupon_codes' => $existing_coupons ) );
 
 			quillcrm_get_logger()->info(
 				__( 'WooCommerce coupon created successfully', 'quillcrm' ),
@@ -345,7 +339,7 @@ class Create_Coupon extends Action {
 			'properties' => array(
 				'title'                  => array(
 					'type'     => 'string',
-					'required' => true,
+					'required' => false,
 				),
 				'discount_type'          => array(
 					'type'       => 'object',
@@ -362,7 +356,7 @@ class Create_Coupon extends Action {
 				),
 				'coupon_prefix'          => array(
 					'type'     => 'string',
-					'required' => true,
+					'required' => false,
 				),
 				'coupon_expiry_date'     => array(
 					'type'       => 'object',

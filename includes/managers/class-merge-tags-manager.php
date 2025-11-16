@@ -21,22 +21,6 @@ use QuillCRM\Models\Automation_Contact_Model;
 final class Merge_Tags_Manager {
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Registed merge tags
 	 *
@@ -125,6 +109,21 @@ final class Merge_Tags_Manager {
 	public function get_merge_tag( $group, $slug ) {
 		if ( isset( $this->merge_tags[ $group ][ $slug ] ) ) {
 			return $this->merge_tags[ $group ][ $slug ];
+		}
+
+		// Check for dynamic merge tags (e.g., dynamic_id_123 matches dynamic_id_)
+		if ( isset( $this->merge_tags[ $group ] ) ) {
+			foreach ( $this->merge_tags[ $group ] as $registered_slug => $merge_tag ) {
+				// Pattern 1: Slug ending with underscore (e.g., dynamic_id_)
+				if ( substr( $registered_slug, -1 ) === '_' && strpos( $slug, $registered_slug ) === 0 ) {
+					return $merge_tag;
+				}
+
+				// Pattern 2: Slug ending with colon (e.g., field:, metadata:)
+				if ( substr( $registered_slug, -1 ) === ':' && strpos( $slug, $registered_slug ) === 0 ) {
+					return $merge_tag;
+				}
+			}
 		}
 
 		return null;
@@ -216,6 +215,11 @@ final class Merge_Tags_Manager {
 				'mergeTags'   => array(),
 				'triggers'    => array( 'wc_review_received' ),
 				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+			),
+			'coupon'         => array(
+				'name'        => __( 'Coupon', 'quillcrm' ),
+				'mergeTags'   => array(),
+				'is_disabled' => true,
 			),
 		);
 		// get forms slug to set in groups

@@ -19,9 +19,6 @@ use QuillCRM\Models\Automation_Contact_Model;
 class Forms_Field extends Merge_Tag {
 
 
-
-
-
 	/**
 	 * Merge Tag Name
 	 *

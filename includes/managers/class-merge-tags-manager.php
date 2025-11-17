@@ -13,12 +13,16 @@
 namespace QuillCRM\Managers;
 
 use QuillCRM\Abstracts\Merge_Tag;
+use QuillCRM\Merge_Tags\Forms\Forms_Field_Backend;
+use QuillCRM\Merge_Tags\Forms\Forms_Metadata_BackEnd;
 use QuillCRM\Models\Automation_Contact_Model;
 
 /**
  * Merge Tag Manager
  */
 final class Merge_Tags_Manager {
+
+
 
 
 	/**
@@ -68,6 +72,19 @@ final class Merge_Tags_Manager {
 	 */
 	private function __construct() {
 		$this->set_groups();
+		add_action( 'init', array( $this, 'register_forms_merge_tags' ) );
+	}
+
+
+	/**
+	 * Register Forms Merge Tags
+	 */
+	public function register_forms_merge_tags() {
+		$forms = Forms_Manager::instance()->get_all_forms();
+		foreach ( $forms as $form ) {
+			$this->register( new Forms_Field_Backend( $form->slug ) );
+			$this->register( new Forms_Metadata_BackEnd( $form->slug ) );
+		}
 	}
 
 	/**
@@ -114,13 +131,12 @@ final class Merge_Tags_Manager {
 		// Check for dynamic merge tags (e.g., dynamic_id_123 matches dynamic_id_)
 		if ( isset( $this->merge_tags[ $group ] ) ) {
 			foreach ( $this->merge_tags[ $group ] as $registered_slug => $merge_tag ) {
-				// Pattern 1: Slug ending with underscore (e.g., dynamic_id_)
-				if ( substr( $registered_slug, -1 ) === '_' && strpos( $slug, $registered_slug ) === 0 ) {
-					return $merge_tag;
-				}
 
-				// Pattern 2: Slug ending with colon (e.g., field:, metadata:)
-				if ( substr( $registered_slug, -1 ) === ':' && strpos( $slug, $registered_slug ) === 0 ) {
+				$last_char = substr( $registered_slug, -1 );
+
+				if ( ( $last_char === '_' || $last_char === ':' ) &&
+					strpos( $slug, $registered_slug ) === 0
+				) {
 					return $merge_tag;
 				}
 			}

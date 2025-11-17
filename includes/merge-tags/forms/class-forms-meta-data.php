@@ -19,7 +19,6 @@ use QuillCRM\Models\Automation_Contact_Model;
 class Forms_Metadata extends Merge_Tag {
 
 
-
 	/**
 	 * Merge Tag Name
 	 *

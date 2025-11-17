@@ -1,13 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { __ } from '@wordpress/i18n';
 import dayjs from 'dayjs';
-// import {
-// 	ReportFilters as ReportFiltersType,
-// 	FilterOptions,
-// } from '../../hooks/useReportFilters';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import FiltersIcon from '@/components/icons/filters';
+
 
 import { DateRangePopup } from './DateRangePopup';
 import { FilterOptions ,ReportFilters as ReportFiltersType, } from '@quillcrm/hooks/useReportFilters';
@@ -27,7 +21,7 @@ const CustomDateRangeFilter: React.FC<CustomDateRangeFilterProps> = ({
 	onChange,
 }) => (
 	<div>
-		<label className="block text-base font-normal mb-1 text-[#09090B] font-[Manrope]">
+		<label className="block text-base font-normal mb-1 text-[#09090B] ">
 			{__('Quick Date Range', 'quillcrm')}
 		</label>
 		<DateRangePopup position='right' value={value} onChange={onChange} className="w-60" />
@@ -59,7 +53,6 @@ interface SaleReportFiltersProps {
 const SaleReportFilter: React.FC<SaleReportFiltersProps> = ({
 	filters,
 	setFilters,
-	title = __('Filters', 'quillcrm'),
 	showDateRange = true,
 	style,
 	className,

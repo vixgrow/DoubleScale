@@ -5,14 +5,13 @@ import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
-	DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { CRMUser } from '../../../../services/user-management';
 import { ManagerRole, ManagerRoleOptions } from './types';
+import { CustomDialogHeader, GradientAddContactIcon, Field } from '@quillcrm/components';
 
 interface ManagerModalProps {
 	isOpen: boolean;
@@ -61,10 +60,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 		if (error) setError(''); // Clear error when user changes role
 	};
 
-	const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setEmail(e.target.value);
-		if (error) setError(''); // Clear error when user types
-	};
+	// Email change handled inline in Field onChange for add mode
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -98,9 +94,9 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 			);
 			const defaultMessage = isEditMode
 				? __(
-						'Failed to update manager role. Please try again.',
-						'quillcrm'
-					)
+					'Failed to update manager role. Please try again.',
+					'quillcrm'
+				)
 				: __('Failed to add manager. Please try again.', 'quillcrm');
 
 			setError(error?.message || defaultMessage);
@@ -123,6 +119,12 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 			: __('Add new Manager', 'quillcrm');
 	};
 
+	const getSubtitle = () => {
+		return isEditMode
+			? __('Update the manager role information below.', 'quillcrm')
+			: __('Add basic information below to add new Manager.', 'quillcrm');
+	};
+
 	const getSubmitButtonText = () => {
 		if (isSubmitting) {
 			return isEditMode
@@ -138,9 +140,9 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 		return isEditMode
 			? __('Email address cannot be changed', 'quillcrm')
 			: __(
-					'Please Provide Email address of your existing system user',
-					'quillcrm'
-				);
+				'Please Provide Email address of your existing system user',
+				'quillcrm'
+			);
 	};
 
 	return (
@@ -148,9 +150,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 			<DialogContent className="max-w-md p-0">
 				{/* Header */}
 				<DialogHeader className="p-6 pb-4">
-					<DialogTitle className="text-lg font-semibold text-gray-900">
-						{getTitle()}
-					</DialogTitle>
+					<CustomDialogHeader title={getTitle()} subtitle={getSubtitle()} icon={<GradientAddContactIcon />} />
 				</DialogHeader>
 
 				{/* Content */}
@@ -164,49 +164,43 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 					{/* User Email Section */}
 					<div className="mb-6">
-						<Label
-							htmlFor="email"
-							className="text-sm font-medium text-gray-700 mb-2 block"
-						>
-							{__('User Email', 'quillcrm')}
-						</Label>
-						<Input
-							id="email"
-							type="email"
-							value={email}
-							onChange={handleEmailChange}
-							disabled={isEditMode}
-							placeholder={
-								!isEditMode
-									? __('Type User Email Address', 'quillcrm')
-									: undefined
-							}
-							className={`w-full h-12 px-4 border border-gray-300 rounded-md ${
-								isEditMode
-									? 'bg-gray-50 text-gray-500 cursor-not-allowed'
-									: 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-							}`}
-							required
-						/>
-						{!isEditMode && (
-							<p className="text-sm text-gray-500 mt-2">
-								{getEmailHelperText()}
-							</p>
+						{isEditMode ? (
+							<Field
+								label={__('User Email', 'quillcrm')}
+								type="label"
+								value={email}
+								onChange={() => { }}
+								helperText={getEmailHelperText()}
+							/>
+						) : (
+							<Field
+								label={__('User Email', 'quillcrm')}
+								type="email"
+								value={email}
+								onChange={(value: string) => {
+									setEmail(value);
+									if (error) setError('');
+								}}
+								required
+								placeholder={__('Type User Email Address', 'quillcrm')}
+								helperText={getEmailHelperText()}
+								className="my-2"
+							/>
 						)}
 					</div>
 
 					{/* Roles Section */}
-					<div className="mb-6">
-						<Label className="text-sm font-medium text-gray-700 mb-4 block">
+					<div className="">
+						<div className="text-[#09090B] font-normal text-base">
 							{isEditMode
 								? __('Role', 'quillcrm')
 								: __('Roles', 'quillcrm')}
-						</Label>
+						</div>
 
 						<RadioGroup
 							value={selectedRole}
 							onValueChange={handleRoleChange}
-							className="space-y-4"
+							className=""
 						>
 							{availableRoles.map((role) => (
 								<div
@@ -230,28 +224,20 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 					</div>
 
 					{/* Action Buttons */}
-					<div className="flex justify-end space-x-3 pt-4">
+					<div className="pt-4">
 						<Button
-							type="button"
-							variant="outline"
-							onClick={handleClose}
-							disabled={isSubmitting}
-							className="px-6"
-						>
-							{__('Cancel', 'quillcrm')}
-						</Button>
-						<Button
+							variant="gradient"
+							size="lg"
 							type="submit"
 							disabled={!email || !selectedRole || isSubmitting}
-							className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+							className="w-full"
 						>
 							{getSubmitButtonText()}
 						</Button>
 					</div>
 				</form>
 			</DialogContent>
-		</Dialog>
+		</Dialog >
 	);
 };
-
 export default ManagerModal;

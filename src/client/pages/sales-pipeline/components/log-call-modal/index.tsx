@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect,useRef } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -31,7 +31,7 @@ import {
 import { useActivityOperations } from '../../hooks/use-activity-operations';
 import './style.scss';
 import { useForm } from 'react-hook-form';
-import { CustomDialogHeader } from '@quillcrm/components';
+import { CustomDialogHeader, NoticeBanner } from '@quillcrm/components';
 import CallLogIcon from '@quillcrm/components/icons/call-log';
 import { Input } from '@quillcrm/components/ui/input';
 import {
@@ -45,12 +45,13 @@ import { Textarea } from '@quillcrm/components/ui/textarea';
 import { Button } from '@quillcrm/components/ui/button';
 import { useDispatch } from '@wordpress/data';
 import { DateTimePicker } from '@quillcrm/components/date-time-picker';
+import { NoticeMessage } from '@/client/types';
 
 
 interface LogCallModalProps {
 	visible: boolean;
 	onClose: () => void;
-	onSuccess: () => void;
+	onSuccess: ( notice?: { type: 'success' | 'error'; message: string }) => void;
 	dealId: number;
 	dealTitle?: string;
 	dealContact?: {
@@ -87,9 +88,10 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 	activity,
 }) => {
 	const [loading, setLoading] = useState(false);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const { logCall, updateActivity } = useActivityOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
+
 
 	const form = useForm<CallFormData>({
 		defaultValues: {
@@ -141,26 +143,31 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 
 			if (editMode && activity) {
 				await updateActivity(activity.id, 'call_logged', callData);
-				createNotice?.({
+				setNotice({
 					type: 'success',
 					message: __('Call updated successfully!', 'quillcrm'),
 				});
 			} else {
 				await logCall(dealId, callData);
-				createNotice?.({
+				setNotice({
 					type: 'success',
 					message: __('Call logged successfully!', 'quillcrm'),
 				});
 			}
 
 			form.reset();
-			onSuccess();
+			onSuccess({
+				type: 'success',
+				message: editMode 
+				  ? __('Call updated successfully!', 'quillcrm')
+				  : __('Call logged successfully!', 'quillcrm'),
+			  });
 			onClose();
 		} catch (error) {
 			const err = error as Error;
-			createNotice?.({
+			setNotice({
 				type: 'error',
-				message: err.message || __(editMode ? 'Failed to update call' : 'Failed to log call', 'quillcrm'),
+				message: err.message || __(editMode ? 'Failed to update call' : 'Failed to logged meeting', 'quillcrm'),
 			});
 
 		} finally {
@@ -172,6 +179,16 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 		form.reset();
 		onClose();
 	};
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && handleCancel()}>
@@ -184,6 +201,8 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 							icon={<CallLogIcon />}
 						/>
 					</DialogTitle>
+					{notice && (
+				   <NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />)}
 				</DialogHeader>
 				{/* form */}
 				<Form {...form}>
@@ -387,12 +406,14 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
         {__('Call Date & Time', 'quillcrm')}
       </FormLabel>
       <FormControl>
-        {/* <div className="flex items-center gap-3"> */}
-          <DateTimePicker
-            {...field}
-            placeholder="Start date"
-           
-          />
+        <DateTimePicker
+          placeholder="Start date"
+          onChange={field.onChange}
+          
+          value={field.value ? new Date(field.value) : undefined}
+         
+        //   ref={field.ref}
+        />
 
         {/* </div> */}
       </FormControl>
@@ -429,7 +450,7 @@ export const LogCallModal: React.FC<LogCallModalProps> = ({
 				<Button
 								type="submit"
 								// disabled={loading}
-								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-[8px] font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
+								className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-[8px] text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
 							>
 								{loading
 									? (editMode ? __('Updating...', 'quillcrm') : __('Adding...', 'quillcrm'))

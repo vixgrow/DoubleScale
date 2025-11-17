@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
 import { blocksRegistry } from '../blocks/BlockRegister';
+import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import { DeleteIcon } from '@quillcrm/components';
 import { useDispatch } from '@wordpress/data';
 import { isTemplateBlock } from '../utils/templateUtils';
@@ -59,7 +60,13 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 	);
 
 	const isSelected = selectedBlockId === block.id;
-	const blockDefinition = blocksRegistry[block.type];
+
+	// Get block definition with fallback to UnknownBlock
+	const { block: blockDefinition, isUnknown, info } = getBlockDefinition(
+		block.type,
+		blocksRegistry,
+		blocksRegistry.unknown
+	);
 
 	const handleBlockClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -71,13 +78,14 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 		dispatch(STORE_KEY).deleteBlock(block.id);
 	};
 
-	if (!blockDefinition) {
-		return (
-			<div className="p-4 border border-red-200 rounded bg-red-50 text-red-700">
-				{__('Unknown block type:', 'quillcrm')} {block.type}
-			</div>
-		);
-	}
+	// Prepare props for rendering
+	// If unknown, pass original type and props for preservation
+	const renderProps = isUnknown && info
+		? {
+			originalType: info.originalType,
+			originalProps: block.props,
+		}
+		: block.props;
 
 	return (
 		<div
@@ -85,6 +93,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			style={style}
 			{...attributes}
 			data-block-id={block.id}
+			data-block-type={block.type}
 			className={`
 				relative mb-4 group cursor-pointer border-2
 				hover:border-blue-300 transition-colors
@@ -124,7 +133,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			{/* Block Content */}
 			<div className="p-2">
 				{blockDefinition.Renderer ? (
-					<blockDefinition.Renderer props={block.props as any} />
+					<blockDefinition.Renderer props={renderProps as any} />
 				) : (
 					<div className="text-muted-foreground">
 						{__('No renderer available', 'quillcrm')}

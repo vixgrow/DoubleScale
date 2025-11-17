@@ -49,11 +49,19 @@ class Campaign_Analytics {
 	/**
 	 * Get model query for campaign type
 	 *
-	 * @param string $type Campaign type ('email', 'sms', 'whatsapp')
+	 * @param string $type Campaign type ('email', 'sms', 'whatsapp') or integer constant
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	protected function get_model_query( $type ) {
+		// Convert string to integer if needed (for backward compatibility)
+		if ( is_string( $type ) ) {
+			$type = Campaign_Channel::ensure_integer( $type );
+			if ( null === $type ) {
+				throw new \InvalidArgumentException( "Unsupported campaign type string" );
+			}
+		}
+
 		switch ( $type ) {
 			case Campaign_Channel::CHANNEL_EMAIL:
 			case Campaign_Channel::CHANNEL_EMAIL_SEQUENCE:
@@ -75,14 +83,17 @@ class Campaign_Analytics {
 	 * IMPORTANT: This method filters by source_type = CAMPAIGN to ensure
 	 * only campaign messages are included (not automations or individual messages).
 	 *
-	 * @param string $type Campaign type ('email', 'sms')
+	 * @param string $type Campaign type string ('email', 'sms', 'whatsapp')
 	 * @param string $interval Analytics interval
 	 * @param string $start_date Start date
 	 * @param string $end_date End date
 	 *
-	 * @return array Analytics data
+	 * @return array Analytics data with string channel key
 	 */
 	public function get_analytics( $type, $interval = 'last_30_days', $start_date = '', $end_date = '' ) {
+		// Ensure we have a string type for the response key
+		$channel_string = is_string( $type ) ? $type : Campaign_Channel::to_string( $type );
+		
 		$query = $this->get_model_query( $type );
 
 		// Filter to only include campaign messages (not automations or individual)
@@ -133,9 +144,10 @@ class Campaign_Analytics {
 
 		$totals = $this->get_total_stats( $type, $start_date, $end_date );
 
+		// Return with string channel key for consistent API response
 		return array(
-			$type  => $data,
-			'data' => $dates,
+			$channel_string => $data,
+			'data'          => $dates,
 		) + $totals;
 	}
 
@@ -262,56 +274,59 @@ class Campaign_Analytics {
 		}
 
 		// Optimized: Single query per type with aggregate functions, including unsubscribe tracking
-		if ( $type === Campaign_Channel::CHANNEL_EMAIL || $type === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE || $type === Campaign_Channel::CHANNEL_SEQUENCE_MAIL ) {
+		// Convert string to integer for comparison (get_model_query already validated the type)
+		$type_int = is_string( $type ) ? Campaign_Channel::to_integer( $type ) : $type;
+		
+		if ( $type_int === Campaign_Channel::CHANNEL_EMAIL || $type_int === Campaign_Channel::CHANNEL_EMAIL_SEQUENCE || $type_int === Campaign_Channel::CHANNEL_SEQUENCE_MAIL ) {
 			$result = $base_query
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
 					"
-					SUM(CASE WHEN {$tracking_table}.opened = 1 THEN 1 ELSE 0 END) as opened,
-					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN {$tracking_table}.opened = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_opened,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
 					SUM(CASE WHEN contacts.status = 'unsubscribed' THEN 1 ELSE 0 END) as unsubscribed
 				"
 				)
 				->first();
 
-			$stats['opened']       = (int) $result->opened;
-			$stats['clicked']      = (int) $result->clicked;
+			$stats['opened']       = (int) $result->total_opened;
+			$stats['clicked']      = (int) $result->total_clicked;
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
 			$stats                 = $this->calculate_email_rates( $stats );
 
-		} elseif ( $type === Campaign_Channel::CHANNEL_SMS ) {
+		} elseif ( $type_int === Campaign_Channel::CHANNEL_SMS ) {
 			$result = $base_query
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
 					"
-					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
 					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
 					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
 				'
 				)
 				->first();
 
-			$stats['clicked']      = (int) $result->clicked;
+			$stats['clicked']      = (int) $result->total_clicked;
 			$stats['delivered']    = (int) $result->delivered;
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
 			$stats                 = $this->calculate_sms_rates( $stats );
 
-		} elseif ( $type === Campaign_Channel::CHANNEL_WHATSAPP ) {
+		} elseif ( $type_int === Campaign_Channel::CHANNEL_WHATSAPP ) {
 			$result = $base_query
 				->leftJoin( $contacts_table . ' as contacts', $tracking_table . '.contact_id', '=', 'contacts.id' )
 				->selectRaw(
 					"
-					SUM(CASE WHEN {$tracking_table}.clicked = 1 THEN 1 ELSE 0 END) as clicked,
+					SUM(CASE WHEN {$tracking_table}.clicked = 1 AND {$tracking_table}.status = " . Tracking_Status::SENT . " THEN 1 ELSE 0 END) as total_clicked,
 					SUM(CASE WHEN {$tracking_table}.status = " . Tracking_Status::DELIVERED . ' THEN 1 ELSE 0 END) as delivered,
-					SUM(CASE WHEN ' . $tracking_table . '.status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as read,
+					SUM(CASE WHEN ' . $tracking_table . '.status = ' . Tracking_Status::READ . ' THEN 1 ELSE 0 END) as total_read,
 					SUM(CASE WHEN contacts.status = \'unsubscribed\' THEN 1 ELSE 0 END) as unsubscribed
 				'
 				)
 				->first();
 
-			$stats['clicked']      = (int) $result->clicked;
+			$stats['clicked']      = (int) $result->total_clicked;
 			$stats['delivered']    = (int) $result->delivered;
-			$stats['read']         = (int) $result->read;
+			$stats['read']         = (int) $result->total_read;
 			$stats['unsubscribed'] = (int) $result->unsubscribed;
 			$stats                 = $this->calculate_whatsapp_rates( $stats );
 		}
@@ -416,14 +431,14 @@ class Campaign_Analytics {
             SUM(CASE WHEN status = ' . Tracking_Status::FAILED . ' THEN 1 ELSE 0 END) as failed
         ';
 
-		if ( $type === Campaign_Channel::CHANNEL_EMAIL ) {
+		if ( $type === Campaign_Channel::STR_EMAIL ) {
 			$select_fields .= ',
-                SUM(CASE WHEN opened = 1 THEN 1 ELSE 0 END) as opened,
-                SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked
+                SUM(CASE WHEN opened = 1 AND status = ' . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as total_opened,
+                SUM(CASE WHEN clicked = 1 AND status = ' . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as total_clicked
             ';
-		} elseif ( $type === Campaign_Channel::CHANNEL_SMS ) {
+		} elseif ( $type === Campaign_Channel::STR_SMS ) {
 			$select_fields .= ',
-                SUM(CASE WHEN clicked = 1 THEN 1 ELSE 0 END) as clicked
+                SUM(CASE WHEN clicked = 1 AND status = ' . Tracking_Status::SENT . ' THEN 1 ELSE 0 END) as total_clicked
             ';
 		}
 
@@ -437,5 +452,79 @@ class Campaign_Analytics {
 			->get();
 
 		return $results->toArray();
+	}
+
+	/**
+	 * Get field mapping for normalizing analytics response
+	 *
+	 * Maps source analytics keys to standardized response keys.
+	 * This ensures consistent field naming across all API responses.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array Field mapping (source_key => response_key)
+	 */
+	public static function get_field_mapping() {
+		return array(
+			// Common count fields across all channels
+			'sent'          => 'total_sent',
+			'failed'        => 'total_failed',
+			'pending'       => 'total_pending',
+
+			// Email-specific count fields
+			'opened'        => 'total_opened',
+			'clicked'       => 'total_clicked',
+			'unsubscribed'  => 'total_unsubscribed',
+
+			// Email-specific rate fields
+			'open_rate'     => 'open_rate',
+			'click_rate'    => 'click_rate',
+
+			// SMS/WhatsApp count fields
+			'delivered'     => 'total_delivered',
+
+			// SMS/WhatsApp rate fields
+			'delivery_rate' => 'delivery_rate',
+
+			// WhatsApp-specific count fields
+			'read'          => 'total_read',
+
+			// WhatsApp-specific rate fields
+			'read_rate'     => 'read_rate',
+		);
+	}
+
+	/**
+	 * Normalize analytics response using standard field mapping
+	 *
+	 * Converts analytics data to use consistent field names (e.g., 'sent' => 'total_sent').
+	 * Also includes channel-specific data and metadata.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array  $analytics Raw analytics data from service (already has string keys)
+	 * @param string $channel   Channel identifier (email, sms, whatsapp)
+	 *
+	 * @return array Normalized response with consistent field names
+	 */
+	public static function normalize_response( $analytics, $channel ) {
+		$field_mapping = self::get_field_mapping();
+
+		// Start with base structure
+		// Analytics service now returns data with string keys directly
+		$response = array(
+			$channel => $analytics[ $channel ] ?? array(),
+			'data'   => $analytics['data'] ?? array(),
+			'total'  => $analytics['total'] ?? 0,
+		);
+
+		// Map analytics fields to response using the mapping
+		foreach ( $field_mapping as $source_key => $response_key ) {
+			if ( isset( $analytics[ $source_key ] ) ) {
+				$response[ $response_key ] = $analytics[ $source_key ];
+			}
+		}
+
+		return $response;
 	}
 }

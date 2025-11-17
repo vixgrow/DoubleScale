@@ -50,7 +50,7 @@ export const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
           : undefined,
       }}
     >
-      <span className='text-base font-semibold  whitespace-nowrap' style={{ color: isActive ? StageTextColor(stage.color) : '#9CA3AF' }} >
+      <span className='text-base font-semibold truncate max-w-[200px]  whitespace-nowrap' style={{ color: isActive ? StageTextColor(stage.color) : '#9CA3AF' }} >
         {children}
       </span>
 

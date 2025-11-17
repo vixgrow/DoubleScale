@@ -69,12 +69,14 @@ interface KanbanBoardProps {
 	clearSelection?: () => void;
 	isPerformingBulk?: boolean;
 	setIsPerformingBulk?: (performing: boolean) => void;
+	onNotice: (notice: any) => void
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 	pipeline,
 	deals,
 	onRefresh,
+	onNotice,
 	updateDealOptimistically,
 	onDealView,
 	onDealEdit,
@@ -466,6 +468,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 								selectMode={selectMode}
 								selectedDealIds={selectedDealIds}
 								toggleDealSelection={toggleDealSelection}
+								onRefresh={onRefresh}
+								onNotice={onNotice}
 							/>
 						))}
 				</div>

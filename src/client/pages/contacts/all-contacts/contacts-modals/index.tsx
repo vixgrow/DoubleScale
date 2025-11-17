@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * external dependencies
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 /**
  * internal dependencies
  */
@@ -31,21 +31,29 @@ export const CreateContactModal: React.FC = () => {
 	const {
 		createContactVisible,
 		setCreateContactVisible,
-		contact,
-		setContact,
 		isSaving,
 	} = useContactsContext();
 
 	const { createContact } = useContactsAPI();
 
+	const emptyContact = {
+		email: '',
+		first_name: '',
+		last_name: '',
+	};
+
+	const [contactForm, setContactForm] = useState(emptyContact);
+
+	useEffect(() => {
+		if (!createContactVisible) {
+			setContactForm(emptyContact);
+		}
+	}, [createContactVisible]);
+
 	const handleClose = (open: boolean) => {
 		setCreateContactVisible(open);
 		if (!open) {
-			setContact({
-				email: '',
-				first_name: '',
-				last_name: '',
-			});
+			setContactForm(emptyContact);
 		}
 	};
 
@@ -69,35 +77,35 @@ export const CreateContactModal: React.FC = () => {
 					<Field
 						label={__('First Name', 'quillcrm')}
 						placeholder={__('Enter First Name', 'quillcrm')}
-						value={contact.first_name}
+						value={contactForm.first_name}
 						onChange={(value) =>
-							setContact({
-								...contact,
+							setContactForm((prev) => ({
+								...prev,
 								first_name: value,
-							})
+							}))
 						}
 						type="text"
 					/>
 					<Field
 						label={__('Last Name', 'quillcrm')}
-						value={contact.last_name}
+						value={contactForm.last_name}
 						onChange={(value) =>
-							setContact({
-								...contact,
+							setContactForm((prev) => ({
+								...prev,
 								last_name: value,
-							})
+							}))
 						}
 						type="text"
 						placeholder={__('Enter Last Name', 'quillcrm')}
 					/>
 					<Field
 						label={__('Email', 'quillcrm')}
-						value={contact.email}
+						value={contactForm.email}
 						onChange={(value) =>
-							setContact({
-								...contact,
+							setContactForm((prev) => ({
+								...prev,
 								email: value,
-							})
+							}))
 						}
 						type="email"
 						placeholder={__('Enter Email', 'quillcrm')}
@@ -106,7 +114,7 @@ export const CreateContactModal: React.FC = () => {
 
 				<DialogFooter className="mt-6">
 					<Button
-						onClick={createContact}
+						onClick={() => createContact(contactForm)}
 						disabled={isSaving}
 						size="xl"
 						variant="gradient"

@@ -25,6 +25,7 @@ interface ContactAnalyticsChartProps {
 	onIntervalChange: (value: string) => void;
 	onChangeFromDate: (date: Date) => void;
 	onChangeToDate: (date: Date) => void;
+	onSubmit: (date: Date) => void;
 }
 
 export const ContactAnalyticsChart: React.FC<ContactAnalyticsChartProps> = ({
@@ -36,6 +37,7 @@ export const ContactAnalyticsChart: React.FC<ContactAnalyticsChartProps> = ({
 	onIntervalChange,
 	onChangeFromDate,
 	onChangeToDate,
+	onSubmit
 }) => {
 	const [gradients, setGradients] = useState<{
 		line: CanvasGradient | string;

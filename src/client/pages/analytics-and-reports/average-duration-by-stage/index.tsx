@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { Card, CardContent } from '@/components/ui/card';
-import { InfoCircleOutlined } from '@ant-design/icons';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,6 +16,8 @@ import { Bar } from 'react-chartjs-2';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@quillcrm/components/ui/tooltip';
 import { Button } from '@quillcrm/components/ui/button';
 import AverageDurationChartSkeleton from './Average-duration-by-stageSkeleton';
+import { EmptyState } from '../../home/no-data';
+import { DashboardContentCard } from '@quillcrm/components';
 
 ChartJS.register(
   CategoryScale,
@@ -83,13 +85,12 @@ const AverageDurationChart: React.FC<AverageDurationChartProps> = ({
     fetchAnalytics();
   }, [fetchAnalytics]);
 
-  // ألوان مختلفة لكل stage
   const stageColors = [
-    '#5B93C7', // أزرق
-    '#8B5CF6', // بنفسجي
-    '#F59E0B', // برتقالي
-    '#F97316', // برتقالي غامق
-    '#10B981', // أخضر
+    '#5B93C7', 
+    '#8B5CF6', 
+    '#F59E0B', 
+    '#F97316', 
+    '#10B981', 
     '#EF4444',
   ];
 
@@ -205,13 +206,12 @@ const AverageDurationChart: React.FC<AverageDurationChartProps> = ({
 
   if (stages.length === 0) {
     return (
-      <Card className="border border-[#DEE1E6] bg-[#FFF] rounded-[16px]">
-        <CardContent className="p-6">
-          <div className="text-center text-gray-500">
-            {__('No data available', 'quillcrm')}
-          </div>
-        </CardContent>
-      </Card>
+      <DashboardContentCard
+       title={__('Average Duration per Stage', 'quillcrm')}
+      >
+         <EmptyState />
+      </DashboardContentCard>
+     
     );
   }
 

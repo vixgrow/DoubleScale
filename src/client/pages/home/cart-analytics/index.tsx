@@ -40,6 +40,8 @@ import { RecentCartsTable } from './recent-carts-list';
 import { CartsChart } from '../cart-chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCartAnalytics } from '../use-analytics';
+import { DashboardContentCard, PageHeader } from '@quillcrm/components';
+import CartAnalyticsSkeleton from './cart-analytics-skeleton';
 
 interface CartAnalyticsProps {
 	dashboardData: DashboardData;
@@ -60,41 +62,50 @@ const CartAnalytics: React.FC<CartAnalyticsProps> = ({ dashboardData }) => {
 
 	if (!data || loading) {
 		return (
-			<div className="space-y-4 p-4">
-				<Skeleton className="h-6 w-1/3" />
-				<Skeleton className="h-4 w-full" />
-				<Skeleton className="h-4 w-5/6" />
-				<Skeleton className="h-4 w-4/6" />
-			</div>
+			 <CartAnalyticsSkeleton />
 		);
 	}
 
 	return (
-		<div className="flex flex-col gap-5 mt-5">
-			<CartStatsCards
-				data={data}
-				total_orders={dashboardData.total_orders}
+		<>
+			<PageHeader
+				title={__('Cart Analytics', 'quillcrm')}
+				subtitle={__('Cart Analytics', 'quillcrm')}
+				actions={[]}
 			/>
-
-			<RecoveredCartsTable
-				recovered_carts={dashboardData.recent_recoverd_carts}
-			/>
-			<div className="flex gap-5">
-				<RecentCartsTable
-					carts={dashboardData.recent_abandoned_carts}
-				/>
-				<CartsChart
-					data={data}
-					interval={interval}
-					startDate={startDate}
-					endDate={endDate}
-					onIntervalChange={setInterval}
-					onChangeFromDate={setStartDate}
-					onChangeToDate={setEndDate}
-					onSubmit={refetch}
+			<div className="flex flex-col gap-5">
+				<DashboardContentCard
+					title={__('Cart Analytics Overview', 'quillcrm')}
+				>
+					<CartStatsCards
+						data={data}
+						total_orders={dashboardData.total_orders ?? 0}
+					/>
+				</DashboardContentCard>
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-5 ">
+					<div className=" h-full md:col-span-2">
+						<RecentCartsTable
+							carts={dashboardData.recent_abandoned_carts}
+						/>
+					</div>
+					<div className=" h-full md:col-span-1">
+						<CartsChart
+							data={data}
+							interval={interval}
+							startDate={startDate}
+							endDate={endDate}
+							onIntervalChange={setInterval}
+							onChangeFromDate={setStartDate}
+							onChangeToDate={setEndDate}
+							onSubmit={refetch}
+						/>
+					</div>
+				</div>
+				<RecoveredCartsTable
+					recovered_carts={dashboardData.recent_recoverd_carts}
 				/>
 			</div>
-		</div>
+		</>
 	);
 };
 

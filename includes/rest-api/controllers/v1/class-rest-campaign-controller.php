@@ -28,7 +28,10 @@ use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Campaign\Email_Processing;
 use QuillCRM\Campaign\SMS_Processing;
 use QuillCRM\Campaign\WhatsApp_Processing;
-use QuillCRM\QuillCRM;
+use QuillCRM\Models\Template_Model;
+use QuillCRM\Emails\Email_Renderer;
+use QuillCRM\Managers\Merge_Tags_Manager;
+
 
 /**
  * REST_Campaign_Controller class
@@ -200,6 +203,32 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 						'message'    => array(
 							'description' => __( 'Message content (body for email, message for SMS/WhatsApp)', 'quillcrm' ),
 							'type'        => 'string',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
+
+		// Send campaign test email endpoint (for email campaigns with templates).
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/send-test-email',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_campaign_test_email' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => array(
+						'id'     => array(
+							'description' => __( 'Campaign ID', 'quillcrm' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+						'emails' => array(
+							'description' => __( 'Array of email addresses to send test emails to', 'quillcrm' ),
+							'type'        => 'array',
+							'items'       => array( 'type' => 'string' ),
 							'required'    => true,
 						),
 					),
@@ -454,6 +483,163 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 				array( 'message' => __( 'Test email sent successfully', 'quillcrm' ) ),
 				200
 			);
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Send campaign test email - sends test emails using campaign template to multiple recipients
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_campaign_test_email( $request ) {
+		try {
+			$campaign_id = $request->get_param( 'id' );
+			$emails      = $request->get_param( 'emails' );
+
+			// Validate emails array
+			if ( empty( $emails ) || ! is_array( $emails ) ) {
+				return new WP_Error( 'invalid_emails', __( 'Please provide an array of email addresses', 'quillcrm' ), array( 'status' => 400 ) );
+			}
+
+			// Validate all email addresses
+			$invalid_emails = array();
+			foreach ( $emails as $email ) {
+				if ( ! is_email( $email ) ) {
+					$invalid_emails[] = $email;
+				}
+			}
+
+			if ( ! empty( $invalid_emails ) ) {
+				return new WP_Error(
+					'invalid_emails',
+					sprintf(
+						/* translators: %s: comma-separated list of invalid email addresses */
+						__( 'Invalid email address(es): %s', 'quillcrm' ),
+						implode( ', ', $invalid_emails )
+					),
+					array( 'status' => 400 )
+				);
+			}
+
+			// Get campaign
+			$campaign = Campaign_Model::find( $campaign_id );
+			if ( ! $campaign ) {
+				return new WP_Error( 'campaign_not_found', __( 'Campaign not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Get template ID from campaign
+			$campaign_settings = is_array( $campaign->settings ) ? $campaign->settings : json_decode( $campaign->settings, true );
+
+			// Email campaigns store template_ids, while SMS/WhatsApp store full templates
+			$template_id = $campaign_settings['template_ids'][0] ?? $campaign_settings['templates'][0]['id'] ?? null;
+
+			if ( ! $template_id ) {
+				return new WP_Error( 'template_not_found', __( 'Campaign template not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Get template
+			$template = Template_Model::find( $template_id );
+			if ( ! $template ) {
+				return new WP_Error( 'template_not_found', __( 'Template not found', 'quillcrm' ), array( 'status' => 404 ) );
+			}
+
+			// Extract template settings
+			$template_settings = is_array( $template->settings ) ? $template->settings : json_decode( $template->settings, true );
+			$from_name         = $template_settings['from_name'] ?? get_option( 'blogname' );
+			$from_email        = $template_settings['from_email'] ?? get_option( 'admin_email' );
+			$reply_to          = $template_settings['reply_to'] ?? '';
+			$subject           = $template->subject ?? 'Test Email';
+
+			// Track results
+			$sent_count    = 0;
+			$failed_count  = 0;
+			$failed_emails = array();
+
+			// Send to each recipient
+			foreach ( $emails as $recipient_email ) {
+				$email_sender               = new Emails();
+				$email_sender->from_address = $from_email;
+				$email_sender->from_name    = $from_name;
+				if ( ! empty( $reply_to ) && is_email( $reply_to ) ) {
+					$email_sender->reply_to = $reply_to;
+				}
+
+				// Get contact for merge tags
+				$contact = Contact_Model::get_by_email( $recipient_email ) ?? null;
+
+				// Render template
+				$email_renderer = new Email_Renderer();
+				$body_content   = $email_renderer->render_template( $template_id, $contact );
+
+				if ( empty( $body_content ) ) {
+					$failed_count++;
+					$failed_emails[] = $recipient_email;
+					continue;
+				}
+
+				// Process subject with merge tags
+				$processed_subject = Merge_Tags_Manager::instance()->process_merge_tags( $subject, $contact );
+
+				// Send email
+				$result = $email_sender->send( $recipient_email, $processed_subject, $body_content );
+
+				if ( $result ) {
+					$sent_count++;
+				} else {
+					$failed_count++;
+					$failed_emails[] = $recipient_email;
+				}
+			}
+
+			// Prepare response
+			if ( $sent_count > 0 && $failed_count === 0 ) {
+				return new WP_REST_Response(
+					array(
+						'success'    => true,
+						'message'    => sprintf(
+							/* translators: %d: number of emails sent */
+							_n(
+								'Test email sent successfully to %d recipient',
+								'Test emails sent successfully to %d recipients',
+								$sent_count,
+								'quillcrm'
+							),
+							$sent_count
+						),
+						'sent_count' => $sent_count,
+					),
+					200
+				);
+			} elseif ( $sent_count > 0 && $failed_count > 0 ) {
+				return new WP_REST_Response(
+					array(
+						'success'       => true,
+						'message'       => sprintf(
+							/* translators: 1: number of successful sends, 2: number of failures */
+							__( 'Test emails sent: %1$d succeeded, %2$d failed', 'quillcrm' ),
+							$sent_count,
+							$failed_count
+						),
+						'sent_count'    => $sent_count,
+						'failed_count'  => $failed_count,
+						'failed_emails' => $failed_emails,
+					),
+					200
+				);
+			} else {
+				return new WP_Error(
+					'send_failed',
+					sprintf(
+						/* translators: %s: comma-separated list of failed email addresses */
+						__( 'Failed to send test email to: %s', 'quillcrm' ),
+						implode( ', ', $failed_emails )
+					),
+					array( 'status' => 500 )
+				);
+			}
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
 		}

@@ -63,7 +63,7 @@ class Send_WhatsApp extends Abstract_Send_Message {
 	 * @return string
 	 */
 	protected function get_channel_type() {
-		return \QuillCRM\Constants\Campaign_Channel::CHANNEL_WHATSAPP;
+		return \QuillCRM\Constants\Campaign_Channel::STR_WHATSAPP;
 	}
 
 	/**

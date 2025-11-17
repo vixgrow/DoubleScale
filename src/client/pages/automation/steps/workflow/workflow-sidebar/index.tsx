@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { useDispatch } from '@wordpress/data';
 
 /**
  * External dependencies
@@ -16,7 +15,7 @@ import { cn } from '@/lib/utils';
  */
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
-import type { OrganizedStep, AutomationStep } from '@quillcrm/client';
+import type { OrganizedStep, AutomationStep, NoticeMessage } from '@quillcrm/client';
 import { getTitle } from './titles';
 import SidebarHeader from './sidebar-header';
 import TriggerContent from './trigger-content';
@@ -24,6 +23,7 @@ import ConditionsModal from '../conditions-modal';
 import StepFieldsModal from '../step-fields-modal';
 import ActionSelector from '../action-selector';
 import GoalSelector from '../goal-selector';
+import { NoticeBanner } from '@quillcrm/components';
 
 interface WorkflowSidebarProps {
 	currentStep: OrganizedStep | null;
@@ -41,7 +41,8 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	const { automation, updateAutomation, updateSettings, updateStep, steps } =
 		useAutomationContext();
 	const [tempAction, setTempAction] = useState<string>('');
-	const { createNotice } = useDispatch('quillcrm/core');
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const closeNotice = () => setNotice(null);
 
 	// Close sidebar if the current step has been deleted
 	useEffect(() => {
@@ -92,10 +93,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		const id = stepId || currentStep?.id;
 
 		if (!id) {
-			createNotice({
-				type: 'error',
-				message: __('Invalid step data', 'quillcrm'),
-			});
+			setNotice({ type: 'error', message: __('Invalid step data', 'quillcrm') });
 			return;
 		}
 
@@ -122,24 +120,15 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 				setTempAction('');
 			}
 
-			createNotice({
-				type: 'success',
-				message: successMessage,
-			});
+			setNotice({ type: 'success', message: successMessage });
 		} catch (error: any) {
-			createNotice({
-				type: 'error',
-				message: error.message || __('Failed to save', 'quillcrm'),
-			});
+			setNotice({ type: 'error', message: error.message || __('Failed to save', 'quillcrm') });
 		}
 	};
 
 	const handleGoalSave = async (goalKey: string) => {
 		if (!currentStep || !goalKey) {
-			createNotice({
-				type: 'error',
-				message: __('Please select a goal', 'quillcrm'),
-			});
+			setNotice({ type: 'error', message: __('Please select a goal', 'quillcrm') });
 			return;
 		}
 
@@ -152,10 +141,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 	const handleActionSave = async (actionKey: string) => {
 		if (!currentStep || !actionKey) {
-			createNotice({
-				type: 'error',
-				message: __('Please select an action', 'quillcrm'),
-			});
+			setNotice({ type: 'error', message: __('Please select an action', 'quillcrm') });
 			return;
 		}
 
@@ -168,10 +154,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 	const handleStepSave = async (stepData: Partial<OrganizedStep>) => {
 		if (!stepData.id) {
-			createNotice({
-				type: 'error',
-				message: __('Invalid step data', 'quillcrm'),
-			});
+			setNotice({ type: 'error', message: __('Invalid step data', 'quillcrm') });
 			return;
 		}
 
@@ -289,6 +272,9 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 			/>
 
 			<div className="space-y-4 p-4">
+				{notice && (
+					<NoticeBanner notice={notice} closeNotice={closeNotice} />
+				)}
 				{renderContent()}
 			</div>
 		</div>

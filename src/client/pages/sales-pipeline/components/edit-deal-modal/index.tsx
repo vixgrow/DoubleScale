@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
+import { useState, useMemo, useEffect, useCallback ,useRef} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -42,12 +42,14 @@ import ConfigAPI, { SOURCE_OPTIONS } from '@quillcrm/config';
 import { CustomDialogHeader, NoticeBanner } from '@quillcrm/components';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import { Input } from '@quillcrm/components/ui/input';
-import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
+import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker'
 import { CustomFieldsSection } from '../deal-custom-fields';
 import { Button } from '@quillcrm/components/ui/button';
 import AllDealIcon from '@quillcrm/components/icons/all-deals';
 import { useDispatch } from '@wordpress/data';
 import { convertDate } from '@quillcrm/utils';
+import { DatePicker } from '@quillcrm/components/ui/date-picker';
+import { NoticeMessage } from '@/client/types';
 
 interface PipelineStageBoxProps {
 	stage: {
@@ -70,10 +72,7 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 	isSelected,
 	isPrevious,
 }) => {
-	const backgroundColor =
-		isSelected || isPrevious ?
-			stage.color
-			: '#DEE1E6';
+	const backgroundColor = isSelected || isPrevious ? stage.color : '#DEE1E6';
 
 	const isFirst = index === 0;
 	const isLast = index === totalStages - 1;
@@ -131,7 +130,8 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 export interface EditDealModalProps {
 	visible: boolean;
 	onClose: () => void;
-	onSuccess: () => void;
+	// onSuccess: () => void;
+	onSuccess: ( notice?: { type: 'success' | 'error'; message: string }) => void;
 	deal: Deal | null;
 	pipelines: any[];
 }
@@ -179,7 +179,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	const [loading, setLoading] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactSearchLoading, setContactSearchLoading] = useState(false);
-
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
 	// Use shared users hook
 	const {
@@ -215,12 +215,9 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 		return ConfigAPI.getDealPriorities();
 	}, []);
 
-
 	// Check if current user is restricted (deal owner)
 	const isRestrictedUser = isDealOwner();
-
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	// Load initial contacts when modal opens
 	useEffect(() => {
 		if (visible) {
@@ -237,9 +234,13 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				title: deal.title,
 				stage_id: deal.stage?.id ? Number(deal.stage.id) : undefined,
 				value: deal.value,
+
+				// expected_close_date: deal.expected_close_date
+				// 	? new Date(deal.expected_close_date)
+				// 	: undefined,
 				expected_close_date: deal.expected_close_date
-					? dayjs(deal.expected_close_date)
-					: undefined,
+                ? new Date(deal.expected_close_date).toISOString().split('T')[0]
+                : null,
 				// source: deal.source || undefined,
 				source: deal.source?.toLowerCase() ?? '',
 				priority: deal.priority || undefined,
@@ -306,7 +307,6 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	const fetchContacts = useCallback(
 		debounce(async (searchTerm: string) => {
 			if (!searchTerm || searchTerm.length < 2) {
-				// Reload initial contacts when search is cleared
 				fetchInitialContacts();
 				return;
 			}
@@ -324,8 +324,6 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				setContacts(contactsData);
 			} catch (error) {
 				console.error('Failed to fetch contacts:', error);
-
-				// message.error(__('Failed to load contacts', 'quillcrm'));
 			} finally {
 				setContactSearchLoading(false);
 			}
@@ -353,10 +351,9 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				stage_id: values.stage_id,
 				value: values.value || 0,
 				currency: 'USD',
-				expected_close_date: values.expected_close_date
-                ? convertDate(values.expected_close_date)
-                : null,
-				
+				expected_close_date: values.expected_close_date || '',
+
+
 				source: values.source,
 				priority: values.priority,
 			};
@@ -368,23 +365,22 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 			}
 
 			await updateDeal(deal.id, updateData);
-			createNotice?.({
+			
+			// onSuccess();
+			onSuccess({
 				type: 'success',
 				message: __(
 					`Deal "${values.title}" updated successfully!`,
 					'quillcrm'
 				),
 			});
-
-			onSuccess();
 			onClose();
 		} catch (error) {
 			const err = error as Error;
-	         createNotice?.({
-		        type: 'error',
-		        message: err.message || __('Failed to update deal', 'quillcrm'),
-	});
-
+			setNotice({
+				type: 'error',
+				message: err.message || __('Failed to update deal', 'quillcrm'),
+			})
 		} finally {
 			setLoading(false);
 		}
@@ -394,15 +390,26 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 		onClose();
 	};
 
-	const handlePipelineChange = (pipelineId: number) => {
-		// Clear stage selection when pipeline changes
-		setSelectedPipelineId(pipelineId);
-		form.setValue('stage_id', undefined);
-	};
+	// const handlePipelineChange = (pipelineId: number) => {
+	// 	// Clear stage selection when pipeline changes
+	// 	setSelectedPipelineId(pipelineId);
+	// 	form.setValue('stage_id', undefined);
+	// };
 	// console.log(deal?.source, SOURCE_OPTIONS)
 	const currentPipeline = pipelines?.find(
 		(p: any) => String(p.id) === String(deal?.pipeline?.id)
 	);
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
+
 
 	return (
 		<Dialog
@@ -422,6 +429,9 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 							icon={<AllDealIcon />}
 						/>
 					</DialogTitle>
+					{notice && (
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+			   )}
 				</DialogHeader>
 
 				<div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 my-3">
@@ -652,21 +662,23 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 							{__('Expected Close Date', 'quillcrm')}
 						</label>
 
-						<DateRangePicker
-							value={{
-								from: form.watch('expected_close_date')
-									? new Date(form.watch('expected_close_date'))
-									: null,
-								to: null
+						<DatePicker
+							value={
+								form.watch('expected_close_date')
+									? new Date(
+											form.watch('expected_close_date')
+										)
+									: null
+							}
+							onChange={(value: string) => {
+								form.setValue(
+									'expected_close_date',
+									value || ''
+								);
 							}}
-							onChange={(range) => {
-								const date = range?.from
-									? range.from.toISOString()
-									: '';
-								form.setValue('expected_close_date', date);
-							}}
-							placeholder={__('Select date', 'quillcrm')}
-							className="w-full h-12 !shadow-none rounded-[8px] border border-[#DEE1E6] bg-white !text-[#09090B] !font-normal !text-base tracking-[-.5px]"
+
+							placeholder={__('Select Date', 'quillcrm')}
+							buttonClassName="!w-full h-12 !shadow-none rounded-[8px] border border-[#DEE1E6] !text-[#09090B] !bg-white !font-normal !text-base tracking-[-.5px]"
 						/>
 					</div>
 					{/* pipeline */}
@@ -743,84 +755,85 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				</div>
 				{/* Priority select */}
 				<div className="w-full grid grid-cols-1 gap-6">
-						{priorities && (
-							<div className="flex flex-col gap-2 mt-2">
-								<label className="block mb-1 font-normal text-[#09090B] text-base">
-									{__('Priority', 'quillcrm')}
-								</label>
+					{priorities && (
+						<div className="flex flex-col gap-2 mt-2">
+							<label className="block mb-1 font-normal text-[#09090B] text-base">
+								{__('Priority', 'quillcrm')}
+							</label>
 
-								<div className="flex flex-wrap gap-2">
-									{Object.entries(priorities).map(
-										([key, value]) => {
-											const selectedPriority =
-												form.watch('priority');
-											const isSelected =
-												selectedPriority === key;
+							<div className="flex flex-wrap gap-2">
+								{Object.entries(priorities).map(
+									([key, value]) => {
+										const selectedPriority =
+											form.watch('priority');
+										const isSelected =
+											selectedPriority === key;
 
-											return (
-												<div
-													key={key}
-													onClick={() =>
-														form.setValue(
-															'priority',
-															key
-														)
-													}
-													className={`flex items-center gap-2 cursor-pointer px-4 py-2 rounded-md border transition-all duration-200 ${
+										return (
+											<div
+												key={key}
+												onClick={() =>
+													form.setValue(
+														'priority',
+														key
+													)
+												}
+												className={`flex items-center gap-2 cursor-pointer px-4 py-2 rounded-md border transition-all duration-200 ${
+													isSelected
+														? 'border-[#1E3A8A] bg-[#E4EEFD] ring-2 ring-[#1E3A8A]/30'
+														: 'border-[#DEE1E6] bg-white hover:bg-[#F9FAFB]'
+												}`}
+											>
+												<span
+													className="inline-block w-5 h-5 rounded-md"
+													style={{
+														backgroundColor:
+															value.color,
+													}}
+												/>
+												<span
+													className={`text-sm font-medium ${
 														isSelected
-															? 'border-[#1E3A8A] bg-[#E4EEFD] ring-2 ring-[#1E3A8A]/30'
-															: 'border-[#DEE1E6] bg-white hover:bg-[#F9FAFB]'
+															? 'text-[#1E3A8A]'
+															: 'text-[#09090B]'
 													}`}
 												>
-													<span
-														className="inline-block w-5 h-5 rounded-md"
-														style={{
-															backgroundColor:
-																value.color,
-														}}
-													/>
-													<span
-														className={`text-sm font-medium ${
-															isSelected
-																? 'text-[#1E3A8A]'
-																: 'text-[#09090B]'
-														}`}
-													>
-														{value.label}
-													</span>
-												</div>
-											);
-										}
-									)}
-								</div>
+													{value.label}
+												</span>
+											</div>
+										);
+									}
+								)}
 							</div>
-						)}
-						<div className="h-[1px] bg-[#DEE1E6] w-full"></div>
-						{/* custom filed */}
-						
-<CustomFieldsSection
-	deal={deal} 
-	// initialValues={deal?.custom_fields || {}}
-	onChange={(fields) => {
-		Object.entries(fields).forEach(([key, value]) => {
-			form.setValue(key as any, value);
-		});
-	}}
-/>
-{/*button */}
-<div className="mt-6">
-	<Button
-		type="button"
-		onClick={handleSubmit} 
-		disabled={loading}
-		className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-md font-manrope text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
-	>
-		{loading ? __('Updating deal...', 'quillcrm') : __('Update Deal', 'quillcrm')}
-	</Button>
-</div>
+						</div>
+					)}
+					<div className="h-[1px] bg-[#DEE1E6] w-full"></div>
+					{/* custom filed */}
+
+					<CustomFieldsSection
+						deal={deal}
+						// initialValues={deal?.custom_fields || {}}
+						onChange={(fields) => {
+							Object.entries(fields).forEach(([key, value]) => {
+								form.setValue(key as any, value);
+							});
+						}}
+					/>
+					{/*button */}
+					<div className="mt-6">
+						<Button
+							type="button"
+							onClick={handleSubmit}
+							disabled={loading}
+							className="w-full bg-gradient-to-r from-[#1E3A8A] via-[#1E3A8A] to-[#3B82F6] text-white flex h-12 justify-center items-center gap-2 rounded-md text-base font-medium tracking-tight hover:opacity-90 transition-all duration-200"
+						>
+							{loading
+								? __('Updating deal...', 'quillcrm')
+								: __('Update Deal', 'quillcrm')}
+						</Button>
+					</div>
 				</div>
 			</DialogContent>
 		</Dialog>
 	);
 };
-

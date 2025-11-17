@@ -80,32 +80,6 @@ const SalesRepCard = ({
 			onClick={onClick}
 		>
 			<CardHeader className="pb-4">
-				{/* <div className="flex items-start justify-between gap-3">
-					<div className="flex items-center gap-2 min-w-0 flex-1">
-						<div
-							className="w-12 h-12 rounded-full flex items-center justify-center border-2 border-[#DEE1E6] font-semibold flex-shrink-0"
-						>
-							<UserActivityIcon width={22} height={32}/>
-						</div>
-						<div className="min-w-0 flex-1">
-							<h3 className="font-semibold text-[#09090B] text-base leading-[26px] truncate">
-								{rep.name}
-							</h3>
-							<div className="flex gap-1">
-							     <MeetingActivityIcon />
-								 <p className='text-base  font-medium text-[#777] '>
-								   {__(	'Last Activity:','quillcrm')}
-								   <span className='text-[#660FF1] font-semibold'>{rep.lastActivity}</span>
-								 </p>
-							</div>
-						</div>
-						<Button variant={'ghost'} onClick={onClick} className=' h-10 flex items-center gap-1 text-base border border-[#458DC7] hover:text-[#458DC7]  text-[#458DC7] hover:bg-[#FFF] bg-[#FFF] py-2 px-4 rounded-[8px]'>
-                           <ViewIcon color='#458DC7' width={24} height={24}/>
-						   {__(	'View','quillcrm')}
-						</Button>
-					</div>
-					
-				</div> */}
 				<SaleRepHeader
 	name={rep.name}
 	lastActivity={rep.lastActivity}

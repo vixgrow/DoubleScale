@@ -13,8 +13,6 @@ import MeetingDealIcon from '@quillcrm/components/icons/meeting-deal';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@quillcrm/components/ui/dropdown-menu';
 import { PlusIcon } from '@quillcrm/components';
 import TrashIcon from '@quillcrm/components/icons/trash';
-import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
-import { EditDealModal } from '../edit-deal-modal';
 import { DeleteDeal } from '../deal-delete';
 import { useDealOperations } from '../../hooks/use-deal-operations';
 
@@ -25,9 +23,10 @@ interface ActivityActionsProps {
   onRefresh?: () => void; 
   onDeleted?: () => void; 
   deal?: any;
+  onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
 }
 
-const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,dealTitle,dealContactName,deal,onDeleted}) => {
+const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,dealTitle,dealContactName,deal,onDeleted,onNotice}) => {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<any>(null);
   const { getDeal } = useDealOperations();
@@ -69,7 +68,7 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
     <div className="flex flex-wrap gap-3">
       <Button
         variant="outline"
-        className="flex items-center justify-center gap-2 h-10 px-4 border border-[#458DC7] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] font-[Inter] text-[#458DC7] hover:text-[#458DC7]"
+        className="flex items-center justify-center gap-2 h-10 px-4 border border-[#458DC7] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px]  text-[#458DC7] hover:text-[#458DC7]"
         onClick={() => {
             setOpenModal('note')
         }
@@ -81,7 +80,7 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
 
       <Button
         variant="outline"
-         className="flex items-center justify-center gap-2 h-10 px-4 border border-[#660FF1] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] font-[Inter] text-[#660FF1] hover:text-[#660FF1]"
+         className="flex items-center justify-center gap-2 h-10 px-4 border border-[#660FF1] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px]  text-[#660FF1] hover:text-[#660FF1]"
         onClick={() => setOpenModal('call')}
       >
         <CallLogIcon  height={20} width={20} />
@@ -90,7 +89,7 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
 
       <Button
         variant="outline"
-        className="flex items-center justify-center gap-2 h-10 px-4 border border-[#16A34A] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] font-[Inter] text-[#16A34A] hover:text-[#16A34A]"
+        className="flex items-center justify-center gap-2 h-10 px-4 border border-[#16A34A] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] text-[#16A34A] hover:text-[#16A34A]"
         onClick={() => setOpenModal('email')}
       >
         <EmailLogIcon height={20} width={20}/>
@@ -99,7 +98,7 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
 
       <Button
         variant="outline"
-         className="flex items-center justify-center gap-2 h-10 px-4 border border-[#CB5301] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] font-[Inter] text-[#CB5301] hover:text-[#CB5301]"
+         className="flex items-center justify-center gap-2 h-10 px-4 border border-[#CB5301] rounded-[8px] bg-[#FFF] !shadow-none font-medium text-base leading-[26px] text-[#CB5301] hover:text-[#CB5301]"
         onClick={() => setOpenModal('meeting')}
       >
         <MeetingDealIcon height={20} width={20} />
@@ -123,13 +122,6 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
     style={{ boxShadow: '3px 3px 4px 0 rgba(0, 0, 0, 0.25)' }}
     className="p-4 flex flex-col gap-[10px] rounded-[10px] border border-[#F5F5F5] z-[100000]"
   >
-    <DropdownMenuItem
-      onClick={() => handleOpenModal('edit', deal)}
-      className="flex items-center gap-2 text-[#374151] font-medium text-sm leading-[16px]"
-    >
-      <EditHeaderIcon />
-      {__('Edit Deal', 'quillcrm')}
-    </DropdownMenuItem>
 
     <DropdownMenuItem
       onClick={() => setOpenModal('delete')}
@@ -148,7 +140,10 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
   onClose={handleClose}
   dealId={dealId}
   dealTitle={dealTitle}
-  onSuccess={onRefresh || (() => {})}
+  onSuccess={(notice) => {
+    onRefresh?.();
+    if (notice) onNotice?.(notice);
+  }}
 />
 
 <LogCallModal
@@ -156,7 +151,10 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
   onClose={handleClose}
   dealId={dealId}
   dealTitle={dealTitle}
-  onSuccess={onRefresh || (() => {})}
+  onSuccess={(notice) => {
+    onRefresh?.();
+    if (notice) onNotice?.(notice);
+  }}
   dealContactName={dealContactName}
 />
 
@@ -165,7 +163,10 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
   onClose={handleClose}
   dealId={dealId}
   dealTitle={dealTitle}
-  onSuccess={onRefresh || (() => {})}
+  onSuccess={(notice) => {
+    onRefresh?.();
+    if (notice) onNotice?.(notice);
+  }}
 />
 
 <ScheduleMeetingModal
@@ -173,31 +174,23 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
   onClose={handleClose}
   dealId={dealId}
   dealTitle={dealTitle}
-  onSuccess={onRefresh || (() => {})}
+  // onSuccess={onRefresh || (() => {})}
+  onSuccess={(notice) => {
+    onRefresh?.();
+    if (notice) onNotice?.(notice);
+  }}
 />
-{/* <EditDealModal
-  visible={openModal === 'edit'}
-  onClose={handleClose}
-  deal={selectedDeal} 
-  pipelines={[]}
-  onSuccess={onRefresh || (() => {})}
-/> */}
-<EditDealModal
-    visible={openModal === 'edit' && !!selectedDeal} 
-    onClose={handleClose}
-    deal={selectedDeal} 
-    pipelines={[]}
-    onSuccess={onRefresh || (() => {})}
-/>
+
 
 <DeleteDeal
   visible={openModal === 'delete'}
   onClose={handleClose}
   deal={deal} 
-  onConfirm={() => {
+  onConfirm={(notice) => {
     handleClose();
     onRefresh?.();
     onDeleted?.();
+    if (notice) onNotice?.(notice);
   }}
  
   // onConfirm={onRefresh || (() => {})}

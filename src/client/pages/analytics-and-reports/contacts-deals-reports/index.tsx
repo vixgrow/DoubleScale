@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
 import { cn } from '../../../../lib/utils';
 import ReportFilters from '@quillcrm/components/reports/ReportFilters';
-import { ContactsIcon } from '@quillcrm/components';
+import { ContactsIcon, PageHeader, PageTabs } from '@quillcrm/components';
 import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import TriangleUpIcon from '@quillcrm/components/icons/triangleUp';
@@ -18,6 +18,7 @@ import CloseIcon from '@quillcrm/components/icons/close';
 import CloseLostIcon from '@quillcrm/components/icons/close-lost';
 import TrendingUpIcon from '@quillcrm/components/icons/trendingUp';
 import TrendingDownIcon from '@quillcrm/components/icons/trendingDown';
+import DealSourceAnalytics from '../deal-source';
 
 interface ContactsDealsReportsProps {
 	contacts_created: number;
@@ -217,10 +218,10 @@ const ContactsDealsReports: React.FC = () => {
 						</div>
 					)}
 					<div className="flex flex-col">
-						<span className="text-2xl font-semibold font-[Inter] leading-normal  tracking-[-1px] text-[#09090B]">
+						<span className="text-2xl font-semibold  leading-normal  tracking-[-1px] text-[#09090B]">
 							{typeof item.value === 'string' ? item.value : item.value.toLocaleString()}
 						</span>
-						<span className="text-base text-[#777] font-medium font-[Inter] leading-6 tracking-[-.5px]  mt-2">
+						<span className="text-base text-[#777] font-medium leading-6 tracking-[-.5px]  mt-2">
 							{item.title}
 						</span>
 					</div>
@@ -304,6 +305,10 @@ const ContactsDealsReports: React.FC = () => {
 	};
 
 	return (
+		<>
+		<PageHeader title={__('Deals Analytics', 'quillcrm')}
+		subtitle={__('Deals Analytics', 'quillcrm')}
+		actions={[]}/>
 		<div className="space-y-6  ">
 			<ReportFilters
 				key={`filters-${JSON.stringify(filters)}`}
@@ -366,6 +371,7 @@ const ContactsDealsReports: React.FC = () => {
 				</div>
 			)}
 		</div>
+		</>
 	);
 };
 

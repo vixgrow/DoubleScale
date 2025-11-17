@@ -493,7 +493,7 @@ const InfoCard: React.FC = () => {
 
                             return (
                                 <Card key={group.id} className="shadow-none">
-                                    <CardHeader className="px-4 py-2 border-b bg-[#F8F8F8] rounded-t-xl">
+                                    <CardHeader className={`px-4 py-2 ${!isCollapsed ? 'border-b rounded-t-xl' : 'rounded-xl'} bg-[#F8F8F8]`}>
                                         <CardTitle className="flex items-center justify-between font-medium text-lg">
                                             <div className="flex items-center gap-2">
                                                 <OutlinedCustomFieldsIcon width={20} height={20} />
@@ -559,12 +559,12 @@ const InfoCard: React.FC = () => {
                                                                     customField.id
                                                                 }
                                                                 className={`flex flex-col gap-1 py-4 ${index !==
-                                                                        group
-                                                                            .custom_fields
-                                                                            .length -
-                                                                        1
-                                                                        ? 'border-b'
-                                                                        : ''
+                                                                    group
+                                                                        .custom_fields
+                                                                        .length -
+                                                                    1
+                                                                    ? 'border-b'
+                                                                    : ''
                                                                     }`}
                                                             >
                                                                 <div className="flex items-center justify-between">
@@ -689,8 +689,8 @@ const InfoCard: React.FC = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`relative p-0 bg-transparent shadow-none hover:bg-transparent pb-4 transition-colors ${activeTab === tab.id
-                                    ? 'text-secondary font-semibold'
-                                    : 'text-[#1E2125] font-medium'
+                                ? 'text-secondary font-semibold'
+                                : 'text-[#1E2125] font-medium'
                                 }`}
                         >
                             {tab.label}

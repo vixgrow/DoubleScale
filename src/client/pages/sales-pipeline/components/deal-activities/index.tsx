@@ -23,9 +23,10 @@ import { useEffect, useState } from 'react';
 
 interface Deal_ActivitesProps {
 	dealId?: number;
+	onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
 }
 
-const Deal_Activites: React.FC<Deal_ActivitesProps> = ({ dealId }) => {
+const Deal_Activites: React.FC<Deal_ActivitesProps> = ({ dealId ,onNotice}) => {
 
 	const [activityCounts, setActivityCounts] = useState({
 		activity: 0,

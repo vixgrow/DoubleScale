@@ -9,10 +9,8 @@ import {
 	SelectValue,
 } from '../../../../components/ui/select';
 
-import { InfoCircleOutlined } from '@ant-design/icons';
 import { __ } from '@wordpress/i18n';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
-import ReportFilters from '../../../../components/reports/ReportFilters';
 import '../../../lib/chart-setup';
 import { Chart } from 'react-chartjs-2';
 import {
@@ -59,13 +57,7 @@ const DealsReportsByDate: React.FC = () => {
 
 	// Use the custom hook for filters
 	const {
-		filters,
-		setFilters,
-		filterOptions,
-		showFilters,
-		setShowFilters,
 		buildQueryParams,
-		clearFilters,
 	} = useReportFilters();
 
 	const fetchDealsReportsByDate = useCallback(
@@ -104,7 +96,7 @@ const DealsReportsByDate: React.FC = () => {
 	// Format date for display based on frequency
 	const formatDate = (dateStr: string, freq: string = frequency) => {
 		if (freq === 'weekly') {
-			// Handle format like "2025-W37"
+			
 			const match = dateStr.match(/(\d{4})-W(\d{1,2})/);
 			if (match) {
 				const year = parseInt(match[1]);
@@ -135,7 +127,7 @@ const DealsReportsByDate: React.FC = () => {
 			}
 		}
 
-		// Fallback - return the original string if parsing fails
+		
 		return dateStr;
 	};
 
@@ -258,30 +250,12 @@ const DealsReportsByDate: React.FC = () => {
 
 	return (
 		<div className="space-y-6">
-			{/* Filters Section */}
-			{/* <ReportFilters
-				key={`filters-${JSON.stringify(filters)}`}
-				title={__('Deal Reports by Date - Filters', 'quillcrm')}
-				filters={filters}
-				setFilters={setFilters}
-				filterOptions={filterOptions}
-				showFilters={showFilters}
-				setShowFilters={setShowFilters}
-				clearFilters={clearFilters}
-				applyFilters={applyFilters}
-				showPredefinedDateRange={false}
-				showDateRange={false}
-				showOwner={true}
-				showPipeline={true}
-				showStatus={true}
-				showContact={true}
-			/> */}
 
 			<Card className='border border-[#DEE1E6] bg-[#F8F8F8] rounded-[16px] p-5'>
 				<CardContent className="p-6">
 					<div className="mb-6">
 						<div className="flex justify-between items-start mb-6">
-							<h3 className="text-2xl font-medium font-[Inter] leading-normal tracking-[-1px] text-[#09090B] mb-4">
+							<h3 className="text-2xl font-medium  leading-normal tracking-[-1px] text-[#09090B] mb-4">
 								{__(
 									'Deal totals by create date with status breakdown',
 									'quillcrm'
@@ -295,7 +269,7 @@ const DealsReportsByDate: React.FC = () => {
 											setDaysBack(parseInt(value))
 										}
 									>
-										<SelectTrigger className=" h-12 py-[5px] px-4 text-[#09090B] font-normal leading-[150%] track-[-.32px] text- font-[Manrope] border border-[#DEE1E6] bg-[#FFF] rounded-[8px]">
+										<SelectTrigger className=" h-12 py-[5px] px-4 text-[#09090B] font-normal leading-[150%] track-[-.32px] border border-[#DEE1E6] bg-[#FFF] rounded-[8px]">
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
@@ -322,7 +296,7 @@ const DealsReportsByDate: React.FC = () => {
 										value={frequency}
 										onValueChange={setFrequency}
 									>
-										<SelectTrigger className=" h-12 py-[5px] px-4 text-[#09090B] font-normal leading-[150%] track-[-.32px] text- font-[Manrope] border border-[#DEE1E6] bg-[#FFF] rounded-[8px]">
+										<SelectTrigger className=" h-12 py-[5px] px-4 text-[#09090B] font-normal leading-[150%] track-[-.32px] border border-[#DEE1E6] bg-[#FFF] rounded-[8px]">
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>

@@ -19,6 +19,7 @@ import { useDispatch } from '@wordpress/data';
 interface ActivityCommentsProps {
   activityId: number;
   initialComments?: any[];
+  onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
 }
 
 interface Comment {
@@ -37,6 +38,7 @@ interface Comment {
 export const ActivityComments: React.FC<ActivityCommentsProps> = ({
   activityId,
   initialComments = [],
+  onNotice
 }) => {
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
@@ -70,19 +72,16 @@ export const ActivityComments: React.FC<ActivityCommentsProps> = ({
       const response = await addComment(activityId, newComment.trim());
       setComments((prev) => [...prev, response]);
       setNewComment('');
-	  createNotice?.({
+	  onNotice?.({
 		type: 'success',
-		message: __(
-			`Comment Added successfully!`,
-			'quillcrm'
-		),
-	});
+		message: __('Comment Added successfully!', 'quillcrm'),
+	  });
     } catch (error) {
-	  const err = error as Error;
-	  createNotice?.({
-		type: 'error',
-		message: err.message || __('Failed to add comment', 'quillcrm'),
-	  })
+		const err = error as Error;
+		onNotice?.({
+			type: 'error',
+			message: err.message || __('Failed to add comment', 'quillcrm'),
+		  });
     } finally {
       setAddingComment(false);
     }
@@ -106,21 +105,17 @@ export const ActivityComments: React.FC<ActivityCommentsProps> = ({
       await deleteComment(commentId);
       setComments((prev) => prev.filter((c) => c.id !== commentId));
       if (editingCommentId === commentId) cancelEditing();
-	  createNotice?.({
+	  onNotice?.({
 		type: 'success',
-		message: __(
-			`Comment deleted successfully!`,
-			'quillcrm'
-		),
-		
-	});
+		message: __('Comment deleted successfully!', 'quillcrm'),
+	  });
 
     } catch (error) {
-	  const err = error as Error;
-	  createNotice?.({
-		type: 'error',
-		message: err.message || __('Failed to delete comment', 'quillcrm'),
-	  })
+		const err = error as Error;
+		onNotice?.({
+			type: 'error',
+			message: err.message || __('Failed to delete comment', 'quillcrm'),
+		  });
     }
   };
 
@@ -142,19 +137,16 @@ export const ActivityComments: React.FC<ActivityCommentsProps> = ({
         prev.map((c) => (c.id === commentId ? { ...c, ...response } : c))
       );
       cancelEditing();
-	  createNotice?.({
+	  onNotice?.({
 		type: 'success',
-		message: __(
-			`Comment edited successfully!`,
-			'quillcrm'
-		),
-	});
+		message: __('Comment edited successfully!', 'quillcrm'),
+	  });
     } catch (error) {
-	  const err = error as Error;
-	  createNotice?.({
-		type: 'error',
-		message: err.message || __('Failed to edit comment', 'quillcrm'),
-	  })
+		const err = error as Error;
+		onNotice?.({
+			type: 'error',
+			message: err.message || __('Failed to edit comment', 'quillcrm'),
+		  });
     }
   };
 

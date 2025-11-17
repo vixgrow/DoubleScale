@@ -63,7 +63,7 @@ class Send_SMS extends Abstract_Send_Message {
 	 * @return string
 	 */
 	protected function get_channel_type() {
-		return \QuillCRM\Constants\Campaign_Channel::CHANNEL_SMS;
+		return \QuillCRM\Constants\Campaign_Channel::STR_SMS;
 	}
 
 	/**

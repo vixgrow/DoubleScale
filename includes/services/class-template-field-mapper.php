@@ -23,12 +23,12 @@ class Template_Field_Mapper
     /**
      * Get field configuration for a campaign type
      *
-     * @param string|int $campaign_type Campaign type (email, sms, whatsapp) or integer constant
+     * @param string $campaign_type Campaign type string ('email', 'sms', 'whatsapp'). Integer constants accepted for backward compatibility.
      * @return array Field configuration
      */
     public static function get_field_config($campaign_type)
     {
-        // Convert string to integer constant if needed
+        // Convert string to integer for internal array lookup
         if (is_string($campaign_type)) {
             $campaign_type = Campaign_Channel::to_integer($campaign_type);
         }

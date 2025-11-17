@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState,useRef } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -35,14 +35,15 @@ import {
  */
 import { useActivityOperations } from '../../hooks/use-activity-operations';
 import './style.scss';
-import { CustomDialogHeader } from '@quillcrm/components';
+import { CustomDialogHeader, NoticeBanner } from '@quillcrm/components';
 import NoteAddIcon from '@quillcrm/components/icons/note-add';
 import { useDispatch } from '@wordpress/data';
+import { NoticeMessage } from '@/client/types';
 
 interface AddNoteModalProps {
 	visible: boolean;
 	onClose: () => void;
-	onSuccess: () => void;
+	onSuccess: ( notice?: { type: 'success' | 'error'; message: string }) => void;
 	dealId: number;
 	dealTitle?: string;
 	editMode?: boolean;
@@ -72,9 +73,9 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 	activity,
 }) => {
 	const [loading, setLoading] = useState(false);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const { addNote, updateActivity } = useActivityOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const form = useForm<NoteFormValues>({
 		resolver: zodResolver(noteSchema),
@@ -100,25 +101,30 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 		try {
 			if (editMode && activity) {
 				await updateActivity(activity.id, 'note_added', values.note);
-				createNotice?.({
+				setNotice({
 					type: 'success',
 					message: __('Note updated successfully!', 'quillcrm'),
 				});
 			} else {
 				await addNote(dealId, values.note);
-				createNotice?.({
+				setNotice({
 					type: 'success',
-					message: __('Note added successfully!', 'quillcrm'),
+					message: __('Note logged successfully!', 'quillcrm'),
 				});
 			}
 			form.reset();
-			onSuccess();
+			onSuccess({
+				type: 'success',
+				message: editMode 
+				  ? __('Note updated successfully!', 'quillcrm')
+				  : __('Note logged successfully!', 'quillcrm'),
+			  });
 			onClose();
 		} catch (error) {
 			const err = error as Error;
-			createNotice?.({
+			setNotice({
 				type: 'error',
-				message: err.message || __(editMode ? 'Failed to update note' : 'Failed to add note', 'quillcrm'),
+				message: err.message || __(editMode ? 'Failed to update note' : 'Failed to logged note', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);
@@ -129,6 +135,16 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 		form.reset();
 		onClose();
 	};
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	return (
 		<Dialog
@@ -146,6 +162,8 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({
 							icon={<NoteAddIcon />}
 						/>
 					</DialogTitle>
+					{notice && (
+				   <NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />)}
 				</DialogHeader>
 				<Form {...form}>
 					<form

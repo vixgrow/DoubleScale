@@ -6,6 +6,8 @@ import { __ } from '@wordpress/i18n';
 import SalesRepCard, { SalesRepCardProps } from '../components/card-sales-rep';
 import SalesRepModal from '../components/modal-sales-rep';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader } from '@quillcrm/components';
+import SalesRepCardSkeleton from './sales-repCard-Skeleton';
 
 const SalesRep = () => {
 	const [loadingUsers, setLoadingUsers] = useState(false);
@@ -43,14 +45,16 @@ const SalesRep = () => {
 	}, []);
 
 	if (loadingUsers) {
-		return <Skeleton className="h-40 w-full" />;
+		return <SalesRepCardSkeleton count={6} />
 	}
 
 	return (
-		<div className="p-6">
-			<h1 className="text-3xl font-semibold text-[#09090B] leading-[30px] mb-6">
-				{__('Sales Representatives Analytics', 'quillcrm')}
-			</h1>
+		<>
+			<PageHeader
+				title={__('Sales Representatives Analytics', 'quillcrm')}
+				subtitle={__('Sales Representatives Analytics', 'quillcrm')}
+				actions={[]}
+			/>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{Object.entries(salesRep).map(([key, rep]) => (
 					<SalesRepCard
@@ -67,7 +71,7 @@ const SalesRep = () => {
 				onClose={handleCloseModal}
 				ownerId={selectedOwnerId}
 			/>
-		</div>
+		</>
 	);
 };
 

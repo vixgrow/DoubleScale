@@ -1,8 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Skeleton } from '../../../../components/ui/skeleton';
 import { __ } from '@wordpress/i18n';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
-import ReportFilters from '../../../../components/reports/ReportFilters';
 import apiFetch from '@wordpress/api-fetch';
 import '../../../lib/chart-setup';
 import { Chart } from 'react-chartjs-2';

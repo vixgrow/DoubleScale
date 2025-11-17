@@ -42,10 +42,19 @@ const EmailDetails: React.FC<EmailDetailsProps> = ({
 		return [
 			{
 				label: __('Subject', 'quillcrm'),
-				value:
-					campaignEmail.template?.subject ||
-					campaignEmail.message?.subject ||
-					__('No Subject', 'quillcrm'),
+				value: (() => {
+					// Try template subject first (for campaign emails)
+					const templateSubject = campaignEmail.template?.subject;
+					// Then try message subject (for individual emails)
+					const messageSubject = campaignEmail.message?.subject;
+					
+					// Return the first non-empty value
+					return (
+						(templateSubject && templateSubject.trim()) ||
+						(messageSubject && messageSubject.trim()) ||
+						__('No Subject', 'quillcrm')
+					);
+				})(),
 			},
 			{
 				label: __('Sent On', 'quillcrm'),

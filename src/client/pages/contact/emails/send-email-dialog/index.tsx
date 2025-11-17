@@ -28,6 +28,7 @@ import {
 } from '@quillcrm/components';
 import { Button } from '@quillcrm/components/ui/button';
 import { Label } from '@quillcrm/components/ui/label';
+import { useSendMessage } from '@quillcrm/hooks/use-send-message';
 
 interface SendEmailDialogProps {
 	open: boolean;
@@ -43,13 +44,32 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 	const [toEmail, setToEmail] = useState(contact?.email || '');
 	const [subject, setSubject] = useState('');
 	const [body, setBody] = useState('');
-	const [isSending, setIsSending] = useState(false);
 
-	const sendEmail = () => {
-		setIsSending(true);
-		console.log({ toEmail, subject, body, contact });
-		// TODO: Implement actual email sending logic
-		setIsSending(false);
+	// Use the send message hook
+	const { isSending, sendMessage, validationError } = useSendMessage({
+		contact,
+		channel: 'email',
+		onSuccess: () => {
+			// Reset form and close dialog on success
+			setSubject('');
+			setBody('');
+			onClose();
+		},
+	});
+
+	// Update toEmail when contact changes
+	useEffect(() => {
+		if (contact?.email) {
+			setToEmail(contact.email);
+		}
+	}, [contact]);
+
+	const handleSendEmail = async () => {
+		await sendMessage({
+			to: toEmail,
+			subject: subject,
+			body: body,
+		});
 	};
 
 	const isInteractableElement = (target: HTMLElement) => {
@@ -144,6 +164,11 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 						</DialogTitle>
 					</DialogHeader>
 					<div className="flex flex-col gap-4">
+						{validationError && (
+							<div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md text-sm">
+								{validationError}
+							</div>
+						)}
 						<Field
 							label={__('To', 'quillcrm')}
 							placeholder={__('Enter To Email', 'quillcrm')}
@@ -170,19 +195,19 @@ const SendEmailDialog: React.FC<SendEmailDialogProps> = ({
 							</div>
 						</div>
 					</div>
-					<DialogFooter className="mt-4">
-						<Button
-							onClick={sendEmail}
-							disabled={isSending}
-							size="xl"
-							variant="gradient"
-							className="w-full"
-						>
-							{isSending
-								? __('Sending...', 'quillcrm')
-								: __('Send Email', 'quillcrm')}
-						</Button>
-					</DialogFooter>
+				<DialogFooter className="mt-4">
+					<Button
+						onClick={handleSendEmail}
+						disabled={isSending}
+						size="xl"
+						variant="gradient"
+						className="w-full"
+					>
+						{isSending
+							? __('Sending...', 'quillcrm')
+							: __('Send Email', 'quillcrm')}
+					</Button>
+				</DialogFooter>
 				</DialogContent>
 			</DialogPortal>
 		</Dialog>

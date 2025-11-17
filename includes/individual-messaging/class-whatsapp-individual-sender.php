@@ -34,7 +34,7 @@ class WhatsApp_Individual_Sender extends Abstract_Individual_Message_Sender {
 	 * @return string Channel type
 	 */
 	protected function get_channel_type() {
-		return Campaign_Channel::CHANNEL_WHATSAPP;
+		return Campaign_Channel::STR_WHATSAPP;
 	}
 
 	/**

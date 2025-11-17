@@ -16,7 +16,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -31,6 +31,13 @@ import {
 import ListsTagsCards from './lists-tags';
 import InfoCard from './info-card';
 import { UserRound, Mail } from 'lucide-react';
+
+// Helper function to generate contact initials
+const getContactInitials = (firstName?: string, lastName?: string): string => {
+	const first = firstName?.trim().charAt(0).toUpperCase() || '';
+	const last = lastName?.trim().charAt(0).toUpperCase() || '';
+	return first + last || '?';
+};
 
 const ContactInformation: React.FC = () => {
 	const { contact, setContact, updateContact, emailAnalytics, showNotice } =
@@ -94,6 +101,9 @@ const ContactInformation: React.FC = () => {
 		`${contact.first_name || ''} ${contact.last_name || ''}`.trim() ||
 		contact.email;
 
+	const initials = getContactInitials(contact.first_name, contact.last_name);
+	const avatarUrl = (contact as any).avatar_url;
+
 	// Calculate email analytics
 	const totalEmails = emailAnalytics?.total_sent || 0;
 	const totalOpened = emailAnalytics?.total_opened || 0;
@@ -123,8 +133,15 @@ const ContactInformation: React.FC = () => {
 			<CardHeader>
 				<div className="flex items-center gap-4 border-b pb-4">
 					<Avatar className="w-28 h-28 border">
-						<AvatarFallback className="bg-transparent">
-							<UserRound className="w-12 h-12" />
+						{avatarUrl ? (
+							<AvatarImage
+								src={avatarUrl}
+								alt={fullName}
+								className="rounded-full"
+							/>
+						) : null}
+						<AvatarFallback className="bg-[#E3EEFF99] text-secondary font-bold text-2xl">
+							{initials || <UserRound className="w-12 h-12" />}
 						</AvatarFallback>
 					</Avatar>
 					<div className="w-full">

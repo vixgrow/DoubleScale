@@ -38,7 +38,8 @@ const EmailAnalytics: React.FC = () => {
 		setLoading(true);
 		try {
 			const response = (await apiFetch({
-				path: addQueryArgs('/qc/v1/email-campaigns/analytics', {
+				path: addQueryArgs('/qc/v1/campaigns/analytics', {
+					channel: 'email',
 					interval,
 					start_date: dayjs(startDate).format('YYYY-MM-DD'),
 					end_date: dayjs(endDate).format('YYYY-MM-DD'),
@@ -93,7 +94,7 @@ const EmailAnalytics: React.FC = () => {
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
-							{data.opened || 0}
+							{data.total_opened || 0}
 						</Typography.Text>
 					</Flex>
 				</Card>
@@ -108,7 +109,7 @@ const EmailAnalytics: React.FC = () => {
 							</Typography.Text>
 						</Flex>
 						<Typography.Text className="qcrm-dashboard-card-value">
-							{data.clicked || 0}
+							{data.total_clicked || 0}
 						</Typography.Text>
 					</Flex>
 				</Card>

@@ -2,19 +2,11 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
-
-/**
- * External dependencies
- */
 
 /**
  * Internal dependencies
  */
-import {
-	NoticeBanner,
-} from '@quillcrm/components';
-import { KanbanBoard } from './components/kanban-board';
+import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import { PipelineSettingsModal } from './components/pipeline-settings-modal';
 // import { NewDealModal } from './components/new-deal-modal';
 import { DealDetailModal } from './components/deal-detail-modal';
@@ -39,6 +31,21 @@ import { PipelineFilters } from './components/pipeline-filters';
 import { NewDealModal } from './components/new-deal-modal';
 
 const SalesPipeline: React.FC = () => {
+	return (
+		<ProFeatureNotice
+			featureName={__('Sales Pipeline', 'quillcrm')}
+			description={__(
+				'Manage your sales process with visual pipeline boards, track deals through stages, and close more sales with our powerful CRM features.',
+				'quillcrm'
+			)}
+		/>
+	);
+};
+
+export default SalesPipeline;
+
+/* Original implementation moved to Pro plugin
+const SalesPipelineOld: React.FC = () => {
 	const [selectedPipelineId, setSelectedPipelineId] = useState<number | null>(
 		null
 	);
@@ -433,6 +440,5 @@ const SalesPipeline: React.FC = () => {
 		</div>
 	);
 };
-
-export default SalesPipeline;
+*/
 

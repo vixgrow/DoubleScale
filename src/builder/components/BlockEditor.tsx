@@ -13,7 +13,7 @@ import { X } from 'lucide-react';
  */
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
-import { blocksRegistry } from '../blocks/BlockRegister';
+import { useRegisteredBlocks } from '../../stores/blocks-registry';
 import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import {
 	GlobalEmailSettingsIcon,
@@ -29,6 +29,7 @@ type ViewState = 'main' | 'background' | 'button' | 'layout';
 const BlockEditor: React.FC = () => {
 	const dispatch = useDispatch();
 	const [currentView, setCurrentView] = useState<ViewState>('main');
+	const blocksRegistry = useRegisteredBlocks();
 
 	const selectedBlock = useSelect(
 		(select) => select(STORE_KEY).getSelectedBlock(),
@@ -63,21 +64,26 @@ const BlockEditor: React.FC = () => {
 	const isSectionSelected = !!selectedSectionId;
 
 	// Get block definition with fallback to UnknownBlock
-	const { block: blockDefinition, isUnknown, info } = selectedBlock
+	const {
+		block: blockDefinition,
+		isUnknown,
+		info,
+	} = selectedBlock
 		? getBlockDefinition(
-			selectedBlock.type,
-			blocksRegistry,
-			blocksRegistry.unknown
-		)
+				selectedBlock.type,
+				blocksRegistry,
+				blocksRegistry.unknown
+			)
 		: { block: null, isUnknown: false, info: undefined };
 
 	// Prepare props for the editor
-	const editorProps = isUnknown && info
-		? {
-			originalType: info.originalType,
-			originalProps: selectedBlock?.props || {},
-		}
-		: selectedBlock?.props;
+	const editorProps =
+		isUnknown && info
+			? {
+					originalType: info.originalType,
+					originalProps: selectedBlock?.props || {},
+				}
+			: selectedBlock?.props;
 
 	// Handle back navigation from settings
 	const handleBackFromSettings = () => {

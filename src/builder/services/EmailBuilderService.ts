@@ -10,7 +10,7 @@ import {
   generateColumnId,
   generateSectionId,
 } from '@/builder/utils/idGenerator';
-import { blocksRegistry } from '../blocks/BlockRegister';
+import { getRegisteredBlocks } from '../../stores/blocks-registry';
 import type {
   BlockType,
   EmailBlock,
@@ -52,7 +52,7 @@ export class EmailBuilderService {
    * Creates a new block from a block type
    */
   static createBlock(blockType: BlockType): EmailBlock {
-    const blockDef = blocksRegistry[blockType];
+    const blockDef = getRegisteredBlocks()[blockType];
 
     if (!blockDef) {
       throw new Error(`Unknown block type: ${blockType}`);
@@ -154,7 +154,7 @@ export class EmailBuilderService {
       errors.push('Block must have a type');
     }
 
-    if (!blocksRegistry[block.type]) {
+    if (!getBlocksRegistry()[block.type]) {
       errors.push(`Unknown block type: ${block.type}`);
     }
 

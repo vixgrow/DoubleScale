@@ -29,7 +29,7 @@ const TemplateCard = ({
 	};
 
 	const baseClasses =
-		'relative w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground px-4 gap-3 transition-colors text-center';
+		'relative w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-3 transition-colors text-center';
 	const interactiveClasses =
 		item.isPro && !item.isProActivated
 			? 'cursor-not-allowed opacity-70'

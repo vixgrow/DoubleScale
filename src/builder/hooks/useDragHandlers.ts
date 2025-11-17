@@ -1,8 +1,8 @@
 import { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from 'react';
+import { getRegisteredBlocks } from '../../stores/blocks-registry';
 import { STORE_KEY } from '../../stores/email-builder/constants';
-import { blocksRegistry } from '../blocks/BlockRegister';
 import { TemplateConfig, TemplateType } from '../types/common';
 import {
   handleTemplateDropOnCanvas,
@@ -241,7 +241,7 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
           return;
         }
 
-        const blockDef = blocksRegistry[blockType];
+        const blockDef = getRegisteredBlocks()[blockType];
         if (blockDef) {
           const newBlockId = generateBlockId();
           dispatch(STORE_KEY).addBlock(sectionId, columnId, {

@@ -27,6 +27,8 @@ use QuillCRM\Managers\Rules_Manager;
  */
 abstract class Form {
 
+
+
 	/**
 	 * Slug
 	 *
@@ -365,11 +367,6 @@ abstract class Form {
 	public function process_automations( $args ) {
 		try {
 			$this->submission = $args;
-
-			// Register dynamic merge tags for form fields before processing automations
-			$this->register_merge_tags_for_form( $args['form_id'], $args['fields'] );
-			// Register field rules for form
-			$this->register_field_rules_for_form( $args['form_id'], $args['fields'] );
 
 			$automations = Automation_Model::get_automations_by_trigger( $this->slug );
 

@@ -400,14 +400,6 @@ registerAdminPage('deals-analytics', {
 	requiredCapability: ['quillcrm_crm_manager'],
 });
 
-registerAdminPage('deals-Source-analytics', {
-	path: 'deals-Source-analytics',
-	component: () => <AnalyticsAndReports defaultTab="deals" />,
-	label: __('Deals Source Analytics', 'quillcrm'),
-	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
-});
-
 registerAdminPage('sales-rep-analytics', {
 	path: 'sales-rep-analytics',
 	component: () => <AnalyticsAndReports defaultTab="sales-rep" />,

@@ -185,7 +185,7 @@ export const DealCard: React.FC<DealCardProps> = ({
 
 						<CardTitle
 							title={deal.title}
-							className="text-lg font-bold leading-6 flex-1"
+							className="text-lg font-bold leading-6 flex-1 truncate max-w-[120px]"
 						>
 							{deal.title}
 						</CardTitle>

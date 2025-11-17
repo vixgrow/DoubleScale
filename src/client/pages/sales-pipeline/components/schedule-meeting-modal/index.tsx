@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import {useState, useEffect ,useRef } from 'react';
 
 /**
  * External dependencies
@@ -29,20 +29,20 @@ import {
 } from '@/components/ui/form';
 import { useActivityOperations } from '../../hooks/use-activity-operations';
 import { useForm } from 'react-hook-form';
-import { CustomDialogHeader } from '@quillcrm/components';
+import { CustomDialogHeader, NoticeBanner } from '@quillcrm/components';
 import { Input } from '@quillcrm/components/ui/input';
 import { Textarea } from '@quillcrm/components/ui/textarea';
 import { Button } from '@quillcrm/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@quillcrm/components/ui/select';
 import { DateTimePicker } from '@quillcrm/components/date-time-picker';
-import { useDispatch } from '@wordpress/data';
 import './style.scss';
 import MeetingDealIcon from '@quillcrm/components/icons/meeting-deal';
+import { NoticeMessage } from '@/client/types';
 
 interface ScheduleMeetingModalProps {
 	visible: boolean;
 	onClose: () => void;
-	onSuccess: () => void;
+	onSuccess: ( notice?: { type: 'success' | 'error'; message: string }) => void;
 	dealId: number;
 	dealTitle?: string;
 	editMode?: boolean;
@@ -68,9 +68,9 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 	activity,
 }) => {
 	const [loading, setLoading] = useState(false);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const { scheduleMeeting, updateActivity } = useActivityOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	const form = useForm<MeetingFormData>({
 		defaultValues: {
@@ -109,29 +109,34 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 		try {
 			const meetingData: MeetingFormData = {
 				...values,
-				scheduled_at: values.scheduled_at, // Preserve as Date to match MeetingFormData type
+				scheduled_at: values.scheduled_at, 
 			};
 
 			if (editMode && activity) {
 				await updateActivity(activity.id, 'meeting_scheduled', meetingData);
-				createNotice?.({
+				setNotice({
 					type: 'success',
 					message: __('Meeting updated successfully!', 'quillcrm'),
 				});
 			} else {
 				await scheduleMeeting(dealId, meetingData);
-				createNotice?.({
+				setNotice({
 					type: 'success',
 					message: __('Meeting scheduled successfully!', 'quillcrm'),
 				});
 			}
 
 			form.reset();
-			onSuccess();
+			onSuccess({
+				type: 'success',
+				message: editMode 
+				  ? __('Meeting updated successfully!', 'quillcrm')
+				  : __('Meeting scheduled successfully!', 'quillcrm'),
+			  });
 			onClose();
 		} catch (error) {
 			const err = error as Error;
-			createNotice?.({
+			setNotice({
 				type: 'error',
 				message: err.message || __(editMode ? 'Failed to update meeting' : 'Failed to schedule meeting', 'quillcrm'),
 			});
@@ -139,7 +144,16 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 			setLoading(false);
 		}
 	};
+    const closeNotice = () => {
+		setNotice(null);
+	};
 
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 	const handleCancel = () => {
 		form.reset();
 		onClose();
@@ -157,7 +171,11 @@ export const ScheduleMeetingModal: React.FC<ScheduleMeetingModalProps> = ({
 							icon={<MeetingDealIcon color='#1E3A8A' />}
 						/>
 					</DialogTitle>
+					{notice && (
+				   <NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />)}
 				</DialogHeader>
+				
+			
 
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col gap-6">

@@ -13,8 +13,6 @@ import MeetingDealIcon from '@quillcrm/components/icons/meeting-deal';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@quillcrm/components/ui/dropdown-menu';
 import { PlusIcon } from '@quillcrm/components';
 import TrashIcon from '@quillcrm/components/icons/trash';
-import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
-import { EditDealModal } from '../edit-deal-modal';
 import { DeleteDeal } from '../deal-delete';
 import { useDealOperations } from '../../hooks/use-deal-operations';
 
@@ -25,9 +23,10 @@ interface ActivityActionsProps {
   onRefresh?: () => void; 
   onDeleted?: () => void; 
   deal?: any;
+  onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
 }
 
-const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,dealTitle,dealContactName,deal,onDeleted}) => {
+const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,dealTitle,dealContactName,deal,onDeleted,onNotice}) => {
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<any>(null);
   const { getDeal } = useDealOperations();
@@ -123,13 +122,6 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
     style={{ boxShadow: '3px 3px 4px 0 rgba(0, 0, 0, 0.25)' }}
     className="p-4 flex flex-col gap-[10px] rounded-[10px] border border-[#F5F5F5] z-[100000]"
   >
-    <DropdownMenuItem
-      onClick={() => handleOpenModal('edit', deal)}
-      className="flex items-center gap-2 text-[#374151] font-medium text-sm leading-[16px]"
-    >
-      <EditHeaderIcon />
-      {__('Edit Deal', 'quillcrm')}
-    </DropdownMenuItem>
 
     <DropdownMenuItem
       onClick={() => setOpenModal('delete')}
@@ -148,7 +140,10 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
   onClose={handleClose}
   dealId={dealId}
   dealTitle={dealTitle}
-  onSuccess={onRefresh || (() => {})}
+  onSuccess={(notice) => {
+    onRefresh?.();
+    if (notice) onNotice?.(notice);
+  }}
 />
 
 <LogCallModal
@@ -156,7 +151,10 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
   onClose={handleClose}
   dealId={dealId}
   dealTitle={dealTitle}
-  onSuccess={onRefresh || (() => {})}
+  onSuccess={(notice) => {
+    onRefresh?.();
+    if (notice) onNotice?.(notice);
+  }}
   dealContactName={dealContactName}
 />
 
@@ -165,7 +163,10 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
   onClose={handleClose}
   dealId={dealId}
   dealTitle={dealTitle}
-  onSuccess={onRefresh || (() => {})}
+  onSuccess={(notice) => {
+    onRefresh?.();
+    if (notice) onNotice?.(notice);
+  }}
 />
 
 <ScheduleMeetingModal
@@ -173,31 +174,23 @@ const ActivityActions: React.FC<ActivityActionsProps> = ({ dealId, onRefresh ,de
   onClose={handleClose}
   dealId={dealId}
   dealTitle={dealTitle}
-  onSuccess={onRefresh || (() => {})}
+  // onSuccess={onRefresh || (() => {})}
+  onSuccess={(notice) => {
+    onRefresh?.();
+    if (notice) onNotice?.(notice);
+  }}
 />
-{/* <EditDealModal
-  visible={openModal === 'edit'}
-  onClose={handleClose}
-  deal={selectedDeal} 
-  pipelines={[]}
-  onSuccess={onRefresh || (() => {})}
-/> */}
-<EditDealModal
-    visible={openModal === 'edit' && !!selectedDeal} 
-    onClose={handleClose}
-    deal={selectedDeal} 
-    pipelines={[]}
-    onSuccess={onRefresh || (() => {})}
-/>
+
 
 <DeleteDeal
   visible={openModal === 'delete'}
   onClose={handleClose}
   deal={deal} 
-  onConfirm={() => {
+  onConfirm={(notice) => {
     handleClose();
     onRefresh?.();
     onDeleted?.();
+    if (notice) onNotice?.(notice);
   }}
  
   // onConfirm={onRefresh || (() => {})}

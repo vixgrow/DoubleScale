@@ -5,13 +5,6 @@ import {
 	DialogHeader,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import {
-	Select,
-	SelectTrigger,
-	SelectContent,
-	SelectItem,
-	SelectValue,
-} from '@/components/ui/select';
 import { useState } from 'react';
 import TrashIcon from '@quillcrm/components/icons/trash';
 import {
@@ -20,14 +13,12 @@ import {
 } from '@quillcrm/components/ui/alert';
 import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import AlertDeleteIcon from '@quillcrm/components/icons/alert-delete';
 import { useDealOperations } from '../../hooks/use-deal-operations';
 
 export const DeleteDeal = ({
   visible,
 	onClose,
-
     deal,
 	onConfirm,
 }) => {
@@ -42,27 +33,24 @@ export const DeleteDeal = ({
         setLoading(true);
         try {
           await deleteDeal(deal.id);
-          createNotice?.({
+          onConfirm?.({
             type: 'success',
             message: __(
               `Deal "${deal.title}" deleted successfully!`,
               'quillcrm'
             ),
           });
-          onConfirm?.();
           onClose();
         } catch (error) {
-          createNotice?.({
-            type: 'error',
-            message: __(`Failed to delete deal`, 'quillcrm'),
+            onConfirm?.({
+              type: 'error',
+               message: __(`Failed to delete deal`, 'quillcrm'),
+              
           });
         } finally {
           setLoading(false);
         }
       };
-      
-  
-
 	return (
 		<Dialog
 			open={visible}

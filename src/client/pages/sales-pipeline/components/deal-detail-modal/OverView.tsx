@@ -4,12 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect, useMemo, useCallback } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-
-/**
- * External dependencies
- */
-import { message } from 'antd';
-
 /**
  * Internal dependencies
  */
@@ -20,7 +14,6 @@ import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import { formatCurrency, getCurrencySymbol } from '../../utils/currency';
-import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
 import {
 	Select,
 	SelectContent,
@@ -39,6 +32,7 @@ interface DealOverViewModalProps {
 	dealId: number | null;
 	onUpdate?: () => void;
 	onEdit?: (deal: Deal) => void;
+	onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
 }
 
 interface Contact {
@@ -52,6 +46,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 	dealId,
 	onUpdate,
 	onEdit,
+	onNotice
 }) => {
 	const [deal, setDeal] = useState<Deal | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -79,20 +74,17 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 
 			// Update local state optimistically
 			setDeal({ ...deal, [field]: value });
-			createNotice?.({
+			onNotice?.({
 				type: 'success',
-				message: __(`Updated successfully`, 'quillcrm'),
-			});
+				message: __('Updated successfully', 'quillcrm'),
+			  });
 			// Notify parent to refresh (this will fetch fresh data)
 			if (onUpdate) onUpdate();
 		} catch (error) {
-			createNotice?.({
+			onNotice?.({
 				type: 'error',
-				message:
-					error instanceof Error
-						? error.message
-						: __('Failed to update', 'quillcrm'),
-			});
+				message: error instanceof Error ? error.message : __('Failed to update', 'quillcrm'),
+			  });
 		} finally {
 			setEditingField(null);
 			setLoading(false);

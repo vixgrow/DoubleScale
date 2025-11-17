@@ -2,12 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
-
-/**
- * External dependencies
- */
-import { Spin, message } from 'antd';
+import { useState, useEffect,useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -36,7 +31,8 @@ import { DealDetailSkeleton } from './DealDetailSkeleton';
 import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
 import DealOverviewSkeleton from './deal-overview-skeleton';
 import { Input } from '@quillcrm/components/ui/input';
-import { useDispatch } from '@wordpress/data';
+import { NoticeMessage } from '@/client/types';
+import { NoticeBanner } from '@quillcrm/components';
 
 interface DealDetailModalProps {
 	dealId: number | null;
@@ -46,6 +42,7 @@ interface DealDetailModalProps {
 	onDeleted?: () => void;
 	onEdit?: (deal: Deal) => void;
 	pipeline?: any;
+	onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
 }
 
 export const DealDetailModal: React.FC<DealDetailModalProps> = ({
@@ -56,6 +53,7 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	onDeleted,
 	onEdit,
 	pipeline,
+	onNotice
 }) => {
 	const [deal, setDeal] = useState<Deal | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -63,10 +61,10 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	const [editingField, setEditingField] = useState<'title' | 'value' | null>(null);
 	const [tempTitle, setTempTitle] = useState('');
 	const [tempValue, setTempValue] = useState('');
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
 	const { getDeal, deleteDeal,updateDeal } = useDealOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (!loading && deal) {
@@ -99,13 +97,10 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 			const dealData = await getDeal(dealId, true);
 			setDeal(dealData);
 		} catch (error) {
-			createNotice?.({
-				type: 'error',
-				message:
-					error instanceof Error
-						? error.message
-						: __('Failed to load deal details', 'quillcrm'),
-			});
+			setNotice({
+				type:'error',
+				message: __('Faild to load deal details', 'quillcrm'),
+			})
 		} finally {
 			setLoading(false);
 		}
@@ -162,6 +157,10 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 			return;
 		}
 		await handleSaveInline('title', tempTitle.trim());
+		setNotice({
+			type:'success',
+			message: __('updated successfully', 'quillcrm'),
+		})
 	};
 
 	const handleSaveValue = async () => {
@@ -171,6 +170,10 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 			return;
 		}
 		await handleSaveInline('value', numValue);
+		setNotice({
+			type:'success',
+			message: __('updated successfully', 'quillcrm'),
+		})
 	};
 
 	const formatCurrency = (value: number): string => {
@@ -188,10 +191,24 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 
 		return formattedValue;
 	};
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
-			<DialogContent className="max-h-[98vh] gap-8 w-full max-w-[calc(100vw-500px)]  ml-auto my-8 p-10  rounded-none overflow-y-auto">
+			<DialogContent 
+			className=' max-h-screen w-[calc(100vw-400px)] max-w-none bg-white gap-8 shadow-none p-10 rounded-none overflow-y-auto'
+			
+			// className="max-h-[98vh] gap-8 w-full max-w-[calc(100vw-400px)]  ml-auto my-8 p-10  rounded-none overflow-y-auto"
+			>
 				{loading || !showContent  ? (
 					// <div className="flex justify-center items-center min-h-[200px]">
 						<DealDetailSkeleton />
@@ -229,29 +246,6 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 											</>
 										)}
 									</div>
-									{/* value */}
-									{/* <div className="flex items-center gap-2 text-[#09090B] font-bold text-2xl">
-										<p className="mt-1 text-2xl">
-											{__(
-												`${formatCurrency(deal?.weighted_value ?? 0)}`,
-												'quillcrm'
-											)}
-										</p>
-										<span className="text-[#777] text-[20px] flex items-center gap-1">
-											<DealValueIcon
-												width={20}
-												height={20}
-											/>
-											USD
-										</span>
-										<span className="w-6 h-6 p-1 flex items-center justify-center rounded-full bg-[#E4EEFD]">
-											<EditHeaderIcon
-												color="#458DC7"
-												width={20}
-												height={20}
-											/>
-										</span>
-									</div> */}
 									{/* Editable Value */}
 									<div className="flex items-center gap-2 text-[#09090B] font-bold text-2xl mt-1">
 										{editingField === 'value' ? (
@@ -300,8 +294,13 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 									onDeleted={() => {
 										if(onDeleted) onDeleted();
 									}}
+									onNotice={onNotice}
+									// to delete
+									
 								/>
 							</DialogTitle>
+							{notice && (
+				               <NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />)}
 						</DialogHeader>
 						{/* contact overview+customfiled */}
 						<div className=" grid grid-cols-2 gap-12">
@@ -313,7 +312,7 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 									dealId={dealId}
 									onEdit={onEdit}
 									onUpdate={handleOverviewUpdate}
-
+                                    onNotice={(notice) => setNotice(notice)}
 								/>
 							</div>
 							)}
@@ -388,10 +387,12 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 							)}
 						</div>
 						{/* avtivites */}
-						<Deal_Activites dealId={dealId || undefined} />
+						<Deal_Activites dealId={dealId || undefined} onNotice={(notice) => setNotice(notice)} />
 					</>
 				)}
 			</DialogContent>
 		</Dialog>
+		
+		  
 	);
 };

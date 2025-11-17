@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
+import { useState, useMemo, useEffect, useCallback ,useRef} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { useDispatch } from '@wordpress/data';
 
@@ -37,16 +37,18 @@ import { UserService } from '../../../../../services/user-service';
 import { SOURCE_OPTIONS } from '../../../../../config/types/config-data';
 import './style.scss';
 import ConfigAPI from '@quillcrm/config';
-import { CustomDialogHeader } from '@quillcrm/components';
+import { CustomDialogHeader, NoticeBanner } from '@quillcrm/components';
 import AddDealIcon from '@quillcrm/components/icons/add-deal';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import { CustomFieldsSection } from '../deal-custom-fields';
 import { DatePicker } from '@quillcrm/components/ui/date-picker';
+import { NoticeMessage } from '@/client/types';
 
 export interface NewDealModalProps {
 	visible: boolean;
 	onClose: () => void;
-	onSuccess: () => void;
+	// onSuccess: () => void;
+	onSuccess: ( notice?: { type: 'success' | 'error'; message: string }) => void;
 	pipeline: any;
 	initialStageId?: number;
 }
@@ -160,12 +162,10 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	const [loading, setLoading] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactsLoading, setContactsLoading] = useState(false);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const [currentUserId, setCurrentUserId] = useState<number | undefined>(
 		undefined
 	);
-
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
 
 	const priorities = useMemo(() => {
 		return ConfigAPI.getDealPriorities();
@@ -215,6 +215,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 	});
 
 	const formValues = watch();
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	// Get current user ID
 	useEffect(() => {
@@ -328,7 +329,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		} catch (error) {
 			if (error instanceof z.ZodError) {
 				for (const err of error.issues) {
-					createNotice?.({
+					setNotice({
 						type: 'error',
 						message: err.message,
 					});
@@ -339,7 +340,7 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		}
 
 		if (!pipeline) {
-			createNotice?.({
+			setNotice({
 				type: 'error',
 				message: __('Please select a pipeline first', 'quillcrm'),
 			});
@@ -347,12 +348,9 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		}
 
 		if (values.value !== undefined && values.value <= 0) {
-			createNotice?.({
+			setNotice({
 				type: 'error',
-				message: __(
-					'Deal value must be greater than zero',
-					'quillcrm'
-				),
+				message: __('Deal value must be greater than zero', 'quillcrm'),
 			});
 			return;
 		}
@@ -365,30 +363,26 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 				...values,
 				pipeline_id: pipeline.id,
 				currency: 'USD',
-				expected_close_date: values.expected_close_date || null,
-				// expected_close_date: values.expected_close_date
-				// ? new Date(values.expected_close_date)
-				// 		.toISOString()
-				// 		.split('T')[0]
-				// : null,
+				// expected_close_date: values.expected_close_date || null,
+				expected_close_date: values.expected_close_date
+				? new Date(values.expected_close_date)
+						.toISOString()
+						.split('T')[0]
+				: null,
 			};
 			await createDeal(dealData);
-
-			createNotice?.({
+			reset();
+			onClose();
+			// await onSuccess();
+			onSuccess({
 				type: 'success',
 				message: __('Deal created successfully!', 'quillcrm'),
 			});
-
-			reset();
-			onClose();
-			await onSuccess();
 		} catch (error: any) {
-			createNotice?.({
+			setNotice({
 				type: 'error',
-				message:
-					error.message ||
-					__('Failed to create deal. Please try again.', 'quillcrm'),
-			});
+				message: error.message || __('Failed to create deal. Please try again.', 'quillcrm'),
+			  });
 		} finally {
 			setLoading(false);
 		}
@@ -398,6 +392,16 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 		reset();
 		onClose();
 	};
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
 
 	return (
 		<Dialog
@@ -420,6 +424,9 @@ export const NewDealModal: React.FC<NewDealModalProps> = ({
 							icon={<AddDealIcon />}
 						/>
 					</DialogTitle>
+                    {notice && (
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+			   )}
 				</DialogHeader>
 
 				<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

@@ -9,6 +9,7 @@ import DuplicatePipelineDialog from '@quillcrm/components/icons/duplicate-pipeli
 
 
 export const DuplicatePipelineModal = ({ visible, onClose, onSuccess, pipeline }) => {
+	
 	return (
 		<PipelineModal
 			visible={visible}

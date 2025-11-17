@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useMemo, useEffect, useCallback } from '@wordpress/element';
+import { useState, useMemo, useEffect, useCallback ,useRef} from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -42,13 +42,14 @@ import ConfigAPI, { SOURCE_OPTIONS } from '@quillcrm/config';
 import { CustomDialogHeader, NoticeBanner } from '@quillcrm/components';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import { Input } from '@quillcrm/components/ui/input';
-import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker';
+import { DateRangePicker } from '@quillcrm/components/ui/date-range-picker'
 import { CustomFieldsSection } from '../deal-custom-fields';
 import { Button } from '@quillcrm/components/ui/button';
 import AllDealIcon from '@quillcrm/components/icons/all-deals';
 import { useDispatch } from '@wordpress/data';
 import { convertDate } from '@quillcrm/utils';
 import { DatePicker } from '@quillcrm/components/ui/date-picker';
+import { NoticeMessage } from '@/client/types';
 
 interface PipelineStageBoxProps {
 	stage: {
@@ -129,7 +130,8 @@ const PipelineStageHeaderBox: React.FC<PipelineStageBoxProps> = ({
 export interface EditDealModalProps {
 	visible: boolean;
 	onClose: () => void;
-	onSuccess: () => void;
+	// onSuccess: () => void;
+	onSuccess: ( notice?: { type: 'success' | 'error'; message: string }) => void;
 	deal: Deal | null;
 	pipelines: any[];
 }
@@ -177,6 +179,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 	const [loading, setLoading] = useState(false);
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactSearchLoading, setContactSearchLoading] = useState(false);
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
 	// Use shared users hook
 	const {
@@ -214,9 +217,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 
 	// Check if current user is restricted (deal owner)
 	const isRestrictedUser = isDealOwner();
-
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 	// Load initial contacts when modal opens
 	useEffect(() => {
 		if (visible) {
@@ -234,9 +235,12 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 				stage_id: deal.stage?.id ? Number(deal.stage.id) : undefined,
 				value: deal.value,
 
+				// expected_close_date: deal.expected_close_date
+				// 	? new Date(deal.expected_close_date)
+				// 	: undefined,
 				expected_close_date: deal.expected_close_date
-					? new Date(deal.expected_close_date)
-					: undefined,
+                ? new Date(deal.expected_close_date).toISOString().split('T')[0]
+                : null,
 				// source: deal.source || undefined,
 				source: deal.source?.toLowerCase() ?? '',
 				priority: deal.priority || undefined,
@@ -361,22 +365,22 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 			}
 
 			await updateDeal(deal.id, updateData);
-			createNotice?.({
+			
+			// onSuccess();
+			onSuccess({
 				type: 'success',
 				message: __(
 					`Deal "${values.title}" updated successfully!`,
 					'quillcrm'
 				),
 			});
-
-			onSuccess();
 			onClose();
 		} catch (error) {
 			const err = error as Error;
-			createNotice?.({
+			setNotice({
 				type: 'error',
 				message: err.message || __('Failed to update deal', 'quillcrm'),
-			});
+			})
 		} finally {
 			setLoading(false);
 		}
@@ -386,15 +390,26 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 		onClose();
 	};
 
-	const handlePipelineChange = (pipelineId: number) => {
-		// Clear stage selection when pipeline changes
-		setSelectedPipelineId(pipelineId);
-		form.setValue('stage_id', undefined);
-	};
+	// const handlePipelineChange = (pipelineId: number) => {
+	// 	// Clear stage selection when pipeline changes
+	// 	setSelectedPipelineId(pipelineId);
+	// 	form.setValue('stage_id', undefined);
+	// };
 	// console.log(deal?.source, SOURCE_OPTIONS)
 	const currentPipeline = pipelines?.find(
 		(p: any) => String(p.id) === String(deal?.pipeline?.id)
 	);
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+		}
+	}, [notice]);
+
 
 	return (
 		<Dialog
@@ -414,6 +429,9 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 							icon={<AllDealIcon />}
 						/>
 					</DialogTitle>
+					{notice && (
+				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+			   )}
 				</DialogHeader>
 
 				<div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 my-3">
@@ -660,8 +678,7 @@ export const EditDealModal: React.FC<EditDealModalProps> = ({
 							}}
 
 							placeholder={__('Select Date', 'quillcrm')}
-							buttonClassName="w-full h-12 justify-start text-left font-normal rounded-[8px] border border-[#DEE1E6] bg-white text-[#09090B] text-base tracking-[-.5px] px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A] focus-visible:ring-offset-2 data-[state=open]:ring-2 data-[state=open]:ring-[#1E3A8A]"
-
+							buttonClassName="!w-full h-12 !shadow-none rounded-[8px] border border-[#DEE1E6] !text-[#09090B] !bg-white !font-normal !text-base tracking-[-.5px]"
 						/>
 					</div>
 					{/* pipeline */}

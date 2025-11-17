@@ -1,8 +1,788 @@
-/**
- * WordPress dependencies
- */
+// /**
+//  * WordPress dependencies
+//  */
+// import { __ } from '@wordpress/i18n';
+// import { useMemo } from '@wordpress/element';
+
+// /**
+//  * External dependencies
+//  */
+// import { useDroppable } from '@dnd-kit/core';
+// import { Tooltip } from 'antd';
+// import { AlertCircle } from 'lucide-react';
+
+
+// /**
+//  * Internal dependencies
+//  */
+// import { DealCard } from '../deal-card';
+// import { Deal } from '../../types';
+// import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
+// import './style.scss';
+// import { NoDealsIcon } from '@quillcrm/components';
+// import WinTagIcon from '@quillcrm/components/icons/win-tag';
+// import { PlusIcon } from 'lucide-react';
+
+// import { DealCardShimmer } from '../deal-card/DealCardShimmer';
+// import React, { useState } from 'react';
+// // import { NewDealModal } from '../new-deal-modal';
+// import { formatCurrency } from '../../utils/currency';
+// import { NewDealModal } from '../new-deal-modal';
+// const ROW_HEIGHT = 152;
+// interface PipelineColumnProps {
+// 	stage: {
+// 		id: number;
+// 		name: string;
+// 		color: string;
+// 		sort_order: number;
+// 		win_probability: number;
+// 	};
+// 	deals: Deal[];
+// 	isOver: boolean;
+// 	activeDealId?: string | null;
+// 	onDealView?: (dealId: number) => void;
+// 	onDealEdit?: (deal: Deal) => void;
+// 	onDealDelete?: (deal: Deal) => void;
+// 	onDealAddNote?: (deal: Deal) => void;
+// 	onDealLogCall?: (deal: Deal) => void;
+// 	onDealScheduleMeeting?: (deal: Deal) => void;
+// 	onDealLogEmail?: (deal: Deal) => void;
+// 	index: number;
+// 	totalStages: number;
+// 	loading?: boolean;
+// 	pipeline?: any;
+// 	selectMode?: boolean;
+// 	selectedDealIds?: number[];
+// 	toggleDealSelection?: (dealId: number) => void;
+// 	onRefresh?: () => void;
+// 	onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
+// }
+
+// export const PipelineColumn: React.FC<PipelineColumnProps> = ({
+// 	stage,
+// 	deals,
+// 	index,
+// 	totalStages,
+// 	isOver,
+// 	activeDealId,
+// 	onDealView,
+// 	onDealEdit,
+// 	onDealDelete,
+// 	onDealAddNote,
+// 	onDealLogCall,
+// 	onDealScheduleMeeting,
+// 	onDealLogEmail,
+// 	loading = false,
+// 	onNotice,
+// 	pipeline,
+// 	selectMode = false,
+// 	selectedDealIds = [],
+// 	toggleDealSelection,
+// 	onRefresh
+// }) => {
+// 	const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
+// 	const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
+// 	const { setNodeRef: setDroppableRef, isOver: isDropOver } = useDroppable({
+// 		id: `stage-${stage.id}`,
+// 		data: {
+// 			type: 'pipeline-stage',
+// 			stageId: stage.id,
+// 			stageName: stage.name,
+// 		},
+// 	});
+
+// 	// Get currency code from deals (use first deal's currency, or USD as fallback)
+// 	const { currencyCode, hasMixedCurrencies, uniqueCurrencies } = useMemo(() => {
+// 		if (deals.length === 0) return { currencyCode: 'USD', hasMixedCurrencies: false, uniqueCurrencies: [] };
+// 		// Get unique currencies in this column
+// 		const currencies = [...new Set(deals.map(d => d.currency))];
+// 		// If all deals use same currency, use that; otherwise default to first deal's currency
+// 		return {
+// 			currencyCode: currencies.length === 1 ? currencies[0] : deals[0].currency,
+// 			hasMixedCurrencies: currencies.length > 1,
+// 			uniqueCurrencies: currencies,
+// 		};
+// 	}, [deals]);
+
+// 	// Calculate column statistics
+// 	const columnStats = useMemo(() => {
+// 		const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);
+// 		const weightedValue = deals.reduce((sum, deal) => {
+// 			// Use deal-specific probability if available, otherwise use stage default
+// 			const probability = deal.probability ?? stage.win_probability;
+// 			return sum + deal.value * (probability / 100);
+// 		}, 0);
+// 		const overdueCount = deals.filter((deal) => deal.is_overdue).length;
+
+// 		return {
+// 			totalDeals: deals.length,
+// 			totalValue,
+// 			weightedValue,
+// 			overdueCount,
+// 		};
+// 	}, [deals, stage.win_probability]);
+
+// 	const isFirst = index === 0;
+// 	const isLast = index === totalStages - 1;
+
+// 	return (
+// 		<div
+// 			ref={setDroppableRef}
+// 			className={`pipeline-column min-w-[360px] flex flex-col flex-1 ${isDropOver ? 'drop-target' : ''} ${isOver ? 'drag-over' : ''}`}
+// 		>
+// 			{/* Column Header */}
+
+// 			<div
+// 				className="column-header h-32  relative rounded-t-[16px] "
+// 				style={{ backgroundColor: stage.color }}
+// 			>
+// 				{isFirst && (
+// 					<div
+// 						className="absolute top-[1px] right-[-32px] w-0 h-0 z-20 rounded-sm"
+// 						style={{
+// 							borderTop: '60px solid transparent',
+// 							borderBottom: '60px solid transparent',
+// 							borderLeft: `40px solid ${stage.color}`,
+// 						}}
+// 					></div>
+// 				)}
+// 				{isLast && (
+// 					<div
+// 						className="absolute top-0 left-[-3px] w-0 h-0"
+// 						style={{
+// 							borderTop: '60px solid transparent',
+// 							borderBottom: '60px solid transparent',
+// 							borderLeft: `40px solid white`,
+// 						}}
+// 					></div>
+// 				)}
+// 				{!isFirst && !isLast && (
+// 					<>
+// 						<div
+// 							className="absolute top-0 left-[-3px] w-0 h-0 "
+// 							style={{
+// 								borderTop: '60px solid transparent',
+// 								borderBottom: '60px solid transparent',
+// 								borderLeft: `40px solid white`,
+// 							}}
+// 						></div>
+// 						<div
+// 							className="absolute top-[1px] right-[-32px] w-0 h-0 z-20"
+// 							style={{
+// 								borderTop: '60px solid transparent',
+// 								borderBottom: '60px solid transparent',
+// 								borderLeft: `40px solid ${stage.color}`,
+// 							}}
+// 						></div>
+// 					</>
+// 				)}
+
+// 				<div
+// 					className={`${index === 0 ? 'left-0' : 'left-5'} absolute  w-full h-full p-3  z-10 flex flex-col `}
+// 				>
+// 					<div
+// 						className={`flex justify-between ${index !== 0 ? 'px-5' : ''}`}
+// 					>
+// 						<div className=" flex gap-2">
+// 							<h3
+// 								className="stage-name text-[24px] font-semibold leading-normal truncate max-w-[200px] tracking-[-1px] "
+// 								style={{ color: StageTextColor(stage.color) }}
+// 							>
+// 								{stage.name} {`(${deals.length})`}{' '}
+// 							</h3>
+// 							<div className=" flex  bg-[#fff] rounded-[8px] py-1 px-2 gap-1">
+// 								<span className="  flex justify-center items-center text-[#09090B]">
+// 									{stage.win_probability}%
+// 								</span>
+// 								<WinTagIcon />
+// 							</div>
+// 						</div>
+// 						<PlusIcon
+// 							style={{ color: '#1E3A8A', cursor:'pointer' }}
+// 							onClick={() => {
+// 								setSelectedStageId(stage.id);
+// 								setIsNewDealModalOpen(true);
+// 							}}
+// 						/>
+// 					</div>
+
+// 					<div
+// 						className={`absolute bottom-3  flex justify-between px-2 gap-6 items-center z-20`}
+// 					>
+// 						{/* Total Value */}
+// 						<div className="flex  gap-1 items-center">
+// 							{/* <DealValueIcon /> */}
+// 							<span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
+// 								{columnStats.totalDeals === 1
+// 									? __('Deal value:', 'quillcrm')
+// 									: __('Deals value:', 'quillcrm')}
+// 							</span>
+// 							<span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
+// 								{formatCurrency(columnStats.totalValue, currencyCode)}
+// 							</span>
+// 							{hasMixedCurrencies && (
+// 								<Tooltip
+// 									title={__(
+// 										`Mixed currencies detected (${uniqueCurrencies.join(', ')}). Total is approximate and not currency-converted.`,
+// 										'quillcrm'
+// 									)}
+// 									placement="top"
+// 								>
+// 									<AlertCircle
+// 										size={16}
+// 										className="text-orange-500 cursor-help"
+// 										style={{ minWidth: '16px' }}
+// 									/>
+// 								</Tooltip>
+// 							)}
+// 						</div>
+
+// 						{/* Weighted Value */}
+// 						<div className="flex  gap-1 items-center">
+// 							{/* <WeightedIcon /> */}
+// 							<span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
+// 								{__('Weighted:', 'quillcrm')}
+// 							</span>
+// 							<span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
+// 								{formatCurrency(columnStats.weightedValue, currencyCode)}
+// 							</span>
+// 							{hasMixedCurrencies && (
+// 								<Tooltip
+// 									title={__(
+// 										`Mixed currencies detected (${uniqueCurrencies.join(', ')}). Weighted total is approximate.`,
+// 										'quillcrm'
+// 									)}
+// 									placement="top"
+// 								>
+// 									<AlertCircle
+// 										size={16}
+// 										className="text-orange-500 cursor-help"
+// 										style={{ minWidth: '16px' }}
+// 									/>
+// 								</Tooltip>
+// 							)}
+// 						</div>
+// 					</div>
+// 				</div>
+// 			</div>
+
+// 			{deals.length > 0 && (
+// 				<div className=" w-full h-[2px] bg-[#ebecef]"></div>
+// 			)}
+
+// 			{/* Deals Container */}
+// 			<div
+// 				className={`deals-container overflow-y-auto flex-1 max-h-screen relative  rounded-br-[16px]  rounded-bl-[16px]  ${isDropOver ? 'accepting-drop' : ''}`}
+// 				style={{ backgroundColor: stage.color }}
+// 				data-stage-id={stage.id}
+// 			>
+// 				{loading ? (
+				
+// 					<div className="">
+// 						{Array.from({ length: 3 }).map((_, shimmerIndex) => (
+// 							<DealCardShimmer
+// 								key={`shimmer-${stage.id}-${shimmerIndex}`}
+// 								style={
+// 									{
+// 										'--stage-color': stage.color,
+// 									} as React.CSSProperties
+// 								}
+// 							/>
+// 						))}
+// 					</div>
+// 				) : deals.length === 0 ? (
+// 					<div className=" flex justify-center items-center flex-col text-center h-full ">
+// 						<span className=" block my-2">
+// 							<NoDealsIcon />
+// 						</span>
+// 						<p className=" my-2  text-lg font-bold leading-7 tracking-[-.5px] text-[#09090B]">
+// 							{__('No deals in this stage', 'quillcrm')}
+// 						</p>
+// 						<small className=" text-base  font-normal leading-[26px] tracking-[-.5px] text-[#777]">
+// 							{__('Drag deals here to move them to', 'quillcrm')}{' '}
+// 							"{stage.name}"
+// 						</small>
+// 					</div>
+// 				) : 
+// 				(
+// 					<div className="">
+// 						{deals.map((deal, index) => {
+// 							const isDragging =
+// 								activeDealId === `deal-${deal.id}`;
+// 							return (
+// 								<DealCard
+// 									key={deal.id}
+// 									deal={deal}
+// 									isDragging={isDragging}
+// 									onCardClick={(dealData) =>
+// 										onDealView?.(dealData.id)
+// 									}
+// 									onDealEdit={onDealEdit}
+// 									onDealDelete={onDealDelete}
+// 									onAddNote={(deal) => onDealAddNote?.(deal)}
+// 									onDealLogCall={(deal) =>
+// 										onDealLogCall?.(deal)
+// 									}
+// 									onDealScheduleMeeting={(deal) =>
+// 										onDealScheduleMeeting?.(deal)
+// 									}
+// 									onDealLogEmail={(deal) =>
+// 										onDealLogEmail?.(deal)
+// 									}
+// 									stageColor={stage.color}
+// 									stageProbability={stage.win_probability}
+// 									selectMode={selectMode}
+// 									isSelected={selectedDealIds.includes(deal.id)}
+// 									onToggleSelect={() => toggleDealSelection?.(deal.id)}
+// 									style={
+// 										{
+// 											'--stage-color': stage.color,
+// 											marginBottom:
+// 												index < deals.length - 1
+// 													? '12px'
+// 													: '0',
+// 										} as React.CSSProperties
+// 									}
+// 								/>
+// 							)
+// 						})}
+// 							</div>
+//                          )}
+// 			</div>
+
+// 			{/* Drop Indicator */}
+// 			{/* {isDropOver && (
+// 				<div className="drop-indicator">
+// 					<div className="drop-indicator-line" />
+// 					<span className="drop-indicator-text">
+// 						{__('Drop here to move to', 'quillcrm')} "{stage.name}"
+// 					</span>
+// 				</div>
+// 			)} */}
+// 			<NewDealModal
+// 				visible={isNewDealModalOpen}
+// 				onClose={() => setIsNewDealModalOpen(false)}
+// 				onSuccess={(notice) => {
+// 					setIsNewDealModalOpen(false);
+// 					onRefresh?.(); 
+// 					if (notice) onNotice?.(notice);
+// 				}}
+// 				pipeline={pipeline}
+// 				initialStageId={selectedStageId ?? undefined}
+// 			/>
+// 		</div>
+// 	);
+// };
+
+
+
+// import { __ } from '@wordpress/i18n';
+// import { useMemo, useCallback, useRef } from '@wordpress/element';
+
+// /**
+// * External dependencies
+// */
+// import { useDroppable } from '@dnd-kit/core';
+// import { Tooltip } from 'antd';
+// import { AlertCircle } from 'lucide-react';
+// import { FixedSizeList as List } from 'react-window';
+
+// /**
+// * Internal dependencies
+// */
+// import { DealCard } from '../deal-card';
+// import { Deal } from '../../types';
+// import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
+// import './style.scss';
+// import { NoDealsIcon } from '@quillcrm/components';
+// import WinTagIcon from '@quillcrm/components/icons/win-tag';
+// import { PlusIcon } from 'lucide-react';
+
+// import { DealCardShimmer } from '../deal-card/DealCardShimmer';
+// import React, { useState } from 'react';
+// import { formatCurrency } from '../../utils/currency';
+// import { NewDealModal } from '../new-deal-modal';
+
+// const ROW_HEIGHT = 176; // 152px card + 12px bottom padding + 16px top padding for first
+
+// interface PipelineColumnProps {
+//    stage: {
+// 	   id: number;
+// 	   name: string;
+// 	   color: string;
+// 	   sort_order: number;
+// 	   win_probability: number;
+//    };
+//    deals: Deal[];
+//    isOver: boolean;
+//    activeDealId?: string | null;
+//    onDealView?: (dealId: number) => void;
+//    onDealEdit?: (deal: Deal) => void;
+//    onDealDelete?: (deal: Deal) => void;
+//    onDealAddNote?: (deal: Deal) => void;
+//    onDealLogCall?: (deal: Deal) => void;
+//    onDealScheduleMeeting?: (deal: Deal) => void;
+//    onDealLogEmail?: (deal: Deal) => void;
+//    index: number;
+//    totalStages: number;
+//    loading?: boolean;
+//    pipeline?: any;
+//    selectMode?: boolean;
+//    selectedDealIds?: number[];
+//    toggleDealSelection?: (dealId: number) => void;
+//    onRefresh?: () => void;
+//    onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
+// }
+
+// export const PipelineColumn: React.FC<PipelineColumnProps> = ({
+//    stage,
+//    deals,
+//    index,
+//    totalStages,
+//    isOver,
+//    activeDealId,
+//    onDealView,
+//    onDealEdit,
+//    onDealDelete,
+//    onDealAddNote,
+//    onDealLogCall,
+//    onDealScheduleMeeting,
+//    onDealLogEmail,
+//    loading = false,
+//    onNotice,
+//    pipeline,
+//    selectMode = false,
+//    selectedDealIds = [],
+//    toggleDealSelection,
+//    onRefresh
+// }) => {
+//    const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
+//    const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
+//    const listRef = useRef<List>(null);
+   
+//    const { setNodeRef: setDroppableRef, isOver: isDropOver } = useDroppable({
+// 	   id: `stage-${stage.id}`,
+// 	   data: {
+// 		   type: 'pipeline-stage',
+// 		   stageId: stage.id,
+// 		   stageName: stage.name,
+// 	   },
+//    });
+
+//    // Get currency code from deals
+//    const { currencyCode, hasMixedCurrencies, uniqueCurrencies } = useMemo(() => {
+// 	   if (deals.length === 0) return { currencyCode: 'USD', hasMixedCurrencies: false, uniqueCurrencies: [] };
+// 	   const currencies = [...new Set(deals.map(d => d.currency))];
+// 	   return {
+// 		   currencyCode: currencies.length === 1 ? currencies[0] : deals[0].currency,
+// 		   hasMixedCurrencies: currencies.length > 1,
+// 		   uniqueCurrencies: currencies,
+// 	   };
+//    }, [deals]);
+
+//    // Calculate column statistics
+//    const columnStats = useMemo(() => {
+// 	   const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);
+// 	   const weightedValue = deals.reduce((sum, deal) => {
+// 		   const probability = deal.probability ?? stage.win_probability;
+// 		   return sum + deal.value * (probability / 100);
+// 	   }, 0);
+// 	   const overdueCount = deals.filter((deal) => deal.is_overdue).length;
+
+// 	   return {
+// 		   totalDeals: deals.length,
+// 		   totalValue,
+// 		   weightedValue,
+// 		   overdueCount,
+// 	   };
+//    }, [deals, stage.win_probability]);
+
+//    const isFirst = index === 0;
+//    const isLast = index === totalStages - 1;
+
+//    // Row renderer for react-window
+//    const Row = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
+// 	   const deal = deals[index];
+// 	   if (!deal) return null;
+	   
+// 	   const isDragging = activeDealId === `deal-${deal.id}`;
+	   
+// 	   // Add padding to the wrapper div to create spacing between cards
+// 	   const wrapperStyle = {
+// 		   ...style,
+// 		   paddingLeft: '16px',
+// 		   paddingRight: '16px',
+// 		   paddingTop: index === 0 ? '16px' : '0', // Add top padding for first item
+// 		   paddingBottom: '12px',
+// 	   };
+	   
+// 	   return (
+// 		   <div style={wrapperStyle}>
+// 			   <DealCard
+// 				   key={deal.id}
+// 				   deal={deal}
+// 				   isDragging={isDragging}
+// 				   onCardClick={(dealData) => onDealView?.(dealData.id)}
+// 				   onDealEdit={onDealEdit}
+// 				   onDealDelete={onDealDelete}
+// 				   onAddNote={(deal) => onDealAddNote?.(deal)}
+// 				   onDealLogCall={(deal) => onDealLogCall?.(deal)}
+// 				   onDealScheduleMeeting={(deal) => onDealScheduleMeeting?.(deal)}
+// 				   onDealLogEmail={(deal) => onDealLogEmail?.(deal)}
+// 				   stageColor={stage.color}
+// 				   stageProbability={stage.win_probability}
+// 				   selectMode={selectMode}
+// 				   isSelected={selectedDealIds.includes(deal.id)}
+// 				   onToggleSelect={() => toggleDealSelection?.(deal.id)}
+// 				   style={
+// 					   {
+// 						   '--stage-color': stage.color,
+// 						   margin: '0', // Override margin since wrapper handles spacing
+// 					   } as React.CSSProperties
+// 				   }
+// 			   />
+// 		   </div>
+// 	   );
+//    }, [deals, activeDealId, stage, selectMode, selectedDealIds, toggleDealSelection, onDealView, onDealEdit, onDealDelete, onDealAddNote, onDealLogCall, onDealScheduleMeeting, onDealLogEmail]);
+
+//    // Use regular rendering if deals are less than 20 to avoid virtualization issues
+//    const shouldVirtualize = deals.length > 10;
+
+//    return (
+// 	   <div
+// 		   className={`pipeline-column min-w-[360px] flex flex-col flex-1 ${isDropOver ? 'drop-target' : ''} ${isOver ? 'drag-over' : ''}`}
+// 	   >
+// 		   {/* Column Header */}
+// 		   <div
+// 			   className="column-header h-32 relative rounded-t-[16px]"
+// 			   style={{ backgroundColor: stage.color }}
+// 		   >
+// 			   {isFirst && (
+// 				   <div
+// 					   className="absolute top-[1px] right-[-32px] w-0 h-0 z-20 rounded-sm"
+// 					   style={{
+// 						   borderTop: '60px solid transparent',
+// 						   borderBottom: '60px solid transparent',
+// 						   borderLeft: `40px solid ${stage.color}`,
+// 					   }}
+// 				   ></div>
+// 			   )}
+// 			   {isLast && (
+// 				   <div
+// 					   className="absolute top-0 left-[-3px] w-0 h-0"
+// 					   style={{
+// 						   borderTop: '60px solid transparent',
+// 						   borderBottom: '60px solid transparent',
+// 						   borderLeft: `40px solid white`,
+// 					   }}
+// 				   ></div>
+// 			   )}
+// 			   {!isFirst && !isLast && (
+// 				   <>
+// 					   <div
+// 						   className="absolute top-0 left-[-3px] w-0 h-0"
+// 						   style={{
+// 							   borderTop: '60px solid transparent',
+// 							   borderBottom: '60px solid transparent',
+// 							   borderLeft: `40px solid white`,
+// 						   }}
+// 					   ></div>
+// 					   <div
+// 						   className="absolute top-[1px] right-[-32px] w-0 h-0 z-20"
+// 						   style={{
+// 							   borderTop: '60px solid transparent',
+// 							   borderBottom: '60px solid transparent',
+// 							   borderLeft: `40px solid ${stage.color}`,
+// 						   }}
+// 					   ></div>
+// 				   </>
+// 			   )}
+
+// 			   <div
+// 				   className={`${index === 0 ? 'left-0' : 'left-5'} absolute w-full h-full p-3 z-10 flex flex-col`}
+// 			   >
+// 				   <div className={`flex justify-between ${index !== 0 ? 'px-5' : ''}`}>
+// 					   <div className="flex gap-2">
+// 						   <h3
+// 							   className="stage-name text-[24px] font-semibold leading-normal truncate max-w-[200px] tracking-[-1px]"
+// 							   style={{ color: StageTextColor(stage.color) }}
+// 						   >
+// 							   {stage.name} {`(${deals.length})`}
+// 						   </h3>
+// 						   <div className="flex bg-[#fff] rounded-[8px] py-1 px-2 gap-1">
+// 							   <span className="flex justify-center items-center text-[#09090B]">
+// 								   {stage.win_probability}%
+// 							   </span>
+// 							   <WinTagIcon />
+// 						   </div>
+// 					   </div>
+// 					   <PlusIcon
+// 						   style={{ color: '#1E3A8A', cursor: 'pointer' }}
+// 						   onClick={() => {
+// 							   setSelectedStageId(stage.id);
+// 							   setIsNewDealModalOpen(true);
+// 						   }}
+// 					   />
+// 				   </div>
+
+// 				   <div className={`absolute bottom-3 flex justify-between px-2 gap-6 items-center z-20`}>
+// 					   {/* Total Value */}
+// 					   <div className="flex gap-1 items-center">
+// 						   <span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
+// 							   {columnStats.totalDeals === 1
+// 								   ? __('Deal value:', 'quillcrm')
+// 								   : __('Deals value:', 'quillcrm')}
+// 						   </span>
+// 						   <span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
+// 							   {formatCurrency(columnStats.totalValue, currencyCode)}
+// 						   </span>
+// 						   {hasMixedCurrencies && (
+// 							   <Tooltip
+// 								   title={__(
+// 									   `Mixed currencies detected (${uniqueCurrencies.join(', ')}). Total is approximate and not currency-converted.`,
+// 									   'quillcrm'
+// 								   )}
+// 								   placement="top"
+// 							   >
+// 								   <AlertCircle
+// 									   size={16}
+// 									   className="text-orange-500 cursor-help"
+// 									   style={{ minWidth: '16px' }}
+// 								   />
+// 							   </Tooltip>
+// 						   )}
+// 					   </div>
+
+// 					   {/* Weighted Value */}
+// 					   <div className="flex gap-1 items-center">
+// 						   <span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
+// 							   {__('Weighted:', 'quillcrm')}
+// 						   </span>
+// 						   <span className="text-[#09090B] font-bold text-base leading-[26px] tracking-[-.5px]">
+// 							   {formatCurrency(columnStats.weightedValue, currencyCode)}
+// 						   </span>
+// 						   {hasMixedCurrencies && (
+// 							   <Tooltip
+// 								   title={__(
+// 									   `Mixed currencies detected (${uniqueCurrencies.join(', ')}). Weighted total is approximate.`,
+// 									   'quillcrm'
+// 								   )}
+// 								   placement="top"
+// 							   >
+// 								   <AlertCircle
+// 									   size={16}
+// 									   className="text-orange-500 cursor-help"
+// 									   style={{ minWidth: '16px' }}
+// 								   />
+// 							   </Tooltip>
+// 						   )}
+// 					   </div>
+// 				   </div>
+// 			   </div>
+// 		   </div>
+
+// 		   {deals.length > 0 && (
+// 			   <div className="w-full h-[2px] bg-[#ebecef]"></div>
+// 		   )}
+
+// 		   {/* Deals Container */}
+// 		   <div
+// 			   ref={setDroppableRef}
+// 			   className={`deals-container flex-1 relative rounded-br-[16px] rounded-bl-[16px] ${isDropOver ? 'accepting-drop' : ''}`}
+// 			   style={{ backgroundColor: stage.color }}
+// 			   data-stage-id={stage.id}
+// 		   >
+// 			   {loading ? (
+// 				   <div className="">
+// 					   {Array.from({ length: 3 }).map((_, shimmerIndex) => (
+// 						   <DealCardShimmer
+// 							   key={`shimmer-${stage.id}-${shimmerIndex}`}
+// 							   style={
+// 								   {
+// 									   '--stage-color': stage.color,
+// 								   } as React.CSSProperties
+// 							   }
+// 						   />
+// 					   ))}
+// 				   </div>
+// 			   ) : deals.length === 0 ? (
+// 				   <div className="flex justify-center items-center flex-col text-center h-full">
+// 					   <span className="block my-2">
+// 						   <NoDealsIcon />
+// 					   </span>
+// 					   <p className="my-2 text-lg font-bold leading-7 tracking-[-.5px] text-[#09090B]">
+// 						   {__('No deals in this stage', 'quillcrm')}
+// 					   </p>
+// 					   <small className="text-base font-normal leading-[26px] tracking-[-.5px] text-[#777]">
+// 						   {__('Drag deals here to move them to', 'quillcrm')} "{stage.name}"
+// 					   </small>
+// 				   </div>
+// 			   ) : shouldVirtualize ? (
+// 				   <List
+// 					   ref={listRef}
+// 					   height={Math.min(window.innerHeight - 300, deals.length * ROW_HEIGHT + 16)}
+// 					   itemCount={deals.length}
+// 					   itemSize={ROW_HEIGHT}
+// 					   width="100%"
+// 					   className="virtualized-deals-list"
+// 					   overscanCount={10}
+// 					   style={{
+// 						   overflowX: 'hidden',
+// 						   overflowY: 'auto',
+// 					   }}
+// 				   >
+// 					   {Row}
+// 				   </List>
+// 			   ) : (
+// 				   <div className="non-virtualized-deals">
+// 					   {deals.map((deal, idx) => {
+// 						   const isDragging = activeDealId === `deal-${deal.id}`;
+// 						   return (
+// 							   <DealCard
+// 								   key={deal.id}
+// 								   deal={deal}
+// 								   isDragging={isDragging}
+// 								   onCardClick={(dealData) => onDealView?.(dealData.id)}
+// 								   onDealEdit={onDealEdit}
+// 								   onDealDelete={onDealDelete}
+// 								   onAddNote={(deal) => onDealAddNote?.(deal)}
+// 								   onDealLogCall={(deal) => onDealLogCall?.(deal)}
+// 								   onDealScheduleMeeting={(deal) => onDealScheduleMeeting?.(deal)}
+// 								   onDealLogEmail={(deal) => onDealLogEmail?.(deal)}
+// 								   stageColor={stage.color}
+// 								   stageProbability={stage.win_probability}
+// 								   selectMode={selectMode}
+// 								   isSelected={selectedDealIds.includes(deal.id)}
+// 								   onToggleSelect={() => toggleDealSelection?.(deal.id)}
+// 								   style={
+// 									   {
+// 										   '--stage-color': stage.color,
+// 									   } as React.CSSProperties
+// 								   }
+// 							   />
+// 						   );
+// 					   })}
+// 				   </div>
+// 			   )}
+// 		   </div>
+
+// 		   <NewDealModal
+// 			   visible={isNewDealModalOpen}
+// 			   onClose={() => setIsNewDealModalOpen(false)}
+// 			   onSuccess={(notice) => {
+// 				   setIsNewDealModalOpen(false);
+// 				   onRefresh?.();
+// 				   if (notice) onNotice?.(notice);
+// 			   }}
+// 			   pipeline={pipeline}
+// 			   initialStageId={selectedStageId ?? undefined}
+// 		   />
+// 	   </div>
+//    );
+// };
+
 import { __ } from '@wordpress/i18n';
-import { useMemo } from '@wordpress/element';
+import { useMemo, useCallback, useRef } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -10,6 +790,7 @@ import { useMemo } from '@wordpress/element';
 import { useDroppable } from '@dnd-kit/core';
 import { Tooltip } from 'antd';
 import { AlertCircle } from 'lucide-react';
+import { FixedSizeList as List } from 'react-window';
 
 /**
  * Internal dependencies
@@ -24,9 +805,10 @@ import { PlusIcon } from 'lucide-react';
 
 import { DealCardShimmer } from '../deal-card/DealCardShimmer';
 import React, { useState } from 'react';
-// import { NewDealModal } from '../new-deal-modal';
 import { formatCurrency } from '../../utils/currency';
 import { NewDealModal } from '../new-deal-modal';
+
+const ROW_HEIGHT = 184; // 148px card height + 16px spacing (8px top + 8px bottom)
 
 interface PipelineColumnProps {
 	stage: {
@@ -54,6 +836,7 @@ interface PipelineColumnProps {
 	selectedDealIds?: number[];
 	toggleDealSelection?: (dealId: number) => void;
 	onRefresh?: () => void;
+	onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
 }
 
 export const PipelineColumn: React.FC<PipelineColumnProps> = ({
@@ -71,6 +854,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	onDealScheduleMeeting,
 	onDealLogEmail,
 	loading = false,
+	onNotice,
 	pipeline,
 	selectMode = false,
 	selectedDealIds = [],
@@ -79,6 +863,9 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 }) => {
 	const [isNewDealModalOpen, setIsNewDealModalOpen] = useState(false);
 	const [selectedStageId, setSelectedStageId] = useState<number | null>(null);
+	const listRef = useRef<List>(null);
+	
+	
 	const { setNodeRef: setDroppableRef, isOver: isDropOver } = useDroppable({
 		id: `stage-${stage.id}`,
 		data: {
@@ -88,12 +875,10 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 		},
 	});
 
-	// Get currency code from deals (use first deal's currency, or USD as fallback)
+	// Get currency code from deals
 	const { currencyCode, hasMixedCurrencies, uniqueCurrencies } = useMemo(() => {
 		if (deals.length === 0) return { currencyCode: 'USD', hasMixedCurrencies: false, uniqueCurrencies: [] };
-		// Get unique currencies in this column
 		const currencies = [...new Set(deals.map(d => d.currency))];
-		// If all deals use same currency, use that; otherwise default to first deal's currency
 		return {
 			currencyCode: currencies.length === 1 ? currencies[0] : deals[0].currency,
 			hasMixedCurrencies: currencies.length > 1,
@@ -105,7 +890,6 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	const columnStats = useMemo(() => {
 		const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);
 		const weightedValue = deals.reduce((sum, deal) => {
-			// Use deal-specific probability if available, otherwise use stage default
 			const probability = deal.probability ?? stage.win_probability;
 			return sum + deal.value * (probability / 100);
 		}, 0);
@@ -122,15 +906,59 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 	const isFirst = index === 0;
 	const isLast = index === totalStages - 1;
 
+	// Row renderer for react-window
+	const Row = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
+		const deal = deals[index];
+		if (!deal) return null;
+		
+		const isDragging = activeDealId === `deal-${deal.id}`;
+		
+		return (
+			<div 
+				style={{
+					...style,
+					pointerEvents: 'none',
+					padding:'16px',
+					boxSizing: 'border-box',
+				}}
+			>
+				<DealCard
+					key={deal.id}
+					deal={deal}
+					isDragging={isDragging}
+					onCardClick={(dealData) => onDealView?.(dealData.id)}
+					onDealEdit={onDealEdit}
+					onDealDelete={onDealDelete}
+					onAddNote={(deal) => onDealAddNote?.(deal)}
+					onDealLogCall={(deal) => onDealLogCall?.(deal)}
+					onDealScheduleMeeting={(deal) => onDealScheduleMeeting?.(deal)}
+					onDealLogEmail={(deal) => onDealLogEmail?.(deal)}
+					stageColor={stage.color}
+					stageProbability={stage.win_probability}
+					selectMode={selectMode}
+					isSelected={selectedDealIds.includes(deal.id)}
+					onToggleSelect={() => toggleDealSelection?.(deal.id)}
+					style={{
+						'--stage-color': stage.color,
+						margin: '0',
+						height: '164px',
+						pointerEvents: 'auto',
+					} as React.CSSProperties}
+				/>
+			</div>
+		);
+	}, [deals, activeDealId, stage, selectMode, selectedDealIds, toggleDealSelection, onDealView, onDealEdit, onDealDelete, onDealAddNote, onDealLogCall, onDealScheduleMeeting, onDealLogEmail]);
+
+	// Use regular rendering if deals are less than 20 to avoid virtualization issues
+	const shouldVirtualize = deals.length > 20;
+
 	return (
 		<div
-			ref={setDroppableRef}
 			className={`pipeline-column min-w-[360px] flex flex-col flex-1 ${isDropOver ? 'drop-target' : ''} ${isOver ? 'drag-over' : ''}`}
 		>
 			{/* Column Header */}
-
 			<div
-				className="column-header h-32  relative rounded-t-[16px] "
+				className="column-header h-32 relative rounded-t-[16px]"
 				style={{ backgroundColor: stage.color }}
 			>
 				{isFirst && (
@@ -156,7 +984,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 				{!isFirst && !isLast && (
 					<>
 						<div
-							className="absolute top-0 left-[-3px] w-0 h-0 "
+							className="absolute top-0 left-[-3px] w-0 h-0"
 							style={{
 								borderTop: '60px solid transparent',
 								borderBottom: '60px solid transparent',
@@ -175,27 +1003,25 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 				)}
 
 				<div
-					className={`${index === 0 ? 'left-0' : 'left-5'} absolute  w-full h-full p-3  z-10 flex flex-col `}
+					className={`${index === 0 ? 'left-0' : 'left-5'} absolute w-full h-full p-3 z-10 flex flex-col`}
 				>
-					<div
-						className={`flex justify-between ${index !== 0 ? 'px-5' : ''}`}
-					>
-						<div className=" flex gap-2">
+					<div className={`flex justify-between ${index !== 0 ? 'px-5' : ''}`}>
+						<div className="flex gap-2">
 							<h3
-								className="stage-name text-[24px] font-semibold leading-normal tracking-[-1px] "
+								className="stage-name text-[24px] font-semibold leading-normal truncate max-w-[200px] tracking-[-1px]"
 								style={{ color: StageTextColor(stage.color) }}
 							>
-								{stage.name} {`(${deals.length})`}{' '}
+								{stage.name} {`(${deals.length})`}
 							</h3>
-							<div className=" flex  bg-[#fff] rounded-[8px] py-1 px-2 gap-1">
-								<span className="  flex justify-center items-center text-[#09090B]">
+							<div className="flex bg-[#fff] rounded-[8px] py-1 px-2 gap-1">
+								<span className="flex justify-center items-center text-[#09090B]">
 									{stage.win_probability}%
 								</span>
 								<WinTagIcon />
 							</div>
 						</div>
 						<PlusIcon
-							style={{ color: '#1E3A8A', cursor:'pointer' }}
+							style={{ color: '#1E3A8A', cursor: 'pointer' }}
 							onClick={() => {
 								setSelectedStageId(stage.id);
 								setIsNewDealModalOpen(true);
@@ -203,12 +1029,9 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 						/>
 					</div>
 
-					<div
-						className={`absolute bottom-3  flex justify-between px-2 gap-6 items-center z-20`}
-					>
+					<div className={`absolute bottom-3 flex justify-between px-2 gap-6 items-center z-20`}>
 						{/* Total Value */}
-						<div className="flex  gap-1 items-center">
-							{/* <DealValueIcon /> */}
+						<div className="flex gap-1 items-center">
 							<span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
 								{columnStats.totalDeals === 1
 									? __('Deal value:', 'quillcrm')
@@ -235,8 +1058,7 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 						</div>
 
 						{/* Weighted Value */}
-						<div className="flex  gap-1 items-center">
-							{/* <WeightedIcon /> */}
+						<div className="flex gap-1 items-center">
 							<span className="text-[#777] text-base font-medium leading-[26px] tracking-[-.5px]">
 								{__('Weighted:', 'quillcrm')}
 							</span>
@@ -264,17 +1086,17 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 			</div>
 
 			{deals.length > 0 && (
-				<div className=" w-full h-[2px] bg-[#ebecef]"></div>
+				<div className="w-full h-[2px] bg-[#ebecef]"></div>
 			)}
 
 			{/* Deals Container */}
 			<div
-				className={`deals-container overflow-y-auto flex-1 max-h-screen relative  rounded-br-[16px]  rounded-bl-[16px]  ${isDropOver ? 'accepting-drop' : ''}`}
+				ref={setDroppableRef}
+				className={`deals-container flex-1 relative rounded-br-[16px] rounded-bl-[16px] ${isDropOver ? 'accepting-drop' : ''}`}
 				style={{ backgroundColor: stage.color }}
 				data-stage-id={stage.id}
 			>
 				{loading ? (
-				
 					<div className="">
 						{Array.from({ length: 3 }).map((_, shimmerIndex) => (
 							<DealCardShimmer
@@ -288,43 +1110,49 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 						))}
 					</div>
 				) : deals.length === 0 ? (
-					<div className=" flex justify-center items-center flex-col text-center h-full ">
-						<span className=" block my-2">
+					<div className="flex justify-center items-center flex-col text-center h-full">
+						<span className="block my-2">
 							<NoDealsIcon />
 						</span>
-						<p className=" my-2  text-lg font-bold leading-7 tracking-[-.5px] text-[#09090B]">
+						<p className="my-2 text-lg font-bold leading-7 tracking-[-.5px] text-[#09090B]">
 							{__('No deals in this stage', 'quillcrm')}
 						</p>
-						<small className=" text-base  font-normal leading-[26px] tracking-[-.5px] text-[#777]">
-							{__('Drag deals here to move them to', 'quillcrm')}{' '}
-							"{stage.name}"
+						<small className="text-base font-normal leading-[26px] tracking-[-.5px] text-[#777]">
+							{__('Drag deals here to move them to', 'quillcrm')} "{stage.name}"
 						</small>
 					</div>
+				) : shouldVirtualize ? (
+					<List
+						ref={listRef}
+						height={Math.min(window.innerHeight - 300, (deals.length * ROW_HEIGHT))}
+						itemCount={deals.length}
+						itemSize={ROW_HEIGHT}
+						width="100%"
+						className="virtualized-deals-list"
+						overscanCount={10}
+						style={{
+							overflowX: 'hidden',
+							overflowY: 'auto',
+						}}
+					>
+						{Row}
+					</List>
 				) : (
-					<div className="">
-						{deals.map((deal, index) => {
-							const isDragging =
-								activeDealId === `deal-${deal.id}`;
+					<div className="non-virtualized-deals">
+						{deals.map((deal, idx) => {
+							const isDragging = activeDealId === `deal-${deal.id}`;
 							return (
 								<DealCard
 									key={deal.id}
 									deal={deal}
 									isDragging={isDragging}
-									onCardClick={(dealData) =>
-										onDealView?.(dealData.id)
-									}
+									onCardClick={(dealData) => onDealView?.(dealData.id)}
 									onDealEdit={onDealEdit}
 									onDealDelete={onDealDelete}
 									onAddNote={(deal) => onDealAddNote?.(deal)}
-									onDealLogCall={(deal) =>
-										onDealLogCall?.(deal)
-									}
-									onDealScheduleMeeting={(deal) =>
-										onDealScheduleMeeting?.(deal)
-									}
-									onDealLogEmail={(deal) =>
-										onDealLogEmail?.(deal)
-									}
+									onDealLogCall={(deal) => onDealLogCall?.(deal)}
+									onDealScheduleMeeting={(deal) => onDealScheduleMeeting?.(deal)}
+									onDealLogEmail={(deal) => onDealLogEmail?.(deal)}
 									stageColor={stage.color}
 									stageProbability={stage.win_probability}
 									selectMode={selectMode}
@@ -333,10 +1161,6 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 									style={
 										{
 											'--stage-color': stage.color,
-											marginBottom:
-												index < deals.length - 1
-													? '12px'
-													: '0',
 										} as React.CSSProperties
 									}
 								/>
@@ -346,21 +1170,13 @@ export const PipelineColumn: React.FC<PipelineColumnProps> = ({
 				)}
 			</div>
 
-			{/* Drop Indicator */}
-			{/* {isDropOver && (
-				<div className="drop-indicator">
-					<div className="drop-indicator-line" />
-					<span className="drop-indicator-text">
-						{__('Drop here to move to', 'quillcrm')} "{stage.name}"
-					</span>
-				</div>
-			)} */}
 			<NewDealModal
 				visible={isNewDealModalOpen}
 				onClose={() => setIsNewDealModalOpen(false)}
-				onSuccess={() => {
+				onSuccess={(notice) => {
 					setIsNewDealModalOpen(false);
-					onRefresh?.(); 
+					onRefresh?.();
+					if (notice) onNotice?.(notice);
 				}}
 				pipeline={pipeline}
 				initialStageId={selectedStageId ?? undefined}

@@ -1,208 +1,290 @@
 
-	.pipeline-column {
-		   
-	
-		&.drop-target {
-			border-color: #3b82f6;
-			box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-			background: rgba(59, 130, 246, 0.02);
+
+// .pipeline-column {
+// 	&.drop-target {
+// 		border-color: #3b82f6;
+// 		box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+// 		background: rgba(59, 130, 246, 0.02);
+// 	}
+
+// 	&.drag-over {
+// 		transform: scale(1.02);
+// 		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+// 	}
+
+// 	.deals-container {
+// 		overflow: hidden; // Changed from overflow-y: auto to let react-window handle scrolling
+// 		position: relative;
+
+// 		&.accepting-drop {
+// 			background: rgba(59, 130, 246, 0.05);
+// 		}
+
+// 		// Styles for react-window virtualized list
+// 		.virtualized-deals-list {
+// 			// Override react-window scrollbar to match your design
+// 			&::-webkit-scrollbar {
+// 				width: 6px;
+// 			}
+
+// 			&::-webkit-scrollbar-track {
+// 				background: transparent;
+// 			}
+
+// 			&::-webkit-scrollbar-thumb {
+// 				background: #cbd5e0;
+// 				border-radius: 3px;
+// 			}
+
+// 			&::-webkit-scrollbar-thumb:hover {
+// 				background: #a0aec0;
+// 			}
+
+// 			// Smooth scrolling
+// 			scroll-behavior: smooth;
+			
+// 			// Ensure proper overflow handling
+// 			overflow-x: hidden !important;
+// 			overflow-y: auto !important;
+
+// 			// Important: Allow drag events to propagate
+// 			> div {
+// 				pointer-events: auto;
+// 			}
+// 		}
+
+// 		// Fallback scrollbar for non-virtualized (loading/empty states)
+// 		&::-webkit-scrollbar {
+// 			width: 6px;
+// 		}
+
+// 		&::-webkit-scrollbar-track {
+// 			background: transparent;
+// 		}
+
+// 		&::-webkit-scrollbar-thumb {
+// 			background: #cbd5e0;
+// 			border-radius: 3px;
+// 		}
+
+// 		&::-webkit-scrollbar-thumb:hover {
+// 			background: #a0aec0;
+// 		}
+
+// 		// Non-virtualized deals container
+// 		.non-virtualized-deals {
+// 			overflow-y: auto;
+// 			max-height: calc(100vh - 300px);
+// 			padding: 4px 0;
+
+// 			&::-webkit-scrollbar {
+// 				width: 6px;
+// 			}
+
+// 			&::-webkit-scrollbar-track {
+// 				background: transparent;
+// 			}
+
+// 			&::-webkit-scrollbar-thumb {
+// 				background: #cbd5e0;
+// 				border-radius: 3px;
+// 			}
+
+// 			&::-webkit-scrollbar-thumb:hover {
+// 				background: #a0aec0;
+// 			}
+// 		}
+// 	}
+
+// 	.empty-stage {
+// 		.empty-message {
+// 			color: #64748b;
+
+// 			.empty-icon {
+// 				// Existing styles
+// 			}
+
+// 			small {
+// 				font-size: 12px;
+// 				opacity: 0.7;
+// 				line-height: 1.4;
+// 				display: block;
+// 			}
+// 		}
+// 	}
+
+// 	.drop-indicator {
+// 		position: absolute;
+// 		top: 0;
+// 		left: 0;
+// 		right: 0;
+// 		bottom: 0;
+// 		display: flex;
+// 		align-items: center;
+// 		justify-content: center;
+// 		background: rgba(59, 130, 246, 0.1);
+// 		border-radius: 12px;
+// 		z-index: 10;
+// 		pointer-events: none;
+// 	}
+// }
+
+// // Ensure virtualized rows don't have extra spacing
+// .virtualized-deals-list {
+// 	> div {
+// 		// react-window creates wrapper divs, ensure they don't add extra spacing
+// 		> div {
+// 			// This is the actual row content
+// 			display: flex;
+// 			align-items: flex-start;
+// 		}
+// 	}
+// }
+
+.pipeline-column {
+	&.drop-target {
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+		background: rgba(59, 130, 246, 0.02);
+	}
+
+	&.drag-over {
+		transform: scale(1.02);
+		box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+	}
+
+	.deals-container {
+		overflow: hidden;
+		position: relative;
+		padding: 16px 0; // Add consistent top/bottom padding
+
+		&.accepting-drop {
+			background: rgba(59, 130, 246, 0.05);
 		}
-	
-		&.drag-over {
-			transform: scale(1.02);
-			box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-		}
-	
-		// .column-header {
-		// 	padding: 16px;
-		// 	border-radius: 12px 12px 0 0;
-		// 	color: white;
-		// 	position: relative;
-		// 	overflow: hidden;
-	
-		// 	&::before {
-		// 		content: '';
-		// 		position: absolute;
-		// 		top: 0;
-		// 		left: 0;
-		// 		right: 0;
-		// 		bottom: 0;
-		// 		background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.1) 100%);
-		// 		pointer-events: none;
-		// 	}
-	
-		// 	.header-content {
-		// 		position: relative;
-		// 		z-index: 1;
-		// 	}
-	
-		// 	.stage-name {
-		// 		font-size: 18px;
-		// 		font-weight: 600;
-		// 		margin: 0 0 4px 0;
-		// 		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-		// 	}
-	
-		// 	.stage-meta {
-		// 		font-size: 13px;
-		// 		opacity: 0.9;
-		// 	}
-	
-		// 	.column-stats {
-		// 		margin-top: 12px;
-		// 		font-size: 13px;
-		// 		position: relative;
-		// 		z-index: 1;
-	
-		// 		.stat-row {
-		// 			display: flex;
-		// 			justify-content: space-between;
-		// 			align-items: center;
-		// 			margin-bottom: 4px;
-		// 		}
-	
-		// 		.deal-count {
-		// 			font-weight: 500;
-		// 		}
-	
-		// 		.overdue-count {
-		// 			background: rgba(255, 255, 255, 0.2);
-		// 			padding: 2px 8px;
-		// 			border-radius: 12px;
-		// 			font-size: 11px;
-		// 			font-weight: 500;
-		// 		}
-	
-		// 		.value-row {
-		// 			display: flex;
-		// 			justify-content: space-between;
-		// 			align-items: center;
-		// 		}
-	
-		// 		.total-value {
-		// 			font-weight: 600;
-		// 			font-size: 16px;
-		// 		}
-	
-		// 		.weighted-value {
-		// 			font-size: 12px;
-		// 			opacity: 0.8;
-		// 		}
-		// 	}
-		// }
-	
-		.deals-container {
-			// flex: 1;
-			// padding: 16px;
-			overflow-y: auto;
-			// position: relative;
-	
-			&.accepting-drop {
-				background: rgba(59, 130, 246, 0.05);
-			}
-	
-			// Custom scrollbar
+
+		// Styles for react-window virtualized list
+		.virtualized-deals-list {
+			padding: 0 !important; // Remove any default padding
+			
 			&::-webkit-scrollbar {
 				width: 6px;
 			}
-	
+
 			&::-webkit-scrollbar-track {
 				background: transparent;
 			}
-	
+
 			&::-webkit-scrollbar-thumb {
 				background: #cbd5e0;
 				border-radius: 3px;
 			}
-	
+
 			&::-webkit-scrollbar-thumb:hover {
 				background: #a0aec0;
 			}
-		}
-	
-		.empty-stage {
-			// display: flex;
-			// align-items: center;
-			// justify-content: center;
-			// min-height: 200px;
-			// text-align: center;
-	
-			.empty-message {
-				color: #64748b;
-	
-				.empty-icon {
-					// font-size: 32px;
-					// margin-bottom: 8px;
-					// display: block;
-					// opacity: 0.5;
-				}
-	
-				// p {
-				// 	font-size: 14px;
-				// 	font-weight: 500;
-				// 	margin: 0 0 4px 0;
-				// }
-	
-				small {
-					font-size: 12px;
-					opacity: 0.7;
-					line-height: 1.4;
-					display: block;
+
+			scroll-behavior: smooth;
+			overflow-x: hidden !important;
+			overflow-y: auto !important;
+
+			// Ensure proper pointer events
+			> div {
+				pointer-events: none; // Wrapper has no pointer events
+				
+				> div {
+					pointer-events: none; // Row wrapper has no pointer events
 				}
 			}
 		}
-	
-		.drop-indicator {
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			background: rgba(59, 130, 246, 0.1);
-			border-radius: 12px;
-			z-index: 10;
-			pointer-events: none;
-	
-			// .drop-indicator-text {
-			// 	background: #3b82f6;
-			// 	color: white;
-			// 	padding: 8px 16px;
-			// 	border-radius: 20px;
-			// 	font-size: 13px;
-			// 	font-weight: 500;
-			// 	box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-			// }
+
+		// Fallback scrollbar styles
+		&::-webkit-scrollbar {
+			width: 6px;
+		}
+
+		&::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		&::-webkit-scrollbar-thumb {
+			background: #cbd5e0;
+			border-radius: 3px;
+		}
+
+		&::-webkit-scrollbar-thumb:hover {
+			background: #a0aec0;
+		}
+
+		// Non-virtualized deals container
+		.non-virtualized-deals {
+			overflow-y: auto;
+			max-height: calc(100vh - 300px);
+			padding: 0; // Remove padding to let deal cards control spacing
+
+			&::-webkit-scrollbar {
+				width: 6px;
+			}
+
+			&::-webkit-scrollbar-track {
+				background: transparent;
+			}
+
+			&::-webkit-scrollbar-thumb {
+				background: #cbd5e0;
+				border-radius: 3px;
+			}
+
+			&::-webkit-scrollbar-thumb:hover {
+				background: #a0aec0;
+			}
+
+			// First card top margin
+			> .deal-card:first-child {
+				margin-top: 16px;
+			}
+
+			// Last card bottom margin
+			> .deal-card:last-child {
+				margin-bottom: 16px;
+			}
 		}
 	}
+
+	.empty-stage {
+		.empty-message {
+			color: #64748b;
+
+			small {
+				font-size: 12px;
+				opacity: 0.7;
+				line-height: 1.4;
+				display: block;
+			}
+		}
+	}
+
+	.drop-indicator {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(59, 130, 246, 0.1);
+		border-radius: 12px;
+		z-index: 10;
+		pointer-events: none;
+	}
+}
+
+// Deal card specific adjustments
+.deal-card {
+	margin: 0 10px 12px 10px; // Horizontal margins only, controlled vertical spacing
 	
-
-// Responsive adjustments
-// @media (max-width: 768px) {
-// 	.pipeline-column {
-// 		min-height: 400px;
-
-// 		.column-header {
-// 			padding: 12px;
-
-// 			.stage-name {
-// 				font-size: 16px;
-// 			}
-
-// 			.column-stats {
-// 				margin-top: 8px;
-// 				font-size: 12px;
-
-// 				.total-value {
-// 					font-size: 14px;
-// 				}
-// 			}
-// 		}
-
-// 		.deals-container {
-// 			padding: 12px;
-// 		}
-// 	}
-// }
+	// In virtualized list, cards are positioned absolutely
+	.virtualized-deals-list & {
+		margin: 0; // Remove margins in virtualized context
+	}
+}

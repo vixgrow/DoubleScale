@@ -10,15 +10,15 @@ import CreatePipelineIcon from '@quillcrm/components/icons/create-pipeline';
 
 
 export const NewPipelineModal = ({ visible, onClose, onSuccess }) => {
-	const handleSuccess = (newPipeline) => {
-		onSuccess(newPipeline); 
-	};
+	// const handleSuccess = (newPipeline) => {
+	// 	onSuccess(newPipeline); 
+	// };
+	
 	return (
 		<PipelineModal
 			visible={visible}
 			onClose={onClose}
-			// onSuccess={onSuccess}
-			onSuccess={handleSuccess}
+			onSuccess={onSuccess}
 			mode="create"
 			title={__('Create New Pipeline', 'quillcrm')}
 			subtitle={__(

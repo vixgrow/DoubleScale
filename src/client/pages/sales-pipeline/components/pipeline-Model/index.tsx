@@ -2,10 +2,8 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import { useState, useEffect,useRef } from '@wordpress/element';
 import ConfigAPI from '@quillcrm/config';
-
 /**
  * External dependencies
  */
@@ -37,6 +35,7 @@ import { usePipelineOperations } from '../../hooks/use-pipeline-operations';
 import { PipelineStageEditor } from './PipelineStageEditor';
 import { PipelinePreviewBoard } from './PipelinePreviewBoard';
 import './style.scss';
+import { NoticeMessage } from '@/client/types';
 
 const formSchema = z.object({
 	name: z
@@ -52,8 +51,7 @@ const formSchema = z.object({
 export interface PipelineModalProps {
 	visible: boolean;
 	onClose: () => void;
-	// onSuccess: () => void;
-	onSuccess: (pipeline?: any) => void;
+	onSuccess: (pipeline?: any, notice?: { type: 'success' | 'error'; message: string }) => void;
 	pipeline?: any | null;
 	mode: 'create' | 'duplicate' | 'edit';
 	title?: string;
@@ -74,11 +72,11 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 	const [loading, setLoading] = useState(false);
 	const [customStages, setCustomStages] = useState(pipeline?.stages || []);
 	const [originalPipeline, setOriginalPipeline] = useState<any | null>(null);
-
+    const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const { createPipeline, updatePipeline, duplicatePipeline } =
 		usePipelineOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
+
+
 
 	const DEFAULT_STAGES = ConfigAPI.getDefaultStages();
 
@@ -136,26 +134,13 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					pipeline.id,
 					values.name.trim()
 				);
-				createNotice?.({
-					type: 'success',
-					message: __(
-						`Pipeline "${values.name}" duplicated successfully!`,
-						'quillcrm'
-					),
-				});
 			} else if (mode === 'create') {
 				updatedPipeline = await createPipeline({
 					name: values.name,
 					description: '',
 					stages: customStages || [],
 				});
-				createNotice?.({
-					type: 'success',
-					message: __(
-						`Pipeline "${values.name}" created successfully!`,
-						'quillcrm'
-					),
-				});
+
 			} else if (mode === 'edit' && pipeline) {
 				updatedPipeline = await updatePipeline(pipeline.id, {
 					name: values.name.trim(),
@@ -163,23 +148,27 @@ export const PipelineModal: React.FC<PipelineModalProps> = ({
 					sort_order: pipeline?.sort_order || 0,
 					stages: customStages || [],
 				});
-
-				createNotice?.({
-					type: 'success',
-					message: __(
-						`Pipeline "${values.name}" updated successfully!`,
-						'quillcrm'
-					),
-				});
+				
 			}
 			onClose();
 			// Pass the updated pipeline to the parent for proper refresh
-			await onSuccess(updatedPipeline);
+			// await onSuccess(updatedPipeline);
+			onSuccess(updatedPipeline, {
+				type: 'success',
+				message: __(
+				  mode === 'duplicate'
+					? `Pipeline "${values.name}" duplicated successfully!`
+					: mode === 'edit'
+					  ? `Pipeline "${values.name}" updated successfully!`
+					  : `Pipeline "${values.name}" created successfully!`,
+				  'quillcrm'
+				),
+			  });
 			form.reset();
 		} catch (error) {
-			createNotice?.({
+			setNotice({
 				type: 'error',
-				message:
+					message:
 					error instanceof Error
 						? error.message
 						: __('Failed to process pipeline', 'quillcrm'),

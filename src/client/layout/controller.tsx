@@ -191,7 +191,7 @@ export const Controller = ({ page }) => {
 		<motion.div layoutScroll className="qcrm-page-component-wrapper">
 			<div className="flex justify-between items-center w-full">
 				<div
-					className="text-[#CB5301] flex items-center gap-2 cursor-pointer text-base p-0 hover:bg-transparent shadow-none bg-transparent"
+					className="text-[#CB5301] flex items-center gap-2 cursor-pointer text-base p-0 bg-transparent"
 					onClick={handleBackToDashboard}
 				>
 					<WordPressIcon />
@@ -397,14 +397,6 @@ registerAdminPage('deals-analytics', {
 	path: 'deals-analytics',
 	component: () => <AnalyticsAndReports defaultTab="deals" />,
 	label: __('Deals Analytics', 'quillcrm'),
-	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
-});
-
-registerAdminPage('deals-Source-analytics', {
-	path: 'deals-Source-analytics',
-	component: () => <AnalyticsAndReports defaultTab="deals" />,
-	label: __('Deals Source Analytics', 'quillcrm'),
 	hidden: true,
 	requiredCapability: ['quillcrm_crm_manager'],
 });

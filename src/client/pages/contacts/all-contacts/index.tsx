@@ -17,7 +17,7 @@ import {
 	ContactsImportModal,
 	ContactsExportModal,
 } from './contacts-modals';
-import { NoData, ContactsIcon, GradientAddContactIcon, GradientContactsIcon } from '@quillcrm/components';
+import { NoData, GradientContactsIcon } from '@quillcrm/components';
 
 export interface AllContactsRef {
 	openCreateContactModal: () => void;
@@ -36,18 +36,12 @@ const AllContactsContent = forwardRef<AllContactsRef, AllContactsProps>(
 			setCreateContactVisible,
 			setImportModalVisible,
 			setExportModalVisible,
-			setContact,
 			loading,
 			hasRecords,
 		} = useContactsContext();
 
 		// Handler functions
 		const handleOpenCreateContactModal = () => {
-			setContact({
-				email: '',
-				first_name: '',
-				last_name: '',
-			});
 			setCreateContactVisible(true);
 		};
 

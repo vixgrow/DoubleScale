@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { useReportFilters } from '../../../../hooks/useReportFilters';
 import { cn } from '../../../../lib/utils';
 import ReportFilters from '@quillcrm/components/reports/ReportFilters';
-import { ContactsIcon, PageHeader } from '@quillcrm/components';
+import { ContactsIcon, PageHeader, PageTabs } from '@quillcrm/components';
 import DealOwnerIcon from '@quillcrm/components/icons/deal-owner';
 import DealValueIcon from '@quillcrm/components/icons/deal-value';
 import TriangleUpIcon from '@quillcrm/components/icons/triangleUp';
@@ -18,6 +18,7 @@ import CloseIcon from '@quillcrm/components/icons/close';
 import CloseLostIcon from '@quillcrm/components/icons/close-lost';
 import TrendingUpIcon from '@quillcrm/components/icons/trendingUp';
 import TrendingDownIcon from '@quillcrm/components/icons/trendingDown';
+import DealSourceAnalytics from '../deal-source';
 
 interface ContactsDealsReportsProps {
 	contacts_created: number;

@@ -1,17 +1,8 @@
 import React, { useState } from 'react';
-import { Edit, Trash2, Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { __ } from '@wordpress/i18n';
 
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -22,12 +13,16 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { DataTable } from '@/components/ui/data-table';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import AddNewManager from './components/add-new-manager';
 import EditManager from './components/edit-manager';
 import { useUserManagement } from '../../../hooks/use-user-management';
 import { CRMUser } from '../../../services/user-management';
-import { ManagerRole, ManagerRoleLabels } from './components/types';
+import { ManagerRole } from './components/types';
+import { getManagerColumns } from './columns';
+import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable';
+import { ColoredDeleteIcon } from '@quillcrm/components';
 
 const Managers: React.FC = () => {
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -35,6 +30,9 @@ const Managers: React.FC = () => {
 	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 	const [managerToDelete, setManagerToDelete] = useState<number | null>(null);
 	const [managerToEdit, setManagerToEdit] = useState<CRMUser | null>(null);
+	const [page, setPage] = useState<number>(1);
+	const [perPage, setPerPage] = useState<number>(10);
+	const [totalRecords, setTotalRecords] = useState<number>(0);
 	const {
 		users: managers,
 		isLoading,
@@ -45,6 +43,27 @@ const Managers: React.FC = () => {
 		updateUserRole,
 		removeUser,
 	} = useUserManagement();
+
+	// Keep total count in sync
+	React.useEffect(() => {
+		setTotalRecords(managers.length);
+	}, [managers]);
+
+	// Server-like pagination hook (UI-only for now)
+	const serverSideTable = useServerSideTable({
+		page,
+		perPage,
+		totalRecords,
+		setPage,
+		setPerPage,
+	});
+
+	// Slice managers for current page (client-side emulation)
+	const pagedManagers = React.useMemo(() => {
+		const start = (page - 1) * perPage;
+		const end = start + perPage;
+		return managers.slice(start, end);
+	}, [managers, page, perPage]);
 
 	const handleAddManager = () => {
 		setIsAddModalOpen(true);
@@ -98,34 +117,23 @@ const Managers: React.FC = () => {
 		}
 	};
 
-	// Mock table object for pagination
-	const mockTable = {
-		getState: () => ({
-			pagination: {
-				pageIndex: 0,
-				pageSize: 10,
-			},
-		}),
-		getPageCount: () => 1,
-		getFilteredSelectedRowModel: () => ({ rows: [] }),
-		getFilteredRowModel: () => ({ rows: managers }),
-		setPageSize: (size: number) => console.log('Set page size:', size),
-		setPageIndex: (index: number) => console.log('Set page index:', index),
-		getCanPreviousPage: () => false,
-		getCanNextPage: () => false,
-		previousPage: () => console.log('Previous page'),
-		nextPage: () => console.log('Next page'),
-	};
+	// Columns for DataTable
+	const columns = getManagerColumns({
+		onEdit: handleEditManager,
+		onDelete: handleDeleteManager,
+		isUpdating,
+		isDeleting,
+	});
 
 	return (
 		<div className="space-y-6">
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-2xl font-semibold text-[#1E3A8A] mb-2">
+					<div className="text-[#09090B] font-semibold text-2xl">
 						{__('CRM Managers', 'quillcrm')}
-					</h1>
-					<p className="text-sm text-gray-600">
+					</div>
+					<p className="text-sm text-gray-400">
 						{__(
 							'All WordPress Administrators automatically get full access to QuillCRM',
 							'quillcrm'
@@ -135,7 +143,6 @@ const Managers: React.FC = () => {
 				<Button
 					onClick={handleAddManager}
 					disabled={isAdding}
-					className="bg-[#3B82F6] hover:bg-[#2563EB] text-white px-6"
 				>
 					{isAdding ? (
 						<Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -147,126 +154,18 @@ const Managers: React.FC = () => {
 			</div>
 
 			{/* Table */}
-			<div className="border rounded-lg">
-				{isLoading ? (
-					<div className="flex items-center justify-center p-8">
-						<Loader2 className="w-6 h-6 animate-spin mr-2" />
-						{__('Loading CRM users...', 'quillcrm')}
-					</div>
-				) : (
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead className="font-semibold text-gray-700">
-									ID
-								</TableHead>
-								<TableHead className="font-semibold text-gray-700">
-									Name
-								</TableHead>
-								<TableHead className="font-semibold text-gray-700">
-									Email
-								</TableHead>
-								<TableHead className="font-semibold text-gray-700">
-									Role
-								</TableHead>
-								<TableHead className="font-semibold text-gray-700">
-									Actions
-								</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{managers.length === 0 ? (
-								<TableRow>
-									<TableCell
-										colSpan={5}
-										className="text-center py-8 text-gray-500"
-									>
-										{__(
-											'No CRM users found. Add your first manager above.',
-											'quillcrm'
-										)}
-									</TableCell>
-								</TableRow>
-							) : (
-								managers.map((manager) => (
-									<TableRow key={manager.id}>
-										<TableCell className="font-medium">
-											{manager.id}
-										</TableCell>
-										<TableCell>{manager.name}</TableCell>
-										<TableCell>{manager.email}</TableCell>
-										<TableCell>
-											<Badge
-												variant="secondary"
-												className={`text-xs ${
-													manager.crm_role ===
-													'quillcrm_crm_manager'
-														? 'bg-blue-100 text-blue-700'
-														: 'bg-green-100 text-green-700'
-												}`}
-											>
-												{
-													ManagerRoleLabels[
-														manager.crm_role
-													]
-												}
-											</Badge>
-										</TableCell>
-										<TableCell>
-											<div className="flex items-center gap-2">
-												<Button
-													variant="outline"
-													size="sm"
-													onClick={() =>
-														handleEditManager(
-															manager.id
-														)
-													}
-													disabled={isUpdating}
-													className="text-blue-600 border-blue-200 hover:bg-blue-50"
-													title={__(
-														'Edit role',
-														'quillcrm'
-													)}
-												>
-													{isUpdating ? (
-														<Loader2 className="w-4 h-4 animate-spin" />
-													) : (
-														<Edit className="w-4 h-4" />
-													)}
-												</Button>
-												<Button
-													variant="outline"
-													size="sm"
-													onClick={() =>
-														handleDeleteManager(
-															manager.id
-														)
-													}
-													disabled={isDeleting}
-													className="text-red-600 border-red-200 hover:bg-red-50"
-													title={__(
-														'Remove CRM access',
-														'quillcrm'
-													)}
-												>
-													{isDeleting ? (
-														<Loader2 className="w-4 h-4 animate-spin" />
-													) : (
-														<Trash2 className="w-4 h-4" />
-													)}
-												</Button>
-											</div>
-										</TableCell>
-									</TableRow>
-								))
-							)}
-						</TableBody>
-					</Table>
-				)}
-
-				{/* Pagination */}
-				<DataTablePagination table={mockTable} />
+			<div className="">
+				<DataTable
+					columns={columns}
+					data={pagedManagers}
+					showMainActions={false}
+					config={{}}
+					showPagination={false}
+					initialPageSize={perPage}
+					setPage={setPage}
+					loading={isLoading}
+				/>
+				<DataTablePagination table={serverSideTable} />
 			</div>
 
 			{/* Add New Manager Modal */}
@@ -292,29 +191,35 @@ const Managers: React.FC = () => {
 				open={deleteConfirmOpen}
 				onOpenChange={setDeleteConfirmOpen}
 			>
-				<AlertDialogContent>
+				<AlertDialogContent className="max-w-[38rem] p-8 z-[150200]">
 					<AlertDialogHeader>
-						<AlertDialogTitle>
-							{__('Remove CRM Access', 'quillcrm')}
-						</AlertDialogTitle>
-						<AlertDialogDescription>
-							{__(
-								"Are you sure you want to remove this user's CRM access? This action cannot be undone.",
-								'quillcrm'
-							)}
-						</AlertDialogDescription>
+						<div className="flex flex-col items-center justify-center gap-6">
+							<div className="flex items-center justify-center rounded-3xl p-5 bg-[#FCDADA] text-[#EF4444]">
+								<ColoredDeleteIcon />
+							</div>
+							<AlertDialogTitle className="text-2xl font-bold text-[#09090B] text-center">
+								{__('Remove CRM Access', 'quillcrm')}
+							</AlertDialogTitle>
+							<AlertDialogDescription className="text-center text-[#6B7280]">
+								{__(
+									"Are you sure you want to remove this user's CRM access? This action cannot be undone.",
+									'quillcrm'
+								)}
+							</AlertDialogDescription>
+						</div>
 					</AlertDialogHeader>
-					<AlertDialogFooter>
+					<AlertDialogFooter className="flex gap-2 mt-4">
 						<AlertDialogCancel
 							onClick={() => setDeleteConfirmOpen(false)}
+							className="flex-1"
 						>
-							{__('Cancel', 'quillcrm')}
+							{__('Back', 'quillcrm')}
 						</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={confirmDeleteManager}
-							className="bg-red-600 hover:bg-red-700 text-white"
+							className="flex-1 bg-destructive hover:bg-destructive/90 text-white"
 						>
-							{__('Remove Access', 'quillcrm')}
+							{__('Yes, Remove', 'quillcrm')}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

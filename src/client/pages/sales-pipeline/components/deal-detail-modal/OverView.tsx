@@ -30,6 +30,7 @@ import { DatePicker } from '@quillcrm/components/ui/date-picker';
 
 interface DealOverViewModalProps {
 	dealId: number | null;
+	deal?: Deal | null;
 	onUpdate?: () => void;
 	onEdit?: (deal: Deal) => void;
 	onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
@@ -44,17 +45,18 @@ interface Contact {
 
 export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 	dealId,
+	deal: initialDeal,
 	onUpdate,
 	onEdit,
 	onNotice
 }) => {
-	const [deal, setDeal] = useState<Deal | null>(null);
-	const [loading, setLoading] = useState(false);
+	const [deal, setDeal] = useState<Deal | null>(initialDeal || null);
 	const [editingField, setEditingField] = useState<string | null>(null);
 	const [contacts, setContacts] = useState<Contact[]>([]);
 	const [contactsLoading, setContactsLoading] = useState(false);
+	const [isSaving, setIsSaving] = useState(false);
 
-	const { getDeal, deleteDeal, updateDeal } = useDealOperations();
+	const { updateDeal } = useDealOperations();
 	const { isDealOwner } = useCapabilities();
 	const {
 		users: owners,
@@ -67,7 +69,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 	const handleSaveInline = async (field: string, value: any) => {
 		try {
 			if (!deal) return;
-			setLoading(true);
+			setIsSaving(true);
 
 			// Update the deal on server
 			await updateDeal(deal.id, { [field]: value });
@@ -87,7 +89,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 			  });
 		} finally {
 			setEditingField(null);
-			setLoading(false);
+			setIsSaving(false);
 		}
 	};
 
@@ -125,41 +127,26 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 		}
 	}, []);
 
-	// Fetch deal data when modal opens
+	// Update local deal state when prop changes
+	useEffect(() => {
+		if (initialDeal) {
+			const formattedDate = initialDeal.expected_close_date
+				? initialDeal.expected_close_date.split('T')[0]
+				: null;
+			setDeal({
+				...initialDeal,
+				expected_close_date: formattedDate,
+			});
+		}
+	}, [initialDeal]);
+
+	// Load contacts and owners when modal opens
 	useEffect(() => {
 		if (dealId) {
-			fetchDealDetails();
 			loadContacts();
 			loadOwners();
 		}
 	}, [dealId, loadContacts, loadOwners]);
-
-	const fetchDealDetails = async () => {
-		if (!dealId) return;
-
-		setLoading(true);
-		try {
-			const dealData = await getDeal(dealId, true);
-			const formattedDate = dealData.expected_close_date
-				? dealData.expected_close_date.split('T')[0]
-				: null;
-			// setDeal(dealData);
-			setDeal({
-				...dealData,
-				expected_close_date: formattedDate,
-			});
-		} catch (error) {
-			createNotice?.({
-				type: 'error',
-				message:
-					error instanceof Error
-						? error.message
-						: __('Failed to load deal details', 'quillcrm'),
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -194,18 +181,15 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 	if (!deal) return null;
 
 	return (
-		<div className="border flex flex-col gap-6 border-[#DEE1E6] bg-[#F8F8F8] rounded-[20px] p-6">
+		<div className={`border flex flex-col gap-6 border-[#DEE1E6] bg-[#F8F8F8] rounded-[20px] p-6 relative transition-opacity ${isSaving ? 'opacity-60 pointer-events-none' : ''}`}>
 			{/* title */}
 			<p className="text-[#09090B] text-[24px] font-medium leading-normal">
 				{__('Overview', 'quillcrm')}
 			</p>
-			{loading || !deal ? (
-				<DealOverviewSkeleton />
-			) : (
-				<div className="grid grid-cols-2 gap-5">
+			<div className="grid grid-cols-2 gap-5">
 					{/* Related Contact - Select */}
 					{deal.contact && (
-						<div className="flex justify-between items-center">
+						<div className="flex justify-between items-start">
 							<div className="flex flex-col gap-2 w-full">
 								<p className="text-[#777] text-base font-medium">
 									{__('Related Contact', 'quillcrm')}
@@ -309,7 +293,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 
 					{/* Deal Owner - Select */}
 					{deal.owner && (
-						<div className="flex justify-between items-center border-l border-[#DEE1E6] pl-4">
+						<div className="flex justify-between items-start border-l border-[#DEE1E6] pl-4">
 							<div className="flex flex-col gap-2 w-full">
 								<p className="text-[#777] text-base font-medium">
 									{__('Deal Owner', 'quillcrm')}
@@ -405,7 +389,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 					)}
 
 					{/* Deal Source - Select */}
-					<div className="flex justify-between items-center">
+					<div className="flex justify-between items-start">
 						<div className="flex flex-col gap-2 w-full">
 							<p className="text-[#777] text-base font-medium">
 								{__('Deal Source', 'quillcrm')}
@@ -461,7 +445,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 					</div>
 
 					{/* Expected Close Date */}
-					<div className="flex justify-between items-center border-l border-[#DEE1E6] pl-4">
+					<div className="flex justify-between items-start border-l border-[#DEE1E6] pl-4">
 						<div className="flex flex-col gap-2 w-full">
 							<p className="text-[#777] text-base font-medium">
 								{__('Expected Close Date', 'quillcrm')}
@@ -512,7 +496,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 					</div>
 
 					{/* Priority - Select */}
-					<div className="flex justify-between items-center">
+					<div className="flex justify-between items-start">
 						<div className="flex flex-col gap-2 w-full">
 							<p className="text-[#777] text-base font-medium">
 								{__('Priority', 'quillcrm')}
@@ -598,7 +582,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 
 					{/* weighted value */}
 					{deal.weighted_value && (
-						<div className="flex justify-between items-center border-l border-[#DEE1E6] pl-4">
+						<div className="flex justify-between items-start border-l border-[#DEE1E6] pl-4">
 							<div className="flex flex-col gap-2">
 								<p className="text-[#777] text-base font-medium">
 									{__('Weighted Value', 'quillcrm')}
@@ -618,7 +602,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 
 					{/* create-at */}
 					{deal.created_at && (
-						<div className="flex justify-between items-center">
+						<div className="flex justify-between items-start">
 							<div className="flex flex-col gap-2">
 								<p className="text-[#777] text-base font-medium">
 									{__('Create Date', 'quillcrm')}
@@ -632,7 +616,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 
 					{/* last activity date */}
 					{deal.updated_at && (
-						<div className="flex justify-between items-center border-l border-[#DEE1E6] pl-4">
+						<div className="flex justify-between items-start border-l border-[#DEE1E6] pl-4">
 							<div className="flex flex-col gap-2">
 								<p className="text-[#777] text-base font-medium">
 									{__('Last activity date', 'quillcrm')}
@@ -646,7 +630,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 
 					{/* create by */}
 					{deal.owner && (
-						<div className="flex justify-between items-center">
+						<div className="flex justify-between items-start">
 							<div className="flex flex-col gap-2">
 								<p className="text-[#777] text-base font-medium">
 									{__('Created by', 'quillcrm')}
@@ -671,8 +655,7 @@ export const DealOverViewModal: React.FC<DealOverViewModalProps> = ({
 							</div>
 						</div>
 					)}
-				</div>
-			)}
+			</div>
 		</div>
 	);
 };

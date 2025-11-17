@@ -44,6 +44,18 @@ export const getBlockDefinition = (
 	isUnknown: boolean;
 	info?: UnknownBlockInfo;
 } => {
+	// Check if block type is missing/empty
+	if (!blockType || blockType.trim() === '') {
+		return {
+			block: unknownBlock,
+			isUnknown: true,
+			info: {
+				originalType: blockType || '',
+				originalProps: {},
+			},
+		};
+	}
+
 	const blockDef = registry[blockType];
 
 	// Block not found in registry (Pro plugin not installed, block removed, etc.)
@@ -58,7 +70,20 @@ export const getBlockDefinition = (
 		};
 	}
 
-	// Block is available
+	// Check if block is marked as Pro (check the isPro property from registration)
+	// This allows blocks like 'banner' to show as UnknownBlock if isPro: true
+	if (blockDef.isPro && !blockDef.isProActivated) {
+		return {
+			block: unknownBlock,
+			isUnknown: true,
+			info: {
+				originalType: blockType,
+				originalProps: {},
+			},
+		};
+	}
+
+	// Block is available and not a Pro block
 	return {
 		block: blockDef,
 		isUnknown: false,

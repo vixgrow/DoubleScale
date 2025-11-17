@@ -32,14 +32,6 @@ use QuillCRM\User_Roles\Permissions;
  */
 class Rest_Automation_Controller extends REST_Controller {
 
-
-
-
-
-
-
-
-
 	/**
 	 * REST Base
 	 *
@@ -1135,44 +1127,44 @@ class Rest_Automation_Controller extends REST_Controller {
 		// Define plugin dependencies based on rule group
 		$plugin_dependencies = array(
 			'woocommerce'               => array(
-				'plugin'      => 'woocommerce/woocommerce.php',
-				'label'       => 'WooCommerce',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				'plugin'     => 'woocommerce/woocommerce.php',
+				'label'      => 'WooCommerce',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'woocommerce_current_order' => array(
-				'plugin'      => 'woocommerce/woocommerce.php',
-				'label'       => 'WooCommerce',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				'plugin'     => 'woocommerce/woocommerce.php',
+				'label'      => 'WooCommerce',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'woocommerce_membership'    => array(
-				'plugin'      => 'woocommerce-memberships/woocommerce-memberships.php',
-				'label'       => 'WooCommerce Memberships',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
+				'plugin'     => 'woocommerce-memberships/woocommerce-memberships.php',
+				'label'      => 'WooCommerce Memberships',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
 			),
 			'woocommerce_whishlist'     => array(
-				'plugin'      => 'woocommerce-wishlist/woocommerce-wishlist.php',
-				'label'       => 'WooCommerce Wishlist',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-wishlist/woocommerce-wishlist.php' ),
+				'plugin'     => 'woocommerce-wishlist/woocommerce-wishlist.php',
+				'label'      => 'WooCommerce Wishlist',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce-wishlist/woocommerce-wishlist.php' ),
 			),
 			'woocommerce_subscription'  => array(
-				'plugin'      => 'woocommerce-subscriptions/woocommerce-subscriptions.php',
-				'label'       => 'WooCommerce Subscriptions',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
+				'plugin'     => 'woocommerce-subscriptions/woocommerce-subscriptions.php',
+				'label'      => 'WooCommerce Subscriptions',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
 			),
 			'woocommerce_review'        => array(
-				'plugin'      => 'woocommerce/woocommerce.php',
-				'label'       => 'WooCommerce',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				'plugin'     => 'woocommerce/woocommerce.php',
+				'label'      => 'WooCommerce',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'cart'                      => array(
-				'plugin'      => 'woocommerce/woocommerce.php',
-				'label'       => 'WooCommerce',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				'plugin'     => 'woocommerce/woocommerce.php',
+				'label'      => 'WooCommerce',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'learndash'                 => array(
-				'plugin'      => 'sfwd-lms/sfwd_lms.php',
-				'label'       => 'LearnDash',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
+				'plugin'     => 'sfwd-lms/sfwd_lms.php',
+				'label'      => 'LearnDash',
+				'is_enabled' => quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 			),
 		);
 
@@ -1180,9 +1172,9 @@ class Rest_Automation_Controller extends REST_Controller {
 		$forms = Forms_Manager::instance()->get_all_forms();
 		foreach ( $forms as $form ) {
 			$plugin_dependencies[ $form->slug ] = array(
-				'plugin'      => $form->slug,
-				'label'       => $form->name,
-				'is_disabled' => ! $form->is_enabled(),
+				'plugin'     => $form->slug,
+				'label'      => $form->name,
+				'is_enabled' => $form->is_enabled(),
 			);
 		}
 
@@ -1200,7 +1192,7 @@ class Rest_Automation_Controller extends REST_Controller {
 						// Check if this rule's group requires a plugin
 						if ( ! empty( $selected_group ) && isset( $plugin_dependencies[ $selected_group ] ) ) {
 							$dependency = $plugin_dependencies[ $selected_group ];
-							$is_active  = $dependency['is_disabled'] ? false : quillcrm_is_plugin_active( $dependency['plugin'] );
+							$is_active  = $dependency['is_enabled'];
 
 							if ( ! $is_active ) {
 								// Store unavailable rule information

@@ -16,13 +16,18 @@ import ConfigAPI from '@quillcrm/config';
 import { formatDateForAPI } from '@quillcrm/utils';
 import { useContactsContext } from './contexts';
 
+interface ContactPayload {
+	email: string;
+	first_name: string;
+	last_name: string;
+}
+
 export const useContactsAPI = () => {
 	const {
 		page,
 		perPage,
 		filters,
 		dateRange,
-		contact,
 		selectedRowKeys,
 		keywords,
 		setTotalRecords,
@@ -65,8 +70,8 @@ export const useContactsAPI = () => {
 		}
 	};
 
-	const createContact = async () => {
-		if (!isEmail(contact.email)) {
+	const createContact = async (contactPayload: ContactPayload) => {
+		if (!isEmail(contactPayload.email)) {
 			setCreateContactVisible(false);
 			showNotice('error', __('Invalid email', 'quillcrm'));
 			return;
@@ -78,7 +83,7 @@ export const useContactsAPI = () => {
 			const response = (await apiFetch({
 				path: '/qc/v1/contacts',
 				method: 'POST',
-				data: contact,
+				data: contactPayload,
 			})) as Contact;
 
 			// Close the create contact modal

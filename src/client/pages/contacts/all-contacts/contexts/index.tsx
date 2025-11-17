@@ -47,11 +47,6 @@ export interface ContactsState {
 	importModalVisible: boolean;
 	exportModalVisible: boolean;
 	isSaving: boolean;
-	contact: {
-		email: string;
-		first_name: string;
-		last_name: string;
-	};
 
 	// Notice state
 	notice: NoticeMessage | null;
@@ -86,7 +81,6 @@ export interface ContactsActions {
 	setImportModalVisible: (visible: boolean) => void;
 	setExportModalVisible: (visible: boolean) => void;
 	setIsSaving: (saving: boolean) => void;
-	setContact: (contact: ContactsState['contact']) => void;
 
 	// Contact navigation actions
 	openContactDialog: (id: string) => void;
@@ -119,7 +113,6 @@ const initialState: ContactsState = {
 	importModalVisible: false,
 	exportModalVisible: false,
 	isSaving: false,
-	contact: { email: '', first_name: '', last_name: '' },
 	notice: null,
 };
 
@@ -163,7 +156,6 @@ export const ContactsProvider: React.FC<{ children: ReactNode }> = ({
 		setExportModalVisible: (exportModalVisible) =>
 			updateState({ exportModalVisible }),
 		setIsSaving: (isSaving) => updateState({ isSaving }),
-		setContact: (contact) => updateState({ contact }),
 		openContactDialog: (id) => {
 			// Navigate to the contact page with the ID in the URL
 			navigate(getToLink(`contacts/${id}`));

@@ -124,12 +124,33 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 			? getAction(actionKey)
 			: getGoal(step.action);
 
-	// Check if action has plugin dependency warning
-	const hasActionWarning = step.settings?._action_warning;
-	const actionLabel = step.settings?._action_label || step.action;
+	// Check if action/goal has plugin dependency warning
+	const hasActionWarning =
+		step.type === 'goal'
+			? step.settings?._goal_warning
+			: step.settings?._action_warning;
+	const actionLabel =
+		step.type === 'goal'
+			? step.settings?._goal_label || step.action
+			: step.settings?._action_label || step.action;
 
-	// If there's an action warning, show only the warning
+	// If there's an action/goal warning, show only the warning
 	if (hasActionWarning) {
+		const warningMessage =
+			step.type === 'goal'
+				? __(
+						'Goal requires a plugin that is not currently active.',
+						'quillcrm'
+					)
+				: __(
+						'Action requires a plugin that is not currently active.',
+						'quillcrm'
+					);
+		const labelText =
+			step.type === 'goal'
+				? __('Goal:', 'quillcrm')
+				: __('Action:', 'quillcrm');
+
 		return (
 			<div className="qcrm-step-fields-content flex flex-col">
 				<Alert
@@ -138,12 +159,9 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 				>
 					<AlertTriangle className="h-4 w-4 text-orange-600" />
 					<AlertDescription className="text-sm text-orange-800">
-						{__(
-							'Action requires a plugin that is not currently active.',
-							'quillcrm'
-						)}
+						{warningMessage}
 						<span className="block mt-1 font-medium">
-							{__('Action:', 'quillcrm')} {actionLabel}
+							{labelText} {actionLabel}
 						</span>
 					</AlertDescription>
 				</Alert>
@@ -197,6 +215,7 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 					onChange={(value) => {
 						setSettings(value);
 					}}
+					stepId={step.id}
 				/>
 			</div>
 

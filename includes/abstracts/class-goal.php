@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Goal
  *
@@ -11,14 +12,17 @@
 
 namespace QuillCRM\Abstracts;
 
+use Exception;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 
 /**
  * Goal class
  */
 abstract class Goal {
+
 
 	/**
 	 * Goal Name
@@ -92,8 +96,18 @@ abstract class Goal {
 			}
 
 			foreach ( $steps as $step ) {
-				if ( $this->is_completed( $step, $data ) ) {
-					$this->enqueue_goal( $contact, $step );
+				// Find all automation contacts waiting at this goal step
+				$automation_contacts = $step->automation->contacts()
+					->where( 'contact_id', $contact->id )
+					->where( 'current_step', $step->id )
+					->where( 'status', 'pending' )
+					->get();
+
+				// Enqueue goal for each automation contact
+				foreach ( $automation_contacts as $automation_contact ) {
+					if ( $this->is_completed( $automation_contact, $data ) ) {
+						$this->enqueue_goal( $automation_contact, $step );
+					}
 				}
 			}
 		} catch ( Exception $e ) {
@@ -115,12 +129,12 @@ abstract class Goal {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Automation_Step_Model $step Automation Step Model.
-	 * @param array                 $data Data.
+	 * @param Automation_Contact_Model $automation_contact Automation Contact Model.
+	 * @param array                    $data Data.
 	 *
 	 * @return bool
 	 */
-	public function is_completed( Automation_Step_Model $step, $data ) {
+	public function is_completed( Automation_Contact_Model $automation_contact, $data ) {
 		return true;
 	}
 
@@ -138,13 +152,13 @@ abstract class Goal {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Contact_Model         $contact Contact Model.
-	 * @param Automation_Step_Model $step Automation Step.
+	 * @param Automation_Contact_Model $automation_contact Automation Contact Model.
+	 * @param Automation_Step_Model    $step Automation Step.
 	 *
 	 * @return void
 	 */
-	public function enqueue_goal( $contact, $step ) {
-		QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automation_goal', $step, $contact->id );
+	public function enqueue_goal( $automation_contact, $step ) {
+		QuillCRM::instance()->automations_tasks->enqueue_sync( 'process_automation_goal', $step, $automation_contact->id );
 	}
 
 	/**

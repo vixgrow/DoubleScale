@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Goals Manager
  * This class is responsible for handling the goals
@@ -17,6 +18,13 @@ use QuillCRM\Abstracts\Goal;
  * Goals class
  */
 final class Goals_Manager {
+
+
+
+
+
+
+
 
 	/**
 	 * Registed goals
@@ -99,10 +107,22 @@ final class Goals_Manager {
 		}
 
 		$this->goals[ $goal->slug ] = $goal;
+
+		// Get triggers and is_disabled from the source group if they exist
+		$triggers = isset( $this->sources[ $goal->source ]['groups'][ $goal->group ]['triggers'] )
+			? $this->sources[ $goal->source ]['groups'][ $goal->group ]['triggers']
+			: array();
+
+		$is_disabled = isset( $this->sources[ $goal->source ]['groups'][ $goal->group ]['is_disabled'] )
+			? $this->sources[ $goal->source ]['groups'][ $goal->group ]['is_disabled']
+			: false;
+
 		$this->sources[ $goal->source ]['groups'][ $goal->group ]['goals'][ $goal->slug ] = array(
 			'label'       => $goal->name,
 			'description' => $goal->description,
 			'fields'      => $goal->get_fields(),
+			'triggers'    => $triggers,
+			'is_disabled' => $is_disabled,
 		);
 	}
 
@@ -139,19 +159,29 @@ final class Goals_Manager {
 	 * @return array
 	 */
 	public function set_sources() {
-		$this->sources = array(
-			'automation' => array(
-				'label'  => __( 'Automation', 'quillcrm' ),
-				'groups' => array(
-					'contact' => array(
-						'label' => __( 'Contact', 'quillcrm' ),
-						'goals' => array(),
-					),
-				),
-			),
-		);
+		 $this->sources = array(
+			 'automation'  => array(
+				 'label'  => __( 'Automation', 'quillcrm' ),
+				 'groups' => array(
+					 'contact' => array(
+						 'label' => __( 'Contact', 'quillcrm' ),
+						 'goals' => array(),
+					 ),
+				 ),
+			 ),
+			 'woocommerce' => array(
+				 'label'  => __( 'WooCommerce', 'quillcrm' ),
+				 'groups' => array(
+					 'coupon' => array(
+						 'label'       => __( 'Coupon', 'quillcrm' ),
+						 'goals'       => array(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+					 ),
+				 ),
+			 ),
+		 );
 
-		$this->sources = apply_filters( 'quillcrm_goals_sources', $this->sources );
+		 $this->sources = apply_filters( 'quillcrm_goals_sources', $this->sources );
 	}
 
 	/**
@@ -160,6 +190,6 @@ final class Goals_Manager {
 	 * @return array
 	 */
 	public function get_sources() {
-		return $this->sources;
+		 return $this->sources;
 	}
 }

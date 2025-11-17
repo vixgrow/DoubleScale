@@ -319,6 +319,83 @@ export const getFilteredRulesGroups = () => {
 };
 
 /**
+ * Get filtered goals (excluding disabled groups)
+ * @returns Filtered goals object
+ */
+export const getFilteredGoals = () => {
+	const allGoals = ConfigAPI.getAutomationGoals();
+	const filteredGoals: any = {};
+
+	Object.keys(allGoals).forEach((sourceKey) => {
+		const source = allGoals[sourceKey];
+		const filteredGroups: any = {};
+
+		Object.keys(source.groups).forEach((groupKey) => {
+			const group = source.groups[groupKey];
+			// Filter out disabled groups
+			if (!group.is_disabled) {
+				filteredGroups[groupKey] = group;
+			}
+		});
+
+		// Only include source if it has groups
+		if (Object.keys(filteredGroups).length > 0) {
+			filteredGoals[sourceKey] = {
+				...source,
+				groups: filteredGroups
+			};
+		}
+	});
+
+	return filteredGoals;
+};
+
+/**
+ * Get filtered goals by trigger (excluding disabled groups and groups not matching the trigger)
+ * @param triggerSlug - Trigger slug to filter by
+ * @returns Filtered goals object
+ */
+export const getFilteredGoalsByTrigger = (triggerSlug?: string) => {
+	const allGoals = ConfigAPI.getAutomationGoals();
+
+	if (!triggerSlug) {
+		return getFilteredGoals();
+	}
+
+	const filteredGoals: any = {};
+
+	Object.keys(allGoals).forEach((sourceKey) => {
+		const source = allGoals[sourceKey];
+		const filteredGroups: any = {};
+
+		Object.keys(source.groups).forEach((groupKey) => {
+			const group = source.groups[groupKey];
+
+			// Filter out disabled groups
+			if (group.is_disabled) {
+				return;
+			}
+
+			// Include group if it has no triggers property (available for all)
+			// or if the triggers array includes the current trigger
+			if (!group.triggers || group.triggers.includes(triggerSlug)) {
+				filteredGroups[groupKey] = group;
+			}
+		});
+
+		// Only include source if it has groups
+		if (Object.keys(filteredGroups).length > 0) {
+			filteredGoals[sourceKey] = {
+				...source,
+				groups: filteredGroups
+			};
+		}
+	});
+
+	return filteredGoals;
+};
+
+/**
  * Get initial rule for RulesBuilder
  * @param rulesGroups - Rules groups map
  * @returns Initial RuleItem
@@ -436,6 +513,30 @@ export const getActionLabel = (step: any): string => {
  */
 export const hasActionWarning = (step: any): boolean => {
 	return step?.settings?._action_warning === true;
+};
+
+/**
+ * Get goal label from step (uses backend-provided label)
+ * @param step - The automation step object
+ * @returns The goal label
+ */
+export const getGoalLabel = (step: any): string => {
+	// Use backend-provided label (works even when plugin is deactivated)
+	if (step?.settings?._goal_label) {
+		return step.settings._goal_label;
+	}
+
+	// Fallback to action slug
+	return step?.action || __('Unknown Goal', 'quillcrm');
+};
+
+/**
+ * Check if goal has a plugin dependency warning
+ * @param step - The automation step object
+ * @returns True if goal requires a missing plugin
+ */
+export const hasGoalWarning = (step: any): boolean => {
+	return step?.settings?._goal_warning === true;
 };
 
 /**

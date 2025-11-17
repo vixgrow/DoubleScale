@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Automation_Contact_Model
  * This class is responsible for handling the Automation Contact model
@@ -20,6 +21,7 @@ use QuillCRM\Models\Automation_Contact_Processes_Model;
  * Automation_Contact_Model class
  */
 class Automation_Contact_Model extends Model {
+
 
 	/**
 	 * Table name
@@ -99,7 +101,7 @@ class Automation_Contact_Model extends Model {
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
 	 */
 	public function contact() {
-		return $this->belongsTo( Contact_Model::class, 'contact_id', 'id' );
+		 return $this->belongsTo( Contact_Model::class, 'contact_id', 'id' );
 	}
 
 	/**
@@ -149,6 +151,21 @@ class Automation_Contact_Model extends Model {
 		return $this->data[ $key ] ?? $default;
 	}
 
+
+	/**
+	 * Set data
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Data.
+	 *
+	 * @return void
+	 */
+	public function set_data( $data ) {
+		$this->data = array_merge( $this->data, $data );
+		$this->save();
+	}
+
 	/**
 	 * Boot
 	 *
@@ -157,11 +174,11 @@ class Automation_Contact_Model extends Model {
 	 * @return void
 	 */
 	public static function boot() {
-		parent::boot();
+		 parent::boot();
 
 		// Delete all the contact processes when the contact is deleted
 		static::deleting(
-			function( $automation_contact ) {
+			function ( $automation_contact ) {
 				$automation_contact->processes()->delete();
 			}
 		);

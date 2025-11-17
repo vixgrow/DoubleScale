@@ -14,11 +14,13 @@ namespace QuillCRM\Managers;
 
 use Exception;
 use QuillCRM\Abstracts\Rule;
+use QuillCRM\Automations\Rules\Forms\Form_Field_Rule_Backend;
 
 /**
  * Rules class
  */
 final class Rules_Manager {
+
 
 
 
@@ -71,6 +73,17 @@ final class Rules_Manager {
 	 */
 	public function __construct() {
 		 $this->set_groups();
+		add_action( 'init', array( $this, 'register_forms_rules' ) );
+	}
+
+	/**
+	 * Register Forms Rules
+	 */
+	public function register_forms_rules() {
+		$forms = Forms_Manager::instance()->get_all_forms();
+		foreach ( $forms as $form ) {
+			$this->register( new Form_Field_Rule_Backend( $form ) );
+		}
 	}
 
 	/**
@@ -211,10 +224,11 @@ final class Rules_Manager {
 
 		$this->rules[ $rule->slug ]                           = $rule;
 		$this->groups[ $rule->group ]['rules'][ $rule->slug ] = array(
-			'name'      => $rule->name,
-			'type'      => $rule->type,
-			'operators' => $rule->get_operators(),
-			'options'   => $rule->get_options(),
+			'name'              => $rule->name,
+			'type'              => $rule->type,
+			'operators'         => $rule->get_operators(),
+			'options'           => $rule->get_options(),
+			'required_triggers' => $rule->required_triggers,
 		);
 	}
 
@@ -241,6 +255,12 @@ final class Rules_Manager {
 	public function get_rule( $slug ) {
 		if ( isset( $this->rules[ $slug ] ) ) {
 			return $this->rules[ $slug ];
+		}
+
+		foreach ( $this->rules as $registered_slug => $rule ) {
+			if ( substr( $registered_slug, -1 ) === '_' && strpos( $slug, $registered_slug ) === 0 ) {
+				return $rule;
+			}
 		}
 
 		return null;

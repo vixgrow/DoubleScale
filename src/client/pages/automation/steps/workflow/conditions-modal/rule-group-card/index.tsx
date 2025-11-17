@@ -43,6 +43,7 @@ interface RuleGroupCardProps {
 				string,
 				{
 					name: string;
+					required_triggers?: string[];
 				}
 			>;
 		}

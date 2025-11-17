@@ -32,9 +32,6 @@ use QuillCRM\User_Roles\Permissions;
  */
 class Rest_Automation_Controller extends REST_Controller {
 
-
-
-
 	/**
 	 * REST Base
 	 *
@@ -904,6 +901,54 @@ class Rest_Automation_Controller extends REST_Controller {
 						$step->_unavailable_rules       = array();
 						$step->_unavailable_rules_count = 0;
 					}
+				} elseif ( $step->type === 'goal' && ! empty( $step->action ) ) {
+
+					try {
+						$goal = Goals_Manager::instance()->get_goal( $step->action );
+
+						// Action exists, check if its required plugin is active
+						$goal_plugin_check = $this->check_goal_plugin_dependency( $goal );
+
+						if ( ! $goal_plugin_check['is_active'] ) {
+							$has_warnings = true;
+							$warnings[]   = array(
+								'type'         => 'goal',
+								'step_id'      => $step->id,
+								'slug'         => $step->action,
+								'message'      => $goal_plugin_check['message'],
+								'plugin_label' => $goal_plugin_check['plugin_label'],
+							);
+
+							// Store action label and warning
+							$settings                  = $step->settings ?: array();
+							$settings['_goal_label']   = $goal->name;
+							$settings['_goal_warning'] = true;
+							$step->settings            = $settings;
+						} else {
+							// Action exists and plugin is active, store its label
+							$settings                = $step->settings ?: array();
+							$settings['_goal_label'] = $goal->name;
+							unset( $settings['_goal_warning'] );
+							$step->settings = $settings;
+						}
+					} catch ( \Exception $e ) {
+						// Goal not found - plugin missing
+						$has_warnings = true;
+						$warnings[]   = array(
+							'type'    => 'goal',
+							'step_id' => $step->id,
+							'slug'    => $step->action,
+							'message' => __( 'Goal requires a plugin that is not currently active.', 'quillcrm' ),
+						);
+
+						// Store goal label (slug) if not already stored and add warning flag
+						$settings = $step->settings ?: array();
+						if ( empty( $settings['_goal_label'] ) ) {
+							$settings['_goal_label'] = $step->action;
+						}
+						$settings['_goal_warning'] = true;
+						$step->settings            = $settings;
+					}
 				}
 			}
 		}
@@ -1082,44 +1127,44 @@ class Rest_Automation_Controller extends REST_Controller {
 		// Define plugin dependencies based on rule group
 		$plugin_dependencies = array(
 			'woocommerce'               => array(
-				'plugin'      => 'woocommerce/woocommerce.php',
-				'label'       => 'WooCommerce',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				'plugin'     => 'woocommerce/woocommerce.php',
+				'label'      => 'WooCommerce',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'woocommerce_current_order' => array(
-				'plugin'      => 'woocommerce/woocommerce.php',
-				'label'       => 'WooCommerce',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				'plugin'     => 'woocommerce/woocommerce.php',
+				'label'      => 'WooCommerce',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'woocommerce_membership'    => array(
-				'plugin'      => 'woocommerce-memberships/woocommerce-memberships.php',
-				'label'       => 'WooCommerce Memberships',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
+				'plugin'     => 'woocommerce-memberships/woocommerce-memberships.php',
+				'label'      => 'WooCommerce Memberships',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ),
 			),
 			'woocommerce_whishlist'     => array(
-				'plugin'      => 'woocommerce-wishlist/woocommerce-wishlist.php',
-				'label'       => 'WooCommerce Wishlist',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-wishlist/woocommerce-wishlist.php' ),
+				'plugin'     => 'woocommerce-wishlist/woocommerce-wishlist.php',
+				'label'      => 'WooCommerce Wishlist',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce-wishlist/woocommerce-wishlist.php' ),
 			),
 			'woocommerce_subscription'  => array(
-				'plugin'      => 'woocommerce-subscriptions/woocommerce-subscriptions.php',
-				'label'       => 'WooCommerce Subscriptions',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
+				'plugin'     => 'woocommerce-subscriptions/woocommerce-subscriptions.php',
+				'label'      => 'WooCommerce Subscriptions',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php' ),
 			),
 			'woocommerce_review'        => array(
-				'plugin'      => 'woocommerce/woocommerce.php',
-				'label'       => 'WooCommerce',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				'plugin'     => 'woocommerce/woocommerce.php',
+				'label'      => 'WooCommerce',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'cart'                      => array(
-				'plugin'      => 'woocommerce/woocommerce.php',
-				'label'       => 'WooCommerce',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
+				'plugin'     => 'woocommerce/woocommerce.php',
+				'label'      => 'WooCommerce',
+				'is_enabled' => quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ),
 			),
 			'learndash'                 => array(
-				'plugin'      => 'sfwd-lms/sfwd_lms.php',
-				'label'       => 'LearnDash',
-				'is_disabled' => ! quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
+				'plugin'     => 'sfwd-lms/sfwd_lms.php',
+				'label'      => 'LearnDash',
+				'is_enabled' => quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ),
 			),
 		);
 
@@ -1127,9 +1172,9 @@ class Rest_Automation_Controller extends REST_Controller {
 		$forms = Forms_Manager::instance()->get_all_forms();
 		foreach ( $forms as $form ) {
 			$plugin_dependencies[ $form->slug ] = array(
-				'plugin'      => $form->slug,
-				'label'       => $form->name,
-				'is_disabled' => ! $form->is_enabled(),
+				'plugin'     => $form->slug,
+				'label'      => $form->name,
+				'is_enabled' => $form->is_enabled(),
 			);
 		}
 
@@ -1147,7 +1192,7 @@ class Rest_Automation_Controller extends REST_Controller {
 						// Check if this rule's group requires a plugin
 						if ( ! empty( $selected_group ) && isset( $plugin_dependencies[ $selected_group ] ) ) {
 							$dependency = $plugin_dependencies[ $selected_group ];
-							$is_active  = $dependency['is_disabled'] ? false : quillcrm_is_plugin_active( $dependency['plugin'] );
+							$is_active  = $dependency['is_enabled'];
 
 							if ( ! $is_active ) {
 								// Store unavailable rule information
@@ -1201,6 +1246,55 @@ class Rest_Automation_Controller extends REST_Controller {
 		);
 	}
 
+
+	/**
+	 * Check goal plugin dependency
+	 * Returns whether the goal's required plugin is active
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param object $goal The goal object.
+	 *
+	 * @return array Array with 'is_active', 'message', and 'plugin_labels' keys
+	 */
+	private function check_goal_plugin_dependency( $goal ) {
+		// Define plugin dependencies based on goal source and group
+		$plugin_dependencies = array(
+			'woocommerce' => array(
+				'coupon' => array(
+					'plugin' => 'woocommerce/woocommerce.php',
+					'label'  => 'WooCommerce',
+				),
+			),
+		);
+
+		// Check if action has a source and group that requires a plugin
+		if ( ! empty( $goal->source ) && ! empty( $goal->group ) ) {
+			if ( isset( $plugin_dependencies[ $goal->source ][ $goal->group ] ) ) {
+				$dependency = $plugin_dependencies[ $goal->source ][ $goal->group ];
+				$is_active  = quillcrm_is_plugin_active( $dependency['plugin'] );
+
+				if ( ! $is_active ) {
+					return array(
+						'is_active'    => false,
+						'message'      => sprintf(
+							/* translators: %s: plugin name */
+							__( 'This goal requires %s to be installed and activated.', 'quillcrm' ),
+							$dependency['label']
+						),
+						'plugin_label' => $dependency['label'],
+					);
+				}
+			}
+		}
+
+		// No dependency or plugin is active
+		return array(
+			'is_active'    => true,
+			'message'      => '',
+			'plugin_label' => '',
+		);
+	}
 	/**
 	 * Prepare automation
 	 *

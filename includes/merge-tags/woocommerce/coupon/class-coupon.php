@@ -3,23 +3,26 @@
 namespace QuillCRM\Merge_Tags\WooCommerce\Coupon;
 
 use QuillCRM\Abstracts\Merge_Tag;
+use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Automation_Step_Model;
+use QuillCRM\Managers\Merge_Tags_Manager;
 
 class Coupon extends Merge_Tag {
+
 
 	/**
 	 * Merge Tag Name
 	 *
 	 * @var string
 	 */
-	public $name;
+	public $name = 'Coupon';
 
 	/**
 	 * Merge Tag Slug
 	 *
 	 * @var string
 	 */
-	public $slug;
+	public $slug = 'dynamic_id_';
 
 	/**
 	 * Merge Tag Description
@@ -41,10 +44,16 @@ class Coupon extends Merge_Tag {
 	 *
 	 * @var bool
 	 */
-	public $is_automation = true;
+	public $is_automation = false;
 
 
-	public function __construct( string $name, string $slug ) {
+	/**
+	 * Constructor
+	 *
+	 * @param string $name Name.
+	 * @param string $slug Slug.
+	 */
+	public function __construct( $name = 'Coupon', $slug = 'dynamic_id_' ) {
 		$this->name = $name;
 		$this->slug = $slug;
 	}
@@ -65,10 +74,24 @@ class Coupon extends Merge_Tag {
 			return '';
 		}
 
-		$coupon_code = $step->get_setting( 'coupon_code' );
-		if ( ! $coupon_code ) {
+		$automation_contact = Automation_Contact_Model::find( $contact->id );
+		if ( ! $automation_contact ) {
 			return '';
 		}
-		return $coupon_code;
+
+		$coupon_codes = $automation_contact->get_data( 'coupon_codes', array() );
+		if ( empty( $coupon_codes ) ) {
+			return '';
+		}
+
+		foreach ( $coupon_codes as $coupon_code ) {
+			if ( $coupon_code['step_id'] === $step->id ) {
+				return $coupon_code['code'];
+			}
+		}
+
+		return '';
 	}
 }
+
+Merge_Tags_Manager::instance()->register( new Coupon() );

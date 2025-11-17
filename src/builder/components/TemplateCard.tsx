@@ -29,7 +29,7 @@ const TemplateCard = ({
 	};
 
 	const baseClasses =
-		'relative w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground p-4 gap-2 transition-colors text-center';
+		'relative w-full h-full text-xs bg-white rounded-md flex flex-col items-center justify-center border border-input text-muted-foreground px-4 gap-3 transition-colors text-center';
 	const interactiveClasses =
 		item.isPro && !item.isProActivated
 			? 'cursor-not-allowed opacity-70'
@@ -46,13 +46,12 @@ const TemplateCard = ({
 			className={`${baseClasses} ${interactiveClasses}`}
 			key={item.value || blockType}
 		>
-			{item.isPro && !item.isProActivated ? (
-				<div className="absolute top-2 right-2">
-					<PremiumIcon width={16} height={16} />
+			{item.isPro && !item.isProActivated && (
+				<div className="absolute top-2 right-2 p-1 bg-[#FAEADF] rounded-full">
+					<PremiumIcon />
 				</div>
-			) : (
-				<DragDropIcon />
 			)}
+			<DragDropIcon />
 			<div className="flex flex-row gap-2 items-center justify-center w-full">
 				{type === 'layout' &&
 					item.width?.map((width, index) => (

@@ -9,6 +9,7 @@ import { BannerBlockIcon } from '@quillcrm/components';
 
 const BannerBlock = {
 	type: 'banner' as const,
+	name: __('Banner', 'quillcrm'),
 	icon: BannerBlockIcon,
 	isProActivated: false,
 	isPro: true,

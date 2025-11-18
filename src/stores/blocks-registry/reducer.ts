@@ -41,11 +41,19 @@ const reducer: Reducer<BlocksRegistryState, BlocksRegistryActionTypes> = (
 ) => {
   switch (action.type) {
     case REGISTER_BLOCKS:
+      const mergedBlocks = Object.keys(action.blocks).reduce((acc, key) => {
+        acc[key] = {
+          ...state.blocks[key],
+          ...action.blocks[key],
+        };
+        return acc;
+      }, {} as Record<string, any>);
+
       return {
         ...state,
         blocks: {
           ...state.blocks,
-          ...action.blocks,
+          ...mergedBlocks,
         },
       };
     default:

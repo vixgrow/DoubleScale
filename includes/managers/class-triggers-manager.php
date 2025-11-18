@@ -20,6 +20,9 @@ use QuillCRM\Managers\Forms_Manager;
  */
 final class Triggers_Manager {
 
+
+
+
 	/**
 	 * Registed triggers
 	 *
@@ -78,7 +81,21 @@ final class Triggers_Manager {
 		/** @var Trigger[] $triggers */
 		$triggers = apply_filters( 'quillcrm_triggers', $this->triggers );
 
-		foreach ( $triggers as $trigger ) {
+		// Re-register triggers after filter to update sources array
+		// This allows Pro versions to properly replace free versions in the frontend
+		foreach ( $triggers as $slug => $trigger ) {
+			// Update the trigger in the internal array
+			$this->triggers[ $slug ] = $trigger;
+
+			// Update the sources array with the (potentially updated) trigger's fields
+			$this->sources[ $trigger->source ]['groups'][ $trigger->group ]['triggers'][ $trigger->slug ] = array(
+				'label'       => $trigger->name,
+				'description' => $trigger->description,
+				'fields'      => $trigger->get_fields(),
+				'is_pro'      => $trigger->is_pro,
+			);
+
+			// Load the trigger's hooks
 			$trigger->load_hooks();
 		}
 	}

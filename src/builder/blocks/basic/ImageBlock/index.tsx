@@ -25,12 +25,16 @@ export interface ImageBlockProps {
 	link: string;
 	borderRadius: string;
 	shape: string;
+	isProActivated: boolean;
+	isPro: boolean;
 }
 
 const ImageBlock = {
 	type: 'image',
 	name: __('Image', 'quillcrm'),
 	icon: ImageBlockIcon,
+	isProActivated: false,
+	isPro: false,
 	defaultProps: {
 		src: '',
 		alt: 'Image',

@@ -14,12 +14,16 @@ export interface SignatureBlockProps {
 	fontSize: number;
 	color: string;
 	align: string;
+	isPro: boolean;
+	isProActivated: boolean;
 }
 
 const SignatureBlock = {
 	type: 'signature',
 	name: __('Signature', 'quillcrm'),
 	icon: SignatureBlockIcon,
+	isProActivated: false,
+	isPro: false,
 	defaultProps: {
 		content: 'Your text here',
 		fontSize: 16,

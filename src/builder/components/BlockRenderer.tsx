@@ -7,7 +7,7 @@ import { GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { EmailBlock } from '../../stores/email-builder/types';
-import { blocksRegistry } from '../blocks/BlockRegister';
+import { useRegisteredBlocks } from '../../stores/blocks-registry';
 import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import { DeleteIcon } from '@quillcrm/components';
 import { useDispatch } from '@wordpress/data';
@@ -25,6 +25,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 	columnId,
 }) => {
 	const dispatch = useDispatch();
+	const blocksRegistry = useRegisteredBlocks();
 
 	// Check if this block is part of a template (locked from editing)
 	const isThisTemplateBlock = isTemplateBlock(block);

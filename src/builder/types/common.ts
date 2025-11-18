@@ -39,6 +39,8 @@ export interface BlockDefinition<T = any> {
 		props: T;
 		onChange: (updates: Partial<T>) => void;
 	}>;
+	isProActivated?: boolean;
+	isPro: boolean;
 }
 
 // ============================================================================

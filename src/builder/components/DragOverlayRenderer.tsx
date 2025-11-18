@@ -1,5 +1,5 @@
 import React from 'react';
-import { blocksRegistry } from '../blocks/BlockRegister';
+import { useRegisteredBlocks } from '../../stores/blocks-registry';
 import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import TemplateCard from './TemplateCard';
 import { EmailBlock } from '../../stores/email-builder/types';
@@ -81,6 +81,8 @@ const TemplateOverlay: React.FC<{ title: string; label: string }> = ({
 const DragOverlayRenderer: React.FC<DragOverlayRendererProps> = ({
 	activeItem,
 }) => {
+	const blocksRegistry = useRegisteredBlocks();
+
 	if (!activeItem) return null;
 
 	const { type, block, template, item, blockType } = activeItem;

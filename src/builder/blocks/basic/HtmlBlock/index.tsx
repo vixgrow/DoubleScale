@@ -13,6 +13,8 @@ export interface HtmlBlockProps {
 	content: string;
 	customCss: string;
 	width: string;
+	isProActivated: boolean;
+	isPro: boolean;
 	padding?: {
 		top: number;
 		right: number;
@@ -25,6 +27,8 @@ const HtmlBlock = {
 	type: 'html' as const,
 	name: __('HTML', 'quillcrm'),
 	icon: HtmlBlockIcon,
+	isProActivated: false,
+	isPro: false,
 	defaultProps: {
 		content: '',
 		customCss: '',

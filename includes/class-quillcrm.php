@@ -15,11 +15,11 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
 use QuillCRM\Tasks;
 use QuillCRM\Campaign\Email_Processing;
-use QuillCRM\Campaign\SMS_Processing;
-// use QuillCRM\Campaign\WhatsApp_Processing;
+// use QuillCRM\Campaign\SMS_Processing; // Moved to Pro
+// use QuillCRM\Campaign\WhatsApp_Processing; // Moved to Pro
 use QuillCRM\Tracking\Email as Email_Tracking;
-use QuillCRM\Tracking\SMS as SMS_Tracking;
-// use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
+// use QuillCRM\Tracking\SMS as SMS_Tracking; // Moved to Pro
+// use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking; // Moved to Pro
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
@@ -44,8 +44,8 @@ use QuillCRM\Log_Handlers\Log_Handler_DB;
 use QuillCRM\Emails\Email_Builder;
 use QuillCRM\User_Roles\User_Roles;
 use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
-use QuillCRM\Managers\Message_Provider_Registry;
-use QuillCRM\Message_Providers\Twilio_Message_Provider;
+// use QuillCRM\Managers\Message_Provider_Registry; // Moved to Pro
+// use QuillCRM\Message_Providers\Twilio_Message_Provider; // Moved to Pro
 
 
 /**
@@ -246,11 +246,11 @@ final class QuillCRM {
 		Admin_Loader::instance();
 		REST_API::instance();
 		Email_Processing::instance();
-		SMS_Processing::instance();
-		// WhatsApp_Processing::instance();
+		// SMS_Processing::instance(); // Moved to Pro
+		// WhatsApp_Processing::instance(); // Moved to Pro
 		Email_Tracking::instance();
-		SMS_Tracking::instance();
-		// WhatsApp_Tracking::instance();
+		// SMS_Tracking::instance(); // Moved to Pro
+		// WhatsApp_Tracking::instance(); // Moved to Pro
 		Link_Triggers::instance();
 		Subscription_Manage::instance();
 		Forms_Manager::instance();
@@ -280,8 +280,8 @@ final class QuillCRM {
 		 // Register log handlers.
 		add_filter( 'quillcrm_register_log_handlers', array( $this, 'register_log_handlers' ) );
 
-		// Register message providers
-		add_action( 'quillcrm_loaded', array( $this, 'register_message_providers' ) );
+		// Register message providers - Moved to Pro
+		// add_action( 'quillcrm_loaded', array( $this, 'register_message_providers' ) );
 
 		// Register contact meta table
 		add_action( 'init', array( $this, 'register_contact_meta_table' ) );
@@ -320,11 +320,11 @@ final class QuillCRM {
 	private function load_dependencies() {
 		require QUILLCRM_PLUGIN_DIR . 'includes/functions.php';
 
-		// Load message provider system
-		require QUILLCRM_PLUGIN_DIR . 'includes/interfaces/interface-message-provider.php';
-		require QUILLCRM_PLUGIN_DIR . 'includes/abstracts/class-abstract-message-provider.php';
-		require QUILLCRM_PLUGIN_DIR . 'includes/managers/class-message-provider-registry.php';
-		require QUILLCRM_PLUGIN_DIR . 'includes/message-providers/class-twilio-message-provider.php';
+		// Load message provider system - Moved to Pro
+		// require QUILLCRM_PLUGIN_DIR . 'includes/interfaces/interface-message-provider.php';
+		// require QUILLCRM_PLUGIN_DIR . 'includes/abstracts/class-abstract-message-provider.php';
+		// require QUILLCRM_PLUGIN_DIR . 'includes/managers/class-message-provider-registry.php';
+		// require QUILLCRM_PLUGIN_DIR . 'includes/message-providers/class-twilio-message-provider.php';
 
 		// Load all integrations files
 		$integrations_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/integrations/**/class-integration.php' );

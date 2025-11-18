@@ -4,20 +4,15 @@ namespace QuillCRM\Automations\Triggers\Deal;
 
 use QuillCRM\Abstracts\Trigger;
 use QuillCRM\Managers\Triggers_Manager;
-use QuillCRM\Models\Automation_Model;
-use QuillCRM\Models\Deal_Model;
-use QuillCRM\Models\Contact_Model;
 
 /**
- * Deal Owner Change Trigger
+ * Deal Owner Change Trigger (PRO Only - Stub)
+ *
+ * This is a placeholder to register the trigger in the free version
+ * so it appears in the UI with a PRO lock. The actual implementation
+ * is in the PRO version.
  */
 class Deal_Owner_Change extends Trigger {
-
-
-
-
-
-
 
 
 
@@ -43,13 +38,6 @@ class Deal_Owner_Change extends Trigger {
 	public $description = 'This trigger will be fired when a deal owner is changed.';
 
 	/**
-	 * Trigger Attributes
-	 *
-	 * @var array
-	 */
-	public $attributes = array();
-
-	/**
 	 * Trigger Source
 	 *
 	 * @var string
@@ -64,149 +52,40 @@ class Deal_Owner_Change extends Trigger {
 	public $group = 'deal';
 
 	/**
+	 * Is PRO only
+	 *
+	 * @var bool
+	 */
+	public $is_pro = true;
+
+	/**
+	 * Constructor
+	 *
+	 * @since 1.0.0
+	 */
+	public function __construct() {
+		 // Check if PRO plugin is active - if yes, remove the lock
+		$this->is_pro = ! quillcrm_is_plugin_active( QUILLCRM_PRO_PLUGIN_PATH );
+
+		parent::__construct();
+	}
+
+	/**
 	 * Load Hooks
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return void
 	 */
-	public function load_hooks() {
-		add_action( 'quillcrm_automation_deal_owner_changed', array( $this, 'deal_owner_changed' ), 10, 4 );
-	}
+	public function load_hooks() {}
 
 	/**
-	 * Deal Owner Changed
+	 * Get fields (required for UI)
 	 *
-	 * @since 1.0.0
-	 *
-	 * @param Contact_Model $contact Contact Model
-	 * @param Deal_Model    $deal Deal Model
-	 * @param int|string    $old_owner Old Owner ID
-	 * @param int|string    $new_owner New Owner ID
+	 * @return array
 	 */
-	public function deal_owner_changed( $contact, $deal, $old_owner_id, $new_owner_id ) {
-
-		$data = array(
-			'contact' => $contact,
-			'deal'    => $deal,
-			'data'    => array(
-				'old_owner_id' => $old_owner_id,
-				'new_owner_id' => $new_owner_id,
-			),
-		);
-		$this->process( $data );
-	}
-
-	/**
-	 * Is Processable
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param Automation_Model $automation Automation Model
-	 * @param array            $args Arguments
-	 *
-	 * @return bool
-	 */
-	public function is_processable( Automation_Model $automation, $args ) {
-		$automation_from_owner = $automation->get_setting( 'from' ) ?? array();
-		$automation_to_owner   = $automation->get_setting( 'to' ) ?? array();
-		$old_owner             = (string) ( $args['data']['old_owner_id'] ?? '' );
-		$new_owner             = (string) ( $args['data']['new_owner_id'] ?? '' );
-
-		// If owner didn't actually change, don't process
-		if ( $old_owner === $new_owner ) {
-			return false;
-		}
-
-		// Check 'from' condition
-		if ( ! empty( $automation_from_owner ) && ! $this->check_owner_condition( $automation_from_owner, $old_owner ) ) {
-			return false;
-		}
-
-		// Check 'to' condition
-		if ( ! empty( $automation_to_owner ) && ! $this->check_owner_condition( $automation_to_owner, $new_owner ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if an owner meets the specified condition
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array  $condition_config The condition configuration
-	 * @param string $owner_id The owner ID to check
-	 *
-	 * @return bool
-	 */
-	private function check_owner_condition( $condition_config, $owner_id ) {
-		$condition       = $condition_config['condition'] ?? '';
-		$target_owner_id = (string) ( $condition_config['owner_id'] ?? '' );
-
-		// If condition is 'any-value', always return true
-		if ( 'any-value' === $condition ) {
-			return true;
-		}
-
-		// Check specific conditions
-		switch ( $condition ) {
-			case 'equal_to':
-				return $owner_id === $target_owner_id;
-			case 'not_equal_to':
-				return $owner_id !== $target_owner_id;
-			default:
-				return true; // Default to true for unknown conditions
-		}
-	}
-
-
 	public function get_fields() {
-		return array(
-			'from' => array(
-				'type'  => 'deal_owner_change',
-				'label' => __( 'From', 'quillcrm' ),
-			),
-			'to'   => array(
-				'type'  => 'deal_owner_change',
-				'label' => __( 'To', 'quillcrm' ),
-			),
-		);
-	}
-
-	public function get_attributes_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'from' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'condition' => array(
-							'type'     => 'string',
-							'required' => true,
-						),
-						'owner_id'  => array(
-							'type'     => 'integer',
-							'required' => true,
-						),
-					),
-				),
-				'to'   => array(
-					'type'       => 'object',
-					'properties' => array(
-						'condition' => array(
-							'type'     => 'string',
-							'required' => true,
-						),
-						'owner_id'  => array(
-							'type'     => 'integer',
-							'required' => true,
-						),
-					),
-				),
-			),
-		);
+		return array();
 	}
 }
 

@@ -36,6 +36,11 @@ if ( ! defined( 'QUILLCRM_PLUGIN_URL' ) ) {
 	define( 'QUILLCRM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 }
 
+// PRO Plugin Path (for checking if PRO is active).
+if ( ! defined( 'QUILLCRM_PRO_PLUGIN_PATH' ) ) {
+	define( 'QUILLCRM_PRO_PLUGIN_PATH', 'QuillCRM-Pro/quillcrm-pro.php' );
+}
+
 // Require dependencies.
 require_once QUILLCRM_PLUGIN_DIR . 'dependencies/libraries/load.php';
 require_once QUILLCRM_PLUGIN_DIR . 'dependencies/vendor/autoload.php';

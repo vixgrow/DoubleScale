@@ -61,6 +61,13 @@ abstract class Trigger {
 	public $group;
 
 	/**
+	 * Is PRO only
+	 *
+	 * @var bool
+	 */
+	public $is_pro = false;
+
+	/**
 	 * Constructor
 	 *
 	 * @since 1.0.0

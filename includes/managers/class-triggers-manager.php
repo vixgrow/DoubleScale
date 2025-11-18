@@ -109,6 +109,7 @@ final class Triggers_Manager {
 			'label'       => $trigger->name,
 			'description' => $trigger->description,
 			'fields'      => $trigger->get_fields(),
+			'is_pro'      => $trigger->is_pro,
 		);
 	}
 

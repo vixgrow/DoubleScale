@@ -1,0 +1,173 @@
+.qcrm-pro-feature-notice {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 60vh;
+	padding: 2rem;
+
+	&__container {
+		max-width: 800px;
+		width: 100%;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		border-radius: 16px;
+		padding: 3rem;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+		color: white;
+		text-align: center;
+	}
+
+	&__icon {
+		margin-bottom: 2rem;
+		
+		svg {
+			color: #ffd700;
+			filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+		}
+	}
+
+	&__content {
+		h2, h3, p, ul {
+			margin: 0;
+		}
+	}
+
+	&__title {
+		font-size: 2rem;
+		font-weight: 700;
+		margin-bottom: 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+
+	&__title-icon {
+		color: #ffd700;
+	}
+
+	&__description {
+		font-size: 1.125rem;
+		margin-bottom: 2rem;
+		opacity: 0.95;
+		line-height: 1.6;
+	}
+
+	&__features {
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 12px;
+		padding: 1.5rem;
+		margin: 2rem 0;
+		backdrop-filter: blur(10px);
+
+		h3 {
+			font-size: 1.25rem;
+			margin-bottom: 1rem;
+			font-weight: 600;
+		}
+
+		ul {
+			list-style: none;
+			padding: 0;
+			text-align: left;
+			display: grid;
+			gap: 0.75rem;
+
+			li {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				font-size: 1rem;
+				padding: 0.5rem;
+				border-radius: 6px;
+				transition: background 0.2s;
+
+				&:hover {
+					background: rgba(255, 255, 255, 0.1);
+				}
+
+				svg {
+					flex-shrink: 0;
+					color: #ffd700;
+				}
+			}
+		}
+	}
+
+	&__actions {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		flex-wrap: wrap;
+		margin-top: 2rem;
+	}
+
+	&__button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.875rem 1.75rem;
+		border-radius: 8px;
+		font-size: 1rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition: all 0.2s;
+		cursor: pointer;
+
+		&--primary {
+			background: #ffd700;
+			color: #764ba2;
+			box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+
+			&:hover {
+				background: #ffed4e;
+				transform: translateY(-2px);
+				box-shadow: 0 6px 16px rgba(255, 215, 0, 0.5);
+			}
+		}
+
+		&--secondary {
+			background: rgba(255, 255, 255, 0.2);
+			color: white;
+			border: 2px solid rgba(255, 255, 255, 0.3);
+
+			&:hover {
+				background: rgba(255, 255, 255, 0.3);
+				border-color: rgba(255, 255, 255, 0.5);
+				transform: translateY(-2px);
+			}
+		}
+
+		svg {
+			flex-shrink: 0;
+		}
+	}
+}
+
+@media (max-width: 768px) {
+	.qcrm-pro-feature-notice {
+		padding: 1rem;
+
+		&__container {
+			padding: 2rem 1.5rem;
+		}
+
+		&__title {
+			font-size: 1.5rem;
+		}
+
+		&__description {
+			font-size: 1rem;
+		}
+
+		&__actions {
+			flex-direction: column;
+			width: 100%;
+
+			a {
+				width: 100%;
+				justify-content: center;
+			}
+		}
+	}
+}
+

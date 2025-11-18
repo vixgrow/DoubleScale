@@ -30,10 +30,6 @@ use QuillCRM\REST_API\Controllers\V1\REST_General_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Import_Export_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Log_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Automation_Reports_Controller;
-use QuillCRM\REST_API\Controllers\V1\REST_Pipeline_Controller;
-use QuillCRM\REST_API\Controllers\V1\REST_Deal_Controller;
-use QuillCRM\REST_API\Controllers\V1\REST_Activity_Controller;
-use QuillCRM\REST_API\Controllers\V1\REST_Stage_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Reports_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_User_Management_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Email_Sequence_Controller;
@@ -118,10 +114,7 @@ class REST_API {
 			Rest_Import_Export_Controller::class,
 			REST_Log_Controller::class,
 			REST_Automation_Reports_Controller::class,
-			REST_Pipeline_Controller::class,
-			REST_Deal_Controller::class,
-			REST_Activity_Controller::class,
-			REST_Stage_Controller::class,
+			// Pipeline, Deal, Activity, and Stage controllers moved to Pro plugin
 			Rest_Reports_Controller::class,
 			REST_User_Management_Controller::class,
 			REST_Email_Sequence_Controller::class,

@@ -2,19 +2,11 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from '@wordpress/element';
-
-/**
- * External dependencies
- */
 
 /**
  * Internal dependencies
  */
-import {
-	NoticeBanner,
-} from '@quillcrm/components';
-import { KanbanBoard } from './components/kanban-board';
+import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import { PipelineSettingsModal } from './components/pipeline-settings-modal';
 // import { NewDealModal } from './components/new-deal-modal';
 import { DealDetailModal } from './components/deal-detail-modal';
@@ -39,6 +31,21 @@ import { PipelineFilters } from './components/pipeline-filters';
 import { NewDealModal } from './components/new-deal-modal';
 
 const SalesPipeline: React.FC = () => {
+	return (
+		<ProFeatureNotice
+			featureName={__('Sales Pipeline', 'quillcrm')}
+			description={__(
+				'Manage your sales process with visual pipeline boards, track deals through stages, and close more sales with our powerful CRM features.',
+				'quillcrm'
+			)}
+		/>
+	);
+};
+
+export default SalesPipeline;
+
+/* Original implementation moved to Pro plugin
+const SalesPipelineOld: React.FC = () => {
 	const [selectedPipelineId, setSelectedPipelineId] = useState<number | null>(
 		null
 	);
@@ -68,6 +75,7 @@ const SalesPipeline: React.FC = () => {
 	);
 	const [ScheduleMeetingVisible, setScheduleMeetingVisible] = useState(false);
 	const [LogEmailVisible, setLogEmailVisible] = useState(false);
+	const [notice, setNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 	const [filters, setFilters] = useState<Filters>({
 		search: '',
 		ownerId: null,
@@ -216,6 +224,13 @@ const SalesPipeline: React.FC = () => {
 				/>
 			)}
 
+			{notice && (
+           <NoticeBanner
+           notice={notice}
+           closeNotice={() => setNotice(null)}
+        />
+)}
+
 
                <PipelineFilters
 				pipelines={pipelines || []}
@@ -263,6 +278,7 @@ const SalesPipeline: React.FC = () => {
 							clearSelection={clearSelection}
 							isPerformingBulk={isPerformingBulk}
 							setIsPerformingBulk={setIsPerformingBulk}
+							onNotice={(notice) => setNotice(notice)}
 						/>
 					</div>
 				)}
@@ -284,7 +300,13 @@ const SalesPipeline: React.FC = () => {
 			<NewDealModal
 				visible={newDealModalVisible}
 				onClose={() => setNewDealModalVisible(false)}
-				onSuccess={refreshData}
+				// onSuccess={refreshData}
+				onSuccess={(notice) => {
+					refreshData();
+					if (notice) {
+					  setNotice(notice); 
+					}
+				  }}
 				pipeline={selectedPipeline}
 			/>
 
@@ -308,6 +330,8 @@ const SalesPipeline: React.FC = () => {
 					setSelectedDealId(null);
 					refreshData();
 				}}
+				onNotice={(notice) => setNotice(notice)}
+			
 				pipeline={selectedPipeline}
 			/>
 
@@ -317,10 +341,14 @@ const SalesPipeline: React.FC = () => {
 					setEditDealModalVisible(false);
 					setEditingDeal(null);
 				}}
-				onSuccess={() => {
+				onSuccess={(notice) => {
 					refreshData();
 					setEditDealModalVisible(false);
 					setEditingDeal(null);
+
+					if (notice) {
+						setNotice(notice); 
+					}
 				}}
 				deal={editingDeal}
 				pipelines={pipelines || []}
@@ -330,10 +358,13 @@ const SalesPipeline: React.FC = () => {
 				<DuplicatePipelineModal
 					visible={duplicatePipelineModalVisible}
 					onClose={() => setDuplicatePipelineModalVisible(false)}
-					onSuccess={() => {
-						refreshData();
+					onSuccess={async (newPipeline, notice) => {
+						await refreshData();
+						if (notice) {
+						  setNotice(notice);
+						}
 						setDuplicatePipelineModalVisible(false);
-					}}
+					  }}
 					pipeline={selectedPipeline}
 				/>
 			)}
@@ -341,58 +372,65 @@ const SalesPipeline: React.FC = () => {
 			<NewPipelineModal
 				visible={newPipelineModalVisible}
 				onClose={() => setNewPipelineModalVisible(false)}
-				// onSuccess={() => {
-				// 	refreshData();
-				// 	// Auto-select the newly created pipeline if it's the first one
-				// 	if (!selectedPipelineId && pipelines.length === 0) {
-				// 		// Will be handled by useEffect when pipelines update
-				// 	}
-				// }}
-				onSuccess={async (newPipeline) => {
-							await refreshData();
-										
-							if (newPipeline?.id) {
-							setSelectedPipelineId(newPipeline.id);
-						}
-						}}
+				onSuccess={async (newPipeline, notice) => {
+					await refreshData();
+					if (newPipeline?.id) {
+					  setSelectedPipelineId(newPipeline.id);
+					}
+					if (notice) {
+					  setNotice(notice); 
+					}
+				  }}
 			/>
 			<EditPipelineModal
 				visible={editPipelineModalVisible}
 				onClose={() => setEditPipelineModalVisible(false)}
-				onSuccess={async (updatedPipeline: Pipeline) => {
+				onSuccess={async (updatedPipeline, notice) => {
 					await refreshData();
 					if (updatedPipeline?.id) {
-						setSelectedPipelineId(updatedPipeline.id);
+					  setSelectedPipelineId(updatedPipeline.id);
+					}
+					if (notice) {
+					  setNotice(notice);
 					}
 					setEditPipelineModalVisible(false);
-				}}
+				  }}
 				pipeline={selectedPipeline}
 			/>
 			<DeleteDeal
 				visible={deleteDealModalVisible}
 				onClose={() => setDeleteDealModalVisible(false)}
 				deal={dealToDelete}
-				// pipeline={selectedPipeline}
-				// pipelines={pipelines}
-				onConfirm={() => {
+				onConfirm={(notice) => {
 					refreshData();
 					setDeleteDealModalVisible(false);
+					if (notice) {
+						setNotice(notice); 
+					 }
 				}}
 			/>
 			<AddNoteModal
 				visible={addNoteVisible}
 				onClose={() => setAddNoteVisible(false)}
 				dealId={selectedDealForNote?.id}
-				onSuccess={() => {
+				onSuccess={(notice) => {
 					setAddNoteVisible(false);
 					refreshData();
+					if (notice) {
+						setNotice(notice);
+					}
 				}}
 				dealTitle={selectedDealForNote?.title}
 			/>
 			<LogCallModal
 				visible={logCallVisible}
 				onClose={() => setLogCallVisible(false)}
-				onSuccess={refreshData}
+				onSuccess={(notice) => {
+					refreshData();
+					if (notice) {
+					  setNotice(notice);
+					}
+				  }}
 				dealId={selectedDealForCall?.id || 0}
 				dealTitle={selectedDealForCall?.title}
 				dealContact={selectedDealForCall?.contact}
@@ -401,14 +439,24 @@ const SalesPipeline: React.FC = () => {
 			<ScheduleMeetingModal
 				visible={ScheduleMeetingVisible}
 				onClose={() => setScheduleMeetingVisible(false)}
-				onSuccess={refreshData}
+				onSuccess={(notice) => {
+					refreshData();
+					if (notice) {
+					  setNotice(notice);
+					}
+				  }}
 				dealId={selectedDealForCall?.id || 0}
 				dealTitle={selectedDealForCall?.title}
 			/>
 			<LogEmailModal
 				visible={LogEmailVisible}
 				onClose={() => setLogEmailVisible(false)}
-				onSuccess={refreshData}
+				onSuccess={(notice) => {
+					refreshData();
+					if (notice) {
+					  setNotice(notice);
+					}
+				  }}
 				dealId={selectedDealForCall?.id || 0}
 				dealTitle={selectedDealForCall?.title}
 			/>
@@ -417,7 +465,7 @@ const SalesPipeline: React.FC = () => {
 				onClose={() => setDeleteDialogOpen(false)}
 				pipeline={selectedPipeline}
 				pipelines={pipelines}
-				onConfirm={async () => {
+				onConfirm={async (notice) => {
 				await refreshData();
 				// If the deleted pipeline was selected, switch to the first available pipeline
 				if (selectedPipelineId === selectedPipeline?.id && pipelines.length > 1) {
@@ -428,11 +476,13 @@ const SalesPipeline: React.FC = () => {
 						setSelectedPipelineId(null);
 					}
 				}
+				if (notice) {
+					setNotice(notice);
+				}
 			}}
 			/>
 		</div>
 	);
 };
-
-export default SalesPipeline;
+*/
 

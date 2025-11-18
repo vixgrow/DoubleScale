@@ -86,7 +86,34 @@ const ConditionsModal: React.FC<RulesProps> = ({
 			// Include group if it has no triggers property (available for all)
 			// or if the triggers array includes the current trigger
 			if (!group.triggers || group.triggers.includes(currentTrigger)) {
-				filteredGroups[groupKey] = group;
+				// Filter rules within the group based on required_triggers
+				const filteredRules: any = {};
+				if (group.rules) {
+					Object.keys(group.rules).forEach((ruleKey) => {
+						const rule = group.rules[ruleKey];
+						// If rule has no required_triggers, include it
+						if (
+							!rule.required_triggers ||
+							rule.required_triggers.length === 0
+						) {
+							filteredRules[ruleKey] = rule;
+						}
+						// If rule has required_triggers and current trigger is in it, include it
+						else if (
+							rule.required_triggers.includes(currentTrigger)
+						) {
+							filteredRules[ruleKey] = rule;
+						}
+					});
+				}
+
+				// Only add group if it has at least one rule after filtering
+				if (Object.keys(filteredRules).length > 0) {
+					filteredGroups[groupKey] = {
+						...group,
+						rules: filteredRules,
+					};
+				}
 			}
 		});
 

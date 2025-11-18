@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Tag Removed Goal
  *
@@ -13,6 +14,7 @@ namespace QuillCRM\Goals;
 
 use QuillCRM\Abstracts\Goal;
 use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Managers\Goals_Manager;
 
@@ -20,6 +22,7 @@ use QuillCRM\Managers\Goals_Manager;
  * Tag Removed Goal class
  */
 class Tag_Removed extends Goal {
+
 
 	/**
 	 * Goal Name
@@ -100,14 +103,21 @@ class Tag_Removed extends Goal {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Automation_Step_Model $step Automation Step Model.
-	 * @param array                 $data Data.
+	 * @param Automation_Contact_Model $automation_contact Automation Contact Model.
+	 * @param array                    $data Data.
 	 *
 	 * @return bool
 	 */
-	public function is_completed( Automation_Step_Model $step, $data ) {
-		$tags      = $data['tags'] ?? array();
-		$goal_tags = $step->get_setting( 'tags', array() );
+	public function is_completed( Automation_Contact_Model $automation_contact, $data ) {
+		$tags = $data['tags'] ?? array();
+
+		// Get the current step model
+		$current_step = Automation_Step_Model::find( $automation_contact->current_step );
+		if ( ! $current_step ) {
+			return false;
+		}
+
+		$goal_tags = $current_step->get_setting( 'tags', array() );
 
 		return ! empty( array_intersect( $tags, $goal_tags ) );
 	}

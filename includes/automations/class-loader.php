@@ -16,11 +16,13 @@ use Exception;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Automations\Process_Automation;
+use QuillCRM\Models\Automation_Contact_Model;
 
 /**
  * Automations Loader class
  */
 final class Loader {
+
 
 
 
@@ -117,16 +119,16 @@ final class Loader {
 	 *
 	 * @param Automation_Model|int $automation The automation model or meta_id integer.
 	 * @param int                  $step_id      The step.
-	 * @param int                  $contact_id      The contact.
+	 * @param int                  $automation_contact_id      The automation contact.
 	 * @return void
 	 */
-	public function process_automation_step( $automation, $step_id = null, $contact_id = null ) {
+	public function process_automation_step( $automation, $step_id = null, $automation_contact_id = null ) {
 		try {
 			// if this below condition is true this meaning i get args from meta_id from database and automation is integer from that meta_id
-			if ( is_numeric( $automation ) && $step_id == null && $contact_id == null ) {
+			if ( is_numeric( $automation ) && $step_id == null && $automation_contact_id == null ) {
 				$args = $this->get_meta_args( $automation );
 				if ( $args && count( $args ) >= 3 ) {
-					list($automation, $parent_step_id, $step_id, $contact_id) = $args;
+					list($automation, $parent_step_id, $step_id, $automation_contact_id) = $args;
 				} else {
 					throw new Exception( 'Failed to retrieve arguments from meta_id: ' . $automation );
 				}
@@ -143,7 +145,7 @@ final class Loader {
 			if ( $parent_step_id && is_numeric( $parent_step_id ) && $parent_step_id > 0 ) {
 				// Find and update the process record for the delay step, not the step itself
 				$delay_process = $automation->processes()
-					->where( 'automation_contact_id', $contact_id )
+					->where( 'automation_contact_id', $automation_contact_id )
 					->where( 'step_id', $parent_step_id )
 					->where( 'status', 'pending' )
 					->first();
@@ -155,7 +157,7 @@ final class Loader {
 			}
 			$step               = Automation_Step_Model::findOrFail( $step_id );
 			$automation_process = new Process_Automation( $automation );
-			$automation_process->process_step( $step, $contact_id );
+			$automation_process->process_step( $step, $automation_contact_id );
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
 				__( 'Process Automation Step Error: ', 'quillcrm' ),
@@ -177,42 +179,39 @@ final class Loader {
 	 * @since 1.0.0
 	 *
 	 * @param Automation_Step_Model $step The automation model.
-	 * @param int                   $contact_id      The contact.
+	 * @param int                   $automation_contact_id The automation contact ID.
 	 *
 	 * @return void
 	 */
-	public function process_automation_goal( $step, $contact_id ) {
+	public function process_automation_goal( $step, $automation_contact_id ) {
 		try {
-			$skip       = $step->get_setting( 'skip', false );
-			$automation = $step->automation;
-			if ( ! $automation ) {
+			$skip               = $step->get_setting( 'skip', false );
+			$automation         = $step->automation;
+			$automation_contact = Automation_Contact_Model::find( $automation_contact_id );
+
+			if ( ! $automation || ! $automation_contact ) {
 				return;
 			}
 
 			if ( ! $skip ) {
-				$automation_contacts = $step->automation->contacts()->where( 'contact_id', $contact_id )->where( 'current_step', $step->id )->where( 'status', 'pending' )->get();
-				foreach ( $automation_contacts as $automation_contact ) {
-					// Update the goal process record to completed
-					$goal_process = $automation_contact->processes()->where( 'step_id', $step->id )->where( 'status', 'pending' )->first();
-					if ( $goal_process ) {
-						$goal_process->status = 'completed';
-						$goal_process->save();
-					}
+				// Update the goal process record to completed
+				$goal_process = $automation_contact->processes()->where( 'step_id', $step->id )->where( 'status', 'pending' )->first();
+				if ( $goal_process ) {
+					$goal_process->status = 'completed';
+					$goal_process->save();
+				}
 
-					// Move to next step if available
-					if ( 0 !== $automation_contact->next_step ) {
-						$automation_process = new Process_Automation( $step->automation );
-						$automation_process->enqueue_step( $automation_contact->next_step, $automation_contact->id );
-					}
+				// Move to next step if available
+				if ( 0 !== $automation_contact->next_step ) {
+					$automation_process = new Process_Automation( $step->automation );
+					$automation_process->enqueue_step( $automation_contact->next_step, $automation_contact->id );
 				}
 			} else {
-				$automation_contacts = $step->automation->contacts()->where( 'contact_id', $contact_id )->get();
-				foreach ( $automation_contacts as $automation_contact ) {
-					$automation_process = $automation_contact->processes()->where( 'step_id', $step->id )->where( 'status', 'pending' )->first();
-					if ( $automation_process ) {
-						$automation_process->status = 'completed';
-						$automation_process->save();
-					}
+				// If skipped, just mark the process as completed
+				$automation_process = $automation_contact->processes()->where( 'step_id', $step->id )->where( 'status', 'pending' )->first();
+				if ( $automation_process ) {
+					$automation_process->status = 'completed';
+					$automation_process->save();
 				}
 			}
 		} catch ( Exception $e ) {

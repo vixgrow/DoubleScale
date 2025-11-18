@@ -48,6 +48,7 @@ interface ActivityProps {
 	activityTypeFilter?: string;
 	onActivityAdded?: any;
 	activityItem?: any;
+	onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
 }
 
 interface Activity {
@@ -90,6 +91,7 @@ const activityTypeColors: Record<string, string> = {
 export default function Activity({
 	dealId,
 	activityTypeFilter,
+	onNotice
 	
 }: ActivityProps) {
 	const { getDealActivities } = useDealOperations();
@@ -537,6 +539,7 @@ export default function Activity({
 													initialComments={
 														activity.comments || []
 													}
+													
 												/>
 											)}
 										</div>

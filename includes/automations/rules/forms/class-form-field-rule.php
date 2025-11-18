@@ -24,6 +24,7 @@ if ( ! class_exists( 'QuillCRM\Automations\Rules\Forms\Form_Field_Rule' ) ) {
 	 */
 	class Form_Field_Rule extends Rule {
 
+
 		/**
 		 * Form instance
 		 *
@@ -91,7 +92,7 @@ if ( ! class_exists( 'QuillCRM\Automations\Rules\Forms\Form_Field_Rule' ) ) {
 			} else {
 				// Generic form field rule
 				$this->name  = sprintf( __( '%s Field', 'quillcrm' ), $form->name );
-				$this->slug  = $form->slug . '_field';
+				$this->slug  = $form->slug . '_field_';
 				$this->group = $form->slug;
 			}
 		}
@@ -176,9 +177,15 @@ if ( ! class_exists( 'QuillCRM\Automations\Rules\Forms\Form_Field_Rule' ) ) {
 					$value = $form_data['entry']['fields'][ $this->field_id ];
 				}
 			} else {
-				// This is a generic rule, get form and field from rule options
-				$rule_form_id  = isset( $rule['options']['form_id'] ) ? $rule['options']['form_id'] : null;
-				$rule_field_id = isset( $rule['options']['field_id'] ) ? $rule['options']['field_id'] : null;
+				$slug = $rule['rule'] ?? null;
+
+				if ( $slug && preg_match( '/_field_([^_]+)_form_([^_]+)$/', $slug, $matches ) ) {
+					$rule_field_id = $matches[1];
+					$rule_form_id  = $matches[2];
+				} else {
+					$rule_field_id = $rule['options']['field_id'] ?? null;
+					$rule_form_id  = $rule['options']['form_id'] ?? null;
+				}
 
 				if ( ! $rule_form_id || ! $rule_field_id ) {
 					return false;
@@ -188,7 +195,6 @@ if ( ! class_exists( 'QuillCRM\Automations\Rules\Forms\Form_Field_Rule' ) ) {
 					return false;
 				}
 
-				// Get the specific field value
 				if ( isset( $form_data['entry']['fields'][ $rule_field_id ] ) ) {
 					$value = $form_data['entry']['fields'][ $rule_field_id ];
 				}

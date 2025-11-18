@@ -9,17 +9,25 @@ import { useDispatch } from '@wordpress/data';
  * External dependencies
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
+import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 /**
  * Internal dependencies
  */
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
-import { getGoal } from '@quillcrm/utils';
+import { getGoalLabel, hasGoalWarning } from '@quillcrm/utils';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
 import { GoalIcon } from '@quillcrm/components';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface GoalNodeData {
 	step: AutomationStep;
@@ -30,17 +38,52 @@ interface GoalNodeData {
 }
 
 const GoalNode: React.FC<NodeProps> = ({ data }) => {
-	const { step, onStepClick, selectedStepId, viewMode = false, analytics } = data as unknown as GoalNodeData;
+	const {
+		step,
+		onStepClick,
+		selectedStepId,
+		viewMode = false,
+		analytics,
+	} = data as unknown as GoalNodeData;
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
 
-	const goal = step.action ? getGoal(step.action) : null;
-	const hasGoal = !!step.action;
+	// Check if goal is configured - a goal is configured if it has an action slug
+	const isConfigured = !!step.action;
 
-	const subtitle = hasGoal ? (
-		<span className="qcrm-reactflow-goal__configured">
-			{goal?.label}
-		</span>
+	// Get goal label and warning status from backend
+	const goalName = getGoalLabel(step);
+	const hasWarning = hasGoalWarning(step);
+
+	const subtitle = isConfigured ? (
+		<div className="flex items-center gap-2">
+			<span
+				className="qcrm-reactflow-goal__configured"
+				style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
+			>
+				{goalName}
+			</span>
+			{hasWarning && (
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<AlertTriangle className="h-4 w-4 text-orange-500" />
+						</TooltipTrigger>
+						<TooltipContent side="right" className="max-w-xs">
+							<p className="font-semibold">
+								{__('Plugin Required', 'quillcrm')}
+							</p>
+							<p className="text-xs mt-1">
+								{__(
+									'This goal requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
+									'quillcrm'
+								)}
+							</p>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			)}
+		</div>
 	) : (
 		<span className="qcrm-reactflow-goal__not-configured">
 			{__('Goal not set', 'quillcrm')}
@@ -123,8 +166,14 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 	const isSelected = selectedStepId === step.id.toString();
 
 	return (
-		<NodeContextMenu onEdit={viewMode ? undefined : handleEdit} onDelete={viewMode ? undefined : handleDelete} disabled={viewMode}>
-			<div className={`qcrm-reactflow-node qcrm-reactflow-node--goal ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}>
+		<NodeContextMenu
+			onEdit={viewMode ? undefined : handleEdit}
+			onDelete={viewMode ? undefined : handleDelete}
+			disabled={viewMode}
+		>
+			<div
+				className={`qcrm-reactflow-node qcrm-reactflow-node--goal ${isSelected ? 'qcrm-reactflow-node--selected' : ''} ${viewMode && analytics ? 'qcrm-reactflow-node--action-with-analytics' : ''}`}
+			>
 				<Handle
 					type="target"
 					position={Position.Top}

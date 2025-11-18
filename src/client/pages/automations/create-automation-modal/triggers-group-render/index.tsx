@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * External dependencies
  */
 import { useState } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, Lock } from 'lucide-react';
 import { map } from 'lodash';
 
 /**
@@ -21,6 +21,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import ProTriggerModal from '@/components/pro-trigger-modal';
 import type { TriggersGroup } from '@quillcrm/config';
 
 interface TriggersGroupRenderProps {
@@ -35,6 +36,8 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
     value,
 }) => {
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+    const [showProModal, setShowProModal] = useState(false);
+    const [selectedProTrigger, setSelectedProTrigger] = useState<{ name: string; key: string } | null>(null);
 
     // Helper function to get tooltip message for disabled triggers
     const getDisabledTooltip = (groupLabel: string) => {
@@ -75,87 +78,117 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
         }));
     };
 
+    const handleTriggerClick = (triggerKey: string, trigger: any) => {
+        if (trigger.is_pro) {
+            setSelectedProTrigger({ name: trigger.label, key: triggerKey });
+            setShowProModal(true);
+        } else {
+            onChange(triggerKey);
+        }
+    };
+
+    const handleCloseProModal = () => {
+        setShowProModal(false);
+        setSelectedProTrigger(null);
+    };
+
     return (
-        <div className="flex flex-col gap-4">
-            {map(groups, (group, key) => (
-                <Card key={key} className="shadow-none">
-                    <CardHeader className="px-4 py-2 border-b-2">
-                        <CardTitle className="flex items-center justify-between font-bold text-base">
-                            <div className="flex items-center gap-2">
-                                {group.label}
-                                {group.is_disabled && (
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <span className="text-sm text-muted-foreground">
-                                                    ({__('Not Available', 'quillcrm')})
-                                                </span>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                {getDisabledTooltip(group.label)}
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                )}
-                            </div>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => toggleGroup(key)}
-                                className="h-8 w-8 p-0"
-                            >
-                                {collapsedGroups[key] ? (
-                                    <ChevronDown className="h-6 w-6" />
-                                ) : (
-                                    <ChevronUp className="h-6 w-6" />
-                                )}
-                            </Button>
-                        </CardTitle>
-                    </CardHeader>
-                    {!collapsedGroups[key] && (
-                        <CardContent className="p-0">
-                            <div className="flex flex-col divide-y">
-                                {map(group.triggers, (trigger, triggerKey) => {
-                                    const triggerButton = (
-                                        <div
-                                            key={triggerKey}
-                                            className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 transition-colors"
-                                        >
-                                            <span className="text-sm">{trigger.label}</span>
-                                            <Button
-                                                onClick={() => onChange(triggerKey)}
-                                                disabled={group.is_disabled}
-                                                className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${value === triggerKey ? 'border-2 border-primary' : 'border'
-                                                    }`}
+        <>
+            <div className="flex flex-col gap-4">
+                {map(groups, (group, key) => (
+                    <Card key={key} className="shadow-none">
+                        <CardHeader className="px-4 py-2 border-b-2">
+                            <CardTitle className="flex items-center justify-between font-bold text-base">
+                                <div className="flex items-center gap-2">
+                                    {group.label}
+                                    {group.is_disabled && (
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <span className="text-sm text-muted-foreground">
+                                                        ({__('Not Available', 'quillcrm')})
+                                                    </span>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    {getDisabledTooltip(group.label)}
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    )}
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => toggleGroup(key)}
+                                    className="h-8 w-8 p-0"
+                                >
+                                    {collapsedGroups[key] ? (
+                                        <ChevronDown className="h-6 w-6" />
+                                    ) : (
+                                        <ChevronUp className="h-6 w-6" />
+                                    )}
+                                </Button>
+                            </CardTitle>
+                        </CardHeader>
+                        {!collapsedGroups[key] && (
+                            <CardContent className="p-0">
+                                <div className="flex flex-col divide-y">
+                                    {map(group.triggers, (trigger, triggerKey) => {
+                                        const triggerButton = (
+                                            <div
+                                                key={triggerKey}
+                                                className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 transition-colors"
                                             >
-                                                {__('Select', 'quillcrm')}
-                                            </Button>
-                                        </div>
-                                    );
-
-                                    if (group.is_disabled) {
-                                        return (
-                                            <TooltipProvider key={triggerKey}>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        {triggerButton}
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        {getDisabledTooltip(group.label)}
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm">{trigger.label}</span>
+                                                    {trigger.is_pro && (
+                                                        <Lock className="h-4 w-4 text-orange-500" />
+                                                    )}
+                                                </div>
+                                                <Button
+                                                    onClick={() => handleTriggerClick(triggerKey, trigger)}
+                                                    disabled={group.is_disabled}
+                                                    className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${value === triggerKey ? 'border-2 border-primary' : 'border'
+                                                        }`}
+                                                >
+                                                    {__('Select', 'quillcrm')}
+                                                </Button>
+                                            </div>
                                         );
-                                    }
 
-                                    return triggerButton;
-                                })}
-                            </div>
-                        </CardContent>
-                    )}
-                </Card>
-            ))}
-        </div>
+                                        if (group.is_disabled) {
+                                            return (
+                                                <TooltipProvider key={triggerKey}>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            {triggerButton}
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            {getDisabledTooltip(group.label)}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            );
+                                        }
+
+                                        return triggerButton;
+                                    })}
+                                </div>
+                            </CardContent>
+                        )}
+                    </Card>
+                ))}
+            </div>
+
+            {/* PRO Trigger Modal */}
+            {selectedProTrigger && (
+                <ProTriggerModal
+                    visible={showProModal}
+                    onClose={handleCloseProModal}
+                    triggerName={selectedProTrigger.name}
+                />
+            )}
+        </>
     );
 };
 

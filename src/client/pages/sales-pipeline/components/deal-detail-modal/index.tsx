@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -30,7 +30,8 @@ import Deal_Activites from '../deal-activities';
 import { DealDetailSkeleton } from './DealDetailSkeleton';
 import { StageTextColor } from '@quillcrm/components/stagebody-color/stagebodyColor';
 import { Input } from '@quillcrm/components/ui/input';
-import { useDispatch } from '@wordpress/data';
+import { NoticeMessage } from '@/client/types';
+import { NoticeBanner } from '@quillcrm/components';
 
 interface DealDetailModalProps {
 	dealId: number | null;
@@ -40,6 +41,7 @@ interface DealDetailModalProps {
 	onDeleted?: () => void;
 	onEdit?: (deal: Deal) => void;
 	pipeline?: any;
+	onNotice?: (notice: { type: 'success' | 'error'; message: string }) => void;
 }
 
 export const DealDetailModal: React.FC<DealDetailModalProps> = ({
@@ -50,17 +52,20 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	onDeleted,
 	onEdit,
 	pipeline,
+	onNotice,
 }) => {
 	const [deal, setDeal] = useState<Deal | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [showContent, setShowContent] = useState(false);
-	const [editingField, setEditingField] = useState<'title' | 'value' | null>(null);
+	const [editingField, setEditingField] = useState<'title' | 'value' | null>(
+		null
+	);
 	const [tempTitle, setTempTitle] = useState('');
 	const [tempValue, setTempValue] = useState('');
+	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 
 	const { getDeal, deleteDeal, updateDeal } = useDealOperations();
-	const dispatch = useDispatch('quillcrm/core');
-	const createNotice = dispatch?.createNotice;
+	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (!loading && deal) {
@@ -94,12 +99,9 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 			const dealData = await getDeal(dealId, true);
 			setDeal(dealData);
 		} catch (error) {
-			createNotice?.({
+			setNotice({
 				type: 'error',
-				message:
-					error instanceof Error
-						? error.message
-						: __('Failed to load deal details', 'quillcrm'),
+				message: __('Faild to load deal details', 'quillcrm'),
 			});
 		} finally {
 			setLoading(false);
@@ -129,7 +131,10 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 
 		return null;
 	})();
-	const handleSaveInline = async (field: 'title' | 'weighted_value' | 'value', value: any) => {
+	const handleSaveInline = async (
+		field: 'title' | 'weighted_value' | 'value',
+		value: any
+	) => {
 		try {
 			if (!deal) return;
 
@@ -169,6 +174,10 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 			return;
 		}
 		await handleSaveInline('title', tempTitle.trim());
+		setNotice({
+			type: 'success',
+			message: __('updated successfully', 'quillcrm'),
+		});
 	};
 
 	const handleSaveValue = async () => {
@@ -178,6 +187,10 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 			return;
 		}
 		await handleSaveInline('value', numValue);
+		setNotice({
+			type: 'success',
+			message: __('updated successfully', 'quillcrm'),
+		});
 	};
 
 	const formatCurrency = (value: number): string => {
@@ -195,6 +208,19 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 
 		return formattedValue;
 	};
+	const closeNotice = () => {
+		setNotice(null);
+	};
+
+	// Scroll to notice banner when notice appears
+	useEffect(() => {
+		if (notice && noticeBannerRef.current) {
+			noticeBannerRef.current.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			});
+		}
+	}, [notice]);
 
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
@@ -202,8 +228,8 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 				{loading || !showContent ? (
 					// <div className="flex justify-center items-center min-h-[200px]">
 					<DealDetailSkeleton />
-					// </div>
 				) : (
+					// </div>
 					<>
 						<DialogHeader>
 							<DialogTitle className=" flex justify-between ">
@@ -212,14 +238,21 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 										{editingField === 'title' ? (
 											<Input
 												value={tempTitle}
-												onChange={(e) => setTempTitle(e.target.value)}
+												onChange={(e) =>
+													setTempTitle(e.target.value)
+												}
 												className="text-[#09090B] font-bold text-[32px] h-12 border-2 border-[#458DC7]"
-												placeholder={__('Deal Title', 'quillcrm')}
+												placeholder={__(
+													'Deal Title',
+													'quillcrm'
+												)}
 												autoFocus
 												onBlur={handleSaveTitle}
 												onKeyDown={(e) => {
-													if (e.key === 'Enter') handleSaveTitle();
-													if (e.key === 'Escape') handleCancelEdit();
+													if (e.key === 'Enter')
+														handleSaveTitle();
+													if (e.key === 'Escape')
+														handleCancelEdit();
 												}}
 											/>
 										) : (
@@ -229,36 +262,19 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 												</p>
 												<span
 													className="w-6 h-6 p-1 flex items-center justify-center rounded-full bg-[#E4EEFD] cursor-pointer"
-													onClick={() => handleStartEdit('title')}
+													onClick={() =>
+														handleStartEdit('title')
+													}
 												>
-													<EditHeaderIcon color="#458DC7" width={20} height={20} />
+													<EditHeaderIcon
+														color="#458DC7"
+														width={20}
+														height={20}
+													/>
 												</span>
 											</>
 										)}
 									</div>
-									{/* value */}
-									{/* <div className="flex items-center gap-2 text-[#09090B] font-bold text-2xl">
-										<p className="mt-1 text-2xl">
-											{__(
-												`${formatCurrency(deal?.weighted_value ?? 0)}`,
-												'quillcrm'
-											)}
-										</p>
-										<span className="text-[#777] text-[20px] flex items-center gap-1">
-											<DealValueIcon
-												width={20}
-												height={20}
-											/>
-											USD
-										</span>
-										<span className="w-6 h-6 p-1 flex items-center justify-center rounded-full bg-[#E4EEFD]">
-											<EditHeaderIcon
-												color="#458DC7"
-												width={20}
-												height={20}
-											/>
-										</span>
-									</div> */}
 									{/* Editable Value */}
 									<div className="flex items-center gap-2 text-[#09090B] font-bold text-2xl mt-1">
 										{editingField === 'value' ? (
@@ -267,36 +283,53 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 												<Input
 													type="number"
 													value={tempValue}
-													onChange={(e) => setTempValue(e.target.value)}
+													onChange={(e) =>
+														setTempValue(
+															e.target.value
+														)
+													}
 													className="text-[#09090B] font-bold text-2xl h-12 pl-8 border-2 border-[#458DC7]"
 													placeholder="0"
 													autoFocus
 													onBlur={handleSaveValue}
 													onKeyDown={(e) => {
-														if (e.key === 'Enter') handleSaveValue();
-														if (e.key === 'Escape') handleCancelEdit();
+														if (e.key === 'Enter')
+															handleSaveValue();
+														if (e.key === 'Escape')
+															handleCancelEdit();
 													}}
 												/>
 											</div>
 										) : (
 											<>
 												<p className="text-2xl">
-													${formatCurrency(deal?.value ?? 0)}
+													$
+													{formatCurrency(
+														deal?.value ?? 0
+													)}
 												</p>
 												<span className="text-[#777] text-[20px] flex items-center gap-1">
-													<DealValueIcon width={20} height={20} />
+													<DealValueIcon
+														width={20}
+														height={20}
+													/>
 													USD
 												</span>
 												<span
 													className="w-6 h-6 p-1 flex items-center justify-center rounded-full bg-[#E4EEFD] cursor-pointer"
-													onClick={() => handleStartEdit('value')}
+													onClick={() =>
+														handleStartEdit('value')
+													}
 												>
-													<EditHeaderIcon color="#458DC7" width={20} height={20} />
+													<EditHeaderIcon
+														color="#458DC7"
+														width={20}
+														height={20}
+													/>
 												</span>
 											</>
 										)}
 									</div>
-
 								</div>
 								<ActivityActions
 									dealId={deal?.id ?? 0}
@@ -307,9 +340,18 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 									onDeleted={() => {
 										if (onDeleted) onDeleted();
 									}}
+									onNotice={onNotice}
+									// to delete
 								/>
 							</DialogTitle>
 						</DialogHeader>
+						{notice && (
+							<NoticeBanner
+								ref={noticeBannerRef}
+								notice={notice}
+								closeNotice={closeNotice}
+							/>
+						)}
 						{/* contact overview+customfiled */}
 						<div className=" grid grid-cols-2 gap-12">
 							<DealOverViewModal
@@ -317,6 +359,7 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 								deal={deal}
 								onEdit={onEdit}
 								onUpdate={handleOverviewUpdate}
+								onNotice={(notice) => setNotice(notice)}
 							/>
 							<div className="border flex flex-col gap-6 border-[#DEE1E6] bg-[#F8F8F8] rounded-[20px] p-6">
 								{deal && <CustomFieldsView deal={deal} />}
@@ -324,7 +367,10 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 						</div>
 
 						{pipeline?.stages && (
-							<PipelineStagesHeader stages={pipeline.stages} currentStageId={deal?.stage?.id} />
+							<PipelineStagesHeader
+								stages={pipeline.stages}
+								currentStageId={deal?.stage?.id}
+							/>
 						)}
 						{/* pipeline */}
 						<div className=" flex flex-wrap md:flex-nowrap justify-between items-start md:items-center gap-6 w-full ">
@@ -349,9 +395,9 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 										{previousStage
 											? previousStage.name
 											: __(
-												'No previous stage',
-												'quillcrm'
-											)}
+													'No previous stage',
+													'quillcrm'
+												)}
 									</p>
 								</div>
 							</div>
@@ -364,7 +410,11 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 										</p>
 										<p
 											className="font-bold text-lg "
-											style={{ color: StageTextColor(deal.stage.color) }}
+											style={{
+												color: StageTextColor(
+													deal.stage.color
+												),
+											}}
 										>
 											{deal?.stage?.name}
 										</p>
@@ -389,7 +439,10 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 							)}
 						</div>
 						{/* avtivites */}
-						<Deal_Activites dealId={dealId || undefined} />
+						<Deal_Activites
+							dealId={dealId || undefined}
+							onNotice={(notice) => setNotice(notice)}
+						/>
 					</>
 				)}
 			</DialogContent>

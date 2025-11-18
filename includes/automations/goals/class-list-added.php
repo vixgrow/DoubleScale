@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class List Added Goal
  *
@@ -13,6 +14,7 @@ namespace QuillCRM\Goals;
 
 use QuillCRM\Abstracts\Goal;
 use QuillCRM\Models\Contact_Model;
+use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Managers\Goals_Manager;
 
@@ -20,6 +22,8 @@ use QuillCRM\Managers\Goals_Manager;
  * List Added Goal class
  */
 class List_Added extends Goal {
+
+
 
 	/**
 	 * Goal Name
@@ -100,14 +104,21 @@ class List_Added extends Goal {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param Automation_Step_Model $step Automation Step Model.
-	 * @param array                 $data Data.
+	 * @param Automation_Contact_Model $automation_contact Automation Contact Model.
+	 * @param array                    $data Data.
 	 *
 	 * @return bool
 	 */
-	public function is_completed( Automation_Step_Model $step, $data ) {
-		$lists      = $data['lists'] ?? array();
-		$goal_lists = $step->get_setting( 'lists', array() );
+	public function is_completed( Automation_Contact_Model $automation_contact, $data ) {
+		$lists = $data['lists'] ?? array();
+
+		// Get the current step model
+		$current_step = Automation_Step_Model::find( $automation_contact->current_step );
+		if ( ! $current_step ) {
+			return false;
+		}
+
+		$goal_lists = $current_step->get_setting( 'lists', array() );
 
 		return ! empty( array_intersect( $lists, $goal_lists ) );
 	}

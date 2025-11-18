@@ -45,34 +45,39 @@ export const DeletePipelineDialog = ({
 		try {
 			if (action === 'delete') {
 				await deletePipeline(pipeline.id);
-				createNotice?.({
+				
+				onConfirm?.({
 					type: 'success',
 					message: __(
-						`Pipeline "${pipeline.name}" deleted successfully!`,
-						'quillcrm'
+					  `Pipeline "${pipeline.name}" deleted successfully!`,
+					  'quillcrm'
 					),
-				});
+				  });
 				onClose();
 				// Call onConfirm after closing to trigger refresh and update pipeline selection
-				if (onConfirm) {
-					await onConfirm();
-				}
+				// if (onConfirm) {
+				// 	await onConfirm();
+				// }
 			} else {
 
-				createNotice?.({
+				onConfirm?.({
 					type: 'info',
 					message: __(
-						`"${action}" option selected — no real action executed.`,
-						'quillcrm'
+					  `"${action}" option selected — no real action executed.`,
+					  'quillcrm'
 					),
-				});
+				  });
 				onClose();
 			}
 		} catch (error) {
-			createNotice?.({
-				type: 'error',
-				message: __(`Failed to delete pipeline`, 'quillcrm'),
-			});
+			const errorMessage = error instanceof Error
+      ? error.message
+      : __('Failed to delete pipeline', 'quillcrm');
+
+    onConfirm?.({
+      type: 'error',
+      message: errorMessage,
+    });
 		} finally {
 			setLoading(false);
 		}

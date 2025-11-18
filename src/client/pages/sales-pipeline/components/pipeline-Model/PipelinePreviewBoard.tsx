@@ -27,7 +27,7 @@ export const PipelinePreviewBoard = ({ stages }) => {
 								totalStages={stages.length}
 							>
 								<div
-									className="font-bold  text-base leading-[26px] tracking-[-.5px]"
+									className="font-bold  text-base leading-[26px] truncate max-w-[120px] tracking-[-.5px]"
 									style={{ color: StageTextColor(stage.color) }}
 								>
 									{stage.name || `Stage ${index + 1}`}

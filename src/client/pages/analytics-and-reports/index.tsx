@@ -18,6 +18,7 @@ import EmailAnalytics from '../home/emails-analytics';
 import { useDashboardData } from '../home/use-analytics';
 import CartAnalytics from '../home/cart-analytics';
 import DealSourceAnalytics from './deal-source';
+import { ContactsIcon, PageTabs } from '@quillcrm/components';
 
 
 interface AnalyticsAndReportsProps {
@@ -59,11 +60,42 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({ defaultTab })
 					return <SalesRepDetailView />;
 				}
 				return (
-					<div className="space-y-6">
-						<ContactsDealsReports />
-						<DealsReportsByDate />
-						<DealsReportsLeaderboard />
-					</div>
+					// <div className="space-y-6">
+					// 	<ContactsDealsReports />
+					// 	<DealsReportsByDate />
+					// 	<DealsReportsLeaderboard />
+					// </div>
+					<PageTabs
+						defaultValue='deals'
+						tabsList={[
+							{
+								label: __('Deal Analysis', 'quillcrm'),
+								value: 'deals',
+								icon: <ContactsIcon width={20} height={20} />,
+							},
+							{
+								label: __('Deal Source Analysis', 'quillcrm'),
+								value: 'dealSource-rep',
+								icon: <ContactsIcon width={20} height={20} />,
+							},
+						]}
+						tabsContent={[
+							{
+								value: 'deals',
+								children: (
+									<div className="space-y-6">
+										<ContactsDealsReports />
+										<DealsReportsByDate />
+										<DealsReportsLeaderboard />
+									</div>
+								),
+							},
+							{
+								value: 'dealSource-rep',
+								children: <DealSourceAnalytics />,
+							},
+						]}
+					/>
 				);
 		}
 	};

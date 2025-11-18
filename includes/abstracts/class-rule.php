@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Rule
  *
@@ -17,6 +18,8 @@ use QuillCRM\Models\Automation_Contact_Model;
  * Rule class
  */
 abstract class Rule {
+
+
 
 	/**
 	 * Name
@@ -54,6 +57,16 @@ abstract class Rule {
 	 */
 	public $type;
 
+
+
+	/**
+	 * Required Triggers
+	 *
+	 * @var array
+	 */
+	public $required_triggers = array();
+
+
 	/**
 	 * Get operators
 	 *
@@ -82,7 +95,7 @@ abstract class Rule {
 	 * @return bool
 	 */
 	public function has_options() {
-		return false;
+		 return false;
 	}
 
 	/**
@@ -93,7 +106,7 @@ abstract class Rule {
 	 * @return array
 	 */
 	public function get_options() {
-		return array();
+		 return array();
 	}
 
 	/**
@@ -105,7 +118,7 @@ abstract class Rule {
 	 *
 	 * @return mixed
 	 */
-	abstract public function get_value( $automation_contact );
+	abstract public function get_value( $automation_contact);
 
 	/**
 	 * Is met
@@ -128,13 +141,13 @@ abstract class Rule {
 					return array_diff( $value, $rule_value );
 				}
 
-				return ( $value == $rule_value ); // phpcs:ignore
+				return ($value == $rule_value); // phpcs:ignore
 
 			case 'is_not':
 				if ( is_array( $value ) ) {
-					return ! in_array( $rule_value, $value ); // phpcs:ignore
+					return ! in_array($rule_value, $value); // phpcs:ignore
 				}
-				return ( $value != $rule_value ); // phpcs:ignore
+				return ($value != $rule_value); // phpcs:ignore
 
 			case 'greater_than':
 				if ( ! is_numeric( $rule_value ) || ! is_numeric( $value ) ) {

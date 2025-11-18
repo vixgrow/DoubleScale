@@ -156,10 +156,12 @@ final class QuillCRM {
 			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_email_campaigns' );
 		}
 
-		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_sms_campaigns' ) === false ) {
-			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_sms_campaigns' );
-		}
+		// SMS campaigns moved to Pro - scheduling handled by Pro plugin
+		// if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_sms_campaigns' ) === false ) {
+		// 	$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_sms_campaigns' );
+		// }
 
+		// WhatsApp campaigns moved to Pro - scheduling handled by Pro plugin
 		// if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_whatsapp_campaigns' ) === false ) {
 		// $this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_whatsapp_campaigns' );
 		// }

@@ -42,3 +42,4 @@ export { MessageStatsCard } from './message-stats-card';
 export { default as MessageDetailsDialog } from './message-details-dialog';
 export { default as DashboardSmallCard } from './dashboard-small-card';
 export { default as DashboardContentCard } from './dashboard-content-card';
+export { ProFeatureNotice } from './pro-feature-notice';

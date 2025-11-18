@@ -26,6 +26,7 @@ import {
 	ContactTotalEmailsIcon,
 	ContactSMSIcon,
 	NoticeBanner,
+	ProFeatureNotice,
 } from '@/components';
 import DataTablePagination from '@/components/ui/data-table-pagination';
 import EmptyCampaignList from './empty-campaign-list';
@@ -377,6 +378,26 @@ const Campaigns: React.FC = () => {
 	);
 
 	// Define tabs content
+	// Apply filters to allow Pro version to override tab content
+	// If filter returns null, it means PRO wants to use the regular CampaignContent
+	const SMSTabContentOverride = applyFilters(
+		'QuillCRM.Campaigns.TabContent',
+		'default', // Pass a signal value, not a component
+		'sms'
+	);
+
+	const SMSTabContent = SMSTabContentOverride === null
+		? <CampaignContent /> // PRO version active - use regular campaigns
+		: ( // Free version - show PRO notice
+			<ProFeatureNotice
+				featureName={__('SMS Campaigns', 'quillcrm')}
+				description={__(
+					'Create and send bulk SMS campaigns to your contacts with full tracking and analytics.',
+					'quillcrm'
+				)}
+			/>
+		);
+
 	const tabsContent = [
 		{
 			value: 'email',
@@ -384,7 +405,7 @@ const Campaigns: React.FC = () => {
 		},
 		{
 			value: 'sms',
-			children: <CampaignContent />,
+			children: SMSTabContent,
 		},
 	];
 

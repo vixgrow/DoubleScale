@@ -381,11 +381,11 @@ final class QuillCRM {
 			require $file;
 		}
 
-		// Load all automations deal triggers files
-		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
-		foreach ( $triggers_files as $file ) {
-			require $file;
-		}
+		// Deal triggers moved to Pro plugin
+		// $triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
+		// foreach ( $triggers_files as $file ) {
+		// 	require $file;
+		// }
 
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
@@ -427,18 +427,14 @@ final class QuillCRM {
 			require $file;
 		}
 
-		// Load all automations deal actions files
-		// First load the base class
-		require_once QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-base-deal-action.php';
-
-		// Then load all other deal action files
-		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
-		foreach ( $actions_files as $file ) {
-			// Skip the base class as we've already loaded it
-			if ( basename( $file ) !== 'class-base-deal-action.php' ) {
-				require $file;
-			}
-		}
+		// Deal actions moved to Pro plugin
+		// require_once QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-base-deal-action.php';
+		// $actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
+		// foreach ( $actions_files as $file ) {
+		// 	if ( basename( $file ) !== 'class-base-deal-action.php' ) {
+		// 		require $file;
+		// 	}
+		// }
 
 		// Load all froms
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/forms/class-*.php' );
@@ -535,25 +531,5 @@ final class QuillCRM {
 	public function register_log_handlers( $handlers ) {
 		$handlers[] = new Log_Handler_DB();
 		return $handlers;
-	}
-
-	/**
-	 * Register message providers
-	 *
-	 * Registers default message providers (Twilio for MVP).
-	 * Third-party plugins can add additional providers via the
-	 * 'quillcrm_register_message_providers' action hook.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function register_message_providers() {
-		// Register Twilio as the default provider for SMS and WhatsApp
-		Message_Provider_Registry::instance()->register(
-			new Twilio_Message_Provider()
-		);
-
-		do_action( 'quillcrm_register_message_providers' );
 	}
 }

@@ -23,7 +23,7 @@ use QuillCRM\Models\Abandoned_Cart_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Tag_Model;
-use QuillCRM\Models\Deal_Model;
+// use QuillCRM\Models\Deal_Model; // Moved to Pro
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Campaign_Channel;
@@ -79,9 +79,18 @@ class REST_General_Controller extends REST_Controller {
 		$total_tags                   = Tag_Model::count();
 		$total_automations            = Automation_Model::where( 'status', 'active' )->count();
 		$total_email_templates        = Template_Model::where( 'type', Campaign_Channel::CHANNEL_EMAIL )->count();
-		$deals                        = Deal_Model::count();
-		$deals_closed_won             = Deal_Model::where( 'status', 'won' )->count();
-		$deals_won_value              = (float) Deal_Model::where( 'status', 'won' )->sum( 'value' );
+
+		// Deal statistics - only if PRO plugin is active
+		if ( class_exists( 'QuillCRM_Pro\Models\Deal_Model' ) ) {
+			$deals            = \QuillCRM_Pro\Models\Deal_Model::count();
+			$deals_closed_won = \QuillCRM_Pro\Models\Deal_Model::where( 'status', 'won' )->count();
+			$deals_won_value  = (float) \QuillCRM_Pro\Models\Deal_Model::where( 'status', 'won' )->sum( 'value' );
+		} else {
+			$deals            = 0;
+			$deals_closed_won = 0;
+			$deals_won_value  = 0;
+		}
+
 		$recent_contacts              = Contact_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$recent_unsubscribed_contacts = Contact_Model::where( 'status', 'unsubscribed' )->orderBy( 'id', 'desc' )->limit( 5 )->get();
 		$top_campaigns                = Campaign_Model::orderBy( 'id', 'desc' )->limit( 5 )->get();

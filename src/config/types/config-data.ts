@@ -152,6 +152,7 @@ export type Trigger = {
 		};
 	};
 	is_form?: boolean;
+	is_pro?: boolean;
 };
 
 export type TriggersGroup = {

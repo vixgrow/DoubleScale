@@ -32,7 +32,7 @@ use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Managers\Merge_Tags_Manager;
-use QuillCRM\Traits\Message_Provider_Validation;
+// use QuillCRM\Traits\Message_Provider_Validation; // Moved to Pro
 
 /**
  * REST_Contact_Controller is REST api controller class for log
@@ -41,7 +41,7 @@ use QuillCRM\Traits\Message_Provider_Validation;
  */
 class REST_Contact_Controller extends REST_Controller {
 
-	use Message_Provider_Validation;
+	// use Message_Provider_Validation; // Moved to Pro
 
 
 
@@ -1626,13 +1626,14 @@ class REST_Contact_Controller extends REST_Controller {
 			);
 		}
 
-		// Validate provider connection for SMS/WhatsApp before processing.
-		if ( $channel === Campaign_Channel::STR_SMS || $channel === Campaign_Channel::STR_WHATSAPP ) {
-			$provider_check = $this->validate_provider_connection( $channel );
-			if ( is_wp_error( $provider_check ) ) {
-				return $provider_check;
-			}
-		}
+		// Validate provider connection for SMS/WhatsApp before processing - Moved to Pro
+		// SMS/WhatsApp messaging are Pro-only features
+		// if ( $channel === Campaign_Channel::STR_SMS || $channel === Campaign_Channel::STR_WHATSAPP ) {
+		// 	$provider_check = $this->validate_provider_connection( $channel );
+		// 	if ( is_wp_error( $provider_check ) ) {
+		// 		return $provider_check;
+		// 	}
+		// }
 
 		// Route to appropriate sender based on channel.
 		switch ( $channel ) {
@@ -1641,12 +1642,13 @@ class REST_Contact_Controller extends REST_Controller {
 				break;
 
 			case Campaign_Channel::STR_SMS:
-				$sender = new \QuillCRM\Individual_Messaging\SMS_Individual_Sender();
-				break;
-
 			case Campaign_Channel::STR_WHATSAPP:
-				$sender = new \QuillCRM\Individual_Messaging\WhatsApp_Individual_Sender();
-				break;
+				// SMS/WhatsApp messaging moved to Pro plugin
+				return new WP_Error(
+					'pro_feature_required',
+					__( 'SMS and WhatsApp messaging are available in QuillCRM Pro.', 'quillcrm' ),
+					array( 'status' => 403 )
+				);
 
 			default:
 				return new WP_Error(

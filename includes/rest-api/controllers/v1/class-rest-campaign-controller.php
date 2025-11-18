@@ -18,16 +18,16 @@ use QuillCRM\Abstracts\Abstract_Campaign_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Campaign_Status_Manager;
-use QuillCRM\Managers\Message_Provider_Registry;
+// use QuillCRM\Managers\Message_Provider_Registry; // Moved to Pro
 use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Traits\Message_Provider_Validation;
+// use QuillCRM\Traits\Message_Provider_Validation; // Moved to Pro
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Campaign\Email_Processing;
-use QuillCRM\Campaign\SMS_Processing;
-use QuillCRM\Campaign\WhatsApp_Processing;
+// use QuillCRM\Campaign\SMS_Processing; // Moved to Pro
+// use QuillCRM\Campaign\WhatsApp_Processing; // Moved to Pro
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Emails\Email_Renderer;
 use QuillCRM\Managers\Merge_Tags_Manager;
@@ -41,7 +41,7 @@ use QuillCRM\Managers\Merge_Tags_Manager;
  */
 class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 
-	use Message_Provider_Validation;
+	// use Message_Provider_Validation; // Moved to Pro
 
 	/**
 	 * REST Base
@@ -301,13 +301,14 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 
 		$this->channel = $type;
 
-		// Validate provider connection for SMS/WhatsApp campaigns.
-		if ( $type === Campaign_Channel::STR_SMS || $type === Campaign_Channel::STR_WHATSAPP ) {
-			$provider_check = $this->validate_provider_connection( $type );
-			if ( is_wp_error( $provider_check ) ) {
-				return $provider_check;
-			}
-		}
+		// Validate provider connection for SMS/WhatsApp campaigns - Moved to Pro
+		// SMS/WhatsApp campaigns are Pro-only features
+		// if ( $type === Campaign_Channel::STR_SMS || $type === Campaign_Channel::STR_WHATSAPP ) {
+		// 	$provider_check = $this->validate_provider_connection( $type );
+		// 	if ( is_wp_error( $provider_check ) ) {
+		// 		return $provider_check;
+		// 	}
+		// }
 
 		return parent::create_item( $request );
 	}

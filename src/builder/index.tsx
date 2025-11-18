@@ -86,6 +86,11 @@ const BuilderContent: React.FC<BuilderProps> = ({
 	const { activeItem, handleDragStart, handleDragEnd } =
 		useDragHandlers(onDragEndCallback);
 
+	// Handle opening global settings by clearing selection
+	const handleOpenGlobalSettings = () => {
+		dispatch(STORE_KEY).clearSelection();
+	};
+
 	useEffect(() => {
 		if (initialData) {
 			dispatch(STORE_KEY).setLoading(true);
@@ -272,6 +277,7 @@ const BuilderContent: React.FC<BuilderProps> = ({
 						<Sidebar
 							sidebarCloseTrigger={sidebarCloseTrigger}
 							templatesRefreshKey={templatesRefreshTrigger}
+							openGlobalSettings={handleOpenGlobalSettings}
 						/>
 						<Canvas />
 

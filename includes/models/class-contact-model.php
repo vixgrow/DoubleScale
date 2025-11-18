@@ -21,7 +21,7 @@ use QuillCRM\Models\User_Model;
 use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\WC_Order_Model;
 use QuillCRM\Models\Automation_Contact_Processes_Model;
-use QuillCRM\Models\Deal_Model;
+// use QuillCRM\Models\Deal_Model; // Moved to Pro
 use QuillCRM\Utils;
 
 /**
@@ -251,24 +251,32 @@ class Contact_Model extends Model {
 
 	/**
 	 * Get the deals for this contact
+	 * Deals are PRO-only feature - uses PRO model if available
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany|null
 	 */
 	public function deals() {
-		return $this->hasMany( Deal_Model::class, 'contact_id', 'id' );
+		if ( class_exists( 'QuillCRM_Pro\Models\Deal_Model' ) ) {
+			return $this->hasMany( \QuillCRM_Pro\Models\Deal_Model::class, 'contact_id', 'id' );
+		}
+		return null;
 	}
 
 	/**
 	 * Get active deals (open status) for this contact
+	 * Deals are PRO-only feature - uses PRO model if available
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\HasMany
+	 * @return \Illuminate\Database\Eloquent\Relations\HasMany|null
 	 */
 	public function active_deals() {
-		return $this->hasMany( Deal_Model::class, 'contact_id', 'id' )->where( 'status', 'open' );
+		if ( class_exists( 'QuillCRM_Pro\Models\Deal_Model' ) ) {
+			return $this->hasMany( \QuillCRM_Pro\Models\Deal_Model::class, 'contact_id', 'id' )->where( 'status', 'open' );
+		}
+		return null;
 	}
 
 	/**

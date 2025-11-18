@@ -27,10 +27,14 @@ function autoload( $class ) {
 			},
 			$class_breakdown
 		);
-		$class_breakdown[] = 'class-' . array_pop( $class_breakdown );
-		$class_file        = __DIR__ . '/' . implode( '/', $class_breakdown ) . '.php';
-		if ( file_exists( $class_file ) ) {
-			include $class_file;
-		}
+	$class_breakdown[] = 'class-' . array_pop( $class_breakdown );
+	$class_file        = __DIR__ . '/' . implode( '/', $class_breakdown ) . '.php';
+
+	// Note: SMS/WhatsApp, Pipeline, Deal, and Activity implementation files removed
+	// These features are available in QuillCRM Pro plugin
+	
+	if ( file_exists( $class_file ) ) {
+		include $class_file;
+	}
 	}
 }

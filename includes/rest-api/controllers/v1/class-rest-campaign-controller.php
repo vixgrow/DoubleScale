@@ -18,16 +18,16 @@ use QuillCRM\Abstracts\Abstract_Campaign_Controller;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Managers\Campaign_Status_Manager;
-use QuillCRM\Managers\Message_Provider_Registry;
+// use QuillCRM\Managers\Message_Provider_Registry; // Moved to Pro
 use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Traits\Message_Provider_Validation;
+// use QuillCRM\Traits\Message_Provider_Validation; // Moved to Pro
 use QuillCRM\Constants\Tracking_Status;
 use QuillCRM\Constants\Message_Source_Types;
 use QuillCRM\Campaign\Email_Processing;
-use QuillCRM\Campaign\SMS_Processing;
-use QuillCRM\Campaign\WhatsApp_Processing;
+// use QuillCRM\Campaign\SMS_Processing; // Moved to Pro
+// use QuillCRM\Campaign\WhatsApp_Processing; // Moved to Pro
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Emails\Email_Renderer;
 use QuillCRM\Managers\Merge_Tags_Manager;
@@ -41,7 +41,7 @@ use QuillCRM\Managers\Merge_Tags_Manager;
  */
 class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 
-	use Message_Provider_Validation;
+	// use Message_Provider_Validation; // Moved to Pro
 
 	/**
 	 * REST Base
@@ -301,13 +301,14 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 
 		$this->channel = $type;
 
-		// Validate provider connection for SMS/WhatsApp campaigns.
-		if ( $type === Campaign_Channel::STR_SMS || $type === Campaign_Channel::STR_WHATSAPP ) {
-			$provider_check = $this->validate_provider_connection( $type );
-			if ( is_wp_error( $provider_check ) ) {
-				return $provider_check;
-			}
-		}
+		// Validate provider connection for SMS/WhatsApp campaigns - Moved to Pro
+		// SMS/WhatsApp campaigns are Pro-only features
+		// if ( $type === Campaign_Channel::STR_SMS || $type === Campaign_Channel::STR_WHATSAPP ) {
+		// 	$provider_check = $this->validate_provider_connection( $type );
+		// 	if ( is_wp_error( $provider_check ) ) {
+		// 		return $provider_check;
+		// 	}
+		// }
 
 		return parent::create_item( $request );
 	}
@@ -843,31 +844,49 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 				);
 			}
 
-			// Get the appropriate processor based on campaign type
-			// Use get_type() to get integer value for comparison
-			$campaign_type = $campaign->get_type();
-			$processor     = null;
-			
-			switch ( $campaign_type ) {
-				case Campaign_Channel::CHANNEL_EMAIL:
-					$processor = Email_Processing::instance();
-					break;
-				case Campaign_Channel::CHANNEL_SMS:
-					$processor = SMS_Processing::instance();
-					break;
-				case Campaign_Channel::CHANNEL_WHATSAPP:
-					$processor = WhatsApp_Processing::instance();
-					break;
-				default:
+		// Get the appropriate processor based on campaign type
+		// Use get_type() to get integer value for comparison
+		$campaign_type = $campaign->get_type();
+		$processor     = null;
+		
+		switch ( $campaign_type ) {
+			case Campaign_Channel::CHANNEL_EMAIL:
+				$processor = Email_Processing::instance();
+				break;
+			case Campaign_Channel::CHANNEL_SMS:
+				// SMS processing is only available in Pro version
+				if ( class_exists( '\QuillCRM_Pro\Campaign\SMS_Processing' ) ) {
+					$processor = \QuillCRM_Pro\Campaign\SMS_Processing::instance();
+				} else {
 					return new WP_Error(
-						'invalid_campaign_type',
-						__( 'Invalid campaign type', 'quillcrm' ),
-						array( 'status' => 400 )
+						'pro_feature_required',
+						__( 'SMS campaigns require QuillCRM Pro', 'quillcrm' ),
+						array( 'status' => 403 )
 					);
-			}
+				}
+				break;
+			case Campaign_Channel::CHANNEL_WHATSAPP:
+				// WhatsApp processing is only available in Pro version
+				if ( class_exists( '\QuillCRM_Pro\Campaign\WhatsApp_Processing' ) ) {
+					$processor = \QuillCRM_Pro\Campaign\WhatsApp_Processing::instance();
+				} else {
+					return new WP_Error(
+						'pro_feature_required',
+						__( 'WhatsApp campaigns require QuillCRM Pro', 'quillcrm' ),
+						array( 'status' => 403 )
+					);
+				}
+				break;
+			default:
+				return new WP_Error(
+					'invalid_campaign_type',
+					__( 'Invalid campaign type', 'quillcrm' ),
+					array( 'status' => 400 )
+				);
+		}
 
-			// Use the processor's resend_single_message method
-			$processor->resend_single_message( $campaign, $contact, $tracking );
+		// Use the processor's resend_single_message method
+		$processor->resend_single_message( $campaign, $contact, $tracking );
 
 			return rest_ensure_response(
 				array(

@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * External dependencies
@@ -13,8 +14,8 @@ import { __ } from '@wordpress/i18n';
 import { Card, CardContent } from '@/components/ui/card';
 import PageTabs from '@/components/page-tabs';
 import Emails from '../emails';
-import SMS from '../sms';
-// import WhatsApp from '../whatsapp';
+import SMSBase from '../sms';
+// import WhatsAppBase from '../whatsapp';
 import PurchaseHistory from '../purchase-history';
 import Automation from '../automation';
 import Notes from '../notes';
@@ -42,6 +43,10 @@ const DataCard: React.FC = () => {
 	if (!contact) {
 		return null;
 	}
+
+	// Apply filters to allow Pro version to override components
+	const SMS = applyFilters('QuillCRM.Contact.TabComponent', SMSBase, 'sms') as React.FC<{ contact_id: number }>;
+	// const WhatsApp = applyFilters('QuillCRM.Contact.TabComponent', WhatsAppBase, 'whatsapp') as React.FC<{ contact_id: number }>;
 
 	const tabsList = [
 		{

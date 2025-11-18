@@ -24,8 +24,8 @@ use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
 use QuillCRM\User_Roles\Permissions;
-use QuillCRM\Managers\Pipeline_Manager;
-use QuillCRM\Managers\Deal_Manager;
+// use QuillCRM\Managers\Pipeline_Manager; // Moved to Pro
+// use QuillCRM\Managers\Deal_Manager; // Moved to Pro
 
 /**
  * Core Class
@@ -85,8 +85,13 @@ class Core {
 				'qcrm.config.setMergeTags( ' . wp_json_encode( Merge_Tags_Manager::instance()->get_groups() ) . ');' .
 				'qcrm.config.setImporters( ' . wp_json_encode( Importers_Manager::instance()->get_options() ) . ');' .
 				'qcrm.config.setUserCapabilities( ' . wp_json_encode( $user_capabilities ) . ');' .
-				'qcrm.config.setDefaultStages( ' . wp_json_encode( Pipeline_Manager::instance()->get_default_stages() ) . ');' .
-				'qcrm.config.setDealPriorities( ' . wp_json_encode( Deal_Manager::instance()->get_deal_priorities() ) . ');' .
+				// Pipeline and Deal config - only if PRO plugin is active
+				( class_exists( 'QuillCRM_Pro\Managers\Pipeline_Manager' )
+					? 'qcrm.config.setDefaultStages( ' . wp_json_encode( \QuillCRM_Pro\Managers\Pipeline_Manager::instance()->get_default_stages() ) . ');'
+					: 'qcrm.config.setDefaultStages( [] );' ) .
+				( class_exists( 'QuillCRM_Pro\Managers\Deal_Manager' )
+					? 'qcrm.config.setDealPriorities( ' . wp_json_encode( \QuillCRM_Pro\Managers\Deal_Manager::instance()->get_deal_priorities() ) . ');'
+					: 'qcrm.config.setDealPriorities( [] );' ) .
 				'qcrm.config.setQuillSMTPInfo( ' . wp_json_encode( $quillsmtp_info ) . ');'
 		);
 	}

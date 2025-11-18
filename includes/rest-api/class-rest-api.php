@@ -114,8 +114,7 @@ class REST_API {
 			Rest_Import_Export_Controller::class,
 			REST_Log_Controller::class,
 			REST_Automation_Reports_Controller::class,
-			// Pipeline, Deal, Activity, and Stage controllers moved to Pro plugin
-			Rest_Reports_Controller::class,
+			// Pipeline, Deal, Activity, Stage, and Reports controllers moved to Pro plugin
 			REST_User_Management_Controller::class,
 			REST_Email_Sequence_Controller::class,
 		);

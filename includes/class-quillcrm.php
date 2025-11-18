@@ -15,11 +15,11 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Container\Container;
 use QuillCRM\Tasks;
 use QuillCRM\Campaign\Email_Processing;
-use QuillCRM\Campaign\SMS_Processing;
-// use QuillCRM\Campaign\WhatsApp_Processing;
+// use QuillCRM\Campaign\SMS_Processing; // Moved to Pro
+// use QuillCRM\Campaign\WhatsApp_Processing; // Moved to Pro
 use QuillCRM\Tracking\Email as Email_Tracking;
-use QuillCRM\Tracking\SMS as SMS_Tracking;
-// use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking;
+// use QuillCRM\Tracking\SMS as SMS_Tracking; // Moved to Pro
+// use QuillCRM\Tracking\WhatsApp as WhatsApp_Tracking; // Moved to Pro
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
@@ -44,8 +44,8 @@ use QuillCRM\Log_Handlers\Log_Handler_DB;
 use QuillCRM\Emails\Email_Builder;
 use QuillCRM\User_Roles\User_Roles;
 use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
-use QuillCRM\Managers\Message_Provider_Registry;
-use QuillCRM\Message_Providers\Twilio_Message_Provider;
+// use QuillCRM\Managers\Message_Provider_Registry; // Moved to Pro
+// use QuillCRM\Message_Providers\Twilio_Message_Provider; // Moved to Pro
 
 
 /**
@@ -156,10 +156,12 @@ final class QuillCRM {
 			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_email_campaigns' );
 		}
 
-		if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_sms_campaigns' ) === false ) {
-			$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_sms_campaigns' );
-		}
+		// SMS campaigns moved to Pro - scheduling handled by Pro plugin
+		// if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_sms_campaigns' ) === false ) {
+		// 	$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_sms_campaigns' );
+		// }
 
+		// WhatsApp campaigns moved to Pro - scheduling handled by Pro plugin
 		// if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_whatsapp_campaigns' ) === false ) {
 		// $this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_whatsapp_campaigns' );
 		// }
@@ -246,11 +248,11 @@ final class QuillCRM {
 		Admin_Loader::instance();
 		REST_API::instance();
 		Email_Processing::instance();
-		SMS_Processing::instance();
-		// WhatsApp_Processing::instance();
+		// SMS_Processing::instance(); // Moved to Pro
+		// WhatsApp_Processing::instance(); // Moved to Pro
 		Email_Tracking::instance();
-		SMS_Tracking::instance();
-		// WhatsApp_Tracking::instance();
+		// SMS_Tracking::instance(); // Moved to Pro
+		// WhatsApp_Tracking::instance(); // Moved to Pro
 		Link_Triggers::instance();
 		Subscription_Manage::instance();
 		Forms_Manager::instance();
@@ -280,8 +282,8 @@ final class QuillCRM {
 		 // Register log handlers.
 		add_filter( 'quillcrm_register_log_handlers', array( $this, 'register_log_handlers' ) );
 
-		// Register message providers
-		add_action( 'quillcrm_loaded', array( $this, 'register_message_providers' ) );
+		// Register message providers - Moved to Pro
+		// add_action( 'quillcrm_loaded', array( $this, 'register_message_providers' ) );
 
 		// Register contact meta table
 		add_action( 'init', array( $this, 'register_contact_meta_table' ) );
@@ -320,11 +322,11 @@ final class QuillCRM {
 	private function load_dependencies() {
 		require QUILLCRM_PLUGIN_DIR . 'includes/functions.php';
 
-		// Load message provider system
-		require QUILLCRM_PLUGIN_DIR . 'includes/interfaces/interface-message-provider.php';
-		require QUILLCRM_PLUGIN_DIR . 'includes/abstracts/class-abstract-message-provider.php';
-		require QUILLCRM_PLUGIN_DIR . 'includes/managers/class-message-provider-registry.php';
-		require QUILLCRM_PLUGIN_DIR . 'includes/message-providers/class-twilio-message-provider.php';
+		// Load message provider system - Moved to Pro
+		// require QUILLCRM_PLUGIN_DIR . 'includes/interfaces/interface-message-provider.php';
+		// require QUILLCRM_PLUGIN_DIR . 'includes/abstracts/class-abstract-message-provider.php';
+		// require QUILLCRM_PLUGIN_DIR . 'includes/managers/class-message-provider-registry.php';
+		// require QUILLCRM_PLUGIN_DIR . 'includes/message-providers/class-twilio-message-provider.php';
 
 		// Load all integrations files
 		$integrations_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/integrations/**/class-integration.php' );
@@ -379,11 +381,11 @@ final class QuillCRM {
 			require $file;
 		}
 
-		// Load all automations deal triggers files
-		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
-		foreach ( $triggers_files as $file ) {
-			require $file;
-		}
+		// Deal triggers moved to Pro plugin
+		// $triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
+		// foreach ( $triggers_files as $file ) {
+		// 	require $file;
+		// }
 
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
@@ -425,18 +427,14 @@ final class QuillCRM {
 			require $file;
 		}
 
-		// Load all automations deal actions files
-		// First load the base class
-		require_once QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-base-deal-action.php';
-
-		// Then load all other deal action files
-		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
-		foreach ( $actions_files as $file ) {
-			// Skip the base class as we've already loaded it
-			if ( basename( $file ) !== 'class-base-deal-action.php' ) {
-				require $file;
-			}
-		}
+		// Deal actions moved to Pro plugin
+		// require_once QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-base-deal-action.php';
+		// $actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
+		// foreach ( $actions_files as $file ) {
+		// 	if ( basename( $file ) !== 'class-base-deal-action.php' ) {
+		// 		require $file;
+		// 	}
+		// }
 
 		// Load all froms
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/forms/class-*.php' );
@@ -533,25 +531,5 @@ final class QuillCRM {
 	public function register_log_handlers( $handlers ) {
 		$handlers[] = new Log_Handler_DB();
 		return $handlers;
-	}
-
-	/**
-	 * Register message providers
-	 *
-	 * Registers default message providers (Twilio for MVP).
-	 * Third-party plugins can add additional providers via the
-	 * 'quillcrm_register_message_providers' action hook.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function register_message_providers() {
-		// Register Twilio as the default provider for SMS and WhatsApp
-		Message_Provider_Registry::instance()->register(
-			new Twilio_Message_Provider()
-		);
-
-		do_action( 'quillcrm_register_message_providers' );
 	}
 }

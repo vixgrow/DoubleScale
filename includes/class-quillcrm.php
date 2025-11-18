@@ -282,8 +282,8 @@ final class QuillCRM {
 		 // Register log handlers.
 		add_filter( 'quillcrm_register_log_handlers', array( $this, 'register_log_handlers' ) );
 
-		// Register message providers - Moved to Pro
-		// add_action( 'quillcrm_loaded', array( $this, 'register_message_providers' ) );
+		// Register message providers
+		add_action( 'quillcrm_loaded', array( $this, 'register_message_providers' ) );
 
 		// Register contact meta table
 		add_action( 'init', array( $this, 'register_contact_meta_table' ) );
@@ -531,5 +531,26 @@ final class QuillCRM {
 	public function register_log_handlers( $handlers ) {
 		$handlers[] = new Log_Handler_DB();
 		return $handlers;
+	}
+
+	/**
+	 * Register message providers
+	 *
+	 * Fires the 'quillcrm_register_message_providers' action hook to allow
+	 * QuillCRM Pro and third-party plugins to register message providers.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return void
+	 */
+	public function register_message_providers() {
+		/**
+		 * Fires when message providers should be registered.
+		 *
+		 * QuillCRM Pro uses this hook to register Twilio and other messaging providers.
+		 *
+		 * @since 1.0.0
+		 */
+		do_action( 'quillcrm_register_message_providers' );
 	}
 }

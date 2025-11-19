@@ -20,7 +20,7 @@ import PurchaseHistory from '../purchase-history';
 import Automation from '../automation';
 import Notes from '../notes';
 import { useContactContext } from '../state/context';
-import Deals from '../deals';
+import DealsBase from '../deals';
 import {
 	AutomationsIcon,
 	ContactSMSIcon,
@@ -46,6 +46,7 @@ const DataCard: React.FC = () => {
 
 	// Apply filters to allow Pro version to override components
 	const SMS = applyFilters('QuillCRM.Contact.TabComponent', SMSBase, 'sms') as React.FC<{ contact_id: number }>;
+	const Deals = applyFilters('QuillCRM.Contact.TabComponent', DealsBase, 'deals') as React.FC<{ contact_id: number }>;
 	// const WhatsApp = applyFilters('QuillCRM.Contact.TabComponent', WhatsAppBase, 'whatsapp') as React.FC<{ contact_id: number }>;
 
 	const tabsList = [

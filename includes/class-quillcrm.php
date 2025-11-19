@@ -74,6 +74,7 @@ final class QuillCRM {
 
 
 
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -363,10 +364,10 @@ final class QuillCRM {
 
 		// Load all automations memberpress triggers files
 		// if ( quillcrm_is_plugin_active( 'memberpress/memberpress.php' ) ) {
-		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/memberpress/class-*.php' );
-		foreach ( $triggers_files as $file ) {
-			require $file;
-		}
+		// $triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/memberpress/class-*.php' );
+		// foreach ( $triggers_files as $file ) {
+		// require $file;
+		// }
 		// }
 
 		// Load all automations edd triggers files
@@ -547,12 +548,12 @@ final class QuillCRM {
 	 */
 	public function register_message_providers() {
 		/**
-		 * Fires when message providers should be registered.
-		 *
-		 * QuillCRM Pro uses this hook to register Twilio and other messaging providers.
-		 *
-		 * @since 1.0.0
-		 */
+		   * Fires when message providers should be registered.
+		   *
+		   * QuillCRM Pro uses this hook to register Twilio and other messaging providers.
+		   *
+		   * @since 1.0.0
+		   */
 		do_action( 'quillcrm_register_message_providers' );
 	}
 }

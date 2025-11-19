@@ -24,6 +24,7 @@ final class Triggers_Manager {
 
 
 
+
 	/**
 	 * Registed triggers
 	 *
@@ -243,16 +244,16 @@ final class Triggers_Manager {
 					 ),
 				 ),
 			 ),
-			 'memberpress' => array(
-				 'label'  => __( 'MemberPress', 'quillcrm' ),
-				 'groups' => array(
-					 'memberpress' => array(
-						 'label'       => __( 'MemberPress', 'quillcrm' ),
-						 'triggers'    => array(),
-						 'is_disabled' => ! quillcrm_is_plugin_active( 'memberpress/memberpress.php' ),
-					 ),
-				 ),
-			 ),
+			 // 'memberpress' => array(
+			 // 'label'  => __( 'MemberPress', 'quillcrm' ),
+			 // 'groups' => array(
+			 // 'memberpress' => array(
+			 // 'label'       => __( 'MemberPress', 'quillcrm' ),
+			 // 'triggers'    => array(),
+			 // 'is_disabled' => ! quillcrm_is_plugin_active( 'memberpress/memberpress.php' ),
+			 // ),
+			 // ),
+			 // ),
 			 'booking'     => array(
 				 'label'  => __( 'Booking', 'quillcrm' ),
 				 'groups' => array(

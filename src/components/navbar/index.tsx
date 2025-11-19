@@ -12,6 +12,7 @@ import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 import {
 	useCallback,
 	useEffect,
@@ -110,26 +111,41 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				// Add submenu for Analytics based on capabilities
 				if (item.path === 'analytics-and-reports') {
-					navItem.subMenu = isDealOwner()
-						? [
-							{
-								path: 'my-reports',
-								label: __('My Reports', 'quillcrm'),
-							},
-						]
-						: [
-							{
-								path: 'deals-analytics',
-								label: __('Deals Analytics', 'quillcrm'),
-							},
-							{
-								path: 'sales-rep-analytics',
-								label: __('Sales Rep Analytics', 'quillcrm'),
-							},
-							{
-								path: 'pipeline-analytics',
-								label: __('Pipeline Analytics', 'quillcrm'),
-							},
+					// Check if deal analytics should be shown (Pro plugin can override this)
+					const showDealsAnalytics = applyFilters('quillcrm_show_deals_analytics', false);
+
+					if (isDealOwner()) {
+						navItem.subMenu = showDealsAnalytics
+							? [
+								{
+									path: 'my-reports',
+									label: __('My Reports', 'quillcrm'),
+								},
+							]
+							: [];
+					} else {
+						// Build submenu with conditional deal analytics
+						const submenu = [];
+
+						if (showDealsAnalytics) {
+							submenu.push(
+								{
+									path: 'deals-analytics',
+									label: __('Deals Analytics', 'quillcrm'),
+								},
+								{
+									path: 'sales-rep-analytics',
+									label: __('Sales Rep Analytics', 'quillcrm'),
+								},
+								{
+									path: 'pipeline-analytics',
+									label: __('Pipeline Analytics', 'quillcrm'),
+								}
+							);
+						}
+
+						// Always show these analytics (non-deal related)
+						submenu.push(
 							{
 								path: 'emails-analytics',
 								label: __('Emails Analytics', 'quillcrm'),
@@ -141,8 +157,11 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							{
 								path: 'cart-analytics',
 								label: __('Cart Analytics', 'quillcrm'),
-							},
-						];
+							}
+						);
+
+						navItem.subMenu = submenu;
+					}
 				}
 
 				return navItem;

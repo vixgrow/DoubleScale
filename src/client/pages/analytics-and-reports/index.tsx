@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 import ContactsDealsReports from './contacts-deals-reports';
 import DealsReportsByDate from './deals-reports-by-date';
 import DealsReportsLeaderboard from './deals-reports-leaderboard';
@@ -18,7 +19,7 @@ import EmailAnalytics from '../home/emails-analytics';
 import { useDashboardData } from '../home/use-analytics';
 import CartAnalytics from '../home/cart-analytics';
 import DealSourceAnalytics from './deal-source';
-import { ContactsIcon, PageTabs } from '@quillcrm/components';
+import { ContactsIcon, PageTabs, ProFeatureNotice } from '@quillcrm/components';
 
 
 interface AnalyticsAndReportsProps {
@@ -33,21 +34,60 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({ defaultTab })
 	const renderContent = () => {
 		switch (defaultTab) {
 			case 'my-reports':
-				return <SalesRepDetailView />;
+				return applyFilters(
+					'quillcrm_analytics_my_reports_content',
+					<ProFeatureNotice
+						featureName={__('My Reports', 'quillcrm')}
+						description={__(
+							'Track your personal sales performance, deals, and activity metrics.',
+							'quillcrm'
+						)}
+					/>
+				);
 			case 'deals':
-				return (
-					<div className="space-y-6">
-						<ContactsDealsReports />
-						<DealsReportsByDate />
-						<DealsReportsLeaderboard />
-					</div>
+				return applyFilters(
+					'quillcrm_analytics_deals_content',
+					<ProFeatureNotice
+						featureName={__('Deals Analytics', 'quillcrm')}
+						description={__(
+							'Analyze deal performance, conversion rates, and sales metrics across your pipeline.',
+							'quillcrm'
+						)}
+					/>
 				);
 			case 'sales-rep':
-				return <SalesRep />;
+				return applyFilters(
+					'quillcrm_analytics_sales_rep_content',
+					<ProFeatureNotice
+						featureName={__('Sales Rep Analytics', 'quillcrm')}
+						description={__(
+							'Track individual sales representative performance, activity, and deal metrics.',
+							'quillcrm'
+						)}
+					/>
+				);
 			case 'dealSource-rep':
-				return <DealSourceAnalytics />;
+				return applyFilters(
+					'quillcrm_analytics_deal_source_content',
+					<ProFeatureNotice
+						featureName={__('Deal Source Analysis', 'quillcrm')}
+						description={__(
+							'Analyze where your deals are coming from and optimize your lead sources.',
+							'quillcrm'
+						)}
+					/>
+				);
 			case 'pipeline-analysis':
-				return <PipelineAnalysis />;
+				return applyFilters(
+					'quillcrm_analytics_pipeline_content',
+					<ProFeatureNotice
+						featureName={__('Pipeline Analytics', 'quillcrm')}
+						description={__(
+							'Visualize your sales pipeline, identify bottlenecks, and improve conversion rates.',
+							'quillcrm'
+						)}
+					/>
+				);
 			case 'contacts-analytics':
 				return data ? <ContactAnalytics dashboardData={data} /> : null;
 			case 'emails-analytics':
@@ -57,44 +97,25 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({ defaultTab })
 			default:
 				// Default view for analytics-and-reports main page
 				if (isDealOwner()) {
-					return <SalesRepDetailView />;
+					return applyFilters(
+						'quillcrm_analytics_my_reports_content',
+						<ProFeatureNotice
+							featureName={__('My Reports', 'quillcrm')}
+							description={__(
+								'Track your personal sales performance, deals, and activity metrics.',
+								'quillcrm'
+							)}
+						/>
+					);
 				}
-				return (
-					// <div className="space-y-6">
-					// 	<ContactsDealsReports />
-					// 	<DealsReportsByDate />
-					// 	<DealsReportsLeaderboard />
-					// </div>
-					<PageTabs
-						defaultValue='deals'
-						tabsList={[
-							{
-								label: __('Deal Analysis', 'quillcrm'),
-								value: 'deals',
-								icon: <ContactsIcon width={20} height={20} />,
-							},
-							{
-								label: __('Deal Source Analysis', 'quillcrm'),
-								value: 'dealSource-rep',
-								icon: <ContactsIcon width={20} height={20} />,
-							},
-						]}
-						tabsContent={[
-							{
-								value: 'deals',
-								children: (
-									<div className="space-y-6">
-										<ContactsDealsReports />
-										<DealsReportsByDate />
-										<DealsReportsLeaderboard />
-									</div>
-								),
-							},
-							{
-								value: 'dealSource-rep',
-								children: <DealSourceAnalytics />,
-							},
-						]}
+				return applyFilters(
+					'quillcrm_analytics_default_content',
+					<ProFeatureNotice
+						featureName={__('Deals Analytics', 'quillcrm')}
+						description={__(
+							'Access comprehensive analytics for deals, sales performance, and pipeline metrics. Upgrade to QuillCRM Pro to unlock powerful insights.',
+							'quillcrm'
+						)}
 					/>
 				);
 		}

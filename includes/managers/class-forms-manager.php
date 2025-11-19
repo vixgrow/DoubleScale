@@ -19,6 +19,7 @@ use QuillCRM\Abstracts\Form;
  */
 final class Forms_Manager {
 
+
 	/**
 	 * Registed forms
 	 *
@@ -133,8 +134,25 @@ final class Forms_Manager {
 	 * @return void
 	 */
 	public function load_forms() {
-		foreach ( $this->forms as $form ) {
-			/** @var Form $form */
+		/** @var Form[] $forms */
+		$forms = apply_filters( 'quillcrm_forms', $this->forms );
+
+		// Re-register forms after filter to allow Pro versions to replace free versions
+		foreach ( $forms as $slug => $form ) {
+			// Update the form in the internal array
+			$this->forms[ $slug ] = $form;
+
+			// Update the options array with the (potentially updated) form's data
+			$this->options[ $slug ] = array(
+				'label'           => $form->name,
+				'description'     => $form->description,
+				'options'         => $form->get_form_options(),
+				'fields_settings' => $form->get_form_fields_settings(),
+				'is_enabled'      => $form->is_enabled(),
+				'is_pro'          => $form->is_pro,
+			);
+
+			// Load the form's hooks
 			$form->load_hooks();
 		}
 	}

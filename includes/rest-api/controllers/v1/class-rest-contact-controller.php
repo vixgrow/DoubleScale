@@ -24,7 +24,7 @@ use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Log_Model;
 use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Tracking_Model;
-use QuillCRM\Models\Custom_Field_Model;
+// use QuillCRM\Models\Custom_Field_Model; // Moved to Pro
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 use QuillCRM\Settings;
@@ -1409,13 +1409,18 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	protected function sync_custom_fields( $request, $contact ) {
 		try {
+			// Custom fields are PRO-only feature
+			if ( ! class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
+				return;
+			}
+
 			$custom_fields = $request->get_param( 'custom_fields' );
 			if ( $custom_fields ) {
 				$custom_fields_arr = array();
 
 				foreach ( $custom_fields as $custom_field ) {
 					// Check if custom field exists
-					$custom_field_model = Custom_Field_Model::find( $custom_field['id'] );
+					$custom_field_model = \QuillCRM_Pro\Models\Custom_Field_Model::find( $custom_field['id'] );
 					if ( ! $custom_field_model ) {
 						return new WP_Error( 'error', __( 'Custom field not found', 'quillcrm' ), array( 'status' => 400 ) );
 					}

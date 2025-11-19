@@ -32,7 +32,7 @@ use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Admin\Admin;
 use QuillCRM\Admin\Admin_Loader;
 use QuillCRM\Abandoned_Cart\Abandoned_Cart;
-use QuillCRM\Managers\Custom_Fields_Manager;
+// use QuillCRM\Managers\Custom_Fields_Manager; // Moved to Pro
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
 use QuillCRM\Managers\Email_Sequences_Manager;
@@ -243,7 +243,7 @@ final class QuillCRM {
 		$this->daily_tasks          = new Tasks( 'quillcrm_daily' );
 		$this->abandoned_cart_tasks = new Tasks( 'quillcrm_abandoned_cart' );
 
-		Custom_Fields_Manager::instance();
+		// Custom_Fields_Manager::instance(); // Moved to Pro
 		Admin::instance();
 		Admin_Loader::instance();
 		REST_API::instance();

@@ -13,8 +13,6 @@ namespace QuillCRM\REST_API;
 use QuillCRM\REST_API\Controllers\V1\REST_Contact_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_List_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Tag_Controller;
-use QuillCRM\REST_API\Controllers\V1\REST_Custom_Fields_Group_Controller;
-use QuillCRM\REST_API\Controllers\V1\REST_Custom_Field_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Contact_Note_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Campaign_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Template_Controller;
@@ -97,8 +95,6 @@ class REST_API {
 			REST_Contact_Controller::class,
 			REST_List_Controller::class,
 			REST_Tag_Controller::class,
-			REST_Custom_Fields_Group_Controller::class,
-			REST_Custom_Field_Controller::class,
 			Rest_Contact_Note_Controller::class,
 			REST_Campaign_Controller::class,
 				REST_Template_Controller::class,
@@ -114,7 +110,7 @@ class REST_API {
 			Rest_Import_Export_Controller::class,
 			REST_Log_Controller::class,
 			REST_Automation_Reports_Controller::class,
-			// Pipeline, Deal, Activity, Stage, and Reports controllers moved to Pro plugin
+			// Pipeline, Deal, Activity, Stage, Reports, and Custom Fields controllers moved to Pro plugin
 			REST_User_Management_Controller::class,
 			REST_Email_Sequence_Controller::class,
 		);

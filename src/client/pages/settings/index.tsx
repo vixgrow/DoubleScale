@@ -35,7 +35,7 @@ import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
-import CustomFields from '../custom-fields';
+// import CustomFields from '../custom-fields'; // Moved to Pro
 import LinkTriggers from '../link-triggers';
 import { UserRound, MessageSquare } from 'lucide-react';
 
@@ -166,7 +166,7 @@ const SettingsPage: React.FC = () => {
 					/>
 				);
 			case 'custom_fields':
-				return <CustomFields />;
+				return <div className="p-4">{__('Custom Fields is a Pro feature', 'quillcrm')}</div>;
 			case 'link_triggers':
 				return <LinkTriggers />;
 			default:

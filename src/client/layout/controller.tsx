@@ -21,7 +21,7 @@ import Contacts from '../pages/contacts';
 import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
-import CustomFields from '../pages/custom-fields';
+// import CustomFields from '../pages/custom-fields'; // Moved to Pro
 import Campaigns from '../pages/campaigns';
 import Campaign from '../pages/campaign';
 import Forms from '../pages/forms';
@@ -255,9 +255,10 @@ registerAdminPage('tags', {
 	hidden: true,
 });
 
+// Custom Fields page registration - now handled by Pro plugin
 registerAdminPage('custom-fields', {
 	path: 'custom-fields',
-	component: () => <CustomFields />,
+	component: () => <div>{__('Custom Fields is a Pro feature', 'quillcrm')}</div>,
 	label: __('Custom Fields', 'quillcrm'),
 	icon: <CustomFieldsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],

@@ -12,7 +12,7 @@ namespace QuillCRM;
 
 defined( 'ABSPATH' ) || exit;
 
-use QuillCRM\Managers\Custom_Fields_Manager;
+// use QuillCRM\Managers\Custom_Fields_Manager; // Moved to Pro
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Integrations_Manager;
@@ -71,7 +71,7 @@ class Core {
 				'qcrm.config.setPluginDirUrl("' . QUILLCRM_PLUGIN_URL . '");' .
 				'qcrm.config.setForms(' . wp_json_encode( Forms_Manager::instance()->get_options() ) . ');' .
 				'qcrm.config.setFiltersGroups(' . wp_json_encode( Filters_Manager::instance()->get_groups() ) . ');' .
-				'qcrm.config.setCustomFieldsTypes(' . wp_json_encode( Custom_Fields_Manager::instance()->get_options() ) . ');' .
+				'qcrm.config.setCustomFieldsTypes(' . wp_json_encode( class_exists( 'QuillCRM_Pro\Managers\Custom_Fields_Manager' ) ? \QuillCRM_Pro\Managers\Custom_Fields_Manager::instance()->get_options() : array() ) . ');' .
 				'qcrm.config.setContactFieldsGroups(' . wp_json_encode( Utils::get_contact_fields() ) . ');' .
 				'qcrm.config.setIntegrations(' . wp_json_encode( Integrations_Manager::instance()->get_options() ) . ');' .
 				'qcrm.config.setAutomationTriggers(' . wp_json_encode( Triggers_Manager::instance()->get_sources() ) . ');' .

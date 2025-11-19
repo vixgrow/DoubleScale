@@ -154,7 +154,7 @@ export class EmailBuilderService {
       errors.push('Block must have a type');
     }
 
-    if (!getBlocksRegistry()[block.type]) {
+    if (!getRegisteredBlocks()[block.type]) {
       errors.push(`Unknown block type: ${block.type}`);
     }
 

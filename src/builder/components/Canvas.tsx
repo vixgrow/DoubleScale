@@ -115,7 +115,7 @@ const Canvas = () => {
 								)}
 
 								<div className="text-muted-foreground mb-4">
-									<div className="size-full mx-auto mb-4 flex items-center justify-center">
+									<div className="size-80 mx-auto mb-4 flex items-center justify-center">
 										<img
 											src={emailBuilder}
 											alt="email-builder.png"

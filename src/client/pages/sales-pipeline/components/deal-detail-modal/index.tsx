@@ -68,7 +68,7 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
 	const noticeBannerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		if (!loading && deal) {
+		if (!loading) {
 			const timer = setTimeout(() => setShowContent(true), 150);
 			return () => clearTimeout(timer);
 		}

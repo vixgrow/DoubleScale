@@ -1,4 +1,5 @@
 <?php
+
 /**
  * EDD Trigger for New Order Success
  *
@@ -11,13 +12,14 @@
 
 namespace QuillCRM\Automations\Triggers\EDD;
 
-use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
 
 /**
  * New Order Success Trigger
  */
-class New_Order_Success extends Trigger {
+class New_Order_Success extends Trigger_Pro {
+
 
 	/**
 	 * Trigger Name
@@ -60,46 +62,6 @@ class New_Order_Success extends Trigger {
 	 * @var string
 	 */
 	public $group = 'order';
-
-	/**
-	 * Load hooks.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function load_hooks() {
-		add_action( 'edd_complete_purchase', array( $this, 'new_order_success' ), 10, 3 );
-	}
-
-	/**
-	 * New Order Success
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int           $payment_id Payment ID.
-	 * @param \EDD_Payment  $payment    EDD_Payment object containing all payment data.
-	 * @param \EDD_Customer $customer   EDD_Customer object containing all customer data.
-	 *
-	 * @return void
-	 */
-	public function new_order_success( $payment_id, $payment, $customer ) {
-		$user_id = $customer->user_id;
-		$user    = get_user_by( 'id', $user_id );
-		if ( ! $user instanceof \WP_User ) {
-			return;
-		}
-
-		$data = array(
-			'email' => $user->user_email,
-			'data'  => array(
-				'payment_id'  => $payment_id,
-				'customer_id' => $customer->id,
-			),
-		);
-
-		$this->process( $data );
-	}
 }
 
 Triggers_Manager::instance()->register( new New_Order_Success() );

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Forms Manager
  * This class is responsible for handling the integration of forms
@@ -96,6 +97,7 @@ final class Forms_Manager {
 			'options'         => $form->get_form_options(),
 			'fields_settings' => $form->get_form_fields_settings(),
 			'is_enabled'      => $form->is_enabled(),
+			'is_pro'          => $form->is_pro,
 		);
 	}
 
@@ -145,6 +147,6 @@ final class Forms_Manager {
 	 * @return array
 	 */
 	public function get_options() {
-		return $this->options;
+		 return $this->options;
 	}
 }

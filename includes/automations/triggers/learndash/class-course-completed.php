@@ -1,4 +1,5 @@
 <?php
+
 /**
  * LearnDash Trigger for Course Completed
  * This trigger will be fired when a user completes a course.
@@ -10,14 +11,14 @@
 
 namespace QuillCRM\Automations\Triggers\LearnDash;
 
-use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
-use WP_User;
 
 /**
  * Course Completed Trigger
  */
-class Course_Completed extends Trigger {
+class Course_Completed extends Trigger_Pro {
+
 
 	/**
 	 * Trigger Name
@@ -60,47 +61,6 @@ class Course_Completed extends Trigger {
 	 * @var string
 	 */
 	public $group = 'learndash';
-
-	/**
-	 * Load Hooks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function load_hooks() {
-		add_action( 'learndash_course_completed', array( $this, 'course_completed' ), 10, 1 );
-	}
-
-	/**
-	 * Course Completed
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $course Course.
-	 * @return void
-	 */
-	public function course_completed( $course ) {
-		$user_id   = $course['user']->ID;
-		$course_id = $course['course']->ID;
-		$progress  = $course['progress'];
-		$user      = get_user_by( 'ID', $user_id );
-		if ( ! $user instanceof WP_User ) {
-			return;
-		}
-
-		$data = array(
-			'email' => $user->user_email,
-			'data'  => array(
-				'course_id' => $course_id,
-				'user_id'   => $user_id,
-				'progress'  => $progress,
-			),
-		);
-
-		$this->process( $data );
-		error_log( 'Course Completed Trigger: ' . json_encode( $data ) );
-	}
 }
 
 Triggers_Manager::instance()->register( new Course_Completed() );

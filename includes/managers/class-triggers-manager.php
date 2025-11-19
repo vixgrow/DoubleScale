@@ -23,6 +23,7 @@ final class Triggers_Manager {
 
 
 
+
 	/**
 	 * Registed triggers
 	 *
@@ -258,7 +259,7 @@ final class Triggers_Manager {
 					 'quillbooking' => array(
 						 'label'       => __( 'QuillBooking', 'quillcrm' ),
 						 'triggers'    => array(),
-						 'is_disabled' => ! $this->is_quillbooking_active(),
+						 'is_disabled' => ! quillcrm_is_plugin_active( 'QuillBooking/quillbooking.php' ),
 					 ),
 				 ),
 			 ),
@@ -290,27 +291,13 @@ final class Triggers_Manager {
 						'fields'      => $form->get_form_options(),
 						'is_disabled' => ! $form->is_enabled(),
 						'is_form'     => true,
+						'is_pro'      => $form->is_pro,
 					),
 				),
 			);
 		}
 	}
 
-	/**
-	 * Check if QuillBooking plugin is active
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return bool
-	 */
-	private function is_quillbooking_active() {
-		 // Check if QuillBooking plugin is active
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-		}
-
-		return \is_plugin_active( 'QuillBooking/quillbooking.php' ) || class_exists( 'QuillBooking\Plugin' );
-	}
 
 	/**
 	 * Get sources

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Contact Subscribes Trigger
  * This trigger will be fired when a contact subscribes to a list.
@@ -10,14 +11,13 @@
 
 namespace QuillCRM\Automations\Triggers;
 
-use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
-use QuillCRM\Models\Contact_Model;
 
 /**
  * Contact Subscribes Trigger
  */
-class Contact_Subscribed extends Trigger {
+class Contact_Subscribed extends Trigger_Pro {
 
 	/**
 	 * Trigger Name
@@ -60,34 +60,6 @@ class Contact_Subscribed extends Trigger {
 	 * @var string
 	 */
 	public $group = 'contact';
-
-	/**
-	 * Load Hooks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function load_hooks() {
-		add_action( 'quillcrm_contact_subscribed', array( $this, 'contact_subscribed' ) );
-	}
-
-	/**
-	 * Contact Subscribed
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param Contact_Model $contact_id Contact.
-	 *
-	 * @return void
-	 */
-	public function contact_subscribed( $contact ) {
-		$data = array(
-			'contact' => $contact,
-		);
-
-		$this->process( $data );
-	}
 }
 
 Triggers_Manager::instance()->register( new Contact_Subscribed() );

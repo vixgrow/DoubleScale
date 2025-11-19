@@ -11,17 +11,13 @@
 
 namespace QuillCRM\Forms\Formidable;
 
-use QuillCRM\Abstracts\Form as Abstracts_Form;
+use QuillCRM\Abstracts\Form_Pro;
 use QuillCRM\Managers\Forms_Manager;
-use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
 
 /**
  * Formidable class
  */
-class Form extends Abstracts_Form {
-
-
-
+class Form extends Form_Pro {
 
 	/**
 	 * Slug
@@ -45,19 +41,6 @@ class Form extends Abstracts_Form {
 	public $description = 'This will trigger when a form is submitted';
 
 	/**
-	 * Load Hooks
-	 */
-	public function load_hooks() {
-		add_action( 'frm_after_create_entry', array( $this, 'process' ), 10, 2 );
-		// Ajax Get Fields
-		add_action( "wp_ajax_quillcrm_{$this->slug}_get_fields", array( $this, 'ajax_get_fields' ) );
-		// Ajax Get Form Select Options
-		add_action( "wp_ajax_quillcrm_{$this->slug}_get_form_select_options", array( $this, 'ajax_get_form_select_options' ) );
-	}
-
-
-
-	/**
 	 * Is Enabled
 	 *
 	 * @since 1.0.0
@@ -66,111 +49,6 @@ class Form extends Abstracts_Form {
 	 */
 	public function is_enabled() {
 		return quillcrm_is_plugin_active( 'formidable/formidable.php' );
-	}
-
-	/**
-	 * Get Fields
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $form_id
-	 *
-	 * @return array
-	 */
-	public function get_fields( $form_id ) {
-		$form = \FrmField::get_all_for_form( $form_id );
-		if ( ! $form ) {
-			return;
-		}
-
-		$fields = array();
-		foreach ( $form as $field ) {
-			if ( 'submit' === $field->type ) {
-				continue;
-			}
-
-			$fields[ $field->id ] = $field->name;
-		}
-
-		return $fields;
-	}
-
-	/**
-	 * Ajax Get Fields
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function ajax_get_fields() {
-		 // Check nonce.
-		check_ajax_referer( 'quillcrm-admin', 'nonce' );
-
-		$form_id = isset( $_POST['form_id'] ) ? sanitize_text_field( $_POST['form_id'] ) : '';
-
-		if ( empty( $form_id ) ) {
-			wp_send_json_error( __( 'Invalid form id', 'quillcrm' ) );
-		}
-
-		$fields = $this->get_fields( $form_id );
-
-		wp_send_json_success( $fields );
-	}
-
-	/**
-	 * Ajax Get Form Select Options
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function ajax_get_form_select_options() {
-		// Check nonce.
-		check_ajax_referer( 'quillcrm-admin', 'nonce' );
-
-		$forms   = \FrmForm::getAll();
-		$options = array();
-
-		foreach ( $forms as $form ) {
-			$options[ $form->id ] = $form->name;
-		}
-
-		wp_send_json_success( $options );
-	}
-
-	/**
-	 * Process
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $entry_id
-	 * @param int $form_id
-	 *
-	 * @return void
-	 */
-	public function process( $entry_id, $form_id ) {
-		$entry = \FrmEntry::getOne( $entry_id, true );
-		if ( ! isset( $entry->metas ) ) {
-			return;
-		}
-
-		$data               = $this->get_default_data();
-		$data['form_id']    = $form_id;
-		$data['form_title'] = \FrmForm::getOne( $form_id )->name;
-		$data['fields']     = $this->get_fields( $form_id );
-		$data['entry']      = array(
-			'fields' => array(),
-		);
-
-		foreach ( $entry->metas as $field_id => $value ) {
-			$data['entry']['fields'][ $field_id ] = $value;
-		}
-
-		if ( $this->is_form_active( $form_id ) ) {
-			$this->process_form( $data );
-		}
-
-		$this->process_automations( $data );
 	}
 }
 

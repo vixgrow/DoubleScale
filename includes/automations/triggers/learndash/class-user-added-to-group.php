@@ -11,17 +11,13 @@
 
 namespace QuillCRM\Automations\Triggers\LearnDash;
 
-use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
-use WP_User;
 
 /**
  * User Added to Group Trigger
  */
-class User_Added_To_Group extends Trigger {
-
-
-
+class User_Added_To_Group extends Trigger_Pro {
 
 	/**
 	 * Trigger Name
@@ -64,43 +60,6 @@ class User_Added_To_Group extends Trigger {
 	 * @var string
 	 */
 	public $group = 'learndash';
-
-	/**
-	 * Load Hooks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function load_hooks() {
-		add_action( 'ld_added_group_access', array( $this, 'user_added_to_group' ), 10, 2 );
-	}
-
-	/**
-	 * User Added to Group
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $group_id Group ID.
-	 * @param int $user_id User ID.
-	 * @return void
-	 */
-	public function user_added_to_group( $user_id, $group_id ) {
-		$user = get_user_by( 'ID', $user_id );
-		if ( ! $user instanceof WP_User ) {
-			return;
-		}
-
-		$data = array(
-			'email' => $user->user_email,
-			'data'  => array(
-				'group_id' => $group_id,
-				'user_id'  => $user_id,
-			),
-		);
-
-		$this->process( $data );
-	}
 }
 
 Triggers_Manager::instance()->register( new User_Added_To_Group() );

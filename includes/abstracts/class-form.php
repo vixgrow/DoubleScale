@@ -28,7 +28,6 @@ use QuillCRM\Managers\Rules_Manager;
 abstract class Form {
 
 
-
 	/**
 	 * Slug
 	 *
@@ -63,6 +62,14 @@ abstract class Form {
 	 * @var array
 	 */
 	protected $submission = array();
+
+
+	/**
+	 * Is PRO only
+	 *
+	 * @var bool
+	 */
+	public $is_pro = false;
 
 	/**
 	 * Load Hooks

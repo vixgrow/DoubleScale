@@ -72,6 +72,8 @@ final class QuillCRM {
 
 
 
+
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -158,7 +160,7 @@ final class QuillCRM {
 
 		// SMS campaigns moved to Pro - scheduling handled by Pro plugin
 		// if ( $this->campaigns_tasks->get_next_timestamp( 'quillcrm_sms_campaigns' ) === false ) {
-		// 	$this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_sms_campaigns' );
+		// $this->campaigns_tasks->schedule_recurring( time(), 60, 'quillcrm_sms_campaigns' );
 		// }
 
 		// WhatsApp campaigns moved to Pro - scheduling handled by Pro plugin
@@ -382,10 +384,10 @@ final class QuillCRM {
 		}
 
 		// Deal triggers moved to Pro plugin
-		// $triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
-		// foreach ( $triggers_files as $file ) {
-		// 	require $file;
-		// }
+		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
+		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
 
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
@@ -431,9 +433,9 @@ final class QuillCRM {
 		// require_once QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-base-deal-action.php';
 		// $actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
 		// foreach ( $actions_files as $file ) {
-		// 	if ( basename( $file ) !== 'class-base-deal-action.php' ) {
-		// 		require $file;
-		// 	}
+		// if ( basename( $file ) !== 'class-base-deal-action.php' ) {
+		// require $file;
+		// }
 		// }
 
 		// Load all froms

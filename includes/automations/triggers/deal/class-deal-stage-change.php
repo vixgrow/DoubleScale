@@ -10,22 +10,6 @@ use QuillCRM\Managers\Triggers_Manager;
  */
 class Deal_Stage_Change extends Trigger_Pro {
 
-
-
-	/**
-	 * Default Value Pipeline
-	 *
-	 * @var string
-	 */
-	public $Default_Value_Pipeline = 'any-pipeline';
-
-	/**
-	 * Default Value Stage
-	 *
-	 * @var string
-	 */
-	public $Default_Value_Stage = 'any-stage';
-
 	/**
 	 * Trigger Name
 	 *

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Webhook Received Trigger
  *
@@ -11,15 +12,15 @@
 
 namespace QuillCRM\Automations\Triggers;
 
-use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
-use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Automation_Model;
+
 
 /**
  * Webhook Received
  */
-class Webhook_Received extends Trigger {
+class Webhook_Received extends Trigger_Pro {
+
 
 	/**
 	 * Trigger Name
@@ -62,119 +63,6 @@ class Webhook_Received extends Trigger {
 	 * @var string
 	 */
 	public $group = 'webhooks';
-
-	/**
-	 * Load hooks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function load_hooks() {
-		add_action( 'quillcrm_webhook_received', array( $this, 'webhook_received' ), 10, 2 );
-	}
-
-	/**
-	 * Webhook Received
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param Automation_Model $automation Automation.
-	 * @param array            $payload Payload.
-	 *
-	 * @return void
-	 */
-	public function webhook_received( $automation, $payload ) {
-		$automation->set_setting( 'payload', $payload );
-		$automation->set_setting( 'received_at', current_time( 'mysql' ) );
-		$automation->save();
-
-		// Process the automation
-		$this->process_webhook_automation( $automation, $payload );
-	}
-
-	/**
-	 * Process the automation
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param Automation_Model $automation Automation.
-	 * @param array            $payload Payload.
-	 *
-	 * @return void
-	 */
-	public function process_webhook_automation( $automation, $payload ) {
-		$mapped_fields = $automation->get_setting( 'mapped_fields', array() );
-		if ( empty( $mapped_fields ) ) {
-			return;
-		}
-
-		$contact_data = array();
-		foreach ( $mapped_fields as $field ) {
-			if ( isset( $payload[ $field ] ) ) {
-				$contact_data[ $field ] = $payload[ $field ];
-			}
-		}
-
-		if ( empty( $contact_data ) ) {
-			return;
-		}
-
-		try {
-			$contact = Contact_Model::createOrUpdate( $contact_data );
-
-			$data = array(
-				'contact' => $contact,
-			);
-
-			$this->process( $data );
-		} catch ( \Exception $e ) {
-			error_log( 'Error creating contact: ' . $e->getMessage() );
-		}
-	}
-
-	/**
-	 * Set automation attributes
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param Automation_Model $automation Automation.
-	 *
-	 * @return void
-	 */
-	public function set_settings( $automation ) {
-		$random_string = bin2hex( random_bytes( 16 ) );
-		$automation->set_setting( 'webhook_key', $random_string );
-		$automation->save();
-		error_log( 'Webhook Key: ' . $random_string );
-	}
-
-	/**
-	 * Get fields
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array
-	 */
-	public function get_fields() {
-		return array(
-			'mapped_fields' => array(
-				'label'  => __( 'Mapped Fields', 'quillcrm' ),
-				'type'   => 'mapped_fields',
-				'fields' => array(
-					'first_name' => array(
-						'label' => __( 'First Name', 'quillcrm' ),
-					),
-					'last_name'  => array(
-						'label' => __( 'Last Name', 'quillcrm' ),
-					),
-					'email'      => array(
-						'label' => __( 'Email', 'quillcrm' ),
-					),
-				),
-			),
-		);
-	}
 }
 
 Triggers_Manager::instance()->register( new Webhook_Received() );

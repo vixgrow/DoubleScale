@@ -11,17 +11,13 @@
 
 namespace QuillCRM\Automations\Triggers\Booking\QuillBooking;
 
-use QuillCRM\Abstracts\Trigger;
+use QuillCRM\Abstracts\Trigger_Pro;
 use QuillCRM\Managers\Triggers_Manager;
 
 /**
  * Booking Cancelled Trigger
  */
-class Booking_Cancelled extends Trigger {
-
-
-
-
+class Booking_Cancelled extends Trigger_Pro {
 
 	/**
 	 * Trigger Name
@@ -64,81 +60,6 @@ class Booking_Cancelled extends Trigger {
 	 * @var string
 	 */
 	public $group = 'quillbooking';
-
-	/**
-	 * Load Hooks
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return void
-	 */
-	public function load_hooks() {
-		\add_action( 'quillbooking_booking_cancelled', array( $this, 'booking_cancelled' ), 10, 2 );
-	}
-
-
-
-	/**
-	 * Booking Cancelled
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param \QuillBooking\Models\Booking_Model $booking Booking object.
-	 * @return void
-	 */
-	public function booking_cancelled( $booking ) {
-		$guest       = $booking->guest ?? null;
-		$guest_name  = '';
-		$guest_email = '';
-
-		if ( $guest ) {
-			$guest_name  = $guest->name ?? '';
-			$guest_email = $guest->email ?? '';
-		}
-
-		// Split name into first and last name if available
-		$name_parts = explode( ' ', $guest_name, 2 );
-		$first_name = $name_parts[0] ?? '';
-		$last_name  = $name_parts[1] ?? '';
-
-		$data = array(
-			'first_name' => $first_name,
-			'last_name'  => $last_name,
-			'email'      => $guest_email,
-			'data'       => array(
-				'booking_id'     => $booking->id,
-				'booking_data'   => $booking->toArray(),
-				'trigger_action' => 'created',
-			),
-		);
-
-		$this->process( $data );
-	}
-
-	/**
-	 * Get fields
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array
-	 */
-	public function get_fields() {
-		return array();
-	}
-
-	/**
-	 * Get attributes schema
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array
-	 */
-	public function get_attributes_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(),
-		);
-	}
 }
 
 Triggers_Manager::instance()->register( new Booking_Cancelled() );

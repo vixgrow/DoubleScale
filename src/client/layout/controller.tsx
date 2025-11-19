@@ -44,6 +44,7 @@ import { useDashboardData } from '../pages/home/use-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
 // import SalesPipeline from '../pages/sales-pipeline'; // Moved to Pro
+import { ProFeatureNotice } from '@quillcrm/components';
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -296,9 +297,18 @@ registerAdminPage('email-sequence', {
 
 // Sales Pipeline - stub registration that Pro plugin will override via filter
 // The Pro plugin uses addFilter('QuillCRM.Navigation.PageSettings') to replace the component
+// If Pro is not active, shows upgrade notice instead of blank page
 registerAdminPage('sales-pipeline', {
 	path: 'sales-pipeline',
-	component: () => null, // Pro plugin overrides this
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Sales Pipeline', 'quillcrm')}
+			description={__(
+				'Manage your sales pipeline, track deals through stages, and close more sales with QuillCRM Pro.',
+				'quillcrm'
+			)}
+		/>
+	), // Pro plugin overrides with actual pipeline
 	label: __('Pipelines', 'quillcrm'),
 	icon: <PiplelinesIcon />,
 	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],

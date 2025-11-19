@@ -459,7 +459,8 @@ abstract class Form {
 				$contact->tags()->syncWithoutDetaching( $tags );
 			}
 
-			if ( ! empty( $custom_fields ) ) {
+			// Only process custom fields if Pro plugin is active
+			if ( ! empty( $custom_fields ) && class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
 				$custom_fields_values = array();
 				foreach ( $custom_fields as $key => $value ) {
 					$custom_fields_values[ $key ] = array(

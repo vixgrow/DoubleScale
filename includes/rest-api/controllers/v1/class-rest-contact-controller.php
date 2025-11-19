@@ -1000,7 +1000,12 @@ class REST_Contact_Controller extends REST_Controller {
 			$total_count   = $query->count();
 
 			// Start with base query and load relationships
-			$contacts = $query->with( 'lists', 'tags', 'custom_fields', 'notes' );
+			// Load custom_fields only if Pro plugin is active
+			$relationships = array( 'lists', 'tags', 'notes' );
+			if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
+				$relationships[] = 'custom_fields';
+			}
+			$contacts = $query->with( $relationships );
 
 			// Apply date range filters
 			if ( $from ) {
@@ -1162,15 +1167,19 @@ class REST_Contact_Controller extends REST_Controller {
 	public function get_item( $request ) {
 		try {
 			$contact_id = $request->get_param( 'id' );
-			$contact    = Contact_Model::find( $contact_id );
+		$contact    = Contact_Model::find( $contact_id );
 
-			if ( ! $contact ) {
-				return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
-			}
+		if ( ! $contact ) {
+			return new WP_Error( 'not_found', 'Contact not found', array( 'status' => 404 ) );
+		}
 
-			$contact->load( 'lists', 'tags', 'custom_fields' );
+		// Load relationships - custom_fields only if Pro plugin is active
+		$contact->load( array( 'lists', 'tags' ) );
+		if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
+			$contact->load( 'custom_fields' );
+		}
 
-			return new WP_REST_Response( $contact, 200 );
+		return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}
@@ -1212,14 +1221,18 @@ class REST_Contact_Controller extends REST_Controller {
 				return $sync_custom_fields;
 			}
 
-			$sync_notes = $this->sync_notes( $request, $contact );
-			if ( is_wp_error( $sync_notes ) ) {
-				return $sync_notes;
-			}
+		$sync_notes = $this->sync_notes( $request, $contact );
+		if ( is_wp_error( $sync_notes ) ) {
+			return $sync_notes;
+		}
 
-			$contact->load( 'lists', 'tags', 'custom_fields' );
+		// Load relationships - custom_fields only if Pro plugin is active
+		$contact->load( array( 'lists', 'tags' ) );
+		if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
+			$contact->load( 'custom_fields' );
+		}
 
-			return new WP_REST_Response( $contact, 200 );
+		return new WP_REST_Response( $contact, 200 );
 		} catch ( Exception $e ) {
 			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 400 ) );
 		}

@@ -290,24 +290,34 @@ class Contact_Model extends Model {
 
 	/**
 	 * Get total deal value for won deals
+	 * Returns 0 if Pro plugin is not active
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return float
 	 */
 	public function getTotalDealValueAttribute() {
-		return $this->deals()->where( 'status', 'won' )->sum( 'value' );
+		$deals = $this->deals();
+		if ( ! $deals ) {
+			return 0;
+		}
+		return $deals->where( 'status', 'won' )->sum( 'value' );
 	}
 
 	/**
 	 * Get active deals count
+	 * Returns 0 if Pro plugin is not active
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return int
 	 */
 	public function getActiveDealsCountAttribute() {
-		return $this->active_deals()->count();
+		$active_deals = $this->active_deals();
+		if ( ! $active_deals ) {
+			return 0;
+		}
+		return $active_deals->count();
 	}
 
 	/**

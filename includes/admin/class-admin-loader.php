@@ -233,6 +233,16 @@ class Admin_Loader {
 
 		do_action( 'qcrm_admin_enqueue_scripts' );
 
+		// Add Pro client as dependency if Pro plugin is active and registered its script
+		// This ensures Pro's filters are registered before our registerAdminPage calls
+		if ( defined( 'QUILLCRM_PRO_VERSION' ) && wp_script_is( 'quillcrm-pro-client', 'registered' ) ) {
+			// Get current qcrm-admin dependencies and add Pro script
+			global $wp_scripts;
+			if ( isset( $wp_scripts->registered['qcrm-admin'] ) ) {
+				$wp_scripts->registered['qcrm-admin']->deps[] = 'quillcrm-pro-client';
+			}
+		}
+
 		// Enqueue scripts.
 		wp_enqueue_script( 'qcrm-config' );
 		wp_enqueue_script( 'qcrm-admin' );

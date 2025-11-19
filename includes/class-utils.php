@@ -10,8 +10,8 @@
 
 namespace QuillCRM;
 
-use QuillCRM\Models\Custom_Fields_Group_Model;
-use QuillCRM\Models\Custom_Field_Model;
+// use QuillCRM\Models\Custom_Fields_Group_Model; // Moved to Pro
+// use QuillCRM\Models\Custom_Field_Model; // Moved to Pro
 use DateInterval;
 use DatePeriod;
 use DateTime;
@@ -182,13 +182,19 @@ class Utils {
 
 	/**
 	 * Get custom fields
+	 * Custom fields are PRO-only feature
 	 *
 	 * @since 1.0.0
 	 *
 	 * @return array
 	 */
 	public static function get_custom_fields() {
-		$groups = Custom_Fields_Group_Model::with( 'custom_fields' )->get();
+		// Custom fields are PRO-only feature
+		if ( ! class_exists( 'QuillCRM_Pro\Models\Custom_Fields_Group_Model' ) ) {
+			return array();
+		}
+
+		$groups = \QuillCRM_Pro\Models\Custom_Fields_Group_Model::with( 'custom_fields' )->get();
 
 		$fields = array();
 
@@ -197,14 +203,14 @@ class Utils {
 				continue;
 			}
 
-			/** @var Custom_Fields_Group_Model $group */
+			/** @var \QuillCRM_Pro\Models\Custom_Fields_Group_Model $group */
 			$fields[ $group->id ] = array(
 				'label'  => $group->name,
 				'fields' => array(),
 			);
 
 			foreach ( $group->custom_fields as $field ) {
-				/** @var Custom_Field_Model $field */
+				/** @var \QuillCRM_Pro\Models\Custom_Field_Model $field */
 				$fields[ $group->id ]['fields'][ $field->id ] = array(
 					'label' => $field->name,
 					'type'  => $field->type,

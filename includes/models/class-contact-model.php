@@ -14,7 +14,6 @@ namespace QuillCRM\Models;
 use WPEloquent\Eloquent\Model;
 use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Tag_Model;
-use QuillCRM\Models\Custom_Field_Model;
 use QuillCRM\Models\Contact_Note_Model;
 use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Models\User_Model;
@@ -22,6 +21,7 @@ use QuillCRM\Models\Tracking_Model;
 use QuillCRM\Models\WC_Order_Model;
 use QuillCRM\Models\Automation_Contact_Processes_Model;
 // use QuillCRM\Models\Deal_Model; // Moved to Pro
+// use QuillCRM\Models\Custom_Field_Model; // Moved to Pro
 use QuillCRM\Utils;
 
 /**
@@ -143,15 +143,19 @@ class Contact_Model extends Model {
 
 	/**
 	 * Get the custom fields
+	 * Custom fields are PRO-only feature - uses PRO model if available
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany|null
 	 */
 	public function custom_fields() {
-		return $this->belongsToMany( Custom_Field_Model::class, 'quillcrm_custom_field_relationship', 'entity_id', 'custom_field_id' )
-			->withPivot( 'value' )
-			->wherePivot( 'entity_type', 'contact' );
+		if ( class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
+			return $this->belongsToMany( \QuillCRM_Pro\Models\Custom_Field_Model::class, 'quillcrm_custom_field_relationship', 'entity_id', 'custom_field_id' )
+				->withPivot( 'value' )
+				->wherePivot( 'entity_type', 'contact' );
+		}
+		return null;
 	}
 
 	/**
@@ -200,14 +204,19 @@ class Contact_Model extends Model {
 
 	/**
 	 * Get the contact custom field value
+	 * Custom fields are PRO-only feature
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param int $custom_field_id Custom field ID
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	public function get_custom_field( $custom_field_id ) {
+		if ( ! class_exists( 'QuillCRM_Pro\Models\Custom_Field_Model' ) ) {
+			return null;
+		}
+		
 		$custom_field = $this->custom_fields->where( 'id', $custom_field_id )->first();
 		if ( $custom_field ) {
 			return $custom_field->pivot->value ?? '';

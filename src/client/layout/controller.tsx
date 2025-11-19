@@ -21,7 +21,7 @@ import Contacts from '../pages/contacts';
 import Contact from '../pages/contact';
 import Lists from '../pages/contacts/lists';
 import Tags from '../pages/contacts/tags';
-import CustomFields from '../pages/custom-fields';
+// import CustomFields from '../pages/custom-fields'; // Moved to Pro
 import Campaigns from '../pages/campaigns';
 import Campaign from '../pages/campaign';
 import Forms from '../pages/forms';
@@ -43,7 +43,7 @@ import EmailAnalytics from '../pages/home/emails-analytics';
 import { useDashboardData } from '../pages/home/use-analytics';
 import Debug from '../pages/debug';
 import AnalyticsAndReports from '../pages/analytics-and-reports';
-import SalesPipeline from '../pages/sales-pipeline';
+// import SalesPipeline from '../pages/sales-pipeline'; // Moved to Pro
 import {
 	AnalyticsReportsIcon,
 	AutomationsIcon,
@@ -60,8 +60,6 @@ import {
 	WordPressIcon,
 } from '@quillcrm/components';
 import EmailSequences from '../pages/email-sequences';
-
-// Import Lucide React icon for pipeline
 import { User as UserIcon } from 'lucide-react';
 import SequencesMail from '../pages/email-sequences/sequences-mail';
 import { Button } from '@quillcrm/components/ui/button';
@@ -255,9 +253,10 @@ registerAdminPage('tags', {
 	hidden: true,
 });
 
+// Custom Fields page registration - now handled by Pro plugin
 registerAdminPage('custom-fields', {
 	path: 'custom-fields',
-	component: () => <CustomFields />,
+	component: () => <div>{__('Custom Fields is a Pro feature', 'quillcrm')}</div>,
 	label: __('Custom Fields', 'quillcrm'),
 	icon: <CustomFieldsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
@@ -295,9 +294,11 @@ registerAdminPage('email-sequence', {
 	hidden: true,
 });
 
+// Sales Pipeline - stub registration that Pro plugin will override via filter
+// The Pro plugin uses addFilter('QuillCRM.Navigation.PageSettings') to replace the component
 registerAdminPage('sales-pipeline', {
 	path: 'sales-pipeline',
-	component: () => <SalesPipeline />,
+	component: () => null, // Pro plugin overrides this
 	label: __('Pipelines', 'quillcrm'),
 	icon: <PiplelinesIcon />,
 	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],

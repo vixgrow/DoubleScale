@@ -234,3 +234,5 @@ class Message_Provider_Registry {
 		return $this->default_providers[ $channel ] ?? null;
 	}
 }
+
+

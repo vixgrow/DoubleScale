@@ -18,7 +18,7 @@ import { Button } from '@quillcrm/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useContactContext } from '../../state/context';
 import { EditIcon, OutlinedCustomFieldsIcon } from '@quillcrm/components';
-import { useCustomFields } from '../../../custom-fields/use-customFields';
+// import { useCustomFields } from '../../../custom-fields/use-customFields'; // Moved to Pro
 import Field from '@quillcrm/components/field';
 import { getToLink } from '@quillcrm/navigation';
 import { useNavigate } from '@quillcrm/navigation';
@@ -39,7 +39,9 @@ type EditingField =
 
 const InfoCard: React.FC = () => {
     const { contact, updateContact } = useContactContext();
-    const { groups, loading: customFieldsLoading } = useCustomFields();
+    // Custom fields moved to Pro plugin - use empty defaults
+    const groups = [];
+    const customFieldsLoading = false;
     const [activeTab, setActiveTab] = useState<TabType>('basic');
     const [editingField, setEditingField] = useState<EditingField>(null);
     const [editValue, setEditValue] = useState<string>('');

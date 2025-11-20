@@ -138,11 +138,13 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	if (hasActionWarning) {
 		const warningMessage =
 			step.type === 'goal'
-				? __(
+				? step.settings?._goal_warning_message ||
+					__(
 						'Goal requires a plugin that is not currently active.',
 						'quillcrm'
 					)
-				: __(
+				: step.settings?._action_warning_message ||
+					__(
 						'Action requires a plugin that is not currently active.',
 						'quillcrm'
 					);

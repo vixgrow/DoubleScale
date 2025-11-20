@@ -460,6 +460,7 @@ export type AutomationStep = {
 	settings: {
 		_action_label?: string;
 		_action_warning?: boolean;
+		_action_warning_message?: string;
 		_condition_warning?: boolean;
 		[key: string]: any;
 	};

@@ -654,77 +654,12 @@ class REST_Campaign_Controller extends Abstract_Campaign_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	private function send_test_provider_message( $request, $channel ) {
-		try {
-			$phone   = $request->get_param( 'phone' );
-			$message = $request->get_param( 'message' );
-
-			if ( empty( $phone ) ) {
-				return new WP_Error(
-					'missing_phone',
-					sprintf( __( 'Phone number is required for %s channel', 'quillcrm' ), $channel ),
-					array( 'status' => 400 )
-				);
-			}
-
-			// Get provider for this channel
-			$provider = Message_Provider_Registry::instance()->get_provider( $channel );
-
-			if ( ! $provider ) {
-				return new WP_Error(
-					'provider_not_available',
-					sprintf( __( 'No provider configured for %s channel', 'quillcrm' ), $channel ),
-					array( 'status' => 500 )
-				);
-			}
-
-			// Find contact for merge tag processing
-			$contact = Contact_Model::where( 'phone', $phone )->first() ?? null;
-
-			// Process merge tags
-			$processed_message = $this->process_merge_tags( $message, $contact );
-
-			// Prepare message data
-			$message_data = array(
-				'To'   => $phone,
-				'Body' => $processed_message,
-			);
-
-			// Add webhook URL for tracking
-			$webhook_url = $provider->get_webhook_url( $channel );
-			if ( $webhook_url && ! isset( $message_data['StatusCallback'] ) ) {
-				$message_data['StatusCallback'] = $webhook_url;
-			}
-
-			// Send message using provider
-			$result = $provider->send_message( $channel, $message_data, $contact ?? new Contact_Model() );
-
-			// Handle result
-			if ( ! isset( $result['success'] ) || ! $result['success'] ) {
-				$error_message = $result['error'] ?? 'Failed to send test message';
-
-				// Check for provider error details
-				if ( isset( $result['metadata']['error_details'] ) ) {
-					$error_details = $result['metadata']['error_details'];
-
-					if ( is_string( $error_details ) ) {
-						$error_message = $error_details;
-					} elseif ( is_array( $error_details ) && isset( $error_details['message'] ) ) {
-						$error_message = $error_details['message'];
-					}
-				}
-
-				return new WP_Error( 'send_failed', __( $error_message, 'quillcrm' ), array( 'status' => 400 ) );
-			}
-
-			$channel_upper = strtoupper( $channel );
-
-			return new WP_REST_Response(
-				array( 'message' => sprintf( __( 'Test %s sent successfully', 'quillcrm' ), $channel_upper ) ),
-				200
-			);
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'error', $e->getMessage(), array( 'status' => 500 ) );
-		}
+		// SMS/WhatsApp test messages moved to Pro plugin
+		return new WP_Error(
+			'pro_feature_required',
+			sprintf( __( '%s messaging is available in QuillCRM Pro.', 'quillcrm' ), ucfirst( $channel ) ),
+			array( 'status' => 403 )
+		);
 	}
 
 	/**

@@ -122,7 +122,7 @@ abstract class Action {
 	 *
 	 * @since 1.0.0
 	 */
-	private function __construct() {
+	protected function __construct() {
 		$this->attributes         = $this->get_attributes_schema();
 		$this->merge_tags_manager = Merge_Tags_Manager::instance();
 		add_action( 'init', array( $this, 'register' ) );

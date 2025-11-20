@@ -20,11 +20,6 @@ use QuillCRM\Managers\Integrations_Manager;
  */
 final class Actions_Manager {
 
-
-
-
-
-
 	/**
 	 * Registed actions
 	 *
@@ -100,6 +95,7 @@ final class Actions_Manager {
 			'fields'            => $action->get_fields(),
 			'is_integration'    => $action->is_integration,
 			'required_triggers' => $action->required_triggers,
+			'is_pro'            => $action->is_pro,
 		);
 	}
 

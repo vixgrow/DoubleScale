@@ -22,6 +22,7 @@ use QuillCRM\Managers\Actions_Manager;
 abstract class Action {
 
 
+
 	/**
 	 * Action Name
 	 *
@@ -70,6 +71,14 @@ abstract class Action {
 	 * @var string
 	 */
 	public $group;
+
+
+	/**
+	 * Is PRO only
+	 *
+	 * @var bool
+	 */
+	public $is_pro = false;
 
 	/**
 	 * Merge Tags Manager
@@ -122,7 +131,7 @@ abstract class Action {
 	 *
 	 * @since 1.0.0
 	 */
-	private function __construct() {
+	public function __construct() {
 		$this->attributes         = $this->get_attributes_schema();
 		$this->merge_tags_manager = Merge_Tags_Manager::instance();
 		add_action( 'init', array( $this, 'register' ) );

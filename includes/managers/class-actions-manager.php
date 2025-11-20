@@ -21,6 +21,7 @@ use QuillCRM\Managers\Integrations_Manager;
 final class Actions_Manager {
 
 
+
 	/**
 	 * Registed actions
 	 *
@@ -278,10 +279,6 @@ final class Actions_Manager {
 						 'label'   => __( 'Slack', 'quillcrm' ),
 						 'actions' => array(),
 					 ),
-					 // 'twilio'         => array(
-					 // 'label'   => __( 'Twilio', 'quillcrm' ),
-					 // 'actions' => array(),
-					 // ),
 					 'zapier'       => array(
 						 'label'   => __( 'Zapier', 'quillcrm' ),
 						 'actions' => array(),

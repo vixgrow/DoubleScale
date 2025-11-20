@@ -20,12 +20,6 @@ use QuillCRM\Abstracts\Goal;
 final class Goals_Manager {
 
 
-
-
-
-
-
-
 	/**
 	 * Registed goals
 	 *
@@ -84,8 +78,28 @@ final class Goals_Manager {
 		/** @var Goal[] $goals */
 		$goals = apply_filters( 'quillcrm_goals', $this->goals );
 
-		foreach ( $goals as $trigger ) {
-			$trigger->load_hooks();
+		foreach ( $goals as $slug => $goal ) {
+			$this->goals[ $slug ] = $goal;
+
+			// Get triggers and is_disabled from the source group if they exist
+			$triggers = isset( $this->sources[ $goal->source ]['groups'][ $goal->group ]['triggers'] )
+				? $this->sources[ $goal->source ]['groups'][ $goal->group ]['triggers']
+				: array();
+
+			$is_disabled = isset( $this->sources[ $goal->source ]['groups'][ $goal->group ]['is_disabled'] )
+				? $this->sources[ $goal->source ]['groups'][ $goal->group ]['is_disabled']
+				: false;
+
+			// Update the sources array with the (potentially updated) goal's fields
+			$this->sources[ $goal->source ]['groups'][ $goal->group ]['goals'][ $goal->slug ] = array(
+				'label'       => $goal->name,
+				'description' => $goal->description,
+				'fields'      => $goal->get_fields(),
+				'triggers'    => $triggers,
+				'is_disabled' => $is_disabled,
+				'is_pro'      => $goal->is_pro,
+			);
+			$goal->load_hooks();
 		}
 	}
 
@@ -123,6 +137,7 @@ final class Goals_Manager {
 			'fields'      => $goal->get_fields(),
 			'triggers'    => $triggers,
 			'is_disabled' => $is_disabled,
+			'is_pro'      => $goal->is_pro,
 		);
 	}
 

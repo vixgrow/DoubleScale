@@ -23,7 +23,6 @@ use QuillCRM\Models\Automation_Contact_Model;
  */
 abstract class Goal {
 
-
 	/**
 	 * Goal Name
 	 *
@@ -68,6 +67,13 @@ abstract class Goal {
 	 * @since 1.0.0
 	 */
 	public $group;
+
+	/**
+	 * Is PRO only
+	 *
+	 * @var bool
+	 */
+	public $is_pro = false;
 
 	/**
 	 * Load Hooks

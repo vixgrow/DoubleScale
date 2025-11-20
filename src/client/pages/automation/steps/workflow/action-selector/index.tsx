@@ -53,10 +53,16 @@ const ActionSelector: React.FC<ActionSelectorProps> = ({
 	const [selectedCategory, setSelectedCategory] = useState('crm');
 	const automationActions = ConfigAPI.getAutomationActions();
 
-	// Filter out delay action from CRM contact group
+	console.log(automationActions);
+
+	// Filter out delay actions from CRM contact group (handled by Delay Selector)
 	const filteredActions = { ...automationActions };
 	if (filteredActions.crm?.groups?.contact?.actions) {
-		const { delay, ...restActions } = filteredActions.crm.groups.contact.actions;
+		const {
+			delay,
+			['delay-until-datetime']: delayUntilDatetime,
+			...restActions
+		} = filteredActions.crm.groups.contact.actions;
 		filteredActions.crm = {
 			...filteredActions.crm,
 			groups: {

@@ -17,12 +17,6 @@ namespace QuillCRM\Abstracts;
  */
 abstract class Form_Pro extends Form {
 
-	/**
-	 * Is PRO only
-	 *
-	 * @var bool
-	 */
-	public $is_pro = true;
 
 	public function __construct() {
 		 $this->is_pro = ! quillcrm_is_plugin_active( QUILLCRM_PRO_PLUGIN_PATH );

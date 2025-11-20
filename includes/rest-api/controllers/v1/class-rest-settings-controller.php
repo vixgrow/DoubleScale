@@ -551,37 +551,10 @@ class REST_Settings_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object with bounce webhook URLs or error.
 	 */
 	public function get_bounce_webhooks( $request ) {
-		$manager  = Bounce_Handler_Manager::instance();
-		$urls     = $manager->get_webhook_urls();
-		$provider = $request->get_param( 'provider' );
-
-		// If no provider specified, return all webhooks.
-		if ( empty( $provider ) ) {
-			return new WP_REST_Response( $urls, 200 );
-		}
-
-		// Provider specified - validate and return single webhook.
-		if ( ! isset( $urls[ $provider ] ) ) {
-			return new WP_Error(
-				'invalid_provider',
-				sprintf(
-					/* translators: 1: provider slug, 2: available providers */
-					__( 'Provider "%1$s" not found. Available providers: %2$s', 'quillcrm' ),
-					$provider,
-					implode( ', ', array_keys( $urls ) )
-				),
-				array( 'status' => 404 )
-			);
-		}
-
-		// Return single provider webhook.
-		return new WP_REST_Response(
-			array(
-				'provider' => $provider,
-				'name'     => $urls[ $provider ]['name'],
-				'url'      => $urls[ $provider ]['url'],
-			),
-			200
+		return new WP_Error(
+			'pro_feature_required',
+			__( 'Bounce handling is available in QuillCRM Pro.', 'quillcrm' ),
+			array( 'status' => 403 )
 		);
 	}
 

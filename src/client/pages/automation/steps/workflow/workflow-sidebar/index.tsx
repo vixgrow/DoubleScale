@@ -23,6 +23,7 @@ import ConditionsModal from '../conditions-modal';
 import StepFieldsModal from '../step-fields-modal';
 import ActionSelector from '../action-selector';
 import GoalSelector from '../goal-selector';
+import DelaySelector from '../delay-selector';
 import { NoticeBanner } from '@quillcrm/components';
 
 interface WorkflowSidebarProps {
@@ -80,6 +81,10 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	};
 
 	const handleGoalChange = (value: string) => {
+		setTempAction(value);
+	};
+
+	const handleDelayChange = (value: string) => {
 		setTempAction(value);
 	};
 
@@ -152,6 +157,19 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		);
 	};
 
+	const handleDelaySave = async (delayKey: string) => {
+		if (!currentStep || !delayKey) {
+			setNotice({ type: 'error', message: __('Please select a delay type', 'quillcrm') });
+			return;
+		}
+
+		await handleSave(
+			{ action: delayKey },
+			__('Delay saved', 'quillcrm'),
+			{ clearTempAction: true }
+		);
+	};
+
 	const handleStepSave = async (stepData: Partial<OrganizedStep>) => {
 		if (!stepData.id) {
 			setNotice({ type: 'error', message: __('Invalid step data', 'quillcrm') });
@@ -211,6 +229,13 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 						onSave={handleGoalSave}
 					/>
 				),
+				delay: () => (
+					<DelaySelector
+						value={tempAction}
+						onChange={handleDelayChange}
+						onSave={handleDelaySave}
+					/>
+				),
 				default: () => null,
 			},
 
@@ -243,7 +268,9 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		if (!currentStep || currentStep.type === 'end_automation') return null;
 
 		// Determine renderer based on step configuration
-		const hasAction = currentStep.action || currentStep.type === 'delay';
+		const requiresSelection = ['action', 'goal', 'delay'];
+		const hasAction =
+			!requiresSelection.includes(currentStep.type) || !!currentStep.action;
 		const category = hasAction ? 'configured' : 'unconfigured';
 		const renderer = contentRenderers[category][currentStep.type] ||
 			contentRenderers[category].default;

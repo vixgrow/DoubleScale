@@ -105,9 +105,13 @@ const AddStep: React.FC<AddStepProps> = ({
 			order,
 		} as AutomationStep;
 
+		// Set appropriate action based on step type
 		if (type === 'condition') {
 			stepData.action = 'condition';
+		} else if (type === 'end_automation') {
+			stepData.action = 'end_automation';
 		}
+		// For 'action', 'goal', and 'delay' types, leave action empty - will be set when user selects specific action/goal/delay
 
 		if (parentId && condition) {
 			stepData.parent_id = parentId;

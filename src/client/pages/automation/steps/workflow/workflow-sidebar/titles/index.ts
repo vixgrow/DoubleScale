@@ -57,7 +57,11 @@ const titleMap: Record<string, (currentStep: OrganizedStep | null) => string> =
 					__('Goal Settings', 'quillcrm')
 				: __('Goal Settings', 'quillcrm'),
 		condition: () => __('Condition Settings', 'quillcrm'),
-		delay: () => __('Delay', 'quillcrm'),
+		delay: (currentStep) =>
+			currentStep?.action
+				? findActionLabel(currentStep.action) ||
+					__('Delay Settings', 'quillcrm')
+				: __('Select Delay Type', 'quillcrm'),
 	};
 
 /**

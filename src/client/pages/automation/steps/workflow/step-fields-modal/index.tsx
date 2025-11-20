@@ -51,7 +51,10 @@ const StepFieldsModal: React.FC<StepFieldsModalProps> = ({
 	const { steps, setSteps } = useAutomationContext();
 
 	// Determine if this is a messaging action that requires provider
-	const actionKey = step.type === 'delay' ? 'delay' : step.action;
+	const actionKey =
+		step.type === 'delay'
+			? step.action || 'delay'
+			: step.action;
 	const isSmsAction = actionKey === 'send_sms';
 	const isWhatsAppAction = actionKey === 'send_whatsapp';
 	const requiresProvider = isSmsAction || isWhatsAppAction;

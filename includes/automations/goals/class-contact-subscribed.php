@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Contact Subscribed Goal
  *
@@ -9,17 +10,16 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Goals;
+namespace QuillCRM\Automations\Goals;
 
 use QuillCRM\Abstracts\Goal;
-use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Models\Automation_Step_Model;
 use QuillCRM\Managers\Goals_Manager;
 
 /**
  * Contact Subscribed Goal class
  */
 class Contact_Subscribed extends Goal {
+
 
 	/**
 	 * Goal Name

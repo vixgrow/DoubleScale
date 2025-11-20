@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { applyFilters } from '@wordpress/hooks';
 /**
  * external dependencies
  */
@@ -13,6 +14,7 @@ import { ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ColorPaletteIcon } from '@quillcrm/components';
 import { STORE_KEY } from '../../stores/email-builder/constants';
+import LockedButtons from './LockedButtons';
 
 interface GlobalEmailSettingsProps {
 	onShowBackgroundSettings: () => void;
@@ -24,7 +26,18 @@ const GlobalEmailSettings: React.FC<GlobalEmailSettingsProps> = ({
 	onShowButtonSettings,
 }) => {
 	const dispatch = useDispatch();
-	const globalSettings = useSelect((select) => select(STORE_KEY).getGlobalSettings(), []);
+	const globalSettings = useSelect(
+		(select) => select(STORE_KEY).getGlobalSettings(),
+		[]
+	);
+
+	// Apply filter to Buttons settings - Pro can override with clickable button
+	const ButtonSettingsContent = applyFilters(
+		'QuillCRM.Builder.ButtonSettings',
+		LockedButtons,
+		{ onShowButtonSettings }
+	) as React.ComponentType<any>;
+
 	return (
 		<div className="grid gap-5">
 			<div className="flex flex-col gap-2">
@@ -37,7 +50,11 @@ const GlobalEmailSettings: React.FC<GlobalEmailSettingsProps> = ({
 					className="w-full h-12 rounded-lg"
 					placeholder={__('700', 'quillcrm')}
 					value={globalSettings.canvasWidth}
-					onChange={(e) => dispatch(STORE_KEY).updateGlobalSettings({ canvasWidth: parseInt(e.target.value) || 600 })}
+					onChange={(e) =>
+						dispatch(STORE_KEY).updateGlobalSettings({
+							canvasWidth: Number.parseInt(e.target.value) || 600,
+						})
+					}
 				/>
 				<div className="text-[#616161] text-xs">
 					{__('We recommend using a 600-700px width', 'quillcrm')}
@@ -48,8 +65,10 @@ const GlobalEmailSettings: React.FC<GlobalEmailSettingsProps> = ({
 				<div className="text-[#333333]">
 					{__('Theme Settings', 'quillcrm')}
 				</div>
-				<div
-					className="flex justify-between items-center border rounded-lg p-4 text-[#616161] text-base cursor-pointer"
+				{/* Background - Always available */}
+				<button
+					type="button"
+					className="flex justify-between items-center border rounded-lg p-4 text-[#616161] text-base cursor-pointer w-full hover:bg-gray-50 transition-colors"
 					onClick={onShowBackgroundSettings}
 				>
 					<div className="flex items-center gap-6">
@@ -57,19 +76,11 @@ const GlobalEmailSettings: React.FC<GlobalEmailSettingsProps> = ({
 						<div>{__('Background', 'quillcrm')}</div>
 					</div>
 					<ChevronRight />
-				</div>
-				<div
-					className="flex justify-between items-center border rounded-lg p-4 text-[#616161] text-base cursor-pointer"
-					onClick={onShowButtonSettings}
-				>
-					<div className="flex items-center gap-[14px]">
-						<div className="border rounded-lg border-[#616161] p-1.5">
-							<div className="border-t border-[#616161] w-[18px]"></div>
-						</div>
-						<div>{__('Buttons', 'quillcrm')}</div>
-					</div>
-					<ChevronRight />
-				</div>
+				</button>
+				{/* Buttons - Locked by default, Pro can override */}
+				<ButtonSettingsContent
+					onShowButtonSettings={onShowButtonSettings}
+				/>
 			</div>
 		</div>
 	);

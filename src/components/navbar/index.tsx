@@ -376,7 +376,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 						className="qcrm-navbar__submenu-portal"
 						style={{
 							position: 'fixed',
-							top: `${hoveredItem.rect.top - 80}px`,
+							top: `${hoveredItem.rect.top - 40}px`,
 							left: `${hoveredItem.rect.right + 20}px`,
 							zIndex: 99999,
 						}}

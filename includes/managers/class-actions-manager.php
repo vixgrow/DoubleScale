@@ -21,10 +21,6 @@ use QuillCRM\Managers\Integrations_Manager;
 final class Actions_Manager {
 
 
-
-
-
-
 	/**
 	 * Registed actions
 	 *
@@ -73,6 +69,34 @@ final class Actions_Manager {
 	 */
 	private function __construct() {
 		$this->set_sources();
+		add_action( 'quillcrm_loaded', array( $this, 'load_actions' ) );
+	}
+
+	/**
+	 * Load actions
+	 */
+	public function load_actions() {
+		/** @var Action[] $actions */
+		$actions = apply_filters( 'quillcrm_actions', $this->actions );
+
+		// Re-register actions after filter to update sources array
+		// This allows Pro versions to properly register in the frontend
+		foreach ( $actions as $action ) {
+			// For actions coming from filter that aren't Action instances, instantiate them
+			if ( ! isset( $this->actions[ $action->slug ] ) ) {
+				$this->actions[ $action->slug ] = $action;
+			}
+
+			// Update the sources array with the action's fields
+			$this->sources[ $action->source ]['groups'][ $action->group ]['actions'][ $action->slug ] = array(
+				'label'             => $action->name,
+				'description'       => $action->description,
+				'fields'            => $action->get_fields(),
+				'is_integration'    => $action->is_integration,
+				'required_triggers' => $action->required_triggers,
+				'is_pro'            => $action->is_pro,
+			);
+		}
 	}
 
 
@@ -90,7 +114,7 @@ final class Actions_Manager {
 		}
 
 		if ( isset( $this->actions[ $action->slug ] ) ) {
-			throw new Exception( sprintf( __( 'Action %s already registered', 'quillcrm' ), $action->name ) );
+			return;
 		}
 
 		$this->actions[ $action->slug ] = $action;
@@ -100,6 +124,7 @@ final class Actions_Manager {
 			'fields'            => $action->get_fields(),
 			'is_integration'    => $action->is_integration,
 			'required_triggers' => $action->required_triggers,
+			'is_pro'            => $action->is_pro,
 		);
 	}
 

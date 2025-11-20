@@ -185,6 +185,7 @@ export type Action = {
 		};
 	};
 	required_triggers?: string[];
+	is_pro?: boolean;
 };
 
 export type ActionsGroup = {

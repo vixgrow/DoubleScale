@@ -516,6 +516,24 @@ export const hasActionWarning = (step: any): boolean => {
 };
 
 /**
+ * Get action warning message from step (uses backend-provided message)
+ * @param step - The automation step object
+ * @returns The action warning message
+ */
+export const getActionWarningMessage = (step: any): string => {
+	// Use backend-provided warning message
+	if (step?.settings?._action_warning_message) {
+		return step.settings._action_warning_message;
+	}
+
+	// Fallback message
+	return __(
+		'This action requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
+		'quillcrm'
+	);
+};
+
+/**
  * Get goal label from step (uses backend-provided label)
  * @param step - The automation step object
  * @returns The goal label

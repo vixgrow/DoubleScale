@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * External dependencies
  */
-import { Lock, X } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -20,20 +20,20 @@ import {
 } from '@/components/ui/dialog';
 import './style.scss';
 
-interface ProTriggerModalProps {
+interface ProAutomationModalProps {
 	visible: boolean;
 	onClose: () => void;
-	triggerName: string;
+	featureName: string;
 }
 
-export const ProTriggerModal: React.FC<ProTriggerModalProps> = ({
+export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 	visible,
 	onClose,
-	triggerName,
+	featureName,
 }) => {
 	return (
-		<Dialog open={visible} onOpenChange={onClose}>
-			<DialogContent className="qcrm-pro-trigger-modal sm:max-w-[500px]">
+		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
+			<DialogContent className="z-[150300] qcrm-pro-modal sm:max-w-[500px]">
 				<DialogHeader>
 					<DialogTitle className="flex items-center justify-between">
 						<div className="flex items-center gap-2">
@@ -42,8 +42,8 @@ export const ProTriggerModal: React.FC<ProTriggerModalProps> = ({
 						</div>
 					</DialogTitle>
 				</DialogHeader>
-				
-				<div className="qcrm-pro-trigger-modal__content">
+
+				<div className="qcrm-pro-modal__content">
 					<p className="text-gray-600 mb-6">
 						{__(
 							"We're sorry, this feature is not available on your plan. Please upgrade to the PRO plan to unlock all these awesome features.",
@@ -51,12 +51,12 @@ export const ProTriggerModal: React.FC<ProTriggerModalProps> = ({
 						)}
 					</p>
 
-					<div className="qcrm-pro-trigger-modal__trigger-info mb-6">
+					<div className="qcrm-pro-modal__feature-info mb-6">
 						<div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
 							<Lock className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
 							<div>
 								<div className="font-semibold text-blue-900 mb-1">
-									{triggerName}
+									{featureName}
 								</div>
 								<div className="text-sm text-blue-700">
 									{__('Available in PRO version', 'quillcrm')}
@@ -65,7 +65,7 @@ export const ProTriggerModal: React.FC<ProTriggerModalProps> = ({
 						</div>
 					</div>
 
-					<div className="qcrm-pro-trigger-modal__actions flex gap-3">
+					<div className="qcrm-pro-modal__actions flex gap-3">
 						<Button
 							variant="outline"
 							onClick={onClose}
@@ -75,7 +75,10 @@ export const ProTriggerModal: React.FC<ProTriggerModalProps> = ({
 						</Button>
 						<Button
 							onClick={() => {
-								window.open('https://www.quillcrm.com/pro', '_blank');
+								window.open(
+									'https://www.quillcrm.com/pro',
+									'_blank'
+								);
 							}}
 							className="flex-1 bg-green-600 hover:bg-green-700"
 						>
@@ -88,5 +91,4 @@ export const ProTriggerModal: React.FC<ProTriggerModalProps> = ({
 	);
 };
 
-export default ProTriggerModal;
-
+export default ProAutomationModal;

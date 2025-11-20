@@ -21,7 +21,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
-import ProTriggerModal from '@/components/pro-trigger-modal';
+import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
 import type { TriggersGroup } from '@quillcrm/config';
 
 interface TriggersGroupRenderProps {
@@ -220,12 +220,12 @@ const TriggersGroupRender: React.FC<TriggersGroupRenderProps> = ({
 				))}
 			</div>
 
-			{/* PRO Trigger Modal */}
+			{/* PRO Modal */}
 			{selectedProTrigger && (
-				<ProTriggerModal
+				<ProAutomationModal
 					visible={showProModal}
 					onClose={handleCloseProModal}
-					triggerName={selectedProTrigger.name}
+					featureName={selectedProTrigger.name}
 				/>
 			)}
 		</>

@@ -46,4 +46,3 @@ abstract class Action_Pro extends Action {
 		return false;
 	}
 }
-

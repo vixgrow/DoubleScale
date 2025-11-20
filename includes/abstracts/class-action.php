@@ -21,7 +21,6 @@ use QuillCRM\Managers\Actions_Manager;
  */
 abstract class Action {
 
-
 	/**
 	 * Action Name
 	 *
@@ -70,6 +69,14 @@ abstract class Action {
 	 * @var string
 	 */
 	public $group;
+
+
+	/**
+	 * Is PRO only
+	 *
+	 * @var bool
+	 */
+	public $is_pro = false;
 
 	/**
 	 * Merge Tags Manager

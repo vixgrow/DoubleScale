@@ -57,24 +57,6 @@ use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
 final class QuillCRM {
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Campaigns tasks
 	 *
@@ -390,6 +372,12 @@ final class QuillCRM {
 			require $file;
 		}
 
+		// Load all automations messaging actions files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/messaging/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
+
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
 		foreach ( $actions_files as $file ) {
@@ -431,13 +419,11 @@ final class QuillCRM {
 		}
 
 		// Deal actions moved to Pro plugin
-		// require_once QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-base-deal-action.php';
-		// $actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
-		// foreach ( $actions_files as $file ) {
-		// if ( basename( $file ) !== 'class-base-deal-action.php' ) {
-		// require $file;
-		// }
-		// }
+
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/deal/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
 
 		// Load all froms
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/forms/class-*.php' );

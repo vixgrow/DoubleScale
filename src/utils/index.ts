@@ -558,6 +558,25 @@ export const hasGoalWarning = (step: any): boolean => {
 };
 
 /**
+ * Get goal warning message from step (uses backend-provided message)
+ * @param step - The automation step object
+ * @returns The goal warning message
+ */
+export const getGoalWarningMessage = (step: any): string => {
+	// Use backend-provided warning message
+	if (step?.settings?._goal_warning_message) {
+		return step.settings._goal_warning_message;
+	}
+
+	// Fallback message
+	return __(
+		'This goal requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
+		'quillcrm'
+	);
+};
+
+
+/**
  * Get all warnings from automation
  * @param automation - The automation object
  * @returns Array of warnings

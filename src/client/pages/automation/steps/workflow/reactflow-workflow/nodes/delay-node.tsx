@@ -8,6 +8,7 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 /**
  * Internal dependencies
@@ -24,7 +25,18 @@ import { useAutomationContext } from '../../../../state/context';
 import { useDispatch } from '@wordpress/data';
 import { deleteStep } from '../utils/step-utils';
 import { TimerBlockIcon } from '@quillcrm/components';
-import { getAction } from '@quillcrm/utils';
+import {
+	getAction,
+	getActionLabel,
+	getActionWarningMessage,
+	hasActionWarning,
+} from '@quillcrm/utils';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface DelayNodeData {
 	step: AutomationStep;
@@ -53,12 +65,19 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 	const hasActionSelected = !!step.action;
 	const actionKey = step.action || 'delay';
 	const actionConfig = getAction(actionKey);
-	const actionLabel = actionConfig?.label || __('Delay', 'quillcrm');
+
+	// Get delay label and warning status from backend
+	const actionLabel =
+		getActionLabel(step) || actionConfig?.label || __('Delay', 'quillcrm');
+	const hasWarning = hasActionWarning(step);
+	const warningMessage = getActionWarningMessage(step);
 	const isDelayUntil = actionKey === 'delay-until-datetime';
 
 	const formatDatetime = (value?: string | null) => {
 		if (!value) return null;
-		const normalized = value.includes('T') ? value : value.replace(' ', 'T');
+		const normalized = value.includes('T')
+			? value
+			: value.replace(' ', 'T');
 		const date = new Date(normalized);
 		if (Number.isNaN(date.getTime())) {
 			return value;
@@ -67,11 +86,11 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 	};
 
 	// Check if configured: must have action selected AND appropriate settings
-	const isConfigured = hasActionSelected && (
-		isDelayUntil
+	const isConfigured =
+		hasActionSelected &&
+		(isDelayUntil
 			? !!step.settings?.datetime
-			: !!step.settings?.delay && !!step.settings?.unit
-	);
+			: !!step.settings?.delay && !!step.settings?.unit);
 
 	const getDelayText = () => {
 		if (!isConfigured) return null;
@@ -83,27 +102,48 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 		return delay && unit ? `${delay} ${unit}` : null;
 	};
 
-	const delayText = getDelayText();
+	const delayText = hasWarning ? '...' : getDelayText();
 
-	const subtitle = isConfigured && delayText ? (
-		<span className="qcrm-reactflow-delay__configured">
-			{isDelayUntil
-				? __('Delays until', 'quillcrm')
-				: __('Sets to delay', 'quillcrm')}{' '}
-			{delayText}
-		</span>
-	) : (
-		<span className="qcrm-reactflow-delay__not-configured">
-			<span className="text-[#333333B2] mr-1">
-				{__('Need to', 'quillcrm')}
+	const subtitle =
+		isConfigured && delayText ? (
+			<div className="flex items-center gap-2">
+				<span
+					className="qcrm-reactflow-delay__configured"
+					style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
+				>
+					{isDelayUntil
+						? __('Delays until', 'quillcrm')
+						: __('Sets to delay', 'quillcrm')}{' '}
+					{delayText}
+				</span>
+				{hasWarning && (
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<AlertTriangle className="h-4 w-4 text-orange-500" />
+							</TooltipTrigger>
+							<TooltipContent side="right" className="max-w-xs">
+								<p className="font-semibold">
+									{__('Plugin Required', 'quillcrm')}
+								</p>
+								<p className="text-xs mt-1">{warningMessage}</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				)}
+			</div>
+		) : (
+			<span className="qcrm-reactflow-delay__not-configured">
+				<span className="text-[#333333B2] mr-1">
+					{__('Need to', 'quillcrm')}
+				</span>
+				{!hasActionSelected
+					? __('Select Delay Type', 'quillcrm')
+					: isDelayUntil
+						? __('Set Datetime', 'quillcrm')
+						: __('Set Delay Time', 'quillcrm')}
 			</span>
-			{!hasActionSelected
-				? __('Select Delay Type', 'quillcrm')
-				: isDelayUntil
-					? __('Set Datetime', 'quillcrm')
-					: __('Set Delay Time', 'quillcrm')}
-		</span>
-	);
+		);
 
 	const handleEdit = () => {
 		if (!viewMode && onStepClick) {
@@ -130,11 +170,13 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 			disabled={viewMode}
 		>
 			<div
-				className={`qcrm-reactflow-node qcrm-reactflow-node--delay ${isSelected ? 'qcrm-reactflow-node--selected' : ''
-					} ${viewMode && analytics
+				className={`qcrm-reactflow-node qcrm-reactflow-node--delay ${
+					isSelected ? 'qcrm-reactflow-node--selected' : ''
+				} ${
+					viewMode && analytics
 						? 'qcrm-reactflow-node--action-with-analytics'
 						: ''
-					}`}
+				}`}
 				onClick={viewMode ? undefined : handleEdit}
 			>
 				<Handle
@@ -153,13 +195,19 @@ const DelayNode: React.FC<NodeProps> = (props) => {
 					onEdit={handleEdit}
 					onDelete={handleDelete}
 					editLabel={sprintf(__('Edit %s', 'quillcrm'), actionLabel)}
-					deleteLabel={sprintf(__('Delete %s', 'quillcrm'), actionLabel)}
+					deleteLabel={sprintf(
+						__('Delete %s', 'quillcrm'),
+						actionLabel
+					)}
 					deleteTitle={sprintf(
 						__('Delete this %s?', 'quillcrm'),
 						actionLabel
 					)}
 					deleteDescription={sprintf(
-						__('This will remove the %s from your workflow.', 'quillcrm'),
+						__(
+							'This will remove the %s from your workflow.',
+							'quillcrm'
+						),
 						actionLabel
 					)}
 					viewMode={viewMode}

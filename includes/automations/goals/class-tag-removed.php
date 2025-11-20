@@ -10,7 +10,7 @@
  * @package QuillCRM
  */
 
-namespace QuillCRM\Goals;
+namespace QuillCRM\Automations\Goals;
 
 use QuillCRM\Abstracts\Goal;
 use QuillCRM\Models\Contact_Model;
@@ -22,7 +22,6 @@ use QuillCRM\Managers\Goals_Manager;
  * Tag Removed Goal class
  */
 class Tag_Removed extends Goal {
-
 
 	/**
 	 * Goal Name

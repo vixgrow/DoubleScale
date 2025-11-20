@@ -2,6 +2,7 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 /**
  * external dependencies
  */
@@ -9,12 +10,7 @@ import { ChevronRight } from 'lucide-react';
 /**
  * internal dependencies
  */
-import PreheaderLibrary from '../blocks/libraries/Preheader';
-import HeaderLibrary from '../blocks/libraries/Header';
-import HeroImageLibrary from '../blocks/libraries/HeroImage';
-import EmailBodyLibrary from '../blocks/libraries/EmailBody';
-import FooterLibrary from '../blocks/libraries/Footer';
-import ImageGalleryLibrary from '../blocks/libraries/ImageGallery';
+import LockedLibrary from './LockedLibrary';
 
 interface LayoutItemsProps {
 	activeSidebar?: any;
@@ -26,32 +22,56 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 		{
 			id: 'preheader',
 			title: __('Preheader', 'quillcrm'),
-			component: PreheaderLibrary,
+			component: applyFilters(
+				'QuillCRM.Builder.LibraryComponent',
+				LockedLibrary,
+				'preheader'
+			),
 		},
 		{
 			id: 'header',
 			title: __('Header', 'quillcrm'),
-			component: HeaderLibrary,
+			component: applyFilters(
+				'QuillCRM.Builder.LibraryComponent',
+				LockedLibrary,
+				'header'
+			),
 		},
 		{
 			id: 'hero-image',
 			title: __('Hero Image', 'quillcrm'),
-			component: HeroImageLibrary,
+			component: applyFilters(
+				'QuillCRM.Builder.LibraryComponent',
+				LockedLibrary,
+				'hero-image'
+			),
 		},
 		{
 			id: 'email-body',
 			title: __('Email Body', 'quillcrm'),
-			component: EmailBodyLibrary,
+			component: applyFilters(
+				'QuillCRM.Builder.LibraryComponent',
+				LockedLibrary,
+				'email-body'
+			),
 		},
 		{
 			id: 'image-gallery',
 			title: __('Image Gallery', 'quillcrm'),
-			component: ImageGalleryLibrary,
+			component: applyFilters(
+				'QuillCRM.Builder.LibraryComponent',
+				LockedLibrary,
+				'image-gallery'
+			),
 		},
 		{
 			id: 'footer',
 			title: __('Footer', 'quillcrm'),
-			component: FooterLibrary,
+			component: applyFilters(
+				'QuillCRM.Builder.LibraryComponent',
+				LockedLibrary,
+				'footer'
+			),
 		},
 	];
 
@@ -70,17 +90,17 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 				<div
 					key={item.id}
 					onClick={() => handleItemClick(item.id)}
-					className={`flex items-center justify-between w-full px-4 py-3 rounded-md cursor-pointer transition-colors ${activeSidebar?.id === item.id
-						? 'text-primary font-bold'
-						: 'text-muted-foreground'
-						}`}
+					className={`flex items-center justify-between w-full px-4 py-3 rounded-md cursor-pointer transition-colors ${
+						activeSidebar?.id === item.id
+							? 'text-primary font-bold'
+							: 'text-muted-foreground'
+					}`}
 				>
 					<span className="text-base">{item.title}</span>
 					<ChevronRight
-						className={`transition-transform ${activeSidebar?.id === item.id
-							? 'rotate-180'
-							: ''
-							}`}
+						className={`transition-transform ${
+							activeSidebar?.id === item.id ? 'rotate-180' : ''
+						}`}
 					/>
 				</div>
 			))}

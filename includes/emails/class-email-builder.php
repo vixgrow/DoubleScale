@@ -56,20 +56,16 @@ class Email_Builder {
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/layouts/class-generic-inline-layout-handler.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/layouts/class-layout-handler-registry.php';
 
-		// Include block implementations
+		// Include free block implementations
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-text-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-button-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-image-block.php';
-		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-divider-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-html-block.php';
-		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-social-media-block.php';
-		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-timer-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-video-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-table-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-signature-block.php';
-		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-menu-block.php';
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-preheader-block.php';
-		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/blocks/class-product-block.php';
+		// Pro blocks (banner, divider, menu, product, social_media, timer) are loaded by Pro plugin
 
 		// Include renderer
 		require_once QUILLCRM_PLUGIN_DIR . 'includes/emails/class-email-renderer.php';

@@ -45,7 +45,7 @@ class Email_Renderer {
 	/**
 	 * Render email template
 	 *
-	 * @param int                                                                    $template_id Template ID
+	 * @param int                                         $template_id Template ID
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
@@ -88,10 +88,10 @@ class Email_Renderer {
 	 * Render builder content directly from builder data (without template ID)
 	 * Useful for email sequences and campaigns where content is stored in email_body field
 	 *
-	 * @param array                                                                  $builder_data Builder content data (sections, globalSettings, buttonSettings)
+	 * @param array                                       $builder_data Builder content data (sections, globalSettings, buttonSettings)
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
-	 * @param string                                                                 $preview_text Optional preview text
-	 * @param string                                                                 $footer_html Optional footer HTML to inject before </body> tag
+	 * @param string                                      $preview_text Optional preview text
+	 * @param string                                      $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string HTML output
 	 */
 	public function render_from_builder_data( $builder_data, $contact = null, $preview_text = '', $footer_html = '' ) {
@@ -116,11 +116,11 @@ class Email_Renderer {
 	/**
 	 * Build email HTML structure
 	 *
-	 * @param array                                                                  $content Template content
-	 * @param array                                                                   $global_settings Global email settings (canvas, background, etc.)
+	 * @param array                                       $content Template content
+	 * @param array                                       $global_settings Global email settings (canvas, background, etc.)
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
-	 * @param string                                                                  $preview_text Preview text for email clients
-	 * @param string                                                                  $footer_html Optional footer HTML to inject before </body> tag
+	 * @param string                                      $preview_text Preview text for email clients
+	 * @param string                                      $footer_html Optional footer HTML to inject before </body> tag
 	 * @return string HTML output
 	 */
 	private function build_email_structure( $content, $global_settings, $contact, $preview_text = '', $footer_html = '' ) {
@@ -244,7 +244,10 @@ class Email_Renderer {
 		if ( isset( $content['sections'] ) && is_array( $content['sections'] ) ) {
 			// Structure with explicit 'sections' property
 			foreach ( $content['sections'] as $section ) {
-				$html .= $this->render_section( $section, $contact );
+				// Only render section if it has valid content
+				if ( $this->section_has_content( $section ) ) {
+					$html .= $this->render_section( $section, $contact );
+				}
 			}
 		} elseif ( is_array( $content ) ) {
 			// Check if this is an array of section objects
@@ -259,7 +262,10 @@ class Email_Renderer {
 			if ( $is_section_array ) {
 				// Content is an array of section objects (each with id, columns, styles)
 				foreach ( $content as $section ) {
-					$html .= $this->render_section( $section, $contact );
+					// Only render section if it has valid content
+					if ( $this->section_has_content( $section ) ) {
+						$html .= $this->render_section( $section, $contact );
+					}
 				}
 			} else {
 				// Handle flat content structure (no sections) - wrap in a default section
@@ -312,9 +318,58 @@ class Email_Renderer {
 	}
 
 	/**
+	 * Check if a section has any valid content (registered blocks)
+	 *
+	 * @param array $section Section data
+	 * @return bool True if section has valid content, false if empty
+	 */
+	private function section_has_content( $section ) {
+		if ( empty( $section['columns'] ) || ! is_array( $section['columns'] ) ) {
+			return false;
+		}
+
+		foreach ( $section['columns'] as $column ) {
+			if ( $this->column_has_content( $column ) ) {
+				return true;
+			}
+		}
+
+		// No valid blocks found in any column
+		return false;
+	}
+
+	/**
+	 * Check if a column has any valid content (registered blocks)
+	 *
+	 * @param array $column Column data
+	 * @return bool True if column has valid content, false if empty
+	 */
+	private function column_has_content( $column ) {
+		if ( empty( $column['blocks'] ) || ! is_array( $column['blocks'] ) ) {
+			return false;
+		}
+
+		foreach ( $column['blocks'] as $block ) {
+			if ( ! isset( $block['type'] ) ) {
+				continue;
+			}
+
+			// Check if block type is registered
+			$block_instance = $this->block_registry->get_block( $block['type'] );
+			if ( $block_instance !== null ) {
+				// Found at least one valid block
+				return true;
+			}
+		}
+
+		// No valid blocks found in this column
+		return false;
+	}
+
+	/**
 	 * Render a section
 	 *
-	 * @param array                                                                   $section Section data
+	 * @param array                                       $section Section data
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
@@ -344,63 +399,75 @@ class Email_Renderer {
 
 		// Render columns
 		if ( ! empty( $section['columns'] ) ) {
-			$html .= '<tr>';
-
-			// Calculate total ratio to convert ratio-based widths to percentages
-			$total_ratio = 0;
+			// First, filter out columns with no valid content
+			$valid_columns = array();
 			foreach ( $section['columns'] as $column ) {
-				$column_width = isset( $column['width'] ) ? $column['width'] : 1;
-				$total_ratio += $column_width;
+				if ( $this->column_has_content( $column ) ) {
+					$valid_columns[] = $column;
+				}
 			}
 
-			foreach ( $section['columns'] as $column_index => $column ) {
-				$column_width = isset( $column['width'] ) ? $column['width'] : 1;
+			// Only render row if we have valid columns
+			if ( ! empty( $valid_columns ) ) {
+				$html .= '<tr>';
 
-				// Calculate width as ratio-based to handle all layout patterns
-				$width = ( $column_width / $total_ratio ) * 100;
-				$width = round( $width, 2 );
+				// Calculate total ratio to convert ratio-based widths to percentages
+				// Only include valid columns in the calculation
+				$total_ratio = 0;
+				foreach ( $valid_columns as $column ) {
+					$column_width = isset( $column['width'] ) ? $column['width'] : 1;
+					$total_ratio += $column_width;
+				}
 
-				// Calculate pixel width for Outlook (600px max width container)
-				$pixel_width = round( ( $width / 100 ) * 600 );
+				foreach ( $valid_columns as $column_index => $column ) {
+					$column_width = isset( $column['width'] ) ? $column['width'] : 1;
 
-				// Column styles - ensuring proper vertical alignment and spacing
-				$column_styles = array(
-					'vertical-align'   => 'top',
-					'padding'          => '0',
-					'mso-table-lspace' => '0pt',
-					'mso-table-rspace' => '0pt',
-				);
+					// Calculate width as ratio-based to handle all layout patterns
+					$width = ( $column_width / $total_ratio ) * 100;
+					$width = round( $width, 2 );
 
-				// Add column-specific styles if available
-				if ( isset( $column['styles'] ) ) {
-					foreach ( $column['styles'] as $property => $value ) {
-						$css_property                   = $this->convert_camel_to_kebab( $property );
-						$column_styles[ $css_property ] = $value;
+					// Calculate pixel width for Outlook (600px max width container)
+					$pixel_width = round( ( $width / 100 ) * 600 );
+
+					// Column styles - ensuring proper vertical alignment and spacing
+					$column_styles = array(
+						'vertical-align'   => 'top',
+						'padding'          => '0',
+						'mso-table-lspace' => '0pt',
+						'mso-table-rspace' => '0pt',
+					);
+
+					// Add column-specific styles if available
+					if ( isset( $column['styles'] ) ) {
+						foreach ( $column['styles'] as $property => $value ) {
+							$css_property                   = $this->convert_camel_to_kebab( $property );
+							$column_styles[ $css_property ] = $value;
+						}
 					}
+
+					$column_style_string = $this->build_style_string( $column_styles );
+
+					// Outlook conditional comment for column
+					$html .= '<!--[if mso | IE]><td style="' . $column_style_string . '" width="' . $pixel_width . '"><![endif]-->';
+
+					// Standard column wrapper
+					$html .= '<td width="' . $width . '%" style="' . $column_style_string . '" class="mobile-full-width">';
+
+					// Inner table for blocks (ensures proper stacking)
+					$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';
+
+					// Render blocks in this column using the same logic as frontend
+					if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
+						$html .= $this->render_column_blocks( $column['blocks'], $contact );
+					}
+
+					$html .= '</table>'; // Close inner blocks table
+					$html .= '</td>'; // Close standard column
+					$html .= '<!--[if mso | IE]></td><![endif]-->'; // Close Outlook column
 				}
 
-				$column_style_string = $this->build_style_string( $column_styles );
-
-				// Outlook conditional comment for column
-				$html .= '<!--[if mso | IE]><td style="' . $column_style_string . '" width="' . $pixel_width . '"><![endif]-->';
-
-				// Standard column wrapper
-				$html .= '<td width="' . $width . '%" style="' . $column_style_string . '" class="mobile-full-width">';
-
-				// Inner table for blocks (ensures proper stacking)
-				$html .= '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;">';
-
-				// Render blocks in this column using the same logic as frontend
-				if ( isset( $column['blocks'] ) && is_array( $column['blocks'] ) ) {
-					$html .= $this->render_column_blocks( $column['blocks'], $contact );
-				}
-
-				$html .= '</table>'; // Close inner blocks table
-				$html .= '</td>'; // Close standard column
-				$html .= '<!--[if mso | IE]></td><![endif]-->'; // Close Outlook column
+				$html .= '</tr>';
 			}
-
-			$html .= '</tr>';
 		}
 
 		$html .= '</table>'; // Close section table
@@ -413,7 +480,7 @@ class Email_Renderer {
 	 * Render blocks in a column with template-aware layout handling
 	 * Uses the Layout Handler Registry pattern
 	 *
-	 * @param array                                                                   $blocks Array of blocks
+	 * @param array                                       $blocks Array of blocks
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
@@ -452,7 +519,7 @@ class Email_Renderer {
 	/**
 	 * Render a block
 	 *
-	 * @param array                                                                   $block Block data
+	 * @param array                                       $block Block data
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */

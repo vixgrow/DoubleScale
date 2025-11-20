@@ -32,6 +32,7 @@ use QuillCRM\User_Roles\Permissions;
  */
 class Rest_Automation_Controller extends REST_Controller {
 
+
 	/**
 	 * REST Base
 	 *
@@ -1118,6 +1119,16 @@ class Rest_Automation_Controller extends REST_Controller {
 				'learndash' => array(
 					'plugin' => 'sfwd-lms/sfwd_lms.php',
 					'label'  => 'LearnDash',
+				),
+			),
+			'message'     => array(
+				'sms'      => array(
+					'plugin' => '',
+					'label'  => 'QuillCRM Pro',
+				),
+				'whatsapp' => array(
+					'plugin' => '',
+					'label'  => 'QuillCRM Pro',
 				),
 			),
 		);

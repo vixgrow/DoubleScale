@@ -56,6 +56,7 @@ use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
  */
 final class QuillCRM {
 
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -368,6 +369,12 @@ final class QuillCRM {
 		// Deal triggers moved to Pro plugin
 		$triggers_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/triggers/deal/class-*.php' );
 		foreach ( $triggers_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations messaging actions files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/messaging/class-*.php' );
+		foreach ( $actions_files as $file ) {
 			require $file;
 		}
 

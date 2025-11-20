@@ -88,7 +88,10 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 
 	const subtitle = isConfigured ? (
 		<div className="flex items-center gap-2">
-			<span className="qcrm-reactflow-action__configured" style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}>
+			<span
+				className="qcrm-reactflow-action__configured"
+				style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
+			>
 				{actionName}
 			</span>
 			{hasWarning && (
@@ -205,7 +208,7 @@ const ActionNode: React.FC<NodeProps> = (props) => {
 			</NodeContextMenu>
 
 			{/* Analytics Popup */}
-			{isConfigured && hasAnalytics && analyticsData && (
+			{isConfigured && hasAnalytics && analyticsData && !hasWarning && (
 				<AnalyticsPopup
 					visible={showAnalytics}
 					onClose={hideAnalytics}

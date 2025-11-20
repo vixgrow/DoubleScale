@@ -12,20 +12,12 @@
 
 namespace QuillCRM\Automations\Actions;
 
-use QuillCRM\Abstracts\Action;
-use QuillCRM\Models\Automation_Model;
-use QuillCRM\Models\Automation_Step_Model;
-use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Constants\Order_Status;
+use QuillCRM\Abstracts\Action_Pro;
 
 /**
  * Change Order Status Action
  */
-class Change_Order_Status extends Action {
-
-
-
-
+class Change_Order_Status extends Action_Pro {
 
 	/**
 	 * Action Name
@@ -68,129 +60,6 @@ class Change_Order_Status extends Action {
 	 * @var array
 	 */
 	public $required_triggers = array( 'wc_order_created', 'wc_order_completed', 'wc_order_status_changed', 'wc_order_refunded' );
-
-
-	/**
-	 * Process Action
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param Automation_Model         $automation Automation Model.
-	 * @param Automation_Step_Model    $step Automation Step Model.
-	 * @param Automation_Contact_Model $contact Contact Model.
-	 *
-	 * @return bool
-	 */
-	public function process_action( Automation_Model $automation, Automation_Step_Model $step, Automation_Contact_Model $automation_contact ) {
-		$order_id = $automation_contact->get_data( 'order_id', null );
-		if ( ! $order_id ) {
-			quillcrm_get_logger()->warning(
-				__( 'Order ID not found in automation contact data', 'quillcrm' ),
-				array(
-					'code'          => 'woocommerce_order_id_missing',
-					'automation_id' => $automation->id,
-					'step_id'       => $step->id,
-				)
-			);
-			return false;
-		}
-
-		// Check if WooCommerce function exists
-		if ( ! function_exists( 'wc_get_order' ) ) {
-			quillcrm_get_logger()->error(
-				__( 'WooCommerce plugin is not active. Cannot change order status.', 'quillcrm' ),
-				array(
-					'code'          => 'woocommerce_plugin_inactive',
-					'order_id'      => $order_id,
-					'automation_id' => $automation->id,
-					'step_id'       => $step->id,
-				)
-			);
-			return false;
-		}
-
-		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
-			quillcrm_get_logger()->warning(
-				__( 'WooCommerce order not found', 'quillcrm' ),
-				array(
-					'code'          => 'woocommerce_order_not_found',
-					'order_id'      => $order_id,
-					'automation_id' => $automation->id,
-					'step_id'       => $step->id,
-				)
-			);
-			return false;
-		}
-
-		$status = $step->get_setting( 'status', '' );
-		if ( ! $status ) {
-			quillcrm_get_logger()->warning(
-				__( 'Order status not configured for WooCommerce action', 'quillcrm' ),
-				array(
-					'code'          => 'woocommerce_status_missing',
-					'order_id'      => $order_id,
-					'automation_id' => $automation->id,
-					'step_id'       => $step->id,
-				)
-			);
-			return false;
-		}
-
-		// Execute the action
-		$order->update_status( $status );
-
-		quillcrm_get_logger()->info(
-			__( 'WooCommerce order status updated successfully', 'quillcrm' ),
-			array(
-				'code'          => 'woocommerce_order_status_changed',
-				'order_id'      => $order_id,
-				'new_status'    => $status,
-				'automation_id' => $automation->id,
-				'step_id'       => $step->id,
-			)
-		);
-
-		return true;
-	}
-
-	/**
-	 * Get fields
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array
-	 */
-	public function get_fields() {
-		return array(
-			'status' => array(
-				'type'    => 'select',
-				'label'   => __( 'Order Status', 'quillcrm' ),
-				'options' => Order_Status::get_all(),
-			),
-		);
-	}
-
-	/**
-	 * Get attributes schema
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return array
-	 */
-	public function get_attributes_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'statuses' => array(
-					'type'  => 'array',
-					'items' => array(
-						'type' => 'string',
-					),
-				),
-			),
-		);
-	}
 }
 
 Change_Order_Status::instance();

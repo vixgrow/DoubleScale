@@ -57,6 +57,7 @@ use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
 final class QuillCRM {
 
 
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -391,6 +392,12 @@ final class QuillCRM {
 			require $file;
 		}
 		// }
+
+		// Load all automations WordPress actions files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/wordpress/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
 
 		// Load all automations crm actions files
 		// $actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/crm/**/class-*.php' );

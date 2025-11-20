@@ -33,6 +33,7 @@ use QuillCRM\User_Roles\Permissions;
 class Rest_Automation_Controller extends REST_Controller {
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -1113,6 +1114,12 @@ class Rest_Automation_Controller extends REST_Controller {
 				'coupon' => array(
 					'plugin' => 'woocommerce/woocommerce.php',
 					'label'  => 'WooCommerce',
+				),
+			),
+			'wp'          => array(
+				'user' => array(
+					'plugin' => '',
+					'label'  => 'QuillCRM Pro',
 				),
 			),
 			'lms'         => array(

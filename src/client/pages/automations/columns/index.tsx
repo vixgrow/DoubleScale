@@ -88,12 +88,16 @@ export const getAutomationColumns = ({
 			),
 			cell: ({ row }) => {
 				const warnings = getAutomationWarnings(row.original);
+				const triggerWarnings = warnings.filter(
+					(w) => w.type === 'trigger'
+				);
+
 				return (
 					<div className="flex items-center gap-2">
 						<NavLink to={`automations/${row.original.id}`}>
 							{row.original.name}
 						</NavLink>
-						{warnings.length > 0 && (
+						{triggerWarnings.length > 0 && (
 							<TooltipProvider>
 								<Tooltip>
 									<TooltipTrigger asChild>
@@ -103,18 +107,24 @@ export const getAutomationColumns = ({
 										side="right"
 										className="max-w-xs"
 									>
-										<p className="font-semibold">
-											{__(
-												'Plugin Dependencies Required',
-												'quillcrm'
+										<div className="space-y-2">
+											{triggerWarnings.map(
+												(warning, index) => (
+													<div key={index}>
+														{warning.plugin_label && (
+															<p className="font-semibold">
+																{
+																	warning.plugin_label
+																}
+															</p>
+														)}
+														<p className="text-xs">
+															{warning.message}
+														</p>
+													</div>
+												)
 											)}
-										</p>
-										<p className="text-xs mt-1">
-											{__(
-												'This automation requires plugins that are not currently active.',
-												'quillcrm'
-											)}
-										</p>
+										</div>
 									</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>

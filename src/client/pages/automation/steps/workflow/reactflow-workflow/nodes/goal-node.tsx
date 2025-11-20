@@ -17,7 +17,11 @@ import { AlertTriangle } from 'lucide-react';
  */
 import { useAutomationContext } from '../../../../state/context';
 import type { AutomationStep, OrganizedStep } from '@quillcrm/client';
-import { getGoalLabel, hasGoalWarning } from '@quillcrm/utils';
+import {
+	getGoalLabel,
+	hasGoalWarning,
+	getGoalWarningMessage,
+} from '@quillcrm/utils';
 import NodeContextMenu from '../components/node-context-menu';
 import NodeLayout from '../components/node-layout';
 import StepReorderControls from '../components/step-reorder-controls';
@@ -54,6 +58,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 	// Get goal label and warning status from backend
 	const goalName = getGoalLabel(step);
 	const hasWarning = hasGoalWarning(step);
+	const warningMessage = getGoalWarningMessage(step);
 
 	const subtitle = isConfigured ? (
 		<div className="flex items-center gap-2">
@@ -73,12 +78,7 @@ const GoalNode: React.FC<NodeProps> = ({ data }) => {
 							<p className="font-semibold">
 								{__('Plugin Required', 'quillcrm')}
 							</p>
-							<p className="text-xs mt-1">
-								{__(
-									'This goal requires a plugin that is not currently active. Please activate the required plugin for this automation to work.',
-									'quillcrm'
-								)}
-							</p>
+							<p className="text-xs mt-1">{warningMessage}</p>
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>

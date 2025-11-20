@@ -5,16 +5,17 @@ import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 
 /**
+ * External dependencies
+ */
+import { Lock } from 'lucide-react';
+
+/**
  * Internal dependencies
  */
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getAction } from '@quillcrm/utils';
+import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
 import './style.scss';
 
 interface DelaySelectorProps {
@@ -31,13 +32,24 @@ const DelaySelector: React.FC<DelaySelectorProps> = ({
 	onSave,
 }) => {
 	const [isSaving, setIsSaving] = useState(false);
+	const [showProModal, setShowProModal] = useState(false);
+	const [selectedProDelay, setSelectedProDelay] = useState<{
+		name: string;
+		key: string;
+	} | null>(null);
 
 	const delayActions = DELAY_ACTION_KEYS.map((key) => ({
 		key,
 		action: getAction(key),
 	})).filter(({ action }) => !!action);
 
-	const handleSelect = async (actionKey: string) => {
+	const handleSelect = async (actionKey: string, action: any) => {
+		if (action.is_pro) {
+			setSelectedProDelay({ name: action.label, key: actionKey });
+			setShowProModal(true);
+			return;
+		}
+
 		onChange(actionKey);
 		setIsSaving(true);
 		try {
@@ -50,42 +62,63 @@ const DelaySelector: React.FC<DelaySelectorProps> = ({
 		}
 	};
 
+	const handleCloseProModal = () => {
+		setShowProModal(false);
+		setSelectedProDelay(null);
+	};
+
 	return (
-		<div className="py-4">
-			<div className="flex flex-col gap-4">
-				{delayActions.map(({ key, action }) => (
-					<Card key={key} className="shadow-none border">
-						<CardHeader className="px-4 py-3 border-b">
-							<CardTitle className="text-base font-semibold text-[#1F2937]">
-								{action?.label || __('Delay', 'quillcrm')}
-							</CardTitle>
-							{action?.description && (
-								<p className="text-sm text-muted-foreground mt-1">
-									{action.description}
-								</p>
-							)}
-						</CardHeader>
-						<CardContent className="px-4 py-3 flex justify-end">
-							<Button
-								onClick={() => handleSelect(key)}
-								disabled={isSaving}
-								className={`text-primary bg-transparent shadow-none font-semibold rounded-full px-4 py-2 hover:bg-primary/10 ${
-									value === key
-										? 'border-2 border-primary'
-										: 'border'
-								}`}
-							>
-								{isSaving && value === key
-									? __('Saving...', 'quillcrm')
-									: __('Select', 'quillcrm')}
-							</Button>
-						</CardContent>
-					</Card>
-				))}
+		<>
+			<div className="py-4">
+				<div className="flex flex-col gap-4">
+					{delayActions.map(({ key, action }) => (
+						<Card key={key} className="shadow-none border">
+							<CardHeader className="px-4 py-3 border-b">
+								<CardTitle className="text-base font-semibold text-[#1F2937]">
+									<div className="flex items-center gap-2">
+										{action?.label ||
+											__('Delay', 'quillcrm')}
+										{action?.is_pro && (
+											<Lock className="h-4 w-4 text-orange-500" />
+										)}
+									</div>
+								</CardTitle>
+								{action?.description && (
+									<p className="text-sm text-muted-foreground mt-1">
+										{action.description}
+									</p>
+								)}
+							</CardHeader>
+							<CardContent className="px-4 py-3 flex justify-end">
+								<Button
+									onClick={() => handleSelect(key, action)}
+									disabled={!action?.is_pro && isSaving}
+									className={`text-primary bg-transparent shadow-none font-semibold rounded-full px-4 py-2 hover:bg-primary/10 ${
+										value === key
+											? 'border-2 border-primary'
+											: 'border'
+									}`}
+								>
+									{isSaving && value === key
+										? __('Saving...', 'quillcrm')
+										: __('Select', 'quillcrm')}
+								</Button>
+							</CardContent>
+						</Card>
+					))}
+				</div>
 			</div>
-		</div>
+
+			{/* PRO Modal */}
+			{selectedProDelay && (
+				<ProAutomationModal
+					visible={showProModal}
+					onClose={handleCloseProModal}
+					featureName={selectedProDelay.name}
+				/>
+			)}
+		</>
 	);
 };
 
 export default DelaySelector;
-

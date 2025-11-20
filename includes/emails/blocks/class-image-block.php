@@ -61,7 +61,7 @@ class Image_Block extends Email_Block {
 	/**
 	 * Render block
 	 *
-	 * @param array $props Block properties
+	 * @param array                                       $props Block properties
 	 * @param Contact_Model|Automation_Contact_Model|null $contact Contact model for merge tags
 	 * @return string HTML output
 	 */
@@ -79,6 +79,7 @@ class Image_Block extends Email_Block {
 			array(
 				'text-align' => $props['align'],
 				'width'      => '100%',
+				'margin'     => '0',
 			)
 		);
 
@@ -89,42 +90,68 @@ class Image_Block extends Email_Block {
 				'padding'          => $this->format_padding( $props['padding'] ),
 				'border-radius'    => $props['borderRadius'] . 'px',
 				'display'          => 'inline-block',
+				'max-width'        => '100%',
+				'width'            => $props['width'],
+				'margin'           => '0',
 			)
 		);
 
 		// Image style (matches frontend imageStyle)
 		$image_style = $this->build_style_string(
 			array(
-				'width'         => $props['width'],
+				'width'         => '100%',
 				'height'        => $props['height'] === 'auto' ? 'auto' : $props['height'],
 				'max-width'     => '100%',
 				'border-radius' => $props['borderRadius'] . 'px',
 				'display'       => 'block',
 				'border'        => '0',
 				'outline'       => 'none',
+				'margin'        => '0',
+				'padding'       => '0',
 			)
 		);
 
-		// Placeholder style (matches frontend placeholderStyle)
-		$placeholder_style = $this->build_style_string(
+		// Placeholder wrapper style
+		$placeholder_height        = $props['height'] === 'auto' ? '200px' : $props['height'];
+		$placeholder_wrapper_style = $this->build_style_string(
 			array(
-				'width'            => $props['width'],
-				'height'           => $props['height'] === 'auto' ? '200px' : $props['height'],
-				'max-width'        => '100%',
+				'width'            => '100%',
+				'height'           => $placeholder_height,
 				'border-radius'    => $props['borderRadius'] . 'px',
-				'display'          => 'flex',
-				'align-items'      => 'center',
-				'justify-content'  => 'center',
 				'background-color' => '#F5F5F580',
-				'color'            => '#6B7280',
-				'font-size'        => '14px',
-				'font-weight'      => '500',
+				'display'          => 'block',
+				'margin'           => '0',
+				'padding'          => '0',
+				'overflow'         => 'hidden',
+			)
+		);
+
+		// Placeholder table for centering (email-safe)
+		$placeholder_table_style = $this->build_style_string(
+			array(
+				'width'           => '100%',
+				'height'          => $placeholder_height,
+				'border-collapse' => 'collapse',
+				'margin'          => '0',
+				'padding'         => '0',
+			)
+		);
+
+		$placeholder_cell_style = $this->build_style_string(
+			array(
+				'text-align'     => 'center',
+				'vertical-align' => 'middle',
+				'color'          => '#6B7280',
+				'font-size'      => '32px',
+				'line-height'    => '1',
+				'margin'         => '0',
+				'padding'        => '0',
 			)
 		);
 
 		// Simple div structure - already wrapped in table cell by renderer
 		$output  = "<div style=\"{$wrapper_style}\">";
-		$output .= "<span style=\"{$container_style}\">";
+		$output .= "<div style=\"{$container_style}\">";
 
 		// Build the image or placeholder
 		if ( ! empty( $src ) ) {
@@ -138,11 +165,15 @@ class Image_Block extends Email_Block {
 				$output .= $image;
 			}
 		} else {
-			// Render placeholder
-			$output .= "<div style=\"{$placeholder_style}\">📷</div>";
+			// Render placeholder with table-based centering for email compatibility
+			$output .= "<div style=\"{$placeholder_wrapper_style}\">";
+			$output .= "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"{$placeholder_table_style}\">";
+			$output .= "<tr><td style=\"{$placeholder_cell_style}\">📷</td></tr>";
+			$output .= '</table>';
+			$output .= '</div>';
 		}
 
-		$output .= '</span>';
+		$output .= '</div>';
 		$output .= '</div>';
 
 		return $output;

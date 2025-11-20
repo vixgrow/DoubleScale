@@ -37,6 +37,12 @@ class Rest_Automation_Controller extends REST_Controller {
 
 
 
+
+
+
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -827,7 +833,7 @@ class Rest_Automation_Controller extends REST_Controller {
 		// Check each action step's availability
 		if ( ! empty( $automation->steps ) ) {
 			foreach ( $automation->steps as $step ) {
-				if ( $step->type === 'action' && ! empty( $step->action ) ) {
+				if ( ( $step->type === 'action' || $step->type === 'delay' ) && ! empty( $step->action ) ) {
 					try {
 						$action = Actions_Manager::instance()->get_action( $step->action );
 
@@ -907,7 +913,7 @@ class Rest_Automation_Controller extends REST_Controller {
 					try {
 						$goal = Goals_Manager::instance()->get_goal( $step->action );
 
-						// Action exists, check if its required plugin is active
+						// Goal exists, check if its required plugin is active
 						$goal_plugin_check = $this->check_goal_plugin_dependency( $goal );
 
 						if ( ! $goal_plugin_check['is_active'] ) {
@@ -920,35 +926,39 @@ class Rest_Automation_Controller extends REST_Controller {
 								'plugin_label' => $goal_plugin_check['plugin_label'],
 							);
 
-							// Store action label and warning
-							$settings                  = $step->settings ?: array();
-							$settings['_goal_label']   = $goal->name;
-							$settings['_goal_warning'] = true;
-							$step->settings            = $settings;
+							// Store goal label, warning flag, and warning message
+							$settings                          = $step->settings ?: array();
+							$settings['_goal_label']           = $goal->name;
+							$settings['_goal_warning']         = true;
+							$settings['_goal_warning_message'] = $goal_plugin_check['message'];
+							$step->settings                    = $settings;
 						} else {
-							// Action exists and plugin is active, store its label
+							// Goal exists and plugin is active, store its label and clear warnings
 							$settings                = $step->settings ?: array();
 							$settings['_goal_label'] = $goal->name;
 							unset( $settings['_goal_warning'] );
+							unset( $settings['_goal_warning_message'] );
 							$step->settings = $settings;
 						}
 					} catch ( \Exception $e ) {
 						// Goal not found - plugin missing
-						$has_warnings = true;
-						$warnings[]   = array(
+						$has_warnings    = true;
+						$warning_message = __( 'Goal requires a plugin that is not currently active.', 'quillcrm' );
+						$warnings[]      = array(
 							'type'    => 'goal',
 							'step_id' => $step->id,
 							'slug'    => $step->action,
-							'message' => __( 'Goal requires a plugin that is not currently active.', 'quillcrm' ),
+							'message' => $warning_message,
 						);
 
-						// Store goal label (slug) if not already stored and add warning flag
+						// Store goal label (slug) if not already stored, warning flag, and warning message
 						$settings = $step->settings ?: array();
 						if ( empty( $settings['_goal_label'] ) ) {
 							$settings['_goal_label'] = $step->action;
 						}
-						$settings['_goal_warning'] = true;
-						$step->settings            = $settings;
+						$settings['_goal_warning']         = true;
+						$settings['_goal_warning_message'] = $warning_message;
+						$step->settings                    = $settings;
 					}
 				}
 			}
@@ -1104,7 +1114,11 @@ class Rest_Automation_Controller extends REST_Controller {
 		// Define plugin dependencies based on action source and group
 		$plugin_dependencies = array(
 			'crm'         => array(
-				'deal' => array(
+				'deal'  => array(
+					'plugin' => '',
+					'label'  => 'QuillCRM Pro',
+				),
+				'delay' => array(
 					'plugin' => '',
 					'label'  => 'QuillCRM Pro',
 				),
@@ -1366,11 +1380,29 @@ class Rest_Automation_Controller extends REST_Controller {
 		if ( ! empty( $goal->source ) && ! empty( $goal->group ) ) {
 			if ( isset( $plugin_dependencies[ $goal->source ][ $goal->group ] ) ) {
 				$dependency = $plugin_dependencies[ $goal->source ][ $goal->group ];
-				$is_active  = quillcrm_is_plugin_active( $dependency['plugin'] );
+				if ( empty( $dependency['plugin'] ) ) {
+					$is_active = true;
+				} else {
+					$is_active = quillcrm_is_plugin_active( $dependency['plugin'] );
+				}
+				$is_pro = isset( $goal->is_pro ) && $goal->is_pro;
+
+				if ( $is_pro ) {
+					return array(
+						'is_active'    => $is_active,
+						'is_pro'       => true,
+						'message'      => sprintf(
+							__( 'This goal requires QuillCRM Pro to be installed and activated.', 'quillcrm' ),
+							$dependency['label']
+						),
+						'plugin_label' => $dependency['label'],
+					);
+				}
 
 				if ( ! $is_active ) {
 					return array(
 						'is_active'    => false,
+						'is_pro'       => false,
 						'message'      => sprintf(
 							/* translators: %s: plugin name */
 							__( 'This goal requires %s to be installed and activated.', 'quillcrm' ),
@@ -1385,6 +1417,7 @@ class Rest_Automation_Controller extends REST_Controller {
 		// No dependency or plugin is active
 		return array(
 			'is_active'    => true,
+			'is_pro'       => false,
 			'message'      => '',
 			'plugin_label' => '',
 		);

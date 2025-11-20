@@ -59,6 +59,7 @@ final class QuillCRM {
 
 
 
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -382,6 +383,12 @@ final class QuillCRM {
 
 		// Load all automations actions files
 		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/class-*.php' );
+		foreach ( $actions_files as $file ) {
+			require $file;
+		}
+
+		// Load all automations delays actions files
+		$actions_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/actions/delays/class-*.php' );
 		foreach ( $actions_files as $file ) {
 			require $file;
 		}

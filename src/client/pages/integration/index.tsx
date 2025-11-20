@@ -34,6 +34,7 @@ import App from './app';
 import Instructions from './instructions';
 import { Button } from '@quillcrm/components/ui/button';
 import { NoticeBanner } from '@quillcrm/components';
+import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 
 interface IntegrationProps {
 	open: boolean;
@@ -50,8 +51,9 @@ const Integration: React.FC<IntegrationProps> = ({
 	slug,
 	onSuccess,
 }) => {
-	const { fields, settings, label, description } = integration;
+	const { fields, settings, label, description, is_pro } = integration;
 	const isAppBased = !!fields.app;
+	const isProFeature = is_pro === true;
 
 	const initialValues = isAppBased
 		? typeof settings.app === 'object'
@@ -152,50 +154,57 @@ const Integration: React.FC<IntegrationProps> = ({
 				)}
 
 				<div className="px-12 pb-12 h-screen pt-4">
-					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-						{/* Instructions Card */}
-						<Card className="shadow-none bg-[#F8F8F8] h-screen">
-							<CardContent className="p-6">
-								<Instructions
-									slug={slug}
-									label={label}
-									description={description}
-								/>
-							</CardContent>
-						</Card>
-
-						{/* Credentials/App Card */}
-						<Card className="flex shadow-none bg-[#F8F8F8] flex-col h-screen">
-							<CardContent className="flex-1 overflow-y-auto p-6">
-								{!isAppBased ? (
-									<Credentials
-										integration={integration}
+					{isProFeature ? (
+						<ProFeatureNotice
+							featureName={label}
+							description={description}
+						/>
+					) : (
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+							{/* Instructions Card */}
+							<Card className="shadow-none bg-[#F8F8F8] h-screen">
+								<CardContent className="p-6">
+									<Instructions
 										slug={slug}
-										fieldsValue={fieldsValue}
-										setFieldsValue={setFieldsValue}
+										label={label}
+										description={description}
 									/>
-								) : (
-									<App
-										integration={integration}
-										fieldsValue={fieldsValue}
-										setFieldsValue={setFieldsValue}
-									/>
-								)}
-							</CardContent>
-							<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
-								<Button
-									onClick={save}
-									disabled={isSaving}
-									className="min-w-[120px] rounded-lg px-0"
-									variant="gradient"
-								>
-									{isSaving
-										? __('Connecting...', 'quillcrm')
-										: __(`Connect ${label}`, 'quillcrm')}
-								</Button>
-							</CardFooter>
-						</Card>
-					</div>
+								</CardContent>
+							</Card>
+
+							{/* Credentials/App Card */}
+							<Card className="flex shadow-none bg-[#F8F8F8] flex-col h-screen">
+								<CardContent className="flex-1 overflow-y-auto p-6">
+									{!isAppBased ? (
+										<Credentials
+											integration={integration}
+											slug={slug}
+											fieldsValue={fieldsValue}
+											setFieldsValue={setFieldsValue}
+										/>
+									) : (
+										<App
+											integration={integration}
+											fieldsValue={fieldsValue}
+											setFieldsValue={setFieldsValue}
+										/>
+									)}
+								</CardContent>
+								<CardFooter className="border-t bg-white rounded-b-xl p-4 mt-auto justify-end">
+									<Button
+										onClick={save}
+										disabled={isSaving}
+										className="min-w-[120px] rounded-lg px-0"
+										variant="gradient"
+									>
+										{isSaving
+											? __('Connecting...', 'quillcrm')
+											: __(`Connect ${label}`, 'quillcrm')}
+									</Button>
+								</CardFooter>
+							</Card>
+						</div>
+					)}
 				</div>
 			</DialogContent>
 		</Dialog>

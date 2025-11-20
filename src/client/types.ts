@@ -656,6 +656,10 @@ export type Settings = {
 		max_in_second: number;
 		max_in_day: number;
 	};
+	sms: {
+		max_in_second: number;
+		max_in_day: number;
+	};
 	double_optin: {
 		email_subject: string;
 		email_content: string;

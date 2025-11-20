@@ -5,6 +5,7 @@ import { useState, useEffect, useRef as useWordPressRef, useMemo } from '@wordpr
 import { useRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -137,10 +138,12 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-			case 'email':
-				return (
-					<EmailSettings settings={settings!} onChange={setSettings} />
-				);
+		case 'email':
+			const EmailComponent = applyFilters(
+				'QuillCRM.Settings.EmailSettings',
+				EmailSettings
+			) as React.ComponentType<{ settings: Settings; onChange: (settings: Settings) => void }>;
+			return <EmailComponent settings={settings!} onChange={setSettings} />;
 			case 'sms':
 				return (
 					<SMSSettings settings={settings!} onChange={setSettings} />
@@ -165,8 +168,12 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-			case 'custom_fields':
-				return <div className="p-4">{__('Custom Fields is a Pro feature', 'quillcrm')}</div>;
+		case 'custom_fields':
+			const CustomFieldsComponent = applyFilters(
+				'QuillCRM.Settings.CustomFieldsSettings',
+				() => <div className="p-4">{__('Custom Fields is a Pro feature', 'quillcrm')}</div>
+			) as React.ComponentType;
+			return <CustomFieldsComponent />;
 			case 'link_triggers':
 				return <LinkTriggers />;
 			default:

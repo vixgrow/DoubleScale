@@ -62,27 +62,7 @@ class REST_Settings_Controller extends REST_Controller {
 			)
 		);
 
-		register_rest_route(
-			$this->namespace,
-			"/{$this->rest_base}/bounce-webhooks",
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_bounce_webhooks' ),
-				'permission_callback' => array( $this, 'get_permissions_check' ),
-				'args'                => array(
-					'provider' => array(
-						'description'       => __( 'Optional email provider slug to filter results (e.g., sendgrid, mailgun, postmark). If not provided, returns all providers.', 'quillcrm' ),
-						'type'              => 'string',
-						'required'          => false,
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => function ( $param ) {
-							// Allow only lowercase alphanumeric and hyphens.
-							return preg_match( '/^[a-z0-9-]+$/', $param );
-						},
-					),
-				),
-			)
-		);
+		// Note: Bounce webhooks endpoint moved to Pro plugin (REST_Settings_Controller_Pro)
 	}
 
 	/**
@@ -536,27 +516,9 @@ class REST_Settings_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Get bounce webhook URLs.
-	 *
-	 * Retrieves bounce webhook URLs for email providers. If a provider parameter
-	 * is specified, returns only that provider's webhook URL. Otherwise, returns
-	 * all available provider webhook URLs.
-	 *
-	 * These URLs can be used to configure webhooks in email service providers
-	 * (SendGrid, Mailgun, Postmark, etc.) to automatically handle email bounces.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error Response object with bounce webhook URLs or error.
+	 * Note: get_bounce_webhooks() method removed - functionality moved to Pro plugin
+	 * See: QuillCRM_Pro\REST_API\Controllers\V1\REST_Settings_Controller_Pro
 	 */
-	public function get_bounce_webhooks( $request ) {
-		return new WP_Error(
-			'pro_feature_required',
-			__( 'Bounce handling is available in QuillCRM Pro.', 'quillcrm' ),
-			array( 'status' => 403 )
-		);
-	}
 
 	/**
 	 * Check if a value is considered empty

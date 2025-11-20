@@ -44,6 +44,15 @@ abstract class Integration {
 	public $description;
 
 	/**
+	 * Is Pro feature
+	 *
+	 * @var bool
+	 *
+	 * @since 1.0.0
+	 */
+	public $is_pro = false;
+
+	/**
 	 * Option name
 	 *
 	 * @var string

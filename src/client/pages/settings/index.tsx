@@ -26,9 +26,9 @@ import {
 	TotalSMSIcon,
 	ManagerIcon,
 } from '@quillcrm/components';
+import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
 import EmailSettings from './email';
-import SMSSettings from './sms';
 import DoubleOptInSettings from './double-optin';
 import CartSettings from './cart';
 import Managers from './managers';
@@ -145,9 +145,19 @@ const SettingsPage: React.FC = () => {
 			) as React.ComponentType<{ settings: Settings; onChange: (settings: Settings) => void }>;
 			return <EmailComponent settings={settings!} onChange={setSettings} />;
 			case 'sms':
-				return (
-					<SMSSettings settings={settings!} onChange={setSettings} />
-				);
+				const SMSComponent = applyFilters(
+					'QuillCRM.Settings.SMSSettings',
+					() => (
+						<ProFeatureNotice
+							featureName={__('SMS Settings', 'quillcrm')}
+							description={__(
+								'Configure SMS sending rate limits and manage SMS campaign settings with QuillCRM Pro.',
+								'quillcrm'
+							)}
+						/>
+					)
+				) as React.ComponentType<{ settings: Settings; onChange: (settings: Settings) => void }>;
+				return <SMSComponent settings={settings!} onChange={setSettings} />;
 			case 'double_optin':
 				return (
 					<DoubleOptInSettings
@@ -171,7 +181,15 @@ const SettingsPage: React.FC = () => {
 		case 'custom_fields':
 			const CustomFieldsComponent = applyFilters(
 				'QuillCRM.Settings.CustomFieldsSettings',
-				() => <div className="p-4">{__('Custom Fields is a Pro feature', 'quillcrm')}</div>
+				() => (
+					<ProFeatureNotice
+						featureName={__('Custom Fields', 'quillcrm')}
+						description={__(
+							'Create and manage custom fields to capture additional contact information tailored to your business needs.',
+							'quillcrm'
+						)}
+					/>
+				)
 			) as React.ComponentType;
 			return <CustomFieldsComponent />;
 			case 'link_triggers':

@@ -115,17 +115,7 @@ const EmailSettings: React.FC<EmailSettingsProps> = ({
                     </div>
                 </div>
             </div>
-
-			{/* Bounce Handler Configuration - Pro Feature */}
-			<div className="mt-8 pt-8 border-t border-gray-200">
-				<ProFeatureNotice
-					featureName={__('Bounce Handler', 'quillcrm')}
-					description={__(
-						'Automatically handle bounced emails with webhook notifications from your email service provider. Track soft and hard bounces to protect your sender reputation.',
-						'quillcrm'
-					)}
-				/>
-			</div>
+			{/* Note: Bounce Handler section removed - only available in Pro plugin */}
         </div>
     );
 };

@@ -5,6 +5,7 @@ import { useState, useEffect, useRef as useWordPressRef, useMemo } from '@wordpr
 import { useRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -25,9 +26,9 @@ import {
 	TotalSMSIcon,
 	ManagerIcon,
 } from '@quillcrm/components';
+import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
 import EmailSettings from './email';
-import SMSSettings from './sms';
 import DoubleOptInSettings from './double-optin';
 import CartSettings from './cart';
 import Managers from './managers';
@@ -137,14 +138,26 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-			case 'email':
-				return (
-					<EmailSettings settings={settings!} onChange={setSettings} />
-				);
+		case 'email':
+			const EmailComponent = applyFilters(
+				'QuillCRM.Settings.EmailSettings',
+				EmailSettings
+			) as React.ComponentType<{ settings: Settings; onChange: (settings: Settings) => void }>;
+			return <EmailComponent settings={settings!} onChange={setSettings} />;
 			case 'sms':
-				return (
-					<SMSSettings settings={settings!} onChange={setSettings} />
-				);
+				const SMSComponent = applyFilters(
+					'QuillCRM.Settings.SMSSettings',
+					() => (
+						<ProFeatureNotice
+							featureName={__('SMS Settings', 'quillcrm')}
+							description={__(
+								'Configure SMS sending rate limits and manage SMS campaign settings with QuillCRM Pro.',
+								'quillcrm'
+							)}
+						/>
+					)
+				) as React.ComponentType<{ settings: Settings; onChange: (settings: Settings) => void }>;
+				return <SMSComponent settings={settings!} onChange={setSettings} />;
 			case 'double_optin':
 				return (
 					<DoubleOptInSettings
@@ -165,8 +178,20 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-			case 'custom_fields':
-				return <div className="p-4">{__('Custom Fields is a Pro feature', 'quillcrm')}</div>;
+		case 'custom_fields':
+			const CustomFieldsComponent = applyFilters(
+				'QuillCRM.Settings.CustomFieldsSettings',
+				() => (
+					<ProFeatureNotice
+						featureName={__('Custom Fields', 'quillcrm')}
+						description={__(
+							'Create and manage custom fields to capture additional contact information tailored to your business needs.',
+							'quillcrm'
+						)}
+					/>
+				)
+			) as React.ComponentType;
+			return <CustomFieldsComponent />;
 			case 'link_triggers':
 				return <LinkTriggers />;
 			default:

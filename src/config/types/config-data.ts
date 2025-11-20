@@ -245,6 +245,7 @@ export type Integration = {
 	description: string;
 	fields: IntegrationFields;
 	is_connected: boolean;
+	is_pro?: boolean;
 	settings: {
 		[key: string]: string;
 	};

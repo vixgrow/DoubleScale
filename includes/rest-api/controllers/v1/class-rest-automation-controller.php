@@ -34,6 +34,9 @@ class Rest_Automation_Controller extends REST_Controller {
 
 
 
+
+
+
 	/**
 	 * REST Base
 	 *
@@ -1128,12 +1131,32 @@ class Rest_Automation_Controller extends REST_Controller {
 					'label'  => 'LearnDash',
 				),
 			),
+			'email'       => array(
+				'email' => array(
+					'plugin' => '',
+					'label'  => 'QuillCRM Pro',
+				),
+			),
 			'message'     => array(
 				'sms'      => array(
 					'plugin' => '',
 					'label'  => 'QuillCRM Pro',
 				),
 				'whatsapp' => array(
+					'plugin' => '',
+					'label'  => 'QuillCRM Pro',
+				),
+			),
+			'send_data'   => array(
+				'slack'        => array(
+					'plugin' => '',
+					'label'  => 'QuillCRM Pro',
+				),
+				'zapier'       => array(
+					'plugin' => '',
+					'label'  => 'QuillCRM Pro',
+				),
+				'http_request' => array(
 					'plugin' => '',
 					'label'  => 'QuillCRM Pro',
 				),

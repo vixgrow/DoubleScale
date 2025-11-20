@@ -23,7 +23,7 @@ use QuillCRM\Tracking\Email as Email_Tracking;
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
-use QuillCRM\Managers\Bounce_Handler_Manager;
+// use QuillCRM\Managers\Bounce_Handler_Manager; // Moved to Pro
 use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Tracking\Link_Triggers;
@@ -257,7 +257,7 @@ final class QuillCRM {
 		// Pipeline, Deal, and Activity managers moved to Pro plugin
 		Email_Sequences_Manager::instance();
 		User_Roles::instance();
-		Bounce_Handler_Manager::instance();
+		// Bounce_Handler_Manager::instance(); // Moved to Pro
 	}
 
 	/**

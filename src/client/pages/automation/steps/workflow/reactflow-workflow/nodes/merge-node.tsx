@@ -184,8 +184,6 @@ const MergeNode: React.FC<NodeProps> = ({ data }) => {
 			stepData.action = 'condition';
 		} else if (type === 'end_automation') {
 			stepData.action = 'end_automation';
-		} else if (type === 'delay') {
-			stepData.action = 'delay';
 		}
 
 		const { newSteps, updatedSteps, currentStepOrder } =

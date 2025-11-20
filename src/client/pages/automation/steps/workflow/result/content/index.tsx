@@ -150,13 +150,30 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 
 	const organizedSteps = processSteps(0, steps) as OrganizedStep[];
 
+	// Format datetime helper
+	const formatDelayDatetime = (value?: string | null) => {
+		if (!value) return null;
+		const normalized = value.includes('T') ? value : value.replace(' ', 'T');
+		const date = new Date(normalized);
+		if (Number.isNaN(date.getTime())) {
+			return value;
+		}
+		return date.toLocaleString();
+	};
+
 	// Format delay text from step settings
 	const getDelayText = (step: OrganizedStep) => {
-		if (step.type !== 'delay' || !step.settings) {
+		if (step.type !== 'delay') {
 			return null;
 		}
-		const delay = step.settings.delay;
-		const unit = step.settings.unit;
+
+		const actionKey = step.action || 'delay';
+		if (actionKey === 'delay-until-datetime') {
+			return formatDelayDatetime(step.settings?.datetime);
+		}
+
+		const delay = step.settings?.delay;
+		const unit = step.settings?.unit;
 		if (!delay || !unit) {
 			return null;
 		}
@@ -189,7 +206,10 @@ const ResultContent: React.FC<ResultContentProps> = ({ contact }) => {
 
 	// Helper: Format step label based on type
 	const formatStepLabel = (step: OrganizedStep): string => {
-		const baseLabel = typesOptions[step.type].label;
+		const baseLabel =
+			step.type === 'delay' && step.action
+				? getAction(step.action)?.label || typesOptions[step.type].label
+				: typesOptions[step.type].label;
 		const stepData = getStep(step);
 
 		// Label formatters for each type

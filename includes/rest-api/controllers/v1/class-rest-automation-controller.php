@@ -43,6 +43,8 @@ class Rest_Automation_Controller extends REST_Controller {
 
 
 
+
+
 	/**
 	 * REST Base
 	 *
@@ -916,7 +918,7 @@ class Rest_Automation_Controller extends REST_Controller {
 						// Goal exists, check if its required plugin is active
 						$goal_plugin_check = $this->check_goal_plugin_dependency( $goal );
 
-						if ( ! $goal_plugin_check['is_active'] ) {
+						if ( ! $goal_plugin_check['is_active'] || $goal_plugin_check['is_pro'] ) {
 							$has_warnings = true;
 							$warnings[]   = array(
 								'type'         => 'goal',
@@ -1366,6 +1368,7 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return array Array with 'is_active', 'message', and 'plugin_labels' keys
 	 */
 	private function check_goal_plugin_dependency( $goal ) {
+		xdebug_break();
 		// Define plugin dependencies based on goal source and group
 		$plugin_dependencies = array(
 			'woocommerce' => array(

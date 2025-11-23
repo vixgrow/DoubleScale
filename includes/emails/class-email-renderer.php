@@ -388,7 +388,7 @@ class Email_Renderer {
 			$section_styles['background-color'] = 'transparent';
 		}
 		if ( ! isset( $section_styles['padding'] ) ) {
-			$section_styles['padding'] = '20px';
+			$section_styles['padding'] = '40px';
 		}
 
 		$section_style_string = $this->build_style_string( $section_styles );
@@ -432,7 +432,7 @@ class Email_Renderer {
 					// Column styles - ensuring proper vertical alignment and spacing
 					$column_styles = array(
 						'vertical-align'   => 'top',
-						'padding'          => '0',
+						'padding'          => '10px 10px',
 						'mso-table-lspace' => '0pt',
 						'mso-table-rspace' => '0pt',
 					);
@@ -506,7 +506,7 @@ class Email_Renderer {
 				);
 			} else {
 				// Regular block - render in single row
-				$html .= '<tr><td style="padding: 10px 0;">';
+				$html .= '<tr><td style="padding: 0;">';
 				$html .= $this->render_block( $block, $contact );
 				$html .= '</td></tr>';
 				$i++;

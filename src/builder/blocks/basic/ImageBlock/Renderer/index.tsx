@@ -17,16 +17,20 @@ export interface ImageBlockRendererProps {
 	props: ImageBlockProps;
 }
 
-export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({ props }) => {
+export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({
+	props,
+}) => {
 	const [imageError, setImageError] = useState(false);
 	const [imageLoaded, setImageLoaded] = useState(false);
 
 	const containerStyle: React.CSSProperties = {
 		backgroundColor: props.backgroundColor,
-		padding: `${(props.padding?.top || 0)}px ${(props.padding?.right || 0)}px ${(props.padding?.bottom || 0)}px ${(props.padding?.left || 0)}px`,
+		padding: `${props.padding?.top || 0}px ${props.padding?.right || 0}px ${props.padding?.bottom || 0}px ${props.padding?.left || 0}px`,
 		borderRadius: `${props.borderRadius}px`,
 		display: 'block',
 		maxWidth: '100%',
+		width: props.width,
+		margin: '0',
 	};
 
 	const wrapperStyle: React.CSSProperties = {
@@ -48,8 +52,8 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({ props })
 		maxWidth: '100%',
 		borderRadius: `${props.borderRadius}px`,
 		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'center',
+		alignItems: 'flex-start',
+		justifyContent: 'flex-start',
 		backgroundColor: '#F5F5F580',
 		color: '#6B7280',
 		fontSize: '14px',
@@ -68,7 +72,7 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({ props })
 		if (!props.src || imageError) {
 			return (
 				<div style={placeholderStyle}>
-					<ImageBlockIcon width={57} height={57} />
+					<ImageBlockIcon width={24} height={24} />
 				</div>
 			);
 		}
@@ -90,7 +94,11 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({ props })
 		<div style={wrapperStyle}>
 			<div style={containerStyle}>
 				{props.link ? (
-					<a href={props.link} target="_blank" rel="noopener noreferrer">
+					<a
+						href={props.link}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
 						{imageElement}
 					</a>
 				) : (

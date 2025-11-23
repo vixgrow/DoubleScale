@@ -382,14 +382,16 @@ const Campaigns: React.FC = () => {
 	// Apply filters to allow Pro version to override tab content
 	// If filter returns null, it means PRO wants to use the regular CampaignContent
 	const SMSTabContentOverride = applyFilters(
-		'QuillCRM.Campaigns.TabContent',
+		'quillcrm_campaigns_tab_content',
 		'default', // Pass a signal value, not a component
 		'sms'
 	);
 
-	const SMSTabContent = SMSTabContentOverride === null
-		? <CampaignContent /> // PRO version active - use regular campaigns
-		: ( // Free version - show PRO notice
+	const SMSTabContent =
+		SMSTabContentOverride === null ? (
+			<CampaignContent /> // PRO version active - use regular campaigns
+		) : (
+			// Free version - show PRO notice
 			<ProFeatureNotice
 				featureName={__('SMS Campaigns', 'quillcrm')}
 				description={__(

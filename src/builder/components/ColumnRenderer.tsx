@@ -70,11 +70,12 @@ const ColumnRenderer: React.FC<ColumnRendererProps> = ({
 		<div
 			ref={setNodeRef}
 			className={`
-				min-h-24 p-4
+				min-h-24
 				${isOver && !isThisTemplateSection ? 'bg-blue-50' : ''}
 			`}
 			style={{
 				width: `${column.width}%`,
+				padding: '10px 10px',
 			}}
 		>
 			<SortableContext

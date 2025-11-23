@@ -66,7 +66,7 @@ export interface SectionStyles {
 	backgroundRepeat?: BackgroundRepeat;
 	backgroundSize?: BackgroundSize;
 	backgroundPosition?: BackgroundPosition;
-	padding?: PaddingValue;
+	padding?: string;
 }
 
 // ============================================================================

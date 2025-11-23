@@ -23,7 +23,7 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 			id: 'preheader',
 			title: __('Preheader', 'quillcrm'),
 			component: applyFilters(
-				'QuillCRM.Builder.LibraryComponent',
+				'quillcrm_builder_library_component',
 				LockedLibrary,
 				'preheader'
 			),
@@ -32,7 +32,7 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 			id: 'header',
 			title: __('Header', 'quillcrm'),
 			component: applyFilters(
-				'QuillCRM.Builder.LibraryComponent',
+				'quillcrm_builder_library_component',
 				LockedLibrary,
 				'header'
 			),
@@ -41,7 +41,7 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 			id: 'hero-image',
 			title: __('Hero Image', 'quillcrm'),
 			component: applyFilters(
-				'QuillCRM.Builder.LibraryComponent',
+				'quillcrm_builder_library_component',
 				LockedLibrary,
 				'hero-image'
 			),
@@ -50,7 +50,7 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 			id: 'email-body',
 			title: __('Email Body', 'quillcrm'),
 			component: applyFilters(
-				'QuillCRM.Builder.LibraryComponent',
+				'quillcrm_builder_library_component',
 				LockedLibrary,
 				'email-body'
 			),
@@ -59,7 +59,7 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 			id: 'image-gallery',
 			title: __('Image Gallery', 'quillcrm'),
 			component: applyFilters(
-				'QuillCRM.Builder.LibraryComponent',
+				'quillcrm_builder_library_component',
 				LockedLibrary,
 				'image-gallery'
 			),
@@ -68,7 +68,7 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 			id: 'footer',
 			title: __('Footer', 'quillcrm'),
 			component: applyFilters(
-				'QuillCRM.Builder.LibraryComponent',
+				'quillcrm_builder_library_component',
 				LockedLibrary,
 				'footer'
 			),

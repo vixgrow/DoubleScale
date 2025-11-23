@@ -33,7 +33,7 @@ const GlobalEmailSettings: React.FC<GlobalEmailSettingsProps> = ({
 
 	// Apply filter to Buttons settings - Pro can override with clickable button
 	const ButtonSettingsContent = applyFilters(
-		'QuillCRM.Builder.ButtonSettings',
+		'quillcrm_builder_button_settings',
 		LockedButtons,
 		{ onShowButtonSettings }
 	) as React.ComponentType<any>;

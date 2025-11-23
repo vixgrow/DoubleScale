@@ -154,15 +154,16 @@ export const saveCampaignStep =
 				// Handle template step - add template_id to template_ids array
 				if (step === 'template' && stepData?.template_id) {
 					const templateIds = campaign.settings.template_ids || [];
-					// Replace the first template ID or add new one
 					const newTemplateIds =
 						templateIds.length > 0
 							? [stepData.template_id, ...templateIds.slice(1)]
 							: [stepData.template_id];
 
 					updatedSettings.template_ids = newTemplateIds;
-				} else {
-					// Handle other steps - save to their respective data fields
+				}
+
+				// Handle other steps with data
+				if (stepData) {
 					const stepDataMap: Record<string, string> = {
 						contacts: 'contacts_data',
 						review: 'review_data',
@@ -170,21 +171,17 @@ export const saveCampaignStep =
 
 					const dataKey = stepDataMap[step];
 
-					if (!dataKey) {
-						throw new Error(__(`Invalid step: ${step}`, 'quillcrm'));
+					if (dataKey) {
+						const existingStepData =
+							(campaign.settings)[dataKey] || {};
+
+						const updatedStepData = {
+							...existingStepData,
+							...stepData,
+						};
+
+						(updatedSettings)[dataKey] = updatedStepData;
 					}
-
-					// Get existing step data for this specific step
-					const existingStepData =
-						(campaign.settings as any)[dataKey] || {};
-
-					// Merge existing step data with new step data
-					const updatedStepData = {
-						...existingStepData,
-						...stepData,
-					};
-
-					(updatedSettings as any)[dataKey] = updatedStepData;
 				}
 
 				// Use unified endpoint - type is auto-detected from campaign

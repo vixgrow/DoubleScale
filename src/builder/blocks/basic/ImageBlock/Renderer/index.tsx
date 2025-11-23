@@ -29,6 +29,8 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({
 		borderRadius: `${props.borderRadius}px`,
 		display: 'block',
 		maxWidth: '100%',
+		width: props.width,
+		margin: '0',
 	};
 
 	const wrapperStyle: React.CSSProperties = {
@@ -56,7 +58,6 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({
 		color: '#6B7280',
 		fontSize: '14px',
 		fontWeight: '500',
-		padding: '8px',
 	};
 
 	const handleImageError = () => {

@@ -506,7 +506,7 @@ class Email_Renderer {
 				);
 			} else {
 				// Regular block - render in single row
-				$html .= '<tr><td style="padding: 10px 0;">';
+				$html .= '<tr><td style="padding: 0;">';
 				$html .= $this->render_block( $block, $contact );
 				$html .= '</td></tr>';
 				$i++;

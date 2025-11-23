@@ -93,10 +93,7 @@ export function DatePicker({
 
 		// Call onChange with the appropriate format
 		if (selectedDate) {
-			const outputValue =
-				outputFormat === 'iso'
-					? selectedDate.toISOString().split('T')[0] // YYYY-MM-DD
-					: formatDate(selectedDate);
+			const outputValue = formatDate(selectedDate);
 			onChange(outputValue);
 		} else {
 			onChange('');

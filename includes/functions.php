@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Functions
  * This file contains all the functions used in the plugin
@@ -7,6 +8,7 @@
  *
  * @package QuillCRM
  */
+
 use QuillCRM\QuillCRM;
 
 use QuillCRM\Interfaces\Logger_Interface;
@@ -136,10 +138,13 @@ function quillcrm_decode_string( $string ) {
  *
  * @return bool
  */
-function quillcrm_is_plugin_active( $plugin_name ) {
-	$active_plugins = get_option( 'active_plugins' );
 
-	return in_array( $plugin_name, $active_plugins, true );
+if ( ! function_exists( 'quillcrm_is_plugin_active' ) ) {
+	function quillcrm_is_plugin_active( $plugin_name ) {
+		$active_plugins = get_option( 'active_plugins' );
+
+		return in_array( $plugin_name, $active_plugins, true );
+	}
 }
 
 /**
@@ -150,7 +155,7 @@ function quillcrm_is_plugin_active( $plugin_name ) {
  * @return array
  */
 function quillcrm_get_countries() {
-	require_once ABSPATH . 'wp-admin/includes/file.php'; // We will probably need to load this file.
+	 require_once ABSPATH . 'wp-admin/includes/file.php'; // We will probably need to load this file.
 	global $wp_filesystem;
 	WP_Filesystem(); // Initial WP file system.
 	$contries  = QUILLCRM_PLUGIN_DIR . 'assets/countries.json';
@@ -203,7 +208,7 @@ function quillcrm_get_country_name( $country_code ) {
  * @return object
  */
 function quillcrm_validator() {
-	return QuillCRM::instance()->validator;
+	 return QuillCRM::instance()->validator;
 }
 
 /**

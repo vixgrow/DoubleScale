@@ -28,7 +28,6 @@ use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Tracking\Link_Triggers;
 use QuillCRM\Subscription_Manage\Subscription_Manage;
-use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Admin\Admin;
 use QuillCRM\Admin\Admin_Loader;
 use QuillCRM\Abandoned_Cart\Abandoned_Cart;
@@ -55,10 +54,6 @@ use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
  * @since 1.0.0
  */
 final class QuillCRM {
-
-
-
-
 
 	/**
 	 * Campaigns tasks
@@ -248,7 +243,6 @@ final class QuillCRM {
 		Actions_Manager::instance();
 		Automations_Loader::instance();
 		Merge_Tags_Manager::instance();
-		Rules_Manager::instance();
 		Abandoned_Cart::instance();
 		Filters_Manager::instance();
 		Importers_Manager::instance();
@@ -485,12 +479,6 @@ final class QuillCRM {
 		// Load all order merge tags files
 		$merge_tags_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/merge-tags/edd/**/class-*.php' );
 		foreach ( $merge_tags_files as $file ) {
-			require $file;
-		}
-
-		// Load contact rules files
-		$rules_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/rules/**/class-*.php' );
-		foreach ( $rules_files as $file ) {
 			require $file;
 		}
 

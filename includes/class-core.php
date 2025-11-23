@@ -20,7 +20,7 @@ use QuillCRM\Utils;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Managers\Goals_Manager;
-use QuillCRM\Managers\Rules_Manager;
+use QuillCRM_Pro\Managers\Rules_Manager;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Import_Export\Importers\Manager as Importers_Manager;
 use QuillCRM\User_Roles\Permissions;
@@ -33,10 +33,6 @@ use QuillCRM\User_Roles\Permissions;
  * @since 1.0.0
  */
 class Core {
-
-
-
-
 
 
 	/**
@@ -77,7 +73,7 @@ class Core {
 				'qcrm.config.setAutomationTriggers(' . wp_json_encode( Triggers_Manager::instance()->get_sources() ) . ');' .
 				'qcrm.config.setAutomationActions(' . wp_json_encode( Actions_Manager::instance()->get_sources() ) . ');' .
 				'qcrm.config.setAutomationGoals(' . wp_json_encode( Goals_Manager::instance()->get_sources() ) . ');' .
-				'qcrm.config.setAutomationRules(' . wp_json_encode( Rules_Manager::instance()->get_groups() ) . ');' .
+				'qcrm.config.setAutomationRules(' . wp_json_encode( class_exists( 'QuillCRM_Pro\Managers\Rules_Manager' ) ? Rules_Manager::instance()->get_groups() : array() ) . ');' .
 				'qcrm.config.setIsWoocommerceActive( ' . quillcrm_is_plugin_active( 'woocommerce/woocommerce.php' ) . ' );' .
 				'qcrm.config.setIsEddActive( ' . defined( 'EDD_PLUGIN_FILE' ) . ' );' .
 				'qcrm.config.setIsLmsActive( ' . quillcrm_is_plugin_active( 'sfwd-lms/sfwd_lms.php' ) . ' );' .

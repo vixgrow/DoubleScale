@@ -16,7 +16,7 @@ export const createNewSection = (): EmailSection => ({
   ],
   styles: {
     backgroundColor: '#fff',
-    padding: '20px',
+    padding: '40px',
   },
 });
 

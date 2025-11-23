@@ -89,7 +89,7 @@ class Image_Block extends Email_Block {
 				'background-color' => $props['backgroundColor'],
 				'padding'          => $this->format_padding( $props['padding'] ),
 				'border-radius'    => $props['borderRadius'] . 'px',
-				'display'          => 'inline-block',
+				'display'          => 'block',
 				'max-width'        => '100%',
 				'width'            => $props['width'],
 				'margin'           => '0',
@@ -123,14 +123,15 @@ class Image_Block extends Email_Block {
 				'margin'           => '0',
 				'padding'          => '0',
 				'overflow'         => 'hidden',
+				'box-sizing'       => 'border-box',
 			)
 		);
 
-		// Placeholder table for centering (email-safe)
+		// Placeholder table for positioning (email-safe)
 		$placeholder_table_style = $this->build_style_string(
 			array(
 				'width'           => '100%',
-				'height'          => $placeholder_height,
+				'height'          => '100%',
 				'border-collapse' => 'collapse',
 				'margin'          => '0',
 				'padding'         => '0',
@@ -139,10 +140,10 @@ class Image_Block extends Email_Block {
 
 		$placeholder_cell_style = $this->build_style_string(
 			array(
-				'text-align'     => 'center',
-				'vertical-align' => 'middle',
+				'text-align'     => 'left',
+				'vertical-align' => 'top',
 				'color'          => '#6B7280',
-				'font-size'      => '32px',
+				'font-size'      => '24px',
 				'line-height'    => '1',
 				'margin'         => '0',
 				'padding'        => '0',

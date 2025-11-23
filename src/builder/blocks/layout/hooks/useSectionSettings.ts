@@ -32,9 +32,9 @@ const convertSectionStylesToSettings = (
   if (!section?.styles) return {};
 
   const styles = section.styles;
-  const padding = styles.padding || '20px';
+  const padding = styles.padding || '40px';
 
-  let paddingValues = { top: 20, right: 20, bottom: 20, left: 20 };
+  let paddingValues = { top: 40, right: 40, bottom: 40, left: 40 };
   if (typeof padding === 'string') {
     const paddingArray = padding
       .split(' ')
@@ -106,10 +106,10 @@ export const useSectionSettings = ({
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       padding: {
-        top: 20,
-        right: 20,
-        bottom: 20,
-        left: 20,
+        top: 40,
+        right: 40,
+        bottom: 40,
+        left: 40,
       },
     };
 

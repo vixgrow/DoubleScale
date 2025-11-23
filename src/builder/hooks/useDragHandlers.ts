@@ -266,7 +266,10 @@ export const useDragHandlers = (onDragEndCallback?: () => void) => {
           width,
           blocks: [],
         })),
-        styles: {},
+        styles: {
+          backgroundColor: 'transparent',
+          padding: '40px 40px 40px 40px',
+        },
       };
 
       // If dropping on a drop zone, insert at specific position

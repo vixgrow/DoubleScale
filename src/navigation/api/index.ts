@@ -22,7 +22,7 @@ export const registerAdminPage = (id: string, settings: PageSettings) => {
   }
 
   settings = applyFilters(
-    "QuillCRM.Navigation.PageSettings",
+    "quillcrm_navigation_page_settings",
     settings,
     id
   ) as PageSettings;

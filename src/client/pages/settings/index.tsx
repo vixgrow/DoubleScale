@@ -1,7 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { useState, useEffect, useRef as useWordPressRef, useMemo } from '@wordpress/element';
+import {
+	useState,
+	useEffect,
+	useRef as useWordPressRef,
+	useMemo,
+} from '@wordpress/element';
 import { useRef } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
@@ -68,7 +73,9 @@ const SettingsPage: React.FC = () => {
 
 			const settingsData = response as Settings;
 			setSettings(settingsData);
-			originalSettingsRef.current = JSON.parse(JSON.stringify(settingsData));
+			originalSettingsRef.current = JSON.parse(
+				JSON.stringify(settingsData)
+			);
 		} catch (error) {
 			setNotice({
 				type: 'error',
@@ -113,7 +120,10 @@ const SettingsPage: React.FC = () => {
 	// Scroll to notice banner when notice appears
 	useEffect(() => {
 		if (notice && noticeBannerRef.current) {
-			noticeBannerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			noticeBannerRef.current.scrollIntoView({
+				behavior: 'smooth',
+				block: 'nearest',
+			});
 		}
 	}, [notice]);
 
@@ -122,7 +132,10 @@ const SettingsPage: React.FC = () => {
 		if (!settings || !originalSettingsRef.current) {
 			return false;
 		}
-		return JSON.stringify(settings) !== JSON.stringify(originalSettingsRef.current);
+		return (
+			JSON.stringify(settings) !==
+			JSON.stringify(originalSettingsRef.current)
+		);
 	}, [settings, saveCounter]);
 
 	useEffect(() => {
@@ -138,15 +151,23 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-		case 'email':
-			const EmailComponent = applyFilters(
-				'QuillCRM.Settings.EmailSettings',
-				EmailSettings
-			) as React.ComponentType<{ settings: Settings; onChange: (settings: Settings) => void }>;
-			return <EmailComponent settings={settings!} onChange={setSettings} />;
+			case 'email':
+				const EmailComponent = applyFilters(
+					'quillcrm_settings_email_settings',
+					EmailSettings
+				) as React.ComponentType<{
+					settings: Settings;
+					onChange: (settings: Settings) => void;
+				}>;
+				return (
+					<EmailComponent
+						settings={settings!}
+						onChange={setSettings}
+					/>
+				);
 			case 'sms':
 				const SMSComponent = applyFilters(
-					'QuillCRM.Settings.SMSSettings',
+					'quillcrm_settings_sms_settings',
 					() => (
 						<ProFeatureNotice
 							featureName={__('SMS Settings', 'quillcrm')}
@@ -156,8 +177,13 @@ const SettingsPage: React.FC = () => {
 							)}
 						/>
 					)
-				) as React.ComponentType<{ settings: Settings; onChange: (settings: Settings) => void }>;
-				return <SMSComponent settings={settings!} onChange={setSettings} />;
+				) as React.ComponentType<{
+					settings: Settings;
+					onChange: (settings: Settings) => void;
+				}>;
+				return (
+					<SMSComponent settings={settings!} onChange={setSettings} />
+				);
 			case 'double_optin':
 				return (
 					<DoubleOptInSettings
@@ -178,20 +204,20 @@ const SettingsPage: React.FC = () => {
 						onChange={setSettings}
 					/>
 				);
-		case 'custom_fields':
-			const CustomFieldsComponent = applyFilters(
-				'QuillCRM.Settings.CustomFieldsSettings',
-				() => (
-					<ProFeatureNotice
-						featureName={__('Custom Fields', 'quillcrm')}
-						description={__(
-							'Create and manage custom fields to capture additional contact information tailored to your business needs.',
-							'quillcrm'
-						)}
-					/>
-				)
-			) as React.ComponentType;
-			return <CustomFieldsComponent />;
+			case 'custom_fields':
+				const CustomFieldsComponent = applyFilters(
+					'quillcrm_settings_custom_fields_settings',
+					() => (
+						<ProFeatureNotice
+							featureName={__('Custom Fields', 'quillcrm')}
+							description={__(
+								'Create and manage custom fields to capture additional contact information tailored to your business needs.',
+								'quillcrm'
+							)}
+						/>
+					)
+				) as React.ComponentType;
+				return <CustomFieldsComponent />;
 			case 'link_triggers':
 				return <LinkTriggers />;
 			default:
@@ -254,24 +280,30 @@ const SettingsPage: React.FC = () => {
 
 		const requiresSettings = SETTINGS_DEPENDENT_TABS.has(value);
 		const content =
-			requiresSettings && (isLoading || !settings)
-				? <SettingsShimmer />
-				: renderTabBody(value);
+			requiresSettings && (isLoading || !settings) ? (
+				<SettingsShimmer />
+			) : (
+				renderTabBody(value)
+			);
 
 		return {
 			value,
 			children: (
 				<Card
-					className={`flex shadow-none flex-col mt-4 ${TABS_WITHOUT_SAVE_BUTTON.has(value) ? 'bg-white' : 'bg-[#F8F8F8]'
-						}`}
+					className={`flex shadow-none flex-col mt-4 ${
+						TABS_WITHOUT_SAVE_BUTTON.has(value)
+							? 'bg-white'
+							: 'bg-[#F8F8F8]'
+					}`}
 				>
 					<CardContent
-						className={`flex-1 ${value === 'custom_fields'
-							? 'px-6 py-0 pb-6'
-							: TABS_WITHOUT_SAVE_BUTTON.has(value)
-								? 'px-6 py-6'
-								: 'p-6'
-							}`}
+						className={`flex-1 ${
+							value === 'custom_fields'
+								? 'px-6 py-0 pb-6'
+								: TABS_WITHOUT_SAVE_BUTTON.has(value)
+									? 'px-6 py-6'
+									: 'p-6'
+						}`}
 					>
 						{content}
 					</CardContent>
@@ -303,7 +335,11 @@ const SettingsPage: React.FC = () => {
 			/>
 
 			{notice && (
-				<NoticeBanner ref={noticeBannerRef} notice={notice} closeNotice={closeNotice} />
+				<NoticeBanner
+					ref={noticeBannerRef}
+					notice={notice}
+					closeNotice={closeNotice}
+				/>
 			)}
 
 			<PageTabs
@@ -311,8 +347,8 @@ const SettingsPage: React.FC = () => {
 				onValueChange={setTab}
 				tabsList={tabsList}
 				tabsContent={tabsContent}
-				tabsListWrapperClassName='py-3 px-2.5 border rounded-lg'
-				tabsListClassName='gap-2 bg-transparent text-foreground justify-center'
+				tabsListWrapperClassName="py-3 px-2.5 border rounded-lg"
+				tabsListClassName="gap-2 bg-transparent text-foreground justify-center"
 			/>
 		</div>
 	);

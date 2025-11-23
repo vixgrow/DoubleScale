@@ -45,8 +45,16 @@ const DataCard: React.FC = () => {
 	}
 
 	// Apply filters to allow Pro version to override components
-	const SMS = applyFilters('QuillCRM.Contact.TabComponent', SMSBase, 'sms') as React.FC<{ contact_id: number }>;
-	const Deals = applyFilters('QuillCRM.Contact.TabComponent', DealsBase, 'deals') as React.FC<{ contact_id: number }>;
+	const SMS = applyFilters(
+		'quillcrm_contact_tab_component',
+		SMSBase,
+		'sms'
+	) as React.FC<{ contact_id: number }>;
+	const Deals = applyFilters(
+		'quillcrm_contact_tab_component',
+		DealsBase,
+		'deals'
+	) as React.FC<{ contact_id: number }>;
 	// const WhatsApp = applyFilters('QuillCRM.Contact.TabComponent', WhatsAppBase, 'whatsapp') as React.FC<{ contact_id: number }>;
 
 	const tabsList = [

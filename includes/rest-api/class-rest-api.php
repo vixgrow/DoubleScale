@@ -20,7 +20,7 @@ use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Step_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Contact_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Form_Controller;
-use QuillCRM\REST_API\Controllers\V1\REST_Link_Trigger_Controller;
+// use QuillCRM\REST_API\Controllers\V1\REST_Link_Trigger_Controller; // Moved to Pro
 use QuillCRM\REST_API\Controllers\V1\REST_Integration_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Settings_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Abandoned_Cart_Controller;
@@ -102,7 +102,7 @@ class REST_API {
 			Rest_Automation_Step_Controller::class,
 			Rest_Automation_Contact_Controller::class,
 			Rest_Form_Controller::class,
-			REST_Link_Trigger_Controller::class,
+			// REST_Link_Trigger_Controller::class, // Moved to Pro
 			REST_Integration_Controller::class,
 			REST_Settings_Controller::class,
 			Rest_Abandoned_Cart_Controller::class,
@@ -110,7 +110,7 @@ class REST_API {
 			Rest_Import_Export_Controller::class,
 			REST_Log_Controller::class,
 			REST_Automation_Reports_Controller::class,
-			// Pipeline, Deal, Activity, Stage, Reports, and Custom Fields controllers moved to Pro plugin
+			// Pipeline, Deal, Activity, Stage, Reports, Link Triggers, and Custom Fields controllers moved to Pro plugin
 			REST_User_Management_Controller::class,
 			REST_Email_Sequence_Controller::class,
 		);

@@ -42,7 +42,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
 // import CustomFields from '../custom-fields'; // Moved to Pro
-import LinkTriggers from '../link-triggers';
+// import LinkTriggers from '../link-triggers'; // Moved to Pro
 import { UserRound, MessageSquare } from 'lucide-react';
 
 const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers']);
@@ -219,7 +219,19 @@ const SettingsPage: React.FC = () => {
 				) as React.ComponentType;
 				return <CustomFieldsComponent />;
 			case 'link_triggers':
-				return <LinkTriggers />;
+				const LinkTriggersComponent = applyFilters(
+					'quillcrm_settings_link_triggers_settings',
+					() => (
+						<ProFeatureNotice
+							featureName={__('Link Triggers', 'quillcrm')}
+							description={__(
+								'Create trackable links with automated actions. Track clicks, auto-login users, and trigger automations with QuillCRM Pro.',
+								'quillcrm'
+							)}
+						/>
+					)
+				) as React.ComponentType;
+				return <LinkTriggersComponent />;
 			default:
 				return null;
 		}

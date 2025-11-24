@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import {
+	RESET_CAMPAIGN,
 	SET_CAMPAIGN,
 	SET_ERROR,
 	SET_LOADING,
@@ -16,6 +17,13 @@ import {
 	UPDATE_SETTINGS,
 } from './constants';
 import type { ExtendedCampaign } from './types';
+
+/**
+ * Reset campaign state
+ */
+export const resetCampaign = () => ({
+	type: RESET_CAMPAIGN,
+});
 
 /**
  * Set campaign data

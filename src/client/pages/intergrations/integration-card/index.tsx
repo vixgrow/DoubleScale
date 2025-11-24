@@ -66,48 +66,18 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 				</div>
 			)}
 
-			{/* Pro Feature Overlay */}
-			{isProFeature && (
-				<div className="absolute inset-0 z-20 bg-white/90 backdrop-blur-sm flex items-center justify-center">
-					<div className="text-center p-4">
-						<div className="inline-flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mb-3">
-							<Lock className="w-6 h-6 text-primary" />
-						</div>
-						<h3 className="font-semibold text-lg mb-1">
-							{__('Pro Feature', 'quillcrm')}
-						</h3>
-						<p className="text-sm text-gray-600 mb-3">
-							{__(
-								'Upgrade to QuillCRM Pro to unlock this integration',
-								'quillcrm'
-							)}
-						</p>
-						<Button
-							variant="default"
-							size="sm"
-							className="rounded-lg"
-							onClick={() => window.open(upgradeUrl, '_blank')}
-						>
-							{__('Upgrade Now', 'quillcrm')}
-						</Button>
-					</div>
-				</div>
-			)}
-
 			<CardContent className={`p-4 ${isLoading ? 'opacity-50' : ''}`}>
-				{/* Header with logo and connection status - Keep logo visible */}
+				{/* Header with logo and connection status */}
 				<div className="flex items-center justify-between mb-3">
 					<div className="flex items-center gap-4">
 						{imageUrl && (
 							<img
 								src={imageUrl}
 								alt={integration.label}
-								className={`max-w-[100px] h-auto ${isProFeature ? 'relative z-30' : ''}`}
+								className="max-w-[100px] h-auto"
 							/>
 						)}
-						<div
-							className={`font-semibold text-xl ${isProFeature ? 'blur-sm' : ''}`}
-						>
+						<div className="font-semibold text-xl">
 							{integration.label}
 						</div>
 					</div>
@@ -118,22 +88,18 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 					)}
 				</div>
 
-				{/* Description - Blur only this section for Pro features */}
-				<div
-					className={`text-base text-gray-500 border-b pb-3 ${isProFeature ? 'blur-sm' : ''}`}
-				>
+				{/* Description */}
+				<div className="text-base text-gray-500 border-b pb-3">
 					{integration.description}
 				</div>
 
-				{/* Action buttons - Blur only this section for Pro features */}
-				<div
-					className={`flex items-center justify-end gap-3 mt-4 ${isProFeature ? 'blur-sm' : ''}`}
-				>
+				{/* Action buttons */}
+				<div className="flex items-center justify-end gap-3 mt-4">
 					<Button
 						onClick={onNavigate}
 						variant="secondary"
 						className="rounded-lg"
-						disabled={isLoading || isProFeature}
+						disabled={isLoading}
 					>
 						{buttonText || (
 							<>

@@ -1,4 +1,4 @@
-import { useSelect } from '@wordpress/data';
+import { select, useSelect } from '@wordpress/data';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { STORE_KEY } from '../../stores/email-builder/constants';
 import { getTemplate, saveTemplate } from '../api/templates';
@@ -106,19 +106,42 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			return { success: false, templateId: null };
 		}
 
+		// Get fresh state from store when saving (not from closure)
+		// This ensures we always save the latest data
+		const getFreshState = () => {
+			// Access the store directly to get the latest state
+			const store = select(STORE_KEY);
+			if (!store) {
+				// Fallback to currentState if store is not available
+				return JSON.parse(currentState);
+			}
+
+			const freshSections = store.getSections();
+			const freshGlobalSettings = store.getGlobalSettings();
+			const freshButtonSettings = store.getAllButtonSettings();
+
+			return {
+				sections: freshSections,
+				globalSettings: freshGlobalSettings,
+				buttonSettings: freshButtonSettings,
+			};
+		};
+
 		// If customSaveCallback is provided, use it instead of default save logic
 		if (customSaveCallback) {
 			try {
 				setSaveStatus((prev) => ({ ...prev, isSaving: true, error: null }));
 
-				const builderData = JSON.parse(currentState);
+				const builderData = getFreshState();
 
 				// Call custom save callback with complete builder data
 				await customSaveCallback(builderData);
 
 				if (isMountedRef.current) {
 					const now = new Date();
-					lastSavedStateRef.current = currentState;
+					// Update the saved state reference with the fresh state
+					const freshStateString = JSON.stringify(builderData);
+					lastSavedStateRef.current = freshStateString;
 					setSaveStatus({
 						isSaving: false,
 						lastSaved: now,
@@ -150,12 +173,8 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 		try {
 			setSaveStatus((prev) => ({ ...prev, isSaving: true, error: null }));
 
-			// Create the builder data
-			const builderData = {
-				sections: JSON.parse(currentState).sections,
-				globalSettings: JSON.parse(currentState).globalSettings,
-				buttonSettings: JSON.parse(currentState).buttonSettings,
-			};
+			// Get fresh builder data from store
+			const builderData = getFreshState();
 
 			// Get template ID from campaign settings
 			const templateId = campaign.settings?.template_ids?.[0];
@@ -182,7 +201,9 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 
 			if (isMountedRef.current) {
 				const now = new Date();
-				lastSavedStateRef.current = currentState;
+				// Update the saved state reference with the fresh state
+				const freshStateString = JSON.stringify(builderData);
+				lastSavedStateRef.current = freshStateString;
 				setSaveStatus({
 					isSaving: false,
 					lastSaved: now,
@@ -204,7 +225,7 @@ export const useAutoSave = (options: UseAutoSaveOptions = {}) => {
 			console.error('Save error:', error);
 			return { success: false, templateId: null };
 		}
-	}, [campaign, currentState, customSaveCallback]);
+	}, [campaign, customSaveCallback]);
 
 	// Auto-save effect
 	useEffect(() => {

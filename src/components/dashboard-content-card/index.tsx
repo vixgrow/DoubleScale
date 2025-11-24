@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import { getToLink, useNavigate } from '@quillcrm/navigation';
+import { getToLink } from '@quillcrm/navigation';
 
 interface DashboardContentProps {
 	title: string;
@@ -32,7 +32,12 @@ const DashboardContentCard: React.FC<DashboardContentProps> = ({
 	dateFilter,
 	dateFilterComponent,
 }) => {
-	const navigate = useNavigate();
+	const handleNavigate = () => {
+		if (viewAllLinkUrl) {
+			window.location.href = getToLink(viewAllLinkUrl);
+		}
+	};
+
 	return (
 		<Card className={`shadow-none rounded-lg bg-[#F8F8F8] ${cardClassName}`}>
 			<CardHeader className={`flex flex-row justify-between items-center px-5 pt-5 pb-0`}>
@@ -44,7 +49,7 @@ const DashboardContentCard: React.FC<DashboardContentProps> = ({
 				{/* </div> */}
 				{viewAllLink && (
 					<div className="flex justify-end">
-						<Button className="text-primary shadow-none text-base bg-transparent hover:bg-transparent p-0" onClick={() => navigate(getToLink(viewAllLinkUrl ?? ''))}>
+						<Button className="text-primary shadow-none text-base bg-transparent hover:bg-transparent p-0" onClick={handleNavigate}>
 							{__('View All', 'quillcrm')}
 							<ArrowRight className="size-4" />
 						</Button>

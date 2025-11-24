@@ -1,9 +1,4 @@
 /**
- * WordPress dependencies
- */
-import { __ } from '@wordpress/i18n';
-
-/**
  * External dependencies
  */
 import { useDraggable } from '@dnd-kit/core';
@@ -45,13 +40,10 @@ export const DraggableTemplate: React.FC<DraggableTemplateProps> = ({
 			ref={setNodeRef}
 			{...listeners}
 			{...attributes}
-			className={`relative cursor-grab active:cursor-grabbing transition-all ${
+			className={`group relative cursor-grab active:cursor-grabbing transition-all ${
 				isDragging ? 'opacity-50' : ''
 			}`}
 		>
-			<div className="absolute top-2 right-2 z-10 bg-white rounded-lg shadow-md p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-				<DragDropIcon className="w-4 h-4 text-gray-600" />
-			</div>
 			{children}
 		</div>
 	);

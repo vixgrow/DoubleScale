@@ -1,12 +1,13 @@
 /**
- * internal dependencies
+ * WordPress dependencies
  */
-import './style.scss';
+import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Card, CardContent } from '@/components/ui/card';
-import { ExportProvider } from './contexts';
-import ExportHeader from './export-header';
-import ExportContent from './export-content';
+import { ProFeatureNotice } from '@quillcrm/components';
 
 export interface Props {
 	open: boolean;
@@ -15,36 +16,24 @@ export interface Props {
 
 const ExportModal: React.FC<Props> = ({ open, onClose }) => {
 	return (
-		<ExportProvider open={open} onClose={onClose}>
-			<Dialog
-				open={open}
-				onOpenChange={(value) => {
-					if (!value) {
-						onClose();
-					}
-				}}
-			>
-				<DialogContent className="z-[150000] w-screen h-screen max-w-none gap-0 overflow-y-auto bg-white rounded-none shadow-none"
-				style={{
-					paddingTop: '12px',
-					paddingLeft: '0px',
-					paddingRight: '0px',
-					paddingBottom: '0px',
-				}}
-				>
-					<ExportHeader />
-					<div className="flex overflow-y-auto gap-5 px-16 pb-8">
-						<div className="w-full">
-							<Card className="shadow-none rounded-2xl border-none bg-[#FAFAFA]">
-								<CardContent className="py-4 px-24">
-									<ExportContent />
-								</CardContent>
-							</Card>
-						</div>
-					</div>
-				</DialogContent>
-			</Dialog>
-		</ExportProvider>
+		<Dialog
+			open={open}
+			onOpenChange={(value) => {
+				if (!value) {
+					onClose();
+				}
+			}}
+		>
+			<DialogContent className="z-[150000] max-w-3xl p-0">
+				<ProFeatureNotice
+					featureName={__('Contact Export', 'quillcrm')}
+					description={__(
+						'Export your contacts to CSV with advanced filtering, custom field selection, and automated scheduling. Upgrade to QuillCRM Pro to unlock this powerful feature.',
+						'quillcrm'
+					)}
+				/>
+			</DialogContent>
+		</Dialog>
 	);
 };
 

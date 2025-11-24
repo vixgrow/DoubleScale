@@ -17,7 +17,6 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use QuillCRM\Abstracts\REST_Controller;
-use QuillCRM\Import_Export\Export;
 use QuillCRM\Import_Export\Security;
 use QuillCRM\Import_Export\Importers\Manager;
 
@@ -459,9 +458,19 @@ class Rest_Import_Export_Controller extends REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 *
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function export( $request ) {
+		// Check if Pro plugin provides the Export class
+		if ( ! class_exists( 'QuillCRM_Pro\Import_Export\Export' ) ) {
+			return new WP_Error(
+				'pro_feature',
+				__( 'Contact export is a Pro feature. Please upgrade to QuillCRM Pro.', 'quillcrm' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		// Delegate to Pro plugin's Export class
 		$file_id = $request->get_param( 'file_id' ) ? $request->get_param( 'file_id' ) : time();
 		$offset  = $request->get_param( 'offset' ) ?? 0;
 		$fields  = $request->get_param( 'fields' ) ?? array();
@@ -474,7 +483,7 @@ class Rest_Import_Export_Controller extends REST_Controller {
 			'filters' => $filters,
 		);
 
-		$exporter = new Export( $args );
+		$exporter = new \QuillCRM_Pro\Import_Export\Export( $args );
 		$result   = $exporter->export();
 
 		$result['file_id'] = $file_id;

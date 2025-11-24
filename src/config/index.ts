@@ -76,6 +76,7 @@ const configData: ConfigData = {
 	quillsmtpInfo: {
 		configured: false,
 	},
+	urlQuillCRMPro: '',
 };
 
 /**
@@ -631,6 +632,27 @@ export const setQuillSMTPInfo = (data: ConfigData) => (value: QuillSMTPInfo) => 
 	data.quillsmtpInfo = value;
 };
 
+/**
+ * Get QuillCRM Pro URL
+ *
+ * @param data the json environment configuration to use for getting config values
+ *
+ * @returns string
+ */
+export const getUrlQuillCRMPro = (data: ConfigData): string => {
+	return data.urlQuillCRMPro;
+};
+
+/**
+ * Set QuillCRM Pro URL
+ *
+ * @param data the json environment configuration to use for getting config values
+ * @param value the value to set
+ */
+export const setUrlQuillCRMPro = (data: ConfigData) => (value: string) => {
+	data.urlQuillCRMPro = value;
+};
+
 export interface ConfigApi {
 	<T>(key: string): T;
 	setInitialPayload: (value: InitialPayload) => void;
@@ -685,6 +707,8 @@ export interface ConfigApi {
 	setDealPriorities: (value: DealPriority[]) => void;
 	getQuillSMTPInfo: () => QuillSMTPInfo;
 	setQuillSMTPInfo: (value: QuillSMTPInfo) => void;
+	getUrlQuillCRMPro: () => string;
+	setUrlQuillCRMPro: (value: string) => void;
 }
 
 const createConfig = (data: ConfigData): ConfigApi => {
@@ -741,6 +765,8 @@ const createConfig = (data: ConfigData): ConfigApi => {
 	configApi.setDealPriorities = setDealPriorities(data);
 	configApi.getQuillSMTPInfo = () => getQuillSMTPInfo(data);
 	configApi.setQuillSMTPInfo = setQuillSMTPInfo(data);
+	configApi.getUrlQuillCRMPro = () => getUrlQuillCRMPro(data);
+	configApi.setUrlQuillCRMPro = setUrlQuillCRMPro(data);
 	return configApi;
 };
 

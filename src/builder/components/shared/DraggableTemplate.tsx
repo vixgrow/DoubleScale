@@ -2,12 +2,6 @@
  * External dependencies
  */
 import { useDraggable } from '@dnd-kit/core';
-
-/**
- * Internal dependencies
- */
-import { DragDropIcon } from '@/components/icons';
-
 interface DraggableTemplateProps {
 	template: any;
 	id: string;

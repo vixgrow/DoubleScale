@@ -27,6 +27,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { applyFilters } from '@wordpress/hooks';
 
 interface ConditionNodeData {
 	step: AutomationStep;
@@ -48,6 +49,11 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 
 	const { steps, setSteps } = useAutomationContext();
 	const { createNotice } = useDispatch('quillcrm/core');
+
+	const isConditionLockedByDefault = applyFilters(
+		'quillcrm_automation_condition_locked',
+		true
+	) as boolean;
 
 	// Check if condition is configured - a condition is configured if it has rules
 	const isConfigured =
@@ -74,9 +80,17 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 		<div className="flex items-center gap-2">
 			<span
 				className="qcrm-reactflow-condition__configured"
-				style={{ color: hasWarning ? '#f59e0b' : 'inherit' }}
+				style={{
+					color: hasWarning
+						? '#f59e0b'
+						: isConditionLockedByDefault
+							? '#ff4d4f'
+							: 'inherit',
+				}}
 			>
-				{__('Configured', 'quillcrm')}
+				{isConditionLockedByDefault
+					? __('This is a PRO Feature', 'quillcrm')
+					: __('Configured', 'quillcrm')}
 			</span>
 			{hasWarning && unavailableRulesCount > 0 && (
 				<TooltipProvider>
@@ -113,7 +127,9 @@ const ConditionNode: React.FC<NodeProps> = (props) => {
 		</div>
 	) : (
 		<span className="qcrm-reactflow-condition__not-configured">
-			{__('Not Configured', 'quillcrm')}
+			{isConditionLockedByDefault
+				? __('This is a PRO Feature', 'quillcrm')
+				: __('Not Configured', 'quillcrm')}
 		</span>
 	);
 

@@ -22,7 +22,7 @@ use QuillCRM\Models\Automation_Contact_Model;
 use QuillCRM\Managers\Triggers_Manager;
 use QuillCRM\Managers\Actions_Manager;
 use QuillCRM\Managers\Merge_Tags_Manager;
-use QuillCRM\Managers\Rules_Manager;
+use QuillCRM_Pro\Managers\Rules_Manager;
 use QuillCRM\Managers\Goals_Manager;
 use QuillCRM\Managers\Forms_Manager;
 use QuillCRM\User_Roles\Permissions;
@@ -31,16 +31,6 @@ use QuillCRM\User_Roles\Permissions;
  * Rest_Automation_Controller class
  */
 class Rest_Automation_Controller extends REST_Controller {
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -387,7 +377,11 @@ class Rest_Automation_Controller extends REST_Controller {
 			}
 		}
 
-		$rules = Rules_Manager::instance()->get_groups();
+		if ( class_exists( 'QuillCRM_Pro\Managers\Rules_Manager' ) ) {
+			$rules = Rules_Manager::instance()->get_groups();
+		} else {
+			$rules = array();
+		}
 
 		return new WP_REST_Response( $rules, 200 );
 	}
@@ -1368,7 +1362,6 @@ class Rest_Automation_Controller extends REST_Controller {
 	 * @return array Array with 'is_active', 'message', and 'plugin_labels' keys
 	 */
 	private function check_goal_plugin_dependency( $goal ) {
-		xdebug_break();
 		// Define plugin dependencies based on goal source and group
 		$plugin_dependencies = array(
 			'woocommerce' => array(

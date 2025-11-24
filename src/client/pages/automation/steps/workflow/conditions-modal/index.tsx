@@ -75,12 +75,21 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	// Filter rules groups by current trigger and disabled status
 	const filterRulesByTrigger = (groups: any) => {
 		if (!currentTrigger) return groups;
+		if (!groups || typeof groups !== 'object') return {};
 
 		const filteredGroups: any = {};
 		Object.keys(groups).forEach((groupKey) => {
 			const group = groups[groupKey];
+			// Skip if group is not valid
+			if (!group || typeof group !== 'object') {
+				return;
+			}
 			// Filter out disabled groups
 			if (group.is_disabled) {
+				return;
+			}
+			// Skip groups without rules
+			if (!group.rules || typeof group.rules !== 'object') {
 				return;
 			}
 			// Include group if it has no triggers property (available for all)
@@ -88,29 +97,31 @@ const ConditionsModal: React.FC<RulesProps> = ({
 			if (!group.triggers || group.triggers.includes(currentTrigger)) {
 				// Filter rules within the group based on required_triggers
 				const filteredRules: any = {};
-				if (group.rules) {
-					Object.keys(group.rules).forEach((ruleKey) => {
-						const rule = group.rules[ruleKey];
-						// If rule has no required_triggers, include it
-						if (
-							!rule.required_triggers ||
-							rule.required_triggers.length === 0
-						) {
-							filteredRules[ruleKey] = rule;
-						}
-						// If rule has required_triggers and current trigger is in it, include it
-						else if (
-							rule.required_triggers.includes(currentTrigger)
-						) {
-							filteredRules[ruleKey] = rule;
-						}
-					});
-				}
+				Object.keys(group.rules).forEach((ruleKey) => {
+					const rule = group.rules[ruleKey];
+					if (!rule || typeof rule !== 'object') {
+						return;
+					}
+					// If rule has no required_triggers, include it
+					if (
+						!rule.required_triggers ||
+						rule.required_triggers.length === 0
+					) {
+						filteredRules[ruleKey] = rule;
+					}
+					// If rule has required_triggers and current trigger is in it, include it
+					else if (rule.required_triggers.includes(currentTrigger)) {
+						filteredRules[ruleKey] = rule;
+					}
+				});
 
 				// Only add group if it has at least one rule after filtering
 				if (Object.keys(filteredRules).length > 0) {
 					filteredGroups[groupKey] = {
 						...group,
+						// Ensure group has a name, fallback to key
+						name: group.name || groupKey,
+						key: group.key || groupKey,
 						rules: filteredRules,
 					};
 				}
@@ -123,23 +134,19 @@ const ConditionsModal: React.FC<RulesProps> = ({
 	// Get filtered rules groups based on current trigger
 	const filteredRulesGroups = filterRulesByTrigger(rulesGroups);
 
-	const firstGroup = Object.keys(filteredRulesGroups)[0];
-	const firstRule = firstGroup
-		? Object.keys(filteredRulesGroups[firstGroup].rules)[0]
-		: '';
-	const getInitialRule = () => ({
-		rule: firstRule,
-		operator: 'is',
-		value: '',
-		selectedGroup: firstGroup,
-	});
+	const getInitialRule = () => {
+		const firstGroup = Object.keys(filteredRulesGroups)[0];
+		const firstRule = firstGroup
+			? Object.keys(filteredRulesGroups[firstGroup].rules)[0]
+			: '';
+		return {
+			rule: firstRule,
+			operator: 'is',
+			value: '',
+			selectedGroup: firstGroup,
+		};
+	};
 
-	const stepRules =
-		step.settings &&
-		Array.isArray(step.settings) &&
-		step.settings.length > 0
-			? step.settings
-			: [[getInitialRule()]];
 	const [rules, setRules] = useState<
 		Array<
 			Array<{
@@ -149,7 +156,15 @@ const ConditionsModal: React.FC<RulesProps> = ({
 				selectedGroup: string;
 			}>
 		>
-	>(stepRules);
+	>(() => {
+		const stepRules =
+			step.settings &&
+			Array.isArray(step.settings) &&
+			step.settings.length > 0
+				? step.settings
+				: [[getInitialRule()]];
+		return stepRules;
+	});
 	const [isSaving, setIsSaving] = useState(false);
 
 	// Sync rules state with step.settings when modal opens
@@ -180,6 +195,7 @@ const ConditionsModal: React.FC<RulesProps> = ({
 					})) as any;
 
 					if (response) {
+						console.log('response', response);
 						setRulesGroups(response);
 						ConfigAPI.setAutomationRules(response);
 					}
@@ -193,6 +209,28 @@ const ConditionsModal: React.FC<RulesProps> = ({
 			fetchDynamicRules();
 		}
 	}, [formContext, visible]);
+
+	// Reset rules when rulesGroups changes (after fetching dynamic rules)
+	useEffect(() => {
+		if (visible && Object.keys(rulesGroups).length > 0) {
+			// If current rules are invalid (e.g., group/rule doesn't exist in new groups), reset them
+			const currentRule = rules[0]?.[0];
+			if (
+				currentRule &&
+				(!filteredRulesGroups[currentRule.selectedGroup] ||
+					!filteredRulesGroups[currentRule.selectedGroup]?.rules[
+						currentRule.rule
+					])
+			) {
+				console.log(
+					'Resetting rules due to invalid current rule',
+					currentRule
+				);
+				// Current rule is invalid, reset to initial
+				setRules([[getInitialRule()]]);
+			}
+		}
+	}, [rulesGroups, visible]);
 
 	useLayoutEffect(() => {
 		// placeholder

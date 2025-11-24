@@ -2,12 +2,15 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
+
 /**
  * internal dependencies
  */
 import {
 	DashboardContentCard,
 	MessageStatsCard,
+	ProStatCard,
 	DealsWonValueIcon,
 	DealsClosedWonIcon,
 	ContactsIcon,
@@ -15,7 +18,7 @@ import {
 	TagsIcon,
 	AutomationsIcon,
 	DealsIcon,
-	MyTemplatesIcon,
+	ListsIcon,
 } from '@quillcrm/components';
 import type { DashboardData } from '@quillcrm/client';
 
@@ -24,6 +27,10 @@ interface DashboardCardsProps {
 }
 
 export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
+	// Check if Pro plugin is active via WordPress filter
+	// Pro plugin will set this to true via addFilter('quillcrm_is_pro_active', ...)
+	const isProActive = applyFilters('quillcrm_is_pro_active', false) as boolean;
+
 	return (
 		<DashboardContentCard
 			title={__('Analytics Overview', 'quillcrm')}
@@ -58,6 +65,15 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 				/>
 
 				<MessageStatsCard
+					label={__('Total Lists', 'quillcrm')}
+					value={data.total_lists || 0}
+					icon={<ListsIcon width={40} height={40} />}
+					iconBgClass="bg-[#E8F5E9]"
+					borderColorClass="border-l-[#4CAF50]"
+					iconColor="text-[#4CAF50]"
+				/>
+
+				<MessageStatsCard
 					label={__('Active Automation', 'quillcrm')}
 					value={data.total_automations || 0}
 					icon={<AutomationsIcon width={40} height={40} />}
@@ -66,41 +82,68 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 					iconColor="text-[#CB5301]"
 				/>
 
-				<MessageStatsCard
-					label={__('Total Deals', 'quillcrm')}
-					value={data.deals || 0}
-					icon={<DealsIcon width={40} height={40} />}
-					iconBgClass="bg-[#E4EEFD]"
-					borderColorClass="border-l-secondary"
-					iconColor="text-secondary"
-				/>
+				{/* Pro Feature: Total Deals - Show blurred if Pro not active */}
+				{isProActive ? (
+					<MessageStatsCard
+						label={__('Total Deals', 'quillcrm')}
+						value={data.deals || 0}
+						icon={<DealsIcon width={40} height={40} />}
+						iconBgClass="bg-[#E4EEFD]"
+						borderColorClass="border-l-secondary"
+						iconColor="text-secondary"
+					/>
+				) : (
+					<ProStatCard
+						label={__('Total Deals', 'quillcrm')}
+						value={data.deals || 0}
+						icon={<DealsIcon width={40} height={40} />}
+						iconBgClass="bg-[#E4EEFD]"
+						borderColorClass="border-l-secondary"
+						iconColor="text-secondary"
+					/>
+				)}
 
-				<MessageStatsCard
-					label={__('Deals Closed Won ', 'quillcrm')}
-					value={data.deals_closed_won || 0}
-					icon={<DealsClosedWonIcon width={40} height={40} />}
-					iconBgClass="bg-[#E4FAEC]"
-					borderColorClass="border-l-[#16A34A]"
-					iconColor="text-[#16A34A]"
-				/>
+				{/* Pro Feature: Deals Closed Won - Show blurred if Pro not active */}
+				{isProActive ? (
+					<MessageStatsCard
+						label={__('Deals Closed Won ', 'quillcrm')}
+						value={data.deals_closed_won || 0}
+						icon={<DealsClosedWonIcon width={40} height={40} />}
+						iconBgClass="bg-[#E4FAEC]"
+						borderColorClass="border-l-[#16A34A]"
+						iconColor="text-[#16A34A]"
+					/>
+				) : (
+					<ProStatCard
+						label={__('Deals Closed Won ', 'quillcrm')}
+						value={data.deals_closed_won || 0}
+						icon={<DealsClosedWonIcon width={40} height={40} />}
+						iconBgClass="bg-[#E4FAEC]"
+						borderColorClass="border-l-[#16A34A]"
+						iconColor="text-[#16A34A]"
+					/>
+				)}
 
-				<MessageStatsCard
-					label={__('Deals Won Value', 'quillcrm')}
-					value={data.deals_won_value || 0}
-					icon={<DealsWonValueIcon width={40} height={40} />}
-					iconBgClass="bg-[#E4FAEC]"
-					borderColorClass="border-l-[#16A34A]"
-					iconColor="text-[#16A34A]"
-				/>
-                
-				<MessageStatsCard
-					label={__('Email Templates', 'quillcrm')}
-					value={data.total_email_templates || 0}
-					icon={<MyTemplatesIcon width={36} height={36} />}
-					iconBgClass="bg-[#FAF3DF]"
-					borderColorClass="border-l-[#A67D0A]"
-					iconColor="text-[#A67D0A]"
-				/>
+				{/* Pro Feature: Deals Won Value - Show blurred if Pro not active */}
+				{isProActive ? (
+					<MessageStatsCard
+						label={__('Deals Won Value', 'quillcrm')}
+						value={data.deals_won_value || 0}
+						icon={<DealsWonValueIcon width={40} height={40} />}
+						iconBgClass="bg-[#E4FAEC]"
+						borderColorClass="border-l-[#16A34A]"
+						iconColor="text-[#16A34A]"
+					/>
+				) : (
+					<ProStatCard
+						label={__('Deals Won Value', 'quillcrm')}
+						value={data.deals_won_value || 0}
+						icon={<DealsWonValueIcon width={40} height={40} />}
+						iconBgClass="bg-[#E4FAEC]"
+						borderColorClass="border-l-[#16A34A]"
+						iconColor="text-[#16A34A]"
+					/>
+				)}
 			</div>
 		</DashboardContentCard>
 	);

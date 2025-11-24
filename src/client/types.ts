@@ -581,6 +581,7 @@ export type DashboardData = {
 	total_contacts: number;
 	total_sent_emails: number;
 	total_tags: number;
+	total_lists: number;
 	total_automations: number;
 	total_email_templates: number;
 	deals: number;

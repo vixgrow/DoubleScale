@@ -23,6 +23,7 @@ use QuillCRM\Models\Abandoned_Cart_Model;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\Models\Campaign_Model;
 use QuillCRM\Models\Tag_Model;
+use QuillCRM\Models\List_Model;
 // use QuillCRM\Models\Deal_Model; // Moved to Pro
 use QuillCRM\Models\Template_Model;
 use QuillCRM\Constants\Tracking_Status;
@@ -77,6 +78,7 @@ class REST_General_Controller extends REST_Controller {
 		$total_contacts               = Contact_Model::count();
 		$total_sent_emails            = Tracking_Model::emails()->where( 'status', Tracking_Status::SENT )->count();
 		$total_tags                   = Tag_Model::count();
+		$total_lists                  = List_Model::count();
 		$total_automations            = Automation_Model::where( 'status', 'active' )->count();
 		$total_email_templates        = Template_Model::where( 'type', Campaign_Channel::CHANNEL_EMAIL )->count();
 
@@ -101,6 +103,7 @@ class REST_General_Controller extends REST_Controller {
 			'total_contacts'               => $total_contacts,
 			'total_sent_emails'            => $total_sent_emails,
 			'total_tags'                   => $total_tags,
+			'total_lists'                  => $total_lists,
 			'total_automations'            => $total_automations,
 			'total_email_templates'        => $total_email_templates,
 			'deals'                        => $deals,

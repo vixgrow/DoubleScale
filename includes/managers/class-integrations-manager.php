@@ -66,14 +66,15 @@ final class Integrations_Manager {
 	 * @since 1.0.0
 	 *
 	 * @param Integration $integration
+	 * @param bool        $override Whether to override existing integration (used by Pro plugin)
 	 * @return void
 	 */
-	public function register( Integration $integration ) {
+	public function register( Integration $integration, $override = false ) {
 		if ( ! $integration instanceof Integration ) {
 			throw new Exception( __( 'Invalid integration', 'quillcrm' ) );
 		}
 
-		if ( isset( $this->integrations[ $integration->slug ] ) ) {
+		if ( isset( $this->integrations[ $integration->slug ] ) && ! $override ) {
 			throw new Exception( sprintf( __( 'Integration %s already registered', 'quillcrm' ), $integration->name ) );
 		}
 
@@ -84,6 +85,7 @@ final class Integrations_Manager {
 			'fields'       => $integration->rest_controller->get_settings_schema()['properties'],
 			'is_connected' => $integration->is_connected(),
 			'settings'     => $integration->get_settings(),
+			'is_pro'       => $integration->is_pro ?? false,
 		);
 	}
 

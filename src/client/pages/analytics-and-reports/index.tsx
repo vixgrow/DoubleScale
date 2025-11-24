@@ -3,23 +3,16 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-import ContactsDealsReports from './contacts-deals-reports';
-import DealsReportsByDate from './deals-reports-by-date';
-import DealsReportsLeaderboard from './deals-reports-leaderboard';
-import SalesRep from './sales-rep';
-import SalesRepDetailView from './sale-rep';
 
 /**
  * Internal dependencies
  */
 import { useCapabilities } from '../../../hooks/use-capabilities';
-import PipelineAnalysis from './pipeline-rep';
 import ContactAnalytics from '../home/contacts-analytics';
 import EmailAnalytics from '../home/emails-analytics';
 import { useDashboardData } from '../home/use-analytics';
 import CartAnalytics from '../home/cart-analytics';
-import DealSourceAnalytics from './deal-source';
-import { ContactsIcon, PageTabs, ProFeatureNotice } from '@quillcrm/components';
+import { ProFeatureNotice } from '@quillcrm/components';
 
 
 interface AnalyticsAndReportsProps {
@@ -108,15 +101,10 @@ const AnalyticsAndReports: React.FC<AnalyticsAndReportsProps> = ({ defaultTab })
 						/>
 					);
 				}
+				// Show contact analytics by default (available in free version)
 				return applyFilters(
 					'quillcrm_analytics_default_content',
-					<ProFeatureNotice
-						featureName={__('Deals Analytics', 'quillcrm')}
-						description={__(
-							'Access comprehensive analytics for deals, sales performance, and pipeline metrics. Upgrade to QuillCRM Pro to unlock powerful insights.',
-							'quillcrm'
-						)}
-					/>
+					data ? <ContactAnalytics dashboardData={data} /> : null
 				);
 		}
 	};

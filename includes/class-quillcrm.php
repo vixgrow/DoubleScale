@@ -28,7 +28,6 @@ use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
 use QuillCRM\Tracking\Link_Triggers;
 use QuillCRM\Subscription_Manage\Subscription_Manage;
-use QuillCRM\Managers\Rules_Manager;
 use QuillCRM\Admin\Admin;
 use QuillCRM\Admin\Admin_Loader;
 use QuillCRM\Abandoned_Cart\Abandoned_Cart;
@@ -55,9 +54,6 @@ use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
  * @since 1.0.0
  */
 final class QuillCRM {
-
-
-
 
 
 	/**
@@ -248,7 +244,6 @@ final class QuillCRM {
 		Actions_Manager::instance();
 		Automations_Loader::instance();
 		Merge_Tags_Manager::instance();
-		Rules_Manager::instance();
 		Abandoned_Cart::instance();
 		Filters_Manager::instance();
 		Importers_Manager::instance();
@@ -488,21 +483,9 @@ final class QuillCRM {
 			require $file;
 		}
 
-		// Load contact rules files
-		$rules_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/rules/**/class-*.php' );
-		foreach ( $rules_files as $file ) {
-			require $file;
-		}
-
 		// Load all automations goals files
 		$goals_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/goals/class-*.php' );
 		foreach ( $goals_files as $file ) {
-			require $file;
-		}
-
-		// Load all custom fields types files
-		$custom_fields_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/fields/types/class-*.php' );
-		foreach ( $custom_fields_files as $file ) {
 			require $file;
 		}
 

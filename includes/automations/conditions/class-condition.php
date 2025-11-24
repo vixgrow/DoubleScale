@@ -13,12 +13,13 @@
 namespace QuillCRM\Automations\Conditions;
 
 use QuillCRM\Models\Automation_Contact_Model;
-use QuillCRM\Managers\Rules_Manager;
+use QuillCRM_Pro\Managers\Rules_Manager;
 
 /**
  * Condition class
  */
 class Condition {
+
 
 	/**
 	 * Rules
@@ -58,6 +59,10 @@ class Condition {
 	 */
 	public function is_condition_fulfilled() {
 		$result = true;
+
+		if ( ! class_exists( 'QuillCRM_Pro\Managers\Rules_Manager' ) ) {
+			return throw new \Exception( 'QuillCRM Pro is not installed' );
+		}
 
 		foreach ( $this->rules as $rule ) {
 			$rule_manager = Rules_Manager::instance()->get_rule( $rule['rule'] );

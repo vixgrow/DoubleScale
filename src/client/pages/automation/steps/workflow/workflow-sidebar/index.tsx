@@ -15,7 +15,11 @@ import { cn } from '@/lib/utils';
  */
 import './style.scss';
 import { useAutomationContext } from '../../../state/context';
-import type { OrganizedStep, AutomationStep, NoticeMessage } from '@quillcrm/client';
+import type {
+	OrganizedStep,
+	AutomationStep,
+	NoticeMessage,
+} from '@quillcrm/client';
 import { getTitle } from './titles';
 import SidebarHeader from './sidebar-header';
 import TriggerContent from './trigger-content';
@@ -25,6 +29,8 @@ import ActionSelector from '../action-selector';
 import GoalSelector from '../goal-selector';
 import DelaySelector from '../delay-selector';
 import { NoticeBanner } from '@quillcrm/components';
+import ProAutomationModal from '../../../../../../components/pro-automation-modal';
+import { applyFilters } from '@wordpress/hooks';
 
 interface WorkflowSidebarProps {
 	currentStep: OrganizedStep | null;
@@ -45,17 +51,37 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
 	const closeNotice = () => setNotice(null);
 
+	const isConditionLockedByDefault = applyFilters(
+		'quillcrm_automation_condition_locked',
+		true
+	) as boolean;
+
+	const [showProConditionModal, setShowProConditionModal] = useState(false);
+
 	// Close sidebar if the current step has been deleted
 	useEffect(() => {
 		if (currentStep && currentStep.id) {
 			// Check if the current step still exists in the steps array
-			const stepExists = steps.some(step => step.id === currentStep.id);
+			const stepExists = steps.some((step) => step.id === currentStep.id);
 			if (!stepExists) {
 				// Step was deleted, close the sidebar
 				setCurrentStep(null);
 			}
 		}
 	}, [steps, currentStep, setCurrentStep]);
+
+	// Show Pro modal when condition step is clicked and it's locked
+	useEffect(() => {
+		if (
+			currentStep &&
+			currentStep.type === 'condition' &&
+			isConditionLockedByDefault
+		) {
+			setShowProConditionModal(true);
+			// Close the current step to prevent sidebar from showing
+			setCurrentStep(null);
+		}
+	}, [currentStep, isConditionLockedByDefault]);
 
 	// Only show sidebar for trigger, configured steps, unconfigured goals, or delay steps
 	// Exclude conditions and end_automation (they don't need configuration)
@@ -98,7 +124,10 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		const id = stepId || currentStep?.id;
 
 		if (!id) {
-			setNotice({ type: 'error', message: __('Invalid step data', 'quillcrm') });
+			setNotice({
+				type: 'error',
+				message: __('Invalid step data', 'quillcrm'),
+			});
 			return;
 		}
 
@@ -127,26 +156,33 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 			setNotice({ type: 'success', message: successMessage });
 		} catch (error: any) {
-			setNotice({ type: 'error', message: error.message || __('Failed to save', 'quillcrm') });
+			setNotice({
+				type: 'error',
+				message: error.message || __('Failed to save', 'quillcrm'),
+			});
 		}
 	};
 
 	const handleGoalSave = async (goalKey: string) => {
 		if (!currentStep || !goalKey) {
-			setNotice({ type: 'error', message: __('Please select a goal', 'quillcrm') });
+			setNotice({
+				type: 'error',
+				message: __('Please select a goal', 'quillcrm'),
+			});
 			return;
 		}
 
-		await handleSave(
-			{ action: goalKey },
-			__('Goal saved', 'quillcrm'),
-			{ clearTempAction: true }
-		);
+		await handleSave({ action: goalKey }, __('Goal saved', 'quillcrm'), {
+			clearTempAction: true,
+		});
 	};
 
 	const handleActionSave = async (actionKey: string) => {
 		if (!currentStep || !actionKey) {
-			setNotice({ type: 'error', message: __('Please select an action', 'quillcrm') });
+			setNotice({
+				type: 'error',
+				message: __('Please select an action', 'quillcrm'),
+			});
 			return;
 		}
 
@@ -159,28 +195,30 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 	const handleDelaySave = async (delayKey: string) => {
 		if (!currentStep || !delayKey) {
-			setNotice({ type: 'error', message: __('Please select a delay type', 'quillcrm') });
+			setNotice({
+				type: 'error',
+				message: __('Please select a delay type', 'quillcrm'),
+			});
 			return;
 		}
 
-		await handleSave(
-			{ action: delayKey },
-			__('Delay saved', 'quillcrm'),
-			{ clearTempAction: true }
-		);
+		await handleSave({ action: delayKey }, __('Delay saved', 'quillcrm'), {
+			clearTempAction: true,
+		});
 	};
 
 	const handleStepSave = async (stepData: Partial<OrganizedStep>) => {
 		if (!stepData.id) {
-			setNotice({ type: 'error', message: __('Invalid step data', 'quillcrm') });
+			setNotice({
+				type: 'error',
+				message: __('Invalid step data', 'quillcrm'),
+			});
 			return;
 		}
 
-		await handleSave(
-			stepData,
-			__('Step saved', 'quillcrm'),
-			{ stepId: stepData.id }
-		);
+		await handleSave(stepData, __('Step saved', 'quillcrm'), {
+			stepId: stepData.id,
+		});
 	};
 
 	const handleConditionSave = async (data: Partial<AutomationStep>) => {
@@ -195,18 +233,25 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 	const renderContent = () => {
 		// Close any other open sidebars first
 		isTriggerVisible && currentStep && setCurrentStep(null);
-		!isTriggerVisible && currentStep?.type === 'trigger' && setTriggerVisible(false);
+		!isTriggerVisible &&
+			currentStep?.type === 'trigger' &&
+			setTriggerVisible(false);
 
 		// Content renderers configuration map
 		const contentRenderers = {
 			// Trigger content
-			trigger: () => automation && (
-				<TriggerContent
-					automation={automation}
-					onSettingsChange={(value) => updateAutomation({ ...automation, settings: value })}
-					onMultipleRunsChange={(value) => updateSettings('multiple_runs', value)}
-				/>
-			),
+			trigger: () =>
+				automation && (
+					<TriggerContent
+						automation={automation}
+						onSettingsChange={(value) =>
+							updateAutomation({ ...automation, settings: value })
+						}
+						onMultipleRunsChange={(value) =>
+							updateSettings('multiple_runs', value)
+						}
+					/>
+				),
 
 			// Unconfigured steps (no action selected)
 			unconfigured: {
@@ -246,7 +291,7 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 						key={currentStep!.id}
 						step={currentStep!}
 						onSave={handleConditionSave}
-						visible={true}
+						visible={!isConditionLockedByDefault}
 						onClose={() => setCurrentStep(null)}
 					/>
 				),
@@ -270,9 +315,11 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 		// Determine renderer based on step configuration
 		const requiresSelection = ['action', 'goal', 'delay'];
 		const hasAction =
-			!requiresSelection.includes(currentStep.type) || !!currentStep.action;
+			!requiresSelection.includes(currentStep.type) ||
+			!!currentStep.action;
 		const category = hasAction ? 'configured' : 'unconfigured';
-		const renderer = contentRenderers[category][currentStep.type] ||
+		const renderer =
+			contentRenderers[category][currentStep.type] ||
 			contentRenderers[category].default;
 
 		return renderer?.() || null;
@@ -287,24 +334,35 @@ const WorkflowSidebar: React.FC<WorkflowSidebarProps> = ({
 
 	// Render content within sidebar wrapper
 	return (
-		<div
-			className={cn(
-				'qcrm-workflow-sidebar absolute top-1 right-0 h-screen min-w-[21rem] max-w-96 rounded-l-lg z-[150400] overflow-y-auto',
-				isVisible ? 'is-visible' : ''
-			)}
-		>
-			<SidebarHeader
-				title={getTitle(isTriggerVisible, currentStep)}
-				onClose={handleClose}
-			/>
-
-			<div className="space-y-4 p-4">
-				{notice && (
-					<NoticeBanner notice={notice} closeNotice={closeNotice} />
+		<>
+			<div
+				className={cn(
+					'qcrm-workflow-sidebar absolute top-1 right-0 h-screen min-w-[21rem] max-w-96 rounded-l-lg z-[150400] overflow-y-auto',
+					isVisible ? 'is-visible' : ''
 				)}
-				{renderContent()}
+			>
+				<SidebarHeader
+					title={getTitle(isTriggerVisible, currentStep)}
+					onClose={handleClose}
+				/>
+
+				<div className="space-y-4 p-4">
+					{notice && (
+						<NoticeBanner
+							notice={notice}
+							closeNotice={closeNotice}
+						/>
+					)}
+					{renderContent()}
+				</div>
 			</div>
-		</div>
+
+			<ProAutomationModal
+				visible={showProConditionModal}
+				onClose={() => setShowProConditionModal(false)}
+				featureName={__('Condition Step', 'quillcrm')}
+			/>
+		</>
 	);
 };
 

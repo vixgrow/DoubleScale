@@ -8,6 +8,7 @@ import type { Reducer } from 'redux';
  * Internal dependencies
  */
 import {
+	RESET_CAMPAIGN,
 	SET_CAMPAIGN,
 	SET_ERROR,
 	SET_LOADING,
@@ -33,6 +34,11 @@ const reducer: Reducer<CampaignState, CampaignAction> = (
 	action
 ) => {
 	switch (action.type) {
+		case RESET_CAMPAIGN:
+			return {
+				...initialState,
+			};
+
 		case SET_CAMPAIGN:
 			return {
 				...state,

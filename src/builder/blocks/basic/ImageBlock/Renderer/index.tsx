@@ -52,8 +52,8 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({
 		maxWidth: '100%',
 		borderRadius: `${props.borderRadius}px`,
 		display: 'flex',
-		alignItems: 'flex-start',
-		justifyContent: 'flex-start',
+		alignItems: 'center',
+		justifyContent: 'center',
 		backgroundColor: '#F5F5F580',
 		color: '#6B7280',
 		fontSize: '14px',
@@ -72,7 +72,7 @@ export const ImageBlockRenderer: React.FC<ImageBlockRendererProps> = ({
 		if (!props.src || imageError) {
 			return (
 				<div style={placeholderStyle}>
-					<ImageBlockIcon width={24} height={24} />
+					<ImageBlockIcon width={48} height={48} />
 				</div>
 			);
 		}

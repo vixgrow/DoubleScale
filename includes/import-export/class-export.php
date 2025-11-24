@@ -13,7 +13,7 @@
 namespace QuillCRM\Import_Export;
 
 use QuillCRM\Utils;
-use QuillCRM_Pro\Fields\Contact_Fields;
+use QuillCRM\Fields\Contact_Fields;
 use QuillCRM\Models\Contact_Model;
 use League\Csv\Writer;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
@@ -24,6 +24,7 @@ use WP_Error;
  * Export class
  */
 class Export {
+
 
 
 	/**

@@ -15,7 +15,7 @@ namespace QuillCRM\Abstracts;
 use Exception;
 use QuillCRM\Models\Contact_Model;
 use QuillCRM\Models\Form_Model;
-use QuillCRM_Pro\Fields\Contact_Fields;
+use QuillCRM\Fields\Contact_Fields;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\QuillCRM;
 use QuillCRM\Merge_Tags\Forms\Dynamic_Fields_Registration;
@@ -26,6 +26,7 @@ use QuillCRM_Pro\Managers\Rules_Manager;
  * Form class
  */
 abstract class Form {
+
 
 	/**
 	 * Slug

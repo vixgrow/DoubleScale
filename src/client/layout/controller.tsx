@@ -366,6 +366,7 @@ registerAdminPage('link-triggers', {
 	label: __('Link Triggers', 'quillcrm'),
 	icon: <ToolsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
+	hidden: true, // Hidden from sidebar - accessible via Settings
 });
 
 // Link Trigger Edit - stub registration

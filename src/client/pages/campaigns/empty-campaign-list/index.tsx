@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -22,7 +22,13 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 	setStep,
 	campaignChannel = 'email'
 }) => {
-	const isSMS = campaignChannel === 'sms';
+	// Capitalize first letter for display
+	const channelName = campaignChannel.charAt(0).toUpperCase() + campaignChannel.slice(1);
+	
+	const stepThreeContent = {
+		email: __('You can Send Basic Email Or Unleash your creativity to build new one by Email Builder!', 'quillcrm'),
+		sms: __('Compose your SMS message and reach your contacts instantly!', 'quillcrm'),
+	};
 	
 	return (
 		<div className="flex items-center justify-center border border-gray-200 rounded-lg py-28 px-10">
@@ -36,9 +42,9 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 				<div className="w-full max-w-xl">
 					<div className="mb-3">
 						<h2 className="text-2xl font-semibold">
-							{isSMS 
-								? __("Let's Start SMS Campaign!", 'quillcrm')
-								: __("Let's Start Email Campaign!", 'quillcrm')
+							{
+								/* translators: %s: Campaign channel name (Email, SMS, etc.) */
+								sprintf(__("Let's Start %s Campaign!", 'quillcrm'), channelName)
 							}
 						</h2>
 						<p className="text-base text-gray-400">
@@ -62,16 +68,7 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({
 							)}
 						</li>
 						<li>
-							{isSMS
-								? __(
-									'Compose your SMS message and reach your contacts instantly!',
-									'quillcrm'
-								)
-								: __(
-									'You can Send Basic Email Or Unleash your creativity to build new one by Email Builder!',
-									'quillcrm'
-								)
-							}
+							{stepThreeContent[campaignChannel] || stepThreeContent.email}
 						</li>
 					</ol>
 					<div className="flex gap-4 items-center">

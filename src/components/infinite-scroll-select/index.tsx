@@ -156,7 +156,7 @@ export const InfiniteScrollSelect: React.FC<InfiniteScrollSelectProps> = ({
 	 * Handle item selection
 	 */
 	const handleSelect = (item: any) => {
-		onValueChange(getOptionValue(item));
+		onValueChange(getOptionValue(item), item);
 		setSearch('');
 		setIsOpen(false);
 	};

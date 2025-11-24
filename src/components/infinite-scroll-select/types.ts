@@ -5,7 +5,7 @@
 export interface InfiniteScrollSelectProps {
   // Core props
   value?: string | number;
-  onValueChange: (value: string | number) => void;
+  onValueChange: (value: string | number, item?: any) => void;
   placeholder?: string;
 
   // API configuration

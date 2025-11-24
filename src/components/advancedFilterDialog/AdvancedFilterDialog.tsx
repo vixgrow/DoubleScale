@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@quillcrm/components/ui/dialog';
-import { CustomDialogHeader, FiltersIcon } from '@quillcrm/components';
+import { CustomDialogHeader, FiltersIcon, InfiniteScrollSelect } from '@quillcrm/components';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@quillcrm/components/ui/input';
@@ -17,8 +17,6 @@ interface AdvancedFiltersDialogProps {
 	pipelines: any[];
 	selectedPipelineId: number | null;
 	onPipelineChange: (pipelineId: number) => void;
-	owners: any[];
-	ownersLoading: boolean;
 	priorities: any;
 }
 
@@ -30,8 +28,6 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 	pipelines,
 	selectedPipelineId,
 	onPipelineChange,
-	owners,
-	ownersLoading,
 	priorities,
 }) => {
 	const handleFilterChange = (key: string, value: any) => {
@@ -89,61 +85,31 @@ export const AdvancedFiltersDialog: React.FC<AdvancedFiltersDialogProps> = ({
 										{__('Deal Owner', 'quillcrm')}
 									</label>
 
-									<Select
-										value={
-											filters.ownerId
-												? String(filters.ownerId)
-												: ''
-										}
-										onValueChange={(value) =>
-											handleFilterChange(
-												'ownerId',
-												value ? Number(value) : null
-											)
-										}
-										disabled={ownersLoading}
-									>
-										<SelectTrigger className=" h-10 !shadow-none rounded-md border border-[#E1E3EA] !text-[#09090B] font-sm text-base tracking-[-.5px]">
-											<SelectValue
-												placeholder={
-													ownersLoading
-														? __(
-																'Loading owners...',
-																'quillcrm'
-															)
-														: __(
-																'Select All Owner',
-																'quillcrm'
-															)
-												}
-											/>
-										</SelectTrigger>
-
-										<SelectContent>
-											{!ownersLoading &&
-											Object.values(owners).length > 0 ? (
-												Object.values(owners).map(
-													(owner) => (
-														<SelectItem
-															key={owner.value}
-															value={String(
-																owner.value
-															)}
-														>
-															{owner.label}
-														</SelectItem>
-													)
-												)
-											) : (
-												<div className="px-3 py-2 text-sm">
-													{__(
-														'No owners found',
-														'quillcrm'
-													)}
-												</div>
-											)}
-										</SelectContent>
-									</Select>
+								<InfiniteScrollSelect
+									value={filters.ownerId || undefined}
+									onValueChange={(value) =>
+										handleFilterChange(
+											'ownerId',
+											value ? Number(value) : null
+										)
+									}
+									placeholder={__(
+										'Select All Owner',
+										'quillcrm'
+									)}
+									apiEndpoint="/qc/v1/contacts"
+									getOptionLabel={(c) => {
+										const name = [c.first_name, c.last_name]
+											.filter(Boolean)
+											.join(' ') || 'Unnamed';
+										return c.email ? `${name} (${c.email})` : name;
+									}}
+									getOptionValue={(c) => c.id}
+									dataPath="data"
+									searchParamName="keywords"
+									perPage={10}
+									className="h-10"
+								/>
 								</div>
 								{/* Pipeline Filter */}
 								<div className="flex flex-col gap-2">

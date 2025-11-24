@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import type { Campaign } from '@quillcrm/client';
-import { SET_CAMPAIGN, SET_ERROR, SET_LOADING, SET_SAVING, UPDATE_CAMPAIGN, UPDATE_SETTINGS } from './constants';
+import { RESET_CAMPAIGN, SET_CAMPAIGN, SET_ERROR, SET_LOADING, SET_SAVING, UPDATE_CAMPAIGN, UPDATE_SETTINGS } from './constants';
 
 // Contacts step data
 export interface ContactsStepData {
@@ -78,8 +78,13 @@ export type SetErrorAction = {
   error: string | null;
 };
 
+export type ResetCampaignAction = {
+  type: typeof RESET_CAMPAIGN;
+};
+
 export type CampaignAction =
   | SetCampaignAction
+  | ResetCampaignAction
   | UpdateCampaignAction
   | UpdateSettingsAction
   | SetLoadingAction

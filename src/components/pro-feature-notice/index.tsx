@@ -12,6 +12,7 @@ import { AlertCircle, Crown, ExternalLink } from 'lucide-react';
  * Internal dependencies
  */
 import './style.scss';
+import config from '../../config';
 
 interface ProFeatureNoticeProps {
 	featureName: string;
@@ -22,7 +23,7 @@ interface ProFeatureNoticeProps {
 export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 	featureName,
 	description,
-	upgradeUrl = 'https://www.quillcrm.com/pro',
+	upgradeUrl = config.getUrlQuillCRMPro(),
 }) => {
 	return (
 		<div className="qcrm-pro-feature-notice">
@@ -32,7 +33,10 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 				</div>
 				<div className="qcrm-pro-feature-notice__content">
 					<h2 className="qcrm-pro-feature-notice__title">
-						<Crown size={24} className="qcrm-pro-feature-notice__title-icon" />
+						<Crown
+							size={24}
+							className="qcrm-pro-feature-notice__title-icon"
+						/>
 						{featureName} {__('is a Pro Feature', 'quillcrm')}
 					</h2>
 					{description && (
@@ -45,7 +49,10 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 						<ul>
 							<li>
 								<AlertCircle size={16} />
-								{__('Advanced Sales Pipeline Management', 'quillcrm')}
+								{__(
+									'Advanced Sales Pipeline Management',
+									'quillcrm'
+								)}
 							</li>
 							<li>
 								<AlertCircle size={16} />
@@ -61,7 +68,10 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 							</li>
 							<li>
 								<AlertCircle size={16} />
-								{__('Deal Automation Triggers & Actions', 'quillcrm')}
+								{__(
+									'Deal Automation Triggers & Actions',
+									'quillcrm'
+								)}
 							</li>
 						</ul>
 					</div>
@@ -91,4 +101,3 @@ export const ProFeatureNotice: React.FC<ProFeatureNoticeProps> = ({
 		</div>
 	);
 };
-

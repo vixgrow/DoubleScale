@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Export
  *
@@ -23,6 +24,8 @@ use WP_Error;
  * Export class
  */
 class Export {
+
+
 
 	/**
 	 * File id
@@ -122,7 +125,7 @@ class Export {
 
 		$contact_fields = $this->get_contact_fields();
 		$headers        = array_map(
-			function( $key ) use ( $contact_fields ) {
+			function ( $key ) use ( $contact_fields ) {
 				return $contact_fields[ $key ]['name'];
 			},
 			$this->fields
@@ -141,9 +144,9 @@ class Export {
 			usleep( 1000000 );
 
 			$contacts_query = Contact_Model::with( 'lists', 'tags' )
-			->offset( $this->offset )
-			->limit( 10 )
-			->orderBy( 'created_at', 'desc' );
+				->offset( $this->offset )
+				->limit( 10 )
+				->orderBy( 'created_at', 'desc' );
 
 			if ( ! empty( $this->filters ) ) {
 				$filters_process = new Contact_Filters_Process( $contacts_query, $this->filters );

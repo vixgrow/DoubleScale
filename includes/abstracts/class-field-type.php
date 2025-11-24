@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Abstract class Field_Type
  *
@@ -91,7 +92,7 @@ abstract class Field_Type {
 	 *
 	 * @return mixed
 	 */
-	abstract public function sanitize_field( $value );
+	abstract public function sanitize_field( $value);
 
 	/**
 	 * Validate Value
@@ -100,7 +101,7 @@ abstract class Field_Type {
 	 *
 	 * @return bool
 	 */
-	abstract public function validate_value( $value );
+	abstract public function validate_value( $value);
 
 	/**
 	 * Format Value

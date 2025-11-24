@@ -28,6 +28,7 @@ export type ConfigData = Record<string, unknown> & {
 	defaultStages: DefaultStage[];
 	dealPriorities: DealPriority[];
 	quillsmtpInfo: QuillSMTPInfo;
+	urlQuillCRMPro: string;
 };
 
 export type UserCapabilities = {

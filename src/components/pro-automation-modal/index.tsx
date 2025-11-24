@@ -19,6 +19,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import './style.scss';
+import config from '../../config';
 
 interface ProAutomationModalProps {
 	visible: boolean;
@@ -31,6 +32,7 @@ export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 	onClose,
 	featureName,
 }) => {
+	const upgradeUrl = config.getUrlQuillCRMPro();
 	return (
 		<Dialog open={visible} onOpenChange={(open) => !open && onClose()}>
 			<DialogContent className="z-[150300] qcrm-pro-modal sm:max-w-[500px]">
@@ -75,10 +77,7 @@ export const ProAutomationModal: React.FC<ProAutomationModalProps> = ({
 						</Button>
 						<Button
 							onClick={() => {
-								window.open(
-									'https://www.quillcrm.com/pro',
-									'_blank'
-								);
+								window.open(upgradeUrl, '_blank');
 							}}
 							className="flex-1 bg-green-600 hover:bg-green-700"
 						>

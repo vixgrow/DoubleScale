@@ -22,6 +22,7 @@ class Form extends Abstracts_Form {
 
 
 
+
 	/**
 	 * Slug
 	 *
@@ -147,7 +148,6 @@ class Form extends Abstracts_Form {
 	 * @return void
 	 */
 	public function process( $contact_form, $result ) {
-		xdebug_break();
 		$data               = $this->get_default_data();
 		$data['form_id']    = $contact_form->id();
 		$data['fields']     = $this->get_fields( $contact_form->id() );

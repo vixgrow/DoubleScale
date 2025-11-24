@@ -13,6 +13,7 @@ import { Crown } from 'lucide-react';
  */
 import { MessageStatsCard } from '../message-stats-card';
 import './style.scss';
+import config from '../../config';
 
 interface ProStatCardProps {
 	label: string;
@@ -26,7 +27,7 @@ interface ProStatCardProps {
 
 /**
  * ProStatCard Component
- * 
+ *
  * Displays a blurred stat card with a "Pro Feature" overlay for free plugin users.
  * Shows the actual stat card when Pro plugin is active.
  */
@@ -37,7 +38,7 @@ export const ProStatCard: React.FC<ProStatCardProps> = ({
 	iconBgClass,
 	borderColorClass,
 	iconColor,
-	upgradeUrl = 'https://www.quillcrm.com/pro',
+	upgradeUrl = config.getUrlQuillCRMPro(),
 }) => {
 	return (
 		<div className="qcrm-pro-stat-card">

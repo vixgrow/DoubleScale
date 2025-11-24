@@ -34,6 +34,7 @@ class Rest_Automation_Controller extends REST_Controller {
 
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -365,7 +366,6 @@ class Rest_Automation_Controller extends REST_Controller {
 		$trigger    = $request->get_param( 'trigger' );
 		$form_id    = $request->get_param( 'form_id' );
 		$trigger_id = $request->get_param( 'trigger_id' );
-		xdebug_break();
 
 		$forms = Forms_Manager::instance()->get_all_forms();
 

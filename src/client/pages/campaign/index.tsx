@@ -54,20 +54,25 @@ const Campaign: React.FC = () => {
 		any | undefined
 	>(undefined);
 
-	const { fetchCampaign, saveCampaignStep } =
+	const { fetchCampaign, saveCampaignStep, resetCampaign } =
 		useDispatch('quillcrm/campaign');
 
 	useEffect(() => {
 		isMountedRef.current = true;
 
+		// Clear previous campaign data when ID changes
 		if (id) {
+			resetCampaign();
 			fetchCampaign(id);
+		} else {
+			// If no ID, clear the campaign state
+			resetCampaign();
 		}
 
 		return () => {
 			isMountedRef.current = false;
 		};
-	}, [id, fetchCampaign]);
+	}, [id, fetchCampaign, resetCampaign]);
 
 	// Redirect to saved current step when campaign is loaded
 	useEffect(() => {

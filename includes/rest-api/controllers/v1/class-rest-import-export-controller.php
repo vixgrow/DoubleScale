@@ -486,6 +486,11 @@ class Rest_Import_Export_Controller extends REST_Controller {
 		$exporter = new \QuillCRM_Pro\Import_Export\Export( $args );
 		$result   = $exporter->export();
 
+		// Check if export returned an error
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
 		$result['file_id'] = $file_id;
 
 		return new WP_REST_Response( $result, 200 );

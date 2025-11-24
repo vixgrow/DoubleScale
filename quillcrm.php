@@ -41,6 +41,11 @@ if ( ! defined( 'QUILLCRM_PRO_PLUGIN_PATH' ) ) {
 	define( 'QUILLCRM_PRO_PLUGIN_PATH', 'QuillCRM-Pro/quillcrm-pro.php' );
 }
 
+// QuillCRM Pro Plugin Price URL.
+if ( ! defined( 'QUILLCRM_PRO_PRICE_URL' ) ) {
+	define( 'QUILLCRM_PRO_PRICE_URL', 'https://quillcrm.io/pricing' );
+}
+
 // Require dependencies.
 require_once QUILLCRM_PLUGIN_DIR . 'dependencies/libraries/load.php';
 require_once QUILLCRM_PLUGIN_DIR . 'dependencies/vendor/autoload.php';

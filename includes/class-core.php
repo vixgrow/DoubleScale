@@ -35,6 +35,8 @@ use QuillCRM\User_Roles\Permissions;
 class Core {
 
 
+
+
 	/**
 	 * Set admin config
 	 *
@@ -53,6 +55,8 @@ class Core {
 			'quillcrm_crm_manager' => Permissions::is_crm_manager(),
 			'quillcrm_deal_owner'  => Permissions::is_deal_owner(),
 		);
+
+		$url_quillcrm_pro = QUILLCRM_PRO_PRICE_URL;
 
 		// Get QuillSMTP connection info
 		$quillsmtp_info = self::get_quillsmtp_connection_info();
@@ -88,7 +92,8 @@ class Core {
 				( class_exists( 'QuillCRM_Pro\Managers\Deal_Manager' )
 					? 'qcrm.config.setDealPriorities( ' . wp_json_encode( \QuillCRM_Pro\Managers\Deal_Manager::instance()->get_deal_priorities() ) . ');'
 					: 'qcrm.config.setDealPriorities( [] );' ) .
-				'qcrm.config.setQuillSMTPInfo( ' . wp_json_encode( $quillsmtp_info ) . ');'
+				'qcrm.config.setQuillSMTPInfo( ' . wp_json_encode( $quillsmtp_info ) . ');' .
+				'qcrm.config.setUrlQuillCRMPro( "' . $url_quillcrm_pro . '" );'
 		);
 	}
 

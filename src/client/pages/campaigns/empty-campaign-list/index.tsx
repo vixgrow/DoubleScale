@@ -15,9 +15,15 @@ import { CampaignModalStep } from '@quillcrm/client';
 
 interface EmptyCampaignListProps {
 	setStep: (step: CampaignModalStep) => void;
+	campaignChannel?: string;
 }
 
-const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({ setStep }) => {
+const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({ 
+	setStep,
+	campaignChannel = 'email'
+}) => {
+	const isSMS = campaignChannel === 'sms';
+	
 	return (
 		<div className="flex items-center justify-center border border-gray-200 rounded-lg py-28 px-10">
 			<div className="flex items-center justify-center gap-24">
@@ -30,7 +36,10 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({ setStep }) => {
 				<div className="w-full max-w-xl">
 					<div className="mb-3">
 						<h2 className="text-2xl font-semibold">
-							{__("Let's Start Email Campaign!", 'quillcrm')}
+							{isSMS 
+								? __("Let's Start SMS Campaign!", 'quillcrm')
+								: __("Let's Start Email Campaign!", 'quillcrm')
+							}
 						</h2>
 						<p className="text-base text-gray-400">
 							{__(
@@ -53,10 +62,16 @@ const EmptyCampaignList: React.FC<EmptyCampaignListProps> = ({ setStep }) => {
 							)}
 						</li>
 						<li>
-							{__(
-								'You can Send Basic Email Or Unleash your creativity to build new one by Email Builder!',
-								'quillcrm'
-							)}
+							{isSMS
+								? __(
+									'Compose your SMS message and reach your contacts instantly!',
+									'quillcrm'
+								)
+								: __(
+									'You can Send Basic Email Or Unleash your creativity to build new one by Email Builder!',
+									'quillcrm'
+								)
+							}
 						</li>
 					</ol>
 					<div className="flex gap-4 items-center">

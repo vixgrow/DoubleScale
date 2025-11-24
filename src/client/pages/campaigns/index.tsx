@@ -373,7 +373,7 @@ const Campaigns: React.FC = () => {
 					<DataTablePagination table={serverSideTable} />
 				</>
 			) : (
-				<EmptyCampaignList setStep={setStep} />
+				<EmptyCampaignList setStep={setStep} campaignChannel={activeTab} />
 			)}
 		</>
 	);

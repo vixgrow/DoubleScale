@@ -18,7 +18,7 @@ import {
 	TagsIcon,
 	AutomationsIcon,
 	DealsIcon,
-	MyTemplatesIcon,
+	ListsIcon,
 } from '@quillcrm/components';
 import type { DashboardData } from '@quillcrm/client';
 
@@ -62,6 +62,15 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 					iconBgClass="bg-[#F5EFFF]"
 					borderColorClass="border-l-[#660FF1]"
 					iconColor="text-[#660FF1]"
+				/>
+
+				<MessageStatsCard
+					label={__('Total Lists', 'quillcrm')}
+					value={data.total_lists || 0}
+					icon={<ListsIcon width={40} height={40} />}
+					iconBgClass="bg-[#E8F5E9]"
+					borderColorClass="border-l-[#4CAF50]"
+					iconColor="text-[#4CAF50]"
 				/>
 
 				<MessageStatsCard
@@ -135,15 +144,6 @@ export const DashboardCards: React.FC<DashboardCardsProps> = ({ data }) => {
 						iconColor="text-[#16A34A]"
 					/>
 				)}
-                
-				<MessageStatsCard
-					label={__('Email Templates', 'quillcrm')}
-					value={data.total_email_templates || 0}
-					icon={<MyTemplatesIcon width={36} height={36} />}
-					iconBgClass="bg-[#FAF3DF]"
-					borderColorClass="border-l-[#A67D0A]"
-					iconColor="text-[#A67D0A]"
-				/>
 			</div>
 		</DashboardContentCard>
 	);

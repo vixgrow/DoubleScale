@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { CRMUser } from '../../../../services/user-management';
 import { ManagerRole, ManagerRoleOptions } from './types';
-import { CustomDialogHeader, GradientAddContactIcon, Field } from '@quillcrm/components';
+import {
+	CustomDialogHeader,
+	GradientAddContactIcon,
+} from '@quillcrm/components';
+import { InfiniteScrollSelect } from '@/components/infinite-scroll-select';
 
 interface ManagerModalProps {
 	isOpen: boolean;
@@ -27,6 +27,14 @@ export interface ManagerFormData {
 	managerId?: number;
 }
 
+interface WordPressUser {
+	id: number;
+	name: string;
+	display_name: string;
+	email: string;
+	username: string;
+}
+
 const ManagerModal: React.FC<ManagerModalProps> = ({
 	isOpen,
 	onClose,
@@ -35,6 +43,10 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 	manager,
 }) => {
 	const [email, setEmail] = useState('');
+	const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+	const [selectedUser, setSelectedUser] = useState<WordPressUser | null>(
+		null
+	);
 	const [selectedRole, setSelectedRole] = useState<ManagerRole | ''>('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string>('');
@@ -47,10 +59,20 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 	useEffect(() => {
 		if (isEditMode && manager) {
 			setEmail(manager.email);
+			setSelectedUserId(manager.id);
+			setSelectedUser({
+				id: manager.id,
+				name: manager.name,
+				display_name: manager.name,
+				email: manager.email,
+				username: manager.user_login || '',
+			});
 			setSelectedRole(manager.crm_role);
 		} else if (!isEditMode) {
 			// Reset for add mode
 			setEmail('');
+			setSelectedUserId(null);
+			setSelectedUser(null);
 			setSelectedRole('');
 		}
 	}, [manager, mode, isEditMode]);
@@ -60,19 +82,46 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 		if (error) setError(''); // Clear error when user changes role
 	};
 
-	// Email change handled inline in Field onChange for add mode
+	const handleUserChange = (
+		userId: number | string,
+		user?: WordPressUser
+	) => {
+		const numericId = Number(userId);
+		setSelectedUserId(numericId);
+		if (user) {
+			setSelectedUser(user);
+			setEmail(user.email); // Set email for submission
+		}
+		if (error) setError(''); // Clear error when user changes selection
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!email || !selectedRole) return;
+
+		// For add mode, require user selection
+		if (!isEditMode && !selectedUserId) {
+			setError(__('Please select a user', 'quillcrm'));
+			return;
+		}
+
+		if (!selectedRole) {
+			setError(__('Please select a role', 'quillcrm'));
+			return;
+		}
+
 		if (isEditMode && !manager) return;
 
 		setIsSubmitting(true);
 		setError(''); // Clear any previous errors
 
 		try {
+			// For add mode, use the email from selected user
+			const emailToSubmit = isEditMode
+				? email
+				: selectedUser?.email || email;
+
 			const formData: ManagerFormData = {
-				email,
+				email: emailToSubmit,
 				roles: [selectedRole as ManagerRole],
 			};
 
@@ -85,6 +134,8 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 			// Reset form only in add mode (edit mode parent will close modal)
 			if (!isEditMode) {
 				setEmail('');
+				setSelectedUserId(null);
+				setSelectedUser(null);
 				setSelectedRole('');
 			}
 		} catch (error: any) {
@@ -94,9 +145,9 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 			);
 			const defaultMessage = isEditMode
 				? __(
-					'Failed to update manager role. Please try again.',
-					'quillcrm'
-				)
+						'Failed to update manager role. Please try again.',
+						'quillcrm'
+					)
 				: __('Failed to add manager. Please try again.', 'quillcrm');
 
 			setError(error?.message || defaultMessage);
@@ -108,6 +159,8 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 
 	const handleClose = () => {
 		setEmail('');
+		setSelectedUserId(null);
+		setSelectedUser(null);
 		setSelectedRole('');
 		setError('');
 		onClose();
@@ -136,13 +189,10 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 			: __('Add Manager', 'quillcrm');
 	};
 
-	const getEmailHelperText = () => {
+	const getUserHelperText = () => {
 		return isEditMode
-			? __('Email address cannot be changed', 'quillcrm')
-			: __(
-				'Please Provide Email address of your existing system user',
-				'quillcrm'
-			);
+			? __('User cannot be changed', 'quillcrm')
+			: __('Please select an existing WordPress user', 'quillcrm');
 	};
 
 	return (
@@ -150,7 +200,11 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 			<DialogContent className="max-w-md p-0">
 				{/* Header */}
 				<DialogHeader className="p-6 pb-4">
-					<CustomDialogHeader title={getTitle()} subtitle={getSubtitle()} icon={<GradientAddContactIcon />} />
+					<CustomDialogHeader
+						title={getTitle()}
+						subtitle={getSubtitle()}
+						icon={<GradientAddContactIcon />}
+					/>
 				</DialogHeader>
 
 				{/* Content */}
@@ -162,30 +216,49 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 						</div>
 					)}
 
-					{/* User Email Section */}
+					{/* User Selection Section */}
 					<div className="mb-6">
+						<label className="block text-[#09090B] font-normal text-base mb-2">
+							{__('Select User', 'quillcrm')}
+							{!isEditMode && (
+								<span className="text-red-500 ml-1">*</span>
+							)}
+						</label>
 						{isEditMode ? (
-							<Field
-								label={__('User Email', 'quillcrm')}
-								type="label"
-								value={email}
-								onChange={() => { }}
-								helperText={getEmailHelperText()}
-							/>
+							<>
+								<div className="h-12 w-full py-[5px] px-4 rounded-[8px] border border-[#DEE1E6] bg-gray-50 text-[#09090B] text-sm flex items-center">
+									{email}
+								</div>
+								<p className="text-xs text-gray-500 mt-1">
+									{getUserHelperText()}
+								</p>
+							</>
 						) : (
-							<Field
-								label={__('User Email', 'quillcrm')}
-								type="email"
-								value={email}
-								onChange={(value: string) => {
-									setEmail(value);
-									if (error) setError('');
-								}}
-								required
-								placeholder={__('Type User Email Address', 'quillcrm')}
-								helperText={getEmailHelperText()}
-								className="my-2"
-							/>
+							<>
+								<InfiniteScrollSelect
+									value={selectedUserId || ''}
+									onValueChange={handleUserChange}
+									placeholder={__(
+										'Select a WordPress user',
+										'quillcrm'
+									)}
+									apiEndpoint="/qc/v1/user-management/users/frontend"
+									searchParamName="search"
+									getOptionLabel={(user: WordPressUser) =>
+										`${user.display_name} (${user.email})`
+									}
+									getOptionValue={(user: WordPressUser) =>
+										user.id
+									}
+									dataPath="users"
+									totalPath="pagination.total"
+									perPage={20}
+									selectedItem={selectedUser}
+								/>
+								<p className="text-xs text-gray-500 mt-1">
+									{getUserHelperText()}
+								</p>
+							</>
 						)}
 					</div>
 
@@ -229,7 +302,13 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 							variant="gradient"
 							size="lg"
 							type="submit"
-							disabled={!email || !selectedRole || isSubmitting}
+							disabled={
+								isEditMode
+									? !selectedRole || isSubmitting
+									: !selectedUserId ||
+										!selectedRole ||
+										isSubmitting
+							}
 							className="w-full"
 						>
 							{getSubmitButtonText()}
@@ -237,7 +316,7 @@ const ManagerModal: React.FC<ManagerModalProps> = ({
 					</div>
 				</form>
 			</DialogContent>
-		</Dialog >
+		</Dialog>
 	);
 };
 export default ManagerModal;

@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * External dependencies
@@ -18,7 +19,6 @@ import './style.scss';
 import {
 	ListField,
 	TagField,
-	LinkTriggerField,
 	DynamicKeyValueInput,
 	TestButton,
 } from '@quillcrm/components';
@@ -226,12 +226,38 @@ const Field: React.FC<FieldProps> = ({
 			);
 			break;
 		case 'link-triggers':
-			fieldContent = (
-				<LinkTriggerField
-					value={Array.isArray(value) ? value : []}
-					onChange={(value) => onChange(value)}
-				/>
-			);
+			// Get LinkTriggerField from Pro plugin via filter
+			const LinkTriggerFieldComponent = applyFilters(
+				'quillcrm_pro_component',
+				null,
+				'LinkTriggerField'
+			) as React.ComponentType<{
+				value: number[];
+				onChange: (value: number[]) => void;
+			}> | null;
+
+			if (LinkTriggerFieldComponent) {
+				fieldContent = (
+					<LinkTriggerFieldComponent
+						value={Array.isArray(value) ? value : []}
+						onChange={(value) => onChange(value)}
+					/>
+				);
+			} else {
+				// Show Pro notice if component not available
+				fieldContent = (
+					<div style={{ 
+						padding: '12px', 
+						backgroundColor: '#fff3cd', 
+						border: '1px solid #ffc107',
+						borderRadius: '4px',
+						color: '#856404'
+					}}>
+						<strong>{__('Pro Feature:', 'quillcrm')}</strong>{' '}
+						{__('Link Triggers require QuillCRM Pro to be installed and activated.', 'quillcrm')}
+					</div>
+				);
+			}
 			break;
 		case 'from_email':
 			fieldContent = (

@@ -26,8 +26,8 @@ import Campaigns from '../pages/campaigns';
 import Campaign from '../pages/campaign';
 import Forms from '../pages/forms';
 import Form from '../pages/form';
-import LinkTriggers from '../pages/link-triggers';
-import LinkTrigger from '../pages/link-trigger';
+// import LinkTriggers from '../pages/link-triggers'; // Moved to Pro
+// import LinkTrigger from '../pages/link-trigger'; // Moved to Pro
 import Integrations from '../pages/intergrations';
 import Templates from '../pages/templates';
 import Template from '../pages/template';
@@ -351,18 +351,35 @@ registerAdminPage('form', {
 	hidden: true,
 });
 
+// Link Triggers - stub registration that Pro plugin will override
 registerAdminPage('link-triggers', {
 	path: 'link-triggers',
-	component: () => <LinkTriggers />,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Link Triggers', 'quillcrm')}
+			description={__(
+				'Create trackable links with automated actions. Track clicks, auto-login users, and trigger automations with QuillCRM Pro.',
+				'quillcrm'
+			)}
+		/>
+	),
 	label: __('Link Triggers', 'quillcrm'),
 	icon: <ToolsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],
-	hidden: true,
 });
 
+// Link Trigger Edit - stub registration
 registerAdminPage('link-trigger', {
 	path: 'link-triggers/:id',
-	component: () => <LinkTrigger />,
+	component: () => (
+		<ProFeatureNotice
+			featureName={__('Link Triggers', 'quillcrm')}
+			description={__(
+				'Create trackable links with automated actions. Track clicks, auto-login users, and trigger automations with QuillCRM Pro.',
+				'quillcrm'
+			)}
+		/>
+	),
 	label: __('Link Trigger', 'quillcrm'),
 	hidden: true,
 });

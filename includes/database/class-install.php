@@ -28,7 +28,7 @@ use QuillCRM\Database\Migrations\Tracking_Table;
 use QuillCRM\Database\Migrations\Messages_Table;
 use QuillCRM\Database\Migrations\Forms_Table;
 use QuillCRM\Database\Migrations\Automation_Contact_Processes_Table;
-use QuillCRM\Database\Migrations\Link_Triggers_Table;
+// use QuillCRM\Database\Migrations\Link_Triggers_Table; // Moved to Pro
 use QuillCRM\Database\Migrations\Abandoned_Carts_Table;
 use QuillCRM\Database\Migrations\Logs_Table;
 use QuillCRM\User_Roles\User_Roles;
@@ -112,10 +112,10 @@ class Install {
 				'messages'                     => Messages_Table::class,
 				'forms'                        => Forms_Table::class,
 				'automation_contact_processes' => Automation_Contact_Processes_Table::class,
-				'link_triggers'                => Link_Triggers_Table::class,
+				// 'link_triggers'                => Link_Triggers_Table::class, // Moved to Pro
 				'abandoned_carts'              => Abandoned_Carts_Table::class,
 				'logs'                         => Logs_Table::class,
-				// Pipeline and Custom Fields tables moved to Pro plugin
+				// Pipeline, Link Triggers, and Custom Fields tables moved to Pro plugin
 			)
 		);
 

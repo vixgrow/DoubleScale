@@ -26,7 +26,7 @@ use QuillCRM\Managers\Actions_Manager;
 // use QuillCRM\Managers\Bounce_Handler_Manager; // Moved to Pro
 use QuillCRM\Automations\Loader as Automations_Loader;
 use QuillCRM\Managers\Merge_Tags_Manager;
-use QuillCRM\Tracking\Link_Triggers;
+// use QuillCRM\Tracking\Link_Triggers; // Moved to Pro
 use QuillCRM\Subscription_Manage\Subscription_Manage;
 use QuillCRM\Admin\Admin;
 use QuillCRM\Admin\Admin_Loader;
@@ -236,7 +236,7 @@ final class QuillCRM {
 		Email_Tracking::instance();
 		// SMS_Tracking::instance(); // Moved to Pro
 		// WhatsApp_Tracking::instance(); // Moved to Pro
-		Link_Triggers::instance();
+		// Link_Triggers::instance(); // Moved to Pro
 		Subscription_Manage::instance();
 		Forms_Manager::instance();
 		Triggers_Manager::instance();

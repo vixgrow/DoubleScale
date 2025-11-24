@@ -295,7 +295,7 @@ abstract class Form {
 			if ( ! class_exists( $contact_fields[ $contact_field ]['type'] ) ) {
 				throw new Exception( 'Invalid field type' );
 			}
-			/** @var \QuillCRM\Abstracts\Field_Type $field_type */
+			/** @var \QuillCRM_Pro\Abstracts\Field_Type $field_type */
 			$field_type = new $contact_fields[ $contact_field ]['type']( $contact_fields[ $contact_field ] );
 			$form_field = $field_type->sanitize_field( $entry['fields'][ $form_field ] );
 			if ( 'country' === $contact_field ) {

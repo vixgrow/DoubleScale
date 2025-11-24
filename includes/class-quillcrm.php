@@ -55,6 +55,7 @@ use QuillCRM\Automations\Integrations\GoHighLevel\GoHighLevel_OAuth;
  */
 final class QuillCRM {
 
+
 	/**
 	 * Campaigns tasks
 	 *
@@ -485,12 +486,6 @@ final class QuillCRM {
 		// Load all automations goals files
 		$goals_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/automations/goals/class-*.php' );
 		foreach ( $goals_files as $file ) {
-			require $file;
-		}
-
-		// Load all custom fields types files
-		$custom_fields_files = glob( QUILLCRM_PLUGIN_DIR . 'includes/fields/types/class-*.php' );
-		foreach ( $custom_fields_files as $file ) {
 			require $file;
 		}
 

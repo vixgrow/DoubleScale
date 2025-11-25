@@ -2,7 +2,6 @@
  * wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { applyFilters } from '@wordpress/hooks';
 /**
  * external dependencies
  */
@@ -10,7 +9,12 @@ import { ChevronRight } from 'lucide-react';
 /**
  * internal dependencies
  */
-import LockedLibrary from './LockedLibrary';
+import PreheaderLibrary from '../blocks/libraries/Preheader';
+import HeaderLibrary from '../blocks/libraries/Header';
+import HeroImageLibrary from '../blocks/libraries/HeroImage';
+import EmailBodyLibrary from '../blocks/libraries/EmailBody';
+import ImageGalleryLibrary from '../blocks/libraries/ImageGallery';
+import FooterLibrary from '../blocks/libraries/Footer';
 
 interface LayoutItemsProps {
 	activeSidebar?: any;
@@ -22,56 +26,32 @@ const LayoutItems = ({ activeSidebar, setActiveSidebar }: LayoutItemsProps) => {
 		{
 			id: 'preheader',
 			title: __('Preheader', 'quillcrm'),
-			component: applyFilters(
-				'quillcrm_builder_library_component',
-				LockedLibrary,
-				'preheader'
-			),
+			component: PreheaderLibrary,
 		},
 		{
 			id: 'header',
 			title: __('Header', 'quillcrm'),
-			component: applyFilters(
-				'quillcrm_builder_library_component',
-				LockedLibrary,
-				'header'
-			),
+			component: HeaderLibrary,
 		},
 		{
 			id: 'hero-image',
 			title: __('Hero Image', 'quillcrm'),
-			component: applyFilters(
-				'quillcrm_builder_library_component',
-				LockedLibrary,
-				'hero-image'
-			),
+			component: HeroImageLibrary,
 		},
 		{
 			id: 'email-body',
 			title: __('Email Body', 'quillcrm'),
-			component: applyFilters(
-				'quillcrm_builder_library_component',
-				LockedLibrary,
-				'email-body'
-			),
+			component: EmailBodyLibrary,
 		},
 		{
 			id: 'image-gallery',
 			title: __('Image Gallery', 'quillcrm'),
-			component: applyFilters(
-				'quillcrm_builder_library_component',
-				LockedLibrary,
-				'image-gallery'
-			),
+			component: ImageGalleryLibrary,
 		},
 		{
 			id: 'footer',
 			title: __('Footer', 'quillcrm'),
-			component: applyFilters(
-				'quillcrm_builder_library_component',
-				LockedLibrary,
-				'footer'
-			),
+			component: FooterLibrary,
 		},
 	];
 

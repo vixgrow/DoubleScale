@@ -2,6 +2,11 @@
  * External dependencies
  */
 import { useDraggable } from '@dnd-kit/core';
+/**
+ * Internal dependencies
+ */
+import { PremiumIcon } from '@/components/icons';
+
 interface DraggableTemplateProps {
 	template: any;
 	id: string;
@@ -13,6 +18,7 @@ interface DraggableTemplateProps {
 		| 'hero-image'
 		| 'image-gallery'
 		| 'preheader';
+	disabled?: boolean;
 }
 
 export const DraggableTemplate: React.FC<DraggableTemplateProps> = ({
@@ -20,6 +26,7 @@ export const DraggableTemplate: React.FC<DraggableTemplateProps> = ({
 	id,
 	children,
 	templateType,
+	disabled = false,
 }) => {
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
 		id: `template-${id}`,
@@ -27,17 +34,25 @@ export const DraggableTemplate: React.FC<DraggableTemplateProps> = ({
 			type: `${templateType}-template`,
 			template: template,
 		},
+		disabled: disabled,
 	});
 
 	return (
 		<div
 			ref={setNodeRef}
-			{...listeners}
-			{...attributes}
-			className={`group relative cursor-grab active:cursor-grabbing transition-all ${
-				isDragging ? 'opacity-50' : ''
-			}`}
+			{...(!disabled ? listeners : {})}
+			{...(!disabled ? attributes : {})}
+			className={`group relative transition-all ${
+				disabled
+					? 'cursor-not-allowed opacity-70'
+					: 'cursor-grab active:cursor-grabbing'
+			} ${isDragging ? 'opacity-50' : ''}`}
 		>
+			{disabled && (
+				<div className="absolute top-2 right-2 p-1 bg-[#FAEADF] rounded-full z-10">
+					<PremiumIcon />
+				</div>
+			)}
 			{children}
 		</div>
 	);

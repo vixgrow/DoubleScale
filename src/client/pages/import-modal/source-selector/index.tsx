@@ -125,7 +125,13 @@ const SourceSelector: React.FC = () => {
 			'pipedrive',
 			'gohighlevel',
 		].includes(slug),
-	}));
+	})).filter((source) => {
+		// Hide FluentCRM and FunnelKit when they are not active
+		if (['wpfunnelkit', 'fluentcrm'].includes(source.value)) {
+			return source.disabled === false; // Only show if active
+		}
+		return true; // Show all other sources
+	});
 
 	const handleSourceChange = (newSource: string) => {
 		// Prevent source change when importing is in progress

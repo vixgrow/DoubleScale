@@ -97,8 +97,15 @@ class Email_Tracking_Helper {
 				parse_str( $query_string, $query_args );
 
 				// Get link trigger hash
-				$hash         = $query_args['quillcrm-link-trigger'] ?? '';
-				$link_trigger = \QuillCRM\Models\Link_Trigger_Model::where( 'hash', $hash )->first();
+				$hash = $query_args['quillcrm-link-trigger'] ?? '';
+
+				$link_trigger_class = '\QuillCRM_Pro\Models\Link_Trigger_Model';
+				$link_trigger       = null;
+
+				if ( class_exists( $link_trigger_class ) ) {
+					$link_trigger = $link_trigger_class::where( 'hash', $hash )->first();
+				}
+
 				if ( ! $link_trigger ) {
 					continue;
 				}
@@ -214,9 +221,9 @@ class Email_Tracking_Helper {
 	/**
 	 * Configure link trigger URL with tracking parameters and optional auto-login
 	 *
-	 * @param \QuillCRM\Models\Link_Trigger_Model $link_trigger Link trigger model.
-	 * @param Contact_Model                        $contact Contact model.
-	 * @param string                               $hash_key Tracking hash key.
+	 * @param object        $link_trigger Link trigger model.
+	 * @param Contact_Model $contact      Contact model.
+	 * @param string        $hash_key     Tracking hash key.
 	 * @return string Configured link trigger URL
 	 */
 	protected static function configure_link_trigger_url( $link_trigger, Contact_Model $contact, $hash_key ) {

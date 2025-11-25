@@ -22,8 +22,6 @@ use WP_Error;
 class REST_User_Management_Controller extends REST_Controller {
 
 
-
-
 	/**
 	 * Route base.
 	 *
@@ -179,24 +177,33 @@ class REST_User_Management_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_crm_users( $request ) {
-		// Get all users with CRM roles or WordPress admin access
+		// CRM roles we filter by
+		$crm_roles = array(
+			User_Roles::CRM_MANAGER,
+			User_Roles::DEAL_OWNER,
+		);
+
+		// Get all users with CRM roles
 		$users = get_users(
 			array(
-				'role__in' => array( User_Roles::CRM_MANAGER, User_Roles::DEAL_OWNER ),
+				'role__in' => $crm_roles,
 			)
 		);
 
 		$formatted_users = array();
+
 		foreach ( $users as $user ) {
-			$user_role = Permissions::get_user_role( $user->ID );
+
+			// Extract only CRM-related roles from the user's role list
+			$user_crm_roles = array_values( array_intersect( $user->roles, $crm_roles ) );
 
 			$formatted_users[] = array(
 				'id'         => $user->ID,
 				'name'       => $user->display_name,
 				'email'      => $user->user_email,
 				'user_login' => $user->user_login,
-				'role'       => User_Roles::get_roles()[ $user_role ],
-				'crm_role'   => $user_role,
+				'role'       => '',
+				'crm_role'   => reset( $user_crm_roles ),
 				'roles'      => $user->roles,
 			);
 		}
@@ -213,30 +220,30 @@ class REST_User_Management_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_crm_users_frontend( $request ) {
-		$search   = $request->get_param( 'search' );
-		$per_page = $request->get_param( 'per_page' ) ?: 50;
-		$page     = $request->get_param( 'page' ) ?: 1;
-		$orderby  = $request->get_param( 'orderby' ) ?: 'display_name';
-		$order    = $request->get_param( 'order' ) ?: 'asc';
+		$search           = $request->get_param( 'search' );
+		$per_page         = $request->get_param( 'per_page' ) ?: 50;
+		$page             = $request->get_param( 'page' ) ?: 1;
+		$orderby          = $request->get_param( 'orderby' ) ?: 'display_name';
+		$order            = $request->get_param( 'order' ) ?: 'asc';
+		$filter_crm_users = $request->get_param( 'filter_crm_users' ) ?: false;
 
 		// Build user query arguments
 		$user_args = array(
-			'role__in' => array(
-				User_Roles::CRM_MANAGER,
-				User_Roles::DEAL_OWNER,
-				User_Roles::ADMINISTRATOR,
-			),
-			'number'   => $per_page,
-			'offset'   => ( $page - 1 ) * $per_page,
-			'orderby'  => $orderby,
-			'order'    => strtoupper( $order ),
-			'fields'   => 'all',
+			'number'  => $per_page,
+			'offset'  => ( $page - 1 ) * $per_page,
+			'orderby' => $orderby,
+			'order'   => strtoupper( $order ),
+			'fields'  => 'all',
 		);
 
 		// Add search functionality
 		if ( ! empty( $search ) && strlen( $search ) >= 2 ) {
 			$user_args['search']         = '*' . esc_attr( $search ) . '*';
 			$user_args['search_columns'] = array( 'user_login', 'user_email', 'display_name' );
+		}
+
+		if ( $filter_crm_users ) {
+			$user_args['role__in'] = array( User_Roles::CRM_MANAGER, User_Roles::DEAL_OWNER, User_Roles::ADMINISTRATOR );
 		}
 
 		// Get users
@@ -302,40 +309,52 @@ class REST_User_Management_Controller extends REST_Controller {
 		// Check if user already exists
 		$user = get_user_by( 'email', $email );
 		if ( ! $user ) {
-			return new WP_Error( 'user_not_found', 'User with this email does not exist. Please create the WordPress user first.', array( 'status' => 404 ) );
+			return new WP_Error( 'user_not_found', 'User not found.', array( 'status' => 404 ) );
 		}
 
-		// check if user already has a CRM role
-		$check_user_has_role = Permissions::check_user_has_role( $user->ID );
-		if ( $check_user_has_role ) {
+		// Check if user already has a CRM role
+		$check_crm_role = Permissions::check_user_has_role( $user->ID );
+		if ( $check_crm_role ) {
 			return new WP_Error( 'user_already_has_crm_role', 'User already has a CRM role.', array( 'status' => 400 ) );
 		}
 
-		// Set specific role only
-		$frontend_role = $roles[0];
-		if ( $frontend_role === User_Roles::CRM_MANAGER ) {
-			$user->set_role( User_Roles::CRM_MANAGER );
-		} elseif ( $frontend_role === User_Roles::DEAL_OWNER ) {
-			$user->set_role( User_Roles::DEAL_OWNER );
+		// CRM roles we manage
+		$crm_roles = array(
+			User_Roles::CRM_MANAGER,
+			User_Roles::DEAL_OWNER,
+		);
+
+		// Remove existing CRM roles only
+		foreach ( $crm_roles as $crm_role ) {
+			$user->remove_role( $crm_role );
 		}
 
-		// Get role label for response
+		// Add new CRM roles (no duplicates happen automatically)
+		foreach ( $roles as $role ) {
+			if ( in_array( $role, $crm_roles, true ) ) {
+				$user->add_role( $role );
+			}
+		}
+
+		// Get CRM-related roles assigned
+		$assigned_crm_roles = array_values( array_intersect( $user->roles, $crm_roles ) );
 
 		return new WP_REST_Response(
 			array(
 				'success' => true,
-				'message' => 'User role assigned successfully.',
+				'message' => 'User roles assigned successfully.',
 				'user'    => array(
 					'id'       => $user->ID,
 					'name'     => $user->display_name,
 					'email'    => $user->user_email,
-					'role'     => User_Roles::get_roles()[ reset( $user->roles ) ],
-					'crm_role' => reset( $user->roles ),
+					'role'     => '',
+					'crm_role' => reset( $assigned_crm_roles ),
 				),
 			),
 			201
 		);
 	}
+
 
 	/**
 	 * Assign CRM role to user
@@ -354,13 +373,24 @@ class REST_User_Management_Controller extends REST_Controller {
 			return new WP_Error( 'user_not_found', 'User not found.', array( 'status' => 404 ) );
 		}
 
-		// Set specific role
-		User_Roles::remove_role_and_capabilities( $user->ID );
-		if ( $role === User_Roles::CRM_MANAGER ) {
-			$user->set_role( User_Roles::CRM_MANAGER );
-		} elseif ( $role === User_Roles::DEAL_OWNER ) {
-			$user->set_role( User_Roles::DEAL_OWNER );
+		// CRM roles list
+		$crm_roles = array(
+			User_Roles::CRM_MANAGER,
+			User_Roles::DEAL_OWNER,
+		);
+
+		// Remove existing CRM roles
+		foreach ( $crm_roles as $crm_role ) {
+			$user->remove_role( $crm_role );
 		}
+
+		// Add the new CRM role
+		if ( in_array( $role, $crm_roles, true ) ) {
+			$user->add_role( $role );
+		}
+
+		// Get assigned CRM roles
+		$assigned_crm_roles = array_values( array_intersect( $user->roles, $crm_roles ) );
 
 		return new WP_REST_Response(
 			array(
@@ -368,12 +398,13 @@ class REST_User_Management_Controller extends REST_Controller {
 				'message' => 'User role updated successfully.',
 				'user'    => array(
 					'id'       => $user->ID,
-					'crm_role' => reset( $user->roles ),
+					'crm_role' => reset( $assigned_crm_roles ),
 				),
 			),
 			200
 		);
 	}
+
 
 	/**
 	 * Remove user CRM role
@@ -391,8 +422,18 @@ class REST_User_Management_Controller extends REST_Controller {
 			return new WP_Error( 'user_not_found', 'User not found.', array( 'status' => 404 ) );
 		}
 
-		// Remove CRM access via user meta
-		User_Roles::remove_role_and_capabilities( $user->ID );
+		// CRM roles
+		$crm_roles = array(
+			User_Roles::CRM_MANAGER,
+			User_Roles::DEAL_OWNER,
+		);
+
+		// Remove only CRM roles, keep everything else
+		foreach ( $crm_roles as $crm_role ) {
+			if ( in_array( $crm_role, $user->roles, true ) ) {
+				$user->remove_role( $crm_role );
+			}
+		}
 
 		return new WP_REST_Response(
 			array(
@@ -402,6 +443,7 @@ class REST_User_Management_Controller extends REST_Controller {
 			200
 		);
 	}
+
 
 	/**
 	 * Check admin permissions

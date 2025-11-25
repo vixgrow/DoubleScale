@@ -111,41 +111,29 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				// Add submenu for Analytics based on capabilities
 				if (item.path === 'analytics-and-reports') {
-					// Check if deal analytics should be shown (Pro plugin can override this)
-					const showDealsAnalytics = applyFilters('quillcrm_show_deals_analytics', false);
-
 					if (isDealOwner()) {
-						navItem.subMenu = showDealsAnalytics
-							? [
-								{
-									path: 'my-reports',
-									label: __('My Reports', 'quillcrm'),
-								},
-							]
-							: [];
+						// Deal owners see only their reports
+						navItem.subMenu = [
+							{
+								path: 'my-reports',
+								label: __('My Reports', 'quillcrm'),
+							},
+						];
 					} else {
-						// Build submenu with conditional deal analytics
-						const submenu = [];
-
-						if (showDealsAnalytics) {
-							submenu.push(
-								{
-									path: 'deals-analytics',
-									label: __('Deals Analytics', 'quillcrm'),
-								},
-								{
-									path: 'sales-rep-analytics',
-									label: __('Sales Rep Analytics', 'quillcrm'),
-								},
-								{
-									path: 'pipeline-analytics',
-									label: __('Pipeline Analytics', 'quillcrm'),
-								}
-							);
-						}
-
-						// Always show these analytics (non-deal related)
-						submenu.push(
+						// Build submenu with all analytics (deal analytics will show Pro notice in free version)
+						const submenu = [
+							{
+								path: 'deals-analytics',
+								label: __('Deals Analytics', 'quillcrm'),
+							},
+							{
+								path: 'sales-rep-analytics',
+								label: __('Sales Rep Analytics', 'quillcrm'),
+							},
+							{
+								path: 'pipeline-analytics',
+								label: __('Pipeline Analytics', 'quillcrm'),
+							},
 							{
 								path: 'emails-analytics',
 								label: __('Emails Analytics', 'quillcrm'),
@@ -158,7 +146,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 								path: 'cart-analytics',
 								label: __('Cart Analytics', 'quillcrm'),
 							}
-						);
+						];
 
 						navItem.subMenu = submenu;
 					}

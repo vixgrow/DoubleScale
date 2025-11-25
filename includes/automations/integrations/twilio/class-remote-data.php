@@ -21,3 +21,4 @@ class Remote_Data extends Integration_Remote_Data {
 	// Stub class - no additional functionality needed in free version
 }
 
+

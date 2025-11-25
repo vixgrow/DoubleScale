@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useSelect } from '@wordpress/data';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -12,6 +12,7 @@ import { getBlockDefinition } from '../blocks/blockRegistryUtils';
 import { DeleteIcon } from '@quillcrm/components';
 import { useDispatch } from '@wordpress/data';
 import { isTemplateBlock } from '../utils/templateUtils';
+import { ImageResizeHandles } from './ImageResizeHandles';
 
 interface BlockRendererProps {
 	block: EmailBlock;
@@ -79,6 +80,13 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 		dispatch(STORE_KEY).deleteBlock(block.id);
 	};
 
+	const handleImageResize = useCallback(
+		(width: string, height: string) => {
+			dispatch(STORE_KEY).updateBlock(block.id, { width, height });
+		},
+		[block.id, dispatch]
+	);
+
 	// Prepare props for rendering
 	// If unknown, pass original type and props for preservation
 	const renderProps = isUnknown && info
@@ -87,6 +95,10 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			originalProps: block.props,
 		}
 		: block.props;
+
+	// Check if this is an image block and should show resize handles
+	const isImageBlock = block.type === 'image' && isSelected && !isThisTemplateBlock;
+	const imageProps = isImageBlock ? (renderProps as any) : null;
 
 	return (
 		<div
@@ -132,9 +144,26 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 			)}
 
 			{/* Block Content */}
-			<div className="p-2">
+			<div className="p-2 relative">
 				{blockDefinition.Renderer ? (
-					<blockDefinition.Renderer props={renderProps as any} />
+					<blockDefinition.Renderer
+						props={
+							isImageBlock && imageProps
+								? {
+										...renderProps,
+										renderResizeHandles: (containerRef: React.RefObject<HTMLDivElement>) =>
+											isImageBlock && imageProps ? (
+												<ImageResizeHandles
+													width={imageProps.width || '100%'}
+													height={imageProps.height || 'auto'}
+													onResize={handleImageResize}
+													containerRef={containerRef}
+												/>
+											) : null,
+									}
+								: (renderProps as any)
+						}
+					/>
 				) : (
 					<div className="text-muted-foreground">
 						{__('No renderer available', 'quillcrm')}

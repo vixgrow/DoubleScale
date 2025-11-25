@@ -60,12 +60,7 @@ export const ImageResizeHandles: React.FC<ImageResizeHandlesProps> = ({
 	});
 
 	return (
-		<div
-			className="absolute inset-0 pointer-events-none"
-			style={{
-				zIndex: 1000,
-			}}
-		>
+		<div className="absolute inset-0 pointer-events-none">
 			{handlePositions.map(({ type, position, cursor }) => (
 				<button
 					key={type}

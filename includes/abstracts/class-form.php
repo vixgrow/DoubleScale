@@ -14,7 +14,7 @@ namespace QuillCRM\Abstracts;
 
 use Exception;
 use QuillCRM\Models\Contact_Model;
-use QuillCRM\Models\Form_Model;
+use QuillCRM_Pro\Models\Form_Model;
 use QuillCRM\Fields\Contact_Fields;
 use QuillCRM\Models\Automation_Model;
 use QuillCRM\QuillCRM;
@@ -26,6 +26,7 @@ use QuillCRM_Pro\Managers\Rules_Manager;
  * Form class
  */
 abstract class Form {
+
 
 
 	/**
@@ -340,6 +341,9 @@ abstract class Form {
 	 */
 	public function is_form_active( $form_id ) {
 		try {
+			if ( ! class_exists( 'QuillCRM_Pro\Models\Form_Model' ) ) {
+				return false;
+			}
 			$form            = Form_Model::get_form_by_form_id( $this->get_form_id( $form_id ), $this->slug, 'active' );
 			$this->form_data = $form;
 			return true;

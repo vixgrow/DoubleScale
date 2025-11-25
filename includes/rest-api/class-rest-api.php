@@ -19,7 +19,6 @@ use QuillCRM\REST_API\Controllers\V1\REST_Template_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Step_Controller;
 use QuillCRM\REST_API\Controllers\V1\Rest_Automation_Contact_Controller;
-use QuillCRM\REST_API\Controllers\V1\Rest_Form_Controller;
 // use QuillCRM\REST_API\Controllers\V1\REST_Link_Trigger_Controller; // Moved to Pro
 use QuillCRM\REST_API\Controllers\V1\REST_Integration_Controller;
 use QuillCRM\REST_API\Controllers\V1\REST_Settings_Controller;
@@ -38,13 +37,6 @@ use QuillCRM\REST_API\Controllers\V1\REST_Email_Sequence_Controller;
  * @since 1.0.0
  */
 class REST_API {
-
-
-
-
-
-
-
 
 	/**
 	 *  Class singleton instance
@@ -97,11 +89,10 @@ class REST_API {
 			REST_Tag_Controller::class,
 			Rest_Contact_Note_Controller::class,
 			REST_Campaign_Controller::class,
-				REST_Template_Controller::class,
+			REST_Template_Controller::class,
 			Rest_Automation_Controller::class,
 			Rest_Automation_Step_Controller::class,
 			Rest_Automation_Contact_Controller::class,
-			Rest_Form_Controller::class,
 			// REST_Link_Trigger_Controller::class, // Moved to Pro
 			REST_Integration_Controller::class,
 			REST_Settings_Controller::class,

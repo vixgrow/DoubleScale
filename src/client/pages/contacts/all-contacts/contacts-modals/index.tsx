@@ -2,6 +2,7 @@
  * wordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 /**
  * external dependencies
  */
@@ -155,8 +156,15 @@ export const ContactsImportModal: React.FC = () => {
 export const ContactsExportModal: React.FC = () => {
 	const { exportModalVisible, setExportModalVisible } = useContactsContext();
 
+	// Apply filter to allow Pro plugin to override
+	const ExportModalComponent = applyFilters(
+		'quillcrm_export_modal_component',
+		ExportModal,
+		'contacts'
+	) as React.FC<{ open: boolean; onClose: () => void }>;
+
 	return (
-		<ExportModal
+		<ExportModalComponent
 			open={exportModalVisible}
 			onClose={() => setExportModalVisible(false)}
 		/>

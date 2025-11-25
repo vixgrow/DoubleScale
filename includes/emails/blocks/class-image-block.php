@@ -84,12 +84,14 @@ class Image_Block extends Email_Block {
 		);
 
 		// Container style (matches frontend containerStyle)
+		$is_full_width   = $props['width'] === '100%' || ( strpos( $props['width'], '%' ) !== false && floatval( $props['width'] ) >= 100 );
+		$should_center   = $props['align'] === 'center';
 		$container_style = $this->build_style_string(
 			array(
 				'background-color' => $props['backgroundColor'],
 				'padding'          => $this->format_padding( $props['padding'] ),
 				'border-radius'    => $props['borderRadius'] . 'px',
-				'display'          => 'block',
+				'display'          => ( $is_full_width && ! $should_center ) ? 'block' : 'inline-block',
 				'max-width'        => '100%',
 				'width'            => $props['width'],
 				'margin'           => '0',
@@ -140,8 +142,8 @@ class Image_Block extends Email_Block {
 
 		$placeholder_cell_style = $this->build_style_string(
 			array(
-				'text-align'     => 'left',
-				'vertical-align' => 'top',
+				'text-align'     => 'center',
+				'vertical-align' => 'middle',
 				'color'          => '#6B7280',
 				'font-size'      => '24px',
 				'line-height'    => '1',

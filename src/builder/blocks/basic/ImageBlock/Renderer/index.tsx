@@ -5,7 +5,12 @@
 /**
  * external dependencies
  */
-import React, { useState, forwardRef, useRef, useImperativeHandle } from 'react';
+import React, {
+	useState,
+	forwardRef,
+	useRef,
+	useImperativeHandle,
+} from 'react';
 
 /**
  * internal dependencies
@@ -15,7 +20,9 @@ import { ImageBlockIcon } from '@quillcrm/components';
 
 export interface ImageBlockRendererProps {
 	props: ImageBlockProps & {
-		renderResizeHandles?: (containerRef: React.RefObject<HTMLDivElement>) => React.ReactNode;
+		renderResizeHandles?: (
+			containerRef: React.RefObject<HTMLDivElement>
+		) => React.ReactNode;
 	};
 }
 
@@ -24,21 +31,29 @@ export const ImageBlockRenderer = forwardRef<
 	ImageBlockRendererProps
 >(({ props }, ref) => {
 	const containerRef = useRef<HTMLDivElement>(null);
-	
+
 	// Sync the forwarded ref with our internal ref
 	useImperativeHandle(ref, () => containerRef.current as HTMLDivElement, []);
-	
+
 	// Extract renderResizeHandles from props if it exists
 	const { renderResizeHandles, ...imageProps } = props;
-	
+
 	const [imageError, setImageError] = useState(false);
-	const [imageLoaded, setImageLoaded] = useState(false);
+
+	// Determine display type based on width and alignment (matches backend logic)
+	const is_full_width =
+		imageProps.width === '100%' ||
+		(imageProps.width?.includes('%') &&
+			Number.parseFloat(imageProps.width) >= 100);
+	const should_center = imageProps.align === 'center';
+	const containerDisplay =
+		is_full_width && !should_center ? 'block' : 'inline-block';
 
 	const containerStyle: React.CSSProperties = {
 		backgroundColor: imageProps.backgroundColor,
 		padding: `${imageProps.padding?.top || 0}px ${imageProps.padding?.right || 0}px ${imageProps.padding?.bottom || 0}px ${imageProps.padding?.left || 0}px`,
 		borderRadius: `${imageProps.borderRadius}px`,
-		display: 'block',
+		display: containerDisplay,
 		maxWidth: '100%',
 		width: imageProps.width,
 		margin: '0',
@@ -76,10 +91,6 @@ export const ImageBlockRenderer = forwardRef<
 		setImageError(true);
 	};
 
-	const handleImageLoad = () => {
-		setImageLoaded(true);
-	};
-
 	const renderImageElement = () => {
 		if (!imageProps.src || imageError) {
 			return (
@@ -95,7 +106,6 @@ export const ImageBlockRenderer = forwardRef<
 				alt={imageProps.alt}
 				style={imageStyle}
 				onError={handleImageError}
-				onLoad={handleImageLoad}
 			/>
 		);
 	};
@@ -116,7 +126,7 @@ export const ImageBlockRenderer = forwardRef<
 				) : (
 					imageElement
 				)}
-				{renderResizeHandles && renderResizeHandles(containerRef)}
+				{renderResizeHandles?.(containerRef)}
 			</div>
 		</div>
 	);

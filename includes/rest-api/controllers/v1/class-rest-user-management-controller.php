@@ -21,6 +21,7 @@ use WP_Error;
  */
 class REST_User_Management_Controller extends REST_Controller {
 
+
 	/**
 	 * Route base.
 	 *
@@ -219,7 +220,6 @@ class REST_User_Management_Controller extends REST_Controller {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_crm_users_frontend( $request ) {
-		xdebug_break();
 		$search           = $request->get_param( 'search' );
 		$per_page         = $request->get_param( 'per_page' ) ?: 50;
 		$page             = $request->get_param( 'page' ) ?: 1;

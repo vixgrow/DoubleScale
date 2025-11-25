@@ -64,11 +64,11 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 	const isSelected = selectedBlockId === block.id;
 
 	// Get block definition with fallback to UnknownBlock
-	const { block: blockDefinition, isUnknown, info } = getBlockDefinition(
-		block.type,
-		blocksRegistry,
-		blocksRegistry.unknown
-	);
+	const {
+		block: blockDefinition,
+		isUnknown,
+		info,
+	} = getBlockDefinition(block.type, blocksRegistry, blocksRegistry.unknown);
 
 	const handleBlockClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -89,15 +89,17 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 
 	// Prepare props for rendering
 	// If unknown, pass original type and props for preservation
-	const renderProps = isUnknown && info
-		? {
-			originalType: info.originalType,
-			originalProps: block.props,
-		}
-		: block.props;
+	const renderProps =
+		isUnknown && info
+			? {
+					originalType: info.originalType,
+					originalProps: block.props,
+				}
+			: block.props;
 
 	// Check if this is an image block and should show resize handles
-	const isImageBlock = block.type === 'image' && isSelected && !isThisTemplateBlock;
+	const isImageBlock =
+		block.type === 'image' && isSelected && !isThisTemplateBlock;
 	const imageProps = isImageBlock ? (renderProps as any) : null;
 
 	return (
@@ -151,11 +153,19 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({
 							isImageBlock && imageProps
 								? {
 										...renderProps,
-										renderResizeHandles: (containerRef: React.RefObject<HTMLDivElement>) =>
+										renderResizeHandles: (
+											containerRef: React.RefObject<HTMLDivElement>
+										) =>
 											isImageBlock && imageProps ? (
 												<ImageResizeHandles
-													width={imageProps.width || '100%'}
-													height={imageProps.height || 'auto'}
+													width={
+														imageProps.width ||
+														'100%'
+													}
+													height={
+														imageProps.height ||
+														'auto'
+													}
 													onResize={handleImageResize}
 													containerRef={containerRef}
 												/>

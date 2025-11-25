@@ -145,8 +145,8 @@ const ContactInformation: React.FC = () => {
 						</AvatarFallback>
 					</Avatar>
 					<div className="w-full">
-						<div className="flex justify-between items-center gap-2">
-							<CardTitle className="text-xl font-semibold truncate max-w-[168px]">
+						<div className="flex justify-between items-start gap-2">
+							<CardTitle className="text-xl font-semibold break-words max-w-[168px]">
 								{fullName}
 							</CardTitle>
 							<Select
@@ -169,17 +169,17 @@ const ContactInformation: React.FC = () => {
 										)}
 									/>
 								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="unverified">
+								<SelectContent position="popper" sideOffset={5} className="z-[150000]">
+									<SelectItem value="unverified" className='cursor-pointer'>
 										{__('Unverified', 'quillcrm')}
 									</SelectItem>
-									<SelectItem value="subscribed">
+									<SelectItem value="subscribed" className='cursor-pointer'>
 										{__('Subscribed', 'quillcrm')}
 									</SelectItem>
-									<SelectItem value="unsubscribed">
+									<SelectItem value="unsubscribed" className='cursor-pointer'>
 										{__('Unsubscribed', 'quillcrm')}
 									</SelectItem>
-									<SelectItem value="bounced">
+									<SelectItem value="bounced" className='cursor-pointer'>
 										{__('Bounced', 'quillcrm')}
 									</SelectItem>
 								</SelectContent>
@@ -205,8 +205,8 @@ const ContactInformation: React.FC = () => {
 									{isSendingOptIn
 										? __('Sending...', 'quillcrm')
 										: optInSent
-										? __('Email Sent', 'quillcrm')
-										: __('Send Opt-in Email', 'quillcrm')}
+											? __('Email Sent', 'quillcrm')
+											: __('Send Opt-in Email', 'quillcrm')}
 								</Button>
 							</div>
 						)}

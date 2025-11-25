@@ -41,6 +41,7 @@ export const CreateContactModal: React.FC = () => {
 		email: '',
 		first_name: '',
 		last_name: '',
+		phone: '',
 	};
 
 	const [contactForm, setContactForm] = useState(emptyContact);
@@ -98,6 +99,22 @@ export const CreateContactModal: React.FC = () => {
 						}
 						type="text"
 						placeholder={__('Enter Last Name', 'quillcrm')}
+					/>
+					<Field
+						label={__('Phone', 'quillcrm')}
+						value={contactForm.phone}
+						onChange={(value) => {
+							// Allow only numbers and common phone characters (+, -, spaces, parentheses)
+							const phoneRegex = /^[0-9+\-\s()]*$/;
+							if (phoneRegex.test(value) || value === '') {
+								setContactForm((prev) => ({
+									...prev,
+									phone: value,
+								}));
+							}
+						}}
+						type="tel"
+						placeholder={__('Enter Phone Number', 'quillcrm')}
 					/>
 					<Field
 						label={__('Email', 'quillcrm')}

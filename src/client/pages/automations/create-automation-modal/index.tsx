@@ -121,8 +121,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
 
     return (
         <Dialog open={visible} onOpenChange={(open) => !open && onCancel()}>
-            <DialogContent className="max-w-[1100px] overflow-y-auto max-h-[90vh]">
-                <DialogHeader>
+            <DialogContent className="max-w-[1100px] max-h-[90vh] h-full flex flex-col overflow-hidden">
+                <DialogHeader className="shrink-0">
                     <CustomDialogHeader
                         title={__('Create Automation', 'quillcrm')}
                         subtitle={__('Add New Automation', 'quillcrm')}
@@ -130,70 +130,71 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({
                     />
                 </DialogHeader>
 
-                {error && (
-                    <div className="mb-4">
-                        <NoticeBanner
-                            ref={noticeBannerRef}
-                            notice={error}
-                            closeNotice={onClearError}
-                        />
-                    </div>
-                )}
-
-                <div className="qcrm-fields qcrm-automation-modal-fields">
-                    <Field
-                        label={__('Automation Name', 'quillcrm')}
-                        value={automation.name}
-                        onChange={(value) =>
-                            onAutomationChange({ ...automation, name: value })
-                        }
-                        type="text"
-                        required
-                    />
-
-                    <div className="qcrm-field">
-                        <div className="qcrm-field-label flex items-center text-base text-[#09090B]">
-                            {__('Trigger', 'quillcrm')}
-                            <span className="text-destructive">*</span>
+                <div className="flex-1 overflow-y-auto pr-1">
+                    {error && (
+                        <div className="mb-4">
+                            <NoticeBanner
+                                ref={noticeBannerRef}
+                                notice={error}
+                                closeNotice={onClearError}
+                            />
                         </div>
+                    )}
 
-                        <div className="flex h-full gap-5">
-                            <div className="w-1/2">
-                                <TriggerCategorySelector
-                                    triggers={automationTriggers}
-                                    selectedCategory={selectedCategory}
-                                    onCategoryChange={setSelectedCategory}
-                                    data={categoryData}
-                                />
+                    <div className="qcrm-fields qcrm-automation-modal-fields">
+                        <Field
+                            label={__('Automation Name', 'quillcrm')}
+                            value={automation.name}
+                            onChange={(value) =>
+                                onAutomationChange({ ...automation, name: value })
+                            }
+                            type="text"
+                            required
+                        />
+
+                        <div className="qcrm-field">
+                            <div className="qcrm-field-label flex items-center text-base text-[#09090B]">
+                                {__('Trigger', 'quillcrm')}
+                                <span className="text-destructive">*</span>
                             </div>
 
-                            <div className="w-1/2">
-                                <TriggersGroupRender
-                                    groups={currentCategoryData?.groups || []}
-                                    value={automation.trigger}
-                                    onChange={(value) =>
-                                        onAutomationChange({
-                                            ...automation,
-                                            trigger: value,
-                                        })
-                                    }
-                                />
+                            <div className="flex h-full gap-5">
+                                <div className="w-1/2">
+                                    <TriggerCategorySelector
+                                        triggers={automationTriggers}
+                                        selectedCategory={selectedCategory}
+                                        onCategoryChange={setSelectedCategory}
+                                        data={categoryData}
+                                    />
+                                </div>
+
+                                <div className="w-1/2">
+                                    <TriggersGroupRender
+                                        groups={currentCategoryData?.groups || []}
+                                        value={automation.trigger}
+                                        onChange={(value) =>
+                                            onAutomationChange({
+                                                ...automation,
+                                                trigger: value,
+                                            })
+                                        }
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <DialogFooter>
+                <DialogFooter className="pt-4 border-t border-border flex justify-end shrink-0 bg-white">
                     <Button
                         onClick={onOk}
                         disabled={isSaving}
-                        size="xl"
                         variant="gradient"
-                        className="w-full mt-4"
+                        className="mt-0 px-8 py-3 rounded-lg"
                     >
                         {isSaving
                             ? __('Creating...', 'quillcrm')
-                            : __('Create', 'quillcrm')}
+                            : __('Create Automation', 'quillcrm')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

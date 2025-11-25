@@ -273,6 +273,7 @@ const Field: React.FC<FieldProps> = ({
 		case 'text':
 		case 'number':
 		case 'email':
+		case 'tel':
 		case 'url':
 		case 'password':
 			fieldContent = (

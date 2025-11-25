@@ -71,7 +71,6 @@ export const ImageResizeHandles: React.FC<ImageResizeHandlesProps> = ({
 					style={{
 						cursor: cursor,
 						margin: '-8px', // Center the 16px handle on the edge
-						zIndex: 1001,
 						boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
 						padding: 0,
 						border: '2px solid white',

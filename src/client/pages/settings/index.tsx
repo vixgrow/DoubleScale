@@ -35,7 +35,6 @@ import { ProFeatureNotice } from '@quillcrm/components/pro-feature-notice';
 import BusinessSettings from './business';
 import EmailSettings from './email';
 import DoubleOptInSettings from './double-optin';
-import CartSettings from './cart';
 import Managers from './managers';
 import SettingsShimmer from './settings-shimmer';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -43,7 +42,7 @@ import { Button } from '@/components/ui/button';
 import CurrenciesSettings from './currencies';
 // import CustomFields from '../custom-fields'; // Moved to Pro
 // import LinkTriggers from '../link-triggers'; // Moved to Pro
-import { UserRound, MessageSquare } from 'lucide-react';
+// import CartSettings from './cart'; // Moved to Pro
 
 const TABS_WITHOUT_SAVE_BUTTON = new Set(['custom_fields', 'link_triggers']);
 const SETTINGS_DEPENDENT_TABS = new Set([
@@ -192,8 +191,26 @@ const SettingsPage: React.FC = () => {
 					/>
 				);
 			case 'cart':
+				const CartComponent = applyFilters(
+					'quillcrm_settings_cart_settings',
+					() => (
+						<ProFeatureNotice
+							featureName={__('Cart Settings', 'quillcrm')}
+							description={__(
+								'Track abandoned carts, set up GDPR compliance, and automate cart recovery with QuillCRM Pro.',
+								'quillcrm'
+							)}
+						/>
+					)
+				) as React.ComponentType<{
+					settings: Settings;
+					onChange: (settings: Settings) => void;
+				}>;
 				return (
-					<CartSettings settings={settings!} onChange={setSettings} />
+					<CartComponent
+						settings={settings!}
+						onChange={setSettings}
+					/>
 				);
 			case 'managers':
 				return <Managers />;

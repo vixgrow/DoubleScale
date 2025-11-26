@@ -603,8 +603,18 @@ class REST_Settings_Controller extends REST_Controller {
 		$campaigns_tasks = \QuillCRM\QuillCRM::instance()->campaigns_tasks;
 		$email_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_email_campaigns' );
 
-		$next_run = isset( $email_heartbeat['next_scheduled'] ) ? strtotime( $email_heartbeat['next_scheduled'] ) : time() + 60;
 		$last_run = $email_heartbeat['last_run'] ?? null;
+
+		// Calculate next_scheduled on-the-fly.
+		if ( $last_run ) {
+			$next_run = strtotime( $last_run ) + 60;
+		} else {
+			$next_run = as_next_scheduled_action( 'quillcrm_campaigns_quillcrm_email_campaigns' );
+		}
+
+		if ( ! $next_run || true === $next_run ) {
+			$next_run = time() + 60;
+		}
 
 		$events[] = array(
 			'hook'       => 'quillcrm_campaigns_quillcrm_email_campaigns',
@@ -613,14 +623,23 @@ class REST_Settings_Controller extends REST_Controller {
 			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
 			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
 			'interval'   => 60,
-			'run_count'  => $email_heartbeat['run_count'] ?? 0,
 		);
 
 		// SMS campaigns (every 60 seconds) - Pro only.
 		if ( class_exists( 'QuillCRM_Pro\QuillCRM_Pro' ) ) {
 			$sms_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_sms_campaigns' );
-			$next_run      = isset( $sms_heartbeat['next_scheduled'] ) ? strtotime( $sms_heartbeat['next_scheduled'] ) : time() + 60;
 			$last_run      = $sms_heartbeat['last_run'] ?? null;
+
+			// Calculate next_scheduled on-the-fly.
+			if ( $last_run ) {
+				$next_run = strtotime( $last_run ) + 60;
+			} else {
+				$next_run = as_next_scheduled_action( 'quillcrm_campaigns_quillcrm_sms_campaigns' );
+			}
+
+			if ( ! $next_run || true === $next_run ) {
+				$next_run = time() + 60;
+			}
 
 			$events[] = array(
 				'hook'       => 'quillcrm_campaigns_quillcrm_sms_campaigns',
@@ -629,7 +648,6 @@ class REST_Settings_Controller extends REST_Controller {
 				'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
 				'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
 				'interval'   => 60,
-				'run_count'  => $sms_heartbeat['run_count'] ?? 0,
 			);
 		}
 
@@ -668,8 +686,18 @@ class REST_Settings_Controller extends REST_Controller {
 		// Daily tasks.
 		$daily_tasks      = \QuillCRM\QuillCRM::instance()->daily_tasks;
 		$daily3_heartbeat = $daily_tasks->get_heartbeat_status( 'quillcrm_daily3' );
-		$next_run         = isset( $daily3_heartbeat['next_scheduled'] ) ? strtotime( $daily3_heartbeat['next_scheduled'] ) : time() + DAY_IN_SECONDS;
 		$last_run         = $daily3_heartbeat['last_run'] ?? null;
+
+		// Calculate next_scheduled on-the-fly.
+		if ( $last_run ) {
+			$next_run = strtotime( $last_run ) + DAY_IN_SECONDS;
+		} else {
+			$next_run = as_next_scheduled_action( 'quillcrm_daily_quillcrm_daily3' );
+		}
+
+		if ( ! $next_run || true === $next_run ) {
+			$next_run = time() + DAY_IN_SECONDS;
+		}
 
 		$events[] = array(
 			'hook'       => 'quillcrm_daily_quillcrm_daily3',
@@ -678,7 +706,6 @@ class REST_Settings_Controller extends REST_Controller {
 			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
 			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
 			'interval'   => DAY_IN_SECONDS,
-			'run_count'  => $daily3_heartbeat['run_count'] ?? 0,
 		);
 
 		// Server information

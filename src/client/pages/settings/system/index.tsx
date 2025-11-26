@@ -33,7 +33,6 @@ interface CronEvent {
 	next_run: string;
 	last_run: string;
 	interval: number;
-	run_count: number;
 }
 
 interface ServerInfo {
@@ -310,16 +309,11 @@ const SystemSettings: React.FC = () => {
 									</div>
 									<div className="flex items-center gap-4 text-xs text-muted-foreground">
 										<span>
-											{__('Next:', 'quillcrm')} {event.next_run}
+											{__('Next Run:', 'quillcrm')} {event.next_run}
 										</span>
 										<span>•</span>
 										<span>
-											{__('Last:', 'quillcrm')} {event.last_run}
-										</span>
-										<span>•</span>
-										<span>
-											{__('Runs:', 'quillcrm')}{' '}
-											{event.run_count.toLocaleString()}
+											{__('Last Run:', 'quillcrm')} {event.last_run}
 										</span>
 									</div>
 								</div>

@@ -283,16 +283,12 @@ class Tasks {
 		return (bool) $wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->prefix}quillcrm_task_meta
-				SET last_run = %s,
-					run_count = run_count + 1,
-					next_scheduled = DATE_ADD(%s, INTERVAL %d SECOND)
+				SET last_run = %s
 				WHERE hook = %s
 				AND group_slug = %s
 				ORDER BY ID DESC
 				LIMIT 1",
 				$current_time,
-				$current_time,
-				$interval,
 				$full_hook,
 				$this->group
 			)
@@ -302,13 +298,12 @@ class Tasks {
 	/**
 	 * Get heartbeat status for a hook
 	 *
-	 * Returns last run time, next scheduled time, and run count
-	 * for monitoring task health.
+	 * Returns last run time for monitoring task health.
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param string $hook Hook name (without group prefix).
-	 * @return array|null Heartbeat data with last_run, next_scheduled, run_count.
+	 * @return array|null Heartbeat data with last_run.
 	 */
 	public function get_heartbeat_status( $hook ) {
 		global $wpdb;
@@ -317,7 +312,7 @@ class Tasks {
 
 		return $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT last_run, next_scheduled, run_count
+				"SELECT last_run
 				FROM {$wpdb->prefix}quillcrm_task_meta
 				WHERE hook = %s
 				AND group_slug = %s

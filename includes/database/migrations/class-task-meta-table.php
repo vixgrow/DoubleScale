@@ -41,8 +41,6 @@ class Task_Meta_Table extends Migration {
 				value longtext NOT NULL,
 				date_created datetime NOT NULL,
 				last_run datetime DEFAULT NULL,
-				next_scheduled datetime DEFAULT NULL,
-				run_count BIGINT UNSIGNED DEFAULT 0,
 				PRIMARY KEY  (ID),
 				KEY action_id (action_id),
 				KEY hook (hook),

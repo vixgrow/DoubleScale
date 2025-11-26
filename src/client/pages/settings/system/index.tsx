@@ -352,69 +352,6 @@ const SystemSettings: React.FC = () => {
 				</CardContent>
 			</Card>
 
-			{/* Server Information */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<Server className="h-5 w-5" />
-						{__('Server Information', 'quillcrm')}
-					</CardTitle>
-					<CardDescription>
-						{__('System resources and cron configuration', 'quillcrm')}
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div className="p-3 border rounded-lg">
-							<dt className="text-xs font-medium text-muted-foreground mb-1">
-								{__('Memory Limit', 'quillcrm')}
-							</dt>
-							<dd className="text-lg font-semibold">
-								{cronStatus.server.memory_limit}
-							</dd>
-						</div>
-						<div className="p-3 border rounded-lg">
-							<dt className="text-xs font-medium text-muted-foreground mb-1">
-								{__('Memory Usage', 'quillcrm')}
-							</dt>
-							<dd className="text-lg font-semibold flex items-center gap-2">
-								{cronStatus.server.usage_percent}%
-								{cronStatus.server.usage_percent > 80 && (
-									<Badge variant="destructive" className="text-xs">
-										{__('High', 'quillcrm')}
-									</Badge>
-								)}
-							</dd>
-						</div>
-						<div className="p-3 border rounded-lg">
-							<dt className="text-xs font-medium text-muted-foreground mb-1">
-								{__('Max Execution Time', 'quillcrm')}
-							</dt>
-							<dd className="text-lg font-semibold">
-								{cronStatus.server.max_execution_time}
-							</dd>
-						</div>
-						<div className="p-3 border rounded-lg">
-							<dt className="text-xs font-medium text-muted-foreground mb-1">
-								{__('Cron Type', 'quillcrm')}
-							</dt>
-							<dd className="text-lg font-semibold flex items-center gap-2">
-								{hasServerCron ? (
-									<Badge variant="default" className="text-xs">
-										<CheckCircle2 className="h-3 w-3 mr-1" />
-										{__('Server Cron', 'quillcrm')}
-									</Badge>
-								) : (
-									<Badge variant="secondary" className="text-xs">
-										{__('WP-Cron', 'quillcrm')}
-									</Badge>
-								)}
-							</dd>
-						</div>
-					</dl>
-				</CardContent>
-			</Card>
-
 			{/* Server-Side Cron Setup Guide (only if not enabled) */}
 			{!hasServerCron && (
 				<Card>

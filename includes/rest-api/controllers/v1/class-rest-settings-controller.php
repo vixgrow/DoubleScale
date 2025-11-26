@@ -599,7 +599,7 @@ class REST_Settings_Controller extends REST_Controller {
 	public function get_cron_status( $request ) {
 		$events = array();
 
-		// Email campaigns (every 60 seconds)
+		// Email campaigns (every 60 seconds).
 		$campaigns_tasks = \QuillCRM\QuillCRM::instance()->campaigns_tasks;
 		$email_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_email_campaigns' );
 
@@ -608,7 +608,7 @@ class REST_Settings_Controller extends REST_Controller {
 
 		$events[] = array(
 			'hook'       => 'quillcrm_campaigns_quillcrm_email_campaigns',
-			'is_overdue' => $this->is_task_overdue( $last_run, 90 ), // 90 seconds threshold
+			'is_overdue' => $this->is_task_overdue( $last_run, 90 ), // 90 seconds threshold.
 			'human_name' => __( 'Scheduled Email Sending Tasks', 'quillcrm' ),
 			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
 			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
@@ -616,30 +616,64 @@ class REST_Settings_Controller extends REST_Controller {
 			'run_count'  => $email_heartbeat['run_count'] ?? 0,
 		);
 
-		// Email sequences (every 60 seconds)
-		$sequences_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_email_sequences' );
-		$next_run = isset( $sequences_heartbeat['next_scheduled'] ) ? strtotime( $sequences_heartbeat['next_scheduled'] ) : time() + 60;
-		$last_run = $sequences_heartbeat['last_run'] ?? null;
+		// SMS campaigns (every 60 seconds) - Pro only.
+		if ( class_exists( 'QuillCRM_Pro\QuillCRM_Pro' ) ) {
+			$sms_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_sms_campaigns' );
+			$next_run      = isset( $sms_heartbeat['next_scheduled'] ) ? strtotime( $sms_heartbeat['next_scheduled'] ) : time() + 60;
+			$last_run      = $sms_heartbeat['last_run'] ?? null;
 
-		$events[] = array(
-			'hook'       => 'quillcrm_campaigns_quillcrm_email_sequences',
-			'is_overdue' => $this->is_task_overdue( $last_run, 90 ),
-			'human_name' => __( 'Scheduled Email Processing', 'quillcrm' ),
-			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
-			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
-			'interval'   => 60,
-			'run_count'  => $sequences_heartbeat['run_count'] ?? 0,
-		);
+			$events[] = array(
+				'hook'       => 'quillcrm_campaigns_quillcrm_sms_campaigns',
+				'is_overdue' => $this->is_task_overdue( $last_run, 90 ),
+				'human_name' => __( 'Scheduled SMS Sending Tasks', 'quillcrm' ),
+				'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
+				'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+				'interval'   => 60,
+				'run_count'  => $sms_heartbeat['run_count'] ?? 0,
+			);
+		}
 
-		// Daily tasks
-		$daily_tasks = \QuillCRM\QuillCRM::instance()->daily_tasks;
+		// Email sequences - Not shipping in this version.
+		// $sequences_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_email_sequences' );
+		// $next_run = isset( $sequences_heartbeat['next_scheduled'] ) ? strtotime( $sequences_heartbeat['next_scheduled'] ) : time() + 60;
+		// $last_run = $sequences_heartbeat['last_run'] ?? null;
+		//
+		// $events[] = array(
+		// 'hook'       => 'quillcrm_campaigns_quillcrm_email_sequences',
+		// 'is_overdue' => $this->is_task_overdue( $last_run, 90 ),
+		// 'human_name' => __( 'Scheduled Email Processing', 'quillcrm' ),
+		// 'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
+		// 'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+		// 'interval'   => 60,
+		// 'run_count'  => $sequences_heartbeat['run_count'] ?? 0,
+		// );
+
+		// WhatsApp campaigns - Not shipping in this version.
+		// if ( class_exists( 'QuillCRM_Pro\QuillCRM_Pro' ) ) {
+		// $whatsapp_heartbeat = $campaigns_tasks->get_heartbeat_status( 'quillcrm_whatsapp_campaigns' );
+		// $next_run = isset( $whatsapp_heartbeat['next_scheduled'] ) ? strtotime( $whatsapp_heartbeat['next_scheduled'] ) : time() + 60;
+		// $last_run = $whatsapp_heartbeat['last_run'] ?? null;
+		//
+		// $events[] = array(
+		// 'hook'       => 'quillcrm_campaigns_quillcrm_whatsapp_campaigns',
+		// 'is_overdue' => $this->is_task_overdue( $last_run, 90 ),
+		// 'human_name' => __( 'Scheduled WhatsApp Sending Tasks', 'quillcrm' ),
+		// 'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
+		// 'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
+		// 'interval'   => 60,
+		// 'run_count'  => $whatsapp_heartbeat['run_count'] ?? 0,
+		// );
+		// }
+
+		// Daily tasks.
+		$daily_tasks      = \QuillCRM\QuillCRM::instance()->daily_tasks;
 		$daily3_heartbeat = $daily_tasks->get_heartbeat_status( 'quillcrm_daily3' );
-		$next_run = isset( $daily3_heartbeat['next_scheduled'] ) ? strtotime( $daily3_heartbeat['next_scheduled'] ) : time() + DAY_IN_SECONDS;
-		$last_run = $daily3_heartbeat['last_run'] ?? null;
+		$next_run         = isset( $daily3_heartbeat['next_scheduled'] ) ? strtotime( $daily3_heartbeat['next_scheduled'] ) : time() + DAY_IN_SECONDS;
+		$last_run         = $daily3_heartbeat['last_run'] ?? null;
 
 		$events[] = array(
 			'hook'       => 'quillcrm_daily_quillcrm_daily3',
-			'is_overdue' => $this->is_task_overdue( $last_run, 90000 ), // ~25 hours threshold
+			'is_overdue' => $this->is_task_overdue( $last_run, 90000 ), // ~25 hours threshold.
 			'human_name' => __( 'Scheduled Automation Tasks', 'quillcrm' ),
 			'next_run'   => $next_run ? human_time_diff( $next_run, time() ) : __( 'Unknown', 'quillcrm' ),
 			'last_run'   => $last_run ? human_time_diff( strtotime( $last_run ), time() ) . ' ' . __( 'ago', 'quillcrm' ) : __( 'Never', 'quillcrm' ),
@@ -732,13 +766,22 @@ class REST_Settings_Controller extends REST_Controller {
 	public function run_cron_manually( $request ) {
 		$hook = $request->get_param( 'hook' );
 
-		// Whitelist of allowed hooks
+		// Whitelist of allowed hooks.
 		$valid_hooks = array(
 			'quillcrm_campaigns_quillcrm_email_campaigns' => __( 'Scheduled Email Sending Tasks', 'quillcrm' ),
-			'quillcrm_campaigns_quillcrm_email_sequences' => __( 'Scheduled Email Processing', 'quillcrm' ),
 			'quillcrm_daily_quillcrm_daily3'              => __( 'Scheduled Automation Tasks', 'quillcrm' ),
 			'quillcrm_daily_quillcrm_daily4'              => __( 'Daily Cleanup Tasks', 'quillcrm' ),
 		);
+
+		// Add Pro hooks if Pro plugin is active.
+		if ( class_exists( 'QuillCRM_Pro\QuillCRM_Pro' ) ) {
+			$valid_hooks['quillcrm_campaigns_quillcrm_sms_campaigns'] = __( 'Scheduled SMS Sending Tasks', 'quillcrm' );
+			// WhatsApp not shipping in this version.
+			// $valid_hooks['quillcrm_campaigns_quillcrm_whatsapp_campaigns'] = __( 'Scheduled WhatsApp Sending Tasks', 'quillcrm' );
+		}
+
+		// Email sequences not shipping in this version.
+		// $valid_hooks['quillcrm_campaigns_quillcrm_email_sequences'] = __( 'Scheduled Email Processing', 'quillcrm' );
 
 		if ( ! isset( $valid_hooks[ $hook ] ) ) {
 			return new WP_Error(

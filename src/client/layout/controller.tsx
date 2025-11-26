@@ -1,7 +1,12 @@
 /**
  * QuillCRM dependencies
  */
-import { registerAdminPage } from '@quillcrm/navigation';
+import {
+	registerAdminPage,
+	useNavigate,
+	useParams,
+	getToLink,
+} from '@quillcrm/navigation';
 
 /**
  * WordPress dependencies
@@ -68,6 +73,11 @@ import type { User } from '@/services/user-service';
 
 export const Controller = ({ page }) => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
+	const navigate = useNavigate();
+	const params = useParams();
+
+	// Navigation helper for Pro components
+	const handleNavigate = (path: string) => navigate(getToLink(path));
 
 	const handleBackToDashboard = () => {
 		const ajaxUrl = (window as Window & { ajaxurl?: string }).ajaxurl ?? '';
@@ -211,7 +221,7 @@ export const Controller = ({ page }) => {
 					</div>
 				</div>
 			</div>
-			<page.component />
+			<page.component navigate={handleNavigate} params={params} />
 		</motion.div>
 	);
 };

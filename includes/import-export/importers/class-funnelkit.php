@@ -45,7 +45,7 @@ class Funnelkit extends Importer {
 	 * @var bool
 	 */
 	public function is_active() {
-		return quillcrm_is_plugin_active( 'fluent-crm/fluent-crm.php' );
+		return quillcrm_is_plugin_active( 'wp-marketing-automations/wp-marketing-automations.php' );
 	}
 
 	/**

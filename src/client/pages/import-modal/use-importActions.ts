@@ -9,7 +9,7 @@ import { addQueryArgs } from '@wordpress/url';
  * external dependencies
  */
 import { isEmpty, trim } from 'lodash';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 /**
  * internal dependencies
  */
@@ -41,6 +41,9 @@ export const useImportActions = () => {
 		},
 	});
 
+	// Track if we've already initiated a fetch for FluentCRM/FunnelKit
+	const hasFetchedRef = useRef<string | null>(null);
+
 	// Reset sourceData and currentStep when source changes for integration importers
 	useEffect(() => {
 		if (
@@ -59,6 +62,11 @@ export const useImportActions = () => {
 			);
 			dispatch({ type: 'SET_SOURCE_DATA', payload: null });
 			dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
+		}
+
+		// Reset fetch tracking when source changes
+		if (hasFetchedRef.current !== state.source) {
+			hasFetchedRef.current = null;
 		}
 	}, [state.source, importer?.is_integration]);
 
@@ -175,8 +183,9 @@ export const useImportActions = () => {
 
 			dispatch({ type: 'SET_SOURCE_DATA', payload: response });
 
-			// For integration importers, advance to step 2 when source data is fetched
-			if (importer?.is_integration) {
+			// For API-based integration importers (not FluentCRM/FunnelKit), advance to step 2
+			// FluentCRM and FunnelKit stay on step 1 since they only have lists/tags mapping
+			if (importer?.is_integration && !['fluentcrm', 'wpfunnelkit'].includes(state.source)) {
 				dispatch({ type: 'SET_CURRENT_STEP', payload: 2 });
 			}
 		} catch (error: any) {
@@ -551,6 +560,22 @@ export const useImportActions = () => {
 			dispatch({ type: 'SET_CURSOR', payload: null });
 		}
 	};
+
+	// Auto-fetch source data for FluentCRM and FunnelKit when selected
+	useEffect(() => {
+		const shouldAutoFetch =
+			importer?.is_integration &&
+			['fluentcrm', 'wpfunnelkit'].includes(state.source) &&
+			!state.sourceData &&
+			!state.isFetching &&
+			hasFetchedRef.current !== state.source;
+
+		if (shouldAutoFetch) {
+			console.log('Auto-fetching source data for:', state.source);
+			hasFetchedRef.current = state.source;
+			getSourceData();
+		}
+	}, [state.source, state.sourceData, state.isFetching, importer?.is_integration]);
 
 	// Cleanup on unmount
 	useEffect(() => {

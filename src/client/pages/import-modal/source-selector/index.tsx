@@ -139,15 +139,16 @@ const SourceSelector: React.FC = () => {
 			return;
 		}
 
+		// Reset source data when changing sources to trigger fresh fetch
+		dispatch({ type: 'SET_SOURCE_DATA', payload: null });
+		dispatch({ type: 'SET_IS_FETCHING', payload: false });
 		dispatch({ type: 'SET_SOURCE', payload: newSource });
 		dispatch({ type: 'SET_CURRENT_STEP', payload: 1 });
+		dispatch({ type: 'SET_VALUES', payload: {} });
+		dispatch({ type: 'SET_CREDENTIALS', payload: {} });
 
 		if (newSource !== 'csv') {
 			dispatch({ type: 'SET_FILE_DATA', payload: null });
-			dispatch({
-				type: 'SET_VALUES',
-				payload: { ...state.values, file_name: '' },
-			});
 		}
 	};
 

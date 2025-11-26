@@ -71,7 +71,9 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 											'gohighlevel',
 									  ].includes(source)
 									? `Step ${currentStep} of 2`
-									: 'Step 1 of 1'}
+									: ['fluentcrm', 'wpfunnelkit'].includes(source)
+										? 'Step 1 of 1'
+										: 'Step 1 of 1'}
 						</div>
 					</div>
 				</DialogTitle>

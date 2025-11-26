@@ -18,6 +18,12 @@ import { Button } from '@/components/ui/button';
 import './style.scss';
 import { getFilteredGoalsByTrigger } from '@quillcrm/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import ProAutomationModal from '@quillcrm/components/pro-automation-modal';
 
 interface GoalSelectorProps {
@@ -48,6 +54,32 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 
 	// Get filtered goals based on current trigger
 	const filteredAutomationGoals = getFilteredGoalsByTrigger(currentTrigger);
+
+	// Helper function to get tooltip message for disabled goals
+	const getDisabledTooltip = (groupLabel: string) => {
+		if (groupLabel === 'WooCommerce') {
+			return __(
+				'WooCommerce plugin is not installed or activated. Install WooCommerce to use these goals.',
+				'quillcrm'
+			);
+		}
+		if (groupLabel === 'LearnDash') {
+			return __(
+				'LearnDash plugin is not installed or activated. Install LearnDash to use these goals.',
+				'quillcrm'
+			);
+		}
+		if (groupLabel === 'MemberPress') {
+			return __(
+				'MemberPress plugin is not installed or activated. Install MemberPress to use these goals.',
+				'quillcrm'
+			);
+		}
+		return __(
+			'This integration is not available. Please install the required plugin.',
+			'quillcrm'
+		);
+	};
 
 	const toggleGroup = (key: string) => {
 		setCollapsedGroups((prev) => ({
@@ -130,50 +162,82 @@ const GoalSelector: React.FC<GoalSelectorProps> = ({
 														{map(
 															group.goals,
 															(goal, goalKey) => {
-																return (
-																	<div
-																		key={
-																			goalKey
-																		}
-																		className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 transition-colors"
-																	>
-																		<div className="flex items-center gap-2">
-																			<span className="text-sm">
-																				{
-																					goal.label
-																				}
-																			</span>
-																			{goal.is_pro && (
-																				<Lock className="h-4 w-4 text-orange-500" />
-																			)}
-																		</div>
-																		<Button
-																			onClick={() =>
-																				handleSelect(
-																					goalKey,
-																					goal
-																				)
-																			}
-																			disabled={
-																				!goal.is_pro &&
-																				isSaving
-																			}
-																			className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${value === goalKey ? 'border-2 border-primary' : 'border'}`}
-																		>
-																			{isSaving &&
-																			value ===
+																const goalButton =
+																	(
+																		<div
+																			key={
 																				goalKey
-																				? __(
-																						'Saving...',
-																						'quillcrm'
+																			}
+																			className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/50 transition-colors"
+																		>
+																			<div className="flex items-center gap-2">
+																				<span className="text-sm">
+																					{
+																						goal.label
+																					}
+																				</span>
+																				{goal.is_pro && (
+																					<Lock className="h-4 w-4 text-orange-500" />
+																				)}
+																			</div>
+																			<Button
+																				onClick={() =>
+																					handleSelect(
+																						goalKey,
+																						goal
 																					)
-																				: __(
-																						'Select',
-																						'quillcrm'
+																				}
+																				disabled={
+																					!goal.is_pro &&
+																					(group.is_disabled ||
+																						isSaving)
+																				}
+																				className={`text-primary bg-transparent shadow-none font-semibold rounded-full p-2 hover:bg-primary/10 ${value === goalKey ? 'border-2 border-primary' : 'border'}`}
+																			>
+																				{isSaving &&
+																				value ===
+																					goalKey
+																					? __(
+																							'Saving...',
+																							'quillcrm'
+																						)
+																					: __(
+																							'Select',
+																							'quillcrm'
+																						)}
+																			</Button>
+																		</div>
+																	);
+
+																if (
+																	!goal.is_pro &&
+																	group.is_disabled
+																) {
+																	return (
+																		<TooltipProvider
+																			key={
+																				goalKey
+																			}
+																		>
+																			<Tooltip>
+																				<TooltipTrigger
+																					asChild
+																				>
+																					{
+																						goalButton
+																					}
+																				</TooltipTrigger>
+																				<TooltipContent>
+																					{getDisabledTooltip(
+																						group.label
 																					)}
-																		</Button>
-																	</div>
-																);
+																				</TooltipContent>
+																			</Tooltip>
+																		</TooltipProvider>
+																	);
+																}
+
+																return goalButton;
 															}
 														)}
 													</div>

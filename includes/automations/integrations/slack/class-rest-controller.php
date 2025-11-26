@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Slack Rest Controller
  *
@@ -16,11 +17,13 @@ use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * Slack Rest Controller
  */
 class REST_Controller extends REST_Integration_Controller {
+
 
 	/**
 	 * Register the routes for the objects of the controller.
@@ -28,7 +31,7 @@ class REST_Controller extends REST_Integration_Controller {
 	 * @since 1.0.0
 	 */
 	public function register_routes() {
-		parent::register_routes();
+		 parent::register_routes();
 
 		register_rest_route(
 			$this->namespace,
@@ -49,29 +52,29 @@ class REST_Controller extends REST_Integration_Controller {
 	 * @return array
 	 */
 	public function get_settings_schema() {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'app' => array(
-					'type'       => 'object',
-					'context'    => array( 'view' ),
-					'properties' => array(
-						'client_id'     => array(
-							'label'    => __( 'Client ID', 'quillcrm' ),
-							'type'     => 'string',
-							'required' => true,
-							'context'  => array( 'view' ),
-						),
-						'client_secret' => array(
-							'label'    => __( 'Client Secret', 'quillcrm' ),
-							'type'     => 'string',
-							'required' => true,
-							'context'  => array(),
-						),
-					),
-				),
-			),
-		);
+		 return array(
+			 'type'       => 'object',
+			 'properties' => array(
+				 'app' => array(
+					 'type'       => 'object',
+					 'context'    => array( 'view' ),
+					 'properties' => array(
+						 'client_id'     => array(
+							 'label'    => __( 'Client ID', 'quillcrm' ),
+							 'type'     => 'string',
+							 'required' => true,
+							 'context'  => array( 'view' ),
+						 ),
+						 'client_secret' => array(
+							 'label'    => __( 'Client Secret', 'quillcrm' ),
+							 'type'     => 'string',
+							 'required' => true,
+							 'context'  => array(),
+						 ),
+					 ),
+				 ),
+			 ),
+		 );
 	}
 
 	/**
@@ -97,6 +100,6 @@ class REST_Controller extends REST_Integration_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function auth_uri_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

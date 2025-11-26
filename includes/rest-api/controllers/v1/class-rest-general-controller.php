@@ -37,6 +37,7 @@ use QuillCRM\Constants\Campaign_Channel;
 class REST_General_Controller extends REST_Controller {
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -75,12 +76,12 @@ class REST_General_Controller extends REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_dashboard( WP_REST_Request $request ) {
-		$total_contacts               = Contact_Model::count();
-		$total_sent_emails            = Tracking_Model::emails()->where( 'status', Tracking_Status::SENT )->count();
-		$total_tags                   = Tag_Model::count();
-		$total_lists                  = List_Model::count();
-		$total_automations            = Automation_Model::where( 'status', 'active' )->count();
-		$total_email_templates        = Template_Model::where( 'type', Campaign_Channel::CHANNEL_EMAIL )->count();
+		$total_contacts        = Contact_Model::count();
+		$total_sent_emails     = Tracking_Model::emails()->where( 'status', Tracking_Status::SENT )->count();
+		$total_tags            = Tag_Model::count();
+		$total_lists           = List_Model::count();
+		$total_automations     = Automation_Model::where( 'status', 'active' )->count();
+		$total_email_templates = Template_Model::where( 'type', Campaign_Channel::CHANNEL_EMAIL )->count();
 
 		// Deal statistics - only if PRO plugin is active
 		if ( class_exists( 'QuillCRM_Pro\Models\Deal_Model' ) ) {
@@ -141,6 +142,6 @@ class REST_General_Controller extends REST_Controller {
 	 * @return bool|WP_Error
 	 */
 	public function get_dashboard_permissions_check( WP_REST_Request $request ) {
-		return Permissions::has_crm_manager_access();
+		return Permissions::has_sales_rep_access();
 	}
 }

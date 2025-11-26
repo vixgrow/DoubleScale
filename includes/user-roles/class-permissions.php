@@ -20,6 +20,10 @@ namespace QuillCRM\User_Roles;
  */
 final class Permissions {
 
+
+
+
+
 	/**
 	 * Check if user is a CRM Manager/Admin
 	 *
@@ -34,16 +38,16 @@ final class Permissions {
 	}
 
 	/**
-	 * Check if user is a Deal Owner
+	 * Check if user is a Sales Rep
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param int|null $user_id User ID (null for current user)
-	 * @return bool True if user is deal owner
+	 * @return bool True if user is sales rep
 	 */
-	public static function is_deal_owner( $user_id = null ) {
+	public static function is_sales_rep( $user_id = null ) {
 		$user_role = self::get_user_role( $user_id );
-		return in_array( $user_role, array( User_Roles::DEAL_OWNER ) ) ? true : false;
+		return in_array( $user_role, array( User_Roles::SALES_REP ) ) ? true : false;
 	}
 
 
@@ -64,17 +68,17 @@ final class Permissions {
 
 
 	/**
-	 * Check if user has deal owner access
+	 * Check if user has sales rep access
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param int|null $user_id User ID (null for current user)
-	 * @return bool True if user has deal owner access
+	 * @return bool True if user has sales rep access
 	 */
-	public static function has_deal_owner_access( $user_id = null ) {
+	public static function has_sales_rep_access( $user_id = null ) {
 		$user_role = self::get_user_role( $user_id );
 		// Check if user has one of the allowed roles
-		return in_array( $user_role, array( User_Roles::CRM_MANAGER, User_Roles::ADMINISTRATOR, User_Roles::DEAL_OWNER ) ) ? true : false;
+		return in_array( $user_role, array( User_Roles::CRM_MANAGER, User_Roles::ADMINISTRATOR, User_Roles::SALES_REP ) ) ? true : false;
 	}
 
 	/**
@@ -87,7 +91,7 @@ final class Permissions {
 	 */
 	public static function check_user_has_role( $user_id ) {
 		$user_role = self::get_user_role( $user_id );
-		return in_array( $user_role, array( User_Roles::CRM_MANAGER, User_Roles::DEAL_OWNER ) ) ? true : false;
+		return in_array( $user_role, array( User_Roles::CRM_MANAGER, User_Roles::SALES_REP ) ) ? true : false;
 	}
 
 
@@ -117,15 +121,27 @@ final class Permissions {
 	 * @return string User role
 	 */
 	public static function get_user_role( $user_id ) {
-		// Get current user ID if none passed
 		$user_id = self::set_current_user_id( $user_id );
-		// Get user data
+
 		$user = get_userdata( $user_id );
 		if ( ! $user ) {
 			return User_Roles::NONE;
 		}
-		// User roles (array)
+
 		$roles = (array) $user->roles;
-		return reset( $roles );
+
+		$priority = array(
+			User_Roles::ADMINISTRATOR,
+			User_Roles::CRM_MANAGER,
+			User_Roles::SALES_REP,
+		);
+
+		foreach ( $priority as $role ) {
+			if ( in_array( $role, $roles ) ) {
+				return $role; // return highest role
+			}
+		}
+
+		return User_Roles::NONE;
 	}
 }

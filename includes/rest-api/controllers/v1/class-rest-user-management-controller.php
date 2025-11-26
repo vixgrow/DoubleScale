@@ -56,7 +56,7 @@ class REST_User_Management_Controller extends REST_Controller {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_crm_users_frontend' ),
-					'permission_callback' => array( $this, 'check_deal_owner_permissions' ),
+					'permission_callback' => array( $this, 'check_sales_rep_permissions' ),
 					'args'                => array(
 						'search'   => array(
 							'description'       => 'Search term for user name or email',
@@ -110,7 +110,7 @@ class REST_User_Management_Controller extends REST_Controller {
 						'role' => array(
 							'required' => true,
 							'type'     => 'string',
-							'enum'     => array( User_Roles::CRM_MANAGER, User_Roles::DEAL_OWNER, User_Roles::NONE ),
+							'enum'     => array( User_Roles::CRM_MANAGER, User_Roles::SALES_REP, User_Roles::NONE ),
 						),
 					),
 				),
@@ -137,7 +137,7 @@ class REST_User_Management_Controller extends REST_Controller {
 							'type'     => 'array',
 							'items'    => array(
 								'type' => 'string',
-								'enum' => array( User_Roles::CRM_MANAGER, User_Roles::DEAL_OWNER ),
+								'enum' => array( User_Roles::CRM_MANAGER, User_Roles::SALES_REP ),
 							),
 						),
 					),
@@ -180,7 +180,7 @@ class REST_User_Management_Controller extends REST_Controller {
 		// CRM roles we filter by
 		$crm_roles = array(
 			User_Roles::CRM_MANAGER,
-			User_Roles::DEAL_OWNER,
+			User_Roles::SALES_REP,
 		);
 
 		// Get all users with CRM roles
@@ -243,7 +243,7 @@ class REST_User_Management_Controller extends REST_Controller {
 		}
 
 		if ( $filter_crm_users ) {
-			$user_args['role__in'] = array( User_Roles::CRM_MANAGER, User_Roles::DEAL_OWNER, User_Roles::ADMINISTRATOR );
+			$user_args['role__in'] = array( User_Roles::CRM_MANAGER, User_Roles::SALES_REP, User_Roles::ADMINISTRATOR );
 		}
 
 		// Get users
@@ -321,7 +321,7 @@ class REST_User_Management_Controller extends REST_Controller {
 		// CRM roles we manage
 		$crm_roles = array(
 			User_Roles::CRM_MANAGER,
-			User_Roles::DEAL_OWNER,
+			User_Roles::SALES_REP,
 		);
 
 		// Remove existing CRM roles only
@@ -376,7 +376,7 @@ class REST_User_Management_Controller extends REST_Controller {
 		// CRM roles list
 		$crm_roles = array(
 			User_Roles::CRM_MANAGER,
-			User_Roles::DEAL_OWNER,
+			User_Roles::SALES_REP,
 		);
 
 		// Remove existing CRM roles
@@ -425,7 +425,7 @@ class REST_User_Management_Controller extends REST_Controller {
 		// CRM roles
 		$crm_roles = array(
 			User_Roles::CRM_MANAGER,
-			User_Roles::DEAL_OWNER,
+			User_Roles::SALES_REP,
 		);
 
 		// Remove only CRM roles, keep everything else
@@ -456,12 +456,12 @@ class REST_User_Management_Controller extends REST_Controller {
 	}
 
 	/**
-	 * Check deal owner permissions (less restrictive for frontend usage)
+	 * Check sales rep permissions (less restrictive for frontend usage)
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool|WP_Error
 	 */
-	public function check_deal_owner_permissions( $request ) {
-		return Permissions::has_crm_manager_access();
+	public function check_sales_rep_permissions( $request ) {
+		return Permissions::has_sales_rep_access();
 	}
 }

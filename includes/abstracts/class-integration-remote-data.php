@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Integration Remote Data
  *
@@ -12,11 +13,13 @@
 namespace QuillCRM\Abstracts;
 
 use QuillCRM\Abstracts\Integration;
+use QuillCRM\User_Roles\Permissions;
 
 /**
  * Integration Remote Data class
  */
 abstract class Integration_Remote_Data {
+
 
 	/**
 	 * Integration
@@ -127,6 +130,6 @@ abstract class Integration_Remote_Data {
 	 * @return bool|WP_Error
 	 */
 	public function get_entity_permissions_check( $request ) {
-		return current_user_can( 'manage_options' );
+		return Permissions::has_crm_manager_access();
 	}
 }

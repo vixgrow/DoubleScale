@@ -18,17 +18,14 @@ namespace QuillCRM\User_Roles;
  *
  * Manages the two-role CRM system:
  * - CRM Manager/Admin (quillcrm_crm_manager)
- * - Deal Owner (quillcrm_deal_owner)
+ * - Sales Rep (quillcrm_sales_rep)
  */
 final class User_Roles {
 
 
-
-
-
 	public const PREFIX        = 'quillcrm_';
 	public const CRM_MANAGER   = self::PREFIX . 'crm_manager';
-	public const DEAL_OWNER    = self::PREFIX . 'deal_owner';
+	public const SALES_REP     = self::PREFIX . 'sales_rep';
 	public const ADMINISTRATOR = 'administrator';
 	public const NONE          = self::PREFIX . 'none';
 
@@ -81,8 +78,8 @@ final class User_Roles {
 		foreach ( $roles as $role => $label ) {
 			if ( $role === User_Roles::CRM_MANAGER ) {
 				$capabilities = self::get_crm_manager_capabilities();
-			} elseif ( $role === User_Roles::DEAL_OWNER ) {
-				$capabilities = self::get_deal_owner_capabilities();
+			} elseif ( $role === User_Roles::SALES_REP ) {
+				$capabilities = self::get_sales_rep_capabilities();
 			}
 
 			$capabilities = array_fill_keys( $capabilities, true );
@@ -143,7 +140,7 @@ final class User_Roles {
 				'quillcrm_view_activities',  // View activities
 				'read',                     // For Wordpress
 			),
-			User_Roles::DEAL_OWNER  => array(
+			User_Roles::SALES_REP   => array(
 				'quillcrm_edit_own_deals',     // Edit own deals
 				'quillcrm_edit_own_contacts',  // Edit own contacts
 				'quillcrm_create_activities',  // Create activities
@@ -175,7 +172,7 @@ final class User_Roles {
 		return array_merge(
 			self::get_capabilities()['common'],
 			self::get_capabilities()[ User_Roles::CRM_MANAGER ],
-			self::get_capabilities()[ User_Roles::DEAL_OWNER ]
+			self::get_capabilities()[ User_Roles::SALES_REP ]
 		);
 	}
 
@@ -190,7 +187,7 @@ final class User_Roles {
 	public static function get_roles() {
 		return array(
 			User_Roles::CRM_MANAGER => __( 'CRM Manager', 'quillcrm' ),
-			User_Roles::DEAL_OWNER  => __( 'Deal Owner', 'quillcrm' ),
+			User_Roles::SALES_REP   => __( 'Sales Rep', 'quillcrm' ),
 		);
 	}
 
@@ -205,21 +202,21 @@ final class User_Roles {
 		return array_merge(
 			self::get_capabilities()['common'],
 			self::get_capabilities()[ User_Roles::CRM_MANAGER ],
-			self::get_capabilities()[ User_Roles::DEAL_OWNER ]
+			self::get_capabilities()[ User_Roles::SALES_REP ]
 		);
 	}
 
 	/**
-	 * Get deal owner capabilities
+	 * Get sales rep capabilities
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return array Array of deal owner capabilities
+	 * @return array Array of sales rep capabilities
 	 */
-	public static function get_deal_owner_capabilities() {
+	public static function get_sales_rep_capabilities() {
 		return array_merge(
 			self::get_capabilities()['common'],
-			self::get_capabilities()[ User_Roles::DEAL_OWNER ]
+			self::get_capabilities()[ User_Roles::SALES_REP ]
 		);
 	}
 }

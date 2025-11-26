@@ -24,7 +24,6 @@ use QuillCRM\Models\List_Model;
 use QuillCRM\Models\Log_Model;
 use QuillCRM\Models\Tag_Model;
 use QuillCRM\Models\Tracking_Model;
-// use QuillCRM\Models\Custom_Field_Model; // Moved to Pro
 use QuillCRM\Managers\Filters_Manager;
 use QuillCRM\Contact_Filters\Process as Contact_Filters_Process;
 use QuillCRM\Settings;
@@ -32,7 +31,6 @@ use QuillCRM\Emails\Emails;
 use QuillCRM\Constants\Campaign_Channel;
 use QuillCRM\Emails\Email_Tracking_Helper;
 use QuillCRM\Managers\Merge_Tags_Manager;
-// use QuillCRM\Traits\Message_Provider_Validation; // Moved to Pro
 
 /**
  * REST_Contact_Controller is REST api controller class for log
@@ -40,16 +38,6 @@ use QuillCRM\Managers\Merge_Tags_Manager;
  * @since 1.0.0
  */
 class REST_Contact_Controller extends REST_Controller {
-
-	// use Message_Provider_Validation; // Moved to Pro
-
-
-
-
-
-
-
-
 
 	/**
 	 * REST Base
@@ -1643,15 +1631,6 @@ class REST_Contact_Controller extends REST_Controller {
 				array( 'status' => 400 )
 			);
 		}
-
-		// Validate provider connection for SMS/WhatsApp before processing - Moved to Pro
-		// SMS/WhatsApp messaging are Pro-only features
-		// if ( $channel === Campaign_Channel::STR_SMS || $channel === Campaign_Channel::STR_WHATSAPP ) {
-		// 	$provider_check = $this->validate_provider_connection( $channel );
-		// 	if ( is_wp_error( $provider_check ) ) {
-		// 		return $provider_check;
-		// 	}
-		// }
 
 		// Route to appropriate sender based on channel.
 		switch ( $channel ) {

@@ -83,6 +83,47 @@ class Email_Individual_Sender extends Abstract_Individual_Message_Sender {
 	}
 
 	/**
+	 * Validate email-specific requirements
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param \WP_REST_Request $request Request object
+	 * @return true|WP_Error True if valid, WP_Error if invalid
+	 */
+	protected function validate_email_requirements( $request ) {
+		$subject = $request->get_param( 'subject' );
+
+		if ( empty( $subject ) || ! trim( $subject ) ) {
+			return new WP_Error(
+				'missing_subject',
+				__( 'Subject is required for email messages.', 'quillcrm' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Send email with subject validation
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param \WP_REST_Request $request Request object
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function send( $request ) {
+		// Validate email-specific requirements
+		$validation = $this->validate_email_requirements( $request );
+		if ( is_wp_error( $validation ) ) {
+			return $validation;
+		}
+
+		// Call parent send logic
+		return parent::send( $request );
+	}
+
+	/**
 	 * Override process_message to add email-specific tracking (pixel + footer)
 	 *
 	 * @since 1.0.0

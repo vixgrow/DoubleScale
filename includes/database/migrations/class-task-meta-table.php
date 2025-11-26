@@ -40,8 +40,15 @@ class Task_Meta_Table extends Migration {
 				group_slug varchar(255) NOT NULL,
 				value longtext NOT NULL,
 				date_created datetime NOT NULL,
+				last_run datetime DEFAULT NULL,
+				next_scheduled datetime DEFAULT NULL,
+				run_count BIGINT UNSIGNED DEFAULT 0,
 				PRIMARY KEY  (ID),
-				KEY action_id (action_id)';
+				KEY action_id (action_id),
+				KEY hook (hook),
+				KEY group_slug (group_slug),
+				KEY last_run (last_run),
+				KEY hook_group (hook, group_slug)';
 
 		return $query;
 	}

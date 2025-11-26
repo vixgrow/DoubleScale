@@ -412,6 +412,9 @@ abstract class Abstract_Campaign_Processing {
 			}
 
 			$this->process_campaign( $campaign );
+
+			// Update heartbeat to track successful execution
+			QuillCRM::instance()->campaigns_tasks->update_heartbeat( "quillcrm_{$this->channel}_campaigns", 60 );
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
 				sprintf( __( '%s Campaign processing error.', 'quillcrm' ), ucfirst( $this->channel ) ),

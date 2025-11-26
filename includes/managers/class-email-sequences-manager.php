@@ -196,6 +196,9 @@ final class Email_Sequences_Manager {
 
 				$this->process_sequence_with_rate_limiting( $sequence );
 			}
+
+			// Update heartbeat to track successful execution
+			QuillCRM::instance()->campaigns_tasks->update_heartbeat( 'quillcrm_email_sequences', 60 );
 		} catch ( Exception $e ) {
 			quillcrm_get_logger()->error(
 				'Email sequence processing error',

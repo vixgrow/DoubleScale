@@ -261,4 +261,72 @@ class Tasks {
 			$where
 		);
 	}
+
+	/**
+	 * Update heartbeat timestamp after task execution
+	 *
+	 * This method records when a task last ran successfully,
+	 * enabling health monitoring and overdue detection.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $hook Hook name (without group prefix).
+	 * @param int    $interval Interval in seconds until next run.
+	 * @return bool Success.
+	 */
+	public function update_heartbeat( $hook, $interval = 60 ) {
+		global $wpdb;
+
+		$full_hook = "{$this->group}_$hook";
+		$current_time = current_time( 'mysql' );
+
+		return (bool) $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}quillcrm_task_meta
+				SET last_run = %s,
+					run_count = run_count + 1,
+					next_scheduled = DATE_ADD(%s, INTERVAL %d SECOND)
+				WHERE hook = %s
+				AND group_slug = %s
+				ORDER BY ID DESC
+				LIMIT 1",
+				$current_time,
+				$current_time,
+				$interval,
+				$full_hook,
+				$this->group
+			)
+		);
+	}
+
+	/**
+	 * Get heartbeat status for a hook
+	 *
+	 * Returns last run time, next scheduled time, and run count
+	 * for monitoring task health.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $hook Hook name (without group prefix).
+	 * @return array|null Heartbeat data with last_run, next_scheduled, run_count.
+	 */
+	public function get_heartbeat_status( $hook ) {
+		global $wpdb;
+
+		$full_hook = "{$this->group}_$hook";
+
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT last_run, next_scheduled, run_count
+				FROM {$wpdb->prefix}quillcrm_task_meta
+				WHERE hook = %s
+				AND group_slug = %s
+				ORDER BY ID DESC
+				LIMIT 1",
+				$full_hook,
+				$this->group
+			),
+			ARRAY_A
+		);
+	}
 }

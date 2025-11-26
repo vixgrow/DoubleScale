@@ -259,7 +259,13 @@ registerAdminPage('tags', {
 registerAdminPage('custom-fields', {
 	path: 'custom-fields',
 	component: () => (
-		<div>{__('Custom Fields is a Pro feature', 'quillcrm')}</div>
+		<ProFeatureNotice
+			featureName={__('Custom Fields', 'quillcrm')}
+			description={__(
+				'Custom Fields is a Pro feature. Please upgrade to the Pro plan to access this feature.',
+				'quillcrm'
+			)}
+		/>
 	),
 	label: __('Custom Fields', 'quillcrm'),
 	icon: <CustomFieldsIcon />,

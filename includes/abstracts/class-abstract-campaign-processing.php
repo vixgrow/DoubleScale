@@ -389,6 +389,17 @@ abstract class Abstract_Campaign_Processing {
 
 		$this->start_time = microtime( true );
 
+		// Update heartbeat at the start to track that cron is running
+		if ( ! QuillCRM::instance()->campaigns_tasks->update_heartbeat( "quillcrm_{$this->channel}_campaigns" ) ) {
+			quillcrm_get_logger()->warning(
+				sprintf( __( 'Failed to update heartbeat for %s campaigns', 'quillcrm' ), $this->channel ),
+				array(
+					'channel' => $this->channel,
+					'context' => 'campaign_processing_start',
+				)
+			);
+		}
+
 		// Check if memory limit is reached
 		if ( Utils::is_memory_limit_reached() ) {
 			return;
@@ -412,17 +423,6 @@ abstract class Abstract_Campaign_Processing {
 			}
 
 			$this->process_campaign( $campaign );
-
-			// Update heartbeat to track successful execution.
-			if ( ! QuillCRM::instance()->campaigns_tasks->update_heartbeat( "quillcrm_{$this->channel}_campaigns" ) ) {
-				quillcrm_get_logger()->warning(
-					sprintf( __( 'Failed to update heartbeat for %s campaigns', 'quillcrm' ), $this->channel ),
-					array(
-						'channel' => $this->channel,
-						'context' => 'campaign_processing',
-					)
-				);
-			}
 		} catch ( \Exception $e ) {
 			quillcrm_get_logger()->error(
 				sprintf( __( '%s Campaign processing error.', 'quillcrm' ), ucfirst( $this->channel ) ),

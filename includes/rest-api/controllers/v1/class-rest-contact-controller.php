@@ -41,6 +41,7 @@ class REST_Contact_Controller extends REST_Controller {
 
 
 
+
 	/**
 	 * REST Base
 	 *
@@ -231,7 +232,7 @@ class REST_Contact_Controller extends REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_automation_contacts' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'permission_callback' => array( $this, 'get_automation_contacts_permissions_check' ),
 					'args'                => array(
 						'id'       => array(
 							'description' => __( 'Contact ID.', 'quillcrm' ),
@@ -1899,6 +1900,19 @@ class REST_Contact_Controller extends REST_Controller {
 	 */
 	public function get_item_permissions_check( $request ) {
 		return Permissions::has_sales_rep_access();
+	}
+
+	/**
+	 * Check if a given request has access to get automation contacts
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 *
+	 * @return bool $response Permission check result.
+	 */
+	public function get_automation_contacts_permissions_check( $request ) {
+		return Permissions::has_crm_manager_access();
 	}
 
 	/**

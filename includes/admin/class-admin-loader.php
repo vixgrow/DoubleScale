@@ -302,7 +302,7 @@ class Admin_Loader {
       }
       50% {
         filter: drop-shadow(0 0 25px rgba(79, 158, 249, 0.6));
-        transform: scale(1.02);
+        transform: scale(1.05);
       }
     }
 
@@ -494,14 +494,13 @@ class Admin_Loader {
 </head>
 <body>
   <div class="quillcrm-wrap">
-    <div id="qcrm-admin-root">
+    <div id="qcrm-admin-root-1">
       <div id="qcrm-admin-root__loader-container">
         
         <!-- Ambient background glow -->
         <div class="ambient-glow"></div>
         
         <!-- Sparkle stars around the logo -->
-        <div class="sparkle"></div>
         <div class="sparkle"></div>
         <div class="sparkle"></div>
         <div class="sparkle"></div>

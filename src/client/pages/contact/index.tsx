@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import {  useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 
 /**
  * External dependencies
@@ -214,7 +214,12 @@ const Contact: React.FC<ContactProps> = ({
 				<DialogHeader className="pb-0 border-b border-[#E4E7EC]">
 					<DialogTitle className="px-12 pb-4 pt-2">
 						<h1 className="text-base font-normal text-[#667085] flex items-center gap-2">
-							{__('Contacts List', 'quillcrm')}
+							<button
+								onClick={() => navigate(getToLink('contacts'))}
+								className="hover:text-[#344054] cursor-pointer transition-colors"
+							>
+								{__('Contacts List', 'quillcrm')}
+							</button>
 							<ChevronRight className="w-4 h-4 text-[#667085]" />
 							{__('Contact Details', 'quillcrm')}
 						</h1>

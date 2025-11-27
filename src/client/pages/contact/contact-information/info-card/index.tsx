@@ -26,6 +26,7 @@ import {
 import Field from '@quillcrm/components/field';
 import { getToLink } from '@quillcrm/navigation';
 import { useNavigate } from '@quillcrm/navigation';
+import EditHeaderIcon from '@quillcrm/components/icons/edit-header';
 
 type TabType = 'basic' | 'address' | 'custom';
 type EditingField =
@@ -325,9 +326,9 @@ const InfoCard: React.FC = () => {
 						<Button
 							size="sm"
 							onClick={() => handleEdit(fieldName, value)}
-							className="h-6 w-6 p-1 shadow-none rounded-full bg-[#E4EEFD] text-secondary"
+							className="h-6 w-6 p-1 shadow-none rounded-full bg-[#E4EEFD] text-[#458DC7]"
 						>
-							<EditIcon />
+							<EditHeaderIcon width={20} height={20} color="#458DC7" />
 						</Button>
 					) : (
 						<div className="flex gap-1">
@@ -620,7 +621,7 @@ const InfoCard: React.FC = () => {
 																			}
 																			className="h-6 w-6 p-1 shadow-none rounded-full bg-[#E4EEFD] text-secondary"
 																		>
-																			<EditIcon />
+																			<EditHeaderIcon width={20} height={20} color="#458DC7" />
 																		</Button>
 																	) : (
 																		<div className="flex gap-1">

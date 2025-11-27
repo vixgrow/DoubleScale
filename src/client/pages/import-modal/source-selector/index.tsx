@@ -153,7 +153,7 @@ const SourceSelector: React.FC = () => {
 	};
 
 	return (
-		<Card className="p-6 shadow-none rounded-[20px]">
+		<Card className="p-6 shadow-none rounded-[20px] flex flex-col h-full">
 			<CardHeader className="mb-6 p-0">
 				<CardTitle className="text-2xl font-normal text-[#09090B]">
 					{__('Import From', 'quillcrm')}
@@ -166,7 +166,7 @@ const SourceSelector: React.FC = () => {
 				</CardDescription>
 			</CardHeader>
 
-			<CardContent className="p-0 space-y-3">
+			<CardContent className="p-0 space-y-3 overflow-y-auto max-h-[calc(100vh-220px)]">
 				{sources.map((s) => {
 					const isSelected = source === s.value;
 					const isLocked = importing && !isSelected;

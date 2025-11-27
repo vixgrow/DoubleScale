@@ -22,6 +22,7 @@ import {
 } from '@quillcrm/components';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useContactContext } from '../../state/context';
 import type { List, Tag } from '@quillcrm/client';
 
@@ -29,6 +30,8 @@ const ListsTagsCards: React.FC = () => {
 	const { contact, updateContact } = useContactContext();
 	const [deletingListId, setDeletingListId] = useState<number | null>(null);
 	const [deletingTagId, setDeletingTagId] = useState<number | null>(null);
+	const [isAddingLists, setIsAddingLists] = useState(false);
+	const [isAddingTags, setIsAddingTags] = useState(false);
 	const [isListModalOpen, setIsListModalOpen] = useState(false);
 	const [isTagModalOpen, setIsTagModalOpen] = useState(false);
 	const [isListsCollapsed, setIsListsCollapsed] = useState(false);
@@ -81,6 +84,7 @@ const ListsTagsCards: React.FC = () => {
 			return;
 		}
 
+		setIsAddingLists(true);
 		try {
 			// Fetch the full list objects
 			const response = (await apiFetch({
@@ -105,6 +109,8 @@ const ListsTagsCards: React.FC = () => {
 		} catch (error: any) {
 			// Error notification is handled by updateContact
 			console.error('Failed to add lists:', error);
+		} finally {
+			setIsAddingLists(false);
 		}
 	};
 
@@ -113,6 +119,7 @@ const ListsTagsCards: React.FC = () => {
 			return;
 		}
 
+		setIsAddingTags(true);
 		try {
 			// Fetch the full tag objects
 			const response = (await apiFetch({
@@ -137,6 +144,8 @@ const ListsTagsCards: React.FC = () => {
 		} catch (error: any) {
 			// Error notification is handled by updateContact
 			console.error('Failed to add tags:', error);
+		} finally {
+			setIsAddingTags(false);
 		}
 	};
 
@@ -168,50 +177,66 @@ const ListsTagsCards: React.FC = () => {
 					</CardHeader>
 					{!isListsCollapsed && (
 						<CardContent className="p-4">
-							<div className="flex flex-wrap gap-2 items-center">
-								{contact?.lists && contact.lists.length > 0 ? (
-									contact.lists.map((list) => (
-										<Badge
-											key={list.id}
-											variant="outline"
-											className="px-3 py-1.5 text-base flex items-center gap-2 bg-transparent border rounded-lg"
-										>
-											{list.name}
-											<X
-												className="h-4 w-4 cursor-pointer hover:text-destructive transition-colors"
-												onClick={() =>
-													deleteList(list.id)
-												}
-												style={{
-													opacity:
-														deletingListId ===
-														list.id
-															? 0.5
-															: 1,
-													cursor:
-														deletingListId ===
-														list.id
-															? 'wait'
-															: 'pointer',
-												}}
+							{isAddingLists || deletingListId !== null ? (
+								<div className="flex flex-wrap gap-2 items-center">
+									{contact?.lists && contact.lists.length > 0 ? (
+										contact.lists.map((list) => (
+											<Skeleton
+												key={list.id}
+												className="h-8 w-24 rounded-lg"
 											/>
-										</Badge>
-									))
-								) : (
-									<p className="text-sm text-muted-foreground">
-										{__('No lists found', 'quillcrm')}
-									</p>
-								)}
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => setIsListModalOpen(true)}
-									className="h-8 px-2 text-primary text-base hover:bg-blue-50"
-								>
-									<Plus className="h-4 w-4 mr-1" />
-									{__('Add Lists', 'quillcrm')}
-								</Button>
-							</div>
+										))
+									) : (
+										<Skeleton className="h-8 w-32 rounded-lg" />
+									)}
+									<Skeleton className="h-8 w-28 rounded-lg" />
+								</div>
+							) : (
+								<div className="flex flex-wrap gap-2 items-center">
+									{contact?.lists && contact.lists.length > 0 ? (
+										contact.lists.map((list) => (
+											<Badge
+												key={list.id}
+												variant="outline"
+												className="px-3 py-1.5 text-base flex items-center gap-2 bg-transparent border rounded-lg"
+											>
+												{list.name}
+												<X
+													className="h-4 w-4 cursor-pointer hover:text-destructive transition-colors"
+													onClick={() =>
+														deleteList(list.id)
+													}
+													style={{
+														opacity:
+															deletingListId ===
+																list.id
+																? 0.5
+																: 1,
+														cursor:
+															deletingListId ===
+																list.id
+																? 'wait'
+																: 'pointer',
+													}}
+												/>
+											</Badge>
+										))
+									) : (
+										<p className="text-sm text-muted-foreground">
+											{__('No lists found', 'quillcrm')}
+										</p>
+									)}
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={() => setIsListModalOpen(true)}
+										className="h-8 px-2 text-primary text-base hover:bg-blue-50"
+									>
+										<Plus className="h-4 w-4 mr-1" />
+										{__('Add Lists', 'quillcrm')}
+									</Button>
+								</div>
+							)}
 						</CardContent>
 					)}
 				</Card>
@@ -240,48 +265,64 @@ const ListsTagsCards: React.FC = () => {
 					</CardHeader>
 					{!isTagsCollapsed && (
 						<CardContent className="p-4">
-							<div className="flex flex-wrap gap-2 items-center">
-								{contact?.tags && contact.tags.length > 0 ? (
-									contact.tags.map((tag) => (
-										<Badge
-											key={tag.id}
-											variant="outline"
-											className="px-3 py-1.5 text-base flex items-center gap-2 bg-transparent border rounded-lg"
-										>
-											{tag.name}
-											<X
-												className="h-4 w-4 cursor-pointer hover:text-destructive transition-colors"
-												onClick={() =>
-													deleteTag(tag.id)
-												}
-												style={{
-													opacity:
-														deletingTagId === tag.id
-															? 0.5
-															: 1,
-													cursor:
-														deletingTagId === tag.id
-															? 'wait'
-															: 'pointer',
-												}}
+							{isAddingTags || deletingTagId !== null ? (
+								<div className="flex flex-wrap gap-2 items-center">
+									{contact?.tags && contact.tags.length > 0 ? (
+										contact.tags.map((tag) => (
+											<Skeleton
+												key={tag.id}
+												className="h-8 w-24 rounded-lg"
 											/>
-										</Badge>
-									))
-								) : (
-									<p className="text-sm text-muted-foreground">
-										{__('No tags found', 'quillcrm')}
-									</p>
-								)}
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => setIsTagModalOpen(true)}
-									className="h-8 px-2 text-primary text-base hover:bg-blue-50"
-								>
-									<Plus className="h-4 w-4 mr-1" />
-									{__('Add Tags', 'quillcrm')}
-								</Button>
-							</div>
+										))
+									) : (
+										<Skeleton className="h-8 w-32 rounded-lg" />
+									)}
+									<Skeleton className="h-8 w-28 rounded-lg" />
+								</div>
+							) : (
+								<div className="flex flex-wrap gap-2 items-center">
+									{contact?.tags && contact.tags.length > 0 ? (
+										contact.tags.map((tag) => (
+											<Badge
+												key={tag.id}
+												variant="outline"
+												className="px-3 py-1.5 text-base flex items-center gap-2 bg-transparent border rounded-lg"
+											>
+												{tag.name}
+												<X
+													className="h-4 w-4 cursor-pointer hover:text-destructive transition-colors"
+													onClick={() =>
+														deleteTag(tag.id)
+													}
+													style={{
+														opacity:
+															deletingTagId === tag.id
+																? 0.5
+																: 1,
+														cursor:
+															deletingTagId === tag.id
+																? 'wait'
+																: 'pointer',
+													}}
+												/>
+											</Badge>
+										))
+									) : (
+										<p className="text-sm text-muted-foreground">
+											{__('No tags found', 'quillcrm')}
+										</p>
+									)}
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={() => setIsTagModalOpen(true)}
+										className="h-8 px-2 text-primary text-base hover:bg-blue-50"
+									>
+										<Plus className="h-4 w-4 mr-1" />
+										{__('Add Tags', 'quillcrm')}
+									</Button>
+								</div>
+							)}
 						</CardContent>
 					)}
 				</Card>

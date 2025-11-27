@@ -1018,8 +1018,15 @@ class REST_Contact_Controller extends REST_Controller {
 
 			// Apply campaign type filter (email/phone availability)
 			if ( $campaign_type ) {
+				// Convert campaign_type to integer format
+				// Frontend may send: "sms" (string), "2" (numeric string), or 2 (integer)
+				if ( is_numeric( $campaign_type ) ) {
+					$campaign_type_int = (int) $campaign_type;
+				} else {
+					$campaign_type_int = Campaign_Channel::to_integer( $campaign_type );
+				}
 				$campaign_contact_filter = \QuillCRM\Services\Campaign_Contact_Filter::instance();
-				$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type );
+				$contacts                = $campaign_contact_filter->apply_campaign_type_filter( $contacts, $campaign_type_int );
 			}
 
 			// Apply keyword search AFTER filters (search within filtered results)

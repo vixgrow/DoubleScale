@@ -35,6 +35,9 @@ import AddCampaign from './add-campaign';
 import { useServerSideTable } from '@quillcrm/hooks/use-serverSideTable'; // Import the hook
 import { formatDateForAPI } from '@quillcrm/utils';
 import PageTabs from '@/components/page-tabs';
+import { ProviderNotConnectedWarning } from '@/client/pages/contact/components/provider-not-connected-warning';
+import TwilioConfigModal from '@/client/pages/contact/components/twilio-config-modal';
+import { useProviderStatus } from '@quillcrm/hooks/use-provider-status';
 
 const Campaigns: React.FC = () => {
 	const [loading, setLoading] = useState(true);
@@ -63,8 +66,16 @@ const Campaigns: React.FC = () => {
 		updatedAt: { from: null, to: null },
 	});
 	const [notice, setNotice] = useState<NoticeMessage | null>(null);
+	const [showTwilioConfig, setShowTwilioConfig] = useState(false);
 
 	const navigate = useNavigate();
+
+	// Check SMS provider status
+	const {
+		isConnected: isSmsProviderConnected,
+		isLoading: isSmsProviderLoading,
+		checkStatus: checkSmsProviderStatus,
+	} = useProviderStatus('sms');
 
 	// Use the reusable hook
 	const serverSideTable = useServerSideTable({
@@ -302,6 +313,34 @@ const Campaigns: React.FC = () => {
 		}
 	};
 
+	/**
+	 * Handle successful Twilio configuration
+	 * Refresh provider status
+	 */
+	const handleTwilioConfigSuccess = async () => {
+		await checkSmsProviderStatus();
+		setShowTwilioConfig(false);
+	};
+
+	/**
+	 * Handle create campaign button click
+	 * For SMS campaigns, check provider connection before opening modal
+	 */
+	const handleCreateCampaign = () => {
+		if (activeTab === 'sms' && !isSmsProviderConnected) {
+			// Show error notice if provider not configured
+			setNotice({
+				type: 'error',
+				message: __(
+					'Please configure Twilio before creating SMS campaigns',
+					'quillcrm'
+				),
+			});
+			return;
+		}
+		setStep('campaign-types');
+	};
+
 	const columns = getColumns();
 
 	// Define tabs list with icons
@@ -373,7 +412,11 @@ const Campaigns: React.FC = () => {
 					<DataTablePagination table={serverSideTable} />
 				</>
 			) : (
-				<EmptyCampaignList setStep={setStep} campaignChannel={activeTab} />
+				<EmptyCampaignList
+					setStep={setStep}
+					campaignChannel={activeTab}
+					onCreateClick={handleCreateCampaign}
+				/>
 			)}
 		</>
 	);
@@ -412,18 +455,28 @@ const Campaigns: React.FC = () => {
 		},
 	];
 
+	// Determine if "Create Campaign" button should be shown
+	// Hide for SMS campaigns when Twilio is not configured
+	const showCreateButton =
+		activeTab === 'email' ||
+		(activeTab === 'sms' && isSmsProviderConnected);
+
 	return (
 		<div className="qcrm-campaigns">
 			<PageHeader
 				title={__('Campaigns List', 'quillcrm')}
 				subtitle={__('Campaigns', 'quillcrm')}
-				actions={[
-					{
-						label: __('Create Campaign', 'quillcrm'),
-						icon: <PlusIcon />,
-						onClick: () => setStep('campaign-types'),
-					},
-				]}
+				actions={
+					showCreateButton
+						? [
+								{
+									label: __('Create Campaign', 'quillcrm'),
+									icon: <PlusIcon />,
+									onClick: handleCreateCampaign,
+								},
+						  ]
+						: []
+				}
 			/>
 
 			{/* Notice Banner */}
@@ -431,6 +484,14 @@ const Campaigns: React.FC = () => {
 				<NoticeBanner
 					notice={notice}
 					closeNotice={() => setNotice(null)}
+				/>
+			)}
+
+			{/* SMS: Show provider warning if not configured */}
+			{activeTab === 'sms' && !isSmsProviderConnected && !isSmsProviderLoading && (
+				<ProviderNotConnectedWarning
+					channel="sms"
+					onConfigureClick={() => setShowTwilioConfig(true)}
 				/>
 			)}
 
@@ -450,6 +511,13 @@ const Campaigns: React.FC = () => {
 				step={step}
 				addCampaign={addCampaign}
 				activeTab={activeTab}
+			/>
+
+			{/* Twilio Configuration Modal */}
+			<TwilioConfigModal
+				open={showTwilioConfig}
+				onClose={() => setShowTwilioConfig(false)}
+				onSuccess={handleTwilioConfigSuccess}
 			/>
 		</div>
 	);

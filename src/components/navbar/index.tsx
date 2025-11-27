@@ -77,7 +77,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 	} | null>(null);
 	const hoverTimeoutRef = useRef<number | null>(null);
 	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-	const { hasRequiredCapability, isDealOwner } = useCapabilities();
+	const { hasRequiredCapability, isSalesRep } = useCapabilities();
 
 	useEffect(() => {
 		const frameId = requestAnimationFrame(() => setIsMounted(true));
@@ -111,7 +111,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				// Add submenu for Analytics based on capabilities
 				if (item.path === 'analytics-and-reports') {
-					if (isDealOwner()) {
+					if (isSalesRep()) {
 						// Deal owners see only their reports
 						navItem.subMenu = [
 							{
@@ -145,7 +145,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 							{
 								path: 'cart-analytics',
 								label: __('Cart Analytics', 'quillcrm'),
-							}
+							},
 						];
 
 						navItem.subMenu = submenu;
@@ -154,7 +154,7 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 
 				return navItem;
 			});
-	}, [hasRequiredCapability, isDealOwner]);
+	}, [hasRequiredCapability, isSalesRep]);
 
 	const handleNavigation = (path: string) => {
 		setSelectedKey(path);
@@ -312,8 +312,9 @@ const NavBar: React.FC<NavBarProps> = ({ defaultSelectedPath = '/' }) => {
 		<>
 			<Sidebar
 				collapsible="icon"
-				className={`qcrm-navbar${isMounted ? ' qcrm-navbar--mounted' : ''
-					}`}
+				className={`qcrm-navbar${
+					isMounted ? ' qcrm-navbar--mounted' : ''
+				}`}
 			>
 				<div className="qcrm-navbar__surface">
 					<SidebarHeader className="qcrm-navbar__header">

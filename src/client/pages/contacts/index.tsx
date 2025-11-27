@@ -14,7 +14,6 @@ import {
 	ArrowUpIcon,
 	ArrowDownIcon,
 	PageTabs,
-	AllContactsIcon,
 	ListsIcon,
 	TagsIcon,
 	ContactsIcon,
@@ -23,9 +22,11 @@ import Lists from './lists';
 import { ListsRef } from './lists';
 import Tags, { TagsRef } from './tags';
 import AllContacts, { AllContactsRef } from './all-contacts';
+import { useCapabilities } from '@quillcrm/hooks/use-capabilities';
 
 const ContactsList: React.FC = () => {
 	const [activeTab, setActiveTab] = useState('all');
+	const isCrmManager = useCapabilities().isCrmManager();
 
 	const listsRef = useRef<ListsRef>(null);
 	const tagsRef = useRef<TagsRef>(null);
@@ -40,20 +41,24 @@ const ContactsList: React.FC = () => {
 	const headerActions =
 		activeTab == 'all'
 			? [
-					{
-						label: __('Export Contact', 'quillcrm'),
-						onClick: () =>
-							allContactsRef.current?.openExportModal(),
-						variant: 'outline',
-						icon: <ArrowUpIcon />,
-					},
-					{
-						label: __('Import Contact', 'quillcrm'),
-						onClick: () =>
-							allContactsRef.current?.openImportModal(),
-						variant: 'secondary',
-						icon: <ArrowDownIcon />,
-					},
+					...(isCrmManager
+						? [
+								{
+									label: __('Export Contact', 'quillcrm'),
+									onClick: () =>
+										allContactsRef.current?.openExportModal(),
+									variant: 'outline',
+									icon: <ArrowUpIcon />,
+								},
+								{
+									label: __('Import Contact', 'quillcrm'),
+									onClick: () =>
+										allContactsRef.current?.openImportModal(),
+									variant: 'secondary',
+									icon: <ArrowDownIcon />,
+								},
+							]
+						: []),
 					{
 						label: __('Add Contact', 'quillcrm'),
 						onClick: () =>
@@ -61,7 +66,7 @@ const ContactsList: React.FC = () => {
 						icon: <PlusIcon />,
 					},
 				]
-			: activeTab == 'lists'
+			: activeTab == 'lists' && isCrmManager
 				? [
 						{
 							label: __('Add Lists', 'quillcrm'),
@@ -71,7 +76,7 @@ const ContactsList: React.FC = () => {
 							icon: <PlusIcon />,
 						},
 					]
-				: activeTab == 'tags'
+				: activeTab == 'tags' && isCrmManager
 					? [
 							{
 								label: __('Add Tags', 'quillcrm'),
@@ -100,16 +105,20 @@ const ContactsList: React.FC = () => {
 						value: 'all',
 						icon: <ContactsIcon width={20} height={20} />,
 					},
-					{
-						label: __('Lists', 'quillcrm'),
-						value: 'lists',
-						icon: <ListsIcon width={20} height={20} />,
-					},
-					{
-						label: __('Tags', 'quillcrm'),
-						value: 'tags',
-						icon: <TagsIcon width={20} height={20} />,
-					},
+					...(isCrmManager
+						? [
+								{
+									label: __('Lists', 'quillcrm'),
+									value: 'lists',
+									icon: <ListsIcon width={20} height={20} />,
+								},
+								{
+									label: __('Tags', 'quillcrm'),
+									value: 'tags',
+									icon: <TagsIcon width={20} height={20} />,
+								},
+							]
+						: []),
 				]}
 				tabsContent={[
 					{

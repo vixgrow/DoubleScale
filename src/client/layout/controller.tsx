@@ -239,7 +239,7 @@ registerAdminPage('contacts', {
 	component: () => <Contacts />,
 	label: __('Contacts', 'quillcrm'),
 	icon: <ContactsIcon />,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('contact', {
@@ -247,7 +247,7 @@ registerAdminPage('contact', {
 	component: () => <Contact />,
 	label: __('Contact', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_crm_manager'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('lists', {
@@ -337,7 +337,7 @@ registerAdminPage('sales-pipeline', {
 	), // Pro plugin overrides with actual pipeline
 	label: __('Pipelines', 'quillcrm'),
 	icon: <PiplelinesIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('automations', {
@@ -461,7 +461,7 @@ registerAdminPage('analytics-and-reports', {
 	component: () => <AnalyticsAndReports />,
 	label: __('Analytics', 'quillcrm'),
 	icon: <AnalyticsReportsIcon />,
-	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_deal_owner'],
+	requiredCapability: ['quillcrm_crm_manager', 'quillcrm_sales_rep'],
 });
 
 registerAdminPage('deals-analytics', {
@@ -493,7 +493,7 @@ registerAdminPage('my-reports', {
 	component: () => <AnalyticsAndReports defaultTab="my-reports" />,
 	label: __('My Reports', 'quillcrm'),
 	hidden: true,
-	requiredCapability: ['quillcrm_deal_owner'],
+	requiredCapability: ['quillcrm_sales_rep'],
 });
 
 // Wrapper components for analytics pages that need dashboard data

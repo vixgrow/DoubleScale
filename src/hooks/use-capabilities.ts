@@ -24,11 +24,11 @@ export const useCapabilities = () => {
     };
 
     /**
-     * Check if current user is a deal owner (has restricted permissions)
+     * Check if current user is a sales rep (has restricted permissions)
      */
-    const isDealOwner = (): boolean => {
+    const isSalesRep = (): boolean => {
         const userCapabilities = Config.getUserCapabilities();
-        return userCapabilities.quillcrm_deal_owner || false;
+        return userCapabilities.quillcrm_sales_rep || false;
     };
 
     /**
@@ -41,7 +41,7 @@ export const useCapabilities = () => {
 
     return {
         hasRequiredCapability,
-        isDealOwner,
+        isSalesRep,
         isCrmManager,
     };
 };

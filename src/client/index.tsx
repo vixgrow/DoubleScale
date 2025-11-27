@@ -19,24 +19,26 @@ import '../styles/react-select-global.css';
 const appRoot = document.getElementById('qcrm-admin-root');
 
 if (appRoot) {
-	createRoot(appRoot).render(
-		<ConfigProvider
-			theme={{
-				token: {
-					colorPrimary: '#6d78d8',
-				},
-				components: {
-					Button: {
-						algorithm: false,
+	setTimeout(() => {
+		createRoot(appRoot).render(
+			<ConfigProvider
+				theme={{
+					token: {
+						colorPrimary: '#6d78d8',
 					},
-					Input: {
-						paddingBlock: 14,
-						paddingInline: 14,
+					components: {
+						Button: {
+							algorithm: false,
+						},
+						Input: {
+							paddingBlock: 14,
+							paddingInline: 14,
+						},
 					},
-				},
-			}}
-		>
-			<PageLayout />
-		</ConfigProvider>
-	);
+				}}
+			>
+				<PageLayout />
+			</ConfigProvider>
+		)
+	}, 1500);
 }

@@ -34,9 +34,6 @@ use QuillCRM\User_Roles\Permissions;
  */
 class Core {
 
-
-
-
 	/**
 	 * Set admin config
 	 *
@@ -53,7 +50,7 @@ class Core {
 		// Get current user capabilities for role-based access control
 		$user_capabilities = array(
 			'quillcrm_crm_manager' => Permissions::is_crm_manager(),
-			'quillcrm_deal_owner'  => Permissions::is_deal_owner(),
+			'quillcrm_sales_rep'   => Permissions::is_sales_rep(),
 		);
 
 		$url_quillcrm_pro = QUILLCRM_PRO_PRICE_URL;

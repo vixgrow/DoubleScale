@@ -61,19 +61,16 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 							{__('Import Contacts', 'quillcrm')}
 						</h1>
 						<div className="text-base text-[#979797] pr-12">
-							{source === 'csv'
+							{[
+								'csv',
+								'mailerlite',
+								'activecampaign',
+								'hubspot',
+								'pipedrive',
+								'gohighlevel',
+							].includes(source)
 								? `Step ${currentStep} of 2`
-								: [
-											'mailerlite',
-											'activecampaign',
-											'hubspot',
-											'pipedrive',
-											'gohighlevel',
-									  ].includes(source)
-									? `Step ${currentStep} of 2`
-									: ['fluentcrm', 'wpfunnelkit'].includes(source)
-										? 'Step 1 of 1'
-										: 'Step 1 of 1'}
+								: 'Step 1 of 1'}
 						</div>
 					</div>
 				</DialogTitle>

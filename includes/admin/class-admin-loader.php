@@ -494,33 +494,26 @@ class Admin_Loader {
 </head>
 <body>
   <div class="quillcrm-wrap">
-    <div id="qcrm-admin-root-1">
+    <div id="qcrm-admin-root">
       <div id="qcrm-admin-root__loader-container">
         
         <!-- Ambient background glow -->
         <div class="ambient-glow"></div>
         
         <!-- Sparkle stars around the logo -->
+        <?php foreach ( range( 1, 7 ) as $i ) : ?>
         <div class="sparkle"></div>
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
-        <div class="sparkle"></div>
+        <?php endforeach; ?>
         
         <!-- Floating particles -->
+        <?php foreach ( range( 1, 6 ) as $i ) : ?>
         <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
+        <?php endforeach; ?>
         
         <!-- Magic dust trail -->
+        <?php foreach ( range( 1, 3 ) as $i ) : ?>
         <div class="dust"></div>
-        <div class="dust"></div>
-        <div class="dust"></div>
+        <?php endforeach; ?>
         
         <!-- Orbiting dots -->
         <div class="orbit-container">

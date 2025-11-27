@@ -526,7 +526,12 @@ abstract class Abstract_Campaign_Processing {
 
 				$result = $this->add_message( $campaign, $contact, $current_offset );
 				if ( ! $result ) {
-					// If message failed to add, break to avoid infinite loop
+					// If message failed to add, check if campaign was marked as failed.
+					if ( 'failed' === $campaign->status ) {
+						// Campaign failed due to critical error (e.g., no template), stop processing completely.
+						return;
+					}
+					// Other failures, break to avoid infinite loop.
 					break;
 				}
 			}
@@ -579,6 +584,19 @@ abstract class Abstract_Campaign_Processing {
 						'contact_id'  => $contact->id,
 					)
 				);
+
+				// Mark campaign as failed to prevent infinite reprocessing.
+				// Use direct database update to ensure status persists immediately.
+				global $wpdb;
+				$wpdb->update(
+					$wpdb->prefix . 'quillcrm_campaigns',
+					array( 'status' => 'failed' ),
+					array( 'id' => $campaign->id ),
+					array( '%s' ),
+					array( '%d' )
+				);
+				$campaign->status = 'failed'; // Update in-memory object too.
+
 				return false;
 			}
 

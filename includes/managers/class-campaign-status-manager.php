@@ -23,6 +23,7 @@ final class Campaign_Status_Manager
   const RESENDING = 'resending';
   const PAUSED = 'paused';
   const CANCELLED = 'cancelled';
+  const FAILED = 'failed';
 
 
   /**
@@ -70,6 +71,7 @@ final class Campaign_Status_Manager
       self::RESENDING,
       self::PAUSED,
       self::CANCELLED,
+      self::FAILED,
     ];
   }
 
@@ -90,6 +92,7 @@ final class Campaign_Status_Manager
       self::RESENDING => __('Resending', 'quillcrm'),
       self::PAUSED => __('Paused', 'quillcrm'),
       self::CANCELLED => __('Cancelled', 'quillcrm'),
+      self::FAILED => __('Failed', 'quillcrm'),
     ];
   }
 
@@ -116,12 +119,13 @@ final class Campaign_Status_Manager
     return [
       self::DRAFT => [self::INACTIVE, self::SCHEDULED, self::PROCESSING],
       self::INACTIVE => [self::DRAFT, self::SCHEDULED, self::PROCESSING],
-      self::SCHEDULED => [self::DRAFT, self::INACTIVE, self::PROCESSING, self::CANCELLED],
-      self::PROCESSING => [self::COMPLETED, self::PAUSED, self::CANCELLED],
+      self::SCHEDULED => [self::DRAFT, self::INACTIVE, self::PROCESSING, self::CANCELLED, self::FAILED],
+      self::PROCESSING => [self::COMPLETED, self::PAUSED, self::CANCELLED, self::FAILED],
       self::PAUSED => [self::PROCESSING, self::CANCELLED],
       self::COMPLETED => [self::RESENDING],
       self::RESENDING => [self::COMPLETED, self::CANCELLED],
       self::CANCELLED => [],
+      self::FAILED => [], // Terminal state, no transitions allowed
     ];
   }
 

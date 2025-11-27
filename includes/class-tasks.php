@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Tasks
  *
@@ -106,8 +105,7 @@ class Tasks {
 	 *
 	 * @param string $hook Hook name.
 	 * @param array  ...$args Args passed to hook.
-	 *
-	 * @return integer|false
+	 * @return void
 	 */
 	public function enqueue_sync( $hook, ...$args ) {
 		do_action( "{$this->group}_$hook", ...$args );
@@ -157,14 +155,38 @@ class Tasks {
 	 * @return integer|false
 	 */
 	public function schedule_recurring( $timestamp, $interval, $hook, ...$args ) {
-		// add args meta.
-		$meta_id = $this->add_meta( "{$this->group}_$hook", $args );
-		if ( ! $meta_id ) {
-			return false;
+		global $wpdb;
+		$full_hook = "{$this->group}_$hook";
+
+		// Check if meta already exists for this recurring task.
+		$existing_meta_id = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->prefix}quillcrm_task_meta
+				WHERE hook = %s
+				AND group_slug = %s
+				ORDER BY ID DESC
+				LIMIT 1",
+				$full_hook,
+				$this->group
+			)
+		);
+
+		if ( $existing_meta_id ) {
+			// Reuse existing meta for recurring tasks.
+			$meta_id = $existing_meta_id;
+
+			// Update the args in case they changed.
+			$this->update_meta( $meta_id, array( 'value' => maybe_serialize( $args ) ), '%s' );
+		} else {
+			// Create new meta only if none exists (first-time scheduling).
+			$meta_id = $this->add_meta( $full_hook, $args );
+			if ( ! $meta_id ) {
+				return false;
+			}
 		}
 
 		// the action id isn't single, so we won't assign it to the meta.
-		return as_schedule_recurring_action( $timestamp, $interval, "{$this->group}_$hook", compact( 'meta_id' ), $this->group, true );
+		return as_schedule_recurring_action( $timestamp, $interval, $full_hook, compact( 'meta_id' ), $this->group, true );
 	}
 
 	/**
@@ -268,31 +290,52 @@ class Tasks {
 	 * This method records when a task last ran successfully,
 	 * enabling health monitoring and overdue detection.
 	 *
+	 * Uses standard SQL with subquery for database portability.
+	 *
 	 * @since 1.0.0
 	 *
 	 * @param string $hook Hook name (without group prefix).
-	 * @param int    $interval Interval in seconds until next run.
 	 * @return bool Success.
 	 */
-	public function update_heartbeat( $hook, $interval = 60 ) {
+	public function update_heartbeat( $hook ) {
 		global $wpdb;
 
-		$full_hook = "{$this->group}_$hook";
+		$full_hook    = "{$this->group}_$hook";
 		$current_time = current_time( 'mysql' );
 
-		return (bool) $wpdb->query(
+		$result = $wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->prefix}quillcrm_task_meta
 				SET last_run = %s
-				WHERE hook = %s
-				AND group_slug = %s
-				ORDER BY ID DESC
-				LIMIT 1",
+				WHERE ID = (
+					SELECT ID FROM (
+						SELECT ID
+						FROM {$wpdb->prefix}quillcrm_task_meta
+						WHERE hook = %s
+						AND group_slug = %s
+						ORDER BY ID DESC
+						LIMIT 1
+					) AS tmp
+				)",
 				$current_time,
 				$full_hook,
 				$this->group
 			)
 		);
+
+		// Log failure for debugging.
+		if ( false === $result ) {
+			quillcrm_get_logger()->warning(
+				'Failed to update heartbeat timestamp',
+				array(
+					'hook'  => $full_hook,
+					'group' => $this->group,
+					'error' => $wpdb->last_error,
+				)
+			);
+		}
+
+		return (bool) $result;
 	}
 
 	/**
@@ -323,5 +366,69 @@ class Tasks {
 			),
 			ARRAY_A
 		);
+	}
+
+	/**
+	 * Clean up duplicate meta records for recurring tasks
+	 *
+	 * Keeps only the most recent meta record for each recurring task hook.
+	 * Should be called after fixing schedule_recurring() to prevent future duplicates.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return int Number of records deleted
+	 */
+	public function cleanup_duplicate_meta() {
+		global $wpdb;
+
+		// Get all unique hooks for this group.
+		$hooks = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT hook
+				FROM {$wpdb->prefix}quillcrm_task_meta
+				WHERE group_slug = %s",
+				$this->group
+			)
+		);
+
+		$deleted = 0;
+
+		foreach ( $hooks as $hook ) {
+			// Get the most recent meta ID for this hook.
+			$keeper_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->prefix}quillcrm_task_meta
+					WHERE hook = %s
+					AND group_slug = %s
+					ORDER BY ID DESC
+					LIMIT 1",
+					$hook,
+					$this->group
+				)
+			);
+
+			if ( ! $keeper_id ) {
+				continue;
+			}
+
+			// Delete all other records for this hook.
+			$result = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->prefix}quillcrm_task_meta
+					WHERE hook = %s
+					AND group_slug = %s
+					AND ID != %d",
+					$hook,
+					$this->group,
+					$keeper_id
+				)
+			);
+
+			if ( $result ) {
+				$deleted += $result;
+			}
+		}
+
+		return $deleted;
 	}
 }

@@ -75,15 +75,15 @@ const ImportModalContent: React.FC<Omit<Props, 'open'>> = ({
 					</div>
 				</DialogTitle>
 			</DialogHeader>
-			<div className="overflow-y-auto px-16 pb-8">
+			<div className="px-16 pb-8">
 				<div className="flex gap-5 ">
 					<div className="w-2/5">
 						<SourceSelector />
 					</div>
 
-					<Card className="w-3/5 shadow-none rounded-[20px]">
+					<Card className="w-3/5 shadow-none rounded-[20px] flex flex-col h-full">
 						<SourceHeader />
-						<CardContent className="p-8">
+						<CardContent className="p-8 overflow-y-auto max-h-[calc(100vh-166px)]">
 							<MainContent
 								onImportComplete={handleImportComplete}
 							/>

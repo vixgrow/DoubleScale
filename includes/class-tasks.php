@@ -364,6 +364,7 @@ class Tasks {
 				$full_hook,
 				$this->group
 			),
+			ARRAY_A
 		);
 	}
 }

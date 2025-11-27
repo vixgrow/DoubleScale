@@ -22,7 +22,6 @@ use WC_Order;
  */
 class Cart_Recovered extends Trigger {
 
-
 	/**
 	 * Trigger Name
 	 *
@@ -73,9 +72,7 @@ class Cart_Recovered extends Trigger {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_action( 'woocommerce_order_status_completed', array( $this, 'check_cart_recovery' ), 10, 1 );
-		add_action( 'woocommerce_order_status_processing', array( $this, 'check_cart_recovery' ), 10, 1 );
-		add_action( 'woocommerce_payment_complete', array( $this, 'check_cart_recovery' ), 10, 1 );
+		add_action( 'quillcrm_abandoned_cart_recovered', array( $this, 'check_cart_recovery' ), 10, 1 );
 	}
 
 	/**
@@ -83,11 +80,21 @@ class Cart_Recovered extends Trigger {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $order_id Order ID.
+	 * @param Abandoned_Cart_Model $abandoned_cart Abandoned cart object.
 	 *
 	 * @return void
 	 */
-	public function check_cart_recovery( $order_id ) {
+	public function check_cart_recovery( $abandoned_cart ) {
+		if ( ! $abandoned_cart instanceof Abandoned_Cart_Model ) {
+			return;
+		}
+
+		// Get the order
+		$order_id = $abandoned_cart->order_id ?? 0;
+		if ( empty( $order_id ) ) {
+			return;
+		}
+
 		$order = wc_get_order( $order_id );
 		if ( ! $order instanceof WC_Order ) {
 			return;
@@ -98,20 +105,6 @@ class Cart_Recovered extends Trigger {
 		if ( empty( $customer_email ) ) {
 			return;
 		}
-
-		// Check if there was an abandoned cart for this email
-		$abandoned_cart = $this->get_abandoned_cart_by_email( $customer_email );
-		if ( ! $abandoned_cart ) {
-			return;
-		}
-
-		// Check if the order contains similar products to the abandoned cart
-		if ( ! $this->is_cart_recovery( $order, $abandoned_cart ) ) {
-			return;
-		}
-
-		// Mark the abandoned cart as recovered
-		$this->mark_cart_as_recovered( $abandoned_cart->id, $order_id );
 
 		$data = array(
 			'first_name' => $order->get_billing_first_name(),
@@ -127,122 +120,6 @@ class Cart_Recovered extends Trigger {
 		);
 
 		$this->process( $data );
-	}
-
-	/**
-	 * Get Abandoned Cart by Email
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $email Customer email.
-	 *
-	 * @return Abandoned_Cart_Model|null
-	 */
-	private function get_abandoned_cart_by_email( $email ) {
-		global $wpdb;
-
-		$table_name = $wpdb->prefix . 'quillcrm_abandoned_carts';
-
-		// Check if table exists
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) !== $table_name ) {
-			return null;
-		}
-
-		$cart_data = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM {$table_name} 
-				WHERE email = %s 
-				AND status = 'abandoned' 
-				AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-				ORDER BY created_at DESC 
-				LIMIT 1",
-				$email
-			)
-		);
-
-		if ( ! $cart_data ) {
-			return null;
-		}
-
-		return new Abandoned_Cart_Model( $cart_data );
-	}
-
-	/**
-	 * Check if Order is Cart Recovery
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WC_Order             $order Order object.
-	 * @param Abandoned_Cart_Model $abandoned_cart Abandoned cart model.
-	 *
-	 * @return bool
-	 */
-	private function is_cart_recovery( $order, $abandoned_cart ) {
-		// Get order items
-		$order_items = $order->get_items();
-		if ( empty( $order_items ) ) {
-			return false;
-		}
-
-		// Get abandoned cart items
-		$cart_items = isset( $abandoned_cart->cart_items ) ? json_decode( $abandoned_cart->cart_items, true ) : array();
-		if ( empty( $cart_items ) ) {
-			return false;
-		}
-
-		// Extract product IDs from order
-		$order_product_ids = array();
-		foreach ( $order_items as $item ) {
-			$product = $item->get_product();
-			if ( $product ) {
-				$order_product_ids[] = $product->get_id();
-			}
-		}
-
-		// Extract product IDs from abandoned cart
-		$cart_product_ids = array();
-		foreach ( $cart_items as $cart_item ) {
-			if ( isset( $cart_item['product_id'] ) ) {
-				$cart_product_ids[] = (int) $cart_item['product_id'];
-			}
-		}
-
-		// Check if there's at least 50% overlap in products
-		$common_products    = array_intersect( $order_product_ids, $cart_product_ids );
-		$overlap_percentage = count( $common_products ) / max( count( $cart_product_ids ), 1 ) * 100;
-
-		return $overlap_percentage >= 50;
-	}
-
-	/**
-	 * Mark Cart as Recovered
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $cart_id Abandoned cart ID.
-	 * @param int $order_id Order ID.
-	 *
-	 * @return void
-	 */
-	private function mark_cart_as_recovered( $cart_id, $order_id ) {
-		global $wpdb;
-
-		$table_name = $wpdb->prefix . 'quillcrm_abandoned_carts';
-
-		$wpdb->update(
-			$table_name,
-			array(
-				'status'             => 'recovered',
-				'recovered_at'       => current_time( 'mysql' ),
-				'recovered_order_id' => $order_id,
-			),
-			array( 'id' => $cart_id ),
-			array( '%s', '%s', '%d' ),
-			array( '%d' )
-		);
-
-		// Fire action for other plugins/code to hook into
-		do_action( 'quillcrm_cart_recovered', $cart_id, $order_id );
 	}
 
 	/**

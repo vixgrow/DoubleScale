@@ -1,149 +1,211 @@
 class CheckoutFormHandler {
     constructor() {
         this.quillcrmAbandonedCart = window?.['quillcrm_abandoned_cart'] || {};
-        this.checkoutForm = document.querySelector('form.checkout');
+        this.checkoutForm = null;
         this.fieldsValues = {};
-        this.checkoutFields = [
-            'billing_email', 'billing_first_name', 'billing_last_name', 'billing_company', 'billing_phone',
-            'billing_country', 'billing_address_1', 'billing_address_2', 'billing_city',
-            'billing_state', 'billing_postcode', 'shipping_first_name', 'shipping_last_name',
-            'shipping_company', 'shipping_country', 'shipping_address_1', 'shipping_address_2',
-            'shipping_city', 'shipping_state', 'shipping_postcode', 'shipping_phone',
-        ];
+        this.previousValues = {};
+        this.saveTimeout = null;
+        this.debounceDelay = 800;
         this.isLoading = false;
+        this.retryCount = 0;
+        this.maxRetries = 10;
+
+        this.checkoutFields = {
+            'billing_email': ['#billing_email', '#email', 'input[name="billing_email"]', 'input[name="email"]', 'input[type="email"]'],
+            'billing_first_name': ['#billing_first_name', '#billing-first_name', 'input[name="billing_first_name"]'],
+            'billing_last_name': ['#billing_last_name', '#billing-last_name', 'input[name="billing_last_name"]'],
+            'billing_phone': ['#billing_phone', '#billing-phone', 'input[name="billing_phone"]'],
+            'billing_country': ['#billing_country', '#billing-country', 'select[name="billing_country"]'],
+            'billing_address_1': ['#billing_address_1', '#billing-address_1', 'input[name="billing_address_1"]'],
+            'billing_address_2': ['#billing_address_2', '#billing-address_2', 'input[name="billing_address_2"]'],
+            'billing_city': ['#billing_city', '#billing-city', 'input[name="billing_city"]'],
+            'billing_state': ['#billing_state', '#billing-state', 'select[name="billing_state"]'],
+            'billing_postcode': ['#billing_postcode', '#billing-postcode', 'input[name="billing_postcode"]'],
+            'shipping_first_name': ['#shipping_first_name', '#shipping-first_name', 'input[name="shipping_first_name"]'],
+            'shipping_last_name': ['#shipping_last_name', '#shipping-last_name', 'input[name="shipping_last_name"]'],
+            'shipping_phone': ['#shipping_phone', '#shipping-phone', 'input[name="shipping_phone"]'],
+            'shipping_country': ['#shipping_country', '#shipping-country', 'select[name="shipping_country"]'],
+            'shipping_address_1': ['#shipping_address_1', '#shipping-address_1', 'input[name="shipping_address_1"]'],
+            'shipping_address_2': ['#shipping_address_2', '#shipping-address_2', 'input[name="shipping_address_2"]'],
+            'shipping_city': ['#shipping_city', '#shipping-city', 'input[name="shipping_city"]'],
+            'shipping_state': ['#shipping_state', '#shipping-state', 'select[name="shipping_state"]'],
+            'shipping_postcode': ['#shipping_postcode', '#shipping-postcode', 'input[name="shipping_postcode"]'],
+        };
+
         this.init();
     }
 
     init() {
+        this.checkoutForm = this.findCheckoutForm();
         if (this.checkoutForm) {
-            console.log('Checkout form found2');
             this.attachEventListeners();
+            this.attachPageLeaveListeners();
+            this.maybeAddGDPRConsent();
+        } else if (this.retryCount < this.maxRetries) {
+            this.retryCount++;
+            setTimeout(() => this.init(), 500);
+        } else {
+            console.error('Checkout form not found after ' + this.maxRetries + ' retries');
         }
+    }
 
-        this.maybeAddGDPRConsent();
+    findCheckoutForm() {
+        let form = document.querySelector('form.checkout') ||
+            document.querySelector('form.wc-block-checkout__form') ||
+            document.querySelector('.woocommerce-checkout form') ||
+            document.querySelector('form[name="checkout"]');
+        this.isBlockCheckout = form?.classList.contains('wc-block-checkout__form') || false;
+        return form;
     }
 
     maybeAddGDPRConsent() {
-        const enableGdpr = this.quillcrmAbandonedCart.gdpr_compliance;
-        if (enableGdpr) {
-            // Check if gdpr_consent field already exists
-            if (document.querySelector('.quillcrm-gdpr-message')) {
-                return;
-            }
+        if (!this.quillcrmAbandonedCart.gdpr_compliance) return;
+        if (document.querySelector('.quillcrm-gdpr-message')) return;
 
-            const gdprMessage = this.quillcrmAbandonedCart.gdpr_message;
-            const gdprMessageEl = document.createElement('div');
-            gdprMessageEl.className = 'quillcrm-gdpr-message';
-            gdprMessageEl.style.marginTop = '10px';
-            gdprMessageEl.style.fontSize = 'small';
-            gdprMessageEl.innerHTML = `
-                <p>${gdprMessage}</p>
-            `;
+        const gdprMessageEl = document.createElement('div');
+        gdprMessageEl.className = 'quillcrm-gdpr-message';
+        gdprMessageEl.style.marginTop = '10px';
+        gdprMessageEl.style.fontSize = 'small';
+        gdprMessageEl.innerHTML = `<p>${this.quillcrmAbandonedCart.gdpr_message}</p>`;
 
-            // Add after the email field
-            const emailField = document.querySelector('#billing_email_field, .wc-block-components-address-form__email');
-            if (emailField) {
-                emailField.insertAdjacentElement('afterend', gdprMessageEl);
-            } else {
-                setTimeout(() => {
-                    this.maybeAddGDPRConsent();
-                }, 3000);
-            }
-
-            // Add event listener for opt-out
-            const optOutLink = document.querySelector('#quillcrm-opt-out');
-            if (optOutLink) {
-                optOutLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    console.log('Opting out');
-                    fetch(this.quillcrmAbandonedCart.ajax_url, {
-                        method: 'POST',
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                        body: new URLSearchParams({
-                            action: 'quillcrm_opt_out_abandoned_cart',
-                            nonce: this.quillcrmAbandonedCart.nonce,
-                        }),
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            const messageEl = document.querySelector('.quillcrm-gdpr-message');
-                            if (messageEl) {
-                                messageEl.innerHTML = `<p>${data.data.message}</p>`;
-
-                                setTimeout(() => {
-                                    messageEl.style.display = 'none';
-                                }, 5000);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-                });
-            }
-        }
+        const emailField = document.querySelector('#billing_email_field, .wc-block-components-address-form__email');
+        if (emailField) emailField.insertAdjacentElement('afterend', gdprMessageEl);
     }
 
     attachEventListeners() {
-        this.checkoutFields.forEach(field => {
-            const input = document.querySelector(`#${field}`);
-            if (input) {
-                // Check if type checkbox or radio or select
-                if (input.type === 'checkbox' || input.type === 'radio' || input.tagName === 'SELECT') {
-                    input.addEventListener('change', this.changeHandler.bind(this));
-                } else {
-                    input.addEventListener('blur', this.changeHandler.bind(this));
+        const attach = () => {
+            Object.keys(this.checkoutFields).forEach(key => {
+                for (const selector of this.checkoutFields[key]) {
+                    const input = document.querySelector(selector);
+                    if (input && !input.dataset.quillcrmListener) {
+                        input.dataset.quillcrmListener = 'true';
+                        input.dataset.quillcrmFieldKey = key;
+                        const eventType = (input.type === 'checkbox' || input.type === 'radio' || input.tagName === 'SELECT') ? 'change' : 'input';
+                        input.addEventListener(eventType, this.debouncedChangeHandler.bind(this));
+                        if (eventType === 'input') input.addEventListener('blur', this.debouncedChangeHandler.bind(this));
+                        break;
+                    }
                 }
-            }
+            });
+        };
+
+        attach();
+
+        if (this.isBlockCheckout && this.checkoutForm) {
+            const observer = new MutationObserver(attach);
+            observer.observe(this.checkoutForm, { childList: true, subtree: true });
+        }
+    }
+
+    attachPageLeaveListeners() {
+        // Save when user closes/leaves the page
+        window.addEventListener('beforeunload', () => {
+            this.saveAbandonedCartImmediate();
+        });
+
+        // For mobile browsers (especially iOS Safari)
+        window.addEventListener('pagehide', () => {
+            this.saveAbandonedCartImmediate();
         });
     }
 
-    changeHandler(e) {
-        const { id, value } = e.target;
-        this.fieldsValues[id] = value;
+    debouncedChangeHandler(e) {
+        const input = e.target;
+        const key = input.dataset.quillcrmFieldKey;
+        const value = input.value;
 
-        if (this.isEmailFilled()) {
-            this.saveAbandonedCart();
-        }
+
+        this.fieldsValues[key] = value;
+
+
+        if (this.previousValues[key] === value) return;
+
+        clearTimeout(this.saveTimeout);
+        this.saveTimeout = setTimeout(() => this.saveAbandonedCart(), this.debounceDelay);
     }
 
     isEmailFilled() {
-        return this.fieldsValues.billing_email !== undefined && this.fieldsValues.billing_email !== '';
+        return this.fieldsValues.billing_email && this.fieldsValues.billing_email.trim() !== '';
     }
 
     saveAbandonedCart() {
-        if (this.isLoading) {
-            return;
-        }
+        if (!this.isEmailFilled() || this.isLoading) return;
 
         this.isLoading = true;
 
         const { ajax_url, nonce } = this.quillcrmAbandonedCart;
-
         fetch(ajax_url, {
             method: 'POST',
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({
                 action: 'quillcrm_save_abandoned_cart',
                 nonce,
-                fields: JSON.stringify(this.fieldsValues),
-            }),
+                fields: JSON.stringify(this.fieldsValues)
+            })
         })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
-                console.log(data);
+                console.log('Abandoned cart saved:', data);
+                this.previousValues = { ...this.fieldsValues };
                 this.isLoading = false;
             })
-            .catch(error => {
-                console.error('Error:', error);
+            .catch(err => {
+                console.error('Error saving abandoned cart:', err);
                 this.isLoading = false;
             });
     }
+
+    saveAbandonedCartImmediate() {
+        // Capture current field values first
+        this.captureCurrentFieldValues();
+
+        if (!this.isEmailFilled()) return;
+
+        // Cancel any pending debounced save
+        clearTimeout(this.saveTimeout);
+
+        const { ajax_url, nonce } = this.quillcrmAbandonedCart;
+
+        // Use sendBeacon for reliable delivery when page is closing
+        // Falls back to synchronous fetch if sendBeacon is not available
+        const data = new URLSearchParams({
+            action: 'quillcrm_save_abandoned_cart',
+            nonce,
+            fields: JSON.stringify(this.fieldsValues)
+        });
+
+        if (navigator.sendBeacon) {
+            // sendBeacon is the best way to send data when page is unloading
+            const formData = new FormData();
+            formData.append('action', 'quillcrm_save_abandoned_cart');
+            formData.append('nonce', nonce);
+            formData.append('fields', JSON.stringify(this.fieldsValues));
+            navigator.sendBeacon(ajax_url, data);
+            console.log('Abandoned cart saved on page leave (sendBeacon)');
+        } else {
+            // Fallback to synchronous fetch
+            fetch(ajax_url, {
+                method: 'POST',
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: data,
+                keepalive: true // Allows request to continue even after page unload
+            });
+            console.log('Abandoned cart saved on page leave (fetch)');
+        }
+    }
+
+    captureCurrentFieldValues() {
+        // Capture all field values at this moment (in case user typed but didn't blur)
+        Object.keys(this.checkoutFields).forEach(key => {
+            for (const selector of this.checkoutFields[key]) {
+                const input = document.querySelector(selector);
+                if (input && input.value) {
+                    this.fieldsValues[key] = input.value;
+                    break;
+                }
+            }
+        });
+    }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    new CheckoutFormHandler();
-});
+window.addEventListener('DOMContentLoaded', () => new CheckoutFormHandler());

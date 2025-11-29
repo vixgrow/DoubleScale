@@ -67,6 +67,7 @@ import { Button } from '@quillcrm/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UserService } from '@/services/user-service';
 import type { User } from '@/services/user-service';
+import GetStart from '../pages/get-start';
 
 export const Controller = ({ page }) => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -226,6 +227,14 @@ registerAdminPage('dashboard', {
 registerAdminPage('contacts', {
 	path: 'contacts',
 	component: () => <Contacts />,
+	label: __('Contacts', 'quillcrm'),
+	icon: <ContactsIcon />,
+	requiredCapability: ['quillcrm_crm_manager'],
+});
+
+registerAdminPage('start', {
+	path: 'start',
+	component: () => <GetStart/>,
 	label: __('Contacts', 'quillcrm'),
 	icon: <ContactsIcon />,
 	requiredCapability: ['quillcrm_crm_manager'],

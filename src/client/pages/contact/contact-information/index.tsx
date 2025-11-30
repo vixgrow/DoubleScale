@@ -167,51 +167,22 @@ const ContactInformation: React.FC = () => {
 								<SelectTrigger
 									className={`w-auto h-7 text-xs px-3 ${getStatusClasses(contact.status)}`}
 								>
-									<SelectValue
-										placeholder={__(
-											'Select status',
-											'quillcrm'
-										)}
-									/>
-								</SelectTrigger>
-								<SelectContent position="popper" sideOffset={5} className="z-[150000]">
-									<SelectItem value="unverified" className='cursor-pointer'>
-										{__('Unverified', 'quillcrm')}
-									</SelectItem>
-									<SelectItem value="subscribed" className='cursor-pointer'>
-										{__('Subscribed', 'quillcrm')}
-									</SelectItem>
-									<SelectItem value="unsubscribed" className='cursor-pointer'>
-										{__('Unsubscribed', 'quillcrm')}
-									</SelectItem>
-									<SelectItem value="bounced" className='cursor-pointer'>
-										{__('Bounced', 'quillcrm')}
-									</SelectItem>
-								</SelectContent>
-							</Select>
-							<Select
-								value={contact.email_status}
-								onValueChange={(value) => {
-									setContact({
-										...contact,
-										email_status: value,
-									});
-									updateContact({ email_status: value });
-								}}
-							>
-								<SelectTrigger
-									className={`w-auto h-7 text-xs px-3 ${getStatusClasses(contact.email_status)}`}
-								>
 									<div className="text-xs">
-										{getChannelStatusLabel('email', contact.email_status)}
+										{getChannelStatusLabel('email', contact.status)}
 									</div>
 								</SelectTrigger>
 								<SelectContent position="popper" sideOffset={5} className="z-[150000]">
+									<SelectItem value="unverified" className='cursor-pointer'>
+										email_unverified
+									</SelectItem>
 									<SelectItem value="subscribed" className='cursor-pointer'>
 										email_subscribed
 									</SelectItem>
 									<SelectItem value="unsubscribed" className='cursor-pointer'>
 										email_unsubscribed
+									</SelectItem>
+									<SelectItem value="bounced" className='cursor-pointer'>
+										email_bounced
 									</SelectItem>
 								</SelectContent>
 							</Select>
